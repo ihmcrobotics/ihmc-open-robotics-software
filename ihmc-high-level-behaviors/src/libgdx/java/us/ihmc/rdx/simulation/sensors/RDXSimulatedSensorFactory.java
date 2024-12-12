@@ -4,9 +4,8 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Node;
 
 import java.util.function.LongSupplier;
 
@@ -14,7 +13,7 @@ public class RDXSimulatedSensorFactory
 {
    private static final boolean LOW_RESOLUTION_SENSORS = Boolean.parseBoolean(System.getProperty("low.resolution.sensors", "true"));
 
-   public static RDXHighLevelDepthSensorSimulator createMultisenseLidar(ROS2SyncedRobotModel syncedRobot, ROS2NodeInterface ros2Node)
+   public static RDXHighLevelDepthSensorSimulator createMultisenseLidar(ROS2SyncedRobotModel syncedRobot, ROS2Node ros2Node)
    {
       int pointsPerSweep = 720;
       int height = 1;
@@ -40,7 +39,7 @@ public class RDXSimulatedSensorFactory
       return highLevelDepthSensorSimulator;
    }
 
-   public static RDXHighLevelDepthSensorSimulator createMultisenseLeftEye(ROS2SyncedRobotModel syncedRobot, ROS2NodeInterface ros2Node)
+   public static RDXHighLevelDepthSensorSimulator createMultisenseLeftEye(ROS2SyncedRobotModel syncedRobot, ROS2Node ros2Node)
    {
       double fovY = 49.0;
       int imageWidth = 1024;
@@ -211,15 +210,13 @@ public class RDXSimulatedSensorFactory
       return highLevelDepthSensorSimulator;
    }
 
-   public static RDXHighLevelDepthSensorSimulator createChestRightBlackflyForObjectDetection(ROS2SyncedRobotModel syncedRobot,
-                                                                                             PubSubImplementation pubSubImplementation)
+   public static RDXHighLevelDepthSensorSimulator createChestRightBlackflyForObjectDetection(ROS2SyncedRobotModel syncedRobot)
    {
-      return createChestRightBlackflyForObjectDetection(syncedRobot.getReferenceFrames(), syncedRobot::getTimestamp, pubSubImplementation);
+      return createChestRightBlackflyForObjectDetection(syncedRobot.getReferenceFrames(), syncedRobot::getTimestamp);
    }
 
    public static RDXHighLevelDepthSensorSimulator createChestRightBlackflyForObjectDetection(HumanoidReferenceFrames referenceFrames,
-                                                                                             LongSupplier timeSupplier,
-                                                                                             PubSubImplementation pubSubImplementation)
+                                                                                             LongSupplier timeSupplier)
    {
       double publishRateHz = 20.0;
       double verticalFOV = 100.0;
@@ -240,13 +237,12 @@ public class RDXSimulatedSensorFactory
                                                    0.01,
                                                    false,
                                                    publishRateHz);
-      highLevelDepthSensorSimulator.setupForROS2Color(pubSubImplementation, PerceptionAPI.BLACKFLY_VIDEO.get(RobotSide.RIGHT));
+      highLevelDepthSensorSimulator.setupForROS2Color(PerceptionAPI.BLACKFLY_VIDEO.get(RobotSide.RIGHT));
       return highLevelDepthSensorSimulator;
    }
 
    public static RDXHighLevelDepthSensorSimulator createChestZED2ForObjectDetection(HumanoidReferenceFrames referenceFrames,
-                                                                                    LongSupplier timeSupplier,
-                                                                                    PubSubImplementation pubSubImplementation)
+                                                                                    LongSupplier timeSupplier)
    {
       double publishRateHz = 20.0;
       double verticalFOV = 70.0;

@@ -2,7 +2,7 @@
 # It specifies where an expected external force will be applied.
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # Estimator gain, usually in the range of 0.25 - 5.0. If the system is noisy or prone to oscillation, a lower gain is suggested.
 # Field default value 0.5

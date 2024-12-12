@@ -17,7 +17,7 @@ string MOVING_RIGHT_ARM="moving the right arm"
 string NETWORKPROCESSOR_ONLINE="Reestablished Connection To The Network Processor"
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 bool speak_packet
 

@@ -1,37 +1,35 @@
 package us.ihmc.avatar.networkProcessor.kinematicsPlanningToolboxModule;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import toolbox_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.communication.ToolboxAPIs;
-import us.ihmc.ros2.ROS2NodeInterface;
-import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.KinematicsPlanningToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.KinematicsPlanningToolboxInputCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.KinematicsPlanningToolboxRigidBodyCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Topic;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class KinematicsPlanningToolboxModule extends ToolboxModule
 {
    private final KinematicsPlanningToolboxController kinematicsPlanningToolboxController;
 
-   public KinematicsPlanningToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, PubSubImplementation pubSubImplementation) throws IOException
+   public KinematicsPlanningToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer) throws IOException
    {
       super(robotModel.getSimpleRobotName(), robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), startYoVariableServer,
-            DEFAULT_UPDATE_PERIOD_MILLISECONDS, pubSubImplementation);
+            DEFAULT_UPDATE_PERIOD_MILLISECONDS);
       kinematicsPlanningToolboxController = new KinematicsPlanningToolboxController(robotModel,
                                                                                     fullRobotModel,
                                                                                     commandInputManager,
@@ -43,7 +41,7 @@ public class KinematicsPlanningToolboxModule extends ToolboxModule
    }
 
    @Override
-   public void registerExtraPuSubs(ROS2NodeInterface ros2Node)
+   public void registerExtraPuSubs(ROS2Node ros2Node)
    {
       ros2Node.createSubscription(StateEstimatorAPI.getRobotConfigurationDataTopic(robotName), s ->
       {

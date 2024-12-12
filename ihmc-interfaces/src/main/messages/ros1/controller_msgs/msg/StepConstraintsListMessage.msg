@@ -4,7 +4,7 @@
 # As concave hulls are complex to manipulate, a set of convex polygons are also provided, altogether they approximate the area of the constraint region.
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # The coordinates in world of the origin of each constraint region.
 geometry_msgs/Point[] region_origin

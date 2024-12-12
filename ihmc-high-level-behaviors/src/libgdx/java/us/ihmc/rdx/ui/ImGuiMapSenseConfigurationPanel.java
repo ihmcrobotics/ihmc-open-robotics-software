@@ -1,20 +1,19 @@
 package us.ihmc.rdx.ui;
 
 import controller_msgs.msg.dds.ConcaveHullFactoryParametersStringMessage;
-import perception_msgs.msg.dds.PolygonizerParametersStringMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
+import perception_msgs.msg.dds.PolygonizerParametersStringMessage;
 import std_msgs.msg.dds.Float64;
 import us.ihmc.avatar.sensors.realsense.DelayFixedPlanarRegionsSubscription;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2PublisherMap;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
-import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.utilities.ros.RosNodeInterface;
 import us.ihmc.utilities.ros.RosTools;
 import us.ihmc.utilities.ros.publisher.RosMapsenseConfigurationPublisher;
@@ -50,7 +49,7 @@ public class ImGuiMapSenseConfigurationPanel
    private final ROS2PublisherMap ros2Publisher;
    private final RosMapsenseConfigurationPublisher mapSenseConfigurationPublisher;
 
-   public ImGuiMapSenseConfigurationPanel(RosNodeInterface ros1Node, ROS2NodeInterface ros2Node)
+   public ImGuiMapSenseConfigurationPanel(RosNodeInterface ros1Node, ROS2Node ros2Node)
    {
       ros2Publisher = new ROS2PublisherMap(ros2Node);
 

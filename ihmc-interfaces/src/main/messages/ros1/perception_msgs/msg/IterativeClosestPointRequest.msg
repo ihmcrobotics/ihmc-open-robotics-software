@@ -11,7 +11,7 @@ int8 SHAPE_CYLINDER=3
 int8 SHAPE_CONE=4
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # Scene node ID
 uint32 node_id

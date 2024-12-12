@@ -15,7 +15,7 @@ public class DoorPanelMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "13ad742aa02c308a444eb7bbdec827e4af2f1842fc321fe0f93bc7ddb77fe8f2";
+   		return "142d8739f2ddf175cf2c2433d3f3df67823f442be66392c63a093d6705aecc0c";
    }
    
    @Override

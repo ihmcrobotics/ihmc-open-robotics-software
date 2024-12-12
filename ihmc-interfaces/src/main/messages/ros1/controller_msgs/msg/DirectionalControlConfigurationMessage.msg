@@ -1,6 +1,6 @@
 # This message contains the control behavior for Directional Control.
 
-uint32 sequence_id
+uint64 sequence_id
 
 # Set to true to cause the robot to walk. Setting this to false will cause the robot to stop walking.
 # However, the robot will still finish the current step.

@@ -13,20 +13,19 @@ import perception_msgs.msg.dds.DetectedObjectPacket;
 import perception_msgs.msg.dds.IterativeClosestPointRequest;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.ros2.ROS2Input;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodySceneNode;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.RDXPointCloudRendererOld;
 import us.ihmc.rdx.imgui.ImGuiExpandCollapseRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
+import us.ihmc.ros2.ROS2Input;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.thread.RestartableThrottledThread;
 
@@ -38,7 +37,7 @@ public class RDXIterativeClosestPointOptions implements RenderableProvider
    private final RDXPrimitiveRigidBodySceneNode requestingNode;
    private final ROS2Node ros2Node;
    private final ROS2Helper ros2Helper;
-   private final ROS2PublisherBasics<IterativeClosestPointRequest> requestPublisher;
+   private final ROS2Publisher<IterativeClosestPointRequest> requestPublisher;
    private final ROS2Input<DetectedObjectPacket> resultSubscription;
    private final RestartableThrottledThread updateThread;
 
@@ -64,7 +63,7 @@ public class RDXIterativeClosestPointOptions implements RenderableProvider
    {
       this.requestingNode = requestingNode;
       this.labels = labels;
-      ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "primitive_scene_node_" + requestingNode.getSceneNode().getID());
+      ros2Node = new ROS2NodeBuilder().build("primitive_scene_node_" + requestingNode.getSceneNode().getID());
       ros2Helper = new ROS2Helper(ros2Node);
       requestPublisher = ros2Node.createPublisher(PerceptionAPI.ICP_REQUEST);
       resultSubscription = ros2Helper.subscribe(PerceptionAPI.ICP_RESULT, message -> message.getId() == requestingNode.getSceneNode().getID());

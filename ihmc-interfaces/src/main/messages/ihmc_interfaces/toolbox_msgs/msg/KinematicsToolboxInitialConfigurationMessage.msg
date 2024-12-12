@@ -2,7 +2,7 @@
 # It contains auxiliary information that allows to customize the initial configuration.
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # This array is used to identify to which joint each angle in initial_joint_angles belongs to.
 # See Joint.hashCode() for the computation of a joint hash code.

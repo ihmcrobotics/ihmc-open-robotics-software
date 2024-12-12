@@ -1,18 +1,13 @@
 package us.ihmc.atlas;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
-
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule;
 import us.ihmc.log.LogTools;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
@@ -20,13 +15,15 @@ import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class AtlasKinematicsStreamingToolboxModule extends KinematicsStreamingToolboxModule
 {
    public AtlasKinematicsStreamingToolboxModule(DRCRobotModel robotModel,
-                                                boolean startYoVariableServer,
-                                                PubSubImplementation pubSubImplementation)
+                                                boolean startYoVariableServer)
    {
-      super(robotModel, startYoVariableServer, pubSubImplementation);
+      super(robotModel, startYoVariableServer);
       controller.setInitialRobotConfigurationNamedMap(initialConfiguration(robotModel));
       controller.getTools().getIKController().getCenterOfMassSafeMargin().set(0.10);
    }
@@ -100,8 +97,6 @@ public class AtlasKinematicsStreamingToolboxModule extends KinematicsStreamingTo
       }
 
       boolean startYoVariableServer = true;
-      PubSubImplementation pubSubImplementation = PubSubImplementation.FAST_RTPS;
-      LogTools.info("Using ROS 2 {} mode.", pubSubImplementation.name());
-      new AtlasKinematicsStreamingToolboxModule(robotModel, startYoVariableServer, pubSubImplementation);
+      new AtlasKinematicsStreamingToolboxModule(robotModel, startYoVariableServer);
    }
 }

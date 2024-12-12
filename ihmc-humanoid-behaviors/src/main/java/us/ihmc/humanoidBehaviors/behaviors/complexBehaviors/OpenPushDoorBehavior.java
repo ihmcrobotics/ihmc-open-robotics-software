@@ -1,14 +1,10 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
-import java.util.concurrent.atomic.AtomicReference;
-
 import controller_msgs.msg.dds.AutomaticManipulationAbortMessage;
-import perception_msgs.msg.dds.DoorLocationPacket;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
 import controller_msgs.msg.dds.UIPositionCheckerPacket;
-import us.ihmc.ros2.ROS2PublisherBasics;
+import perception_msgs.msg.dds.DoorLocationPacket;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -27,8 +23,11 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.sensorProcessing.frames.CommonReferenceFrameIds;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 public class OpenPushDoorBehavior extends StateMachineBehavior<OpenDoorState>
 {
@@ -54,13 +53,13 @@ public class OpenPushDoorBehavior extends StateMachineBehavior<OpenDoorState>
    private final AtlasPrimitiveActions atlasPrimitiveActions;
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private SleepBehavior sleepBehavior;
-   private final ROS2PublisherBasics<UIPositionCheckerPacket> uiPositionCheckerPacketpublisher;
+   private final ROS2Publisher<UIPositionCheckerPacket> uiPositionCheckerPacketpublisher;
    protected final AtomicReference<DoorLocationPacket> doorLocationPacket = new AtomicReference<DoorLocationPacket>();
   // private final DoorOpenDetectorBehaviorService doorOpenDetectorBehaviorService;
    
    private long timeFirstDoorPushFinished = Long.MAX_VALUE;
 
-   private final ROS2PublisherBasics<AutomaticManipulationAbortMessage> abortMessagePublisher;
+   private final ROS2Publisher<AutomaticManipulationAbortMessage> abortMessagePublisher;
 
    public OpenPushDoorBehavior(String robotName, String behaviorPrefix, YoDouble yoTime, ROS2Node ros2Node, AtlasPrimitiveActions atlasPrimitiveActions,
                                DoorOpenDetectorBehaviorService doorOpenDetectorBehaviorService, YoGraphicsListRegistry yoGraphicsListRegistry)

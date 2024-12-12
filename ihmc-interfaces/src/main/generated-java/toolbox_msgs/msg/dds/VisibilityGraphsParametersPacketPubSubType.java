@@ -15,7 +15,7 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "bb991351cefcc176e9ad7a0219b3cf98b1a8a54ba8620c9b07a4dc5fe0eb0fa9";
+   		return "64ee1f9ee47beb4512e7b7c344b23a6055095775d924459ab04ac8de7d564067";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -119,7 +119,7 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -206,7 +206,7 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
 
    public static void write(toolbox_msgs.msg.dds.VisibilityGraphsParametersPacket data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_6(data.getMaxInterRegionConnectionLength());
 
@@ -264,7 +264,7 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
 
    public static void read(toolbox_msgs.msg.dds.VisibilityGraphsParametersPacket data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setMaxInterRegionConnectionLength(cdr.read_type_6());
       	
@@ -324,7 +324,7 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
    @Override
    public final void serialize(toolbox_msgs.msg.dds.VisibilityGraphsParametersPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_6("max_inter_region_connection_length", data.getMaxInterRegionConnectionLength());
       ser.write_type_6("normal_z_threshold_for_accessible_regions", data.getNormalZThresholdForAccessibleRegions());
       ser.write_type_6("navigable_extrusion_distance", data.getNavigableExtrusionDistance());
@@ -356,7 +356,7 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, toolbox_msgs.msg.dds.VisibilityGraphsParametersPacket data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setMaxInterRegionConnectionLength(ser.read_type_6("max_inter_region_connection_length"));
       data.setNormalZThresholdForAccessibleRegions(ser.read_type_6("normal_z_threshold_for_accessible_regions"));
       data.setNavigableExtrusionDistance(ser.read_type_6("navigable_extrusion_distance"));

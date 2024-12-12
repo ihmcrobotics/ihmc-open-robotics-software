@@ -15,7 +15,7 @@ public class JointspaceTrajectoryStatusMessagePubSubType implements us.ihmc.pubs
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "e3f9617aa3ac28c59776ea90e79338775369d39c4021bb536ed0d252f161e80c";
+   		return "174037ab9d6d30a4cd7b1c04a1482afb092f9269c234c1def7f9d5c74f73e4fc";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class JointspaceTrajectoryStatusMessagePubSubType implements us.ihmc.pubs
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
       {
@@ -79,7 +79,7 @@ public class JointspaceTrajectoryStatusMessagePubSubType implements us.ihmc.pubs
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -107,7 +107,7 @@ public class JointspaceTrajectoryStatusMessagePubSubType implements us.ihmc.pubs
 
    public static void write(controller_msgs.msg.dds.JointspaceTrajectoryStatusMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       if(data.getJointNames().size() <= 100)
       cdr.write_type_e(data.getJointNames());else
@@ -129,7 +129,7 @@ public class JointspaceTrajectoryStatusMessagePubSubType implements us.ihmc.pubs
 
    public static void read(controller_msgs.msg.dds.JointspaceTrajectoryStatusMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       cdr.read_type_e(data.getJointNames());	
       data.setTrajectoryExecutionStatus(cdr.read_type_9());
@@ -144,7 +144,7 @@ public class JointspaceTrajectoryStatusMessagePubSubType implements us.ihmc.pubs
    @Override
    public final void serialize(controller_msgs.msg.dds.JointspaceTrajectoryStatusMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_e("joint_names", data.getJointNames());
       ser.write_type_9("trajectory_execution_status", data.getTrajectoryExecutionStatus());
       ser.write_type_6("timestamp", data.getTimestamp());
@@ -155,7 +155,7 @@ public class JointspaceTrajectoryStatusMessagePubSubType implements us.ihmc.pubs
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.JointspaceTrajectoryStatusMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       ser.read_type_e("joint_names", data.getJointNames());
       data.setTrajectoryExecutionStatus(ser.read_type_9("trajectory_execution_status"));
       data.setTimestamp(ser.read_type_6("timestamp"));

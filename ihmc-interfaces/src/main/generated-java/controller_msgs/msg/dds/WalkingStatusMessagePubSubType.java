@@ -15,7 +15,7 @@ public class WalkingStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "60f683b1c082eaf179dddb5e6f970ca631072915a24172d1b9ea1b281fe9aafe";
+   		return "afb7b6709740d2412c62ed4ffe5633520c2047adde7dc2a4678755d8db6aa2e8";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class WalkingStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -69,7 +69,7 @@ public class WalkingStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -81,7 +81,7 @@ public class WalkingStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataT
 
    public static void write(controller_msgs.msg.dds.WalkingStatusMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_9(data.getWalkingStatus());
 
@@ -89,7 +89,7 @@ public class WalkingStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataT
 
    public static void read(controller_msgs.msg.dds.WalkingStatusMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setWalkingStatus(cdr.read_type_9());
       	
@@ -99,14 +99,14 @@ public class WalkingStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final void serialize(controller_msgs.msg.dds.WalkingStatusMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_9("walking_status", data.getWalkingStatus());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.WalkingStatusMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setWalkingStatus(ser.read_type_9("walking_status"));
    }
 

@@ -1,16 +1,6 @@
 package us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher;
 
-import java.net.URI;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
-
 import com.google.common.util.concurrent.AtomicDouble;
-
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessagePubSubType;
 import sensor_msgs.PointCloud2;
@@ -25,19 +15,28 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.perception.depthData.CollisionShapeTester;
 import us.ihmc.perception.depthData.PointCloudData;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.filters.CollidingScanPointFilter;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelFactory;
-import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
+
+import java.net.URI;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 public class StereoVisionPointCloudPublisher
 {
@@ -81,13 +80,13 @@ public class StereoVisionPointCloudPublisher
    private long publisherPeriodInMillisecond = 200L;
    private double minimumResolution = 0.005;
 
-   public StereoVisionPointCloudPublisher(FullRobotModelFactory modelFactory, ROS2NodeInterface ros2Node, ROS2Topic<StereoVisionPointCloudMessage> topic)
+   public StereoVisionPointCloudPublisher(FullRobotModelFactory modelFactory, ROS2Node ros2Node, ROS2Topic<StereoVisionPointCloudMessage> topic)
    {
       this(modelFactory, ros2Node, topic, ROS2QosProfile.RELIABLE());
    }
 
    public StereoVisionPointCloudPublisher(FullRobotModelFactory modelFactory,
-                                          ROS2NodeInterface ros2Node,
+                                          ROS2Node ros2Node,
                                           ROS2Topic<StereoVisionPointCloudMessage> topic,
                                           ROS2QosProfile qosProfile)
    {
@@ -96,7 +95,7 @@ public class StereoVisionPointCloudPublisher
 
    public StereoVisionPointCloudPublisher(String robotName,
                                           FullRobotModel fullRobotModel,
-                                          ROS2NodeInterface ros2Node,
+                                          ROS2Node ros2Node,
                                           ROS2Topic<StereoVisionPointCloudMessage> topic)
    {
       this(robotName, fullRobotModel, ros2Node, topic, ROS2QosProfile.RELIABLE());
@@ -104,7 +103,7 @@ public class StereoVisionPointCloudPublisher
 
    public StereoVisionPointCloudPublisher(String robotName,
                                           FullRobotModel fullRobotModel,
-                                          ROS2NodeInterface ros2Node,
+                                          ROS2Node ros2Node,
                                           ROS2Topic<StereoVisionPointCloudMessage> topic,
                                           ROS2QosProfile qosProfile)
    {

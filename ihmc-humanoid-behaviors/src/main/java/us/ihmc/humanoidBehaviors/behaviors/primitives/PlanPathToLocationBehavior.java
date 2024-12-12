@@ -1,14 +1,11 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
-import java.util.concurrent.atomic.AtomicReference;
-
 import controller_msgs.msg.dds.FootstepDataListMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import toolbox_msgs.msg.dds.FootstepPlannerParametersPacket;
 import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
 import toolbox_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
-import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import toolbox_msgs.msg.dds.ToolboxStateMessage;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.ToolboxState;
@@ -31,8 +28,11 @@ import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationPropertie
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.taskExecutor.PipeLine;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 public class PlanPathToLocationBehavior extends AbstractBehavior
 {
@@ -57,10 +57,10 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
    private boolean squareUpEndSteps = true;
 
    protected final ConcurrentListeningQueue<FootstepPlanningToolboxOutputStatus> footPlanStatusQueue = new ConcurrentListeningQueue<FootstepPlanningToolboxOutputStatus>(2);
-   private final ROS2PublisherBasics<ToolboxStateMessage> toolboxStatePublisher;
-   private final ROS2PublisherBasics<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher;
-   private final ROS2PublisherBasics<FootstepPlannerParametersPacket> footstepPlannerParametersPublisher;
-   private final ROS2PublisherBasics<FootstepDataListMessage> goalFootstepToUIVisualization;
+   private final ROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
+   private final ROS2Publisher<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher;
+   private final ROS2Publisher<FootstepPlannerParametersPacket> footstepPlannerParametersPublisher;
+   private final ROS2Publisher<FootstepDataListMessage> goalFootstepToUIVisualization;
 
    private final AtomicReference<PlanarRegionsListMessage> planarRegions = new AtomicReference<>();
 

@@ -15,7 +15,7 @@ public class StampedPosePacketPubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "046998c0678764138cf2292a89f7e9db0645e555bef6f56500deb8d5f42c6c59";
+   		return "2b5e3813996bd2fe6fcbab5f036ab43410eb0878581355076a2adfce486a8daa";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class StampedPosePacketPubSubType implements us.ihmc.pubsub.TopicDataType
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -76,7 +76,7 @@ public class StampedPosePacketPubSubType implements us.ihmc.pubsub.TopicDataType
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getPose(), current_alignment);
@@ -97,7 +97,7 @@ public class StampedPosePacketPubSubType implements us.ihmc.pubsub.TopicDataType
 
    public static void write(ihmc_common_msgs.msg.dds.StampedPosePacket data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       geometry_msgs.msg.dds.PosePubSubType.write(data.getPose(), cdr);
       geometry_msgs.msg.dds.TwistPubSubType.write(data.getTwist(), cdr);
@@ -113,7 +113,7 @@ public class StampedPosePacketPubSubType implements us.ihmc.pubsub.TopicDataType
 
    public static void read(ihmc_common_msgs.msg.dds.StampedPosePacket data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       geometry_msgs.msg.dds.PosePubSubType.read(data.getPose(), cdr);	
       geometry_msgs.msg.dds.TwistPubSubType.read(data.getTwist(), cdr);	
@@ -128,7 +128,7 @@ public class StampedPosePacketPubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final void serialize(ihmc_common_msgs.msg.dds.StampedPosePacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_a("pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getPose());
 
       ser.write_type_a("twist", new geometry_msgs.msg.dds.TwistPubSubType(), data.getTwist());
@@ -141,7 +141,7 @@ public class StampedPosePacketPubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, ihmc_common_msgs.msg.dds.StampedPosePacket data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       ser.read_type_a("pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getPose());
 
       ser.read_type_a("twist", new geometry_msgs.msg.dds.TwistPubSubType(), data.getTwist());

@@ -15,7 +15,7 @@ public class BodyPathPlanMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "f946c1a87691219f82288488e08a1bbaaf945255a5af78e15d86c8ee9be35387";
+   		return "87262f9d71b96f695c405d5faa9f581c110d37a3c1491df8869a81bb3927849b";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class BodyPathPlanMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -80,7 +80,7 @@ public class BodyPathPlanMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -106,7 +106,7 @@ public class BodyPathPlanMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
    public static void write(toolbox_msgs.msg.dds.BodyPathPlanMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_9(data.getFootstepPlanningResult());
 
@@ -123,7 +123,7 @@ public class BodyPathPlanMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
    public static void read(toolbox_msgs.msg.dds.BodyPathPlanMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setFootstepPlanningResult(cdr.read_type_9());
       	
@@ -139,7 +139,7 @@ public class BodyPathPlanMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final void serialize(toolbox_msgs.msg.dds.BodyPathPlanMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_9("footstep_planning_result", data.getFootstepPlanningResult());
       ser.write_type_2("plan_id", data.getPlanId());
       ser.write_type_a("planar_regions_list", new perception_msgs.msg.dds.PlanarRegionsListMessagePubSubType(), data.getPlanarRegionsList());
@@ -154,7 +154,7 @@ public class BodyPathPlanMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, toolbox_msgs.msg.dds.BodyPathPlanMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setFootstepPlanningResult(ser.read_type_9("footstep_planning_result"));
       data.setPlanId(ser.read_type_2("plan_id"));
       ser.read_type_a("planar_regions_list", new perception_msgs.msg.dds.PlanarRegionsListMessagePubSubType(), data.getPlanarRegionsList());

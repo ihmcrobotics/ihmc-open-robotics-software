@@ -15,7 +15,7 @@ public class BehaviorStatusPacketPubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "7d83efec22c6b3ca50b9c97e17c5c23e663a515a17e6c2e2fb02ade532777d4c";
+   		return "c501bfcdac2b9dc9579ec094ab133330b08d7bd85b5357c7f04d9453883afc5a";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class BehaviorStatusPacketPubSubType implements us.ihmc.pubsub.TopicDataT
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -71,7 +71,7 @@ public class BehaviorStatusPacketPubSubType implements us.ihmc.pubsub.TopicDataT
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -86,7 +86,7 @@ public class BehaviorStatusPacketPubSubType implements us.ihmc.pubsub.TopicDataT
 
    public static void write(toolbox_msgs.msg.dds.BehaviorStatusPacket data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_9(data.getCurrentBehaviorStatus());
 
@@ -96,7 +96,7 @@ public class BehaviorStatusPacketPubSubType implements us.ihmc.pubsub.TopicDataT
 
    public static void read(toolbox_msgs.msg.dds.BehaviorStatusPacket data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setCurrentBehaviorStatus(cdr.read_type_9());
       	
@@ -108,7 +108,7 @@ public class BehaviorStatusPacketPubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final void serialize(toolbox_msgs.msg.dds.BehaviorStatusPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_9("current_behavior_status", data.getCurrentBehaviorStatus());
       ser.write_type_9("humanoid_behavior_type", data.getHumanoidBehaviorType());
    }
@@ -116,7 +116,7 @@ public class BehaviorStatusPacketPubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, toolbox_msgs.msg.dds.BehaviorStatusPacket data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setCurrentBehaviorStatus(ser.read_type_9("current_behavior_status"));
       data.setHumanoidBehaviorType(ser.read_type_9("humanoid_behavior_type"));
    }

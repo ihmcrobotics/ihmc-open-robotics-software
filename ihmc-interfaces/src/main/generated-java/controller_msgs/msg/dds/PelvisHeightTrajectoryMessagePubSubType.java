@@ -15,7 +15,7 @@ public class PelvisHeightTrajectoryMessagePubSubType implements us.ihmc.pubsub.T
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "a3556820a1dab29433957adff61c8b6d05b8f65dd7c3733f3ec4f6f49d690851";
+   		return "d19ae6ef32ec91e783ad20c033b6fd37cf8c5b076bf149a1fbb2e29c67c7777f";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class PelvisHeightTrajectoryMessagePubSubType implements us.ihmc.pubsub.T
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -73,7 +73,7 @@ public class PelvisHeightTrajectoryMessagePubSubType implements us.ihmc.pubsub.T
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -90,7 +90,7 @@ public class PelvisHeightTrajectoryMessagePubSubType implements us.ihmc.pubsub.T
 
    public static void write(controller_msgs.msg.dds.PelvisHeightTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_7(data.getEnableUserPelvisControl());
 
@@ -101,7 +101,7 @@ public class PelvisHeightTrajectoryMessagePubSubType implements us.ihmc.pubsub.T
 
    public static void read(controller_msgs.msg.dds.PelvisHeightTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setEnableUserPelvisControl(cdr.read_type_7());
       	
@@ -114,7 +114,7 @@ public class PelvisHeightTrajectoryMessagePubSubType implements us.ihmc.pubsub.T
    @Override
    public final void serialize(controller_msgs.msg.dds.PelvisHeightTrajectoryMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_7("enable_user_pelvis_control", data.getEnableUserPelvisControl());
       ser.write_type_7("enable_user_pelvis_control_during_walking", data.getEnableUserPelvisControlDuringWalking());
       ser.write_type_a("euclidean_trajectory", new ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType(), data.getEuclideanTrajectory());
@@ -124,7 +124,7 @@ public class PelvisHeightTrajectoryMessagePubSubType implements us.ihmc.pubsub.T
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.PelvisHeightTrajectoryMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setEnableUserPelvisControl(ser.read_type_7("enable_user_pelvis_control"));
       data.setEnableUserPelvisControlDuringWalking(ser.read_type_7("enable_user_pelvis_control_during_walking"));
       ser.read_type_a("euclidean_trajectory", new ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType(), data.getEuclideanTrajectory());

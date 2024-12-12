@@ -15,7 +15,7 @@ public class EuclideanTrajectoryMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "32f6cd72887fe06094e7ecb23ac2bd5554adaff6f92612da380f4454bcc32bd1";
+   		return "761e01c3467b2dc0373bb355849a29d0f22191f95d78237b59c9acde8344c841";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class EuclideanTrajectoryMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50; ++i0)
       {
@@ -82,7 +82,7 @@ public class EuclideanTrajectoryMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -109,7 +109,7 @@ public class EuclideanTrajectoryMessagePubSubType implements us.ihmc.pubsub.Topi
 
    public static void write(ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       if(data.getTaskspaceTrajectoryPoints().size() <= 50)
       cdr.write_type_e(data.getTaskspaceTrajectoryPoints());else
@@ -126,7 +126,7 @@ public class EuclideanTrajectoryMessagePubSubType implements us.ihmc.pubsub.Topi
 
    public static void read(ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       cdr.read_type_e(data.getTaskspaceTrajectoryPoints());	
       ihmc_common_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.read(data.getSelectionMatrix(), cdr);	
@@ -142,7 +142,7 @@ public class EuclideanTrajectoryMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final void serialize(ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_e("taskspace_trajectory_points", data.getTaskspaceTrajectoryPoints());
       ser.write_type_a("selection_matrix", new ihmc_common_msgs.msg.dds.SelectionMatrix3DMessagePubSubType(), data.getSelectionMatrix());
 
@@ -160,7 +160,7 @@ public class EuclideanTrajectoryMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       ser.read_type_e("taskspace_trajectory_points", data.getTaskspaceTrajectoryPoints());
       ser.read_type_a("selection_matrix", new ihmc_common_msgs.msg.dds.SelectionMatrix3DMessagePubSubType(), data.getSelectionMatrix());
 

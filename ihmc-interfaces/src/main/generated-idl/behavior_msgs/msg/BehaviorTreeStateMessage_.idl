@@ -97,7 +97,7 @@ module behavior_msgs
         /**
          * Monotonically increasing message ID that matches the CRDTInfo update number
          */
-        unsigned long sequence_id;
+        unsigned long long sequence_id;
         /**
          * The ID to assign to the next instantiated node
          */

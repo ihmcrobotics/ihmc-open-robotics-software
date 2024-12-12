@@ -2,7 +2,7 @@
 # It contains auxiliary information that allows to further customized the behavior of the solver.
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # Specifies how much high joint velocity values should be penalized in the optimization problem.
 # A low value generally results in a reduce number of iterations before convergence but it also decreases the general stability of the solver.

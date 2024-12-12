@@ -15,7 +15,7 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "02834143142106e8df98428110fd9ed671901225742ce0e986fd45c55959544f";
+   		return "1671b8788165f08e5f62461a7b103a4bb6378e271d21e0d8e18e35c3283d0c71";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -89,7 +89,7 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -135,7 +135,7 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
    public static void write(perception_msgs.msg.dds.HeightMapMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_6(data.getXyResolution());
 
@@ -171,7 +171,7 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
    public static void read(perception_msgs.msg.dds.HeightMapMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setXyResolution(cdr.read_type_6());
       	
@@ -194,7 +194,7 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final void serialize(perception_msgs.msg.dds.HeightMapMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_6("xy_resolution", data.getXyResolution());
       ser.write_type_6("grid_size_xy", data.getGridSizeXy());
       ser.write_type_6("grid_center_x", data.getGridCenterX());
@@ -210,7 +210,7 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.HeightMapMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setXyResolution(ser.read_type_6("xy_resolution"));
       data.setGridSizeXy(ser.read_type_6("grid_size_xy"));
       data.setGridCenterX(ser.read_type_6("grid_center_x"));

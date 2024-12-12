@@ -14,7 +14,7 @@ int8 VIDEO_SOURCE_IMAGE_PROCESSING_BEHAVIOR=5
 int8 VIDEO_SOURCE_AWARE_FACE_TRACKER=6
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # Field default value 255
 int8 video_source

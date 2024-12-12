@@ -15,7 +15,7 @@ public class PrepareForLocomotionMessagePubSubType implements us.ihmc.pubsub.Top
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "b72181e318ebba9e1f22e1ebe710a8468da4f23e5539ec11f3778b340afcaa5c";
+   		return "aef3ec715e7b1f61bb0270135ca678d86755f75a854b6b24933e89606a3f449e";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class PrepareForLocomotionMessagePubSubType implements us.ihmc.pubsub.Top
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -73,7 +73,7 @@ public class PrepareForLocomotionMessagePubSubType implements us.ihmc.pubsub.Top
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -91,7 +91,7 @@ public class PrepareForLocomotionMessagePubSubType implements us.ihmc.pubsub.Top
 
    public static void write(controller_msgs.msg.dds.PrepareForLocomotionMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_7(data.getPrepareManipulation());
 
@@ -103,7 +103,7 @@ public class PrepareForLocomotionMessagePubSubType implements us.ihmc.pubsub.Top
 
    public static void read(controller_msgs.msg.dds.PrepareForLocomotionMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setPrepareManipulation(cdr.read_type_7());
       	
@@ -117,7 +117,7 @@ public class PrepareForLocomotionMessagePubSubType implements us.ihmc.pubsub.Top
    @Override
    public final void serialize(controller_msgs.msg.dds.PrepareForLocomotionMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_7("prepare_manipulation", data.getPrepareManipulation());
       ser.write_type_7("prepare_chest", data.getPrepareChest());
       ser.write_type_7("prepare_pelvis", data.getPreparePelvis());
@@ -126,7 +126,7 @@ public class PrepareForLocomotionMessagePubSubType implements us.ihmc.pubsub.Top
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.PrepareForLocomotionMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setPrepareManipulation(ser.read_type_7("prepare_manipulation"));
       data.setPrepareChest(ser.read_type_7("prepare_chest"));
       data.setPreparePelvis(ser.read_type_7("prepare_pelvis"));

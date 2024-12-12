@@ -15,14 +15,14 @@ import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2PublisherBasics;
+import us.ihmc.ros2.ROS2Publisher;
 
 import javax.annotation.Nullable;
 import java.time.Instant;
 
 public class ROS2SRTVideoStreamImageMessageRelayWorker
 {
-   private final ROS2PublisherBasics<ImageMessage> publisher;
+   private final ROS2Publisher<ImageMessage> publisher;
    private final ROS2SRTVideoSubscriber subscriber;
 
    /**
@@ -38,12 +38,12 @@ public class ROS2SRTVideoStreamImageMessageRelayWorker
    private final ImageMessage imageMessage;
    private long frameSequenceNumber = 0L;
 
-   public ROS2SRTVideoStreamImageMessageRelayWorker(ROS2Node publisherNode, ROS2Node subscriberNode, ROS2SRTStreamTopicPair streamTopicPair)
+   public ROS2SRTVideoStreamImageMessageRelayWorker(ROS2Node loopbackPublisherNode, ROS2Node subscriberNode, ROS2SRTStreamTopicPair streamTopicPair)
    {
-      this(publisherNode, subscriberNode, streamTopicPair, CompressionType.UNCOMPRESSED);
+      this(loopbackPublisherNode, subscriberNode, streamTopicPair, CompressionType.UNCOMPRESSED);
    }
 
-   public ROS2SRTVideoStreamImageMessageRelayWorker(ROS2Node publisherNode,
+   public ROS2SRTVideoStreamImageMessageRelayWorker(ROS2Node loopbackPublisherNode,
                                                     ROS2Node subscriberNode,
                                                     ROS2SRTStreamTopicPair streamTopicPair,
                                                     CompressionType compressionType)
@@ -56,7 +56,7 @@ public class ROS2SRTVideoStreamImageMessageRelayWorker
       imageMessage.setCameraModel(CameraModel.PINHOLE.toByte());
 
       // Create publisher and subscriber using two separate nodes as publisher should ideally only publish on loopback.
-      publisher = publisherNode.createPublisher(streamTopicPair.imageMessageTopic());
+      publisher = loopbackPublisherNode.createPublisher(streamTopicPair.imageMessageTopic());
       subscriber = new ROS2SRTVideoSubscriber(new ROS2Helper(subscriberNode), streamTopicPair.streamStatusTopic(), outputPixelFormat);
       subscriber.addNewFrameConsumer(this::republishFrameAsImageMessage);
       subscriber.subscribe();

@@ -10,14 +10,14 @@ import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import perception_msgs.msg.dds.REAStateRequestMessage;
-import us.ihmc.javaFXToolkit.JavaFXTools;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.ui.UIAuxiliaryRobotData;
+import us.ihmc.javaFXToolkit.JavaFXTools;
 import us.ihmc.messager.javafx.JavaFXMessager;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
+import us.ihmc.ros2.ROS2Publisher;
 
 public class RobotOperationTabController
 {
@@ -35,7 +35,7 @@ public class RobotOperationTabController
    @FXML private Spinner<Double> supportRegionScale;
    @FXML private HBox robotOperationHBox;
 
-   private ROS2PublisherBasics<REAStateRequestMessage> reaStateRequestPublisher;
+   private ROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher;
 
    private final RobotIKUI robotIKUI = new RobotIKUI();
 
@@ -155,7 +155,7 @@ public class RobotOperationTabController
       updateButtons();
    }
 
-   public void setREAStateRequestPublisher(ROS2PublisherBasics<REAStateRequestMessage> reaStateRequestPublisher)
+   public void setREAStateRequestPublisher(ROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher)
    {
       this.reaStateRequestPublisher = reaStateRequestPublisher;
    }

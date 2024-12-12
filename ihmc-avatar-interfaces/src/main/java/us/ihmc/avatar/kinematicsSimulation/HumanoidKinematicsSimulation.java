@@ -1,13 +1,10 @@
 package us.ihmc.avatar.kinematicsSimulation;
 
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
-
-import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.msg.dds.WalkingStatusMessage;
+import controller_msgs.msg.dds.WholeBodyStreamingMessage;
+import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.AvatarControllerThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -67,6 +64,7 @@ import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisher;
@@ -88,6 +86,13 @@ import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
+
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class HumanoidKinematicsSimulation
 {
@@ -151,7 +156,7 @@ public class HumanoidKinematicsSimulation
       this.kinematicsSimulationParameters = kinematicsSimulationParameters;
 
       // instantiate some existing controller ROS2 API?
-      ros2Node = ROS2Tools.createROS2Node(kinematicsSimulationParameters.getPubSubImplementation(), HumanoidControllerAPI.HUMANOID_KINEMATICS_CONTROLLER_NODE_NAME);
+      ros2Node = new ROS2NodeBuilder().build(HumanoidControllerAPI.HUMANOID_KINEMATICS_CONTROLLER_NODE_NAME);
       heartbeat = new ROS2Heartbeat(ros2Node, KINEMATICS_SIMULATION_HEARTBEAT);
 
       String robotName = robotModel.getSimpleRobotName();
@@ -252,8 +257,7 @@ public class HumanoidKinematicsSimulation
       walkingParentRegistry.addChild(walkingController.getYoVariableRegistry());
 
       // create controller network subscriber here!!
-      realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(kinematicsSimulationParameters.getPubSubImplementation(),
-                                                          HumanoidControllerAPI.HUMANOID_KINEMATICS_CONTROLLER_NODE_NAME + "_rt");
+      realtimeROS2Node = new ROS2NodeBuilder().buildRealtime(HumanoidControllerAPI.HUMANOID_KINEMATICS_CONTROLLER_NODE_NAME + "_rt");
       ROS2Topic inputTopic = HumanoidControllerAPI.getInputTopic(robotName);
       ROS2Topic outputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
       ControllerNetworkSubscriber controllerNetworkSubscriber = new ControllerNetworkSubscriber(inputTopic,

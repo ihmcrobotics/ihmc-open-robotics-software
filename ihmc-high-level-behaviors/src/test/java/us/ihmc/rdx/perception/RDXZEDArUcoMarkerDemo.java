@@ -10,13 +10,11 @@ import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetectionResults;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetector;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -26,6 +24,7 @@ import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2ColoredPointCloudVisualize
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.sensors.ZEDColorDepthImagePublisher;
 import us.ihmc.sensors.ZEDColorDepthImageRetriever;
 import us.ihmc.tools.thread.SwapReference;
@@ -60,7 +59,7 @@ public class RDXZEDArUcoMarkerDemo
 
    public RDXZEDArUcoMarkerDemo()
    {
-      ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, getClass().getSimpleName() + "_ROS2Node");
+      ros2Node = new ROS2NodeBuilder().build(getClass().getSimpleName() + "_ROS2Node");
 
       imageRetriever = new ZEDColorDepthImageRetriever(0, ReferenceFrame::getWorldFrame, () -> true, () -> true, true);
       imagePublisher = new ZEDColorDepthImagePublisher(PerceptionAPI.ZED2_COLOR_IMAGES, PerceptionAPI.ZED2_DEPTH, PerceptionAPI.ZED2_CUT_OUT_DEPTH);

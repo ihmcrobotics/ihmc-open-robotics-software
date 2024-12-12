@@ -4,7 +4,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.SakeHandAPI;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Node;
 
 public class ROS2SakeHandStatus
 {
@@ -26,7 +26,7 @@ public class ROS2SakeHandStatus
    private volatile int errorCodes = 0;
    private volatile int handRealtimeTick = 0;
 
-   public ROS2SakeHandStatus(ROS2NodeInterface ros2Node, String robotName, RobotSide handSide)
+   public ROS2SakeHandStatus(ROS2Node ros2Node, String robotName, RobotSide handSide)
    {
       ROS2Tools.createVolatileCallbackSubscription(ros2Node, SakeHandAPI.getHandSakeStatusTopic(robotName, handSide), sakeHandStatusMessage ->
       {

@@ -3,7 +3,7 @@
 # A linear interpolation is used to interpolate between trajectory points.
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # List of trajectory points (in taskpsace) to go through while executing the trajectory.
 WrenchTrajectoryPointMessage[<=50] wrench_trajectory_points

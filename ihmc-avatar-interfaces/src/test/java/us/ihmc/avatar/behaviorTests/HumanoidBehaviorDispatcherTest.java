@@ -1,28 +1,18 @@
 package us.ihmc.avatar.behaviorTests;
 
-import static us.ihmc.robotics.Assert.assertEquals;
-import static us.ihmc.robotics.Assert.assertFalse;
-import static us.ihmc.robotics.Assert.assertTrue;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import toolbox_msgs.msg.dds.BehaviorControlModePacket;
-import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import toolbox_msgs.msg.dds.HumanoidBehaviorTypePacket;
-import controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage;
-import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.ros2.ROS2PublisherBasics;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -49,12 +39,13 @@ import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataRecei
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
@@ -65,6 +56,11 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+
+import static us.ihmc.robotics.Assert.*;
 
 public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestInterface
 {
@@ -125,7 +121,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       registry = new YoRegistry(getClass().getSimpleName());
       this.yoTime = new YoDouble("yoTime", registry);
 
-      this.ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.INTRAPROCESS, "ihmc_humanoid_behavior_dispatcher_test");
+      this.ros2Node = new ROS2NodeBuilder().build("ihmc_humanoid_behavior_dispatcher_test");
 
       simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), simulationTestingParameters);
       simulationTestHelper.start();
@@ -463,8 +459,8 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       targetMidFeetPose.changeFrame(worldFrame);
 
       BehaviorControlModePacket pauseModePacket = HumanoidMessageTools.createBehaviorControlModePacket(BehaviorControlModeEnum.PAUSE);
-      ROS2PublisherBasics<BehaviorControlModePacket> publisher = simulationTestHelper.createPublisher(BehaviorControlModePacket.class,
-                                                                                                    IHMCHumanoidBehaviorManager.getInputTopic(getSimpleRobotName()));
+      ROS2Publisher<BehaviorControlModePacket> publisher = simulationTestHelper.createPublisher(BehaviorControlModePacket.class,
+                                                                                                IHMCHumanoidBehaviorManager.getInputTopic(getSimpleRobotName()));
       publisher.publish(pauseModePacket);
       LogTools.debug(this, "Sending Pause Request");
 

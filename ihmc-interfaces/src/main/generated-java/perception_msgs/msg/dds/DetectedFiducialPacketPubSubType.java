@@ -15,7 +15,7 @@ public class DetectedFiducialPacketPubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "42779ff520895c59f998e40723bb70a3324807f8d128b9e2399d26eab184eafd";
+   		return "76863a9509053261d7f1dfc95b728fa7d61d1b9907e8f30b63b6c82a1fccec6c";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class DetectedFiducialPacketPubSubType implements us.ihmc.pubsub.TopicDat
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -74,7 +74,7 @@ public class DetectedFiducialPacketPubSubType implements us.ihmc.pubsub.TopicDat
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -93,7 +93,7 @@ public class DetectedFiducialPacketPubSubType implements us.ihmc.pubsub.TopicDat
 
    public static void write(perception_msgs.msg.dds.DetectedFiducialPacket data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_4(data.getFiducialId());
 
@@ -106,7 +106,7 @@ public class DetectedFiducialPacketPubSubType implements us.ihmc.pubsub.TopicDat
 
    public static void read(perception_msgs.msg.dds.DetectedFiducialPacket data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setFiducialId(cdr.read_type_4());
       	
@@ -118,7 +118,7 @@ public class DetectedFiducialPacketPubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final void serialize(perception_msgs.msg.dds.DetectedFiducialPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_4("fiducial_id", data.getFiducialId());
       ser.write_type_a("fiducial_transform_to_world", new geometry_msgs.msg.dds.PosePubSubType(), data.getFiducialTransformToWorld());
 
@@ -128,7 +128,7 @@ public class DetectedFiducialPacketPubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.DetectedFiducialPacket data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setFiducialId(ser.read_type_4("fiducial_id"));
       ser.read_type_a("fiducial_transform_to_world", new geometry_msgs.msg.dds.PosePubSubType(), data.getFiducialTransformToWorld());
 

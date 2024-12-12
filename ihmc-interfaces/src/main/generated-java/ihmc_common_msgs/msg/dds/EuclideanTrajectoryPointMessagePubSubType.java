@@ -15,7 +15,7 @@ public class EuclideanTrajectoryPointMessagePubSubType implements us.ihmc.pubsub
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "b3585feaf39ab81154b98086cd2909da929f19a2c01a7a243d197689f08c52ff";
+   		return "7b4ed34a1e0b51af77b3f056e5bfc6fc32f37ef242ce82bef4bb82f34d154173";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class EuclideanTrajectoryPointMessagePubSubType implements us.ihmc.pubsub
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -73,7 +73,7 @@ public class EuclideanTrajectoryPointMessagePubSubType implements us.ihmc.pubsub
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -89,7 +89,7 @@ public class EuclideanTrajectoryPointMessagePubSubType implements us.ihmc.pubsub
 
    public static void write(ihmc_common_msgs.msg.dds.EuclideanTrajectoryPointMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_6(data.getTime());
 
@@ -99,7 +99,7 @@ public class EuclideanTrajectoryPointMessagePubSubType implements us.ihmc.pubsub
 
    public static void read(ihmc_common_msgs.msg.dds.EuclideanTrajectoryPointMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setTime(cdr.read_type_6());
       	
@@ -111,7 +111,7 @@ public class EuclideanTrajectoryPointMessagePubSubType implements us.ihmc.pubsub
    @Override
    public final void serialize(ihmc_common_msgs.msg.dds.EuclideanTrajectoryPointMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_6("time", data.getTime());
       ser.write_type_a("position", new geometry_msgs.msg.dds.PointPubSubType(), data.getPosition());
 
@@ -122,7 +122,7 @@ public class EuclideanTrajectoryPointMessagePubSubType implements us.ihmc.pubsub
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, ihmc_common_msgs.msg.dds.EuclideanTrajectoryPointMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setTime(ser.read_type_6("time"));
       ser.read_type_a("position", new geometry_msgs.msg.dds.PointPubSubType(), data.getPosition());
 

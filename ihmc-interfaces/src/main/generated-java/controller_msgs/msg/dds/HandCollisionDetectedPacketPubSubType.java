@@ -15,7 +15,7 @@ public class HandCollisionDetectedPacketPubSubType implements us.ihmc.pubsub.Top
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "da130ac45eb1053e2cbdb8cb30808851da9b02457163addcb7ba5b43c617765f";
+   		return "4b33ee77a96b8cb85f851767e7df878cf454a61d2ba5a7878306b8b1e479bce2";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class HandCollisionDetectedPacketPubSubType implements us.ihmc.pubsub.Top
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -71,7 +71,7 @@ public class HandCollisionDetectedPacketPubSubType implements us.ihmc.pubsub.Top
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -86,7 +86,7 @@ public class HandCollisionDetectedPacketPubSubType implements us.ihmc.pubsub.Top
 
    public static void write(controller_msgs.msg.dds.HandCollisionDetectedPacket data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_9(data.getRobotSide());
 
@@ -96,7 +96,7 @@ public class HandCollisionDetectedPacketPubSubType implements us.ihmc.pubsub.Top
 
    public static void read(controller_msgs.msg.dds.HandCollisionDetectedPacket data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setRobotSide(cdr.read_type_9());
       	
@@ -108,7 +108,7 @@ public class HandCollisionDetectedPacketPubSubType implements us.ihmc.pubsub.Top
    @Override
    public final void serialize(controller_msgs.msg.dds.HandCollisionDetectedPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_9("robot_side", data.getRobotSide());
       ser.write_type_2("collision_severity_level_one_to_three", data.getCollisionSeverityLevelOneToThree());
    }
@@ -116,7 +116,7 @@ public class HandCollisionDetectedPacketPubSubType implements us.ihmc.pubsub.Top
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.HandCollisionDetectedPacket data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setRobotSide(ser.read_type_9("robot_side"));
       data.setCollisionSeverityLevelOneToThree(ser.read_type_2("collision_severity_level_one_to_three"));
    }
