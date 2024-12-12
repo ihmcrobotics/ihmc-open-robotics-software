@@ -7,6 +7,7 @@ import imgui.flag.ImGuiTableFlags;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import us.ihmc.pubsub.impl.fastRTPS.FastRTPSDomain;
+import us.ihmc.pubsub.impl.fastRTPS.FastRTPSParticipant;
 import us.ihmc.pubsub.participant.Participant;
 import us.ihmc.pubsub.publisher.Publisher;
 import us.ihmc.pubsub.subscriber.Subscriber;
@@ -80,7 +81,7 @@ public class RDXROS2StatsPanel extends RDXPanel
       publishersSortedByName.clear();
       subscribersSortedByName.clear();
 
-      List<Participant> participants = FastRTPSDomain.accessInstance().getAllParticipantsForStatistics();
+      List<FastRTPSParticipant> participants = (List<FastRTPSParticipant>) FastRTPSDomain.accessInstance().getAllParticipantsForStatistics();
       synchronized (participants)
       {
          for (Participant participant : participants)
