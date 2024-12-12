@@ -30,6 +30,7 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 import java.net.URISyntaxException;
 import java.net.URL;
 
+import static org.bytedeco.cuda.global.cudart.cudaFree;
 import static org.bytedeco.cuda.global.cudart.cudaStreamSynchronize;
 
 public class RapidHeightMapExtractorCUDA
@@ -168,6 +169,7 @@ public class RapidHeightMapExtractorCUDA
       if (devicePointer != null)
       {
          devicePointer.close();
+         cudaFree(devicePointer);
          System.out.println("Deallocated device pointer.");
       }
    }
@@ -188,7 +190,6 @@ public class RapidHeightMapExtractorCUDA
       updateKernel = heightMapCUDAProgram.loadKernel(updateKernelName);
       registerKernel = heightMapCUDAProgram.loadKernel(registerKernelName);
       croppingKernel = heightMapCUDAProgram.loadKernel(croppingKernelName);
-      preprocessKernel = heightMapCUDAProgram.loadKernel(preprocessKernelName);
 
       recomputeDerivedParameters();
 
