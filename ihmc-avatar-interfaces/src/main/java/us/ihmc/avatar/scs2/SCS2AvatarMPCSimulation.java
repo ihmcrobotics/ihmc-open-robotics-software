@@ -1,9 +1,6 @@
 package us.ihmc.avatar.scs2;
 
-import us.ihmc.avatar.AvatarControllerThread;
-import us.ihmc.avatar.AvatarEstimatorThread;
-import us.ihmc.avatar.AvatarMPCControllerThread;
-import us.ihmc.avatar.AvatarStepGeneratorThread;
+import us.ihmc.avatar.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.avatar.factory.DisposableRobotController;
@@ -50,7 +47,7 @@ public class SCS2AvatarMPCSimulation
    private HumanoidRobotContextData masterContext;
    private AvatarEstimatorThread estimatorThread;
    private AvatarMPCControllerThread controllerThread;
-   private AvatarStepGeneratorThread stepGeneratorThread;
+   private AvatarMPCStepGeneratorThread stepGeneratorThread;
    private IKStreamingRTThread ikStreamingRTThread;
    private JointDesiredOutputWriter outputWriter;
    private SimulatedDRCRobotTimeProvider simulatedRobotTimeProvider;
@@ -426,12 +423,12 @@ public class SCS2AvatarMPCSimulation
       return controllerThread;
    }
 
-   public void setStepGeneratorThread(AvatarStepGeneratorThread stepGeneratorThread)
+   public void setStepGeneratorThread(AvatarMPCStepGeneratorThread stepGeneratorThread)
    {
       this.stepGeneratorThread = stepGeneratorThread;
    }
 
-   public AvatarStepGeneratorThread getStepGeneratorThread()
+   public AvatarMPCStepGeneratorThread getStepGeneratorThread()
    {
       return stepGeneratorThread;
    }

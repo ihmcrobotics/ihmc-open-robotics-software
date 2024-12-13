@@ -153,7 +153,7 @@ public class SCS2AvatarMPCSimulationFactory
    protected HumanoidRobotContextData masterContext;
    protected AvatarEstimatorThread estimatorThread;
    protected AvatarMPCControllerThread controllerThread;
-   protected AvatarStepGeneratorThread stepGeneratorThread;
+   protected AvatarMPCStepGeneratorThread stepGeneratorThread;
    protected IKStreamingRTThread ikStreamingRTThread;
    protected DisposableRobotController robotController;
    protected SimulatedDRCRobotTimeProvider simulatedRobotTimeProvider;
@@ -389,7 +389,7 @@ public class SCS2AvatarMPCSimulationFactory
       }
 
       HumanoidRobotContextDataFactory contextDataFactory = new HumanoidRobotContextDataFactory();
-      AvatarEstimatorThreadFactory avatarEstimatorThreadFactory = new AvatarEstimatorThreadFactory();
+      AvatarMPCEstimatorThreadFactory avatarEstimatorThreadFactory = new AvatarMPCEstimatorThreadFactory();
 
       if (realtimeROS2Node.hasBeenSet())
       {
@@ -474,7 +474,7 @@ public class SCS2AvatarMPCSimulationFactory
       RealtimeROS2Node ros2Node = null;
       if (realtimeROS2Node.hasBeenSet())
          ros2Node = realtimeROS2Node.get();
-      stepGeneratorThread = new AvatarStepGeneratorThread(steppingFactory,
+      stepGeneratorThread = new AvatarMPCStepGeneratorThread(steppingFactory,
                                                           contextDataFactory,
                                                           highLevelHumanoidControllerFactory.get().getStatusOutputManager(),
                                                           highLevelHumanoidControllerFactory.get().getCommandInputManager(),
@@ -523,9 +523,9 @@ public class SCS2AvatarMPCSimulationFactory
       int controllerDivisor = (int) Math.round(robotModel.getControllerDT() / simulationDT.get());
       int stepGeneratorDivisor = (int) Math.round(robotModel.getStepGeneratorDT() / simulationDT.get());
       int handControlDivisor = (int) Math.round(robotModel.getSimulatedHandControlDT() / simulationDT.get());
-      HumanoidRobotControlTask estimatorTask = new EstimatorTask(estimatorThread, estimatorDivisor, simulationDT.get(), masterFullRobotModel);
+      HumanoidRobotControlTask estimatorTask = new MPCEstimatorTask(estimatorThread, estimatorDivisor, simulationDT.get(), masterFullRobotModel);
       HumanoidRobotControlTask controllerTask = new MPCControllerTask("Controller", controllerThread, controllerDivisor, simulationDT.get(), masterFullRobotModel);
-      HumanoidRobotControlTask stepGeneratorTask = new StepGeneratorTask("StepGenerator",
+      HumanoidRobotControlTask stepGeneratorTask = new MPCStepGeneratorTask("StepGenerator",
                                                                          stepGeneratorThread,
                                                                          stepGeneratorDivisor,
                                                                          simulationDT.get(),
