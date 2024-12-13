@@ -524,7 +524,7 @@ public class SCS2AvatarMPCSimulationFactory
       int stepGeneratorDivisor = (int) Math.round(robotModel.getStepGeneratorDT() / simulationDT.get());
       int handControlDivisor = (int) Math.round(robotModel.getSimulatedHandControlDT() / simulationDT.get());
       HumanoidRobotControlTask estimatorTask = new EstimatorTask(estimatorThread, estimatorDivisor, simulationDT.get(), masterFullRobotModel);
-      HumanoidRobotControlTask controllerTask = new ControllerTask("Controller", controllerThread, controllerDivisor, simulationDT.get(), masterFullRobotModel);
+      HumanoidRobotControlTask controllerTask = new MPCControllerTask("Controller", controllerThread, controllerDivisor, simulationDT.get(), masterFullRobotModel);
       HumanoidRobotControlTask stepGeneratorTask = new StepGeneratorTask("StepGenerator",
                                                                          stepGeneratorThread,
                                                                          stepGeneratorDivisor,
