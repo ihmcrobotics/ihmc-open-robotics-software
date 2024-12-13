@@ -5,6 +5,12 @@ import us.ihmc.pubsub.common.Guid;
 import java.time.Duration;
 import java.time.Instant;
 
+/**
+ * Keeps track of the clock offset of a peer.
+ *
+ * TODO: Add an alpha filter since the network latency and compute
+ *   is noisy, but the clock rates are smooth.
+ */
 public class ROS2DistributedClockPeer
 {
    private final Guid guid;

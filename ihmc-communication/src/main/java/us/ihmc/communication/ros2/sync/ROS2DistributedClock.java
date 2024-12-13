@@ -18,7 +18,9 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- * Assumes symmetric network delay.
+ * Sends out pings to other instances of this class on the network to estimate
+ * the clock offsets on those computers. This can be used to synchronize data
+ * modifications. We account for and assume a symmetric network delay.
  */
 public class ROS2DistributedClock
 {
