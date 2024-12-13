@@ -57,6 +57,8 @@ public class QuicksterFootstepProvider implements Updatable
    private final SideDependentList<QuicksterFootstepProviderTouchdownCalculator> touchdownCalculator = new SideDependentList<>();
    private final SideDependentList<FramePoint2D> desiredTouchdownPositions = new SideDependentList<>();
    private final SideDependentList<FramePose2D> desiredTouchdownPoses = new SideDependentList<>();
+   private final SideDependentList<YoFramePoint3D> desiredTouchdownPosition3DInWorld = new SideDependentList<>();
+   private final SideDependentList<YoGraphicPosition> desiredTouchdownPositionViz = new SideDependentList<>();
 
    // Desired inputs
    private final YoDouble desiredTurningVelocity = new YoDouble("desiredTurningVelocity" + variableNameSuffix, registry);
@@ -156,6 +158,20 @@ public class QuicksterFootstepProvider implements Updatable
          desiredTouchdownPositions.put(robotSide, new FramePoint2D());
          desiredTouchdownPoses.put(robotSide, new FramePose2D());
 
+         desiredTouchdownPosition3DInWorld.put(robotSide, new YoFramePoint3D(robotSide.getLowerCaseName() + "DesiredTouchdownPosition3DInWorld" + variableNameSuffix,
+                                                                             ReferenceFrame.getWorldFrame(),
+                                                                             registry));
+
+         AppearanceDefinition touchdownVizColor = robotSide == RobotSide.LEFT ? YoAppearance.Magenta() : YoAppearance.Green();
+         desiredTouchdownPositionViz.put(robotSide, new YoGraphicPosition(robotSide.getLowerCaseName() + "DesiredTouchdownPosition" + variableNameSuffix,
+                                                                          desiredTouchdownPosition3DInWorld.get(robotSide),
+                                                                          0.015,
+                                                                          touchdownVizColor,
+                                                                          YoGraphicPosition.GraphicType.DIAMOND_WITH_CROSS));
+
+         yoGraphicsListRegistry.registerYoGraphic(variableNameSuffix, desiredTouchdownPositionViz.get(robotSide));
+         yoGraphicsListRegistry.registerArtifact(variableNameSuffix, desiredTouchdownPositionViz.get(robotSide).createArtifact());
+
          StateMachineFactory<FootState, State> stateMachineFactory = new StateMachineFactory<>(FootState.class);
          stateMachineFactory.setRegistry(registry).setNamePrefix(robotSide.getLowerCaseName() + variableNameSuffix).buildYoClock(yoTime);
 
@@ -217,7 +233,10 @@ public class QuicksterFootstepProvider implements Updatable
       for (RobotSide robotSide : RobotSide.values)
       {
          footStateMachines.get(robotSide).doActionAndTransition();
+
          pendulumBase3DInWorld.get(robotSide).setMatchingFrame(pendulumBase.get(robotSide), 0.0);
+
+         desiredTouchdownPosition3DInWorld.get(robotSide).setMatchingFrame(desiredTouchdownPositions.get(robotSide), 0.0);
 
          desiredTouchdownPoses.get(robotSide).getPosition().set(desiredTouchdownPositions.get(robotSide));
          desiredTouchdownPoses.get(robotSide).getOrientation().setFromReferenceFrame(centerOfMassControlZUpFrame);
