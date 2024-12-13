@@ -198,6 +198,7 @@ public class SCS2AvatarMPCSimulationFactory
       avatarSimulation.setControllerThread(controllerThread);
       avatarSimulation.setEstimatorThread(estimatorThread);
       avatarSimulation.setStepGeneratorThread(stepGeneratorThread);
+      avatarSimulation.setWholeBodyControllerCoreThread(wholeBodyControllerCoreThread);
       avatarSimulation.setIKStreamingRTThread(ikStreamingRTThread);
       avatarSimulation.setOutputWriter(simulationOutputWriter);
       avatarSimulation.setRobotController(robotController);
@@ -650,6 +651,9 @@ public class SCS2AvatarMPCSimulationFactory
          builders.add(new RegistrySendBufferBuilder(stepGeneratorThread.getYoVariableRegistry(),
                                                     enableSCS1YoGraphics.get() ? stepGeneratorThread.getSCS1YoGraphicsListRegistry() : null,
                                                     enableSCS2YoGraphics.get() ? stepGeneratorThread.getSCS2YoGraphics() : null));
+         builders.add(new RegistrySendBufferBuilder(wholeBodyControllerCoreThread.getYoVariableRegistry(),
+                                                    enableSCS1YoGraphics.get() ? wholeBodyControllerCoreThread.getSCS1YoGraphicsListRegistry() : null,
+                                                    enableSCS2YoGraphics.get() ? wholeBodyControllerCoreThread.getSCS2YoGraphics() : null));
          if (ikStreamingRTThread != null)
          {
             builders.add(new RegistrySendBufferBuilder(ikStreamingRTThread.getYoVariableRegistry(),
@@ -739,6 +743,7 @@ public class SCS2AvatarMPCSimulationFactory
             estimatorThread.initializeStateEstimators(rootJointTransform, jointPositions);
             controllerThread.initialize();
             stepGeneratorThread.initialize();
+            wholeBodyControllerCoreThread.initialize();
             //            ikStreamingRTThread.initialize(); // TODO Not sure if that's needed.
             masterContext.set(estimatorThread.getHumanoidRobotContextData());
 

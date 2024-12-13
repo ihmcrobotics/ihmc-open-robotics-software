@@ -76,19 +76,19 @@ public class AvatarMPCWholeBodyControllerCoreThread implements AvatarControllerT
       LowLevelOneDoFJointDesiredDataHolder wholeBodyControllerCoreDesiredJointDataHolder = new LowLevelOneDoFJointDesiredDataHolder(controllerCoreFullRobotModel.getControllableOneDoFJoints());
       RobotMotionStatusHolder robotMotionStatusHolder = new RobotMotionStatusHolder();
       // TODO will be worked later
-//      ControllerCoreOutputDataHolder controllerCoreOutPutDataHolder = new ControllerCoreOutputDataHolder(controllerCoreFullRobotModel.getControllableOneDoFJoints());
-//      ControllerCoreCommandDataHolder controllerCoreCommandDataHolder = new ControllerCoreCommandDataHolder();
+      //      ControllerCoreOutputDataHolder controllerCoreOutPutDataHolder = new ControllerCoreOutputDataHolder(controllerCoreFullRobotModel.getControllableOneDoFJoints());
+      //      ControllerCoreCommandDataHolder controllerCoreCommandDataHolder = new ControllerCoreCommandDataHolder();
       contextDataFactory.setForceSensorDataHolder(forceSensorDataHolderForWholeBodyControllerCore);
       contextDataFactory.setCenterOfMassDataHolder(centerOfMassDataHolderForWholeBodyControllerCore);
       contextDataFactory.setCenterOfPressureDataHolder(centerOfPressureDataHolderForWholeBodyControllerCore);
       contextDataFactory.setRobotMotionStatusHolder(robotMotionStatusHolder);
       contextDataFactory.setJointDesiredOutputList(desiredJointDataHolder);
       // TODO will be worked later
-//      contextDataFactory.setWBCCJointDesiredOutputList(wholeBodyControllerCoreDesiredJointDataHolder);
+      //      contextDataFactory.setWBCCJointDesiredOutputList(wholeBodyControllerCoreDesiredJointDataHolder);
       contextDataFactory.setProcessedJointData(processedJointData);
       // TODO will be worked later
-//      contextDataFactory.setControllerCoreOutputDataHolder(controllerCoreOutPutDataHolder);
-//      contextDataFactory.setControllerCoreCommandDataHolder(controllerCoreCommandDataHolder);
+      //      contextDataFactory.setControllerCoreOutputDataHolder(controllerCoreOutPutDataHolder);
+      //      contextDataFactory.setControllerCoreCommandDataHolder(controllerCoreCommandDataHolder);
       contextDataFactory.setSensorDataContext(new SensorDataContext(controllerCoreFullRobotModel));
       humanoidRobotContextData = contextDataFactory.createHumanoidRobotMPCContextData();
 
@@ -221,7 +221,7 @@ public class AvatarMPCWholeBodyControllerCoreThread implements AvatarControllerT
    public void initialize()
    {
       firstTick.set(true);
-//      humanoidRobotContextData.setWholeBodyControllerCoreRan(false);
+      humanoidRobotContextData.setWholeBodyControllerCoreRan(false);
       humanoidRobotContextData.setControllerRan(false);
       humanoidRobotContextData.setEstimatorRan(false);
 
@@ -235,11 +235,6 @@ public class AvatarMPCWholeBodyControllerCoreThread implements AvatarControllerT
       {
          jointDesiredOutputList.getJointDesiredOutput(i).clear();
       }
-   }
-
-   private void runOnFirstTick()
-   {
-
    }
 
    @Override
@@ -270,7 +265,7 @@ public class AvatarMPCWholeBodyControllerCoreThread implements AvatarControllerT
             firstTick.set(false);
          }
          wholeBodyControllerCoreCalculator.doControl();
-//         humanoidRobotContextData.setWholeBodyControllerCoreRan(true);
+         humanoidRobotContextData.setWholeBodyControllerCoreRan(true);
       }
       catch (Exception e)
       {

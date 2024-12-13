@@ -299,6 +299,7 @@ public class AvatarMPCControllerThread implements AvatarControllerThreadInterfac
       firstTick.set(true);
       humanoidRobotMPCContextData.setControllerRan(false);
       humanoidRobotMPCContextData.setEstimatorRan(false);
+      humanoidRobotMPCContextData.setWholeBodyControllerCoreRan(false);
 
       LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList = humanoidRobotMPCContextData.getJointDesiredOutputList();
 

@@ -123,6 +123,7 @@ public class AvatarMPCStepGeneratorThread implements AvatarControllerThreadInter
       firstTick.set(true);
       humanoidRobotMPCContextData.setControllerRan(false);
       humanoidRobotMPCContextData.setEstimatorRan(false);
+      humanoidRobotMPCContextData.setWholeBodyControllerCoreRan(false);
    }
 
    private void runOnFirstTick()

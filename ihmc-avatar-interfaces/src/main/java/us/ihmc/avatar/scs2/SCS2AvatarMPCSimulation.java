@@ -48,6 +48,7 @@ public class SCS2AvatarMPCSimulation
    private AvatarEstimatorThread estimatorThread;
    private AvatarMPCControllerThread controllerThread;
    private AvatarMPCStepGeneratorThread stepGeneratorThread;
+   private AvatarMPCWholeBodyControllerCoreThread wholeBodyControllerCoreThread;
    private IKStreamingRTThread ikStreamingRTThread;
    private JointDesiredOutputWriter outputWriter;
    private SimulatedDRCRobotTimeProvider simulatedRobotTimeProvider;
@@ -427,10 +428,18 @@ public class SCS2AvatarMPCSimulation
    {
       this.stepGeneratorThread = stepGeneratorThread;
    }
+   public void setWholeBodyControllerCoreThread(AvatarMPCWholeBodyControllerCoreThread wholeBodyControllerCoreThread)
+   {
+      this.wholeBodyControllerCoreThread = wholeBodyControllerCoreThread;
+   }
 
    public AvatarMPCStepGeneratorThread getStepGeneratorThread()
    {
       return stepGeneratorThread;
+   }
+   public AvatarMPCWholeBodyControllerCoreThread getWholeBodyControllerCoreThread()
+   {
+      return wholeBodyControllerCoreThread;
    }
 
    public void setIKStreamingRTThread(IKStreamingRTThread ikStreamingRTThread)

@@ -58,14 +58,16 @@ public class MPCWholeBodyControllerCoreTask extends MPCHumanoidRobotControlTask
       timer.stop();
    }
 
-   protected void updateMasterContext(HumanoidRobotMPCContextData context)
+   protected void updateMasterContext(HumanoidRobotMPCContextData masterContext)
    {
-
+      runAll(schedulerThreadRunnables);
+      //      masterResolver.resolveHumanoidRobotContextDataController(wholeBodyControllerCoreThread.getHumanoidRobotContextData(), masterContext);
    }
 
-   protected void updateLocalContext(HumanoidRobotMPCContextData context)
+   protected void updateLocalContext(HumanoidRobotMPCContextData masterContext)
    {
-
+      wholeBodyControllerCoreResolver.resolveHumanoidRobotContextDataScheduler(masterContext, wholeBodyControllerCoreThread.getHumanoidRobotContextData());
+      wholeBodyControllerCoreResolver.resolveHumanoidRobotContextDataEstimator(masterContext, wholeBodyControllerCoreThread.getHumanoidRobotContextData());
    }
 
    @Override
