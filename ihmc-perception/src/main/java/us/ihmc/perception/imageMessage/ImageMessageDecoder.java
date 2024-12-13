@@ -39,7 +39,7 @@ public class ImageMessageDecoder
       }
    }
 
-   public RawImage decodeMessage(ImageMessage messageToDecode)
+   public RawImage decodeMessageCPU(ImageMessage messageToDecode)
    {
       Mat image = new Mat();
       decodeMessage(messageToDecode, image);

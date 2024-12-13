@@ -119,7 +119,7 @@ public class RDXROS2RawImagePointCloudVisualizer extends RDXROS2MultiTopicVisual
       if (message.getData().isEmpty())
          return;
 
-      RawImage depthImage = depthMessageDecoder.decodeMessage(message);
+      RawImage depthImage = depthMessageDecoder.decodeMessageCPU(message);
       visualizer.setDepthImage(depthImage);
 
       getFrequency(depthTopic).ping();
@@ -134,7 +134,7 @@ public class RDXROS2RawImagePointCloudVisualizer extends RDXROS2MultiTopicVisual
       if (message.getData().isEmpty())
          return;
 
-      RawImage colorImage = colorMessageDecoder.decodeMessage(message);
+      RawImage colorImage = colorMessageDecoder.decodeMessageCPU(message);
       visualizer.setColorImage(colorImage);
 
       getFrequency(colorTopic).ping();
