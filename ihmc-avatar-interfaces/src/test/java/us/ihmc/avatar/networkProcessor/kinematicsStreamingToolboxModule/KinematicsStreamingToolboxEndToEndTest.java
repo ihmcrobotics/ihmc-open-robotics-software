@@ -18,7 +18,6 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetwork
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.ControllerAPI;
@@ -30,8 +29,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.scs2.definition.controller.interfaces.Controller;
@@ -80,7 +79,7 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
    {
       DRCRobotModel robotModel = newRobotModel();
       String robotName = robotModel.getSimpleRobotName();
-      kinematicsStreamingToolboxMessageReplay = new KinematicsStreamingToolboxMessageReplay(robotName, inputStream, PubSubImplementation.INTRAPROCESS);
+      kinematicsStreamingToolboxMessageReplay = new KinematicsStreamingToolboxMessageReplay(robotName, inputStream);
 
       if (!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer())
          simulationTestingParameters.setKeepSCSUp(true);
@@ -103,7 +102,7 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
       simulationTestHelperFactory.addSecondaryRobot(toolboxGhost);
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
 
-      toolboxROS2Node = ROS2Tools.createRealtimeROS2Node(PubSubImplementation.INTRAPROCESS, "toolbox_node");
+      toolboxROS2Node = new ROS2NodeBuilder().buildRealtime("toolbox_node");
       createToolboxController(robotModel);
       toolboxGhost.addThrottledController(new Controller()
       {

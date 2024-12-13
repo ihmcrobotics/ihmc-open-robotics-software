@@ -2,18 +2,18 @@ package us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import controller_msgs.msg.dds.*;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.RobotConfigurationDataPubSubType;
+import controller_msgs.msg.dds.RobotDesiredConfigurationData;
+import controller_msgs.msg.dds.RobotDesiredConfigurationDataPubSubType;
 import toolbox_msgs.msg.dds.ExternalForceEstimationConfigurationMessage;
 import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.ros2.ROS2PublisherBasics;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 
@@ -38,18 +38,18 @@ public class ExternalForceEstimationMessageReplay
    private final JSONSerializer<RobotConfigurationData> robotConfigurationDataSerializer = new JSONSerializer<>(new RobotConfigurationDataPubSubType());
    private final JSONSerializer<RobotDesiredConfigurationData> robotDesiredConfigurationDataSerializer = new JSONSerializer<>(new RobotDesiredConfigurationDataPubSubType());
 
-   private final ROS2PublisherBasics<RobotConfigurationData> robotConfigurationDataPublisher;
-   private final ROS2PublisherBasics<RobotDesiredConfigurationData> robotDesiredConfigurationDataPublisher;
-   private final ROS2PublisherBasics<ToolboxStateMessage> toolboxStatePublisher;
-   private final ROS2PublisherBasics<ExternalForceEstimationConfigurationMessage> configMessagePublisher;
+   private final ROS2Publisher<RobotConfigurationData> robotConfigurationDataPublisher;
+   private final ROS2Publisher<RobotDesiredConfigurationData> robotDesiredConfigurationDataPublisher;
+   private final ROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
+   private final ROS2Publisher<ExternalForceEstimationConfigurationMessage> configMessagePublisher;
 
-   public ExternalForceEstimationMessageReplay(String robotName, InputStream inputStream, PubSubImplementation pubSubImplementation) throws IOException
+   public ExternalForceEstimationMessageReplay(String robotName, InputStream inputStream) throws IOException
    {
       this.robotName = robotName;
       messages = loadMessages(inputStream);
 
       String name = getClass().getSimpleName();
-      ros2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, "ihmc_" + name);
+      ros2Node = new ROS2NodeBuilder().buildRealtime("ihmc_" + name);
 
       ROS2Topic controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
       robotConfigurationDataPublisher = ros2Node.createPublisher(controllerOutputTopic.withTypeName(RobotConfigurationData.class));
@@ -169,7 +169,7 @@ public class ExternalForceEstimationMessageReplay
       if (chooserState == JFileChooser.APPROVE_OPTION)
       {
          InputStream inputStream = new FileInputStream(fileChooser.getSelectedFile());
-         new ExternalForceEstimationMessageReplay(robotName, inputStream, PubSubImplementation.FAST_RTPS).replayAllMessages();
+         new ExternalForceEstimationMessageReplay(robotName, inputStream).replayAllMessages();
       }
    }
 }

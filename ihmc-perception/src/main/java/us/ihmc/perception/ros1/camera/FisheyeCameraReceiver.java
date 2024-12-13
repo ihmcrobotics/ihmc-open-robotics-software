@@ -1,11 +1,7 @@
 package us.ihmc.perception.ros1.camera;
 
-import java.awt.image.BufferedImage;
-import java.util.function.LongUnaryOperator;
-
 import perception_msgs.msg.dds.FisheyePacket;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.ConnectionStateListener;
 import us.ihmc.communication.producers.CompressedVideoHandler;
@@ -15,11 +11,15 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.RosCompressedImageSubscriber;
+
+import java.awt.image.BufferedImage;
+import java.util.function.LongUnaryOperator;
 
 @Deprecated
 public class FisheyeCameraReceiver extends CameraDataReceiver
@@ -27,7 +27,7 @@ public class FisheyeCameraReceiver extends CameraDataReceiver
    private static final boolean DEBUG = false;
 
    public FisheyeCameraReceiver(FullHumanoidRobotModelFactory fullRobotModelFactory, final AvatarRobotCameraParameters cameraParameters,
-                                RobotConfigurationDataBuffer robotConfigurationDataBuffer, ROS2NodeInterface ros2Node,
+                                RobotConfigurationDataBuffer robotConfigurationDataBuffer, ROS2Node ros2Node,
                                 LongUnaryOperator robotMonotonicTimeCalculator, final RosMainNode rosMainNode)
    {
       super(fullRobotModelFactory, cameraParameters.getSensorNameInSdf(), robotConfigurationDataBuffer, new CompressedFisheyeHandler(ros2Node),
@@ -63,9 +63,9 @@ public class FisheyeCameraReceiver extends CameraDataReceiver
    @Deprecated
    private static class CompressedFisheyeHandler implements CompressedVideoHandler
    {
-      private final ROS2PublisherBasics<FisheyePacket> publisher;
+      private final ROS2Publisher<FisheyePacket> publisher;
 
-      public CompressedFisheyeHandler(ROS2NodeInterface ros2Node)
+      public CompressedFisheyeHandler(ROS2Node ros2Node)
       {
          publisher = ros2Node.createPublisher(ROS2Tools.IHMC_ROOT.withTypeName(FisheyePacket.class));
       }

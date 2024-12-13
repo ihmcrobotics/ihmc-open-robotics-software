@@ -15,7 +15,7 @@ public class QueueableMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "532884e5aaa2436daa1cc485344f57765ae426d736760fd218be445b0b85978c";
+   		return "8fe209bfec8987ddb6ae936c8ad1ae0d0042d3d729a51cc447c70679ad8b7e8a";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class QueueableMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -79,7 +79,7 @@ public class QueueableMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -106,7 +106,7 @@ public class QueueableMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
    public static void write(ihmc_common_msgs.msg.dds.QueueableMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_9(data.getExecutionMode());
 
@@ -124,7 +124,7 @@ public class QueueableMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
    public static void read(ihmc_common_msgs.msg.dds.QueueableMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setExecutionMode(cdr.read_type_9());
       	
@@ -144,7 +144,7 @@ public class QueueableMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final void serialize(ihmc_common_msgs.msg.dds.QueueableMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_9("execution_mode", data.getExecutionMode());
       ser.write_type_11("message_id", data.getMessageId());
       ser.write_type_11("previous_message_id", data.getPreviousMessageId());
@@ -156,7 +156,7 @@ public class QueueableMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, ihmc_common_msgs.msg.dds.QueueableMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setExecutionMode(ser.read_type_9("execution_mode"));
       data.setMessageId(ser.read_type_11("message_id"));
       data.setPreviousMessageId(ser.read_type_11("previous_message_id"));

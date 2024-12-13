@@ -1,18 +1,17 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
-import org.apache.commons.lang3.StringUtils;
-
 import controller_msgs.msg.dds.HandTrajectoryMessage;
 import controller_msgs.msg.dds.JointspaceTrajectoryStatusMessage;
 import controller_msgs.msg.dds.StopAllTrajectoryMessage;
 import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
+import org.apache.commons.lang3.StringUtils;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.TrajectoryExecutionStatus;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -34,8 +33,8 @@ public class HandTrajectoryBehavior extends AbstractBehavior
    protected final YoBoolean hasStatusBeenReceived;
    private final YoBoolean isDone;
 
-   private final ROS2PublisherBasics<HandTrajectoryMessage> handTrajectoryPublisher;
-   private final ROS2PublisherBasics<StopAllTrajectoryMessage> stopAllTrajectoryPublisher;
+   private final ROS2Publisher<HandTrajectoryMessage> handTrajectoryPublisher;
+   private final ROS2Publisher<StopAllTrajectoryMessage> stopAllTrajectoryPublisher;
    private final ConcurrentListeningQueue<JointspaceTrajectoryStatusMessage> jointSpaceTrajectoryStatus = new ConcurrentListeningQueue<>(10);
    private final ConcurrentListeningQueue<TaskspaceTrajectoryStatusMessage> taskSpaceTrajectoryStatus = new ConcurrentListeningQueue<>(10);
 

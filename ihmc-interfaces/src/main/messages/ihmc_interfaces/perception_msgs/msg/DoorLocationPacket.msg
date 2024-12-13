@@ -7,7 +7,7 @@ byte PULL_HANDLE_LEFT = 3
 byte PULL_HANDLE_RIGHT = 4
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 geometry_msgs/Pose door_transform_to_world
 byte detected_door_type 255

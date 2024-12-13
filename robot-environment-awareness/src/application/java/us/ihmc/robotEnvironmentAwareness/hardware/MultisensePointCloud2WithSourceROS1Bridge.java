@@ -1,33 +1,32 @@
 package us.ihmc.robotEnvironmentAwareness.hardware;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-
-import perception_msgs.msg.dds.LidarScanMessage;
 import geometry_msgs.Point;
+import perception_msgs.msg.dds.LidarScanMessage;
 import scan_to_cloud.PointCloud2WithSource;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotEnvironmentAwareness.fusion.MultisenseInformation;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber.UnpackedPointCloud;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+
 public class MultisensePointCloud2WithSourceROS1Bridge extends AbstractRosTopicSubscriber<PointCloud2WithSource>
 {
    private static final MultisenseInformation multisense = MultisenseInformation.CART;
    
-   private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "lidarScanPublisherNode");
+   private final ROS2Node ros2Node = new ROS2NodeBuilder().build("lidarScanPublisherNode");
 
-   private final ROS2PublisherBasics<LidarScanMessage> lidarScanPublisher;
+   private final ROS2Publisher<LidarScanMessage> lidarScanPublisher;
 
    public MultisensePointCloud2WithSourceROS1Bridge() throws URISyntaxException, IOException
    {

@@ -15,7 +15,7 @@ public class MultiContactTrajectoryStatusPubSubType implements us.ihmc.pubsub.To
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "0045d9a5c4df70f58cc3aec4c3c1840d90348a912033edd01effe4fd7d018854";
+   		return "0973142eb9df732c10f6a2311595f7c53d1d320ecba9c06fb6963b49ac82d5f1";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class MultiContactTrajectoryStatusPubSubType implements us.ihmc.pubsub.To
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -69,7 +69,7 @@ public class MultiContactTrajectoryStatusPubSubType implements us.ihmc.pubsub.To
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -81,7 +81,7 @@ public class MultiContactTrajectoryStatusPubSubType implements us.ihmc.pubsub.To
 
    public static void write(controller_msgs.msg.dds.MultiContactTrajectoryStatus data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_9(data.getTrajectoryStatus());
 
@@ -89,7 +89,7 @@ public class MultiContactTrajectoryStatusPubSubType implements us.ihmc.pubsub.To
 
    public static void read(controller_msgs.msg.dds.MultiContactTrajectoryStatus data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setTrajectoryStatus(cdr.read_type_9());
       	
@@ -99,14 +99,14 @@ public class MultiContactTrajectoryStatusPubSubType implements us.ihmc.pubsub.To
    @Override
    public final void serialize(controller_msgs.msg.dds.MultiContactTrajectoryStatus data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_9("trajectory_status", data.getTrajectoryStatus());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.MultiContactTrajectoryStatus data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setTrajectoryStatus(ser.read_type_9("trajectory_status"));
    }
 

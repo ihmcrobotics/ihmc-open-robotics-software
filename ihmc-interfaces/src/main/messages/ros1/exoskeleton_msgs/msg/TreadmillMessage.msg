@@ -28,7 +28,7 @@ int8 GET_COMMANDED_SPEED=11
 int8 GET_COMMANDED_ELEVATION=12
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # bool to dictate activation of communication between the treadmill and the computer. If true, activate and if false, deactivate
 bool activate

@@ -8,7 +8,7 @@ byte R_ARM_WRX = 4
 byte R_ARM_WRY2 = 5
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # The Enum value of the motor to enable
 byte atlas_electric_motor_packet_enum_enable 255

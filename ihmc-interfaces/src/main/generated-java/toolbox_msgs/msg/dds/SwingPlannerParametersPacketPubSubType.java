@@ -15,7 +15,7 @@ public class SwingPlannerParametersPacketPubSubType implements us.ihmc.pubsub.To
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "3c31f62d364faeb1464397a1d26b16d46df07b8650817cf84c4968f10c981769";
+   		return "38db7af4f5922278ac084f1061d53b307ab84df9e2a6b13f02ee8de8750ae488";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class SwingPlannerParametersPacketPubSubType implements us.ihmc.pubsub.To
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -137,7 +137,7 @@ public class SwingPlannerParametersPacketPubSubType implements us.ihmc.pubsub.To
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -251,7 +251,7 @@ public class SwingPlannerParametersPacketPubSubType implements us.ihmc.pubsub.To
 
    public static void write(toolbox_msgs.msg.dds.SwingPlannerParametersPacket data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_7(data.getDoInitialFastApproximation());
 
@@ -327,7 +327,7 @@ public class SwingPlannerParametersPacketPubSubType implements us.ihmc.pubsub.To
 
    public static void read(toolbox_msgs.msg.dds.SwingPlannerParametersPacket data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setDoInitialFastApproximation(cdr.read_type_7());
       	
@@ -405,7 +405,7 @@ public class SwingPlannerParametersPacketPubSubType implements us.ihmc.pubsub.To
    @Override
    public final void serialize(toolbox_msgs.msg.dds.SwingPlannerParametersPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_7("do_initial_fast_approximation", data.getDoInitialFastApproximation());
       ser.write_type_6("minimum_swing_foot_clearance", data.getMinimumSwingFootClearance());
       ser.write_type_6("fast_approximation_less_clearance", data.getFastApproximationLessClearance());
@@ -446,7 +446,7 @@ public class SwingPlannerParametersPacketPubSubType implements us.ihmc.pubsub.To
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, toolbox_msgs.msg.dds.SwingPlannerParametersPacket data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setDoInitialFastApproximation(ser.read_type_7("do_initial_fast_approximation"));
       data.setMinimumSwingFootClearance(ser.read_type_6("minimum_swing_foot_clearance"));
       data.setFastApproximationLessClearance(ser.read_type_6("fast_approximation_less_clearance"));

@@ -5,8 +5,9 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
+import us.ihmc.commons.UnitConversions;
 import us.ihmc.commons.thread.Notification;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2Helper;
@@ -19,20 +20,18 @@ import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
+import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.perception.realsense.RealsenseDevice;
 import us.ihmc.perception.realsense.RealsenseDeviceManager;
-import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.perception.tools.PerceptionMessageTools;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.commons.UnitConversions;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
-import us.ihmc.commons.thread.Throttler;
 
 import java.time.Instant;
 import java.util.concurrent.ScheduledExecutorService;
@@ -124,7 +123,7 @@ public class TerrainPerceptionProcessWithDriver
          LogTools.info("Creating terrain process with no collision provider.");
 
       openCLManager = new OpenCLManager();
-      realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "l515_videopub");
+      realtimeROS2Node = new ROS2NodeBuilder().buildRealtime("l515_videopub");
       realtimeROS2Node.spin();
       realsenseDeviceManager = new RealsenseDeviceManager();
 
@@ -146,7 +145,7 @@ public class TerrainPerceptionProcessWithDriver
       LogTools.info("Depth width: " + depthWidth + ", height: " + depthHeight);
       LogTools.info("Color width: " + colorWidth + ", height: " + colorHeight);
 
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "realsense_color_and_depth_publisher");
+      ROS2Node ros2Node = new ROS2NodeBuilder().build("realsense_color_and_depth_publisher");
 
       depthBytedecoImage = new BytedecoImage(realsense.getDepthWidth(), realsense.getDepthHeight(), opencv_core.CV_16UC1);
 

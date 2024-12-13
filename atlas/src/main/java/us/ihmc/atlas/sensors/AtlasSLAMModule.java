@@ -1,18 +1,13 @@
 package us.ihmc.atlas.sensors;
 
-import java.io.File;
-import java.text.DecimalFormat;
-import java.util.LinkedList;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
-
-import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
@@ -25,6 +20,13 @@ import us.ihmc.robotEnvironmentAwareness.slam.SLAMFrame;
 import us.ihmc.robotEnvironmentAwareness.slam.SLAMModule;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
+
+import java.io.File;
+import java.text.DecimalFormat;
+import java.util.LinkedList;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class AtlasSLAMModule extends SLAMModule
 {
@@ -41,7 +43,7 @@ public class AtlasSLAMModule extends SLAMModule
     * to update corrected sensor frame for robot state estimation.
     */
    protected final AtomicLong latestRobotTimeStamp = new AtomicLong();
-   protected ROS2PublisherBasics<StampedPosePacket> estimatedPelvisPublisher = null;
+   protected ROS2Publisher<StampedPosePacket> estimatedPelvisPublisher = null;
    protected RigidBodyTransform sensorPoseToPelvisTransformer = null;
 
    public AtlasSLAMModule(ROS2Node ros2Node, Messager messager, DRCRobotModel drcRobotModel, File configurationFile)

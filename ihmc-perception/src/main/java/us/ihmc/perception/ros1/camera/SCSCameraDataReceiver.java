@@ -1,7 +1,5 @@
 package us.ihmc.perception.ros1.camera;
 
-import java.util.function.LongUnaryOperator;
-
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.producers.VideoSource;
@@ -9,9 +7,11 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.LocalVideoPacket;
 import us.ihmc.robotModels.FullRobotModelFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
+
+import java.util.function.LongUnaryOperator;
 
 /**
  * Generate simulated camera data and camera info packet from SCS, we use only left eye.
@@ -26,7 +26,7 @@ public class SCSCameraDataReceiver extends CameraDataReceiver implements ObjectC
                                 String sensorNameInSdf,
                                 RobotConfigurationDataBuffer robotConfigurationDataBuffer,
                                 ObjectCommunicator scsSensorsCommunicator,
-                                ROS2NodeInterface ros2Node,
+                                ROS2Node ros2Node,
                                 LongUnaryOperator robotMonotonicTimeCalculator)
    {
       this(robotSide,
@@ -44,7 +44,7 @@ public class SCSCameraDataReceiver extends CameraDataReceiver implements ObjectC
                                 String sensorNameInSdf,
                                 RobotConfigurationDataBuffer robotConfigurationDataBuffer,
                                 ObjectCommunicator scsSensorsCommunicator,
-                                ROS2NodeInterface ros2Node,
+                                ROS2Node ros2Node,
                                 ROS2QosProfile qosProfile,
                                 LongUnaryOperator robotMonotonicTimeCalculator)
    {

@@ -3,7 +3,6 @@ package us.ihmc.rdx.ui.processes;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 
 import java.util.Map;
 
@@ -24,7 +23,7 @@ public class KinematicsStreamingToolboxProcess extends RestartableProcess
    @Override
    protected void startInternal()
    {
-      kinematicsStreamingToolboxModule = new KinematicsStreamingToolboxModule(robotModel, startYoVariableServer, PubSubImplementation.FAST_RTPS);
+      kinematicsStreamingToolboxModule = new KinematicsStreamingToolboxModule(robotModel, startYoVariableServer);
       KinematicsStreamingToolboxController controller = (KinematicsStreamingToolboxController) kinematicsStreamingToolboxModule.getToolboxController();
       controller.setInitialRobotConfigurationNamedMap(initialConfiguration);
       controller.getTools().getIKController().getCenterOfMassSafeMargin().set(0.10);

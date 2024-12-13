@@ -1,7 +1,6 @@
 package us.ihmc.rdx.perception;
 
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.environment.RDXEnvironmentBuilder;
@@ -43,11 +42,9 @@ public class RDXROS2VideoSensorDemo
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(sensorPoseGizmo::process3DViewInput);
             baseUI.getPrimaryScene().addRenderableProvider(sensorPoseGizmo, RDXSceneLevel.VIRTUAL);
 
-            PubSubImplementation pubSubImplementation = PubSubImplementation.INTRAPROCESS;
             perceptionVisualizerPanel = new RDXPerceptionVisualizersPanel();
 
             RDXROS2BigVideoVisualizer videoVisualizer = new RDXROS2BigVideoVisualizer("Video",
-                                                                                      pubSubImplementation,
                                                                                       PerceptionAPI.BIG_VIDEO);
             perceptionVisualizerPanel.addVisualizer(videoVisualizer);
 
@@ -74,7 +71,7 @@ public class RDXROS2VideoSensorDemo
                                                                                  0.05,
                                                                                  true,
                                                                                  publishRateHz);
-            highLevelDepthSensorSimulator.setupForROS2Color(pubSubImplementation, PerceptionAPI.BIG_VIDEO);
+            highLevelDepthSensorSimulator.setupForROS2Color(PerceptionAPI.BIG_VIDEO);
             baseUI.getImGuiPanelManager().addPanel(highLevelDepthSensorSimulator);
             highLevelDepthSensorSimulator.setSensorEnabled(true);
             highLevelDepthSensorSimulator.getLowLevelSimulator().setDepthEnabled(false);

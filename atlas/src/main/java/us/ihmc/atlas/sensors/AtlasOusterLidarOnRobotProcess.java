@@ -6,11 +6,10 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.perception.ouster.OusterDriverAndDepthPublisher;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
 
 public class AtlasOusterLidarOnRobotProcess
 {
@@ -19,7 +18,7 @@ public class AtlasOusterLidarOnRobotProcess
    public AtlasOusterLidarOnRobotProcess()
    {
       AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.REAL_ROBOT);
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "atlas_ouster_driver_and_depth_publisher");
+      ROS2Node ros2Node = new ROS2NodeBuilder().build("atlas_ouster_driver_and_depth_publisher");
 
       syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
       syncedRobot.initializeToDefaultRobotInitialSetup(0.0, 0.0, 0.0, 0.0);

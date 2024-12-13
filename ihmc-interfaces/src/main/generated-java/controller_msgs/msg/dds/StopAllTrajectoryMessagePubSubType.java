@@ -15,7 +15,7 @@ public class StopAllTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "620da91490bb0abe45707eb4f122f46642950cc8083378b1c9217a8f417b48a5";
+   		return "7e1c3077089ffa613001eb501179f765b47f7c19fc9ec452ad9d2131d515f258";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class StopAllTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicD
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       return current_alignment - initial_alignment;
@@ -67,7 +67,7 @@ public class StopAllTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicD
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
 
@@ -76,13 +76,13 @@ public class StopAllTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicD
 
    public static void write(controller_msgs.msg.dds.StopAllTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
    }
 
    public static void read(controller_msgs.msg.dds.StopAllTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
 
    }
@@ -90,13 +90,13 @@ public class StopAllTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final void serialize(controller_msgs.msg.dds.StopAllTrajectoryMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.StopAllTrajectoryMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));   }
+      data.setSequenceId(ser.read_type_12("sequence_id"));   }
 
    public static void staticCopy(controller_msgs.msg.dds.StopAllTrajectoryMessage src, controller_msgs.msg.dds.StopAllTrajectoryMessage dest)
    {

@@ -3,11 +3,10 @@ package us.ihmc.communication.ros2;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.RobotConfigurationDataPubSubType;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.QueuedROS2Subscription;
-import us.ihmc.ros2.ROS2PublisherBasics;
+import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Subscription;
 import us.ihmc.ros2.RealtimeROS2Node;
@@ -15,11 +14,11 @@ import us.ihmc.ros2.RealtimeROS2Node;
 public class FrameRealtimeROS2PublisherSubscriberTest
 {
    private RealtimeROS2Node realtimeROS2Node;
-   private ROS2PublisherBasics<RobotConfigurationData> publisher;
+   private ROS2Publisher<RobotConfigurationData> publisher;
 
    public FrameRealtimeROS2PublisherSubscriberTest()
    {
-      realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "frameTest");
+      realtimeROS2Node = new ROS2NodeBuilder().buildRealtime("frameTest");
       String topic = "FrameData";
       LogTools.info("Publishing to {}", topic);
       RobotConfigurationDataPubSubType topicDataType = RobotConfigurationData.getPubSubType().get();

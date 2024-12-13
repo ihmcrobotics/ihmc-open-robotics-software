@@ -1,9 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors;
 
-import java.awt.image.BufferedImage;
-
 import perception_msgs.msg.dds.VideoPacket;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.net.ConnectionStateListener;
 import us.ihmc.communication.producers.CompressedVideoDataFactory;
 import us.ihmc.communication.producers.CompressedVideoDataServer;
@@ -13,6 +10,9 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
+
+import java.awt.image.BufferedImage;
 
 @Deprecated
 public abstract class ImageProcessingBehavior extends VideoPacketListenerBehavior
@@ -23,7 +23,7 @@ public abstract class ImageProcessingBehavior extends VideoPacketListenerBehavio
    {
       super(robotName, namePrefix, ros2Node);
 
-      ROS2PublisherBasics<VideoPacket> publisher = createBehaviorOutputPublisher(VideoPacket.class);
+      ROS2Publisher<VideoPacket> publisher = createBehaviorOutputPublisher(VideoPacket.class);
       videoDataServer = CompressedVideoDataFactory.createCompressedVideoDataServer(new UIVideoHandler(publisher));
    }
 
@@ -41,9 +41,9 @@ public abstract class ImageProcessingBehavior extends VideoPacketListenerBehavio
 
    class UIVideoHandler implements CompressedVideoHandler
    {
-      private final ROS2PublisherBasics<VideoPacket> publisher;
+      private final ROS2Publisher<VideoPacket> publisher;
 
-      public UIVideoHandler(ROS2PublisherBasics<VideoPacket> publisher)
+      public UIVideoHandler(ROS2Publisher<VideoPacket> publisher)
       {
          this.publisher = publisher;
       }

@@ -11,20 +11,19 @@ import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.javaFXToolkit.ApplicationNoModule;
-import us.ihmc.ros2.ROS2PublisherBasics;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.javaFXToolkit.ApplicationNoModule;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.ros2.ROS2Publisher;
 
 public class AtlasJoystickBasedSteppingApplication extends ApplicationNoModule
 {
    private JoystickBasedSteppingMainUI ui;
-   private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "ihmc_atlas_xbox_joystick_control");
-   private ROS2PublisherBasics<BDIBehaviorCommandPacket> bdiBehaviorcommandPublisher;
+   private final ROS2Node ros2Node = new ROS2NodeBuilder().build("ihmc_atlas_xbox_joystick_control");
+   private ROS2Publisher<BDIBehaviorCommandPacket> bdiBehaviorcommandPublisher;
 
    @Override
    public void start(Stage primaryStage) throws Exception

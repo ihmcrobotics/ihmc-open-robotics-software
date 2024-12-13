@@ -1,5 +1,17 @@
 package us.ihmc.robotEnvironmentAwareness.hardware;
 
+import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.Stage;
+import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.javaFXToolkit.ApplicationNoModule;
+import us.ihmc.robotEnvironmentAwareness.ui.io.StereoVisionPointCloudDataLoader;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.ros2.ROS2Publisher;
+import us.ihmc.tools.thread.ExecutorServiceTools;
+import us.ihmc.tools.thread.ExecutorServiceTools.ExceptionHandling;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,25 +20,12 @@ import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
-import javafx.stage.DirectoryChooser;
-import javafx.stage.Stage;
-import us.ihmc.javaFXToolkit.ApplicationNoModule;
-import us.ihmc.ros2.ROS2PublisherBasics;
-import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.robotEnvironmentAwareness.ui.io.StereoVisionPointCloudDataLoader;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.tools.thread.ExecutorServiceTools;
-import us.ihmc.tools.thread.ExecutorServiceTools.ExceptionHandling;
-
 public class SimulatedStereoVisionPointCloudPublisher extends ApplicationNoModule
 {
    private static long DEFAULT_PUBLISHING_PERIOD_MS = 250;
 
-   private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "stereoVisionPublisherNode");
-   private final ROS2PublisherBasics<StereoVisionPointCloudMessage> stereoVisionPublisher = ros2Node.createPublisher(PerceptionAPI.D435_POINT_CLOUD);
+   private final ROS2Node ros2Node = new ROS2NodeBuilder().build("stereoVisionPublisherNode");
+   private final ROS2Publisher<StereoVisionPointCloudMessage> stereoVisionPublisher = ros2Node.createPublisher(PerceptionAPI.D435_POINT_CLOUD);
 
    private int indexToPublish = 0;
    private final List<StereoVisionPointCloudMessage> stereoVisionPointCloudMessagesToPublish = new ArrayList<>();

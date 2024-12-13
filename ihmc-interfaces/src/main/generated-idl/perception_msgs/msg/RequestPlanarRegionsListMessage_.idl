@@ -33,7 +33,7 @@ module perception_msgs
         /**
          * Unique ID used to identify this message, should preferably be consecutively increasing.
          */
-        unsigned long sequence_id;
+        unsigned long long sequence_id;
         octet planar_regions_request_type;
         ihmc_common_msgs::msg::dds::BoundingBox3DMessage bounding_box_in_world_for_request;
       };

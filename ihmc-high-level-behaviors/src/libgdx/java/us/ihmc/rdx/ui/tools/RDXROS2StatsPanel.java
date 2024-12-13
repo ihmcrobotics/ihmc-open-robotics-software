@@ -1,11 +1,13 @@
 package us.ihmc.rdx.ui.tools;
 
+import com.eprosima.xmlschemas.fastrtps_profiles.TransportDescriptorType;
 import imgui.ImGui;
 import imgui.flag.ImGuiTableColumnFlags;
 import imgui.flag.ImGuiTableFlags;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import us.ihmc.pubsub.impl.fastRTPS.FastRTPSDomain;
+import us.ihmc.pubsub.impl.fastRTPS.FastRTPSParticipant;
 import us.ihmc.pubsub.participant.Participant;
 import us.ihmc.pubsub.publisher.Publisher;
 import us.ihmc.pubsub.subscriber.Subscriber;
@@ -17,6 +19,7 @@ import us.ihmc.scs2.sessionVisualizer.jfx.controllers.RegularExpression;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.StringJoiner;
 import java.util.TreeSet;
 
 public class RDXROS2StatsPanel extends RDXPanel
@@ -78,7 +81,7 @@ public class RDXROS2StatsPanel extends RDXPanel
       publishersSortedByName.clear();
       subscribersSortedByName.clear();
 
-      List<Participant> participants = FastRTPSDomain.accessInstance().getAllParticipantsForStatistics();
+      List<FastRTPSParticipant> participants = (List<FastRTPSParticipant>) FastRTPSDomain.accessInstance().getAllParticipantsForStatistics();
       synchronized (participants)
       {
          for (Participant participant : participants)
@@ -228,9 +231,11 @@ public class RDXROS2StatsPanel extends RDXPanel
 
       ImGuiTools.separatorText("Nodes");
 
-      if (ImGui.beginTable(labels.get("Nodes"), 4, tableFlags))
+      if (ImGui.beginTable(labels.get("Nodes"), 6, tableFlags))
       {
          ImGui.tableSetupColumn(labels.get("Node Name"), ImGuiTableColumnFlags.WidthFixed);
+         ImGui.tableSetupColumn(labels.get("Transports"), ImGuiTableColumnFlags.WidthFixed);
+         ImGui.tableSetupColumn(labels.get("Intraprocess"), ImGuiTableColumnFlags.WidthFixed);
          ImGui.tableSetupColumn(labels.get("Publishers"), ImGuiTableColumnFlags.WidthFixed);
          ImGui.tableSetupColumn(labels.get("Subscribers"), ImGuiTableColumnFlags.WidthFixed);
          ImGui.tableSetupColumn(labels.get("Removed"), ImGuiTableColumnFlags.WidthFixed);
@@ -245,6 +250,25 @@ public class RDXROS2StatsPanel extends RDXPanel
             {
                ImGui.tableNextColumn();
                ImGui.text(participant.getAttributes().getName());
+               ImGui.tableNextColumn();
+               String transports = "";
+               if (participant.getAttributes().getProfile().getRtps().getUserTransports() != null)
+               {
+                  StringJoiner stringJoiner = new StringJoiner(", ");
+                  for (String transportId : participant.getAttributes().getProfile().getRtps().getUserTransports().getTransportId())
+                  {
+                     for (TransportDescriptorType transportDescriptorType : participant.getAttributes().getTransportDescriptors().getTransportDescriptor())
+                     {
+                        if (transportDescriptorType.getTransportId().equals(transportId))
+                           stringJoiner.add(transportDescriptorType.getType());
+                     }
+                  }
+                  transports = stringJoiner.toString();
+               }
+               ImGui.text(transports);
+               ImGui.tableNextColumn();
+               String intraProcessDelivery = participant.getAttributes().getLibrarySettings().getIntraprocessDelivery();
+               ImGui.text(intraProcessDelivery == null ? "DISABLED" : intraProcessDelivery);
                ImGui.tableNextColumn();
                ImGui.text("%d".formatted(participant.getAllPublishersForStatistics().size()));
                ImGui.tableNextColumn();

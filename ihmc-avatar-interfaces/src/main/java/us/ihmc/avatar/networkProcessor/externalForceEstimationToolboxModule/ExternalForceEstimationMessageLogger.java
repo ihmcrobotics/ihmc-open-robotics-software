@@ -1,19 +1,19 @@
 package us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule;
 
 import com.google.common.base.CaseFormat;
-import controller_msgs.msg.dds.*;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.RobotConfigurationDataPubSubType;
+import controller_msgs.msg.dds.RobotDesiredConfigurationData;
+import controller_msgs.msg.dds.RobotDesiredConfigurationDataPubSubType;
 import toolbox_msgs.msg.dds.ExternalForceEstimationConfigurationMessage;
 import toolbox_msgs.msg.dds.ExternalForceEstimationConfigurationMessagePubSubType;
 import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.log.LogTools;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 
@@ -31,7 +31,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class ExternalForceEstimationMessageLogger
 {
-   private static final PubSubImplementation pubSubImplementation = PubSubImplementation.FAST_RTPS;
    private static final long recordPeriodMillis = 10;
    private static final double maximumRecordTimeSeconds = 120.0;
    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
@@ -67,8 +66,7 @@ public class ExternalForceEstimationMessageLogger
    public ExternalForceEstimationMessageLogger(String robotName)
    {
       this.robotName = robotName;
-      ros2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation,
-                                                  "ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, "ExternalForceEstimationMessageLogger"));
+      ros2Node = new ROS2NodeBuilder().buildRealtime("ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, "ExternalForceEstimationMessageLogger"));
 
       ROS2Topic<?> controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
       ros2Node.createSubscription(controllerOutputTopic.withTypeName(RobotConfigurationData.class),

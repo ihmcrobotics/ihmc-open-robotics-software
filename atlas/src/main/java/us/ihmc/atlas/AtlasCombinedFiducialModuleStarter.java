@@ -8,7 +8,6 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorToolboxModule;
 import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolboxModule;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 
 public class AtlasCombinedFiducialModuleStarter
 {
@@ -38,12 +37,10 @@ public class AtlasCombinedFiducialModuleStarter
          return;
       }
 
-      PubSubImplementation pubSubImplementation = PubSubImplementation.FAST_RTPS;
       new FiducialDetectorToolboxModule(robotModel.getSimpleRobotName(),
                                         robotModel.getTarget(),
                                         robotModel.createFullRobotModel(),
-                                        robotModel.getLogModelProvider(),
-                                        pubSubImplementation);
-      new ObjectDetectorToolboxModule(robotModel.getSimpleRobotName(),robotModel.createFullRobotModel(),robotModel.getLogModelProvider(),pubSubImplementation);
+                                        robotModel.getLogModelProvider());
+      new ObjectDetectorToolboxModule(robotModel.getSimpleRobotName(),robotModel.createFullRobotModel(),robotModel.getLogModelProvider());
    }
 }

@@ -2,7 +2,7 @@
 # It holds all the information needed for detailing the type of constraint to apply to the center of mass.
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # Specifies the desired center of mass position.
 # The data is assumed to be expressed in world frame.

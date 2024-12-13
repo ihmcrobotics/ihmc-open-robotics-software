@@ -10,11 +10,10 @@ import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.ros.RobotROSClockCalculatorFromPPSOffset;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.log.LogTools;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotPointCloudParameters;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosTools;
@@ -26,7 +25,7 @@ public class AtlasStereoVisionPointCloudPublisher
    public AtlasStereoVisionPointCloudPublisher()
    {
       AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.REAL_ROBOT);
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "stereo_bridge");
+      ROS2Node ros2Node = new ROS2NodeBuilder().build("stereo_bridge");
       RosMainNode ros1Node = RosTools.createRosNode(NetworkParameters.getROSURI(), "stereo_bridge");
 
       AtlasSensorInformation sensorInformation = (AtlasSensorInformation) robotModel.getSensorInformation();

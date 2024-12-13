@@ -15,7 +15,7 @@ public class SpineDesiredAccelerationsMessagePubSubType implements us.ihmc.pubsu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "450763f5ebef929b85ddc1655c903ef6ece4b1abd4a1ebdf3f4039bf73021ebc";
+   		return "5c7b80768d3fea7dd0f66db103393f42edb70a4b9abc9e4adf353be41c0a129a";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class SpineDesiredAccelerationsMessagePubSubType implements us.ihmc.pubsu
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += controller_msgs.msg.dds.DesiredAccelerationsMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -69,7 +69,7 @@ public class SpineDesiredAccelerationsMessagePubSubType implements us.ihmc.pubsu
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += controller_msgs.msg.dds.DesiredAccelerationsMessagePubSubType.getCdrSerializedSize(data.getDesiredAccelerations(), current_alignment);
@@ -80,14 +80,14 @@ public class SpineDesiredAccelerationsMessagePubSubType implements us.ihmc.pubsu
 
    public static void write(controller_msgs.msg.dds.SpineDesiredAccelerationsMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       controller_msgs.msg.dds.DesiredAccelerationsMessagePubSubType.write(data.getDesiredAccelerations(), cdr);
    }
 
    public static void read(controller_msgs.msg.dds.SpineDesiredAccelerationsMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       controller_msgs.msg.dds.DesiredAccelerationsMessagePubSubType.read(data.getDesiredAccelerations(), cdr);	
 
@@ -96,7 +96,7 @@ public class SpineDesiredAccelerationsMessagePubSubType implements us.ihmc.pubsu
    @Override
    public final void serialize(controller_msgs.msg.dds.SpineDesiredAccelerationsMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_a("desired_accelerations", new controller_msgs.msg.dds.DesiredAccelerationsMessagePubSubType(), data.getDesiredAccelerations());
 
    }
@@ -104,7 +104,7 @@ public class SpineDesiredAccelerationsMessagePubSubType implements us.ihmc.pubsu
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.SpineDesiredAccelerationsMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       ser.read_type_a("desired_accelerations", new controller_msgs.msg.dds.DesiredAccelerationsMessagePubSubType(), data.getDesiredAccelerations());
 
    }

@@ -26,7 +26,7 @@ module perception_msgs
         /**
          * Unique ID used to identify this message, should preferably be consecutively increasing.
          */
-        unsigned long sequence_id;
+        unsigned long long sequence_id;
         @defaultValue(value=-1)
         long region_id;
         geometry_msgs::msg::dds::Point region_origin;

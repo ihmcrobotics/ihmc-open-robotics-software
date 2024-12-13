@@ -6,27 +6,27 @@ import org.apache.commons.lang3.mutable.MutableDouble;
 import org.apache.commons.lang3.tuple.Pair;
 import org.ros.message.Time;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.StateEstimatorAPI;
-import us.ihmc.perception.filters.CollidingScanRegionFilter;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.commons.Conversions;
+import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.euclid.exceptions.NotARotationMatrixException;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.perception.depthData.CollisionBoxProvider;
-import us.ihmc.perception.depthData.CollisionShapeTester;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.perception.depthData.CollisionBoxProvider;
+import us.ihmc.perception.depthData.CollisionShapeTester;
+import us.ihmc.perception.filters.CollidingScanRegionFilter;
 import us.ihmc.robotEnvironmentAwareness.updaters.GPUPlanarRegionUpdater;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Subscription;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.tools.thread.MissingThreadTools;
@@ -47,7 +47,7 @@ public class DelayFixedPlanarRegionsSubscription
    private final GPUPlanarRegionUpdater gpuPlanarRegionUpdater = new GPUPlanarRegionUpdater();
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer;
    private final HumanoidReferenceFrames referenceFrames;
-   private final ROS2NodeInterface ros2Node;
+   private final ROS2Node ros2Node;
    private final DRCRobotModel robotModel;
    private final String topic;
    private final Consumer<Pair<Long, PlanarRegionsList>> callback;
@@ -67,7 +67,7 @@ public class DelayFixedPlanarRegionsSubscription
    private double delay = 0.0;
    private RosNodeInterface ros1Node;
 
-   public DelayFixedPlanarRegionsSubscription(ROS2NodeInterface ros2Node,
+   public DelayFixedPlanarRegionsSubscription(ROS2Node ros2Node,
                                               DRCRobotModel robotModel,
                                               String topic,
                                               Consumer<Pair<Long, PlanarRegionsList>> callback)

@@ -4,7 +4,7 @@
 float64 DEFAULT_NO_VALUE = -11.1
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 float64 max_inter_region_connection_length -11.1
 

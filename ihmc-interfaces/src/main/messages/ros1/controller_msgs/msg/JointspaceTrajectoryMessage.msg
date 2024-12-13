@@ -5,7 +5,7 @@
 # If a joint trajectory message is empty, the controller will hold the last desired joint position while executing the other joint trajectories.
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # Trajectory for each joint.
 controller_msgs/OneDoFJointTrajectoryMessage[] joint_trajectory_messages

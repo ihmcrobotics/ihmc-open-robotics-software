@@ -14,7 +14,7 @@ module controller_msgs
       @TypeCode(type="controller_msgs::msg::dds_::DirectionalControlConfigurationMessage_")
       struct DirectionalControlConfigurationMessage
       {
-        unsigned long sequence_id;
+        unsigned long long sequence_id;
         /**
          * Set to true to cause the robot to walk. Setting this to false will cause the robot to stop walking.
          * However, the robot will still finish the current step.

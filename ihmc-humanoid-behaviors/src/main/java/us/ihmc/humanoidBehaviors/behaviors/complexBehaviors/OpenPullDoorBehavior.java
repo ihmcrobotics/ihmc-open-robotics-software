@@ -1,12 +1,14 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
-import java.util.concurrent.atomic.AtomicReference;
-
-import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.ArmTrajectoryMessage;
+import controller_msgs.msg.dds.AutomaticManipulationAbortMessage;
+import controller_msgs.msg.dds.ChestTrajectoryMessage;
+import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
+import controller_msgs.msg.dds.HandTrajectoryMessage;
+import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
+import controller_msgs.msg.dds.UIPositionCheckerPacket;
 import perception_msgs.msg.dds.DoorLocationPacket;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -28,8 +30,11 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.sensorProcessing.frames.CommonReferenceFrameIds;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 public class OpenPullDoorBehavior extends StateMachineBehavior<OpenDoorState>
 {
@@ -70,14 +75,14 @@ public class OpenPullDoorBehavior extends StateMachineBehavior<OpenDoorState>
    private final AtlasPrimitiveActions atlasPrimitiveActions;
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private SleepBehavior sleepBehavior;
-   private final ROS2PublisherBasics<UIPositionCheckerPacket> uiPositionCheckerPacketpublisher;
+   private final ROS2Publisher<UIPositionCheckerPacket> uiPositionCheckerPacketpublisher;
    protected final AtomicReference<DoorLocationPacket> doorLocationPacket = new AtomicReference<DoorLocationPacket>();
    private final DoorOpenDetectorBehaviorService doorOpenDetectorBehaviorService;
 
    private long timeFirstDoorPullFinished = Long.MAX_VALUE;
 
    
-   private final ROS2PublisherBasics<AutomaticManipulationAbortMessage> abortMessagePublisher;
+   private final ROS2Publisher<AutomaticManipulationAbortMessage> abortMessagePublisher;
    
    private final HumanoidReferenceFrames referenceFrames;
    

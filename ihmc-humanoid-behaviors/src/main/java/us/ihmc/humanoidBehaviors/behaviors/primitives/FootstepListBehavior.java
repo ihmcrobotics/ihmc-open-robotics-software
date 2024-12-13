@@ -1,8 +1,5 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
@@ -10,7 +7,6 @@ import controller_msgs.msg.dds.PauseWalkingMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -25,8 +21,12 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoInteger;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class FootstepListBehavior extends AbstractBehavior
 {
@@ -48,8 +48,8 @@ public class FootstepListBehavior extends AbstractBehavior
    private double defaultSwingTime;
    private double defaultTranferTime;
 
-   private final ROS2PublisherBasics<FootstepDataListMessage> footstepPublisher;
-   private final ROS2PublisherBasics<PauseWalkingMessage> pauseWalkingPublisher;
+   private final ROS2Publisher<FootstepDataListMessage> footstepPublisher;
+   private final ROS2Publisher<PauseWalkingMessage> pauseWalkingPublisher;
 
    public FootstepListBehavior(String robotName, ROS2Node ros2Node, WalkingControllerParameters walkingControllerParameters)
    {

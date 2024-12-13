@@ -2,13 +2,12 @@ package us.ihmc.perception.streaming;
 
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.RawImage;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.sensors.ZEDColorDepthImageRetriever;
 import us.ihmc.tools.IHMCCommonPaths;
 
@@ -18,7 +17,7 @@ public class ROS2SRTVideoStreamingDemo
                                                                                         .toAbsolutePath()
                                                                                         .toString();
 
-   private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "srt_video_streamer_demo");
+   private final ROS2Node ros2Node = new ROS2NodeBuilder().build("srt_video_streamer_demo");
    private final ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
    private final ROS2SRTSensorStreamer streamer = new ROS2SRTSensorStreamer();

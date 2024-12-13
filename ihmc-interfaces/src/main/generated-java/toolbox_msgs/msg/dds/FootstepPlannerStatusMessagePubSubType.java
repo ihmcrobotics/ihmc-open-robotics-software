@@ -15,7 +15,7 @@ public class FootstepPlannerStatusMessagePubSubType implements us.ihmc.pubsub.To
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "952c8097725a04cfb4957b3ca280c4461bada85bd398a1a53d13b11da017f0e8";
+   		return "3326fc514b32c9740ee4fd8455337f27296ceeafe48287b1690b2e5fff208d9c";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class FootstepPlannerStatusMessagePubSubType implements us.ihmc.pubsub.To
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -69,7 +69,7 @@ public class FootstepPlannerStatusMessagePubSubType implements us.ihmc.pubsub.To
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -81,7 +81,7 @@ public class FootstepPlannerStatusMessagePubSubType implements us.ihmc.pubsub.To
 
    public static void write(toolbox_msgs.msg.dds.FootstepPlannerStatusMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_9(data.getFootstepPlannerStatus());
 
@@ -89,7 +89,7 @@ public class FootstepPlannerStatusMessagePubSubType implements us.ihmc.pubsub.To
 
    public static void read(toolbox_msgs.msg.dds.FootstepPlannerStatusMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setFootstepPlannerStatus(cdr.read_type_9());
       	
@@ -99,14 +99,14 @@ public class FootstepPlannerStatusMessagePubSubType implements us.ihmc.pubsub.To
    @Override
    public final void serialize(toolbox_msgs.msg.dds.FootstepPlannerStatusMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_9("footstep_planner_status", data.getFootstepPlannerStatus());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, toolbox_msgs.msg.dds.FootstepPlannerStatusMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setFootstepPlannerStatus(ser.read_type_9("footstep_planner_status"));
    }
 
