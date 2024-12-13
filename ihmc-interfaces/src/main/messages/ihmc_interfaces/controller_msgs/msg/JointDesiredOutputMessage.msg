@@ -2,7 +2,7 @@
 # This message contains joint-level desired values that are output from the whole-body controller
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 string joint_name
 

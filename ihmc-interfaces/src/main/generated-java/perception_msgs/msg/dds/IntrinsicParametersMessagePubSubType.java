@@ -15,7 +15,7 @@ public class IntrinsicParametersMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "0a1a602ede9c3af8da2d4e5dc23fd4a3bc3d1b5f68a085b896a9ddb04e53c45e";
+   		return "6783b12297710a9eccf78baa9756b84a97d7cb28dae7e76ba912d20b50c9eafe";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class IntrinsicParametersMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -87,7 +87,7 @@ public class IntrinsicParametersMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -127,7 +127,7 @@ public class IntrinsicParametersMessagePubSubType implements us.ihmc.pubsub.Topi
 
    public static void write(perception_msgs.msg.dds.IntrinsicParametersMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_2(data.getWidth());
 
@@ -155,7 +155,7 @@ public class IntrinsicParametersMessagePubSubType implements us.ihmc.pubsub.Topi
 
    public static void read(perception_msgs.msg.dds.IntrinsicParametersMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setWidth(cdr.read_type_2());
       	
@@ -182,7 +182,7 @@ public class IntrinsicParametersMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final void serialize(perception_msgs.msg.dds.IntrinsicParametersMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_2("width", data.getWidth());
       ser.write_type_2("height", data.getHeight());
       ser.write_type_6("fx", data.getFx());
@@ -198,7 +198,7 @@ public class IntrinsicParametersMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.IntrinsicParametersMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setWidth(ser.read_type_2("width"));
       data.setHeight(ser.read_type_2("height"));
       data.setFx(ser.read_type_6("fx"));

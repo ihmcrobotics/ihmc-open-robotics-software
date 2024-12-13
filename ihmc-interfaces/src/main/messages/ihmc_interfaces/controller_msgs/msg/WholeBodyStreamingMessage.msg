@@ -2,7 +2,7 @@
 # It is a lightweight version of WholeBodyTrajectoryMessage designed for streaming.
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # When receiving a trajectory message that is part of a stream, the controller will extrapolate the trajectory point in the future using a simple first order integration over the given duration.
 # This integration allows to improve continuity of execution for streams.

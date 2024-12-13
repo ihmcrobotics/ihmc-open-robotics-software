@@ -3,7 +3,7 @@
 # If no path was previously planned, it's ignored.
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 byte SWING_PLANNER_TYPE_NONE = 0
 byte SWING_PLANNER_TYPE_POSITION = 1

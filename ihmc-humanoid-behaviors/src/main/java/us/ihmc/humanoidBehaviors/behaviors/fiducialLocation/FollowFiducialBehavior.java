@@ -1,19 +1,16 @@
 package us.ihmc.humanoidBehaviors.behaviors.fiducialLocation;
 
-import java.util.concurrent.atomic.AtomicReference;
-
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
-import toolbox_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.HeadTrajectoryMessage;
-import perception_msgs.msg.dds.PlanarRegionsListMessage;
-import perception_msgs.msg.dds.REAStateRequestMessage;
-import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import controller_msgs.msg.dds.WalkOverTerrainGoalPacket;
 import controller_msgs.msg.dds.WalkingStatusMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.msg.dds.REAStateRequestMessage;
+import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
+import toolbox_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.ToolboxState;
@@ -43,11 +40,14 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 public class FollowFiducialBehavior extends StateMachineBehavior<FollowFiducialState>
 {
@@ -75,11 +75,11 @@ public class FollowFiducialBehavior extends StateMachineBehavior<FollowFiducialS
    private final YoDouble swingTime = new YoDouble("swingTime", registry);
    private final YoDouble transferTime = new YoDouble("transferTime", registry);
    private final YoInteger planId = new YoInteger("planId", registry);
-   private final ROS2PublisherBasics<FootstepDataListMessage> footstepPublisher;
-   private final ROS2PublisherBasics<ToolboxStateMessage> toolboxStatePublisher;
-   private final ROS2PublisherBasics<FootstepPlanningRequestPacket> planningRequestPublisher;
-   private final ROS2PublisherBasics<REAStateRequestMessage> reaStateRequestPublisher;
-   private final ROS2PublisherBasics<HeadTrajectoryMessage> headTrajectoryPublisher;
+   private final ROS2Publisher<FootstepDataListMessage> footstepPublisher;
+   private final ROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
+   private final ROS2Publisher<FootstepPlanningRequestPacket> planningRequestPublisher;
+   private final ROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher;
+   private final ROS2Publisher<HeadTrajectoryMessage> headTrajectoryPublisher;
    private final double waitTimeValue = 5.0;
    private boolean hasWalkedBetweenWaiting = false;
 

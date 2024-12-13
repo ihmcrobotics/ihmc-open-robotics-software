@@ -1,7 +1,7 @@
 # This message is part of the IHMC Robot Environment Awareness (REA) module.
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # Field default value 0.05
 float64 search_radius

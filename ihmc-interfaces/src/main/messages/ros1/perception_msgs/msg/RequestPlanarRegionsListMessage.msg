@@ -12,7 +12,7 @@ int8 STOP_UPDATE=2
 int8 CLEAR=3
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 int8 planar_regions_request_type
 

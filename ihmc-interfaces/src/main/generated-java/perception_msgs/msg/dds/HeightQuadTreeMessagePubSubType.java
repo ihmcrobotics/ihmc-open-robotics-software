@@ -15,7 +15,7 @@ public class HeightQuadTreeMessagePubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "c5d5273afb994c5ea2860a5fbcd25182a1c3b101bf7a16a685f0852b5b82a7ce";
+   		return "8d906a52fd3bb82acde9c31256694c1e85d2325a66b73f124eba0db64ca40565";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class HeightQuadTreeMessagePubSubType implements us.ihmc.pubsub.TopicData
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -78,7 +78,7 @@ public class HeightQuadTreeMessagePubSubType implements us.ihmc.pubsub.TopicData
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -104,7 +104,7 @@ public class HeightQuadTreeMessagePubSubType implements us.ihmc.pubsub.TopicData
 
    public static void write(perception_msgs.msg.dds.HeightQuadTreeMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_5(data.getDefaultHeight());
 
@@ -122,7 +122,7 @@ public class HeightQuadTreeMessagePubSubType implements us.ihmc.pubsub.TopicData
 
    public static void read(perception_msgs.msg.dds.HeightQuadTreeMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setDefaultHeight(cdr.read_type_5());
       	
@@ -139,7 +139,7 @@ public class HeightQuadTreeMessagePubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final void serialize(perception_msgs.msg.dds.HeightQuadTreeMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_5("default_height", data.getDefaultHeight());
       ser.write_type_5("resolution", data.getResolution());
       ser.write_type_5("size_x", data.getSizeX());
@@ -150,7 +150,7 @@ public class HeightQuadTreeMessagePubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.HeightQuadTreeMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setDefaultHeight(ser.read_type_5("default_height"));
       data.setResolution(ser.read_type_5("resolution"));
       data.setSizeX(ser.read_type_5("size_x"));

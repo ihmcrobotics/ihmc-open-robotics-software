@@ -11,7 +11,7 @@ int8 LOAD_BEARING_REQUEST_LOAD=0
 int8 LOAD_BEARING_REQUEST_UNLOAD=1
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # Needed to identify a side dependent end-effector.
 # Field default value 255

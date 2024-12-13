@@ -15,7 +15,7 @@ public class Image32PubSubType implements us.ihmc.pubsub.TopicDataType<perceptio
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "5894a3eddd157a9b707b958e4c422541039dd6284d5da1f0a10d05e1df409fb8";
+   		return "845bc30f741283f53e75846f2622c0329b25862b9458e1490416ac466b1b0923";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class Image32PubSubType implements us.ihmc.pubsub.TopicDataType<perceptio
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -73,7 +73,7 @@ public class Image32PubSubType implements us.ihmc.pubsub.TopicDataType<perceptio
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -92,7 +92,7 @@ public class Image32PubSubType implements us.ihmc.pubsub.TopicDataType<perceptio
 
    public static void write(perception_msgs.msg.dds.Image32 data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_2(data.getWidth());
 
@@ -106,7 +106,7 @@ public class Image32PubSubType implements us.ihmc.pubsub.TopicDataType<perceptio
 
    public static void read(perception_msgs.msg.dds.Image32 data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setWidth(cdr.read_type_2());
       	
@@ -119,7 +119,7 @@ public class Image32PubSubType implements us.ihmc.pubsub.TopicDataType<perceptio
    @Override
    public final void serialize(perception_msgs.msg.dds.Image32 data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_2("width", data.getWidth());
       ser.write_type_2("height", data.getHeight());
       ser.write_type_e("rgbdata", data.getRgbdata());
@@ -128,7 +128,7 @@ public class Image32PubSubType implements us.ihmc.pubsub.TopicDataType<perceptio
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.Image32 data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setWidth(ser.read_type_2("width"));
       data.setHeight(ser.read_type_2("height"));
       ser.read_type_e("rgbdata", data.getRgbdata());

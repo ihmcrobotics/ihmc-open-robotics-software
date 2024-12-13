@@ -15,7 +15,7 @@ public class FootTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "ae85005606802d867b241fcca8f186f5e2bed37f8ef9d0759a0c6e6bf21b5d50";
+   		return "3d9b4d0b962c9e3a5d0a57d797da25c00a8d9bdd0375514944c1676ca0a51797";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class FootTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicData
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -71,7 +71,7 @@ public class FootTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicData
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -85,7 +85,7 @@ public class FootTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicData
 
    public static void write(controller_msgs.msg.dds.FootTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_9(data.getRobotSide());
 
@@ -94,7 +94,7 @@ public class FootTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicData
 
    public static void read(controller_msgs.msg.dds.FootTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setRobotSide(cdr.read_type_9());
       	
@@ -105,7 +105,7 @@ public class FootTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final void serialize(controller_msgs.msg.dds.FootTrajectoryMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_9("robot_side", data.getRobotSide());
       ser.write_type_a("se3_trajectory", new ihmc_common_msgs.msg.dds.SE3TrajectoryMessagePubSubType(), data.getSe3Trajectory());
 
@@ -114,7 +114,7 @@ public class FootTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.FootTrajectoryMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setRobotSide(ser.read_type_9("robot_side"));
       ser.read_type_a("se3_trajectory", new ihmc_common_msgs.msg.dds.SE3TrajectoryMessagePubSubType(), data.getSe3Trajectory());
 

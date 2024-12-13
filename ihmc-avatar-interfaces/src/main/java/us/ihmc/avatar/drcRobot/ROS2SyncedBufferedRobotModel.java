@@ -4,7 +4,7 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
-import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Node;
 
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -20,7 +20,7 @@ public class ROS2SyncedBufferedRobotModel extends ROS2SyncedRobotModel
    private long monotonicNanos = -1;
    private RobotConfigurationData nextRobotConfigrationData;
 
-   public ROS2SyncedBufferedRobotModel(DRCRobotModel robotModel, ROS2NodeInterface ros2Node)
+   public ROS2SyncedBufferedRobotModel(DRCRobotModel robotModel, ROS2Node ros2Node)
    {
       super(robotModel, ros2Node);
 

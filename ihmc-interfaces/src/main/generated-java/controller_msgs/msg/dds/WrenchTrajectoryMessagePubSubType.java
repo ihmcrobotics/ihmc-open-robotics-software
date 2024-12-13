@@ -15,7 +15,7 @@ public class WrenchTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDa
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "a1a527941f6cd28e76f77f201297285a364074c350a97c45f247dc3eead2bb1b";
+   		return "59634b7413b4f7da4d1a45f36fcb04253ceea04dac754296c88e9d31b93de4f4";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class WrenchTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDa
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50; ++i0)
       {
@@ -78,7 +78,7 @@ public class WrenchTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDa
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -101,7 +101,7 @@ public class WrenchTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
    public static void write(controller_msgs.msg.dds.WrenchTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       if(data.getWrenchTrajectoryPoints().size() <= 50)
       cdr.write_type_e(data.getWrenchTrajectoryPoints());else
@@ -116,7 +116,7 @@ public class WrenchTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
    public static void read(controller_msgs.msg.dds.WrenchTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       cdr.read_type_e(data.getWrenchTrajectoryPoints());	
       ihmc_common_msgs.msg.dds.FrameInformationPubSubType.read(data.getFrameInformation(), cdr);	
@@ -130,7 +130,7 @@ public class WrenchTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDa
    @Override
    public final void serialize(controller_msgs.msg.dds.WrenchTrajectoryMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_e("wrench_trajectory_points", data.getWrenchTrajectoryPoints());
       ser.write_type_a("frame_information", new ihmc_common_msgs.msg.dds.FrameInformationPubSubType(), data.getFrameInformation());
 
@@ -144,7 +144,7 @@ public class WrenchTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDa
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.WrenchTrajectoryMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       ser.read_type_e("wrench_trajectory_points", data.getWrenchTrajectoryPoints());
       ser.read_type_a("frame_information", new ihmc_common_msgs.msg.dds.FrameInformationPubSubType(), data.getFrameInformation());
 

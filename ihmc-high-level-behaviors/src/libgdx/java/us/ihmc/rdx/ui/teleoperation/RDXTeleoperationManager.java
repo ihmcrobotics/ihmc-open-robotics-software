@@ -18,23 +18,29 @@ import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.footstepPlanning.LocomotionParameters;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.ImGuiStoredPropertySetDoubleWidget;
-import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
 import us.ihmc.rdx.ui.RDX3DPanelToolbarButton;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.affordances.*;
+import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
+import us.ihmc.rdx.ui.affordances.RDXArmControlMode;
+import us.ihmc.rdx.ui.affordances.RDXArmManager;
+import us.ihmc.rdx.ui.affordances.RDXInteractableFoot;
+import us.ihmc.rdx.ui.affordances.RDXInteractableHand;
+import us.ihmc.rdx.ui.affordances.RDXInteractableRobotLink;
+import us.ihmc.rdx.ui.affordances.RDXInteractableTools;
+import us.ihmc.rdx.ui.affordances.RDXRobotCollidable;
 import us.ihmc.rdx.ui.collidables.RDXRobotCollisionModel;
 import us.ihmc.rdx.ui.interactable.RDXHumanoidDoFsWidgets;
 import us.ihmc.rdx.ui.interactable.RDXPelvisHeightSlider;
 import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionManager;
-import us.ihmc.footstepPlanning.LocomotionParameters;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.ArmJointName;
@@ -156,7 +162,7 @@ public class RDXTeleoperationManager extends RDXPanel
       desiredRobot = new RDXDesiredRobot(robotModel);
       desiredRobot.setSceneLevels(RDXSceneLevel.VIRTUAL);
 
-      controllerStatusTracker = new ControllerStatusTracker(logToolsLogger, ros2Helper.getROS2NodeInterface(), robotModel.getSimpleRobotName());
+      controllerStatusTracker = new ControllerStatusTracker(logToolsLogger, ros2Helper.getROS2Node(), robotModel.getSimpleRobotName());
 
       locomotionManager = new RDXLocomotionManager(robotModel, communicationHelper, syncedRobot, controllerStatusTracker, this);
 

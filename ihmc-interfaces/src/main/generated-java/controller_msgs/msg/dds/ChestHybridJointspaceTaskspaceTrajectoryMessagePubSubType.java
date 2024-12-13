@@ -15,7 +15,7 @@ public class ChestHybridJointspaceTaskspaceTrajectoryMessagePubSubType implement
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "5509eae047c36be6dfa62a027a85359226176969bea531a9932fa4e6a4f36508";
+   		return "3497bc3e81c66c51419c40cbd318e8c4196cedb2d31c29ec8f3353373a36341e";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class ChestHybridJointspaceTaskspaceTrajectoryMessagePubSubType implement
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += ihmc_common_msgs.msg.dds.SO3TrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -71,7 +71,7 @@ public class ChestHybridJointspaceTaskspaceTrajectoryMessagePubSubType implement
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += ihmc_common_msgs.msg.dds.SO3TrajectoryMessagePubSubType.getCdrSerializedSize(data.getTaskspaceTrajectoryMessage(), current_alignment);
@@ -84,7 +84,7 @@ public class ChestHybridJointspaceTaskspaceTrajectoryMessagePubSubType implement
 
    public static void write(controller_msgs.msg.dds.ChestHybridJointspaceTaskspaceTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       ihmc_common_msgs.msg.dds.SO3TrajectoryMessagePubSubType.write(data.getTaskspaceTrajectoryMessage(), cdr);
       controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.write(data.getJointspaceTrajectoryMessage(), cdr);
@@ -92,7 +92,7 @@ public class ChestHybridJointspaceTaskspaceTrajectoryMessagePubSubType implement
 
    public static void read(controller_msgs.msg.dds.ChestHybridJointspaceTaskspaceTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       ihmc_common_msgs.msg.dds.SO3TrajectoryMessagePubSubType.read(data.getTaskspaceTrajectoryMessage(), cdr);	
       controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.read(data.getJointspaceTrajectoryMessage(), cdr);	
@@ -102,7 +102,7 @@ public class ChestHybridJointspaceTaskspaceTrajectoryMessagePubSubType implement
    @Override
    public final void serialize(controller_msgs.msg.dds.ChestHybridJointspaceTaskspaceTrajectoryMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_a("taskspace_trajectory_message", new ihmc_common_msgs.msg.dds.SO3TrajectoryMessagePubSubType(), data.getTaskspaceTrajectoryMessage());
 
       ser.write_type_a("jointspace_trajectory_message", new controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType(), data.getJointspaceTrajectoryMessage());
@@ -112,7 +112,7 @@ public class ChestHybridJointspaceTaskspaceTrajectoryMessagePubSubType implement
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.ChestHybridJointspaceTaskspaceTrajectoryMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       ser.read_type_a("taskspace_trajectory_message", new ihmc_common_msgs.msg.dds.SO3TrajectoryMessagePubSubType(), data.getTaskspaceTrajectoryMessage());
 
       ser.read_type_a("jointspace_trajectory_message", new controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType(), data.getJointspaceTrajectoryMessage());

@@ -15,7 +15,7 @@ public class RequestLidarScanMessagePubSubType implements us.ihmc.pubsub.TopicDa
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "b49e21c190b37f1f5a0b983d63d9910398dc472fcec9f0f47a76925affa9962c";
+   		return "0247ee1687900fd45b9afa5bcb34706d4f96068827298520df92ff48bdd8e0d1";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class RequestLidarScanMessagePubSubType implements us.ihmc.pubsub.TopicDa
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -71,7 +71,7 @@ public class RequestLidarScanMessagePubSubType implements us.ihmc.pubsub.TopicDa
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -86,7 +86,7 @@ public class RequestLidarScanMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
    public static void write(perception_msgs.msg.dds.RequestLidarScanMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_7(data.getRemoveShadows());
 
@@ -96,7 +96,7 @@ public class RequestLidarScanMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
    public static void read(perception_msgs.msg.dds.RequestLidarScanMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setRemoveShadows(cdr.read_type_7());
       	
@@ -108,7 +108,7 @@ public class RequestLidarScanMessagePubSubType implements us.ihmc.pubsub.TopicDa
    @Override
    public final void serialize(perception_msgs.msg.dds.RequestLidarScanMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_7("remove_shadows", data.getRemoveShadows());
       ser.write_type_7("remove_self_collisions", data.getRemoveSelfCollisions());
    }
@@ -116,7 +116,7 @@ public class RequestLidarScanMessagePubSubType implements us.ihmc.pubsub.TopicDa
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.RequestLidarScanMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setRemoveShadows(ser.read_type_7("remove_shadows"));
       data.setRemoveSelfCollisions(ser.read_type_7("remove_self_collisions"));
    }

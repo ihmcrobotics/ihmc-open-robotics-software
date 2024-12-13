@@ -10,9 +10,7 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTreeExecutor;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
-import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.property.ROS2StoredPropertySet;
 import us.ihmc.communication.ros2.ROS2DemandGraphNode;
 import us.ihmc.communication.ros2.ROS2Heartbeat;
@@ -53,6 +51,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.sensors.RealsenseColorDepthImagePublisher;
 import us.ihmc.sensors.RealsenseColorDepthImageRetriever;
@@ -276,7 +275,7 @@ public class PerceptionAndAutonomyProcess
    public void addBehaviorTree(ROS2Node ros2Node, DRCRobotModel robotModel)
    {
       ROS2ControllerHelper ros2ControllerHelper = new ROS2ControllerHelper(ros2Node, robotModel);
-      behaviorTreeSyncedRobot = new ROS2SyncedRobotModel(robotModel, ros2ControllerHelper.getROS2NodeInterface());
+      behaviorTreeSyncedRobot = new ROS2SyncedRobotModel(robotModel, ros2ControllerHelper.getROS2Node());
 
       behaviorTreeReferenceFrameLibrary = new ReferenceFrameLibrary();
       behaviorTreeReferenceFrameLibrary.addAll(Collections.singleton(ReferenceFrame.getWorldFrame()));
@@ -606,8 +605,7 @@ public class PerceptionAndAutonomyProcess
 
          if (heightMapManager == null)
          {
-            heightMapManager = new RapidHeightMapManager(openCLManager,
-                                                         syncedRobot == null ? null : syncedRobot.getRobotModel(),
+            heightMapManager = new RapidHeightMapManager(syncedRobot == null ? null : syncedRobot.getRobotModel(),
                                                          soleFrameSuppliers.get(RobotSide.LEFT).get(),
                                                          soleFrameSuppliers.get(RobotSide.RIGHT).get(),
                                                          latestRealsenseDepthImage.getIntrinsicsCopy(),
@@ -700,7 +698,7 @@ public class PerceptionAndAutonomyProcess
 
    public static void main(String[] args)
    {
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(CommunicationMode.INTERPROCESS.getPubSubImplementation(), "perception_autonomy_process");
+      ROS2Node ros2Node = new ROS2NodeBuilder().build("perception_autonomy_process");
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
       PerceptionAndAutonomyProcess perceptionAndAutonomyProcess = new PerceptionAndAutonomyProcess(ros2Helper, null);

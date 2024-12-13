@@ -15,7 +15,7 @@ int8 CURRENT_TOOLBOX_STATE_INITIALIZE_FAILURE_MISSING_RCD=2
 int8 CURRENT_TOOLBOX_STATE_RUNNING=3
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # Provides insight about the current state of the toolbox, e.g. waiting for user input or waiting for controller input.
 int8 current_toolbox_state

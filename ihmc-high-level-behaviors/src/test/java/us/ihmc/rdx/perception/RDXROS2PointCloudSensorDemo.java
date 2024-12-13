@@ -1,8 +1,6 @@
 package us.ihmc.rdx.perception;
 
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.environment.RDXEnvironmentBuilder;
@@ -14,6 +12,7 @@ import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizersPanel;
 import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2PointCloudVisualizer;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
 
 public class RDXROS2PointCloudSensorDemo
 {
@@ -34,7 +33,7 @@ public class RDXROS2PointCloudSensorDemo
          {
             baseUI.create();
 
-            ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "sensor_node");
+            ros2Node = new ROS2NodeBuilder().build("sensor_node");
 
             environmentBuilder = new RDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
             environmentBuilder.create();

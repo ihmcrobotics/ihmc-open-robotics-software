@@ -1,5 +1,15 @@
 package us.ihmc.robotDataVisualizer.logger.lidar;
 
+import perception_msgs.msg.dds.LidarScanMessage;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.log.LogTools;
+import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.ros2.ROS2Publisher;
+import us.ihmc.ros2.RealtimeROS2Node;
+
 import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.File;
@@ -13,16 +23,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import perception_msgs.msg.dds.LidarScanMessage;
-import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.ros2.ROS2PublisherBasics;
-import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.log.LogTools;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.ros2.RealtimeROS2Node;
-
 public class LidarScanLogReader
 {
    private static final boolean DEBUG = true;
@@ -34,7 +34,7 @@ public class LidarScanLogReader
    private ScheduledFuture<?> currentLoggingTask = null;
 
    private RealtimeROS2Node ros2Node;
-   private ROS2PublisherBasics<LidarScanMessage> lidarScanPublisher;
+   private ROS2Publisher<LidarScanMessage> lidarScanPublisher;
    private PacketConsumer<LidarScanMessage> lidarScanConsumer = null;
 
    private final AtomicBoolean loggingEnabled = new AtomicBoolean(false);
@@ -57,7 +57,7 @@ public class LidarScanLogReader
       }
       else
       {
-         ros2Node = ROS2Tools.createRealtimeROS2Node(PubSubImplementation.FAST_RTPS, "lidar_log");
+         ros2Node = new ROS2NodeBuilder().buildRealtime("lidar_log");
          lidarScanPublisher = ros2Node.createPublisher(ROS2Tools.IHMC_ROOT.withTypeName(LidarScanMessage.class));
          ros2Node.spin();
       }

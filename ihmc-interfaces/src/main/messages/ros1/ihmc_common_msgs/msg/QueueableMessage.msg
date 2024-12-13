@@ -8,7 +8,7 @@ int8 EXECUTION_MODE_QUEUE=1
 int8 EXECUTION_MODE_STREAM=2
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # When EXECUTION_MODE_OVERRIDE is chosen:
 # - For trajectory messages: the time of the first trajectory point can be zero, in which case the controller will start directly at the first trajectory point.

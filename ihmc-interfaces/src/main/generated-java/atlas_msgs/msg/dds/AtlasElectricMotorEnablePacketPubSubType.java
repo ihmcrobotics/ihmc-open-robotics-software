@@ -15,7 +15,7 @@ public class AtlasElectricMotorEnablePacketPubSubType implements us.ihmc.pubsub.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "484307c2f6f4576ee0dddc567e694b03030dd7a88b2c9aa5c65b6b9c0d095ad6";
+   		return "33d0ceabb544fbfc823d03a7c25a353e1a5652cd550de43c0b5b76605c024e0f";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class AtlasElectricMotorEnablePacketPubSubType implements us.ihmc.pubsub.
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -71,7 +71,7 @@ public class AtlasElectricMotorEnablePacketPubSubType implements us.ihmc.pubsub.
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -86,7 +86,7 @@ public class AtlasElectricMotorEnablePacketPubSubType implements us.ihmc.pubsub.
 
    public static void write(atlas_msgs.msg.dds.AtlasElectricMotorEnablePacket data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_9(data.getAtlasElectricMotorPacketEnumEnable());
 
@@ -96,7 +96,7 @@ public class AtlasElectricMotorEnablePacketPubSubType implements us.ihmc.pubsub.
 
    public static void read(atlas_msgs.msg.dds.AtlasElectricMotorEnablePacket data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setAtlasElectricMotorPacketEnumEnable(cdr.read_type_9());
       	
@@ -108,7 +108,7 @@ public class AtlasElectricMotorEnablePacketPubSubType implements us.ihmc.pubsub.
    @Override
    public final void serialize(atlas_msgs.msg.dds.AtlasElectricMotorEnablePacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_9("atlas_electric_motor_packet_enum_enable", data.getAtlasElectricMotorPacketEnumEnable());
       ser.write_type_7("enable", data.getEnable());
    }
@@ -116,7 +116,7 @@ public class AtlasElectricMotorEnablePacketPubSubType implements us.ihmc.pubsub.
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, atlas_msgs.msg.dds.AtlasElectricMotorEnablePacket data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setAtlasElectricMotorPacketEnumEnable(ser.read_type_9("atlas_electric_motor_packet_enum_enable"));
       data.setEnable(ser.read_type_7("enable"));
    }

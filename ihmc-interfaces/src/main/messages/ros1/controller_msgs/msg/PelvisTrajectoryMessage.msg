@@ -5,7 +5,7 @@
 # Note that the pelvis position is limited keep the robot's balance (center of mass has to remain inside the support polygon).
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # When the robot is walking, restrictions on upper-body motion may be applied.
 # To by-pass the safety check and force the execution of this message, set this field to true.

@@ -15,7 +15,7 @@ public class ContinuousStepGeneratorParametersMessagePubSubType implements us.ih
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "2b98f626dbbc242f4d6e4ef51f9d7794218553dcac7153ee28e2e7b52aa11a8d";
+   		return "753c00217ab57af48ac6e56f5448a80d68cfa320492df29ff0f6f31c4c022bd8";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class ContinuousStepGeneratorParametersMessagePubSubType implements us.ih
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -89,7 +89,7 @@ public class ContinuousStepGeneratorParametersMessagePubSubType implements us.ih
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -131,7 +131,7 @@ public class ContinuousStepGeneratorParametersMessagePubSubType implements us.ih
 
    public static void write(controller_msgs.msg.dds.ContinuousStepGeneratorParametersMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_2(data.getNumberOfFootstepsToPlan());
 
@@ -159,7 +159,7 @@ public class ContinuousStepGeneratorParametersMessagePubSubType implements us.ih
 
    public static void read(controller_msgs.msg.dds.ContinuousStepGeneratorParametersMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setNumberOfFootstepsToPlan(cdr.read_type_2());
       	
@@ -189,7 +189,7 @@ public class ContinuousStepGeneratorParametersMessagePubSubType implements us.ih
    @Override
    public final void serialize(controller_msgs.msg.dds.ContinuousStepGeneratorParametersMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_2("number_of_footsteps_to_plan", data.getNumberOfFootstepsToPlan());
       ser.write_type_2("number_of_fixed_footsteps", data.getNumberOfFixedFootsteps());
       ser.write_type_6("swing_height", data.getSwingHeight());
@@ -206,7 +206,7 @@ public class ContinuousStepGeneratorParametersMessagePubSubType implements us.ih
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.ContinuousStepGeneratorParametersMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setNumberOfFootstepsToPlan(ser.read_type_2("number_of_footsteps_to_plan"));
       data.setNumberOfFixedFootsteps(ser.read_type_2("number_of_fixed_footsteps"));
       data.setSwingHeight(ser.read_type_6("swing_height"));

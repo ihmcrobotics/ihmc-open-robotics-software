@@ -15,7 +15,7 @@ public class KinematicsToolboxPrivilegedConfigurationMessagePubSubType implement
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "12c1ec8f651134c5a7f6c2edef914f6b8c883136a5a94087d8e2a194cc036aca";
+   		return "b89d3cbf34b9349415e8dfa43aba9331916400f19d0715e0f3ca42c438307200";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class KinematicsToolboxPrivilegedConfigurationMessagePubSubType implement
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -85,7 +85,7 @@ public class KinematicsToolboxPrivilegedConfigurationMessagePubSubType implement
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -121,7 +121,7 @@ public class KinematicsToolboxPrivilegedConfigurationMessagePubSubType implement
 
    public static void write(toolbox_msgs.msg.dds.KinematicsToolboxPrivilegedConfigurationMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_7(data.getUsePrivilegedRootJointPosition());
 
@@ -147,7 +147,7 @@ public class KinematicsToolboxPrivilegedConfigurationMessagePubSubType implement
 
    public static void read(toolbox_msgs.msg.dds.KinematicsToolboxPrivilegedConfigurationMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setUsePrivilegedRootJointPosition(cdr.read_type_7());
       	
@@ -169,7 +169,7 @@ public class KinematicsToolboxPrivilegedConfigurationMessagePubSubType implement
    @Override
    public final void serialize(toolbox_msgs.msg.dds.KinematicsToolboxPrivilegedConfigurationMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_7("use_privileged_root_joint_position", data.getUsePrivilegedRootJointPosition());
       ser.write_type_7("use_privileged_root_joint_orientation", data.getUsePrivilegedRootJointOrientation());
       ser.write_type_a("privileged_root_joint_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getPrivilegedRootJointPosition());
@@ -186,7 +186,7 @@ public class KinematicsToolboxPrivilegedConfigurationMessagePubSubType implement
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, toolbox_msgs.msg.dds.KinematicsToolboxPrivilegedConfigurationMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setUsePrivilegedRootJointPosition(ser.read_type_7("use_privileged_root_joint_position"));
       data.setUsePrivilegedRootJointOrientation(ser.read_type_7("use_privileged_root_joint_orientation"));
       ser.read_type_a("privileged_root_joint_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getPrivilegedRootJointPosition());

@@ -15,7 +15,7 @@ public class BDIBehaviorStatusPacketPubSubType implements us.ihmc.pubsub.TopicDa
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "d69b22c5754e0d15e681b644f8af90284984346c8867b06566a921d9399caf92";
+   		return "04b13b45236149c34a415149e5a1a0315034281d131888a3403abd597bfefded";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class BDIBehaviorStatusPacketPubSubType implements us.ihmc.pubsub.TopicDa
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -69,7 +69,7 @@ public class BDIBehaviorStatusPacketPubSubType implements us.ihmc.pubsub.TopicDa
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -81,7 +81,7 @@ public class BDIBehaviorStatusPacketPubSubType implements us.ihmc.pubsub.TopicDa
 
    public static void write(atlas_msgs.msg.dds.BDIBehaviorStatusPacket data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_9(data.getCurrentBdiRobotBehavior());
 
@@ -89,7 +89,7 @@ public class BDIBehaviorStatusPacketPubSubType implements us.ihmc.pubsub.TopicDa
 
    public static void read(atlas_msgs.msg.dds.BDIBehaviorStatusPacket data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setCurrentBdiRobotBehavior(cdr.read_type_9());
       	
@@ -99,14 +99,14 @@ public class BDIBehaviorStatusPacketPubSubType implements us.ihmc.pubsub.TopicDa
    @Override
    public final void serialize(atlas_msgs.msg.dds.BDIBehaviorStatusPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_9("current_bdi_robot_behavior", data.getCurrentBdiRobotBehavior());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, atlas_msgs.msg.dds.BDIBehaviorStatusPacket data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setCurrentBdiRobotBehavior(ser.read_type_9("current_bdi_robot_behavior"));
    }
 

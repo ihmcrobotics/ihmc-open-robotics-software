@@ -1,24 +1,14 @@
 package us.ihmc.avatar.testTools.scs2;
 
-import static us.ihmc.robotics.Assert.assertTrue;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-
-import toolbox_msgs.msg.dds.BehaviorControlModePacket;
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import toolbox_msgs.msg.dds.HumanoidBehaviorTypePacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
+import toolbox_msgs.msg.dds.BehaviorControlModePacket;
+import toolbox_msgs.msg.dds.HumanoidBehaviorTypePacket;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.ros2.ROS2PublisherBasics;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -40,7 +30,6 @@ import us.ihmc.humanoidRobotics.communication.subscribers.CapturabilityBasedStat
 import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
@@ -48,6 +37,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.yoVariables.registry.YoNamespace;
@@ -55,6 +46,14 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.registry.YoVariableHolder;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+
+import static us.ihmc.robotics.Assert.assertTrue;
 
 @SuppressWarnings("rawtypes")
 public class SCS2BehaviorTestHelper implements YoVariableHolder
@@ -76,8 +75,8 @@ public class SCS2BehaviorTestHelper implements YoVariableHolder
 
    private final BehaviorDispatcher behaviorDispatcher;
 
-   private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.INTRAPROCESS, "ihmc_behavior_test_helper");
-   private final ROS2PublisherBasics<HumanoidBehaviorTypePacket> humanoidBehabiorTypePublisher;
+   private final ROS2Node ros2Node = new ROS2NodeBuilder().build("ihmc_behavior_test_helper");
+   private final ROS2Publisher<HumanoidBehaviorTypePacket> humanoidBehabiorTypePublisher;
    private final String robotName;
    private SCS2AvatarTestingSimulation avatarTestingSimulation;
 

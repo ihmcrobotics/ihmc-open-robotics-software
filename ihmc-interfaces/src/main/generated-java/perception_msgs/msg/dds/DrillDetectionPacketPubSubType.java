@@ -15,7 +15,7 @@ public class DrillDetectionPacketPubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "989bf816fca52ac22ff98f5d1e2fe99d0efc7db1efbcdfbc7410b0ae98526415";
+   		return "c1c9104c6f05c595d46c5f9d4cf37e5c626ccf7cfc0554e6fa72efe14a3bf912";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class DrillDetectionPacketPubSubType implements us.ihmc.pubsub.TopicDataT
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -69,7 +69,7 @@ public class DrillDetectionPacketPubSubType implements us.ihmc.pubsub.TopicDataT
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -81,7 +81,7 @@ public class DrillDetectionPacketPubSubType implements us.ihmc.pubsub.TopicDataT
 
    public static void write(perception_msgs.msg.dds.DrillDetectionPacket data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_7(data.getIsDrillOn());
 
@@ -89,7 +89,7 @@ public class DrillDetectionPacketPubSubType implements us.ihmc.pubsub.TopicDataT
 
    public static void read(perception_msgs.msg.dds.DrillDetectionPacket data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setIsDrillOn(cdr.read_type_7());
       	
@@ -99,14 +99,14 @@ public class DrillDetectionPacketPubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final void serialize(perception_msgs.msg.dds.DrillDetectionPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_7("is_drill_on", data.getIsDrillOn());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.DrillDetectionPacket data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setIsDrillOn(ser.read_type_7("is_drill_on"));
    }
 

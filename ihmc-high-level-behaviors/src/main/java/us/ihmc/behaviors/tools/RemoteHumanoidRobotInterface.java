@@ -1,19 +1,31 @@
 package us.ihmc.behaviors.tools;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
-
-import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.ArmTrajectoryMessage;
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.ChestTrajectoryMessage;
+import controller_msgs.msg.dds.FootLoadBearingMessage;
+import controller_msgs.msg.dds.FootTrajectoryMessage;
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.msg.dds.GoHomeMessage;
+import controller_msgs.msg.dds.HeadTrajectoryMessage;
+import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
+import controller_msgs.msg.dds.PauseWalkingMessage;
+import controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage;
+import controller_msgs.msg.dds.PelvisTrajectoryMessage;
+import controller_msgs.msg.dds.WalkingStatusMessage;
 import ihmc_common_msgs.msg.dds.SO3TrajectoryMessage;
 import ihmc_common_msgs.msg.dds.SO3TrajectoryPointMessage;
 import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.communication.*;
+import us.ihmc.avatar.ros2.ROS2ControllerPublisherMap;
+import us.ihmc.commons.thread.TypedNotification;
+import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.ros2.ROS2PublisherMap;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -26,8 +38,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.avatar.ros2.ROS2ControllerPublisherMap;
-import us.ihmc.communication.ros2.ROS2PublisherMap;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
@@ -35,17 +45,21 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Input;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.ROS2NodeInterface;
-import us.ihmc.commons.thread.TypedNotification;
-import us.ihmc.robotics.partNames.HumanoidJointNameMap;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 // TODO: Clean this up by using DRCUserInterfaceNetworkingManager (After cleaning that up first...)
 public class RemoteHumanoidRobotInterface
 {
-   private final ROS2NodeInterface ros2Node;
+   private final ROS2Node ros2Node;
    private final DRCRobotModel robotModel;
    private final String robotName;
    private final HumanoidJointNameMap jointMap;
@@ -62,7 +76,7 @@ public class RemoteHumanoidRobotInterface
 
    private final ROS2Topic<?> topicName;
 
-   public RemoteHumanoidRobotInterface(ROS2NodeInterface ros2Node, DRCRobotModel robotModel)
+   public RemoteHumanoidRobotInterface(ROS2Node ros2Node, DRCRobotModel robotModel)
    {
       this.ros2Node = ros2Node;
       this.robotModel = robotModel;

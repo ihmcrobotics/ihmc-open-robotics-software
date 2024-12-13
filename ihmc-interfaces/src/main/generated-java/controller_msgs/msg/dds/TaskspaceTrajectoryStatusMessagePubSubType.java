@@ -15,7 +15,7 @@ public class TaskspaceTrajectoryStatusMessagePubSubType implements us.ihmc.pubsu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "ac841515723edec442ec0e7736a2ccd828ad5d82e993f6a278eafa6895f245a8";
+   		return "c3513256047bc38361c64da6f971d907e9e5c5844bd0154e8b22b9c42592f1b0";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class TaskspaceTrajectoryStatusMessagePubSubType implements us.ihmc.pubsu
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -80,7 +80,7 @@ public class TaskspaceTrajectoryStatusMessagePubSubType implements us.ihmc.pubsu
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getEndEffectorName().length() + 1;
@@ -105,7 +105,7 @@ public class TaskspaceTrajectoryStatusMessagePubSubType implements us.ihmc.pubsu
 
    public static void write(controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       if(data.getEndEffectorName().length() <= 255)
       cdr.write_type_d(data.getEndEffectorName());else
@@ -123,7 +123,7 @@ public class TaskspaceTrajectoryStatusMessagePubSubType implements us.ihmc.pubsu
 
    public static void read(controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       cdr.read_type_d(data.getEndEffectorName());	
       data.setTrajectoryExecutionStatus(cdr.read_type_9());
@@ -140,7 +140,7 @@ public class TaskspaceTrajectoryStatusMessagePubSubType implements us.ihmc.pubsu
    @Override
    public final void serialize(controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_d("end_effector_name", data.getEndEffectorName());
       ser.write_type_9("trajectory_execution_status", data.getTrajectoryExecutionStatus());
       ser.write_type_6("timestamp", data.getTimestamp());
@@ -157,7 +157,7 @@ public class TaskspaceTrajectoryStatusMessagePubSubType implements us.ihmc.pubsu
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       ser.read_type_d("end_effector_name", data.getEndEffectorName());
       data.setTrajectoryExecutionStatus(ser.read_type_9("trajectory_execution_status"));
       data.setTimestamp(ser.read_type_6("timestamp"));

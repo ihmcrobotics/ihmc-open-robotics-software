@@ -6,12 +6,10 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import geometry_msgs.PoseStamped;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.rdx.imgui.ImGuiFrequencyPlot;
 import us.ihmc.rdx.imgui.ImGuiPlot;
@@ -19,6 +17,7 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.string.StringTools;
 
@@ -42,16 +41,14 @@ public class RDXROS2RigidBodyPoseVisualizer extends RDXROS2SingleTopicVisualizer
 
    private ROS2Node ros2Node;
    private final String titleBeforeAdditions;
-   private final DomainFactory.PubSubImplementation pubSubImplementation;
    private final Object syncObject = new Object();
    private final Pose3D message = new Pose3D();
 
-   public RDXROS2RigidBodyPoseVisualizer(String title, DomainFactory.PubSubImplementation pubSubImplementation, ROS2Topic<Pose3D> topic)
+   public RDXROS2RigidBodyPoseVisualizer(String title, ROS2Topic<Pose3D> topic)
    {
       super(title);
       titleBeforeAdditions = title;
       this.topic = topic;
-      this.pubSubImplementation = pubSubImplementation;
 
       setActivenessChangeCallback(isActive ->
                                   {
@@ -99,7 +96,7 @@ public class RDXROS2RigidBodyPoseVisualizer extends RDXROS2SingleTopicVisualizer
 
    private void subscribe()
    {
-      ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, StringTools.titleToSnakeCase(titleBeforeAdditions));
+      ros2Node = new ROS2NodeBuilder().build(StringTools.titleToSnakeCase(titleBeforeAdditions));
 
       ros2Node.createSubscription2(PerceptionAPI.MOCAP_RIGID_BODY, this::queueRenderRigidBodyPose);
    }

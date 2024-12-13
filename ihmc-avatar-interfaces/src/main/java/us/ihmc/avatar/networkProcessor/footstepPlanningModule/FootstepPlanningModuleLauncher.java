@@ -1,18 +1,26 @@
 package us.ihmc.avatar.networkProcessor.footstepPlanningModule;
 
-import controller_msgs.msg.dds.*;
-import toolbox_msgs.msg.dds.*;
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
+import toolbox_msgs.msg.dds.FootstepPlannerActionMessage;
+import toolbox_msgs.msg.dds.FootstepPlannerParametersPacket;
+import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
+import toolbox_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import toolbox_msgs.msg.dds.SwingPlannerParametersPacket;
+import toolbox_msgs.msg.dds.SwingPlanningRequestPacket;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.ros2.ROS2PublisherBasics;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.FootstepPlannerAPI;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.footstepPlanning.*;
-import us.ihmc.communication.FootstepPlannerAPI;
+import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
+import us.ihmc.footstepPlanning.FootstepPlan;
+import us.ihmc.footstepPlanning.FootstepPlannerRequest;
+import us.ihmc.footstepPlanning.FootstepPlannerRequestedAction;
+import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
@@ -21,11 +29,10 @@ import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.log.LogTools;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
@@ -116,19 +123,9 @@ public class FootstepPlanningModuleLauncher
    }
 
    /**
-    * Creates a FootstepPlanningModule and creates ROS 2 subscribers and publishers on a new ros node
-    */
-   public static FootstepPlanningModule createModule(DRCRobotModel robotModel, DomainFactory.PubSubImplementation pubSubImplementation)
-   {
-      LogTools.info("Starting footstep planning module in ROS 2 {} mode", pubSubImplementation.name());
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "footstep_planner");
-      return createModule(ros2Node, robotModel, true);
-   }
-
-   /**
     * Creates a FootstepPlannerModule object and creates ROS 2 subscribers and publishers
     */
-   public static FootstepPlanningModule createModule(ROS2NodeInterface ros2Node, DRCRobotModel robotModel)
+   public static FootstepPlanningModule createModule(ROS2Node ros2Node, DRCRobotModel robotModel)
    {
       return createModule(ros2Node, robotModel, false);
    }
@@ -136,7 +133,7 @@ public class FootstepPlanningModuleLauncher
    /**
     * If we don't create the ROS 2 node, then someone else is responsible for disposing it.
     */
-   private static FootstepPlanningModule createModule(ROS2NodeInterface ros2Node, DRCRobotModel robotModel, boolean manageROS2Node)
+   private static FootstepPlanningModule createModule(ROS2Node ros2Node, DRCRobotModel robotModel, boolean manageROS2Node)
    {
       FootstepPlanningModule footstepPlanningModule = createModule(robotModel);
       footstepPlanningModule.registerRosNode(ros2Node, manageROS2Node);
@@ -155,7 +152,7 @@ public class FootstepPlanningModuleLauncher
       return footstepPlanningModule;
    }
 
-   private static void createParametersCallbacks(ROS2NodeInterface ros2Node,
+   private static void createParametersCallbacks(ROS2Node ros2Node,
                                                  FootstepPlanningModule footstepPlanningModule,
                                                  ROS2Topic<?> inputTopic)
    {
@@ -172,7 +169,7 @@ public class FootstepPlanningModuleLauncher
    }
 
    private static void createRequestCallback(String robotName,
-                                             ROS2NodeInterface ros2Node,
+                                             ROS2Node ros2Node,
                                              FootstepPlanningModule footstepPlanningModule,
                                              ROS2Topic<?> inputTopic,
                                              AtomicBoolean generateLog)
@@ -202,10 +199,10 @@ public class FootstepPlanningModuleLauncher
       });
    }
 
-   private static void createStatusPublisher(String robotName, ROS2NodeInterface ros2Node, FootstepPlanningModule footstepPlanningModule, ROS2Topic outputTopic)
+   private static void createStatusPublisher(String robotName, ROS2Node ros2Node, FootstepPlanningModule footstepPlanningModule, ROS2Topic outputTopic)
    {
-      ROS2PublisherBasics<FootstepPlanningToolboxOutputStatus> resultPublisher = ros2Node.createPublisher(outputTopic.withTypeName(FootstepPlanningToolboxOutputStatus.class));
-      ROS2PublisherBasics<FootstepDataListMessage> swingReplanPublisher = ros2Node.createPublisher(FootstepPlannerAPI.swingReplanOutputTopic(robotName));
+      ROS2Publisher<FootstepPlanningToolboxOutputStatus> resultPublisher = ros2Node.createPublisher(outputTopic.withTypeName(FootstepPlanningToolboxOutputStatus.class));
+      ROS2Publisher<FootstepDataListMessage> swingReplanPublisher = ros2Node.createPublisher(FootstepPlannerAPI.swingReplanOutputTopic(robotName));
 
       footstepPlanningModule.addStatusCallback(output ->
                                                {
@@ -230,12 +227,12 @@ public class FootstepPlanningModuleLauncher
       }
    }
 
-   private static void createPlannerActionCallback(ROS2NodeInterface ros2Node,
+   private static void createPlannerActionCallback(ROS2Node ros2Node,
                                                    FootstepPlanningModule footstepPlanningModule,
                                                    ROS2Topic inputTopic,
                                                    ROS2Topic outputTopic)
    {
-      ROS2PublisherBasics<FootstepPlannerParametersPacket> parametersPublisher = ros2Node.createPublisher(outputTopic.withTypeName(FootstepPlannerParametersPacket.class));
+      ROS2Publisher<FootstepPlannerParametersPacket> parametersPublisher = ros2Node.createPublisher(outputTopic.withTypeName(FootstepPlannerParametersPacket.class));
 
       FootstepPlannerActionMessage footstepPlannerActionMessage = new FootstepPlannerActionMessage();
       FootstepPlannerParametersPacket footstepPlannerParametersPacket = new FootstepPlannerParametersPacket();

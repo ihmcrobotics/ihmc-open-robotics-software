@@ -1,16 +1,8 @@
 package us.ihmc.avatar.behaviorTests;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import toolbox_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
@@ -30,7 +22,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.KinematicsPlanningBehavior;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
@@ -40,6 +31,12 @@ import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.util.environments.ValkyrieEODObstacleCourseEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class KinematicsPlanningBehaviorTest implements MultiRobotTestInterface
 {
@@ -265,8 +262,7 @@ public abstract class KinematicsPlanningBehaviorTest implements MultiRobotTestIn
    {
       DRCRobotModel robotModel = getRobotModel();
       kinematicsPlanningToolboxModule = new KinematicsPlanningToolboxModule(robotModel,
-                                                                            isKinematicsPlanningToolboxVisualizerEnabled,
-                                                                            PubSubImplementation.INTRAPROCESS);
+                                                                            isKinematicsPlanningToolboxVisualizerEnabled);
    }
 
    private static List<VisualDefinition> createEndEffectorKeyFrameVisualization(Pose3DReadOnly pose)

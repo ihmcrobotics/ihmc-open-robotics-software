@@ -1,12 +1,5 @@
 package us.ihmc.atlas.sensors;
 
-import static us.ihmc.pubsub.DomainFactory.PubSubImplementation.FAST_RTPS;
-
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import us.ihmc.atlas.AtlasRobotModel;
@@ -17,14 +10,12 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.javaFXToolkit.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.SharedMemoryMessager;
 import us.ihmc.messager.javafx.SharedMemoryJavaFXMessager;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.SegmentationModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.ui.PlanarSegmentationUI;
@@ -33,9 +24,15 @@ import us.ihmc.robotEnvironmentAwareness.updaters.PlanarSegmentationModule;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.tools.io.WorkspacePathTools;
 import us.ihmc.tools.processManagement.JavaProcessManager;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 public class AtlasSLAMBasedREAStandaloneLauncher
 {
@@ -45,7 +42,6 @@ public class AtlasSLAMBasedREAStandaloneLauncher
    private static final String SEGMENTATION_CONFIGURATION_FILE_NAME = "atlasSegmentationModuleConfiguration.txt";
    private final boolean spawnSegmentationUI;
    private final boolean spawnSLAMUI;
-   private final DomainFactory.PubSubImplementation pubSubImplementation;
 
    private ROS2Node ros2Node;
    private Messager slamMessager;
@@ -56,17 +52,15 @@ public class AtlasSLAMBasedREAStandaloneLauncher
    private PlanarSegmentationUI planarSegmentationUI;
    private PlanarSegmentationModule segmentationModule;
 
-   public AtlasSLAMBasedREAStandaloneLauncher(boolean spawnUIs, DomainFactory.PubSubImplementation pubSubImplementation)
+   public AtlasSLAMBasedREAStandaloneLauncher(boolean spawnUIs)
    {
-      this(spawnUIs, spawnUIs, pubSubImplementation);
+      this(spawnUIs, spawnUIs);
    }
    
-   public AtlasSLAMBasedREAStandaloneLauncher(boolean spawnSegmentationUI, boolean spawnSLAMUI, DomainFactory.PubSubImplementation pubSubImplementation)
+   public AtlasSLAMBasedREAStandaloneLauncher(boolean spawnSegmentationUI, boolean spawnSLAMUI)
    {
       this.spawnSegmentationUI = spawnSegmentationUI;
       this.spawnSLAMUI = spawnSLAMUI;
-
-      this.pubSubImplementation = pubSubImplementation;
 
       Runnable setup = () -> ExceptionTools.handle(this::setup, DefaultExceptionHandler.PRINT_STACKTRACE);
       if (spawnSegmentationUI || spawnSLAMUI)
@@ -97,7 +91,7 @@ public class AtlasSLAMBasedREAStandaloneLauncher
          defaultContactPoints.put(side, contactPointParameters.getControllerFootGroundContactPoints().get(side));
       }
 
-      ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, PerceptionAPI.REA_NODE_NAME);
+      ros2Node = new ROS2NodeBuilder().build(PerceptionAPI.REA_NODE_NAME);
 
       slamMessager = spawnSLAMUI ? new SharedMemoryJavaFXMessager(SLAMModuleAPI.API) : new SharedMemoryMessager(SLAMModuleAPI.API);
       slamMessager.startMessager();
@@ -189,10 +183,10 @@ public class AtlasSLAMBasedREAStandaloneLauncher
    public static void main(String[] args)
    {
       JavaProcessManager manager = new JavaProcessManager();
-      manager.runOrRegister("AtlasSLAMBasedREA", () -> new AtlasSLAMBasedREAStandaloneLauncher(true, true, FAST_RTPS));
+      manager.runOrRegister("AtlasSLAMBasedREA", () -> new AtlasSLAMBasedREAStandaloneLauncher(true, true));
       ArrayList<Process> processes = manager.spawnProcesses(AtlasSLAMBasedREAStandaloneLauncher.class, args);
 
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(FAST_RTPS, "test_node");
+      ROS2Node ros2Node = new ROS2NodeBuilder().build("test_node");
       ros2Node.createSubscription2(SLAMModuleAPI.SHUTDOWN, message ->
       {
          LogTools.info("Received SHUTDOWN. Shutting down...");

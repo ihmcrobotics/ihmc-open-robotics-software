@@ -1,26 +1,25 @@
 package us.ihmc.robotEnvironmentAwareness.updaters;
 
-import java.util.concurrent.atomic.AtomicReference;
-
 import perception_msgs.msg.dds.REASensorDataFilterParametersMessage;
 import perception_msgs.msg.dds.REAStatusMessage;
-import us.ihmc.ros2.ROS2PublisherBasics;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.BoundingBoxParametersMessage;
-import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 public class REACurrentStateProvider
 {
-   private final ROS2PublisherBasics<REAStatusMessage> currentStatePublisher;
+   private final ROS2Publisher<REAStatusMessage> currentStatePublisher;
    private final AtomicReference<Boolean> isRunning, hasCleared, isUsingLidar, isUsingStereoVision, isUsingDepthCloud;
    private final AtomicReference<Double> minRange, maxRange;
    private final AtomicReference<BoundingBoxParametersMessage> boundingBoxParameters;
    private final REAStatusMessage currentState = new REAStatusMessage();
 
-   public REACurrentStateProvider(ROS2NodeInterface ros2Node,
+   public REACurrentStateProvider(ROS2Node ros2Node,
                                   ROS2Topic outputTopic,
                                   Messager messager)
    {

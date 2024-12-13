@@ -8,7 +8,6 @@ import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
@@ -20,9 +19,9 @@ import us.ihmc.perception.ffmpeg.FFmpegTools;
 import us.ihmc.perception.ffmpeg.FFmpegVideoEncoder;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.streaming.StreamingTools;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.sensors.ZEDColorDepthImageRetrieverSVO;
 import us.ihmc.sensors.ZEDColorDepthImageRetrieverSVO.RecordMode;
 import us.ihmc.tools.IHMCCommonPaths;
@@ -46,7 +45,7 @@ public class SVOImageCompressionAlgorithmComparison
    private static final String SVO_FILE_NAME = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20240715_103234_ZEDRecording_NewONRCourseWalk.svo2")
                                                                                         .toAbsolutePath()
                                                                                         .toString();
-   private final ROS2Node ros2Node = ROS2Tools.createLoopbackROS2Node(PubSubImplementation.FAST_RTPS, "compression_algorithm_comparison");
+   private final ROS2Node ros2Node = new ROS2NodeBuilder().build("compression_algorithm_comparison");
    private final ZEDColorDepthImageRetrieverSVO zedDataRetriever;
 
    private final ImageCompressionAlgorithmComparison algorithmComparison = new ImageCompressionAlgorithmComparison();

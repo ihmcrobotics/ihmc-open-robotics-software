@@ -1,22 +1,19 @@
 package us.ihmc.atlas.behaviors;
 
+import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import perception_msgs.msg.dds.LidarScanMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
-import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.atlas.sensors.AtlasSLAMBasedREAStandaloneLauncher;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.behaviors.tools.PlanarRegionSLAMMapper;
 import us.ihmc.behaviors.tools.perception.MultisenseHeadStereoSimulator;
 import us.ihmc.behaviors.tools.perception.MultisenseLidarSimulator;
 import us.ihmc.behaviors.tools.perception.RealsensePelvisSimulator;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
-import us.ihmc.communication.CommunicationMode;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.behaviors.tools.PlanarRegionSLAMMapper;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudMessageTools;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
@@ -25,15 +22,16 @@ import us.ihmc.robotEnvironmentAwareness.updaters.REANetworkProvider;
 import us.ihmc.robotEnvironmentAwareness.updaters.REAPlanarRegionPublicNetworkProvider;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.List;
 
-import static us.ihmc.atlas.behaviors.AtlasPerceptionSimulation.Fidelity.*;
+import static us.ihmc.atlas.behaviors.AtlasPerceptionSimulation.Fidelity.LOW;
 import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.*;
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.depthOutputTopic;
 
 public class AtlasPerceptionSimulation
 {
@@ -48,8 +46,7 @@ public class AtlasPerceptionSimulation
    private PausablePeriodicThread realsensePointCloudPublisher;
    private LIDARBasedREAModule lidarREA;
 
-   public AtlasPerceptionSimulation(CommunicationMode communicationMode,
-                                    PlanarRegionsList map,
+   public AtlasPerceptionSimulation(PlanarRegionsList map,
                                     boolean runRealsenseSLAM,
                                     boolean spawnUIs,
                                     boolean runLidarREA,
@@ -58,7 +55,7 @@ public class AtlasPerceptionSimulation
    {
       this.runRealsenseSLAM = runRealsenseSLAM;
       this.runLidarREA = runLidarREA;
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(communicationMode.getPubSubImplementation(), "perception");
+      ROS2Node ros2Node = new ROS2NodeBuilder().build("perception");
 
       // might be a weird delay with threads at 0.5 hz depending on each other
       double period = 1.0;
@@ -84,13 +81,13 @@ public class AtlasPerceptionSimulation
       if (runLidarREA)
       {
          MultisenseLidarSimulator multisenseLidar = new MultisenseLidarSimulator(robotModel, ros2Node, map, multisenseLidarScanSize);
-         ROS2PublisherBasics<LidarScanMessage> publisher = ros2Node.createPublisher(PerceptionAPI.MULTISENSE_LIDAR_SCAN);
+         ROS2Publisher<LidarScanMessage> publisher = ros2Node.createPublisher(PerceptionAPI.MULTISENSE_LIDAR_SCAN);
          multisenseLidar.addLidarScanListener(scan -> publisher.publish(PointCloudMessageTools.toLidarScanMessage(scan, multisenseLidar.getSensorPose())));
 
          ExceptionTools.handle(() ->
          {
             REANetworkProvider networkProvider = new REAPlanarRegionPublicNetworkProvider(
-                  ROS2Tools.createROS2Node(communicationMode.getPubSubImplementation(), PerceptionAPI.REA_NODE_NAME),
+                  new ROS2NodeBuilder().build(PerceptionAPI.REA_NODE_NAME),
                   outputTopic,
                   lidarOutputTopic,
                   stereoOutputTopic,
@@ -108,7 +105,7 @@ public class AtlasPerceptionSimulation
                                                                                             ros2Node,
                                                                                             multisenseStereoRange,
                                                                                             multisenseStereoSphereScanSize);
-         ROS2PublisherBasics<PlanarRegionsListMessage> publisher = ros2Node.createPublisher(PerceptionAPI.LIDAR_REA_REGIONS);
+         ROS2Publisher<PlanarRegionsListMessage> publisher = ros2Node.createPublisher(PerceptionAPI.LIDAR_REA_REGIONS);
          multisenseRegionsPublisher = new PausablePeriodicThread("MultisenseREARegionsPublisher", period,
             () -> publisher.publish(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(multisenseStereo.computeRegions())));
          multisenseRegionsPublisher.start();
@@ -117,7 +114,7 @@ public class AtlasPerceptionSimulation
       RealsensePelvisSimulator realsense = new RealsensePelvisSimulator(map, robotModel, ros2Node, realsenseRange, realsenseSphereScanSize);
       if (runRealsenseSLAM)
       {
-         ROS2PublisherBasics<StereoVisionPointCloudMessage> publisher = ros2Node.createPublisher(PerceptionAPI.D435_POINT_CLOUD);
+         ROS2Publisher<StereoVisionPointCloudMessage> publisher = ros2Node.createPublisher(PerceptionAPI.D435_POINT_CLOUD);
          realsensePointCloudPublisher = new PausablePeriodicThread("RealsensePointCloudPublisher", period,
             () ->
             {
@@ -126,12 +123,12 @@ public class AtlasPerceptionSimulation
                   publisher.publish(PointCloudMessageTools.toStereoVisionPointCloudMessage(pointCloud, realsense.getSensorPose()));
             });
          realsensePointCloudPublisher.start();
-         realsenseSLAMFramework = new AtlasSLAMBasedREAStandaloneLauncher(spawnUIs, communicationMode.getPubSubImplementation());
+         realsenseSLAMFramework = new AtlasSLAMBasedREAStandaloneLauncher(spawnUIs);
       }
       else
       {
          PlanarRegionSLAMMapper realsenseSLAM = new PlanarRegionSLAMMapper();
-         ROS2PublisherBasics<PlanarRegionsListMessage> publisher = ros2Node.createPublisher(PerceptionAPI.REALSENSE_SLAM_REGIONS);
+         ROS2Publisher<PlanarRegionsListMessage> publisher = ros2Node.createPublisher(PerceptionAPI.REALSENSE_SLAM_REGIONS);
          realsenseRegionsPublisher = new PausablePeriodicThread("RealsenseSLAMPublisher", period,
             () -> publisher.publish(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(realsenseSLAM.update(realsense.computeRegions()))));
          realsenseRegionsPublisher.start();

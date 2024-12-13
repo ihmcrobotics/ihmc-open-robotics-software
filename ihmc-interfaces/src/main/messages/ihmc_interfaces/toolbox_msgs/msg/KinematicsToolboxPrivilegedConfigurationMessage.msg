@@ -4,7 +4,7 @@
 # It also helps escaping singularities, for instance a bent configuration for the knee is an ideal privileged configuration that will help knee singularities.
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # Indicates whether the privileged_root_joint_position is to be used or not.
 bool use_privileged_root_joint_position false
