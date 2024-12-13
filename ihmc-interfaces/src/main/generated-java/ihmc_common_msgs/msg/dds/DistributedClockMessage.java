@@ -13,9 +13,9 @@ import us.ihmc.pubsub.TopicDataType;
 public class DistributedClockMessage extends Packet<DistributedClockMessage> implements Settable<DistributedClockMessage>, EpsilonComparable<DistributedClockMessage>
 {
    /**
-            * The guid of destination of this message
+            * If this is a request message, else it's a reply message
             */
-   public ihmc_common_msgs.msg.dds.GuidMessage destination_target_;
+   public boolean is_request_;
    /**
             * The guid of the publisher that's expected to send back a reply
             */
@@ -35,7 +35,6 @@ public class DistributedClockMessage extends Packet<DistributedClockMessage> imp
 
    public DistributedClockMessage()
    {
-      destination_target_ = new ihmc_common_msgs.msg.dds.GuidMessage();
       request_target_ = new ihmc_common_msgs.msg.dds.GuidMessage();
       reply_target_ = new ihmc_common_msgs.msg.dds.GuidMessage();
       request_send_time_ = new ihmc_common_msgs.msg.dds.InstantMessage();
@@ -50,20 +49,27 @@ public class DistributedClockMessage extends Packet<DistributedClockMessage> imp
 
    public void set(DistributedClockMessage other)
    {
-      ihmc_common_msgs.msg.dds.GuidMessagePubSubType.staticCopy(other.destination_target_, destination_target_);
+      is_request_ = other.is_request_;
+
       ihmc_common_msgs.msg.dds.GuidMessagePubSubType.staticCopy(other.request_target_, request_target_);
       ihmc_common_msgs.msg.dds.GuidMessagePubSubType.staticCopy(other.reply_target_, reply_target_);
       ihmc_common_msgs.msg.dds.InstantMessagePubSubType.staticCopy(other.request_send_time_, request_send_time_);
       ihmc_common_msgs.msg.dds.InstantMessagePubSubType.staticCopy(other.reply_send_time_, reply_send_time_);
    }
 
-
    /**
-            * The guid of destination of this message
+            * If this is a request message, else it's a reply message
             */
-   public ihmc_common_msgs.msg.dds.GuidMessage getDestinationTarget()
+   public void setIsRequest(boolean is_request)
    {
-      return destination_target_;
+      is_request_ = is_request;
+   }
+   /**
+            * If this is a request message, else it's a reply message
+            */
+   public boolean getIsRequest()
+   {
+      return is_request_;
    }
 
 
@@ -120,7 +126,8 @@ public class DistributedClockMessage extends Packet<DistributedClockMessage> imp
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!this.destination_target_.epsilonEquals(other.destination_target_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_request_, other.is_request_, epsilon)) return false;
+
       if (!this.request_target_.epsilonEquals(other.request_target_, epsilon)) return false;
       if (!this.reply_target_.epsilonEquals(other.reply_target_, epsilon)) return false;
       if (!this.request_send_time_.epsilonEquals(other.request_send_time_, epsilon)) return false;
@@ -138,7 +145,8 @@ public class DistributedClockMessage extends Packet<DistributedClockMessage> imp
 
       DistributedClockMessage otherMyClass = (DistributedClockMessage) other;
 
-      if (!this.destination_target_.equals(otherMyClass.destination_target_)) return false;
+      if(this.is_request_ != otherMyClass.is_request_) return false;
+
       if (!this.request_target_.equals(otherMyClass.request_target_)) return false;
       if (!this.reply_target_.equals(otherMyClass.reply_target_)) return false;
       if (!this.request_send_time_.equals(otherMyClass.request_send_time_)) return false;
@@ -153,8 +161,8 @@ public class DistributedClockMessage extends Packet<DistributedClockMessage> imp
       StringBuilder builder = new StringBuilder();
 
       builder.append("DistributedClockMessage {");
-      builder.append("destination_target=");
-      builder.append(this.destination_target_);      builder.append(", ");
+      builder.append("is_request=");
+      builder.append(this.is_request_);      builder.append(", ");
       builder.append("request_target=");
       builder.append(this.request_target_);      builder.append(", ");
       builder.append("reply_target=");
