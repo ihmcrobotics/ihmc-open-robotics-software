@@ -115,7 +115,7 @@ public class MPCHighLevelHumanoidControllerFactory implements CloseableAndDispos
 
    private ConcurrentLinkedQueue<Command<?, ?>> controllerCommands;
 
-   private MPCHumanoidHighLevelControllerManager humanoidHighLevelControllerManager;
+   private MPCHumanoidHighLevelControllerManager mpcHumanoidHighLevelControllerManager;
 
    public MPCHighLevelHumanoidControllerFactory(ContactableBodiesFactory<RobotSide> contactableBodiesFactory,
                                                 SideDependentList<String> footForceSensorNames,
@@ -199,8 +199,8 @@ public class MPCHighLevelHumanoidControllerFactory implements CloseableAndDispos
       componentBasedFootstepDataMessageGeneratorFactory.setHeadingAndVelocityEvaluationScriptParameters(headingAndVelocityEvaluationScriptParameters);
       componentBasedFootstepDataMessageGeneratorFactory.setFootStepAdjustment(footstepAdjustment);
 
-      if (humanoidHighLevelControllerManager != null)
-         humanoidHighLevelControllerManager.addControllerPluginFactory(componentBasedFootstepDataMessageGeneratorFactory);
+      if (mpcHumanoidHighLevelControllerManager != null)
+         mpcHumanoidHighLevelControllerManager.addControllerPluginFactory(componentBasedFootstepDataMessageGeneratorFactory);
       else
          pluginFactories.add(componentBasedFootstepDataMessageGeneratorFactory);
    }
@@ -549,26 +549,26 @@ public class MPCHighLevelHumanoidControllerFactory implements CloseableAndDispos
       FrameMessageCommandConverter commandConversionHelper = new FrameMessageCommandConverter(referenceFrameHashCodeResolver);
       commandInputManager.registerConversionHelper(commandConversionHelper);
 
-      humanoidHighLevelControllerManager = new MPCHumanoidHighLevelControllerManager(commandInputManager,
-                                                                                     statusMessageOutputManager,
-                                                                                     initialControllerState,
-                                                                                     highLevelControllerParameters,
-                                                                                     walkingControllerParameters,
-                                                                                     requestedHighLevelControllerState,
-                                                                                     controllerFactoriesMap,
-                                                                                     stateTransitionFactories,
-                                                                                     pluginFactories,
-                                                                                     managerFactory,
-                                                                                     controllerCoreFactory,
-                                                                                     controllerToolbox,
-                                                                                     centerOfPressureDataHolderForEstimator,
-                                                                                     forceSensorDataHolder,
-                                                                                     lowLevelControllerOutput);
-      humanoidHighLevelControllerManager.addYoVariableRegistry(registry);
-      humanoidHighLevelControllerManager.setListenToHighLevelStatePackets(isListeningToHighLevelStatePackets);
+      mpcHumanoidHighLevelControllerManager = new MPCHumanoidHighLevelControllerManager(commandInputManager,
+                                                                                        statusMessageOutputManager,
+                                                                                        initialControllerState,
+                                                                                        highLevelControllerParameters,
+                                                                                        walkingControllerParameters,
+                                                                                        requestedHighLevelControllerState,
+                                                                                        controllerFactoriesMap,
+                                                                                        stateTransitionFactories,
+                                                                                        pluginFactories,
+                                                                                        managerFactory,
+                                                                                        controllerCoreFactory,
+                                                                                        controllerToolbox,
+                                                                                        centerOfPressureDataHolderForEstimator,
+                                                                                        forceSensorDataHolder,
+                                                                                        lowLevelControllerOutput);
+      mpcHumanoidHighLevelControllerManager.addYoVariableRegistry(registry);
+      mpcHumanoidHighLevelControllerManager.setListenToHighLevelStatePackets(isListeningToHighLevelStatePackets);
       for (RobotSide robotSide : RobotSide.values)
-         humanoidHighLevelControllerManager.addYoGraphic(footSwitches.get(robotSide).getSCS2YoGraphics());
-      return humanoidHighLevelControllerManager;
+         mpcHumanoidHighLevelControllerManager.addYoGraphic(footSwitches.get(robotSide).getSCS2YoGraphics());
+      return mpcHumanoidHighLevelControllerManager;
    }
 
    private SideDependentList<FootSwitchInterface> createFootSwitches(SideDependentList<? extends ContactablePlaneBody> bipedFeet,
@@ -729,18 +729,18 @@ public class MPCHighLevelHumanoidControllerFactory implements CloseableAndDispos
 
    public HighLevelControllerName getCurrentHighLevelControlState()
    {
-      return humanoidHighLevelControllerManager.getCurrentHighLevelControlState();
+      return mpcHumanoidHighLevelControllerManager.getCurrentHighLevelControlState();
    }
 
    public void addHighLevelStateChangedListener(StateChangedListener<HighLevelControllerName> stateChangedListener)
    {
-      humanoidHighLevelControllerManager.addHighLevelStateChangedListener(stateChangedListener);
+      mpcHumanoidHighLevelControllerManager.addHighLevelStateChangedListener(stateChangedListener);
    }
 
    public void setListenToHighLevelStatePackets(boolean isListening)
    {
-      if (humanoidHighLevelControllerManager != null)
-         humanoidHighLevelControllerManager.setListenToHighLevelStatePackets(isListening);
+      if (mpcHumanoidHighLevelControllerManager != null)
+         mpcHumanoidHighLevelControllerManager.setListenToHighLevelStatePackets(isListening);
       else
          isListeningToHighLevelStatePackets = isListening;
    }
