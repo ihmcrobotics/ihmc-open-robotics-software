@@ -13,14 +13,23 @@ public class ROS2DistributedClockTest
    {
       ROS2Node ros2Node = new ROS2NodeBuilder().specialTransportMode(SpecialTransportMode.INTRAPROCESS_ONLY).build("test");
 
-      new ROS2DistributedClock(ros2Node);
-      new ROS2DistributedClock(ros2Node);
+      ROS2DistributedClock clock1 = new ROS2DistributedClock(ros2Node);
+      ROS2DistributedClock clock2 = new ROS2DistributedClock(ros2Node);
 
-      ros2Node = new ROS2NodeBuilder().specialTransportMode(SpecialTransportMode.INTRAPROCESS_ONLY).build("test2");
+      while (true)
+      {
+         ThreadTools.park(1.0);
+      }
 
-      new ROS2DistributedClock(ros2Node);
-      new ROS2DistributedClock(ros2Node);
 
-      ThreadTools.park(1.0);
+
+
+
+//      ros2Node = new ROS2NodeBuilder().specialTransportMode(SpecialTransportMode.INTRAPROCESS_ONLY).build("test2");
+//
+//      new ROS2DistributedClock(ros2Node);
+//      new ROS2DistributedClock(ros2Node);
+
+//      ThreadTools.park(1.0);
    }
 }

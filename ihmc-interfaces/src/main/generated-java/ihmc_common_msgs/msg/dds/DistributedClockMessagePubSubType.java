@@ -15,7 +15,7 @@ public class DistributedClockMessagePubSubType implements us.ihmc.pubsub.TopicDa
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "8af4786a0f7a7ac2922fcced67bbc34bc8ddd2f51ce7c24e11b2f74aebcbfa6f";
+   		return "0dbb6546a403e5f5df788c3e99df502f689c69f344be2246fc925536d220cc0e";
    }
    
    @Override
@@ -56,6 +56,8 @@ public class DistributedClockMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
       current_alignment += ihmc_common_msgs.msg.dds.GuidMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += ihmc_common_msgs.msg.dds.GuidMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
       current_alignment += ihmc_common_msgs.msg.dds.InstantMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += ihmc_common_msgs.msg.dds.InstantMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
@@ -73,6 +75,8 @@ public class DistributedClockMessagePubSubType implements us.ihmc.pubsub.TopicDa
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += ihmc_common_msgs.msg.dds.GuidMessagePubSubType.getCdrSerializedSize(data.getDestinationTarget(), current_alignment);
+
       current_alignment += ihmc_common_msgs.msg.dds.GuidMessagePubSubType.getCdrSerializedSize(data.getRequestTarget(), current_alignment);
 
       current_alignment += ihmc_common_msgs.msg.dds.GuidMessagePubSubType.getCdrSerializedSize(data.getReplyTarget(), current_alignment);
@@ -87,6 +91,7 @@ public class DistributedClockMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
    public static void write(ihmc_common_msgs.msg.dds.DistributedClockMessage data, us.ihmc.idl.CDR cdr)
    {
+      ihmc_common_msgs.msg.dds.GuidMessagePubSubType.write(data.getDestinationTarget(), cdr);
       ihmc_common_msgs.msg.dds.GuidMessagePubSubType.write(data.getRequestTarget(), cdr);
       ihmc_common_msgs.msg.dds.GuidMessagePubSubType.write(data.getReplyTarget(), cdr);
       ihmc_common_msgs.msg.dds.InstantMessagePubSubType.write(data.getRequestSendTime(), cdr);
@@ -95,6 +100,7 @@ public class DistributedClockMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
    public static void read(ihmc_common_msgs.msg.dds.DistributedClockMessage data, us.ihmc.idl.CDR cdr)
    {
+      ihmc_common_msgs.msg.dds.GuidMessagePubSubType.read(data.getDestinationTarget(), cdr);	
       ihmc_common_msgs.msg.dds.GuidMessagePubSubType.read(data.getRequestTarget(), cdr);	
       ihmc_common_msgs.msg.dds.GuidMessagePubSubType.read(data.getReplyTarget(), cdr);	
       ihmc_common_msgs.msg.dds.InstantMessagePubSubType.read(data.getRequestSendTime(), cdr);	
@@ -105,6 +111,8 @@ public class DistributedClockMessagePubSubType implements us.ihmc.pubsub.TopicDa
    @Override
    public final void serialize(ihmc_common_msgs.msg.dds.DistributedClockMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+      ser.write_type_a("destination_target", new ihmc_common_msgs.msg.dds.GuidMessagePubSubType(), data.getDestinationTarget());
+
       ser.write_type_a("request_target", new ihmc_common_msgs.msg.dds.GuidMessagePubSubType(), data.getRequestTarget());
 
       ser.write_type_a("reply_target", new ihmc_common_msgs.msg.dds.GuidMessagePubSubType(), data.getReplyTarget());
@@ -118,6 +126,8 @@ public class DistributedClockMessagePubSubType implements us.ihmc.pubsub.TopicDa
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, ihmc_common_msgs.msg.dds.DistributedClockMessage data)
    {
+      ser.read_type_a("destination_target", new ihmc_common_msgs.msg.dds.GuidMessagePubSubType(), data.getDestinationTarget());
+
       ser.read_type_a("request_target", new ihmc_common_msgs.msg.dds.GuidMessagePubSubType(), data.getRequestTarget());
 
       ser.read_type_a("reply_target", new ihmc_common_msgs.msg.dds.GuidMessagePubSubType(), data.getReplyTarget());

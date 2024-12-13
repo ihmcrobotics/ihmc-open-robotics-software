@@ -18,6 +18,10 @@ module ihmc_common_msgs
       struct DistributedClockMessage
       {
         /**
+         * The guid of destination of this message
+         */
+        ihmc_common_msgs::msg::dds::GuidMessage destination_target;
+        /**
          * The guid of the publisher that's expected to send back a reply
          */
         ihmc_common_msgs::msg::dds::GuidMessage request_target;

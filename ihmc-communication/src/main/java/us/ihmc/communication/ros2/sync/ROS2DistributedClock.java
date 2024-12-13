@@ -3,10 +3,12 @@ package us.ihmc.communication.ros2.sync;
 import ihmc_common_msgs.msg.dds.DistributedClockMessage;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.thread.RepeatingTaskThread;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.common.Guid;
+import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
@@ -14,6 +16,7 @@ import us.ihmc.ros2.ROS2Topic;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Assumes symmetric network delay.
@@ -23,7 +26,7 @@ public class ROS2DistributedClock
    private static final ROS2Topic<DistributedClockMessage> TOPIC = ROS2Tools.IHMC_ROOT.withModule("distributed_clock").withType(DistributedClockMessage.class);
 
    private final HashMap<Guid, ROS2DistributedClockPeer> peerMap = new HashMap<>();
-   private final ArrayList<ROS2DistributedClockPeer> peerList = new ArrayList<>();
+   private final List<ROS2DistributedClockPeer> peerList = new ArrayList<>();
    private int nextPeerToPing = 0;
    private final ROS2Publisher<DistributedClockMessage> publisher;
    private final Guid ourGuid;
@@ -32,7 +35,8 @@ public class ROS2DistributedClock
                                                                              DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
    private final DistributedClockMessage requestMessage = new DistributedClockMessage();
    private final DistributedClockMessage receivedMessage = new DistributedClockMessage();
-   private final DistributedClockMessage replyMessage = new DistributedClockMessage();
+   private final SampleInfo sampleInfo = new SampleInfo();
+   private final Guid receivedDestination = new Guid();
    private final Guid receivedRequestTarget = new Guid();
    private final Guid receivedReplyTarget = new Guid();
 
@@ -43,28 +47,38 @@ public class ROS2DistributedClock
 
       ros2Node.createSubscription(TOPIC, subscriber ->
       {
-         subscriber.takeNextData(receivedMessage, null);
+         subscriber.takeNextData(receivedMessage, sampleInfo);
+         MessageTools.fromMessage(receivedMessage.getDestinationTarget(), receivedDestination);
 
-         MessageTools.fromMessage(receivedMessage.getRequestTarget(), receivedRequestTarget);
-         MessageTools.fromMessage(receivedMessage.getReplyTarget(), receivedReplyTarget);
-
-         if (receivedRequestTarget.equals(ourGuid)) // Reply
+         if (receivedDestination.equals(ourGuid))
          {
-            replyMessage.set(receivedMessage);
-            MessageTools.toMessage(Instant.now(), replyMessage.getReplySendTime());
-            synchronized (publisher)
+            MessageTools.fromMessage(receivedMessage.getRequestTarget(), receivedRequestTarget);
+            MessageTools.fromMessage(receivedMessage.getReplyTarget(), receivedReplyTarget);
+
+            if (receivedRequestTarget.equals(ourGuid)) // Reply
             {
-               publisher.publish(replyMessage);
+               DistributedClockMessage replyMessage = new DistributedClockMessage();
+               replyMessage.set(receivedMessage);
+               MessageTools.toMessage(receivedReplyTarget, replyMessage.getDestinationTarget());
+               MessageTools.toMessage(Instant.now(), replyMessage.getReplySendTime());
+
+               ThreadTools.startAsDaemon(() ->
+               {
+                  synchronized (publisher)
+                  {
+                     publisher.publish(replyMessage);
+                  }
+               }, getClass().getSimpleName() + "PublishReply");
             }
-         }
-         else if (receivedReplyTarget.equals(ourGuid)) // Update clock offset estimate
-         {
-            ROS2DistributedClockPeer peer = peerMap.get(receivedReplyTarget);
-            if (peer != null)
+            else if (receivedReplyTarget.equals(ourGuid)) // Update clock offset estimate
             {
-               peer.update(MessageTools.toInstant(receivedMessage.getRequestSendTime()),
-                           Instant.now(),
-                           MessageTools.toInstant(receivedMessage.getReplySendTime()));
+               ROS2DistributedClockPeer peer = peerMap.get(receivedRequestTarget);
+               if (peer != null)
+               {
+                  peer.update(MessageTools.toInstant(receivedMessage.getRequestSendTime()),
+                              Instant.now(),
+                              MessageTools.toInstant(receivedMessage.getReplySendTime()));
+               }
             }
          }
       }, (subscriber, info) ->
@@ -83,19 +97,22 @@ public class ROS2DistributedClock
                      guidCopy.set(guid);
 
                      LogTools.info("Setting up peer: %s", guidCopy);
-                     peerMap.put(guidCopy, new ROS2DistributedClockPeer(guidCopy));
+                     ROS2DistributedClockPeer peer = new ROS2DistributedClockPeer(guidCopy);
+                     peerMap.put(guidCopy, peer);
+                     peerList.add(peer);
                   }
                }
                case REMOVED_MATCHING ->
                {
                   peerMap.remove(guid);
+                  peerList.removeIf(peer -> peer.getGuid().equals(guid));
                }
             }
          }
       });
 
-      requestThread.setFrequencyLimit(5.0);
-      requestThread.start();
+      requestThread.setFrequencyLimit(.5);
+      requestThread.startRepeating();
    }
 
    private void requestThread()
@@ -106,9 +123,10 @@ public class ROS2DistributedClock
             nextPeerToPing = 0;
 
          ROS2DistributedClockPeer peer = peerList.get(nextPeerToPing);
-         MessageTools.toMessage(Instant.now(), requestMessage.getRequestSendTime());
+         MessageTools.toMessage(peer.getGuid(), requestMessage.getDestinationTarget());
          MessageTools.toMessage(peer.getGuid(), requestMessage.getRequestTarget());
-         MessageTools.toMessage(publisher.getPublisher().getGuid(), requestMessage.getReplyTarget());
+         MessageTools.toMessage(ourGuid, requestMessage.getReplyTarget());
+         MessageTools.toMessage(Instant.now(), requestMessage.getRequestSendTime());
          synchronized (publisher)
          {
             publisher.publish(requestMessage);
@@ -116,5 +134,10 @@ public class ROS2DistributedClock
 
          ++nextPeerToPing;
       }
+   }
+
+   public List<ROS2DistributedClockPeer> getPeerList()
+   {
+      return peerList;
    }
 }
