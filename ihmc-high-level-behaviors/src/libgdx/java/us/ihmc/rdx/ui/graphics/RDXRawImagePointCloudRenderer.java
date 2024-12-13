@@ -43,7 +43,7 @@ public class RDXRawImagePointCloudRenderer extends AbstractRDXPointCloudRenderer
    private BytePointer pixmapDataPointer;
    private Texture colorImageTexture;
    private CameraIntrinsics colorIntrinsics = new CameraIntrinsics();
-   private final RigidBodyTransform depthToColorTransform = new RigidBodyTransform();
+   private final RigidBodyTransform colorToDepthTransform = new RigidBodyTransform();
    private final Matrix4 libGDXColorTransform = new Matrix4();
    private final RigidBodyTransform tempColorTransform = new RigidBodyTransform();
 
@@ -109,8 +109,9 @@ public class RDXRawImagePointCloudRenderer extends AbstractRDXPointCloudRenderer
 
       // Update color image uniforms
       colorIntrinsics = colorImage.getIntrinsicsCopy();
-      depthPose.getReferenceFrame().getTransformToDesiredFrame(depthToColorTransform, colorImage.getPose().getReferenceFrame());
-      LibGDXTools.toLibGDX(depthToColorTransform, tempColorTransform, libGDXColorTransform);
+      colorToDepthTransform.setAndInvert(colorImage.getPose());
+      colorToDepthTransform.multiply(depthPose);
+      LibGDXTools.toLibGDX(colorToDepthTransform, tempColorTransform, libGDXColorTransform);
 
       // Reallocate pixmap and data pointer if image size changed
       if (colorImagePixmap.getWidth() != colorImage.getWidth() || colorImagePixmap.getHeight() != colorImage.getHeight())
@@ -223,9 +224,8 @@ public class RDXRawImagePointCloudRenderer extends AbstractRDXPointCloudRenderer
       });
       rdxShader.registerUniform(colorIntrinsicsUniform);
 
-      RDXUniform depthTransformUniform = RDXUniform.createGlobalUniform("u_depthToColorTransform", (shader, inputID, renderable, combinedAttributes) ->
+      RDXUniform depthTransformUniform = RDXUniform.createGlobalUniform("u_colorToDepthTransform", (shader, inputID, renderable, combinedAttributes) ->
       {
-         LibGDXTools.toLibGDX(depthToColorTransform, tempColorTransform, libGDXColorTransform);
          shader.set(inputID, libGDXColorTransform);
       });
       rdxShader.registerUniform(depthTransformUniform);
