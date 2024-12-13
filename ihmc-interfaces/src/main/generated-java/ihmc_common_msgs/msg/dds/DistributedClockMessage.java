@@ -23,7 +23,7 @@ public class DistributedClockMessage extends Packet<DistributedClockMessage> imp
    /**
             * Monotonically increasing request number
             */
-   public long sequence_id_;
+   public long request_number_;
    /**
             * The time at which the request is sent
             */
@@ -55,7 +55,7 @@ public class DistributedClockMessage extends Packet<DistributedClockMessage> imp
       replier_id_.setLength(0);
       replier_id_.append(other.replier_id_);
 
-      sequence_id_ = other.sequence_id_;
+      request_number_ = other.request_number_;
 
       ihmc_common_msgs.msg.dds.InstantMessagePubSubType.staticCopy(other.request_send_time_, request_send_time_);
       ihmc_common_msgs.msg.dds.InstantMessagePubSubType.staticCopy(other.reply_send_time_, reply_send_time_);
@@ -112,16 +112,16 @@ public class DistributedClockMessage extends Packet<DistributedClockMessage> imp
    /**
             * Monotonically increasing request number
             */
-   public void setSequenceId(long sequence_id)
+   public void setRequestNumber(long request_number)
    {
-      sequence_id_ = sequence_id;
+      request_number_ = request_number;
    }
    /**
             * Monotonically increasing request number
             */
-   public long getSequenceId()
+   public long getRequestNumber()
    {
-      return sequence_id_;
+      return request_number_;
    }
 
 
@@ -164,7 +164,7 @@ public class DistributedClockMessage extends Packet<DistributedClockMessage> imp
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.replier_id_, other.replier_id_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.request_number_, other.request_number_, epsilon)) return false;
 
       if (!this.request_send_time_.epsilonEquals(other.request_send_time_, epsilon)) return false;
       if (!this.reply_send_time_.epsilonEquals(other.reply_send_time_, epsilon)) return false;
@@ -185,7 +185,7 @@ public class DistributedClockMessage extends Packet<DistributedClockMessage> imp
 
       if (!us.ihmc.idl.IDLTools.equals(this.replier_id_, otherMyClass.replier_id_)) return false;
 
-      if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
+      if(this.request_number_ != otherMyClass.request_number_) return false;
 
       if (!this.request_send_time_.equals(otherMyClass.request_send_time_)) return false;
       if (!this.reply_send_time_.equals(otherMyClass.reply_send_time_)) return false;
@@ -203,8 +203,8 @@ public class DistributedClockMessage extends Packet<DistributedClockMessage> imp
       builder.append(this.requester_id_);      builder.append(", ");
       builder.append("replier_id=");
       builder.append(this.replier_id_);      builder.append(", ");
-      builder.append("sequence_id=");
-      builder.append(this.sequence_id_);      builder.append(", ");
+      builder.append("request_number=");
+      builder.append(this.request_number_);      builder.append(", ");
       builder.append("request_send_time=");
       builder.append(this.request_send_time_);      builder.append(", ");
       builder.append("reply_send_time=");

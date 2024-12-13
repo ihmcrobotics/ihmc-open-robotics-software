@@ -8,7 +8,7 @@ string requester_id
 string replier_id
 
 # Monotonically increasing request number
-uint64 sequence_id
+uint64 request_number
 
 # The time at which the request is sent
 ihmc_common_msgs/InstantMessage request_send_time

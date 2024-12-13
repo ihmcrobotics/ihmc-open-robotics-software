@@ -15,7 +15,7 @@ public class DistributedClockMessagePubSubType implements us.ihmc.pubsub.TopicDa
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "dd81b48b59f9cf8127efe53e2aa6f59c2eebc719487f6051827e5fdc2d7a5ac3";
+   		return "9b29df5decb710752845fe1e9451103d00a8c5892b8dadd4a3a7998bea11974a";
    }
    
    @Override
@@ -98,7 +98,7 @@ public class DistributedClockMessagePubSubType implements us.ihmc.pubsub.TopicDa
       cdr.write_type_d(data.getReplierId());else
           throw new RuntimeException("replier_id field exceeds the maximum length");
 
-      cdr.write_type_12(data.getSequenceId());
+      cdr.write_type_12(data.getRequestNumber());
 
       ihmc_common_msgs.msg.dds.InstantMessagePubSubType.write(data.getRequestSendTime(), cdr);
       ihmc_common_msgs.msg.dds.InstantMessagePubSubType.write(data.getReplySendTime(), cdr);
@@ -108,7 +108,7 @@ public class DistributedClockMessagePubSubType implements us.ihmc.pubsub.TopicDa
    {
       cdr.read_type_d(data.getRequesterId());	
       cdr.read_type_d(data.getReplierId());	
-      data.setSequenceId(cdr.read_type_12());
+      data.setRequestNumber(cdr.read_type_12());
       	
       ihmc_common_msgs.msg.dds.InstantMessagePubSubType.read(data.getRequestSendTime(), cdr);	
       ihmc_common_msgs.msg.dds.InstantMessagePubSubType.read(data.getReplySendTime(), cdr);	
@@ -120,7 +120,7 @@ public class DistributedClockMessagePubSubType implements us.ihmc.pubsub.TopicDa
    {
       ser.write_type_d("requester_id", data.getRequesterId());
       ser.write_type_d("replier_id", data.getReplierId());
-      ser.write_type_12("sequence_id", data.getSequenceId());
+      ser.write_type_12("request_number", data.getRequestNumber());
       ser.write_type_a("request_send_time", new ihmc_common_msgs.msg.dds.InstantMessagePubSubType(), data.getRequestSendTime());
 
       ser.write_type_a("reply_send_time", new ihmc_common_msgs.msg.dds.InstantMessagePubSubType(), data.getReplySendTime());
@@ -132,7 +132,7 @@ public class DistributedClockMessagePubSubType implements us.ihmc.pubsub.TopicDa
    {
       ser.read_type_d("requester_id", data.getRequesterId());
       ser.read_type_d("replier_id", data.getReplierId());
-      data.setSequenceId(ser.read_type_12("sequence_id"));
+      data.setRequestNumber(ser.read_type_12("request_number"));
       ser.read_type_a("request_send_time", new ihmc_common_msgs.msg.dds.InstantMessagePubSubType(), data.getRequestSendTime());
 
       ser.read_type_a("reply_send_time", new ihmc_common_msgs.msg.dds.InstantMessagePubSubType(), data.getReplySendTime());

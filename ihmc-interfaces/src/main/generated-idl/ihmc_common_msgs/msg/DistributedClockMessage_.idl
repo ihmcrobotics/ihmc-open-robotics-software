@@ -27,7 +27,7 @@ module ihmc_common_msgs
         /**
          * Monotonically increasing request number
          */
-        unsigned long long sequence_id;
+        unsigned long long request_number;
         /**
          * The time at which the request is sent
          */
