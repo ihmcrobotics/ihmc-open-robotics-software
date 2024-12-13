@@ -24,9 +24,9 @@ public class CUDAFlyingPointsFilter
    public CUDAFlyingPointsFilter()
    {
       stream = CUDAStreamManager.getStream();
-      URL kernelPath = getClass().getResource("/CUDA/flyingPointFilterKernel.cu");
+      URL kernelPath = getClass().getResource("/CUDA/FlyingPointFilterKernel.cu");
       flyingPointFilterCUDAProgram = new CUDAProgram(kernelPath);
-      String filterKernelName = "filterFlyingPoints";
+      String filterKernelName = "FilterFlyingPoints";
       flyingPointFilterKernel = flyingPointFilterCUDAProgram.loadKernel(filterKernelName);
    }
 
