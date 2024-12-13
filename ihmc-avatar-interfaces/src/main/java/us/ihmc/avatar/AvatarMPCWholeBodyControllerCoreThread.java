@@ -1,10 +1,7 @@
 package us.ihmc.avatar;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
-import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
-import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
-import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextTools;
+import us.ihmc.commonWalkingControlModules.barrierScheduler.context.*;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HumanoidWholeBodyControllerCoreManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MPCHighLevelHumanoidControllerFactory;
@@ -51,7 +48,7 @@ public class AvatarMPCWholeBodyControllerCoreThread implements AvatarControllerT
    private final YoBoolean firstTick = new YoBoolean("FirstTick", registry);
    private final YoLong timeStamp = new YoLong("TimeStampWholeBodyControllerCore", registry);
    private final YoLong timeStampOffset = new YoLong("TimestampOffsetWholeBodyControllerCore", registry);
-   private final HumanoidRobotContextData humanoidRobotContextData;
+   private final HumanoidRobotMPCContextData humanoidRobotContextData;
    private final YoBoolean runWholeBodyControllerCore = new YoBoolean("RunWholeBodyControllerCore", registry);
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private final List<Supplier<YoGraphicDefinition>> scs2YoGraphicHolders = new ArrayList<>();
@@ -59,7 +56,7 @@ public class AvatarMPCWholeBodyControllerCoreThread implements AvatarControllerT
    private final ExecutionTimer wholeBodyControllerCoreThreadTimer;
 
    public AvatarMPCWholeBodyControllerCoreThread(String robotName,
-                                                 HumanoidRobotContextDataFactory contextDataFactory,
+                                                 HumanoidRobotMPCContextDataFactory contextDataFactory,
                                                  StatusMessageOutputManager walkingOutputManager,
                                                  DRCRobotModel robotModel,
                                                  HumanoidRobotSensorInformation sensorInformation,
@@ -93,7 +90,7 @@ public class AvatarMPCWholeBodyControllerCoreThread implements AvatarControllerT
 //      contextDataFactory.setControllerCoreOutputDataHolder(controllerCoreOutPutDataHolder);
 //      contextDataFactory.setControllerCoreCommandDataHolder(controllerCoreCommandDataHolder);
       contextDataFactory.setSensorDataContext(new SensorDataContext(controllerCoreFullRobotModel));
-      humanoidRobotContextData = contextDataFactory.createHumanoidRobotContextData();
+      humanoidRobotContextData = contextDataFactory.createHumanoidRobotMPCContextData();
 
       /**
        * Something related to realtimeROS2Node should be here?
@@ -294,7 +291,6 @@ public class AvatarMPCWholeBodyControllerCoreThread implements AvatarControllerT
       return controllerCoreFullRobotModel;
    }
 
-   @Override
    public HumanoidRobotContextData getHumanoidRobotContextData()
    {
       return humanoidRobotContextData;

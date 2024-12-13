@@ -3,10 +3,7 @@ package us.ihmc.avatar;
 import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
-import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
-import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
-import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
-import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextTools;
+import us.ihmc.commonWalkingControlModules.barrierScheduler.context.*;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.MPCHumanoidHighLevelControllerManager;
@@ -84,7 +81,7 @@ public class AvatarMPCControllerThread implements AvatarControllerThreadInterfac
 
    private final ROS2Publisher<ControllerCrashNotificationPacket> crashNotificationPublisher;
 
-   private final HumanoidRobotContextData humanoidRobotContextData;
+   private final HumanoidRobotMPCContextData humanoidRobotMPCContextData;
 
    private final ExecutionTimer controllerThreadTimer;
 
@@ -93,7 +90,7 @@ public class AvatarMPCControllerThread implements AvatarControllerThreadInterfac
                                     RobotInitialSetup<?> robotInitialSetup,
                                     HumanoidRobotSensorInformation sensorInformation,
                                     MPCHighLevelHumanoidControllerFactory controllerFactory,
-                                    HumanoidRobotContextDataFactory contextDataFactory,
+                                    HumanoidRobotMPCContextDataFactory contextDataFactory,
                                     DRCOutputProcessor outputProcessor,
                                     RealtimeROS2Node realtimeROS2Node,
                                     double gravity,
@@ -118,7 +115,7 @@ public class AvatarMPCControllerThread implements AvatarControllerThreadInterfac
       contextDataFactory.setJointDesiredOutputList(desiredJointDataHolder);
       contextDataFactory.setProcessedJointData(processedJointData);
       contextDataFactory.setSensorDataContext(new SensorDataContext(controllerFullRobotModel));
-      humanoidRobotContextData = contextDataFactory.createHumanoidRobotContextData();
+      humanoidRobotMPCContextData = contextDataFactory.createHumanoidRobotMPCContextData();
 
       if (realtimeROS2Node != null)
       {
@@ -300,10 +297,10 @@ public class AvatarMPCControllerThread implements AvatarControllerThreadInterfac
    public void initialize()
    {
       firstTick.set(true);
-      humanoidRobotContextData.setControllerRan(false);
-      humanoidRobotContextData.setEstimatorRan(false);
+      humanoidRobotMPCContextData.setControllerRan(false);
+      humanoidRobotMPCContextData.setEstimatorRan(false);
 
-      LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList = humanoidRobotContextData.getJointDesiredOutputList();
+      LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList = humanoidRobotMPCContextData.getJointDesiredOutputList();
 
       for (int i = 0; i < jointDesiredOutputList.getNumberOfJointsWithDesiredOutput(); i++)
       {
@@ -316,7 +313,7 @@ public class AvatarMPCControllerThread implements AvatarControllerThreadInterfac
    {
       controllerThreadTimer.startMeasurement();
 
-      runController.set(humanoidRobotContextData.getEstimatorRan());
+      runController.set(humanoidRobotMPCContextData.getEstimatorRan());
       if (!runController.getValue())
       {
          return;
@@ -324,8 +321,8 @@ public class AvatarMPCControllerThread implements AvatarControllerThreadInterfac
 
       try
       {
-         HumanoidRobotContextTools.updateRobot(controllerFullRobotModel, humanoidRobotContextData.getProcessedJointData());
-         timestamp.set(humanoidRobotContextData.getTimestamp());
+         HumanoidRobotContextTools.updateRobot(controllerFullRobotModel, humanoidRobotMPCContextData.getProcessedJointData());
+         timestamp.set(humanoidRobotMPCContextData.getTimestamp());
          if (firstTick.getValue())
          {
             // Record this to have time start at 0.0 on the real robot for viewing pleasure.
@@ -340,7 +337,7 @@ public class AvatarMPCControllerThread implements AvatarControllerThreadInterfac
          }
 
          robotController.doControl();
-         humanoidRobotContextData.setControllerRan(true);
+         humanoidRobotMPCContextData.setControllerRan(true);
       }
       catch (Exception e)
       {
@@ -393,14 +390,14 @@ public class AvatarMPCControllerThread implements AvatarControllerThreadInterfac
       return controllerFullRobotModel;
    }
 
-   @Override
    public HumanoidRobotContextData getHumanoidRobotContextData()
    {
-      return humanoidRobotContextData;
+      return humanoidRobotMPCContextData;
    }
 
+   // This method comes from implemented AvatarControllerThreadInterface, it was used in AvatarSimulation, not the SCS2.
    public JointDesiredOutputListBasics getDesiredJointDataHolder()
    {
-      return humanoidRobotContextData.getJointDesiredOutputList();
+      return humanoidRobotMPCContextData.getJointDesiredOutputList();
    }
 }

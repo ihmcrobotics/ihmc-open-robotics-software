@@ -1,10 +1,7 @@
 package us.ihmc.avatar;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
-import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
-import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
-import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextTools;
+import us.ihmc.commonWalkingControlModules.barrierScheduler.context.*;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepValidityIndicator;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HumanoidSteppingPlugin;
@@ -42,7 +39,7 @@ public class AvatarMPCStepGeneratorThread implements AvatarControllerThreadInter
    private final HumanoidSteppingPlugin continuousStepGeneratorPlugin;
    private final FullHumanoidRobotModel fullRobotModel;
 
-   private final HumanoidRobotContextData humanoidRobotContextData;
+   private final HumanoidRobotMPCContextData humanoidRobotMPCContextData;
    private final HumanoidReferenceFrames humanoidReferenceFrames;
    private final YoBoolean firstTick = new YoBoolean("FirstTick", csgRegistry);
    private final YoLong timestampOffset = new YoLong("TimestampOffsetCSG", csgRegistry);
@@ -53,7 +50,7 @@ public class AvatarMPCStepGeneratorThread implements AvatarControllerThreadInter
    private final StepGeneratorCommandInputManager csgCommandInputManager;
 
    public AvatarMPCStepGeneratorThread(HumanoidSteppingPluginFactory pluginFactory,
-                                       HumanoidRobotContextDataFactory contextDataFactory,
+                                       HumanoidRobotMPCContextDataFactory contextDataFactory,
                                        StatusMessageOutputManager walkingOutputManager,
                                        CommandInputManager walkingCommandInputManager,
                                        DRCRobotModel drcRobotModel,
@@ -75,7 +72,7 @@ public class AvatarMPCStepGeneratorThread implements AvatarControllerThreadInter
       contextDataFactory.setJointDesiredOutputList(desiredJointDataHolder);
       contextDataFactory.setProcessedJointData(processedJointData);
       contextDataFactory.setSensorDataContext(new SensorDataContext(fullRobotModel));
-      humanoidRobotContextData = contextDataFactory.createHumanoidRobotContextData();
+      humanoidRobotMPCContextData = contextDataFactory.createHumanoidRobotMPCContextData();
 
       csgCommandInputManager = pluginFactory.getStepGeneratorCommandInputManager();
 
@@ -124,8 +121,8 @@ public class AvatarMPCStepGeneratorThread implements AvatarControllerThreadInter
    public void initialize()
    {
       firstTick.set(true);
-      humanoidRobotContextData.setControllerRan(false);
-      humanoidRobotContextData.setEstimatorRan(false);
+      humanoidRobotMPCContextData.setControllerRan(false);
+      humanoidRobotMPCContextData.setEstimatorRan(false);
    }
 
    private void runOnFirstTick()
@@ -135,7 +132,7 @@ public class AvatarMPCStepGeneratorThread implements AvatarControllerThreadInter
    @Override
    public void run()
    {
-      runCSG.set(humanoidRobotContextData.getEstimatorRan());
+      runCSG.set(humanoidRobotMPCContextData.getEstimatorRan());
       if (!runCSG.getValue())
       {
          return;
@@ -143,10 +140,10 @@ public class AvatarMPCStepGeneratorThread implements AvatarControllerThreadInter
 
       try
       {
-         HumanoidRobotContextTools.updateRobot(fullRobotModel, humanoidRobotContextData.getProcessedJointData());
+         HumanoidRobotContextTools.updateRobot(fullRobotModel, humanoidRobotMPCContextData.getProcessedJointData());
          humanoidReferenceFrames.updateFrames();
 
-         timestamp.set(humanoidRobotContextData.getTimestamp());
+         timestamp.set(humanoidRobotMPCContextData.getTimestamp());
          if (firstTick.getValue())
          {
             // Record this to have time start at 0.0 on the real robot for viewing pleasure.
@@ -161,7 +158,7 @@ public class AvatarMPCStepGeneratorThread implements AvatarControllerThreadInter
          }
 
          continuousStepGeneratorPlugin.update(csgTime.getValue());
-         humanoidRobotContextData.setPerceptionRan(true);
+         humanoidRobotMPCContextData.setPerceptionRan(true);
       }
       catch (Exception e)
       {
@@ -194,10 +191,9 @@ public class AvatarMPCStepGeneratorThread implements AvatarControllerThreadInter
       return fullRobotModel;
    }
 
-   @Override
    public HumanoidRobotContextData getHumanoidRobotContextData()
    {
-      return humanoidRobotContextData;
+      return humanoidRobotMPCContextData;
    }
 
    public StepGeneratorCommandInputManager getCsgCommandInputManager()

@@ -15,6 +15,7 @@ import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.IKStrea
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
+import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotMPCContextDataFactory;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
@@ -411,7 +412,7 @@ public class SCS2AvatarMPCSimulationFactory
    private void setupControllerThread()
    {
       String robotName = robotModel.get().getSimpleRobotName();
-      HumanoidRobotContextDataFactory contextDataFactory = new HumanoidRobotContextDataFactory();
+      HumanoidRobotMPCContextDataFactory contextDataFactory = new HumanoidRobotMPCContextDataFactory();
 
       RealtimeROS2Node ros2Node = null;
       if (realtimeROS2Node.hasBeenSet())
@@ -437,7 +438,7 @@ public class SCS2AvatarMPCSimulationFactory
 
    private void setupStepGeneratorThread()
    {
-      HumanoidRobotContextDataFactory contextDataFactory = new HumanoidRobotContextDataFactory();
+      HumanoidRobotMPCContextDataFactory contextDataFactory = new HumanoidRobotMPCContextDataFactory();
 
       HumanoidSteppingPluginFactory steppingFactory;
       HumanoidSteppingPluginEnvironmentalConstraints stepSnapperUpdatable = null;
@@ -514,7 +515,7 @@ public class SCS2AvatarMPCSimulationFactory
    private void setupWholeBodyControllerCoreThread()
    {
       String robotName = robotModel.get().getSimpleRobotName();
-      HumanoidRobotContextDataFactory contextDataFactory = new HumanoidRobotContextDataFactory();
+      HumanoidRobotMPCContextDataFactory contextDataFactory = new HumanoidRobotMPCContextDataFactory();
 
       RealtimeROS2Node ros2Node = null;
       if (realtimeROS2Node.hasBeenSet())
