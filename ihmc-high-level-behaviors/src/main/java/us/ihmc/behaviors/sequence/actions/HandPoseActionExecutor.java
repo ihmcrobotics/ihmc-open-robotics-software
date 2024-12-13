@@ -227,6 +227,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
             HandHybridJointspaceTaskspaceTrajectoryMessage handHybridJointspaceTaskspaceTrajectoryMessage
                   = new HandHybridJointspaceTaskspaceTrajectoryMessage();
             handHybridJointspaceTaskspaceTrajectoryMessage.setRobotSide(definition.getSide().toByte());
+            handHybridJointspaceTaskspaceTrajectoryMessage.setImpedanceEnabled(definition.getImpedanceControl());
             handHybridJointspaceTaskspaceTrajectoryMessage.getTaskspaceTrajectoryMessage().set(se3TrajectoryMessage);
             handHybridJointspaceTaskspaceTrajectoryMessage.getJointspaceTrajectoryMessage().set(jointspaceTrajectoryMessage);
             state.getLogger().info("Publishing arm hybrid jointspace taskpace");

@@ -23,6 +23,7 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
    public static final int MAX_NUMBER_OF_JOINTS = 7;
    public static final String CUSTOM_ANGLES_NAME = "CUSTOM_ANGLES";
    public static final boolean DEFAULT_HOLD_POSE =  false;
+   public static final boolean DEFAULT_IMPEDANCE_CONTROL = false;
    public static final double DEFAULT_LINEAR_POSITION_WEIGHT = 50.0;
    public static final double DEFAULT_ANGULAR_POSITION_WEIGHT = 50.0;
    public static final double DEFAULT_JOINTSPACE_WEIGHT = -1.0;
@@ -32,6 +33,7 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
    private final CRDTBidirectionalEnumField<RobotSide> side;
    private final CRDTBidirectionalDouble trajectoryDuration;
    private final CRDTBidirectionalBoolean holdPoseInWorldLater;
+   private final CRDTBidirectionalBoolean impedanceControl;
    private final CRDTBidirectionalBoolean jointspaceOnly;
    private final CRDTBidirectionalBoolean usePredefinedJointAngles;
    /** Preset is null when using explicitly specified custom joint angles */
@@ -49,6 +51,7 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
    private RobotSide onDiskSide;
    private double onDiskTrajectoryDuration;
    private boolean onDiskHoldPoseInWorldLater;
+   private boolean onDiskImpedanceControl;
    private boolean onDiskJointspaceOnly;
    private boolean onDiskUsePredefinedJointAngles;
    private PresetArmConfiguration onDiskPreset;
@@ -68,6 +71,7 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
       side = new CRDTBidirectionalEnumField<>(this, RobotSide.LEFT);
       trajectoryDuration = new CRDTBidirectionalDouble(this, DEFAULT_TRAJECTORY_DURATION);
       holdPoseInWorldLater = new CRDTBidirectionalBoolean(this, DEFAULT_HOLD_POSE);
+      impedanceControl = new CRDTBidirectionalBoolean(this, DEFAULT_IMPEDANCE_CONTROL);
       jointspaceOnly = new CRDTBidirectionalBoolean(this, DEFAULT_IS_JOINTSPACE_MODE);
       usePredefinedJointAngles = new CRDTBidirectionalBoolean(this, DEFAULT_USE_PREDEFINED_JOINT_ANGLES);
       preset = new CRDTBidirectionalEnumField<>(this, PresetArmConfiguration.HOME);
@@ -107,6 +111,7 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
          jsonNode.put("parentFrame", palmParentFrameName.getValue());
          JSONTools.toJSON(jsonNode, palmTransformToParent.getValueReadOnly());
          jsonNode.put("jointspaceOnly", jointspaceOnly.getValue());
+         jsonNode.put("impedanceControl", impedanceControl.getValue());
          jsonNode.put("holdPoseInWorldLater", holdPoseInWorldLater.getValue());
          jsonNode.put("linearPositionWeight", linearPositionWeight.getValue());
          jsonNode.put("angularPositionWeight", angularPositionWeight.getValue());
@@ -143,6 +148,7 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
          palmParentFrameName.setValue(jsonNode.get("parentFrame").textValue());
          JSONTools.toEuclid(jsonNode, palmTransformToParent.getValueAndFreeze());
          holdPoseInWorldLater.setValue(jsonNode.get("holdPoseInWorldLater").asBoolean());
+         impedanceControl.setValue(jsonNode.get("impedanceControl").asBoolean());
          jointspaceOnly.setValue(jsonNode.get("jointspaceOnly").asBoolean());
          linearPositionWeight.setValue(jsonNode.get("linearPositionWeight").asDouble());
          angularPositionWeight.setValue(jsonNode.get("angularPositionWeight").asDouble());
@@ -161,6 +167,7 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
       onDiskSide = side.getValue();
       onDiskTrajectoryDuration = trajectoryDuration.getValue();
       onDiskHoldPoseInWorldLater = holdPoseInWorldLater.getValue();
+      onDiskImpedanceControl = impedanceControl.getValue();
       onDiskJointspaceOnly = jointspaceOnly.getValue();
       onDiskUsePredefinedJointAngles = usePredefinedJointAngles.getValue();
       onDiskPreset = preset.getValue();
@@ -183,6 +190,7 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
       side.setValue(onDiskSide);
       trajectoryDuration.setValue(onDiskTrajectoryDuration);
       holdPoseInWorldLater.setValue(onDiskHoldPoseInWorldLater);
+      impedanceControl.setValue(onDiskImpedanceControl);
       jointspaceOnly.setValue(onDiskJointspaceOnly);
       usePredefinedJointAngles.setValue(onDiskUsePredefinedJointAngles);
       preset.setValue(onDiskPreset);
@@ -216,6 +224,7 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
       else
       {
          unchanged &= holdPoseInWorldLater.getValue() == onDiskHoldPoseInWorldLater;
+         unchanged &= impedanceControl.getValue() == onDiskImpedanceControl;
          unchanged &= jointspaceOnly.getValue() == onDiskJointspaceOnly;
          unchanged &= palmParentFrameName.getValue().equals(onDiskPalmParentFrameName);
          unchanged &= palmTransformToParent.getValueReadOnly().equals(onDiskPalmTransformToParent);
@@ -239,6 +248,7 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
       message.setRobotSide(side.toMessage().toByte());
       message.setTrajectoryDuration(trajectoryDuration.toMessage());
       message.setHoldPoseInWorld(holdPoseInWorldLater.toMessage());
+      message.setImpedanceControl(impedanceControl.toMessage());
       message.setJointSpaceControl(jointspaceOnly.toMessage());
       message.setUsePredefinedJointAngles(usePredefinedJointAngles.toMessage());
       message.setPreset(preset.toMessageOrdinal());
@@ -259,6 +269,7 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
       side.fromMessage(RobotSide.fromByte(message.getRobotSide()));
       trajectoryDuration.fromMessage(message.getTrajectoryDuration());
       holdPoseInWorldLater.fromMessage(message.getHoldPoseInWorld());
+      impedanceControl.fromMessage(message.getImpedanceControl());
       jointspaceOnly.fromMessage(message.getJointSpaceControl());
       usePredefinedJointAngles.fromMessage(message.getUsePredefinedJointAngles());
       preset.fromMessageOrdinal(message.getPreset(), PresetArmConfiguration.values);
@@ -299,6 +310,16 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
    public void setHoldPoseInWorldLater(boolean holdPoseInWorldLater)
    {
       this.holdPoseInWorldLater.setValue(holdPoseInWorldLater);
+   }
+
+   public boolean getImpedanceControl()
+   {
+      return impedanceControl.getValue();
+   }
+
+   public void setImpedanceControl(boolean impedanceControl)
+   {
+      this.impedanceControl.setValue(impedanceControl);
    }
 
    public boolean getJointspaceOnly()

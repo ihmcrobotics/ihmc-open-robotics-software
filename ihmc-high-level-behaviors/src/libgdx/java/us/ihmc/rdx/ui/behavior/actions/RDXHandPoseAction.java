@@ -81,6 +81,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
    private final ImGuiSliderDoubleWrapper angularPositionWeightWidget;
    private final ImGuiSliderDoubleWrapper jointspaceWeightWidget;
    private final ImBooleanWrapper holdPoseInWorldLaterWrapper;
+   private final ImBooleanWrapper impedanceControlWrapper;
    private final ImBooleanWrapper jointSpaceControlWrapper;
    private final ImBooleanWrapper usePredefinedJointAnglesWrapper;
    private final ImDoubleWrapper positionErrorToleranceInput;
@@ -195,12 +196,15 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
       jointSpaceControlWrapper = new ImBooleanWrapper(definition::getJointspaceOnly,
                                                       definition::setJointspaceOnly,
                                                       imBoolean -> {
-                                                         if (ImGui.radioButton(labels.get("Hybrid"), !imBoolean.get()))
-                                                            imBoolean.set(false);
-                                                         ImGui.sameLine();
-                                                         if (ImGui.radioButton(labels.get("Jointspace Only"), imBoolean.get()))
+                                                         if (ImGui.radioButton(labels.get("Jointspace"), imBoolean.get()))
                                                             imBoolean.set(true);
+                                                         ImGui.sameLine();
+                                                         if (ImGui.radioButton(labels.get("Taskspace"), !imBoolean.get()))
+                                                            imBoolean.set(false);
                                                       });
+      impedanceControlWrapper = new ImBooleanWrapper(definition::getImpedanceControl,
+                                                     definition::setImpedanceControl,
+                                                     imBoolean -> ImGui.checkbox(labels.get("Impedance Control"), imBoolean));
       ImGuiLabelledWidgetAligner widgetAligner = new ImGuiLabelledWidgetAligner();
       linearPositionWeightWidget = new ImGuiSliderDoubleWrapper("Linear Position Weight", "%.2f", 0.0, 100.0,
                                                                 definition::getLinearPositionWeight,
@@ -381,6 +385,8 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
          jointSpaceControlWrapper.renderImGuiWidget();
          if (!definition.getJointspaceOnly())
          {
+            ImGui.sameLine();
+            impedanceControlWrapper.renderImGuiWidget();
             ImGui.sameLine();
             holdPoseInWorldLaterWrapper.renderImGuiWidget();
          }

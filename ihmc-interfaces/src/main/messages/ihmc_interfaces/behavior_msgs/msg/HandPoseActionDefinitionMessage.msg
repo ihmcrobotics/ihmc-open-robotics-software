@@ -25,6 +25,9 @@ float64[7] joint_angles
 # The trajectory duration
 float64 trajectory_duration
 
+# Whether impedance control is active
+bool impedance_control
+
 # Whether maintaining the rigid body controlled in world after the action is complete
 bool hold_pose_in_world
 
