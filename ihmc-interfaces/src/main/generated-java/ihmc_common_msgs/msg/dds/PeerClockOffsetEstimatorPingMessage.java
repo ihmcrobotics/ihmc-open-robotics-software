@@ -10,7 +10,7 @@ import us.ihmc.pubsub.TopicDataType;
        * This message is a request-reply ping used to estimate the clock offset
        * of another node to be used by data synchronization algorithms.
        */
-public class DistributedClockMessage extends Packet<DistributedClockMessage> implements Settable<DistributedClockMessage>, EpsilonComparable<DistributedClockMessage>
+public class PeerClockOffsetEstimatorPingMessage extends Packet<PeerClockOffsetEstimatorPingMessage> implements Settable<PeerClockOffsetEstimatorPingMessage>, EpsilonComparable<PeerClockOffsetEstimatorPingMessage>
 {
    /**
             * If this is a request message, else it's a reply message
@@ -33,7 +33,7 @@ public class DistributedClockMessage extends Packet<DistributedClockMessage> imp
             */
    public ihmc_common_msgs.msg.dds.InstantMessage reply_send_time_;
 
-   public DistributedClockMessage()
+   public PeerClockOffsetEstimatorPingMessage()
    {
       request_target_ = new ihmc_common_msgs.msg.dds.GuidMessage();
       reply_target_ = new ihmc_common_msgs.msg.dds.GuidMessage();
@@ -41,13 +41,13 @@ public class DistributedClockMessage extends Packet<DistributedClockMessage> imp
       reply_send_time_ = new ihmc_common_msgs.msg.dds.InstantMessage();
    }
 
-   public DistributedClockMessage(DistributedClockMessage other)
+   public PeerClockOffsetEstimatorPingMessage(PeerClockOffsetEstimatorPingMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(DistributedClockMessage other)
+   public void set(PeerClockOffsetEstimatorPingMessage other)
    {
       is_request_ = other.is_request_;
 
@@ -109,19 +109,19 @@ public class DistributedClockMessage extends Packet<DistributedClockMessage> imp
    }
 
 
-   public static Supplier<DistributedClockMessagePubSubType> getPubSubType()
+   public static Supplier<PeerClockOffsetEstimatorPingMessagePubSubType> getPubSubType()
    {
-      return DistributedClockMessagePubSubType::new;
+      return PeerClockOffsetEstimatorPingMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return DistributedClockMessagePubSubType::new;
+      return PeerClockOffsetEstimatorPingMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(DistributedClockMessage other, double epsilon)
+   public boolean epsilonEquals(PeerClockOffsetEstimatorPingMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -141,9 +141,9 @@ public class DistributedClockMessage extends Packet<DistributedClockMessage> imp
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof DistributedClockMessage)) return false;
+      if(!(other instanceof PeerClockOffsetEstimatorPingMessage)) return false;
 
-      DistributedClockMessage otherMyClass = (DistributedClockMessage) other;
+      PeerClockOffsetEstimatorPingMessage otherMyClass = (PeerClockOffsetEstimatorPingMessage) other;
 
       if(this.is_request_ != otherMyClass.is_request_) return false;
 
@@ -160,7 +160,7 @@ public class DistributedClockMessage extends Packet<DistributedClockMessage> imp
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("DistributedClockMessage {");
+      builder.append("PeerClockOffsetEstimatorPingMessage {");
       builder.append("is_request=");
       builder.append(this.is_request_);      builder.append(", ");
       builder.append("request_target=");

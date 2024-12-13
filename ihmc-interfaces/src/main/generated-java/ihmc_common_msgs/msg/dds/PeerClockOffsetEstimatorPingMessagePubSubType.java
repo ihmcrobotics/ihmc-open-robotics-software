@@ -2,20 +2,20 @@ package ihmc_common_msgs.msg.dds;
 
 /**
 * 
-* Topic data type of the struct "DistributedClockMessage" defined in "DistributedClockMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+* Topic data type of the struct "PeerClockOffsetEstimatorPingMessage" defined in "PeerClockOffsetEstimatorPingMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
 *
-* This file was automatically generated from DistributedClockMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit DistributedClockMessage_.idl instead.
+* This file was automatically generated from PeerClockOffsetEstimatorPingMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit PeerClockOffsetEstimatorPingMessage_.idl instead.
 *
 */
-public class DistributedClockMessagePubSubType implements us.ihmc.pubsub.TopicDataType<ihmc_common_msgs.msg.dds.DistributedClockMessage>
+public class PeerClockOffsetEstimatorPingMessagePubSubType implements us.ihmc.pubsub.TopicDataType<ihmc_common_msgs.msg.dds.PeerClockOffsetEstimatorPingMessage>
 {
-   public static final java.lang.String name = "ihmc_common_msgs::msg::dds_::DistributedClockMessage_";
+   public static final java.lang.String name = "ihmc_common_msgs::msg::dds_::PeerClockOffsetEstimatorPingMessage_";
    
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "16d5f26ad9da80c8261bf1dc1800a8b91e7535ec399247617b9095f59ee71428";
+   		return "d21275a34208cc47d453c10c1d2d01990ee182f4a62b2de9c99f880e6b2bf166";
    }
    
    @Override
@@ -28,7 +28,7 @@ public class DistributedClockMessagePubSubType implements us.ihmc.pubsub.TopicDa
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(ihmc_common_msgs.msg.dds.DistributedClockMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
+   public void serialize(ihmc_common_msgs.msg.dds.PeerClockOffsetEstimatorPingMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -36,7 +36,7 @@ public class DistributedClockMessagePubSubType implements us.ihmc.pubsub.TopicDa
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, ihmc_common_msgs.msg.dds.DistributedClockMessage data) throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, ihmc_common_msgs.msg.dds.PeerClockOffsetEstimatorPingMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -66,12 +66,12 @@ public class DistributedClockMessagePubSubType implements us.ihmc.pubsub.TopicDa
       return current_alignment - initial_alignment;
    }
 
-   public final static int getCdrSerializedSize(ihmc_common_msgs.msg.dds.DistributedClockMessage data)
+   public final static int getCdrSerializedSize(ihmc_common_msgs.msg.dds.PeerClockOffsetEstimatorPingMessage data)
    {
       return getCdrSerializedSize(data, 0);
    }
 
-   public final static int getCdrSerializedSize(ihmc_common_msgs.msg.dds.DistributedClockMessage data, int current_alignment)
+   public final static int getCdrSerializedSize(ihmc_common_msgs.msg.dds.PeerClockOffsetEstimatorPingMessage data, int current_alignment)
    {
       int initial_alignment = current_alignment;
 
@@ -90,7 +90,7 @@ public class DistributedClockMessagePubSubType implements us.ihmc.pubsub.TopicDa
       return current_alignment - initial_alignment;
    }
 
-   public static void write(ihmc_common_msgs.msg.dds.DistributedClockMessage data, us.ihmc.idl.CDR cdr)
+   public static void write(ihmc_common_msgs.msg.dds.PeerClockOffsetEstimatorPingMessage data, us.ihmc.idl.CDR cdr)
    {
       cdr.write_type_7(data.getIsRequest());
 
@@ -100,7 +100,7 @@ public class DistributedClockMessagePubSubType implements us.ihmc.pubsub.TopicDa
       ihmc_common_msgs.msg.dds.InstantMessagePubSubType.write(data.getReplySendTime(), cdr);
    }
 
-   public static void read(ihmc_common_msgs.msg.dds.DistributedClockMessage data, us.ihmc.idl.CDR cdr)
+   public static void read(ihmc_common_msgs.msg.dds.PeerClockOffsetEstimatorPingMessage data, us.ihmc.idl.CDR cdr)
    {
       data.setIsRequest(cdr.read_type_7());
       	
@@ -112,7 +112,7 @@ public class DistributedClockMessagePubSubType implements us.ihmc.pubsub.TopicDa
    }
 
    @Override
-   public final void serialize(ihmc_common_msgs.msg.dds.DistributedClockMessage data, us.ihmc.idl.InterchangeSerializer ser)
+   public final void serialize(ihmc_common_msgs.msg.dds.PeerClockOffsetEstimatorPingMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_7("is_request", data.getIsRequest());
       ser.write_type_a("request_target", new ihmc_common_msgs.msg.dds.GuidMessagePubSubType(), data.getRequestTarget());
@@ -126,7 +126,7 @@ public class DistributedClockMessagePubSubType implements us.ihmc.pubsub.TopicDa
    }
 
    @Override
-   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, ihmc_common_msgs.msg.dds.DistributedClockMessage data)
+   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, ihmc_common_msgs.msg.dds.PeerClockOffsetEstimatorPingMessage data)
    {
       data.setIsRequest(ser.read_type_7("is_request"));
       ser.read_type_a("request_target", new ihmc_common_msgs.msg.dds.GuidMessagePubSubType(), data.getRequestTarget());
@@ -139,15 +139,15 @@ public class DistributedClockMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
    }
 
-   public static void staticCopy(ihmc_common_msgs.msg.dds.DistributedClockMessage src, ihmc_common_msgs.msg.dds.DistributedClockMessage dest)
+   public static void staticCopy(ihmc_common_msgs.msg.dds.PeerClockOffsetEstimatorPingMessage src, ihmc_common_msgs.msg.dds.PeerClockOffsetEstimatorPingMessage dest)
    {
       dest.set(src);
    }
 
    @Override
-   public ihmc_common_msgs.msg.dds.DistributedClockMessage createData()
+   public ihmc_common_msgs.msg.dds.PeerClockOffsetEstimatorPingMessage createData()
    {
-      return new ihmc_common_msgs.msg.dds.DistributedClockMessage();
+      return new ihmc_common_msgs.msg.dds.PeerClockOffsetEstimatorPingMessage();
    }
    @Override
    public int getTypeSize()
@@ -161,24 +161,24 @@ public class DistributedClockMessagePubSubType implements us.ihmc.pubsub.TopicDa
       return name;
    }
    
-   public void serialize(ihmc_common_msgs.msg.dds.DistributedClockMessage data, us.ihmc.idl.CDR cdr)
+   public void serialize(ihmc_common_msgs.msg.dds.PeerClockOffsetEstimatorPingMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
    }
 
-   public void deserialize(ihmc_common_msgs.msg.dds.DistributedClockMessage data, us.ihmc.idl.CDR cdr)
+   public void deserialize(ihmc_common_msgs.msg.dds.PeerClockOffsetEstimatorPingMessage data, us.ihmc.idl.CDR cdr)
    {
       read(data, cdr);
    }
    
-   public void copy(ihmc_common_msgs.msg.dds.DistributedClockMessage src, ihmc_common_msgs.msg.dds.DistributedClockMessage dest)
+   public void copy(ihmc_common_msgs.msg.dds.PeerClockOffsetEstimatorPingMessage src, ihmc_common_msgs.msg.dds.PeerClockOffsetEstimatorPingMessage dest)
    {
       staticCopy(src, dest);
    }
 
    @Override
-   public DistributedClockMessagePubSubType newInstance()
+   public PeerClockOffsetEstimatorPingMessagePubSubType newInstance()
    {
-      return new DistributedClockMessagePubSubType();
+      return new PeerClockOffsetEstimatorPingMessagePubSubType();
    }
 }

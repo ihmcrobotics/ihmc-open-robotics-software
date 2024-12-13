@@ -11,12 +11,12 @@ import java.time.Instant;
  * TODO: Add an alpha filter since the network latency and compute
  *   is noisy, but the clock rates are smooth.
  */
-public class ROS2DistributedClockPeer
+public class ROS2PeerClockOffsetEstimatorPeer
 {
    private final Guid guid;
    private Duration peerClockOffset;
 
-   public ROS2DistributedClockPeer(Guid guid)
+   public ROS2PeerClockOffsetEstimatorPeer(Guid guid)
    {
       this.guid = guid;
    }

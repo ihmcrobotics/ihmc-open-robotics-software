@@ -1,5 +1,5 @@
-#ifndef __ihmc_common_msgs__msg__DistributedClockMessage__idl__
-#define __ihmc_common_msgs__msg__DistributedClockMessage__idl__
+#ifndef __ihmc_common_msgs__msg__PeerClockOffsetEstimatorPingMessage__idl__
+#define __ihmc_common_msgs__msg__PeerClockOffsetEstimatorPingMessage__idl__
 
 #include "ihmc_common_msgs/msg/./GuidMessage_.idl"
 #include "ihmc_common_msgs/msg/./InstantMessage_.idl"
@@ -14,8 +14,8 @@ module ihmc_common_msgs
        * This message is a request-reply ping used to estimate the clock offset
        * of another node to be used by data synchronization algorithms.
        */
-      @TypeCode(type="ihmc_common_msgs::msg::dds_::DistributedClockMessage_")
-      struct DistributedClockMessage
+      @TypeCode(type="ihmc_common_msgs::msg::dds_::PeerClockOffsetEstimatorPingMessage_")
+      struct PeerClockOffsetEstimatorPingMessage
       {
         /**
          * If this is a request message, else it's a reply message

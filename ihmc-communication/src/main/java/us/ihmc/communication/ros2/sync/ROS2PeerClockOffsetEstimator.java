@@ -1,6 +1,6 @@
 package us.ihmc.communication.ros2.sync;
 
-import ihmc_common_msgs.msg.dds.DistributedClockMessage;
+import ihmc_common_msgs.msg.dds.PeerClockOffsetEstimatorPingMessage;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.commons.thread.ThreadTools;
@@ -22,25 +22,26 @@ import java.util.List;
  * the clock offsets on those computers. This can be used to synchronize data
  * modifications. We account for and assume a symmetric network delay.
  */
-public class ROS2DistributedClock
+public class ROS2PeerClockOffsetEstimator
 {
-   private static final ROS2Topic<DistributedClockMessage> TOPIC = ROS2Tools.IHMC_ROOT.withModule("distributed_clock").withType(DistributedClockMessage.class);
+   private static final ROS2Topic<PeerClockOffsetEstimatorPingMessage> TOPIC = ROS2Tools.IHMC_ROOT.withModule("peer_clock_offset_estimator")
+                                                                                                  .withType(PeerClockOffsetEstimatorPingMessage.class);
 
-   private final HashMap<Guid, ROS2DistributedClockPeer> peerMap = new HashMap<>();
-   private final List<ROS2DistributedClockPeer> peerList = new ArrayList<>();
+   private final HashMap<Guid, ROS2PeerClockOffsetEstimatorPeer> peerMap = new HashMap<>();
+   private final List<ROS2PeerClockOffsetEstimatorPeer> peerList = new ArrayList<>();
    private int nextPeerToPing = 0;
-   private final ROS2Publisher<DistributedClockMessage> publisher;
+   private final ROS2Publisher<PeerClockOffsetEstimatorPingMessage> publisher;
    private final Guid ourGuid;
    private final RepeatingTaskThread requestThread = new RepeatingTaskThread(getClass().getSimpleName(),
                                                                              this::requestThread,
                                                                              DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
-   private final DistributedClockMessage requestMessage = new DistributedClockMessage();
-   private final DistributedClockMessage receivedMessage = new DistributedClockMessage();
+   private final PeerClockOffsetEstimatorPingMessage requestMessage = new PeerClockOffsetEstimatorPingMessage();
+   private final PeerClockOffsetEstimatorPingMessage receivedMessage = new PeerClockOffsetEstimatorPingMessage();
    private final SampleInfo sampleInfo = new SampleInfo();
    private final Guid receivedRequestTarget = new Guid();
    private final Guid receivedReplyTarget = new Guid();
 
-   public ROS2DistributedClock(ROS2Node ros2Node)
+   public ROS2PeerClockOffsetEstimator(ROS2Node ros2Node)
    {
       publisher = ros2Node.createPublisher(TOPIC);
       ourGuid = publisher.getPublisher().getGuid();
@@ -54,7 +55,7 @@ public class ROS2DistributedClock
 
          if (receivedMessage.getIsRequest() && receivedRequestTarget.equals(ourGuid)) // Reply
          {
-            DistributedClockMessage replyMessage = new DistributedClockMessage();
+            PeerClockOffsetEstimatorPingMessage replyMessage = new PeerClockOffsetEstimatorPingMessage();
             replyMessage.set(receivedMessage);
             replyMessage.setIsRequest(false);
             MessageTools.toMessage(Instant.now(), replyMessage.getReplySendTime());
@@ -69,7 +70,7 @@ public class ROS2DistributedClock
          }
          else if (!receivedMessage.getIsRequest() && receivedReplyTarget.equals(ourGuid)) // Update clock offset estimate
          {
-            ROS2DistributedClockPeer peer = peerMap.get(receivedRequestTarget);
+            ROS2PeerClockOffsetEstimatorPeer peer = peerMap.get(receivedRequestTarget);
             if (peer != null)
             {
                peer.update(MessageTools.toInstant(receivedMessage.getRequestSendTime()),
@@ -91,7 +92,7 @@ public class ROS2DistributedClock
                      Guid guidCopy = new Guid();
                      guidCopy.set(guid);
 
-                     ROS2DistributedClockPeer peer = new ROS2DistributedClockPeer(guidCopy);
+                     ROS2PeerClockOffsetEstimatorPeer peer = new ROS2PeerClockOffsetEstimatorPeer(guidCopy);
                      peerMap.put(guidCopy, peer);
                      peerList.add(peer);
                   }
@@ -116,7 +117,7 @@ public class ROS2DistributedClock
          if (nextPeerToPing >= peerList.size())
             nextPeerToPing = 0;
 
-         ROS2DistributedClockPeer peer = peerList.get(nextPeerToPing);
+         ROS2PeerClockOffsetEstimatorPeer peer = peerList.get(nextPeerToPing);
          requestMessage.setIsRequest(true);
          MessageTools.toMessage(peer.getGuid(), requestMessage.getRequestTarget());
          MessageTools.toMessage(ourGuid, requestMessage.getReplyTarget());
@@ -135,7 +136,7 @@ public class ROS2DistributedClock
       requestThread.kill();
    }
 
-   public List<ROS2DistributedClockPeer> getPeerList()
+   public List<ROS2PeerClockOffsetEstimatorPeer> getPeerList()
    {
       return peerList;
    }
