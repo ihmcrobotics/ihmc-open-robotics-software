@@ -36,7 +36,7 @@ uniform mat4 u_depthTransform;
 // Color image uniforms
 uniform sampler2D u_colorTexture;
 uniform vec4 u_colorIntrinsics; // fx, fy, cx, cy
-uniform mat4 u_colorToDepthTransform;
+uniform mat4 u_depthToColorTransform;
 #endif
 
 // EUCLID STUFF //
@@ -101,7 +101,7 @@ void main()
 #ifdef INPUT_COLOR_IMAGE
    else if (u_coloringMethod == COLOR_FROM_IMAGE)
    {
-      vec3 colorFramePoint = transformPoint3D(depthFramePoint, u_colorToDepthTransform);
+      vec3 colorFramePoint = transformPoint3D(depthFramePoint, u_depthToColorTransform);
 
       float yaw = -angle2D(vec2(1.0f, 0.0f), colorFramePoint.xy);
       float pitch = -angle2D(vec2(1.0f, 0.0f), colorFramePoint.xz);
