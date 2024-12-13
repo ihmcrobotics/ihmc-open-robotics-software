@@ -7,7 +7,7 @@ import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.pubsub.common.Time;
-import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 
 import java.net.InetAddress;
@@ -35,7 +35,7 @@ public class ROS2DistributedClock
                                                                              DefaultExceptionHandler.MESSAGE_AND_STACKTRACE)
                                                          .setFrequencyLimit(1.0);
 
-   public ROS2DistributedClock(ROS2NodeInterface ros2Node)
+   public ROS2DistributedClock(ROS2Node ros2Node)
    {
       AtomicReference<String> hostname = new AtomicReference<>("");
       ExceptionTools.handle(() -> hostname.set("_" + InetAddress.getLocalHost().getHostName()), DefaultExceptionHandler.PROCEED_SILENTLY);
