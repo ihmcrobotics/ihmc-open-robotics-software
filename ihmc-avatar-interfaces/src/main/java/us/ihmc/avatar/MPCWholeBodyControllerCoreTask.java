@@ -2,7 +2,7 @@ package us.ihmc.avatar;
 
 import us.ihmc.avatar.factory.MPCHumanoidRobotControlTask;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotMPCContextData;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.CrossRobotCommandResolver;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.MPCCrossRobotCommandResolver;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.time.ThreadTimer;
 import us.ihmc.yoVariables.variable.YoLong;
@@ -12,8 +12,8 @@ import java.util.List;
 
 public class MPCWholeBodyControllerCoreTask extends MPCHumanoidRobotControlTask
 {
-   private final CrossRobotCommandResolver wholeBodyControllerCoreResolver;
-   private final CrossRobotCommandResolver masterResolver;
+   private final MPCCrossRobotCommandResolver wholeBodyControllerCoreResolver;
+   private final MPCCrossRobotCommandResolver masterResolver;
    private final long divisor;
    protected final List<Runnable> schedulerThreadRunnables = new ArrayList<>();
    private final AvatarControllerThreadInterface wholeBodyControllerCoreThread;
@@ -32,8 +32,8 @@ public class MPCWholeBodyControllerCoreTask extends MPCHumanoidRobotControlTask
       this.divisor = divisor;
       this.wholeBodyControllerCoreThread = wholeBodyControllerCoreThread;
 
-      this.wholeBodyControllerCoreResolver = new CrossRobotCommandResolver(wholeBodyControllerCoreThread.getFullRobotModel());
-      this.masterResolver = new CrossRobotCommandResolver(masterFullRobotModel);
+      this.wholeBodyControllerCoreResolver = new MPCCrossRobotCommandResolver(wholeBodyControllerCoreThread.getFullRobotModel());
+      this.masterResolver = new MPCCrossRobotCommandResolver(masterFullRobotModel);
 
       this.timer = new ThreadTimer(prefix, schedulerDt * divisor, wholeBodyControllerCoreThread.getYoVariableRegistry());
       ticksBehindScheduled = new YoLong(prefix + "TicksBehindScheduled", wholeBodyControllerCoreThread.getYoVariableRegistry());
@@ -66,8 +66,8 @@ public class MPCWholeBodyControllerCoreTask extends MPCHumanoidRobotControlTask
 
    protected void updateLocalContext(HumanoidRobotMPCContextData masterContext)
    {
-      wholeBodyControllerCoreResolver.resolveHumanoidRobotContextDataScheduler(masterContext, wholeBodyControllerCoreThread.getHumanoidRobotContextData());
-      wholeBodyControllerCoreResolver.resolveHumanoidRobotContextDataEstimator(masterContext, wholeBodyControllerCoreThread.getHumanoidRobotContextData());
+      wholeBodyControllerCoreResolver.resolveHumanoidRobotContextDataScheduler(masterContext, (HumanoidRobotMPCContextData) wholeBodyControllerCoreThread.getHumanoidRobotContextData());
+      wholeBodyControllerCoreResolver.resolveHumanoidRobotContextDataEstimator(masterContext, (HumanoidRobotMPCContextData) wholeBodyControllerCoreThread.getHumanoidRobotContextData());
    }
 
    @Override

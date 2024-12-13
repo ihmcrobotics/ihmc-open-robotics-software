@@ -3,6 +3,7 @@ package us.ihmc.avatar;
 import us.ihmc.avatar.factory.MPCHumanoidRobotControlTask;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotMPCContextData;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.CrossRobotCommandResolver;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.MPCCrossRobotCommandResolver;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.time.ThreadTimer;
 import us.ihmc.yoVariables.variable.YoLong;
@@ -12,8 +13,8 @@ import java.util.List;
 
 public class MPCControllerTask extends MPCHumanoidRobotControlTask
 {
-   private final CrossRobotCommandResolver controllerResolver;
-   private final CrossRobotCommandResolver masterResolver;
+   private final MPCCrossRobotCommandResolver controllerResolver;
+   private final MPCCrossRobotCommandResolver masterResolver;
 
    private final AvatarControllerThreadInterface controllerThread;
 
@@ -34,8 +35,8 @@ public class MPCControllerTask extends MPCHumanoidRobotControlTask
       this.divisor = divisor;
       this.controllerThread = controllerThread;
 
-      controllerResolver = new CrossRobotCommandResolver(controllerThread.getFullRobotModel());
-      masterResolver = new CrossRobotCommandResolver(masterFullRobotModel);
+      controllerResolver = new MPCCrossRobotCommandResolver(controllerThread.getFullRobotModel());
+      masterResolver = new MPCCrossRobotCommandResolver(masterFullRobotModel);
 
       //      String prefix = "Controller";
       timer = new ThreadTimer(prefix, schedulerDt * divisor, controllerThread.getYoVariableRegistry());
@@ -65,13 +66,14 @@ public class MPCControllerTask extends MPCHumanoidRobotControlTask
    protected void updateMasterContext(HumanoidRobotMPCContextData masterContext)
    {
       runAll(schedulerThreadRunnables);
-      masterResolver.resolveHumanoidRobotContextDataController(controllerThread.getHumanoidRobotContextData(), masterContext);
+      masterResolver.resolveHumanoidRobotContextDataController((HumanoidRobotMPCContextData) controllerThread.getHumanoidRobotContextData(), masterContext);
    }
 
    protected void updateLocalContext(HumanoidRobotMPCContextData masterContext)
    {
-      controllerResolver.resolveHumanoidRobotContextDataScheduler(masterContext, controllerThread.getHumanoidRobotContextData());
-      controllerResolver.resolveHumanoidRobotContextDataEstimator(masterContext, controllerThread.getHumanoidRobotContextData());
+
+      controllerResolver.resolveHumanoidRobotContextDataScheduler(masterContext, (HumanoidRobotMPCContextData) controllerThread.getHumanoidRobotContextData());
+      controllerResolver.resolveHumanoidRobotContextDataEstimator(masterContext, (HumanoidRobotMPCContextData) controllerThread.getHumanoidRobotContextData());
    }
 
    @Override

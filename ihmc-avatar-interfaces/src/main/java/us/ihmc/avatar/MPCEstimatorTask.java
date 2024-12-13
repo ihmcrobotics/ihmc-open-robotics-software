@@ -2,7 +2,7 @@ package us.ihmc.avatar;
 
 import us.ihmc.avatar.factory.MPCHumanoidRobotControlTask;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotMPCContextData;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.CrossRobotCommandResolver;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.MPCCrossRobotCommandResolver;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.time.ThreadTimer;
 import us.ihmc.yoVariables.variable.YoLong;
@@ -12,8 +12,8 @@ import java.util.List;
 
 public class MPCEstimatorTask extends MPCHumanoidRobotControlTask
 {
-   private final CrossRobotCommandResolver estimatorResolver;
-   private final CrossRobotCommandResolver masterResolver;
+   private final MPCCrossRobotCommandResolver estimatorResolver;
+   private final MPCCrossRobotCommandResolver masterResolver;
 
    private final AvatarEstimatorThread estimatorThread;
 
@@ -34,8 +34,8 @@ public class MPCEstimatorTask extends MPCHumanoidRobotControlTask
       this.divisor = divisor;
       this.estimatorThread = estimatorThread;
 
-      estimatorResolver = new CrossRobotCommandResolver(estimatorThread.getFullRobotModel());
-      masterResolver = new CrossRobotCommandResolver(masterFullRobotModel);
+      estimatorResolver = new MPCCrossRobotCommandResolver(estimatorThread.getFullRobotModel());
+      masterResolver = new MPCCrossRobotCommandResolver(masterFullRobotModel);
 
       String prefix = "Estimator";
       timer = new ThreadTimer(prefix, schedulerDt * divisor, estimatorThread.getYoRegistry());
