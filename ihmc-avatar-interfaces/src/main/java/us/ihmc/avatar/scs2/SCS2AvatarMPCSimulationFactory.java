@@ -95,7 +95,7 @@ import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLev
 public class SCS2AvatarMPCSimulationFactory
 {
    protected final RequiredFactoryField<DRCRobotModel> robotModel = new RequiredFactoryField<>("robotModel");
-   protected final RequiredFactoryField<HighLevelHumanoidControllerFactory> highLevelHumanoidControllerFactory = new RequiredFactoryField<>(
+   protected final RequiredFactoryField<MPCHighLevelHumanoidControllerFactory> highLevelHumanoidControllerFactory = new RequiredFactoryField<>(
          "highLevelHumanoidControllerFactory");
    protected final ArrayList<TerrainObjectDefinition> terrainObjectDefinitions = new ArrayList<>();
 
@@ -152,7 +152,7 @@ public class SCS2AvatarMPCSimulationFactory
    protected JointDesiredOutputWriter simulationOutputWriter;
    protected HumanoidRobotContextData masterContext;
    protected AvatarEstimatorThread estimatorThread;
-   protected AvatarControllerThread controllerThread;
+   protected AvatarMPCControllerThread controllerThread;
    protected AvatarStepGeneratorThread stepGeneratorThread;
    protected IKStreamingRTThread ikStreamingRTThread;
    protected DisposableRobotController robotController;
@@ -420,7 +420,7 @@ public class SCS2AvatarMPCSimulationFactory
          ros2Node = realtimeROS2Node.get();
       }
 
-      controllerThread = new AvatarControllerThread(robotName,
+      controllerThread = new AvatarMPCControllerThread(robotName,
                                                     robotModel.get(),
                                                     robotInitialSetup.get(),
                                                     robotModel.get().getSensorInformation(),
@@ -798,7 +798,7 @@ public class SCS2AvatarMPCSimulationFactory
       robotInitialSetup.setDefaultValue(robotModel.getDefaultRobotInitialSetup(0, 0));
    }
 
-   public HighLevelHumanoidControllerFactory setDefaultHighLevelHumanoidControllerFactory()
+   public MPCHighLevelHumanoidControllerFactory setDefaultHighLevelHumanoidControllerFactory()
    {
       DRCRobotModel robotModel = this.robotModel.get();
       HighLevelControllerParameters highLevelControllerParameters = robotModel.getHighLevelControllerParameters();
@@ -822,7 +822,7 @@ public class SCS2AvatarMPCSimulationFactory
                                                             additionalContactNames.get(i),
                                                             additionalContactTransforms.get(i));
 
-      HighLevelHumanoidControllerFactory controllerFactory = new HighLevelHumanoidControllerFactory(contactableBodiesFactory,
+      MPCHighLevelHumanoidControllerFactory controllerFactory = new MPCHighLevelHumanoidControllerFactory(contactableBodiesFactory,
                                                                                                     feetForceSensorNames,
                                                                                                     wristForceSensorNames,
                                                                                                     highLevelControllerParameters,
@@ -853,10 +853,10 @@ public class SCS2AvatarMPCSimulationFactory
       return controllerFactory;
    }
 
-   public HighLevelHumanoidControllerFactory setDefaultHighLevelHumanoidControllerFactory(boolean useVelocityAndHeadingScript,
+   public MPCHighLevelHumanoidControllerFactory setDefaultHighLevelHumanoidControllerFactory(boolean useVelocityAndHeadingScript,
                                                                                           HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters)
    {
-      HighLevelHumanoidControllerFactory controllerFactory;
+      MPCHighLevelHumanoidControllerFactory controllerFactory;
 
       if (highLevelHumanoidControllerFactory.hasBeenSet())
          controllerFactory = highLevelHumanoidControllerFactory.get();
@@ -866,12 +866,12 @@ public class SCS2AvatarMPCSimulationFactory
       return controllerFactory;
    }
 
-   public void setHighLevelHumanoidControllerFactory(HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory)
+   public void setHighLevelHumanoidControllerFactory(MPCHighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory)
    {
       this.highLevelHumanoidControllerFactory.set(highLevelHumanoidControllerFactory);
    }
 
-   public HighLevelHumanoidControllerFactory getHighLevelHumanoidControllerFactory()
+   public MPCHighLevelHumanoidControllerFactory getHighLevelHumanoidControllerFactory()
    {
       return highLevelHumanoidControllerFactory.get();
    }
@@ -1094,7 +1094,7 @@ public class SCS2AvatarMPCSimulationFactory
 
    public void setupDefaultExternalControllerFactory()
    {
-      HighLevelHumanoidControllerFactory highLevelControllerFactory = highLevelHumanoidControllerFactory.get();
+      MPCHighLevelHumanoidControllerFactory highLevelControllerFactory = highLevelHumanoidControllerFactory.get();
       if (highLevelControllerFactory == null)
          throw new RuntimeException("You must call this.setDefaultHighLevelHumanoidCointrollerFactory first!");
 

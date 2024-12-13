@@ -2,6 +2,7 @@ package us.ihmc.avatar.scs2;
 
 import us.ihmc.avatar.AvatarControllerThread;
 import us.ihmc.avatar.AvatarEstimatorThread;
+import us.ihmc.avatar.AvatarMPCControllerThread;
 import us.ihmc.avatar.AvatarStepGeneratorThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
@@ -12,6 +13,7 @@ import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.IKStrea
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MPCHighLevelHumanoidControllerFactory;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.tools.RotationMatrixTools;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -41,13 +43,13 @@ public class SCS2AvatarMPCSimulation
 
    private Robot robot;
    private SimulationConstructionSet2 simulationConstructionSet;
-   private HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory;
+   private MPCHighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory;
    private YoVariableServer yoVariableServer;
    private IntraprocessYoVariableLogger intraprocessYoVariableLogger;
    private DisposableRobotController robotController;
    private HumanoidRobotContextData masterContext;
    private AvatarEstimatorThread estimatorThread;
-   private AvatarControllerThread controllerThread;
+   private AvatarMPCControllerThread controllerThread;
    private AvatarStepGeneratorThread stepGeneratorThread;
    private IKStreamingRTThread ikStreamingRTThread;
    private JointDesiredOutputWriter outputWriter;
@@ -364,7 +366,7 @@ public class SCS2AvatarMPCSimulation
       return controllerThread.getFullRobotModelCorruptor();
    }
 
-   public HighLevelHumanoidControllerFactory getHighLevelHumanoidControllerFactory()
+   public MPCHighLevelHumanoidControllerFactory getHighLevelHumanoidControllerFactory()
    {
       return highLevelHumanoidControllerFactory;
    }
@@ -379,7 +381,7 @@ public class SCS2AvatarMPCSimulation
       this.simulationConstructionSet = simulationConstructionSet;
    }
 
-   public void setHighLevelHumanoidControllerFactory(HighLevelHumanoidControllerFactory momentumBasedControllerFactory)
+   public void setHighLevelHumanoidControllerFactory(MPCHighLevelHumanoidControllerFactory momentumBasedControllerFactory)
    {
       this.highLevelHumanoidControllerFactory = momentumBasedControllerFactory;
    }
@@ -414,12 +416,12 @@ public class SCS2AvatarMPCSimulation
       return estimatorThread;
    }
 
-   public void setControllerThread(AvatarControllerThread controllerThread)
+   public void setControllerThread(AvatarMPCControllerThread controllerThread)
    {
       this.controllerThread = controllerThread;
    }
 
-   public AvatarControllerThread getControllerThread()
+   public AvatarMPCControllerThread getControllerThread()
    {
       return controllerThread;
    }
