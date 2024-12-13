@@ -107,6 +107,7 @@ public class AvatarMPCControllerThread implements AvatarControllerThreadInterfac
       CenterOfMassDataHolder centerOfMassDataHolderForController = new CenterOfMassDataHolder();
       CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator = new CenterOfPressureDataHolder(controllerFullRobotModel);
       LowLevelOneDoFJointDesiredDataHolder desiredJointDataHolder = new LowLevelOneDoFJointDesiredDataHolder(controllerFullRobotModel.getControllableOneDoFJoints());
+      LowLevelOneDoFJointDesiredDataHolder desiredMPCControllerOutputDataHolder = new LowLevelOneDoFJointDesiredDataHolder(controllerFullRobotModel.getControllableOneDoFJoints());
       RobotMotionStatusHolder robotMotionStatusHolder = new RobotMotionStatusHolder();
       contextDataFactory.setForceSensorDataHolder(forceSensorDataHolderForController);
       contextDataFactory.setCenterOfMassDataHolder(centerOfMassDataHolderForController);
@@ -114,6 +115,7 @@ public class AvatarMPCControllerThread implements AvatarControllerThreadInterfac
       contextDataFactory.setRobotMotionStatusHolder(robotMotionStatusHolder);
       contextDataFactory.setJointDesiredOutputList(desiredJointDataHolder);
       contextDataFactory.setProcessedJointData(processedJointData);
+      contextDataFactory.setMpcControllerDesiredOutputList(desiredMPCControllerOutputDataHolder);
       contextDataFactory.setSensorDataContext(new SensorDataContext(controllerFullRobotModel));
       humanoidRobotMPCContextData = contextDataFactory.createHumanoidRobotMPCContextData();
 

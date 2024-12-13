@@ -18,10 +18,12 @@ import java.util.List;
 public class HumanoidRobotMPCContextData extends HumanoidRobotContextData
 {
    private boolean wholeBodyControllerCoreRan = false;
+   private final LowLevelOneDoFJointDesiredDataHolder mpcControllerDesiredOutputList;
 
    public HumanoidRobotMPCContextData()
    {
       super();
+      mpcControllerDesiredOutputList = new LowLevelOneDoFJointDesiredDataHolder();
    }
 
    public HumanoidRobotMPCContextData(HumanoidRobotContextJointData processedJointData,
@@ -30,7 +32,8 @@ public class HumanoidRobotMPCContextData extends HumanoidRobotContextData
                                       CenterOfPressureDataHolder centerOfPressureDataHolder,
                                       RobotMotionStatusHolder robotMotionStatusHolder,
                                       LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList,
-                                      SensorDataContext sensorDataContext)
+                                      SensorDataContext sensorDataContext,
+                                      LowLevelOneDoFJointDesiredDataHolder mpcControllerDesiredOutputList)
    {
       super(processedJointData,
             forceSensorDataHolder,
@@ -39,21 +42,29 @@ public class HumanoidRobotMPCContextData extends HumanoidRobotContextData
             robotMotionStatusHolder,
             jointDesiredOutputList,
             sensorDataContext);
+      this.mpcControllerDesiredOutputList = mpcControllerDesiredOutputList;
    }
 
    public HumanoidRobotMPCContextData(FullHumanoidRobotModel fullRobotModel)
    {
       super(fullRobotModel);
+      mpcControllerDesiredOutputList = new LowLevelOneDoFJointDesiredDataHolder(fullRobotModel.getControllableOneDoFJoints());
    }
 
    public HumanoidRobotMPCContextData(List<OneDoFJointBasics> joints)
    {
       super(joints);
+      mpcControllerDesiredOutputList = new LowLevelOneDoFJointDesiredDataHolder(joints.toArray(new OneDoFJointBasics[0]));
    }
 
    public void setWholeBodyControllerCoreRan(boolean wholeBodyControllerCoreRan)
    {
       this.wholeBodyControllerCoreRan = wholeBodyControllerCoreRan;
+   }
+
+   public boolean getWholeBodyControllerCoreRan()
+   {
+      return wholeBodyControllerCoreRan;
    }
 
    public void set(HumanoidRobotMPCContextData other)
@@ -64,6 +75,7 @@ public class HumanoidRobotMPCContextData extends HumanoidRobotContextData
    public void copyFrom(HumanoidRobotMPCContextData src)
    {
       super.copyFrom(src);
+      mpcControllerDesiredOutputList.set(src.mpcControllerDesiredOutputList);
    }
 
    public boolean equals(Object obj)
@@ -74,6 +86,8 @@ public class HumanoidRobotMPCContextData extends HumanoidRobotContextData
       }
       else if (obj instanceof HumanoidRobotMPCContextData other)
       {
+         if (!mpcControllerDesiredOutputList.equals(other.mpcControllerDesiredOutputList))
+            return false;
          return super.equals(other);
       }
       else

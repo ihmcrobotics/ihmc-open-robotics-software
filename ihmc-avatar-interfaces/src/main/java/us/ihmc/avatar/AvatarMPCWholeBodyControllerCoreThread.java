@@ -73,7 +73,7 @@ public class AvatarMPCWholeBodyControllerCoreThread implements AvatarControllerT
       CenterOfMassDataHolder centerOfMassDataHolderForWholeBodyControllerCore = new CenterOfMassDataHolder();
       CenterOfPressureDataHolder centerOfPressureDataHolderForWholeBodyControllerCore = new CenterOfPressureDataHolder(controllerCoreFullRobotModel);
       LowLevelOneDoFJointDesiredDataHolder desiredJointDataHolder = new LowLevelOneDoFJointDesiredDataHolder(controllerCoreFullRobotModel.getControllableOneDoFJoints());
-      LowLevelOneDoFJointDesiredDataHolder wholeBodyControllerCoreDesiredJointDataHolder = new LowLevelOneDoFJointDesiredDataHolder(controllerCoreFullRobotModel.getControllableOneDoFJoints());
+      LowLevelOneDoFJointDesiredDataHolder desiredMPCControlOutputDataHolder = new LowLevelOneDoFJointDesiredDataHolder(controllerCoreFullRobotModel.getControllableOneDoFJoints());
       RobotMotionStatusHolder robotMotionStatusHolder = new RobotMotionStatusHolder();
       // TODO will be worked later
       //      ControllerCoreOutputDataHolder controllerCoreOutPutDataHolder = new ControllerCoreOutputDataHolder(controllerCoreFullRobotModel.getControllableOneDoFJoints());
@@ -83,8 +83,7 @@ public class AvatarMPCWholeBodyControllerCoreThread implements AvatarControllerT
       contextDataFactory.setCenterOfPressureDataHolder(centerOfPressureDataHolderForWholeBodyControllerCore);
       contextDataFactory.setRobotMotionStatusHolder(robotMotionStatusHolder);
       contextDataFactory.setJointDesiredOutputList(desiredJointDataHolder);
-      // TODO will be worked later
-      //      contextDataFactory.setWBCCJointDesiredOutputList(wholeBodyControllerCoreDesiredJointDataHolder);
+      contextDataFactory.setMpcControllerDesiredOutputList(desiredMPCControlOutputDataHolder);
       contextDataFactory.setProcessedJointData(processedJointData);
       // TODO will be worked later
       //      contextDataFactory.setControllerCoreOutputDataHolder(controllerCoreOutPutDataHolder);
@@ -118,7 +117,7 @@ public class AvatarMPCWholeBodyControllerCoreThread implements AvatarControllerT
                                                                                   centerOfMassDataHolderForWholeBodyControllerCore,
                                                                                   centerOfPressureDataHolderForWholeBodyControllerCore,
                                                                                   sensorInformation,
-                                                                                  wholeBodyControllerCoreDesiredJointDataHolder,
+                                                                                  desiredMPCControlOutputDataHolder,
                                                                                   desiredJointDataHolder,
                                                                                   //controllerCoreOutPutDataHolder,
                                                                                   //controllerCoreCommandDataHolder,
@@ -189,28 +188,6 @@ public class AvatarMPCWholeBodyControllerCoreThread implements AvatarControllerT
                                                                                                                 //controllerCoreCommandDataHolder,
                                                                                                                 controllerFactory.getWholeBodyControllerCoreFactory(),
                                                                                                                 jointsToIgnore);
-
-      // new try using the controllerFactory to keep the same stateMachine structure of controllerThread and use it.
-      // use the same constructor is not possible. The registry values can not be generated with the same name.
-      // Generating new one can't be. When set the feet, contactableBodiesFactory should createFootContactableFeet, but this is cannot be called twice.
-      // ControllerCoreFactory should be shared through the context.
-      // If so, how the stateMachine is shared?
-      //      HumanoidHighLevelControllerManager controllerCoreManager = controllerFactory.getControllerCoreCalculator(controllerCoreModel,
-      //                                                                                                               controllerCoreDT,
-      //                                                                                                               gravity,
-      //                                                                                                               kinematicsSimulation,
-      //                                                                                                               yoTime,
-      //                                                                                                               yoGraphicsListRegistry,
-      //                                                                                                               sensorInformation,
-      //                                                                                                               forceSensorDataHolderForControllerCore,
-      //                                                                                                               centerOfMassDataHolderForControllerCore,
-      //                                                                                                               centerOfPressureDataHolderForEstimator,
-      //                                                                                                               wholeBodyControllerCoreOutput,
-      //                                                                                                               controllerCoreOutPutDataHolder,
-      //                                                                                                               controllerCoreCommandDataHolder,
-      //                                                                                                               jointsToIgnore);
-
-      //      scs2YoGraphicHolders.add(() -> controllerCoreManager.getSCS2YoGraphics());
 
       ModularRobotController modularRobotController = new ModularRobotController("WholeBodyControllerCoreThread1");
       modularRobotController.addRobotController(controllerCoreManager);
