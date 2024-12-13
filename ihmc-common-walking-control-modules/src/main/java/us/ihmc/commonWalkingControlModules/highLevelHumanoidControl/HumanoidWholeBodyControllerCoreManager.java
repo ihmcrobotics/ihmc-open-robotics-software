@@ -30,8 +30,9 @@ public class HumanoidWholeBodyControllerCoreManager implements RobotController, 
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final JointDesiredOutputListBasics lowLevelControllerOutput;
-   private final JointDesiredOutputListBasics wholeBodyControllerCoreJointLevelOutput;
+   private final JointDesiredOutputListBasics desiredMPCControllerOutput;
    private final YoLowLevelOneDoFJointDesiredDataHolder yoLowLevelOneDoFJointDesiredDataHolder;
+   private final YoLowLevelOneDoFJointDesiredDataHolder yoDesiredMPCControllerOutputDataHolder;
    private final JointBasics[] controlledJoint;
    //   private final HighLevelControllerFactoryHelper controllerFactoryHelper;
    //TODO will be worked later
@@ -51,7 +52,7 @@ public class HumanoidWholeBodyControllerCoreManager implements RobotController, 
                                                  ForceSensorDataHolderReadOnly forceSensorDataHolder,
                                                  CenterOfMassDataHolderReadOnly centerOfMassDataHolderForControllerCore,
                                                  JointDesiredOutputListBasics lowLevelControllerOutput,
-                                                 JointDesiredOutputListBasics wholeBodyControllerCoreOutput,
+                                                 JointDesiredOutputListBasics desiredMPCControllerOutput,
                                                  //ControllerCoreOutputDataHolder controllerCoreOutputDataHolder,
                                                  //ControllerCoreCommandDataHolder controllerCoreCommandDataHolder,
                                                  WholeBodyControllerCoreFactory controllerCoreFactory,
@@ -64,7 +65,7 @@ public class HumanoidWholeBodyControllerCoreManager implements RobotController, 
       this.lowLevelControllerOutput = lowLevelControllerOutput;
 //      this.controllerCoreOutPutDataHolder = controllerCoreOutputDataHolder;
 //      this.controllerCoreCommandDataHolder = controllerCoreCommandDataHolder;
-      this.wholeBodyControllerCoreJointLevelOutput = wholeBodyControllerCoreOutput;
+      this.desiredMPCControllerOutput = desiredMPCControllerOutput;
 
       controlledJoint = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
 
@@ -73,6 +74,7 @@ public class HumanoidWholeBodyControllerCoreManager implements RobotController, 
 
       OneDoFJointBasics[] controlledOneDoFJoints = MultiBodySystemTools.filterJoints(controlledJoint, OneDoFJointBasics.class);
       yoLowLevelOneDoFJointDesiredDataHolder = new YoLowLevelOneDoFJointDesiredDataHolder(controlledOneDoFJoints, registry);
+      yoDesiredMPCControllerOutputDataHolder = new YoLowLevelOneDoFJointDesiredDataHolder("MPCControllerOutput", controlledOneDoFJoints, registry);
 
    }
 
@@ -110,6 +112,7 @@ public class HumanoidWholeBodyControllerCoreManager implements RobotController, 
          // Not all the highLevelControllerState use the WholeBodyControllerCore
          // But WholeBodyControllerCore updates the joint input here.
          // So, the output of other highLevelStates should be called in here to be delivered to copyJointDesiredsToJoints
+         yoDesiredMPCControllerOutputDataHolder.overwriteWith(desiredMPCControllerOutput);
          controllerCore.submitControllerCoreCommand(controllerCoreCommand);
          //         controllerCore.compute();
       }
@@ -145,7 +148,7 @@ public class HumanoidWholeBodyControllerCoreManager implements RobotController, 
       // The output of the controllCore in this Manager will be saved into loweLevelControllerOutput,
       // which is written to the joints
       //      JointDesiredOutputListReadOnly lowLevelOneDoFJointDesiredDataHolder = controllerCore.getControllerCoreOutput().getLowLevelOneDoFJointDesiredDataHolder();
-      JointDesiredOutputListReadOnly lowLevelOneDoFJointDesiredDataHolder = wholeBodyControllerCoreJointLevelOutput;
+      JointDesiredOutputListReadOnly lowLevelOneDoFJointDesiredDataHolder = desiredMPCControllerOutput;
       //      yoLowLevelOneDoFJointDesiredDataHolder.overwriteWith(lowLevelOneDoFJointDesiredDataHolder);
       lowLevelControllerOutput.overwriteWith(lowLevelOneDoFJointDesiredDataHolder);
 

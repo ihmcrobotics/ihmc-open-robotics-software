@@ -56,6 +56,7 @@ import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusChangedListener;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.tools.thread.CloseableAndDisposable;
@@ -433,6 +434,7 @@ public class MPCHighLevelHumanoidControllerFactory implements CloseableAndDispos
                                                                  CenterOfMassDataHolderReadOnly centerOfMassDataHolderForController,
                                                                  CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
                                                                  JointDesiredOutputListBasics lowLevelControllerOutput,
+                                                                 JointDesiredOutputListBasics desiredMPCControllerOutput,
                                                                  JointBasics... jointsToIgnore)
    {
       YoBoolean usingEstimatorCoMPosition = new YoBoolean("usingEstimatorCoMPosition", registry);
@@ -563,7 +565,8 @@ public class MPCHighLevelHumanoidControllerFactory implements CloseableAndDispos
                                                                                         controllerToolbox,
                                                                                         centerOfPressureDataHolderForEstimator,
                                                                                         forceSensorDataHolder,
-                                                                                        lowLevelControllerOutput);
+                                                                                        lowLevelControllerOutput,
+                                                                                        desiredMPCControllerOutput);
       mpcHumanoidHighLevelControllerManager.addYoVariableRegistry(registry);
       mpcHumanoidHighLevelControllerManager.setListenToHighLevelStatePackets(isListeningToHighLevelStatePackets);
       for (RobotSide robotSide : RobotSide.values)

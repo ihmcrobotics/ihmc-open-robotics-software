@@ -149,6 +149,7 @@ public class AvatarMPCControllerThread implements AvatarControllerThreadInterfac
                                                   centerOfPressureDataHolderForEstimator,
                                                   sensorInformation,
                                                   desiredJointDataHolder,
+                                                  desiredMPCControllerOutputDataHolder,
                                                   yoGraphicsListRegistry,
                                                   registry,
                                                   kinematicsSimulation,
@@ -224,6 +225,7 @@ public class AvatarMPCControllerThread implements AvatarControllerThreadInterfac
                                                             CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
                                                             HumanoidRobotSensorInformation sensorInformation,
                                                             JointDesiredOutputListBasics lowLevelControllerOutput,
+                                                            JointDesiredOutputListBasics desiredMPCControllerOutput,
                                                             YoGraphicsListRegistry yoGraphicsListRegistry,
                                                             YoRegistry registry,
                                                             boolean kinematicsSimulation,
@@ -256,6 +258,7 @@ public class AvatarMPCControllerThread implements AvatarControllerThreadInterfac
                                                                                                  centerOfMassDataHolderForController,
                                                                                                  centerOfPressureDataHolderForEstimator,
                                                                                                  lowLevelControllerOutput,
+                                                                                                 desiredMPCControllerOutput,
                                                                                                  jointsToIgnore);
       scs2YoGraphicHolders.add(() -> robotController.getSCS2YoGraphics());
 

@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJ
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoLowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.*;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.MPCHighLevelControllerState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HighLevelHumanoidControllerPlugin;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HighLevelHumanoidControllerPluginFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -68,6 +69,7 @@ public class MPCHumanoidHighLevelControllerManager implements RobotController, S
 
    private final CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator;
    private final JointDesiredOutputListBasics lowLevelControllerOutput;
+   private final JointDesiredOutputListBasics desiredMPCControllerOutput;
    private final RootJointDesiredConfigurationData rootJointDesiredConfiguration = new RootJointDesiredConfigurationData();
    private final CommandInputManager commandInputManager;
    private final StatusMessageOutputManager statusMessageOutputManager;
@@ -99,7 +101,8 @@ public class MPCHumanoidHighLevelControllerManager implements RobotController, S
                                                 HighLevelHumanoidControllerToolbox controllerToolbox,
                                                 CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
                                                 ForceSensorDataHolderReadOnly forceSensorDataHolder,
-                                                JointDesiredOutputListBasics lowLevelControllerOutput)
+                                                JointDesiredOutputListBasics lowLevelControllerOutput,
+                                                JointDesiredOutputListBasics desiredMPCControllerOutput)
    {
       this.commandInputManager = commandInputManager;
       this.statusMessageOutputManager = statusMessageOutputManager;
@@ -107,6 +110,7 @@ public class MPCHumanoidHighLevelControllerManager implements RobotController, S
       this.requestedHighLevelControllerState = requestedHighLevelControllerState;
       this.centerOfPressureDataHolderForEstimator = centerOfPressureDataHolderForEstimator;
       this.lowLevelControllerOutput = lowLevelControllerOutput;
+      this.desiredMPCControllerOutput = desiredMPCControllerOutput;
 
       this.requestedHighLevelControllerState.set(initialControllerState);
       registry.addChild(controllerToolbox.getYoVariableRegistry());
@@ -148,7 +152,7 @@ public class MPCHumanoidHighLevelControllerManager implements RobotController, S
     * setup. Ideally, the plugin can be registered before creating the controller via the
     * {@link HighLevelHumanoidControllerFactory}.
     * </p>
-    * 
+    *
     * @param pluginFactory the factory used to create the new plugin to be registered.
     */
    public void addControllerPluginFactory(HighLevelHumanoidControllerPluginFactory pluginFactory)
@@ -163,7 +167,7 @@ public class MPCHumanoidHighLevelControllerManager implements RobotController, S
     * setup. Ideally, the plugin can be registered before creating the controller via the
     * {@link HighLevelHumanoidControllerFactory}.
     * </p>
-    * 
+    *
     * @param plugin the plugin to be registered.
     */
    public void addControllerPlugin(HighLevelHumanoidControllerPlugin plugin)
