@@ -13,8 +13,8 @@ import us.ihmc.avatar.logging.IntraprocessYoVariableLogger;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.IKStreamingRTPluginFactory;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.IKStreamingRTPluginFactory.IKStreamingRTThread;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
-import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
+import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotMPCContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotMPCContextDataFactory;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -151,7 +151,7 @@ public class SCS2AvatarMPCSimulationFactory
    protected IntraprocessYoVariableLogger intraprocessYoVariableLogger;
    protected SimulationConstructionSet2 simulationConstructionSet;
    protected JointDesiredOutputWriter simulationOutputWriter;
-   protected HumanoidRobotContextData masterContext;
+   protected HumanoidRobotMPCContextData masterContext;
    protected AvatarEstimatorThread estimatorThread;
    protected AvatarMPCControllerThread controllerThread;
    protected AvatarMPCStepGeneratorThread stepGeneratorThread;
@@ -542,7 +542,7 @@ public class SCS2AvatarMPCSimulationFactory
       // Create intermediate data buffer for threading.
       FullHumanoidRobotModel masterFullRobotModel = robotModel.createFullRobotModel();
       robotInitialSetup.get().initializeFullRobotModel(masterFullRobotModel);
-      masterContext = new HumanoidRobotContextData(masterFullRobotModel);
+      masterContext = new HumanoidRobotMPCContextData(masterFullRobotModel);
 
       // Create the tasks that will be run on their own threads.
       int estimatorDivisor = (int) Math.round(robotModel.getEstimatorDT() / simulationDT.get());
@@ -550,22 +550,22 @@ public class SCS2AvatarMPCSimulationFactory
       int stepGeneratorDivisor = (int) Math.round(robotModel.getStepGeneratorDT() / simulationDT.get());
       int handControlDivisor = (int) Math.round(robotModel.getSimulatedHandControlDT() / simulationDT.get());
       int wholeBodyControllerCoreDivisor = (int) Math.round(robotModel.getWBCCDT() / simulationDT.get());
-      HumanoidRobotControlTask estimatorTask = new MPCEstimatorTask(estimatorThread, estimatorDivisor, simulationDT.get(), masterFullRobotModel);
-      HumanoidRobotControlTask controllerTask = new MPCControllerTask("Controller",
-                                                                      controllerThread,
-                                                                      controllerDivisor,
-                                                                      simulationDT.get(),
-                                                                      masterFullRobotModel);
-      HumanoidRobotControlTask stepGeneratorTask = new MPCStepGeneratorTask("StepGenerator",
-                                                                            stepGeneratorThread,
-                                                                            stepGeneratorDivisor,
-                                                                            simulationDT.get(),
-                                                                            masterFullRobotModel);
-      HumanoidRobotControlTask wholeBodyControllerCoreTask = new MPCWholeBodyControllerCoreTask("WholeBodyController",
-                                                                                                wholeBodyControllerCoreThread,
-                                                                                                wholeBodyControllerCoreDivisor,
-                                                                                                simulationDT.get(),
-                                                                                                masterFullRobotModel);
+      MPCHumanoidRobotControlTask estimatorTask = new MPCEstimatorTask(estimatorThread, estimatorDivisor, simulationDT.get(), masterFullRobotModel);
+      MPCHumanoidRobotControlTask controllerTask = new MPCControllerTask("Controller",
+                                                                         controllerThread,
+                                                                         controllerDivisor,
+                                                                         simulationDT.get(),
+                                                                         masterFullRobotModel);
+      MPCHumanoidRobotControlTask stepGeneratorTask = new MPCStepGeneratorTask("StepGenerator",
+                                                                               stepGeneratorThread,
+                                                                               stepGeneratorDivisor,
+                                                                               simulationDT.get(),
+                                                                               masterFullRobotModel);
+      MPCHumanoidRobotControlTask wholeBodyControllerCoreTask = new MPCWholeBodyControllerCoreTask("WholeBodyController",
+                                                                                                   wholeBodyControllerCoreThread,
+                                                                                                   wholeBodyControllerCoreDivisor,
+                                                                                                   simulationDT.get(),
+                                                                                                   masterFullRobotModel);
       HumanoidRobotControlTask ikStreamingRTTask;
       if (createIKStreamingRealTimeController.get())
          ikStreamingRTTask = ikStreamingRealTimePluginFactory.createRTTask(simulationDT.get());
@@ -614,15 +614,17 @@ public class SCS2AvatarMPCSimulationFactory
                                                     });
       }
 
-      List<HumanoidRobotControlTask> tasks = new ArrayList<>();
+      List<MPCHumanoidRobotControlTask> tasks = new ArrayList<>();
       tasks.add(estimatorTask);
       tasks.add(controllerTask);
       tasks.add(stepGeneratorTask);
       tasks.add(wholeBodyControllerCoreTask);
-      if (ikStreamingRTTask != null)
-         tasks.add(ikStreamingRTTask);
-      if (handControlTask != null)
-         tasks.add(handControlTask);
+
+      // for now just remove this. If we want to include this, should make MPC specific type of ikStreamingRTTask and handControlTask.
+      //      if (ikStreamingRTTask != null)
+      //         tasks.add(ikStreamingRTTask);
+      //      if (handControlTask != null)
+      //         tasks.add(handControlTask);
 
       // Create the controller that will run the tasks.
       String controllerName = "DRCSimulation";
@@ -634,7 +636,7 @@ public class SCS2AvatarMPCSimulationFactory
       else
       {
          TaskOverrunBehavior overrunBehavior = TaskOverrunBehavior.BUSY_WAIT;
-         robotController = new BarrierScheduledRobotController(controllerName, tasks, masterContext, overrunBehavior, simulationDT.get());
+         robotController = new MPCBarrierScheduledRobotController(controllerName, tasks, masterContext, overrunBehavior, simulationDT.get());
          tasks.forEach(task -> new Thread(task, task.getClass().getSimpleName() + "Thread").start());
       }
 
@@ -685,7 +687,8 @@ public class SCS2AvatarMPCSimulationFactory
          yoVariableServer.addRegistry(wholeBodyControllerCoreThread.getYoVariableRegistry(),
                                       enableSCS1YoGraphics.get() ? wholeBodyControllerCoreThread.getSCS1YoGraphicsListRegistry() : null,
                                       enableSCS2YoGraphics.get() ? wholeBodyControllerCoreThread.getSCS2YoGraphics() : null);
-         wholeBodyControllerCoreTask.addCallbackPostTask(() -> yoVariableServer.update(wholeBodyControllerCoreThread.getHumanoidRobotContextData().getTimestamp(),
+         wholeBodyControllerCoreTask.addCallbackPostTask(() -> yoVariableServer.update(wholeBodyControllerCoreThread.getHumanoidRobotContextData()
+                                                                                                                    .getTimestamp(),
                                                                                        wholeBodyControllerCoreThread.getYoVariableRegistry()));
          if (ikStreamingRTThread != null)
          {
@@ -709,12 +712,15 @@ public class SCS2AvatarMPCSimulationFactory
       mirroredRegistries.add(setupWithMirroredRegistry(estimatorThread.getYoRegistry(), estimatorTask, robotController.getYoRegistry()));
       mirroredRegistries.add(setupWithMirroredRegistry(controllerThread.getYoVariableRegistry(), controllerTask, robotController.getYoRegistry()));
       mirroredRegistries.add(setupWithMirroredRegistry(stepGeneratorThread.getYoVariableRegistry(), stepGeneratorTask, robotController.getYoRegistry()));
-      mirroredRegistries.add(setupWithMirroredRegistry(wholeBodyControllerCoreThread.getYoVariableRegistry(), wholeBodyControllerCoreTask, robotController.getYoRegistry()));
+      mirroredRegistries.add(setupWithMirroredRegistry(wholeBodyControllerCoreThread.getYoVariableRegistry(),
+                                                       wholeBodyControllerCoreTask,
+                                                       robotController.getYoRegistry()));
 
-      if (ikStreamingRTTask != null)
-         mirroredRegistries.add(setupWithMirroredRegistry(ikStreamingRTThread.getYoVariableRegistry(), ikStreamingRTTask, robotController.getYoRegistry()));
-      if (handControlThread != null)
-         mirroredRegistries.add(setupWithMirroredRegistry(handControlThread.getYoVariableRegistry(), handControlTask, robotController.getYoRegistry()));
+      // These two task should be handled MPC specific task. But for now, just ignore them.
+      //      if (ikStreamingRTTask != null)
+      //         mirroredRegistries.add(setupWithMirroredRegistry(ikStreamingRTThread.getYoVariableRegistry(), ikStreamingRTTask, robotController.getYoRegistry()));
+      //      if (handControlThread != null)
+      //         mirroredRegistries.add(setupWithMirroredRegistry(handControlThread.getYoVariableRegistry(), handControlTask, robotController.getYoRegistry()));
       robot.getRegistry().addChild(robotController.getYoRegistry());
       robot.getControllerManager().addController(new Controller()
       {
@@ -774,7 +780,7 @@ public class SCS2AvatarMPCSimulationFactory
       return joints;
    }
 
-   private static MirroredYoVariableRegistry setupWithMirroredRegistry(YoRegistry registry, HumanoidRobotControlTask owner, YoRegistry schedulerRegistry)
+   private static MirroredYoVariableRegistry setupWithMirroredRegistry(YoRegistry registry, MPCHumanoidRobotControlTask owner, YoRegistry schedulerRegistry)
    {
       MirroredYoVariableRegistry mirroredRegistry = new MirroredYoVariableRegistry(registry);
       owner.addRunnableOnSchedulerThread(() ->

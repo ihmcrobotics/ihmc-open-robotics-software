@@ -1,7 +1,7 @@
 package us.ihmc.avatar;
 
-import us.ihmc.avatar.factory.HumanoidRobotControlTask;
-import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
+import us.ihmc.avatar.factory.MPCHumanoidRobotControlTask;
+import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotMPCContextData;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.CrossRobotCommandResolver;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.time.ThreadTimer;
@@ -10,7 +10,7 @@ import us.ihmc.yoVariables.variable.YoLong;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MPCWholeBodyControllerCoreTask extends HumanoidRobotControlTask
+public class MPCWholeBodyControllerCoreTask extends MPCHumanoidRobotControlTask
 {
    private final CrossRobotCommandResolver wholeBodyControllerCoreResolver;
    private final CrossRobotCommandResolver masterResolver;
@@ -21,7 +21,6 @@ public class MPCWholeBodyControllerCoreTask extends HumanoidRobotControlTask
    private final YoLong ticksBehindScheduled;
 
    protected final List<Runnable> postWholeBodyControllerCoreCallbacks = new ArrayList<>();
-
 
    public MPCWholeBodyControllerCoreTask(String prefix,
                                          AvatarControllerThreadInterface wholeBodyControllerCoreThread,
@@ -47,6 +46,7 @@ public class MPCWholeBodyControllerCoreTask extends HumanoidRobotControlTask
       ticksBehindScheduled.set(0);
       return super.initialize();
    }
+
    @Override
    protected void execute()
    {
@@ -58,17 +58,16 @@ public class MPCWholeBodyControllerCoreTask extends HumanoidRobotControlTask
       timer.stop();
    }
 
-   @Override
-   protected void updateMasterContext(HumanoidRobotContextData context)
+   protected void updateMasterContext(HumanoidRobotMPCContextData context)
    {
 
    }
 
-   @Override
-   protected void updateLocalContext(HumanoidRobotContextData context)
+   protected void updateLocalContext(HumanoidRobotMPCContextData context)
    {
 
    }
+
    @Override
    public void addCallbackPostTask(Runnable runnable)
    {

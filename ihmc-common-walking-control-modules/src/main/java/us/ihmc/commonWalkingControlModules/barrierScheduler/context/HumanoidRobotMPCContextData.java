@@ -17,6 +17,8 @@ import java.util.List;
 @SuppressWarnings("serial")
 public class HumanoidRobotMPCContextData extends HumanoidRobotContextData
 {
+   private boolean wholeBodyControllerCoreRan = false;
+
    public HumanoidRobotMPCContextData()
    {
       super();
@@ -49,6 +51,10 @@ public class HumanoidRobotMPCContextData extends HumanoidRobotContextData
       super(joints);
    }
 
+   public void setWholeBodyControllerCoreRan(boolean wholeBodyControllerCoreRan)
+   {
+      this.wholeBodyControllerCoreRan = wholeBodyControllerCoreRan;
+   }
 
    public void set(HumanoidRobotMPCContextData other)
    {
@@ -59,15 +65,15 @@ public class HumanoidRobotMPCContextData extends HumanoidRobotContextData
    {
       super.copyFrom(src);
    }
+
    public boolean equals(Object obj)
    {
-      if(obj == this)
+      if (obj == this)
       {
          return true;
       }
-      else if(obj instanceof HumanoidRobotMPCContextData)
+      else if (obj instanceof HumanoidRobotMPCContextData other)
       {
-         HumanoidRobotMPCContextData other = (HumanoidRobotMPCContextData) obj;
          return super.equals(other);
       }
       else

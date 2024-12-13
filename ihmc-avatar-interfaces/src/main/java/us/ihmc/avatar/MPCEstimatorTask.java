@@ -1,7 +1,7 @@
 package us.ihmc.avatar;
 
-import us.ihmc.avatar.factory.HumanoidRobotControlTask;
-import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
+import us.ihmc.avatar.factory.MPCHumanoidRobotControlTask;
+import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotMPCContextData;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.CrossRobotCommandResolver;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.time.ThreadTimer;
@@ -10,7 +10,7 @@ import us.ihmc.yoVariables.variable.YoLong;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MPCEstimatorTask extends HumanoidRobotControlTask
+public class MPCEstimatorTask extends MPCHumanoidRobotControlTask
 {
    private final CrossRobotCommandResolver estimatorResolver;
    private final CrossRobotCommandResolver masterResolver;
@@ -66,16 +66,14 @@ public class MPCEstimatorTask extends HumanoidRobotControlTask
       timer.stop();
    }
 
-   @Override
-   protected void updateMasterContext(HumanoidRobotContextData masterContext)
+   protected void updateMasterContext(HumanoidRobotMPCContextData masterContext)
    {
       runAll(schedulerThreadRunnables);
       masterResolver.resolveHumanoidRobotContextDataEstimator(estimatorThread.getHumanoidRobotContextData(), masterContext);
       masterContextUpdated = true;
    }
 
-   @Override
-   protected void updateLocalContext(HumanoidRobotContextData masterContext)
+   protected void updateLocalContext(HumanoidRobotMPCContextData masterContext)
    {
       estimatorResolver.resolveHumanoidRobotContextDataScheduler(masterContext, estimatorThread.getHumanoidRobotContextData());
       estimatorResolver.resolveHumanoidRobotContextDataController(masterContext, estimatorThread.getHumanoidRobotContextData());
@@ -98,5 +96,4 @@ public class MPCEstimatorTask extends HumanoidRobotControlTask
    {
       schedulerThreadRunnables.add(runnable);
    }
-
 }

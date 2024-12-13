@@ -1,7 +1,7 @@
 package us.ihmc.avatar;
 
-import us.ihmc.avatar.factory.HumanoidRobotControlTask;
-import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
+import us.ihmc.avatar.factory.MPCHumanoidRobotControlTask;
+import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotMPCContextData;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.CrossRobotCommandResolver;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.time.ThreadTimer;
@@ -10,7 +10,7 @@ import us.ihmc.yoVariables.variable.YoLong;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MPCControllerTask extends HumanoidRobotControlTask
+public class MPCControllerTask extends MPCHumanoidRobotControlTask
 {
    private final CrossRobotCommandResolver controllerResolver;
    private final CrossRobotCommandResolver masterResolver;
@@ -24,7 +24,11 @@ public class MPCControllerTask extends HumanoidRobotControlTask
    protected final List<Runnable> postControllerCallbacks = new ArrayList<>();
    protected final List<Runnable> schedulerThreadRunnables = new ArrayList<>();
 
-   public MPCControllerTask(String prefix, AvatarControllerThreadInterface controllerThread, long divisor, double schedulerDt, FullHumanoidRobotModel masterFullRobotModel)
+   public MPCControllerTask(String prefix,
+                            AvatarControllerThreadInterface controllerThread,
+                            long divisor,
+                            double schedulerDt,
+                            FullHumanoidRobotModel masterFullRobotModel)
    {
       super(divisor);
       this.divisor = divisor;
@@ -33,7 +37,7 @@ public class MPCControllerTask extends HumanoidRobotControlTask
       controllerResolver = new CrossRobotCommandResolver(controllerThread.getFullRobotModel());
       masterResolver = new CrossRobotCommandResolver(masterFullRobotModel);
 
-//      String prefix = "Controller";
+      //      String prefix = "Controller";
       timer = new ThreadTimer(prefix, schedulerDt * divisor, controllerThread.getYoVariableRegistry());
       ticksBehindScheduled = new YoLong(prefix + "TicksBehindScheduled", controllerThread.getYoVariableRegistry());
    }
@@ -58,15 +62,13 @@ public class MPCControllerTask extends HumanoidRobotControlTask
       timer.stop();
    }
 
-   @Override
-   protected void updateMasterContext(HumanoidRobotContextData masterContext)
+   protected void updateMasterContext(HumanoidRobotMPCContextData masterContext)
    {
       runAll(schedulerThreadRunnables);
       masterResolver.resolveHumanoidRobotContextDataController(controllerThread.getHumanoidRobotContextData(), masterContext);
    }
 
-   @Override
-   protected void updateLocalContext(HumanoidRobotContextData masterContext)
+   protected void updateLocalContext(HumanoidRobotMPCContextData masterContext)
    {
       controllerResolver.resolveHumanoidRobotContextDataScheduler(masterContext, controllerThread.getHumanoidRobotContextData());
       controllerResolver.resolveHumanoidRobotContextDataEstimator(masterContext, controllerThread.getHumanoidRobotContextData());
@@ -83,5 +85,4 @@ public class MPCControllerTask extends HumanoidRobotControlTask
    {
       schedulerThreadRunnables.add(runnable);
    }
-
 }
