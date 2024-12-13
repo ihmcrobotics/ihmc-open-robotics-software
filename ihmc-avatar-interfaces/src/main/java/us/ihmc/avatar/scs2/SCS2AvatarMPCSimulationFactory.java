@@ -154,6 +154,7 @@ public class SCS2AvatarMPCSimulationFactory
    protected AvatarEstimatorThread estimatorThread;
    protected AvatarMPCControllerThread controllerThread;
    protected AvatarMPCStepGeneratorThread stepGeneratorThread;
+   protected AvatarMPCWholeBodyControllerCoreThread wholeBodyControllerCoreThread;
    protected IKStreamingRTThread ikStreamingRTThread;
    protected DisposableRobotController robotController;
    protected SimulatedDRCRobotTimeProvider simulatedRobotTimeProvider;
@@ -176,6 +177,7 @@ public class SCS2AvatarMPCSimulationFactory
       setupSimulationOutputWriter();
       setupStateEstimationThread();
       setupControllerThread();
+      setupWholeBodyControllerCoreThread();
       setupStepGeneratorThread();
       setupIKStreamingRTControllerThread();
       setupMultiThreadedRobotController();
@@ -475,12 +477,12 @@ public class SCS2AvatarMPCSimulationFactory
       if (realtimeROS2Node.hasBeenSet())
          ros2Node = realtimeROS2Node.get();
       stepGeneratorThread = new AvatarMPCStepGeneratorThread(steppingFactory,
-                                                          contextDataFactory,
-                                                          highLevelHumanoidControllerFactory.get().getStatusOutputManager(),
-                                                          highLevelHumanoidControllerFactory.get().getCommandInputManager(),
-                                                          robotModel.get(),
-                                                          stepSnapperUpdatable,
-                                                          ros2Node);
+                                                             contextDataFactory,
+                                                             highLevelHumanoidControllerFactory.get().getStatusOutputManager(),
+                                                             highLevelHumanoidControllerFactory.get().getCommandInputManager(),
+                                                             robotModel.get(),
+                                                             stepSnapperUpdatable,
+                                                             ros2Node);
       if (enableSCS1YoGraphics.get())
          simulationConstructionSet.addYoGraphics(YoGraphicConversionTools.toYoGraphicDefinitions(stepGeneratorThread.getSCS1YoGraphicsListRegistry()));
       if (enableSCS2YoGraphics.get())
@@ -509,6 +511,29 @@ public class SCS2AvatarMPCSimulationFactory
          simulationConstructionSet.addYoGraphic(ikStreamingRTThread.getSCS2YoGraphics());
    }
 
+   private void setupWholeBodyControllerCoreThread()
+   {
+      String robotName = robotModel.get().getSimpleRobotName();
+      HumanoidRobotContextDataFactory contextDataFactory = new HumanoidRobotContextDataFactory();
+
+      RealtimeROS2Node ros2Node = null;
+      if (realtimeROS2Node.hasBeenSet())
+      {
+         ros2Node = realtimeROS2Node.get();
+      }
+
+      wholeBodyControllerCoreThread = new AvatarMPCWholeBodyControllerCoreThread(robotName,
+                                                                                 contextDataFactory,
+                                                                                 null,
+                                                                                 robotModel.get(),
+                                                                                 robotModel.get().getSensorInformation(),
+                                                                                 highLevelHumanoidControllerFactory.get(),
+                                                                                 null,
+                                                                                 ros2Node,
+                                                                                 gravity.get(),
+                                                                                 kinematicsSimulation.get());
+   }
+
    private void setupMultiThreadedRobotController()
    {
       DRCRobotModel robotModel = this.robotModel.get();
@@ -523,13 +548,23 @@ public class SCS2AvatarMPCSimulationFactory
       int controllerDivisor = (int) Math.round(robotModel.getControllerDT() / simulationDT.get());
       int stepGeneratorDivisor = (int) Math.round(robotModel.getStepGeneratorDT() / simulationDT.get());
       int handControlDivisor = (int) Math.round(robotModel.getSimulatedHandControlDT() / simulationDT.get());
+      int wholeBodyControllerCoreDivisor = (int) Math.round(robotModel.getWBCCDT() / simulationDT.get());
       HumanoidRobotControlTask estimatorTask = new MPCEstimatorTask(estimatorThread, estimatorDivisor, simulationDT.get(), masterFullRobotModel);
-      HumanoidRobotControlTask controllerTask = new MPCControllerTask("Controller", controllerThread, controllerDivisor, simulationDT.get(), masterFullRobotModel);
+      HumanoidRobotControlTask controllerTask = new MPCControllerTask("Controller",
+                                                                      controllerThread,
+                                                                      controllerDivisor,
+                                                                      simulationDT.get(),
+                                                                      masterFullRobotModel);
       HumanoidRobotControlTask stepGeneratorTask = new MPCStepGeneratorTask("StepGenerator",
-                                                                         stepGeneratorThread,
-                                                                         stepGeneratorDivisor,
-                                                                         simulationDT.get(),
-                                                                         masterFullRobotModel);
+                                                                            stepGeneratorThread,
+                                                                            stepGeneratorDivisor,
+                                                                            simulationDT.get(),
+                                                                            masterFullRobotModel);
+      HumanoidRobotControlTask wholeBodyControllerCoreTask = new MPCWholeBodyControllerCoreTask("WholeBodyController",
+                                                                                                wholeBodyControllerCoreThread,
+                                                                                                wholeBodyControllerCoreDivisor,
+                                                                                                simulationDT.get(),
+                                                                                                masterFullRobotModel);
       HumanoidRobotControlTask ikStreamingRTTask;
       if (createIKStreamingRealTimeController.get())
          ikStreamingRTTask = ikStreamingRealTimePluginFactory.createRTTask(simulationDT.get());
@@ -582,6 +617,7 @@ public class SCS2AvatarMPCSimulationFactory
       tasks.add(estimatorTask);
       tasks.add(controllerTask);
       tasks.add(stepGeneratorTask);
+      tasks.add(wholeBodyControllerCoreTask);
       if (ikStreamingRTTask != null)
          tasks.add(ikStreamingRTTask);
       if (handControlTask != null)
@@ -645,6 +681,11 @@ public class SCS2AvatarMPCSimulationFactory
                                       enableSCS2YoGraphics.get() ? stepGeneratorThread.getSCS2YoGraphics() : null);
          stepGeneratorTask.addCallbackPostTask(() -> yoVariableServer.update(stepGeneratorThread.getHumanoidRobotContextData().getTimestamp(),
                                                                              stepGeneratorThread.getYoVariableRegistry()));
+         yoVariableServer.addRegistry(wholeBodyControllerCoreThread.getYoVariableRegistry(),
+                                      enableSCS1YoGraphics.get() ? wholeBodyControllerCoreThread.getSCS1YoGraphicsListRegistry() : null,
+                                      enableSCS2YoGraphics.get() ? wholeBodyControllerCoreThread.getSCS2YoGraphics() : null);
+         wholeBodyControllerCoreTask.addCallbackPostTask(() -> yoVariableServer.update(wholeBodyControllerCoreThread.getHumanoidRobotContextData().getTimestamp(),
+                                                                                       wholeBodyControllerCoreThread.getYoVariableRegistry()));
          if (ikStreamingRTThread != null)
          {
             yoVariableServer.addRegistry(ikStreamingRTThread.getYoVariableRegistry(),
@@ -667,6 +708,8 @@ public class SCS2AvatarMPCSimulationFactory
       mirroredRegistries.add(setupWithMirroredRegistry(estimatorThread.getYoRegistry(), estimatorTask, robotController.getYoRegistry()));
       mirroredRegistries.add(setupWithMirroredRegistry(controllerThread.getYoVariableRegistry(), controllerTask, robotController.getYoRegistry()));
       mirroredRegistries.add(setupWithMirroredRegistry(stepGeneratorThread.getYoVariableRegistry(), stepGeneratorTask, robotController.getYoRegistry()));
+      mirroredRegistries.add(setupWithMirroredRegistry(wholeBodyControllerCoreThread.getYoVariableRegistry(), wholeBodyControllerCoreTask, robotController.getYoRegistry()));
+
       if (ikStreamingRTTask != null)
          mirroredRegistries.add(setupWithMirroredRegistry(ikStreamingRTThread.getYoVariableRegistry(), ikStreamingRTTask, robotController.getYoRegistry()));
       if (handControlThread != null)

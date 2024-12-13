@@ -19,6 +19,8 @@ public interface WholeBodyControllerParameters<E extends Enum<E> & RobotSegment<
    {
       return getControllerDT();
    }
+   public double getWBCCDT();
+
 
    public StateEstimatorParameters getStateEstimatorParameters();
 
