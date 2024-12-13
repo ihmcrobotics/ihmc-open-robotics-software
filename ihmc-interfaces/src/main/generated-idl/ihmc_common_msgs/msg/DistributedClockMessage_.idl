@@ -1,6 +1,7 @@
 #ifndef __ihmc_common_msgs__msg__DistributedClockMessage__idl__
 #define __ihmc_common_msgs__msg__DistributedClockMessage__idl__
 
+#include "ihmc_common_msgs/msg/./GuidMessage_.idl"
 #include "ihmc_common_msgs/msg/./InstantMessage_.idl"
 module ihmc_common_msgs
 {
@@ -17,17 +18,13 @@ module ihmc_common_msgs
       struct DistributedClockMessage
       {
         /**
-         * The requester's unique ID
+         * The guid of the publisher that's expected to send back a reply
          */
-        string requester_id;
+        ihmc_common_msgs::msg::dds::GuidMessage request_target;
         /**
-         * The replier's unique ID
+         * The guid of the publisher associated with the requester
          */
-        string replier_id;
-        /**
-         * Monotonically increasing request number
-         */
-        unsigned long long request_number;
+        ihmc_common_msgs::msg::dds::GuidMessage reply_target;
         /**
          * The time at which the request is sent
          */

@@ -13,17 +13,13 @@ import us.ihmc.pubsub.TopicDataType;
 public class DistributedClockMessage extends Packet<DistributedClockMessage> implements Settable<DistributedClockMessage>, EpsilonComparable<DistributedClockMessage>
 {
    /**
-            * The requester's unique ID
+            * The guid of the publisher that's expected to send back a reply
             */
-   public java.lang.StringBuilder requester_id_;
+   public ihmc_common_msgs.msg.dds.GuidMessage request_target_;
    /**
-            * The replier's unique ID
+            * The guid of the publisher associated with the requester
             */
-   public java.lang.StringBuilder replier_id_;
-   /**
-            * Monotonically increasing request number
-            */
-   public long request_number_;
+   public ihmc_common_msgs.msg.dds.GuidMessage reply_target_;
    /**
             * The time at which the request is sent
             */
@@ -35,8 +31,8 @@ public class DistributedClockMessage extends Packet<DistributedClockMessage> imp
 
    public DistributedClockMessage()
    {
-      requester_id_ = new java.lang.StringBuilder(255);
-      replier_id_ = new java.lang.StringBuilder(255);
+      request_target_ = new ihmc_common_msgs.msg.dds.GuidMessage();
+      reply_target_ = new ihmc_common_msgs.msg.dds.GuidMessage();
       request_send_time_ = new ihmc_common_msgs.msg.dds.InstantMessage();
       reply_send_time_ = new ihmc_common_msgs.msg.dds.InstantMessage();
    }
@@ -49,79 +45,28 @@ public class DistributedClockMessage extends Packet<DistributedClockMessage> imp
 
    public void set(DistributedClockMessage other)
    {
-      requester_id_.setLength(0);
-      requester_id_.append(other.requester_id_);
-
-      replier_id_.setLength(0);
-      replier_id_.append(other.replier_id_);
-
-      request_number_ = other.request_number_;
-
+      ihmc_common_msgs.msg.dds.GuidMessagePubSubType.staticCopy(other.request_target_, request_target_);
+      ihmc_common_msgs.msg.dds.GuidMessagePubSubType.staticCopy(other.reply_target_, reply_target_);
       ihmc_common_msgs.msg.dds.InstantMessagePubSubType.staticCopy(other.request_send_time_, request_send_time_);
       ihmc_common_msgs.msg.dds.InstantMessagePubSubType.staticCopy(other.reply_send_time_, reply_send_time_);
    }
 
-   /**
-            * The requester's unique ID
-            */
-   public void setRequesterId(java.lang.String requester_id)
-   {
-      requester_id_.setLength(0);
-      requester_id_.append(requester_id);
-   }
 
    /**
-            * The requester's unique ID
+            * The guid of the publisher that's expected to send back a reply
             */
-   public java.lang.String getRequesterIdAsString()
+   public ihmc_common_msgs.msg.dds.GuidMessage getRequestTarget()
    {
-      return getRequesterId().toString();
-   }
-   /**
-            * The requester's unique ID
-            */
-   public java.lang.StringBuilder getRequesterId()
-   {
-      return requester_id_;
+      return request_target_;
    }
 
-   /**
-            * The replier's unique ID
-            */
-   public void setReplierId(java.lang.String replier_id)
-   {
-      replier_id_.setLength(0);
-      replier_id_.append(replier_id);
-   }
 
    /**
-            * The replier's unique ID
+            * The guid of the publisher associated with the requester
             */
-   public java.lang.String getReplierIdAsString()
+   public ihmc_common_msgs.msg.dds.GuidMessage getReplyTarget()
    {
-      return getReplierId().toString();
-   }
-   /**
-            * The replier's unique ID
-            */
-   public java.lang.StringBuilder getReplierId()
-   {
-      return replier_id_;
-   }
-
-   /**
-            * Monotonically increasing request number
-            */
-   public void setRequestNumber(long request_number)
-   {
-      request_number_ = request_number;
-   }
-   /**
-            * Monotonically increasing request number
-            */
-   public long getRequestNumber()
-   {
-      return request_number_;
+      return reply_target_;
    }
 
 
@@ -160,12 +105,8 @@ public class DistributedClockMessage extends Packet<DistributedClockMessage> imp
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.requester_id_, other.requester_id_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.replier_id_, other.replier_id_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.request_number_, other.request_number_, epsilon)) return false;
-
+      if (!this.request_target_.epsilonEquals(other.request_target_, epsilon)) return false;
+      if (!this.reply_target_.epsilonEquals(other.reply_target_, epsilon)) return false;
       if (!this.request_send_time_.epsilonEquals(other.request_send_time_, epsilon)) return false;
       if (!this.reply_send_time_.epsilonEquals(other.reply_send_time_, epsilon)) return false;
 
@@ -181,12 +122,8 @@ public class DistributedClockMessage extends Packet<DistributedClockMessage> imp
 
       DistributedClockMessage otherMyClass = (DistributedClockMessage) other;
 
-      if (!us.ihmc.idl.IDLTools.equals(this.requester_id_, otherMyClass.requester_id_)) return false;
-
-      if (!us.ihmc.idl.IDLTools.equals(this.replier_id_, otherMyClass.replier_id_)) return false;
-
-      if(this.request_number_ != otherMyClass.request_number_) return false;
-
+      if (!this.request_target_.equals(otherMyClass.request_target_)) return false;
+      if (!this.reply_target_.equals(otherMyClass.reply_target_)) return false;
       if (!this.request_send_time_.equals(otherMyClass.request_send_time_)) return false;
       if (!this.reply_send_time_.equals(otherMyClass.reply_send_time_)) return false;
 
@@ -199,12 +136,10 @@ public class DistributedClockMessage extends Packet<DistributedClockMessage> imp
       StringBuilder builder = new StringBuilder();
 
       builder.append("DistributedClockMessage {");
-      builder.append("requester_id=");
-      builder.append(this.requester_id_);      builder.append(", ");
-      builder.append("replier_id=");
-      builder.append(this.replier_id_);      builder.append(", ");
-      builder.append("request_number=");
-      builder.append(this.request_number_);      builder.append(", ");
+      builder.append("request_target=");
+      builder.append(this.request_target_);      builder.append(", ");
+      builder.append("reply_target=");
+      builder.append(this.reply_target_);      builder.append(", ");
       builder.append("request_send_time=");
       builder.append(this.request_send_time_);      builder.append(", ");
       builder.append("reply_send_time=");
