@@ -1,15 +1,17 @@
 package us.ihmc.rdx.ui.graphics;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
+import imgui.flag.ImGuiCol;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.perception.RawImage;
 import us.ihmc.rdx.AbstractRDXPointCloudRenderer.ColoringMethod;
+import us.ihmc.rdx.imgui.ImGuiExpandCollapseRenderer;
+import us.ihmc.rdx.imgui.ImGuiPlot;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.robotics.time.TimeTools;
@@ -23,7 +25,8 @@ import java.util.Set;
 
 /**
  * Visualizer for visualizing point cloud from depth and color images.
- * Attempts to compensate for de-synchronization of images using the acquisition times.
+ * Attempts to compensate for de-synchronization of color and depth
+ * using the image acquisition times.
  */
 public class RDXRawImagePointCloudVisualizer extends RDXVisualizer
 {
@@ -38,7 +41,13 @@ public class RDXRawImagePointCloudVisualizer extends RDXVisualizer
 
    private final ImInt coloringMethod = new ImInt(ColoringMethod.COLOR_IMAGE.ordinal());
    private final float[] defaultColor = new float[] {1.0f, 1.0f, 1.0f};
-   private final ImFloat pointScale = new ImFloat(0.005f);
+   private final ImFloat pointScale = new ImFloat(1.5f);
+
+   private final  ImGuiPlot deSyncPlot = new ImGuiPlot("Depth Color De-Sync", 100, 230, 22);
+   private double colorDepthDeSync = Double.NaN;
+
+   private final ImGuiExpandCollapseRenderer expandCollapseRenderer = new ImGuiExpandCollapseRenderer();
+   private boolean showExtraOptions = false;
 
    /**
     * The duration of history kept in the image histories.
@@ -58,7 +67,6 @@ public class RDXRawImagePointCloudVisualizer extends RDXVisualizer
     */
    private final ImFloat maxDeSync = new ImFloat(0.1f);
 
-   // FIXME: This is kinda buggy
    private boolean switchBackToColor = false;
 
    public RDXRawImagePointCloudVisualizer(String title)
@@ -109,10 +117,12 @@ public class RDXRawImagePointCloudVisualizer extends RDXVisualizer
       RawImage colorImage = null;
       boolean foundMatchingColorImage = false;
 
-      if (!colorImageHistory.isEmpty()) // Otherwise, we try to match the color and depth images according to acquisition time
+      // We try to match the color and depth images according to acquisition time
+      if (!colorImageHistory.isEmpty() && (coloringMethod.get() == ColoringMethod.COLOR_IMAGE.ordinal() || switchBackToColor))
       {
          depthImage = depthImageHistory.getFirst();
          colorImage = colorImageHistory.getFirst();
+         colorDepthDeSync = Math.abs(TimeTools.secondsBetween(colorImage.getAcquisitionTime(), depthImage.getAcquisitionTime()));
 
          if (depthImage.getAcquisitionTime().isBefore(colorImage.getAcquisitionTime()))
          {
@@ -146,13 +156,10 @@ public class RDXRawImagePointCloudVisualizer extends RDXVisualizer
             switchBackToColor = true;
          }
       }
-      else
+      else if (switchBackToColor)
       {
-         if (switchBackToColor)
-         {
-            coloringMethod.set(ColoringMethod.COLOR_IMAGE.ordinal());
-            switchBackToColor = false;
-         }
+         coloringMethod.set(ColoringMethod.COLOR_IMAGE.ordinal());
+         switchBackToColor = false;
       }
 
       // Ensure the renderer is initialized with a large enough max size
@@ -168,7 +175,9 @@ public class RDXRawImagePointCloudVisualizer extends RDXVisualizer
          availableColoringMethods = Arrays.stream(pointCloudRenderer.getAvailableColoringMethods()).map(Enum::name).toArray(String[]::new);
       }
 
-      // Update the coloring method
+      // Update the render settings
+      pointCloudRenderer.setPointScale(pointScale.get() / depthImage.getFocalLengthX());
+      pointCloudRenderer.setDefaultPointColor(defaultColor[0], defaultColor[1], defaultColor[2], 1.0f);
       pointCloudRenderer.setColoringMethod(ColoringMethod.values()[coloringMethod.get()]);
 
       // Update the mesh
@@ -207,23 +216,36 @@ public class RDXRawImagePointCloudVisualizer extends RDXVisualizer
    @Override
    public void renderImGuiWidgets()
    {
-      ImGui.combo("Coloring Method", coloringMethod, availableColoringMethods);
+      // Render the de-sync plot
+      deSyncPlot.setYScale(0, historyLength.get());
+      deSyncPlot.setWidth((int) (0.65f * ImGui.getWindowWidth()));
+      ImGui.pushStyleColor(ImGuiCol.PlotLines, ImGuiTools.greenRedGradientColor(colorDepthDeSync, 0.0f, historyLength.get()));
+      deSyncPlot.render(colorDepthDeSync);
+      ImGui.popStyleColor();
 
-      if (ImGui.colorEdit3("Default Color", defaultColor))
-         pointCloudRenderer.setDefaultPointColor(new Color(defaultColor[0], defaultColor[1], defaultColor[2], 1.0f));
+      // Render the renderer options
+      if (ImGui.combo("Coloring Method", coloringMethod, availableColoringMethods))
+         switchBackToColor = false;
+      ImGui.colorEdit3("Default Color", defaultColor);
+      ImGui.sliderFloat("Point Scale", pointScale.getData(), 0.0f, 2.0f);
 
-      if (ImGui.sliderFloat("Point Scale", pointScale.getData(), 0.0f, 0.1f))
-         pointCloudRenderer.setPointScale(pointScale.get());
-
-      if (ImGui.sliderFloat("History Length (S)", historyLength.getData(), 0.0f, 3.0f))
+      // Render extra options (if expanded)
+      if (expandCollapseRenderer.render(showExtraOptions))
+         showExtraOptions = !showExtraOptions;
+      ImGui.sameLine();
+      ImGui.text((showExtraOptions ? "Hide" : "Show") + " Extra Options");
+      if (showExtraOptions)
       {
-         if (maxDeSync.get() > 0.5f * historyLength.get())
-            maxDeSync.set(0.5f * historyLength.get());
-      }
-      ImGuiTools.previousWidgetTooltip("Affects how much de-sync the visualizer can compensate for.");
+         if (ImGui.sliderFloat("History Length (S)", historyLength.getData(), 0.0f, 3.0f))
+         {
+            if (maxDeSync.get() > 0.5f * historyLength.get())
+               maxDeSync.set(0.5f * historyLength.get());
+         }
+         ImGuiTools.previousWidgetTooltip("Affects how much de-sync can be corrected.");
 
-      ImGui.sliderFloat("Max De-Sync (S)", maxDeSync.getData(), 0.0f, 0.5f * historyLength.get());
-      ImGuiTools.previousWidgetTooltip("Amount of de-sync allowed for the images, after compensation.");
+         ImGui.sliderFloat("Max De-Sync (S)", maxDeSync.getData(), 0.0f, 0.5f * historyLength.get());
+         ImGuiTools.previousWidgetTooltip("Amount of de-sync allowed after correction.");
+      }
    }
 
    @Override

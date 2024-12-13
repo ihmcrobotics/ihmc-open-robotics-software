@@ -80,6 +80,11 @@ public abstract class AbstractRDXPointCloudRenderer implements RenderableProvide
       pointScale = scale;
    }
 
+   public void setDefaultPointColor(float r, float g, float b, float a)
+   {
+      defaultPointColor.set(r, g, b, a);
+   }
+
    public void setDefaultPointColor(Color color)
    {
       defaultPointColor.set(color);
