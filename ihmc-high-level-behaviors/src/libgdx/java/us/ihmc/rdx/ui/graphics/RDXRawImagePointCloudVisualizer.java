@@ -67,11 +67,18 @@ public class RDXRawImagePointCloudVisualizer extends RDXVisualizer
     */
    private final ImFloat maxDeSync = new ImFloat(0.1f);
 
+   private final boolean enableColorImageRendering;
    private boolean switchBackToColor = false;
 
    public RDXRawImagePointCloudVisualizer(String title)
    {
+      this(title, true);
+   }
+
+   public RDXRawImagePointCloudVisualizer(String title, boolean enableColorImageRendering)
+   {
       super(title);
+      this.enableColorImageRendering = enableColorImageRendering;
    }
 
    public void setDepthImage(RawImage depthImage)
@@ -118,7 +125,7 @@ public class RDXRawImagePointCloudVisualizer extends RDXVisualizer
       boolean foundMatchingColorImage = false;
 
       // We try to match the color and depth images according to acquisition time
-      if (!colorImageHistory.isEmpty() && (coloringMethod.get() == ColoringMethod.COLOR_IMAGE.ordinal() || switchBackToColor))
+      if (enableColorImageRendering && !colorImageHistory.isEmpty() && (coloringMethod.get() == ColoringMethod.COLOR_IMAGE.ordinal() || switchBackToColor))
       {
          depthImage = depthImageHistory.getFirst();
          colorImage = colorImageHistory.getFirst();
@@ -170,7 +177,7 @@ public class RDXRawImagePointCloudVisualizer extends RDXVisualizer
 
          if (pointCloudRenderer != null)
             pointCloudRenderer.dispose();
-         pointCloudRenderer = new RDXRawImagePointCloudRenderer(true);
+         pointCloudRenderer = new RDXRawImagePointCloudRenderer(enableColorImageRendering);
          pointCloudRenderer.create(maxPoints);
          availableColoringMethods = Arrays.stream(pointCloudRenderer.getAvailableColoringMethods()).map(Enum::name).toArray(String[]::new);
       }
@@ -216,12 +223,15 @@ public class RDXRawImagePointCloudVisualizer extends RDXVisualizer
    @Override
    public void renderImGuiWidgets()
    {
-      // Render the de-sync plot
-      deSyncPlot.setYScale(0, historyLength.get());
-      deSyncPlot.setWidth((int) (0.65f * ImGui.getWindowWidth()));
-      ImGui.pushStyleColor(ImGuiCol.PlotLines, ImGuiTools.greenRedGradientColor(colorDepthDeSync, 0.0f, historyLength.get()));
-      deSyncPlot.render(colorDepthDeSync);
-      ImGui.popStyleColor();
+      if (enableColorImageRendering)
+      {
+         // Render the de-sync plot
+         deSyncPlot.setYScale(0, historyLength.get());
+         deSyncPlot.setWidth((int) (0.65f * ImGui.getWindowWidth()));
+         ImGui.pushStyleColor(ImGuiCol.PlotLines, ImGuiTools.greenRedGradientColor(colorDepthDeSync, 0.0f, historyLength.get()));
+         deSyncPlot.render(colorDepthDeSync);
+         ImGui.popStyleColor();
+      }
 
       // Render the renderer options
       if (ImGui.combo("Coloring Method", coloringMethod, availableColoringMethods))
@@ -230,7 +240,7 @@ public class RDXRawImagePointCloudVisualizer extends RDXVisualizer
       ImGui.sliderFloat("Point Scale", pointScale.getData(), 0.0f, 2.0f);
 
       // Render extra options (if expanded)
-      if (expandCollapseRenderer.render(showExtraOptions))
+      if (enableColorImageRendering && expandCollapseRenderer.render(showExtraOptions))
          showExtraOptions = !showExtraOptions;
       ImGui.sameLine();
       ImGui.text((showExtraOptions ? "Hide" : "Show") + " Extra Options");
