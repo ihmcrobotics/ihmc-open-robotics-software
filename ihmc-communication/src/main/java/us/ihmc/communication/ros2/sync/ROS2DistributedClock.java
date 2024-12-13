@@ -6,7 +6,6 @@ import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.common.Guid;
 import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.ros2.ROS2Node;
@@ -86,7 +85,6 @@ public class ROS2DistributedClock
          Guid guid = info.getGuid();
          if (!guid.equals(publisher.getPublisher().getGuid())) // Exclude our publisher
          {
-            LogTools.info("ent: %s prefix: %s status: %s".formatted(guid.getEntity(), guid.getGuidPrefix(), info.getStatus()));
             switch (info.getStatus())
             {
                case MATCHED_MATCHING ->
@@ -96,7 +94,6 @@ public class ROS2DistributedClock
                      Guid guidCopy = new Guid();
                      guidCopy.set(guid);
 
-                     LogTools.info("Setting up peer: %s", guidCopy);
                      ROS2DistributedClockPeer peer = new ROS2DistributedClockPeer(guidCopy);
                      peerMap.put(guidCopy, peer);
                      peerList.add(peer);
@@ -111,7 +108,7 @@ public class ROS2DistributedClock
          }
       });
 
-      requestThread.setFrequencyLimit(.5);
+      requestThread.setFrequencyLimit(5.0);
       requestThread.startRepeating();
    }
 
@@ -134,6 +131,11 @@ public class ROS2DistributedClock
 
          ++nextPeerToPing;
       }
+   }
+
+   public void destroy()
+   {
+      requestThread.kill();
    }
 
    public List<ROS2DistributedClockPeer> getPeerList()
