@@ -51,6 +51,10 @@ module behavior_msgs
          */
         double trajectory_duration;
         /**
+         * Whether impedance control is active
+         */
+        boolean impedance_control;
+        /**
          * Whether maintaining the rigid body controlled in world after the action is complete
          */
         boolean hold_pose_in_world;
