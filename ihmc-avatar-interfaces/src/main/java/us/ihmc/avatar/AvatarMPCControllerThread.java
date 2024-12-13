@@ -9,8 +9,7 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextTools;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HumanoidHighLevelControllerManager;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.MPCHumanoidHighLevelControllerManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MPCHighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaEllipsoidsVisualizer;
 import us.ihmc.commonWalkingControlModules.visualizer.InverseDynamicsMechanismReferenceFrameVisualizer;
@@ -247,18 +246,18 @@ public class AvatarMPCControllerThread implements AvatarControllerThreadInterfac
          }
       }
 
-      HumanoidHighLevelControllerManager robotController = controllerFactory.getController(controllerModel,
-                                                                                           controlDT,
-                                                                                           gravity,
-                                                                                           kinematicsSimulation,
-                                                                                           yoTime,
-                                                                                           yoGraphicsListRegistry,
-                                                                                           sensorInformation,
-                                                                                           forceSensorDataHolderForController,
-                                                                                           centerOfMassDataHolderForController,
-                                                                                           centerOfPressureDataHolderForEstimator,
-                                                                                           lowLevelControllerOutput,
-                                                                                           jointsToIgnore);
+      MPCHumanoidHighLevelControllerManager robotController = controllerFactory.getMPCController(controllerModel,
+                                                                                                 controlDT,
+                                                                                                 gravity,
+                                                                                                 kinematicsSimulation,
+                                                                                                 yoTime,
+                                                                                                 yoGraphicsListRegistry,
+                                                                                                 sensorInformation,
+                                                                                                 forceSensorDataHolderForController,
+                                                                                                 centerOfMassDataHolderForController,
+                                                                                                 centerOfPressureDataHolderForEstimator,
+                                                                                                 lowLevelControllerOutput,
+                                                                                                 jointsToIgnore);
       scs2YoGraphicHolders.add(() -> robotController.getSCS2YoGraphics());
 
       ModularRobotController modularRobotController = new ModularRobotController("DRCMomentumBasedController");

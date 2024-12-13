@@ -113,7 +113,7 @@ public class SCS2AvatarMPCSimulationFactory
    protected final OptionalFactoryField<Integer> simulationDataRecordTickPeriod = new OptionalFactoryField<>("simulationDataRecordTickPeriod");
    protected final OptionalFactoryField<Boolean> usePerfectSensors = new OptionalFactoryField<>("usePerfectSensors", false);
    protected final OptionalFactoryField<Boolean> kinematicsSimulation = new OptionalFactoryField<>("kinematicsSimulation", false);
-   protected  final OptionalFactoryField<Boolean> createRigidBodyMutators = new OptionalFactoryField<>("createRigidBodyMutators", false);
+   protected final OptionalFactoryField<Boolean> createRigidBodyMutators = new OptionalFactoryField<>("createRigidBodyMutators", false);
    protected final OptionalFactoryField<SCS2JointDesiredOutputWriterFactory> outputWriterFactory = new OptionalFactoryField<>("outputWriterFactory",
                                                                                                                               getDefaultOutputWriterFactory());
    protected final OptionalFactoryField<HighLevelControllerName> initialState = new OptionalFactoryField<>("initialControllerState", WALKING);
@@ -307,13 +307,10 @@ public class SCS2AvatarMPCSimulationFactory
       robot.addThrottledController(new SCS2StateEstimatorDebugVariables(simulationConstructionSet.getInertialFrame(),
                                                                         gravity.get(),
                                                                         robotModel.getEstimatorDT(),
-                                                                        robot.getControllerManager().getControllerInput()),
-                                   robotModel.getEstimatorDT());
+                                                                        robot.getControllerManager().getControllerInput()), robotModel.getEstimatorDT());
       if (createRigidBodyMutators.hasValue() && createRigidBodyMutators.get())
       {
-         robot.addThrottledController(new SCS2RobotRigidBodyMutator(robot,
-                                                                    simulationConstructionSet.getTime(),
-                                                                    robotModel.getEstimatorDT()),
+         robot.addThrottledController(new SCS2RobotRigidBodyMutator(robot, simulationConstructionSet.getTime(), robotModel.getEstimatorDT()),
                                       robotModel.getEstimatorDT());
       }
 
@@ -349,8 +346,7 @@ public class SCS2AvatarMPCSimulationFactory
    private void setupSimulationOutputWriter()
    {
       simulationOutputWriter = outputWriterFactory.get()
-                                                  .build(robot.getControllerManager().getControllerInput(),
-                                                         robot.getControllerManager().getControllerOutput());
+                                                  .build(robot.getControllerManager().getControllerInput(), robot.getControllerManager().getControllerOutput());
    }
 
    private void setupKinematicsSimulationOutputWriter()
@@ -386,8 +382,9 @@ public class SCS2AvatarMPCSimulationFactory
          if (realtimeROS2Node.hasBeenSet())
          {
             pelvisPoseCorrectionCommunicator = new PelvisPoseCorrectionCommunicator(realtimeROS2Node.get(), robotName);
-            realtimeROS2Node.get().createSubscription(StateEstimatorAPI.getTopic(StampedPosePacket.class, robotName),
-                                        s -> pelvisPoseCorrectionCommunicator.receivedPacket(s.takeNextData()));
+            realtimeROS2Node.get()
+                            .createSubscription(StateEstimatorAPI.getTopic(StampedPosePacket.class, robotName),
+                                                s -> pelvisPoseCorrectionCommunicator.receivedPacket(s.takeNextData()));
          }
       }
 
@@ -421,15 +418,15 @@ public class SCS2AvatarMPCSimulationFactory
       }
 
       controllerThread = new AvatarMPCControllerThread(robotName,
-                                                    robotModel.get(),
-                                                    robotInitialSetup.get(),
-                                                    robotModel.get().getSensorInformation(),
-                                                    highLevelHumanoidControllerFactory.get(),
-                                                    contextDataFactory,
-                                                    null,
-                                                    ros2Node,
-                                                    gravity.get(),
-                                                    kinematicsSimulation.get());
+                                                       robotModel.get(),
+                                                       robotInitialSetup.get(),
+                                                       robotModel.get().getSensorInformation(),
+                                                       highLevelHumanoidControllerFactory.get(),
+                                                       contextDataFactory,
+                                                       null,
+                                                       ros2Node,
+                                                       gravity.get(),
+                                                       kinematicsSimulation.get());
       if (enableSCS1YoGraphics.get())
          simulationConstructionSet.addYoGraphics(YoGraphicConversionTools.toYoGraphicDefinitions(controllerThread.getSCS1YoGraphicsListRegistry()));
       if (enableSCS2YoGraphics.get())
@@ -823,12 +820,12 @@ public class SCS2AvatarMPCSimulationFactory
                                                             additionalContactTransforms.get(i));
 
       MPCHighLevelHumanoidControllerFactory controllerFactory = new MPCHighLevelHumanoidControllerFactory(contactableBodiesFactory,
-                                                                                                    feetForceSensorNames,
-                                                                                                    wristForceSensorNames,
-                                                                                                    highLevelControllerParameters,
-                                                                                                    walkingControllerParameters,
-                                                                                                    copTrajectoryParameters,
-                                                                                                    robotModel.getSplitFractionCalculatorParameters());
+                                                                                                          feetForceSensorNames,
+                                                                                                          wristForceSensorNames,
+                                                                                                          highLevelControllerParameters,
+                                                                                                          walkingControllerParameters,
+                                                                                                          copTrajectoryParameters,
+                                                                                                          robotModel.getSplitFractionCalculatorParameters());
       HighLevelControllerName fallbackControllerState = highLevelControllerParameters.getFallbackControllerState();
       controllerFactory.useDefaultDoNothingControlState();
       controllerFactory.useDefaultWalkingControlState();
@@ -854,7 +851,7 @@ public class SCS2AvatarMPCSimulationFactory
    }
 
    public MPCHighLevelHumanoidControllerFactory setDefaultHighLevelHumanoidControllerFactory(boolean useVelocityAndHeadingScript,
-                                                                                          HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters)
+                                                                                             HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters)
    {
       MPCHighLevelHumanoidControllerFactory controllerFactory;
 
@@ -881,7 +878,7 @@ public class SCS2AvatarMPCSimulationFactory
       terrainObjectDefinitions.add(terrainObjectDefinition);
    }
 
-   public void setCommonAvatarEnvrionmentInterface(CommonAvatarEnvironmentInterface environment)
+   public void setCommonAvatarEnvironmentInterface(CommonAvatarEnvironmentInterface environment)
    {
       addTerrainObjectDefinition(TerrainObjectDefinitionTools.toTerrainObjectDefinition(environment,
                                                                                         collidableHelper,
@@ -934,7 +931,9 @@ public class SCS2AvatarMPCSimulationFactory
       this.usePerfectSensors.set(usePerfectSensors);
    }
 
-   /** Must be used with perfect sensors. */
+   /**
+    * Must be used with perfect sensors.
+    */
    public void setKinematicsSimulation(boolean kinematicsSimulation)
    {
       this.kinematicsSimulation.set(kinematicsSimulation);

@@ -15,7 +15,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.Foo
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.falling.FallingControllerStateFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HumanoidHighLevelControllerManager;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.MPCHumanoidHighLevelControllerManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ComponentBasedFootstepDataMessageGeneratorFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HighLevelHumanoidControllerPluginFactory;
@@ -109,13 +109,13 @@ public class MPCHighLevelHumanoidControllerFactory implements CloseableAndDispos
 
    private boolean createQueuedControllerCommandGenerator = false;
    private boolean createUserDesiredControllerCommandGenerator = false;
-   private boolean useHeadingAndVelocityScript = true;
+   private final boolean useHeadingAndVelocityScript = true;
 
    private boolean isListeningToHighLevelStatePackets = true;
 
    private ConcurrentLinkedQueue<Command<?, ?>> controllerCommands;
 
-   private HumanoidHighLevelControllerManager humanoidHighLevelControllerManager;
+   private MPCHumanoidHighLevelControllerManager humanoidHighLevelControllerManager;
 
    public MPCHighLevelHumanoidControllerFactory(ContactableBodiesFactory<RobotSide> contactableBodiesFactory,
                                                 SideDependentList<String> footForceSensorNames,
@@ -367,7 +367,7 @@ public class MPCHighLevelHumanoidControllerFactory implements CloseableAndDispos
     * Adds a transition from {@code currentControlStateEnum} to {@code nextControlStateEnum} that will
     * trigger as soon as {@code currentControlStateEnum}'s
     * {@link HighLevelControllerState#isDone(double)} returns {@code true}.
-    * 
+    *
     * @param currentControlStateEnum The state that is to be checked to see if it is finished.
     * @param nextControlStateEnum    The state to transition to.
     */
@@ -380,7 +380,7 @@ public class MPCHighLevelHumanoidControllerFactory implements CloseableAndDispos
     * Adds a transition from {@code currentControlStateEnum} to {@code nextControlStateEnum} that will
     * trigger as soon as {@code currentControlStateEnum}'s
     * {@link HighLevelControllerState#isDone(double)} returns {@code true}.
-    * 
+    *
     * @param currentControlStateEnum The state that is to be checked to see if it is finished.
     * @param nextControlStateEnum    The state to transition to.
     * @param performNextStateOnEntry indicates whether {@link HighLevelControllerState#onEntry()} of
@@ -421,25 +421,26 @@ public class MPCHighLevelHumanoidControllerFactory implements CloseableAndDispos
       return requestedHighLevelControllerState;
    }
 
-   public HumanoidHighLevelControllerManager getController(FullHumanoidRobotModel fullRobotModel,
-                                                           double controlDT,
-                                                           double gravity,
-                                                           boolean kinematicsSimulation, // For fast non-physics preview simulations
-                                                           YoDouble yoTime,
-                                                           YoGraphicsListRegistry yoGraphicsListRegistry,
-                                                           HumanoidRobotSensorInformation sensorInformation,
-                                                           ForceSensorDataHolderReadOnly forceSensorDataHolder,
-                                                           CenterOfMassDataHolderReadOnly centerOfMassDataHolderForController,
-                                                           CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
-                                                           JointDesiredOutputListBasics lowLevelControllerOutput,
-                                                           JointBasics... jointsToIgnore)
+   public MPCHumanoidHighLevelControllerManager getMPCController(FullHumanoidRobotModel fullRobotModel,
+                                                                 double controlDT,
+                                                                 double gravity,
+                                                                 boolean kinematicsSimulation,
+                                                                 // For fast non-physics preview simulations
+                                                                 YoDouble yoTime,
+                                                                 YoGraphicsListRegistry yoGraphicsListRegistry,
+                                                                 HumanoidRobotSensorInformation sensorInformation,
+                                                                 ForceSensorDataHolderReadOnly forceSensorDataHolder,
+                                                                 CenterOfMassDataHolderReadOnly centerOfMassDataHolderForController,
+                                                                 CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
+                                                                 JointDesiredOutputListBasics lowLevelControllerOutput,
+                                                                 JointBasics... jointsToIgnore)
    {
       YoBoolean usingEstimatorCoMPosition = new YoBoolean("usingEstimatorCoMPosition", registry);
       YoBoolean usingEstimatorCoMVelocity = new YoBoolean("usingEstimatorCoMVelocity", registry);
 
       CenterOfMassStateProvider centerOfMassStateProvider = new CenterOfMassStateProvider()
       {
-         CenterOfMassJacobian centerOfMassJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator(), worldFrame);
+         final CenterOfMassJacobian centerOfMassJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator(), worldFrame);
 
          @Override
          public void updateState()
@@ -525,7 +526,7 @@ public class MPCHighLevelHumanoidControllerFactory implements CloseableAndDispos
 
       if (walkingControllerParameters.createMultiContactPostureAdjustmentCalculator())
          controllerToolbox.setupMultiContactPostureAdjustmentProvider();
-      
+
       double defaultTransferTime = walkingControllerParameters.getDefaultTransferTime();
       double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
       double defaultInitialTransferTime = walkingControllerParameters.getDefaultInitialTransferTime();
@@ -548,21 +549,21 @@ public class MPCHighLevelHumanoidControllerFactory implements CloseableAndDispos
       FrameMessageCommandConverter commandConversionHelper = new FrameMessageCommandConverter(referenceFrameHashCodeResolver);
       commandInputManager.registerConversionHelper(commandConversionHelper);
 
-      humanoidHighLevelControllerManager = new HumanoidHighLevelControllerManager(commandInputManager,
-                                                                                  statusMessageOutputManager,
-                                                                                  initialControllerState,
-                                                                                  highLevelControllerParameters,
-                                                                                  walkingControllerParameters,
-                                                                                  requestedHighLevelControllerState,
-                                                                                  controllerFactoriesMap,
-                                                                                  stateTransitionFactories,
-                                                                                  pluginFactories,
-                                                                                  managerFactory,
-                                                                                  controllerCoreFactory,
-                                                                                  controllerToolbox,
-                                                                                  centerOfPressureDataHolderForEstimator,
-                                                                                  forceSensorDataHolder,
-                                                                                  lowLevelControllerOutput);
+      humanoidHighLevelControllerManager = new MPCHumanoidHighLevelControllerManager(commandInputManager,
+                                                                                     statusMessageOutputManager,
+                                                                                     initialControllerState,
+                                                                                     highLevelControllerParameters,
+                                                                                     walkingControllerParameters,
+                                                                                     requestedHighLevelControllerState,
+                                                                                     controllerFactoriesMap,
+                                                                                     stateTransitionFactories,
+                                                                                     pluginFactories,
+                                                                                     managerFactory,
+                                                                                     controllerCoreFactory,
+                                                                                     controllerToolbox,
+                                                                                     centerOfPressureDataHolderForEstimator,
+                                                                                     forceSensorDataHolder,
+                                                                                     lowLevelControllerOutput);
       humanoidHighLevelControllerManager.addYoVariableRegistry(registry);
       humanoidHighLevelControllerManager.setListenToHighLevelStatePackets(isListeningToHighLevelStatePackets);
       for (RobotSide robotSide : RobotSide.values)
@@ -743,5 +744,4 @@ public class MPCHighLevelHumanoidControllerFactory implements CloseableAndDispos
       else
          isListeningToHighLevelStatePackets = isListening;
    }
-
 }
