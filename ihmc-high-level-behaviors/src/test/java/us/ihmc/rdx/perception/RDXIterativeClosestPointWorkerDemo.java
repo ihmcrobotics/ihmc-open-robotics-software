@@ -32,7 +32,7 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizersPanel;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
-import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2ColoredPointCloudVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2RawImagePointCloudVisualizer;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
@@ -223,7 +223,7 @@ public class RDXIterativeClosestPointWorkerDemo
             zedDepthImageVisualizer.createRequestHeartbeat(node, PerceptionAPI.REQUEST_ZED_COLOR);
             perceptionVisualizerPanel.addVisualizer(zedDepthImageVisualizer);
 
-            RDXROS2ColoredPointCloudVisualizer zedPointCloudVisualizer = new RDXROS2ColoredPointCloudVisualizer("ZED2 Colored Point Cloud",
+            RDXROS2RawImagePointCloudVisualizer zedPointCloudVisualizer = new RDXROS2RawImagePointCloudVisualizer("ZED2 Colored Point Cloud",
                                                                                                                 node,
                                                                                                                 PerceptionAPI.ZED2_DEPTH,
                                                                                                                 PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));

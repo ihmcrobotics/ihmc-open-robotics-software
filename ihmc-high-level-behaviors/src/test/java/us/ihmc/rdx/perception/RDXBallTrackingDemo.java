@@ -22,7 +22,7 @@ import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizersPanel;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2BallTrackingVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
-import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2ColoredPointCloudVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2RawImagePointCloudVisualizer;
 import us.ihmc.robotics.math.filters.AlphaFilteredRigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
@@ -131,7 +131,7 @@ public class RDXBallTrackingDemo
             colorImageVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_COLOR);
             perceptionVisualizerPanel.addVisualizer(colorImageVisualizer);
 
-            RDXROS2ColoredPointCloudVisualizer pointCloudVisualizer = new RDXROS2ColoredPointCloudVisualizer("Point Cloud",
+            RDXROS2RawImagePointCloudVisualizer pointCloudVisualizer = new RDXROS2RawImagePointCloudVisualizer("Point Cloud",
                                                                                                              ros2Node,
                                                                                                              PerceptionAPI.ZED2_DEPTH,
                                                                                                              PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));

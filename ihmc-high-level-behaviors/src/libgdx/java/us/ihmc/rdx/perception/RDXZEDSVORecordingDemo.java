@@ -11,7 +11,7 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizersPanel;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
-import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2ColoredPointCloudVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2RawImagePointCloudVisualizer;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
@@ -29,7 +29,7 @@ public class RDXZEDSVORecordingDemo
    // Demo file on Google Drive https://drive.google.com/file/d/1wF5tFVqEJM21uK12g_O5GpvACPJhXKZ1/view
    // Uncomment below lines to play it back
    private static final RecordMode RECORD_MODE = RecordMode.PLAYBACK;
-   private static final String SVO_FILE_NAME = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.toAbsolutePath() + "/20240625_154000_ZEDRecording_Demo.svo2";
+   private static final String SVO_FILE_NAME = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.toAbsolutePath() + "/20240715_103234_ZEDRecording_NewONRCourseWalk.svo2";
 
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private final ROS2Node ros2Node;
@@ -114,7 +114,7 @@ public class RDXZEDSVORecordingDemo
    {
       // ZED2 colored point cloud visualizer
       {
-         RDXROS2ColoredPointCloudVisualizer zed2ColoredPointCloudVisualizer = new RDXROS2ColoredPointCloudVisualizer("ZED 2 Colored Point Cloud",
+         RDXROS2RawImagePointCloudVisualizer zed2ColoredPointCloudVisualizer = new RDXROS2RawImagePointCloudVisualizer("ZED 2 Colored Point Cloud",
                                                                                                                      ros2Node,
                                                                                                                      PerceptionAPI.ZED2_DEPTH,
                                                                                                                      PerceptionAPI.ZED2_COLOR_IMAGES.get(

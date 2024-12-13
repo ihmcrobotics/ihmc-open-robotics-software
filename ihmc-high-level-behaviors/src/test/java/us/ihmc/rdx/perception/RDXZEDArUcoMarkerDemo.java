@@ -20,7 +20,7 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizersPanel;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
-import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2ColoredPointCloudVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2RawImagePointCloudVisualizer;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
@@ -43,7 +43,7 @@ public class RDXZEDArUcoMarkerDemo
    private final RDXBaseUI baseUI;
    private RDXMatImagePanel arUcoDetectionImagePanel;
    private final Mat annotatedImage = new Mat();
-   private final RDXROS2ColoredPointCloudVisualizer pointCloudVisualizer;
+   private final RDXROS2RawImagePointCloudVisualizer pointCloudVisualizer;
    private final RDXPerceptionVisualizersPanel perceptionVisualizersPanel;
    private final RDXReferenceFrameGraphicsList markerPoseGraphics = new RDXReferenceFrameGraphicsList();
    private final ImFloat markerSize = new ImFloat(0.02975f);
@@ -66,7 +66,7 @@ public class RDXZEDArUcoMarkerDemo
       sensorFrame = new MutableReferenceFrame(ReferenceFrame.getWorldFrame());
 
       baseUI = new RDXBaseUI("ArUco Marker Demo");
-      pointCloudVisualizer = new RDXROS2ColoredPointCloudVisualizer("ZED Point Cloud",
+      pointCloudVisualizer = new RDXROS2RawImagePointCloudVisualizer("ZED Point Cloud",
                                                                     ros2Node,
                                                                     PerceptionAPI.ZED2_DEPTH,
                                                                     PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
