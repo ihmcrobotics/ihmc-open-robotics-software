@@ -665,6 +665,7 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
    {
       latestStatusReceived.setValue(FootstepStatus.COMPLETED);
       currentSupportSide.set(robotSide);
+//      update(0.0);
    }
 
    /**
