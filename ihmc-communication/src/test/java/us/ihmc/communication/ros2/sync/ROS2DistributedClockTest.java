@@ -10,37 +10,47 @@ import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2NodeBuilder.SpecialTransportMode;
 
 import java.time.Duration;
+import java.time.Instant;
 
 public class ROS2DistributedClockTest
 {
    @Test
    public void test()
    {
-      ROS2Node ros2Node1 = new ROS2NodeBuilder().specialTransportMode(SpecialTransportMode.INTRAPROCESS_ONLY).build("test");
+      ROS2Node ros2Node0 = new ROS2NodeBuilder().specialTransportMode(SpecialTransportMode.INTRAPROCESS_ONLY).build("distributed_clock_test0");
+      ROS2Node ros2Node1 = new ROS2NodeBuilder().specialTransportMode(SpecialTransportMode.INTRAPROCESS_ONLY).build("distributed_clock_test1");
 
-      ROS2DistributedClock clock1 = new ROS2DistributedClock(ros2Node1);
+      ROS2DistributedClock[] clocks = new ROS2DistributedClock[3];
+      clocks[0] = new ROS2DistributedClock(ros2Node0);
+      clocks[1] = new ROS2DistributedClock(ros2Node0);
+      clocks[2] = new ROS2DistributedClock(ros2Node1);
 
-      ROS2Node ros2Node2 = new ROS2NodeBuilder().specialTransportMode(SpecialTransportMode.INTRAPROCESS_ONLY).build("test2");
+      ThreadTools.park(0.5);
 
-      ROS2DistributedClock clock2 = new ROS2DistributedClock(ros2Node2);
+      for (int i = 0; i < 10; i++)
+      {
+         for (ROS2DistributedClock clock : clocks)
+            Assertions.assertEquals(clocks.length - 1, clock.getPeerList().size());
 
-      ThreadTools.park(1.0);
+         for (ROS2DistributedClock clock : clocks)
+         {
+            Duration offset = clock.getPeerList().get(0).getPeerClockOffset();
+            LogTools.info("Clock offset: {}", offset);
+            Assertions.assertTrue(TimeTools.toDoubleSeconds(offset) < 0.1);
+         }
 
-      Assertions.assertEquals(1, clock1.getPeerList().size());
-      Assertions.assertEquals(1, clock2.getPeerList().size());
+         for (ROS2DistributedClock clock : clocks)
+         {
+            LogTools.info("Converted peer time: {}", clock.getPeerList().get(0).convertPeerTimeToOurTime(Instant.now()));
+         }
 
-      Duration offset0 = clock1.getPeerList().get(0).getPeerClockOffset();
-      LogTools.info("Clock 1 offset: {}", offset0);
-      Duration offset1 = clock2.getPeerList().get(0).getPeerClockOffset();
-      LogTools.info("Clock 2 offset: {}", offset1);
+         ThreadTools.park(0.3);
+      }
 
-      Assertions.assertTrue(TimeTools.toDoubleSeconds(offset0) < 0.1);
-      Assertions.assertTrue(TimeTools.toDoubleSeconds(offset1) < 0.1);
+      for (ROS2DistributedClock clock : clocks)
+         clock.destroy();
 
-      clock1.destroy();
-      clock2.destroy();
-
+      ros2Node0.destroy();
       ros2Node1.destroy();
-      ros2Node2.destroy();
    }
 }
