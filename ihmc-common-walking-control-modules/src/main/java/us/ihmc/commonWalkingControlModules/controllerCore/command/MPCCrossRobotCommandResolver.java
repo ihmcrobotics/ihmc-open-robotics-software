@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command;
 
-import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotMPCContextData;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.JointHashCodeResolver;
@@ -13,6 +12,7 @@ public class MPCCrossRobotCommandResolver extends CrossRobotCommandResolver
    {
       super(fullHumanoidRobotModel);
    }
+
    public MPCCrossRobotCommandResolver(ReferenceFrameHashCodeResolver referenceFrameHashCodeResolver,
                                        RigidBodyHashCodeResolver rigidBodyHashCodeResolver,
                                        JointHashCodeResolver jointHashCodeResolver)
@@ -26,13 +26,16 @@ public class MPCCrossRobotCommandResolver extends CrossRobotCommandResolver
       out.setTimestamp(in.getTimestamp());
       out.setSchedulerTick(in.getSchedulerTick());
    }
+
    public void resolveHumanoidRobotContextDataController(HumanoidRobotMPCContextData in, HumanoidRobotMPCContextData out)
    {
       resolveCenterOfPressureDataHolder(in.getCenterOfPressureDataHolder(), out.getCenterOfPressureDataHolder());
       resolveRobotMotionStatusHolder(in.getRobotMotionStatusHolder(), out.getRobotMotionStatusHolder());
-      resolveLowLevelOneDoFJointDesiredDataHolder(in.getJointDesiredOutputList(), out.getJointDesiredOutputList());
+//      resolveLowLevelOneDoFJointDesiredDataHolder(in.getJointDesiredOutputList(), out.getJointDesiredOutputList());
+      resolveLowLevelOneDoFJointDesiredDataHolder(in.getMpcControllerDesiredOutputList(), out.getMpcControllerDesiredOutputList());
       out.setControllerRan(in.getControllerRan());
    }
+
    public void resolveHumanoidRobotContextDataEstimator(HumanoidRobotMPCContextData in, HumanoidRobotMPCContextData out)
    {
       resolveHumanoidRobotContextJointData(in.getProcessedJointData(), out.getProcessedJointData());
@@ -41,4 +44,8 @@ public class MPCCrossRobotCommandResolver extends CrossRobotCommandResolver
       out.setEstimatorRan(in.getEstimatorRan());
    }
 
+   public void resolveHumanoidRobotContextDataControllerCore(HumanoidRobotMPCContextData in, HumanoidRobotMPCContextData out)
+   {
+      resolveLowLevelOneDoFJointDesiredDataHolder(in.getMpcControllerDesiredOutputList(), out.getMpcControllerDesiredOutputList());
+   }
 }

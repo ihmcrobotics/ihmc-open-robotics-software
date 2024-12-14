@@ -62,12 +62,14 @@ public class MPCWholeBodyControllerCoreTask extends MPCHumanoidRobotControlTask
    {
       runAll(schedulerThreadRunnables);
       //      masterResolver.resolveHumanoidRobotContextDataController(wholeBodyControllerCoreThread.getHumanoidRobotContextData(), masterContext);
+      wholeBodyControllerCoreResolver.resolveLowLevelOneDoFJointDesiredDataHolder(wholeBodyControllerCoreThread.getHumanoidRobotContextData().getJointDesiredOutputList(), masterContext.getJointDesiredOutputList());
    }
 
    protected void updateLocalContext(HumanoidRobotMPCContextData masterContext)
    {
       wholeBodyControllerCoreResolver.resolveHumanoidRobotContextDataScheduler(masterContext, (HumanoidRobotMPCContextData) wholeBodyControllerCoreThread.getHumanoidRobotContextData());
       wholeBodyControllerCoreResolver.resolveHumanoidRobotContextDataEstimator(masterContext, (HumanoidRobotMPCContextData) wholeBodyControllerCoreThread.getHumanoidRobotContextData());
+      wholeBodyControllerCoreResolver.resolveHumanoidRobotContextDataControllerCore(masterContext, (HumanoidRobotMPCContextData) wholeBodyControllerCoreThread.getHumanoidRobotContextData());
    }
 
    @Override

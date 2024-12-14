@@ -125,7 +125,7 @@ public class HumanoidWholeBodyControllerCoreManager implements RobotController, 
          //         controllerToolbox.reportControllerFailureToListeners(null);
       }
 
-//      copyJointDesiredsToJoints();
+      copyJointDesiredsToJoints();
       //      reportControllerCoreOutputDataHolderForController();
    }
 

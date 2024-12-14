@@ -3,19 +3,7 @@ package us.ihmc.atlas;
 import com.jme3.math.Transform;
 import us.ihmc.atlas.diagnostic.AtlasDiagnosticParameters;
 import us.ihmc.atlas.initialSetup.AtlasSimInitialSetup;
-import us.ihmc.atlas.parameters.AtlasCoPTrajectoryParameters;
-import us.ihmc.atlas.parameters.AtlasContactPointParameters;
-import us.ihmc.atlas.parameters.AtlasFootstepPlannerParameters;
-import us.ihmc.atlas.parameters.AtlasHighLevelControllerParameters;
-import us.ihmc.atlas.parameters.AtlasICPSplitFractionCalculatorParameters;
-import us.ihmc.atlas.parameters.AtlasKinematicsCollisionModel;
-import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
-import us.ihmc.atlas.parameters.AtlasSensorInformation;
-import us.ihmc.atlas.parameters.AtlasSimulationCollisionModel;
-import us.ihmc.atlas.parameters.AtlasStateEstimatorParameters;
-import us.ihmc.atlas.parameters.AtlasSwingPlannerParameters;
-import us.ihmc.atlas.parameters.AtlasVisibilityGraphParameters;
-import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
+import us.ihmc.atlas.parameters.*;
 import us.ihmc.atlas.ros.AtlasPPSTimestampOffsetProvider;
 import us.ihmc.atlas.sensors.AtlasCollisionBoxProvider;
 import us.ihmc.atlas.sensors.AtlasSensorSuiteManager;
@@ -243,10 +231,10 @@ public class AtlasRobotModel implements DRCRobotModel
          RobotDefinitionTools.setDefaultMaterial(robotDefinition, new MaterialDefinition(ColorDefinitions.Black()));
 
       getRobotDefinitionMutator().accept(robotDefinition);
-      
+
       if (isUseHandMutatorCollisions())
          getRobotDefinitionHandMutator().accept(robotDefinition);
-      
+
       return robotDefinition;
    }
 
@@ -283,14 +271,13 @@ public class AtlasRobotModel implements DRCRobotModel
          robotDefinitionMutator = new AtlasRobotDefinitionMutator(getJointMap(), getSensorInformation());
       return robotDefinitionMutator;
    }
-   
+
    public Consumer<RobotDefinition> getRobotDefinitionHandMutator()
    {
       if (robotDefinitionHandMutator == null)
          robotDefinitionHandMutator = new AtlasRobotDefinitionHandMutator();
       return robotDefinitionHandMutator;
    }
-
 
    @Override
    public HighLevelControllerParameters getHighLevelControllerParameters()
@@ -428,8 +415,9 @@ public class AtlasRobotModel implements DRCRobotModel
             }
             else
             {
-               System.out.println(this.getClass().getName() + ", createFullRobotModel(): range not large enough to reduce for side="
-                     + robotSide.getLowerCaseName() + " joint=" + armJointName.getCamelCaseNameForStartOfExpression());
+               System.out.println(
+                     this.getClass().getName() + ", createFullRobotModel(): range not large enough to reduce for side=" + robotSide.getLowerCaseName()
+                     + " joint=" + armJointName.getCamelCaseNameForStartOfExpression());
             }
          }
       }
@@ -464,6 +452,12 @@ public class AtlasRobotModel implements DRCRobotModel
    public double getControllerDT()
    {
       return CONTROL_DT;
+   }
+
+   @Override
+   public double getWBCCDT()
+   {
+      return 0.0;
    }
 
    @Override

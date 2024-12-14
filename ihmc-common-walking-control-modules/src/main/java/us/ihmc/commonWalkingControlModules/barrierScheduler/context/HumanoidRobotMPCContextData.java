@@ -66,6 +66,10 @@ public class HumanoidRobotMPCContextData extends HumanoidRobotContextData
    {
       return wholeBodyControllerCoreRan;
    }
+   public LowLevelOneDoFJointDesiredDataHolder getMpcControllerDesiredOutputList()
+   {
+      return mpcControllerDesiredOutputList;
+   }
 
    public void set(HumanoidRobotMPCContextData other)
    {

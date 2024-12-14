@@ -11,7 +11,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJ
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoLowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.*;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.MPCHighLevelControllerState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HighLevelHumanoidControllerPlugin;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HighLevelHumanoidControllerPluginFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -345,7 +344,14 @@ public class MPCHumanoidHighLevelControllerManager implements RobotController, S
       }
 
       yoLowLevelOneDoFJointDesiredDataHolder.overwriteWith(lowLevelOneDoFJointDesiredDataHolder);
-      lowLevelControllerOutput.overwriteWith(lowLevelOneDoFJointDesiredDataHolder);
+
+      /**
+       * This line tells the output of this Controller saved to lowLevelControllerOutput which the dataType to be delivered to the actuator.
+       * The output will be saved into desiredMPCControllerOutput and be delivered to the wholebodycontrollercore thread. Then, the data is saved into
+       * lowLevelControllerOutput in `copyJointDesiredsToJoints` in `HumanoidWholeBodyControllerCoreManager`
+       */
+      //      lowLevelControllerOutput.overwriteWith(lowLevelOneDoFJointDesiredDataHolder);
+      desiredMPCControllerOutput.overwriteWith(lowLevelOneDoFJointDesiredDataHolder);
 
       RootJointDesiredConfigurationDataReadOnly rootJointDesiredConfiguration = stateMachine.getCurrentState().getOutputForRootJoint();
       if (rootJointDesiredConfiguration != null)
