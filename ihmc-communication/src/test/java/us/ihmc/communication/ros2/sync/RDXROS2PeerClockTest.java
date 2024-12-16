@@ -57,7 +57,8 @@ public class RDXROS2PeerClockTest
             {
                ImGui.text("Peer %s time (peer frame):".formatted(peer.getGuid()));
                ImGui.pushFont(ImGuiTools.getBigFont());
-               ImGui.text(formatter.format(peer.getPeerTimeInPeerFrame(now).atZone(ZoneId.systemDefault())));
+               if (peer.getPeerClockOffset() != null)
+                  ImGui.text(formatter.format(peer.getPeerTimeInPeerFrame(now).atZone(ZoneId.systemDefault())));
                ImGui.popFont();
             }
          }
