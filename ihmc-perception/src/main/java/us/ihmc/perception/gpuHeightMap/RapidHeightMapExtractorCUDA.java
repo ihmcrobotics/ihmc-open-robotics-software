@@ -33,7 +33,7 @@ import java.net.URL;
 import static org.bytedeco.cuda.global.cudart.cudaFree;
 import static org.bytedeco.cuda.global.cudart.cudaStreamSynchronize;
 
-public class RapidHeightMapExtractorCUDA
+public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInterface
 {
    private static final int BLOCK_SIZE_XY = 32;
    private static HeightMapParameters heightMapParameters = new HeightMapParameters("GPU");
@@ -112,10 +112,24 @@ public class RapidHeightMapExtractorCUDA
 
    private float[] paramsArray;
 
-   public RapidHeightMapExtractorCUDA(ReferenceFrame leftFootSoleFrame, ReferenceFrame rightFootSoleFrame)
+   public RapidHeightMapExtractorCUDA(ReferenceFrame leftFootSoleFrame, ReferenceFrame rightFootSoleFrame, GpuMat depthImage, int mode)
    {
       footSoleFrames.put(RobotSide.LEFT, leftFootSoleFrame);
       footSoleFrames.put(RobotSide.RIGHT, rightFootSoleFrame);
+
+
+      inputDepthImage = depthImage;
+
+      this.mode = mode;
+      try
+      {
+         initialize();
+      }
+      catch (URISyntaxException e)
+      {
+         throw new RuntimeException(e);
+      }
+      reset();
    }
 
    public void setDepthIntrinsics(CameraIntrinsics cameraIntrinsics)
@@ -246,22 +260,6 @@ public class RapidHeightMapExtractorCUDA
       globalHeightMapImage.setTo(new Scalar(offset));
 
       sequenceNumber = 0;
-   }
-
-   public void create(GpuMat depthImage, int mode)
-   {
-      inputDepthImage = depthImage;
-
-      this.mode = mode;
-      try
-      {
-         initialize();
-      }
-      catch (URISyntaxException e)
-      {
-         throw new RuntimeException(e);
-      }
-      reset();
    }
 
    public void update(RigidBodyTransform sensorToWorldTransform, RigidBodyTransform sensorToGroundTransform, RigidBodyTransform groundToWorldTransform)
@@ -476,7 +474,7 @@ public class RapidHeightMapExtractorCUDA
                                  (float) parameters.getFastSearchSize()};
    }
 
-   public static HeightMapData packHeightMapData(RapidHeightMapExtractorCUDA heightMapExtractor, HeightMapData heightMapDataToPack)
+   public static HeightMapData packHeightMapData(RapidHeightMapExtractorInterface heightMapExtractor, HeightMapData heightMapDataToPack)
    {
       Mat heightMapMat = heightMapExtractor.getTerrainMapData().getHeightMap();
       HeightMapData latestHeightMapData = heightMapDataToPack;
