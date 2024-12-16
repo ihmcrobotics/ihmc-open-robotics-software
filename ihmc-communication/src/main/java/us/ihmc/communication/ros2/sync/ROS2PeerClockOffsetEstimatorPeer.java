@@ -29,9 +29,14 @@ public class ROS2PeerClockOffsetEstimatorPeer
       peerClockOffset = Duration.between(replyReceiveTime, peerNow);
    }
 
-   public Instant convertPeerTimeToOurTime(Instant peerTime)
+   public Instant getPeerTimeInLocalFrame(Instant peerTime)
    {
       return peerTime.minus(peerClockOffset);
+   }
+
+   public Instant getPeerTimeInPeerFrame(Instant ourTime)
+   {
+      return ourTime.plus(peerClockOffset);
    }
 
    public Duration getPeerClockOffset()

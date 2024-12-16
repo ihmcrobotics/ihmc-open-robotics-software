@@ -33,7 +33,7 @@ public class ROS2PeerClockOffsetEstimator
    private final ROS2Publisher<PeerClockOffsetEstimatorPingMessage> publisher;
    private final Guid ourGuid;
    private final RepeatingTaskThread requestThread = new RepeatingTaskThread(getClass().getSimpleName(),
-                                                                             this::requestThread,
+                                                                             this::runRequestTask,
                                                                              DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
    private final PeerClockOffsetEstimatorPingMessage requestMessage = new PeerClockOffsetEstimatorPingMessage();
    private final PeerClockOffsetEstimatorPingMessage receivedMessage = new PeerClockOffsetEstimatorPingMessage();
@@ -110,7 +110,7 @@ public class ROS2PeerClockOffsetEstimator
       requestThread.startRepeating();
    }
 
-   private void requestThread()
+   private void runRequestTask()
    {
       if (!peerList.isEmpty())
       {

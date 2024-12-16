@@ -41,7 +41,7 @@ public class ROS2PeerClockOffsetEstimatorTest
 
          for (ROS2PeerClockOffsetEstimator clock : clocks)
          {
-            LogTools.info("Converted peer time: {}", clock.getPeerList().get(0).convertPeerTimeToOurTime(Instant.now()));
+            LogTools.info("Converted peer time: {}", clock.getPeerList().get(0).getPeerTimeInLocalFrame(Instant.now()));
          }
 
          ThreadTools.park(0.3);
