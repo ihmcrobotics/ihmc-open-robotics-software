@@ -77,7 +77,6 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    private final RDXStoredPropertySetTuner continuousHikingParametersPanel = new RDXStoredPropertySetTuner("Continuous Hiking Parameters (CH)");
    private final ImGuiRemoteROS2StoredPropertySetGroup hostStoredPropertySets;
    private final ImGuiSliderDouble stepsBeforeSafetyStop = new ImGuiSliderDouble("Steps Before Safety Stop", "%.2f");
-   private final ImBoolean enableContinuousHiking = new ImBoolean(false);
    private final ImBoolean squareUpToGoal = new ImBoolean(false);
    private final ImBoolean useAStarFootstepPlanner = new ImBoolean(true);
    private final ImBoolean useMonteCarloReference = new ImBoolean(false);
@@ -265,7 +264,6 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       ImGui.separator();
       ImGui.text("Options for Continuous Hiking Message");
       ImGui.indent();
-      ImGui.checkbox("Enable Continuous Hiking", enableContinuousHiking);
       ImGui.checkbox("Square Up To Goal", squareUpToGoal);
       if (ImGui.button("Clear Planned footsteps"))
       {
@@ -287,7 +285,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
 
       if (ImGui.getIO().getKeyCtrl() && ImGui.getIO().getKeyShift())
       {
-         publishContinuousHikingCommand();
+         publishContinuousHikingCommandWithEnabled();
       }
       else if (controllerConnected)
       {
@@ -381,12 +379,11 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
 
    private void publishJoystickStatus(Controller joystickController)
    {
-
       // Setup variables to be published in the message
-      boolean walkBackwards = false;
-      double forwardJoystickValue = 0.0;
-      double lateralJoystickValue = 0.0;
-      double turningJoystickValue = 0.0;
+      boolean walkBackwards;
+      double forwardJoystickValue;
+      double lateralJoystickValue;
+      double turningJoystickValue;
 
       walkBackwards = joystickController.getButton(joystickController.getMapping().buttonB);
       forwardJoystickValue = -joystickController.getAxis(joystickController.getMapping().axisLeftY);
@@ -406,9 +403,9 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    /**
     * Here we want to publish and walk forward, that is the point of pressing the keys on the keyboard
     */
-   private void publishContinuousHikingCommand()
+   private void publishContinuousHikingCommandWithEnabled()
    {
-      commandMessage.setEnableContinuousHiking(enableContinuousHiking.get());
+      commandMessage.setEnableContinuousHiking(true);
       commandMessage.setStepsBeforeSafetyStop((int) stepsBeforeSafetyStop.getDoubleValue());
       commandMessage.setWalkForwards(true);
       commandMessage.setSquareUpToGoal(squareUpToGoal.get());
