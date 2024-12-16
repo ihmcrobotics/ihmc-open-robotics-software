@@ -4,6 +4,8 @@ import us.ihmc.pubsub.common.Guid;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 
 /**
  * Keeps track of the clock offset of a peer.
@@ -15,6 +17,7 @@ public class ROS2PeerClockOffsetEstimatorPeer
 {
    private final Guid guid;
    private Duration peerClockOffset;
+   private Instant replyReceiveTime;
 
    public ROS2PeerClockOffsetEstimatorPeer(Guid guid)
    {
@@ -23,6 +26,8 @@ public class ROS2PeerClockOffsetEstimatorPeer
 
    public void update(Instant requestSendTime, Instant replyReceiveTime, Instant peerClockTime)
    {
+      this.replyReceiveTime = replyReceiveTime;
+
       Duration roundTripTime = Duration.between(requestSendTime, replyReceiveTime);
       Duration halfRoundTripTime = roundTripTime.dividedBy(2);
       Instant peerNow = peerClockTime.plus(halfRoundTripTime);
@@ -37,6 +42,11 @@ public class ROS2PeerClockOffsetEstimatorPeer
    public Instant getPeerTimeInPeerFrame(Instant ourTime)
    {
       return ourTime.plus(peerClockOffset);
+   }
+
+   public boolean isAlive(Instant ourTime)
+   {
+      return replyReceiveTime != null && replyReceiveTime.isAfter(ourTime.minus(1, ChronoUnit.SECONDS));
    }
 
    public Duration getPeerClockOffset()

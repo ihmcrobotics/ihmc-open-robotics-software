@@ -55,11 +55,13 @@ public class RDXROS2PeerClockTest
 
             for (ROS2PeerClockOffsetEstimatorPeer peer : clockEstimator.getPeerList())
             {
-               ImGui.text("Peer %s time (peer frame):".formatted(peer.getGuid()));
-               ImGui.pushFont(ImGuiTools.getBigFont());
-               if (peer.getPeerClockOffset() != null)
+               if (peer.isAlive(now))
+               {
+                  ImGui.text("Peer %s time (peer frame):".formatted(peer.getGuid()));
+                  ImGui.pushFont(ImGuiTools.getBigFont());
                   ImGui.text(formatter.format(peer.getPeerTimeInPeerFrame(now).atZone(ZoneId.systemDefault())));
-               ImGui.popFont();
+                  ImGui.popFont();
+               }
             }
          }
       });
