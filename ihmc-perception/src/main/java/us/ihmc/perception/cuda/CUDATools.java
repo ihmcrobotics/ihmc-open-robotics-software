@@ -9,6 +9,10 @@ import org.bytedeco.javacpp.Loader;
 import org.bytedeco.javacpp.Pointer;
 import us.ihmc.log.LogTools;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
 import static org.bytedeco.cuda.global.cudart.*;
 import static org.bytedeco.cuda.global.nvjpeg.NVJPEG_STATUS_SUCCESS;
 import static org.bytedeco.cuda.global.nvrtc.NVRTC_SUCCESS;
@@ -16,6 +20,8 @@ import static org.bytedeco.cuda.global.nvrtc.nvrtcGetErrorString;
 
 public class CUDATools
 {
+   public static final String REQUIRED_CUDA_VERSION = "12.6";
+
    public static boolean hasCUDA()
    {
       return hasLibrary(cudart.class);
@@ -57,6 +63,44 @@ public class CUDATools
    public static boolean hasCUDADevice()
    {
       return getCUDADeviceCount() > 0;
+   }
+
+   public static boolean doesCUDAExistAndMatchVersion()
+   {
+      try
+      {
+         ProcessBuilder processBuilder = new ProcessBuilder("nvcc", "--version");
+         Process process = processBuilder.start();
+
+         BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+         String line;
+         while ((line = reader.readLine()) != null)
+         {
+            if (line.contains("release"))
+            {
+               String cudaVersion = extractVersion(line);
+               return cudaVersion != null && cudaVersion.equals(REQUIRED_CUDA_VERSION);
+            }
+         }
+
+         process.waitFor();
+      }
+      catch (IOException | InterruptedException e)
+      {
+         return false;
+      }
+      return false;
+   }
+
+   private static String extractVersion(String nvccOutputLine)
+   {
+      int releaseIndex = nvccOutputLine.indexOf("release");
+      if (releaseIndex != -1)
+      {
+         String versionPart = nvccOutputLine.substring(releaseIndex + 7).trim();
+         return versionPart.split(",")[0].trim();
+      }
+      return null;
    }
 
    /**
@@ -103,8 +147,7 @@ public class CUDATools
    {
       if (errorCode != CUDA_SUCCESS)
       {
-         try (BytePointer errorName = cudaGetErrorName(errorCode);
-              BytePointer errorString = cudaGetErrorString(errorCode))
+         try (BytePointer errorName = cudaGetErrorName(errorCode); BytePointer errorString = cudaGetErrorString(errorCode))
          {
             LogTools.error("CUDA Error ({}): {}", errorName.getString(), errorString.getString());
          }
