@@ -283,6 +283,8 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       // Here we check against null rather then .isConnected() because if the controller is unplugged, that method won't work
       boolean controllerConnected = joystickController != null;
 
+      // The following logic determines how the Continuous Hiking State Machine will be started.
+      // This can be with buttons pressed on the keyboard, or with an XBox One Controller
       if (ImGui.getIO().getKeyCtrl() && ImGui.getIO().getKeyShift())
       {
          publishContinuousHikingCommandWithEnabled();
@@ -300,6 +302,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
          }
       }
 
+      // Pressing this key will stop Continuous Hiking
       if (ImGui.getIO().getKeyAlt())
       {
          publishStopContinuousHiking();
@@ -371,12 +374,18 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       terrainPlanningDebugger.generateMonteCarloPlanGraphic(message);
    }
 
+   /**
+    * Stop Continuous Hiking. Tells the state machine that we want to stop walking
+    */
    private void publishStopContinuousHiking()
    {
       commandMessage.setEnableContinuousHiking(false);
       commandPublisher.publish(commandMessage);
    }
 
+   /**
+    * Publish the status of the joystick controller. We define different buttons to perform different actions which get sent with the message.
+    */
    private void publishJoystickStatus(Controller joystickController)
    {
       // Setup variables to be published in the message
@@ -401,7 +410,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    }
 
    /**
-    * Here we want to publish and walk forward, that is the point of pressing the keys on the keyboard
+    * This publishes and tells the state machine that we want to start walking. Setting the enable Continuous Hiking to true
     */
    private void publishContinuousHikingCommandWithEnabled()
    {
