@@ -18,7 +18,6 @@ import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractorCUDA;
 import us.ihmc.perception.heightMap.TerrainMapData;
-import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
@@ -41,8 +40,7 @@ public class RapidHeightMapManager
    private final Notification resetHeightMapRequested = new Notification();
    private final BytePointer compressedCroppedHeightMapPointer = new BytePointer();
 
-   public RapidHeightMapManager(OpenCLManager openCLManager,
-                                DRCRobotModel robotModel,
+   public RapidHeightMapManager(DRCRobotModel robotModel,
                                 ReferenceFrame leftFootSoleFrame,
                                 ReferenceFrame rightFootSoleFrame,
                                 CameraIntrinsics depthImageIntrinsics,
