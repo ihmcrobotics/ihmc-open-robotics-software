@@ -190,10 +190,10 @@ public class QuicksterFootstepProviderTouchdownCalculator
       this.timeToReachGoal.set(timeToReachGoal);
 
       // compute all the touchdown positions and their offset values
-      computeDesiredALIPTouchdownPosition(timeToReachGoal, pendulumBase);
+      computeDesiredALIPTouchdownPositionWithDS(timeToReachGoal, pendulumBase, netPendulumBase, isInDoubleSupport);
 
-      desiredTouchdownPosition2D.set(desiredALIPTouchdownPositionWithoutDS);
-      predictedVelocityAtTouchdown2D.setIncludingFrame(predictedALIPVelocityAtTouchdownWithoutDS);
+      desiredTouchdownPosition2D.set(desiredALIPTouchdownPositionWithDS);
+      predictedVelocityAtTouchdown2D.setIncludingFrame(predictedALIPVelocityAtTouchdownWithDS);
       predictedVelocityAtTouchdown2D.changeFrameAndProjectToXYPlane(predictedVelocityAtTouchdown3D.getReferenceFrame());
       predictedVelocityAtTouchdown3D.set(predictedVelocityAtTouchdown2D);
 
