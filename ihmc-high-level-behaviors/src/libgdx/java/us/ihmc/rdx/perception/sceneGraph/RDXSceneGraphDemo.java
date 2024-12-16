@@ -32,7 +32,7 @@ import us.ihmc.rdx.ui.graphics.ros2.RDXDetectionManagerSettings;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2FramePlanarRegionsVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXYOLOv8Settings;
-import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2RawImagePointCloudVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2ColoredPointCloudVisualizer;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
@@ -114,8 +114,8 @@ public class RDXSceneGraphDemo
             zed2DepthImageVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_DEPTH);
             perceptionVisualizerPanel.addVisualizer(zed2DepthImageVisualizer);
 
-            RDXROS2RawImagePointCloudVisualizer zed2ColoredPointCloudVisualizer
-                  = new RDXROS2RawImagePointCloudVisualizer("ZED 2 Colored Point Cloud",
+            RDXROS2ColoredPointCloudVisualizer zed2ColoredPointCloudVisualizer
+                  = new RDXROS2ColoredPointCloudVisualizer("ZED 2 Colored Point Cloud",
                                                            ros2Node,
                                                            PerceptionAPI.ZED2_DEPTH,
                                                            PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));

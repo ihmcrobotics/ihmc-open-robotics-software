@@ -18,7 +18,7 @@ import us.ihmc.ros2.ROS2Topic;
 import java.util.List;
 import java.util.Set;
 
-public class RDXROS2RawImagePointCloudVisualizer extends RDXROS2MultiTopicVisualizer
+public class RDXROS2ColoredPointCloudVisualizer extends RDXROS2MultiTopicVisualizer
 {
    private final ROS2Node ros2Node;
 
@@ -37,7 +37,7 @@ public class RDXROS2RawImagePointCloudVisualizer extends RDXROS2MultiTopicVisual
 
    private final RDXRawImagePointCloudVisualizer visualizer;
 
-   public RDXROS2RawImagePointCloudVisualizer(String title, ROS2Node ros2Node, ROS2Topic<ImageMessage> depthTopic, ROS2Topic<ImageMessage> colorTopic)
+   public RDXROS2ColoredPointCloudVisualizer(String title, ROS2Node ros2Node, ROS2Topic<ImageMessage> depthTopic, ROS2Topic<ImageMessage> colorTopic)
    {
       super(title);
 

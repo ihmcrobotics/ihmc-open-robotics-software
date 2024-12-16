@@ -10,7 +10,7 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizersPanel;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2DetectedObjectBoundingBoxVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
-import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2RawImagePointCloudVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2ColoredPointCloudVisualizer;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
@@ -69,7 +69,7 @@ public class RDXCenterposeObjectDetectionDemo
             zed2DepthImageVisualizer.setActive(true);
             perceptionVisualizerPanel.addVisualizer(zed2DepthImageVisualizer);
 
-            RDXROS2RawImagePointCloudVisualizer zed2ColoredPointCloudVisualizer = new RDXROS2RawImagePointCloudVisualizer("ZED 2 Colored Point Cloud",
+            RDXROS2ColoredPointCloudVisualizer zed2ColoredPointCloudVisualizer = new RDXROS2ColoredPointCloudVisualizer("ZED 2 Colored Point Cloud",
                                                                                                                         ros2Node,
                                                                                                                         PerceptionAPI.ZED2_DEPTH,
                                                                                                                         PerceptionAPI.ZED2_COLOR_IMAGES.get(
