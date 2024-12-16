@@ -605,7 +605,8 @@ public class PerceptionAndAutonomyProcess
 
          if (heightMapManager == null)
          {
-            heightMapManager = new RapidHeightMapManager(syncedRobot == null ? null : syncedRobot.getRobotModel(),
+            heightMapManager = new RapidHeightMapManager(openCLManager,
+                                                         syncedRobot == null ? null : syncedRobot.getRobotModel(),
                                                          soleFrameSuppliers.get(RobotSide.LEFT).get(),
                                                          soleFrameSuppliers.get(RobotSide.RIGHT).get(),
                                                          latestRealsenseDepthImage.getIntrinsicsCopy(),

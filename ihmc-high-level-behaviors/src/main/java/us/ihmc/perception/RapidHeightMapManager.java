@@ -18,6 +18,7 @@ import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractorCUDA;
 import us.ihmc.perception.heightMap.TerrainMapData;
+import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
@@ -40,7 +41,8 @@ public class RapidHeightMapManager
    private final Notification resetHeightMapRequested = new Notification();
    private final BytePointer compressedCroppedHeightMapPointer = new BytePointer();
 
-   public RapidHeightMapManager(DRCRobotModel robotModel,
+   public RapidHeightMapManager(OpenCLManager openCLManager,
+                                DRCRobotModel robotModel,
                                 ReferenceFrame leftFootSoleFrame,
                                 ReferenceFrame rightFootSoleFrame,
                                 CameraIntrinsics depthImageIntrinsics,
@@ -108,8 +110,8 @@ public class RapidHeightMapManager
 
    public HeightMapData getLatestHeightMapData()
    {
-      HeightMapData temp = new HeightMapData((float) RapidHeightMapExtractorCUDA.getHeightMapParameters().getGlobalCellSizeInMeters(),
-                                             (float) RapidHeightMapExtractorCUDA.getHeightMapParameters().getGlobalWidthInMeters(),
+      HeightMapData temp = new HeightMapData((float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalCellSizeInMeters(),
+                                             (float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalWidthInMeters(),
                                              rapidHeightMapExtractor.getSensorOrigin().getX(),
                                              rapidHeightMapExtractor.getSensorOrigin().getY());
       RapidHeightMapExtractorCUDA.packHeightMapData(rapidHeightMapExtractor, temp);
