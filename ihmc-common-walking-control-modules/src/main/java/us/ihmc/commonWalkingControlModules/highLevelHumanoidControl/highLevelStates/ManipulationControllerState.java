@@ -244,7 +244,6 @@ public class ManipulationControllerState extends HighLevelControllerState
       ContactablePlaneBody contactableBody = null;
       RigidBodyControlMode defaultControlMode = walkingControllerParameters.getDefaultControlModesForRigidBodies().get(bodyName);
       boolean enableFunctionGenerators = walkingControllerParameters.enableFunctionGeneratorMode(bodyToControl.getName());
-      YoBoolean isImpedanceEnabled = new YoBoolean(bodyName + "-EnableImpedanceControl", registry);
 
       RigidBodyControlManager manager = new RigidBodyControlManager(bodyToControl,
                                                                     baseBody,
@@ -263,7 +262,6 @@ public class ManipulationControllerState extends HighLevelControllerState
                                                                     null,
                                                                     defaultControlMode,
                                                                     enableFunctionGenerators,
-                                                                    isImpedanceEnabled,
                                                                     momentumOptimizationSettings.getRhoWeight(),
                                                                     WholeBodyPostureAdjustmentProvider.createZeroPostureAdjustmentProvider(),
                                                                     yoTime,
@@ -510,17 +508,10 @@ public class ManipulationControllerState extends HighLevelControllerState
             SE3TrajectoryControllerCommand taskspaceTrajectoryCommand = command.getTaskspaceTrajectoryCommand();
             JointspaceTrajectoryCommand jointspaceTrajectoryCommand = command.getJointspaceTrajectoryCommand();
             WrenchTrajectoryControllerCommand feedForwardCommand = command.getFeedForwardTrajectoryCommand();
+            SE3PIDGainsTrajectoryControllerCommand gainsTrajectoryCommand = command.getPIDGainsTrajectoryCommand();
             taskspaceTrajectoryCommand.setSequenceId(command.getSequenceId());
             jointspaceTrajectoryCommand.setSequenceId(command.getSequenceId());
-            if (feedForwardCommand.getNumberOfTrajectoryPoints() != taskspaceTrajectoryCommand.getNumberOfTrajectoryPoints())
-            {
-               handManager.handleHybridTrajectoryCommand(taskspaceTrajectoryCommand, jointspaceTrajectoryCommand);
-            }
-            else
-            {
-               feedForwardCommand.setSequenceId(command.getSequenceId());
-               handManager.handleHybridTrajectoryCommand(taskspaceTrajectoryCommand, jointspaceTrajectoryCommand, feedForwardCommand);
-            }
+            handManager.handleHybridTrajectoryCommand(taskspaceTrajectoryCommand, jointspaceTrajectoryCommand, feedForwardCommand, gainsTrajectoryCommand);
          }
       }
 

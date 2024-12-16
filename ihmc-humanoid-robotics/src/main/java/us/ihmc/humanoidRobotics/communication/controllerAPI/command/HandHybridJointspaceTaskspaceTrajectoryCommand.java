@@ -79,11 +79,15 @@ public class HandHybridJointspaceTaskspaceTrajectoryCommand
       this.pidGainsTrajectoryCommand.set(pidGainsTrajectoryCommand);
    }
 
-   public HandHybridJointspaceTaskspaceTrajectoryCommand(Random random)
-   {
-      this(RobotSide.generateRandomRobotSide(random), random.nextBoolean(), new SE3TrajectoryControllerCommand(random),
-           new JointspaceTrajectoryCommand(random));
-   }
+//   public HandHybridJointspaceTaskspaceTrajectoryCommand(Random random)
+//   {
+//      this(RobotSide.generateRandomRobotSide(random),
+//           random.nextBoolean(),
+//           new SE3TrajectoryControllerCommand(random),
+//           new JointspaceTrajectoryCommand(random),
+//           new WrenchTrajectoryControllerCommand(random),
+//           new SE3PIDGainsTrajectoryControllerCommand(random));
+//   }
 
    @Override
    public Class<HandHybridJointspaceTaskspaceTrajectoryMessage> getMessageClass()

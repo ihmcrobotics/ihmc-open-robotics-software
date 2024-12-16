@@ -1,17 +1,14 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
+import controller_msgs.msg.dds.PID3DGains;
 import controller_msgs.msg.dds.SE3PIDGainsTrajectoryMessage;
 import controller_msgs.msg.dds.SE3PIDGainsTrajectoryPointMessage;
-import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
-import controller_msgs.msg.dds.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.OneDoFTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.SE3PIDGainsTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SE3PIDGainsTrajectoryPointBasics;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.TrajectoryPointListBasics;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.SE3PIDGainsTrajectoryPointList;
 
 import java.util.List;
 
@@ -21,7 +18,8 @@ public class SE3PIDGainsTrajectoryControllerCommand extends QueueableCommand<SE3
    private long sequenceId;
    private final RecyclingArrayList<SE3PIDGainsTrajectoryPoint> trajectoryPoints = new RecyclingArrayList<>(200, SE3PIDGainsTrajectoryPoint.class);
 
-   public SE3PIDGainsTrajectoryControllerCommand() {
+   public SE3PIDGainsTrajectoryControllerCommand()
+   {
    }
 
    @Override

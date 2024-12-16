@@ -90,12 +90,12 @@ public class RigidBodyOrientationControlHelper
    private final FrameVector3D desiredVelocity = new FrameVector3D();
    private final FrameVector3D feedForwardAcceleration = new FrameVector3D();
 
-   TDoubleArrayList feedForwardTrajectoryTimes = new TDoubleArrayList();
-   RecyclingArrayList<SpatialVector> feedForwardTrajectoryList = new RecyclingArrayList<>(200, SpatialVector.class);
-   RecyclingArrayList<SE3PIDGainsTrajectoryPoint> gainsTrajectoryPoints;
+   private final TDoubleArrayList feedForwardTrajectoryTimes = new TDoubleArrayList();
+   private final RecyclingArrayList<SpatialVector> feedForwardTrajectoryList = new RecyclingArrayList<>(200, SpatialVector.class);
+   private final RecyclingArrayList<SE3PIDGainsTrajectoryPoint> gainsTrajectoryPoints;
 
    private final BooleanProvider useBaseFrameForControl;
-   private final YoBoolean isImpedanceEnabled;
+   private final BooleanProvider isImpedanceEnabled;
    private final YoBoolean isFeedforwardEnabled;
 
    private final FixedFrameQuaternionBasics previousControlFrameOrientation;
@@ -121,7 +121,7 @@ public class RigidBodyOrientationControlHelper
                                             BooleanProvider useBaseFrameForControl,
                                             BooleanProvider useWeightFromMessage,
                                             boolean enableFunctionGenerators,
-                                            YoBoolean enableImpedanceControl,
+                                            BooleanProvider isImpedanceEnabled,
                                             DoubleProvider time,
                                             YoRegistry registry)
    {
@@ -144,8 +144,7 @@ public class RigidBodyOrientationControlHelper
 
       feedbackControlCommand.set(elevator, bodyToControl);
       feedbackControlCommand.setPrimaryBase(baseBody);
-      feedbackControlCommand.setImpedanceEnabled(enableImpedanceControl.getBooleanValue());
-      isImpedanceEnabled = enableImpedanceControl;
+      this.isImpedanceEnabled = isImpedanceEnabled;
       isFeedforwardEnabled = new YoBoolean(prefix + "FeedforwardEnabled", registry);
       isFeedforwardEnabled.set(true);
 
@@ -299,6 +298,7 @@ public class RigidBodyOrientationControlHelper
 
       if (!feedForwardTrajectoryList.isEmpty())
       {
+         // TODO this should interpolate between trajectory points
          feedForwardAcceleration.set(feedForwardTrajectoryList.get(Math.max(
                feedForwardTrajectoryList.size() - pointQueue.size() - trajectoryGenerator.getCurrentNumberOfWaypoints()
                + trajectoryGenerator.getCurrentWaypointIndex(), 0)).getAngularPart());
@@ -306,11 +306,13 @@ public class RigidBodyOrientationControlHelper
 
       if (!gainsTrajectoryPoints.isEmpty())
       {
-         gains = gainsTrajectoryPoints.get(Math.max(gainsTrajectoryPoints.size() - pointQueue.size() - trajectoryGenerator.getCurrentNumberOfWaypoints()
-                                                    + trajectoryGenerator.getCurrentWaypointIndex(), 0)).getAngular();
+         // TODO this should interpolate between trajectory points
+         int trajectoryIndex = Math.max(gainsTrajectoryPoints.size() - pointQueue.size() - trajectoryGenerator.getCurrentNumberOfWaypoints()
+                            + trajectoryGenerator.getCurrentWaypointIndex(), 0);
+         gains = gainsTrajectoryPoints.get(trajectoryIndex).getAngular();
          feedbackControlCommand.setGains(gains);
       }
-      else if (!isImpedanceEnabled.getBooleanValue())
+      else if (!isImpedanceEnabled.getValue())
       {
          feedbackControlCommand.setGains(gains);
       }
@@ -335,7 +337,7 @@ public class RigidBodyOrientationControlHelper
          feedForwardAcceleration.set(0.0, 0.0, 0.0);
 
       feedbackControlCommand.setInverseDynamics(desiredOrientation, desiredVelocity, feedForwardAcceleration);
-      feedbackControlCommand.setImpedanceEnabled(isImpedanceEnabled.getBooleanValue());
+      feedbackControlCommand.setImpedanceEnabled(isImpedanceEnabled.getValue());
 
       // This will improve the tracking with respect to moving trajectory frames.
       if (useBaseFrameForControl.getValue())
