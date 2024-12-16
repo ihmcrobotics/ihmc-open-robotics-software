@@ -15,7 +15,7 @@ public class BoundingBox3DMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "bd5c9c8219a60de02a424f37f96d3ae31f033bec2a9d6918efff878fd541dec6";
+   		return "353df14236a3bdf97ca705982d25846a50f2c81911adb5054f60ec885a3191d0";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class BoundingBox3DMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -71,7 +71,7 @@ public class BoundingBox3DMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getMinPoint(), current_alignment);
@@ -84,7 +84,7 @@ public class BoundingBox3DMessagePubSubType implements us.ihmc.pubsub.TopicDataT
 
    public static void write(ihmc_common_msgs.msg.dds.BoundingBox3DMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       geometry_msgs.msg.dds.PointPubSubType.write(data.getMinPoint(), cdr);
       geometry_msgs.msg.dds.PointPubSubType.write(data.getMaxPoint(), cdr);
@@ -92,7 +92,7 @@ public class BoundingBox3DMessagePubSubType implements us.ihmc.pubsub.TopicDataT
 
    public static void read(ihmc_common_msgs.msg.dds.BoundingBox3DMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       geometry_msgs.msg.dds.PointPubSubType.read(data.getMinPoint(), cdr);	
       geometry_msgs.msg.dds.PointPubSubType.read(data.getMaxPoint(), cdr);	
@@ -102,7 +102,7 @@ public class BoundingBox3DMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final void serialize(ihmc_common_msgs.msg.dds.BoundingBox3DMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_a("min_point", new geometry_msgs.msg.dds.PointPubSubType(), data.getMinPoint());
 
       ser.write_type_a("max_point", new geometry_msgs.msg.dds.PointPubSubType(), data.getMaxPoint());
@@ -112,7 +112,7 @@ public class BoundingBox3DMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, ihmc_common_msgs.msg.dds.BoundingBox3DMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       ser.read_type_a("min_point", new geometry_msgs.msg.dds.PointPubSubType(), data.getMinPoint());
 
       ser.read_type_a("max_point", new geometry_msgs.msg.dds.PointPubSubType(), data.getMaxPoint());

@@ -7,10 +7,12 @@
 #include "behavior_msgs/msg/./BehaviorTreeRootNodeStateMessage_.idl"
 #include "behavior_msgs/msg/./BuildingExplorationStateMessage_.idl"
 #include "behavior_msgs/msg/./ChestOrientationActionStateMessage_.idl"
+#include "behavior_msgs/msg/./ConditionNodeStateMessage_.idl"
 #include "behavior_msgs/msg/./DoorTraversalStateMessage_.idl"
 #include "behavior_msgs/msg/./FallbackNodeStateMessage_.idl"
 #include "behavior_msgs/msg/./FootPoseActionStateMessage_.idl"
 #include "behavior_msgs/msg/./FootstepPlanActionStateMessage_.idl"
+#include "behavior_msgs/msg/./GotoNodeStateMessage_.idl"
 #include "behavior_msgs/msg/./HandPoseActionStateMessage_.idl"
 #include "behavior_msgs/msg/./HandWrenchActionStateMessage_.idl"
 #include "behavior_msgs/msg/./PelvisHeightOrientationActionStateMessage_.idl"
@@ -40,14 +42,20 @@ module behavior_msgs
       const octet FALLBACK_NODE =
       4;
 
-      const octet DOOR_TRAVERSAL =
+      const octet CONDITION_NODE =
       5;
 
-      const octet TRASH_CAN_INTERACTION =
+      const octet GOTO_NODE =
       6;
 
-      const octet BUILDING_EXPLORATION =
+      const octet DOOR_TRAVERSAL =
       7;
+
+      const octet TRASH_CAN_INTERACTION =
+      8;
+
+      const octet BUILDING_EXPLORATION =
+      9;
 
       const octet CHEST_ORIENTATION_ACTION =
       10;
@@ -89,7 +97,7 @@ module behavior_msgs
         /**
          * Monotonically increasing message ID that matches the CRDTInfo update number
          */
-        unsigned long sequence_id;
+        unsigned long long sequence_id;
         /**
          * The ID to assign to the next instantiated node
          */
@@ -113,6 +121,8 @@ module behavior_msgs
         sequence<behavior_msgs::msg::dds::AI2RNodeStateMessage, 1> ai2r_nodes;
         sequence<behavior_msgs::msg::dds::ActionSequenceStateMessage, 200> action_sequences;
         sequence<behavior_msgs::msg::dds::FallbackNodeStateMessage, 200> fallback_nodes;
+        sequence<behavior_msgs::msg::dds::ConditionNodeStateMessage, 200> condition_nodes;
+        sequence<behavior_msgs::msg::dds::GotoNodeStateMessage, 200> goto_nodes;
         sequence<behavior_msgs::msg::dds::DoorTraversalStateMessage, 200> door_traversals;
         sequence<behavior_msgs::msg::dds::TrashCanInteractionStateMessage, 200> trash_can_interactions;
         sequence<behavior_msgs::msg::dds::BuildingExplorationStateMessage, 200> building_explorations;

@@ -13,7 +13,7 @@ int8 R_ARM_WRX=4
 int8 R_ARM_WRY2=5
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # The Enum value of the motor to enable
 # Field default value 255

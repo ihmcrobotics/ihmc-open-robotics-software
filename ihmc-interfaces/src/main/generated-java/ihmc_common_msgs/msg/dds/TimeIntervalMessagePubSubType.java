@@ -15,7 +15,7 @@ public class TimeIntervalMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "a0653a5a82a206833f2d98e8452fcf1d28a94dfde1c0bbe446ce5dfbfa60a443";
+   		return "958b075aa3bca66d16aaa9e8690a7b65623b63d36174b5358d5ada3c4b987f1e";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class TimeIntervalMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -71,7 +71,7 @@ public class TimeIntervalMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -86,7 +86,7 @@ public class TimeIntervalMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
    public static void write(ihmc_common_msgs.msg.dds.TimeIntervalMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_6(data.getStartTime());
 
@@ -96,7 +96,7 @@ public class TimeIntervalMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
    public static void read(ihmc_common_msgs.msg.dds.TimeIntervalMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setStartTime(cdr.read_type_6());
       	
@@ -108,7 +108,7 @@ public class TimeIntervalMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final void serialize(ihmc_common_msgs.msg.dds.TimeIntervalMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_6("start_time", data.getStartTime());
       ser.write_type_6("end_time", data.getEndTime());
    }
@@ -116,7 +116,7 @@ public class TimeIntervalMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, ihmc_common_msgs.msg.dds.TimeIntervalMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setStartTime(ser.read_type_6("start_time"));
       data.setEndTime(ser.read_type_6("end_time"));
    }

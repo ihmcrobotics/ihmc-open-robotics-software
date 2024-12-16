@@ -10,7 +10,6 @@ import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulation;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameters;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 
 public class AtlasKinematicSimulation
 {
@@ -85,7 +84,6 @@ public class AtlasKinematicSimulation
    public static void main(String[] args)
    {
       HumanoidKinematicsSimulationParameters kinematicsSimulationParameters = new HumanoidKinematicsSimulationParameters();
-      kinematicsSimulationParameters.setPubSubImplementation(PubSubImplementation.FAST_RTPS);
       AtlasKinematicSimulation.create(new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, RobotTarget.SCS, false),
                                       kinematicsSimulationParameters);
    }

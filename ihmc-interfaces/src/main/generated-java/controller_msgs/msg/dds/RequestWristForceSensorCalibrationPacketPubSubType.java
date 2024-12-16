@@ -15,7 +15,7 @@ public class RequestWristForceSensorCalibrationPacketPubSubType implements us.ih
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "1c1fe63a0b97f3f9fe2d46358e08184197a53c54d7f989ecc4ad4ed60cd7adee";
+   		return "5c2a3bfa8a89d1e8502edbaa52ee3414539205ee3823e0cdff94c6e82fe00c94";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class RequestWristForceSensorCalibrationPacketPubSubType implements us.ih
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       return current_alignment - initial_alignment;
@@ -67,7 +67,7 @@ public class RequestWristForceSensorCalibrationPacketPubSubType implements us.ih
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
 
@@ -76,13 +76,13 @@ public class RequestWristForceSensorCalibrationPacketPubSubType implements us.ih
 
    public static void write(controller_msgs.msg.dds.RequestWristForceSensorCalibrationPacket data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
    }
 
    public static void read(controller_msgs.msg.dds.RequestWristForceSensorCalibrationPacket data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
 
    }
@@ -90,13 +90,13 @@ public class RequestWristForceSensorCalibrationPacketPubSubType implements us.ih
    @Override
    public final void serialize(controller_msgs.msg.dds.RequestWristForceSensorCalibrationPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.RequestWristForceSensorCalibrationPacket data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));   }
+      data.setSequenceId(ser.read_type_12("sequence_id"));   }
 
    public static void staticCopy(controller_msgs.msg.dds.RequestWristForceSensorCalibrationPacket src, controller_msgs.msg.dds.RequestWristForceSensorCalibrationPacket dest)
    {

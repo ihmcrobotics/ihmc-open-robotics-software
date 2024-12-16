@@ -13,7 +13,7 @@ byte PAUSED = 3
 byte RESUMED = 4
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # Status of walking.
 byte walking_status 255

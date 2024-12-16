@@ -6,16 +6,15 @@ import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.cuda.CUDACompressionTools;
 import us.ihmc.perception.cuda.CUDAJPEGProcessor;
 import us.ihmc.perception.opencv.OpenCVTools;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.sensors.ZEDColorDepthImageRetrieverSVO;
 import us.ihmc.sensors.ZEDColorDepthImageRetrieverSVO.RecordMode;
 import us.ihmc.tools.IHMCCommonPaths;
@@ -39,7 +38,7 @@ public class NVCompSVODemo extends NVCompDemo
                                                                                         .toString();
    private static final int MAX_DATA_POINTS = 100;
 
-   private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "nvcomp_svo_demo");
+   private final ROS2Node ros2Node = new ROS2NodeBuilder().build("nvcomp_svo_demo");
    private final ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
    private final ZEDColorDepthImageRetrieverSVO zedDataRetriever;

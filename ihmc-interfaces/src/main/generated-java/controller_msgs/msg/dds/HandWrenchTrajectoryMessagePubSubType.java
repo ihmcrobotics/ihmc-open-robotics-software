@@ -15,7 +15,7 @@ public class HandWrenchTrajectoryMessagePubSubType implements us.ihmc.pubsub.Top
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "017c82964199a22cb29996f692ce4b0f96f69fb32d47a5fe27f50ab99b8aabd3";
+   		return "2871e6c4f5e4a7b3960d0acd96a7c94995c0ec2cf16c8c4f408bdac51e45e7a7";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class HandWrenchTrajectoryMessagePubSubType implements us.ihmc.pubsub.Top
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -73,7 +73,7 @@ public class HandWrenchTrajectoryMessagePubSubType implements us.ihmc.pubsub.Top
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -90,7 +90,7 @@ public class HandWrenchTrajectoryMessagePubSubType implements us.ihmc.pubsub.Top
 
    public static void write(controller_msgs.msg.dds.HandWrenchTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_7(data.getForceExecution());
 
@@ -101,7 +101,7 @@ public class HandWrenchTrajectoryMessagePubSubType implements us.ihmc.pubsub.Top
 
    public static void read(controller_msgs.msg.dds.HandWrenchTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setForceExecution(cdr.read_type_7());
       	
@@ -114,7 +114,7 @@ public class HandWrenchTrajectoryMessagePubSubType implements us.ihmc.pubsub.Top
    @Override
    public final void serialize(controller_msgs.msg.dds.HandWrenchTrajectoryMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_7("force_execution", data.getForceExecution());
       ser.write_type_9("robot_side", data.getRobotSide());
       ser.write_type_a("wrench_trajectory", new controller_msgs.msg.dds.WrenchTrajectoryMessagePubSubType(), data.getWrenchTrajectory());
@@ -124,7 +124,7 @@ public class HandWrenchTrajectoryMessagePubSubType implements us.ihmc.pubsub.Top
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.HandWrenchTrajectoryMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setForceExecution(ser.read_type_7("force_execution"));
       data.setRobotSide(ser.read_type_9("robot_side"));
       ser.read_type_a("wrench_trajectory", new controller_msgs.msg.dds.WrenchTrajectoryMessagePubSubType(), data.getWrenchTrajectory());

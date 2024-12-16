@@ -15,7 +15,7 @@ public class KinematicsToolboxRigidBodyMessagePubSubType implements us.ihmc.pubs
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "64dc3d3d898527dffb860bbb2dc872fe435da2c49801acaacdcf5198f8c5ee49";
+   		return "122803e60b2702e444c826c0630f437bc9353eda4d3e86290607516de71e4bb5";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class KinematicsToolboxRigidBodyMessagePubSubType implements us.ihmc.pubs
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -97,7 +97,7 @@ public class KinematicsToolboxRigidBodyMessagePubSubType implements us.ihmc.pubs
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -141,7 +141,7 @@ public class KinematicsToolboxRigidBodyMessagePubSubType implements us.ihmc.pubs
 
    public static void write(toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_2(data.getEndEffectorHashCode());
 
@@ -167,7 +167,7 @@ public class KinematicsToolboxRigidBodyMessagePubSubType implements us.ihmc.pubs
 
    public static void read(toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setEndEffectorHashCode(cdr.read_type_2());
       	
@@ -195,7 +195,7 @@ public class KinematicsToolboxRigidBodyMessagePubSubType implements us.ihmc.pubs
    @Override
    public final void serialize(toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_2("end_effector_hash_code", data.getEndEffectorHashCode());
       ser.write_type_a("desired_position_in_world", new geometry_msgs.msg.dds.PointPubSubType(), data.getDesiredPositionInWorld());
 
@@ -226,7 +226,7 @@ public class KinematicsToolboxRigidBodyMessagePubSubType implements us.ihmc.pubs
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setEndEffectorHashCode(ser.read_type_2("end_effector_hash_code"));
       ser.read_type_a("desired_position_in_world", new geometry_msgs.msg.dds.PointPubSubType(), data.getDesiredPositionInWorld());
 

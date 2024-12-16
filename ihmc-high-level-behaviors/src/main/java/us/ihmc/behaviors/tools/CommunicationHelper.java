@@ -38,7 +38,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Input;
-import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.SwapReference;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
@@ -65,7 +65,7 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
    private FootstepPlanningModule footstepPlanner;
    private RobotLowLevelMessenger lowLevelMessenger;
 
-   public CommunicationHelper(DRCRobotModel robotModel, ROS2NodeInterface ros2Node)
+   public CommunicationHelper(DRCRobotModel robotModel, ROS2Node ros2Node)
    {
       this.robotModel = robotModel;
       this.ros2Helper = new ROS2ControllerHelper(ros2Node, robotModel);
@@ -82,21 +82,21 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
    public RemoteHumanoidRobotInterface getOrCreateRobotInterface()
    {
       if (robot == null)
-         robot = new RemoteHumanoidRobotInterface(ros2Helper.getROS2NodeInterface(), robotModel);
+         robot = new RemoteHumanoidRobotInterface(ros2Helper.getROS2Node(), robotModel);
       return robot;
    }
 
    public RemoteREAInterface getOrCreateREAInterface()
    {
       if (rea == null)
-         rea = new RemoteREAInterface(ros2Helper.getROS2NodeInterface());
+         rea = new RemoteREAInterface(ros2Helper.getROS2Node());
       return rea; // REA toolbox
    }
 
    public RemoteEnvironmentMapInterface getOrCreateEnvironmentMapInterface()
    {
       if (environmentMap == null)
-         environmentMap = new RemoteEnvironmentMapInterface(ros2Helper.getROS2NodeInterface());
+         environmentMap = new RemoteEnvironmentMapInterface(ros2Helper.getROS2Node());
       return environmentMap;
    }
 
@@ -123,7 +123,7 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
    public RobotLowLevelMessenger getOrCreateRobotLowLevelMessenger()
    {
       if (lowLevelMessenger == null)
-         lowLevelMessenger = robotModel.newRobotLowLevelMessenger(ros2Helper.getROS2NodeInterface());
+         lowLevelMessenger = robotModel.newRobotLowLevelMessenger(ros2Helper.getROS2Node());
 
       return lowLevelMessenger;
    }
@@ -148,7 +148,7 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
 
    public DelayFixedPlanarRegionsSubscription subscribeToPlanarRegionsViaCallback(String topic, Consumer<Pair<Long, PlanarRegionsList>> callback)
    {
-      return MapsenseTools.subscribeToPlanarRegionsWithDelayCompensation(ros2Helper.getROS2NodeInterface(), robotModel, topic, callback);
+      return MapsenseTools.subscribeToPlanarRegionsWithDelayCompensation(ros2Helper.getROS2Node(), robotModel, topic, callback);
    }
 
    @Override
@@ -221,7 +221,7 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
 
    public Supplier<PlanarRegionsList> subscribeToPlanarRegionsViaReference(ROS2Topic<PlanarRegionsListMessage> topic)
    {
-      ROS2Input<PlanarRegionsListMessage> input = new ROS2Input<>(ros2Helper.getROS2NodeInterface(), topic.getType(), topic);
+      ROS2Input<PlanarRegionsListMessage> input = new ROS2Input<>(ros2Helper.getROS2Node(), topic.getType(), topic);
       return () -> PlanarRegionMessageConverter.convertToPlanarRegionsList(input.getLatest());
    }
 
@@ -330,9 +330,9 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
 
    }
 
-   public ROS2NodeInterface getROS2Node()
+   public ROS2Node getROS2Node()
    {
-      return ros2Helper.getROS2NodeInterface();
+      return ros2Helper.getROS2Node();
    }
 
    public DRCRobotModel getRobotModel()

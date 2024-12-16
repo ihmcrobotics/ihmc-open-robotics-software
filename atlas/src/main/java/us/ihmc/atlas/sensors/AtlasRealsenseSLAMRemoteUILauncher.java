@@ -10,20 +10,19 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.javaFXToolkit.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.kryo.KryoMessager;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.ui.PlanarSegmentationUI;
 import us.ihmc.robotEnvironmentAwareness.ui.SLAMBasedEnvironmentAwarenessUI;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.tools.processManagement.JavaProcessManager;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
@@ -31,12 +30,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static us.ihmc.commons.exception.DefaultExceptionHandler.RUNTIME_EXCEPTION;
-import static us.ihmc.pubsub.DomainFactory.PubSubImplementation.FAST_RTPS;
 
 public class AtlasRealsenseSLAMRemoteUILauncher
 {
-   private final PubSubImplementation pubSubImplementation = FAST_RTPS;
-
    private ROS2Node ros2Node;
    private Messager slamMessager;
    private Messager segmentationMessager;
@@ -63,7 +59,7 @@ public class AtlasRealsenseSLAMRemoteUILauncher
          defaultContactPoints.put(side, contactPointParameters.getControllerFootGroundContactPoints().get(side));
       }
 
-      ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, PerceptionAPI.REA_NODE_NAME);
+      ros2Node = new ROS2NodeBuilder().build(PerceptionAPI.REA_NODE_NAME);
 
       slamMessager = KryoMessager.createClient(SLAMModuleAPI.API,
                                                "poweredge",
@@ -111,7 +107,7 @@ public class AtlasRealsenseSLAMRemoteUILauncher
       manager.runOrRegister("AtlasSLAMBasedREA", AtlasRealsenseSLAMRemoteUILauncher::new);
       ArrayList<Process> processes = manager.spawnProcesses(AtlasRealsenseSLAMRemoteUILauncher.class, args);
 
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(FAST_RTPS, "test_node");
+      ROS2Node ros2Node = new ROS2NodeBuilder().build("test_node");
       ros2Node.createSubscription2(SLAMModuleAPI.SHUTDOWN, message ->
       {
          LogTools.info("Received SHUTDOWN. Shutting down...");

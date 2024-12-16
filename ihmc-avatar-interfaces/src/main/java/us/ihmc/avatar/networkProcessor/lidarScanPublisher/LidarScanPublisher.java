@@ -1,23 +1,15 @@
 package us.ihmc.avatar.networkProcessor.lidarScanPublisher;
 
-import java.net.URI;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-
+import gnu.trove.list.array.TFloatArrayList;
 import perception_msgs.msg.dds.LidarScanMessage;
 import perception_msgs.msg.dds.SimulatedLidarScanPacket;
-import gnu.trove.list.array.TFloatArrayList;
 import scan_to_cloud.PointCloud2WithSource;
 import sensor_msgs.PointCloud2;
-import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.StateEstimatorAPI;
-import us.ihmc.perception.filters.CollidingScanPointFilter;
-import us.ihmc.perception.depthData.PointCloudData;
 import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.RangeScanPointFilter;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.ros2.ROS2PublisherBasics;
+import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packets.MessageTools;
@@ -28,11 +20,14 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.perception.depthData.CollisionShapeTester;
+import us.ihmc.perception.depthData.PointCloudData;
+import us.ihmc.perception.filters.CollidingScanPointFilter;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelFactory;
 import us.ihmc.robotics.lidar.LidarScan;
 import us.ihmc.robotics.lidar.LidarScanParameters;
-import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
@@ -40,6 +35,11 @@ import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosTopicSubscriberInterface;
+
+import java.net.URI;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class LidarScanPublisher
 {
@@ -60,7 +60,7 @@ public class LidarScanPublisher
 
    private RobotROSClockCalculator rosClockCalculator = null;
 
-   private final ROS2PublisherBasics<LidarScanMessage> lidarScanPublisher;
+   private final ROS2Publisher<LidarScanMessage> lidarScanPublisher;
 
    private int maximumNumberOfPoints = DEFAULT_MAX_NUMBER_OF_POINTS;
    private RangeScanPointFilter rangeFilter = null;
@@ -70,27 +70,27 @@ public class LidarScanPublisher
 
    private long publisherPeriodInMillisecond = 1L;
 
-   public LidarScanPublisher(String lidarName, FullRobotModelFactory modelFactory, ROS2NodeInterface ros2Node)
+   public LidarScanPublisher(String lidarName, FullRobotModelFactory modelFactory, ROS2Node ros2Node)
    {
       this(lidarName, modelFactory, ros2Node, ROS2QosProfile.RELIABLE());
    }
 
-   public LidarScanPublisher(String lidarName, FullRobotModelFactory modelFactory, ROS2NodeInterface ros2Node, ROS2QosProfile qosProfile)
+   public LidarScanPublisher(String lidarName, FullRobotModelFactory modelFactory, ROS2Node ros2Node, ROS2QosProfile qosProfile)
    {
       this(modelFactory, defaultSensorFrameFactory(lidarName), ros2Node, qosProfile);
    }
 
-   public LidarScanPublisher(FullRobotModelFactory modelFactory, SensorFrameFactory sensorFrameFactory, ROS2NodeInterface ros2Node)
+   public LidarScanPublisher(FullRobotModelFactory modelFactory, SensorFrameFactory sensorFrameFactory, ROS2Node ros2Node)
    {
       this(modelFactory, sensorFrameFactory, ros2Node, ROS2QosProfile.RELIABLE());
    }
 
-   public LidarScanPublisher(FullRobotModelFactory modelFactory, SensorFrameFactory sensorFrameFactory, ROS2NodeInterface ros2Node, ROS2QosProfile qosProfile)
+   public LidarScanPublisher(FullRobotModelFactory modelFactory, SensorFrameFactory sensorFrameFactory, ROS2Node ros2Node, ROS2QosProfile qosProfile)
    {
       this(modelFactory.getRobotDefinition().getName(), modelFactory.createFullRobotModel(), sensorFrameFactory, ros2Node, qosProfile);
    }
 
-   public LidarScanPublisher(String robotName, FullRobotModel fullRobotModel, SensorFrameFactory sensorFrameFactory, ROS2NodeInterface ros2Node)
+   public LidarScanPublisher(String robotName, FullRobotModel fullRobotModel, SensorFrameFactory sensorFrameFactory, ROS2Node ros2Node)
    {
       this(robotName, fullRobotModel, sensorFrameFactory, ros2Node, ROS2QosProfile.RELIABLE());
    }
@@ -98,7 +98,7 @@ public class LidarScanPublisher
    public LidarScanPublisher(String robotName,
                              FullRobotModel fullRobotModel,
                              SensorFrameFactory sensorFrameFactory,
-                             ROS2NodeInterface ros2Node,
+                             ROS2Node ros2Node,
                              ROS2QosProfile qosProfile)
    {
       this.robotName = robotName;

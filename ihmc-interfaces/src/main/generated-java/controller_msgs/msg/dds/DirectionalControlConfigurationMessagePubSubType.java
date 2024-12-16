@@ -15,7 +15,7 @@ public class DirectionalControlConfigurationMessagePubSubType implements us.ihmc
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "2dbfb6aaf460a3c9a023793ef4044afe15188dcdf5c18ac6bcbebb630d9a3e57";
+   		return "13aab3cba18f28e15d723cbf5bc577eea014532fff8a4e73dc40bb9674046b12";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class DirectionalControlConfigurationMessagePubSubType implements us.ihmc
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -70,7 +70,7 @@ public class DirectionalControlConfigurationMessagePubSubType implements us.ihmc
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -84,7 +84,7 @@ public class DirectionalControlConfigurationMessagePubSubType implements us.ihmc
 
    public static void write(controller_msgs.msg.dds.DirectionalControlConfigurationMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_7(data.getEnableWalking());
 
@@ -96,7 +96,7 @@ public class DirectionalControlConfigurationMessagePubSubType implements us.ihmc
 
    public static void read(controller_msgs.msg.dds.DirectionalControlConfigurationMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setEnableWalking(cdr.read_type_7());
       	
@@ -107,7 +107,7 @@ public class DirectionalControlConfigurationMessagePubSubType implements us.ihmc
    @Override
    public final void serialize(controller_msgs.msg.dds.DirectionalControlConfigurationMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_7("enable_walking", data.getEnableWalking());
       ser.write_type_d("profile_name", data.getProfileName());
    }
@@ -115,7 +115,7 @@ public class DirectionalControlConfigurationMessagePubSubType implements us.ihmc
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.DirectionalControlConfigurationMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setEnableWalking(ser.read_type_7("enable_walking"));
       ser.read_type_d("profile_name", data.getProfileName());
    }

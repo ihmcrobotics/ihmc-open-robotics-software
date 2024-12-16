@@ -15,7 +15,7 @@ public class DoorParameterPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "6e94fb94c5948cdf1832968c80c5ff802f0479db96902e868915a62d70bf2149";
+   		return "9da63cdb8c8bfcd7e71d1325c22f863e445cbd3039c4f9264f22a5b6e3d35c26";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class DoorParameterPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -77,7 +77,7 @@ public class DoorParameterPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getHingedPointOnGround(), current_alignment);
@@ -98,7 +98,7 @@ public class DoorParameterPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
 
    public static void write(perception_msgs.msg.dds.DoorParameterPacket data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       geometry_msgs.msg.dds.PointPubSubType.write(data.getHingedPointOnGround(), cdr);
       geometry_msgs.msg.dds.PointPubSubType.write(data.getEndPointOnGround(), cdr);
@@ -111,7 +111,7 @@ public class DoorParameterPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
 
    public static void read(perception_msgs.msg.dds.DoorParameterPacket data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       geometry_msgs.msg.dds.PointPubSubType.read(data.getHingedPointOnGround(), cdr);	
       geometry_msgs.msg.dds.PointPubSubType.read(data.getEndPointOnGround(), cdr);	
@@ -126,7 +126,7 @@ public class DoorParameterPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final void serialize(perception_msgs.msg.dds.DoorParameterPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_a("hinged_point_on_ground", new geometry_msgs.msg.dds.PointPubSubType(), data.getHingedPointOnGround());
 
       ser.write_type_a("end_point_on_ground", new geometry_msgs.msg.dds.PointPubSubType(), data.getEndPointOnGround());
@@ -140,7 +140,7 @@ public class DoorParameterPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.DoorParameterPacket data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       ser.read_type_a("hinged_point_on_ground", new geometry_msgs.msg.dds.PointPubSubType(), data.getHingedPointOnGround());
 
       ser.read_type_a("end_point_on_ground", new geometry_msgs.msg.dds.PointPubSubType(), data.getEndPointOnGround());

@@ -1,7 +1,5 @@
 package us.ihmc.atlas.sensors;
 
-import java.net.URI;
-
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.avatar.drcRobot.RobotPhysicalProperties;
@@ -13,33 +11,32 @@ import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.avatar.sensors.multisense.MultiSenseSensorManager;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.net.ObjectCommunicator;
+import us.ihmc.log.LogTools;
+import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.perception.ros1.camera.FisheyeCameraReceiver;
 import us.ihmc.perception.ros1.camera.SCSCameraDataReceiver;
-import us.ihmc.perception.depthData.CollisionBoxProvider;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotPointCloudParameters;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.utilities.ros.RosMainNode;
-import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 
-import static us.ihmc.pubsub.DomainFactory.PubSubImplementation.FAST_RTPS;
+import java.net.URI;
 
 public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 {
    private static final boolean USE_DEPTH_FRAME_ESTIMATED_BY_TRACKING = false;
    public static final String NODE_NAME = "ihmc_atlas_sensor_suite_node";
 
-   private final ROS2NodeInterface ros2Node;
+   private final ROS2Node ros2Node;
 
    private final String robotName;
    private final FullHumanoidRobotModelFactory modelFactory;
@@ -72,7 +69,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
                                   HumanoidJointNameMap jointMap,
                                   RobotPhysicalProperties physicalProperties,
                                   RobotTarget targetDeployment,
-                                  ROS2NodeInterface ros2Node)
+                                  ROS2Node ros2Node)
    {
       this.robotName = robotName;
       this.collisionBoxProvider = collisionBoxProvider;
@@ -80,7 +77,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       this.sensorInformation = sensorInformation;
       this.robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
       this.modelFactory = modelFactory;
-      this.ros2Node = ros2Node == null ? ROS2Tools.createROS2Node(FAST_RTPS, NODE_NAME) : ros2Node;
+      this.ros2Node = ros2Node == null ? new ROS2NodeBuilder().build(NODE_NAME) : ros2Node;
    }
 
    public void setEnableVideoPublisher(boolean enableVideoPublisher)

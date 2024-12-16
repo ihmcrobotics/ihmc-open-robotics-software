@@ -4,12 +4,11 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.BigVideoPacket;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.perception.opencv.OpenCVTools;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.string.StringTools;
@@ -17,7 +16,6 @@ import us.ihmc.tools.string.StringTools;
 public class RDXROS2BigDepthVideoVisualizer extends RDXROS2OpenCVVideoVisualizer<BigVideoPacket>
 {
    private final String titleBeforeAdditions;
-   private final PubSubImplementation pubSubImplementation;
    private final ROS2Topic<BigVideoPacket> topic;
    private RealtimeROS2Node realtimeROS2Node = null;
    private final BigVideoPacket videoPacket = new BigVideoPacket();
@@ -29,11 +27,10 @@ public class RDXROS2BigDepthVideoVisualizer extends RDXROS2OpenCVVideoVisualizer
 //   private final ImPlotDoublePlot delayPlot = new ImPlotDoublePlot("Delay", 30);
    private final RDXMessageSizeReadout messageSizeReadout = new RDXMessageSizeReadout();
 
-   public RDXROS2BigDepthVideoVisualizer(String title, PubSubImplementation pubSubImplementation, ROS2Topic<BigVideoPacket> topic)
+   public RDXROS2BigDepthVideoVisualizer(String title, ROS2Topic<BigVideoPacket> topic)
    {
       super(title, topic.getName(), false);
       titleBeforeAdditions = title;
-      this.pubSubImplementation = pubSubImplementation;
       this.topic = topic;
 
       setActivenessChangeCallback(isActive ->
@@ -51,7 +48,7 @@ public class RDXROS2BigDepthVideoVisualizer extends RDXROS2OpenCVVideoVisualizer
 
    private void subscribe()
    {
-      this.realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, StringTools.titleToSnakeCase(titleBeforeAdditions));
+      this.realtimeROS2Node = new ROS2NodeBuilder().buildRealtime(StringTools.titleToSnakeCase(titleBeforeAdditions));
       // synchronize with the update method
       realtimeROS2Node.createSubscription(topic, subscriber ->
       {

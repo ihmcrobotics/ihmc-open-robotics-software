@@ -3,7 +3,7 @@
 # It is defined by an origin, a normal, and a concave hull.
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # Approximate last update time
 ihmc_common_msgs/InstantMessage last_updated

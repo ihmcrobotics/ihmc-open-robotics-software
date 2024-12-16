@@ -14,25 +14,20 @@ import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.detections.InstantDetection;
 import us.ihmc.perception.imageMessage.CompressionType;
-import us.ihmc.perception.imageMessage.ImageMessageDataPacker;
-import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.opencl.OpenCLDepthImageSegmenter;
 import us.ihmc.perception.opencl.OpenCLPointCloudExtractor;
 import us.ihmc.perception.tools.PerceptionMessageTools;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2PublisherBasics;
+import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.tools.thread.RestartableThrottledThread;
 
 import java.nio.file.Path;
@@ -62,7 +57,7 @@ public class YOLOv8DetectionExecutor
    private final List<Consumer<List<InstantDetection>>> detectionConsumerCallbacks = new ArrayList<>();
 
    private final BooleanSupplier isDemandedSupplier;
-   private final ROS2PublisherBasics<ImageMessage> annotatedImagePublisher;
+   private final ROS2Publisher<ImageMessage> annotatedImagePublisher;
 
    // TODO: temp hack
    private int lastRunDetectorIndex = 0;
@@ -88,7 +83,7 @@ public class YOLOv8DetectionExecutor
    {
       this.isDemandedSupplier = isDemandedSupplier;
 
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "yolo_detection_manager");
+      ROS2Node ros2Node = new ROS2NodeBuilder().build("yolo_detection_manager");
       annotatedImagePublisher = ros2Node.createPublisher(PerceptionAPI.YOLO_ANNOTATED_IMAGE);
 
       ros2Helper.subscribe(PerceptionAPI.YOLO_PARAMETERS).addCallback(parametersMessage ->

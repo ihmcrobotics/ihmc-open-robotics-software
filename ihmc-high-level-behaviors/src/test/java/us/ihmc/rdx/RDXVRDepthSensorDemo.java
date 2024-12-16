@@ -51,7 +51,7 @@ public class RDXVRDepthSensorDemo
                                                                                                  0.03,
                                                                                                  0.07,
                                                                                                  false);
-      RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
+      RDXPointCloudRendererOld pointCloudRenderer = new RDXPointCloudRendererOld();
       SideDependentList<ModelInstance> controllerCoordinateFrames = new SideDependentList<>();
 
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()

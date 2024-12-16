@@ -15,7 +15,7 @@ public class AtlasWristSensorCalibrationRequestPacketPubSubType implements us.ih
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "d5d1f7cce3757fc425c51ff5bf407af4ce6b4345053ab61815f9df33f0cdb2ad";
+   		return "043212119002479ce85120d7b15f173a6b6993f4e3aa2f0b0a079c7954d810fa";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class AtlasWristSensorCalibrationRequestPacketPubSubType implements us.ih
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -69,7 +69,7 @@ public class AtlasWristSensorCalibrationRequestPacketPubSubType implements us.ih
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -81,7 +81,7 @@ public class AtlasWristSensorCalibrationRequestPacketPubSubType implements us.ih
 
    public static void write(atlas_msgs.msg.dds.AtlasWristSensorCalibrationRequestPacket data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_9(data.getRobotSide());
 
@@ -89,7 +89,7 @@ public class AtlasWristSensorCalibrationRequestPacketPubSubType implements us.ih
 
    public static void read(atlas_msgs.msg.dds.AtlasWristSensorCalibrationRequestPacket data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setRobotSide(cdr.read_type_9());
       	
@@ -99,14 +99,14 @@ public class AtlasWristSensorCalibrationRequestPacketPubSubType implements us.ih
    @Override
    public final void serialize(atlas_msgs.msg.dds.AtlasWristSensorCalibrationRequestPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_9("robot_side", data.getRobotSide());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, atlas_msgs.msg.dds.AtlasWristSensorCalibrationRequestPacket data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setRobotSide(ser.read_type_9("robot_side"));
    }
 

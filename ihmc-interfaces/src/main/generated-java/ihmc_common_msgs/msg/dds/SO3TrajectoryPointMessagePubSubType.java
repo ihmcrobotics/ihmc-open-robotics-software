@@ -15,7 +15,7 @@ public class SO3TrajectoryPointMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "b24c119fd1086fc6414dcc12ad7a6b2f28a4b88a6ddb54486bde7c643e27480e";
+   		return "fa525621b76c8b77ae74002a6b3bec1b9df689e9a544215d5b274cfeba4a5773";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class SO3TrajectoryPointMessagePubSubType implements us.ihmc.pubsub.Topic
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -73,7 +73,7 @@ public class SO3TrajectoryPointMessagePubSubType implements us.ihmc.pubsub.Topic
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -89,7 +89,7 @@ public class SO3TrajectoryPointMessagePubSubType implements us.ihmc.pubsub.Topic
 
    public static void write(ihmc_common_msgs.msg.dds.SO3TrajectoryPointMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_6(data.getTime());
 
@@ -99,7 +99,7 @@ public class SO3TrajectoryPointMessagePubSubType implements us.ihmc.pubsub.Topic
 
    public static void read(ihmc_common_msgs.msg.dds.SO3TrajectoryPointMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setTime(cdr.read_type_6());
       	
@@ -111,7 +111,7 @@ public class SO3TrajectoryPointMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final void serialize(ihmc_common_msgs.msg.dds.SO3TrajectoryPointMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_6("time", data.getTime());
       ser.write_type_a("orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getOrientation());
 
@@ -122,7 +122,7 @@ public class SO3TrajectoryPointMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, ihmc_common_msgs.msg.dds.SO3TrajectoryPointMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setTime(ser.read_type_6("time"));
       ser.read_type_a("orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getOrientation());
 

@@ -3,14 +3,14 @@ package us.ihmc.perception.streaming;
 import org.bytedeco.javacpp.BytePointer;
 import perception_msgs.msg.dds.SRTStreamStatus;
 import perception_msgs.msg.dds.VideoFrameExtraData;
+import us.ihmc.commons.time.FrequencyCalculator;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2PublisherBasics;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.commons.time.FrequencyCalculator;
 
 import java.net.InetSocketAddress;
 import java.util.Map;
@@ -26,7 +26,7 @@ public class ROS2SRTVideoStreamer
    private static final int COLOR_OUTPUT_PIXEL_FORMAT = AV_PIX_FMT_YUV444P;
 
    private final SRTStreamStatus statusMessage;
-   private final ROS2PublisherBasics<SRTStreamStatus> statusMessagePublisher;
+   private final ROS2Publisher<SRTStreamStatus> statusMessagePublisher;
    private final VideoFrameExtraData frameExtraData;
 
    private final SRTVideoStreamer videoStreamer;

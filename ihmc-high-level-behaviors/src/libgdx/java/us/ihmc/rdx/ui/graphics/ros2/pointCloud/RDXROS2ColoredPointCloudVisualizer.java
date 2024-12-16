@@ -13,7 +13,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.opencl.OpenCLFloatBuffer;
 import us.ihmc.perception.opencl.OpenCLManager;
-import us.ihmc.rdx.RDXPointCloudRenderer;
+import us.ihmc.rdx.RDXPointCloudRendererOld;
 import us.ihmc.rdx.imgui.ImGuiAveragedFrequencyText;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -54,7 +54,7 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXROS2MultiTopicVisuali
 
    private final Object imageMessagesSyncObject = new Object();
 
-   private RDXPointCloudRenderer pointCloudRenderer;
+   private RDXPointCloudRendererOld pointCloudRenderer;
    private OpenCLManager openCLManager;
    private OpenCLFloatBuffer pointCloudVertexBuffer;
    private RDXPinholePinholeColoredPointCloudKernel pinholePinholeKernel;
@@ -133,16 +133,16 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXROS2MultiTopicVisuali
             }
 
             if (pointCloudVertexBuffer == null
-             || pointCloudVertexBuffer.getBackingDirectFloatBuffer().capacity() / RDXPointCloudRenderer.FLOATS_PER_VERTEX != totalNumberOfPoints)
+             || pointCloudVertexBuffer.getBackingDirectFloatBuffer().capacity() / RDXPointCloudRendererOld.FLOATS_PER_VERTEX != totalNumberOfPoints)
             {
                LogTools.info("Allocating new buffers. {} total points", totalNumberOfPoints);
 
                if (pointCloudRenderer != null)
                   pointCloudRenderer.dispose();
-               pointCloudRenderer = new RDXPointCloudRenderer();
+               pointCloudRenderer = new RDXPointCloudRendererOld();
                pointCloudRenderer.create(totalNumberOfPoints);
 
-               pointCloudVertexBuffer = new OpenCLFloatBuffer(totalNumberOfPoints * RDXPointCloudRenderer.FLOATS_PER_VERTEX, pointCloudRenderer.getVertexBuffer());
+               pointCloudVertexBuffer = new OpenCLFloatBuffer(totalNumberOfPoints * RDXPointCloudRendererOld.FLOATS_PER_VERTEX, pointCloudRenderer.getVertexBuffer());
                pointCloudVertexBuffer.createOpenCLBufferObject(openCLManager);
             }
 

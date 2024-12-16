@@ -1,11 +1,5 @@
 package us.ihmc.avatar.networkProcessor.wholeBodyTrajectoryToolboxModule;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import controller_msgs.msg.dds.RobotConfigurationData;
 import toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxMessage;
 import toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxOutputStatus;
@@ -14,8 +8,6 @@ import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ToolboxAPIs;
-import us.ihmc.ros2.ROS2NodeInterface;
-import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
@@ -23,21 +15,27 @@ import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.Reac
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.RigidBodyExplorationConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WaypointBasedTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WholeBodyTrajectoryToolboxConfigurationCommand;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Topic;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class WholeBodyTrajectoryToolboxModule extends ToolboxModule
 {
    private final WholeBodyTrajectoryToolboxController wholeBodyTrajectoryToolboxController;
 
-   public WholeBodyTrajectoryToolboxModule(DRCRobotModel drcRobotModel, boolean startYoVariableServer, PubSubImplementation pubSubImplementation)
+   public WholeBodyTrajectoryToolboxModule(DRCRobotModel drcRobotModel, boolean startYoVariableServer)
          throws IOException
    {
       super(drcRobotModel.getSimpleRobotName(),
             drcRobotModel.createFullRobotModel(),
             drcRobotModel.getLogModelProvider(),
             startYoVariableServer,
-            DEFAULT_UPDATE_PERIOD_MILLISECONDS,
-            pubSubImplementation);
+            DEFAULT_UPDATE_PERIOD_MILLISECONDS);
 
       setTimeWithoutInputsBeforeGoingToSleep(Double.POSITIVE_INFINITY);
 
@@ -117,7 +115,7 @@ public class WholeBodyTrajectoryToolboxModule extends ToolboxModule
    }
 
    @Override
-   public void registerExtraPuSubs(ROS2NodeInterface ros2Node)
+   public void registerExtraPuSubs(ROS2Node ros2Node)
    {
       ROS2Topic<?> controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
 

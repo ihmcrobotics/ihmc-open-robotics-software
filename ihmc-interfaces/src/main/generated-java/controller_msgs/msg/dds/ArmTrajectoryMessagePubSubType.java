@@ -15,7 +15,7 @@ public class ArmTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "d996f0d93f33dc161df4bc7c9bfc99f2a7d2b3edc134be66aea6c3c26784d9a0";
+   		return "1f29e28f2488d68ac8807b126fb75e70ece1f21a843717dfc7633eaacd353e31";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class ArmTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -73,7 +73,7 @@ public class ArmTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -90,7 +90,7 @@ public class ArmTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataT
 
    public static void write(controller_msgs.msg.dds.ArmTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_7(data.getForceExecution());
 
@@ -101,7 +101,7 @@ public class ArmTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataT
 
    public static void read(controller_msgs.msg.dds.ArmTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setForceExecution(cdr.read_type_7());
       	
@@ -114,7 +114,7 @@ public class ArmTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final void serialize(controller_msgs.msg.dds.ArmTrajectoryMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_7("force_execution", data.getForceExecution());
       ser.write_type_9("robot_side", data.getRobotSide());
       ser.write_type_a("jointspace_trajectory", new controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType(), data.getJointspaceTrajectory());
@@ -124,7 +124,7 @@ public class ArmTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.ArmTrajectoryMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setForceExecution(ser.read_type_7("force_execution"));
       data.setRobotSide(ser.read_type_9("robot_side"));
       ser.read_type_a("jointspace_trajectory", new controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType(), data.getJointspaceTrajectory());

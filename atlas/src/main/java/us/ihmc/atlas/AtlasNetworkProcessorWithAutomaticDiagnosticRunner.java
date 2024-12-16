@@ -1,14 +1,16 @@
 package us.ihmc.atlas;
 
-import java.net.URISyntaxException;
-
-import com.martiansoftware.jsap.*;
-
+import com.martiansoftware.jsap.FlaggedOption;
+import com.martiansoftware.jsap.JSAP;
+import com.martiansoftware.jsap.JSAPException;
+import com.martiansoftware.jsap.JSAPResult;
+import com.martiansoftware.jsap.Switch;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessor;
 import us.ihmc.log.LogTools;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+
+import java.net.URISyntaxException;
 
 public class AtlasNetworkProcessorWithAutomaticDiagnosticRunner
 {
@@ -65,7 +67,7 @@ public class AtlasNetworkProcessorWithAutomaticDiagnosticRunner
         
         System.out.println("Using the " + model + " model");
         
-        HumanoidNetworkProcessor networkProcessor = new HumanoidNetworkProcessor(model, PubSubImplementation.FAST_RTPS);
+        HumanoidNetworkProcessor networkProcessor = new HumanoidNetworkProcessor(model);
         LogTools.info("ROS_MASTER_URI = " + networkProcessor.getOrCreateRosURI());
         networkProcessor.setupRosModule();
         networkProcessor.setupBehaviorModule(true, true, 15.0);

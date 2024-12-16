@@ -12,6 +12,10 @@ import us.ihmc.behaviors.buildingExploration.BuildingExplorationDefinition;
 import us.ihmc.behaviors.buildingExploration.BuildingExplorationState;
 import us.ihmc.behaviors.door.DoorTraversalDefinition;
 import us.ihmc.behaviors.door.DoorTraversalState;
+import us.ihmc.behaviors.logic.ConditionNodeDefinition;
+import us.ihmc.behaviors.logic.ConditionNodeState;
+import us.ihmc.behaviors.logic.GotoNodeDefinition;
+import us.ihmc.behaviors.logic.GotoNodeState;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.ActionSequenceState;
 import us.ihmc.behaviors.sequence.FallbackNodeDefinition;
@@ -34,6 +38,8 @@ public class ROS2BehaviorTreeMessageTools
       treeStateMessage.getBasicNodes().clear();
       treeStateMessage.getActionSequences().clear();
       treeStateMessage.getFallbackNodes().clear();
+      treeStateMessage.getConditionNodes().clear();
+      treeStateMessage.getGotoNodes().clear();
       treeStateMessage.getDoorTraversals().clear();
       treeStateMessage.getTrashCanInteractions().clear();
       treeStateMessage.getBuildingExplorations().clear();
@@ -78,6 +84,18 @@ public class ROS2BehaviorTreeMessageTools
             treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.FALLBACK_NODE);
             treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getFallbackNodes().size());
             fallbackNodeState.toMessage(treeStateMessage.getFallbackNodes().add());
+         }
+         else if (nodeState instanceof ConditionNodeState conditionNodeState)
+         {
+            treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.CONDITION_NODE);
+            treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getConditionNodes().size());
+            conditionNodeState.toMessage(treeStateMessage.getConditionNodes().add());
+         }
+         else if (nodeState instanceof GotoNodeState gotoNodeState)
+         {
+            treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.GOTO_NODE);
+            treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getGotoNodes().size());
+            gotoNodeState.toMessage(treeStateMessage.getGotoNodes().add());
          }
          else if (nodeState instanceof DoorTraversalState doorTraversalState)
          {
@@ -191,6 +209,14 @@ public class ROS2BehaviorTreeMessageTools
       {
          fallbackNodeState.fromMessage(subscriptionNode.getFallbackNodeStateMessage());
       }
+      else if (subscriptionNode.getType() == ConditionNodeDefinition.class && nodeState instanceof ConditionNodeState conditionNodeState)
+      {
+         conditionNodeState.fromMessage(subscriptionNode.getConditionNodeStateMessage());
+      }
+      else if (subscriptionNode.getType() == GotoNodeDefinition.class && nodeState instanceof GotoNodeState gotoNodeState)
+      {
+         gotoNodeState.fromMessage(subscriptionNode.getGotoNodeStateMessage());
+      }
       else if (subscriptionNode.getType() == DoorTraversalDefinition.class && nodeState instanceof DoorTraversalState doorTraversalState)
       {
          doorTraversalState.fromMessage(subscriptionNode.getDoorTraversalStateMessage());
@@ -286,6 +312,20 @@ public class ROS2BehaviorTreeMessageTools
             subscriptionNode.setFallbackNodeStateMessage(fallbackNodeStateMessage);
             subscriptionNode.setBehaviorTreeNodeStateMessage(fallbackNodeStateMessage.getState());
             subscriptionNode.setBehaviorTreeNodeDefinitionMessage(fallbackNodeStateMessage.getDefinition().getDefinition());
+         }
+         case BehaviorTreeStateMessage.CONDITION_NODE ->
+         {
+            ConditionNodeStateMessage conditionNodeStateMessage = treeStateMessage.getConditionNodes().get(indexInTypesList);
+            subscriptionNode.setConditionNodeStateMessage(conditionNodeStateMessage);
+            subscriptionNode.setBehaviorTreeNodeStateMessage(conditionNodeStateMessage.getState());
+            subscriptionNode.setBehaviorTreeNodeDefinitionMessage(conditionNodeStateMessage.getDefinition().getDefinition());
+         }
+         case BehaviorTreeStateMessage.GOTO_NODE ->
+         {
+            GotoNodeStateMessage gotoNodeStateMessage = treeStateMessage.getGotoNodes().get(indexInTypesList);
+            subscriptionNode.setGotoNodeStateMessage(gotoNodeStateMessage);
+            subscriptionNode.setBehaviorTreeNodeStateMessage(gotoNodeStateMessage.getState());
+            subscriptionNode.setBehaviorTreeNodeDefinitionMessage(gotoNodeStateMessage.getDefinition().getDefinition());
          }
          case BehaviorTreeStateMessage.DOOR_TRAVERSAL ->
          {

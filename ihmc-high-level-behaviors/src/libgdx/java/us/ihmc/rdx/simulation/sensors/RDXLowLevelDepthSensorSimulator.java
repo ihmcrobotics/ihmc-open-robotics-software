@@ -17,8 +17,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.camera.CameraIntrinsics;
-import us.ihmc.rdx.RDXPointCloudRenderer;
-import us.ihmc.rdx.imgui.ImGuiTools;
+import us.ihmc.rdx.RDXPointCloudRendererOld;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXImagePanel;
 import us.ihmc.rdx.perception.RDXBytedecoImagePanel;
@@ -43,7 +42,7 @@ import java.util.Random;
 public class RDXLowLevelDepthSensorSimulator
 {
    // Each point contains {X, Y, Z, R, G, B, A, Size}
-   public static final int FLOATS_PER_POINT = RDXPointCloudRenderer.FLOATS_PER_VERTEX;
+   public static final int FLOATS_PER_POINT = RDXPointCloudRendererOld.FLOATS_PER_VERTEX;
 
    private final String depthWindowName;
    private final String colorWindowName;

@@ -2,7 +2,7 @@
 #This message acts as a go-between between the Tufftread treadmill controller and Eva
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 byte START_BELT_TIMEOUT_ENABLED = 0
 byte START_BELT_TIMEOUT_DISABLED = 1

@@ -1,6 +1,23 @@
 package us.ihmc.robotEnvironmentAwareness.hardware;
 
-import java.awt.Color;
+import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
+import sensor_msgs.PointCloud2;
+import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.communication.packets.StereoPointCloudCompression;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.robotEnvironmentAwareness.fusion.MultisenseInformation;
+import us.ihmc.robotEnvironmentAwareness.fusion.tools.PointCloudProjectionHelper;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.ros2.ROS2Publisher;
+import us.ihmc.utilities.ros.RosMainNode;
+import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
+import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
+import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber.UnpackedPointCloud;
+
+import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileWriter;
@@ -11,34 +28,15 @@ import java.util.Random;
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicReference;
 
-import javax.imageio.ImageIO;
-
-import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
-import sensor_msgs.PointCloud2;
-import us.ihmc.ros2.ROS2PublisherBasics;
-import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.packets.StereoPointCloudCompression;
-import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.robotEnvironmentAwareness.fusion.MultisenseInformation;
-import us.ihmc.robotEnvironmentAwareness.fusion.tools.PointCloudProjectionHelper;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.utilities.ros.RosMainNode;
-import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
-import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
-import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber.UnpackedPointCloud;
-
 public class MultisenseStereoVisionPointCloudROS1Bridge extends AbstractRosTopicSubscriber<PointCloud2>
 {
    private static final MultisenseInformation multisense = MultisenseInformation.CART;
 
    private static final int MAX_NUMBER_OF_POINTS = 200000;
 
-   private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "stereoVisionPublisherNode");
+   private final ROS2Node ros2Node = new ROS2NodeBuilder().build("stereoVisionPublisherNode");
 
-   private final ROS2PublisherBasics<StereoVisionPointCloudMessage> stereoVisionPublisher;
+   private final ROS2Publisher<StereoVisionPointCloudMessage> stereoVisionPublisher;
 
    private static final int projectionWidth = 1024;
    private static final int projectionHeight = 544;

@@ -1,12 +1,7 @@
 package us.ihmc.robotEnvironmentAwareness.ui;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-import java.util.function.Function;
-
-import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
+import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -16,8 +11,6 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.ros2.ROS2PublisherBasics;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
@@ -28,14 +21,24 @@ import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.perceptionSuite.PerceptionUI;
 import us.ihmc.robotEnvironmentAwareness.slam.viewer.FootstepMeshViewer;
 import us.ihmc.robotEnvironmentAwareness.slam.viewer.SLAMMeshViewer;
-import us.ihmc.robotEnvironmentAwareness.ui.controller.*;
+import us.ihmc.robotEnvironmentAwareness.ui.controller.BoundingBoxAnchorPaneController;
+import us.ihmc.robotEnvironmentAwareness.ui.controller.FrameNormalEstimationAnchorPaneController;
+import us.ihmc.robotEnvironmentAwareness.ui.controller.NormalEstimationAnchorPaneController;
+import us.ihmc.robotEnvironmentAwareness.ui.controller.SLAMAnchorPaneController;
+import us.ihmc.robotEnvironmentAwareness.ui.controller.SLAMDataManagerAnchorPaneController;
+import us.ihmc.robotEnvironmentAwareness.ui.controller.SurfaceElementICPPaneController;
 import us.ihmc.robotEnvironmentAwareness.ui.io.StereoVisionPointCloudDataExporter;
 import us.ihmc.robotEnvironmentAwareness.ui.viewer.SensorFrameViewer;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.ros2.ROS2Publisher;
 
-import static us.ihmc.pubsub.DomainFactory.PubSubImplementation.FAST_RTPS;
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+import java.util.function.Function;
 
 public class SLAMBasedEnvironmentAwarenessUI implements PerceptionUI
 {
@@ -158,8 +161,8 @@ public class SLAMBasedEnvironmentAwarenessUI implements PerceptionUI
 
       primaryStage.setScene(mainScene);
 
-      ros2Node = ROS2Tools.createROS2Node(FAST_RTPS, "slam_ui");
-      ROS2PublisherBasics<Empty> shutdownPublisher = ros2Node.createPublisher(SLAMModuleAPI.SHUTDOWN);
+      ros2Node = new ROS2NodeBuilder().build("slam_ui");
+      ROS2Publisher<Empty> shutdownPublisher = ros2Node.createPublisher(SLAMModuleAPI.SHUTDOWN);
       ros2Node.createSubscription2(SLAMModuleAPI.SHUTDOWN, message ->
       {
          if (!shuttingDown)

@@ -1,7 +1,7 @@
 # This message is part of the IHMC height map module
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # Discretization of the height map grid
 # Field default value -1.0
