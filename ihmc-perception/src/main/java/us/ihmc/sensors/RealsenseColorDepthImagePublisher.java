@@ -21,7 +21,9 @@ public class RealsenseColorDepthImagePublisher
 {
    private final ROS2Node ros2Node;
    private final ROS2Publisher<ImageMessage> ros2DepthImagePublisher;
+   private final ImageMessage depthImageMessage = new ImageMessage();
    private final ROS2Publisher<ImageMessage> ros2ColorImagePublisher;
+   private final ImageMessage colorImageMessage = new ImageMessage();
 
    private CUDAJPEGProcessor imageEncoder;
    private CUDACompressionTools compressionTools;
@@ -88,7 +90,6 @@ public class RealsenseColorDepthImagePublisher
          BytePointer depthPNGPointer = compressionTools.compressDepth(depthImageToPublish.getGpuImageMat());
 
          // Publish image
-         ImageMessage depthImageMessage = new ImageMessage();
          PerceptionMessageTools.packImageMessage(depthImageToPublish, depthPNGPointer, CompressionType.ZSTD_NVJPEG_HYBRID, depthImageMessage);
 
          ros2DepthImagePublisher.publish(depthImageMessage);
@@ -136,7 +137,6 @@ public class RealsenseColorDepthImagePublisher
          imageEncoder.encodeBGR(colorImageToPublish.getGpuImageMat(), colorJPEGPointer);
 
          // Publish compressed image
-         ImageMessage colorImageMessage = new ImageMessage();
          PerceptionMessageTools.packImageMessage(colorImageToPublish, colorJPEGPointer, CompressionType.NVJPEG, colorImageMessage);
 
          ros2ColorImagePublisher.publish(colorImageMessage);
