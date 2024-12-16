@@ -1,13 +1,9 @@
 package us.ihmc.perception.footstepSnapping;
 
-import static org.bytedeco.librealsense2.global.realsense2.rs2_release_frame;
-import static us.ihmc.pubsub.DomainFactory.PubSubImplementation.FAST_RTPS;
-
-import java.io.IOException;
-import java.util.function.Consumer;
-
+import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.IntPointer;
+import org.bytedeco.librealsense2.global.realsense2;
 import org.bytedeco.librealsense2.rs2_config;
 import org.bytedeco.librealsense2.rs2_context;
 import org.bytedeco.librealsense2.rs2_device;
@@ -20,9 +16,6 @@ import org.bytedeco.librealsense2.rs2_pipeline_profile;
 import org.bytedeco.librealsense2.rs2_processing_block;
 import org.bytedeco.librealsense2.rs2_stream_profile;
 import org.bytedeco.librealsense2.rs2_vertex;
-import org.bytedeco.librealsense2.global.realsense2;
-
-import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.KryoObjectServer;
@@ -34,7 +27,13 @@ import us.ihmc.communication.packets.StereoPointCloudCompression.PointAccessor;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.perception.MutableBytePointer;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2Topic;
+
+import java.io.IOException;
+import java.util.function.Consumer;
+
+import static org.bytedeco.librealsense2.global.realsense2.rs2_release_frame;
 
 /**
  * Realsense2 API from bytedeco to poll depth data from an L515. See
@@ -86,7 +85,7 @@ public class StandAloneL515Streamer
       }
       else
       {
-         ROS2Node ros2Node = ROS2Tools.createROS2Node(FAST_RTPS, "L515");
+         ROS2Node ros2Node = new ROS2NodeBuilder().build("L515");
          ROS2Topic<StereoVisionPointCloudMessage> topic = ROS2Tools.IHMC_ROOT.withTypeName(StereoVisionPointCloudMessage.class);
          pointcloudPublisher = ros2Node.createPublisher(topic)::publish;
 

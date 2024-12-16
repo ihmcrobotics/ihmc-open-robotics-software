@@ -1,16 +1,16 @@
 package us.ihmc.behaviors.tools.perception;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
-import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Node;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,12 +46,12 @@ public class RealsensePelvisSimulator implements Supplier<PlanarRegionsList>
 
    private final FramePose3D tempSensorFramePose = new FramePose3D();
 
-   public RealsensePelvisSimulator(PlanarRegionsList map, DRCRobotModel robotModel, ROS2NodeInterface ros2Node)
+   public RealsensePelvisSimulator(PlanarRegionsList map, DRCRobotModel robotModel, ROS2Node ros2Node)
    {
       this(map, robotModel, ros2Node, 1.5, 30000);
    }
 
-   public RealsensePelvisSimulator(PlanarRegionsList map, DRCRobotModel robotModel, ROS2NodeInterface ros2Node, double range, int sphereScanSize)
+   public RealsensePelvisSimulator(PlanarRegionsList map, DRCRobotModel robotModel, ROS2Node ros2Node, double range, int sphereScanSize)
    {
       this.map = map;
 

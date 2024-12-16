@@ -15,7 +15,7 @@ public class ValveLocationPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "d1dd82a283bf7b28135506e69d962d66e8ac8aa809af99f535557af3922e75ac";
+   		return "ec9d414c7c60f3a3fae6a93b3d08000bbe4365c7e4dc5f900851993111d8b4b1";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class ValveLocationPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -71,7 +71,7 @@ public class ValveLocationPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getValvePoseInWorld(), current_alignment);
@@ -85,7 +85,7 @@ public class ValveLocationPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
 
    public static void write(perception_msgs.msg.dds.ValveLocationPacket data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       geometry_msgs.msg.dds.PosePubSubType.write(data.getValvePoseInWorld(), cdr);
       cdr.write_type_6(data.getValveRadius());
@@ -94,7 +94,7 @@ public class ValveLocationPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
 
    public static void read(perception_msgs.msg.dds.ValveLocationPacket data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       geometry_msgs.msg.dds.PosePubSubType.read(data.getValvePoseInWorld(), cdr);	
       data.setValveRadius(cdr.read_type_6());
@@ -105,7 +105,7 @@ public class ValveLocationPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final void serialize(perception_msgs.msg.dds.ValveLocationPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_a("valve_pose_in_world", new geometry_msgs.msg.dds.PosePubSubType(), data.getValvePoseInWorld());
 
       ser.write_type_6("valve_radius", data.getValveRadius());
@@ -114,7 +114,7 @@ public class ValveLocationPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.ValveLocationPacket data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       ser.read_type_a("valve_pose_in_world", new geometry_msgs.msg.dds.PosePubSubType(), data.getValvePoseInWorld());
 
       data.setValveRadius(ser.read_type_6("valve_radius"));

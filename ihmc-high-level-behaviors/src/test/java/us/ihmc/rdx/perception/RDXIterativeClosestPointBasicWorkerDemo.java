@@ -11,7 +11,6 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -26,9 +25,8 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.IterativeClosestPointTools;
 import us.ihmc.perception.IterativeClosestPointWorker;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.RDXPointCloudRenderer;
+import us.ihmc.rdx.RDXPointCloudRendererOld;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
@@ -36,6 +34,7 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizersPanel;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.tools.thread.RestartableThread;
 
 import java.text.DecimalFormat;
@@ -52,7 +51,7 @@ public class RDXIterativeClosestPointBasicWorkerDemo
 
    private final Random random = new Random(System.nanoTime());
 
-   private final ROS2Node node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "icp_worker_demo");
+   private final ROS2Node node = new ROS2NodeBuilder().build("icp_worker_demo");
    private final ROS2Helper ros2Helper = new ROS2Helper(node);
    private IterativeClosestPointWorker icpWorker = new IterativeClosestPointWorker(SHAPE_SAMPLE_POINTS, CORRESPONDENCE_POINTS, random);
 
@@ -63,14 +62,14 @@ public class RDXIterativeClosestPointBasicWorkerDemo
    private ModelInstance mousePickSphere;
    FramePoint3D pickFramePoint = new FramePoint3D();
 
-   private final RDXPointCloudRenderer icpBoxRenderer = new RDXPointCloudRenderer();
+   private final RDXPointCloudRendererOld icpBoxRenderer = new RDXPointCloudRendererOld();
    private List<Point3D32> objectPointCloud;
    private final RecyclingArrayList<Point3D32> icpBoxPointCloud = new RecyclingArrayList<>(Point3D32::new);
 
-   private final RDXPointCloudRenderer environmentPointCloudRenderer = new RDXPointCloudRenderer();
-   private final RDXPointCloudRenderer segmentedPointCloudRenderer = new RDXPointCloudRenderer();
-   private final RDXPointCloudRenderer correspondingObjectPointCloudRenderer = new RDXPointCloudRenderer();
-   private final RDXPointCloudRenderer correspondingMeasurementPointCloudRenderer = new RDXPointCloudRenderer();
+   private final RDXPointCloudRendererOld environmentPointCloudRenderer = new RDXPointCloudRendererOld();
+   private final RDXPointCloudRendererOld segmentedPointCloudRenderer = new RDXPointCloudRendererOld();
+   private final RDXPointCloudRendererOld correspondingObjectPointCloudRenderer = new RDXPointCloudRendererOld();
+   private final RDXPointCloudRendererOld correspondingMeasurementPointCloudRenderer = new RDXPointCloudRendererOld();
    private final RecyclingArrayList<Point3D32> segmentedPtCld = new RecyclingArrayList<>(Point3D32::new);
    private final RecyclingArrayList<Point3D32> correspondingObjectPtCld = new RecyclingArrayList<>(Point3D32::new);
    private final RecyclingArrayList<Point3D32> correspondingMeasurementPtCld = new RecyclingArrayList<>(Point3D32::new);

@@ -15,7 +15,7 @@ public class StepConstraintsListMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "45b58b844d1abe33b51618fa4eeae630dbc7ea88d1d327015b27e4b68b4df4ee";
+   		return "dc8a09e2acd298662ee211e94a27e511ebb88cf2a1fb25e8bac0654f328e8ba3";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class StepConstraintsListMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 20; ++i0)
       {
@@ -85,7 +85,7 @@ public class StepConstraintsListMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -126,7 +126,7 @@ public class StepConstraintsListMessagePubSubType implements us.ihmc.pubsub.Topi
 
    public static void write(controller_msgs.msg.dds.StepConstraintsListMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       if(data.getRegionOrigin().size() <= 20)
       cdr.write_type_e(data.getRegionOrigin());else
@@ -160,7 +160,7 @@ public class StepConstraintsListMessagePubSubType implements us.ihmc.pubsub.Topi
 
    public static void read(controller_msgs.msg.dds.StepConstraintsListMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       cdr.read_type_e(data.getRegionOrigin());	
       cdr.read_type_e(data.getRegionOrientation());	
@@ -175,7 +175,7 @@ public class StepConstraintsListMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final void serialize(controller_msgs.msg.dds.StepConstraintsListMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_e("region_origin", data.getRegionOrigin());
       ser.write_type_e("region_orientation", data.getRegionOrientation());
       ser.write_type_e("region_normal", data.getRegionNormal());
@@ -188,7 +188,7 @@ public class StepConstraintsListMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.StepConstraintsListMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       ser.read_type_e("region_origin", data.getRegionOrigin());
       ser.read_type_e("region_orientation", data.getRegionOrientation());
       ser.read_type_e("region_normal", data.getRegionNormal());

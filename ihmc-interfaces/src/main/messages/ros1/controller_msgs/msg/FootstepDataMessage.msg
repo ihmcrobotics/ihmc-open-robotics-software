@@ -14,7 +14,7 @@ int8 TRAJECTORY_TYPE_CUSTOM=2
 int8 TRAJECTORY_TYPE_WAYPOINTS=3
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # Specifies which foot will swing to reach the footstep.
 # Field default value 255

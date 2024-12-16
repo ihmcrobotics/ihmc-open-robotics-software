@@ -15,7 +15,7 @@ public class NormalEstimationParametersMessagePubSubType implements us.ihmc.pubs
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "ea1f75a814e7b67b545de9f643f6574f33cbcb518348389d75c0ba01cb99ffc3";
+   		return "fda3ae7886837c6fbd8825a767698b08b2a7523220a322c799e144df54895056";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class NormalEstimationParametersMessagePubSubType implements us.ihmc.pubs
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -81,7 +81,7 @@ public class NormalEstimationParametersMessagePubSubType implements us.ihmc.pubs
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -111,7 +111,7 @@ public class NormalEstimationParametersMessagePubSubType implements us.ihmc.pubs
 
    public static void write(perception_msgs.msg.dds.NormalEstimationParametersMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_6(data.getSearchRadius());
 
@@ -131,7 +131,7 @@ public class NormalEstimationParametersMessagePubSubType implements us.ihmc.pubs
 
    public static void read(perception_msgs.msg.dds.NormalEstimationParametersMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setSearchRadius(cdr.read_type_6());
       	
@@ -153,7 +153,7 @@ public class NormalEstimationParametersMessagePubSubType implements us.ihmc.pubs
    @Override
    public final void serialize(perception_msgs.msg.dds.NormalEstimationParametersMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_6("search_radius", data.getSearchRadius());
       ser.write_type_6("max_distance_from_plane", data.getMaxDistanceFromPlane());
       ser.write_type_6("min_consensus_ratio", data.getMinConsensusRatio());
@@ -166,7 +166,7 @@ public class NormalEstimationParametersMessagePubSubType implements us.ihmc.pubs
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.NormalEstimationParametersMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setSearchRadius(ser.read_type_6("search_radius"));
       data.setMaxDistanceFromPlane(ser.read_type_6("max_distance_from_plane"));
       data.setMinConsensusRatio(ser.read_type_6("min_consensus_ratio"));

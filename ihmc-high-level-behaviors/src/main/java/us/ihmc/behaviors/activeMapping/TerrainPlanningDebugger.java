@@ -27,7 +27,7 @@ import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2PublisherBasics;
+import us.ihmc.ros2.ROS2Publisher;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,11 +57,11 @@ public class TerrainPlanningDebugger
    private HeatMapGenerator contactHeatMapGenerator = new HeatMapGenerator();
    private ContinuousWalkingStatusMessage statusMessage = new ContinuousWalkingStatusMessage();
 
-   private ROS2PublisherBasics<FootstepDataListMessage> plannedFootstesPublisherForUI;
-   private ROS2PublisherBasics<ContinuousWalkingStatusMessage> statusPublisher;
-   private ROS2PublisherBasics<FootstepDataListMessage> monteCarloPlanPublisherForUI;
-   private ROS2PublisherBasics<PoseListMessage> startAndGoalPublisherForUI;
-   private ROS2PublisherBasics<PoseListMessage> monteCarloNodesPublisherForUI;
+   private ROS2Publisher<FootstepDataListMessage> plannedFootstesPublisherForUI;
+   private ROS2Publisher<ContinuousWalkingStatusMessage> statusPublisher;
+   private ROS2Publisher<FootstepDataListMessage> monteCarloPlanPublisherForUI;
+   private ROS2Publisher<PoseListMessage> startAndGoalPublisherForUI;
+   private ROS2Publisher<PoseListMessage> monteCarloNodesPublisherForUI;
    private MonteCarloFootstepPlannerRequest request;
    private MonteCarloFootstepPlannerParameters parameters;
    private PlanningMode planningMode;

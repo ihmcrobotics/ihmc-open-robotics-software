@@ -8,12 +8,11 @@ import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.scs2.SCS2AvatarSimulation;
 import us.ihmc.avatar.scs2.SCS2AvatarSimulationFactory;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
-import us.ihmc.communication.CommunicationMode;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
@@ -33,21 +32,19 @@ public class RDXSCS2HumanoidSimulationManager extends RDXSCS2RestartableSimulati
    private final HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters;
    private final boolean useVelocityAndHeadingScript;
    private final DRCRobotModel robotModel;
-   private final CommunicationMode ros2CommunicationMode;
    private final List<RobotDefinition> secondaryRobotDefinitions = new ArrayList<>();
    private final List<TerrainObjectDefinition> terrainObjectDefinitions = new ArrayList<>();
    private SCS2AvatarSimulation avatarSimulation;
    private Consumer<SCS2AvatarSimulationFactory> externalFactorySetup = null;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
-   public RDXSCS2HumanoidSimulationManager(RDXBaseUI baseUI, DRCRobotModel robotModel, CommunicationMode ros2CommunicationMode)
+   public RDXSCS2HumanoidSimulationManager(RDXBaseUI baseUI, DRCRobotModel robotModel)
    {
-      this(baseUI, robotModel, ros2CommunicationMode, 0.3, 0.0, 0.0);
+      this(baseUI, robotModel, 0.3, 0.0, 0.0);
    }
 
    public RDXSCS2HumanoidSimulationManager(RDXBaseUI baseUI,
                                            DRCRobotModel robotModel,
-                                           CommunicationMode ros2CommunicationMode,
                                            double initialYaw,
                                            double initialX,
                                            double initialY)
@@ -55,7 +52,6 @@ public class RDXSCS2HumanoidSimulationManager extends RDXSCS2RestartableSimulati
       super(baseUI);
 
       this.robotModel = robotModel;
-      this.ros2CommunicationMode = ros2CommunicationMode;
 
       setSessionBuilder(this::buildSession);
       getOnSessionStartedRunnables().add(() ->
@@ -76,7 +72,7 @@ public class RDXSCS2HumanoidSimulationManager extends RDXSCS2RestartableSimulati
 
    public SimulationSession buildSession()
    {
-      RealtimeROS2Node realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(ros2CommunicationMode.getPubSubImplementation(), "humanoid_simulation");
+      RealtimeROS2Node realtimeROS2Node = new ROS2NodeBuilder().buildRealtime("humanoid_simulation");
 
       SCS2AvatarSimulationFactory avatarSimulationFactory = new SCS2AvatarSimulationFactory();
       avatarSimulationFactory.setRobotModel(robotModel);

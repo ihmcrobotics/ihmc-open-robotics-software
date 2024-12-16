@@ -15,7 +15,7 @@ public class AtlasAuxiliaryRobotDataPubSubType implements us.ihmc.pubsub.TopicDa
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "8719501297b00475a730fa537bd42296a33585ea381937b74fbc388baabe1e69";
+   		return "a001420a43ffe44d661594476a7adfc7da1343faeeb557b40ad058601eaaa8e6";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class AtlasAuxiliaryRobotDataPubSubType implements us.ihmc.pubsub.TopicDa
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (6 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -111,7 +111,7 @@ public class AtlasAuxiliaryRobotDataPubSubType implements us.ihmc.pubsub.TopicDa
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -184,7 +184,7 @@ public class AtlasAuxiliaryRobotDataPubSubType implements us.ihmc.pubsub.TopicDa
 
    public static void write(atlas_msgs.msg.dds.AtlasAuxiliaryRobotData data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       if(data.getElectricJointTemperatures().size() <= 6)
       cdr.write_type_e(data.getElectricJointTemperatures());else
@@ -250,7 +250,7 @@ public class AtlasAuxiliaryRobotDataPubSubType implements us.ihmc.pubsub.TopicDa
 
    public static void read(atlas_msgs.msg.dds.AtlasAuxiliaryRobotData data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       cdr.read_type_e(data.getElectricJointTemperatures());	
       cdr.read_type_e(data.getElectricJointCurrents());	
@@ -311,7 +311,7 @@ public class AtlasAuxiliaryRobotDataPubSubType implements us.ihmc.pubsub.TopicDa
    @Override
    public final void serialize(atlas_msgs.msg.dds.AtlasAuxiliaryRobotData data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_e("electric_joint_temperatures", data.getElectricJointTemperatures());
       ser.write_type_e("electric_joint_currents", data.getElectricJointCurrents());
       ser.write_type_e("electric_joint_enabled_array", data.getElectricJointEnabledArray());
@@ -338,7 +338,7 @@ public class AtlasAuxiliaryRobotDataPubSubType implements us.ihmc.pubsub.TopicDa
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, atlas_msgs.msg.dds.AtlasAuxiliaryRobotData data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       ser.read_type_e("electric_joint_temperatures", data.getElectricJointTemperatures());
       ser.read_type_e("electric_joint_currents", data.getElectricJointCurrents());
       ser.read_type_e("electric_joint_enabled_array", data.getElectricJointEnabledArray());

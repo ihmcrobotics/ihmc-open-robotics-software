@@ -15,7 +15,7 @@ public class TextToSpeechPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "7ee4994a76a6916fe4cb6113bbbfc3ec650710ddd82de6e4f1467f0666770a4f";
+   		return "9c6f410ca3b587f9694dbdde215e553fc909adf0327071b6f2505aff9e21223a";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class TextToSpeechPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -72,7 +72,7 @@ public class TextToSpeechPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -89,7 +89,7 @@ public class TextToSpeechPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
 
    public static void write(ihmc_common_msgs.msg.dds.TextToSpeechPacket data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_7(data.getSpeakPacket());
 
@@ -103,7 +103,7 @@ public class TextToSpeechPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
 
    public static void read(ihmc_common_msgs.msg.dds.TextToSpeechPacket data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setSpeakPacket(cdr.read_type_7());
       	
@@ -116,7 +116,7 @@ public class TextToSpeechPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
    @Override
    public final void serialize(ihmc_common_msgs.msg.dds.TextToSpeechPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_7("speak_packet", data.getSpeakPacket());
       ser.write_type_7("beep", data.getBeep());
       ser.write_type_d("text_to_speak", data.getTextToSpeak());
@@ -125,7 +125,7 @@ public class TextToSpeechPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, ihmc_common_msgs.msg.dds.TextToSpeechPacket data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setSpeakPacket(ser.read_type_7("speak_packet"));
       data.setBeep(ser.read_type_7("beep"));
       ser.read_type_d("text_to_speak", data.getTextToSpeak());

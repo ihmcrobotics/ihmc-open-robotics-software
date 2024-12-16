@@ -1,20 +1,31 @@
 package us.ihmc.humanoidBehaviors.behaviors.diagnostic;
 
-import java.util.ArrayList;
-import java.util.Random;
-
+import controller_msgs.msg.dds.ArmTrajectoryMessage;
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.GoHomeMessage;
+import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
+import controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage;
+import controller_msgs.msg.dds.PelvisTrajectoryMessage;
 import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import org.apache.commons.lang3.StringUtils;
 import org.ejml.data.DMatrixRMaj;
-
-import controller_msgs.msg.dds.*;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.MathTools;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -23,12 +34,32 @@ import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.*;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.ArmTrajectoryBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.ChestTrajectoryBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.FootTrajectoryBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.FootstepListBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.GoHomeBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.HandTrajectoryBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisHeightTrajectoryBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisOrientationTrajectoryBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisTrajectoryBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.WalkToLocationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SleepBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.TurnInPlaceBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
-import us.ihmc.humanoidBehaviors.taskExecutor.*;
+import us.ihmc.humanoidBehaviors.taskExecutor.ArmTrajectoryTask;
+import us.ihmc.humanoidBehaviors.taskExecutor.ChestOrientationTask;
+import us.ihmc.humanoidBehaviors.taskExecutor.FootTrajectoryTask;
+import us.ihmc.humanoidBehaviors.taskExecutor.FootstepListTask;
+import us.ihmc.humanoidBehaviors.taskExecutor.FootstepTask;
+import us.ihmc.humanoidBehaviors.taskExecutor.GoHomeTask;
+import us.ihmc.humanoidBehaviors.taskExecutor.PelvisHeightTrajectoryTask;
+import us.ihmc.humanoidBehaviors.taskExecutor.PelvisOrientationTrajectoryTask;
+import us.ihmc.humanoidBehaviors.taskExecutor.PelvisTrajectoryTask;
+import us.ihmc.humanoidBehaviors.taskExecutor.SleepTask;
+import us.ihmc.humanoidBehaviors.taskExecutor.TurnInPlaceTask;
+import us.ihmc.humanoidBehaviors.taskExecutor.WalkToLocationTask;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.humanoidRobotics.communication.subscribers.TimeStampedTransformBuffer;
@@ -49,20 +80,27 @@ import us.ihmc.robotics.math.trajectories.generators.OneDoFTrajectoryPointCalcul
 import us.ihmc.robotics.math.trajectories.trajectorypoints.OneDoFTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.OneDoFTrajectoryPointList;
 import us.ihmc.robotics.partNames.LimbName;
-import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.taskExecutor.NullState;
 import us.ihmc.robotics.taskExecutor.PipeLine;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.wholeBodyController.diagnostics.HumanoidArmPose;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
 import us.ihmc.yoVariables.listener.YoVariableChangedListener;
-import us.ihmc.yoVariables.variable.*;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.YoVariable;
+
+import java.util.ArrayList;
+import java.util.Random;
 
 public class DiagnosticBehavior extends AbstractBehavior
 {
@@ -213,7 +251,7 @@ public class DiagnosticBehavior extends AbstractBehavior
    private final YoDouble pelvisOrientationScaleFactor = new YoDouble("diagnosticBehaviorPelvisOrientationScaleFactor", registry);
    private final YoDouble bootyShakeTime = new YoDouble("diagnosticBehaviorButtyShakeTime", registry);
 
-   private final ROS2PublisherBasics<StampedPosePacket> stampedPosePublisher;
+   private final ROS2Publisher<StampedPosePacket> stampedPosePublisher;
 
    public DiagnosticBehavior(String robotName, FullHumanoidRobotModel fullRobotModel, YoEnum<RobotSide> supportLeg, HumanoidReferenceFrames referenceFrames,
                              YoDouble yoTime, YoBoolean yoDoubleSupport, ROS2Node ros2Node, WholeBodyControllerParameters wholeBodyControllerParameters, DefaultFootstepPlannerParametersBasics footstepPlannerParameters,

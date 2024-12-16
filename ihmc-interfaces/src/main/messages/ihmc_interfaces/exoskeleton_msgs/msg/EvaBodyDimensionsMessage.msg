@@ -1,7 +1,7 @@
 #Message used for syncing the body dimension config files in eva's resources with eva's local config files
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 int8[<=2048] file_name
 

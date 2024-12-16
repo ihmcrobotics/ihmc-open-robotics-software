@@ -1,21 +1,16 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessor;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisher;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisherFactory;
@@ -26,10 +21,14 @@ import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
 public class KinematicToolboxDiagnosticEnvironment
 {
    private final String threadName = "NonRealtimeScheduler";
-   private final RealtimeROS2Node realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(PubSubImplementation.INTRAPROCESS, "ihmc_fake_controller");
+   private final RealtimeROS2Node realtimeROS2Node = new ROS2NodeBuilder().buildRealtime("ihmc_fake_controller");
 
    public KinematicToolboxDiagnosticEnvironment(DRCRobotModel drcRobotModel)
    {
@@ -60,7 +59,7 @@ public class KinematicToolboxDiagnosticEnvironment
          }
       }, 1, TimeUnit.MILLISECONDS);
 
-      HumanoidNetworkProcessor networkProcessor = new HumanoidNetworkProcessor(drcRobotModel, PubSubImplementation.INTRAPROCESS);
+      HumanoidNetworkProcessor networkProcessor = new HumanoidNetworkProcessor(drcRobotModel);
       networkProcessor.setupKinematicsToolboxModule(true);
       networkProcessor.start();
    }

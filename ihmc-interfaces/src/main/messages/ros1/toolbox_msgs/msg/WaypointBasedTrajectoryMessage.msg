@@ -2,7 +2,7 @@
 # Main usage is the IHMC WholeBodyTrajectoryToolbox.
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 int32 end_effector_hash_code
 

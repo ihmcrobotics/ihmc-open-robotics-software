@@ -1,22 +1,11 @@
 package us.ihmc.humanoidBehaviors.behaviors.behaviorServices;
 
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
-import javax.imageio.ImageIO;
-
 import controller_msgs.msg.dds.BoundingBoxesPacket;
 import perception_msgs.msg.dds.HeatMapPacket;
 import perception_msgs.msg.dds.VideoPacket;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.producers.JPEGDecompressor;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -25,7 +14,17 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.goalLocation.GoalDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.yoVariables.variable.YoBoolean;
+
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class ObjectDetectorBehaviorService extends GoalDetectorBehaviorService
 {
@@ -68,8 +67,8 @@ public class ObjectDetectorBehaviorService extends GoalDetectorBehaviorService
 
       locationEnabled.set(false);
 
-      ROS2PublisherBasics<BoundingBoxesPacket> boundingBoxesPublisher = createBehaviorOutputPublisher(BoundingBoxesPacket.class, "/bounding_boxes");
-      ROS2PublisherBasics<HeatMapPacket> heatMapPublisher = createBehaviorOutputPublisher(HeatMapPacket.class, "/heat_map");
+      ROS2Publisher<BoundingBoxesPacket> boundingBoxesPublisher = createBehaviorOutputPublisher(BoundingBoxesPacket.class, "/bounding_boxes");
+      ROS2Publisher<HeatMapPacket> heatMapPublisher = createBehaviorOutputPublisher(HeatMapPacket.class, "/heat_map");
 
 //      objectDetectorFromCameraImages.addDetectionResultListener(detectionVisualizationPackets -> {
 //         boundingBoxesPublisher.publish(detectionVisualizationPackets.getBoundingBoxesPacket());

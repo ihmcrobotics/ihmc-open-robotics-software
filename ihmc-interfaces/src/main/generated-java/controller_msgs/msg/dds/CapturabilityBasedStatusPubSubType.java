@@ -15,7 +15,7 @@ public class CapturabilityBasedStatusPubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "a8d1eccd07678b67aa5302370dafbbc31ff789a3f0def2d983b6addf3532cd78";
+   		return "a061802451efb379a0b1ec500434173b27b6a5a63c646ccb2a7eeeaa96384a74";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class CapturabilityBasedStatusPubSubType implements us.ihmc.pubsub.TopicD
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -91,7 +91,7 @@ public class CapturabilityBasedStatusPubSubType implements us.ihmc.pubsub.TopicD
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -133,7 +133,7 @@ public class CapturabilityBasedStatusPubSubType implements us.ihmc.pubsub.TopicD
 
    public static void write(controller_msgs.msg.dds.CapturabilityBasedStatus data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_6(data.getOmega());
 
@@ -162,7 +162,7 @@ public class CapturabilityBasedStatusPubSubType implements us.ihmc.pubsub.TopicD
 
    public static void read(controller_msgs.msg.dds.CapturabilityBasedStatus data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setOmega(cdr.read_type_6());
       	
@@ -181,7 +181,7 @@ public class CapturabilityBasedStatusPubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final void serialize(controller_msgs.msg.dds.CapturabilityBasedStatus data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_6("omega", data.getOmega());
       ser.write_type_a("capture_point_2d", new geometry_msgs.msg.dds.PointPubSubType(), data.getCapturePoint2d());
 
@@ -202,7 +202,7 @@ public class CapturabilityBasedStatusPubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.CapturabilityBasedStatus data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setOmega(ser.read_type_6("omega"));
       ser.read_type_a("capture_point_2d", new geometry_msgs.msg.dds.PointPubSubType(), data.getCapturePoint2d());
 

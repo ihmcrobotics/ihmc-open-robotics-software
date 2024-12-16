@@ -2,7 +2,7 @@
 # Message for commanding whole-body jointspace trajectory as well as precomputed load status
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # Timed intervals that left arm is in contact
 ihmc_common_msgs/TimeIntervalMessage[] left_arm_contact_intervals

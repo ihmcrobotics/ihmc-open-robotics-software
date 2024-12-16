@@ -2,7 +2,6 @@ package us.ihmc.perception.detections.centerPose;
 
 import perception_msgs.msg.dds.DetectedObjectPacket;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -12,9 +11,9 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.perception.detections.DetectionManager;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.RealtimeROS2Node;
 
 import java.time.Instant;
@@ -45,7 +44,7 @@ public class CenterPoseDetectionSubscriber
    {
       if (ros2Node == null)
       {
-         ros2Node = ROS2Tools.createRealtimeROS2Node(PubSubImplementation.FAST_RTPS, "center_pose_subscription_node");
+         ros2Node = new ROS2NodeBuilder().buildRealtime("center_pose_subscription_node");
          ros2Node.createSubscription(PerceptionAPI.CENTERPOSE_DETECTED_OBJECT, this::receiveDetectedObjectMessage);
          ros2Node.spin();
       }

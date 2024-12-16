@@ -4,17 +4,16 @@ import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2DemandGraphNode;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.perception.realsense.RealsenseDeviceManager;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.sensors.RealsenseColorDepthImagePublisher;
 import us.ihmc.sensors.RealsenseColorDepthImageRetriever;
@@ -85,8 +84,7 @@ public class StandAloneRealsenseProcess
          RawImage latestRealsenseDepthImage = realsenseDepthImage.get();
          if (heightMapManager == null) // TODO: This should be able to instantiated earlier, but it doesn't reset correctly
          {
-            heightMapManager = new RapidHeightMapManager(new OpenCLManager(),
-                                                         syncedRobot == null ? null : syncedRobot.getRobotModel(),
+            heightMapManager = new RapidHeightMapManager(syncedRobot == null ? null : syncedRobot.getRobotModel(),
                                                          soleFrameSuppliers.get(RobotSide.LEFT).get(),
                                                          soleFrameSuppliers.get(RobotSide.RIGHT).get(),
                                                          latestRealsenseDepthImage.getIntrinsicsCopy(),
@@ -98,8 +96,6 @@ public class StandAloneRealsenseProcess
                                  realsenseFrameSupplier.get(),
                                  realsenseZUpFrameSupplier.get(),
                                  ros2Helper);
-
-//         PerceptionDebugTools.printHeightMap("Your mom", latestHeightMapData, 10);
 
          latestRealsenseDepthImage.release();
       }
@@ -132,7 +128,7 @@ public class StandAloneRealsenseProcess
 
    public static void main(String[] args)
    {
-      ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "nadia_realsense_process");
+      ros2Node = new ROS2NodeBuilder().build("nadia_realsense_process");
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
       StandAloneRealsenseProcess standAloneRealsenseProcess = new StandAloneRealsenseProcess(ros2Helper, null);

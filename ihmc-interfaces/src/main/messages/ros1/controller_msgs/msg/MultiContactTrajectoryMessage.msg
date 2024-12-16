@@ -2,7 +2,7 @@
 # Experimental mode of specifying a desired configuration in terms of root pose and joint angles.
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # Duration of trajectory in seconds
 float64 trajectory_duration

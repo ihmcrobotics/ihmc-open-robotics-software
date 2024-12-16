@@ -15,7 +15,7 @@ public class TrajectoryPoint1DMessagePubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "6581462b3cc4a8092bac9c9a4f04b20aea254465914055999ba442e4a6f8c557";
+   		return "ab64744254760876e04bc1606424dc7a396faad5b0a46dd9e712d407c8509d9f";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class TrajectoryPoint1DMessagePubSubType implements us.ihmc.pubsub.TopicD
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -73,7 +73,7 @@ public class TrajectoryPoint1DMessagePubSubType implements us.ihmc.pubsub.TopicD
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -91,7 +91,7 @@ public class TrajectoryPoint1DMessagePubSubType implements us.ihmc.pubsub.TopicD
 
    public static void write(ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_6(data.getTime());
 
@@ -103,7 +103,7 @@ public class TrajectoryPoint1DMessagePubSubType implements us.ihmc.pubsub.TopicD
 
    public static void read(ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setTime(cdr.read_type_6());
       	
@@ -117,7 +117,7 @@ public class TrajectoryPoint1DMessagePubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final void serialize(ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_6("time", data.getTime());
       ser.write_type_6("position", data.getPosition());
       ser.write_type_6("velocity", data.getVelocity());
@@ -126,7 +126,7 @@ public class TrajectoryPoint1DMessagePubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setTime(ser.read_type_6("time"));
       data.setPosition(ser.read_type_6("position"));
       data.setVelocity(ser.read_type_6("velocity"));

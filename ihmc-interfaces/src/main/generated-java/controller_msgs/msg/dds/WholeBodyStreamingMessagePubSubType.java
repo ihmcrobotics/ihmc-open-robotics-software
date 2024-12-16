@@ -15,7 +15,7 @@ public class WholeBodyStreamingMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "9cefce68b58b7434f96f5fba2cff80a26d4ebfcbb0effeb059052069398dc61a";
+   		return "649905c27e24fb3e73d77ff49867be3a4744d4d8dc1b536d1e9f7f11a192c6d5";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class WholeBodyStreamingMessagePubSubType implements us.ihmc.pubsub.Topic
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -101,7 +101,7 @@ public class WholeBodyStreamingMessagePubSubType implements us.ihmc.pubsub.Topic
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -154,7 +154,7 @@ public class WholeBodyStreamingMessagePubSubType implements us.ihmc.pubsub.Topic
 
    public static void write(controller_msgs.msg.dds.WholeBodyStreamingMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_5(data.getStreamIntegrationDuration());
 
@@ -187,7 +187,7 @@ public class WholeBodyStreamingMessagePubSubType implements us.ihmc.pubsub.Topic
 
    public static void read(controller_msgs.msg.dds.WholeBodyStreamingMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setStreamIntegrationDuration(cdr.read_type_5());
       	
@@ -222,7 +222,7 @@ public class WholeBodyStreamingMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final void serialize(controller_msgs.msg.dds.WholeBodyStreamingMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_5("stream_integration_duration", data.getStreamIntegrationDuration());
       ser.write_type_11("timestamp", data.getTimestamp());
       ser.write_type_7("has_left_hand_streaming_message", data.getHasLeftHandStreamingMessage());
@@ -252,7 +252,7 @@ public class WholeBodyStreamingMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.WholeBodyStreamingMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setStreamIntegrationDuration(ser.read_type_5("stream_integration_duration"));
       data.setTimestamp(ser.read_type_11("timestamp"));
       data.setHasLeftHandStreamingMessage(ser.read_type_7("has_left_hand_streaming_message"));

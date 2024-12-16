@@ -1,20 +1,20 @@
 package us.ihmc.robotEnvironmentAwareness.updaters;
 
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.subscriber.Subscriber;
-import us.ihmc.robotEnvironmentAwareness.communication.*;
+import us.ihmc.robotEnvironmentAwareness.communication.LiveMapModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.perceptionSuite.PerceptionModule;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAM;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMParameters;
-import us.ihmc.tools.thread.ExecutorServiceTools;
-import us.ihmc.tools.thread.ExecutorServiceTools.ExceptionHandling;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
+import us.ihmc.tools.thread.ExecutorServiceTools;
+import us.ihmc.tools.thread.ExecutorServiceTools.ExceptionHandling;
 
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -22,7 +22,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.*;
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.lidarOutputTopic;
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.stereoOutputTopic;
 
 public class LiveMapModule implements PerceptionModule
 {
@@ -56,7 +57,7 @@ public class LiveMapModule implements PerceptionModule
 
    private final PlanarRegionSLAMParameters slamParameters;
 
-   private final ROS2PublisherBasics<PlanarRegionsListMessage> combinedMapPublisher;
+   private final ROS2Publisher<PlanarRegionsListMessage> combinedMapPublisher;
 
    private LiveMapModule(ROS2Node ros2Node, Messager messager)
    {

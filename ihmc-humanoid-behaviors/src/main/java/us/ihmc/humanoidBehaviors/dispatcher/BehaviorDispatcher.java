@@ -1,19 +1,11 @@
 package us.ihmc.humanoidBehaviors.dispatcher;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
 import toolbox_msgs.msg.dds.BehaviorControlModeResponsePacket;
 import toolbox_msgs.msg.dds.BehaviorStatusPacket;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.ros2.ROS2PublisherBasics;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
@@ -30,12 +22,19 @@ import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.sensorProcessing.communication.subscribers.RobotDataReceiver;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -73,8 +72,8 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
    private E stopBehaviorKey;
    private E currentBehaviorKey;
 
-   private final ROS2PublisherBasics<BehaviorStatusPacket> behaviorStatusPublisher;
-   private final ROS2PublisherBasics<BehaviorControlModeResponsePacket> behaviorControlModeResponsePublisher;
+   private final ROS2Publisher<BehaviorStatusPacket> behaviorStatusPublisher;
+   private final ROS2Publisher<BehaviorControlModeResponsePacket> behaviorControlModeResponsePublisher;
 
    MessagerAPIFactory apiFactory = new MessagerAPIFactory();
 

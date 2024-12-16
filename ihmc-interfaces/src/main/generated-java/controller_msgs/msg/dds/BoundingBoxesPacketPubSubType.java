@@ -15,7 +15,7 @@ public class BoundingBoxesPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "0cd676e84e192f81e02d1d8da8e2d1d24ede0f452717401e834829c5d4396f0a";
+   		return "9677f76546f37fa6651f2648d50698037c7b37fbd4e901956eb2dc59bfe3e95e";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class BoundingBoxesPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -79,7 +79,7 @@ public class BoundingBoxesPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -109,7 +109,7 @@ public class BoundingBoxesPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
 
    public static void write(controller_msgs.msg.dds.BoundingBoxesPacket data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       if(data.getBoundingBoxesXCoordinates().size() <= 100)
       cdr.write_type_e(data.getBoundingBoxesXCoordinates());else
@@ -135,7 +135,7 @@ public class BoundingBoxesPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
 
    public static void read(controller_msgs.msg.dds.BoundingBoxesPacket data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       cdr.read_type_e(data.getBoundingBoxesXCoordinates());	
       cdr.read_type_e(data.getBoundingBoxesYCoordinates());	
@@ -148,7 +148,7 @@ public class BoundingBoxesPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final void serialize(controller_msgs.msg.dds.BoundingBoxesPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_e("bounding_boxes_x_coordinates", data.getBoundingBoxesXCoordinates());
       ser.write_type_e("bounding_boxes_y_coordinates", data.getBoundingBoxesYCoordinates());
       ser.write_type_e("bounding_boxes_widths", data.getBoundingBoxesWidths());
@@ -159,7 +159,7 @@ public class BoundingBoxesPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.BoundingBoxesPacket data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       ser.read_type_e("bounding_boxes_x_coordinates", data.getBoundingBoxesXCoordinates());
       ser.read_type_e("bounding_boxes_y_coordinates", data.getBoundingBoxesYCoordinates());
       ser.read_type_e("bounding_boxes_widths", data.getBoundingBoxesWidths());

@@ -5,12 +5,13 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.UnitConversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -29,12 +30,10 @@ import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.perception.realsense.RealsenseDevice;
 import us.ihmc.perception.realsense.RealsenseDeviceManager;
 import us.ihmc.perception.tools.PerceptionMessageTools;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.IHMCCommonPaths;
-import us.ihmc.commons.UnitConversions;
-import us.ihmc.commons.thread.Throttler;
 
 import java.time.Instant;
 import java.util.function.Supplier;
@@ -101,7 +100,7 @@ public class RealsenseColorDepthPublisher
       realsense.enableColor(realsenseConfiguration);
       realsense.initialize();
 
-      ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "realsense_color_and_depth_publisher");
+      ros2Node = new ROS2NodeBuilder().build("realsense_color_and_depth_publisher");
       ros2Helper = new ROS2Helper(ros2Node);
 
       LogTools.info("Setting up ROS2StoredPropertySetGroup");

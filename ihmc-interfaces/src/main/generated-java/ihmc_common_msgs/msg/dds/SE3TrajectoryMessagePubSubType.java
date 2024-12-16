@@ -15,7 +15,7 @@ public class SE3TrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "9dd6ee74575933edd4c126b08f0bd65e0d3f2d7fe8823c1abf44de187a36dd2e";
+   		return "4564aeaed38ee4f9106b0b2f2a0bdb9f76661533f1e86423cf24a2de5403cf9b";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class SE3TrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50; ++i0)
       {
@@ -86,7 +86,7 @@ public class SE3TrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -117,7 +117,7 @@ public class SE3TrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataT
 
    public static void write(ihmc_common_msgs.msg.dds.SE3TrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       if(data.getTaskspaceTrajectoryPoints().size() <= 50)
       cdr.write_type_e(data.getTaskspaceTrajectoryPoints());else
@@ -136,7 +136,7 @@ public class SE3TrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataT
 
    public static void read(ihmc_common_msgs.msg.dds.SE3TrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       cdr.read_type_e(data.getTaskspaceTrajectoryPoints());	
       ihmc_common_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.read(data.getAngularSelectionMatrix(), cdr);	
@@ -154,7 +154,7 @@ public class SE3TrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final void serialize(ihmc_common_msgs.msg.dds.SE3TrajectoryMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_e("taskspace_trajectory_points", data.getTaskspaceTrajectoryPoints());
       ser.write_type_a("angular_selection_matrix", new ihmc_common_msgs.msg.dds.SelectionMatrix3DMessagePubSubType(), data.getAngularSelectionMatrix());
 
@@ -176,7 +176,7 @@ public class SE3TrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, ihmc_common_msgs.msg.dds.SE3TrajectoryMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       ser.read_type_e("taskspace_trajectory_points", data.getTaskspaceTrajectoryPoints());
       ser.read_type_a("angular_selection_matrix", new ihmc_common_msgs.msg.dds.SelectionMatrix3DMessagePubSubType(), data.getAngularSelectionMatrix());
 

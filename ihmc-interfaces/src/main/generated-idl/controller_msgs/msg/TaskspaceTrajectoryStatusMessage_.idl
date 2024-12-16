@@ -32,7 +32,7 @@ module controller_msgs
         /**
          * Unique ID of the trajectory message this status refers to.
          */
-        unsigned long sequence_id;
+        unsigned long long sequence_id;
         /**
          * Refers to the name of the end-effector that executed the trajectory.
          */

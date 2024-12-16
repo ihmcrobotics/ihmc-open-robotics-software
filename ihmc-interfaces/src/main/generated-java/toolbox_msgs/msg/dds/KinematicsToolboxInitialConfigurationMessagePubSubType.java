@@ -15,7 +15,7 @@ public class KinematicsToolboxInitialConfigurationMessagePubSubType implements u
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "5ecb7436690ed7cf4cc4d329dc1eeb8f4eba19e578c31d91496994fcea022898";
+   		return "e78e990a6684da0570ff6b42fc61a940dc1c9ed919c8096f237136c0532fa0d5";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class KinematicsToolboxInitialConfigurationMessagePubSubType implements u
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -71,7 +71,7 @@ public class KinematicsToolboxInitialConfigurationMessagePubSubType implements u
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -88,7 +88,7 @@ public class KinematicsToolboxInitialConfigurationMessagePubSubType implements u
 
    public static void write(toolbox_msgs.msg.dds.KinematicsToolboxInitialConfigurationMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       if(data.getInitialJointHashCodes().size() <= 100)
       cdr.write_type_e(data.getInitialJointHashCodes());else
@@ -102,7 +102,7 @@ public class KinematicsToolboxInitialConfigurationMessagePubSubType implements u
 
    public static void read(toolbox_msgs.msg.dds.KinematicsToolboxInitialConfigurationMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       cdr.read_type_e(data.getInitialJointHashCodes());	
       cdr.read_type_e(data.getInitialJointAngles());	
@@ -112,7 +112,7 @@ public class KinematicsToolboxInitialConfigurationMessagePubSubType implements u
    @Override
    public final void serialize(toolbox_msgs.msg.dds.KinematicsToolboxInitialConfigurationMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_e("initial_joint_hash_codes", data.getInitialJointHashCodes());
       ser.write_type_e("initial_joint_angles", data.getInitialJointAngles());
    }
@@ -120,7 +120,7 @@ public class KinematicsToolboxInitialConfigurationMessagePubSubType implements u
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, toolbox_msgs.msg.dds.KinematicsToolboxInitialConfigurationMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       ser.read_type_e("initial_joint_hash_codes", data.getInitialJointHashCodes());
       ser.read_type_e("initial_joint_angles", data.getInitialJointAngles());
    }

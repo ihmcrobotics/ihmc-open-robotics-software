@@ -1,15 +1,16 @@
 package us.ihmc.atlas.joystickBasedStepping;
 
-import static us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools.createTrajectoryPoint1DMessage;
-
 import atlas_msgs.msg.dds.AtlasLowLevelControlModeMessage;
-import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.AbortWalkingMessage;
+import controller_msgs.msg.dds.ArmTrajectoryMessage;
+import controller_msgs.msg.dds.FootLoadBearingMessage;
+import controller_msgs.msg.dds.FootTrajectoryMessage;
+import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
+import controller_msgs.msg.dds.PauseWalkingMessage;
 import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
 import us.ihmc.avatar.joystickBasedJavaFXController.HumanoidRobotKickMessenger;
 import us.ihmc.avatar.joystickBasedJavaFXController.HumanoidRobotPunchMessenger;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.ros2.ROS2PublisherBasics;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -19,17 +20,20 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest
 import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
-import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
+import us.ihmc.ros2.ROS2Topic;
+
+import static us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools.createTrajectoryPoint1DMessage;
 
 public class AtlasKickAndPunchMessenger implements HumanoidRobotPunchMessenger, HumanoidRobotKickMessenger, RobotLowLevelMessenger
 {
-   private final ROS2PublisherBasics<ArmTrajectoryMessage> armTrajectoryPublisher;
-   private final ROS2PublisherBasics<FootTrajectoryMessage> footTrajectoryPublisher;
-   private final ROS2PublisherBasics<FootLoadBearingMessage> footLoadBearingPublisher;
-   private final ROS2PublisherBasics<AtlasLowLevelControlModeMessage> atlasLowLevelControlModePublisher;
-   private final ROS2PublisherBasics<AbortWalkingMessage> abortWalkingPublisher;
-   private final ROS2PublisherBasics<PauseWalkingMessage> pauseWalkingPublisher;
+   private final ROS2Publisher<ArmTrajectoryMessage> armTrajectoryPublisher;
+   private final ROS2Publisher<FootTrajectoryMessage> footTrajectoryPublisher;
+   private final ROS2Publisher<FootLoadBearingMessage> footLoadBearingPublisher;
+   private final ROS2Publisher<AtlasLowLevelControlModeMessage> atlasLowLevelControlModePublisher;
+   private final ROS2Publisher<AbortWalkingMessage> abortWalkingPublisher;
+   private final ROS2Publisher<PauseWalkingMessage> pauseWalkingPublisher;
 
    public AtlasKickAndPunchMessenger(ROS2Node ros2Node, String robotName)
    {

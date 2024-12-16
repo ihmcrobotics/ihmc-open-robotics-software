@@ -7,7 +7,6 @@ import org.apache.commons.lang3.time.StopWatch;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingLogger;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
 import us.ihmc.behaviors.activeMapping.ContinuousPlanner;
-import us.ihmc.behaviors.activeMapping.ContinuousPlannerSchedulingTask.PlanningMode;
 import us.ihmc.behaviors.activeMapping.ContinuousPlannerTools;
 import us.ihmc.behaviors.activeMapping.ControllerFootstepQueueMonitor;
 import us.ihmc.communication.packets.MessageTools;

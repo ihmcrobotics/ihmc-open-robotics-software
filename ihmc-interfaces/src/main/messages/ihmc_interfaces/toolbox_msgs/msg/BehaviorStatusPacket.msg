@@ -7,7 +7,7 @@ byte BEHAVIOR_FINISHED_FAILED = 3
 byte BEHAVIOR_FINISHED_SUCCESS = 4
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 byte current_behavior_status 255
 

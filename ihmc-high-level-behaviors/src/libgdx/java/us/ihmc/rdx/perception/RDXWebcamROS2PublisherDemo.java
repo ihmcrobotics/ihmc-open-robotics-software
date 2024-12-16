@@ -9,16 +9,15 @@ import perception_msgs.msg.dds.BigVideoPacket;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.imgui.RDXPanel;
-import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.imgui.ImPlotFrequencyPlot;
 import us.ihmc.rdx.imgui.ImPlotIntegerPlot;
 import us.ihmc.rdx.imgui.ImPlotStopwatchPlot;
+import us.ihmc.rdx.imgui.RDXPanel;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.robotics.time.TimeTools;
-import us.ihmc.ros2.ROS2PublisherBasics;
+import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
@@ -41,7 +40,7 @@ public class RDXWebcamROS2PublisherDemo
    private final Stopwatch threadOneDuration = new Stopwatch();
    private final Stopwatch threadTwoDuration = new Stopwatch();
    private RealtimeROS2Node realtimeROS2Node;
-   private ROS2PublisherBasics<BigVideoPacket> publisher;
+   private ROS2Publisher<BigVideoPacket> publisher;
    private final BigVideoPacket videoPacket = new BigVideoPacket();
    private IntPointer compressionParameters;
    private final Runnable encodeAndPublish = this::encodeAndPublish;
@@ -59,7 +58,7 @@ public class RDXWebcamROS2PublisherDemo
             baseUI.create();
             webcamReader = new RDXOpenCVWebcamReader();
 
-            realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "videopub");
+            realtimeROS2Node = new ROS2NodeBuilder().buildRealtime("videopub");
 
             ROS2Topic<BigVideoPacket> bigVideoTestTopic = PerceptionAPI.BIG_VIDEO_TEST;
             publisher = realtimeROS2Node.createPublisher(BigVideoPacket.getPubSubType().get(), bigVideoTestTopic.getName(), ROS2QosProfile.BEST_EFFORT());

@@ -6,10 +6,10 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.StateEstimatorAPI;
-import us.ihmc.ros2.ROS2Input;
 import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Input;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 
 import java.util.function.Consumer;
@@ -20,12 +20,12 @@ public class ROS2ControllerHelper extends ROS2Helper implements ROS2ControllerPu
    protected final ROS2ControllerPublisherMap ros2ControllerPublisherMap;
    private final String simpleRobotName;
 
-   public ROS2ControllerHelper(ROS2NodeInterface ros2Node, DRCRobotModel robotModel)
+   public ROS2ControllerHelper(ROS2Node ros2Node, DRCRobotModel robotModel)
    {
       this(ros2Node, robotModel.getSimpleRobotName());
    }
 
-   public ROS2ControllerHelper(ROS2NodeInterface ros2Node, String simpleRobotName)
+   public ROS2ControllerHelper(ROS2Node ros2Node, String simpleRobotName)
    {
       super(ros2Node);
       this.simpleRobotName = simpleRobotName;

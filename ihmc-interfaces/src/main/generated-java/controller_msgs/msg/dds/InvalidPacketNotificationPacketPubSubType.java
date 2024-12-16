@@ -15,7 +15,7 @@ public class InvalidPacketNotificationPacketPubSubType implements us.ihmc.pubsub
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "74270feafcbb553bcfba3d146fcc0d7fcf49190fd4dadbfc3dac44cb3a2967ea";
+   		return "36d1e45e83215c45740fade0e03452a107246b7618098b10838c2ca7e9a9c212";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class InvalidPacketNotificationPacketPubSubType implements us.ihmc.pubsub
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
@@ -69,7 +69,7 @@ public class InvalidPacketNotificationPacketPubSubType implements us.ihmc.pubsub
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getPacketClassSimpleName().length() + 1;
@@ -82,7 +82,7 @@ public class InvalidPacketNotificationPacketPubSubType implements us.ihmc.pubsub
 
    public static void write(controller_msgs.msg.dds.InvalidPacketNotificationPacket data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       if(data.getPacketClassSimpleName().length() <= 255)
       cdr.write_type_d(data.getPacketClassSimpleName());else
@@ -96,7 +96,7 @@ public class InvalidPacketNotificationPacketPubSubType implements us.ihmc.pubsub
 
    public static void read(controller_msgs.msg.dds.InvalidPacketNotificationPacket data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       cdr.read_type_d(data.getPacketClassSimpleName());	
       cdr.read_type_d(data.getErrorMessage());	
@@ -106,7 +106,7 @@ public class InvalidPacketNotificationPacketPubSubType implements us.ihmc.pubsub
    @Override
    public final void serialize(controller_msgs.msg.dds.InvalidPacketNotificationPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_d("packet_class_simple_name", data.getPacketClassSimpleName());
       ser.write_type_d("error_message", data.getErrorMessage());
    }
@@ -114,7 +114,7 @@ public class InvalidPacketNotificationPacketPubSubType implements us.ihmc.pubsub
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.InvalidPacketNotificationPacket data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       ser.read_type_d("packet_class_simple_name", data.getPacketClassSimpleName());
       ser.read_type_d("error_message", data.getErrorMessage());
    }
