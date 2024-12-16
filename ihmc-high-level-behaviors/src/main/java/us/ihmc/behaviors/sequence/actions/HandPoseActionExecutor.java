@@ -269,8 +269,8 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
          state.setIsExecuting(false);
          state.setFailed(true);
          state.getLogger().error("%s  %s"
-                 .formatted("Position error: %.3f / %.3f".formatted(trackingCalculator.getPositionError(), definition.getPositionErrorTolerance())),
-                            "Orientation error: %.3f / %.3f".formatted(trackingCalculator.getOrientationError(), definition.getOrientationErrorTolerance()));
+                 .formatted("Position error: %.3f / %.3f".formatted(trackingCalculator.getPositionError(), definition.getPositionErrorTolerance()),
+                            "Orientation error: %.3f / %.3f".formatted(trackingCalculator.getOrientationError(), definition.getOrientationErrorTolerance())));
          return;
       }
 
