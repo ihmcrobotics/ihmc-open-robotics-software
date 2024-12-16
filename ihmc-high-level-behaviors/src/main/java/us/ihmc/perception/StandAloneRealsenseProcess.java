@@ -84,7 +84,8 @@ public class StandAloneRealsenseProcess
          RawImage latestRealsenseDepthImage = realsenseDepthImage.get();
          if (heightMapManager == null) // TODO: This should be able to instantiated earlier, but it doesn't reset correctly
          {
-            heightMapManager = new RapidHeightMapManager(syncedRobot == null ? null : syncedRobot.getRobotModel(),
+            heightMapManager = new RapidHeightMapManager(new OpenCLManager(),
+                                                         syncedRobot == null ? null : syncedRobot.getRobotModel(),
                                                          soleFrameSuppliers.get(RobotSide.LEFT).get(),
                                                          soleFrameSuppliers.get(RobotSide.RIGHT).get(),
                                                          latestRealsenseDepthImage.getIntrinsicsCopy(),
