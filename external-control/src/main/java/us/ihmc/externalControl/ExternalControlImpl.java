@@ -6,15 +6,10 @@ import java.nio.*;
 import org.bytedeco.javacpp.*;
 import org.bytedeco.javacpp.annotation.*;
 
-public class ExternalControlWrapper extends us.ihmc.externalControl.presets.ExternalControlInfoMapper {
-    static { Loader.load(); }
+import static us.ihmc.externalControl.global.ExternalControlWrapper.*;
 
-// Parsed from external-control.hpp
-
-// #pragma once
-
-// #include "controllers/constant-position-controller.hpp"
-    @Namespace("ihmc") @NoOffset public static class ExternalControlImpl extends Pointer {
+    @Namespace("ihmc") @NoOffset @Properties(inherit = us.ihmc.externalControl.ExternalControlInfoMapper.class)
+public class ExternalControlImpl extends Pointer {
         static { Loader.load(); }
         /** Pointer cast constructor. Invokes {@link Pointer#Pointer(Pointer)}. */
         public ExternalControlImpl(Pointer p) { super(p); }
@@ -66,7 +61,3 @@ public class ExternalControlWrapper extends us.ihmc.externalControl.presets.Exte
                                  double[] p_gains_to_pack, int p_gain_rows,
                                  double[] d_gains_to_pack, int d_gain_rows);
     }
-
-
-
-}

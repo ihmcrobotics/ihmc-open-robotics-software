@@ -1,4 +1,4 @@
-package us.ihmc.externalControl.presets;
+package us.ihmc.externalControl;
 
 import org.bytedeco.javacpp.annotation.Platform;
 import org.bytedeco.javacpp.annotation.Properties;
@@ -9,13 +9,14 @@ import org.bytedeco.javacpp.tools.InfoMapper;
 // @formatter:off
 @Properties(value =
       @Platform(value = "linux",
-                includepath = "../include",
+                includepath = {"include", "include/eigen3"},
                 include = {"external-control.hpp"},
-                linkpath = "../lib",
+                linkpath = "lib",
                 link = "external-wrapper",
                 preload = {"external-wrapper", "jniExternalControlWrapper"}
       ),
-      target = "us.ihmc.externalControl.ExternalControlWrapper"
+      target = "us.ihmc.externalControl",
+      global = "us.ihmc.externalControl.global.ExternalControlWrapper"
 )
 // @formatter:on
 

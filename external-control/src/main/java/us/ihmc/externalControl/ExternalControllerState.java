@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.PairList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
+import us.ihmc.externalControl.library.ExternalControlNativeLibrary;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -53,7 +54,7 @@ public class ExternalControllerState extends HighLevelControllerState
 
       blendRatioCurrentValue = new YoDouble(namePrefix + "BlendRatioCurrentValue", registry);
 
-      ExternalWrapperNativeLibrary.load();
+      ExternalControlNativeLibrary.load();
 
       externalControl = new ExternalControl(controllerToolbox.getFullRobotModel().getRootBody(), controlledJoints, 100.0, 25.0);
 

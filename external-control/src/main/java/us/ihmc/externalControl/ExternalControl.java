@@ -14,7 +14,7 @@ import java.util.HashMap;
 
 public class ExternalControl
 {
-   private final ExternalControlWrapper.ExternalControlImpl externalControlImpl;
+   private final ExternalControlImpl externalControlImpl;
    private final DMatrixRMaj robotState;
    private final DMatrixRMaj robotControl;
    private final DMatrixRMaj feetPositions;
@@ -45,7 +45,7 @@ public class ExternalControl
       solutionDampingVector = new DMatrixRMaj(joints.length, 1);
       for (OneDoFJointReadOnly joint : joints)
          solutionJointData.put(joint, new SolutionJointData());
-      externalControlImpl = new ExternalControlWrapper.ExternalControlImpl(defaultStiffness, defaultDamping, joints.length);
+      externalControlImpl = new ExternalControlImpl(defaultStiffness, defaultDamping, joints.length);
    }
 
    public void setFootStates(SideDependentList<? extends ReferenceFrame> soleFrames, boolean leftInContact, boolean rightInContact)
