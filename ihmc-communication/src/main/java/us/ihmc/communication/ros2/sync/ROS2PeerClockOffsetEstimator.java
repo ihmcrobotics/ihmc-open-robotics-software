@@ -11,6 +11,7 @@ import us.ihmc.pubsub.common.Guid;
 import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
+import us.ihmc.ros2.ROS2Subscription;
 import us.ihmc.ros2.ROS2Topic;
 
 import java.time.Instant;
@@ -38,6 +39,7 @@ public class ROS2PeerClockOffsetEstimator
    private final RepeatingTaskThread requestThread = new RepeatingTaskThread(getClass().getSimpleName(),
                                                                              this::runRequestTask,
                                                                              DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+   private final ROS2Subscription<PeerClockOffsetEstimatorPingMessage> subscription;
    private final ExecutorService cachedThreadPool
          = Executors.newCachedThreadPool(ThreadTools.createNamedThreadFactory(getClass().getSimpleName() + "PublishReply", true));
    private final PeerClockOffsetEstimatorPingMessage requestMessage = new PeerClockOffsetEstimatorPingMessage();
@@ -51,7 +53,7 @@ public class ROS2PeerClockOffsetEstimator
       publisher = ros2Node.createPublisher(TOPIC);
       ourGuid = publisher.getPublisher().getGuid();
 
-      ros2Node.createSubscription(TOPIC, subscriber ->
+      subscription = ros2Node.createSubscription(TOPIC, subscriber ->
       {
          subscriber.takeNextData(receivedMessage, sampleInfo);
 
@@ -138,6 +140,9 @@ public class ROS2PeerClockOffsetEstimator
 
    public void destroy()
    {
+      subscription.remove();
+      publisher.remove();
+      cachedThreadPool.shutdownNow();
       requestThread.kill();
    }
 

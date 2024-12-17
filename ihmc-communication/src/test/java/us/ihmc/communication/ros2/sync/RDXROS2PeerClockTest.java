@@ -23,13 +23,14 @@ public class RDXROS2PeerClockTest
       RDXBaseUI baseUI = new RDXBaseUI();
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
-         ROS2PeerClockOffsetEstimator clockEstimator;
-         final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss:SSS");
-         final Map<Guid, float[]> plots = new HashMap<>();
-         final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-         double history = 5.0;
-         int samples = 1000;
-         final Throttler plotThottler = new Throttler().setPeriod(history / samples);
+         private ROS2Node ros2Node;
+         private ROS2PeerClockOffsetEstimator clockEstimator;
+         private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss:SSS");
+         private final Map<Guid, float[]> plots = new HashMap<>();
+         private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+         private final double history = 5.0;
+         private final int samples = 1000;
+         private final Throttler plotThottler = new Throttler().setPeriod(history / samples);
 
          @Override
          public void create()
@@ -37,7 +38,7 @@ public class RDXROS2PeerClockTest
             baseUI.create();
             baseUI.getImGuiPanelManager().addPanel("Main", this::renderImGuiWidgets);
 
-            ROS2Node ros2Node = new ROS2NodeBuilder().build("peer_clock_test");
+            ros2Node = new ROS2NodeBuilder().build("peer_clock_test");
             clockEstimator = new ROS2PeerClockOffsetEstimator(ros2Node);
          }
 
@@ -51,6 +52,8 @@ public class RDXROS2PeerClockTest
          @Override
          public void dispose()
          {
+            clockEstimator.destroy();
+            ros2Node.destroy();
             baseUI.dispose();
          }
 
