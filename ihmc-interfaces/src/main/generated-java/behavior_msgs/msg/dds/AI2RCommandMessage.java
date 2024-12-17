@@ -8,10 +8,14 @@ import us.ihmc.pubsub.TopicDataType;
 
 public class AI2RCommandMessage extends Packet<AI2RCommandMessage> implements Settable<AI2RCommandMessage>, EpsilonComparable<AI2RCommandMessage>
 {
-   public boolean unused_placeholder_field_;
+   /**
+            * Behavior to execute (checkpoint to jump to in the pre-loaded behavior collection)
+            */
+   public java.lang.StringBuilder behavior_to_execute_;
 
    public AI2RCommandMessage()
    {
+      behavior_to_execute_ = new java.lang.StringBuilder(255);
    }
 
    public AI2RCommandMessage(AI2RCommandMessage other)
@@ -22,17 +26,32 @@ public class AI2RCommandMessage extends Packet<AI2RCommandMessage> implements Se
 
    public void set(AI2RCommandMessage other)
    {
-      unused_placeholder_field_ = other.unused_placeholder_field_;
-
+      behavior_to_execute_.setLength(0);
+      behavior_to_execute_.append(other.behavior_to_execute_);
    }
 
-   public void setUnusedPlaceholderField(boolean unused_placeholder_field)
+   /**
+            * Behavior to execute (checkpoint to jump to in the pre-loaded behavior collection)
+            */
+   public void setBehaviorToExecute(java.lang.String behavior_to_execute)
    {
-      unused_placeholder_field_ = unused_placeholder_field;
+      behavior_to_execute_.setLength(0);
+      behavior_to_execute_.append(behavior_to_execute);
    }
-   public boolean getUnusedPlaceholderField()
+
+   /**
+            * Behavior to execute (checkpoint to jump to in the pre-loaded behavior collection)
+            */
+   public java.lang.String getBehaviorToExecuteAsString()
    {
-      return unused_placeholder_field_;
+      return getBehaviorToExecute().toString();
+   }
+   /**
+            * Behavior to execute (checkpoint to jump to in the pre-loaded behavior collection)
+            */
+   public java.lang.StringBuilder getBehaviorToExecute()
+   {
+      return behavior_to_execute_;
    }
 
 
@@ -53,8 +72,7 @@ public class AI2RCommandMessage extends Packet<AI2RCommandMessage> implements Se
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.unused_placeholder_field_, other.unused_placeholder_field_, epsilon)) return false;
-
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.behavior_to_execute_, other.behavior_to_execute_, epsilon)) return false;
 
       return true;
    }
@@ -68,8 +86,7 @@ public class AI2RCommandMessage extends Packet<AI2RCommandMessage> implements Se
 
       AI2RCommandMessage otherMyClass = (AI2RCommandMessage) other;
 
-      if(this.unused_placeholder_field_ != otherMyClass.unused_placeholder_field_) return false;
-
+      if (!us.ihmc.idl.IDLTools.equals(this.behavior_to_execute_, otherMyClass.behavior_to_execute_)) return false;
 
       return true;
    }
@@ -80,8 +97,8 @@ public class AI2RCommandMessage extends Packet<AI2RCommandMessage> implements Se
       StringBuilder builder = new StringBuilder();
 
       builder.append("AI2RCommandMessage {");
-      builder.append("unused_placeholder_field=");
-      builder.append(this.unused_placeholder_field_);
+      builder.append("behavior_to_execute=");
+      builder.append(this.behavior_to_execute_);
       builder.append("}");
       return builder.toString();
    }
