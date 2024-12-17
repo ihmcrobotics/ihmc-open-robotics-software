@@ -79,7 +79,8 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
             objectMessage.setObjectName(nodeName);
             objectMessage.getObjectPoseInWorld().set(sceneGraph.getNamesToNodesMap().get(nodeName).getNodeFrame().getTransformToWorldFrame());
          }
-         statusMessage.getAvailableBehaviors().clear();
+
+         statusMessage.getAvailableBehaviors().resetQuick();
          for (int i =0; i< state.getCheckPoints().size(); i++)
          {
             String checkPointName = state.getCheckPoints().get(i).getDefinition().getName();
