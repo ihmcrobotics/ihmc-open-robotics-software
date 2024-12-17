@@ -57,6 +57,5 @@ public class ExternalControlNativeLibrary implements NativeLibraryDescription
    public static void main(String[] args)
    {
       load();
-      ExternalControlWrapper.test();
    }
 }
