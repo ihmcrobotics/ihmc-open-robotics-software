@@ -53,6 +53,8 @@ public class ExternalControllerState extends HighLevelControllerState
 
       blendRatioCurrentValue = new YoDouble(namePrefix + "BlendRatioCurrentValue", registry);
 
+      ExternalWrapperNativeLibrary.load();
+
       externalControl = new ExternalControl(controllerToolbox.getFullRobotModel().getRootBody(), controlledJoints, 100.0, 25.0);
 
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledJoints);

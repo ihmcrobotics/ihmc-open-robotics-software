@@ -7,10 +7,10 @@ namespace ihmc
     ConstantPositionController::ConstantPositionController(const double default_stiffness, const double default_damping, const int number_of_joints)
     {
         number_of_joints_ = number_of_joints;
-        desired_joint_velocities_ = Eigen::VectorXd(number_of_joints_);
-        desired_joint_torques_ = Eigen::VectorXd(number_of_joints_);
-        desired_joint_stiffnesses_ = Eigen::VectorXd(number_of_joints_);
-        desired_joint_damping_ = Eigen::VectorXd(number_of_joints_);
+        desired_joint_velocities_.resize(number_of_joints_);
+        desired_joint_torques_.resize(number_of_joints_);
+        desired_joint_stiffnesses_.resize(number_of_joints_);
+        desired_joint_damping_.resize(number_of_joints_);
 
         desired_joint_velocities_.setZero();
         desired_joint_torques_.setZero();

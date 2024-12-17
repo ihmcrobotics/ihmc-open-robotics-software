@@ -13,7 +13,7 @@ import org.bytedeco.javacpp.tools.InfoMapper;
                 include = {"external-control.hpp"},
                 linkpath = "../lib",
                 link = "external-wrapper",
-                preload = {"external-wrapper", "jniExternalWrapper"}
+                preload = {"external-wrapper", "jniExternalControlWrapper"}
       ),
       target = "us.ihmc.externalControl.ExternalControlWrapper"
 )
