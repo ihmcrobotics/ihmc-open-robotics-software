@@ -53,9 +53,4 @@ public class ExternalControlNativeLibrary implements NativeLibraryDescription
       }
       return loaded;
    }
-
-   public static void main(String[] args)
-   {
-      load();
-   }
 }

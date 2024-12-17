@@ -10,7 +10,7 @@ import org.bytedeco.javacpp.tools.InfoMapper;
 @Properties(value =
       @Platform(value = "linux",
                 includepath = {"include", "include/eigen3"},
-                include = {"external-control.hpp"},
+                include = {"test.hpp"},
                 linkpath = "lib",
                 link = "external-control",
                 preload = {"external-control", "jniExternalControlWrapper"}
