@@ -17,7 +17,7 @@ public class SimulationSceneObjectRobotBuilders
 {
    public static final double SPACE_TO_ALLOW_IT_TO_FALL_ONTO_SURFACE = 0.01;
    public static final double TABLE_X = -1.0;
-   public static final double TABLE_Y = 2.0;
+   public static final double TABLE_Y = 1.2;
    public static final double TABLE_Z = TableModelParameters.TABLE_LEG_LENGTH + SPACE_TO_ALLOW_IT_TO_FALL_ONTO_SURFACE;
    public static final double TABLE_SURFACE_Z = TableModelParameters.TABLE_LEG_LENGTH + TableModelParameters.TABLE_THICKNESS;
 
