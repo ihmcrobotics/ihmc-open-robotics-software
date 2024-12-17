@@ -22,15 +22,20 @@ public class AI2RStatusMessage extends Packet<AI2RStatusMessage> implements Sett
             */
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.AI2RObjectMessage>  objects_;
    /**
-            * List of available behaviors (JSON file names)
+            * List of available behaviors (checkpoints from a pre-loaded behavior)
             */
    public us.ihmc.idl.IDLSequence.StringBuilderHolder  available_behaviors_;
+   /**
+            * Name of the behavior that has failed (name of the checkpoint in the pre-loaded behavior collection)
+            */
+   public java.lang.StringBuilder failed_behavior_;
 
    public AI2RStatusMessage()
    {
       robot_mid_feet_under_pelvis_pose_in_world_ = new us.ihmc.euclid.geometry.Pose3D();
       objects_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.AI2RObjectMessage> (200, new behavior_msgs.msg.dds.AI2RObjectMessagePubSubType());
       available_behaviors_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (200, "type_d");
+      failed_behavior_ = new java.lang.StringBuilder(255);
 
    }
 
@@ -45,6 +50,9 @@ public class AI2RStatusMessage extends Packet<AI2RStatusMessage> implements Sett
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.robot_mid_feet_under_pelvis_pose_in_world_, robot_mid_feet_under_pelvis_pose_in_world_);
       objects_.set(other.objects_);
       available_behaviors_.set(other.available_behaviors_);
+      failed_behavior_.setLength(0);
+      failed_behavior_.append(other.failed_behavior_);
+
    }
 
 
@@ -69,11 +77,35 @@ public class AI2RStatusMessage extends Packet<AI2RStatusMessage> implements Sett
 
 
    /**
-            * List of available behaviors (JSON file names)
+            * List of available behaviors (checkpoints from a pre-loaded behavior)
             */
    public us.ihmc.idl.IDLSequence.StringBuilderHolder  getAvailableBehaviors()
    {
       return available_behaviors_;
+   }
+
+   /**
+            * Name of the behavior that has failed (name of the checkpoint in the pre-loaded behavior collection)
+            */
+   public void setFailedBehavior(java.lang.String failed_behavior)
+   {
+      failed_behavior_.setLength(0);
+      failed_behavior_.append(failed_behavior);
+   }
+
+   /**
+            * Name of the behavior that has failed (name of the checkpoint in the pre-loaded behavior collection)
+            */
+   public java.lang.String getFailedBehaviorAsString()
+   {
+      return getFailedBehavior().toString();
+   }
+   /**
+            * Name of the behavior that has failed (name of the checkpoint in the pre-loaded behavior collection)
+            */
+   public java.lang.StringBuilder getFailedBehavior()
+   {
+      return failed_behavior_;
    }
 
 
@@ -104,6 +136,8 @@ public class AI2RStatusMessage extends Packet<AI2RStatusMessage> implements Sett
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilderSequence(this.available_behaviors_, other.available_behaviors_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.failed_behavior_, other.failed_behavior_, epsilon)) return false;
+
 
       return true;
    }
@@ -120,6 +154,8 @@ public class AI2RStatusMessage extends Packet<AI2RStatusMessage> implements Sett
       if (!this.robot_mid_feet_under_pelvis_pose_in_world_.equals(otherMyClass.robot_mid_feet_under_pelvis_pose_in_world_)) return false;
       if (!this.objects_.equals(otherMyClass.objects_)) return false;
       if (!this.available_behaviors_.equals(otherMyClass.available_behaviors_)) return false;
+      if (!us.ihmc.idl.IDLTools.equals(this.failed_behavior_, otherMyClass.failed_behavior_)) return false;
+
 
       return true;
    }
@@ -135,7 +171,9 @@ public class AI2RStatusMessage extends Packet<AI2RStatusMessage> implements Sett
       builder.append("objects=");
       builder.append(this.objects_);      builder.append(", ");
       builder.append("available_behaviors=");
-      builder.append(this.available_behaviors_);
+      builder.append(this.available_behaviors_);      builder.append(", ");
+      builder.append("failed_behavior=");
+      builder.append(this.failed_behavior_);
       builder.append("}");
       return builder.toString();
    }

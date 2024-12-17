@@ -8,7 +8,10 @@ geometry_msgs/Pose robot_mid_feet_under_pelvis_pose_in_world
 # List of objects in the scene
 behavior_msgs/AI2RObjectMessage[] objects
 
-# List of available behaviors (JSON file names)
+# List of available behaviors (checkpoints from a pre-loaded behavior)
 string[] available_behaviors
+
+# Name of the behavior that has failed (name of the checkpoint in the pre-loaded behavior collection)
+string failed_behavior
 
 

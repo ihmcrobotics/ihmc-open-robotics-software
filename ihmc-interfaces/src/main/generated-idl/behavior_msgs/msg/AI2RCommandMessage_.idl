@@ -11,7 +11,10 @@ module behavior_msgs
       @TypeCode(type="behavior_msgs::msg::dds_::AI2RCommandMessage_")
       struct AI2RCommandMessage
       {
-        boolean unused_placeholder_field;
+        /**
+         * Behavior to execute (checkpoint to jump to in the pre-loaded behavior collection)
+         */
+        string behavior_to_execute;
       };
     };
   };

@@ -15,7 +15,7 @@ public class AI2RCommandMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "5947fee668a9b61becc21e3a17b9528f0b7dbb023e1b4decb778416c54b8bfe3";
+   		return "73e9a1deff2cb1505f9e6d4da59b2cd487b38a1323a7977302a6dd50bc792ac1";
    }
    
    @Override
@@ -52,9 +52,7 @@ public class AI2RCommandMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       return current_alignment - initial_alignment;
    }
 
@@ -67,36 +65,36 @@ public class AI2RCommandMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getBehaviorToExecute().length() + 1;
 
       return current_alignment - initial_alignment;
    }
 
    public static void write(behavior_msgs.msg.dds.AI2RCommandMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_7(data.getUnusedPlaceholderField());
+      if(data.getBehaviorToExecute().length() <= 255)
+      cdr.write_type_d(data.getBehaviorToExecute());else
+          throw new RuntimeException("behavior_to_execute field exceeds the maximum length");
 
    }
 
    public static void read(behavior_msgs.msg.dds.AI2RCommandMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setUnusedPlaceholderField(cdr.read_type_7());
-      	
+      cdr.read_type_d(data.getBehaviorToExecute());	
 
    }
 
    @Override
    public final void serialize(behavior_msgs.msg.dds.AI2RCommandMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_7("unused_placeholder_field", data.getUnusedPlaceholderField());
+      ser.write_type_d("behavior_to_execute", data.getBehaviorToExecute());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.AI2RCommandMessage data)
    {
-      data.setUnusedPlaceholderField(ser.read_type_7("unused_placeholder_field"));   }
+      ser.read_type_d("behavior_to_execute", data.getBehaviorToExecute());
+   }
 
    public static void staticCopy(behavior_msgs.msg.dds.AI2RCommandMessage src, behavior_msgs.msg.dds.AI2RCommandMessage dest)
    {
