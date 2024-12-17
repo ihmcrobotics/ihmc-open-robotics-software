@@ -117,10 +117,9 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
       footSoleFrames.put(RobotSide.LEFT, leftFootSoleFrame);
       footSoleFrames.put(RobotSide.RIGHT, rightFootSoleFrame);
 
-
       inputDepthImage = depthImage;
-
       this.mode = mode;
+
       try
       {
          initialize();

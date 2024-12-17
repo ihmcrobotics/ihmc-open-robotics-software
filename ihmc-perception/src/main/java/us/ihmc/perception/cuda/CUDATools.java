@@ -147,7 +147,8 @@ public class CUDATools
    {
       if (errorCode != CUDA_SUCCESS)
       {
-         try (BytePointer errorName = cudaGetErrorName(errorCode); BytePointer errorString = cudaGetErrorString(errorCode))
+         try (BytePointer errorName = cudaGetErrorName(errorCode);
+              BytePointer errorString = cudaGetErrorString(errorCode))
          {
             LogTools.error("CUDA Error ({}): {}", errorName.getString(), errorString.getString());
          }

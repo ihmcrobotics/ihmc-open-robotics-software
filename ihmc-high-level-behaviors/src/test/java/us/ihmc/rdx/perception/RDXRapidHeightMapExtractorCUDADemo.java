@@ -96,7 +96,6 @@ public class RDXRapidHeightMapExtractorCUDADemo
 
             extractor = new RapidHeightMapExtractorCUDA(leftFootSoleFrame, rightFootSoleFrame, heightMapImage, 1);
             extractor.setDepthIntrinsics(intrinsics);
-//            extractor.create(heightMapImage, 1);
 
             baseUI.getPrimaryScene().addRenderableProvider(heightMapGraphic, RDXSceneLevel.MODEL);
          }
