@@ -2,6 +2,7 @@ package us.ihmc.communication.ros2.sync;
 
 import ihmc_common_msgs.msg.dds.PeerClockOffsetEstimatorPingMessage;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
@@ -16,6 +17,8 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Sends out pings to other instances of this class on the network to estimate
@@ -35,6 +38,8 @@ public class ROS2PeerClockOffsetEstimator
    private final RepeatingTaskThread requestThread = new RepeatingTaskThread(getClass().getSimpleName(),
                                                                              this::runRequestTask,
                                                                              DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+   private final ExecutorService cachedThreadPool
+         = Executors.newCachedThreadPool(ThreadTools.createNamedThreadFactory(getClass().getSimpleName() + "PublishReply", true));
    private final PeerClockOffsetEstimatorPingMessage requestMessage = new PeerClockOffsetEstimatorPingMessage();
    private final PeerClockOffsetEstimatorPingMessage receivedMessage = new PeerClockOffsetEstimatorPingMessage();
    private final SampleInfo sampleInfo = new SampleInfo();
@@ -60,13 +65,13 @@ public class ROS2PeerClockOffsetEstimator
             replyMessage.setIsRequest(false);
             MessageTools.toMessage(Instant.now(), replyMessage.getReplySendTime());
 
-            ThreadTools.startAsDaemon(() ->
+            cachedThreadPool.submit(() -> ExceptionTools.handle(() ->
             {
                synchronized (publisher)
                {
                   publisher.publish(replyMessage);
                }
-            }, getClass().getSimpleName() + "PublishReply");
+            }, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE));
          }
          else if (!receivedMessage.getIsRequest() && receivedReplyTarget.equals(ourGuid)) // Update clock offset estimate
          {
