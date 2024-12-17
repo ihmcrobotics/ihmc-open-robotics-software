@@ -89,17 +89,26 @@ public class CUDATools
       {
          return false;
       }
+
       return false;
    }
 
-   private static String extractVersion(String nvccOutputLine)
+   /**
+    * We search for the release keyword in the text, and pull the version from this
+    * @return the version number or null if the version doesn't exist
+    */
+   private static String extractVersion(String lineOfText)
    {
-      int releaseIndex = nvccOutputLine.indexOf("release");
+      String keyword = "release";
+      int sizeOfKeyword = keyword.length();
+      int releaseIndex = lineOfText.indexOf(keyword);
+
       if (releaseIndex != -1)
       {
-         String versionPart = nvccOutputLine.substring(releaseIndex + 7).trim();
+         String versionPart = lineOfText.substring(releaseIndex + sizeOfKeyword).trim();
          return versionPart.split(",")[0].trim();
       }
+
       return null;
    }
 
