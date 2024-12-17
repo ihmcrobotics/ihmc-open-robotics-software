@@ -12,8 +12,8 @@ import org.bytedeco.javacpp.tools.InfoMapper;
                 includepath = {"include", "include/eigen3"},
                 include = {"external-control.hpp"},
                 linkpath = "lib",
-                link = "external-wrapper",
-                preload = {"external-wrapper", "jniExternalControlWrapper"}
+                link = "external-control",
+                preload = {"external-control", "jniExternalControlWrapper"}
       ),
       target = "us.ihmc.externalControl",
       global = "us.ihmc.externalControl.global.ExternalControlWrapper"

@@ -14,7 +14,7 @@ cmake -DCMAKE_INSTALL_PREFIX=../../ ..
 cmake --install .
 cd ../../
 
-# Build external-wrapper
+# Build external-control
 cmake -DCMAKE_INSTALL_PREFIX=. ..
 cmake --build . --config Release --target install
 
@@ -39,6 +39,6 @@ mkdir -p ../src/main/resources/externalControl/native/linux-x86_64
 if [ -f "javainstall/libjniExternalControlWrapper.so" ]; then
   cp javainstall/libjniExternalControlWrapper.so ../src/main/resources/externalControl/native/linux-x86_64
 fi
-if [ -f "lib/libexternal-wrapper.so" ]; then
-  cp lib/libexternal-wrapper.so ../src/main/resources/externalControl/native/linux-x86_64
+if [ -f "lib/libexternal-control.so" ]; then
+  cp lib/libexternal-control.so ../src/main/resources/externalControl/native/linux-x86_64
 fi

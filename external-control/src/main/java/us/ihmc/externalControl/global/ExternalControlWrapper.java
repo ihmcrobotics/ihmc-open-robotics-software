@@ -11,15 +11,10 @@ import org.bytedeco.javacpp.annotation.*;
 public class ExternalControlWrapper extends us.ihmc.externalControl.ExternalControlInfoMapper {
     static { Loader.load(); }
 
-// Parsed from external-control.hpp
+// Parsed from test.hpp
 
-// #pragma once
+//  #include <stdio.h>
 
-// #include "controllers/constant-position-controller.hpp"
-// Targeting ../ExternalControlImpl.java
-
-
-
-
+ public static native void test();
 
 }

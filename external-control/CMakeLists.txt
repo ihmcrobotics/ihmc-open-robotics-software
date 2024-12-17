@@ -3,22 +3,21 @@ set(CMAKE_CXX_STANDARD 17)
 
 project(external-control CXX)
 
-set(Eigen3_DIR "${CMAKE_INSTALL_PREFIX}/include/eigen3")
-find_package(Eigen3 REQUIRED)
-include_directories(${EIGEN3_INCLUDE_DIR})
+find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 
-set(SOURCES
-        ${CONTROL_SOURCES}
-        src/main/cpp/external-control.hpp
-        src/main/cpp/external-control.cpp
-        src/main/cpp/types.hpp)
+file(GLOB_RECURSE SOURCES
+    "src/main/cpp/*.cpp"
+    "src/main/cpp/*.hpp"
+)
 
-add_library(external-wrapper SHARED ${SOURCES})
-target_include_directories(external-wrapper PUBLIC
+add_library(external-control SHARED ${SOURCES})
+target_include_directories(external-control PUBLIC
         src/main/cpp)
 
-install(TARGETS external-wrapper
+install(TARGETS external-control
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib)
 install(DIRECTORY src/main/cpp/ DESTINATION ${CMAKE_INSTALL_PREFIX}/include FILES_MATCHING PATTERN "*.hpp")
+
+target_link_libraries(external-control Eigen3::Eigen)

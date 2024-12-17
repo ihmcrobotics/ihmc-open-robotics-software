@@ -1,5 +1,6 @@
 package us.ihmc.externalControl.library;
 
+import us.ihmc.externalControl.global.ExternalControlWrapper;
 import us.ihmc.tools.nativelibraries.NativeLibraryDescription;
 import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
 import us.ihmc.tools.nativelibraries.NativeLibraryWithDependencies;
@@ -36,7 +37,7 @@ public class ExternalControlNativeLibrary implements NativeLibraryDescription
    public NativeLibraryWithDependencies getLibraryWithDependencies(OperatingSystem os, Architecture arch)
    {
       if (os == OperatingSystem.LINUX64 && arch == Architecture.x64)
-         return NativeLibraryWithDependencies.fromFilename("libjniExternalControlWrapper.so", "libexternal-wrapper.so");
+         return NativeLibraryWithDependencies.fromFilename("libjniExternalControlWrapper.so", "libexternal-control.so");
 
       throw new RuntimeException("Unsupported platform: " + os.name() + "-" + arch.name());
    }
@@ -51,5 +52,11 @@ public class ExternalControlNativeLibrary implements NativeLibraryDescription
          loaded = NativeLibraryLoader.loadLibrary(lib);
       }
       return loaded;
+   }
+
+   public static void main(String[] args)
+   {
+      load();
+      ExternalControlWrapper.test();
    }
 }
