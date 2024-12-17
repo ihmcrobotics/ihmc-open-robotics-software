@@ -81,7 +81,7 @@ public class RDXSceneGraphUI
       baseUI.getImGuiPanelManager().addPanel(panel);
    }
 
-   private void addUISceneNode(RDXSceneNode uiSceneNode)
+   public void addUISceneNode(RDXSceneNode uiSceneNode)
    {
       uiSceneNodes.put(uiSceneNode.getSceneNode(), uiSceneNode);
 
