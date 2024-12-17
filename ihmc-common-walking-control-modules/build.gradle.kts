@@ -29,7 +29,7 @@ visualizersDependencies {
    api("us.ihmc:simulation-construction-set:0.25.1")
    api("us.ihmc:scs2-simulation-construction-set:17-0.27.3")
 
-   var javaFXVersion = "17.0.9"
+   var javaFXVersion = "17.0.8"
    api(ihmc.javaFXModule("base", javaFXVersion))
    api(ihmc.javaFXModule("controls", javaFXVersion))
    api(ihmc.javaFXModule("graphics", javaFXVersion))

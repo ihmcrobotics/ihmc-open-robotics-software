@@ -34,7 +34,7 @@ jmonkeyengineDependencies {
 
    api("us.ihmc:simulation-construction-set-tools:source")
 
-   var javaFXVersion = "17.0.9"
+   var javaFXVersion = "17.0.8"
    api(ihmc.javaFXModule("graphics", javaFXVersion)) // JFX Color
 }
 
@@ -70,7 +70,7 @@ libgdxDependencies {
    api("io.github.spair:imgui-java-natives-macos-ft:$imguiVersion")
    api("io.github.spair:imgui-java-natives-windows-ft:$imguiVersion")
 
-   val javaFXVersion = "17.0.9"
+   val javaFXVersion = "17.0.8"
    api(ihmc.javaFXModule("graphics", javaFXVersion)) // JFX Color
 
    api("org.bytedeco:javacpp:1.5.9")
