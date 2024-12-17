@@ -29,6 +29,7 @@ public class AI2RNodeState extends BehaviorTreeNodeState<AI2RNodeDefinition>
       super.update();
 
       actionSequence = BehaviorTreeTools.findRootNode(this);
+      checkPoints.clear();
       updateActionSubtree(this);
    }
 
