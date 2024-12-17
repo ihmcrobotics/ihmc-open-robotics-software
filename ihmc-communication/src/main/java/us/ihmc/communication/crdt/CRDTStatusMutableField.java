@@ -16,7 +16,7 @@ public abstract class CRDTStatusMutableField<T> extends CRDTStatusField
 {
    private final T value;
 
-   public CRDTStatusMutableField(ROS2ActorDesignation sideThatCanModify, CRDTInfo crdtInfo, Supplier<T> valueSupplier)
+   public CRDTStatusMutableField(ROS2ActorDesignation sideThatCanModify, CRDTGlobalInfo crdtInfo, Supplier<T> valueSupplier)
    {
       super(sideThatCanModify, crdtInfo);
 

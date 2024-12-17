@@ -2,12 +2,12 @@ package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.SakeHandCommandActionStateMessage;
 import us.ihmc.behaviors.sequence.ActionNodeState;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class SakeHandCommandActionState extends ActionNodeState<SakeHandCommandActionDefinition>
 {
-   public SakeHandCommandActionState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public SakeHandCommandActionState(long id, CRDTGlobalInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(id, new SakeHandCommandActionDefinition(crdtInfo, saveFileDirectory), crdtInfo);
    }

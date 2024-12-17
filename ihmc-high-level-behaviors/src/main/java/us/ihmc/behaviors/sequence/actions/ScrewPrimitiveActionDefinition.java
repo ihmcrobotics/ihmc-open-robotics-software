@@ -48,7 +48,7 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
    private double onDiskPositionErrorTolerance;
    private double onDiskOrientationErrorTolerance;
 
-   public ScrewPrimitiveActionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public ScrewPrimitiveActionDefinition(CRDTGlobalInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(crdtInfo, saveFileDirectory);
 

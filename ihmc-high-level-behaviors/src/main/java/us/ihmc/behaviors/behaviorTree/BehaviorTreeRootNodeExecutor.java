@@ -3,7 +3,7 @@ package us.ihmc.behaviors.behaviorTree;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.behaviors.sequence.FallbackNodeExecutor;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
@@ -22,7 +22,7 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
    private final List<ActionNodeExecutor<?, ?>> successfulActions = new ArrayList<>();
    private final List<ActionNodeExecutor<?, ?>> failedActionsWithoutFallback = new ArrayList<>();
 
-   public BehaviorTreeRootNodeExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public BehaviorTreeRootNodeExecutor(long id, CRDTGlobalInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(new BehaviorTreeRootNodeState(id, crdtInfo, saveFileDirectory));
 

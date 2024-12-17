@@ -2,13 +2,13 @@ package us.ihmc.communication.crdt;
 
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 
-public class CRDTInfo
+public class CRDTGlobalInfo
 {
    private final ROS2ActorDesignation actorDesignation;
    private final int maxFreezeDuration;
    private long updateNumber = 0;
 
-   public CRDTInfo(ROS2ActorDesignation actorDesignation, int maxFreezeDuration)
+   public CRDTGlobalInfo(ROS2ActorDesignation actorDesignation, int maxFreezeDuration)
    {
       this.actorDesignation = actorDesignation;
       this.maxFreezeDuration = maxFreezeDuration;

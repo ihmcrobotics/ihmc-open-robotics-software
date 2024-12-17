@@ -11,7 +11,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
  */
 public class CRDTStatusVector3D extends CRDTStatusMutableField<Vector3D>
 {
-   public CRDTStatusVector3D(ROS2ActorDesignation sideThatCanModify, CRDTInfo crdtInfo)
+   public CRDTStatusVector3D(ROS2ActorDesignation sideThatCanModify, CRDTGlobalInfo crdtInfo)
    {
       super(sideThatCanModify, crdtInfo, Vector3D::new);
    }

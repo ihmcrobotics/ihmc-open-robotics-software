@@ -6,7 +6,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.crdt.CRDTBidirectionalRigidBodyTransform;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.communication.crdt.CRDTStatusEnumField;
 import us.ihmc.communication.crdt.CRDTStatusFootstepList;
 import us.ihmc.communication.crdt.CRDTStatusInteger;
@@ -40,7 +40,7 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
    private final CRDTStatusFootstepList previewFootsteps;
 
    public FootstepPlanActionState(long id,
-                                  CRDTInfo crdtInfo,
+                                  CRDTGlobalInfo crdtInfo,
                                   WorkspaceResourceDirectory saveFileDirectory,
                                   ReferenceFrameLibrary referenceFrameLibrary,
                                   DRCRobotModel robotModel)

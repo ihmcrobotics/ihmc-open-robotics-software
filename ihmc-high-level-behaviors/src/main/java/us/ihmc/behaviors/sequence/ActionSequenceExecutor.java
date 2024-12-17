@@ -1,7 +1,7 @@
 package us.ihmc.behaviors.sequence;
 
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSequenceState, ActionSequenceDefinition>
@@ -9,7 +9,7 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
    private final ActionSequenceState state;
    private final ActionSequenceDefinition definition;
 
-   public ActionSequenceExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public ActionSequenceExecutor(long id, CRDTGlobalInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(new ActionSequenceState(id, crdtInfo, saveFileDirectory));
 

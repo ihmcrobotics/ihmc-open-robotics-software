@@ -2,12 +2,12 @@ package us.ihmc.behaviors.sequence;
 
 import behavior_msgs.msg.dds.FallbackNodeDefinitionMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class FallbackNodeDefinition extends BehaviorTreeNodeDefinition
 {
-   public FallbackNodeDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public FallbackNodeDefinition(CRDTGlobalInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(crdtInfo, saveFileDirectory);
    }

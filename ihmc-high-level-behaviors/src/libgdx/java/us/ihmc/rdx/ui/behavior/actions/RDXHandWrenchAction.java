@@ -3,7 +3,7 @@ package us.ihmc.rdx.ui.behavior.actions;
 import imgui.ImGui;
 import us.ihmc.behaviors.sequence.actions.HandWrenchActionDefinition;
 import us.ihmc.behaviors.sequence.actions.HandWrenchActionState;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
@@ -16,7 +16,7 @@ public class RDXHandWrenchAction extends RDXActionNode<HandWrenchActionState, Ha
    private final ImDoubleWrapper trajectoryDurationWidget;
    private final ImDoubleWrapper forceWidget;
 
-   public RDXHandWrenchAction(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public RDXHandWrenchAction(long id, CRDTGlobalInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(new HandWrenchActionState(id, crdtInfo, saveFileDirectory));
 

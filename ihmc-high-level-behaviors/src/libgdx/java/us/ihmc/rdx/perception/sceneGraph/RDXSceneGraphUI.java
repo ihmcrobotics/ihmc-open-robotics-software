@@ -6,7 +6,7 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiTableColumnFlags;
 import imgui.type.ImBoolean;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.tuple3D.Vector3D32;
@@ -61,7 +61,7 @@ public class RDXSceneGraphUI
 
       sceneGraph = new ROS2SceneGraph(new SceneNode(SceneGraph.ROOT_NODE_ID,
                                                     SceneGraph.ROOT_NODE_NAME,
-                                                    new CRDTInfo(ROS2ActorDesignation.OPERATOR, (int) SceneGraph.CRDT_SYNC_FREQUENCY)),
+                                                    new CRDTGlobalInfo(ROS2ActorDesignation.OPERATOR, (int) SceneGraph.CRDT_SYNC_FREQUENCY)),
                                       (sceneGraph, ros2SceneGraphSubscriptionNode) ->
       {
          RDXSceneNode uiSceneNode = RDXSceneGraphTools.createNodeFromMessage(ros2SceneGraphSubscriptionNode, panel3D, labels, sceneGraph);

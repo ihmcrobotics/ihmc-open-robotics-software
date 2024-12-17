@@ -7,7 +7,7 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.behaviors.sequence.actions.ScrewPrimitiveActionState;
 import us.ihmc.behaviors.sequence.actions.WaitDurationActionState;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.communication.crdt.CRDTStatusDouble;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
@@ -42,7 +42,7 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
    private final CRDTStatusDouble doorHingeJointAngle;
    private final CRDTStatusDouble doorHandleDistanceFromStart;
 
-   public DoorTraversalState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public DoorTraversalState(long id, CRDTGlobalInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(id, new DoorTraversalDefinition(crdtInfo, saveFileDirectory), crdtInfo);
 

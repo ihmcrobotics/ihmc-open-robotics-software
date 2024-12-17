@@ -14,7 +14,7 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
  */
 public class CRDTStatusRigidBodyTransform extends CRDTStatusMutableField<RigidBodyTransform>
 {
-   public CRDTStatusRigidBodyTransform(ROS2ActorDesignation sideThatCanModify, CRDTInfo crdtInfo)
+   public CRDTStatusRigidBodyTransform(ROS2ActorDesignation sideThatCanModify, CRDTGlobalInfo crdtInfo)
    {
       super(sideThatCanModify, crdtInfo, RigidBodyTransform::new);
    }

@@ -5,7 +5,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.behaviorTree.trashCan.TrashCanInteractionDefinition;
 import us.ihmc.behaviors.behaviorTree.trashCan.TrashCanInteractionState;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.rdx.imgui.*;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
 import us.ihmc.rdx.ui.behavior.tree.RDXBehaviorTreeNode;
@@ -20,7 +20,7 @@ public class RDXTrashCanInteraction extends RDXBehaviorTreeNode<TrashCanInteract
    private final ROS2SyncedRobotModel syncedRobot;
    private final ImGuiInputText obstructNodeName;
 
-   public RDXTrashCanInteraction(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ROS2SyncedRobotModel syncedRobot)
+   public RDXTrashCanInteraction(long id, CRDTGlobalInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ROS2SyncedRobotModel syncedRobot)
    {
       super(new TrashCanInteractionState(id, crdtInfo, saveFileDirectory));
 

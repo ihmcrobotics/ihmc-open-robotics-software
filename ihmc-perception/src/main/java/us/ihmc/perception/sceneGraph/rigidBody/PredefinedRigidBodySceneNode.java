@@ -1,7 +1,7 @@
 package us.ihmc.perception.sceneGraph.rigidBody;
 
 import gnu.trove.map.TLongObjectMap;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.perception.sceneGraph.SceneNode;
@@ -31,7 +31,7 @@ public class PredefinedRigidBodySceneNode extends RigidBodySceneNode
                                        RigidBodyTransformReadOnly initialTransformToParent,
                                        String visualModelFilePath,
                                        RigidBodyTransform visualModelToNodeFrameTransform,
-                                       CRDTInfo crdtInfo)
+                                       CRDTGlobalInfo crdtInfo)
    {
       super(id, name, sceneGraphIDToNodeMap, initialParentNodeID, initialTransformToParent, crdtInfo);
       this.visualModelFilePath = visualModelFilePath;

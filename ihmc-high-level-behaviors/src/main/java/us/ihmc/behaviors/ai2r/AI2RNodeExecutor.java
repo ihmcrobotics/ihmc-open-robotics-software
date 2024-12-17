@@ -6,7 +6,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
 import us.ihmc.communication.AutonomyAPI;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.SceneGraph;
@@ -27,7 +27,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
    private final AI2RStatusMessage statusMessage = new AI2RStatusMessage();
 
    public AI2RNodeExecutor(long id,
-                           CRDTInfo crdtInfo,
+                           CRDTGlobalInfo crdtInfo,
                            WorkspaceResourceDirectory saveFileDirectory,
                            ROS2ControllerHelper ros2,
                            ROS2SyncedRobotModel syncedRobot,

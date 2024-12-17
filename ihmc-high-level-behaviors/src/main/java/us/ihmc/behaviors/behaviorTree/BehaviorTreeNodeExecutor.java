@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree;
 
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
@@ -24,7 +24,7 @@ public class BehaviorTreeNodeExecutor<S extends BehaviorTreeNodeState<D>,
 
    /** For creating a basic node. */
    @SuppressWarnings("unchecked")
-   public BehaviorTreeNodeExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public BehaviorTreeNodeExecutor(long id, CRDTGlobalInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       D definition = (D) new BehaviorTreeNodeDefinition(crdtInfo, saveFileDirectory);
       this.state = (S) new BehaviorTreeNodeState<D>(id, definition, crdtInfo);

@@ -1,7 +1,7 @@
 package us.ihmc.perception.sceneGraph.rigidBody;
 
 import gnu.trove.map.TLongObjectMap;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -37,7 +37,7 @@ public class StaticRelativeSceneNode extends PredefinedRigidBodySceneNode
                                   String visualModelFilePath,
                                   RigidBodyTransform visualModelToNodeFrameTransform,
                                   double distanceToDisableTracking,
-                                  CRDTInfo crdtInfo)
+                                  CRDTGlobalInfo crdtInfo)
    {
       super(id, name, sceneGraphIDToNodeMap, initialParentNodeID, initialTransformToParent, visualModelFilePath, visualModelToNodeFrameTransform, crdtInfo);
       this.distanceToDisableTracking = distanceToDisableTracking;

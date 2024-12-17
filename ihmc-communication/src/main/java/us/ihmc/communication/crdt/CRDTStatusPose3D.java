@@ -11,7 +11,7 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
  */
 public class CRDTStatusPose3D extends CRDTStatusMutableField<Pose3D>
 {
-   public CRDTStatusPose3D(ROS2ActorDesignation sideThatCanModify, CRDTInfo crdtInfo)
+   public CRDTStatusPose3D(ROS2ActorDesignation sideThatCanModify, CRDTGlobalInfo crdtInfo)
    {
       super(sideThatCanModify, crdtInfo, Pose3D::new);
    }

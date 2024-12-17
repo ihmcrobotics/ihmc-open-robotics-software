@@ -32,7 +32,7 @@ public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinitio
    private final SideDependentList<Integer> numberOfJoints = new SideDependentList<>();
 
    public HandPoseActionState(long id,
-                              CRDTInfo crdtInfo,
+                              CRDTGlobalInfo crdtInfo,
                               WorkspaceResourceDirectory saveFileDirectory,
                               ReferenceFrameLibrary referenceFrameLibrary,
                               DRCRobotModel robotModel)

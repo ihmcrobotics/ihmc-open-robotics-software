@@ -4,9 +4,8 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.perception.sceneGraph.SceneGraph;
-import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneObjectDefinitions;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorSceneNodeDefinitions;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -20,7 +19,7 @@ public class TrashCanInteractionExecutor extends BehaviorTreeNodeExecutor<TrashC
    private final SceneGraph sceneGraph;
 
    public TrashCanInteractionExecutor(long id,
-                                      CRDTInfo crdtInfo,
+                                      CRDTGlobalInfo crdtInfo,
                                       WorkspaceResourceDirectory saveFileDirectory,
                                       ROS2ControllerHelper ros2ControllerHelper,
                                       ROS2SyncedRobotModel syncedRobot,

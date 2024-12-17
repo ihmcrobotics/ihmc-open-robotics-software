@@ -1,6 +1,6 @@
 package us.ihmc.perception.sceneGraph.ros2;
 
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.perception.sceneGraph.SceneGraph;
@@ -26,7 +26,7 @@ public class ROS2SceneGraph extends SceneGraph
     */
    public ROS2SceneGraph(ROS2PublishSubscribeAPI ros2PublishSubscribeAPI)
    {
-      this(new SceneNode(ROOT_NODE_ID, ROOT_NODE_NAME, new CRDTInfo(ROS2ActorDesignation.ROBOT, (int) SceneGraph.CRDT_SYNC_FREQUENCY)),
+      this(new SceneNode(ROOT_NODE_ID, ROOT_NODE_NAME, new CRDTGlobalInfo(ROS2ActorDesignation.ROBOT, (int) SceneGraph.CRDT_SYNC_FREQUENCY)),
            null,
            ros2PublishSubscribeAPI,
            ROS2ActorDesignation.ROBOT);

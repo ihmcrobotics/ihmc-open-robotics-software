@@ -4,7 +4,7 @@ import behavior_msgs.msg.dds.HandWrenchActionDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.ActionNodeDefinition;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.communication.crdt.CRDTBidirectionalDouble;
 import us.ihmc.communication.crdt.CRDTBidirectionalEnumField;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -22,7 +22,7 @@ public class HandWrenchActionDefinition extends ActionNodeDefinition implements 
    private double onDiskTrajectoryDuration;
    private double onDiskForce;
 
-   public HandWrenchActionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public HandWrenchActionDefinition(CRDTGlobalInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(crdtInfo, saveFileDirectory);
 

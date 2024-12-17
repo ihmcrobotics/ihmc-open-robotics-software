@@ -13,7 +13,7 @@ import us.ihmc.idl.IDLSequence;
  */
 public class CRDTStatusPoseList extends CRDTStatusMutableField<RecyclingArrayList<Pose3D>>
 {
-   public CRDTStatusPoseList(ROS2ActorDesignation sideThatCanModify, CRDTInfo crdtInfo)
+   public CRDTStatusPoseList(ROS2ActorDesignation sideThatCanModify, CRDTGlobalInfo crdtInfo)
    {
       super(sideThatCanModify, crdtInfo, () -> new RecyclingArrayList<>(Pose3D::new));
    }

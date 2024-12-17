@@ -2,12 +2,12 @@ package us.ihmc.behaviors.sequence;
 
 import behavior_msgs.msg.dds.ActionSequenceStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDefinition>
 {
-   public ActionSequenceState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public ActionSequenceState(long id, CRDTGlobalInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(id, new ActionSequenceDefinition(crdtInfo, saveFileDirectory), crdtInfo);
    }

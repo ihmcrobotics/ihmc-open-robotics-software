@@ -7,7 +7,7 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.behaviors.sequence.actions.FootstepPlanActionState;
 import us.ihmc.behaviors.sequence.actions.WaitDurationActionState;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.communication.crdt.CRDTStatusEnumField;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -33,7 +33,7 @@ public class TrashCanInteractionState extends BehaviorTreeNodeState<TrashCanInte
    private FootstepPlanActionState approachFrontAction;
    private final CRDTStatusEnumField<InteractionStance> stance;
 
-   public TrashCanInteractionState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public TrashCanInteractionState(long id, CRDTGlobalInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(id, new TrashCanInteractionDefinition(crdtInfo, saveFileDirectory), crdtInfo);
 

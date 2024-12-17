@@ -3,7 +3,7 @@ package us.ihmc.rdx.ui.behavior.logic;
 import imgui.ImGui;
 import us.ihmc.behaviors.logic.ConditionNodeDefinition;
 import us.ihmc.behaviors.logic.ConditionNodeState;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.behavior.tree.RDXBehaviorTreeNode;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -13,7 +13,7 @@ public class RDXConditionNode extends RDXBehaviorTreeNode<ConditionNodeState, Co
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ConditionNodeState state;
 
-   public RDXConditionNode(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public RDXConditionNode(long id, CRDTGlobalInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(new ConditionNodeState(id, crdtInfo, saveFileDirectory));
 

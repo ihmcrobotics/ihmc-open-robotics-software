@@ -2,8 +2,7 @@ package us.ihmc.behaviors.buildingExploration;
 
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
 import us.ihmc.behaviors.door.DoorTraversalExecutor;
-import us.ihmc.behaviors.sequence.ActionSequenceExecutor;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
@@ -13,7 +12,7 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
 {
    private final SceneGraph sceneGraph;
 
-   public BuildingExplorationExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, SceneGraph sceneGraph)
+   public BuildingExplorationExecutor(long id, CRDTGlobalInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, SceneGraph sceneGraph)
    {
       super(new BuildingExplorationState(id, crdtInfo, saveFileDirectory));
       this.sceneGraph = sceneGraph;

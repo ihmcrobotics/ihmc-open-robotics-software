@@ -2,12 +2,12 @@ package us.ihmc.behaviors.logic;
 
 import behavior_msgs.msg.dds.ConditionNodeDefinitionMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class ConditionNodeDefinition extends BehaviorTreeNodeDefinition
 {
-   public ConditionNodeDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public ConditionNodeDefinition(CRDTGlobalInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(crdtInfo, saveFileDirectory);
    }

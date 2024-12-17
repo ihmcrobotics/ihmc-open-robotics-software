@@ -3,7 +3,7 @@ package us.ihmc.behaviors.behaviorTree.topology;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeLayer;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeLayerSupplier;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.log.LogTools;
 
 import java.util.HashMap;
@@ -11,12 +11,12 @@ import java.util.HashMap;
 public class BehaviorTreeExtensionSubtreeRebuilder
 {
    private final HashMap<Long, BehaviorTreeNodeLayer<?, ?, ?, ?>> idToNodesMap = new HashMap<>();
-   private final CRDTInfo crdtInfo;
+   private final CRDTGlobalInfo crdtInfo;
 
    private final BehaviorTreeTopologyOperation clearSubtreeOperation;
    private final BehaviorTreeTopologyOperation destroyLeftoversOperation;
 
-   public BehaviorTreeExtensionSubtreeRebuilder(BehaviorTreeNodeLayerSupplier subtreeNodeSupplier, CRDTInfo crdtInfo)
+   public BehaviorTreeExtensionSubtreeRebuilder(BehaviorTreeNodeLayerSupplier subtreeNodeSupplier, CRDTGlobalInfo crdtInfo)
    {
       this.crdtInfo = crdtInfo;
 

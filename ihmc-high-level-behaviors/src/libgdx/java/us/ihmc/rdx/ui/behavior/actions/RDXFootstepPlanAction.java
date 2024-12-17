@@ -15,7 +15,7 @@ import us.ihmc.behaviors.tools.MinimalFootstep;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.TypedNotification;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -80,7 +80,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    private final RDXFootstepPlanGraphic previewFootstepPlan;
 
    public RDXFootstepPlanAction(long id,
-                                CRDTInfo crdtInfo,
+                                CRDTGlobalInfo crdtInfo,
                                 WorkspaceResourceDirectory saveFileDirectory,
                                 RDXBaseUI baseUI,
                                 DRCRobotModel robotModel,

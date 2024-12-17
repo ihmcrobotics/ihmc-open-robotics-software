@@ -11,7 +11,7 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SE3Traject
 
 public class CRDTStatusSE3Trajectory extends CRDTStatusMutableField<RecyclingArrayList<SE3TrajectoryPoint>>
 {
-   public CRDTStatusSE3Trajectory(ROS2ActorDesignation sideThatCanModify, CRDTInfo crdtInfo)
+   public CRDTStatusSE3Trajectory(ROS2ActorDesignation sideThatCanModify, CRDTGlobalInfo crdtInfo)
    {
       super(sideThatCanModify, crdtInfo, () -> new RecyclingArrayList<>(SE3TrajectoryPoint::new));
    }

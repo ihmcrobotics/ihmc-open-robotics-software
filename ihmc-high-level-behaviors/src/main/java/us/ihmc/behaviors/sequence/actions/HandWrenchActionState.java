@@ -2,12 +2,12 @@ package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.HandWrenchActionStateMessage;
 import us.ihmc.behaviors.sequence.ActionNodeState;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class HandWrenchActionState extends ActionNodeState<HandWrenchActionDefinition>
 {
-   public HandWrenchActionState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public HandWrenchActionState(long id, CRDTGlobalInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(id, new HandWrenchActionDefinition(crdtInfo, saveFileDirectory), crdtInfo);
    }

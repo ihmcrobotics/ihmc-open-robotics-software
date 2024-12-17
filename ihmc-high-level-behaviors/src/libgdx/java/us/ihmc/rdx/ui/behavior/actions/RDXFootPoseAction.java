@@ -8,7 +8,7 @@ import imgui.flag.ImGuiMouseButton;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.sequence.actions.FootPoseActionDefinition;
 import us.ihmc.behaviors.sequence.actions.FootPoseActionState;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.rdx.imgui.*;
@@ -53,7 +53,7 @@ public class RDXFootPoseAction extends RDXActionNode<FootPoseActionState, FootPo
    private final RDX3DPanelTooltip tooltip;
 
    public RDXFootPoseAction(long id,
-                            CRDTInfo crdtInfo,
+                            CRDTGlobalInfo crdtInfo,
                             WorkspaceResourceDirectory saveFileDirectory,
                             RDX3DPanel panel3D,
                             DRCRobotModel robotModel,

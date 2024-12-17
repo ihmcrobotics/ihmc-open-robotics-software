@@ -1,6 +1,6 @@
 package us.ihmc.perception.sceneGraph.arUco;
 
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.perception.filters.BreakFrequencyAlphaCalculator;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.robotics.math.filters.AlphaFilteredRigidBodyTransform;
@@ -22,7 +22,7 @@ public class ArUcoMarkerNode extends DetectableSceneNode
    /**
     * Give the marker info directly from code.
     */
-   public ArUcoMarkerNode(long id, String name, int markerID, double markerSize, CRDTInfo crdtInfo)
+   public ArUcoMarkerNode(long id, String name, int markerID, double markerSize, CRDTGlobalInfo crdtInfo)
    {
       super(id, name, crdtInfo);
 

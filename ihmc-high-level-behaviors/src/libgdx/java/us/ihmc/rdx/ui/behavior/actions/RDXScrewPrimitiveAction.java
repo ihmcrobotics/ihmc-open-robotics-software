@@ -11,7 +11,7 @@ import us.ihmc.behaviors.sequence.actions.ScrewPrimitiveActionDefinition;
 import us.ihmc.behaviors.sequence.actions.ScrewPrimitiveActionState;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -58,7 +58,7 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
    private final Stopwatch playbackStopwatch = new Stopwatch();
 
    public RDXScrewPrimitiveAction(long id,
-                                  CRDTInfo crdtInfo,
+                                  CRDTGlobalInfo crdtInfo,
                                   WorkspaceResourceDirectory saveFileDirectory,
                                   RDX3DPanel panel3D,
                                   ReferenceFrameLibrary referenceFrameLibrary,

@@ -1,7 +1,7 @@
 package us.ihmc.behaviors.sequence;
 
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.util.ArrayList;
@@ -21,7 +21,7 @@ public class FallbackNodeExecutor extends BehaviorTreeNodeExecutor<FallbackNodeS
    private final List<ActionNodeExecutor<?, ?>> tryActions = new ArrayList<>();
    private final List<ActionNodeExecutor<?, ?>> fallbackActions = new ArrayList<>();
 
-   public FallbackNodeExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public FallbackNodeExecutor(long id, CRDTGlobalInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(new FallbackNodeState(id, crdtInfo, saveFileDirectory));
 

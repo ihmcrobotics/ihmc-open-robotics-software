@@ -13,7 +13,7 @@ import java.util.function.Supplier;
  */
 public class CRDTStatusRecyclingArrayList<T> extends CRDTStatusMutableField<RecyclingArrayList<T>>
 {
-   public CRDTStatusRecyclingArrayList(ROS2ActorDesignation sideThatCanModify, CRDTInfo crdtInfo, Supplier<RecyclingArrayList<T>> valueSupplier)
+   public CRDTStatusRecyclingArrayList(ROS2ActorDesignation sideThatCanModify, CRDTGlobalInfo crdtInfo, Supplier<RecyclingArrayList<T>> valueSupplier)
    {
       super(sideThatCanModify, crdtInfo, valueSupplier);
    }

@@ -4,7 +4,7 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
@@ -78,7 +78,7 @@ public class SceneGraph
    /** Create without CRDT synchronization. */
    public SceneGraph()
    {
-      this(new SceneNode(ROOT_NODE_ID, ROOT_NODE_NAME, new CRDTInfo(ROS2ActorDesignation.OPERATOR, (int) CRDT_SYNC_FREQUENCY)));
+      this(new SceneNode(ROOT_NODE_ID, ROOT_NODE_NAME, new CRDTGlobalInfo(ROS2ActorDesignation.OPERATOR, (int) CRDT_SYNC_FREQUENCY)));
    }
 
    /**
@@ -238,7 +238,7 @@ public class SceneGraph
       return rootNode;
    }
 
-   public CRDTInfo getCRDTInfo()
+   public CRDTGlobalInfo getCRDTInfo()
    {
       return rootNode.getCRDTInfo();
    }

@@ -9,7 +9,7 @@ import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.behaviors.sequence.JointspaceTrajectoryTrackingErrorCalculator;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.SakeHandAPI;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -41,7 +41,7 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
    private boolean needsReset;
 
    public SakeHandCommandActionExecutor(long id,
-                                        CRDTInfo crdtInfo,
+                                        CRDTGlobalInfo crdtInfo,
                                         WorkspaceResourceDirectory saveFileDirectory,
                                         ROS2ControllerHelper ros2ControllerHelper,
                                         ROS2SyncedRobotModel syncedRobot)

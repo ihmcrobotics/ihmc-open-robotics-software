@@ -283,7 +283,7 @@ public class RequestConfirmFreezableTest
 
    private RequestConfirmFreezable createNode(ROS2ActorDesignation actorDesignation, int maxFreezeDuration)
    {
-      CRDTInfo crdtInfo = new CRDTInfo(actorDesignation, maxFreezeDuration);
+      CRDTGlobalInfo crdtInfo = new CRDTGlobalInfo(actorDesignation, maxFreezeDuration);
       return new RequestConfirmFreezable(crdtInfo);
    }
 }

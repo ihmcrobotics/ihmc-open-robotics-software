@@ -8,7 +8,7 @@ import imgui.flag.ImGuiMouseButton;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.sequence.actions.PelvisHeightOrientationActionDefinition;
 import us.ihmc.behaviors.sequence.actions.PelvisHeightOrientationActionState;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -58,7 +58,7 @@ public class RDXPelvisHeightOrientationAction extends RDXActionNode<PelvisHeight
    private final FullHumanoidRobotModel syncedFullRobotModel;
 
    public RDXPelvisHeightOrientationAction(long id,
-                                           CRDTInfo crdtInfo,
+                                           CRDTGlobalInfo crdtInfo,
                                            WorkspaceResourceDirectory saveFileDirectory,
                                            RDX3DPanel panel3D,
                                            DRCRobotModel robotModel,

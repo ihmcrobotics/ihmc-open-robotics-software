@@ -7,7 +7,7 @@ import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeExtensionSubtreeRebui
 import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTreeState;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionDefinition;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionType;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.detections.DetectionManager;
@@ -18,7 +18,7 @@ import us.ihmc.tools.io.WorkspaceResourceFile;
 
 public class BehaviorTreeExecutor
 {
-   private final CRDTInfo crdtInfo = new CRDTInfo(ROS2ActorDesignation.ROBOT, (int) ROS2BehaviorTreeState.SYNC_FREQUENCY);
+   private final CRDTGlobalInfo crdtInfo = new CRDTGlobalInfo(ROS2ActorDesignation.ROBOT, (int) ROS2BehaviorTreeState.SYNC_FREQUENCY);
    private final BehaviorTreeExecutorNodeBuilder nodeBuilder;
    private final BehaviorTreeExtensionSubtreeRebuilder treeRebuilder;
    private final BehaviorTreeState state;
@@ -85,7 +85,7 @@ public class BehaviorTreeExecutor
       return state;
    }
 
-   public CRDTInfo getCrdtInfo()
+   public CRDTGlobalInfo getCrdtInfo()
    {
       return crdtInfo;
    }

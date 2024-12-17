@@ -14,7 +14,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
  */
 public class CRDTStatusFootstepList extends CRDTStatusMutableField<RecyclingArrayList<FootstepPlanActionFootstepDefinitionMessage>>
 {
-   public CRDTStatusFootstepList(ROS2ActorDesignation sideThatCanModify, CRDTInfo crdtInfo)
+   public CRDTStatusFootstepList(ROS2ActorDesignation sideThatCanModify, CRDTGlobalInfo crdtInfo)
    {
       super(sideThatCanModify, crdtInfo, () -> new RecyclingArrayList<>(FootstepPlanActionFootstepDefinitionMessage::new));
    }

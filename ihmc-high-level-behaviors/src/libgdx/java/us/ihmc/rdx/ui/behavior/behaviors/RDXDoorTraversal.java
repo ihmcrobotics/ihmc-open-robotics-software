@@ -7,7 +7,7 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.door.DoorTraversalDefinition;
 import us.ihmc.behaviors.door.DoorTraversalState;
 import us.ihmc.behaviors.sequence.actions.WaitDurationActionState;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.rdx.imgui.ImGuiLabelledWidgetAligner;
 import us.ihmc.rdx.imgui.ImGuiSliderDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -28,7 +28,7 @@ public class RDXDoorTraversal extends RDXBehaviorTreeNode<DoorTraversalState, Do
    private final ImGuiSliderDoubleWrapper lostGraspDetectionHandOpenAngleSlider;
    private final ImGuiSliderDoubleWrapper openedDoorHandleDistanceFromStartSlider;
 
-   public RDXDoorTraversal(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ROS2SyncedRobotModel syncedRobot)
+   public RDXDoorTraversal(long id, CRDTGlobalInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ROS2SyncedRobotModel syncedRobot)
    {
       super(new DoorTraversalState(id, crdtInfo, saveFileDirectory));
 

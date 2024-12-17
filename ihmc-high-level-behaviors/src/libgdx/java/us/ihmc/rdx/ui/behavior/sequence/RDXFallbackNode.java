@@ -3,7 +3,7 @@ package us.ihmc.rdx.ui.behavior.sequence;
 import imgui.ImGui;
 import us.ihmc.behaviors.sequence.FallbackNodeDefinition;
 import us.ihmc.behaviors.sequence.FallbackNodeState;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.behavior.tree.RDXBehaviorTreeNode;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -13,7 +13,7 @@ public class RDXFallbackNode extends RDXBehaviorTreeNode<FallbackNodeState, Fall
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final FallbackNodeState state;
 
-   public RDXFallbackNode(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public RDXFallbackNode(long id, CRDTGlobalInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(new FallbackNodeState(id, crdtInfo, saveFileDirectory));
 

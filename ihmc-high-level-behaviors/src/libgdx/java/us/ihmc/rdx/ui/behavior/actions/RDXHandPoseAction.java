@@ -13,7 +13,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.sequence.actions.HandPoseActionDefinition;
 import us.ihmc.behaviors.sequence.actions.HandPoseActionState;
 import us.ihmc.communication.crdt.CRDTDetachableReferenceFrame;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.communication.crdt.CRDTBidirectionalRigidBodyTransform;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -89,7 +89,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
    private final RDX3DPanelTooltip tooltip;
 
    public RDXHandPoseAction(long id,
-                            CRDTInfo crdtInfo,
+                            CRDTGlobalInfo crdtInfo,
                             WorkspaceResourceDirectory saveFileDirectory,
                             RDX3DPanel panel3D,
                             DRCRobotModel robotModel,

@@ -6,7 +6,7 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.behaviors.sequence.TaskspaceTrajectoryTrackingErrorCalculator;
 import us.ihmc.commons.Conversions;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -28,7 +28,7 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
    private final TaskspaceTrajectoryTrackingErrorCalculator trackingCalculator = new TaskspaceTrajectoryTrackingErrorCalculator();
 
    public ChestOrientationActionExecutor(long id,
-                                         CRDTInfo crdtInfo,
+                                         CRDTGlobalInfo crdtInfo,
                                          WorkspaceResourceDirectory saveFileDirectory,
                                          ROS2ControllerHelper ros2ControllerHelper,
                                          ROS2SyncedRobotModel syncedRobot,

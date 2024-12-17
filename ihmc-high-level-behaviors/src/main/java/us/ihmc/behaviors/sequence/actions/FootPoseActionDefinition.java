@@ -26,7 +26,7 @@ public class FootPoseActionDefinition extends ActionNodeDefinition implements Si
    private String onDiskParentFrameName;
    private final RigidBodyTransform onDiskFootToParentTransform = new RigidBodyTransform();
 
-   public FootPoseActionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public FootPoseActionDefinition(CRDTGlobalInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(crdtInfo, saveFileDirectory);
 

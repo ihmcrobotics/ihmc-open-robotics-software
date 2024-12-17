@@ -5,7 +5,7 @@ import us.ihmc.avatar.sakeGripper.SakeHandParameters;
 import us.ihmc.avatar.sakeGripper.SakeHandPreset;
 import us.ihmc.behaviors.sequence.actions.SakeHandCommandActionDefinition;
 import us.ihmc.behaviors.sequence.actions.SakeHandCommandActionState;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiLabelledWidgetAligner;
 import us.ihmc.rdx.imgui.ImGuiSliderDoubleWrapper;
@@ -27,7 +27,7 @@ public class RDXSakeHandCommandAction extends RDXActionNode<SakeHandCommandActio
    private final ImGuiSliderDoubleWrapper fingertipGripForceSlider;
    private final ImGuiGripperWidget gripperWidget = new ImGuiGripperWidget();
 
-   public RDXSakeHandCommandAction(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public RDXSakeHandCommandAction(long id, CRDTGlobalInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(new SakeHandCommandActionState(id, crdtInfo, saveFileDirectory));
 

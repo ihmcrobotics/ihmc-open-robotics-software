@@ -1,7 +1,7 @@
 package us.ihmc.perception.sceneGraph.yolo;
 
 import perception_msgs.msg.dds.YOLOv8NodeMessage;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -43,7 +43,7 @@ public class YOLOv8Node extends DetectableSceneNode
                      List<Point3D32> objectPointCloud,
                      RigidBodyTransformReadOnly centroidToObjectTransform,
                      Pose3DReadOnly objectPose,
-                     CRDTInfo crdtInfo)
+                     CRDTGlobalInfo crdtInfo)
    {
       super(id, name, crdtInfo);
 
@@ -55,7 +55,7 @@ public class YOLOv8Node extends DetectableSceneNode
    }
 
    // TODO: remove?
-   public YOLOv8Node(long id, String name, CRDTInfo crdtInfo, PersistentDetection detection)
+   public YOLOv8Node(long id, String name, CRDTGlobalInfo crdtInfo, PersistentDetection detection)
    {
       super (id, name, crdtInfo);
 

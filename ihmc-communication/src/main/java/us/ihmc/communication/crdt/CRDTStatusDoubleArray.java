@@ -9,7 +9,7 @@ import us.ihmc.communication.ros2.ROS2ActorDesignation;
  */
 public class CRDTStatusDoubleArray extends CRDTStatusMutableField<double[]>
 {
-   public CRDTStatusDoubleArray(ROS2ActorDesignation sideThatCanModify, CRDTInfo crdtInfo, int arraySize)
+   public CRDTStatusDoubleArray(ROS2ActorDesignation sideThatCanModify, CRDTGlobalInfo crdtInfo, int arraySize)
    {
       super(sideThatCanModify, crdtInfo, () -> new double[arraySize]);
    }

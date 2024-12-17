@@ -4,7 +4,7 @@ import perception_msgs.msg.dds.DoorOpeningMechanismMessage;
 import perception_msgs.msg.dds.PredefinedRigidBodySceneNodeMessage;
 import perception_msgs.msg.dds.PrimitiveRigidBodySceneNodeMessage;
 import perception_msgs.msg.dds.SceneGraphMessage;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -35,7 +35,7 @@ public class ROS2SceneGraphTools
       byte nodeType = subscriptionNode.getType();
       long nodeID = subscriptionNode.getSceneNodeMessage().getId();
       String nodeName = subscriptionNode.getSceneNodeMessage().getNameAsString();
-      CRDTInfo crdtInfo = sceneGraph.getCRDTInfo();
+      CRDTGlobalInfo crdtInfo = sceneGraph.getCRDTInfo();
 
       if (nodeType == SceneGraphMessage.PREDEFINED_RIGID_BODY_NODE_TYPE || nodeType == SceneGraphMessage.STATIC_RELATIVE_NODE_TYPE)
       {

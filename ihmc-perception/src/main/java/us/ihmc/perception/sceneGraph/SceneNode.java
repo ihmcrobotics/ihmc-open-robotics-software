@@ -1,6 +1,6 @@
 package us.ihmc.perception.sceneGraph;
 
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.communication.crdt.RequestConfirmFreezable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -26,7 +26,7 @@ public class SceneNode extends RequestConfirmFreezable
    private final MutableReferenceFrame nodeFrame;
    private final List<SceneNode> children = new ArrayList<>();
 
-   public SceneNode(long id, String name, CRDTInfo crdtInfo)
+   public SceneNode(long id, String name, CRDTGlobalInfo crdtInfo)
    {
       super(crdtInfo);
 

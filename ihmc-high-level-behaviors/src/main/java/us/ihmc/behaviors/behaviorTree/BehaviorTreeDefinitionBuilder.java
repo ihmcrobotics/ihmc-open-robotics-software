@@ -9,7 +9,7 @@ import us.ihmc.behaviors.logic.GotoNodeDefinition;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.FallbackNodeDefinition;
 import us.ihmc.behaviors.sequence.actions.*;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -17,7 +17,7 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 public class BehaviorTreeDefinitionBuilder
 {
    public static BehaviorTreeNodeDefinition createNode(Class<?> definitionType,
-                                                       CRDTInfo crdtInfo,
+                                                       CRDTGlobalInfo crdtInfo,
                                                        WorkspaceResourceDirectory saveFileDirectory,
                                                        DefaultFootstepPlannerParametersReadOnly defaultFootstepPlannerParameters)
    {

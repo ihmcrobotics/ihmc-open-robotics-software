@@ -10,7 +10,7 @@ public class CRDTStatusInteger extends CRDTStatusField
 {
    private int value;
 
-   public CRDTStatusInteger(ROS2ActorDesignation sideThatCanModify, CRDTInfo crdtInfo, int initialValue)
+   public CRDTStatusInteger(ROS2ActorDesignation sideThatCanModify, CRDTGlobalInfo crdtInfo, int initialValue)
    {
       super(sideThatCanModify, crdtInfo);
 

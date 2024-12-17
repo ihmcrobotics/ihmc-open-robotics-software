@@ -3,7 +3,7 @@ package us.ihmc.rdx.ui.behavior.logic;
 import imgui.ImGui;
 import us.ihmc.behaviors.logic.GotoNodeDefinition;
 import us.ihmc.behaviors.logic.GotoNodeState;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.behavior.tree.RDXBehaviorTreeNode;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -13,7 +13,7 @@ public class RDXGotoNode extends RDXBehaviorTreeNode<GotoNodeState, GotoNodeDefi
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final GotoNodeState state;
 
-   public RDXGotoNode(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public RDXGotoNode(long id, CRDTGlobalInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(new GotoNodeState(id, crdtInfo, saveFileDirectory));
 

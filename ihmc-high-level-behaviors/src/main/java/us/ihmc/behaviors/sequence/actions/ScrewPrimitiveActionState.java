@@ -2,7 +2,7 @@ package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.ScrewPrimitiveActionStateMessage;
 import us.ihmc.behaviors.sequence.ActionNodeState;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.communication.crdt.CRDTStatusDouble;
 import us.ihmc.communication.crdt.CRDTStatusDoubleArray;
 import us.ihmc.communication.crdt.CRDTStatusPoseList;
@@ -29,7 +29,7 @@ public class ScrewPrimitiveActionState extends ActionNodeState<ScrewPrimitiveAct
    private final CRDTStatusDoubleArray previewJointAngles;
    private final CRDTStatusDouble previewSolutionQuality;
 
-   public ScrewPrimitiveActionState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ReferenceFrameLibrary referenceFrameLibrary)
+   public ScrewPrimitiveActionState(long id, CRDTGlobalInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ReferenceFrameLibrary referenceFrameLibrary)
    {
       super(id, new ScrewPrimitiveActionDefinition(crdtInfo, saveFileDirectory), crdtInfo);
 

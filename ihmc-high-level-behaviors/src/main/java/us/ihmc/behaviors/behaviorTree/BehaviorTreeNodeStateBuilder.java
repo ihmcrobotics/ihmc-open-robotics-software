@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree;
 
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 /**
@@ -8,5 +8,5 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
  */
 public interface BehaviorTreeNodeStateBuilder<T extends BehaviorTreeNodeLayer<T, ?, ?, ?>>
 {
-   T createNode(Class<?> nodeType, long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory);
+   T createNode(Class<?> nodeType, long id, CRDTGlobalInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory);
 }

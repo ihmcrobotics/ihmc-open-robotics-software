@@ -4,7 +4,7 @@ import behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.communication.crdt.CRDTBidirectionalString;
 import us.ihmc.communication.crdt.RequestConfirmFreezable;
 import us.ihmc.log.LogTools;
@@ -45,7 +45,7 @@ public class BehaviorTreeNodeDefinition extends RequestConfirmFreezable implemen
    private String onDiskNotes;
    private final List<String> onDiskChildrenNames = new ArrayList<>();
 
-   public BehaviorTreeNodeDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public BehaviorTreeNodeDefinition(CRDTGlobalInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(crdtInfo);
 

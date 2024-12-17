@@ -16,7 +16,7 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.sequence.*;
 import us.ihmc.commons.Conversions;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -43,7 +43,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
    private final FramePose3D goalChestFrame = new FramePose3D();
 
    public HandPoseActionExecutor(long id,
-                                 CRDTInfo crdtInfo,
+                                 CRDTGlobalInfo crdtInfo,
                                  WorkspaceResourceDirectory saveFileDirectory,
                                  ROS2ControllerHelper ros2ControllerHelper,
                                  ReferenceFrameLibrary referenceFrameLibrary,

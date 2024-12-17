@@ -10,7 +10,7 @@ public class CRDTStatusLong extends CRDTStatusField
 {
    private long value;
 
-   public CRDTStatusLong(ROS2ActorDesignation sideThatCanModify, CRDTInfo crdtInfo, long initialValue)
+   public CRDTStatusLong(ROS2ActorDesignation sideThatCanModify, CRDTGlobalInfo crdtInfo, long initialValue)
    {
       super(sideThatCanModify, crdtInfo);
 

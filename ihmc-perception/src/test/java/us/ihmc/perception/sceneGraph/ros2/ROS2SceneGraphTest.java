@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.thread.Notification;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2IOTopicQualifier;
 import us.ihmc.perception.sceneGraph.SceneGraph;
@@ -23,7 +23,7 @@ public class ROS2SceneGraphTest
    {
       SceneGraph sceneGraph = new SceneGraph();
 
-      CRDTInfo crdtInfo = sceneGraph.getCRDTInfo();
+      CRDTGlobalInfo crdtInfo = sceneGraph.getCRDTInfo();
       SceneNode child0 = new SceneNode(sceneGraph.getNextID().getAndIncrement(), "Child0", crdtInfo);
       SceneNode child1 = new SceneNode(sceneGraph.getNextID().getAndIncrement(), "Child1", crdtInfo);
       SceneNode child1child0 = new SceneNode(sceneGraph.getNextID().getAndIncrement(), "Child1Child0", crdtInfo);

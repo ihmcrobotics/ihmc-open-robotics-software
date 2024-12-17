@@ -2,16 +2,15 @@ package us.ihmc.behaviors.behaviorTree.trashCan;
 
 import behavior_msgs.msg.dds.TrashCanInteractionDefinitionMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.communication.crdt.CRDTBidirectionalString;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class TrashCanInteractionDefinition extends BehaviorTreeNodeDefinition
 {
    private final CRDTBidirectionalString obstructedNode;
 
-   public TrashCanInteractionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public TrashCanInteractionDefinition(CRDTGlobalInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(crdtInfo, saveFileDirectory);
 

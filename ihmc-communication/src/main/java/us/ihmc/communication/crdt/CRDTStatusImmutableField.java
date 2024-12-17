@@ -10,7 +10,7 @@ public class CRDTStatusImmutableField<T> extends CRDTStatusField
 {
    private T value;
 
-   public CRDTStatusImmutableField(ROS2ActorDesignation sideThatCanModify, CRDTInfo crdtInfo, T initialValue)
+   public CRDTStatusImmutableField(ROS2ActorDesignation sideThatCanModify, CRDTGlobalInfo crdtInfo, T initialValue)
    {
       super(sideThatCanModify, crdtInfo);
 

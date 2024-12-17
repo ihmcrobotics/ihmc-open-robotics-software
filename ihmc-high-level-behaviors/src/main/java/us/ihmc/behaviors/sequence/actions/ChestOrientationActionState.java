@@ -3,7 +3,7 @@ package us.ihmc.behaviors.sequence.actions;
 import behavior_msgs.msg.dds.ChestOrientationActionStateMessage;
 import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.communication.crdt.CRDTDetachableReferenceFrame;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.communication.crdt.CRDTStatusRigidBodyTransform;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -23,7 +23,7 @@ public class ChestOrientationActionState extends ActionNodeState<ChestOrientatio
    private final CRDTStatusRigidBodyTransform goalPelvisToWorldTransform;
    private final ReferenceFrame goalPelvisFrame;
 
-   public ChestOrientationActionState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ReferenceFrameLibrary referenceFrameLibrary)
+   public ChestOrientationActionState(long id, CRDTGlobalInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ReferenceFrameLibrary referenceFrameLibrary)
    {
       super(id, new ChestOrientationActionDefinition(crdtInfo, saveFileDirectory), crdtInfo);
 

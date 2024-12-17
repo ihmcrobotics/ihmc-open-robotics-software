@@ -3,7 +3,7 @@ package us.ihmc.behaviors.buildingExploration;
 import behavior_msgs.msg.dds.BuildingExplorationStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.door.DoorTraversalState;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
@@ -17,7 +17,7 @@ public class BuildingExplorationState extends BehaviorTreeNodeState<BuildingExpl
    private final Stack<DoorNode> traversedDoorNodes = new Stack<>();
    private DoorNode nextDoorNode;
 
-   public BuildingExplorationState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public BuildingExplorationState(long id, CRDTGlobalInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(id, new BuildingExplorationDefinition(crdtInfo, saveFileDirectory), crdtInfo);
    }

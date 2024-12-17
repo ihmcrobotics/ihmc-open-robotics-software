@@ -3,7 +3,7 @@ package us.ihmc.behaviors.behaviorTree;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.commons.lang3.mutable.MutableObject;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperations;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.log.LogTools;
@@ -22,7 +22,7 @@ import java.nio.file.Path;
  */
 public class BehaviorTreeJSONSanitizer
 {
-   private final CRDTInfo crdtInfo = new CRDTInfo(ROS2ActorDesignation.OPERATOR, 1);
+   private final CRDTGlobalInfo crdtInfo = new CRDTGlobalInfo(ROS2ActorDesignation.OPERATOR, 1);
    private final DefaultFootstepPlannerParametersReadOnly defaultFootstepPlannerParameters;
    private final WorkspaceResourceDirectory treeFilesDirectory;
 

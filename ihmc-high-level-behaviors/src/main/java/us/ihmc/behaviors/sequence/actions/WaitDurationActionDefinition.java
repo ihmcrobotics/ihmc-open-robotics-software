@@ -4,7 +4,7 @@ import behavior_msgs.msg.dds.WaitDurationActionDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.ActionNodeDefinition;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.communication.crdt.CRDTBidirectionalDouble;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
@@ -15,7 +15,7 @@ public class WaitDurationActionDefinition extends ActionNodeDefinition
    // On disk fields
    private double onDiskWaitDuration;
 
-   public WaitDurationActionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public WaitDurationActionDefinition(CRDTGlobalInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(crdtInfo, saveFileDirectory);
 

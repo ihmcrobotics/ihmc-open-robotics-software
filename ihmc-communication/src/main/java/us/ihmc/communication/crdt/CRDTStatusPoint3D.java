@@ -11,7 +11,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
  */
 public class CRDTStatusPoint3D extends CRDTStatusMutableField<Point3D>
 {
-   public CRDTStatusPoint3D(ROS2ActorDesignation sideThatCanModify, CRDTInfo crdtInfo)
+   public CRDTStatusPoint3D(ROS2ActorDesignation sideThatCanModify, CRDTGlobalInfo crdtInfo)
    {
       super(sideThatCanModify, crdtInfo, Point3D::new);
    }

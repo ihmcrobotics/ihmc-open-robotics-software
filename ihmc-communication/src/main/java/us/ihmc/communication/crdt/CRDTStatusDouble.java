@@ -6,7 +6,7 @@ public class CRDTStatusDouble extends CRDTStatusField
 {
    private double value;
 
-   public CRDTStatusDouble(ROS2ActorDesignation sideThatCanModify, CRDTInfo crdtInfo, double initialValue)
+   public CRDTStatusDouble(ROS2ActorDesignation sideThatCanModify, CRDTGlobalInfo crdtInfo, double initialValue)
    {
       super(sideThatCanModify, crdtInfo);
 

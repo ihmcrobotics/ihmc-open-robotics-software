@@ -2,14 +2,14 @@ package us.ihmc.behaviors.sequence;
 
 import behavior_msgs.msg.dds.ActionSequenceDefinitionMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class ActionSequenceDefinition extends BehaviorTreeNodeDefinition
 {
    // Seems to be nothing special here so far TODO Does that mean we delete it?
 
-   public ActionSequenceDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public ActionSequenceDefinition(CRDTGlobalInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(crdtInfo, saveFileDirectory);
    }

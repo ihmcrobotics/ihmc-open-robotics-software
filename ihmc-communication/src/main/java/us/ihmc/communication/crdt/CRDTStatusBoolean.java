@@ -10,7 +10,7 @@ public class CRDTStatusBoolean extends CRDTStatusField
 {
    private boolean value;
 
-   public CRDTStatusBoolean(ROS2ActorDesignation sideThatCanModify, CRDTInfo crdtInfo, boolean initialValue)
+   public CRDTStatusBoolean(ROS2ActorDesignation sideThatCanModify, CRDTGlobalInfo crdtInfo, boolean initialValue)
    {
       super(sideThatCanModify, crdtInfo);
 

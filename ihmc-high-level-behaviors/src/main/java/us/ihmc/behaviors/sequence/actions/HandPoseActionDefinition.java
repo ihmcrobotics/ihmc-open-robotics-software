@@ -61,7 +61,7 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
    private double onDiskPositionErrorTolerance;
    private double onDiskOrientationErrorTolerance;
 
-   public HandPoseActionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public HandPoseActionDefinition(CRDTGlobalInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(crdtInfo, saveFileDirectory);
 

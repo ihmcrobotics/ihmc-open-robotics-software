@@ -1,7 +1,7 @@
 package us.ihmc.perception.sceneGraph.rigidBody.trashcan;
 
 import perception_msgs.msg.dds.TrashCanNodeMessage;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
@@ -22,12 +22,12 @@ public class TrashCanNode extends DetectableSceneNode
    private final PersistentDetection trashCanDetection;
    private final MutableReferenceFrame trashCanFrame = new MutableReferenceFrame();
 
-   public TrashCanNode(long id, String name, CRDTInfo crdtInfo)
+   public TrashCanNode(long id, String name, CRDTGlobalInfo crdtInfo)
    {
       this(id, name, null, crdtInfo);
    }
 
-   public TrashCanNode(long id, String name, PersistentDetection trashCanDetection, CRDTInfo crdtInfo)
+   public TrashCanNode(long id, String name, PersistentDetection trashCanDetection, CRDTGlobalInfo crdtInfo)
    {
       super(id, name, crdtInfo);
       this.trashCanDetection = trashCanDetection;

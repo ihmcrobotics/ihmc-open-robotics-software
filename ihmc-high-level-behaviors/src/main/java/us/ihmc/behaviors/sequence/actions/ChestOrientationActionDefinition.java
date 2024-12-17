@@ -25,7 +25,7 @@ public class ChestOrientationActionDefinition extends ActionNodeDefinition
    private String onDiskParentFrameName;
    private final RigidBodyTransform onDiskChestToParentTransform = new RigidBodyTransform();
 
-   public ChestOrientationActionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public ChestOrientationActionDefinition(CRDTGlobalInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(crdtInfo, saveFileDirectory);
 

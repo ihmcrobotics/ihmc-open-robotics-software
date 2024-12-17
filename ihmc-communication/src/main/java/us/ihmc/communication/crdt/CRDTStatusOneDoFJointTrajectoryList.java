@@ -11,7 +11,7 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.OneDoFTraj
 
 public class CRDTStatusOneDoFJointTrajectoryList extends CRDTStatusMutableField<RecyclingArrayList<RecyclingArrayList<OneDoFTrajectoryPoint>>>
 {
-   public CRDTStatusOneDoFJointTrajectoryList(ROS2ActorDesignation sideThatCanModify, CRDTInfo crdtInfo)
+   public CRDTStatusOneDoFJointTrajectoryList(ROS2ActorDesignation sideThatCanModify, CRDTGlobalInfo crdtInfo)
    {
       super(sideThatCanModify, crdtInfo, () -> new RecyclingArrayList<>(() -> new RecyclingArrayList<>(OneDoFTrajectoryPoint::new)));
    }

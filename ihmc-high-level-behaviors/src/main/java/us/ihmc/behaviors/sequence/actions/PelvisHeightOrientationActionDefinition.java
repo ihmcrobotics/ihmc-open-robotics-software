@@ -4,7 +4,7 @@ import behavior_msgs.msg.dds.PelvisHeightOrientationActionDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.ActionNodeDefinition;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.communication.crdt.CRDTBidirectionalDouble;
 import us.ihmc.communication.crdt.CRDTBidirectionalRigidBodyTransform;
 import us.ihmc.communication.crdt.CRDTBidirectionalString;
@@ -26,7 +26,7 @@ public class PelvisHeightOrientationActionDefinition extends ActionNodeDefinitio
    private String onDiskParentFrameName;
    private final RigidBodyTransform onDiskPelvisToParentTransform = new RigidBodyTransform();
 
-   public PelvisHeightOrientationActionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public PelvisHeightOrientationActionDefinition(CRDTGlobalInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(crdtInfo, saveFileDirectory);
 

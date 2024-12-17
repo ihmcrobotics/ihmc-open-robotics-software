@@ -11,7 +11,7 @@ import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import us.ihmc.behaviors.behaviorTree.*;
 import us.ihmc.behaviors.behaviorTree.log.BehaviorTreeNodeMessageLogger.LogMessage;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiExpandCollapseRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -62,7 +62,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
 
    /** For creating a basic node. */
    @SuppressWarnings("unchecked")
-   public RDXBehaviorTreeNode(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public RDXBehaviorTreeNode(long id, CRDTGlobalInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       definition = (D) new BehaviorTreeNodeDefinition(crdtInfo, saveFileDirectory);
       state = (S) new BehaviorTreeNodeState<D>(id, definition, crdtInfo);

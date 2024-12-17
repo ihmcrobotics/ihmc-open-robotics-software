@@ -2,7 +2,7 @@ package us.ihmc.perception.sceneGraph;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
 import us.ihmc.robotics.EuclidCoreTestMissingTools;
@@ -15,7 +15,7 @@ public class SceneGraphTest
    public void testBasicOperations()
    {
       SceneGraph sceneGraph = new SceneGraph();
-      CRDTInfo crdtInfo = sceneGraph.getCRDTInfo();
+      CRDTGlobalInfo crdtInfo = sceneGraph.getCRDTInfo();
 
       Assertions.assertEquals(0, sceneGraph.getRootNode().getChildren().size());
 
@@ -62,7 +62,7 @@ public class SceneGraphTest
    public void testMovingNodes()
    {
       SceneGraph sceneGraph = new SceneGraph();
-      CRDTInfo crdtInfo = sceneGraph.getCRDTInfo();
+      CRDTGlobalInfo crdtInfo = sceneGraph.getCRDTInfo();
       SceneNode child0 = new SceneNode(sceneGraph.getNextID().getAndIncrement(), "Child0", crdtInfo);
       SceneNode child1 = new SceneNode(sceneGraph.getNextID().getAndIncrement(), "Child1", crdtInfo);
       SceneNode child1child0 = new SceneNode(sceneGraph.getNextID().getAndIncrement(), "Child1Child0", crdtInfo);

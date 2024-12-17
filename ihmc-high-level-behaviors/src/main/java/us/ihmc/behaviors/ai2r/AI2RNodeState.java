@@ -2,12 +2,12 @@ package us.ihmc.behaviors.ai2r;
 
 import behavior_msgs.msg.dds.AI2RNodeStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class AI2RNodeState extends BehaviorTreeNodeState<AI2RNodeDefinition>
 {
-      public AI2RNodeState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+      public AI2RNodeState(long id, CRDTGlobalInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(id, new AI2RNodeDefinition(crdtInfo, saveFileDirectory), crdtInfo);
    }

@@ -2,9 +2,8 @@ package us.ihmc.behaviors.sequence;
 
 import behavior_msgs.msg.dds.ActionNodeStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.communication.crdt.CRDTStatusDoubleArray;
 import us.ihmc.communication.crdt.CRDTStatusOneDoFJointTrajectoryList;
 import us.ihmc.communication.crdt.CRDTStatusPose3D;
@@ -40,7 +39,7 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
    /** The index is not CRDT synced because it's a simple local calculation. */
    private int actionIndex = -1;
 
-   public ActionNodeState(long id, D definition, CRDTInfo crdtInfo)
+   public ActionNodeState(long id, D definition, CRDTGlobalInfo crdtInfo)
    {
       super(id, definition, crdtInfo);
 

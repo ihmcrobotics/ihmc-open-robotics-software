@@ -4,7 +4,7 @@ import imgui.ImGui;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.buildingExploration.BuildingExplorationDefinition;
 import us.ihmc.behaviors.buildingExploration.BuildingExplorationState;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.rdx.ui.behavior.tree.RDXBehaviorTreeNode;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
@@ -12,7 +12,7 @@ public class RDXBuildingExploration extends RDXBehaviorTreeNode<BuildingExplorat
 {
    private final ROS2SyncedRobotModel syncedRobot;
 
-   public RDXBuildingExploration(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ROS2SyncedRobotModel syncedRobot)
+   public RDXBuildingExploration(long id, CRDTGlobalInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ROS2SyncedRobotModel syncedRobot)
    {
       super(new BuildingExplorationState(id, crdtInfo, saveFileDirectory));
 

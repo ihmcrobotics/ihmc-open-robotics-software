@@ -8,7 +8,7 @@ import imgui.flag.ImGuiMouseButton;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.sequence.actions.ChestOrientationActionDefinition;
 import us.ihmc.behaviors.sequence.actions.ChestOrientationActionState;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.rdx.imgui.*;
@@ -55,7 +55,7 @@ public class RDXChestOrientationAction extends RDXActionNode<ChestOrientationAct
    private final RDX3DPanelTooltip tooltip;
 
    public RDXChestOrientationAction(long id,
-                                    CRDTInfo crdtInfo,
+                                    CRDTGlobalInfo crdtInfo,
                                     WorkspaceResourceDirectory saveFileDirectory,
                                     RDX3DPanel panel3D,
                                     DRCRobotModel robotModel,

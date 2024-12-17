@@ -8,7 +8,7 @@ import us.ihmc.communication.ros2.ROS2ActorDesignation;
  */
 public class CRDTStatusEnumField<T extends Enum<T>> extends CRDTStatusImmutableField<T>
 {
-   public CRDTStatusEnumField(ROS2ActorDesignation sideThatCanModify, CRDTInfo crdtInfo, T initialValue)
+   public CRDTStatusEnumField(ROS2ActorDesignation sideThatCanModify, CRDTGlobalInfo crdtInfo, T initialValue)
    {
       super(sideThatCanModify, crdtInfo, initialValue);
    }

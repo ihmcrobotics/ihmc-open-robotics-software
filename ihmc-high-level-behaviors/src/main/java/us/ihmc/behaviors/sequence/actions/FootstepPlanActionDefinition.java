@@ -57,7 +57,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
    private boolean onDiskPlannerPerformAStarSearch;
    private boolean onDiskPlannerWalkWithGoalOrientation;
 
-   public FootstepPlanActionDefinition(CRDTInfo crdtInfo,
+   public FootstepPlanActionDefinition(CRDTGlobalInfo crdtInfo,
                                        WorkspaceResourceDirectory saveFileDirectory,
                                        DefaultFootstepPlannerParametersBasics initialPlannerParameters)
    {

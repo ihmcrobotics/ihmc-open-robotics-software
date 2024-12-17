@@ -3,7 +3,7 @@ package us.ihmc.behaviors.sequence.actions;
 import behavior_msgs.msg.dds.PelvisHeightOrientationActionStateMessage;
 import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.communication.crdt.CRDTDetachableReferenceFrame;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
@@ -11,7 +11,7 @@ public class PelvisHeightOrientationActionState extends ActionNodeState<PelvisHe
 {
    private final CRDTDetachableReferenceFrame pelvisFrame;
 
-   public PelvisHeightOrientationActionState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ReferenceFrameLibrary referenceFrameLibrary)
+   public PelvisHeightOrientationActionState(long id, CRDTGlobalInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ReferenceFrameLibrary referenceFrameLibrary)
    {
       super(id, new PelvisHeightOrientationActionDefinition(crdtInfo, saveFileDirectory), crdtInfo);
 

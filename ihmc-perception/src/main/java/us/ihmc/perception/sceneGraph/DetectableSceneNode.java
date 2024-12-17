@@ -1,6 +1,6 @@
 package us.ihmc.perception.sceneGraph;
 
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 
 /**
  * An object that is currently detected or not currently detected,
@@ -10,7 +10,7 @@ public class DetectableSceneNode extends SceneNode
 {
    private boolean currentlyDetected;
 
-   public DetectableSceneNode(long id, String name, CRDTInfo crdtInfo)
+   public DetectableSceneNode(long id, String name, CRDTGlobalInfo crdtInfo)
    {
       super(id, name, crdtInfo);
    }

@@ -13,12 +13,12 @@ import us.ihmc.communication.ros2.ROS2ActorDesignation;
 public class CRDTStatusField
 {
    private final ROS2ActorDesignation sideThatCanModify;
-   private final CRDTInfo crdtInfo;
+   private final CRDTGlobalInfo crdtInfo;
 
    /** Used to detemine whether sending this data is necessary. */
    private final Notification hasStatus = new Notification();
 
-   public CRDTStatusField(ROS2ActorDesignation sideThatCanModify, CRDTInfo crdtInfo)
+   public CRDTStatusField(ROS2ActorDesignation sideThatCanModify, CRDTGlobalInfo crdtInfo)
    {
       this.sideThatCanModify = sideThatCanModify;
       this.crdtInfo = crdtInfo;

@@ -1,7 +1,7 @@
 package us.ihmc.perception.sceneGraph.rigidBody.doors;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTGlobalInfo;
 import us.ihmc.euclid.Axis2D;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -62,12 +62,12 @@ public class DoorNode extends DetectableSceneNode
 
    private boolean lockDoorFramePose = false;
 
-   public DoorNode(long id, CRDTInfo crdtInfo)
+   public DoorNode(long id, CRDTGlobalInfo crdtInfo)
    {
       this(id, null, crdtInfo);
    }
 
-   public DoorNode(long id, PersistentDetection initialDetection, CRDTInfo crdtInfo)
+   public DoorNode(long id, PersistentDetection initialDetection, CRDTGlobalInfo crdtInfo)
    {
       super(id, "Door" + id, crdtInfo);
 
