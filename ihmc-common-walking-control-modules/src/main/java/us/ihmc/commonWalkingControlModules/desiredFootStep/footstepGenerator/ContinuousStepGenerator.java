@@ -163,7 +163,7 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
    private final YoEnum<CSGMode> csgMode = new YoEnum<>("csgMode", registry, CSGMode.class);
    private final OptionalFactoryField<QuicksterFootstepProvider> quicksterFootstepProvider = new OptionalFactoryField<>("QuicksterFootstepProviderField");
    private final YoBoolean updateFootstepContinuouslyThroughoutSwing = new YoBoolean("updateFootstepContinuouslyThroughoutSwingCSG", registry);
-   private final boolean updateFootstepContinuouslyThroughoutSwingDefault = true;
+   private final boolean updateFootstepContinuouslyThroughoutSwingDefault = false;
 
    /**
     * Creates a new step generator, its {@code YoVariable}s will not be attached to any registry.
@@ -192,8 +192,8 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
                           {
                              if (csgMode.getEnumValue() == CSGMode.QFP)
                                 updateFootstepContinuouslyThroughoutSwing.set(true);
-                             else
-                                updateFootstepContinuouslyThroughoutSwing.set(updateFootstepContinuouslyThroughoutSwingDefault);
+//                             else
+//                                updateFootstepContinuouslyThroughoutSwing.set(updateFootstepContinuouslyThroughoutSwingDefault);
                           });
 
       setSupportFootBasedFootstepAdjustment(true);
