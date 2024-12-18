@@ -14,7 +14,7 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.commons.thread.Throttler;
 
 /**
- * For interfacing with external foundation models.
+ * Node that enables interaction with external reasoning modules
  */
 public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI2RNodeDefinition>
 {
