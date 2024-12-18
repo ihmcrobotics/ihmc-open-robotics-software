@@ -45,7 +45,7 @@ public class DoNothingState implements State
          message.setClearRemainingFootstepQueue(true);
          continuousPlanner.setLatestFootstepPlan(null);
          pauseWalkingPublisher.publish(message);
-         debugger.resetVisualizationForUIPublisher();
+         debugger.resetVisualizationForUIPublisher(continuousPlanner.getStartStancePose());
       }
 
       continuousPlanner.setInitialized(false);

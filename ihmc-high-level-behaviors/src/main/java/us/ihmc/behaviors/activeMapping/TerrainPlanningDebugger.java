@@ -258,14 +258,14 @@ public class TerrainPlanningDebugger
       startAndGoalPublisherForUI.publish(poseListMessage);
    }
 
-   public void resetVisualizationForUIPublisher()
+   public void resetVisualizationForUIPublisher( SideDependentList<FramePose3D> startPoses)
    {
       PoseListMessage poseListMessage = new PoseListMessage();
       FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
 
       if (planningMode == PlanningMode.FAST_HIKING)
       {
-         startAndGoalPublisherForUI.publish(poseListMessage);
+         publishStartAndGoalForVisualization(startPoses, startPoses);
          monteCarloNodesPublisherForUI.publish(poseListMessage);
          plannedFootstesPublisherForUI.publish(footstepDataListMessage);
       }
