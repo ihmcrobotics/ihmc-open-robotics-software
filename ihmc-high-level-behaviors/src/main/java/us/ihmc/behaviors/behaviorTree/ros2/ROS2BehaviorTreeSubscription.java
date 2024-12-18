@@ -97,23 +97,39 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, 
 
             behaviorTreeState.modifyTreeTopology(topologyOperationQueue ->
             {
-               boolean treeRootReferenceUpToDate = !behaviorTreeState.isModificationIncoming();
+               T rootNode = (T) behaviorTreeState.getRootNode();
 
                boolean allowReplicatingRoot = behaviorTreeState.isModificationIncoming();
-               T rootNode = subscriptionRootIsNull ? null : retrieveOrReplicateLocalNode(subscriptionRootNode, allowReplicatingRoot);
+               if (allowReplicatingRoot)
+                  rootNode = subscriptionRootIsNull ? null : retrieveOrReplicateLocalNode(subscriptionRootNode, allowReplicatingRoot);
 
-               if (rootNode != null)
-               {
-                  T parent = null;
-                  updateLocalTreeFromSubscription(subscriptionRootNode, rootNode, parent, topologyOperationQueue, treeRootReferenceUpToDate);
-               }
-               else if (allowReplicatingRoot)
-               {
-                  rootNodeSetter.accept(null);
-               }
+               topologyOperationQueue.queueSetRootNode(rootNode, rootNodeSetter);
+
+               if (rootNode != null && !subscriptionRootIsNull)
+                  retrieveOrReplicateSubreeFromSubscription(subscriptionRootNode, rootNode, topologyOperationQueue);
 
                topologyOperationQueue.queueOperation(behaviorTreeState.getTreeRebuilder().getDestroyLeftoversOperation());
             });
+         }
+      }
+   }
+
+   private void retrieveOrReplicateSubreeFromSubscription(ROS2BehaviorTreeSubscriptionNode subscriptionNode,
+                                                          T localNode,
+                                                          BehaviorTreeTopologyOperationQueue topologyOperationQueue)
+   {
+      // Update the node first, to detect incoming modifications
+      ROS2BehaviorTreeMessageTools.fromMessage(subscriptionNode, localNode.getState());
+
+      for (int i = 0; i < subscriptionNode.getChildren().size(); i++)
+      {
+         boolean allowReplication = localNode.getDefinition().isModificationIncoming();
+         T localChildNode = (T) retrieveOrReplicateLocalNode(subscriptionNode.getChildren().get(i), allowReplication);
+
+         if (localChildNode != null)
+         {
+            topologyOperationQueue.queueAddNode(localChildNode, localNode);
+            retrieveOrReplicateSubreeFromSubscription(subscriptionNode.getChildren().get(i), localChildNode, topologyOperationQueue);
          }
       }
    }
@@ -125,10 +141,10 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, 
       if (localNode == null && allowReplication) // New node that wasn't in the local tree; duplicate of one on the other side
       {
          LogTools.info("Replicating node: %s:%d (%s) Actor: %s".formatted(
-                       subscriptionNode.getBehaviorTreeNodeDefinitionMessage().getName(),
-                       nodeID,
-                       subscriptionNode.getType().getSimpleName(),
-                       behaviorTreeState.getCRDTInfo().getActorDesignation().name()));
+               subscriptionNode.getBehaviorTreeNodeDefinitionMessage().getName(),
+               nodeID,
+               subscriptionNode.getType().getSimpleName(),
+               behaviorTreeState.getCRDTInfo().getActorDesignation().name()));
          localNode = (T) behaviorTreeState.getNodeStateBuilder()
                                           .createNode(subscriptionNode.getType(),
                                                       nodeID,
@@ -137,54 +153,6 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, 
       }
 
       return localNode;
-   }
-
-   private void updateLocalTreeFromSubscription(ROS2BehaviorTreeSubscriptionNode subscriptionNode,
-                                                T localNode,
-                                                T localParentNode,
-                                                BehaviorTreeTopologyOperationQueue topologyOperationQueue,
-                                                boolean anAncestorIsUpToDate)
-   {
-      // We just add nodes if they would not be part of a frozen subtree.
-      if (!anAncestorIsUpToDate)
-      {
-         if (localParentNode == null)
-            topologyOperationQueue.queueSetRootNode(localNode, rootNodeSetter);
-         else
-            topologyOperationQueue.queueAddNode(localNode, localParentNode);
-      }
-
-      for (int i = 0; i < subscriptionNode.getChildren().size(); i++)
-      {
-         anAncestorIsUpToDate |= !localNode.getDefinition().isModificationIncoming();
-
-         T localChildNode = null;
-         if (anAncestorIsUpToDate)
-         {
-            // In the case of locally nodes that just got added or removed, only update children with matching IDs.
-            // This'll just be for a few updates.
-            for (T possibleMatch : localNode.getChildren())
-            {
-               if (possibleMatch.getState().getID() == subscriptionNode.getChildren().get(i).getBehaviorTreeNodeStateMessage().getId())
-               {
-                  localChildNode = possibleMatch;
-               }
-            }
-         }
-         else
-         {
-            localChildNode = (T) retrieveOrReplicateLocalNode(subscriptionNode.getChildren().get(i), true);
-         }
-
-         if (localChildNode != null)
-         {
-            updateLocalTreeFromSubscription(subscriptionNode.getChildren().get(i), localChildNode, localNode, topologyOperationQueue, anAncestorIsUpToDate);
-         }
-      }
-
-      // Update the state after iterating over children, because node can unfreeze at this time
-      // Each state handles which fields it updates based on its frozen status
-      ROS2BehaviorTreeMessageTools.fromMessage(subscriptionNode, localNode.getState());
    }
 
    /** Build an intermediate tree representation of the message, which helps to sync with the actual tree. */
