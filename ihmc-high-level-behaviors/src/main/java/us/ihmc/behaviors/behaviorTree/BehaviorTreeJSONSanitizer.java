@@ -22,7 +22,7 @@ import java.nio.file.Path;
  */
 public class BehaviorTreeJSONSanitizer
 {
-   private final CRDTInfo crdtInfo = new CRDTInfo(ROS2ActorDesignation.OPERATOR, 1);
+   private final CRDTInfo crdtInfo = new CRDTInfo(ROS2ActorDesignation.OPERATOR, null);
    private final DefaultFootstepPlannerParametersReadOnly defaultFootstepPlannerParameters;
    private final WorkspaceResourceDirectory treeFilesDirectory;
 

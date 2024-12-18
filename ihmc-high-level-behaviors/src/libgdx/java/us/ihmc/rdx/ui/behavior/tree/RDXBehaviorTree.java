@@ -13,9 +13,9 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeLayer;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeExtensionSubtreeRebuilder;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionType;
-import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTreeState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.rdx.imgui.ImGuiExpandCollapseRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -31,7 +31,7 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class RDXBehaviorTree
 {
-   private final CRDTInfo crdtInfo = new CRDTInfo(ROS2ActorDesignation.OPERATOR, (int) ROS2BehaviorTreeState.SYNC_FREQUENCY);
+   private final CRDTInfo crdtInfo;
    private final WorkspaceResourceDirectory treeFilesDirectory;
    private final RDXBehaviorTreeNodeBuilder nodeBuilder;
    private final BehaviorTreeExtensionSubtreeRebuilder treeRebuilder;
@@ -57,6 +57,7 @@ public class RDXBehaviorTree
    public RDXBehaviorTree(WorkspaceResourceDirectory treeFilesDirectory,
                           DRCRobotModel robotModel,
                           ROS2SyncedRobotModel syncedRobot,
+                          ROS2PeerClockOffsetEstimator peerClockEstimator,
                           RobotCollisionModel selectionCollisionModel,
                           RDXBaseUI baseUI,
                           RDX3DPanel panel3D,
@@ -64,6 +65,7 @@ public class RDXBehaviorTree
    {
       this.treeFilesDirectory = treeFilesDirectory;
 
+      crdtInfo = new CRDTInfo(ROS2ActorDesignation.OPERATOR, peerClockEstimator);
       nodeBuilder = new RDXBehaviorTreeNodeBuilder(robotModel,
                                                    syncedRobot,
                                                    selectionCollisionModel,
