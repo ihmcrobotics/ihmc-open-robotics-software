@@ -29,7 +29,7 @@ public class RDXZEDSVORecordingDemo
    // Demo file on Google Drive https://drive.google.com/file/d/1wF5tFVqEJM21uK12g_O5GpvACPJhXKZ1/view
    // Uncomment below lines to play it back
    private static final RecordMode RECORD_MODE = RecordMode.PLAYBACK;
-   private static final String SVO_FILE_NAME = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.toAbsolutePath() + "/20240625_154000_ZEDRecording_Demo.svo2";
+   private static final String SVO_FILE_NAME = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.toAbsolutePath() + "/20240715_103234_ZEDRecording_NewONRCourseWalk.svo2";
 
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private final ROS2Node ros2Node;
