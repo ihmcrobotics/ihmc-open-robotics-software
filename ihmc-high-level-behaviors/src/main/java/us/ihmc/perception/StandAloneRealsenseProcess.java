@@ -61,7 +61,7 @@ public class StandAloneRealsenseProcess
             soleFrameSuppliers.put(side, () -> syncedRobot.getReferenceFrames().getSoleFrame(side));
          }
       }
-      realsenseDemandNode = new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_REALSENSE_POINT_CLOUD);
+      realsenseDemandNode = new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_REALSENSE_PUBLICATION);
 
       realsenseImageRetriever = new RealsenseColorDepthImageRetriever(new RealsenseDeviceManager(),
                                                                       RealsenseConfiguration.D455_COLOR_720P_DEPTH_720P_30HZ,
@@ -84,7 +84,8 @@ public class StandAloneRealsenseProcess
          RawImage latestRealsenseDepthImage = realsenseDepthImage.get();
          if (heightMapManager == null) // TODO: This should be able to instantiated earlier, but it doesn't reset correctly
          {
-            heightMapManager = new RapidHeightMapManager(syncedRobot == null ? null : syncedRobot.getRobotModel(),
+            heightMapManager = new RapidHeightMapManager(new OpenCLManager(),
+                                                         syncedRobot == null ? null : syncedRobot.getRobotModel(),
                                                          soleFrameSuppliers.get(RobotSide.LEFT).get(),
                                                          soleFrameSuppliers.get(RobotSide.RIGHT).get(),
                                                          latestRealsenseDepthImage.getIntrinsicsCopy(),
