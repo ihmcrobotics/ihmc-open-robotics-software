@@ -21,7 +21,7 @@ public class CRDTBidirectionalDoubleArray extends CRDTBidirectionalMutableField<
       return getValueInternal()[index];
    }
 
-   /** Use to prevent unecessary freezes. */
+   /** Use to prevent unecessary modifications. */
    public void setValue(int index, double value)
    {
       if (getValueReadOnly(index) != value)

@@ -186,7 +186,7 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
                {
                   if (ImGui.menuItem(relativeNode.getDefinition().getName()))
                   {
-                     topologyOperationQueue.queueMoveAndFreezeNode(nodeToMove, nodeToMove.getParent(), relativeNode, relativeNode, insertionType);
+                     topologyOperationQueue.queueMoveAndModifyNode(nodeToMove, nodeToMove.getParent(), relativeNode, relativeNode, insertionType);
                   }
                }
             }
@@ -194,7 +194,7 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
             {
                if (ImGui.menuItem(relativeNode.getDefinition().getName()))
                {
-                  topologyOperationQueue.queueMoveAndFreezeNode(nodeToMove, nodeToMove.getParent(), relativeNode.getParent(), relativeNode, insertionType);
+                  topologyOperationQueue.queueMoveAndModifyNode(nodeToMove, nodeToMove.getParent(), relativeNode.getParent(), relativeNode, insertionType);
                }
             }
          }

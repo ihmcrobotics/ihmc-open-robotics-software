@@ -29,9 +29,9 @@ public class BehaviorTreeTopologyOperations
       clearChildrenBasic(node.getDefinition());
    }
 
-   public static <T extends BehaviorTreeNodeLayer<T, ?, ?, ?>> void addAndFreeze(T nodeToAdd, T parent)
+   public static <T extends BehaviorTreeNodeLayer<T, ?, ?, ?>> void addAndModify(T nodeToAdd, T parent)
    {
-      insertAndFreeze(nodeToAdd, parent, parent.getChildren().size());
+      insertAndModify(nodeToAdd, parent, parent.getChildren().size());
    }
 
    public static <T extends BehaviorTreeNodeLayer<T, ?, ?, ?>> void add(T nodeToAdd, T parent)
@@ -39,18 +39,18 @@ public class BehaviorTreeTopologyOperations
       insert(nodeToAdd, parent, parent.getChildren().size());
    }
 
-   public static <T extends BehaviorTreeNodeLayer<T, ?, ?, ?>> void moveAndFreeze(T nodeToAdd, T previousParent, T nextParent, int insertionIndex)
+   public static <T extends BehaviorTreeNodeLayer<T, ?, ?, ?>> void moveAndModify(T nodeToAdd, T previousParent, T nextParent, int insertionIndex)
    {
-      removeAndFreeze(nodeToAdd, previousParent);
-      insertAndFreeze(nodeToAdd, nextParent, insertionIndex);
+      removeAndModify(nodeToAdd, previousParent);
+      insertAndModify(nodeToAdd, nextParent, insertionIndex);
    }
 
-   public static <T extends BehaviorTreeNodeLayer<T, ?, ?, ?>> void removeAndFreeze(T nodeToRemove, T parent)
+   public static <T extends BehaviorTreeNodeLayer<T, ?, ?, ?>> void removeAndModify(T nodeToRemove, T parent)
    {
-      removeAndFreezeBasic(nodeToRemove, parent);
+      removeAndModifyBasic(nodeToRemove, parent);
       if (nodeToRemove.isLayerOverState())
-         removeAndFreezeBasic(nodeToRemove.getState(), parent.getState());
-      removeAndFreezeBasic(nodeToRemove.getDefinition(), parent.getDefinition());
+         removeAndModifyBasic(nodeToRemove.getState(), parent.getState());
+      removeAndModifyBasic(nodeToRemove.getDefinition(), parent.getDefinition());
    }
 
    public static <T extends BehaviorTreeNodeLayer<T, ?, ?, ?>> void remove(T nodeToRemove, T parent)
@@ -61,12 +61,12 @@ public class BehaviorTreeTopologyOperations
       removeBasic(nodeToRemove.getDefinition(), parent.getDefinition());
    }
 
-   public static <T extends BehaviorTreeNodeLayer<T, ?, ?, ?>> void insertAndFreeze(T nodeToAdd, T parent, int insertionIndex)
+   public static <T extends BehaviorTreeNodeLayer<T, ?, ?, ?>> void insertAndModify(T nodeToAdd, T parent, int insertionIndex)
    {
-      insertChildAndFreezeBasic(nodeToAdd, parent, insertionIndex);
+      insertChildAndModifyBasic(nodeToAdd, parent, insertionIndex);
       if (nodeToAdd.isLayerOverState())
-         insertChildAndFreezeBasic(nodeToAdd.getState(), parent.getState(), insertionIndex);
-      insertChildAndFreezeBasic(nodeToAdd.getDefinition(), parent.getDefinition(), insertionIndex);
+         insertChildAndModifyBasic(nodeToAdd.getState(), parent.getState(), insertionIndex);
+      insertChildAndModifyBasic(nodeToAdd.getDefinition(), parent.getDefinition(), insertionIndex);
    }
 
    public static <T extends BehaviorTreeNodeLayer<T, ?, ?, ?>> void insert(T nodeToAdd, T parent, int insertionIndex)
@@ -85,7 +85,7 @@ public class BehaviorTreeTopologyOperations
       if (parent != null)
       {
          parent.getChildren().remove(node);
-         attemptFreeze(parent);
+         attemptModify(parent);
       }
       node.setParent(null);
 
@@ -113,24 +113,24 @@ public class BehaviorTreeTopologyOperations
       clearChildrenBasic(node);
    }
 
-   public static <T extends BehaviorTreeNode<T>> void addChildAndFreezeBasic(T nodeToAdd, T parent)
+   public static <T extends BehaviorTreeNode<T>> void addChildAndModifyBasic(T nodeToAdd, T parent)
    {
       addChildBasic(nodeToAdd, parent);
-      attemptFreeze(nodeToAdd);
-      attemptFreeze(parent);
+      attemptModify(nodeToAdd);
+      attemptModify(parent);
    }
 
-   public static <T extends BehaviorTreeNode<T>> void insertChildAndFreezeBasic(T nodeToAdd, T parent, int insertionIndex)
+   public static <T extends BehaviorTreeNode<T>> void insertChildAndModifyBasic(T nodeToAdd, T parent, int insertionIndex)
    {
       insertBasic(nodeToAdd, parent, insertionIndex);
-      attemptFreeze(nodeToAdd);
-      attemptFreeze(parent);
+      attemptModify(nodeToAdd);
+      attemptModify(parent);
    }
 
-   public static <T extends BehaviorTreeNode<T>> void removeAndFreezeBasic(T nodeToRemove, T parent)
+   public static <T extends BehaviorTreeNode<T>> void removeAndModifyBasic(T nodeToRemove, T parent)
    {
       removeBasic(nodeToRemove, parent);
-      attemptFreeze(parent);
+      attemptModify(parent);
    }
 
    public static <T extends BehaviorTreeNode<T>> void addChildBasic(T nodeToAdd, T parent)
@@ -162,9 +162,9 @@ public class BehaviorTreeTopologyOperations
       nodeToAdd.setParent(parent);
    }
 
-   public static void attemptFreeze(Object thingToFreeze)
+   public static void attemptModify(Object thingToModify)
    {
-      if (thingToFreeze instanceof LatestTimestampModifiable freezable)
+      if (thingToModify instanceof LatestTimestampModifiable freezable)
          freezable.modify();
    }
 

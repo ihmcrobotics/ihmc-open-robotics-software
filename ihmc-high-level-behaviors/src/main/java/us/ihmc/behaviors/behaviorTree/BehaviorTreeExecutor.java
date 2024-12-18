@@ -110,7 +110,7 @@ public class BehaviorTreeExecutor
                   nodeToInsert = new BehaviorTreeRootNodeExecutor(state.getAndIncrementNextID(),
                                                                   state.getCRDTInfo(),
                                                                   state.getSaveFileDirectory());
-                  topologyOperationQueue.queueAddAndFreezeNode(loadedNode, nodeToInsert);
+                  topologyOperationQueue.queueAddAndModifyNode(loadedNode, nodeToInsert);
                }
 
                var insertionDefinition = BehaviorTreeNodeInsertionDefinition.build(nodeToInsert,

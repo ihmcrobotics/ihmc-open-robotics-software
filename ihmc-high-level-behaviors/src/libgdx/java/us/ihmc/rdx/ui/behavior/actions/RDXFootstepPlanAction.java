@@ -455,7 +455,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
 
             if (ImGui.collapsingHeader(labels.get("Planner Parameters")))
                if (plannerParametersWidgets.renderImGuiWidgetsSimple())
-                  definition.getAndFreezePlannerParameters();
+                  definition.getAndModifyPlannerParameters();
          }
       }
    }
@@ -526,7 +526,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    public void changeParentFrame(String newParentFrameName)
    {
       definition.setParentFrameName(newParentFrameName);
-      // Freeze to prevent the frame from glitching when changing frames
+      // Timestamp modification to prevent the frame from glitching when changing frames
       state.getGoalFrame().changeFrame(newParentFrameName, state.getGoalToParentTransform().getValueAndModify());
 
       ReferenceFrame newParent = state.getGoalFrame().getReferenceFrame().getParent();

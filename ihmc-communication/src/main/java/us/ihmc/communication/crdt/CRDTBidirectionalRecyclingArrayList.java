@@ -30,7 +30,7 @@ public class CRDTBidirectionalRecyclingArrayList<T> extends CRDTBidirectionalMut
       return getValueInternal().size();
    }
 
-   /** Use to prevent unecessary freezes. */
+   /** Use to prevent unecessary modifications. */
    public void setValue(int index, T value)
    {
       if (!getValueReadOnly(index).equals(value))

@@ -14,7 +14,7 @@ public class BehaviorTreeNodeInsertionDefinition<T extends BehaviorTreeNodeLayer
    private T nodeToInsert;
    private T sibling;
    private T parent;
-   private LatestTimestampModifiable freezableRootNodeHolder;
+   private LatestTimestampModifiable rootNodeModifiable;
    private Consumer<BehaviorTreeNodeLayer<T, ?, ?, ?>> rootNodeSetter;
    private BehaviorTreeNodeInsertionType insertionType;
    private int insertionIndex;
@@ -55,11 +55,11 @@ public class BehaviorTreeNodeInsertionDefinition<T extends BehaviorTreeNodeLayer
    }
 
    private void setupInsertRoot(T newRoot,
-                                LatestTimestampModifiable freezableRootNodeHolder,
+                                LatestTimestampModifiable rootNodeModifiable,
                                 Consumer<BehaviorTreeNodeLayer<T, ?, ?, ?>> rootNodeSetter)
    {
       this.nodeToInsert = newRoot;
-      this.freezableRootNodeHolder = freezableRootNodeHolder;
+      this.rootNodeModifiable = rootNodeModifiable;
       this.rootNodeSetter = rootNodeSetter;
 
       insertionType = BehaviorTreeNodeInsertionType.INSERT_ROOT;
@@ -126,9 +126,9 @@ public class BehaviorTreeNodeInsertionDefinition<T extends BehaviorTreeNodeLayer
       return rootNodeSetter;
    }
 
-   public LatestTimestampModifiable getFreezableRootNodeHolder()
+   public LatestTimestampModifiable getRootNodeModifiable()
    {
-      return freezableRootNodeHolder;
+      return rootNodeModifiable;
    }
 
    public BehaviorTreeNodeInsertionType getInsertionType()

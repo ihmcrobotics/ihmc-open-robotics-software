@@ -409,7 +409,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       return (DefaultFootstepPlannerParametersReadOnly) plannerParameters.getValueReadOnly();
    }
 
-   public DefaultFootstepPlannerParametersBasics getAndFreezePlannerParameters()
+   public DefaultFootstepPlannerParametersBasics getAndModifyPlannerParameters()
    {
       return (DefaultFootstepPlannerParametersBasics) plannerParameters.getValueAndModify();
    }

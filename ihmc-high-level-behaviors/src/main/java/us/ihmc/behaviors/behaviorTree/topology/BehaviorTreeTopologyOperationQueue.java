@@ -35,13 +35,13 @@ public class BehaviorTreeTopologyOperationQueue
    {
       if (insertionDefinition.getInsertionType() == BehaviorTreeNodeInsertionType.INSERT_ROOT)
       {
-         queueSetAndFreezeRootNode(insertionDefinition.getNodeToInsert(),
+         queueSetAndModifyRootNode(insertionDefinition.getNodeToInsert(),
                                    insertionDefinition.getRootNodeSetter(),
-                                   insertionDefinition.getFreezableRootNodeHolder());
+                                   insertionDefinition.getRootNodeModifiable());
       }
       else
       {
-         queueAddAndFreezeNode(insertionDefinition.getNodeToInsert(),
+         queueAddAndModifyNode(insertionDefinition.getNodeToInsert(),
                                insertionDefinition.getParent(),
                                insertionDefinition.getInsertionIndex());
       }
@@ -52,7 +52,7 @@ public class BehaviorTreeTopologyOperationQueue
       topologyOperationQueue.add(() -> setter.accept(node));
    }
 
-   public <T extends BehaviorTreeNodeLayer<T, ?, ?, ?>> void queueSetAndFreezeRootNode(BehaviorTreeNodeLayer<T, ?, ?, ?> node,
+   public <T extends BehaviorTreeNodeLayer<T, ?, ?, ?>> void queueSetAndModifyRootNode(BehaviorTreeNodeLayer<T, ?, ?, ?> node,
                                                                                        Consumer<BehaviorTreeNodeLayer<T, ?, ?, ?>> setter,
                                                                                        LatestTimestampModifiable freezableRootHolder)
    {
@@ -74,15 +74,15 @@ public class BehaviorTreeTopologyOperationQueue
       topologyOperationQueue.add(() -> BehaviorTreeTopologyOperations.add(nodeToAdd, parent));
    }
 
-   public <T extends BehaviorTreeNodeLayer<T, ?, ?, ?>> void queueAddAndFreezeNode(T nodeToAdd, T parent, int insertionIndex)
+   public <T extends BehaviorTreeNodeLayer<T, ?, ?, ?>> void queueAddAndModifyNode(T nodeToAdd, T parent, int insertionIndex)
    {
       topologyOperationQueue.add(() ->
       {
-         BehaviorTreeTopologyOperations.insertAndFreeze(nodeToAdd, parent, insertionIndex);
+         BehaviorTreeTopologyOperations.insertAndModify(nodeToAdd, parent, insertionIndex);
       });
    }
 
-   public <T extends BehaviorTreeNodeLayer<T, ?, ?, ?>> void queueMoveAndFreezeNode(T nodeToMove,
+   public <T extends BehaviorTreeNodeLayer<T, ?, ?, ?>> void queueMoveAndModifyNode(T nodeToMove,
                                                                                     T previousParent,
                                                                                     T nextParent,
                                                                                     T relativeNode,
@@ -106,13 +106,13 @@ public class BehaviorTreeTopologyOperationQueue
                --insertionIndex;
          }
 
-         BehaviorTreeTopologyOperations.moveAndFreeze(nodeToMove, previousParent, nextParent, insertionIndex);
+         BehaviorTreeTopologyOperations.moveAndModify(nodeToMove, previousParent, nextParent, insertionIndex);
       });
    }
 
-   public <T extends BehaviorTreeNodeLayer<T, ?, ?, ?>> void queueAddAndFreezeNode(T nodeToAdd, T parent)
+   public <T extends BehaviorTreeNodeLayer<T, ?, ?, ?>> void queueAddAndModifyNode(T nodeToAdd, T parent)
    {
-      topologyOperationQueue.add(() -> BehaviorTreeTopologyOperations.addAndFreeze(nodeToAdd, parent));
+      topologyOperationQueue.add(() -> BehaviorTreeTopologyOperations.addAndModify(nodeToAdd, parent));
    }
 
    public void queueOperation(BehaviorTreeTopologyOperation topologyOperation)
