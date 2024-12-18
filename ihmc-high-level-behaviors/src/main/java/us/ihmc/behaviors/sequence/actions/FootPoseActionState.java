@@ -35,9 +35,9 @@ public class FootPoseActionState extends ActionNodeState<FootPoseActionDefinitio
 
    public void fromMessage(FootPoseActionStateMessage message)
    {
-      super.fromMessage(message.getState());
-
       getDefinition().fromMessage(message.getDefinition());
+
+      super.fromMessage(message.getState());
    }
 
    public CRDTDetachableReferenceFrame getFootFrame()

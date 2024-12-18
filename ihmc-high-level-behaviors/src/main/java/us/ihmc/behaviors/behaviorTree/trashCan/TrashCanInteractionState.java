@@ -126,9 +126,9 @@ public class TrashCanInteractionState extends BehaviorTreeNodeState<TrashCanInte
 
    public void fromMessage(TrashCanInteractionStateMessage message)
    {
-      super.fromMessage(message.getState());
-
       getDefinition().fromMessage(message.getDefinition());
+
+      super.fromMessage(message.getState());
 
       stance.fromMessageOrdinal(message.getStance(), InteractionStance.values);
    }

@@ -27,8 +27,8 @@ public class AI2RNodeState extends BehaviorTreeNodeState<AI2RNodeDefinition>
 
    public void fromMessage(AI2RNodeStateMessage message)
    {
-      super.fromMessage(message.getState());
-
       getDefinition().fromMessage(message.getDefinition());
+
+      super.fromMessage(message.getState());
    }
 }
