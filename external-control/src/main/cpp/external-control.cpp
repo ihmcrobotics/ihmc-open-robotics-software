@@ -7,12 +7,16 @@ namespace ihmc
 {
     ExternalControlImpl::ExternalControlImpl(const double default_stiffness, const double default_damping, const int number_of_joints)
     {
+       std::cout << "Creating external control object." << std::endl;
+
         constant_position_controller_.resize(default_stiffness, default_damping, number_of_joints);
         desired_state_data_.resize(13 + 2 * number_of_joints);
         desired_control_data_.resize(number_of_joints);
         p_gains_.resize(number_of_joints);
         d_gains_.resize(number_of_joints);
         number_of_joints_ = number_of_joints;
+
+        std::cout << "Created external control object." << std::endl;
     }
 
 
@@ -90,6 +94,7 @@ namespace ihmc
 
     bool ExternalControlImpl::setHomeJointConfiguration(const double* configuration_data, int rows)
     {
+        std::cout << "Setting home configuration" << std::endl;
         return constant_position_controller_.setHomeJointConfiguration(configuration_data, rows);
     }
 }

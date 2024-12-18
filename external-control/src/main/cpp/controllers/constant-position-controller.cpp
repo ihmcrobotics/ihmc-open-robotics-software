@@ -20,6 +20,7 @@ namespace ihmc
 
     void ConstantPositionController::resize(const double default_stiffness, const double default_damping, const int number_of_joints)
     {
+        std::cout << "resizing constant position controller" << std::endl;
         number_of_joints_ = number_of_joints;
         desired_joint_velocities_.resize(number_of_joints_);
         desired_joint_torques_.resize(number_of_joints_);
@@ -42,6 +43,8 @@ namespace ihmc
 
         const VectorViewReadOnly configuration(configuration_data, configuration_rows);
         home_configuration_ = configuration;
+
+        std::cout << "home configuration is set" << std::endl;
 
         return true;
     }
