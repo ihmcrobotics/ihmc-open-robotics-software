@@ -8,7 +8,7 @@ import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 public class RDXCRDTTools
 {
    /**
-    * Update and freeze the field when the gizmo is moved and/or the parent frame is changed.
+    * Update and modify the field when the gizmo is moved and/or the parent frame is changed.
     * Otherwise, make sure the current state reflects the synced field because it can be changed
     * by other CRDT actors.
     */
@@ -29,7 +29,7 @@ public class RDXCRDTTools
    }
 
    /**
-    * Update and freeze the field when the gizmo is moved and/or the parent frame is changed.
+    * Update and modify the field when the gizmo is moved and/or the parent frame is changed.
     * Otherwise, make sure the current state reflects the synced field because it can be changed
     * by other CRDT actors.
     */
