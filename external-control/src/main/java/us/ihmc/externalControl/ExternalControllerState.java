@@ -1,12 +1,16 @@
 package us.ihmc.externalControl;
 
+import org.ejml.data.DMatrixRMaj;
+import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.JointControlBlender;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.PairList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
+import us.ihmc.externalControl.library.ExternalControlNativeLibrary;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -15,10 +19,13 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 public class ExternalControllerState extends HighLevelControllerState
 {
    public static boolean REDUCE_YOVARIABLES = false;
+
+   private enum DesiredMode {HOLD_POSITION, REXXXXXXX}
 
    private final YoDouble blendRatioCurrentValue;
 
@@ -29,6 +36,8 @@ public class ExternalControllerState extends HighLevelControllerState
    private final LowLevelOneDoFJointDesiredDataHolder frozenJointDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
    private final LowLevelOneDoFJointDesiredDataHolder externalJointDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
 
+   private final YoEnum<DesiredMode> desiredMode = new YoEnum<>("DesiredExternalMode", registry, DesiredMode.class);
+
    private final CommandInputManager commandInputManager;
 
    private final PairList<OneDoFJointBasics, YoDouble> frozenJointDesireds = new PairList<>();
@@ -37,25 +46,27 @@ public class ExternalControllerState extends HighLevelControllerState
 
    private final ExternalControl externalControl;
 
-   public ExternalControllerState(String namePrefix,
-                                  HighLevelControllerName controllerState,
+   public ExternalControllerState(HighLevelControllerParameters highLevelControllerParameters,
                                   HighLevelHumanoidControllerToolbox controllerToolbox,
                                   OneDoFJointBasics[] controlledJoints,
                                   JointDesiredOutputListReadOnly highLevelControllerOutput,
                                   CommandInputManager commandInputManager)
    {
-      super(namePrefix, controllerState, controlledJoints);
+      super("externalControl", HighLevelControllerName.EXTERNAL, highLevelControllerParameters, controlledJoints);
 
       this.highLevelControllerOutput = highLevelControllerOutput;
       this.controllerToolbox = controllerToolbox;
 
       this.commandInputManager = commandInputManager;
 
-      blendRatioCurrentValue = new YoDouble(namePrefix + "BlendRatioCurrentValue", registry);
+      blendRatioCurrentValue = new YoDouble("ExternalControlBlendRatioCurrentValue", registry);
 
-      ExternalWrapperNativeLibrary.load();
+      ExternalControlNativeLibrary.load();
 
-      externalControl = new ExternalControl(controllerToolbox.getFullRobotModel().getRootBody(), controlledJoints, 100.0, 25.0);
+      desiredMode.set(DesiredMode.HOLD_POSITION);
+      externalControl = new ExternalControl(controllerToolbox.getFullRobotModel().getRootBody(), highLevelControllerParameters.getStandPrepParameters(),
+                                            controlledJoints, 1000.0, 5.0);
+
 
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledJoints);
       frozenJointDataHolder.registerJointsWithEmptyData(controlledJoints);
@@ -104,7 +115,7 @@ public class ExternalControllerState extends HighLevelControllerState
       externalControl.setFootStates(controllerToolbox.getReferenceFrames().getSoleFrames(),
                                     controllerToolbox.getFootSwitches().get(RobotSide.LEFT).hasFootHitGroundFiltered(),
                                     controllerToolbox.getFootSwitches().get(RobotSide.RIGHT).hasFootHitGroundFiltered());
-      externalControl.writeRobotState(controllerToolbox.getYoTime().getDoubleValue(), 0);
+      externalControl.writeRobotState(controllerToolbox.getYoTime().getDoubleValue(), desiredMode.getOrdinal());
 
       externalControl.readControlSolution();
 
@@ -120,9 +131,6 @@ public class ExternalControllerState extends HighLevelControllerState
       {
          OneDoFJointBasics joint = jointCommandBlenders.get(jointIndex).getLeft();
 
-         JointDesiredOutputBasics externalJointData = externalJointDataHolder.getJointDesiredOutput(joint);
-         externalControl.getSolutionData(joint).getJointDesiredOutput(externalJointData);
-
          YoDouble frozenDesiredPosition = frozenJointDesireds.get(jointIndex).getRight();
 
          JointDesiredOutputBasics frozenJointData = frozenJointDataHolder.getJointDesiredOutput(joint);
@@ -130,6 +138,17 @@ public class ExternalControllerState extends HighLevelControllerState
          frozenJointData.setDesiredPosition(frozenDesiredPosition.getDoubleValue());
          frozenJointData.setDesiredVelocity(0.0);
          frozenJointData.setDesiredAcceleration(0.0);
+      }
+      frozenJointDataHolder.completeWith(getStateSpecificJointSettings());
+
+      for (int jointIndex = 0; jointIndex < jointCommandBlenders.size(); jointIndex++)
+      {
+         OneDoFJointBasics joint = jointCommandBlenders.get(jointIndex).getLeft();
+
+         JointDesiredOutputBasics externalJointData = externalJointDataHolder.getJointDesiredOutput(joint);
+         externalControl.getSolutionData(joint).getJointDesiredOutput(externalJointData);
+
+         JointDesiredOutputBasics frozenJointData = frozenJointDataHolder.getJointDesiredOutput(joint);
 
          JointDesiredOutputBasics lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
          lowLevelJointData.clear();
@@ -140,6 +159,8 @@ public class ExternalControllerState extends HighLevelControllerState
                                                           externalJointData,
                                                           gainRatio);
       }
+
+      lowLevelOneDoFJointDesiredDataHolder.completeWith(getStateSpecificJointSettings());
    }
 
    @Override

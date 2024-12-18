@@ -1,12 +1,10 @@
 #pragma once
 
-#include <Eigen/Core>
-
-#include "controller.hpp"
+#include "types.hpp"
 
 namespace ihmc
 {
-    class ConstantPositionController final : public Controller
+    class ConstantPositionController
     {
     public:
 
@@ -16,20 +14,19 @@ namespace ihmc
 
         virtual ~ConstantPositionController() = default;
 
+        void resize(const double default_stiffness, const double default_damping, const int number_of_joints);
+
         bool setHomeJointConfiguration(const double* configuration_data, int rows);
 
-        void compute(const Eigen::Vector3d& base_position, const Eigen::Vector4d& base_orientation, const Eigen::VectorXd& joint_positions,
-                                     const Eigen::Vector3d& base_linear_velocity, const Eigen::Vector3d& base_angular_velocity, const Eigen::VectorXd& joint_velocities) override;
+        Eigen::VectorXd get_desired_joint_positions() const;
 
-        Eigen::VectorXd get_desired_joint_positions() const override;
+        Eigen::VectorXd get_desired_joint_velocities() const;
 
-        Eigen::VectorXd get_desired_joint_velocities() const override;
+        Eigen::VectorXd get_desired_joint_torques() const;
 
-        Eigen::VectorXd get_desired_joint_torques() const override;
+        Eigen::VectorXd get_desired_joint_stiffnesses() const;
 
-        Eigen::VectorXd get_desired_joint_stiffnesses() const override;
-
-        Eigen::VectorXd get_desired_joint_damping() const override;
+        Eigen::VectorXd get_desired_joint_damping() const;
 
     private:
         int number_of_joints_;

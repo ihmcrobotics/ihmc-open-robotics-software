@@ -1,9 +1,12 @@
 package us.ihmc.externalControl;
 
 import org.ejml.data.DMatrixRMaj;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.externalControl.global.ExternalControlWrapper;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -32,7 +35,7 @@ public class ExternalControl
    private final FramePose3D solutionBasePose = new FramePose3D();
    private final HashMap<OneDoFJointReadOnly, SolutionJointData> solutionJointData = new HashMap<>();
 
-   public ExternalControl(RigidBodyBasics baseBody, OneDoFJointReadOnly[] joints, double defaultStiffness, double defaultDamping)
+   public ExternalControl(RigidBodyBasics baseBody, WholeBodySetpointParameters homeConfiguration, OneDoFJointReadOnly[] joints, double defaultStiffness, double defaultDamping)
    {
       this.baseBody = baseBody;
       this.joints = joints;
@@ -46,6 +49,11 @@ public class ExternalControl
       for (OneDoFJointReadOnly joint : joints)
          solutionJointData.put(joint, new SolutionJointData());
       externalControlImpl = new ExternalControlWrapper.ExternalControlImpl(defaultStiffness, defaultDamping, joints.length);
+
+      DMatrixRMaj homeConfigurationVector = new DMatrixRMaj(joints.length, 1);
+      for (int i = 0; i < joints.length; i++)
+         homeConfigurationVector.set(i, 0, homeConfiguration.getSetpoint(joints[i].getName()));
+      externalControlImpl.setHomeJointConfiguration(homeConfigurationVector.data, homeConfigurationVector.numRows);
    }
 
    public void setFootStates(SideDependentList<? extends ReferenceFrame> soleFrames, boolean leftInContact, boolean rightInContact)
@@ -105,6 +113,7 @@ public class ExternalControl
          data.stiffness = solutionStiffnessVector.get(i, 0);
          data.damping = solutionDampingVector.get(i, 0);
       }
+      LogTools.info("returned stiffness" + solutionStiffnessVector);
    }
 
    public SolutionJointData getSolutionData(OneDoFJointReadOnly joint)

@@ -23,8 +23,7 @@ public class ExternalControllerStateFactory implements HighLevelControllerStateF
          OneDoFJointBasics[] controlledJoints = controllerFactoryHelper.getHighLevelHumanoidControllerToolbox().getControlledOneDoFJoints();
          CommandInputManager commandInputManager = controllerFactoryHelper.getCommandInputManager();
 
-         externalControlState = new ExternalControllerState("externalControl",
-                                                            HighLevelControllerName.EXTERNAL,
+         externalControlState = new ExternalControllerState(controllerFactoryHelper.getHighLevelControllerParameters(),
                                                             controllerFactoryHelper.getHighLevelHumanoidControllerToolbox(),
                                                             controlledJoints,
                                                             controllerFactoryHelper.getLowLevelControllerOutput(),

@@ -7,12 +7,16 @@ namespace ihmc
 {
     ExternalControlImpl::ExternalControlImpl(const double default_stiffness, const double default_damping, const int number_of_joints)
     {
-        constant_position_controller_ = ConstantPositionController(default_stiffness, default_damping, number_of_joints);
+       std::cout << "Creating external control object." << std::endl;
+
+        constant_position_controller_.resize(default_stiffness, default_damping, number_of_joints);
         desired_state_data_.resize(13 + 2 * number_of_joints);
         desired_control_data_.resize(number_of_joints);
         p_gains_.resize(number_of_joints);
         d_gains_.resize(number_of_joints);
         number_of_joints_ = number_of_joints;
+
+        std::cout << "Created external control object." << std::endl;
     }
 
 
@@ -24,22 +28,33 @@ namespace ihmc
                                                const double* foot_locations, int foot_locations_rows,
                                                const int hardware_status)
     {
+        if (x_rows != 13 + 2 * number_of_joints_)
+        {
+            std::cout << "The size of the state vector is incorrect" << std::endl;
+            return false;
+        }
+        if (u_rows != number_of_joints_)
+        {
+            std::cout << "The size of the control vector is incorrect" << std::endl;
+            return false;
+        }
+        if (foot_locations_rows != 6)
+        {
+            std::cout << "The size of the foot location rows is incorrect" << std::endl;
+            return false;
+        }
+
         if (hardware_status == 0)
         {
+
+
             const VectorViewReadOnly state(x_data, x_rows);
             const Eigen::Vector3d base_position = state.head(3);
             const Eigen::Vector4d base_orientation = state.segment(3, 4);
             const Eigen::VectorXd joint_positions = state.segment(7, number_of_joints_);
-            const Eigen::VectorXd base_linear_velocity = state.segment(7 + number_of_joints_, 3);
-            const Eigen::VectorXd base_angular_velocity = state.segment(10 + number_of_joints_, 3);
+            const Eigen::Vector3d base_linear_velocity = state.segment(7 + number_of_joints_, 3);
+            const Eigen::Vector3d base_angular_velocity = state.segment(10 + number_of_joints_, 3);
             const Eigen::VectorXd joint_velocities = state.tail(number_of_joints_);
-
-            constant_position_controller_.compute(base_position,
-                                                  base_orientation,
-                                                  joint_positions,
-                                                  base_linear_velocity,
-                                                  base_angular_velocity,
-                                                  joint_velocities);
 
             desired_state_data_.head(7) << base_position, base_orientation;
             desired_state_data_.segment(7, number_of_joints_) = constant_position_controller_.get_desired_joint_positions();
@@ -79,6 +94,7 @@ namespace ihmc
 
     bool ExternalControlImpl::setHomeJointConfiguration(const double* configuration_data, int rows)
     {
+        std::cout << "Setting home configuration" << std::endl;
         return constant_position_controller_.setHomeJointConfiguration(configuration_data, rows);
     }
 }
