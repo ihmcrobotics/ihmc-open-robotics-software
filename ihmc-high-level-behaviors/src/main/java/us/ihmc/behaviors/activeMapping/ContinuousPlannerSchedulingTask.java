@@ -1,11 +1,11 @@
 package us.ihmc.behaviors.activeMapping;
 
-import behavior_msgs.msg.dds.ContinuousWalkingCommandMessage;
+import behavior_msgs.msg.dds.ContinuousHikingCommandMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingStateMachine.*;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
-import us.ihmc.footstepPlanning.communication.ContinuousWalkingAPI;
+import us.ihmc.footstepPlanning.communication.ContinuousHikingAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -61,13 +61,14 @@ public class ContinuousPlannerSchedulingTask
       String simpleRobotName = robotModel.getSimpleRobotName();
 
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
-      AtomicReference<ContinuousWalkingCommandMessage> commandMessage = new AtomicReference<>(new ContinuousWalkingCommandMessage());
-      ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.CONTINUOUS_WALKING_COMMAND, commandMessage::set);
+      AtomicReference<ContinuousHikingCommandMessage> commandMessage = new AtomicReference<>(new ContinuousHikingCommandMessage());
+      ros2Helper.subscribeViaCallback(ContinuousHikingAPI.CONTINUOUS_HIKING_COMMAND, commandMessage::set);
 
       TerrainPlanningDebugger debugger = new TerrainPlanningDebugger(ros2Node, monteCarloFootstepPlannerParameters, planningMode);
       ContinuousHikingLogger continuousHikingLogger = new ContinuousHikingLogger();
       continuousPlanner = new ContinuousPlanner(robotModel,
                                                 referenceFrames,
+                                                commandMessage,
                                                 continuousHikingParameters,
                                                 monteCarloFootstepPlannerParameters,
                                                 footstepPlannerParameters,
@@ -96,8 +97,7 @@ public class ContinuousPlannerSchedulingTask
                                                     continuousHikingParameters,
                                                     terrainMap,
                                                     debugger,
-                                                    continuousHikingLogger,
-                                                    planningMode);
+                                                    continuousHikingLogger);
       State waitingtoLandState = new WaitingToLandState(ros2Helper,
                                                         simpleRobotName,
                                                         continuousPlanner,
@@ -111,10 +111,8 @@ public class ContinuousPlannerSchedulingTask
       stateMachineFactory.addState(ContinuousHikingState.WAITING_TO_LAND, waitingtoLandState);
 
       // Create different conditions
-      StartContinuousHikingTransitionCondition startContinuousHikingTransitionCondition = new StartContinuousHikingTransitionCondition(commandMessage,
-                                                                                                                                       continuousHikingParameters);
-      StopContinuousHikingTransitionCondition stopContinuousHikingTransitionCondition = new StopContinuousHikingTransitionCondition(commandMessage,
-                                                                                                                                    continuousHikingParameters);
+      StartContinuousHikingTransitionCondition startContinuousHikingTransitionCondition = new StartContinuousHikingTransitionCondition(commandMessage);
+      StopContinuousHikingTransitionCondition stopContinuousHikingTransitionCondition = new StopContinuousHikingTransitionCondition(commandMessage);
       PlanAgainTransitionCondition planAgainTransitionCondition = new PlanAgainTransitionCondition(continuousPlanner, continuousHikingParameters);
 
       //NOTE: The transitions for the state machine are checked in the order they are added.
