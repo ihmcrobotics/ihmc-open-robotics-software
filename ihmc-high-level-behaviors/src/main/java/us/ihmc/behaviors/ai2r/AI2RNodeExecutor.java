@@ -11,7 +11,6 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
-import us.ihmc.tools.io.resources.ResourceTools;
 import us.ihmc.commons.thread.Throttler;
 
 /**
@@ -25,7 +24,6 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
    private final Throttler statusThrottler = new Throttler().setFrequency(1.0);
    private final AI2RStatusMessage statusMessage = new AI2RStatusMessage();
    private final AI2RNodeState state;
-   private boolean triedPush = false;
 
    public AI2RNodeExecutor(long id,
                            CRDTInfo crdtInfo,
@@ -40,11 +38,6 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
       this.syncedRobot = syncedRobot;
       this.sceneGraph = sceneGraph;
       state = getState();
-
-      for (String behaviorTreeFileName : ResourceTools.listResources("behaviorTrees", ".*"))
-      {
-         statusMessage.getAvailableBehaviors().add(behaviorTreeFileName);
-      }
 
       ros2.subscribeViaCallback(AutonomyAPI.AI2R_COMMAND, message ->
       {
@@ -116,18 +109,22 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
          ros2.publish(AutonomyAPI.AI2R_STATUS, statusMessage);
       }
 
-      // Custom logic, since we don't have conditions implemented yet
-      for (var checkPoint : state.getCheckPoints())
+      // Jump to end of sequence, once completed a behavior
+      for (int i = 0; i < state.getCheckPoints().size(); i++)
       {
-         if (checkPoint.getDefinition().getName().contains("END OF PUSH") && checkPoint.getIsExecuting())
+         // If we execute the end of behavior checkpoint, we communicate that in the status
+         if (state.getCheckPoints().get(i).getDefinition().getName().contains("END OF") && state.getCheckPoints().get(i).getIsExecuting())
          {
-            triedPush = true;
-         }
-         // Jump to end of sequence
-         if (checkPoint.getDefinition().getName().contains("PULL") && checkPoint.getIsExecuting() && triedPush)
-         {
+            // ! WARNING !
+            // Assuming checkpoints are only used at the beginning and end of a behaviors
+            statusMessage.setCompletedBehavior(state.getCheckPoints().get(i - 1).getDefinition().getName());
+            LogTools.info("Completed behavior: {}", statusMessage.getCompletedBehavior());
+            // Jump to end of sequence
             state.getActionSequence().setExecutionNextIndex(state.getCheckPoints().get(state.getCheckPoints().size()-1).getActionIndex());
-            triedPush = false;
+         }
+         else if (!state.getCheckPoints().get(i).getDefinition().getName().contains("END") && state.getCheckPoints().get(i).getIsExecuting())
+         { // If we are executing another behavior checkpoint
+            statusMessage.setCompletedBehavior("");
          }
       }
    }
