@@ -59,7 +59,7 @@ public class ROS2BehaviorTreeMessageTools
       boolean packBasicNode = false;
 
       // Only allow packing full node types if we have updated data
-      if (nodeState.getDefinition().isFrozen() || nodeState.hasStatus())
+      if (!nodeState.getDefinition().isOutOfDate() || nodeState.hasStatus())
       {
          if (nodeState instanceof BehaviorTreeRootNodeState rootNodeState)
          {

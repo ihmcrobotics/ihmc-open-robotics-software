@@ -1,7 +1,7 @@
 package us.ihmc.behaviors.behaviorTree.topology;
 
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeLayer;
-import us.ihmc.communication.crdt.RequestConfirmFreezable;
+import us.ihmc.communication.crdt.LatestTimestampModifiable;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -54,13 +54,13 @@ public class BehaviorTreeTopologyOperationQueue
 
    public <T extends BehaviorTreeNodeLayer<T, ?, ?, ?>> void queueSetAndFreezeRootNode(BehaviorTreeNodeLayer<T, ?, ?, ?> node,
                                                                                        Consumer<BehaviorTreeNodeLayer<T, ?, ?, ?>> setter,
-                                                                                       RequestConfirmFreezable freezableRootHolder)
+                                                                                       LatestTimestampModifiable freezableRootHolder)
    {
       topologyOperationQueue.add(() ->
       {
          setter.accept(node);
-         node.getDefinition().freeze();
-         freezableRootHolder.freeze();
+         node.getDefinition().modify();
+         freezableRootHolder.modify();
       });
    }
 

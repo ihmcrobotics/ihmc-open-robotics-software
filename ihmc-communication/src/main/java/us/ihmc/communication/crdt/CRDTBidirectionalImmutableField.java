@@ -12,13 +12,13 @@ import java.util.Objects;
  */
 public class CRDTBidirectionalImmutableField<T>
 {
-   private final RequestConfirmFreezable requestConfirmFreezable;
+   private final LatestTimestampModifiable latestTimestampModifiable;
 
    private T value;
 
-   public CRDTBidirectionalImmutableField(RequestConfirmFreezable requestConfirmFreezable, T initialValue)
+   public CRDTBidirectionalImmutableField(LatestTimestampModifiable latestTimestampModifiable, T initialValue)
    {
-      this.requestConfirmFreezable = requestConfirmFreezable;
+      this.latestTimestampModifiable = latestTimestampModifiable;
 
       value = initialValue;
    }
@@ -33,7 +33,7 @@ public class CRDTBidirectionalImmutableField<T>
       if (!Objects.equals(this.value, value)) // Don't want to do anything in the case nothing changed
       {
          this.value = value;
-         requestConfirmFreezable.freeze();
+         latestTimestampModifiable.modify();
       }
    }
 
@@ -44,7 +44,7 @@ public class CRDTBidirectionalImmutableField<T>
 
    public void fromMessage(T value)
    {
-      if (!requestConfirmFreezable.isFrozen())
+      if (latestTimestampModifiable.isOutOfDate())
       {
          this.value = value;
       }

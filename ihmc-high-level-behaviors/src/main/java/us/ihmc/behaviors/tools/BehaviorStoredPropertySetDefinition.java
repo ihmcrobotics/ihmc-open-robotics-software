@@ -10,7 +10,7 @@ import gnu.trove.map.hash.TObjectByteHashMap;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import us.ihmc.communication.crdt.CRDTBidirectionalStoredPropertySet;
-import us.ihmc.communication.crdt.RequestConfirmFreezable;
+import us.ihmc.communication.crdt.LatestTimestampModifiable;
 import us.ihmc.tools.property.BooleanStoredPropertyKey;
 import us.ihmc.tools.property.DoubleStoredPropertyKey;
 import us.ihmc.tools.property.IntegerStoredPropertyKey;
@@ -28,11 +28,11 @@ public class BehaviorStoredPropertySetDefinition extends CRDTBidirectionalStored
    private final TIntArrayList onDiskIntegerValues = new TIntArrayList();
    private final TByteArrayList onDiskBooleanValues = new TByteArrayList();
 
-   public BehaviorStoredPropertySetDefinition(RequestConfirmFreezable requestConfirmFreezable,
+   public BehaviorStoredPropertySetDefinition(LatestTimestampModifiable latestTimestampModifiable,
                                               String name,
                                               StoredPropertySetBasics storedPropertySet)
    {
-      super(requestConfirmFreezable, storedPropertySet);
+      super(latestTimestampModifiable, storedPropertySet);
 
       this.name = name;
 

@@ -6,8 +6,8 @@
 # Long form notes about the node.
 # string notes
 
-# A mechanism for confirming and ending a freeze early
-ihmc_common_msgs/ConfirmableRequestMessage confirmable_request
+# The timestamp and modifer ID of the latest modification
+ihmc_common_msgs/LatestModificationMessage latest_modification
 
 # The name of the node including .json if it's a JSON root node
 string name

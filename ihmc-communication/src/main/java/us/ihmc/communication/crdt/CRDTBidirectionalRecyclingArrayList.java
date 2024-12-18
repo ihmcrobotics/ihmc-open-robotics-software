@@ -15,9 +15,9 @@ import java.util.function.Consumer;
  */
 public class CRDTBidirectionalRecyclingArrayList<T> extends CRDTBidirectionalMutableField<RecyclingArrayList<T>>
 {
-   public CRDTBidirectionalRecyclingArrayList(RequestConfirmFreezable requestConfirmFreezable, RecyclingArrayList<T> initialValue)
+   public CRDTBidirectionalRecyclingArrayList(LatestTimestampModifiable latestTimestampModifiable, RecyclingArrayList<T> initialValue)
    {
-      super(requestConfirmFreezable, initialValue);
+      super(latestTimestampModifiable, initialValue);
    }
 
    public T getValueReadOnly(int index)

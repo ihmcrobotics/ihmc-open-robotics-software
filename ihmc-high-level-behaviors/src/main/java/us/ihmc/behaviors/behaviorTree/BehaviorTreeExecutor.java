@@ -132,6 +132,6 @@ public class BehaviorTreeExecutor
    {
       state.modifyTreeTopology(topologyOperationQueue -> topologyOperationQueue.queueDestroySubtree(rootNode));
       this.rootNode = null;
-      state.freeze();
+      state.modify();
    }
 }

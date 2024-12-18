@@ -10,7 +10,7 @@ import us.ihmc.pubsub.TopicDataType;
        * A message to hold onto the most recent modification timestamp
        * on the data this message is associated with.
        */
-public class CRDTTimestampedModificationMessage extends Packet<CRDTTimestampedModificationMessage> implements Settable<CRDTTimestampedModificationMessage>, EpsilonComparable<CRDTTimestampedModificationMessage>
+public class LatestModificationMessage extends Packet<LatestModificationMessage> implements Settable<LatestModificationMessage>, EpsilonComparable<LatestModificationMessage>
 {
    /**
             * The guid of the peer that made the most recent modification
@@ -21,19 +21,19 @@ public class CRDTTimestampedModificationMessage extends Packet<CRDTTimestampedMo
             */
    public ihmc_common_msgs.msg.dds.InstantMessage latest_modification_time_in_modifier_frame_;
 
-   public CRDTTimestampedModificationMessage()
+   public LatestModificationMessage()
    {
       latest_modifier_id_ = new ihmc_common_msgs.msg.dds.GuidMessage();
       latest_modification_time_in_modifier_frame_ = new ihmc_common_msgs.msg.dds.InstantMessage();
    }
 
-   public CRDTTimestampedModificationMessage(CRDTTimestampedModificationMessage other)
+   public LatestModificationMessage(LatestModificationMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(CRDTTimestampedModificationMessage other)
+   public void set(LatestModificationMessage other)
    {
       ihmc_common_msgs.msg.dds.GuidMessagePubSubType.staticCopy(other.latest_modifier_id_, latest_modifier_id_);
       ihmc_common_msgs.msg.dds.InstantMessagePubSubType.staticCopy(other.latest_modification_time_in_modifier_frame_, latest_modification_time_in_modifier_frame_);
@@ -58,19 +58,19 @@ public class CRDTTimestampedModificationMessage extends Packet<CRDTTimestampedMo
    }
 
 
-   public static Supplier<CRDTTimestampedModificationMessagePubSubType> getPubSubType()
+   public static Supplier<LatestModificationMessagePubSubType> getPubSubType()
    {
-      return CRDTTimestampedModificationMessagePubSubType::new;
+      return LatestModificationMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return CRDTTimestampedModificationMessagePubSubType::new;
+      return LatestModificationMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(CRDTTimestampedModificationMessage other, double epsilon)
+   public boolean epsilonEquals(LatestModificationMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -86,9 +86,9 @@ public class CRDTTimestampedModificationMessage extends Packet<CRDTTimestampedMo
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof CRDTTimestampedModificationMessage)) return false;
+      if(!(other instanceof LatestModificationMessage)) return false;
 
-      CRDTTimestampedModificationMessage otherMyClass = (CRDTTimestampedModificationMessage) other;
+      LatestModificationMessage otherMyClass = (LatestModificationMessage) other;
 
       if (!this.latest_modifier_id_.equals(otherMyClass.latest_modifier_id_)) return false;
       if (!this.latest_modification_time_in_modifier_frame_.equals(otherMyClass.latest_modification_time_in_modifier_frame_)) return false;
@@ -101,7 +101,7 @@ public class CRDTTimestampedModificationMessage extends Packet<CRDTTimestampedMo
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("CRDTTimestampedModificationMessage {");
+      builder.append("LatestModificationMessage {");
       builder.append("latest_modifier_id=");
       builder.append(this.latest_modifier_id_);      builder.append(", ");
       builder.append("latest_modification_time_in_modifier_frame=");

@@ -14,7 +14,7 @@ public class CRDTInfo
    private final int maxFreezeDuration;
    private long updateNumber = 0;
 
-   /** For timestamp based CRDTs that use {@link CRDTModificationManager}. */
+   /** For timestamp based CRDTs that use {@link LatestTimestampModifiable}. */
    public CRDTInfo(ROS2ActorDesignation actorDesignation, ROS2PeerClockOffsetEstimator peerClockEstimator)
    {
       this.actorDesignation = actorDesignation;

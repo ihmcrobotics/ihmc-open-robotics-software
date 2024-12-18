@@ -1,7 +1,7 @@
 #ifndef __behavior_msgs__msg__BehaviorTreeNodeDefinitionMessage__idl__
 #define __behavior_msgs__msg__BehaviorTreeNodeDefinitionMessage__idl__
 
-#include "ihmc_common_msgs/msg/./ConfirmableRequestMessage_.idl"
+#include "ihmc_common_msgs/msg/./LatestModificationMessage_.idl"
 module behavior_msgs
 {
   module msg
@@ -22,9 +22,9 @@ module behavior_msgs
       struct BehaviorTreeNodeDefinitionMessage
       {
         /**
-         * A mechanism for confirming and ending a freeze early
+         * The timestamp and modifer ID of the latest modification
          */
-        ihmc_common_msgs::msg::dds::ConfirmableRequestMessage confirmable_request;
+        ihmc_common_msgs::msg::dds::LatestModificationMessage latest_modification;
         /**
          * The name of the node including .json if it's a JSON root node
          */

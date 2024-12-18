@@ -42,9 +42,9 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
             */
    public long next_id_;
    /**
-            * A mechanism for confirming and ending a freeze early
+            * The timestamp and modifer ID of the latest modification
             */
-   public ihmc_common_msgs.msg.dds.ConfirmableRequestMessage confirmable_request_;
+   public ihmc_common_msgs.msg.dds.LatestModificationMessage latest_modification_;
    /**
             * A depth first ordered list of types.
             */
@@ -77,7 +77,7 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
 
    public BehaviorTreeStateMessage()
    {
-      confirmable_request_ = new ihmc_common_msgs.msg.dds.ConfirmableRequestMessage();
+      latest_modification_ = new ihmc_common_msgs.msg.dds.LatestModificationMessage();
       behavior_tree_types_ = new us.ihmc.idl.IDLSequence.Byte (1000, "type_9");
 
       behavior_tree_indices_ = new us.ihmc.idl.IDLSequence.Long (1000, "type_4");
@@ -116,7 +116,7 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
 
       next_id_ = other.next_id_;
 
-      ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType.staticCopy(other.confirmable_request_, confirmable_request_);
+      ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.staticCopy(other.latest_modification_, latest_modification_);
       behavior_tree_types_.set(other.behavior_tree_types_);
       behavior_tree_indices_.set(other.behavior_tree_indices_);
       root_nodes_.set(other.root_nodes_);
@@ -172,11 +172,11 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
 
 
    /**
-            * A mechanism for confirming and ending a freeze early
+            * The timestamp and modifer ID of the latest modification
             */
-   public ihmc_common_msgs.msg.dds.ConfirmableRequestMessage getConfirmableRequest()
+   public ihmc_common_msgs.msg.dds.LatestModificationMessage getLatestModification()
    {
-      return confirmable_request_;
+      return latest_modification_;
    }
 
 
@@ -335,7 +335,7 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.next_id_, other.next_id_, epsilon)) return false;
 
-      if (!this.confirmable_request_.epsilonEquals(other.confirmable_request_, epsilon)) return false;
+      if (!this.latest_modification_.epsilonEquals(other.latest_modification_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsByteSequence(this.behavior_tree_types_, other.behavior_tree_types_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsLongSequence(this.behavior_tree_indices_, other.behavior_tree_indices_, epsilon)) return false;
@@ -490,7 +490,7 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
 
       if(this.next_id_ != otherMyClass.next_id_) return false;
 
-      if (!this.confirmable_request_.equals(otherMyClass.confirmable_request_)) return false;
+      if (!this.latest_modification_.equals(otherMyClass.latest_modification_)) return false;
       if (!this.behavior_tree_types_.equals(otherMyClass.behavior_tree_types_)) return false;
       if (!this.behavior_tree_indices_.equals(otherMyClass.behavior_tree_indices_)) return false;
       if (!this.root_nodes_.equals(otherMyClass.root_nodes_)) return false;
@@ -526,8 +526,8 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("next_id=");
       builder.append(this.next_id_);      builder.append(", ");
-      builder.append("confirmable_request=");
-      builder.append(this.confirmable_request_);      builder.append(", ");
+      builder.append("latest_modification=");
+      builder.append(this.latest_modification_);      builder.append(", ");
       builder.append("behavior_tree_types=");
       builder.append(this.behavior_tree_types_);      builder.append(", ");
       builder.append("behavior_tree_indices=");
