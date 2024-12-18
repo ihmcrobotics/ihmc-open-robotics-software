@@ -54,7 +54,7 @@ public class FootstepPlanActionFootstepDefinition implements SidedObject
    public void loadFromFile(JsonNode jsonNode)
    {
       side.setValue(RobotSide.getSideFromString(jsonNode.get("side").asText()));
-      JSONTools.toEuclid(jsonNode, soleToPlanFrameTransform.getValueAndFreeze());
+      JSONTools.toEuclid(jsonNode, soleToPlanFrameTransform.getValueAndModify());
    }
 
    public void setOnDiskFields()
@@ -66,7 +66,7 @@ public class FootstepPlanActionFootstepDefinition implements SidedObject
    public void undoAllNontopologicalChanges()
    {
       side.setValue(onDiskSide);
-      soleToPlanFrameTransform.getValueAndFreeze().set(onDiskSoleToPlanFrameTransform);
+      soleToPlanFrameTransform.getValueAndModify().set(onDiskSoleToPlanFrameTransform);
    }
 
    public boolean hasChanges()

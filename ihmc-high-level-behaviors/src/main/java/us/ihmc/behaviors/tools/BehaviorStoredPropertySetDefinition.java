@@ -85,7 +85,7 @@ public class BehaviorStoredPropertySetDefinition extends CRDTBidirectionalStored
 
    public void fromJSON(JsonNode jsonNode)
    {
-      StoredPropertySetBasics storedPropertySet = getValueAndFreeze();
+      StoredPropertySetBasics storedPropertySet = getValueAndModify();
       if (jsonNode.get(name) instanceof ObjectNode objectNode)
       {
          for (StoredPropertyKey<?> key : storedPropertySet.getKeyList().keys())
@@ -140,7 +140,7 @@ public class BehaviorStoredPropertySetDefinition extends CRDTBidirectionalStored
       int integerIndex = 0;
       int booleanIndex = 0;
 
-      StoredPropertySetBasics storedPropertySet = getValueAndFreeze();
+      StoredPropertySetBasics storedPropertySet = getValueAndModify();
       for (StoredPropertyKey<?> key : storedPropertySet.getKeyList().keys())
       {
          if (key instanceof DoubleStoredPropertyKey doubleKey)

@@ -89,7 +89,7 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
       }
    }
 
-   public void copyDefinitionToGoalFoostepToGoalTransform(RobotSide side)
+   public void copyDefinitionToGoalFootstepToGoalTransform(RobotSide side)
    {
       goalFootstepToGoalTransforms.get(side).setToZero();
       goalFootstepToGoalTransforms.get(side).getTranslation().setX(definition.getGoalFootstepToGoalX(side).getValue());

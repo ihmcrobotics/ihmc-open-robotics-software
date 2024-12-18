@@ -25,7 +25,7 @@ public class CRDTBidirectionalDoubleArray extends CRDTBidirectionalMutableField<
    public void setValue(int index, double value)
    {
       if (getValueReadOnly(index) != value)
-         getValueAndFreeze()[index] = value;
+         getValueAndModify()[index] = value;
    }
 
    public int getLength()
@@ -43,7 +43,7 @@ public class CRDTBidirectionalDoubleArray extends CRDTBidirectionalMutableField<
 
    public void fromMessage(double[] messageArray)
    {
-      if (!isFrozen())
+      if (isModificationIncoming())
       {
          for (int i = 0; i < getValueInternal().length; i++)
          {

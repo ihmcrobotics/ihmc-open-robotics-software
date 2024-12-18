@@ -47,7 +47,7 @@ public class CRDTBidirectionalRigidBodyTransform extends CRDTBidirectionalMutabl
 
    public void fromMessage(RigidBodyTransformMessage rigidBodyTransformMessage)
    {
-      if (!isFrozen()) // Ignore updates if we are frozen
+      if (isModificationIncoming())
       {
          MessageTools.toEuclid(rigidBodyTransformMessage, getValueInternal());
       }
@@ -55,7 +55,7 @@ public class CRDTBidirectionalRigidBodyTransform extends CRDTBidirectionalMutabl
 
    public void fromMessage(Pose3D poseMessage)
    {
-      if (!isFrozen()) // Ignore updates if we are frozen
+      if (isModificationIncoming())
       {
          getValueInternal().set(poseMessage);
       }

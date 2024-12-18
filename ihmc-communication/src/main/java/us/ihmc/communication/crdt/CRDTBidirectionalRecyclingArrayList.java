@@ -34,7 +34,7 @@ public class CRDTBidirectionalRecyclingArrayList<T> extends CRDTBidirectionalMut
    public void setValue(int index, T value)
    {
       if (!getValueReadOnly(index).equals(value))
-         getValueAndFreeze().set(index, value);
+         getValueAndModify().set(index, value);
    }
 
    public int getLength()
@@ -52,7 +52,7 @@ public class CRDTBidirectionalRecyclingArrayList<T> extends CRDTBidirectionalMut
 
    public void fromMessage(Consumer<RecyclingArrayList<T>> valueConsumer)
    {
-      if (!isFrozen()) // Ignore updates if we are frozen
+      if (isModificationIncoming())
       {
          valueConsumer.accept(getValueInternal());
       }

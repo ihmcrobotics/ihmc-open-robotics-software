@@ -52,7 +52,7 @@ public class CRDTBidirectionalInteger
 
    public void fromMessage(int value)
    {
-      if (latestTimestampModifiable.isOutOfDate())
+      if (latestTimestampModifiable.isModificationIncoming())
       {
          this.value = value;
       }

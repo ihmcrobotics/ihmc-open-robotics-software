@@ -30,9 +30,9 @@ public class CRDTBidirectionalMutableField<T>
     * Do not call this every tick.
     * @return modifiable interface
     */
-   public T getValueAndFreeze()
+   public T getValueAndModify()
    {
-      // Freeze to prevent it getting overwritten immediately
+      // Mark and timestamp modification
       latestTimestampModifiable.modify();
       return value;
    }
@@ -40,7 +40,7 @@ public class CRDTBidirectionalMutableField<T>
    /**
     * Call this to update the data every tick, but it can get overritten immediately by
     * incoming data. And example is to update a calculation on the robot side, but allow
-    * the UI to also modify that using {@link #getValueAndFreeze}.
+    * the UI to also modify that using {@link #getValueAndModify}.
     */
    public T getValue()
    {
@@ -52,8 +52,8 @@ public class CRDTBidirectionalMutableField<T>
       return value;
    }
 
-   protected boolean isFrozen()
+   protected boolean isModificationIncoming()
    {
-      return !latestTimestampModifiable.isOutOfDate();
+      return latestTimestampModifiable.isModificationIncoming();
    }
 }

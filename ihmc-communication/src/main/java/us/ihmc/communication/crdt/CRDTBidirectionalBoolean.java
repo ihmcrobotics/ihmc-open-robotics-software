@@ -42,7 +42,7 @@ public class CRDTBidirectionalBoolean
 
    public void fromMessage(boolean value)
    {
-      if (latestTimestampModifiable.isOutOfDate())
+      if (latestTimestampModifiable.isModificationIncoming())
       {
          this.value = value;
       }

@@ -30,7 +30,7 @@ public class CRDTBidirectionalPoint3D extends CRDTBidirectionalMutableField<Poin
 
    public void fromMessage(Point3D message)
    {
-      if (!isFrozen())
+      if (isModificationIncoming())
       {
          getValueInternal().set(message);
       }

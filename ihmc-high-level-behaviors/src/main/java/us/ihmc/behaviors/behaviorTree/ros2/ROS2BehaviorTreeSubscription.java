@@ -88,19 +88,18 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, 
 
             behaviorTreeState.fromMessage(behaviorTreeStateMessage);
 
-            if (behaviorTreeState.isOutOfDate())
+            if (behaviorTreeState.isModificationIncoming())
             {
-               // Clears all unfrozen nodes
+               // Clear tree to rebuild with new state
                behaviorTreeState.modifyTreeTopology(topologyOperationQueue ->
                                       topologyOperationQueue.queueOperation(behaviorTreeState.getTreeRebuilder().getClearSubtreeOperation()));
             }
 
             behaviorTreeState.modifyTreeTopology(topologyOperationQueue ->
             {
-               // When the root node is swapped out, we freeze the reference to the new one
-               boolean treeRootReferenceUpToDate = behaviorTreeState.isUpToDate();
+               boolean treeRootReferenceUpToDate = !behaviorTreeState.isModificationIncoming();
 
-               boolean allowReplicatingRoot = behaviorTreeState.isOutOfDate();
+               boolean allowReplicatingRoot = behaviorTreeState.isModificationIncoming();
                T rootNode = subscriptionRootIsNull ? null : retrieveOrReplicateLocalNode(subscriptionRootNode, allowReplicatingRoot);
 
                if (rootNode != null)
@@ -157,7 +156,7 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, 
 
       for (int i = 0; i < subscriptionNode.getChildren().size(); i++)
       {
-         anAncestorIsUpToDate |= localNode.getDefinition().isUpToDate();
+         anAncestorIsUpToDate |= !localNode.getDefinition().isModificationIncoming();
 
          T localChildNode = null;
          if (anAncestorIsUpToDate)

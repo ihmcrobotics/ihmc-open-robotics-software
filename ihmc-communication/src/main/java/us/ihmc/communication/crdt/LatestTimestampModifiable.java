@@ -13,7 +13,8 @@ public class LatestTimestampModifiable
    private final CRDTInfo crdtInfo;
    private final Guid latestModifier = new Guid();
    private Instant latestModificationTime = Instant.MIN;
-   private boolean isOutOfDate = true;
+   private boolean modificationIncoming = false;
+   private boolean modificationOutgoing = false;
 
    private transient final Guid messageModifier = new Guid();
 
@@ -27,15 +28,16 @@ public class LatestTimestampModifiable
       if (crdtInfo.isMultiMachineNetwork())
          latestModifier.set(crdtInfo.getPeerClockEstimator().getOurGuid());
       latestModificationTime = Instant.now();
+      modificationOutgoing = true;
    }
 
    /**
-    * @return If the incoming modification was older or same time as what we already have.
-    *         To be used after {@link #fromMessage}.
+    * @return If we changed this data locally and it needs to be sent out.
+    *         To be used after call to {@link #modify}.
     */
-   public boolean isUpToDate()
+   public boolean isModificationOutgoing()
    {
-      return !isOutOfDate;
+      return modificationOutgoing;
    }
 
    /**
@@ -43,9 +45,9 @@ public class LatestTimestampModifiable
     *         If so, we'll be expecting to have our state updated to the incoming one.
     *         To be used after {@link #fromMessage}.
     */
-   public boolean isOutOfDate()
+   public boolean isModificationIncoming()
    {
-      return isOutOfDate;
+      return modificationIncoming;
    }
 
    public void toMessage(LatestModificationMessage message)
@@ -56,7 +58,8 @@ public class LatestTimestampModifiable
 
    public void fromMessage(LatestModificationMessage message)
    {
-      isOutOfDate = false;
+      modificationOutgoing = false;
+      modificationIncoming = false;
 
       if (crdtInfo.isMultiMachineNetwork())
       {
@@ -79,7 +82,7 @@ public class LatestTimestampModifiable
                {
                   latestModifier.set(messageModifier);
                   latestModificationTime = timeInLocalFrame;
-                  isOutOfDate = true;
+                  modificationIncoming = true;
                }
             }
          }
@@ -90,7 +93,7 @@ public class LatestTimestampModifiable
          if (timeInLocalFrame.isAfter(latestModificationTime))
          {
             latestModificationTime = timeInLocalFrame;
-            isOutOfDate = true;
+            modificationIncoming = true;
          }
       }
    }

@@ -54,7 +54,7 @@ public class ChestOrientationActionDefinition extends ActionNodeDefinition
       trajectoryDuration.setValue(jsonNode.get("trajectoryDuration").asDouble());
       holdPoseInWorldLater.setValue(jsonNode.get("holdPoseInWorldLater").asBoolean());
       parentFrameName.setValue(jsonNode.get("parentFrame").textValue());
-      JSONTools.toEuclid(jsonNode, chestToParentTransform.getValueAndFreeze());
+      JSONTools.toEuclid(jsonNode, chestToParentTransform.getValueAndModify());
    }
 
    @Override
@@ -76,7 +76,7 @@ public class ChestOrientationActionDefinition extends ActionNodeDefinition
       trajectoryDuration.setValue(onDiskTrajectoryDuration);
       holdPoseInWorldLater.setValue(onDiskHoldPoseInWorldLater);
       parentFrameName.setValue(onDiskParentFrameName);
-      chestToParentTransform.getValueAndFreeze().set(onDiskChestToParentTransform);
+      chestToParentTransform.getValueAndModify().set(onDiskChestToParentTransform);
    }
 
    @Override
@@ -114,25 +114,25 @@ public class ChestOrientationActionDefinition extends ActionNodeDefinition
 
    public void setYaw(double yaw)
    {
-      RotationMatrixBasics rotation = chestToParentTransform.getValueAndFreeze().getRotation();
-      chestToParentTransform.getValueAndFreeze().getRotation().setYawPitchRoll(yaw, rotation.getPitch(), rotation.getRoll());
+      RotationMatrixBasics rotation = chestToParentTransform.getValueAndModify().getRotation();
+      chestToParentTransform.getValueAndModify().getRotation().setYawPitchRoll(yaw, rotation.getPitch(), rotation.getRoll());
    }
 
    public void setPitch(double pitch)
    {
-      RotationMatrixBasics rotation = chestToParentTransform.getValueAndFreeze().getRotation();
-      chestToParentTransform.getValueAndFreeze().getRotation().setYawPitchRoll(rotation.getYaw(), pitch, rotation.getRoll());
+      RotationMatrixBasics rotation = chestToParentTransform.getValueAndModify().getRotation();
+      chestToParentTransform.getValueAndModify().getRotation().setYawPitchRoll(rotation.getYaw(), pitch, rotation.getRoll());
    }
 
    public void setRoll(double roll)
    {
-      RotationMatrixBasics rotation = chestToParentTransform.getValueAndFreeze().getRotation();
-      chestToParentTransform.getValueAndFreeze().getRotation().setYawPitchRoll(rotation.getYaw(), rotation.getPitch(), roll);
+      RotationMatrixBasics rotation = chestToParentTransform.getValueAndModify().getRotation();
+      chestToParentTransform.getValueAndModify().getRotation().setYawPitchRoll(rotation.getYaw(), rotation.getPitch(), roll);
    }
 
    public RotationMatrixBasics getRotation()
    {
-      return chestToParentTransform.getValueAndFreeze().getRotation();
+      return chestToParentTransform.getValueAndModify().getRotation();
    }
 
    public RotationMatrixReadOnly getRotationReadOnly()

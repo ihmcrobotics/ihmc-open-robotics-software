@@ -4,7 +4,6 @@ import imgui.ImGui;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTreeState;
-import us.ihmc.communication.crdt.LatestTimestampModifiable;
 import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.rdx.imgui.ImGuiAveragedFrequencyText;
@@ -68,24 +67,16 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
 
       // Prevent jumping around when it changes
       float nodeCountsTextWidth = ImGuiTools.calcTextSizeX("Operator: 000 Robot: 000 ");
-      float frozenStatusTextWidth = ImGuiTools.calcTextSizeX("State: Frozen (000)");
       float frequencyTextWidth = ImGuiTools.calcTextSizeX("000 Hz ");
       float droppedTextWidth = ImGuiTools.calcTextSizeX("Dropped: 0000");
       float rightMargin = 20.0f;
 
-      ImGui.sameLine(ImGui.getWindowSizeX() - nodeCountsTextWidth - frozenStatusTextWidth - frequencyTextWidth - droppedTextWidth - rightMargin);
+      ImGui.sameLine(ImGui.getWindowSizeX() - nodeCountsTextWidth - frequencyTextWidth - droppedTextWidth - rightMargin);
       int numberOfLocalNodes = ros2BehaviorTreeState.getBehaviorTreeState().getNumberOfNodes();
       ImGui.text("Operator: %3d  Robot: %3d".formatted(numberOfLocalNodes, ros2BehaviorTreeState.getBehaviorTreeSubscription().getNumberOfOnRobotNodes()));
 
-      ImGui.sameLine(ImGui.getWindowSizeX() - frozenStatusTextWidth - frequencyTextWidth - droppedTextWidth - rightMargin);
-      int numberOfFrozenNodes = ros2BehaviorTreeState.getBehaviorTreeState().getNumberOfFrozenNodes();
+      ImGui.sameLine(ImGui.getWindowSizeX() - frequencyTextWidth - droppedTextWidth - rightMargin);
       ImGui.text("State:");
-      ImGui.sameLine();
-      LatestTimestampModifiable latestTimestampModifiable = ros2BehaviorTreeState.getBehaviorTreeState();
-      if (!latestTimestampModifiable.isOutOfDate() || numberOfFrozenNodes > 0)
-         ImGui.textColored(ImGuiTools.LIGHT_BLUE, "Frozen (%d)".formatted(numberOfFrozenNodes));
-      else
-         ImGui.text("Normal");
 
       ImGui.sameLine(ImGui.getWindowSizeX() - frequencyTextWidth - droppedTextWidth - rightMargin);
       subscriptionFrequencyText.render();

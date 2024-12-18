@@ -44,7 +44,7 @@ public class CRDTBidirectionalImmutableField<T>
 
    public void fromMessage(T value)
    {
-      if (latestTimestampModifiable.isOutOfDate())
+      if (latestTimestampModifiable.isModificationIncoming())
       {
          this.value = value;
       }
