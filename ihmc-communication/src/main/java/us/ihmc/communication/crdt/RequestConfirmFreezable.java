@@ -46,7 +46,7 @@ import us.ihmc.log.LogTools;
  *   in the CRDT graph.
  * </p>
  */
-public class RequestConfirmFreezable implements Freezable
+public class RequestConfirmFreezable
 {
    private final CRDTInfo crdtInfo;
    private final MutableLong nextRequestID = new MutableLong();
@@ -66,7 +66,6 @@ public class RequestConfirmFreezable implements Freezable
       this.crdtInfo = crdtInfo;
    }
 
-   @Override
    public void freeze()
    {
       updateNumberToUnfreeze = crdtInfo.getUpdateNumber() + crdtInfo.getMaxFreezeDuration();
@@ -97,7 +96,6 @@ public class RequestConfirmFreezable implements Freezable
                                                                       this.getClass().getSimpleName()));
    }
 
-   @Override
    public boolean isFrozen()
    {
       boolean isFrozen = crdtInfo.getUpdateNumber() < updateNumberToUnfreeze;

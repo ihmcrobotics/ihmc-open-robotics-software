@@ -1,7 +1,7 @@
 package us.ihmc.behaviors.behaviorTree.topology;
 
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeLayer;
-import us.ihmc.communication.crdt.Freezable;
+import us.ihmc.communication.crdt.RequestConfirmFreezable;
 
 import java.util.function.Consumer;
 
@@ -14,14 +14,14 @@ public class BehaviorTreeNodeInsertionDefinition<T extends BehaviorTreeNodeLayer
    private T nodeToInsert;
    private T sibling;
    private T parent;
-   private Freezable freezableRootNodeHolder;
+   private RequestConfirmFreezable freezableRootNodeHolder;
    private Consumer<BehaviorTreeNodeLayer<T, ?, ?, ?>> rootNodeSetter;
    private BehaviorTreeNodeInsertionType insertionType;
    private int insertionIndex;
 
    public static <R extends BehaviorTreeNodeLayer<R, ?, ?, ?>>
    BehaviorTreeNodeInsertionDefinition<R> build(R nodeToInsert,
-                                                Freezable freezableRootNodeHolder,
+                                                RequestConfirmFreezable freezableRootNodeHolder,
                                                 Consumer<BehaviorTreeNodeLayer<R, ?, ?, ?>> rootNodeSetter,
                                                 R relativeNode,
                                                 BehaviorTreeNodeInsertionType insertionType)
@@ -55,7 +55,7 @@ public class BehaviorTreeNodeInsertionDefinition<T extends BehaviorTreeNodeLayer
    }
 
    private void setupInsertRoot(T newRoot,
-                                Freezable freezableRootNodeHolder,
+                                RequestConfirmFreezable freezableRootNodeHolder,
                                 Consumer<BehaviorTreeNodeLayer<T, ?, ?, ?>> rootNodeSetter)
    {
       this.nodeToInsert = newRoot;
@@ -126,7 +126,7 @@ public class BehaviorTreeNodeInsertionDefinition<T extends BehaviorTreeNodeLayer
       return rootNodeSetter;
    }
 
-   public Freezable getFreezableRootNodeHolder()
+   public RequestConfirmFreezable getFreezableRootNodeHolder()
    {
       return freezableRootNodeHolder;
    }
