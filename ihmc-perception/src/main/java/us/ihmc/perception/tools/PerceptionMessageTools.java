@@ -106,9 +106,9 @@ public class PerceptionMessageTools
 
    public static void publishFramePlanarRegionsList(FramePlanarRegionsList framePlanarRegionsList,
                                                     ROS2Topic<FramePlanarRegionsListMessage> topic,
-                                                    ROS2Helper ros2Helper)
+                                                    ROS2PublishSubscribeAPI ros2)
    {
-      ros2Helper.publish(topic, PlanarRegionMessageConverter.convertToFramePlanarRegionsListMessage(framePlanarRegionsList));
+      ros2.publish(topic, PlanarRegionMessageConverter.convertToFramePlanarRegionsListMessage(framePlanarRegionsList));
    }
 
    public static void publishPlanarRegionsList(PlanarRegionsList planarRegionsList, ROS2Topic<PlanarRegionsListMessage> topic, ROS2Helper ros2Helper)
