@@ -27,6 +27,10 @@ public class RDXVRPrescientFootstepStreaming
    public static final int WAIT_TIME_BEFORE_STEP = 1; // [ms] time to wait before walking, need some time for the stop streaming status to get to the controller
    public static final int WAIT_TIME_AFTER_STEP = 1; // [ms] time to wait before restarting streaming
 
+   // P gain for direction control
+   // Adjust KP as needed: larger KP = faster response, smaller KP = smoother but slower response
+   private static final double KP_DIRECTION = 0.5;
+
    private final ROS2SyncedRobotModel syncedRobot;
    private final RDXManualFootstepPlacement footstepPlacer;
    private final SideDependentList<ReferenceFrame> ankleTrackerFrames = new SideDependentList<>();
@@ -35,6 +39,9 @@ public class RDXVRPrescientFootstepStreaming
    private final SideDependentList<RigidBodyTransform> previousTrackersTransform = new SideDependentList<>();
    private final SideDependentList<Integer> stableIterationCounts = new SideDependentList<>();
    private final Notification readyToStep = new Notification();
+   // Store controlled direction vector for each foot.
+   private final SideDependentList<FrameVector2D> directionsCtrl = new SideDependentList<>();
+   private final SideDependentList<RigidBodyTransform> initialFootstepTransformsInWorld = new SideDependentList<>();
 
    /**
     * Constructor for the footstep streaming class.
@@ -51,6 +58,8 @@ public class RDXVRPrescientFootstepStreaming
          isUserStepping.put(side, false);
          stableIterationCounts.put(side, 0);
          previousTrackersTransform.put(side, new RigidBodyTransform());
+         // Initialize controlled direction to (1,0) (forward)
+         directionsCtrl.put(side, new FrameVector2D(ReferenceFrame.getWorldFrame(), 1.0, 0.0));
       }
    }
 
@@ -87,23 +96,21 @@ public class RDXVRPrescientFootstepStreaming
                if (translationXY.norm() >= STEP_THRESHOLD && translation.getZ() >= LIFT_THRESHOLD)
                {
                   // Get the current robot foot position in world
-                  RigidBodyTransform currentRobotFootTransformInWorld = new RigidBodyTransform(syncedRobot.getReferenceFrames().getSoleFrame(side).getTransformToWorldFrame());
-                  FramePoint2D currentRobotFootXY = new FramePoint2D(ReferenceFrame.getWorldFrame(), currentRobotFootTransformInWorld.getTranslation().getX(),
-                                                                     currentRobotFootTransformInWorld.getTranslation().getY());
-                  // Estimate the final footstep location in the XY plane (world frame)
-                  FramePoint2D initialXY = new FramePoint2D(ReferenceFrame.getWorldFrame(), currentRobotFootXY.getX(), currentRobotFootXY.getY());
-
+                  RigidBodyTransform footstepTransformInWorld = new RigidBodyTransform(syncedRobot.getReferenceFrames().getSoleFrame(side).getTransformToWorldFrame());
+                  FramePoint2D initialXY = new FramePoint2D(ReferenceFrame.getWorldFrame(), footstepTransformInWorld.getTranslation().getX(),
+                                                                     footstepTransformInWorld.getTranslation().getY());
+                  initialFootstepTransformsInWorld.put(side, footstepTransformInWorld);
                   // Normalize the translation direction to have a fixed stride distance
                   translationXY.normalize();
                   // Scale the normalized direction to the fixed stride distance
                   translationXY.scale(STRIDE_LENGTH);
                   // Apply the translation to the current robot foot position
-                  FramePoint2D finalFootstep = new FramePoint2D(initialXY);
-                  finalFootstep.add(translationXY);
-                  currentRobotFootTransformInWorld.getTranslation().setX(finalFootstep.getX());
-                  currentRobotFootTransformInWorld.getTranslation().setY(finalFootstep.getY());
+                  FramePoint2D predictedXY = new FramePoint2D(initialXY);
+                  predictedXY.add(translationXY);
+                  footstepTransformInWorld.getTranslation().setX(predictedXY.getX());
+                  footstepTransformInWorld.getTranslation().setY(predictedXY.getY());
                   // Compute yaw variation
-                  double newYaw = currentRobotFootTransformInWorld.getRotation().getYaw();
+                  double newYaw = footstepTransformInWorld.getRotation().getYaw();
                   double yawVariation = currentTrackerTransform.getRotation().getYaw() - initialTrackerTransform.getRotation().getYaw();
                   if (Math.toDegrees(yawVariation) >= TURNING_THRESHOLD)
                   {
@@ -114,13 +121,13 @@ public class RDXVRPrescientFootstepStreaming
                      newYaw -= Math.toRadians(33.33);
                   }
                   // Update yaw of footstep
-                  currentRobotFootTransformInWorld.getRotation().setYawPitchRoll(newYaw,
-                                                                                 currentRobotFootTransformInWorld.getRotation().getPitch(),
-                                                                                 currentRobotFootTransformInWorld.getRotation().getRoll());
+                  footstepTransformInWorld.getRotation().setYawPitchRoll(newYaw,
+                                                                                 footstepTransformInWorld.getRotation().getPitch(),
+                                                                                 footstepTransformInWorld.getRotation().getRoll());
 
                   // Place and send footstep
                   footstepPlacer.createNewFootstep(side);
-                  footstepPlacer.setFootstepPose(new FramePose3D(ReferenceFrame.getWorldFrame(), currentRobotFootTransformInWorld));
+                  footstepPlacer.setFootstepPose(new FramePose3D(ReferenceFrame.getWorldFrame(), footstepTransformInWorld));
                   if(footstepPlacer.checkAndPlaceFootstep())
                   {
                      footstepPlacer.exitPlacement();
@@ -134,7 +141,7 @@ public class RDXVRPrescientFootstepStreaming
                   }
                }
             }
-            else // User is stepping, a first prediction for the footstep has been sent already
+            else // Already stepping: continuously update footstep direction
             {
                if (initialTrackerTransform != null)
                {
@@ -156,11 +163,49 @@ public class RDXVRPrescientFootstepStreaming
                         stableIterationCounts.put(side, 0);
                      }
                   }
-                  else  // the tracker is still, update the predicted footstep and reset stability count
+                  else  // Still moving
                   {
-                     stableIterationCounts.put(side, 0);
-                     // Here implmenet PD control
+                     stableIterationCounts.put(side, 0); // reset stability count
 
+                     // Only update direction if acceleration is not too small
+                     if (accelerationMag > ACCELERATION_THRESHOLD)
+                     {
+                        // Compute current direction from ankle movement
+                        Vector3D translation = new Vector3D();
+                        translation.sub(currentTrackerTransform.getTranslation(), initialTrackerTransform.getTranslation());
+                        FrameVector2D directionDesired = new FrameVector2D(ReferenceFrame.getWorldFrame(), translation.getX(), translation.getY());
+                        directionDesired.normalize();
+                     }
+                     else
+                     {
+                        // If acceleration is very low, do not update direction any further.
+                        // Just keep the desired direction as is.
+                     }
+
+                     // P-control: error = desired_direction - current_controlled_direction
+                     FrameVector2D directionCtrl = directionsCtrl.get(side);
+                     FrameVector2D directionError = new FrameVector2D(directionDesired);
+                     directionError.sub(directionCtrl);
+
+                     // Update the controlled direction based on error
+                     directionCtrl.addX(KP_DIRECTION * directionError.getX());
+                     directionCtrl.addY(KP_DIRECTION * directionError.getY());
+
+                     // Re-normalize direction
+                     directionCtrl.normalize();
+                     directionsCtrl.put(side, new FrameVector2D(directionCtrl));
+
+                     // Predict new footstep position
+                     RigidBodyTransform footstepTransformInWorld = new RigidBodyTransform(initialFootstepTransformsInWorld.get(side));
+                     FramePoint2D initialXY = new FramePoint2D(ReferenceFrame.getWorldFrame(),
+                                                                        footstepTransformInWorld.getTranslation().getX(),
+                                                                        footstepTransformInWorld.getTranslation().getY());
+
+                     FramePoint2D predictedXY = new FramePoint2D(initialXY);
+                     predictedXY.add(directionCtrl.getX() * STRIDE_LENGTH, directionCtrl.getY() * STRIDE_LENGTH);
+
+                     footstepTransformInWorld.getTranslation().setX(predictedXY.getX());
+                     footstepTransformInWorld.getTranslation().setY(predictedXY.getY());
                   }
 
                   // Update the previous tracker position for the next iteration
