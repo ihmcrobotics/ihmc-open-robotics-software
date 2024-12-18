@@ -143,7 +143,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
 
          for (RobotSide side : RobotSide.values)
          {
-            state.copyDefinitionToGoalFoostepToGoalTransform(side);
+            state.copyDefinitionToGoalFootstepToGoalTransform(side);
 
             liveGoalFeetPoses.get(side)
                              .setIncludingFrame(state.getGoalFrame().getReferenceFrame(),

@@ -27,7 +27,6 @@ public class BehaviorTreeState extends LatestTimestampModifiable
    private final Supplier<BehaviorTreeNodeLayer<?, ?, ?, ?>> rootNodeSupplier;
    private final WorkspaceResourceDirectory saveFileDirectory;
    private int numberOfNodes = 0;
-   private int numberOfFrozenNodes = 0;
 
    public BehaviorTreeState(BehaviorTreeNodeStateBuilder nodeStateBuilder,
                             BehaviorTreeExtensionSubtreeRebuilder treeRebuilder,
@@ -46,7 +45,6 @@ public class BehaviorTreeState extends LatestTimestampModifiable
    public void update()
    {
       numberOfNodes = 0;
-      numberOfFrozenNodes = 0;
       update(rootNodeSupplier.get());
    }
 
@@ -55,8 +53,6 @@ public class BehaviorTreeState extends LatestTimestampModifiable
       if (node != null)
       {
          ++numberOfNodes;
-         if (!node.getDefinition().isOutOfDate())
-            ++numberOfFrozenNodes;
 
          for (Object child : node.getChildren())
          {
@@ -96,7 +92,7 @@ public class BehaviorTreeState extends LatestTimestampModifiable
    {
       fromMessage(message.getLatestModification());
 
-      if (isOutOfDate())
+      if (isModificationIncoming())
          nextID.setValue(message.getNextId());
    }
 
@@ -134,11 +130,6 @@ public class BehaviorTreeState extends LatestTimestampModifiable
    public BehaviorTreeTopologyOperationQueue getTopologyChangeQueue()
    {
       return topologyChangeQueue;
-   }
-
-   public int getNumberOfFrozenNodes()
-   {
-      return numberOfFrozenNodes;
    }
 
    public int getNumberOfNodes()

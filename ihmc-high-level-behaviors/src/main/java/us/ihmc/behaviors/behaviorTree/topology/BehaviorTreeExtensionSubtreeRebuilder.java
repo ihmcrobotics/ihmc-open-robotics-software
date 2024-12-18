@@ -4,7 +4,6 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeLayer;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeLayerSupplier;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.communication.crdt.LatestTimestampModifiable;
 import us.ihmc.log.LogTools;
 
 import java.util.HashMap;
@@ -51,7 +50,7 @@ public class BehaviorTreeExtensionSubtreeRebuilder
 //                                                                             crdtInfo.getActorDesignation()));
          idToNodesMap.put(localNode.getState().getID(), localNode);
 
-         if (localNode.getDefinition().isOutOfDate()) // Disassemble non-frozen parts
+         if (localNode.getDefinition().isModificationIncoming()) // Disassemble parts that have changes
          {
             for (BehaviorTreeNode<?> child : localNode.getChildren())
             {

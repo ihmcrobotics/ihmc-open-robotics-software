@@ -58,7 +58,7 @@ public class CRDTBidirectionalNotification
 
    public void fromMessage(boolean isSet)
    {
-      if (latestTimestampModifiable.isOutOfDate())
+      if (latestTimestampModifiable.isModificationIncoming())
       {
          if (isSet != this.isSet)
             LogTools.debug("%b -> %b Actor: %s".formatted(this.isSet, isSet, latestTimestampModifiable.getCRDTInfo().getActorDesignation()));

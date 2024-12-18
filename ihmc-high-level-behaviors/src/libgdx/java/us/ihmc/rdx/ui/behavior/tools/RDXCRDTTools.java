@@ -18,9 +18,9 @@ public class RDXCRDTTools
    {
       if (gizmo.getGizmoModifiedByUser().poll())
       {
-         transform.getValueAndFreeze().set(gizmo.getTransformToParent());
+         transform.getValueAndModify().set(gizmo.getTransformToParent());
       }
-      else if (latestTimestampModifiable.isOutOfDate())
+      else if (latestTimestampModifiable.isModificationIncoming())
       {
          gizmo.getTransformToParent().set(transform.getValueReadOnly());
       }
@@ -37,9 +37,9 @@ public class RDXCRDTTools
    {
       if (gizmo.getGizmoModifiedByUser().poll())
       {
-         point.getValueAndFreeze().set(gizmo.getTransformToParent().getTranslation());
+         point.getValueAndModify().set(gizmo.getTransformToParent().getTranslation());
       }
-      else if (latestTimestampModifiable.isOutOfDate())
+      else if (latestTimestampModifiable.isModificationIncoming())
       {
          gizmo.getTransformToParent().getTranslation().set(point.getValueReadOnly());
       }

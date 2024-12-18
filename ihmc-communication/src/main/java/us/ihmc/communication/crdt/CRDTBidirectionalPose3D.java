@@ -30,7 +30,7 @@ public class CRDTBidirectionalPose3D extends CRDTBidirectionalMutableField<Pose3
 
    public void fromMessage(Pose3D message)
    {
-      if (!isFrozen())
+      if (isModificationIncoming())
       {
          getValueInternal().set(message);
       }

@@ -40,7 +40,7 @@ public class CRDTBidirectionalStoredPropertySet extends CRDTBidirectionalMutable
 
    public void fromMessage(PrimitiveDataVectorMessage message)
    {
-      if (!isFrozen())
+      if (isModificationIncoming())
       {
          StoredPropertySetMessageTools.fromMessage(message, getValueInternal());
       }

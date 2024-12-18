@@ -42,7 +42,7 @@ public class CRDTBidirectionalLong
 
    public void fromMessage(long value)
    {
-      if (latestTimestampModifiable.isOutOfDate())
+      if (latestTimestampModifiable.isModificationIncoming())
       {
          this.value = value;
       }

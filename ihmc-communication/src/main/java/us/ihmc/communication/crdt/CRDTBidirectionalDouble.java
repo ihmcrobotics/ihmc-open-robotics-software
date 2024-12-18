@@ -48,7 +48,7 @@ public class CRDTBidirectionalDouble
 
    public void fromMessage(double value)
    {
-      if (latestTimestampModifiable.isOutOfDate())
+      if (latestTimestampModifiable.isModificationIncoming())
       {
          this.value = value;
       }
