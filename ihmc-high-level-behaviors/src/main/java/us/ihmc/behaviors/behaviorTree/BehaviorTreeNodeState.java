@@ -43,7 +43,7 @@ public class BehaviorTreeNodeState<D extends BehaviorTreeNodeDefinition>
       this.id = id;
       this.definition = definition;
 
-      logger = new BehaviorTreeNodeMessageLogger(definition);
+      logger = new BehaviorTreeNodeMessageLogger(crdtInfo);
    }
 
    /** Used to determine if the node's full data needs to be sent. */
