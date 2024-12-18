@@ -93,9 +93,6 @@ public class RDXBehaviorTree
 
    public void update()
    {
-      // Perform any modifications we made in the last tick.
-      state.modifyTreeTopology();
-
       idToNodeMap.clear();
 
       if (rootNode != null)
@@ -271,6 +268,9 @@ public class RDXBehaviorTree
       {
          nodeCreationMenu.renderImGuiWidgets(rootNode, BehaviorTreeNodeInsertionType.INSERT_ROOT);
       }
+
+      // Perform any modifications that were made via user interaction.
+      state.modifyTreeTopology();
    }
 
    private void expandCollapseAll(boolean expandOrCollapse, RDXBehaviorTreeNode<?, ?> node)
