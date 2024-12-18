@@ -5,6 +5,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTreeState;
 import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
+import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.rdx.imgui.ImGuiAveragedFrequencyText;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.ui.RDX3DPanel;
@@ -28,19 +29,14 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
    public RDXROS2BehaviorTree(WorkspaceResourceDirectory treeFilesDirectory,
                               DRCRobotModel robotModel,
                               ROS2SyncedRobotModel syncedRobot,
+                              ROS2PeerClockOffsetEstimator peerClockEstimator,
                               RobotCollisionModel selectionCollisionModel,
                               RDXBaseUI baseUI,
                               RDX3DPanel panel3D,
                               ReferenceFrameLibrary referenceFrameLibrary,
                               ROS2ControllerPublishSubscribeAPI ros2)
    {
-      super(treeFilesDirectory,
-            robotModel,
-            syncedRobot,
-            selectionCollisionModel,
-            baseUI,
-            panel3D,
-            referenceFrameLibrary);
+      super(treeFilesDirectory, robotModel, syncedRobot, peerClockEstimator, selectionCollisionModel, baseUI, panel3D, referenceFrameLibrary);
 
       ros2BehaviorTreeState = new ROS2BehaviorTreeState(getBehaviorTreeState(), this::setRootNode, ros2);
 
