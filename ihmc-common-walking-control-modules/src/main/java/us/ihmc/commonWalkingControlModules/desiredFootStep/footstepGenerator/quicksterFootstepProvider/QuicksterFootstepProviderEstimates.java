@@ -71,7 +71,7 @@ public class QuicksterFootstepProviderEstimates
 
       centerOfMassControlZUpFrame = new MovingZUpFrame(centerOfMassControlFrame, "centerOfMassControlZUpFrame" + variableNameSuffix);
 
-      centerOfMassControlZUpFrameGraphic = new YoGraphicReferenceFrame(centerOfMassControlZUpFrame, registry, false, 2.0);
+      centerOfMassControlZUpFrameGraphic = new YoGraphicReferenceFrame(centerOfMassControlZUpFrame, registry, false, 1.25);
       yoGraphicsListRegistry.registerYoGraphic("QFP", centerOfMassControlZUpFrameGraphic);
 
       angularExcursionCalculator = new AngularExcursionCalculator(centerOfMassFrame, robotModel.getElevator(), updateDT, registry, null);

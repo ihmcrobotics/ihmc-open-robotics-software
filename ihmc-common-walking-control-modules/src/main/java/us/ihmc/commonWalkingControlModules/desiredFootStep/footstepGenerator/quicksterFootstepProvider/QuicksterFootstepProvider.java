@@ -190,9 +190,9 @@ public class QuicksterFootstepProvider implements Updatable
 
    private boolean firstTick = true;
 
-   private void initialize()
+   public void initialize()
    {
-      chestOrientation.setToZero(robotModel.getChest().getBodyFixedFrame());
+      chestOrientation.setToZero(robotModel.getPelvis().getBodyFixedFrame());
       chestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
 
       desiredPelvisOrientation.setToZero();
@@ -214,8 +214,6 @@ public class QuicksterFootstepProvider implements Updatable
 
    private void updateEstimates()
    {
-      // TODO should we set to chest yaw each tick?
-      // desiredPelvisOrientation.setToYawOrientation(referenceFrames.getChestFrame().getTransformToWorldFrame().getRotation().getYaw());
       desiredPelvisOrientation.appendYawRotation(desiredTurningVelocity.getDoubleValue() * updateDT);
 
       estimates.update();

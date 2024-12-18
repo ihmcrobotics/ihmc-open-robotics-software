@@ -191,7 +191,11 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
       csgMode.addListener(change ->
                           {
                              if (csgMode.getEnumValue() == CSGMode.QFP)
+                             {
                                 updateFootstepContinuouslyThroughoutSwing.set(true);
+                                if (quicksterFootstepProvider.hasValue())
+                                 quicksterFootstepProvider.get().initialize();
+                             }
 //                             else
 //                                updateFootstepContinuouslyThroughoutSwing.set(updateFootstepContinuouslyThroughoutSwingDefault);
                           });
@@ -339,7 +343,15 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
 
       int startingIndexToAdjust = footsteps.size();
 
-      quicksterFootstepProvider.get().update(time);
+      // Continuously update QFP for data visualization purposes
+      if (quicksterFootstepProvider.hasValue())
+      {
+         // If in standard mode, keep initializing QFP so its control frame matches pelvis yaw
+         if (csgMode.getEnumValue() == CSGMode.STANDARD)
+            quicksterFootstepProvider.get().initialize();
+
+         quicksterFootstepProvider.get().update(time);
+      }
 
       for (int i = startingIndexToAdjust; i < parameters.getNumberOfFootstepsToPlan(); i++)
       {
