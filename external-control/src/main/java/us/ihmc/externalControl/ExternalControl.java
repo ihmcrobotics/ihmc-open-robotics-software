@@ -4,6 +4,7 @@ import org.ejml.data.DMatrixRMaj;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.externalControl.global.ExternalControlWrapper;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -14,7 +15,7 @@ import java.util.HashMap;
 
 public class ExternalControl
 {
-   private final ExternalControlImpl externalControlImpl;
+   private final ExternalControlWrapper.ExternalControlImpl externalControlImpl;
    private final DMatrixRMaj robotState;
    private final DMatrixRMaj robotControl;
    private final DMatrixRMaj feetPositions;
@@ -45,7 +46,7 @@ public class ExternalControl
       solutionDampingVector = new DMatrixRMaj(joints.length, 1);
       for (OneDoFJointReadOnly joint : joints)
          solutionJointData.put(joint, new SolutionJointData());
-      externalControlImpl = new ExternalControlImpl(defaultStiffness, defaultDamping, joints.length);
+      externalControlImpl = new ExternalControlWrapper.ExternalControlImpl(defaultStiffness, defaultDamping, joints.length);
    }
 
    public void setFootStates(SideDependentList<? extends ReferenceFrame> soleFrames, boolean leftInContact, boolean rightInContact)

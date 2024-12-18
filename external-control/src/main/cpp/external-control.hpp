@@ -1,6 +1,8 @@
 #pragma once
 
-#include "controllers/constant-position-controller.hpp"
+#include <Eigen/Core>
+
+//#include "controllers/constant-position-controller.hpp"
 
 namespace ihmc
 {

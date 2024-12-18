@@ -2,8 +2,6 @@
 
 package us.ihmc.externalControl.global;
 
-import us.ihmc.externalControl.*;
-
 import java.nio.*;
 import org.bytedeco.javacpp.*;
 import org.bytedeco.javacpp.annotation.*;
@@ -13,7 +11,91 @@ public class ExternalControlWrapper extends us.ihmc.externalControl.ExternalCont
 
 // Parsed from test.hpp
 
-public static native void test();
-public static native void test2(double data);
+
+    @Name("ihmc::Test") public static class TestImpl extends Pointer {
+        static { Loader.load(); }
+        /** Pointer cast constructor. Invokes {@link Pointer#Pointer(Pointer)}. */
+        public TestImpl(Pointer p) { super(p); }
+        /** Native array allocator. Access with {@link Pointer#position(long)}. */
+        public TestImpl(long size) { super((Pointer)null); allocateArray(size); }
+        private native void allocateArray(long size);
+        @Override public TestImpl position(long position) {
+            return (TestImpl)super.position(position);
+        }
+        @Override public TestImpl getPointer(long i) {
+            return new TestImpl((Pointer)this).offsetAddress(i);
+        }
+    
+        public TestImpl() { super((Pointer)null); allocate(); }
+        private native void allocate();
+
+        public native void test();
+
+        public native void test2(double data);
+    }
+
+
+
+// Parsed from external-control.hpp
+
+// #pragma once
+
+// #include <Eigen/Core>
+
+//#include "controllers/constant-position-controller.hpp"
+    @Namespace("ihmc") @NoOffset public static class ExternalControlImpl extends Pointer {
+        static { Loader.load(); }
+        /** Pointer cast constructor. Invokes {@link Pointer#Pointer(Pointer)}. */
+        public ExternalControlImpl(Pointer p) { super(p); }
+    
+        public ExternalControlImpl(double default_stiffness, double default_damping, int number_of_joints) { super((Pointer)null); allocate(default_stiffness, default_damping, number_of_joints); }
+        private native void allocate(double default_stiffness, double default_damping, int number_of_joints);
+
+        
+
+        
+
+        
+
+        
+
+        public native @Cast("bool") boolean setHomeJointConfiguration(@Const DoublePointer configuration_data, int rows);
+        public native @Cast("bool") boolean setHomeJointConfiguration(@Const DoubleBuffer configuration_data, int rows);
+        public native @Cast("bool") boolean setHomeJointConfiguration(@Const double[] configuration_data, int rows);
+
+        public native @Cast("bool") boolean updateRobotState(double current_time,
+                                      @Const DoublePointer x_data, int x_rows,
+                                      @Const DoublePointer u_data, int u_rows,
+                                      @Cast("const bool") boolean left_in_contact, @Cast("const bool") boolean right_in_contact,
+                                      @Const DoublePointer foot_locations, int foot_locations_rows,
+                                      int hardware_status);
+        public native @Cast("bool") boolean updateRobotState(double current_time,
+                                      @Const DoubleBuffer x_data, int x_rows,
+                                      @Const DoubleBuffer u_data, int u_rows,
+                                      @Cast("const bool") boolean left_in_contact, @Cast("const bool") boolean right_in_contact,
+                                      @Const DoubleBuffer foot_locations, int foot_locations_rows,
+                                      int hardware_status);
+        public native @Cast("bool") boolean updateRobotState(double current_time,
+                                      @Const double[] x_data, int x_rows,
+                                      @Const double[] u_data, int u_rows,
+                                      @Cast("const bool") boolean left_in_contact, @Cast("const bool") boolean right_in_contact,
+                                      @Const double[] foot_locations, int foot_locations_rows,
+                                      int hardware_status);
+
+        public native @Cast("bool") boolean getSolution(DoublePointer state_data_to_pack, int state_rows,
+                                 DoublePointer control_data_to_pack, int control_rows,
+                                 DoublePointer p_gains_to_pack, int p_gain_rows,
+                                 DoublePointer d_gains_to_pack, int d_gain_rows);
+        public native @Cast("bool") boolean getSolution(DoubleBuffer state_data_to_pack, int state_rows,
+                                 DoubleBuffer control_data_to_pack, int control_rows,
+                                 DoubleBuffer p_gains_to_pack, int p_gain_rows,
+                                 DoubleBuffer d_gains_to_pack, int d_gain_rows);
+        public native @Cast("bool") boolean getSolution(double[] state_data_to_pack, int state_rows,
+                                 double[] control_data_to_pack, int control_rows,
+                                 double[] p_gains_to_pack, int p_gain_rows,
+                                 double[] d_gains_to_pack, int d_gain_rows);
+    }
+
+
 
 }

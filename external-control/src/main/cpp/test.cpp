@@ -1,12 +1,17 @@
 #include "test.hpp"
 #include "stdio.h"
 
-void test()
+namespace ihmc
 {
-    printf("test\n");
+    void Test::test()
+    {
+        printf("test\n");
+    }
+
+    void Test::test2(double data)
+    {
+        printf("data * 2 = %f\n", (data * 2));
+    }
 }
 
-void test2(double data)
-{
-    printf("data * 2 = %f\n", (data * 2));
-}
+

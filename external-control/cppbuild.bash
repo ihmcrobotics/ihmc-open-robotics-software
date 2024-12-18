@@ -21,17 +21,24 @@ cmake --build . --config Release --target install
 ### Java generation ####
 cp -r ../src/main/java/* .
 
+# Clone and checkout JavaCPP from specific tag; should update periodically
 JAVACPP_VERSION=1.5.10
+# Download and unzip javacpp into the java source directory
+# Check if the javacpp.jar already exists -- we can skip the fetching step if it does
 if [ ! -f javacpp.jar ]; then
   curl -L https://github.com/bytedeco/javacpp/releases/download/$JAVACPP_VERSION/javacpp-platform-$JAVACPP_VERSION-bin.zip -o javacpp-platform-$JAVACPP_VERSION-bin.zip
   unzip -j javacpp-platform-$JAVACPP_VERSION-bin.zip
 fi
 
+# This will generate the JNI shared library and place it in the classpath resources dir
 java -jar javacpp.jar us/ihmc/externalControl/ExternalControlInfoMapper.java
+java -jar javacpp.jar us/ihmc/externalControl/global/ExternalControlWrapper.java -d javainstall
+
+# Copy newly generated Java into global
 cp us/ihmc/externalControl/*.java ../src/main/java/us/ihmc/externalControl
 cp us/ihmc/externalControl/global/*.java ../src/main/java/us/ihmc/externalControl/global
 
-java -jar javacpp.jar us/ihmc/externalControl/global/*.java -d javainstall
+
 
 ##### Copy shared libs to resources ####
 # Linux

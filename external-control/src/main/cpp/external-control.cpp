@@ -34,21 +34,21 @@ namespace ihmc
             const Eigen::VectorXd base_angular_velocity = state.segment(10 + number_of_joints_, 3);
             const Eigen::VectorXd joint_velocities = state.tail(number_of_joints_);
 
-            constant_position_controller_.compute(base_position,
-                                                  base_orientation,
-                                                  joint_positions,
-                                                  base_linear_velocity,
-                                                  base_angular_velocity,
-                                                  joint_velocities);
+//            constant_position_controller_.compute(base_position,
+//                                                  base_orientation,
+//                                                  joint_positions,
+//                                                  base_linear_velocity,
+//                                                  base_angular_velocity,
+//                                                  joint_velocities);
 
             desired_state_data_.head(7) << base_position, base_orientation;
-            desired_state_data_.segment(7, number_of_joints_) = constant_position_controller_.get_desired_joint_positions();
+//            desired_state_data_.segment(7, number_of_joints_) = constant_position_controller_.get_desired_joint_positions();
             desired_state_data_.segment(7 + number_of_joints_, 6) << base_linear_velocity, base_angular_velocity;
-            desired_state_data_.tail(number_of_joints_) = constant_position_controller_.get_desired_joint_velocities();
+//            desired_state_data_.tail(number_of_joints_) = constant_position_controller_.get_desired_joint_velocities();
 
-            desired_control_data_ = constant_position_controller_.get_desired_joint_torques();
-            p_gains_ = constant_position_controller_.get_desired_joint_stiffnesses();
-            d_gains_ = constant_position_controller_.get_desired_joint_damping();
+//            desired_control_data_ = constant_position_controller_.get_desired_joint_torques();
+//            p_gains_ = constant_position_controller_.get_desired_joint_stiffnesses();
+//            d_gains_ = constant_position_controller_.get_desired_joint_damping();
 
             return true;
         }
@@ -79,6 +79,7 @@ namespace ihmc
 
     bool ExternalControlImpl::setHomeJointConfiguration(const double* configuration_data, int rows)
     {
-        return constant_position_controller_.setHomeJointConfiguration(configuration_data, rows);
+    return true;
+//        return constant_position_controller_.setHomeJointConfiguration(configuration_data, rows);
     }
 }

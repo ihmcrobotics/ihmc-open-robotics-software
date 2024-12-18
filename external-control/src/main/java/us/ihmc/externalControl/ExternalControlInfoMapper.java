@@ -10,15 +10,15 @@ import org.bytedeco.javacpp.tools.InfoMapper;
 @Properties(value =
       @Platform(value = "linux",
                 includepath = {"include", "include/eigen3"},
-                include = {"test.hpp"},
+                include = {"test.hpp",
+                           "external-control.hpp"},
                 linkpath = "lib",
                 link = "external-control",
                 preload = {"external-control", "jniExternalControlWrapper"}
       ),
-      target = "us.ihmc.externalControl",
-      global = "us.ihmc.externalControl.global.ExternalControlWrapper"
+      target = "us.ihmc.externalControl.global.ExternalControlWrapper"
 )
-// @formatter:on
+// @formatter:onExtWra
 
 public class ExternalControlInfoMapper implements InfoMapper
 {
@@ -27,16 +27,19 @@ public class ExternalControlInfoMapper implements InfoMapper
 
       // Types
 
+
       // Renaming, example: infoMap.put(new Info("ihmc::Frame").pointerTypes("FrameImpl"));
 
       // Enums
 
       // Abstract
-      infoMap.put(new Info("ihmc::ExternalControlImpl").virtualize());
+//      infoMap.put(new Info("ihmc::ExternalControlImpl").virtualize());
+      infoMap.put(new Info("ihmc::Test").pointerTypes("TestImpl"));
+      infoMap.put(new Info("ihmc::ExternalControl").pointerTypes("ExternalControlImpl"));
 
       // Skipping some parts of the headers
-      String skipStartRegex = "^ *// JAVACPP START SKIP *$";
-      String skipEndRegex = "^ *// JAVACPP END SKIP *$";
-      infoMap.put(new Info("external-control.hpp").linePatterns(skipStartRegex, skipEndRegex).skip());
+//      String skipStartRegex = "^ *// JAVACPP START SKIP *$";
+//      String skipEndRegex = "^ *// JAVACPP END SKIP *$";
+//      infoMap.put(new Info("external-control.hpp").linePatterns(skipStartRegex, skipEndRegex).skip());
    }
 }
