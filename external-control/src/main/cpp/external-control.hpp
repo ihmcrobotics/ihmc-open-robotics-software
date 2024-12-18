@@ -2,7 +2,7 @@
 
 #include <Eigen/Core>
 
-//#include "controllers/constant-position-controller.hpp"
+#include "controllers/constant-position-controller.hpp"
 
 namespace ihmc
 {
@@ -36,7 +36,7 @@ namespace ihmc
                          double* d_gains_to_pack, int d_gain_rows) const;
 
     private:
-//        ConstantPositionController constant_position_controller_;
+        ConstantPositionController constant_position_controller_;
 
         int number_of_joints_;
         Eigen::VectorXd desired_state_data_;

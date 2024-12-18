@@ -1,6 +1,6 @@
 #include "constant-position-controller.hpp"
 
-#include "types.hpp"
+#include <iostream>
 
 namespace ihmc
 {
@@ -18,10 +18,27 @@ namespace ihmc
         desired_joint_damping_.fill(default_damping);
     }
 
+    void ConstantPositionController::resize(const double default_stiffness, const double default_damping, const int number_of_joints)
+    {
+        number_of_joints_ = number_of_joints;
+        desired_joint_velocities_.resize(number_of_joints_);
+        desired_joint_torques_.resize(number_of_joints_);
+        desired_joint_stiffnesses_.resize(number_of_joints_);
+        desired_joint_damping_.resize(number_of_joints_);
+
+        desired_joint_velocities_.setZero();
+        desired_joint_torques_.setZero();
+        desired_joint_stiffnesses_.fill(default_stiffness);
+        desired_joint_damping_.fill(default_damping);
+    }
+
     bool ConstantPositionController::setHomeJointConfiguration(const double* configuration_data, int configuration_rows)
     {
         if (configuration_rows != number_of_joints_)
+        {
+            std::cout << "The size of the home configuration is incorrect" << std::endl;
             return false;
+        }
 
         const VectorViewReadOnly configuration(configuration_data, configuration_rows);
         home_configuration_ = configuration;
@@ -29,8 +46,7 @@ namespace ihmc
         return true;
     }
 
-    void compute(const Eigen::Vector3d& base_position, const Eigen::Vector4d& base_orientation, const Eigen::VectorXd& joint_positions,
-                 const Eigen::Vector3d& base_linear_velocity, const Eigen::Vector3d& base_angular_velocity, const Eigen::VectorXd& joint_velocities)
+    void compute()
     {
     }
 

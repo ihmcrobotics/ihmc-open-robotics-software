@@ -9,40 +9,13 @@ import org.bytedeco.javacpp.annotation.*;
 public class ExternalControlWrapper extends us.ihmc.externalControl.ExternalControlInfoMapper {
     static { Loader.load(); }
 
-// Parsed from test.hpp
-
-
-    @Name("ihmc::Test") public static class TestImpl extends Pointer {
-        static { Loader.load(); }
-        /** Pointer cast constructor. Invokes {@link Pointer#Pointer(Pointer)}. */
-        public TestImpl(Pointer p) { super(p); }
-        /** Native array allocator. Access with {@link Pointer#position(long)}. */
-        public TestImpl(long size) { super((Pointer)null); allocateArray(size); }
-        private native void allocateArray(long size);
-        @Override public TestImpl position(long position) {
-            return (TestImpl)super.position(position);
-        }
-        @Override public TestImpl getPointer(long i) {
-            return new TestImpl((Pointer)this).offsetAddress(i);
-        }
-    
-        public TestImpl() { super((Pointer)null); allocate(); }
-        private native void allocate();
-
-        public native void test();
-
-        public native void test2(double data);
-    }
-
-
-
 // Parsed from external-control.hpp
 
 // #pragma once
 
 // #include <Eigen/Core>
 
-//#include "controllers/constant-position-controller.hpp"
+// #include "controllers/constant-position-controller.hpp"
     @Namespace("ihmc") @NoOffset public static class ExternalControlImpl extends Pointer {
         static { Loader.load(); }
         /** Pointer cast constructor. Invokes {@link Pointer#Pointer(Pointer)}. */
