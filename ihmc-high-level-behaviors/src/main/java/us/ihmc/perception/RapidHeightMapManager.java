@@ -45,7 +45,7 @@ public class RapidHeightMapManager
 
    private final Notification resetHeightMapRequested = new Notification();
    private final BytePointer compressedCroppedHeightMapPointer = new BytePointer();
-   private final boolean hasCUDAAvailable = CUDATools.doesCUDAExistAndMatchVersion();
+   private final boolean hasCUDAAvailable = CUDATools.hasCUDA();
 
    public RapidHeightMapManager(OpenCLManager openCLManager,
                                 DRCRobotModel robotModel,

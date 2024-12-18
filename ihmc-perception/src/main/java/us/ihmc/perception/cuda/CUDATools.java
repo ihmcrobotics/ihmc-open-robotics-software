@@ -9,10 +9,6 @@ import org.bytedeco.javacpp.Loader;
 import org.bytedeco.javacpp.Pointer;
 import us.ihmc.log.LogTools;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-
 import static org.bytedeco.cuda.global.cudart.*;
 import static org.bytedeco.cuda.global.nvjpeg.NVJPEG_STATUS_SUCCESS;
 import static org.bytedeco.cuda.global.nvrtc.NVRTC_SUCCESS;
@@ -20,8 +16,6 @@ import static org.bytedeco.cuda.global.nvrtc.nvrtcGetErrorString;
 
 public class CUDATools
 {
-   public static final String REQUIRED_CUDA_VERSION = "12.6";
-
    public static boolean hasCUDA()
    {
       return hasLibrary(cudart.class);
@@ -63,53 +57,6 @@ public class CUDATools
    public static boolean hasCUDADevice()
    {
       return getCUDADeviceCount() > 0;
-   }
-
-   public static boolean doesCUDAExistAndMatchVersion()
-   {
-      try
-      {
-         ProcessBuilder processBuilder = new ProcessBuilder("nvcc", "--version");
-         Process process = processBuilder.start();
-
-         BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-         String line;
-         while ((line = reader.readLine()) != null)
-         {
-            if (line.contains("release"))
-            {
-               String cudaVersion = extractVersion(line);
-               return cudaVersion != null && cudaVersion.equals(REQUIRED_CUDA_VERSION);
-            }
-         }
-
-         process.waitFor();
-      }
-      catch (IOException | InterruptedException e)
-      {
-         return false;
-      }
-
-      return false;
-   }
-
-   /**
-    * We search for the release keyword in the text, and pull the version from this
-    * @return the version number or null if the version doesn't exist
-    */
-   private static String extractVersion(String lineOfText)
-   {
-      String keyword = "release";
-      int sizeOfKeyword = keyword.length();
-      int releaseIndex = lineOfText.indexOf(keyword);
-
-      if (releaseIndex != -1)
-      {
-         String versionPart = lineOfText.substring(releaseIndex + sizeOfKeyword).trim();
-         return versionPart.split(",")[0].trim();
-      }
-
-      return null;
    }
 
    /**
