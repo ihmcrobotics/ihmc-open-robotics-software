@@ -267,8 +267,8 @@ public class ROS2BehaviorTreeMessageTools
       }
       else
       {
-         nodeState.fromMessage(subscriptionNode.getBehaviorTreeNodeStateMessage());
          nodeState.getDefinition().fromMessage(subscriptionNode.getBehaviorTreeNodeDefinitionMessage());
+         nodeState.fromMessage(subscriptionNode.getBehaviorTreeNodeStateMessage());
       }
    }
 

@@ -154,7 +154,8 @@ public class BehaviorTreeNodeDefinition extends LatestTimestampModifiable implem
 
    public void fromMessage(BehaviorTreeNodeDefinitionMessage message)
    {
-      fromMessage(message.getLatestModification()); // Unpack first, because this also unfreezes
+      // Needs to be done first to detect incoming modification
+      fromMessage(message.getLatestModification());
 
       name.fromMessage(message.getNameAsString());
       // notes.fromMessage(message.getNotesAsString());

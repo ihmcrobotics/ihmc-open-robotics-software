@@ -81,9 +81,9 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
 
    public void fromMessage(BehaviorTreeRootNodeStateMessage message)
    {
-      super.fromMessage(message.getState());
-
       definition.fromMessage(message.getDefinition());
+
+      super.fromMessage(message.getState());
 
       automaticExecution.fromMessage(message.getAutomaticExecution());
       executionNextIndex.fromMessage(message.getExecutionNextIndex());

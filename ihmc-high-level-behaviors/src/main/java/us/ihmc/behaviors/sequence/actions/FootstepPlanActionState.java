@@ -146,9 +146,9 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
 
    public void fromMessage(FootstepPlanActionStateMessage message)
    {
-      super.fromMessage(message.getState());
-
       definition.fromMessage(message.getDefinition());
+
+      super.fromMessage(message.getState());
 
       goalToParentTransform.fromMessage(message.getGoalTransformToParent());
       totalNumberOfFootsteps.fromMessage(message.getTotalNumberOfFootsteps());
