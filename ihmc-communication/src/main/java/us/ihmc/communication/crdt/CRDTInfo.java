@@ -30,13 +30,11 @@ public class CRDTInfo
       this.peerClockEstimator = null;
    }
 
-   /** Only used for freezable CRDTs. */
    public void startNextUpdate()
    {
       ++updateNumber;
    }
 
-   /** Only used for freezable CRDTs. */
    public long getUpdateNumber()
    {
       return updateNumber;
