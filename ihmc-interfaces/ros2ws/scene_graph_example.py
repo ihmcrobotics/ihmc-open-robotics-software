@@ -25,8 +25,6 @@ def scene_graph_message_callback(msg):
     if "updated_scene_graph" in state:
         ros2["scene_graph_publisher"].publish(state["updated_scene_graph"])
         state["scene_graph"] = state["updated_scene_graph"]
-        print(state["scene_graph"].scene_nodes[0].name)
-        print(state["scene_graph"].scene_nodes[1].name)
         del state["updated_scene_graph"]
     else:
         state["scene_graph"] = msg
@@ -41,8 +39,14 @@ def add_simple_node():
 
 def clear_scene_nodes():
     updated_scene_graph = state["scene_graph"]
+
+    updated_scene_graph.scene_tree_types = [b'\x00']
+    updated_scene_graph.scene_tree_indices = [0]
+
     root_node = updated_scene_graph.scene_nodes[0]
+    root_node.number_of_children = 0
     updated_scene_graph.scene_nodes = [root_node]
+
     updated_scene_graph.detectable_scene_nodes = []
     updated_scene_graph.predefined_rigid_body_scene_nodes = []
     updated_scene_graph.aruco_marker_scene_nodes = []
@@ -52,8 +56,8 @@ def clear_scene_nodes():
     updated_scene_graph.yolo_scene_nodes = []
     updated_scene_graph.door_scene_nodes = []
     updated_scene_graph.trash_can_nodes = []
-    print(updated_scene_graph)
-    # ros2["scene_graph_publisher"].publish(updated_scene_graph)
+
+    state["updated_scene_graph"] = updated_scene_graph
 
 def main(args=None):
     rclpy.init(args=args)
@@ -81,10 +85,7 @@ def main(args=None):
     try:
         rclpy.spin(node)
     except KeyboardInterrupt:
-        shutdown = True
-
-    node.destroy_node()
-    rclpy.shutdown()
+        node.destroy_node()
 
 if __name__ == '__main__':
     main()
