@@ -24,8 +24,8 @@ public class RDXVRPrescientFootstepStreaming
    private static final double STABILITY_THRESHOLD = 0.005; // stability threshold
    private static final int STABILITY_ITERATIONS = 20; // Number of stable iterations
    private static final int TURNING_THRESHOLD = 12; // Degrees variation for ankle tracker to trigger 33.3 deg turn on robot
-   public static final int WAIT_TIME_BEFORE_STEP = 50; // [ms] time to wait before walking, need some time for the stop streaming status to get to the controller
-   public static final int WAIT_TIME_AFTER_STEP = 500; // [ms] time to wait before restarting streaming
+   public static final int WAIT_TIME_BEFORE_STEP = 1; // [ms] time to wait before walking, need some time for the stop streaming status to get to the controller
+   public static final int WAIT_TIME_AFTER_STEP = 1; // [ms] time to wait before restarting streaming
 
    private final ROS2SyncedRobotModel syncedRobot;
    private final RDXManualFootstepPlacement footstepPlacer;
@@ -55,7 +55,9 @@ public class RDXVRPrescientFootstepStreaming
    }
 
    /**
-    * Predicts and places footsteps based on the movement of ankle trackers.
+    * This method is called continuously. It updates footstep targets based on ankle tracker movement.
+    * If a user starts stepping, we enter stepping mode and use PD control to continuously update the footstep.
+    * Once the user’s foot begins descending, we stabilize the stride length and finalize the step once stable.
     */
    public void streamFootsteps()
    {
@@ -81,70 +83,67 @@ public class RDXVRPrescientFootstepStreaming
                translation.sub(currentTrackerTransform.getTranslation(), initialTrackerTransform.getTranslation());
                FrameVector2D translationXY = new FrameVector2D(ReferenceFrame.getWorldFrame(), translation.getX(), translation.getY());
 
-               // Check if the tracker has moved in any direction
-               if (translationXY.norm() >= STEP_THRESHOLD)
+               // Check if the tracker has moved in any direction AND the foot has been lifted
+               if (translationXY.norm() >= STEP_THRESHOLD && translation.getZ() >= LIFT_THRESHOLD)
                {
-                  // Check if the foot has been lifted
-                  if (translation.getZ() >= LIFT_THRESHOLD)
+                  // Get the current robot foot position in world
+                  RigidBodyTransform currentRobotFootTransformInWorld = new RigidBodyTransform(syncedRobot.getReferenceFrames().getSoleFrame(side).getTransformToWorldFrame());
+                  FramePoint2D currentRobotFootXY = new FramePoint2D(ReferenceFrame.getWorldFrame(), currentRobotFootTransformInWorld.getTranslation().getX(),
+                                                                     currentRobotFootTransformInWorld.getTranslation().getY());
+                  // Estimate the final footstep location in the XY plane (world frame)
+                  FramePoint2D initialXY = new FramePoint2D(ReferenceFrame.getWorldFrame(), currentRobotFootXY.getX(), currentRobotFootXY.getY());
+
+                  // Normalize the translation direction to have a fixed stride distance
+                  translationXY.normalize();
+                  // Scale the normalized direction to the fixed stride distance
+                  translationXY.scale(STRIDE_LENGTH);
+                  // Apply the translation to the current robot foot position
+                  FramePoint2D finalFootstep = new FramePoint2D(initialXY);
+                  finalFootstep.add(translationXY);
+                  currentRobotFootTransformInWorld.getTranslation().setX(finalFootstep.getX());
+                  currentRobotFootTransformInWorld.getTranslation().setY(finalFootstep.getY());
+                  // Compute yaw variation
+                  double newYaw = currentRobotFootTransformInWorld.getRotation().getYaw();
+                  double yawVariation = currentTrackerTransform.getRotation().getYaw() - initialTrackerTransform.getRotation().getYaw();
+                  if (Math.toDegrees(yawVariation) >= TURNING_THRESHOLD)
                   {
-                     // Get the current robot foot position in world
-                     RigidBodyTransform currentRobotFootTransformInWorld = new RigidBodyTransform(syncedRobot.getReferenceFrames().getSoleFrame(side).getTransformToWorldFrame());
-                     FramePoint2D currentRobotFootXY = new FramePoint2D(ReferenceFrame.getWorldFrame(), currentRobotFootTransformInWorld.getTranslation().getX(),
-                                                                        currentRobotFootTransformInWorld.getTranslation().getY());
-                     // Estimate the final footstep location in the XY plane (world frame)
-                     FramePoint2D initialXY = new FramePoint2D(ReferenceFrame.getWorldFrame(), currentRobotFootXY.getX(), currentRobotFootXY.getY());
+                     newYaw += Math.toRadians(33.33);
+                  }
+                  else if (Math.toDegrees(yawVariation) <= -TURNING_THRESHOLD)
+                  {
+                     newYaw -= Math.toRadians(33.33);
+                  }
+                  // Update yaw of footstep
+                  currentRobotFootTransformInWorld.getRotation().setYawPitchRoll(newYaw,
+                                                                                 currentRobotFootTransformInWorld.getRotation().getPitch(),
+                                                                                 currentRobotFootTransformInWorld.getRotation().getRoll());
 
-                     // Normalize the translation direction to have a fixed stride distance
-                     translationXY.normalize();
-                     // Scale the normalized direction to the fixed stride distance
-                     translationXY.scale(STRIDE_LENGTH);
-                     // Apply the translation to the current robot foot position
-                     FramePoint2D finalFootstep = new FramePoint2D(initialXY);
-                     finalFootstep.add(translationXY);
-                     currentRobotFootTransformInWorld.getTranslation().setX(finalFootstep.getX());
-                     currentRobotFootTransformInWorld.getTranslation().setY(finalFootstep.getY());
-                     // Compute yaw variation
-                     double newYaw = currentRobotFootTransformInWorld.getRotation().getYaw();
-                     double yawVariation = currentTrackerTransform.getRotation().getYaw() - initialTrackerTransform.getRotation().getYaw();
-                     if (Math.toDegrees(yawVariation) >= TURNING_THRESHOLD)
-                     {
-                        newYaw += Math.toRadians(33.33);
-                     }
-                     else if (Math.toDegrees(yawVariation) <= -TURNING_THRESHOLD)
-                     {
-                        newYaw -= Math.toRadians(33.33);
-                     }
-                     // Update yaw of footstep
-                     currentRobotFootTransformInWorld.getRotation().setYawPitchRoll(newYaw,
-                                                                                    currentRobotFootTransformInWorld.getRotation().getPitch(),
-                                                                                    currentRobotFootTransformInWorld.getRotation().getRoll());
-
-                     // Place and send footstep
-                     footstepPlacer.createNewFootstep(side);
-                     footstepPlacer.setFootstepPose(new FramePose3D(ReferenceFrame.getWorldFrame(), currentRobotFootTransformInWorld));
-                     if(footstepPlacer.checkAndPlaceFootstep())
-                     {
-                        footstepPlacer.exitPlacement();
-                        isUserStepping.put(side, true);
-                        readyToStep.clear();
-                        readyToStep.set();
-                     }
-                     else
-                     {
-                        footstepPlacer.exitPlacement();
-                     }
+                  // Place and send footstep
+                  footstepPlacer.createNewFootstep(side);
+                  footstepPlacer.setFootstepPose(new FramePose3D(ReferenceFrame.getWorldFrame(), currentRobotFootTransformInWorld));
+                  if(footstepPlacer.checkAndPlaceFootstep())
+                  {
+                     footstepPlacer.exitPlacement();
+                     isUserStepping.put(side, true);
+                     readyToStep.clear();
+                     readyToStep.set();
+                  }
+                  else
+                  {
+                     footstepPlacer.exitPlacement();
                   }
                }
             }
-            else
+            else // User is stepping, a first prediction for the footstep has been sent already
             {
                if (initialTrackerTransform != null)
                {
                   // Check if tracker is not moving much anymore
-                  Vector3D translation = new Vector3D();
-                  translation.sub(currentTrackerTransform.getTranslation(), previousTrackersTransform.get(side).getTranslation());
+                  Vector3D translationFromInitialPosition = new Vector3D();
+                  translationFromInitialPosition.sub(currentTrackerTransform.getTranslation(), previousTrackersTransform.get(side).getTranslation());
 
-                  if (translation.norm() <= STABILITY_THRESHOLD)
+                  // If the tacker is not moving much, then start counting for stability
+                  if (translationFromInitialPosition.norm() <= STABILITY_THRESHOLD)
                   {
                      int stableCount = stableIterationCounts.get(side);
                      stableCount++;
@@ -157,9 +156,11 @@ public class RDXVRPrescientFootstepStreaming
                         stableIterationCounts.put(side, 0);
                      }
                   }
-                  else
+                  else  // the tracker is still, update the predicted footstep and reset stability count
                   {
                      stableIterationCounts.put(side, 0);
+                     // Here implmenet PD control
+
                   }
 
                   // Update the previous tracker position for the next iteration
