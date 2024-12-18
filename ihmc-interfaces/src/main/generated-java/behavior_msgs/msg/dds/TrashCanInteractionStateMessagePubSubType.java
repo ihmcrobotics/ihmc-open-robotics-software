@@ -15,7 +15,7 @@ public class TrashCanInteractionStateMessagePubSubType implements us.ihmc.pubsub
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "5a7eec11daf28654368dc6161895ecac866b26f23b3e8f6abbc12de1d21e9870";
+   		return "6f768a7dbc077c3c898523ea5a1a7e75cdf4481b875de4fcc0177fb3e323e324";
    }
    
    @Override

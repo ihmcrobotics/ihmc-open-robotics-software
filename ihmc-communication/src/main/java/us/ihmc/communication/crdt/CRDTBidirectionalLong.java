@@ -10,13 +10,13 @@ package us.ihmc.communication.crdt;
  */
 public class CRDTBidirectionalLong
 {
-   private final RequestConfirmFreezable requestConfirmFreezable;
+   private final LatestTimestampModifiable latestTimestampModifiable;
 
    private long value;
 
-   public CRDTBidirectionalLong(RequestConfirmFreezable requestConfirmFreezable, long initialValue)
+   public CRDTBidirectionalLong(LatestTimestampModifiable latestTimestampModifiable, long initialValue)
    {
-      this.requestConfirmFreezable = requestConfirmFreezable;
+      this.latestTimestampModifiable = latestTimestampModifiable;
 
       value = initialValue;
    }
@@ -31,7 +31,7 @@ public class CRDTBidirectionalLong
       if (this.value != value) // Don't want to do anything in the case nothing changed
       {
          this.value = value;
-         requestConfirmFreezable.freeze();
+         latestTimestampModifiable.modify();
       }
    }
 
@@ -42,7 +42,7 @@ public class CRDTBidirectionalLong
 
    public void fromMessage(long value)
    {
-      if (!requestConfirmFreezable.isFrozen())
+      if (latestTimestampModifiable.isOutOfDate())
       {
          this.value = value;
       }

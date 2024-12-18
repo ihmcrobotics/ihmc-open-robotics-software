@@ -20,7 +20,7 @@
 #include "behavior_msgs/msg/./ScrewPrimitiveActionStateMessage_.idl"
 #include "behavior_msgs/msg/./TrashCanInteractionStateMessage_.idl"
 #include "behavior_msgs/msg/./WaitDurationActionStateMessage_.idl"
-#include "ihmc_common_msgs/msg/./ConfirmableRequestMessage_.idl"
+#include "ihmc_common_msgs/msg/./LatestModificationMessage_.idl"
 module behavior_msgs
 {
   module msg
@@ -103,9 +103,9 @@ module behavior_msgs
          */
         unsigned long next_id;
         /**
-         * A mechanism for confirming and ending a freeze early
+         * The timestamp and modifer ID of the latest modification
          */
-        ihmc_common_msgs::msg::dds::ConfirmableRequestMessage confirmable_request;
+        ihmc_common_msgs::msg::dds::LatestModificationMessage latest_modification;
         /**
          * A depth first ordered list of types.
          */

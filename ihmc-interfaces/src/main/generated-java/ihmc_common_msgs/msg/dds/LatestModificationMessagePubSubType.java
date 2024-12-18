@@ -2,20 +2,20 @@ package ihmc_common_msgs.msg.dds;
 
 /**
 * 
-* Topic data type of the struct "CRDTTimestampedModificationMessage" defined in "CRDTTimestampedModificationMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+* Topic data type of the struct "LatestModificationMessage" defined in "LatestModificationMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
 *
-* This file was automatically generated from CRDTTimestampedModificationMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit CRDTTimestampedModificationMessage_.idl instead.
+* This file was automatically generated from LatestModificationMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit LatestModificationMessage_.idl instead.
 *
 */
-public class CRDTTimestampedModificationMessagePubSubType implements us.ihmc.pubsub.TopicDataType<ihmc_common_msgs.msg.dds.CRDTTimestampedModificationMessage>
+public class LatestModificationMessagePubSubType implements us.ihmc.pubsub.TopicDataType<ihmc_common_msgs.msg.dds.LatestModificationMessage>
 {
-   public static final java.lang.String name = "ihmc_common_msgs::msg::dds_::CRDTTimestampedModificationMessage_";
+   public static final java.lang.String name = "ihmc_common_msgs::msg::dds_::LatestModificationMessage_";
    
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "2440a68c78797577df657364e054562c9a6cba58a7e127916133055492cbd4cf";
+   		return "0db59189fea8bd2f9c5832e08d1c1fb14054dc774d8f9543d9610a2f554219cf";
    }
    
    @Override
@@ -28,7 +28,7 @@ public class CRDTTimestampedModificationMessagePubSubType implements us.ihmc.pub
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(ihmc_common_msgs.msg.dds.CRDTTimestampedModificationMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
+   public void serialize(ihmc_common_msgs.msg.dds.LatestModificationMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -36,7 +36,7 @@ public class CRDTTimestampedModificationMessagePubSubType implements us.ihmc.pub
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, ihmc_common_msgs.msg.dds.CRDTTimestampedModificationMessage data) throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, ihmc_common_msgs.msg.dds.LatestModificationMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -60,12 +60,12 @@ public class CRDTTimestampedModificationMessagePubSubType implements us.ihmc.pub
       return current_alignment - initial_alignment;
    }
 
-   public final static int getCdrSerializedSize(ihmc_common_msgs.msg.dds.CRDTTimestampedModificationMessage data)
+   public final static int getCdrSerializedSize(ihmc_common_msgs.msg.dds.LatestModificationMessage data)
    {
       return getCdrSerializedSize(data, 0);
    }
 
-   public final static int getCdrSerializedSize(ihmc_common_msgs.msg.dds.CRDTTimestampedModificationMessage data, int current_alignment)
+   public final static int getCdrSerializedSize(ihmc_common_msgs.msg.dds.LatestModificationMessage data, int current_alignment)
    {
       int initial_alignment = current_alignment;
 
@@ -77,13 +77,13 @@ public class CRDTTimestampedModificationMessagePubSubType implements us.ihmc.pub
       return current_alignment - initial_alignment;
    }
 
-   public static void write(ihmc_common_msgs.msg.dds.CRDTTimestampedModificationMessage data, us.ihmc.idl.CDR cdr)
+   public static void write(ihmc_common_msgs.msg.dds.LatestModificationMessage data, us.ihmc.idl.CDR cdr)
    {
       ihmc_common_msgs.msg.dds.GuidMessagePubSubType.write(data.getLatestModifierId(), cdr);
       ihmc_common_msgs.msg.dds.InstantMessagePubSubType.write(data.getLatestModificationTimeInModifierFrame(), cdr);
    }
 
-   public static void read(ihmc_common_msgs.msg.dds.CRDTTimestampedModificationMessage data, us.ihmc.idl.CDR cdr)
+   public static void read(ihmc_common_msgs.msg.dds.LatestModificationMessage data, us.ihmc.idl.CDR cdr)
    {
       ihmc_common_msgs.msg.dds.GuidMessagePubSubType.read(data.getLatestModifierId(), cdr);	
       ihmc_common_msgs.msg.dds.InstantMessagePubSubType.read(data.getLatestModificationTimeInModifierFrame(), cdr);	
@@ -91,7 +91,7 @@ public class CRDTTimestampedModificationMessagePubSubType implements us.ihmc.pub
    }
 
    @Override
-   public final void serialize(ihmc_common_msgs.msg.dds.CRDTTimestampedModificationMessage data, us.ihmc.idl.InterchangeSerializer ser)
+   public final void serialize(ihmc_common_msgs.msg.dds.LatestModificationMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_a("latest_modifier_id", new ihmc_common_msgs.msg.dds.GuidMessagePubSubType(), data.getLatestModifierId());
 
@@ -100,7 +100,7 @@ public class CRDTTimestampedModificationMessagePubSubType implements us.ihmc.pub
    }
 
    @Override
-   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, ihmc_common_msgs.msg.dds.CRDTTimestampedModificationMessage data)
+   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, ihmc_common_msgs.msg.dds.LatestModificationMessage data)
    {
       ser.read_type_a("latest_modifier_id", new ihmc_common_msgs.msg.dds.GuidMessagePubSubType(), data.getLatestModifierId());
 
@@ -108,15 +108,15 @@ public class CRDTTimestampedModificationMessagePubSubType implements us.ihmc.pub
 
    }
 
-   public static void staticCopy(ihmc_common_msgs.msg.dds.CRDTTimestampedModificationMessage src, ihmc_common_msgs.msg.dds.CRDTTimestampedModificationMessage dest)
+   public static void staticCopy(ihmc_common_msgs.msg.dds.LatestModificationMessage src, ihmc_common_msgs.msg.dds.LatestModificationMessage dest)
    {
       dest.set(src);
    }
 
    @Override
-   public ihmc_common_msgs.msg.dds.CRDTTimestampedModificationMessage createData()
+   public ihmc_common_msgs.msg.dds.LatestModificationMessage createData()
    {
-      return new ihmc_common_msgs.msg.dds.CRDTTimestampedModificationMessage();
+      return new ihmc_common_msgs.msg.dds.LatestModificationMessage();
    }
    @Override
    public int getTypeSize()
@@ -130,24 +130,24 @@ public class CRDTTimestampedModificationMessagePubSubType implements us.ihmc.pub
       return name;
    }
    
-   public void serialize(ihmc_common_msgs.msg.dds.CRDTTimestampedModificationMessage data, us.ihmc.idl.CDR cdr)
+   public void serialize(ihmc_common_msgs.msg.dds.LatestModificationMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
    }
 
-   public void deserialize(ihmc_common_msgs.msg.dds.CRDTTimestampedModificationMessage data, us.ihmc.idl.CDR cdr)
+   public void deserialize(ihmc_common_msgs.msg.dds.LatestModificationMessage data, us.ihmc.idl.CDR cdr)
    {
       read(data, cdr);
    }
    
-   public void copy(ihmc_common_msgs.msg.dds.CRDTTimestampedModificationMessage src, ihmc_common_msgs.msg.dds.CRDTTimestampedModificationMessage dest)
+   public void copy(ihmc_common_msgs.msg.dds.LatestModificationMessage src, ihmc_common_msgs.msg.dds.LatestModificationMessage dest)
    {
       staticCopy(src, dest);
    }
 
    @Override
-   public CRDTTimestampedModificationMessagePubSubType newInstance()
+   public LatestModificationMessagePubSubType newInstance()
    {
-      return new CRDTTimestampedModificationMessagePubSubType();
+      return new LatestModificationMessagePubSubType();
    }
 }

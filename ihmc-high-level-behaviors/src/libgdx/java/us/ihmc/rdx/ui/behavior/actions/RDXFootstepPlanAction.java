@@ -247,9 +247,9 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
 
          for (RobotSide side : RobotSide.values)
             if (goalFeetGizmos.get(side).getPoseGizmo().getGizmoModifiedByUser().poll())
-               definition.freeze();
+               definition.modify();
 
-         if (definition.isFrozen())
+         if (!definition.isOutOfDate())
             for (RobotSide side : RobotSide.values)
                state.copyGoalFootstepToGoalTransformToDefinition(side);
          else

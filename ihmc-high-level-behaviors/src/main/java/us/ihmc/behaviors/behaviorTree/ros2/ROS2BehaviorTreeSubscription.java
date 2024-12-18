@@ -88,7 +88,7 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, 
 
             behaviorTreeState.fromMessage(behaviorTreeStateMessage);
 
-            if (!behaviorTreeState.isFrozen())
+            if (behaviorTreeState.isOutOfDate())
             {
                // Clears all unfrozen nodes
                behaviorTreeState.modifyTreeTopology(topologyOperationQueue ->
@@ -98,17 +98,17 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, 
             behaviorTreeState.modifyTreeTopology(topologyOperationQueue ->
             {
                // When the root node is swapped out, we freeze the reference to the new one
-               boolean treeRootReferenceFrozen = behaviorTreeState.isFrozen();
+               boolean treeRootReferenceUpToDate = behaviorTreeState.isUpToDate();
 
-               boolean allowReplicatingRoot = !treeRootReferenceFrozen;
+               boolean allowReplicatingRoot = behaviorTreeState.isOutOfDate();
                T rootNode = subscriptionRootIsNull ? null : retrieveOrReplicateLocalNode(subscriptionRootNode, allowReplicatingRoot);
 
                if (rootNode != null)
                {
-                  // The root node's parent is "null"
-                  updateLocalTreeFromSubscription(subscriptionRootNode, rootNode, null, topologyOperationQueue, treeRootReferenceFrozen);
+                  T parent = null;
+                  updateLocalTreeFromSubscription(subscriptionRootNode, rootNode, parent, topologyOperationQueue, treeRootReferenceUpToDate);
                }
-               else if (!treeRootReferenceFrozen)
+               else if (allowReplicatingRoot)
                {
                   rootNodeSetter.accept(null);
                }
@@ -144,10 +144,10 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, 
                                                 T localNode,
                                                 T localParentNode,
                                                 BehaviorTreeTopologyOperationQueue topologyOperationQueue,
-                                                boolean anAncestorIsFrozen)
+                                                boolean anAncestorIsUpToDate)
    {
       // We just add nodes if they would not be part of a frozen subtree.
-      if (!anAncestorIsFrozen)
+      if (!anAncestorIsUpToDate)
       {
          if (localParentNode == null)
             topologyOperationQueue.queueSetRootNode(localNode, rootNodeSetter);
@@ -157,10 +157,10 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, 
 
       for (int i = 0; i < subscriptionNode.getChildren().size(); i++)
       {
-         anAncestorIsFrozen |= localNode.getDefinition().isFrozen();
+         anAncestorIsUpToDate |= localNode.getDefinition().isUpToDate();
 
          T localChildNode = null;
-         if (anAncestorIsFrozen)
+         if (anAncestorIsUpToDate)
          {
             // In the case of locally nodes that just got added or removed, only update children with matching IDs.
             // This'll just be for a few updates.
@@ -179,7 +179,7 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, 
 
          if (localChildNode != null)
          {
-            updateLocalTreeFromSubscription(subscriptionNode.getChildren().get(i), localChildNode, localNode, topologyOperationQueue, anAncestorIsFrozen);
+            updateLocalTreeFromSubscription(subscriptionNode.getChildren().get(i), localChildNode, localNode, topologyOperationQueue, anAncestorIsUpToDate);
          }
       }
 

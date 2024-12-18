@@ -17,9 +17,9 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
  */
 public class CRDTBidirectionalRigidBodyTransform extends CRDTBidirectionalMutableField<RigidBodyTransform>
 {
-   public CRDTBidirectionalRigidBodyTransform(RequestConfirmFreezable requestConfirmFreezable)
+   public CRDTBidirectionalRigidBodyTransform(LatestTimestampModifiable latestTimestampModifiable)
    {
-      super(requestConfirmFreezable, new RigidBodyTransform());
+      super(latestTimestampModifiable, new RigidBodyTransform());
    }
 
    public RigidBodyTransformReadOnly getValueReadOnly()

@@ -13,9 +13,9 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
  */
 public class CRDTBidirectionalPoint3D extends CRDTBidirectionalMutableField<Point3D>
 {
-   public CRDTBidirectionalPoint3D(RequestConfirmFreezable requestConfirmFreezable)
+   public CRDTBidirectionalPoint3D(LatestTimestampModifiable latestTimestampModifiable)
    {
-      super(requestConfirmFreezable, new Point3D());
+      super(latestTimestampModifiable, new Point3D());
    }
 
    public Point3DReadOnly getValueReadOnly()

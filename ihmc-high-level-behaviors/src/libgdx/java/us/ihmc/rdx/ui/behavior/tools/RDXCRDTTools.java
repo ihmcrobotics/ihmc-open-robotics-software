@@ -2,7 +2,7 @@ package us.ihmc.rdx.ui.behavior.tools;
 
 import us.ihmc.communication.crdt.CRDTBidirectionalPoint3D;
 import us.ihmc.communication.crdt.CRDTBidirectionalRigidBodyTransform;
-import us.ihmc.communication.crdt.RequestConfirmFreezable;
+import us.ihmc.communication.crdt.LatestTimestampModifiable;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 
 public class RDXCRDTTools
@@ -14,13 +14,13 @@ public class RDXCRDTTools
     */
    public static void syncGizmoWithBidirectionalField(RDXPose3DGizmo gizmo,
                                                       CRDTBidirectionalRigidBodyTransform transform,
-                                                      RequestConfirmFreezable requestConfirmFreezable)
+                                                      LatestTimestampModifiable latestTimestampModifiable)
    {
       if (gizmo.getGizmoModifiedByUser().poll())
       {
          transform.getValueAndFreeze().set(gizmo.getTransformToParent());
       }
-      else if (!requestConfirmFreezable.isFrozen())
+      else if (latestTimestampModifiable.isOutOfDate())
       {
          gizmo.getTransformToParent().set(transform.getValueReadOnly());
       }
@@ -33,13 +33,13 @@ public class RDXCRDTTools
     * Otherwise, make sure the current state reflects the synced field because it can be changed
     * by other CRDT actors.
     */
-   public static void syncGizmoWithBidirectionalField(RDXPose3DGizmo gizmo, CRDTBidirectionalPoint3D point, RequestConfirmFreezable requestConfirmFreezable)
+   public static void syncGizmoWithBidirectionalField(RDXPose3DGizmo gizmo, CRDTBidirectionalPoint3D point, LatestTimestampModifiable latestTimestampModifiable)
    {
       if (gizmo.getGizmoModifiedByUser().poll())
       {
          point.getValueAndFreeze().set(gizmo.getTransformToParent().getTranslation());
       }
-      else if (!requestConfirmFreezable.isFrozen())
+      else if (latestTimestampModifiable.isOutOfDate())
       {
          gizmo.getTransformToParent().getTranslation().set(point.getValueReadOnly());
       }

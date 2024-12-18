@@ -1,6 +1,6 @@
 package us.ihmc.communication.crdt;
 
-import ihmc_common_msgs.msg.dds.CRDTTimestampedModificationMessage;
+import ihmc_common_msgs.msg.dds.LatestModificationMessage;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimatorPeer;
 import us.ihmc.log.LogTools;
@@ -8,50 +8,64 @@ import us.ihmc.pubsub.common.Guid;
 
 import java.time.Instant;
 
-public class CRDTModificationManager
+public class LatestTimestampModifiable
 {
-   private final CRDTInfo globalInfo;
+   private final CRDTInfo crdtInfo;
    private final Guid latestModifier = new Guid();
    private Instant latestModificationTime = Instant.MIN;
    private boolean isOutOfDate = true;
 
    private transient final Guid messageModifier = new Guid();
 
-   public CRDTModificationManager(CRDTInfo globalInfo)
+   public LatestTimestampModifiable(CRDTInfo crdtInfo)
    {
-      this.globalInfo = globalInfo;
+      this.crdtInfo = crdtInfo;
    }
 
    public void modify()
    {
-      if (globalInfo.isMultiMachineNetwork())
-         latestModifier.set(globalInfo.getPeerClockEstimator().getOurGuid());
+      if (crdtInfo.isMultiMachineNetwork())
+         latestModifier.set(crdtInfo.getPeerClockEstimator().getOurGuid());
       latestModificationTime = Instant.now();
    }
 
+   /**
+    * @return If the incoming modification was older or same time as what we already have.
+    *         To be used after {@link #fromMessage}.
+    */
+   public boolean isUpToDate()
+   {
+      return !isOutOfDate;
+   }
+
+   /**
+    * @return If the incoming modification is newer than what we have.
+    *         If so, we'll be expecting to have our state updated to the incoming one.
+    *         To be used after {@link #fromMessage}.
+    */
    public boolean isOutOfDate()
    {
       return isOutOfDate;
    }
 
-   public void toMessage(CRDTTimestampedModificationMessage message)
+   public void toMessage(LatestModificationMessage message)
    {
       MessageTools.toMessage(latestModifier, message.getLatestModifierId());
       MessageTools.toMessage(latestModificationTime, message.getLatestModificationTimeInModifierFrame());
    }
 
-   public void fromMessage(CRDTTimestampedModificationMessage message)
+   public void fromMessage(LatestModificationMessage message)
    {
       isOutOfDate = false;
 
-      if (globalInfo.isMultiMachineNetwork())
+      if (crdtInfo.isMultiMachineNetwork())
       {
          MessageTools.fromMessage(message.getLatestModifierId(), messageModifier);
 
          // Another peer made the most recent modification
-         if (!messageModifier.equals(globalInfo.getPeerClockEstimator().getOurGuid()))
+         if (!messageModifier.equals(crdtInfo.getPeerClockEstimator().getOurGuid()))
          {
-            ROS2PeerClockOffsetEstimatorPeer latestModifierPeer = globalInfo.getPeerClockEstimator().getPeerMap().get(messageModifier);
+            ROS2PeerClockOffsetEstimatorPeer latestModifierPeer = crdtInfo.getPeerClockEstimator().getPeerMap().get(messageModifier);
             if (latestModifierPeer == null)
             {
                LogTools.error("Peer not in peer map: {}", messageModifier);
@@ -79,5 +93,10 @@ public class CRDTModificationManager
             isOutOfDate = true;
          }
       }
+   }
+
+   public CRDTInfo getCRDTInfo()
+   {
+      return crdtInfo;
    }
 }

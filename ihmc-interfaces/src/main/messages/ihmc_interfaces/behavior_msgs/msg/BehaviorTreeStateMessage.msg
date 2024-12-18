@@ -30,8 +30,8 @@ uint64 sequence_id
 # The ID to assign to the next instantiated node
 uint32 next_id
 
-# A mechanism for confirming and ending a freeze early
-ihmc_common_msgs/ConfirmableRequestMessage confirmable_request
+# The timestamp and modifer ID of the latest modification
+ihmc_common_msgs/LatestModificationMessage latest_modification
 
 # A depth first ordered list of types.
 byte[<=1000] behavior_tree_types

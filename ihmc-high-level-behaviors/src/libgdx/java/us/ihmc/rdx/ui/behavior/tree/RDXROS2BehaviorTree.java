@@ -4,6 +4,7 @@ import imgui.ImGui;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTreeState;
+import us.ihmc.communication.crdt.LatestTimestampModifiable;
 import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.rdx.imgui.ImGuiAveragedFrequencyText;
@@ -80,7 +81,8 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
       int numberOfFrozenNodes = ros2BehaviorTreeState.getBehaviorTreeState().getNumberOfFrozenNodes();
       ImGui.text("State:");
       ImGui.sameLine();
-      if (ros2BehaviorTreeState.getBehaviorTreeState().isFrozen() || numberOfFrozenNodes > 0)
+      LatestTimestampModifiable latestTimestampModifiable = ros2BehaviorTreeState.getBehaviorTreeState();
+      if (!latestTimestampModifiable.isOutOfDate() || numberOfFrozenNodes > 0)
          ImGui.textColored(ImGuiTools.LIGHT_BLUE, "Frozen (%d)".formatted(numberOfFrozenNodes));
       else
          ImGui.text("Normal");

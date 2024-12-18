@@ -6,13 +6,13 @@ package us.ihmc.communication.crdt;
  */
 public class CRDTBidirectionalMutableField<T>
 {
-   private final RequestConfirmFreezable requestConfirmFreezable;
+   private final LatestTimestampModifiable latestTimestampModifiable;
 
    private final T value;
 
-   public CRDTBidirectionalMutableField(RequestConfirmFreezable requestConfirmFreezable, T initialValue)
+   public CRDTBidirectionalMutableField(LatestTimestampModifiable latestTimestampModifiable, T initialValue)
    {
-      this.requestConfirmFreezable = requestConfirmFreezable;
+      this.latestTimestampModifiable = latestTimestampModifiable;
 
       value = initialValue;
    }
@@ -32,7 +32,8 @@ public class CRDTBidirectionalMutableField<T>
     */
    public T getValueAndFreeze()
    {
-      requestConfirmFreezable.freeze(); // Freeze to prevent it getting overwritten immediately
+      // Freeze to prevent it getting overwritten immediately
+      latestTimestampModifiable.modify();
       return value;
    }
 
@@ -53,6 +54,6 @@ public class CRDTBidirectionalMutableField<T>
 
    protected boolean isFrozen()
    {
-      return requestConfirmFreezable.isFrozen();
+      return !latestTimestampModifiable.isOutOfDate();
    }
 }

@@ -13,9 +13,9 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
  */
 public class CRDTBidirectionalPose3D extends CRDTBidirectionalMutableField<Pose3D>
 {
-   public CRDTBidirectionalPose3D(RequestConfirmFreezable requestConfirmFreezable)
+   public CRDTBidirectionalPose3D(LatestTimestampModifiable latestTimestampModifiable)
    {
-      super(requestConfirmFreezable, new Pose3D());
+      super(latestTimestampModifiable, new Pose3D());
    }
 
    public Pose3DReadOnly getValueReadOnly()

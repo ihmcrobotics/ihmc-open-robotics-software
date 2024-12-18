@@ -11,9 +11,9 @@ package us.ihmc.communication.crdt;
  */
 public class CRDTBidirectionalDoubleArray extends CRDTBidirectionalMutableField<double[]>
 {
-   public CRDTBidirectionalDoubleArray(RequestConfirmFreezable requestConfirmFreezable, int arraySize)
+   public CRDTBidirectionalDoubleArray(LatestTimestampModifiable latestTimestampModifiable, int arraySize)
    {
-      super(requestConfirmFreezable, new double[arraySize]);
+      super(latestTimestampModifiable, new double[arraySize]);
    }
 
    public double getValueReadOnly(int index)

@@ -5,7 +5,7 @@ import org.apache.commons.lang3.mutable.MutableLong;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeExtensionSubtreeRebuilder;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.communication.crdt.RequestConfirmFreezable;
+import us.ihmc.communication.crdt.LatestTimestampModifiable;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.util.function.Consumer;
@@ -18,7 +18,7 @@ import java.util.function.Supplier;
  * The root node is going to be a single basic root node with no functionality
  * and it will never be replaced.
  */
-public class BehaviorTreeState extends RequestConfirmFreezable
+public class BehaviorTreeState extends LatestTimestampModifiable
 {
    private final MutableLong nextID = new MutableLong(0);
    private final BehaviorTreeTopologyOperationQueue topologyChangeQueue = new BehaviorTreeTopologyOperationQueue();
@@ -55,7 +55,7 @@ public class BehaviorTreeState extends RequestConfirmFreezable
       if (node != null)
       {
          ++numberOfNodes;
-         if (node.getDefinition().isFrozen())
+         if (!node.getDefinition().isOutOfDate())
             ++numberOfFrozenNodes;
 
          for (Object child : node.getChildren())
@@ -89,20 +89,20 @@ public class BehaviorTreeState extends RequestConfirmFreezable
    {
       message.setSequenceId(getCRDTInfo().getUpdateNumber());
       message.setNextId(nextID.longValue());
-      toMessage(message.getConfirmableRequest());
+      toMessage(message.getLatestModification());
    }
 
    public void fromMessage(BehaviorTreeStateMessage message)
    {
-      fromMessage(message.getConfirmableRequest());
+      fromMessage(message.getLatestModification());
 
-      if (!isFrozen())
+      if (isOutOfDate())
          nextID.setValue(message.getNextId());
    }
 
    public long getAndIncrementNextID()
    {
-      freeze();
+      modify();
       return nextID.getAndIncrement();
    }
 

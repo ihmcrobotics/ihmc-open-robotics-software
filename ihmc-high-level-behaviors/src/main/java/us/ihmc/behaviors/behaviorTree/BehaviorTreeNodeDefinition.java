@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTBidirectionalString;
-import us.ihmc.communication.crdt.RequestConfirmFreezable;
+import us.ihmc.communication.crdt.LatestTimestampModifiable;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -19,7 +19,7 @@ import java.util.List;
 /**
  * The base definition of a behavior tree node.
  */
-public class BehaviorTreeNodeDefinition extends RequestConfirmFreezable implements BehaviorTreeNode<BehaviorTreeNodeDefinition>
+public class BehaviorTreeNodeDefinition extends LatestTimestampModifiable implements BehaviorTreeNode<BehaviorTreeNodeDefinition>
 {
    /**
     * The name of the node.
@@ -145,7 +145,7 @@ public class BehaviorTreeNodeDefinition extends RequestConfirmFreezable implemen
 
    public void toMessage(BehaviorTreeNodeDefinitionMessage message)
    {
-      toMessage(message.getConfirmableRequest());
+      toMessage(message.getLatestModification());
 
       message.setName(name.toMessage());
       // message.setNotes(notes.toMessage());
@@ -154,7 +154,7 @@ public class BehaviorTreeNodeDefinition extends RequestConfirmFreezable implemen
 
    public void fromMessage(BehaviorTreeNodeDefinitionMessage message)
    {
-      fromMessage(message.getConfirmableRequest()); // Unpack first, because this also unfreezes
+      fromMessage(message.getLatestModification()); // Unpack first, because this also unfreezes
 
       name.fromMessage(message.getNameAsString());
       // notes.fromMessage(message.getNotesAsString());
