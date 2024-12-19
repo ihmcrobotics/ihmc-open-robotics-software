@@ -16,10 +16,14 @@ state = {}
 
 def scene_graph_message_callback(msg):
     print("Received SceneGraphMessage msg " + str(msg.sequence_id))
-    
+
+    # Occasionally add a node
+    if msg.sequence_id % 50 == 0:
+        add_simple_node()
+
+    # Occasionally clear the scene nodes
     if msg.sequence_id % 100 == 0:
         clear_scene_nodes()
-        # add_simple_node()
 
     # Check if we are updating the scene graph
     if "updated_scene_graph" in state:
@@ -32,9 +36,23 @@ def scene_graph_message_callback(msg):
 def add_simple_node():
     print("Adding a new node to the scene graph")
     updated_scene_graph = state["scene_graph"]
+
     new_scene_node = SceneNodeMessage()
-    new_scene_node.name = "Test new node"
+    new_scene_node.id = updated_scene_graph.next_id
+    updated_scene_graph.next_id = updated_scene_graph.next_id + 1 # We used next_id, so we have to increment it
+    new_scene_node.name = "NewNode"
+
+    # Adding NewNode as a child of the root node
+    root_node_index = 0
+    root_node_number_of_children = updated_scene_graph.scene_nodes[root_node_index].number_of_children
+    updated_scene_graph.scene_nodes[root_node_index].number_of_children = root_node_number_of_children + 1
+    updated_scene_graph.scene_tree_types.insert(root_node_index + 1, b'\x00')
+    updated_scene_graph.scene_tree_indices.insert(root_node_index + 1, root_node_index + 1)
+
     updated_scene_graph.scene_nodes.append(new_scene_node)
+
+    print(updated_scene_graph)
+
     state["updated_scene_graph"] = updated_scene_graph
 
 def clear_scene_nodes():
