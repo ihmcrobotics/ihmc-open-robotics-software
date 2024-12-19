@@ -93,9 +93,9 @@ public final class ImpedanceSpatialFeedbackControllerTest
       spatialFeedbackControlCommand.set(baseBody, endEffector);
       spatialFeedbackControlCommand.setGains(gains);
       spatialFeedbackControlCommand.setInverseDynamics(desiredPose, zero, zero);
-      spatialFeedbackController.submitFeedbackControlCommand(spatialFeedbackControlCommand);
       spatialFeedbackController.setEnabled(true);
       spatialFeedbackController.setImpedanceEnabled(true);
+      spatialFeedbackController.submitFeedbackControlCommand(spatialFeedbackControlCommand);
 
       MotionQPInputCalculator motionQPInputCalculator = toolbox.getMotionQPInputCalculator();
       NativeQPInputTypeA motionQPInput = new NativeQPInputTypeA(MultiBodySystemTools.computeDegreesOfFreedom(joints));
@@ -174,9 +174,10 @@ public final class ImpedanceSpatialFeedbackControllerTest
       spatialFeedbackControlCommand.setGains(gains);
       spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(bodyFixedPointToControl);
       spatialFeedbackControlCommand.setInverseDynamics(desiredOrientation, desiredPosition, new FrameVector3D(worldFrame), new FrameVector3D(worldFrame), new FrameVector3D(worldFrame), new FrameVector3D(worldFrame));
-      spatialFeedbackController.submitFeedbackControlCommand(spatialFeedbackControlCommand);
       spatialFeedbackController.setEnabled(true);
       spatialFeedbackController.setImpedanceEnabled(true);
+      spatialFeedbackController.submitFeedbackControlCommand(spatialFeedbackControlCommand);
+
 
       int numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(jointsToOptimizeFor);
       NativeQPInputTypeA motionQPInput = new NativeQPInputTypeA(numberOfDoFs);
@@ -275,16 +276,17 @@ public final class ImpedanceSpatialFeedbackControllerTest
       SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
       spatialFeedbackControlCommand.set(elevator, endEffector);
       DefaultPIDSE3Gains gains = new DefaultPIDSE3Gains();
-      gains.getPositionGains().setProportialAndDerivativeGains(1.5, Double.NaN);
+      gains.getPositionGains().setProportialAndDerivativeGains(10, Double.NaN);
       gains.getOrientationGains().setProportialAndDerivativeGains(1.5, Double.NaN);
       gains.getPositionGains().setDampingRatios(1);
       gains.getOrientationGains().setDampingRatios(1);
       spatialFeedbackControlCommand.setGains(gains);
       spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(bodyFixedPointToControl);
       spatialFeedbackControlCommand.setInverseDynamics(desiredOrientation, desiredPosition, new FrameVector3D(worldFrame), new FrameVector3D(worldFrame), new FrameVector3D(worldFrame), new FrameVector3D(worldFrame));
-      spatialFeedbackController.submitFeedbackControlCommand(spatialFeedbackControlCommand);
       spatialFeedbackController.setEnabled(true);
       spatialFeedbackController.setImpedanceEnabled(true);
+      spatialFeedbackController.submitFeedbackControlCommand(spatialFeedbackControlCommand);
+
 
       int numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(jointsToOptimizeFor);
       NativeQPInputTypeA motionQPInput = new NativeQPInputTypeA(numberOfDoFs);
