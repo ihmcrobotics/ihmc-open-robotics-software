@@ -5,6 +5,7 @@ import behavior_msgs.msg.dds.AI2RStatusMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
+import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.behaviors.sequence.actions.FootstepPlanActionState;
 import us.ihmc.communication.AutonomyAPI;
 import us.ihmc.communication.crdt.CRDTInfo;
@@ -14,6 +15,9 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.commons.thread.Throttler;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Node that enables interaction with external reasoning modules
@@ -26,6 +30,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
    private final Throttler statusThrottler = new Throttler().setFrequency(1.0);
    private final AI2RStatusMessage statusMessage = new AI2RStatusMessage();
    private final AI2RNodeState state;
+   private final List<ActionNodeState<?>> failedActions = new ArrayList<>();
 
    public AI2RNodeExecutor(long id,
                            CRDTInfo crdtInfo,
@@ -66,6 +71,11 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
          {
             if (state.getCheckPoints().get(i).getDefinition().getName().equals(checkPointName))
             {
+               for (int j=0; j < failedActions.size(); j++)
+               {
+                  failedActions.get(j).setFailed(false);
+               }
+               failedActions.clear();
                state.getActionSequence().setExecutionNextIndex(state.getCheckPoints().get(i).getActionIndex());
                state.getActionSequence().setAutomaticExecution(true);
                break;
@@ -118,6 +128,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
                                    actionChild.getActionIndex(), checkpointActionName);
 
                      statusMessage.setFailedBehavior(checkpointActionName);
+                     failedActions.add(actionChild);
                      break;
                   }
                }
@@ -145,5 +156,17 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
             statusMessage.setCompletedBehavior("");
          }
       }
+
+//      // Check if Goto action is executing
+//      for (var actionChild : state.getActionSequence().getActionChildren())
+//      {
+//         if (actionChild.getDefinition().getName().contains("Go to Action") && actionChild instanceof FootstepPlanActionState gotoActionState)
+//         {
+//           if (gotoActionState.getIsExecuting())
+//           {
+//              gotoActionState.getPreviewFootsteps()
+//           }
+//         }
+//      }
    }
 }
