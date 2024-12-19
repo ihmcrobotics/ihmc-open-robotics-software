@@ -15,7 +15,7 @@ public class ExternalForceEstimationConfigurationMessagePubSubType implements us
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "1cf66818d79ba2698e9270cc6ca538bcf7223057dcd605d4acdafe57eaa75a24";
+   		return "0c90dfb99ba2db65b4b6383bda02af474fec99962bde5e3b4b7f0a35f4c397ab";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class ExternalForceEstimationConfigurationMessagePubSubType implements us
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -80,7 +80,7 @@ public class ExternalForceEstimationConfigurationMessagePubSubType implements us
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -110,7 +110,7 @@ public class ExternalForceEstimationConfigurationMessagePubSubType implements us
 
    public static void write(toolbox_msgs.msg.dds.ExternalForceEstimationConfigurationMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_6(data.getEstimatorGain());
 
@@ -132,7 +132,7 @@ public class ExternalForceEstimationConfigurationMessagePubSubType implements us
 
    public static void read(toolbox_msgs.msg.dds.ExternalForceEstimationConfigurationMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setEstimatorGain(cdr.read_type_6());
       	
@@ -150,7 +150,7 @@ public class ExternalForceEstimationConfigurationMessagePubSubType implements us
    @Override
    public final void serialize(toolbox_msgs.msg.dds.ExternalForceEstimationConfigurationMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_6("estimator_gain", data.getEstimatorGain());
       ser.write_type_6("solver_alpha", data.getSolverAlpha());
       ser.write_type_7("calculate_root_joint_wrench", data.getCalculateRootJointWrench());
@@ -162,7 +162,7 @@ public class ExternalForceEstimationConfigurationMessagePubSubType implements us
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, toolbox_msgs.msg.dds.ExternalForceEstimationConfigurationMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setEstimatorGain(ser.read_type_6("estimator_gain"));
       data.setSolverAlpha(ser.read_type_6("solver_alpha"));
       data.setCalculateRootJointWrench(ser.read_type_7("calculate_root_joint_wrench"));

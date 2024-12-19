@@ -15,7 +15,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
-import us.ihmc.footstepPlanning.communication.ContinuousWalkingAPI;
+import us.ihmc.footstepPlanning.communication.ContinuousHikingAPI;
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloFootstepNode;
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloFootstepPlannerRequest;
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloPlannerTools;
@@ -27,7 +27,7 @@ import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2PublisherBasics;
+import us.ihmc.ros2.ROS2Publisher;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,11 +57,11 @@ public class TerrainPlanningDebugger
    private HeatMapGenerator contactHeatMapGenerator = new HeatMapGenerator();
    private ContinuousWalkingStatusMessage statusMessage = new ContinuousWalkingStatusMessage();
 
-   private ROS2PublisherBasics<FootstepDataListMessage> plannedFootstesPublisherForUI;
-   private ROS2PublisherBasics<ContinuousWalkingStatusMessage> statusPublisher;
-   private ROS2PublisherBasics<FootstepDataListMessage> monteCarloPlanPublisherForUI;
-   private ROS2PublisherBasics<PoseListMessage> startAndGoalPublisherForUI;
-   private ROS2PublisherBasics<PoseListMessage> monteCarloNodesPublisherForUI;
+   private ROS2Publisher<FootstepDataListMessage> plannedFootstesPublisherForUI;
+   private ROS2Publisher<ContinuousWalkingStatusMessage> statusPublisher;
+   private ROS2Publisher<FootstepDataListMessage> monteCarloPlanPublisherForUI;
+   private ROS2Publisher<PoseListMessage> startAndGoalPublisherForUI;
+   private ROS2Publisher<PoseListMessage> monteCarloNodesPublisherForUI;
    private MonteCarloFootstepPlannerRequest request;
    private MonteCarloFootstepPlannerParameters parameters;
    private PlanningMode planningMode;
@@ -74,11 +74,11 @@ public class TerrainPlanningDebugger
       this.planningMode = planningMode;
       if (ros2Node != null)
       {
-         plannedFootstesPublisherForUI = ros2Node.createPublisher(ContinuousWalkingAPI.PLANNED_FOOTSTEPS);
-         statusPublisher = ros2Node.createPublisher(ContinuousWalkingAPI.CONTINUOUS_WALKING_STATUS);
-         monteCarloPlanPublisherForUI = ros2Node.createPublisher(ContinuousWalkingAPI.MONTE_CARLO_FOOTSTEP_PLAN);
-         startAndGoalPublisherForUI = ros2Node.createPublisher(ContinuousWalkingAPI.START_AND_GOAL_FOOTSTEPS);
-         monteCarloNodesPublisherForUI = ros2Node.createPublisher(ContinuousWalkingAPI.MONTE_CARLO_TREE_NODES);
+         plannedFootstesPublisherForUI = ros2Node.createPublisher(ContinuousHikingAPI.PLANNED_FOOTSTEPS);
+         statusPublisher = ros2Node.createPublisher(ContinuousHikingAPI.CONTINUOUS_WALKING_STATUS);
+         monteCarloPlanPublisherForUI = ros2Node.createPublisher(ContinuousHikingAPI.MONTE_CARLO_FOOTSTEP_PLAN);
+         startAndGoalPublisherForUI = ros2Node.createPublisher(ContinuousHikingAPI.START_AND_GOAL_FOOTSTEPS);
+         monteCarloNodesPublisherForUI = ros2Node.createPublisher(ContinuousHikingAPI.MONTE_CARLO_TREE_NODES);
       }
    }
 

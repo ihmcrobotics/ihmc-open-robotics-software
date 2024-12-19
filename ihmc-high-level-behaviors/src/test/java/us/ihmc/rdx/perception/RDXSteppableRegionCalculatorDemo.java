@@ -1,8 +1,6 @@
 package us.ihmc.rdx.perception;
 
-import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.heightMap.RemoteHeightMapUpdater;
@@ -22,6 +20,7 @@ import us.ihmc.rdx.ui.graphics.ros2.RDXROS2HeightMapVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXSteppableRegionsVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2PointCloudVisualizer;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.RealtimeROS2Node;
 
 public class RDXSteppableRegionCalculatorDemo
@@ -40,10 +39,8 @@ public class RDXSteppableRegionCalculatorDemo
 
    public RDXSteppableRegionCalculatorDemo()
    {
-      CommunicationMode ros2CommunicationMode = CommunicationMode.INTERPROCESS;
-
-      RealtimeROS2Node realtimeRos2Node = ROS2Tools.createRealtimeROS2Node(ros2CommunicationMode.getPubSubImplementation(), "simulation_ui_realtime");
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(ros2CommunicationMode.getPubSubImplementation(), "simulation_ui_realtime");
+      RealtimeROS2Node realtimeRos2Node = new ROS2NodeBuilder().buildRealtime("simulation_ui_realtime");
+      ROS2Node ros2Node = new ROS2NodeBuilder().build("simulation_ui_realtime");
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
       heightMap = new RemoteHeightMapUpdater("", ReferenceFrame::getWorldFrame, realtimeRos2Node);

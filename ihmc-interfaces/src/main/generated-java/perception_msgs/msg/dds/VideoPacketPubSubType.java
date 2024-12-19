@@ -15,7 +15,7 @@ public class VideoPacketPubSubType implements us.ihmc.pubsub.TopicDataType<perce
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "ec4aae5c1dd82dc69a8b73789df338f210c80d23378f1a142393e7def2b1acb2";
+   		return "965962b74cf3a8ab76d194860829c5451b069ad46f88b8b041bbaf65c1e41099";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class VideoPacketPubSubType implements us.ihmc.pubsub.TopicDataType<perce
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -83,7 +83,7 @@ public class VideoPacketPubSubType implements us.ihmc.pubsub.TopicDataType<perce
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -114,7 +114,7 @@ public class VideoPacketPubSubType implements us.ihmc.pubsub.TopicDataType<perce
 
    public static void write(perception_msgs.msg.dds.VideoPacket data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_9(data.getVideoSource());
 
@@ -135,7 +135,7 @@ public class VideoPacketPubSubType implements us.ihmc.pubsub.TopicDataType<perce
 
    public static void read(perception_msgs.msg.dds.VideoPacket data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setVideoSource(cdr.read_type_9());
       	
@@ -155,7 +155,7 @@ public class VideoPacketPubSubType implements us.ihmc.pubsub.TopicDataType<perce
    @Override
    public final void serialize(perception_msgs.msg.dds.VideoPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_9("video_source", data.getVideoSource());
       ser.write_type_11("timestamp", data.getTimestamp());
       ser.write_type_e("data", data.getData());
@@ -172,7 +172,7 @@ public class VideoPacketPubSubType implements us.ihmc.pubsub.TopicDataType<perce
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.VideoPacket data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setVideoSource(ser.read_type_9("video_source"));
       data.setTimestamp(ser.read_type_11("timestamp"));
       ser.read_type_e("data", data.getData());

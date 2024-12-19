@@ -4,14 +4,12 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import perception_msgs.msg.dds.ImageMessage;
-import us.ihmc.communication.ROS2Tools;
-import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.imageMessage.CompressionType;
 import us.ihmc.perception.tools.PerceptionMessageTools;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2PublisherBasics;
+import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.RestartableThread;
 
@@ -24,7 +22,7 @@ public class OusterDepthImagePublisher
    private static final IntPointer COMPRESSION_PARAMETERS = new IntPointer(opencv_imgcodecs.IMWRITE_PNG_COMPRESSION, 1);
 
    private final ROS2Node ros2Node;
-   private final ROS2PublisherBasics<ImageMessage> ros2DepthImagePublisher;
+   private final ROS2Publisher<ImageMessage> ros2DepthImagePublisher;
 
    private long lastSequenceNumber = -1L;
    private RawImage nextCpuDepthImage;
@@ -38,7 +36,7 @@ public class OusterDepthImagePublisher
    {
       this.ouster = ouster;
 
-      ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "ouster_depth_publisher");
+      ros2Node = new ROS2NodeBuilder().build("ouster_depth_publisher");
       ros2DepthImagePublisher = ros2Node.createPublisher(depthTopic);
 
       publishDepthThread = new RestartableThread("OusterDepthImagePublisher", this::publishDepthThreadFunction);

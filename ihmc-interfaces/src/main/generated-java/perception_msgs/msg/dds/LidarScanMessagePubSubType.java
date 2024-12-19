@@ -15,7 +15,7 @@ public class LidarScanMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "ebfdbd3f7904af808f9876e4d8950753175e68ac0df246d4aee620d75d0d094e";
+   		return "aa05c79b01b2932fe1db22eda91f78f0d97a5d65a5246a623977003ee33173ed";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class LidarScanMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -81,7 +81,7 @@ public class LidarScanMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -110,7 +110,7 @@ public class LidarScanMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
    public static void write(perception_msgs.msg.dds.LidarScanMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_11(data.getRobotTimestamp());
 
@@ -130,7 +130,7 @@ public class LidarScanMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
    public static void read(perception_msgs.msg.dds.LidarScanMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setRobotTimestamp(cdr.read_type_11());
       	
@@ -149,7 +149,7 @@ public class LidarScanMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final void serialize(perception_msgs.msg.dds.LidarScanMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_11("robot_timestamp", data.getRobotTimestamp());
       ser.write_type_a("lidar_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getLidarPosition());
 
@@ -164,7 +164,7 @@ public class LidarScanMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.LidarScanMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setRobotTimestamp(ser.read_type_11("robot_timestamp"));
       ser.read_type_a("lidar_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getLidarPosition());
 

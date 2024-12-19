@@ -7,20 +7,19 @@ import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.BigVideoPacket;
+import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.idl.IDLSequence;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.imgui.RDXPanel;
-import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.imgui.ImPlotDoublePlot;
 import us.ihmc.rdx.imgui.ImPlotFrequencyPlot;
 import us.ihmc.rdx.imgui.ImPlotStopwatchPlot;
+import us.ihmc.rdx.imgui.RDXPanel;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.robotics.time.TimeTools;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.commons.thread.Throttler;
 
 /**
  * Subscribes to ROS 2 webcam images with best performance.
@@ -63,7 +62,7 @@ public class RDXWebcamROS2SubscriberDemo
          {
             baseUI.create();
 
-            realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "videosub");
+            realtimeROS2Node = new ROS2NodeBuilder().buildRealtime("videosub");
             //             videoSwapData.accessOnHighPriorityThread(data ->
             //             {
             //                data.incomingDataMessage(subscriber);

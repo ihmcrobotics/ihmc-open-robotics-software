@@ -7,7 +7,6 @@ import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningMo
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.log.LogTools;
-import us.ihmc.pubsub.DomainFactory;
 
 public class AtlasFootstepPlanningModule
 {
@@ -17,7 +16,7 @@ public class AtlasFootstepPlanningModule
    public AtlasFootstepPlanningModule()
    {
       AtlasRobotModel robotModel = new AtlasRobotModel(ATLAS_VERSION, ATLAS_TARGET, false);
-      FootstepPlanningModule module = FootstepPlanningModuleLauncher.createModule(robotModel, DomainFactory.PubSubImplementation.FAST_RTPS);
+      FootstepPlanningModule module = FootstepPlanningModuleLauncher.createModule(robotModel);
       Runtime.getRuntime().addShutdownHook(new Thread(() ->
       {
          LogTools.info("Shutting down network processor modules.");

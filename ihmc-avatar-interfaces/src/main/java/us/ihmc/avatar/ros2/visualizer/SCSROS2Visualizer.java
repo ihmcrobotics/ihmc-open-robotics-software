@@ -1,5 +1,6 @@
 package us.ihmc.avatar.ros2.visualizer;
 
+import us.ihmc.commons.UnitConversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -15,7 +16,6 @@ import us.ihmc.pubsub.participant.Participant;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
-import us.ihmc.commons.UnitConversions;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -72,7 +72,7 @@ public class SCSROS2Visualizer
    private void setupROS2Debugger() throws Exception
    {
       int domainID = NetworkParameters.getRTPSDomainID();
-      Domain domain = DomainFactory.getDomain(DomainFactory.PubSubImplementation.FAST_RTPS);
+      Domain domain = DomainFactory.getDomain();
       ParticipantProfile attributes = domain.createParticipantAttributes(domainID, getClass().getSimpleName());
 
       participant = domain.createParticipant(attributes, (participant, info) ->

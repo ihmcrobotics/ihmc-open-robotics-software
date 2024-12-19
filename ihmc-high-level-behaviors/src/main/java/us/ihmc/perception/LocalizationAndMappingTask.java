@@ -8,7 +8,6 @@ import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StepGeneratorAPIDefinition;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
@@ -26,8 +25,10 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.ExecutorServiceTools;
+
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -56,8 +57,8 @@ public class LocalizationAndMappingTask
    protected ROS2Node ros2Node;
    protected PlanarRegionMap planarRegionMap;
 
-   private ROS2PublisherBasics<PlanarRegionsListMessage> controllerRegionsPublisher;
-   private ROS2PublisherBasics<PlanarRegionsListMessage> slamOutputRegionsPublisher;
+   private ROS2Publisher<PlanarRegionsListMessage> controllerRegionsPublisher;
+   private ROS2Publisher<PlanarRegionsListMessage> slamOutputRegionsPublisher;
 
    private final AtomicReference<HighLevelStateMessage> highLevelState = new AtomicReference<>();
    private final AtomicReference<WalkingControllerFailureStatusMessage> walkingFailureStatus = new AtomicReference<>();

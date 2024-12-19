@@ -1,10 +1,5 @@
 package us.ihmc.avatar;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.function.Supplier;
-
 import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
@@ -20,7 +15,6 @@ import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaEllipsoidsVis
 import us.ihmc.commonWalkingControlModules.visualizer.InverseDynamicsMechanismReferenceFrameVisualizer;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.packets.ControllerCrashLocation;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -34,6 +28,7 @@ import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
@@ -55,6 +50,11 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Supplier;
 
 public class AvatarControllerThread implements AvatarControllerThreadInterface
 {
@@ -82,7 +82,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
 
    private final ModularRobotController robotController;
 
-   private final ROS2PublisherBasics<ControllerCrashNotificationPacket> crashNotificationPublisher;
+   private final ROS2Publisher<ControllerCrashNotificationPacket> crashNotificationPublisher;
 
    private final HumanoidRobotContextData humanoidRobotContextData;
 

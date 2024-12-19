@@ -5,8 +5,8 @@ import std_msgs.msg.dds.Empty;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2Topic;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -18,7 +18,7 @@ public class ROS2DemandGraphNodeTest
    @Test
    public void testIsDemanded()
    {
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "demand_graph_test_is_demanded");
+      ROS2Node ros2Node = new ROS2NodeBuilder().build("demand_graph_test_is_demanded");
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
       ROS2Topic<Empty> testTopic = ROS2Tools.IHMC_ROOT.withSuffix("demand_graph_test_is_demanded").withType(Empty.class);
 
@@ -43,7 +43,7 @@ public class ROS2DemandGraphNodeTest
    @Test
    public void testDependantDemand()
    {
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "demand_graph_test_dependant");
+      ROS2Node ros2Node = new ROS2NodeBuilder().build("demand_graph_test_dependant");
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
       ROS2Topic<Empty> testTopic = ROS2Tools.IHMC_ROOT.withSuffix("demand_graph_test_dependant").withType(Empty.class);
       ROS2Topic<Empty> dependantTopic = testTopic.withPrefix("dependant");
@@ -87,7 +87,7 @@ public class ROS2DemandGraphNodeTest
    @Test
    public void testDemandChangedCallback()
    {
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "demand_graph_test_dependant");
+      ROS2Node ros2Node = new ROS2NodeBuilder().build("demand_graph_test_dependant");
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
       ROS2Topic<Empty> testTopic = ROS2Tools.IHMC_ROOT.withSuffix("demand_graph_test_dependant").withType(Empty.class);
       ROS2Topic<Empty> dependantTopic = testTopic.withPrefix("dependant");

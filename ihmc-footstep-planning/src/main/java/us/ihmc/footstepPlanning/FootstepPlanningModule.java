@@ -1,13 +1,5 @@
 package us.ihmc.footstepPlanning;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
 import us.ihmc.commons.MathTools;
@@ -27,7 +19,11 @@ import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.stepChecking.HeightMapFootstepChecker;
-import us.ihmc.footstepPlanning.log.*;
+import us.ihmc.footstepPlanning.log.AStarBodyPathEdgeData;
+import us.ihmc.footstepPlanning.log.AStarBodyPathIterationData;
+import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
+import us.ihmc.footstepPlanning.log.FootstepPlannerIterationData;
+import us.ihmc.footstepPlanning.log.VariableDescriptor;
 import us.ihmc.footstepPlanning.simplePlanners.PlanThenSnapPlanner;
 import us.ihmc.footstepPlanning.swing.AdaptiveSwingTrajectoryCalculator;
 import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
@@ -41,17 +37,24 @@ import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.yoVariables.variable.YoVariableType;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 public class FootstepPlanningModule implements CloseableAndDisposable
 {
    private final String name;
-   private ROS2NodeInterface ros2Node;
+   private ROS2Node ros2Node;
    private boolean manageROS2Node = false;
    private final AStarBodyPathPlannerParametersBasics aStarBodyPathPlannerParameters;
    private final DefaultFootstepPlannerParametersBasics footstepPlannerParameters;
@@ -410,7 +413,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       aStarFootstepPlanner.clearCustomTerminationConditions();
    }
 
-   public boolean registerRosNode(ROS2NodeInterface ros2Node, boolean manageROS2Node)
+   public boolean registerRosNode(ROS2Node ros2Node, boolean manageROS2Node)
    {
       this.manageROS2Node = manageROS2Node;
       if (this.ros2Node != null)

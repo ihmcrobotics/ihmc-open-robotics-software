@@ -15,7 +15,7 @@ public class MultiContactTimedContactSequenceMessagePubSubType implements us.ihm
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "356e04a1322d0b50a85e2802c74a9a67ec241dedf2acdf921717cb366c1abd09";
+   		return "331a0e0a452ff0a5569c4cb6c12db09b7d1719a2ebe35e5a7bd7d165bc5f0dc2";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class MultiContactTimedContactSequenceMessagePubSubType implements us.ihm
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 25; ++i0)
       {
@@ -79,7 +79,7 @@ public class MultiContactTimedContactSequenceMessagePubSubType implements us.ihm
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -108,7 +108,7 @@ public class MultiContactTimedContactSequenceMessagePubSubType implements us.ihm
 
    public static void write(controller_msgs.msg.dds.MultiContactTimedContactSequenceMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       if(data.getLeftArmContactIntervals().size() <= 25)
       cdr.write_type_e(data.getLeftArmContactIntervals());else
@@ -130,7 +130,7 @@ public class MultiContactTimedContactSequenceMessagePubSubType implements us.ihm
 
    public static void read(controller_msgs.msg.dds.MultiContactTimedContactSequenceMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       cdr.read_type_e(data.getLeftArmContactIntervals());	
       cdr.read_type_e(data.getRightArmContactIntervals());	
@@ -142,7 +142,7 @@ public class MultiContactTimedContactSequenceMessagePubSubType implements us.ihm
    @Override
    public final void serialize(controller_msgs.msg.dds.MultiContactTimedContactSequenceMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_e("left_arm_contact_intervals", data.getLeftArmContactIntervals());
       ser.write_type_e("right_arm_contact_intervals", data.getRightArmContactIntervals());
       ser.write_type_e("left_leg_contact_intervals", data.getLeftLegContactIntervals());
@@ -152,7 +152,7 @@ public class MultiContactTimedContactSequenceMessagePubSubType implements us.ihm
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.MultiContactTimedContactSequenceMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       ser.read_type_e("left_arm_contact_intervals", data.getLeftArmContactIntervals());
       ser.read_type_e("right_arm_contact_intervals", data.getRightArmContactIntervals());
       ser.read_type_e("left_leg_contact_intervals", data.getLeftLegContactIntervals());

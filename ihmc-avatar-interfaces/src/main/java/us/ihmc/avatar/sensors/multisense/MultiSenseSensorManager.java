@@ -2,13 +2,13 @@ package us.ihmc.avatar.sensors.multisense;
 
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.communication.producers.VideoControlSettings;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.ros1.camera.CameraDataReceiver;
 import us.ihmc.perception.ros1.camera.CameraLogger;
 import us.ihmc.perception.ros1.camera.RosCameraCompressedImageReceiver;
 import us.ihmc.perception.ros1.camera.VideoPacketHandler;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullRobotModelFactory;
-import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
@@ -21,7 +21,7 @@ public class MultiSenseSensorManager
    public static boolean LOG_PRIMARY_CAMERA_IMAGES = false;
 
    private final RosMainNode rosMainNode;
-   private final ROS2NodeInterface ros2Node;
+   private final ROS2Node ros2Node;
    private final AvatarRobotCameraParameters cameraParameters;
    private final AvatarRobotLidarParameters lidarParameters;
    private boolean setROSParameters;
@@ -34,7 +34,7 @@ public class MultiSenseSensorManager
    public MultiSenseSensorManager(FullRobotModelFactory fullRobotModelFactory,
                                   RobotConfigurationDataBuffer robotConfigurationDataBuffer,
                                   RosMainNode rosMainNode,
-                                  ROS2NodeInterface ros2Node,
+                                  ROS2Node ros2Node,
                                   RobotROSClockCalculator rosClockCalculator,
                                   AvatarRobotCameraParameters cameraParameters,
                                   AvatarRobotLidarParameters lidarParameters,
@@ -56,7 +56,7 @@ public class MultiSenseSensorManager
    public MultiSenseSensorManager(FullRobotModelFactory fullRobotModelFactory,
                                   RobotConfigurationDataBuffer robotConfigurationDataBuffer,
                                   RosMainNode rosMainNode,
-                                  ROS2NodeInterface ros2Node,
+                                  ROS2Node ros2Node,
                                   ROS2QosProfile qosProfile,
                                   RobotROSClockCalculator rosClockCalculator,
                                   AvatarRobotCameraParameters cameraParameters,

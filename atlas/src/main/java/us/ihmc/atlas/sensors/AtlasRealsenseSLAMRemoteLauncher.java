@@ -8,28 +8,22 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.SharedMemoryMessager;
-import us.ihmc.messager.kryo.KryoMessager;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.SegmentationModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.updaters.PlanarSegmentationModule;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
 
 import java.io.File;
 import java.nio.file.Paths;
-
-import static us.ihmc.pubsub.DomainFactory.PubSubImplementation.FAST_RTPS;
 
 public class AtlasRealsenseSLAMRemoteLauncher
 {
    private static final String SLAM_CONFIGURATION_FILE_NAME = "atlasSLAMModuleConfiguration.txt";
    private static final String SEGMENTATION_CONFIGURATION_FILE_NAME = "atlasSegmentationModuleConfiguration.txt";
-   private final PubSubImplementation pubSubImplementation = FAST_RTPS;
 
    private ROS2Node ros2Node;
    private Messager slamMessager;
@@ -47,7 +41,7 @@ public class AtlasRealsenseSLAMRemoteLauncher
    {
       DRCRobotModel drcRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, RobotTarget.REAL_ROBOT, false);
 
-      ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, PerceptionAPI.REA_NODE_NAME);
+      ros2Node = new ROS2NodeBuilder().build(PerceptionAPI.REA_NODE_NAME);
 
 //      slamMessager = KryoMessager.createServer(SLAMModuleAPI.API, NetworkPorts.SLAM_MODULE_UI_PORT.getPort(), "SLAMModule", 5);
 //      ThreadTools.startAThread(() -> ExceptionTools.handle(slamMessager::startMessager, DefaultExceptionHandler.RUNTIME_EXCEPTION), "KryoStarter");

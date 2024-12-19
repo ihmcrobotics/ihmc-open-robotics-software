@@ -15,7 +15,7 @@ public class VehiclePosePacketPubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "01bbc0ccf29e2f1c9b31269c1d2d4efd233cc93532dc50788633a2c4395d609f";
+   		return "2448c7aba77bf85f6fb036c8abfc17f93313afce159d3dfeb45f02a79c79d366";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class VehiclePosePacketPubSubType implements us.ihmc.pubsub.TopicDataType
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -73,7 +73,7 @@ public class VehiclePosePacketPubSubType implements us.ihmc.pubsub.TopicDataType
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getPosition(), current_alignment);
@@ -89,7 +89,7 @@ public class VehiclePosePacketPubSubType implements us.ihmc.pubsub.TopicDataType
 
    public static void write(perception_msgs.msg.dds.VehiclePosePacket data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       geometry_msgs.msg.dds.PointPubSubType.write(data.getPosition(), cdr);
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getOrientation(), cdr);
@@ -99,7 +99,7 @@ public class VehiclePosePacketPubSubType implements us.ihmc.pubsub.TopicDataType
 
    public static void read(perception_msgs.msg.dds.VehiclePosePacket data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       geometry_msgs.msg.dds.PointPubSubType.read(data.getPosition(), cdr);	
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getOrientation(), cdr);	
@@ -111,7 +111,7 @@ public class VehiclePosePacketPubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final void serialize(perception_msgs.msg.dds.VehiclePosePacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_a("position", new geometry_msgs.msg.dds.PointPubSubType(), data.getPosition());
 
       ser.write_type_a("orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getOrientation());
@@ -122,7 +122,7 @@ public class VehiclePosePacketPubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.VehiclePosePacket data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       ser.read_type_a("position", new geometry_msgs.msg.dds.PointPubSubType(), data.getPosition());
 
       ser.read_type_a("orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getOrientation());

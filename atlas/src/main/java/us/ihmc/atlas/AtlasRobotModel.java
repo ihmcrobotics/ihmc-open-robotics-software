@@ -1,9 +1,5 @@
 package us.ihmc.atlas;
 
-import java.io.InputStream;
-import java.util.Arrays;
-import java.util.function.Consumer;
-
 import com.jme3.math.Transform;
 import us.ihmc.atlas.diagnostic.AtlasDiagnosticParameters;
 import us.ihmc.atlas.initialSetup.AtlasSimInitialSetup;
@@ -51,13 +47,13 @@ import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
-import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.modelFileLoaders.SdfLoader.SDFModelLoader;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.DefaultLogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
+import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelWrapper;
@@ -68,7 +64,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotiq.model.RobotiqHandModel;
 import us.ihmc.robotiq.simulatedHand.SimulatedRobotiqHandKinematicController;
 import us.ihmc.robotiq.simulatedHand.SimulatedRobotiqHandsControlThread;
-import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
@@ -83,6 +79,10 @@ import us.ihmc.wholeBodyController.DRCOutputProcessor;
 import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters;
 import us.ihmc.yoVariables.providers.DoubleProvider;
+
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.function.Consumer;
 
 public class AtlasRobotModel implements DRCRobotModel
 {
@@ -514,7 +514,7 @@ public class AtlasRobotModel implements DRCRobotModel
    }
 
    @Override
-   public AtlasSensorSuiteManager getSensorSuiteManager(ROS2NodeInterface ros2Node)
+   public AtlasSensorSuiteManager getSensorSuiteManager(ROS2Node ros2Node)
    {
       if (sensorSuiteManager == null)
       {
@@ -717,7 +717,7 @@ public class AtlasRobotModel implements DRCRobotModel
    }
 
    @Override
-   public RobotLowLevelMessenger newRobotLowLevelMessenger(ROS2NodeInterface ros2Node)
+   public RobotLowLevelMessenger newRobotLowLevelMessenger(ROS2Node ros2Node)
    {
       return new AtlasDirectRobotInterface(ros2Node, this);
    }

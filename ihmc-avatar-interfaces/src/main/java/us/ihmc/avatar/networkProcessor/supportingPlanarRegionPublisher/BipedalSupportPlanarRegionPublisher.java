@@ -1,26 +1,26 @@
 package us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-
-import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.BipedalSupportPlanarRegionParametersMessage;
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.communication.StateEstimatorAPI;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.thread.CloseableAndDisposable;
+
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class BipedalSupportPlanarRegionPublisher implements CloseableAndDisposable
 {
@@ -28,7 +28,7 @@ public class BipedalSupportPlanarRegionPublisher implements CloseableAndDisposab
 
    private final boolean manageROS2Node;
    private final RealtimeROS2Node ros2Node;
-   private final ROS2PublisherBasics<PlanarRegionsListMessage> regionPublisher;
+   private final ROS2Publisher<PlanarRegionsListMessage> regionPublisher;
 
    private final AtomicReference<CapturabilityBasedStatus> latestCapturabilityBasedStatusMessage = new AtomicReference<>(null);
    private final AtomicReference<RobotConfigurationData> latestRobotConfigurationData = new AtomicReference<>(null);
@@ -39,24 +39,19 @@ public class BipedalSupportPlanarRegionPublisher implements CloseableAndDisposab
 
    private final BipedalSupportPlanarRegionCalculator bipedalSupportPlanarRegionCalculator;
 
+   public BipedalSupportPlanarRegionPublisher(DRCRobotModel robotModel)
+   {
+      this(robotModel, null);
+   }
+
    public BipedalSupportPlanarRegionPublisher(DRCRobotModel robotModel, RealtimeROS2Node realtimeROS2Node)
-   {
-      this(robotModel, realtimeROS2Node, null);
-   }
-
-   public BipedalSupportPlanarRegionPublisher(DRCRobotModel robotModel, PubSubImplementation pubSubImplementation)
-   {
-      this(robotModel, null, pubSubImplementation);
-   }
-
-   private BipedalSupportPlanarRegionPublisher(DRCRobotModel robotModel, RealtimeROS2Node realtimeROS2Node, PubSubImplementation pubSubImplementation)
    {
       String robotName = robotModel.getSimpleRobotName();
       bipedalSupportPlanarRegionCalculator = new BipedalSupportPlanarRegionCalculator(robotModel);
 
       manageROS2Node = realtimeROS2Node == null;
       if (realtimeROS2Node == null)
-         realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, "supporting_planar_region_publisher");
+         realtimeROS2Node = new ROS2NodeBuilder().buildRealtime("supporting_planar_region_publisher");
       ros2Node = realtimeROS2Node;
 
       ros2Node.createSubscription(HumanoidControllerAPI.getTopic(CapturabilityBasedStatus.class, robotName),

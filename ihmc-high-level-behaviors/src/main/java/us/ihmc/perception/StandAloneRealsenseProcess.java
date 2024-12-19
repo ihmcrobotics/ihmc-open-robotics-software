@@ -4,17 +4,16 @@ import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2DemandGraphNode;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.perception.realsense.RealsenseDeviceManager;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.sensors.RealsenseColorDepthImagePublisher;
 import us.ihmc.sensors.RealsenseColorDepthImageRetriever;
@@ -62,7 +61,7 @@ public class StandAloneRealsenseProcess
             soleFrameSuppliers.put(side, () -> syncedRobot.getReferenceFrames().getSoleFrame(side));
          }
       }
-      realsenseDemandNode = new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_REALSENSE_POINT_CLOUD);
+      realsenseDemandNode = new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_REALSENSE_PUBLICATION);
 
       realsenseImageRetriever = new RealsenseColorDepthImageRetriever(new RealsenseDeviceManager(),
                                                                       RealsenseConfiguration.D455_COLOR_720P_DEPTH_720P_30HZ,
@@ -99,8 +98,6 @@ public class StandAloneRealsenseProcess
                                  realsenseZUpFrameSupplier.get(),
                                  ros2Helper);
 
-//         PerceptionDebugTools.printHeightMap("Your mom", latestHeightMapData, 10);
-
          latestRealsenseDepthImage.release();
       }
    }
@@ -132,7 +129,7 @@ public class StandAloneRealsenseProcess
 
    public static void main(String[] args)
    {
-      ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "nadia_realsense_process");
+      ros2Node = new ROS2NodeBuilder().build("nadia_realsense_process");
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
       StandAloneRealsenseProcess standAloneRealsenseProcess = new StandAloneRealsenseProcess(ros2Helper, null);

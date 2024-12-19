@@ -15,7 +15,7 @@ public class LocalizationPointMapPacketPubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "9a578ef99b4ca95858e1b158a5c5668f49282569f40f3b4cc54b74ac008b00ce";
+   		return "7eb6699fabc2c71427446af8bd313a0995455c5170ec3dce4c3800f37000dc81";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class LocalizationPointMapPacketPubSubType implements us.ihmc.pubsub.Topi
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -71,7 +71,7 @@ public class LocalizationPointMapPacketPubSubType implements us.ihmc.pubsub.Topi
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -87,7 +87,7 @@ public class LocalizationPointMapPacketPubSubType implements us.ihmc.pubsub.Topi
 
    public static void write(controller_msgs.msg.dds.LocalizationPointMapPacket data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_11(data.getTimestamp());
 
@@ -99,7 +99,7 @@ public class LocalizationPointMapPacketPubSubType implements us.ihmc.pubsub.Topi
 
    public static void read(controller_msgs.msg.dds.LocalizationPointMapPacket data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setTimestamp(cdr.read_type_11());
       	
@@ -110,7 +110,7 @@ public class LocalizationPointMapPacketPubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final void serialize(controller_msgs.msg.dds.LocalizationPointMapPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_11("timestamp", data.getTimestamp());
       ser.write_type_e("localization_point_map", data.getLocalizationPointMap());
    }
@@ -118,7 +118,7 @@ public class LocalizationPointMapPacketPubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.LocalizationPointMapPacket data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setTimestamp(ser.read_type_11("timestamp"));
       ser.read_type_e("localization_point_map", data.getLocalizationPointMap());
    }

@@ -15,7 +15,7 @@ public class WrenchTrajectoryStatusMessagePubSubType implements us.ihmc.pubsub.T
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "17a0d056f073bd8b6ca69a6cd098f7f4bb41e11c8bacf254f74e54d46ae5f14e";
+   		return "41c954fbd16b498df1e9afe09a1035444aedcf6ac82ad3b08137b01f65763b74";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class WrenchTrajectoryStatusMessagePubSubType implements us.ihmc.pubsub.T
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -72,7 +72,7 @@ public class WrenchTrajectoryStatusMessagePubSubType implements us.ihmc.pubsub.T
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getEndEffectorName().length() + 1;
@@ -89,7 +89,7 @@ public class WrenchTrajectoryStatusMessagePubSubType implements us.ihmc.pubsub.T
 
    public static void write(controller_msgs.msg.dds.WrenchTrajectoryStatusMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       if(data.getEndEffectorName().length() <= 255)
       cdr.write_type_d(data.getEndEffectorName());else
@@ -103,7 +103,7 @@ public class WrenchTrajectoryStatusMessagePubSubType implements us.ihmc.pubsub.T
 
    public static void read(controller_msgs.msg.dds.WrenchTrajectoryStatusMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       cdr.read_type_d(data.getEndEffectorName());	
       data.setTrajectoryExecutionStatus(cdr.read_type_9());
@@ -116,7 +116,7 @@ public class WrenchTrajectoryStatusMessagePubSubType implements us.ihmc.pubsub.T
    @Override
    public final void serialize(controller_msgs.msg.dds.WrenchTrajectoryStatusMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_d("end_effector_name", data.getEndEffectorName());
       ser.write_type_9("trajectory_execution_status", data.getTrajectoryExecutionStatus());
       ser.write_type_6("timestamp", data.getTimestamp());
@@ -125,7 +125,7 @@ public class WrenchTrajectoryStatusMessagePubSubType implements us.ihmc.pubsub.T
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.WrenchTrajectoryStatusMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       ser.read_type_d("end_effector_name", data.getEndEffectorName());
       data.setTrajectoryExecutionStatus(ser.read_type_9("trajectory_execution_status"));
       data.setTimestamp(ser.read_type_6("timestamp"));

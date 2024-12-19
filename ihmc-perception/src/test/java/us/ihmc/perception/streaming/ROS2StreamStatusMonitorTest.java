@@ -8,10 +8,9 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2Topic;
 
 import java.net.InetSocketAddress;
@@ -21,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class ROS2StreamStatusMonitorTest
 {
-   private static final ROS2Node ROS2_NODE = ROS2Tools.createROS2Node(PubSubImplementation.INTRAPROCESS, "stream_status_monitor_test_node");
+   private static final ROS2Node ROS2_NODE = new ROS2NodeBuilder().build("stream_status_monitor_test_node");
    private static final ROS2Helper ROS2_HELPER = new ROS2Helper(ROS2_NODE);
    private static final ROS2Topic<SRTStreamStatus> TEST_TOPIC = PerceptionAPI.SRT_STREAM_STATUS.withSuffix("test");
 

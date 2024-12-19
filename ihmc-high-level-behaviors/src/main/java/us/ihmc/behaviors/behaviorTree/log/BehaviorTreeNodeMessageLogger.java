@@ -3,8 +3,8 @@ package us.ihmc.behaviors.behaviorTree.log;
 import behavior_msgs.msg.dds.BehaviorTreeLogMessage;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.message.ParameterizedMessage;
-import us.ihmc.communication.crdt.CRDTUnidirectionalField;
-import us.ihmc.communication.crdt.RequestConfirmFreezable;
+import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTStatusField;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.log.LogTools;
@@ -18,20 +18,20 @@ import java.util.function.Supplier;
 /**
  * An unidirectional CRDT for log messages.
  */
-public class BehaviorTreeNodeMessageLogger extends CRDTUnidirectionalField implements LogToolsWriteOnly
+public class BehaviorTreeNodeMessageLogger extends CRDTStatusField implements LogToolsWriteOnly
 {
    public record LogMessage(Instant instant, Level level, String message) { }
    private final LinkedList<LogMessage> recentMessages = new LinkedList<>();
    private Instant lastPrintedTimestamp = Instant.now();
 
-   public BehaviorTreeNodeMessageLogger(RequestConfirmFreezable freezable)
+   public BehaviorTreeNodeMessageLogger(CRDTInfo crdtInfo)
    {
-      super(ROS2ActorDesignation.ROBOT, freezable);
+      super(ROS2ActorDesignation.ROBOT, crdtInfo);
    }
 
    private void queueLogMessage(Level level, String message)
    {
-      checkActorCanModifyAndFreeze();
+      checkActorCanModifyAndMarkHasStatus();
 
       Instant now = Instant.now();
 

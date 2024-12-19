@@ -15,7 +15,7 @@ public class KinematicsStreamingToolboxConfigurationMessagePubSubType implements
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "adbb80bba9ebc6c0eaf0144915b2372c04de0e848973c03fde8e09a0dc1fe236";
+   		return "d51bf2c63f634f7397e40ed2d51858204b851ed2c9642464683ce4b2e2267551";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class KinematicsStreamingToolboxConfigurationMessagePubSubType implements
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -93,7 +93,7 @@ public class KinematicsStreamingToolboxConfigurationMessagePubSubType implements
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -141,7 +141,7 @@ public class KinematicsStreamingToolboxConfigurationMessagePubSubType implements
 
    public static void write(toolbox_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_7(data.getLockPelvis());
 
@@ -173,7 +173,7 @@ public class KinematicsStreamingToolboxConfigurationMessagePubSubType implements
 
    public static void read(toolbox_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setLockPelvis(cdr.read_type_7());
       	
@@ -207,7 +207,7 @@ public class KinematicsStreamingToolboxConfigurationMessagePubSubType implements
    @Override
    public final void serialize(toolbox_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_7("lock_pelvis", data.getLockPelvis());
       ser.write_type_7("lock_chest", data.getLockChest());
       ser.write_type_7("enable_left_arm_jointspace", data.getEnableLeftArmJointspace());
@@ -226,7 +226,7 @@ public class KinematicsStreamingToolboxConfigurationMessagePubSubType implements
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, toolbox_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setLockPelvis(ser.read_type_7("lock_pelvis"));
       data.setLockChest(ser.read_type_7("lock_chest"));
       data.setEnableLeftArmJointspace(ser.read_type_7("enable_left_arm_jointspace"));

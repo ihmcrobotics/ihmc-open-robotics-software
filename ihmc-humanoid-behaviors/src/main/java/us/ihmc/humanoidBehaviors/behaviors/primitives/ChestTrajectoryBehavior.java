@@ -1,12 +1,11 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
-import org.apache.commons.lang3.StringUtils;
-
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
+import org.apache.commons.lang3.StringUtils;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -22,7 +21,7 @@ public class ChestTrajectoryBehavior extends AbstractBehavior
    private final YoDouble trajectoryTime;
    private final YoBoolean trajectoryTimeHasElapsed;
 
-   private final ROS2PublisherBasics<ChestTrajectoryMessage> publisher;
+   private final ROS2Publisher<ChestTrajectoryMessage> publisher;
 
    public ChestTrajectoryBehavior(String robotName, ROS2Node ros2Node, YoDouble yoTime)
    {

@@ -1,21 +1,20 @@
 package us.ihmc.humanoidBehaviors.behaviors.behaviorServices;
 
-import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.opencv.core.Scalar;
-
 import controller_msgs.msg.dds.RobotConfigurationData;
+import org.opencv.core.Scalar;
 import perception_msgs.msg.dds.VideoPacket;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.producers.JPEGCompressor;
 import us.ihmc.communication.producers.JPEGDecompressor;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
+
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehaviorService
 {
@@ -33,7 +32,7 @@ public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehavior
    private final Object ballListConch = new Object();
 
    private static final Scalar circleColor = new Scalar(160, 0, 0);
-   private final ROS2PublisherBasics<VideoPacket> videoPublisher;
+   private final ROS2Publisher<VideoPacket> videoPublisher;
 
    public ColoredCircularBlobDetectorBehaviorService(String robotName, ROS2Node ros2Node)
    {

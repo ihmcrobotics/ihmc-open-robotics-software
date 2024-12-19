@@ -1,35 +1,34 @@
 package us.ihmc.avatar.sensors.multisense;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.nio.charset.StandardCharsets;
-
-import org.ros.exception.RemoteException;
-import org.ros.node.NodeConfiguration;
-import org.ros.node.parameter.ParameterListener;
-import org.ros.node.parameter.ParameterTree;
-import org.ros.node.service.ServiceResponseListener;
-
-import perception_msgs.msg.dds.MultisenseParameterPacket;
 import dynamic_reconfigure.BoolParameter;
 import dynamic_reconfigure.DoubleParameter;
 import dynamic_reconfigure.Reconfigure;
 import dynamic_reconfigure.ReconfigureRequest;
 import dynamic_reconfigure.ReconfigureResponse;
 import dynamic_reconfigure.StrParameter;
-import us.ihmc.ros2.ROS2PublisherBasics;
+import org.ros.exception.RemoteException;
+import org.ros.node.NodeConfiguration;
+import org.ros.node.parameter.ParameterListener;
+import org.ros.node.parameter.ParameterTree;
+import org.ros.node.service.ServiceResponseListener;
+import perception_msgs.msg.dds.MultisenseParameterPacket;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
-import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.tools.processManagement.ProcessStreamGobbler;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosServiceClient;
 import us.ihmc.utilities.ros.publisher.RosDoublePublisher;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 
 public class MultiSenseParamaterSetter implements PacketConsumer<MultisenseParameterPacket>
 {
@@ -43,9 +42,9 @@ public class MultiSenseParamaterSetter implements PacketConsumer<MultisenseParam
    private final RosServiceClient<ReconfigureRequest, ReconfigureResponse> multiSenseClient;
    private final RosMainNode rosMainNode;
    private ParameterTree params;
-   private ROS2PublisherBasics<MultisenseParameterPacket> publisher;
+   private ROS2Publisher<MultisenseParameterPacket> publisher;
 
-   public MultiSenseParamaterSetter(RosMainNode rosMainNode, ROS2NodeInterface ros2Node)
+   public MultiSenseParamaterSetter(RosMainNode rosMainNode, ROS2Node ros2Node)
    {
       this.rosMainNode = rosMainNode;
       multiSenseClient = new RosServiceClient<ReconfigureRequest, ReconfigureResponse>(Reconfigure._TYPE);

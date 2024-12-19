@@ -1,22 +1,14 @@
 package us.ihmc.footstepPlanning;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.IntStream;
-
-import static org.junit.jupiter.api.Assertions.*;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import perception_msgs.msg.dds.HeightMapMessage;
 import toolbox_msgs.msg.dds.FootstepPlannerParametersPacket;
 import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
@@ -26,8 +18,6 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.FootstepPlannerAPI;
-import us.ihmc.ros2.ROS2PublisherBasics;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ExecutionTiming;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -52,15 +42,24 @@ import us.ihmc.messager.javafx.SharedMemoryJavaFXMessager;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
+import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.IntStream;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 // TODO fix me completely, this breaks github real bad - Nick
 @Disabled
@@ -74,7 +73,6 @@ public class RemoteFootstepPlannerUIMessagingTest
    private RealtimeROS2Node localNode = null;
    private RemoteUIMessageConverter messageConverter = null;
    private SharedMemoryMessager messager = null;
-   private DomainFactory.PubSubImplementation pubSubImplementation = null;
 
    private final AtomicReference<FootstepPlanningRequestPacket> planningRequestReference = new AtomicReference<>(null);
    private final AtomicReference<FootstepPlannerParametersPacket> footstepPlannerParametersReference = new AtomicReference<>(null);
@@ -94,7 +92,6 @@ public class RemoteFootstepPlannerUIMessagingTest
       messager = null;
       messageConverter = null;
       localNode = null;
-      pubSubImplementation = null;
 
       planningRequestReference.set(null);
    }
@@ -103,12 +100,12 @@ public class RemoteFootstepPlannerUIMessagingTest
 
    public void setup()
    {
-      localNode = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, "ihmc_footstep_planner_test");
+      localNode = new ROS2NodeBuilder().buildRealtime("ihmc_footstep_planner_test");
       if (VISUALIZE)
          messager = new SharedMemoryJavaFXMessager(FootstepPlannerMessagerAPI.API);
       else
          messager = new SharedMemoryMessager(FootstepPlannerMessagerAPI.API);
-      messageConverter = RemoteUIMessageConverter.createConverter(messager, robotName, pubSubImplementation);
+      messageConverter = RemoteUIMessageConverter.createConverter(messager, robotName);
 
       try
       {
@@ -144,7 +141,6 @@ public class RemoteFootstepPlannerUIMessagingTest
    @Test
    public void testSendingFootstepPlanningRequestPacketFromUIIntraprocess()
    {
-      pubSubImplementation = DomainFactory.PubSubImplementation.INTRAPROCESS;
       setup();
       runPlanningRequestTestFromUI();
    }
@@ -153,7 +149,6 @@ public class RemoteFootstepPlannerUIMessagingTest
    @Test
    public void testSendingFootstepPlanningRequestPacketFromUIFastRTPS()
    {
-      pubSubImplementation = DomainFactory.PubSubImplementation.FAST_RTPS;
       setup();
       runPlanningRequestTestFromUI();
    }
@@ -161,7 +156,6 @@ public class RemoteFootstepPlannerUIMessagingTest
    @Test
    public void testSendingFootstepPlannerRequestPacketToUIIntraprocess()
    {
-      pubSubImplementation = DomainFactory.PubSubImplementation.INTRAPROCESS;
       setup();
       runPlannerRequestToUI();
    }
@@ -169,7 +163,6 @@ public class RemoteFootstepPlannerUIMessagingTest
    @Test
    public void testSendingFootstepPlannerRequestPacketToUIFastRTPS()
    {
-      pubSubImplementation = DomainFactory.PubSubImplementation.FAST_RTPS;
       setup();
       runPlannerRequestToUI();
    }
@@ -177,7 +170,6 @@ public class RemoteFootstepPlannerUIMessagingTest
    @Test
    public void testSendingPlanObjectivePacketIntraprocess()
    {
-      pubSubImplementation = DomainFactory.PubSubImplementation.INTRAPROCESS;
       setup();
       runPlanObjectivePackets();
    }
@@ -185,7 +177,6 @@ public class RemoteFootstepPlannerUIMessagingTest
    @Test
    public void testSendingPlanObjectivePacketFastRTPS()
    {
-      pubSubImplementation = DomainFactory.PubSubImplementation.FAST_RTPS;
       setup();
       runPlanObjectivePackets();
    }
@@ -194,7 +185,6 @@ public class RemoteFootstepPlannerUIMessagingTest
    @Test
    public void testSendingFootstepPlannerOutputStatusToUIIntraprocess()
    {
-      pubSubImplementation = DomainFactory.PubSubImplementation.INTRAPROCESS;
       setup();
       runOutputStatusToUI();
    }
@@ -202,7 +192,6 @@ public class RemoteFootstepPlannerUIMessagingTest
    @Test
    public void testSendingFootstepPlannerOutputStatusToUIFastRTPS()
    {
-      pubSubImplementation = DomainFactory.PubSubImplementation.FAST_RTPS;
       setup();
       runOutputStatusToUI();
    }
@@ -279,7 +268,7 @@ public class RemoteFootstepPlannerUIMessagingTest
    private void runPlannerRequestToUI()
    {
       Random random = new Random(1738L);
-      ROS2PublisherBasics<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher = localNode.createPublisher(FootstepPlannerAPI.FOOTSTEP_PLANNER.withRobot(robotName).withInput().withTypeName(FootstepPlanningRequestPacket.class));
+      ROS2Publisher<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher = localNode.createPublisher(FootstepPlannerAPI.FOOTSTEP_PLANNER.withRobot(robotName).withInput().withTypeName(FootstepPlanningRequestPacket.class));
       localNode.spin();
 
       AtomicReference<Pose3DReadOnly> leftFootPoseReference = messager.createInput(FootstepPlannerMessagerAPI.LeftFootPose);
@@ -419,7 +408,7 @@ public class RemoteFootstepPlannerUIMessagingTest
    private void runOutputStatusToUI()
    {
       Random random = new Random(1738L);
-      ROS2PublisherBasics<FootstepPlanningToolboxOutputStatus> footstepOutputStatusPublisher = localNode.createPublisher(FootstepPlannerAPI.FOOTSTEP_PLANNER.withRobot(robotName).withOutput().withTypeName(FootstepPlanningToolboxOutputStatus.class));
+      ROS2Publisher<FootstepPlanningToolboxOutputStatus> footstepOutputStatusPublisher = localNode.createPublisher(FootstepPlannerAPI.FOOTSTEP_PLANNER.withRobot(robotName).withOutput().withTypeName(FootstepPlanningToolboxOutputStatus.class));
 
       localNode.spin();
       AtomicReference<PlanarRegionsList> planarRegionsListReference = messager.createInput(FootstepPlannerMessagerAPI.PlanarRegionData);

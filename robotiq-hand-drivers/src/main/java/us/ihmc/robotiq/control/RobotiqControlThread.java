@@ -4,7 +4,6 @@ import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
-
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
 import controller_msgs.msg.dds.HandJointAnglePacket;
 import controller_msgs.msg.dds.ManualHandControlPacket;
@@ -14,13 +13,13 @@ import us.ihmc.avatar.handControl.packetsAndConsumers.ManualHandControlProvider;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.OldHandAPI;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.subscribers.HandDesiredConfigurationMessageSubscriber;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotiq.RobotiqHandCommunicator;
 import us.ihmc.robotiq.data.RobotiqHandSensorData;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
 
 public class RobotiqControlThread extends HandControlThread
@@ -45,7 +44,7 @@ public class RobotiqControlThread extends HandControlThread
       ROS2Topic<?> outputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
       ROS2Topic<?> inputTopic = HumanoidControllerAPI.getInputTopic(robotName);
 
-      ROS2PublisherBasics<HandJointAnglePacket> handJointAnglePublisher = realtimeROS2Node.createPublisher(outputTopic.withTypeName(HandJointAnglePacket.class));
+      ROS2Publisher<HandJointAnglePacket> handJointAnglePublisher = realtimeROS2Node.createPublisher(outputTopic.withTypeName(HandJointAnglePacket.class));
       jointAngleCommunicator = new HandJointAngleCommunicator(robotSide, handJointAnglePublisher);
       realtimeROS2Node.createSubscription(OldHandAPI.getHandDesiredConfigurationTopic(robotName),
                                           handDesiredConfigurationMessageSubscriber);

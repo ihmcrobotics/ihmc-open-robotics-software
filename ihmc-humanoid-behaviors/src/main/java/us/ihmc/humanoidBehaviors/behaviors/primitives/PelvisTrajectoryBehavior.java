@@ -1,11 +1,10 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
-import org.apache.commons.lang3.StringUtils;
-
 import controller_msgs.msg.dds.PelvisTrajectoryMessage;
-import us.ihmc.ros2.ROS2PublisherBasics;
+import org.apache.commons.lang3.StringUtils;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -19,7 +18,7 @@ public class PelvisTrajectoryBehavior extends AbstractBehavior
    private final YoDouble trajectoryTime;
    private final YoBoolean trajectoryTimeElapsed;
 
-   private final ROS2PublisherBasics<PelvisTrajectoryMessage> publisher;
+   private final ROS2Publisher<PelvisTrajectoryMessage> publisher;
 
    public PelvisTrajectoryBehavior(String robotName, ROS2Node ros2Node, YoDouble yoTime)
    {

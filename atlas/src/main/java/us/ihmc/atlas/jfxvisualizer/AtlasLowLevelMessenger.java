@@ -1,24 +1,23 @@
 package us.ihmc.atlas.jfxvisualizer;
 
-import controller_msgs.msg.dds.AbortWalkingMessage;
 import atlas_msgs.msg.dds.AtlasLowLevelControlModeMessage;
 import atlas_msgs.msg.dds.BDIBehaviorCommandPacket;
+import controller_msgs.msg.dds.AbortWalkingMessage;
 import controller_msgs.msg.dds.PauseWalkingMessage;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.ros2.ROS2PublisherBasics;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.atlas.AtlasLowLevelControlMode;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 
 public class AtlasLowLevelMessenger implements RobotLowLevelMessenger
 {
-   private final ROS2PublisherBasics<AtlasLowLevelControlModeMessage> lowLevelModePublisher;
-   private final ROS2PublisherBasics<BDIBehaviorCommandPacket> bdiBehaviorPublisher;
-   private final ROS2PublisherBasics<AbortWalkingMessage> abortWalkingPublisher;
-   private final ROS2PublisherBasics<PauseWalkingMessage> pauseWalkingPublisher;
+   private final ROS2Publisher<AtlasLowLevelControlModeMessage> lowLevelModePublisher;
+   private final ROS2Publisher<BDIBehaviorCommandPacket> bdiBehaviorPublisher;
+   private final ROS2Publisher<AbortWalkingMessage> abortWalkingPublisher;
+   private final ROS2Publisher<PauseWalkingMessage> pauseWalkingPublisher;
 
    public AtlasLowLevelMessenger(RealtimeROS2Node ros2Node, String robotName)
    {

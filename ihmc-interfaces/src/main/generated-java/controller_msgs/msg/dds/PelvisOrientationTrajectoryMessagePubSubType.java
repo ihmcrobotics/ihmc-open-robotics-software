@@ -15,7 +15,7 @@ public class PelvisOrientationTrajectoryMessagePubSubType implements us.ihmc.pub
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "bbf28ab951db0bd903feb11b8d9646533375b69e8b6dea0b253e2ae1825bf75d";
+   		return "fa85d8bca03a7371a8f087faa696ed84cc5ff51b77f83bad439518f28ebabb25";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class PelvisOrientationTrajectoryMessagePubSubType implements us.ihmc.pub
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -73,7 +73,7 @@ public class PelvisOrientationTrajectoryMessagePubSubType implements us.ihmc.pub
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -90,7 +90,7 @@ public class PelvisOrientationTrajectoryMessagePubSubType implements us.ihmc.pub
 
    public static void write(controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_7(data.getForceExecution());
 
@@ -101,7 +101,7 @@ public class PelvisOrientationTrajectoryMessagePubSubType implements us.ihmc.pub
 
    public static void read(controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setForceExecution(cdr.read_type_7());
       	
@@ -114,7 +114,7 @@ public class PelvisOrientationTrajectoryMessagePubSubType implements us.ihmc.pub
    @Override
    public final void serialize(controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_7("force_execution", data.getForceExecution());
       ser.write_type_7("enable_user_pelvis_control_during_walking", data.getEnableUserPelvisControlDuringWalking());
       ser.write_type_a("so3_trajectory", new ihmc_common_msgs.msg.dds.SO3TrajectoryMessagePubSubType(), data.getSo3Trajectory());
@@ -124,7 +124,7 @@ public class PelvisOrientationTrajectoryMessagePubSubType implements us.ihmc.pub
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setForceExecution(ser.read_type_7("force_execution"));
       data.setEnableUserPelvisControlDuringWalking(ser.read_type_7("enable_user_pelvis_control_during_walking"));
       ser.read_type_a("so3_trajectory", new ihmc_common_msgs.msg.dds.SO3TrajectoryMessagePubSubType(), data.getSo3Trajectory());

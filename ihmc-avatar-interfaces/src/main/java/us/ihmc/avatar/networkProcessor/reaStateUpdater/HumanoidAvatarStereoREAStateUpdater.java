@@ -1,18 +1,17 @@
 package us.ihmc.avatar.networkProcessor.reaStateUpdater;
 
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
-import perception_msgs.msg.dds.REAStateRequestMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
+import perception_msgs.msg.dds.REAStateRequestMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.ros2.ROS2PublisherBasics;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
+import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.thread.CloseableAndDisposable;
@@ -23,7 +22,7 @@ import java.util.concurrent.Executors;
 public class HumanoidAvatarStereoREAStateUpdater implements CloseableAndDisposable
 {
    private final RealtimeROS2Node ros2Node;
-   private final ROS2PublisherBasics<REAStateRequestMessage> reaStateRequestPublisher;
+   private final ROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher;
 
    private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.createNamedThreadFactory(getClass().getSimpleName()));
 
@@ -32,12 +31,12 @@ public class HumanoidAvatarStereoREAStateUpdater implements CloseableAndDisposab
    private final REAStateRequestMessage resumeRequestMessage = new REAStateRequestMessage();
    private final REAStateRequestMessage clearAndResumeRequestMessage = new REAStateRequestMessage();
 
-   public HumanoidAvatarStereoREAStateUpdater(DRCRobotModel robotModel, PubSubImplementation implementation)
+   public HumanoidAvatarStereoREAStateUpdater(DRCRobotModel robotModel)
    {
-      this(robotModel, implementation, REACommunicationProperties.inputTopic);
+      this(robotModel, REACommunicationProperties.inputTopic);
    }
 
-   public HumanoidAvatarStereoREAStateUpdater(DRCRobotModel robotModel, PubSubImplementation implementation, ROS2Topic<?> inputTopic)
+   public HumanoidAvatarStereoREAStateUpdater(DRCRobotModel robotModel, ROS2Topic<?> inputTopic)
    {
       String robotName = robotModel.getSimpleRobotName();
 
@@ -47,7 +46,7 @@ public class HumanoidAvatarStereoREAStateUpdater implements CloseableAndDisposab
       clearAndResumeRequestMessage.setRequestClear(true);
       clearAndResumeRequestMessage.setRequestResume(true);
 
-      ros2Node = ROS2Tools.createRealtimeROS2Node(implementation, "avatar_rea_state_updater");
+      ros2Node = new ROS2NodeBuilder().buildRealtime("avatar_rea_state_updater");
 
       reaStateRequestPublisher = ros2Node.createPublisher(inputTopic.withTypeName(REAStateRequestMessage.class));
       ros2Node.createSubscription(HumanoidControllerAPI.getOutputTopic(robotName).withTypeName(HighLevelStateChangeStatusMessage.class), this::handleHighLevelStateChangeMessage);

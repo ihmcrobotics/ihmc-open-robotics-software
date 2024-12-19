@@ -1,13 +1,7 @@
 package us.ihmc.robotEnvironmentAwareness.simulation;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.LinkedBlockingQueue;
-
 import perception_msgs.msg.dds.LidarScanMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.LidarPointCloudCompression;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -26,6 +20,7 @@ import us.ihmc.robotics.graphics.YoGraphicPlanarRegionsList;
 import us.ihmc.robotics.lidar.LidarScan;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.util.RobotController;
@@ -35,6 +30,11 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class SimpleLidarRobotController implements RobotController
 {
@@ -56,7 +56,7 @@ public class SimpleLidarRobotController implements RobotController
 
    private final YoGraphicPlanarRegionsList yoGraphicPlanarRegionsList = new YoGraphicPlanarRegionsList("region", 100, 150, registry);
 
-   private final ROS2PublisherBasics<LidarScanMessage> lidarScanPublisher;
+   private final ROS2Publisher<LidarScanMessage> lidarScanPublisher;
 
    public SimpleLidarRobotController(SimpleLidarRobot lidarRobot, double dt, ROS2Node ros2Node, Graphics3DAdapter graphics3dAdapter,
                                      YoGraphicsListRegistry yoGraphicsListRegistry) throws IOException

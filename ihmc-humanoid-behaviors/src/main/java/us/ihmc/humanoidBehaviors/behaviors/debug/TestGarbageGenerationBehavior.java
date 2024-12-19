@@ -6,7 +6,6 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
 import ihmc_common_msgs.msg.dds.SO3TrajectoryMessage;
 import ihmc_common_msgs.msg.dds.SO3TrajectoryPointMessage;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -18,6 +17,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.time.YoStopwatch;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class TestGarbageGenerationBehavior extends AbstractBehavior
@@ -29,9 +29,9 @@ public class TestGarbageGenerationBehavior extends AbstractBehavior
    private final HumanoidReferenceFrames referenceFrames;
    private final YoStopwatch timer;
 
-   private final ROS2PublisherBasics<ArmTrajectoryMessage> armPublisher;
-   private final ROS2PublisherBasics<ChestTrajectoryMessage> chestPublisher;
-   private final ROS2PublisherBasics<FootstepDataListMessage> footstepPublisher;
+   private final ROS2Publisher<ArmTrajectoryMessage> armPublisher;
+   private final ROS2Publisher<ChestTrajectoryMessage> chestPublisher;
+   private final ROS2Publisher<FootstepDataListMessage> footstepPublisher;
 
    public TestGarbageGenerationBehavior(String robotName, ROS2Node ros2Node, HumanoidReferenceFrames referenceFrames, YoDouble yoTime)
    {

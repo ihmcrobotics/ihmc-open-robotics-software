@@ -2,21 +2,16 @@ package us.ihmc.sensors;
 
 import org.bytedeco.javacpp.BytePointer;
 import perception_msgs.msg.dds.ImageMessage;
-import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.cuda.CUDACompressionTools;
 import us.ihmc.perception.cuda.CUDAJPEGProcessor;
 import us.ihmc.perception.imageMessage.CompressionType;
-import us.ihmc.perception.imageMessage.ImageMessageDataPacker;
-import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.tools.PerceptionMessageTools;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2PublisherBasics;
+import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.RestartableThread;
 
@@ -27,9 +22,12 @@ import java.util.concurrent.locks.ReentrantLock;
 public class ZEDColorDepthImagePublisher
 {
    private final ROS2Node ros2Node;
-   private final SideDependentList<ROS2PublisherBasics<ImageMessage>> ros2ColorImagePublishers;
-   private final ROS2PublisherBasics<ImageMessage> ros2DepthImagePublisher;
-   private final ROS2PublisherBasics<ImageMessage> ros2CutOutDepthImagePublisher;
+   private final SideDependentList<ROS2Publisher<ImageMessage>> ros2ColorImagePublishers;
+   private final SideDependentList<ImageMessage> colorImageMessages = new SideDependentList<>(side -> new ImageMessage());
+   private final ROS2Publisher<ImageMessage> ros2DepthImagePublisher;
+   private final ImageMessage depthImageMessage = new ImageMessage();
+
+   private final ROS2Publisher<ImageMessage> ros2CutOutDepthImagePublisher;
 
    private final SideDependentList<CUDAJPEGProcessor> imageEncoders = new SideDependentList<>();
    private final CUDACompressionTools dataCompressor = new CUDACompressionTools();
@@ -59,7 +57,7 @@ public class ZEDColorDepthImagePublisher
                                       ROS2Topic<ImageMessage> depthTopic,
                                       ROS2Topic<ImageMessage> cutoutDepthTopic)
    {
-      ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "zed_color_depth_publisher");
+      ros2Node = new ROS2NodeBuilder().build("zed_color_depth_publisher");
       ros2ColorImagePublishers = new SideDependentList<>(ros2Node.createPublisher(colorTopics.get(RobotSide.LEFT)),
                                                          ros2Node.createPublisher(colorTopics.get(RobotSide.RIGHT)));
       ros2DepthImagePublisher = ros2Node.createPublisher(depthTopic);
@@ -89,7 +87,8 @@ public class ZEDColorDepthImagePublisher
 
          if (nextGpuDepthImage != null)
          {
-            ros2DepthImagePublisher.publish(createDepthImageMessage(nextGpuDepthImage));
+            packDepthImageMessage(nextGpuDepthImage);
+            ros2DepthImagePublisher.publish(depthImageMessage);
             lastDepthSequenceNumber = nextGpuDepthImage.getSequenceNumber();
          }
       }
@@ -116,7 +115,8 @@ public class ZEDColorDepthImagePublisher
 
          if (nextCutOutDepthImage != null)
          {
-            ros2CutOutDepthImagePublisher.publish(createDepthImageMessage(nextCutOutDepthImage));
+            packDepthImageMessage(nextCutOutDepthImage);
+            ros2CutOutDepthImagePublisher.publish(depthImageMessage);
             lastCutOutDepthSequenceNumber = nextCutOutDepthImage.getSequenceNumber();
          }
       }
@@ -130,10 +130,8 @@ public class ZEDColorDepthImagePublisher
       }
    }
 
-   private ImageMessage createDepthImageMessage(RawImage depthImageToPublish)
+   private void packDepthImageMessage(RawImage depthImageToPublish)
    {
-      ImageMessage depthImageMessage = new ImageMessage();
-
       if (depthImageToPublish != null && depthImageToPublish.isAvailable())
       {
          depthImageToPublish.get();
@@ -149,8 +147,6 @@ public class ZEDColorDepthImagePublisher
 
          depthImageToPublish.release();
       }
-
-      return depthImageMessage;
    }
 
    private void publishLeftColorThreadFunction()
@@ -214,9 +210,8 @@ public class ZEDColorDepthImagePublisher
          imageEncoders.get(side).encodeBGR(colorImageToPublish.getGpuImageMat(), colorJPEGPointer);
 
          // Publish compressed image
-         ImageMessage colorImageMessage = new ImageMessage();
-         PerceptionMessageTools.packImageMessage(colorImageToPublish, colorJPEGPointer, CompressionType.NVJPEG, colorImageMessage);
-         ros2ColorImagePublishers.get(side).publish(colorImageMessage);
+         PerceptionMessageTools.packImageMessage(colorImageToPublish, colorJPEGPointer, CompressionType.NVJPEG, colorImageMessages.get(side));
+         ros2ColorImagePublishers.get(side).publish(colorImageMessages.get(side));
 
          lastColorSequenceNumbers.put(side, colorImageToPublish.getSequenceNumber());
 

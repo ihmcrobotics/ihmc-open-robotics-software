@@ -2,11 +2,10 @@ package us.ihmc.perception.streaming;
 
 import org.apache.logging.log4j.core.util.ExecutorServices;
 import perception_msgs.msg.dds.SRTStreamStatus;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2Topic;
 
 import java.util.HashMap;
@@ -22,13 +21,20 @@ import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_RGB2RGBA;
 public class ROS2SRTSensorStreamer
 {
    private final ROS2Node ros2Node;
+   private boolean destroyROS2Node = false;
 
    private final Map<ROS2Topic<SRTStreamStatus>, ROS2SRTVideoStreamer> videoStreamers = new HashMap<>();
    private final ExecutorService sendFrameExecutor = Executors.newCachedThreadPool();
 
    public ROS2SRTSensorStreamer()
    {
-      ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, getClass().getSimpleName().toLowerCase() + "_node");
+      this(new ROS2NodeBuilder().build(ROS2SRTSensorStreamer.class.getSimpleName().toLowerCase() + "_node"));
+      destroyROS2Node = true;
+   }
+
+   public ROS2SRTSensorStreamer(ROS2Node ros2Node)
+   {
+      this.ros2Node = ros2Node;
    }
 
    public void addStream(ROS2Topic<SRTStreamStatus> streamTopic,
@@ -52,7 +58,7 @@ public class ROS2SRTSensorStreamer
 
    public void sendFrame(ROS2Topic<SRTStreamStatus> streamTopic, RawImage frame)
    {
-      if (frame != null && frame.get() == null)
+      if (frame == null || frame.get() == null)
          return;
 
       if (!hasStream(streamTopic))
@@ -71,6 +77,9 @@ public class ROS2SRTSensorStreamer
 
       for (ROS2SRTVideoStreamer videoStreamer : videoStreamers.values())
          videoStreamer.destroy();
+
+      if (destroyROS2Node)
+         ros2Node.destroy();
    }
 
    private void addStreamWithGuessedParameters(ROS2Topic<SRTStreamStatus> streamTopic, RawImage exampleImage)

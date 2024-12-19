@@ -15,7 +15,7 @@ public class AStarBodyPathPlannerParametersPacketPubSubType implements us.ihmc.p
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "0f5c28b7da1b5511d105dce87e7b6e812bd74cf484b7f47937d395a4916ec07c";
+   		return "b547aa3ae2f57b6b83f2938feb08895a508c8bef91aab5af4210b999f7aee3e0";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class AStarBodyPathPlannerParametersPacketPubSubType implements us.ihmc.p
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -151,7 +151,7 @@ public class AStarBodyPathPlannerParametersPacketPubSubType implements us.ihmc.p
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -286,7 +286,7 @@ public class AStarBodyPathPlannerParametersPacketPubSubType implements us.ihmc.p
 
    public static void write(toolbox_msgs.msg.dds.AStarBodyPathPlannerParametersPacket data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_7(data.getCheckForCollisions());
 
@@ -376,7 +376,7 @@ public class AStarBodyPathPlannerParametersPacketPubSubType implements us.ihmc.p
 
    public static void read(toolbox_msgs.msg.dds.AStarBodyPathPlannerParametersPacket data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setCheckForCollisions(cdr.read_type_7());
       	
@@ -468,7 +468,7 @@ public class AStarBodyPathPlannerParametersPacketPubSubType implements us.ihmc.p
    @Override
    public final void serialize(toolbox_msgs.msg.dds.AStarBodyPathPlannerParametersPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_7("check_for_collisions", data.getCheckForCollisions());
       ser.write_type_7("compute_surface_normal_cost", data.getComputeSurfaceNormalCost());
       ser.write_type_7("compute_traversibility", data.getComputeTraversibility());
@@ -516,7 +516,7 @@ public class AStarBodyPathPlannerParametersPacketPubSubType implements us.ihmc.p
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, toolbox_msgs.msg.dds.AStarBodyPathPlannerParametersPacket data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setCheckForCollisions(ser.read_type_7("check_for_collisions"));
       data.setComputeSurfaceNormalCost(ser.read_type_7("compute_surface_normal_cost"));
       data.setComputeTraversibility(ser.read_type_7("compute_traversibility"));

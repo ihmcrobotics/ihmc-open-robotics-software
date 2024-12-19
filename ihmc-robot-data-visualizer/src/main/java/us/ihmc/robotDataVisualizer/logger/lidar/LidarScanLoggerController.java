@@ -1,11 +1,5 @@
 package us.ihmc.robotDataVisualizer.logger.lidar;
 
-import java.io.File;
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-
-import perception_msgs.msg.dds.LidarScanMessage;
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -15,15 +9,20 @@ import javafx.beans.value.ObservableValue;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Window;
-import us.ihmc.communication.ROS2Tools;
+import perception_msgs.msg.dds.LidarScanMessage;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
+
+import java.io.File;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class LidarScanLoggerController
 {
-   private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "lidar_scan_logger");
+   private final ROS2Node ros2Node = new ROS2NodeBuilder().build("lidar_scan_logger");
 
    private final LidarScanLogWriter logWriter = new LidarScanLogWriter(ros2Node);
    private final LidarScanLogReader logReader = new LidarScanLogReader();

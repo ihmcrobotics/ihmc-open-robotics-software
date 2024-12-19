@@ -19,18 +19,17 @@ import us.ihmc.avatar.networkProcessor.walkingPreview.WalkingControllerPreviewTo
 import us.ihmc.avatar.networkProcessor.wholeBodyTrajectoryToolboxModule.WholeBodyTrajectoryToolboxModule;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.log.LogTools;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 import us.ihmc.robotEnvironmentAwareness.updaters.LIDARBasedREAModule;
 import us.ihmc.robotEnvironmentAwareness.updaters.REANetworkProvider;
 import us.ihmc.robotEnvironmentAwareness.updaters.REAPlanarRegionPublicNetworkProvider;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.tools.processManagement.JavaProcessSpawner;
@@ -53,16 +52,15 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
    private final List<CloseableAndDisposable> modulesToClose = new ArrayList<>();
 
    private final DRCRobotModel robotModel;
-   private final PubSubImplementation pubSubImplementation;
 
    private RealtimeROS2Node realtimeROS2Node;
    private URI rosURI;
    private ObjectCommunicator simulatedSensorCommunicator;
 
-   public static HumanoidNetworkProcessor newFromParameters(DRCRobotModel robotModel, PubSubImplementation pubSubImplementation,
+   public static HumanoidNetworkProcessor newFromParameters(DRCRobotModel robotModel,
                                                             HumanoidNetworkProcessorParameters parameters)
    {
-      HumanoidNetworkProcessor humanoidNetworkProcessor = new HumanoidNetworkProcessor(robotModel, pubSubImplementation);
+      HumanoidNetworkProcessor humanoidNetworkProcessor = new HumanoidNetworkProcessor(robotModel);
       humanoidNetworkProcessor.setRosURI(parameters.getRosURI());
       humanoidNetworkProcessor.setSimulatedSensorCommunicator(parameters.getSimulatedSensorCommunicator());
 
@@ -106,10 +104,9 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
       return humanoidNetworkProcessor;
    }
 
-   public HumanoidNetworkProcessor(DRCRobotModel robotModel, PubSubImplementation pubSubImplementation)
+   public HumanoidNetworkProcessor(DRCRobotModel robotModel)
    {
       this.robotModel = robotModel;
-      this.pubSubImplementation = pubSubImplementation;
    }
 
    public void setupShutdownHook()
@@ -148,8 +145,7 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
    {
       if (realtimeROS2Node == null)
       {
-         LogTools.info("Creating ROS 2 node in {} mode", pubSubImplementation.name());
-         realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, NETWORK_PROCESSOR_ROS2_NODE_NAME);
+         realtimeROS2Node = new ROS2NodeBuilder().buildRealtime(NETWORK_PROCESSOR_ROS2_NODE_NAME);
          modulesToClose.add(realtimeROS2Node::destroy);
       }
       return realtimeROS2Node;
@@ -175,7 +171,7 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
 
       try
       {
-         ZeroPoseMockRobotConfigurationDataPublisherModule module = new ZeroPoseMockRobotConfigurationDataPublisherModule(robotModel, pubSubImplementation);
+         ZeroPoseMockRobotConfigurationDataPublisherModule module = new ZeroPoseMockRobotConfigurationDataPublisherModule(robotModel);
          modulesToClose.add(module);
          return module;
       }
@@ -192,7 +188,7 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
 
       try
       {
-         WholeBodyTrajectoryToolboxModule module = new WholeBodyTrajectoryToolboxModule(robotModel, enableYoVariableServer, pubSubImplementation);
+         WholeBodyTrajectoryToolboxModule module = new WholeBodyTrajectoryToolboxModule(robotModel, enableYoVariableServer);
          modulesToClose.add(module);
          return module;
       }
@@ -226,7 +222,7 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
 
       try
       {
-         KinematicsPlanningToolboxModule module = new KinematicsPlanningToolboxModule(robotModel, enableYoVariableServer, pubSubImplementation);
+         KinematicsPlanningToolboxModule module = new KinematicsPlanningToolboxModule(robotModel, enableYoVariableServer);
          modulesToClose.add(module);
          return module;
       }
@@ -241,13 +237,13 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
    {
       try
       {
-         modulesToClose.add(new KinematicsStreamingToolboxMessageLogger(robotModel.getSimpleRobotName(), pubSubImplementation));
+         modulesToClose.add(new KinematicsStreamingToolboxMessageLogger(robotModel.getSimpleRobotName()));
 
          if (launcherClass == null)
          {
             checkIfModuleCanBeCreated(KinematicsStreamingToolboxModule.class);
 
-            KinematicsStreamingToolboxModule module = new KinematicsStreamingToolboxModule(robotModel, enableYoVariableServer, pubSubImplementation);
+            KinematicsStreamingToolboxModule module = new KinematicsStreamingToolboxModule(robotModel, enableYoVariableServer);
             modulesToClose.add(module);
             return module;
          }
@@ -402,8 +398,7 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
          FiducialDetectorToolboxModule module = new FiducialDetectorToolboxModule(robotModel.getSimpleRobotName(),
                                                                                   robotModel.getTarget(),
                                                                                   robotModel.createFullRobotModel(),
-                                                                                  robotModel.getLogModelProvider(),
-                                                                                  pubSubImplementation);
+                                                                                  robotModel.getLogModelProvider());
          modulesToClose.add(module);
          return module;
       }
@@ -422,8 +417,7 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
       {
          ObjectDetectorToolboxModule module = new ObjectDetectorToolboxModule(robotModel.getSimpleRobotName(),
                                                                               robotModel.createFullRobotModel(),
-                                                                              robotModel.getLogModelProvider(),
-                                                                              pubSubImplementation);
+                                                                              robotModel.getLogModelProvider());
          modulesToClose.add(module);
          return module;
       }
@@ -518,7 +512,7 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
 
       try
       {
-         HumanoidAvatarStereoREAStateUpdater module = new HumanoidAvatarStereoREAStateUpdater(robotModel, pubSubImplementation, stereoInputTopic);
+         HumanoidAvatarStereoREAStateUpdater module = new HumanoidAvatarStereoREAStateUpdater(robotModel, stereoInputTopic);
          modulesToClose.add(module);
          return module;
       }

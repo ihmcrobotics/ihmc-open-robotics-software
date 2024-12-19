@@ -29,11 +29,10 @@ import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToo
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxInitialConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxPrivilegedConfigurationCommand;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.util.JVMStatisticsGenerator;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.ros2.ROS2NodeInterface;
-import us.ihmc.ros2.ROS2PublisherBasics;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
 
 import java.util.ArrayList;
@@ -53,27 +52,25 @@ import java.util.Map;
 public class KinematicsStreamingToolboxModule extends ToolboxModule
 {
    protected final KinematicsStreamingToolboxController controller;
-   private ROS2PublisherBasics<WholeBodyTrajectoryMessage> trajectoryMessagePublisher;
-   private ROS2PublisherBasics<WholeBodyStreamingMessage> streamingMessagePublisher;
+   private ROS2Publisher<WholeBodyTrajectoryMessage> trajectoryMessagePublisher;
+   private ROS2Publisher<WholeBodyStreamingMessage> streamingMessagePublisher;
 
    RobotConfigurationDataBasedUpdater robotStateUpdater = new RobotConfigurationDataBasedUpdater();
 
-   public KinematicsStreamingToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, PubSubImplementation pubSubImplementation)
+   public KinematicsStreamingToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer)
    {
-      this(robotModel, KinematicsStreamingToolboxParameters.defaultParameters(), startYoVariableServer, pubSubImplementation);
+      this(robotModel, KinematicsStreamingToolboxParameters.defaultParameters(), startYoVariableServer);
    }
 
    public KinematicsStreamingToolboxModule(DRCRobotModel robotModel,
                                            KinematicsStreamingToolboxParameters parameters,
-                                           boolean startYoVariableServer,
-                                           PubSubImplementation pubSubImplementation)
+                                           boolean startYoVariableServer)
    {
       super(robotModel.getSimpleRobotName(),
             robotModel.createFullRobotModel(),
             robotModel.getLogModelProvider(),
             startYoVariableServer,
-            (int) (parameters.getToolboxUpdatePeriod() * 1000),
-            pubSubImplementation);
+            (int) (parameters.getToolboxUpdatePeriod() * 1000));
 
       setTimeWithoutInputsBeforeGoingToSleep(parameters.getTimeThresholdForSleeping());
       controller = new KinematicsStreamingToolboxController(commandInputManager,
@@ -116,7 +113,7 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
    }
 
    @Override
-   public void registerExtraPuSubs(ROS2NodeInterface ros2Node)
+   public void registerExtraPuSubs(ROS2Node ros2Node)
    {
       trajectoryMessagePublisher = ros2Node.createPublisher(HumanoidControllerAPI.getTopic(WholeBodyTrajectoryMessage.class, robotName));
       streamingMessagePublisher = ros2Node.createPublisher(HumanoidControllerAPI.getTopic(WholeBodyStreamingMessage.class, robotName));

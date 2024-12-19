@@ -2,7 +2,7 @@
 # It holds all the information needed for detailing the type of constraint to apply to the center of mass.
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # This is the list of desired times for each key frames.
 float64[] way_point_times

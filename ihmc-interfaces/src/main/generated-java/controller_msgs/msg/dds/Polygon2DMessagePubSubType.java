@@ -15,7 +15,7 @@ public class Polygon2DMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "baad5603602cdd1f156c6cd14741553878c3617142e82daabc86d4b5b8adc618";
+   		return "f1f62243dc0335bc2ff3ab9147f1bdc69cb07db4b9e46c7943943e5a205afa86";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class Polygon2DMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50; ++i0)
       {
@@ -70,7 +70,7 @@ public class Polygon2DMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -84,7 +84,7 @@ public class Polygon2DMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
    public static void write(controller_msgs.msg.dds.Polygon2DMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       if(data.getVertices().size() <= 50)
       cdr.write_type_e(data.getVertices());else
@@ -94,7 +94,7 @@ public class Polygon2DMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
    public static void read(controller_msgs.msg.dds.Polygon2DMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       cdr.read_type_e(data.getVertices());	
 
@@ -103,14 +103,14 @@ public class Polygon2DMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final void serialize(controller_msgs.msg.dds.Polygon2DMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_e("vertices", data.getVertices());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.Polygon2DMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       ser.read_type_e("vertices", data.getVertices());
    }
 

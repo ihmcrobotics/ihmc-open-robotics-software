@@ -1,14 +1,13 @@
 package us.ihmc.behaviors.tools.perception;
 
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAM;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMParameters;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 
 import java.util.ArrayList;
@@ -21,14 +20,14 @@ import java.util.function.Supplier;
 public class CompositePlanarRegionService
 {
    private Supplier<PlanarRegionsList>[] planarRegionSuppliers;
-   private final List<ROS2PublisherBasics<PlanarRegionsListMessage>> planarRegionPublishers = new ArrayList<>();
-   private final ROS2PublisherBasics<PlanarRegionsListMessage> combinedPlanarRegionPublisher;
+   private final List<ROS2Publisher<PlanarRegionsListMessage>> planarRegionPublishers = new ArrayList<>();
+   private final ROS2Publisher<PlanarRegionsListMessage> combinedPlanarRegionPublisher;
    private final PausablePeriodicThread thread;
 
    private PlanarRegionSLAMParameters planarRegionSLAMParameters = new PlanarRegionSLAMParameters();
    private long sequenceId = 0;
 
-   public CompositePlanarRegionService(ROS2NodeInterface ros2Node, List<String> topicNames, double period, Supplier<PlanarRegionsList>... planarRegionSuppliers)
+   public CompositePlanarRegionService(ROS2Node ros2Node, List<String> topicNames, double period, Supplier<PlanarRegionsList>... planarRegionSuppliers)
    {
       this.planarRegionSuppliers = planarRegionSuppliers;
 

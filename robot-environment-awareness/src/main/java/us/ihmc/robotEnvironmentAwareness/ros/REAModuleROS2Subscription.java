@@ -3,7 +3,7 @@ package us.ihmc.robotEnvironmentAwareness.ros;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.ros2.NewMessageListener;
-import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Subscription;
 
@@ -16,7 +16,7 @@ public class REAModuleROS2Subscription<T>
 
    private ROS2Subscription<T> subscription = null;
 
-   public REAModuleROS2Subscription(ROS2NodeInterface ros2Node,
+   public REAModuleROS2Subscription(ROS2Node ros2Node,
                                     Messager messager,
                                     REASourceType reaSourceType,
                                     Class<T> messageType,
@@ -26,7 +26,7 @@ public class REAModuleROS2Subscription<T>
       this(ros2Node, messager, reaSourceType.getTopicName(), messageType, listener, qosProfile, reaSourceType.getEnableTopic());
    }
 
-   public REAModuleROS2Subscription(ROS2NodeInterface node,
+   public REAModuleROS2Subscription(ROS2Node node,
                                     Messager messager,
                                     String name,
                                     Class<T> Type,
@@ -42,7 +42,7 @@ public class REAModuleROS2Subscription<T>
       messager.addTopicListener(enableTopic, (enable) -> handle(node, enable));
    }
 
-   public void handle(ROS2NodeInterface ros2Node, boolean enable)
+   public void handle(ROS2Node ros2Node, boolean enable)
    {
       if (enable)
          create(ros2Node);
@@ -50,7 +50,7 @@ public class REAModuleROS2Subscription<T>
          remove();
    }
 
-   public void create(ROS2NodeInterface ros2Node)
+   public void create(ROS2Node ros2Node)
    {
       if (subscription == null)
          subscription = ros2Node.createSubscription(messageType, listener, topicName, qosProfile);

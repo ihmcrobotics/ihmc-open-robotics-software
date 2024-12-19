@@ -3,15 +3,14 @@ package us.ihmc.behaviors.tools;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAM;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMParameters;
 import us.ihmc.robotEnvironmentAwareness.tools.ConcaveHullMergerListener;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2PublisherBasics;
+import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
 
 /**
@@ -19,7 +18,7 @@ import us.ihmc.ros2.ROS2Topic;
  */
 public class PlanarRegionsMappingModule
 {
-   private final ROS2PublisherBasics<PlanarRegionsListMessage> planarRegionPublisher;
+   private final ROS2Publisher<PlanarRegionsListMessage> planarRegionPublisher;
 
    private volatile PlanarRegionsList slamMap = new PlanarRegionsList();
    private PlanarRegionSLAMParameters planarRegionSLAMParameters = new PlanarRegionSLAMParameters();
@@ -30,9 +29,9 @@ public class PlanarRegionsMappingModule
    private long sequenceId = 0; // to detect slam updated
    private static final int SLAM_EVERY = 1;
 
-   public PlanarRegionsMappingModule(DomainFactory.PubSubImplementation pubSubImplementation)
+   public PlanarRegionsMappingModule()
    {
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, PerceptionAPI.MAPPING_MODULE_NODE_NAME);
+      ROS2Node ros2Node = new ROS2NodeBuilder().build(PerceptionAPI.MAPPING_MODULE_NODE_NAME);
 
       planarRegionPublisher = ros2Node.createPublisher(PerceptionAPI.REALSENSE_SLAM_MODULE.withOutput().withTypeName(PlanarRegionsListMessage.class));
       ROS2Topic realsenseTopic = PerceptionAPI.REA.withOutput().withSuffix("realsense");
