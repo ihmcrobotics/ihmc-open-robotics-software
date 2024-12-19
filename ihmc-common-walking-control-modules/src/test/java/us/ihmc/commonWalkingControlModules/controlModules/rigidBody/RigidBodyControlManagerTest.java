@@ -527,7 +527,6 @@ public class RigidBodyControlManagerTest
                                                                     null,
                                                                     null,
                                                                     false,
-                                                                    isImpedanceEnabled,
                                                                     nominalRhoWeight,
                                                                     WholeBodyPostureAdjustmentProvider.createZeroPostureAdjustmentProvider(),
                                                                     yoTime,

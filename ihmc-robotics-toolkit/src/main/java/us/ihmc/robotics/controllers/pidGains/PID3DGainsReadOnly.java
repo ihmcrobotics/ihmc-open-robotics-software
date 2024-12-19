@@ -186,6 +186,8 @@ public interface PID3DGainsReadOnly
             return false;
          if (!Arrays.equals(getIntegralGains(), other.getIntegralGains()))
             return false;
+         if (!Arrays.equals(getDampingRatios(), other.getDampingRatios()))
+            return false;
          if (Double.compare(getMaximumIntegralError(), other.getMaximumIntegralError()) != 0)
             return false;
          if (Double.compare(getMaximumDerivativeError(), other.getMaximumDerivativeError()) != 0)

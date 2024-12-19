@@ -428,7 +428,7 @@ public class CrossRobotCommandCodeQualityTest
 
             if (!wasFieldDifferent)
             {
-               errorMessage += "Random generator for " + typeToTest.getSimpleName() + " seems to be missing generation of the field: " + field.getName() + "\n";
+               errorMessage += "Random generator for " + typeToTest.getSimpleName() + " seems to be missing generation of the field: " + field.getName() + " see methods in " + CrossRobotCommandRandomTools.class.getSimpleName() + "\n";
             }
 
             // We now assert that 2 successive random objects have different values for each field.

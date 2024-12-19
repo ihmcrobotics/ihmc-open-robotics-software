@@ -636,6 +636,8 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
             return false;
          if (controlBaseFrame != other.controlBaseFrame)
             return false;
+         if (isImpedanceEnabled != other.isImpedanceEnabled)
+            return false;
 
          return true;
       }

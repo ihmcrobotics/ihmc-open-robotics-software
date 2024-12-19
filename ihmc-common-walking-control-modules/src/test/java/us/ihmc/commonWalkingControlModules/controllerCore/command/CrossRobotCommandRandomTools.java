@@ -1255,6 +1255,7 @@ public class CrossRobotCommandRandomTools
       next.setGainsFrame(nextElementIn(random, possibleFrames));
       next.getSpatialAccelerationCommand().set(nextSpatialAccelerationCommand(random, rootBody, possibleFrames));
       next.setControlBaseFrame(nextElementIn(random, possibleFrames));
+      next.setImpedanceEnabled(random.nextBoolean());
       return next;
    }
 
@@ -1272,6 +1273,7 @@ public class CrossRobotCommandRandomTools
       next.setGainsFrame(nextElementIn(random, possibleFrames));
       next.getSpatialAccelerationCommand().set(nextSpatialAccelerationCommand(random, rootBody, possibleFrames));
       next.setControlBaseFrame(nextElementIn(random, possibleFrames));
+      next.setImpedanceEnabled(random.nextBoolean());
       return next;
    }
 
@@ -1307,6 +1309,7 @@ public class CrossRobotCommandRandomTools
       next.getReferenceForce().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
       next.getSpatialAccelerationCommand().set(nextSpatialAccelerationCommand(random, rootBody, possibleFrames));
       next.setControlBaseFrame(nextElementIn(random, possibleFrames));
+      next.setImpedanceEnabled(random.nextBoolean());
       return next;
    }
 

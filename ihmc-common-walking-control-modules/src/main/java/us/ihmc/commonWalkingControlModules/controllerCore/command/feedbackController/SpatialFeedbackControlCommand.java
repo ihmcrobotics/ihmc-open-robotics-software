@@ -334,7 +334,6 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     *
     *    @param isImpedanceEnabled whether to enable impedance control
     */
-
    public void setImpedanceEnabled(boolean isImpedanceEnabled)
    {
       this.isImpedanceEnabled = isImpedanceEnabled;
@@ -1334,6 +1333,8 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
          if (!spatialAccelerationCommand.equals(other.spatialAccelerationCommand))
             return false;
          if (controlBaseFrame != other.controlBaseFrame)
+            return false;
+         if (isImpedanceEnabled != other.isImpedanceEnabled)
             return false;
 
          return true;
