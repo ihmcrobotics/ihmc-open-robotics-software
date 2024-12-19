@@ -1,7 +1,9 @@
 package us.ihmc.rdx.simulation;
 
+import org.bytedeco.opencv.opencv_core.GpuMat;
 import us.ihmc.commons.thread.Throttler;
 import us.ihmc.perception.RawImage;
+import us.ihmc.perception.cuda.CUDADepthColorizer;
 import us.ihmc.rdx.AbstractRDXPointCloudRenderer.ColoringMethod;
 import us.ihmc.rdx.DepthSensorDemoObjectsModel;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
@@ -27,6 +29,8 @@ public class RDXSensorSimulatorDemo
    private final RDXRawImagePointCloudRenderer pointCloudRenderer = new RDXRawImagePointCloudRenderer(false);
 
    private RDXMatImagePanel imagePanel;
+
+   private CUDADepthColorizer depthColorizer = new CUDADepthColorizer();
 
    public RDXSensorSimulatorDemo()
    {
@@ -71,8 +75,11 @@ public class RDXSensorSimulatorDemo
                RawImage colorImage = sensorSimulator.getColorImage();
                RawImage depthImage = sensorSimulator.getDepthImage();
 
+               GpuMat colorizedDepth = depthColorizer.colorizeDepth(depthImage.getGpuImageMat());
+               RawImage deColorizedDepth = depthImage.replaceImage(depthColorizer.deColorizeDepth(colorizedDepth));
+
                // Set point cloud to render
-               pointCloudRenderer.updateMesh(depthImage);
+               pointCloudRenderer.updateMesh(deColorizedDepth);
 
                // Set color image to render
                imagePanel.ensureDimensionsMatch(colorImage.getWidth(), colorImage.getHeight());
@@ -82,6 +89,8 @@ public class RDXSensorSimulatorDemo
                // Release the grabbed images
                colorImage.release();
                depthImage.release();
+               deColorizedDepth.release();
+               colorizedDepth.close();
             }
 
             baseUI.renderBeforeOnScreenUI();
