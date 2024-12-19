@@ -231,7 +231,7 @@ public class RDXPredefinedRigidBodySceneNodeBuilder extends RDXSceneNodeBuilder<
                                                                                            parent.getID(),
                                                                                            new RigidBodyTransform(),
                                                                                            DoorSceneNodeDefinitions.DOOR_PANEL_VISUAL_MODEL_FILE_PATH,
-                                                                                           new RigidBodyTransform(),
+                                                                                           DoorSceneNodeDefinitions.PULL_DOOR_PANEL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
                                                                                            sceneGraph.getCRDTInfo());
             return new RDXPredefinedRigidBodySceneNode(rightDoorPanel, RDXBaseUI.getInstance().getPrimary3DPanel());
          }
