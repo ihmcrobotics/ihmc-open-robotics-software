@@ -5,8 +5,10 @@ import behavior_msgs.msg.dds.AI2RStatusMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
+import us.ihmc.behaviors.sequence.actions.FootstepPlanActionState;
 import us.ihmc.communication.AutonomyAPI;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.SceneGraph;
@@ -43,6 +45,22 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
       {
          LogTools.info("Received command message: %s".formatted(message));
 
+         // Set goals for GoTo behavior
+         String referenceFrame = message.getGotoReferenceFrameName().toString();
+         Point3D goalStancePoint = message.getGotoGoalStancePoint();
+         Point3D goalFocalPoint = message.getGotoGoalFocalPoint();
+         for (var actionChild : state.getActionSequence().getActionChildren())
+         {
+            if (actionChild.getDefinition().getName().contains("Go to Action") && actionChild instanceof FootstepPlanActionState gotoActionState)
+            {
+               gotoActionState.getDefinition().setParentFrameName(referenceFrame);
+               gotoActionState.getDefinition().getGoalStancePoint().getValue().set(goalStancePoint);
+               gotoActionState.getDefinition().getGoalFocalPoint().getValue().set(goalFocalPoint);
+               break;
+            }
+         }
+
+         // Trigger specified behavior
          String checkPointName = message.getBehaviorToExecuteAsString();
          for (int i=0; i < state.getCheckPoints().size(); i++)
          {
