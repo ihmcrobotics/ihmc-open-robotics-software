@@ -9,7 +9,9 @@ import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.behaviors.sequence.actions.FootstepPlanActionState;
 import us.ihmc.communication.AutonomyAPI;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTStatusFootstepList;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.SceneGraph;
@@ -31,6 +33,8 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
    private final AI2RStatusMessage statusMessage = new AI2RStatusMessage();
    private final AI2RNodeState state;
    private final List<ActionNodeState<?>> failedActions = new ArrayList<>();
+   private CRDTStatusFootstepList plannedSteps;
+   private static final double DISTANCE_COLLISION_THRESHOLD = 0.3;
 
    public AI2RNodeExecutor(long id,
                            CRDTInfo crdtInfo,
@@ -134,7 +138,6 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
                }
             }
          }
-
          ros2.publish(AutonomyAPI.AI2R_STATUS, statusMessage);
       }
 
@@ -157,16 +160,44 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
          }
       }
 
-//      // Check if Goto action is executing
-//      for (var actionChild : state.getActionSequence().getActionChildren())
-//      {
-//         if (actionChild.getDefinition().getName().contains("Go to Action") && actionChild instanceof FootstepPlanActionState gotoActionState)
-//         {
-//           if (gotoActionState.getIsExecuting())
-//           {
-//              gotoActionState.getPreviewFootsteps()
-//           }
-//         }
-//      }
+      // Check if Goto action is executing and if next steps are colliding with objects in the scene
+      goToCollisionLoop:
+      for (var actionChild : state.getActionSequence().getActionChildren())
+      {
+         if (actionChild.getDefinition().getName().contains("Go to Action") && actionChild instanceof FootstepPlanActionState gotoActionState)
+         {
+            if (gotoActionState.getIsExecuting())
+            {
+               if (plannedSteps == null)
+               {
+                  plannedSteps = gotoActionState.getPreviewFootsteps();
+               }
+               else // Check if the next step's pose is too close with any object in the scene
+               {
+                  int stepsLeft = gotoActionState.getNumberOfIncompleteFootsteps();
+                  if (stepsLeft > 0)
+                  {
+                     Point3DReadOnly positionNextStep = plannedSteps.getPoseReadOnly(plannedSteps.getSize() - stepsLeft).getTranslation();
+                     for (var object : statusMessage.getObjects())
+                     {
+                        if (!object.getObjectNameAsString().contains("SceneGraphRoot"))
+                        {
+                           Point3DReadOnly objectPosition = object.getObjectPoseInWorld().getTranslation();
+                           if(positionNextStep.distanceXY(objectPosition) < DISTANCE_COLLISION_THRESHOLD)
+                           {
+                              gotoActionState.setFailed(true);
+                              // set abort flag in state and have the executor abort
+                              gotoActionState.setAbortWalking(true);
+                              plannedSteps = null;
+                              break goToCollisionLoop;
+                           }
+                        }
+                     }
+                  }
+               }
+            }
+            break;
+         }
+      }
    }
 }
