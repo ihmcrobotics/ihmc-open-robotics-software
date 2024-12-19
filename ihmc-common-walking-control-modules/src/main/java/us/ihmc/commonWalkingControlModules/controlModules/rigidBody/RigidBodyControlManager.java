@@ -7,7 +7,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -80,6 +79,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
    private final YoBoolean stateSwitched;
    private final YoBoolean doPrepareForLocomotion;
    private boolean hasContactStateChanged = false;
+   private final boolean supportsImpedanceMode;
 
    public RigidBodyControlManager(RigidBodyBasics bodyToControl,
                                   RigidBodyBasics baseBody,
@@ -98,7 +98,6 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                   LoadBearingParameters loadBearingParameters,
                                   RigidBodyControlMode defaultControlMode,
                                   boolean enableFunctionGenerators,
-                                  YoBoolean isImpedanceEnabled,
                                   double nominalRhoWeight,
                                   WholeBodyPostureAdjustmentProvider postureAdjustmentProvider,
                                   YoDouble yoTime,
@@ -107,13 +106,13 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                   YoRegistry parentRegistry)
    {
       this.bodyToControl = bodyToControl;
-      this.isImpedanceEnabled = isImpedanceEnabled;
       bodyName = bodyToControl.getName();
       String namePrefix = bodyName + "Manager";
       registry = new YoRegistry(namePrefix);
 
       requestedState = new YoEnum<>(namePrefix + "RequestedControlMode", registry, RigidBodyControlMode.class, true);
       stateSwitched = new YoBoolean(namePrefix + "StateSwitched", registry);
+      isImpedanceEnabled = new YoBoolean(bodyToControl + "ImpedanceEnabled", registry);
 
       doPrepareForLocomotion = new YoBoolean(namePrefix + "DoPrepareForLocomotion", registry);
 
@@ -143,7 +142,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
          taskspaceControlState.setGains(taskspaceOrientationGains);
          taskspaceControlState.setWeights(taskspaceAngularWeight);
          this.taskspaceControlState = taskspaceControlState;
-         LogTools.info("Creating manager for " + bodyName + " with orientation controller. (Impedance enabled: " + isImpedanceEnabled.getValue() + ")");
+         this.supportsImpedanceMode = false;
       }
       else if (taskspaceAngularWeight == null && taskspaceLinearWeight != null)
       {
@@ -164,7 +163,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
          taskspaceControlState.setGains(taskspacePositionGains);
          taskspaceControlState.setWeights(taskspaceLinearWeight);
          this.taskspaceControlState = taskspaceControlState;
-         LogTools.info("Creating manager for " + bodyName + " with position controller. (Impedance enabled: " + isImpedanceEnabled.getValue() + ")");
+         this.supportsImpedanceMode = false;
       }
       else if (taskspaceAngularWeight != null && taskspaceLinearWeight != null)
       {
@@ -187,10 +186,10 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
          }
          taskspaceControlState.setGains(taskspaceOrientationGains, taskspacePositionGains);
          taskspaceControlState.setWeights(taskspaceAngularWeight, taskspaceLinearWeight);
-         if (taskspaceOrientationImpedanceGains != null && taskspacePositionImpedanceGains != null)
+         supportsImpedanceMode = taskspaceOrientationImpedanceGains != null && taskspacePositionImpedanceGains != null;
+         if (supportsImpedanceMode)
             taskspaceControlState.setImpedanceGains(taskspaceOrientationImpedanceGains, taskspacePositionImpedanceGains);
          this.taskspaceControlState = taskspaceControlState;
-         LogTools.info("Creating manager for " + bodyName + " with pose controller. (Impedance enabled: " + isImpedanceEnabled.getValue() + ")");
       }
       else
       {
@@ -371,16 +370,19 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
       }
    }
 
-   public void handleHybridTrajectoryCommand(SE3TrajectoryControllerCommand taskspaceCommand, JointspaceTrajectoryCommand jointSpaceCommand)
+   public void handleHybridTrajectoryCommand(SE3TrajectoryControllerCommand taskspaceCommand,
+                                             JointspaceTrajectoryCommand jointSpaceCommand,
+                                             WrenchTrajectoryControllerCommand feedForwardCommand,
+                                             SE3PIDGainsTrajectoryControllerCommand gainsCommand)
    {
       computeDesiredJointPositions(initialJointPositions);
 
       if (stateMachine.getCurrentStateKey() == RigidBodyControlMode.LOADBEARING)
-      { // If in LOADBEARING mode, execute the trajectory in that state
+      { // If in LOADBEARING mode, execute the trajectory in that state. Impedance mode is not supported
          loadBearingControlState.handleAsOrientationTrajectoryCommand(taskspaceCommand);
          loadBearingControlState.handleJointTrajectoryCommand(jointSpaceCommand, initialJointPositions);
       }
-      else if (taskspaceControlState.handleHybridTrajectoryCommand(taskspaceCommand, jointSpaceCommand, initialJointPositions))
+      else if (taskspaceControlState.handleHybridTrajectoryCommand(taskspaceCommand, jointSpaceCommand, feedForwardCommand, gainsCommand, initialJointPositions))
       { // Otherwise execute in TASKSPACE mode
          requestState(taskspaceControlState.getControlMode());
       }
@@ -402,73 +404,6 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
       else
       {
          LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " received invalid hybrid SO3 trajectory command.");
-         hold();
-      }
-   }
-
-   public void handleHybridTrajectoryCommand(SE3TrajectoryControllerCommand taskspaceCommand,
-                                             JointspaceTrajectoryCommand jointSpaceCommand,
-                                             WrenchTrajectoryControllerCommand feedForwardCommand)
-   {
-      computeDesiredJointPositions(initialJointPositions);
-
-      if (stateMachine.getCurrentStateKey() == RigidBodyControlMode.LOADBEARING)
-      { // If in LOADBEARING mode, execute the trajectory in that state
-         loadBearingControlState.handleAsOrientationTrajectoryCommand(taskspaceCommand);
-         loadBearingControlState.handleJointTrajectoryCommand(jointSpaceCommand, initialJointPositions);
-      }
-      else if (taskspaceControlState.handleHybridTrajectoryCommand(taskspaceCommand, jointSpaceCommand, feedForwardCommand, initialJointPositions))
-      { // Otherwise execute in TASKSPACE mode
-         requestState(taskspaceControlState.getControlMode());
-      }
-      else
-      {
-         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " received invalid hybrid SE3 trajectory command.");
-         hold();
-      }
-   }
-
-   public void handleHybridTrajectoryCommand(SE3TrajectoryControllerCommand taskspaceCommand,
-                                             JointspaceTrajectoryCommand jointSpaceCommand,
-                                             SE3PIDGainsTrajectoryControllerCommand gainsCommand)
-   {
-      computeDesiredJointPositions(initialJointPositions);
-
-      if (stateMachine.getCurrentStateKey() == RigidBodyControlMode.LOADBEARING)
-      { // If in LOADBEARING mode, execute the trajectory in that state
-         loadBearingControlState.handleAsOrientationTrajectoryCommand(taskspaceCommand);
-         loadBearingControlState.handleJointTrajectoryCommand(jointSpaceCommand, initialJointPositions);
-      }
-      else if (taskspaceControlState.handleHybridTrajectoryCommand(taskspaceCommand, jointSpaceCommand, gainsCommand, initialJointPositions))
-      { // Otherwise execute in TASKSPACE mode
-         requestState(taskspaceControlState.getControlMode());
-      }
-      else
-      {
-         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " received invalid hybrid SE3 trajectory command.");
-         hold();
-      }
-   }
-
-   public void handleHybridTrajectoryCommand(SE3TrajectoryControllerCommand taskspaceCommand,
-                                             JointspaceTrajectoryCommand jointSpaceCommand,
-                                             WrenchTrajectoryControllerCommand feedForwardCommand,
-                                             SE3PIDGainsTrajectoryControllerCommand gainsCommand)
-   {
-      computeDesiredJointPositions(initialJointPositions);
-
-      if (stateMachine.getCurrentStateKey() == RigidBodyControlMode.LOADBEARING)
-      { // If in LOADBEARING mode, execute the trajectory in that state
-         loadBearingControlState.handleAsOrientationTrajectoryCommand(taskspaceCommand);
-         loadBearingControlState.handleJointTrajectoryCommand(jointSpaceCommand, initialJointPositions);
-      }
-      else if (taskspaceControlState.handleHybridTrajectoryCommand(taskspaceCommand, jointSpaceCommand, feedForwardCommand, gainsCommand, initialJointPositions))
-      { // Otherwise execute in TASKSPACE mode
-         requestState(taskspaceControlState.getControlMode());
-      }
-      else
-      {
-         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " received invalid hybrid SE3 trajectory command.");
          hold();
       }
    }
@@ -765,9 +700,9 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
       return ret;
    }
 
-   public YoBoolean getImpedanceEnabled()
+   public void setImpedanceEnabled(boolean isImpedanceEnabled)
    {
-      return isImpedanceEnabled;
+      this.isImpedanceEnabled.set(supportsImpedanceMode && isImpedanceEnabled);
    }
 
    public RigidBodyBasics getBodyToControl()

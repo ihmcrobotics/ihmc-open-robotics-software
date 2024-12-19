@@ -630,6 +630,8 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
             return false;
          if (controlBaseFrame != other.controlBaseFrame)
             return false;
+         if (isImpedanceEnabled != other.isImpedanceEnabled)
+            return false;
 
          return true;
       }

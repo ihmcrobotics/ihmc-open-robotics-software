@@ -102,7 +102,6 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
    protected final YoMatrix yoDerivativeTermMatrix;
    protected final YoMatrix yoCoriolisMatrix;
-   protected final YoMatrix yoTestMatrix;
 
    protected final FramePoint3D controlFramePosition = new FramePoint3D();
    protected final FrameQuaternion controlFrameOrientation = new FrameQuaternion();
@@ -149,7 +148,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    protected final GeometricJacobianCalculator jacobianCalculator = new GeometricJacobianCalculator();
    protected final DMatrixRMaj inverseInertiaMatrix = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj inverseInertiaTempMatrix = new DMatrixRMaj(0, 0);
-   protected final DMatrixRMaj coriolisMatrix = new DMatrixRMaj(0,0);
+   protected final DMatrixRMaj coriolisMatrix = new DMatrixRMaj(0, 0);
    protected final TIntArrayList activeAxis = new TIntArrayList();
    private final DMatrixRMaj tempMatrix = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj tempFeedbackMatrix = new DMatrixRMaj(6, 1);
@@ -171,8 +170,8 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    protected final DMatrixRMaj subMassMatrix = new DMatrixRMaj(0, 0);
    protected final DMatrixRMaj subMassInverseMatrix = new DMatrixRMaj(0, 0);
    protected final DMatrixRMaj identityMatrix = CommonOps_DDRM.identity(6, 6);
+   private final DMatrixRMaj tempInertiaMatrix = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj inertiaMatrix = new DMatrixRMaj(0, 0);
-   private final DMatrixRMaj savedInertiaMatrix = new DMatrixRMaj(0, 0);
 
    protected final RigidBodyTwistProvider rigidBodyTwistProvider;
    protected final RigidBodyAccelerationProvider rigidBodyAccelerationProvider;
@@ -260,7 +259,6 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
       yoDerivativeTermMatrix = new YoMatrix(appendIndex(endEffectorName, controllerIndex) + "DerivativeTermMatrix", 6, 6, fbToolbox.getRegistry());
       yoCoriolisMatrix = new YoMatrix(appendIndex(endEffectorName, controllerIndex) + "CoriolisMatrix", 6, 6, fbToolbox.getRegistry());
-      yoTestMatrix = new YoMatrix(appendIndex(endEffectorName, controllerIndex) + "TestMatrix", 6, 6, fbToolbox.getRegistry());
 
       if (computeIntegralTerm)
       {
@@ -404,12 +402,12 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       virtualModelControlOutput.setProperties(command.getSpatialAccelerationCommand());
 
       gains.set(command.getGains());
-      dampingRatioMatrix.set(0,0, gains.getOrientationGains().getDampingRatios()[0]);
-      dampingRatioMatrix.set(1,1, gains.getOrientationGains().getDampingRatios()[1]);
-      dampingRatioMatrix.set(2,2, gains.getOrientationGains().getDampingRatios()[2]);
-      dampingRatioMatrix.set(3,3, gains.getPositionGains().getDampingRatios()[0]);
-      dampingRatioMatrix.set(4,4, gains.getPositionGains().getDampingRatios()[1]);
-      dampingRatioMatrix.set(5,5, gains.getPositionGains().getDampingRatios()[2]);
+      dampingRatioMatrix.set(0, 0, gains.getOrientationGains().getDampingRatios()[0]);
+      dampingRatioMatrix.set(1, 1, gains.getOrientationGains().getDampingRatios()[1]);
+      dampingRatioMatrix.set(2, 2, gains.getOrientationGains().getDampingRatios()[2]);
+      dampingRatioMatrix.set(3, 3, gains.getPositionGains().getDampingRatios()[0]);
+      dampingRatioMatrix.set(4, 4, gains.getPositionGains().getDampingRatios()[1]);
+      dampingRatioMatrix.set(5, 5, gains.getPositionGains().getDampingRatios()[2]);
       command.getSpatialAccelerationCommand().getSelectionMatrix(selectionMatrix);
       // This one should be set from the orientation gains, put zero for x, y kind of this way
 //      selectionMatrix.getAngularPart().setAxisSelection(false, false, true);
@@ -902,39 +900,31 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
       if (isImpedanceEnabled())
       {
+         // Derivative term follows the approach outlined here 10.1109/ROBOT.2003.1242165
+
          positionGains.getFullProportionalGainMatrix(tempLinearMatrix, 3);
          orientationGains.getFullProportionalGainMatrix(tempAngularMatrix, 0);
 
          CommonOps_DDRM.mult(tempAngularMatrix, tempLinearMatrix, tempMatrix);
 
-         sqrtProportionalGainMatrix.reshape(6,6);
-         sqrtInertiaMatrix.reshape(6,6);
+         sqrtProportionalGainMatrix.reshape(6, 6);
+         sqrtInertiaMatrix.reshape(6, 6);
 
          MatrixMissingTools.sqrt(tempMatrix, sqrtProportionalGainMatrix, tempSqrtMatrix, U, W, Vt, svd);
-         //         LogTools.info("K_p^{1/2} = " + sqrtProportionalGainMatrix);
 
          tempMatrix.set(inverseInertiaMatrix);
 
          MatrixMissingTools.invert(tempMatrix, inverseSolver);
          MatrixMissingTools.sqrt(tempMatrix, sqrtInertiaMatrix, tempSqrtMatrix, U, W, Vt, svd);
 
-         //         for (int row = 0; row < tempMatrix.getNumRows(); row++)
-         //         {
-         //            for (int col = 0; col < tempMatrix.getNumCols(); col++)
-         //            {
-         //               yoTestMatrix.set(row, col, tempMatrix.get(row, col));
-         //            }
-         //         }
-         //         LogTools.info("End effector: " + endEffector.getName() + " - Inertia matrix: " + tempMatrix);
-
-         tempMatrix.reshape(6,6);
+         tempMatrix.reshape(6, 6);
          CommonOps_DDRM.mult(sqrtInertiaMatrix, dampingRatioMatrix, tempMatrix);
          CommonOps_DDRM.mult(tempMatrix, sqrtProportionalGainMatrix, tempDerivativeGainMatrix);
          CommonOps_DDRM.mult(sqrtProportionalGainMatrix, dampingRatioMatrix, tempMatrix);
          CommonOps_DDRM.multAdd(tempMatrix, sqrtInertiaMatrix, tempDerivativeGainMatrix);
 
          computeCoriolisMatrix();
-         CommonOps_DDRM.add(tempDerivativeGainMatrix,-1, coriolisMatrix, tempDerivativeGainMatrix);
+         CommonOps_DDRM.add(tempDerivativeGainMatrix, -1, coriolisMatrix, tempDerivativeGainMatrix);
 
          feedbacktermsMatrix.set(0, 0, angularFeedbackTermToPack.getX());
          feedbacktermsMatrix.set(1, 0, angularFeedbackTermToPack.getY());
@@ -943,7 +933,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          feedbacktermsMatrix.set(4, 0, linearFeedbackTermToPack.getY());
          feedbacktermsMatrix.set(5, 0, linearFeedbackTermToPack.getZ());
 
-         tempMatrix.reshape(6,1);
+         tempMatrix.reshape(6, 1);
          CommonOps_DDRM.mult(tempDerivativeGainMatrix, feedbacktermsMatrix, tempMatrix);
 
          linearFeedbackTermToPack.setX(tempMatrix.get(3, 0));
@@ -953,15 +943,6 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          angularFeedbackTermToPack.setX(tempMatrix.get(0, 0));
          angularFeedbackTermToPack.setY(tempMatrix.get(1, 0));
          angularFeedbackTermToPack.setZ(tempMatrix.get(2, 0));
-
-         //         for (int row = 0; row < 6; row++)
-         //         {
-         //            for (int col = 0; col < 6; col++)
-         //            {
-         //               yoDerivativeTermMatrix.set(row, col, tempDerivativeGainMatrix.get(row, col));
-         //               yoCoriolisMatrix.set(row, col, coriolisMatrix.get(row, col));
-         //            }
-         //         }
       }
       else
       {
@@ -1172,6 +1153,8 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
    private void computeInverseInertiaMatrix()
    {
+      // Follows the approach outlined in 10.1109/TRO.2024.3420800
+
       jacobianCalculator.clear();
       jacobianCalculator.setKinematicChain(base.getChildrenJoints().get(0).getSuccessor(), endEffector);
       jacobianCalculator.setJacobianFrame(controlFrame);
@@ -1180,7 +1163,6 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       //      Jacobian is an M x N matrix, M is called the task size and
       //    * N is the overall number of degrees of freedom (DoFs) to be controlled.
       jacobianMatrix.set(jacobianCalculator.getJacobianMatrix());
-      jacobianMatrix.reshape(jacobianMatrix.getNumRows(), jacobianMatrix.getNumCols());
 
       tempMatrix.reshape(activeAxis.size(), jacobianMatrix.getNumCols());
       MatrixMissingTools.extractRows(jacobianMatrix, activeAxis, tempMatrix);
@@ -1206,23 +1188,23 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    // This is \bar{C} for the Derivative term
    private void computeCoriolisMatrix()
    {
-      inertiaMatrix.reshape(inverseInertiaMatrix.getNumRows(), inverseInertiaMatrix.getNumCols());
-      inertiaMatrix.set(inverseInertiaMatrix);
-      MatrixMissingTools.invert(inertiaMatrix, inverseSolver);
+      tempInertiaMatrix.reshape(inverseInertiaMatrix.getNumRows(), inverseInertiaMatrix.getNumCols());
+      tempInertiaMatrix.set(inverseInertiaMatrix);
+      MatrixMissingTools.invert(tempInertiaMatrix, inverseSolver);
 
-      if (savedInertiaMatrix.getNumCols()==0)
+      if (inertiaMatrix.getNumCols() == 0)
       {
-         savedInertiaMatrix.set(inertiaMatrix);
-         savedInertiaMatrix.reshape(savedInertiaMatrix.getNumRows(), savedInertiaMatrix.getNumCols());
-         coriolisMatrix.reshape(savedInertiaMatrix.getNumRows(), savedInertiaMatrix.getNumCols());
+         inertiaMatrix.set(tempInertiaMatrix);
+         inertiaMatrix.reshape(inertiaMatrix.getNumRows(), inertiaMatrix.getNumCols());
+         coriolisMatrix.reshape(inertiaMatrix.getNumRows(), inertiaMatrix.getNumCols());
          coriolisMatrix.zero();
          return;
       }
 
-      coriolisMatrix.reshape(inertiaMatrix.getNumRows(), inertiaMatrix.getNumCols());
-      CommonOps_DDRM.add(inertiaMatrix, -1, savedInertiaMatrix, coriolisMatrix);
-      CommonOps_DDRM.scale(0.5/dt, coriolisMatrix);
-      savedInertiaMatrix.set(inertiaMatrix);
+      coriolisMatrix.reshape(tempInertiaMatrix.getNumRows(), tempInertiaMatrix.getNumCols());
+      CommonOps_DDRM.add(tempInertiaMatrix, -1, inertiaMatrix, coriolisMatrix);
+      CommonOps_DDRM.scale(0.5 / dt, coriolisMatrix);
+      inertiaMatrix.set(tempInertiaMatrix);
    }
 
    private void updateFeedForward()

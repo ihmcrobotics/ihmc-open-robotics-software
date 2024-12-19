@@ -114,7 +114,7 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
 
    public void setGains(PID3DGainsReadOnly gains)
    {
-      positionHelper.setGains(gains);
+      positionHelper.setDefaultMotionGains(gains);
    }
 
    public void setWeights(Vector3DReadOnly weights)

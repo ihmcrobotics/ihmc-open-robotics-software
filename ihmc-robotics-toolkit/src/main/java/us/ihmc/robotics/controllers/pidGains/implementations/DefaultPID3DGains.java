@@ -201,6 +201,6 @@ public class DefaultPID3DGains implements PID3DGains, Settable<DefaultPID3DGains
    public String toString()
    {
       return getClass().getSimpleName() + ": kp: " + Arrays.toString(proportionalGains) + ", kd: " + Arrays.toString(derivativeGains) + ", ki: "
-            + Arrays.toString(integralGains);
+             + Arrays.toString(integralGains);
    }
 }

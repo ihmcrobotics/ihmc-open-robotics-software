@@ -48,14 +48,14 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HandH
    /**
             * The PIDGains for the taskspace controller.
             */
-   public controller_msgs.msg.dds.SE3PIDGainsTrajectoryMessage taskspace_pid_gains_trajectory_message_;
+   public ihmc_common_msgs.msg.dds.SE3PIDGainsTrajectoryMessage taskspace_pid_gains_trajectory_message_;
 
    public HandHybridJointspaceTaskspaceTrajectoryMessage()
    {
       taskspace_trajectory_message_ = new ihmc_common_msgs.msg.dds.SE3TrajectoryMessage();
       jointspace_trajectory_message_ = new controller_msgs.msg.dds.JointspaceTrajectoryMessage();
       feedforward_taskspace_trajectory_message_ = new controller_msgs.msg.dds.WrenchTrajectoryMessage();
-      taskspace_pid_gains_trajectory_message_ = new controller_msgs.msg.dds.SE3PIDGainsTrajectoryMessage();
+      taskspace_pid_gains_trajectory_message_ = new ihmc_common_msgs.msg.dds.SE3PIDGainsTrajectoryMessage();
    }
 
    public HandHybridJointspaceTaskspaceTrajectoryMessage(HandHybridJointspaceTaskspaceTrajectoryMessage other)
@@ -77,7 +77,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HandH
       ihmc_common_msgs.msg.dds.SE3TrajectoryMessagePubSubType.staticCopy(other.taskspace_trajectory_message_, taskspace_trajectory_message_);
       controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.staticCopy(other.jointspace_trajectory_message_, jointspace_trajectory_message_);
       controller_msgs.msg.dds.WrenchTrajectoryMessagePubSubType.staticCopy(other.feedforward_taskspace_trajectory_message_, feedforward_taskspace_trajectory_message_);
-      controller_msgs.msg.dds.SE3PIDGainsTrajectoryMessagePubSubType.staticCopy(other.taskspace_pid_gains_trajectory_message_, taskspace_pid_gains_trajectory_message_);
+      ihmc_common_msgs.msg.dds.SE3PIDGainsTrajectoryMessagePubSubType.staticCopy(other.taskspace_pid_gains_trajectory_message_, taskspace_pid_gains_trajectory_message_);
    }
 
    /**
@@ -174,7 +174,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HandH
    /**
             * The PIDGains for the taskspace controller.
             */
-   public controller_msgs.msg.dds.SE3PIDGainsTrajectoryMessage getTaskspacePidGainsTrajectoryMessage()
+   public ihmc_common_msgs.msg.dds.SE3PIDGainsTrajectoryMessage getTaskspacePidGainsTrajectoryMessage()
    {
       return taskspace_pid_gains_trajectory_message_;
    }

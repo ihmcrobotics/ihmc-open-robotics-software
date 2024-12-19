@@ -18,6 +18,7 @@ import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -56,7 +57,7 @@ public class RigidBodyOrientationController extends RigidBodyTaskspaceControlSta
                                          YoDouble yoTime,
                                          RigidBodyJointControlHelper jointControlHelper,
                                          boolean enableFunctionGenerators,
-                                         YoBoolean enableImpedanceControl,
+                                         BooleanProvider enableImpedanceControl,
                                          YoRegistry parentRegistry)
    {
       super(RigidBodyControlMode.TASKSPACE, bodyToControl.getName(), yoTime, parentRegistry);
@@ -108,7 +109,7 @@ public class RigidBodyOrientationController extends RigidBodyTaskspaceControlSta
 
    public void setGains(PID3DGainsReadOnly gains)
    {
-      orientationHelper.setGains(gains);
+      orientationHelper.setDefaultMotionGains(gains);
    }
 
    public void setWeights(Vector3DReadOnly weights)

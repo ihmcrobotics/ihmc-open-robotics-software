@@ -686,48 +686,6 @@ public class SelectionMatrix6D
     * Returns a list of indices for the active axes
     * @param activeAxesToPack list to store the active axes
     */
-   public void getActiveAxes(List<Integer> activeAxesToPack)
-   {
-      activeAxesToPack.clear();
-      if (isAngularXSelected())
-         activeAxesToPack.add(0);
-      if (isAngularYSelected())
-         activeAxesToPack.add(1);
-      if (isAngularZSelected())
-         activeAxesToPack.add(2);
-      if (isLinearXSelected())
-         activeAxesToPack.add(3);
-      if (isLinearYSelected())
-         activeAxesToPack.add(4);
-      if (isLinearZSelected())
-         activeAxesToPack.add(5);
-   }
-
-   /**
-    * Returns a list of indices for the active axes
-    * @param activeAxesToPack list to store the active axes
-    */
-   public void getActiveAxes(int[] activeAxesToPack)
-   {
-      int index = 0;
-      if (isAngularXSelected())
-         activeAxesToPack[index++] = 0;
-      if (isAngularYSelected())
-         activeAxesToPack[index++] = 1;
-      if (isAngularZSelected())
-         activeAxesToPack[index++] = 2;
-      if (isLinearXSelected())
-         activeAxesToPack[index++] = 3;
-      if (isLinearYSelected())
-         activeAxesToPack[index++] = 4;
-      if (isLinearZSelected())
-         activeAxesToPack[index++] = 5;
-   }
-
-   /**
-    * Returns a list of indices for the active axes
-    * @param activeAxesToPack list to store the active axes
-    */
    public void getActiveAxes(TIntArrayList activeAxesToPack)
    {
       activeAxesToPack.reset();

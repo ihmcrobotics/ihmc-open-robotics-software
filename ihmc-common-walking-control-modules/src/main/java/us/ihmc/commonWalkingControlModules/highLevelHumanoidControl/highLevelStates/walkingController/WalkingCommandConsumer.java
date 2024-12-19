@@ -413,7 +413,6 @@ public class WalkingCommandConsumer
          HandHybridJointspaceTaskspaceTrajectoryCommand command = handHybridCommands.get(i);
          RobotSide robotSide = command.getRobotSide();
          RigidBodyControlManager handManager = handManagers.get(robotSide);
-         handManager.getImpedanceEnabled().set(command.getImpedanceEnabled());
          if (handManager != null && (allowCommand || command.getForceExecution()))
          {
             SE3TrajectoryControllerCommand taskspaceTrajectoryCommand = command.getTaskspaceTrajectoryCommand();
@@ -422,34 +421,18 @@ public class WalkingCommandConsumer
             jointspaceTrajectoryCommand.setSequenceId(command.getSequenceId());
             WrenchTrajectoryControllerCommand feedForwardCommand = command.getFeedForwardTrajectoryCommand();
             SE3PIDGainsTrajectoryControllerCommand gainsCommand = command.getPIDGainsTrajectoryCommand();
-            if (feedForwardCommand.getNumberOfTrajectoryPoints() != taskspaceTrajectoryCommand.getNumberOfTrajectoryPoints())
-            {
-               if (gainsCommand.getNumberOfTrajectoryPoints() != taskspaceTrajectoryCommand.getNumberOfTrajectoryPoints())
-               {
-                  handManager.handleHybridTrajectoryCommand(taskspaceTrajectoryCommand, jointspaceTrajectoryCommand);
-               }
-               else
-               {
-                  gainsCommand.setSequenceId(command.getSequenceId());
-                  handManager.handleHybridTrajectoryCommand(taskspaceTrajectoryCommand, jointspaceTrajectoryCommand, gainsCommand);
-               }
-            }
-            else
-            {
-               LogTools.info("Hybrid message with feedForward activated");
-               feedForwardCommand.setSequenceId(command.getSequenceId());
 
-               if (gainsCommand.getNumberOfTrajectoryPoints() != taskspaceTrajectoryCommand.getNumberOfTrajectoryPoints())
-               {
-                  handManager.handleHybridTrajectoryCommand(taskspaceTrajectoryCommand, jointspaceTrajectoryCommand, feedForwardCommand);
-               }
-               else
-               {
-                  LogTools.info("Hybrid message with feedForward and gains activated");
-                  gainsCommand.setSequenceId(command.getSequenceId());
-                  handManager.handleHybridTrajectoryCommand(taskspaceTrajectoryCommand, jointspaceTrajectoryCommand, feedForwardCommand, gainsCommand);
-               }
-            }
+            int expectedNumberTrajectoryPoints = taskspaceTrajectoryCommand.getNumberOfTrajectoryPoints();
+            boolean useFeedforwardTrajectory = feedForwardCommand.getNumberOfTrajectoryPoints() == expectedNumberTrajectoryPoints;
+            boolean useGainsTrajectory = gainsCommand.getNumberOfTrajectoryPoints() == expectedNumberTrajectoryPoints;
+
+            if (!useFeedforwardTrajectory)
+               feedForwardCommand = null;
+            if (!useGainsTrajectory)
+               gainsCommand = null;
+
+            handManager.setImpedanceEnabled(command.getImpedanceEnabled());
+            handManager.handleHybridTrajectoryCommand(taskspaceTrajectoryCommand, jointspaceTrajectoryCommand, feedForwardCommand, gainsCommand);
          }
       }
 

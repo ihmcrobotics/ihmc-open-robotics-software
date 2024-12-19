@@ -28,6 +28,7 @@ import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -64,7 +65,7 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
    private final RigidBodyOrientationControlHelper orientationHelper;
 
    private final YoBoolean hybridModeActive;
-   private final YoBoolean isImpedanceEnabled;
+   private final BooleanProvider isImpedanceEnabled;
    private final RigidBodyJointControlHelper jointControlHelper;
 
    private final TaskspaceTrajectoryStatusMessageHelper statusHelper;
@@ -77,7 +78,7 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
                                   YoDouble yoTime,
                                   RigidBodyJointControlHelper jointControlHelper,
                                   boolean enableFunctionGenerators,
-                                  YoBoolean enableImpedanceControl,
+                                  BooleanProvider isImpedanceEnabled,
                                   YoGraphicsListRegistry graphicsListRegistry,
                                   YoRegistry parentRegistry)
    {
@@ -100,7 +101,7 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
                                                           useBaseFrameForControl,
                                                           usingWeightFromMessage,
                                                           enableFunctionGenerators,
-                                                          enableImpedanceControl,
+                                                          isImpedanceEnabled,
                                                           yoTime,
                                                           registry,
                                                           graphicsListRegistry);
@@ -113,7 +114,7 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
                                                                 useBaseFrameForControl,
                                                                 usingWeightFromMessage,
                                                                 enableFunctionGenerators,
-                                                                enableImpedanceControl,
+                                                                isImpedanceEnabled,
                                                                 yoTime,
                                                                 registry);
 
@@ -125,8 +126,8 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
       feedbackControlCommand.set(elevator, bodyToControl);
       feedbackControlCommand.setPrimaryBase(baseBody);
       feedbackControlCommand.setSelectionMatrixToIdentity();
-      feedbackControlCommand.setImpedanceEnabled(enableImpedanceControl.getBooleanValue());
-      isImpedanceEnabled = enableImpedanceControl;
+      feedbackControlCommand.setImpedanceEnabled(isImpedanceEnabled.getValue());
+      this.isImpedanceEnabled = isImpedanceEnabled;
    }
 
    public void setWeights(Vector3DReadOnly angularWeight, Vector3DReadOnly linearWeight)
@@ -147,34 +148,34 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
 
    public void setGains(PID3DGainsReadOnly orientationGains, PID3DGainsReadOnly positionGains)
    {
-      positionHelper.setGains(positionGains);
-      orientationHelper.setGains(orientationGains);
+      positionHelper.setDefaultMotionGains(positionGains);
+      orientationHelper.setDefaultMotionGains(orientationGains);
    }
 
    public PID3DGainsReadOnly getOrientationGains()
    {
-      return orientationHelper.getGains();
+      return orientationHelper.getDefaultMotionGains();
    }
 
    public PID3DGainsReadOnly getPositionGains()
    {
-      return positionHelper.getGains();
+      return positionHelper.getDefaultMotionGains();
    }
 
    public void setImpedanceGains(PID3DGainsReadOnly orientationGains, PID3DGainsReadOnly positionGains)
    {
-      positionHelper.setImpedanceGains(positionGains);
-      orientationHelper.setImpedanceGains(orientationGains);
+      positionHelper.setDefaultImpedanceGains(positionGains);
+      orientationHelper.setDefaultImpedanceGains(orientationGains);
    }
 
    public PID3DGainsReadOnly getOrientationImpedanceGains()
    {
-      return orientationHelper.getImpedanceGains();
+      return orientationHelper.getDefaultImpedanceGains();
    }
 
    public PID3DGainsReadOnly getPositionImpedanceGains()
    {
-      return positionHelper.getImpedanceGains();
+      return positionHelper.getDefaultImpedanceGains();
    }
 
    @Override
@@ -231,7 +232,7 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
                                                                orientationCommand.getControlFrameOrientation());
 
       feedbackControlCommand.setControlBaseFrame(positionCommand.getControlBaseFrame());
-      feedbackControlCommand.setImpedanceEnabled(isImpedanceEnabled.getBooleanValue());
+      feedbackControlCommand.setImpedanceEnabled(isImpedanceEnabled.getValue());
    }
 
    @Override
@@ -356,95 +357,6 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
    @Override
    public boolean handleHybridTrajectoryCommand(SE3TrajectoryControllerCommand command,
                                                 JointspaceTrajectoryCommand jointspaceCommand,
-                                                double[] initialJointPositions)
-   {
-      if (handleTrajectoryCommand(command) && jointControlHelper.handleTrajectoryCommand(jointspaceCommand, initialJointPositions))
-      {
-         hybridModeActive.set(true);
-         statusHelper.registerNewTrajectory(command);
-
-         positionHelper.getGainsTrajectoryPoints().clear();
-         orientationHelper.getGainsTrajectoryPoints().clear();
-         positionHelper.getFeedForwardTrajectoryList().clear();
-         positionHelper.getFeedForwardTrajectoryTimes().clear();
-         orientationHelper.getFeedForwardTrajectoryList().clear();
-         orientationHelper.getFeedForwardTrajectoryTimes().clear();
-
-         return true;
-      }
-
-      clear();
-      positionHelper.clear();
-      orientationHelper.clear();
-      return false;
-   }
-
-   public boolean handleHybridTrajectoryCommand(SE3TrajectoryControllerCommand command,
-                                                JointspaceTrajectoryCommand jointspaceCommand,
-                                                WrenchTrajectoryControllerCommand feedForwardCommand,
-                                                double[] initialJointPositions)
-   {
-      if (handleTrajectoryCommand(command) && jointControlHelper.handleTrajectoryCommand(jointspaceCommand, initialJointPositions))
-      {
-         hybridModeActive.set(true);
-         statusHelper.registerNewTrajectory(command);
-
-         positionHelper.getGainsTrajectoryPoints().clear();
-         orientationHelper.getGainsTrajectoryPoints().clear();
-         positionHelper.getFeedForwardTrajectoryList().clear();
-         positionHelper.getFeedForwardTrajectoryTimes().clear();
-         orientationHelper.getFeedForwardTrajectoryList().clear();
-         orientationHelper.getFeedForwardTrajectoryTimes().clear();
-
-         for (int i = 0; i < feedForwardCommand.getNumberOfTrajectoryPoints(); i++)
-         {
-            positionHelper.getFeedForwardTrajectoryList().add().set(feedForwardCommand.getTrajectoryPoint(i));
-            positionHelper.getFeedForwardTrajectoryTimes().add(feedForwardCommand.getTrajectoryPointTime(i));
-            orientationHelper.getFeedForwardTrajectoryList().add().set(feedForwardCommand.getTrajectoryPoint(i));
-            orientationHelper.getFeedForwardTrajectoryTimes().add(feedForwardCommand.getTrajectoryPointTime(i));
-         }
-         return true;
-      }
-
-      clear();
-      positionHelper.clear();
-      orientationHelper.clear();
-      return false;
-   }
-
-   public boolean handleHybridTrajectoryCommand(SE3TrajectoryControllerCommand command,
-                                                JointspaceTrajectoryCommand jointspaceCommand,
-                                                SE3PIDGainsTrajectoryControllerCommand gainsCommand,
-                                                double[] initialJointPositions)
-   {
-      if (handleTrajectoryCommand(command) && jointControlHelper.handleTrajectoryCommand(jointspaceCommand, initialJointPositions))
-      {
-         hybridModeActive.set(true);
-         statusHelper.registerNewTrajectory(command);
-
-         positionHelper.getGainsTrajectoryPoints().clear();
-         orientationHelper.getGainsTrajectoryPoints().clear();
-         positionHelper.getFeedForwardTrajectoryList().clear();
-         positionHelper.getFeedForwardTrajectoryTimes().clear();
-         orientationHelper.getFeedForwardTrajectoryList().clear();
-         orientationHelper.getFeedForwardTrajectoryTimes().clear();
-
-         for (int i = 0; i < gainsCommand.getNumberOfTrajectoryPoints(); i++)
-         {
-            positionHelper.getGainsTrajectoryPoints().add().set(gainsCommand.getTrajectoryPoint(i));
-            orientationHelper.getGainsTrajectoryPoints().add().set(gainsCommand.getTrajectoryPoint(i));
-         }
-         return true;
-      }
-
-      clear();
-      positionHelper.clear();
-      orientationHelper.clear();
-      return false;
-   }
-
-   public boolean handleHybridTrajectoryCommand(SE3TrajectoryControllerCommand command,
-                                                JointspaceTrajectoryCommand jointspaceCommand,
                                                 WrenchTrajectoryControllerCommand feedForwardCommand,
                                                 SE3PIDGainsTrajectoryControllerCommand gainsCommand,
                                                 double[] initialJointPositions)
@@ -461,16 +373,23 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
          orientationHelper.getFeedForwardTrajectoryList().clear();
          orientationHelper.getFeedForwardTrajectoryTimes().clear();
 
-         for (int i = 0; i < feedForwardCommand.getNumberOfTrajectoryPoints(); i++)
+         for (int i = 0; i < command.getNumberOfTrajectoryPoints(); i++)
          {
-            positionHelper.getFeedForwardTrajectoryList().add().set(feedForwardCommand.getTrajectoryPoint(i));
-            positionHelper.getFeedForwardTrajectoryTimes().add(feedForwardCommand.getTrajectoryPointTime(i));
-            orientationHelper.getFeedForwardTrajectoryList().add().set(feedForwardCommand.getTrajectoryPoint(i));
-            orientationHelper.getFeedForwardTrajectoryTimes().add(feedForwardCommand.getTrajectoryPointTime(i));
+            if (feedForwardCommand != null)
+            {
+               positionHelper.getFeedForwardTrajectoryList().add().set(feedForwardCommand.getTrajectoryPoint(i));
+               positionHelper.getFeedForwardTrajectoryTimes().add(feedForwardCommand.getTrajectoryPointTime(i));
+               orientationHelper.getFeedForwardTrajectoryList().add().set(feedForwardCommand.getTrajectoryPoint(i));
+               orientationHelper.getFeedForwardTrajectoryTimes().add(feedForwardCommand.getTrajectoryPointTime(i));
+            }
 
-            positionHelper.getGainsTrajectoryPoints().add().set(gainsCommand.getTrajectoryPoint(i));
-            orientationHelper.getGainsTrajectoryPoints().add().set(gainsCommand.getTrajectoryPoint(i));
+            if (gainsCommand != null)
+            {
+               positionHelper.getGainsTrajectoryPoints().add().set(gainsCommand.getTrajectoryPoint(i));
+               orientationHelper.getGainsTrajectoryPoints().add().set(gainsCommand.getTrajectoryPoint(i));
+            }
          }
+
          return true;
       }
 
