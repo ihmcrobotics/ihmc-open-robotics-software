@@ -15,7 +15,7 @@ ros2 = {}
 state = {}
 
 def scene_graph_message_callback(msg):
-    print("Recieved SceneGraphMessage msg " + str(msg.sequence_id))
+    print("Received SceneGraphMessage msg " + str(msg.sequence_id))
     
     if msg.sequence_id % 100 == 0:
         clear_scene_nodes()
