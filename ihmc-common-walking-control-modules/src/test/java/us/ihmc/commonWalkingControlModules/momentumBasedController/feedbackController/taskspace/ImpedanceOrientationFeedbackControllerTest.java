@@ -94,7 +94,6 @@ public class ImpedanceOrientationFeedbackControllerTest
       orientationFeedbackController.setImpedanceEnabled(true);
       orientationFeedbackController.submitFeedbackControlCommand(orientationFeedbackControlCommand);
 
-
       int numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(jointsToOptimizeFor);
       NativeQPInputTypeA motionQPInput = new NativeQPInputTypeA(numberOfDoFs);
       LinearSolverDense<DMatrixRMaj> pseudoInverseSolver = LinearSolverFactory_DDRM.pseudoInverse(true);
@@ -139,6 +138,7 @@ public class ImpedanceOrientationFeedbackControllerTest
          previousErrorMagnitude = errorMagnitude;
       }
    }
+
    //   Test already didn't work. Seems to  be an issue with SpatialController and not the Impedance controller
    @Test
    public void testCompareAgainstSpatialController() throws Exception
@@ -151,28 +151,36 @@ public class ImpedanceOrientationFeedbackControllerTest
       List<RevoluteJoint> joints = randomFloatingChain.getRevoluteJoints();
       RigidBodyBasics elevator = randomFloatingChain.getElevator();
       RigidBodyBasics endEffector = joints.get(joints.size() - 1).getSuccessor();
+      FrameOrientation3DReadOnly bodyFixedOrientationToControl = EuclidFrameRandomTools.nextFrameQuaternion(random, endEffector.getBodyFixedFrame());
+      ReferenceFrame bodyFixedTransform = EuclidFrameRandomTools.nextReferenceFrame(random, endEffector.getBodyFixedFrame(), false);
 
       ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", worldFrame, elevator);
       JointBasics[] jointsToOptimizeFor = MultiBodySystemTools.collectSupportAndSubtreeJoints(elevator);
       double controlDT = 0.004;
 
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, null, null,
-                                                                            registry);
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, null, null, registry);
       toolbox.setupForInverseDynamicsSolver(null);
       // Making the controllers to run with different instances of the toolbox so they don't share variables.
-      OrientationFeedbackController orientationFeedbackController = new OrientationFeedbackController(endEffector, toolbox, new FeedbackControllerToolbox(new YoRegistry("Dummy")), registry);
-      SpatialFeedbackController spatialFeedbackController = new SpatialFeedbackController(endEffector, toolbox, new FeedbackControllerToolbox(new YoRegistry("Dummy")), registry);
+      OrientationFeedbackController orientationFeedbackController = new OrientationFeedbackController(endEffector,
+                                                                                                      toolbox,
+                                                                                                      new FeedbackControllerToolbox(new YoRegistry("Dummy")),
+                                                                                                      registry);
+      SpatialFeedbackController spatialFeedbackController = new SpatialFeedbackController(endEffector,
+                                                                                          toolbox,
+                                                                                          new FeedbackControllerToolbox(new YoRegistry("Dummy")),
+                                                                                          registry);
       orientationFeedbackController.setEnabled(true);
+      orientationFeedbackController.setImpedanceEnabled(true);
       spatialFeedbackController.setEnabled(true);
+      spatialFeedbackController.setImpedanceEnabled(true);
 
       OrientationFeedbackControlCommand orientationFeedbackControlCommand = new OrientationFeedbackControlCommand();
       orientationFeedbackControlCommand.set(elevator, endEffector);
-      orientationFeedbackControlCommand.setControlBaseFrame(worldFrame);
+      //      orientationFeedbackControlCommand.setControlBaseFrame(worldFrame);
       PID3DGains orientationGains = new DefaultPID3DGains();
 
       SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
       spatialFeedbackControlCommand.set(elevator, endEffector);
-      spatialFeedbackControlCommand.setControlBaseFrame(worldFrame);
       spatialFeedbackControlCommand.getSpatialAccelerationCommand().setSelectionMatrixForAngularControl();
 
       MotionQPInputCalculator motionQPInputCalculator = toolbox.getMotionQPInputCalculator();
@@ -181,6 +189,10 @@ public class ImpedanceOrientationFeedbackControllerTest
 
       SpatialAccelerationCommand orientationControllerOutput = orientationFeedbackController.getInverseDynamicsOutput();
       SpatialAccelerationCommand spatialControllerOutput = spatialFeedbackController.getInverseDynamicsOutput();
+
+      FrameQuaternion currentOrientation = new FrameQuaternion();
+      FrameQuaternion errorOrientation = new FrameQuaternion();
+      FrameQuaternion errorSpatialOrientation = new FrameQuaternion();
 
       for (int i = 0; i < 300; i++)
       {
@@ -201,11 +213,15 @@ public class ImpedanceOrientationFeedbackControllerTest
          orientationFeedbackControlCommand.setGains(orientationGains);
          spatialFeedbackControlCommand.setOrientationGains(orientationGains);
 
-         FrameQuaternion desiredOrientation = new FrameQuaternion(worldFrame, EuclidCoreRandomTools.nextQuaternion(random));
+         FrameQuaternion desiredOrientation = new FrameQuaternion(worldFrame, EuclidCoreRandomTools.nextQuaternion(random, 10.0));
+         //         desiredOrientation.setIncludingFrame(bodyFixedOrientationToControl);
+         //         desiredOrientation.changeFrame(worldFrame);
          FrameVector3D desiredAngularVelocity = new FrameVector3D(worldFrame, EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
          FrameVector3D feedForwardAngularAcceleration = new FrameVector3D(worldFrame, EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
 
+         orientationFeedbackControlCommand.setControlFrameFixedInEndEffector(bodyFixedOrientationToControl);
          orientationFeedbackControlCommand.setInverseDynamics(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
+         spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(bodyFixedOrientationToControl.getReferenceFrame().getTransformToRoot());
          spatialFeedbackControlCommand.setInverseDynamics(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
 
          spatialFeedbackController.submitFeedbackControlCommand(spatialFeedbackControlCommand);
@@ -213,6 +229,11 @@ public class ImpedanceOrientationFeedbackControllerTest
 
          spatialFeedbackController.computeInverseDynamics();
          orientationFeedbackController.computeInverseDynamics();
+
+         currentOrientation.setIncludingFrame(orientationFeedbackControlCommand.getControlFrameOrientation());
+         currentOrientation.changeFrame(worldFrame);
+
+         errorOrientation.difference(desiredOrientation, currentOrientation);
 
          motionQPInputCalculator.convertSpatialAccelerationCommand(orientationControllerOutput, orientationMotionQPInput);
          motionQPInputCalculator.convertSpatialAccelerationCommand(spatialControllerOutput, spatialMotionQPInput);
