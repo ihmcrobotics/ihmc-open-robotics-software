@@ -24,5 +24,6 @@ mainDependencies {
 
 testDependencies {
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
+   api("us.ihmc:ihmc-graphics-libgdx:source")
    api("us.ihmc:ros2-library-test:1.1.4")
 }
