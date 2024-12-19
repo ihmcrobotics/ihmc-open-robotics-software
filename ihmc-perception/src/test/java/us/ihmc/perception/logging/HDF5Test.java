@@ -15,7 +15,7 @@ public class HDF5Test
 {
    static
    {
-      LogTools.info("Native byte order: {}", ByteOrder.nativeOrder());
+      LogTools.debug("Native byte order: {}", ByteOrder.nativeOrder());
    }
 
    @Test
@@ -54,8 +54,8 @@ public class HDF5Test
       dataSet._close();
       h5File._close();
 
-      LogTools.info("Wrote: {}", Arrays.toString(writeData));
-      LogTools.info("Read:  {}", Arrays.toString(readData));
+      LogTools.debug("Wrote: {}", Arrays.toString(writeData));
+      LogTools.debug("Read:  {}", Arrays.toString(readData));
       Assertions.assertArrayEquals(writeData, readData);
    }
 
@@ -96,8 +96,8 @@ public class HDF5Test
       dataSet._close();
       h5File._close();
 
-      LogTools.info("Wrote: {}", Arrays.toString(writeData));
-      LogTools.info("Read:  {}", Arrays.toString(readData));
+      LogTools.debug("Wrote: {}", Arrays.toString(writeData));
+      LogTools.debug("Read:  {}", Arrays.toString(readData));
       Assertions.assertArrayEquals(writeData, readData);
    }
 
@@ -138,8 +138,8 @@ public class HDF5Test
       dataSet._close();
       h5File._close();
 
-      LogTools.info("Wrote: {}", Arrays.toString(writeData));
-      LogTools.info("Read:  {}", Arrays.toString(readData));
+      LogTools.debug("Wrote: {}", Arrays.toString(writeData));
+      LogTools.debug("Read:  {}", Arrays.toString(readData));
       Assertions.assertArrayEquals(writeData, readData);
    }
 
@@ -180,8 +180,8 @@ public class HDF5Test
       dataSet._close();
       h5File._close();
 
-      LogTools.info("Wrote: {}", Arrays.toString(writeData));
-      LogTools.info("Read:  {}", Arrays.toString(readData));
+      LogTools.debug("Wrote: {}", Arrays.toString(writeData));
+      LogTools.debug("Read:  {}", Arrays.toString(readData));
       Assertions.assertArrayEquals(writeData, readData);
    }
 
@@ -221,8 +221,8 @@ public class HDF5Test
       dataSet._close();
       h5File._close();
 
-      LogTools.info("Wrote: {}", Arrays.toString(writeData));
-      LogTools.info("Read:  {}", Arrays.toString(readData));
+      LogTools.debug("Wrote: {}", Arrays.toString(writeData));
+      LogTools.debug("Read:  {}", Arrays.toString(readData));
       Assertions.assertArrayEquals(writeData, readData);
    }
 
@@ -263,8 +263,8 @@ public class HDF5Test
       dataSet._close();
       h5File._close();
 
-      LogTools.info("Wrote: {}", Arrays.toString(writeData));
-      LogTools.info("Read:  {}", Arrays.toString(readData));
+      LogTools.debug("Wrote: {}", Arrays.toString(writeData));
+      LogTools.debug("Read:  {}", Arrays.toString(readData));
       Assertions.assertArrayEquals(writeData, readData);
    }
 
@@ -292,8 +292,8 @@ public class HDF5Test
 
       byte[] beforeWriteData = new byte[(int) dataPointer.limit()];
       dataPointer.get(beforeWriteData);
-      LogTools.info("Before: {}", Arrays.toString(beforeWriteData));
-      LogTools.info("Writing {} bytes", writeData.length);
+      LogTools.debug("Before: {}", Arrays.toString(beforeWriteData));
+      LogTools.debug("Writing {} bytes", writeData.length);
 
       int rank = 1;
       long[] dimensions = { dataPointer.limit() };
@@ -302,7 +302,7 @@ public class HDF5Test
       DataSet dataSet = h5File.createDataSet(datasetId, dataType, fileSpace);
 
       dataSet.write((Pointer) dataPointer, dataType);
-      LogTools.info("Wrote:  {}", Arrays.toString(writeData));
+      LogTools.debug("Wrote:  {}", Arrays.toString(writeData));
 
       dataSet._close();
       fileSpace._close();
@@ -316,10 +316,10 @@ public class HDF5Test
       // See https://github.com/bytedeco/javacpp-presets/issues/1311
       dataPointer = new BytePointer(writeData.length);
       dataSet.read((Pointer) dataPointer, dataType);
-      LogTools.info("Read    {} bytes", dataPointer.limit());
+      LogTools.debug("Read    {} bytes", dataPointer.limit());
       byte[] readData = new byte[(int) dataPointer.limit()];
       dataPointer.get(readData);
-      LogTools.info("Read:   {}", Arrays.toString(readData));
+      LogTools.debug("Read:   {}", Arrays.toString(readData));
 
       dataSet._close();
       h5File._close();
