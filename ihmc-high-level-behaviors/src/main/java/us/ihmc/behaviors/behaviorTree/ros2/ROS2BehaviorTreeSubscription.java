@@ -88,12 +88,9 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, 
 
             behaviorTreeState.fromMessage(behaviorTreeStateMessage);
 
-            if (behaviorTreeState.isModificationIncoming())
-            {
-               // Clear tree to rebuild with new state
-               behaviorTreeState.modifyTreeTopology(topologyOperationQueue ->
-                                      topologyOperationQueue.queueOperation(behaviorTreeState.getTreeRebuilder().getClearSubtreeOperation()));
-            }
+            // Clear tree to rebuild with new state
+            behaviorTreeState.modifyTreeTopology(topologyOperationQueue ->
+                                   topologyOperationQueue.queueOperation(behaviorTreeState.getTreeRebuilder().getClearSubtreeOperation()));
 
             behaviorTreeState.modifyTreeTopology(topologyOperationQueue ->
             {
