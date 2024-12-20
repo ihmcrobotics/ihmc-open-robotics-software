@@ -1,5 +1,10 @@
-#define MAX_DEPTH_VAL 65535.0
+// http://reality.cs.ucl.ac.uk/projects/depth-streaming/depth-streaming.pdf
+
+#define MAX_DEPTH_VAL 65536.0
 #define MAX_COLOR_VAL 255.0
+#define MAX_COLOR_VAL_INT 255
+#define PERIOD 512
+#define THREE_FOURTHS_PERIOD 384
 #define NORMALIZED_PERIOD 0.0078125
 
 #include "Utils.cu"
@@ -27,26 +32,21 @@ void colorizeDepth(unsigned short* depthImage, size_t depthPitch,
         for (int x = coordX; x < cols; x += strideX)
         {
             unsigned short depthValue = depthRow[x];
-            double normalizedDepth = depthValue / MAX_DEPTH_VAL;
 
-            double ha = fmod(normalizedDepth / (0.5 * NORMALIZED_PERIOD), 2.0);
-            if (ha > 1.0)
-                ha = 2.0 - ha;
+            // TODO: Figure out how to do this using only integers
+            unsigned int normalizedDepth = round(MAX_COLOR_VAL * ((depthValue + 0.5) / MAX_DEPTH_VAL));
+            
+            unsigned int ha = depthValue % PERIOD;
+            if (ha > MAX_COLOR_VAL_INT)
+                ha = PERIOD - ha - 1;
 
-            // TODO: This is ha +/- 0.5
-            double hb = fmod((normalizedDepth - 0.25 * NORMALIZED_PERIOD) / (0.5 * NORMALIZED_PERIOD), 2.0);
-            if (hb < 0.0)
-                hb = 2.0 + hb;
-            if (hb > 1.0)
-                hb = 2.0 - hb;
+            unsigned int hb = ((int) depthValue + THREE_FOURTHS_PERIOD) % PERIOD;
+            if (hb > MAX_COLOR_VAL_INT)
+                hb = PERIOD - hb - 1;
 
-            unsigned char colorDepth = (unsigned char) round(MAX_COLOR_VAL * normalizedDepth);
-            unsigned char colorHa = (unsigned char) round(MAX_COLOR_VAL * ha);
-            unsigned char colorHb = (unsigned char) round(MAX_COLOR_VAL * hb);
-
-            colorizedRow[3 * x + 0] = colorDepth;   // B
-            colorizedRow[3 * x + 1] = colorHa;      // G
-            colorizedRow[3 * x + 2] = colorHb;      // R
+            colorizedRow[3 * x + 0] = normalizedDepth;   // B
+            colorizedRow[3 * x + 1] = ha;      // G
+            colorizedRow[3 * x + 2] = hb;      // R
         }
     }
 }
