@@ -25,7 +25,7 @@ public class ROS2PeerClockOffsetEstimatorTest
       clocks[1] = new ROS2PeerClockOffsetEstimator(ros2Node0);
       clocks[2] = new ROS2PeerClockOffsetEstimator(ros2Node1);
 
-      ThreadTools.park(0.5);
+      ThreadTools.park(1.0);
 
       for (int i = 0; i < 10; i++)
       {
@@ -34,6 +34,7 @@ public class ROS2PeerClockOffsetEstimatorTest
 
          for (ROS2PeerClockOffsetEstimator clock : clocks)
          {
+            Assertions.assertTrue(clock.getPeerList().get(0).isAlive());
             Duration offset = clock.getPeerList().get(0).getPeerClockOffset();
             LogTools.info("Clock offset: {}", offset);
             Assertions.assertTrue(TimeTools.toDoubleSeconds(offset) < 0.1);
