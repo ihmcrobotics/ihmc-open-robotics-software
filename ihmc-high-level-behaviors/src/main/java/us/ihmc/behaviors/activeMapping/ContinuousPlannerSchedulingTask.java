@@ -104,16 +104,19 @@ public class ContinuousPlannerSchedulingTask
                                                         controllerFootstepQueueMonitor,
                                                         continuousHikingParameters,
                                                         continuousHikingLogger);
+      State justWaitState = new JustWaitState(controllerFootstepQueueMonitor);
 
       // Adding the different states
       stateMachineFactory.addState(ContinuousHikingState.DO_NOTHING, notStartedState);
       stateMachineFactory.addState(ContinuousHikingState.READY_TO_PLAN, readyToPlanState);
       stateMachineFactory.addState(ContinuousHikingState.WAITING_TO_LAND, waitingtoLandState);
+      stateMachineFactory.addState(ContinuousHikingState.JUST_WAIT, justWaitState);
 
       // Create different conditions
       StartContinuousHikingTransitionCondition startContinuousHikingTransitionCondition = new StartContinuousHikingTransitionCondition(commandMessage);
       StopContinuousHikingTransitionCondition stopContinuousHikingTransitionCondition = new StopContinuousHikingTransitionCondition(commandMessage);
       PlanAgainTransitionCondition planAgainTransitionCondition = new PlanAgainTransitionCondition(continuousPlanner, continuousHikingParameters);
+      SquareUpTransitionCondition squareUpTransitionCondition = new SquareUpTransitionCondition(commandMessage);
 
       //NOTE: The transitions for the state machine are checked in the order they are added.
       // And once one condition is true the other's don't get checked.
@@ -129,9 +132,13 @@ public class ContinuousPlannerSchedulingTask
       // Add condition, this allows us to plan over and over again without sending any footsteps to the controller
       stateMachineFactory.addTransition(ContinuousHikingState.READY_TO_PLAN, ContinuousHikingState.READY_TO_PLAN, planAgainTransitionCondition);
 
+      // Add condition, this allows up to prepare to square the robot up to the goal
+      stateMachineFactory.addTransition(ContinuousHikingState.READY_TO_PLAN, ContinuousHikingState.JUST_WAIT, squareUpTransitionCondition);
+
       // Add done conditions in order to go into the next state
       stateMachineFactory.addDoneTransition(ContinuousHikingState.READY_TO_PLAN, ContinuousHikingState.WAITING_TO_LAND);
       stateMachineFactory.addDoneTransition(ContinuousHikingState.WAITING_TO_LAND, ContinuousHikingState.READY_TO_PLAN);
+   stateMachineFactory.addDoneTransition(ContinuousHikingState.JUST_WAIT, ContinuousHikingState.DO_NOTHING);
 
       // Added a couple listeners to help when jumping between states
       stateMachine = stateMachineFactory.build(ContinuousHikingState.DO_NOTHING);
