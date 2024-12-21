@@ -23,7 +23,7 @@ public class YOLOv8DetectionResults
    private final MatVector outputBlobs;
    private final RawImage detectionImage;
    private final FloatIndexer outputMasksIndexer;
-   private final Map<YOLOv8DetectionOutput, Mat> objectMasks = new HashMap<>();
+   private final Map<YOLOv8DetectionOutput, RawImage> objectMasks = new HashMap<>();
 
    private final float maskThreshold;
 
@@ -66,10 +66,7 @@ public class YOLOv8DetectionResults
       {
          for (YOLOv8DetectionOutput detection : detections)
          {
-            Mat detectionMask = getDetectionMask(detection);
-
-            if (detectionMask != null && !detectionMask.isNull()) // FIXME: This can be NULL
-               segmentationImages.put(detection, createMaskRawImage(detectionMask));
+            segmentationImages.put(detection, getDetectionMask(detection));
          }
       }
 
@@ -86,9 +83,7 @@ public class YOLOv8DetectionResults
          {
             if (targetClasses.contains(detection.objectClass()))
             {
-               Mat detectionMask = getDetectionMask(detection);
-               if (detectionMask != null && !detectionMask.isNull()) // FIXME: This can be NULL
-                  segmentationImages.put(detection, createMaskRawImage(detectionMask));
+               segmentationImages.put(detection, getDetectionMask(detection));
             }
          }
       }
@@ -101,7 +96,7 @@ public class YOLOv8DetectionResults
       for (YOLOv8DetectionOutput detection : detections)
       {
          if (detection.objectClass().equals(objectClass))
-            return createMaskRawImage(getDetectionMask(detection));
+            return getDetectionMask(detection);
       }
 
       return null;
@@ -112,16 +107,18 @@ public class YOLOv8DetectionResults
       return detections;
    }
 
-   private Mat getDetectionMask(YOLOv8DetectionOutput detection)
+   private RawImage getDetectionMask(YOLOv8DetectionOutput detection)
    {
-      if (objectMasks.containsKey(detection))
-         return objectMasks.get(detection);
+      RawImage existingMask = objectMasks.get(detection);
+      if (existingMask != null)
+         return existingMask;
 
       Mat floatMaskMat = getFloatMaskMat(detection);
       Mat booleanMaskMat = getBooleanMaskMat(detection, floatMaskMat);
-      objectMasks.put(detection, booleanMaskMat);
+      RawImage maskRawImage = createMaskRawImage(booleanMaskMat);
+      objectMasks.put(detection, maskRawImage);
       floatMaskMat.close();
-      return booleanMaskMat;
+      return maskRawImage;
    }
 
    private Mat getFloatMaskMat(YOLOv8DetectionOutput detection)
@@ -172,9 +169,8 @@ public class YOLOv8DetectionResults
 
    public synchronized void destroy()
    {
-      for (Mat mat : objectMasks.values())
-         if (mat != null && !mat.isNull())
-            mat.close();
+      for (RawImage maskImage : objectMasks.values())
+         maskImage.release();
 
       detectionImage.release();
       outputMasksIndexer.close();
