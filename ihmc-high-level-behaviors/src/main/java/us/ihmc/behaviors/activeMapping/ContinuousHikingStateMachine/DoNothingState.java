@@ -5,6 +5,8 @@ import us.ihmc.behaviors.activeMapping.ContinuousPlanner;
 import us.ihmc.behaviors.activeMapping.TerrainPlanningDebugger;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.ros2.ROS2Publisher;
 
@@ -20,7 +22,10 @@ public class DoNothingState implements State
     * things like visuals and some initialization booleans.
     * When we leave this state we re-initialize the continuous planner as this can only mean we are starting things up.
     */
-   public DoNothingState(ROS2Helper ros2Helper, String simpleRobotName, ContinuousPlanner continuousPlanner, TerrainPlanningDebugger debugger)
+   public DoNothingState(ROS2Helper ros2Helper,
+                         String simpleRobotName,
+                         ContinuousPlanner continuousPlanner,
+                         TerrainPlanningDebugger debugger)
    {
       this.continuousPlanner = continuousPlanner;
       this.debugger = debugger;
@@ -45,7 +50,7 @@ public class DoNothingState implements State
          message.setClearRemainingFootstepQueue(true);
          continuousPlanner.setLatestFootstepPlan(null);
          pauseWalkingPublisher.publish(message);
-         debugger.resetVisualizationForUIPublisher(continuousPlanner.getStartStancePose());
+         debugger.resetVisualizationForUIPublisher();
       }
 
       continuousPlanner.setInitialized(false);

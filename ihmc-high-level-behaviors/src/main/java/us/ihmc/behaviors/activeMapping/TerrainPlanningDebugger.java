@@ -68,10 +68,9 @@ public class TerrainPlanningDebugger
 
    private Mat contactHeatMapImage;
 
-   public TerrainPlanningDebugger(ROS2Node ros2Node, MonteCarloFootstepPlannerParameters parameters, PlanningMode planningMode)
+   public TerrainPlanningDebugger(ROS2Node ros2Node, MonteCarloFootstepPlannerParameters parameters)
    {
       this.parameters = parameters;
-      this.planningMode = planningMode;
       if (ros2Node != null)
       {
          plannedFootstesPublisherForUI = ros2Node.createPublisher(ContinuousHikingAPI.PLANNED_FOOTSTEPS);
@@ -258,23 +257,14 @@ public class TerrainPlanningDebugger
       startAndGoalPublisherForUI.publish(poseListMessage);
    }
 
-   public void resetVisualizationForUIPublisher( SideDependentList<FramePose3D> startPoses)
+   public void resetVisualizationForUIPublisher()
    {
       PoseListMessage poseListMessage = new PoseListMessage();
       FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
 
-      if (planningMode == PlanningMode.FAST_HIKING)
-      {
-         publishStartAndGoalForVisualization(startPoses, startPoses);
-         monteCarloNodesPublisherForUI.publish(poseListMessage);
-         plannedFootstesPublisherForUI.publish(footstepDataListMessage);
-      }
-
-      if (planningMode == PlanningMode.WALK_TO_GOAL)
-      {
-         monteCarloNodesPublisherForUI.publish(poseListMessage);
-         plannedFootstesPublisherForUI.publish(footstepDataListMessage);
-      }
+      startAndGoalPublisherForUI.publish(poseListMessage);
+      monteCarloNodesPublisherForUI.publish(poseListMessage);
+      plannedFootstesPublisherForUI.publish(footstepDataListMessage);
    }
 
    public void publishMonteCarloNodesForVisualization(MonteCarloTreeNode root, TerrainMapData terrainMap)
@@ -345,16 +335,6 @@ public class TerrainPlanningDebugger
    public Mat getDisplayImage()
    {
       return stacked;
-   }
-
-   public PlanningMode getPlanningMode()
-   {
-      return planningMode;
-   }
-
-   public void setPlanningMode(PlanningMode planningMode)
-   {
-      this.planningMode = planningMode;
    }
 
    public void setEnabled(boolean enabled)
