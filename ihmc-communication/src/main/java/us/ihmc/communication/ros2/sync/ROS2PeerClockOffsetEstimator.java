@@ -140,10 +140,10 @@ public class ROS2PeerClockOffsetEstimator
 
    public void destroy()
    {
+      cachedThreadPool.shutdown();
+      requestThread.kill();
       subscription.remove();
       publisher.remove();
-      cachedThreadPool.shutdownNow();
-      requestThread.kill();
    }
 
    public List<ROS2PeerClockOffsetEstimatorPeer> getPeerList()
