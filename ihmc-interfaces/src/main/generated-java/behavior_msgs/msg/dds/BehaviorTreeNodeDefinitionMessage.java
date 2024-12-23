@@ -18,9 +18,13 @@ import us.ihmc.pubsub.TopicDataType;
 public class BehaviorTreeNodeDefinitionMessage extends Packet<BehaviorTreeNodeDefinitionMessage> implements Settable<BehaviorTreeNodeDefinitionMessage>, EpsilonComparable<BehaviorTreeNodeDefinitionMessage>
 {
    /**
-            * The timestamp and modifer ID of the latest modification
+            * The timestamp and modifer ID of the latest modification to this node's children set
             */
-   public ihmc_common_msgs.msg.dds.LatestModificationMessage latest_modification_;
+   public ihmc_common_msgs.msg.dds.LatestModificationMessage latest_modification_to_children_;
+   /**
+            * The timestamp and modifer ID of the latest modification to this node's data fields
+            */
+   public ihmc_common_msgs.msg.dds.LatestModificationMessage latest_modification_to_data_;
    /**
             * The name of the node including .json if it's a JSON root node
             */
@@ -32,7 +36,8 @@ public class BehaviorTreeNodeDefinitionMessage extends Packet<BehaviorTreeNodeDe
 
    public BehaviorTreeNodeDefinitionMessage()
    {
-      latest_modification_ = new ihmc_common_msgs.msg.dds.LatestModificationMessage();
+      latest_modification_to_children_ = new ihmc_common_msgs.msg.dds.LatestModificationMessage();
+      latest_modification_to_data_ = new ihmc_common_msgs.msg.dds.LatestModificationMessage();
       name_ = new java.lang.StringBuilder(255);
    }
 
@@ -44,7 +49,8 @@ public class BehaviorTreeNodeDefinitionMessage extends Packet<BehaviorTreeNodeDe
 
    public void set(BehaviorTreeNodeDefinitionMessage other)
    {
-      ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.staticCopy(other.latest_modification_, latest_modification_);
+      ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.staticCopy(other.latest_modification_to_children_, latest_modification_to_children_);
+      ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.staticCopy(other.latest_modification_to_data_, latest_modification_to_data_);
       name_.setLength(0);
       name_.append(other.name_);
 
@@ -54,11 +60,20 @@ public class BehaviorTreeNodeDefinitionMessage extends Packet<BehaviorTreeNodeDe
 
 
    /**
-            * The timestamp and modifer ID of the latest modification
+            * The timestamp and modifer ID of the latest modification to this node's children set
             */
-   public ihmc_common_msgs.msg.dds.LatestModificationMessage getLatestModification()
+   public ihmc_common_msgs.msg.dds.LatestModificationMessage getLatestModificationToChildren()
    {
-      return latest_modification_;
+      return latest_modification_to_children_;
+   }
+
+
+   /**
+            * The timestamp and modifer ID of the latest modification to this node's data fields
+            */
+   public ihmc_common_msgs.msg.dds.LatestModificationMessage getLatestModificationToData()
+   {
+      return latest_modification_to_data_;
    }
 
    /**
@@ -118,7 +133,8 @@ public class BehaviorTreeNodeDefinitionMessage extends Packet<BehaviorTreeNodeDe
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!this.latest_modification_.epsilonEquals(other.latest_modification_, epsilon)) return false;
+      if (!this.latest_modification_to_children_.epsilonEquals(other.latest_modification_to_children_, epsilon)) return false;
+      if (!this.latest_modification_to_data_.epsilonEquals(other.latest_modification_to_data_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.name_, other.name_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.number_of_children_, other.number_of_children_, epsilon)) return false;
@@ -136,7 +152,8 @@ public class BehaviorTreeNodeDefinitionMessage extends Packet<BehaviorTreeNodeDe
 
       BehaviorTreeNodeDefinitionMessage otherMyClass = (BehaviorTreeNodeDefinitionMessage) other;
 
-      if (!this.latest_modification_.equals(otherMyClass.latest_modification_)) return false;
+      if (!this.latest_modification_to_children_.equals(otherMyClass.latest_modification_to_children_)) return false;
+      if (!this.latest_modification_to_data_.equals(otherMyClass.latest_modification_to_data_)) return false;
       if (!us.ihmc.idl.IDLTools.equals(this.name_, otherMyClass.name_)) return false;
 
       if(this.number_of_children_ != otherMyClass.number_of_children_) return false;
@@ -151,8 +168,10 @@ public class BehaviorTreeNodeDefinitionMessage extends Packet<BehaviorTreeNodeDe
       StringBuilder builder = new StringBuilder();
 
       builder.append("BehaviorTreeNodeDefinitionMessage {");
-      builder.append("latest_modification=");
-      builder.append(this.latest_modification_);      builder.append(", ");
+      builder.append("latest_modification_to_children=");
+      builder.append(this.latest_modification_to_children_);      builder.append(", ");
+      builder.append("latest_modification_to_data=");
+      builder.append(this.latest_modification_to_data_);      builder.append(", ");
       builder.append("name=");
       builder.append(this.name_);      builder.append(", ");
       builder.append("number_of_children=");

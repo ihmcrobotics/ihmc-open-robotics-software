@@ -12,7 +12,6 @@ import us.ihmc.tools.Destroyable;
  */
 public class BehaviorTreeTopologyOperations
 {
-
    public static void detachAndDestroySubtree(BehaviorTreeNodeLayer<?, ?, ?, ?> node)
    {
       detachAndDestroySubtreeBasic(node);
@@ -77,7 +76,7 @@ public class BehaviorTreeTopologyOperations
       insertBasic(nodeToAdd.getDefinition(), parent.getDefinition(), insertionIndex);
    }
 
-   // PRIVATE BASIC OPERATIONS
+   // BASIC OPERATIONS
 
    public static void detachAndDestroySubtreeBasic(BehaviorTreeNode<?> node)
    {

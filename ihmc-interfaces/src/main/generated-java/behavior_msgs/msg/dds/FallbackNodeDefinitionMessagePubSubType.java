@@ -15,7 +15,7 @@ public class FallbackNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.T
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "d1ba1e9419733a7560f4b8eaf419cdcc4b170962aff803e95d51200a7a91fd97";
+   		return "5ed5c58f94aff6358720b4c013368fe77f0344e280f423fdccc42024c3336886";
    }
    
    @Override

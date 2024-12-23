@@ -88,19 +88,42 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, 
 
             behaviorTreeState.fromMessage(behaviorTreeStateMessage);
 
-            // Clear tree to rebuild with new state
-            behaviorTreeState.modifyTreeTopology(topologyOperationQueue ->
-                                   topologyOperationQueue.queueOperation(behaviorTreeState.getTreeRebuilder().getClearSubtreeOperation()));
-
             behaviorTreeState.modifyTreeTopology(topologyOperationQueue ->
             {
                T rootNode = (T) behaviorTreeState.getRootNode();
 
-               boolean allowReplicatingRoot = behaviorTreeState.isModificationIncoming();
+               boolean allowReplicatingRoot = behaviorTreeState.getRootReferenceModification().isModificationIncoming();
                if (allowReplicatingRoot)
                   rootNode = subscriptionRootIsNull ? null : retrieveOrReplicateLocalNode(subscriptionRootNode, allowReplicatingRoot);
 
                topologyOperationQueue.queueSetRootNode(rootNode, rootNodeSetter);
+
+               if (behaviorTreeState.getRootReferenceModification().isModificationIncoming())
+               {
+                  if (rootNode == null)
+                  {
+                     if (!subscriptionRootIsNull) // replicate
+                     {
+                        LogTools.info("Replicating node: %s:%d (%s) Actor: %s".formatted(
+                              subscriptionNode.getBehaviorTreeNodeDefinitionMessage().getName(),
+                              nodeID,
+                              subscriptionNode.getType().getSimpleName(),
+                              behaviorTreeState.getCRDTInfo().getActorDesignation().name()));
+                        rootNode = (T) behaviorTreeState.getNodeStateBuilder()
+                                                         .createNode(subscriptionNode.getType(),
+                                                                     nodeID,
+                                                                     behaviorTreeState.getCRDTInfo(),
+                                                                     behaviorTreeState.getSaveFileDirectory());
+                     }
+                  }
+                  else
+                  {
+
+                  }
+
+                  topologyOperationQueue.queueSetRootNode(rootNode, rootNodeSetter);
+               }
+
 
                if (rootNode != null && !subscriptionRootIsNull)
                   retrieveOrReplicateSubreeFromSubscription(subscriptionRootNode, rootNode, topologyOperationQueue);

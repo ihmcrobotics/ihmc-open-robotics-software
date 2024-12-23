@@ -21,6 +21,7 @@ import java.util.List;
  */
 public class BehaviorTreeNodeDefinition extends LatestTimestampModifiable implements BehaviorTreeNode<BehaviorTreeNodeDefinition>
 {
+   private final LatestTimestampModifiable childrenModification;
    /**
     * The name of the node.
     * It should be a set of words that summarize the node and that fits onto one line.
@@ -49,6 +50,7 @@ public class BehaviorTreeNodeDefinition extends LatestTimestampModifiable implem
    {
       super(crdtInfo);
 
+      this.childrenModification = new LatestTimestampModifiable(crdtInfo);
       this.saveFileDirectory = saveFileDirectory;
 
       name = new CRDTBidirectionalString(this, BehaviorTreeDefinitionRegistry.getInitialName(getClass()));
@@ -145,7 +147,8 @@ public class BehaviorTreeNodeDefinition extends LatestTimestampModifiable implem
 
    public void toMessage(BehaviorTreeNodeDefinitionMessage message)
    {
-      toMessage(message.getLatestModification());
+      toMessage(message.getLatestModificationToData());
+      childrenModification.toMessage(message.getLatestModificationToChildren());
 
       message.setName(name.toMessage());
       // message.setNotes(notes.toMessage());
@@ -155,10 +158,16 @@ public class BehaviorTreeNodeDefinition extends LatestTimestampModifiable implem
    public void fromMessage(BehaviorTreeNodeDefinitionMessage message)
    {
       // Needs to be done first to detect incoming modification
-      fromMessage(message.getLatestModification());
+      fromMessage(message.getLatestModificationToData());
+      childrenModification.fromMessage(message.getLatestModificationToChildren());
 
       name.fromMessage(message.getNameAsString());
       // notes.fromMessage(message.getNotesAsString());
+   }
+
+   public LatestTimestampModifiable getChildrenModification()
+   {
+      return childrenModification;
    }
 
    public void setName(String name)
