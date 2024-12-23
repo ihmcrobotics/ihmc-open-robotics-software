@@ -2,6 +2,7 @@ package us.ihmc.communication.ros2.sync;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.time.TimeTools;
@@ -15,6 +16,7 @@ import java.time.Instant;
 public class ROS2PeerClockOffsetEstimatorTest
 {
    @Test
+   @Timeout(30)
    public void test()
    {
       ROS2Node ros2Node0 = new ROS2NodeBuilder().specialTransportMode(SpecialTransportMode.INTRAPROCESS_ONLY).build("peer_clock_test0");
@@ -25,7 +27,18 @@ public class ROS2PeerClockOffsetEstimatorTest
       clocks[1] = new ROS2PeerClockOffsetEstimator(ros2Node0);
       clocks[2] = new ROS2PeerClockOffsetEstimator(ros2Node1);
 
-      ThreadTools.park(1.0);
+      boolean peersPopulated = false;
+      while (!peersPopulated)
+      {
+         peersPopulated = true;
+         for (ROS2PeerClockOffsetEstimator clock : clocks)
+            peersPopulated = clock.getPeerList().size() == clocks.length - 1;
+
+         ThreadTools.park(0.1);
+      }
+
+      for (ROS2PeerClockOffsetEstimator clock : clocks)
+         clock.getPeerList().get(0).getUpdatedNotification().blockingPoll();
 
       for (int i = 0; i < 10; i++)
       {

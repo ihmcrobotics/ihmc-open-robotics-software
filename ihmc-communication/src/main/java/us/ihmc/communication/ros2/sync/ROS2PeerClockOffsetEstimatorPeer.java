@@ -1,5 +1,6 @@
 package us.ihmc.communication.ros2.sync;
 
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.pubsub.common.Guid;
 
 import java.time.Duration;
@@ -17,6 +18,7 @@ public class ROS2PeerClockOffsetEstimatorPeer
    private final Guid guid;
    private Duration peerClockOffset;
    private Instant replyReceiveTime;
+   private final Notification updatedNotification = new Notification();
 
    public ROS2PeerClockOffsetEstimatorPeer(Guid guid)
    {
@@ -31,6 +33,8 @@ public class ROS2PeerClockOffsetEstimatorPeer
       Duration halfRoundTripTime = roundTripTime.dividedBy(2);
       Instant peerNow = peerClockTime.plus(halfRoundTripTime);
       peerClockOffset = Duration.between(replyReceiveTime, peerNow);
+
+      updatedNotification.set();
    }
 
    public Instant getPeerTimeInLocalFrame(Instant peerTime)
@@ -41,6 +45,11 @@ public class ROS2PeerClockOffsetEstimatorPeer
    public Instant getPeerTimeInPeerFrame(Instant ourTime)
    {
       return ourTime.plus(peerClockOffset);
+   }
+
+   public Notification getUpdatedNotification()
+   {
+      return updatedNotification;
    }
 
    public boolean isAlive()
