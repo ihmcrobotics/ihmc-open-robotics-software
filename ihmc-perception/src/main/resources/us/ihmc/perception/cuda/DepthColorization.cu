@@ -1,6 +1,7 @@
 // http://reality.cs.ucl.ac.uk/projects/depth-streaming/depth-streaming.pdf
 
 #define MAX_DEPTH_VAL 65536.0
+#define MAX_DEPTH_VAL_INT 65536
 #define MAX_COLOR_VAL 255.0
 #define MAX_COLOR_VAL_INT 255
 #define PERIOD 512
@@ -33,20 +34,19 @@ void colorizeDepth(unsigned short* depthImage, size_t depthPitch,
         {
             unsigned short depthValue = depthRow[x];
 
-            // TODO: Figure out how to do this using only integers
-            unsigned int normalizedDepth = round(MAX_COLOR_VAL * ((depthValue + 0.5) / MAX_DEPTH_VAL));
+            unsigned char normalizedDepth = (depthValue + 128) / 256;
             
-            unsigned int ha = depthValue % PERIOD;
+            unsigned short ha = depthValue % PERIOD;
             if (ha > MAX_COLOR_VAL_INT)
                 ha = PERIOD - ha - 1;
 
-            unsigned int hb = ((int) depthValue + THREE_FOURTHS_PERIOD) % PERIOD;
+            unsigned short hb = (depthValue + THREE_FOURTHS_PERIOD) % PERIOD;
             if (hb > MAX_COLOR_VAL_INT)
                 hb = PERIOD - hb - 1;
 
-            colorizedRow[3 * x + 0] = normalizedDepth;   // B
-            colorizedRow[3 * x + 1] = ha;      // G
-            colorizedRow[3 * x + 2] = hb;      // R
+            colorizedRow[3 * x + 0] = normalizedDepth;  // B
+            colorizedRow[3 * x + 1] = ha;               // G
+            colorizedRow[3 * x + 2] = hb;               // R
         }
     }
 }
@@ -72,32 +72,31 @@ void deColorizeDepth(unsigned char* colorizedImage, size_t colorizedPitch,
 
         for (int x = coordX; x < cols; x += strideX)
         {
-            double normalizedDepth = colorizedRow[3 * x + 0] / MAX_COLOR_VAL;
-            double ha = colorizedRow[3 * x + 1] / MAX_COLOR_VAL;
-            double hb = colorizedRow[3 * x + 2] / MAX_COLOR_VAL;
+            unsigned char normalizedDepth = colorizedRow[3 * x + 0];
+            unsigned char ha = colorizedRow[3 * x + 1];
+            unsigned char hb = colorizedRow[3 * x + 2];
 
-            int mL = ((int) (4.0 * normalizedDepth / NORMALIZED_PERIOD - 0.5)) % 4;
+            char mL = ((4 * 256 * normalizedDepth) / PERIOD - 1) % 4;
             if (mL < 0)
                 mL = 4 + mL;
 
-            double moddedValue = fmod(normalizedDepth - 0.125 * NORMALIZED_PERIOD, NORMALIZED_PERIOD);
-            if (moddedValue < 0.0)
-                moddedValue = NORMALIZED_PERIOD + moddedValue;
+            unsigned int depthLevel = 256 * normalizedDepth;
+            short moddedValueC = (depthLevel - PERIOD / 8) % PERIOD;
+            if (moddedValueC < 0)
+                moddedValueC = PERIOD - moddedValueC;
+            unsigned short preciseDepthLevel = depthLevel - moddedValueC + mL * PERIOD / 4 - PERIOD / 8;
 
-            double depthLevel = normalizedDepth - moddedValue + (0.25 * NORMALIZED_PERIOD * mL) - 0.125 * NORMALIZED_PERIOD;
-
-            double delta;
+            unsigned short delta;
             if (mL == 0)
-                delta = 0.5 * NORMALIZED_PERIOD * ha;
+                delta = ha;
             else if (mL == 1)
-                delta = 0.5 * NORMALIZED_PERIOD * hb;
+                delta = hb;
             else if (mL == 2)
-                delta = 0.5 * NORMALIZED_PERIOD * (1.0 - ha);
+                delta = 255 - ha;
             else if (mL == 3)
-                delta = 0.5 * NORMALIZED_PERIOD * (1.0 - hb);
+                delta = 255 - hb;
 
-            unsigned short depthValue = (unsigned short) round(MAX_DEPTH_VAL * (depthLevel + delta));
-            depthRow[x] = depthValue;
+            depthRow[x] = preciseDepthLevel + delta;
         }
     }
 }
