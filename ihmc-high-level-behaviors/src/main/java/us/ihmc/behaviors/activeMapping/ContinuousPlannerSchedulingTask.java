@@ -166,9 +166,4 @@ public class ContinuousPlannerSchedulingTask
    {
       executorService.shutdown();
    }
-
-   public enum PlanningMode
-   {
-      FAST_HIKING, WALK_TO_GOAL
-   }
 }
