@@ -63,7 +63,6 @@ public class TerrainPlanningDebugger
    private ROS2Publisher<PoseListMessage> monteCarloNodesPublisherForUI;
    private MonteCarloFootstepPlannerRequest request;
    private MonteCarloFootstepPlannerParameters parameters;
-   private PlanningMode planningMode;
 
    private Mat contactHeatMapImage;
 
