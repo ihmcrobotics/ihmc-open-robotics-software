@@ -537,8 +537,6 @@ public class ContinuousPlanner
       return startStancePose;
    }
 
-
-
    public FramePose3D getWalkingStartMidPose()
    {
       return walkingStartMidPose;
