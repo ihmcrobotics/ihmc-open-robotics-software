@@ -1,12 +1,8 @@
 // http://reality.cs.ucl.ac.uk/projects/depth-streaming/depth-streaming.pdf
 
-#define MAX_DEPTH_VAL 65536.0
-#define MAX_DEPTH_VAL_INT 65536
-#define MAX_COLOR_VAL 255.0
-#define MAX_COLOR_VAL_INT 255
+#define COLOR_RANGE 256
+#define MAX_COLOR_VAL 255
 #define PERIOD 512
-#define THREE_FOURTHS_PERIOD 384
-#define NORMALIZED_PERIOD 0.0078125
 
 #include "Utils.cu"
 
@@ -34,14 +30,14 @@ void colorizeDepth(unsigned short* depthImage, size_t depthPitch,
         {
             unsigned short depthValue = depthRow[x];
 
-            unsigned char normalizedDepth = (depthValue + 128) / 256;
+            unsigned char normalizedDepth = (depthValue + 128) / COLOR_RANGE;
             
             unsigned short ha = depthValue % PERIOD;
-            if (ha > MAX_COLOR_VAL_INT)
+            if (ha > MAX_COLOR_VAL)
                 ha = PERIOD - ha - 1;
 
-            unsigned short hb = (depthValue + THREE_FOURTHS_PERIOD) % PERIOD;
-            if (hb > MAX_COLOR_VAL_INT)
+            unsigned short hb = (depthValue + 3 * PERIOD / 4) % PERIOD;
+            if (hb > MAX_COLOR_VAL)
                 hb = PERIOD - hb - 1;
 
             colorizedRow[3 * x + 0] = normalizedDepth;  // B
@@ -76,11 +72,12 @@ void deColorizeDepth(unsigned char* colorizedImage, size_t colorizedPitch,
             unsigned char ha = colorizedRow[3 * x + 1];
             unsigned char hb = colorizedRow[3 * x + 2];
 
-            char mL = ((4 * 256 * normalizedDepth) / PERIOD - 1) % 4;
+            unsigned int depthLevel = COLOR_RANGE * normalizedDepth;
+
+            char mL = (4 * depthLevel / PERIOD - 1) % 4;
             if (mL < 0)
                 mL = 4 + mL;
 
-            unsigned int depthLevel = 256 * normalizedDepth;
             short moddedValueC = (depthLevel - PERIOD / 8) % PERIOD;
             if (moddedValueC < 0)
                 moddedValueC = PERIOD - moddedValueC;
@@ -92,9 +89,9 @@ void deColorizeDepth(unsigned char* colorizedImage, size_t colorizedPitch,
             else if (mL == 1)
                 delta = hb;
             else if (mL == 2)
-                delta = 255 - ha;
+                delta = MAX_COLOR_VAL - ha;
             else if (mL == 3)
-                delta = 255 - hb;
+                delta = MAX_COLOR_VAL - hb;
 
             depthRow[x] = preciseDepthLevel + delta;
         }
