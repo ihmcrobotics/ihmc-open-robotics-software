@@ -7,7 +7,6 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Size;
-import us.ihmc.behaviors.activeMapping.ContinuousPlannerSchedulingTask.PlanningMode;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -64,7 +63,6 @@ public class TerrainPlanningDebugger
    private ROS2Publisher<PoseListMessage> monteCarloNodesPublisherForUI;
    private MonteCarloFootstepPlannerRequest request;
    private MonteCarloFootstepPlannerParameters parameters;
-   private PlanningMode planningMode;
 
    private Mat contactHeatMapImage;
 
