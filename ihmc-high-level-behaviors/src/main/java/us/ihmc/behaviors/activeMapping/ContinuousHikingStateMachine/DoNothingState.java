@@ -22,10 +22,7 @@ public class DoNothingState implements State
     * things like visuals and some initialization booleans.
     * When we leave this state we re-initialize the continuous planner as this can only mean we are starting things up.
     */
-   public DoNothingState(ROS2Helper ros2Helper,
-                         String simpleRobotName,
-                         ContinuousPlanner continuousPlanner,
-                         TerrainPlanningDebugger debugger)
+   public DoNothingState(ROS2Helper ros2Helper, String simpleRobotName, ContinuousPlanner continuousPlanner, TerrainPlanningDebugger debugger)
    {
       this.continuousPlanner = continuousPlanner;
       this.debugger = debugger;
