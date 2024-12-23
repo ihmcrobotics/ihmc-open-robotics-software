@@ -42,9 +42,13 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
             */
    public long next_id_;
    /**
-            * The timestamp and modifer ID of the latest modification
+            * The timestamp and modifer ID of the most recent time the root node was replaced or removed
             */
-   public ihmc_common_msgs.msg.dds.LatestModificationMessage latest_modification_;
+   public ihmc_common_msgs.msg.dds.LatestModificationMessage latest_modification_to_root_reference_;
+   /**
+            * The timestamp and modifer ID of the latest modification of the tree data fields
+            */
+   public ihmc_common_msgs.msg.dds.LatestModificationMessage latest_modification_to_data_;
    /**
             * A depth first ordered list of types.
             */
@@ -77,7 +81,8 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
 
    public BehaviorTreeStateMessage()
    {
-      latest_modification_ = new ihmc_common_msgs.msg.dds.LatestModificationMessage();
+      latest_modification_to_root_reference_ = new ihmc_common_msgs.msg.dds.LatestModificationMessage();
+      latest_modification_to_data_ = new ihmc_common_msgs.msg.dds.LatestModificationMessage();
       behavior_tree_types_ = new us.ihmc.idl.IDLSequence.Byte (1000, "type_9");
 
       behavior_tree_indices_ = new us.ihmc.idl.IDLSequence.Long (1000, "type_4");
@@ -116,7 +121,8 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
 
       next_id_ = other.next_id_;
 
-      ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.staticCopy(other.latest_modification_, latest_modification_);
+      ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.staticCopy(other.latest_modification_to_root_reference_, latest_modification_to_root_reference_);
+      ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.staticCopy(other.latest_modification_to_data_, latest_modification_to_data_);
       behavior_tree_types_.set(other.behavior_tree_types_);
       behavior_tree_indices_.set(other.behavior_tree_indices_);
       root_nodes_.set(other.root_nodes_);
@@ -172,11 +178,20 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
 
 
    /**
-            * The timestamp and modifer ID of the latest modification
+            * The timestamp and modifer ID of the most recent time the root node was replaced or removed
             */
-   public ihmc_common_msgs.msg.dds.LatestModificationMessage getLatestModification()
+   public ihmc_common_msgs.msg.dds.LatestModificationMessage getLatestModificationToRootReference()
    {
-      return latest_modification_;
+      return latest_modification_to_root_reference_;
+   }
+
+
+   /**
+            * The timestamp and modifer ID of the latest modification of the tree data fields
+            */
+   public ihmc_common_msgs.msg.dds.LatestModificationMessage getLatestModificationToData()
+   {
+      return latest_modification_to_data_;
    }
 
 
@@ -335,7 +350,8 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.next_id_, other.next_id_, epsilon)) return false;
 
-      if (!this.latest_modification_.epsilonEquals(other.latest_modification_, epsilon)) return false;
+      if (!this.latest_modification_to_root_reference_.epsilonEquals(other.latest_modification_to_root_reference_, epsilon)) return false;
+      if (!this.latest_modification_to_data_.epsilonEquals(other.latest_modification_to_data_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsByteSequence(this.behavior_tree_types_, other.behavior_tree_types_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsLongSequence(this.behavior_tree_indices_, other.behavior_tree_indices_, epsilon)) return false;
@@ -490,7 +506,8 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
 
       if(this.next_id_ != otherMyClass.next_id_) return false;
 
-      if (!this.latest_modification_.equals(otherMyClass.latest_modification_)) return false;
+      if (!this.latest_modification_to_root_reference_.equals(otherMyClass.latest_modification_to_root_reference_)) return false;
+      if (!this.latest_modification_to_data_.equals(otherMyClass.latest_modification_to_data_)) return false;
       if (!this.behavior_tree_types_.equals(otherMyClass.behavior_tree_types_)) return false;
       if (!this.behavior_tree_indices_.equals(otherMyClass.behavior_tree_indices_)) return false;
       if (!this.root_nodes_.equals(otherMyClass.root_nodes_)) return false;
@@ -526,8 +543,10 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("next_id=");
       builder.append(this.next_id_);      builder.append(", ");
-      builder.append("latest_modification=");
-      builder.append(this.latest_modification_);      builder.append(", ");
+      builder.append("latest_modification_to_root_reference=");
+      builder.append(this.latest_modification_to_root_reference_);      builder.append(", ");
+      builder.append("latest_modification_to_data=");
+      builder.append(this.latest_modification_to_data_);      builder.append(", ");
       builder.append("behavior_tree_types=");
       builder.append(this.behavior_tree_types_);      builder.append(", ");
       builder.append("behavior_tree_indices=");

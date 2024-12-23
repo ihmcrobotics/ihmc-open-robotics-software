@@ -15,7 +15,7 @@ public class GotoNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "764d2aaf406f26017fce304ad3f8724fd037b7c03eb8acd304b27829ea873e57";
+   		return "08a650d5509e27fa72e63b424e31c1e82845acd11e3b56c9af10677bc70cad9a";
    }
    
    @Override

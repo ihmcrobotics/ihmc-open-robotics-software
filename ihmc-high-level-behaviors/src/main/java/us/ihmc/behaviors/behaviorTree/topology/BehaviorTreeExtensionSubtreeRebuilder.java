@@ -50,22 +50,22 @@ public class BehaviorTreeExtensionSubtreeRebuilder
 //                                                                             crdtInfo.getActorDesignation()));
          idToNodesMap.put(localNode.getState().getID(), localNode);
 
-         if (localNode.getDefinition().isModificationIncoming()) // Disassemble parts that have changes
-         {
+//         if (localNode.getDefinition().isModificationIncoming()) // Disassemble parts that have changes
+//         {
             for (BehaviorTreeNode<?> child : localNode.getChildren())
             {
                clearChildren((BehaviorTreeNodeLayer<?, ?, ?, ?>) child);
             }
 
             BehaviorTreeTopologyOperations.clearChildren(localNode);
-         }
-         else
-         {
+//         }
+//         else
+//         {
 //            LogTools.info("Rejecting frozen %s:%d. Children: %d Actor: %s".formatted(localNode.getDefinition().getDescription(),
 //                                                                                    localNode.getState().getID(),
 //                                                                                    localNode.getChildren().size(),
 //                                                                                    crdtInfo.getActorDesignation()));
-         }
+//         }
       }
    }
 

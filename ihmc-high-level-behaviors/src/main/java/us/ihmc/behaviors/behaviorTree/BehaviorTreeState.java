@@ -18,8 +18,11 @@ import java.util.function.Supplier;
  * The root node is going to be a single basic root node with no functionality
  * and it will never be replaced.
  */
-public class BehaviorTreeState extends LatestTimestampModifiable
+public class BehaviorTreeState
 {
+   private final CRDTInfo crdtInfo;
+   private final LatestTimestampModifiable rootReferenceModification;
+   private final LatestTimestampModifiable dataModification;
    private final MutableLong nextID = new MutableLong(0);
    private final BehaviorTreeTopologyOperationQueue topologyChangeQueue = new BehaviorTreeTopologyOperationQueue();
    private final BehaviorTreeNodeStateBuilder nodeStateBuilder;
@@ -34,8 +37,9 @@ public class BehaviorTreeState extends LatestTimestampModifiable
                             CRDTInfo crdtInfo,
                             WorkspaceResourceDirectory saveFileDirectory)
    {
-      super(crdtInfo);
-
+      this.crdtInfo = crdtInfo;
+      this.rootReferenceModification = new LatestTimestampModifiable(crdtInfo);
+      this.dataModification = new LatestTimestampModifiable(crdtInfo);
       this.nodeStateBuilder = nodeStateBuilder;
       this.treeRebuilder = treeRebuilder;
       this.rootNodeSupplier = rootNodeSupplier;
@@ -83,22 +87,39 @@ public class BehaviorTreeState extends LatestTimestampModifiable
 
    public void toMessage(BehaviorTreeStateMessage message)
    {
-      message.setSequenceId(getCRDTInfo().getUpdateNumber());
+      message.setSequenceId(crdtInfo.getUpdateNumber());
       message.setNextId(nextID.longValue());
-      toMessage(message.getLatestModification());
+      rootReferenceModification.toMessage(message.getLatestModificationToRootReference());
+      dataModification.toMessage(message.getLatestModificationToData());
    }
 
    public void fromMessage(BehaviorTreeStateMessage message)
    {
-      fromMessage(message.getLatestModification());
+      rootReferenceModification.fromMessage(message.getLatestModificationToRootReference());
+      dataModification.fromMessage(message.getLatestModificationToData());
 
-      if (isModificationIncoming())
+      if (dataModification.isModificationIncoming())
          nextID.setValue(message.getNextId());
+   }
+
+   public CRDTInfo getCRDTInfo()
+   {
+      return crdtInfo;
+   }
+
+   public LatestTimestampModifiable getRootReferenceModification()
+   {
+      return rootReferenceModification;
+   }
+
+   public LatestTimestampModifiable getDataModification()
+   {
+      return dataModification;
    }
 
    public long getAndIncrementNextID()
    {
-      modify();
+      dataModification.modify();
       return nextID.getAndIncrement();
    }
 

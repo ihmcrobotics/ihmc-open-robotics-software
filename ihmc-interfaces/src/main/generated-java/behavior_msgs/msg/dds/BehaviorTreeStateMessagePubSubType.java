@@ -15,7 +15,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "0d9ce550d5575670ffd3c752bffa5882f7eda8a1429de04df2ebc31a4c226b2f";
+   		return "c5888f63bcd624ab7e5faa42d6e1de6afdd4059386a921c5b1381d2611c505ad";
    }
    
    @Override
@@ -55,6 +55,8 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -138,7 +140,9 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
-      current_alignment += ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.getCdrSerializedSize(data.getLatestModification(), current_alignment);
+      current_alignment += ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.getCdrSerializedSize(data.getLatestModificationToRootReference(), current_alignment);
+
+      current_alignment += ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.getCdrSerializedSize(data.getLatestModificationToData(), current_alignment);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getBehaviorTreeTypes().size() * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -253,7 +257,8 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
 
       cdr.write_type_4(data.getNextId());
 
-      ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.write(data.getLatestModification(), cdr);
+      ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.write(data.getLatestModificationToRootReference(), cdr);
+      ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.write(data.getLatestModificationToData(), cdr);
       if(data.getBehaviorTreeTypes().size() <= 1000)
       cdr.write_type_e(data.getBehaviorTreeTypes());else
           throw new RuntimeException("behavior_tree_types field exceeds the maximum length");
@@ -346,7 +351,8 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       	
       data.setNextId(cdr.read_type_4());
       	
-      ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.read(data.getLatestModification(), cdr);	
+      ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.read(data.getLatestModificationToRootReference(), cdr);	
+      ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.read(data.getLatestModificationToData(), cdr);	
       cdr.read_type_e(data.getBehaviorTreeTypes());	
       cdr.read_type_e(data.getBehaviorTreeIndices());	
       cdr.read_type_e(data.getRootNodes());	
@@ -376,7 +382,9 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
    {
       ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_4("next_id", data.getNextId());
-      ser.write_type_a("latest_modification", new ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType(), data.getLatestModification());
+      ser.write_type_a("latest_modification_to_root_reference", new ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType(), data.getLatestModificationToRootReference());
+
+      ser.write_type_a("latest_modification_to_data", new ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType(), data.getLatestModificationToData());
 
       ser.write_type_e("behavior_tree_types", data.getBehaviorTreeTypes());
       ser.write_type_e("behavior_tree_indices", data.getBehaviorTreeIndices());
@@ -406,7 +414,9 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
    {
       data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setNextId(ser.read_type_4("next_id"));
-      ser.read_type_a("latest_modification", new ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType(), data.getLatestModification());
+      ser.read_type_a("latest_modification_to_root_reference", new ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType(), data.getLatestModificationToRootReference());
+
+      ser.read_type_a("latest_modification_to_data", new ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType(), data.getLatestModificationToData());
 
       ser.read_type_e("behavior_tree_types", data.getBehaviorTreeTypes());
       ser.read_type_e("behavior_tree_indices", data.getBehaviorTreeIndices());
