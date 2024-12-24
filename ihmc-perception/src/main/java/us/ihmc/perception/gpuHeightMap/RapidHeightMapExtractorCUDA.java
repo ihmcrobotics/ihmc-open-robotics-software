@@ -68,8 +68,6 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
    private CUDAProgram heightMapCUDAProgram;
    private CUstream_st stream;
 
-   private final RigidBodyTransform currentSensorToWorldTransform = new RigidBodyTransform();
-   private final RigidBodyTransform currentGroundToWorldTransform = new RigidBodyTransform();
    private final Point3D sensorOrigin = new Point3D();
    private final TerrainMapStatistics terrainMapStatistics = new TerrainMapStatistics();
 
@@ -264,10 +262,6 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
    public void update(RigidBodyTransform sensorToWorldTransform, RigidBodyTransform sensorToGroundTransform, RigidBodyTransform groundToWorldTransform)
    {
       int error;
-
-      //Update the current transforms to be used for further calculations
-      currentGroundToWorldTransform.set(groundToWorldTransform);
-      currentSensorToWorldTransform.set(sensorToWorldTransform);
 
       // Update the Z translation of the sensor to match the world transform (to handle the sensor's vertical position)
       sensorToGroundTransform.getTranslation().setZ(sensorToWorldTransform.getTranslationZ());
