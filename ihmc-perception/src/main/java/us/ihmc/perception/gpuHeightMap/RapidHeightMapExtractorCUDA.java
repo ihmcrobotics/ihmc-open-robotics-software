@@ -434,17 +434,13 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
       }
    }
 
-   public static HeightMapData packHeightMapData(RapidHeightMapExtractorInterface heightMapExtractor, HeightMapData heightMapDataToPack)
+   public static HeightMapData packHeightMapData(RapidHeightMapExtractorInterface heightMapExtractor)
    {
+      HeightMapData latestHeightMapData = new HeightMapData((float) RapidHeightMapExtractorCUDA.getHeightMapParameters().getGlobalCellSizeInMeters(),
+                                                            (float) RapidHeightMapExtractorCUDA.getHeightMapParameters().getGlobalWidthInMeters(),
+                                                            heightMapExtractor.getSensorOrigin().getX(),
+                                                            heightMapExtractor.getSensorOrigin().getY());
       Mat heightMapMat = heightMapExtractor.getTerrainMapData().getHeightMap();
-      HeightMapData latestHeightMapData = heightMapDataToPack;
-      if (latestHeightMapData == null)
-      {
-         latestHeightMapData = new HeightMapData((float) RapidHeightMapExtractorCUDA.getHeightMapParameters().getGlobalCellSizeInMeters(),
-                                                 (float) RapidHeightMapExtractorCUDA.getHeightMapParameters().getGlobalWidthInMeters(),
-                                                 heightMapExtractor.getSensorOrigin().getX(),
-                                                 heightMapExtractor.getSensorOrigin().getY());
-      }
       PerceptionMessageTools.convertToHeightMapData(heightMapMat,
                                                     latestHeightMapData,
                                                     heightMapExtractor.getSensorOrigin(),
