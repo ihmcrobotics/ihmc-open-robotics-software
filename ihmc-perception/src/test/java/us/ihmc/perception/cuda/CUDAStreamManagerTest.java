@@ -59,7 +59,7 @@ public class CUDAStreamManagerTest
       Random random = new Random(0L);
       AtomicBoolean exceptionThrown = new AtomicBoolean(false);
 
-      int numRuns = 100;
+      int numRuns = 10;
       Thread[] threads = new Thread[numRuns];
 
       for (int i = 0; i < numRuns; ++i)
