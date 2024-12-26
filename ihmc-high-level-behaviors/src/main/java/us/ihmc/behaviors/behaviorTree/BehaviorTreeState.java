@@ -2,7 +2,6 @@ package us.ihmc.behaviors.behaviorTree;
 
 import behavior_msgs.msg.dds.BehaviorTreeStateMessage;
 import org.apache.commons.lang3.mutable.MutableLong;
-import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeExtensionSubtreeRebuilder;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.LatestTimestampModifiable;
@@ -26,13 +25,11 @@ public class BehaviorTreeState
    private final MutableLong nextID = new MutableLong(0);
    private final BehaviorTreeTopologyOperationQueue topologyChangeQueue = new BehaviorTreeTopologyOperationQueue();
    private final BehaviorTreeNodeStateBuilder nodeStateBuilder;
-   private final BehaviorTreeExtensionSubtreeRebuilder treeRebuilder;
    private final Supplier<BehaviorTreeNodeLayer<?, ?, ?, ?>> rootNodeSupplier;
    private final WorkspaceResourceDirectory saveFileDirectory;
    private int numberOfNodes = 0;
 
    public BehaviorTreeState(BehaviorTreeNodeStateBuilder nodeStateBuilder,
-                            BehaviorTreeExtensionSubtreeRebuilder treeRebuilder,
                             Supplier<BehaviorTreeNodeLayer<?, ?, ?, ?>> rootNodeSupplier,
                             CRDTInfo crdtInfo,
                             WorkspaceResourceDirectory saveFileDirectory)
@@ -41,7 +38,6 @@ public class BehaviorTreeState
       this.rootReferenceModification = new LatestTimestampModifiable(crdtInfo);
       this.dataModification = new LatestTimestampModifiable(crdtInfo);
       this.nodeStateBuilder = nodeStateBuilder;
-      this.treeRebuilder = treeRebuilder;
       this.rootNodeSupplier = rootNodeSupplier;
       this.saveFileDirectory = saveFileDirectory;
    }
@@ -136,11 +132,6 @@ public class BehaviorTreeState
    public BehaviorTreeNodeStateBuilder getNodeStateBuilder()
    {
       return nodeStateBuilder;
-   }
-
-   public BehaviorTreeExtensionSubtreeRebuilder getTreeRebuilder()
-   {
-      return treeRebuilder;
    }
 
    public WorkspaceResourceDirectory getSaveFileDirectory()
