@@ -29,11 +29,13 @@ public class CUDADepthColorizerTest
       depthImage.upload(cpuDepthImage);
 
       // Colorize the image
-      GpuMat colorizedDepth = colorizer.colorizeDepth(depthImage);
+      GpuMat colorizedDepth = new GpuMat();
+      colorizer.colorizeDepth(depthImage, colorizedDepth);
 
       // De-colorize the image
-      GpuMat deColorizedDepth = colorizer.deColorizeDepth(colorizedDepth);
+      GpuMat deColorizedDepth = new GpuMat();
       Mat cpuDeColorizedDepth = new Mat();
+      colorizer.deColorizeDepth(colorizedDepth, deColorizedDepth);
       deColorizedDepth.download(cpuDeColorizedDepth);
 
       // Find difference between de-colorized and original depth image
