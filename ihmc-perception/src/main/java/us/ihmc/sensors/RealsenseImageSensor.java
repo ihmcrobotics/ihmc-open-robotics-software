@@ -22,7 +22,7 @@ public class RealsenseImageSensor extends ImageSensor
    private static final double OUTPUT_FREQUENCY = 20.0;
 
    private final RealsenseConfiguration realsenseConfiguration;
-   private final RealsenseDeviceManager realsenseManager;
+   private final RealsenseDeviceManager realsenseManager = new RealsenseDeviceManager();
    private RealsenseDevice realsense = null;
 
    private final RawImage[] grabbedImages = new RawImage[OUTPUT_IMAGE_COUNT];
@@ -33,11 +33,10 @@ public class RealsenseImageSensor extends ImageSensor
    private final FramePose3D colorPose = new FramePose3D();
    private final Throttler grabThrottler = new Throttler().setFrequency(OUTPUT_FREQUENCY);
 
-   public RealsenseImageSensor(RealsenseDeviceManager realsenseManager, RealsenseConfiguration realsenseConfiguration)
+   public RealsenseImageSensor(RealsenseConfiguration realsenseConfiguration)
    {
       super(realsenseConfiguration.name().split("_")[0]);
 
-      this.realsenseManager = realsenseManager;
       this.realsenseConfiguration = realsenseConfiguration;
    }
 
@@ -146,6 +145,8 @@ public class RealsenseImageSensor extends ImageSensor
       // Close the camera
       if (realsense != null && realsense.getDevice() != null)
          realsense.deleteDevice();
+
+      realsenseManager.deleteContext();
 
       System.out.println("Closed " + getClass().getSimpleName());
    }
