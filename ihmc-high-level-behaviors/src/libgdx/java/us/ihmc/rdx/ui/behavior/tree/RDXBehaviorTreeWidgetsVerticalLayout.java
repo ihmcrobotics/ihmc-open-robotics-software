@@ -98,7 +98,7 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
             if (node.isRootNode()) // Root node
             {
                tree.setRootNode(null);
-               tree.getBehaviorTreeState().modify();
+               tree.getBehaviorTreeState().getRootReferenceModification().modify();
             }
          }
          ImGui.popStyleColor();

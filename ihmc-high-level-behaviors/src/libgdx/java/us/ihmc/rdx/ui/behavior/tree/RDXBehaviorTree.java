@@ -11,7 +11,6 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeFileLoader;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeLayer;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
-import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeExtensionSubtreeRebuilder;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionType;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
@@ -34,7 +33,6 @@ public class RDXBehaviorTree
    private final CRDTInfo crdtInfo;
    private final WorkspaceResourceDirectory treeFilesDirectory;
    private final RDXBehaviorTreeNodeBuilder nodeBuilder;
-   private final BehaviorTreeExtensionSubtreeRebuilder treeRebuilder;
    private final BehaviorTreeState state;
    private RDXBehaviorTreeRootNode rootNode;
    /**
@@ -72,10 +70,9 @@ public class RDXBehaviorTree
                                                    baseUI,
                                                    panel3D,
                                                    referenceFrameLibrary);
-      treeRebuilder = new BehaviorTreeExtensionSubtreeRebuilder(this::getRootNode, crdtInfo);
       fileMenu = new RDXBehaviorTreeFileMenu();
 
-      state = new BehaviorTreeState(nodeBuilder, treeRebuilder, this::getRootNode, crdtInfo, treeFilesDirectory);
+      state = new BehaviorTreeState(nodeBuilder, this::getRootNode, crdtInfo, treeFilesDirectory);
       fileLoader = new BehaviorTreeFileLoader<>(state, nodeBuilder, treeFilesDirectory);
       nodeCreationMenu = new RDXBehaviorTreeNodeCreationMenu(this, treeFilesDirectory, referenceFrameLibrary);
       treeWidgetsVerticalLayout = new RDXBehaviorTreeWidgetsVerticalLayout(this);

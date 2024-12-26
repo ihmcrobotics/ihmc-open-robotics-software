@@ -147,7 +147,11 @@ public class RDXBehaviorTreeNodeCreationMenu
                                                                 tree.getBehaviorTreeState().getSaveFileDirectory());
 
             BehaviorTreeNodeInsertionDefinition<RDXBehaviorTreeNode<?, ?>> insertionDefinition
-                  = BehaviorTreeNodeInsertionDefinition.build(newNode, tree.getBehaviorTreeState(), tree::setRootNode, relativeNode, insertionType);
+                  = BehaviorTreeNodeInsertionDefinition.build(newNode,
+                                                              tree.getBehaviorTreeState().getRootReferenceModification(),
+                                                              tree::setRootNode,
+                                                              relativeNode,
+                                                              insertionType);
 
             if (insertionDefinition.getNodeToInsert() instanceof RDXActionNode<?, ?> newAction)
             {

@@ -3,7 +3,6 @@ package us.ihmc.behaviors.behaviorTree;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
-import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeExtensionSubtreeRebuilder;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionDefinition;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionType;
 import us.ihmc.communication.crdt.CRDTInfo;
@@ -20,7 +19,6 @@ public class BehaviorTreeExecutor
 {
    private final CRDTInfo crdtInfo;
    private final BehaviorTreeExecutorNodeBuilder nodeBuilder;
-   private final BehaviorTreeExtensionSubtreeRebuilder treeRebuilder;
    private final BehaviorTreeState state;
    private BehaviorTreeRootNodeExecutor rootNode;
    private final BehaviorTreeFileLoader<BehaviorTreeNodeExecutor<?, ?>> fileLoader;
@@ -36,9 +34,8 @@ public class BehaviorTreeExecutor
    {
       crdtInfo = new CRDTInfo(ROS2ActorDesignation.ROBOT, peerClockEstimator);
       nodeBuilder = new BehaviorTreeExecutorNodeBuilder(robotModel, ros2ControllerHelper, syncedRobot, referenceFrameLibrary, sceneGraph, detectionManager);
-      treeRebuilder = new BehaviorTreeExtensionSubtreeRebuilder(this::getRootNode, crdtInfo);
 
-      state = new BehaviorTreeState(nodeBuilder, treeRebuilder, this::getRootNode, crdtInfo, null);
+      state = new BehaviorTreeState(nodeBuilder, this::getRootNode, crdtInfo, null);
       fileLoader = new BehaviorTreeFileLoader<>(state, nodeBuilder, saveFileDirectory);
    }
 
@@ -114,7 +111,7 @@ public class BehaviorTreeExecutor
                }
 
                var insertionDefinition = BehaviorTreeNodeInsertionDefinition.build(nodeToInsert,
-                                                                                   state,
+                                                                                   state.getRootReferenceModification(),
                                                                                    this::setRootNode,
                                                                                    null,
                                                                                    BehaviorTreeNodeInsertionType.INSERT_ROOT);
@@ -132,6 +129,6 @@ public class BehaviorTreeExecutor
    {
       state.modifyTreeTopology(topologyOperationQueue -> topologyOperationQueue.queueDestroySubtree(rootNode));
       this.rootNode = null;
-      state.modify();
+      state.getRootReferenceModification().modify();
    }
 }

@@ -133,7 +133,7 @@ public class RDXAvailableBehaviorTreeDirectory
                      }
 
                      var insertionDefinition = BehaviorTreeNodeInsertionDefinition.build(nodeToInsert,
-                                                                                         tree.getBehaviorTreeState(),
+                                                                                         tree.getBehaviorTreeState().getRootReferenceModification(),
                                                                                          tree::setRootNode,
                                                                                          relativeNode,
                                                                                          insertionType);
