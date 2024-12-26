@@ -16,7 +16,6 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.camera.CameraIntrinsics;
-import us.ihmc.perception.cuda.CUDATools;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractorCUDA;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractorInterface;
@@ -36,28 +35,33 @@ public class RapidHeightMapManager
    private final RapidHeightMapExtractorInterface rapidHeightMapExtractor;
    private final ImageMessage croppedHeightMapImageMessage = new ImageMessage();
    private final FramePose3D cameraPose = new FramePose3D();
+   private final ROS2PublishSubscribeAPI ros2;
+   private final boolean runWithCUDA;
    private GpuMat deviceDepthImage;
    private final Mat hostDepthImage = new Mat();
    private BytedecoImage heightMapBytedecoImage;
 
    private final Notification resetHeightMapRequested = new Notification();
    private final BytePointer compressedCroppedHeightMapPointer = new BytePointer();
-   private final boolean hasCUDAAvailable = CUDATools.hasCUDA();
 
-   public RapidHeightMapManager(OpenCLManager openCLManager,
+   public RapidHeightMapManager(ROS2PublishSubscribeAPI ros2,
                                 DRCRobotModel robotModel,
                                 ReferenceFrame leftFootSoleFrame,
                                 ReferenceFrame rightFootSoleFrame,
                                 CameraIntrinsics depthImageIntrinsics,
-                                ROS2PublishSubscribeAPI ros2)
+                                boolean runWithCUDA)
    {
-      if (hasCUDAAvailable)
+      this.ros2 = ros2;
+      this.runWithCUDA = runWithCUDA;
+
+      if (runWithCUDA)
       {
          deviceDepthImage = new GpuMat(depthImageIntrinsics.getHeight(), depthImageIntrinsics.getWidth(), opencv_core.CV_16UC1);
          rapidHeightMapExtractor = new RapidHeightMapExtractorCUDA(leftFootSoleFrame, rightFootSoleFrame, deviceDepthImage, 1);
       }
       else
       {
+         OpenCLManager openCLManager = new OpenCLManager();
          heightMapBytedecoImage = new BytedecoImage(depthImageIntrinsics.getWidth(), depthImageIntrinsics.getHeight(), opencv_core.CV_16UC1);
          heightMapBytedecoImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
          rapidHeightMapExtractor = new RapidHeightMapExtractor(openCLManager, leftFootSoleFrame, rightFootSoleFrame, heightMapBytedecoImage, 1);
@@ -77,13 +81,9 @@ public class RapidHeightMapManager
       }
    }
 
-   public void update(Mat latestDepthImage,
-                      Instant imageAquisitionTime,
-                      ReferenceFrame cameraFrame,
-                      ReferenceFrame cameraZUpFrame,
-                      ROS2PublishSubscribeAPI ros2)
+   public void update(Mat latestDepthImage, Instant imageAcquisitionTime, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame)
    {
-      if (hasCUDAAvailable)
+      if (runWithCUDA)
       {
          if (latestDepthImage.type() == opencv_core.CV_32FC1) // Support our simulated sensors
          {
@@ -130,7 +130,7 @@ public class RapidHeightMapManager
                                                          croppedHeightMapImageMessage,
                                                          ros2,
                                                          cameraPose,
-                                                         imageAquisitionTime,
+                                                         imageAcquisitionTime,
                                                          rapidHeightMapExtractor.getSequenceNumber(),
                                                          croppedHeightMapImage.rows(),
                                                          croppedHeightMapImage.cols(),

@@ -33,10 +33,8 @@ public class StandAloneRealsenseProcess
    private final RealsenseImageSensor d455Sensor;
    private ImageSensorPublishThread d455PublishThread;
 
-
    private final ROS2DemandGraphNode heightMapDemandNode;
    private final OpenCLManager openCLManager = new OpenCLManager();
-
 
    public StandAloneRealsenseProcess(ROS2Node ros2Node, ROS2Helper ros2Helper, ROS2SyncedRobotModel syncedRobot)
    {
@@ -48,7 +46,6 @@ public class StandAloneRealsenseProcess
 
       realsenseDemandNode = new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_REALSENSE);
       realsenseDemandNode.addDependents(realsensePublishDemandNode, heightMapDemandNode);
-
 
       d455Sensor = new RealsenseImageSensor(RealsenseConfiguration.D455_COLOR_720P_DEPTH_720P_30HZ);
 
@@ -66,13 +63,14 @@ public class StandAloneRealsenseProcess
 
    private void initializeHeightMap()
    {
+      boolean runWithCUDA = false;
       RapidHeightMapUpdateThread heightMapUpdateThread = new RapidHeightMapUpdateThread(ros2Helper,
                                                                                         syncedRobot,
                                                                                         syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.LEFT),
                                                                                         syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.RIGHT),
-                                                                                        openCLManager,
                                                                                         d455Sensor,
-                                                                                        RealsenseImageSensor.DEPTH_IMAGE_KEY);
+                                                                                        RealsenseImageSensor.DEPTH_IMAGE_KEY,
+                                                                                        runWithCUDA);
       loopOnDemand(heightMapUpdateThread, heightMapDemandNode);
    }
 
