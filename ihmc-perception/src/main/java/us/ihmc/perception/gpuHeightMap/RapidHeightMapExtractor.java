@@ -793,17 +793,14 @@ public class RapidHeightMapExtractor implements RapidHeightMapExtractorInterface
       return imageToCrop.apply(cropWindowRectangle);
    }
 
-   public static HeightMapData packHeightMapData(RapidHeightMapExtractorInterface heightMapExtractor, HeightMapData heightMapDataToPack)
+   public static HeightMapData packHeightMapData(RapidHeightMapExtractorInterface heightMapExtractor)
    {
+      HeightMapData latestHeightMapData = new HeightMapData((float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalCellSizeInMeters(),
+                                                            (float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalWidthInMeters(),
+                                                            heightMapExtractor.getSensorOrigin().getX(),
+                                                            heightMapExtractor.getSensorOrigin().getY());
+
       Mat heightMapMat = heightMapExtractor.getTerrainMapData().getHeightMap();
-      HeightMapData latestHeightMapData = heightMapDataToPack;
-      if (latestHeightMapData == null)
-      {
-         latestHeightMapData = new HeightMapData((float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalCellSizeInMeters(),
-                                                 (float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalWidthInMeters(),
-                                                 heightMapExtractor.getSensorOrigin().getX(),
-                                                 heightMapExtractor.getSensorOrigin().getY());
-      }
       PerceptionMessageTools.convertToHeightMapData(heightMapMat,
                                                     latestHeightMapData,
                                                     heightMapExtractor.getSensorOrigin(),

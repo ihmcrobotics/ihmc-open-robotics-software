@@ -35,10 +35,7 @@ public class RapidHeightMapManager
 {
    private final RapidHeightMapExtractorInterface rapidHeightMapExtractor;
    private final ImageMessage croppedHeightMapImageMessage = new ImageMessage();
-   private final FramePose3D cameraPoseForHeightMap = new FramePose3D();
-   private final RigidBodyTransform sensorToWorldForHeightMap = new RigidBodyTransform();
-   private final RigidBodyTransform sensorToGroundForHeightMap = new RigidBodyTransform();
-   private final RigidBodyTransform groundToWorldForHeightMap = new RigidBodyTransform();
+   private final FramePose3D cameraPose = new FramePose3D();
    private GpuMat deviceDepthImage;
    private final Mat hostDepthImage = new Mat();
    private BytedecoImage heightMapBytedecoImage;
@@ -56,7 +53,7 @@ public class RapidHeightMapManager
    {
       if (hasCUDAAvailable)
       {
-         deviceDepthImage = new GpuMat(depthImageIntrinsics.getWidth(), depthImageIntrinsics.getHeight(), opencv_core.CV_16UC1);
+         deviceDepthImage = new GpuMat(depthImageIntrinsics.getHeight(), depthImageIntrinsics.getWidth(), opencv_core.CV_16UC1);
          rapidHeightMapExtractor = new RapidHeightMapExtractorCUDA(leftFootSoleFrame, rightFootSoleFrame, deviceDepthImage, 1);
       }
       else
@@ -82,8 +79,8 @@ public class RapidHeightMapManager
 
    public void update(Mat latestDepthImage,
                       Instant imageAquisitionTime,
-                      ReferenceFrame d455SensorFrame,
-                      ReferenceFrame d455ZUpSensorFrame,
+                      ReferenceFrame cameraFrame,
+                      ReferenceFrame cameraZUpFrame,
                       ROS2PublishSubscribeAPI ros2)
    {
       if (hasCUDAAvailable)
@@ -116,14 +113,14 @@ public class RapidHeightMapManager
          rapidHeightMapExtractor.reset();
       }
 
-      d455SensorFrame.getTransformToDesiredFrame(sensorToWorldForHeightMap, ReferenceFrame.getWorldFrame());
-      d455SensorFrame.getTransformToDesiredFrame(sensorToGroundForHeightMap, d455ZUpSensorFrame);
-      d455ZUpSensorFrame.getTransformToDesiredFrame(groundToWorldForHeightMap, ReferenceFrame.getWorldFrame());
+      RigidBodyTransform sensorToWorld = cameraFrame.getTransformToWorldFrame();
+      RigidBodyTransform sensorToGround = cameraFrame.getTransformToDesiredFrame(cameraZUpFrame);
+      RigidBodyTransform groundToWorld = cameraZUpFrame.getTransformToWorldFrame();
 
-      cameraPoseForHeightMap.setToZero(d455SensorFrame);
-      cameraPoseForHeightMap.changeFrame(ReferenceFrame.getWorldFrame());
+      cameraPose.setToZero(cameraFrame);
+      cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      rapidHeightMapExtractor.update(sensorToWorldForHeightMap, sensorToGroundForHeightMap, groundToWorldForHeightMap);
+      rapidHeightMapExtractor.update(sensorToWorld, sensorToGround, groundToWorld);
 
       Mat croppedHeightMapImage = rapidHeightMapExtractor.getTerrainMapData().getHeightMap();
 
@@ -132,7 +129,7 @@ public class RapidHeightMapManager
                                                          PerceptionAPI.HEIGHT_MAP_CROPPED,
                                                          croppedHeightMapImageMessage,
                                                          ros2,
-                                                         cameraPoseForHeightMap,
+                                                         cameraPose,
                                                          imageAquisitionTime,
                                                          rapidHeightMapExtractor.getSequenceNumber(),
                                                          croppedHeightMapImage.rows(),
@@ -142,12 +139,7 @@ public class RapidHeightMapManager
 
    public HeightMapData getLatestHeightMapData()
    {
-      HeightMapData temp = new HeightMapData((float) RapidHeightMapExtractorCUDA.getHeightMapParameters().getGlobalCellSizeInMeters(),
-                                             (float) RapidHeightMapExtractorCUDA.getHeightMapParameters().getGlobalWidthInMeters(),
-                                             rapidHeightMapExtractor.getSensorOrigin().getX(),
-                                             rapidHeightMapExtractor.getSensorOrigin().getY());
-      RapidHeightMapExtractorCUDA.packHeightMapData(rapidHeightMapExtractor, temp);
-      return temp;
+      return RapidHeightMapExtractorCUDA.packHeightMapData(rapidHeightMapExtractor);
    }
 
    public TerrainMapData getTerrainMapData()
