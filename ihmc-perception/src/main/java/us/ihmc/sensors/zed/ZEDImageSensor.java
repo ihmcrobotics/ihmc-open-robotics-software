@@ -202,6 +202,12 @@ public class ZEDImageSensor extends ImageSensor
       {
          // Grab images now
          returnCode = sl_grab(cameraID, zedRuntimeParameters);
+         if (returnCode == SL_ERROR_CODE_END_OF_SVOFILE_REACHED)
+         {
+            sl_set_svo_position(0, 0);
+            return false;
+         }
+
          throwOnError(returnCode);
          lastGrabTime = Instant.now();
          ++grabSequenceNumber;
