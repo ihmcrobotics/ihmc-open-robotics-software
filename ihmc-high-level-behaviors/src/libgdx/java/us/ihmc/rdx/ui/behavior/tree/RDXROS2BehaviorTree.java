@@ -3,6 +3,8 @@ package us.ihmc.rdx.ui.behavior.tree;
 import imgui.ImGui;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTreeState;
 import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
@@ -20,7 +22,7 @@ import us.ihmc.commons.thread.Throttler;
  */
 public class RDXROS2BehaviorTree extends RDXBehaviorTree
 {
-   private final ROS2BehaviorTreeState ros2BehaviorTreeState;
+   private final ROS2BehaviorTreeState<RDXBehaviorTreeRootNode, BehaviorTreeRootNodeState, BehaviorTreeRootNodeDefinition> ros2BehaviorTreeState;
    /** Reduce the communication update rate. */
    private final Throttler communicationThrottler = new Throttler().setFrequency(ROS2BehaviorTreeState.SYNC_FREQUENCY);
    private final ImGuiAveragedFrequencyText subscriptionFrequencyText = new ImGuiAveragedFrequencyText();
@@ -38,7 +40,7 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
    {
       super(treeFilesDirectory, robotModel, syncedRobot, peerClockEstimator, selectionCollisionModel, baseUI, panel3D, referenceFrameLibrary);
 
-      ros2BehaviorTreeState = new ROS2BehaviorTreeState(getBehaviorTreeState(), this::setRootNode, ros2);
+      ros2BehaviorTreeState = new ROS2BehaviorTreeState<>(getBehaviorTreeState(), this::setRootNode, ros2);
 
       ros2BehaviorTreeState.getBehaviorTreeSubscription().registerMessageReceivedCallback(subscriptionFrequencyText::ping);
    }
