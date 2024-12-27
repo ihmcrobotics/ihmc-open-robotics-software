@@ -1,5 +1,5 @@
 {
-  "title" : "Continuous Hiking parameters",
+  "title" : "ContinuousHikingParameters",
   "Step publisher enabled" : false,
   "Override entire queue each step" : true,
   "Number of steps to send" : 3,
