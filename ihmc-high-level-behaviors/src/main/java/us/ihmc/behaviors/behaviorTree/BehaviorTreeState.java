@@ -16,8 +16,14 @@ import java.util.function.Supplier;
  *
  * The root node is going to be a single basic root node with no functionality
  * and it will never be replaced.
+ *
+ * @param <L> Root node layer type.
+ * @param <S> Root node state type.
+ * @param <D> Root node definition type.
  */
-public class BehaviorTreeState
+public class BehaviorTreeState<L extends BehaviorTreeNodeLayer<?, S, S, D>,
+                               S extends BehaviorTreeNodeState<D>,
+                               D extends BehaviorTreeNodeDefinition>
 {
    private final CRDTInfo crdtInfo;
    private final LatestTimestampModifiable rootReferenceModification;
@@ -25,12 +31,12 @@ public class BehaviorTreeState
    private final MutableLong nextID = new MutableLong(0);
    private final BehaviorTreeTopologyOperationQueue topologyChangeQueue = new BehaviorTreeTopologyOperationQueue();
    private final BehaviorTreeNodeStateBuilder nodeStateBuilder;
-   private final Supplier<BehaviorTreeNodeLayer<?, ?, ?, ?>> rootNodeSupplier;
+   private final Supplier<L> rootNodeSupplier;
    private final WorkspaceResourceDirectory saveFileDirectory;
    private int numberOfNodes = 0;
 
    public BehaviorTreeState(BehaviorTreeNodeStateBuilder nodeStateBuilder,
-                            Supplier<BehaviorTreeNodeLayer<?, ?, ?, ?>> rootNodeSupplier,
+                            Supplier<L> rootNodeSupplier,
                             CRDTInfo crdtInfo,
                             WorkspaceResourceDirectory saveFileDirectory)
    {
@@ -42,21 +48,22 @@ public class BehaviorTreeState
       this.saveFileDirectory = saveFileDirectory;
    }
 
-   public void update()
+   /** Used only when modifying tree topology. */
+   private void update()
    {
       numberOfNodes = 0;
       update(rootNodeSupplier.get());
    }
 
-   private void update(BehaviorTreeNodeLayer<?, ?, ?, ?> node)
+   private void update(BehaviorTreeNode<?> node)
    {
       if (node != null)
       {
          ++numberOfNodes;
 
-         for (Object child : node.getChildren())
+         for (BehaviorTreeNode<?> child : node.getChildren())
          {
-            update((BehaviorTreeNodeLayer<?, ?, ?, ?>) child);
+            update(child);
          }
       }
    }
@@ -124,7 +131,7 @@ public class BehaviorTreeState
       return nextID.longValue();
    }
 
-   public BehaviorTreeNodeLayer<?, ?, ?, ?> getRootNode()
+   public L getRootNode()
    {
       return rootNodeSupplier.get();
    }

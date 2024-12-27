@@ -19,7 +19,7 @@ public class BehaviorTreeExecutor
 {
    private final CRDTInfo crdtInfo;
    private final BehaviorTreeExecutorNodeBuilder nodeBuilder;
-   private final BehaviorTreeState state;
+   private final BehaviorTreeState<BehaviorTreeRootNodeExecutor, BehaviorTreeRootNodeState, BehaviorTreeRootNodeDefinition> state;
    private BehaviorTreeRootNodeExecutor rootNode;
    private final BehaviorTreeFileLoader<BehaviorTreeNodeExecutor<?, ?>> fileLoader;
    private final WorkspaceResourceDirectory saveFileDirectory = new WorkspaceResourceDirectory(BehaviorTreeExecutor.class, "/behaviorTrees");
@@ -35,7 +35,7 @@ public class BehaviorTreeExecutor
       crdtInfo = new CRDTInfo(ROS2ActorDesignation.ROBOT, peerClockEstimator);
       nodeBuilder = new BehaviorTreeExecutorNodeBuilder(robotModel, ros2ControllerHelper, syncedRobot, referenceFrameLibrary, sceneGraph, detectionManager);
 
-      state = new BehaviorTreeState(nodeBuilder, this::getRootNode, crdtInfo, null);
+      state = new BehaviorTreeState<>(nodeBuilder, this::getRootNode, crdtInfo, null);
       fileLoader = new BehaviorTreeFileLoader<>(state, nodeBuilder, saveFileDirectory);
    }
 
@@ -69,9 +69,9 @@ public class BehaviorTreeExecutor
       }
    }
 
-   public void setRootNode(BehaviorTreeNodeLayer<?, ?, ?, ?> rootNode)
+   public void setRootNode(BehaviorTreeRootNodeExecutor rootNode)
    {
-      this.rootNode = (BehaviorTreeRootNodeExecutor) rootNode;
+      this.rootNode = rootNode;
    }
 
    public BehaviorTreeRootNodeExecutor getRootNode()
@@ -79,7 +79,7 @@ public class BehaviorTreeExecutor
       return rootNode;
    }
 
-   public BehaviorTreeState getState()
+   public BehaviorTreeState<BehaviorTreeRootNodeExecutor, BehaviorTreeRootNodeState, BehaviorTreeRootNodeDefinition> getState()
    {
       return state;
    }
@@ -115,7 +115,9 @@ public class BehaviorTreeExecutor
                                                                                    this::setRootNode,
                                                                                    null,
                                                                                    BehaviorTreeNodeInsertionType.INSERT_ROOT);
-               topologyOperationQueue.queueInsertNode(insertionDefinition);
+               topologyOperationQueue.queueSetAndModifyRootNode(nodeToInsert,
+                                                                this::setRootNode,
+                                                                state.getRootReferenceModification());
             }
          });
       }
@@ -128,7 +130,7 @@ public class BehaviorTreeExecutor
    public void deleteRootNode()
    {
       state.modifyTreeTopology(topologyOperationQueue -> topologyOperationQueue.queueDestroySubtree(rootNode));
-      this.rootNode = null;
+      rootNode = null;
       state.getRootReferenceModification().modify();
    }
 }

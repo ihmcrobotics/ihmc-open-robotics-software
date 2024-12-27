@@ -41,6 +41,17 @@ public class BehaviorTreeTools
       }
    }
 
+   public static <T extends BehaviorTreeNodeLayer<T, ?, ?, ?>> void runForSubtreeNodes(BehaviorTreeNodeLayer<T, ?, ?, ?> node,
+                                                                                       Consumer<BehaviorTreeNodeLayer<T, ?, ?, ?>> operation)
+   {
+      operation.accept(node);
+
+      for (BehaviorTreeNodeLayer<T, ?, ?, ?> child : node.getChildren())
+      {
+         runForSubtreeNodes(child, operation);
+      }
+   }
+
    public static void runForEntireTree(BehaviorTreeNodeDefinition anyNode, Consumer<BehaviorTreeNodeDefinition> operation)
    {
       runForSubtreeNodes(findRootNode(anyNode), operation);

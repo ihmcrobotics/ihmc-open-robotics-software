@@ -4,6 +4,9 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeExecutor;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.perception.detections.DetectionManager;
 import us.ihmc.perception.sceneGraph.SceneGraph;
@@ -14,7 +17,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
  */
 public class ROS2BehaviorTreeExecutor extends BehaviorTreeExecutor
 {
-   private final ROS2BehaviorTreeState ros2BehaviorTreeState;
+   private final ROS2BehaviorTreeState<BehaviorTreeRootNodeExecutor, BehaviorTreeRootNodeState, BehaviorTreeRootNodeDefinition> ros2BehaviorTreeState;
 
    public ROS2BehaviorTreeExecutor(ROS2ControllerHelper ros2ControllerHelper,
                                    DRCRobotModel robotModel,
@@ -26,7 +29,7 @@ public class ROS2BehaviorTreeExecutor extends BehaviorTreeExecutor
    {
       super(robotModel, syncedRobot, peerClockEstimator, referenceFrameLibrary, sceneGraph, detectionManager, ros2ControllerHelper);
 
-      ros2BehaviorTreeState = new ROS2BehaviorTreeState(getState(), this::setRootNode, ros2ControllerHelper);
+      ros2BehaviorTreeState = new ROS2BehaviorTreeState<>(getState(), this::setRootNode, ros2ControllerHelper);
    }
 
    /** Expected to be called at the {@link ROS2BehaviorTreeState#SYNC_FREQUENCY} */
