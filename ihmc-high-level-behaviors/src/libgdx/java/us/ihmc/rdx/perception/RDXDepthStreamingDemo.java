@@ -21,11 +21,7 @@ import us.ihmc.sensors.ZEDModelData;
 import us.ihmc.sensors.ZEDSVOPlaybackSensor;
 import us.ihmc.tools.IHMCCommonPaths;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import static org.bytedeco.ffmpeg.global.avutil.AV_PIX_FMT_BGR24;
-import static org.bytedeco.ffmpeg.global.avutil.AV_PIX_FMT_BGRA;
 
 public class RDXDepthStreamingDemo
 {
@@ -105,8 +101,7 @@ public class RDXDepthStreamingDemo
          zed.waitForGrab();
          RawImage depthImage = zed.getImage(ZEDImageSensor.DEPTH_IMAGE_KEY);
 
-         GpuMat colorizedDepth = new GpuMat();
-         depthColorizer.colorizeDepth(depthImage.getGpuImageMat(), colorizedDepth);
+         GpuMat colorizedDepth = depthColorizer.colorizeDepth(depthImage.getGpuImageMat());
          RawImage colorizedImage = depthImage.replaceImage(colorizedDepth, PixelFormat.BGR8);
 
          sentColorVisualizer.updateImageDimensions(colorizedImage.getWidth(), colorizedImage.getHeight());
@@ -129,10 +124,12 @@ public class RDXDepthStreamingDemo
       receivedColorVisualizer.updateImageDimensions(colorizedDepth.getWidth(), colorizedDepth.getHeight());
       opencv_imgproc.cvtColor(colorizedDepth.getCpuImageMat(), receivedColorVisualizer.getRGBA8Mat(), opencv_imgproc.COLOR_BGR2RGBA);
 
-      GpuMat colorizedDepthGPU = colorizedDepth.getGpuImageMat();
+      GpuMat deColorizedDepth = depthColorizer.deColorizeDepth(colorizedDepth.getGpuImageMat());
+      RawImage deColorizedImage = colorizedDepth.replaceImage(deColorizedDepth);
 
-//      pointCloudVisualizer.setDepthImage(deColorizedImage);
+      pointCloudVisualizer.setDepthImage(deColorizedImage);
 
+      deColorizedImage.release();
       colorizedDepth.release();
    }
 
