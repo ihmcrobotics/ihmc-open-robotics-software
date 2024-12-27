@@ -6,10 +6,13 @@ import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros2.ROS2DemandGraphNode;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.perception.heightMap.TerrainMapData;
+import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensors.RealsenseImageSensor;
 
 import java.util.Map;
@@ -33,6 +36,8 @@ public class StandAloneRealsenseProcess
    private ImageSensorPublishThread d455PublishThread;
 
    private final ROS2DemandGraphNode heightMapDemandNode;
+   private final OpenCLManager openCLManager = new OpenCLManager();
+   private RapidHeightMapUpdateThread heightMapUpdateThread;
 
    public StandAloneRealsenseProcess(ROS2Node ros2Node, ROS2Helper ros2Helper, ROS2SyncedRobotModel syncedRobot)
    {
@@ -54,22 +59,37 @@ public class StandAloneRealsenseProcess
 
          d455PublishThread = new ImageSensorPublishThread(ros2Node, d455Sensor, D455_IMAGE_TOPIC_MAP);
          loopOnDemand(d455PublishThread, realsensePublishDemandNode);
-      }
 
-      initializeHeightMap();
+         initializeHeightMap();
+      }
    }
 
    private void initializeHeightMap()
    {
       boolean runWithCUDA = false;
-      RapidHeightMapUpdateThread heightMapUpdateThread = new RapidHeightMapUpdateThread(ros2Helper,
-                                                                                        syncedRobot,
-                                                                                        syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.LEFT),
-                                                                                        syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.RIGHT),
-                                                                                        d455Sensor,
-                                                                                        RealsenseImageSensor.DEPTH_IMAGE_KEY,
-                                                                                        runWithCUDA);
+      heightMapUpdateThread = new RapidHeightMapUpdateThread(ros2Helper,
+                                                             syncedRobot,
+                                                             syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.LEFT),
+                                                             syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.RIGHT),
+                                                             d455Sensor,
+                                                             RealsenseImageSensor.DEPTH_IMAGE_KEY,
+                                                             runWithCUDA);
       loopOnDemand(heightMapUpdateThread, heightMapDemandNode);
+   }
+
+   public RapidHeightMapManager getHeightMapManager()
+   {
+      return heightMapUpdateThread.getHeightMapManager();
+   }
+
+   public HeightMapData getLatestHeightMapData()
+   {
+      return heightMapUpdateThread.getLatestHeightMapData();
+   }
+
+   public TerrainMapData getLatestTerrainMapData()
+   {
+      return heightMapUpdateThread.getLatestTerrainMapData();
    }
 
    public void destroy()
