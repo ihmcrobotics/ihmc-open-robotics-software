@@ -1,16 +1,5 @@
 package us.ihmc.avatar.networkProcessor.footstepStreamingModule;
 
-import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.WholeBodyStreamingMessage;
-import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage;
-import us.ihmc.avatar.networkProcessor.footstepStreamingModule.FootstepStreamingToolboxController.FootstepStreamingMessagePublisher;
-import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
-import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.output.KSTOutputDataBasics;
-import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.output.KSTOutputDataReadOnly;
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxController;
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController.RobotConfigurationDataBasedUpdater;
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -22,21 +11,12 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.QuaternionTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxConfigurationCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
-import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.humanoidRobotics.communication.footstepStreamingToolboxAPI.FootstepStreamingToolboxInputCommand;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
-
-import java.util.List;
 
 public class FSTTools
 {
@@ -48,21 +28,15 @@ public class FSTTools
    private final YoRegistry registry;
 
    private final double toolboxControllerPeriod;
-   private final YoDouble walkingControllerMonotonicTime, walkingControllerWallTime;
-
    private final YoLong currentMessageId;
 
    private final YoBoolean hasNewInputCommand, hasPreviousInput;
    private final YoDouble latestInputReceivedTime, previousInputReceivedTime;
-   private KinematicsStreamingToolboxInputCommand latestInput = null;
-   private KinematicsStreamingToolboxInputCommand previousInput = null;
+   private FootstepStreamingToolboxInputCommand latestInput = null;
+   private FootstepStreamingToolboxInputCommand previousInput = null;
 
    private final YoLong latestInputTimestampSource;
    private final YoDouble latestInputTimeSource;
-
-   private FootstepStreamingMessagePublisher footstepStreamingMessagePublisher = m ->
-   {
-   };
 
    public FSTTools(CommandInputManager commandInputManager,
                    StatusMessageOutputManager statusOutputManager,
@@ -78,9 +52,6 @@ public class FSTTools
       this.time = time;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
       this.registry = registry;
-
-      walkingControllerMonotonicTime = new YoDouble("walkingControllerMonotonicTime", registry);
-      walkingControllerWallTime = new YoDouble("walkingControllerWallTime", registry);
 
       currentMessageId = new YoLong("currentMessageId", registry);
       currentMessageId.set(1L);
@@ -102,7 +73,7 @@ public class FSTTools
          if (latestInput != null)
          {
             if (previousInput == null)
-               previousInput = new KinematicsStreamingToolboxInputCommand();
+               previousInput = new FootstepStreamingToolboxInputCommand();
 
             previousInput.set(latestInput);
             previousInputReceivedTime.set(latestInputReceivedTime.getValue());
@@ -110,16 +81,9 @@ public class FSTTools
          }
 
          if (latestInput == null)
-            latestInput = new KinematicsStreamingToolboxInputCommand();
+            latestInput = new FootstepStreamingToolboxInputCommand();
 
-         latestInput.set(commandInputManager.pollNewestCommand(KinematicsStreamingToolboxInputCommand.class));
-
-         for (int i = latestInput.getNumberOfInputs() - 1; i >= 0; i--)
-         {
-            KinematicsToolboxRigidBodyCommand latestEndEffectorInput = latestInput.getInput(i);
-            RigidBodyBasics endEffector = latestEndEffectorInput.getEndEffector();
-            KinematicsToolboxRigidBodyCommand previousEndEffectorInput = hasPreviousInput.getValue() ? previousInput.getInputFor(endEffector) : null;
-         }
+         latestInput.set(commandInputManager.pollNewestCommand(FootstepStreamingToolboxInputCommand.class));
 
          latestInputTimestampSource.set(latestInput.getTimestamp());
          latestInputTimeSource.set(latestInput.getTimestamp() * 1.0e-9);
@@ -146,7 +110,7 @@ public class FSTTools
       return time.getValue();
    }
 
-   public KinematicsStreamingToolboxInputCommand getLatestInput()
+   public FootstepStreamingToolboxInputCommand getLatestInput()
    {
       return latestInput;
    }
@@ -161,7 +125,7 @@ public class FSTTools
       return hasPreviousInput.getValue();
    }
 
-   public KinematicsStreamingToolboxInputCommand getPreviousInput()
+   public FootstepStreamingToolboxInputCommand getPreviousInput()
    {
       return hasPreviousInput.getValue() ? previousInput : null;
    }
@@ -169,6 +133,11 @@ public class FSTTools
    public double getPreviousInputReceivedTime()
    {
       return previousInputReceivedTime.getValue();
+   }
+
+   public boolean hasNewInputCommand()
+   {
+      return hasNewInputCommand.getValue();
    }
 
    public void flushInputCommands()
@@ -179,136 +148,6 @@ public class FSTTools
       hasPreviousInput.set(false);
       latestInputReceivedTime.set(-1.0);
       previousInputReceivedTime.set(-1.0);
-   }
-
-   public void setFootstepMessagerPublisher(FootstepStreamingMessagePublisher outputPublisher)
-   {
-      this.footstepStreamingMessagePublisher = outputPublisher;
-   }
-
-   public void streamToController(KSTOutputDataReadOnly outputToPublish, boolean finalizeTrajectory)
-   {
-      if (streamingMessagePublisher == null || !useStreamingPublisher.getValue())
-         footstepStreamingMessagePublisher.publish(setupTrajectoryMessage(outputToPublish));
-      else
-         streamingMessagePublisher.publish(setupStreamingMessage(outputToPublish));
-   }
-
-   public WholeBodyStreamingMessage setupStreamingMessage(KSTOutputDataReadOnly solutionToConvert)
-   {
-      streamingMessageFactory.update(currentMessageId.getValue(),
-                                     Conversions.secondsToNanoseconds(time.getValue()),
-                                     streamIntegrationDuration.getValue(),
-                                     solutionToConvert::updateRobot);
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         if (areHandTaskspaceOutputsEnabled.get(robotSide).getValue())
-            streamingMessageFactory.computeHandStreamingMessage(robotSide, configurationCommand.getHandTrajectoryFrameId(robotSide));
-
-         if (areArmJointspaceOutputsEnabled.get(robotSide).getValue())
-            streamingMessageFactory.computeArmStreamingMessage(robotSide);
-      }
-
-      if (isNeckJointspaceOutputEnabled.getValue())
-         streamingMessageFactory.computeNeckStreamingMessage();
-      if (isChestTaskspaceOutputEnabled.getValue())
-         streamingMessageFactory.computeChestStreamingMessage(configurationCommand.getChestTrajectoryFrameId());
-      if (isPelvisTaskspaceOutputEnabled.getValue())
-         streamingMessageFactory.computePelvisStreamingMessage(configurationCommand.getPelvisTrajectoryFrameId());
-
-      currentMessageId.increment();
-      return streamingMessageFactory.getOutput();
-   }
-
-   public WholeBodyTrajectoryMessage setupTrajectoryMessage(KSTOutputDataReadOnly solutionToConvert)
-   {
-      HumanoidMessageTools.resetWholeBodyTrajectoryToolboxMessage(wholeBodyTrajectoryMessage);
-      trajectoryMessageFactory.updateFullRobotModel(solutionToConvert::updateRobot);
-      trajectoryMessageFactory.setMessageToCreate(wholeBodyTrajectoryMessage);
-      trajectoryMessageFactory.setTrajectoryTime(0.0);
-      trajectoryMessageFactory.setEnableVelocity(true);
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         if (areHandTaskspaceOutputsEnabled.get(robotSide).getValue())
-            trajectoryMessageFactory.computeHandTrajectoryMessage(robotSide, configurationCommand.getHandTrajectoryFrameId(robotSide));
-
-         if (areArmJointspaceOutputsEnabled.get(robotSide).getValue())
-            trajectoryMessageFactory.computeArmTrajectoryMessage(robotSide);
-      }
-
-      if (isNeckJointspaceOutputEnabled.getValue())
-         trajectoryMessageFactory.computeNeckTrajectoryMessage();
-      if (isChestTaskspaceOutputEnabled.getValue())
-         trajectoryMessageFactory.computeChestTrajectoryMessage(configurationCommand.getChestTrajectoryFrameId());
-      if (isPelvisTaskspaceOutputEnabled.getValue())
-         trajectoryMessageFactory.computePelvisTrajectoryMessage(configurationCommand.getPelvisTrajectoryFrameId());
-
-      wholeBodyTrajectoryMessage.getPelvisTrajectoryMessage().setEnableUserPelvisControl(true);
-      HumanoidMessageTools.configureForStreaming(wholeBodyTrajectoryMessage,
-                                                 streamIntegrationDuration.getValue(),
-                                                 Conversions.secondsToNanoseconds(time.getValue()));
-      setAllIDs(wholeBodyTrajectoryMessage, currentMessageId.getValue());
-      currentMessageId.increment();
-      return wholeBodyTrajectoryMessage;
-   }
-
-   public WholeBodyTrajectoryMessage setupFinalizeTrajectoryMessage(KSTOutputDataReadOnly solutionToConvert)
-   {
-      HumanoidMessageTools.resetWholeBodyTrajectoryToolboxMessage(wholeBodyTrajectoryMessage);
-      trajectoryMessageFactory.updateFullRobotModel(solutionToConvert::updateRobot);
-      trajectoryMessageFactory.setMessageToCreate(wholeBodyTrajectoryMessage);
-      trajectoryMessageFactory.setTrajectoryTime(0.5);
-
-
-      wholeBodyTrajectoryMessage.getPelvisTrajectoryMessage().setEnableUserPelvisControl(false);
-      HumanoidMessageTools.configureForOverriding(wholeBodyTrajectoryMessage);
-      setAllIDs(wholeBodyTrajectoryMessage, currentMessageId.getValue());
-      currentMessageId.increment();
-
-      return wholeBodyTrajectoryMessage;
-   }
-
-   private static void setAllIDs(WholeBodyTrajectoryMessage message, long id)
-   {
-      message.setSequenceId(id);
-      message.getLeftHandTrajectoryMessage().setSequenceId(id);
-      message.getRightHandTrajectoryMessage().setSequenceId(id);
-      message.getLeftArmTrajectoryMessage().setSequenceId(id);
-      message.getRightArmTrajectoryMessage().setSequenceId(id);
-      message.getChestTrajectoryMessage().setSequenceId(id);
-      message.getSpineTrajectoryMessage().setSequenceId(id);
-      message.getPelvisTrajectoryMessage().setSequenceId(id);
-      message.getLeftFootTrajectoryMessage().setSequenceId(id);
-      message.getRightFootTrajectoryMessage().setSequenceId(id);
-      message.getNeckTrajectoryMessage().setSequenceId(id);
-      message.getHeadTrajectoryMessage().setSequenceId(id);
-
-      message.setUniqueId(id);
-      message.getLeftHandTrajectoryMessage().setUniqueId(id);
-      message.getRightHandTrajectoryMessage().setUniqueId(id);
-      message.getLeftArmTrajectoryMessage().setUniqueId(id);
-      message.getRightArmTrajectoryMessage().setUniqueId(id);
-      message.getChestTrajectoryMessage().setUniqueId(id);
-      message.getSpineTrajectoryMessage().setUniqueId(id);
-      message.getPelvisTrajectoryMessage().setUniqueId(id);
-      message.getLeftFootTrajectoryMessage().setUniqueId(id);
-      message.getRightFootTrajectoryMessage().setUniqueId(id);
-      message.getNeckTrajectoryMessage().setUniqueId(id);
-      message.getHeadTrajectoryMessage().setUniqueId(id);
-
-      message.getLeftHandTrajectoryMessage().getSe3Trajectory().getQueueingProperties().setMessageId(id);
-      message.getRightHandTrajectoryMessage().getSe3Trajectory().getQueueingProperties().setMessageId(id);
-      message.getLeftArmTrajectoryMessage().getJointspaceTrajectory().getQueueingProperties().setMessageId(id);
-      message.getRightArmTrajectoryMessage().getJointspaceTrajectory().getQueueingProperties().setMessageId(id);
-      message.getChestTrajectoryMessage().getSo3Trajectory().getQueueingProperties().setMessageId(id);
-      message.getSpineTrajectoryMessage().getJointspaceTrajectory().getQueueingProperties().setMessageId(id);
-      message.getPelvisTrajectoryMessage().getSe3Trajectory().getQueueingProperties().setMessageId(id);
-      message.getLeftFootTrajectoryMessage().getSe3Trajectory().getQueueingProperties().setMessageId(id);
-      message.getRightFootTrajectoryMessage().getSe3Trajectory().getQueueingProperties().setMessageId(id);
-      message.getNeckTrajectoryMessage().getJointspaceTrajectory().getQueueingProperties().setMessageId(id);
-      message.getHeadTrajectoryMessage().getSo3Trajectory().getQueueingProperties().setMessageId(id);
    }
 
    public CommandInputManager getCommandInputManager()

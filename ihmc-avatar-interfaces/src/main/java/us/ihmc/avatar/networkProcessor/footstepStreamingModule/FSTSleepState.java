@@ -1,8 +1,6 @@
 package us.ihmc.avatar.networkProcessor.footstepStreamingModule;
 
-import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KSTTools;
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxController;
-import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
+import us.ihmc.humanoidRobotics.communication.footstepStreamingToolboxAPI.FootstepStreamingToolboxInputCommand;
 import us.ihmc.robotics.stateMachine.core.State;
 
 public class FSTSleepState implements State
@@ -17,13 +15,12 @@ public class FSTSleepState implements State
    @Override
    public void onEntry()
    {
-      //ikController.requestInitialize();
    }
 
    @Override
    public void doAction(double timeInState)
    {
-      tools.getCommandInputManager().clearCommands(KinematicsStreamingToolboxInputCommand.class);
+      tools.getCommandInputManager().clearCommands(FootstepStreamingToolboxInputCommand.class);
    }
 
    @Override
@@ -34,6 +31,6 @@ public class FSTSleepState implements State
    @Override
    public boolean isDone(double timeInState)
    {
-      return true; //ikController.hasBeenInitialized();
+      return true;
    }
 }

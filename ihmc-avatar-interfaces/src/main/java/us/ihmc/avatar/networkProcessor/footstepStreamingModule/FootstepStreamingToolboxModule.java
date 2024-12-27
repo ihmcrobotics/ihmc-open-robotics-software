@@ -1,46 +1,21 @@
 package us.ihmc.avatar.networkProcessor.footstepStreamingModule;
 
-import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
-import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.WholeBodyStreamingMessage;
-import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
-import toolbox_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxInitialConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import toolbox_msgs.msg.dds.KinematicsToolboxPrivilegedConfigurationMessage;
+import toolbox_msgs.msg.dds.FootstepStreamingToolboxInputMessage;
+import toolbox_msgs.msg.dds.FootstepStreamingToolboxOutputStatus;
 import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController.RobotConfigurationDataBasedUpdater;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
-import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.communication.ToolboxAPIs;
-import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
-import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxConfigurationCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxInitialConfigurationCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxPrivilegedConfigurationCommand;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.humanoidRobotics.communication.footstepStreamingToolboxAPI.FootstepStreamingToolboxInputCommand;
 import us.ihmc.robotDataLogger.util.JVMStatisticsGenerator;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * This class implements a toolbox module designed to stream footstep commands to the robot based on real-time VR user input.
@@ -58,7 +33,6 @@ import java.util.Map;
 public class FootstepStreamingToolboxModule extends ToolboxModule
 {
    protected final FootstepStreamingToolboxController controller;
-   private ROS2Publisher<FootstepDataMessage> footstepMessagePublisher;
 
    public FootstepStreamingToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer)
    {
@@ -83,7 +57,6 @@ public class FootstepStreamingToolboxModule extends ToolboxModule
                                                           robotModel,
                                                           yoGraphicsListRegistry,
                                                           registry);
-      controller.setFootstepMessagePublisher(footstepMessagePublisher::publish);
       startYoVariableServer();
       if (yoVariableServer != null)
       {
@@ -95,7 +68,6 @@ public class FootstepStreamingToolboxModule extends ToolboxModule
    @Override
    public void registerExtraPuSubs(ROS2Node ros2Node)
    {
-      footstepMessagePublisher = ros2Node.createPublisher(HumanoidControllerAPI.getTopic(FootstepDataMessage.class, robotName));
    }
 
    @Override

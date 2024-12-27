@@ -1,71 +1,21 @@
 package us.ihmc.avatar.networkProcessor.footstepStreamingModule;
 
-import toolbox_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
-import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KSTTools;
-import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxController;
-import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
-import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxParameters.InputStateEstimatorType;
-import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.input.KSTInputFBControllerStateEstimator;
-import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.input.KSTInputFirstOrderStateEstimator;
-import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.input.KSTInputStateEstimator;
-import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.output.KSTCompiledOutputProcessor;
-import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.output.KSTOutputDataReadOnly;
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxController;
-import us.ihmc.commons.MathTools;
-import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.communication.controllerAPI.CommandInputManager;
-import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
-import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
-import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
-import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePose3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.humanoidRobotics.communication.footstepStreamingToolboxAPI.FootstepStreamingToolboxInputCommand;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
-import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.stateMachine.core.State;
-import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
-import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
-import us.ihmc.yoVariables.euclid.YoVector3D;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
-import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 /**
- * This the main class of the IK streaming. This is a good starting to understand the mechanics of it.
- * <p>
- * TODO The IK streaming toolbox is a mess. This class should really be {@link KinematicsStreamingToolboxController} and the state machine removed. That'd be simpler.
- * </p>
+ * This the main class of the Footstep streaming. This is a good starting to understand the mechanics of it.
  */
 public class FSTStreamingState implements State
 {
@@ -74,495 +24,219 @@ public class FSTStreamingState implements State
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final FSTTools tools;
+   private final SideDependentList<ReferenceFrame> ankleTrackerFrames = new SideDependentList<>();
+   private final SideDependentList<Boolean> isUserStepping = new SideDependentList<>();
+   private final SideDependentList<RigidBodyTransform> initialTrackersTransform = new SideDependentList<>();
+   private final SideDependentList<RigidBodyTransform> previousTrackersTransform = new SideDependentList<>();
+   private final SideDependentList<Integer> stableIterationCounts = new SideDependentList<>();
+   private final SideDependentList<FrameVector2D> directionsCtrl = new SideDependentList<>(); // Controlled direction vector for each foot.
+   private final SideDependentList<RigidBodyTransform> initialFootstepTransformsInWorld = new SideDependentList<>();
+
+   private final YoDouble timeOfLastInput = new YoDouble("timeOfLastInput", registry);
+   private final YoDouble timeSinceLastInput = new YoDouble("timeSinceLastInput", registry);
+   private final YoDouble rawInputFrequency = new YoDouble("rawInputFrequency", registry);
+   private final AlphaFilteredYoVariable inputFrequency;
    private final double toolboxControllerPeriod;
-   private final YoDouble timeOfLastMessageSentToController = new YoDouble("timeOfLastMessageSentToController", registry);
-   /**
-    * Allows to observe when the IK streaming actually publishes its output to the controller.
-    */
-   private final YoBoolean isPublishing = new YoBoolean("isPublishing", registry);
    private final YoDouble publishingPeriod = new YoDouble("publishingPeriod", registry);
-   private final CommandInputManager ikCommandInputManager;
+
+   private final YoDouble defaultStepThreshold = new YoDouble("defaultStepThreshold", registry);
+   private final YoDouble defaultLiftThreshold = new YoDouble("defaultLiftThreshold", registry);
+   private final YoDouble defaultStrideLength = new YoDouble("defaultStepThreshold", registry);
+   private final YoDouble defaultKpDirection = new YoDouble("defaultKpDirection", registry);
+   private final YoDouble defaultTurningThreshold = new YoDouble("defaultTurningThreshold", registry);
+   private final YoDouble defaultTurnDegrees = new YoDouble("defaultTurnDegrees", registry);
+   private final YoDouble defaultStabilityThreshold = new YoDouble("defaultStabilityThreshold", registry);
+   private final YoInteger defaultStabilityIterations = new YoInteger("defaultStabilityIterations", registry);
 
    public FSTStreamingState(FSTTools tools)
    {
       FootstepStreamingToolboxParameters parameters = tools.getParameters();
       this.tools = tools;
       toolboxControllerPeriod = tools.getToolboxControllerPeriod();
-      ikController = tools.getIKController();
-      ikSolverSpatialGains = ikController.getDefaultSpatialGains();
-      ikSolverJointGains = ikController.getDefaultJointGains();
-      ikController.getCenterOfMassSafeMargin().set(parameters.getCenterOfMassSafeMargin());
-      ikController.setPublishingSolutionPeriod(parameters.getPublishingSolutionPeriod());
-      ikController.getMomentumWeight().set(parameters.getCenterOfMassHoldWeight());
-      ikController.minimizeMomentum(parameters.isMinimizeAngularMomentum(), parameters.isMinimizeLinearMomentum());
-      ikController.setMomentumWeight(parameters.getAngularMomentumWeight(), parameters.getLinearMomentumWeight());
-      ikController.minimizeMomentumRate(parameters.isMinimizeAngularMomentumRate(), parameters.isMinimizeLinearMomentumRate());
-      ikController.setMomentumRateWeight(parameters.getAngularMomentumRateWeight(), parameters.getLinearMomentumRateWeight());
-      FullHumanoidRobotModel desiredFullRobotModel = tools.getDesiredFullRobotModel();
-      ikCommandInputManager = tools.getIKCommandInputManager();
 
       tools.getRegistry().addChild(registry);
 
-      head = desiredFullRobotModel.getHead();
-      pelvis = desiredFullRobotModel.getPelvis();
-      chest = desiredFullRobotModel.getChest();
-      if (head == null)
-         neckJoints = new OneDoFJointBasics[0];
-      else
-         neckJoints = MultiBodySystemTools.createOneDoFJointPath(chest, head);
-      defaultNeckJointMessages = Stream.of(neckJoints)
-                                       .map(joint -> KinematicsToolboxMessageFactory.newOneDoFJointMessage(joint, 10.0, 0.0))
-                                       .collect(Collectors.toList());
-      defaultPelvisMessage.setEndEffectorHashCode(pelvis.hashCode());
-      defaultPelvisMessage.getDesiredOrientationInWorld().setToZero();
-      defaultChestMessage.setEndEffectorHashCode(chest.hashCode());
-      defaultChestMessage.getDesiredOrientationInWorld().setToZero();
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         RigidBodyBasics hand = desiredFullRobotModel.getHand(robotSide);
-         if (hand == null)
-            continue;
-         OneDoFJointBasics[] joints = MultiBodySystemTools.createOneDoFJointPath(chest, hand);
-         hands.put(robotSide, hand);
-         armJoints.put(robotSide, joints);
-         defaultArmJointMessages.put(robotSide,
-                                     Stream.of(joints)
-                                           .map(joint -> KinematicsToolboxMessageFactory.newOneDoFJointMessage(joint, 10.0, 0.0))
-                                           .collect(Collectors.toList()));
-      }
-
-      defaultJointVelocityWeight.set(parameters.getDefaultSolverConfiguration().getJointVelocityWeight());
-      defaultJointAccelerationWeight.set(parameters.getDefaultSolverConfiguration().getJointAccelerationWeight());
-
-      holdArmWeight.set(parameters.getHoldArmWeight());
-      holdNeckWeight.set(parameters.getHoldNeckWeight());
-      holdPelvisLinearWeight.set(parameters.getHoldPelvisLinearWeight());
-      holdPelvisAngularWeight.set(parameters.getHoldPelvisAngularWeight());
-      holdChestAngularWeight.set(parameters.getHoldChestAngularWeight());
-
-      lockPelvisWeight.set(parameters.getLockPelvisWeight());
-      lockChestWeight.set(parameters.getLockChestWeight());
-
-      defaultLinearWeight.set(parameters.getDefaultLinearWeight());
-      defaultAngularWeight.set(parameters.getDefaultAngularWeight());
-      defaultPelvisLinearWeight.set(parameters.getDefaultPelvisLinearWeight());
-      defaultPelvisAngularWeight.set(parameters.getDefaultPelvisAngularWeight());
-      defaultChestLinearWeight.set(parameters.getDefaultChestLinearWeight());
-      defaultChestAngularWeight.set(parameters.getDefaultChestAngularWeight());
-      defaultHandLinearWeight.set(parameters.getDefaultHandLinearWeight());
-      defaultHandAngularWeight.set(parameters.getDefaultHandAngularWeight());
-      defaultLinearWeightMap.put(pelvis.getName(), defaultPelvisLinearWeight);
-      defaultAngularWeightMap.put(pelvis.getName(), defaultPelvisAngularWeight);
-      defaultLinearWeightMap.put(chest.getName(), defaultChestLinearWeight);
-      defaultAngularWeightMap.put(chest.getName(), defaultChestAngularWeight);
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         defaultLinearWeightMap.put(hands.get(robotSide).getName(), defaultHandLinearWeight);
-         defaultAngularWeightMap.put(hands.get(robotSide).getName(), defaultHandAngularWeight);
-      }
-      /*
-       * TODO This was introduced to reduce the risk of shoulder flip on Valkyrie, but it seems that it is
-       * impacting too much the task-space objectives and preventing the privileged configuration to kick
-       * in when there's a singularity.
-       */
-      //      preferredArmConfigWeight.set(0.075);
-      //
-      //      for (RobotSide robotSide : RobotSide.values)
-      //      {
-      //         OneDoFJointBasics[] joints = armJoints.get(robotSide);
-      //         preferredArmJointMessages.put(robotSide,
-      //                                       Stream.of(joints).map(joint -> KinematicsToolboxMessageFactory.newOneDoFJointMessage(joint, 10.0, 0.0))
-      //                                             .collect(Collectors.toList()));
-      //      }
-
       publishingPeriod.set(parameters.getPublishingPeriod());
-
-      ikSolution = KSTOutputDataReadOnly.wrap(ikController.getSolution());
-      defaultLinearGain.set(parameters.getDefaultLinearGain());
-      defaultAngularGain.set(parameters.getDefaultAngularGain());
-      defaultSingleJointGain.set(parameters.getDefaultSingleJointGain());
-      defaultLinearRateLimit.set(parameters.getDefaultLinearRateLimit());
-      defaultAngularRateLimit.set(parameters.getDefaultAngularRateLimit());
-      streamingBlendingDuration.set(parameters.getDefaultStreamingBlendingDuration());
-      outputProcessor = new KSTCompiledOutputProcessor(tools, streamingBlendingDuration, isPublishing, registry);
-
-      { // Filter for locking
-         DoubleProvider alpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(lockPoseFilterBreakFrequency.getValue(),
-                                                                                                      toolboxControllerPeriod);
-         lockPoseFilterBreakFrequency.set(0.25);
-         lockPelvisPoseFiltered = new AlphaFilteredYoFramePose3D("lockPelvisPoseFiltered", "", lockPelvisPose, alpha, registry);
-         lockChestPoseFiltered = new AlphaFilteredYoFramePose3D("lockChestPoseFiltered", "", lockChestPose, alpha, registry);
-      }
 
       YoDouble inputFrequencyAlpha = new YoDouble("inputFrequencyFilter", registry);
       inputFrequencyAlpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(2.0, toolboxControllerPeriod));
       inputFrequency = new AlphaFilteredYoVariable("inputFrequency", registry, inputFrequencyAlpha, rawInputFrequency);
-      inputWeightDecayFactor = new YoDouble("inputDecayFactor", registry);
-      inputWeightDecayFactor.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(1.0 / parameters.getInputWeightDecayDuration(),
-                                                                                                 toolboxControllerPeriod));
 
-      Collection<? extends RigidBodyBasics> controllableRigidBodies = ikController.getControllableRigidBodies();
-      activeInputStateEstimator.set(parameters.getInputStateEstimatorType());
-      inputStateEstimatorsMap.put(InputStateEstimatorType.FIRST_ORDER_LPF,
-                                  new KSTInputFirstOrderStateEstimator(controllableRigidBodies, parameters, toolboxControllerPeriod, registry));
-      inputStateEstimatorsMap.put(InputStateEstimatorType.FBC_STYLE,
-                                  new KSTInputFBControllerStateEstimator(controllableRigidBodies,
-                                                                         parameters,
-                                                                         toolboxControllerPeriod,
-                                                                         () -> 1.0 / inputFrequency.getValue(),
-                                                                         registry));
-      inputStateEstimators = inputStateEstimatorsMap.values().toArray(new KSTInputStateEstimator[0]);
-
-      for (RigidBodyBasics rigidBody : controllableRigidBodies)
-      {
-         rigidBodyControlStartTimeMap.put(rigidBody, new YoDouble(rigidBody.getName() + "ControlStartTime", registry));
-      }
-
-      rigidBodyControlStartTimeArray = new YoDouble[controllableRigidBodies.size()];
-
-      int index = 0;
-
-      for (RigidBodyBasics rigidBody : controllableRigidBodies)
-      {
-         rigidBodyControlStartTimeArray[index++] = rigidBodyControlStartTimeMap.get(rigidBody);
-      }
+      defaultStepThreshold.set(parameters.getStepThreshold());
+      defaultLiftThreshold.set(parameters.getLiftThreshold());
+      defaultStrideLength.set(parameters.getStrideLength());
+      defaultKpDirection.set(parameters.getKpDirection());
+      defaultTurningThreshold.set(parameters.getTurningThreshold());
+      defaultTurnDegrees.set(parameters.getTurnDegrees());
+      defaultStabilityThreshold.set(parameters.getStabilityThreshold());
+      defaultStabilityIterations.set(parameters.getStabilityIterations());
    }
 
    @Override
    public void onEntry()
    {
-      isStreaming.set(false);
-      wasStreaming.set(false);
-      timeOfLastMessageSentToController.set(Double.NEGATIVE_INFINITY);
-      ikSolverSpatialGains.setPositionProportionalGains(defaultLinearGain.getValue());
-      ikSolverSpatialGains.setOrientationProportionalGains(defaultAngularGain.getValue());
-      ikSolverSpatialGains.setPositionMaxFeedbackAndFeedbackRate(linearRateLimit.getValue(), Double.POSITIVE_INFINITY);
-      ikSolverSpatialGains.setOrientationMaxFeedbackAndFeedbackRate(angularRateLimit.getValue(), Double.POSITIVE_INFINITY);
-      ikSolverJointGains.setKp(defaultSingleJointGain.getValue());
-      ikSolverJointGains.setMaximumFeedbackAndMaximumFeedbackRate(angularRateLimit.getValue(), Double.POSITIVE_INFINITY);
-
-      tools.resetUserInvalidInputFlag();
-      KinematicsStreamingToolboxParameters kstParameters = tools.getParameters();
-      kstParameters.getDefaultSolverConfiguration().setJointVelocityWeight(defaultJointVelocityWeight.getValue());
-      kstParameters.getDefaultSolverConfiguration().setJointAccelerationWeight(defaultJointAccelerationWeight.getValue());
-      ikCommandInputManager.submitMessage(kstParameters.getDefaultSolverConfiguration());
-
-      if (kstParameters.getSolverNullspaceAlpha() > 0.0 && Double.isFinite(kstParameters.getSolverNullspaceAlpha()))
-         ikController.setPrivilegedNullspaceAlpha(kstParameters.getSolverNullspaceAlpha(), true);
-      if (kstParameters.getSolverPrivilegedDefaultWeight() > 0.0 && Double.isFinite(kstParameters.getSolverPrivilegedDefaultWeight()))
-         ikController.setPrivilegedWeight(kstParameters.getSolverPrivilegedDefaultWeight(), true);
-      if (kstParameters.getSolverPrivilegedDefaultGain() > 0.0 && Double.isFinite(kstParameters.getSolverPrivilegedDefaultGain()))
-         ikController.setPrivilegedConfigurationGain(kstParameters.getSolverPrivilegedDefaultGain(), true);
-
-      /*
-       * The desiredFullRobotModel can either be at the current configuration or at a configuration
-       * pre-defined at construction. Let's initialize the arms and neck joints using the current robot
-       * configuration.
-       */
-      FullHumanoidRobotModel controllerFullRobotModel = tools.getCurrentFullRobotModel();
-
-      for (OneDoFJointBasics neckJoint : neckJoints)
+      for (RobotSide side : RobotSide.values())
       {
-         neckJoint.setQ(controllerFullRobotModel.getOneDoFJointByName(neckJoint.getName()).getQ());
+         isUserStepping.put(side, false);
+         stableIterationCounts.put(side, 0);
+         previousTrackersTransform.put(side, new RigidBodyTransform());
+         // Initialize controlled direction to (1,0) (forward)
+         directionsCtrl.put(side, new FrameVector2D(ReferenceFrame.getWorldFrame(), 1.0, 0.0));
+
+         ankleTrackerFrames.put(side, null);
+         initialTrackersTransform.put(side, null);
       }
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         if (armJoints.get(robotSide) == null)
-            continue;
-         for (OneDoFJointBasics armJoint : armJoints.get(robotSide))
-            armJoint.setQ(controllerFullRobotModel.getOneDoFJointByName(armJoint.getName()).getQ());
-      }
-
-      for (int i = 0; i < neckJoints.length; i++)
-      {
-         defaultNeckJointMessages.get(i).setDesiredPosition(controllerFullRobotModel.getOneDoFJointByName(neckJoints[i].getName()).getQ());
-         defaultNeckJointMessages.get(i).setWeight(holdNeckWeight.getValue());
-      }
-
-      // TODO change to using mid-feet z-up frame for initializing pelvis and chest
-      lockPelvis.set(tools.getConfigurationCommand().isLockPelvis());
-
-      // TODO Make it possible to lock/unlock pelvis/chest while streaming
-      if (lockPelvis.getValue())
-      {
-         lockPelvisPose.setFromReferenceFrame(controllerFullRobotModel.getPelvis().getBodyFixedFrame());
-         lockPelvisPoseFiltered.update();
-         defaultPelvisMessage.getDesiredPositionInWorld().set(lockPelvisPoseFiltered.getPosition());
-         defaultPelvisMessage.getDesiredOrientationInWorld().set(lockPelvisPoseFiltered.getOrientation());
-         defaultPelvisMessage.getLinearSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(true, true, true, worldFrame));
-         defaultPelvisMessage.getAngularSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(true, true, true, worldFrame));
-         MessageTools.packWeightMatrix3DMessage(lockPelvisWeight.getValue(), defaultPelvisMessage.getLinearWeightMatrix());
-         MessageTools.packWeightMatrix3DMessage(lockPelvisWeight.getValue(), defaultPelvisMessage.getAngularWeightMatrix());
-      }
-      else
-      {
-         lockPelvisPoseFiltered.reset();
-         lockPelvisPose.setFromReferenceFrame(pelvis.getBodyFixedFrame());
-         defaultPelvisMessage.getDesiredPositionInWorld().set(lockPelvisPose.getPosition());
-         defaultPelvisMessage.getDesiredOrientationInWorld().setToYawOrientation(lockPelvisPose.getYaw());
-         defaultPelvisMessage.getLinearSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(false, false, true, worldFrame));
-         defaultPelvisMessage.getAngularSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(true, true, true, worldFrame));
-         MessageTools.packWeightMatrix3DMessage(holdPelvisLinearWeight, defaultPelvisMessage.getLinearWeightMatrix());
-         MessageTools.packWeightMatrix3DMessage(holdPelvisAngularWeight, defaultPelvisMessage.getAngularWeightMatrix());
-      }
-
-      lockChest.set(tools.getConfigurationCommand().isLockChest());
-
-      if (lockChest.getValue())
-      {
-         lockChestPose.setFromReferenceFrame(controllerFullRobotModel.getChest().getBodyFixedFrame());
-         lockChestPoseFiltered.update();
-         defaultChestMessage.getDesiredPositionInWorld().set(lockChestPoseFiltered.getPosition());
-         defaultChestMessage.getDesiredOrientationInWorld().set(lockChestPoseFiltered.getOrientation());
-         defaultChestMessage.getLinearSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(true, true, true, worldFrame));
-         defaultChestMessage.getAngularSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(true, true, true, worldFrame));
-         MessageTools.packWeightMatrix3DMessage(lockChestWeight.getValue(), defaultChestMessage.getLinearWeightMatrix());
-         MessageTools.packWeightMatrix3DMessage(lockChestWeight.getValue(), defaultChestMessage.getAngularWeightMatrix());
-      }
-      else
-      {
-         lockChestPoseFiltered.reset();
-         lockChestPose.setFromReferenceFrame(chest.getBodyFixedFrame());
-         defaultChestMessage.getDesiredPositionInWorld().setToZero();
-         defaultChestMessage.getDesiredOrientationInWorld().setToYawOrientation(lockChestPose.getYaw());
-         defaultChestMessage.getLinearSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(false, false, false, worldFrame));
-         defaultChestMessage.getAngularSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(true, true, true, worldFrame));
-         MessageTools.packWeightMatrix3DMessage(0.0, defaultChestMessage.getLinearWeightMatrix());
-         MessageTools.packWeightMatrix3DMessage(holdChestAngularWeight, defaultChestMessage.getAngularWeightMatrix());
-      }
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         if (armJoints.get(robotSide) == null)
-            continue;
-         OneDoFJointBasics[] joints = armJoints.get(robotSide);
-         List<KinematicsToolboxOneDoFJointMessage> defaultMessages = defaultArmJointMessages.get(robotSide);
-
-         for (int i = 0; i < joints.length; i++)
-         {
-            defaultMessages.get(i).setDesiredPosition(controllerFullRobotModel.getOneDoFJointByName(joints[i].getName()).getQ());
-            defaultMessages.get(i).setWeight(holdArmWeight.getValue());
-         }
-      }
-
-      outputProcessor.initialize();
 
       timeOfLastInput.set(Double.NaN);
       timeSinceLastInput.set(Double.NaN);
       inputFrequency.reset();
-
-      for (KSTInputStateEstimator inputStateEstimator : inputStateEstimators)
-         inputStateEstimator.reset();
-
-      for (YoDouble rigidBodyControlStartTime : rigidBodyControlStartTimeArray)
-         rigidBodyControlStartTime.setToNaN();
-      centerOfMassControlStartTime.setToNaN();
-
-      //      System.gc(); // TODO This needs to be removed.
    }
 
-   private final KinematicsStreamingToolboxInputCommand filteredInputs = new KinematicsStreamingToolboxInputCommand();
-   private final List<RigidBodyBasics> uncontrolledRigidBodies = new ArrayList<>();
-
+   /**
+    * This method is called continuously. It updates footstep targets based on ankle tracker movement.
+    * If a user starts stepping, we enter stepping mode and use PD control to continuously update the footstep.
+    * Once the user’s foot begins descending, we stabilize the stride length and finalize the step once stable.
+    */
    @Override
    public void doAction(double timeInState)
    {
-      FullHumanoidRobotModel controllerFullRobotModel = tools.getCurrentFullRobotModel();
+      FootstepStreamingToolboxInputCommand latestInput = tools.getLatestInput();
 
-      if (lockPelvis.getValue() && !tools.getConfigurationCommand().isPelvisTaskspaceEnabled())
+      if (latestInput != null)
       {
-         lockPelvisPose.setFromReferenceFrame(controllerFullRobotModel.getPelvis().getBodyFixedFrame());
-         lockPelvisPoseFiltered.update();
-         defaultPelvisMessage.getDesiredPositionInWorld().set(lockPelvisPoseFiltered.getPosition());
-         defaultPelvisMessage.getDesiredOrientationInWorld().set(lockPelvisPoseFiltered.getOrientation());
-      }
-      else
-      {
-         lockPelvisPoseFiltered.reset();
-      }
-
-      if (lockChest.getValue() && !tools.getConfigurationCommand().isChestTaskspaceEnabled())
-      {
-         lockChestPose.setFromReferenceFrame(controllerFullRobotModel.getChest().getBodyFixedFrame());
-         lockChestPoseFiltered.update();
-         defaultChestMessage.getDesiredPositionInWorld().set(lockChestPoseFiltered.getPosition());
-         defaultChestMessage.getDesiredOrientationInWorld().set(lockChestPoseFiltered.getOrientation());
-      }
-      else
-      {
-         lockChestPoseFiltered.reset();
-      }
-
-      KinematicsStreamingToolboxInputCommand latestInput = tools.getLatestInput();
-
-      if (tools.hasUserSubmittedInvalidInput())
-      {
-         isStreaming.set(false);
-      }
-      else if (latestInput != null)
-      {
-         isStreaming.set(latestInput.getStreamToController());
-         if (latestInput.getStreamInitialBlendDuration() > 0.0)
-            streamingBlendingDuration.set(latestInput.getStreamInitialBlendDuration());
-         else
-            streamingBlendingDuration.set(tools.getParameters().getDefaultStreamingBlendingDuration());
-
-         // Reset the list to keep track of the bodies that are not controlled
-         uncontrolledRigidBodies.clear();
-         List<? extends RigidBodyBasics> controllableRigidBodies = ikController.getControllableRigidBodies();
-
-         for (int i = 0; i < controllableRigidBodies.size(); i++)
+         RobotSide side = latestInput.getSide();
+         // keep reading input, here we need the current robot  adn tracker poses from latest input
+         ReferenceFrame trackerFrame = ankleTrackerFrames.get(side);
+         if (trackerFrame != null)
          {
-            uncontrolledRigidBodies.add(controllableRigidBodies.get(i));
-         }
+            RigidBodyTransform currentTrackerTransform = new RigidBodyTransform();
+            trackerFrame.getTransformToWorldFrame().transform(currentTrackerTransform);
+            RigidBodyTransform initialTrackerTransform = initialTrackersTransform.get(side);
 
-         for (int i = 0; i < latestInput.getNumberOfInputs(); i++)
-         {
-            KinematicsToolboxRigidBodyCommand rigidBodyInput = latestInput.getInput(i);
-            // Sets the user weights only if provided.
-            SelectionMatrix6D selectionMatrix = rigidBodyInput.getSelectionMatrix();
-            WeightMatrix6D weightMatrix = rigidBodyInput.getWeightMatrix();
-            setDefaultWeightsIfNeeded(rigidBodyInput, selectionMatrix, weightMatrix);
-
-            // Update time for which each rigid body started being controlled.
-            YoDouble startTime = rigidBodyControlStartTimeMap.get(rigidBodyInput.getEndEffector());
-            if (startTime.isNaN())
-               startTime.set(timeInState);
-            blendWeightMatrix(rigidBodyInput.getWeightMatrix(), timeInState, startTime.getValue(), streamingBlendingDuration.getValue());
-
-            // Update the list of bodies that are not controlled this tick
-            uncontrolledRigidBodies.remove(rigidBodyInput.getEndEffector());
-         }
-
-         for (int i = 0; i < uncontrolledRigidBodies.size(); i++)
-         {
-            rigidBodyControlStartTimeMap.get(uncontrolledRigidBodies.get(i)).setToNaN();
-         }
-
-         if (latestInput.hasCenterOfMassInput())
-         {
-            KinematicsToolboxCenterOfMassCommand centerOfMassInput = latestInput.getCenterOfMassInput();
-            // TODO Maybe the CoM task should have its own default weight value.
-            setDefaultWeightIfNeeded(centerOfMassInput.getSelectionMatrix(), centerOfMassInput.getWeightMatrix(), defaultLinearWeight);
-            if (centerOfMassControlStartTime.isNaN())
-               centerOfMassControlStartTime.set(timeInState);
-            blendWeightMatrix(centerOfMassInput.getWeightMatrix(), timeInState, centerOfMassControlStartTime.getValue(), streamingBlendingDuration.getValue());
-         }
-         else
-         {
-            centerOfMassControlStartTime.setToNaN();
-         }
-
-         if (!latestInput.getStreamToController() && latestInput.getNumberOfInputs() == 0 && tools.hasPreviousInput())
-         {
-            /*
-             * In case the user abruptly stops streaming and the message is empty.
-             * Only then we remember the last inputs and use them to finish this session.
-             * Without this, the robot would go to its privileged configuration.
-             */
-            KinematicsStreamingToolboxInputCommand previousInput = tools.getPreviousInput();
-            latestInput.addInputs(previousInput.getInputs());
-
-            if (previousInput.hasCenterOfMassInput())
-               latestInput.setCenterOfMassInput(previousInput.getCenterOfMassInput());
-            else
-               latestInput.setUseCenterOfMassInput(false);
-
-            filteredInputs.set(latestInput);
-         }
-         else if (tools.hasNewInputCommand())
-         {
-            filteredInputs.set(latestInput);
-         }
-
-         for (int i = filteredInputs.getNumberOfInputs() - 1; i >= 0; i--)
-         { // Removing the inputs for rigid-bodies that are locked.
-            RigidBodyBasics endEffector = filteredInputs.getInput(i).getEndEffector();
-
-            if (lockPelvis.getValue() && endEffector == pelvis)
-               filteredInputs.removeInput(i);
-            else if (lockChest.getValue() && endEffector == chest)
-               filteredInputs.removeInput(i);
-         }
-
-         if (latestInput.getAngularRateLimitation() > 0.0)
-            angularRateLimit.set(latestInput.getAngularRateLimitation());
-         else
-            angularRateLimit.set(defaultAngularRateLimit.getValue());
-         if (latestInput.getLinearRateLimitation() > 0.0)
-            linearRateLimit.set(latestInput.getLinearRateLimitation());
-         else
-            linearRateLimit.set(defaultLinearRateLimit.getValue());
-
-         for (KSTInputStateEstimator inputStateEstimator : inputStateEstimators)
-         {
-            inputStateEstimator.update(tools.getTime(),
-                                       tools.hasNewInputCommand(),
-                                       linearRateLimit.getValue(),
-                                       angularRateLimit.getValue(),
-                                       filteredInputs,
-                                       tools.getPreviousInput());
-         }
-
-         /////////////////////////////////////////////////////////////////////////
-         ///// We are now ready to submit the commands to the IK controller. /////
-         /////////////////////////////////////////////////////////////////////////
-
-         for (int i = 0; i < filteredInputs.getNumberOfInputs(); i++)
-         { // Ship it
-            KinematicsToolboxRigidBodyCommand filteredInput = filteredInputs.getInput(i);
-            KSTInputStateEstimator inputStateEstimator = inputStateEstimatorsMap.get(activeInputStateEstimator.getValue());
-            FramePose3DReadOnly estimatedPose = inputStateEstimator.getEstimatedPose(filteredInput.getEndEffector());
-            SpatialVectorReadOnly estimatedVelocity = inputStateEstimator.getEstimatedVelocity(filteredInput.getEndEffector());
-            if (estimatedPose != null)
-               filteredInput.getDesiredPose().set(estimatedPose);
-            if (estimatedVelocity != null)
-               filteredInput.getDesiredVelocity().set(estimatedVelocity);
-            ikCommandInputManager.submitCommand(filteredInput);
-         }
-
-         if (filteredInputs.hasCenterOfMassInput())
-         {
-            KinematicsToolboxCenterOfMassCommand centerOfMassInput = filteredInputs.getCenterOfMassInput();
-            KSTInputStateEstimator inputStateEstimator = inputStateEstimatorsMap.get(activeInputStateEstimator.getValue());
-            FramePoint3DReadOnly estimatedPose = inputStateEstimator.getEstimatedCoMPosition();
-            FrameVector3DReadOnly estimatedVelocity = inputStateEstimator.getEstimatedCoMVelocity();
-            if (estimatedPose != null)
-               centerOfMassInput.getDesiredPosition().set(estimatedPose);
-            if (estimatedVelocity != null)
-               centerOfMassInput.getDesiredVelocity().set(estimatedVelocity);
-            ikCommandInputManager.submitCommand(centerOfMassInput);
-         }
-
-         if (!latestInput.hasInputFor(head))
-            ikCommandInputManager.submitMessages(defaultNeckJointMessages);
-         if (!latestInput.hasInputFor(pelvis) || lockPelvis.getValue())
-            ikCommandInputManager.submitMessage(defaultPelvisMessage);
-         if (!latestInput.hasInputFor(chest) || lockChest.getValue())
-            ikCommandInputManager.submitMessage(defaultChestMessage);
-
-         for (RobotSide robotSide : RobotSide.values)
-         {
-            if (hands.get(robotSide) == null)
-               continue;
-            if (!latestInput.hasInputFor(hands.get(robotSide)))
+            if (!isUserStepping.get(side))
             {
-               ikCommandInputManager.submitMessages(defaultArmJointMessages.get(robotSide));
+               if (initialTrackerTransform == null)
+               {
+                  initialTrackersTransform.put(side, new RigidBodyTransform(currentTrackerTransform));
+                  previousTrackersTransform.put(side, new RigidBodyTransform(currentTrackerTransform));
+               }
+
+               Vector3D translation = new Vector3D();
+               translation.sub(currentTrackerTransform.getTranslation(), initialTrackerTransform.getTranslation());
+               FrameVector2D translationXY = new FrameVector2D(ReferenceFrame.getWorldFrame(), translation.getX(), translation.getY());
+               // Check if the tracker has moved in any direction AND the foot has been lifted
+               if (translationXY.norm() >= defaultStepThreshold.getDoubleValue() && translation.getZ() >= defaultLiftThreshold.getDoubleValue())
+               {
+                  // Get the current robot foot position in world
+                  RigidBodyTransform footstepTransformInWorld = new RigidBodyTransform(latestInput.getRobotFootPose());
+
+                  FramePoint2D initialXY = new FramePoint2D(ReferenceFrame.getWorldFrame(),
+                                                            footstepTransformInWorld.getTranslation().getX(),
+                                                            footstepTransformInWorld.getTranslation().getY());
+                  initialFootstepTransformsInWorld.put(side, footstepTransformInWorld);
+                  // Normalize the translation direction to have a fixed stride distance
+                  translationXY.normalize();
+                  // Scale the normalized direction to the fixed stride distance
+                  translationXY.scale(defaultStrideLength.getDoubleValue());
+                  // Apply the translation to the current robot foot position
+                  FramePoint2D predictedXY = new FramePoint2D(initialXY);
+                  predictedXY.add(translationXY);
+                  footstepTransformInWorld.getTranslation().setX(predictedXY.getX());
+                  footstepTransformInWorld.getTranslation().setY(predictedXY.getY());
+                  // Compute yaw variation
+                  double newYaw = footstepTransformInWorld.getRotation().getYaw();
+                  double yawVariation = currentTrackerTransform.getRotation().getYaw() - initialTrackerTransform.getRotation().getYaw();
+                  if (Math.toDegrees(yawVariation) >= defaultTurningThreshold.getDoubleValue())
+                  {
+                     newYaw += Math.toRadians(defaultTurnDegrees.getDoubleValue());
+                  }
+                  else if (Math.toDegrees(yawVariation) <= -defaultTurningThreshold.getDoubleValue())
+                  {
+                     newYaw -= Math.toRadians(defaultTurnDegrees.getDoubleValue());
+                  }
+                  // Update yaw of footstep
+                  footstepTransformInWorld.getRotation()
+                                          .setYawPitchRoll(newYaw,
+                                                           footstepTransformInWorld.getRotation().getPitch(),
+                                                           footstepTransformInWorld.getRotation().getRoll());
+
+                  // Publish footstep to UI
+
+                  isUserStepping.put(side, true);
+               }
+            }
+            else // Already stepping: continuously update footstep direction
+            {
+               if (initialTrackerTransform != null)
+               {
+                  // Check if tracker is not moving much anymore
+                  Vector3D translationFromInitialPosition = new Vector3D();
+                  translationFromInitialPosition.sub(currentTrackerTransform.getTranslation(), previousTrackersTransform.get(side).getTranslation());
+
+                  // If the tacker is not moving much, then start counting for stability
+                  if (translationFromInitialPosition.norm() <= defaultStabilityThreshold.getDoubleValue())
+                  {
+                     int stableCount = stableIterationCounts.get(side);
+                     stableCount++;
+                     stableIterationCounts.put(side, stableCount);
+
+                     if (stableCount >= defaultStabilityIterations.getIntegerValue())
+                     {
+                        isUserStepping.put(side, false);
+                        initialTrackersTransform.put(side, new RigidBodyTransform(currentTrackerTransform));
+                        stableIterationCounts.put(side, 0);
+                     }
+                  }
+                  else  // Still moving
+                  {
+                     stableIterationCounts.put(side, 0); // reset stability count
+                     // Only update direction if acceleration is not too small
+                     //                     if (accelerationMag > ACCELERATION_THRESHOLD)
+                     //                     {
+                     //                        // Compute current direction from ankle movement
+                     //                        Vector3D translation = new Vector3D();
+                     //                        translation.sub(currentTrackerTransform.getTranslation(), initialTrackerTransform.getTranslation());
+                     //                        FrameVector2D directionDesired = new FrameVector2D(ReferenceFrame.getWorldFrame(), translation.getX(), translation.getY());
+                     //                        directionDesired.normalize();
+                     //                     }
+                     //                     else
+                     //                     {
+                     //                        // If acceleration is very low, do not update direction any further.
+                     //                        // Just keep the desired direction as is.
+                     //                     }
+                     //
+                     //                     // P-control: error = desired_direction - current_controlled_direction
+                     //                     FrameVector2D directionCtrl = directionsCtrl.get(side);
+                     //                     FrameVector2D directionError = new FrameVector2D(directionDesired);
+                     //                     directionError.sub(directionCtrl);
+                     //
+                     //                     // Update the controlled direction based on error
+                     //                     directionCtrl.addX(KP_DIRECTION * directionError.getX());
+                     //                     directionCtrl.addY(KP_DIRECTION * directionError.getY());
+                     //
+                     //                     // Re-normalize direction
+                     //                     directionCtrl.normalize();
+                     //                     directionsCtrl.put(side, new FrameVector2D(directionCtrl));
+                     //
+                     //                     // Predict new footstep position
+                     //                     RigidBodyTransform footstepTransformInWorld = new RigidBodyTransform(initialFootstepTransformsInWorld.get(side));
+                     //                     FramePoint2D initialXY = new FramePoint2D(ReferenceFrame.getWorldFrame(),
+                     //                                                                        footstepTransformInWorld.getTranslation().getX(),
+                     //                                                                        footstepTransformInWorld.getTranslation().getY());
+                     //
+                     //                     FramePoint2D predictedXY = new FramePoint2D(initialXY);
+                     //                     predictedXY.add(directionCtrl.getX() * STRIDE_LENGTH, directionCtrl.getY() * STRIDE_LENGTH);
+                     //
+                     //                     footstepTransformInWorld.getTranslation().setX(predictedXY.getX());
+                     //                     footstepTransformInWorld.getTranslation().setY(predictedXY.getY());
+                  }
+
+                  // Update the previous tracker position for the next iteration
+                  previousTrackersTransform.put(side, new RigidBodyTransform(currentTrackerTransform));
+               }
             }
          }
-
-         if (tools.hasPreviousInput())
-         {
-            handleInputsDecay(latestInput, tools.getPreviousInput());
-            ikCommandInputManager.submitCommands(decayingInputs);
-         }
       }
-
-      ikSolverSpatialGains.setPositionMaxFeedbackAndFeedbackRate(linearRateLimit.getValue(), Double.POSITIVE_INFINITY);
-      ikSolverSpatialGains.setOrientationMaxFeedbackAndFeedbackRate(angularRateLimit.getValue(), Double.POSITIVE_INFINITY);
-      ikSolverJointGains.setMaximumFeedbackAndMaximumFeedbackRate(angularRateLimit.getValue(), Double.POSITIVE_INFINITY);
-      ikController.updateInternal();
 
       // Updating some statistics
       if (tools.hasNewInputCommand())
@@ -579,156 +253,6 @@ public class FSTStreamingState implements State
       if (Double.isFinite(timeOfLastInput.getValue()))
       {
          timeSinceLastInput.set(timeInState - timeOfLastInput.getValue());
-      }
-
-
-      /*
-       * Updating the desired default position for the arms and/or neck only if the corresponding
-       * end-effector is controlled. This allows to improve continuity in case the user stops controlling
-       * a hand/head.
-       */
-      if (latestInput != null)
-      {
-         if (latestInput.hasInputFor(head))
-            KSTTools.copyJointDesiredPositions(neckJoints, defaultNeckJointMessages);
-
-         for (RobotSide robotSide : RobotSide.values)
-         {
-            if (hands.get(robotSide) == null)
-               continue;
-            if (latestInput.hasInputFor(hands.get(robotSide)))
-               KSTTools.copyJointDesiredPositions(armJoints.get(robotSide), defaultArmJointMessages.get(robotSide));
-         }
-      }
-
-      // Figure out if we need to publish the output to the controller
-      if (isStreaming.getValue())
-      {
-         isPublishing.set((timeInState - timeOfLastMessageSentToController.getValue()) >= publishingPeriod.getValue());
-         if (isPublishing.getValue())
-            timeOfLastMessageSentToController.set(timeInState);
-      }
-      else if (wasStreaming.getValue())
-      {
-         isPublishing.set(true);
-         timeOfLastMessageSentToController.set(timeInState);
-      }
-      else
-      {
-         isPublishing.set(false);
-         timeOfLastMessageSentToController.set(Double.NEGATIVE_INFINITY);
-      }
-
-      // Post-process 
-      outputProcessor.update(timeInState, wasStreaming.getValue(), isStreaming.getValue(), ikSolution);
-
-      if (isPublishing.getValue())
-      {
-         tools.streamToController(outputProcessor.getProcessedOutput(), !isStreaming.getValue());
-      }
-
-      wasStreaming.set(isStreaming.getValue());
-   }
-
-   private void handleInputsDecay(KinematicsStreamingToolboxInputCommand latestInputs, KinematicsStreamingToolboxInputCommand previousInputs)
-   {
-      // 1- Forget inputs for end-effectors that are once again being controlled.
-      for (int i = decayingInputs.size() - 1; i >= 0; i--)
-      {
-         KinematicsToolboxRigidBodyCommand decayingInput = decayingInputs.get(i);
-         if (latestInputs.hasInputFor(decayingInput.getEndEffector()))
-            decayingInputs.remove(i);
-      }
-
-      // 2- Register inputs for end-effectors that stopped being controlled.
-      for (int i = 0; i < previousInputs.getNumberOfInputs(); i++)
-      {
-         KinematicsToolboxRigidBodyCommand previousInput = previousInputs.getInput(i);
-         if (!latestInputs.hasInputFor(previousInput.getEndEffector()))
-         {
-            boolean addInputToDecay = true;
-
-            for (int j = 0; j < decayingInputs.size(); j++)
-            {
-               if (previousInput.getEndEffector() == decayingInputs.get(j).getEndEffector())
-               {
-                  addInputToDecay = false;
-                  break;
-               }
-            }
-
-            if (addInputToDecay)
-               decayingInputs.add().set(previousInput);
-         }
-      }
-
-      // 3- Decay inputs by reducing their, if it reaches a low threshold then the input is dropped.
-      for (int i = decayingInputs.size() - 1; i >= 0; i--)
-      {
-         KinematicsToolboxRigidBodyCommand decayingInput = decayingInputs.get(i);
-         decayingInput.getWeightMatrix().scale(inputWeightDecayFactor.getValue());
-
-         if (findMaximumWeightValue(decayingInput.getWeightMatrix()) < 0.1)
-            decayingInputs.remove(i);
-      }
-
-      numberOfDecayingInputs.set(decayingInputs.size());
-   }
-
-   private static double findMaximumWeightValue(WeightMatrix6D weightMatrix)
-   {
-      return Math.max(findMaximumWeightValue(weightMatrix.getAngularPart()), findMaximumWeightValue(weightMatrix.getLinearPart()));
-   }
-
-   private static double findMaximumWeightValue(WeightMatrix3D weightMatrix)
-   {
-      return EuclidCoreTools.max(weightMatrix.getX(), weightMatrix.getY(), weightMatrix.getZ());
-   }
-
-   private void setDefaultWeightsIfNeeded(KinematicsToolboxRigidBodyCommand rigidBodyInput, SelectionMatrix6D selectionMatrix, WeightMatrix6D weightMatrix)
-   {
-      Vector3DReadOnly defaultLinearWeight = defaultLinearWeightMap.get(rigidBodyInput.getEndEffector().getName());
-      if (defaultLinearWeight == null)
-         defaultLinearWeight = this.defaultLinearWeight;
-      Vector3DReadOnly defaultAngularWeight = defaultAngularWeightMap.get(rigidBodyInput.getEndEffector().getName());
-      if (defaultAngularWeight == null)
-         defaultAngularWeight = this.defaultAngularWeight;
-      setDefaultWeightIfNeeded(selectionMatrix.getLinearPart(), weightMatrix.getLinearPart(), defaultLinearWeight);
-      setDefaultWeightIfNeeded(selectionMatrix.getAngularPart(), weightMatrix.getAngularPart(), defaultAngularWeight);
-   }
-
-   private static void setDefaultWeightIfNeeded(SelectionMatrix3D selectionMatrix, WeightMatrix3D weightMatrix, Tuple3DReadOnly defaultWeight)
-   {
-      if (selectionMatrix.isXSelected())
-      {
-         if (Double.isNaN(weightMatrix.getX()) || weightMatrix.getX() <= 0.0)
-            weightMatrix.setXAxisWeight(defaultWeight.getX());
-      }
-      if (selectionMatrix.isYSelected())
-      {
-         if (Double.isNaN(weightMatrix.getY()) || weightMatrix.getY() <= 0.0)
-            weightMatrix.setYAxisWeight(defaultWeight.getY());
-      }
-      if (selectionMatrix.isZSelected())
-      {
-         if (Double.isNaN(weightMatrix.getZ()) || weightMatrix.getZ() <= 0.0)
-            weightMatrix.setZAxisWeight(defaultWeight.getZ());
-      }
-   }
-
-   private static void blendWeightMatrix(WeightMatrix6D weightMatrix, double currentTime, double startTime, double blendingDuration)
-   {
-      blendWeightMatrix(weightMatrix.getLinearPart(), currentTime, startTime, blendingDuration);
-      blendWeightMatrix(weightMatrix.getAngularPart(), currentTime, startTime, blendingDuration);
-   }
-
-   private static void blendWeightMatrix(WeightMatrix3D weightMatrix, double currentTime, double startTime, double blendingDuration)
-   {
-      double controlDuration = currentTime - startTime;
-      if (controlDuration < blendingDuration)
-      { // Blend the weight matrix to smoothly activate the objective.
-         double blendingFactor = MathTools.clamp(controlDuration / blendingDuration, 0.0, 1.0);
-         weightMatrix.scale(blendingFactor);
       }
    }
 

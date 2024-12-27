@@ -6,7 +6,6 @@ import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -21,8 +20,6 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-
-import java.util.List;
 
 import static us.ihmc.avatar.networkProcessor.footstepStreamingModule.FootstepStreamingToolboxController.FSTState.SLEEP;
 import static us.ihmc.avatar.networkProcessor.footstepStreamingModule.FootstepStreamingToolboxController.FSTState.STREAMING;
@@ -64,8 +61,6 @@ public class FootstepStreamingToolboxController extends ToolboxController
 
    private final YoBoolean isDone = new YoBoolean("isDone", registry);
 
-   private final Class[] commandTypesToForward;
-
    public FootstepStreamingToolboxController(CommandInputManager commandInputManager,
                                              StatusMessageOutputManager statusOutputManager,
                                              FootstepStreamingToolboxParameters parameters,
@@ -86,8 +81,6 @@ public class FootstepStreamingToolboxController extends ToolboxController
       tools = new FSTTools(commandInputManager,
                            statusOutputManager,
                            parameters,
-                           desiredFullRobotModel,
-                           fullRobotModelFactory,
                            time,
                            yoGraphicsListRegistry,
                            registry);
@@ -99,10 +92,6 @@ public class FootstepStreamingToolboxController extends ToolboxController
 
       stateMachine = createStateMachine(time);
       isDone.set(false);
-
-      // All the commands that are supported by the IK solver will automatically be forwarded to the IK solver.
-      List<Class<? extends Command<?, ?>>> ikSolverCommands = FootstepStreamingToolboxModule.supportedCommands();
-      commandTypesToForward = commandInputManager.getListOfSupportedCommands().stream().filter(ikSolverCommands::contains).toArray(Class[]::new);
    }
 
    /**
@@ -151,7 +140,6 @@ public class FootstepStreamingToolboxController extends ToolboxController
          time.set(timeProvider.getTime());
 
          tools.update();
-         forwardCommandsToIKSolver();
          stateMachine.doActionAndTransition();
       }
       catch (Throwable e)
@@ -175,33 +163,11 @@ public class FootstepStreamingToolboxController extends ToolboxController
       }
    }
 
-   @SuppressWarnings("unchecked")
-   private void forwardCommandsToIKSolver()
-   {
-      for (Class commandType : commandTypesToForward)
-      {
-         if (tools.getCommandInputManager().isNewCommandAvailable(commandType))
-         { // Forwarding commands for the IK to the IK.
-            tools.getIKCommandInputManager().submitCommands(tools.getCommandInputManager().pollNewCommands(commandType));
-         }
-      }
-   }
-
    @Override
    public void notifyToolboxStateChange(ToolboxState newState)
    {
       if (newState == ToolboxState.SLEEP)
          stateMachine.performTransition(SLEEP);
-   }
-
-   public interface FootstepStreamingMessagePublisher
-   {
-      void publish(FootstepDataMessage messageToPublish);
-   }
-
-   public void setFootstepMessagePublisher(FootstepStreamingMessagePublisher outputPublisher)
-   {
-      tools.setFootstepMessagerPublisher(outputPublisher);
    }
 
    @Override
