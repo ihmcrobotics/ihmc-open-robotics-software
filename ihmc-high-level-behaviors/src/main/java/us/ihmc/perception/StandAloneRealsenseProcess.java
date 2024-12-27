@@ -6,7 +6,6 @@ import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros2.ROS2DemandGraphNode;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
@@ -34,7 +33,6 @@ public class StandAloneRealsenseProcess
    private ImageSensorPublishThread d455PublishThread;
 
    private final ROS2DemandGraphNode heightMapDemandNode;
-   private final OpenCLManager openCLManager = new OpenCLManager();
 
    public StandAloneRealsenseProcess(ROS2Node ros2Node, ROS2Helper ros2Helper, ROS2SyncedRobotModel syncedRobot)
    {
