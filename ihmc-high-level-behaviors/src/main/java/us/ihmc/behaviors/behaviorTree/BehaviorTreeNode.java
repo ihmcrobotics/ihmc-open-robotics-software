@@ -12,23 +12,26 @@ import java.util.List;
  * - Graphical user interface
  *
  * A node has a list of children and a reference to the parent.
+ *
+ * @param <LT> The generic type of this node layer: UI, Executor, State, or Definition
  */
-public interface BehaviorTreeNode<T extends BehaviorTreeNode<T>>
+public interface BehaviorTreeNode<LT extends BehaviorTreeNode<LT>>
 {
    /**
     * @return The node's children in order
     */
-   List<T> getChildren();
+   List<LT> getChildren();
 
    /**
     * @param parent Sets the parent node or null if this is the root node
     */
-   void setParent(@Nullable T parent);
+   void setParent(@Nullable LT parent);
 
    /**
     * @return The parent node or null if this is the root node
     */
-   @Nullable T getParent();
+   @Nullable
+   LT getParent();
 
    default boolean isRootNode()
    {
