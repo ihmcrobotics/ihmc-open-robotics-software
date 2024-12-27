@@ -29,6 +29,8 @@ public class RDXVRFootstepStreaming
    private final ROS2SyncedRobotModel syncedRobot;
    private final RDXManualFootstepPlacement footstepPlacer;
    private final SideDependentList<ReferenceFrame> ankleTrackerFrames = new SideDependentList<>();
+   private final SideDependentList<SpatialVector> ankleTrackerVelocities = new SideDependentList<>();
+   private final SideDependentList<Long> ankleTrackerTimestamps = new SideDependentList<>();
    private final Notification readyToStep = new Notification();
    private boolean wasEnabled = false;
 
@@ -62,7 +64,7 @@ public class RDXVRFootstepStreaming
             if (ankleTrackerFrames.get(side) != null)
             {
                FootstepStreamingToolboxInputMessage toolboxInputMessage = new FootstepStreamingToolboxInputMessage();
-               toolboxInputMessage.setTimestamp();
+               toolboxInputMessage.setTimestamp(ankleTrackerTimestamps.get(side));
                toolboxInputMessage.setSide(side.toByte());
                RigidBodyTransform currentRobotFootTransformInWorld = new RigidBodyTransform(syncedRobot.getReferenceFrames().getSoleFrame(side).getTransformToWorldFrame());
                toolboxInputMessage.getRobotFootPositionInWorld().set(currentRobotFootTransformInWorld.getTranslation());
@@ -72,7 +74,10 @@ public class RDXVRFootstepStreaming
                ankleTrackerFrames.get(side).getTransformToWorldFrame().transform(currentTrackerTransform);
                toolboxInputMessage.getCurrentPositionInWorld().set(currentTrackerTransform.getTranslation());
                toolboxInputMessage.getCurrentOrientationInWorld().set(currentTrackerTransform.getRotation());
+
                toolboxInputMessage.setHasCurrentVelocity(true);
+               toolboxInputMessage.getCurrentLinearVelocityInWorld().set(ankleTrackerVelocities.get(side).getLinearPart());
+               toolboxInputMessage.getCurrentAngularVelocityInWorld().set(ankleTrackerVelocities.get(side).getAngularPart());
 
                ros2Helper.publish(FootstepStreamingToolboxModule.getInputCommandTopic(syncedRobot.getRobotModel().getSimpleRobotName()), toolboxInputMessage);
             }
@@ -127,6 +132,11 @@ public class RDXVRFootstepStreaming
    public void setTrackerVelocity(RobotSide side, SpatialVector velocity)
    {
       ankleTrackerVelocities.put(side, velocity);
+   }
+
+   public void setTrackerTimestamp(RobotSide side, long time)
+   {
+      ankleTrackerTimestamps.put(side, time);
    }
 
    public void reset()

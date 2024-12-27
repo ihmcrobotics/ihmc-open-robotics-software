@@ -105,135 +105,129 @@ public class FSTStreamingState implements State
       if (latestInput != null)
       {
          RobotSide side = latestInput.getSide();
-         // keep reading input, here we need the current robot  adn tracker poses from latest input
-         ReferenceFrame trackerFrame = ankleTrackerFrames.get(side);
-         if (trackerFrame != null)
+         RigidBodyTransform currentTrackerTransform =  new RigidBodyTransform(latestInput.getCurrentPose());
+         RigidBodyTransform initialTrackerTransform = initialTrackersTransform.get(side);
+
+         if (!isUserStepping.get(side))
          {
-            RigidBodyTransform currentTrackerTransform = new RigidBodyTransform();
-            trackerFrame.getTransformToWorldFrame().transform(currentTrackerTransform);
-            RigidBodyTransform initialTrackerTransform = initialTrackersTransform.get(side);
-
-            if (!isUserStepping.get(side))
+            if (initialTrackerTransform == null)
             {
-               if (initialTrackerTransform == null)
-               {
-                  initialTrackersTransform.put(side, new RigidBodyTransform(currentTrackerTransform));
-                  previousTrackersTransform.put(side, new RigidBodyTransform(currentTrackerTransform));
-               }
-
-               Vector3D translation = new Vector3D();
-               translation.sub(currentTrackerTransform.getTranslation(), initialTrackerTransform.getTranslation());
-               FrameVector2D translationXY = new FrameVector2D(ReferenceFrame.getWorldFrame(), translation.getX(), translation.getY());
-               // Check if the tracker has moved in any direction AND the foot has been lifted
-               if (translationXY.norm() >= defaultStepThreshold.getDoubleValue() && translation.getZ() >= defaultLiftThreshold.getDoubleValue())
-               {
-                  // Get the current robot foot position in world
-                  RigidBodyTransform footstepTransformInWorld = new RigidBodyTransform(latestInput.getRobotFootPose());
-
-                  FramePoint2D initialXY = new FramePoint2D(ReferenceFrame.getWorldFrame(),
-                                                            footstepTransformInWorld.getTranslation().getX(),
-                                                            footstepTransformInWorld.getTranslation().getY());
-                  initialFootstepTransformsInWorld.put(side, footstepTransformInWorld);
-                  // Normalize the translation direction to have a fixed stride distance
-                  translationXY.normalize();
-                  // Scale the normalized direction to the fixed stride distance
-                  translationXY.scale(defaultStrideLength.getDoubleValue());
-                  // Apply the translation to the current robot foot position
-                  FramePoint2D predictedXY = new FramePoint2D(initialXY);
-                  predictedXY.add(translationXY);
-                  footstepTransformInWorld.getTranslation().setX(predictedXY.getX());
-                  footstepTransformInWorld.getTranslation().setY(predictedXY.getY());
-                  // Compute yaw variation
-                  double newYaw = footstepTransformInWorld.getRotation().getYaw();
-                  double yawVariation = currentTrackerTransform.getRotation().getYaw() - initialTrackerTransform.getRotation().getYaw();
-                  if (Math.toDegrees(yawVariation) >= defaultTurningThreshold.getDoubleValue())
-                  {
-                     newYaw += Math.toRadians(defaultTurnDegrees.getDoubleValue());
-                  }
-                  else if (Math.toDegrees(yawVariation) <= -defaultTurningThreshold.getDoubleValue())
-                  {
-                     newYaw -= Math.toRadians(defaultTurnDegrees.getDoubleValue());
-                  }
-                  // Update yaw of footstep
-                  footstepTransformInWorld.getRotation()
-                                          .setYawPitchRoll(newYaw,
-                                                           footstepTransformInWorld.getRotation().getPitch(),
-                                                           footstepTransformInWorld.getRotation().getRoll());
-
-                  // Publish footstep to UI
-
-                  isUserStepping.put(side, true);
-               }
+               initialTrackersTransform.put(side, new RigidBodyTransform(currentTrackerTransform));
+               previousTrackersTransform.put(side, new RigidBodyTransform(currentTrackerTransform));
             }
-            else // Already stepping: continuously update footstep direction
+
+            Vector3D translation = new Vector3D();
+            translation.sub(currentTrackerTransform.getTranslation(), initialTrackerTransform.getTranslation());
+            FrameVector2D translationXY = new FrameVector2D(ReferenceFrame.getWorldFrame(), translation.getX(), translation.getY());
+            // Check if the tracker has moved in any direction AND the foot has been lifted
+            if (translationXY.norm() >= defaultStepThreshold.getDoubleValue() && translation.getZ() >= defaultLiftThreshold.getDoubleValue())
             {
-               if (initialTrackerTransform != null)
+               // Get the current robot foot position in world
+               RigidBodyTransform footstepTransformInWorld = new RigidBodyTransform(latestInput.getRobotFootPose());
+
+               FramePoint2D initialXY = new FramePoint2D(ReferenceFrame.getWorldFrame(),
+                                                         footstepTransformInWorld.getTranslation().getX(),
+                                                         footstepTransformInWorld.getTranslation().getY());
+               initialFootstepTransformsInWorld.put(side, footstepTransformInWorld);
+               // Normalize the translation direction to have a fixed stride distance
+               translationXY.normalize();
+               // Scale the normalized direction to the fixed stride distance
+               translationXY.scale(defaultStrideLength.getDoubleValue());
+               // Apply the translation to the current robot foot position
+               FramePoint2D predictedXY = new FramePoint2D(initialXY);
+               predictedXY.add(translationXY);
+               footstepTransformInWorld.getTranslation().setX(predictedXY.getX());
+               footstepTransformInWorld.getTranslation().setY(predictedXY.getY());
+               // Compute yaw variation
+               double newYaw = footstepTransformInWorld.getRotation().getYaw();
+               double yawVariation = currentTrackerTransform.getRotation().getYaw() - initialTrackerTransform.getRotation().getYaw();
+               if (Math.toDegrees(yawVariation) >= defaultTurningThreshold.getDoubleValue())
                {
-                  // Check if tracker is not moving much anymore
-                  Vector3D translationFromInitialPosition = new Vector3D();
-                  translationFromInitialPosition.sub(currentTrackerTransform.getTranslation(), previousTrackersTransform.get(side).getTranslation());
-
-                  // If the tacker is not moving much, then start counting for stability
-                  if (translationFromInitialPosition.norm() <= defaultStabilityThreshold.getDoubleValue())
-                  {
-                     int stableCount = stableIterationCounts.get(side);
-                     stableCount++;
-                     stableIterationCounts.put(side, stableCount);
-
-                     if (stableCount >= defaultStabilityIterations.getIntegerValue())
-                     {
-                        isUserStepping.put(side, false);
-                        initialTrackersTransform.put(side, new RigidBodyTransform(currentTrackerTransform));
-                        stableIterationCounts.put(side, 0);
-                     }
-                  }
-                  else  // Still moving
-                  {
-                     stableIterationCounts.put(side, 0); // reset stability count
-                     // Only update direction if acceleration is not too small
-                     //                     if (accelerationMag > ACCELERATION_THRESHOLD)
-                     //                     {
-                     //                        // Compute current direction from ankle movement
-                     //                        Vector3D translation = new Vector3D();
-                     //                        translation.sub(currentTrackerTransform.getTranslation(), initialTrackerTransform.getTranslation());
-                     //                        FrameVector2D directionDesired = new FrameVector2D(ReferenceFrame.getWorldFrame(), translation.getX(), translation.getY());
-                     //                        directionDesired.normalize();
-                     //                     }
-                     //                     else
-                     //                     {
-                     //                        // If acceleration is very low, do not update direction any further.
-                     //                        // Just keep the desired direction as is.
-                     //                     }
-                     //
-                     //                     // P-control: error = desired_direction - current_controlled_direction
-                     //                     FrameVector2D directionCtrl = directionsCtrl.get(side);
-                     //                     FrameVector2D directionError = new FrameVector2D(directionDesired);
-                     //                     directionError.sub(directionCtrl);
-                     //
-                     //                     // Update the controlled direction based on error
-                     //                     directionCtrl.addX(KP_DIRECTION * directionError.getX());
-                     //                     directionCtrl.addY(KP_DIRECTION * directionError.getY());
-                     //
-                     //                     // Re-normalize direction
-                     //                     directionCtrl.normalize();
-                     //                     directionsCtrl.put(side, new FrameVector2D(directionCtrl));
-                     //
-                     //                     // Predict new footstep position
-                     //                     RigidBodyTransform footstepTransformInWorld = new RigidBodyTransform(initialFootstepTransformsInWorld.get(side));
-                     //                     FramePoint2D initialXY = new FramePoint2D(ReferenceFrame.getWorldFrame(),
-                     //                                                                        footstepTransformInWorld.getTranslation().getX(),
-                     //                                                                        footstepTransformInWorld.getTranslation().getY());
-                     //
-                     //                     FramePoint2D predictedXY = new FramePoint2D(initialXY);
-                     //                     predictedXY.add(directionCtrl.getX() * STRIDE_LENGTH, directionCtrl.getY() * STRIDE_LENGTH);
-                     //
-                     //                     footstepTransformInWorld.getTranslation().setX(predictedXY.getX());
-                     //                     footstepTransformInWorld.getTranslation().setY(predictedXY.getY());
-                  }
-
-                  // Update the previous tracker position for the next iteration
-                  previousTrackersTransform.put(side, new RigidBodyTransform(currentTrackerTransform));
+                  newYaw += Math.toRadians(defaultTurnDegrees.getDoubleValue());
                }
+               else if (Math.toDegrees(yawVariation) <= -defaultTurningThreshold.getDoubleValue())
+               {
+                  newYaw -= Math.toRadians(defaultTurnDegrees.getDoubleValue());
+               }
+               // Update yaw of footstep
+               footstepTransformInWorld.getRotation()
+                                       .setYawPitchRoll(newYaw,
+                                                        footstepTransformInWorld.getRotation().getPitch(),
+                                                        footstepTransformInWorld.getRotation().getRoll());
+
+               // Publish footstep to UI
+
+               isUserStepping.put(side, true);
+            }
+         }
+         else // Already stepping: continuously update footstep direction
+         {
+            if (initialTrackerTransform != null)
+            {
+               // Check if tracker is not moving much anymore
+               Vector3D translationFromInitialPosition = new Vector3D();
+               translationFromInitialPosition.sub(currentTrackerTransform.getTranslation(), previousTrackersTransform.get(side).getTranslation());
+
+               // If the tacker is not moving much, then start counting for stability
+               if (translationFromInitialPosition.norm() <= defaultStabilityThreshold.getDoubleValue())
+               {
+                  int stableCount = stableIterationCounts.get(side);
+                  stableCount++;
+                  stableIterationCounts.put(side, stableCount);
+
+                  if (stableCount >= defaultStabilityIterations.getIntegerValue())
+                  {
+                     isUserStepping.put(side, false);
+                     initialTrackersTransform.put(side, new RigidBodyTransform(currentTrackerTransform));
+                     stableIterationCounts.put(side, 0);
+                  }
+               }
+               else  // Still moving
+               {
+                  stableIterationCounts.put(side, 0); // reset stability count
+                  // Only update direction if acceleration is not too small
+                  //                     if (accelerationMag > ACCELERATION_THRESHOLD)
+                  //                     {
+                  //                        // Compute current direction from ankle movement
+                  //                        Vector3D translation = new Vector3D();
+                  //                        translation.sub(currentTrackerTransform.getTranslation(), initialTrackerTransform.getTranslation());
+                  //                        FrameVector2D directionDesired = new FrameVector2D(ReferenceFrame.getWorldFrame(), translation.getX(), translation.getY());
+                  //                        directionDesired.normalize();
+                  //                     }
+                  //                     else
+                  //                     {
+                  //                        // If acceleration is very low, do not update direction any further.
+                  //                        // Just keep the desired direction as is.
+                  //                     }
+                  //
+                  //                     // P-control: error = desired_direction - current_controlled_direction
+                  //                     FrameVector2D directionCtrl = directionsCtrl.get(side);
+                  //                     FrameVector2D directionError = new FrameVector2D(directionDesired);
+                  //                     directionError.sub(directionCtrl);
+                  //
+                  //                     // Update the controlled direction based on error
+                  //                     directionCtrl.addX(KP_DIRECTION * directionError.getX());
+                  //                     directionCtrl.addY(KP_DIRECTION * directionError.getY());
+                  //
+                  //                     // Re-normalize direction
+                  //                     directionCtrl.normalize();
+                  //                     directionsCtrl.put(side, new FrameVector2D(directionCtrl));
+                  //
+                  //                     // Predict new footstep position
+                  //                     RigidBodyTransform footstepTransformInWorld = new RigidBodyTransform(initialFootstepTransformsInWorld.get(side));
+                  //                     FramePoint2D initialXY = new FramePoint2D(ReferenceFrame.getWorldFrame(),
+                  //                                                                        footstepTransformInWorld.getTranslation().getX(),
+                  //                                                                        footstepTransformInWorld.getTranslation().getY());
+                  //
+                  //                     FramePoint2D predictedXY = new FramePoint2D(initialXY);
+                  //                     predictedXY.add(directionCtrl.getX() * STRIDE_LENGTH, directionCtrl.getY() * STRIDE_LENGTH);
+                  //
+                  //                     footstepTransformInWorld.getTranslation().setX(predictedXY.getX());
+                  //                     footstepTransformInWorld.getTranslation().setY(predictedXY.getY());
+               }
+
+               // Update the previous tracker position for the next iteration
+               previousTrackersTransform.put(side, new RigidBodyTransform(currentTrackerTransform));
             }
          }
       }

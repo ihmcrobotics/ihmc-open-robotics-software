@@ -39,6 +39,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.motionRetargeting.RetargetingParameters;
 import us.ihmc.motionRetargeting.VRTrackedSegmentType;
 import us.ihmc.perception.sceneGraph.SceneGraph;
@@ -403,6 +404,16 @@ public class RDXVRKinematicsStreamingMode
                      trackerDesiredControlFrame.getTransformToParent().appendOrientation(retargetingParameters.getYawPitchRollFromTracker(segmentType));
                      trackerDesiredControlFrame.getReferenceFrame().update();
                      trackerReferenceFrames.put(segmentType.getSegmentName(), trackerDesiredControlFrame);
+
+                     if (segmentType.isFootRelated())
+                     {
+                        footstepStreaming.setTrackerReference(segmentType.getSegmentSide(), trackerDesiredControlFrame.getReferenceFrame());
+                        footstepStreaming.setTrackerVelocity(segmentType.getSegmentSide(),
+                                                             new SpatialVector(ReferenceFrame.getWorldFrame(),
+                                                                               tracker.getAngularVelocity(),
+                                                                               tracker.getLinearVelocity()));
+                        footstepStreaming.setTrackerTimestamp(segmentType.getSegmentSide(), tracker.getLastPollTimeNanos());
+                     }
                   }
                   if (!trackerFrameGraphics.containsKey(segmentType.getSegmentName()))
                   {
@@ -411,6 +422,7 @@ public class RDXVRKinematicsStreamingMode
                   }
                   trackerFrameGraphics.get(segmentType.getSegmentName())
                                       .setToReferenceFrame(trackerReferenceFrames.get(segmentType.getSegmentName()).getReferenceFrame());
+
                   if (motionRetargeting.isRetargetingNotNeeded(segmentType))
                   {
                      RigidBodyBasics controlledSegment = getControlledSegment(segmentType);
@@ -431,10 +443,6 @@ public class RDXVRKinematicsStreamingMode
                      }
                   }
                });
-               if (segmentType.isFootRelated())
-               {
-                  footstepStreaming.setTrackerReference(segmentType.getSegmentSide(), trackerReferenceFrames.get(segmentType.getSegmentName()).getReferenceFrame());
-               }
             }
          }
          // ---------- end VR Trackers ------------
