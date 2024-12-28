@@ -111,6 +111,9 @@ public class ROS2BehaviorTreeSubscription<HLT extends BehaviorTreeNodeHighLayer<
                   topologyOperationQueue.queueSetAndModifyRootNode(rootNode, rootNodeSetter, behaviorTreeState.getRootReferenceModification());
                }
 
+               if (rootNode != null)
+                  idToLocalNodesMap.remove(rootNode.getState().getID());
+
                if (rootNode != null && !subscriptionRootIsNull)
                   retrieveOrReplicateSubreeFromSubscription(subscriptionRootNode, rootNode, topologyOperationQueue);
 
@@ -127,8 +130,6 @@ public class ROS2BehaviorTreeSubscription<HLT extends BehaviorTreeNodeHighLayer<
                                                           HLT localNode,
                                                           BehaviorTreeTopologyOperationQueue<HLT> topologyOperationQueue)
    {
-      idToLocalNodesMap.remove(localNode.getState().getID()); // Remove IDs as we traverse the tree
-
       // Update the node first, to detect incoming modifications
       ROS2BehaviorTreeMessageTools.fromMessage(subscriptionNode, localNode.getState());
 
@@ -141,15 +142,17 @@ public class ROS2BehaviorTreeSubscription<HLT extends BehaviorTreeNodeHighLayer<
             HLT localChildNode = retrieveOrReplicateLocalNode(subscriptionChild, true);
             topologyOperationQueue.queueAddNode(localChildNode, localNode);
             retrieveOrReplicateSubreeFromSubscription(subscriptionChild, localChildNode, topologyOperationQueue);
+            idToLocalNodesMap.remove(localChildNode.getState().getID());
          }
       }
       else
       {
-         for (HLT localChild : localNode.getChildren())
+         for (HLT localChildNode : localNode.getChildren())
          {
-            ROS2BehaviorTreeSubscriptionNode subscriptionChild = idToSubscriptionNodesMap.get(localChild.getState().getID());
+            ROS2BehaviorTreeSubscriptionNode subscriptionChild = idToSubscriptionNodesMap.get(localChildNode.getState().getID());
             if (subscriptionChild != null)
-               retrieveOrReplicateSubreeFromSubscription(subscriptionChild, localChild, topologyOperationQueue);
+               retrieveOrReplicateSubreeFromSubscription(subscriptionChild, localChildNode, topologyOperationQueue);
+            idToLocalNodesMap.remove(localChildNode.getState().getID());
          }
       }
    }
