@@ -18,25 +18,25 @@ import java.nio.file.Path;
  */
 public class BehaviorTreeFileLoader<HLT extends BehaviorTreeNodeHighLayer<HLT, ? ,?>>
 {
-   private final BehaviorTreeState behaviorTreeState;
-   private final BehaviorTreeNodeStateBuilder<HLT> nodeBuilder;
+   private final BehaviorTree<HLT> behaviorTree;
+   private final BehaviorTreeNodeHighLayerBuilder<HLT> nodeBuilder;
    private final WorkspaceResourceDirectory treeFilesDirectory;
 
-   public BehaviorTreeFileLoader(BehaviorTreeState behaviorTreeState,
-                                 BehaviorTreeNodeStateBuilder<HLT> nodeBuilder,
+   public BehaviorTreeFileLoader(BehaviorTree<HLT> behaviorTree,
+                                 BehaviorTreeNodeHighLayerBuilder<HLT> nodeBuilder,
                                  WorkspaceResourceDirectory treeFilesDirectory)
    {
-      this.behaviorTreeState = behaviorTreeState;
+      this.behaviorTree = behaviorTree;
       this.nodeBuilder = nodeBuilder;
       this.treeFilesDirectory = treeFilesDirectory;
    }
 
-   public HLT loadFromFile(WorkspaceResourceFile file, BehaviorTreeTopologyOperationQueue topologyOperationQueue)
+   public HLT loadFromFile(WorkspaceResourceFile file, BehaviorTreeTopologyOperationQueue<HLT> topologyOperationQueue)
    {
       return loadFromFile(file, null, null, topologyOperationQueue);
    }
 
-   private HLT loadFromFile(WorkspaceResourceFile file, JsonNode jsonNode, HLT parentNode, BehaviorTreeTopologyOperationQueue topologyOperationQueue)
+   private HLT loadFromFile(WorkspaceResourceFile file, JsonNode jsonNode, HLT parentNode, BehaviorTreeTopologyOperationQueue<HLT> topologyOperationQueue)
    {
       MutableObject<HLT> loadedNode = new MutableObject<>();
 
@@ -77,9 +77,9 @@ public class BehaviorTreeFileLoader<HLT extends BehaviorTreeNodeHighLayer<HLT, ?
          String typeName = jsonNode.get("type").textValue();
 
          HLT node = nodeBuilder.createNode(BehaviorTreeDefinitionRegistry.getClassFromTypeName(typeName),
-                                           behaviorTreeState.getAndIncrementNextID(),
-                                           behaviorTreeState.getCRDTInfo(),
-                                           behaviorTreeState.getSaveFileDirectory());
+                                           behaviorTree.getAndIncrementNextID(),
+                                           behaviorTree.getCRDTInfo(),
+                                           behaviorTree.getSaveFileDirectory());
          node.getDefinition().loadFromFile(jsonNode);
 
          // Make sure the node is named the same as the file including subdirectory

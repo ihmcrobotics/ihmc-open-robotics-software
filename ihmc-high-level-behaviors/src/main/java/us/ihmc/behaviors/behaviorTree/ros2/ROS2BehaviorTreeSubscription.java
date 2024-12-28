@@ -2,8 +2,8 @@ package us.ihmc.behaviors.behaviorTree.ros2;
 
 import behavior_msgs.msg.dds.*;
 import org.apache.commons.lang3.mutable.MutableInt;
+import us.ihmc.behaviors.behaviorTree.BehaviorTree;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeHighLayer;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
 import us.ihmc.commons.thread.Notification;
@@ -24,7 +24,7 @@ public class ROS2BehaviorTreeSubscription<HLT extends BehaviorTreeNodeHighLayer<
 {
    private final ROS2Topic<BehaviorTreeStateMessage> topic;
    private final ArrayList<Runnable> messageRecievedCallbacks = new ArrayList<>();
-   private final BehaviorTreeState<HLT> behaviorTreeState;
+   private final BehaviorTree<HLT> behaviorTree;
    private final Consumer<HLT> rootNodeSetter;
    private long numberOfMessagesReceived = 0;
    private long previousSequenceID = -1;
@@ -38,14 +38,14 @@ public class ROS2BehaviorTreeSubscription<HLT extends BehaviorTreeNodeHighLayer<
    private final MutableInt subscriptionNodeDepthFirstIndex = new MutableInt();
    private final HashMap<Long, HLT> idToLocalNodesMap = new HashMap<>();
 
-   public ROS2BehaviorTreeSubscription(BehaviorTreeState<HLT> behaviorTreeState,
+   public ROS2BehaviorTreeSubscription(BehaviorTree<HLT> behaviorTree,
                                        Consumer<HLT> rootNodeSetter,
                                        ROS2PublishSubscribeAPI ros2PublishSubscribeAPI)
    {
-      this.behaviorTreeState = behaviorTreeState;
+      this.behaviorTree = behaviorTree;
       this.rootNodeSetter = rootNodeSetter;
 
-      topic = AutonomyAPI.BEAVIOR_TREE.getTopic(behaviorTreeState.getCRDTInfo().getActorDesignation().getIncomingQualifier());
+      topic = AutonomyAPI.BEAVIOR_TREE.getTopic(behaviorTree.getCRDTInfo().getActorDesignation().getIncomingQualifier());
       behaviorTreeStateMessageSwapReference = ros2PublishSubscribeAPI.subscribeViaSwapReference(topic, behaviorTreeStateMessage ->
       {
          ++numberOfMessagesReceived;
@@ -58,7 +58,7 @@ public class ROS2BehaviorTreeSubscription<HLT extends BehaviorTreeNodeHighLayer<
          long expectedSequenceID = previousSequenceID + 1;
          long difference = receivedSequenceID - expectedSequenceID;
 
-         if (Math.abs(difference) < ROS2BehaviorTreeState.SYNC_FREQUENCY) // Account for restarts
+         if (Math.abs(difference) < ROS2BehaviorTree.SYNC_FREQUENCY) // Account for restarts
          {
             if (difference > 0)
             {
@@ -93,22 +93,22 @@ public class ROS2BehaviorTreeSubscription<HLT extends BehaviorTreeNodeHighLayer<
             if (!subscriptionRootIsNull)
                buildSubscriptionTree(behaviorTreeStateMessage, subscriptionRootNode);
 
-            behaviorTreeState.fromMessage(behaviorTreeStateMessage);
+            behaviorTree.fromMessage(behaviorTreeStateMessage);
 
             idToLocalNodesMap.clear();
-            if (behaviorTreeState.getRootNode() != null)
-               BehaviorTreeTools.runForSubtreeNodes(behaviorTreeState.getRootNode(),
+            if (behaviorTree.getRootNode() != null)
+               BehaviorTreeTools.runForSubtreeNodes(behaviorTree.getRootNode(),
                                                     node -> idToLocalNodesMap.put(node.getState().getID(), node));
 
-            behaviorTreeState.modifyTreeTopology(topologyOperationQueue ->
+            behaviorTree.modifyTreeTopology(topologyOperationQueue ->
             {
-               HLT rootNode = behaviorTreeState.getRootNode();
+               HLT rootNode = behaviorTree.getRootNode();
 
-               boolean rootReferenceModificationIncoming = behaviorTreeState.getRootReferenceModification().isModificationIncoming();
+               boolean rootReferenceModificationIncoming = behaviorTree.getRootReferenceModification().isModificationIncoming();
                if (rootReferenceModificationIncoming)
                {
                   rootNode = subscriptionRootIsNull ? null : retrieveOrReplicateLocalNode(subscriptionRootNode, rootReferenceModificationIncoming);
-                  topologyOperationQueue.queueSetAndModifyRootNode(rootNode, rootNodeSetter, behaviorTreeState.getRootReferenceModification());
+                  topologyOperationQueue.queueSetAndModifyRootNode(rootNode, rootNodeSetter, behaviorTree.getRootReferenceModification());
                }
 
                if (rootNode != null)
@@ -167,11 +167,11 @@ public class ROS2BehaviorTreeSubscription<HLT extends BehaviorTreeNodeHighLayer<
                subscriptionNode.getBehaviorTreeNodeDefinitionMessage().getName(),
                nodeID,
                subscriptionNode.getType().getSimpleName(),
-               behaviorTreeState.getCRDTInfo().getActorDesignation().name()));
-         localNode = behaviorTreeState.getNodeStateBuilder().createNode(subscriptionNode.getType(),
-                                                                        nodeID,
-                                                                        behaviorTreeState.getCRDTInfo(),
-                                                                        behaviorTreeState.getSaveFileDirectory());
+               behaviorTree.getCRDTInfo().getActorDesignation().name()));
+         localNode = behaviorTree.getNodeBuilder().createNode(subscriptionNode.getType(),
+                                                              nodeID,
+                                                              behaviorTree.getCRDTInfo(),
+                                                              behaviorTree.getSaveFileDirectory());
       }
 
       return localNode;

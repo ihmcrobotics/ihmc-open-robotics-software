@@ -25,7 +25,7 @@ public class ROS2BehaviorTreeUpdateThread extends RepeatingTaskThread
                                        DetectionManager detectionManager)
    {
       super(ROS2BehaviorTreeUpdateThread.class.getSimpleName());
-      setFrequencyLimit(ROS2BehaviorTreeState.SYNC_FREQUENCY);
+      setFrequencyLimit(ROS2BehaviorTree.SYNC_FREQUENCY);
 
       ROS2ControllerHelper ros2ControllerHelper = new ROS2ControllerHelper(ros2Node, robotModel);
       syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2ControllerHelper.getROS2Node());

@@ -1,34 +1,34 @@
 package us.ihmc.behaviors.behaviorTree.ros2;
 
 import behavior_msgs.msg.dds.BehaviorTreeStateMessage;
+import us.ihmc.behaviors.behaviorTree.BehaviorTree;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeHighLayer;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
 import us.ihmc.communication.AutonomyAPI;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.ros2.ROS2Topic;
 
 public class ROS2BehaviorTreePublisher
 {
-   private final BehaviorTreeState behaviorTreeState;
+   private final BehaviorTree behaviorTree;
    private final ROS2PublishSubscribeAPI ros2PublishSubscribeAPI;
    private final BehaviorTreeStateMessage behaviorTreeMessage = new BehaviorTreeStateMessage();
    private final ROS2Topic<BehaviorTreeStateMessage> topic;
 
-   public ROS2BehaviorTreePublisher(BehaviorTreeState behaviorTreeState, ROS2PublishSubscribeAPI ros2PublishSubscribeAPI)
+   public ROS2BehaviorTreePublisher(BehaviorTree behaviorTree, ROS2PublishSubscribeAPI ros2PublishSubscribeAPI)
    {
-      this.behaviorTreeState = behaviorTreeState;
+      this.behaviorTree = behaviorTree;
       this.ros2PublishSubscribeAPI = ros2PublishSubscribeAPI;
 
-      topic = AutonomyAPI.BEAVIOR_TREE.getTopic(behaviorTreeState.getCRDTInfo().getActorDesignation().getOutgoingQualifier());
+      topic = AutonomyAPI.BEAVIOR_TREE.getTopic(behaviorTree.getCRDTInfo().getActorDesignation().getOutgoingQualifier());
    }
 
    public void publish()
    {
-      behaviorTreeState.toMessage(behaviorTreeMessage);
+      behaviorTree.toMessage(behaviorTreeMessage);
       ROS2BehaviorTreeMessageTools.clearLists(behaviorTreeMessage);
 
-      BehaviorTreeNodeHighLayer<?, ?, ?> rootNode = behaviorTreeState.getRootNode();
+      BehaviorTreeNodeHighLayer<?, ?, ?> rootNode = behaviorTree.getRootNode();
       if (rootNode != null)
       {
          packTreeToMessage(rootNode.getState());

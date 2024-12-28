@@ -21,7 +21,7 @@ import java.util.function.Consumer;
 public class RDXAvailableBehaviorTreeDirectory
 {
    private final WorkspaceResourceDirectory treeFilesDirectory;
-   private final RDXBehaviorTree tree;
+   private final RDXBehaviorTree behaviorTree;
    private final BehaviorTreeTopologyOperationQueue<RDXBehaviorTreeNode<?, ?>> topologyOperationQueue;
    private final ReferenceFrameLibrary referenceFrameLibrary;
    private final Consumer<BehaviorTreeNodeInsertionDefinition<RDXBehaviorTreeNode<?, ?>>> complete;
@@ -32,13 +32,13 @@ public class RDXAvailableBehaviorTreeDirectory
    private final List<RDXAvailableBehaviorTreeDirectory> indexedTreeDirectories = new ArrayList<>();
 
    public RDXAvailableBehaviorTreeDirectory(WorkspaceResourceDirectory treeFilesDirectory,
-                                            RDXBehaviorTree tree,
+                                            RDXBehaviorTree behaviorTree,
                                             BehaviorTreeTopologyOperationQueue<RDXBehaviorTreeNode<?, ?>> topologyOperationQueue,
                                             ReferenceFrameLibrary referenceFrameLibrary,
                                             Consumer<BehaviorTreeNodeInsertionDefinition<RDXBehaviorTreeNode<?, ?>>> complete)
    {
       this.treeFilesDirectory = treeFilesDirectory;
-      this.tree = tree;
+      this.behaviorTree = behaviorTree;
       this.topologyOperationQueue = topologyOperationQueue;
       this.referenceFrameLibrary = referenceFrameLibrary;
       this.complete = complete;
@@ -65,8 +65,7 @@ public class RDXAvailableBehaviorTreeDirectory
       }
       for (WorkspaceResourceDirectory subdirectory : treeFilesDirectory.queryContainedDirectories())
       {
-         RDXAvailableBehaviorTreeDirectory subtreeDirectory = new RDXAvailableBehaviorTreeDirectory(subdirectory,
-                                                                                                    tree,
+         RDXAvailableBehaviorTreeDirectory subtreeDirectory = new RDXAvailableBehaviorTreeDirectory(subdirectory, behaviorTree,
                                                                                                     topologyOperationQueue,
                                                                                                     referenceFrameLibrary,
                                                                                                     complete);
@@ -118,25 +117,25 @@ public class RDXAvailableBehaviorTreeDirectory
             {
                if (ImGui.isMouseClicked(ImGuiMouseButton.Left))
                {
-                  RDXBehaviorTreeNode<?, ?> loadedNode = tree.getFileLoader().loadFromFile(indexedTreeFile.getTreeFile(), topologyOperationQueue);
+                  RDXBehaviorTreeNode<?, ?> loadedNode = behaviorTree.getFileLoader().loadFromFile(indexedTreeFile.getTreeFile(), topologyOperationQueue);
 
                   if (loadedNode != null)
                   {
                      RDXBehaviorTreeNode<?, ?> nodeToInsert = loadedNode;
 
-                     if (tree.getRootNode() == null) // Automatically add a root node if there isn't one
+                     if (behaviorTree.getRootNode() == null) // Automatically add a root node if there isn't one
                      {
-                        nodeToInsert = new RDXBehaviorTreeRootNode(tree.getBehaviorTreeState().getAndIncrementNextID(),
-                                                                   tree.getBehaviorTreeState().getCRDTInfo(),
-                                                                   tree.getBehaviorTreeState().getSaveFileDirectory());
+                        nodeToInsert = new RDXBehaviorTreeRootNode(behaviorTree.getAndIncrementNextID(),
+                                                                   behaviorTree.getCRDTInfo(),
+                                                                   behaviorTree.getSaveFileDirectory());
                         topologyOperationQueue.queueAddAndModifyNode(loadedNode, nodeToInsert);
                      }
 
                      BehaviorTreeNodeInsertionDefinition<RDXBehaviorTreeNode<?, ?>> insertionDefinition
                            = new BehaviorTreeNodeInsertionDefinition<>(nodeToInsert,
                                                                        relativeNode,
-                                                                       tree::setRootNode,
-                                                                       tree.getBehaviorTreeState().getRootReferenceModification(),
+                                                                       behaviorTree::setRootNode,
+                                                                       behaviorTree.getRootReferenceModification(),
                                                                        insertionType);
                      complete.accept(insertionDefinition);
                   }

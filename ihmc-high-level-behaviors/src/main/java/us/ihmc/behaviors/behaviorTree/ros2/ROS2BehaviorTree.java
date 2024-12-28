@@ -1,26 +1,25 @@
 package us.ihmc.behaviors.behaviorTree.ros2;
 
+import us.ihmc.behaviors.behaviorTree.BehaviorTree;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeHighLayer;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 
 import java.util.function.Consumer;
 
 /**
- * This class is concerned with syncing behavior tree state only
- * over ROS 2 nodes as a CRDT.
+ * Manages syncing a behavior tree over ROS 2 as a CRDT.
  *
  * @param <HLT> The generic type of this node high layer: RDX or Executor
  */
-public class ROS2BehaviorTreeState<HLT extends BehaviorTreeNodeHighLayer<HLT, ? ,?>>
+public class ROS2BehaviorTree<HLT extends BehaviorTreeNodeHighLayer<HLT, ? ,?>>
 {
    /**
     * The SYNC_FREQUENCY should be a multiple of the scene graph's update frequency.
     */
    public static final double SYNC_FREQUENCY = SceneGraph.UPDATE_FREQUENCY / 2.0;
 
-   private final BehaviorTreeState behaviorTreeState;
+   private final BehaviorTree<HLT> behaviorTree;
    private final ROS2BehaviorTreePublisher behaviorTreePublisher;
    private final ROS2BehaviorTreeSubscription<HLT> behaviorTreeSubscription;
 
@@ -28,14 +27,14 @@ public class ROS2BehaviorTreeState<HLT extends BehaviorTreeNodeHighLayer<HLT, ? 
     * The complexity of this constructor is to support the UI having nodes that extend the base
     * on-robot ones.
     */
-   public ROS2BehaviorTreeState(BehaviorTreeState<HLT> behaviorTreeState,
-                                Consumer<HLT> rootNodeSetter,
-                                ROS2PublishSubscribeAPI ros2PublishSubscribeAPI)
+   public ROS2BehaviorTree(BehaviorTree<HLT> behaviorTree,
+                           Consumer<HLT> rootNodeSetter,
+                           ROS2PublishSubscribeAPI ros2PublishSubscribeAPI)
    {
-      this.behaviorTreeState = behaviorTreeState;
+      this.behaviorTree = behaviorTree;
 
-      behaviorTreePublisher = new ROS2BehaviorTreePublisher(behaviorTreeState, ros2PublishSubscribeAPI);
-      behaviorTreeSubscription = new ROS2BehaviorTreeSubscription<>(behaviorTreeState, rootNodeSetter, ros2PublishSubscribeAPI);
+      behaviorTreePublisher = new ROS2BehaviorTreePublisher(behaviorTree, ros2PublishSubscribeAPI);
+      behaviorTreeSubscription = new ROS2BehaviorTreeSubscription<>(behaviorTree, rootNodeSetter, ros2PublishSubscribeAPI);
    }
 
    /**
@@ -63,7 +62,7 @@ public class ROS2BehaviorTreeState<HLT extends BehaviorTreeNodeHighLayer<HLT, ? 
 
       // We increment the CRDT update number once per publication,
       // which done at the SYNC_FREQUENCY.
-      behaviorTreeState.getCRDTInfo().startNextUpdate();
+      behaviorTree.getCRDTInfo().startNextUpdate();
    }
 
    public void destroy()
@@ -71,9 +70,9 @@ public class ROS2BehaviorTreeState<HLT extends BehaviorTreeNodeHighLayer<HLT, ? 
       behaviorTreeSubscription.destroy();
    }
 
-   public BehaviorTreeState getBehaviorTreeState()
+   public BehaviorTree<HLT> getBehaviorTree()
    {
-      return behaviorTreeState;
+      return behaviorTree;
    }
 
    public ROS2BehaviorTreeSubscription<HLT> getBehaviorTreeSubscription()
