@@ -75,8 +75,6 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
       int numberOfLocalNodes = ros2BehaviorTreeState.getBehaviorTreeState().getNumberOfNodes();
       ImGui.text("Operator: %3d  Robot: %3d".formatted(numberOfLocalNodes, ros2BehaviorTreeState.getBehaviorTreeSubscription().getNumberOfOnRobotNodes()));
 
-      ImGui.sameLine(ImGui.getWindowSizeX() - frequencyTextWidth - droppedTextWidth - rightMargin);
-      ImGui.text("State:");
 
       ImGui.sameLine(ImGui.getWindowSizeX() - frequencyTextWidth - droppedTextWidth - rightMargin);
       subscriptionFrequencyText.render();
