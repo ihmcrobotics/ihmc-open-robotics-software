@@ -35,9 +35,18 @@ public class BehaviorTreeTopologyOperationQueue<HLT extends BehaviorTreeNodeHigh
 
    public void queueInsertNode(BehaviorTreeNodeInsertionDefinition<HLT> insertionDefinition)
    {
-      queueAddAndModifyNode(insertionDefinition.getNodeToInsert(),
-                            insertionDefinition.getParent(),
-                            insertionDefinition.getInsertionIndex());
+      if (insertionDefinition.getInsertionType() == BehaviorTreeNodeInsertionType.INSERT_ROOT)
+      {
+         queueSetAndModifyRootNode(insertionDefinition.getNodeToInsert(),
+                                   insertionDefinition.getRootNodeSetter(),
+                                   insertionDefinition.getRootNodeModifiable());
+      }
+      else
+      {
+         queueAddAndModifyNode(insertionDefinition.getNodeToInsert(),
+                               insertionDefinition.getParent(),
+                               insertionDefinition.getInsertionIndex());
+      }
    }
 
    public void queueSetAndModifyRootNode(HLT node, Consumer<HLT> setter, LatestTimestampModifiable freezableRootHolder)
