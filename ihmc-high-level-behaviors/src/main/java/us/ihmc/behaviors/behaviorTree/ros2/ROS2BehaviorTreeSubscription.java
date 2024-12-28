@@ -2,8 +2,10 @@ package us.ihmc.behaviors.behaviorTree.ros2;
 
 import behavior_msgs.msg.dds.*;
 import org.apache.commons.lang3.mutable.MutableInt;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeLayer;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeHighLayer;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.AutonomyAPI;
@@ -13,15 +15,20 @@ import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.SwapReference;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.function.Consumer;
 
-@SuppressWarnings({"unchecked"}) // Sometimes in this class we need to be a little unsafe
-public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, ?, ?>>
+/**
+ * @param <HLT> The generic type of this node high layer: RDX or Executor
+ * @param <RT> The type of the root node instance.
+ */
+public class ROS2BehaviorTreeSubscription<HLT extends BehaviorTreeNodeHighLayer<HLT, ? ,?>,
+                                          RT extends BehaviorTreeRootNode<RT, HLT, ?, ?>>
 {
    private final ROS2Topic<BehaviorTreeStateMessage> topic;
    private final ArrayList<Runnable> messageRecievedCallbacks = new ArrayList<>();
-   private final BehaviorTreeState behaviorTreeState;
-   private final Consumer<T> rootNodeSetter;
+   private final BehaviorTreeState<HLT, RT> behaviorTreeState;
+   private final Consumer<RT> rootNodeSetter;
    private long numberOfMessagesReceived = 0;
    private long previousSequenceID = -1;
    private long messageDropCount = 0;
@@ -30,10 +37,12 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, 
    private final SwapReference<BehaviorTreeStateMessage> behaviorTreeStateMessageSwapReference;
    private final Notification recievedMessageNotification = new Notification();
    private final ROS2BehaviorTreeSubscriptionNode subscriptionRootNode = new ROS2BehaviorTreeSubscriptionNode();
+   private final HashMap<Long, ROS2BehaviorTreeSubscriptionNode> idToSubscriptionNodesMap = new HashMap<>();
    private final MutableInt subscriptionNodeDepthFirstIndex = new MutableInt();
+   private final HashMap<Long, HLT> idToLocalNodesMap = new HashMap<>();
 
-   public ROS2BehaviorTreeSubscription(BehaviorTreeState behaviorTreeState,
-                                       Consumer<T> rootNodeSetter,
+   public ROS2BehaviorTreeSubscription(BehaviorTreeState<HLT, RT> behaviorTreeState,
+                                       Consumer<RT> rootNodeSetter,
                                        ROS2PublishSubscribeAPI ros2PublishSubscribeAPI)
    {
       this.behaviorTreeState = behaviorTreeState;
@@ -82,82 +91,76 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, 
 
             subscriptionRootNode.clear();
             subscriptionNodeDepthFirstIndex.setValue(0);
+            idToSubscriptionNodesMap.clear();
             boolean subscriptionRootIsNull = behaviorTreeStateMessage.getBehaviorTreeTypes().isEmpty();
             if (!subscriptionRootIsNull)
                buildSubscriptionTree(behaviorTreeStateMessage, subscriptionRootNode);
 
             behaviorTreeState.fromMessage(behaviorTreeStateMessage);
 
+            idToLocalNodesMap.clear();
+            if (behaviorTreeState.getRootNode() != null)
+               BehaviorTreeTools.runForEntireTree(behaviorTreeState.getRootNode(),
+                                                  node -> idToLocalNodesMap.put(node.getState().getID(), node));
+
             behaviorTreeState.modifyTreeTopology(topologyOperationQueue ->
             {
-               T rootNode = (T) behaviorTreeState.getRootNode();
+               RT rootNode = behaviorTreeState.getRootNode();
 
-               boolean allowReplicatingRoot = behaviorTreeState.getRootReferenceModification().isModificationIncoming();
-               if (allowReplicatingRoot)
-                  rootNode = subscriptionRootIsNull ? null : retrieveOrReplicateLocalNode(subscriptionRootNode, allowReplicatingRoot);
-
-               topologyOperationQueue.queueSetRootNode(rootNode, rootNodeSetter);
-
-               if (behaviorTreeState.getRootReferenceModification().isModificationIncoming())
+               boolean rootReferenceModificationIncoming = behaviorTreeState.getRootReferenceModification().isModificationIncoming();
+               if (rootReferenceModificationIncoming)
                {
-                  if (rootNode == null)
-                  {
-                     if (!subscriptionRootIsNull) // replicate
-                     {
-                        LogTools.info("Replicating node: %s:%d (%s) Actor: %s".formatted(
-                              subscriptionNode.getBehaviorTreeNodeDefinitionMessage().getName(),
-                              nodeID,
-                              subscriptionNode.getType().getSimpleName(),
-                              behaviorTreeState.getCRDTInfo().getActorDesignation().name()));
-                        rootNode = (T) behaviorTreeState.getNodeStateBuilder()
-                                                         .createNode(subscriptionNode.getType(),
-                                                                     nodeID,
-                                                                     behaviorTreeState.getCRDTInfo(),
-                                                                     behaviorTreeState.getSaveFileDirectory());
-                     }
-                  }
-                  else
-                  {
-
-                  }
-
-                  topologyOperationQueue.queueSetRootNode(rootNode, rootNodeSetter);
+                  rootNode = subscriptionRootIsNull ? null : (RT) retrieveOrReplicateLocalNode(subscriptionRootNode, rootReferenceModificationIncoming);
+                  topologyOperationQueue.queueSetAndModifyRootNode(rootNode, rootNodeSetter, behaviorTreeState.getRootReferenceModification());
                }
 
-
                if (rootNode != null && !subscriptionRootIsNull)
-                  retrieveOrReplicateSubreeFromSubscription(subscriptionRootNode, rootNode, topologyOperationQueue);
+                  retrieveOrReplicateSubreeFromSubscription(subscriptionRootNode, (HLT) rootNode, topologyOperationQueue);
 
-               topologyOperationQueue.queueOperation(behaviorTreeState.getTreeRebuilder().getDestroyLeftoversOperation());
+               // These nodes were removed from the tree
+               for (HLT value : idToLocalNodesMap.values())
+                  value.destroy();
+               idToLocalNodesMap.clear();
             });
          }
       }
    }
 
    private void retrieveOrReplicateSubreeFromSubscription(ROS2BehaviorTreeSubscriptionNode subscriptionNode,
-                                                          T localNode,
-                                                          BehaviorTreeTopologyOperationQueue topologyOperationQueue)
+                                                          HLT localNode,
+                                                          BehaviorTreeTopologyOperationQueue<HLT, RT> topologyOperationQueue)
    {
+      idToLocalNodesMap.remove(localNode.getState().getID()); // Remove IDs as we traverse the tree
+
       // Update the node first, to detect incoming modifications
       ROS2BehaviorTreeMessageTools.fromMessage(subscriptionNode, localNode.getState());
 
-      for (int i = 0; i < subscriptionNode.getChildren().size(); i++)
+      // Traverse the latest children list
+      if (localNode.getDefinition().getChildrenModification().isModificationIncoming())
       {
-         boolean allowReplication = localNode.getDefinition().isModificationIncoming();
-         T localChildNode = (T) retrieveOrReplicateLocalNode(subscriptionNode.getChildren().get(i), allowReplication);
-
-         if (localChildNode != null)
+         topologyOperationQueue.queueClearChildren(localNode);
+         for (ROS2BehaviorTreeSubscriptionNode subscriptionChild : subscriptionNode.getChildren())
          {
+            HLT localChildNode = retrieveOrReplicateLocalNode(subscriptionChild, true);
             topologyOperationQueue.queueAddNode(localChildNode, localNode);
-            retrieveOrReplicateSubreeFromSubscription(subscriptionNode.getChildren().get(i), localChildNode, topologyOperationQueue);
+            retrieveOrReplicateSubreeFromSubscription(subscriptionChild, localChildNode, topologyOperationQueue);
+         }
+      }
+      else
+      {
+         for (HLT localChild : localNode.getChildren())
+         {
+            ROS2BehaviorTreeSubscriptionNode subscriptionChild = idToSubscriptionNodesMap.get(localChild.getState().getID());
+            if (subscriptionChild != null)
+               retrieveOrReplicateSubreeFromSubscription(subscriptionChild, localChild, topologyOperationQueue);
          }
       }
    }
 
-   private T retrieveOrReplicateLocalNode(ROS2BehaviorTreeSubscriptionNode subscriptionNode, boolean allowReplication)
+   private HLT retrieveOrReplicateLocalNode(ROS2BehaviorTreeSubscriptionNode subscriptionNode, boolean allowReplication)
    {
       long nodeID = subscriptionNode.getBehaviorTreeNodeStateMessage().getId();
-      T localNode = (T) behaviorTreeState.getTreeRebuilder().getReplacementNode(nodeID);
+      HLT localNode = idToLocalNodesMap.get(nodeID);
       if (localNode == null && allowReplication) // New node that wasn't in the local tree; duplicate of one on the other side
       {
          LogTools.info("Replicating node: %s:%d (%s) Actor: %s".formatted(
@@ -165,11 +168,10 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, 
                nodeID,
                subscriptionNode.getType().getSimpleName(),
                behaviorTreeState.getCRDTInfo().getActorDesignation().name()));
-         localNode = (T) behaviorTreeState.getNodeStateBuilder()
-                                          .createNode(subscriptionNode.getType(),
-                                                      nodeID,
-                                                      behaviorTreeState.getCRDTInfo(),
-                                                      behaviorTreeState.getSaveFileDirectory());
+         localNode = behaviorTreeState.getNodeStateBuilder().createNode(subscriptionNode.getType(),
+                                                                        nodeID,
+                                                                        behaviorTreeState.getCRDTInfo(),
+                                                                        behaviorTreeState.getSaveFileDirectory());
       }
 
       return localNode;
@@ -183,6 +185,8 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, 
       subscriptionNode.setType(nodeType);
 
       ROS2BehaviorTreeMessageTools.packSubscriptionNode(nodeType, indexInTypesList, behaviorTreeStateMessage, subscriptionNode);
+
+      idToSubscriptionNodesMap.put(subscriptionNode.getBehaviorTreeNodeStateMessage().getId(), subscriptionNode);
 
       for (int i = 0; i < subscriptionNode.getBehaviorTreeNodeDefinitionMessage().getNumberOfChildren(); i++)
       {

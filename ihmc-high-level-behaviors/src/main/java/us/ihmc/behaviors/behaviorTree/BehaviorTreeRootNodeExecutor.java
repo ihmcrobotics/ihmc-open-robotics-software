@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<BehaviorTreeRootNodeState, BehaviorTreeRootNodeDefinition>
+      implements BehaviorTreeRootNode<BehaviorTreeRootNodeExecutor, BehaviorTreeNodeExecutor<?, ?>, BehaviorTreeRootNodeState, BehaviorTreeRootNodeDefinition>
 {
    private final BehaviorTreeRootNodeState state;
    private final BehaviorTreeRootNodeDefinition definition;

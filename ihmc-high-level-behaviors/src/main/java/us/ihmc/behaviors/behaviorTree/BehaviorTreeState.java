@@ -17,26 +17,24 @@ import java.util.function.Supplier;
  * The root node is going to be a single basic root node with no functionality
  * and it will never be replaced.
  *
- * @param <L> Root node layer type.
- * @param <S> Root node state type.
- * @param <D> Root node definition type.
+ * @param <HLT> The generic type of this node high layer: RDX or Executor
+ * @param <RT> The type of the root node instance.
  */
-public class BehaviorTreeState<L extends BehaviorTreeNodeLayer<?, S, S, D>,
-                               S extends BehaviorTreeNodeState<D>,
-                               D extends BehaviorTreeNodeDefinition>
+public class BehaviorTreeState<HLT extends BehaviorTreeNodeHighLayer<HLT, ? ,?>,
+                               RT extends BehaviorTreeRootNode<RT, HLT, ?, ?>>
 {
    private final CRDTInfo crdtInfo;
    private final LatestTimestampModifiable rootReferenceModification;
    private final LatestTimestampModifiable dataModification;
    private final MutableLong nextID = new MutableLong(0);
-   private final BehaviorTreeTopologyOperationQueue topologyChangeQueue = new BehaviorTreeTopologyOperationQueue();
-   private final BehaviorTreeNodeStateBuilder nodeStateBuilder;
-   private final Supplier<L> rootNodeSupplier;
+   private final BehaviorTreeTopologyOperationQueue<HLT, RT> topologyChangeQueue = new BehaviorTreeTopologyOperationQueue<>();
+   private final BehaviorTreeNodeStateBuilder<HLT> nodeStateBuilder;
+   private final Supplier<RT> rootNodeSupplier;
    private final WorkspaceResourceDirectory saveFileDirectory;
    private int numberOfNodes = 0;
 
-   public BehaviorTreeState(BehaviorTreeNodeStateBuilder nodeStateBuilder,
-                            Supplier<L> rootNodeSupplier,
+   public BehaviorTreeState(BehaviorTreeNodeStateBuilder<HLT> nodeStateBuilder,
+                            Supplier<RT> rootNodeSupplier,
                             CRDTInfo crdtInfo,
                             WorkspaceResourceDirectory saveFileDirectory)
    {
@@ -71,7 +69,7 @@ public class BehaviorTreeState<L extends BehaviorTreeNodeLayer<?, S, S, D>,
    /**
     * Convenience method.
     */
-   public void modifyTreeTopology(Consumer<BehaviorTreeTopologyOperationQueue> modifier)
+   public void modifyTreeTopology(Consumer<BehaviorTreeTopologyOperationQueue<HLT, RT>> modifier)
    {
       modifier.accept(topologyChangeQueue);
       modifyTreeTopology();
@@ -131,12 +129,12 @@ public class BehaviorTreeState<L extends BehaviorTreeNodeLayer<?, S, S, D>,
       return nextID.longValue();
    }
 
-   public L getRootNode()
+   public RT getRootNode()
    {
       return rootNodeSupplier.get();
    }
 
-   public BehaviorTreeNodeStateBuilder getNodeStateBuilder()
+   public BehaviorTreeNodeStateBuilder<HLT> getNodeStateBuilder()
    {
       return nodeStateBuilder;
    }
@@ -146,7 +144,7 @@ public class BehaviorTreeState<L extends BehaviorTreeNodeLayer<?, S, S, D>,
       return saveFileDirectory;
    }
 
-   public BehaviorTreeTopologyOperationQueue getTopologyChangeQueue()
+   public BehaviorTreeTopologyOperationQueue<HLT, RT> getTopologyChangeQueue()
    {
       return topologyChangeQueue;
    }

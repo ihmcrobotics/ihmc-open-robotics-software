@@ -1,8 +1,7 @@
 package us.ihmc.behaviors.behaviorTree.ros2;
 
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeLayer;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeHighLayer;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.perception.sceneGraph.SceneGraph;
@@ -13,29 +12,27 @@ import java.util.function.Consumer;
  * This class is concerned with syncing behavior tree state only
  * over ROS 2 nodes as a CRDT.
  *
- * @param <L> Root node layer type.
- * @param <S> Root node state type.
- * @param <D> Root node definition type.
+ * @param <HLT> The generic type of this node high layer: RDX or Executor
+ * @param <RT> The type of the root node instance.
  */
-public class ROS2BehaviorTreeState<L extends BehaviorTreeNodeLayer<?, S, S, D>,
-                                   S extends BehaviorTreeNodeState<D>,
-                                   D extends BehaviorTreeNodeDefinition>
+public class ROS2BehaviorTreeState<HLT extends BehaviorTreeNodeHighLayer<HLT, ? ,?>,
+                                   RT extends BehaviorTreeRootNode<RT, HLT, ?, ?>>
 {
    /**
     * The SYNC_FREQUENCY should be a multiple of the scene graph's update frequency.
     */
    public static final double SYNC_FREQUENCY = SceneGraph.UPDATE_FREQUENCY / 2.0;
 
-   private final BehaviorTreeState<L, S, D> behaviorTreeState;
+   private final BehaviorTreeState behaviorTreeState;
    private final ROS2BehaviorTreePublisher behaviorTreePublisher;
-   private final ROS2BehaviorTreeSubscription<L, S, D> behaviorTreeSubscription;
+   private final ROS2BehaviorTreeSubscription<HLT, RT> behaviorTreeSubscription;
 
    /**
     * The complexity of this constructor is to support the UI having nodes that extend the base
     * on-robot ones.
     */
-   public ROS2BehaviorTreeState(BehaviorTreeState<L, S, D> behaviorTreeState,
-                                Consumer<L> rootNodeSetter,
+   public ROS2BehaviorTreeState(BehaviorTreeState behaviorTreeState,
+                                Consumer<RT> rootNodeSetter,
                                 ROS2PublishSubscribeAPI ros2PublishSubscribeAPI)
    {
       this.behaviorTreeState = behaviorTreeState;
@@ -77,12 +74,12 @@ public class ROS2BehaviorTreeState<L extends BehaviorTreeNodeLayer<?, S, S, D>,
       behaviorTreeSubscription.destroy();
    }
 
-   public BehaviorTreeState<L, S, D> getBehaviorTreeState()
+   public BehaviorTreeState getBehaviorTreeState()
    {
       return behaviorTreeState;
    }
 
-   public ROS2BehaviorTreeSubscription getBehaviorTreeSubscription()
+   public ROS2BehaviorTreeSubscription<HLT, RT> getBehaviorTreeSubscription()
    {
       return behaviorTreeSubscription;
    }
