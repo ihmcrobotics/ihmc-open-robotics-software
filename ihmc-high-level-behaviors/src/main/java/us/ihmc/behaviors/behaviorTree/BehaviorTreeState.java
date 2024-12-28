@@ -18,23 +18,21 @@ import java.util.function.Supplier;
  * and it will never be replaced.
  *
  * @param <HLT> The generic type of this node high layer: RDX or Executor
- * @param <RT> The type of the root node instance.
  */
-public class BehaviorTreeState<HLT extends BehaviorTreeNodeHighLayer<HLT, ? ,?>,
-                               RT extends BehaviorTreeRootNode<RT, HLT, ?, ?>>
+public class BehaviorTreeState<HLT extends BehaviorTreeNodeHighLayer<HLT, ? ,?>>
 {
    private final CRDTInfo crdtInfo;
    private final LatestTimestampModifiable rootReferenceModification;
    private final LatestTimestampModifiable dataModification;
    private final MutableLong nextID = new MutableLong(0);
-   private final BehaviorTreeTopologyOperationQueue<HLT, RT> topologyChangeQueue = new BehaviorTreeTopologyOperationQueue<>();
+   private final BehaviorTreeTopologyOperationQueue<HLT> topologyChangeQueue = new BehaviorTreeTopologyOperationQueue<>();
    private final BehaviorTreeNodeStateBuilder<HLT> nodeStateBuilder;
-   private final Supplier<RT> rootNodeSupplier;
+   private final Supplier<HLT> rootNodeSupplier;
    private final WorkspaceResourceDirectory saveFileDirectory;
    private int numberOfNodes = 0;
 
    public BehaviorTreeState(BehaviorTreeNodeStateBuilder<HLT> nodeStateBuilder,
-                            Supplier<RT> rootNodeSupplier,
+                            Supplier<HLT> rootNodeSupplier,
                             CRDTInfo crdtInfo,
                             WorkspaceResourceDirectory saveFileDirectory)
    {
@@ -69,7 +67,7 @@ public class BehaviorTreeState<HLT extends BehaviorTreeNodeHighLayer<HLT, ? ,?>,
    /**
     * Convenience method.
     */
-   public void modifyTreeTopology(Consumer<BehaviorTreeTopologyOperationQueue<HLT, RT>> modifier)
+   public void modifyTreeTopology(Consumer<BehaviorTreeTopologyOperationQueue<HLT>> modifier)
    {
       modifier.accept(topologyChangeQueue);
       modifyTreeTopology();
@@ -129,7 +127,7 @@ public class BehaviorTreeState<HLT extends BehaviorTreeNodeHighLayer<HLT, ? ,?>,
       return nextID.longValue();
    }
 
-   public RT getRootNode()
+   public HLT getRootNode()
    {
       return rootNodeSupplier.get();
    }
@@ -144,7 +142,7 @@ public class BehaviorTreeState<HLT extends BehaviorTreeNodeHighLayer<HLT, ? ,?>,
       return saveFileDirectory;
    }
 
-   public BehaviorTreeTopologyOperationQueue<HLT, RT> getTopologyChangeQueue()
+   public BehaviorTreeTopologyOperationQueue<HLT> getTopologyChangeQueue()
    {
       return topologyChangeQueue;
    }

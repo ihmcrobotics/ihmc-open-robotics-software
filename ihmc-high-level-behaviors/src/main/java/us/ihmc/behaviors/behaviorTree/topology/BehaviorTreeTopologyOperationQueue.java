@@ -1,7 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.topology;
 
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeHighLayer;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNode;
 import us.ihmc.communication.crdt.LatestTimestampModifiable;
 
 import java.util.LinkedList;
@@ -16,10 +15,8 @@ import java.util.function.Consumer;
  * to complicated to use and doesn't add much value.
  *
  * @param <HLT> The generic type of this node high layer: RDX or Executor
- * @param <RT> The type of the root node instance.
  */
-public class BehaviorTreeTopologyOperationQueue<HLT extends BehaviorTreeNodeHighLayer<HLT, ?, ?>,
-                                                RT extends BehaviorTreeRootNode<RT, HLT, ?, ?>>
+public class BehaviorTreeTopologyOperationQueue<HLT extends BehaviorTreeNodeHighLayer<HLT, ?, ?>>
 {
    private final Queue<BehaviorTreeTopologyOperation> topologyOperationQueue = new LinkedList<>();
 
@@ -43,7 +40,7 @@ public class BehaviorTreeTopologyOperationQueue<HLT extends BehaviorTreeNodeHigh
                             insertionDefinition.getInsertionIndex());
    }
 
-   public void queueSetAndModifyRootNode(RT node, Consumer<RT> setter, LatestTimestampModifiable freezableRootHolder)
+   public void queueSetAndModifyRootNode(HLT node, Consumer<HLT> setter, LatestTimestampModifiable freezableRootHolder)
    {
       topologyOperationQueue.add(() ->
       {

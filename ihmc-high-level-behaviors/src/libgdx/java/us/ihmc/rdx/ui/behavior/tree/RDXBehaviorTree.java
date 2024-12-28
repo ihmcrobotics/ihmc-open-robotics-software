@@ -32,7 +32,7 @@ public class RDXBehaviorTree
    private final CRDTInfo crdtInfo;
    private final WorkspaceResourceDirectory treeFilesDirectory;
    private final RDXBehaviorTreeNodeBuilder nodeBuilder;
-   private final BehaviorTreeState<RDXBehaviorTreeNode<?, ?>, RDXBehaviorTreeRootNode> state;
+   private final BehaviorTreeState<RDXBehaviorTreeNode<?, ?>> state;
    private RDXBehaviorTreeRootNode rootNode;
    /**
     * Useful for accessing nodes by ID instead of searching.
@@ -347,7 +347,7 @@ public class RDXBehaviorTree
       RDXBaseUI.getInstance().getPrimary3DPanel().removeImGui3DViewInputProcessor(this);
    }
 
-   public BehaviorTreeState<RDXBehaviorTreeNode<?, ?>, RDXBehaviorTreeRootNode> getBehaviorTreeState()
+   public BehaviorTreeState<RDXBehaviorTreeNode<?, ?>> getBehaviorTreeState()
    {
       return state;
    }

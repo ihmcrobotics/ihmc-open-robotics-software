@@ -71,17 +71,6 @@ public class BehaviorTreeTools
       }
    }
 
-   public static <HLT extends BehaviorTreeNodeHighLayer<HLT, ?, ?>,
-                  RT extends BehaviorTreeRootNode<RT, HLT, ?, ?>> void runForEntireTree(RT rootNode, Consumer<HLT> operation)
-   {
-      operation.accept((HLT) rootNode);
-
-      for (HLT child : rootNode.getChildren())
-      {
-         runForSubtreeNodes(child, operation);
-      }
-   }
-
    public static void runForEntireTree(BehaviorTreeNodeDefinition anyNode, Consumer<BehaviorTreeNodeDefinition> operation)
    {
       runForSubtreeNodes(findRootNode(anyNode), operation);
