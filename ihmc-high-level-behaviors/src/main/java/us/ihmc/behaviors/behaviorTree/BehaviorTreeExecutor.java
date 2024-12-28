@@ -3,8 +3,6 @@ package us.ihmc.behaviors.behaviorTree;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
-import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionDefinition;
-import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionType;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
@@ -19,7 +17,7 @@ public class BehaviorTreeExecutor
 {
    private final CRDTInfo crdtInfo;
    private final BehaviorTreeExecutorNodeBuilder nodeBuilder;
-   private final BehaviorTreeState<BehaviorTreeRootNodeExecutor, BehaviorTreeRootNodeState, BehaviorTreeRootNodeDefinition> state;
+   private final BehaviorTreeState<BehaviorTreeNodeExecutor<?, ?>, BehaviorTreeRootNodeExecutor> state;
    private BehaviorTreeRootNodeExecutor rootNode;
    private final BehaviorTreeFileLoader<BehaviorTreeNodeExecutor<?, ?>> fileLoader;
    private final WorkspaceResourceDirectory saveFileDirectory = new WorkspaceResourceDirectory(BehaviorTreeExecutor.class, "/behaviorTrees");
@@ -79,7 +77,7 @@ public class BehaviorTreeExecutor
       return rootNode;
    }
 
-   public BehaviorTreeState<BehaviorTreeRootNodeExecutor, BehaviorTreeRootNodeState, BehaviorTreeRootNodeDefinition> getState()
+   public BehaviorTreeState<BehaviorTreeNodeExecutor<?, ?>, BehaviorTreeRootNodeExecutor> getState()
    {
       return state;
    }
@@ -100,24 +98,26 @@ public class BehaviorTreeExecutor
 
             if (loadedNode != null)
             {
-               BehaviorTreeNodeExecutor<?, ?> nodeToInsert = loadedNode;
-
-               if (state.getRootNode() == null) // Automatically add a root node if there isn't one
+               if (loadedNode instanceof BehaviorTreeRootNodeExecutor loadedRootNode) // If we loaded a root node, replace the existing one
                {
-                  nodeToInsert = new BehaviorTreeRootNodeExecutor(state.getAndIncrementNextID(),
+                  topologyOperationQueue.queueSetAndModifyRootNode(loadedRootNode,
+                                                                   this::setRootNode,
+                                                                   state.getRootReferenceModification());
+               }
+               else if (state.getRootNode() == null) // Automatically add a root node if there isn't one
+               {
+                  BehaviorTreeRootNodeExecutor newRootNode = new BehaviorTreeRootNodeExecutor(state.getAndIncrementNextID(),
                                                                   state.getCRDTInfo(),
                                                                   state.getSaveFileDirectory());
-                  topologyOperationQueue.queueAddAndModifyNode(loadedNode, nodeToInsert);
+                  topologyOperationQueue.queueAddAndModifyNode(loadedNode, newRootNode);
+                  topologyOperationQueue.queueSetAndModifyRootNode(newRootNode,
+                                                                   this::setRootNode,
+                                                                   state.getRootReferenceModification());
                }
-
-               var insertionDefinition = BehaviorTreeNodeInsertionDefinition.build(nodeToInsert,
-                                                                                   state.getRootReferenceModification(),
-                                                                                   this::setRootNode,
-                                                                                   null,
-                                                                                   BehaviorTreeNodeInsertionType.INSERT_ROOT);
-               topologyOperationQueue.queueSetAndModifyRootNode(nodeToInsert,
-                                                                this::setRootNode,
-                                                                state.getRootReferenceModification());
+               else // Add the loaded node as a child of the root node
+               {
+                  topologyOperationQueue.queueAddAndModifyNode(loadedNode, state.getRootNode());
+               }
             }
          });
       }

@@ -9,8 +9,6 @@ import imgui.ImGui;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeFileLoader;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionType;
 import us.ihmc.communication.crdt.CRDTInfo;
@@ -34,7 +32,7 @@ public class RDXBehaviorTree
    private final CRDTInfo crdtInfo;
    private final WorkspaceResourceDirectory treeFilesDirectory;
    private final RDXBehaviorTreeNodeBuilder nodeBuilder;
-   private final BehaviorTreeState<RDXBehaviorTreeRootNode, BehaviorTreeRootNodeState, BehaviorTreeRootNodeDefinition> state;
+   private final BehaviorTreeState<RDXBehaviorTreeNode<?, ?>, RDXBehaviorTreeRootNode> state;
    private RDXBehaviorTreeRootNode rootNode;
    /**
     * Useful for accessing nodes by ID instead of searching.
@@ -349,17 +347,17 @@ public class RDXBehaviorTree
       RDXBaseUI.getInstance().getPrimary3DPanel().removeImGui3DViewInputProcessor(this);
    }
 
-   public BehaviorTreeState<RDXBehaviorTreeRootNode, BehaviorTreeRootNodeState, BehaviorTreeRootNodeDefinition> getBehaviorTreeState()
+   public BehaviorTreeState<RDXBehaviorTreeNode<?, ?>, RDXBehaviorTreeRootNode> getBehaviorTreeState()
    {
       return state;
    }
 
-   public void setRootNode(RDXBehaviorTreeRootNode rootNode)
+   public void setRootNode(RDXBehaviorTreeNode<?, ?> rootNode)
    {
-      this.rootNode = rootNode;
+      this.rootNode = (RDXBehaviorTreeRootNode) rootNode;
    }
 
-   public RDXBehaviorTreeRootNode getRootNode()
+   public RDXBehaviorTreeNode<?, ?> getRootNode()
    {
       return rootNode;
    }

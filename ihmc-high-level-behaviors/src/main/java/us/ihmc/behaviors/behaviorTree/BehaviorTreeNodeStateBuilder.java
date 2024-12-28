@@ -4,9 +4,9 @@ import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 /**
- * States won't be built directly. They'll be Executors or UI types.
+ * @param <HLT> The generic type of this node high layer: RDX or Executor
  */
-public interface BehaviorTreeNodeStateBuilder<T extends BehaviorTreeNodeLayer<T, ?, ?, ?>>
+public interface BehaviorTreeNodeStateBuilder<HLT extends BehaviorTreeNodeHighLayer<HLT, ? ,?>>
 {
-   T createNode(Class<?> nodeType, long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory);
+   HLT createNode(Class<?> nodeType, long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory);
 }

@@ -13,14 +13,17 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class BehaviorTreeFileLoader<T extends BehaviorTreeNodeLayer<T, ?, ?, ?>>
+/**
+ * @param <HLT> The generic type of this node high layer: RDX or Executor
+ */
+public class BehaviorTreeFileLoader<HLT extends BehaviorTreeNodeHighLayer<HLT, ? ,?>>
 {
    private final BehaviorTreeState behaviorTreeState;
-   private final BehaviorTreeNodeStateBuilder<T> nodeBuilder;
+   private final BehaviorTreeNodeStateBuilder<HLT> nodeBuilder;
    private final WorkspaceResourceDirectory treeFilesDirectory;
 
    public BehaviorTreeFileLoader(BehaviorTreeState behaviorTreeState,
-                                 BehaviorTreeNodeStateBuilder<T> nodeBuilder,
+                                 BehaviorTreeNodeStateBuilder<HLT> nodeBuilder,
                                  WorkspaceResourceDirectory treeFilesDirectory)
    {
       this.behaviorTreeState = behaviorTreeState;
@@ -28,14 +31,14 @@ public class BehaviorTreeFileLoader<T extends BehaviorTreeNodeLayer<T, ?, ?, ?>>
       this.treeFilesDirectory = treeFilesDirectory;
    }
 
-   public T loadFromFile(WorkspaceResourceFile file, BehaviorTreeTopologyOperationQueue topologyOperationQueue)
+   public HLT loadFromFile(WorkspaceResourceFile file, BehaviorTreeTopologyOperationQueue topologyOperationQueue)
    {
       return loadFromFile(file, null, null, topologyOperationQueue);
    }
 
-   private T loadFromFile(WorkspaceResourceFile file, JsonNode jsonNode, T parentNode, BehaviorTreeTopologyOperationQueue topologyOperationQueue)
+   private HLT loadFromFile(WorkspaceResourceFile file, JsonNode jsonNode, HLT parentNode, BehaviorTreeTopologyOperationQueue topologyOperationQueue)
    {
-      MutableObject<T> loadedNode = new MutableObject<>();
+      MutableObject<HLT> loadedNode = new MutableObject<>();
 
       if (jsonNode == null)
       {
@@ -73,10 +76,10 @@ public class BehaviorTreeFileLoader<T extends BehaviorTreeNodeLayer<T, ?, ?, ?>>
       {
          String typeName = jsonNode.get("type").textValue();
 
-         T node = nodeBuilder.createNode(BehaviorTreeDefinitionRegistry.getClassFromTypeName(typeName),
-                                         behaviorTreeState.getAndIncrementNextID(),
-                                         behaviorTreeState.getCRDTInfo(),
-                                         behaviorTreeState.getSaveFileDirectory());
+         HLT node = nodeBuilder.createNode(BehaviorTreeDefinitionRegistry.getClassFromTypeName(typeName),
+                                           behaviorTreeState.getAndIncrementNextID(),
+                                           behaviorTreeState.getCRDTInfo(),
+                                           behaviorTreeState.getSaveFileDirectory());
          node.getDefinition().loadFromFile(jsonNode);
 
          // Make sure the node is named the same as the file including subdirectory

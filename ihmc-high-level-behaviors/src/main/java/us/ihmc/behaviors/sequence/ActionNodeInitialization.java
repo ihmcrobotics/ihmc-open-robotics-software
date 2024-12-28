@@ -24,7 +24,7 @@ public class ActionNodeInitialization
                                                                                              HandPoseActionState.class,
                                                                                              indexOfInsertion,
                                                                                              sideOfNewAction));
-         handPoseAction.getState().update();
+         handPoseAction.update();
 
          HandPoseActionState nextPreviousHandPoseAction = findNextPreviousAction(actionSequence,
                                                                                  HandPoseActionState.class,
@@ -51,7 +51,7 @@ public class ActionNodeInitialization
          screwPrimitiveAction.getDefinition().setSide(sideOfNewAction);
          screwPrimitiveAction.getDefinition()
                              .setObjectFrameName(findConvenientParentFrameName(actionSequence, HandPoseActionState.class, indexOfInsertion, sideOfNewAction));
-         screwPrimitiveAction.getState().update();
+         screwPrimitiveAction.update();
       }
       if (newAction instanceof FootPoseActionState footPoseAction)
       {
@@ -61,7 +61,7 @@ public class ActionNodeInitialization
                                                                                          FootPoseActionState.class,
                                                                                          indexOfInsertion,
                                                                                          sideOfNewAction));
-         footPoseAction.getState().update();
+         footPoseAction.update();
 
          FootPoseActionState nextPreviousFootPoseAction = findNextPreviousAction(actionSequence,
                                                                                  FootPoseActionState.class,

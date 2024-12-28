@@ -41,12 +41,42 @@ public class BehaviorTreeTools
       }
    }
 
-   public static <T extends BehaviorTreeNodeLayer<T, ?, ?, ?>> void runForSubtreeNodes(BehaviorTreeNodeLayer<T, ?, ?, ?> node,
-                                                                                       Consumer<BehaviorTreeNodeLayer<T, ?, ?, ?>> operation)
+   public static <LT extends BehaviorTreeNode<LT>> void runForSubtreeNodes(LT node, Consumer<LT> operation)
    {
       operation.accept(node);
 
-      for (BehaviorTreeNodeLayer<T, ?, ?, ?> child : node.getChildren())
+      for (LT child : node.getChildren())
+      {
+         runForSubtreeNodes(child, operation);
+      }
+   }
+
+   public static void runForSubtreeNodes(BehaviorTreeNodeState<?> node, Consumer<BehaviorTreeNodeState<?>> operation)
+   {
+      operation.accept(node);
+
+      for (BehaviorTreeNodeState<?> child : node.getChildren())
+      {
+         runForSubtreeNodes(child, operation);
+      }
+   }
+
+   public static <HLT extends BehaviorTreeNodeHighLayer<HLT, ?, ?>> void runForSubtreeNodes(HLT node, Consumer<HLT> operation)
+   {
+      operation.accept(node);
+
+      for (HLT child : node.getChildren())
+      {
+         runForSubtreeNodes(child, operation);
+      }
+   }
+
+   public static <HLT extends BehaviorTreeNodeHighLayer<HLT, ?, ?>,
+                  RT extends BehaviorTreeRootNode<RT, HLT, ?, ?>> void runForEntireTree(RT rootNode, Consumer<HLT> operation)
+   {
+      operation.accept((HLT) rootNode);
+
+      for (HLT child : rootNode.getChildren())
       {
          runForSubtreeNodes(child, operation);
       }

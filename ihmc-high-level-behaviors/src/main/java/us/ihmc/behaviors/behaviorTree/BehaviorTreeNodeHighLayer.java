@@ -3,16 +3,16 @@ package us.ihmc.behaviors.behaviorTree;
 import us.ihmc.log.LogTools;
 
 /**
- * An interface that represents a behavior tree node's UI or Executor layer.
+ * An interface that represents a behavior tree node's RDX or Executor layer.
  *
- * @param <LT> The generic type of this node layer: UI or Executor
+ * @param <HLT> The generic type of this node high layer: RDX or Executor
  * @param <S> The type of this node's state instance.
  * @param <D> The type of this node's definition instance.
  */
-public interface BehaviorTreeNodeHighLayer<LT extends BehaviorTreeNodeHighLayer<LT, ?, ?>,
+public interface BehaviorTreeNodeHighLayer<HLT extends BehaviorTreeNodeHighLayer<HLT, ?, ?>,
                                            S extends BehaviorTreeNodeState<D>,
                                            D extends BehaviorTreeNodeDefinition>
-      extends BehaviorTreeNode<LT>
+      extends BehaviorTreeNode<HLT>
 {
    S getState();
 

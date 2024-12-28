@@ -53,7 +53,7 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
 
    public void updateActionSubtree(BehaviorTreeNodeState<?> node, MutableInt actionIndex)
    {
-      idToNodeMap.put(node.getState().getID(), node);
+      idToNodeMap.put(node.getID(), node);
 
       for (BehaviorTreeNodeState<?> child : node.getChildren())
       {
