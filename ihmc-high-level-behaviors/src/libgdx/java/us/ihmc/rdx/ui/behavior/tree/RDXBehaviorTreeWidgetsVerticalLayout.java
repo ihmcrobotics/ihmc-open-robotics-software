@@ -15,7 +15,7 @@ import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
 public class RDXBehaviorTreeWidgetsVerticalLayout
 {
    private final RDXBehaviorTree tree;
-   private final BehaviorTreeTopologyOperationQueue topologyOperationQueue;
+   private final BehaviorTreeTopologyOperationQueue<RDXBehaviorTreeNode<?, ?>> topologyOperationQueue;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private BehaviorTreeNodeInsertionType insertionType = null;
    private RDXBehaviorTreeNode<?, ?> modalPopupNode;

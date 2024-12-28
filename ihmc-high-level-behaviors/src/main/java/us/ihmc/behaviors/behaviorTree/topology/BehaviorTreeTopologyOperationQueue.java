@@ -54,7 +54,8 @@ public class BehaviorTreeTopologyOperationQueue<HLT extends BehaviorTreeNodeHigh
       topologyOperationQueue.add(() ->
       {
          setter.accept(node);
-         node.getDefinition().modify();
+         if (node != null)
+            node.getDefinition().modify();
          freezableRootHolder.modify();
       });
    }
