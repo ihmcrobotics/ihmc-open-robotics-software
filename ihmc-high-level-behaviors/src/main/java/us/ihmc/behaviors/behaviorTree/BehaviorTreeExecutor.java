@@ -17,7 +17,7 @@ public class BehaviorTreeExecutor
 {
    private final CRDTInfo crdtInfo;
    private final BehaviorTreeExecutorNodeBuilder nodeBuilder;
-   private final BehaviorTreeState<BehaviorTreeNodeExecutor<?, ?>, BehaviorTreeRootNodeExecutor> state;
+   private final BehaviorTreeState<BehaviorTreeNodeExecutor<?, ?>> state;
    private BehaviorTreeRootNodeExecutor rootNode;
    private final BehaviorTreeFileLoader<BehaviorTreeNodeExecutor<?, ?>> fileLoader;
    private final WorkspaceResourceDirectory saveFileDirectory = new WorkspaceResourceDirectory(BehaviorTreeExecutor.class, "/behaviorTrees");
@@ -67,9 +67,9 @@ public class BehaviorTreeExecutor
       }
    }
 
-   public void setRootNode(BehaviorTreeRootNodeExecutor rootNode)
+   public void setRootNode(BehaviorTreeNodeExecutor<?, ?> rootNode)
    {
-      this.rootNode = rootNode;
+      this.rootNode = (BehaviorTreeRootNodeExecutor) rootNode;
    }
 
    public BehaviorTreeRootNodeExecutor getRootNode()
@@ -77,7 +77,7 @@ public class BehaviorTreeExecutor
       return rootNode;
    }
 
-   public BehaviorTreeState<BehaviorTreeNodeExecutor<?, ?>, BehaviorTreeRootNodeExecutor> getState()
+   public BehaviorTreeState<BehaviorTreeNodeExecutor<?, ?>> getState()
    {
       return state;
    }

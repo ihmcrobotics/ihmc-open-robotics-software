@@ -28,7 +28,7 @@ import javax.annotation.Nullable;
 public class RDXBehaviorTreeNodeCreationMenu
 {
    private final RDXBehaviorTree tree;
-   private final BehaviorTreeTopologyOperationQueue topologyOperationQueue;
+   private final BehaviorTreeTopologyOperationQueue<RDXBehaviorTreeNode<?, ?>> topologyOperationQueue;
    private final RDXAvailableBehaviorTreeDirectory behaviorTreesDirectory;
 
    public RDXBehaviorTreeNodeCreationMenu(RDXBehaviorTree tree, WorkspaceResourceDirectory treeFilesDirectory, ReferenceFrameLibrary referenceFrameLibrary)
@@ -156,7 +156,7 @@ public class RDXBehaviorTreeNodeCreationMenu
             if (insertionDefinition.getNodeToInsert() instanceof RDXActionNode<?, ?> newAction)
             {
                // We want to do best effort initialization
-               RDXBehaviorTreeRootNode actionSequenceOrNull = tree.getRootNode();
+               RDXBehaviorTreeRootNode actionSequenceOrNull = (RDXBehaviorTreeRootNode) tree.getRootNode();
                tree.getNodeBuilder().initializeActionNode(actionSequenceOrNull, newAction, insertionDefinition.getInsertionIndex(), side);
             }
 

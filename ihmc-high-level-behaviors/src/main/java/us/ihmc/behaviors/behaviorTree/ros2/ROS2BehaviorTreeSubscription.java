@@ -3,7 +3,6 @@ package us.ihmc.behaviors.behaviorTree.ros2;
 import behavior_msgs.msg.dds.*;
 import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeHighLayer;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
@@ -20,15 +19,13 @@ import java.util.function.Consumer;
 
 /**
  * @param <HLT> The generic type of this node high layer: RDX or Executor
- * @param <RT> The type of the root node instance.
  */
-public class ROS2BehaviorTreeSubscription<HLT extends BehaviorTreeNodeHighLayer<HLT, ? ,?>,
-                                          RT extends BehaviorTreeRootNode<RT, HLT, ?, ?>>
+public class ROS2BehaviorTreeSubscription<HLT extends BehaviorTreeNodeHighLayer<HLT, ? ,?>>
 {
    private final ROS2Topic<BehaviorTreeStateMessage> topic;
    private final ArrayList<Runnable> messageRecievedCallbacks = new ArrayList<>();
-   private final BehaviorTreeState<HLT, RT> behaviorTreeState;
-   private final Consumer<RT> rootNodeSetter;
+   private final BehaviorTreeState<HLT> behaviorTreeState;
+   private final Consumer<HLT> rootNodeSetter;
    private long numberOfMessagesReceived = 0;
    private long previousSequenceID = -1;
    private long messageDropCount = 0;
@@ -41,8 +38,8 @@ public class ROS2BehaviorTreeSubscription<HLT extends BehaviorTreeNodeHighLayer<
    private final MutableInt subscriptionNodeDepthFirstIndex = new MutableInt();
    private final HashMap<Long, HLT> idToLocalNodesMap = new HashMap<>();
 
-   public ROS2BehaviorTreeSubscription(BehaviorTreeState<HLT, RT> behaviorTreeState,
-                                       Consumer<RT> rootNodeSetter,
+   public ROS2BehaviorTreeSubscription(BehaviorTreeState<HLT> behaviorTreeState,
+                                       Consumer<HLT> rootNodeSetter,
                                        ROS2PublishSubscribeAPI ros2PublishSubscribeAPI)
    {
       this.behaviorTreeState = behaviorTreeState;
@@ -100,22 +97,22 @@ public class ROS2BehaviorTreeSubscription<HLT extends BehaviorTreeNodeHighLayer<
 
             idToLocalNodesMap.clear();
             if (behaviorTreeState.getRootNode() != null)
-               BehaviorTreeTools.runForEntireTree(behaviorTreeState.getRootNode(),
-                                                  node -> idToLocalNodesMap.put(node.getState().getID(), node));
+               BehaviorTreeTools.runForSubtreeNodes(behaviorTreeState.getRootNode(),
+                                                    node -> idToLocalNodesMap.put(node.getState().getID(), node));
 
             behaviorTreeState.modifyTreeTopology(topologyOperationQueue ->
             {
-               RT rootNode = behaviorTreeState.getRootNode();
+               HLT rootNode = behaviorTreeState.getRootNode();
 
                boolean rootReferenceModificationIncoming = behaviorTreeState.getRootReferenceModification().isModificationIncoming();
                if (rootReferenceModificationIncoming)
                {
-                  rootNode = subscriptionRootIsNull ? null : (RT) retrieveOrReplicateLocalNode(subscriptionRootNode, rootReferenceModificationIncoming);
+                  rootNode = subscriptionRootIsNull ? null : retrieveOrReplicateLocalNode(subscriptionRootNode, rootReferenceModificationIncoming);
                   topologyOperationQueue.queueSetAndModifyRootNode(rootNode, rootNodeSetter, behaviorTreeState.getRootReferenceModification());
                }
 
                if (rootNode != null && !subscriptionRootIsNull)
-                  retrieveOrReplicateSubreeFromSubscription(subscriptionRootNode, (HLT) rootNode, topologyOperationQueue);
+                  retrieveOrReplicateSubreeFromSubscription(subscriptionRootNode, rootNode, topologyOperationQueue);
 
                // These nodes were removed from the tree
                for (HLT value : idToLocalNodesMap.values())
@@ -128,7 +125,7 @@ public class ROS2BehaviorTreeSubscription<HLT extends BehaviorTreeNodeHighLayer<
 
    private void retrieveOrReplicateSubreeFromSubscription(ROS2BehaviorTreeSubscriptionNode subscriptionNode,
                                                           HLT localNode,
-                                                          BehaviorTreeTopologyOperationQueue<HLT, RT> topologyOperationQueue)
+                                                          BehaviorTreeTopologyOperationQueue<HLT> topologyOperationQueue)
    {
       idToLocalNodesMap.remove(localNode.getState().getID()); // Remove IDs as we traverse the tree
 

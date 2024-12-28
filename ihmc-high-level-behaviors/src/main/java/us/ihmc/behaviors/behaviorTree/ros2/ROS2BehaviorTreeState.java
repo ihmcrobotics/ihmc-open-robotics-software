@@ -1,7 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.ros2;
 
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeHighLayer;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.perception.sceneGraph.SceneGraph;
@@ -13,10 +12,8 @@ import java.util.function.Consumer;
  * over ROS 2 nodes as a CRDT.
  *
  * @param <HLT> The generic type of this node high layer: RDX or Executor
- * @param <RT> The type of the root node instance.
  */
-public class ROS2BehaviorTreeState<HLT extends BehaviorTreeNodeHighLayer<HLT, ? ,?>,
-                                   RT extends BehaviorTreeRootNode<RT, HLT, ?, ?>>
+public class ROS2BehaviorTreeState<HLT extends BehaviorTreeNodeHighLayer<HLT, ? ,?>>
 {
    /**
     * The SYNC_FREQUENCY should be a multiple of the scene graph's update frequency.
@@ -25,14 +22,14 @@ public class ROS2BehaviorTreeState<HLT extends BehaviorTreeNodeHighLayer<HLT, ? 
 
    private final BehaviorTreeState behaviorTreeState;
    private final ROS2BehaviorTreePublisher behaviorTreePublisher;
-   private final ROS2BehaviorTreeSubscription<HLT, RT> behaviorTreeSubscription;
+   private final ROS2BehaviorTreeSubscription<HLT> behaviorTreeSubscription;
 
    /**
     * The complexity of this constructor is to support the UI having nodes that extend the base
     * on-robot ones.
     */
-   public ROS2BehaviorTreeState(BehaviorTreeState behaviorTreeState,
-                                Consumer<RT> rootNodeSetter,
+   public ROS2BehaviorTreeState(BehaviorTreeState<HLT> behaviorTreeState,
+                                Consumer<HLT> rootNodeSetter,
                                 ROS2PublishSubscribeAPI ros2PublishSubscribeAPI)
    {
       this.behaviorTreeState = behaviorTreeState;
@@ -79,7 +76,7 @@ public class ROS2BehaviorTreeState<HLT extends BehaviorTreeNodeHighLayer<HLT, ? 
       return behaviorTreeState;
    }
 
-   public ROS2BehaviorTreeSubscription<HLT, RT> getBehaviorTreeSubscription()
+   public ROS2BehaviorTreeSubscription<HLT> getBehaviorTreeSubscription()
    {
       return behaviorTreeSubscription;
    }

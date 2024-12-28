@@ -2,7 +2,6 @@ package us.ihmc.rdx.ui.behavior.tree;
 
 import gnu.trove.map.hash.TLongObjectHashMap;
 import imgui.ImGui;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.communication.crdt.CRDTInfo;
@@ -17,7 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRootNodeState, BehaviorTreeRootNodeDefinition>
-   implements BehaviorTreeRootNode<RDXBehaviorTreeRootNode, RDXBehaviorTreeNode<?, ?>, BehaviorTreeRootNodeState, BehaviorTreeRootNodeDefinition>
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final BehaviorTreeRootNodeState state;
