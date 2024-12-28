@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.behaviorTree;
 
 import us.ihmc.log.LogTools;
+import us.ihmc.tools.Destroyable;
 
 /**
  * An interface that represents a behavior tree node's RDX or Executor layer.
@@ -12,7 +13,7 @@ import us.ihmc.log.LogTools;
 public interface BehaviorTreeNodeHighLayer<HLT extends BehaviorTreeNodeHighLayer<HLT, ?, ?>,
                                            S extends BehaviorTreeNodeState<D>,
                                            D extends BehaviorTreeNodeDefinition>
-      extends BehaviorTreeNode<HLT>
+      extends BehaviorTreeNode<HLT>, Destroyable
 {
    S getState();
 
@@ -23,6 +24,7 @@ public interface BehaviorTreeNodeHighLayer<HLT extends BehaviorTreeNodeHighLayer
       getState().update();
    }
 
+   @Override
    default void destroy()
    {
       LogTools.info("Destroying node: {}:{}", getDefinition().getName(), getState().getID());
