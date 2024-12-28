@@ -27,17 +27,23 @@ import javax.annotation.Nullable;
 
 public class RDXBehaviorTreeNodeCreationMenu
 {
-   private final RDXBehaviorTree tree;
+   private final RDXBehaviorTree behaviorTree;
    private final BehaviorTreeTopologyOperationQueue<RDXBehaviorTreeNode<?, ?>> topologyOperationQueue;
    private final RDXAvailableBehaviorTreeDirectory behaviorTreesDirectory;
 
-   public RDXBehaviorTreeNodeCreationMenu(RDXBehaviorTree tree, WorkspaceResourceDirectory treeFilesDirectory, ReferenceFrameLibrary referenceFrameLibrary)
+   public RDXBehaviorTreeNodeCreationMenu(RDXBehaviorTree behaviorTree,
+                                          WorkspaceResourceDirectory treeFilesDirectory,
+                                          ReferenceFrameLibrary referenceFrameLibrary)
    {
-      this.tree = tree;
+      this.behaviorTree = behaviorTree;
 
-      topologyOperationQueue = tree.getBehaviorTreeState().getTopologyChangeQueue();
+      topologyOperationQueue = behaviorTree.getTopologyChangeQueue();
 
-      behaviorTreesDirectory = new RDXAvailableBehaviorTreeDirectory(treeFilesDirectory, tree, topologyOperationQueue, referenceFrameLibrary, this::complete);
+      behaviorTreesDirectory = new RDXAvailableBehaviorTreeDirectory(treeFilesDirectory,
+                                                                     behaviorTree,
+                                                                     topologyOperationQueue,
+                                                                     referenceFrameLibrary,
+                                                                     this::complete);
       behaviorTreesDirectory.reindexDirectory();
    }
 
@@ -140,24 +146,25 @@ public class RDXBehaviorTreeNodeCreationMenu
       {
          if (ImGui.isMouseClicked(ImGuiMouseButton.Left))
          {
-            RDXBehaviorTreeNode<?, ?> newNode = tree.getNodeBuilder()
-                                                    .createNode(nodeType,
-                                                                tree.getBehaviorTreeState().getAndIncrementNextID(),
-                                                                tree.getBehaviorTreeState().getCRDTInfo(),
-                                                                tree.getBehaviorTreeState().getSaveFileDirectory());
+            RDXBehaviorTreeNode<?, ?> newNode = behaviorTree.getNodeBuilder()
+                                                            .createNode(nodeType,
+                                                                        behaviorTree.getAndIncrementNextID(),
+                                                                        behaviorTree.getCRDTInfo(),
+                                                                        behaviorTree.getSaveFileDirectory());
 
             BehaviorTreeNodeInsertionDefinition<RDXBehaviorTreeNode<?, ?>> insertionDefinition
                   = new BehaviorTreeNodeInsertionDefinition<>(newNode,
                                                               relativeNode,
-                                                              tree::setRootNode,
-                                                              tree.getBehaviorTreeState().getRootReferenceModification(),
+                                                              behaviorTree::setRootNode,
+                                                              behaviorTree.getRootReferenceModification(),
                                                               insertionType);
 
             if (insertionDefinition.getNodeToInsert() instanceof RDXActionNode<?, ?> newAction)
             {
                // We want to do best effort initialization
-               RDXBehaviorTreeRootNode actionSequenceOrNull = (RDXBehaviorTreeRootNode) tree.getRootNode();
-               tree.getNodeBuilder().initializeActionNode(actionSequenceOrNull, newAction, insertionDefinition.getInsertionIndex(), side);
+               RDXBehaviorTreeRootNode actionSequenceOrNull = behaviorTree.getRootNode();
+               if (behaviorTree.getNodeBuilder() instanceof RDXBehaviorTreeNodeBuilder rdxNodeBuilder)
+                  rdxNodeBuilder.initializeActionNode(actionSequenceOrNull, newAction, insertionDefinition.getInsertionIndex(), side);
             }
 
             complete(insertionDefinition);

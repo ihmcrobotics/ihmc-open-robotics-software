@@ -3,7 +3,7 @@ package us.ihmc.rdx.ui.behavior.tree;
 import imgui.ImGui;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTreeState;
+import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTree;
 import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.rdx.imgui.ImGuiAveragedFrequencyText;
@@ -20,9 +20,9 @@ import us.ihmc.commons.thread.Throttler;
  */
 public class RDXROS2BehaviorTree extends RDXBehaviorTree
 {
-   private final ROS2BehaviorTreeState<RDXBehaviorTreeNode<?, ?>> ros2BehaviorTreeState;
+   private final ROS2BehaviorTree<RDXBehaviorTreeNode<?, ?>> ros2BehaviorTree;
    /** Reduce the communication update rate. */
-   private final Throttler communicationThrottler = new Throttler().setFrequency(ROS2BehaviorTreeState.SYNC_FREQUENCY);
+   private final Throttler communicationThrottler = new Throttler().setFrequency(ROS2BehaviorTree.SYNC_FREQUENCY);
    private final ImGuiAveragedFrequencyText subscriptionFrequencyText = new ImGuiAveragedFrequencyText();
    private final ImGuiAveragedFrequencyText publishFrequencyText = new ImGuiAveragedFrequencyText();
 
@@ -38,9 +38,9 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
    {
       super(treeFilesDirectory, robotModel, syncedRobot, peerClockEstimator, selectionCollisionModel, baseUI, panel3D, referenceFrameLibrary);
 
-      ros2BehaviorTreeState = new ROS2BehaviorTreeState<>(getBehaviorTreeState(), this::setRootNode, ros2);
+      ros2BehaviorTree = new ROS2BehaviorTree<>(this, this::setRootNode, ros2);
 
-      ros2BehaviorTreeState.getBehaviorTreeSubscription().registerMessageReceivedCallback(subscriptionFrequencyText::ping);
+      ros2BehaviorTree.getBehaviorTreeSubscription().registerMessageReceivedCallback(subscriptionFrequencyText::ping);
    }
 
    public void update()
@@ -48,14 +48,14 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
       boolean updateComms = communicationThrottler.run();
       if (updateComms)
       {
-         ros2BehaviorTreeState.updateSubscription();
+         ros2BehaviorTree.updateSubscription();
       }
 
       super.update();
 
       if (updateComms)
       {
-         ros2BehaviorTreeState.updatePublication();
+         ros2BehaviorTree.updatePublication();
          publishFrequencyText.ping();
       }
    }
@@ -72,30 +72,30 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
       float rightMargin = 20.0f;
 
       ImGui.sameLine(ImGui.getWindowSizeX() - nodeCountsTextWidth - frequencyTextWidth - droppedTextWidth - rightMargin);
-      int numberOfLocalNodes = ros2BehaviorTreeState.getBehaviorTreeState().getNumberOfNodes();
-      ImGui.text("Operator: %3d  Robot: %3d".formatted(numberOfLocalNodes, ros2BehaviorTreeState.getBehaviorTreeSubscription().getNumberOfOnRobotNodes()));
+      int numberOfLocalNodes = ros2BehaviorTree.getBehaviorTree().getNumberOfNodes();
+      ImGui.text("Operator: %3d  Robot: %3d".formatted(numberOfLocalNodes, ros2BehaviorTree.getBehaviorTreeSubscription().getNumberOfOnRobotNodes()));
 
 
       ImGui.sameLine(ImGui.getWindowSizeX() - frequencyTextWidth - droppedTextWidth - rightMargin);
       subscriptionFrequencyText.render();
 
       ImGui.sameLine(ImGui.getWindowSizeX() - droppedTextWidth - rightMargin);
-      ImGui.text("Dropped: %4d".formatted(ros2BehaviorTreeState.getBehaviorTreeSubscription().getMessageDropCount()));
+      ImGui.text("Dropped: %4d".formatted(ros2BehaviorTree.getBehaviorTreeSubscription().getMessageDropCount()));
 
       ImGui.endMenuBar();
 
       ImGui.text("CRDT#: Local: %d (%s)  Robot: %d  Out of order: %d"
-                       .formatted(getBehaviorTreeState().getCRDTInfo().getUpdateNumber(),
+                       .formatted(getCRDTInfo().getUpdateNumber(),
                                   publishFrequencyText.getText(),
-                                  ros2BehaviorTreeState.getBehaviorTreeSubscription().getPreviousSequenceID(),
-                                  ros2BehaviorTreeState.getBehaviorTreeSubscription().getOutOfOrderCount()));
+                                  ros2BehaviorTree.getBehaviorTreeSubscription().getPreviousSequenceID(),
+                                  ros2BehaviorTree.getBehaviorTreeSubscription().getOutOfOrderCount()));
 
       super.renderImGuiWidgetsPost();
    }
 
    public void destroy()
    {
-      ros2BehaviorTreeState.destroy();
+      ros2BehaviorTree.destroy();
 
       super.destroy();
    }

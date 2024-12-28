@@ -4,7 +4,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.ai2r.AI2RNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStateBuilder;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeHighLayerBuilder;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
 import us.ihmc.behaviors.door.DoorTraversalDefinition;
 import us.ihmc.behaviors.buildingExploration.BuildingExplorationDefinition;
@@ -35,7 +35,7 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import javax.annotation.Nullable;
 
-public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder<RDXBehaviorTreeNode<?, ?>>
+public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeHighLayerBuilder<RDXBehaviorTreeNode<?, ?>>
 {
    private final DRCRobotModel robotModel;
    private final ROS2SyncedRobotModel syncedRobot;

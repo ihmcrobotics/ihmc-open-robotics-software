@@ -15,7 +15,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
  */
 public class ROS2BehaviorTreeExecutor extends BehaviorTreeExecutor
 {
-   private final ROS2BehaviorTreeState<BehaviorTreeNodeExecutor<?, ?>> ros2BehaviorTreeState;
+   private final ROS2BehaviorTree<BehaviorTreeNodeExecutor<?, ?>> ros2BehaviorTree;
 
    public ROS2BehaviorTreeExecutor(ROS2ControllerHelper ros2ControllerHelper,
                                    DRCRobotModel robotModel,
@@ -27,23 +27,23 @@ public class ROS2BehaviorTreeExecutor extends BehaviorTreeExecutor
    {
       super(robotModel, syncedRobot, peerClockEstimator, referenceFrameLibrary, sceneGraph, detectionManager, ros2ControllerHelper);
 
-      ros2BehaviorTreeState = new ROS2BehaviorTreeState<>(getState(), this::setRootNode, ros2ControllerHelper);
+      ros2BehaviorTree = new ROS2BehaviorTree<>(this, this::setRootNode, ros2ControllerHelper);
    }
 
-   /** Expected to be called at the {@link ROS2BehaviorTreeState#SYNC_FREQUENCY} */
+   /** Expected to be called at the {@link ROS2BehaviorTree#SYNC_FREQUENCY} */
    public void update()
    {
-      ros2BehaviorTreeState.updateSubscription();
+      ros2BehaviorTree.updateSubscription();
 
       // TODO: Consider updating this at a higher rate than the comms
       super.update();
 
-      ros2BehaviorTreeState.updatePublication();
+      ros2BehaviorTree.updatePublication();
    }
 
    public void destroy()
    {
-      ros2BehaviorTreeState.destroy();
+      ros2BehaviorTree.destroy();
 
       super.destroy();
    }
