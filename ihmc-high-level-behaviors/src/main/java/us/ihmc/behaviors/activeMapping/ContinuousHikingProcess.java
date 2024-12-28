@@ -3,17 +3,13 @@ package us.ihmc.behaviors.activeMapping;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.commons.thread.RepeatingTaskThread;
-import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.communication.ContinuousHikingAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.StandAloneRealsenseProcess;
-import us.ihmc.perception.TerrainPerceptionProcessWithDriver;
-import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.tools.thread.ExecutorServiceTools;
@@ -24,7 +20,6 @@ import java.util.concurrent.TimeUnit;
 public class ContinuousHikingProcess
 {
    private final ROS2StoredPropertySetGroup ros2PropertySetGroup;
-   //   private final TerrainPerceptionProcessWithDriver perceptionTask;
    private final ContinuousPlannerSchedulingTask continuousPlannerSchedulingTask;
 
    protected final ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(1,
@@ -61,17 +56,6 @@ public class ContinuousHikingProcess
 
       standAloneRealsenseProcess = new StandAloneRealsenseProcess(ros2Node, ros2Helper, syncedRobot);
 
-      //      perceptionTask = new TerrainPerceptionProcessWithDriver(robotModel.getSimpleRobotName(),
-      //                                                              robotModel.getCollisionBoxProvider(),
-      //                                                              robotModel.createFullRobotModel(),
-      //                                                              RealsenseConfiguration.D455_COLOR_720P_DEPTH_720P_30HZ,
-      //                                                              ros2PropertySetGroup,
-      //                                                              ros2Helper,
-      //                                                              PerceptionAPI.D455_DEPTH_IMAGE,
-      //                                                              PerceptionAPI.D455_COLOR_IMAGE,
-      //                                                              syncedRobot.getReferenceFrames(),
-      //                                                              syncedRobot::update);
-
       continuousPlannerSchedulingTask = new ContinuousPlannerSchedulingTask(robotModel,
                                                                             ros2Node,
                                                                             syncedRobot.getReferenceFrames(),
@@ -79,8 +63,6 @@ public class ContinuousHikingProcess
                                                                             monteCarloPlannerParameters,
                                                                             footstepPlannerParameters,
                                                                             swingPlannerParameters);
-
-      //      perceptionTask.run();
 
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "Shutdown"));
 
