@@ -65,7 +65,8 @@ public class RDXAvailableBehaviorTreeDirectory
       }
       for (WorkspaceResourceDirectory subdirectory : treeFilesDirectory.queryContainedDirectories())
       {
-         RDXAvailableBehaviorTreeDirectory subtreeDirectory = new RDXAvailableBehaviorTreeDirectory(subdirectory, behaviorTree,
+         RDXAvailableBehaviorTreeDirectory subtreeDirectory = new RDXAvailableBehaviorTreeDirectory(subdirectory,
+                                                                                                    behaviorTree,
                                                                                                     topologyOperationQueue,
                                                                                                     referenceFrameLibrary,
                                                                                                     complete);
@@ -128,15 +129,11 @@ public class RDXAvailableBehaviorTreeDirectory
                         nodeToInsert = new RDXBehaviorTreeRootNode(behaviorTree.getAndIncrementNextID(),
                                                                    behaviorTree.getCRDTInfo(),
                                                                    behaviorTree.getSaveFileDirectory());
-                        topologyOperationQueue.queueAddAndModifyNode(loadedNode, nodeToInsert);
+                        topologyOperationQueue.queueAppendChildModify(nodeToInsert, loadedNode);
                      }
 
                      BehaviorTreeNodeInsertionDefinition<RDXBehaviorTreeNode<?, ?>> insertionDefinition
-                           = new BehaviorTreeNodeInsertionDefinition<>(nodeToInsert,
-                                                                       relativeNode,
-                                                                       behaviorTree::setRootNode,
-                                                                       behaviorTree.getRootReferenceModification(),
-                                                                       insertionType);
+                           = new BehaviorTreeNodeInsertionDefinition<>(insertionType, nodeToInsert, relativeNode);
                      complete.accept(insertionDefinition);
                   }
                }

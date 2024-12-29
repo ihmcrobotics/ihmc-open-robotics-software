@@ -108,7 +108,7 @@ public class ROS2BehaviorTreeSubscription<HLT extends BehaviorTreeNodeHighLayer<
                if (rootReferenceModificationIncoming)
                {
                   rootNode = subscriptionRootIsNull ? null : retrieveOrReplicateLocalNode(subscriptionRootNode, rootReferenceModificationIncoming);
-                  topologyOperationQueue.queueSetAndModifyRootNode(rootNode, rootNodeSetter, behaviorTree.getRootReferenceModification());
+                  topologyOperationQueue.queueSetRootNodeModify(rootNode);
                }
 
                if (rootNode != null)
@@ -136,11 +136,11 @@ public class ROS2BehaviorTreeSubscription<HLT extends BehaviorTreeNodeHighLayer<
       // Traverse the latest children list
       if (localNode.getDefinition().getChildrenModification().isModificationIncoming())
       {
-         topologyOperationQueue.queueClearChildren(localNode);
+         topologyOperationQueue.queueClearImmediateChildren(localNode);
          for (ROS2BehaviorTreeSubscriptionNode subscriptionChild : subscriptionNode.getChildren())
          {
             HLT localChildNode = retrieveOrReplicateLocalNode(subscriptionChild, true);
-            topologyOperationQueue.queueAddNode(localChildNode, localNode);
+            topologyOperationQueue.queueAppendChild(localNode, localChildNode);
             retrieveOrReplicateSubreeFromSubscription(subscriptionChild, localChildNode, topologyOperationQueue);
             idToLocalNodesMap.remove(localChildNode.getState().getID());
          }

@@ -153,11 +153,7 @@ public class RDXBehaviorTreeNodeCreationMenu
                                                                         behaviorTree.getSaveFileDirectory());
 
             BehaviorTreeNodeInsertionDefinition<RDXBehaviorTreeNode<?, ?>> insertionDefinition
-                  = new BehaviorTreeNodeInsertionDefinition<>(newNode,
-                                                              relativeNode,
-                                                              behaviorTree::setRootNode,
-                                                              behaviorTree.getRootReferenceModification(),
-                                                              insertionType);
+                  = new BehaviorTreeNodeInsertionDefinition<>(insertionType, newNode, relativeNode);
 
             if (insertionDefinition.getNodeToInsert() instanceof RDXActionNode<?, ?> newAction)
             {
@@ -174,7 +170,7 @@ public class RDXBehaviorTreeNodeCreationMenu
 
    private void complete(BehaviorTreeNodeInsertionDefinition<RDXBehaviorTreeNode<?, ?>> insertionDefinition)
    {
-      topologyOperationQueue.queueInsertNode(insertionDefinition);
+      topologyOperationQueue.queueInsertNodeModify(insertionDefinition);
       ImGui.closeCurrentPopup();
 
       if (insertionDefinition.getParent() != null)

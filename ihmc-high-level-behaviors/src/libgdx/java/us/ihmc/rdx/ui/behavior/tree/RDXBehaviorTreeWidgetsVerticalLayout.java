@@ -93,7 +93,7 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
          ImGui.pushStyleColor(ImGuiCol.Text, ImGuiTools.RED);
          if (ImGui.menuItem(labels.get("Delete Node")))
          {
-            topologyOperationQueue.queueDestroySubtree(node);
+            topologyOperationQueue.queueDestroySubtreeModify(node);
 
             if (node.isRootNode()) // Root node
             {
@@ -186,7 +186,7 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
                {
                   if (ImGui.menuItem(relativeNode.getDefinition().getName()))
                   {
-                     topologyOperationQueue.queueMoveAndModifyNode(nodeToMove, nodeToMove.getParent(), relativeNode, relativeNode, insertionType);
+                     topologyOperationQueue.queueMoveChildModify(nodeToMove.getParent(), relativeNode, nodeToMove, relativeNode, insertionType);
                   }
                }
             }
@@ -194,7 +194,7 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
             {
                if (ImGui.menuItem(relativeNode.getDefinition().getName()))
                {
-                  topologyOperationQueue.queueMoveAndModifyNode(nodeToMove, nodeToMove.getParent(), relativeNode.getParent(), relativeNode, insertionType);
+                  topologyOperationQueue.queueMoveChildModify(nodeToMove.getParent(), relativeNode.getParent(), nodeToMove, relativeNode, insertionType);
                }
             }
          }

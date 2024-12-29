@@ -1,9 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.topology;
 
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeHighLayer;
-import us.ihmc.communication.crdt.LatestTimestampModifiable;
-
-import java.util.function.Consumer;
 
 /**
  * @param <HLT> The generic type of this node high layer: RDX or Executor
@@ -15,14 +12,8 @@ public class BehaviorTreeNodeInsertionDefinition<HLT extends BehaviorTreeNodeHig
    private HLT sibling;
    private HLT parent;
    private int insertionIndex;
-   private LatestTimestampModifiable rootNodeModifiable;
-   private Consumer<HLT> rootNodeSetter;
 
-   public BehaviorTreeNodeInsertionDefinition(HLT nodeToInsert,
-                                              HLT relativeNode,
-                                              Consumer<HLT> rootNodeSetter,
-                                              LatestTimestampModifiable rootNodeModifiable,
-                                              BehaviorTreeNodeInsertionType insertionType)
+   public BehaviorTreeNodeInsertionDefinition(BehaviorTreeNodeInsertionType insertionType, HLT nodeToInsert, HLT relativeNode)
    {
       this.insertionType = insertionType;
 
@@ -54,8 +45,6 @@ public class BehaviorTreeNodeInsertionDefinition<HLT extends BehaviorTreeNodeHig
          case INSERT_ROOT ->
          {
             this.nodeToInsert = nodeToInsert;
-            this.rootNodeModifiable = rootNodeModifiable;
-            this.rootNodeSetter = rootNodeSetter;
          }
       }
    }
@@ -67,6 +56,11 @@ public class BehaviorTreeNodeInsertionDefinition<HLT extends BehaviorTreeNodeHig
          throw new RuntimeException("Sibling's parent cannot be null.");
 
       return parent;
+   }
+
+   public BehaviorTreeNodeInsertionType getInsertionType()
+   {
+      return insertionType;
    }
 
    public HLT getNodeToInsert()
@@ -82,21 +76,6 @@ public class BehaviorTreeNodeInsertionDefinition<HLT extends BehaviorTreeNodeHig
    public HLT getParent()
    {
       return parent;
-   }
-
-   public Consumer<HLT> getRootNodeSetter()
-   {
-      return rootNodeSetter;
-   }
-
-   public LatestTimestampModifiable getRootNodeModifiable()
-   {
-      return rootNodeModifiable;
-   }
-
-   public BehaviorTreeNodeInsertionType getInsertionType()
-   {
-      return insertionType;
    }
 
    public int getInsertionIndex()
