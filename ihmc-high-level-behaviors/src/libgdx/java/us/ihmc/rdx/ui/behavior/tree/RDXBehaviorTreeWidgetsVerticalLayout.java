@@ -93,13 +93,10 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
          ImGui.pushStyleColor(ImGuiCol.Text, ImGuiTools.RED);
          if (ImGui.menuItem(labels.get("Delete Node")))
          {
-            topologyOperationQueue.queueDestroySubtreeModify(node);
-
-            if (node.isRootNode()) // Root node
-            {
-               behaviorTree.setRootNode(null);
-               behaviorTree.getRootReferenceModification().modify();
-            }
+            if (node.isRootNode())
+               topologyOperationQueue.queueDestroyEntireTreeModify();
+            else
+               topologyOperationQueue.queueDestroySubtreeModify(node);
          }
          ImGui.popStyleColor();
 

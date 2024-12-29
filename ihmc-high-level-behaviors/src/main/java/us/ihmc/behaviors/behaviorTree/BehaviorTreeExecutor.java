@@ -3,6 +3,7 @@ package us.ihmc.behaviors.behaviorTree;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.log.LogTools;
@@ -54,10 +55,7 @@ public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeNodeExecutor<
 
    public void destroy()
    {
-      if (rootNode != null)
-      {
-         modifyTreeTopology(topologyOperationQueue -> topologyOperationQueue.queueDestroySubtreeModify(rootNode));
-      }
+      modifyTreeTopology(BehaviorTreeTopologyOperationQueue::queueDestroyEntireTreeModify);
    }
 
    @Override
@@ -90,8 +88,9 @@ public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeNodeExecutor<
                else if (rootNode == null) // Automatically add a root node if there isn't one
                {
                   BehaviorTreeRootNodeExecutor newRootNode = new BehaviorTreeRootNodeExecutor(getAndIncrementNextID(),
-                                                                  getCRDTInfo(),
-                                                                  getSaveFileDirectory());
+                                                                                              getCRDTInfo(),
+                                                                                              getSaveFileDirectory());
+                  newRootNode.getDefinition().modify();
                   topologyOperationQueue.queueAppendChildModify(newRootNode, loadedNode);
                   topologyOperationQueue.queueSetRootNodeModify(newRootNode);
                }

@@ -129,6 +129,7 @@ public class RDXAvailableBehaviorTreeDirectory
                         nodeToInsert = new RDXBehaviorTreeRootNode(behaviorTree.getAndIncrementNextID(),
                                                                    behaviorTree.getCRDTInfo(),
                                                                    behaviorTree.getSaveFileDirectory());
+                        nodeToInsert.getDefinition().modify();
                         topologyOperationQueue.queueAppendChildModify(nodeToInsert, loadedNode);
                      }
 

@@ -85,9 +85,7 @@ public abstract class BehaviorTree<HLT extends BehaviorTreeNodeHighLayer<HLT, ? 
 
    public void deleteRootNode()
    {
-      modifyTreeTopology(topologyOperationQueue -> topologyOperationQueue.queueDestroySubtreeModify(getRootNode()));
-      setRootNode(null);
-      rootReferenceModification.modify();
+      modifyTreeTopology(BehaviorTreeTopologyOperationQueue::queueDestroyEntireTreeModify);
    }
 
    public void toMessage(BehaviorTreeStateMessage message)
