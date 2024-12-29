@@ -81,6 +81,7 @@ public class BehaviorTreeTopologyOperationQueue<HLT extends BehaviorTreeNodeHigh
 
          if (insertionType != BehaviorTreeNodeInsertionType.INSERT_AS_CHILD)
          {
+            // Start with INSERT_BEFORE
             int indexOfRelativeNode = toParent.getChildren().indexOf(relativeNode);
 
             insertionIndex = indexOfRelativeNode;
@@ -88,6 +89,7 @@ public class BehaviorTreeTopologyOperationQueue<HLT extends BehaviorTreeNodeHigh
             if (insertionType == BehaviorTreeNodeInsertionType.INSERT_AFTER)
                ++insertionIndex;
 
+            // When node is moved to a different index of the same parent. i.e. reordering
             if (fromParent == toParent && indexOfRelativeNode > indexOfNodeToMove) // Avoid out of bounds after node's been removed
                --insertionIndex;
          }
