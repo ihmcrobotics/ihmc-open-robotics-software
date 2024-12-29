@@ -26,7 +26,7 @@ public abstract class BehaviorTree<HLT extends BehaviorTreeNodeHighLayer<HLT, ? 
    private final WorkspaceResourceDirectory saveFileDirectory;
    private final BehaviorTreeFileLoader<HLT> fileLoader;
    private final BehaviorTreeNodeHighLayerBuilder<HLT> nodeBuilder;
-   private final BehaviorTreeTopologyOperationQueue<HLT> topologyChangeQueue = new BehaviorTreeTopologyOperationQueue<>();
+   private final BehaviorTreeTopologyOperationQueue<HLT> topologyChangeQueue;
 
    public BehaviorTree(ROS2ActorDesignation actor,
                        ROS2PeerClockOffsetEstimator peerClockEstimator,
@@ -40,6 +40,7 @@ public abstract class BehaviorTree<HLT extends BehaviorTreeNodeHighLayer<HLT, ? 
       rootReferenceModification = new LatestTimestampModifiable(crdtInfo);
       dataModification = new LatestTimestampModifiable(crdtInfo);
       fileLoader = new BehaviorTreeFileLoader<>(this, nodeBuilder, saveFileDirectory);
+      topologyChangeQueue = new BehaviorTreeTopologyOperationQueue<>(this);
    }
 
    /** Used only when modifying tree topology. */
@@ -84,7 +85,7 @@ public abstract class BehaviorTree<HLT extends BehaviorTreeNodeHighLayer<HLT, ? 
 
    public void deleteRootNode()
    {
-      modifyTreeTopology(topologyOperationQueue -> topologyOperationQueue.queueDestroySubtree(getRootNode()));
+      modifyTreeTopology(topologyOperationQueue -> topologyOperationQueue.queueDestroySubtreeModify(getRootNode()));
       setRootNode(null);
       rootReferenceModification.modify();
    }

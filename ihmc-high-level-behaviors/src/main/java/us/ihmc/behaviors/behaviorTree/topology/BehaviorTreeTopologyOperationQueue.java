@@ -1,11 +1,10 @@
 package us.ihmc.behaviors.behaviorTree.topology;
 
+import us.ihmc.behaviors.behaviorTree.BehaviorTree;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeHighLayer;
-import us.ihmc.communication.crdt.LatestTimestampModifiable;
 
 import java.util.LinkedList;
 import java.util.Queue;
-import java.util.function.Consumer;
 
 /**
  * This interface just exists to provide a better name to what this is,
@@ -18,7 +17,13 @@ import java.util.function.Consumer;
  */
 public class BehaviorTreeTopologyOperationQueue<HLT extends BehaviorTreeNodeHighLayer<HLT, ?, ?>>
 {
+   private final BehaviorTree<HLT> behaviorTree;
    private final Queue<BehaviorTreeTopologyOperation> topologyOperationQueue = new LinkedList<>();
+
+   public BehaviorTreeTopologyOperationQueue(BehaviorTree<HLT> behaviorTree)
+   {
+      this.behaviorTree = behaviorTree;
+   }
 
    public boolean performAllQueuedOperations()
    {
@@ -33,87 +38,77 @@ public class BehaviorTreeTopologyOperationQueue<HLT extends BehaviorTreeNodeHigh
       return atLeastOneOperationPerformed;
    }
 
-   public void queueInsertNode(BehaviorTreeNodeInsertionDefinition<HLT> insertionDefinition)
+   public void queueInsertNodeModify(BehaviorTreeNodeInsertionDefinition<HLT> insertionDefinition)
    {
       if (insertionDefinition.getInsertionType() == BehaviorTreeNodeInsertionType.INSERT_ROOT)
       {
-         queueSetAndModifyRootNode(insertionDefinition.getNodeToInsert(),
-                                   insertionDefinition.getRootNodeSetter(),
-                                   insertionDefinition.getRootNodeModifiable());
+         queueSetRootNodeModify(insertionDefinition.getNodeToInsert());
       }
       else
       {
-         queueAddAndModifyNode(insertionDefinition.getNodeToInsert(),
-                               insertionDefinition.getParent(),
-                               insertionDefinition.getInsertionIndex());
+         queueInsertChildModify(insertionDefinition.getParent(), insertionDefinition.getNodeToInsert(), insertionDefinition.getInsertionIndex());
       }
    }
 
-   public void queueSetAndModifyRootNode(HLT node, Consumer<HLT> setter, LatestTimestampModifiable freezableRootHolder)
+   public void queueSetRootNodeModify(HLT rootNode)
    {
       topologyOperationQueue.add(() ->
       {
-         setter.accept(node);
-         if (node != null)
-            node.getDefinition().modify();
-         freezableRootHolder.modify();
+         behaviorTree.setRootNode(rootNode);
+         behaviorTree.getRootReferenceModification().modify();
       });
    }
 
-   public void queueClearChildren(BehaviorTreeNodeHighLayer<?, ?, ?> node)
+   public void queueDestroySubtreeModify(HLT subtreeRoot)
    {
-      topologyOperationQueue.add(() -> BehaviorTreeTopologyOperations.clearChildren(node));
+      topologyOperationQueue.add(() -> BehaviorTreeTopologyOperations.destroySubtreeModify(subtreeRoot));
    }
 
-   public void queueDestroySubtree(BehaviorTreeNodeHighLayer<?, ?, ?> subtree)
-   {
-      topologyOperationQueue.add(() -> BehaviorTreeTopologyOperations.detachAndDestroySubtree(subtree));
-   }
-
-   public void queueAddNode(HLT nodeToAdd, HLT parent)
-   {
-      topologyOperationQueue.add(() -> BehaviorTreeTopologyOperations.add(nodeToAdd, parent));
-   }
-
-   public void queueAddAndModifyNode(HLT nodeToAdd, HLT parent, int insertionIndex)
+   public void queueInsertChildModify(HLT parent, HLT child, int insertionIndex)
    {
       topologyOperationQueue.add(() ->
       {
-         BehaviorTreeTopologyOperations.insertAndModify(nodeToAdd, parent, insertionIndex);
+         BehaviorTreeTopologyOperations.insertChildModify(parent, child, insertionIndex);
       });
    }
 
-   public void queueMoveAndModifyNode(HLT nodeToMove,
-                                      HLT previousParent,
-                                      HLT nextParent,
-                                      HLT relativeNode,
-                                      BehaviorTreeNodeInsertionType insertionType)
+   public void queueMoveChildModify(HLT fromParent, HLT toParent, HLT child, HLT relativeNode, BehaviorTreeNodeInsertionType insertionType)
    {
       topologyOperationQueue.add(() ->
       {
-         int indexOfNodeToMove = previousParent.getChildren().indexOf(nodeToMove);
-         int insertionIndex = nextParent.getChildren().size();
+         int indexOfNodeToMove = fromParent.getChildren().indexOf(child);
+         int insertionIndex = toParent.getChildren().size();
 
          if (insertionType != BehaviorTreeNodeInsertionType.INSERT_AS_CHILD)
          {
-            int indexOfRelativeNode = nextParent.getChildren().indexOf(relativeNode);
+            int indexOfRelativeNode = toParent.getChildren().indexOf(relativeNode);
 
             insertionIndex = indexOfRelativeNode;
 
             if (insertionType == BehaviorTreeNodeInsertionType.INSERT_AFTER)
                ++insertionIndex;
 
-            if (previousParent == nextParent && indexOfRelativeNode > indexOfNodeToMove) // Avoid out of bounds after node's been removed
+            if (fromParent == toParent && indexOfRelativeNode > indexOfNodeToMove) // Avoid out of bounds after node's been removed
                --insertionIndex;
          }
 
-         BehaviorTreeTopologyOperations.moveAndModify(nodeToMove, previousParent, nextParent, insertionIndex);
+         BehaviorTreeTopologyOperations.moveChildModify(toParent, child, insertionIndex);
       });
    }
 
-   public void queueAddAndModifyNode(HLT nodeToAdd, HLT parent)
+   public void queueAppendChildModify(HLT parent, HLT child)
    {
-      topologyOperationQueue.add(() -> BehaviorTreeTopologyOperations.addAndModify(nodeToAdd, parent));
+      topologyOperationQueue.add(() -> BehaviorTreeTopologyOperations.appendChildModify(parent, child));
+   }
+
+   public void queueClearImmediateChildren(HLT node)
+   {
+      topologyOperationQueue.add(() -> BehaviorTreeTopologyOperations.clearImmediateChildren(node));
+   }
+
+   public void queueAppendChild(HLT parent, HLT child)
+   {
+      topologyOperationQueue.add(() -> BehaviorTreeTopologyOperations.appendChild(parent, child));
    }
 
    public void queueOperation(BehaviorTreeTopologyOperation topologyOperation)

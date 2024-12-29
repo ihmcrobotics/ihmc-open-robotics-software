@@ -56,7 +56,7 @@ public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeNodeExecutor<
    {
       if (rootNode != null)
       {
-         modifyTreeTopology(topologyOperationQueue -> topologyOperationQueue.queueDestroySubtree(rootNode));
+         modifyTreeTopology(topologyOperationQueue -> topologyOperationQueue.queueDestroySubtreeModify(rootNode));
       }
    }
 
@@ -85,23 +85,19 @@ public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeNodeExecutor<
             {
                if (loadedNode instanceof BehaviorTreeRootNodeExecutor loadedRootNode) // If we loaded a root node, replace the existing one
                {
-                  topologyOperationQueue.queueSetAndModifyRootNode(loadedRootNode,
-                                                                   this::setRootNode,
-                                                                   getRootReferenceModification());
+                  topologyOperationQueue.queueSetRootNodeModify(loadedRootNode);
                }
                else if (rootNode == null) // Automatically add a root node if there isn't one
                {
                   BehaviorTreeRootNodeExecutor newRootNode = new BehaviorTreeRootNodeExecutor(getAndIncrementNextID(),
                                                                   getCRDTInfo(),
                                                                   getSaveFileDirectory());
-                  topologyOperationQueue.queueAddAndModifyNode(loadedNode, newRootNode);
-                  topologyOperationQueue.queueSetAndModifyRootNode(newRootNode,
-                                                                   this::setRootNode,
-                                                                   getRootReferenceModification());
+                  topologyOperationQueue.queueAppendChildModify(newRootNode, loadedNode);
+                  topologyOperationQueue.queueSetRootNodeModify(newRootNode);
                }
                else // Add the loaded node as a child of the root node
                {
-                  topologyOperationQueue.queueAddAndModifyNode(loadedNode, rootNode);
+                  topologyOperationQueue.queueAppendChildModify(rootNode, loadedNode);
                }
             }
          });

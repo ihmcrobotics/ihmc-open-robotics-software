@@ -110,7 +110,7 @@ public class BehaviorTreeFileLoader<HLT extends BehaviorTreeNodeHighLayer<HLT, ?
 
          if (parentNode != null)
          {
-            topologyOperationQueue.queueAddAndModifyNode(node, parentNode);
+            topologyOperationQueue.queueAppendChildModify(parentNode, node);
          }
 
          JSONTools.forEachArrayElement(jsonNode, "children", childJsonNode ->
