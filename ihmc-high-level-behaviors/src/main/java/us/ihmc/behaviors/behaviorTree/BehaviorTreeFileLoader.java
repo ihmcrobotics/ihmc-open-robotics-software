@@ -80,6 +80,7 @@ public class BehaviorTreeFileLoader<HLT extends BehaviorTreeNodeHighLayer<HLT, ?
                                            behaviorTree.getAndIncrementNextID(),
                                            behaviorTree.getCRDTInfo(),
                                            behaviorTree.getSaveFileDirectory());
+         node.getDefinition().modify();
          node.getDefinition().loadFromFile(jsonNode);
 
          // Make sure the node is named the same as the file including subdirectory

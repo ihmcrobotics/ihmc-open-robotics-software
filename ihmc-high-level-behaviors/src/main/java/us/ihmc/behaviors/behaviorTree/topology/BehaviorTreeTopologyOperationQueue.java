@@ -50,12 +50,32 @@ public class BehaviorTreeTopologyOperationQueue<HLT extends BehaviorTreeNodeHigh
       }
    }
 
+   public void queueSetRootNode(HLT rootNode)
+   {
+      topologyOperationQueue.add(() ->
+      {
+         behaviorTree.setRootNode(rootNode);
+      });
+   }
+
    public void queueSetRootNodeModify(HLT rootNode)
    {
       topologyOperationQueue.add(() ->
       {
          behaviorTree.setRootNode(rootNode);
          behaviorTree.getRootReferenceModification().modify();
+      });
+   }
+
+   public void queueDestroyEntireTreeModify()
+   {
+      topologyOperationQueue.add(() ->
+      {
+         HLT rootNode = behaviorTree.getRootNode();
+         behaviorTree.setRootNode(null);
+         behaviorTree.getRootReferenceModification().modify();
+         if (rootNode != null)
+            BehaviorTreeTopologyOperations.destroySubtreeModify(rootNode);
       });
    }
 
