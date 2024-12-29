@@ -36,7 +36,7 @@ public abstract class BehaviorTree<HLT extends BehaviorTreeNodeHighLayer<HLT, ? 
       this.nodeBuilder = nodeBuilder;
       this.saveFileDirectory = saveFileDirectory;
 
-      crdtInfo = new CRDTInfo(ROS2ActorDesignation.ROBOT, peerClockEstimator);
+      crdtInfo = new CRDTInfo(actor, peerClockEstimator);
       rootReferenceModification = new LatestTimestampModifiable(crdtInfo);
       dataModification = new LatestTimestampModifiable(crdtInfo);
       fileLoader = new BehaviorTreeFileLoader<>(this, nodeBuilder, saveFileDirectory);
