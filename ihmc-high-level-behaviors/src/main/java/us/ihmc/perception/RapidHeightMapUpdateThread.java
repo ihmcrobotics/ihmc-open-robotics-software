@@ -57,12 +57,14 @@ public class RapidHeightMapUpdateThread extends RepeatingTaskThread
          // Initialize
          if (heightMapManager == null)
          {
-            heightMapManager = new RapidHeightMapManager(ros2,
-                                                         syncedRobotModel.getRobotModel(),
+            heightMapManager = new RapidHeightMapManager(syncedRobotModel.getRobotModel().getSimpleRobotName(),
                                                          leftFootFrame,
                                                          rightFootFrame,
                                                          depthImage.getIntrinsicsCopy(),
                                                          runWithCUDA);
+            heightMapManager.attachResetRequestSubscriber(ros2);
+            heightMapManager.attachResetOnStateChangeSubscriber(ros2);
+            heightMapManager.createHeightMapPublisher(ros2);
          }
 
          // Update height map

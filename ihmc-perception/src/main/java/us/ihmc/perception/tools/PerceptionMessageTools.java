@@ -91,7 +91,7 @@ public class PerceptionMessageTools
 
    public static void publishJPGCompressedColorImage(BytePointer compressedColorPointer,
                                                      ROS2Topic<ImageMessage> topic,
-                                                     ImageMessage colorImageMessage,
+                                                     ImageMessage colorImageMessageToPack,
                                                      ROS2Helper helper,
                                                      Pose3DReadOnly cameraPose,
                                                      Instant acquisitionTime,
@@ -100,8 +100,8 @@ public class PerceptionMessageTools
                                                      int width,
                                                      float depthToMetersRatio)
    {
-      packJPGCompressedColorImage(compressedColorPointer, colorImageMessage, cameraPose, acquisitionTime, sequenceNumber, height, width, depthToMetersRatio);
-      helper.publish(topic, colorImageMessage);
+      packJPGCompressedColorImage(compressedColorPointer, colorImageMessageToPack, cameraPose, acquisitionTime, sequenceNumber, height, width, depthToMetersRatio);
+      helper.publish(topic, colorImageMessageToPack);
    }
 
    public static void publishFramePlanarRegionsList(FramePlanarRegionsList framePlanarRegionsList,
@@ -133,7 +133,7 @@ public class PerceptionMessageTools
    }
 
    public static void packCompressedDepthImage(BytePointer compressedDepthPointer,
-                                               ImageMessage depthImageMessage,
+                                               ImageMessage depthImageMessageToPack,
                                                Pose3DReadOnly cameraPose,
                                                Instant aquisitionTime,
                                                long sequenceNumber,
@@ -141,13 +141,13 @@ public class PerceptionMessageTools
                                                int width,
                                                float depthToMetersRatio)
    {
-      packImageMessage(depthImageMessage, compressedDepthPointer, cameraPose, aquisitionTime, sequenceNumber, height, width, depthToMetersRatio);
-      depthImageMessage.setPixelFormat(PixelFormat.GRAY16.toByte());
-      depthImageMessage.setCompressionType(CompressionType.PNG.toByte());
+      packImageMessage(depthImageMessageToPack, compressedDepthPointer, cameraPose, aquisitionTime, sequenceNumber, height, width, depthToMetersRatio);
+      depthImageMessageToPack.setPixelFormat(PixelFormat.GRAY16.toByte());
+      depthImageMessageToPack.setCompressionType(CompressionType.PNG.toByte());
    }
 
    public static void packJPGCompressedColorImage(BytePointer compressedColorPointer,
-                                                  ImageMessage colorImageMessage,
+                                                  ImageMessage colorImageMessageToPack,
                                                   Pose3DReadOnly cameraPose,
                                                   Instant aquisitionTime,
                                                   long sequenceNumber,
@@ -155,12 +155,12 @@ public class PerceptionMessageTools
                                                   int width,
                                                   float depthToMetersRatio)
    {
-      packImageMessage(colorImageMessage, compressedColorPointer, cameraPose, aquisitionTime, sequenceNumber, height, width, depthToMetersRatio);
-      colorImageMessage.setPixelFormat(PixelFormat.YUV_I420.toByte());
-      colorImageMessage.setCompressionType(CompressionType.JPEG.toByte());
+      packImageMessage(colorImageMessageToPack, compressedColorPointer, cameraPose, aquisitionTime, sequenceNumber, height, width, depthToMetersRatio);
+      colorImageMessageToPack.setPixelFormat(PixelFormat.YUV_I420.toByte());
+      colorImageMessageToPack.setCompressionType(CompressionType.JPEG.toByte());
    }
 
-   public static void packImageMessage(ImageMessage imageMessage,
+   public static void packImageMessage(ImageMessage imageMessageToPack,
                                        BytePointer dataBytePointer,
                                        Pose3DReadOnly cameraPose,
                                        Instant aquisitionTime,
@@ -169,14 +169,14 @@ public class PerceptionMessageTools
                                        int width,
                                        float depthToMetersRatio)
    {
-      packImageMessageData(imageMessage, dataBytePointer);
-      imageMessage.setImageHeight(height);
-      imageMessage.setImageWidth(width);
-      imageMessage.getPosition().set(cameraPose.getPosition());
-      imageMessage.getOrientation().set(cameraPose.getOrientation());
-      imageMessage.setSequenceNumber(sequenceNumber);
-      MessageTools.toMessage(aquisitionTime, imageMessage.getAcquisitionTime());
-      imageMessage.setDepthDiscretization(depthToMetersRatio);
+      packImageMessageData(imageMessageToPack, dataBytePointer);
+      imageMessageToPack.setImageHeight(height);
+      imageMessageToPack.setImageWidth(width);
+      imageMessageToPack.getPosition().set(cameraPose.getPosition());
+      imageMessageToPack.getOrientation().set(cameraPose.getOrientation());
+      imageMessageToPack.setSequenceNumber(sequenceNumber);
+      MessageTools.toMessage(aquisitionTime, imageMessageToPack.getAcquisitionTime());
+      imageMessageToPack.setDepthDiscretization(depthToMetersRatio);
    }
 
    public static void packImageMessage(RawImage originalImage,
