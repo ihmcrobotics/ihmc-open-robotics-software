@@ -131,7 +131,7 @@ public class ROS2BehaviorTreeSubscription<HLT extends BehaviorTreeNodeHighLayer<
                                                           BehaviorTreeTopologyOperationQueue<HLT> topologyOperationQueue)
    {
       // Update the node first, to detect incoming modifications
-      ROS2BehaviorTreeMessageTools.fromMessage(behaviorTree.getCRDTInfo(), subscriptionNode, localNode.getState());
+      ROS2BehaviorTreeMessageTools.fromMessage(subscriptionNode, localNode.getState());
 
       // Traverse the latest children list
       if (localNode.getDefinition().getChildrenModification().isModificationIncoming())
