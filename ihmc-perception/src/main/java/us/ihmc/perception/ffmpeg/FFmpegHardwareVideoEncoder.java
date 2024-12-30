@@ -7,6 +7,7 @@ import org.bytedeco.ffmpeg.avutil.AVBufferRef;
 import org.bytedeco.ffmpeg.avutil.AVDictionary;
 import org.bytedeco.ffmpeg.avutil.AVHWFramesContext;
 import org.bytedeco.javacpp.Pointer;
+import org.bytedeco.opencv.global.opencv_cudaarithm;
 import org.bytedeco.opencv.global.opencv_cudaimgproc;
 import org.bytedeco.opencv.global.opencv_cudawarping;
 import org.bytedeco.opencv.opencv_core.GpuMat;
@@ -34,6 +35,8 @@ public class FFmpegHardwareVideoEncoder extends FFmpegVideoEncoder
    private final Size resizeTarget;
    private final GpuMat tempGpuMat;
 
+   private final int inputPixelFormat;
+
    /**
     * Creates a new video encoder. Must call {@link FFmpegEncoder#initialize(AVDictionary)} after this.
     * @param outputFormat The format of encoded output
@@ -58,6 +61,8 @@ public class FFmpegHardwareVideoEncoder extends FFmpegVideoEncoder
                                      int inputPixelFormat)
    {
       super(outputFormat, preferredEncoderName, bitRate, outputWidth, outputHeight, groupOfPicturesSize, maxBFrames);
+
+      this.inputPixelFormat = inputPixelFormat;
 
       outputSize = new Size(outputWidth, outputHeight);
       resizeTarget = new Size();
@@ -109,7 +114,13 @@ public class FFmpegHardwareVideoEncoder extends FFmpegVideoEncoder
    {
       if (gpuImageToEncode instanceof GpuMat mat)
       {
-         GpuMatVector matVector = new GpuMatVector(mat);
+         // TODO: This doesn't work? Figure out CUDA planar data
+         GpuMatVector matVector = new GpuMatVector();
+         if (FFmpegTools.isPixelFormatPlanar(inputPixelFormat))
+            opencv_cudaarithm.split(mat, matVector);
+         else
+            matVector.put(mat);
+
          prepareFrameForEncoding(matVector);
          matVector.close();
       }

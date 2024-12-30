@@ -6,6 +6,7 @@ import org.bytedeco.ffmpeg.avutil.AVFrame;
 import org.bytedeco.ffmpeg.swscale.SwsContext;
 import org.bytedeco.javacpp.DoublePointer;
 import org.bytedeco.javacpp.Pointer;
+import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
@@ -25,6 +26,8 @@ public class FFmpegSoftwareVideoEncoder extends FFmpegVideoEncoder
 
    private final AVFrame frameToScale;
    private final Mat tempMat;
+
+   private final int inputPixelFormat;
 
    /**
     * Creates a new video encoder. Must call {@link FFmpegEncoder#initialize(AVDictionary)} after this.
@@ -52,6 +55,8 @@ public class FFmpegSoftwareVideoEncoder extends FFmpegVideoEncoder
                                      int inputPixelFormat)
    {
       super(outputFormat, preferredEncoderName, bitRate, outputWidth, outputHeight, groupOfPicturesSize, maxBFrames);
+
+      this.inputPixelFormat = inputPixelFormat;
 
       tempMat = new Mat();
 
@@ -82,7 +87,12 @@ public class FFmpegSoftwareVideoEncoder extends FFmpegVideoEncoder
    {
       if (imageToEncode instanceof Mat mat)
       {
-         MatVector matVector = new MatVector(mat);
+         MatVector matVector = new MatVector();
+         if (FFmpegTools.isPixelFormatPlanar(inputPixelFormat))
+            opencv_core.split(mat, matVector);
+         else
+            matVector.put(mat);
+
          prepareFrameForEncoding(matVector);
          matVector.close();
       }
