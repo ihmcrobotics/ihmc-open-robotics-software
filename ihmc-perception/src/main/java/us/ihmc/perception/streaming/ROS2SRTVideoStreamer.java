@@ -19,8 +19,9 @@ import static org.bytedeco.ffmpeg.global.avutil.*;
 
 public class ROS2SRTVideoStreamer
 {
-   private static final String PREFERRED_COLOR_CODEC = "hevc_nvenc";
-   private static final String COLOR_OUTPUT_FORMAT = "mpegts";
+   private static final String SOFTWARE_COLOR_CODEC = null; // let LibAV choose an HEVC codec
+   private static final String HARDWARE_COLOR_CODEC = "hevc_nvenc";
+   private static final String COLOR_OUTPUT_FORMAT = "hevc";
    private static final String PREFERRED_DEPTH_CODEC = "ffv1";
    private static final String DEPTH_OUTPUT_FORMAT = "matroska";
    private static final int COLOR_OUTPUT_PIXEL_FORMAT = AV_PIX_FMT_YUV444P;
@@ -76,7 +77,9 @@ public class ROS2SRTVideoStreamer
 
    public void initializeForColor(int imageWidth, int imageHeight, int inputPixelFormat, int intermediateColorConversion, boolean useHardwareAcceleration)
    {
-      Map<String, String> hevcOptions = StreamingTools.getHEVCNVENCStreamingOptions();
+      Map<String, String> hevcOptions = useHardwareAcceleration ?
+            StreamingTools.getHEVCNVENCStreamingOptions() :
+            StreamingTools.getHEVCStreamingOptions();
       hevcOptions.put("udu_sei", "1");
       videoStreamer.initialize(imageWidth,
                                imageHeight,
@@ -84,7 +87,7 @@ public class ROS2SRTVideoStreamer
                                COLOR_OUTPUT_PIXEL_FORMAT,
                                intermediateColorConversion,
                                COLOR_OUTPUT_FORMAT,
-                               PREFERRED_COLOR_CODEC,
+                               useHardwareAcceleration ? HARDWARE_COLOR_CODEC : SOFTWARE_COLOR_CODEC,
                                hevcOptions,
                                useHardwareAcceleration);
       isStreamingDepth = false;

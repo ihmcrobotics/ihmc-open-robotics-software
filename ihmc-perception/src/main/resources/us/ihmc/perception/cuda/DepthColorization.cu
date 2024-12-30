@@ -30,7 +30,7 @@ void colorizeDepth(unsigned short* depthImage, size_t depthPitch,
         {
             unsigned short depthValue = depthRow[x];
 
-            unsigned char normalizedDepth = (depthValue + 128) / COLOR_RANGE;
+            unsigned char normalizedDepth = 255 - (depthValue + 128) / COLOR_RANGE;
             
             unsigned short ha = depthValue % PERIOD;
             if (ha > MAX_COLOR_VAL)
@@ -68,7 +68,7 @@ void deColorizeDepth(unsigned char* colorizedImage, size_t colorizedPitch,
 
         for (int x = coordX; x < cols; x += strideX)
         {
-            unsigned char normalizedDepth = colorizedRow[3 * x + 0];
+            unsigned char normalizedDepth = 255 - colorizedRow[3 * x + 0];
             unsigned char ha = colorizedRow[3 * x + 1];
             unsigned char hb = colorizedRow[3 * x + 2];
 
