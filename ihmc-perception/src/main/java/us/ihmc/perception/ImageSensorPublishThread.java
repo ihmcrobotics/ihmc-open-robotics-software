@@ -28,15 +28,6 @@ public class ImageSensorPublishThread extends RepeatingTaskThread
       publisher = new RawImagePublisher(ros2Node);
    }
 
-   public ImageSensorPublishThread(ROS2Node ros2Node,
-                                   ImageSensor sensorToPublish,
-                                   Map<Integer, ROS2Topic<? extends Packet<?>>> imageKeyToTopicMap,
-                                   double publishFrequencyLimit)
-   {
-      this(ros2Node, sensorToPublish, imageKeyToTopicMap);
-      setFrequencyLimit(publishFrequencyLimit);
-   }
-
    @Override
    public ImageSensorPublishThread setFrequencyLimit(double publishFrequencyLimit)
    {
