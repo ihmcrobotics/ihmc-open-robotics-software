@@ -27,7 +27,7 @@ public interface BehaviorTreeNodeHighLayer<HLT extends BehaviorTreeNodeHighLayer
    @Override
    default void destroy()
    {
-      LogTools.info("Destroying node: {}:{}", getDefinition().getName(), getState().getID());
+      LogTools.info("{}: Destroying node: {}:{}", getClass().getSimpleName(), getDefinition().getName(), getState().getID());
       getState().destroy();
    }
 }

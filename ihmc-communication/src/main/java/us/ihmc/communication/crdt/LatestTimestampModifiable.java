@@ -8,6 +8,11 @@ import us.ihmc.pubsub.common.Guid;
 
 import java.time.Instant;
 
+/**
+ * Keeps track of the latest time associated data was modified, for
+ * the purpose of network synchronization. The association to data is
+ * external to this class.
+ */
 public class LatestTimestampModifiable
 {
    private final CRDTInfo crdtInfo;
@@ -23,8 +28,17 @@ public class LatestTimestampModifiable
       this.crdtInfo = crdtInfo;
    }
 
+   /**
+    * Call to mark this data as holding the latest valid values.
+    * These values will propagate to the rest of the system until
+    * this method is called again on this data instance here
+    * or somewhere else. This method records a timestamp to compare
+    * against latest remote modifications.
+    */
    public void modify()
    {
+      LogTools.debug(1, "MODIFY");
+
       if (crdtInfo.isMultiMachineNetwork())
          latestModifier.set(crdtInfo.getPeerClockEstimator().getOurGuid());
       latestModificationTime = Instant.now();

@@ -50,9 +50,9 @@ public class BehaviorTreeNodeDefinition extends LatestTimestampModifiable implem
    {
       super(crdtInfo);
 
-      this.childrenModification = new LatestTimestampModifiable(crdtInfo);
       this.saveFileDirectory = saveFileDirectory;
 
+      childrenModification = new LatestTimestampModifiable(crdtInfo);
       name = new CRDTBidirectionalString(this, BehaviorTreeDefinitionRegistry.getInitialName(getClass()));
       notes = new CRDTBidirectionalString(this, "");
    }
