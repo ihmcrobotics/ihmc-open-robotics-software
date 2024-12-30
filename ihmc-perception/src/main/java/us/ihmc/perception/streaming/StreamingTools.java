@@ -36,17 +36,13 @@ public class StreamingTools
       return new HashMap<>(LIVE_SRT_OPTIONS);
    }
 
-   private static final Map<String, String> HEVC_STREAMING_OPTIONS
-         = Map.ofEntries(entry("preset", "llhq"),
-                         entry("tune", "ull"),
-                         entry("rc", "constqp"),
-                         entry("qp", "10"),
-                         entry("cq", "0"),
-                         entry("gpu", "any"));
+   private static final Map<String, String> LIBX265_STREAMING_OPTIONS
+         = Map.ofEntries(entry("threads", "16"),
+                         entry("x265-params", "lossless=true"));
 
-   public static Map<String, String> getHEVCStreamingOptions()
+   public static Map<String, String> getLibX265StreamingOptions()
    {
-      return new HashMap<>(HEVC_STREAMING_OPTIONS);
+      return new HashMap<>(LIBX265_STREAMING_OPTIONS);
    }
 
    /** hevc_nvenc options can be found using {@code ffmpeg -hide_banner -h encoder=hevc_nvenc}. */
