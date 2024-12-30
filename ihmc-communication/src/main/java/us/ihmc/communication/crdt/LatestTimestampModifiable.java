@@ -57,9 +57,13 @@ public class LatestTimestampModifiable
     * @return If we changed this data locally and it needs to be sent out.
     *         To be used after call to {@link #modify}.
     */
-   public boolean isModificationOutgoing()
+   public boolean pollModificationOutgoing()
    {
-      return modificationOutgoing;
+      boolean priorValue = modificationOutgoing;
+      if (priorValue)
+         LogTools.debug("{}: OUTGOING = false", debugName);
+      modificationOutgoing = false;
+      return priorValue;
    }
 
    /**
@@ -76,9 +80,6 @@ public class LatestTimestampModifiable
    {
       MessageTools.toMessage(latestModifier, message.getLatestModifierId());
       MessageTools.toMessage(latestModificationTime, message.getLatestModificationTimeInModifierFrame());
-      if (modificationOutgoing)
-         LogTools.debug("{}: OUTGOING = false", debugName);
-      modificationOutgoing = false;
    }
 
    public void fromMessage(LatestModificationMessage message)
