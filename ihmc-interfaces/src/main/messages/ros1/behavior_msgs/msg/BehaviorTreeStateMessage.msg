@@ -17,9 +17,9 @@ int8 CONDITION_NODE=5
 
 int8 GOTO_NODE=6
 
-int8 DOOR_TRAVERSAL=7
+int8 CHECKPOINT_NODE=7
 
-int8 TRASH_CAN_INTERACTION=8
+int8 DOOR_TRAVERSAL=8
 
 int8 BUILDING_EXPLORATION=9
 
@@ -72,9 +72,9 @@ behavior_msgs/ConditionNodeStateMessage[] condition_nodes
 
 behavior_msgs/GotoNodeStateMessage[] goto_nodes
 
-behavior_msgs/DoorTraversalStateMessage[] door_traversals
+behavior_msgs/CheckPointNodeStateMessage[] checkpoint_nodes
 
-behavior_msgs/TrashCanInteractionStateMessage[] trash_can_interactions
+behavior_msgs/DoorTraversalStateMessage[] door_traversals
 
 behavior_msgs/BuildingExplorationStateMessage[] building_explorations
 

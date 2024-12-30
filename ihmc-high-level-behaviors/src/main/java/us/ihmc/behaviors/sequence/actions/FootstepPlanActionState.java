@@ -38,6 +38,7 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
    private final SideDependentList<CRDTStatusPose3D> currentFootPoses = new SideDependentList<>();
    private final CRDTStatusEnumField<FootstepPlanActionExecutionState> executionState;
    private final CRDTStatusFootstepList previewFootsteps;
+   private boolean abortWalking;
 
    public FootstepPlanActionState(long id,
                                   CRDTInfo crdtInfo,
@@ -236,5 +237,15 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
    public CRDTStatusFootstepList getPreviewFootsteps()
    {
       return previewFootsteps;
+   }
+
+   public boolean getAbortWalking()
+   {
+      return abortWalking;
+   }
+
+   public void setAbortWalking(boolean abort)
+   {
+      abortWalking = abort;
    }
 }
