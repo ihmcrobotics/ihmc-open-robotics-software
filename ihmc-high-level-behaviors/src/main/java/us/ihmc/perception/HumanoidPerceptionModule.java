@@ -20,6 +20,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.perception.filters.CollidingScanRegionFilter;
+import us.ihmc.perception.gpuHeightMap.FootBasedDefaultHeightProvider;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.heightMap.RemoteHeightMapUpdater;
 import us.ihmc.perception.opencl.OpenCLManager;
@@ -312,8 +313,8 @@ public class HumanoidPerceptionModule
    {
       LogTools.info("Rapid Height Map: {}", cameraIntrinsics);
       rapidHeightMapExtractor = new RapidHeightMapExtractor(openCLManager,
-                                                            referenceFrames.getSoleFrame(RobotSide.LEFT),
-                                                            referenceFrames.getSoleFrame(RobotSide.RIGHT),
+                                                            new FootBasedDefaultHeightProvider(referenceFrames.getSoleFrame(RobotSide.LEFT),
+                                                                                               referenceFrames.getSoleFrame(RobotSide.RIGHT)),
                                                             realsenseDepthImage,
                                                             1);
       rapidHeightMapExtractor.setDepthIntrinsics(cameraIntrinsics);

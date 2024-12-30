@@ -4,6 +4,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.perception.gpuHeightMap.FootBasedDefaultHeightProvider;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensors.ImageSensor;
@@ -58,8 +59,7 @@ public class RapidHeightMapUpdateThread extends RepeatingTaskThread
          if (heightMapManager == null)
          {
             heightMapManager = new RapidHeightMapManager(syncedRobotModel.getRobotModel().getSimpleRobotName(),
-                                                         leftFootFrame,
-                                                         rightFootFrame,
+                                                         new FootBasedDefaultHeightProvider(leftFootFrame, rightFootFrame),
                                                          depthImage.getIntrinsicsCopy(),
                                                          runWithCUDA);
             heightMapManager.attachResetRequestSubscriber(ros2);

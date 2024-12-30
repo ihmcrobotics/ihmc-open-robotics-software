@@ -12,6 +12,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.camera.CameraIntrinsics;
+import us.ihmc.perception.gpuHeightMap.FootBasedDefaultHeightProvider;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractorCUDA;
 import us.ihmc.perception.tools.PerceptionMessageTools;
@@ -94,7 +95,7 @@ public class RDXRapidHeightMapExtractorCUDADemo
 
             heightMapImage = new GpuMat(intrinsics.getWidth(), intrinsics.getHeight(), opencv_core.CV_16UC1);
 
-            extractor = new RapidHeightMapExtractorCUDA(leftFootSoleFrame, rightFootSoleFrame, heightMapImage, 1);
+            extractor = new RapidHeightMapExtractorCUDA(new FootBasedDefaultHeightProvider(leftFootSoleFrame, rightFootSoleFrame), heightMapImage, 1);
             extractor.setDepthIntrinsics(intrinsics);
 
             baseUI.getPrimaryScene().addRenderableProvider(heightMapGraphic, RDXSceneLevel.MODEL);

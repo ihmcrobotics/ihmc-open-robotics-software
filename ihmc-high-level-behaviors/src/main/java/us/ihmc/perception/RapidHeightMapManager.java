@@ -15,6 +15,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.camera.CameraIntrinsics;
+import us.ihmc.perception.gpuHeightMap.DefaultHeightProvider;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractorCUDA;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractorInterface;
@@ -48,8 +49,7 @@ public class RapidHeightMapManager
    private ROS2PublishSubscribeAPI heightMapPublisher;
 
    public RapidHeightMapManager(String simpleRobotName,
-                                ReferenceFrame leftFootSoleFrame,
-                                ReferenceFrame rightFootSoleFrame,
+                                DefaultHeightProvider defaultHeightProvider,
                                 CameraIntrinsics depthImageIntrinsics,
                                 boolean runWithCUDA)
    {
@@ -59,14 +59,14 @@ public class RapidHeightMapManager
       if (runWithCUDA)
       {
          deviceDepthImage = new GpuMat(depthImageIntrinsics.getHeight(), depthImageIntrinsics.getWidth(), opencv_core.CV_16UC1);
-         rapidHeightMapExtractor = new RapidHeightMapExtractorCUDA(leftFootSoleFrame, rightFootSoleFrame, deviceDepthImage, 1);
+         rapidHeightMapExtractor = new RapidHeightMapExtractorCUDA(defaultHeightProvider, deviceDepthImage, 1);
       }
       else
       {
          OpenCLManager openCLManager = new OpenCLManager();
          heightMapBytedecoImage = new BytedecoImage(depthImageIntrinsics.getWidth(), depthImageIntrinsics.getHeight(), opencv_core.CV_16UC1);
          heightMapBytedecoImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
-         rapidHeightMapExtractor = new RapidHeightMapExtractor(openCLManager, leftFootSoleFrame, rightFootSoleFrame, heightMapBytedecoImage, 1);
+         rapidHeightMapExtractor = new RapidHeightMapExtractor(openCLManager, defaultHeightProvider, heightMapBytedecoImage, 1);
       }
 
       rapidHeightMapExtractor.setDepthIntrinsics(depthImageIntrinsics);

@@ -66,7 +66,7 @@ public class RapidHeightMapExtractor implements RapidHeightMapExtractorInterface
    private final TerrainMapStatistics terrainMapStatistics = new TerrainMapStatistics();
 
 //   private HeightMapAutoencoder denoiser;
-   private final SideDependentList<ReferenceFrame> footSoleFrames = new SideDependentList<>();
+   private final DefaultHeightProvider defaultHeightProvider;
    private OpenCLManager openCLManager;
    private OpenCLFloatParameters parametersBuffer;
    private OpenCLFloatParameters snappingParametersBuffer;
@@ -119,16 +119,15 @@ public class RapidHeightMapExtractor implements RapidHeightMapExtractorInterface
    private Mat denoisedHeightMapImage;
    private Rect cropWindowRectangle;
 
-   public RapidHeightMapExtractor(OpenCLManager openCLManager, ReferenceFrame leftFootSoleFrame, ReferenceFrame rightFootSoleFrame, BytedecoImage depthImage, int mode)
-   {
-      this(openCLManager,  depthImage, mode);
-      footSoleFrames.put(RobotSide.LEFT, leftFootSoleFrame);
-      footSoleFrames.put(RobotSide.RIGHT, rightFootSoleFrame);
-   }
-
    public RapidHeightMapExtractor(OpenCLManager openCLManager, BytedecoImage depthImage, int mode)
    {
+      this(openCLManager, new ZeroDefaultHeightProvider(), depthImage, mode);
+   }
+
+   public RapidHeightMapExtractor(OpenCLManager openCLManager, DefaultHeightProvider defaultHeightProvider, BytedecoImage depthImage, int mode)
+   {
       this.openCLManager = openCLManager;
+      this.defaultHeightProvider = defaultHeightProvider;
 
       rapidHeightMapUpdaterProgram = openCLManager.loadProgram("RapidHeightMapExtractor", "HeightMapUtils.cl");
 
@@ -497,14 +496,7 @@ public class RapidHeightMapExtractor implements RapidHeightMapExtractorInterface
 
    public void reset()
    {
-      double thicknessOfTheFoot = 0.02;
-      double height = 0.0f;
-
-      if (footSoleFrames.sides().length == 2)
-      {
-         height = Math.min(footSoleFrames.get(RobotSide.LEFT).getTransformToWorldFrame().getTranslationZ(),
-                           footSoleFrames.get(RobotSide.RIGHT).getTransformToWorldFrame().getTranslationZ()) - thicknessOfTheFoot;
-      }
+      double height = defaultHeightProvider.computeDefaultHeight();
 
       int offset = (int) ((height + heightMapParameters.getHeightOffset()) * heightMapParameters.getHeightScaleFactor());
       localHeightMapImage.getBytedecoOpenCVMat().put(new Scalar(offset));

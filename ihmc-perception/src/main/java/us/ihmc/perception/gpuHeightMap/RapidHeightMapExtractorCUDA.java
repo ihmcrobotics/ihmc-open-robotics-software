@@ -61,7 +61,7 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
 
    private TerrainMapData terrainMapData;
 
-   private final SideDependentList<ReferenceFrame> footSoleFrames = new SideDependentList<>();
+   private final DefaultHeightProvider defaultHeightProvider;
 
    private Rect cropWindowRectangle;
 
@@ -108,10 +108,14 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
    private dim3 registerKernelGridDim;
    private dim3 croppingKernelGridDim;
 
-   public RapidHeightMapExtractorCUDA(ReferenceFrame leftFootSoleFrame, ReferenceFrame rightFootSoleFrame, GpuMat depthImage, int mode)
+   public RapidHeightMapExtractorCUDA(GpuMat depthImage, int mode)
    {
-      footSoleFrames.put(RobotSide.LEFT, leftFootSoleFrame);
-      footSoleFrames.put(RobotSide.RIGHT, rightFootSoleFrame);
+      this(new ZeroDefaultHeightProvider(), depthImage, mode);
+   }
+
+   public RapidHeightMapExtractorCUDA(DefaultHeightProvider defaultHeightProvider, GpuMat depthImage, int mode)
+   {
+      this.defaultHeightProvider = defaultHeightProvider;
 
       inputDepthImage = depthImage;
       this.mode = mode;
@@ -200,14 +204,8 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
 
    public void reset()
    {
-      double thicknessOfTheFoot = 0.02;
-      double height = 0.0;
+      double height = defaultHeightProvider.computeDefaultHeight();
 
-      if (footSoleFrames.sides().length == 2)
-      {
-         height = Math.min(footSoleFrames.get(RobotSide.LEFT).getTransformToWorldFrame().getTranslationZ(),
-                           footSoleFrames.get(RobotSide.RIGHT).getTransformToWorldFrame().getTranslationZ()) - thicknessOfTheFoot;
-      }
       int offset = (int) ((height + heightMapParameters.getHeightOffset()) * heightMapParameters.getHeightScaleFactor());
 
       localHeightMapImage.setTo(new Scalar(offset));
