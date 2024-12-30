@@ -320,7 +320,7 @@ extern "C" __global__ void heightMapUpdateKernel(unsigned short *in, size_t pitc
 
     // Search within the window in the depth image
     for (int pitchOffset = -static_cast<int>(params[SEARCH_WINDOW_HEIGHT] / 2);
-         pitchOffset < static_cast<int>(params[SEARCH_WINDOW_HEIGHT] / 2 + 1); pitchOffset += skip)
+         pitchOffset < static_cast<int>(params[SEARCH_WINDOW_HEIGHT] / 2); pitchOffset += skip)
     {
         int pitchIdx = projectedPoint.y + pitchOffset;
 
