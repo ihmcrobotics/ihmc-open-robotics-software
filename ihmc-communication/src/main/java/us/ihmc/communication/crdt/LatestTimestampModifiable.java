@@ -43,11 +43,13 @@ public class LatestTimestampModifiable
     */
    public void modify()
    {
-      LogTools.debug(1, debugName + ": OUTGOING = true");
-
       if (crdtInfo.isMultiMachineNetwork())
          latestModifier.set(crdtInfo.getPeerClockEstimator().getOurGuid());
       latestModificationTime = Instant.now();
+
+      if (!modificationOutgoing)
+         LogTools.debug("{}: OUTGOING = true", debugName);
+
       modificationOutgoing = true;
    }
 
@@ -75,14 +77,14 @@ public class LatestTimestampModifiable
       MessageTools.toMessage(latestModifier, message.getLatestModifierId());
       MessageTools.toMessage(latestModificationTime, message.getLatestModificationTimeInModifierFrame());
       if (modificationOutgoing)
-         LogTools.debug(1, debugName + ": OUTGOING = false");
+         LogTools.debug("{}: OUTGOING = false", debugName);
       modificationOutgoing = false;
    }
 
    public void fromMessage(LatestModificationMessage message)
    {
       if (modificationIncoming)
-         LogTools.debug(1, debugName + ": INCOMING = false");
+         LogTools.debug("{}: INCOMING = false", debugName);
       modificationIncoming = false;
 
       if (crdtInfo.isMultiMachineNetwork())
@@ -107,7 +109,7 @@ public class LatestTimestampModifiable
                   latestModifier.set(messageModifier);
                   latestModificationTime = timeInLocalFrame;
                   modificationIncoming = true;
-                  LogTools.debug(1, debugName + ": INCOMING = true");
+                  LogTools.debug("{}: INCOMING = true", debugName);
                }
             }
          }
@@ -119,7 +121,7 @@ public class LatestTimestampModifiable
          {
             latestModificationTime = timeInLocalFrame;
             modificationIncoming = true;
-            LogTools.debug(1, debugName + ": INCOMING = true");
+            LogTools.debug("{}: INCOMING = true", debugName);
          }
       }
    }
