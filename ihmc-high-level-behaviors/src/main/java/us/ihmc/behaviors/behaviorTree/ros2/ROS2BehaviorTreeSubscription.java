@@ -108,7 +108,7 @@ public class ROS2BehaviorTreeSubscription<HLT extends BehaviorTreeNodeHighLayer<
                if (rootReferenceModificationIncoming)
                {
                   rootNode = subscriptionRootIsNull ? null : retrieveOrReplicateLocalNode(subscriptionRootNode, rootReferenceModificationIncoming);
-                  topologyOperationQueue.queueSetRootNodeModify(rootNode);
+                  topologyOperationQueue.queueSetRootNode(rootNode);
                }
 
                if (rootNode != null)

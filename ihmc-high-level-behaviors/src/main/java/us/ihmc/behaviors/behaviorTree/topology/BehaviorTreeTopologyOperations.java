@@ -12,11 +12,11 @@ public class BehaviorTreeTopologyOperations
 {
    static <HLT extends BehaviorTreeNodeHighLayer<HLT, ?, ?>> void destroySubtreeModify(HLT subtreeRoot)
    {
+      // Avoiding concurrent modifications
+      while (!subtreeRoot.getChildren().isEmpty())
+         destroySubtreeModify(subtreeRoot.getChildren().get(0));
+
       detachChildModify(subtreeRoot);
-
-      for (HLT child : subtreeRoot.getChildren())
-         destroySubtreeModify(child);
-
       subtreeRoot.destroy();
    }
 
@@ -44,13 +44,13 @@ public class BehaviorTreeTopologyOperations
 
    static <HLT extends BehaviorTreeNodeHighLayer<HLT, ?, ?>> void detachChildModify(HLT child)
    {
-      detachChildAbstract(child);
-      detachChildAbstract(child.getState());
-      detachChildAbstract(child.getDefinition());
-
       HLT parent = child.getParent();
       if (parent != null)
          parent.getDefinition().getChildrenModification().modify();
+
+      detachChildAbstract(child);
+      detachChildAbstract(child.getState());
+      detachChildAbstract(child.getDefinition());
    }
 
    static <HLT extends BehaviorTreeNodeHighLayer<HLT, ?, ?>> void clearImmediateChildren(HLT parent)
