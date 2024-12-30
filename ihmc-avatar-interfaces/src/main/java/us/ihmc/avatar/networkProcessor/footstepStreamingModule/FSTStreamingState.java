@@ -41,7 +41,7 @@ public class FSTStreamingState implements State
 
    private final YoDouble defaultStepThreshold = new YoDouble("defaultStepThreshold", registry);
    private final YoDouble defaultLiftThreshold = new YoDouble("defaultLiftThreshold", registry);
-   private final YoDouble defaultStrideLength = new YoDouble("defaultStepThreshold", registry);
+   private final YoDouble defaultStrideLength = new YoDouble("defaultStrideLength", registry);
    private final YoDouble defaultKpDirection = new YoDouble("defaultKpDirection", registry);
    private final YoDouble defaultTurningThreshold = new YoDouble("defaultTurningThreshold", registry);
    private final YoDouble defaultTurnDegrees = new YoDouble("defaultTurnDegrees", registry);
