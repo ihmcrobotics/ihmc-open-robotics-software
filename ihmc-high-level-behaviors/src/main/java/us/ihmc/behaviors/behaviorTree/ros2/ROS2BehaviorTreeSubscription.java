@@ -114,7 +114,9 @@ public class ROS2BehaviorTreeSubscription<HLT extends BehaviorTreeNodeHighLayer<
                if (rootNode != null)
                   idToLocalNodesMap.remove(rootNode.getState().getID());
 
-               if (rootNode != null && !subscriptionRootIsNull)
+               // We need to traverse the tree even if there are no remote nodes to match,
+               // because we might have the most up to date version
+               if (rootNode != null)
                   retrieveOrReplicateSubreeFromSubscription(subscriptionRootNode, rootNode, topologyOperationQueue);
 
                // These nodes were removed from the tree
@@ -130,11 +132,14 @@ public class ROS2BehaviorTreeSubscription<HLT extends BehaviorTreeNodeHighLayer<
                                                           HLT localNode,
                                                           BehaviorTreeTopologyOperationQueue<HLT> topologyOperationQueue)
    {
+      boolean existsMatchingSubscriptionNode = subscriptionNode != null && subscriptionNode.getType() != null;
+
       // Update the node first, to detect incoming modifications
-      ROS2BehaviorTreeMessageTools.fromMessage(subscriptionNode, localNode.getState());
+      if (existsMatchingSubscriptionNode)
+         ROS2BehaviorTreeMessageTools.fromMessage(behaviorTree.getCRDTInfo(), subscriptionNode, localNode.getState());
 
       // Traverse the latest children list
-      if (localNode.getDefinition().getChildrenModification().isModificationIncoming())
+      if (existsMatchingSubscriptionNode && localNode.getDefinition().getChildrenModification().isModificationIncoming())
       {
          topologyOperationQueue.queueClearImmediateChildren(localNode);
          for (ROS2BehaviorTreeSubscriptionNode subscriptionChild : subscriptionNode.getChildren())
@@ -150,8 +155,7 @@ public class ROS2BehaviorTreeSubscription<HLT extends BehaviorTreeNodeHighLayer<
          for (HLT localChildNode : localNode.getChildren())
          {
             ROS2BehaviorTreeSubscriptionNode subscriptionChild = idToSubscriptionNodesMap.get(localChildNode.getState().getID());
-            if (subscriptionChild != null)
-               retrieveOrReplicateSubreeFromSubscription(subscriptionChild, localChildNode, topologyOperationQueue);
+            retrieveOrReplicateSubreeFromSubscription(subscriptionChild, localChildNode, topologyOperationQueue);
             idToLocalNodesMap.remove(localChildNode.getState().getID());
          }
       }
