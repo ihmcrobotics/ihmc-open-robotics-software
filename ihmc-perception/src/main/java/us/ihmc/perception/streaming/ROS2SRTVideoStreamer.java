@@ -19,7 +19,7 @@ import static org.bytedeco.ffmpeg.global.avutil.*;
 
 public class ROS2SRTVideoStreamer
 {
-   private static final String SOFTWARE_COLOR_CODEC = null; // let LibAV choose an HEVC codec
+   private static final String SOFTWARE_COLOR_CODEC = "libx265"; // let LibAV choose an HEVC codec
    private static final String HARDWARE_COLOR_CODEC = "hevc_nvenc";
    private static final String COLOR_OUTPUT_FORMAT = "hevc";
    private static final String PREFERRED_DEPTH_CODEC = "ffv1";
@@ -79,7 +79,7 @@ public class ROS2SRTVideoStreamer
    {
       Map<String, String> hevcOptions = useHardwareAcceleration ?
             StreamingTools.getHEVCNVENCStreamingOptions() :
-            StreamingTools.getHEVCStreamingOptions();
+            StreamingTools.getLibX265StreamingOptions();
       hevcOptions.put("udu_sei", "1");
       videoStreamer.initialize(imageWidth,
                                imageHeight,

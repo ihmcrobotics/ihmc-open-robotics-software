@@ -128,7 +128,7 @@ public class RDXDepthStreamingDemo
                                               colorizedImage.getDepthDiscretization());
 
          if (!videoStreamer.isInitialized())
-            videoStreamer.initializeForColor(smallerImage, AV_PIX_FMT_YUV444P, -1, false);
+            videoStreamer.initializeForColor(smallerImage, AV_PIX_FMT_YUV444P);
 
          videoStreamer.sendFrame(smallerImage);
 

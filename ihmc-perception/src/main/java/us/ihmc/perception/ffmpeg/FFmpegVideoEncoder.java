@@ -134,9 +134,22 @@ public abstract class FFmpegVideoEncoder extends FFmpegEncoder
 
    public void setNextFrameSideData(BytePointer data)
    {
-      AVBufferRef seiBuffer = av_buffer_alloc(16 + data.limit());
-      Pointer.memcpy(seiBuffer.data().position(0), uuid.position(0), 16);
-      Pointer.memcpy(seiBuffer.data().position(16), data.position(0), data.limit());
+      AVBufferRef seiBuffer;
+
+      String encoderName = encoder.name().getString();
+      if (encoderName.equals("libx265"))
+      {
+         seiBuffer = av_buffer_alloc(data.limit());
+         Pointer.memcpy(seiBuffer.data().position(0), data.position(0), data.limit());
+      }
+      else if (encoderName.contains("nvenc"))
+      {
+         seiBuffer = av_buffer_alloc(16 + data.limit());
+         Pointer.memcpy(seiBuffer.data().position(0), uuid.position(0), 16);
+         Pointer.memcpy(seiBuffer.data().position(16), data.position(0), data.limit());
+      }
+      else
+         throw new UnsupportedOperationException(encoderName + " cannot take side data");
 
       av_frame_remove_side_data(frameToEncode, AV_FRAME_DATA_SEI_UNREGISTERED);
       AVFrameSideData sideData = av_frame_new_side_data_from_buf(frameToEncode, AV_FRAME_DATA_SEI_UNREGISTERED, seiBuffer);
