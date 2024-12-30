@@ -21,6 +21,8 @@ import us.ihmc.behaviors.sequence.ActionSequenceState;
 import us.ihmc.behaviors.sequence.FallbackNodeDefinition;
 import us.ihmc.behaviors.sequence.FallbackNodeState;
 import us.ihmc.behaviors.sequence.actions.*;
+import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.log.LogTools;
 
 /**
  * All the stuff that for packing/unpacking the specific types goes in here
@@ -54,13 +56,20 @@ public class ROS2BehaviorTreeMessageTools
       treeStateMessage.getFootPoseActions().clear();
    }
 
-   public static void packMessage(BehaviorTreeNodeState nodeState, BehaviorTreeStateMessage treeStateMessage)
+   public static void packMessage(CRDTInfo crdtInfo, BehaviorTreeNodeState nodeState, BehaviorTreeStateMessage treeStateMessage)
    {
       boolean packBasicNode = false;
 
       // Only allow packing full node types if we have updated data
-      if (nodeState.getDefinition().pollModificationOutgoing() || nodeState.hasStatus())
+      boolean modificationOutgoing = nodeState.getDefinition().pollModificationOutgoing();
+      boolean hasStatus = nodeState.hasStatus();
+      if (modificationOutgoing || hasStatus)
       {
+         if (modificationOutgoing)
+            LogTools.info("%s: Packing full data: %s outgoing = %b  status = %b".formatted(crdtInfo.getActorDesignation().name(),
+                                                                                           nodeState.getDefinition().getName(),
+                                                                                           modificationOutgoing,
+                                                                                           hasStatus));
          if (nodeState instanceof BehaviorTreeRootNodeState rootNodeState)
          {
             treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.ROOT_NODE);
@@ -189,12 +198,13 @@ public class ROS2BehaviorTreeMessageTools
       }
    }
 
-   public static void fromMessage(ROS2BehaviorTreeSubscriptionNode subscriptionNode, BehaviorTreeNodeState<?> nodeState)
+   public static void fromMessage(CRDTInfo crdtInfo, ROS2BehaviorTreeSubscriptionNode subscriptionNode, BehaviorTreeNodeState<?> nodeState)
    {
       // Here we check that the incoming data has the full type data as well as that the local node is of that type
       // When the full data is not necessary to send, we only send the basic node information
       if (subscriptionNode.getType() == BehaviorTreeRootNodeDefinition.class && nodeState instanceof BehaviorTreeRootNodeState rootNodeState)
       {
+         LogTools.info("{}: Receiving full state: {}", crdtInfo.getActorDesignation().name(), nodeState.getDefinition().getName());
          rootNodeState.fromMessage(subscriptionNode.getBehaviorTreeRootNodeStateMessage());
       }
       else if (subscriptionNode.getType() == AI2RNodeDefinition.class && nodeState instanceof AI2RNodeState ai2rNodeState)
