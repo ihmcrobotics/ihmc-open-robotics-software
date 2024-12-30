@@ -9,13 +9,12 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.rdx.ui.affordances.RDXManualFootstepPlacement;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Input;
-
-import java.awt.*;
 
 /**
  * Class responsible for streaming footstep placements based on VR tracker data.
@@ -92,19 +91,34 @@ public class RDXVRFootstepStreaming
 
    public void processToolboxOutput()
    {
-      // Place and send footstep
-      footstepPlacer.createNewFootstep(side);
-      footstepPlacer.setFootstepPose(new FramePose3D(ReferenceFrame.getWorldFrame(), footstepTransformInWorld));
-      if(footstepPlacer.checkAndPlaceFootstep())
+      if (status.getMessageNotification().poll())
       {
-         footstepPlacer.exitPlacement();
-         isUserStepping.put(side, true);
-         readyToStep.clear();
-         readyToStep.set();
-      }
-      else
-      {
-         footstepPlacer.exitPlacement();
+         FootstepStreamingToolboxOutputStatus latestStatus = status.getMessageNotification().read();
+
+         RobotSide side = RobotSide.fromByte(latestStatus.getRobotSide());
+         if (side != null)
+         {
+            // Place and send footstep
+            footstepPlacer.createNewFootstep(side);
+            footstepPlacer.setFootstepPose(new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                                           latestStatus.getDesiredFootPosition(),
+                                                           latestStatus.getDesiredFootOrientation()));
+            if (footstepPlacer.checkAndPlaceFootstep())
+            {
+               footstepPlacer.exitPlacement();
+               readyToStep.clear();
+               readyToStep.set();
+            }
+            else
+            {
+               footstepPlacer.exitPlacement();
+               LogTools.warn("Could not place step computed from the footstep streaming module");
+            }
+         }
+         else
+         {
+            LogTools.error("Received null footstep streaming output status");
+         }
       }
    }
 
@@ -147,5 +161,6 @@ public class RDXVRFootstepStreaming
       }
       footstepStreamingToolbox.sleep();
       wasEnabled = false;
+      readyToStep.clear();
    }
 }

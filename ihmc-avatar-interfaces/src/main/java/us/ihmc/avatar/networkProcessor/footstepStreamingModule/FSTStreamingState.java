@@ -1,5 +1,7 @@
 package us.ihmc.avatar.networkProcessor.footstepStreamingModule;
 
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import toolbox_msgs.msg.dds.FootstepStreamingToolboxOutputStatus;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -19,8 +21,6 @@ import us.ihmc.yoVariables.variable.YoInteger;
  */
 public class FSTStreamingState implements State
 {
-   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final FSTTools tools;
@@ -156,7 +156,11 @@ public class FSTStreamingState implements State
                                                         footstepTransformInWorld.getRotation().getRoll());
 
                // Publish footstep to UI
-
+               FootstepStreamingToolboxOutputStatus outputStatus = new FootstepStreamingToolboxOutputStatus();
+               outputStatus.setRobotSide(side.toByte());
+               outputStatus.getDesiredFootOrientation().set(footstepTransformInWorld.getRotation());
+               outputStatus.getDesiredFootPosition().set(footstepTransformInWorld.getTranslation());
+               tools.getStatusOutputManager().reportStatusMessage(outputStatus);
                isUserStepping.put(side, true);
             }
          }
