@@ -38,7 +38,9 @@ public abstract class BehaviorTree<HLT extends BehaviorTreeNodeHighLayer<HLT, ? 
 
       crdtInfo = new CRDTInfo(actor, peerClockEstimator);
       rootReferenceModification = new LatestTimestampModifiable(crdtInfo);
+      rootReferenceModification.setDebugName(crdtInfo.getActorDesignation().name() + ": " + "Root reference");
       dataModification = new LatestTimestampModifiable(crdtInfo);
+      dataModification.setDebugName(crdtInfo.getActorDesignation().name() + ": " + "Tree data");
       fileLoader = new BehaviorTreeFileLoader<>(this, nodeBuilder, saveFileDirectory);
       topologyChangeQueue = new BehaviorTreeTopologyOperationQueue<>(this);
    }

@@ -20,12 +20,18 @@ public class LatestTimestampModifiable
    private Instant latestModificationTime = Instant.MIN;
    private boolean modificationIncoming = false;
    private boolean modificationOutgoing = false;
+   private String debugName = "";
 
    private transient final Guid messageModifier = new Guid();
 
    public LatestTimestampModifiable(CRDTInfo crdtInfo)
    {
       this.crdtInfo = crdtInfo;
+   }
+
+   public void setDebugName(String debugName)
+   {
+      this.debugName = debugName;
    }
 
    /**
@@ -37,7 +43,7 @@ public class LatestTimestampModifiable
     */
    public void modify()
    {
-      LogTools.debug(1, "MODIFY");
+      LogTools.debug(1, debugName + ": OUTGOING = true");
 
       if (crdtInfo.isMultiMachineNetwork())
          latestModifier.set(crdtInfo.getPeerClockEstimator().getOurGuid());
@@ -68,11 +74,15 @@ public class LatestTimestampModifiable
    {
       MessageTools.toMessage(latestModifier, message.getLatestModifierId());
       MessageTools.toMessage(latestModificationTime, message.getLatestModificationTimeInModifierFrame());
+      if (modificationOutgoing)
+         LogTools.debug(1, debugName + ": OUTGOING = false");
+      modificationOutgoing = false;
    }
 
    public void fromMessage(LatestModificationMessage message)
    {
-      modificationOutgoing = false;
+      if (modificationIncoming)
+         LogTools.debug(1, debugName + ": INCOMING = false");
       modificationIncoming = false;
 
       if (crdtInfo.isMultiMachineNetwork())
@@ -97,6 +107,7 @@ public class LatestTimestampModifiable
                   latestModifier.set(messageModifier);
                   latestModificationTime = timeInLocalFrame;
                   modificationIncoming = true;
+                  LogTools.debug(1, debugName + ": INCOMING = true");
                }
             }
          }
@@ -108,6 +119,7 @@ public class LatestTimestampModifiable
          {
             latestModificationTime = timeInLocalFrame;
             modificationIncoming = true;
+            LogTools.debug(1, debugName + ": INCOMING = true");
          }
       }
    }
