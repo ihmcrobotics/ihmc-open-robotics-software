@@ -36,6 +36,19 @@ public class StreamingTools
       return new HashMap<>(LIVE_SRT_OPTIONS);
    }
 
+   private static final Map<String, String> HEVC_STREAMING_OPTIONS
+         = Map.ofEntries(entry("preset", "llhq"),
+                         entry("tune", "ull"),
+                         entry("rc", "constqp"),
+                         entry("qp", "10"),
+                         entry("cq", "0"),
+                         entry("gpu", "any"));
+
+   public static Map<String, String> getHEVCStreamingOptions()
+   {
+      return new HashMap<>(HEVC_STREAMING_OPTIONS);
+   }
+
    /** hevc_nvenc options can be found using {@code ffmpeg -hide_banner -h encoder=hevc_nvenc}. */
    private static final Map<String, String> HEVC_NVENC_STREAMING_OPTIONS
          = Map.ofEntries(entry("rc", "vbr"),          // Rate control: variable bit rate mode
