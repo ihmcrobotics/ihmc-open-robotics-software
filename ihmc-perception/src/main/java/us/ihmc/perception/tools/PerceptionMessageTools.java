@@ -106,9 +106,9 @@ public class PerceptionMessageTools
 
    public static void publishFramePlanarRegionsList(FramePlanarRegionsList framePlanarRegionsList,
                                                     ROS2Topic<FramePlanarRegionsListMessage> topic,
-                                                    ROS2Helper ros2Helper)
+                                                    ROS2PublishSubscribeAPI ros2)
    {
-      ros2Helper.publish(topic, PlanarRegionMessageConverter.convertToFramePlanarRegionsListMessage(framePlanarRegionsList));
+      ros2.publish(topic, PlanarRegionMessageConverter.convertToFramePlanarRegionsListMessage(framePlanarRegionsList));
    }
 
    public static void publishPlanarRegionsList(PlanarRegionsList planarRegionsList, ROS2Topic<PlanarRegionsListMessage> topic, ROS2Helper ros2Helper)
@@ -263,12 +263,12 @@ public class PerceptionMessageTools
       floatPointer.put(startIndex + 3, (float) quaternion.getS());
    }
 
-   public static void convertToHeightMapData(Mat heightMapPointer, HeightMapData heightMapData, Point3D gridCenter, float widthInMeters, float cellSizeInMeters)
+   public static void convertToHeightMapData(Mat heightMapPointer, HeightMapData heightMapDataToPack, Point3D gridCenter, float widthInMeters, float cellSizeInMeters)
    {
       int centerIndex = HeightMapTools.computeCenterIndex(widthInMeters, cellSizeInMeters);
       int cellsPerAxis = 2 * centerIndex + 1;
 
-      heightMapData.setGridCenter(gridCenter.getX(), gridCenter.getY());
+      heightMapDataToPack.setGridCenter(gridCenter.getX(), gridCenter.getY());
 
       for (int xIndex = 0; xIndex < cellsPerAxis; xIndex++)
       {
@@ -279,7 +279,7 @@ public class PerceptionMessageTools
                                - (float) RapidHeightMapExtractor.getHeightMapParameters().getHeightOffset();
 
             int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
-            heightMapData.setHeightAt(key, cellHeight);
+            heightMapDataToPack.setHeightAt(key, cellHeight);
          }
       }
    }

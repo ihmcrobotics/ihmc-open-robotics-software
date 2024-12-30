@@ -104,14 +104,14 @@ public class RDXSceneGraphDemo
                      = new RDXROS2ImageMessageVisualizer("ZED 2 Color %s".formatted(side.getPascalCaseName()),
                                                          ros2Node,
                                                          PerceptionAPI.ZED2_COLOR_IMAGES.get(side));
-               zedColorImageVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_COLOR);
+               zedColorImageVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_PUBLICATION);
                perceptionVisualizerPanel.addVisualizer(zedColorImageVisualizer);
             }
 
             RDXROS2ImageMessageVisualizer zed2DepthImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED 2 Depth Image",
                                                                                                        ros2Node,
                                                                                                        PerceptionAPI.ZED2_DEPTH);
-            zed2DepthImageVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_DEPTH);
+            zed2DepthImageVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_PUBLICATION);
             perceptionVisualizerPanel.addVisualizer(zed2DepthImageVisualizer);
 
             RDXROS2ColoredPointCloudVisualizer zed2ColoredPointCloudVisualizer
@@ -119,7 +119,7 @@ public class RDXSceneGraphDemo
                                                            ros2Node,
                                                            PerceptionAPI.ZED2_DEPTH,
                                                            PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
-            zed2ColoredPointCloudVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_POINT_CLOUD);
+            zed2ColoredPointCloudVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_PUBLICATION);
             zed2ColoredPointCloudVisualizer.setActive(true);
             perceptionVisualizerPanel.addVisualizer(zed2ColoredPointCloudVisualizer);
 

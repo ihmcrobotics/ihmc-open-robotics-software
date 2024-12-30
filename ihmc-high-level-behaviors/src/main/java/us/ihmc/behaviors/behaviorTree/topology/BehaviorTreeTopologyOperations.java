@@ -2,7 +2,7 @@ package us.ihmc.behaviors.behaviorTree.topology;
 
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeLayer;
-import us.ihmc.communication.crdt.Freezable;
+import us.ihmc.communication.crdt.RequestConfirmFreezable;
 import us.ihmc.tools.Destroyable;
 
 /**
@@ -164,7 +164,7 @@ public class BehaviorTreeTopologyOperations
 
    public static void attemptFreeze(Object thingToFreeze)
    {
-      if (thingToFreeze instanceof Freezable freezable)
+      if (thingToFreeze instanceof RequestConfirmFreezable freezable)
          freezable.freeze();
    }
 
