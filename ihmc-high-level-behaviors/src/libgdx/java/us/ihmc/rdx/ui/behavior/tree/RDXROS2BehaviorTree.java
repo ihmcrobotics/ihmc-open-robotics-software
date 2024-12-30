@@ -45,19 +45,17 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
 
    public void update()
    {
-      boolean updateComms = communicationThrottler.run();
-      if (updateComms)
+      if (communicationThrottler.run())
       {
+         // Must publish first to get newly modified data published
+         // This is because data gets modified after the update in the
+         // ImGui rendering thread.
+         ros2BehaviorTree.updatePublication();
+         publishFrequencyText.ping();
          ros2BehaviorTree.updateSubscription();
       }
 
       super.update();
-
-      if (updateComms)
-      {
-         ros2BehaviorTree.updatePublication();
-         publishFrequencyText.ping();
-      }
    }
 
    @Override

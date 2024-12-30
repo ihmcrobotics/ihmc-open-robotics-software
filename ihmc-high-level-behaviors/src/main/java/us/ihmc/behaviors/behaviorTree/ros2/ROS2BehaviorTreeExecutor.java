@@ -33,12 +33,11 @@ public class ROS2BehaviorTreeExecutor extends BehaviorTreeExecutor
    /** Expected to be called at the {@link ROS2BehaviorTree#SYNC_FREQUENCY} */
    public void update()
    {
+      ros2BehaviorTree.updatePublication();
       ros2BehaviorTree.updateSubscription();
 
       // TODO: Consider updating this at a higher rate than the comms
       super.update();
-
-      ros2BehaviorTree.updatePublication();
    }
 
    public void destroy()
