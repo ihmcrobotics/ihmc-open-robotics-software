@@ -39,7 +39,7 @@ public class ROS2BehaviorTreePublisher
 
    private void packTreeToMessage(BehaviorTreeNodeState behaviorTreeNode)
    {
-      ROS2BehaviorTreeMessageTools.packMessage(behaviorTree.getCRDTInfo(), behaviorTreeNode, behaviorTreeMessage);
+      ROS2BehaviorTreeMessageTools.packMessage(behaviorTreeNode, behaviorTreeMessage);
 
       for (Object child : behaviorTreeNode.getChildren())
       {
