@@ -241,8 +241,12 @@ public class RDXSimulatedSensorFactory
       return highLevelDepthSensorSimulator;
    }
 
-   public static RDXHighLevelDepthSensorSimulator createChestZED2ForObjectDetection(HumanoidReferenceFrames referenceFrames,
-                                                                                    LongSupplier timeSupplier)
+   public static RDXHighLevelDepthSensorSimulator createChestZED2ForObjectDetection(ROS2SyncedRobotModel syncedRobot)
+   {
+      return createChestZED2ForObjectDetection(syncedRobot.getReferenceFrames(), syncedRobot::getTimestamp);
+   }
+
+   public static RDXHighLevelDepthSensorSimulator createChestZED2ForObjectDetection(HumanoidReferenceFrames referenceFrames, LongSupplier timeSupplier)
    {
       double publishRateHz = 20.0;
       double verticalFOV = 70.0;
