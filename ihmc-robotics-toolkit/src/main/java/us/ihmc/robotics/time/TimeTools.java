@@ -4,6 +4,9 @@ import us.ihmc.commons.Conversions;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.Temporal;
+import java.util.List;
 
 /**
  * This class is to assist with calulating delays and timings
@@ -42,6 +45,11 @@ public class TimeTools
       return seconds + Conversions.nanosecondsToSeconds(nano);
    }
 
+   public static double secondsBetween(Temporal startInclusive, Temporal endExclusive)
+   {
+      return toDoubleSeconds(Duration.between(startInclusive, endExclusive));
+   }
+
    public static double toDoubleSeconds(Duration duration)
    {
       return secondsNanosToDoubleSeconds(duration.getSeconds(), duration.getNano());
@@ -63,5 +71,28 @@ public class TimeTools
       long longSeconds = (long) seconds;
       long nanos = (long) ((seconds - longSeconds) * 1E9);
       return Duration.ofSeconds(longSeconds, nanos);
+   }
+
+   public static int findClosestTimeIndex(Temporal targetTime, List<? extends Temporal> times)
+   {
+      long closestNanosFromTargetTime = Long.MAX_VALUE;
+      int closestTimeIndex = -1;
+
+      for (int i = 0; i < times.size(); ++i)
+      {
+         Temporal time = times.get(i);
+         long nanosFromTargetTime = Math.abs(time.until(targetTime, ChronoUnit.NANOS));
+
+         if (nanosFromTargetTime == 0L)
+            return i;
+
+         if (nanosFromTargetTime < closestNanosFromTargetTime)
+         {
+            closestNanosFromTargetTime = nanosFromTargetTime;
+            closestTimeIndex = i;
+         }
+      }
+
+      return closestTimeIndex;
    }
 }
