@@ -109,7 +109,8 @@ public class RDXRawImagePointCloudRenderer extends AbstractRDXPointCloudRenderer
 
       // Update color image uniforms
       colorIntrinsics = colorImage.getIntrinsicsCopy();
-      depthPose.getReferenceFrame().getTransformToDesiredFrame(depthToColorTransform, colorImage.getPose().getReferenceFrame());
+      depthToColorTransform.setAndInvert(colorImage.getPose());
+      depthToColorTransform.multiply(depthPose);
       LibGDXTools.toLibGDX(depthToColorTransform, tempColorTransform, libGDXColorTransform);
 
       // Reallocate pixmap and data pointer if image size changed
@@ -225,7 +226,6 @@ public class RDXRawImagePointCloudRenderer extends AbstractRDXPointCloudRenderer
 
       RDXUniform depthTransformUniform = RDXUniform.createGlobalUniform("u_depthToColorTransform", (shader, inputID, renderable, combinedAttributes) ->
       {
-         LibGDXTools.toLibGDX(depthToColorTransform, tempColorTransform, libGDXColorTransform);
          shader.set(inputID, libGDXColorTransform);
       });
       rdxShader.registerUniform(depthTransformUniform);

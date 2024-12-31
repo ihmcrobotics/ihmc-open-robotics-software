@@ -7,7 +7,6 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Size;
-import us.ihmc.behaviors.activeMapping.ContinuousPlannerSchedulingTask.PlanningMode;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -15,7 +14,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
-import us.ihmc.footstepPlanning.communication.ContinuousWalkingAPI;
+import us.ihmc.footstepPlanning.communication.ContinuousHikingAPI;
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloFootstepNode;
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloFootstepPlannerRequest;
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloPlannerTools;
@@ -64,21 +63,19 @@ public class TerrainPlanningDebugger
    private ROS2Publisher<PoseListMessage> monteCarloNodesPublisherForUI;
    private MonteCarloFootstepPlannerRequest request;
    private MonteCarloFootstepPlannerParameters parameters;
-   private PlanningMode planningMode;
 
    private Mat contactHeatMapImage;
 
-   public TerrainPlanningDebugger(ROS2Node ros2Node, MonteCarloFootstepPlannerParameters parameters, PlanningMode planningMode)
+   public TerrainPlanningDebugger(ROS2Node ros2Node, MonteCarloFootstepPlannerParameters parameters)
    {
       this.parameters = parameters;
-      this.planningMode = planningMode;
       if (ros2Node != null)
       {
-         plannedFootstesPublisherForUI = ros2Node.createPublisher(ContinuousWalkingAPI.PLANNED_FOOTSTEPS);
-         statusPublisher = ros2Node.createPublisher(ContinuousWalkingAPI.CONTINUOUS_WALKING_STATUS);
-         monteCarloPlanPublisherForUI = ros2Node.createPublisher(ContinuousWalkingAPI.MONTE_CARLO_FOOTSTEP_PLAN);
-         startAndGoalPublisherForUI = ros2Node.createPublisher(ContinuousWalkingAPI.START_AND_GOAL_FOOTSTEPS);
-         monteCarloNodesPublisherForUI = ros2Node.createPublisher(ContinuousWalkingAPI.MONTE_CARLO_TREE_NODES);
+         plannedFootstesPublisherForUI = ros2Node.createPublisher(ContinuousHikingAPI.PLANNED_FOOTSTEPS);
+         statusPublisher = ros2Node.createPublisher(ContinuousHikingAPI.CONTINUOUS_WALKING_STATUS);
+         monteCarloPlanPublisherForUI = ros2Node.createPublisher(ContinuousHikingAPI.MONTE_CARLO_FOOTSTEP_PLAN);
+         startAndGoalPublisherForUI = ros2Node.createPublisher(ContinuousHikingAPI.START_AND_GOAL_FOOTSTEPS);
+         monteCarloNodesPublisherForUI = ros2Node.createPublisher(ContinuousHikingAPI.MONTE_CARLO_TREE_NODES);
       }
    }
 
@@ -263,18 +260,9 @@ public class TerrainPlanningDebugger
       PoseListMessage poseListMessage = new PoseListMessage();
       FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
 
-      if (planningMode == PlanningMode.FAST_HIKING)
-      {
-         startAndGoalPublisherForUI.publish(poseListMessage);
-         monteCarloNodesPublisherForUI.publish(poseListMessage);
-         plannedFootstesPublisherForUI.publish(footstepDataListMessage);
-      }
-
-      if (planningMode == PlanningMode.WALK_TO_GOAL)
-      {
-         monteCarloNodesPublisherForUI.publish(poseListMessage);
-         plannedFootstesPublisherForUI.publish(footstepDataListMessage);
-      }
+      startAndGoalPublisherForUI.publish(poseListMessage);
+      monteCarloNodesPublisherForUI.publish(poseListMessage);
+      plannedFootstesPublisherForUI.publish(footstepDataListMessage);
    }
 
    public void publishMonteCarloNodesForVisualization(MonteCarloTreeNode root, TerrainMapData terrainMap)
@@ -345,16 +333,6 @@ public class TerrainPlanningDebugger
    public Mat getDisplayImage()
    {
       return stacked;
-   }
-
-   public PlanningMode getPlanningMode()
-   {
-      return planningMode;
-   }
-
-   public void setPlanningMode(PlanningMode planningMode)
-   {
-      this.planningMode = planningMode;
    }
 
    public void setEnabled(boolean enabled)

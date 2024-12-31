@@ -39,7 +39,7 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
  * for distance away from boundaries and edges for each cell). For more information on Distance Transform visit:
  * https://en.wikipedia.org/wiki/Distance_transform
  * */
-public class RapidHeightMapExtractor
+public class RapidHeightMapExtractor implements RapidHeightMapExtractorInterface
 {
    private int mode = 1; // 0 -> Ouster, 1 -> Realsense
    private float gridOffsetX;
@@ -119,18 +119,24 @@ public class RapidHeightMapExtractor
    private Mat denoisedHeightMapImage;
    private Rect cropWindowRectangle;
 
-   public RapidHeightMapExtractor(OpenCLManager openCLManager)
+   public RapidHeightMapExtractor(OpenCLManager openCLManager, ReferenceFrame leftFootSoleFrame, ReferenceFrame rightFootSoleFrame, BytedecoImage depthImage, int mode)
    {
-      this.openCLManager = openCLManager;
-      //      denoiser = new HeightMapAutoencoder();
-      rapidHeightMapUpdaterProgram = openCLManager.loadProgram("RapidHeightMapExtractor", "HeightMapUtils.cl");
-   }
-
-   public RapidHeightMapExtractor(OpenCLManager openCLManager, ReferenceFrame leftFootSoleFrame, ReferenceFrame rightFootSoleFrame)
-   {
-      this(openCLManager);
+      this(openCLManager,  depthImage, mode);
       footSoleFrames.put(RobotSide.LEFT, leftFootSoleFrame);
       footSoleFrames.put(RobotSide.RIGHT, rightFootSoleFrame);
+   }
+
+   public RapidHeightMapExtractor(OpenCLManager openCLManager, BytedecoImage depthImage, int mode)
+   {
+      this.openCLManager = openCLManager;
+
+      rapidHeightMapUpdaterProgram = openCLManager.loadProgram("RapidHeightMapExtractor", "HeightMapUtils.cl");
+
+      this.inputDepthImage = depthImage;
+      this.mode = mode;
+
+      initialize();
+      reset();
    }
 
    public void initialize()
@@ -185,15 +191,6 @@ public class RapidHeightMapExtractor
          computeSnappedValuesKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "computeSnappedValuesKernel");
          computeSteppabilityConnectionsKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "computeSteppabilityConnectionsKernel");
       }
-   }
-
-   public void create(BytedecoImage depthImage, int mode)
-   {
-      this.inputDepthImage = depthImage;
-      this.mode = mode;
-
-      initialize();
-      reset();
    }
 
    public void recomputeDerivedParameters()
@@ -796,17 +793,14 @@ public class RapidHeightMapExtractor
       return imageToCrop.apply(cropWindowRectangle);
    }
 
-   public static HeightMapData packHeightMapData(RapidHeightMapExtractor heightMapExtractor, HeightMapData heightMapDataToPack)
+   public static HeightMapData packHeightMapData(RapidHeightMapExtractorInterface heightMapExtractor)
    {
+      HeightMapData latestHeightMapData = new HeightMapData((float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalCellSizeInMeters(),
+                                                            (float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalWidthInMeters(),
+                                                            heightMapExtractor.getSensorOrigin().getX(),
+                                                            heightMapExtractor.getSensorOrigin().getY());
+
       Mat heightMapMat = heightMapExtractor.getTerrainMapData().getHeightMap();
-      HeightMapData latestHeightMapData = heightMapDataToPack;
-      if (latestHeightMapData == null)
-      {
-         latestHeightMapData = new HeightMapData((float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalCellSizeInMeters(),
-                                                 (float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalWidthInMeters(),
-                                                 heightMapExtractor.getSensorOrigin().getX(),
-                                                 heightMapExtractor.getSensorOrigin().getY());
-      }
       PerceptionMessageTools.convertToHeightMapData(heightMapMat,
                                                     latestHeightMapData,
                                                     heightMapExtractor.getSensorOrigin(),

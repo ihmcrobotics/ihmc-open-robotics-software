@@ -8,11 +8,6 @@ import us.ihmc.tools.property.StoredPropertySetBasics;
  */
 public interface ContinuousHikingParametersBasics extends ContinuousHikingParametersReadOnly, StoredPropertySetBasics
 {
-   default void setEnableContinuousHiking(boolean enableContinuousHiking)
-   {
-      set(ContinuousHikingParameters.enableContinuousHiking, enableContinuousHiking);
-   }
-
    default void setStepPublisherEnabled(boolean stepPublisherEnabled)
    {
       set(ContinuousHikingParameters.stepPublisherEnabled, stepPublisherEnabled);

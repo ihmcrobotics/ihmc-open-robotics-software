@@ -3,7 +3,7 @@ package us.ihmc.communication.crdt;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 
 /**
- * An unidirectional String field. See {@link CRDTUnidirectionalImmutableField}.
+ * An status String field. See {@link CRDTStatusImmutableField}.
  */
 public class CRDTStatusString extends CRDTStatusImmutableField<String>
 {
