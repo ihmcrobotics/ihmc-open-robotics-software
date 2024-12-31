@@ -7,6 +7,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
 import imgui.ImGui;
+import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -50,6 +51,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
    private boolean renderTooltip = false;
    private final FramePose3D tempFramePose = new FramePose3D();
    private RDX3DPanelTooltip tooltip;
+   private final ImBoolean activeAdjustmentEnabled = new ImBoolean(false);
 
    public void create(ROS2SyncedRobotModel syncedRobot,
                       RDXBaseUI baseUI,
@@ -127,6 +129,10 @@ public class RDXManualFootstepPlacement implements RenderableProvider
          footstepPlan.removeLastStep();
       }
       ImGuiTools.previousWidgetTooltip("Delete");
+      if (ImGui.checkbox("Active Footstep Adjustment", activeAdjustmentEnabled))
+      {
+         footstepPlan.setActiveAdjustment(activeAdjustmentEnabled.get());
+      }
    }
 
    public void calculateVRPick(RDXVRContext vrContext)
