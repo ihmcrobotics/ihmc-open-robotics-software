@@ -172,7 +172,7 @@
     "description" : "If a grid cell is at height h, points below (h - s * m) are ignored, and points above (h + s * m) will cause the cell to throw out old data and reset. where s is getNominalStandardDeviation() and m is this value."
   },
   "Variance added when translating" : {
-    "value" : 0.1,
+    "value" : 0.0,
     "lowerBound" : 0.01,
     "upperBound" : 0.2,
     "description" : "This is the variance added to all past measurements when a cell is translated"
