@@ -2,12 +2,30 @@ package us.ihmc.perception.camera;
 
 public class CameraIntrinsics
 {
+   /**
+    * Focal length along the x axis of the camera.
+    */
    private double fx;
+   /**
+    * Focal length along the y axis of the camera.
+    */
    private double fy;
+   /**
+    * Camera central point along the x axis of the camera, also known as u
+    */
    private double cx;
+   /**
+    * Camera central point along the y axis of the camera, also known as v
+    */
    private double cy;
 
+   /**
+    * Number of pixels along the height of the image, which is in the x axis, also known as u width
+    */
    private int height;
+   /**
+    * Number of pixels along the width of the image, which is in the y axis.
+    */
    private int width;
 
    public CameraIntrinsics()

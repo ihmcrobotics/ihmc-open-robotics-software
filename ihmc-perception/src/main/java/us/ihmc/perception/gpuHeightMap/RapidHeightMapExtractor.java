@@ -196,7 +196,9 @@ public class RapidHeightMapExtractor implements RapidHeightMapExtractorInterface
    {
       centerIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getLocalWidthInMeters(), heightMapParameters.getLocalCellSizeInMeters());
       localCellsPerAxis = 2 * centerIndex + 1;
-      gridOffsetX = (float) heightMapParameters.getLocalWidthInMeters() / 2.0f;
+      gridOffsetX = 0.0f;
+      // TODO do we want this to be derived?
+//      gridOffsetX = (float) heightMapParameters.getLocalWidthInMeters() / 2.0f;
       globalCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getInternalGlobalWidthInMeters(),
                                                             heightMapParameters.getInternalGlobalCellSizeInMeters());
       globalCellsPerAxis = 2 * globalCenterIndex + 1;

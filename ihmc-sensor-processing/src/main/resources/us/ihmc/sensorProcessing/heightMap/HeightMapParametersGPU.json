@@ -57,7 +57,7 @@
     "upperBound" : 8.0
   },
   "Local width in meters" : {
-    "value" : 3.0,
+    "value" : 1.0,
     "lowerBound" : 1.0,
     "upperBound" : 4.5
   },
@@ -67,7 +67,7 @@
     "upperBound" : 0.06
   },
   "Global width in meters" : {
-    "value" : 4.0,
+    "value" : 2.0,
     "lowerBound" : 1.0,
     "upperBound" : 5.5
   },
@@ -77,7 +77,7 @@
     "upperBound" : 0.06
   },
   "Robot collision cylinder radius" : {
-    "value" : 0.4,
+    "value" : 0.0,
     "lowerBound" : 0.1,
     "upperBound" : 0.8
   },

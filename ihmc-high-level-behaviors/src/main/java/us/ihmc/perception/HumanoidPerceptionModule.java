@@ -20,8 +20,10 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.perception.filters.CollidingScanRegionFilter;
+import us.ihmc.perception.gpuHeightMap.DefaultHeightProvider;
 import us.ihmc.perception.gpuHeightMap.FootBasedDefaultHeightProvider;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
+import us.ihmc.perception.gpuHeightMap.ZeroDefaultHeightProvider;
 import us.ihmc.perception.heightMap.RemoteHeightMapUpdater;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVTools;
@@ -312,11 +314,9 @@ public class HumanoidPerceptionModule
    public void initializeHeightMapExtractor(ROS2Helper ros2Helper, HumanoidReferenceFrames referenceFrames, CameraIntrinsics cameraIntrinsics)
    {
       LogTools.info("Rapid Height Map: {}", cameraIntrinsics);
-      rapidHeightMapExtractor = new RapidHeightMapExtractor(openCLManager,
-                                                            new FootBasedDefaultHeightProvider(referenceFrames.getSoleFrame(RobotSide.LEFT),
-                                                                                               referenceFrames.getSoleFrame(RobotSide.RIGHT)),
-                                                            realsenseDepthImage,
-                                                            1);
+      DefaultHeightProvider heightProvider = referenceFrames == null ? new ZeroDefaultHeightProvider() : new FootBasedDefaultHeightProvider(referenceFrames.getSoleFrame(RobotSide.LEFT),
+                                                                                                                                            referenceFrames.getSoleFrame(RobotSide.RIGHT));
+      rapidHeightMapExtractor = new RapidHeightMapExtractor(openCLManager, heightProvider, realsenseDepthImage, 1);
       rapidHeightMapExtractor.setDepthIntrinsics(cameraIntrinsics);
 
       if (ros2Helper != null)
