@@ -15,6 +15,7 @@ import java.time.Instant;
  */
 public class LatestTimestampModifiable
 {
+   private static final Guid ZERO_GUID = new Guid();
    private final CRDTInfo crdtInfo;
    private final Guid latestModifier = new Guid();
    private Instant latestModificationTime = Instant.MIN;
@@ -122,7 +123,7 @@ public class LatestTimestampModifiable
          MessageTools.fromMessage(message.getLatestModifierId(), messageModifier);
 
          // Another peer made the most recent modification
-         if (!messageModifier.equals(crdtInfo.getPeerClockEstimator().getOurGuid()))
+         if (!messageModifier.equals(ZERO_GUID) && !messageModifier.equals(crdtInfo.getPeerClockEstimator().getOurGuid()))
          {
             ROS2PeerClockOffsetEstimatorPeer latestModifierPeer = crdtInfo.getPeerClockEstimator().getPeerMap().get(messageModifier);
             if (latestModifierPeer == null)
