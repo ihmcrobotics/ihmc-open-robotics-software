@@ -1,4 +1,4 @@
-package us.ihmc.rdx.perception;
+package us.ihmc.rdx.perception.heightMap;
 
 public class OpenCLRapidHeightMapManagerTest extends RapidHeightMapManagerTest
 {

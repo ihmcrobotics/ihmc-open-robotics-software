@@ -23,9 +23,9 @@ import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
-import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 
 import java.time.Instant;
 
@@ -79,7 +79,7 @@ public class RapidHeightMapManager
    public void attachResetRequestSubscriber(ROS2PublishSubscribeAPI ros2)
    {
       // We use a notification in order to only call resetting the height map in one place
-      ros2.subscribeViaVolatileCallback(PerceptionAPI.RESET_HEIGHT_MAP, message -> resetHeightMapRequested.set());
+      ros2.subscribeViaVolatileCallback(PerceptionAPI.RESET_HEIGHT_MAP, message -> requestReset());
    }
 
    /**
@@ -94,9 +94,19 @@ public class RapidHeightMapManager
          ros2API.subscribeViaVolatileCallback(HumanoidControllerAPI.getTopic(HighLevelStateChangeStatusMessage.class, simpleRobotName), message ->
          { // Automatically reset the height map when the robot goes into the walking state
             if (message.getEndHighLevelControllerName() == HighLevelStateChangeStatusMessage.WALKING)
-               resetHeightMapRequested.set();
+               requestReset();
          });
       }
+   }
+
+   public void requestReset()
+   {
+      resetHeightMapRequested.set();
+   }
+
+   public HeightMapParameters getHeightMapParameters()
+   {
+      return rapidHeightMapExtractor.getParameters();
    }
 
    /**

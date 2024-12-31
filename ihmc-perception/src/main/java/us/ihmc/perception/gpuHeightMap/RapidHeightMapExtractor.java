@@ -859,6 +859,11 @@ public class RapidHeightMapExtractor implements RapidHeightMapExtractorInterface
       return heightMapParameters;
    }
 
+   public HeightMapParameters getParameters()
+   {
+      return heightMapParameters;
+   }
+
    public boolean isInitialized()
    {
       return initialized;

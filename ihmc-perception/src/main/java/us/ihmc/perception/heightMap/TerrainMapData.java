@@ -113,6 +113,13 @@ public class TerrainMapData
       return getSnappedAreaLocal(rIndex, cIndex);
    }
 
+   public boolean isPointInWorldOutOfBounds(double x, double y)
+   {
+      int rIndex = getLocalIndex(x, heightMapCenter.getX());
+      int cIndex = getLocalIndex(y, heightMapCenter.getY());
+      return isOutOfBounds(rIndex, cIndex);
+   }
+
    public float getHeightInWorld(double x, double y)
    {
       int rIndex = getLocalIndex(x, heightMapCenter.getX());

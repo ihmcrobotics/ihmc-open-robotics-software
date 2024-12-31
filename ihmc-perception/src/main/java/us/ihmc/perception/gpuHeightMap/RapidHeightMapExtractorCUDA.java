@@ -473,6 +473,11 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
       return heightMapParameters;
    }
 
+   public HeightMapParameters getParameters()
+   {
+      return heightMapParameters;
+   }
+
    public int getCenterIndex()
    {
       return centerIndex;

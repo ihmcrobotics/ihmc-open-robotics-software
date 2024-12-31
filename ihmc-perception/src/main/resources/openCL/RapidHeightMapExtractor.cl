@@ -206,10 +206,6 @@ void kernel heightMapUpdateKernel(read_write image2d_t in,
    int xIndex = get_global_id(0);
    int yIndex = get_global_id(1);
 
-    bool should_print = xIndex == 25 && yIndex == 25;
-    if (should_print)
-        printf("going to print. Center");
-
    float currentAverageHeight = 0.0f;
    float averageHeightZ = 0.0f;
    float3 cellCenterInZUp = (float3) (0.0f, 0.0f, 0.5f);
@@ -230,10 +226,6 @@ void kernel heightMapUpdateKernel(read_write image2d_t in,
    int count = 0;
    int skip = (int) params[SEARCH_SKIP_SIZE];
 
-    if (should_print)
-    {
-        printf("\n\nCell sensor in z up %f %f %f\n", cellCenterInZUp.x, cellCenterInZUp.y, cellCenterInZUp.z);
-    }
    float3 cellCenterInSensor = transformPoint3D32_2(
       cellCenterInZUp,
       (float3)(zUpToSensorFrameTf[0], zUpToSensorFrameTf[1], zUpToSensorFrameTf[2]),
@@ -250,22 +242,11 @@ void kernel heightMapUpdateKernel(read_write image2d_t in,
    {
       // convert cellCenterInSensor to z-forward, x-right, y-down
       float3 cellCenterInSensorZfwd = (float3) (-cellCenterInSensor.y, -cellCenterInSensor.z, cellCenterInSensor.x);
-      if (should_print)
-      {
-        printf("\n\ncell center in sensor, %f %f, %f\n",  cellCenterInSensor.x, cellCenterInSensor.y, cellCenterInSensor.z);
-        printf("perspective projection, resulting point %f, %f, %f\n", cellCenterInSensorZfwd.x, cellCenterInSensorZfwd.y, cellCenterInSensorZfwd.z);
-      }
-
 
       if (cellCenterInSensorZfwd.z < 0)
         return;
 
       projectedPoint = perspective_projection(cellCenterInSensorZfwd, params);
-      if (should_print)
-      {
-        printf("projected point point %d, %d,\n\n",  projectedPoint.x, projectedPoint.y);
-        printf("Projection parameters (fx, fy, cx, cy) (%f %f %f %f)\n\n", params[DEPTH_FX], params[DEPTH_FY], params[DEPTH_CX], params[DEPTH_CY]);
-      }
    }
 
    for (int pitch_count_offset = - ((int) params[SEARCH_WINDOW_HEIGHT] / 2); pitch_count_offset < ((int) params[SEARCH_WINDOW_HEIGHT] / 2 + 1); pitch_count_offset+=skip)
@@ -277,9 +258,6 @@ void kernel heightMapUpdateKernel(read_write image2d_t in,
          if ((yaw_count >= 0) && (yaw_count < (int)params[DEPTH_INPUT_WIDTH]) && (pitch_count >= 0) && (pitch_count < (int)params[DEPTH_INPUT_HEIGHT]))
          {
             float depth = ((float)read_imageui(in, (int2) (yaw_count, pitch_count)).x) / (float) 1000;
-
-          //  if (should_print)
-          //      printf("Depth = %f\n", depth);
 
             float3 queryPointInSensor;
             if (params[MODE] == 0) // Spherical
@@ -304,7 +282,7 @@ void kernel heightMapUpdateKernel(read_write image2d_t in,
                if (count > 1)
                {
                   currentAverageHeight = averageHeightZ / (float)(count);
-                  if (fabs(queryPointInZUp.z - currentAverageHeight) > 0.05)
+                  if (fabs(queryPointInZUp.z - currentAverageHeight) > 0.1)
                   {
                      continue;
                   }
@@ -319,7 +297,6 @@ void kernel heightMapUpdateKernel(read_write image2d_t in,
    if (count > 0)
    {
       averageHeightZ = averageHeightZ / (float)(count);
-      printf("(x, y) = (%d, %d) = (%f, %f) average height Z %f\n", xIndex, yIndex, cellCenterInZUp.x, cellCenterInZUp.y, averageHeightZ);
    }
    else
    {
@@ -380,15 +357,9 @@ void kernel heightMapRegistrationKernel(read_write image2d_t localMap,
    float previousHeight = (float) read_imageui(globalMap, (int2)(yIndex, xIndex)).x / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
    float localHeight = previousHeight;
 
-    bool should_print = false;
    if (localCellIndex.x >= 0 && localCellIndex.x < localCellsPerAxis && localCellIndex.y >= 0 && localCellIndex.y < localCellsPerAxis)
    {
       localHeight = (float)read_imageui(localMap, (int2)(localCellIndex.y, localCellIndex.x)).x / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
-      if (false) //(localHeight > 0.0f)
-      {
-        printf("reading local height of %f at (%d, %d)\n", localHeight, localCellIndex.y, localCellIndex.x);
-        should_print = true;
-      }
    }
 
    float finalHeight = previousHeight;
@@ -401,17 +372,11 @@ void kernel heightMapRegistrationKernel(read_write image2d_t localMap,
       if (height_diff < params[MAX_HEIGHT_DIFFERENCE])
       {
          finalHeight = previousHeight * params[HEIGHT_FILTER_ALPHA] + localHeight * (1.0f - params[HEIGHT_FILTER_ALPHA]);
-         if (should_print)
-         printf("Filtering towards local %f from prevous %f, resulting in %f at (%d, %d) (%f, %f)\n", localHeight, previousHeight, finalHeight, xIndex, yIndex, cellCenterInWorld.x, cellCenterInWorld.y);
-
       }
       else
       {
          // the difference between the incoming data and the old data was too much, reset it to the incoming data completely
          finalHeight = localHeight;
-
-        if (should_print)
-         printf("Setting final height to local %f at (%d, %d)\n", localHeight, xIndex, yIndex);
       }
       finalHeight = get_spatial_filtered_height(xIndex, yIndex, finalHeight, globalMap, params);
    }
