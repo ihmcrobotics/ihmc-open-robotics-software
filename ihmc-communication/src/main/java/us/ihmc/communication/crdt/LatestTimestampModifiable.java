@@ -15,7 +15,6 @@ import java.time.Instant;
  */
 public class LatestTimestampModifiable
 {
-   private static final Guid ZERO_GUID = new Guid();
    private final CRDTInfo crdtInfo;
    private final Guid latestModifier = new Guid();
    private Instant latestModificationTime = Instant.MIN;
@@ -122,15 +121,12 @@ public class LatestTimestampModifiable
       {
          MessageTools.fromMessage(message.getLatestModifierId(), messageModifier);
 
-         // Another peer made the most recent modification
-         if (!messageModifier.equals(ZERO_GUID) && !messageModifier.equals(crdtInfo.getPeerClockEstimator().getOurGuid()))
+         // Another peer made the most recent modification or no modification made yet
+         if (!messageModifier.equals(crdtInfo.getPeerClockEstimator().getOurGuid()))
          {
             ROS2PeerClockOffsetEstimatorPeer latestModifierPeer = crdtInfo.getPeerClockEstimator().getPeerMap().get(messageModifier);
-            if (latestModifierPeer == null)
-            {
-               LogTools.error("Peer not in peer map: {}", messageModifier);
-            }
-            else
+            // If this is null, it's fine, probably the last modifier went offline
+            if (latestModifierPeer != null)
             {
                Instant timeInPeerFrame = MessageTools.toInstant(message.getLatestModificationTimeInModifierFrame());
                Instant timeInLocalFrame = latestModifierPeer.getPeerTimeInLocalFrame(timeInPeerFrame);
