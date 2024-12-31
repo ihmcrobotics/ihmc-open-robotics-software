@@ -71,6 +71,8 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
    @Override
    public void update()
    {
+      super.update();
+
       for (RobotSide side : RobotSide.values)
       {
          goalFootstepToGoalTransforms.get(side).getTranslation().setZ(0.0);

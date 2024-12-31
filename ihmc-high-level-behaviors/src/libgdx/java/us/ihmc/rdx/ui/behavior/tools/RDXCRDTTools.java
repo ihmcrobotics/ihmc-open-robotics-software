@@ -20,7 +20,7 @@ public class RDXCRDTTools
       {
          transform.getValueAndModify().set(gizmo.getTransformToParent());
       }
-      else if (latestTimestampModifiable.isModificationIncoming())
+      else if (latestTimestampModifiable.isModified())
       {
          gizmo.getTransformToParent().set(transform.getValueReadOnly());
       }
@@ -39,7 +39,7 @@ public class RDXCRDTTools
       {
          point.getValueAndModify().set(gizmo.getTransformToParent().getTranslation());
       }
-      else if (latestTimestampModifiable.isModificationIncoming())
+      else if (latestTimestampModifiable.isModified())
       {
          gizmo.getTransformToParent().getTranslation().set(point.getValueReadOnly());
       }
