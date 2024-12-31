@@ -21,6 +21,18 @@ public class LatestTimestampModifiable
    private boolean modificationIncoming = false;
    private boolean modificationOutgoing = false;
    private String debugName = "";
+   /**
+    * Used by local code to track external modifications to state data.
+    * Data can be modified in several ways, such as loading from file,
+    * remote processes, etc.
+    */
+   private Instant modificationCheckTime = Instant.MIN;
+   /**
+    * Whether the associated data had been modified between the last two
+    * calls to {@link #checkModified} or was modified for the first time
+    * before the most recent call.
+    */
+   private boolean isModified = false;
 
    private transient final Guid messageModifier = new Guid();
 
@@ -54,8 +66,25 @@ public class LatestTimestampModifiable
    }
 
    /**
-    * @return If we changed this data locally and it needs to be sent out.
-    *         To be used after call to {@link #modify}.
+    * Call once per tick. The {@link #isModified()} will return
+    * whether the associated data has been modified since the last time we checked.
+    * {@link #isModified()} will return a constant value until this
+    * method is called again.
+    */
+   public void checkModified()
+   {
+      isModified = latestModificationTime.isAfter(modificationCheckTime);
+      modificationCheckTime = latestModificationTime;
+   }
+
+   public boolean isModified()
+   {
+      return isModified;
+   }
+
+   /**
+    * Used by the state publisher to determine if the full
+    * message data needs to be sent out.
     */
    public boolean pollModificationOutgoing()
    {
@@ -69,7 +98,7 @@ public class LatestTimestampModifiable
    /**
     * @return If the incoming modification is newer than what we have.
     *         If so, we'll be expecting to have our state updated to the incoming one.
-    *         To be used after {@link #fromMessage}.
+    *         To be used after {@link #fromMessage} in subsequent {@link #fromMessage}s.
     */
    public boolean isModificationIncoming()
    {

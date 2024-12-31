@@ -73,7 +73,7 @@ public class BehaviorTreeNodeState<D extends BehaviorTreeNodeDefinition> impleme
 
    public void update()
    {
-
+      definition.checkModified();
    }
 
    public void destroy()
