@@ -3,6 +3,7 @@ package us.ihmc.behaviors.behaviorTree.ros2;
 import behavior_msgs.msg.dds.*;
 import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.behaviors.behaviorTree.BehaviorTree;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeDefinitionRegistry;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeHighLayer;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
@@ -132,11 +133,21 @@ public class ROS2BehaviorTreeSubscription<HLT extends BehaviorTreeNodeHighLayer<
                                                           HLT localNode,
                                                           BehaviorTreeTopologyOperationQueue<HLT> topologyOperationQueue)
    {
-      boolean existsMatchingSubscriptionNode = subscriptionNode != null && subscriptionNode.getType() != null;
+      boolean existsMatchingSubscriptionNode = subscriptionNode != null && subscriptionNode.getDefinitionClass() != null;
 
       // Update the node first, to detect incoming modifications
       if (existsMatchingSubscriptionNode)
-         ROS2BehaviorTreeMessageTools.fromMessage(behaviorTree.getCRDTInfo(), subscriptionNode, localNode.getState());
+      {
+         if (subscriptionNode.getPackedType() == BehaviorTreeStateMessage.PARTIAL_DATA)
+         {
+            localNode.getDefinition().fromMessage(subscriptionNode.getBehaviorTreeNodeDefinitionMessage());
+            localNode.getState().fromMessage(subscriptionNode.getBehaviorTreeNodeStateMessage());
+         }
+         else
+         {
+            ROS2BehaviorTreeMessageTools.fromMessage(subscriptionNode, localNode.getState());
+         }
+      }
 
       // Traverse the latest children list
       if (existsMatchingSubscriptionNode && localNode.getDefinition().getChildrenModification().isModificationIncoming())
@@ -170,9 +181,9 @@ public class ROS2BehaviorTreeSubscription<HLT extends BehaviorTreeNodeHighLayer<
          LogTools.info("Replicating node: %s:%d (%s) Actor: %s".formatted(
                subscriptionNode.getBehaviorTreeNodeDefinitionMessage().getName(),
                nodeID,
-               subscriptionNode.getType().getSimpleName(),
+               subscriptionNode.getDefinitionClass().getSimpleName(),
                behaviorTree.getCRDTInfo().getActorDesignation().name()));
-         localNode = behaviorTree.getNodeBuilder().createNode(subscriptionNode.getType(),
+         localNode = behaviorTree.getNodeBuilder().createNode(subscriptionNode.getDefinitionClass(),
                                                               nodeID,
                                                               behaviorTree.getCRDTInfo(),
                                                               behaviorTree.getSaveFileDirectory());
@@ -186,7 +197,7 @@ public class ROS2BehaviorTreeSubscription<HLT extends BehaviorTreeNodeHighLayer<
    {
       byte nodeType = behaviorTreeStateMessage.getBehaviorTreeTypes().get(subscriptionNodeDepthFirstIndex.intValue());
       int indexInTypesList = (int) behaviorTreeStateMessage.getBehaviorTreeIndices().get(subscriptionNodeDepthFirstIndex.intValue());
-      subscriptionNode.setType(nodeType);
+      subscriptionNode.setPackedType(nodeType);
 
       ROS2BehaviorTreeMessageTools.packSubscriptionNode(nodeType, indexInTypesList, behaviorTreeStateMessage, subscriptionNode);
 

@@ -150,6 +150,8 @@ public class BehaviorTreeNodeDefinition extends LatestTimestampModifiable implem
 
    public void toMessage(BehaviorTreeNodeDefinitionMessage message)
    {
+      message.setType(BehaviorTreeDefinitionRegistry.getMessageByte(getClass()));
+
       toMessage(message.getLatestModificationToData());
       childrenModification.toMessage(message.getLatestModificationToChildren());
 
