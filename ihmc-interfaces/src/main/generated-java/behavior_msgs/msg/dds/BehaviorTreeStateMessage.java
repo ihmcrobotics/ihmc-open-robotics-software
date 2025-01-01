@@ -14,6 +14,11 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> implements Settable<BehaviorTreeStateMessage>, EpsilonComparable<BehaviorTreeStateMessage>
 {
+   /**
+          * Used to minimize bandwidth, nodes that are send
+          * without their full data.
+          */
+   public static final byte PARTIAL_DATA = (byte) 255;
    public static final byte ROOT_NODE = (byte) 0;
    public static final byte BASIC_NODE = (byte) 1;
    public static final byte AI2R_NODE = (byte) 2;
@@ -59,6 +64,7 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
             * it's type.
             */
    public us.ihmc.idl.IDLSequence.Long  behavior_tree_indices_;
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BasicNodeStateMessage>  partial_data_nodes_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BehaviorTreeRootNodeStateMessage>  root_nodes_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BasicNodeStateMessage>  basic_nodes_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.AI2RNodeStateMessage>  ai2r_nodes_;
@@ -87,6 +93,7 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
 
       behavior_tree_indices_ = new us.ihmc.idl.IDLSequence.Long (1000, "type_4");
 
+      partial_data_nodes_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BasicNodeStateMessage> (500, new behavior_msgs.msg.dds.BasicNodeStateMessagePubSubType());
       root_nodes_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BehaviorTreeRootNodeStateMessage> (1, new behavior_msgs.msg.dds.BehaviorTreeRootNodeStateMessagePubSubType());
       basic_nodes_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BasicNodeStateMessage> (200, new behavior_msgs.msg.dds.BasicNodeStateMessagePubSubType());
       ai2r_nodes_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.AI2RNodeStateMessage> (1, new behavior_msgs.msg.dds.AI2RNodeStateMessagePubSubType());
@@ -125,6 +132,7 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.staticCopy(other.latest_modification_to_data_, latest_modification_to_data_);
       behavior_tree_types_.set(other.behavior_tree_types_);
       behavior_tree_indices_.set(other.behavior_tree_indices_);
+      partial_data_nodes_.set(other.partial_data_nodes_);
       root_nodes_.set(other.root_nodes_);
       basic_nodes_.set(other.basic_nodes_);
       ai2r_nodes_.set(other.ai2r_nodes_);
@@ -212,6 +220,12 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
    public us.ihmc.idl.IDLSequence.Long  getBehaviorTreeIndices()
    {
       return behavior_tree_indices_;
+   }
+
+
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BasicNodeStateMessage>  getPartialDataNodes()
+   {
+      return partial_data_nodes_;
    }
 
 
@@ -355,6 +369,13 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       if (!us.ihmc.idl.IDLTools.epsilonEqualsByteSequence(this.behavior_tree_types_, other.behavior_tree_types_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsLongSequence(this.behavior_tree_indices_, other.behavior_tree_indices_, epsilon)) return false;
+
+      if (this.partial_data_nodes_.size() != other.partial_data_nodes_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.partial_data_nodes_.size(); i++)
+         {  if (!this.partial_data_nodes_.get(i).epsilonEquals(other.partial_data_nodes_.get(i), epsilon)) return false; }
+      }
 
       if (this.root_nodes_.size() != other.root_nodes_.size()) { return false; }
       else
@@ -510,6 +531,7 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       if (!this.latest_modification_to_data_.equals(otherMyClass.latest_modification_to_data_)) return false;
       if (!this.behavior_tree_types_.equals(otherMyClass.behavior_tree_types_)) return false;
       if (!this.behavior_tree_indices_.equals(otherMyClass.behavior_tree_indices_)) return false;
+      if (!this.partial_data_nodes_.equals(otherMyClass.partial_data_nodes_)) return false;
       if (!this.root_nodes_.equals(otherMyClass.root_nodes_)) return false;
       if (!this.basic_nodes_.equals(otherMyClass.basic_nodes_)) return false;
       if (!this.ai2r_nodes_.equals(otherMyClass.ai2r_nodes_)) return false;
@@ -551,6 +573,8 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       builder.append(this.behavior_tree_types_);      builder.append(", ");
       builder.append("behavior_tree_indices=");
       builder.append(this.behavior_tree_indices_);      builder.append(", ");
+      builder.append("partial_data_nodes=");
+      builder.append(this.partial_data_nodes_);      builder.append(", ");
       builder.append("root_nodes=");
       builder.append(this.root_nodes_);      builder.append(", ");
       builder.append("basic_nodes=");

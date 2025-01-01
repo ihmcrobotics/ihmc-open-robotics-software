@@ -3,6 +3,10 @@
 # reduce the complexity of logic in figuring out when nodes are currently under
 # consideration.
 
+# Used to minimize bandwidth, nodes that are send
+# without their full data.
+byte PARTIAL_DATA = 255
+
 byte ROOT_NODE = 0
 byte BASIC_NODE = 1
 byte AI2R_NODE = 2
@@ -43,6 +47,8 @@ byte[<=1000] behavior_tree_types
 # The index is of that node in it's respective list for
 # it's type.
 uint32[<=1000] behavior_tree_indices
+
+behavior_msgs/BasicNodeStateMessage[<=500] partial_data_nodes
 
 behavior_msgs/BehaviorTreeRootNodeStateMessage[<=1] root_nodes
 

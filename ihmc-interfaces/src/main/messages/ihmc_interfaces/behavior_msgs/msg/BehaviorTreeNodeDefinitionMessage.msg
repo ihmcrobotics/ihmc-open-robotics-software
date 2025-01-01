@@ -4,6 +4,9 @@
 # Instead we use a depth first ordered list and number of children
 # to send trees over. This is contained in another higher level message.
 
+# The type of this node
+byte type
+
 # The timestamp and modifer ID of the latest modification to this node's data fields
 ihmc_common_msgs/LatestModificationMessage latest_modification_to_data
 

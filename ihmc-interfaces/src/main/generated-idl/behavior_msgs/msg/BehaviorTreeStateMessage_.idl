@@ -27,6 +27,13 @@ module behavior_msgs
   {
     module dds
     {
+      /**
+       * Used to minimize bandwidth, nodes that are send
+       * without their full data.
+       */
+      const octet PARTIAL_DATA =
+      255;
+
       const octet ROOT_NODE =
       0;
 
@@ -120,6 +127,7 @@ module behavior_msgs
          * it's type.
          */
         sequence<unsigned long, 1000> behavior_tree_indices;
+        sequence<behavior_msgs::msg::dds::BasicNodeStateMessage, 500> partial_data_nodes;
         sequence<behavior_msgs::msg::dds::BehaviorTreeRootNodeStateMessage, 1> root_nodes;
         sequence<behavior_msgs::msg::dds::BasicNodeStateMessage, 200> basic_nodes;
         sequence<behavior_msgs::msg::dds::AI2RNodeStateMessage, 1> ai2r_nodes;

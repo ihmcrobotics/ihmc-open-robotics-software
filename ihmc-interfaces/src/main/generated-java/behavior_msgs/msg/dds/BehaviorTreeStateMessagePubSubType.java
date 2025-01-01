@@ -15,7 +15,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "c5888f63bcd624ab7e5faa42d6e1de6afdd4059386a921c5b1381d2611c505ad";
+   		return "9193ada32044d8c14d374f6a91c73efd012b7da0e5cdeae946b683c8a21c36b0";
    }
    
    @Override
@@ -64,6 +64,9 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (1000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 500; ++i0)
+      {
+          current_alignment += behavior_msgs.msg.dds.BasicNodeStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 1; ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.BehaviorTreeRootNodeStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
@@ -151,6 +154,11 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getBehaviorTreeIndices().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getPartialDataNodes().size(); ++i0)
+      {
+          current_alignment += behavior_msgs.msg.dds.BasicNodeStateMessagePubSubType.getCdrSerializedSize(data.getPartialDataNodes().get(i0), current_alignment);}
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getRootNodes().size(); ++i0)
@@ -267,6 +275,10 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       cdr.write_type_e(data.getBehaviorTreeIndices());else
           throw new RuntimeException("behavior_tree_indices field exceeds the maximum length");
 
+      if(data.getPartialDataNodes().size() <= 500)
+      cdr.write_type_e(data.getPartialDataNodes());else
+          throw new RuntimeException("partial_data_nodes field exceeds the maximum length");
+
       if(data.getRootNodes().size() <= 1)
       cdr.write_type_e(data.getRootNodes());else
           throw new RuntimeException("root_nodes field exceeds the maximum length");
@@ -355,6 +367,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.read(data.getLatestModificationToData(), cdr);	
       cdr.read_type_e(data.getBehaviorTreeTypes());	
       cdr.read_type_e(data.getBehaviorTreeIndices());	
+      cdr.read_type_e(data.getPartialDataNodes());	
       cdr.read_type_e(data.getRootNodes());	
       cdr.read_type_e(data.getBasicNodes());	
       cdr.read_type_e(data.getAi2rNodes());	
@@ -388,6 +401,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
 
       ser.write_type_e("behavior_tree_types", data.getBehaviorTreeTypes());
       ser.write_type_e("behavior_tree_indices", data.getBehaviorTreeIndices());
+      ser.write_type_e("partial_data_nodes", data.getPartialDataNodes());
       ser.write_type_e("root_nodes", data.getRootNodes());
       ser.write_type_e("basic_nodes", data.getBasicNodes());
       ser.write_type_e("ai2r_nodes", data.getAi2rNodes());
@@ -420,6 +434,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
 
       ser.read_type_e("behavior_tree_types", data.getBehaviorTreeTypes());
       ser.read_type_e("behavior_tree_indices", data.getBehaviorTreeIndices());
+      ser.read_type_e("partial_data_nodes", data.getPartialDataNodes());
       ser.read_type_e("root_nodes", data.getRootNodes());
       ser.read_type_e("basic_nodes", data.getBasicNodes());
       ser.read_type_e("ai2r_nodes", data.getAi2rNodes());
