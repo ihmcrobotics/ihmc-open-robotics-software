@@ -11,6 +11,9 @@ import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.FallbackNodeDefinition;
 import us.ihmc.behaviors.sequence.actions.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class BehaviorTreeDefinitionRegistry
 {
    private static final RegistryRecord[] DEFINITIONS = new RegistryRecord[]
@@ -36,6 +39,14 @@ public class BehaviorTreeDefinitionRegistry
       new RegistryRecord(WaitDurationActionDefinition.class, BehaviorTreeStateMessage.WAIT_DURATION_ACTION),
       new RegistryRecord(FootPoseActionDefinition.class, BehaviorTreeStateMessage.FOOT_POSE_ACTION)
    };
+   private static final Map<Class<?>, RegistryRecord> recordMap = new HashMap<>();
+   static
+   {
+      for (RegistryRecord definitionEntry : DEFINITIONS)
+      {
+         recordMap.put(definitionEntry.getTypeClass(), definitionEntry);
+      }
+   }
 
    public static Class<?> getClassFromTypeName(String typeName)
    {
@@ -44,7 +55,6 @@ public class BehaviorTreeDefinitionRegistry
          if (typeName.equals(definitionEntry.getTypeClass().getSimpleName()))
             return definitionEntry.getTypeClass();
       }
-
       return null;
    }
 
@@ -59,12 +69,23 @@ public class BehaviorTreeDefinitionRegistry
       return null;
    }
 
+   public static byte getMessageByte(Class<?> definitionClass)
+   {
+      RegistryRecord registryRecord = recordMap.get(definitionClass);
+      if (registryRecord != null)
+      {
+         return registryRecord.getMessageByte();
+      }
+
+      return -1;
+   }
+
    public static String getInitialName(Class<?> definitionClass)
    {
-      for (RegistryRecord definitionEntry : DEFINITIONS)
+      RegistryRecord registryRecord = recordMap.get(definitionClass);
+      if (registryRecord != null)
       {
-         if (definitionClass == definitionEntry.getTypeClass())
-            return definitionEntry.getInitialName();
+         return registryRecord.getInitialName();
       }
 
       return null;
