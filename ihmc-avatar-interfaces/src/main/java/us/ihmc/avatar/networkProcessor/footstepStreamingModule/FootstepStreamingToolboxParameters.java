@@ -63,6 +63,14 @@ public class FootstepStreamingToolboxParameters
     * Default acceleration norm threshold, to consider the swing foot is not decelerating
     */
    private double accelerationThreshold;
+   /**
+    * Default weight for stride length estimation related to a fraction of horizontal tracker acceleration
+    */
+   private double horizontalAccelerationWeight;
+   /**
+    * Default weight for stride length estimation related to a fraction of vertical tracker acceleration
+    */
+   private double verticalAccelerationWeight;
 
 
    private double publishingPeriod;
@@ -92,7 +100,10 @@ public class FootstepStreamingToolboxParameters
       stabilityIterations = 20;
 
       publishingPeriod = 5.0 * 0.006;
-      accelerationThreshold = 0.001;
+      accelerationThreshold = 0.0;
+
+      horizontalAccelerationWeight = 0.1;
+      verticalAccelerationWeight = 0.1;
    }
 
    public ClockType getClockType()
@@ -160,6 +171,16 @@ public class FootstepStreamingToolboxParameters
       return accelerationThreshold;
    }
 
+   public double getHorizontalAccelerationWeight()
+   {
+      return horizontalAccelerationWeight;
+   }
+
+   public double getVerticalAccelerationWeight()
+   {
+      return verticalAccelerationWeight;
+   }
+
    public void setClockType(ClockType clockType)
    {
       this.clockType = clockType;
@@ -223,5 +244,15 @@ public class FootstepStreamingToolboxParameters
    public void setAccelerationThreshold(double accelerationThreshold)
    {
       this.accelerationThreshold = accelerationThreshold;
+   }
+
+   public void setHorizontalAccelerationWeight(double horizontalAccelerationWeight)
+   {
+      this.horizontalAccelerationWeight = horizontalAccelerationWeight;
+   }
+
+   public void setVerticalAccelerationWeight(double verticalAccelerationWeight)
+   {
+      this.verticalAccelerationWeight = verticalAccelerationWeight;
    }
 }

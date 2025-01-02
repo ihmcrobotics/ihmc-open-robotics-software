@@ -58,6 +58,8 @@ public class FSTStreamingState implements State
    private final YoDouble defaultStabilityThreshold = new YoDouble("defaultStabilityThreshold", registry);
    private final YoInteger defaultStabilityIterations = new YoInteger("defaultStabilityIterations", registry);
    private final YoDouble defaultAccelerationThreshold = new YoDouble("defaultAccelerationThreshold", registry);
+   private final YoDouble defaultHorizontalAccelerationWeight = new YoDouble("defaultHorizontalAccelerationWeight", registry);
+   private final YoDouble defaultVerticalAccelerationWeight = new YoDouble("defaultHorizontalAccelerationWeight", registry);
 
    public FSTStreamingState(FSTTools tools)
    {
@@ -82,6 +84,8 @@ public class FSTStreamingState implements State
       defaultStabilityThreshold.set(parameters.getStabilityThreshold());
       defaultStabilityIterations.set(parameters.getStabilityIterations());
       defaultAccelerationThreshold.set(parameters.getAccelerationThreshold());
+      defaultHorizontalAccelerationWeight.set(parameters.getHorizontalAccelerationWeight());
+      defaultVerticalAccelerationWeight.set(parameters.getVerticalAccelerationWeight());
    }
 
    @Override
@@ -372,9 +376,8 @@ public class FSTStreamingState implements State
                                    double horizontalAccelerationMag,
                                    double verticalAccelerationMag)
    {
-      double alpha = 0.1; // tune this gain to scale how acceleration influences stride
-      double beta = 0.1; // TODO Add these 2 as toolbox parameters
-      double rawStride = measuredDistance + horizontalAccelerationMag * alpha + (1.0 - horizontalAccelerationMag) * beta * verticalAccelerationMag;
+      double rawStride = measuredDistance + horizontalAccelerationMag * defaultHorizontalAccelerationWeight.getValue()
+                         + (1.0 - horizontalAccelerationMag) * defaultVerticalAccelerationWeight.getValue() * verticalAccelerationMag;
       double clampedStride = Math.max(0.0, Math.min(rawStride, defaultStrideLength.getDoubleValue()));
 
       // Scale the normalized direction to the computed stride distance
