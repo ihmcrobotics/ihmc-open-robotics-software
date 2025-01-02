@@ -1,100 +1,80 @@
 package us.ihmc.humanoidRobotics.communication.footstepStreamingToolboxAPI;
 
 import toolbox_msgs.msg.dds.FootstepStreamingToolboxInputMessage;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.robotics.robotSide.RobotSide;
+
+import java.util.List;
 
 public class FootstepStreamingToolboxInputCommand implements Command<FootstepStreamingToolboxInputCommand, FootstepStreamingToolboxInputMessage>
 {
    private long sequenceId;
-   private long timestamp;
-   private RobotSide side;
-   private final FramePose3D robotFootPose = new FramePose3D();
-   private final FramePose3D currentPose = new FramePose3D();
-   private boolean hasCurrentVelocity;
-   private final SpatialVector currentVelocity = new SpatialVector();
+   private final RecyclingArrayList<FootstepStreamingToolboxTrackerCommand> inputs = new RecyclingArrayList<>(FootstepStreamingToolboxTrackerCommand::new);
 
    @Override
    public void clear()
    {
       sequenceId = 0;
-      timestamp = 0;
-      hasCurrentVelocity = false;
-      robotFootPose.setToNaN(ReferenceFrame.getWorldFrame());
-      currentPose.setToNaN(ReferenceFrame.getWorldFrame());
-      currentVelocity.setToNaN(ReferenceFrame.getWorldFrame());
+      inputs.clear();
    }
 
    @Override
    public void set(FootstepStreamingToolboxInputCommand other)
    {
       sequenceId = other.sequenceId;
-      timestamp = other.timestamp;
-      side = other.side;
-      robotFootPose.setIncludingFrame(other.robotFootPose);
-      currentPose.setIncludingFrame(other.currentPose);
-      hasCurrentVelocity = other.hasCurrentVelocity;
-      currentVelocity.setIncludingFrame(other.currentVelocity);
+      inputs.clear();
+      for (int i = 0; i < other.inputs.size(); i++)
+         inputs.add().set(other.inputs.get(i));
    }
 
    @Override
    public void setFromMessage(FootstepStreamingToolboxInputMessage message)
    {
       sequenceId = message.getSequenceId();
-      timestamp = message.getTimestamp();
-      side = RobotSide.fromByte(message.getSide());
-      robotFootPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), message.getRobotFootPositionInWorld(), message.getRobotFootOrientationInWorld());
-      currentPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), message.getCurrentPositionInWorld(), message.getCurrentOrientationInWorld());
-      hasCurrentVelocity = message.getHasCurrentVelocity();
-      currentVelocity.setIncludingFrame(ReferenceFrame.getWorldFrame(), message.getCurrentAngularVelocityInWorld(), message.getCurrentLinearVelocityInWorld());
+      inputs.clear();
+      for (int i = 0; i < message.getTrackers().size(); i++)
+         inputs.add().setFromMessage(message.getTrackers().get(i));
    }
 
-   public void setTimestamp(long timestamp)
+   public void removeInput(int index)
    {
-      this.timestamp = timestamp;
+      inputs.remove(index);
    }
 
-   public long getTimestamp()
+   public void removeInput(FootstepStreamingToolboxTrackerCommand input)
    {
-      return timestamp;
+      inputs.remove(input);
    }
 
-   public RobotSide getSide()
+   public int getNumberOfInputs()
    {
-      return side;
+      return inputs.size();
    }
 
-   public void setSide(RobotSide side)
+   public FootstepStreamingToolboxTrackerCommand getInput(int index)
    {
-      this.side = side;
+      return inputs.get(index);
    }
 
-   public void setHasCurrentVelocity(boolean hasCurrentVelocity)
+   public List<FootstepStreamingToolboxTrackerCommand> getInputs()
    {
-      this.hasCurrentVelocity = hasCurrentVelocity;
+      return inputs;
    }
 
-   public FramePose3D getCurrentPose()
+   public boolean hasInputFor(RobotSide side)
    {
-      return currentPose;
+      return getInputFor(side) != null;
    }
 
-   public SpatialVector getCurrentVelocity()
+   public FootstepStreamingToolboxTrackerCommand getInputFor(RobotSide side)
    {
-      return currentVelocity;
-   }
-
-   public FramePose3D getRobotFootPose()
-   {
-      return robotFootPose;
-   }
-
-   public boolean getHasCurrentVelocity()
-   {
-      return hasCurrentVelocity;
+      for (int i = 0; i < inputs.size(); i++)
+      {
+         if (inputs.get(i).getSide() == side)
+            return inputs.get(i);
+      }
+      return null;
    }
 
    @Override
@@ -106,12 +86,11 @@ public class FootstepStreamingToolboxInputCommand implements Command<FootstepStr
    @Override
    public boolean isCommandValid()
    {
-      if (currentPose.containsNaN())
-         return false;
-      if (hasCurrentVelocity && this.currentVelocity.containsNaN())
-         return false;
-      if (robotFootPose.containsNaN())
-         return false;
+      for (int i = 0; i < inputs.size(); i++)
+      {
+         if (!inputs.get(i).isCommandValid())
+            return false;
+      }
 
       return true;
    }

@@ -331,10 +331,16 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       footstepBeingPlaced.updatePose(tempFramePose);
    }
 
-   public void setFootstepPose(FramePose3DReadOnly poseToSet)
+   public void setFootstepBeingPlacedPose(FramePose3DReadOnly poseToSet)
    {
       poseToSet.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       footstepBeingPlaced.updatePose(poseToSet);
+   }
+
+   public void setLastFootstepPose(FramePose3DReadOnly poseToSet)
+   {
+      poseToSet.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+      footstepPlan.getLastFootstep().updatePose(poseToSet);
    }
 
    public void squareUpFootstep()
@@ -401,5 +407,15 @@ public class RDXManualFootstepPlacement implements RenderableProvider
    public void walkFromSteps()
    {
       footstepPlan.walkFromSteps();
+   }
+
+   public void setActiveAdjustment(boolean enabled)
+   {
+      footstepPlan.setActiveAdjustment(enabled);
+   }
+
+   public void clear()
+   {
+      footstepPlan.clear();
    }
 }

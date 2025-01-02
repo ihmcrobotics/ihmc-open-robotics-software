@@ -32,6 +32,14 @@ module toolbox_msgs
         @defaultValue(value=255)
         octet robot_side;
         /**
+         * Specifies whether the footstep comes from an initial estimate (false) or from an adjustment (true)
+         */
+        boolean adjustment_footstep;
+        /**
+         * Specifies whether it's the last pose update for a step
+         */
+        boolean last_adjustment;
+        /**
          * Desired footstep position in world frame.
          */
         geometry_msgs::msg::dds::Point desired_foot_position;

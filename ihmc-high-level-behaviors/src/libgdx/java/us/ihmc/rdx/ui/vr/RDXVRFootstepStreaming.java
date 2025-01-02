@@ -2,6 +2,7 @@ package us.ihmc.rdx.ui.vr;
 
 import toolbox_msgs.msg.dds.FootstepStreamingToolboxInputMessage;
 import toolbox_msgs.msg.dds.FootstepStreamingToolboxOutputStatus;
+import toolbox_msgs.msg.dds.FootstepStreamingToolboxTrackerMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepStreamingModule.FootstepStreamingToolboxModule;
 import us.ihmc.commons.thread.Notification;
@@ -58,29 +59,32 @@ public class RDXVRFootstepStreaming
             footstepStreamingToolbox.wakeUp();
             wasEnabled = true;
          }
+         FootstepStreamingToolboxInputMessage toolboxInputMessage = new FootstepStreamingToolboxInputMessage();
          for (RobotSide side : RobotSide.values)
          {
             if (ankleTrackerFrames.get(side) != null)
             {
-               FootstepStreamingToolboxInputMessage toolboxInputMessage = new FootstepStreamingToolboxInputMessage();
-               toolboxInputMessage.setTimestamp(ankleTrackerTimestamps.get(side));
-               toolboxInputMessage.setSide(side.toByte());
+               FootstepStreamingToolboxTrackerMessage footstepMessage = new FootstepStreamingToolboxTrackerMessage();
+               footstepMessage.setTimestamp(ankleTrackerTimestamps.get(side));
+               footstepMessage.setSide(side.toByte());
                RigidBodyTransform currentRobotFootTransformInWorld = new RigidBodyTransform(syncedRobot.getReferenceFrames().getSoleFrame(side).getTransformToWorldFrame());
-               toolboxInputMessage.getRobotFootPositionInWorld().set(currentRobotFootTransformInWorld.getTranslation());
-               toolboxInputMessage.getRobotFootOrientationInWorld().set(currentRobotFootTransformInWorld.getRotation());
+               footstepMessage.getRobotFootPositionInWorld().set(currentRobotFootTransformInWorld.getTranslation());
+               footstepMessage.getRobotFootOrientationInWorld().set(currentRobotFootTransformInWorld.getRotation());
 
                RigidBodyTransform currentTrackerTransform = new RigidBodyTransform();
                ankleTrackerFrames.get(side).getTransformToWorldFrame().transform(currentTrackerTransform);
-               toolboxInputMessage.getCurrentPositionInWorld().set(currentTrackerTransform.getTranslation());
-               toolboxInputMessage.getCurrentOrientationInWorld().set(currentTrackerTransform.getRotation());
+               footstepMessage.getCurrentPositionInWorld().set(currentTrackerTransform.getTranslation());
+               footstepMessage.getCurrentOrientationInWorld().set(currentTrackerTransform.getRotation());
 
-               toolboxInputMessage.setHasCurrentVelocity(true);
-               toolboxInputMessage.getCurrentLinearVelocityInWorld().set(ankleTrackerVelocities.get(side).getLinearPart());
-               toolboxInputMessage.getCurrentAngularVelocityInWorld().set(ankleTrackerVelocities.get(side).getAngularPart());
+               footstepMessage.setHasCurrentVelocity(true);
+               footstepMessage.getCurrentLinearVelocityInWorld().set(ankleTrackerVelocities.get(side).getLinearPart());
+               footstepMessage.getCurrentAngularVelocityInWorld().set(ankleTrackerVelocities.get(side).getAngularPart());
 
-               ros2Helper.publish(FootstepStreamingToolboxModule.getInputCommandTopic(syncedRobot.getRobotModel().getSimpleRobotName()), toolboxInputMessage);
+               toolboxInputMessage.getTrackers().add().set(footstepMessage);
             }
          }
+         if (toolboxInputMessage.getTrackers().size() == 2) // Do not publish if we have only the info of one tracker
+            ros2Helper.publish(FootstepStreamingToolboxModule.getInputCommandTopic(syncedRobot.getRobotModel().getSimpleRobotName()), toolboxInputMessage);
       }
       else
       {
@@ -94,25 +98,41 @@ public class RDXVRFootstepStreaming
       if (status.getMessageNotification().poll())
       {
          FootstepStreamingToolboxOutputStatus latestStatus = status.getMessageNotification().read();
-
          RobotSide side = RobotSide.fromByte(latestStatus.getRobotSide());
          if (side != null)
          {
-            // Place and send footstep
-            footstepPlacer.createNewFootstep(side);
-            footstepPlacer.setFootstepPose(new FramePose3D(ReferenceFrame.getWorldFrame(),
-                                                           latestStatus.getDesiredFootPosition(),
-                                                           latestStatus.getDesiredFootOrientation()));
-            if (footstepPlacer.checkAndPlaceFootstep())
+            if (!latestStatus.getAdjustmentFootstep()) // First value estimate for a footstep
             {
-               footstepPlacer.exitPlacement();
-               readyToStep.clear();
-               readyToStep.set();
+               // Place and send footstep
+               footstepPlacer.createNewFootstep(side);
+               footstepPlacer.setFootstepBeingPlacedPose(new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                                                         latestStatus.getDesiredFootPosition(),
+                                                                         latestStatus.getDesiredFootOrientation()));
+               if (footstepPlacer.checkAndPlaceFootstep())
+               {
+                  footstepPlacer.exitPlacement();
+                  // We can't trigger stepping here. We have to notify the KST and stop streaming
+                  readyToStep.clear();
+                  readyToStep.set();
+               }
+               else
+               {
+                  footstepPlacer.exitPlacement();
+                  LogTools.warn("Could not place step computed from the footstep streaming module");
+               }
             }
-            else
+            else if (latestStatus.getAdjustmentFootstep() && !latestStatus.getLastAdjustment()) // Later values of updated estimate
             {
-               footstepPlacer.exitPlacement();
-               LogTools.warn("Could not place step computed from the footstep streaming module");
+               footstepPlacer.setActiveAdjustment(true);
+               footstepPlacer.setLastFootstepPose(new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                                                  latestStatus.getDesiredFootPosition(),
+                                                                  latestStatus.getDesiredFootOrientation()));
+               step();
+            }
+            else if (latestStatus.getLastAdjustment()) // Last estimate
+            {
+               footstepPlacer.setActiveAdjustment(false);
+               footstepPlacer.clear();
             }
          }
          else

@@ -128,7 +128,6 @@ public class RDXVRKinematicsStreamingMode
    private RDXVRMotionRetargeting motionRetargeting;
 
    private RDXVRFootstepStreaming footstepStreaming;
-   private long lastStepCompletionTime;
    private boolean reintializingToolbox = false;
    private boolean pausedForWalking = false;
    private final RDXManualFootstepPlacement footstepPlacer;

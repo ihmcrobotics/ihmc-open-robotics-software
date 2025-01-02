@@ -12,6 +12,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.QuaternionTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.footstepStreamingToolboxAPI.FootstepStreamingToolboxInputCommand;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -85,11 +86,11 @@ public class FSTTools
 
          latestInput.set(commandInputManager.pollNewestCommand(FootstepStreamingToolboxInputCommand.class));
 
-         latestInputTimestampSource.set(latestInput.getTimestamp());
-         latestInputTimeSource.set(latestInput.getTimestamp() * 1.0e-9);
+         latestInputTimestampSource.set(latestInput.getInputFor(RobotSide.LEFT).getTimestamp());
+         latestInputTimeSource.set(latestInput.getInputFor(RobotSide.LEFT).getTimestamp() * 1.0e-9);
 
-         if (latestInput.getTimestamp() <= 0)
-            latestInput.setTimestamp(Conversions.secondsToNanoseconds(time.getValue()));
+         if (latestInput.getInputFor(RobotSide.LEFT).getTimestamp() <= 0)
+            latestInput.getInputFor(RobotSide.LEFT).setTimestamp(Conversions.secondsToNanoseconds(time.getValue()));
 
          latestInputReceivedTime.set(time.getValue());
          hasNewInputCommand.set(true);
@@ -211,6 +212,28 @@ public class FSTTools
       double wz = qs * qDot_z + qx * qDot_y - qy * qDot_x + qz * qDot_s;
       angularVelocityToPack.set(wx, wy, wz);
       angularVelocityToPack.scale(2.0 / dt);
+   }
+
+   /**
+    * Computes the acceleration from finite difference. This method uses two consecutive
+    * velocity measurements and the time interval between them to approximate the acceleration.
+    *
+    * @param dt                         the time delta between the two velocity measurements
+    * @param previousVelocity           the velocity measured at the previous time step
+    * @param currentVelocity            the velocity measured at the current time step
+    * @param accelerationToPack   the acceleration to pack, expressed in the same reference frame
+    */
+   public void computeAcceleration(double dt,
+                                          FrameVector3DReadOnly previousVelocity,
+                                          FrameVector3DReadOnly currentVelocity,
+                                          FixedFrameVector3DBasics accelerationToPack)
+   {
+      // Ensure all arguments are in the same reference frame
+      previousVelocity.checkReferenceFrameMatch(currentVelocity);
+      previousVelocity.checkReferenceFrameMatch(accelerationToPack);
+
+      accelerationToPack.sub(currentVelocity, previousVelocity);
+      accelerationToPack.scale(1.0 / dt);
    }
 
    public static void integrateLinearVelocity(double dt,

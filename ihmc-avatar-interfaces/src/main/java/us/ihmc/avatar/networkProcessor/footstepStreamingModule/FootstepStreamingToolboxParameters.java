@@ -59,6 +59,11 @@ public class FootstepStreamingToolboxParameters
     * Default number of iterations required to assess stability
     */
    private int stabilityIterations;
+   /**
+    * Default acceleration norm threshold, to consider the swing foot is not decelerating
+    */
+   private double accelerationThreshold;
+
 
    private double publishingPeriod;
 
@@ -87,6 +92,7 @@ public class FootstepStreamingToolboxParameters
       stabilityIterations = 20;
 
       publishingPeriod = 5.0 * 0.006;
+      accelerationThreshold = 0.001;
    }
 
    public ClockType getClockType()
@@ -149,6 +155,11 @@ public class FootstepStreamingToolboxParameters
       return stabilityThreshold;
    }
 
+   public double getAccelerationThreshold()
+   {
+      return accelerationThreshold;
+   }
+
    public void setClockType(ClockType clockType)
    {
       this.clockType = clockType;
@@ -207,5 +218,10 @@ public class FootstepStreamingToolboxParameters
    public void setPublishingPeriod(double publishingPeriod)
    {
       this.publishingPeriod = publishingPeriod;
+   }
+
+   public void setAccelerationThreshold(double accelerationThreshold)
+   {
+      this.accelerationThreshold = accelerationThreshold;
    }
 }

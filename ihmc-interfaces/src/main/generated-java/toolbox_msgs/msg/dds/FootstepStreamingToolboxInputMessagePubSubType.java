@@ -15,7 +15,7 @@ public class FootstepStreamingToolboxInputMessagePubSubType implements us.ihmc.p
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "173c549454ca35ffd609192910498a1bf153dd2d469ab8791e12360f70d7b4dc";
+   		return "f708e69c0e473b66556bc5c39327c96d875260c61c70b1008447a7bea0f931e4";
    }
    
    @Override
@@ -54,24 +54,9 @@ public class FootstepStreamingToolboxInputMessagePubSubType implements us.ihmc.p
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
-
-      current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
-
-      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
-
-      current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
-
-      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
-
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 10; ++i0)
+      {
+          current_alignment += toolbox_msgs.msg.dds.FootstepStreamingToolboxTrackerMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
 
       return current_alignment - initial_alignment;
    }
@@ -88,26 +73,10 @@ public class FootstepStreamingToolboxInputMessagePubSubType implements us.ihmc.p
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
-      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getRobotFootPositionInWorld(), current_alignment);
-
-      current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getRobotFootOrientationInWorld(), current_alignment);
-
-      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getCurrentPositionInWorld(), current_alignment);
-
-      current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getCurrentOrientationInWorld(), current_alignment);
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
-      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getCurrentLinearVelocityInWorld(), current_alignment);
-
-      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getCurrentAngularVelocityInWorld(), current_alignment);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getTrackers().size(); ++i0)
+      {
+          current_alignment += toolbox_msgs.msg.dds.FootstepStreamingToolboxTrackerMessagePubSubType.getCdrSerializedSize(data.getTrackers().get(i0), current_alignment);}
 
 
       return current_alignment - initial_alignment;
@@ -117,36 +86,17 @@ public class FootstepStreamingToolboxInputMessagePubSubType implements us.ihmc.p
    {
       cdr.write_type_12(data.getSequenceId());
 
-      cdr.write_type_11(data.getTimestamp());
+      if(data.getTrackers().size() <= 10)
+      cdr.write_type_e(data.getTrackers());else
+          throw new RuntimeException("trackers field exceeds the maximum length");
 
-      cdr.write_type_9(data.getSide());
-
-      geometry_msgs.msg.dds.PointPubSubType.write(data.getRobotFootPositionInWorld(), cdr);
-      geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getRobotFootOrientationInWorld(), cdr);
-      geometry_msgs.msg.dds.PointPubSubType.write(data.getCurrentPositionInWorld(), cdr);
-      geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getCurrentOrientationInWorld(), cdr);
-      cdr.write_type_7(data.getHasCurrentVelocity());
-
-      geometry_msgs.msg.dds.Vector3PubSubType.write(data.getCurrentLinearVelocityInWorld(), cdr);
-      geometry_msgs.msg.dds.Vector3PubSubType.write(data.getCurrentAngularVelocityInWorld(), cdr);
    }
 
    public static void read(toolbox_msgs.msg.dds.FootstepStreamingToolboxInputMessage data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_12());
       	
-      data.setTimestamp(cdr.read_type_11());
-      	
-      data.setSide(cdr.read_type_9());
-      	
-      geometry_msgs.msg.dds.PointPubSubType.read(data.getRobotFootPositionInWorld(), cdr);	
-      geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getRobotFootOrientationInWorld(), cdr);	
-      geometry_msgs.msg.dds.PointPubSubType.read(data.getCurrentPositionInWorld(), cdr);	
-      geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getCurrentOrientationInWorld(), cdr);	
-      data.setHasCurrentVelocity(cdr.read_type_7());
-      	
-      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getCurrentLinearVelocityInWorld(), cdr);	
-      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getCurrentAngularVelocityInWorld(), cdr);	
+      cdr.read_type_e(data.getTrackers());	
 
    }
 
@@ -154,42 +104,14 @@ public class FootstepStreamingToolboxInputMessagePubSubType implements us.ihmc.p
    public final void serialize(toolbox_msgs.msg.dds.FootstepStreamingToolboxInputMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_12("sequence_id", data.getSequenceId());
-      ser.write_type_11("timestamp", data.getTimestamp());
-      ser.write_type_9("side", data.getSide());
-      ser.write_type_a("robot_foot_position_in_world", new geometry_msgs.msg.dds.PointPubSubType(), data.getRobotFootPositionInWorld());
-
-      ser.write_type_a("robot_foot_orientation_in_world", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getRobotFootOrientationInWorld());
-
-      ser.write_type_a("current_position_in_world", new geometry_msgs.msg.dds.PointPubSubType(), data.getCurrentPositionInWorld());
-
-      ser.write_type_a("current_orientation_in_world", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getCurrentOrientationInWorld());
-
-      ser.write_type_7("has_current_velocity", data.getHasCurrentVelocity());
-      ser.write_type_a("current_linear_velocity_in_world", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getCurrentLinearVelocityInWorld());
-
-      ser.write_type_a("current_angular_velocity_in_world", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getCurrentAngularVelocityInWorld());
-
+      ser.write_type_e("trackers", data.getTrackers());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, toolbox_msgs.msg.dds.FootstepStreamingToolboxInputMessage data)
    {
       data.setSequenceId(ser.read_type_12("sequence_id"));
-      data.setTimestamp(ser.read_type_11("timestamp"));
-      data.setSide(ser.read_type_9("side"));
-      ser.read_type_a("robot_foot_position_in_world", new geometry_msgs.msg.dds.PointPubSubType(), data.getRobotFootPositionInWorld());
-
-      ser.read_type_a("robot_foot_orientation_in_world", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getRobotFootOrientationInWorld());
-
-      ser.read_type_a("current_position_in_world", new geometry_msgs.msg.dds.PointPubSubType(), data.getCurrentPositionInWorld());
-
-      ser.read_type_a("current_orientation_in_world", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getCurrentOrientationInWorld());
-
-      data.setHasCurrentVelocity(ser.read_type_7("has_current_velocity"));
-      ser.read_type_a("current_linear_velocity_in_world", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getCurrentLinearVelocityInWorld());
-
-      ser.read_type_a("current_angular_velocity_in_world", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getCurrentAngularVelocityInWorld());
-
+      ser.read_type_e("trackers", data.getTrackers());
    }
 
    public static void staticCopy(toolbox_msgs.msg.dds.FootstepStreamingToolboxInputMessage src, toolbox_msgs.msg.dds.FootstepStreamingToolboxInputMessage dest)

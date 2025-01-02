@@ -15,7 +15,7 @@ public class FootstepStreamingToolboxOutputStatusPubSubType implements us.ihmc.p
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "7837d499956970d7c7011c4d1073d7b81fc9f1eb2bc0e33aec3cc6aed4e1729c";
+   		return "14d598e400fbda9249905913d125d4178a6ed5f8edbce68c3c17deb410be8bd8";
    }
    
    @Override
@@ -56,6 +56,10 @@ public class FootstepStreamingToolboxOutputStatusPubSubType implements us.ihmc.p
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
@@ -79,6 +83,12 @@ public class FootstepStreamingToolboxOutputStatusPubSubType implements us.ihmc.p
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getDesiredFootPosition(), current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getDesiredFootOrientation(), current_alignment);
@@ -93,6 +103,10 @@ public class FootstepStreamingToolboxOutputStatusPubSubType implements us.ihmc.p
 
       cdr.write_type_9(data.getRobotSide());
 
+      cdr.write_type_7(data.getAdjustmentFootstep());
+
+      cdr.write_type_7(data.getLastAdjustment());
+
       geometry_msgs.msg.dds.PointPubSubType.write(data.getDesiredFootPosition(), cdr);
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getDesiredFootOrientation(), cdr);
    }
@@ -102,6 +116,10 @@ public class FootstepStreamingToolboxOutputStatusPubSubType implements us.ihmc.p
       data.setSequenceId(cdr.read_type_12());
       	
       data.setRobotSide(cdr.read_type_9());
+      	
+      data.setAdjustmentFootstep(cdr.read_type_7());
+      	
+      data.setLastAdjustment(cdr.read_type_7());
       	
       geometry_msgs.msg.dds.PointPubSubType.read(data.getDesiredFootPosition(), cdr);	
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getDesiredFootOrientation(), cdr);	
@@ -113,6 +131,8 @@ public class FootstepStreamingToolboxOutputStatusPubSubType implements us.ihmc.p
    {
       ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_9("robot_side", data.getRobotSide());
+      ser.write_type_7("adjustment_footstep", data.getAdjustmentFootstep());
+      ser.write_type_7("last_adjustment", data.getLastAdjustment());
       ser.write_type_a("desired_foot_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getDesiredFootPosition());
 
       ser.write_type_a("desired_foot_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getDesiredFootOrientation());
@@ -124,6 +144,8 @@ public class FootstepStreamingToolboxOutputStatusPubSubType implements us.ihmc.p
    {
       data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setRobotSide(ser.read_type_9("robot_side"));
+      data.setAdjustmentFootstep(ser.read_type_7("adjustment_footstep"));
+      data.setLastAdjustment(ser.read_type_7("last_adjustment"));
       ser.read_type_a("desired_foot_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getDesiredFootPosition());
 
       ser.read_type_a("desired_foot_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getDesiredFootOrientation());

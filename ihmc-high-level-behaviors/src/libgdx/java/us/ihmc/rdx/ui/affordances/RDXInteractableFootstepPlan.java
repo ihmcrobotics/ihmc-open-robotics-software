@@ -252,8 +252,8 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       stepChecker.clear();
       if (!activeAdjustment)
       {
-      footsteps.clear();
-      selectedFootstep = null;
+         footsteps.clear();
+         selectedFootstep = null;
       }
    }
 

@@ -22,6 +22,14 @@ public class FootstepStreamingToolboxOutputStatus extends Packet<FootstepStreami
             */
    public byte robot_side_ = (byte) 255;
    /**
+            * Specifies whether the footstep comes from an initial estimate (false) or from an adjustment (true)
+            */
+   public boolean adjustment_footstep_;
+   /**
+            * Specifies whether it's the last pose update for a step
+            */
+   public boolean last_adjustment_;
+   /**
             * Desired footstep position in world frame.
             */
    public us.ihmc.euclid.tuple3D.Point3D desired_foot_position_;
@@ -47,6 +55,10 @@ public class FootstepStreamingToolboxOutputStatus extends Packet<FootstepStreami
       sequence_id_ = other.sequence_id_;
 
       robot_side_ = other.robot_side_;
+
+      adjustment_footstep_ = other.adjustment_footstep_;
+
+      last_adjustment_ = other.last_adjustment_;
 
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.desired_foot_position_, desired_foot_position_);
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.desired_foot_orientation_, desired_foot_orientation_);
@@ -80,6 +92,36 @@ public class FootstepStreamingToolboxOutputStatus extends Packet<FootstepStreami
    public byte getRobotSide()
    {
       return robot_side_;
+   }
+
+   /**
+            * Specifies whether the footstep comes from an initial estimate (false) or from an adjustment (true)
+            */
+   public void setAdjustmentFootstep(boolean adjustment_footstep)
+   {
+      adjustment_footstep_ = adjustment_footstep;
+   }
+   /**
+            * Specifies whether the footstep comes from an initial estimate (false) or from an adjustment (true)
+            */
+   public boolean getAdjustmentFootstep()
+   {
+      return adjustment_footstep_;
+   }
+
+   /**
+            * Specifies whether it's the last pose update for a step
+            */
+   public void setLastAdjustment(boolean last_adjustment)
+   {
+      last_adjustment_ = last_adjustment;
+   }
+   /**
+            * Specifies whether it's the last pose update for a step
+            */
+   public boolean getLastAdjustment()
+   {
+      return last_adjustment_;
    }
 
 
@@ -122,6 +164,10 @@ public class FootstepStreamingToolboxOutputStatus extends Packet<FootstepStreami
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.adjustment_footstep_, other.adjustment_footstep_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.last_adjustment_, other.last_adjustment_, epsilon)) return false;
+
       if (!this.desired_foot_position_.epsilonEquals(other.desired_foot_position_, epsilon)) return false;
       if (!this.desired_foot_orientation_.epsilonEquals(other.desired_foot_orientation_, epsilon)) return false;
 
@@ -141,6 +187,10 @@ public class FootstepStreamingToolboxOutputStatus extends Packet<FootstepStreami
 
       if(this.robot_side_ != otherMyClass.robot_side_) return false;
 
+      if(this.adjustment_footstep_ != otherMyClass.adjustment_footstep_) return false;
+
+      if(this.last_adjustment_ != otherMyClass.last_adjustment_) return false;
+
       if (!this.desired_foot_position_.equals(otherMyClass.desired_foot_position_)) return false;
       if (!this.desired_foot_orientation_.equals(otherMyClass.desired_foot_orientation_)) return false;
 
@@ -157,6 +207,10 @@ public class FootstepStreamingToolboxOutputStatus extends Packet<FootstepStreami
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);      builder.append(", ");
+      builder.append("adjustment_footstep=");
+      builder.append(this.adjustment_footstep_);      builder.append(", ");
+      builder.append("last_adjustment=");
+      builder.append(this.last_adjustment_);      builder.append(", ");
       builder.append("desired_foot_position=");
       builder.append(this.desired_foot_position_);      builder.append(", ");
       builder.append("desired_foot_orientation=");

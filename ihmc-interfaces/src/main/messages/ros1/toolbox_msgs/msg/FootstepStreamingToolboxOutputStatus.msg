@@ -11,6 +11,12 @@ uint64 sequence_id
 # Field default value 255
 int8 robot_side
 
+# Specifies whether the footstep comes from an initial estimate (false) or from an adjustment (true)
+bool adjustment_footstep
+
+# Specifies whether it's the last pose update for a step
+bool last_adjustment
+
 # Desired footstep position in world frame.
 geometry_msgs/Point desired_foot_position
 
