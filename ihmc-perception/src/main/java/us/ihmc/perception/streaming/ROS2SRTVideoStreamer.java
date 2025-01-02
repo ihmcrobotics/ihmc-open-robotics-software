@@ -79,7 +79,7 @@ public class ROS2SRTVideoStreamer
    {
       Map<String, String> hevcOptions = useHardwareAcceleration ?
             StreamingTools.getHEVCNVENCStreamingOptions() :
-            StreamingTools.getLibX265StreamingOptions();
+            StreamingTools.getLibX265HighQualityStreamingOptions();
       hevcOptions.put("udu_sei", "1");
       videoStreamer.initialize(imageWidth,
                                imageHeight,

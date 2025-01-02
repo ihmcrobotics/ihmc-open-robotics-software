@@ -1,14 +1,11 @@
 package us.ihmc.rdx.perception;
 
-import org.bytedeco.opencv.global.opencv_cudawarping;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.GpuMat;
-import org.bytedeco.opencv.opencv_core.Size;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.cuda.CUDADepthColorizer;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.streaming.ROS2SRTVideoStreamer;
@@ -110,29 +107,29 @@ public class RDXDepthStreamingDemo
          sentColorVisualizer.updateImageDimensions(colorizedImage.getWidth(), colorizedImage.getHeight());
          opencv_imgproc.cvtColor(colorizedImage.getCpuImageMat(), sentColorVisualizer.getRGBA8Mat(), opencv_imgproc.COLOR_BGR2RGBA);
 
-         GpuMat smallerColorizedDepth = new GpuMat();
-         opencv_cudawarping.resize(colorizedDepth, smallerColorizedDepth, new Size(colorizedImage.getWidth() / 2, colorizedImage.getHeight() / 2));
-         RawImage smallerImage = new RawImage(null,
-                                              smallerColorizedDepth,
-                                              PixelFormat.BGR8,
-                                              new CameraIntrinsics(smallerColorizedDepth.rows(),
-                                                                   smallerColorizedDepth.cols(),
-                                                                   colorizedImage.getFocalLengthX() / 2,
-                                                                   colorizedImage.getFocalLengthY() / 2,
-                                                                   colorizedImage.getPrincipalPointX() / 2,
-                                                                   colorizedImage.getPrincipalPointY() / 2),
-                                              colorizedImage.getCameraModel(),
-                                              colorizedImage.getPose(),
-                                              colorizedImage.getAcquisitionTime(),
-                                              colorizedImage.getSequenceNumber(),
-                                              colorizedImage.getDepthDiscretization());
+//         GpuMat smallerColorizedDepth = new GpuMat();
+//         opencv_cudawarping.resize(colorizedDepth, smallerColorizedDepth, new Size(colorizedImage.getWidth() / 2, colorizedImage.getHeight() / 2));
+//         RawImage smallerImage = new RawImage(null,
+//                                              smallerColorizedDepth,
+//                                              PixelFormat.BGR8,
+//                                              new CameraIntrinsics(smallerColorizedDepth.rows(),
+//                                                                   smallerColorizedDepth.cols(),
+//                                                                   colorizedImage.getFocalLengthX() / 2,
+//                                                                   colorizedImage.getFocalLengthY() / 2,
+//                                                                   colorizedImage.getPrincipalPointX() / 2,
+//                                                                   colorizedImage.getPrincipalPointY() / 2),
+//                                              colorizedImage.getCameraModel(),
+//                                              colorizedImage.getPose(),
+//                                              colorizedImage.getAcquisitionTime(),
+//                                              colorizedImage.getSequenceNumber(),
+//                                              colorizedImage.getDepthDiscretization());
 
          if (!videoStreamer.isInitialized())
-            videoStreamer.initializeForColor(smallerImage, AV_PIX_FMT_YUV444P);
+            videoStreamer.initializeForColor(colorizedImage, AV_PIX_FMT_YUV444P);
 
-         videoStreamer.sendFrame(smallerImage);
+         videoStreamer.sendFrame(colorizedImage);
 
-         smallerImage.release();
+//         smallerImage.release();
          colorizedImage.release();
          depthImage.release();
       } catch (InterruptedException ignored) {}
