@@ -4,6 +4,7 @@ import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiWindowFlags;
+import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionType;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.log.LogTools;
@@ -14,6 +15,7 @@ import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
 public class RDXBehaviorTreeWidgetsVerticalLayout
 {
    private final RDXBehaviorTree behaviorTree;
+   private final BehaviorTreeTopologyOperationQueue<RDXBehaviorTreeNode<?, ?>> topologyOperationQueue;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private BehaviorTreeNodeInsertionType insertionType = null;
    private RDXBehaviorTreeNode<?, ?> modalPopupNode;
@@ -22,6 +24,8 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
    public RDXBehaviorTreeWidgetsVerticalLayout(RDXBehaviorTree behaviorTree)
    {
       this.behaviorTree = behaviorTree;
+
+      topologyOperationQueue = behaviorTree.getTopologyChangeQueue();
    }
 
    public void renderImGuiWidgets(RDXBehaviorTreeNode<?, ?> node)
@@ -89,13 +93,10 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
          ImGui.pushStyleColor(ImGuiCol.Text, ImGuiTools.RED);
          if (ImGui.menuItem(labels.get("Delete Node")))
          {
-            behaviorTree.modifyTreeTopology(topologyOperationQueue ->
-            {
-               if (node.isRootNode())
-                  topologyOperationQueue.queueDestroyEntireTreeModify();
-               else
-                  topologyOperationQueue.queueDestroySubtreeModify(node);
-            });
+            if (node.isRootNode())
+               topologyOperationQueue.queueDestroyEntireTreeModify();
+            else
+               topologyOperationQueue.queueDestroySubtreeModify(node);
          }
          ImGui.popStyleColor();
 
@@ -182,8 +183,7 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
                {
                   if (ImGui.menuItem(relativeNode.getDefinition().getName()))
                   {
-                     behaviorTree.modifyTreeTopology(topologyOperationQueue ->
-                        topologyOperationQueue.queueMoveChildModify(nodeToMove.getParent(), relativeNode, nodeToMove, relativeNode, insertionType));
+                     topologyOperationQueue.queueMoveChildModify(nodeToMove.getParent(), relativeNode, nodeToMove, relativeNode, insertionType);
                   }
                }
             }
@@ -191,8 +191,7 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
             {
                if (ImGui.menuItem(relativeNode.getDefinition().getName()))
                {
-                  behaviorTree.modifyTreeTopology(topologyOperationQueue ->
-                     topologyOperationQueue.queueMoveChildModify(nodeToMove.getParent(), relativeNode.getParent(), nodeToMove, relativeNode, insertionType));
+                  topologyOperationQueue.queueMoveChildModify(nodeToMove.getParent(), relativeNode.getParent(), nodeToMove, relativeNode, insertionType);
                }
             }
          }

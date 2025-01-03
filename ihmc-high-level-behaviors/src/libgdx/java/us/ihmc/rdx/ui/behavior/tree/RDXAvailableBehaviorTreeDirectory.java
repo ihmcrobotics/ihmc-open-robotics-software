@@ -16,15 +16,15 @@ import us.ihmc.tools.io.WorkspaceResourceFile;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 public class RDXAvailableBehaviorTreeDirectory
 {
    private final WorkspaceResourceDirectory treeFilesDirectory;
    private final RDXBehaviorTree behaviorTree;
+   private final BehaviorTreeTopologyOperationQueue<RDXBehaviorTreeNode<?, ?>> topologyOperationQueue;
    private final ReferenceFrameLibrary referenceFrameLibrary;
-   private final BiConsumer<BehaviorTreeNodeInsertionDefinition<RDXBehaviorTreeNode<?, ?>>,
-                            BehaviorTreeTopologyOperationQueue<RDXBehaviorTreeNode<?, ?>>> complete;
+   private final Consumer<BehaviorTreeNodeInsertionDefinition<RDXBehaviorTreeNode<?, ?>>> complete;
 
    private final ImGuiExpandCollapseRenderer expandCollapseRenderer = new ImGuiExpandCollapseRenderer();
    private boolean treeWidgetExpanded = false;
@@ -33,12 +33,13 @@ public class RDXAvailableBehaviorTreeDirectory
 
    public RDXAvailableBehaviorTreeDirectory(WorkspaceResourceDirectory treeFilesDirectory,
                                             RDXBehaviorTree behaviorTree,
+                                            BehaviorTreeTopologyOperationQueue<RDXBehaviorTreeNode<?, ?>> topologyOperationQueue,
                                             ReferenceFrameLibrary referenceFrameLibrary,
-                                            BiConsumer<BehaviorTreeNodeInsertionDefinition<RDXBehaviorTreeNode<?, ?>>,
-                                                       BehaviorTreeTopologyOperationQueue<RDXBehaviorTreeNode<?, ?>>> complete)
+                                            Consumer<BehaviorTreeNodeInsertionDefinition<RDXBehaviorTreeNode<?, ?>>> complete)
    {
       this.treeFilesDirectory = treeFilesDirectory;
       this.behaviorTree = behaviorTree;
+      this.topologyOperationQueue = topologyOperationQueue;
       this.referenceFrameLibrary = referenceFrameLibrary;
       this.complete = complete;
    }
@@ -66,6 +67,7 @@ public class RDXAvailableBehaviorTreeDirectory
       {
          RDXAvailableBehaviorTreeDirectory subtreeDirectory = new RDXAvailableBehaviorTreeDirectory(subdirectory,
                                                                                                     behaviorTree,
+                                                                                                    topologyOperationQueue,
                                                                                                     referenceFrameLibrary,
                                                                                                     complete);
          subtreeDirectory.reindexDirectory();
@@ -116,28 +118,25 @@ public class RDXAvailableBehaviorTreeDirectory
             {
                if (ImGui.isMouseClicked(ImGuiMouseButton.Left))
                {
-                  behaviorTree.modifyTreeTopology(topologyOperationQueue ->
+                  RDXBehaviorTreeNode<?, ?> loadedNode = behaviorTree.getFileLoader().loadFromFile(indexedTreeFile.getTreeFile(), topologyOperationQueue);
+
+                  if (loadedNode != null)
                   {
-                     RDXBehaviorTreeNode<?, ?> loadedNode = behaviorTree.getFileLoader().loadFromFile(indexedTreeFile.getTreeFile(), topologyOperationQueue);
+                     RDXBehaviorTreeNode<?, ?> nodeToInsert = loadedNode;
 
-                     if (loadedNode != null)
+                     if (behaviorTree.getRootNode() == null) // Automatically add a root node if there isn't one
                      {
-                        RDXBehaviorTreeNode<?, ?> nodeToInsert = loadedNode;
-
-                        if (behaviorTree.getRootNode() == null) // Automatically add a root node if there isn't one
-                        {
-                           nodeToInsert = new RDXBehaviorTreeRootNode(behaviorTree.getAndIncrementNextID(),
-                                                                      behaviorTree.getCRDTInfo(),
-                                                                      behaviorTree.getSaveFileDirectory());
-                           nodeToInsert.getDefinition().modify();
-                           topologyOperationQueue.queueAppendChildModify(nodeToInsert, loadedNode);
-                        }
-
-                        BehaviorTreeNodeInsertionDefinition<RDXBehaviorTreeNode<?, ?>> insertionDefinition
-                              = new BehaviorTreeNodeInsertionDefinition<>(insertionType, nodeToInsert, relativeNode);
-                        complete.accept(insertionDefinition, topologyOperationQueue);
+                        nodeToInsert = new RDXBehaviorTreeRootNode(behaviorTree.getAndIncrementNextID(),
+                                                                   behaviorTree.getCRDTInfo(),
+                                                                   behaviorTree.getSaveFileDirectory());
+                        nodeToInsert.getDefinition().modify();
+                        topologyOperationQueue.queueAppendChildModify(nodeToInsert, loadedNode);
                      }
-                  });
+
+                     BehaviorTreeNodeInsertionDefinition<RDXBehaviorTreeNode<?, ?>> insertionDefinition
+                           = new BehaviorTreeNodeInsertionDefinition<>(insertionType, nodeToInsert, relativeNode);
+                     complete.accept(insertionDefinition);
+                  }
                }
             }
 
