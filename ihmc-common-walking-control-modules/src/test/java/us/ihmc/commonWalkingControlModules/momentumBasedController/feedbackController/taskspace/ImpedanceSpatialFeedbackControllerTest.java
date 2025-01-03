@@ -1,14 +1,10 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace;
 
-import java.util.List;
-import java.util.Random;
-
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
 import org.ejml.interfaces.linsol.LinearSolverDense;
 import org.junit.jupiter.api.Test;
-
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
@@ -18,12 +14,9 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.NativeQPInputTypeA;
 import us.ihmc.convexOptimization.quadraticProgram.OASESConstrainedQPSolver;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.matrixlib.MatrixTools;
@@ -42,8 +35,10 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPIDSE3Gains;
-import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
+
+import java.util.List;
+import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -108,7 +103,10 @@ public final class ImpedanceSpatialFeedbackControllerTest
          spatialFeedbackController.computeInverseDynamics();
          SpatialAccelerationCommand spatialAccelerationCommand = spatialFeedbackController.getInverseDynamicsOutput();
          Assert.assertTrue(motionQPInputCalculator.convertSpatialAccelerationCommand(spatialAccelerationCommand, motionQPInput));
-         NativeCommonOps.solveDamped(new DMatrixRMaj(motionQPInput.getTaskJacobian()), new DMatrixRMaj(motionQPInput.getTaskObjective()), damping, jointAccelerations);
+         NativeCommonOps.solveDamped(new DMatrixRMaj(motionQPInput.getTaskJacobian()),
+                                     new DMatrixRMaj(motionQPInput.getTaskObjective()),
+                                     damping,
+                                     jointAccelerations);
          integrator.integrateJointAccelerations(joints, jointAccelerations);
          integrator.integrateJointVelocities(joints, integrator.getJointVelocities());
          MultiBodySystemTools.insertJointsState(joints, JointStateType.VELOCITY, integrator.getJointVelocities());
@@ -157,9 +155,7 @@ public final class ImpedanceSpatialFeedbackControllerTest
       JointBasics[] jointsToOptimizeFor = MultiBodySystemTools.collectSupportAndSubtreeJoints(elevator);
       double controlDT = 0.004;
 
-
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, null,
-                                                                            null, registry);
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, null, null, registry);
       toolbox.setupForInverseDynamicsSolver(null);
       FeedbackControllerToolbox feedbackControllerToolbox = new FeedbackControllerToolbox(registry);
       SpatialFeedbackController spatialFeedbackController = new SpatialFeedbackController(endEffector, toolbox, feedbackControllerToolbox, registry);
@@ -173,11 +169,15 @@ public final class ImpedanceSpatialFeedbackControllerTest
       gains.getOrientationGains().setDampingRatios(1);
       spatialFeedbackControlCommand.setGains(gains);
       spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(bodyFixedPointToControl);
-      spatialFeedbackControlCommand.setInverseDynamics(desiredOrientation, desiredPosition, new FrameVector3D(worldFrame), new FrameVector3D(worldFrame), new FrameVector3D(worldFrame), new FrameVector3D(worldFrame));
+      spatialFeedbackControlCommand.setInverseDynamics(desiredOrientation,
+                                                       desiredPosition,
+                                                       new FrameVector3D(worldFrame),
+                                                       new FrameVector3D(worldFrame),
+                                                       new FrameVector3D(worldFrame),
+                                                       new FrameVector3D(worldFrame));
       spatialFeedbackController.setEnabled(true);
       spatialFeedbackController.setImpedanceEnabled(true);
       spatialFeedbackController.submitFeedbackControlCommand(spatialFeedbackControlCommand);
-
 
       int numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(jointsToOptimizeFor);
       NativeQPInputTypeA motionQPInput = new NativeQPInputTypeA(numberOfDoFs);
@@ -231,7 +231,6 @@ public final class ImpedanceSpatialFeedbackControllerTest
       }
    }
 
-
    //   Warning: Unfair test for the controller. The controller is not designed to handle this case.
    @Test
    public void testConvergenceWithJerryQP() throws Exception
@@ -267,8 +266,7 @@ public final class ImpedanceSpatialFeedbackControllerTest
       JointBasics[] jointsToOptimizeFor = MultiBodySystemTools.collectSupportAndSubtreeJoints(elevator);
       double controlDT = 0.004;
 
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, null,
-                                                                            null, registry);
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, null, null, registry);
       toolbox.setupForInverseDynamicsSolver(null);
       FeedbackControllerToolbox feedbackControllerToolbox = new FeedbackControllerToolbox(registry);
       SpatialFeedbackController spatialFeedbackController = new SpatialFeedbackController(endEffector, toolbox, feedbackControllerToolbox, registry);
@@ -282,11 +280,15 @@ public final class ImpedanceSpatialFeedbackControllerTest
       gains.getOrientationGains().setDampingRatios(1);
       spatialFeedbackControlCommand.setGains(gains);
       spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(bodyFixedPointToControl);
-      spatialFeedbackControlCommand.setInverseDynamics(desiredOrientation, desiredPosition, new FrameVector3D(worldFrame), new FrameVector3D(worldFrame), new FrameVector3D(worldFrame), new FrameVector3D(worldFrame));
+      spatialFeedbackControlCommand.setInverseDynamics(desiredOrientation,
+                                                       desiredPosition,
+                                                       new FrameVector3D(worldFrame),
+                                                       new FrameVector3D(worldFrame),
+                                                       new FrameVector3D(worldFrame),
+                                                       new FrameVector3D(worldFrame));
       spatialFeedbackController.setEnabled(true);
       spatialFeedbackController.setImpedanceEnabled(true);
       spatialFeedbackController.submitFeedbackControlCommand(spatialFeedbackControlCommand);
-
 
       int numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(jointsToOptimizeFor);
       NativeQPInputTypeA motionQPInput = new NativeQPInputTypeA(numberOfDoFs);
@@ -341,8 +343,16 @@ public final class ImpedanceSpatialFeedbackControllerTest
          jerryQPSolver.clear();
          jerryQPSolver.setQuadraticCostFunction(solverInput_H, solverInput_f, 0.0);
          jerryQPSolver.solve(jointAccelerationsFromJerryQP);
-         oasesQPSolver.solve(solverInput_H, solverInput_f, solverInput_Aeq, solverInput_beq, solverInput_Ain, solverInput_bin, solverInput_lb, solverInput_ub,
-                             jointAccelerationsFromQPOASES, true);
+         oasesQPSolver.solve(solverInput_H,
+                             solverInput_f,
+                             solverInput_Aeq,
+                             solverInput_beq,
+                             solverInput_Ain,
+                             solverInput_bin,
+                             solverInput_lb,
+                             solverInput_ub,
+                             jointAccelerationsFromQPOASES,
+                             true);
 
          pseudoInverseSolver.setA(new DMatrixRMaj(motionQPInput.taskJacobian));
          pseudoInverseSolver.invert(jInverse);
