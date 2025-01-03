@@ -70,6 +70,11 @@ public class CUDADepthColorizer
     */
    public GpuMat deColorizeDepth(GpuMat colorizedDepthImage)
    {
+      return deColorizeDepth(colorizedDepthImage, 8);
+   }
+
+   public GpuMat deColorizeDepth(GpuMat colorizedDepthImage, int noiseThreshold)
+   {
       GpuMat deColorizedDepth = new GpuMat(colorizedDepthImage.size(), opencv_core.CV_16UC1);
 
       int gridSizeX = (colorizedDepthImage.cols() / BLOCK_DIM_XY) / 4;
@@ -82,6 +87,7 @@ public class CUDADepthColorizer
          decoder.withPointer(colorizedDepthImage.data()).withLong(colorizedDepthImage.step())
                 .withPointer(deColorizedDepth.data()).withLong(deColorizedDepth.step())
                 .withInt(colorizedDepthImage.rows()).withInt(colorizedDepthImage.cols())
+                .withInt(noiseThreshold)
                 .run(stream, gridSize, blockSize, 0);
       }
 
