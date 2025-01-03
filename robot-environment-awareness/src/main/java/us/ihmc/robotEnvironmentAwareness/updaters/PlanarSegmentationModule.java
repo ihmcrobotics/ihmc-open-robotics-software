@@ -1,19 +1,8 @@
 package us.ihmc.robotEnvironmentAwareness.updaters;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-
 import com.google.common.util.concurrent.AtomicDouble;
-
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
-import us.ihmc.ros2.ROS2Callback;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -24,7 +13,6 @@ import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.jOctoMap.tools.JOctoMapTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
@@ -37,12 +25,21 @@ import us.ihmc.robotEnvironmentAwareness.perceptionSuite.PerceptionModule;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.SurfaceNormalFilterParameters;
-import us.ihmc.tools.thread.ExecutorServiceTools;
-import us.ihmc.tools.thread.ExecutorServiceTools.ExceptionHandling;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.tools.thread.ExecutorServiceTools;
+import us.ihmc.tools.thread.ExecutorServiceTools.ExceptionHandling;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModule
 {
@@ -62,7 +59,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
    private final REAPlanarRegionFeatureUpdater planarRegionFeatureUpdater;
 
    private final SegmentationModuleStateReporter moduleStateReporter;
-   private final ROS2PublisherBasics<PlanarRegionsListMessage> planarRegionPublisher;
+   private final ROS2Publisher<PlanarRegionsListMessage> planarRegionPublisher;
 
    private final AtomicReference<Boolean> clearOcTree;
    private final AtomicReference<NormalOcTree> ocTree = new AtomicReference<>(null);
@@ -80,7 +77,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
 
    private PlanarSegmentationModule(Messager reaMessager, File configurationFile) throws Exception
    {
-      this(ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, PerceptionAPI.REA_NODE_NAME),
+      this(new ROS2NodeBuilder().build(PerceptionAPI.REA_NODE_NAME),
            REACommunicationProperties.inputTopic,
            REACommunicationProperties.subscriberCustomRegionsTopicName,
            PerceptionAPI.REALSENSE_SLAM_MODULE,
@@ -121,7 +118,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
                                     Messager reaMessager,
                                     File configurationFile) throws Exception
    {
-      this(ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, PerceptionAPI.REA_NODE_NAME),
+      this(new ROS2NodeBuilder().build(PerceptionAPI.REA_NODE_NAME),
            inputTopic,
            customRegionTopic,
            outputTopic,
@@ -193,7 +190,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
                                                                                                                            0.5f));
 
       ros2Node.createSubscription(customRegionTopic.withTypeName(PlanarRegionsListMessage.class), this::dispatchCustomPlanarRegion);
-      new ROS2Callback<>(ros2Node, SLAMModuleAPI.SHUTDOWN, message ->
+      ros2Node.createSubscription2(SLAMModuleAPI.SHUTDOWN, message ->
       {
          LogTools.info("Received SHUTDOWN. Shutting down...");
          stop();

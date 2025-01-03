@@ -8,23 +8,23 @@ import imgui.type.ImBoolean;
 import imgui.type.ImDouble;
 import imgui.type.ImInt;
 import org.bytedeco.opencv.global.opencv_imgproc;
+import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import org.bytedeco.opencv.opencv_objdetect.DetectorParameters;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.perception.opencv.OpenCVArUcoMarker;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetectionResults;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetector;
-import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.imgui.ImPlotDoublePlotLine;
+import us.ihmc.rdx.imgui.ImPlotPlot;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.ui.RDXImagePanel;
-import us.ihmc.rdx.imgui.ImPlotDoublePlotLine;
-import us.ihmc.rdx.imgui.ImPlotPlot;
-import us.ihmc.perception.BytedecoImage;
-import us.ihmc.perception.opencv.OpenCVArUcoMarker;
 import us.ihmc.tools.thread.SwapReference;
 
 import java.util.ArrayList;
@@ -149,13 +149,13 @@ public class RDXOpenCVArUcoMarkerDetectionUI
 
             if (markerImagePanel.getImagePanel().getIsShowing().get())
             {
-               BytedecoImage imageForDrawing = arUcoMarkerDetectionResults.getInputImage();
+               Mat imageForDrawing = arUcoMarkerDetectionResults.getInputImage();
 
-               arUcoMarkerDetectionResults.drawDetectedMarkers(imageForDrawing.getBytedecoOpenCVMat(), idColor);
-               arUcoMarkerDetectionResults.drawRejectedPoints(imageForDrawing.getBytedecoOpenCVMat());
+               arUcoMarkerDetectionResults.drawDetectedMarkers(imageForDrawing, idColor);
+               arUcoMarkerDetectionResults.drawRejectedPoints(imageForDrawing);
 
-               markerImagePanel.ensureDimensionsMatch(imageForDrawing.getImageWidth(), imageForDrawing.getImageHeight());
-               opencv_imgproc.cvtColor(imageForDrawing.getBytedecoOpenCVMat(), markerImagePanel.getImage(), opencv_imgproc.COLOR_RGB2RGBA);
+               markerImagePanel.ensureDimensionsMatch(imageForDrawing.cols(), imageForDrawing.rows());
+               opencv_imgproc.cvtColor(imageForDrawing, markerImagePanel.getImage(), opencv_imgproc.COLOR_RGB2RGBA);
 
                markerImagePanel.display();
             }
@@ -190,8 +190,8 @@ public class RDXOpenCVArUcoMarkerDetectionUI
          ImGui.checkbox(labels.get("Detection enabled"), detectionEnabled);
          ImGui.sameLine();
          ImGui.checkbox(labels.get("Show 3D graphics"), showGraphics);
-         BytedecoImage imageForDrawing = arUcoMarkerDetectionResults.getInputImage();
-         ImGui.text("Image width: " + imageForDrawing.getImageWidth() + " height: " + imageForDrawing.getImageHeight());
+         Mat imageForDrawing = arUcoMarkerDetectionResults.getInputImage();
+         ImGui.text("Image width: " + imageForDrawing.cols() + " height: " + imageForDrawing.rows());
          detectionDurationPlot.render();
          ImGui.text("Detected ArUco Markers:");
          for (RDXOpenCVArUcoTrackedMarker trackedMarker : trackedMarkers)

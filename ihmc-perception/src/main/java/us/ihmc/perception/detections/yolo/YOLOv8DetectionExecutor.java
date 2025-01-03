@@ -14,25 +14,20 @@ import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.detections.InstantDetection;
 import us.ihmc.perception.imageMessage.CompressionType;
-import us.ihmc.perception.imageMessage.ImageMessageDataPacker;
-import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.opencl.OpenCLDepthImageSegmenter;
 import us.ihmc.perception.opencl.OpenCLPointCloudExtractor;
 import us.ihmc.perception.tools.PerceptionMessageTools;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2PublisherBasics;
+import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.tools.thread.RestartableThrottledThread;
 
 import java.nio.file.Path;
@@ -62,7 +57,7 @@ public class YOLOv8DetectionExecutor
    private final List<Consumer<List<InstantDetection>>> detectionConsumerCallbacks = new ArrayList<>();
 
    private final BooleanSupplier isDemandedSupplier;
-   private final ROS2PublisherBasics<ImageMessage> annotatedImagePublisher;
+   private final ROS2Publisher<ImageMessage> annotatedImagePublisher;
 
    // TODO: temp hack
    private int lastRunDetectorIndex = 0;
@@ -79,6 +74,8 @@ public class YOLOv8DetectionExecutor
    private int erosionKernelRadius = 2;
    private double outlierThreshold = 1.0;
 
+   private boolean printNoModelsFoundError = true;
+
    // TODO: add back
 //   private Set<String> targetDetections = new HashSet<>();
 
@@ -86,7 +83,7 @@ public class YOLOv8DetectionExecutor
    {
       this.isDemandedSupplier = isDemandedSupplier;
 
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "yolo_detection_manager");
+      ROS2Node ros2Node = new ROS2NodeBuilder().build("yolo_detection_manager");
       annotatedImagePublisher = ros2Node.createPublisher(PerceptionAPI.YOLO_ANNOTATED_IMAGE);
 
       ros2Helper.subscribe(PerceptionAPI.YOLO_PARAMETERS).addCallback(parametersMessage ->
@@ -127,6 +124,16 @@ public class YOLOv8DetectionExecutor
 
    public void runYOLODetectionOnAllModels(RawImage colorImage, RawImage depthImage)
    {
+      if (yoloObjectDetectors.isEmpty())
+      {
+         if (printNoModelsFoundError)
+         {
+            LogTools.error("No YOLOv8 models were found. Cannot run YOLO.");
+            printNoModelsFoundError = false;
+         }
+         return;
+      }
+
       if (lastRunDetectorIndex + 1 > yoloObjectDetectors.size())
          lastRunDetectorIndex = 0;
 
@@ -144,21 +151,22 @@ public class YOLOv8DetectionExecutor
    {
       if (yoloDetector.isReady() && !yoloExecutorService.isShutdown())
       {
+         // Acquire the images
+         if (colorImage.get() == null || depthImage.get() == null)
+            return;
+
          yoloExecutorService.submit(() ->
          {
-            // Acquire the images
-            if (!colorImage.isAvailable() || !depthImage.isAvailable())
-               return;
-            colorImage.get();
-            depthImage.get();
-
             // Run YOLO to get results
             YOLOv8DetectionResults yoloResults = yoloDetector.runOnImage(colorImage, yoloConfidenceThreshold, yoloNMSThreshold, yoloMaskThreshold);
 
             // TODO: temp hack
-            if (yoloDetectionResults.containsKey(lastRunDetectorIndex))
-               yoloDetectionResults.remove(lastRunDetectorIndex).destroy();
-            yoloDetectionResults.put(lastRunDetectorIndex, yoloResults);
+            synchronized (yoloDetectionResults)
+            {
+               if (yoloDetectionResults.containsKey(lastRunDetectorIndex))
+                  yoloDetectionResults.remove(lastRunDetectorIndex).destroy();
+               yoloDetectionResults.put(lastRunDetectorIndex, yoloResults);
+            }
             newestColorImage = colorImage;
 
             // Get the object masks from the results
@@ -270,61 +278,66 @@ public class YOLOv8DetectionExecutor
          detectionMasks.putAll(value.getSegmentationImages());
       }
 
-      detectionMasks.entrySet().stream().filter(entry -> entry.getKey().confidence() >= yoloConfidenceThreshold).forEach(entry ->
+      synchronized (yoloDetectionResults)
       {
-         YOLOv8DetectionOutput detection = entry.getKey();
-         RawImage maskImage = entry.getValue();
+         detectionMasks.entrySet().stream().filter(entry -> entry.getKey().confidence() >= yoloConfidenceThreshold).forEach(entry ->
+         {
+            YOLOv8DetectionOutput detection = entry.getKey();
+            RawImage maskImage = entry.getValue().get();
+            if (maskImage == null || maskImage.isEmpty())
+               return;
 
-         String text = String.format("%s: %.2f", detection.objectClass().toString(), detection.confidence());
+            String text = String.format("%s: %.2f", detection.objectClass().toString(), detection.confidence());
 
-         // Draw the bounding box
-         Rect boundingBox = new Rect(detection.x(), detection.y(), detection.width(), detection.height());
-         opencv_imgproc.rectangle(resultMat, boundingBox, BOUNDING_BOX_COLOR, 5, LINE_TYPE, 0);
+            // Draw the bounding box
+            Rect boundingBox = new Rect(detection.x(), detection.y(), detection.width(), detection.height());
+            opencv_imgproc.rectangle(resultMat, boundingBox, BOUNDING_BOX_COLOR, 5, LINE_TYPE, 0);
 
-         // Draw text background
-         Size textSize = opencv_imgproc.getTextSize(text, FONT, FONT_SCALE, FONT_THICKNESS, new IntPointer());
+            // Draw text background
+            Size textSize = opencv_imgproc.getTextSize(text, FONT, FONT_SCALE, FONT_THICKNESS, new IntPointer());
 
-         int textBoxClampedX = MathTools.clamp(detection.x(), 0, colorImage.getWidth() - textSize.width());
-         int textBoxClampedY = MathTools.clamp(detection.y() - textSize.height(), 0, colorImage.getHeight() - textSize.height());
+            int textBoxClampedX = MathTools.clamp(detection.x(), 0, colorImage.getWidth() - textSize.width());
+            int textBoxClampedY = MathTools.clamp(detection.y() - textSize.height(), 0, colorImage.getHeight() - textSize.height());
 
-         Rect textBox = new Rect(textBoxClampedX, textBoxClampedY, textSize.width(), textSize.height());
+            Rect textBox = new Rect(textBoxClampedX, textBoxClampedY, textSize.width(), textSize.height());
 
-         opencv_imgproc.rectangle(resultMat, textBox, BOUNDING_BOX_COLOR, opencv_imgproc.FILLED, LINE_TYPE, 0);
+            opencv_imgproc.rectangle(resultMat, textBox, BOUNDING_BOX_COLOR, opencv_imgproc.FILLED, LINE_TYPE, 0);
 
-         opencv_imgproc.putText(resultMat,
-                                text,
-                                new Point(textBoxClampedX, textBoxClampedY + textSize.height()),
-                                opencv_imgproc.CV_FONT_HERSHEY_DUPLEX,
-                                FONT_SCALE,
-                                new Scalar(255.0, 255.0, 255.0, 255.0),
-                                FONT_THICKNESS,
-                                LINE_TYPE,
-                                false);
+            opencv_imgproc.putText(resultMat,
+                                   text,
+                                   new Point(textBoxClampedX, textBoxClampedY + textSize.height()),
+                                   opencv_imgproc.CV_FONT_HERSHEY_DUPLEX,
+                                   FONT_SCALE,
+                                   new Scalar(255.0, 255.0, 255.0, 255.0),
+                                   FONT_THICKNESS,
+                                   LINE_TYPE,
+                                   false);
 
-         // Add green tint to show mask
-         // first convert 32F mask to 8U
-         Mat maskMat = new Mat(maskImage.getHeight(), maskImage.getWidth(), opencv_core.CV_8U);
-         maskImage.getCpuImageMat().convertTo(maskMat, opencv_core.CV_8U, 255.0, 0.0);
+            // Add green tint to show mask
+            // first convert 32F mask to 8U
+            Mat maskMat = new Mat(maskImage.getHeight(), maskImage.getWidth(), opencv_core.CV_8U);
+            maskImage.getCpuImageMat().convertTo(maskMat, opencv_core.CV_8U, 255.0, 0.0);
 
-         // resize the mask to fit the result image
-         opencv_imgproc.resize(maskMat, maskMat, resultMat.size(), 0.0, 0.0, opencv_imgproc.INTER_NEAREST);
+            // resize the mask to fit the result image
+            opencv_imgproc.resize(maskMat, maskMat, resultMat.size(), 0.0, 0.0, opencv_imgproc.INTER_NEAREST);
 
-         // ensure the green Mat is same size as image
-         if (resultMat.cols() != GREEN_MAT.cols() || resultMat.rows() != GREEN_MAT.rows())
-            opencv_imgproc.resize(GREEN_MAT, GREEN_MAT, resultMat.size());
+            // ensure the green Mat is same size as image
+            if (resultMat.cols() != GREEN_MAT.cols() || resultMat.rows() != GREEN_MAT.rows())
+               opencv_imgproc.resize(GREEN_MAT, GREEN_MAT, resultMat.size());
 
-         // add a green tint where mask = 255
-         opencv_core.add(resultMat, GREEN_MAT, resultMat, maskMat, -1);
+            // add a green tint where mask = 255
+            opencv_core.add(resultMat, GREEN_MAT, resultMat, maskMat, -1);
 
-         maskImage.release();
-         maskMat.release();
-      });
+            maskImage.release();
+            maskMat.release();
+         });
+      }
 
       BytePointer annotatedImagePointer = new BytePointer();
       opencv_imgcodecs.imencode(".jpg", resultMat, annotatedImagePointer); // for some reason using CUDAImageEncoder broke YOLO's CUDNN
 
       ImageMessage imageMessage = new ImageMessage();
-      PerceptionMessageTools.packImageMessage(colorImage, annotatedImagePointer, CompressionType.JPEG, CameraModel.PINHOLE, imageMessage);
+      PerceptionMessageTools.packImageMessage(colorImage, annotatedImagePointer, CompressionType.JPEG, imageMessage);
       annotatedImagePublisher.publish(imageMessage);
 
       resultMat.close();

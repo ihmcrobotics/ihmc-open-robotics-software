@@ -10,11 +10,6 @@ import static us.ihmc.behaviors.activeMapping.ContinuousHikingParameters.*;
  */
 public interface ContinuousHikingParametersReadOnly extends StoredPropertySetReadOnly
 {
-   default boolean getEnableContinuousHiking()
-   {
-      return get(enableContinuousHiking);
-   }
-
    default boolean getStepPublisherEnabled()
    {
       return get(stepPublisherEnabled);
@@ -40,6 +35,11 @@ public interface ContinuousHikingParametersReadOnly extends StoredPropertySetRea
       return get(goalPoseUpDistance);
    }
 
+   default double getGoalPoseBackwardDistance()
+   {
+      return get(goalPoseBackwardDistance);
+   }
+
    default double getSwingTime()
    {
       return get(swingTime);
@@ -50,9 +50,9 @@ public interface ContinuousHikingParametersReadOnly extends StoredPropertySetRea
       return get(transferTime);
    }
 
-   default double getPlannerTimeoutFraction()
+   default double getPlanningTimeoutAsAFractionOfTheStepDuration()
    {
-      return get(plannerTimeoutFraction);
+      return get(planningTimeoutAsAFractionOfTheStepDuration);
    }
 
    default double getPlanningWithoutReferenceTimeout()

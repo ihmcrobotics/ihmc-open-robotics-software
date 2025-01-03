@@ -4,7 +4,7 @@
 # All the information here is expressed in the world frame.
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # This is the current value of omega, which is the time constant of the inverted pendulum.
 float64 omega

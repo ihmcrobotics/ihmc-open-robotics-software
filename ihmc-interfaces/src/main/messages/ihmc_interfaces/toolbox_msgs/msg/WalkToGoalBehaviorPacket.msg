@@ -6,7 +6,7 @@ byte WALK_TO_GOAL_ACTION_EXECUTE_UNKNOWN = 2
 byte WALK_TO_GOAL_ACTION_STOP = 3
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 byte ROBOT_SIDE_LEFT = 0
 byte ROBOT_SIDE_RIGHT = 1

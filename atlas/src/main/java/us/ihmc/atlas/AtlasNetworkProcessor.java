@@ -1,13 +1,15 @@
 package us.ihmc.atlas;
 
-import com.martiansoftware.jsap.*;
-
+import com.martiansoftware.jsap.FlaggedOption;
+import com.martiansoftware.jsap.JSAP;
+import com.martiansoftware.jsap.JSAPException;
+import com.martiansoftware.jsap.JSAPResult;
+import com.martiansoftware.jsap.Switch;
 import us.ihmc.atlas.sensors.AtlasSensorSuiteManager;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessor;
 import us.ihmc.communication.producers.VideoControlSettings;
 import us.ihmc.log.LogTools;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 
 import static us.ihmc.atlas.AtlasNetworkProcessor.NetworkProcessorMode.VR;
 
@@ -103,7 +105,7 @@ public class AtlasNetworkProcessor
 
       LogTools.info("Selected model: {}", model);
 
-      HumanoidNetworkProcessor networkProcessor = new HumanoidNetworkProcessor(model, PubSubImplementation.FAST_RTPS);
+      HumanoidNetworkProcessor networkProcessor = new HumanoidNetworkProcessor(model);
       LogTools.info("ROS_MASTER_URI = " + networkProcessor.getOrCreateRosURI());
 
       LogTools.info("Setting up network processor modules...");

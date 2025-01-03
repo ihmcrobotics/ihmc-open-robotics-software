@@ -6,7 +6,7 @@ byte EXECUTION_TIMING_CONTROL_DURATIONS = 0
 byte EXECUTION_TIMING_CONTROL_ABSOLUTE_TIMINGS = 1
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # Defines the list of footstep to perform.
 FootstepDataMessage[<=50] footstep_data_list

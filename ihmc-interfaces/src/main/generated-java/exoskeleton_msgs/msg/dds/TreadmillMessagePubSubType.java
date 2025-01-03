@@ -15,7 +15,7 @@ public class TreadmillMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "7564a0c4ced1b9dc6410974ae416190ea1f5f0980f57b837c3b7ef7c77ddbb28";
+   		return "43a8c66eb4e190aa6eb98aa145b3ec897f490e6bdbabde0f87eeab37dd4a9b50";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class TreadmillMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -75,7 +75,7 @@ public class TreadmillMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -96,7 +96,7 @@ public class TreadmillMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
    public static void write(exoskeleton_msgs.msg.dds.TreadmillMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_7(data.getActivate());
 
@@ -110,7 +110,7 @@ public class TreadmillMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
    public static void read(exoskeleton_msgs.msg.dds.TreadmillMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setActivate(cdr.read_type_7());
       	
@@ -126,7 +126,7 @@ public class TreadmillMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final void serialize(exoskeleton_msgs.msg.dds.TreadmillMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_7("activate", data.getActivate());
       ser.write_type_9("action", data.getAction());
       ser.write_type_6("speed", data.getSpeed());
@@ -136,7 +136,7 @@ public class TreadmillMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, exoskeleton_msgs.msg.dds.TreadmillMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setActivate(ser.read_type_7("activate"));
       data.setAction(ser.read_type_9("action"));
       data.setSpeed(ser.read_type_6("speed"));

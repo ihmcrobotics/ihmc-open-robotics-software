@@ -4,20 +4,13 @@ import imgui.ImGui;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import javax.annotation.Nullable;
 
 public class RDXBehaviorTreeFileMenu
 {
-   private final WorkspaceResourceDirectory treeFilesDirectory;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final Notification menuShouldClose = new Notification();
-
-   public RDXBehaviorTreeFileMenu(WorkspaceResourceDirectory treeFilesDirectory)
-   {
-      this.treeFilesDirectory = treeFilesDirectory;
-   }
 
    public void renderFileMenu(@Nullable RDXBehaviorTreeNode<?, ?> rootNode, RDXBehaviorTreeNodeCreationMenu nodeCreationMenu)
    {

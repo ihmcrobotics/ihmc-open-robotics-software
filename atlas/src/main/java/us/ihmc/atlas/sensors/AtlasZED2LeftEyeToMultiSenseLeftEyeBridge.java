@@ -1,7 +1,5 @@
 package us.ihmc.atlas.sensors;
 
-import boofcv.struct.calib.CameraPinholeBrown;
-import perception_msgs.msg.dds.VideoPacket;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencv.global.opencv_core;
@@ -9,6 +7,7 @@ import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.jboss.netty.buffer.ChannelBuffer;
+import perception_msgs.msg.dds.VideoPacket;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
@@ -16,20 +15,19 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.codecs.yuv.JPEGEncoder;
 import us.ihmc.codecs.yuv.YUVPictureConverter;
+import us.ihmc.commons.UnitConversions;
+import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.tools.UnitConversions;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
-import us.ihmc.tools.thread.Throttler;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosTools;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
@@ -40,6 +38,7 @@ import java.awt.image.ComponentColorModel;
 import java.awt.image.DataBuffer;
 import java.nio.ByteBuffer;
 
+@Deprecated
 public class AtlasZED2LeftEyeToMultiSenseLeftEyeBridge
 {
    private static final double OUTPUT_FREQUENCY = UnitConversions.hertzToSeconds(10.0);
@@ -47,7 +46,7 @@ public class AtlasZED2LeftEyeToMultiSenseLeftEyeBridge
    public AtlasZED2LeftEyeToMultiSenseLeftEyeBridge()
    {
       RosMainNode ros1Node = RosTools.createRosNode(NetworkParameters.getROSURI(), "zed2_to_left_eye");
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "zed2_to_left_eye");
+      ROS2Node ros2Node = new ROS2NodeBuilder().build("zed2_to_left_eye");
       AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, RobotTarget.REAL_ROBOT);
       CommunicationHelper ros2Helper = new CommunicationHelper(robotModel, ros2Node);
       ROS2SyncedRobotModel syncedRobot = ros2Helper.newSyncedRobot();
@@ -60,7 +59,7 @@ public class AtlasZED2LeftEyeToMultiSenseLeftEyeBridge
       int imageHeight = 360;
       double fx = 500.0;
       double fy = 500.0;
-      CameraPinholeBrown depthCameraIntrinsics = new CameraPinholeBrown(fx, fy, 0, imageWidth / 2.0, imageHeight / 2.0, imageWidth, imageHeight);
+      Object depthCameraIntrinsics = new Object();
 
       ResettableExceptionHandlingExecutorService executor = MissingThreadTools.newSingleThreadExecutor("ZED2LeftEyeToLeftEyeBridge", true);
 

@@ -27,7 +27,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
-import us.ihmc.tools.thread.Throttler;
+import us.ihmc.commons.thread.Throttler;
 
 import java.util.UUID;
 
@@ -351,7 +351,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
          trackingCalculators.get(side).factoryInSO3Errors(ORIENTATION_TOLERANCE);
          meetsDesiredCompletionCriteria &= trackingCalculators.get(side).isWithinPositionTolerance();
          meetsDesiredCompletionCriteria &= trackingCalculators.get(side).getTimeIsUp();
-         hitTimeLimit |= trackingCalculators.get(side).getHitTimeLimit();
+         hitTimeLimit |= trackingCalculators.get(side).getHitTimeLimit(state.getLogger());
       }
 
       int incompleteFootsteps = controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps();

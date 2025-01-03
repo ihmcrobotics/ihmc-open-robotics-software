@@ -15,7 +15,7 @@ public class LocalizationPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "23d4a52236a81539788631534eca87fa8bf461f550c898c4794683939ad1255b";
+   		return "e86f459afc88f7d8b69972a9971d12ff7f92ba57d9d4cb2140e16f87e4a83c65";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class LocalizationPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -71,7 +71,7 @@ public class LocalizationPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -86,7 +86,7 @@ public class LocalizationPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
 
    public static void write(controller_msgs.msg.dds.LocalizationPacket data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_7(data.getReset());
 
@@ -96,7 +96,7 @@ public class LocalizationPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
 
    public static void read(controller_msgs.msg.dds.LocalizationPacket data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setReset(cdr.read_type_7());
       	
@@ -108,7 +108,7 @@ public class LocalizationPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
    @Override
    public final void serialize(controller_msgs.msg.dds.LocalizationPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_7("reset", data.getReset());
       ser.write_type_7("toggle", data.getToggle());
    }
@@ -116,7 +116,7 @@ public class LocalizationPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.LocalizationPacket data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setReset(ser.read_type_7("reset"));
       data.setToggle(ser.read_type_7("toggle"));
    }

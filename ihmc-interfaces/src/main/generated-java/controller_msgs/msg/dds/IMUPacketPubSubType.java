@@ -15,7 +15,7 @@ public class IMUPacketPubSubType implements us.ihmc.pubsub.TopicDataType<control
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "874efe0012164d2149034a6eeb88064c1d7f80652f8354ecdef13023b22597c3";
+   		return "1722395aa8b754cb820ae8f102cefce31e7136d143e351dea022017a60e22dba";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class IMUPacketPubSubType implements us.ihmc.pubsub.TopicDataType<control
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -75,7 +75,7 @@ public class IMUPacketPubSubType implements us.ihmc.pubsub.TopicDataType<control
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getOrientation(), current_alignment);
@@ -93,7 +93,7 @@ public class IMUPacketPubSubType implements us.ihmc.pubsub.TopicDataType<control
 
    public static void write(controller_msgs.msg.dds.IMUPacket data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getOrientation(), cdr);
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getAngularVelocity(), cdr);
@@ -104,7 +104,7 @@ public class IMUPacketPubSubType implements us.ihmc.pubsub.TopicDataType<control
 
    public static void read(controller_msgs.msg.dds.IMUPacket data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getOrientation(), cdr);	
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getAngularVelocity(), cdr);	
@@ -117,7 +117,7 @@ public class IMUPacketPubSubType implements us.ihmc.pubsub.TopicDataType<control
    @Override
    public final void serialize(controller_msgs.msg.dds.IMUPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_a("orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getOrientation());
 
       ser.write_type_a("angular_velocity", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getAngularVelocity());
@@ -130,7 +130,7 @@ public class IMUPacketPubSubType implements us.ihmc.pubsub.TopicDataType<control
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.IMUPacket data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       ser.read_type_a("orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getOrientation());
 
       ser.read_type_a("angular_velocity", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getAngularVelocity());

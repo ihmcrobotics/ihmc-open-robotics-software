@@ -15,7 +15,7 @@ public class SwingPlanningRequestPacketPubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "ac6f8510725a3f8c0e50772c9d3e56e6d576a60aed233b4b793232b44101bb14";
+   		return "d4309aabba08eef5091e295b29b197d41e291532b35bced659bb44c05952a395";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class SwingPlanningRequestPacketPubSubType implements us.ihmc.pubsub.Topi
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -71,7 +71,7 @@ public class SwingPlanningRequestPacketPubSubType implements us.ihmc.pubsub.Topi
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -86,7 +86,7 @@ public class SwingPlanningRequestPacketPubSubType implements us.ihmc.pubsub.Topi
 
    public static void write(toolbox_msgs.msg.dds.SwingPlanningRequestPacket data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_9(data.getRequestedSwingPlanner());
 
@@ -96,7 +96,7 @@ public class SwingPlanningRequestPacketPubSubType implements us.ihmc.pubsub.Topi
 
    public static void read(toolbox_msgs.msg.dds.SwingPlanningRequestPacket data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setRequestedSwingPlanner(cdr.read_type_9());
       	
@@ -108,7 +108,7 @@ public class SwingPlanningRequestPacketPubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final void serialize(toolbox_msgs.msg.dds.SwingPlanningRequestPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_9("requested_swing_planner", data.getRequestedSwingPlanner());
       ser.write_type_7("generate_log", data.getGenerateLog());
    }
@@ -116,7 +116,7 @@ public class SwingPlanningRequestPacketPubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, toolbox_msgs.msg.dds.SwingPlanningRequestPacket data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setRequestedSwingPlanner(ser.read_type_9("requested_swing_planner"));
       data.setGenerateLog(ser.read_type_7("generate_log"));
    }

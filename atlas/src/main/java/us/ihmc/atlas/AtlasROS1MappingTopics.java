@@ -7,13 +7,12 @@ import sensor_msgs.PointCloud2;
 import std_msgs.Header;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosTools;
 import us.ihmc.utilities.ros.publisher.RosPointCloudPublisher;
@@ -62,7 +61,7 @@ public class AtlasROS1MappingTopics
       ros1Node.attachSubscriber(OUSTER_TOPIC_IN, pointCloudSubscriber);
 
       AtomicReference<RobotConfigurationData> robotConfigurationDataHolder = new AtomicReference<>(new RobotConfigurationData());
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "atlas_topics2");
+      ROS2Node ros2Node = new ROS2NodeBuilder().build("atlas_topics2");
       ros2Node.createSubscription(HumanoidControllerAPI.getOutputTopic("Atlas").withTypeName(RobotConfigurationData.class),
                                   s -> robotConfigurationDataHolder.set(s.takeNextData()));
 

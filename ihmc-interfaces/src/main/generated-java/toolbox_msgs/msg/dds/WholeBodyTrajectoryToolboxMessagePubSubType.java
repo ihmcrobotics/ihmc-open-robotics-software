@@ -15,7 +15,7 @@ public class WholeBodyTrajectoryToolboxMessagePubSubType implements us.ihmc.pubs
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "9cad471fd69c8ef4e2ac5d2ea44270d4423cf566d3cec4849f4b0f8385a1a781";
+   		return "0507fa389750db026c3d95bc6976be87f4dec98a0413bc67f760b93e7438cf70";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class WholeBodyTrajectoryToolboxMessagePubSubType implements us.ihmc.pubs
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -78,7 +78,7 @@ public class WholeBodyTrajectoryToolboxMessagePubSubType implements us.ihmc.pubs
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessagePubSubType.getCdrSerializedSize(data.getConfiguration(), current_alignment);
@@ -104,7 +104,7 @@ public class WholeBodyTrajectoryToolboxMessagePubSubType implements us.ihmc.pubs
 
    public static void write(toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessagePubSubType.write(data.getConfiguration(), cdr);
       if(data.getEndEffectorTrajectories().size() <= 10)
@@ -123,7 +123,7 @@ public class WholeBodyTrajectoryToolboxMessagePubSubType implements us.ihmc.pubs
 
    public static void read(toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessagePubSubType.read(data.getConfiguration(), cdr);	
       cdr.read_type_e(data.getEndEffectorTrajectories());	
@@ -135,7 +135,7 @@ public class WholeBodyTrajectoryToolboxMessagePubSubType implements us.ihmc.pubs
    @Override
    public final void serialize(toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_a("configuration", new toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessagePubSubType(), data.getConfiguration());
 
       ser.write_type_e("end_effector_trajectories", data.getEndEffectorTrajectories());
@@ -146,7 +146,7 @@ public class WholeBodyTrajectoryToolboxMessagePubSubType implements us.ihmc.pubs
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       ser.read_type_a("configuration", new toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessagePubSubType(), data.getConfiguration());
 
       ser.read_type_e("end_effector_trajectories", data.getEndEffectorTrajectories());

@@ -3,13 +3,12 @@ package us.ihmc.sensors;
 import org.bytedeco.javacpp.BytePointer;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.perception.logging.PerceptionDataLogger;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.IHMCCommonPaths;
@@ -31,7 +30,6 @@ public class ZEDColorDepthLogger
    private BytePointer colorBytePointer;
 
    public ZEDColorDepthLogger(String title,
-                              DomainFactory.PubSubImplementation pubSubImplementation,
                               ROS2Topic<ImageMessage> depthTopic,
                               ROS2Topic<ImageMessage> colorTopic)
    {
@@ -49,7 +47,7 @@ public class ZEDColorDepthLogger
       zedDepthDataLogger.addLongChannel(this.timeChannelName, 1, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
       zedDepthDataLogger.setChannelEnabled(this.timeChannelName, true);
 
-      RealtimeROS2Node realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, StringTools.titleToSnakeCase(title));
+      RealtimeROS2Node realtimeROS2Node = new ROS2NodeBuilder().buildRealtime(StringTools.titleToSnakeCase(title));
       realtimeROS2Node.createSubscription(depthTopic, this::receiveAndLogDepthImagesCallback);
       realtimeROS2Node.createSubscription(colorTopic, this::receiveAndLogColorImagesCallback);
       realtimeROS2Node.spin();
@@ -94,7 +92,6 @@ public class ZEDColorDepthLogger
    public static void main(String[] args)
    {
       new ZEDColorDepthLogger("ZED 2 Depth",
-                              DomainFactory.PubSubImplementation.FAST_RTPS,
                               PerceptionAPI.ZED2_DEPTH,
                               PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
    }

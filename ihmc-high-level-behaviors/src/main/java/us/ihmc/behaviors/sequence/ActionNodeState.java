@@ -2,6 +2,8 @@ package us.ihmc.behaviors.sequence;
 
 import behavior_msgs.msg.dds.ActionNodeStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTStatusDoubleArray;
 import us.ihmc.communication.crdt.CRDTStatusOneDoFJointTrajectoryList;
@@ -11,6 +13,7 @@ import us.ihmc.communication.crdt.CRDTStatusBoolean;
 import us.ihmc.communication.crdt.CRDTStatusDouble;
 import us.ihmc.communication.crdt.CRDTStatusInteger;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.log.LogTools;
 
 import java.util.List;
 
@@ -56,6 +59,49 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
       currentJointAngles = new CRDTStatusDoubleArray(ROS2ActorDesignation.ROBOT, crdtInfo, SUPPORTED_NUMBER_OF_JOINTS);
       positionDistanceToGoalTolerance = new CRDTStatusDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
       orientationDistanceToGoalTolerance = new CRDTStatusDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
+   }
+
+   /**
+    * Updates the definition executeAfterActionName string for
+    * saving an up to date human readable name in the JSON.
+    * It also finds the correct node upon loading the name from JSON.
+    */
+   public void updateAndValidateExecuteAfter(List<ActionNodeState<?>> actionStateChildren)
+   {
+      String executeAfterActionName = null;
+
+      if (!definition.getExecuteAfterPrevious().getValue() && !definition.getExecuteAfterBeginning().getValue())
+      {
+         // We need to find the node by name
+         // This happens when we load from JSON
+         if (definition.getExecuteAfterNodeID().getValue() == 0)
+         {
+            for (int j = actionIndex - 1; j >= 0; j--)
+            {
+               ActionNodeState<?> actionStateToCompare = actionStateChildren.get(j);
+               if (actionStateToCompare.getDefinition().getName().equals(definition.getExecuteAfterActionName()))
+               {
+                  executeAfterActionName = actionStateToCompare.getDefinition().getName();
+                  definition.getExecuteAfterNodeID().setValue(actionStateToCompare.getID());
+                  break;
+               }
+            }
+         }
+         else // Update the node's name for saving in human readable format
+         {
+            long executeAfterID = definition.getExecuteAfterNodeID().getValue();
+            for (int j = actionIndex - 1; j >= 0; j--)
+            {
+               ActionNodeState<?> actionStateToCompare = actionStateChildren.get(j);
+               if (actionStateToCompare.getID() == executeAfterID)
+               {
+                  executeAfterActionName = actionStateToCompare.getDefinition().getName();
+               }
+            }
+         }
+      }
+
+      definition.updateAndSanitizeExecuteAfterFields(executeAfterActionName);
    }
 
    @Override
@@ -248,34 +294,33 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
       return isExecuting.getValue();
    }
 
-   public int calculateExecuteAfterActionIndex(List<ActionNodeState<?>> actionStateChildren)
+   public int calculateExecuteAfterActionIndex()
    {
       if (definition.getExecuteAfterBeginning().getValue())
       {
          return -1;
       }
-      else if (definition.getExecuteAfterPrevious().getValue())
+      else if (!definition.getExecuteAfterPrevious().getValue())
       {
-         return actionIndex - 1;
+         ActionNodeState<?> executeAfterAction = findExecuteAfterAction();
+
+         if (executeAfterAction != null)
+            return executeAfterAction.getActionIndex();
       }
-      else
-      {
-         return findActionToExecuteAfter(actionStateChildren).getActionIndex();
-      }
+
+      return actionIndex - 1; // previous
    }
 
-   /** Assumes execute after node ID matches a valid action. */
-   public ActionNodeState<?> findActionToExecuteAfter(List<ActionNodeState<?>> actionStateChildren)
+   public ActionNodeState<?> findExecuteAfterAction()
    {
       long executeAfterID = definition.getExecuteAfterNodeID().getValue();
-      for (int j = actionIndex - 1; j >= 0; j--)
+
+      if (BehaviorTreeTools.findRootNode(this).getIDToNodeMap().get(executeAfterID) instanceof ActionNodeState<?> executeAfterAction)
       {
-         ActionNodeState<?> actionStateToCompare = actionStateChildren.get(j);
-         if (actionStateToCompare.getID() == executeAfterID)
-         {
-            return actionStateToCompare;
-         }
+         return executeAfterAction;
       }
+
+      LogTools.error("Action ID not found: {}", executeAfterID);
 
       return null;
    }

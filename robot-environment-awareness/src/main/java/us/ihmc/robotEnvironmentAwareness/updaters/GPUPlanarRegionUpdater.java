@@ -3,12 +3,7 @@ package us.ihmc.robotEnvironmentAwareness.updaters;
 import geometry_msgs.Point;
 import map_sense.RawGPUPlanarRegion;
 import map_sense.RawGPUPlanarRegionList;
-import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.packets.ScanPointFilter;
-import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
@@ -20,7 +15,7 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionSegmentationDataExporter;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Node;
 
 import java.io.File;
 import java.util.List;
@@ -59,13 +54,11 @@ public class GPUPlanarRegionUpdater
       polygonizerParameters = new PolygonizerParameters();
    }
 
-   public void attachROS2Tuner(ROS2NodeInterface ros2Node)
+   public void attachROS2Tuner(ROS2Node ros2Node)
    {
-      new ROS2Callback<>(ros2Node,
-                             PerceptionAPI.CONCAVE_HULL_FACTORY_PARAMETERS,
+      ros2Node.createSubscription2(PerceptionAPI.CONCAVE_HULL_FACTORY_PARAMETERS,
                              parameters -> concaveHullFactoryParameters.setFromColonCommaString(parameters.getParameters().toString()));
-      new ROS2Callback<>(ros2Node,
-                             PerceptionAPI.POLYGONIZER_PARAMETERS,
+      ros2Node.createSubscription2(PerceptionAPI.POLYGONIZER_PARAMETERS,
                              parameters -> polygonizerParameters.setFromColonCommaString(parameters.getParameters().toString()));
    }
 

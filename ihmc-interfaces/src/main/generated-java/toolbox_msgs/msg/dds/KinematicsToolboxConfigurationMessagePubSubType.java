@@ -15,7 +15,7 @@ public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "74ab1f6139100d691f76c8881ac312eff593b8d3fd26d24ee0987324e97a6264";
+   		return "b449f56a65cdc924735b20e9068d9a1a46c442c56be4018a0fbdb2c29e84269d";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -91,7 +91,7 @@ public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -138,7 +138,7 @@ public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.
 
    public static void write(toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_6(data.getJointVelocityWeight());
 
@@ -172,7 +172,7 @@ public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.
 
    public static void read(toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setJointVelocityWeight(cdr.read_type_6());
       	
@@ -202,7 +202,7 @@ public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.
    @Override
    public final void serialize(toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_6("joint_velocity_weight", data.getJointVelocityWeight());
       ser.write_type_6("joint_acceleration_weight", data.getJointAccelerationWeight());
       ser.write_type_7("enable_joint_velocity_limits", data.getEnableJointVelocityLimits());
@@ -220,7 +220,7 @@ public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setJointVelocityWeight(ser.read_type_6("joint_velocity_weight"));
       data.setJointAccelerationWeight(ser.read_type_6("joint_acceleration_weight"));
       data.setEnableJointVelocityLimits(ser.read_type_7("enable_joint_velocity_limits"));

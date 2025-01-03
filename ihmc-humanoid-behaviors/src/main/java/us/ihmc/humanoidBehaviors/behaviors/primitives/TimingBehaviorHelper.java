@@ -11,6 +11,7 @@ import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
 import controller_msgs.msg.dds.WalkOverTerrainGoalPacket;
 import controller_msgs.msg.dds.WalkingStatusMessage;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.RunEvent;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.SQLBehaviorDatabaseManager;
@@ -37,17 +38,17 @@ public class TimingBehaviorHelper extends AbstractBehavior
       createSubscriber(FootstepPlanningToolboxOutputStatus.class, footstepPlannerOutputTopic, plannerResult::set);
       createSubscriber(FootstepPlanningRequestPacket.class, footstepPlannerInputTopic, footstepPlanningRequestPacket::set);
 
-      createSubscriber(FootstepStatusMessage.class, controllerInputTopic, footstepStatusMessage::set);
-      createSubscriber(HandTrajectoryMessage.class, controllerInputTopic, handTrajectoryMessage::set);
-      createSubscriber(ArmTrajectoryMessage.class, controllerInputTopic, armTrajectoryMessage::set);
-      createSubscriber(FootstepDataListMessage.class, controllerInputTopic, footstepDataListMessage::set);
-      createSubscriber(WalkingStatusMessage.class, controllerInputTopic, walkingStatusMessage::set);
+      createSubscriber(HumanoidControllerAPI.getTopic(FootstepStatusMessage.class, robotName), footstepStatusMessage::set);
+      createSubscriber(HumanoidControllerAPI.getTopic(HandTrajectoryMessage.class, robotName), handTrajectoryMessage::set);
+      createSubscriber(HumanoidControllerAPI.getTopic(ArmTrajectoryMessage.class, robotName), armTrajectoryMessage::set);
+      createSubscriber(HumanoidControllerAPI.getTopic(FootstepDataListMessage.class, robotName), footstepDataListMessage::set);
+      createSubscriber(HumanoidControllerAPI.getTopic(WalkingStatusMessage.class, robotName), walkingStatusMessage::set);
 
-      createSubscriber(FootstepStatusMessage.class, controllerOutputTopic, footstepStatusMessage::set);
-      createSubscriber(HandTrajectoryMessage.class, controllerOutputTopic, handTrajectoryMessage::set);
-      createSubscriber(ArmTrajectoryMessage.class, controllerOutputTopic, armTrajectoryMessage::set);
-      createSubscriber(FootstepDataListMessage.class, controllerOutputTopic, footstepDataListMessage::set);
-      createSubscriber(WalkingStatusMessage.class, controllerOutputTopic, walkingStatusMessage::set);
+      createSubscriber(HumanoidControllerAPI.getTopic(FootstepStatusMessage.class, robotName), footstepStatusMessage::set);
+      createSubscriber(HumanoidControllerAPI.getTopic(HandTrajectoryMessage.class, robotName), handTrajectoryMessage::set);
+      createSubscriber(HumanoidControllerAPI.getTopic(ArmTrajectoryMessage.class, robotName), armTrajectoryMessage::set);
+      createSubscriber(HumanoidControllerAPI.getTopic(FootstepDataListMessage.class, robotName), footstepDataListMessage::set);
+      createSubscriber(HumanoidControllerAPI.getTopic(WalkingStatusMessage.class, robotName), walkingStatusMessage::set);
       createBehaviorInputSubscriber(DoorLocationPacket.class, doorLocationMessage::set);
       createBehaviorInputSubscriber(WalkOverTerrainGoalPacket.class, walkOverTerrainGoalMessage::set);
       dataBase = new SQLBehaviorDatabaseManager();

@@ -15,7 +15,7 @@ public class AtlasElectricMotorAutoEnableFlagPacketPubSubType implements us.ihmc
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "47b76a6a5db28e2fd364a8ec5cb3a3c649c4f0faa162160b88174cf634f5ff90";
+   		return "9250f158bd4d391a32dfb4499294541ca3c130bdf8a2701d74f51b40088dff33";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class AtlasElectricMotorAutoEnableFlagPacketPubSubType implements us.ihmc
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -69,7 +69,7 @@ public class AtlasElectricMotorAutoEnableFlagPacketPubSubType implements us.ihmc
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -81,7 +81,7 @@ public class AtlasElectricMotorAutoEnableFlagPacketPubSubType implements us.ihmc
 
    public static void write(atlas_msgs.msg.dds.AtlasElectricMotorAutoEnableFlagPacket data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_7(data.getShouldAutoEnable());
 
@@ -89,7 +89,7 @@ public class AtlasElectricMotorAutoEnableFlagPacketPubSubType implements us.ihmc
 
    public static void read(atlas_msgs.msg.dds.AtlasElectricMotorAutoEnableFlagPacket data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setShouldAutoEnable(cdr.read_type_7());
       	
@@ -99,14 +99,14 @@ public class AtlasElectricMotorAutoEnableFlagPacketPubSubType implements us.ihmc
    @Override
    public final void serialize(atlas_msgs.msg.dds.AtlasElectricMotorAutoEnableFlagPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_7("should_auto_enable", data.getShouldAutoEnable());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, atlas_msgs.msg.dds.AtlasElectricMotorAutoEnableFlagPacket data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setShouldAutoEnable(ser.read_type_7("should_auto_enable"));
    }
 

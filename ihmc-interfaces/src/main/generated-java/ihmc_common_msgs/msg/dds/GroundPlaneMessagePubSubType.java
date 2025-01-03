@@ -15,7 +15,7 @@ public class GroundPlaneMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "ed19af7d7c3bc34bb786f6a4999564a3d394808a87981e48abf81e4f809affef";
+   		return "9e72167e01ee19bb41f3ee4e2a675942862a26965267a3da201325f8795563eb";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class GroundPlaneMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -71,7 +71,7 @@ public class GroundPlaneMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getRegionOrigin(), current_alignment);
@@ -84,7 +84,7 @@ public class GroundPlaneMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
 
    public static void write(ihmc_common_msgs.msg.dds.GroundPlaneMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       geometry_msgs.msg.dds.PointPubSubType.write(data.getRegionOrigin(), cdr);
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getRegionNormal(), cdr);
@@ -92,7 +92,7 @@ public class GroundPlaneMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
 
    public static void read(ihmc_common_msgs.msg.dds.GroundPlaneMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       geometry_msgs.msg.dds.PointPubSubType.read(data.getRegionOrigin(), cdr);	
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getRegionNormal(), cdr);	
@@ -102,7 +102,7 @@ public class GroundPlaneMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
    @Override
    public final void serialize(ihmc_common_msgs.msg.dds.GroundPlaneMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_a("region_origin", new geometry_msgs.msg.dds.PointPubSubType(), data.getRegionOrigin());
 
       ser.write_type_a("region_normal", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getRegionNormal());
@@ -112,7 +112,7 @@ public class GroundPlaneMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, ihmc_common_msgs.msg.dds.GroundPlaneMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       ser.read_type_a("region_origin", new geometry_msgs.msg.dds.PointPubSubType(), data.getRegionOrigin());
 
       ser.read_type_a("region_normal", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getRegionNormal());

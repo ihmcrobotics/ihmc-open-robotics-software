@@ -1,7 +1,7 @@
 package us.ihmc.tools;
 
 import us.ihmc.commons.Conversions;
-import us.ihmc.tools.thread.MissingThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 public class Timer
 {
@@ -35,7 +35,7 @@ public class Timer
          double expirationTime = resetTime + expirationDuration;
          double remainingDuration = expirationTime - Conversions.nanosecondsToSeconds(System.nanoTime());
 
-         MissingThreadTools.sleepAtLeast(remainingDuration);
+         ThreadTools.parkAtLeast(remainingDuration);
       }
    }
 

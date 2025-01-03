@@ -1,7 +1,7 @@
 # This message is part of the IHMC whole-body inverse kinematics module.
 # This output status will be converted into the WholeBodyTrajectoryMessage.
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 byte KINEMATICS_PLANNING_RESULT_OPTIMAL_SOLUTION = 0
 byte KINEMATICS_PLANNING_RESULT_EXCEED_JOINT_VELOCITY_LIMIT = 1

@@ -1,24 +1,24 @@
 package us.ihmc.perception.ros1.camera;
 
-import boofcv.struct.calib.CameraPinholeBrown;
 import sensor_msgs.CameraInfo;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
+@Deprecated
 public class RosCameraInfoSubscriber extends AbstractRosTopicSubscriber<CameraInfo>
 {
-   private final CameraPinholeBrown intrinsicParameters = new CameraPinholeBrown();
+   private final Object intrinsicParameters = new Object();
 
    public RosCameraInfoSubscriber(String which)
    {
       super(sensor_msgs.CameraInfo._TYPE);
    }
 
-   public CameraPinholeBrown getIntrinisicParameters()
+   public Object getIntrinisicParameters()
    {
       synchronized (intrinsicParameters)
       {
-         return new CameraPinholeBrown(intrinsicParameters);
+         return new Object();
       }
 
    }
@@ -32,11 +32,11 @@ public class RosCameraInfoSubscriber extends AbstractRosTopicSubscriber<CameraIn
 
       synchronized (intrinsicParameters)
       {
-         intrinsicParameters.fx = P[0];
-         intrinsicParameters.skew = P[1];
-         intrinsicParameters.cx = P[2];
-         intrinsicParameters.fy = P[5];
-         intrinsicParameters.cy = P[6];
+//         intrinsicParameters.fx = P[0];
+//         intrinsicParameters.skew = P[1];
+//         intrinsicParameters.cx = P[2];
+//         intrinsicParameters.fy = P[5];
+//         intrinsicParameters.cy = P[6];
 
          // Use these parameters for Gazebo in the future.
 
@@ -49,12 +49,12 @@ public class RosCameraInfoSubscriber extends AbstractRosTopicSubscriber<CameraIn
          //            packet.param.fy = K[4];
          //            packet.param.cy = K[5];
 
-         intrinsicParameters.width = message.getWidth();
-         intrinsicParameters.height = message.getHeight();
+//         intrinsicParameters.width = message.getWidth();
+//         intrinsicParameters.height = message.getHeight();
          if (RosCameraReceiver.DEBUG)
          {
             PrintTools.debug(this, "Receiving intrinsicParameters");
-            intrinsicParameters.print();
+//            intrinsicParameters.print();
          }
          //calc field of view
          //            double hfov;

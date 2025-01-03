@@ -46,7 +46,7 @@ public class HeightMapPolygonSnapper
                                            ConvexPolygon2DReadOnly polygonInStepFrame,
                                            FootstepPlannerEnvironmentHandler environmentHandler,
                                            double snapHeightThreshold,
-                                           double minimumSurfaceInclineRadians)
+                                           double minSurfaceIncline)
    {
       return computeSnapData(footstep.getX(),
                              footstep.getY(),
@@ -54,7 +54,7 @@ public class HeightMapPolygonSnapper
                              polygonInStepFrame,
                              environmentHandler,
                              snapHeightThreshold,
-                             minimumSurfaceInclineRadians,
+                             minSurfaceIncline,
                              -Double.MAX_VALUE);
    }
 
@@ -64,7 +64,7 @@ public class HeightMapPolygonSnapper
                                            ConvexPolygon2DReadOnly polygonInStepFrame,
                                            FootstepPlannerEnvironmentHandler environmentHandler,
                                            double snapHeightThreshold,
-                                           double minimumSurfaceInclineRadians)
+                                           double minSurfaceIncline)
    {
       return computeSnapData(stepX,
                              stepY,
@@ -72,7 +72,7 @@ public class HeightMapPolygonSnapper
                              polygonInStepFrame,
                              environmentHandler,
                              snapHeightThreshold,
-                             minimumSurfaceInclineRadians,
+                             minSurfaceIncline,
                              -Double.MAX_VALUE);
    }
 
@@ -80,7 +80,7 @@ public class HeightMapPolygonSnapper
                                            ConvexPolygon2DReadOnly polygonInStepFrame,
                                            FootstepPlannerEnvironmentHandler environmentHandler,
                                            double snapHeightThreshold,
-                                           double minimumSurfaceInclineRadians,
+                                           double minSurfaceIncline,
                                            double minimumHeightToConsider)
    {
       return computeSnapData(footstep.getX(),
@@ -89,7 +89,7 @@ public class HeightMapPolygonSnapper
                              polygonInStepFrame,
                              environmentHandler,
                              snapHeightThreshold,
-                             minimumSurfaceInclineRadians,
+                             minSurfaceIncline,
                              minimumHeightToConsider);
    }
 
@@ -99,7 +99,7 @@ public class HeightMapPolygonSnapper
                                            ConvexPolygon2DReadOnly polygonInStepFrame,
                                            FootstepPlannerEnvironmentHandler environmentHandler,
                                            double snapHeightThreshold,
-                                           double minimumSurfaceInclineRadians,
+                                           double minSurfaceIncline,
                                            double minimumHeightToConsider)
    {
       RigidBodyTransform footstepTransform = new RigidBodyTransform();
@@ -111,7 +111,7 @@ public class HeightMapPolygonSnapper
       RigidBodyTransform snapTransform = snapPolygonToHeightMap(footPolygonInWorld,
                                                                 environmentHandler,
                                                                 snapHeightThreshold,
-                                                                minimumSurfaceInclineRadians,
+                                                                minSurfaceIncline,
                                                                 minimumHeightToConsider);
 
       if (snapTransform == null)
@@ -141,9 +141,9 @@ public class HeightMapPolygonSnapper
    public RigidBodyTransform snapPolygonToHeightMap(ConvexPolygon2DReadOnly polygonToSnap,
                                                     FootstepPlannerEnvironmentHandler environmentHandler,
                                                     double snapHeightThreshold,
-                                                    double minimumSurfaceInclineRadians)
+                                                    double minSurfaceIncline)
    {
-      return snapPolygonToHeightMap(polygonToSnap, environmentHandler, snapHeightThreshold, minimumSurfaceInclineRadians, -Double.MAX_VALUE);
+      return snapPolygonToHeightMap(polygonToSnap, environmentHandler, snapHeightThreshold, minSurfaceIncline, -Double.MAX_VALUE);
    }
 
    /**
@@ -155,7 +155,7 @@ public class HeightMapPolygonSnapper
    public RigidBodyTransform snapPolygonToHeightMap(ConvexPolygon2DReadOnly polygonToSnap,
                                                     FootstepPlannerEnvironmentHandler environmentHandler,
                                                     double snapHeightThreshold,
-                                                    double minimumSurfaceInclineRadians,
+                                                    double minSurfaceIncline,
                                                     double minimumHeightToConsider)
    {
       RigidBodyTransform transformToReturn;
@@ -229,7 +229,7 @@ public class HeightMapPolygonSnapper
          }
 
          double minZ = maxPoint.getZ() - snapHeightThreshold;
-         double slope = Math.tan(minimumSurfaceInclineRadians);
+         double slope = Math.tan(minSurfaceIncline);
          footPointsInEnvironment.removeIf(point ->
                                           {
                                              double distance = point.distanceXY(maxPoint);

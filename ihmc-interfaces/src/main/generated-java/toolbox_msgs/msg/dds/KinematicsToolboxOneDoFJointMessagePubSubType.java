@@ -15,7 +15,7 @@ public class KinematicsToolboxOneDoFJointMessagePubSubType implements us.ihmc.pu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "90ecace412c00eab0ec4667102d1928f97825b5fdbd3c8db701e7e66756fb2ee";
+   		return "61b189fd3b22f3f6aecb17d37f5f7e69f17d7000ab4134407905538a625d8306";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class KinematicsToolboxOneDoFJointMessagePubSubType implements us.ihmc.pu
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -73,7 +73,7 @@ public class KinematicsToolboxOneDoFJointMessagePubSubType implements us.ihmc.pu
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -91,7 +91,7 @@ public class KinematicsToolboxOneDoFJointMessagePubSubType implements us.ihmc.pu
 
    public static void write(toolbox_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_2(data.getJointHashCode());
 
@@ -103,7 +103,7 @@ public class KinematicsToolboxOneDoFJointMessagePubSubType implements us.ihmc.pu
 
    public static void read(toolbox_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setJointHashCode(cdr.read_type_2());
       	
@@ -117,7 +117,7 @@ public class KinematicsToolboxOneDoFJointMessagePubSubType implements us.ihmc.pu
    @Override
    public final void serialize(toolbox_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_2("joint_hash_code", data.getJointHashCode());
       ser.write_type_6("desired_position", data.getDesiredPosition());
       ser.write_type_6("weight", data.getWeight());
@@ -126,7 +126,7 @@ public class KinematicsToolboxOneDoFJointMessagePubSubType implements us.ihmc.pu
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, toolbox_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setJointHashCode(ser.read_type_2("joint_hash_code"));
       data.setDesiredPosition(ser.read_type_6("desired_position"));
       data.setWeight(ser.read_type_6("weight"));

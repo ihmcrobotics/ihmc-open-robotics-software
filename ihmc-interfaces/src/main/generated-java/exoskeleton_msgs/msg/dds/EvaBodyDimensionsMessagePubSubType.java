@@ -15,7 +15,7 @@ public class EvaBodyDimensionsMessagePubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "360ac6a3caf40584ac16c6c17a4fc488ac29cfd098a9c3e88346c4eb0c151a20";
+   		return "f15ef88cfa89b2d1b4a74b368841e74938f2033210e55afc7079436543877501";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class EvaBodyDimensionsMessagePubSubType implements us.ihmc.pubsub.TopicD
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (2048 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -75,7 +75,7 @@ public class EvaBodyDimensionsMessagePubSubType implements us.ihmc.pubsub.TopicD
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -97,7 +97,7 @@ public class EvaBodyDimensionsMessagePubSubType implements us.ihmc.pubsub.TopicD
 
    public static void write(exoskeleton_msgs.msg.dds.EvaBodyDimensionsMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       if(data.getFileName().size() <= 2048)
       cdr.write_type_e(data.getFileName());else
@@ -113,7 +113,7 @@ public class EvaBodyDimensionsMessagePubSubType implements us.ihmc.pubsub.TopicD
 
    public static void read(exoskeleton_msgs.msg.dds.EvaBodyDimensionsMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       cdr.read_type_e(data.getFileName());	
       data.setThighLength(cdr.read_type_6());
@@ -128,7 +128,7 @@ public class EvaBodyDimensionsMessagePubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final void serialize(exoskeleton_msgs.msg.dds.EvaBodyDimensionsMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_e("file_name", data.getFileName());
       ser.write_type_6("thigh_length", data.getThighLength());
       ser.write_type_6("shank_length", data.getShankLength());
@@ -138,7 +138,7 @@ public class EvaBodyDimensionsMessagePubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, exoskeleton_msgs.msg.dds.EvaBodyDimensionsMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       ser.read_type_e("file_name", data.getFileName());
       data.setThighLength(ser.read_type_6("thigh_length"));
       data.setShankLength(ser.read_type_6("shank_length"));

@@ -3,26 +3,26 @@ package us.ihmc.atlas;
 import atlas_msgs.msg.dds.AtlasDesiredPumpPSIPacket;
 import atlas_msgs.msg.dds.AtlasLowLevelControlModeMessage;
 import atlas_msgs.msg.dds.BDIBehaviorCommandPacket;
-import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.AbortWalkingMessage;
+import controller_msgs.msg.dds.PauseWalkingMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.ros2.ROS2PublisherBasics;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.atlas.AtlasLowLevelControlMode;
-import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
 
 public class AtlasDirectRobotInterface implements RobotLowLevelMessenger
 {
-   private final ROS2PublisherBasics<AtlasLowLevelControlModeMessage> lowLevelModePublisher;
-   private final ROS2PublisherBasics<BDIBehaviorCommandPacket> bdiBehaviorPublisher;
-   private final ROS2PublisherBasics<AtlasDesiredPumpPSIPacket> desiredPumpPSIPublisher;
-   private final ROS2PublisherBasics<AbortWalkingMessage> abortWalkingPublisher;
-   private final ROS2PublisherBasics<PauseWalkingMessage> pauseWalkingPublisher;
+   private final ROS2Publisher<AtlasLowLevelControlModeMessage> lowLevelModePublisher;
+   private final ROS2Publisher<BDIBehaviorCommandPacket> bdiBehaviorPublisher;
+   private final ROS2Publisher<AtlasDesiredPumpPSIPacket> desiredPumpPSIPublisher;
+   private final ROS2Publisher<AbortWalkingMessage> abortWalkingPublisher;
+   private final ROS2Publisher<PauseWalkingMessage> pauseWalkingPublisher;
 
-   public AtlasDirectRobotInterface(ROS2NodeInterface ros2Node, DRCRobotModel robotModel)
+   public AtlasDirectRobotInterface(ROS2Node ros2Node, DRCRobotModel robotModel)
    {
       ROS2Topic inputTopic = HumanoidControllerAPI.getInputTopic(robotModel.getSimpleRobotName());
       lowLevelModePublisher = ros2Node.createPublisher(inputTopic.withTypeName(AtlasLowLevelControlModeMessage.class));

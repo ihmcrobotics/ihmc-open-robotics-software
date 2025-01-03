@@ -1,6 +1,5 @@
 package us.ihmc.perception.opencv;
 
-import boofcv.struct.calib.CameraPinholeBrown;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.global.opencv_objdetect;
@@ -11,7 +10,6 @@ import org.bytedeco.opencv.opencv_objdetect.DetectorParameters;
 import org.bytedeco.opencv.opencv_objdetect.Dictionary;
 import org.bytedeco.opencv.opencv_objdetect.RefineParameters;
 import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
 
 /**
@@ -35,8 +33,8 @@ public class OpenCVArUcoMarkerDetector
    private final Mat cameraMatrix;
    private final Mat distortionCoefficients;
    private final Stopwatch stopwatch = new Stopwatch();
-   private BytedecoImage rgb8ImageForDetection;
-   private BytedecoImage optionalSourceColorImage;
+   private Mat rgb8ImageForDetection;
+   private Mat optionalSourceColorImage;
 
    public OpenCVArUcoMarkerDetector()
    {
@@ -56,18 +54,9 @@ public class OpenCVArUcoMarkerDetector
       distortionCoefficients.ptr(0, 4).putFloat(0.0f);
    }
 
-   public void setSourceImageForDetection(BytedecoImage optionalSourceColorImage)
+   public void setSourceImageForDetection(Mat optionalSourceColorImage)
    {
       this.optionalSourceColorImage = optionalSourceColorImage;
-   }
-
-   public void setCameraInstrinsics(CameraPinholeBrown depthCameraIntrinsics)
-   {
-      opencv_core.setIdentity(cameraMatrix);
-      cameraMatrix.ptr(0, 0).putDouble(depthCameraIntrinsics.getFx());
-      cameraMatrix.ptr(1, 1).putDouble(depthCameraIntrinsics.getFy());
-      cameraMatrix.ptr(0, 2).putDouble(depthCameraIntrinsics.getCx());
-      cameraMatrix.ptr(1, 2).putDouble(depthCameraIntrinsics.getCy());
    }
 
    public void setCameraIntrinsics(CameraIntrinsics cameraIntrinsics)
@@ -93,11 +82,11 @@ public class OpenCVArUcoMarkerDetector
    }
 
    /** The user can pass in the image each time or set it once using {@link #setSourceImageForDetection}. */
-   public void update(BytedecoImage sourceColorImage)
+   public void update(Mat sourceColorImage)
    {
       if (rgb8ImageForDetection == null)
       {
-         rgb8ImageForDetection = new BytedecoImage(sourceColorImage.getImageWidth(), sourceColorImage.getImageHeight(), opencv_core.CV_8UC3);
+         rgb8ImageForDetection = new Mat(sourceColorImage.size(), opencv_core.CV_8UC3);
       }
 
       convertOrCopyToRGB(sourceColorImage, rgb8ImageForDetection);
@@ -105,34 +94,33 @@ public class OpenCVArUcoMarkerDetector
       performDetection(rgb8ImageForDetection);
    }
 
-   public static void convertOrCopyToRGB(BytedecoImage sourceColorImage, BytedecoImage rgb8ImageForDetection)
+   public static void convertOrCopyToRGB(Mat sourceColorImage, Mat rgb8ImageForDetection)
    {
-      rgb8ImageForDetection.ensureDimensionsMatch(sourceColorImage);
+      if (!OpenCVTools.dimensionsMatch(sourceColorImage, rgb8ImageForDetection))
+         rgb8ImageForDetection = new Mat(sourceColorImage.size(), opencv_core.CV_8UC3);
 
-      if (sourceColorImage.getBytedecoOpenCVMat().type() == opencv_core.CV_8UC4)
+      if (sourceColorImage.type() == opencv_core.CV_8UC4)
       {
          // ArUco library doesn't support alpha channel being in there
-         opencv_imgproc.cvtColor(sourceColorImage.getBytedecoOpenCVMat(),
-                                 rgb8ImageForDetection.getBytedecoOpenCVMat(),
-                                 opencv_imgproc.COLOR_RGBA2RGB);
+         opencv_imgproc.cvtColor(sourceColorImage, rgb8ImageForDetection, opencv_imgproc.COLOR_RGBA2RGB);
       }
       else
       {
-         sourceColorImage.getBytedecoOpenCVMat().copyTo(rgb8ImageForDetection.getBytedecoOpenCVMat());
+         sourceColorImage.copyTo(rgb8ImageForDetection);
       }
    }
 
    /** For use if the user already has a valid image. */
-   public void performDetection(BytedecoImage rgb8ImageForDetection)
+   public void performDetection(Mat rgb8ImageForDetection)
    {
       arucoDetector.setDetectorParameters(detectorParameters);
       // detectMarkers is the big slow thing, so we put it on an async thread.
       stopwatch.start();
-      arucoDetector.detectMarkers(rgb8ImageForDetection.getBytedecoOpenCVMat(), corners, ids, rejectedImagePoints);
+      arucoDetector.detectMarkers(rgb8ImageForDetection, corners, ids, rejectedImagePoints);
       stopwatch.suspend();
    }
 
-   public BytedecoImage getRGB8ImageForDetection()
+   public Mat getRGB8ImageForDetection()
    {
       return rgb8ImageForDetection;
    }

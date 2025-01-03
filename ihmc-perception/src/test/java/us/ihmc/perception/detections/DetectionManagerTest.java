@@ -8,6 +8,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.detections.centerPose.CenterPoseInstantDetection;
@@ -334,6 +335,7 @@ public class DetectionManagerTest
                           null,
                           PixelFormat.GRAY8,
                           new CameraIntrinsics(mat.rows(), mat.cols(), 10.0f, 10.0f, mat.cols() / 2.0f, mat.rows() / 2.0f),
+                          CameraModel.PINHOLE,
                           new FramePose3D(),
                           now,
                           0,

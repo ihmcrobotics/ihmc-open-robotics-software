@@ -13,7 +13,7 @@ int8 SWING_PLANNER_TYPE_PROPORTION=2
 int32 NO_PLAN_ID=-1
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # Starting left foot pose
 geometry_msgs/Pose start_left_foot_pose

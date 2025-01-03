@@ -1,11 +1,11 @@
 package us.ihmc.rdx.logging;
 
-import boofcv.struct.calib.CameraPinholeBrown;
 import imgui.ImGui;
 import org.bytedeco.ffmpeg.global.avutil;
 import org.bytedeco.opencv.global.opencv_core;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.BytedecoImage;
+import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.RDXPanel;
@@ -95,7 +95,7 @@ public class RDXFFMPEGL515DepthLoggingDemo
             l515.setRenderColorVideoDirectly(true);
             l515.setRenderDepthVideoDirectly(true);
             l515.setPublishColorImageROS2(false);
-            CameraPinholeBrown cameraIntrinsics = l515.getDepthCameraIntrinsics();
+            CameraIntrinsics cameraIntrinsics = l515.getDepthCameraIntrinsics();
             baseUI.getPrimaryScene().addRenderableProvider(l515::getRenderables);
 
             normalizedDepthImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC1);

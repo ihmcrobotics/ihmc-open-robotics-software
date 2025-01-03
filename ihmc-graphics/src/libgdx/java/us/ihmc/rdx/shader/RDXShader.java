@@ -23,11 +23,20 @@ public class RDXShader implements ShaderProvider
 
    public void create()
    {
+      create(null, null);
+   }
+
+   public void create(String[] vertexFlags, String[] fragmentFlags)
+   {
       String path = clazz.getName().replace(".", "/") + ".glsl";
       Pair<String, String> shaderStrings = LibGDXTools.loadCombinedShader(path);
       String vertexShader = shaderStrings.getLeft();
       String fragmentShader = shaderStrings.getRight();
-      shaderProgram = new ShaderProgram(vertexShader, fragmentShader);
+
+      String vertexShaderWithFlags = addFlags(vertexShader, vertexFlags);
+      String fragmentShaderWithFlags = addFlags(fragmentShader, fragmentFlags);
+
+      shaderProgram = new ShaderProgram(vertexShaderWithFlags, fragmentShaderWithFlags);
 
       LogTools.info("OpenGL shader compilation output for {}:\n{}", path, shaderProgram.getLog());
 //      LibGDXTools.printShaderLog(shaderProgram);
@@ -76,5 +85,25 @@ public class RDXShader implements ShaderProvider
    public void dispose()
    {
       baseShader.dispose();
+   }
+
+   private static String addFlags(String shader, String[] flags)
+   {
+      if (flags == null || flags.length == 0)
+         return shader;
+
+      String[] versionAndCode = shader.trim().split("\n", 2);
+
+      // Start with version string
+      StringBuilder shaderWithFlags = new StringBuilder(versionAndCode[0] + "\n");
+
+      // Add the flag defines
+      for (String flag : flags)
+         shaderWithFlags.append("#define " + flag + "\n");
+
+      // Add the shader code
+      shaderWithFlags.append(versionAndCode[1]);
+
+      return shaderWithFlags.toString();
    }
 }

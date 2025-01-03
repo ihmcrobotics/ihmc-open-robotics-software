@@ -15,7 +15,7 @@ public class KinematicsStreamingToolboxInputMessagePubSubType implements us.ihmc
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "c530a3e84b8612d3e2568d505f5ea8b7c5f757c7e70304944f22c9f6dfe59252";
+   		return "72bdad3904591ea26ef444aa065a1f3ee22faa5eb065e728930fee4a7ca844c8";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class KinematicsStreamingToolboxInputMessagePubSubType implements us.ihmc
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -84,7 +84,7 @@ public class KinematicsStreamingToolboxInputMessagePubSubType implements us.ihmc
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -118,7 +118,7 @@ public class KinematicsStreamingToolboxInputMessagePubSubType implements us.ihmc
 
    public static void write(toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_11(data.getTimestamp());
 
@@ -141,7 +141,7 @@ public class KinematicsStreamingToolboxInputMessagePubSubType implements us.ihmc
 
    public static void read(toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setTimestamp(cdr.read_type_11());
       	
@@ -163,7 +163,7 @@ public class KinematicsStreamingToolboxInputMessagePubSubType implements us.ihmc
    @Override
    public final void serialize(toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_11("timestamp", data.getTimestamp());
       ser.write_type_7("stream_to_controller", data.getStreamToController());
       ser.write_type_6("stream_initial_blend_duration", data.getStreamInitialBlendDuration());
@@ -178,7 +178,7 @@ public class KinematicsStreamingToolboxInputMessagePubSubType implements us.ihmc
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setTimestamp(ser.read_type_11("timestamp"));
       data.setStreamToController(ser.read_type_7("stream_to_controller"));
       data.setStreamInitialBlendDuration(ser.read_type_6("stream_initial_blend_duration"));

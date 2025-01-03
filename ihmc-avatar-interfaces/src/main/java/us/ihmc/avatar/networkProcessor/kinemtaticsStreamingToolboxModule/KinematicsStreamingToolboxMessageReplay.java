@@ -2,19 +2,23 @@ package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.CapturabilityBasedStatusPubSubType;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.RobotConfigurationDataPubSubType;
 import org.apache.commons.lang3.mutable.MutableInt;
-import toolbox_msgs.msg.dds.*;
+import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
+import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessagePubSubType;
+import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessagePubSubType;
+import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.ros2.ROS2PublisherBasics;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 
@@ -42,23 +46,23 @@ public class KinematicsStreamingToolboxMessageReplay
    private final JSONSerializer<KinematicsToolboxConfigurationMessage> kinematicsToolboxConfigurationMessageSerializer = new JSONSerializer<>(new KinematicsToolboxConfigurationMessagePubSubType());
    private final JSONSerializer<KinematicsStreamingToolboxInputMessage> kinematicsStreamingToolboxInputMessageSerializer = new JSONSerializer<>(new KinematicsStreamingToolboxInputMessagePubSubType());
 
-   private final ROS2PublisherBasics<RobotConfigurationData> robotConfigurationDataPublisher;
-   private final ROS2PublisherBasics<CapturabilityBasedStatus> capturabilityBasedStatusPublisher;
-   private final ROS2PublisherBasics<KinematicsToolboxConfigurationMessage> kinematicsToolboxConfigurationPublisher;
-   private final ROS2PublisherBasics<KinematicsStreamingToolboxInputMessage> kinematicsStreamingToolboxInputPublisher;
-   private final ROS2PublisherBasics<ToolboxStateMessage> toolboxStatePublisher;
+   private final ROS2Publisher<RobotConfigurationData> robotConfigurationDataPublisher;
+   private final ROS2Publisher<CapturabilityBasedStatus> capturabilityBasedStatusPublisher;
+   private final ROS2Publisher<KinematicsToolboxConfigurationMessage> kinematicsToolboxConfigurationPublisher;
+   private final ROS2Publisher<KinematicsStreamingToolboxInputMessage> kinematicsStreamingToolboxInputPublisher;
+   private final ROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
 
    private final MutableInt counter = new MutableInt();
    private double timeOffsetSeconds;
 
    private final RealtimeROS2Node ros2Node;
 
-   public KinematicsStreamingToolboxMessageReplay(String robotName, InputStream inputStream, PubSubImplementation pubSubImplementation) throws IOException
+   public KinematicsStreamingToolboxMessageReplay(String robotName, InputStream inputStream) throws IOException
    {
       messages = loadMessages(inputStream);
       String name = getClass().getSimpleName();
 
-      ros2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, "ihmc_" + name);
+      ros2Node = new ROS2NodeBuilder().buildRealtime("ihmc_" + name);
 
       ROS2Topic controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
       robotConfigurationDataPublisher = ros2Node.createPublisher(controllerOutputTopic.withTypeName(RobotConfigurationData.class));
@@ -223,7 +227,7 @@ public class KinematicsStreamingToolboxMessageReplay
       {
 
          InputStream inputStream = new FileInputStream(fileChooser.getSelectedFile());
-         new KinematicsStreamingToolboxMessageReplay(robotName, inputStream, PubSubImplementation.FAST_RTPS).replayAllMessages();
+         new KinematicsStreamingToolboxMessageReplay(robotName, inputStream).replayAllMessages();
       }
    }
 }

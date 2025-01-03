@@ -3,12 +3,12 @@ package us.ihmc.communication.ros2;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
-import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
+import us.ihmc.ros2.ROS2Input;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.Timer;
-import us.ihmc.tools.thread.Throttler;
+import us.ihmc.commons.thread.Throttler;
 
 import java.util.function.Consumer;
 
@@ -27,7 +27,7 @@ public class ROS2HeartbeatMonitor
     */
    public static final double HEARTBEAT_EXPIRATION = 1.25 * ROS2Heartbeat.HEARTBEAT_PERIOD;
    private final Timer timer = new Timer();
-   private final ROS2TypelessInput subscription;
+   private final ROS2Input<Empty> subscription;
 
    // To provide callback when aliveness changes
    private volatile boolean running = true;
@@ -38,13 +38,13 @@ public class ROS2HeartbeatMonitor
 
    public ROS2HeartbeatMonitor(ROS2PublishSubscribeAPI ros2, ROS2Topic<Empty> heartbeatTopic)
    {
-      subscription = ros2.subscribeTypeless(heartbeatTopic);
+      subscription = ros2.subscribe(heartbeatTopic);
       subscription.addCallback(this::receivedHeartbeat);
       ThreadTools.startAsDaemon(() -> ExceptionTools.handle(this::monitorThread, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE),
                                 "HeartbeatMonitor");
    }
 
-   private synchronized void receivedHeartbeat()
+   private synchronized void receivedHeartbeat(Empty empty)
    {
       timer.reset();
    }

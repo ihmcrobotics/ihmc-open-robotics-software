@@ -18,6 +18,14 @@ public class CRDTBidirectionalMutableField<T>
    }
 
    /**
+    * Used to set the initial value which can require special computation.
+    */
+   public T getValueToInitialize()
+   {
+      return value;
+   }
+
+   /**
     * Call this if you want the change to stick.
     * Do not call this every tick.
     * @return modifiable interface

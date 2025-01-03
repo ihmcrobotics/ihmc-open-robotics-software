@@ -8,11 +8,6 @@ import us.ihmc.tools.property.StoredPropertySetBasics;
  */
 public interface ContinuousHikingParametersBasics extends ContinuousHikingParametersReadOnly, StoredPropertySetBasics
 {
-   default void setEnableContinuousHiking(boolean enableContinuousHiking)
-   {
-      set(ContinuousHikingParameters.enableContinuousHiking, enableContinuousHiking);
-   }
-
    default void setStepPublisherEnabled(boolean stepPublisherEnabled)
    {
       set(ContinuousHikingParameters.stepPublisherEnabled, stepPublisherEnabled);
@@ -38,6 +33,11 @@ public interface ContinuousHikingParametersBasics extends ContinuousHikingParame
       set(ContinuousHikingParameters.goalPoseUpDistance, goalPoseUpDistance);
    }
 
+   default void setGoalPoseBackwardDistance(double goalPoseBackwardDistance)
+   {
+      set(ContinuousHikingParameters.goalPoseBackwardDistance, goalPoseBackwardDistance);
+   }
+
    default void setSwingTime(double swingTime)
    {
       set(ContinuousHikingParameters.swingTime, swingTime);
@@ -48,9 +48,9 @@ public interface ContinuousHikingParametersBasics extends ContinuousHikingParame
       set(ContinuousHikingParameters.transferTime, transferTime);
    }
 
-   default void setPlannerTimeoutFraction(double plannerTimeoutFraction)
+   default void setPlanningTimeoutAsAFractionOfTheStepDuration(double planningTimeoutAsAFractionOfTheStepDuration)
    {
-      set(ContinuousHikingParameters.plannerTimeoutFraction, plannerTimeoutFraction);
+      set(ContinuousHikingParameters.planningTimeoutAsAFractionOfTheStepDuration, planningTimeoutAsAFractionOfTheStepDuration);
    }
 
    default void setPlanningWithoutReferenceTimeout(double planningWithoutReferenceTimeout)

@@ -5,18 +5,17 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.ActionNodeDefinition;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.communication.crdt.CRDTUnidirectionalDouble;
-import us.ihmc.communication.crdt.CRDTUnidirectionalEnumField;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.communication.crdt.CRDTBidirectionalDouble;
+import us.ihmc.communication.crdt.CRDTBidirectionalEnumField;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SidedObject;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class HandWrenchActionDefinition extends ActionNodeDefinition implements SidedObject
 {
-   private final CRDTUnidirectionalEnumField<RobotSide> side;
-   private final CRDTUnidirectionalDouble trajectoryDuration;
-   private final CRDTUnidirectionalDouble force;
+   private final CRDTBidirectionalEnumField<RobotSide> side;
+   private final CRDTBidirectionalDouble trajectoryDuration;
+   private final CRDTBidirectionalDouble force;
 
    // On disk fields
    private RobotSide onDiskSide;
@@ -27,9 +26,9 @@ public class HandWrenchActionDefinition extends ActionNodeDefinition implements 
    {
       super(crdtInfo, saveFileDirectory);
 
-      side = new CRDTUnidirectionalEnumField<>(ROS2ActorDesignation.OPERATOR, this, RobotSide.LEFT);
-      trajectoryDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, 1000.0);
-      force = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, 20.0);
+      side = new CRDTBidirectionalEnumField<>(this, RobotSide.LEFT);
+      trajectoryDuration = new CRDTBidirectionalDouble(this, 1000.0);
+      force = new CRDTBidirectionalDouble(this, 20.0);
    }
 
    @Override

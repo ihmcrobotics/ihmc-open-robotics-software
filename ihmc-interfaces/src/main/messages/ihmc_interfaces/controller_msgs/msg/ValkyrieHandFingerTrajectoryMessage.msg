@@ -10,7 +10,7 @@ byte MIDDLE_FINGER_MOTOR_PITCH1 = 4
 byte PINKY_MOTOR_PITCH1 = 5
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # Specifies the side of the robot that will execute the trajectory.
 byte robot_side 255

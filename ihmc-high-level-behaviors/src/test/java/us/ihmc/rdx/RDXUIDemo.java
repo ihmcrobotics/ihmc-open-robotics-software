@@ -1,6 +1,6 @@
 package us.ihmc.rdx;
 
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.Model;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
@@ -10,7 +10,8 @@ import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.rdx.imgui.ImGuiMovingPlot;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.tools.BoxesDemoModel;
-import us.ihmc.rdx.tools.RDXModelBuilder;
+import us.ihmc.rdx.tools.RDXModelInstance;
+import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDX3DPanelToolbarButton;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -42,6 +43,9 @@ public class RDXUIDemo
             baseUI.create();
 
             baseUI.getPrimaryScene().addModelInstance(new BoxesDemoModel().newInstance());
+
+            Model model = RDXModelLoader.load("environmentObjects/couch/Couch.gltf");
+            baseUI.getPrimaryScene().addModelInstance(new RDXModelInstance(model));
 
             baseUI.getImGuiPanelManager().addPanel("Window 1", RDXUIDemo.this::renderWindow1);
             baseUI.getImGuiPanelManager().addPanel("Window 2", RDXUIDemo.this::renderWindow2);

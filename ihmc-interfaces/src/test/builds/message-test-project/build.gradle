@@ -3,7 +3,6 @@ buildscript {
       maven { url = uri("https://plugins.gradle.org/m2/") }
       mavenCentral()
       mavenLocal()
-      jcenter()
    }
    dependencies {
       classpath "us.ihmc:ros2-msg-to-pubsub-generator:0.24.4"
@@ -27,8 +26,8 @@ ihmc {
 }
 
 mainDependencies {
-   api("us.ihmc:ihmc-pub-sub:0.20.0")
-   api("us.ihmc:ros2-common-interfaces:0.24.4")
+   api("us.ihmc:ihmc-pub-sub:1.1.0")
+   api("us.ihmc:ros2-common-interfaces:1.1.0")
 }
 
 def generator = new us.ihmc.ros2.rosidl.ROS2InterfaceGenerator();

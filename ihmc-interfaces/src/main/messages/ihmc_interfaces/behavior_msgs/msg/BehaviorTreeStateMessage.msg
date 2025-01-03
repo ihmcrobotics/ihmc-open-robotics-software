@@ -7,9 +7,12 @@ byte ROOT_NODE = 0
 byte BASIC_NODE = 1
 byte AI2R_NODE = 2
 byte ACTION_SEQUENCE = 3
-byte DOOR_TRAVERSAL = 4
-byte TRASH_CAN_INTERACTION = 5
-byte BUILDING_EXPLORATION = 6
+byte FALLBACK_NODE = 4
+byte CONDITION_NODE = 5
+byte GOTO_NODE = 6
+byte DOOR_TRAVERSAL = 7
+byte TRASH_CAN_INTERACTION = 8
+byte BUILDING_EXPLORATION = 9
 
 byte CHEST_ORIENTATION_ACTION = 10
 byte FOOTSTEP_PLAN_ACTION = 11
@@ -22,7 +25,7 @@ byte WAIT_DURATION_ACTION = 17
 byte FOOT_POSE_ACTION = 18
 
 # Monotonically increasing message ID that matches the CRDTInfo update number
-uint32 sequence_id
+uint64 sequence_id
 
 # The ID to assign to the next instantiated node
 uint32 next_id
@@ -45,6 +48,12 @@ behavior_msgs/BasicNodeStateMessage[<=200] basic_nodes
 behavior_msgs/AI2RNodeStateMessage[<=1] ai2r_nodes
 
 behavior_msgs/ActionSequenceStateMessage[<=200] action_sequences
+
+behavior_msgs/FallbackNodeStateMessage[<=200] fallback_nodes
+
+behavior_msgs/ConditionNodeStateMessage[<=200] condition_nodes
+
+behavior_msgs/GotoNodeStateMessage[<=200] goto_nodes
 
 behavior_msgs/DoorTraversalStateMessage[<=200] door_traversals
 

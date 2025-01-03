@@ -2,7 +2,6 @@ package us.ihmc.humanoidBehaviors.behaviors.debug;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -15,6 +14,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.time.YoStopwatch;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -29,7 +29,7 @@ public class TestICPOptimizationBehavior extends AbstractBehavior
    private final YoBoolean abortBehavior = new YoBoolean("AbortBehavior", registry);
 
    private final YoStopwatch timer;
-   private final ROS2PublisherBasics<FootstepDataListMessage> publisher;
+   private final ROS2Publisher<FootstepDataListMessage> publisher;
 
    public TestICPOptimizationBehavior(String robotName, ROS2Node ros2Node, HumanoidReferenceFrames referenceFrames, YoDouble yoTime)
    {

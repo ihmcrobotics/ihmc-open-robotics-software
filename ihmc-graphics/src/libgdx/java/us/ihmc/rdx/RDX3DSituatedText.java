@@ -25,8 +25,6 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
@@ -171,6 +169,14 @@ public class RDX3DSituatedText implements RenderableProvider
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       textData.getModelInstance().getRenderables(renderables, pool);
+   }
+
+   public void dispose()
+   {
+      for (RDX3DSituatedTextData textData : textDataMap.values())
+      {
+         textData.dispose();
+      }
    }
 
    public String getCurrentText()

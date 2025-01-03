@@ -1,15 +1,11 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
+import gnu.trove.list.array.TDoubleArrayList;
 import toolbox_msgs.msg.dds.KinematicsPlanningToolboxCenterOfMassMessage;
 import toolbox_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus;
 import toolbox_msgs.msg.dds.KinematicsPlanningToolboxRigidBodyMessage;
 import toolbox_msgs.msg.dds.ToolboxStateMessage;
-import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
-import gnu.trove.list.array.TDoubleArrayList;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -29,6 +25,10 @@ import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class KinematicsPlanningBehavior extends AbstractBehavior
 {
@@ -44,10 +44,10 @@ public class KinematicsPlanningBehavior extends AbstractBehavior
 
    private final ConcurrentListeningQueue<KinematicsPlanningToolboxOutputStatus> toolboxOutputQueue = new ConcurrentListeningQueue<>(40);
 
-   private final ROS2PublisherBasics<ToolboxStateMessage> toolboxStatePublisher;
-   private final ROS2PublisherBasics<KinematicsPlanningToolboxRigidBodyMessage> rigidBodyMessagePublisher;
-   private final ROS2PublisherBasics<KinematicsPlanningToolboxCenterOfMassMessage> comMessagePublisher;
-   private final ROS2PublisherBasics<WholeBodyTrajectoryMessage> wholeBodyTrajectoryPublisher;
+   private final ROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
+   private final ROS2Publisher<KinematicsPlanningToolboxRigidBodyMessage> rigidBodyMessagePublisher;
+   private final ROS2Publisher<KinematicsPlanningToolboxCenterOfMassMessage> comMessagePublisher;
+   private final ROS2Publisher<WholeBodyTrajectoryMessage> wholeBodyTrajectoryPublisher;
 
    private double trajectoryTime = 0.0;
    private int planningResult = -1;

@@ -9,9 +9,7 @@ import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacpp.LongPointer;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.commons.Conversions;
-import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2Helper;
@@ -23,9 +21,9 @@ import us.ihmc.idl.IDLSequence;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
 import us.ihmc.perception.tools.PerceptionMessageTools;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.IHMCCommonPaths;
 
@@ -44,7 +42,6 @@ public class PerceptionDataLogger
    private ROS2StoredPropertySetGroup ros2PropertySetGroup;
    private PerceptionConfigurationParameters parameters;
 
-   private final CommunicationMode communicationMode;
    private final ArrayDeque<Runnable> runnablesToStopLogging = new ArrayDeque<>();
    private ROS2Node ros2Node;
    private ROS2Helper ros2Helper;
@@ -60,11 +57,6 @@ public class PerceptionDataLogger
    private final HashMap<String, byte[]> byteArrays = new HashMap<>();
    private HashMap<String, AtomicReference<ImageMessage>> imageMessageReferences = new HashMap<>();
    private HashMap<String, AtomicReference<Pose3D>> transformMessageReferences = new HashMap<>();
-
-   public PerceptionDataLogger()
-   {
-      communicationMode = CommunicationMode.INTERPROCESS;
-   }
 
    public void addAllChannels()
    {
@@ -254,17 +246,16 @@ public class PerceptionDataLogger
       openLogFile(logFileName);
 
       // Use both regular and real-time ROS2 nodes to assign callbacks to different message types
-      ros2Node = ROS2Tools.createROS2Node(communicationMode.getPubSubImplementation(), "perception_logger_node");
+      ros2Node = new ROS2NodeBuilder().build("perception_logger_node");
       ros2Helper = new ROS2Helper(ros2Node);
 
-      realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "perception_logger_realtime_node");
+      realtimeROS2Node = new ROS2NodeBuilder().buildRealtime("perception_logger_realtime_node");
 
       // Add callback for Robot Configuration Data
       if (channels.get(PerceptionLoggerConstants.ROBOT_CONFIGURATION_DATA_NAME).isEnabled())
       {
          var robotConfigurationDataSubscription = ros2Helper.subscribe(StateEstimatorAPI.getRobotConfigurationDataTopic(simpleRobotName));
          robotConfigurationDataSubscription.addCallback(this::logRobotConfigurationData);
-         runnablesToStopLogging.addLast(robotConfigurationDataSubscription::destroy);
       }
 
       // Add callback for D435 Color images
@@ -273,7 +264,6 @@ public class PerceptionDataLogger
          byteArrays.put(PerceptionLoggerConstants.D435_COLOR_NAME, new byte[PerceptionLoggerConstants.FLOAT_BUFFER_SIZE]);
          var d435VideoSubscription = ros2Helper.subscribe(PerceptionAPI.D435_COLOR_IMAGE);
          d435VideoSubscription.addCallback(this::logColorD435);
-         runnablesToStopLogging.addLast(d435VideoSubscription::destroy);
       }
 
       // Add callback for D435 Depth images
@@ -282,7 +272,6 @@ public class PerceptionDataLogger
          byteArrays.put(PerceptionLoggerConstants.D435_DEPTH_NAME, new byte[PerceptionLoggerConstants.FLOAT_BUFFER_SIZE]);
          var d435DepthSubscription = ros2Helper.subscribe(PerceptionAPI.D435_DEPTH_IMAGE);
          d435DepthSubscription.addCallback(this::logDepthD435);
-         runnablesToStopLogging.addLast(d435DepthSubscription::destroy);
       }
 
       // Add callback for L515 Depth Maps
@@ -291,7 +280,6 @@ public class PerceptionDataLogger
          byteArrays.put(PerceptionLoggerConstants.L515_DEPTH_NAME, new byte[PerceptionLoggerConstants.FLOAT_BUFFER_SIZE]);
          var l515DepthSubscription = ros2Helper.subscribe(PerceptionAPI.L515_DEPTH_IMAGE);
          l515DepthSubscription.addCallback(this::logDepthL515);
-         runnablesToStopLogging.addLast(l515DepthSubscription::destroy);
       }
 
       // Add callback for L515 Color Images
@@ -300,7 +288,6 @@ public class PerceptionDataLogger
          byteArrays.put(PerceptionLoggerConstants.L515_COLOR_NAME, new byte[PerceptionLoggerConstants.FLOAT_BUFFER_SIZE]);
          var l515ColorSubscription = ros2Helper.subscribe(PerceptionAPI.L515_COLOR_IMAGE);
          l515ColorSubscription.addCallback(this::logColorL515);
-         runnablesToStopLogging.addLast(l515ColorSubscription::destroy);
       }
 
       // Add callback for D435 Color images
@@ -309,7 +296,6 @@ public class PerceptionDataLogger
          byteArrays.put(PerceptionLoggerConstants.ZED2_COLOR_NAME, new byte[PerceptionLoggerConstants.FLOAT_BUFFER_SIZE]);
          var zed2StereoSubscription = ros2Helper.subscribe(PerceptionAPI.ZED2_STEREO_COLOR);
          zed2StereoSubscription.addCallback(this::logColorZED2);
-         runnablesToStopLogging.addLast(zed2StereoSubscription::destroy);
       }
 
       // Add callback for Ouster depth maps

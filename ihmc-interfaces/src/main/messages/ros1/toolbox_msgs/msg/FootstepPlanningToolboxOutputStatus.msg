@@ -35,7 +35,7 @@ int8 FOOTSTEP_PLANNING_RESULT_HALTED=7
 int32 NO_PLAN_ID=-1
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # ID of the request this output corresponds to
 # Field default value -1

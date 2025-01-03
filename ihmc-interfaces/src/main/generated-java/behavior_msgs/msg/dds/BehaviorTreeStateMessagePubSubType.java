@@ -15,7 +15,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "eaf2e0f49ff038cca54c5acb459c69080920a3aab14a12b17dc4bd2f2824c3d5";
+   		return "59ad0ec7762395c22d8975f6e745ccb156c806e717dc33d7ce6f74ba6dd50ece";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -74,6 +74,15 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.ActionSequenceStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
+      {
+          current_alignment += behavior_msgs.msg.dds.FallbackNodeStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
+      {
+          current_alignment += behavior_msgs.msg.dds.ConditionNodeStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
+      {
+          current_alignment += behavior_msgs.msg.dds.GotoNodeStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.DoorTraversalStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
@@ -123,7 +132,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -158,6 +167,21 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       for(int i0 = 0; i0 < data.getActionSequences().size(); ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.ActionSequenceStateMessagePubSubType.getCdrSerializedSize(data.getActionSequences().get(i0), current_alignment);}
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getFallbackNodes().size(); ++i0)
+      {
+          current_alignment += behavior_msgs.msg.dds.FallbackNodeStateMessagePubSubType.getCdrSerializedSize(data.getFallbackNodes().get(i0), current_alignment);}
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getConditionNodes().size(); ++i0)
+      {
+          current_alignment += behavior_msgs.msg.dds.ConditionNodeStateMessagePubSubType.getCdrSerializedSize(data.getConditionNodes().get(i0), current_alignment);}
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getGotoNodes().size(); ++i0)
+      {
+          current_alignment += behavior_msgs.msg.dds.GotoNodeStateMessagePubSubType.getCdrSerializedSize(data.getGotoNodes().get(i0), current_alignment);}
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getDoorTraversals().size(); ++i0)
@@ -225,7 +249,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
 
    public static void write(behavior_msgs.msg.dds.BehaviorTreeStateMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_4(data.getNextId());
 
@@ -253,6 +277,18 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       if(data.getActionSequences().size() <= 200)
       cdr.write_type_e(data.getActionSequences());else
           throw new RuntimeException("action_sequences field exceeds the maximum length");
+
+      if(data.getFallbackNodes().size() <= 200)
+      cdr.write_type_e(data.getFallbackNodes());else
+          throw new RuntimeException("fallback_nodes field exceeds the maximum length");
+
+      if(data.getConditionNodes().size() <= 200)
+      cdr.write_type_e(data.getConditionNodes());else
+          throw new RuntimeException("condition_nodes field exceeds the maximum length");
+
+      if(data.getGotoNodes().size() <= 200)
+      cdr.write_type_e(data.getGotoNodes());else
+          throw new RuntimeException("goto_nodes field exceeds the maximum length");
 
       if(data.getDoorTraversals().size() <= 200)
       cdr.write_type_e(data.getDoorTraversals());else
@@ -306,7 +342,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
 
    public static void read(behavior_msgs.msg.dds.BehaviorTreeStateMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setNextId(cdr.read_type_4());
       	
@@ -317,6 +353,9 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       cdr.read_type_e(data.getBasicNodes());	
       cdr.read_type_e(data.getAi2rNodes());	
       cdr.read_type_e(data.getActionSequences());	
+      cdr.read_type_e(data.getFallbackNodes());	
+      cdr.read_type_e(data.getConditionNodes());	
+      cdr.read_type_e(data.getGotoNodes());	
       cdr.read_type_e(data.getDoorTraversals());	
       cdr.read_type_e(data.getTrashCanInteractions());	
       cdr.read_type_e(data.getBuildingExplorations());	
@@ -335,7 +374,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final void serialize(behavior_msgs.msg.dds.BehaviorTreeStateMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_4("next_id", data.getNextId());
       ser.write_type_a("confirmable_request", new ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType(), data.getConfirmableRequest());
 
@@ -345,6 +384,9 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       ser.write_type_e("basic_nodes", data.getBasicNodes());
       ser.write_type_e("ai2r_nodes", data.getAi2rNodes());
       ser.write_type_e("action_sequences", data.getActionSequences());
+      ser.write_type_e("fallback_nodes", data.getFallbackNodes());
+      ser.write_type_e("condition_nodes", data.getConditionNodes());
+      ser.write_type_e("goto_nodes", data.getGotoNodes());
       ser.write_type_e("door_traversals", data.getDoorTraversals());
       ser.write_type_e("trash_can_interactions", data.getTrashCanInteractions());
       ser.write_type_e("building_explorations", data.getBuildingExplorations());
@@ -362,7 +404,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.BehaviorTreeStateMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setNextId(ser.read_type_4("next_id"));
       ser.read_type_a("confirmable_request", new ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType(), data.getConfirmableRequest());
 
@@ -372,6 +414,9 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       ser.read_type_e("basic_nodes", data.getBasicNodes());
       ser.read_type_e("ai2r_nodes", data.getAi2rNodes());
       ser.read_type_e("action_sequences", data.getActionSequences());
+      ser.read_type_e("fallback_nodes", data.getFallbackNodes());
+      ser.read_type_e("condition_nodes", data.getConditionNodes());
+      ser.read_type_e("goto_nodes", data.getGotoNodes());
       ser.read_type_e("door_traversals", data.getDoorTraversals());
       ser.read_type_e("trash_can_interactions", data.getTrashCanInteractions());
       ser.read_type_e("building_explorations", data.getBuildingExplorations());

@@ -15,7 +15,7 @@ public class AtlasDesiredPumpPSIPacketPubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "741c3effd15815663dfddb994e2bd9c7c91e308000d8ff0c82a23faafb66045f";
+   		return "466c95549e2c854bc40c5a6ac8ec9bbf061230898c9d192306a1b28b1f497e26";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class AtlasDesiredPumpPSIPacketPubSubType implements us.ihmc.pubsub.Topic
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -69,7 +69,7 @@ public class AtlasDesiredPumpPSIPacketPubSubType implements us.ihmc.pubsub.Topic
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -81,7 +81,7 @@ public class AtlasDesiredPumpPSIPacketPubSubType implements us.ihmc.pubsub.Topic
 
    public static void write(atlas_msgs.msg.dds.AtlasDesiredPumpPSIPacket data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_2(data.getDesiredPumpPsi());
 
@@ -89,7 +89,7 @@ public class AtlasDesiredPumpPSIPacketPubSubType implements us.ihmc.pubsub.Topic
 
    public static void read(atlas_msgs.msg.dds.AtlasDesiredPumpPSIPacket data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setDesiredPumpPsi(cdr.read_type_2());
       	
@@ -99,14 +99,14 @@ public class AtlasDesiredPumpPSIPacketPubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final void serialize(atlas_msgs.msg.dds.AtlasDesiredPumpPSIPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_2("desired_pump_psi", data.getDesiredPumpPsi());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, atlas_msgs.msg.dds.AtlasDesiredPumpPSIPacket data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setDesiredPumpPsi(ser.read_type_2("desired_pump_psi"));
    }
 

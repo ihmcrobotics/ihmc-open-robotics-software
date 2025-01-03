@@ -1,6 +1,5 @@
 package us.ihmc.perception.tools;
 
-import boofcv.struct.calib.CameraPinhole;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.LongPointer;
@@ -57,20 +56,22 @@ public class PerceptionMessageTools
       imageMessageToPack.setPrincipalPointYPixels((float) sensor.getColorPrincipalOffsetYPixels());
    }
 
-   public static void copyToMessage(CameraPinhole cameraPinhole, ImageMessage imageMessageToPack)
+   @Deprecated
+   public static void copyToMessage(Object cameraPinhole, ImageMessage imageMessageToPack)
    {
-      imageMessageToPack.setFocalLengthXPixels((float) cameraPinhole.getFx());
-      imageMessageToPack.setFocalLengthYPixels((float) cameraPinhole.getFy());
-      imageMessageToPack.setPrincipalPointXPixels((float) cameraPinhole.getCx());
-      imageMessageToPack.setPrincipalPointYPixels((float) cameraPinhole.getCy());
+//      imageMessageToPack.setFocalLengthXPixels((float) cameraPinhole.getFx());
+//      imageMessageToPack.setFocalLengthYPixels((float) cameraPinhole.getFy());
+//      imageMessageToPack.setPrincipalPointXPixels((float) cameraPinhole.getCx());
+//      imageMessageToPack.setPrincipalPointYPixels((float) cameraPinhole.getCy());
    }
 
-   public static void toBoofCV(ImageMessage imageMessage, CameraPinhole cameraPinholeToPack)
+   @Deprecated
+   public static void toBoofCV(ImageMessage imageMessage, Object cameraPinholeToPack)
    {
-      cameraPinholeToPack.setFx(imageMessage.getFocalLengthXPixels());
-      cameraPinholeToPack.setFy(imageMessage.getFocalLengthYPixels());
-      cameraPinholeToPack.setCx(imageMessage.getPrincipalPointXPixels());
-      cameraPinholeToPack.setCy(imageMessage.getPrincipalPointYPixels());
+//      cameraPinholeToPack.setFx(imageMessage.getFocalLengthXPixels());
+//      cameraPinholeToPack.setFy(imageMessage.getFocalLengthYPixels());
+//      cameraPinholeToPack.setCx(imageMessage.getPrincipalPointXPixels());
+//      cameraPinholeToPack.setCy(imageMessage.getPrincipalPointYPixels());
    }
 
    public static void publishCompressedDepthImage(BytePointer compressedDepthPointer,
@@ -105,9 +106,9 @@ public class PerceptionMessageTools
 
    public static void publishFramePlanarRegionsList(FramePlanarRegionsList framePlanarRegionsList,
                                                     ROS2Topic<FramePlanarRegionsListMessage> topic,
-                                                    ROS2Helper ros2Helper)
+                                                    ROS2PublishSubscribeAPI ros2)
    {
-      ros2Helper.publish(topic, PlanarRegionMessageConverter.convertToFramePlanarRegionsListMessage(framePlanarRegionsList));
+      ros2.publish(topic, PlanarRegionMessageConverter.convertToFramePlanarRegionsListMessage(framePlanarRegionsList));
    }
 
    public static void publishPlanarRegionsList(PlanarRegionsList planarRegionsList, ROS2Topic<PlanarRegionsListMessage> topic, ROS2Helper ros2Helper)
@@ -181,16 +182,14 @@ public class PerceptionMessageTools
    public static void packImageMessage(RawImage originalImage,
                                        BytePointer compressedData,
                                        CompressionType compressionType,
-                                       CameraModel cameraModel,
                                        ImageMessage imageMessageToPack)
    {
-      packImageMessage(originalImage, compressedData, compressionType, cameraModel, null, null, imageMessageToPack);
+      packImageMessage(originalImage, compressedData, compressionType, null, null, imageMessageToPack);
    }
 
    public static void packImageMessage(RawImage originalImage,
                                        BytePointer compressedData,
                                        CompressionType compressionType,
-                                       CameraModel cameraModel,
                                        @Nullable ByteBuffer ousterBeamAltitudeAngles,
                                        @Nullable ByteBuffer ousterBeamAzimuthAngles,
                                        ImageMessage imageMessageToPack)
@@ -198,7 +197,6 @@ public class PerceptionMessageTools
       originalImage.packImageMessageMetaData(imageMessageToPack);
       packImageMessageData(imageMessageToPack, compressedData);
       imageMessageToPack.setCompressionType(compressionType.toByte());
-      imageMessageToPack.setCameraModel(cameraModel.toByte());
       if (ousterBeamAltitudeAngles != null)
          MessageTools.packIDLSequence(ousterBeamAltitudeAngles, imageMessageToPack.getOusterBeamAltitudeAngles());
       if (ousterBeamAzimuthAngles != null)
@@ -265,12 +263,12 @@ public class PerceptionMessageTools
       floatPointer.put(startIndex + 3, (float) quaternion.getS());
    }
 
-   public static void convertToHeightMapData(Mat heightMapPointer, HeightMapData heightMapData, Point3D gridCenter, float widthInMeters, float cellSizeInMeters)
+   public static void convertToHeightMapData(Mat heightMapPointer, HeightMapData heightMapDataToPack, Point3D gridCenter, float widthInMeters, float cellSizeInMeters)
    {
       int centerIndex = HeightMapTools.computeCenterIndex(widthInMeters, cellSizeInMeters);
       int cellsPerAxis = 2 * centerIndex + 1;
 
-      heightMapData.setGridCenter(gridCenter.getX(), gridCenter.getY());
+      heightMapDataToPack.setGridCenter(gridCenter.getX(), gridCenter.getY());
 
       for (int xIndex = 0; xIndex < cellsPerAxis; xIndex++)
       {
@@ -281,7 +279,7 @@ public class PerceptionMessageTools
                                - (float) RapidHeightMapExtractor.getHeightMapParameters().getHeightOffset();
 
             int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
-            heightMapData.setHeightAt(key, cellHeight);
+            heightMapDataToPack.setHeightAt(key, cellHeight);
          }
       }
    }

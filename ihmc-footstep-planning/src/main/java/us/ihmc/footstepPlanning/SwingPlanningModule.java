@@ -68,6 +68,7 @@ public class SwingPlanningModule
                                      SwingPlannerType swingPlannerType)
    {
       swingTrajectories.clear();
+
       if (heightMapData == null || heightMapData.isEmpty())
       {
          return;

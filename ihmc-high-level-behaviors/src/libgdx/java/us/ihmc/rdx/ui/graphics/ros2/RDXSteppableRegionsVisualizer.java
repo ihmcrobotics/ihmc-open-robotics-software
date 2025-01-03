@@ -10,7 +10,6 @@ import perception_msgs.msg.dds.SteppableRegionsListCollectionMessage;
 import us.ihmc.perception.steppableRegions.SteppableRegionsAPI;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXSteppableRegionGraphic;
-import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.MissingThreadTools;
@@ -56,7 +55,7 @@ public class RDXSteppableRegionsVisualizer extends RDXROS2SingleTopicVisualizer<
 
    public void setUpForNetworking(ROS2Node ros2Node)
    {
-      new ROS2Callback<>(ros2Node, SteppableRegionsAPI.STEPPABLE_REGIONS_OUTPUT, this::acceptSteppableRegionsCollection);
+      ros2Node.createSubscription2(SteppableRegionsAPI.STEPPABLE_REGIONS_OUTPUT, this::acceptSteppableRegionsCollection);
    }
 
    public void acceptSteppableRegionsCollection(SteppableRegionsListCollectionMessage steppableRegionsListCollection)

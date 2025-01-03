@@ -1,9 +1,7 @@
 package us.ihmc.rdx.ui.gizmo;
 
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXInteractableReferenceFrame;

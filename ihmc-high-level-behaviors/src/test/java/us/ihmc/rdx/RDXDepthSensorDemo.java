@@ -8,13 +8,10 @@ import us.ihmc.rdx.simulation.sensors.RDXLowLevelDepthSensorSimulator;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDXBaseUI;
 
-/**
- * TODO: Fix me
- */
 public class RDXDepthSensorDemo
 {
    private RDXLowLevelDepthSensorSimulator depthSensorSimulator;
-   private RDXPointCloudRenderer pointCloudRenderer;
+   private RDXPointCloudRendererOld pointCloudRenderer;
 
    public RDXDepthSensorDemo()
    {
@@ -27,10 +24,10 @@ public class RDXDepthSensorDemo
             baseUI.create();
 
             depthSensorSimulator = new RDXLowLevelDepthSensorSimulator("Sensor", 80.0, 800, 600, 0.05, 5.0, 0.03, 0.07, false);
-            pointCloudRenderer = new RDXPointCloudRenderer();
+            pointCloudRenderer = new RDXPointCloudRendererOld();
 
             baseUI.getPrimaryScene().addCoordinateFrame(0.3);
-            baseUI.getPrimaryScene().addModelInstance(new DepthSensorDemoObjectsModel().newInstance());
+            baseUI.getPrimaryScene().addModelInstance(new DepthSensorDemoObjectsModel().newInstance(), RDXSceneLevel.GROUND_TRUTH);
 
             pointCloudRenderer.create(depthSensorSimulator.getNumberOfPoints());
             baseUI.getPrimaryScene().addRenderableProvider(pointCloudRenderer, RDXSceneLevel.VIRTUAL);

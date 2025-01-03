@@ -215,47 +215,51 @@ public class FootstepPlannerOutput
       this.swingTrajectories = swingTrajectories;
    }
 
-   public void setPacket(FootstepPlanningToolboxOutputStatus outputStatus)
+   /**
+    * This packs the parameter with all the values in the {@link FootstepPlanningToolboxOutputStatus} assuming things aren't null
+    * @param outputStatusToPack is the parameter that gets packed
+    */
+   public void setPacket(FootstepPlanningToolboxOutputStatus outputStatusToPack)
    {
-      outputStatus.setPlanId(getRequestId());
-      outputStatus.getFootstepDataList().set(FootstepDataMessageConverter.createFootstepDataListFromPlan(getFootstepPlan(), -1.0, -1.0));
-      outputStatus.getBodyPath().clear();
-      outputStatus.getBodyPathUnsmoothed().clear();
-      outputStatus.getGoalPose().set(getGoalPose());
-      getPlannerTimings().setPacket(outputStatus.getPlannerTimings());
+      outputStatusToPack.setPlanId(getRequestId());
+      outputStatusToPack.getFootstepDataList().set(FootstepDataMessageConverter.createFootstepDataListFromPlan(getFootstepPlan(), -1.0, -1.0));
+      outputStatusToPack.getBodyPath().clear();
+      outputStatusToPack.getBodyPathUnsmoothed().clear();
+      outputStatusToPack.getGoalPose().set(getGoalPose());
+      getPlannerTimings().setPacket(outputStatusToPack.getPlannerTimings());
 
       if (getBodyPathPlanningResult() != null)
       {
-         outputStatus.setBodyPathPlanningResult(getBodyPathPlanningResult().toByte());
+         outputStatusToPack.setBodyPathPlanningResult(getBodyPathPlanningResult().toByte());
       }
 
       if (getFootstepPlanningResult() != null)
       {
-         outputStatus.setFootstepPlanningResult(getFootstepPlanningResult().toByte());
+         outputStatusToPack.setFootstepPlanningResult(getFootstepPlanningResult().toByte());
       }
 
       if(getException() != null)
       {
-         outputStatus.setExceptionMessage(getException().toString());
+         outputStatusToPack.setExceptionMessage(getException().toString());
          StackTraceElement[] stackTrace = getException().getStackTrace();
          if(stackTrace != null)
          {
             int numberOfElements = Math.min(exception.getStackTrace().length, 20);
             for (int i = 0; i < numberOfElements; i++)
             {
-               outputStatus.getStacktrace().add(exception.getStackTrace()[i].toString());
+               outputStatusToPack.getStacktrace().add(exception.getStackTrace()[i].toString());
             }
          }
       }
 
       for (int i = 0; i < bodyPath.size(); i++)
       {
-         outputStatus.getBodyPath().add().set(bodyPath.get(i));
+         outputStatusToPack.getBodyPath().add().set(bodyPath.get(i));
       }
 
       for (int i = 0; i < bodyPathUnsmoothed.size(); i++)
       {
-         outputStatus.getBodyPathUnsmoothed().add().set(bodyPathUnsmoothed.get(i));
+         outputStatusToPack.getBodyPathUnsmoothed().add().set(bodyPathUnsmoothed.get(i));
       }
    }
 }

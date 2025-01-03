@@ -1,7 +1,7 @@
 package us.ihmc.tools.time;
 
 import org.junit.jupiter.api.Test;
-import us.ihmc.tools.thread.MissingThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 public class DurationStatisticPrinterTest
 {
@@ -13,7 +13,7 @@ public class DurationStatisticPrinterTest
       for (int i = 0; i < 300; i++)
       {
          printer.before();
-         MissingThreadTools.sleepMillis(10);
+         ThreadTools.sleep(10);
          printer.after();
       }
 

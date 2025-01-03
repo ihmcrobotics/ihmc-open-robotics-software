@@ -1,19 +1,18 @@
 package us.ihmc.robotEnvironmentAwareness.communication.converters;
 
+import org.jboss.netty.buffer.ChannelBuffer;
 import perception_msgs.msg.dds.LidarScanMessage;
+import sensor_msgs.PointCloud2;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.ros2.ROS2PublisherBasics;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.LidarPointCloudCompression;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
-import sensor_msgs.PointCloud2;
-import org.jboss.netty.buffer.ChannelBuffer;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -53,8 +52,8 @@ public class PointCloud2ToLidarScanMessageConverter
       RosMainNode rosMainNode = new RosMainNode(rosMasterURI, getClass().getSimpleName());
       Pose3D sensorPose = new Pose3D(poseX, poseY, poseZ, poseYaw, posePitch, poseRoll);
 
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, getClass().getSimpleName());
-      ROS2PublisherBasics<LidarScanMessage> lidarScanMessagePublisher = ros2Node.createPublisher(LidarScanMessage.class, "/ihmc/lidar_scan");
+      ROS2Node ros2Node = new ROS2NodeBuilder().build(getClass().getSimpleName());
+      ROS2Publisher<LidarScanMessage> lidarScanMessagePublisher = ros2Node.createPublisher(LidarScanMessage.class, "/ihmc/lidar_scan");
 
       // save and handle on another thread
       RosPointCloudSubscriber pointCloudSubscriber = new RosPointCloudSubscriber()

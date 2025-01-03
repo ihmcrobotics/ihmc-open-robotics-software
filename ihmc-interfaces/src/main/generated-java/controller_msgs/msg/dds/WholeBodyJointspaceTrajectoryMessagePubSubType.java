@@ -15,7 +15,7 @@ public class WholeBodyJointspaceTrajectoryMessagePubSubType implements us.ihmc.p
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "7d7892e85f314072e6cd368418a16a57e02f66ad142afbd17e2753010afef144";
+   		return "2cb3a6c856b8005b350c8361df75bb02e19d2da0d563ddd4ea1cb7069fc18557";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class WholeBodyJointspaceTrajectoryMessagePubSubType implements us.ihmc.p
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -74,7 +74,7 @@ public class WholeBodyJointspaceTrajectoryMessagePubSubType implements us.ihmc.p
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -94,7 +94,7 @@ public class WholeBodyJointspaceTrajectoryMessagePubSubType implements us.ihmc.p
 
    public static void write(controller_msgs.msg.dds.WholeBodyJointspaceTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       if(data.getJointHashCodes().size() <= 100)
       cdr.write_type_e(data.getJointHashCodes());else
@@ -109,7 +109,7 @@ public class WholeBodyJointspaceTrajectoryMessagePubSubType implements us.ihmc.p
 
    public static void read(controller_msgs.msg.dds.WholeBodyJointspaceTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       cdr.read_type_e(data.getJointHashCodes());	
       cdr.read_type_e(data.getJointTrajectoryMessages());	
@@ -120,7 +120,7 @@ public class WholeBodyJointspaceTrajectoryMessagePubSubType implements us.ihmc.p
    @Override
    public final void serialize(controller_msgs.msg.dds.WholeBodyJointspaceTrajectoryMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_e("joint_hash_codes", data.getJointHashCodes());
       ser.write_type_e("joint_trajectory_messages", data.getJointTrajectoryMessages());
       ser.write_type_a("queueing_properties", new ihmc_common_msgs.msg.dds.QueueableMessagePubSubType(), data.getQueueingProperties());
@@ -130,7 +130,7 @@ public class WholeBodyJointspaceTrajectoryMessagePubSubType implements us.ihmc.p
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.WholeBodyJointspaceTrajectoryMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       ser.read_type_e("joint_hash_codes", data.getJointHashCodes());
       ser.read_type_e("joint_trajectory_messages", data.getJointTrajectoryMessages());
       ser.read_type_a("queueing_properties", new ihmc_common_msgs.msg.dds.QueueableMessagePubSubType(), data.getQueueingProperties());

@@ -7,7 +7,6 @@ import us.ihmc.footstepPlanning.ui.components.FootstepPathCalculatorModule;
 import us.ihmc.javaFXToolkit.ApplicationNoModule;
 import us.ihmc.messager.javafx.JavaFXMessager;
 import us.ihmc.messager.javafx.SharedMemoryJavaFXMessager;
-import us.ihmc.pubsub.DomainFactory;
 
 /**
  * This class provides a fully remote footstep planner. It includes the UI and the footstep planning modules, which are
@@ -25,7 +24,7 @@ public class RemoteStandaloneFootstepPlannerUI extends ApplicationNoModule
    public void start(Stage primaryStage) throws Exception
    {
       messager = new SharedMemoryJavaFXMessager(FootstepPlannerMessagerAPI.API);
-      messageConverter = RemotePlannerMessageConverter.createConverter(messager, "", DomainFactory.PubSubImplementation.INTRAPROCESS);
+      messageConverter = RemotePlannerMessageConverter.createConverter(messager, "");
       module = new FootstepPathCalculatorModule(messager);
 
       messager.startMessager();

@@ -17,7 +17,7 @@ int8 PAUSED=3
 int8 RESUMED=4
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # Status of walking.
 # Field default value 255

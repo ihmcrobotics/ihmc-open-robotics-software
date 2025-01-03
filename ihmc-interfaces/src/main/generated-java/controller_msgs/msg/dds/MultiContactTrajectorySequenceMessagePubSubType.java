@@ -15,7 +15,7 @@ public class MultiContactTrajectorySequenceMessagePubSubType implements us.ihmc.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "7364c45f5d577264b066169bf4789a54c6eba9988dd136cc8a7790c78a93f5a7";
+   		return "72c645feb56c006dfece37ef9cd094c3f38d1ed06194b3e9f28a51615d554ad4";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class MultiContactTrajectorySequenceMessagePubSubType implements us.ihmc.
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50; ++i0)
       {
@@ -70,7 +70,7 @@ public class MultiContactTrajectorySequenceMessagePubSubType implements us.ihmc.
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -84,7 +84,7 @@ public class MultiContactTrajectorySequenceMessagePubSubType implements us.ihmc.
 
    public static void write(controller_msgs.msg.dds.MultiContactTrajectorySequenceMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       if(data.getTrajectorySequence().size() <= 50)
       cdr.write_type_e(data.getTrajectorySequence());else
@@ -94,7 +94,7 @@ public class MultiContactTrajectorySequenceMessagePubSubType implements us.ihmc.
 
    public static void read(controller_msgs.msg.dds.MultiContactTrajectorySequenceMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       cdr.read_type_e(data.getTrajectorySequence());	
 
@@ -103,14 +103,14 @@ public class MultiContactTrajectorySequenceMessagePubSubType implements us.ihmc.
    @Override
    public final void serialize(controller_msgs.msg.dds.MultiContactTrajectorySequenceMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_e("trajectory_sequence", data.getTrajectorySequence());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.MultiContactTrajectorySequenceMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       ser.read_type_e("trajectory_sequence", data.getTrajectorySequence());
    }
 

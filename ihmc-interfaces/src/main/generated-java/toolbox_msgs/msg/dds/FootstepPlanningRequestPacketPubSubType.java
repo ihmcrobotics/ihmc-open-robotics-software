@@ -15,7 +15,7 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "2f63b2077372c7759da4c39508b70f1b32eec4fa60be3f041b68c82cdeb48b63";
+   		return "d2e37c40267f8d33c40f52f82bd861dbb168fd61ae4064f9fa90510c2bd2e7b3";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -116,7 +116,7 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getStartLeftFootPose(), current_alignment);
@@ -193,7 +193,7 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
 
    public static void write(toolbox_msgs.msg.dds.FootstepPlanningRequestPacket data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       geometry_msgs.msg.dds.PosePubSubType.write(data.getStartLeftFootPose(), cdr);
       geometry_msgs.msg.dds.PosePubSubType.write(data.getStartRightFootPose(), cdr);
@@ -243,7 +243,7 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
 
    public static void read(toolbox_msgs.msg.dds.FootstepPlanningRequestPacket data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       geometry_msgs.msg.dds.PosePubSubType.read(data.getStartLeftFootPose(), cdr);	
       geometry_msgs.msg.dds.PosePubSubType.read(data.getStartRightFootPose(), cdr);	
@@ -292,7 +292,7 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
    @Override
    public final void serialize(toolbox_msgs.msg.dds.FootstepPlanningRequestPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_a("start_left_foot_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getStartLeftFootPose());
 
       ser.write_type_a("start_right_foot_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getStartRightFootPose());
@@ -328,7 +328,7 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, toolbox_msgs.msg.dds.FootstepPlanningRequestPacket data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       ser.read_type_a("start_left_foot_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getStartLeftFootPose());
 
       ser.read_type_a("start_right_foot_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getStartRightFootPose());

@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.function.Consumer;
 
-import boofcv.struct.calib.CameraPinholeBrown;
 import perception_msgs.msg.dds.VideoPacket;
 import us.ihmc.codecs.generated.YUVPicture;
 import us.ihmc.codecs.yuv.JPEGEncoder;
@@ -16,6 +15,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 
+@Deprecated
 public class SCSVideoDataROS2Bridge implements VideoDataServer
 {
    private static final Object hackyLockBecauseJPEGEncoderIsNotThreadsafe = new Object();
@@ -35,7 +35,7 @@ public class SCSVideoDataROS2Bridge implements VideoDataServer
                        long timeStamp,
                        Point3DReadOnly cameraPosition,
                        QuaternionReadOnly cameraOrientation,
-                       CameraPinholeBrown intrinsicParameters)
+                       Object intrinsicParameters)
    {
 
       YUVPicture picture = converter.fromBufferedImage(bufferedImage, YUVPicture.YUVSubsamplingType.YUV420);

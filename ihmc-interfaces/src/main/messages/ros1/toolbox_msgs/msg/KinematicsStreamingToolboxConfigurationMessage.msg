@@ -2,7 +2,7 @@
 # Allows to specify the messages the toolbox should stream to the controller.
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # Whether the pelvis should pinned or free to move.
 # Default value is false.

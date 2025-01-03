@@ -8,7 +8,6 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.javaFXToolkit.ApplicationNoModule;
 import us.ihmc.messager.javafx.SharedMemoryJavaFXMessager;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 
 /**
  * This class provides a visualizer for the remote footstep planner found in the footstep planner toolbox.
@@ -27,9 +26,9 @@ public class RemoteFootstepPlannerUI extends ApplicationNoModule
    public void start(Stage primaryStage) throws Exception
    {
       messager = new SharedMemoryJavaFXMessager(FootstepPlannerMessagerAPI.API);
-      messageConverter = RemoteUIMessageConverter.createConverter(messager, "", PubSubImplementation.INTRAPROCESS);
+      messageConverter = RemoteUIMessageConverter.createConverter(messager, "");
 
-      heightMapHeartbeat = new ROS2Heartbeat(new ROS2Helper(PubSubImplementation.FAST_RTPS, "height_map_heartbeat"), PerceptionAPI.REQUEST_HEIGHT_MAP);
+      heightMapHeartbeat = new ROS2Heartbeat(new ROS2Helper("height_map_heartbeat"), PerceptionAPI.REQUEST_HEIGHT_MAP);
       heightMapHeartbeat.setAlive(true);
 
       messager.startMessager();

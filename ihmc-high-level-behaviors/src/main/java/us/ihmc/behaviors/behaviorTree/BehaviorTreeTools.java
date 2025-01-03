@@ -1,9 +1,6 @@
 package us.ihmc.behaviors.behaviorTree;
 
 import us.ihmc.behaviors.sequence.ActionNodeDefinition;
-import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
-import us.ihmc.behaviors.sequence.ActionSequenceExecutor;
-import us.ihmc.behaviors.sequence.ActionSequenceState;
 
 import java.util.ArrayList;
 import java.util.List;

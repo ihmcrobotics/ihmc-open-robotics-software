@@ -1,6 +1,7 @@
 package us.ihmc.tools.io;
 
 import us.ihmc.commons.nio.BasicPathVisitor;
+import us.ihmc.commons.nio.BasicPathVisitor.PathType;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.resources.ResourceTools;
 
@@ -88,6 +89,19 @@ public class WorkspaceResourceDirectory extends WorkspaceDirectory
          }
       });
       return files;
+   }
+
+   public List<WorkspaceResourceDirectory> queryContainedDirectories()
+   {
+      ArrayList<WorkspaceResourceDirectory> directories = new ArrayList<>();
+      ResourceTools.walkResourcesFlat(pathNecessaryForResourceExploring, (fileName, pathType) ->
+      {
+         if (pathType == PathType.DIRECTORY)
+         {
+            directories.add(new WorkspaceResourceDirectory(classForLoading, pathNecessaryForClasspathLoadingString + "/" + fileName));
+         }
+      });
+      return directories;
    }
 
    /**

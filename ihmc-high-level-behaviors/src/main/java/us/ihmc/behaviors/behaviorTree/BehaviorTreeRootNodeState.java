@@ -1,14 +1,13 @@
 package us.ihmc.behaviors.behaviorTree;
 
 import behavior_msgs.msg.dds.BehaviorTreeRootNodeStateMessage;
+import gnu.trove.map.hash.TLongObjectHashMap;
 import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.communication.crdt.CRDTBidirectionalBoolean;
 import us.ihmc.communication.crdt.CRDTBidirectionalInteger;
+import us.ihmc.communication.crdt.CRDTBidirectionalNotification;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.communication.crdt.CRDTUnidirectionalBoolean;
-import us.ihmc.communication.crdt.CRDTUnidirectionalNotification;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SidedObject;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -22,10 +21,11 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
    private final BehaviorTreeRootNodeDefinition definition;
    private final CRDTBidirectionalBoolean automaticExecution;
    private final CRDTBidirectionalInteger executionNextIndex;
-   private final CRDTUnidirectionalNotification manualExecutionRequested;
-   private final CRDTUnidirectionalBoolean concurrencyEnabled;
+   private final CRDTBidirectionalNotification manualExecutionRequested;
+   private final CRDTBidirectionalBoolean concurrencyEnabled;
 
-   private transient final MutableInt actionIndex = new MutableInt();
+   private final TLongObjectHashMap<BehaviorTreeNodeState<?>> idToNodeMap = new TLongObjectHashMap<>();
+   private transient final MutableInt actionIndexAssignment = new MutableInt();
    private final List<ActionNodeState<?>> actionChildren = new ArrayList<>();
 
    public BehaviorTreeRootNodeState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
@@ -36,8 +36,8 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
 
       automaticExecution = new CRDTBidirectionalBoolean(definition, false);
       executionNextIndex = new CRDTBidirectionalInteger(definition, 0);
-      manualExecutionRequested = new CRDTUnidirectionalNotification(ROS2ActorDesignation.OPERATOR, definition);
-      concurrencyEnabled = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, definition, true);
+      manualExecutionRequested = new CRDTBidirectionalNotification(definition);
+      concurrencyEnabled = new CRDTBidirectionalBoolean(definition, true);
    }
 
    @Override
@@ -45,13 +45,16 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
    {
       super.update();
 
-      actionIndex.setValue(0);
+      idToNodeMap.clear();
+      actionIndexAssignment.setValue(0);
       actionChildren.clear();
-      updateActionSubtree(this, actionIndex);
+      updateActionSubtree(this, actionIndexAssignment);
    }
 
    public void updateActionSubtree(BehaviorTreeNodeState<?> node, MutableInt actionIndex)
    {
+      idToNodeMap.put(node.getState().getID(), node);
+
       for (BehaviorTreeNodeState<?> child : node.getChildren())
       {
          if (child instanceof ActionNodeState<?> actionNode)
@@ -59,16 +62,14 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
             actionNode.setActionIndex(actionIndex.getAndIncrement());
             actionChildren.add(actionNode);
          }
-         else
-         {
-            updateActionSubtree(child, actionIndex);
-         }
+
+         updateActionSubtree(child, actionIndex);
       }
    }
 
    public void toMessage(BehaviorTreeRootNodeStateMessage message)
    {
-      getDefinition().toMessage(message.getDefinition());
+      definition.toMessage(message.getDefinition());
 
       super.toMessage(message.getState());
 
@@ -82,7 +83,7 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
    {
       super.fromMessage(message.getState());
 
-      getDefinition().fromMessage(message.getDefinition());
+      definition.fromMessage(message.getDefinition());
 
       automaticExecution.fromMessage(message.getAutomaticExecution());
       executionNextIndex.fromMessage(message.getExecutionNextIndex());
@@ -166,6 +167,11 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
    public void setConcurrencyEnabled(boolean concurrencyEnabled)
    {
       this.concurrencyEnabled.setValue(concurrencyEnabled);
+   }
+
+   public TLongObjectHashMap<BehaviorTreeNodeState<?>> getIDToNodeMap()
+   {
+      return idToNodeMap;
    }
 
    public List<ActionNodeState<?>> getActionChildren()

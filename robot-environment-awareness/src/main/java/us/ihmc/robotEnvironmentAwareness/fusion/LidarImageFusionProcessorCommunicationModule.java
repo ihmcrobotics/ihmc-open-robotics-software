@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import boofcv.struct.calib.CameraPinholeBrown;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import perception_msgs.msg.dds.Image32;
 import perception_msgs.msg.dds.IntrinsicParametersMessage;
@@ -36,10 +35,10 @@ import us.ihmc.robotEnvironmentAwareness.fusion.tools.ImageVisualizationHelper;
 import us.ihmc.robotEnvironmentAwareness.updaters.REAModuleStateReporter;
 import us.ihmc.robotEnvironmentAwareness.updaters.REANetworkProvider;
 import us.ihmc.robotEnvironmentAwareness.updaters.REAPlanarRegionPublicNetworkProvider;
-import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
 
+@Deprecated
 public class LidarImageFusionProcessorCommunicationModule
 {
    private final Messager messager;
@@ -72,8 +71,8 @@ public class LidarImageFusionProcessorCommunicationModule
       networkProvider.registerStereoVisionPointCloudHandler(this::dispatchStereoVisionPointCloudMessage);
       networkProvider.registerCustomRegionsHandler(this::dispatchCustomPlanarRegion);
 
-      new ROS2Callback<>(ros2Node, Image32.class, ROS2Tools.IHMC_ROOT, this::dispatchImage32);
-      new ROS2Callback<>(ros2Node, VideoPacket.class, ROS2Tools.IHMC_ROOT, this::dispatchVideoPacket);
+      ros2Node.createSubscription2(ROS2Tools.IHMC_ROOT.withType(Image32.class), this::dispatchImage32);
+      ros2Node.createSubscription2(ROS2Tools.IHMC_ROOT.withType(VideoPacket.class), this::dispatchVideoPacket);
 
       objectDetectionManager = new FusionSensorObjectDetectionManager(ros2Node, messager);
 
@@ -136,7 +135,7 @@ public class LidarImageFusionProcessorCommunicationModule
       latestBufferedImage.set(bufferedImage);
       messager.submitMessage(LidarImageFusionAPI.CameraPositionState, message.getPosition());
       messager.submitMessage(LidarImageFusionAPI.CameraOrientationState, message.getOrientation());
-      messager.submitMessage(LidarImageFusionAPI.CameraIntrinsicParametersState, toIntrinsicParameters(message.getIntrinsicParameters()));
+//      messager.submitMessage(LidarImageFusionAPI.CameraIntrinsicParametersState, toIntrinsicParameters(message.getIntrinsicParameters()));
    }
 
    public void start() throws IOException
@@ -168,20 +167,22 @@ public class LidarImageFusionProcessorCommunicationModule
       return new LidarImageFusionProcessorCommunicationModule(ros2Node, networkProvider, kryoMessager, messager);
    }
 
-   private static CameraPinholeBrown toIntrinsicParameters(IntrinsicParametersMessage message)
+   @Deprecated
+   private static Object toIntrinsicParameters(IntrinsicParametersMessage message)
    {
-      CameraPinholeBrown intrinsicParameters = new CameraPinholeBrown();
-      intrinsicParameters.width = message.getWidth();
-      intrinsicParameters.height = message.getHeight();
-      intrinsicParameters.fx = message.getFx();
-      intrinsicParameters.fy = message.getFy();
-      intrinsicParameters.skew = message.getSkew();
-      intrinsicParameters.cx = message.getCx();
-      intrinsicParameters.cy = message.getCy();
-      if (!message.getRadial().isEmpty())
-         intrinsicParameters.radial = message.getRadial().toArray();
-      intrinsicParameters.t1 = message.getT1();
-      intrinsicParameters.t2 = message.getT2();
-      return intrinsicParameters;
+//      CameraPinholeBrown intrinsicParameters = new CameraPinholeBrown();
+//      intrinsicParameters.width = message.getWidth();
+//      intrinsicParameters.height = message.getHeight();
+//      intrinsicParameters.fx = message.getFx();
+//      intrinsicParameters.fy = message.getFy();
+//      intrinsicParameters.skew = message.getSkew();
+//      intrinsicParameters.cx = message.getCx();
+//      intrinsicParameters.cy = message.getCy();
+//      if (!message.getRadial().isEmpty())
+//         intrinsicParameters.radial = message.getRadial().toArray();
+//      intrinsicParameters.t1 = message.getT1();
+//      intrinsicParameters.t2 = message.getT2();
+//      return intrinsicParameters;
+      return new Object();
    }
 }

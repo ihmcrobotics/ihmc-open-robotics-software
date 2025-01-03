@@ -212,6 +212,18 @@ public class RDXPredefinedRigidBodySceneNodeBuilder extends RDXSceneNodeBuilder<
                                                                                            sceneGraph.getCRDTInfo());
             yield new RDXPredefinedRigidBodySceneNode(rightDoorPanel, RDXBaseUI.getInstance().getPrimary3DPanel());
          }
+         case "Charge" ->
+         {
+            PredefinedRigidBodySceneNode charge = new PredefinedRigidBodySceneNode(nextID,
+                                                                                   name,
+                                                                                   sceneGraph.getIDToNodeMap(),
+                                                                                   parent.getID(),
+                                                                                   new RigidBodyTransform(),
+                                                                                   CHARGE_VISUAL_MODEL_FILE_PATH,
+                                                                                   CHARGE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
+                                                                                   sceneGraph.getCRDTInfo());
+            yield new RDXPredefinedRigidBodySceneNode(charge, RDXBaseUI.getInstance().getPrimary3DPanel());
+         }
          default -> throw new IllegalStateException("Unexpected value: " + name);
       };
    }

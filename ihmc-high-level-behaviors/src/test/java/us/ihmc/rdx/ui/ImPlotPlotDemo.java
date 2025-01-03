@@ -7,7 +7,7 @@ import us.ihmc.rdx.imgui.ImPlotIntegerPlotLine;
 import us.ihmc.rdx.imgui.ImPlotPlot;
 import us.ihmc.rdx.imgui.ImPlotDoublePlotLine;
 import us.ihmc.rdx.imgui.ImPlotPlotPanel;
-import us.ihmc.tools.time.FrequencyCalculator;
+import us.ihmc.commons.time.FrequencyCalculator;
 
 import java.util.Random;
 

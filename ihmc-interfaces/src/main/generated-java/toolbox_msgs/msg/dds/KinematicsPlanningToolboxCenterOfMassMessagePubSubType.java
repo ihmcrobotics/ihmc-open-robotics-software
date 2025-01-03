@@ -15,7 +15,7 @@ public class KinematicsPlanningToolboxCenterOfMassMessagePubSubType implements u
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "4e42c7f13073df21194ed2bfd951a4b26d174f7415cd5878aca35696c783170b";
+   		return "b3bd26b303bfb1b5859a1ac1eee847b04b0edbd55b859557e372fd2ffb92a078";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class KinematicsPlanningToolboxCenterOfMassMessagePubSubType implements u
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -76,7 +76,7 @@ public class KinematicsPlanningToolboxCenterOfMassMessagePubSubType implements u
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -98,7 +98,7 @@ public class KinematicsPlanningToolboxCenterOfMassMessagePubSubType implements u
 
    public static void write(toolbox_msgs.msg.dds.KinematicsPlanningToolboxCenterOfMassMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       if(data.getWayPointTimes().size() <= 100)
       cdr.write_type_e(data.getWayPointTimes());else
@@ -114,7 +114,7 @@ public class KinematicsPlanningToolboxCenterOfMassMessagePubSubType implements u
 
    public static void read(toolbox_msgs.msg.dds.KinematicsPlanningToolboxCenterOfMassMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       cdr.read_type_e(data.getWayPointTimes());	
       cdr.read_type_e(data.getDesiredWayPointPositionsInWorld());	
@@ -126,7 +126,7 @@ public class KinematicsPlanningToolboxCenterOfMassMessagePubSubType implements u
    @Override
    public final void serialize(toolbox_msgs.msg.dds.KinematicsPlanningToolboxCenterOfMassMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_e("way_point_times", data.getWayPointTimes());
       ser.write_type_e("desired_way_point_positions_in_world", data.getDesiredWayPointPositionsInWorld());
       ser.write_type_a("selection_matrix", new ihmc_common_msgs.msg.dds.SelectionMatrix3DMessagePubSubType(), data.getSelectionMatrix());
@@ -138,7 +138,7 @@ public class KinematicsPlanningToolboxCenterOfMassMessagePubSubType implements u
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, toolbox_msgs.msg.dds.KinematicsPlanningToolboxCenterOfMassMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       ser.read_type_e("way_point_times", data.getWayPointTimes());
       ser.read_type_e("desired_way_point_positions_in_world", data.getDesiredWayPointPositionsInWorld());
       ser.read_type_a("selection_matrix", new ihmc_common_msgs.msg.dds.SelectionMatrix3DMessagePubSubType(), data.getSelectionMatrix());

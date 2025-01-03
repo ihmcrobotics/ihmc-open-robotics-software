@@ -17,8 +17,6 @@ public class RDXAI2RNode extends RDXBehaviorTreeNode<AI2RNodeState, AI2RNodeDefi
       super(new AI2RNodeState(id, crdtInfo, saveFileDirectory));
 
       this.syncedRobot = syncedRobot;
-
-      getDefinition().setName("AI2R Node");
    }
 
    @Override

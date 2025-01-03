@@ -5,14 +5,13 @@ import controller_msgs.msg.dds.WalkingStatusMessage;
 import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.behaviors.activeMapping.ContinuousPlannerSchedulingTask.PlanningMode;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ros2.ROS2PublisherMap;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.headless.LocalizationAndMappingTask;
+import us.ihmc.perception.LocalizationAndMappingTask;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 
@@ -47,7 +46,7 @@ public class ActivePlanarMappingRemoteTask extends LocalizationAndMappingTask
       super(simpleRobotName, terrainRegionsTopic, structuralRegionsTopic, ros2Node, referenceFrames, referenceFramesUpdater, smoothing);
 
       this.walkingStatusMessage.get().setWalkingStatus(WalkingStatus.COMPLETED.toByte());
-      this.terrainPlanningDebugger = new TerrainPlanningDebugger(ros2Node, null, PlanningMode.FAST_HIKING);
+      this.terrainPlanningDebugger = new TerrainPlanningDebugger(ros2Node, null);
       this.continuousPlanningParameters = continuousPlanningParameters;
       this.swingFootPlannerParameters = robotModel.getSwingPlannerParameters();
       this.controllerFootstepDataTopic = HumanoidControllerAPI.getTopic(FootstepDataListMessage.class, robotModel.getSimpleRobotName());
@@ -93,26 +92,23 @@ public class ActivePlanarMappingRemoteTask extends LocalizationAndMappingTask
     */
    private void updateActiveMappingPlan()
    {
-      if (continuousPlanningParameters.getEnableContinuousHiking())
+      if (walkingStatusMessage.get() != null)
       {
-         if (walkingStatusMessage.get() != null)
+         if (walkingStatusMessage.get().getWalkingStatus() == WalkingStatusMessage.COMPLETED && !continuousPlanner.isPlanAvailable())
          {
-            if (walkingStatusMessage.get().getWalkingStatus() == WalkingStatusMessage.COMPLETED && !continuousPlanner.isPlanAvailable())
-            {
-               continuousPlanner.planBodyPathWithPlanarRegionMap(planarRegionMap);
-            }
+            continuousPlanner.planBodyPathWithPlanarRegionMap(planarRegionMap);
          }
-
-         if (continuousPlanner.isPlanAvailable())
-         {
-            // Publishing Plan Result
-            FootstepDataListMessage footstepDataList = continuousPlanner.getFootstepDataListMessage();
-            publisherMap.publish(controllerFootstepDataTopic, footstepDataList);
-
-            continuousPlanner.setPlanAvailable(false);
-         }
-//         configurationParameters.setActiveMapping(false);
       }
+
+      if (continuousPlanner.isPlanAvailable())
+      {
+         // Publishing Plan Result
+         FootstepDataListMessage footstepDataList = continuousPlanner.getFootstepDataListMessage();
+         publisherMap.publish(controllerFootstepDataTopic, footstepDataList);
+
+         continuousPlanner.setPlanAvailable(false);
+      }
+      //         configurationParameters.setActiveMapping(false);
    }
 
    public ContinuousPlannerForPlanarRegions getContinuousPlanner()

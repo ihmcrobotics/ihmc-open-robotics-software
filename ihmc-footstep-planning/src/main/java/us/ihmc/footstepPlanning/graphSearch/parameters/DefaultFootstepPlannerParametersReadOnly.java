@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch.parameters;
 
+import toolbox_msgs.msg.dds.FootstepPlannerParametersPacket;
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
 
 import static us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters.*;
@@ -33,7 +34,8 @@ public interface DefaultFootstepPlannerParametersReadOnly extends StoredProperty
    }
 
    /**
-    * If true, enables a mask that reduces the number of calculated steps away from the ideal step. See {@link us.ihmc.footstepPlanning.graphSearch.stepExpansion.ParameterBasedStepExpansion} for more information.
+    * If true, enables a mask that reduces the number of calculated steps away from the ideal step. See
+    * {@link us.ihmc.footstepPlanning.graphSearch.stepExpansion.ParameterBasedStepExpansion} for more information.
     */
    default boolean getEnableExpansionMask()
    {
@@ -538,13 +540,13 @@ public interface DefaultFootstepPlannerParametersReadOnly extends StoredProperty
 
    /**
     * Enables a collision check that is lighter-weight than a bounding box. Draws a planar region by vertically extruding the line
-    * between consecutive steps and invalidates steps with collisions, see: {@link us.ihmc.footstepPlanning.graphSearch.stepChecking.ObstacleBetweenStepsChecker}
+    * between consecutive steps and invalidates steps with collisions, see:
+    * {@link us.ihmc.footstepPlanning.graphSearch.stepChecking.ObstacleBetweenStepsChecker}
     */
    default boolean getCheckForPathCollisions()
    {
       return get(checkForPathCollisions);
    }
-
 
    /**
     * The planner can be setup to avoid footsteps near the bottom of "cliffs". When the footstep has a planar region
@@ -627,5 +629,86 @@ public interface DefaultFootstepPlannerParametersReadOnly extends StoredProperty
    default double getCliffHeightThreshold()
    {
       return get(cliffHeightThreshold);
+   }
+
+   default FootstepPlannerParametersPacket getAsPacket()
+   {
+      FootstepPlannerParametersPacket packet = new FootstepPlannerParametersPacket();
+
+      packet.setAStarHeuristicsWeight(getAStarHeuristicsWeight());
+      packet.setMaxBranchFactor(getMaxBranchFactor());
+      packet.setEnableExpansionMask(getEnableExpansionMask());
+      packet.setUseReachabilityMap(getUseReachabilityMap());
+      packet.setSolutionQualityThreshold(getSolutionQualityThreshold());
+
+      packet.setIdealFootstepWidth(getIdealFootstepWidth());
+      packet.setIdealFootstepLength(getIdealFootstepLength());
+      packet.setIdealSideStepWidth(getIdealSideStepWidth());
+      packet.setIdealBackStepLength(getIdealBackStepLength());
+
+      packet.setMinFootholdPercent(getMinFootholdPercent());
+      packet.setMinClearanceFromStance(getMinClearanceFromStance());
+      packet.setMinSurfaceIncline(getMinSurfaceIncline());
+      packet.setMinStepWidth(getMinStepWidth());
+      packet.setMinStepLength(getMinStepLength());
+      packet.setMinStepYaw(getMinStepYaw());
+      packet.setMaxStepWidth(getMaxStepWidth());
+      packet.setMaxStepReach(getMaxStepReach());
+      packet.setMaxStepYaw(getMaxStepYaw());
+      packet.setMaxStepZ(getMaxStepZ());
+      packet.setMaxSwingZ(getMaxSwingZ());
+      packet.setMaxSwingReach(getMaxSwingReach());
+
+      packet.setCostPerStep(getCostPerStep());
+      packet.setForwardWeight(getForwardWeight());
+      packet.setLateralWeight(getLateralWeight());
+      packet.setStepUpWeight(getStepUpWeight());
+      packet.setStepDownWeight(getStepDownWeight());
+      packet.setYawWeight(getYawWeight());
+      packet.setRollWeight(getRollWeight());
+      packet.setPitchWeight(getPitchWeight());
+      packet.setFootholdAreaWeight(getFootholdAreaWeight());
+      packet.setRmsErrorThreshold(getRMSErrorThreshold());
+      packet.setRmsErrorCost(getRMSErrorCost());
+      packet.setRmsMinErrorToPenalize(getRMSMinErrorToPenalize());
+      packet.setHeightMapSnapThreshold(getHeightMapSnapThreshold());
+      packet.setReferencePlanAlpha(getReferencePlanAlpha());
+
+      packet.setCheckForBodyBoxCollisions(getCheckForBodyBoxCollisions());
+      packet.setBodyBoxWidth(getBodyBoxWidth());
+      packet.setBodyBoxHeight(getBodyBoxHeight());
+      packet.setBodyBoxDepth(getBodyBoxDepth());
+      packet.setBodyBoxBaseX(getBodyBoxBaseX());
+      packet.setBodyBoxBaseY(getBodyBoxBaseY());
+      packet.setBodyBoxBaseZ(getBodyBoxBaseZ());
+      packet.setIntermediateBodyBoxChecks(getIntermediateBodyBoxChecks());
+
+      packet.setEnableShinCollisionCheck(getEnableShinCollisionCheck());
+      packet.setShinLength(getShinLength());
+      packet.setShinToeClearance(getShinToeClearance());
+      packet.setShinHeelClearance(getShinHeelClearance());
+      packet.setShinHeightOffset(getShinHeightOffset());
+
+      packet.setWiggleInsideDeltaTarget(getWiggleInsideDeltaTarget());
+      packet.setWiggleInsideDeltaMinimum(getWiggleInsideDeltaMinimum());
+      packet.setWiggleWhilePlanning(getWiggleWhilePlanning());
+      packet.setEnableConcaveHullWiggler(getEnableConcaveHullWiggler());
+      packet.setMaximumXyWiggleDistance(getMaxXYWiggleDistance());
+      packet.setMaximumYawWiggle(getMaxYawWiggle());
+      packet.setMaximumZPenetrationOnValleyRegions(getMaxZPenetrationOnValleyRegions());
+      packet.setMaximumSnapHeight(getMaximumSnapHeight());
+      packet.setFinalTurnProximity(getFinalTurnProximity());
+      packet.setDistanceFromPathTolerance(getDistanceFromPathTolerance());
+      packet.setDeltaYawFromReferenceTolerance(getDeltaYawFromReferenceTolerance());
+
+      packet.setCheckForPathCollisions(getCheckForPathCollisions());
+      packet.setCliffBottomHeightToAvoid(getCliffBottomHeightToAvoid());
+      packet.setMinDistanceFromCliffBottoms(getMinDistanceFromCliffBottoms());
+      packet.setCliffTopHeightToAvoid(getCliffTopHeightToAvoid());
+      packet.setMinDistanceFromCliffTops(getMinDistanceFromCliffTops());
+      packet.setScaledFootPolygonPercentage(getScaledFootPolygonPercentage());
+      packet.setCliffHeightThreshold(getCliffHeightThreshold());
+
+      return packet;
    }
 }

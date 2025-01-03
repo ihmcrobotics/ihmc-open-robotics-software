@@ -7,9 +7,8 @@ import us.ihmc.avatar.sakeGripper.SakeHandParameters;
 import us.ihmc.avatar.sakeGripper.SakeHandPreset;
 import us.ihmc.behaviors.sequence.ActionNodeDefinition;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.communication.crdt.CRDTUnidirectionalDouble;
-import us.ihmc.communication.crdt.CRDTUnidirectionalEnumField;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.communication.crdt.CRDTBidirectionalDouble;
+import us.ihmc.communication.crdt.CRDTBidirectionalEnumField;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
@@ -20,11 +19,11 @@ public class SakeHandCommandActionDefinition extends ActionNodeDefinition
    /** We usually want to allow a bunch of compliance. */
    public static final double DEFAULT_HAND_ANGLE_COMPLETION_TOLERANCE = Math.toRadians(40.0);
 
-   private final CRDTUnidirectionalEnumField<RobotSide> side;
-   private final CRDTUnidirectionalDouble handOpenAngle;
-   private final CRDTUnidirectionalDouble initialSatisfactionHandAngleTolerance;
-   private final CRDTUnidirectionalDouble completionHandAngleTolerance;
-   private final CRDTUnidirectionalDouble fingertipGripForceLimit;
+   private final CRDTBidirectionalEnumField<RobotSide> side;
+   private final CRDTBidirectionalDouble handOpenAngle;
+   private final CRDTBidirectionalDouble initialSatisfactionHandAngleTolerance;
+   private final CRDTBidirectionalDouble completionHandAngleTolerance;
+   private final CRDTBidirectionalDouble fingertipGripForceLimit;
 
    // On disk fields
    private RobotSide onDiskSide;
@@ -37,13 +36,11 @@ public class SakeHandCommandActionDefinition extends ActionNodeDefinition
    {
       super(crdtInfo, saveFileDirectory);
 
-      side = new CRDTUnidirectionalEnumField<>(ROS2ActorDesignation.OPERATOR, this, RobotSide.LEFT);
-      handOpenAngle = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, SakeHandPreset.OPEN.getHandOpenAngle());
-      initialSatisfactionHandAngleTolerance = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR,
-                                                                           this,
-                                                                           DEFAULT_HAND_ANGLE_INITIAL_SATISFACTION_TOLERANCE);
-      completionHandAngleTolerance = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, DEFAULT_HAND_ANGLE_COMPLETION_TOLERANCE);
-      fingertipGripForceLimit = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, SakeHandParameters.FINGERTIP_GRIP_FORCE_SAFE);
+      side = new CRDTBidirectionalEnumField<>(this, RobotSide.LEFT);
+      handOpenAngle = new CRDTBidirectionalDouble(this, SakeHandPreset.OPEN.getHandOpenAngle());
+      initialSatisfactionHandAngleTolerance = new CRDTBidirectionalDouble(this, DEFAULT_HAND_ANGLE_INITIAL_SATISFACTION_TOLERANCE);
+      completionHandAngleTolerance = new CRDTBidirectionalDouble(this, DEFAULT_HAND_ANGLE_COMPLETION_TOLERANCE);
+      fingertipGripForceLimit = new CRDTBidirectionalDouble(this, SakeHandParameters.FINGERTIP_GRIP_FORCE_SAFE);
    }
 
    @Override

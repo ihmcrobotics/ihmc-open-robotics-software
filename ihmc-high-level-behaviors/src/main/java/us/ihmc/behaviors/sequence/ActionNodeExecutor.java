@@ -14,6 +14,11 @@ public abstract class ActionNodeExecutor<S extends ActionNodeState<D>,
       super(state);
    }
 
+   public String getCantExecuteMessage()
+   {
+      return "";
+   }
+
    /** Trigger the action to begin executing. Called once per execution. */
    public void triggerActionExecution()
    {

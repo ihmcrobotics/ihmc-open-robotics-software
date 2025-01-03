@@ -15,7 +15,7 @@ public class FisheyePacketPubSubType implements us.ihmc.pubsub.TopicDataType<per
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "b8b166619c7383eafa06c618caca3445319fb54ddc90cc0e2e44b05bd3bf3eac";
+   		return "9e05981d508e084f80f1498e2194f165bfccd08cd465717cc8db66062a2abcad";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class FisheyePacketPubSubType implements us.ihmc.pubsub.TopicDataType<per
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += perception_msgs.msg.dds.VideoPacketPubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -69,7 +69,7 @@ public class FisheyePacketPubSubType implements us.ihmc.pubsub.TopicDataType<per
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += perception_msgs.msg.dds.VideoPacketPubSubType.getCdrSerializedSize(data.getVideoPacket(), current_alignment);
@@ -80,14 +80,14 @@ public class FisheyePacketPubSubType implements us.ihmc.pubsub.TopicDataType<per
 
    public static void write(perception_msgs.msg.dds.FisheyePacket data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       perception_msgs.msg.dds.VideoPacketPubSubType.write(data.getVideoPacket(), cdr);
    }
 
    public static void read(perception_msgs.msg.dds.FisheyePacket data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       perception_msgs.msg.dds.VideoPacketPubSubType.read(data.getVideoPacket(), cdr);	
 
@@ -96,7 +96,7 @@ public class FisheyePacketPubSubType implements us.ihmc.pubsub.TopicDataType<per
    @Override
    public final void serialize(perception_msgs.msg.dds.FisheyePacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_a("video_packet", new perception_msgs.msg.dds.VideoPacketPubSubType(), data.getVideoPacket());
 
    }
@@ -104,7 +104,7 @@ public class FisheyePacketPubSubType implements us.ihmc.pubsub.TopicDataType<per
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.FisheyePacket data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       ser.read_type_a("video_packet", new perception_msgs.msg.dds.VideoPacketPubSubType(), data.getVideoPacket());
 
    }

@@ -15,7 +15,7 @@ public class ReachingManifoldMessagePubSubType implements us.ihmc.pubsub.TopicDa
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "4969da9998fca7057eb8cbc32f4e3b189fd36b0c44068ea4b65681ac4bf82e55";
+   		return "3d7136b7b8f5fe4efec2347e4da9ac634da23b6f4593094188d5e8c9490ac891";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class ReachingManifoldMessagePubSubType implements us.ihmc.pubsub.TopicDa
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -79,7 +79,7 @@ public class ReachingManifoldMessagePubSubType implements us.ihmc.pubsub.TopicDa
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -107,7 +107,7 @@ public class ReachingManifoldMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
    public static void write(toolbox_msgs.msg.dds.ReachingManifoldMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_2(data.getEndEffectorHashCode());
 
@@ -129,7 +129,7 @@ public class ReachingManifoldMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
    public static void read(toolbox_msgs.msg.dds.ReachingManifoldMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setEndEffectorHashCode(cdr.read_type_2());
       	
@@ -144,7 +144,7 @@ public class ReachingManifoldMessagePubSubType implements us.ihmc.pubsub.TopicDa
    @Override
    public final void serialize(toolbox_msgs.msg.dds.ReachingManifoldMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_2("end_effector_hash_code", data.getEndEffectorHashCode());
       ser.write_type_a("manifold_origin_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getManifoldOriginPosition());
 
@@ -158,7 +158,7 @@ public class ReachingManifoldMessagePubSubType implements us.ihmc.pubsub.TopicDa
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, toolbox_msgs.msg.dds.ReachingManifoldMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setEndEffectorHashCode(ser.read_type_2("end_effector_hash_code"));
       ser.read_type_a("manifold_origin_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getManifoldOriginPosition());
 

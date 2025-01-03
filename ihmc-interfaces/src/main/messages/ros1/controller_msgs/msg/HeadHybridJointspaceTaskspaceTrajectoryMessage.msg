@@ -3,7 +3,7 @@
 # to the desired orientation and joint angles while going through the specified trajectory points.
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # The taskspace trajectory information.
 ihmc_common_msgs/SO3TrajectoryMessage taskspace_trajectory_message

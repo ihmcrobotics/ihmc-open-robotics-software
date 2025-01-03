@@ -1,15 +1,13 @@
 package us.ihmc.atlas.sensors;
 
-import static us.ihmc.pubsub.DomainFactory.PubSubImplementation.FAST_RTPS;
-
-import java.net.URI;
-
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.modules.RosModule;
 import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSupportPlanarRegionPublisher;
 import us.ihmc.communication.configuration.NetworkParameters;
+
+import java.net.URI;
 
 public class AtlasSensorSuiteLauncher
 {
@@ -21,9 +19,9 @@ public class AtlasSensorSuiteLauncher
       URI rosCoreURI = NetworkParameters.getROSURI();
       atlasSensorSuiteManager.initializePhysicalSensors(rosCoreURI);
 
-      new RosModule(atlasRobotModel, rosCoreURI, null, FAST_RTPS);
+      new RosModule(atlasRobotModel, rosCoreURI, null);
 
-      new BipedalSupportPlanarRegionPublisher(atlasRobotModel, FAST_RTPS).start();
+      new BipedalSupportPlanarRegionPublisher(atlasRobotModel).start();
 
       atlasSensorSuiteManager.connect();
    }

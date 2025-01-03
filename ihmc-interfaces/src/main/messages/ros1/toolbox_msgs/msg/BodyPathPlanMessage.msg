@@ -15,7 +15,7 @@ int8 FOOTSTEP_PLANNING_RESULT_PLANNER_FAILED=5
 int32 NO_PLAN_ID=-1
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # Field default value 255
 int8 footstep_planning_result

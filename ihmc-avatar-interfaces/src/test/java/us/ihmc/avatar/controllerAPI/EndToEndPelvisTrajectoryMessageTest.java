@@ -338,7 +338,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
    }
 
    @Test
-   public void testPelvisTranslationContinuityForResetting() throws Exception
+   public void testICPTranslationContinuity() throws Exception
    {
       CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       Random random = new Random(564574L);

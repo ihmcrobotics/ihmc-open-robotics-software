@@ -33,6 +33,11 @@ public enum CameraModel
       return (byte) ordinal();
    }
 
+   public static CameraModel fromByte(byte ordinalByte)
+   {
+      return values[ordinalByte];
+   }
+
    public void packMessageFormat(ImageMessage imageMessage)
    {
       imageMessage.setCameraModel((byte) ordinal());

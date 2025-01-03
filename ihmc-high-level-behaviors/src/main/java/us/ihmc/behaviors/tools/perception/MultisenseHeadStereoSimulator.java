@@ -5,7 +5,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.partNames.NeckJointName;
-import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Node;
 
 import java.util.function.Supplier;
 
@@ -19,7 +19,7 @@ public class MultisenseHeadStereoSimulator implements Supplier<PlanarRegionsList
 
    public MultisenseHeadStereoSimulator(PlanarRegionsList map,
                                         DRCRobotModel robotModel,
-                                        ROS2NodeInterface ros2Node,
+                                        ROS2Node ros2Node,
                                         double range,
                                         int sphereScanSize)
    {
