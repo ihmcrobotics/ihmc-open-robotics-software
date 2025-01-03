@@ -18,26 +18,26 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
           * Used to minimize bandwidth, nodes that are send
           * without their full data.
           */
-   public static final byte PARTIAL_DATA = (byte) 255;
-   public static final byte ROOT_NODE = (byte) 0;
-   public static final byte BASIC_NODE = (byte) 1;
-   public static final byte AI2R_NODE = (byte) 2;
-   public static final byte ACTION_SEQUENCE = (byte) 3;
-   public static final byte FALLBACK_NODE = (byte) 4;
-   public static final byte CONDITION_NODE = (byte) 5;
-   public static final byte GOTO_NODE = (byte) 6;
-   public static final byte DOOR_TRAVERSAL = (byte) 7;
-   public static final byte TRASH_CAN_INTERACTION = (byte) 8;
-   public static final byte BUILDING_EXPLORATION = (byte) 9;
-   public static final byte CHEST_ORIENTATION_ACTION = (byte) 10;
-   public static final byte FOOTSTEP_PLAN_ACTION = (byte) 11;
-   public static final byte SAKE_HAND_COMMAND_ACTION = (byte) 12;
-   public static final byte HAND_POSE_ACTION = (byte) 13;
-   public static final byte HAND_WRENCH_ACTION = (byte) 14;
-   public static final byte SCREW_PRIMITIVE_ACTION = (byte) 15;
-   public static final byte PELVIS_HEIGHT_ORIENTATION_ACTION = (byte) 16;
-   public static final byte WAIT_DURATION_ACTION = (byte) 17;
-   public static final byte FOOT_POSE_ACTION = (byte) 18;
+   public static final byte PARTIAL_DATA = (byte) 0;
+   public static final byte ROOT_NODE = (byte) 1;
+   public static final byte BASIC_NODE = (byte) 2;
+   public static final byte AI2R_NODE = (byte) 3;
+   public static final byte ACTION_SEQUENCE = (byte) 4;
+   public static final byte FALLBACK_NODE = (byte) 5;
+   public static final byte CONDITION_NODE = (byte) 6;
+   public static final byte GOTO_NODE = (byte) 7;
+   public static final byte DOOR_TRAVERSAL = (byte) 8;
+   public static final byte TRASH_CAN_INTERACTION = (byte) 9;
+   public static final byte BUILDING_EXPLORATION = (byte) 10;
+   public static final byte CHEST_ORIENTATION_ACTION = (byte) 11;
+   public static final byte FOOTSTEP_PLAN_ACTION = (byte) 12;
+   public static final byte SAKE_HAND_COMMAND_ACTION = (byte) 13;
+   public static final byte HAND_POSE_ACTION = (byte) 14;
+   public static final byte HAND_WRENCH_ACTION = (byte) 15;
+   public static final byte SCREW_PRIMITIVE_ACTION = (byte) 16;
+   public static final byte PELVIS_HEIGHT_ORIENTATION_ACTION = (byte) 17;
+   public static final byte WAIT_DURATION_ACTION = (byte) 18;
+   public static final byte FOOT_POSE_ACTION = (byte) 19;
    /**
             * Monotonically increasing message ID that matches the CRDTInfo update number
             */

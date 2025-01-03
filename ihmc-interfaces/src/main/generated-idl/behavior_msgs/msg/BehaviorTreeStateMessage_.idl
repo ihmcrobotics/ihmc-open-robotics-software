@@ -32,64 +32,64 @@ module behavior_msgs
        * without their full data.
        */
       const octet PARTIAL_DATA =
-      255;
-
-      const octet ROOT_NODE =
       0;
 
-      const octet BASIC_NODE =
+      const octet ROOT_NODE =
       1;
 
-      const octet AI2R_NODE =
+      const octet BASIC_NODE =
       2;
 
-      const octet ACTION_SEQUENCE =
+      const octet AI2R_NODE =
       3;
 
-      const octet FALLBACK_NODE =
+      const octet ACTION_SEQUENCE =
       4;
 
-      const octet CONDITION_NODE =
+      const octet FALLBACK_NODE =
       5;
 
-      const octet GOTO_NODE =
+      const octet CONDITION_NODE =
       6;
 
-      const octet DOOR_TRAVERSAL =
+      const octet GOTO_NODE =
       7;
 
-      const octet TRASH_CAN_INTERACTION =
+      const octet DOOR_TRAVERSAL =
       8;
 
-      const octet BUILDING_EXPLORATION =
+      const octet TRASH_CAN_INTERACTION =
       9;
 
-      const octet CHEST_ORIENTATION_ACTION =
+      const octet BUILDING_EXPLORATION =
       10;
 
-      const octet FOOTSTEP_PLAN_ACTION =
+      const octet CHEST_ORIENTATION_ACTION =
       11;
 
-      const octet SAKE_HAND_COMMAND_ACTION =
+      const octet FOOTSTEP_PLAN_ACTION =
       12;
 
-      const octet HAND_POSE_ACTION =
+      const octet SAKE_HAND_COMMAND_ACTION =
       13;
 
-      const octet HAND_WRENCH_ACTION =
+      const octet HAND_POSE_ACTION =
       14;
 
-      const octet SCREW_PRIMITIVE_ACTION =
+      const octet HAND_WRENCH_ACTION =
       15;
 
-      const octet PELVIS_HEIGHT_ORIENTATION_ACTION =
+      const octet SCREW_PRIMITIVE_ACTION =
       16;
 
-      const octet WAIT_DURATION_ACTION =
+      const octet PELVIS_HEIGHT_ORIENTATION_ACTION =
       17;
 
-      const octet FOOT_POSE_ACTION =
+      const octet WAIT_DURATION_ACTION =
       18;
+
+      const octet FOOT_POSE_ACTION =
+      19;
 
 
       /**
