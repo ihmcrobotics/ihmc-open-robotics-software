@@ -8,7 +8,6 @@ import imgui.type.ImBoolean;
 import org.lwjgl.openvr.InputDigitalActionData;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxInitialConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
@@ -215,7 +214,7 @@ public class RDXVRKinematicsStreamingMode
          parameters.setInputPoseCorrectionDuration(0.05); // Need to send inputs at 30Hz.
          parameters.setInputVelocityRawAlpha(0.65); // TODO This prob can be 1.0, afraid of overshoots.
          parameters.setInputStateEstimatorType(KinematicsStreamingToolboxParameters.InputStateEstimatorType.FBC_STYLE);
-         parameters.setUseBBXInputFilter(false);
+         parameters.setUseBBXInputFilter(true);
          parameters.setInputBBXFilterSize(2.0, 2.8, 2.6);
          parameters.setInputBBXFilterCenter(0.4, 0.0, 1.25);
          parameters.setOutputLPFBreakFrequency(10.0);
@@ -339,32 +338,7 @@ public class RDXVRKinematicsStreamingMode
             LogTools.warn("Reinitializing toolbox. Forcing initial lower-body IK configuration to current robot configuration");
             if (enabled.get())
             {
-               sleepToolbox();
-               // Update initial configuration of KST
-               KinematicsToolboxInitialConfigurationMessage initialConfigMessage = KinematicsToolboxMessageFactory.initialConfigurationFromFullRobotModel(
-                       syncedRobot.getFullRobotModel());
-               List<OneDoFJointBasics> oneDoFJoints = Arrays.asList(syncedRobot.getFullRobotModel().getOneDoFJoints());
-               for (RobotSide robotSide : RobotSide.values)
-               {
-                  List<ArmJointName> armJointNames = Arrays.asList(ArmJointName.SHOULDER_PITCH, ArmJointName.SHOULDER_ROLL, ArmJointName.SHOULDER_YAW,
-                                                                   ArmJointName.ELBOW_PITCH,
-                                                                   ArmJointName.WRIST_YAW, ArmJointName.WRIST_ROLL, ArmJointName.GRIPPER_YAW);
-                  List<Integer> armIndices = armJointNames.stream()
-                                                          .map(jointName -> oneDoFJoints.indexOf(syncedRobot.getFullRobotModel().getArmJoint(robotSide, jointName)))
-                                                          .toList();
-                  for (int i=0; i < armJointNames.size(); i++)
-                  {
-                     if (armIndices.get(i) != -1)
-                     {
-                        initialConfigMessage.getInitialJointAngles().set(armIndices.get(i), retargetingParameters.getArmHomePoint(robotSide, armJointNames.get(i)));
-                     }
-                  }
-               }
-               ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputStreamingInitialConfigurationTopic(syncedRobot.getRobotModel()
-                       .getSimpleRobotName()), initialConfigMessage);
-               wakeUpToolbox();
-               reinitializeToolbox();
-               wakeUpToolbox();
+               reinitializeToolboxRobotConfiguration();
             }
          }
       });
@@ -846,29 +820,7 @@ public class RDXVRKinematicsStreamingMode
             wakeUpToolbox();
          else
          {
-            // Update initial configuration of KST
-            KinematicsToolboxInitialConfigurationMessage initialConfigMessage = KinematicsToolboxMessageFactory.initialConfigurationFromFullRobotModel(
-                    syncedRobot.getFullRobotModel());
-            List<OneDoFJointBasics> oneDoFJoints = Arrays.asList(syncedRobot.getFullRobotModel().getOneDoFJoints());
-
-            for (RobotSide robotSide : RobotSide.values)
-            {
-               int shyIndex = oneDoFJoints.indexOf(syncedRobot.getFullRobotModel().getArmJoint(robotSide, ArmJointName.SHOULDER_PITCH));
-               int shxIndex = oneDoFJoints.indexOf(syncedRobot.getFullRobotModel().getArmJoint(robotSide, ArmJointName.SHOULDER_ROLL));
-               int shzIndex = oneDoFJoints.indexOf(syncedRobot.getFullRobotModel().getArmJoint(robotSide, ArmJointName.SHOULDER_YAW));
-               int elyIndex = oneDoFJoints.indexOf(syncedRobot.getFullRobotModel().getArmJoint(robotSide, ArmJointName.ELBOW_PITCH));
-
-               initialConfigMessage.getInitialJointAngles().set(shyIndex, -0.5f);
-               initialConfigMessage.getInitialJointAngles().set(shxIndex, robotSide.negateIfRightSide(-0.3f));
-               initialConfigMessage.getInitialJointAngles().set(shzIndex, robotSide.negateIfRightSide(-0.5f));
-               initialConfigMessage.getInitialJointAngles().set(elyIndex, -2.2f);
-            }
-
-            ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputStreamingInitialConfigurationTopic(syncedRobot.getRobotModel()
-                    .getSimpleRobotName()), initialConfigMessage);
-            wakeUpToolbox();
-            reinitializeToolbox();
-            wakeUpToolbox();
+            reinitializeToolboxRobotConfiguration();
          }
          kinematicsRecorder.setReplay(false); // Check no concurrency replay and streaming
          initialPelvisFrame = null;
@@ -895,6 +847,40 @@ public class RDXVRKinematicsStreamingMode
 
       if (enabled != this.enabled.get())
          this.enabled.set(enabled);
+   }
+
+   private void reinitializeToolboxRobotConfiguration()
+   {
+      sleepToolbox();
+      // Update initial configuration of KST
+      KinematicsToolboxInitialConfigurationMessage initialConfigMessage = KinematicsToolboxMessageFactory.initialConfigurationFromFullRobotModel(syncedRobot.getFullRobotModel());
+      List<OneDoFJointBasics> oneDoFJoints = Arrays.asList(syncedRobot.getFullRobotModel().getOneDoFJoints());
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         List<ArmJointName> armJointNames = Arrays.asList(ArmJointName.SHOULDER_PITCH,
+                                                          ArmJointName.SHOULDER_ROLL,
+                                                          ArmJointName.SHOULDER_YAW,
+                                                          ArmJointName.ELBOW_PITCH,
+                                                          ArmJointName.WRIST_YAW,
+                                                          ArmJointName.WRIST_ROLL,
+                                                          ArmJointName.GRIPPER_YAW);
+         List<Integer> armIndices = armJointNames.stream()
+                                                 .map(jointName -> oneDoFJoints.indexOf(syncedRobot.getFullRobotModel().getArmJoint(robotSide, jointName)))
+                                                 .toList();
+         for (int i = 0; i < armJointNames.size(); i++)
+         {
+            if (armIndices.get(i) != -1)
+            {
+               initialConfigMessage.getInitialJointAngles().set(armIndices.get(i), retargetingParameters.getArmHomePoint(robotSide, armJointNames.get(i)));
+            }
+         }
+      }
+      ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputStreamingInitialConfigurationTopic(syncedRobot.getRobotModel()
+                                                                                                                          .getSimpleRobotName()),
+                                                                                                                           initialConfigMessage);
+      wakeUpToolbox();
+      reinitializeToolbox();
+      wakeUpToolbox();
    }
 
    private void reinitializeToolbox()
