@@ -56,10 +56,4 @@ public class CRDTInfo
    {
       return peerClockEstimator;
    }
-
-   /** Pass null in the constructor when you're testing or simulating on a single machine. */
-   public boolean isMultiMachineNetwork()
-   {
-      return peerClockEstimator != null;
-   }
 }
