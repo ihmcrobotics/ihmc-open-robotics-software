@@ -199,16 +199,14 @@ public class ROS2BehaviorTreeSubscription<HLT extends BehaviorTreeNodeHighLayer<
                subscriptionNode.getPackedType(),
                subscriptionNode.getDefinitionClass().getSimpleName(),
                behaviorTree.getCRDTInfo().getActorDesignation().name()));
+         localNode = behaviorTree.getNodeBuilder().createNode(subscriptionNode.getDefinitionClass(),
+                                                              nodeID,
+                                                              behaviorTree.getCRDTInfo(),
+                                                              behaviorTree.getSaveFileDirectory());
          if (subscriptionNode.getPackedType() == BehaviorTreeStateMessage.PARTIAL_DATA)
          {
-            LogTools.error("Cannot replicate node from partial data!");
-         }
-         else
-         {
-            localNode = behaviorTree.getNodeBuilder().createNode(subscriptionNode.getDefinitionClass(),
-                                                                 nodeID,
-                                                                 behaviorTree.getCRDTInfo(),
-                                                                 behaviorTree.getSaveFileDirectory());
+            LogTools.error("Cannot replicate node fully from partial data!");
+            localNode.getDefinition().requestSendFullData();
          }
       }
 
