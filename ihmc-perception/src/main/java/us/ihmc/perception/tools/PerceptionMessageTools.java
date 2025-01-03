@@ -263,12 +263,12 @@ public class PerceptionMessageTools
       floatPointer.put(startIndex + 3, (float) quaternion.getS());
    }
 
-   public static void convertToHeightMapData(Mat heightMapPointer, HeightMapData heightMapData, Point3D gridCenter, float widthInMeters, float cellSizeInMeters)
+   public static void convertToHeightMapData(Mat heightMapPointer, HeightMapData heightMapDataToPack, Point3D gridCenter, float widthInMeters, float cellSizeInMeters)
    {
       int centerIndex = HeightMapTools.computeCenterIndex(widthInMeters, cellSizeInMeters);
       int cellsPerAxis = 2 * centerIndex + 1;
 
-      heightMapData.setGridCenter(gridCenter.getX(), gridCenter.getY());
+      heightMapDataToPack.setGridCenter(gridCenter.getX(), gridCenter.getY());
 
       for (int xIndex = 0; xIndex < cellsPerAxis; xIndex++)
       {
@@ -279,7 +279,7 @@ public class PerceptionMessageTools
                                - (float) RapidHeightMapExtractor.getHeightMapParameters().getHeightOffset();
 
             int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
-            heightMapData.setHeightAt(key, cellHeight);
+            heightMapDataToPack.setHeightAt(key, cellHeight);
          }
       }
    }

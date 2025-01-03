@@ -22,7 +22,7 @@ public class RealsenseImageSensor extends ImageSensor
    private static final double OUTPUT_FREQUENCY = 20.0;
 
    private final RealsenseConfiguration realsenseConfiguration;
-   private final RealsenseDeviceManager realsenseManager;
+   private final RealsenseDeviceManager realsenseManager = new RealsenseDeviceManager();
    private RealsenseDevice realsense = null;
 
    private final RawImage[] grabbedImages = new RawImage[OUTPUT_IMAGE_COUNT];
@@ -33,11 +33,10 @@ public class RealsenseImageSensor extends ImageSensor
    private final FramePose3D colorPose = new FramePose3D();
    private final Throttler grabThrottler = new Throttler().setFrequency(OUTPUT_FREQUENCY);
 
-   public RealsenseImageSensor(RealsenseDeviceManager realsenseManager, RealsenseConfiguration realsenseConfiguration)
+   public RealsenseImageSensor(RealsenseConfiguration realsenseConfiguration)
    {
       super(realsenseConfiguration.name().split("_")[0]);
 
-      this.realsenseManager = realsenseManager;
       this.realsenseConfiguration = realsenseConfiguration;
    }
 
@@ -106,11 +105,16 @@ public class RealsenseImageSensor extends ImageSensor
       // Update grabbed images
       synchronized (grabbedImages)
       {
+         if (grabbedImages[COLOR_IMAGE_KEY] != null)
+            grabbedImages[COLOR_IMAGE_KEY].release();
          grabbedImages[COLOR_IMAGE_KEY] = RawImage.createWithBGRImage(bgrImage,
                                                                       realsense.getColorCameraIntrinsics(),
                                                                       new FramePose3D(colorPose),
                                                                       grabTime,
                                                                       grabSequenceNumber);
+
+         if (grabbedImages[DEPTH_IMAGE_KEY] != null)
+            grabbedImages[DEPTH_IMAGE_KEY].release();
          grabbedImages[DEPTH_IMAGE_KEY] = RawImage.createWith16BitDepth(depthImage,
                                                                         realsense.getDepthCameraIntrinsics(),
                                                                         new FramePose3D(depthPose),
@@ -128,7 +132,10 @@ public class RealsenseImageSensor extends ImageSensor
    {
       synchronized (grabbedImages)
       {
-         return new RawImage(grabbedImages[imageKey]);
+         if (grabbedImages[imageKey] == null)
+            return null;
+
+         return grabbedImages[imageKey].get();
       }
    }
 
@@ -146,6 +153,8 @@ public class RealsenseImageSensor extends ImageSensor
       // Close the camera
       if (realsense != null && realsense.getDevice() != null)
          realsense.deleteDevice();
+
+      realsenseManager.deleteContext();
 
       System.out.println("Closed " + getClass().getSimpleName());
    }
