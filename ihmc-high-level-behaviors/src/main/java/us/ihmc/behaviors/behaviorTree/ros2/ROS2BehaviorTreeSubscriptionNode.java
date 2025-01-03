@@ -8,6 +8,7 @@ import java.util.List;
 
 public class ROS2BehaviorTreeSubscriptionNode
 {
+   private long sequenceId;
    private byte packedMessageType;
    private Class<?> nodeDefinitionClass;
    private BehaviorTreeNodeDefinitionMessage behaviorTreeNodeDefinitionMessage;
@@ -35,6 +36,7 @@ public class ROS2BehaviorTreeSubscriptionNode
 
    public void clear()
    {
+      sequenceId = -1;
       packedMessageType = -1;
       nodeDefinitionClass = null;
       behaviorTreeNodeDefinitionMessage = null;
@@ -59,6 +61,16 @@ public class ROS2BehaviorTreeSubscriptionNode
       waitDurationActionStateMessage = null;
       footPoseActionStateMessage = null;
       children.clear();
+   }
+
+   public long getSequenceId()
+   {
+      return sequenceId;
+   }
+
+   public void setSequenceId(long sequenceId)
+   {
+      this.sequenceId = sequenceId;
    }
 
    public byte getPackedType()

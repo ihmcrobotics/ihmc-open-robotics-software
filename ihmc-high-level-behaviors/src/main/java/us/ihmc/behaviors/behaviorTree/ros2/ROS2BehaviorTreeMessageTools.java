@@ -56,10 +56,12 @@ public class ROS2BehaviorTreeMessageTools
       if (modificationOutgoing || hasStatus)
       {
          if (modificationOutgoing)
-            LogTools.info("%s: Packing full data: %s outgoing = %b  status = %b".formatted(crdtInfo.getActorDesignation().name(),
-                                                                                           nodeState.getDefinition().getName(),
-                                                                                           modificationOutgoing,
-                                                                                           hasStatus));
+            LogTools.info("%s: Seq # %d Packing full data: %s outgoing = %b  status = %b"
+                                .formatted(crdtInfo.getActorDesignation().name(),
+                                           treeStateMessage.getSequenceId(),
+                                           nodeState.getDefinition().getName(),
+                                           modificationOutgoing,
+                                           hasStatus));
          if (nodeState instanceof BehaviorTreeRootNodeState rootNodeState)
          {
             treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.ROOT_NODE);
