@@ -16,17 +16,21 @@ import java.time.Instant;
 public class LatestTimestampModifiable
 {
    private final CRDTInfo crdtInfo;
-   private final Guid latestModifier = new Guid();
+   private String ourName = "unamed";
+
+   private String latestModifierName = ourName;
+   private final Guid latestModifierGuid = new Guid();
    private Instant latestModificationTime = Instant.MIN;
+   private long modificationNumber = -1;
    private boolean modificationIncoming = false;
    private boolean modificationOutgoing = false;
-   private String debugName = "";
+
    /**
     * Used by local code to track external modifications to state data.
     * Data can be modified in several ways, such as loading from file,
     * remote processes, etc.
     */
-   private Instant modificationCheckTime = Instant.MIN;
+   private long modificationCheckNumber = -1;
    /**
     * Whether the associated data had been modified between the last two
     * calls to {@link #checkModified} or was modified for the first time
@@ -34,16 +38,18 @@ public class LatestTimestampModifiable
     */
    private boolean isModified = false;
 
-   private transient final Guid messageModifier = new Guid();
+   private transient final Guid incomingModifierGuid = new Guid();
 
    public LatestTimestampModifiable(CRDTInfo crdtInfo)
    {
       this.crdtInfo = crdtInfo;
    }
 
-   public void setDebugName(String debugName)
+   /** To be set only once right after construction. */
+   public void setModifierName(String ourName)
    {
-      this.debugName = debugName;
+      this.ourName = ourName;
+      latestModifierName = ourName;
    }
 
    /**
@@ -55,12 +61,13 @@ public class LatestTimestampModifiable
     */
    public void modify()
    {
-      if (crdtInfo.isMultiMachineNetwork())
-         latestModifier.set(crdtInfo.getPeerClockEstimator().getOurGuid());
+      latestModifierGuid.set(crdtInfo.getPeerClockEstimator().getOurGuid());
       latestModificationTime = Instant.now();
+      latestModifierName = ourName;
+      ++modificationNumber;
 
       if (!modificationOutgoing)
-         LogTools.debug("{}: OUTGOING = true", debugName);
+         LogTools.debug("{}: OUTGOING = true  # {}", ourName, modificationNumber);
 
       modificationOutgoing = true;
    }
@@ -73,8 +80,8 @@ public class LatestTimestampModifiable
     */
    public void checkModified()
    {
-      isModified = latestModificationTime.isAfter(modificationCheckTime);
-      modificationCheckTime = latestModificationTime;
+      isModified = modificationNumber > modificationCheckNumber;
+      modificationCheckNumber = modificationNumber;
    }
 
    public boolean isModified()
@@ -90,7 +97,7 @@ public class LatestTimestampModifiable
    {
       boolean priorValue = modificationOutgoing;
       if (priorValue)
-         LogTools.debug("{}: OUTGOING = false", debugName);
+         LogTools.debug("{}: OUTGOING = false", ourName);
       modificationOutgoing = false;
       return priorValue;
    }
@@ -107,48 +114,112 @@ public class LatestTimestampModifiable
 
    public void toMessage(LatestModificationMessage message)
    {
-      MessageTools.toMessage(latestModifier, message.getLatestModifierId());
+      MessageTools.toMessage(latestModifierGuid, message.getLatestModifierId());
       MessageTools.toMessage(latestModificationTime, message.getLatestModificationTimeInModifierFrame());
+      message.setLatestModificationNumber(modificationNumber);
+      message.setLatestModifierName(latestModifierName);
    }
 
    public void fromMessage(LatestModificationMessage message)
    {
       if (modificationIncoming)
-         LogTools.debug("{}: INCOMING = false", debugName);
+         LogTools.debug("{}: INCOMING = false", ourName);
       modificationIncoming = false;
 
-      if (crdtInfo.isMultiMachineNetwork())
+      long incomingModificationNumber = message.getLatestModificationNumber();
+      String incomingModifierName = message.getLatestModifierNameAsString();
+      // Only need to do anything if another peer made the most recent modification
+      // and at least one modification has been made
+      MessageTools.fromMessage(message.getLatestModifierId(), incomingModifierGuid);
+      Guid ourGuid = crdtInfo.getPeerClockEstimator().getOurGuid();
+      if (incomingModificationNumber >= 0 && !incomingModifierGuid.equals(ourGuid))
       {
-         MessageTools.fromMessage(message.getLatestModifierId(), messageModifier);
-
-         // Another peer made the most recent modification or no modification made yet
-         if (!messageModifier.equals(crdtInfo.getPeerClockEstimator().getOurGuid()))
+         ROS2PeerClockOffsetEstimatorPeer latestModifierPeer = crdtInfo.getPeerClockEstimator().getPeerMap().get(incomingModifierGuid);
+         boolean peerTimeAvailable = latestModifierPeer != null;
+         Instant incomingModificationTime;
+         if (peerTimeAvailable)
          {
-            ROS2PeerClockOffsetEstimatorPeer latestModifierPeer = crdtInfo.getPeerClockEstimator().getPeerMap().get(messageModifier);
-            // If this is null, it's fine, probably the last modifier went offline
-            if (latestModifierPeer != null)
-            {
-               Instant timeInPeerFrame = MessageTools.toInstant(message.getLatestModificationTimeInModifierFrame());
-               Instant timeInLocalFrame = latestModifierPeer.getPeerTimeInLocalFrame(timeInPeerFrame);
+            Instant incomingModificationTimePeerFrame = MessageTools.toInstant(message.getLatestModificationTimeInModifierFrame());
+            incomingModificationTime = latestModifierPeer.getPeerTimeInLocalFrame(incomingModificationTimePeerFrame);
+         }
+         else
+         {
+            incomingModificationTime = null;
+         }
 
-               if (timeInLocalFrame.isAfter(latestModificationTime))
-               {
-                  latestModifier.set(messageModifier);
-                  latestModificationTime = timeInLocalFrame;
-                  modificationIncoming = true;
-                  LogTools.debug("{}: INCOMING = true", debugName);
-               }
+         // If a later modification number is availble then we take it without checking time
+         if (incomingModificationNumber > modificationNumber)
+         {
+            LogTools.debug(() -> "%s: INCOMING = true  Modification # %d -> %d  Modifier: %s"
+                  .formatted(ourName, modificationNumber, incomingModificationNumber, incomingModifierName));
+            latestModifierGuid.set(incomingModifierGuid);
+            modificationNumber = incomingModificationNumber;
+            latestModifierName = incomingModifierName;
+            modificationIncoming = true;
+
+            // If peer that most recently modified is now offline, we need to become the latest modifier
+            // because
+            if (peerTimeAvailable)
+            {
+               latestModificationTime = incomingModificationTime;
+            }
+            else
+            {
+               LogTools.warn(() -> "%s: INCOMING = true  Modification # %d -> %d  Peer offline: %s"
+                     .formatted(ourName,
+                                modificationNumber,
+                                incomingModificationNumber,
+                                incomingModifierName));
             }
          }
-      }
-      else // Single machine network
-      {
-         Instant timeInLocalFrame = MessageTools.toInstant(message.getLatestModificationTimeInModifierFrame());
-         if (timeInLocalFrame.isAfter(latestModificationTime))
+         // If modification number is the same as what we have, but the modification was made by another peer,
+         // then it's a race condition, and we need to resolve it
+         else if (incomingModificationNumber == modificationNumber && !incomingModifierGuid.equals(latestModifierGuid))
          {
-            latestModificationTime = timeInLocalFrame;
-            modificationIncoming = true;
-            LogTools.debug("{}: INCOMING = true", debugName);
+            // We need to increment modification number and mark modified to resolve the race
+            // keeping the time
+            boolean localWins;
+
+            // We'll resolve the race by a timestamp in hopes to settle it
+            if (peerTimeAvailable)
+            {
+               LogTools.warn(() -> "%s: INCOMING = true  Race! Modification # %d == %d  Local: %s  %s: %s   Peer offset: %s"
+                     .formatted(ourName,
+                                modificationNumber,
+                                incomingModificationNumber,
+                                latestModificationTime,
+                                incomingModifierName,
+                                incomingModificationTime,
+                                latestModifierPeer.getPeerClockOffset()));
+
+               localWins = latestModificationTime.isAfter(incomingModificationTime);
+            }
+            else // Rare case, a now offline peer somehow concurrently modified
+            {
+               LogTools.error(() -> "%s: INCOMING = true  Race: Modification # %d == %d  Local: %s  Peer offline: %s"
+                     .formatted(ourName,
+                                modificationNumber,
+                                incomingModificationNumber,
+                                latestModificationTime,
+                                incomingModifierName));
+               // We need to win because we don't know the time of modification of the offline peer
+               localWins = true;
+            }
+
+            if (localWins)
+            {
+               // We need to modify again to increment the number and send this out
+               // to the other peers, resolving the conflict
+               modify();
+            }
+            else
+            {
+               latestModifierGuid.set(incomingModifierGuid);
+               latestModificationTime = incomingModificationTime;
+               modificationNumber = incomingModificationNumber;
+               latestModifierName = incomingModifierName;
+               modificationIncoming = true;
+            }
          }
       }
    }

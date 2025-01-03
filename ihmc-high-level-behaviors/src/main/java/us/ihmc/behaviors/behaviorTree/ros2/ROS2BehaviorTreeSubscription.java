@@ -142,6 +142,11 @@ public class ROS2BehaviorTreeSubscription<HLT extends BehaviorTreeNodeHighLayer<
          {
             localNode.getDefinition().fromMessage(subscriptionNode.getBehaviorTreeNodeDefinitionMessage());
             localNode.getState().fromMessage(subscriptionNode.getBehaviorTreeNodeStateMessage());
+
+            if (localNode.getDefinition().isModificationIncoming())
+            {
+               LogTools.error("Partial data is newer than what we have. {}", localNode.getDefinition().getName());
+            }
          }
          else
          {
