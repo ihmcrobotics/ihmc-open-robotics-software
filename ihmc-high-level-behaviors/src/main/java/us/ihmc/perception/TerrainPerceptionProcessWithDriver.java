@@ -66,6 +66,7 @@ public class TerrainPerceptionProcessWithDriver
 
    private final ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 8);
    //   private final ExecutorService executorService = Executors.newFixedThreadPool(16);
+   private final RobotConfigurationData robotConfigurationData;
 
    protected final ScheduledExecutorService scheduledExecutorService = ExecutorServiceTools.newScheduledThreadPool(1,
                                                                                                                    getClass(),
@@ -92,6 +93,7 @@ public class TerrainPerceptionProcessWithDriver
 
    private final double outputPeriod = UnitConversions.hertzToSeconds(30.0f);
    private volatile boolean running = true;
+
 
    private final int depthWidth;
    private final int depthHeight;
@@ -149,9 +151,10 @@ public class TerrainPerceptionProcessWithDriver
 
       depthBytedecoImage = new BytedecoImage(realsense.getDepthWidth(), realsense.getDepthHeight(), opencv_core.CV_16UC1);
 
+      robotConfigurationData = new RobotConfigurationData();
       ros2Node.createSubscription(StateEstimatorAPI.getRobotConfigurationDataTopic(robotName).withTypeName(RobotConfigurationData.class), s ->
       {
-         LogTools.warn("Realsense focal length is 0.0, not publishing data");
+         s.takeNextData(robotConfigurationData, null);
       });
 
       LogTools.info(String.format("Sensor Fx: %.2f, Sensor Fy: %.2f, Sensor Cx: %.2f, Sensor Cy: %.2f",

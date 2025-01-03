@@ -47,7 +47,6 @@ public class ReadyToPlanState implements State
    private final Point3D robotLocation = new Point3D();
    private final StopWatch stopWatch = new StopWatch();
    double timeInSwingToStopPlanningAndWaitTillNextAttempt = 0;
-   private boolean wasWalkingTowardsGoal = false;
 
    /**
     * This state exists to plan footsteps based on the conditions of the {@link ContinuousHikingParameters}. This state publishes visuals the UI but doesn't
@@ -104,6 +103,12 @@ public class ReadyToPlanState implements State
       continuousHikingLogger.appendString("Goal Poses: \n" + goalPoses.toString());
       debugger.publishStartAndGoalForVisualization(continuousPlanner.getStartStancePose(), goalPoses);
 
+      // Based on the success of placing a goal, we may have asked the state machine to stop walking if we can't walk to the goal anymore
+      if (!commandMessage.get().getEnableContinuousHiking())
+      {
+         return;
+      }
+
       // Plan to the goal and log the plan
       continuousPlanner.planToGoal(goalPoses);
       continuousPlanner.logFootStePlan();
@@ -144,16 +149,10 @@ public class ReadyToPlanState implements State
       String message = commandMessage.get().toString();
       continuousHikingLogger.appendString("Continuous Hiking Command Being Used: \n" + message);
 
-      SideDependentList<FramePose3D> goalPoses = new SideDependentList<>(new FramePose3D(), new FramePose3D());
+      SideDependentList<FramePose3D> goalPoses;
 
-      if (wasWalkingTowardsGoal && walkToGoalWayPointPoses.isEmpty())
+      if (!walkToGoalWayPointPoses.isEmpty())
       {
-         commandMessage.get().setEnableContinuousHiking(false);
-         wasWalkingTowardsGoal = false;
-      }
-      else if (!walkToGoalWayPointPoses.isEmpty())
-      {
-         wasWalkingTowardsGoal = true;
          // Allow for more planning time with this one, just plan for one-step length
          continuousHikingParameters.setPlanningWithoutReferenceTimeout(1.0);
 
@@ -168,6 +167,12 @@ public class ReadyToPlanState implements State
          if (distanceToGoalPose < continuousHikingParameters.getNextWaypointDistanceMargin())
          {
             walkToGoalWayPointPoses.remove(0);
+
+            // If we have reached the goal, we can stop walking
+            if (walkToGoalWayPointPoses.isEmpty())
+            {
+               commandMessage.get().setEnableContinuousHiking(false);
+            }
          }
       }
       else if (commandMessage.get().getUseJoystickController())
@@ -237,6 +242,8 @@ public class ReadyToPlanState implements State
 
       LogTools.info("Added waypoint for WALK_TO_GOAL");
       walkToGoalWayPointPoses.add(latestWayPoint);
+      continuousPlanner.setStartStancePose(referenceFrames.getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame(),
+                                           referenceFrames.getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame());
       debugger.publishStartAndGoalForVisualization(continuousPlanner.getStartStancePose(), latestWayPoint);
    }
 
