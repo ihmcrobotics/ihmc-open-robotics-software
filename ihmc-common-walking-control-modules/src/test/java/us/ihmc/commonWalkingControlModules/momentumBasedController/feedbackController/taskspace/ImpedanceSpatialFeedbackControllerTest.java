@@ -78,9 +78,9 @@ public final class ImpedanceSpatialFeedbackControllerTest
       FramePose3D desiredPose = EuclidFrameRandomTools.nextFramePose3D(random, baseBody.getBodyFixedFrame());
       SpatialVector zero = new SpatialVector(desiredPose.getReferenceFrame());
       PIDSE3Gains gains = new DefaultPIDSE3Gains();
-      gains.setPositionProportionalGains(2.0);
+      gains.setPositionProportionalGains(50.0);
       gains.setPositionDerivativeGains(Double.NaN);
-      gains.setOrientationProportionalGains(2.0);
+      gains.setOrientationProportionalGains(50.0);
       gains.setOrientationDerivativeGains(Double.NaN);
       gains.getPositionGains().setDampingRatios(1.0);
       gains.getOrientationGains().setDampingRatios(1.0);
@@ -91,6 +91,7 @@ public final class ImpedanceSpatialFeedbackControllerTest
       spatialFeedbackController.setEnabled(true);
       spatialFeedbackController.setImpedanceEnabled(true);
       spatialFeedbackController.submitFeedbackControlCommand(spatialFeedbackControlCommand);
+
 
       MotionQPInputCalculator motionQPInputCalculator = toolbox.getMotionQPInputCalculator();
       NativeQPInputTypeA motionQPInput = new NativeQPInputTypeA(MultiBodySystemTools.computeDegreesOfFreedom(joints));
@@ -272,7 +273,7 @@ public final class ImpedanceSpatialFeedbackControllerTest
       spatialFeedbackControlCommand.set(elevator, endEffector);
       DefaultPIDSE3Gains gains = new DefaultPIDSE3Gains();
       gains.getPositionGains().setProportialAndDerivativeGains(10, Double.NaN);
-      gains.getOrientationGains().setProportialAndDerivativeGains(1.5, Double.NaN);
+      gains.getOrientationGains().setProportialAndDerivativeGains(10, Double.NaN);
       gains.getPositionGains().setDampingRatios(1);
       gains.getOrientationGains().setDampingRatios(1);
       spatialFeedbackControlCommand.setGains(gains);
