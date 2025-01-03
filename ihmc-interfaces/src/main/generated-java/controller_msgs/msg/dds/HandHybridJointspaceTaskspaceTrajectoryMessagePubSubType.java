@@ -15,7 +15,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessagePubSubType implements
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "116a91d7d75006460a92258a598788b7ef72db1c6c9edd05f3928d6cac1acfea";
+   		return "2705f7c3e4da3dd1d34f26ebf7cbd675ca31340846960635793577338ad00486";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessagePubSubType implements
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -81,7 +81,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessagePubSubType implements
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -107,7 +107,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessagePubSubType implements
 
    public static void write(controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_7(data.getForceExecution());
 
@@ -123,7 +123,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessagePubSubType implements
 
    public static void read(controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setForceExecution(cdr.read_type_7());
       	
@@ -141,7 +141,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessagePubSubType implements
    @Override
    public final void serialize(controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_7("force_execution", data.getForceExecution());
       ser.write_type_7("impedance_enabled", data.getImpedanceEnabled());
       ser.write_type_9("robot_side", data.getRobotSide());
@@ -158,7 +158,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessagePubSubType implements
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setForceExecution(ser.read_type_7("force_execution"));
       data.setImpedanceEnabled(ser.read_type_7("impedance_enabled"));
       data.setRobotSide(ser.read_type_9("robot_side"));
