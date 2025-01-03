@@ -24,6 +24,7 @@ public class LatestTimestampModifiable
    private long modificationNumber = 0;
    private boolean modificationIncoming = false;
    private boolean needSendFullData = false;
+   private boolean requestSendFullData = false;
 
    /**
     * Used by local code to track external modifications to state data.
@@ -68,7 +69,7 @@ public class LatestTimestampModifiable
       if (!needSendFullData)
       {
          ++modificationNumber;
-         LogTools.debug("{}: Need send full data: false -> true  # {}", ourName, modificationNumber);
+         LogTools.debug("{}: Modification # {} Need send full data: false -> true", ourName, modificationNumber);
       }
 
       needSendFullData = true;
@@ -89,6 +90,13 @@ public class LatestTimestampModifiable
    public boolean isModified()
    {
       return isModified;
+   }
+
+   public void requestSendFullData()
+   {
+      if (!requestSendFullData)
+         LogTools.debug("{}: Request send full data", ourName);
+      requestSendFullData = true;
    }
 
    /**
@@ -120,6 +128,8 @@ public class LatestTimestampModifiable
       MessageTools.toMessage(latestModificationTime, message.getLatestModificationTimeInModifierFrame());
       message.setLatestModificationNumber(modificationNumber);
       message.setLatestModifierName(latestModifierName);
+      message.setFullDataNeeded(requestSendFullData);
+      requestSendFullData = false;
    }
 
    public void fromMessage(LatestModificationMessage message)
@@ -127,6 +137,12 @@ public class LatestTimestampModifiable
       if (modificationIncoming)
          LogTools.debug("{}: INCOMING true -> false", ourName);
       modificationIncoming = false;
+
+      if (message.getFullDataNeeded() && !needSendFullData)
+      {
+         LogTools.debug("{}: INCOMING Need send full data: false -> true", ourName);
+         needSendFullData = true;
+      }
 
       long incomingModificationNumber = message.getLatestModificationNumber();
       String incomingModifierName = message.getLatestModifierNameAsString();

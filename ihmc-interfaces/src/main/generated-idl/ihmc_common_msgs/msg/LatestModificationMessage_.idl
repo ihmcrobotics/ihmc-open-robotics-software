@@ -34,6 +34,10 @@ module ihmc_common_msgs
          * Human readable name of the latest modifier
          */
         string latest_modifier_name;
+        /**
+         * A way for a peer to request the full data to be resent
+         */
+        boolean full_data_needed;
       };
     };
   };

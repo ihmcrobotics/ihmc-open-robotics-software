@@ -15,7 +15,7 @@ public class LatestModificationMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "2a86a039b8626614a8998f14e465ce23dd7f3220b12a531dcccfdae0f8b670c1";
+   		return "bd3c289471ef1ca3fbcf82f955fb64ebe7d63542007984d02fb6490a5ef03423";
    }
    
    @Override
@@ -59,6 +59,8 @@ public class LatestModificationMessagePubSubType implements us.ihmc.pubsub.Topic
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -81,6 +83,9 @@ public class LatestModificationMessagePubSubType implements us.ihmc.pubsub.Topic
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getLatestModifierName().length() + 1;
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -95,6 +100,8 @@ public class LatestModificationMessagePubSubType implements us.ihmc.pubsub.Topic
       cdr.write_type_d(data.getLatestModifierName());else
           throw new RuntimeException("latest_modifier_name field exceeds the maximum length");
 
+      cdr.write_type_7(data.getFullDataNeeded());
+
    }
 
    public static void read(ihmc_common_msgs.msg.dds.LatestModificationMessage data, us.ihmc.idl.CDR cdr)
@@ -104,6 +111,8 @@ public class LatestModificationMessagePubSubType implements us.ihmc.pubsub.Topic
       data.setLatestModificationNumber(cdr.read_type_12());
       	
       cdr.read_type_d(data.getLatestModifierName());	
+      data.setFullDataNeeded(cdr.read_type_7());
+      	
 
    }
 
@@ -116,6 +125,7 @@ public class LatestModificationMessagePubSubType implements us.ihmc.pubsub.Topic
 
       ser.write_type_12("latest_modification_number", data.getLatestModificationNumber());
       ser.write_type_d("latest_modifier_name", data.getLatestModifierName());
+      ser.write_type_7("full_data_needed", data.getFullDataNeeded());
    }
 
    @Override
@@ -127,6 +137,7 @@ public class LatestModificationMessagePubSubType implements us.ihmc.pubsub.Topic
 
       data.setLatestModificationNumber(ser.read_type_12("latest_modification_number"));
       ser.read_type_d("latest_modifier_name", data.getLatestModifierName());
+      data.setFullDataNeeded(ser.read_type_7("full_data_needed"));
    }
 
    public static void staticCopy(ihmc_common_msgs.msg.dds.LatestModificationMessage src, ihmc_common_msgs.msg.dds.LatestModificationMessage dest)
