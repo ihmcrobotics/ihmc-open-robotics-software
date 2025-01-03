@@ -186,12 +186,18 @@ public class ROS2BehaviorTreeSubscription<HLT extends BehaviorTreeNodeHighLayer<
       HLT localNode = idToLocalNodesMap.get(nodeID);
       if (localNode == null && allowReplication) // New node that wasn't in the local tree; duplicate of one on the other side
       {
-         LogTools.info("Replicating node: %s:%d Packed as: %s Definition: %s Actor: %s".formatted(
+         LogTools.info("%s: Seq # %d Replicating node: %s:%d Packed as: %s Definition: %s Actor: %s".formatted(
+               behaviorTree.getCRDTInfo().getActorDesignation().name(),
+               subscriptionNode.getSequenceId(),
                subscriptionNode.getBehaviorTreeNodeDefinitionMessage().getName(),
                nodeID,
                subscriptionNode.getPackedType(),
                subscriptionNode.getDefinitionClass().getSimpleName(),
                behaviorTree.getCRDTInfo().getActorDesignation().name()));
+         if (subscriptionNode.getPackedType() == BehaviorTreeStateMessage.PARTIAL_DATA)
+         {
+            LogTools.error("Cannot replicate node from partial data!");
+         }
          localNode = behaviorTree.getNodeBuilder().createNode(subscriptionNode.getDefinitionClass(),
                                                               nodeID,
                                                               behaviorTree.getCRDTInfo(),
@@ -204,6 +210,7 @@ public class ROS2BehaviorTreeSubscription<HLT extends BehaviorTreeNodeHighLayer<
    /** Build an intermediate tree representation of the message, which helps to sync with the actual tree. */
    private void buildSubscriptionTree(BehaviorTreeStateMessage behaviorTreeStateMessage, ROS2BehaviorTreeSubscriptionNode subscriptionNode)
    {
+      subscriptionNode.setSequenceId(behaviorTreeStateMessage.getSequenceId());
       byte nodeType = behaviorTreeStateMessage.getBehaviorTreeTypes().get(subscriptionNodeDepthFirstIndex.intValue());
       int indexInTypesList = (int) behaviorTreeStateMessage.getBehaviorTreeIndices().get(subscriptionNodeDepthFirstIndex.intValue());
       subscriptionNode.setPackedType(nodeType);
