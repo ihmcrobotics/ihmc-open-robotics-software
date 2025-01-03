@@ -29,6 +29,10 @@ public class LatestModificationMessage extends Packet<LatestModificationMessage>
             * Human readable name of the latest modifier
             */
    public java.lang.StringBuilder latest_modifier_name_;
+   /**
+            * A way for a peer to request the full data to be resent
+            */
+   public boolean full_data_needed_;
 
    public LatestModificationMessage()
    {
@@ -51,6 +55,8 @@ public class LatestModificationMessage extends Packet<LatestModificationMessage>
 
       latest_modifier_name_.setLength(0);
       latest_modifier_name_.append(other.latest_modifier_name_);
+
+      full_data_needed_ = other.full_data_needed_;
 
    }
 
@@ -113,6 +119,21 @@ public class LatestModificationMessage extends Packet<LatestModificationMessage>
       return latest_modifier_name_;
    }
 
+   /**
+            * A way for a peer to request the full data to be resent
+            */
+   public void setFullDataNeeded(boolean full_data_needed)
+   {
+      full_data_needed_ = full_data_needed;
+   }
+   /**
+            * A way for a peer to request the full data to be resent
+            */
+   public boolean getFullDataNeeded()
+   {
+      return full_data_needed_;
+   }
+
 
    public static Supplier<LatestModificationMessagePubSubType> getPubSubType()
    {
@@ -137,6 +158,8 @@ public class LatestModificationMessage extends Packet<LatestModificationMessage>
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.latest_modifier_name_, other.latest_modifier_name_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.full_data_needed_, other.full_data_needed_, epsilon)) return false;
+
 
       return true;
    }
@@ -156,6 +179,8 @@ public class LatestModificationMessage extends Packet<LatestModificationMessage>
 
       if (!us.ihmc.idl.IDLTools.equals(this.latest_modifier_name_, otherMyClass.latest_modifier_name_)) return false;
 
+      if(this.full_data_needed_ != otherMyClass.full_data_needed_) return false;
+
 
       return true;
    }
@@ -173,7 +198,9 @@ public class LatestModificationMessage extends Packet<LatestModificationMessage>
       builder.append("latest_modification_number=");
       builder.append(this.latest_modification_number_);      builder.append(", ");
       builder.append("latest_modifier_name=");
-      builder.append(this.latest_modifier_name_);
+      builder.append(this.latest_modifier_name_);      builder.append(", ");
+      builder.append("full_data_needed=");
+      builder.append(this.full_data_needed_);
       builder.append("}");
       return builder.toString();
    }

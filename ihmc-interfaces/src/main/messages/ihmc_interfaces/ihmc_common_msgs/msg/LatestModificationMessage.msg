@@ -13,3 +13,6 @@ uint64 latest_modification_number
 
 # Human readable name of the latest modifier
 string latest_modifier_name
+
+# A way for a peer to request the full data to be resent
+bool full_data_needed

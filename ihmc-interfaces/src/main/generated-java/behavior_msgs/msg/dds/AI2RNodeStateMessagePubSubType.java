@@ -15,7 +15,7 @@ public class AI2RNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "13d567b8f2ac0f20474e3f6befeef00e05d9537bb47a059fc9c5837f0deaaf53";
+   		return "597903cc4b346ed6bd87cf92884695d59a0990fca26e9046d98dcb9c7c04fcc5";
    }
    
    @Override

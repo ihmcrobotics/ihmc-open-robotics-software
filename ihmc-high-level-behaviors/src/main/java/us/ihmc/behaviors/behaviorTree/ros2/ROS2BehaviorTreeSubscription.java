@@ -145,10 +145,12 @@ public class ROS2BehaviorTreeSubscription<HLT extends BehaviorTreeNodeHighLayer<
 
             if (localNode.getDefinition().isModificationIncoming())
             {
+               // This is caused by dropped messages or newly online processes
                LogTools.error(() -> "%s: Partial data is newer than what we have. %s"
                      .formatted(behaviorTree.getCRDTInfo().getActorDesignation(),
                                 localNode.getDefinition().getName()));
-               int i = 9;
+               // We need to ask to get sent the full data
+               localNode.getDefinition().requestSendFullData();
             }
          }
          else
@@ -164,9 +166,12 @@ public class ROS2BehaviorTreeSubscription<HLT extends BehaviorTreeNodeHighLayer<
          for (ROS2BehaviorTreeSubscriptionNode subscriptionChild : subscriptionNode.getChildren())
          {
             HLT localChildNode = retrieveOrReplicateLocalNode(subscriptionChild, true);
-            topologyOperationQueue.queueAppendChild(localNode, localChildNode);
-            retrieveOrReplicateSubreeFromSubscription(subscriptionChild, localChildNode, topologyOperationQueue);
-            idToLocalNodesMap.remove(localChildNode.getState().getID());
+            if (localChildNode != null)
+            {
+               topologyOperationQueue.queueAppendChild(localNode, localChildNode);
+               retrieveOrReplicateSubreeFromSubscription(subscriptionChild, localChildNode, topologyOperationQueue);
+               idToLocalNodesMap.remove(localChildNode.getState().getID());
+            }
          }
       }
       else
@@ -198,10 +203,13 @@ public class ROS2BehaviorTreeSubscription<HLT extends BehaviorTreeNodeHighLayer<
          {
             LogTools.error("Cannot replicate node from partial data!");
          }
-         localNode = behaviorTree.getNodeBuilder().createNode(subscriptionNode.getDefinitionClass(),
-                                                              nodeID,
-                                                              behaviorTree.getCRDTInfo(),
-                                                              behaviorTree.getSaveFileDirectory());
+         else
+         {
+            localNode = behaviorTree.getNodeBuilder().createNode(subscriptionNode.getDefinitionClass(),
+                                                                 nodeID,
+                                                                 behaviorTree.getCRDTInfo(),
+                                                                 behaviorTree.getSaveFileDirectory());
+         }
       }
 
       return localNode;
