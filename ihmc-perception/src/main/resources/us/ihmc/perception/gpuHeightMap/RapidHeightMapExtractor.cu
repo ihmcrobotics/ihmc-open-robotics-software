@@ -1,5 +1,8 @@
 
 extern "C"
+
+#include "HeightMapUtils.cuh"
+
 #define LOCAL_CELL_SIZE 0
 #define LOCAL_CENTER_INDEX 1
 #define DEPTH_INPUT_HEIGHT 2
@@ -64,16 +67,6 @@ extern "C"
 #define CLIFF_BOTTOM 2
 #define NOT_ENOUGH_AREA 0
 #define VALID 4
-
-__device__ float index_to_coordinate(int index, float center, float resolution, int center_index)
-{
-    return (index - center_index) * resolution + center;
-}
-
-__device__ float2 indices_to_coordinate(int2 index, float2 center, float resolution, int center_index)
-{
-    return make_float2(index_to_coordinate(index.x, center.x, resolution, center_index), index_to_coordinate(index.y, center.y, resolution, center_index));
-}
 
 __device__ float dot(const float3 a, const float3 b)
 {
