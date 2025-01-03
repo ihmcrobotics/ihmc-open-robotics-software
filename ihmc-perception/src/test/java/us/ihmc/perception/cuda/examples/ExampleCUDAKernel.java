@@ -22,6 +22,8 @@ public class ExampleCUDAKernel
          __global__
          void add_arrays(int n, float *x, float *y)
          {
+            // Printing Hello World here with a newline character at the end to show how it can be used in a string
+            printf("Hello World\\n");
             int index = blockIdx.x * blockDim.x + threadIdx.x;
             int stride = blockDim.x * gridDim.x;
             for (int i = index; i < n; i += stride)

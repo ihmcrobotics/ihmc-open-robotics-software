@@ -109,12 +109,12 @@ public class OpenCLManager
 
       for (String includedHeader : includedHeaders)
       {
-         Path headerFilePath = Paths.get("openCL", includedHeader);
+         Path headerFilePath = Paths.get("us/ihmc/perception/openCL", includedHeader);
          LogTools.info("Loading OpenCL program: openCL/{}", includedHeader);
          sourceAsString += OpenCLTools.readFile(headerFilePath) + "\n";
       }
 
-      Path programPath = Paths.get("openCL", programName + ".cl");
+      Path programPath = Paths.get("us/ihmc/perception/openCL", programName + ".cl");
       LogTools.info("Loading OpenCL program: {}", programPath);
       sourceAsString += OpenCLTools.readFile(programPath);
 
