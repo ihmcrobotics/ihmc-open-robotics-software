@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
+import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
@@ -95,6 +96,30 @@ public abstract class HighLevelControllerState implements State, JointLoadStatus
    {
       return null;
    }
+
+   public DMatrixRMaj getQuMatrix()
+   {
+      return null;
+   }
+
+   public DMatrixRMaj getQuuMatrix()
+   {
+      return null;
+   }
+
+   public DMatrixRMaj getQxuMatrix()
+   {
+      return null;
+   }
+   public int getMPCControlSize()
+   {
+      return 0;
+   }
+   public double getMpcCostCommandWeight()
+   {
+      return 0.0;
+   }
+
 
    @Override
    public boolean isDone(double timeInState)
