@@ -30,19 +30,19 @@ void colorizeDepth(unsigned short* depthImage, size_t depthPitch,
         {
             unsigned short depthValue = depthRow[x];
 
-            unsigned char normalizedDepth = 255 - (depthValue + 128) / COLOR_RANGE;
+            unsigned char normalizedDepth = depthValue / COLOR_RANGE;
             
-            unsigned short ha = depthValue % PERIOD;
-            if (ha > MAX_COLOR_VAL)
-                ha = PERIOD - ha - 1;
+            unsigned short adjustmentA = depthValue % PERIOD;
+            if (adjustmentA > MAX_COLOR_VAL)
+                adjustmentA = PERIOD - adjustmentA - 1;
 
-            unsigned short hb = (depthValue + 3 * PERIOD / 4) % PERIOD;
-            if (hb > MAX_COLOR_VAL)
-                hb = PERIOD - hb - 1;
+            unsigned short adjustmentB = (depthValue + PERIOD / 2) % PERIOD;
+            if (adjustmentB > MAX_COLOR_VAL)
+                adjustmentB = PERIOD - adjustmentB - 1;
 
-            colorizedRow[3 * x + 0] = normalizedDepth;  // B
-            colorizedRow[3 * x + 1] = ha;               // G
-            colorizedRow[3 * x + 2] = hb;               // R
+            colorizedRow[3 * x + 0] = normalizedDepth;  // Y
+            colorizedRow[3 * x + 1] = adjustmentA;      // U
+            colorizedRow[3 * x + 2] = adjustmentB;      // V
         }
     }
 }
@@ -51,7 +51,7 @@ extern "C"
 __global__
 void deColorizeDepth(unsigned char* colorizedImage, size_t colorizedPitch,
                      unsigned short* depthImage, size_t depthPitch,
-                     int rows, int cols)
+                     int rows, int cols, int noiseThreshold)
 {
     // Find the X coordinate and stride of this thread
     int coordX = Utils::getThreadCoordX();
@@ -68,32 +68,28 @@ void deColorizeDepth(unsigned char* colorizedImage, size_t colorizedPitch,
 
         for (int x = coordX; x < cols; x += strideX)
         {
-            unsigned char normalizedDepth = 255 - colorizedRow[3 * x + 0];
-            unsigned char ha = colorizedRow[3 * x + 1];
-            unsigned char hb = colorizedRow[3 * x + 2];
+            unsigned char normalizedDepth = colorizedRow[3 * x + 0];
+            unsigned char adjustmentA = colorizedRow[3 * x + 1];
+            unsigned char adjustmentB = colorizedRow[3 * x + 2];
 
-            unsigned int depthLevel = COLOR_RANGE * normalizedDepth;
+            unsigned char phase = normalizedDepth % 2;
+            short deltaA;
+            short deltaB;
+            if (phase == 0)
+            {
+                deltaA = adjustmentA;
+                deltaB = COLOR_RANGE - adjustmentB - 1;
+            }
+            else if (phase == 1)
+            {
+                deltaA = COLOR_RANGE - adjustmentA - 1;
+                deltaB = adjustmentB;
+            }
 
-            char mL = (4 * depthLevel / PERIOD - 1) % 4;
-            if (mL < 0)
-                mL = 4 + mL;
-
-            short moddedValueC = (depthLevel - PERIOD / 8) % PERIOD;
-            if (moddedValueC < 0)
-                moddedValueC = PERIOD - moddedValueC;
-            unsigned short preciseDepthLevel = depthLevel - moddedValueC + mL * PERIOD / 4 - PERIOD / 8;
-
-            unsigned short delta;
-            if (mL == 0)
-                delta = ha;
-            else if (mL == 1)
-                delta = hb;
-            else if (mL == 2)
-                delta = MAX_COLOR_VAL - ha;
-            else if (mL == 3)
-                delta = MAX_COLOR_VAL - hb;
-
-            depthRow[x] = preciseDepthLevel + delta;
+            if (abs(deltaA - deltaB) > noiseThreshold)
+                depthRow[x] = 0;
+            else
+                depthRow[x] = COLOR_RANGE * normalizedDepth + (deltaA + deltaB) / 2;
         }
     }
 }

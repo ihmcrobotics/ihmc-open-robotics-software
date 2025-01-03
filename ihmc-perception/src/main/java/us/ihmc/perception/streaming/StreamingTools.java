@@ -36,14 +36,24 @@ public class StreamingTools
       return new HashMap<>(LIVE_SRT_OPTIONS);
    }
 
-   private static final Map<String, String> LIBX265_HIGH_QUALITY_STREAMING_OPTIONS
+   private static final Map<String, String> LIBX265_STREAMING_OPTIONS
+         = Map.ofEntries(entry("preset", "superfast"),
+                         entry("tune", "zerolatency"),
+                         entry("x265-params", "crf-min=20.0:crf=30.0:crf-max=35.0:repeat-headers=true:info=false:log-level=warning"));
+
+   public static Map<String, String> getLibX265StreamingOptions()
+   {
+      return new HashMap<>(LIBX265_STREAMING_OPTIONS);
+   }
+
+   private static final Map<String, String> LIBX265_HIGH_QUALITY_OPTIONS
          = Map.ofEntries(entry("preset", "superfast"),
                          entry("tune", "zerolatency"),
                          entry("x265-params", "crf-min=2.5:crf=7.5:crf-max=15.0:cbqpoffs=6:crqpoffs=6:repeat-headers=true:info=false:log-level=warning"));
 
-   public static Map<String, String> getLibX265HighQualityStreamingOptions()
+   public static Map<String, String> getLibX265HighQualityOptions()
    {
-      return new HashMap<>(LIBX265_HIGH_QUALITY_STREAMING_OPTIONS);
+      return new HashMap<>(LIBX265_HIGH_QUALITY_OPTIONS);
    }
 
    /** hevc_nvenc options can be found using {@code ffmpeg -hide_banner -h encoder=hevc_nvenc}. */
@@ -60,6 +70,18 @@ public class StreamingTools
    {
       return new HashMap<>(HEVC_NVENC_STREAMING_OPTIONS);
    }
+
+   private static final Map<String, String> HEVC_NVENC_HIGH_QUALITY_OPTIONS =
+         Map.ofEntries(entry("rc", "constqp"),
+                       entry("zerolatency", "1"),
+                       entry("cq", "0"),
+                       entry("b_ref_mode", "0"));
+
+   public static Map<String, String> getHEVCNVENCHighQualityOptions()
+   {
+      return new HashMap<>(HEVC_NVENC_HIGH_QUALITY_OPTIONS);
+   }
+
 
    /** FFV1 options can be found <a href="https://trac.ffmpeg.org/wiki/Encode/FFV1">here</a>. */
    private static final Map<String, String> FFV1_STREAMING_OPTIONS

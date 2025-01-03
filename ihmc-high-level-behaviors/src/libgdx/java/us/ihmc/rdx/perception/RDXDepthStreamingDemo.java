@@ -102,34 +102,15 @@ public class RDXDepthStreamingDemo
          RawImage depthImage = zed.getImage(ZEDImageSensor.DEPTH_IMAGE_KEY);
 
          GpuMat colorizedDepth = depthColorizer.colorizeDepth(depthImage.getGpuImageMat());
-         RawImage colorizedImage = depthImage.replaceImage(colorizedDepth, PixelFormat.BGR8);
-
+         RawImage colorizedImage = depthImage.replaceImage(colorizedDepth, PixelFormat.YUV444P);
          sentColorVisualizer.updateImageDimensions(colorizedImage.getWidth(), colorizedImage.getHeight());
          opencv_imgproc.cvtColor(colorizedImage.getCpuImageMat(), sentColorVisualizer.getRGBA8Mat(), opencv_imgproc.COLOR_BGR2RGBA);
 
-//         GpuMat smallerColorizedDepth = new GpuMat();
-//         opencv_cudawarping.resize(colorizedDepth, smallerColorizedDepth, new Size(colorizedImage.getWidth() / 2, colorizedImage.getHeight() / 2));
-//         RawImage smallerImage = new RawImage(null,
-//                                              smallerColorizedDepth,
-//                                              PixelFormat.BGR8,
-//                                              new CameraIntrinsics(smallerColorizedDepth.rows(),
-//                                                                   smallerColorizedDepth.cols(),
-//                                                                   colorizedImage.getFocalLengthX() / 2,
-//                                                                   colorizedImage.getFocalLengthY() / 2,
-//                                                                   colorizedImage.getPrincipalPointX() / 2,
-//                                                                   colorizedImage.getPrincipalPointY() / 2),
-//                                              colorizedImage.getCameraModel(),
-//                                              colorizedImage.getPose(),
-//                                              colorizedImage.getAcquisitionTime(),
-//                                              colorizedImage.getSequenceNumber(),
-//                                              colorizedImage.getDepthDiscretization());
-
          if (!videoStreamer.isInitialized())
-            videoStreamer.initializeForColor(colorizedImage, AV_PIX_FMT_YUV444P);
+            videoStreamer.initializeForColor(colorizedImage, AV_PIX_FMT_YUV444P, -1, true, true);
 
          videoStreamer.sendFrame(colorizedImage);
 
-//         smallerImage.release();
          colorizedImage.release();
          depthImage.release();
       } catch (InterruptedException ignored) {}

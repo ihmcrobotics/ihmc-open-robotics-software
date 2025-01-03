@@ -4,8 +4,6 @@ import org.bytedeco.cuda.cudart.CUstream_st;
 import org.bytedeco.cuda.cudart.dim3;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
-import org.bytedeco.opencv.opencv_core.Size;
-import us.ihmc.perception.opencv.OpenCVTools;
 
 import java.net.URL;
 
@@ -57,6 +55,11 @@ public class CUDADepthColorizer
 
    public GpuMat deColorizeDepth(GpuMat colorizedDepthImage)
    {
+      return deColorizeDepth(colorizedDepthImage, 8);
+   }
+
+   public GpuMat deColorizeDepth(GpuMat colorizedDepthImage, int noiseThreshold)
+   {
       GpuMat deColorizedDepth = new GpuMat(colorizedDepthImage.size(), opencv_core.CV_16UC1);
 
       int gridSizeX = (colorizedDepthImage.cols() / BLOCK_DIM_XY) / 4;
@@ -69,6 +72,7 @@ public class CUDADepthColorizer
          decoder.withPointer(colorizedDepthImage.data()).withLong(colorizedDepthImage.step())
                 .withPointer(deColorizedDepth.data()).withLong(deColorizedDepth.step())
                 .withInt(colorizedDepthImage.rows()).withInt(colorizedDepthImage.cols())
+                .withInt(noiseThreshold)
                 .run(stream, gridSize, blockSize, 0);
       }
 

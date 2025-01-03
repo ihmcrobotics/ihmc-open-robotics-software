@@ -77,9 +77,36 @@ public class ROS2SRTVideoStreamer
 
    public void initializeForColor(int imageWidth, int imageHeight, int inputPixelFormat, int intermediateColorConversion, boolean useHardwareAcceleration)
    {
-      Map<String, String> hevcOptions = useHardwareAcceleration ?
-            StreamingTools.getHEVCNVENCStreamingOptions() :
-            StreamingTools.getLibX265HighQualityStreamingOptions();
+      initializeForColor(imageWidth, imageHeight, inputPixelFormat, intermediateColorConversion, false, useHardwareAcceleration);
+   }
+
+   public void initializeForColor(RawImage exampleImage,
+                                  int inputPixelFormat,
+                                  int intermediateColorConversion,
+                                  boolean highQuality,
+                                  boolean useHardwareAcceleration)
+   {
+      initializeForColor(exampleImage.getWidth(),
+                         exampleImage.getHeight(),
+                         inputPixelFormat,
+                         intermediateColorConversion,
+                         highQuality,
+                         useHardwareAcceleration);
+   }
+
+   public void initializeForColor(int imageWidth,
+                                  int imageHeight,
+                                  int inputPixelFormat,
+                                  int intermediateColorConversion,
+                                  boolean highQuality,
+                                  boolean useHardwareAcceleration)
+   {
+      Map<String, String> hevcOptions;
+      if (highQuality)
+         hevcOptions = useHardwareAcceleration ? StreamingTools.getHEVCNVENCHighQualityOptions() : StreamingTools.getLibX265HighQualityOptions();
+      else
+         hevcOptions = useHardwareAcceleration ? StreamingTools.getHEVCNVENCStreamingOptions() : StreamingTools.getLibX265StreamingOptions();
+
       hevcOptions.put("udu_sei", "1");
       videoStreamer.initialize(imageWidth,
                                imageHeight,
