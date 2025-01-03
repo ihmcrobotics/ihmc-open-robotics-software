@@ -4,13 +4,15 @@ import behavior_msgs.msg.dds.AI2RCommandMessage;
 import behavior_msgs.msg.dds.AI2RStatusMessage;
 import behavior_msgs.msg.dds.BehaviorTreeStateMessage;
 import us.ihmc.communication.ros2.ROS2IOTopicPair;
+import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 
 public final class AutonomyAPI
 {
    public static final String BEHAVIOR_TREE_MODULE_NAME = "behavior_tree";
 
-   public static final ROS2Topic<?> BEHAVIOR_TREE_MODULE = ROS2Tools.IHMC_ROOT.withModule(BEHAVIOR_TREE_MODULE_NAME);
+   public static final ROS2Topic<?> BEHAVIOR_TREE_MODULE = ROS2Tools.IHMC_ROOT.withModule(BEHAVIOR_TREE_MODULE_NAME)
+                                                                             .withQoS(ROS2QosProfile.RELIABLE());
    public static final ROS2IOTopicPair<BehaviorTreeStateMessage> BEHAVIOR_TREE
          = new ROS2IOTopicPair<>(BEHAVIOR_TREE_MODULE.withTypeName(BehaviorTreeStateMessage.class));
 
