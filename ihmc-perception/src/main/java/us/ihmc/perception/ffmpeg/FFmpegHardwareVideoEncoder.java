@@ -4,9 +4,13 @@ import org.bytedeco.ffmpeg.avcodec.AVCodec;
 import org.bytedeco.ffmpeg.avcodec.AVCodecHWConfig;
 import org.bytedeco.ffmpeg.avformat.AVOutputFormat;
 import org.bytedeco.ffmpeg.avutil.AVBufferRef;
+import org.bytedeco.ffmpeg.avutil.AVComponentDescriptor;
 import org.bytedeco.ffmpeg.avutil.AVDictionary;
 import org.bytedeco.ffmpeg.avutil.AVHWFramesContext;
+import org.bytedeco.ffmpeg.avutil.AVPixFmtDescriptor;
+import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.Pointer;
+import org.bytedeco.javacpp.SizeTPointer;
 import org.bytedeco.opencv.global.opencv_cudaarithm;
 import org.bytedeco.opencv.global.opencv_cudaimgproc;
 import org.bytedeco.opencv.global.opencv_cudawarping;
@@ -17,6 +21,7 @@ import us.ihmc.perception.RawImage;
 
 import java.util.Objects;
 
+import static org.bytedeco.cuda.global.cudart.*;
 import static org.bytedeco.ffmpeg.global.avcodec.AV_CODEC_HW_CONFIG_METHOD_HW_FRAMES_CTX;
 import static org.bytedeco.ffmpeg.global.avcodec.avcodec_get_hw_config;
 import static org.bytedeco.ffmpeg.global.avutil.*;
@@ -33,9 +38,11 @@ public class FFmpegHardwareVideoEncoder extends FFmpegVideoEncoder
 
    private final Size outputSize;
    private final Size resizeTarget;
-   private final GpuMat tempGpuMat;
+   private final BytePointer cudaPointer = new BytePointer();
+   private final SizeTPointer cudaPitch = new SizeTPointer(1);
 
    private final int inputPixelFormat;
+   private final AVPixFmtDescriptor inputPixelFormatDescriptor;
 
    /**
     * Creates a new video encoder. Must call {@link FFmpegEncoder#initialize(AVDictionary)} after this.
@@ -63,10 +70,10 @@ public class FFmpegHardwareVideoEncoder extends FFmpegVideoEncoder
       super(outputFormat, preferredEncoderName, bitRate, outputWidth, outputHeight, groupOfPicturesSize, maxBFrames);
 
       this.inputPixelFormat = inputPixelFormat;
+      this.inputPixelFormatDescriptor = av_pix_fmt_desc_get(inputPixelFormat);
 
       outputSize = new Size(outputWidth, outputHeight);
       resizeTarget = new Size();
-      tempGpuMat = new GpuMat();
 
       // Find the hardware configuration for the encoder
       hardwareConfiguration = getCodecHardwareConfiguration(encoder);
@@ -114,7 +121,6 @@ public class FFmpegHardwareVideoEncoder extends FFmpegVideoEncoder
    {
       if (gpuImageToEncode instanceof GpuMat mat)
       {
-         // TODO: This doesn't work? Figure out CUDA planar data
          GpuMatVector matVector = new GpuMatVector();
          if (FFmpegTools.isPixelFormatPlanar(inputPixelFormat))
             opencv_cudaarithm.split(mat, matVector);
@@ -130,37 +136,71 @@ public class FFmpegHardwareVideoEncoder extends FFmpegVideoEncoder
 
    private void prepareFrameForEncoding(GpuMatVector imagePlanes)
    {
+      int planeCount = (int) imagePlanes.size();
+
       int requestedColorConversion = getColorConversion();
       if (requestedColorConversion >= 0) // if a color conversion is requested
       {
          // Convert color an assign to another gpu mat to avoid changing the input data
-         for (int i = 0; i < imagePlanes.size(); ++i)
+         for (int i = 0; i < planeCount; ++i)
          {
-            opencv_cudaimgproc.cvtColor(imagePlanes.get(i), tempGpuMat, requestedColorConversion);
-            imagePlanes.put(i, tempGpuMat);
+            GpuMat plane = imagePlanes.get(i);
+            opencv_cudaimgproc.cvtColor(plane, plane, requestedColorConversion);
          }
       }
+
+      // Get the first plane (either luma plane, or the whole image if it's not planar)
+      GpuMat firstPlane = imagePlanes.get(0);
+      int width = firstPlane.cols();
+      int height = firstPlane.rows();
+      long pitch = firstPlane.step();
 
       // If the input and output dimensions don't match
-      if (outputSize.width() != imagePlanes.get(0).cols() || outputSize.height() != imagePlanes.get(0).rows())
+      if (outputSize.width() != width || outputSize.height() != height)
       {  // Find the scale factor
-         double widthScaleFactor = (double) outputSize.width() / imagePlanes.get(0).cols();
-         double heightScaleFactor = (double) outputSize.height() / imagePlanes.get(0).rows();
+         double widthScaleFactor = (double) outputSize.width() / width;
+         double heightScaleFactor = (double) outputSize.height() / height;
 
          // Rescale all planes by that factor
-         for (int i = 0; i < imagePlanes.size(); ++i)
+         for (int i = 0; i < planeCount; ++i)
          {
             // Resize and put data in the frame to encode
-            resizeTarget.width((int) (outputSize.width() * widthScaleFactor));
-            resizeTarget.height((int) (outputSize.height() * heightScaleFactor));
-            opencv_cudawarping.resize(imagePlanes.get(i), tempGpuMat, resizeTarget);
-            imagePlanes.put(i, tempGpuMat);
+            GpuMat plane = imagePlanes.get(i);
+            resizeTarget.width((int) (plane.cols() * widthScaleFactor));
+            resizeTarget.height((int) (plane.rows() * heightScaleFactor));
+            opencv_cudawarping.resize(plane, plane, resizeTarget);
          }
+
+         // Update the first plane dimensions
+         width = firstPlane.cols();
+         height = firstPlane.rows();
+         pitch = firstPlane.step();
       }
 
-      // Put data into AVFrame
-      for (int i = 0; i < imagePlanes.size(); ++i)
-         frameToEncode.data(i, imagePlanes.get(i).data());
+      // Ensure we have CUDA memory for the data
+      if (cudaPointer.isNull())
+      {
+         allocateCUDAMemory(width, height, inputPixelFormat);
+         frameToEncode.data(0, cudaPointer);
+         frameToEncode.linesize(0, (int) cudaPitch.get());
+      }
+
+      // Copy the 1st plane into the frame's CUDA memory
+      AVComponentDescriptor firstPlaneComponent = inputPixelFormatDescriptor.comp(0);
+      int widthInBytes = (firstPlaneComponent.step() * firstPlaneComponent.depth() * width) / 8;
+      cudaMemcpy2D(cudaPointer, cudaPitch.get(), firstPlane.data(), pitch, widthInBytes, height, cudaMemcpyDefault);
+      firstPlaneComponent.close();
+
+      // Copy chroma planes into CUDA memory
+      long offset = height * pitch;
+      for (int i = 1; i < planeCount; ++i)
+      {
+         GpuMat plane = imagePlanes.get(i);
+         Pointer chromaPointer = cudaPointer.getPointer(offset);
+         int chromaPitch = FFmpegTools.getChromaWidth((int) cudaPitch.get(), inputPixelFormat);
+         cudaMemcpy2D(chromaPointer, chromaPitch, plane.data(), plane.step(), plane.cols(), plane.rows(), cudaMemcpyDefault);
+         offset += (long) plane.rows() * chromaPitch;
+      }
    }
 
    private AVCodecHWConfig getCodecHardwareConfiguration(AVCodec encoder)
@@ -179,6 +219,24 @@ public class FFmpegHardwareVideoEncoder extends FFmpegVideoEncoder
       }
    }
 
+   private void allocateCUDAMemory(int width, int height, int pixelFormat)
+   {
+      int allocationWidth = width;
+      int allocationHeight = height;
+
+      for (int i = 0; i < inputPixelFormatDescriptor.nb_components(); ++i)
+      {
+         AVComponentDescriptor component = inputPixelFormatDescriptor.comp(i);
+         if (component.plane() == 0)
+            allocationWidth = (component.step() * component.depth() * width) / 8;
+         else
+            allocationHeight += FFmpegTools.getChromaHeight(height, pixelFormat);
+         component.close();
+      }
+
+      cudaMallocPitch(cudaPointer, cudaPitch, allocationWidth, allocationHeight);
+   }
+
    @Override
    public void destroy()
    {
@@ -190,8 +248,12 @@ public class FFmpegHardwareVideoEncoder extends FFmpegVideoEncoder
       hardwareFramesReference.close();
       hardwareConfiguration.close();
 
+      cudaFree(cudaPointer);
+      cudaPointer.close();
+      cudaPitch.close();
+
       outputSize.close();
       resizeTarget.close();
-      tempGpuMat.close();
+      inputPixelFormatDescriptor.close();
    }
 }

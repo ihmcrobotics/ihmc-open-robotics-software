@@ -42,6 +42,22 @@ public class FFmpegTools
       }
    }
 
+   public static int getChromaWidth(int lumaWidth, int avPixelFormat)
+   {
+      try (AVPixFmtDescriptor pixelFormatDescriptor = av_pix_fmt_desc_get(avPixelFormat))
+      {
+         return -((-lumaWidth) >> pixelFormatDescriptor.log2_chroma_w());
+      }
+   }
+
+   public static int getChromaHeight(int lumaHeight, int avPixelFormat)
+   {
+      try (AVPixFmtDescriptor pixelFormatDescriptor = av_pix_fmt_desc_get(avPixelFormat))
+      {
+         return -((-lumaHeight) >> pixelFormatDescriptor.log2_chroma_h());
+      }
+   }
+
    /**
     * Converts the given {@code AVFrame} to a {@code Mat}.
     * @param frame {@code AVFrame} to convert into a {@code Mat}.
