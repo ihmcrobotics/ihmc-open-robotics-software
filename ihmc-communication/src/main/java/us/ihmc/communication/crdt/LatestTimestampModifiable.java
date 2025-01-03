@@ -130,6 +130,7 @@ public class LatestTimestampModifiable
       message.setLatestModifierName(latestModifierName);
       message.setFullDataNeeded(requestSendFullData);
       requestSendFullData = false;
+      needSendFullData = false; // In case it doesn't get polled
    }
 
    public void fromMessage(LatestModificationMessage message)
