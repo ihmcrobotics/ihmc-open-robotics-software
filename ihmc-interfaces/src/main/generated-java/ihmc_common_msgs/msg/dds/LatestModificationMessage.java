@@ -20,11 +20,21 @@ public class LatestModificationMessage extends Packet<LatestModificationMessage>
             * The time the latest modification was made in peer frame
             */
    public ihmc_common_msgs.msg.dds.InstantMessage latest_modification_time_in_modifier_frame_;
+   /**
+            * Modification number used to order the modifications across all peers
+            * This allows us to workaround peer clock offset drift.
+            */
+   public long latest_modification_number_;
+   /**
+            * Human readable name of the latest modifier
+            */
+   public java.lang.StringBuilder latest_modifier_name_;
 
    public LatestModificationMessage()
    {
       latest_modifier_id_ = new ihmc_common_msgs.msg.dds.GuidMessage();
       latest_modification_time_in_modifier_frame_ = new ihmc_common_msgs.msg.dds.InstantMessage();
+      latest_modifier_name_ = new java.lang.StringBuilder(255);
    }
 
    public LatestModificationMessage(LatestModificationMessage other)
@@ -37,6 +47,11 @@ public class LatestModificationMessage extends Packet<LatestModificationMessage>
    {
       ihmc_common_msgs.msg.dds.GuidMessagePubSubType.staticCopy(other.latest_modifier_id_, latest_modifier_id_);
       ihmc_common_msgs.msg.dds.InstantMessagePubSubType.staticCopy(other.latest_modification_time_in_modifier_frame_, latest_modification_time_in_modifier_frame_);
+      latest_modification_number_ = other.latest_modification_number_;
+
+      latest_modifier_name_.setLength(0);
+      latest_modifier_name_.append(other.latest_modifier_name_);
+
    }
 
 
@@ -55,6 +70,47 @@ public class LatestModificationMessage extends Packet<LatestModificationMessage>
    public ihmc_common_msgs.msg.dds.InstantMessage getLatestModificationTimeInModifierFrame()
    {
       return latest_modification_time_in_modifier_frame_;
+   }
+
+   /**
+            * Modification number used to order the modifications across all peers
+            * This allows us to workaround peer clock offset drift.
+            */
+   public void setLatestModificationNumber(long latest_modification_number)
+   {
+      latest_modification_number_ = latest_modification_number;
+   }
+   /**
+            * Modification number used to order the modifications across all peers
+            * This allows us to workaround peer clock offset drift.
+            */
+   public long getLatestModificationNumber()
+   {
+      return latest_modification_number_;
+   }
+
+   /**
+            * Human readable name of the latest modifier
+            */
+   public void setLatestModifierName(java.lang.String latest_modifier_name)
+   {
+      latest_modifier_name_.setLength(0);
+      latest_modifier_name_.append(latest_modifier_name);
+   }
+
+   /**
+            * Human readable name of the latest modifier
+            */
+   public java.lang.String getLatestModifierNameAsString()
+   {
+      return getLatestModifierName().toString();
+   }
+   /**
+            * Human readable name of the latest modifier
+            */
+   public java.lang.StringBuilder getLatestModifierName()
+   {
+      return latest_modifier_name_;
    }
 
 
@@ -77,6 +133,10 @@ public class LatestModificationMessage extends Packet<LatestModificationMessage>
 
       if (!this.latest_modifier_id_.epsilonEquals(other.latest_modifier_id_, epsilon)) return false;
       if (!this.latest_modification_time_in_modifier_frame_.epsilonEquals(other.latest_modification_time_in_modifier_frame_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.latest_modification_number_, other.latest_modification_number_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.latest_modifier_name_, other.latest_modifier_name_, epsilon)) return false;
+
 
       return true;
    }
@@ -92,6 +152,10 @@ public class LatestModificationMessage extends Packet<LatestModificationMessage>
 
       if (!this.latest_modifier_id_.equals(otherMyClass.latest_modifier_id_)) return false;
       if (!this.latest_modification_time_in_modifier_frame_.equals(otherMyClass.latest_modification_time_in_modifier_frame_)) return false;
+      if(this.latest_modification_number_ != otherMyClass.latest_modification_number_) return false;
+
+      if (!us.ihmc.idl.IDLTools.equals(this.latest_modifier_name_, otherMyClass.latest_modifier_name_)) return false;
+
 
       return true;
    }
@@ -105,7 +169,11 @@ public class LatestModificationMessage extends Packet<LatestModificationMessage>
       builder.append("latest_modifier_id=");
       builder.append(this.latest_modifier_id_);      builder.append(", ");
       builder.append("latest_modification_time_in_modifier_frame=");
-      builder.append(this.latest_modification_time_in_modifier_frame_);
+      builder.append(this.latest_modification_time_in_modifier_frame_);      builder.append(", ");
+      builder.append("latest_modification_number=");
+      builder.append(this.latest_modification_number_);      builder.append(", ");
+      builder.append("latest_modifier_name=");
+      builder.append(this.latest_modifier_name_);
       builder.append("}");
       return builder.toString();
    }
