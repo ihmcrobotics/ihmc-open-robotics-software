@@ -21,7 +21,7 @@ public class LatestTimestampModifiable
    private String latestModifierName = ourName;
    private final Guid latestModifierGuid = new Guid();
    private Instant latestModificationTime = Instant.MIN;
-   private long modificationNumber = -1;
+   private long modificationNumber = 0;
    private boolean modificationIncoming = false;
    private boolean modificationOutgoing = false;
 
@@ -30,7 +30,7 @@ public class LatestTimestampModifiable
     * Data can be modified in several ways, such as loading from file,
     * remote processes, etc.
     */
-   private long modificationCheckNumber = -1;
+   private long modificationCheckNumber = 0;
    /**
     * Whether the associated data had been modified between the last two
     * calls to {@link #checkModified} or was modified for the first time
@@ -64,10 +64,12 @@ public class LatestTimestampModifiable
       latestModifierGuid.set(crdtInfo.getPeerClockEstimator().getOurGuid());
       latestModificationTime = Instant.now();
       latestModifierName = ourName;
-      ++modificationNumber;
 
       if (!modificationOutgoing)
+      {
+         ++modificationNumber;
          LogTools.debug("{}: OUTGOING = true  # {}", ourName, modificationNumber);
+      }
 
       modificationOutgoing = true;
    }
@@ -132,7 +134,7 @@ public class LatestTimestampModifiable
       // and at least one modification has been made
       MessageTools.fromMessage(message.getLatestModifierId(), incomingModifierGuid);
       Guid ourGuid = crdtInfo.getPeerClockEstimator().getOurGuid();
-      if (incomingModificationNumber >= 0 && !incomingModifierGuid.equals(ourGuid))
+      if (incomingModificationNumber > 0 && !incomingModifierGuid.equals(ourGuid))
       {
          ROS2PeerClockOffsetEstimatorPeer latestModifierPeer = crdtInfo.getPeerClockEstimator().getPeerMap().get(incomingModifierGuid);
          boolean peerTimeAvailable = latestModifierPeer != null;

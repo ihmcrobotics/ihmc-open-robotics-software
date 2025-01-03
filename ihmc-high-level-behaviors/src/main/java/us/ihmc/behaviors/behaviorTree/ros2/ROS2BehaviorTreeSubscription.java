@@ -145,7 +145,10 @@ public class ROS2BehaviorTreeSubscription<HLT extends BehaviorTreeNodeHighLayer<
 
             if (localNode.getDefinition().isModificationIncoming())
             {
-               LogTools.error("Partial data is newer than what we have. {}", localNode.getDefinition().getName());
+               LogTools.error(() -> "%s: Partial data is newer than what we have. %s"
+                     .formatted(behaviorTree.getCRDTInfo().getActorDesignation(),
+                                localNode.getDefinition().getName()));
+               int i = 9;
             }
          }
          else
@@ -183,9 +186,10 @@ public class ROS2BehaviorTreeSubscription<HLT extends BehaviorTreeNodeHighLayer<
       HLT localNode = idToLocalNodesMap.get(nodeID);
       if (localNode == null && allowReplication) // New node that wasn't in the local tree; duplicate of one on the other side
       {
-         LogTools.info("Replicating node: %s:%d (%s) Actor: %s".formatted(
+         LogTools.info("Replicating node: %s:%d Packed as: %s Definition: %s Actor: %s".formatted(
                subscriptionNode.getBehaviorTreeNodeDefinitionMessage().getName(),
                nodeID,
+               subscriptionNode.getPackedType(),
                subscriptionNode.getDefinitionClass().getSimpleName(),
                behaviorTree.getCRDTInfo().getActorDesignation().name()));
          localNode = behaviorTree.getNodeBuilder().createNode(subscriptionNode.getDefinitionClass(),
