@@ -7,8 +7,8 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionDefinition;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionType;
-import us.ihmc.behaviors.behaviorTree.trashCan.TrashCanInteractionDefinition;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
+import us.ihmc.behaviors.behaviorTree.trashCan.TrashCanInteractionDefinition;
 import us.ihmc.behaviors.buildingExploration.BuildingExplorationDefinition;
 import us.ihmc.behaviors.door.DoorTraversalDefinition;
 import us.ihmc.behaviors.logic.ConditionNodeDefinition;
@@ -28,7 +28,6 @@ import javax.annotation.Nullable;
 public class RDXBehaviorTreeNodeCreationMenu
 {
    private final RDXBehaviorTree behaviorTree;
-   private final BehaviorTreeTopologyOperationQueue<RDXBehaviorTreeNode<?, ?>> topologyOperationQueue;
    private final RDXAvailableBehaviorTreeDirectory behaviorTreesDirectory;
 
    public RDXBehaviorTreeNodeCreationMenu(RDXBehaviorTree behaviorTree,
@@ -37,11 +36,8 @@ public class RDXBehaviorTreeNodeCreationMenu
    {
       this.behaviorTree = behaviorTree;
 
-      topologyOperationQueue = behaviorTree.getTopologyChangeQueue();
-
       behaviorTreesDirectory = new RDXAvailableBehaviorTreeDirectory(treeFilesDirectory,
                                                                      behaviorTree,
-                                                                     topologyOperationQueue,
                                                                      referenceFrameLibrary,
                                                                      this::complete);
       behaviorTreesDirectory.reindexDirectory();
@@ -146,29 +142,33 @@ public class RDXBehaviorTreeNodeCreationMenu
       {
          if (ImGui.isMouseClicked(ImGuiMouseButton.Left))
          {
-            RDXBehaviorTreeNode<?, ?> newNode = behaviorTree.getNodeBuilder()
-                                                            .createNode(nodeType,
-                                                                        behaviorTree.getAndIncrementNextID(),
-                                                                        behaviorTree.getCRDTInfo(),
-                                                                        behaviorTree.getSaveFileDirectory());
-            newNode.getDefinition().modify();
-            BehaviorTreeNodeInsertionDefinition<RDXBehaviorTreeNode<?, ?>> insertionDefinition
-                  = new BehaviorTreeNodeInsertionDefinition<>(insertionType, newNode, relativeNode);
-
-            if (insertionDefinition.getNodeToInsert() instanceof RDXActionNode<?, ?> newAction)
+            behaviorTree.modifyTreeTopology(topologyOperationQueue ->
             {
-               // We want to do best effort initialization
-               RDXBehaviorTreeRootNode actionSequenceOrNull = behaviorTree.getRootNode();
-               if (behaviorTree.getNodeBuilder() instanceof RDXBehaviorTreeNodeBuilder rdxNodeBuilder)
-                  rdxNodeBuilder.initializeActionNode(actionSequenceOrNull, newAction, insertionDefinition.getInsertionIndex(), side);
-            }
+               RDXBehaviorTreeNode<?, ?> newNode = behaviorTree.getNodeBuilder()
+                                                               .createNode(nodeType,
+                                                                           behaviorTree.getAndIncrementNextID(),
+                                                                           behaviorTree.getCRDTInfo(),
+                                                                           behaviorTree.getSaveFileDirectory());
+               newNode.getDefinition().modify();
+               BehaviorTreeNodeInsertionDefinition<RDXBehaviorTreeNode<?, ?>> insertionDefinition
+                     = new BehaviorTreeNodeInsertionDefinition<>(insertionType, newNode, relativeNode);
 
-            complete(insertionDefinition);
+               if (insertionDefinition.getNodeToInsert() instanceof RDXActionNode<?, ?> newAction)
+               {
+                  // We want to do best effort initialization
+                  RDXBehaviorTreeRootNode actionSequenceOrNull = behaviorTree.getRootNode();
+                  if (behaviorTree.getNodeBuilder() instanceof RDXBehaviorTreeNodeBuilder rdxNodeBuilder)
+                     rdxNodeBuilder.initializeActionNode(actionSequenceOrNull, newAction, insertionDefinition.getInsertionIndex(), side);
+               }
+
+               complete(insertionDefinition, topologyOperationQueue);
+            });
          }
       }
    }
 
-   private void complete(BehaviorTreeNodeInsertionDefinition<RDXBehaviorTreeNode<?, ?>> insertionDefinition)
+   private void complete(BehaviorTreeNodeInsertionDefinition<RDXBehaviorTreeNode<?, ?>> insertionDefinition,
+                         BehaviorTreeTopologyOperationQueue<RDXBehaviorTreeNode<?, ?>> topologyOperationQueue)
    {
       topologyOperationQueue.queueInsertNodeModify(insertionDefinition);
       ImGui.closeCurrentPopup();
