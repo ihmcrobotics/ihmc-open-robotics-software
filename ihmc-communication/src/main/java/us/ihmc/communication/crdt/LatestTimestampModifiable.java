@@ -23,7 +23,7 @@ public class LatestTimestampModifiable
    private Instant latestModificationTime = Instant.MIN;
    private long modificationNumber = 0;
    private boolean modificationIncoming = false;
-   private boolean modificationOutgoing = false;
+   private boolean needSendFullData = false;
 
    /**
     * Used by local code to track external modifications to state data.
@@ -65,13 +65,13 @@ public class LatestTimestampModifiable
       latestModificationTime = Instant.now();
       latestModifierName = ourName;
 
-      if (!modificationOutgoing)
+      if (!needSendFullData)
       {
          ++modificationNumber;
-         LogTools.debug("{}: OUTGOING = true  # {}", ourName, modificationNumber);
+         LogTools.debug("{}: Need send full data: false -> true  # {}", ourName, modificationNumber);
       }
 
-      modificationOutgoing = true;
+      needSendFullData = true;
    }
 
    /**
@@ -95,12 +95,12 @@ public class LatestTimestampModifiable
     * Used by the state publisher to determine if the full
     * message data needs to be sent out.
     */
-   public boolean pollModificationOutgoing()
+   public boolean pollNeedSendFullData()
    {
-      boolean priorValue = modificationOutgoing;
+      boolean priorValue = needSendFullData;
       if (priorValue)
-         LogTools.debug("{}: OUTGOING = false", ourName);
-      modificationOutgoing = false;
+         LogTools.debug("{}: Need send full data: true -> false", ourName);
+      needSendFullData = false;
       return priorValue;
    }
 
@@ -125,7 +125,7 @@ public class LatestTimestampModifiable
    public void fromMessage(LatestModificationMessage message)
    {
       if (modificationIncoming)
-         LogTools.debug("{}: INCOMING = false", ourName);
+         LogTools.debug("{}: INCOMING true -> false", ourName);
       modificationIncoming = false;
 
       long incomingModificationNumber = message.getLatestModificationNumber();

@@ -51,7 +51,7 @@ public class ROS2BehaviorTreeMessageTools
    public static void packMessage(CRDTInfo crdtInfo, BehaviorTreeNodeState nodeState, BehaviorTreeStateMessage treeStateMessage)
    {
       // Only allow packing full node types if we have updated data
-      boolean modificationOutgoing = nodeState.getDefinition().pollModificationOutgoing();
+      boolean modificationOutgoing = nodeState.getDefinition().pollNeedSendFullData();
       boolean hasStatus = nodeState.hasStatus();
       if (modificationOutgoing || hasStatus)
       {
