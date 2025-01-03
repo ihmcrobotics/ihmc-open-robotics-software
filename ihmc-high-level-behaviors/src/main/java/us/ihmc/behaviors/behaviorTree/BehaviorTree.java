@@ -71,14 +71,7 @@ public abstract class BehaviorTree<HLT extends BehaviorTreeNodeHighLayer<HLT, ? 
    public void modifyTreeTopology(Consumer<BehaviorTreeTopologyOperationQueue<HLT>> modifier)
    {
       modifier.accept(topologyChangeQueue);
-      modifyTreeTopology();
-   }
 
-   /**
-    * Use with {@link #getTopologyChangeQueue()}.
-    */
-   public void modifyTreeTopology()
-   {
       boolean atLeastOnePerformed = topologyChangeQueue.performAllQueuedOperations();
 
       if (atLeastOnePerformed)
