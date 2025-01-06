@@ -96,6 +96,12 @@ public class ROS2BehaviorTreeSubscription<HLT extends BehaviorTreeNodeHighLayer<
 
             behaviorTree.fromMessage(behaviorTreeStateMessage);
 
+            // The algorithm to support added, removed, and moved nodes:
+            // 1. Map the nodes by ID
+            // 2. As we traverse the tree, remove the IDs from the map
+            //    2a. If children modified, traverse the message's children
+            //    2b. Else, traverse our local children list
+            // 3. Any nodes remaining in the map afterwards get destroyed
             idToLocalNodesMap.clear();
             if (behaviorTree.getRootNode() != null)
                BehaviorTreeTools.runForSubtreeNodes(behaviorTree.getRootNode(),
