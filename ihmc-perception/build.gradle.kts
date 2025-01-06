@@ -43,7 +43,6 @@ mainDependencies {
    api("org.bytedeco:ffmpeg:$ffmpegVersion:linux-x86_64")
    api("org.bytedeco:ffmpeg:$ffmpegVersion:linux-arm64")
    api("org.bytedeco:ffmpeg:$ffmpegVersion:windows-x86_64")
-   api("org.bytedeco:ffmpeg-platform-gpl:$ffmpegVersion")
    val openclVersion = "3.0-1.5.9"
    api("org.bytedeco:opencl:$openclVersion")
    api("org.bytedeco:opencl:$openclVersion:linux-x86_64")
