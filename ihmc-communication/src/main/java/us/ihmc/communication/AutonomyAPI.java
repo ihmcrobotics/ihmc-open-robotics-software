@@ -12,7 +12,7 @@ public final class AutonomyAPI
    public static final String BEAVIOR_TREE_MODULE_NAME = "behavior_tree";
 
    public static final ROS2Topic<?> BEAVIOR_TREE_MODULE = ROS2Tools.IHMC_ROOT.withModule(BEAVIOR_TREE_MODULE_NAME)
-                                                                             .withQoS(ROS2QosProfile.BEST_EFFORT()); // TODO: Switch to RELIABLE
+                                                                             .withQoS(ROS2QosProfile.RELIABLE());
    public static final ROS2IOTopicPair<BehaviorTreeStateMessage> BEAVIOR_TREE
          = new ROS2IOTopicPair<>(BEAVIOR_TREE_MODULE.withTypeName(BehaviorTreeStateMessage.class));
 
