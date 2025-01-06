@@ -32,6 +32,7 @@ mainDependencies {
    api("us.ihmc:ihmc-graphics-description:0.25.1")
    api("us.ihmc:simulation-construction-set-utilities:0.25.1")
    api("us.ihmc:ihmc-native-library-loader:2.0.3")
+   api("us.ihmc:ihmc-math-linear-algebra:0.15.0")
    api("us.ihmc:scs2-definition:17-0.27.3")
    // NOTE: IHMCRoboticsToolkit should not depend on any other IHMC project(!), especially it should not depend on IHMCJavaToolkit.
 }
@@ -44,5 +45,6 @@ testDependencies {
    api("us.ihmc:euclid-test:0.21.0")
    api("us.ihmc:simulation-construction-set:0.25.1")
    api("us.ihmc:ihmc-matrix-library-test:0.19.0")
+   api("us.ihmc:ihmc-math-linear-dynamic-systems:0.15.0")
    api("us.ihmc:ihmc-commons-testing:0.35.0")
 }
