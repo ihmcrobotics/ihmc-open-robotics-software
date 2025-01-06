@@ -22,8 +22,6 @@ import us.ihmc.sensors.ZEDModelData;
 import us.ihmc.sensors.ZEDSVOPlaybackSensor;
 import us.ihmc.tools.IHMCCommonPaths;
 
-import static org.bytedeco.ffmpeg.global.avutil.AV_PIX_FMT_YUV444P;
-
 public class RDXDepthStreamingDemo
 {
    private static final String SVO_FILE = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20240715_103234_ZEDRecording_NewONRCourseWalk.svo2").toAbsolutePath().toString();
@@ -109,7 +107,7 @@ public class RDXDepthStreamingDemo
          sentColorVisualizer.setImage(rgbMat);
 
          if (!videoStreamer.isInitialized())
-            videoStreamer.initializeForColor(colorizedImage, AV_PIX_FMT_YUV444P, -1, true, true);
+            videoStreamer.initializeForColor(colorizedImage, -1, true, true);
 
          videoStreamer.sendFrame(colorizedImage);
 

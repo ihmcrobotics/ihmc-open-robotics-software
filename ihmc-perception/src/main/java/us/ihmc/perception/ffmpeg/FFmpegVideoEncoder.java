@@ -137,12 +137,7 @@ public abstract class FFmpegVideoEncoder extends FFmpegEncoder
       AVBufferRef seiBuffer;
 
       String encoderName = encoder.name().getString();
-      if (encoderName.equals("libx265"))
-      {
-         seiBuffer = av_buffer_alloc(data.limit());
-         Pointer.memcpy(seiBuffer.data().position(0), data.position(0), data.limit());
-      }
-      else if (encoderName.contains("nvenc"))
+      if (encoderName.contains("nvenc"))
       {
          seiBuffer = av_buffer_alloc(16 + data.limit());
          Pointer.memcpy(seiBuffer.data().position(0), uuid.position(0), 16);

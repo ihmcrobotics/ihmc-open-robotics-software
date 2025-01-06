@@ -47,7 +47,7 @@ public class ROS2SRTSensorStreamer
       if (inputAVPixelFormat == AV_PIX_FMT_GRAY16)
          videoStreamer.initializeForDepth(exampleImage);
       else
-         videoStreamer.initializeForColor(exampleImage, inputAVPixelFormat, intermediateColorConversion, useHardwareAcceleration);
+         videoStreamer.initializeForColor(exampleImage, intermediateColorConversion, useHardwareAcceleration);
       videoStreamers.put(streamTopic, videoStreamer);
    }
 
