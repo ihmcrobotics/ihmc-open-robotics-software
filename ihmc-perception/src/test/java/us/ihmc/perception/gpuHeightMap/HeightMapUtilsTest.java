@@ -11,6 +11,7 @@ import org.bytedeco.opencl._cl_program;
 import org.jcodec.common.Assert;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.cuda.CUDAKernel;
@@ -23,6 +24,7 @@ import java.net.URL;
 import static org.bytedeco.cuda.global.cudart.*;
 import static org.bytedeco.cuda.global.cudart.cudaMemcpyAsync;
 
+@Tag("ihmc-perception")
 public class HeightMapUtilsTest
 {
    private IntPointer indexPointer;
