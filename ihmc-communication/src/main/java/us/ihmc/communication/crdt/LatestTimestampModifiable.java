@@ -69,7 +69,7 @@ public class LatestTimestampModifiable
       if (!needSendFullData)
       {
          ++modificationNumber;
-         LogTools.debug("{}: Modification # {} Need send full data: false -> true", ourName, modificationNumber);
+         LogTools.debug("{}: Update # {} Modification # {} Need send full data: false -> true", ourName, crdtInfo.getUpdateNumber(), modificationNumber);
       }
 
       needSendFullData = true;
@@ -95,8 +95,16 @@ public class LatestTimestampModifiable
    public void requestSendFullData()
    {
       if (!requestSendFullData)
-         LogTools.debug("{}: Request send full data", ourName);
+         LogTools.debug("{}: Update # {} Request send full data", ourName, crdtInfo.getUpdateNumber());
       requestSendFullData = true;
+   }
+
+   public void confirmRecievedFullData()
+   {
+      if (requestSendFullData)
+         LogTools.debug("{}: Update # {} Full data received", ourName, crdtInfo.getUpdateNumber());
+
+      requestSendFullData = false;
    }
 
    /**
@@ -107,7 +115,7 @@ public class LatestTimestampModifiable
    {
       boolean priorValue = needSendFullData;
       if (priorValue)
-         LogTools.debug("{}: Need send full data: true -> false", ourName);
+         LogTools.debug("{}: Update # {} Need send full data: true -> false", ourName, crdtInfo.getUpdateNumber());
       needSendFullData = false;
       return priorValue;
    }
@@ -129,19 +137,18 @@ public class LatestTimestampModifiable
       message.setLatestModificationNumber(modificationNumber);
       message.setLatestModifierName(latestModifierName);
       message.setFullDataNeeded(requestSendFullData);
-      requestSendFullData = false;
       needSendFullData = false; // In case it doesn't get polled
    }
 
    public void fromMessage(LatestModificationMessage message)
    {
       if (modificationIncoming)
-         LogTools.debug("{}: INCOMING true -> false", ourName);
+         LogTools.debug("{}: Update # {} INCOMING true -> false", ourName, crdtInfo.getUpdateNumber());
       modificationIncoming = false;
 
       if (message.getFullDataNeeded() && !needSendFullData)
       {
-         LogTools.debug("{}: INCOMING Need send full data: false -> true", ourName);
+         LogTools.debug("{}: Update # {} INCOMING Need send full data: false -> true", ourName, crdtInfo.getUpdateNumber());
          needSendFullData = true;
       }
 
@@ -169,8 +176,8 @@ public class LatestTimestampModifiable
          // If a later modification number is availble then we take it without checking time
          if (incomingModificationNumber > modificationNumber)
          {
-            LogTools.debug(() -> "%s: INCOMING = true  Modification # %d -> %d  Modifier: %s"
-                  .formatted(ourName, modificationNumber, incomingModificationNumber, incomingModifierName));
+            LogTools.debug(() -> "%s: Update # %d INCOMING = true  Modification # %d -> %d  Modifier: %s"
+                  .formatted(ourName, crdtInfo.getUpdateNumber(), modificationNumber, incomingModificationNumber, incomingModifierName));
             latestModifierGuid.set(incomingModifierGuid);
             modificationNumber = incomingModificationNumber;
             latestModifierName = incomingModifierName;
@@ -184,8 +191,9 @@ public class LatestTimestampModifiable
             }
             else
             {
-               LogTools.warn(() -> "%s: INCOMING = true  Modification # %d -> %d  Peer offline: %s"
+               LogTools.warn(() -> "%s: Update # %d INCOMING = true  Modification # %d -> %d  Peer offline: %s"
                      .formatted(ourName,
+                                crdtInfo.getUpdateNumber(),
                                 modificationNumber,
                                 incomingModificationNumber,
                                 incomingModifierName));
@@ -202,8 +210,9 @@ public class LatestTimestampModifiable
             // We'll resolve the race by a timestamp in hopes to settle it
             if (peerTimeAvailable)
             {
-               LogTools.warn(() -> "%s: INCOMING = true  Race! Modification # %d == %d  Local: %s  %s: %s   Peer offset: %s"
+               LogTools.warn(() -> "%s: Update # %d INCOMING = true  Race! Modification # %d == %d  Local: %s  %s: %s   Peer offset: %s"
                      .formatted(ourName,
+                                crdtInfo.getUpdateNumber(),
                                 modificationNumber,
                                 incomingModificationNumber,
                                 latestModificationTime,
@@ -215,8 +224,9 @@ public class LatestTimestampModifiable
             }
             else // Rare case, a now offline peer somehow concurrently modified
             {
-               LogTools.error(() -> "%s: INCOMING = true  Race: Modification # %d == %d  Local: %s  Peer offline: %s"
+               LogTools.error(() -> "%s: Update # %d INCOMING = true  Race: Modification # %d == %d  Local: %s  Peer offline: %s"
                      .formatted(ourName,
+                                crdtInfo.getUpdateNumber(),
                                 modificationNumber,
                                 incomingModificationNumber,
                                 latestModificationTime,

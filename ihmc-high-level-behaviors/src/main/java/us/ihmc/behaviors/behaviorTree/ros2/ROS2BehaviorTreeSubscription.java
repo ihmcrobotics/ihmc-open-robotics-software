@@ -155,6 +155,7 @@ public class ROS2BehaviorTreeSubscription<HLT extends BehaviorTreeNodeHighLayer<
          }
          else
          {
+            localNode.getDefinition().confirmRecievedFullData();
             ROS2BehaviorTreeMessageTools.fromMessage(subscriptionNode, localNode.getState());
          }
       }
