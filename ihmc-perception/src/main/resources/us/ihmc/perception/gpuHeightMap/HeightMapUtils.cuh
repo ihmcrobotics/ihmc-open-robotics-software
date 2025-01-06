@@ -1,5 +1,3 @@
-extern "C"
-
 __device__ float index_to_coordinate(int index, float center, float resolution, int center_index)
 {
     return (index - center_index) * resolution + center;

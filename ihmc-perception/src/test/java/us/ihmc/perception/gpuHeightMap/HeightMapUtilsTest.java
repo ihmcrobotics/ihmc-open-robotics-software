@@ -24,7 +24,6 @@ import java.net.URL;
 import static org.bytedeco.cuda.global.cudart.*;
 import static org.bytedeco.cuda.global.cudart.cudaMemcpyAsync;
 
-@Tag("ihmc-perception")
 public class HeightMapUtilsTest
 {
    private IntPointer indexPointer;
