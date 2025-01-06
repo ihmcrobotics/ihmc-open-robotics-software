@@ -114,7 +114,7 @@ public class TouchDownState extends AbstractFootControlState
 
       SideDependentList<FootSwitchInterface> footSwitches = controllerToolbox.getFootSwitches();
       footSwitch = footSwitches.get(robotSide);
-      soleFrame = contactableFoot.getSoleFrame();
+      soleFrame = contactableFoot.getContactFrame();
 
       String namePrefix = footControlHelper.getRobotSide().getCamelCaseNameForStartOfExpression();
       registry = new YoRegistry(namePrefix + name);
