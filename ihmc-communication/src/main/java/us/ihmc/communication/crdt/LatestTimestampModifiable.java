@@ -12,6 +12,13 @@ import java.time.Instant;
  * Keeps track of the latest time associated data was modified, for
  * the purpose of network synchronization. The association to data is
  * external to this class.
+ *
+ * The algorithm uses a monotonically increasing modification number as
+ * the primary way to order modifications. A timestamp with nanosecond precision
+ * is used to resolve any race conditions.
+ *
+ * This class also provides infrastructure for sending data over the network
+ * only when it is needed to reduce bandwidth.
  */
 public class LatestTimestampModifiable
 {
@@ -92,6 +99,7 @@ public class LatestTimestampModifiable
       return isModified;
    }
 
+   /** Used when we missed a message or recently came online and need the full data. */
    public void requestSendFullData()
    {
       if (!requestSendFullData)
@@ -99,6 +107,7 @@ public class LatestTimestampModifiable
       requestSendFullData = true;
    }
 
+   /** Call when we receive the full data to stop requesting it. */
    public void confirmRecievedFullData()
    {
       if (requestSendFullData)
