@@ -59,7 +59,7 @@ public class FSTStreamingState implements State
    private final YoInteger defaultStabilityIterations = new YoInteger("defaultStabilityIterations", registry);
    private final YoDouble defaultAccelerationThreshold = new YoDouble("defaultAccelerationThreshold", registry);
    private final YoDouble defaultHorizontalAccelerationWeight = new YoDouble("defaultHorizontalAccelerationWeight", registry);
-   private final YoDouble defaultVerticalAccelerationWeight = new YoDouble("defaultHorizontalAccelerationWeight", registry);
+   private final YoDouble defaultVerticalComponentWeight = new YoDouble("defaultVerticalComponentWeight", registry);
 
    public FSTStreamingState(FSTTools tools)
    {
@@ -85,7 +85,7 @@ public class FSTStreamingState implements State
       defaultStabilityIterations.set(parameters.getStabilityIterations());
       defaultAccelerationThreshold.set(parameters.getAccelerationThreshold());
       defaultHorizontalAccelerationWeight.set(parameters.getHorizontalAccelerationWeight());
-      defaultVerticalAccelerationWeight.set(parameters.getVerticalAccelerationWeight());
+      defaultVerticalComponentWeight.set(parameters.getVerticalComponentWeight());
    }
 
    @Override
@@ -237,7 +237,7 @@ public class FSTStreamingState implements State
                               applyStrideScaling(translationTrackerXY,
                                                  translationTracker.norm(),
                                                  linearAccelerationXY.norm(),
-                                                 Math.abs(linearAcceleration.getZ()));
+                                                 Math.abs(translationTracker.getZ()));
 
                               RigidBodyTransformReadOnly robotFootstepTransformInWorld = computeTargetFootstepFromStance(latestInput,
                                                                                                                          side,
@@ -372,12 +372,12 @@ public class FSTStreamingState implements State
    }
 
    private void applyStrideScaling(FrameVector2D translationTrackerXYToPack,
-                                   double measuredDistance,
-                                   double horizontalAccelerationMag,
-                                   double verticalAccelerationMag)
+                                   double measuredTrackerDistance,
+                                   double horizontalTrackerAccelerationMag,
+                                   double trackerHeight)
    {
-      double rawStride = measuredDistance + horizontalAccelerationMag * defaultHorizontalAccelerationWeight.getValue()
-                         + (1.0 - horizontalAccelerationMag) * defaultVerticalAccelerationWeight.getValue() * verticalAccelerationMag;
+      double rawStride = measuredTrackerDistance + defaultHorizontalAccelerationWeight.getValue() * horizontalTrackerAccelerationMag
+                         + defaultVerticalComponentWeight.getValue() * trackerHeight;
       double clampedStride = Math.max(0.0, Math.min(rawStride, defaultStrideLength.getDoubleValue()));
 
       // Scale the normalized direction to the computed stride distance

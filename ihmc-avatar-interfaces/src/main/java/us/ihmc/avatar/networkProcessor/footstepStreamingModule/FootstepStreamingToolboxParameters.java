@@ -68,9 +68,9 @@ public class FootstepStreamingToolboxParameters
     */
    private double horizontalAccelerationWeight;
    /**
-    * Default weight for stride length estimation related to a fraction of vertical tracker acceleration
+    * Default weight for stride length estimation related to a fraction of vertical tracker position
     */
-   private double verticalAccelerationWeight;
+   private double verticalComponentWeight;
 
 
    private double publishingPeriod;
@@ -103,7 +103,7 @@ public class FootstepStreamingToolboxParameters
       accelerationThreshold = 0.0;
 
       horizontalAccelerationWeight = 0.1;
-      verticalAccelerationWeight = 0.1;
+      verticalComponentWeight = 0.1;
    }
 
    public ClockType getClockType()
@@ -176,9 +176,9 @@ public class FootstepStreamingToolboxParameters
       return horizontalAccelerationWeight;
    }
 
-   public double getVerticalAccelerationWeight()
+   public double getVerticalComponentWeight()
    {
-      return verticalAccelerationWeight;
+      return verticalComponentWeight;
    }
 
    public void setClockType(ClockType clockType)
@@ -251,8 +251,8 @@ public class FootstepStreamingToolboxParameters
       this.horizontalAccelerationWeight = horizontalAccelerationWeight;
    }
 
-   public void setVerticalAccelerationWeight(double verticalAccelerationWeight)
+   public void setVerticalComponentWeight(double verticalComponentWeight)
    {
-      this.verticalAccelerationWeight = verticalAccelerationWeight;
+      this.verticalComponentWeight = verticalComponentWeight;
    }
 }
