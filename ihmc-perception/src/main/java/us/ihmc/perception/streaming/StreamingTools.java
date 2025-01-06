@@ -72,10 +72,10 @@ public class StreamingTools
    }
 
    private static final Map<String, String> HEVC_NVENC_HIGH_QUALITY_OPTIONS =
-         Map.ofEntries(entry("rc", "constqp"),
+         Map.ofEntries(entry("tune", "ull"),
                        entry("zerolatency", "1"),
-                       entry("cq", "0"),
-                       entry("b_ref_mode", "0"));
+                       entry("rc", "constqp"),
+                       entry("qp", "30"));
 
    public static Map<String, String> getHEVCNVENCHighQualityOptions()
    {

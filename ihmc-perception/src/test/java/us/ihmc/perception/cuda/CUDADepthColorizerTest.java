@@ -11,6 +11,7 @@ import us.ihmc.perception.opencv.OpenCVTools;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -37,7 +38,7 @@ public class CUDADepthColorizerTest
 
       // Find difference between de-colorized and original depth image
       double difference = OpenCVTools.averagePixelDifference(cpuDepthImage, cpuDeColorizedDepth);
-      assertTrue(difference < 0.01, "Average Difference = " + difference);
+      assertEquals(0.0, difference, "Average Difference = " + difference);
 
       cpuDepthImage.close();
       depthImage.close();
@@ -52,7 +53,7 @@ public class CUDADepthColorizerTest
       try
       {
          URL imageURL = RawImageTest.class.getResource("zedDepth16U.raw");
-         byte[] imageBytes = IOUtils.toByteArray(imageURL);
+         byte[] imageBytes = IOUtils.toByteArray(Objects.requireNonNull(imageURL));
          return new Mat(720, 1280, opencv_core.CV_16UC1, new BytePointer(imageBytes));
       }
       catch (IOException e)

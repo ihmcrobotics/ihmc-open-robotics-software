@@ -2,6 +2,7 @@ package us.ihmc.rdx.perception;
 
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.GpuMat;
+import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
@@ -96,15 +97,16 @@ public class RDXDepthStreamingDemo
 
    public void publishZED()
    {
-      try
+      try (Mat rgbMat = new Mat())
       {
          zed.waitForGrab();
          RawImage depthImage = zed.getImage(ZEDImageSensor.DEPTH_IMAGE_KEY);
 
          GpuMat colorizedDepth = depthColorizer.colorizeDepth(depthImage.getGpuImageMat());
          RawImage colorizedImage = depthImage.replaceImage(colorizedDepth, PixelFormat.YUV444P);
-         sentColorVisualizer.updateImageDimensions(colorizedImage.getWidth(), colorizedImage.getHeight());
-         opencv_imgproc.cvtColor(colorizedImage.getCpuImageMat(), sentColorVisualizer.getRGBA8Mat(), opencv_imgproc.COLOR_BGR2RGBA);
+
+         opencv_imgproc.cvtColor(colorizedImage.getCpuImageMat(), rgbMat, opencv_imgproc.COLOR_YUV2RGB);
+         sentColorVisualizer.setImage(rgbMat);
 
          if (!videoStreamer.isInitialized())
             videoStreamer.initializeForColor(colorizedImage, AV_PIX_FMT_YUV444P, -1, true, true);
@@ -120,14 +122,16 @@ public class RDXDepthStreamingDemo
    {
       colorizedDepth.get();
 
-      receivedColorVisualizer.updateImageDimensions(colorizedDepth.getWidth(), colorizedDepth.getHeight());
-      opencv_imgproc.cvtColor(colorizedDepth.getCpuImageMat(), receivedColorVisualizer.getRGBA8Mat(), opencv_imgproc.COLOR_BGR2RGBA);
+      Mat rgbMat = new Mat();
+      opencv_imgproc.cvtColor(colorizedDepth.getCpuImageMat(), rgbMat, opencv_imgproc.COLOR_YUV2RGB);
+      receivedColorVisualizer.setImage(rgbMat);
 
       GpuMat deColorizedDepth = depthColorizer.deColorizeDepth(colorizedDepth.getGpuImageMat());
       RawImage deColorizedImage = colorizedDepth.replaceImage(deColorizedDepth);
 
       pointCloudVisualizer.setDepthImage(deColorizedImage);
 
+      rgbMat.close();
       deColorizedImage.release();
       colorizedDepth.release();
    }
