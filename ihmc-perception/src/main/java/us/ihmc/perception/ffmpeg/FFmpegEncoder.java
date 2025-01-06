@@ -40,12 +40,10 @@ public abstract class FFmpegEncoder
 
    public FFmpegEncoder(AVOutputFormat outputFormat, String preferredEncoderName, int bitRate)
    {
-      System.out.println("NAME: " + preferredEncoderName);
       this.bitRate = bitRate;
 
       encoder = findEncoder(preferredEncoderName, outputFormat);
       FFmpegTools.checkPointer(encoder, "Finding encoder");
-      System.out.println("ID: " + encoder.id() + " NAME: " + encoder.long_name().getString());
 
       encodedPacket = av_packet_alloc();
       FFmpegTools.checkPointer(encodedPacket, "Allocating next packet");
