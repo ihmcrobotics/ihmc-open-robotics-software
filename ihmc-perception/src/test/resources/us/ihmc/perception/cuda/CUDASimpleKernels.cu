@@ -15,3 +15,10 @@ __global__ void pass_in_variable(int value,
     printf("Value passed in is: %d\n", value);
     *valueBeingReturned = value;
 }
+
+// Simple kernel that only takes in an int for testing
+extern "C"
+__global__ void pass_in_int(int value)
+{
+    printf("Only an int being passed to this kernel");
+}
