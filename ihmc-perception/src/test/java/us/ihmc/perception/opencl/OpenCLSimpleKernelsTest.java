@@ -6,7 +6,7 @@ import org.bytedeco.opencl._cl_mem;
 import org.bytedeco.opencl._cl_program;
 import org.junit.jupiter.api.Test;
 
-public class OpenCLKernelsSimpleTest
+public class OpenCLSimpleKernelsTest
 {
    /**
     * This test makes sure that we can pass a value to the GPU from the OpenCL kernel code.
@@ -18,6 +18,8 @@ public class OpenCLKernelsSimpleTest
    @Test
    public void passIntToGPUKernelExample()
    {
+      // Note that the way OpenCLManager loads the kernels is path dependent.
+      //  So the kernel file needs to be declared in the right location
       // Overhead to getting a OpenCL kernel up and running
       OpenCLManager openCLManager = new OpenCLManager();
       _cl_program openCLProgram = openCLManager.loadProgram("OpenCLKernelsSimpleTest");

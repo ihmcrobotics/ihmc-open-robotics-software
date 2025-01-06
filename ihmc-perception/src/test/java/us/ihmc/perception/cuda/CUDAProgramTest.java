@@ -5,7 +5,6 @@ import org.bytedeco.cuda.cudart.dim3;
 import org.bytedeco.javacpp.IntPointer;
 import org.junit.jupiter.api.Test;
 
-import java.net.URISyntaxException;
 import java.net.URL;
 
 import static org.bytedeco.cuda.global.cudart.*;
@@ -139,7 +138,7 @@ public class CUDAProgramTest
    }
 
    @Test
-   public void testLoadingKernelFromFile() throws URISyntaxException
+   public void testLoadingKernelFromFile()
    {
       // Get a stream
       CUstream_st stream = CUDAStreamManager.getStream();

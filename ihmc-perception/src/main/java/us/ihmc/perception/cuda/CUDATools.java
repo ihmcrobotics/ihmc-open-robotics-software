@@ -106,7 +106,9 @@ public class CUDATools
          try (BytePointer errorName = cudaGetErrorName(errorCode);
               BytePointer errorString = cudaGetErrorString(errorCode))
          {
-            LogTools.error("CUDA Error ({}): {}", errorName.getString(), errorString.getString());
+            String errorMessage = String.format("CUDA Error (%s): %s", errorName.getString(), errorString.getString());
+            LogTools.error(errorMessage);
+            throw new RuntimeException(errorMessage);
          }
       }
    }
@@ -134,7 +136,10 @@ public class CUDATools
             case 10 -> "NVJPEG_STATUS_INCOMPLETE_BITSTREAM";
             default -> "UNKNOWN";
          };
-         LogTools.error("NVJPEG Error ({}): {}", errorCode, errorName);
+
+         String errorMessage = String.format("NVJPEG Error (%d): %s", errorCode, errorName);
+         LogTools.error(errorMessage);
+         throw new RuntimeException(errorMessage);
       }
    }
 
@@ -145,7 +150,9 @@ public class CUDATools
 
       try (BytePointer errorString = nvrtcGetErrorString(errorCode))
       {
-         LogTools.error("NVRTC error: {}", errorString.getString());
+         String errorMessage = String.format("CUDA Error: %s", errorString.getString());
+         LogTools.error(errorMessage);
+         throw new RuntimeException(errorMessage);
       }
    }
 }

@@ -16,12 +16,12 @@ import java.net.URL;
 /**
  * This is an example of using a more complex CUDA kernel that takes in an OpenCV {@link Mat} object. We do this often for kernels, so this example walks you
  * through how it would work for a simple case.
- * This uses more of the standard approach then the {@link ExampleCUDAKernel} did because we use the {@link CUDAStreamManager} and we are creating objects
+ * This uses more of the standard approach then the {@link CUDAExampleKernel} did because we use the {@link CUDAStreamManager} and we are creating objects
  * in the try-with-resources statement.
  */
-public class ExampleCUDAKernel2D
+public class CUDAExampleKernel2D
 {
-   public ExampleCUDAKernel2D()
+   public CUDAExampleKernel2D()
    {
       // We load the kernel from resources; this is a good place to store kernels to separate them from the Java classes
       URL programPath = getClass().getResource("matrix_element_wise_addition.cu");
@@ -119,6 +119,6 @@ public class ExampleCUDAKernel2D
 
    public static void main(String[] args)
    {
-      new ExampleCUDAKernel2D();
+      new CUDAExampleKernel2D();
    }
 }
