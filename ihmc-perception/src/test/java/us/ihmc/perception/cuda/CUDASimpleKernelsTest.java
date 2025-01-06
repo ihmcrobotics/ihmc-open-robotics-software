@@ -184,18 +184,6 @@ public class CUDASimpleKernelsTest
       assertTrue(thrown.getMessage().contains("cudaErrorSymbolNotFound"));
    }
 
-//   @Test
-//   public void dmumb()
-//   {
-//      testWrongNumberOfKernelVariables();
-//      testPassingInWrongTypeToGPU();
-//      testPassVariableToGPU();
-//      testCreateStreamAfterManager();
-//      testNotSynchronizingStream();
-//      testNoSemicolonInKernel();
-//   }
-
-
    @Test
    public void testNoSemicolonInKernel()
    {
