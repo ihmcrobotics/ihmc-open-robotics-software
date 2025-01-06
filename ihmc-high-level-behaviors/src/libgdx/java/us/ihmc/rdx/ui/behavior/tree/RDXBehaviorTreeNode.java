@@ -136,6 +136,8 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       }
       else
       {
+         // Add spacing to make up for expand collapse not being there
+         ImGui.setCursorPosX(ImGui.getCursorPosX() + ImGuiExpandCollapseRenderer.getPlaceholderWidth());
          treeWidgetExpanded = false;
       }
    }
