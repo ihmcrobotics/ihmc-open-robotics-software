@@ -16,7 +16,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.imageMessage.CompressionType;
-import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.ouster.OusterDepthExtractionKernel;
 import us.ihmc.perception.ouster.OusterNetServer;

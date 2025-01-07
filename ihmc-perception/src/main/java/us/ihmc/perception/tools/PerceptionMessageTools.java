@@ -20,12 +20,12 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.idl.IDLSequence;
-import us.ihmc.perception.CameraModel;
+import us.ihmc.perception.ImageMessageTools;
+import us.ihmc.perception.PixelFormat;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.imageMessage.CompressionType;
-import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.realsense.RealsenseDevice;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
@@ -194,7 +194,7 @@ public class PerceptionMessageTools
                                        @Nullable ByteBuffer ousterBeamAzimuthAngles,
                                        ImageMessage imageMessageToPack)
    {
-      originalImage.packImageMessageMetaData(imageMessageToPack);
+      ImageMessageTools.packImageMessageMetaData(originalImage, imageMessageToPack);
       packImageMessageData(imageMessageToPack, compressedData);
       imageMessageToPack.setCompressionType(compressionType.toByte());
       if (ousterBeamAltitudeAngles != null)

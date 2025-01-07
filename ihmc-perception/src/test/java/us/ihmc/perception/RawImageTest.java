@@ -9,14 +9,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.perception.camera.CameraIntrinsics;
-import us.ihmc.perception.imageMessage.PixelFormat;
 
 import java.time.Instant;
 import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static us.ihmc.perception.imageMessage.PixelFormat.*;
+import static us.ihmc.perception.PixelFormat.*;
 
 public class RawImageTest
 {

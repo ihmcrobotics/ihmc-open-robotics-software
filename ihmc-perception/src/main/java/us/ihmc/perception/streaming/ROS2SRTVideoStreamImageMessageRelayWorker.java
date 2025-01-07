@@ -8,10 +8,11 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2SRTStreamTopicPair;
 import us.ihmc.perception.CameraModel;
+import us.ihmc.perception.ImageMessageTools;
+import us.ihmc.perception.PixelFormat;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.cuda.CUDAJPEGProcessor;
 import us.ihmc.perception.imageMessage.CompressionType;
-import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.ros2.ROS2Node;
@@ -124,7 +125,7 @@ public class ROS2SRTVideoStreamImageMessageRelayWorker
       }
 
       // Pack the image message meta data
-      frame.packImageMessageMetaData(imageMessage);
+      ImageMessageTools.packImageMessageMetaData(frame, imageMessage);
 
       // Send the message
       publisher.publish(imageMessage);

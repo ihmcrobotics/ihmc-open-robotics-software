@@ -10,6 +10,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.PixelFormat;
 import us.ihmc.perception.RawImageTest;
 import us.ihmc.perception.opencv.OpenCVTools;
 

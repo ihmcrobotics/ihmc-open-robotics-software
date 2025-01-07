@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.PixelFormat;
 import us.ihmc.perception.RawImageTest;
 import us.ihmc.perception.cuda.CUDACompressionTools;
 import us.ihmc.perception.cuda.CUDAJPEGProcessor;
@@ -24,7 +25,7 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static us.ihmc.perception.imageMessage.PixelFormat.*;
+import static us.ihmc.perception.PixelFormat.*;
 
 public class ImageMessageDecoderTest
 {

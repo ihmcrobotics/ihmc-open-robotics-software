@@ -3,8 +3,9 @@ package us.ihmc.rdx.ui.graphics.ros2;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.jetbrains.annotations.Nullable;
 import perception_msgs.msg.dds.ImageMessage;
+import us.ihmc.perception.ImageMessageTools;
+import us.ihmc.perception.PixelFormat;
 import us.ihmc.perception.imageMessage.ImageMessageDecoder;
-import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
@@ -95,7 +96,7 @@ public class RDXROS2ImageMessageVisualizer extends RDXROS2OpenCVVideoVisualizer<
          synchronized (imageMessageSwapReference)
          {
             imageMessageB = imageMessageSwapReference.getForThreadTwo();
-            PixelFormat imagePixelFormat = PixelFormat.fromImageMessage(imageMessageB);
+            PixelFormat imagePixelFormat = ImageMessageTools.getPixelFormat(imageMessageB);
 
             /*
              * Depth images can't be directly converted to RGBA, so we must first convert it into an 8 bit gray image by clamping the values,

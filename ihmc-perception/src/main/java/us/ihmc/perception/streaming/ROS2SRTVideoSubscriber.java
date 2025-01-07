@@ -9,8 +9,8 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.PixelFormat;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.ros2.ROS2Topic;
 

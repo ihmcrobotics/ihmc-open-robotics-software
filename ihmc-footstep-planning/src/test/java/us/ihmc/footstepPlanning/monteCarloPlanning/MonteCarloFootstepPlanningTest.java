@@ -16,7 +16,7 @@ import us.ihmc.footstepPlanning.tools.HeightMapTerrainGeneratorTools;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
-import us.ihmc.perception.camera.CameraIntrinsics;
+import us.ihmc.perception.CameraIntrinsics;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.opencl.OpenCLManager;

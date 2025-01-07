@@ -8,10 +8,10 @@ import org.bytedeco.opencv.opencv_core.MatExpr;
 import org.bytedeco.opencv.opencv_core.MatVector;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Scalar;
+import us.ihmc.perception.CameraIntrinsics;
 import us.ihmc.perception.CameraModel;
+import us.ihmc.perception.PixelFormat;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.camera.CameraIntrinsics;
-import us.ihmc.perception.imageMessage.PixelFormat;
 
 import java.util.HashMap;
 import java.util.Map;

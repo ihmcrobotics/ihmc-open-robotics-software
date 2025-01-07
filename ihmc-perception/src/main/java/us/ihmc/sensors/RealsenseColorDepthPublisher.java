@@ -20,6 +20,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.CameraModel;
+import us.ihmc.perception.ImageMessageTools;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.logging.HDF5Tools;
 import us.ihmc.perception.logging.PerceptionDataLogger;
@@ -171,7 +172,7 @@ public class RealsenseColorDepthPublisher
             OpenCVTools.compressImagePNG(depth16UC1Image, compressedDepthPointer);
 
             PerceptionMessageTools.setDepthIntrinsicsFromRealsense(realsense, depthImageMessage);
-            CameraModel.PINHOLE.packMessageFormat(depthImageMessage);
+            ImageMessageTools.setCameraModel(CameraModel.PINHOLE, depthImageMessage);
             PerceptionMessageTools.publishCompressedDepthImage(compressedDepthPointer,
                                                                depthTopic,
                                                                depthImageMessage,
@@ -202,7 +203,7 @@ public class RealsenseColorDepthPublisher
             OpenCVTools.compressRGBImageJPG(color8UC3Image, yuvColorImage, compressedColorPointer);
 
             PerceptionMessageTools.setColorIntrinsicsFromRealsense(realsense, colorImageMessage);
-            CameraModel.PINHOLE.packMessageFormat(colorImageMessage);
+            ImageMessageTools.setCameraModel(CameraModel.PINHOLE, colorImageMessage);
             PerceptionMessageTools.publishJPGCompressedColorImage(compressedColorPointer,
                                                                   colorTopic,
                                                                   colorImageMessage,

@@ -8,12 +8,12 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.perception.CameraIntrinsics;
 import us.ihmc.perception.CameraModel;
+import us.ihmc.perception.PixelFormat;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.detections.centerPose.CenterPoseInstantDetection;
 import us.ihmc.perception.detections.yolo.YOLOv8InstantDetection;
-import us.ihmc.perception.imageMessage.PixelFormat;
 
 import java.time.Duration;
 import java.time.Instant;

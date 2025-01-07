@@ -11,9 +11,11 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.CameraIntrinsics;
 import us.ihmc.perception.CameraModel;
+import us.ihmc.perception.ImageMessageTools;
+import us.ihmc.perception.PixelFormat;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.cuda.CUDACompressionTools;
 import us.ihmc.perception.cuda.CUDAJPEGProcessor;
 import us.ihmc.perception.cuda.CUDATools;
@@ -74,7 +76,7 @@ public class ImageMessageDecoder
       resizeToMessageDimensions(messageToDecode, imageToPack);
       messageDataExtractor.extract(messageToDecode);
 
-      lastImagePixelFormat = PixelFormat.fromImageMessage(messageToDecode);
+      lastImagePixelFormat = ImageMessageTools.getPixelFormat(messageToDecode);
 
       switch (CompressionType.fromImageMessage(messageToDecode))
       {
@@ -140,7 +142,7 @@ public class ImageMessageDecoder
       resizeToMessageDimensions(messageToDecode, imageToPack);
       messageDataExtractor.extract(messageToDecode);
 
-      lastImagePixelFormat = PixelFormat.fromImageMessage(messageToDecode);
+      lastImagePixelFormat = ImageMessageTools.getPixelFormat(messageToDecode);
 
       switch (CompressionType.fromImageMessage(messageToDecode))
       {

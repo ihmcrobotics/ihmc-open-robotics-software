@@ -88,6 +88,8 @@ mainDependencies {
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:robot-environment-awareness:source")
 
+   api("us.ihmc:ihmc-perception-tools:source")
+
    // Previously used for HeightMapAutoencoder and FootstepPredictor
    // This is a very large dependency, only uncomment for testing purposes
    // api("com.microsoft.onnxruntime:onnxruntime:1.11.0")

@@ -5,7 +5,7 @@ import org.bytedeco.ffmpeg.global.avutil;
 import org.bytedeco.opencv.global.opencv_core;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.BytedecoImage;
-import us.ihmc.perception.camera.CameraIntrinsics;
+import us.ihmc.perception.CameraIntrinsics;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.RDXPanel;
