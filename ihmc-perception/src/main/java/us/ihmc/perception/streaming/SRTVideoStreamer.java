@@ -27,7 +27,7 @@ import static org.bytedeco.ffmpeg.global.avutil.*;
 // TODO: Make abstract SRTStreamer class and extend to video and audio
 public class SRTVideoStreamer
 {
-   private static final String DEFAULT_OUTPUT_FORMAT = "hevc";
+   private static final String DEFAULT_OUTPUT_FORMAT = "mpegts";
    private static final String DEFAULT_CODEC = "hevc_nvenc"; // TODO: use other codec if CUDA not available
    private static final int OUTPUT_PIXEL_FORMAT = AV_PIX_FMT_YUV444P;
    private static final int GOP_SIZE = 5; // send 5 P frames between key frames
