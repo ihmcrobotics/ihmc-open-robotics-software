@@ -5,18 +5,14 @@ import org.bytedeco.cuda.cudart.dim3;
 import org.bytedeco.javacpp.FloatPointer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
 
 import java.net.URL;
 
-import static org.bytedeco.cuda.global.cudart.*;
-import static org.bytedeco.cuda.global.cudart.cudaMemcpyDefault;
+import static org.bytedeco.cuda.global.cudart.cudaFreeAsync;
+import static org.bytedeco.cuda.global.cudart.cudaStreamSynchronize;
 import static org.junit.jupiter.api.Assertions.*;
 
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class CUDASimpleKernelsTest
 {
    private CUstream_st stream;
@@ -148,28 +144,6 @@ public class CUDASimpleKernelsTest
       kernel.run(stream, new dim3(), new dim3(), 0);
 
       cudaStreamSynchronize(stream);
-   }
-
-   /**
-    * A stream needs to be created before creating a CUDAProgram. This should throw an exception if the program is created first.
-    * This test checks that an exception is thrown and that `cudaErrorDeviceUninitialized` is in the message
-    */
-   // Needed to have this test run first because if this test doesn't run first it will fail.
-   // TODO this is not good as independent order is important as these tests should be independent
-   @Order(1)
-   @Test
-   public void testCreateStreamAfterManager()
-   {
-      // In order for this test to pass the stream needs to be null
-      stream = null;
-      URL kernelPath = getClass().getResource("CUDASimpleKernels.cu");
-      RuntimeException thrown = assertThrows(RuntimeException.class, () ->
-      {
-         CUDAProgram program = new CUDAProgram(kernelPath);
-         program.close();
-      });
-
-      assertTrue(thrown.getMessage().contains("cudaErrorDeviceUninitialized"));
    }
 
    /**

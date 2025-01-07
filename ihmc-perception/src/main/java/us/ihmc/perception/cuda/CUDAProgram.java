@@ -9,14 +9,11 @@ import org.bytedeco.javacpp.PointerPointer;
 import org.bytedeco.javacpp.SizeTPointer;
 import us.ihmc.log.LogTools;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 
 import static org.bytedeco.cuda.global.cudart.*;
 import static org.bytedeco.cuda.global.nvrtc.*;
@@ -197,6 +194,10 @@ public class CUDAProgram implements AutoCloseable
    private void initialize(String programName, String programCode, String[] headerNames, String[] headerContents, String[] compilationOptions)
    {
       int error;
+
+      // Perform some CUDA Runtime API call to automatically initialize CUDA, if it hasn't been initialized yet
+      error = cudaFree(null);
+      checkCUDAError(error);
 
       // Compile the program
       _nvrtcProgram compiledProgram = new _nvrtcProgram();
