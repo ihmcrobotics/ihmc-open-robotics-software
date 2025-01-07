@@ -226,7 +226,7 @@ public class SRTStreamerSubscriberTest
       SRTVideoStreamer streamer = new SRTVideoStreamer(localAddress);
       Map<String, String> encoderOptions = StreamingTools.getHEVCNVENCStreamingOptions();
       encoderOptions.put("udu_sei", "1");
-      streamer.initialize(sampleImage.cols(), sampleImage.rows(), AV_PIX_FMT_BGR24, AV_PIX_FMT_YUV444P, -1, "hevc", "hevc_nvenc", encoderOptions, false);
+      streamer.initialize(sampleImage.cols(), sampleImage.rows(), AV_PIX_FMT_BGR24, AV_PIX_FMT_YUV444P, -1, "mpegts", "hevc_nvenc", encoderOptions, false);
       assertEquals(0, streamer.connectedCallerCount());
 
       String message = "Hello World!";
