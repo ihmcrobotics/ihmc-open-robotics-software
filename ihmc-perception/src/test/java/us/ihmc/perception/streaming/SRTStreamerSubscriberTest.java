@@ -284,7 +284,7 @@ public class SRTStreamerSubscriberTest
 
       // Create and initialize the streamer
       ROS2SRTVideoStreamer streamer = new ROS2SRTVideoStreamer(ROS2_NODE, requestTopic, localAddress);
-      streamer.initializeForColor(rawImage);
+      streamer.initializeForColor(rawImage, AV_PIX_FMT_BGR24);
 
       // Create the subscriber
       ROS2SRTVideoSubscriber subscriber = new ROS2SRTVideoSubscriber(ROS2_HELPER, requestTopic, PixelFormat.BGR8);
