@@ -13,7 +13,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.CameraIntrinsics;
 import us.ihmc.perception.CameraModel;
-import us.ihmc.perception.ImageMessageTools;
 import us.ihmc.perception.PixelFormat;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.cuda.CUDACompressionTools;

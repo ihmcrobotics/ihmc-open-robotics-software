@@ -3,7 +3,7 @@ package us.ihmc.rdx.ui.graphics.ros2;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.jetbrains.annotations.Nullable;
 import perception_msgs.msg.dds.ImageMessage;
-import us.ihmc.perception.ImageMessageTools;
+import us.ihmc.perception.imageMessage.ImageMessageTools;
 import us.ihmc.perception.PixelFormat;
 import us.ihmc.perception.imageMessage.ImageMessageDecoder;
 import us.ihmc.perception.OpenCVTools;

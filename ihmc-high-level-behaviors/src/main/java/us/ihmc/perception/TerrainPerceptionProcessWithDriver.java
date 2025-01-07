@@ -17,6 +17,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.depthData.CollisionBoxProvider;
+import us.ihmc.perception.imageMessage.ImageMessageTools;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
 import us.ihmc.perception.realsense.RealsenseConfiguration;

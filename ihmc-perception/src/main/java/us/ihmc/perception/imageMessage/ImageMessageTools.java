@@ -1,7 +1,10 @@
-package us.ihmc.perception;
+package us.ihmc.perception.imageMessage;
 
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.perception.CameraModel;
+import us.ihmc.perception.PixelFormat;
+import us.ihmc.perception.RawImage;
 
 public final class ImageMessageTools
 {

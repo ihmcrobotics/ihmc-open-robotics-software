@@ -8,7 +8,7 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2SRTStreamTopicPair;
 import us.ihmc.perception.CameraModel;
-import us.ihmc.perception.ImageMessageTools;
+import us.ihmc.perception.imageMessage.ImageMessageTools;
 import us.ihmc.perception.PixelFormat;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.cuda.CUDAJPEGProcessor;
