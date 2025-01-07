@@ -272,8 +272,14 @@ public class RDXRawImagePointCloudVisualizer extends RDXVisualizer
    {
       super.destroy();
 
-      depthImageHistory.forEach(RawImage::release);
-      colorImageHistory.forEach(RawImage::release);
+      synchronized (depthImageHistory)
+      {
+         depthImageHistory.forEach(RawImage::release);
+      }
+      synchronized (colorImageHistory)
+      {
+         colorImageHistory.forEach(RawImage::release);
+      }
 
       if (pointCloudRenderer != null)
          pointCloudRenderer.dispose();
