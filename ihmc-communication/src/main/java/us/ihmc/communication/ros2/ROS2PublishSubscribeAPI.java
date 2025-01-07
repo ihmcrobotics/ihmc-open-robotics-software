@@ -35,6 +35,9 @@ public interface ROS2PublishSubscribeAPI
    /** Allocation free version with size 16 ring buffer. */
    public <T> ConcurrentRingBuffer<T> subscribeViaQueue(ROS2Topic<T> topic);
 
+   /** Allocation free version with size 16 ring buffer. Callback allows immediate temporary access to message. */
+   public <T> ConcurrentRingBuffer<T> subscribeViaQueue(ROS2Topic<T> topic, Consumer<T> callback);
+
    public void subscribeViaCallback(ROS2Topic<Empty> topic, Runnable callback);
 
    public <T> ROS2Input<T> subscribe(ROS2Topic<T> topic);

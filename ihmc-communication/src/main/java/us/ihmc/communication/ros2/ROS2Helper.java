@@ -67,6 +67,12 @@ public class ROS2Helper implements ROS2PublishSubscribeAPI
    @Override
    public <T> ConcurrentRingBuffer<T> subscribeViaQueue(ROS2Topic<T> topic)
    {
+      return subscribeViaQueue(topic, message -> { });
+   }
+
+   @Override
+   public <T> ConcurrentRingBuffer<T> subscribeViaQueue(ROS2Topic<T> topic, Consumer<T> callback)
+   {
       TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(topic.getType());
       int queueSize = 16;
       ConcurrentRingBuffer<T> concurrentQueue = new ConcurrentRingBuffer<>(topicDataType::createData, queueSize);
@@ -77,6 +83,7 @@ public class ROS2Helper implements ROS2PublishSubscribeAPI
          {
             if (subscriber.takeNextData(nextData, null))
             {
+               callback.accept(nextData);
                concurrentQueue.commit();
             }
          }
