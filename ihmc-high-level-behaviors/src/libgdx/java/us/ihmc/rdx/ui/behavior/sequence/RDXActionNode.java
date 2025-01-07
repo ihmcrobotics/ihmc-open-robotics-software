@@ -7,6 +7,7 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.sequence.ActionNodeDefinition;
 import us.ihmc.behaviors.sequence.ActionNodeState;
+import us.ihmc.rdx.imgui.ImGuiExpandCollapseRenderer;
 import us.ihmc.rdx.imgui.ImGuiFlashingColors;
 import us.ihmc.rdx.imgui.ImGuiFlashingText;
 import us.ihmc.rdx.imgui.ImGuiHollowArrowRenderer;
@@ -61,6 +62,9 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
       RDXBehaviorTreeRootNode actionSequence = RDXBehaviorTreeTools.findRootNode(this);
       if (actionSequence != null)
       {
+         // The arrow can move back to take the place of the expand collapse, since this is a leaf node
+         ImGui.setCursorPosX(ImGui.getCursorPosX() - ImGuiExpandCollapseRenderer.getPlaceholderWidth());
+
          // Not displaying this now until we calculate it correctly. @dcalvert
           if (state.getConcurrencyRank() != 1)
           {
