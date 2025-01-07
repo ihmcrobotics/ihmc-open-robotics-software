@@ -26,23 +26,6 @@ mainDependencies {
    api("net.java.dev.jna:jna:4.1.0")
 
    api("org.bytedeco:javacpp:1.5.9")
-   val openblasVersion = "0.3.23-1.5.9"
-   api("org.bytedeco:openblas:$openblasVersion")
-   api("org.bytedeco:openblas:$openblasVersion:linux-x86_64")
-   api("org.bytedeco:openblas:$openblasVersion:linux-arm64")
-   api("org.bytedeco:openblas:$openblasVersion:windows-x86_64")
-   val opencvVersion = "4.7.0-1.5.9"
-   api("org.bytedeco:opencv:$opencvVersion")
-   api("org.bytedeco:opencv:$opencvVersion:linux-x86_64")
-   api("org.bytedeco:opencv:$opencvVersion:linux-arm64")
-   api("org.bytedeco:opencv:$opencvVersion:windows-x86_64")
-   api("org.bytedeco:opencv:$opencvVersion:linux-x86_64-gpu")
-   api("org.bytedeco:opencv:$opencvVersion:windows-x86_64-gpu")
-   val ffmpegVersion = "6.0-1.5.9"
-   api("org.bytedeco:ffmpeg:$ffmpegVersion")
-   api("org.bytedeco:ffmpeg:$ffmpegVersion:linux-x86_64")
-   api("org.bytedeco:ffmpeg:$ffmpegVersion:linux-arm64")
-   api("org.bytedeco:ffmpeg:$ffmpegVersion:windows-x86_64")
    val openclVersion = "3.0-1.5.9"
    api("org.bytedeco:opencl:$openclVersion")
    api("org.bytedeco:opencl:$openclVersion:linux-x86_64")
@@ -71,19 +54,6 @@ mainDependencies {
    api("org.bytedeco:hdf5:$hdf5Version:linux-x86_64")
    // No arm64 version
    api("org.bytedeco:hdf5:$hdf5Version:windows-x86_64")
-   val cudaVersion = "12.3-8.9-1.5.10"
-   api("org.bytedeco:cuda:$cudaVersion") {
-      exclude(group = "org.bytedeco", module = "javacpp")
-   }
-   api("org.bytedeco:cuda:$cudaVersion:linux-x86_64") {
-      exclude(group = "org.bytedeco", module = "javacpp")
-   }
-   api("org.bytedeco:cuda:$cudaVersion:linux-arm64") {
-      exclude(group = "org.bytedeco", module = "javacpp")
-   }
-   api("org.bytedeco:cuda:$cudaVersion:windows-x86_64") {
-      exclude(group = "org.bytedeco", module = "javacpp")
-   }
 
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:robot-environment-awareness:source")
