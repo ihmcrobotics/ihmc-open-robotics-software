@@ -17,7 +17,7 @@ import us.ihmc.perception.ffmpeg.FFmpegHardwareVideoEncoder;
 import us.ihmc.perception.ffmpeg.FFmpegSoftwareVideoEncoder;
 import us.ihmc.perception.ffmpeg.FFmpegTools;
 import us.ihmc.perception.ffmpeg.FFmpegVideoEncoder;
-import us.ihmc.perception.opencv.OpenCVTools;
+import us.ihmc.perception.OpenCVTools;
 import us.ihmc.perception.streaming.StreamingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;

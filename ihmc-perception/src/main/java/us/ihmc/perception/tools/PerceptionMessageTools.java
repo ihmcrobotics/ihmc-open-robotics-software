@@ -26,7 +26,7 @@ import us.ihmc.perception.RawImage;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.imageMessage.CompressionType;
-import us.ihmc.perception.opencv.OpenCVTools;
+import us.ihmc.perception.OpenCVTools;
 import us.ihmc.perception.realsense.RealsenseDevice;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;

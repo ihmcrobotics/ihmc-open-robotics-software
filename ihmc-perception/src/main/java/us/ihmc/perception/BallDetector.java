@@ -16,7 +16,6 @@ import org.bytedeco.opencv.opencv_core.RotatedRect;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import org.bytedeco.opencv.opencv_core.Size;
 import org.bytedeco.opencv.opencv_cudafilters.Filter;
-import us.ihmc.perception.opencv.OpenCVTools;
 
 import java.util.Arrays;
 import java.util.Comparator;

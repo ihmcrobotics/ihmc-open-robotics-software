@@ -4,7 +4,7 @@ import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.opencv.global.opencv_core;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.opencv.OpenCVTools;
+import us.ihmc.perception.OpenCVTools;
 
 import java.io.File;
 import java.io.FileWriter;

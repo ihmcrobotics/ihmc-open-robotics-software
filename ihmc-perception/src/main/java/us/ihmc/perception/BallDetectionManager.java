@@ -10,7 +10,6 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.imageMessage.CompressionType;
-import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotics.math.filters.AlphaFilteredRigidBodyTransform;
 

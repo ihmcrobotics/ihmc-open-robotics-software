@@ -13,7 +13,7 @@ import us.ihmc.perception.PixelFormat;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.cuda.CUDAJPEGProcessor;
 import us.ihmc.perception.imageMessage.CompressionType;
-import us.ihmc.perception.opencv.OpenCVTools;
+import us.ihmc.perception.OpenCVTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;

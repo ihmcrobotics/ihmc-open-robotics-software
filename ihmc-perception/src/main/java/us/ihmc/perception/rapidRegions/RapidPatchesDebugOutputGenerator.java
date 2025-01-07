@@ -13,7 +13,7 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.perception.BytedecoImage;
-import us.ihmc.perception.opencv.OpenCVTools;
+import us.ihmc.perception.OpenCVTools;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 
 import java.nio.FloatBuffer;

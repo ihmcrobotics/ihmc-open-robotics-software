@@ -17,10 +17,9 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.perception.CameraIntrinsics;
+import us.ihmc.perception.OpenCVTools;
 import us.ihmc.perception.PixelFormat;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.RawImageTest;
-import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2Topic;
@@ -60,7 +59,7 @@ public class SRTStreamerSubscriberTest
    @BeforeAll
    public static void readSampleImage() throws URISyntaxException, IOException
    {
-      byte[] imageBytes = Files.readAllBytes(Path.of(Objects.requireNonNull(RawImageTest.class.getResource("zedColorBGR.raw")).toURI()));
+      byte[] imageBytes = Files.readAllBytes(Path.of(Objects.requireNonNull(SRTStreamerSubscriberTest.class.getResource("zedColorBGR.raw")).toURI()));
       sampleImage = new Mat(720, 1280, opencv_core.CV_8UC3, new BytePointer(imageBytes));
    }
 

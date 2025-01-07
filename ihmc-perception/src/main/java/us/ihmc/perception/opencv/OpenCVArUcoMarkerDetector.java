@@ -11,6 +11,7 @@ import org.bytedeco.opencv.opencv_objdetect.Dictionary;
 import org.bytedeco.opencv.opencv_objdetect.RefineParameters;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.perception.CameraIntrinsics;
+import us.ihmc.perception.OpenCVTools;
 
 /**
  * Thin wrapper over OpenCV's {@link ArucoDetector} to make it

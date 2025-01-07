@@ -8,8 +8,7 @@ import org.bytedeco.opencv.opencv_core.Scalar;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.RawImageTest;
-import us.ihmc.perception.opencv.OpenCVTools;
+import us.ihmc.perception.OpenCVTools;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -26,8 +25,8 @@ public class CUDACompressionToolsTest
    @BeforeAll
    public static void loadFiles() throws URISyntaxException
    {
-      zedColorBGRPath = Path.of(RawImageTest.class.getResource("zedColorBGR.raw").toURI());
-      zedDepth16UPath = Path.of(RawImageTest.class.getResource("zedDepth16U.raw").toURI());
+      zedColorBGRPath = Path.of(CUDACompressionToolsTest.class.getResource("zedColorBGR.raw").toURI());
+      zedDepth16UPath = Path.of(CUDACompressionToolsTest.class.getResource("zedDepth16U.raw").toURI());
    }
 
    @Test

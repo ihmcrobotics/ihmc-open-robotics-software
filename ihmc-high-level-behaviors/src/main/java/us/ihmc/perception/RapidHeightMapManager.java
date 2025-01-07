@@ -20,7 +20,6 @@ import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractorCUDA;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractorInterface;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.opencl.OpenCLManager;
-import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 

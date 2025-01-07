@@ -25,7 +25,7 @@ import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.logging.HDF5Tools;
 import us.ihmc.perception.logging.PerceptionDataLogger;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
-import us.ihmc.perception.opencv.OpenCVTools;
+import us.ihmc.perception.OpenCVTools;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.perception.realsense.RealsenseDevice;

@@ -11,7 +11,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.opencv.OpenCVTools;
+import us.ihmc.perception.OpenCVTools;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.thread.ExecutorServiceTools;

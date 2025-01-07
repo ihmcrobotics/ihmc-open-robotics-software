@@ -3,7 +3,7 @@ package us.ihmc.perception.tools;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.perception.logging.PerceptionDataLogger;
-import us.ihmc.perception.opencv.OpenCVTools;
+import us.ihmc.perception.OpenCVTools;
 
 public class PerceptionLoggingTools
 {

@@ -9,11 +9,10 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.OpenCVTools;
 import us.ihmc.perception.PixelFormat;
-import us.ihmc.perception.RawImageTest;
 import us.ihmc.perception.cuda.CUDACompressionTools;
 import us.ihmc.perception.cuda.CUDAJPEGProcessor;
-import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 
 import java.io.IOException;
@@ -40,8 +39,8 @@ public class ImageMessageDecoderTest
    @BeforeAll
    public static void loadImages() throws URISyntaxException, IOException
    {
-      Path zedColorBGRPath = Path.of(Objects.requireNonNull(RawImageTest.class.getResource("zedColorBGR.raw")).toURI());
-      Path zedDepth16UPath = Path.of(Objects.requireNonNull(RawImageTest.class.getResource("zedDepth16U.raw")).toURI());
+      Path zedColorBGRPath = Path.of(Objects.requireNonNull(ImageMessageDecoderTest.class.getResource("zedColorBGR.raw")).toURI());
+      Path zedDepth16UPath = Path.of(Objects.requireNonNull(ImageMessageDecoderTest.class.getResource("zedDepth16U.raw")).toURI());
 
       byte[] colorBytes = Files.readAllBytes(zedColorBGRPath);
       byte[] depthBytes = Files.readAllBytes(zedDepth16UPath);

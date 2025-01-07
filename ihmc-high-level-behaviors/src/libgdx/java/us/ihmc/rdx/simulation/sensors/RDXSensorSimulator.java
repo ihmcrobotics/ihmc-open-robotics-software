@@ -17,7 +17,7 @@ import us.ihmc.perception.CameraIntrinsics;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.PixelFormat;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.opencv.OpenCVTools;
+import us.ihmc.perception.OpenCVTools;
 import us.ihmc.rdx.sceneManager.RDX3DScene;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;

@@ -12,7 +12,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.MutableBytePointer;
 import us.ihmc.perception.logging.PerceptionDataLogger;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
-import us.ihmc.perception.opencv.OpenCVTools;
+import us.ihmc.perception.OpenCVTools;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.perception.realsense.RealsenseDevice;
 import us.ihmc.perception.realsense.RealsenseDeviceManager;

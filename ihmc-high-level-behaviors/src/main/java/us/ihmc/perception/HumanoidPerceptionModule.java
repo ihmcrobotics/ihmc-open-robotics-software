@@ -22,7 +22,6 @@ import us.ihmc.perception.filters.CollidingScanRegionFilter;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.heightMap.RemoteHeightMapUpdater;
 import us.ihmc.perception.opencl.OpenCLManager;
-import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.timing.PerceptionStatistics;

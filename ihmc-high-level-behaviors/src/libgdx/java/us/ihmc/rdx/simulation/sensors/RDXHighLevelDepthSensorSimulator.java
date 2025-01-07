@@ -44,7 +44,7 @@ import us.ihmc.perception.elements.DiscretizedColoredPointCloud;
 import us.ihmc.perception.opencl.OpenCLFloatBuffer;
 import us.ihmc.perception.opencl.OpenCLIntBuffer;
 import us.ihmc.perception.opencl.OpenCLManager;
-import us.ihmc.perception.opencv.OpenCVTools;
+import us.ihmc.perception.OpenCVTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.rdx.RDXPointCloudRendererOld;
 import us.ihmc.rdx.imgui.ImGuiTools;

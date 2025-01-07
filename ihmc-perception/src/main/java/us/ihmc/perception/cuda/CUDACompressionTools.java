@@ -19,7 +19,7 @@ import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.opencv.OpenCVTools;
+import us.ihmc.perception.OpenCVTools;
 
 import static org.bytedeco.cuda.global.cudart.*;
 import static us.ihmc.perception.cuda.CUDATools.*;

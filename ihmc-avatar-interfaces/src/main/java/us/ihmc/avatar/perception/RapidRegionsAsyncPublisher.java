@@ -9,7 +9,7 @@ import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.opencl.OpenCLManager;
-import us.ihmc.perception.opencv.OpenCVTools;
+import us.ihmc.perception.OpenCVTools;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;

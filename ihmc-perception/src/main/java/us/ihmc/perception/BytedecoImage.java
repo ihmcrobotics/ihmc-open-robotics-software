@@ -6,7 +6,6 @@ import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.perception.opencl.OpenCLManager;
-import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.NativeMemoryTools;
 
 import java.nio.ByteBuffer;
@@ -330,5 +329,10 @@ public class BytedecoImage
    public BytePointer getPointerForAccessSpeed()
    {
       return pointerForAccessSpeed;
+   }
+
+   public static boolean dimensionsMatch(BytedecoImage a, BytedecoImage b)
+   {
+      return a.getImageWidth() == b.getImageWidth() && a.getImageHeight() == b.getImageHeight();
    }
 }

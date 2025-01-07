@@ -24,7 +24,7 @@ import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.CameraIntrinsics;
 import us.ihmc.perception.opencl.OpenCLFloatBuffer;
 import us.ihmc.perception.opencl.OpenCLManager;
-import us.ihmc.perception.opencv.OpenCVTools;
+import us.ihmc.perception.OpenCVTools;
 import us.ihmc.rdx.RDXPointCloudRendererOld;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.perception.RDXBytedecoImagePanel;

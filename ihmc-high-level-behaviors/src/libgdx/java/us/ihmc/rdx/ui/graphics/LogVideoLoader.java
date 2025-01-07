@@ -1,16 +1,20 @@
 package us.ihmc.rdx.ui.graphics;
 
 import gnu.trove.list.array.TLongArrayList;
+import org.bytedeco.javacv.Java2DFrameUtils;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_videoio.VideoCapture;
 import us.ihmc.codecs.demuxer.MP4VideoDemuxer;
 import us.ihmc.codecs.generated.YUVPicture;
 import us.ihmc.codecs.yuv.YUVPictureConverter;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.opencv.OpenCVTools;
 
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -100,7 +104,8 @@ public class LogVideoLoader
          YUVPicture nextFrame = demuxer.getNextFrame();
          BufferedImage bufImage = converter.toBufferedImage(nextFrame);
 
-         Mat mat = OpenCVTools.convertBufferedImageToMat(bufImage);
+         // TODO: Remove JavaCV dependency
+         Mat mat = Java2DFrameUtils.toMat(bufImage);
 
          return mat;
       }
