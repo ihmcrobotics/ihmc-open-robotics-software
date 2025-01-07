@@ -53,13 +53,19 @@ public class CUDASimpleKernelsTest
       kernel = program.loadKernel("pass_in_variable");
 
       FloatPointer gpuResult = new FloatPointer();
-      cudaMallocAsync(gpuResult, gpuResult.sizeof(), stream);
+
+      // The convention is to use CUDATools for allocating memory at the moment
+      CUDATools.mallocAsync(gpuResult, gpuResult.sizeof(), stream);
+//      cudaMallocAsync(gpuResult, gpuResult.sizeof(), stream);
 
       kernel.withInt(5).withPointer(gpuResult);
       kernel.run(stream, new dim3(), new dim3(), 0);
 
       FloatPointer cpuResult = new FloatPointer(1F);
-      cudaMemcpyAsync(cpuResult, gpuResult, cpuResult.sizeof(), cudaMemcpyDefault, stream);
+
+      // The convention is to use CUDATools for allocating memory at the moment
+      CUDATools.memcpyAsync(cpuResult, gpuResult, cpuResult.sizeof(), stream);
+//      cudaMemcpyAsync(cpuResult, gpuResult, cpuResult.sizeof(), cudaMemcpyDefault, stream);
       cudaStreamSynchronize(stream);
 
       int expectedValue = 5; // This is the value passed into the kernel as the first parameter in (kernel.withInt(5))
