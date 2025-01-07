@@ -113,6 +113,9 @@ public class CUDATools
       }
    }
 
+   /**
+    * @return The URL to the Utils.cu file
+    */
    public static URL getUtilsFile()
    {
       return CUDATools.class.getResource("Utils.cu");

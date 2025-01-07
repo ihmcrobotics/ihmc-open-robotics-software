@@ -136,6 +136,8 @@ public abstract class FFmpegVideoEncoder extends FFmpegEncoder
    {
       AVBufferRef seiBuffer;
 
+      // Only the NVENC and x264/5 encoders can accept side data.
+      // Since we can't use x264/5, we ensure the encoder is from NVENC
       String encoderName = encoder.name().getString();
       if (encoderName.contains("nvenc"))
       {

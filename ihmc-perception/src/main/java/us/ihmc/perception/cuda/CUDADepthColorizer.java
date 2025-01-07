@@ -9,6 +9,9 @@ import java.net.URL;
 
 import static org.bytedeco.cuda.global.cudart.cudaStreamSynchronize;
 
+/**
+ * Class for colorizing and de-colorizing 16 bit depth data using CUDA kernels.
+ */
 public class CUDADepthColorizer
 {
    private static final int BLOCK_DIM_XY = 16;
@@ -30,6 +33,12 @@ public class CUDADepthColorizer
       decoder = program.loadKernel("deColorizeDepth");
    }
 
+   /**
+    * Performs colorization on the passed in depth image.
+    *
+    * @param depthImage The 16 bit 1 channel depth image to colorize.
+    * @return A new image containing 8 bit 3 channel colorized depth.
+    */
    public GpuMat colorizeDepth(GpuMat depthImage)
    {
       GpuMat colorizedDepth = new GpuMat(depthImage.size(), opencv_core.CV_8UC3);
@@ -53,6 +62,12 @@ public class CUDADepthColorizer
       return colorizedDepth;
    }
 
+   /**
+    * Performs de-colorization on the passed in colorized depth image.
+    *
+    * @param colorizedDepthImage The 8 bit 3 channel colorized depth image to de-colorize.
+    * @return A new image containing 16 bit 1 channel depth data.
+    */
    public GpuMat deColorizeDepth(GpuMat colorizedDepthImage)
    {
       GpuMat deColorizedDepth = new GpuMat(colorizedDepthImage.size(), opencv_core.CV_16UC1);
