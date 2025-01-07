@@ -59,9 +59,9 @@ public class ROS2SRTVideoStreamer
       sendFrequencyCalculator = new FrequencyCalculator();
    }
 
-   public void initializeForColor(RawImage exampleImage)
+   public void initializeForColor(RawImage exampleImage, int inputPixelFormat)
    {
-      initializeForColor(exampleImage.getWidth(), exampleImage.getHeight(), exampleImage.getPixelFormat().toFFmpegPixelFormat());
+      initializeForColor(exampleImage.getWidth(), exampleImage.getHeight(), inputPixelFormat);
    }
 
    public void initializeForColor(int imageWidth, int imageHeight, int inputPixelFormat)
@@ -69,13 +69,9 @@ public class ROS2SRTVideoStreamer
       initializeForColor(imageWidth, imageHeight, inputPixelFormat, -1, false);
    }
 
-   public void initializeForColor(RawImage exampleImage, int intermediateColorConversion, boolean useHardwareAcceleration)
+   public void initializeForColor(RawImage exampleImage, int inputPixelFormat, int intermediateColorConversion, boolean useHardwareAcceleration)
    {
-      initializeForColor(exampleImage.getWidth(),
-                         exampleImage.getHeight(),
-                         exampleImage.getPixelFormat().toFFmpegPixelFormat(),
-                         intermediateColorConversion,
-                         useHardwareAcceleration);
+      initializeForColor(exampleImage.getWidth(), exampleImage.getHeight(), inputPixelFormat, intermediateColorConversion, useHardwareAcceleration);
    }
 
    public void initializeForColor(int imageWidth, int imageHeight, int inputPixelFormat, int intermediateColorConversion, boolean useHardwareAcceleration)
@@ -83,11 +79,15 @@ public class ROS2SRTVideoStreamer
       initializeForColor(imageWidth, imageHeight, inputPixelFormat, intermediateColorConversion, useHardwareAcceleration, false);
    }
 
-   public void initializeForColor(RawImage exampleImage, int intermediateColorConversion, boolean useHardwareAcceleration, boolean highQuality)
+   public void initializeForColor(RawImage exampleImage,
+                                  int inputPixelFormat,
+                                  int intermediateColorConversion,
+                                  boolean useHardwareAcceleration,
+                                  boolean highQuality)
    {
       initializeForColor(exampleImage.getWidth(),
                          exampleImage.getHeight(),
-                         exampleImage.getPixelFormat().toFFmpegPixelFormat(),
+                         inputPixelFormat,
                          intermediateColorConversion,
                          useHardwareAcceleration,
                          highQuality);

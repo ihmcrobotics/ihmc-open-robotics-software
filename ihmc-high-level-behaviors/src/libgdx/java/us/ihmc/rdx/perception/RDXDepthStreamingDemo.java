@@ -9,7 +9,7 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.cuda.CUDADepthColorizer;
 import us.ihmc.perception.imageMessage.PixelFormat;
-import us.ihmc.perception.streaming.ROS2SRTVideoStreamer;
+import us.ihmc.perception.streaming.ROS2SRTSensorStreamer;
 import us.ihmc.perception.streaming.ROS2SRTVideoSubscriber;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -32,15 +32,16 @@ public class RDXDepthStreamingDemo
    private final ZEDSVOPlaybackSensor zed = new ZEDSVOPlaybackSensor(ros2Helper, 0, ZEDModelData.ZED_2, SVO_FILE);
 
    private final CUDADepthColorizer depthColorizer = new CUDADepthColorizer();
-   private final ROS2SRTVideoStreamer videoStreamer = new ROS2SRTVideoStreamer(ros2Node, PerceptionAPI.SRT_ZED_DEPTH_STREAM_STATUS);
-   private final ROS2SRTVideoSubscriber videoSubscriber = new ROS2SRTVideoSubscriber(ros2Helper, PerceptionAPI.SRT_ZED_DEPTH_STREAM_STATUS, PixelFormat.YUV444P);
+   private final ROS2SRTSensorStreamer sensorStreamer = new ROS2SRTSensorStreamer(ros2Node);
+   private final ROS2SRTVideoSubscriber depthSubscriber = new ROS2SRTVideoSubscriber(ros2Helper, PerceptionAPI.SRT_ZED_DEPTH_STREAM_STATUS, PixelFormat.YUV444P);
+   private final ROS2SRTVideoSubscriber colorSubscriber = new ROS2SRTVideoSubscriber(ros2Helper, PerceptionAPI.SRT_ZED_LEFT_COLOR_STREAM_STATUS, PixelFormat.RGBA8);
 
    private final RepeatingTaskThread zedPublishThread = new RepeatingTaskThread("ZEDPublish", this::publishZED);
 
    private final RDXBaseUI baseUI = new RDXBaseUI(getClass().getSimpleName());
-   private final RDXOpenCVVideoVisualizer sentColorVisualizer = new RDXOpenCVVideoVisualizer("Sent Colorized Depth", "Sent Colorized Depth", false);
-   private final RDXOpenCVVideoVisualizer receivedColorVisualizer = new RDXOpenCVVideoVisualizer("Received Colorized Depth", "Received Colorized Depth", false);
-   private final RDXRawImagePointCloudVisualizer pointCloudVisualizer = new RDXRawImagePointCloudVisualizer("De-Colorized Point Cloud", false);
+   private final RDXOpenCVVideoVisualizer sentDepthVisualizer = new RDXOpenCVVideoVisualizer("Sent Colorized Depth", "Sent Colorized Depth", false);
+   private final RDXOpenCVVideoVisualizer receivedDepthVisualizer = new RDXOpenCVVideoVisualizer("Received Colorized Depth", "Received Colorized Depth", false);
+   private final RDXRawImagePointCloudVisualizer pointCloudVisualizer = new RDXRawImagePointCloudVisualizer("De-Colorized Point Cloud");
 
    public RDXDepthStreamingDemo()
    {
@@ -48,25 +49,23 @@ public class RDXDepthStreamingDemo
       zed.run(true);
       zedPublishThread.startRepeating();
 
-      videoSubscriber.addNewFrameConsumer(this::receiveColorizedDepth);
-      videoSubscriber.subscribe();
+      depthSubscriber.addNewFrameConsumer(this::receiveColorizedDepth);
+      depthSubscriber.subscribe();
+
+      colorSubscriber.addNewFrameConsumer(this::receiveColorImage);
+      colorSubscriber.subscribe();
 
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
          @Override
          public void create()
          {
-            sentColorVisualizer.create();
-            sentColorVisualizer.setActive(true);
-
-            receivedColorVisualizer.create();
-            receivedColorVisualizer.setActive(true);
-
-            pointCloudVisualizer.create();
+            sentDepthVisualizer.setActive(true);
+            receivedDepthVisualizer.setActive(true);
             pointCloudVisualizer.setActive(true);
 
-            baseUI.getImGuiPanelManager().addPanel(sentColorVisualizer.getPanel());
-            baseUI.getImGuiPanelManager().addPanel(receivedColorVisualizer.getPanel());
+            baseUI.getImGuiPanelManager().addPanel(sentDepthVisualizer.getPanel());
+            baseUI.getImGuiPanelManager().addPanel(receivedDepthVisualizer.getPanel());
             baseUI.getImGuiPanelManager().addPanel("Visualizer Settings", pointCloudVisualizer::renderImGuiWidgets);
             baseUI.getPrimaryScene().addRenderableProvider(pointCloudVisualizer);
             baseUI.create();
@@ -75,8 +74,8 @@ public class RDXDepthStreamingDemo
          @Override
          public void render()
          {
-            sentColorVisualizer.update();
-            receivedColorVisualizer.update();
+            sentDepthVisualizer.update();
+            receivedDepthVisualizer.update();
             pointCloudVisualizer.update();
 
             baseUI.renderBeforeOnScreenUI();
@@ -99,20 +98,20 @@ public class RDXDepthStreamingDemo
       {
          zed.waitForGrab();
          RawImage depthImage = zed.getImage(ZEDImageSensor.DEPTH_IMAGE_KEY);
+         RawImage colorImage = zed.getImage(ZEDImageSensor.LEFT_COLOR_IMAGE_KEY);
 
          GpuMat colorizedDepth = depthColorizer.colorizeDepth(depthImage.getGpuImageMat());
-         RawImage colorizedImage = depthImage.replaceImage(colorizedDepth, PixelFormat.YUV444P);
+         RawImage colorizedDepthImage = depthImage.replaceImage(colorizedDepth, PixelFormat.YUV444P);
 
-         opencv_imgproc.cvtColor(colorizedImage.getCpuImageMat(), rgbMat, opencv_imgproc.COLOR_YUV2RGB);
-         sentColorVisualizer.setImage(rgbMat);
+         opencv_imgproc.cvtColor(colorizedDepthImage.getCpuImageMat(), rgbMat, opencv_imgproc.COLOR_YUV2RGB);
+         sentDepthVisualizer.setImage(rgbMat);
 
-         if (!videoStreamer.isInitialized())
-            videoStreamer.initializeForColor(colorizedImage, -1, true, true);
+         sensorStreamer.sendFrame(PerceptionAPI.SRT_ZED_DEPTH_STREAM_STATUS, colorizedDepthImage);
+         sensorStreamer.sendFrame(PerceptionAPI.SRT_ZED_LEFT_COLOR_STREAM_STATUS, colorImage);
 
-         videoStreamer.sendFrame(colorizedImage);
-
-         colorizedImage.release();
+         colorizedDepthImage.release();
          depthImage.release();
+         colorImage.release();
       } catch (InterruptedException ignored) {}
    }
 
@@ -122,7 +121,7 @@ public class RDXDepthStreamingDemo
 
       Mat rgbMat = new Mat();
       opencv_imgproc.cvtColor(colorizedDepth.getCpuImageMat(), rgbMat, opencv_imgproc.COLOR_YUV2RGB);
-      receivedColorVisualizer.setImage(rgbMat);
+      receivedDepthVisualizer.setImage(rgbMat);
 
       GpuMat deColorizedDepth = depthColorizer.deColorizeDepth(colorizedDepth.getGpuImageMat());
       RawImage deColorizedImage = colorizedDepth.replaceImage(deColorizedDepth);
@@ -134,13 +133,23 @@ public class RDXDepthStreamingDemo
       colorizedDepth.release();
    }
 
+   public void receiveColorImage(RawImage colorImage)
+   {
+      colorImage.get();
+
+      pointCloudVisualizer.setColorImage(colorImage);
+
+      colorImage.release();
+   }
+
    public void destroy()
    {
       zedPublishThread.blockingKill();
       zed.close();
       depthColorizer.destroy();
-      videoStreamer.destroy();
-      videoSubscriber.destroy();
+      sensorStreamer.destroy();
+      depthSubscriber.destroy();
+      colorSubscriber.destroy();
       ros2Node.destroy();
    }
 

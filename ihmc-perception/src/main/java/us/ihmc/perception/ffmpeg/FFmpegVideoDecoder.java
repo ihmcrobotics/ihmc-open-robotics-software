@@ -134,7 +134,7 @@ public class FFmpegVideoDecoder extends FFmpegDecoder
       if (!gotAFrame.getValue())
          return null;
 
-      return outputImage;
+      return outputImage.clone();
    }
 
    /**
