@@ -2,7 +2,6 @@ package us.ihmc.perception.gpuHeightMap;
 
 import org.bytedeco.cuda.cudart.CUstream_st;
 import org.bytedeco.cuda.cudart.dim3;
-import org.bytedeco.cuda.global.cudart;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencl._cl_kernel;
@@ -11,18 +10,17 @@ import org.bytedeco.opencl._cl_program;
 import org.jcodec.common.Assert;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
 import us.ihmc.perception.cuda.CUDAStreamManager;
+import us.ihmc.perception.cuda.CUDATools;
 import us.ihmc.perception.opencl.OpenCLManager;
 
 import java.net.URL;
 
 import static org.bytedeco.cuda.global.cudart.*;
-import static org.bytedeco.cuda.global.cudart.cudaMemcpyAsync;
 
 public class HeightMapUtilsTest
 {
@@ -267,15 +265,15 @@ public class HeightMapUtilsTest
       long xHostPointerSize = xHostPointer.limit() + 1;
       long yHostPointerSize = yHostPointer.limit() + 1;
 
-      cudaMallocAsync(gpuCenterPointer, gpuCenterPointer.sizeof() * centerPointerSize, stream);
-      cudaMallocAsync(gpuResolutionPointer, gpuResolutionPointer.sizeof() * resolutionPointerSize, stream);
-      cudaMallocAsync(gpuXHostPointer, gpuXHostPointer.sizeof() * xHostPointerSize, stream);
-      cudaMallocAsync(gpuYHostPointer, gpuYHostPointer.sizeof() * yHostPointerSize, stream);
+      CUDATools.mallocAsync(gpuCenterPointer, centerPointerSize, stream);
+      CUDATools.mallocAsync(gpuResolutionPointer, resolutionPointerSize, stream);
+      CUDATools.mallocAsync(gpuXHostPointer, xHostPointerSize, stream);
+      CUDATools.mallocAsync(gpuYHostPointer, yHostPointerSize, stream);
 
-      cudaMemcpyAsync(gpuCenterPointer, centerPointer, (long) centerPointer.sizeof() * centerPointerSize, cudaMemcpyDefault, stream);
-      cudaMemcpyAsync(gpuResolutionPointer, resolutionPointer, (long) resolutionPointer.sizeof() * resolutionPointerSize, cudaMemcpyDefault, stream);
-      cudaMemcpyAsync(gpuXHostPointer, xHostPointer, (long) xHostPointer.sizeof() * xHostPointerSize, cudaMemcpyDefault, stream);
-      cudaMemcpyAsync(gpuYHostPointer, yHostPointer, (long) yHostPointer.sizeof() * yHostPointerSize, cudaMemcpyDefault, stream);
+      CUDATools.memcpyAsync(gpuCenterPointer, centerPointer, centerPointerSize, stream);
+      CUDATools.memcpyAsync(gpuResolutionPointer, resolutionPointer, resolutionPointerSize, stream);
+      CUDATools.memcpyAsync(gpuXHostPointer, xHostPointer, xHostPointerSize, stream);
+      CUDATools.memcpyAsync(gpuYHostPointer, yHostPointer, yHostPointerSize, stream);
 
       kernel.withInt(5).withPointer(gpuCenterPointer).withPointer(gpuResolutionPointer);
       kernel.withInt(5).withPointer(gpuXHostPointer).withPointer(gpuYHostPointer);
@@ -283,8 +281,8 @@ public class HeightMapUtilsTest
       // This is where the kernel is run, for more help with CUDA Examples look at the ExampleCUDAKernel class
       kernel.run(stream, new dim3(), new dim3(), 0);
 
-      cudaMemcpyAsync(xHostPointer, gpuXHostPointer, (long) gpuXHostPointer.sizeof() * xHostPointerSize, cudaMemcpyDefault, stream);
-      cudaMemcpyAsync(yHostPointer, gpuYHostPointer, (long) gpuYHostPointer.sizeof() * yHostPointerSize, cudaMemcpyDefault, stream);
+      CUDATools.memcpyAsync(xHostPointer, gpuXHostPointer, xHostPointerSize, stream);
+      CUDATools.memcpyAsync(yHostPointer, gpuYHostPointer, yHostPointerSize, stream);
 
       cudaStreamSynchronize(stream);
 
@@ -308,12 +306,7 @@ public class HeightMapUtilsTest
       gpuXHostPointer.close();
       gpuYHostPointer.close();
 
-      cudart.cudaStreamDestroy(stream);
-
-      if (stream != null)
-      {
-         stream.close();
-      }
+      CUDAStreamManager.releaseStream(stream);
 
       return new float[] {xResult[0], yResult[0]};
    }
@@ -384,15 +377,15 @@ public class HeightMapUtilsTest
       long xHostPointerSize = xHostPointer.limit() + 1;
       long yHostPointerSize = yHostPointer.limit() + 1;
 
-      cudaMallocAsync(gpuCoordinatePointer, gpuCoordinatePointer.sizeof() * centerPointerSize, stream);
-      cudaMallocAsync(gpuCenterPointer, gpuCenterPointer.sizeof() * resolutionPointerSize, stream);
-      cudaMallocAsync(gpuXHostPointer, gpuXHostPointer.sizeof() * xHostPointerSize, stream);
-      cudaMallocAsync(gpuYHostPointer, gpuYHostPointer.sizeof() * yHostPointerSize, stream);
+      CUDATools.mallocAsync(gpuCoordinatePointer, centerPointerSize, stream);
+      CUDATools.mallocAsync(gpuCenterPointer, resolutionPointerSize, stream);
+      CUDATools.mallocAsync(gpuXHostPointer, xHostPointerSize, stream);
+      CUDATools.mallocAsync(gpuYHostPointer, yHostPointerSize, stream);
 
-      cudaMemcpyAsync(gpuCoordinatePointer, coordinatePointer, (long) centerPointer.sizeof() * centerPointerSize, cudaMemcpyDefault, stream);
-      cudaMemcpyAsync(gpuCenterPointer, centerPointer, (long) centerPointer.sizeof() * centerPointerSize, cudaMemcpyDefault, stream);
-      cudaMemcpyAsync(gpuXHostPointer, xHostPointer, (long) xHostPointer.sizeof() * xHostPointerSize, cudaMemcpyDefault, stream);
-      cudaMemcpyAsync(gpuYHostPointer, yHostPointer, (long) yHostPointer.sizeof() * yHostPointerSize, cudaMemcpyDefault, stream);
+      CUDATools.memcpyAsync(gpuCoordinatePointer, coordinatePointer, centerPointerSize, stream);
+      CUDATools.memcpyAsync(gpuCenterPointer, centerPointer, centerPointerSize, stream);
+      CUDATools.memcpyAsync(gpuXHostPointer, xHostPointer, xHostPointerSize, stream);
+      CUDATools.memcpyAsync(gpuYHostPointer, yHostPointer, yHostPointerSize, stream);
 
       kernel.withPointer(gpuCoordinatePointer).withPointer(gpuCenterPointer);
       kernel.withFloat(5.0f).withInt(5);
@@ -401,8 +394,8 @@ public class HeightMapUtilsTest
       // This is where the kernel is run, for more help with CUDA Examples look at the ExampleCUDAKernel class
       kernel.run(stream, new dim3(), new dim3(), 0);
 
-      cudaMemcpyAsync(xHostPointer, gpuXHostPointer, (long) gpuXHostPointer.sizeof() * xHostPointerSize, cudaMemcpyDefault, stream);
-      cudaMemcpyAsync(yHostPointer, gpuYHostPointer, (long) gpuYHostPointer.sizeof() * yHostPointerSize, cudaMemcpyDefault, stream);
+      CUDATools.memcpyAsync(xHostPointer, gpuXHostPointer, xHostPointerSize, stream);
+      CUDATools.memcpyAsync(yHostPointer, gpuYHostPointer, yHostPointerSize, stream);
 
       cudaStreamSynchronize(stream);
 
@@ -426,12 +419,7 @@ public class HeightMapUtilsTest
       gpuXHostPointer.close();
       gpuYHostPointer.close();
 
-      cudart.cudaStreamDestroy(stream);
-
-      if (stream != null)
-      {
-         stream.close();
-      }
+      CUDAStreamManager.releaseStream(stream);
 
       return new float[] {xResult[0], yResult[0]};
    }
