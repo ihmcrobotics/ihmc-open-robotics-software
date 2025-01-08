@@ -9,7 +9,7 @@ import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXRawImagePointCloudVisualizer;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.time.TimeTools;
-import us.ihmc.sensors.ZEDColorDepthImageRetriever;
+import us.ihmc.sensors.deprecated.ZEDColorDepthImageRetriever;
 
 import java.time.Instant;
 import java.util.LinkedList;

@@ -1,4 +1,4 @@
-package us.ihmc.sensors;
+package us.ihmc.sensors.zed;
 
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.opencv.opencv_core.GpuMat;
@@ -12,6 +12,7 @@ import us.ihmc.perception.RawImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
+import us.ihmc.sensors.ImageSensor;
 import us.ihmc.zed.SL_CalibrationParameters;
 import us.ihmc.zed.SL_CameraInformation;
 import us.ihmc.zed.SL_InitParameters;

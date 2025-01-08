@@ -29,10 +29,10 @@ mainDependencies {
    api("us.ihmc:ihmc-commons:0.35.0")
    api("us.ihmc:ihmc-messager-kryo:0.2.0")
    api("us.ihmc:ihmc-matrix-library:0.19.0")
-   api("us.ihmc:ihmc-graphics-description:0.25.1")
-   api("us.ihmc:simulation-construction-set-utilities:0.25.1")
+   api("us.ihmc:ihmc-graphics-description:0.26.0")
+   api("us.ihmc:simulation-construction-set-utilities:0.25.3")
    api("us.ihmc:ihmc-native-library-loader:2.0.3")
-   api("us.ihmc:scs2-definition:17-0.27.3")
+   api("us.ihmc:scs2-definition:17-0.28.3")
    // NOTE: IHMCRoboticsToolkit should not depend on any other IHMC project(!), especially it should not depend on IHMCJavaToolkit.
 }
 
@@ -42,7 +42,7 @@ testDependencies {
    api("org.hamcrest:hamcrest:2.2")
 
    api("us.ihmc:euclid-test:0.21.0")
-   api("us.ihmc:simulation-construction-set:0.25.1")
+   api("us.ihmc:simulation-construction-set:0.25.3")
    api("us.ihmc:ihmc-matrix-library-test:0.19.0")
    api("us.ihmc:ihmc-commons-testing:0.35.0")
 }
