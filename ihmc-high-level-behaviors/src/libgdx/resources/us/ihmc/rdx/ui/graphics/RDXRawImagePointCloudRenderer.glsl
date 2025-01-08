@@ -13,7 +13,11 @@
  * This attribute represents the depth value
  * stored in the pixel that's being rendered as a point. 
  */
+#ifdef INPUT_COLORIZED_DEPTH
+layout(location = 0) in vec3 a_depthData;
+#else
 layout(location = 0) in float a_depthData;
+#endif
 
 // We output the color of the vertex for the fragment shader to use
 out vec4 v_color;
@@ -73,14 +77,27 @@ vec4 calculateSinusoidalGradientColor(float value)
    return vec4(r / 255.0f, g / 255.0f, b / 255.0f, 1.0);
 }
 
+// Function for de-colorizing colorized depth data
+float deColorizeDepth(vec3 colorizedDepth)
+{
+    return colorizedDepth.x * colorizedDepth.x + colorizedDepth.y + colorizedDepth.z;
+}
+
 void main()
 {
+   float depthValue;
    vec3 worldFramePoint;
    vec4 pointColor;
    float pointSize;
 
+#ifdef INPUT_COLORIZED_DEPTH
+   depthValue = deColorizeDepth(a_depthData);
+#else
+   depthValue = a_depthData;
+#endif
+
    // We calculate the worldFramePoint using the depth image
-   float depthInMeters = a_depthData * u_depthDiscretization;
+   float depthInMeters = depthValue * u_depthDiscretization;
 
    // No need to render if depth is zero (would be inside the sensor depth sensor)
    if (depthInMeters == 0.0f)
