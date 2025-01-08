@@ -13,7 +13,6 @@ import org.junit.jupiter.api.TestMethodOrder;
 import java.net.URL;
 
 import static org.bytedeco.cuda.global.cudart.*;
-import static org.bytedeco.cuda.global.cudart.cudaMemcpyDefault;
 import static org.junit.jupiter.api.Assertions.*;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -56,7 +55,7 @@ public class CUDASimpleKernelsTest
 
       // The convention is to use CUDATools for allocating memory at the moment
       CUDATools.mallocAsync(gpuResult, gpuResult.sizeof(), stream);
-//      cudaMallocAsync(gpuResult, gpuResult.sizeof(), stream);
+      // cudaMallocAsync(gpuResult, gpuResult.sizeof(), stream);
 
       kernel.withInt(5).withPointer(gpuResult);
       kernel.run(stream, new dim3(), new dim3(), 0);
@@ -65,7 +64,7 @@ public class CUDASimpleKernelsTest
 
       // The convention is to use CUDATools for allocating memory at the moment
       CUDATools.memcpyAsync(cpuResult, gpuResult, cpuResult.sizeof(), stream);
-//      cudaMemcpyAsync(cpuResult, gpuResult, cpuResult.sizeof(), cudaMemcpyDefault, stream);
+      // cudaMemcpyAsync(cpuResult, gpuResult, cpuResult.sizeof(), cudaMemcpyDefault, stream);
       cudaStreamSynchronize(stream);
 
       int expectedValue = 5; // This is the value passed into the kernel as the first parameter in (kernel.withInt(5))
@@ -78,43 +77,59 @@ public class CUDASimpleKernelsTest
 
    /**
     * Test that when you pass in the wrong type into the GPU kernel that it fails.
-    * WHen the kernel expects and int and you pass a in float, it should fail.
+    * WHen the kernel expects and int, and you pass an in float, it should fail.
+    * In this case, we pass in a float, but it expects an int.
+    * So the gpu converts the int to a float in bits.
+    * Then it uses that value for the duration of the kernel.
+    * This value is returned and compared against the expected result
     */
-   // TODO this test should fail but seems to pass even when the wrong paramter is passed into the kernel
-   @Disabled
    @Test
    public void testPassingInWrongTypeToGPU()
    {
       URL kernelPath = getClass().getResource("CUDASimpleKernels.cu");
       stream = CUDAStreamManager.getStream();
       program = new CUDAProgram(kernelPath);
-      kernel = program.loadKernel("pass_in_int");
+      kernel = program.loadKernel("pass_in_variable");
 
-      kernel.withFloat(5.0f);
+      FloatPointer gpuResult = new FloatPointer();
+      CUDATools.mallocAsync(gpuResult, gpuResult.sizeof(), stream);
 
-      // TODO how do we handle the case where the kernel can run but the parameters are wrong?
-      // TODO is that something we can change or is that just the way it is with gpu programming?... (someone investigate this)
+      float originalValue = 5.0f; // This is the value passed into the kernel as the first parameter in (kernel.withInt(5))
+      kernel.withFloat(originalValue).withPointer(gpuResult);
+
       kernel.run(stream, new dim3(), new dim3(), 0);
 
-      //      RuntimeException thrown = assertThrows(RuntimeException.class, () -> kernel.run(stream, new dim3(), new dim3(), 0));
-      //      assertTrue(thrown.getMessage().contains("cudaErrorInvalidValue"));
-
+      FloatPointer cpuResult = new FloatPointer(1F);
+      CUDATools.memcpyAsync(cpuResult, gpuResult, cpuResult.sizeof(), stream);
       cudaStreamSynchronize(stream);
+
+      // Since we are passing in a float into the kernel, and it expected an int.
+      // It converted the float to an int as bits.
+      float floatBits = Float.floatToIntBits(originalValue);
+      String expectedStringValue = Float.toString(floatBits);
+
+      String cpuResultAsString = Float.toString(cpuResult.get(0));
+      assertEquals(expectedStringValue, cpuResultAsString, "The expected value is: " + expectedStringValue + " but the actual result is: " + cpuResultAsString);
+
+      cudaFreeAsync(gpuResult, stream);
+      gpuResult.close();
    }
 
    /**
     * Here the goal is to pass in the wrong number of variables and see that the GPU crashes accordingly.
     * This test shows what happens when you make that mistake.
+    * CUDA reports these errors in later CUDA function calls (once it knows there was an error).
+    * So that's why we see the errors from the {@link CUDAStreamManager}.
+    * This test is disabled because the stream doesn't get cleared correctly, and it affects the next time a stream is created
     */
-   // TODO: this test fails when releasing the stream. That seems wrong because there are 6 parameters being passed into the kernel
-   // TODO: So it would seem like the kernel should not even run, but it does... (this could use some investigating)
-   // TODO: This also causes other tests to fail when this one doesn't release the steam correclty... bugs in the code lol
    @Disabled
    @Test
    public void testWrongNumberOfKernelVariables()
    {
       URL kernelPath = getClass().getResource("CUDASimpleKernels.cu");
-      stream = CUDAStreamManager.getStream();
+
+      // This test creates its own stream to not interfere with other tests
+      CUstream_st streamLocal = new CUstream_st();
       program = new CUDAProgram(kernelPath);
       kernel = program.loadKernel("pass_in_variable");
 
@@ -122,17 +137,29 @@ public class CUDASimpleKernelsTest
       kernel.withInt(5).withFloat(4.0f).withLong((long) 2.0);
       kernel.withInt(5).withFloat(4.0f).withLong((long) 2.0);
 
-      // TODO how is this not failing when the kernel is trying to pass in a lot of variables that don't get defined in the kernel on the GPU
-      kernel.run(stream, new dim3(), new dim3(), 0);
+      // Even though the kernel has way to many parameters, we can still run it.
+      // This is because we call it asynchronously and so it may not run right away,
+      // However, when we synchronize the stream we block until the kernel has run, so that will report the error
+      kernel.run(streamLocal, new dim3(), new dim3(), 0);
 
-      cudaStreamSynchronize(stream);
-      // ^^^ TODO How come this doesn't fix things???
+      // This forces the gpu code to run as the stream is waiting for the kernels to finish.
+      // This is when the error is reported
+      // Note that the error is NOT reported till you synchronize the stream, that isn't always obvious
+      RuntimeException thrown = assertThrows(RuntimeException.class, () -> CUDATools.checkCUDAError(cudaStreamSynchronize(streamLocal)));
+
+      assertTrue(thrown.getMessage().contains("an illegal memory access was encountered"));
+
+      // TODO there is a problem with releasing the stream, so even if the following lines are performed
+      // Any call to cudart.cudaStreamCreate(stream) will throw an error
+      streamLocal.position(0);
+      streamLocal.deallocate();
+      streamLocal.close();
    }
 
    /**
     * This test is meant to test the case where you don't synchronize the stream after running the kernel.
     * Need to do some more testing to see why this still works, and if there is a better way to test this.
-    * That is why this test is disabled at the moment, it doesn't appear to be that useful
+    * That is why this test is disabled at the moment; it doesn't appear to be that useful
     */
    @Disabled
    @Test
