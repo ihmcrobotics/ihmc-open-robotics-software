@@ -19,7 +19,7 @@ import java.util.function.Consumer;
  * - 3D position
  * - quaternion orientation
  */
-public class ImageSensorPoseFile
+public class ImageSensorPosesFile
 {
    private static final int BYTES_PER_FRAME = Long.BYTES + Integer.BYTES + (3 * Double.BYTES) + (4 * Double.BYTES);
    private static final int MAX_WRITE_BUFFER_SIZE = BYTES_PER_FRAME * 128; // Max of 128 frames in the write buffer
@@ -28,7 +28,7 @@ public class ImageSensorPoseFile
    private final ByteBuffer writeBuffer = ByteBuffer.allocate(MAX_WRITE_BUFFER_SIZE);
    private ByteBuffer readBuffer = ByteBuffer.allocate(0);
 
-   public ImageSensorPoseFile(Path file)
+   public ImageSensorPosesFile(Path file)
    {
       this.file = file;
    }

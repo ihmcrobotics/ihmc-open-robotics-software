@@ -57,8 +57,8 @@ public class ZEDImageSensor extends ImageSensor
    private final FramePose3D leftSensorPose = new FramePose3D();
    private final FramePose3D rightSensorPose = new FramePose3D();
 
-   private long grabSequenceNumber = 0L;
-   private Instant lastGrabTime;
+   protected long grabSequenceNumber = 0L;
+   protected Instant lastGrabTime;
    private boolean lastGrabFailed = false;
 
    protected final SL_InitParameters zedInitParameters = new SL_InitParameters();
@@ -202,6 +202,12 @@ public class ZEDImageSensor extends ImageSensor
       {
          // Grab images now
          returnCode = sl_grab(cameraID, zedRuntimeParameters);
+         if (returnCode == SL_ERROR_CODE_END_OF_SVOFILE_REACHED)
+         {
+            sl_set_svo_position(cameraID, 0);
+            grabSequenceNumber = 0;
+            return false;
+         }
          throwOnError(returnCode);
          lastGrabTime = Instant.now();
          ++grabSequenceNumber;

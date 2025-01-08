@@ -2,7 +2,7 @@ package us.ihmc.sensors.zed;
 
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
-import us.ihmc.sensors.ImageSensorPoseFile;
+import us.ihmc.sensors.ImageSensorPosesFile;
 import us.ihmc.tools.IHMCCommonPaths;
 
 import java.nio.file.Path;
@@ -14,7 +14,7 @@ import static us.ihmc.zed.global.zed.*;
 
 public class ZEDSVORecordSensor extends ZEDImageSensor
 {
-   private ImageSensorPoseFile poseRecorder;
+   private ImageSensorPosesFile poseRecorder;
 
    public ZEDSVORecordSensor(int cameraID, ZEDModelData zedModel, int slInputType)
    {
@@ -32,7 +32,7 @@ public class ZEDSVORecordSensor extends ZEDImageSensor
       returnCode = sl_enable_recording(getCameraID(), svoFileName, SL_SVO_COMPRESSION_MODE_H264, 8000, CAMERA_FPS, true);
       throwOnError(returnCode);
 
-      poseRecorder = new ImageSensorPoseFile(Path.of(svoFileName + ".sensorposes"));
+      poseRecorder = new ImageSensorPosesFile(Path.of(svoFileName + ".sensorposes"));
    }
 
    @Override
