@@ -24,7 +24,7 @@ import java.time.Instant;
 public class ImageSensorPoseRecorder
 {
    private static final int BYTES_PER_FRAME = Long.BYTES + Long.BYTES + Integer.BYTES + (3 * Double.BYTES) + (4 * Double.BYTES);
-   private static final int MAX_BUFFER_SIZE = BYTES_PER_FRAME * 512; // Max of 512 frames in the buffer
+   private static final int MAX_BUFFER_SIZE = BYTES_PER_FRAME * 128; // Max of 128 frames in the buffer
 
    private final Path file;
    private final ByteBuffer buffer = ByteBuffer.allocate(MAX_BUFFER_SIZE);
