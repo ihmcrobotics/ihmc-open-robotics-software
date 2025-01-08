@@ -76,6 +76,7 @@ public class ImageSensorPosesFile
       double q1 = readBuffer.getDouble();
       double q2 = readBuffer.getDouble();
       double q3 = readBuffer.getDouble();
+
       instantConsumer.accept(Instant.ofEpochSecond(epochSecond, nano));
       position.set(x, y, z);
       orientation.set(q0, q1, q2, q3);
