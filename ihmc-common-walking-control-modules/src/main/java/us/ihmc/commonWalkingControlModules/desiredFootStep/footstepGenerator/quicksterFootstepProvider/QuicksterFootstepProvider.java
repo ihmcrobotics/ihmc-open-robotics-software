@@ -110,6 +110,7 @@ public class QuicksterFootstepProvider implements Updatable
       estimates = new QuicksterFootstepProviderEstimates(robotModel,
                                                          referenceFrames,
                                                          desiredPelvisOrientation,
+                                                         parameters,
                                                          updateDT,
                                                          variableNameSuffix,
                                                          registry,
@@ -216,12 +217,12 @@ public class QuicksterFootstepProvider implements Updatable
    {
       desiredPelvisOrientation.appendYawRotation(desiredTurningVelocity.getDoubleValue() * updateDT);
 
-      estimates.update();
-
       inDoubleSupport.set(footStates.get(RobotSide.LEFT).getEnumValue() == FootState.SUPPORT &&
                           footStates.get(RobotSide.RIGHT).getEnumValue() == FootState.SUPPORT);
 
       calculateNetPendulumBase();
+
+      estimates.update(getTrailingSide().getOppositeSide());
    }
 
    private void updateDesireds()
@@ -274,7 +275,6 @@ public class QuicksterFootstepProvider implements Updatable
             netPendulumBase.changeFrameAndProjectToXYPlane(referenceFrames.getSoleZUpFrame(RobotSide.LEFT));
             setTrailingSide(RobotSide.LEFT);
          }
-
          else
          {
             netPendulumBase.setIncludingFrame(pendulumBase.get(RobotSide.RIGHT));

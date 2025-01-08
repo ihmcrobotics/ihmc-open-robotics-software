@@ -5,11 +5,14 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.AngularExcursionCalculator;
 import us.ihmc.robotics.screwTheory.MovingZUpFrame;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
@@ -34,14 +37,23 @@ public class QuicksterFootstepProviderEstimates
    // Calculator for CoM momentum info
    private final AngularExcursionCalculator angularExcursionCalculator;
 
+   //
+   private final double mass;
+   private final YoFramePoint3D acp;
+   private final QuicksterFootstepProviderParameters parameters;
+
    public  QuicksterFootstepProviderEstimates(FullHumanoidRobotModel robotModel,
                                               CommonHumanoidReferenceFrames referenceFrames,
                                               FrameQuaternionReadOnly desiredPelvisOrientation,
+                                              QuicksterFootstepProviderParameters parameters,
                                               double updateDT,
                                               String variableNameSuffix,
                                               YoRegistry registry,
                                               YoGraphicsListRegistry yoGraphicsListRegistry)
    {
+      this.parameters = parameters;
+      mass = robotModel.getTotalMass();
+
       currentCoMPosition = new YoFramePoint3D("currentCoMPosition" + variableNameSuffix, ReferenceFrame.getWorldFrame(), registry);
       currentCoMVelocity = new YoFrameVector3D("currentCoMVelocity" + variableNameSuffix, ReferenceFrame.getWorldFrame(), registry);
       currentCoMLinearMomentum = new YoFrameVector3D("currentCoMLinearMomentum" + variableNameSuffix, ReferenceFrame.getWorldFrame(), registry);
@@ -75,9 +87,13 @@ public class QuicksterFootstepProviderEstimates
       yoGraphicsListRegistry.registerYoGraphic("QFP", centerOfMassControlZUpFrameGraphic);
 
       angularExcursionCalculator = new AngularExcursionCalculator(centerOfMassFrame, robotModel.getElevator(), updateDT, registry, null);
+
+      acp = new YoFramePoint3D("ACP_" + variableNameSuffix, ReferenceFrame.getWorldFrame(), registry);
+      YoGraphicPosition acpViz = new YoGraphicPosition("ACP", acp, 0.01, YoAppearance.Red(), YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
+      yoGraphicsListRegistry.registerArtifact("QFP", acpViz.createArtifact());
    }
 
-   public void update()
+   public void update(RobotSide swingSide)
    {
       // Update CoM position and velocity from CoM frame
       currentCoMPosition.setFromReferenceFrame(centerOfMassFrame);
@@ -92,6 +108,16 @@ public class QuicksterFootstepProviderEstimates
       centerOfMassControlFrame.update();
       centerOfMassControlZUpFrame.update();
       centerOfMassControlZUpFrameGraphic.update();
+
+      // Update Measured ACP
+      double wmh = parameters.getOmega(swingSide).getDoubleValue() * mass * parameters.getDesiredCoMHeight(swingSide).getDoubleValue();
+
+      acp.setFromReferenceFrame(centerOfMassFrame);
+      acp.scaleAdd(1.0 / parameters.getOmega(swingSide).getDoubleValue(),
+                   getCenterOfMassVelocity(),
+                   getCenterOfMassPosition());
+      acp.addX(1.0 / wmh * getCenterOfMassAngularMomentum().getY());
+      acp.addY(-1.0 / wmh * getCenterOfMassAngularMomentum().getX());
    }
 
    public FramePoint3DReadOnly getCenterOfMassPosition()
