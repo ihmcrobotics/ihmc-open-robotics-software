@@ -8,6 +8,7 @@ import org.bytedeco.cuda.nvjpeg.nvjpegImage_t;
 import org.bytedeco.cuda.nvjpeg.nvjpegJpegState;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.IntPointer;
+import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.javacpp.SizeTPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_cudaarithm;
@@ -80,64 +81,85 @@ public class CUDAJPEGProcessor
     * Encodes a YUV I420 image into jpeg.
     *
     * @param sourceImage        the YUV I420 image
-    * @param outputImagePointer pointer to the jpeg image output
-    * @param imageWidth         width (in bytes) of the source image
-    * @param imageHeight        height (in bytes) of the source image
+    * @param encodedImage pointer to the jpeg image output
     */
-   public void encodeYUV420(BytePointer sourceImage, BytePointer outputImagePointer, int imageWidth, int imageHeight)
+   public void encodeYUV420(Pointer sourceImage, BytePointer encodedImage)
    {
-      int frameSize = imageWidth * imageHeight;
-      long quarterOfFrameSize = ((frameSize % 4 == 0) ? (frameSize / 4) : (frameSize / 4 + 1)); // ensure integer math goes well
-      long halfOfImageWidth = ((imageWidth % 2 == 0) ? (imageWidth / 2) : (imageWidth / 2 + 1));
+      GpuMat gpuSourceImage = new GpuMat();
+      if (sourceImage instanceof Mat cpuMat)
+         gpuSourceImage.upload(cpuMat);
+      else if (sourceImage instanceof GpuMat gpuImage)
+         gpuImage.copyTo(gpuSourceImage);
 
-      // Set params to correct sampling factor
-      checkNVJPEGError(nvjpegEncoderParamsSetSamplingFactors(encoderParameters, NVJPEG_CSS_420, cudaStream));
+      int totalHeight = gpuSourceImage.rows();
+      int lumaHeight = (2 * totalHeight) / 3;
 
-      // Get Y plane data
-      BytePointer yPlanePointer = new BytePointer(); // create a pointer for the Y plane
-      checkCUDAError(cudaMallocAsync(yPlanePointer, frameSize, cudaStream)); // allocate Y plane memory
-      checkCUDAError(cudaMemcpyAsync(yPlanePointer, sourceImage, frameSize, cudaMemcpyHostToDevice, cudaStream)); // copy Y plane data to device memory
+      int width = gpuSourceImage.cols();
+      int chromaWidth = width / 2;
 
+      GpuMatVector planes = new GpuMatVector();
+      planes.push_back(gpuSourceImage.rowRange(0, lumaHeight));                                          // Y
+      planes.push_back(gpuSourceImage.rowRange(lumaHeight, totalHeight).colRange(0, chromaWidth));       // U
+      planes.push_back(gpuSourceImage.rowRange(lumaHeight, totalHeight).colRange(chromaWidth, width));   // V
+
+      encodeYUV(planes, NVJPEG_CSS_420, encodedImage);
+
+      planes.close();
+      gpuSourceImage.close();
+   }
+
+   public void encodeYUV444(Pointer sourceImage, BytePointer encodedImage)
+   {
+      GpuMat gpuSourceImage = new GpuMat();
+      if (sourceImage instanceof Mat cpuMat)
+         gpuSourceImage.upload(cpuMat);
+      else if (sourceImage instanceof GpuMat gpuImage)
+         gpuImage.copyTo(gpuSourceImage);
+
+      GpuMatVector planes = new GpuMatVector();
+      opencv_cudaarithm.split(gpuSourceImage, planes);
+
+      encodeYUV(planes, NVJPEG_CSS_444, encodedImage);
+
+      planes.close();
+      gpuSourceImage.close();
+   }
+
+   public void encodeYUV(GpuMatVector imageToEncode, int chromaSubSampling, BytePointer encodedImage)
+   {
+      // Set sampling factor
+      checkNVJPEGError(nvjpegEncoderParamsSetSamplingFactors(encoderParameters, chromaSubSampling, cudaStream));
+
+      // Create nvjpeg image
       nvjpegImage_t nvjpegImage = new nvjpegImage_t();
-      nvjpegImage.pitch(0, imageWidth); // set the pitch
-      nvjpegImage.channel(0, yPlanePointer); //set the channel
-      sourceImage.position(sourceImage.position() + frameSize); // move pointer to start of U plane
+      for (int i = 0; i < imageToEncode.size() && i < 4; ++i)
+      {
+         GpuMat plane = imageToEncode.get(i);
+         nvjpegImage.pitch(i, plane.step());
+         nvjpegImage.channel(i, plane.data());
+      }
 
-      // Get U plane data
-      BytePointer uPlanePointer = new BytePointer();
-      checkCUDAError(cudaMallocAsync(uPlanePointer, quarterOfFrameSize, cudaStream));
-      checkCUDAError(cudaMemcpyAsync(uPlanePointer, sourceImage, quarterOfFrameSize, cudaMemcpyHostToDevice, cudaStream));
-      nvjpegImage.pitch(1, halfOfImageWidth);
-      nvjpegImage.channel(1, uPlanePointer);
-      sourceImage.position(sourceImage.position() + quarterOfFrameSize);
+      GpuMat lumaPlane = imageToEncode.get(0);
+      checkNVJPEGError(nvjpegEncodeYUV(nvjpegHandle,
+                                       encoderState,
+                                       encoderParameters,
+                                       nvjpegImage,
+                                       chromaSubSampling,
+                                       lumaPlane.cols(),
+                                       lumaPlane.rows(),
+                                       cudaStream));
 
-      // Get V plane data
-      BytePointer vPlanePointer = new BytePointer();
-      checkCUDAError(cudaMallocAsync(vPlanePointer, quarterOfFrameSize, cudaStream));
-      checkCUDAError(cudaMemcpyAsync(vPlanePointer, sourceImage, quarterOfFrameSize, cudaMemcpyHostToDevice, cudaStream));
-      nvjpegImage.pitch(2, halfOfImageWidth);
-      nvjpegImage.channel(2, vPlanePointer);
-
-      // Encode image (mem)
-      checkNVJPEGError(nvjpegEncodeYUV(nvjpegHandle, encoderState, encoderParameters, nvjpegImage, NVJPEG_CSS_420, imageWidth, imageHeight, cudaStream));
-
-      // Get compressed size
+      // Get compressed image size
       SizeTPointer jpegSize = new SizeTPointer(1);
       checkNVJPEGError(nvjpegEncodeRetrieveBitstream(nvjpegHandle, encoderState, (BytePointer) null, jpegSize, cudaStream));
 
       // Retrieve bitstream
-      outputImagePointer.limit(jpegSize.get());
-      checkNVJPEGError(nvjpegEncodeRetrieveBitstream(nvjpegHandle, encoderState, outputImagePointer, jpegSize, cudaStream));
+      encodedImage.limit(jpegSize.get());
+      checkNVJPEGError(nvjpegEncodeRetrieveBitstream(nvjpegHandle, encoderState, encodedImage, jpegSize, cudaStream));
 
-      // Free GPU memory
-      checkCUDAError(cudaFreeAsync(yPlanePointer, cudaStream));
-      checkCUDAError(cudaFreeAsync(uPlanePointer, cudaStream));
-      checkCUDAError(cudaFreeAsync(vPlanePointer, cudaStream));
+      checkCUDAError(cudaStreamSynchronize(cudaStream));
 
-      // Close pointers
-      yPlanePointer.close();
-      uPlanePointer.close();
-      vPlanePointer.close();
+      // Close everything
       jpegSize.close();
       nvjpegImage.close();
    }
