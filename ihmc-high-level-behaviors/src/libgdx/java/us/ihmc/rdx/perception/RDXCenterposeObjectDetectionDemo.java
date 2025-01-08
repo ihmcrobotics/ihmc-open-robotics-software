@@ -14,7 +14,7 @@ import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2ColoredPointCloudVisualize
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.sensors.ZEDModelData;
+import us.ihmc.sensors.zed.ZEDModelData;
 
 public class RDXCenterposeObjectDetectionDemo
 {

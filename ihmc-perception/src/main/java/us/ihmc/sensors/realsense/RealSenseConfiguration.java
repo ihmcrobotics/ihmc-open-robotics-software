@@ -1,4 +1,4 @@
-package us.ihmc.perception.realsense;
+package us.ihmc.sensors.realsense;
 
 /**
  * Only certain combinations of settings are valid and it's cumbersome to pass them around
@@ -10,7 +10,7 @@ package us.ihmc.perception.realsense;
  * D435 serial numbers:
  * - 752112070330
  */
-public enum RealsenseConfiguration
+public enum RealSenseConfiguration
 {
    L515_COLOR_720P_DEPTH_768P_30HZ(1024, 768, 30, 1280, 720, 30),
    L515_COLOR_480P_DEPTH_480P_30HZ(640, 480, 30, 640, 640, 30),
@@ -27,7 +27,7 @@ public enum RealsenseConfiguration
    private final int colorHeight;
    private final int colorFPS;
 
-   RealsenseConfiguration(int depthWidth, int depthHeight, int depthFPS, int colorWidth, int colorHeight, int colorFPS)
+   RealSenseConfiguration(int depthWidth, int depthHeight, int depthFPS, int colorWidth, int colorHeight, int colorFPS)
    {
       this.depthWidth = depthWidth;
       this.depthHeight = depthHeight;

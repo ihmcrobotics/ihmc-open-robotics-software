@@ -1,4 +1,4 @@
-package us.ihmc.sensors;
+package us.ihmc.sensors.zed;
 
 import perception_msgs.msg.dds.ZEDSVOCurrentFileMessage;
 import us.ihmc.commons.thread.RepeatingTaskThread;
