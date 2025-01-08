@@ -13,6 +13,8 @@ import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.sensors.ImageSensor;
+import us.ihmc.sensors.ImageSensorPoseRecorder;
+import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.zed.SL_CalibrationParameters;
 import us.ihmc.zed.SL_CameraInformation;
 import us.ihmc.zed.SL_InitParameters;
@@ -22,7 +24,11 @@ import us.ihmc.zed.SL_RuntimeParameters;
 import us.ihmc.zed.SL_Vector3;
 import us.ihmc.zed.library.ZEDJavaAPINativeLibrary;
 
+import javax.annotation.Nullable;
+import java.nio.file.Path;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.util.Date;
 
 import static us.ihmc.zed.global.zed.*;
 
@@ -45,6 +51,7 @@ public class ZEDImageSensor extends ImageSensor
    private final int cameraID;
    private final ZEDModelData zedModel;
    private final int slInputType;
+   private final boolean recordToSVO;
 
    private final RawImage[] grabbedImages = new RawImage[OUTPUT_IMAGE_COUNT];
    private final Pointer[] slMatPointers = new Pointer[OUTPUT_IMAGE_COUNT];
@@ -69,13 +76,17 @@ public class ZEDImageSensor extends ImageSensor
    private final SL_Quaternion sensorRotation = new SL_Quaternion();
    private final SL_Vector3 sensorTranslation = new SL_Vector3();
 
-   public ZEDImageSensor(int cameraID, ZEDModelData zedModel, int slInputType)
+   @Nullable
+   private ImageSensorPoseRecorder poseRecorder;
+
+   public ZEDImageSensor(int cameraID, ZEDModelData zedModel, int slInputType, boolean recordToSVO)
    {
       super(zedModel.name());
 
       this.cameraID = cameraID;
       this.zedModel = zedModel;
       this.slInputType = slInputType;
+      this.recordToSVO = recordToSVO;
 
       // Set runtime parameters to default values
       zedRuntimeParameters.reference_frame(SL_REFERENCE_FRAME_CAMERA);
@@ -100,8 +111,7 @@ public class ZEDImageSensor extends ImageSensor
          setInitParameters(zedInitParameters);
 
          // Open the camera
-         int returnCode = openCamera();
-         throwOnError(returnCode);
+         openCamera();
 
          if (positionalTrackingEnabled)
          {
@@ -172,9 +182,20 @@ public class ZEDImageSensor extends ImageSensor
       parametersToSet.async_grab_camera_recovery(false);
    }
 
-   protected int openCamera()
+   protected void openCamera() throws ZEDException
    {
-      return sl_open_camera(cameraID, zedInitParameters, 0, "", "", 0, "", "", "");
+      String svoFileName = recordToSVO ? generateSVOFileName() : "";
+
+      int returnCode = sl_open_camera(cameraID, zedInitParameters, 0, svoFileName, "", 0, "", "", "");
+      throwOnError(returnCode);
+
+      if (recordToSVO)
+      {
+         returnCode = sl_enable_recording(getCameraID(), svoFileName, SL_SVO_COMPRESSION_MODE_H264, 8000, CAMERA_FPS, true);
+         throwOnError(returnCode);
+
+         poseRecorder = new ImageSensorPoseRecorder(Path.of(svoFileName + ".sensorposes"));
+      }
    }
 
    @Override
@@ -245,6 +266,9 @@ public class ZEDImageSensor extends ImageSensor
             if (grabbedImages[DEPTH_IMAGE_KEY] != null)
                grabbedImages[DEPTH_IMAGE_KEY].release();
             grabbedImages[DEPTH_IMAGE_KEY] = slMatToRawImage(depthImagePointer, PixelFormat.GRAY16, leftSensorIntrinsics, leftSensorPose);
+
+            if (poseRecorder != null)
+               poseRecorder.recordFrame(grabbedImages[DEPTH_IMAGE_KEY]);
          }
       }
       catch (ZEDException exception)
@@ -324,16 +348,19 @@ public class ZEDImageSensor extends ImageSensor
 
       sl_close_camera(cameraID);
 
+      if (poseRecorder != null)
+         poseRecorder.flush();
+
       System.out.println("Closed " + getClass().getSimpleName());
    }
 
-   private void throwOnError(int errorCode) throws ZEDException
+   protected void throwOnError(int errorCode) throws ZEDException
    {
       if (errorCode != SL_ERROR_CODE_SUCCESS)
          throw new ZEDException(errorCode);
    }
 
-   private class ZEDException extends Exception
+   protected class ZEDException extends Exception
    {
       private final int zedErrorCode;
 
@@ -392,5 +419,12 @@ public class ZEDImageSensor extends ImageSensor
          case SL_ERROR_CODE_SENSORS_DATA_REQUIRED -> "SL_ERROR_CODE_SENSORS_DATA_REQUIRED";
          default -> "UNKNOWN";
       };
+   }
+
+   private static String generateSVOFileName()
+   {
+      SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
+      String depthLogFileName = dateFormat.format(new Date()) + "_" + "ZEDRecording.svo2";
+      return IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.toAbsolutePath() + "/" + depthLogFileName;
    }
 }

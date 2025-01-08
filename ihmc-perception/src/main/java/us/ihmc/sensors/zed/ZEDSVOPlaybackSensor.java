@@ -19,7 +19,7 @@ public class ZEDSVOPlaybackSensor extends ZEDImageSensor
 
    public ZEDSVOPlaybackSensor(ROS2PublishSubscribeAPI ros2, int cameraID, ZEDModelData zedModel, String svoFileName)
    {
-      super(cameraID, zedModel, SL_INPUT_TYPE_SVO);
+      super(cameraID, zedModel, SL_INPUT_TYPE_SVO, false);
       this.svoFileName = svoFileName;
 
       if (!Files.exists(Path.of(svoFileName)))
@@ -66,9 +66,10 @@ public class ZEDSVOPlaybackSensor extends ZEDImageSensor
    }
 
    @Override
-   protected int openCamera()
+   protected void openCamera() throws ZEDException
    {
-      return sl_open_camera(getCameraID(), zedInitParameters, 0, svoFileName, "", 0, "", "", "");
+      int returnCode = sl_open_camera(getCameraID(), zedInitParameters, 0, svoFileName, "", 0, "", "", "");
+      throwOnError(returnCode);
    }
 
    @Override
