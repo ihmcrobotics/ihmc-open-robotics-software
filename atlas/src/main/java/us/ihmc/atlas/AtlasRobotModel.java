@@ -455,7 +455,7 @@ public class AtlasRobotModel implements DRCRobotModel
    }
 
    @Override
-   public double getWBCCDT()
+   public double getWholeBodyControllerCoreDT()
    {
       return 0.0;
    }

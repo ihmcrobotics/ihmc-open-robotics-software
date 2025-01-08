@@ -53,12 +53,12 @@ public class ControllerCoreCommandDataHolder implements ControllerCoreCommandInt
 
    public void set(ControllerCoreCommandDataHolder other)
    {
-      hasInverseDynamicsCommandList = true;
-      hasInverseKinematicsCommandList = true;
-      hasVirtualModelControlCommandList = true;
-      hasControllerCoreMode = true;
-      hasFeedbackControlCommandList = true;
-      hasLowLevelOneDoFJointDesiredDataHolder = true;
+      hasInverseDynamicsCommandList = other.hasInverseDynamicsCommandList;
+      hasInverseKinematicsCommandList = other.hasInverseKinematicsCommandList;
+      hasVirtualModelControlCommandList = other.hasVirtualModelControlCommandList;
+      hasControllerCoreMode = other.hasControllerCoreMode;
+      hasFeedbackControlCommandList = other.hasFeedbackControlCommandList;
+      hasLowLevelOneDoFJointDesiredDataHolder = other.hasLowLevelOneDoFJointDesiredDataHolder;
 
       this.inverseDynamicsCommandList.set(other.getInverseDynamicsCommandList());
       this.inverseKinematicsCommandList.set(other.getInverseKinematicsCommandList());
@@ -180,6 +180,18 @@ public class ControllerCoreCommandDataHolder implements ControllerCoreCommandInt
       }
       else if (obj instanceof ControllerCoreCommandDataHolder other)
       {
+         if (hasFeedbackControlCommandList != other.hasFeedbackControlCommandList)
+            return false;
+         if (hasControllerCoreMode != other.hasControllerCoreMode)
+            return false;
+         if (hasLowLevelOneDoFJointDesiredDataHolder != other.hasLowLevelOneDoFJointDesiredDataHolder)
+            return false;
+         if (hasInverseDynamicsCommandList != other.hasInverseDynamicsCommandList)
+            return false;
+         if (hasVirtualModelControlCommandList != other.hasVirtualModelControlCommandList)
+            return false;
+         if (hasInverseKinematicsCommandList != other.hasInverseKinematicsCommandList)
+            return false;
          if (!inverseKinematicsCommandList.equals(other.inverseKinematicsCommandList))
             return false;
          if (!inverseDynamicsCommandList.equals(other.inverseDynamicsCommandList))
@@ -190,10 +202,7 @@ public class ControllerCoreCommandDataHolder implements ControllerCoreCommandInt
             return false;
          if (!controllerCoreMode.equals(other.controllerCoreMode))
             return false;
-         if(!lowLevelOneDoFJointDesiredDataHolder.equals(other.lowLevelOneDoFJointDesiredDataHolder))
-            return false;
-
-         return true;
+         return lowLevelOneDoFJointDesiredDataHolder.equals(other.lowLevelOneDoFJointDesiredDataHolder);
       }
       else
       {
