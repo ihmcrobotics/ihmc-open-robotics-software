@@ -72,12 +72,15 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
       ForceSensorDefinition[] forceSensorDefinitions = fullRobotModel.getForceSensorDefinitions();
       for (int i = 0; i < forceSensorDefinitions.length; i++)
       {
-         if (wristForceSensorNames.containsKey(side) && wristForceSensorNames.get(side).equals(forceSensorDefinitions[i].getSensorName()))
+         if (wristForceSensorNames != null)
          {
-            // wristWrenchArrows.put(side, new RDXSpatialVectorArrows(forceSensorDefinitions[i].getSensorFrame(), i));
-            sensorWristWrenchArrows = new RDXSpatialVectorArrows(forceSensorDefinitions[i].getSensorFrame(),
-                                                                 yoVariableClientHelper,
-                                                                 side.getLowerCaseName() + "WristSensor");
+            if (wristForceSensorNames.containsKey(side) && wristForceSensorNames.get(side).equals(forceSensorDefinitions[i].getSensorName()))
+            {
+               // wristWrenchArrows.put(side, new RDXSpatialVectorArrows(forceSensorDefinitions[i].getSensorFrame(), i));
+               sensorWristWrenchArrows = new RDXSpatialVectorArrows(forceSensorDefinitions[i].getSensorFrame(),
+                                                                    yoVariableClientHelper,
+                                                                    side.getLowerCaseName() + "WristSensor");
+            }
          }
       }
       ReferenceFrame afterLastWristJointFrame = fullRobotModel.getEndEffectorFrame(side, LimbName.ARM);
