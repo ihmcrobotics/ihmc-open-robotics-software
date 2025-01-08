@@ -14,6 +14,13 @@ public interface DefaultFootstepPlannerParametersReadOnly extends StoredProperty
    ///////////////////////////////////////////////////////////////////////////////////////////////////
    /////////////////////////////         Algorithm parameters       //////////////////////////////////
    ///////////////////////////////////////////////////////////////////////////////////////////////////
+   /**
+    * Whether we use the GPU for body path planning
+    */
+   default boolean getUseGPU()
+   {
+      return get(useGPU);
+   }
 
    /**
     * Heuristic inflation weight, used to speed up the planner at the expense of optimality
@@ -635,6 +642,7 @@ public interface DefaultFootstepPlannerParametersReadOnly extends StoredProperty
    {
       FootstepPlannerParametersPacket packet = new FootstepPlannerParametersPacket();
 
+      packet.setUseGpu(getUseGPU());
       packet.setAStarHeuristicsWeight(getAStarHeuristicsWeight());
       packet.setMaxBranchFactor(getMaxBranchFactor());
       packet.setEnableExpansionMask(getEnableExpansionMask());

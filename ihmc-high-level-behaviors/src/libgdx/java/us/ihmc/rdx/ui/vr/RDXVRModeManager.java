@@ -186,10 +186,6 @@ public class RDXVRModeManager
       { // Disable interactables because we do not want to collide with the walking control ring
          interactablesEnabled.set(false);
       }
-      else if (!interactablesEnabled.get())
-      {
-         interactablesEnabled.set(true);
-      }
    }
 
    public void renderImGuiWidgets()
