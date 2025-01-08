@@ -65,23 +65,20 @@ public class ImageSensorPoseFile
    {
       readFile();
 
-      if (readBuffer != null)
-      {
-         readBuffer.position((int) (BYTES_PER_FRAME * sequenceNumber));
+      readBuffer.position((int) (BYTES_PER_FRAME * sequenceNumber));
 
-         long epochSecond = readBuffer.getLong();
-         int nano = readBuffer.getInt();
-         double x = readBuffer.getDouble();
-         double y = readBuffer.getDouble();
-         double z = readBuffer.getDouble();
-         double q0 = readBuffer.getDouble();
-         double q1 = readBuffer.getDouble();
-         double q2 = readBuffer.getDouble();
-         double q3 = readBuffer.getDouble();
-         instantConsumer.accept(Instant.ofEpochSecond(epochSecond, nano));
-         position.set(x, y, z);
-         orientation.set(q0, q1, q2, q3);
-      }
+      long epochSecond = readBuffer.getLong();
+      int nano = readBuffer.getInt();
+      double x = readBuffer.getDouble();
+      double y = readBuffer.getDouble();
+      double z = readBuffer.getDouble();
+      double q0 = readBuffer.getDouble();
+      double q1 = readBuffer.getDouble();
+      double q2 = readBuffer.getDouble();
+      double q3 = readBuffer.getDouble();
+      instantConsumer.accept(Instant.ofEpochSecond(epochSecond, nano));
+      position.set(x, y, z);
+      orientation.set(q0, q1, q2, q3);
    }
 
    public void recordFrameData(Instant acquisitionTime, Point3DBasics position, QuaternionBasics orientation)
