@@ -7,6 +7,7 @@ import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
+import org.bytedeco.opencv.global.opencv_core;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.perception.RawImage;
 import us.ihmc.rdx.AbstractRDXPointCloudRenderer.ColoringMethod;
@@ -179,7 +180,9 @@ public class RDXRawImagePointCloudVisualizer extends RDXVisualizer
 
          if (pointCloudRenderer != null)
             pointCloudRenderer.dispose();
-         pointCloudRenderer = new RDXRawImagePointCloudRenderer(enableColorImageRendering);
+
+         boolean renderColorizedDepth = depthImage.getOpenCVType() == opencv_core.CV_8UC3;
+         pointCloudRenderer = new RDXRawImagePointCloudRenderer(enableColorImageRendering, renderColorizedDepth);
          pointCloudRenderer.create(maxPoints);
          availableColoringMethods = Arrays.stream(pointCloudRenderer.getAvailableColoringMethods()).map(Enum::name).toArray(String[]::new);
       }
