@@ -1,4 +1,4 @@
-package us.ihmc.sensors;
+package us.ihmc.sensors.deprecated;
 
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
@@ -26,9 +26,9 @@ import us.ihmc.perception.logging.PerceptionDataLogger;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
-import us.ihmc.perception.realsense.RealsenseConfiguration;
-import us.ihmc.perception.realsense.RealsenseDevice;
-import us.ihmc.perception.realsense.RealsenseDeviceManager;
+import us.ihmc.sensors.realsense.RealSenseConfiguration;
+import us.ihmc.sensors.realsense.RealSenseDevice;
+import us.ihmc.sensors.realsense.RealSenseDeviceManager;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
@@ -46,6 +46,8 @@ import java.util.function.Supplier;
  * <p>
  * Use this to retrieve files from ihmc-mini-2
  * rsync -aP ihmc-mini-2:/home/ihmc/.ihmc/logs/perception/20230226_172530_PerceptionLog.hdf5 /home/robotlab/.ihmc/logs/perception/
+ * <p>
+ * Deprecated, use {@link us.ihmc.perception.ImageSensorPublishThread}
  */
 @Deprecated
 public class RealsenseColorDepthPublisher
@@ -60,8 +62,8 @@ public class RealsenseColorDepthPublisher
    private final ROS2Helper ros2Helper;
    private final PerceptionConfigurationParameters parameters = new PerceptionConfigurationParameters();
    private final PerceptionDataLogger perceptionDataLogger = new PerceptionDataLogger();
-   private final RealsenseDeviceManager realsenseDeviceManager;
-   private final RealsenseDevice realsense;
+   private final RealSenseDeviceManager realsenseDeviceManager;
+   private final RealSenseDevice realsense;
 
    // Pre-allocations for update loop
    private final ImageMessage colorImageMessage = new ImageMessage();
@@ -81,7 +83,7 @@ public class RealsenseColorDepthPublisher
    private volatile boolean running = true;
    private final Notification destroyedNotification = new Notification();
 
-   public RealsenseColorDepthPublisher(RealsenseConfiguration realsenseConfiguration,
+   public RealsenseColorDepthPublisher(RealSenseConfiguration realsenseConfiguration,
                                        ROS2Topic<ImageMessage> depthTopic,
                                        ROS2Topic<ImageMessage> colorTopic,
                                        Supplier<ReferenceFrame> sensorFrameUpdater)
@@ -90,7 +92,7 @@ public class RealsenseColorDepthPublisher
       this.depthTopic = depthTopic;
       this.sensorFrameUpdater = sensorFrameUpdater;
 
-      realsenseDeviceManager = new RealsenseDeviceManager();
+      realsenseDeviceManager = new RealSenseDeviceManager();
       realsense = realsenseDeviceManager.createBytedecoRealsenseDevice(realsenseConfiguration);
       if (realsense.getDevice() == null)
       {
@@ -290,7 +292,7 @@ public class RealsenseColorDepthPublisher
 
       // L515: [F1121365, F0245563], D455: [215122254074]
       String realsenseSerialNumber = System.getProperty("d455.serial.number", "213522252883");
-      RealsenseColorDepthPublisher realsensePublisher = new RealsenseColorDepthPublisher(RealsenseConfiguration.D455_COLOR_720P_DEPTH_720P_30HZ,
+      RealsenseColorDepthPublisher realsensePublisher = new RealsenseColorDepthPublisher(RealSenseConfiguration.D455_COLOR_720P_DEPTH_720P_30HZ,
                                                                                          PerceptionAPI.D455_DEPTH_IMAGE,
                                                                                          PerceptionAPI.D455_COLOR_IMAGE,
                                                                                          ReferenceFrame::getWorldFrame);

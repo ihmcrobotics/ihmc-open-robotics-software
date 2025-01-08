@@ -6,8 +6,8 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.MutableBytePointer;
-import us.ihmc.perception.realsense.RealsenseDevice;
-import us.ihmc.perception.realsense.RealsenseDeviceManager;
+import us.ihmc.sensors.realsense.RealSenseDevice;
+import us.ihmc.sensors.realsense.RealSenseDeviceManager;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -24,8 +24,8 @@ public class RDXRealsenseD435UI
    private RDXInteractableRealsenseD435 d435Interactable;
    private YoRegistry yoRegistry = new YoRegistry(getClass().getSimpleName());
    private YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-   private RealsenseDeviceManager realsenseDeviceManager;
-   private RealsenseDevice d435;
+   private RealSenseDeviceManager realsenseDeviceManager;
+   private RealSenseDevice d435;
    private RDXBytedecoImagePanel depthImagePanel;
    private Mat depthU16C1Image;
    private BytedecoImage depth32FC1Image;
@@ -46,7 +46,7 @@ public class RDXRealsenseD435UI
 
             d435Interactable = new RDXInteractableRealsenseD435(baseUI.getPrimary3DPanel());
 
-            realsenseDeviceManager = new RealsenseDeviceManager(yoRegistry, yoGraphicsListRegistry);
+            realsenseDeviceManager = new RealSenseDeviceManager(yoRegistry, yoGraphicsListRegistry);
 
             d435 = realsenseDeviceManager.createBytedecoRealsenseDevice(1280, 720, 30);
             //                  d435.enableColor(1920, 1080, 30);
