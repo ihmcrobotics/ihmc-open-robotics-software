@@ -1,17 +1,20 @@
 package us.ihmc.sensors.zed;
 
-import us.ihmc.sensors.ImageSensorPoseRecorder;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
+import us.ihmc.sensors.ImageSensorPoseFile;
 import us.ihmc.tools.IHMCCommonPaths;
 
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.Date;
 
 import static us.ihmc.zed.global.zed.*;
 
 public class ZEDSVORecordSensor extends ZEDImageSensor
 {
-   private ImageSensorPoseRecorder poseRecorder;
+   private ImageSensorPoseFile poseRecorder;
 
    public ZEDSVORecordSensor(int cameraID, ZEDModelData zedModel, int slInputType)
    {
@@ -29,7 +32,7 @@ public class ZEDSVORecordSensor extends ZEDImageSensor
       returnCode = sl_enable_recording(getCameraID(), svoFileName, SL_SVO_COMPRESSION_MODE_H264, 8000, CAMERA_FPS, true);
       throwOnError(returnCode);
 
-      poseRecorder = new ImageSensorPoseRecorder(Path.of(svoFileName + ".sensorposes"));
+      poseRecorder = new ImageSensorPoseFile(Path.of(svoFileName + ".sensorposes"));
    }
 
    @Override
@@ -38,7 +41,12 @@ public class ZEDSVORecordSensor extends ZEDImageSensor
       boolean grab = super.grab();
 
       if (poseRecorder != null)
-         poseRecorder.recordFrame(getImage(DEPTH_IMAGE_KEY));
+      {
+         Instant acquisitionTime = getImage(DEPTH_IMAGE_KEY).getAcquisitionTime();
+         Point3DBasics position = getImage(DEPTH_IMAGE_KEY).getPosition();
+         QuaternionBasics orientation = getImage(DEPTH_IMAGE_KEY).getOrientation();
+         poseRecorder.recordFrameData(acquisitionTime, position, orientation);
+      }
 
       return grab;
    }
