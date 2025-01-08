@@ -1,4 +1,4 @@
-package us.ihmc.sensors;
+package us.ihmc.sensors.deprecated;
 
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.opencv.global.opencv_core;
@@ -13,6 +13,8 @@ import us.ihmc.perception.RawImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.sensors.zed.ZEDImageSensor;
+import us.ihmc.sensors.zed.ZEDModelData;
 import us.ihmc.tools.thread.RestartableThread;
 import us.ihmc.zed.SL_CalibrationParameters;
 import us.ihmc.zed.SL_CameraInformation;
@@ -37,7 +39,10 @@ import static us.ihmc.zed.global.zed.*;
 /**
  * Encodes and publishes color and depth images from a ZED sensor.
  * The depth image is aligned to the left camera of the ZED.
+ * <p>
+ * Deprecated, use {@link ZEDImageSensor}
  */
+@Deprecated
 public class ZEDColorDepthImageRetriever
 {
    static

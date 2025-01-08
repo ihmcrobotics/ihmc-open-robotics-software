@@ -1,4 +1,4 @@
-package us.ihmc.sensors;
+package us.ihmc.sensors.zed;
 
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.opencv.opencv_core.GpuMat;
@@ -12,6 +12,7 @@ import us.ihmc.perception.RawImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
+import us.ihmc.sensors.ImageSensor;
 import us.ihmc.zed.SL_CalibrationParameters;
 import us.ihmc.zed.SL_CameraInformation;
 import us.ihmc.zed.SL_InitParameters;
@@ -233,8 +234,16 @@ public class ZEDImageSensor extends ImageSensor
 
          synchronized (grabbedImages)
          {  // Create RawImages from the grabbed retrieved slMats
+            if (grabbedImages[LEFT_COLOR_IMAGE_KEY] != null)
+               grabbedImages[LEFT_COLOR_IMAGE_KEY].release();
             grabbedImages[LEFT_COLOR_IMAGE_KEY] = slMatToRawImage(leftColorImagePointer, PixelFormat.BGRA8, leftSensorIntrinsics, leftSensorPose);
+
+            if (grabbedImages[RIGHT_COLOR_IMAGE_KEY] != null)
+               grabbedImages[RIGHT_COLOR_IMAGE_KEY].release();
             grabbedImages[RIGHT_COLOR_IMAGE_KEY] = slMatToRawImage(rightColorImagePointer, PixelFormat.BGRA8, rightSensorIntrinsics, rightSensorPose);
+
+            if (grabbedImages[DEPTH_IMAGE_KEY] != null)
+               grabbedImages[DEPTH_IMAGE_KEY].release();
             grabbedImages[DEPTH_IMAGE_KEY] = slMatToRawImage(depthImagePointer, PixelFormat.GRAY16, leftSensorIntrinsics, leftSensorPose);
          }
       }
@@ -257,7 +266,7 @@ public class ZEDImageSensor extends ImageSensor
                                       sl_mat_get_ptr(slMatPointer, SL_MEM_GPU),
                                       sl_mat_get_step_bytes(slMatPointer, SL_MEM_GPU));
       return new RawImage(null,
-                          imageGpuMat,
+                          imageGpuMat.clone(),
                           imagePixelFormat,
                           cameraIntrinsics,
                           CameraModel.PINHOLE,
@@ -272,6 +281,9 @@ public class ZEDImageSensor extends ImageSensor
    {
       synchronized (grabbedImages)
       {
+         if (grabbedImages[imageKey] == null)
+            return null;
+
          return grabbedImages[imageKey].get();
       }
    }
@@ -305,6 +317,10 @@ public class ZEDImageSensor extends ImageSensor
             slMat.close();
          }
       }
+
+      for (RawImage image : grabbedImages)
+         if (image != null)
+            image.release();
 
       sl_close_camera(cameraID);
 
