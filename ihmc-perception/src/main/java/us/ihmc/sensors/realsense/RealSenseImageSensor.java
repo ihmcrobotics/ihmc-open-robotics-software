@@ -1,4 +1,4 @@
-package us.ihmc.sensors;
+package us.ihmc.sensors.realsense;
 
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -7,13 +7,11 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.realsense.RealsenseConfiguration;
-import us.ihmc.perception.realsense.RealsenseDevice;
-import us.ihmc.perception.realsense.RealsenseDeviceManager;
+import us.ihmc.sensors.ImageSensor;
 
 import java.time.Instant;
 
-public class RealsenseImageSensor extends ImageSensor
+public class RealSenseImageSensor extends ImageSensor
 {
    public static final int COLOR_IMAGE_KEY = 0;
    public static final int DEPTH_IMAGE_KEY = 1;
@@ -21,9 +19,9 @@ public class RealsenseImageSensor extends ImageSensor
 
    private static final double OUTPUT_FREQUENCY = 20.0;
 
-   private final RealsenseConfiguration realsenseConfiguration;
-   private final RealsenseDeviceManager realsenseManager = new RealsenseDeviceManager();
-   private RealsenseDevice realsense = null;
+   private final RealSenseConfiguration realsenseConfiguration;
+   private final RealSenseDeviceManager realsenseManager = new RealSenseDeviceManager();
+   private RealSenseDevice realsense = null;
 
    private final RawImage[] grabbedImages = new RawImage[OUTPUT_IMAGE_COUNT];
    private long grabSequenceNumber = 0L;
@@ -33,7 +31,7 @@ public class RealsenseImageSensor extends ImageSensor
    private final FramePose3D colorPose = new FramePose3D();
    private final Throttler grabThrottler = new Throttler().setFrequency(OUTPUT_FREQUENCY);
 
-   public RealsenseImageSensor(RealsenseConfiguration realsenseConfiguration)
+   public RealSenseImageSensor(RealSenseConfiguration realsenseConfiguration)
    {
       super(realsenseConfiguration.name().split("_")[0]);
 

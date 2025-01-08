@@ -1,4 +1,4 @@
-package us.ihmc.perception.realsense;
+package us.ihmc.sensors.realsense;
 
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.librealsense2.global.realsense2;
@@ -19,7 +19,7 @@ import java.util.function.Supplier;
  * It has been tested to be garbage free and is required to be garbage free to run properly within a real time thread
  * Please profile if you make any changes. Most of the Realsense2 pointer methods return a new pointer and are not real time compatible
  */
-public class RealsenseDeviceManager
+public class RealSenseDeviceManager
 {
    private final String name = getClass().getSimpleName();
    private final YoRegistry registry = new YoRegistry(name);
@@ -30,12 +30,12 @@ public class RealsenseDeviceManager
    private rs2_device_list devices;
    private final rs2_error error = new rs2_error();
 
-   public RealsenseDeviceManager()
+   public RealSenseDeviceManager()
    {
       this(null, null);
    }
 
-   public RealsenseDeviceManager(YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
+   public RealSenseDeviceManager(YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       this.graphicsListRegistry = graphicsListRegistry;
 
@@ -51,9 +51,9 @@ public class RealsenseDeviceManager
          parentRegistry.addChild(registry);
    }
 
-   public RealsenseDevice createFullFeaturedL515()
+   public RealSenseDevice createFullFeaturedL515()
    {
-      return createBytedecoRealsenseDevice(RealsenseConfiguration.L515_COLOR_720P_DEPTH_768P_30HZ);
+      return createBytedecoRealsenseDevice(RealSenseConfiguration.L515_COLOR_720P_DEPTH_768P_30HZ);
    }
 
    /**
@@ -62,7 +62,7 @@ public class RealsenseDeviceManager
     *  @param configuration The requested device settings
     *  @return BytedecoRealsense device object for accessing sensor data and config information
     */
-   public RealsenseDevice createBytedecoRealsenseDevice(RealsenseConfiguration configuration)
+   public RealSenseDevice createBytedecoRealsenseDevice(RealSenseConfiguration configuration)
    {
       return createBytedecoRealsenseDevice(
             configuration.getDepthWidth(),
@@ -78,9 +78,9 @@ public class RealsenseDeviceManager
    *  @param fps Frames Per Second which is the frequency of update to be requested from the sensor firmware
    *  @return BytedecoRealsense device object for accessing sensor data and config information
    */
-   public RealsenseDevice createBytedecoRealsenseDevice(int depthWidth, int depthHeight, int fps)
+   public RealSenseDevice createBytedecoRealsenseDevice(int depthWidth, int depthHeight, int fps)
    {
-      return new RealsenseDevice(context, createDevice(), depthWidth, depthHeight, fps);
+      return new RealSenseDevice(context, createDevice(), depthWidth, depthHeight, fps);
    }
 
    public rs2_device createDevice()

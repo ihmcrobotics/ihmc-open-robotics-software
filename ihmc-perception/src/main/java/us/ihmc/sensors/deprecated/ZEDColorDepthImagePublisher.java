@@ -1,4 +1,4 @@
-package us.ihmc.sensors;
+package us.ihmc.sensors.deprecated;
 
 import org.bytedeco.javacpp.BytePointer;
 import perception_msgs.msg.dds.ImageMessage;
@@ -19,6 +19,10 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+/**
+ * Deprecated, use {@link us.ihmc.perception.ImageSensorPublishThread}
+ */
+@Deprecated
 public class ZEDColorDepthImagePublisher
 {
    private final ROS2Node ros2Node;

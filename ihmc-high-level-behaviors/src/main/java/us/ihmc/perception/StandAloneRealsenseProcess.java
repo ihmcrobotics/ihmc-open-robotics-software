@@ -8,12 +8,12 @@ import us.ihmc.communication.ros2.ROS2DemandGraphNode;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.opencl.OpenCLManager;
-import us.ihmc.perception.realsense.RealsenseConfiguration;
+import us.ihmc.sensors.realsense.RealSenseConfiguration;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-import us.ihmc.sensors.RealsenseImageSensor;
+import us.ihmc.sensors.realsense.RealSenseImageSensor;
 
 import java.util.Map;
 
@@ -22,9 +22,9 @@ import java.util.Map;
  */
 public class StandAloneRealsenseProcess
 {
-   private static final Map<Integer, ROS2Topic<? extends Packet<?>>> D455_IMAGE_TOPIC_MAP = Map.of(RealsenseImageSensor.COLOR_IMAGE_KEY,
+   private static final Map<Integer, ROS2Topic<? extends Packet<?>>> D455_IMAGE_TOPIC_MAP = Map.of(RealSenseImageSensor.COLOR_IMAGE_KEY,
                                                                                                    PerceptionAPI.SRT_REALSENSE_COLOR_STREAM_STATUS,
-                                                                                                   RealsenseImageSensor.DEPTH_IMAGE_KEY,
+                                                                                                   RealSenseImageSensor.DEPTH_IMAGE_KEY,
                                                                                                    PerceptionAPI.D455_DEPTH_IMAGE);
 
    private final ROS2DemandGraphNode realsenseDemandNode;
@@ -32,7 +32,7 @@ public class StandAloneRealsenseProcess
    private final ROS2Helper ros2Helper;
    private final ROS2SyncedRobotModel syncedRobot;
 
-   private final RealsenseImageSensor d455Sensor;
+   private final RealSenseImageSensor d455Sensor;
    private ImageSensorPublishThread d455PublishThread;
 
    private final ROS2DemandGraphNode heightMapDemandNode;
@@ -50,7 +50,7 @@ public class StandAloneRealsenseProcess
       realsenseDemandNode = new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_REALSENSE);
       realsenseDemandNode.addDependents(realsensePublishDemandNode, heightMapDemandNode);
 
-      d455Sensor = new RealsenseImageSensor(RealsenseConfiguration.D455_COLOR_720P_DEPTH_720P_30HZ);
+      d455Sensor = new RealSenseImageSensor(RealSenseConfiguration.D455_COLOR_720P_DEPTH_720P_30HZ);
 
       if (syncedRobot != null)
       {
@@ -72,7 +72,7 @@ public class StandAloneRealsenseProcess
                                                              syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.LEFT),
                                                              syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.RIGHT),
                                                              d455Sensor,
-                                                             RealsenseImageSensor.DEPTH_IMAGE_KEY,
+                                                             RealSenseImageSensor.DEPTH_IMAGE_KEY,
                                                              runWithCUDA);
       loopOnDemand(heightMapUpdateThread, heightMapDemandNode);
    }
