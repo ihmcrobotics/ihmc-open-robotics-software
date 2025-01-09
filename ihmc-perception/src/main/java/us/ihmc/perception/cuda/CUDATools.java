@@ -9,6 +9,8 @@ import org.bytedeco.javacpp.Loader;
 import org.bytedeco.javacpp.Pointer;
 import us.ihmc.log.LogTools;
 
+import java.net.URL;
+
 import static org.bytedeco.cuda.global.cudart.*;
 import static org.bytedeco.cuda.global.nvjpeg.NVJPEG_STATUS_SUCCESS;
 import static org.bytedeco.cuda.global.nvrtc.NVRTC_SUCCESS;
@@ -109,6 +111,14 @@ public class CUDATools
             LogTools.error("CUDA Error ({}): {}", errorName.getString(), errorString.getString());
          }
       }
+   }
+
+   /**
+    * @return The URL to the Utils.cu file
+    */
+   public static URL getUtilsFile()
+   {
+      return CUDATools.class.getResource("Utils.cu");
    }
 
    /**

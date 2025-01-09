@@ -108,7 +108,7 @@ public class ContactWrenchMatrixCalculatorTest
       PlaneContactStateCommand next = new PlaneContactStateCommand();
       next.setContactingRigidBody(contactablePlaneBody.getRigidBody());
       next.setCoefficientOfFriction(random.nextDouble());
-      next.setContactNormal(EuclidFrameRandomTools.nextFrameVector3DWithFixedLength(random, contactablePlaneBody.getSoleFrame(), 1.0));
+      next.setContactNormal(EuclidFrameRandomTools.nextFrameVector3DWithFixedLength(random, contactablePlaneBody.getContactFrame(), 1.0));
       next.setHasContactStateChanged(true);
 
       for (FramePoint3D contactPoint : contactablePlaneBody.getContactPointsCopy())

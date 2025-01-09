@@ -10,6 +10,11 @@ public interface DefaultFootstepPlannerParametersBasics extends DefaultFootstepP
       setAll(footstepPlannerParameters.getAll());
    }
 
+   default void setUseGPU(boolean useGPU)
+   {
+      set(DefaultFootstepPlannerParameters.useGPU, useGPU);
+   }
+
    default void setAStarHeuristicsWeight(double aStarHeuristicsWeight)
    {
       set(DefaultFootstepPlannerParameters.astarHeuristicsWeight, aStarHeuristicsWeight);
@@ -343,6 +348,7 @@ public interface DefaultFootstepPlannerParametersBasics extends DefaultFootstepP
    default void set(FootstepPlannerParametersPacket parametersPacket)
    {
       double noValue = FootstepPlannerParametersPacket.DEFAULT_NO_VALUE;
+      setUseGPU(parametersPacket.getUseGpu());
       setCheckForBodyBoxCollisions(parametersPacket.getCheckForBodyBoxCollisions());
       setCheckForPathCollisions(parametersPacket.getCheckForPathCollisions());
       setIntermediateBodyBoxChecks((int) parametersPacket.getIntermediateBodyBoxChecks());

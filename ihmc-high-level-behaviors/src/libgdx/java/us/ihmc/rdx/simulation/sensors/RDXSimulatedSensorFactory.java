@@ -179,7 +179,7 @@ public class RDXSimulatedSensorFactory
 
    public static RDXHighLevelDepthSensorSimulator createBlackflyFisheye(ROS2SyncedRobotModel syncedRobot)
    {
-      return createBlackflyFisheye(syncedRobot.getReferenceFrames().getSituationalAwarenessCameraFrame(RobotSide.RIGHT), syncedRobot::getTimestamp);
+      return createBlackflyFisheye(syncedRobot.getReferenceFrames().getStereoCameraFrame(RobotSide.RIGHT), syncedRobot::getTimestamp);
    }
 
    public static RDXHighLevelDepthSensorSimulator createBlackflyFisheyeImageOnlyNoComms(ReferenceFrame sensorFrame)
@@ -226,7 +226,7 @@ public class RDXSimulatedSensorFactory
       double maxRange = 5.0;
       RDXHighLevelDepthSensorSimulator highLevelDepthSensorSimulator
             = new RDXHighLevelDepthSensorSimulator("Blackfly Right for Object Detection",
-                                                   referenceFrames.getSituationalAwarenessCameraFrame(RobotSide.RIGHT),
+                                                   referenceFrames.getStereoCameraFrame(RobotSide.RIGHT),
                                                    timeSupplier,
                                                    verticalFOV,
                                                    imageWidth,
@@ -241,8 +241,12 @@ public class RDXSimulatedSensorFactory
       return highLevelDepthSensorSimulator;
    }
 
-   public static RDXHighLevelDepthSensorSimulator createChestZED2ForObjectDetection(HumanoidReferenceFrames referenceFrames,
-                                                                                    LongSupplier timeSupplier)
+   public static RDXHighLevelDepthSensorSimulator createChestZED2ForObjectDetection(ROS2SyncedRobotModel syncedRobot)
+   {
+      return createChestZED2ForObjectDetection(syncedRobot.getReferenceFrames(), syncedRobot::getTimestamp);
+   }
+
+   public static RDXHighLevelDepthSensorSimulator createChestZED2ForObjectDetection(HumanoidReferenceFrames referenceFrames, LongSupplier timeSupplier)
    {
       double publishRateHz = 20.0;
       double verticalFOV = 70.0;

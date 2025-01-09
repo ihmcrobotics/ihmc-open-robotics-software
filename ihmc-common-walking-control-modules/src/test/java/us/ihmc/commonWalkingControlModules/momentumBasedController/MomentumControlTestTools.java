@@ -45,7 +45,7 @@ public class MomentumControlTestTools
    }
 
    public static void assertWrenchesInFrictionCones(Map<RigidBodyBasics, Wrench> externalWrenches,
-         Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates, double coefficientOfFriction)
+                                                    Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates, double coefficientOfFriction)
    {
       CenterOfPressureResolver centerOfPressureResolver = new CenterOfPressureResolver();
 

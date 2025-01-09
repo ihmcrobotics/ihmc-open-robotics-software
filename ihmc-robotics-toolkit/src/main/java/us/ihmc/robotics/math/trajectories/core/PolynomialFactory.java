@@ -1,6 +1,6 @@
 package us.ihmc.robotics.math.trajectories.core;
 
-import us.ihmc.robotics.dataStructures.ComplexNumber;
+import us.ihmc.math.ComplexNumber;
 import us.ihmc.robotics.math.trajectories.interfaces.PolynomialBasics;
 import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
 
@@ -10,7 +10,7 @@ public class PolynomialFactory
    public static PolynomialBasics constructFromComplexPairRoot(ComplexNumber oneComplexRoot)
    {
       double a = oneComplexRoot.real();
-      double b = oneComplexRoot.imag();
+      double b = oneComplexRoot.imaginary();
 
       return new Polynomial(new double[] {1.0, -2.0 * a, a * a + b * b}, false);
    }

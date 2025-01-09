@@ -60,12 +60,13 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    private final DefaultFootstepPlannerParametersBasics footstepPlannerParameters;
 
    private final WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder = new WaypointDefinedBodyPathPlanHolder();
-   private final AStarBodyPathPlannerInterface bodyPathPlannerInterface;
+   private AStarBodyPathPlannerInterface bodyPathPlannerInterface;
 
    // TODO plan then snap planner needs to work for height maps.
    private final PlanThenSnapPlanner planThenSnapPlanner;
    private final AStarFootstepPlanner aStarFootstepPlanner;
    private final List<VariableDescriptor> footstepPlanVariableDescriptors;
+   private final SideDependentList<ConvexPolygon2D> footPolygons;
 
    private final AtomicBoolean isPlanning = new AtomicBoolean();
    private final FootstepPlannerRequest request = new FootstepPlannerRequest();
@@ -81,7 +82,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    private final List<Consumer<SwingPlannerType>> swingReplanRequestCallbacks = new ArrayList<>();
    private final List<Consumer<FootstepPlan>> swingReplanStatusCallbacks = new ArrayList<>();
 
-   private final boolean useGPU;
+   private boolean useGPU;
 
    public FootstepPlanningModule()
    {
@@ -97,6 +98,11 @@ public class FootstepPlanningModule implements CloseableAndDisposable
            null,
            PlannerTools.createDefaultFootPolygons(),
            null);
+   }
+
+   public FootstepPlanningModule(boolean useGPU)
+   {
+      this(FootstepPlanningModule.class.getSimpleName(), useGPU);
    }
 
    public FootstepPlanningModule(String name, boolean useGPU)
@@ -141,8 +147,10 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       this.name = name;
       this.aStarBodyPathPlannerParameters = aStarBodyPathPlannerParameters;
       this.footstepPlannerParameters = footstepPlannerParameters;
+      this.footPolygons = footPolygons;
 
       this.useGPU = useGPU;
+
       if (useGPU)
       {
          this.bodyPathPlannerInterface = new GPUAStarBodyPathPlanner(footstepPlannerParameters, aStarBodyPathPlannerParameters, footPolygons, stopwatch);
@@ -208,6 +216,20 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    {
       if (useGPU)
          ((GPUAStarBodyPathPlanner) bodyPathPlannerInterface).destroyOpenCLStuff();
+   }
+
+   public void enableGPUBodyPathPlanner(boolean useGPU)
+   {
+      if (this.useGPU && !useGPU)
+      {
+         destroy();
+         bodyPathPlannerInterface = new AStarBodyPathPlanner(footstepPlannerParameters, aStarBodyPathPlannerParameters, footPolygons, stopwatch);
+      }
+      else if (!this.useGPU && useGPU)
+      {
+         bodyPathPlannerInterface = new GPUAStarBodyPathPlanner(footstepPlannerParameters, aStarBodyPathPlannerParameters, footPolygons, stopwatch);
+      }
+      this.useGPU = useGPU;
    }
 
    private void handleRequestInternal(FootstepPlannerRequest request) throws Exception
