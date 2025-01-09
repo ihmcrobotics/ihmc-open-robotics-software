@@ -5,8 +5,8 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.MatVector;
 import org.junit.jupiter.api.Test;
-import us.ihmc.commons.Assertions;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImageTest;
 import us.ihmc.perception.opencv.OpenCVTools;
@@ -34,6 +34,8 @@ public class CUDAJPEGProcessorTest
          assertTrue(encodedImage.limit() < OpenCVTools.dataSize(bgrImage));
 
          jpegProcessor.decodeToBGR(encodedImage, encodedImage.limit(), decodedImage);
+         PerceptionDebugTools.display("Original vs Processed", new MatVector(bgrImage, decodedImage), 1000);
+
          double averageDifference = OpenCVTools.averagePixelDifference(bgrImage, decodedImage);
          LogTools.info("Average Pixel Difference: {}", averageDifference);
          assertTrue(averageDifference < 5.0);
@@ -59,6 +61,8 @@ public class CUDAJPEGProcessorTest
          assertTrue(encodedImage.limit() < OpenCVTools.dataSize(bgrImage));
 
          jpegProcessor.decodeToBGR(encodedImage, encodedImage.limit(), decodedImage);
+         PerceptionDebugTools.display("Original vs Processed", new MatVector(bgrImage, decodedImage), 1000);
+
          double averageDifference = OpenCVTools.averagePixelDifference(bgrImage, decodedImage);
          LogTools.info("Average Pixel Difference: {}", averageDifference);
          assertTrue(averageDifference < 5.0);
@@ -84,6 +88,8 @@ public class CUDAJPEGProcessorTest
          assertTrue(encodedImage.limit() < OpenCVTools.dataSize(bgrImage));
 
          jpegProcessor.decodeToGray(encodedImage, encodedImage.limit(), decodedImage);
+         PerceptionDebugTools.display("Original vs Processed", new MatVector(grayImage, decodedImage), 1000);
+
          double averageDifference = OpenCVTools.averagePixelDifference(grayImage, decodedImage);
          LogTools.info("Average Pixel Difference: {}", averageDifference);
          assertTrue(averageDifference < 5.0);
@@ -109,6 +115,8 @@ public class CUDAJPEGProcessorTest
          assertTrue(encodedImage.limit() < OpenCVTools.dataSize(bgrImage));
 
          jpegProcessor.decodeToBGR(encodedImage, encodedImage.limit(), decodedImage);
+         PerceptionDebugTools.display("Original vs Processed", new MatVector(bgrImage, decodedImage), 1000);
+
          double averageDifference = OpenCVTools.averagePixelDifference(bgrImage, decodedImage);
          LogTools.info("Average Pixel Difference: {}", averageDifference);
          assertTrue(averageDifference < 5.0);
@@ -118,7 +126,7 @@ public class CUDAJPEGProcessorTest
    }
 
    @Test
-   public void testEncodeYUVDecodeUnchanged()
+   public void testEncodeYUV444DecodeYUV()
    {
       CUDAJPEGProcessor jpegProcessor = new CUDAJPEGProcessor(100);
 
@@ -133,7 +141,9 @@ public class CUDAJPEGProcessorTest
          jpegProcessor.encodeYUV444(yuvImage, encodedImage);
          assertTrue(encodedImage.limit() < OpenCVTools.dataSize(bgrImage));
 
-         jpegProcessor.decodeUnchanged(encodedImage, encodedImage.limit(), decodedImage);
+         jpegProcessor.decodeToYUV(encodedImage, encodedImage.limit(), decodedImage);
+         PerceptionDebugTools.display("Original vs Processed", new MatVector(yuvImage, decodedImage), 1000);
+
          double averageDifference = OpenCVTools.averagePixelDifference(yuvImage, decodedImage);
          LogTools.info("Average Pixel Difference: {}", averageDifference);
          assertTrue(averageDifference < 5.0);
@@ -143,7 +153,7 @@ public class CUDAJPEGProcessorTest
    }
 
    @Test
-   public void tesEncodeYUV420DecodeUnchanged()
+   public void tesEncodeYUV420DecodeYUVI()
    {
       CUDAJPEGProcessor jpegProcessor = new CUDAJPEGProcessor(100);
 
@@ -155,13 +165,42 @@ public class CUDAJPEGProcessorTest
       {
          opencv_imgproc.cvtColor(bgrImage, yuvImage, opencv_imgproc.COLOR_BGR2YUV_I420);
 
-         jpegProcessor.encodeYUV420(yuvImage, encodedImage);
+         jpegProcessor.encodeYUVI420(yuvImage, encodedImage);
          assertTrue(encodedImage.limit() < OpenCVTools.dataSize(bgrImage));
 
-         jpegProcessor.decodeUnchanged(encodedImage, encodedImage.limit(), decodedImage);
+         jpegProcessor.decodeToYUV(encodedImage, encodedImage.limit(), decodedImage);
+         PerceptionDebugTools.display("Original vs Processed", new MatVector(yuvImage, decodedImage), 10000);
+
          double averageDifference = OpenCVTools.averagePixelDifference(yuvImage, decodedImage);
          LogTools.info("Average Pixel Difference: {}", averageDifference);
          assertTrue(averageDifference < 5.0);
+      }
+
+      jpegProcessor.destroy();
+   }
+
+   @Test
+   public void tesEncodeYUVI420DecodeBGR()
+   {
+      CUDAJPEGProcessor jpegProcessor = new CUDAJPEGProcessor(100);
+
+      try (Mat bgrImage = readBGRImage();
+           Mat yuvImage = new Mat();
+           BytePointer encodedImage = new BytePointer(OpenCVTools.dataSize(bgrImage));
+           Mat decodedImage = new Mat())
+
+      {
+         opencv_imgproc.cvtColor(bgrImage, yuvImage, opencv_imgproc.COLOR_BGR2YUV_I420);
+
+         jpegProcessor.encodeYUVI420(yuvImage, encodedImage);
+         assertTrue(encodedImage.limit() < OpenCVTools.dataSize(bgrImage));
+
+         jpegProcessor.decodeToBGR(encodedImage, encodedImage.limit(), decodedImage);
+         PerceptionDebugTools.display("Original vs Processed", new MatVector(bgrImage, decodedImage), 10000);
+
+         double averageDifference = OpenCVTools.averagePixelDifference(bgrImage, decodedImage);
+         LogTools.info("Average Pixel Difference: {}", averageDifference);
+         assertTrue(averageDifference < 10.0);
       }
 
       jpegProcessor.destroy();

@@ -1,5 +1,6 @@
 package us.ihmc.perception.cuda;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.bytedeco.cuda.cudart.CUstream_st;
 import org.bytedeco.cuda.nvjpeg.nvjpegEncoderParams;
 import org.bytedeco.cuda.nvjpeg.nvjpegEncoderState;
@@ -18,8 +19,10 @@ import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.GpuMatVector;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
+import us.ihmc.perception.opencv.OpenCVTools;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.bytedeco.cuda.global.cudart.*;
@@ -30,9 +33,9 @@ import static us.ihmc.perception.cuda.CUDATools.checkNVJPEGError;
 /**
  * Used for encoding images using CUDA.
  * Ensure that the computer has CUDA available before using this class. Most all Nvidia graphics cards should have CUDA available.
- *
+ * <p>
  * This class has been adapted from the SampleJpegEncoder of bytedeco:
- * https://github.com/bytedeco/javacpp-presets/blob/master/cuda/samples/SampleJpegEncoder.java
+ * <a href="https://github.com/bytedeco/javacpp-presets/blob/master/cuda/samples/SampleJpegEncoder.java">SampleJpegEncoder.java</a>
  */
 public class CUDAJPEGProcessor
 {
@@ -49,6 +52,7 @@ public class CUDAJPEGProcessor
 
    /**
     * Initialize necessary CUDA components
+    *
     * @param quality value between 1 and 100 representing the quality of the jpeg image. 1 will result in the lowest quality, but highest compression.
     */
    public CUDAJPEGProcessor(int quality)
@@ -80,74 +84,166 @@ public class CUDAJPEGProcessor
    /**
     * Encodes a YUV I420 image into jpeg.
     *
-    * @param sourceImage        the YUV I420 image
+    * @param sourceImage  the YUV I420 image (OpenCV's 8UC1 format)
     * @param encodedImage pointer to the jpeg image output
     */
-   public void encodeYUV420(Pointer sourceImage, BytePointer encodedImage)
+   public void encodeYUVI420(Mat sourceImage, BytePointer encodedImage)
    {
-      GpuMat gpuSourceImage = new GpuMat();
-      if (sourceImage instanceof Mat cpuMat)
-         gpuSourceImage.upload(cpuMat);
-      else if (sourceImage instanceof GpuMat gpuImage)
-         gpuImage.copyTo(gpuSourceImage);
-
-      int totalHeight = gpuSourceImage.rows();
-      int lumaHeight = (2 * totalHeight) / 3;
-
-      int width = gpuSourceImage.cols();
-      int chromaWidth = width / 2;
-
-      GpuMatVector planes = new GpuMatVector();
-      planes.push_back(gpuSourceImage.rowRange(0, lumaHeight));                                          // Y
-      planes.push_back(gpuSourceImage.rowRange(lumaHeight, totalHeight).colRange(0, chromaWidth));       // U
-      planes.push_back(gpuSourceImage.rowRange(lumaHeight, totalHeight).colRange(chromaWidth, width));   // V
-
-      encodeYUV(planes, NVJPEG_CSS_420, encodedImage);
-
-      planes.close();
-      gpuSourceImage.close();
+      encodeYUVI420(sourceImage.data(), sourceImage.cols(), sourceImage.rows(), sourceImage.step(), encodedImage);
    }
 
-   public void encodeYUV444(Pointer sourceImage, BytePointer encodedImage)
+   /**
+    * Encodes a YUV I420 image into jpeg.
+    *
+    * @param sourceImage  the YUV I420 image (OpenCV's 8UC1 format)
+    * @param encodedImage pointer to the jpeg image output
+    */
+   public void encodeYUVI420(GpuMat sourceImage, BytePointer encodedImage)
    {
-      GpuMat gpuSourceImage = new GpuMat();
-      if (sourceImage instanceof Mat cpuMat)
-         gpuSourceImage.upload(cpuMat);
-      else if (sourceImage instanceof GpuMat gpuImage)
-         gpuImage.copyTo(gpuSourceImage);
-
-      GpuMatVector planes = new GpuMatVector();
-      opencv_cudaarithm.split(gpuSourceImage, planes);
-
-      encodeYUV(planes, NVJPEG_CSS_444, encodedImage);
-
-      planes.close();
-      gpuSourceImage.close();
+      encodeYUVI420(sourceImage.data(), sourceImage.cols(), sourceImage.rows(), sourceImage.step(), encodedImage);
    }
 
-   public void encodeYUV(GpuMatVector imageToEncode, int chromaSubSampling, BytePointer encodedImage)
+   private void encodeYUVI420(Pointer sourceImageData, int sourceWidth, int sourceHeight, long sourcePitch, BytePointer encodedImage)
+   {
+      int error;
+
+      // Get some useful values
+      int lumaHeight = (2 * sourceHeight) / 3;        // luma takes 2/3 of the total height
+      int chromaHeight = sourceHeight - lumaHeight;   // chroma planes take rest of the height
+      int chromaWidth = sourceWidth / 2;              // chroma planes each take half the width of the image
+
+      // Declare and allocate CUDA pointers for each plane
+      BytePointer yPlaneData = new BytePointer();
+      BytePointer uPlaneData = new BytePointer();
+      BytePointer vPlaneData = new BytePointer();
+
+      CUDATools.mallocAsync(yPlaneData, (long) sourceWidth * lumaHeight, cudaStream);
+      CUDATools.mallocAsync(uPlaneData, (long) chromaWidth * chromaHeight, cudaStream);
+      CUDATools.mallocAsync(vPlaneData, (long) chromaWidth * chromaHeight, cudaStream);
+
+      // Copy over each plane to
+      Pointer planePointer = sourceImageData.getPointer();
+      error = cudaMemcpy2DAsync(yPlaneData, sourceWidth, planePointer, sourcePitch, sourceWidth, lumaHeight, cudaMemcpyDefault, cudaStream);
+      CUDATools.checkCUDAError(error);
+
+      planePointer = planePointer.getPointer(sourcePitch * lumaHeight);
+      error = cudaMemcpy2DAsync(uPlaneData, sourceWidth, planePointer, sourcePitch, sourceWidth, chromaHeight / 2, cudaMemcpyDefault, cudaStream);
+      CUDATools.checkCUDAError(error);
+
+      planePointer = planePointer.getPointer(sourcePitch * chromaHeight / 2);
+      error = cudaMemcpy2DAsync(vPlaneData, sourceWidth, planePointer, sourcePitch, sourceWidth, chromaHeight / 2, cudaMemcpyDefault, cudaStream);
+      CUDATools.checkCUDAError(error);
+
+      // Create the nvjpeg image
+      nvjpegImage_t nvjpegImage = new nvjpegImage_t();
+      nvjpegImage.channel(0, yPlaneData).pitch(0, sourceWidth);   // Y
+      nvjpegImage.channel(1, uPlaneData).pitch(1, chromaWidth);   // U
+      nvjpegImage.channel(2, vPlaneData).pitch(2, chromaWidth);   // V
+
+      // Encode the image
+      encodeYUV(nvjpegImage, sourceWidth, lumaHeight, NVJPEG_CSS_420, encodedImage);
+
+      // Free resources
+      checkCUDAError(cudaFreeAsync(yPlaneData, cudaStream));
+      checkCUDAError(cudaFreeAsync(uPlaneData, cudaStream));
+      checkCUDAError(cudaFreeAsync(vPlaneData, cudaStream));
+      yPlaneData.close();
+      uPlaneData.close();
+      vPlaneData.close();
+      planePointer.close();
+      nvjpegImage.close();
+   }
+
+   /**
+    * Encodes a YUV 444 image into jpeg.
+    *
+    * @param sourceImage  the YUV 444 image
+    * @param encodedImage pointer to the jpeg image output
+    */
+   public void encodeYUV444(Mat sourceImage, BytePointer encodedImage)
+   {
+      // Split the source image into its planes
+      MatVector sourceImagePlanes = new MatVector();
+      opencv_core.split(sourceImage, sourceImagePlanes);
+
+      // Get the pointers to the planes
+      Pointer[] planePointers = new Pointer[(int) sourceImagePlanes.size()];
+      long[] planePitches = new long[(int) sourceImagePlanes.size()];
+      for (int i = 0; i < sourceImagePlanes.size(); ++i)
+      {
+         planePointers[i] = sourceImagePlanes.get(i).data();
+         planePitches[i] = sourceImagePlanes.get(i).step();
+      }
+
+      // Encode the image
+      encodeYUV444(planePointers, planePitches, sourceImage.cols(), sourceImage.rows(), encodedImage);
+
+      // Free resources
+      for (int i = 0; i < sourceImagePlanes.size(); ++i)
+         planePointers[i].close();
+      sourceImagePlanes.close();
+   }
+
+   /**
+    * Encodes a YUV 444 image into jpeg.
+    *
+    * @param sourceImage  the YUV 444 image
+    * @param encodedImage pointer to the jpeg image output
+    */
+   public void encodeYUV444(GpuMat sourceImage, BytePointer encodedImage)
+   {
+      // Split the source image into its planes
+      GpuMatVector sourceImagePlanes = new GpuMatVector();
+      opencv_cudaarithm.split(sourceImage, sourceImagePlanes);
+
+      // Get the pointers to the planes
+      Pointer[] planePointers = new Pointer[(int) sourceImagePlanes.size()];
+      long[] planePitches = new long[(int) sourceImagePlanes.size()];
+      for (int i = 0; i < sourceImagePlanes.size(); ++i)
+      {
+         planePointers[i] = sourceImagePlanes.get(i).data();
+         planePitches[i] = sourceImagePlanes.get(i).step();
+      }
+
+      // Encode the image
+      encodeYUV444(planePointers, planePitches, sourceImage.cols(), sourceImage.rows(), encodedImage);
+
+      // Free resources
+      for (int i = 0; i < sourceImagePlanes.size(); ++i)
+         planePointers[i].close();
+      sourceImagePlanes.close();
+   }
+
+   private void encodeYUV444(Pointer[] sourceImagePlanes, long[] planePitches, int width, int height, BytePointer encodedImage)
+   {
+      // Create the nvjpeg image
+      nvjpegImage_t nvjpegImage = new nvjpegImage_t();
+
+      // Copy planes data into it
+      for (int i = 0; i < 3; ++i)
+      {
+         BytePointer plane = new BytePointer();
+         cudaMallocAsync(plane, (long) width * height, cudaStream);
+         cudaMemcpy2DAsync(plane, width, sourceImagePlanes[i], planePitches[i], width, height, cudaMemcpyDefault, cudaStream);
+         nvjpegImage.channel(i, plane).pitch(i, width);
+      }
+
+      // Encode the iamge
+      encodeYUV(nvjpegImage, width, height, NVJPEG_CSS_444, encodedImage);
+
+      // Free resources
+      for (int i = 0; i < 3; ++i)
+         checkCUDAError(cudaFree(nvjpegImage.channel(i)));
+      nvjpegImage.close();
+   }
+
+   public void encodeYUV(nvjpegImage_t imageToEncode, int width, int height, int chromaSubSampling, BytePointer encodedImage)
    {
       // Set sampling factor
       checkNVJPEGError(nvjpegEncoderParamsSetSamplingFactors(encoderParameters, chromaSubSampling, cudaStream));
 
-      // Create nvjpeg image
-      nvjpegImage_t nvjpegImage = new nvjpegImage_t();
-      for (int i = 0; i < imageToEncode.size() && i < 4; ++i)
-      {
-         GpuMat plane = imageToEncode.get(i);
-         nvjpegImage.pitch(i, plane.step());
-         nvjpegImage.channel(i, plane.data());
-      }
-
-      GpuMat lumaPlane = imageToEncode.get(0);
-      checkNVJPEGError(nvjpegEncodeYUV(nvjpegHandle,
-                                       encoderState,
-                                       encoderParameters,
-                                       nvjpegImage,
-                                       chromaSubSampling,
-                                       lumaPlane.cols(),
-                                       lumaPlane.rows(),
-                                       cudaStream));
+      // Encode the image
+      checkNVJPEGError(nvjpegEncodeYUV(nvjpegHandle, encoderState, encoderParameters, imageToEncode, chromaSubSampling, width, height, cudaStream));
 
       // Get compressed image size
       SizeTPointer jpegSize = new SizeTPointer(1);
@@ -161,7 +257,6 @@ public class CUDAJPEGProcessor
 
       // Close everything
       jpegSize.close();
-      nvjpegImage.close();
    }
 
    public void encodeBGR(Mat imageToEncode, BytePointer encodedImage)
@@ -287,9 +382,10 @@ public class CUDAJPEGProcessor
 
    /**
     * Decodes a jpeg encoded image to BGR format.
-    * @param encodedImage INPUT: An encoded multi-channel image.
+    *
+    * @param encodedImage     INPUT: An encoded multi-channel image.
     * @param encodedImageSize INPUT: Number of bytes of the encoded image.
-    * @param decodedImage OUTPUT: The decoded image.
+    * @param decodedImage     OUTPUT: The decoded image.
     */
    public void decodeToBGR(BytePointer encodedImage, long encodedImageSize, Mat decodedImage)
    {
@@ -317,9 +413,10 @@ public class CUDAJPEGProcessor
 
    /**
     * Decodes a jpeg encoded image to BGR format.
-    * @param encodedImage INPUT: An encoded multi-channel image.
+    *
+    * @param encodedImage     INPUT: An encoded multi-channel image.
     * @param encodedImageSize INPUT: Number of bytes of the encoded image.
-    * @param decodedImage OUTPUT: The decoded image.
+    * @param decodedImage     OUTPUT: The decoded image.
     */
    public void decodeToBGR(BytePointer encodedImage, long encodedImageSize, GpuMat decodedImage)
    {
@@ -345,13 +442,14 @@ public class CUDAJPEGProcessor
 
    /**
     * Decodes a jpeg encoded image to YUV I420 format.
-    * @param encodedImage INPUT: An encoded multi-channel image.
+    *
+    * @param encodedImage     INPUT: An encoded multi-channel image.
     * @param encodedImageSize INPUT: Number of bytes of the encoded image.
-    * @param decodedImage OUTPUT: The decoded image.
+    * @param decodedImage     OUTPUT: The decoded image.
     * @apiNote Despite the name, this method does not work when the passed in encoded image is in an OpenCV YUV format.
-    * To decode an OpenCV YUV_I420 image, use {@link CUDAJPEGProcessor#decodeUnchanged(BytePointer, long, Mat)}.
-    * While this method returns an image when the input is an OpenCV YUV image, the colors are incorrect.
-    * TODO: Find out why the colors are incorrect when providing an OpenCV YUV image.
+    *       To decode an OpenCV YUV_I420 image, use {@link CUDAJPEGProcessor#decodeUnchanged(BytePointer, long, Mat)}.
+    *       While this method returns an image when the input is an OpenCV YUV image, the colors are incorrect.
+    *       TODO: Find out why the colors are incorrect when providing an OpenCV YUV image.
     */
    public void decodeToYUV(BytePointer encodedImage, long encodedImageSize, Mat decodedImage)
    {
@@ -375,15 +473,26 @@ public class CUDAJPEGProcessor
       try (Mat yPlane = new Mat(imageInfo.height(0), imageInfo.width(0), opencv_core.CV_8UC1, decodedChannels.get(0));
            Mat uPlane = new Mat(imageInfo.height(1), imageInfo.width(1), opencv_core.CV_8UC1, decodedChannels.get(1));
            Mat vPlane = new Mat(imageInfo.height(2), imageInfo.width(2), opencv_core.CV_8UC1, decodedChannels.get(2));
-           Mat yuvI420CombinedImage = new Mat(imageInfo.height(0) + imageInfo.height(1), imageInfo.width(0), opencv_core.CV_8UC1))
+           MatVector planesVector = new MatVector(yPlane, uPlane, vPlane);
+           Mat yuvCombinedImage = new Mat())
       {
-         // Pack the YUV planes into their respective locations
-         yPlane.copyTo(yuvI420CombinedImage.rowRange(0, imageInfo.height(0)));
-         uPlane.copyTo(yuvI420CombinedImage.rowRange(imageInfo.height(0), imageInfo.height(0) + imageInfo.height(1)).colRange(0, imageInfo.width(1)));
-         vPlane.copyTo(yuvI420CombinedImage.rowRange(imageInfo.height(0), imageInfo.height(0) + imageInfo.height(2))
-                                           .colRange(imageInfo.width(1), imageInfo.width(1) + imageInfo.width(2)));
+         switch (imageInfo.subSamplingType(0))
+         {
+            case NVJPEG_CSS_420 ->
+            {
+               // Create the I420 image with correct size
+               yuvCombinedImage.create(imageInfo.height(0) + imageInfo.height(1), imageInfo.width(0), opencv_core.CV_8UC1);
+               // Pack the YUV planes into their respective locations
+               Pointer.memcpy(yuvCombinedImage.ptr(), yPlane.ptr(), OpenCVTools.dataSize(yPlane));
+               Pointer.memcpy(yuvCombinedImage.ptr(imageInfo.height(0), 0), uPlane.ptr(), OpenCVTools.dataSize(uPlane));
+               Pointer.memcpy(yuvCombinedImage.ptr(imageInfo.height(0) + imageInfo.height(1) / 2, 0), vPlane.ptr(), OpenCVTools.dataSize(vPlane));
+            }
+            case NVJPEG_CSS_444 -> opencv_core.merge(planesVector, yuvCombinedImage);
+            default -> throw new NotImplementedException("Tomasz didn't have enough time to write code for this YUV format. Maybe you could?");
+         }
+
          // Copy the YUV image into the output image
-         yuvI420CombinedImage.copyTo(decodedImage);
+         yuvCombinedImage.copyTo(decodedImage);
       }
 
       // Free all memory
@@ -444,9 +553,10 @@ public class CUDAJPEGProcessor
     * Decodes a jpeg encoded image, leaving the jpeg's format as is.
     * If the jpeg has multiple channels, the output format is likely to be YUV.
     * If the jpeg has a single channel, the output format will be gray scale.
-    * @param encodedImage INPUT: An encoded multi-channel image.
+    *
+    * @param encodedImage     INPUT: An encoded multi-channel image.
     * @param encodedImageSize INPUT: Number of bytes of the encoded image.
-    * @param decodedImage OUTPUT: The decoded image.
+    * @param decodedImage     OUTPUT: The decoded image.
     */
    public void decodeUnchanged(BytePointer encodedImage, long encodedImageSize, Mat decodedImage)
    {
@@ -489,9 +599,10 @@ public class CUDAJPEGProcessor
     * Decodes a jpeg encoded image, leaving the jpeg's format as is.
     * If the jpeg has multiple channels, the output format is likely to be YUV.
     * If the jpeg has a single channel, the output format will be gray scale.
-    * @param encodedImage INPUT: An encoded multi-channel image.
+    *
+    * @param encodedImage     INPUT: An encoded multi-channel image.
     * @param encodedImageSize INPUT: Number of bytes of the encoded image.
-    * @param decodedImage OUTPUT: The decoded image.
+    * @param decodedImage     OUTPUT: The decoded image.
     */
    public void decodeUnchanged(BytePointer encodedImage, long encodedImageSize, GpuMat decodedImage)
    {
@@ -532,17 +643,19 @@ public class CUDAJPEGProcessor
 
    /**
     * Decodes a jpeg encoded image into the specified output type.
-    * @param encodedImage INPUT: An encoded multi-channel image.
+    *
+    * @param encodedImage     INPUT: An encoded multi-channel image.
     * @param encodedImageSize INPUT: Number of bytes of the encoded image.
     * @param decodedImageInfo INPUT: {@link NVJPEGImageInfo} about the passed in image
     * @param nvjpegOutputType INPUT: One of NVJPEG_OUTPUT_* types
-    * @param decodedChannels OUTPUT: List of decoded image channels. Memory must be pre-allocated. This method does not allocate memory for the output pointers.
+    * @param decodedChannels  OUTPUT: List of decoded image channels. Memory must be pre-allocated. This method does not allocate memory for the output
+    *                         pointers.
     */
    private void decodeImage(BytePointer encodedImage,
-                           long encodedImageSize,
-                           NVJPEGImageInfo decodedImageInfo,
-                           int nvjpegOutputType,
-                           List<BytePointer> decodedChannels)
+                            long encodedImageSize,
+                            NVJPEGImageInfo decodedImageInfo,
+                            int nvjpegOutputType,
+                            List<BytePointer> decodedChannels)
    {
       // Create NVJPEG image and allocate memory for decoded image
       int channelsToDecode = getNumberOfOutputChannels(nvjpegOutputType, decodedImageInfo);
@@ -607,17 +720,13 @@ public class CUDAJPEGProcessor
       long[] decodedChannelSizes = new long[channelsToDecode];
       switch (nvjpegOutputType)
       {
-         case NVJPEG_OUTPUT_Y -> decodedChannelSizes[0] = imageInfo.width(0) * imageInfo.height(0);
+         case NVJPEG_OUTPUT_Y -> decodedChannelSizes[0] = (long) imageInfo.width(0) * imageInfo.height(0);
          case NVJPEG_OUTPUT_YUV, NVJPEG_OUTPUT_UNCHANGED ->
          {
             for (int i = 0; i < channelsToDecode; ++i)
-               decodedChannelSizes[i] = imageInfo.width(i) * imageInfo.height(i);
+               decodedChannelSizes[i] = (long) imageInfo.width(i) * imageInfo.height(i);
          }
-         case NVJPEG_OUTPUT_RGB, NVJPEG_OUTPUT_BGR ->
-         {
-            for (int i = 0; i < channelsToDecode; ++i)
-               decodedChannelSizes[i] = imageInfo.width(0) * imageInfo.height(0);
-         }
+         case NVJPEG_OUTPUT_RGB, NVJPEG_OUTPUT_BGR -> Arrays.fill(decodedChannelSizes, (long) imageInfo.width(0) * imageInfo.height(0));
          case NVJPEG_OUTPUT_RGBI, NVJPEG_OUTPUT_BGRI -> decodedChannelSizes[0] = 3L * imageInfo.width(0) * imageInfo.height(0);
          case NVJPEG_OUTPUT_UNCHANGEDI_U16 ->
                throw new UnsupportedOperationException("NVJPEG_OUTPUT_UNCHANGEDI_U16 is currently unsupported. Please feel free to implement it!");
@@ -643,11 +752,7 @@ public class CUDAJPEGProcessor
             for (int i = 0; i < channelsToDecode; ++i)
                channelPitches[i] = imageInfo.width(i);
          }
-         case NVJPEG_OUTPUT_RGB, NVJPEG_OUTPUT_BGR ->
-         {
-            for (int i = 0; i < channelsToDecode; ++i)
-               channelPitches[i] = imageInfo.width(0);
-         }
+         case NVJPEG_OUTPUT_RGB, NVJPEG_OUTPUT_BGR -> Arrays.fill(channelPitches, imageInfo.width(0));
          case NVJPEG_OUTPUT_RGBI, NVJPEG_OUTPUT_BGRI -> channelPitches[0] = 3L * imageInfo.width(0);
          case NVJPEG_OUTPUT_UNCHANGEDI_U16 ->
                throw new UnsupportedOperationException("NVJPEG_OUTPUT_UNCHANGEDI_U16 is currently unsupported. Please feel free to implement it!");
@@ -706,25 +811,8 @@ public class CUDAJPEGProcessor
    /**
     * Helper class for storing and passing around data obtained through nvjpegGetImageInfo().
     */
-   private class NVJPEGImageInfo
+   private record NVJPEGImageInfo(int numberOfComponents, int[] subSamplingTypes, int[] widths, int[] heights)
    {
-      private final int numberOfComponents;
-      private final int[] subSamplingTypes;
-      private final int[] widths;
-      private final int[] heights;
-
-      private NVJPEGImageInfo(int numberOfComponents, int[] subSamplingTypes, int[] widths, int[] heights)
-      {
-         this.numberOfComponents = numberOfComponents;
-         this.subSamplingTypes = subSamplingTypes;
-         this.widths = widths;
-         this.heights = heights;
-      }
-
-      private int numberOfComponents()
-      {
-         return numberOfComponents;
-      }
 
       private int subSamplingType(int channel)
       {
