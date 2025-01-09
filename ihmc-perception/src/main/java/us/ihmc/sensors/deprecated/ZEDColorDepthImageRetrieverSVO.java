@@ -1,10 +1,11 @@
-package us.ihmc.sensors;
+package us.ihmc.sensors.deprecated;
 
 import perception_msgs.msg.dds.ZEDSVOCurrentFileMessage;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
+import us.ihmc.sensors.zed.ZEDImageSensor;
 import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.thread.RestartableThrottledThread;
 import us.ihmc.zed.SL_InitParameters;
@@ -19,6 +20,11 @@ import java.util.function.Supplier;
 import static us.ihmc.zed.global.zed.*;
 
 // https://www.stereolabs.com/docs/video/recording
+
+/**
+ * Deprecated, use {@link ZEDImageSensor}
+ */
+@Deprecated
 public class ZEDColorDepthImageRetrieverSVO extends ZEDColorDepthImageRetriever
 {
    private final RecordMode recordMode;

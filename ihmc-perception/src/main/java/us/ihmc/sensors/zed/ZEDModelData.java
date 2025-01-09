@@ -1,4 +1,4 @@
-package us.ihmc.sensors;
+package us.ihmc.sensors.zed;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;

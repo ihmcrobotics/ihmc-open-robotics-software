@@ -1,4 +1,4 @@
-package us.ihmc.perception.realsense;
+package us.ihmc.sensors.realsense;
 
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.FloatPointer;
@@ -38,7 +38,7 @@ import java.util.function.Supplier;
 import static org.bytedeco.librealsense2.global.realsense2.RS2_CAMERA_INFO_SERIAL_NUMBER;
 import static org.bytedeco.librealsense2.global.realsense2.rs2_release_frame;
 
-public class RealsenseDevice
+public class RealSenseDevice
 {
    protected final int depthWidth;
    protected final int depthHeight;
@@ -84,7 +84,7 @@ public class RealsenseDevice
    private CameraIntrinsics depthCameraIntrinsics;
    private CameraIntrinsics colorCameraIntrinsics;
 
-   public RealsenseDevice(rs2_context context, rs2_device device, int depthWidth, int depthHeight, int fps)
+   public RealSenseDevice(rs2_context context, rs2_device device, int depthWidth, int depthHeight, int fps)
    {
       this.device = device;
       this.depthWidth = depthWidth;
@@ -186,7 +186,7 @@ public class RealsenseDevice
       return isSensorOfType == 1;
    }
 
-   public void enableColor(RealsenseConfiguration realsenseConfiguration)
+   public void enableColor(RealSenseConfiguration realsenseConfiguration)
    {
       enableColor(realsenseConfiguration.getColorWidth(), realsenseConfiguration.getColorHeight(), realsenseConfiguration.getColorFPS());
    }

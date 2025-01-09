@@ -106,7 +106,7 @@ public class CUDAProgram implements AutoCloseable
    {
       try
       {
-         String programName = programPath.getFile();
+         String programName = programPath.getFile().substring(programPath.getFile().lastIndexOf('/') + 1);
 
          InputStream programContentsStream = programPath.openStream();
          String programContents = new String(programContentsStream.readAllBytes());
@@ -122,7 +122,8 @@ public class CUDAProgram implements AutoCloseable
 
             for (int i = 0; i < headerPaths.length; i++)
             {
-               headerNames[i] = headerPaths[i].getFile();
+               String path = headerPaths[i].getFile();
+               headerNames[i] = path.substring(path.lastIndexOf('/') + 1);
 
                InputStream headerInputStream = headerPaths[i].openStream();
                headerContents[i] = new String(headerInputStream.readAllBytes());

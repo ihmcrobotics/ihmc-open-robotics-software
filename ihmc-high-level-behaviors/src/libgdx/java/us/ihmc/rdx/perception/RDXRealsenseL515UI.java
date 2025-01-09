@@ -19,8 +19,8 @@ import us.ihmc.perception.MutableBytePointer;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.opencl.OpenCLFloatBuffer;
 import us.ihmc.perception.opencl.OpenCLManager;
-import us.ihmc.perception.realsense.RealsenseDevice;
-import us.ihmc.perception.realsense.RealsenseDeviceManager;
+import us.ihmc.sensors.realsense.RealSenseDevice;
+import us.ihmc.sensors.realsense.RealSenseDeviceManager;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.RDXPointCloudRendererOld;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -39,8 +39,8 @@ public class RDXRealsenseL515UI
    private RDXInteractableRealsenseL515 l515Interactable;
    private YoRegistry yoRegistry = new YoRegistry(getClass().getSimpleName());
    private YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-   private RealsenseDeviceManager realsenseDeviceManager;
-   private RealsenseDevice l515;
+   private RealSenseDeviceManager realsenseDeviceManager;
+   private RealSenseDevice l515;
    private RDXBytedecoImagePanel depthImagePanel;
    private RDXBytedecoImagePanel colorImagePanel;
    private Mat depthU16C1Image;
@@ -80,7 +80,7 @@ public class RDXRealsenseL515UI
 
             l515Interactable = new RDXInteractableRealsenseL515(baseUI.getPrimary3DPanel());
 
-            realsenseDeviceManager = new RealsenseDeviceManager(yoRegistry, yoGraphicsListRegistry);
+            realsenseDeviceManager = new RealSenseDeviceManager(yoRegistry, yoGraphicsListRegistry);
 
             l515 = realsenseDeviceManager.createFullFeaturedL515();
             l515.enableColor(1280, 720, 30);
