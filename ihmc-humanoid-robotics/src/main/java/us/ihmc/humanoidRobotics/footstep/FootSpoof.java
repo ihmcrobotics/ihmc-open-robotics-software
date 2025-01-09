@@ -24,7 +24,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 
 /**
  * USE ONLY FOR TEST!
@@ -172,12 +171,14 @@ public class FootSpoof implements ContactablePlaneBody
       return false;
    }
 
-   public ReferenceFrame getSoleFrame()
+   @Override
+   public ReferenceFrame getContactFrame()
    {
       return soleFrame;
    }
 
-   public List<FramePoint2D> getContactPoints2d()
+   @Override
+   public List<FramePoint2D> getContactPoints2D()
    {
       return contactPoints2d;
    }
@@ -190,11 +191,5 @@ public class FootSpoof implements ContactablePlaneBody
    public int getTotalNumberOfContactPoints()
    {
       return totalNumberOfContactPoints;
-   }
-
-   @Override
-   public void setSoleFrameTransformFromParentJoint(RigidBodyTransform transform)
-   {
-      throw new RuntimeException("Not implemented");
    }
 }

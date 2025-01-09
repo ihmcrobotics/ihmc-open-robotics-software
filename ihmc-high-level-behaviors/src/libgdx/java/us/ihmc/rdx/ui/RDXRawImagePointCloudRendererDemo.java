@@ -12,7 +12,7 @@ import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXRawImagePointCloudRenderer;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.sensors.ZEDColorDepthImageRetriever;
+import us.ihmc.sensors.deprecated.ZEDColorDepthImageRetriever;
 
 import java.util.Arrays;
 
