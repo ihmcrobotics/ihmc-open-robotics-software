@@ -43,11 +43,21 @@ public class ROS2SRTSensorStreamer
                          int intermediateColorConversion,
                          boolean useHardwareAcceleration)
    {
+      addStream(streamTopic, exampleImage, inputAVPixelFormat, intermediateColorConversion, useHardwareAcceleration, false);
+   }
+
+   public void addStream(ROS2Topic<SRTStreamStatus> streamTopic,
+                         RawImage exampleImage,
+                         int inputAVPixelFormat,
+                         int intermediateColorConversion,
+                         boolean useHardwareAcceleration,
+                         boolean highQuality)
+   {
       ROS2SRTVideoStreamer videoStreamer = new ROS2SRTVideoStreamer(ros2Node, streamTopic);
       if (inputAVPixelFormat == AV_PIX_FMT_GRAY16)
          videoStreamer.initializeForDepth(exampleImage);
       else
-         videoStreamer.initializeForColor(exampleImage, inputAVPixelFormat, intermediateColorConversion, useHardwareAcceleration);
+         videoStreamer.initializeForColor(exampleImage, inputAVPixelFormat, intermediateColorConversion, useHardwareAcceleration, highQuality);
       videoStreamers.put(streamTopic, videoStreamer);
    }
 
@@ -87,6 +97,7 @@ public class ROS2SRTSensorStreamer
       switch (exampleImage.getPixelFormat())
       {
          case GRAY16 -> addStream(streamTopic, exampleImage, exampleImage.getPixelFormat().toFFmpegPixelFormat(), -1, false);
+         case YUV444P -> addStream(streamTopic, exampleImage, AV_PIX_FMT_YUV444P, -1, true, true); // Settings for colorized depth
          case BGR8 -> addStream(streamTopic, exampleImage, AV_PIX_FMT_BGR0, COLOR_BGR2BGRA, true);
          case BGRA8 -> addStream(streamTopic, exampleImage, AV_PIX_FMT_BGR0, -1, true); // This will lose the alpha channel
          case RGB8 -> addStream(streamTopic, exampleImage, AV_PIX_FMT_RGB0, COLOR_RGB2RGBA, true);

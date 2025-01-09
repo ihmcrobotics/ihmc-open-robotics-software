@@ -112,7 +112,7 @@ public class OnToesState extends AbstractFootControlState
       zeroAccelerationCommand.setPrimaryBase(pelvis);
 
       SelectionMatrix6D feedbackControlSelectionMatrix = new SelectionMatrix6D();
-      feedbackControlSelectionMatrix.setSelectionFrames(contactableFoot.getSoleFrame(), worldFrame);
+      feedbackControlSelectionMatrix.setSelectionFrames(contactableFoot.getContactFrame(), worldFrame);
       feedbackControlSelectionMatrix.selectLinearZ(false); // We want to do zero acceleration along z-world.
       feedbackControlSelectionMatrix.selectAngularY(false); // Remove pitch
       feedbackControlCommand.setSelectionMatrix(feedbackControlSelectionMatrix);

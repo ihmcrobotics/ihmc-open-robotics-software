@@ -10,6 +10,7 @@ public class DefaultFootstepPlannerParameters extends StoredPropertySet implemen
 {
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
+   public static final BooleanStoredPropertyKey useGPU = keys.addBooleanKey("Use GPU");
    public static final DoubleStoredPropertyKey astarHeuristicsWeight = keys.addDoubleKey("AStar heuristics weight");
    public static final IntegerStoredPropertyKey maxBranchFactor = keys.addIntegerKey("Max branch factor");
    public static final BooleanStoredPropertyKey enableExpansionMask = keys.addBooleanKey("Enable expansion mask");

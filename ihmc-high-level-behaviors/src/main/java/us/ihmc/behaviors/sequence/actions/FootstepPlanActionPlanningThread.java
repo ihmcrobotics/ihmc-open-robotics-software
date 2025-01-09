@@ -23,7 +23,7 @@ public class FootstepPlanActionPlanningThread
    private final FootstepPlanActionDefinition definition;
    private long started = 0;
    private long completed = 0;
-   private final FootstepPlanningModule footstepPlanner = new FootstepPlanningModule();
+   private final FootstepPlanningModule footstepPlanner;
    private final SideDependentList<FramePose3D> startFootPoses = new SideDependentList<>(new FramePose3D(), new FramePose3D());
    private final SideDependentList<FramePose3D> goalFootPoses = new SideDependentList<>(new FramePose3D(), new FramePose3D());
    private final FramePose3D startMidFeetPose = new FramePose3D();
@@ -37,6 +37,7 @@ public class FootstepPlanActionPlanningThread
       this.isPreviewPlanner = isPreviewPlanner;
       this.state = state;
       this.definition = definition;
+      footstepPlanner = new FootstepPlanningModule();
    }
 
    public void triggerPlan(ROS2SyncedRobotModel syncedRobot, SideDependentList<FramePose3D> liveGoalFeetPoses)
@@ -103,6 +104,7 @@ public class FootstepPlanActionPlanningThread
       footstepPlannerRequest.setPerformAStarSearch(definition.getPlannerPerformAStarSearch().getValue());
       footstepPlannerRequest.setAssumeFlatGround(true); // TODO: Incorporate height map
 
+      footstepPlanner.enableGPUBodyPathPlanner(definition.getPlannerParametersReadOnly().getUseGPU());
       footstepPlanner.getFootstepPlannerParameters().set(definition.getPlannerParametersReadOnly());
 
       // TODO: Add body path planning options to user

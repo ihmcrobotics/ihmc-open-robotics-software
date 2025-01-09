@@ -9,6 +9,7 @@ import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolver;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.math.linearAlgebra.DampedLeastSquaresSolver;
 import us.ihmc.mecano.algorithms.InverseDynamicsCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
@@ -17,7 +18,6 @@ import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameWrench;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
-import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
@@ -39,7 +39,7 @@ public class JointTorqueAgainstForceSensorVisualizer
    {
       for (RigidBodyBasics foot : footSwitches.keySet())
       {
-         estimators.add(new JacobianBasedWrenchEstimator(foot, rootBody, feet.get(foot).getSoleFrame(), footSwitches.get(foot), registry));
+         estimators.add(new JacobianBasedWrenchEstimator(foot, rootBody, feet.get(foot).getContactFrame(), footSwitches.get(foot), registry));
       }
 
       parentRegistry.addChild(registry);

@@ -40,9 +40,9 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.sensors.ZEDColorDepthImagePublisher;
-import us.ihmc.sensors.ZEDColorDepthImageRetrieverSVO;
-import us.ihmc.sensors.ZEDColorDepthImageRetrieverSVO.RecordMode;
+import us.ihmc.sensors.deprecated.ZEDColorDepthImagePublisher;
+import us.ihmc.sensors.deprecated.ZEDColorDepthImageRetrieverSVO;
+import us.ihmc.sensors.deprecated.ZEDColorDepthImageRetrieverSVO.RecordMode;
 import us.ihmc.tools.IHMCCommonPaths;
 
 /**
