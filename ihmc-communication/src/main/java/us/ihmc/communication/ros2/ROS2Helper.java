@@ -1,8 +1,10 @@
 package us.ihmc.communication.ros2;
 
+import org.apache.commons.lang3.mutable.MutableInt;
 import std_msgs.msg.dds.Bool;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.commons.thread.Throttler;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
@@ -67,29 +69,39 @@ public class ROS2Helper implements ROS2PublishSubscribeAPI
    @Override
    public <T> ConcurrentRingBuffer<T> subscribeViaQueue(ROS2Topic<T> topic)
    {
-      return subscribeViaQueue(topic, message -> { });
+      return subscribeViaQueue(topic, 16, message -> { });
    }
 
    @Override
-   public <T> ConcurrentRingBuffer<T> subscribeViaQueue(ROS2Topic<T> topic, Consumer<T> callback)
+   public <T> ConcurrentRingBuffer<T> subscribeViaQueue(ROS2Topic<T> topic, int queueSize, Consumer<T> callback)
    {
       TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(topic.getType());
-      int queueSize = 16;
       ConcurrentRingBuffer<T> concurrentQueue = new ConcurrentRingBuffer<>(topicDataType::createData, queueSize);
+      Throttler warningThrottler = new Throttler().setFrequency(1.0);
+      MutableInt droppedMessages = new MutableInt(0);
       ros2Node.createSubscription(topicDataType, subscriber ->
       {
-         T nextData = concurrentQueue.next();
-         if (nextData != null)
+         // Make sure we are recieving newer data and throw out old data
+         T nextData;
+         while ((nextData = concurrentQueue.next()) == null)
          {
-            if (subscriber.takeNextData(nextData, null))
+            droppedMessages.increment();
+
+            if (warningThrottler.run())
             {
-               callback.accept(nextData);
-               concurrentQueue.commit();
+               LogTools.warn("Concurrent ring buffer has been full! Queue size: {} Have dropped {} oldest messages...", queueSize, droppedMessages.intValue());
+               droppedMessages.setValue(0);
             }
+
+            concurrentQueue.poll();
+            concurrentQueue.read();
+            concurrentQueue.flush();
          }
-         else
+
+         if (subscriber.takeNextData(nextData, null))
          {
-            LogTools.warn("Concurrent ring buffer is full! Queue size: {}", queueSize);
+            callback.accept(nextData);
+            concurrentQueue.commit();
          }
       }, topic.getName(), topic.getQoS());
       return concurrentQueue;
