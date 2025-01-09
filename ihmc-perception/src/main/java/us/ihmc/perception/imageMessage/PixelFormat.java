@@ -18,6 +18,7 @@ public enum PixelFormat
    RGB8(1, 3, COLOR_RGB2RGBA, COLOR_RGBA2RGB, AV_PIX_FMT_RGB24),     // 24 bits per pixel, in RGB order
    RGBA8(1, 4, -1, -1, AV_PIX_FMT_RGBA),                             // 32 bits per pixel, in RGBA order
    YUV_I420(1, 1, COLOR_YUV2RGBA_I420, COLOR_RGBA2YUV_I420, -1),     // YUV420 format
+   YUV444P(1, 3, -1, -1, AV_PIX_FMT_YUV444P),                        // 24 bits per pixel, planar YUV
    YUV_444P16(2, 3, -1, -1, AV_PIX_FMT_YUV444P16),                   // 16 bit planar YUV444, 48 bits per pixel.
    GRAY8(1, 1, COLOR_GRAY2RGBA, COLOR_RGBA2GRAY, AV_PIX_FMT_GRAY8),  // monochrome
    GRAY16(2, 1, -1, -1, AV_PIX_FMT_GRAY16),                          // aka depth

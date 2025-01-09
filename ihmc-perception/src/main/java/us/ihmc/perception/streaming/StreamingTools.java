@@ -51,6 +51,17 @@ public class StreamingTools
       return new HashMap<>(HEVC_NVENC_STREAMING_OPTIONS);
    }
 
+   private static final Map<String, String> HEVC_NVENC_HIGH_QUALITY_OPTIONS =
+         Map.ofEntries(entry("tune", "ull"),
+                       entry("zerolatency", "1"),
+                       entry("rc", "constqp"),
+                       entry("qp", "30"));
+
+   public static Map<String, String> getHEVCNVENCHighQualityOptions()
+   {
+      return new HashMap<>(HEVC_NVENC_HIGH_QUALITY_OPTIONS);
+   }
+
    /** FFV1 options can be found <a href="https://trac.ffmpeg.org/wiki/Encode/FFV1">here</a>. */
    private static final Map<String, String> FFV1_STREAMING_OPTIONS
          = Map.ofEntries(entry("coder", "range_def"), // Coder that allows GRAY16 images

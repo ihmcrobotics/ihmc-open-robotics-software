@@ -36,8 +36,8 @@ import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2ColoredPointCloudVisualize
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.sensors.ZEDColorDepthImagePublisher;
-import us.ihmc.sensors.ZEDColorDepthImageRetriever;
+import us.ihmc.sensors.deprecated.ZEDColorDepthImagePublisher;
+import us.ihmc.sensors.deprecated.ZEDColorDepthImageRetriever;
 import us.ihmc.tools.thread.RestartableThread;
 
 import java.text.DecimalFormat;

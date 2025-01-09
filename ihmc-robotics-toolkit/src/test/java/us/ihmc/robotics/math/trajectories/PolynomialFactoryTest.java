@@ -3,7 +3,7 @@ package us.ihmc.robotics.math.trajectories;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import us.ihmc.robotics.dataStructures.ComplexNumber;
+import us.ihmc.math.ComplexNumber;
 import us.ihmc.robotics.math.trajectories.core.Polynomial;
 import us.ihmc.robotics.math.trajectories.core.PolynomialFactory;
 import us.ihmc.robotics.math.trajectories.core.PolynomialTools;
@@ -86,7 +86,7 @@ public class PolynomialFactoryTest
    private void verifyEpsilonEquals(ComplexNumber expectedComplexNumber, ComplexNumber actualComplexNumber, double epsilon)
    {
       assertEquals(expectedComplexNumber.real(), actualComplexNumber.real(), epsilon);
-      assertEquals(expectedComplexNumber.imag(), actualComplexNumber.imag(), epsilon);
+      assertEquals(expectedComplexNumber.imaginary(), actualComplexNumber.imaginary(), epsilon);
    }
 
 }

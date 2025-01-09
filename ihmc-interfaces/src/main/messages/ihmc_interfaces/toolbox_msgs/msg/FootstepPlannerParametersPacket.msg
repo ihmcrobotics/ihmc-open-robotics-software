@@ -7,6 +7,9 @@ byte ROBOT_SIDE_RIGHT = 1
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint64 sequence_id
 
+# Whether or not we use the GPU for body path planning
+bool use_gpu
+
 # Heuristic inflation weight, used to speed up the planner at the expense of optimality
 # Should not be less than 1.0
 float64 a_star_heuristics_weight

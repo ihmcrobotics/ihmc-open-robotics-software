@@ -79,6 +79,8 @@ public class RDXRawImagePointCloudVisualizer extends RDXVisualizer
    {
       super(title);
       this.enableColorImageRendering = enableColorImageRendering;
+
+      setSceneLevels(RDXSceneLevel.MODEL);
    }
 
    public void setDepthImage(RawImage depthImage)
@@ -261,7 +263,7 @@ public class RDXRawImagePointCloudVisualizer extends RDXVisualizer
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      if (pointCloudRenderer != null)
+      if (pointCloudRenderer != null && sceneLevelCheck(sceneLevels))
          pointCloudRenderer.getRenderables(renderables, pool);
    }
 
@@ -270,8 +272,14 @@ public class RDXRawImagePointCloudVisualizer extends RDXVisualizer
    {
       super.destroy();
 
-      depthImageHistory.forEach(RawImage::release);
-      colorImageHistory.forEach(RawImage::release);
+      synchronized (depthImageHistory)
+      {
+         depthImageHistory.forEach(RawImage::release);
+      }
+      synchronized (colorImageHistory)
+      {
+         colorImageHistory.forEach(RawImage::release);
+      }
 
       if (pointCloudRenderer != null)
          pointCloudRenderer.dispose();

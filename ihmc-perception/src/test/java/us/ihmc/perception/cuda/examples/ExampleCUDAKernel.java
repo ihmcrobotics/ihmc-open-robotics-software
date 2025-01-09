@@ -11,8 +11,10 @@ import us.ihmc.perception.cuda.CUDAProgram;
 import static org.bytedeco.cuda.global.cudart.*;
 
 /**
- * This is a simple example of a kernel that adds two arrays together. The ways in which kernels can be run vary such that you can create all the JavaCPP Pointers
- * inside a try-with-resources. The user can create more threads on the GPU. This example attempted to keep things really simple and avoided most of that overhead.
+ * This is a simple example of a kernel that adds two arrays together. The ways in which kernels can be run vary such that you can create all the JavaCPP
+ * Pointers
+ * inside a try-with-resources. The user can create more threads on the GPU. This example attempted to keep things really simple and avoided most of that
+ * overhead.
  */
 public class ExampleCUDAKernel
 {
@@ -22,6 +24,8 @@ public class ExampleCUDAKernel
          __global__
          void add_arrays(int n, float *x, float *y)
          {
+            // Printing Hello World here with a newline character at the end to show how it can be used in a string
+            printf("Hello World\\n");
             int index = blockIdx.x * blockDim.x + threadIdx.x;
             int stride = blockDim.x * gridDim.x;
             for (int i = index; i < n; i += stride)

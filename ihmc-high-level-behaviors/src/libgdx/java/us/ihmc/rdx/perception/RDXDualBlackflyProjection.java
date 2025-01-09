@@ -81,17 +81,17 @@ public class RDXDualBlackflyProjection
    {
       this.baseUI = RDXBaseUI.getInstance();
       this.robotZUpFrame = currentRobotFrames.getMidFootZUpGroundFrame();
-      robotCameraFrames.set(currentRobotFrames::getSituationalAwarenessCameraFrame);
+      robotCameraFrames.set(currentRobotFrames::getStereoCameraFrame);
 
       RigidBodyTransform stereoMidPoint = new RigidBodyTransform();
       MovingReferenceFrame chestFrame = currentRobotFrames.getChestFrame();
-      stereoMidPoint.interpolate(currentRobotFrames.getSituationalAwarenessCameraFrame(RobotSide.LEFT).getTransformToDesiredFrame(chestFrame),
-                                 currentRobotFrames.getSituationalAwarenessCameraFrame(RobotSide.RIGHT).getTransformToDesiredFrame(chestFrame),
+      stereoMidPoint.interpolate(currentRobotFrames.getStereoCameraFrame(RobotSide.LEFT).getTransformToDesiredFrame(chestFrame),
+                                 currentRobotFrames.getStereoCameraFrame(RobotSide.RIGHT).getTransformToDesiredFrame(chestFrame),
                                  0.5);
       stereoMidPointFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("StereoMidPoint", chestFrame, stereoMidPoint);
       for (RobotSide side : RobotSide.values)
       {
-         RigidBodyTransform cameraToStereoMidPoint = currentRobotFrames.getSituationalAwarenessCameraFrame(side).getTransformToDesiredFrame(chestFrame);
+         RigidBodyTransform cameraToStereoMidPoint = currentRobotFrames.getStereoCameraFrame(side).getTransformToDesiredFrame(chestFrame);
          cameraToStereoMidPoint.invert();
          cameraToStereoMidPoint.multiply(stereoMidPoint);
          cameraToStereoMidPoint.invert();
