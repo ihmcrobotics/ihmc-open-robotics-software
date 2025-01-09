@@ -14,7 +14,6 @@ import us.ihmc.ros2.ROS2Topic;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.function.Consumer;
 
 /**
  * @param <HLT> The generic type of this node high layer: RDX or Executor
@@ -24,7 +23,6 @@ public class ROS2BehaviorTreeSubscription<HLT extends BehaviorTreeNodeHighLayer<
    private final ROS2Topic<BehaviorTreeStateMessage> topic;
    private final ArrayList<Runnable> messageRecievedCallbacks = new ArrayList<>();
    private final BehaviorTree<HLT> behaviorTree;
-   private final Consumer<HLT> rootNodeSetter;
    private long numberOfMessagesReceived = 0;
    private long previousSequenceID = -1;
    private long messageDropCount = 0;
@@ -36,12 +34,9 @@ public class ROS2BehaviorTreeSubscription<HLT extends BehaviorTreeNodeHighLayer<
    private final MutableInt subscriptionNodeDepthFirstIndex = new MutableInt();
    private final HashMap<Long, HLT> idToLocalNodesMap = new HashMap<>();
 
-   public ROS2BehaviorTreeSubscription(BehaviorTree<HLT> behaviorTree,
-                                       Consumer<HLT> rootNodeSetter,
-                                       ROS2PublishSubscribeAPI ros2PublishSubscribeAPI)
+   public ROS2BehaviorTreeSubscription(BehaviorTree<HLT> behaviorTree, ROS2PublishSubscribeAPI ros2PublishSubscribeAPI)
    {
       this.behaviorTree = behaviorTree;
-      this.rootNodeSetter = rootNodeSetter;
 
       topic = AutonomyAPI.BEHAVIOR_TREE.getTopic(behaviorTree.getCRDTInfo().getActorDesignation().getIncomingQualifier());
       int maxClientSoftLimit = 4; // This buffer prevents race conditions between clients

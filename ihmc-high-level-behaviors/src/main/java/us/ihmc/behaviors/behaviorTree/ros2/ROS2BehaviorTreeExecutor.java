@@ -27,7 +27,7 @@ public class ROS2BehaviorTreeExecutor extends BehaviorTreeExecutor
    {
       super(robotModel, syncedRobot, peerClockEstimator, referenceFrameLibrary, sceneGraph, detectionManager, ros2ControllerHelper);
 
-      ros2BehaviorTree = new ROS2BehaviorTree<>(this, this::setRootNode, ros2ControllerHelper);
+      ros2BehaviorTree = new ROS2BehaviorTree<>(this, ros2ControllerHelper);
    }
 
    /** Expected to be called at the {@link ROS2BehaviorTree#SYNC_FREQUENCY} */

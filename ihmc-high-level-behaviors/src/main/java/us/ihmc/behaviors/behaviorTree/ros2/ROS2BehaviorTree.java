@@ -5,8 +5,6 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeHighLayer;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 
-import java.util.function.Consumer;
-
 /**
  * Manages syncing a behavior tree over ROS 2 as a CRDT.
  *
@@ -27,14 +25,12 @@ public class ROS2BehaviorTree<HLT extends BehaviorTreeNodeHighLayer<HLT, ? ,?>>
     * The complexity of this constructor is to support the UI having nodes that extend the base
     * on-robot ones.
     */
-   public ROS2BehaviorTree(BehaviorTree<HLT> behaviorTree,
-                           Consumer<HLT> rootNodeSetter,
-                           ROS2PublishSubscribeAPI ros2PublishSubscribeAPI)
+   public ROS2BehaviorTree(BehaviorTree<HLT> behaviorTree, ROS2PublishSubscribeAPI ros2PublishSubscribeAPI)
    {
       this.behaviorTree = behaviorTree;
 
       behaviorTreePublisher = new ROS2BehaviorTreePublisher(behaviorTree, ros2PublishSubscribeAPI);
-      behaviorTreeSubscription = new ROS2BehaviorTreeSubscription<>(behaviorTree, rootNodeSetter, ros2PublishSubscribeAPI);
+      behaviorTreeSubscription = new ROS2BehaviorTreeSubscription<>(behaviorTree, ros2PublishSubscribeAPI);
    }
 
    /**
