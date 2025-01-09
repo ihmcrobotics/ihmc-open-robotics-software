@@ -222,10 +222,10 @@ public class RDXVRKinematicsStreamingMode
          parameters.setInputBBXFilterSize(2.0, 2.8, 2.6);
          parameters.setInputBBXFilterCenter(0.4, 0.0, 1.25);
          parameters.setOutputLPFBreakFrequency(10.0);
-         parameters.setOutputJointVelocityScale(0.65);
+         parameters.setOutputJointVelocityScale(0.5);
 
          parameters.setMinimizeAngularMomentum(true);
-         parameters.setMinimizeLinearMomentum(false);
+         parameters.setMinimizeLinearMomentum(true);
          parameters.setAngularMomentumWeight(0.20);
          parameters.setLinearMomentumWeight(0.01);
 
