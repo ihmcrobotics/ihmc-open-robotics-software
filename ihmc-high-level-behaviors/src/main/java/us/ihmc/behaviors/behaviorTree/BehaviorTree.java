@@ -66,7 +66,7 @@ public abstract class BehaviorTree<HLT extends BehaviorTreeNodeHighLayer<HLT, ? 
    }
 
    /**
-    * Use to safefly modify the tree, ensuring it's updated afterwards.
+    * Use to safely modify the tree, ensuring it's updated afterwards.
     */
    public void modifyTreeTopology(Consumer<BehaviorTreeTopologyOperationQueue<HLT>> modifier)
    {
