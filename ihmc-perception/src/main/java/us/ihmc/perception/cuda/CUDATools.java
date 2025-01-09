@@ -108,7 +108,19 @@ public class CUDATools
          {
             String errorMessage = String.format("CUDA Error (%s): %s", errorName.getString(), errorString.getString());
             LogTools.error(errorMessage);
-            throw new RuntimeException(errorMessage);
+         }
+      }
+   }
+
+   public static void throwCUDAError(int errorCode) throws Exception
+   {
+      if (errorCode != CUDA_SUCCESS)
+      {
+         try (BytePointer errorName = cudaGetErrorName(errorCode);
+              BytePointer errorString = cudaGetErrorString(errorCode))
+         {
+            String errorMessage = String.format("CUDA Error (%s): %s", errorName.getString(), errorString.getString());
+            throw new Exception("CUDA Error code: " + errorMessage);
          }
       }
    }

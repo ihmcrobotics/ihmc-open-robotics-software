@@ -41,7 +41,7 @@ public class CUDASimpleKernelsTest
    }
 
    @Test
-   public void testPassVariableToGPU()
+   public void testPassVariableToGPU() throws Exception
    {
       URL kernelPath = getClass().getResource("CUDASimpleKernels.cu");
 
@@ -82,7 +82,7 @@ public class CUDASimpleKernelsTest
     * This value is returned and compared against the expected result
     */
    @Test
-   public void testPassingInWrongTypeToGPU()
+   public void testPassingInWrongTypeToGPU() throws Exception
    {
       URL kernelPath = getClass().getResource("CUDASimpleKernels.cu");
       stream = CUDAStreamManager.getStream();
@@ -122,7 +122,7 @@ public class CUDASimpleKernelsTest
     */
    @Disabled
    @Test
-   public void testWrongNumberOfKernelVariables()
+   public void testWrongNumberOfKernelVariables() throws Exception
    {
       URL kernelPath = getClass().getResource("CUDASimpleKernels.cu");
 
@@ -155,33 +155,12 @@ public class CUDASimpleKernelsTest
    }
 
    /**
-    * This test is meant to test the case where you don't synchronize the stream after running the kernel.
-    * Need to do some more testing to see why this still works, and if there is a better way to test this.
-    * That is why this test is disabled at the moment; it doesn't appear to be that useful
-    */
-   @Disabled
-   @Test
-   public void testNotSynchronizingStream()
-   {
-      URL kernelPath = getClass().getResource("CUDASimpleKernels.cu");
-      stream = CUDAStreamManager.getStream();
-      program = new CUDAProgram(kernelPath);
-      kernel = program.loadKernel("pass_in_int");
-
-      kernel.withInt(5);
-
-      kernel.run(stream, new dim3(), new dim3(), 0);
-
-      cudaStreamSynchronize(stream);
-   }
-
-   /**
     * When writing a CUDA kernel, each kernel needs to declare (extern "C") just above the kernel.
     * If this doesn't happen, that kernel should fail as it won't be loaded correctly.
     * Making sure that if fails here...
     */
    @Test
-   public void testNoExternCInGPUKernel()
+   public void testNoExternCInGPUKernel() throws Exception
    {
       URL kernelPath = getClass().getResource("CUDASimpleKernels.cu");
 
@@ -189,7 +168,7 @@ public class CUDASimpleKernelsTest
       program = new CUDAProgram(kernelPath);
 
       // Since we haven't declared the (extern "C"), we expect this kernel to fail loading
-      RuntimeException thrown = assertThrows(RuntimeException.class, () -> program.loadKernel("kernel_not_declared_correctly"));
+      Exception thrown = assertThrows(Exception.class, () -> program.loadKernel("kernel_not_declared_correctly"));
       assertTrue(thrown.getMessage().contains("cudaErrorSymbolNotFound"));
    }
 

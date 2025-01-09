@@ -22,9 +22,11 @@ import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractorInterface;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVTools;
+import us.ihmc.perception.tools.NativeMemoryTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
+import java.nio.ByteBuffer;
 import java.time.Instant;
 
 /**
@@ -40,6 +42,8 @@ public class RapidHeightMapManager
    private GpuMat deviceDepthImage;
    private final Mat hostDepthImage = new Mat();
    private BytedecoImage heightMapBytedecoImage;
+   private MutableBytePointer bytedecoByteBufferPointer;
+
 
    private final Notification resetHeightMapRequested = new Notification();
    private final BytePointer compressedCroppedHeightMapPointer = new BytePointer();
@@ -56,6 +60,12 @@ public class RapidHeightMapManager
 
       if (runWithCUDA)
       {
+
+//         int bytesPerPixel = 2;
+//         ByteBuffer backingDirectByteBuffer = NativeMemoryTools.allocate(depthImageIntrinsics.getWidth() * depthImageIntrinsics.getHeight() * bytesPerPixel);
+//         bytedecoByteBufferPointer = new MutableBytePointer(backingDirectByteBuffer);
+//
+//         hostDepthImage = new Mat(depthImageIntrinsics.getHeight(), depthImageIntrinsics.getWidth(), opencv_core.CV_16UC1, bytedecoByteBufferPointer);
          deviceDepthImage = new GpuMat(depthImageIntrinsics.getHeight(), depthImageIntrinsics.getWidth(), opencv_core.CV_16UC1);
          rapidHeightMapExtractor = new RapidHeightMapExtractorCUDA(leftFootSoleFrame, rightFootSoleFrame, deviceDepthImage, 1);
       }
@@ -87,7 +97,8 @@ public class RapidHeightMapManager
       {
          if (latestDepthImage.type() == opencv_core.CV_32FC1) // Support our simulated sensors
          {
-            OpenCVTools.convertFloatToShort(latestDepthImage, hostDepthImage, 1000.0, 0.0);
+            latestDepthImage.convertTo(hostDepthImage, opencv_core.CV_32FC1);
+//            OpenCVTools.convertFloatToShort(latestDepthImage, hostDepthImage, 1000.0, 0.0);
          }
          else
          {
@@ -149,6 +160,7 @@ public class RapidHeightMapManager
 
    public void destroy()
    {
+      bytedecoByteBufferPointer.close();
       rapidHeightMapExtractor.destroy();
    }
 }
