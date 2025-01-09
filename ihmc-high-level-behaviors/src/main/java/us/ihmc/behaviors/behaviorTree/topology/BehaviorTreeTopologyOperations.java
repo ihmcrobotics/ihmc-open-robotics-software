@@ -24,6 +24,16 @@ public class BehaviorTreeTopologyOperations
       subtreeRoot.destroy();
    }
 
+   static <HLT extends BehaviorTreeNode<HLT, ?, ?>> void destroySubtree(HLT subtreeRoot)
+   {
+      // Avoiding concurrent modifications
+      while (!subtreeRoot.getChildren().isEmpty())
+         destroySubtree(subtreeRoot.getChildren().get(0));
+
+      detachChild(subtreeRoot);
+      subtreeRoot.destroy();
+   }
+
    static <HLT extends BehaviorTreeNode<HLT, ?, ?>> void moveChildModify(HLT toParent, HLT child, int insertionIndex)
    {
       detachChildModify(child);
@@ -44,6 +54,13 @@ public class BehaviorTreeTopologyOperations
       insertChildAbstract(parent.getState(), child.getState(), insertionIndex);
       insertChildAbstract(parent.getDefinition(), child.getDefinition(), insertionIndex);
       parent.getDefinition().getChildrenModification().modify();
+   }
+
+   static <HLT extends BehaviorTreeNode<HLT, ?, ?>> void detachChild(HLT child)
+   {
+      detachChildAbstract(child);
+      detachChildAbstract(child.getState());
+      detachChildAbstract(child.getDefinition());
    }
 
    static <HLT extends BehaviorTreeNode<HLT, ?, ?>> void detachChildModify(HLT child)

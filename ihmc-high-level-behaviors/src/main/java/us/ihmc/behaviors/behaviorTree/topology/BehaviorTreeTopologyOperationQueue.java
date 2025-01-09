@@ -79,6 +79,17 @@ public class BehaviorTreeTopologyOperationQueue<HLT extends BehaviorTreeNode<HLT
       });
    }
 
+   public void queueDestroyEntireTree()
+   {
+      topologyOperationQueue.add(() ->
+      {
+         HLT rootNode = behaviorTree.getRootNode();
+         behaviorTree.setRootNode(null);
+         if (rootNode != null)
+            BehaviorTreeTopologyOperations.destroySubtree(rootNode);
+      });
+   }
+
    public void queueDestroySubtreeModify(HLT subtreeRoot)
    {
       topologyOperationQueue.add(() -> BehaviorTreeTopologyOperations.destroySubtreeModify(subtreeRoot));

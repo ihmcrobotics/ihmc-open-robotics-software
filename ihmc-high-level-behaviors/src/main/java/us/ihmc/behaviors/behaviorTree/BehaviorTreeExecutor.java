@@ -55,7 +55,7 @@ public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeNodeExecutor<
 
    public void destroy()
    {
-      modifyTreeTopology(BehaviorTreeTopologyOperationQueue::queueDestroyEntireTreeModify);
+      modifyTreeTopology(BehaviorTreeTopologyOperationQueue::queueDestroyEntireTree);
    }
 
    @Override
