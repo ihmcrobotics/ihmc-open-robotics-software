@@ -16,41 +16,41 @@ import java.util.Map;
 
 public class BehaviorTreeDefinitionRegistry
 {
-   private static final RegistryRecord[] DEFINITIONS = new RegistryRecord[]
+   private static final DefinitionMapping[] DEFINITIONS = new DefinitionMapping[]
    {
-      new RegistryRecord(BehaviorTreeRootNodeDefinition.class, BehaviorTreeStateMessage.ROOT_NODE),
-      new RegistryRecord(BehaviorTreeNodeDefinition.class, BehaviorTreeStateMessage.BASIC_NODE),
-      new RegistryRecord(AI2RNodeDefinition.class, BehaviorTreeStateMessage.AI2R_NODE),
-      new RegistryRecord(ActionSequenceDefinition.class, BehaviorTreeStateMessage.ACTION_SEQUENCE),
-      new RegistryRecord(FallbackNodeDefinition.class, BehaviorTreeStateMessage.FALLBACK_NODE),
-      new RegistryRecord(ConditionNodeDefinition.class, BehaviorTreeStateMessage.CONDITION_NODE),
-      new RegistryRecord(GotoNodeDefinition.class, BehaviorTreeStateMessage.GOTO_NODE),
-      new RegistryRecord(CheckPointNodeDefinition.class, BehaviorTreeStateMessage.CHECKPOINT_NODE),
-      new RegistryRecord(DoorTraversalDefinition.class, BehaviorTreeStateMessage.DOOR_TRAVERSAL),
-      new RegistryRecord(BuildingExplorationDefinition.class, BehaviorTreeStateMessage.BUILDING_EXPLORATION),
+      new DefinitionMapping(BehaviorTreeRootNodeDefinition.class, BehaviorTreeStateMessage.ROOT_NODE),
+      new DefinitionMapping(BehaviorTreeNodeDefinition.class, BehaviorTreeStateMessage.BASIC_NODE),
+      new DefinitionMapping(AI2RNodeDefinition.class, BehaviorTreeStateMessage.AI2R_NODE),
+      new DefinitionMapping(ActionSequenceDefinition.class, BehaviorTreeStateMessage.ACTION_SEQUENCE),
+      new DefinitionMapping(FallbackNodeDefinition.class, BehaviorTreeStateMessage.FALLBACK_NODE),
+      new DefinitionMapping(ConditionNodeDefinition.class, BehaviorTreeStateMessage.CONDITION_NODE),
+      new DefinitionMapping(GotoNodeDefinition.class, BehaviorTreeStateMessage.GOTO_NODE),
+      new DefinitionMapping(CheckPointNodeDefinition.class, BehaviorTreeStateMessage.CHECKPOINT_NODE),
+      new DefinitionMapping(DoorTraversalDefinition.class, BehaviorTreeStateMessage.DOOR_TRAVERSAL),
+      new DefinitionMapping(BuildingExplorationDefinition.class, BehaviorTreeStateMessage.BUILDING_EXPLORATION),
 
-      new RegistryRecord(ChestOrientationActionDefinition.class, BehaviorTreeStateMessage.CHEST_ORIENTATION_ACTION),
-      new RegistryRecord(FootstepPlanActionDefinition.class, BehaviorTreeStateMessage.FOOTSTEP_PLAN_ACTION),
-      new RegistryRecord(HandPoseActionDefinition.class, BehaviorTreeStateMessage.HAND_POSE_ACTION),
-      new RegistryRecord(HandWrenchActionDefinition.class, BehaviorTreeStateMessage.HAND_WRENCH_ACTION),
-      new RegistryRecord(ScrewPrimitiveActionDefinition.class, BehaviorTreeStateMessage.SCREW_PRIMITIVE_ACTION),
-      new RegistryRecord(PelvisHeightOrientationActionDefinition.class, BehaviorTreeStateMessage.PELVIS_HEIGHT_ORIENTATION_ACTION),
-      new RegistryRecord(SakeHandCommandActionDefinition.class, BehaviorTreeStateMessage.SAKE_HAND_COMMAND_ACTION),
-      new RegistryRecord(WaitDurationActionDefinition.class, BehaviorTreeStateMessage.WAIT_DURATION_ACTION),
-      new RegistryRecord(FootPoseActionDefinition.class, BehaviorTreeStateMessage.FOOT_POSE_ACTION)
+      new DefinitionMapping(ChestOrientationActionDefinition.class, BehaviorTreeStateMessage.CHEST_ORIENTATION_ACTION),
+      new DefinitionMapping(FootstepPlanActionDefinition.class, BehaviorTreeStateMessage.FOOTSTEP_PLAN_ACTION),
+      new DefinitionMapping(HandPoseActionDefinition.class, BehaviorTreeStateMessage.HAND_POSE_ACTION),
+      new DefinitionMapping(HandWrenchActionDefinition.class, BehaviorTreeStateMessage.HAND_WRENCH_ACTION),
+      new DefinitionMapping(ScrewPrimitiveActionDefinition.class, BehaviorTreeStateMessage.SCREW_PRIMITIVE_ACTION),
+      new DefinitionMapping(PelvisHeightOrientationActionDefinition.class, BehaviorTreeStateMessage.PELVIS_HEIGHT_ORIENTATION_ACTION),
+      new DefinitionMapping(SakeHandCommandActionDefinition.class, BehaviorTreeStateMessage.SAKE_HAND_COMMAND_ACTION),
+      new DefinitionMapping(WaitDurationActionDefinition.class, BehaviorTreeStateMessage.WAIT_DURATION_ACTION),
+      new DefinitionMapping(FootPoseActionDefinition.class, BehaviorTreeStateMessage.FOOT_POSE_ACTION)
    };
-   private static final Map<Class<?>, RegistryRecord> recordMap = new HashMap<>();
+   private static final Map<Class<?>, DefinitionMapping> DEFINITIONS_MAP = new HashMap<>();
    static
    {
-      for (RegistryRecord definitionEntry : DEFINITIONS)
+      for (DefinitionMapping definitionEntry : DEFINITIONS)
       {
-         recordMap.put(definitionEntry.getTypeClass(), definitionEntry);
+         DEFINITIONS_MAP.put(definitionEntry.getTypeClass(), definitionEntry);
       }
    }
 
    public static Class<?> getClassFromTypeName(String typeName)
    {
-      for (RegistryRecord definitionEntry : DEFINITIONS)
+      for (DefinitionMapping definitionEntry : DEFINITIONS)
       {
          if (typeName.equals(definitionEntry.getTypeClass().getSimpleName()))
             return definitionEntry.getTypeClass();
@@ -60,7 +60,7 @@ public class BehaviorTreeDefinitionRegistry
 
    public static Class<?> getNodeDefinitionClass(byte nodeType)
    {
-      for (RegistryRecord definitionEntry : DEFINITIONS)
+      for (DefinitionMapping definitionEntry : DEFINITIONS)
       {
          if (nodeType == definitionEntry.getMessageByte())
             return definitionEntry.getTypeClass();
@@ -71,10 +71,10 @@ public class BehaviorTreeDefinitionRegistry
 
    public static byte getMessageByte(Class<?> definitionClass)
    {
-      RegistryRecord registryRecord = recordMap.get(definitionClass);
-      if (registryRecord != null)
+      DefinitionMapping definitionMapping = DEFINITIONS_MAP.get(definitionClass);
+      if (definitionMapping != null)
       {
-         return registryRecord.getMessageByte();
+         return definitionMapping.getMessageByte();
       }
 
       return -1;
@@ -82,22 +82,22 @@ public class BehaviorTreeDefinitionRegistry
 
    public static String getInitialName(Class<?> definitionClass)
    {
-      RegistryRecord registryRecord = recordMap.get(definitionClass);
-      if (registryRecord != null)
+      DefinitionMapping definitionMapping = DEFINITIONS_MAP.get(definitionClass);
+      if (definitionMapping != null)
       {
-         return registryRecord.getInitialName();
+         return definitionMapping.getInitialName();
       }
 
       return null;
    }
 
-   private static class RegistryRecord
+   private static class DefinitionMapping
    {
       private final String initialName;
       private final Class<?> typeClass;
       private final byte messageByte;
 
-      private RegistryRecord(Class<?> typeClass, byte messageByte)
+      private DefinitionMapping(Class<?> typeClass, byte messageByte)
       {
          this.typeClass = typeClass;
          this.messageByte = messageByte;
