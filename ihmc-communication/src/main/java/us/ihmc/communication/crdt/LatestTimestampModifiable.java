@@ -56,7 +56,7 @@ public class LatestTimestampModifiable
    /** To be set only once right after construction. */
    public void setModifierName(String ourName)
    {
-      this.ourName = ourName;
+      this.ourName = crdtInfo.getActorDesignation().name() + ": " + ourName;
       latestModifierName = ourName;
    }
 

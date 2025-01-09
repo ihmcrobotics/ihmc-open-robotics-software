@@ -56,8 +56,8 @@ public class BehaviorTreeNodeDefinition extends LatestTimestampModifiable implem
       name = new CRDTBidirectionalString(this, BehaviorTreeDefinitionRegistry.getInitialName(getClass()));
       notes = new CRDTBidirectionalString(this, "");
 
-      setModifierName(crdtInfo.getActorDesignation().name() + ": " + name.getValue());
-      childrenModification.setModifierName(crdtInfo.getActorDesignation().name() + ": " + name.getValue() + " children");
+      setModifierName(name.getValue());
+      childrenModification.setModifierName("children");
    }
 
    /** Save as JSON file root node. */
