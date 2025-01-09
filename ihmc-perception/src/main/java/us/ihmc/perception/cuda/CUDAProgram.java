@@ -217,8 +217,7 @@ public class CUDAProgram implements AutoCloseable
 
       // Load the module using the PTX
       error = cuModuleLoadData(module, ptx);
-      checkCUDAError(error);
-      throwExceptionIfNotSuccessful(error);
+      throwCUDAError(error);
 
       // Release stuff
       nvrtcDestroyProgram(compiledProgram);

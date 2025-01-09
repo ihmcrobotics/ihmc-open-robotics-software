@@ -17,8 +17,7 @@ import java.util.List;
 
 import static org.bytedeco.cuda.global.cudart.cuLaunchKernel;
 import static org.bytedeco.cuda.global.cudart.cuModuleGetFunction;
-import static us.ihmc.perception.cuda.CUDATools.checkCUDAError;
-import static us.ihmc.perception.cuda.CUDATools.throwExceptionIfNotSuccessful;
+import static us.ihmc.perception.cuda.CUDATools.throwCUDAError;
 
 @SuppressWarnings("resource")
 public class CUDAKernel implements AutoCloseable
@@ -31,8 +30,7 @@ public class CUDAKernel implements AutoCloseable
    public CUDAKernel(String name, CUmod_st kernelModule) throws Exception
    {
       error = cuModuleGetFunction(kernelFunction, kernelModule, name);
-      checkCUDAError(error);
-      throwExceptionIfNotSuccessful(error);
+      throwCUDAError(error);
    }
 
    /**

@@ -112,7 +112,7 @@ public class CUDATools
       }
    }
 
-   public static void throwExceptionIfNotSuccessful(int errorCode) throws Exception
+   public static void throwCUDAError(int errorCode) throws Exception
    {
       if (errorCode != CUDA_SUCCESS)
       {
