@@ -11,10 +11,10 @@ import org.ejml.interfaces.linsol.LinearSolverDense;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.Conversions;
+import us.ihmc.math.linearAlgebra.DampedLeastSquaresNullspaceCalculator;
+import us.ihmc.math.linearAlgebra.DampedLeastSquaresSolver;
 import us.ihmc.matrixlib.MatrixTestTools;
 import us.ihmc.matrixlib.NativeCommonOps;
-import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
-import us.ihmc.robotics.linearAlgebra.DampedLeastSquaresNullspaceCalculator;
 
 public class NativeCommonOpsBenchmarkTest
 {
