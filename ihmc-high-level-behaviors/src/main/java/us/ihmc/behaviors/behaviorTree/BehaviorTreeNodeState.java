@@ -15,7 +15,7 @@ import java.util.List;
  *
  * @param <D> The type of this node's definition instance.
  */
-public class BehaviorTreeNodeState<D extends BehaviorTreeNodeDefinition> implements BehaviorTreeNode<BehaviorTreeNodeState<?>>
+public class BehaviorTreeNodeState<D extends BehaviorTreeNodeDefinition> implements TreeNode<BehaviorTreeNodeState<?>>
 {
    private final D definition;
 

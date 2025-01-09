@@ -1,16 +1,16 @@
 package us.ihmc.behaviors.behaviorTree.ros2;
 
 import us.ihmc.behaviors.behaviorTree.BehaviorTree;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeHighLayer;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNode;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 
 /**
  * Manages syncing a behavior tree over ROS 2 as a CRDT.
  *
- * @param <HLT> The generic type of this node high layer: RDX or Executor
+ * @param <HLT> The generic type of this node: RDX or Executor
  */
-public class ROS2BehaviorTree<HLT extends BehaviorTreeNodeHighLayer<HLT, ? ,?>>
+public class ROS2BehaviorTree<HLT extends BehaviorTreeNode<HLT, ? ,?>>
 {
    /**
     * The SYNC_FREQUENCY should be a multiple of the scene graph's update frequency.

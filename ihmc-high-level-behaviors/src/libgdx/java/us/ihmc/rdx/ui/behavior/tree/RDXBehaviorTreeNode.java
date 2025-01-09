@@ -35,7 +35,7 @@ import java.util.List;
  */
 public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
                                  D extends BehaviorTreeNodeDefinition>
-      implements BehaviorTreeNodeHighLayer<RDXBehaviorTreeNode<?, ?>, S, D>
+      implements BehaviorTreeNode<RDXBehaviorTreeNode<?, ?>, S, D>
 {
    private final S state;
    private final D definition;
@@ -77,7 +77,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    @Override
    public void update()
    {
-      BehaviorTreeNodeHighLayer.super.update();
+      BehaviorTreeNode.super.update();
 
       // Automatically expand if less than 5 children are added at once
       int deltaChildren = getChildren().size() - previousNumberOfChildren;

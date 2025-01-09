@@ -3,7 +3,7 @@ package us.ihmc.behaviors.behaviorTree.ros2;
 import behavior_msgs.msg.dds.*;
 import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.behaviors.behaviorTree.BehaviorTree;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeHighLayer;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
 import us.ihmc.communication.AutonomyAPI;
@@ -16,9 +16,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
- * @param <HLT> The generic type of this node high layer: RDX or Executor
+ * @param <HLT> The generic type of this node: RDX or Executor
  */
-public class ROS2BehaviorTreeSubscription<HLT extends BehaviorTreeNodeHighLayer<HLT, ? ,?>>
+public class ROS2BehaviorTreeSubscription<HLT extends BehaviorTreeNode<HLT, ? ,?>>
 {
    private final ROS2Topic<BehaviorTreeStateMessage> topic;
    private final ArrayList<Runnable> messageRecievedCallbacks = new ArrayList<>();

@@ -6,7 +6,7 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 /**
  * @param <HLT> The generic type of this node: RDX or Executor
  */
-public interface BehaviorTreeNodeHighLayerBuilder<HLT extends BehaviorTreeNode<HLT, ? ,?>>
+public interface BehaviorTreeNodeBuilder<HLT extends BehaviorTreeNode<HLT, ? ,?>>
 {
    HLT createNode(Class<?> nodeType, long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory);
 }

@@ -1,7 +1,7 @@
 package us.ihmc.behaviors.behaviorTree.topology;
 
 import us.ihmc.behaviors.behaviorTree.BehaviorTree;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeHighLayer;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNode;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -13,9 +13,9 @@ import java.util.Queue;
  * We are intentionally not checking the types in this class, because it gets
  * to complicated to use and doesn't add much value.
  *
- * @param <HLT> The generic type of this node high layer: RDX or Executor
+ * @param <HLT> The generic type of this node: RDX or Executor
  */
-public class BehaviorTreeTopologyOperationQueue<HLT extends BehaviorTreeNodeHighLayer<HLT, ?, ?>>
+public class BehaviorTreeTopologyOperationQueue<HLT extends BehaviorTreeNode<HLT, ?, ?>>
 {
    private final BehaviorTree<HLT> behaviorTree;
    private final Queue<BehaviorTreeTopologyOperation> topologyOperationQueue = new LinkedList<>();

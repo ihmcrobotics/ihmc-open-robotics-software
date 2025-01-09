@@ -12,11 +12,11 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import java.util.function.Consumer;
 
 /**
- * Common code for managing the tree between high layer implementations. i.e. RDX or Executor.
+ * Common code for managing the tree between node implementations. i.e. RDX or Executor.
  *
- * @param <HLT> The generic type of this node high layer: RDX or Executor
+ * @param <HLT> The generic type of this node: RDX or Executor
  */
-public abstract class BehaviorTree<HLT extends BehaviorTreeNodeHighLayer<HLT, ? ,?>>
+public abstract class BehaviorTree<HLT extends BehaviorTreeNode<HLT, ? ,?>>
 {
    private int numberOfNodes = 0;
    private final CRDTInfo crdtInfo;
@@ -25,13 +25,13 @@ public abstract class BehaviorTree<HLT extends BehaviorTreeNodeHighLayer<HLT, ? 
    private final LatestTimestampModifiable dataModification;
    private final WorkspaceResourceDirectory saveFileDirectory;
    private final BehaviorTreeFileLoader<HLT> fileLoader;
-   private final BehaviorTreeNodeHighLayerBuilder<HLT> nodeBuilder;
+   private final BehaviorTreeNodeBuilder<HLT> nodeBuilder;
    private final BehaviorTreeTopologyOperationQueue<HLT> topologyChangeQueue;
 
    public BehaviorTree(ROS2ActorDesignation actor,
                        ROS2PeerClockOffsetEstimator peerClockEstimator,
                        WorkspaceResourceDirectory saveFileDirectory,
-                       BehaviorTreeNodeHighLayerBuilder<HLT> nodeBuilder)
+                       BehaviorTreeNodeBuilder<HLT> nodeBuilder)
    {
       this.nodeBuilder = nodeBuilder;
       this.saveFileDirectory = saveFileDirectory;
@@ -152,7 +152,7 @@ public abstract class BehaviorTree<HLT extends BehaviorTreeNodeHighLayer<HLT, ? 
       return fileLoader;
    }
 
-   public BehaviorTreeNodeHighLayerBuilder<HLT> getNodeBuilder()
+   public BehaviorTreeNodeBuilder<HLT> getNodeBuilder()
    {
       return nodeBuilder;
    }

@@ -19,7 +19,7 @@ import java.util.List;
 /**
  * The base definition of a behavior tree node.
  */
-public class BehaviorTreeNodeDefinition extends LatestTimestampModifiable implements BehaviorTreeNode<BehaviorTreeNodeDefinition>
+public class BehaviorTreeNodeDefinition extends LatestTimestampModifiable implements TreeNode<BehaviorTreeNodeDefinition>
 {
    private final LatestTimestampModifiable childrenModification;
    /**

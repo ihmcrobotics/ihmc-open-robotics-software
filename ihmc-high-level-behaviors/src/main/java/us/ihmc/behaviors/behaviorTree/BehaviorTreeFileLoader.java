@@ -14,16 +14,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
- * @param <HLT> The generic type of this node high layer: RDX or Executor
+ * @param <HLT> The generic type of this node: RDX or Executor
  */
-public class BehaviorTreeFileLoader<HLT extends BehaviorTreeNodeHighLayer<HLT, ? ,?>>
+public class BehaviorTreeFileLoader<HLT extends BehaviorTreeNode<HLT, ? ,?>>
 {
    private final BehaviorTree<HLT> behaviorTree;
-   private final BehaviorTreeNodeHighLayerBuilder<HLT> nodeBuilder;
+   private final BehaviorTreeNodeBuilder<HLT> nodeBuilder;
    private final WorkspaceResourceDirectory treeFilesDirectory;
 
    public BehaviorTreeFileLoader(BehaviorTree<HLT> behaviorTree,
-                                 BehaviorTreeNodeHighLayerBuilder<HLT> nodeBuilder,
+                                 BehaviorTreeNodeBuilder<HLT> nodeBuilder,
                                  WorkspaceResourceDirectory treeFilesDirectory)
    {
       this.behaviorTree = behaviorTree;

@@ -1,11 +1,11 @@
 package us.ihmc.behaviors.behaviorTree.topology;
 
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeHighLayer;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNode;
 
 /**
- * @param <HLT> The generic type of this node high layer: RDX or Executor
+ * @param <HLT> The generic type of this node: RDX or Executor
  */
-public class BehaviorTreeNodeInsertionDefinition<HLT extends BehaviorTreeNodeHighLayer<HLT, ?, ?>>
+public class BehaviorTreeNodeInsertionDefinition<HLT extends BehaviorTreeNode<HLT, ?, ?>>
 {
    private final BehaviorTreeNodeInsertionType insertionType;
    private HLT nodeToInsert;

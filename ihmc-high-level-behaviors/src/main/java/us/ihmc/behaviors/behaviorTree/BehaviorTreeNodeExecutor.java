@@ -16,7 +16,7 @@ import java.util.List;
  */
 public class BehaviorTreeNodeExecutor<S extends BehaviorTreeNodeState<D>,
                                       D extends BehaviorTreeNodeDefinition>
-      implements BehaviorTreeNodeHighLayer<BehaviorTreeNodeExecutor<?, ?>, S, D>
+      implements BehaviorTreeNode<BehaviorTreeNodeExecutor<?, ?>, S, D>
 {
    private final S state;
    private final D definition;

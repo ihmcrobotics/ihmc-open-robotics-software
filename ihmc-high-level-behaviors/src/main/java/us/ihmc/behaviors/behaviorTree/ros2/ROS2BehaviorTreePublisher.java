@@ -2,7 +2,7 @@ package us.ihmc.behaviors.behaviorTree.ros2;
 
 import behavior_msgs.msg.dds.BehaviorTreeStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTree;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeHighLayer;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.communication.AutonomyAPI;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
@@ -28,7 +28,7 @@ public class ROS2BehaviorTreePublisher
       behaviorTree.toMessage(behaviorTreeMessage);
       ROS2BehaviorTreeMessageTools.clearLists(behaviorTreeMessage);
 
-      BehaviorTreeNodeHighLayer<?, ?, ?> rootNode = behaviorTree.getRootNode();
+      BehaviorTreeNode<?, ?, ?> rootNode = behaviorTree.getRootNode();
       if (rootNode != null)
       {
          packTreeToMessage(rootNode.getState());
