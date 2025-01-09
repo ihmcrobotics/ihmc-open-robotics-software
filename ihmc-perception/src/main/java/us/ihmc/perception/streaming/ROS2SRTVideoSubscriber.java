@@ -31,8 +31,7 @@ public class ROS2SRTVideoSubscriber
    private final ROS2StreamStatusMonitor streamStatusMonitor;
    private final SRTVideoReceiver videoReceiver;
 
-   private Mat nextFrame;
-   private final PixelFormat nextFramePixelFormat;
+   private final PixelFormat outputPixelFormat;
    private final List<Consumer<RawImage>> newFrameConsumers = new ArrayList<>();
    private double lastFrameDelay;
 
@@ -42,14 +41,14 @@ public class ROS2SRTVideoSubscriber
 
    private final VideoFrameExtraData frameDataMessage = new VideoFrameExtraData();
 
-   public ROS2SRTVideoSubscriber(ROS2PublishSubscribeAPI ros2, ROS2Topic<SRTStreamStatus> streamTopic, PixelFormat outputAVPixelFormat)
+   public ROS2SRTVideoSubscriber(ROS2PublishSubscribeAPI ros2, ROS2Topic<SRTStreamStatus> streamTopic, PixelFormat outputPixelFormat)
    {
       av_log_set_level(AV_LOG_FATAL); // silences no key frame errors which are 99% safe to ignore
 
-      nextFramePixelFormat = outputAVPixelFormat;
+      this.outputPixelFormat = outputPixelFormat;
 
       streamStatusMonitor = new ROS2StreamStatusMonitor(ros2, streamTopic);
-      videoReceiver = new SRTVideoReceiver(outputAVPixelFormat.toFFmpegPixelFormat());
+      videoReceiver = new SRTVideoReceiver(outputPixelFormat.toFFmpegPixelFormat());
       subscriptionThread = ThreadTools.startAThread(this::subscriptionUpdate, "ROS2SRTVideoSubscription");
       
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy));
@@ -138,7 +137,7 @@ public class ROS2SRTVideoSubscriber
 
             // RECEIVER IS CONNECTED
             // Get the latest image and give it to consumers
-            nextFrame = videoReceiver.getNextFrame(UPDATE_TIMEOUT);
+            Mat nextFrame = videoReceiver.getNextFrame(UPDATE_TIMEOUT);
             if (nextFrame != null)
             {
                // Get frame data
@@ -157,7 +156,7 @@ public class ROS2SRTVideoSubscriber
                // Create a RawImage
                RawImage nextFrameRawImage = new RawImage(nextFrame,
                                                          null,
-                                                         nextFramePixelFormat,
+                                                         outputPixelFormat,
                                                          streamStatusMonitor.getCameraIntrinsics(),
                                                          streamStatusMonitor.getCameraModel(),
                                                          frameSensorPose,
@@ -174,7 +173,5 @@ public class ROS2SRTVideoSubscriber
       }
 
       videoReceiver.destroy();
-      if (nextFrame != null)
-         nextFrame.close();
    }
 }
