@@ -4,16 +4,18 @@ import us.ihmc.log.LogTools;
 import us.ihmc.tools.Destroyable;
 
 /**
- * An interface that represents a behavior tree node's RDX or Executor layer.
+ * An interface that represents a complete behavior tree node for instantiation in
+ * the RDX UI or on the robot as an executor. It encapsulates the node state and definition
+ * while allowing extension to implement the various node types.
  *
- * @param <HLT> The generic type of this node high layer: RDX or Executor
+ * @param <HLT> The generic type of this node: RDX or Executor
  * @param <S> The type of this node's state instance.
  * @param <D> The type of this node's definition instance.
  */
 public interface BehaviorTreeNodeHighLayer<HLT extends BehaviorTreeNodeHighLayer<HLT, ?, ?>,
-                                           S extends BehaviorTreeNodeState<D>,
-                                           D extends BehaviorTreeNodeDefinition>
-      extends BehaviorTreeNode<HLT>, Destroyable
+                                  S extends BehaviorTreeNodeState<D>,
+                                  D extends BehaviorTreeNodeDefinition>
+      extends TreeNode<HLT>, Destroyable
 {
    S getState();
 
