@@ -4,18 +4,11 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 /**
- * Base interface for a behavior tree node. It is implemented by
- * several layers of node abstractions, including:
- * - Definition
- * - State
- * - Executor
- * - Graphical user interface
- *
- * A node has a list of children and a reference to the parent.
+ * The base interface for a tree node with a list of children and a reference to the parent.
  *
  * @param <LT> The generic type of this node layer: UI, Executor, State, or Definition
  */
-public interface BehaviorTreeNode<LT extends BehaviorTreeNode<LT>>
+public interface TreeNode<LT extends TreeNode<LT>>
 {
    /**
     * @return The node's children in order
