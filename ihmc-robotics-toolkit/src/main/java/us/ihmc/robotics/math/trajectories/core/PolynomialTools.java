@@ -1,7 +1,7 @@
 package us.ihmc.robotics.math.trajectories.core;
 
 import org.ejml.data.DMatrixRMaj;
-import us.ihmc.robotics.dataStructures.ComplexNumber;
+import us.ihmc.math.ComplexNumber;
 import us.ihmc.robotics.math.trajectories.interfaces.PolynomialBasics;
 
 public class PolynomialTools

@@ -19,6 +19,10 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             */
    public long sequence_id_;
    /**
+            * Whether or not we use the GPU for body path planning
+            */
+   public boolean use_gpu_;
+   /**
             * Heuristic inflation weight, used to speed up the planner at the expense of optimality
             * Should not be less than 1.0
             */
@@ -405,6 +409,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    {
       sequence_id_ = other.sequence_id_;
 
+      use_gpu_ = other.use_gpu_;
+
       a_star_heuristics_weight_ = other.a_star_heuristics_weight_;
 
       check_for_body_box_collisions_ = other.check_for_body_box_collisions_;
@@ -556,6 +562,21 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    public long getSequenceId()
    {
       return sequence_id_;
+   }
+
+   /**
+            * Whether or not we use the GPU for body path planning
+            */
+   public void setUseGpu(boolean use_gpu)
+   {
+      use_gpu_ = use_gpu;
+   }
+   /**
+            * Whether or not we use the GPU for body path planning
+            */
+   public boolean getUseGpu()
+   {
+      return use_gpu_;
    }
 
    /**
@@ -1798,6 +1819,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.use_gpu_, other.use_gpu_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.a_star_heuristics_weight_, other.a_star_heuristics_weight_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.check_for_body_box_collisions_, other.check_for_body_box_collisions_, epsilon)) return false;
@@ -1949,6 +1972,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
+      if(this.use_gpu_ != otherMyClass.use_gpu_) return false;
+
       if(this.a_star_heuristics_weight_ != otherMyClass.a_star_heuristics_weight_) return false;
 
       if(this.check_for_body_box_collisions_ != otherMyClass.check_for_body_box_collisions_) return false;
@@ -2097,6 +2122,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append("FootstepPlannerParametersPacket {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
+      builder.append("use_gpu=");
+      builder.append(this.use_gpu_);      builder.append(", ");
       builder.append("a_star_heuristics_weight=");
       builder.append(this.a_star_heuristics_weight_);      builder.append(", ");
       builder.append("check_for_body_box_collisions=");

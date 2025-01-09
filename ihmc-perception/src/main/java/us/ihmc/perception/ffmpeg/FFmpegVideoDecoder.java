@@ -134,7 +134,7 @@ public class FFmpegVideoDecoder extends FFmpegDecoder
       if (!gotAFrame.getValue())
          return null;
 
-      return outputImage;
+      return outputImage.clone();
    }
 
    /**
@@ -172,7 +172,7 @@ public class FFmpegVideoDecoder extends FFmpegDecoder
    {
       lastFrameSideData.close();
       AVFrameSideData sideData;
-      for (int i = 0; i < decodedFrame.nb_side_data(); ++i)
+      for (int i = decodedFrame.nb_side_data() - 1; i >= 0; --i)
       {
          sideData = decodedFrame.side_data(i);
          if (!sideData.isNull() && sideData.type() == AV_FRAME_DATA_SEI_UNREGISTERED)

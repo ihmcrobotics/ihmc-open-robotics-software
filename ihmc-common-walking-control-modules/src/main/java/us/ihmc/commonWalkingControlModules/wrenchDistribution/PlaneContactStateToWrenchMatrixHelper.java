@@ -101,7 +101,7 @@ public class PlaneContactStateToWrenchMatrixHelper
                                                 int numberOfBasisVectorsPerContactPoint, FrictionConeRotationCalculator coneRotationCalculator,
                                                 YoRegistry parentRegistry)
    {
-      List<FramePoint2D> contactPoints2d = contactablePlaneBody.getContactPoints2d();
+      List<? extends FramePoint2DReadOnly> contactPoints2d = contactablePlaneBody.getContactPoints2D();
 
       if (contactPoints2d.size() > maxNumberOfContactPoints)
          throw new RuntimeException("Unexpected number of contact points: " + contactPoints2d.size());
@@ -139,7 +139,7 @@ public class PlaneContactStateToWrenchMatrixHelper
 
       RigidBodyBasics rigidBody = contactablePlaneBody.getRigidBody();
       planeFrame = new PoseReferenceFrame(namePrefix + "ContactFrame", rigidBody.getBodyFixedFrame());
-      planeFrame.setPoseAndUpdate(contactablePlaneBody.getSoleFrame().getTransformToDesiredFrame(rigidBody.getBodyFixedFrame()));
+      planeFrame.setPoseAndUpdate(contactablePlaneBody.getContactFrame().getTransformToDesiredFrame(rigidBody.getBodyFixedFrame()));
       yoPlaneContactState = new YoPlaneContactState(namePrefix, rigidBody, planeFrame, contactPoints2d, 0.0, registry);
       yoPlaneContactState.clear();
       yoPlaneContactState.computeSupportPolygon();

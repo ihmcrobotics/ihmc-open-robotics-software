@@ -4,6 +4,11 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public interface RobotVersion
 {
+   default boolean hasHead()
+   {
+      return true;
+   }
+   
    default boolean hasArm(RobotSide robotSide)
    {
       return false;
@@ -12,11 +17,6 @@ public interface RobotVersion
    default boolean hasBothArms()
    {
       return hasArm(RobotSide.LEFT) && hasArm(RobotSide.RIGHT);
-   }
-
-   default boolean hasHead()
-   {
-      return true;
    }
 
    default boolean hasSakeGripperJoints(RobotSide side)
