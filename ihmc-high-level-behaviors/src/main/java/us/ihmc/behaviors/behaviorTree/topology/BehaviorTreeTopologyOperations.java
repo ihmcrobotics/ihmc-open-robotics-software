@@ -5,8 +5,12 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeHighLayer;
 
 /**
  * Static topological behavior tree operations to keep the logic in one place.
- * The {@code *Modify} methods mark any node who's children gets changed's children field as modified
- * for the purpose of CRDT synchronization.
+ * The {@code *Modify} methods are for the purpose of CRDT synchronization.
+ * When a user or automated algorithm initiates a modification to the tree topology
+ * (i.e. changing the set of children), then we mark the children field as modified
+ * through the associated LatestTimestampModifiable.
+ * The methods without {@code *Modify} would be exclusively operations as a result
+ * of getting in sync with the changes that happened on other networked peers.
  */
 public class BehaviorTreeTopologyOperations
 {
