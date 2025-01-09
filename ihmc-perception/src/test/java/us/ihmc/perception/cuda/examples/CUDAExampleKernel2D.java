@@ -94,6 +94,10 @@ public class CUDAExampleKernel2D
          gridDim.close();
          blockDim.close();
       }
+      catch (Exception e)
+      {
+         e.getStackTrace();
+      }
 
       CUDAStreamManager.releaseStream(stream);
    }

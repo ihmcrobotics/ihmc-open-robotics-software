@@ -34,7 +34,7 @@ public class CUDAExampleKernel
          """;
 
    // Even if you don't create a stream, CUDA will create a default one for you, so we make one ourselves to handle things better
-   public CUDAExampleKernel()
+   public CUDAExampleKernel() throws Exception
    {
       // Note this name does NOT have to match the name of the program, however for readability its ideal to have them match.
       String userFriendlyNameOfProgram = "userFriendlyNameOfProgram";
@@ -117,7 +117,7 @@ public class CUDAExampleKernel
       stream.close();
    }
 
-   public static void main(String[] args)
+   public static void main(String[] args) throws Exception
    {
       new CUDAExampleKernel();
    }

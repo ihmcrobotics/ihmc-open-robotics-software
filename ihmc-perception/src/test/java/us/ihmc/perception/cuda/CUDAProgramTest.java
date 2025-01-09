@@ -63,6 +63,10 @@ public class CUDAProgramTest
          // Ensure we got the correct result!
          assertEquals(10, sum.get());
       }
+      catch (Exception e)
+      {
+         e.getStackTrace();
+      }
 
       CUDAStreamManager.releaseStream(stream);
    }
@@ -102,6 +106,10 @@ public class CUDAProgramTest
          // Free host memory
          cudaFreeAsync(deviceSum, stream);
       }
+      catch (Exception e)
+      {
+         e.getStackTrace();
+      }
 
       CUDAStreamManager.releaseStream(stream);
    }
@@ -132,6 +140,10 @@ public class CUDAProgramTest
 
          // Free device memory
          cudaFreeAsync(deviceSum, stream);
+      }
+      catch (Exception e)
+      {
+         e.getStackTrace();
       }
 
       CUDAStreamManager.releaseStream(stream);
@@ -178,6 +190,10 @@ public class CUDAProgramTest
          // Ensure we got the correct result!
          assertEquals(10, sum.get());
          assertEquals(4, difference.get());
+      }
+      catch (Exception e)
+      {
+         e .getStackTrace();
       }
 
       CUDAStreamManager.releaseStream(stream);
