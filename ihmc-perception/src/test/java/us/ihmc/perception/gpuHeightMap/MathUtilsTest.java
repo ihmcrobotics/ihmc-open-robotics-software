@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class MathUtilsTest
 {
    @Test
-   public void testDotProductCUDA()
+   public void testDotProductCUDA() throws Exception
    {
       URL programPath = getClass().getClassLoader().getResource("us/ihmc/perception/gpuHeightMap/MathUtilsTest.cu");
       URL headerPath = getClass().getClassLoader().getResource("us/ihmc/perception/gpuHeightMap/MathUtils.cuh");
@@ -76,7 +76,7 @@ public class MathUtilsTest
    }
 
    @Test
-   void testClampCUDA()
+   void testClampCUDA() throws Exception
    {
       float value = 7;
       float minValue = 1;
@@ -120,7 +120,7 @@ public class MathUtilsTest
    }
 
    @Test
-   public void testTransformPointCUDA()
+   public void testTransformPointCUDA() throws Exception
    {
       float[] cudaResult;
       cudaResult = runTransformPoint3d32_2OnCUDA();
@@ -130,7 +130,7 @@ public class MathUtilsTest
       assertEquals(9.0f, cudaResult[2], 1e-6);
    }
 
-   private float[] runTransformPoint3d32_2OnCUDA()
+   private float[] runTransformPoint3d32_2OnCUDA() throws Exception
    {
       URL programPath = getClass().getClassLoader().getResource("us/ihmc/perception/gpuHeightMap/MathUtilsTest.cu");
       URL headerPath = getClass().getClassLoader().getResource("us/ihmc/perception/gpuHeightMap/MathUtils.cuh");
@@ -176,7 +176,7 @@ public class MathUtilsTest
    }
 
    @Test
-   public void testTransformOpenCL()
+   public void testTransformOpenCL() throws Exception
    {
       float[] openCLResult;
       openCLResult = runTransformPoint3d3d_2OnOpenCL();
