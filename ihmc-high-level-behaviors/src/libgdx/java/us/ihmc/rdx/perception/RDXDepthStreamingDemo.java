@@ -43,7 +43,7 @@ public class RDXDepthStreamingDemo
    private final RDXOpenCVVideoVisualizer receivedDepthVisualizer = new RDXOpenCVVideoVisualizer("Received Colorized Depth", "Received Colorized Depth", false);
    private final RDXRawImagePointCloudVisualizer pointCloudVisualizer = new RDXRawImagePointCloudVisualizer("De-Colorized Point Cloud");
 
-   public RDXDepthStreamingDemo()
+   public RDXDepthStreamingDemo() throws Exception
    {
       zed.useTrackedPose(true);
       zed.run(true);
