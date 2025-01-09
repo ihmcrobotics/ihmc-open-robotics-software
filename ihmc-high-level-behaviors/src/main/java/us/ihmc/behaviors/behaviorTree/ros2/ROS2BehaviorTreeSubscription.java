@@ -3,7 +3,6 @@ package us.ihmc.behaviors.behaviorTree.ros2;
 import behavior_msgs.msg.dds.*;
 import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.behaviors.behaviorTree.BehaviorTree;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeDefinitionRegistry;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeHighLayer;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
@@ -13,7 +12,6 @@ import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.log.LogTools;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.tools.thread.SwapReference;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,7 +31,7 @@ public class ROS2BehaviorTreeSubscription<HLT extends BehaviorTreeNodeHighLayer<
    private long messageDropCount = 0;
    private long outOfOrderCount = 0;
    private int numberOfOnRobotNodes = 0;
-   private final ConcurrentRingBuffer<BehaviorTreeStateMessage> behaviorTreeStateMessageSwapReference;
+   private final ConcurrentRingBuffer<BehaviorTreeStateMessage> behaviorTreeStateMessageQueue;
    private final Notification recievedMessageNotification = new Notification();
    private final ROS2BehaviorTreeSubscriptionNode subscriptionRootNode = new ROS2BehaviorTreeSubscriptionNode();
    private final HashMap<Long, ROS2BehaviorTreeSubscriptionNode> idToSubscriptionNodesMap = new HashMap<>();
@@ -48,7 +46,7 @@ public class ROS2BehaviorTreeSubscription<HLT extends BehaviorTreeNodeHighLayer<
       this.rootNodeSetter = rootNodeSetter;
 
       topic = AutonomyAPI.BEAVIOR_TREE.getTopic(behaviorTree.getCRDTInfo().getActorDesignation().getIncomingQualifier());
-      behaviorTreeStateMessageSwapReference = ros2PublishSubscribeAPI.subscribeViaQueue(topic, behaviorTreeStateMessage ->
+      behaviorTreeStateMessageQueue = ros2PublishSubscribeAPI.subscribeViaQueue(topic, behaviorTreeStateMessage ->
       {
          ++numberOfMessagesReceived;
          for (Runnable messageRecievedCallback : messageRecievedCallbacks)
@@ -82,9 +80,9 @@ public class ROS2BehaviorTreeSubscription<HLT extends BehaviorTreeNodeHighLayer<
    {
       if (recievedMessageNotification.poll())
       {
-         synchronized (behaviorTreeStateMessageSwapReference)
+         synchronized (behaviorTreeStateMessageQueue)
          {
-            BehaviorTreeStateMessage behaviorTreeStateMessage = behaviorTreeStateMessageSwapReference.getForThreadTwo();
+            BehaviorTreeStateMessage behaviorTreeStateMessage = behaviorTreeStateMessageQueue.getForThreadTwo();
 
             numberOfOnRobotNodes = behaviorTreeStateMessage.getBehaviorTreeIndices().size();
 
