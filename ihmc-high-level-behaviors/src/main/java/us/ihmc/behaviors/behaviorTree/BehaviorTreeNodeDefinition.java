@@ -162,8 +162,13 @@ public class BehaviorTreeNodeDefinition extends LatestTimestampModifiable implem
 
    public void fromMessage(BehaviorTreeNodeDefinitionMessage message)
    {
+      fromMessage(message, false);
+   }
+
+   public void fromMessage(BehaviorTreeNodeDefinitionMessage message, boolean checkOnly)
+   {
       // Needs to be done first to detect incoming modification
-      fromMessage(message.getLatestModificationToData());
+      fromMessage(message.getLatestModificationToData(), checkOnly);
       childrenModification.fromMessage(message.getLatestModificationToChildren());
 
       name.fromMessage(message.getNameAsString());

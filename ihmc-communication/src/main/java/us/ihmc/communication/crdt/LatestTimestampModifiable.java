@@ -151,6 +151,16 @@ public class LatestTimestampModifiable
 
    public void fromMessage(LatestModificationMessage message)
    {
+      fromMessage(message, false);
+   }
+
+   /**
+    * @param checkOnly is used for when partial data is received in order to not clear the modification
+    *                  status, so isModificationIncoming == true when receiving the full data, which may
+    *                  be several updates later, even using RELIABLE mode, apparently
+    */
+   public void fromMessage(LatestModificationMessage message, boolean checkOnly)
+   {
       if (modificationIncoming)
          LogTools.debug("{}: Update # {} INCOMING true -> false", ourName, crdtInfo.getUpdateNumber());
       modificationIncoming = false;
@@ -187,26 +197,28 @@ public class LatestTimestampModifiable
          {
             LogTools.debug(() -> "%s: Update # %d INCOMING = true  Modification # %d -> %d  Modifier: %s"
                   .formatted(ourName, crdtInfo.getUpdateNumber(), modificationNumber, incomingModificationNumber, incomingModifierName));
-            latestModifierGuid.set(incomingModifierGuid);
-            modificationNumber = incomingModificationNumber;
-            latestModifierName = incomingModifierName;
-            modificationIncoming = true;
+            if (!checkOnly)
+            {
+               modificationNumber = incomingModificationNumber;
 
-            // If peer that most recently modified is now offline, we need to become the latest modifier
-            // because
-            if (peerTimeAvailable)
-            {
-               latestModificationTime = incomingModificationTime;
+               if (peerTimeAvailable)
+               {
+                  latestModifierGuid.set(incomingModifierGuid);
+                  latestModificationTime = incomingModificationTime;
+                  latestModifierName = incomingModifierName;
+               }
+               else // If peer that most recently modified is now offline, we need to become the latest modifier
+               {    // because we don't know when that time was anymore
+                  LogTools.warn(() -> "%s: Update # %d INCOMING = true  Modification # %d -> %d  Peer offline: %s"
+                        .formatted(ourName,
+                                   crdtInfo.getUpdateNumber(),
+                                   modificationNumber,
+                                   incomingModificationNumber,
+                                   incomingModifierName));
+                  modify();
+               }
             }
-            else
-            {
-               LogTools.warn(() -> "%s: Update # %d INCOMING = true  Modification # %d -> %d  Peer offline: %s"
-                     .formatted(ourName,
-                                crdtInfo.getUpdateNumber(),
-                                modificationNumber,
-                                incomingModificationNumber,
-                                incomingModifierName));
-            }
+            modificationIncoming = true;
          }
          // If modification number is the same as what we have, but the modification was made by another peer,
          // then it's a race condition, and we need to resolve it
@@ -252,10 +264,13 @@ public class LatestTimestampModifiable
             }
             else
             {
-               latestModifierGuid.set(incomingModifierGuid);
-               latestModificationTime = incomingModificationTime;
-               modificationNumber = incomingModificationNumber;
-               latestModifierName = incomingModifierName;
+               if (!checkOnly)
+               {
+                  latestModifierGuid.set(incomingModifierGuid);
+                  latestModificationTime = incomingModificationTime;
+                  modificationNumber = incomingModificationNumber;
+                  latestModifierName = incomingModifierName;
+               }
                modificationIncoming = true;
             }
          }

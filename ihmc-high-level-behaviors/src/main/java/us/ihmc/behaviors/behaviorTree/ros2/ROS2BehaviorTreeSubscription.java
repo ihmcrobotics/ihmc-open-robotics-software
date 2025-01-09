@@ -144,7 +144,7 @@ public class ROS2BehaviorTreeSubscription<HLT extends BehaviorTreeNodeHighLayer<
       {
          if (subscriptionNode.getPackedType() == BehaviorTreeStateMessage.PARTIAL_DATA)
          {
-            localNode.getDefinition().fromMessage(subscriptionNode.getBehaviorTreeNodeDefinitionMessage());
+            localNode.getDefinition().fromMessage(subscriptionNode.getBehaviorTreeNodeDefinitionMessage(), true);
             localNode.getState().fromMessage(subscriptionNode.getBehaviorTreeNodeStateMessage());
 
             if (localNode.getDefinition().isModificationIncoming())
