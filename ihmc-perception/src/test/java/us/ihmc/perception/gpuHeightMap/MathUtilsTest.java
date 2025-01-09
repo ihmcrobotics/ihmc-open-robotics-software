@@ -319,6 +319,38 @@ public class MathUtilsTest
       returnData[1] = resultPointer.get(1);
       returnData[2] = resultPointer.get(2);
 
+      pxPointer.close();
+      pyPointer.close();
+      pzPointer.close();
+      r0xPointer.close();
+      r0yPointer.close();
+      r0zPointer.close();
+      r1xPointer.close();
+      r1yPointer.close();
+      r1zPointer.close();
+      r2xPointer.close();
+      r2yPointer.close();
+      r2zPointer.close();
+      txPointer.close();
+      tyPointer.close();
+      tzPointer.close();
+      pxPointerObject.close();
+      pyPointerObject.close();
+      pzPointerObject.close();
+      r0xPointerObject.close();
+      r0yPointerObject.close();
+      r0zPointerObject.close();
+      r1xPointerObject.close();
+      r1yPointerObject.close();
+      r1zPointerObject.close();
+      r2xPointerObject.close();
+      r2yPointerObject.close();
+      r2zPointerObject.close();
+      tzPointerObject.close();
+      txPointerObject.close();
+      tyPointerObject.close();
+      tzPointerObject.close();
+
       return returnData;
    }
 }
