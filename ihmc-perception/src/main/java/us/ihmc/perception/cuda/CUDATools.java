@@ -161,7 +161,6 @@ public class CUDATools
 
          String errorMessage = String.format("NVJPEG Error (%d): %s", errorCode, errorName);
          LogTools.error(errorMessage);
-         throw new RuntimeException(errorMessage);
       }
    }
 
@@ -172,9 +171,8 @@ public class CUDATools
 
       try (BytePointer errorString = nvrtcGetErrorString(errorCode))
       {
-         String errorMessage = String.format("CUDA Error: %s", errorString.getString());
+         String errorMessage = String.format("NVRTC Error (%d): %s", errorCode, errorString.getString());
          LogTools.error(errorMessage);
-         throw new RuntimeException(errorMessage);
       }
    }
 }
