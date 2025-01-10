@@ -33,6 +33,8 @@ public class ZEDImageSensor extends ImageSensor
       ZEDJavaAPINativeLibrary.load();
    }
 
+   private static int streamingPort = 30000;
+
    public static final int LEFT_COLOR_IMAGE_KEY = 0;
    public static final int RIGHT_COLOR_IMAGE_KEY = 1;
    public static final int DEPTH_IMAGE_KEY = 2;
@@ -108,6 +110,8 @@ public class ZEDImageSensor extends ImageSensor
             SL_PositionalTrackingParameters positionalTrackingParameters = new SL_PositionalTrackingParameters();
             sl_enable_positional_tracking(cameraID, positionalTrackingParameters, "");
          }
+
+         sl_enable_streaming(cameraID, SL_STREAMING_CODEC_H264, 8000, (short) streamingPort++, -1, 0, 16084, CAMERA_FPS);
 
          // Get camera intrinsics
          SL_CalibrationParameters sensorIntrinsics = sl_get_calibration_parameters(cameraID, false);
