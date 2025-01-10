@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class CUDADepthColorizerTest
 {
    @Test
-   public void testColorization()
+   public void testColorization() throws Exception
    {
       // Initialize colorizer
       CUDADepthColorizer colorizer = new CUDADepthColorizer();

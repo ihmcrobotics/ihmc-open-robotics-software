@@ -21,7 +21,7 @@ public class CUDADepthColorizer
    private final CUDAKernel encoder;
    private final CUDAKernel decoder;
 
-   public CUDADepthColorizer()
+   public CUDADepthColorizer() throws Exception
    {
       stream = CUDAStreamManager.getStream();
 
