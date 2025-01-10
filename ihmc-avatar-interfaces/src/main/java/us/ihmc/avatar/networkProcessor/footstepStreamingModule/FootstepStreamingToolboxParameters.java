@@ -91,7 +91,7 @@ public class FootstepStreamingToolboxParameters
       stepThreshold = 0.05;
       liftThreshold = 0.02;
       strideLength = 0.20;
-      kpDirection = 0.5;
+      kpDirection = 0.0;
 
       turningThreshold = 12;
       turnDegrees = 33.3;

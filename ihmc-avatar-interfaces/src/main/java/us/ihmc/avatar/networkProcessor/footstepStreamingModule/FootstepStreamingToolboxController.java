@@ -57,7 +57,6 @@ public class FootstepStreamingToolboxController extends ToolboxController
 
    private final FSTSleepState sleepState;
    private final FSTStreamingState streamingState;
-   private ROS2Publisher<FootstepDataMessage> footstepMessagePublisher;
 
    private final YoBoolean isDone = new YoBoolean("isDone", registry);
 

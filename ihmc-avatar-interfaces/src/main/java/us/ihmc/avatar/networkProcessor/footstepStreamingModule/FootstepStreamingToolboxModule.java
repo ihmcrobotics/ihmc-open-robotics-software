@@ -1,5 +1,6 @@
 package us.ihmc.avatar.networkProcessor.footstepStreamingModule;
 
+import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
 import toolbox_msgs.msg.dds.FootstepStreamingToolboxInputMessage;
 import toolbox_msgs.msg.dds.FootstepStreamingToolboxOutputStatus;
 import toolbox_msgs.msg.dds.ToolboxStateMessage;
@@ -99,6 +100,7 @@ public class FootstepStreamingToolboxModule extends ToolboxModule
    {
       List<Class<? extends Settable<?>>> status = new ArrayList<>();
       status.add(FootstepStreamingToolboxOutputStatus.class);
+      status.add(ControllerCrashNotificationPacket.class);
       return status;
    }
 
