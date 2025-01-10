@@ -121,7 +121,7 @@ public class IDLSequenceObjectSerializer extends Serializer<IDLSequence.Object>
          topicDataTypes.put(topicDataTypeClass, topicDataType);
       }
 
-      IDLSequence.Object resultList = new IDLSequence.Object(length, null, topicDataType);
+      IDLSequence.Object resultList = new IDLSequence.Object(length, topicDataType);
 
 //      if (serializer != null)
 //      {

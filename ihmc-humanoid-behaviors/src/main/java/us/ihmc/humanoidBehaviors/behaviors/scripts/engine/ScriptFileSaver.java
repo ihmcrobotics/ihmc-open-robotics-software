@@ -127,7 +127,7 @@ public class ScriptFileSaver
    {
       TopicDataType<T> topicDataType = list.getTopicDataType();
       Class clazz = topicDataType.createData().getClass();
-      IDLSequence.Object<T> trimmed = new IDLSequence.Object<>(list.size(), clazz, topicDataType);
+      IDLSequence.Object<T> trimmed = new IDLSequence.Object<>(list.size(), topicDataType);
       Field allocatorField = trimmed.getClass().getSuperclass().getDeclaredField("allocator");
       allocatorField.setAccessible(true);
       allocatorField.set(trimmed, null); // The allocator is a lambda that can not be recorded
