@@ -34,47 +34,47 @@ uint32 next_id
 ihmc_common_msgs/ConfirmableRequestMessage confirmable_request
 
 # A depth first ordered list of types.
-byte[<=1000] behavior_tree_types
+byte[] behavior_tree_types
 
 # A depth first ordered list of node indexes.
 # The index is of that node in it's respective list for
 # it's type.
-uint32[<=1000] behavior_tree_indices
+uint32[] behavior_tree_indices
 
-behavior_msgs/BehaviorTreeRootNodeStateMessage[<=1] root_nodes
+behavior_msgs/BehaviorTreeRootNodeStateMessage root_node
 
-behavior_msgs/BasicNodeStateMessage[<=200] basic_nodes
+behavior_msgs/BasicNodeStateMessage[] basic_nodes
 
-behavior_msgs/AI2RNodeStateMessage[<=1] ai2r_nodes
+behavior_msgs/AI2RNodeStateMessage[] ai2r_nodes
 
-behavior_msgs/ActionSequenceStateMessage[<=200] action_sequences
+behavior_msgs/ActionSequenceStateMessage[] action_sequences
 
-behavior_msgs/FallbackNodeStateMessage[<=200] fallback_nodes
+behavior_msgs/FallbackNodeStateMessage[] fallback_nodes
 
-behavior_msgs/ConditionNodeStateMessage[<=200] condition_nodes
+behavior_msgs/ConditionNodeStateMessage[] condition_nodes
 
-behavior_msgs/GotoNodeStateMessage[<=200] goto_nodes
+behavior_msgs/GotoNodeStateMessage[] goto_nodes
 
-behavior_msgs/DoorTraversalStateMessage[<=200] door_traversals
+behavior_msgs/DoorTraversalStateMessage[] door_traversals
 
-behavior_msgs/TrashCanInteractionStateMessage[<=200] trash_can_interactions
+behavior_msgs/TrashCanInteractionStateMessage[] trash_can_interactions
 
-behavior_msgs/BuildingExplorationStateMessage[<=200] building_explorations
+behavior_msgs/BuildingExplorationStateMessage[] building_explorations
 
-behavior_msgs/ChestOrientationActionStateMessage[<=200] chest_orientation_actions
+behavior_msgs/ChestOrientationActionStateMessage[] chest_orientation_actions
 
-behavior_msgs/FootstepPlanActionStateMessage[<=200] footstep_plan_actions
+behavior_msgs/FootstepPlanActionStateMessage[] footstep_plan_actions
 
-behavior_msgs/SakeHandCommandActionStateMessage[<=200] sake_hand_command_actions
+behavior_msgs/SakeHandCommandActionStateMessage[] sake_hand_command_actions
 
-behavior_msgs/HandPoseActionStateMessage[<=200] hand_pose_actions
+behavior_msgs/HandPoseActionStateMessage[] hand_pose_actions
 
-behavior_msgs/HandWrenchActionStateMessage[<=200] hand_wrench_actions
+behavior_msgs/HandWrenchActionStateMessage[] hand_wrench_actions
 
-behavior_msgs/ScrewPrimitiveActionStateMessage[<=200] screw_primitive_actions
+behavior_msgs/ScrewPrimitiveActionStateMessage[] screw_primitive_actions
 
-behavior_msgs/PelvisHeightOrientationActionStateMessage[<=200] pelvis_height_actions
+behavior_msgs/PelvisHeightOrientationActionStateMessage[] pelvis_height_actions
 
-behavior_msgs/WaitDurationActionStateMessage[<=200] wait_duration_actions
+behavior_msgs/WaitDurationActionStateMessage[] wait_duration_actions
 
-behavior_msgs/FootPoseActionStateMessage[<=200] foot_pose_actions
+behavior_msgs/FootPoseActionStateMessage[] foot_pose_actions

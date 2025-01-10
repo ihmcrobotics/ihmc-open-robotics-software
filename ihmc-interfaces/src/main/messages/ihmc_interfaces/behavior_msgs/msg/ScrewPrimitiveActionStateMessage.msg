@@ -4,7 +4,7 @@ behavior_msgs/ActionNodeStateMessage state
 # Definition
 behavior_msgs/ScrewPrimitiveActionDefinitionMessage definition
 
-geometry_msgs/Pose[<=50] preview_trajectory
+geometry_msgs/Pose[] preview_trajectory
 
 # Hand force
 geometry_msgs/Vector3 force

@@ -5,4 +5,4 @@ uint32 id
 bool is_active
 
 # Recent log messages
-behavior_msgs/BehaviorTreeLogMessage[<=50] recent_log_messages
+behavior_msgs/BehaviorTreeLogMessage[] recent_log_messages

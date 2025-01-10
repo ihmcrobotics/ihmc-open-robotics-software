@@ -6,7 +6,7 @@
 geometry_msgs/Pose robot_mid_feet_under_pelvis_pose_in_world
 
 # List of objects in the scene
-behavior_msgs/AI2RObjectMessage[<=200] objects
+behavior_msgs/AI2RObjectMessage[] objects
 
 # List of available behaviors (JSON file names)
-string[<=200] available_behaviors
+string[] available_behaviors
