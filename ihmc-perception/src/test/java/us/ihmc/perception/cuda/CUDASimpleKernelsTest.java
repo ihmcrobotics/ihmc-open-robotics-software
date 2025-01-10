@@ -180,12 +180,12 @@ public class CUDASimpleKernelsTest
       stream = CUDAStreamManager.getStream();
 
       // Since we haven't declared the (extern "C"), we expect this kernel to fail loading
-      RuntimeException thrown = assertThrows(RuntimeException.class, () ->
+      Exception thrown = assertThrows(Exception.class, () ->
       {
          CUDAProgram program = new CUDAProgram(kernelPath);
          program.close();
       });
 
-      assertTrue(thrown.getMessage().contains("NVRTC_ERROR_COMPILATION"));
+      assertTrue(thrown.getMessage().contains("cudaErrorInvalidKernelImage"));
    }
 }
