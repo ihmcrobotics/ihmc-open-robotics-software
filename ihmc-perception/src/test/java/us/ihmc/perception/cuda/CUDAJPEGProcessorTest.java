@@ -31,7 +31,6 @@ public class CUDAJPEGProcessorTest
       try (Mat bgrImage = readBGRImage();
            BytePointer encodedImage = new BytePointer(OpenCVTools.dataSize(bgrImage));
            Mat decodedImage = new Mat())
-
       {
          jpegProcessor.encodeBGR(bgrImage, encodedImage);
          assertTrue(encodedImage.limit() < OpenCVTools.dataSize(bgrImage));
@@ -57,7 +56,6 @@ public class CUDAJPEGProcessorTest
            Mat rgbImage = new Mat();
            BytePointer encodedImage = new BytePointer(OpenCVTools.dataSize(bgrImage));
            Mat decodedImage = new Mat())
-
       {
          opencv_imgproc.cvtColor(bgrImage, rgbImage, opencv_imgproc.COLOR_BGR2RGB);
 
@@ -85,7 +83,6 @@ public class CUDAJPEGProcessorTest
            Mat grayImage = new Mat();
            BytePointer encodedImage = new BytePointer(OpenCVTools.dataSize(bgrImage));
            Mat decodedImage = new Mat())
-
       {
          opencv_imgproc.cvtColor(bgrImage, grayImage, opencv_imgproc.COLOR_BGR2GRAY);
 
@@ -113,7 +110,6 @@ public class CUDAJPEGProcessorTest
            Mat yuvImage = new Mat();
            BytePointer encodedImage = new BytePointer(OpenCVTools.dataSize(bgrImage));
            Mat decodedImage = new Mat())
-
       {
          opencv_imgproc.cvtColor(bgrImage, yuvImage, opencv_imgproc.COLOR_BGR2YUV);
 
@@ -141,7 +137,6 @@ public class CUDAJPEGProcessorTest
            Mat yuvImage = new Mat();
            BytePointer encodedImage = new BytePointer(OpenCVTools.dataSize(bgrImage));
            Mat decodedImage = new Mat())
-
       {
          opencv_imgproc.cvtColor(bgrImage, yuvImage, opencv_imgproc.COLOR_BGR2YUV);
 
@@ -169,7 +164,6 @@ public class CUDAJPEGProcessorTest
            Mat yuvImage = new Mat();
            BytePointer encodedImage = new BytePointer(OpenCVTools.dataSize(bgrImage));
            Mat decodedImage = new Mat())
-
       {
          opencv_imgproc.cvtColor(bgrImage, yuvImage, opencv_imgproc.COLOR_BGR2YUV_I420);
 
@@ -197,7 +191,6 @@ public class CUDAJPEGProcessorTest
            Mat yuvImage = new Mat();
            BytePointer encodedImage = new BytePointer(OpenCVTools.dataSize(bgrImage));
            Mat decodedImage = new Mat())
-
       {
          opencv_imgproc.cvtColor(bgrImage, yuvImage, opencv_imgproc.COLOR_BGR2YUV_I420);
 
@@ -225,7 +218,6 @@ public class CUDAJPEGProcessorTest
            Mat grayImage = new Mat();
            BytePointer encodedImage = new BytePointer(OpenCVTools.dataSize(bgrImage));
            Mat decodedImage = new Mat())
-
       {
          opencv_imgproc.cvtColor(bgrImage, grayImage, opencv_imgproc.COLOR_BGR2GRAY);
 
@@ -254,7 +246,6 @@ public class CUDAJPEGProcessorTest
            Mat grayImage = new Mat();
            BytePointer encodedImage = new BytePointer(OpenCVTools.dataSize(bgrImage));
            Mat decodedImage = new Mat())
-
       {
          opencv_imgproc.cvtColor(bgrImage, grayImage, opencv_imgproc.COLOR_BGR2GRAY);
          opencv_imgproc.cvtColor(grayImage, grayBGRImage, opencv_imgproc.COLOR_GRAY2BGR);
@@ -283,7 +274,6 @@ public class CUDAJPEGProcessorTest
            Mat yuv420Image = new Mat();
            BytePointer encodedImage = new BytePointer(OpenCVTools.dataSize(bgrImage));
            Mat decodedImage = new Mat())
-
       {
          opencv_imgproc.cvtColor(bgrImage, yuv420Image, opencv_imgproc.COLOR_BGR2YUV_I420);
          opencv_imgcodecs.imencode(".jpg", yuv420Image, encodedImage, OpenCVTools.compressionParametersJPG);
@@ -310,7 +300,6 @@ public class CUDAJPEGProcessorTest
            Mat yuvI420Image = new Mat();
            BytePointer encodedImage = new BytePointer(OpenCVTools.dataSize(bgrImage));
            Mat decodedImage = new Mat())
-
       {
          opencv_imgproc.cvtColor(bgrImage, yuvI420Image, opencv_imgproc.COLOR_BGR2YUV_I420);
          opencv_imgcodecs.imencode(".jpg", bgrImage, encodedImage, OpenCVTools.compressionParametersJPG);
@@ -336,7 +325,6 @@ public class CUDAJPEGProcessorTest
       try (Mat bgrImage = readBGRImage();
            BytePointer encodedImage = new BytePointer(OpenCVTools.dataSize(bgrImage));
            Mat decodedImage = new Mat())
-
       {
          opencv_imgcodecs.imencode(".jpg", bgrImage, encodedImage, OpenCVTools.compressionParametersJPG);
          assertTrue(encodedImage.limit() < OpenCVTools.dataSize(bgrImage));
@@ -361,7 +349,6 @@ public class CUDAJPEGProcessorTest
       try (Mat bgrImage = readBGRImage();
            Mat yuv420Image = new Mat();
            BytePointer encodedImage = new BytePointer(OpenCVTools.dataSize(bgrImage)))
-
       {
          opencv_imgproc.cvtColor(bgrImage, yuv420Image, opencv_imgproc.COLOR_BGR2YUV_I420);
          jpegProcessor.encodeYUVI420(yuv420Image, encodedImage);
