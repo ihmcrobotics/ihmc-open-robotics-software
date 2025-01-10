@@ -34,6 +34,30 @@ public class FFmpegTools
       return rational.num() / (double) rational.den();
    }
 
+   public static boolean isPixelFormatPlanar(int avPixelFormat)
+   {
+      try (AVPixFmtDescriptor pixelFormatDescriptor = av_pix_fmt_desc_get(avPixelFormat))
+      {
+         return (pixelFormatDescriptor.flags() & AV_PIX_FMT_FLAG_PLANAR) != 0;
+      }
+   }
+
+   public static int getChromaWidth(int lumaWidth, int avPixelFormat)
+   {
+      try (AVPixFmtDescriptor pixelFormatDescriptor = av_pix_fmt_desc_get(avPixelFormat))
+      {
+         return -((-lumaWidth) >> pixelFormatDescriptor.log2_chroma_w());
+      }
+   }
+
+   public static int getChromaHeight(int lumaHeight, int avPixelFormat)
+   {
+      try (AVPixFmtDescriptor pixelFormatDescriptor = av_pix_fmt_desc_get(avPixelFormat))
+      {
+         return -((-lumaHeight) >> pixelFormatDescriptor.log2_chroma_h());
+      }
+   }
+
    /**
     * Converts the given {@code AVFrame} to a {@code Mat}.
     * @param frame {@code AVFrame} to convert into a {@code Mat}.
@@ -42,8 +66,7 @@ public class FFmpegTools
    public static Mat avFrameToMat(AVFrame frame)
    {
       Mat resultMat;
-      AVPixFmtDescriptor pixelFormatDescriptor = av_pix_fmt_desc_get(frame.format());
-      if ((pixelFormatDescriptor.flags() & AV_PIX_FMT_FLAG_PLANAR) == 0)
+      if (!isPixelFormatPlanar(frame.format()))
       {  // Non-planar data; create Mat directly using 1st plane
          int openCVType = PixelFormat.fromFFmpegPixelFormat(frame.format()).toOpenCVType();
          resultMat = new Mat(frame.height(), frame.width(), openCVType, frame.data(0), frame.linesize(0));
@@ -59,7 +82,6 @@ public class FFmpegTools
          opencv_core.merge(planes, resultMat);
          planes.close();
       }
-      pixelFormatDescriptor.close();
 
       return resultMat;
    }

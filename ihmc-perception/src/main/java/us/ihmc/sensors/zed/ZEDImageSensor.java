@@ -135,9 +135,9 @@ public class ZEDImageSensor extends ImageSensor
          cameraInformation.close();
 
          // Create image retrieval pointers
-         slMatPointers[LEFT_COLOR_IMAGE_KEY] = new Pointer(sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_U8_C4, SL_MEM_GPU));
-         slMatPointers[RIGHT_COLOR_IMAGE_KEY] = new Pointer(sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_U8_C4, SL_MEM_GPU));
-         slMatPointers[DEPTH_IMAGE_KEY] = new Pointer(sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_U16_C1, SL_MEM_GPU));
+         slMatPointers[LEFT_COLOR_IMAGE_KEY] = sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_U8_C4, SL_MEM_GPU);
+         slMatPointers[RIGHT_COLOR_IMAGE_KEY] = sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_U8_C4, SL_MEM_GPU);
+         slMatPointers[DEPTH_IMAGE_KEY] = sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_U16_C1, SL_MEM_GPU);
       }
       catch (ZEDException exception)
       {
@@ -202,6 +202,12 @@ public class ZEDImageSensor extends ImageSensor
       {
          // Grab images now
          returnCode = sl_grab(cameraID, zedRuntimeParameters);
+         if (returnCode == SL_ERROR_CODE_END_OF_SVOFILE_REACHED)
+         {
+            sl_set_svo_position(0, 0);
+            return false;
+         }
+
          throwOnError(returnCode);
          lastGrabTime = Instant.now();
          ++grabSequenceNumber;

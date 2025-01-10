@@ -77,13 +77,13 @@ public class ListOfPointsContactablePlaneBody implements ContactablePlaneBody
    }
 
    @Override
-   public ReferenceFrame getSoleFrame()
+   public ReferenceFrame getContactFrame()
    {
       return soleFrame;
    }
 
    @Override
-   public List<FramePoint2D> getContactPoints2d()
+   public List<FramePoint2D> getContactPoints2D()
    {
       return frameContactPoints;
    }
@@ -92,12 +92,6 @@ public class ListOfPointsContactablePlaneBody implements ContactablePlaneBody
    public int getTotalNumberOfContactPoints()
    {
       return totalNumberOfContactPoints;
-   }
-
-   @Override
-   public void setSoleFrameTransformFromParentJoint(RigidBodyTransform transform)
-   {
-      throw new UnsupportedOperationException();
    }
 
 }

@@ -45,9 +45,9 @@ public class QueuedControllerCommandGenerator implements Updatable, RobotMotionS
    private boolean robotReady = false;
 
    public QueuedControllerCommandGenerator(ConcurrentLinkedQueue<Command<?, ?>> controllerCommands,
-         CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
-         WalkingControllerParameters walkingControllerParameters, CommonHumanoidReferenceFrames referenceFrames,
-         SideDependentList<? extends ContactablePlaneBody> bipedFeet, double controlDT, boolean useHeadingAndVelocityScript, YoRegistry parentRegistry)
+                                           CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
+                                           WalkingControllerParameters walkingControllerParameters, CommonHumanoidReferenceFrames referenceFrames,
+                                           SideDependentList<? extends ContactablePlaneBody> bipedFeet, double controlDT, boolean useHeadingAndVelocityScript, YoRegistry parentRegistry)
    {
       this.controllerCommands = controllerCommands;
       this.commandInputManager = commandInputManager;
