@@ -115,7 +115,7 @@ public abstract class HighLevelControllerState implements State, JointLoadStatus
    {
       return 0;
    }
-   public double getMpcCostCommandWeight()
+   public double getMPCCostCommandWeight()
    {
       return 0.0;
    }
