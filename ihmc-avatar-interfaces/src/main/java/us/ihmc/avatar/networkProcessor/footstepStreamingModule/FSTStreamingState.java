@@ -1,12 +1,7 @@
 package us.ihmc.avatar.networkProcessor.footstepStreamingModule;
 
 import toolbox_msgs.msg.dds.FootstepStreamingToolboxOutputStatus;
-import us.ihmc.euclid.referenceFrame.FixedReferenceFrame;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -60,6 +55,11 @@ public class FSTStreamingState implements State
    private final YoDouble defaultAccelerationThreshold = new YoDouble("defaultAccelerationThreshold", registry);
    private final YoDouble defaultHorizontalAccelerationWeight = new YoDouble("defaultHorizontalAccelerationWeight", registry);
    private final YoDouble defaultVerticalComponentWeight = new YoDouble("defaultVerticalComponentWeight", registry);
+   private final FrameVector3D accumulatedLinearVelocity = new FrameVector3D();
+   private final FrameVector3D accumulatedAngularVelocity = new FrameVector3D();
+
+   private final FrameVector3D displacementEstimatedFromLinearVelocity = new FrameVector3D();
+   private final FrameVector3D angleEstimatedFromAngularVelocity = new FrameVector3D();
 
    public FSTStreamingState(FSTTools tools)
    {
@@ -388,5 +388,57 @@ public class FSTStreamingState implements State
    public void onExit(double timeInState)
    {
       tools.flushInputCommands();
+   }
+
+   /**
+    * This method estimate the footstep position using the average velocities and swing time.
+    * Average Velocity is obtained as   <p> <pre>V<sub>bar</sub> =  ∫<sub>i=0</sub><sup>i=N</sup> v<sub>i</sub></pre>, </p>
+    * <pre>v<sub>i</sub> = (P<sup>XY</sup><sub>i</sub> - P<sup>XY</sup><sub>i-1</sub> ) / dt<sub>i</sub></pre>  <br>
+    * P<sub>foot step</sub> = P<sub>foot init </sub> + V\u0305 * T<sub>swing</sub> <br>
+    * P<sub>foot step</sub> is the predicted / estimated footstep over the ground <br>
+    * P<sub>foot init</sub> is the initial swing foot position at the moment the foot starts moving
+    * T<sub>swing</sub> is the constant swing duration <br>
+    * This assumes <br>
+    * - Vive tracker is recorded pretty precise. <br>
+    * - Swing duration is constant
+    *
+    * @param latestInput
+    * @param side
+    * @return
+    */
+   public RigidBodyTransformReadOnly estimateFootstepUsingAverageVelocity(FootstepStreamingToolboxInputCommand latestInput,
+                                                                          RobotSide side,
+                                                                          double swingDuration,
+                                                                          RigidBodyTransformReadOnly initialTrackerTransform,
+                                                                          FootstepStreamingToolboxTrackerCommand latesCommand)
+   {
+      FramePoint2D initialTrackerXY = new FramePoint2D(ReferenceFrame.getWorldFrame(),
+                                                       initialTrackerTransform.getTranslationX(),
+                                                       initialTrackerTransform.getTranslationY());
+      FramePoint2D predictedTrackerXY = new FramePoint2D(initialTrackerXY);
+
+      accumulatedLinearVelocity.add(latesCommand.getCurrentVelocity().getLinearPart());
+      accumulatedAngularVelocity.add(latesCommand.getCurrentVelocity().getAngularPart());
+      displacementEstimatedFromLinearVelocity.scaleAdd(swingDuration, accumulatedLinearVelocity);
+      angleEstimatedFromAngularVelocity.scaleAdd(swingDuration, accumulatedAngularVelocity);
+
+      predictedTrackerXY.add(displacementEstimatedFromLinearVelocity.getX(), displacementEstimatedFromLinearVelocity.getY());
+
+      FramePose3D robotStanceFootTransformInWorld = latestInput.getInputFor(side.getOppositeSide()).getRobotFootPose();
+      ReferenceFrame robotStanceFootFrame = new FixedReferenceFrame("robotStanceFoot", ReferenceFrame.getWorldFrame(), robotStanceFootTransformInWorld);
+      FramePoint2D robotPredictedFootXY = new FramePoint2D(ReferenceFrame.getWorldFrame(),
+                                                           robotStanceFootTransformInWorld.getTranslationX(),
+                                                           robotStanceFootTransformInWorld.getTranslationY());
+      robotPredictedFootXY.changeFrame(robotStanceFootFrame);
+      robotPredictedFootXY.set(predictedTrackerXY);
+      robotPredictedFootXY.changeFrame(ReferenceFrame.getWorldFrame());
+
+      RigidBodyTransform robotFootstepTransformInWorld = new RigidBodyTransform(initialRobotSwingFootTransformsInWorld.get(side));
+
+      robotFootstepTransformInWorld.getTranslation().setX(robotPredictedFootXY.getX());
+      robotFootstepTransformInWorld.getTranslation().setY(robotPredictedFootXY.getY());
+
+
+      return robotFootstepTransformInWorld;
    }
 }
