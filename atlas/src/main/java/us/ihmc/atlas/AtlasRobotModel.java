@@ -3,7 +3,19 @@ package us.ihmc.atlas;
 import com.jme3.math.Transform;
 import us.ihmc.atlas.diagnostic.AtlasDiagnosticParameters;
 import us.ihmc.atlas.initialSetup.AtlasSimInitialSetup;
-import us.ihmc.atlas.parameters.*;
+import us.ihmc.atlas.parameters.AtlasCoPTrajectoryParameters;
+import us.ihmc.atlas.parameters.AtlasContactPointParameters;
+import us.ihmc.atlas.parameters.AtlasFootstepPlannerParameters;
+import us.ihmc.atlas.parameters.AtlasHighLevelControllerParameters;
+import us.ihmc.atlas.parameters.AtlasICPSplitFractionCalculatorParameters;
+import us.ihmc.atlas.parameters.AtlasKinematicsCollisionModel;
+import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
+import us.ihmc.atlas.parameters.AtlasSensorInformation;
+import us.ihmc.atlas.parameters.AtlasSimulationCollisionModel;
+import us.ihmc.atlas.parameters.AtlasStateEstimatorParameters;
+import us.ihmc.atlas.parameters.AtlasSwingPlannerParameters;
+import us.ihmc.atlas.parameters.AtlasVisibilityGraphParameters;
+import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.atlas.ros.AtlasPPSTimestampOffsetProvider;
 import us.ihmc.atlas.sensors.AtlasCollisionBoxProvider;
 import us.ihmc.atlas.sensors.AtlasSensorSuiteManager;
@@ -415,9 +427,8 @@ public class AtlasRobotModel implements DRCRobotModel
             }
             else
             {
-               System.out.println(
-                     this.getClass().getName() + ", createFullRobotModel(): range not large enough to reduce for side=" + robotSide.getLowerCaseName()
-                     + " joint=" + armJointName.getCamelCaseNameForStartOfExpression());
+               System.out.println(this.getClass().getName() + ", createFullRobotModel(): range not large enough to reduce for side="
+                     + robotSide.getLowerCaseName() + " joint=" + armJointName.getCamelCaseNameForStartOfExpression());
             }
          }
       }
@@ -457,6 +468,9 @@ public class AtlasRobotModel implements DRCRobotModel
    @Override
    public double getWholeBodyControllerCoreDT()
    {
+      //TODO This is temporaly return values.
+      // We should figure out the atlas simulation really doesn't need this and then tweak the override structure.
+      // This is only called in the Nadia and Alexander later.
       return 0.0;
    }
 
