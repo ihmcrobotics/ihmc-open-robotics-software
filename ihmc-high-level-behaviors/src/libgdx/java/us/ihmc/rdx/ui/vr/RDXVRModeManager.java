@@ -168,13 +168,14 @@ public class RDXVRModeManager
             kinematicsStreamingMode.visualizeIKPreviewGraphic(false);
             robotVisualizer.fadeVisuals(0.0f, 0.01f);
          }
-         else if (mode == RDXVRMode.WHOLE_BODY_IK_STREAMING && (stereoVision.getDisabledNotification().poll()
-                                                                || kinematicsStreamingMode.getStreamingDisabledNotification().poll()
-                                                                || robotVisualizer.isFading()))
-         { // Fade graphics in if either stereo vision or streaming are exited
-            robotVisualizer.fadeVisuals(1.0f, 0.05f);
-            if (!robotVisualizer.isFading())
-               kinematicsStreamingMode.visualizeIKPreviewGraphic(true);
+         else if (mode == RDXVRMode.WHOLE_BODY_IK_STREAMING && robotVisualizer.isFading())
+         {
+            if (stereoVision.getDisabledNotification().poll() || kinematicsStreamingMode.getStreamingDisabledNotification().poll())
+            { // Fade graphics in if either stereo vision or streaming are exited
+               robotVisualizer.fadeVisuals(1.0f, 0.05f);
+               if (!robotVisualizer.isFading())
+                  kinematicsStreamingMode.visualizeIKPreviewGraphic(true);
+            }
          }
       }
       if (vrModeControls.getRenderOnLeftHand().get())
@@ -182,7 +183,7 @@ public class RDXVRModeManager
       joystickBasedStepping.update(mode == RDXVRMode.JOYSTICK_WALKING);
       vrModeControls.update();
 
-      if (mode == RDXVRMode.FOOTSTEP_PLACEMENT)
+      if (mode == RDXVRMode.FOOTSTEP_PLACEMENT || mode == RDXVRMode.WHOLE_BODY_IK_STREAMING)
       { // Disable interactables because we do not want to collide with the walking control ring
          interactablesEnabled.set(false);
       }

@@ -10,7 +10,7 @@ import us.ihmc.pubsub.TopicDataType;
        * This message is part of the IHMC whole-body inverse kinematics module.
        * It contains auxiliary information that allows to customize the initial configuration.
        */
-public class KinematicsToolboxInitialConfigurationMessage extends Packet<KinematicsToolboxInitialConfigurationMessage> implements Settable<KinematicsToolboxInitialConfigurationMessage>, EpsilonComparable<KinematicsToolboxInitialConfigurationMessage>
+public class KinematicsStreamingToolboxInitialConfigurationMessage extends Packet<KinematicsStreamingToolboxInitialConfigurationMessage> implements Settable<KinematicsStreamingToolboxInitialConfigurationMessage>, EpsilonComparable<KinematicsStreamingToolboxInitialConfigurationMessage>
 {
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -26,7 +26,7 @@ public class KinematicsToolboxInitialConfigurationMessage extends Packet<Kinemat
             */
    public us.ihmc.idl.IDLSequence.Float  initial_joint_angles_;
 
-   public KinematicsToolboxInitialConfigurationMessage()
+   public KinematicsStreamingToolboxInitialConfigurationMessage()
    {
       initial_joint_hash_codes_ = new us.ihmc.idl.IDLSequence.Integer (100, "type_2");
 
@@ -34,13 +34,13 @@ public class KinematicsToolboxInitialConfigurationMessage extends Packet<Kinemat
 
    }
 
-   public KinematicsToolboxInitialConfigurationMessage(KinematicsToolboxInitialConfigurationMessage other)
+   public KinematicsStreamingToolboxInitialConfigurationMessage(KinematicsStreamingToolboxInitialConfigurationMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(KinematicsToolboxInitialConfigurationMessage other)
+   public void set(KinematicsStreamingToolboxInitialConfigurationMessage other)
    {
       sequence_id_ = other.sequence_id_;
 
@@ -83,19 +83,19 @@ public class KinematicsToolboxInitialConfigurationMessage extends Packet<Kinemat
    }
 
 
-   public static Supplier<KinematicsToolboxInitialConfigurationMessagePubSubType> getPubSubType()
+   public static Supplier<KinematicsStreamingToolboxInitialConfigurationMessagePubSubType> getPubSubType()
    {
-      return KinematicsToolboxInitialConfigurationMessagePubSubType::new;
+      return KinematicsStreamingToolboxInitialConfigurationMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return KinematicsToolboxInitialConfigurationMessagePubSubType::new;
+      return KinematicsStreamingToolboxInitialConfigurationMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(KinematicsToolboxInitialConfigurationMessage other, double epsilon)
+   public boolean epsilonEquals(KinematicsStreamingToolboxInitialConfigurationMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -115,9 +115,9 @@ public class KinematicsToolboxInitialConfigurationMessage extends Packet<Kinemat
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof KinematicsToolboxInitialConfigurationMessage)) return false;
+      if(!(other instanceof KinematicsStreamingToolboxInitialConfigurationMessage)) return false;
 
-      KinematicsToolboxInitialConfigurationMessage otherMyClass = (KinematicsToolboxInitialConfigurationMessage) other;
+      KinematicsStreamingToolboxInitialConfigurationMessage otherMyClass = (KinematicsStreamingToolboxInitialConfigurationMessage) other;
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
@@ -132,7 +132,7 @@ public class KinematicsToolboxInitialConfigurationMessage extends Packet<Kinemat
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("KinematicsToolboxInitialConfigurationMessage {");
+      builder.append("KinematicsStreamingToolboxInitialConfigurationMessage {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("initial_joint_hash_codes=");

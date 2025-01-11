@@ -1,16 +1,14 @@
 package us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule;
 
+import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInitialConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxInitialConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxPrivilegedConfigurationMessage;
 import us.ihmc.communication.controllerAPI.CommandConversionInterface;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxInitialConfigurationCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxPrivilegedConfigurationCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInitialConfigurationCommand;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.JointHashCodeResolver;
 import us.ihmc.robotModels.RigidBodyHashCodeResolver;
@@ -35,11 +33,7 @@ public class KinematicsStreamingToolboxCommandConverter implements CommandConver
    {
       if (message instanceof KinematicsStreamingToolboxInputMessage)
          return true;
-      if (message instanceof KinematicsToolboxConfigurationMessage)
-         return true;
-      if (message instanceof KinematicsToolboxPrivilegedConfigurationMessage)
-         return true;
-      if (message instanceof KinematicsToolboxInitialConfigurationMessage)
+      if (message instanceof KinematicsStreamingToolboxInitialConfigurationMessage)
          return true;
       return false;
    }
@@ -52,19 +46,9 @@ public class KinematicsStreamingToolboxCommandConverter implements CommandConver
          KinematicsStreamingToolboxInputCommand inputCommand = (KinematicsStreamingToolboxInputCommand) command;
          inputCommand.set(inputMessage, desiredRigidBodyHashCodeResolver, desiredReferenceFrameHashCodeResolver);
       }
-      else if (message instanceof KinematicsToolboxConfigurationMessage configurationMessage)
+      else if (message instanceof KinematicsStreamingToolboxInitialConfigurationMessage initialConfMessage)
       {
-         KinematicsToolboxConfigurationCommand configurationCommand = (KinematicsToolboxConfigurationCommand) command;
-         configurationCommand.set(configurationMessage, jointHashCodeResolver);
-      }
-      else if (message instanceof KinematicsToolboxPrivilegedConfigurationMessage privilegedConfMessage)
-      {
-         KinematicsToolboxPrivilegedConfigurationCommand privilegedConfCommand = (KinematicsToolboxPrivilegedConfigurationCommand) command;
-         privilegedConfCommand.set(privilegedConfMessage, jointHashCodeResolver);
-      }
-      else if (message instanceof KinematicsToolboxInitialConfigurationMessage initialConfMessage)
-      {
-         KinematicsToolboxInitialConfigurationCommand initialConfCommand = (KinematicsToolboxInitialConfigurationCommand) command;
+         KinematicsStreamingToolboxInitialConfigurationCommand initialConfCommand = (KinematicsStreamingToolboxInitialConfigurationCommand) command;
          initialConfCommand.set(initialConfMessage, jointHashCodeResolver);
       }
    }

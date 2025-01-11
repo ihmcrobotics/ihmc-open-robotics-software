@@ -31,6 +31,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInitialConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
@@ -58,7 +59,9 @@ import us.ihmc.yoVariables.variable.YoLong;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 public class KSTTools
@@ -96,6 +99,7 @@ public class KSTTools
    private KinematicsStreamingToolboxInputCommand previousInput = null;
 
    private final KinematicsStreamingToolboxConfigurationCommand configurationCommand = new KinematicsStreamingToolboxConfigurationCommand();
+   private final KinematicsStreamingToolboxInitialConfigurationCommand initCommand = new KinematicsStreamingToolboxInitialConfigurationCommand();
    private final YoBoolean isNeckJointspaceOutputEnabled;
    private final YoBoolean isChestTaskspaceOutputEnabled;
    private final YoBoolean isPelvisTaskspaceOutputEnabled;
@@ -244,6 +248,21 @@ public class KSTTools
       {
          areHandTaskspaceOutputsEnabled.get(robotSide).set(configurationCommand.isHandTaskspaceEnabled(robotSide));
          areArmJointspaceOutputsEnabled.get(robotSide).set(configurationCommand.isArmJointspaceEnabled(robotSide));
+      }
+
+      if (commandInputManager.isNewCommandAvailable(KinematicsStreamingToolboxInitialConfigurationCommand.class))
+      {
+         initCommand.set(commandInputManager.pollNewestCommand(KinematicsStreamingToolboxInitialConfigurationCommand.class));
+         Map<String, Double> initialConfigurationMap = new HashMap<>();
+         List<OneDoFJointBasics> joints = initCommand.getJoints();
+         var initialJointAngles = initCommand.getInitialJointAngles();
+         for (int i = 0; i < joints.size(); i++)
+         {
+            String jointName = joints.get(i).getName();
+            double q = initialJointAngles.get(i);
+            initialConfigurationMap.put(jointName, q);
+         }
+         ikController.setInitialRobotConfigurationNamedMap(initialConfigurationMap);
       }
 
       boolean wasRobotUpdated = robotStateUpdater.updateRobotConfiguration(currentRootJoint, currentOneDoFJoint);

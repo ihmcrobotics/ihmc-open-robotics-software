@@ -2,7 +2,6 @@ package us.ihmc.avatar.networkProcessor.footstepStreamingModule;
 
 import toolbox_msgs.msg.dds.FootstepStreamingToolboxOutputStatus;
 import us.ihmc.euclid.referenceFrame.*;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
@@ -33,7 +32,7 @@ public class FSTStreamingState implements State
    private final SideDependentList<RigidBodyTransform> previousTrackersTransform = new SideDependentList<>();
    private final SideDependentList<Integer> stableIterationCounts = new SideDependentList<>();
    private final SideDependentList<FrameVector2D> directionTrackersCtrl = new SideDependentList<>(); // Controlled direction vector for each foot.
-   private boolean lastDirectionAdjusment = false;
+   private boolean lastDirectionAdjustment = false;
    private final SideDependentList<RigidBodyTransform> initialRobotSwingFootTransformsInWorld = new SideDependentList<>();
    private final SideDependentList<Double> previousTrackerTimestamp = new SideDependentList<>();
 
@@ -105,7 +104,7 @@ public class FSTStreamingState implements State
          initialRobotSwingFootTransformsInWorld.put(side, null);
       }
 
-      lastDirectionAdjusment = false;
+      lastDirectionAdjustment = false;
       timeOfLastInput.set(Double.NaN);
       timeSinceLastInput.set(Double.NaN);
       inputFrequency.reset();
@@ -198,7 +197,7 @@ public class FSTStreamingState implements State
                               directionTrackersCtrl.put(side, new FrameVector2D());
                               initialTrackersTransform.put(side, new RigidBodyTransform(currentTrackerTransform));
                               stableIterationCounts.put(side, 0);
-                              lastDirectionAdjusment = false;
+                              lastDirectionAdjustment = false;
                            }
                         }
                         else  // Still moving
@@ -255,7 +254,7 @@ public class FSTStreamingState implements State
                            //                              outputStatus.getDesiredFootPosition().set(robotFootstepTransformInWorld.getTranslation());
                            //                              tools.getStatusOutputManager().reportStatusMessage(outputStatus);
                            //                           }
-                           //                           else if (!lastDirectionAdjusment)
+                           //                           else if (!lastDirectionAdjustment)
                            //                           {
                            //                              // If acceleration is very low, do not update direction any further.
                            //                              // Just keep the desired direction as is
@@ -265,7 +264,7 @@ public class FSTStreamingState implements State
                            //                              outputStatus.setLastAdjustment(true);
                            //                              tools.getStatusOutputManager().reportStatusMessage(outputStatus);
                            //
-                           //                              lastDirectionAdjusment = true;
+                           //                              lastDirectionAdjustment = true;
                            //                           }
                            //                        }
                         }
@@ -309,7 +308,6 @@ public class FSTStreamingState implements State
                                                        initialTrackerTransform.getTranslationY());
       FramePoint2D predictedTrackerXY = new FramePoint2D(initialTrackerXY);
       predictedTrackerXY.add(translationTrackerXY);
-
       // Get predicted tracker position in stance frame
       ReferenceFrame stanceTrackerFrame = new FixedReferenceFrame("stanceTracker",
                                                                   ReferenceFrame.getWorldFrame(),
@@ -323,6 +321,7 @@ public class FSTStreamingState implements State
                                                            robotStanceFootTransformInWorld.getTranslationX(),
                                                            robotStanceFootTransformInWorld.getTranslationY());
       robotPredictedFootXY.changeFrameAndProjectToXYPlane(robotStanceFootFrame); // This has value 0 now
+      LogTools.info(robotPredictedFootXY);
       // Apply stance-to-predicted-footstep translation
       robotPredictedFootXY.setX(predictedTrackerXY.getX());
       robotPredictedFootXY.setY(predictedTrackerXY.getY());

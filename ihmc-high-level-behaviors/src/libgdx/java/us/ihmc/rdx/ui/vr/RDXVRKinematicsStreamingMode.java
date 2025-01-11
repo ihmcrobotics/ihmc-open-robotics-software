@@ -6,10 +6,10 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import org.lwjgl.openvr.InputDigitalActionData;
+import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInitialConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxInitialConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import toolbox_msgs.msg.dds.ToolboxStateMessage;
@@ -224,10 +224,10 @@ public class RDXVRKinematicsStreamingMode
          parameters.setInputBBXFilterSize(2.0, 2.8, 2.6);
          parameters.setInputBBXFilterCenter(0.4, 0.0, 1.25);
          parameters.setOutputLPFBreakFrequency(10.0);
-         parameters.setOutputJointVelocityScale(0.65);
+         parameters.setOutputJointVelocityScale(0.5);
 
          parameters.setMinimizeAngularMomentum(true);
-         parameters.setMinimizeLinearMomentum(false);
+         parameters.setMinimizeLinearMomentum(true);
          parameters.setAngularMomentumWeight(0.20);
          parameters.setLinearMomentumWeight(0.01);
 
@@ -548,8 +548,12 @@ public class RDXVRKinematicsStreamingMode
             toolboxInputMessage.setStreamToController(streamToController.get());
          else
             toolboxInputMessage.setStreamToController(kinematicsRecorder.isReplaying());
-//         ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputToolboxConfigurationTopic(syncedRobot.getRobotModel().getSimpleRobotName()), ikSolverConfigurationMessage);
-         ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputCommandTopic(syncedRobot.getRobotModel().getSimpleRobotName()), toolboxInputMessage);
+
+//         if (!pausedForWalking || reintializingToolbox)
+//         {
+            ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputToolboxConfigurationTopic(syncedRobot.getRobotModel().getSimpleRobotName()), ikSolverConfigurationMessage);
+            ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputCommandTopic(syncedRobot.getRobotModel().getSimpleRobotName()), toolboxInputMessage);
+//         }
          outputFrequencyPlot.recordEvent();
 
          footstepStreaming.processVRInput(gripButtonsValue.get(RobotSide.LEFT) > 0.5f && gripButtonsValue.get(RobotSide.RIGHT) > 0.5f);
@@ -705,41 +709,50 @@ public class RDXVRKinematicsStreamingMode
             {
                if (pausedForWalking)
                {
-                  LogTools.info("Stepping from VR");
+                  LogTools.warn("Stepping from VR");
                   footstepStreaming.step();
+
                }
                if (footstepStreaming.getReadyToStepNotification().poll())
                {
-                  LogTools.info("Pausing streaming");
-                  streamToController.set(false);
+                  streamingDisabled.clear();
+                  if (streamToController.get())
+                  {
+                     LogTools.info("Pausing streaming");
+                     streamingDisabled.set();
+                     streamToController.set(false);
+                  }
                   pausedForWalking = true;
                   visualizeIKPreviewGraphic(false);
+                  footstepStreaming.getReadyToStepNotification().clear();
                }
             }
             else
             {
-               sleepToolbox();
                if (footstepStreaming.getReadyToStepNotification().poll())
                {
-                  LogTools.info("Stepping from VR");
+                  LogTools.warn("Consecutive stepping from VR");
                   footstepStreaming.step();
                }
             }
-         }
 
-         // Resumes streaming once walking is done
-         if (pausedForWalking && controllerStatusTracker.getFinishedWalkingNotification().poll())
-         {
-            LogTools.info("Finished walking. Resuming streaming");
-            reintializingToolbox = true;
-         }
-         else if (pausedForWalking && reintializingToolbox)
-         {
-            pausedForWalking = false;
-            reinitializeToolboxRobotConfiguration();
-            visualizeIKPreviewGraphic(true);
-            streamToController.set(true);
-            reintializingToolbox = false;
+            // Resumes streaming once walking is done
+            if (pausedForWalking && controllerStatusTracker.getFinishedWalkingNotification().poll())
+            {
+               reintializingToolbox = true;
+            }
+            else if (pausedForWalking && reintializingToolbox)
+            {
+               pausedForWalking = false;
+               reinitializeToolboxRobotConfiguration();
+               visualizeIKPreviewGraphic(true);
+               if (streamingDisabled.poll())
+               {
+                  LogTools.warn("Finished walking. Resuming streaming");
+                  streamToController.set(true);
+               }
+               reintializingToolbox = false;
+            }
          }
       }
    }
@@ -815,7 +828,7 @@ public class RDXVRKinematicsStreamingMode
       }
       else // Disable
       {
-         streamingDisabled.poll();
+         streamingDisabled.clear();
          sleepToolbox();
          footstepStreaming.reset();
          pausedForWalking = false;
@@ -847,7 +860,7 @@ public class RDXVRKinematicsStreamingMode
    {
       sleepToolbox();
       // Update initial configuration of KST
-      KinematicsToolboxInitialConfigurationMessage initialConfigMessage = KinematicsToolboxMessageFactory.initialConfigurationFromFullRobotModel(syncedRobot.getFullRobotModel());
+      KinematicsStreamingToolboxInitialConfigurationMessage initialConfigMessage = KinematicsToolboxMessageFactory.initialConfigurationFromFullRobotModel(syncedRobot.getFullRobotModel());
       List<OneDoFJointBasics> oneDoFJoints = Arrays.asList(syncedRobot.getFullRobotModel().getOneDoFJoints());
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -872,7 +885,6 @@ public class RDXVRKinematicsStreamingMode
       ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputStreamingInitialConfigurationTopic(syncedRobot.getRobotModel()
                                                                                                                           .getSimpleRobotName()),
                                                                                                                            initialConfigMessage);
-      wakeUpToolbox();
       reinitializeToolbox();
       wakeUpToolbox();
    }

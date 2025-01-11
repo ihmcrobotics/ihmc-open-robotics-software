@@ -1,4 +1,4 @@
-package us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI;
+package us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,12 +6,12 @@ import java.util.Objects;
 
 import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.list.array.TIntArrayList;
-import toolbox_msgs.msg.dds.KinematicsToolboxInitialConfigurationMessage;
+import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInitialConfigurationMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.JointHashCodeResolver;
 
-public class KinematicsToolboxInitialConfigurationCommand implements Command<KinematicsToolboxInitialConfigurationCommand, KinematicsToolboxInitialConfigurationMessage>
+public class KinematicsStreamingToolboxInitialConfigurationCommand implements Command<KinematicsStreamingToolboxInitialConfigurationCommand, KinematicsStreamingToolboxInitialConfigurationMessage>
 {
    private long sequenceId;
    private final List<OneDoFJointBasics> joints = new ArrayList<>();
@@ -26,7 +26,7 @@ public class KinematicsToolboxInitialConfigurationCommand implements Command<Kin
    }
 
    @Override
-   public void set(KinematicsToolboxInitialConfigurationCommand other)
+   public void set(KinematicsStreamingToolboxInitialConfigurationCommand other)
    {
       clear();
 
@@ -39,12 +39,12 @@ public class KinematicsToolboxInitialConfigurationCommand implements Command<Kin
    }
 
    @Override
-   public void setFromMessage(KinematicsToolboxInitialConfigurationMessage message)
+   public void setFromMessage(KinematicsStreamingToolboxInitialConfigurationMessage message)
    {
       set(message, null);
    }
 
-   public void set(KinematicsToolboxInitialConfigurationMessage message, JointHashCodeResolver jointHashCodeResolver)
+   public void set(KinematicsStreamingToolboxInitialConfigurationMessage message, JointHashCodeResolver jointHashCodeResolver)
    {
       Objects.requireNonNull(jointHashCodeResolver);
 
@@ -80,9 +80,9 @@ public class KinematicsToolboxInitialConfigurationCommand implements Command<Kin
    }
 
    @Override
-   public Class<KinematicsToolboxInitialConfigurationMessage> getMessageClass()
+   public Class<KinematicsStreamingToolboxInitialConfigurationMessage> getMessageClass()
    {
-      return KinematicsToolboxInitialConfigurationMessage.class;
+      return KinematicsStreamingToolboxInitialConfigurationMessage.class;
    }
 
    @Override

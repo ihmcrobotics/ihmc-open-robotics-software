@@ -1,6 +1,7 @@
 package us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule;
 
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage;
+import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInitialConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.output.KSTFBOutputProcessor;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -264,6 +265,7 @@ public class KinematicsStreamingToolboxParameters
    private Map<String, Double> jointCustomPositionUpperLimits;
    private Map<String, Double> jointCustomPositionLowerLimits;
    private final KinematicsStreamingToolboxConfigurationMessage defaultConfiguration = new KinematicsStreamingToolboxConfigurationMessage();
+   private final KinematicsStreamingToolboxInitialConfigurationMessage defaultInitialConfiguration = new KinematicsStreamingToolboxInitialConfigurationMessage();
    private final KinematicsToolboxConfigurationMessage defaultSolverConfiguration = new KinematicsToolboxConfigurationMessage();
    private double solverNullspaceAlpha;
    private double solverPrivilegedDefaultWeight;

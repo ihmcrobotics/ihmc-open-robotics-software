@@ -112,9 +112,6 @@ public class KSTStreamingState implements State
    private final YoDouble lockPelvisWeight = new YoDouble("lockPelvisWeight", registry);
    private final YoDouble lockChestWeight = new YoDouble("lockChestWeight", registry);
 
-   //   private final YoDouble preferredArmConfigWeight = new YoDouble("preferredArmConfigWeight", registry);
-   //   private final SideDependentList<List<KinematicsToolboxOneDoFJointMessage>> preferredArmJointMessages = new SideDependentList<>();
-
    private final YoDouble inputWeightDecayFactor;
    private final YoInteger numberOfDecayingInputs = new YoInteger("numberOfDecayingInputs", registry);
 
@@ -248,20 +245,6 @@ public class KSTStreamingState implements State
          defaultLinearWeightMap.put(hands.get(robotSide).getName(), defaultHandLinearWeight);
          defaultAngularWeightMap.put(hands.get(robotSide).getName(), defaultHandAngularWeight);
       }
-      /*
-       * TODO This was introduced to reduce the risk of shoulder flip on Valkyrie, but it seems that it is
-       * impacting too much the task-space objectives and preventing the privileged configuration to kick
-       * in when there's a singularity.
-       */
-      //      preferredArmConfigWeight.set(0.075);
-      //
-      //      for (RobotSide robotSide : RobotSide.values)
-      //      {
-      //         OneDoFJointBasics[] joints = armJoints.get(robotSide);
-      //         preferredArmJointMessages.put(robotSide,
-      //                                       Stream.of(joints).map(joint -> KinematicsToolboxMessageFactory.newOneDoFJointMessage(joint, 10.0, 0.0))
-      //                                             .collect(Collectors.toList()));
-      //      }
 
       publishingPeriod.set(parameters.getPublishingPeriod());
 

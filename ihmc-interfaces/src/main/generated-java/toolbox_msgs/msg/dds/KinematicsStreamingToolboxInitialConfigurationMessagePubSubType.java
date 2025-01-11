@@ -2,20 +2,20 @@ package toolbox_msgs.msg.dds;
 
 /**
 * 
-* Topic data type of the struct "KinematicsToolboxInitialConfigurationMessage" defined in "KinematicsToolboxInitialConfigurationMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+* Topic data type of the struct "KinematicsStreamingToolboxInitialConfigurationMessage" defined in "KinematicsStreamingToolboxInitialConfigurationMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
 *
-* This file was automatically generated from KinematicsToolboxInitialConfigurationMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit KinematicsToolboxInitialConfigurationMessage_.idl instead.
+* This file was automatically generated from KinematicsStreamingToolboxInitialConfigurationMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit KinematicsStreamingToolboxInitialConfigurationMessage_.idl instead.
 *
 */
-public class KinematicsToolboxInitialConfigurationMessagePubSubType implements us.ihmc.pubsub.TopicDataType<toolbox_msgs.msg.dds.KinematicsToolboxInitialConfigurationMessage>
+public class KinematicsStreamingToolboxInitialConfigurationMessagePubSubType implements us.ihmc.pubsub.TopicDataType<toolbox_msgs.msg.dds.KinematicsStreamingToolboxInitialConfigurationMessage>
 {
-   public static final java.lang.String name = "toolbox_msgs::msg::dds_::KinematicsToolboxInitialConfigurationMessage_";
+   public static final java.lang.String name = "toolbox_msgs::msg::dds_::KinematicsStreamingToolboxInitialConfigurationMessage_";
    
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "e78e990a6684da0570ff6b42fc61a940dc1c9ed919c8096f237136c0532fa0d5";
+   		return "be90afa650d595cb3cdc7d64d11b00609c0e72d1adddce06a7632390d48659ff";
    }
    
    @Override
@@ -28,7 +28,7 @@ public class KinematicsToolboxInitialConfigurationMessagePubSubType implements u
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(toolbox_msgs.msg.dds.KinematicsToolboxInitialConfigurationMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
+   public void serialize(toolbox_msgs.msg.dds.KinematicsStreamingToolboxInitialConfigurationMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -36,7 +36,7 @@ public class KinematicsToolboxInitialConfigurationMessagePubSubType implements u
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, toolbox_msgs.msg.dds.KinematicsToolboxInitialConfigurationMessage data) throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, toolbox_msgs.msg.dds.KinematicsStreamingToolboxInitialConfigurationMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -62,12 +62,12 @@ public class KinematicsToolboxInitialConfigurationMessagePubSubType implements u
       return current_alignment - initial_alignment;
    }
 
-   public final static int getCdrSerializedSize(toolbox_msgs.msg.dds.KinematicsToolboxInitialConfigurationMessage data)
+   public final static int getCdrSerializedSize(toolbox_msgs.msg.dds.KinematicsStreamingToolboxInitialConfigurationMessage data)
    {
       return getCdrSerializedSize(data, 0);
    }
 
-   public final static int getCdrSerializedSize(toolbox_msgs.msg.dds.KinematicsToolboxInitialConfigurationMessage data, int current_alignment)
+   public final static int getCdrSerializedSize(toolbox_msgs.msg.dds.KinematicsStreamingToolboxInitialConfigurationMessage data, int current_alignment)
    {
       int initial_alignment = current_alignment;
 
@@ -86,7 +86,7 @@ public class KinematicsToolboxInitialConfigurationMessagePubSubType implements u
       return current_alignment - initial_alignment;
    }
 
-   public static void write(toolbox_msgs.msg.dds.KinematicsToolboxInitialConfigurationMessage data, us.ihmc.idl.CDR cdr)
+   public static void write(toolbox_msgs.msg.dds.KinematicsStreamingToolboxInitialConfigurationMessage data, us.ihmc.idl.CDR cdr)
    {
       cdr.write_type_12(data.getSequenceId());
 
@@ -100,7 +100,7 @@ public class KinematicsToolboxInitialConfigurationMessagePubSubType implements u
 
    }
 
-   public static void read(toolbox_msgs.msg.dds.KinematicsToolboxInitialConfigurationMessage data, us.ihmc.idl.CDR cdr)
+   public static void read(toolbox_msgs.msg.dds.KinematicsStreamingToolboxInitialConfigurationMessage data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_12());
       	
@@ -110,7 +110,7 @@ public class KinematicsToolboxInitialConfigurationMessagePubSubType implements u
    }
 
    @Override
-   public final void serialize(toolbox_msgs.msg.dds.KinematicsToolboxInitialConfigurationMessage data, us.ihmc.idl.InterchangeSerializer ser)
+   public final void serialize(toolbox_msgs.msg.dds.KinematicsStreamingToolboxInitialConfigurationMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_e("initial_joint_hash_codes", data.getInitialJointHashCodes());
@@ -118,22 +118,22 @@ public class KinematicsToolboxInitialConfigurationMessagePubSubType implements u
    }
 
    @Override
-   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, toolbox_msgs.msg.dds.KinematicsToolboxInitialConfigurationMessage data)
+   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, toolbox_msgs.msg.dds.KinematicsStreamingToolboxInitialConfigurationMessage data)
    {
       data.setSequenceId(ser.read_type_12("sequence_id"));
       ser.read_type_e("initial_joint_hash_codes", data.getInitialJointHashCodes());
       ser.read_type_e("initial_joint_angles", data.getInitialJointAngles());
    }
 
-   public static void staticCopy(toolbox_msgs.msg.dds.KinematicsToolboxInitialConfigurationMessage src, toolbox_msgs.msg.dds.KinematicsToolboxInitialConfigurationMessage dest)
+   public static void staticCopy(toolbox_msgs.msg.dds.KinematicsStreamingToolboxInitialConfigurationMessage src, toolbox_msgs.msg.dds.KinematicsStreamingToolboxInitialConfigurationMessage dest)
    {
       dest.set(src);
    }
 
    @Override
-   public toolbox_msgs.msg.dds.KinematicsToolboxInitialConfigurationMessage createData()
+   public toolbox_msgs.msg.dds.KinematicsStreamingToolboxInitialConfigurationMessage createData()
    {
-      return new toolbox_msgs.msg.dds.KinematicsToolboxInitialConfigurationMessage();
+      return new toolbox_msgs.msg.dds.KinematicsStreamingToolboxInitialConfigurationMessage();
    }
    @Override
    public int getTypeSize()
@@ -147,24 +147,24 @@ public class KinematicsToolboxInitialConfigurationMessagePubSubType implements u
       return name;
    }
    
-   public void serialize(toolbox_msgs.msg.dds.KinematicsToolboxInitialConfigurationMessage data, us.ihmc.idl.CDR cdr)
+   public void serialize(toolbox_msgs.msg.dds.KinematicsStreamingToolboxInitialConfigurationMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
    }
 
-   public void deserialize(toolbox_msgs.msg.dds.KinematicsToolboxInitialConfigurationMessage data, us.ihmc.idl.CDR cdr)
+   public void deserialize(toolbox_msgs.msg.dds.KinematicsStreamingToolboxInitialConfigurationMessage data, us.ihmc.idl.CDR cdr)
    {
       read(data, cdr);
    }
    
-   public void copy(toolbox_msgs.msg.dds.KinematicsToolboxInitialConfigurationMessage src, toolbox_msgs.msg.dds.KinematicsToolboxInitialConfigurationMessage dest)
+   public void copy(toolbox_msgs.msg.dds.KinematicsStreamingToolboxInitialConfigurationMessage src, toolbox_msgs.msg.dds.KinematicsStreamingToolboxInitialConfigurationMessage dest)
    {
       staticCopy(src, dest);
    }
 
    @Override
-   public KinematicsToolboxInitialConfigurationMessagePubSubType newInstance()
+   public KinematicsStreamingToolboxInitialConfigurationMessagePubSubType newInstance()
    {
-      return new KinematicsToolboxInitialConfigurationMessagePubSubType();
+      return new KinematicsStreamingToolboxInitialConfigurationMessagePubSubType();
    }
 }

@@ -59,7 +59,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxInitialConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxInputCollectionCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxOneDoFJointCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxPrivilegedConfigurationCommand;
@@ -593,6 +592,7 @@ public class KinematicsToolboxController extends ToolboxController
          if (q_priv != null)
             initialRobotConfigurationMap.put(joint, q_priv);
       }
+      LogTools.warn("Set initial configuration map");
    }
 
    /**
@@ -1062,21 +1062,6 @@ public class KinematicsToolboxController extends ToolboxController
 
          if (command.hasPrivilegedJointAngles())
             snapPrivilegedConfigurationToCurrent();
-      }
-
-      if (commandInputManager.isNewCommandAvailable(KinematicsToolboxInitialConfigurationCommand.class))
-      {
-         KinematicsToolboxInitialConfigurationCommand command = commandInputManager.pollNewestCommand(KinematicsToolboxInitialConfigurationCommand.class);
-         Map<String, Double> initialConfigurationMap = new HashMap<>();
-         List<OneDoFJointBasics> joints = command.getJoints();
-         var initialJointAngles = command.getInitialJointAngles();
-         for (int i = 0; i < joints.size(); i++)
-         {
-            String jointName = joints.get(i).getName();
-            double q = initialJointAngles.get(i);
-            initialConfigurationMap.put(jointName, q);
-         }
-         setInitialRobotConfigurationNamedMap(initialConfigurationMap);
       }
    }
 

@@ -1,5 +1,5 @@
-#ifndef __toolbox_msgs__msg__KinematicsToolboxInitialConfigurationMessage__idl__
-#define __toolbox_msgs__msg__KinematicsToolboxInitialConfigurationMessage__idl__
+#ifndef __toolbox_msgs__msg__KinematicsStreamingToolboxInitialConfigurationMessage__idl__
+#define __toolbox_msgs__msg__KinematicsStreamingToolboxInitialConfigurationMessage__idl__
 
 module toolbox_msgs
 {
@@ -12,8 +12,8 @@ module toolbox_msgs
        * This message is part of the IHMC whole-body inverse kinematics module.
        * It contains auxiliary information that allows to customize the initial configuration.
        */
-      @TypeCode(type="toolbox_msgs::msg::dds_::KinematicsToolboxInitialConfigurationMessage_")
-      struct KinematicsToolboxInitialConfigurationMessage
+      @TypeCode(type="toolbox_msgs::msg::dds_::KinematicsStreamingToolboxInitialConfigurationMessage_")
+      struct KinematicsStreamingToolboxInitialConfigurationMessage
       {
         /**
          * Unique ID used to identify this message, should preferably be consecutively increasing.
