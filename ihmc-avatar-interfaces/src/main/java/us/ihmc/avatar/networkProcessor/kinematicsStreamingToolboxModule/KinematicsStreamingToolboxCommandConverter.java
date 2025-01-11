@@ -3,12 +3,12 @@ package us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInitialConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxPrivilegedConfigurationMessage;
 import us.ihmc.communication.controllerAPI.CommandConversionInterface;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInitialConfigurationCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.JointHashCodeResolver;
 import us.ihmc.robotModels.RigidBodyHashCodeResolver;
@@ -35,6 +35,8 @@ public class KinematicsStreamingToolboxCommandConverter implements CommandConver
          return true;
       if (message instanceof KinematicsStreamingToolboxInitialConfigurationMessage)
          return true;
+      if (message instanceof KinematicsToolboxConfigurationMessage)
+         return true;
       return false;
    }
 
@@ -50,6 +52,11 @@ public class KinematicsStreamingToolboxCommandConverter implements CommandConver
       {
          KinematicsStreamingToolboxInitialConfigurationCommand initialConfCommand = (KinematicsStreamingToolboxInitialConfigurationCommand) command;
          initialConfCommand.set(initialConfMessage, jointHashCodeResolver);
+      }
+      else if (message instanceof KinematicsToolboxConfigurationMessage configurationMessage)
+      {
+         KinematicsToolboxConfigurationCommand configurationCommand = (KinematicsToolboxConfigurationCommand) command;
+         configurationCommand.set(configurationMessage, jointHashCodeResolver);
       }
    }
 }
