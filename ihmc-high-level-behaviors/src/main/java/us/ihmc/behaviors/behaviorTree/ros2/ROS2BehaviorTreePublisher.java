@@ -20,7 +20,7 @@ public class ROS2BehaviorTreePublisher
       this.behaviorTreeState = behaviorTreeState;
       this.ros2PublishSubscribeAPI = ros2PublishSubscribeAPI;
 
-      topic = AutonomyAPI.BEAVIOR_TREE.getTopic(behaviorTreeState.getCRDTInfo().getActorDesignation().getOutgoingQualifier());
+      topic = AutonomyAPI.BEHAVIOR_TREE.getTopic(behaviorTreeState.getCRDTInfo().getActorDesignation().getOutgoingQualifier());
    }
 
    public void publish()

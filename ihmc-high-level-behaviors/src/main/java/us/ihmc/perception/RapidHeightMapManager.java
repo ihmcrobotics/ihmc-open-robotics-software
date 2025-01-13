@@ -25,6 +25,7 @@ import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
+import java.nio.ByteBuffer;
 import java.time.Instant;
 
 /**

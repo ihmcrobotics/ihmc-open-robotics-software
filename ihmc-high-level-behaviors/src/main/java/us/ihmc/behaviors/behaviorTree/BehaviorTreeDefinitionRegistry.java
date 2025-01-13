@@ -2,9 +2,9 @@ package us.ihmc.behaviors.behaviorTree;
 
 import behavior_msgs.msg.dds.BehaviorTreeStateMessage;
 import us.ihmc.behaviors.ai2r.AI2RNodeDefinition;
-import us.ihmc.behaviors.behaviorTree.trashCan.TrashCanInteractionDefinition;
 import us.ihmc.behaviors.buildingExploration.BuildingExplorationDefinition;
 import us.ihmc.behaviors.door.DoorTraversalDefinition;
+import us.ihmc.behaviors.sequence.actions.CheckPointNodeDefinition;
 import us.ihmc.behaviors.logic.ConditionNodeDefinition;
 import us.ihmc.behaviors.logic.GotoNodeDefinition;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
@@ -22,8 +22,8 @@ public class BehaviorTreeDefinitionRegistry
       new RegistryRecord(FallbackNodeDefinition.class, BehaviorTreeStateMessage.FALLBACK_NODE),
       new RegistryRecord(ConditionNodeDefinition.class, BehaviorTreeStateMessage.CONDITION_NODE),
       new RegistryRecord(GotoNodeDefinition.class, BehaviorTreeStateMessage.GOTO_NODE),
+      new RegistryRecord(CheckPointNodeDefinition.class, BehaviorTreeStateMessage.CHECKPOINT_NODE),
       new RegistryRecord(DoorTraversalDefinition.class, BehaviorTreeStateMessage.DOOR_TRAVERSAL),
-      new RegistryRecord(TrashCanInteractionDefinition.class, BehaviorTreeStateMessage.TRASH_CAN_INTERACTION),
       new RegistryRecord(BuildingExplorationDefinition.class, BehaviorTreeStateMessage.BUILDING_EXPLORATION),
 
       new RegistryRecord(ChestOrientationActionDefinition.class, BehaviorTreeStateMessage.CHEST_ORIENTATION_ACTION),
