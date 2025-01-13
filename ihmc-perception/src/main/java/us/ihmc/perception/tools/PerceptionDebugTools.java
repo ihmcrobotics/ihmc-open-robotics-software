@@ -290,6 +290,19 @@ public class PerceptionDebugTools
       return matString.toString();
    }
 
+   public static void display(String tag, MatVector images, int delay)
+   {
+      display(tag, images, delay, -1);
+   }
+
+   public static void display(String tag, MatVector images, int delay, int screenSize)
+   {
+      Mat combinedImage = new Mat();
+      opencv_core.vconcat(images, combinedImage);
+      display(tag, combinedImage, delay, screenSize);
+      combinedImage.close();
+   }
+
    public static void display(String tag, Mat image, int delay)
    {
       display(tag, image, delay, -1);

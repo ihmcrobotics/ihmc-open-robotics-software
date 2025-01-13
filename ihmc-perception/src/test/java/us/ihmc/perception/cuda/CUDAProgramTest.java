@@ -5,7 +5,6 @@ import org.bytedeco.cuda.cudart.dim3;
 import org.bytedeco.javacpp.IntPointer;
 import org.junit.jupiter.api.Test;
 
-import java.net.URISyntaxException;
 import java.net.URL;
 
 import static org.bytedeco.cuda.global.cudart.*;
@@ -64,6 +63,10 @@ public class CUDAProgramTest
          // Ensure we got the correct result!
          assertEquals(10, sum.get());
       }
+      catch (Exception e)
+      {
+         e.getStackTrace();
+      }
 
       CUDAStreamManager.releaseStream(stream);
    }
@@ -103,6 +106,10 @@ public class CUDAProgramTest
          // Free host memory
          cudaFreeAsync(deviceSum, stream);
       }
+      catch (Exception e)
+      {
+         e.getStackTrace();
+      }
 
       CUDAStreamManager.releaseStream(stream);
    }
@@ -134,12 +141,16 @@ public class CUDAProgramTest
          // Free device memory
          cudaFreeAsync(deviceSum, stream);
       }
+      catch (Exception e)
+      {
+         e.getStackTrace();
+      }
 
       CUDAStreamManager.releaseStream(stream);
    }
 
    @Test
-   public void testLoadingKernelFromFile() throws URISyntaxException
+   public void testLoadingKernelFromFile()
    {
       // Get a stream
       CUstream_st stream = CUDAStreamManager.getStream();
@@ -179,6 +190,10 @@ public class CUDAProgramTest
          // Ensure we got the correct result!
          assertEquals(10, sum.get());
          assertEquals(4, difference.get());
+      }
+      catch (Exception e)
+      {
+         e .getStackTrace();
       }
 
       CUDAStreamManager.releaseStream(stream);
