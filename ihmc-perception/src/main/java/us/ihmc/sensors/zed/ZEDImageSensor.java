@@ -39,7 +39,7 @@ public class ZEDImageSensor extends ImageSensor
 
    public static final int OUTPUT_IMAGE_COUNT = 3;
 
-   protected static final int CAMERA_FPS = 30;
+   protected static final int CAMERA_FPS = 15;
    private static final float MILLIMETER_TO_METERS = 0.001f;
 
    private final int cameraID;
@@ -158,7 +158,7 @@ public class ZEDImageSensor extends ImageSensor
       parametersToSet.camera_image_flip(SL_FLIP_MODE_OFF);
       parametersToSet.camera_disable_self_calib(false);
       parametersToSet.enable_image_enhancement(true);
-      parametersToSet.depth_mode(SL_DEPTH_MODE_ULTRA);
+      parametersToSet.depth_mode(SL_DEPTH_MODE_NEURAL);
       parametersToSet.depth_stabilization(1);
       parametersToSet.depth_maximum_distance(zedModel.getMaximumDepthDistance());
       parametersToSet.depth_minimum_distance(zedModel.getMinimumDepthDistance());
