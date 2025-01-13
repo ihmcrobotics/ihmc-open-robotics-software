@@ -6,12 +6,12 @@ import us.ihmc.behaviors.ai2r.AI2RNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
-import us.ihmc.behaviors.behaviorTree.trashCan.TrashCanInteractionDefinition;
-import us.ihmc.behaviors.behaviorTree.trashCan.TrashCanInteractionState;
 import us.ihmc.behaviors.buildingExploration.BuildingExplorationDefinition;
 import us.ihmc.behaviors.buildingExploration.BuildingExplorationState;
 import us.ihmc.behaviors.door.DoorTraversalDefinition;
 import us.ihmc.behaviors.door.DoorTraversalState;
+import us.ihmc.behaviors.sequence.actions.CheckPointNodeDefinition;
+import us.ihmc.behaviors.sequence.actions.CheckPointNodeState;
 import us.ihmc.behaviors.logic.ConditionNodeDefinition;
 import us.ihmc.behaviors.logic.ConditionNodeState;
 import us.ihmc.behaviors.logic.GotoNodeDefinition;
@@ -40,8 +40,8 @@ public class ROS2BehaviorTreeMessageTools
       treeStateMessage.getFallbackNodes().clear();
       treeStateMessage.getConditionNodes().clear();
       treeStateMessage.getGotoNodes().clear();
+      treeStateMessage.getCheckpointNodes().clear();
       treeStateMessage.getDoorTraversals().clear();
-      treeStateMessage.getTrashCanInteractions().clear();
       treeStateMessage.getBuildingExplorations().clear();
       treeStateMessage.getChestOrientationActions().clear();
       treeStateMessage.getFootstepPlanActions().clear();
@@ -97,17 +97,17 @@ public class ROS2BehaviorTreeMessageTools
             treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getGotoNodes().size());
             gotoNodeState.toMessage(treeStateMessage.getGotoNodes().add());
          }
+         else if (nodeState instanceof CheckPointNodeState checkPointNodeState)
+         {
+            treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.CHECKPOINT_NODE);
+            treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getCheckpointNodes().size());
+            checkPointNodeState.toMessage(treeStateMessage.getCheckpointNodes().add());
+         }
          else if (nodeState instanceof DoorTraversalState doorTraversalState)
          {
             treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.DOOR_TRAVERSAL);
             treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getDoorTraversals().size());
             doorTraversalState.toMessage(treeStateMessage.getDoorTraversals().add());
-         }
-         else if (nodeState instanceof TrashCanInteractionState trashCanInteractionState)
-         {
-            treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.TRASH_CAN_INTERACTION);
-            treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getTrashCanInteractions().size());
-            trashCanInteractionState.toMessage(treeStateMessage.getTrashCanInteractions().add());
          }
          else if (nodeState instanceof BuildingExplorationState buildingExplorationState)
          {
@@ -217,13 +217,13 @@ public class ROS2BehaviorTreeMessageTools
       {
          gotoNodeState.fromMessage(subscriptionNode.getGotoNodeStateMessage());
       }
+      else if (subscriptionNode.getType() == CheckPointNodeDefinition.class && nodeState instanceof CheckPointNodeState checkPointNodeState)
+      {
+         checkPointNodeState.fromMessage(subscriptionNode.getCheckPointNodeStateMessage());
+      }
       else if (subscriptionNode.getType() == DoorTraversalDefinition.class && nodeState instanceof DoorTraversalState doorTraversalState)
       {
          doorTraversalState.fromMessage(subscriptionNode.getDoorTraversalStateMessage());
-      }
-      else if (subscriptionNode.getType() == TrashCanInteractionDefinition.class && nodeState instanceof TrashCanInteractionState trashCanInteractionState)
-      {
-         trashCanInteractionState.fromMessage(subscriptionNode.getTrashCanInteractionStateMessage());
       }
       else if (subscriptionNode.getType() == BuildingExplorationDefinition.class && nodeState instanceof BuildingExplorationState buildingExplorationState)
       {
@@ -327,19 +327,19 @@ public class ROS2BehaviorTreeMessageTools
             subscriptionNode.setBehaviorTreeNodeStateMessage(gotoNodeStateMessage.getState());
             subscriptionNode.setBehaviorTreeNodeDefinitionMessage(gotoNodeStateMessage.getDefinition().getDefinition());
          }
+         case BehaviorTreeStateMessage.CHECKPOINT_NODE ->
+         {
+            CheckPointNodeStateMessage checkPointNodeStateMessage = treeStateMessage.getCheckpointNodes().get(indexInTypesList);
+            subscriptionNode.setCheckPointNodeStateMessage(checkPointNodeStateMessage);
+            subscriptionNode.setBehaviorTreeNodeStateMessage(checkPointNodeStateMessage.getState().getState());
+            subscriptionNode.setBehaviorTreeNodeDefinitionMessage(checkPointNodeStateMessage.getDefinition().getDefinition().getDefinition());
+         }
          case BehaviorTreeStateMessage.DOOR_TRAVERSAL ->
          {
             DoorTraversalStateMessage doorTraversalStateMessage = treeStateMessage.getDoorTraversals().get(indexInTypesList);
             subscriptionNode.setDoorTraversalStateMessage(doorTraversalStateMessage);
             subscriptionNode.setBehaviorTreeNodeStateMessage(doorTraversalStateMessage.getState());
             subscriptionNode.setBehaviorTreeNodeDefinitionMessage(doorTraversalStateMessage.getDefinition().getDefinition());
-         }
-         case BehaviorTreeStateMessage.TRASH_CAN_INTERACTION ->
-         {
-            TrashCanInteractionStateMessage trashCanInteractionStateMessage = treeStateMessage.getTrashCanInteractions().get(indexInTypesList);
-            subscriptionNode.setTrashCanInteractionStateMessage(trashCanInteractionStateMessage);
-            subscriptionNode.setBehaviorTreeNodeStateMessage(trashCanInteractionStateMessage.getState());
-            subscriptionNode.setBehaviorTreeNodeDefinitionMessage(trashCanInteractionStateMessage.getDefinition().getDefinition());
          }
          case BehaviorTreeStateMessage.BUILDING_EXPLORATION ->
          {

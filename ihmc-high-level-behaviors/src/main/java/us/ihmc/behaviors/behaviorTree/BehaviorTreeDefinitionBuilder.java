@@ -1,9 +1,9 @@
 package us.ihmc.behaviors.behaviorTree;
 
 import us.ihmc.behaviors.ai2r.AI2RNodeDefinition;
-import us.ihmc.behaviors.behaviorTree.trashCan.TrashCanInteractionDefinition;
 import us.ihmc.behaviors.door.DoorTraversalDefinition;
 import us.ihmc.behaviors.buildingExploration.BuildingExplorationDefinition;
+import us.ihmc.behaviors.sequence.actions.CheckPointNodeDefinition;
 import us.ihmc.behaviors.logic.ConditionNodeDefinition;
 import us.ihmc.behaviors.logic.GotoNodeDefinition;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
@@ -45,13 +45,13 @@ public class BehaviorTreeDefinitionBuilder
       {
          return new GotoNodeDefinition(crdtInfo, saveFileDirectory);
       }
+      if (definitionType == CheckPointNodeDefinition.class)
+      {
+         return new CheckPointNodeDefinition(crdtInfo, saveFileDirectory);
+      }
       if (definitionType == DoorTraversalDefinition.class)
       {
          return new DoorTraversalDefinition(crdtInfo, saveFileDirectory);
-      }
-      if (definitionType == TrashCanInteractionDefinition.class)
-      {
-         return new TrashCanInteractionDefinition(crdtInfo, saveFileDirectory);
       }
       if (definitionType == BuildingExplorationDefinition.class)
       {
