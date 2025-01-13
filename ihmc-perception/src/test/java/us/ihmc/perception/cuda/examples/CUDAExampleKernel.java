@@ -16,7 +16,7 @@ import static org.bytedeco.cuda.global.cudart.*;
  * inside a try-with-resources. The user can create more threads on the GPU. This example attempted to keep things really simple and avoided most of that
  * overhead.
  */
-public class ExampleCUDAKernel
+public class CUDAExampleKernel
 {
    private static final String KERNEL_TO_ADD_THE_VALUES_OF_TWO_ARRAYS = """
          extern "C"
@@ -34,7 +34,7 @@ public class ExampleCUDAKernel
          """;
 
    // Even if you don't create a stream, CUDA will create a default one for you, so we make one ourselves to handle things better
-   public ExampleCUDAKernel()
+   public CUDAExampleKernel() throws Exception
    {
       // Note this name does NOT have to match the name of the program, however for readability its ideal to have them match.
       String userFriendlyNameOfProgram = "userFriendlyNameOfProgram";
@@ -117,8 +117,8 @@ public class ExampleCUDAKernel
       stream.close();
    }
 
-   public static void main(String[] args)
+   public static void main(String[] args) throws Exception
    {
-      new ExampleCUDAKernel();
+      new CUDAExampleKernel();
    }
 }

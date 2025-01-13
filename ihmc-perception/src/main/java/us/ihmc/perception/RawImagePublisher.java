@@ -29,6 +29,8 @@ public class RawImagePublisher implements AutoCloseable
    private final ROS2Helper ros2Helper;
    private final ImageMessage imageMessage;
 
+   private boolean destroyed = false;
+
    public RawImagePublisher(ROS2Node ros2Node)
    {
       compressionTools = new CUDACompressionTools();
@@ -42,6 +44,9 @@ public class RawImagePublisher implements AutoCloseable
    @SuppressWarnings("unchecked") // Trust me bro, I know what I'm doing
    public synchronized void publishImage(ROS2Topic<? extends Packet<?>> imageTopic, RawImage imageToPublish)
    {
+      if (destroyed)
+         return;
+
       if (imageTopic.getType().equals(ImageMessage.class))
       {  // Topic is an ImageMessage topic -> publish as image message
          publishAsImageMessage((ROS2Topic<ImageMessage>) imageTopic, imageToPublish);
@@ -103,6 +108,7 @@ public class RawImagePublisher implements AutoCloseable
       compressionTools.destroy();
       jpegProcessor.destroy();
       sensorStreamer.destroy();
+      destroyed = true;
       System.out.println("Closed " + getClass().getSimpleName());
    }
 }

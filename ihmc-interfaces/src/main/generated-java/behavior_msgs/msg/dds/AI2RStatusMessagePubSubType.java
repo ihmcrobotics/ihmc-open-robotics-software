@@ -15,7 +15,7 @@ public class AI2RStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "95faf437d195d65ffbf399e7c9a445d1e2fba56dbfc3d5917b05fbfb73ae6135";
+   		return "99378d4b75adfff70cb0ff61433e1ad17c5e90808213bef857147f5e52f1fbb6";
    }
    
    @Override
@@ -61,6 +61,8 @@ public class AI2RStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       {
         current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       }
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
 
       return current_alignment - initial_alignment;
    }
@@ -86,6 +88,10 @@ public class AI2RStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       {
           current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getAvailableBehaviors().get(i0).length() + 1;
       }
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getCompletedBehavior().length() + 1;
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getFailedBehavior().length() + 1;
+
 
       return current_alignment - initial_alignment;
    }
@@ -101,6 +107,14 @@ public class AI2RStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       cdr.write_type_e(data.getAvailableBehaviors());else
           throw new RuntimeException("available_behaviors field exceeds the maximum length");
 
+      if(data.getCompletedBehavior().length() <= 255)
+      cdr.write_type_d(data.getCompletedBehavior());else
+          throw new RuntimeException("completed_behavior field exceeds the maximum length");
+
+      if(data.getFailedBehavior().length() <= 255)
+      cdr.write_type_d(data.getFailedBehavior());else
+          throw new RuntimeException("failed_behavior field exceeds the maximum length");
+
    }
 
    public static void read(behavior_msgs.msg.dds.AI2RStatusMessage data, us.ihmc.idl.CDR cdr)
@@ -108,6 +122,8 @@ public class AI2RStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       geometry_msgs.msg.dds.PosePubSubType.read(data.getRobotMidFeetUnderPelvisPoseInWorld(), cdr);	
       cdr.read_type_e(data.getObjects());	
       cdr.read_type_e(data.getAvailableBehaviors());	
+      cdr.read_type_d(data.getCompletedBehavior());	
+      cdr.read_type_d(data.getFailedBehavior());	
 
    }
 
@@ -118,6 +134,8 @@ public class AI2RStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataType
 
       ser.write_type_e("objects", data.getObjects());
       ser.write_type_e("available_behaviors", data.getAvailableBehaviors());
+      ser.write_type_d("completed_behavior", data.getCompletedBehavior());
+      ser.write_type_d("failed_behavior", data.getFailedBehavior());
    }
 
    @Override
@@ -127,6 +145,8 @@ public class AI2RStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataType
 
       ser.read_type_e("objects", data.getObjects());
       ser.read_type_e("available_behaviors", data.getAvailableBehaviors());
+      ser.read_type_d("completed_behavior", data.getCompletedBehavior());
+      ser.read_type_d("failed_behavior", data.getFailedBehavior());
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.AI2RStatusMessage src, behavior_msgs.msg.dds.AI2RStatusMessage dest)

@@ -43,7 +43,7 @@ public class RDXDepthStreamingDemo
    private final RDXOpenCVVideoVisualizer receivedDepthVisualizer = new RDXOpenCVVideoVisualizer("Received Colorized Depth", "Received Colorized Depth", false);
    private final RDXRawImagePointCloudVisualizer pointCloudVisualizer = new RDXRawImagePointCloudVisualizer("De-Colorized Point Cloud");
 
-   public RDXDepthStreamingDemo()
+   public RDXDepthStreamingDemo() throws Exception
    {
       zed.useTrackedPose(true);
       zed.run(true);
@@ -123,13 +123,9 @@ public class RDXDepthStreamingDemo
       opencv_imgproc.cvtColor(colorizedDepth.getCpuImageMat(), rgbMat, opencv_imgproc.COLOR_YUV2RGB);
       receivedDepthVisualizer.setImage(rgbMat);
 
-      GpuMat deColorizedDepth = depthColorizer.deColorizeDepth(colorizedDepth.getGpuImageMat());
-      RawImage deColorizedImage = colorizedDepth.replaceImage(deColorizedDepth);
-
-      pointCloudVisualizer.setDepthImage(deColorizedImage);
+      pointCloudVisualizer.setDepthImage(colorizedDepth);
 
       rgbMat.close();
-      deColorizedImage.release();
       colorizedDepth.release();
    }
 
@@ -153,7 +149,7 @@ public class RDXDepthStreamingDemo
       ros2Node.destroy();
    }
 
-   public static void main(String[] args)
+   public static void main(String[] args) throws Exception
    {
       new RDXDepthStreamingDemo();
    }

@@ -10,8 +10,8 @@ byte ACTION_SEQUENCE = 3
 byte FALLBACK_NODE = 4
 byte CONDITION_NODE = 5
 byte GOTO_NODE = 6
-byte DOOR_TRAVERSAL = 7
-byte TRASH_CAN_INTERACTION = 8
+byte CHECKPOINT_NODE = 7
+byte DOOR_TRAVERSAL = 8
 byte BUILDING_EXPLORATION = 9
 
 byte CHEST_ORIENTATION_ACTION = 10
@@ -55,9 +55,9 @@ behavior_msgs/ConditionNodeStateMessage[<=200] condition_nodes
 
 behavior_msgs/GotoNodeStateMessage[<=200] goto_nodes
 
-behavior_msgs/DoorTraversalStateMessage[<=200] door_traversals
+behavior_msgs/CheckPointNodeStateMessage[<=200] checkpoint_nodes
 
-behavior_msgs/TrashCanInteractionStateMessage[<=200] trash_can_interactions
+behavior_msgs/DoorTraversalStateMessage[<=200] door_traversals
 
 behavior_msgs/BuildingExplorationStateMessage[<=200] building_explorations
 

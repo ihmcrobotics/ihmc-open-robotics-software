@@ -1,6 +1,7 @@
 #ifndef __behavior_msgs__msg__AI2RCommandMessage__idl__
 #define __behavior_msgs__msg__AI2RCommandMessage__idl__
 
+#include "geometry_msgs/msg/./Point_.idl"
 module behavior_msgs
 {
   module msg
@@ -11,7 +12,22 @@ module behavior_msgs
       @TypeCode(type="behavior_msgs::msg::dds_::AI2RCommandMessage_")
       struct AI2RCommandMessage
       {
-        boolean unused_placeholder_field;
+        /**
+         * Behavior to execute (checkpoint to jump to in the pre-loaded behavior collection)
+         */
+        string behavior_to_execute;
+        /**
+         * Goto action - Reference frame for the action
+         */
+        string goto_reference_frame_name;
+        /**
+         * Goto action - The position to which the goal stance is aligned
+         */
+        geometry_msgs::msg::dds::Point goto_goal_stance_point;
+        /**
+         * Goto action - The point that the robot should be facing in the goal stance
+         */
+        geometry_msgs::msg::dds::Point goto_goal_focal_point;
       };
     };
   };

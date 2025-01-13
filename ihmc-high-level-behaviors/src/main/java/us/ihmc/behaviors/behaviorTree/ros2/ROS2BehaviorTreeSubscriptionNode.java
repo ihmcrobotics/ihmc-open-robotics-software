@@ -17,8 +17,8 @@ public class ROS2BehaviorTreeSubscriptionNode
    private FallbackNodeStateMessage fallbackNodeStateMessage;
    private ConditionNodeStateMessage conditionNodeStateMessage;
    private GotoNodeStateMessage gotoNodeStateMessage;
+   private CheckPointNodeStateMessage checkPointNodeStateMessage;
    private DoorTraversalStateMessage doorTraversalStateMessage;
-   private TrashCanInteractionStateMessage trashCanInteractionStateMessage;
    private BuildingExplorationStateMessage buildingExplorationStateMessage;
    private ActionNodeStateMessage actionNodeStateMessage;
    private ChestOrientationActionStateMessage chestOrientationActionStateMessage;
@@ -43,8 +43,8 @@ public class ROS2BehaviorTreeSubscriptionNode
       fallbackNodeStateMessage = null;
       conditionNodeStateMessage = null;
       gotoNodeStateMessage = null;
+      checkPointNodeStateMessage = null;
       doorTraversalStateMessage = null;
-      trashCanInteractionStateMessage = null;
       buildingExplorationStateMessage = null;
       actionNodeStateMessage = null;
       chestOrientationActionStateMessage = null;
@@ -159,6 +159,16 @@ public class ROS2BehaviorTreeSubscriptionNode
       this.gotoNodeStateMessage = gotoNodeStateMessage;
    }
 
+   public CheckPointNodeStateMessage getCheckPointNodeStateMessage()
+   {
+      return checkPointNodeStateMessage;
+   }
+
+   public void setCheckPointNodeStateMessage(CheckPointNodeStateMessage checkPointNodeStateMessage)
+   {
+      this.checkPointNodeStateMessage = checkPointNodeStateMessage;
+   }
+
    public DoorTraversalStateMessage getDoorTraversalStateMessage()
    {
       return doorTraversalStateMessage;
@@ -167,16 +177,6 @@ public class ROS2BehaviorTreeSubscriptionNode
    public void setDoorTraversalStateMessage(DoorTraversalStateMessage doorTraversalStateMessage)
    {
       this.doorTraversalStateMessage = doorTraversalStateMessage;
-   }
-
-   public TrashCanInteractionStateMessage getTrashCanInteractionStateMessage()
-   {
-      return trashCanInteractionStateMessage;
-   }
-
-   public void setTrashCanInteractionStateMessage(TrashCanInteractionStateMessage trashCanInteractionStateMessage)
-   {
-      this.trashCanInteractionStateMessage = trashCanInteractionStateMessage;
    }
 
    public BuildingExplorationStateMessage getBuildingExplorationStateMessage()

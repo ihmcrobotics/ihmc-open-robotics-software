@@ -27,9 +27,17 @@ module behavior_msgs
          */
         sequence<behavior_msgs::msg::dds::AI2RObjectMessage, 200> objects;
         /**
-         * List of available behaviors (JSON file names)
+         * List of available behaviors (checkpoints from a pre-loaded behavior)
          */
         sequence<string, 200> available_behaviors;
+        /**
+         * Name of the behavior that has succeeded (name of the checkpoint in the pre-loaded behavior collection)
+         */
+        string completed_behavior;
+        /**
+         * Name of the behavior that has failed (name of the checkpoint in the pre-loaded behavior collection)
+         */
+        string failed_behavior;
       };
     };
   };
