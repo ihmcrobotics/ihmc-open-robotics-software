@@ -12,6 +12,7 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.perception.cuda.CUDACompressionTools;
 import us.ihmc.perception.cuda.CUDAJPEGProcessor;
 import us.ihmc.perception.imageMessage.CompressionType;
+import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.streaming.ROS2SRTSensorStreamer;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.ros2.ROS2Node;
@@ -74,7 +75,7 @@ public class RawImagePublisher implements AutoCloseable
             opencv_cudaimgproc.cvtColor(imageToCompress, bgr8Image, opencv_imgproc.COLOR_BGRA2BGR);
             imageToCompress = bgr8Image;
          case BGR8: // BGR image -> compress using nvJPEG
-            compressedImage = new BytePointer(imageToCompress.limit());
+            compressedImage = new BytePointer(OpenCVTools.dataSize(imageToCompress));
             jpegProcessor.encodeBGR(imageToCompress, compressedImage);
             compressionType = NVJPEG;
             break;
@@ -83,12 +84,12 @@ public class RawImagePublisher implements AutoCloseable
             opencv_cudaimgproc.cvtColor(imageToCompress, rgb8Image, opencv_imgproc.COLOR_RGBA2RGB);
             imageToCompress = rgb8Image;
          case RGB8: // RGB image -> compress using nvJPEG
-            compressedImage = new BytePointer(imageToCompress.limit());
+            compressedImage = new BytePointer(OpenCVTools.dataSize(imageToCompress));
             jpegProcessor.encodeRGB(imageToCompress, compressedImage);
             compressionType = NVJPEG;
             break;
          case GRAY8: // Black and white image -> compress using nvJPEG
-            compressedImage = new BytePointer(imageToCompress.limit());
+            compressedImage = new BytePointer(OpenCVTools.dataSize(imageToCompress));
             jpegProcessor.encodeGray(imageToCompress, compressedImage);
             compressionType = NVJPEG;
             break;

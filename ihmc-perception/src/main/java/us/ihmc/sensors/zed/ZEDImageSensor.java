@@ -105,7 +105,7 @@ public class ZEDImageSensor extends ImageSensor
 
          if (positionalTrackingEnabled)
          {
-            SL_PositionalTrackingParameters positionalTrackingParameters = new SL_PositionalTrackingParameters();
+            SL_PositionalTrackingParameters positionalTrackingParameters = sl_get_positional_tracking_parameters(cameraID);
             sl_enable_positional_tracking(cameraID, positionalTrackingParameters, "");
          }
 
