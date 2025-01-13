@@ -15,7 +15,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "87eb5e453b9347fdddc2f9de554f3b7d7e483a3f748a9d1dd4110a60f193b6e6";
+   		return "19d48ce59e82b6b09720c171536de46b851462670203fa84a2aa84c860bfd539";
    }
    
    @Override
@@ -90,10 +90,10 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
           current_alignment += behavior_msgs.msg.dds.GotoNodeStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 120; ++i0)
       {
-          current_alignment += behavior_msgs.msg.dds.DoorTraversalStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+          current_alignment += behavior_msgs.msg.dds.CheckPointNodeStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 120; ++i0)
       {
-          current_alignment += behavior_msgs.msg.dds.TrashCanInteractionStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+          current_alignment += behavior_msgs.msg.dds.DoorTraversalStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 120; ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.BuildingExplorationStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
@@ -196,14 +196,14 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
           current_alignment += behavior_msgs.msg.dds.GotoNodeStateMessagePubSubType.getCdrSerializedSize(data.getGotoNodes().get(i0), current_alignment);}
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getCheckpointNodes().size(); ++i0)
+      {
+          current_alignment += behavior_msgs.msg.dds.CheckPointNodeStateMessagePubSubType.getCdrSerializedSize(data.getCheckpointNodes().get(i0), current_alignment);}
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getDoorTraversals().size(); ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.DoorTraversalStateMessagePubSubType.getCdrSerializedSize(data.getDoorTraversals().get(i0), current_alignment);}
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for(int i0 = 0; i0 < data.getTrashCanInteractions().size(); ++i0)
-      {
-          current_alignment += behavior_msgs.msg.dds.TrashCanInteractionStateMessagePubSubType.getCdrSerializedSize(data.getTrashCanInteractions().get(i0), current_alignment);}
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getBuildingExplorations().size(); ++i0)
@@ -307,13 +307,13 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       cdr.write_type_e(data.getGotoNodes());else
           throw new RuntimeException("goto_nodes field exceeds the maximum length");
 
+      if(data.getCheckpointNodes().size() <= 120)
+      cdr.write_type_e(data.getCheckpointNodes());else
+          throw new RuntimeException("checkpoint_nodes field exceeds the maximum length");
+
       if(data.getDoorTraversals().size() <= 120)
       cdr.write_type_e(data.getDoorTraversals());else
           throw new RuntimeException("door_traversals field exceeds the maximum length");
-
-      if(data.getTrashCanInteractions().size() <= 120)
-      cdr.write_type_e(data.getTrashCanInteractions());else
-          throw new RuntimeException("trash_can_interactions field exceeds the maximum length");
 
       if(data.getBuildingExplorations().size() <= 120)
       cdr.write_type_e(data.getBuildingExplorations());else
@@ -375,8 +375,8 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       cdr.read_type_e(data.getFallbackNodes());	
       cdr.read_type_e(data.getConditionNodes());	
       cdr.read_type_e(data.getGotoNodes());	
+      cdr.read_type_e(data.getCheckpointNodes());	
       cdr.read_type_e(data.getDoorTraversals());	
-      cdr.read_type_e(data.getTrashCanInteractions());	
       cdr.read_type_e(data.getBuildingExplorations());	
       cdr.read_type_e(data.getChestOrientationActions());	
       cdr.read_type_e(data.getFootstepPlanActions());	
@@ -409,8 +409,8 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       ser.write_type_e("fallback_nodes", data.getFallbackNodes());
       ser.write_type_e("condition_nodes", data.getConditionNodes());
       ser.write_type_e("goto_nodes", data.getGotoNodes());
+      ser.write_type_e("checkpoint_nodes", data.getCheckpointNodes());
       ser.write_type_e("door_traversals", data.getDoorTraversals());
-      ser.write_type_e("trash_can_interactions", data.getTrashCanInteractions());
       ser.write_type_e("building_explorations", data.getBuildingExplorations());
       ser.write_type_e("chest_orientation_actions", data.getChestOrientationActions());
       ser.write_type_e("footstep_plan_actions", data.getFootstepPlanActions());
@@ -442,8 +442,8 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       ser.read_type_e("fallback_nodes", data.getFallbackNodes());
       ser.read_type_e("condition_nodes", data.getConditionNodes());
       ser.read_type_e("goto_nodes", data.getGotoNodes());
+      ser.read_type_e("checkpoint_nodes", data.getCheckpointNodes());
       ser.read_type_e("door_traversals", data.getDoorTraversals());
-      ser.read_type_e("trash_can_interactions", data.getTrashCanInteractions());
       ser.read_type_e("building_explorations", data.getBuildingExplorations());
       ser.read_type_e("chest_orientation_actions", data.getChestOrientationActions());
       ser.read_type_e("footstep_plan_actions", data.getFootstepPlanActions());

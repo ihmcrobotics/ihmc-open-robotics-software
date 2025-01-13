@@ -18,26 +18,26 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
           * Used to minimize bandwidth, nodes that are send
           * without their full data.
           */
-   public static final byte PARTIAL_DATA = (byte) 255;
-   public static final byte ROOT_NODE = (byte) 0;
-   public static final byte BASIC_NODE = (byte) 1;
-   public static final byte AI2R_NODE = (byte) 2;
-   public static final byte ACTION_SEQUENCE = (byte) 3;
-   public static final byte FALLBACK_NODE = (byte) 4;
-   public static final byte CONDITION_NODE = (byte) 5;
-   public static final byte GOTO_NODE = (byte) 6;
-   public static final byte CHECKPOINT_NODE = (byte) 7;
-   public static final byte DOOR_TRAVERSAL = (byte) 8;
-   public static final byte BUILDING_EXPLORATION = (byte) 9;
-   public static final byte CHEST_ORIENTATION_ACTION = (byte) 10;
-   public static final byte FOOTSTEP_PLAN_ACTION = (byte) 11;
-   public static final byte SAKE_HAND_COMMAND_ACTION = (byte) 12;
-   public static final byte HAND_POSE_ACTION = (byte) 13;
-   public static final byte HAND_WRENCH_ACTION = (byte) 14;
-   public static final byte SCREW_PRIMITIVE_ACTION = (byte) 15;
-   public static final byte PELVIS_HEIGHT_ORIENTATION_ACTION = (byte) 16;
-   public static final byte WAIT_DURATION_ACTION = (byte) 17;
-   public static final byte FOOT_POSE_ACTION = (byte) 18;
+   public static final byte PARTIAL_DATA = (byte) 0;
+   public static final byte ROOT_NODE = (byte) 1;
+   public static final byte BASIC_NODE = (byte) 2;
+   public static final byte AI2R_NODE = (byte) 3;
+   public static final byte ACTION_SEQUENCE = (byte) 4;
+   public static final byte FALLBACK_NODE = (byte) 5;
+   public static final byte CONDITION_NODE = (byte) 6;
+   public static final byte GOTO_NODE = (byte) 7;
+   public static final byte CHECKPOINT_NODE = (byte) 8;
+   public static final byte DOOR_TRAVERSAL = (byte) 9;
+   public static final byte BUILDING_EXPLORATION = (byte) 10;
+   public static final byte CHEST_ORIENTATION_ACTION = (byte) 11;
+   public static final byte FOOTSTEP_PLAN_ACTION = (byte) 12;
+   public static final byte SAKE_HAND_COMMAND_ACTION = (byte) 13;
+   public static final byte HAND_POSE_ACTION = (byte) 14;
+   public static final byte HAND_WRENCH_ACTION = (byte) 15;
+   public static final byte SCREW_PRIMITIVE_ACTION = (byte) 16;
+   public static final byte PELVIS_HEIGHT_ORIENTATION_ACTION = (byte) 17;
+   public static final byte WAIT_DURATION_ACTION = (byte) 18;
+   public static final byte FOOT_POSE_ACTION = (byte) 19;
    /**
             * Monotonically increasing message ID that matches the CRDTInfo update number
             */
@@ -93,26 +93,26 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
 
       behavior_tree_indices_ = new us.ihmc.idl.IDLSequence.Long (1000, "type_4");
 
-      partial_data_nodes_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BasicNodeStateMessage> (500, new behavior_msgs.msg.dds.BasicNodeStateMessagePubSubType());
+      partial_data_nodes_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BasicNodeStateMessage> (300, new behavior_msgs.msg.dds.BasicNodeStateMessagePubSubType());
       root_nodes_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BehaviorTreeRootNodeStateMessage> (1, new behavior_msgs.msg.dds.BehaviorTreeRootNodeStateMessagePubSubType());
-      basic_nodes_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BasicNodeStateMessage> (200, new behavior_msgs.msg.dds.BasicNodeStateMessagePubSubType());
+      basic_nodes_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BasicNodeStateMessage> (120, new behavior_msgs.msg.dds.BasicNodeStateMessagePubSubType());
       ai2r_nodes_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.AI2RNodeStateMessage> (1, new behavior_msgs.msg.dds.AI2RNodeStateMessagePubSubType());
-      action_sequences_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ActionSequenceStateMessage> (200, new behavior_msgs.msg.dds.ActionSequenceStateMessagePubSubType());
-      fallback_nodes_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FallbackNodeStateMessage> (200, new behavior_msgs.msg.dds.FallbackNodeStateMessagePubSubType());
-      condition_nodes_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ConditionNodeStateMessage> (200, new behavior_msgs.msg.dds.ConditionNodeStateMessagePubSubType());
-      goto_nodes_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.GotoNodeStateMessage> (200, new behavior_msgs.msg.dds.GotoNodeStateMessagePubSubType());
-      checkpoint_nodes_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.CheckPointNodeStateMessage> (200, new behavior_msgs.msg.dds.CheckPointNodeStateMessagePubSubType());
-      door_traversals_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.DoorTraversalStateMessage> (200, new behavior_msgs.msg.dds.DoorTraversalStateMessagePubSubType());
-      building_explorations_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BuildingExplorationStateMessage> (200, new behavior_msgs.msg.dds.BuildingExplorationStateMessagePubSubType());
-      chest_orientation_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ChestOrientationActionStateMessage> (200, new behavior_msgs.msg.dds.ChestOrientationActionStateMessagePubSubType());
-      footstep_plan_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepPlanActionStateMessage> (200, new behavior_msgs.msg.dds.FootstepPlanActionStateMessagePubSubType());
-      sake_hand_command_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.SakeHandCommandActionStateMessage> (200, new behavior_msgs.msg.dds.SakeHandCommandActionStateMessagePubSubType());
-      hand_pose_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.HandPoseActionStateMessage> (200, new behavior_msgs.msg.dds.HandPoseActionStateMessagePubSubType());
-      hand_wrench_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.HandWrenchActionStateMessage> (200, new behavior_msgs.msg.dds.HandWrenchActionStateMessagePubSubType());
-      screw_primitive_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ScrewPrimitiveActionStateMessage> (200, new behavior_msgs.msg.dds.ScrewPrimitiveActionStateMessagePubSubType());
-      pelvis_height_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.PelvisHeightOrientationActionStateMessage> (200, new behavior_msgs.msg.dds.PelvisHeightOrientationActionStateMessagePubSubType());
-      wait_duration_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.WaitDurationActionStateMessage> (200, new behavior_msgs.msg.dds.WaitDurationActionStateMessagePubSubType());
-      foot_pose_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootPoseActionStateMessage> (200, new behavior_msgs.msg.dds.FootPoseActionStateMessagePubSubType());
+      action_sequences_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ActionSequenceStateMessage> (120, new behavior_msgs.msg.dds.ActionSequenceStateMessagePubSubType());
+      fallback_nodes_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FallbackNodeStateMessage> (120, new behavior_msgs.msg.dds.FallbackNodeStateMessagePubSubType());
+      condition_nodes_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ConditionNodeStateMessage> (120, new behavior_msgs.msg.dds.ConditionNodeStateMessagePubSubType());
+      goto_nodes_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.GotoNodeStateMessage> (120, new behavior_msgs.msg.dds.GotoNodeStateMessagePubSubType());
+      checkpoint_nodes_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.CheckPointNodeStateMessage> (120, new behavior_msgs.msg.dds.CheckPointNodeStateMessagePubSubType());
+      door_traversals_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.DoorTraversalStateMessage> (120, new behavior_msgs.msg.dds.DoorTraversalStateMessagePubSubType());
+      building_explorations_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BuildingExplorationStateMessage> (120, new behavior_msgs.msg.dds.BuildingExplorationStateMessagePubSubType());
+      chest_orientation_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ChestOrientationActionStateMessage> (120, new behavior_msgs.msg.dds.ChestOrientationActionStateMessagePubSubType());
+      footstep_plan_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepPlanActionStateMessage> (120, new behavior_msgs.msg.dds.FootstepPlanActionStateMessagePubSubType());
+      sake_hand_command_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.SakeHandCommandActionStateMessage> (120, new behavior_msgs.msg.dds.SakeHandCommandActionStateMessagePubSubType());
+      hand_pose_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.HandPoseActionStateMessage> (120, new behavior_msgs.msg.dds.HandPoseActionStateMessagePubSubType());
+      hand_wrench_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.HandWrenchActionStateMessage> (120, new behavior_msgs.msg.dds.HandWrenchActionStateMessagePubSubType());
+      screw_primitive_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ScrewPrimitiveActionStateMessage> (120, new behavior_msgs.msg.dds.ScrewPrimitiveActionStateMessagePubSubType());
+      pelvis_height_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.PelvisHeightOrientationActionStateMessage> (120, new behavior_msgs.msg.dds.PelvisHeightOrientationActionStateMessagePubSubType());
+      wait_duration_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.WaitDurationActionStateMessage> (120, new behavior_msgs.msg.dds.WaitDurationActionStateMessagePubSubType());
+      foot_pose_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootPoseActionStateMessage> (120, new behavior_msgs.msg.dds.FootPoseActionStateMessagePubSubType());
 
    }
 
