@@ -10,7 +10,6 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.time.TimeInterval;
 
-// TODO this is hacked, as it needs to use a BipedTimedStepMessage, not command for the other type.
 public class BipedTimedStepCommand implements Command<BipedTimedStepCommand, BipedTimedStepMessage>
 {
    private final TimeInterval timeInterval = new TimeInterval();
