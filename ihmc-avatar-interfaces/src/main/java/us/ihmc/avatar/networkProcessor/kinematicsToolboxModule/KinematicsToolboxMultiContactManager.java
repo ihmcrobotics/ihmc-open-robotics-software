@@ -1,6 +1,7 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
 import gnu.trove.map.hash.TObjectIntHashMap;
+import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandBuffer;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OneDoFJointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
@@ -11,11 +12,14 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.StabilityMarginRegionCalculator;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.SensitivityBasedStabilityGradientCalculator;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState;
+import us.ihmc.commons.MathTools;
+import us.ihmc.communication.DataModified;
 import us.ihmc.communication.PostureOptimizerState;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.FrameYawPitchRoll;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -44,6 +48,10 @@ public class KinematicsToolboxMultiContactManager
    private static final double MAX_PELVIS_ORIENTATION_ERROR = Math.toRadians(25.0);
    private static final int SPATIAL_DIMENSIONS = 6;
 
+   // Filter params
+   private static final double WHOLE_BODY_POSTURE_ADJUSTMENT_MAGNITUDE = 1.0 / 3.0;
+   private static final double ALPHA_ENABLED_TIME_CONSTANT = 3.0;
+
    // nominal is around 0.72
    private static final double DEFAULT_MIN_PELVIS_HEIGHT = 0.62;
    private static final double DEFAULT_MAX_PELVIS_HEIGHT = 0.78;
@@ -65,6 +73,7 @@ public class KinematicsToolboxMultiContactManager
    private final FullHumanoidRobotModel fullRobotModel;
    private final PDGains jointspaceGains = new PDGains();
 
+   private final ReferenceFrame midFeetZUpFrame;
    private final RateLimitedYoVariable optimizedPelvisHeight;
    private final YoDouble minOptimizedPelvisHeight = new YoDouble("minOptimizedPelvisHeight", registry);
    private final YoDouble maxOptimizedPelvisHeight = new YoDouble("maxOptimizedPelvisHeight", registry);
@@ -76,6 +85,7 @@ public class KinematicsToolboxMultiContactManager
    private final RateLimitedYoFrameOrientation optimizedPelvisOrientationRateLimited;
    private final Vector3D pelvisRotationVectorAdjustment = new Vector3D();
    private final Quaternion pelvisRotationQuaternionAdjustment = new Quaternion();
+   private final FrameYawPitchRoll tmpOrientation = new FrameYawPitchRoll();
 
    private final YoEnum<PostureOptimizerState> mode = new YoEnum<>("postureOptimizerMode", registry, PostureOptimizerState.class, false);
 
@@ -89,15 +99,13 @@ public class KinematicsToolboxMultiContactManager
    private final YoDouble stabilityMarginThresholdHigh = new YoDouble("stabilityMarginThresholdHigh", registry);
    private final YoEnum<StabilityMarginLevel> stabilityMarginLevel = new YoEnum<>("stabilityMarginLevel", registry, StabilityMarginLevel.class, false);
 
-   private final YoDouble qdMultiplier = new YoDouble("qdMultiplier", registry);
    private final YoDouble postureOptimizationWeight = new YoDouble("postureOptimizationWeight", registry);
 
    /* The nominal privileged configuration */
    private final YoDouble[] qPrivNominal;
    /* The optimized privileged configuration. In the NOMINAL state, this is (modulo rate-limiting) the same as qPrivNominal. */
    private final YoDouble[] qPrivOptimized;
-   /* The optimized privileged configuration, rate-limited */
-   private final RateLimitedYoVariable[] qPrivOptimizedRateLimited;
+   private final DMatrixRMaj qdNominal = new DMatrixRMaj(0);
 
    private final YoDouble pelvisPostureWeight = new YoDouble("pelvisPostureWeight", registry);
    private final SelectionMatrix3D pelvisHeightSelection = new SelectionMatrix3D();
@@ -131,6 +139,7 @@ public class KinematicsToolboxMultiContactManager
                                                StabilityMarginRegionCalculator multiContactRegionCalculator,
                                                FullHumanoidRobotModel fullRobotModel,
                                                ReferenceFrame centerOfMassFrame,
+                                               ReferenceFrame midFeetZUpFrame,
                                                double updateDT,
                                                YoRegistry parentRegistry)
    {
@@ -143,13 +152,14 @@ public class KinematicsToolboxMultiContactManager
                                                                               wholeBodyContactState,
                                                                               multiContactRegionCalculator,
                                                                               registry);
+      this.midFeetZUpFrame = midFeetZUpFrame;
 
       int numberOfJoints = wholeBodyContactState.getNumberOfJoints();
       OneDoFJointBasics[] oneDoFJoints = wholeBodyContactState.getOneDoFJoints();
 
       qPrivNominal = new YoDouble[numberOfJoints];
       qPrivOptimized = new YoDouble[numberOfJoints];
-      qPrivOptimizedRateLimited = new RateLimitedYoVariable[numberOfJoints];
+      qdNominal.reshape(numberOfJoints, 1);
 
       jointspaceGains.setKp(JOINTSPACE_KP);
 
@@ -159,7 +169,7 @@ public class KinematicsToolboxMultiContactManager
       pelvisOrientationGains.setMaxProportionalError(MAX_PELVIS_ORIENTATION_ERROR);
 
       pelvisHeightSelection.setAxisSelection(false, false, true);
-      pelvisPostureWeight.set(3.0);
+      pelvisPostureWeight.set(1.0);
       optimizedPelvisHeight = new RateLimitedYoVariable("optimizedPelvisHeight", registry, maxPostureAdjustmentRate, updateDT);
       optimizedPelvisOrientationRateLimited = new RateLimitedYoFrameOrientation("optimizedPelvisOrientationRL", "", registry, maxPostureAdjustmentRate, updateDT, optimizedPelvisOrientation);
 
@@ -170,7 +180,6 @@ public class KinematicsToolboxMultiContactManager
 
          qPrivNominal[i] = new YoDouble("q_priv_nom_" + joint.getName(), registry);
          qPrivOptimized[i] = new YoDouble("q_priv_opt_" + joint.getName(), registry);
-         qPrivOptimizedRateLimited[i] = new RateLimitedYoVariable("q_priv_opt_rl_" + joint.getName(), registry, maxPostureAdjustmentRate, updateDT);
       }
 
       activationAlpha = new RateLimitedYoVariable("activationAlpha", registry, 0.4, updateDT);
@@ -183,8 +192,7 @@ public class KinematicsToolboxMultiContactManager
       stabilityMarginThresholdLow.set(defaultStabilityMarginThresholdLow);
       stabilityMarginThresholdHigh.set(defaultStabilityMarginThresholdHigh);
 
-      maxPostureAdjustmentRate.set(0.15);
-      qdMultiplier.set(0.3);
+      maxPostureAdjustmentRate.set(WHOLE_BODY_POSTURE_ADJUSTMENT_MAGNITUDE);
       postureOptimizationWeight.set(0.25);
       mode.set(PostureOptimizerState.NOMINAL);
 
@@ -241,12 +249,6 @@ public class KinematicsToolboxMultiContactManager
       {
          double postureSensitivityThreshold = this.postureSensitivityThreshold.getValue() + postureSensitivityHysteresisEpsilon * (mode.getValue() == PostureOptimizerState.OPTIMIZER ? -1.0 : 1.0);
          boolean isPostureSensitivityHigh = postureOptimizer.getPostureSensitivity() > postureSensitivityThreshold;
-
-//         if (!isPostureSensitivityHigh)
-//         { // compute sensitivity wrt average stability margin
-//            postureOptimizer.updateSensitivityOfAverageMargin();
-//         }
-
          this.isPostureSensitivityHigh.update(isPostureSensitivityHigh);
 
          if (multiContactRegionCalculator.getStabilityMargin() < stabilityMarginThresholdLow.getValue())
@@ -322,47 +324,63 @@ public class KinematicsToolboxMultiContactManager
       // Update privileged configuration
       for (int i = 0; i < qPrivOptimized.length; i++)
       {
-         double qdOffsetSetpoint = qdMultiplier.getValue() * postureOptimizer.getOptimizedWholeBodyVelocity().get(SPATIAL_DIMENSIONS + i);
-         qdOffsetSetpoint = EuclidCoreTools.clamp(qdOffsetSetpoint, maxPostureAdjustmentRate.getValue());
+         double qdOffsetSetpoint = WHOLE_BODY_POSTURE_ADJUSTMENT_MAGNITUDE * postureOptimizer.getNomalizedStabilityGradient().get(SPATIAL_DIMENSIONS + i);
          double qOffsetSetpoint = qPrivOptimized[i].getValue() + updateDT * qdOffsetSetpoint;
-         qPrivOptimized[i].set(qOffsetSetpoint);
-
-         double qPrivilieged = qPrivOptimized[i].getValue();
          OneDoFJointBasics joint = wholeBodyContactState.getOneDoFJoints()[i];
          double jointRangeOfMotion = joint.getJointLimitUpper() - joint.getJointLimitLower();
          double jointLimitReduction = jointRangeOfMotion * JOINT_LIMIT_REDUCTION_PERCENTAGE;
-         qPrivilieged = EuclidCoreTools.clamp(qPrivilieged, joint.getJointLimitLower() + jointLimitReduction, joint.getJointLimitUpper() - jointLimitReduction);
-         qPrivOptimizedRateLimited[i].update(qPrivilieged);
+         qOffsetSetpoint = EuclidCoreTools.clamp(qOffsetSetpoint, joint.getJointLimitLower() + jointLimitReduction, joint.getJointLimitUpper() - jointLimitReduction);
+         qPrivOptimized[i].set(qOffsetSetpoint);
       }
 
       int linearZIndex = 5;
-      double qdPelvisHeight = qdMultiplier.getValue() * postureOptimizer.getOptimizedWholeBodyVelocity().get(linearZIndex);
+      double qdPelvisHeight = WHOLE_BODY_POSTURE_ADJUSTMENT_MAGNITUDE * postureOptimizer.getNomalizedStabilityGradient().get(linearZIndex);
       double qPelvisHeight = optimizedPelvisHeight.getValue() + updateDT * qdPelvisHeight;
       qPelvisHeight = EuclidCoreTools.clamp(qPelvisHeight, minOptimizedPelvisHeight.getValue(), maxOptimizedPelvisHeight.getValue());
       optimizedPelvisHeight.update(qPelvisHeight);
 
-      tempVector.set(0, postureOptimizer.getOptimizedWholeBodyVelocity());
-      pelvisRotationVectorAdjustment.setAndScale(qdMultiplier.getValue() * updateDT, tempVector);
+      tempVector.set(0, postureOptimizer.getNomalizedStabilityGradient());
+      pelvisRotationVectorAdjustment.setAndScale(WHOLE_BODY_POSTURE_ADJUSTMENT_MAGNITUDE * updateDT, tempVector);
       pelvisRotationQuaternionAdjustment.setRotationVector(pelvisRotationVectorAdjustment);
       integratedPelvisOrientation.append(pelvisRotationQuaternionAdjustment);
 
-      // TODO clamp to max yaw/pitch/roll
+      tmpOrientation.setIncludingFrame(ReferenceFrame.getWorldFrame(), integratedPelvisOrientation);
+      tmpOrientation.changeFrame(midFeetZUpFrame);
+      double clampedYaw = EuclidCoreTools.clamp(tmpOrientation.getYaw(), Math.toRadians(40.0));
+      double clampedPitch = EuclidCoreTools.clamp(tmpOrientation.getPitch(), Math.toRadians(45.0));
+      double clampedRoll = EuclidCoreTools.clamp(tmpOrientation.getYaw(), Math.toRadians(35.0));
+      tmpOrientation.setYawPitchRoll(clampedYaw, clampedPitch, clampedRoll);
+      tmpOrientation.changeFrame(ReferenceFrame.getWorldFrame());
+      initialPelvisOrientation.set(tmpOrientation);
 
       optimizedPelvisOrientation.set(integratedPelvisOrientation);
-      optimizedPelvisOrientationRateLimited.update();
+      optimizedPelvisOrientationRateLimited.set(optimizedPelvisOrientation);
    }
 
    private void updateTowardsNominalPosture()
    {
       // Update privileged configuration
+      double deltaQNominalMagnitude = 0.0;
       for (int i = 0; i < qPrivOptimized.length; i++)
       {
-         qPrivOptimized[i].set(qPrivNominal[i].getValue());
-         double qPrivileged = qPrivOptimized[i].getValue();
-         qPrivOptimizedRateLimited[i].update(qPrivileged);
+         deltaQNominalMagnitude += MathTools.square(qPrivNominal[i].getValue() - qPrivOptimized[i].getValue());
       }
+      deltaQNominalMagnitude = Math.sqrt(deltaQNominalMagnitude);
 
-      // TODO towards nominal pelvis height/orientation
+      boolean isEpsilonFromNominal = deltaQNominalMagnitude < WHOLE_BODY_POSTURE_ADJUSTMENT_MAGNITUDE * updateDT;
+      for (int i = 0; i < qPrivOptimized.length; i++)
+      {
+         if (isEpsilonFromNominal)
+         {
+            qPrivOptimized[i].set(qPrivNominal[i].getValue());
+         }
+         else
+         {
+            double q0 = qPrivOptimized[i].getValue();
+            double qd = (qPrivNominal[i].getValue() - qPrivOptimized[i].getValue()) * WHOLE_BODY_POSTURE_ADJUSTMENT_MAGNITUDE / deltaQNominalMagnitude;
+            qPrivOptimized[i].set(q0 + qd * updateDT);
+         }
+      }
    }
 
    private void onOptimizerEnabled()
@@ -377,11 +395,6 @@ public class KinematicsToolboxMultiContactManager
 
       integratedPelvisOrientation.set(tempPose.getOrientation());
       initialPelvisOrientation.set(tempPose.getOrientation());
-
-      for (int i = 0; i < qPrivNominal.length; i++)
-      { // In case it's partially decayed and switches back to OPTIMIZER, go ahead and reinitialize here
-         qPrivOptimized[i].set(qPrivOptimizedRateLimited[i].getValue());
-      }
    }
 
    public boolean isActivated()
@@ -414,7 +427,7 @@ public class KinematicsToolboxMultiContactManager
             OneDoFJointFeedbackControlCommand jointFeedbackCommand = bufferToPack.addOneDoFJointFeedbackControlCommand();
             jointFeedbackCommand.setJoint(joint);
             jointFeedbackCommand.setWeightForSolver(activationAlpha.getValue() * postureOptimizationWeight.getValue());
-            jointFeedbackCommand.setInverseKinematics(qPrivOptimizedRateLimited[i].getValue(), 0.0);
+            jointFeedbackCommand.setInverseKinematics(qPrivOptimized[i].getValue(), 0.0);
             jointFeedbackCommand.setGains(jointspaceGains);
          }
       }
@@ -456,7 +469,7 @@ public class KinematicsToolboxMultiContactManager
          OneDoFJointBasics[] oneDoFJoints = wholeBodyContactState.getOneDoFJoints();
          for (int i = 0; i < oneDoFJoints.length; i++)
          {
-            privilegedConfigurationCommand.addJoint(oneDoFJoints[i], qPrivOptimizedRateLimited[i].getValue());
+            privilegedConfigurationCommand.addJoint(oneDoFJoints[i], qPrivOptimized[i].getValue());
             //         privilegedConfigurationCommand.addJoint(oneDoFJoints[i], qPrivNominal[i].getValue());
          }
       }

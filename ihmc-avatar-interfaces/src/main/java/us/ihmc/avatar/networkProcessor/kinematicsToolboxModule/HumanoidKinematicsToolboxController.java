@@ -39,6 +39,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.HumanoidKinematicsToolboxConfigurationCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -295,7 +296,13 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       multiContactRegionCalculator.setupForStabilityMarginCalculation(() -> centerOfMass);
 
       wholeBodyContactState = new WholeBodyContactState(desiredOneDoFJoints, rootJoint);
-      multiContactManager = new KinematicsToolboxMultiContactManager(wholeBodyContactState, multiContactRegionCalculator, desiredFullRobotModel, desiredReferenceFrames.getCenterOfMassFrame(), updateDT, registry);
+      multiContactManager = new KinematicsToolboxMultiContactManager(wholeBodyContactState,
+                                                                     multiContactRegionCalculator,
+                                                                     desiredFullRobotModel,
+                                                                     desiredReferenceFrames.getCenterOfMassFrame(),
+                                                                     desiredReferenceFrames.getMidFeetZUpFrame(),
+                                                                     updateDT,
+                                                                     registry);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -321,7 +328,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       }
 
       populateDefaultJointLimitReductionFactors();
-      rigidBodyCommandMutator = this::mutateExternalWeights;
+      rigidBodyCommandMutator = this::mutateExternalRigidBodyWeights;
+      centerOfMassCommandMutator = this::mutateExternalCenterOfMassWeights;
 
       YoArtifactPolygon multiContactCoMRegionArtifact = new YoArtifactPolygon("Multi-Contact CoM Region Ext",
                                                                               unoptimizedStabilityRegion, new Color(120, 130, 10), false, 5);
@@ -923,7 +931,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       }
    }
 
-   private void mutateExternalWeights(KinematicsToolboxRigidBodyCommand command)
+   private void mutateExternalRigidBodyWeights(KinematicsToolboxRigidBodyCommand command)
    {
       if (!isUpperBodyLoadBearing.getValue())
          return;
@@ -940,6 +948,28 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          else
          {
             command.getWeightMatrix().getAngularPart().scale(orientationWeightRatio);
+         }
+      }
+   }
+
+   private void mutateExternalCenterOfMassWeights(KinematicsToolboxCenterOfMassCommand command)
+   {
+      if (!isUpperBodyLoadBearing.getValue())
+         return;
+
+      if (runWithPostureOptimizer.getValue())
+      {
+         double activationAlpha = multiContactManager.getActivationAlpha();
+         double weightRatio = 1.0 - activationAlpha;
+
+         if (weightRatio < 1.0e-6)
+         {
+            command.getSelectionMatrix().selectZAxis(false);
+         }
+         else
+         {
+            double weightZ = command.getWeightMatrix().getZAxisWeight();
+            command.getWeightMatrix().setZAxisWeight(weightRatio * weightZ);
          }
       }
    }

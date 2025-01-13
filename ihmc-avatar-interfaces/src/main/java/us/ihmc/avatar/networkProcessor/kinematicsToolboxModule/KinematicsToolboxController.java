@@ -450,6 +450,7 @@ public class KinematicsToolboxController extends ToolboxController
    private final MomentumCommand momentumCommandForRateMinimization = new MomentumCommand();
 
    protected Consumer<KinematicsToolboxRigidBodyCommand> rigidBodyCommandMutator = command -> {};
+   protected Consumer<KinematicsToolboxCenterOfMassCommand> centerOfMassCommandMutator = command -> {};
 
    public KinematicsToolboxController(CommandInputManager commandInputManager,
                                       StatusMessageOutputManager statusOutputManager,

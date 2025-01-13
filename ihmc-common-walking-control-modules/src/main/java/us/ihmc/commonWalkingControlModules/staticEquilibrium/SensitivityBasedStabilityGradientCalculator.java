@@ -182,7 +182,7 @@ public class SensitivityBasedStabilityGradientCalculator
       yoPostureSensitivity.set(Math.sqrt(optimalSensitivity));
 
       CommonOps_DDRM.mult(nullspaceCalculator.getNullspace(), computedSensitivity, optimizedWholeBodyVelocity);
-      foundSolution.set(normalize(optimizedWholeBodyVelocity));
+      foundSolution.set(normalize(optimizedWholeBodyVelocity, 1.0e-5));
 
       for (int i = 0; i < yoOptimizedWholeBodyVelocity.length; i++)
       {
@@ -233,7 +233,7 @@ public class SensitivityBasedStabilityGradientCalculator
                yoPostureSensitivity.set(Math.sqrt(optimalSensitivity));
 
                CommonOps_DDRM.mult(nullspaceCalculator.getNullspace(), computedSensitivity, optimizedWholeBodyVelocity);
-               foundSolution.set(normalize(optimizedWholeBodyVelocity));
+               foundSolution.set(normalize(optimizedWholeBodyVelocity, 1.0e-5));
 
                // Reset update flags
                updateNullspace.set(true);
@@ -368,7 +368,7 @@ public class SensitivityBasedStabilityGradientCalculator
          }
 
          CommonOps_DDRM.mult(contactNullspace, nullspaceRandomSample, randomSampleWholeBodyVelocity);
-         if (!normalize(randomSampleWholeBodyVelocity))
+         if (!normalize(randomSampleWholeBodyVelocity, 1.0e-5))
             continue;
          DMatrixRMaj solverConstraintVariationRand = postureConstraintVariationCalculator.computeFiniteDifference(randomSampleWholeBodyVelocity);
 
@@ -423,7 +423,7 @@ public class SensitivityBasedStabilityGradientCalculator
       return yoContactPointSensitivity.getValue();
    }
 
-   private static boolean normalize(DMatrixRMaj matrix)
+   static boolean normalize(DMatrixRMaj matrix, double eps)
    {
       if (!MatrixFeatures_DDRM.isVector(matrix))
          return false;
@@ -434,7 +434,7 @@ public class SensitivityBasedStabilityGradientCalculator
          magnitudeSq += EuclidCoreTools.square(matrix.get(i));
       }
 
-      if (magnitudeSq < 1.0e-10)
+      if (magnitudeSq < eps)
          return false;
 
       CommonOps_DDRM.scale(1.0 / Math.sqrt(magnitudeSq), matrix);
@@ -451,7 +451,7 @@ public class SensitivityBasedStabilityGradientCalculator
       return Math.min(Math.abs(joint.getQ() - joint.getJointLimitLower()), Math.abs(joint.getQ() - joint.getJointLimitUpper()));
    }
 
-   public DMatrixRMaj getOptimizedWholeBodyVelocity()
+   public DMatrixRMaj getNomalizedStabilityGradient()
    {
       return optimizedWholeBodyVelocity;
    }

@@ -144,7 +144,7 @@ public class MultiContactPostureAdjustmentCalculator implements WholeBodyPosture
 
    private void updateVelocities()
    {
-      DMatrixRMaj optimizedWholeBodyVelocity = postureOptimizer.getOptimizedWholeBodyVelocity();
+      DMatrixRMaj optimizedWholeBodyVelocity = postureOptimizer.getNomalizedStabilityGradient();
 
       pelvisAngularVelocityPostureAdjustment.set(0, optimizedWholeBodyVelocity);
       qdPelvisHeightPostureAdjustment.set(optimizedWholeBodyVelocity.get(5, 0));
