@@ -4,6 +4,7 @@ import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
@@ -205,6 +206,22 @@ public class ZEDImageSensor extends ImageSensor
          if (returnCode == SL_ERROR_CODE_END_OF_SVOFILE_REACHED)
          {
             sl_set_svo_position(0, 0);
+
+            if (positionalTrackingEnabled)
+            {
+               sensorRotation.x(0.0f);
+               sensorRotation.y(0.0f);
+               sensorRotation.z(0.0f);
+               sensorRotation.w(1.0f);
+
+               sensorTranslation.x(0.0f);
+               sensorTranslation.y(0.0f);
+               sensorTranslation.z(0.0f);
+
+               sl_reset_positional_tracking(cameraID, sensorRotation, sensorTranslation);
+               trackedSensorFrame.update(RigidBodyTransformBasics::setToZero);
+            }
+
             return false;
          }
 
