@@ -23,6 +23,7 @@ import us.ihmc.zed.SL_Vector3;
 import us.ihmc.zed.library.ZEDJavaAPINativeLibrary;
 
 import java.time.Instant;
+import java.util.UUID;
 
 import static us.ihmc.zed.global.zed.*;
 
@@ -184,7 +185,8 @@ public class ZEDImageSensor extends ImageSensor
    @Override
    public boolean isSensorRunning()
    {
-      return sl_is_opened(cameraID) && !lastGrabFailed;
+      boolean recentlyGrabbed = lastGrabTime != null && lastGrabTime.isAfter(Instant.now().minusSeconds(1));
+      return sl_is_opened(cameraID) && !lastGrabFailed && recentlyGrabbed;
    }
 
    @Override
