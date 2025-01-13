@@ -28,22 +28,12 @@ public class StreamingTools
                          entry("tlpktdrop", "1"),        // "Too late packet drop" - drop packets that arrive/are sent too late
                          entry("rcvlatency", "50"),
                          entry("peerlatency", "50"),     // 50ms of buffer delay for packet loss correction
-                         entry("mss", "1360"),           // Max packet size of MPEG-TS
-                         entry("payload_size", "1316")); // Payload size of MPEG-TS
+                         entry("mss", "1500"),           // Max segment size
+                         entry("payload_size", "1456")); // Max payload size
 
    public static Map<String, String> getLiveSRTOptions()
    {
       return new HashMap<>(LIVE_SRT_OPTIONS);
-   }
-
-   private static final Map<String, String> LIBX265_HIGH_QUALITY_STREAMING_OPTIONS
-         = Map.ofEntries(entry("preset", "superfast"),
-                         entry("tune", "zerolatency"),
-                         entry("x265-params", "crf-min=2.5:crf=7.5:crf-max=15.0:cbqpoffs=6:crqpoffs=6:repeat-headers=true:info=false:log-level=warning"));
-
-   public static Map<String, String> getLibX265HighQualityStreamingOptions()
-   {
-      return new HashMap<>(LIBX265_HIGH_QUALITY_STREAMING_OPTIONS);
    }
 
    /** hevc_nvenc options can be found using {@code ffmpeg -hide_banner -h encoder=hevc_nvenc}. */

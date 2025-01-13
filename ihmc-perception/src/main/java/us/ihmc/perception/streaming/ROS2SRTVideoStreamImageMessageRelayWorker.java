@@ -48,7 +48,7 @@ public class ROS2SRTVideoStreamImageMessageRelayWorker
                                                     ROS2SRTStreamTopicPair streamTopicPair,
                                                     CompressionType compressionType)
    {
-      PixelFormat outputPixelFormat = streamTopicPair.isDepth() ? PixelFormat.YUV444P : PixelFormat.BGR8;
+      PixelFormat outputPixelFormat = streamTopicPair.isDepth() ? PixelFormat.GRAY16 : PixelFormat.BGR8;
 
       imageMessage = new ImageMessage();
       imageMessage.setPixelFormat(outputPixelFormat.toByte());
