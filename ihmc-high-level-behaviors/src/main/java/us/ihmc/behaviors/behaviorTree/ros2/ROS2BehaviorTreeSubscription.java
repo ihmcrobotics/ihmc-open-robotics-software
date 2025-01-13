@@ -39,7 +39,7 @@ public class ROS2BehaviorTreeSubscription<HLT extends BehaviorTreeNode<HLT, ? ,?
       this.behaviorTree = behaviorTree;
 
       topic = AutonomyAPI.BEHAVIOR_TREE.getTopic(behaviorTree.getCRDTInfo().getActorDesignation().getIncomingQualifier());
-      int maxClientSoftLimit = 4; // This buffer prevents race conditions between clients
+      int maxClientSoftLimit = 3; // This buffer prevents race conditions between clients
       behaviorTreeStateMessageQueue = ros2PublishSubscribeAPI.subscribeViaQueue(topic, maxClientSoftLimit, behaviorTreeStateMessage ->
       {
          ++numberOfMessagesReceived;
