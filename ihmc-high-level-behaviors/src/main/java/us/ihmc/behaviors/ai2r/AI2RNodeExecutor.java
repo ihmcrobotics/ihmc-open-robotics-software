@@ -2,6 +2,7 @@ package us.ihmc.behaviors.ai2r;
 
 import behavior_msgs.msg.dds.AI2RObjectMessage;
 import behavior_msgs.msg.dds.AI2RStatusMessage;
+import controller_msgs.msg.dds.AbortWalkingMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
@@ -186,8 +187,9 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
                            if(positionNextStep.distanceXY(objectPosition) < DISTANCE_COLLISION_THRESHOLD)
                            {
                               gotoActionState.setFailed(true);
-                              // set abort flag in state and have the executor abort
-                              gotoActionState.setAbortWalking(true);
+                              // Have the executor abort
+                              ros2.publishToController(new AbortWalkingMessage());
+
                               plannedSteps = null;
                               break goToCollisionLoop;
                            }
