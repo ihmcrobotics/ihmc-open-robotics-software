@@ -281,24 +281,30 @@ public class KinematicsStreamingToolboxParameters
    public void setDefault()
    {
       clockType = ClockType.CPU_CLOCK;
-      toolboxUpdatePeriod = 0.005;
+      toolboxUpdatePeriod = 0.003;
       timeThresholdForSleeping = 3.0;
-      streamIntegrationDuration = 0.3;
+
+      useStreamingPublisher = true;
+      publishingPeriod = 0.006;
+
+      boolean usingRealtimePlugin = false;
+      streamIntegrationDuration = usingRealtimePlugin ? 2.0 * publishingPeriod : 0.1;
+
+      holdChestAngularWeight.set(1.0, 1.0, 0.5);
+      holdPelvisLinearWeight.set(10.0, 10.0, 20.0);
+      holdPelvisAngularWeight.set(1.0, 1.0, 1.0);
+      holdArmWeight = 10.0;
+      holdNeckWeight = 10.0;
 
       centerOfMassSafeMargin = 0.05;
       centerOfMassHoldWeight = 0.001;
       publishingSolutionPeriod = UnitConversions.hertzToSeconds(60.0);
-      holdArmWeight = 10.0;
-      holdNeckWeight = 10.0;
-      holdPelvisLinearWeight.set(2.5, 2.5, 2.5);
-      holdPelvisAngularWeight.set(1.0, 1.0, 1.0);
-      holdChestAngularWeight.set(0.75, 0.75, 0.75);
 
       lockPelvisWeight = 1000.0;
       lockChestWeight = 1000.0;
 
-      defaultLinearWeight.set(20.0, 20.0, 20.0);
-      defaultAngularWeight.set(1.0, 1.0, 1.0);
+      defaultLinearWeight.set(10.0, 10.0, 10.0);
+      defaultAngularWeight.set(0.005, 0.005, 0.005); // TODO This is tuned for the 4-DoF arms. We want to relax the orientation tracking which we don't have good control over.
       defaultPelvisLinearWeight.set(defaultLinearWeight);
       defaultPelvisAngularWeight.set(defaultAngularWeight);
       defaultChestLinearWeight.set(defaultLinearWeight);
@@ -309,44 +315,43 @@ public class KinematicsStreamingToolboxParameters
       defaultLinearGain = 50.0;
       defaultAngularGain = 50.0;
       defaultSingleJointGain = 50.0;
-      defaultLinearRateLimit = 1.5;
-      defaultAngularRateLimit = 10.0;
-      outputJointVelocityScale = 0.75;
-      outputFeedbackGain = 500.0;
-      outputFeedbackDampingRatio = 1.0;
-      outputLPFBreakFrequency = Double.POSITIVE_INFINITY;
+
+      defaultLinearRateLimit = 10.0;
+      defaultAngularRateLimit = 100.0;
 
       minimizeAngularMomentum = true;
-      minimizeLinearMomentum = false;
-      angularMomentumWeight = new Vector3D(0.125, 0.125, 0.125);
-      linearMomentumWeight = new Vector3D();
+      minimizeLinearMomentum = true;
+      angularMomentumWeight = new Vector3D(0.2, 0.2, 0.2);
+      linearMomentumWeight = new Vector3D(0.01, 0.01, 0.0);
 
-      minimizeAngularMomentumRate = false;
-      minimizeLinearMomentumRate = false;
-      angularMomentumRateWeight = new Vector3D();
-      linearMomentumRateWeight = new Vector3D();
+      minimizeAngularMomentumRate = true;
+      minimizeLinearMomentumRate = true;
+      angularMomentumRateWeight = new Vector3D(1.0, 1.0, 1.0);
+      linearMomentumRateWeight = new Vector3D(1.0, 1.0, 1.0);
 
       defaultStreamingBlendingDuration = 2.0;
-
-      inputPoseLPFBreakFrequency = 4.0;
+      inputPoseLPFBreakFrequency = 15.0;
+      inputPoseCorrectionDuration = 0.05; // Need to send inputs at 30Hz.
       inputWeightDecayDuration = 3.0;
       inputVelocityDecayDuration = 0.5;
-      inputVelocityRawAlpha = 0.9;
-      inputPoseCorrectionDuration = 0.15;
-      useBBXInputFilter = false;
+      inputVelocityRawAlpha = 0.65; // TODO This prob can be 1.0, afraid of overshoots.
+      inputStateEstimatorType = InputStateEstimatorType.FBC_STYLE;
+      useBBXInputFilter = true;
+      inputFilterBBXSize = new Vector3D(2.0, 2.8, 2.6);
+      inputFilterBBXCenter = new Point3D(0.4, 0.0, 1.25);
 
-      useStreamingPublisher = true;
-      publishingPeriod = 5.0 * 0.006;
-
-      inputStateEstimatorType = InputStateEstimatorType.FIRST_ORDER_LPF;
+      outputJointVelocityScale = 0.5;
+      outputFeedbackGain = 500.0;
+      outputFeedbackDampingRatio = 1.0;
+      outputLPFBreakFrequency = 10.0;
 
       defaultConfiguration.setLockPelvis(false);
       defaultConfiguration.setLockChest(false);
       defaultConfiguration.setEnableLeftArmJointspace(true);
       defaultConfiguration.setEnableRightArmJointspace(true);
       defaultConfiguration.setEnableNeckJointspace(true);
-      defaultConfiguration.setEnableLeftHandTaskspace(true);
-      defaultConfiguration.setEnableRightHandTaskspace(true);
+      defaultConfiguration.setEnableLeftHandTaskspace(false);
+      defaultConfiguration.setEnableRightHandTaskspace(false);
       defaultConfiguration.setEnableChestTaskspace(true);
       defaultConfiguration.setEnablePelvisTaskspace(true);
       defaultConfiguration.setLeftHandTrajectoryFrameId(ReferenceFrame.getWorldFrame().getFrameNameHashCode());
@@ -354,7 +359,8 @@ public class KinematicsStreamingToolboxParameters
       defaultConfiguration.setChestTrajectoryFrameId(ReferenceFrame.getWorldFrame().getFrameNameHashCode());
       defaultConfiguration.setPelvisTrajectoryFrameId(ReferenceFrame.getWorldFrame().getFrameNameHashCode());
 
-      defaultSolverConfiguration.setJointVelocityWeight(1.0);
+      defaultSolverConfiguration.setJointVelocityWeight(0.05);
+      defaultSolverConfiguration.setJointAccelerationWeight(0.0); // As soon as we increase this guy, we inject springy behavior.
       defaultSolverConfiguration.setEnableJointVelocityLimits(true);
 
       // Use the solver's default values for the following:

@@ -592,7 +592,6 @@ public class KinematicsToolboxController extends ToolboxController
          if (q_priv != null)
             initialRobotConfigurationMap.put(joint, q_priv);
       }
-      LogTools.warn("Set initial configuration map");
    }
 
    /**

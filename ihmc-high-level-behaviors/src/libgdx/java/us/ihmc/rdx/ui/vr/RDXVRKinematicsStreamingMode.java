@@ -207,42 +207,13 @@ public class RDXVRKinematicsStreamingMode
          KinematicsStreamingToolboxParameters parameters = new KinematicsStreamingToolboxParameters();
          parameters.setDefault();
          parameters.setToolboxUpdatePeriod(0.003);
-         parameters.setPublishingPeriod(0.006); // Publishing period in seconds.
-         boolean usingRealtimePlugin = false;
-         parameters.setStreamIntegrationDuration(usingRealtimePlugin ? 2.0 * parameters.getPublishingPeriod() : 0.1);
-         parameters.setHoldChestAngularWeight(1.0, 1.0, 0.5);
-         parameters.setHoldPelvisLinearWeight(10.0, 10.0, 20.0);
-         parameters.setDefaultLinearRateLimit(10.0);
-         parameters.setDefaultAngularRateLimit(100.0);
-         parameters.setDefaultLinearWeight(10.0);
-         parameters.setDefaultAngularWeight(0.005); // TODO This is tuned for the 4-DoF arms. We want to relax the orientation tracking which we don't have good control over.
-         parameters.setInputPoseLPFBreakFrequency(15.0);
-         parameters.setInputPoseCorrectionDuration(0.05); // Need to send inputs at 30Hz.
-         parameters.setInputVelocityRawAlpha(0.65); // TODO This prob can be 1.0, afraid of overshoots.
-         parameters.setInputStateEstimatorType(KinematicsStreamingToolboxParameters.InputStateEstimatorType.FBC_STYLE);
-         parameters.setUseBBXInputFilter(true);
-         parameters.setInputBBXFilterSize(2.0, 2.8, 2.6);
-         parameters.setInputBBXFilterCenter(0.4, 0.0, 1.25);
-         parameters.setOutputLPFBreakFrequency(10.0);
-         parameters.setOutputJointVelocityScale(0.5);
-
-         parameters.setMinimizeAngularMomentum(true);
-         parameters.setMinimizeLinearMomentum(true);
-         parameters.setAngularMomentumWeight(0.20);
-         parameters.setLinearMomentumWeight(0.01);
-
-         parameters.setMinimizeAngularMomentumRate(true);
-         parameters.setMinimizeLinearMomentumRate(true);
-         parameters.setAngularMomentumRateWeight(1.0);
-         parameters.setLinearMomentumRateWeight(1.0);
-
+         parameters.setPublishingPeriod(0.006);
+         parameters.setStreamIntegrationDuration(0.1); // not using real-time plugin
          parameters.getDefaultConfiguration().setEnableLeftHandTaskspace(false);
          parameters.getDefaultConfiguration().setEnableRightHandTaskspace(false);
          parameters.getDefaultConfiguration().setEnableNeckJointspace(false);
-         parameters.getDefaultSolverConfiguration().setJointVelocityWeight(0.05);
-         parameters.getDefaultSolverConfiguration().setJointAccelerationWeight(0.0); // As soon as we increase this guy, we inject springy behavior.
-
-         parameters.getDefaultSolverConfiguration().setEnableJointVelocityLimits(true);
+         parameters.setUseBBXInputFilter(true);
+         parameters.setDefaultStreamingBlendingDuration(0.5);
 
          if (robotModel != null)
          {
@@ -533,7 +504,6 @@ public class RDXVRKinematicsStreamingMode
          }
          // ---------- End  Motion retargeting -------------
 
-
          if (controlArmsOnly.get())
          { // If option 'Control Arms Only' is active, lock pelvis and chest to current pose
             lockChest(toolboxInputMessage);
@@ -549,11 +519,8 @@ public class RDXVRKinematicsStreamingMode
          else
             toolboxInputMessage.setStreamToController(kinematicsRecorder.isReplaying());
 
-//         if (!pausedForWalking || reintializingToolbox)
-//         {
-            ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputToolboxConfigurationTopic(syncedRobot.getRobotModel().getSimpleRobotName()), ikSolverConfigurationMessage);
-            ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputCommandTopic(syncedRobot.getRobotModel().getSimpleRobotName()), toolboxInputMessage);
-//         }
+         ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputToolboxConfigurationTopic(syncedRobot.getRobotModel().getSimpleRobotName()), ikSolverConfigurationMessage);
+         ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputCommandTopic(syncedRobot.getRobotModel().getSimpleRobotName()), toolboxInputMessage);
          outputFrequencyPlot.recordEvent();
 
          footstepStreaming.processVRInput(gripButtonsValue.get(RobotSide.LEFT) > 0.5f && gripButtonsValue.get(RobotSide.RIGHT) > 0.5f);
