@@ -6,25 +6,25 @@ import java.util.List;
 /**
  * The base interface for a tree node with a list of children and a reference to the parent.
  *
- * @param <LT> The generic type of this node layer: UI, Executor, State, or Definition
+ * @param <T> The generic type of this node.
  */
-public interface TreeNode<LT extends TreeNode<LT>>
+public interface TreeNode<T extends TreeNode<T>>
 {
    /**
     * @return The node's children in order
     */
-   List<LT> getChildren();
+   List<T> getChildren();
 
    /**
     * @param parent Sets the parent node or null if this is the root node
     */
-   void setParent(@Nullable LT parent);
+   void setParent(@Nullable T parent);
 
    /**
     * @return The parent node or null if this is the root node
     */
    @Nullable
-   LT getParent();
+   T getParent();
 
    default boolean isRootNode()
    {
