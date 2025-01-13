@@ -1,12 +1,8 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
-import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
@@ -76,50 +72,6 @@ public abstract class HighLevelControllerState implements State, JointLoadStatus
    {
       return null;
    }
-
-   public ControllerCoreCommand getControllerCoreCommand()
-   {
-      return null;
-   }
-
-   public FramePose3D getMPCSolutionFloatingBasePose()
-   {
-      return null;
-   }
-
-   public FrameVector3D getMPCSolutionFloatingBaseLinearVelocity()
-   {
-      return null;
-   }
-
-   public FrameVector3D getMPCSolutionFloatingBaseAngularVelocity()
-   {
-      return null;
-   }
-
-   public DMatrixRMaj getQuMatrix()
-   {
-      return null;
-   }
-
-   public DMatrixRMaj getQuuMatrix()
-   {
-      return null;
-   }
-
-   public DMatrixRMaj getQxuMatrix()
-   {
-      return null;
-   }
-   public int getMPCControlSize()
-   {
-      return 0;
-   }
-   public double getMPCCostCommandWeight()
-   {
-      return 0.0;
-   }
-
 
    @Override
    public boolean isDone(double timeInState)
