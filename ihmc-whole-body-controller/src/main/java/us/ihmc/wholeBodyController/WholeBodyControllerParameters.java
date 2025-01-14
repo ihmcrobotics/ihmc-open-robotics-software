@@ -12,29 +12,32 @@ import java.io.InputStream;
 
 public interface WholeBodyControllerParameters<E extends Enum<E> & RobotSegment<E>>
 {
-   public double getControllerDT();
+   double getControllerDT();
 
-   public default double getSimulatedHandControlDT()
+   default double getSimulatedHandControlDT()
    {
       return getControllerDT();
    }
 
-   public double getWholeBodyControllerCoreDT();
+   default double getWholeBodyControllerCoreDT()
+   {
+      return 0.0;
+   }
 
-   public StateEstimatorParameters getStateEstimatorParameters();
+   StateEstimatorParameters getStateEstimatorParameters();
 
-   public CoPTrajectoryParameters getCoPTrajectoryParameters();
+   CoPTrajectoryParameters getCoPTrajectoryParameters();
 
    default SplitFractionCalculatorParametersReadOnly getSplitFractionCalculatorParameters()
    {
       return new DefaultSplitFractionCalculatorParameters();
    }
 
-   public WalkingControllerParameters getWalkingControllerParameters();
+   WalkingControllerParameters getWalkingControllerParameters();
 
-   public RobotContactPointParameters<E> getContactPointParameters();
+   RobotContactPointParameters<E> getContactPointParameters();
 
-   public HumanoidRobotSensorInformation getSensorInformation();
+   HumanoidRobotSensorInformation getSensorInformation();
 
    /**
     * Get the parameter XML file for the controller.
@@ -42,9 +45,10 @@ public interface WholeBodyControllerParameters<E extends Enum<E> & RobotSegment<
     * Each call to this method should return a new InputStream.
     * If null is returned the default values for the parameters are used.
     * </p>
+    *
     * @return new InputStream with the controller parameters
     */
-   public InputStream getWholeBodyControllerParametersFile();
+   InputStream getWholeBodyControllerParametersFile();
 
    /**
     * Allows to overwrite parameters specified in the {@link #getWholeBodyControllerParametersFile()}
@@ -52,12 +56,12 @@ public interface WholeBodyControllerParameters<E extends Enum<E> & RobotSegment<
     *
     * @return InputStream with the parameters that need to be overwritten.
     */
-   public default InputStream getParameterOverwrites()
+   default InputStream getParameterOverwrites()
    {
       return null;
    }
 
-   public default String getParameterFileName()
+   default String getParameterFileName()
    {
       return "not implemented";
    }
