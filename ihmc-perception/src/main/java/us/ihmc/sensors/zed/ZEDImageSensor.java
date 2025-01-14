@@ -23,7 +23,6 @@ import us.ihmc.zed.SL_Vector3;
 import us.ihmc.zed.library.ZEDJavaAPINativeLibrary;
 
 import java.time.Instant;
-import java.util.UUID;
 
 import static us.ihmc.zed.global.zed.*;
 
@@ -34,7 +33,7 @@ public class ZEDImageSensor extends ImageSensor
       ZEDJavaAPINativeLibrary.load();
    }
 
-   private static int streamingPort = 30000;
+   private static int nextStreamingPort = 30000;
 
    public static final int LEFT_COLOR_IMAGE_KEY = 0;
    public static final int RIGHT_COLOR_IMAGE_KEY = 1;
@@ -48,6 +47,7 @@ public class ZEDImageSensor extends ImageSensor
    private final int cameraID;
    private final ZEDModelData zedModel;
    private final int slInputType;
+   private final int streamingPort = nextStreamingPort++;
 
    private final RawImage[] grabbedImages = new RawImage[OUTPUT_IMAGE_COUNT];
    private final Pointer[] slMatPointers = new Pointer[OUTPUT_IMAGE_COUNT];
@@ -112,7 +112,7 @@ public class ZEDImageSensor extends ImageSensor
             sl_enable_positional_tracking(cameraID, positionalTrackingParameters, "");
          }
 
-         sl_enable_streaming(cameraID, SL_STREAMING_CODEC_H264, 8000, (short) streamingPort++, -1, 0, 16084, CAMERA_FPS);
+         sl_enable_streaming(cameraID, SL_STREAMING_CODEC_H264, 8000, (short) streamingPort, -1, 0, 16084, CAMERA_FPS);
 
          // Get camera intrinsics
          SL_CalibrationParameters sensorIntrinsics = sl_get_calibration_parameters(cameraID, false);
@@ -308,6 +308,11 @@ public class ZEDImageSensor extends ImageSensor
    public int getCameraID()
    {
       return cameraID;
+   }
+
+   public int getStreamingPort()
+   {
+      return streamingPort;
    }
 
    public void enablePositionalTracking(boolean enable)
