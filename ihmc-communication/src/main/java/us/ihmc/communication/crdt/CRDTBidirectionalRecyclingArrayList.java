@@ -15,9 +15,9 @@ import java.util.function.Consumer;
  */
 public class CRDTBidirectionalRecyclingArrayList<T> extends CRDTBidirectionalMutableField<RecyclingArrayList<T>>
 {
-   public CRDTBidirectionalRecyclingArrayList(RequestConfirmFreezable requestConfirmFreezable, RecyclingArrayList<T> initialValue)
+   public CRDTBidirectionalRecyclingArrayList(LatestTimestampModifiable latestTimestampModifiable, RecyclingArrayList<T> initialValue)
    {
-      super(requestConfirmFreezable, initialValue);
+      super(latestTimestampModifiable, initialValue);
    }
 
    public T getValueReadOnly(int index)
@@ -30,11 +30,11 @@ public class CRDTBidirectionalRecyclingArrayList<T> extends CRDTBidirectionalMut
       return getValueInternal().size();
    }
 
-   /** Use to prevent unecessary freezes. */
+   /** Use to prevent unecessary modifications. */
    public void setValue(int index, T value)
    {
       if (!getValueReadOnly(index).equals(value))
-         getValueAndFreeze().set(index, value);
+         getValueAndModify().set(index, value);
    }
 
    public int getLength()
@@ -52,7 +52,7 @@ public class CRDTBidirectionalRecyclingArrayList<T> extends CRDTBidirectionalMut
 
    public void fromMessage(Consumer<RecyclingArrayList<T>> valueConsumer)
    {
-      if (!isFrozen()) // Ignore updates if we are frozen
+      if (isModificationIncoming())
       {
          valueConsumer.accept(getValueInternal());
       }

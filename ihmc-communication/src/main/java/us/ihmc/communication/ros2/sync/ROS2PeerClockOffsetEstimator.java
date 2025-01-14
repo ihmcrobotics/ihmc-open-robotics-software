@@ -146,6 +146,16 @@ public class ROS2PeerClockOffsetEstimator
       publisher.remove();
    }
 
+   public Guid getOurGuid()
+   {
+      return ourGuid;
+   }
+
+   public HashMap<Guid, ROS2PeerClockOffsetEstimatorPeer> getPeerMap()
+   {
+      return peerMap;
+   }
+
    public List<ROS2PeerClockOffsetEstimatorPeer> getPeerList()
    {
       return peerList;

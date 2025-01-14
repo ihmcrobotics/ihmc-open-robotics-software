@@ -130,15 +130,15 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       parentFrameName.setValue(jsonNode.get("parentFrame").textValue());
       isManuallyPlaced.setValue(jsonNode.get("footsteps") != null);
 
-      manuallyPlacedFootsteps.getValueAndFreeze().clear();
+      manuallyPlacedFootsteps.getValueAndModify().clear();
       if (isManuallyPlaced.getValue())
       {
-         JSONTools.forEachArrayElement(jsonNode, "footsteps", footstepNode -> manuallyPlacedFootsteps.getValueAndFreeze().add().loadFromFile(footstepNode));
+         JSONTools.forEachArrayElement(jsonNode, "footsteps", footstepNode -> manuallyPlacedFootsteps.getValueAndModify().add().loadFromFile(footstepNode));
       }
       else
       {
-         JSONTools.toEuclid(jsonNode, "goalStancePoint", goalStancePoint.getValueAndFreeze());
-         JSONTools.toEuclid(jsonNode, "goalFocalPoint", goalFocalPoint.getValueAndFreeze());
+         JSONTools.toEuclid(jsonNode, "goalStancePoint", goalStancePoint.getValueAndModify());
+         JSONTools.toEuclid(jsonNode, "goalFocalPoint", goalFocalPoint.getValueAndModify());
 
          for (RobotSide side : RobotSide.values)
          {
@@ -195,11 +195,11 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       executionMode.setValue(onDiskExecutionMode);
       parentFrameName.setValue(onDiskParentFrameName);
       isManuallyPlaced.setValue(onDiskIsManuallyPlaced);
-      manuallyPlacedFootsteps.getValueAndFreeze().clear();
+      manuallyPlacedFootsteps.getValueAndModify().clear();
       for (int i = 0; i < onDiskNumberOfFootsteps; i++)
-         manuallyPlacedFootsteps.getValueAndFreeze().add();
-      goalStancePoint.getValueAndFreeze().set(onDiskGoalStancePoint);
-      goalFocalPoint.getValueAndFreeze().set(onDiskGoalFocalPoint);
+         manuallyPlacedFootsteps.getValueAndModify().add();
+      goalStancePoint.getValueAndModify().set(onDiskGoalStancePoint);
+      goalFocalPoint.getValueAndModify().set(onDiskGoalFocalPoint);
       for (RobotSide side : onDiskGoalFootstepToGoalXs.sides())
       {
          goalFootstepToGoalXs.get(side).setValue(onDiskGoalFootstepToGoalXs.get(side));
@@ -208,7 +208,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       }
 
       for (int i = 0; i < manuallyPlacedFootsteps.getSize(); i++)
-         manuallyPlacedFootsteps.getValueAndFreeze().get(i).undoAllNontopologicalChanges();
+         manuallyPlacedFootsteps.getValueAndModify().get(i).undoAllNontopologicalChanges();
       plannerInitialStanceSide.setValue(onDiskPlannerInitialStanceSide);
       plannerPerformAStarSearch.setValue(onDiskPlannerPerformAStarSearch);
       plannerWalkWithGoalOrientation.setValue(onDiskPlannerWalkWithGoalOrientation);
@@ -409,9 +409,9 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       return (DefaultFootstepPlannerParametersReadOnly) plannerParameters.getValueReadOnly();
    }
 
-   public DefaultFootstepPlannerParametersBasics getAndFreezePlannerParameters()
+   public DefaultFootstepPlannerParametersBasics getAndModifyPlannerParameters()
    {
-      return (DefaultFootstepPlannerParametersBasics) plannerParameters.getValueAndFreeze();
+      return (DefaultFootstepPlannerParametersBasics) plannerParameters.getValueAndModify();
    }
 
    public DefaultFootstepPlannerParametersBasics getPlannerParametersUnsafe()
