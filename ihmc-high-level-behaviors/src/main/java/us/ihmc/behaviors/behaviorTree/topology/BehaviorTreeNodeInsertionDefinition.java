@@ -1,139 +1,81 @@
 package us.ihmc.behaviors.behaviorTree.topology;
 
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeLayer;
-import us.ihmc.communication.crdt.RequestConfirmFreezable;
-
-import java.util.function.Consumer;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNode;
 
 /**
- * To use this class, use static {@link #build} method.
+ * @param <HLT> The generic type of this node: RDX or Executor
  */
-public class BehaviorTreeNodeInsertionDefinition<T extends BehaviorTreeNodeLayer<T, ?, ?, ?>>
+public class BehaviorTreeNodeInsertionDefinition<HLT extends BehaviorTreeNode<HLT, ?, ?>>
 {
-   // A lot of these fields may be null depending on the insertion type
-   private T nodeToInsert;
-   private T sibling;
-   private T parent;
-   private RequestConfirmFreezable freezableRootNodeHolder;
-   private Consumer<BehaviorTreeNodeLayer<T, ?, ?, ?>> rootNodeSetter;
-   private BehaviorTreeNodeInsertionType insertionType;
+   private final BehaviorTreeNodeInsertionType insertionType;
+   private HLT nodeToInsert;
+   private HLT sibling;
+   private HLT parent;
    private int insertionIndex;
 
-   public static <R extends BehaviorTreeNodeLayer<R, ?, ?, ?>>
-   BehaviorTreeNodeInsertionDefinition<R> build(R nodeToInsert,
-                                                RequestConfirmFreezable freezableRootNodeHolder,
-                                                Consumer<BehaviorTreeNodeLayer<R, ?, ?, ?>> rootNodeSetter,
-                                                R relativeNode,
-                                                BehaviorTreeNodeInsertionType insertionType)
+   public BehaviorTreeNodeInsertionDefinition(BehaviorTreeNodeInsertionType insertionType, HLT nodeToInsert, HLT relativeNode)
    {
-      BehaviorTreeNodeInsertionDefinition<R> definition = new BehaviorTreeNodeInsertionDefinition<>();
+      this.insertionType = insertionType;
+
       switch (insertionType)
       {
          case INSERT_BEFORE ->
          {
-            definition.setupInsertBefore(nodeToInsert, relativeNode);
+            this.nodeToInsert = nodeToInsert;
+            this.sibling = relativeNode;
+
+            parent = checkSiblingParent();
+            insertionIndex = parent.getChildren().indexOf(sibling);
          }
          case INSERT_AFTER ->
          {
-            definition.setupInsertAfter(nodeToInsert, relativeNode);
+            this.nodeToInsert = nodeToInsert;
+            this.sibling = relativeNode;
+
+            parent = checkSiblingParent();
+            insertionIndex = parent.getChildren().indexOf(sibling) + 1;
          }
          case INSERT_AS_CHILD ->
          {
-            definition.setupInsertChild(nodeToInsert, relativeNode);
+            this.nodeToInsert = nodeToInsert;
+            this.parent = relativeNode;
+
+            insertionIndex = parent.getChildren().size();
          }
          case INSERT_ROOT ->
          {
-            definition.setupInsertRoot(nodeToInsert, freezableRootNodeHolder, rootNodeSetter);
+            this.nodeToInsert = nodeToInsert;
          }
       }
-      return definition;
    }
 
-   private BehaviorTreeNodeInsertionDefinition()
+   private HLT checkSiblingParent()
    {
-      // Disallow public construction
-   }
-
-   private void setupInsertRoot(T newRoot,
-                                RequestConfirmFreezable freezableRootNodeHolder,
-                                Consumer<BehaviorTreeNodeLayer<T, ?, ?, ?>> rootNodeSetter)
-   {
-      this.nodeToInsert = newRoot;
-      this.freezableRootNodeHolder = freezableRootNodeHolder;
-      this.rootNodeSetter = rootNodeSetter;
-
-      insertionType = BehaviorTreeNodeInsertionType.INSERT_ROOT;
-   }
-
-   private void setupInsertBefore(T nodeToInsert,
-                                  T sibling)
-   {
-      this.nodeToInsert = nodeToInsert;
-      this.sibling = sibling;
-
-      parent = checkSiblingParent();
-      insertionType = BehaviorTreeNodeInsertionType.INSERT_BEFORE;
-      insertionIndex = parent.getChildren().indexOf(sibling);
-   }
-
-   private void setupInsertAfter(T nodeToInsert,
-                                 T sibling)
-   {
-      this.nodeToInsert = nodeToInsert;
-      this.sibling = sibling;
-
-      parent = checkSiblingParent();
-      insertionType = BehaviorTreeNodeInsertionType.INSERT_AFTER;
-      insertionIndex = parent.getChildren().indexOf(sibling) + 1;
-   }
-
-   private void setupInsertChild(T nodeToInsert,
-                                 T parent)
-   {
-      this.nodeToInsert = nodeToInsert;
-      this.parent = parent;
-
-      insertionType = BehaviorTreeNodeInsertionType.INSERT_AS_CHILD;
-      insertionIndex = parent.getChildren().size();
-   }
-
-   private T checkSiblingParent()
-   {
-      T parent = sibling.getParent();
+      HLT parent = sibling.getParent();
       if (parent == null)
          throw new RuntimeException("Sibling's parent cannot be null.");
 
       return parent;
    }
 
-   public T getNodeToInsert()
+   public BehaviorTreeNodeInsertionType getInsertionType()
+   {
+      return insertionType;
+   }
+
+   public HLT getNodeToInsert()
    {
       return nodeToInsert;
    }
 
-   public T getSibling()
+   public HLT getSibling()
    {
       return sibling;
    }
 
-   public T getParent()
+   public HLT getParent()
    {
       return parent;
-   }
-
-   public Consumer<BehaviorTreeNodeLayer<T, ?, ?, ?>> getRootNodeSetter()
-   {
-      return rootNodeSetter;
-   }
-
-   public RequestConfirmFreezable getFreezableRootNodeHolder()
-   {
-      return freezableRootNodeHolder;
-   }
-
-   public BehaviorTreeNodeInsertionType getInsertionType()
-   {
-      return insertionType;
    }
 
    public int getInsertionIndex()

@@ -94,7 +94,7 @@ public class DetachableReferenceFrame
 
    public boolean isChildOfWorld()
    {
-      return referenceFrame.getRootFrame() == ReferenceFrame.getWorldFrame();
+      return referenceFrame != null && referenceFrame.getRootFrame() == ReferenceFrame.getWorldFrame();
    }
 
    public ReferenceFrame getReferenceFrame()

@@ -10,9 +10,9 @@ package us.ihmc.communication.crdt;
  */
 public class CRDTBidirectionalEnumField<T extends Enum<T>> extends CRDTBidirectionalImmutableField<T>
 {
-   public CRDTBidirectionalEnumField(RequestConfirmFreezable requestConfirmFreezable, T initialValue)
+   public CRDTBidirectionalEnumField(LatestTimestampModifiable latestTimestampModifiable, T initialValue)
    {
-      super(requestConfirmFreezable, initialValue);
+      super(latestTimestampModifiable, initialValue);
    }
 
    public int toMessageOrdinal()

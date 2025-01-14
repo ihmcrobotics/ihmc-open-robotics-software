@@ -92,9 +92,9 @@ public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinitio
 
    public void fromMessage(HandPoseActionStateMessage message)
    {
-      super.fromMessage(message.getState());
-
       getDefinition().fromMessage(message.getDefinition());
+
+      super.fromMessage(message.getState());
 
       force.fromMessage(message.getForce());
       torque.fromMessage(message.getTorque());

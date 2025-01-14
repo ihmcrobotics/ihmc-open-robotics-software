@@ -8,14 +8,10 @@ import gnu.trove.map.hash.TLongObjectHashMap;
 import imgui.ImGui;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeFileLoader;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeLayer;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
-import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeExtensionSubtreeRebuilder;
+import us.ihmc.behaviors.behaviorTree.BehaviorTree;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionType;
-import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTreeState;
-import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.rdx.imgui.ImGuiExpandCollapseRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -29,13 +25,8 @@ import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
-public class RDXBehaviorTree
+public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeNode<?, ?>>
 {
-   private final CRDTInfo crdtInfo = new CRDTInfo(ROS2ActorDesignation.OPERATOR, (int) ROS2BehaviorTreeState.SYNC_FREQUENCY);
-   private final WorkspaceResourceDirectory treeFilesDirectory;
-   private final RDXBehaviorTreeNodeBuilder nodeBuilder;
-   private final BehaviorTreeExtensionSubtreeRebuilder treeRebuilder;
-   private final BehaviorTreeState state;
    private RDXBehaviorTreeRootNode rootNode;
    /**
     * Useful for accessing nodes by ID instead of searching.
@@ -47,7 +38,6 @@ public class RDXBehaviorTree
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final RDXBehaviorTreeFileMenu fileMenu;
    private final RDXBehaviorTreeNodeCreationMenu nodeCreationMenu;
-   private final BehaviorTreeFileLoader<RDXBehaviorTreeNode<?, ?>> fileLoader;
    private final ImGuiExpandCollapseRenderer expandCollapseAllRenderer = new ImGuiExpandCollapseRenderer();
    private final RDXBehaviorTreeWidgetsVerticalLayout treeWidgetsVerticalLayout;
    private boolean anyNodeSelected;
@@ -57,24 +47,23 @@ public class RDXBehaviorTree
    public RDXBehaviorTree(WorkspaceResourceDirectory treeFilesDirectory,
                           DRCRobotModel robotModel,
                           ROS2SyncedRobotModel syncedRobot,
+                          ROS2PeerClockOffsetEstimator peerClockEstimator,
                           RobotCollisionModel selectionCollisionModel,
                           RDXBaseUI baseUI,
                           RDX3DPanel panel3D,
                           ReferenceFrameLibrary referenceFrameLibrary)
    {
-      this.treeFilesDirectory = treeFilesDirectory;
+      super(ROS2ActorDesignation.OPERATOR,
+            peerClockEstimator,
+            treeFilesDirectory,
+            new RDXBehaviorTreeNodeBuilder(robotModel,
+                                           syncedRobot,
+                                           selectionCollisionModel,
+                                           baseUI,
+                                           panel3D,
+                                           referenceFrameLibrary));
 
-      nodeBuilder = new RDXBehaviorTreeNodeBuilder(robotModel,
-                                                   syncedRobot,
-                                                   selectionCollisionModel,
-                                                   baseUI,
-                                                   panel3D,
-                                                   referenceFrameLibrary);
-      treeRebuilder = new BehaviorTreeExtensionSubtreeRebuilder(this::getRootNode, crdtInfo);
       fileMenu = new RDXBehaviorTreeFileMenu();
-
-      state = new BehaviorTreeState(nodeBuilder, treeRebuilder, this::getRootNode, crdtInfo, treeFilesDirectory);
-      fileLoader = new BehaviorTreeFileLoader<>(state, nodeBuilder, treeFilesDirectory);
       nodeCreationMenu = new RDXBehaviorTreeNodeCreationMenu(this, treeFilesDirectory, referenceFrameLibrary);
       treeWidgetsVerticalLayout = new RDXBehaviorTreeWidgetsVerticalLayout(this);
       baseUI.getImGuiPanelManager().addPanel(panel);
@@ -91,9 +80,6 @@ public class RDXBehaviorTree
 
    public void update()
    {
-      // Perform any modifications we made in the last tick.
-      state.modifyTreeTopology();
-
       idToNodeMap.clear();
 
       if (rootNode != null)
@@ -269,6 +255,9 @@ public class RDXBehaviorTree
       {
          nodeCreationMenu.renderImGuiWidgets(rootNode, BehaviorTreeNodeInsertionType.INSERT_ROOT);
       }
+
+      // Perform any modifications that were made via user interaction.
+      modifyTreeTopology();
    }
 
    private void expandCollapseAll(boolean expandOrCollapse, RDXBehaviorTreeNode<?, ?> node)
@@ -349,38 +338,20 @@ public class RDXBehaviorTree
       RDXBaseUI.getInstance().getPrimary3DPanel().removeImGui3DViewInputProcessor(this);
    }
 
-   public BehaviorTreeState getBehaviorTreeState()
-   {
-      return state;
-   }
-
-   public void setRootNode(BehaviorTreeNodeLayer<?, ?, ?, ?> rootNode)
+   @Override
+   public void setRootNode(RDXBehaviorTreeNode<?, ?> rootNode)
    {
       this.rootNode = (RDXBehaviorTreeRootNode) rootNode;
    }
 
+   @Override
    public RDXBehaviorTreeRootNode getRootNode()
    {
       return rootNode;
    }
 
-   public BehaviorTreeFileLoader<RDXBehaviorTreeNode<?, ?>> getFileLoader()
-   {
-      return fileLoader;
-   }
-
    public RDXBehaviorTreeNodeCreationMenu getNodeCreationMenu()
    {
       return nodeCreationMenu;
-   }
-
-   public RDXBehaviorTreeNodeBuilder getNodeBuilder()
-   {
-      return nodeBuilder;
-   }
-
-   public WorkspaceResourceDirectory getTreeFilesDirectory()
-   {
-      return treeFilesDirectory;
    }
 }

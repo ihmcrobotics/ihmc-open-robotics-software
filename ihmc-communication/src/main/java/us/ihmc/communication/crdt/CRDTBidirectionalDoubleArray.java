@@ -11,9 +11,9 @@ package us.ihmc.communication.crdt;
  */
 public class CRDTBidirectionalDoubleArray extends CRDTBidirectionalMutableField<double[]>
 {
-   public CRDTBidirectionalDoubleArray(RequestConfirmFreezable requestConfirmFreezable, int arraySize)
+   public CRDTBidirectionalDoubleArray(LatestTimestampModifiable latestTimestampModifiable, int arraySize)
    {
-      super(requestConfirmFreezable, new double[arraySize]);
+      super(latestTimestampModifiable, new double[arraySize]);
    }
 
    public double getValueReadOnly(int index)
@@ -21,11 +21,11 @@ public class CRDTBidirectionalDoubleArray extends CRDTBidirectionalMutableField<
       return getValueInternal()[index];
    }
 
-   /** Use to prevent unecessary freezes. */
+   /** Use to prevent unecessary modifications. */
    public void setValue(int index, double value)
    {
       if (getValueReadOnly(index) != value)
-         getValueAndFreeze()[index] = value;
+         getValueAndModify()[index] = value;
    }
 
    public int getLength()
@@ -43,7 +43,7 @@ public class CRDTBidirectionalDoubleArray extends CRDTBidirectionalMutableField<
 
    public void fromMessage(double[] messageArray)
    {
-      if (!isFrozen())
+      if (isModificationIncoming())
       {
          for (int i = 0; i < getValueInternal().length; i++)
          {
