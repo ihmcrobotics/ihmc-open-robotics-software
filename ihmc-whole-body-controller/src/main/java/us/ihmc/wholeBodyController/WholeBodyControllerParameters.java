@@ -1,15 +1,14 @@
 package us.ihmc.wholeBodyController;
 
-import java.io.InputStream;
-
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.DefaultSplitFractionCalculatorParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
-import us.ihmc.commonWalkingControlModules.configurations.SteppingEnvironmentalConstraintParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.robotics.robotSide.RobotSegment;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
+
+import java.io.InputStream;
 
 public interface WholeBodyControllerParameters<E extends Enum<E> & RobotSegment<E>>
 {
@@ -20,6 +19,8 @@ public interface WholeBodyControllerParameters<E extends Enum<E> & RobotSegment<
       return getControllerDT();
    }
 
+   public double getWholeBodyControllerCoreDT();
+
    public StateEstimatorParameters getStateEstimatorParameters();
 
    public CoPTrajectoryParameters getCoPTrajectoryParameters();
@@ -29,18 +30,18 @@ public interface WholeBodyControllerParameters<E extends Enum<E> & RobotSegment<
       return new DefaultSplitFractionCalculatorParameters();
    }
 
-	public WalkingControllerParameters getWalkingControllerParameters();
+   public WalkingControllerParameters getWalkingControllerParameters();
 
-	public RobotContactPointParameters<E> getContactPointParameters();
+   public RobotContactPointParameters<E> getContactPointParameters();
 
    public HumanoidRobotSensorInformation getSensorInformation();
 
    /**
     * Get the parameter XML file for the controller.
-    *
+    * <p>
     * Each call to this method should return a new InputStream.
     * If null is returned the default values for the parameters are used.
-    *
+    * </p>
     * @return new InputStream with the controller parameters
     */
    public InputStream getWholeBodyControllerParametersFile();
@@ -55,7 +56,7 @@ public interface WholeBodyControllerParameters<E extends Enum<E> & RobotSegment<
    {
       return null;
    }
-   
+
    public default String getParameterFileName()
    {
       return "not implemented";

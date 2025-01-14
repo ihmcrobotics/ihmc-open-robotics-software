@@ -243,10 +243,10 @@ public class AtlasRobotModel implements DRCRobotModel
          RobotDefinitionTools.setDefaultMaterial(robotDefinition, new MaterialDefinition(ColorDefinitions.Black()));
 
       getRobotDefinitionMutator().accept(robotDefinition);
-      
+
       if (isUseHandMutatorCollisions())
          getRobotDefinitionHandMutator().accept(robotDefinition);
-      
+
       return robotDefinition;
    }
 
@@ -283,14 +283,13 @@ public class AtlasRobotModel implements DRCRobotModel
          robotDefinitionMutator = new AtlasRobotDefinitionMutator(getJointMap(), getSensorInformation());
       return robotDefinitionMutator;
    }
-   
+
    public Consumer<RobotDefinition> getRobotDefinitionHandMutator()
    {
       if (robotDefinitionHandMutator == null)
          robotDefinitionHandMutator = new AtlasRobotDefinitionHandMutator();
       return robotDefinitionHandMutator;
    }
-
 
    @Override
    public HighLevelControllerParameters getHighLevelControllerParameters()
@@ -464,6 +463,15 @@ public class AtlasRobotModel implements DRCRobotModel
    public double getControllerDT()
    {
       return CONTROL_DT;
+   }
+
+   @Override
+   public double getWholeBodyControllerCoreDT()
+   {
+      //TODO This is temporaly return values.
+      // We should figure out the atlas simulation really doesn't need this and then tweak the override structure.
+      // This is only called in the Nadia and Alexander later.
+      return 0.0;
    }
 
    @Override
