@@ -2,7 +2,6 @@ package us.ihmc.avatar.logProcessor;
 
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.Axis3D;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -17,7 +16,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.scs2.session.log.LogSession;
 import us.ihmc.tools.io.JSONFileTools;
-import us.ihmc.tools.thread.MissingThreadTools;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
