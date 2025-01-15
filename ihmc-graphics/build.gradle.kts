@@ -66,7 +66,11 @@ libgdxDependencies {
    val imguiVersion = "1.86.11"
    api("io.github.spair:imgui-java-binding:$imguiVersion")
    api("io.github.spair:imgui-java-lwjgl3:$imguiVersion")
-   api("io.github.spair:imgui-java-natives-linux-ft:$imguiVersion")
+   api("us.ihmc:imgui-java-natives-linux-ft:$imguiVersion") {
+      // Rebuilt linux natives here to support Ubuntu 20.04+ (rebuilt in a container, then uploaded to GitHub)
+      // https://github.com/SpaiR/imgui-java/issues/164
+      // https://github.com/ihmcrobotics/maven-artifacts-archive/tree/main/us/ihmc/imgui-java-natives-linux-ft/1.86.11
+   }
    api("io.github.spair:imgui-java-natives-macos-ft:$imguiVersion")
    api("io.github.spair:imgui-java-natives-windows-ft:$imguiVersion")
 
