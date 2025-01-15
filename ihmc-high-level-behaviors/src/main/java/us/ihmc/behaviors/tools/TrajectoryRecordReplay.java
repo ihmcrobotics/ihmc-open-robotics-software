@@ -2,17 +2,20 @@ package us.ihmc.behaviors.tools;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.yoVariables.providers.BooleanProvider;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.function.IntPredicate;
-import java.util.function.IntToDoubleFunction;
 
 /**
  * Class to record and replay multidimensional trajectories.
@@ -36,6 +39,7 @@ public class TrajectoryRecordReplay
    private String recordFileName = "";
    private final List<JoystickData> joystickData = new ArrayList<>();
    private int replayIndex = 0;
+   private double replayInterpolationAlpha = -1.0;
 
    private long replayStartTimeMillis;
    private int lastReplayIndex = -1;
@@ -130,13 +134,19 @@ public class TrajectoryRecordReplay
          searchIndex++;
       }
 
-      // grab the closer index
+      // if first or last index, return it
       if (searchIndex <= 0 || searchIndex >= joystickData.size() - 1)
+      {
+         replayInterpolationAlpha = -1.0;
          return searchIndex;
+      }
 
-      long dtPrev = Math.abs(joystickData.get(searchIndex - 1).timeInTrajectoryMillis - timeInTrajectory);
-      long dtNext = Math.abs(joystickData.get(searchIndex).timeInTrajectoryMillis - timeInTrajectory);
-      return dtNext < dtPrev ? searchIndex : searchIndex - 1;
+      // compute the interpolation between the two adjacent frames to smoothly replay
+      long t0 = joystickData.get(searchIndex - 1).timeInTrajectoryMillis;
+      long t1 = joystickData.get(searchIndex).timeInTrajectoryMillis;
+      replayInterpolationAlpha = ((double) (timeInTrajectory - t0)) / (t1 - t0);
+
+      return searchIndex;
    }
 
    public void onUpdateStartRecord()
@@ -152,11 +162,15 @@ public class TrajectoryRecordReplay
 
    public void recordControllerData(RobotSide robotSide,
                                     boolean aButtonPressed,
+                                    boolean bButtonPressed,
                                     boolean triggerPressed,
                                     ReferenceFrame desiredControlFrame,
+                                    Vector3D angularVelocity,
+                                    Vector3D linearVelocity,
                                     ReferenceFrame recordFrame)
    {
-      joystickData.get(joystickData.size() - 1).set(robotSide, aButtonPressed, triggerPressed, desiredControlFrame, recordFrame);
+      joystickData.get(joystickData.size() - 1)
+                  .set(robotSide, aButtonPressed, bButtonPressed, triggerPressed, desiredControlFrame, angularVelocity, linearVelocity, recordFrame);
    }
 
    public void recordDesiredCenterOfMass(FramePoint3DReadOnly usedDesiredCenterOfMass, ReferenceFrame recordFrame)
@@ -245,7 +259,7 @@ public class TrajectoryRecordReplay
       LogTools.info("Record ended. Duration = " + duration + "ms");
    }
 
-   public boolean onReplayStart(String replayFileToLoad, ReferenceFrame loadInFrame)
+   public boolean onReplayStart(String replayFileToLoad, ReferenceFrame recordFrame)
    {
       joystickData.clear();
       File replayFile = new File(replayFileToLoad);
@@ -258,7 +272,7 @@ public class TrajectoryRecordReplay
          String line;
          while ((line = fileReader.readLine()) != null)
          {
-            joystickData.add(new JoystickData(line.split(","), loadInFrame));
+            joystickData.add(new JoystickData(line.split(","), recordFrame));
          }
          fileReader.close();
 
@@ -421,97 +435,99 @@ public class TrajectoryRecordReplay
 
    private static class JoystickData
    {
+      private final long timeInTrajectoryMillis;
+
       private boolean leftAButtonPressed;
+      private boolean leftBButtonPressed;
       private boolean leftTriggerPressed;
-      private final FramePose3D leftDesiredControllerPose;
 
       private boolean rightAButtonPressed;
+      private boolean rightBButtonPressed;
       private boolean rightTriggerPressed;
-      private final FramePose3D rightDesiredControllerPose;
 
-      private final long timeInTrajectoryMillis;
-      private final FramePoint3D desiredCenterOfMass;
+      private final SideDependentList<FramePose3D> controllerPoses = new SideDependentList<>(new FramePose3D(), new FramePose3D());
+      private final SideDependentList<FrameVector3D> controllerAngularVelocities = new SideDependentList<>(new FrameVector3D(), new FrameVector3D());
+      private final SideDependentList<FrameVector3D> controllerLinearVelocities = new SideDependentList<>(new FrameVector3D(), new FrameVector3D());
+      private final FramePoint3D desiredCenterOfMass = new FramePoint3D();
 
       public JoystickData(long timeInTrajectoryMillis)
       {
-         leftDesiredControllerPose = new FramePose3D();
-         rightDesiredControllerPose = new FramePose3D();
-         desiredCenterOfMass = new FramePoint3D();
          this.timeInTrajectoryMillis = timeInTrajectoryMillis;
       }
 
-      public JoystickData(String[] data, ReferenceFrame loadInFrame)
+      public JoystickData(String[] data, ReferenceFrame recordFrame)
       {
          int index = 0;
 
+         timeInTrajectoryMillis = Long.parseLong(data[index++]);
+
          leftAButtonPressed = Boolean.parseBoolean(data[index++]);
+         leftBButtonPressed = Boolean.parseBoolean(data[index++]);
          leftTriggerPressed = Boolean.parseBoolean(data[index++]);
-         leftDesiredControllerPose = new FramePose3D(loadInFrame);
-         leftDesiredControllerPose.getOrientation().set(Double.parseDouble(data[index++]), Double.parseDouble(data[index++]), Double.parseDouble(data[index++]), Double.parseDouble(data[index++]));
-         leftDesiredControllerPose.getPosition().set(Double.parseDouble(data[index++]), Double.parseDouble(data[index++]), Double.parseDouble(data[index++]));
-         leftDesiredControllerPose.changeFrame(ReferenceFrame.getWorldFrame());
 
          rightAButtonPressed = Boolean.parseBoolean(data[index++]);
+         rightBButtonPressed = Boolean.parseBoolean(data[index++]);
          rightTriggerPressed = Boolean.parseBoolean(data[index++]);
-         rightDesiredControllerPose = new FramePose3D(loadInFrame);
-         rightDesiredControllerPose.getOrientation().set(Double.parseDouble(data[index++]), Double.parseDouble(data[index++]), Double.parseDouble(data[index++]), Double.parseDouble(data[index++]));
-         rightDesiredControllerPose.getPosition().set(Double.parseDouble(data[index++]), Double.parseDouble(data[index++]), Double.parseDouble(data[index++]));
-         rightDesiredControllerPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-         String timestampToParse = data[index++];
-         timeInTrajectoryMillis = Long.parseLong(timestampToParse);
-         desiredCenterOfMass = new FramePoint3D(loadInFrame, Double.parseDouble(data[index++]), Double.parseDouble(data[index++]), Double.parseDouble(data[index++]));
+         for (RobotSide robotSide : RobotSide.values())
+         {
+            index = loadCSV(index, data, controllerPoses.get(robotSide), recordFrame, ReferenceFrame.getWorldFrame());
+            index = loadCSV(index, data, controllerAngularVelocities.get(robotSide), recordFrame, ReferenceFrame.getWorldFrame());
+            index = loadCSV(index, data, controllerLinearVelocities.get(robotSide), recordFrame, ReferenceFrame.getWorldFrame());
+         }
+
+         loadCSV(index, data, desiredCenterOfMass, recordFrame, ReferenceFrame.getWorldFrame());
       }
 
       void set(RobotSide robotSide,
                boolean aButtonPressed,
+               boolean bButtonPressed,
                boolean triggerPressed,
-               ReferenceFrame desiredControlFrame,
+               ReferenceFrame controllerReferenceFrame,
+               Vector3D controllerAngularVelocity,
+               Vector3D controllerLinearVelocity,
                ReferenceFrame recordFrame)
       {
          if (robotSide == RobotSide.LEFT)
          {
             leftAButtonPressed = aButtonPressed;
+            leftBButtonPressed = bButtonPressed;
             leftTriggerPressed = triggerPressed;
-            leftDesiredControllerPose.setToZero(desiredControlFrame);
-            leftDesiredControllerPose.changeFrame(recordFrame);
          }
          else
          {
             rightAButtonPressed = aButtonPressed;
+            rightBButtonPressed = bButtonPressed;
             rightTriggerPressed = triggerPressed;
-            rightDesiredControllerPose.setToZero(desiredControlFrame);
-            rightDesiredControllerPose.changeFrame(recordFrame);
          }
+
+         controllerPoses.get(robotSide).setToZero(controllerReferenceFrame);
+         controllerPoses.get(robotSide).changeFrame(recordFrame);
+         controllerAngularVelocities.get(robotSide).set(ReferenceFrame.getWorldFrame(), controllerAngularVelocity);
+         controllerAngularVelocities.get(robotSide).changeFrame(recordFrame);
+         controllerLinearVelocities.get(robotSide).set(ReferenceFrame.getWorldFrame(), controllerLinearVelocity);
+         controllerLinearVelocities.get(robotSide).changeFrame(recordFrame);
       }
 
       @Override
       public String toString()
       {
-         return leftAButtonPressed + "," +
+         return timeInTrajectoryMillis + "," +
+                leftAButtonPressed + "," +
+                leftBButtonPressed + "," +
                 leftTriggerPressed + "," +
-                leftDesiredControllerPose.getOrientation().getX() + "," +
-                leftDesiredControllerPose.getOrientation().getY() + "," +
-                leftDesiredControllerPose.getOrientation().getZ() + "," +
-                leftDesiredControllerPose.getOrientation().getS() + "," +
-                leftDesiredControllerPose.getPosition().getX() + "," +
-                leftDesiredControllerPose.getPosition().getY() + "," +
-                leftDesiredControllerPose.getPosition().getZ() + "," +
-
                 rightAButtonPressed + "," +
+                rightBButtonPressed + "," +
                 rightTriggerPressed + "," +
-                rightDesiredControllerPose.getOrientation().getX() + "," +
-                rightDesiredControllerPose.getOrientation().getY() + "," +
-                rightDesiredControllerPose.getOrientation().getZ() + "," +
-                rightDesiredControllerPose.getOrientation().getS() + "," +
-                rightDesiredControllerPose.getPosition().getX() + "," +
-                rightDesiredControllerPose.getPosition().getY() + "," +
-                rightDesiredControllerPose.getPosition().getZ() + "," +
-
-                timeInTrajectoryMillis + "," +
-                desiredCenterOfMass.getX() + "," +
-                desiredCenterOfMass.getY() + "," +
-                desiredCenterOfMass.getZ() + "\n";
+                toCSV(controllerPoses.get(RobotSide.LEFT).getOrientation(), false) +
+                toCSV(controllerPoses.get(RobotSide.LEFT).getPosition(), false) +
+                toCSV(controllerAngularVelocities.get(RobotSide.LEFT), false) +
+                toCSV(controllerLinearVelocities.get(RobotSide.LEFT), false) +
+                toCSV(controllerPoses.get(RobotSide.RIGHT).getOrientation(), false) +
+                toCSV(controllerPoses.get(RobotSide.RIGHT).getPosition(), false) +
+                toCSV(controllerAngularVelocities.get(RobotSide.RIGHT), false) +
+                toCSV(controllerLinearVelocities.get(RobotSide.RIGHT), false) +
+                toCSV(desiredCenterOfMass, true);
       }
    }
 
@@ -524,21 +540,53 @@ public class TrajectoryRecordReplay
       return checkButtonPressOverInterval(lastReplayIndex, replayIndex, i -> getAButtonPressed(robotSide, i, joystickData));
    }
 
+   public boolean getBButtonPressed(RobotSide robotSide)
+   {
+      return checkButtonPressOverInterval(lastReplayIndex, replayIndex, i -> getBButtonPressed(robotSide, i, joystickData));
+   }
+
    public boolean getTriggerPressed(RobotSide robotSide)
    {
       return checkButtonPressOverInterval(lastReplayIndex, replayIndex, i -> getTriggerPressed(robotSide, i, joystickData));
    }
 
-   public void packDesiredHandControlFrame(RobotSide robotSide, FramePose3D poseToPack)
+   public void packControllerData(RobotSide robotSide, FramePose3D poseToPack, FrameVector3D angularVelocityToPack, FrameVector3D linearVelocityToPack)
    {
-      JoystickData joystickData = this.joystickData.get(replayIndex);
-      poseToPack.set(robotSide == RobotSide.LEFT ? joystickData.leftDesiredControllerPose : joystickData.rightDesiredControllerPose);
+      if (replayInterpolationAlpha == -1.0)
+      {
+         JoystickData joystickData = this.joystickData.get(replayIndex);
+         poseToPack.set(joystickData.controllerPoses.get(robotSide));
+         angularVelocityToPack.set(joystickData.controllerAngularVelocities.get(robotSide));
+         linearVelocityToPack.set(joystickData.controllerLinearVelocities.get(robotSide));
+      }
+      else
+      {
+         JoystickData joystickData0 = joystickData.get(replayIndex - 1);
+         JoystickData joystickData1 = joystickData.get(replayIndex);
+
+         poseToPack.interpolate(joystickData0.controllerPoses.get(robotSide), joystickData1.controllerPoses.get(robotSide), replayInterpolationAlpha);
+         angularVelocityToPack.interpolate(joystickData0.controllerAngularVelocities.get(robotSide), joystickData1.controllerAngularVelocities.get(robotSide), replayInterpolationAlpha);
+         linearVelocityToPack.interpolate(joystickData0.controllerLinearVelocities.get(robotSide), joystickData1.controllerLinearVelocities.get(robotSide), replayInterpolationAlpha);
+      }
    }
 
    public FramePoint3D getDesiredCenterOfMass()
    {
-      JoystickData joystickData = this.joystickData.get(replayIndex);
-      return joystickData.desiredCenterOfMass;
+      if (replayInterpolationAlpha == -1.0)
+      {
+         JoystickData joystickData = this.joystickData.get(replayIndex);
+         return joystickData.desiredCenterOfMass;
+      }
+      else
+      {
+         JoystickData joystickData0 = this.joystickData.get(replayIndex);
+         JoystickData joystickData1 = this.joystickData.get(replayIndex - 1);
+
+         FramePoint3D desiredCenterOfMass = new FramePoint3D(joystickData0.desiredCenterOfMass);
+         desiredCenterOfMass.interpolate(joystickData1.desiredCenterOfMass, replayInterpolationAlpha);
+
+         return desiredCenterOfMass;
+      }
    }
 
    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -549,6 +597,12 @@ public class TrajectoryRecordReplay
    {
       JoystickData joystickData = joystickDataList.get(index);
       return robotSide == RobotSide.LEFT ? joystickData.leftAButtonPressed : joystickData.rightAButtonPressed;
+   }
+
+   private static boolean getBButtonPressed(RobotSide robotSide, int index, List<JoystickData> joystickDataList)
+   {
+      JoystickData joystickData = joystickDataList.get(index);
+      return robotSide == RobotSide.LEFT ? joystickData.leftBButtonPressed : joystickData.rightBButtonPressed;
    }
 
    private static boolean getTriggerPressed(RobotSide robotSide, int index, List<JoystickData> joystickDataList)
@@ -567,6 +621,40 @@ public class TrajectoryRecordReplay
       return false;
    }
 
+   private static String toCSV(Tuple3DReadOnly tuple, boolean end)
+   {
+      return tuple.getX() + "," + tuple.getY() + "," + tuple.getZ() + (end ? "\n" : ",");
+   }
+
+   private static String toCSV(QuaternionReadOnly quaternion, boolean end)
+   {
+      return quaternion.getX() + "," + quaternion.getY() + "," + quaternion.getZ() + "," + quaternion.getS() + (end ? "\n" : ",");
+   }
+
+   private static int loadCSV(int index, String[] data, FramePose3D poseToPack, ReferenceFrame saveFrame, ReferenceFrame loadFrame)
+   {
+      poseToPack.setReferenceFrame(saveFrame);
+      poseToPack.getOrientation().set(Double.parseDouble(data[index++]), Double.parseDouble(data[index++]), Double.parseDouble(data[index++]), Double.parseDouble(data[index++]));
+      poseToPack.getPosition().set(Double.parseDouble(data[index++]), Double.parseDouble(data[index++]), Double.parseDouble(data[index++]));
+      poseToPack.changeFrame(loadFrame);
+      return index;
+   }
+
+   private static int loadCSV(int index, String[] data, FrameVector3D vectorToPack, ReferenceFrame saveFrame, ReferenceFrame loadFrame)
+   {
+      vectorToPack.setReferenceFrame(saveFrame);
+      vectorToPack.set(Double.parseDouble(data[index++]), Double.parseDouble(data[index++]), Double.parseDouble(data[index++]));
+      vectorToPack.changeFrame(loadFrame);
+      return index;
+   }
+
+   private static int loadCSV(int index, String[] data, FramePoint3D pointToPack, ReferenceFrame saveFrame, ReferenceFrame loadFrame)
+   {
+      pointToPack.setReferenceFrame(saveFrame);
+      pointToPack.set(Double.parseDouble(data[index++]), Double.parseDouble(data[index++]), Double.parseDouble(data[index++]));
+      pointToPack.changeFrame(loadFrame);
+      return index;
+   }
    public static void main(String[] args)
    {
       System.out.println(Long.parseLong("156"));

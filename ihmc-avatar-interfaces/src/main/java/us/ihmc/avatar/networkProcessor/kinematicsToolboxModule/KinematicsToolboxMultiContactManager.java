@@ -13,7 +13,6 @@ import us.ihmc.commonWalkingControlModules.staticEquilibrium.StabilityMarginRegi
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.SensitivityBasedStabilityGradientCalculator;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState;
 import us.ihmc.commons.MathTools;
-import us.ihmc.communication.DataModified;
 import us.ihmc.communication.PostureOptimizerState;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -29,7 +28,6 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
-import us.ihmc.robotics.math.filters.RateLimitedYoFrameOrientation;
 import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.time.ExecutionTimer;
@@ -52,9 +50,9 @@ public class KinematicsToolboxMultiContactManager
    private static final double WHOLE_BODY_POSTURE_ADJUSTMENT_MAGNITUDE = 1.0 / 3.0;
    private static final double ALPHA_ENABLED_TIME_CONSTANT = 3.0;
 
-   // nominal is around 0.72
-   private static final double DEFAULT_MIN_PELVIS_HEIGHT = 0.62;
-   private static final double DEFAULT_MAX_PELVIS_HEIGHT = 0.78;
+   // nominal is around 1.05
+   private static final double DEFAULT_MIN_PELVIS_HEIGHT = 0.85;
+   private static final double DEFAULT_MAX_PELVIS_HEIGHT = 1.15;
 
    private final FramePoint3D zeroPoint = new FramePoint3D();
    private final FrameVector3D tempVector = new FrameVector3D();
@@ -74,18 +72,16 @@ public class KinematicsToolboxMultiContactManager
    private final PDGains jointspaceGains = new PDGains();
 
    private final ReferenceFrame midFeetZUpFrame;
-   private final RateLimitedYoVariable optimizedPelvisHeight;
+   private final YoDouble optimizedPelvisHeight = new YoDouble("optimizedPelvisHeight", registry);
    private final YoDouble minOptimizedPelvisHeight = new YoDouble("minOptimizedPelvisHeight", registry);
    private final YoDouble maxOptimizedPelvisHeight = new YoDouble("maxOptimizedPelvisHeight", registry);
 
-   private final FrameQuaternion integratedPelvisOrientation = new FrameQuaternion();
+   private final FrameYawPitchRoll integratedPelvisOrientation = new FrameYawPitchRoll();
    private final YoFrameYawPitchRoll optimizedPelvisOrientation = new YoFrameYawPitchRoll("optimizedPelvisOrientation", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameYawPitchRoll initialPelvisOrientation = new YoFrameYawPitchRoll("initialPelvisOrientation", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameYawPitchRoll actualPelvisOrientation = new YoFrameYawPitchRoll("actualPelvisOrientation", ReferenceFrame.getWorldFrame(), registry);
-   private final RateLimitedYoFrameOrientation optimizedPelvisOrientationRateLimited;
    private final Vector3D pelvisRotationVectorAdjustment = new Vector3D();
    private final Quaternion pelvisRotationQuaternionAdjustment = new Quaternion();
-   private final FrameYawPitchRoll tmpOrientation = new FrameYawPitchRoll();
 
    private final YoEnum<PostureOptimizerState> mode = new YoEnum<>("postureOptimizerMode", registry, PostureOptimizerState.class, false);
 
@@ -107,12 +103,10 @@ public class KinematicsToolboxMultiContactManager
    private final YoDouble[] qPrivOptimized;
    private final DMatrixRMaj qdNominal = new DMatrixRMaj(0);
 
-   private final YoDouble pelvisPostureWeight = new YoDouble("pelvisPostureWeight", registry);
    private final SelectionMatrix3D pelvisHeightSelection = new SelectionMatrix3D();
    private final DefaultPID3DGains pelvisHeightGains = new DefaultPID3DGains();
    private final DefaultPID3DGains pelvisOrientationGains = new DefaultPID3DGains();
 
-   private final YoDouble maxPostureAdjustmentRate = new YoDouble("maxPostureAdjustmentRate", registry);
    private final RateLimitedYoVariable activationAlpha;
 
    private enum StabilityMarginLevel
@@ -169,9 +163,6 @@ public class KinematicsToolboxMultiContactManager
       pelvisOrientationGains.setMaxProportionalError(MAX_PELVIS_ORIENTATION_ERROR);
 
       pelvisHeightSelection.setAxisSelection(false, false, true);
-      pelvisPostureWeight.set(1.0);
-      optimizedPelvisHeight = new RateLimitedYoVariable("optimizedPelvisHeight", registry, maxPostureAdjustmentRate, updateDT);
-      optimizedPelvisOrientationRateLimited = new RateLimitedYoFrameOrientation("optimizedPelvisOrientationRL", "", registry, maxPostureAdjustmentRate, updateDT, optimizedPelvisOrientation);
 
       for (int i = 0; i < numberOfJoints; i++)
       {
@@ -182,7 +173,7 @@ public class KinematicsToolboxMultiContactManager
          qPrivOptimized[i] = new YoDouble("q_priv_opt_" + joint.getName(), registry);
       }
 
-      activationAlpha = new RateLimitedYoVariable("activationAlpha", registry, 0.4, updateDT);
+      activationAlpha = new RateLimitedYoVariable("activationAlpha", registry, 1.0 / ALPHA_ENABLED_TIME_CONSTANT, updateDT);
 
       double defaultPostureSensitivityThreshold = 0.04;
       double defaultStabilityMarginThresholdLow = 0.12; // should be higher than 5cm, which is the IK solver's threshold to keep the CoM safe
@@ -192,8 +183,7 @@ public class KinematicsToolboxMultiContactManager
       stabilityMarginThresholdLow.set(defaultStabilityMarginThresholdLow);
       stabilityMarginThresholdHigh.set(defaultStabilityMarginThresholdHigh);
 
-      maxPostureAdjustmentRate.set(WHOLE_BODY_POSTURE_ADJUSTMENT_MAGNITUDE);
-      postureOptimizationWeight.set(0.25);
+      postureOptimizationWeight.set(0.3);
       mode.set(PostureOptimizerState.NOMINAL);
 
       parentRegistry.addChild(registry);
@@ -337,29 +327,26 @@ public class KinematicsToolboxMultiContactManager
       double qdPelvisHeight = WHOLE_BODY_POSTURE_ADJUSTMENT_MAGNITUDE * postureOptimizer.getNomalizedStabilityGradient().get(linearZIndex);
       double qPelvisHeight = optimizedPelvisHeight.getValue() + updateDT * qdPelvisHeight;
       qPelvisHeight = EuclidCoreTools.clamp(qPelvisHeight, minOptimizedPelvisHeight.getValue(), maxOptimizedPelvisHeight.getValue());
-      optimizedPelvisHeight.update(qPelvisHeight);
+      optimizedPelvisHeight.set(qPelvisHeight);
 
       tempVector.set(0, postureOptimizer.getNomalizedStabilityGradient());
       pelvisRotationVectorAdjustment.setAndScale(WHOLE_BODY_POSTURE_ADJUSTMENT_MAGNITUDE * updateDT, tempVector);
       pelvisRotationQuaternionAdjustment.setRotationVector(pelvisRotationVectorAdjustment);
       integratedPelvisOrientation.append(pelvisRotationQuaternionAdjustment);
 
-      tmpOrientation.setIncludingFrame(ReferenceFrame.getWorldFrame(), integratedPelvisOrientation);
-      tmpOrientation.changeFrame(midFeetZUpFrame);
-      double clampedYaw = EuclidCoreTools.clamp(tmpOrientation.getYaw(), Math.toRadians(40.0));
-      double clampedPitch = EuclidCoreTools.clamp(tmpOrientation.getPitch(), Math.toRadians(45.0));
-      double clampedRoll = EuclidCoreTools.clamp(tmpOrientation.getYaw(), Math.toRadians(35.0));
-      tmpOrientation.setYawPitchRoll(clampedYaw, clampedPitch, clampedRoll);
-      tmpOrientation.changeFrame(ReferenceFrame.getWorldFrame());
-      initialPelvisOrientation.set(tmpOrientation);
+      // clamp the yaw/pitch/roll of the pelvis orientation setpoint
+      integratedPelvisOrientation.changeFrame(midFeetZUpFrame);
+      double clampedYaw = EuclidCoreTools.clamp(integratedPelvisOrientation.getYaw(), Math.toRadians(40.0));
+      double clampedPitch = EuclidCoreTools.clamp(integratedPelvisOrientation.getPitch(), Math.toRadians(45.0));
+      double clampedRoll = EuclidCoreTools.clamp(integratedPelvisOrientation.getYaw(), Math.toRadians(35.0));
+      integratedPelvisOrientation.setYawPitchRoll(clampedYaw, clampedPitch, clampedRoll);
+      integratedPelvisOrientation.changeFrame(ReferenceFrame.getWorldFrame());
 
       optimizedPelvisOrientation.set(integratedPelvisOrientation);
-      optimizedPelvisOrientationRateLimited.set(optimizedPelvisOrientation);
    }
 
    private void updateTowardsNominalPosture()
    {
-      // Update privileged configuration
       double deltaQNominalMagnitude = 0.0;
       for (int i = 0; i < qPrivOptimized.length; i++)
       {
@@ -441,14 +428,14 @@ public class KinematicsToolboxMultiContactManager
          pelvisHeightCommand.set(fullRobotModel.getRootBody(), fullRobotModel.getPelvis());
          pelvisHeightCommand.setBodyFixedPointToControl(zeroPoint);
          pelvisHeightCommand.setInverseKinematics(tempPoint, null);
-         pelvisHeightCommand.setWeightForSolver(pelvisPostureWeight.getValue() * activationAlpha.getValue());
+         pelvisHeightCommand.setWeightForSolver(postureOptimizationWeight.getValue() * activationAlpha.getValue());
          pelvisHeightCommand.setSelectionMatrix(pelvisHeightSelection);
          pelvisHeightCommand.setGains(pelvisHeightGains);
 
          OrientationFeedbackControlCommand pelvisOrientationCommand = bufferToPack.addOrientationFeedbackControlCommand();
          pelvisOrientationCommand.set(fullRobotModel.getRootBody(), fullRobotModel.getPelvis());
-         pelvisOrientationCommand.setInverseKinematics(optimizedPelvisOrientationRateLimited, null);
-         pelvisOrientationCommand.setWeightForSolver(pelvisPostureWeight.getValue() * activationAlpha.getValue());
+         pelvisOrientationCommand.setInverseKinematics(optimizedPelvisOrientation, null);
+         pelvisOrientationCommand.setWeightForSolver(postureOptimizationWeight.getValue() * activationAlpha.getValue());
          pelvisOrientationCommand.setGains(pelvisOrientationGains);
          pelvisOrientationCommand.setSelectionMatrixToIdentity();
          pelvisOrientationCommand.getControlFrameOrientation().setToZero();

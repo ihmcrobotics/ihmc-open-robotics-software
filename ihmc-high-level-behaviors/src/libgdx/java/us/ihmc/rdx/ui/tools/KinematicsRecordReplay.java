@@ -6,13 +6,12 @@ import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import imgui.type.ImString;
 import us.ihmc.behaviors.tools.TrajectoryRecordReplay;
-import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.SceneGraph;
@@ -43,8 +42,8 @@ public class KinematicsRecordReplay
 //      private final String defaultReplayFile = "241009_wallBracing_pitchedGoodRun.csv";
 //   private final String defaultReplayFile = "241009_wallBracing_uneven.csv";
 
-//   private final String defaultReplayFile = "241113182923-Wall0.csv";
-   private final String defaultReplayFile = "241113185611-Wall0Pitched.csv";
+   private final String defaultReplayFile = "241113182923-Wall0.csv";
+//   private final String defaultReplayFile = "241113185611-Wall0Pitched.csv";
 
    private final ImString replayPath = new ImString(Paths.get(System.getProperty("user.home"), ".ihmc/logs/" + defaultReplayFile).toString(), 100);
    private final ImBoolean enableReplay = new ImBoolean(false);
@@ -105,7 +104,7 @@ public class KinematicsRecordReplay
    /**
     * Called each tick regardless of record/replay status.
     */
-   public void onUpdateEnd(ReferenceFrame loadInFrame)
+   public void onUpdateEnd(ReferenceFrame recordFrame)
    {
       if (requestRecordReplay && enableRecording.get())
       { // Toggle record state
@@ -127,20 +126,23 @@ public class KinematicsRecordReplay
       else if (requestRecordReplay && enableReplay.get() && !isReplaying)
       { // Start to replay
          LogTools.info("Starting to replay!");
-         isReplaying = trajectoryRecorder.onReplayStart(replayPath.get(), loadInFrame);
+         isReplaying = trajectoryRecorder.onReplayStart(replayPath.get(), recordFrame);
          replayCallback.accept(true);
       }
    }
 
-   public void recordControllerData(RobotSide robotSide, boolean aButtonPressed, boolean triggerPressed, ReferenceFrame recordFrame)
+   public void recordControllerData(RobotSide robotSide, boolean aButtonPressed, boolean bButtonPressed, boolean triggerPressed, Vector3D angularVelocity, Vector3D linearVelocity, ReferenceFrame recordFrame)
    {
       if (!isRecording)
          return;
 
       trajectoryRecorder.recordControllerData(robotSide,
                                               aButtonPressed,
+                                              bButtonPressed,
                                               triggerPressed,
                                               handDesiredControlFrames.get(robotSide).getReferenceFrame(),
+                                              angularVelocity,
+                                              linearVelocity,
                                               recordFrame);
    }
 
@@ -203,13 +205,13 @@ public class KinematicsRecordReplay
    /**
     * Pack frame with frame from replay
     */
-   public void framePoseToPack(RobotSide robotSide, FramePose3D framePose)
+   public void packLoggedControllerData(RobotSide robotSide, FramePose3D framePose, FrameVector3D angularVelocity, FrameVector3D linearVelocity)
    {
       if (isReplaying)
       {
          if (robotSide == null)
             return;
-         trajectoryRecorder.packDesiredHandControlFrame(robotSide, framePose);
+         trajectoryRecorder.packControllerData(robotSide, framePose, angularVelocity, linearVelocity);
       }
    }
 
@@ -333,6 +335,11 @@ public class KinematicsRecordReplay
    public boolean getAButtonPressed(RobotSide robotSide)
    {
       return trajectoryRecorder.getAButtonPressed(robotSide);
+   }
+
+   public boolean getBButtonPressed(RobotSide robotSide)
+   {
+      return trajectoryRecorder.getBButtonPressed(robotSide);
    }
 
    public boolean getTriggerPressed(RobotSide robotSide)
