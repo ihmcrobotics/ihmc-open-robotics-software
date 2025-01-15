@@ -19,70 +19,54 @@ ihmc {
 
 mainDependencies {
    api(ihmc.sourceSetProject("slam-wrapper"))
-   // For experimenting with local OpenCV:
-   // api(files("/usr/local/share/OpenCV/java/opencv-310.jar"))
 
    api("org.georegression:georegression:0.22")
    api("net.java.dev.jna:jna:4.1.0")
 
-   api("org.bytedeco:javacpp:1.5.9")
-   val openblasVersion = "0.3.23-1.5.9"
-   api("org.bytedeco:openblas:$openblasVersion")
-   api("org.bytedeco:openblas:$openblasVersion:linux-x86_64")
-   api("org.bytedeco:openblas:$openblasVersion:linux-arm64")
-   api("org.bytedeco:openblas:$openblasVersion:windows-x86_64")
-   val opencvVersion = "4.7.0-1.5.9"
-   api("org.bytedeco:opencv:$opencvVersion")
-   api("org.bytedeco:opencv:$opencvVersion:linux-x86_64")
-   api("org.bytedeco:opencv:$opencvVersion:linux-arm64")
-   api("org.bytedeco:opencv:$opencvVersion:windows-x86_64")
-   api("org.bytedeco:opencv:$opencvVersion:linux-x86_64-gpu")
-   api("org.bytedeco:opencv:$opencvVersion:windows-x86_64-gpu")
-   val ffmpegVersion = "6.0-1.5.9"
-   api("org.bytedeco:ffmpeg:$ffmpegVersion")
-   api("org.bytedeco:ffmpeg:$ffmpegVersion:linux-x86_64")
-   api("org.bytedeco:ffmpeg:$ffmpegVersion:linux-arm64")
-   api("org.bytedeco:ffmpeg:$ffmpegVersion:windows-x86_64")
-   val openclVersion = "3.0-1.5.9"
-   api("org.bytedeco:opencl:$openclVersion")
-   api("org.bytedeco:opencl:$openclVersion:linux-x86_64")
-   api("org.bytedeco:opencl:$openclVersion:linux-arm64")
-   api("org.bytedeco:opencl:$openclVersion:windows-x86_64")
-   val librealsense2Version = "2.53.1-1.5.9"
-   api("org.bytedeco:librealsense2:$librealsense2Version")
-   api("org.bytedeco:librealsense2:$librealsense2Version:linux-x86_64")
-   api("org.bytedeco:librealsense2:$librealsense2Version:linux-arm64")
-   api("org.bytedeco:librealsense2:$librealsense2Version:windows-x86_64")
-   val spinnakerVersion = "3.0.0.118-1.5.9"
-   api("org.bytedeco:spinnaker:$spinnakerVersion") {
-      exclude(group = "org.bytedeco", module = "javacpp")
-   }
-   api("org.bytedeco:spinnaker:$spinnakerVersion:linux-x86_64") {
-      exclude(group = "org.bytedeco", module = "javacpp")
-   }
-   api("org.bytedeco:spinnaker:$spinnakerVersion:windows-x86_64") {
-      exclude(group = "org.bytedeco", module = "javacpp")
-   }
+   val cudaVersion = "12.6-9.5-1.5.11"
+   api("us.ihmc:cuda:$cudaVersion")
+   api("us.ihmc:cuda:$cudaVersion:linux-arm64")
+   api("us.ihmc:cuda:$cudaVersion:linux-x86_64")
+   api("us.ihmc:cuda:$cudaVersion:windows-x86_64")
+   val openblasVersion = "0.3.28-1.5.11"
+   api("us.ihmc:openblas:$openblasVersion")
+   api("us.ihmc:openblas:$openblasVersion:linux-arm64")
+   api("us.ihmc:openblas:$openblasVersion:linux-x86_64")
+   api("us.ihmc:openblas:$openblasVersion:windows-x86_64")
+   val opencvVersion = "4.10.0-1.5.11"
+   api("us.ihmc:opencv:$opencvVersion")
+   api("us.ihmc:opencv:$opencvVersion:linux-arm64")
+   api("us.ihmc:opencv:$opencvVersion:linux-x86_64")
+   api("us.ihmc:opencv:$opencvVersion:linux-x86_64-gpu")
+   api("us.ihmc:opencv:$opencvVersion:windows-x86_64")
+   api("us.ihmc:opencv:$opencvVersion:windows-x86_64-gpu")
+   val ffmpegVersion = "7.1-1.5.11"
+   api("us.ihmc:ffmpeg:$ffmpegVersion")
+   api("us.ihmc:ffmpeg:$ffmpegVersion:linux-arm64")
+   api("us.ihmc:ffmpeg:$ffmpegVersion:linux-x86_64")
+   api("us.ihmc:ffmpeg:$ffmpegVersion:windows-x86_64")
+   val openclVersion = "3.0-1.5.11"
+   api("us.ihmc:opencl:$openclVersion")
+   api("us.ihmc:opencl:$openclVersion:linux-arm64")
+   api("us.ihmc:opencl:$openclVersion:linux-x86_64")
+   api("us.ihmc:opencl:$openclVersion:windows-x86_64")
+   val librealsense2Version = "2.53.1-1.5.11"
+   api("us.ihmc:librealsense2:$librealsense2Version")
+   api("us.ihmc:librealsense2:$librealsense2Version:linux-arm64")
+   api("us.ihmc:librealsense2:$librealsense2Version:linux-x86_64")
+   api("us.ihmc:librealsense2:$librealsense2Version:windows-x86_64")
+   val spinnakerVersion = "4.0.0.116-1.5.11"
+   api("us.ihmc:spinnaker:$spinnakerVersion")
+   api("us.ihmc:spinnaker:$spinnakerVersion:linux-x86_64")
+   api("us.ihmc:spinnaker:$spinnakerVersion:windows-x86_64")
+   val hdf5Version = "1.14.3-1.5.11"
+   api("us.ihmc:hdf5:$hdf5Version")
+   api("us.ihmc:hdf5:$hdf5Version:linux-x86_64")
+   api("us.ihmc:hdf5:$hdf5Version:windows-x86_64")
+
+   // TODO: Upgrade to javacpp 1.5.11
    api("us.ihmc:zed-java-api:4.2.0_1") {
       exclude(group = "org.bytedeco")
-   }
-   val hdf5Version = "1.14.1-1.5.9"
-   api("org.bytedeco:hdf5:$hdf5Version")
-   api("org.bytedeco:hdf5:$hdf5Version:linux-x86_64")
-   // No arm64 version
-   api("org.bytedeco:hdf5:$hdf5Version:windows-x86_64")
-   val cudaVersion = "12.3-8.9-1.5.10"
-   api("org.bytedeco:cuda:$cudaVersion") {
-      exclude(group = "org.bytedeco", module = "javacpp")
-   }
-   api("org.bytedeco:cuda:$cudaVersion:linux-x86_64") {
-      exclude(group = "org.bytedeco", module = "javacpp")
-   }
-   api("org.bytedeco:cuda:$cudaVersion:linux-arm64") {
-      exclude(group = "org.bytedeco", module = "javacpp")
-   }
-   api("org.bytedeco:cuda:$cudaVersion:windows-x86_64") {
-      exclude(group = "org.bytedeco", module = "javacpp")
    }
 
    api("us.ihmc:ihmc-humanoid-robotics:source")
@@ -100,6 +84,6 @@ testDependencies {
 }
 
 slamWrapperDependencies {
-   api("org.bytedeco:javacpp:1.5.9")
+   api("us.ihmc:javacpp:1.5.11")
    api("us.ihmc:ihmc-java-toolkit:source")
 }
