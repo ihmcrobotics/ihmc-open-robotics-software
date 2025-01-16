@@ -35,9 +35,10 @@ sudo apt-get install -y cuda-drivers
 ```shell
 cd ~/Downloads
 wget https://developer.download.nvidia.com/compute/nvcomp/redist/nvcomp/linux-x86_64/nvcomp-linux-x86_64-4.1.0.6_cuda12-archive.tar.xz
-sudo tar --wildcards -xvf nvcomp-linux-x86_64-4.1.0.6_cuda12-archive.tar.xz -C /usr/local/cuda/lib64/ --strip-components=2 */lib/
-sudo tar --wildcards -xvf nvcomp-linux-x86_64-4.1.0.6_cuda12-archive.tar.xz -C /usr/local/cuda/include/ --strip-components=2 */include/
-rm -f $NVCOMP.tar.gz
+tar -xvf nvcomp-linux-x86_64-4.1.0.6_cuda12-archive.tar.xz
+sudo rsync -av nvcomp-linux-x86_64-4.1.0.6_cuda12-archive/lib/* /usr/local/cuda/lib64
+sudo rsync -av nvcomp-linux-x86_64-4.1.0.6_cuda12-archive/include/* /usr/local/cuda/include
+rm -rf nvcomp-linux-x86_64-4.1.0.6_cuda12-archive*
 ```
 
 ### ZED SDK
