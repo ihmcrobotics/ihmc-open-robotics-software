@@ -372,8 +372,7 @@ public class CUDAJPEGProcessorTest
    {
       try
       {
-         URL imageURL = RawImageTest.class.getResource("zedColorBGR.raw");
-         byte[] imageBytes = IOUtils.toByteArray(Objects.requireNonNull(imageURL));
+         byte[] imageBytes = IOUtils.toByteArray(Objects.requireNonNull(RawImageTest.class.getResourceAsStream("zedColorBGR.raw")));
          return new Mat(720, 1280, opencv_core.CV_8UC3, new BytePointer(imageBytes));
       }
       catch (IOException e)

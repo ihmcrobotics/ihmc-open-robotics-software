@@ -10,7 +10,6 @@ import us.ihmc.perception.RawImageTest;
 import us.ihmc.perception.opencv.OpenCVTools;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -52,8 +51,7 @@ public class CUDADepthColorizerTest
    {
       try
       {
-         URL imageURL = RawImageTest.class.getResource("zedDepth16U.raw");
-         byte[] imageBytes = IOUtils.toByteArray(Objects.requireNonNull(imageURL));
+         byte[] imageBytes = IOUtils.toByteArray(Objects.requireNonNull(RawImageTest.class.getResourceAsStream("zedDepth16U.raw")));
          return new Mat(720, 1280, opencv_core.CV_16UC1, new BytePointer(imageBytes));
       }
       catch (IOException e)

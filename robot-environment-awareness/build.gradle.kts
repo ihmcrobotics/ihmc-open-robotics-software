@@ -30,19 +30,6 @@ mainDependencies {
    api("us.ihmc:ihmc-messager-javafx:0.2.0")
    api("us.ihmc:ihmc-robot-data-logger:0.30.2")
    api("us.ihmc:ihmc-ros-tools:source")
-
-   val openblasVersion = "0.3.28-1.5.11"
-   api("us.ihmc:openblas:$openblasVersion")
-   api("us.ihmc:openblas:$openblasVersion:linux-x86_64")
-   api("us.ihmc:openblas:$openblasVersion:linux-arm64")
-   api("us.ihmc:openblas:$openblasVersion:windows-x86_64")
-   val opencvVersion = "4.10.0-1.5.11"
-   api("us.ihmc:opencv:$opencvVersion")
-   api("us.ihmc:opencv:$opencvVersion:linux-arm64")
-   api("us.ihmc:opencv:$opencvVersion:linux-x86_64")
-   api("us.ihmc:opencv:$opencvVersion:linux-x86_64-gpu")
-   api("us.ihmc:opencv:$opencvVersion:windows-x86_64")
-   api("us.ihmc:opencv:$opencvVersion:windows-x86_64-gpu")
 }
 
 applicationDependencies {

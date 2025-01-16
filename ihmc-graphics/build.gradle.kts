@@ -43,8 +43,7 @@ jmonkeyengineTestDependencies {
 }
 
 libgdxDependencies {
-   api("us.ihmc:ihmc-java-toolkit:source")
-   api("us.ihmc:ihmc-robotics-toolkit:source")
+   api("us.ihmc:ihmc-perception:source")
 
    val gdxVersion = "1.12.1"
    api("com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion")
@@ -72,19 +71,6 @@ libgdxDependencies {
 
    val javaFXVersion = "17.0.9"
    api(ihmc.javaFXModule("graphics", javaFXVersion)) // JFX Color
-
-   val openblasVersion = "0.3.28-1.5.11"
-   api("us.ihmc:openblas:$openblasVersion")
-   api("us.ihmc:openblas:$openblasVersion:linux-x86_64")
-   api("us.ihmc:openblas:$openblasVersion:linux-arm64")
-   api("us.ihmc:openblas:$openblasVersion:windows-x86_64")
-   val opencvVersion = "4.10.0-1.5.11"
-   api("us.ihmc:opencv:$opencvVersion")
-   api("us.ihmc:opencv:$opencvVersion:linux-arm64")
-   api("us.ihmc:opencv:$opencvVersion:linux-x86_64")
-   api("us.ihmc:opencv:$opencvVersion:linux-x86_64-gpu")
-   api("us.ihmc:opencv:$opencvVersion:windows-x86_64")
-   api("us.ihmc:opencv:$opencvVersion:windows-x86_64-gpu")
 }
 
 libgdxTestDependencies {
