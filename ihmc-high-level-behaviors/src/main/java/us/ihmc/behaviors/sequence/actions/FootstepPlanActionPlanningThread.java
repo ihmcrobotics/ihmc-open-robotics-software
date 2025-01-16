@@ -37,7 +37,7 @@ public class FootstepPlanActionPlanningThread
       this.isPreviewPlanner = isPreviewPlanner;
       this.state = state;
       this.definition = definition;
-      footstepPlanner = new FootstepPlanningModule();
+      footstepPlanner = new FootstepPlanningModule(definition.getPlannerParametersReadOnly().getUseGPU());
    }
 
    public void triggerPlan(ROS2SyncedRobotModel syncedRobot, SideDependentList<FramePose3D> liveGoalFeetPoses)
