@@ -64,9 +64,9 @@ public class CUDACompressionTools
 
    public void destroy()
    {
+      compressionManager.close();
       checkCUDAError(cudaStreamSynchronize(stream));
       CUDAStreamManager.releaseStream(stream);
-      compressionManager.close();
       jpegProcessor.destroy();
 
       depthMSBExtractorCPU.close();
