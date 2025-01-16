@@ -34,10 +34,10 @@ sudo apt-get install -y cuda-drivers
 
 ```shell
 cd ~/Downloads
-wget https://developer.download.nvidia.com/compute/nvcomp/3.0.5/local_installers/nvcomp_3.0.5_x86_64_12.x.tgz
-sudo tar -xvf nvcomp_3.0.5_x86_64_12.x.tgz -C /usr/local/cuda/lib64/ --strip-components=1 lib/
-sudo tar -xvf nvcomp_3.0.5_x86_64_12.x.tgz -C /usr/local/cuda/include/ --strip-components=1 include/
-rm -f nvcomp_3.0.5_x86_64_12.x.tgz
+wget https://developer.download.nvidia.com/compute/nvcomp/redist/nvcomp/linux-x86_64/nvcomp-linux-x86_64-4.1.0.6_cuda12-archive.tar.xz
+sudo tar --wildcards -xvf nvcomp-linux-x86_64-4.1.0.6_cuda12-archive.tar.xz -C /usr/local/cuda/lib64/ --strip-components=2 */lib/
+sudo tar --wildcards -xvf nvcomp-linux-x86_64-4.1.0.6_cuda12-archive.tar.xz -C /usr/local/cuda/include/ --strip-components=2 */include/
+rm -f $NVCOMP.tar.gz
 ```
 
 ### ZED SDK
@@ -75,14 +75,14 @@ Some of the following commands must be ran as an administrator. To open a Comman
 ```shell
 mkdir nvcomp
 cd nvcomp
-curl -o nvcomp.zip -L https://developer.download.nvidia.com/compute/nvcomp/3.0.5/local_installers/nvcomp_3.0.5_windows_12.x.zip
-tar -xvf nvcomp.zip
+curl -o nvcomp.zip -L https://developer.download.nvidia.com/compute/nvcomp/redist/nvcomp/windows-x86_64/nvcomp-windows-x86_64-4.1.0.6_cuda12-archive.zip
+tar -xvf nvcomp-windows-x86_64-4.1.0.6_cuda12-archive.zip
 
 :: The following move commands must be ran as administrator
-move include\* "%ProgramFiles%\NVIDIA GPU Computing Toolkit\CUDA\v12.6\include"
-move include\nvcomp "%ProgramFiles%\NVIDIA GPU Computing Toolkit\CUDA\v12.6\include"
-move lib\nvcomp*.dll "%ProgramFiles%\NVIDIA GPU Computing Toolkit\CUDA\v12.6\bin"
-move lib\nvcomp*.lib "%ProgramFiles%\NVIDIA GPU Computing Toolkit\CUDA\v12.6\lib\x64"
+move nvcomp-windows-x86_64-4.1.0.6_cuda12-archive\include\* "%ProgramFiles%\NVIDIA GPU Computing Toolkit\CUDA\v12.6\include"
+move nvcomp-windows-x86_64-4.1.0.6_cuda12-archive\include\nvcomp "%ProgramFiles%\NVIDIA GPU Computing Toolkit\CUDA\v12.6\include"
+move nvcomp-windows-x86_64-4.1.0.6_cuda12-archive\bin\nvcomp*.dll "%ProgramFiles%\NVIDIA GPU Computing Toolkit\CUDA\v12.6\bin"
+move nvcomp-windows-x86_64-4.1.0.6_cuda12-archive\lib\nvcomp*.lib "%ProgramFiles%\NVIDIA GPU Computing Toolkit\CUDA\v12.6\lib\x64"
 
 cd ..
 rmdir /s /q nvcomp
