@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.communication.crdt.CRDTBidirectionalEnumField;
 import us.ihmc.communication.crdt.CRDTBidirectionalRigidBodyTransform;
-import us.ihmc.communication.crdt.RequestConfirmFreezable;
+import us.ihmc.communication.crdt.LatestTimestampModifiable;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SidedObject;
@@ -13,7 +13,7 @@ import us.ihmc.tools.io.JSONTools;
 
 public class FootstepPlanActionFootstepDefinition implements SidedObject
 {
-   private final RequestConfirmFreezable freezable;
+   private final LatestTimestampModifiable freezable;
    private final CRDTBidirectionalEnumField<RobotSide> side;
    private final CRDTBidirectionalRigidBodyTransform soleToPlanFrameTransform;
 
@@ -21,7 +21,7 @@ public class FootstepPlanActionFootstepDefinition implements SidedObject
    private RobotSide onDiskSide;
    private final RigidBodyTransform onDiskSoleToPlanFrameTransform = new RigidBodyTransform();
 
-   public FootstepPlanActionFootstepDefinition(RequestConfirmFreezable freezable)
+   public FootstepPlanActionFootstepDefinition(LatestTimestampModifiable freezable)
    {
       this.freezable = freezable;
 
@@ -54,7 +54,7 @@ public class FootstepPlanActionFootstepDefinition implements SidedObject
    public void loadFromFile(JsonNode jsonNode)
    {
       side.setValue(RobotSide.getSideFromString(jsonNode.get("side").asText()));
-      JSONTools.toEuclid(jsonNode, soleToPlanFrameTransform.getValueAndFreeze());
+      JSONTools.toEuclid(jsonNode, soleToPlanFrameTransform.getValueAndModify());
    }
 
    public void setOnDiskFields()
@@ -66,7 +66,7 @@ public class FootstepPlanActionFootstepDefinition implements SidedObject
    public void undoAllNontopologicalChanges()
    {
       side.setValue(onDiskSide);
-      soleToPlanFrameTransform.getValueAndFreeze().set(onDiskSoleToPlanFrameTransform);
+      soleToPlanFrameTransform.getValueAndModify().set(onDiskSoleToPlanFrameTransform);
    }
 
    public boolean hasChanges()
@@ -91,7 +91,7 @@ public class FootstepPlanActionFootstepDefinition implements SidedObject
       soleToPlanFrameTransform.fromMessage(message.getSolePose());
    }
 
-   public RequestConfirmFreezable getFreezable()
+   public LatestTimestampModifiable getFreezable()
    {
       return freezable;
    }

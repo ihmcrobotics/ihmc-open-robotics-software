@@ -21,8 +21,8 @@ public class SakeHandCommandActionState extends ActionNodeState<SakeHandCommandA
 
    public void fromMessage(SakeHandCommandActionStateMessage message)
    {
-      super.fromMessage(message.getState());
-
       getDefinition().fromMessage(message.getDefinition());
+
+      super.fromMessage(message.getState());
    }
 }

@@ -12,13 +12,13 @@ import us.ihmc.log.LogTools;
  */
 public class CRDTBidirectionalNotification
 {
-   private final RequestConfirmFreezable requestConfirmFreezable;
+   private final LatestTimestampModifiable latestTimestampModifiable;
 
    private boolean isSet = false;
 
-   public CRDTBidirectionalNotification(RequestConfirmFreezable requestConfirmFreezable)
+   public CRDTBidirectionalNotification(LatestTimestampModifiable latestTimestampModifiable)
    {
-      this.requestConfirmFreezable = requestConfirmFreezable;
+      this.latestTimestampModifiable = latestTimestampModifiable;
    }
 
    public boolean poll()
@@ -28,8 +28,8 @@ public class CRDTBidirectionalNotification
       if (wasSet)
       {
          isSet = false;
-         requestConfirmFreezable.freeze();
-         LogTools.debug(1, "Polled. Actor: %s".formatted(requestConfirmFreezable.getCRDTInfo().getActorDesignation()));
+         latestTimestampModifiable.modify();
+         LogTools.debug(1, "Polled. Actor: %s".formatted(latestTimestampModifiable.getCRDTInfo().getActorDesignation()));
       }
 
       return wasSet;
@@ -44,10 +44,10 @@ public class CRDTBidirectionalNotification
    {
       if (!isSet)
       {
-         LogTools.debug(1, "Setting. Actor: %s".formatted(requestConfirmFreezable.getCRDTInfo().getActorDesignation()));
+         LogTools.debug(1, "Setting. Actor: %s".formatted(latestTimestampModifiable.getCRDTInfo().getActorDesignation()));
 
          isSet = true;
-         requestConfirmFreezable.freeze();
+         latestTimestampModifiable.modify();
       }
    }
 
@@ -58,10 +58,10 @@ public class CRDTBidirectionalNotification
 
    public void fromMessage(boolean isSet)
    {
-      if (!requestConfirmFreezable.isFrozen())
+      if (latestTimestampModifiable.isModificationIncoming())
       {
          if (isSet != this.isSet)
-            LogTools.debug("%b -> %b Actor: %s".formatted(this.isSet, isSet, requestConfirmFreezable.getCRDTInfo().getActorDesignation()));
+            LogTools.debug("%b -> %b Actor: %s".formatted(this.isSet, isSet, latestTimestampModifiable.getCRDTInfo().getActorDesignation()));
 
          this.isSet = isSet;
       }

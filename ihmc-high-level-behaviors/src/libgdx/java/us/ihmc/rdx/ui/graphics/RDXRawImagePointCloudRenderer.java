@@ -24,12 +24,13 @@ import us.ihmc.rdx.shader.RDXUniform;
 import us.ihmc.rdx.tools.LibGDXTools;
 
 import java.nio.FloatBuffer;
+import java.util.ArrayList;
 
 import static us.ihmc.rdx.AbstractRDXPointCloudRenderer.ColoringMethod.*;
 
 public class RDXRawImagePointCloudRenderer extends AbstractRDXPointCloudRenderer
 {
-   private final VertexAttributes vertexAttributes = new VertexAttributes(new VertexAttribute(Usage.Generic, 1, "a_depthData"));
+   private final VertexAttributes vertexAttributes;
 
    // DEPTH IMAGE UNIFORM DATA
    private CameraIntrinsics depthIntrinsics = new CameraIntrinsics();
@@ -48,16 +49,35 @@ public class RDXRawImagePointCloudRenderer extends AbstractRDXPointCloudRenderer
    private final RigidBodyTransform tempColorTransform = new RigidBodyTransform();
 
    private final boolean enableColorImageInput;
+   private final boolean inputColorizedDepth;
+
+   public RDXRawImagePointCloudRenderer()
+   {
+      this(true);
+   }
 
    public RDXRawImagePointCloudRenderer(boolean enableColorImageInput)
    {
+      this(enableColorImageInput, false);
+   }
+
+   public RDXRawImagePointCloudRenderer(boolean enableColorImageInput, boolean inputColorizedDepth)
+   {
       this.enableColorImageInput = enableColorImageInput;
+      this.inputColorizedDepth = inputColorizedDepth;
+
+      vertexAttributes = new VertexAttributes(new VertexAttribute(Usage.Generic, inputColorizedDepth ? 3 : 1, "a_depthData"));
    }
 
    public void updateMesh(RawImage depthImage)
    {
       if (depthImage.get() == null)
          return;
+
+      if (inputColorizedDepth && depthImage.getOpenCVType() != opencv_core.CV_8UC3)
+         throw new IllegalArgumentException("Depth image's OpenCV type must be 8UC3 for colorized depth input");
+      else if (!inputColorizedDepth && depthImage.getOpenCVType() != opencv_core.CV_16UC1)
+         throw new IllegalArgumentException("Depth image's OpenCV type must be 16UC1 for non-colorized input");
 
       // Update depth image uniforms
       depthIntrinsics = depthImage.getIntrinsicsCopy();
@@ -67,15 +87,18 @@ public class RDXRawImagePointCloudRenderer extends AbstractRDXPointCloudRenderer
 
       int width = depthImage.getWidth();
       int height = depthImage.getHeight();
-      int pixelCount = width * height;
+      int elementCount = width * height;
+
+      if (inputColorizedDepth)
+         elementCount *= 3;
 
       FloatBuffer verticesBuffer = renderable.meshPart.mesh.getVerticesBuffer(true); // Mark dirty
 
       // Ensure correct length and initialize vertices buffer
-      if (renderable.meshPart.size != pixelCount)
+      if (renderable.meshPart.size != elementCount)
       {
-         renderable.meshPart.size = pixelCount;
-         verticesBuffer.limit(pixelCount);
+         renderable.meshPart.size = elementCount;
+         verticesBuffer.limit(elementCount);
       }
 
       /* NOTE:
@@ -85,11 +108,12 @@ public class RDXRawImagePointCloudRenderer extends AbstractRDXPointCloudRenderer
        */
 
       // Wrap the vertices buffer into a pointer, than into a Mat
+      int matrixType = inputColorizedDepth ? opencv_core.CV_32FC3 : opencv_core.CV_32FC1;
       FloatPointer verticesPointer = new FloatPointer(verticesBuffer);
-      Mat verticesMat = new Mat(height, width, opencv_core.CV_32FC1, verticesPointer);
+      Mat verticesMat = new Mat(height, width, matrixType, verticesPointer);
 
       // Convert the depth data to float, and put it into the vertex buffer
-      depthImage.getCpuImageMat().convertTo(verticesMat, opencv_core.CV_32FC1);
+      depthImage.getCpuImageMat().convertTo(verticesMat, matrixType);
 
       verticesMat.close();
       verticesPointer.close();
@@ -157,10 +181,13 @@ public class RDXRawImagePointCloudRenderer extends AbstractRDXPointCloudRenderer
    @Override
    protected String[] getVertexShaderFlags()
    {
+      ArrayList<String> flags = new ArrayList<>();
       if (enableColorImageInput)
-         return new String[] {"INPUT_COLOR_IMAGE"};
+         flags.add("INPUT_COLOR_IMAGE");
+      if (inputColorizedDepth)
+         flags.add("INPUT_COLORIZED_DEPTH");
 
-      return null;
+      return flags.toArray(String[]::new);
    }
 
    @Override

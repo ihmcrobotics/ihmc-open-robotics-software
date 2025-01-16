@@ -9,14 +9,11 @@ import org.bytedeco.javacpp.PointerPointer;
 import org.bytedeco.javacpp.SizeTPointer;
 import us.ihmc.log.LogTools;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 
 import static org.bytedeco.cuda.global.cudart.*;
 import static org.bytedeco.cuda.global.nvrtc.*;
@@ -39,7 +36,7 @@ public class CUDAProgram implements AutoCloseable
     * @param programPath {@link Path} to the .cu file.
     * @param headerPaths {@link Path}s to the header files included (with {@code #include}) in the .cu file.
     */
-   public CUDAProgram(Path programPath, Path... headerPaths)
+   public CUDAProgram(Path programPath, Path... headerPaths) throws Exception
    {
       this(programPath, headerPaths, DEFAULT_OPTIONS);
    }
@@ -52,7 +49,7 @@ public class CUDAProgram implements AutoCloseable
     * @param compilationOptions List of compilation options
     *                           (You can see the available options <a href="https://docs.nvidia.com/cuda/nvrtc/index.html#supported-compile-options">here</a>)
     */
-   public CUDAProgram(Path programPath, Path[] headerPaths, String... compilationOptions)
+   public CUDAProgram(Path programPath, Path[] headerPaths, String... compilationOptions) throws Exception
    {
       try
       {
@@ -89,7 +86,7 @@ public class CUDAProgram implements AutoCloseable
     * @param programPath {@link URL} to the .cu file.
     * @param headerPaths {@link URL}s to the header files included (with {@code #include}) in the .cu file.
     */
-   public CUDAProgram(URL programPath, URL... headerPaths)
+   public CUDAProgram(URL programPath, URL... headerPaths) throws Exception
    {
       this(programPath, headerPaths, DEFAULT_OPTIONS);
    }
@@ -102,11 +99,11 @@ public class CUDAProgram implements AutoCloseable
     * @param compilationOptions List of compilation options
     *                           (You can see the available options <a href="https://docs.nvidia.com/cuda/nvrtc/index.html#supported-compile-options">here</a>)
     */
-   public CUDAProgram(URL programPath, URL[] headerPaths, String... compilationOptions)
+   public CUDAProgram(URL programPath, URL[] headerPaths, String... compilationOptions) throws Exception
    {
       try
       {
-         String programName = programPath.getFile();
+         String programName = programPath.getFile().substring(programPath.getFile().lastIndexOf('/') + 1);
 
          InputStream programContentsStream = programPath.openStream();
          String programContents = new String(programContentsStream.readAllBytes());
@@ -122,7 +119,8 @@ public class CUDAProgram implements AutoCloseable
 
             for (int i = 0; i < headerPaths.length; i++)
             {
-               headerNames[i] = headerPaths[i].getFile();
+               String path = headerPaths[i].getFile();
+               headerNames[i] = path.substring(path.lastIndexOf('/') + 1);
 
                InputStream headerInputStream = headerPaths[i].openStream();
                headerContents[i] = new String(headerInputStream.readAllBytes());
@@ -145,7 +143,7 @@ public class CUDAProgram implements AutoCloseable
     *                    There is no relation with this name to the kernel file; however, it's recommended to use the file name to avoid confusion
     * @param programCode The source code (i.e., the contents of the .cu file)
     */
-   public CUDAProgram(String programName, String programCode)
+   public CUDAProgram(String programName, String programCode) throws Exception
    {
       this(programName, programCode, null, null);
    }
@@ -159,7 +157,7 @@ public class CUDAProgram implements AutoCloseable
     * @param headerNames    List of header names included (with {@code #include}) in the code.
     * @param headerContents Contents of the headers included in the code.
     */
-   public CUDAProgram(String programName, String programCode, String[] headerNames, String[] headerContents)
+   public CUDAProgram(String programName, String programCode, String[] headerNames, String[] headerContents) throws Exception
    {
       this(programName, programCode, headerNames, headerContents, DEFAULT_OPTIONS);
    }
@@ -175,12 +173,12 @@ public class CUDAProgram implements AutoCloseable
     * @param compilationOptions List of compilation options
     *                           (You can see the available options <a href="https://docs.nvidia.com/cuda/nvrtc/index.html#supported-compile-options">here</a>)
     */
-   public CUDAProgram(String programName, String programCode, String[] headerNames, String[] headerContents, String... compilationOptions)
+   public CUDAProgram(String programName, String programCode, String[] headerNames, String[] headerContents, String... compilationOptions) throws Exception
    {
       initialize(programName, programCode, headerNames, headerContents, compilationOptions);
    }
 
-   public CUDAKernel loadKernel(String kernelName)
+   public CUDAKernel loadKernel(String kernelName) throws Exception
    {
       // Load the kernel from module
       return new CUDAKernel(kernelName, module);
@@ -193,9 +191,13 @@ public class CUDAProgram implements AutoCloseable
       module.close();
    }
 
-   private void initialize(String programName, String programCode, String[] headerNames, String[] headerContents, String[] compilationOptions)
+   private void initialize(String programName, String programCode, String[] headerNames, String[] headerContents, String[] compilationOptions) throws Exception
    {
       int error;
+
+      // Perform some CUDA Runtime API call to automatically initialize CUDA, if it hasn't been initialized yet
+      error = cudaFree(null);
+      checkCUDAError(error);
 
       // Compile the program
       _nvrtcProgram compiledProgram = new _nvrtcProgram();
@@ -215,7 +217,7 @@ public class CUDAProgram implements AutoCloseable
 
       // Load the module using the PTX
       error = cuModuleLoadData(module, ptx);
-      checkCUDAError(error);
+      throwCUDAError(error);
 
       // Release stuff
       nvrtcDestroyProgram(compiledProgram);

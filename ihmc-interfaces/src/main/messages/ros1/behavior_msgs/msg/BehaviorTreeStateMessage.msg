@@ -3,43 +3,47 @@
 # reduce the complexity of logic in figuring out when nodes are currently under
 # consideration.
 
-int8 ROOT_NODE=0
+# Used to minimize bandwidth, nodes that are send
+# without their full data.
+int8 PARTIAL_DATA=0
 
-int8 BASIC_NODE=1
+int8 ROOT_NODE=1
 
-int8 AI2R_NODE=2
+int8 BASIC_NODE=2
 
-int8 ACTION_SEQUENCE=3
+int8 AI2R_NODE=3
 
-int8 FALLBACK_NODE=4
+int8 ACTION_SEQUENCE=4
 
-int8 CONDITION_NODE=5
+int8 FALLBACK_NODE=5
 
-int8 GOTO_NODE=6
+int8 CONDITION_NODE=6
 
-int8 DOOR_TRAVERSAL=7
+int8 GOTO_NODE=7
 
-int8 TRASH_CAN_INTERACTION=8
+int8 CHECKPOINT_NODE=8
 
-int8 BUILDING_EXPLORATION=9
+int8 DOOR_TRAVERSAL=9
 
-int8 CHEST_ORIENTATION_ACTION=10
+int8 BUILDING_EXPLORATION=10
 
-int8 FOOTSTEP_PLAN_ACTION=11
+int8 CHEST_ORIENTATION_ACTION=11
 
-int8 SAKE_HAND_COMMAND_ACTION=12
+int8 FOOTSTEP_PLAN_ACTION=12
 
-int8 HAND_POSE_ACTION=13
+int8 SAKE_HAND_COMMAND_ACTION=13
 
-int8 HAND_WRENCH_ACTION=14
+int8 HAND_POSE_ACTION=14
 
-int8 SCREW_PRIMITIVE_ACTION=15
+int8 HAND_WRENCH_ACTION=15
 
-int8 PELVIS_HEIGHT_ORIENTATION_ACTION=16
+int8 SCREW_PRIMITIVE_ACTION=16
 
-int8 WAIT_DURATION_ACTION=17
+int8 PELVIS_HEIGHT_ORIENTATION_ACTION=17
 
-int8 FOOT_POSE_ACTION=18
+int8 WAIT_DURATION_ACTION=18
+
+int8 FOOT_POSE_ACTION=19
 
 # Monotonically increasing message ID that matches the CRDTInfo update number
 uint64 sequence_id
@@ -47,8 +51,11 @@ uint64 sequence_id
 # The ID to assign to the next instantiated node
 uint32 next_id
 
-# A mechanism for confirming and ending a freeze early
-ihmc_common_msgs/ConfirmableRequestMessage confirmable_request
+# The timestamp and modifer ID of the most recent time the root node was replaced or removed
+ihmc_common_msgs/LatestModificationMessage latest_modification_to_root_reference
+
+# The timestamp and modifer ID of the latest modification of the tree data fields
+ihmc_common_msgs/LatestModificationMessage latest_modification_to_data
 
 # A depth first ordered list of types.
 int8[] behavior_tree_types
@@ -57,6 +64,8 @@ int8[] behavior_tree_types
 # The index is of that node in it's respective list for
 # it's type.
 uint32[] behavior_tree_indices
+
+behavior_msgs/BasicNodeStateMessage[] partial_data_nodes
 
 behavior_msgs/BehaviorTreeRootNodeStateMessage[] root_nodes
 
@@ -72,9 +81,9 @@ behavior_msgs/ConditionNodeStateMessage[] condition_nodes
 
 behavior_msgs/GotoNodeStateMessage[] goto_nodes
 
-behavior_msgs/DoorTraversalStateMessage[] door_traversals
+behavior_msgs/CheckPointNodeStateMessage[] checkpoint_nodes
 
-behavior_msgs/TrashCanInteractionStateMessage[] trash_can_interactions
+behavior_msgs/DoorTraversalStateMessage[] door_traversals
 
 behavior_msgs/BuildingExplorationStateMessage[] building_explorations
 

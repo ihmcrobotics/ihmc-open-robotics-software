@@ -114,6 +114,11 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
       return getOrCreateRobotInterface().newSyncedRobot();
    }
 
+   public ROS2SyncedRobotModel newSyncedRobot(boolean enforceUniqueReferenceFrames)
+   {
+      return getOrCreateRobotInterface().newSyncedRobot(enforceUniqueReferenceFrames);
+   }
+
    public VisibilityGraphPathPlanner newBodyPathPlanner()
    {
       VisibilityGraphsParametersBasics visibilityGraphsParameters = robotModel.getVisibilityGraphsParameters();
@@ -179,6 +184,12 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
    public <T> ConcurrentRingBuffer<T> subscribeViaQueue(ROS2Topic<T> topic)
    {
       return ros2Helper.subscribeViaQueue(topic);
+   }
+
+   @Override
+   public <T> ConcurrentRingBuffer<T> subscribeViaQueue(ROS2Topic<T> topic, int queueSize, Consumer<T> callback)
+   {
+      return ros2Helper.subscribeViaQueue(topic, queueSize, callback);
    }
 
    @Override

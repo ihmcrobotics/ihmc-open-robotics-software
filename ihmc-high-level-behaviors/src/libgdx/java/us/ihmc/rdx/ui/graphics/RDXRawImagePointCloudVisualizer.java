@@ -7,6 +7,7 @@ import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
+import org.bytedeco.opencv.global.opencv_core;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.perception.RawImage;
 import us.ihmc.rdx.AbstractRDXPointCloudRenderer.ColoringMethod;
@@ -79,6 +80,8 @@ public class RDXRawImagePointCloudVisualizer extends RDXVisualizer
    {
       super(title);
       this.enableColorImageRendering = enableColorImageRendering;
+
+      setSceneLevels(RDXSceneLevel.MODEL);
    }
 
    public void setDepthImage(RawImage depthImage)
@@ -177,7 +180,9 @@ public class RDXRawImagePointCloudVisualizer extends RDXVisualizer
 
          if (pointCloudRenderer != null)
             pointCloudRenderer.dispose();
-         pointCloudRenderer = new RDXRawImagePointCloudRenderer(enableColorImageRendering);
+
+         boolean renderColorizedDepth = depthImage.getOpenCVType() == opencv_core.CV_8UC3;
+         pointCloudRenderer = new RDXRawImagePointCloudRenderer(enableColorImageRendering, renderColorizedDepth);
          pointCloudRenderer.create(maxPoints);
          availableColoringMethods = Arrays.stream(pointCloudRenderer.getAvailableColoringMethods()).map(Enum::name).toArray(String[]::new);
       }
@@ -261,7 +266,7 @@ public class RDXRawImagePointCloudVisualizer extends RDXVisualizer
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      if (pointCloudRenderer != null)
+      if (pointCloudRenderer != null && sceneLevelCheck(sceneLevels))
          pointCloudRenderer.getRenderables(renderables, pool);
    }
 
@@ -270,8 +275,14 @@ public class RDXRawImagePointCloudVisualizer extends RDXVisualizer
    {
       super.destroy();
 
-      depthImageHistory.forEach(RawImage::release);
-      colorImageHistory.forEach(RawImage::release);
+      synchronized (depthImageHistory)
+      {
+         depthImageHistory.forEach(RawImage::release);
+      }
+      synchronized (colorImageHistory)
+      {
+         colorImageHistory.forEach(RawImage::release);
+      }
 
       if (pointCloudRenderer != null)
          pointCloudRenderer.dispose();

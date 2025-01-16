@@ -10,6 +10,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
@@ -100,8 +101,8 @@ public class ContinuousPlanner
    {
       // When we first start the planner, the starting stance should be at the robot's feet
       // This is ok to do here because later on we check against the controller queue and if we have anything, we change the stance pose
-      startStancePose.get(RobotSide.LEFT).set(referenceFrames.getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame());
-      startStancePose.get(RobotSide.RIGHT).set(referenceFrames.getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame());
+      setStartStancePose(referenceFrames.getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame(),
+                         referenceFrames.getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame());
 
       footstepPlanner.clearCustomTerminationConditions();
       footstepPlanner.addCustomTerminationCondition((time, iterations, finalStep, secondToFinalStep, pathSize) -> pathSize
@@ -134,7 +135,11 @@ public class ContinuousPlanner
 
       if (commandMessage.get().getUseAstarFootstepPlanner())
       {
-         latestFootstepPlan = generateAStarFootstepPlan(latestHeightMapData, latestTerrainMapData, commandMessage.get().getUsePreviousPlanAsReference(), false, goalPoses);
+         latestFootstepPlan = generateAStarFootstepPlan(latestHeightMapData,
+                                                        latestTerrainMapData,
+                                                        commandMessage.get().getUsePreviousPlanAsReference(),
+                                                        false,
+                                                        goalPoses);
       }
       else if (commandMessage.get().getUseMonteCarloFootstepPlanner())
       {
@@ -481,6 +486,12 @@ public class ContinuousPlanner
       return latestFootstepPlan;
    }
 
+   public void setStartStancePose(RigidBodyTransform leftStartPose, RigidBodyTransform rightStartPose)
+   {
+      startStancePose.get(RobotSide.LEFT).set(leftStartPose);
+      startStancePose.get(RobotSide.RIGHT).set(rightStartPose);
+   }
+
    public void setLatestFootstepPlan(FootstepPlan latestFootstepPlan)
    {
       this.previousFootstepPlan = latestFootstepPlan;
@@ -525,6 +536,8 @@ public class ContinuousPlanner
    {
       return startStancePose;
    }
+
+
 
    public FramePose3D getWalkingStartMidPose()
    {

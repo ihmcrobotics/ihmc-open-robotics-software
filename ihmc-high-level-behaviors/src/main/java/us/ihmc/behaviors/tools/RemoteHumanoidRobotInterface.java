@@ -126,6 +126,11 @@ public class RemoteHumanoidRobotInterface
       return new ROS2SyncedRobotModel(robotModel, ros2Node); // TODO: Is using the existing robotModel okay?
    }
 
+   public ROS2SyncedRobotModel newSyncedRobot(boolean enforceUniqueReferenceFrames)
+   {
+      return new ROS2SyncedRobotModel(robotModel, ros2Node, enforceUniqueReferenceFrames); // TODO: Is using the existing robotModel okay?
+   }
+
    public void createFootstepStatusCallback(Consumer<FootstepStatusMessage> consumer)
    {
       ros2Node.createSubscription2(topicName.withOutput().withType(FootstepStatusMessage.class), consumer);

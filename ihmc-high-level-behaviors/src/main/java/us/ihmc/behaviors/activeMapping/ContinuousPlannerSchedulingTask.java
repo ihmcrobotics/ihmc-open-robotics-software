@@ -33,23 +33,12 @@ public class ContinuousPlannerSchedulingTask
     * This is the delay between each tick of the state machine. Set based on perception update rate.
     */
    private final static long CONTINUOUS_PLANNING_DELAY_MS = 16;
-
-   public enum PlanningMode
-   {
-      FAST_HIKING, WALK_TO_GOAL
-   }
-
-   // The default mode for when things start up
-   private PlanningMode planningMode = PlanningMode.FAST_HIKING;
-
    protected final ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(1,
                                                                                                           getClass(),
                                                                                                           ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
-
    private final ContinuousPlanner continuousPlanner;
    public StateMachine<ContinuousHikingState, State> stateMachine;
    private TerrainMapData terrainMap;
-
    public ContinuousPlannerSchedulingTask(DRCRobotModel robotModel,
                                           ROS2Node ros2Node,
                                           HumanoidReferenceFrames referenceFrames,
@@ -64,7 +53,7 @@ public class ContinuousPlannerSchedulingTask
       AtomicReference<ContinuousHikingCommandMessage> commandMessage = new AtomicReference<>(new ContinuousHikingCommandMessage());
       ros2Helper.subscribeViaCallback(ContinuousHikingAPI.CONTINUOUS_HIKING_COMMAND, commandMessage::set);
 
-      TerrainPlanningDebugger debugger = new TerrainPlanningDebugger(ros2Node, monteCarloFootstepPlannerParameters, planningMode);
+      TerrainPlanningDebugger debugger = new TerrainPlanningDebugger(ros2Node, monteCarloFootstepPlannerParameters);
       ContinuousHikingLogger continuousHikingLogger = new ContinuousHikingLogger();
       continuousPlanner = new ContinuousPlanner(robotModel,
                                                 referenceFrames,
@@ -104,16 +93,19 @@ public class ContinuousPlannerSchedulingTask
                                                         controllerFootstepQueueMonitor,
                                                         continuousHikingParameters,
                                                         continuousHikingLogger);
+      State justWaitState = new JustWaitState(controllerFootstepQueueMonitor);
 
       // Adding the different states
       stateMachineFactory.addState(ContinuousHikingState.DO_NOTHING, notStartedState);
       stateMachineFactory.addState(ContinuousHikingState.READY_TO_PLAN, readyToPlanState);
       stateMachineFactory.addState(ContinuousHikingState.WAITING_TO_LAND, waitingtoLandState);
+      stateMachineFactory.addState(ContinuousHikingState.JUST_WAIT, justWaitState);
 
       // Create different conditions
       StartContinuousHikingTransitionCondition startContinuousHikingTransitionCondition = new StartContinuousHikingTransitionCondition(commandMessage);
       StopContinuousHikingTransitionCondition stopContinuousHikingTransitionCondition = new StopContinuousHikingTransitionCondition(commandMessage);
       PlanAgainTransitionCondition planAgainTransitionCondition = new PlanAgainTransitionCondition(continuousPlanner, continuousHikingParameters);
+      SquareUpTransitionCondition squareUpTransitionCondition = new SquareUpTransitionCondition(commandMessage);
 
       //NOTE: The transitions for the state machine are checked in the order they are added.
       // And once one condition is true the other's don't get checked.
@@ -129,19 +121,22 @@ public class ContinuousPlannerSchedulingTask
       // Add condition, this allows us to plan over and over again without sending any footsteps to the controller
       stateMachineFactory.addTransition(ContinuousHikingState.READY_TO_PLAN, ContinuousHikingState.READY_TO_PLAN, planAgainTransitionCondition);
 
+      // Add condition, this allows up to prepare to square the robot up to the goal
+      stateMachineFactory.addTransition(ContinuousHikingState.READY_TO_PLAN, ContinuousHikingState.JUST_WAIT, squareUpTransitionCondition);
+
       // Add done conditions in order to go into the next state
       stateMachineFactory.addDoneTransition(ContinuousHikingState.READY_TO_PLAN, ContinuousHikingState.WAITING_TO_LAND);
       stateMachineFactory.addDoneTransition(ContinuousHikingState.WAITING_TO_LAND, ContinuousHikingState.READY_TO_PLAN);
+   stateMachineFactory.addDoneTransition(ContinuousHikingState.JUST_WAIT, ContinuousHikingState.DO_NOTHING);
 
       // Added a couple listeners to help when jumping between states
       stateMachine = stateMachineFactory.build(ContinuousHikingState.DO_NOTHING);
       stateMachineFactory.addStateChangedListener((from, to) ->
                                                   {
-                                                     String message ="STATE CHANGED: (" + from +  " -> "  + to + ")";
+                                                     String message = "STATE CHANGED: (" + from + " -> " + to + ")";
                                                      LogTools.warn(message);
                                                      continuousHikingLogger.appendString(message);
                                                   });
-      stateMachineFactory.addStateChangedListener((from, to) -> planningMode = debugger.getPlanningMode());
       stateMachineFactory.addStateChangedListener((from, to) -> continuousHikingLogger.logToFile(true, false));
 
       executorService.scheduleWithFixedDelay(this::tickStateMachine, 1500, CONTINUOUS_PLANNING_DELAY_MS, TimeUnit.MILLISECONDS);
@@ -170,5 +165,10 @@ public class ContinuousPlannerSchedulingTask
    public void destroy()
    {
       executorService.shutdown();
+   }
+
+   public enum PlanningMode
+   {
+      FAST_HIKING, WALK_TO_GOAL
    }
 }

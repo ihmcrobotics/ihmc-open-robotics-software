@@ -15,7 +15,7 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "c3f1029e1a834f7a140a4251eed0a1d0f07074deea41c69bee2fe03113687ef3";
+   		return "e81357906e0e606fc497a14e15f15d21ace9f26f7e8b0c43dbe6c9215a997da2";
    }
    
    @Override
@@ -53,6 +53,8 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       int initial_alignment = current_alignment;
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -204,6 +206,9 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       int initial_alignment = current_alignment;
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -418,6 +423,8 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
    {
       cdr.write_type_12(data.getSequenceId());
 
+      cdr.write_type_7(data.getUseGpu());
+
       cdr.write_type_6(data.getAStarHeuristicsWeight());
 
       cdr.write_type_7(data.getCheckForBodyBoxCollisions());
@@ -559,6 +566,8 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
    public static void read(toolbox_msgs.msg.dds.FootstepPlannerParametersPacket data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_12());
+      	
+      data.setUseGpu(cdr.read_type_7());
       	
       data.setAStarHeuristicsWeight(cdr.read_type_6());
       	
@@ -703,6 +712,7 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
    public final void serialize(toolbox_msgs.msg.dds.FootstepPlannerParametersPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_12("sequence_id", data.getSequenceId());
+      ser.write_type_7("use_gpu", data.getUseGpu());
       ser.write_type_6("a_star_heuristics_weight", data.getAStarHeuristicsWeight());
       ser.write_type_7("check_for_body_box_collisions", data.getCheckForBodyBoxCollisions());
       ser.write_type_7("check_for_path_collisions", data.getCheckForPathCollisions());
@@ -777,6 +787,7 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, toolbox_msgs.msg.dds.FootstepPlannerParametersPacket data)
    {
       data.setSequenceId(ser.read_type_12("sequence_id"));
+      data.setUseGpu(ser.read_type_7("use_gpu"));
       data.setAStarHeuristicsWeight(ser.read_type_6("a_star_heuristics_weight"));
       data.setCheckForBodyBoxCollisions(ser.read_type_7("check_for_body_box_collisions"));
       data.setCheckForPathCollisions(ser.read_type_7("check_for_path_collisions"));

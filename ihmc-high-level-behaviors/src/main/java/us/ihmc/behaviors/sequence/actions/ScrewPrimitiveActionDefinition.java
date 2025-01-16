@@ -94,7 +94,7 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
 
       side.setValue(RobotSide.getSideFromString(jsonNode.get("side").asText()));
       objectFrameName.setValue(jsonNode.get("objectFrame").textValue());
-      JSONTools.toEuclid(jsonNode, "screwAxisPose", screwAxisPoseInObjectFrame.getValueAndFreeze());
+      JSONTools.toEuclid(jsonNode, "screwAxisPose", screwAxisPoseInObjectFrame.getValueAndModify());
       translation.setValue(jsonNode.get("translation").asDouble());
       rotation.setValue(jsonNode.get("rotation").asDouble());
       maxLinearVelocity.setValue(jsonNode.get("maxLinearVelocity").asDouble());
@@ -134,7 +134,7 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
 
       side.setValue(onDiskSide);
       objectFrameName.setValue(onDiskObjectFrameName);
-      screwAxisPoseInObjectFrame.getValueAndFreeze().set(onDiskScrewAxisPoseInObjectFrame);
+      screwAxisPoseInObjectFrame.getValueAndModify().set(onDiskScrewAxisPoseInObjectFrame);
       translation.setValue(onDiskTranslation);
       rotation.setValue(onDiskRotation);
       maxLinearVelocity.setValue(onDiskMaxLinearVelocity);
