@@ -1,6 +1,5 @@
 package us.ihmc.perception.cuda;
 
-import org.apache.commons.io.IOUtils;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
@@ -14,7 +13,10 @@ import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 
 import java.io.IOException;
-import java.net.URL;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -372,10 +374,11 @@ public class CUDAJPEGProcessorTest
    {
       try
       {
-         byte[] imageBytes = IOUtils.toByteArray(Objects.requireNonNull(RawImageTest.class.getResourceAsStream("zedColorBGR.raw")));
+         Path path = Paths.get(Objects.requireNonNull(RawImageTest.class.getResource("zedColorBGR.raw")).toURI());
+         byte[] imageBytes = Files.readAllBytes(path);
          return new Mat(720, 1280, opencv_core.CV_8UC3, new BytePointer(imageBytes));
       }
-      catch (IOException e)
+      catch (IOException | URISyntaxException e)
       {
          throw new RuntimeException(e);
       }
