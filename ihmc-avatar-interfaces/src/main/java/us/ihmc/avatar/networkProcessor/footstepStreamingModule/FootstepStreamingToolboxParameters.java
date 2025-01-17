@@ -60,7 +60,12 @@ public class FootstepStreamingToolboxParameters
     */
    private int stabilityIterations;
    /**
-    * Default acceleration norm threshold, to consider the swing foot is not decelerating
+    * Default velocity norm threshold, to consider when the swing foot is not moving much anymore
+    */
+   private double velocityThreshold;
+   /**
+   /**
+    * Default acceleration threshold, to consider when the swing foot is decelerating
     */
    private double accelerationThreshold;
    /**
@@ -72,9 +77,6 @@ public class FootstepStreamingToolboxParameters
     */
    private double verticalComponentWeight;
 
-
-   private double publishingPeriod;
-
    public static FootstepStreamingToolboxParameters defaultParameters()
    {
       FootstepStreamingToolboxParameters parameters = new FootstepStreamingToolboxParameters();
@@ -85,22 +87,25 @@ public class FootstepStreamingToolboxParameters
    public void setDefault()
    {
       clockType = ClockType.CPU_CLOCK;
-      toolboxUpdatePeriod = 0.005;
+      toolboxUpdatePeriod = 0.001;
       timeThresholdForSleeping = 3.0;
 
-      stepThreshold = 0.05;
-      liftThreshold = 0.02;
+      // Step threshold of 5cm and lift of 2cm, seem to be too conservative. Step is identified after ~0.3s. Too long considering that a step lasts ~0.57s
+      stepThreshold = 0.02;
+      liftThreshold = 0.01;
+
       strideLength = 0.20;
       kpDirection = 0.0;
 
       turningThreshold = 12;
       turnDegrees = 33.3;
 
+      // This stability parameters seem to work great
       stabilityThreshold = 0.005;
-      stabilityIterations = 20;
+      stabilityIterations = 5;
 
-      publishingPeriod = 5.0 * 0.006;
-      accelerationThreshold = 0.0;
+      velocityThreshold = 0.05;
+      accelerationThreshold = 0.02;
 
       horizontalAccelerationWeight = 0.1;
       verticalComponentWeight = 0.1;
@@ -119,11 +124,6 @@ public class FootstepStreamingToolboxParameters
    public double getTimeThresholdForSleeping()
    {
       return timeThresholdForSleeping;
-   }
-
-   public double getPublishingPeriod()
-   {
-      return publishingPeriod;
    }
 
    public double getStepThreshold()
@@ -164,6 +164,11 @@ public class FootstepStreamingToolboxParameters
    public double getStabilityThreshold()
    {
       return stabilityThreshold;
+   }
+
+   public double getVelocityThreshold()
+   {
+      return velocityThreshold;
    }
 
    public double getAccelerationThreshold()
@@ -236,9 +241,9 @@ public class FootstepStreamingToolboxParameters
       this.stabilityThreshold = stabilityThreshold;
    }
 
-   public void setPublishingPeriod(double publishingPeriod)
+   public void setVelocityThreshold(double velocityThreshold)
    {
-      this.publishingPeriod = publishingPeriod;
+      this.velocityThreshold = velocityThreshold;
    }
 
    public void setAccelerationThreshold(double accelerationThreshold)

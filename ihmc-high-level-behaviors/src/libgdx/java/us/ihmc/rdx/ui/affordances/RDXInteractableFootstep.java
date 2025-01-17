@@ -504,7 +504,7 @@ public class RDXInteractableFootstep
    /**
     * TODO: Evaluate the use of this method.
     */
-   public void copyFrom(RDXBaseUI baseUI, RDXInteractableFootstep manuallyPlacedFootstep)
+   public void copyFrom(RDXInteractableFootstep manuallyPlacedFootstep)
    {
       this.footstepIndexText = manuallyPlacedFootstep.footstepIndexText;
       this.footstepModelInstance = manuallyPlacedFootstep.footstepModelInstance;

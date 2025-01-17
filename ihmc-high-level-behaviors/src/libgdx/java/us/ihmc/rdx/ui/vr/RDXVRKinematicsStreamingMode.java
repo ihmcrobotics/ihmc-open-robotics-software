@@ -45,7 +45,6 @@ import us.ihmc.rdx.imgui.ImGuiFrequencyPlot;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.affordances.RDXManualFootstepPlacement;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.tools.KinematicsRecordReplay;
@@ -130,13 +129,16 @@ public class RDXVRKinematicsStreamingMode
    private RDXVRFootstepStreaming footstepStreaming;
    private boolean reintializingToolbox = false;
    private boolean pausedForWalking = false;
-   private final RDXManualFootstepPlacement footstepPlacer;
+   private final RDXVRFootstepPlacement footstepPlacer;
    private final ControllerStatusTracker controllerStatusTracker;
    private final SideDependentList<Float> gripButtonsValue = new SideDependentList<>();
 
    private final HandConfiguration[] handConfigurations = {HandConfiguration.HALF_CLOSE, HandConfiguration.CRUSH, HandConfiguration.CLOSE};
    private int leftIndex = -1;
    private int rightIndex = -1;
+   private boolean firstRun = true;
+   private double initialTime = 0.0;
+   private int count = 0;
 
    public RDXVRKinematicsStreamingMode(ROS2SyncedRobotModel syncedRobot,
                                        ROS2ControllerHelper ros2ControllerHelper,
@@ -144,7 +146,7 @@ public class RDXVRKinematicsStreamingMode
                                        RetargetingParameters retargetingParameters,
                                        SceneGraph sceneGraph,
                                        ControllerStatusTracker controllerStatusTracker,
-                                       RDXManualFootstepPlacement footstepPlacer)
+                                       RDXVRFootstepPlacement footstepPlacer)
    {
       this.syncedRobot = syncedRobot;
       this.robotModel = syncedRobot.getRobotModel();
@@ -207,13 +209,42 @@ public class RDXVRKinematicsStreamingMode
          KinematicsStreamingToolboxParameters parameters = new KinematicsStreamingToolboxParameters();
          parameters.setDefault();
          parameters.setToolboxUpdatePeriod(0.003);
-         parameters.setPublishingPeriod(0.006);
-         parameters.setStreamIntegrationDuration(0.1); // not using real-time plugin
+         parameters.setPublishingPeriod(0.006); // Publishing period in seconds.
+         boolean usingRealtimePlugin = false;
+         parameters.setStreamIntegrationDuration(usingRealtimePlugin ? 2.0 * parameters.getPublishingPeriod() : 0.1);
+         parameters.setHoldChestAngularWeight(1.0, 1.0, 0.5);
+         parameters.setHoldPelvisLinearWeight(10.0, 10.0, 20.0);
+         parameters.setDefaultLinearRateLimit(10.0);
+         parameters.setDefaultAngularRateLimit(100.0);
+//         parameters.setDefaultLinearWeight(10.0);
+//         parameters.setDefaultAngularWeight(0.005); // TODO This is tuned for the 4-DoF arms. We want to relax the orientation tracking which we don't have good control over.
+         parameters.setInputPoseLPFBreakFrequency(15.0);
+         parameters.setInputPoseCorrectionDuration(0.05); // Need to send inputs at 30Hz.
+         parameters.setInputVelocityRawAlpha(0.65); // TODO This prob can be 1.0, afraid of overshoots.
+         parameters.setInputStateEstimatorType(KinematicsStreamingToolboxParameters.InputStateEstimatorType.FBC_STYLE);
+         parameters.setUseBBXInputFilter(true);
+         parameters.setInputBBXFilterSize(2.0, 2.8, 2.6);
+         parameters.setInputBBXFilterCenter(0.4, 0.0, 1.25);
+         parameters.setOutputLPFBreakFrequency(10.0);
+         parameters.setOutputJointVelocityScale(0.5);
+
+         parameters.setMinimizeAngularMomentum(true);
+         parameters.setMinimizeLinearMomentum(true);
+         parameters.setAngularMomentumWeight(0.20);
+         parameters.setLinearMomentumWeight(0.01);
+
+         parameters.setMinimizeAngularMomentumRate(true);
+         parameters.setMinimizeLinearMomentumRate(true);
+         parameters.setAngularMomentumRateWeight(1.0);
+         parameters.setLinearMomentumRateWeight(1.0);
+
          parameters.getDefaultConfiguration().setEnableLeftHandTaskspace(false);
          parameters.getDefaultConfiguration().setEnableRightHandTaskspace(false);
          parameters.getDefaultConfiguration().setEnableNeckJointspace(false);
-         parameters.setUseBBXInputFilter(true);
-         parameters.setDefaultStreamingBlendingDuration(0.5);
+         parameters.getDefaultSolverConfiguration().setJointVelocityWeight(0.05);
+         parameters.getDefaultSolverConfiguration().setJointAccelerationWeight(0.0); // As soon as we increase this guy, we inject springy behavior.
+
+         parameters.getDefaultSolverConfiguration().setEnableJointVelocityLimits(true);
 
          if (robotModel != null)
          {
@@ -355,7 +386,7 @@ public class RDXVRKinematicsStreamingMode
          gripButtonsValue.put(RobotSide.RIGHT, controller.getGripActionData().x());
       });
 
-      if ((enabled.get() || kinematicsRecorder.isReplaying()) && toolboxInputStreamRateLimiter.run(streamPeriod))
+      if ((enabled.get() || kinematicsRecorder.isReplaying()))
       {
          KinematicsStreamingToolboxInputMessage toolboxInputMessage = new KinematicsStreamingToolboxInputMessage();
 
@@ -375,14 +406,7 @@ public class RDXVRKinematicsStreamingMode
                      trackerReferenceFrames.put(segmentType.getSegmentName(), trackerDesiredControlFrame);
 
                      if (segmentType.isFootRelated())
-                     {
                         footstepStreaming.setTrackerReference(segmentType.getSegmentSide(), trackerDesiredControlFrame.getReferenceFrame());
-                        footstepStreaming.setTrackerVelocity(segmentType.getSegmentSide(),
-                                                             new SpatialVector(ReferenceFrame.getWorldFrame(),
-                                                                               tracker.getAngularVelocity(),
-                                                                               tracker.getLinearVelocity()));
-                        footstepStreaming.setTrackerTimestamp(segmentType.getSegmentSide(), tracker.getLastPollTimeNanos());
-                     }
                   }
                   if (!trackerFrameGraphics.containsKey(segmentType.getSegmentName()))
                   {
@@ -391,6 +415,15 @@ public class RDXVRKinematicsStreamingMode
                   }
                   trackerFrameGraphics.get(segmentType.getSegmentName())
                                       .setToReferenceFrame(trackerReferenceFrames.get(segmentType.getSegmentName()).getReferenceFrame());
+
+                  if (segmentType.isFootRelated())
+                  {
+                     footstepStreaming.setTrackerVelocity(segmentType.getSegmentSide(),
+                                                          new SpatialVector(ReferenceFrame.getWorldFrame(),
+                                                                            tracker.getAngularVelocity(),
+                                                                            tracker.getLinearVelocity()));
+                     footstepStreaming.setTrackerTimestamp(segmentType.getSegmentSide(), tracker.getLastPollTimeNanos());
+                  }
 
                   if (motionRetargeting.isRetargetingNotNeeded(segmentType))
                   {
@@ -519,11 +552,14 @@ public class RDXVRKinematicsStreamingMode
          else
             toolboxInputMessage.setStreamToController(kinematicsRecorder.isReplaying());
 
-         ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputToolboxConfigurationTopic(syncedRobot.getRobotModel().getSimpleRobotName()), ikSolverConfigurationMessage);
-         ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputCommandTopic(syncedRobot.getRobotModel().getSimpleRobotName()), toolboxInputMessage);
-         outputFrequencyPlot.recordEvent();
+         if (toolboxInputStreamRateLimiter.run(streamPeriod))
+         {
+            ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputToolboxConfigurationTopic(syncedRobot.getRobotModel().getSimpleRobotName()), ikSolverConfigurationMessage);
+            ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputCommandTopic(syncedRobot.getRobotModel().getSimpleRobotName()), toolboxInputMessage);
+            outputFrequencyPlot.recordEvent();
+         }
 
-         footstepStreaming.processVRInput(gripButtonsValue.get(RobotSide.LEFT) > 0.5f && gripButtonsValue.get(RobotSide.RIGHT) > 0.5f);
+         footstepStreaming.processVRInput(gripButtonsValue.get(RobotSide.LEFT) > 0.2f && gripButtonsValue.get(RobotSide.RIGHT) > 0.2f);
       }
    }
 
@@ -674,12 +710,6 @@ public class RDXVRKinematicsStreamingMode
             // Stepping with ankle trackers pauses Streaming until walking is done
             if (!controllerStatusTracker.isWalking())
             {
-               if (pausedForWalking)
-               {
-                  LogTools.warn("Stepping from VR");
-                  footstepStreaming.step();
-
-               }
                if (footstepStreaming.getReadyToStepNotification().poll())
                {
                   streamingDisabled.clear();
@@ -692,6 +722,8 @@ public class RDXVRKinematicsStreamingMode
                   pausedForWalking = true;
                   visualizeIKPreviewGraphic(false);
                   footstepStreaming.getReadyToStepNotification().clear();
+                  LogTools.warn("Stepping from VR");
+                  footstepStreaming.step();
                }
             }
             else
@@ -700,6 +732,8 @@ public class RDXVRKinematicsStreamingMode
                {
                   LogTools.warn("Consecutive stepping from VR");
                   footstepStreaming.step();
+                  // This prevents wrong logic. The controller might think we're done walking even if we've just sent a new footstep, that needs to propagate to the controller
+                  controllerStatusTracker.getFinishedWalkingNotification().clear();
                }
             }
 
@@ -921,6 +955,10 @@ public class RDXVRKinematicsStreamingMode
    {
       if (toolbox != null)
          toolbox.closeAndDispose();
+      if (footstepStreaming != null)
+      {
+         footstepStreaming.destroy();
+      }
       ghostRobotGraphic.destroy();
       for (RobotSide side : RobotSide.values)
       {

@@ -12,7 +12,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.spatial.SpatialVector;
-import us.ihmc.rdx.ui.affordances.RDXManualFootstepPlacement;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Input;
@@ -27,12 +26,13 @@ public class RDXVRFootstepStreaming
    private final FootstepStreamingToolboxModule footstepStreamingToolbox;
    private final ROS2Input<FootstepStreamingToolboxOutputStatus> status;
    private final ROS2SyncedRobotModel syncedRobot;
-   private final RDXManualFootstepPlacement footstepPlacer;
+   private final RDXVRFootstepPlacement footstepPlacer;
    private final SideDependentList<ReferenceFrame> ankleTrackerFrames = new SideDependentList<>();
    private final SideDependentList<SpatialVector> ankleTrackerVelocities = new SideDependentList<>();
    private final SideDependentList<Long> ankleTrackerTimestamps = new SideDependentList<>();
    private final Notification readyToStep = new Notification();
    private boolean wasEnabled = false;
+   private boolean footstepError = false;
 
    /**
     * Constructor for the footstep streaming class.
@@ -40,7 +40,7 @@ public class RDXVRFootstepStreaming
     * @param syncedRobot the synchronized robot model
     * @param footstepPlacer the footstep placer for manual footstep placement
     */
-   public RDXVRFootstepStreaming(ROS2SyncedRobotModel syncedRobot, ROS2Helper ros2Helper, RDXManualFootstepPlacement footstepPlacer)
+   public RDXVRFootstepStreaming(ROS2SyncedRobotModel syncedRobot, ROS2Helper ros2Helper, RDXVRFootstepPlacement footstepPlacer)
    {
       this.syncedRobot = syncedRobot;
       this.footstepPlacer = footstepPlacer;
@@ -103,36 +103,39 @@ public class RDXVRFootstepStreaming
          {
             if (!latestStatus.getAdjustmentFootstep()) // First value estimate for a footstep
             {
+               footstepPlacer.setActiveAdjustment(true); // The footstep will be adjusted later
                // Place and send footstep
                footstepPlacer.createNewFootstep(side);
-               footstepPlacer.setFootstepBeingPlacedPose(new FramePose3D(ReferenceFrame.getWorldFrame(),
-                                                                         latestStatus.getDesiredFootPosition(),
-                                                                         latestStatus.getDesiredFootOrientation()));
-               if (footstepPlacer.checkAndPlaceFootstep())
+               footstepPlacer.setFootstepPose(new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                                              latestStatus.getDesiredFootPosition(),
+                                                              latestStatus.getDesiredFootOrientation()));
+               if (footstepPlacer.checkFootstepValidity())
                {
-                  footstepPlacer.exitPlacement();
                   // We can't trigger stepping here. We have to notify the KST and stop streaming
                   readyToStep.clear();
                   readyToStep.set();
                }
                else
                {
-                  footstepPlacer.exitPlacement();
-                  LogTools.warn("Could not place step computed from the footstep streaming module");
+                  footstepError = true;
+                  LogTools.error("Could not place step computed from the footstep streaming module. Unfeasible step");
                }
             }
             else if (latestStatus.getAdjustmentFootstep() && !latestStatus.getLastAdjustment()) // Later values of updated estimate
             {
-               footstepPlacer.setActiveAdjustment(true);
-               footstepPlacer.setLastFootstepPose(new FramePose3D(ReferenceFrame.getWorldFrame(),
-                                                                  latestStatus.getDesiredFootPosition(),
-                                                                  latestStatus.getDesiredFootOrientation()));
-               step();
+               if (!footstepError)
+               {
+                  footstepPlacer.setFootstepPose(new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                                                 latestStatus.getDesiredFootPosition(),
+                                                                 latestStatus.getDesiredFootOrientation()));
+                  step();
+               }
             }
             else if (latestStatus.getLastAdjustment()) // Last estimate
             {
                footstepPlacer.setActiveAdjustment(false);
-               footstepPlacer.clear();
+               footstepPlacer.reset();
+               footstepError = false;
             }
          }
          else
@@ -149,7 +152,7 @@ public class RDXVRFootstepStreaming
 
    public void step()
    {
-      footstepPlacer.walkFromSteps();
+      footstepPlacer.sendStep();
    }
 
    /**
@@ -182,5 +185,13 @@ public class RDXVRFootstepStreaming
       footstepStreamingToolbox.sleep();
       wasEnabled = false;
       readyToStep.clear();
+      footstepPlacer.reset();
+      footstepPlacer.setActiveAdjustment(false);
+      footstepError = false;
+   }
+
+   public void destroy()
+   {
+      footstepStreamingToolbox.destroy();
    }
 }

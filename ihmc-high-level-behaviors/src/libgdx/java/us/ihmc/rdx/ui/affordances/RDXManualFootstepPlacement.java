@@ -241,7 +241,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       {
          // If safe to place footstep
          RDXInteractableFootstep addedStep = footstepPlan.getNextFootstep();
-         addedStep.copyFrom(baseUI, footstepBeingPlaced);
+         addedStep.copyFrom(footstepBeingPlaced);
          // Switch sides
          currentFootStepSide = currentFootStepSide.getOppositeSide();
          createNewFootstep(currentFootStepSide);
@@ -257,31 +257,6 @@ public class RDXManualFootstepPlacement implements RenderableProvider
    {
       footstepBeingPlacedIsReachable = true;
       placeFootstep();
-   }
-
-   public boolean checkAndPlaceFootstep()
-   {
-      // This allows us to check the current footstep being placed and flash that footstep if its unreasonable
-      FramePose3DReadOnly candidateStepPose = getFootstepBeingPlacedPoseORLastFootstepPose();
-      stepChecker.checkValidSingleStep(footstepPlan.getFootsteps(),
-                                       candidateStepPose,
-                                       currentFootStepSide,
-                                       footstepPlan.getNumberOfFootsteps());
-
-      ArrayList<BipedalFootstepPlannerNodeRejectionReason> failureReasons = stepChecker.getReasons();
-      boolean footstepBeingPlacedIsFeasible = isFootstepBeingPlacedReachable() && failureReasons.get(failureReasons.size()-1) == null;
-      if (footstepBeingPlacedIsFeasible)
-      {
-         // If safe to place footstep
-         RDXInteractableFootstep addedStep = footstepPlan.getNextFootstep();
-         addedStep.copyFrom(baseUI, footstepBeingPlaced);
-         return true;
-      }
-      else
-      {
-         LogTools.info("Footstep Rejected, unfeasible");
-         return false;
-      }
    }
 
    @Override
@@ -335,12 +310,6 @@ public class RDXManualFootstepPlacement implements RenderableProvider
    {
       poseToSet.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       footstepBeingPlaced.updatePose(poseToSet);
-   }
-
-   public void setLastFootstepPose(FramePose3DReadOnly poseToSet)
-   {
-      poseToSet.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      footstepPlan.getLastFootstep().updatePose(poseToSet);
    }
 
    public void squareUpFootstep()
@@ -402,16 +371,6 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       isReachable &= footstepBeingPlaced.getFootPose().getZ() - previousFootstepPose.getZ() > -MAX_DISTANCE_MULTIPLIER * footstepPlannerParameters.getMaxStepZ();
 
       return isReachable;
-   }
-
-   public void walkFromSteps()
-   {
-      footstepPlan.walkFromSteps();
-   }
-
-   public void setActiveAdjustment(boolean enabled)
-   {
-      footstepPlan.setActiveAdjustment(enabled);
    }
 
    public void clear()

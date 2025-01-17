@@ -19,6 +19,7 @@ import us.ihmc.commons.FormattingTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.LocomotionParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -717,6 +718,11 @@ public class RDXTeleoperationManager extends RDXPanel
    public LocomotionParameters getLocomotionParameters()
    {
       return locomotionManager.getLocomotionParameters();
+   }
+
+   public DefaultFootstepPlannerParametersBasics getFootstepPlanningParameters()
+   {
+      return locomotionManager.getFootstepPlanningParameters();
    }
 
    public RDXLocomotionManager getLocomotionManager()

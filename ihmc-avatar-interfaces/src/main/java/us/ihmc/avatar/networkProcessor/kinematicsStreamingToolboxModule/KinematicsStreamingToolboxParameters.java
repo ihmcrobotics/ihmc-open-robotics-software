@@ -303,8 +303,8 @@ public class KinematicsStreamingToolboxParameters
       lockPelvisWeight = 1000.0;
       lockChestWeight = 1000.0;
 
-      defaultLinearWeight.set(10.0, 10.0, 10.0);
-      defaultAngularWeight.set(0.005, 0.005, 0.005); // TODO This is tuned for the 4-DoF arms. We want to relax the orientation tracking which we don't have good control over.
+      defaultLinearWeight.set(20.0, 20.0, 20.0);
+      defaultAngularWeight.set(1.0, 1.0, 1.0); // TODO This is tuned for the 4-DoF arms. We want to relax the orientation tracking which we don't have good control over.
       defaultPelvisLinearWeight.set(defaultLinearWeight);
       defaultPelvisAngularWeight.set(defaultAngularWeight);
       defaultChestLinearWeight.set(defaultLinearWeight);
