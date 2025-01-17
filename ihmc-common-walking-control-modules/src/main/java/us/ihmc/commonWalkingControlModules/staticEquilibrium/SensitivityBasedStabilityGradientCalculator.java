@@ -72,6 +72,7 @@ public class SensitivityBasedStabilityGradientCalculator
    private final YoDouble[] yoVertexSensitivityPrev = new YoDouble[DIRECTIONS_TO_OPTIMIZE];
    private final DMatrixRMaj computedSensitivity = new DMatrixRMaj(0);
    private final DMatrixRMaj optimizedWholeBodyVelocity = new DMatrixRMaj(0);
+   private final DMatrixRMaj stabilityMarginGradient = new DMatrixRMaj(0);
    private final YoDouble[] yoOptimizedWholeBodyVelocity;
 
    private final DMatrixRMaj nullspaceVelocity = new DMatrixRMaj(0);
@@ -181,7 +182,8 @@ public class SensitivityBasedStabilityGradientCalculator
       }
       yoPostureSensitivity.set(Math.sqrt(optimalSensitivity));
 
-      CommonOps_DDRM.mult(nullspaceCalculator.getNullspace(), computedSensitivity, optimizedWholeBodyVelocity);
+      CommonOps_DDRM.mult(nullspaceCalculator.getNullspace(), computedSensitivity, stabilityMarginGradient);
+      optimizedWholeBodyVelocity.set(stabilityMarginGradient);
       foundSolution.set(normalize(optimizedWholeBodyVelocity, 1.0e-5));
 
       for (int i = 0; i < yoOptimizedWholeBodyVelocity.length; i++)
@@ -195,58 +197,6 @@ public class SensitivityBasedStabilityGradientCalculator
    private static int getSensitivityIndex(int nullspace_idx, int edge_idx)
    {
       return nullspace_idx * largestSupportedNullspace + edge_idx;
-   }
-
-   public boolean updateIncremental()
-   {
-      if (!stabilityMarginRegionCalculator.hasSolvedWholeRegion())
-      {
-         return false;
-      }
-
-      if (updateNullspace.getValue())
-      {
-         updateNullspace.set(false);
-         updateNullspace();
-      }
-      else
-      {
-         if (!updateStabilityMarginData(stabilityMarginRegionCalculator.getLowestMarginEdgeIndex()))
-            return false;
-
-         /* Copy nominal actuation constraint matrix */
-         postureConstraintVariationCalculator.initializeFiniteDifference();
-
-         for (int i = 0; i < sensitivityUpdatesPerTick.getValue(); i++)
-         {
-            updateSensitivity();
-            sensitivityIndexCounter.increment();
-
-            if (sensitivityIndexCounter.getValue() >= nullspaceDimensionality.getValue())
-            {
-               // Done updating sensitivity values
-               double optimalSensitivity = 0.0;
-               for (int j = 0; j < nullspaceDimensionality.getValue(); j++)
-               {
-                  optimalSensitivity += EuclidCoreTools.square(yoComputedSensitivity[j].getValue());
-               }
-               yoPostureSensitivity.set(Math.sqrt(optimalSensitivity));
-
-               CommonOps_DDRM.mult(nullspaceCalculator.getNullspace(), computedSensitivity, optimizedWholeBodyVelocity);
-               foundSolution.set(normalize(optimizedWholeBodyVelocity, 1.0e-5));
-
-               // Reset update flags
-               updateNullspace.set(true);
-               sensitivityIndexCounter.set(0);
-               break;
-            }
-         }
-
-         /* Set initial joint state and update frames */
-         postureConstraintVariationCalculator.resetToInitialJointState();
-      }
-
-      return foundSolution.getValue();
    }
 
    public void updateNullspace()
@@ -449,6 +399,11 @@ public class SensitivityBasedStabilityGradientCalculator
    private static double computeMarginToJointLimit(OneDoFJointBasics joint)
    {
       return Math.min(Math.abs(joint.getQ() - joint.getJointLimitLower()), Math.abs(joint.getQ() - joint.getJointLimitUpper()));
+   }
+
+   public DMatrixRMaj getStabilityMarginGradient()
+   {
+      return stabilityMarginGradient;
    }
 
    public DMatrixRMaj getNomalizedStabilityGradient()

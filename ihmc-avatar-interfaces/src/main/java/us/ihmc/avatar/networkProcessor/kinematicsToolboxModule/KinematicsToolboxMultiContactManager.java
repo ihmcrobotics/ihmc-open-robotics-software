@@ -38,7 +38,8 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 public class KinematicsToolboxMultiContactManager
 {
-   private static final boolean MODIFY_POSTURE_WITH_PRIVILEGED_CONFIGURATION = false;
+   public static final boolean DO_SMOOTH_STATE_TRANSITION = true;
+
    private static final double JOINT_LIMIT_REDUCTION_PERCENTAGE = 0.05;
    private static final double JOINTSPACE_KP = 50.0;
    private static final double PELVIS_POSTURE_KP = 1200.0;
@@ -235,28 +236,40 @@ public class KinematicsToolboxMultiContactManager
          postureOptimizer.initialize();
       }
 
-      if (hasPostureSensitivity)
+      if (!hasPostureSensitivity)
       {
-         double postureSensitivityThreshold = this.postureSensitivityThreshold.getValue() + postureSensitivityHysteresisEpsilon * (mode.getValue() == PostureOptimizerState.OPTIMIZER ? -1.0 : 1.0);
-         boolean isPostureSensitivityHigh = postureOptimizer.getPostureSensitivity() > postureSensitivityThreshold;
-         this.isPostureSensitivityHigh.update(isPostureSensitivityHigh);
+         isPostureSensitivityHigh.set(false);
+         stabilityMarginLevel.set(StabilityMarginLevel.HIGH);
+         return;
+      }
 
-         if (multiContactRegionCalculator.getStabilityMargin() < stabilityMarginThresholdLow.getValue())
-         {
-            stabilityMarginLevel.set(StabilityMarginLevel.LOW);
-         }
-         else if (multiContactRegionCalculator.getStabilityMargin() < stabilityMarginThresholdHigh.getValue())
-         {
-            stabilityMarginLevel.set(StabilityMarginLevel.MEDIUM);
-         }
-         else
-         {
-            stabilityMarginLevel.set(StabilityMarginLevel.HIGH);
-         }
+      // TODO add if/else for abrupt transition
+      if (DO_SMOOTH_STATE_TRANSITION)
+      {
+         doSmoothStateTransition();
       }
       else
       {
-         isPostureSensitivityHigh.set(false);
+         doDiscreteStateTransition();
+      }
+   }
+
+   private void doSmoothStateTransition()
+   {
+      double postureSensitivityThreshold = this.postureSensitivityThreshold.getValue() + postureSensitivityHysteresisEpsilon * (mode.getValue() == PostureOptimizerState.OPTIMIZER ? -1.0 : 1.0);
+      boolean isPostureSensitivityHigh = postureOptimizer.getPostureSensitivity() > postureSensitivityThreshold;
+      this.isPostureSensitivityHigh.update(isPostureSensitivityHigh);
+
+      if (multiContactRegionCalculator.getStabilityMargin() < stabilityMarginThresholdLow.getValue())
+      {
+         stabilityMarginLevel.set(StabilityMarginLevel.LOW);
+      }
+      else if (multiContactRegionCalculator.getStabilityMargin() < stabilityMarginThresholdHigh.getValue())
+      {
+         stabilityMarginLevel.set(StabilityMarginLevel.MEDIUM);
+      }
+      else
+      {
          stabilityMarginLevel.set(StabilityMarginLevel.HIGH);
       }
 
@@ -268,7 +281,7 @@ public class KinematicsToolboxMultiContactManager
       {
          newMode = PostureOptimizerState.NOMINAL;
       }
-      else if (stabilityMarginLevel.getValue() == StabilityMarginLevel.LOW && isPostureSensitivityHigh.getValue())
+      else if (stabilityMarginLevel.getValue() == StabilityMarginLevel.LOW && this.isPostureSensitivityHigh.getValue())
       {
          newMode = PostureOptimizerState.OPTIMIZER;
       }
@@ -306,6 +319,24 @@ public class KinematicsToolboxMultiContactManager
       else if (mode.getValue() == PostureOptimizerState.OPTIMIZER)
       {
          activationAlpha.update(1.0);
+      }
+   }
+
+   private void doDiscreteStateTransition()
+   {
+      if (stabilityMarginLevel.getValue() == StabilityMarginLevel.LOW)
+      {
+         // update towards optimized posture
+         activationAlpha.set(1.0);
+      }
+      else
+      {
+         activationAlpha.set(0.0);
+
+         for (int i = 0; i < qPrivOptimized.length; i++)
+         {
+            qPrivOptimized[i].set(qPrivNominal[i].getValue());
+         }
       }
    }
 
@@ -403,7 +434,7 @@ public class KinematicsToolboxMultiContactManager
    {
       boolean isActivated = activationAlpha.getValue() > 1.0e-5;
 
-      if (!MODIFY_POSTURE_WITH_PRIVILEGED_CONFIGURATION && isActivated)
+      if (isActivated)
       {
          // Set optimized posture
          OneDoFJointBasics[] oneDoFJoints = wholeBodyContactState.getOneDoFJoints();
@@ -444,22 +475,7 @@ public class KinematicsToolboxMultiContactManager
 
    public void addPostureInverseKinematicsCommands(InverseKinematicsCommandBuffer bufferToPack)
    {
-      if (MODIFY_POSTURE_WITH_PRIVILEGED_CONFIGURATION)
-      {
-         PrivilegedConfigurationCommand privilegedConfigurationCommand = bufferToPack.addPrivilegedConfigurationCommand();
-         privilegedConfigurationCommand.clear();
 
-         privilegedConfigurationCommand.setDefaultWeight(2.0);
-         privilegedConfigurationCommand.setDefaultConfigurationGain(50.0);
-
-         // For some reason the IK controller requires having each joint populated
-         OneDoFJointBasics[] oneDoFJoints = wholeBodyContactState.getOneDoFJoints();
-         for (int i = 0; i < oneDoFJoints.length; i++)
-         {
-            privilegedConfigurationCommand.addJoint(oneDoFJoints[i], qPrivOptimized[i].getValue());
-            //         privilegedConfigurationCommand.addJoint(oneDoFJoints[i], qPrivNominal[i].getValue());
-         }
-      }
    }
 
    public PostureOptimizerState getMode()
