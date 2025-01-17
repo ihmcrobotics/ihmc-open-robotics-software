@@ -16,6 +16,7 @@ import us.ihmc.yoVariables.euclid.YoPoint2D;
 import us.ihmc.yoVariables.euclid.YoPoint3D;
 import us.ihmc.yoVariables.euclid.YoPose3D;
 import us.ihmc.yoVariables.euclid.YoQuaternion;
+import us.ihmc.yoVariables.euclid.YoVector2D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -39,6 +40,7 @@ public class SCS2LogLocomotionData
    private YoPose3D pelvisPose;
    private YoPoint3D centerOfMass;
    private YoPoint2D capturePoint;
+   private YoVector2D capturePointError;
    private final double plotTimeResolution = 0.1;
    private double lastCoMPlotTime = Double.NaN;
    private final SideDependentList<ArrayList<SCS2LogJointTracker>> armJointPositions = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
@@ -84,7 +86,10 @@ public class SCS2LogLocomotionData
       if (rootRegistry.findVariable(momentumRateControl + "capturePointX") instanceof YoDouble xVariable
        && rootRegistry.findVariable(momentumRateControl + "capturePointY") instanceof YoDouble yVariable)
          capturePoint = new YoPoint2D(xVariable, yVariable);
-      
+      if (rootRegistry.findVariable(momentumRateControl + "ICPController.controllerICPErrorX") instanceof YoDouble xVariable
+       && rootRegistry.findVariable(momentumRateControl + "ICPController.controllerICPErrorY") instanceof YoDouble yVariable)
+         capturePointError = new YoVector2D(xVariable, yVariable);
+
       String feetManager = highLevelController + "HighLevelHumanoidControllerFactory.HighLevelControlManagerFactory.FeetManager.";
       for (RobotSide side : RobotSide.values)
          if (rootRegistry.findVariable(feetManager + "%1$sFootControlModule.%1$sFootCurrentState".formatted(side.getLowerCaseName())) instanceof YoEnum<?> yoEnum)
@@ -108,8 +113,11 @@ public class SCS2LogLocomotionData
       for (RobotSide side : RobotSide.values)
       {
          SimRigidBodyBasics handLink = robot.getRigidBody("%s_GRIPPER_YAW_LINK".formatted(side.getSideNameInAllCaps()));
-         MovingReferenceFrame handFrame = handLink.getParentJoint().getFrameAfterJoint();
-         handFrames.set(side, handFrame);
+         if (handLink != null) // Robot might not have a hand on this side
+         {
+            MovingReferenceFrame handFrame = handLink.getParentJoint().getFrameAfterJoint();
+            handFrames.set(side, handFrame);
+         }
 
          SimRigidBodyBasics footLink = robot.getRigidBody("%s_FOOT_LINK".formatted(side.getSideNameInAllCaps()));
          MovingReferenceFrame footFrame = footLink.getParentJoint().getFrameAfterJoint();
@@ -181,7 +189,7 @@ public class SCS2LogLocomotionData
 
       logWalk.getTimes().add(currentTime);
       logWalk.getPelvisPoses().add().set(pelvisPose);
-      for (RobotSide side : RobotSide.values)
+      for (RobotSide side : handFrames.sides())
          logWalk.getHandPoses().get(side).add().set(handFrames.get(side).getTransformToDesiredFrame(footFrames.get(side)));
       logWalk.getComs().add().set(centerOfMass);
       logWalk.getIcps().add().set(capturePoint);

@@ -182,7 +182,7 @@ public class RDXSCS2LogProcessor
                tableFlags += ImGuiTableFlags.BordersV;
                tableFlags += ImGuiTableFlags.NoBordersInBody;
 
-               if (ImGui.beginTable(labels.get("Logs"), 9, tableFlags))
+               if (ImGui.beginTable(labels.get("Logs"), 11, tableFlags))
                {
                   float charWidth = ImGuiTools.calcTextSizeX("A");
                   ImGui.tableSetupColumn(labels.get("Name"), ImGuiTableColumnFlags.WidthFixed, 50 * charWidth);
@@ -194,6 +194,8 @@ public class RDXSCS2LogProcessor
                   ImGui.tableSetupColumn(labels.get("Coms"), ImGuiTableColumnFlags.WidthFixed, 9 * charWidth);
                   ImGui.tableSetupColumn(labels.get("workingCounterMismatch"), ImGuiTableColumnFlags.WidthFixed, 9 * charWidth);
                   ImGui.tableSetupColumn(labels.get("Plot hand poses"), ImGuiTableColumnFlags.WidthFixed, 15 * charWidth);
+                  ImGui.tableSetupColumn(labels.get("Plot ICP error"), ImGuiTableColumnFlags.WidthFixed, 14 * charWidth);
+                  ImGui.tableSetupColumn(labels.get("Plot step timings"), ImGuiTableColumnFlags.WidthFixed, 17 * charWidth);
 
                   ImGui.tableSetupScrollFreeze(0, 1);
                   ImGui.tableHeadersRow();
@@ -324,7 +326,88 @@ public class RDXSCS2LogProcessor
                               }
                            }
                         }, "Plot Hand Poses");
+                     }
+                     ImGui.tableNextColumn();
+                     if (ImGuiTools.textWithUnderlineOnHover("Plot ICP error") && ImGui.isMouseClicked(ImGuiMouseButton.Left))
+                     {
+                        ThreadTools.startAsDaemon(() ->
+                        {
+                           String logFolderName = logDirectory.getFileName().toString();
+                           Path csvFile = logDirectory.resolve(logFolderName + "_ICPError.csv");
 
+                           if (Files.exists(csvFile))
+                           {
+                              try
+                              {
+                                 Plot pyplot = Plot.create();
+
+                                 try (BufferedReader reader = Files.newBufferedReader(csvFile))
+                                 {
+                                    reader.readLine(); // skip header
+
+
+                                 }
+                                 catch (IOException e)
+                                 {
+                                    throw new RuntimeException("Error reading CSV file.", e);
+                                 }
+
+                                 // Convert Pascal case to title case
+                                 String afterUnderscore = logFolderName.substring(logFolderName.lastIndexOf("_") + 1);
+                                 String titleCaseString = WordUtils.capitalizeFully(afterUnderscore.replaceAll("([a-z])([A-Z])", "$1 $2"));
+
+                                 pyplot.xlabel("Time (s)");
+                                 pyplot.title("%s ICP Error".formatted(titleCaseString));
+                                 pyplot.legend();
+                                 pyplot.show();
+                              }
+                              catch (IOException | PythonExecutionException e)
+                              {
+                                 throw new RuntimeException(e);
+                              }
+                           }
+                        }, "Plot ICP Error");
+                     }
+                     ImGui.tableNextColumn();
+                     if (ImGuiTools.textWithUnderlineOnHover("Plot step timings") && ImGui.isMouseClicked(ImGuiMouseButton.Left))
+                     {
+                        ThreadTools.startAsDaemon(() ->
+                        {
+                           String logFolderName = logDirectory.getFileName().toString();
+                           Path csvFile = logDirectory.resolve(logFolderName + "_StepTimings.csv");
+
+                           if (Files.exists(csvFile))
+                           {
+                              try
+                              {
+                                 Plot pyplot = Plot.create();
+
+                                 try (BufferedReader reader = Files.newBufferedReader(csvFile))
+                                 {
+                                    reader.readLine(); // skip header
+
+
+                                 }
+                                 catch (IOException e)
+                                 {
+                                    throw new RuntimeException("Error reading CSV file.", e);
+                                 }
+
+                                 // Convert Pascal case to title case
+                                 String afterUnderscore = logFolderName.substring(logFolderName.lastIndexOf("_") + 1);
+                                 String titleCaseString = WordUtils.capitalizeFully(afterUnderscore.replaceAll("([a-z])([A-Z])", "$1 $2"));
+
+                                 pyplot.xlabel("Time (s)");
+                                 pyplot.title("%s Step Timings".formatted(titleCaseString));
+                                 pyplot.legend();
+                                 pyplot.show();
+                              }
+                              catch (IOException | PythonExecutionException e)
+                              {
+                                 throw new RuntimeException(e);
+                              }
+                           }
+                        }, "Plot ICP Error");
                      }
                   }
 
