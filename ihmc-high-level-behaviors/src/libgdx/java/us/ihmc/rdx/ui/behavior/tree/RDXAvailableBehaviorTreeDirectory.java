@@ -52,14 +52,21 @@ public class RDXAvailableBehaviorTreeDirectory
       {
          if (queryContainedFile.getFileName().endsWith(".json"))
          {
-            RDXAvailableBehaviorTreeFile treeFile = new RDXAvailableBehaviorTreeFile(queryContainedFile, referenceFrameLibrary);
-            if (treeFile.getName() != null && treeFile.getNotes() != null)
-            {
-               indexedTreeFiles.add(treeFile);
+            if (queryContainedFile.getFilesystemFile() == null)
+            { // This can happen for partially build workspaces. I'd prefer to avoid the crash which doesn't give much info.
+               LogTools.error("Failed to load {}. Filesystem file is null", queryContainedFile.getFileName());
             }
             else
             {
-               LogTools.error("Failed to load {}", queryContainedFile.getFileName());
+               RDXAvailableBehaviorTreeFile treeFile = new RDXAvailableBehaviorTreeFile(queryContainedFile, referenceFrameLibrary);
+               if (treeFile.getName() != null && treeFile.getNotes() != null)
+               {
+                  indexedTreeFiles.add(treeFile);
+               }
+               else
+               {
+                  LogTools.error("Failed to load {}", queryContainedFile.getFileName());
+               }
             }
          }
       }
