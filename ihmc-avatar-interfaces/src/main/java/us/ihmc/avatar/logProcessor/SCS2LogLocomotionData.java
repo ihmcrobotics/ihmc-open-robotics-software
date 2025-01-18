@@ -264,4 +264,9 @@ public class SCS2LogLocomotionData
       else
          return workingCounterMismatch.getIntegerValue() - initialWorkingCounterMismatch;
    }
+
+   public SideDependentList<ReferenceFrame> getHandFrames()
+   {
+      return handFrames;
+   }
 }

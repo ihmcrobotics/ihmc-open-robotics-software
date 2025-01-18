@@ -139,7 +139,8 @@ public class SCS2LogProcessor
          boolean leftPushBar = logFolderName.contains("LeftPushBar");
          boolean rightPushKnob = logFolderName.contains("RightPushKnob");
          boolean rightPullHandle = logFolderName.contains("RightPullHandle");
-         if (rightPullLever || leftPushBar || rightPushKnob || rightPullHandle)
+         boolean leftPushBarDisturbed = logFolderName.contains("LeftPushBarDisturbed");
+         if (rightPullLever || leftPushBar || rightPushKnob || rightPullHandle || leftPushBarDisturbed)
          {
             SCS2LogFootstep closestStepToDoorFrame = null;
             double heelToFrame = Double.NaN;
@@ -163,6 +164,11 @@ public class SCS2LogProcessor
             {
                closestStepToDoorFrame = firstWalk.getFootsteps().get(11);
                heelToFrame = 0.123;
+            }
+            else if (leftPushBarDisturbed)
+            {
+               closestStepToDoorFrame = firstWalk.getFootsteps().get(8); // TODO: Measure
+               heelToFrame = -0.038;
             }
 
             // Apparently we don't know which are the toes
@@ -224,7 +230,7 @@ public class SCS2LogProcessor
                LogTools.error("Failed to write to CSV file.", e);
             }
 
-            for (RobotSide side : RobotSide.values)
+            for (RobotSide side : locomotionData.getHandFrames().sides())
             {
                try (BufferedWriter writer = Files.newBufferedWriter(logPath.resolve("%s_%sArmPoses.csv".formatted(logFolderName, side.getPascalCaseName()))))
                {
