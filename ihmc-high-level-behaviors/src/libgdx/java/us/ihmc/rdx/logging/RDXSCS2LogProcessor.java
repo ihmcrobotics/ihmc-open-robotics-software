@@ -374,7 +374,7 @@ public class RDXSCS2LogProcessor
                         ThreadTools.startAsDaemon(() ->
                         {
                            String logFolderName = logDirectory.getFileName().toString();
-                           Path csvFile = logDirectory.resolve(logFolderName + "_StepTimings.csv");
+                           Path csvFile = logDirectory.resolve(logFolderName + "_FootstepStateTimings.csv");
 
                            if (Files.exists(csvFile))
                            {
@@ -386,7 +386,35 @@ public class RDXSCS2LogProcessor
                                  {
                                     reader.readLine(); // skip header
 
+                                    ArrayList<Double> times = new ArrayList<>();
+                                    ArrayList<Integer> ordinals = new ArrayList<>();
 
+                                    String line;
+                                    boolean processingLeft = true;
+                                    while ((line = reader.readLine()) != null)
+                                    {
+                                       String[] values = line.split(",");
+
+                                       if (processingLeft && values[0].equals("right"))
+                                       {
+                                          pyplot.plot().add(times, ordinals).label("left state");
+                                          times.clear();
+                                          ordinals.clear();
+                                          processingLeft = false;
+                                       }
+
+                                       double time = Double.parseDouble(values[1]);
+                                       if (!times.isEmpty()) // Make square wave
+                                       {
+                                          times.add(time - 0.001);
+                                          ordinals.add(ordinals.get(ordinals.size() - 1));
+                                       }
+
+                                       times.add(time);
+                                       ordinals.add(Integer.parseInt(values[2]));
+                                    }
+
+                                    pyplot.plot().add(times, ordinals).label("right state");
                                  }
                                  catch (IOException e)
                                  {
