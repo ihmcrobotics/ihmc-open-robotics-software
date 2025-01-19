@@ -16,7 +16,6 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.communication.PostureOptimizerState;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.FrameYawPitchRoll;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -47,9 +46,10 @@ public class KinematicsToolboxMultiContactManager
    private static final double MAX_PELVIS_ORIENTATION_ERROR = Math.toRadians(25.0);
    private static final int SPATIAL_DIMENSIONS = 6;
 
-   // Filter params
+   // Filter params - keep activation time constant high, we want alpha to be 0.0 or 1.0 most of the time
    private static final double WHOLE_BODY_POSTURE_ADJUSTMENT_MAGNITUDE = 1.0 / 3.0;
-   private static final double ALPHA_ENABLED_TIME_CONSTANT = 3.0;
+   private static final double WHOLE_BODY_POSTURE_ADJUSTMENT_MAGNITUDE_DISCRETE = 1.5;
+   private static final double ALPHA_ENABLED_TIME_CONSTANT = 1.0;
 
    // nominal is around 1.05
    private static final double DEFAULT_MIN_PELVIS_HEIGHT = 0.85;
@@ -87,7 +87,7 @@ public class KinematicsToolboxMultiContactManager
    private final YoEnum<PostureOptimizerState> mode = new YoEnum<>("postureOptimizerMode", registry, PostureOptimizerState.class, false);
 
    /* Posture optimization state */
-   private double postureSensitivityHysteresisEpsilon = 0.01;
+   private double postureSensitivityHysteresisEpsilon;
    private final YoDouble postureSensitivityThreshold = new YoDouble("postureSensitivityThreshold", registry);
    private final GlitchFilteredYoBoolean isPostureSensitivityHigh = new GlitchFilteredYoBoolean("isPostureSensitivityHigh", registry, 12);
 
@@ -174,17 +174,34 @@ public class KinematicsToolboxMultiContactManager
          qPrivOptimized[i] = new YoDouble("q_priv_opt_" + joint.getName(), registry);
       }
 
-      activationAlpha = new RateLimitedYoVariable("activationAlpha", registry, 1.0 / ALPHA_ENABLED_TIME_CONSTANT, updateDT);
+      double activationMaxRate;
+      double defaultPostureSensitivityThreshold = 0.03;
+      double stabilityThresholdHysteresis;
+      // should be higher than 4cm, which is the IK solver's threshold to keep the CoM safe
+      double stabilityMarginThreshold = 0.12;
 
-      double defaultPostureSensitivityThreshold = 0.04;
-      double defaultStabilityMarginThresholdLow = 0.12; // should be higher than 5cm, which is the IK solver's threshold to keep the CoM safe
-      double defaultStabilityMarginThresholdHigh = 0.18; // 0.12;
+      if (DO_SMOOTH_STATE_TRANSITION)
+      {
+         postureSensitivityHysteresisEpsilon = 0.01;
+         stabilityThresholdHysteresis = 0.03;
+         activationMaxRate = 1.0 / ALPHA_ENABLED_TIME_CONSTANT;
+      }
+      else
+      {
+         postureSensitivityHysteresisEpsilon = 0.0;
+         stabilityThresholdHysteresis = 0.0;
+         activationMaxRate = Double.POSITIVE_INFINITY;
+      }
+
+      double defaultStabilityMarginThresholdLow = stabilityMarginThreshold - 0.5 * stabilityThresholdHysteresis;
+      double defaultStabilityMarginThresholdHigh = stabilityMarginThreshold + 0.5 * stabilityThresholdHysteresis;
 
       postureSensitivityThreshold.set(defaultPostureSensitivityThreshold);
       stabilityMarginThresholdLow.set(defaultStabilityMarginThresholdLow);
       stabilityMarginThresholdHigh.set(defaultStabilityMarginThresholdHigh);
 
-      postureOptimizationWeight.set(0.3);
+      activationAlpha = new RateLimitedYoVariable("activationAlpha", registry, activationMaxRate, updateDT);
+      postureOptimizationWeight.set(0.2);
       mode.set(PostureOptimizerState.NOMINAL);
 
       parentRegistry.addChild(registry);
@@ -218,9 +235,6 @@ public class KinematicsToolboxMultiContactManager
 
    public void update()
    {
-      // These conditions must be true in order to activate the posture optimizer
-      boolean hasPostureSensitivity = false;
-
       tempPose.setToZero(fullRobotModel.getPelvis().getBodyFixedFrame());
       tempPose.changeFrame(ReferenceFrame.getWorldFrame());
       actualPelvisOrientation.set(tempPose.getOrientation());
@@ -228,7 +242,7 @@ public class KinematicsToolboxMultiContactManager
       if (multiContactRegionCalculator.hasSolvedWholeRegion())
       {
          postureOptimizationTimer.startMeasurement();
-         hasPostureSensitivity = postureOptimizer.updateAll();
+         postureOptimizer.updateAll();
          postureOptimizationTimer.stopMeasurement();
       }
       else
@@ -236,26 +250,6 @@ public class KinematicsToolboxMultiContactManager
          postureOptimizer.initialize();
       }
 
-      if (!hasPostureSensitivity)
-      {
-         isPostureSensitivityHigh.set(false);
-         stabilityMarginLevel.set(StabilityMarginLevel.HIGH);
-         return;
-      }
-
-      // TODO add if/else for abrupt transition
-      if (DO_SMOOTH_STATE_TRANSITION)
-      {
-         doSmoothStateTransition();
-      }
-      else
-      {
-         doDiscreteStateTransition();
-      }
-   }
-
-   private void doSmoothStateTransition()
-   {
       double postureSensitivityThreshold = this.postureSensitivityThreshold.getValue() + postureSensitivityHysteresisEpsilon * (mode.getValue() == PostureOptimizerState.OPTIMIZER ? -1.0 : 1.0);
       boolean isPostureSensitivityHigh = postureOptimizer.getPostureSensitivity() > postureSensitivityThreshold;
       this.isPostureSensitivityHigh.update(isPostureSensitivityHigh);
@@ -300,16 +294,20 @@ public class KinematicsToolboxMultiContactManager
       if (mode.getValue() == PostureOptimizerState.OPTIMIZER)
       {
          // do optimizer update
-         updateTowardsOptimizedPosture();
+         updateTowardsOptimizedPosture(postureOptimizer.getNomalizedStabilityGradient(), WHOLE_BODY_POSTURE_ADJUSTMENT_MAGNITUDE);
       }
       else if (mode.getValue() == PostureOptimizerState.NOMINAL)
       {
          // do nominal update
-         updateTowardsNominalPosture();
+         double rateLimit = DO_SMOOTH_STATE_TRANSITION ? WHOLE_BODY_POSTURE_ADJUSTMENT_MAGNITUDE : WHOLE_BODY_POSTURE_ADJUSTMENT_MAGNITUDE_DISCRETE;
+         updateTowardsNominalPosture(rateLimit);
       }
       else
       {
          // freeze, do nothing
+
+         // call this to avoid edge cases of RateLimitedYoVariable#hasBeenCalled being false
+         activationAlpha.update(activationAlpha.getValue());
       }
 
       if (mode.getValue() == PostureOptimizerState.NOMINAL)
@@ -322,30 +320,15 @@ public class KinematicsToolboxMultiContactManager
       }
    }
 
-   private void doDiscreteStateTransition()
-   {
-      if (stabilityMarginLevel.getValue() == StabilityMarginLevel.LOW)
-      {
-         // update towards optimized posture
-         activationAlpha.set(1.0);
-      }
-      else
-      {
-         activationAlpha.set(0.0);
-
-         for (int i = 0; i < qPrivOptimized.length; i++)
-         {
-            qPrivOptimized[i].set(qPrivNominal[i].getValue());
-         }
-      }
-   }
-
-   private void updateTowardsOptimizedPosture()
+   private void updateTowardsOptimizedPosture(DMatrixRMaj gradient, double gradientScalar)
    {
       // Update privileged configuration
+//      DMatrixRMaj gradient = postureOptimizer.getNomalizedStabilityGradient();
+//      double gradientScalar = WHOLE_BODY_POSTURE_ADJUSTMENT_MAGNITUDE;
+
       for (int i = 0; i < qPrivOptimized.length; i++)
       {
-         double qdOffsetSetpoint = WHOLE_BODY_POSTURE_ADJUSTMENT_MAGNITUDE * postureOptimizer.getNomalizedStabilityGradient().get(SPATIAL_DIMENSIONS + i);
+         double qdOffsetSetpoint = gradientScalar * gradient.get(SPATIAL_DIMENSIONS + i);
          double qOffsetSetpoint = qPrivOptimized[i].getValue() + updateDT * qdOffsetSetpoint;
          OneDoFJointBasics joint = wholeBodyContactState.getOneDoFJoints()[i];
          double jointRangeOfMotion = joint.getJointLimitUpper() - joint.getJointLimitLower();
@@ -355,13 +338,13 @@ public class KinematicsToolboxMultiContactManager
       }
 
       int linearZIndex = 5;
-      double qdPelvisHeight = WHOLE_BODY_POSTURE_ADJUSTMENT_MAGNITUDE * postureOptimizer.getNomalizedStabilityGradient().get(linearZIndex);
+      double qdPelvisHeight = gradientScalar * gradient.get(linearZIndex);
       double qPelvisHeight = optimizedPelvisHeight.getValue() + updateDT * qdPelvisHeight;
       qPelvisHeight = EuclidCoreTools.clamp(qPelvisHeight, minOptimizedPelvisHeight.getValue(), maxOptimizedPelvisHeight.getValue());
       optimizedPelvisHeight.set(qPelvisHeight);
 
-      tempVector.set(0, postureOptimizer.getNomalizedStabilityGradient());
-      pelvisRotationVectorAdjustment.setAndScale(WHOLE_BODY_POSTURE_ADJUSTMENT_MAGNITUDE * updateDT, tempVector);
+      tempVector.set(0, gradient);
+      pelvisRotationVectorAdjustment.setAndScale(gradientScalar * updateDT, tempVector);
       pelvisRotationQuaternionAdjustment.setRotationVector(pelvisRotationVectorAdjustment);
       integratedPelvisOrientation.append(pelvisRotationQuaternionAdjustment);
 
@@ -376,7 +359,7 @@ public class KinematicsToolboxMultiContactManager
       optimizedPelvisOrientation.set(integratedPelvisOrientation);
    }
 
-   private void updateTowardsNominalPosture()
+   private void updateTowardsNominalPosture(double rateLimit)
    {
       double deltaQNominalMagnitude = 0.0;
       for (int i = 0; i < qPrivOptimized.length; i++)
@@ -385,7 +368,7 @@ public class KinematicsToolboxMultiContactManager
       }
       deltaQNominalMagnitude = Math.sqrt(deltaQNominalMagnitude);
 
-      boolean isEpsilonFromNominal = deltaQNominalMagnitude < WHOLE_BODY_POSTURE_ADJUSTMENT_MAGNITUDE * updateDT;
+      boolean isEpsilonFromNominal = deltaQNominalMagnitude < rateLimit * updateDT;
       for (int i = 0; i < qPrivOptimized.length; i++)
       {
          if (isEpsilonFromNominal)
@@ -395,7 +378,7 @@ public class KinematicsToolboxMultiContactManager
          else
          {
             double q0 = qPrivOptimized[i].getValue();
-            double qd = (qPrivNominal[i].getValue() - qPrivOptimized[i].getValue()) * WHOLE_BODY_POSTURE_ADJUSTMENT_MAGNITUDE / deltaQNominalMagnitude;
+            double qd = (qPrivNominal[i].getValue() - qPrivOptimized[i].getValue()) * rateLimit / deltaQNominalMagnitude;
             qPrivOptimized[i].set(q0 + qd * updateDT);
          }
       }

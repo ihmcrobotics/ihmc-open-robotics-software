@@ -582,7 +582,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    {
       updateTools();
 
-
       executionTimer.startMeasurement();
 
       if (commandInputManager.isNewCommandAvailable(HumanoidKinematicsToolboxConfigurationCommand.class))
@@ -936,7 +935,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       if (!isUpperBodyLoadBearing.getValue())
          return;
 
-      if (runWithPostureOptimizer.getValue() && command.getEndEffector() == desiredFullRobotModel.getHand(RobotSide.LEFT))
+      if (runWithPostureOptimizer.getValue() && command.getEndEffector() == desiredFullRobotModel.getHand(RobotSide.RIGHT))
       {
          double activationAlpha = multiContactManager.getActivationAlpha();
          double orientationWeightRatio = 1.0 - activationAlpha;
