@@ -27,6 +27,11 @@ public class SCS2LogEnum<E extends Enum<E>>
       return null;
    }
 
+   public boolean changed()
+   {
+      return lastValue != getValue();
+   }
+
    public boolean changedFrom(E fromValue)
    {
       return lastValue == fromValue && getValue() != fromValue;

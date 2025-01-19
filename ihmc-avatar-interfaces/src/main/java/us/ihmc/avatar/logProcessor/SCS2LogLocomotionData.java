@@ -1,6 +1,7 @@
 package us.ihmc.avatar.logProcessor;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import us.ihmc.avatar.logProcessor.SCS2LogWalk.FootStateChange;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -158,12 +159,14 @@ public class SCS2LogLocomotionData
          SCS2LogWalk logWalk = getCurrentLogWalk();
          logWalk.update(currentTime, tick, workingCounterMismatch);
 
-         boolean recentSteps = false;
-         for (RobotSide side : RobotSide.values)
+         for (SCS2LogFootState footState : footStates.values())
          {
-            recentSteps |= footStates.get(side).afterRead(currentTime);
-            logWalk.getFootsteps().addAll(footStates.get(side).getFootsteps());
-            footStates.get(side).getFootsteps().clear();
+            footState.afterRead(currentTime);
+            logWalk.getFootsteps().addAll(footState.getFootsteps());
+            footState.getFootsteps().clear();
+
+            if (footState.getStateChanged().poll())
+               logWalk.getFootStateChanges().get(footState.getSide()).add(new FootStateChange(currentTime, footState.getStateChanged().read()));
          }
 
          if (robotStartLocation.containsNaN())
@@ -172,11 +175,8 @@ public class SCS2LogLocomotionData
             LogTools.info("Robot start location: {}", robotStartLocation);
          }
 
-         if (lastCenterOfMass.containsNaN())
-         {
-            recordEntry(currentTime, logWalk);
-         }
-         else if (centerOfMass.distanceXY(lastCenterOfMass) > 0.001 && currentTime - lastCoMPlotTime > plotTimeResolution)
+         if (lastCenterOfMass.containsNaN() ||
+            (centerOfMass.distanceXY(lastCenterOfMass) > 0.001 && currentTime - lastCoMPlotTime > plotTimeResolution))
          {
             recordEntry(currentTime, logWalk);
          }

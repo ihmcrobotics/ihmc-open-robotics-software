@@ -1,5 +1,6 @@
 package us.ihmc.avatar.logProcessor;
 
+import us.ihmc.avatar.logProcessor.SCS2LogWalk.FootStateChange;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -22,6 +23,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.function.Consumer;
 
 public class SCS2LogProcessor
@@ -230,6 +232,33 @@ public class SCS2LogProcessor
                LogTools.error("Failed to write to CSV file.", e);
             }
 
+            try (BufferedWriter writer = Files.newBufferedWriter(logPath.resolve(logFolderName + "_FootstepStateTimings.csv")))
+            {
+               writer.write("Side,State,Time"); // header
+               writer.newLine();
+               for (SCS2LogWalk logWalk : locomotionData.getLogWalks())
+               {
+                  for (RobotSide side : logWalk.getFootStateChanges().sides())
+                  {
+                     ArrayList<FootStateChange> footStateChanges = logWalk.getFootStateChanges().get(side);
+
+                     for (FootStateChange footStateChange : footStateChanges)
+                     {
+                        writer.write("%s,%.2f,%d,%s".formatted(side.getLowerCaseName(),
+                                                               footStateChange.time(),
+                                                               footStateChange.state().ordinal(),
+                                                               footStateChange.state().name()));
+                        writer.newLine();
+                     }
+
+                  }
+               }
+            }
+            catch (IOException e)
+            {
+               LogTools.error("Failed to write to CSV file.", e);
+            }
+            
             for (RobotSide side : locomotionData.getHandFrames().sides())
             {
                try (BufferedWriter writer = Files.newBufferedWriter(logPath.resolve("%s_%sArmPoses.csv".formatted(logFolderName, side.getPascalCaseName()))))

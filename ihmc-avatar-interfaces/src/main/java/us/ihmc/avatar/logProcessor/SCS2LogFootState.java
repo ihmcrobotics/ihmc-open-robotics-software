@@ -1,6 +1,7 @@
 package us.ihmc.avatar.logProcessor;
 
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
+import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -15,15 +16,16 @@ public class SCS2LogFootState
    private final SCS2LogEnum<ConstraintType> yoFootState;
    private boolean newStep = false;
    private double fullSupportTime = Double.NaN;
-   private YoVariable footPolygon_0_x ;
-   private YoVariable footPolygon_0_y ;
-   private YoVariable footPolygon_1_x ;
-   private YoVariable footPolygon_1_y ;
-   private YoVariable footPolygon_2_x ;
-   private YoVariable footPolygon_2_y ;
-   private YoVariable footPolygon_3_x ;
-   private YoVariable footPolygon_3_y ;
+   private final YoVariable footPolygon_0_x;
+   private final YoVariable footPolygon_0_y;
+   private final YoVariable footPolygon_1_x;
+   private final YoVariable footPolygon_1_y;
+   private final YoVariable footPolygon_2_x;
+   private final YoVariable footPolygon_2_y;
+   private final YoVariable footPolygon_3_x;
+   private final YoVariable footPolygon_3_y;
    private final ArrayList<SCS2LogFootstep> footsteps = new ArrayList<>();
+   private final TypedNotification<ConstraintType> stateChanged = new TypedNotification<>();
    private final double comPlotProximityToFootsteps = 5.0;
 
    public SCS2LogFootState(RobotSide side, SCS2LogEnum<ConstraintType> yoFootState, YoRegistry rootRegistry)
@@ -43,8 +45,12 @@ public class SCS2LogFootState
       footPolygon_3_y  = rootRegistry.findVariable(footPolygonPrefix + "%sFootPolygon_3_y".formatted(side.getLowerCaseName()));
    }
 
-   public boolean afterRead(double currentTime)
+   public void afterRead(double currentTime)
    {
+      if (yoFootState.changed())
+      {
+         stateChanged.set(yoFootState.getValue());
+      }
       if (yoFootState.changedTo(ConstraintType.FULL))
       {
          newStep = true;
@@ -65,13 +71,20 @@ public class SCS2LogFootState
                                                                             footPolygon_3_y.getValueAsDouble()}));
          newStep = false;
       }
+   }
 
-      // recent footstep
-      return !Double.isNaN(fullSupportTime) && currentTime - fullSupportTime < comPlotProximityToFootsteps;
+   public RobotSide getSide()
+   {
+      return side;
    }
 
    public ArrayList<SCS2LogFootstep> getFootsteps()
    {
       return footsteps;
+   }
+
+   public TypedNotification<ConstraintType> getStateChanged()
+   {
+      return stateChanged;
    }
 }

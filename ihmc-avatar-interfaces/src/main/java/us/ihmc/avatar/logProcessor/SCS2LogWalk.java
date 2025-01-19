@@ -1,6 +1,7 @@
 package us.ihmc.avatar.logProcessor;
 
 import gnu.trove.list.array.TDoubleArrayList;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -14,6 +15,8 @@ public class SCS2LogWalk
    private long walkStartTick = -1;
    private final Point2D walkStart = new Point2D();
    private final ArrayList<SCS2LogFootstep> footsteps = new ArrayList<>();
+   public record FootStateChange(double time, ConstraintType state) { }
+   private final SideDependentList<ArrayList<FootStateChange>> footStateChanges = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
    private final TDoubleArrayList times = new TDoubleArrayList();
    private final RecyclingArrayList<Pose3D> pelvisPoses = new RecyclingArrayList<>(Pose3D::new);
    private final SideDependentList<RecyclingArrayList<Pose3D>> handPoses = new SideDependentList<>(new RecyclingArrayList<>(Pose3D::new),
@@ -51,6 +54,11 @@ public class SCS2LogWalk
    public ArrayList<SCS2LogFootstep> getFootsteps()
    {
       return footsteps;
+   }
+
+   public SideDependentList<ArrayList<FootStateChange>> getFootStateChanges()
+   {
+      return footStateChanges;
    }
 
    public boolean isEndedWithFall()
