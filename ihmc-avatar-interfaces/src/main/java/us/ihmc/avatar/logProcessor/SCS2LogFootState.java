@@ -27,6 +27,8 @@ public class SCS2LogFootState
    private final ArrayList<SCS2LogFootstep> footsteps = new ArrayList<>();
    private final TypedNotification<ConstraintType> stateChanged = new TypedNotification<>();
    private final double comPlotProximityToFootsteps = 5.0;
+   private double timeStartedSwing = Double.NaN;
+   private final TypedNotification<Double> swingCompleted = new TypedNotification<>();
 
    public SCS2LogFootState(RobotSide side, SCS2LogEnum<ConstraintType> yoFootState, YoRegistry rootRegistry)
    {
@@ -55,6 +57,15 @@ public class SCS2LogFootState
       {
          newStep = true;
          fullSupportTime = currentTime;
+      }
+      if (yoFootState.changedTo(ConstraintType.SWING))
+      {
+         timeStartedSwing = currentTime;
+      }
+      if (yoFootState.changedFrom(ConstraintType.SWING))
+      {
+         double swingDuration = currentTime - timeStartedSwing;
+         swingCompleted.set(swingDuration);
       }
       yoFootState.postUpdate();
 
@@ -86,5 +97,10 @@ public class SCS2LogFootState
    public TypedNotification<ConstraintType> getStateChanged()
    {
       return stateChanged;
+   }
+
+   public TypedNotification<Double> getSwingCompleted()
+   {
+      return swingCompleted;
    }
 }

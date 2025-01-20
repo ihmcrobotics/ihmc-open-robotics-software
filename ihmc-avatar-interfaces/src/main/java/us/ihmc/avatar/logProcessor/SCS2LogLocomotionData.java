@@ -2,6 +2,7 @@ package us.ihmc.avatar.logProcessor;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.avatar.logProcessor.SCS2LogWalk.FootStateChange;
+import us.ihmc.avatar.logProcessor.SCS2LogWalk.FootSwing;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -167,6 +168,11 @@ public class SCS2LogLocomotionData
 
             if (footState.getStateChanged().poll())
                logWalk.getFootStateChanges().get(footState.getSide()).add(new FootStateChange(currentTime, footState.getStateChanged().read()));
+
+            if (footState.getSwingCompleted().poll())
+               logWalk.getFootSwings().get(footState.getSide()).add(new FootSwing(currentTime, footState.getSwingCompleted().read()));
+
+            // TODO: transfer duration -> BOTH (FULL | TOES) ->
          }
 
          if (robotStartLocation.containsNaN())
