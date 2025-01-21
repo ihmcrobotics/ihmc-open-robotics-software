@@ -9,6 +9,7 @@ import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.property.ROS2StoredPropertySet;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.perception.BytedecoImage;
+import us.ihmc.perception.ImageSensorPublishThread;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.detections.DetectionManager;
@@ -40,10 +41,12 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.sensors.deprecated.ZEDColorDepthImagePublisher;
-import us.ihmc.sensors.deprecated.ZEDColorDepthImageRetrieverSVO;
-import us.ihmc.sensors.deprecated.ZEDColorDepthImageRetrieverSVO.RecordMode;
+import us.ihmc.sensors.zed.ZEDImageSensor;
+import us.ihmc.sensors.zed.ZEDModelData;
+import us.ihmc.sensors.zed.ZEDSVOPlaybackSensor;
 import us.ihmc.tools.IHMCCommonPaths;
+
+import java.util.Map;
 
 /**
  * A self contained demo and development environment for our scene graph functionality.
@@ -74,8 +77,8 @@ public class RDXSceneGraphDemo
    private final OpenCLManager planarRegionsOpenCLManager = new OpenCLManager();
 
    // ZED SVO sensor related things
-   private ZEDColorDepthImageRetrieverSVO zedColorDepthImageRetrieverSVO;
-   private ZEDColorDepthImagePublisher zedColorDepthImagePublisher;
+   private ZEDSVOPlaybackSensor zedSVOPlayer;
+   private ImageSensorPublishThread zedPublishThread;
    private RawImage zedDepthImage;
    private final SideDependentList<RawImage> zedColorImages = new SideDependentList<>();
    private final MutableReferenceFrame sensorFrame = new MutableReferenceFrame();
@@ -147,11 +150,15 @@ public class RDXSceneGraphDemo
             sensorPoseGraphic = RDXModelBuilder.createCoordinateFrameInstance(0.1);
             baseUI.getPrimaryScene().addRenderableProvider(sensorPoseGraphic, RDXSceneLevel.VIRTUAL);
 
-            zedColorDepthImageRetrieverSVO = new ZEDColorDepthImageRetrieverSVO(0, () -> true, () -> true, ros2Helper, RecordMode.PLAYBACK, SVO_FILE_NAME);
-            zedColorDepthImageRetrieverSVO.start();
-            zedColorDepthImagePublisher = new ZEDColorDepthImagePublisher(PerceptionAPI.ZED2_COLOR_IMAGES,
-                                                                          PerceptionAPI.ZED2_DEPTH,
-                                                                          PerceptionAPI.ZED2_CUT_OUT_DEPTH);
+            zedSVOPlayer = new ZEDSVOPlaybackSensor(ros2Helper, 0, ZEDModelData.ZED_2, SVO_FILE_NAME);
+            zedSVOPlayer.useTrackedPose(true);
+            zedSVOPlayer.run(true);
+
+            zedPublishThread = new ImageSensorPublishThread(ros2Node, zedSVOPlayer,
+                                                            Map.of(ZEDImageSensor.LEFT_COLOR_IMAGE_KEY, PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT),
+                                                                   ZEDImageSensor.RIGHT_COLOR_IMAGE_KEY, PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.RIGHT),
+                                                                   ZEDImageSensor.DEPTH_IMAGE_KEY, PerceptionAPI.ZED2_DEPTH));
+            zedPublishThread.startRepeating();
 
             zedSVORecorderPanel = new RDXZEDSVORecorderPanel(ros2Helper);
 
@@ -168,15 +175,13 @@ public class RDXSceneGraphDemo
 
             perceptionUpdateThread = new RepeatingTaskThread("PerceptionUpdateThread", () ->
             {
-               zedDepthImage = zedColorDepthImageRetrieverSVO.getLatestRawDepthImage();
-               for (RobotSide side : RobotSide.values)
-                  zedColorImages.put(side, zedColorDepthImageRetrieverSVO.getLatestRawColorImage(side));
+               zedSVOPlayer.waitForGrab();
 
-               zedColorDepthImagePublisher.setNextGpuDepthImage(zedDepthImage.get());
-               for (RobotSide side : RobotSide.values)
-                  zedColorDepthImagePublisher.setNextColorImage(zedColorImages.get(side).get(), side);
+               zedDepthImage = zedSVOPlayer.getImage(ZEDImageSensor.DEPTH_IMAGE_KEY);
+               zedColorImages.put(RobotSide.LEFT, zedSVOPlayer.getImage(ZEDImageSensor.LEFT_COLOR_IMAGE_KEY));
+               zedColorImages.put(RobotSide.RIGHT, zedSVOPlayer.getImage(ZEDImageSensor.RIGHT_COLOR_IMAGE_KEY));
 
-               sensorFrame.update(transform -> transform.set(zedColorDepthImageRetrieverSVO.getLatestSensorPose()));
+               sensorFrame.update(transform -> transform.set(zedSVOPlayer.getTrackedSensorFrame().getTransformToWorldFrame()));
                LibGDXTools.toLibGDX(sensorFrame.getTransformToParent(), sensorPoseGraphic.transform);
 
                if (planarRegionsExtractor == null)
@@ -235,7 +240,6 @@ public class RDXSceneGraphDemo
                onRobotSceneGraph.updateOnRobotOnly(sensorFrame.getReferenceFrame());
                onRobotSceneGraph.updatePublication();
             }, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
-            perceptionUpdateThread.setFrequencyLimit(30.0);
             perceptionUpdateThread.startRepeating();
          }
 
@@ -258,10 +262,10 @@ public class RDXSceneGraphDemo
 
             yolov8DetectionExecutor.destroy();
 
-            if (zedColorDepthImageRetrieverSVO != null)
-               zedColorDepthImageRetrieverSVO.destroy();
-            if (zedColorDepthImagePublisher != null)
-               zedColorDepthImagePublisher.destroy();
+            if (zedSVOPlayer != null)
+               zedSVOPlayer.close();
+            if (zedPublishThread != null)
+               zedPublishThread.kill();
 
             planarRegionsOpenCLManager.destroy();
 

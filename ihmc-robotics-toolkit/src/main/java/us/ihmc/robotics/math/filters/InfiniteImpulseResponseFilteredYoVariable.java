@@ -1,6 +1,6 @@
 package us.ihmc.robotics.math.filters;
 
-import us.ihmc.robotics.dataStructures.ComplexNumber;
+import us.ihmc.math.ComplexNumber;
 import us.ihmc.robotics.dataStructures.ObsoletePolynomial;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;

@@ -55,7 +55,7 @@ public class FootPoseActionDefinition extends ActionNodeDefinition implements Si
       side.setValue(RobotSide.getSideFromString(jsonNode.get("side").asText()));
       trajectoryDuration.setValue(jsonNode.get("trajectoryDuration").asDouble());
       parentFrameName.setValue(jsonNode.get("parentFrame").textValue());
-      JSONTools.toEuclid(jsonNode, footToParentTransform.getValueAndFreeze());
+      JSONTools.toEuclid(jsonNode, footToParentTransform.getValueAndModify());
    }
 
    @Override
@@ -77,7 +77,7 @@ public class FootPoseActionDefinition extends ActionNodeDefinition implements Si
       side.setValue(onDiskSide);
       trajectoryDuration.setValue(onDiskTrajectoryDuration);
       parentFrameName.setValue(onDiskParentFrameName);
-      footToParentTransform.getValueAndFreeze().set(onDiskFootToParentTransform);
+      footToParentTransform.getValueAndModify().set(onDiskFootToParentTransform);
    }
 
    @Override
@@ -115,7 +115,7 @@ public class FootPoseActionDefinition extends ActionNodeDefinition implements Si
 
    public RotationMatrixBasics getRotation()
    {
-      return footToParentTransform.getValueAndFreeze().getRotation();
+      return footToParentTransform.getValueAndModify().getRotation();
    }
 
    @Override

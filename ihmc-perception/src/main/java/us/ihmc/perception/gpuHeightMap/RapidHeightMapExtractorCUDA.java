@@ -120,7 +120,7 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
       {
          initialize();
       }
-      catch (URISyntaxException e)
+      catch (Exception e)
       {
          throw new RuntimeException(e);
       }
@@ -142,7 +142,7 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
          throw new RuntimeException("The crop center index was computed incorrectly.");
    }
 
-   public void initialize() throws URISyntaxException
+   public void initialize() throws Exception
    {
       stream = CUDAStreamManager.getStream();
 

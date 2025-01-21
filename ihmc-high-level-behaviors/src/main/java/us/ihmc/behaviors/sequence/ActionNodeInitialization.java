@@ -24,7 +24,7 @@ public class ActionNodeInitialization
                                                                                              HandPoseActionState.class,
                                                                                              indexOfInsertion,
                                                                                              sideOfNewAction));
-         handPoseAction.getState().update();
+         handPoseAction.update();
 
          HandPoseActionState nextPreviousHandPoseAction = findNextPreviousAction(actionSequence,
                                                                                  HandPoseActionState.class,
@@ -34,14 +34,14 @@ public class ActionNodeInitialization
          {
             // Set pose to previous hand pose
             handPoseAction.getDefinition().setPalmParentFrameName(nextPreviousHandPoseAction.getDefinition().getPalmParentFrameName());
-            handPoseAction.getDefinition().getPalmTransformToParent().getValueAndFreeze()
+            handPoseAction.getDefinition().getPalmTransformToParent().getValueAndModify()
                           .set(nextPreviousHandPoseAction.getDefinition().getPalmTransformToParent().getValueReadOnly());
          }
          else // set to current robot's hand pose
          {
             handPoseAction.getDefinition().setPalmParentFrameName(ReferenceFrame.getWorldFrame().getName());
             syncedRobot.getReferenceFrames().getHandFrame(sideOfNewAction)
-                       .getTransformToDesiredFrame(handPoseAction.getDefinition().getPalmTransformToParent().getValueAndFreeze(),
+                       .getTransformToDesiredFrame(handPoseAction.getDefinition().getPalmTransformToParent().getValueAndModify(),
                                                    ReferenceFrame.getWorldFrame());
          }
          handPoseAction.update();
@@ -51,7 +51,7 @@ public class ActionNodeInitialization
          screwPrimitiveAction.getDefinition().setSide(sideOfNewAction);
          screwPrimitiveAction.getDefinition()
                              .setObjectFrameName(findConvenientParentFrameName(actionSequence, HandPoseActionState.class, indexOfInsertion, sideOfNewAction));
-         screwPrimitiveAction.getState().update();
+         screwPrimitiveAction.update();
       }
       if (newAction instanceof FootPoseActionState footPoseAction)
       {
@@ -61,7 +61,7 @@ public class ActionNodeInitialization
                                                                                          FootPoseActionState.class,
                                                                                          indexOfInsertion,
                                                                                          sideOfNewAction));
-         footPoseAction.getState().update();
+         footPoseAction.update();
 
          FootPoseActionState nextPreviousFootPoseAction = findNextPreviousAction(actionSequence,
                                                                                  FootPoseActionState.class,
@@ -71,14 +71,14 @@ public class ActionNodeInitialization
          {
             // Set pose to previous hand pose
             footPoseAction.getDefinition().setParentFrameName(nextPreviousFootPoseAction.getDefinition().getParentFrameName());
-            footPoseAction.getDefinition().getFootToParentTransform().getValueAndFreeze()
+            footPoseAction.getDefinition().getFootToParentTransform().getValueAndModify()
                           .set(nextPreviousFootPoseAction.getDefinition().getFootToParentTransform().getValueReadOnly());
          }
          else // set to current robot's hand pose
          {
             footPoseAction.getDefinition().setParentFrameName(ReferenceFrame.getWorldFrame().getName());
             syncedRobot.getReferenceFrames().getFootFrame(sideOfNewAction)
-                       .getTransformToDesiredFrame(footPoseAction.getDefinition().getFootToParentTransform().getValueAndFreeze(),
+                       .getTransformToDesiredFrame(footPoseAction.getDefinition().getFootToParentTransform().getValueAndModify(),
                                                    ReferenceFrame.getWorldFrame());
          }
          footPoseAction.update();
@@ -89,14 +89,14 @@ public class ActionNodeInitialization
          if (nextPreviousAction != null && nextPreviousAction.getChestFrame().isChildOfWorld())
          {
             chestOrientationAction.getDefinition().setParentFrameName(nextPreviousAction.getDefinition().getParentFrameName());
-            chestOrientationAction.getDefinition().getChestToParentTransform().getValueAndFreeze()
+            chestOrientationAction.getDefinition().getChestToParentTransform().getValueAndModify()
                                   .set(nextPreviousAction.getDefinition().getChestToParentTransform().getValueReadOnly());
          }
          else
          {
             chestOrientationAction.getDefinition().setParentFrameName(ReferenceFrame.getWorldFrame().getName());
             syncedRobot.getReferenceFrames().getChestFrame()
-                       .getTransformToDesiredFrame(chestOrientationAction.getDefinition().getChestToParentTransform().getValueAndFreeze(),
+                       .getTransformToDesiredFrame(chestOrientationAction.getDefinition().getChestToParentTransform().getValueAndModify(),
                                                    ReferenceFrame.getWorldFrame());
 
          }
@@ -108,14 +108,14 @@ public class ActionNodeInitialization
          if (nextPreviousAction != null && nextPreviousAction.getPelvisFrame().isChildOfWorld())
          {
             pelvisHeightPitchAction.getDefinition().setParentFrameName(nextPreviousAction.getDefinition().getParentFrameName());
-            pelvisHeightPitchAction.getDefinition().getPelvisToParentTransform().getValueAndFreeze()
+            pelvisHeightPitchAction.getDefinition().getPelvisToParentTransform().getValueAndModify()
                                    .set(nextPreviousAction.getDefinition().getPelvisToParentTransform().getValueReadOnly());
          }
          else
          {
             pelvisHeightPitchAction.getDefinition().setParentFrameName(ReferenceFrame.getWorldFrame().getName());
             syncedRobot.getReferenceFrames().getPelvisFrame()
-                       .getTransformToDesiredFrame(pelvisHeightPitchAction.getDefinition().getPelvisToParentTransform().getValueAndFreeze(),
+                       .getTransformToDesiredFrame(pelvisHeightPitchAction.getDefinition().getPelvisToParentTransform().getValueAndModify(),
                                                    ReferenceFrame.getWorldFrame());
 
          }

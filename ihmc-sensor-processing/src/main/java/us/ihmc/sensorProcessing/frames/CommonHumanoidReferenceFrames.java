@@ -20,6 +20,8 @@ public interface CommonHumanoidReferenceFrames extends CommonLeggedReferenceFram
 
    MovingReferenceFrame getChestFrame();
 
+   MovingReferenceFrame getHeadFrame();
+
    MovingReferenceFrame getMidFeetZUpFrame();
 
    MovingReferenceFrame getMidFeetUnderPelvisFrame();

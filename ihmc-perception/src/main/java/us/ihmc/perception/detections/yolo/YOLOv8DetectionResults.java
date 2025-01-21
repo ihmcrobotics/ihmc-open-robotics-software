@@ -145,7 +145,7 @@ public class YOLOv8DetectionResults
 
       Mat boundingBoxMask = new Mat(maskHeight, maskWidth, opencv_core.CV_32FC1, new Scalar(0.0));
       opencv_imgproc.rectangle(boundingBoxMask,
-                               new Rect(detection.x() / 4, detection.y() / 4, detection.width() / 4, detection.height() / 4),
+                               new Rect(detection.x() / 4, detection.y() / 4, detection.width() / 4 + 2, detection.height() / 4 + 2),
                                new Scalar(1.0), opencv_imgproc.FILLED, opencv_imgproc.LINE_8, 0);
 
       opencv_core.bitwise_and(booleanMask, boundingBoxMask, booleanMask);

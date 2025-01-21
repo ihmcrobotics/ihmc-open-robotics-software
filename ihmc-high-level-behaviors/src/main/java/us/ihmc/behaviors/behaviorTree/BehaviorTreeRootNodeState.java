@@ -53,7 +53,7 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
 
    public void updateActionSubtree(BehaviorTreeNodeState<?> node, MutableInt actionIndex)
    {
-      idToNodeMap.put(node.getState().getID(), node);
+      idToNodeMap.put(node.getID(), node);
 
       for (BehaviorTreeNodeState<?> child : node.getChildren())
       {
@@ -81,9 +81,9 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
 
    public void fromMessage(BehaviorTreeRootNodeStateMessage message)
    {
-      super.fromMessage(message.getState());
-
       definition.fromMessage(message.getDefinition());
+
+      super.fromMessage(message.getState());
 
       automaticExecution.fromMessage(message.getAutomaticExecution());
       executionNextIndex.fromMessage(message.getExecutionNextIndex());

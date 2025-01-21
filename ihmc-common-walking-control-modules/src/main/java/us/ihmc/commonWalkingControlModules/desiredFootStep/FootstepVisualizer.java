@@ -53,7 +53,7 @@ public class FootstepVisualizer
                              YoGraphicsListRegistry yoGraphicsListRegistry,
                              YoRegistry registry)
    {
-      this(name, graphicListName, robotSide, contactableFoot.getContactPoints2d(), footstepColor, yoGraphicsListRegistry, registry);
+      this(name, graphicListName, robotSide, contactableFoot.getContactPoints2D(), footstepColor, yoGraphicsListRegistry, registry);
    }
 
    public FootstepVisualizer(String name,
