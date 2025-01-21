@@ -124,7 +124,7 @@ public class RDXYOLOv8PipelineDemo
          LogTools.info("\t\t\tClasses: " + model.getDetectionClassNames().size());
 
          yoloObjectDetectors.add(objectDetector);
-         availableDetectors.add(model.getModelName());
+         availableDetectors.add(model.getName());
       }
 
       zed.useTrackedPose(false);
