@@ -1,7 +1,10 @@
 package us.ihmc.behaviors.tools;
 
+import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KSTTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
@@ -11,10 +14,20 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.time.ThreadTimer;
 
-import java.io.*;
+import java.awt.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import java.util.function.IntPredicate;
 
 /**
@@ -655,9 +668,104 @@ public class TrajectoryRecordReplay
       pointToPack.changeFrame(loadFrame);
       return index;
    }
-   public static void main(String[] args)
+
+   public static void main(String[] args) throws Exception
    {
-      System.out.println(Long.parseLong("156"));
-      System.out.println(Double.parseDouble("NaN"));
+      FileDialog dialog = new FileDialog((Frame) null, "Choose file", FileDialog.LOAD);
+      dialog.setFilenameFilter((dir, name) -> name.endsWith(".csv"));
+
+      String filePath = Paths.get(System.getProperty("user.home"), ".ihmc/logs").toString();
+      File logDirectory = new File(System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs");
+      dialog.setFile(logDirectory.getAbsolutePath());
+      dialog.setVisible(true);
+
+      String directory = dialog.getDirectory();
+      String filename = dialog.getFile();
+      File file;
+
+      if (filename != null)
+      {
+         file = new File(directory + filename);
+      }
+      else
+      {
+         return;
+      }
+
+      List<JoystickData> updatedJoystickData = new ArrayList<>();
+      BufferedReader fileReader = new BufferedReader(new FileReader(directory + filename));
+
+      String line;
+
+      while ((line = fileReader.readLine()) != null)
+      {
+         String[] data = line.split(",");
+
+         long timeInTrajectoryMillis = Long.parseLong(data[18]);
+         JoystickData joystickData = new JoystickData(timeInTrajectoryMillis);
+
+         int index = 0;
+         joystickData.leftAButtonPressed = Boolean.parseBoolean(data[index++]);
+         joystickData.leftTriggerPressed = Boolean.parseBoolean(data[index++]);
+         index = loadCSV(index, data, joystickData.controllerPoses.get(RobotSide.LEFT), ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
+         joystickData.rightAButtonPressed = Boolean.parseBoolean(data[index++]);
+         joystickData.rightTriggerPressed = Boolean.parseBoolean(data[index++]);
+         index = loadCSV(index, data, joystickData.controllerPoses.get(RobotSide.RIGHT), ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
+
+         if (index != 18)
+            throw new RuntimeException("Expecting index of 18 for timestamp");
+         index++;
+
+         index = loadCSV(index, data, joystickData.desiredCenterOfMass, ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
+         updatedJoystickData.add(joystickData);
+      }
+      fileReader.close();
+
+      // go back and compute velocities
+      int indexDelta = 5;
+
+      // compute velocities
+      for (int i = indexDelta; i < updatedJoystickData.size() - indexDelta - 1; i++)
+      {
+         JoystickData joystickData0 = updatedJoystickData.get(i - indexDelta);
+         JoystickData joystickData1 = updatedJoystickData.get(i + indexDelta);
+         JoystickData joystickDataToPack = updatedJoystickData.get(i);
+
+         double dtMillis = (double) joystickData1.timeInTrajectoryMillis - joystickData0.timeInTrajectoryMillis;
+         double dtSec = dtMillis / 1000.0;
+
+         for (RobotSide robotSide : RobotSide.values())
+         {
+            FramePose3D pose0 = joystickData0.controllerPoses.get(robotSide);
+            FramePose3D pose1 = joystickData0.controllerPoses.get(robotSide);
+
+            KSTTools.computeAngularVelocity(dtSec, pose0.getOrientation(), pose1.getOrientation(), joystickDataToPack.controllerAngularVelocities.get(robotSide));
+            KSTTools.computeLinearVelocity(dtSec, pose0.getPosition(), pose1.getPosition(), joystickDataToPack.controllerLinearVelocities.get(robotSide));
+         }
+      }
+
+      // export csvs
+
+      String recordFileName = "241113182923-Wall0_updated.csv";
+
+      File csvFile = new File(filePath + File.separator + recordFileName);
+      csvFile.createNewFile();
+
+      try (FileWriter writer = new FileWriter(csvFile))
+      {
+         for (int row = 0; row < updatedJoystickData.size(); row++)
+         {
+            JoystickData joystickData = updatedJoystickData.get(row);
+            writer.write(joystickData.toString());
+         }
+
+         writer.flush();
+         writer.close();
+         ThreadTools.sleep(5000);
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+      }
    }
 }

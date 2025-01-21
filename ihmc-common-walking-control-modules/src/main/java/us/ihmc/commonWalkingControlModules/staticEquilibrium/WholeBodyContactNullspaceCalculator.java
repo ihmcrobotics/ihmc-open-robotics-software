@@ -66,26 +66,27 @@ public class WholeBodyContactNullspaceCalculator
          handJacobians.put(robotSide, new GeometricJacobian(fullRobotModel.getElevator(), fullRobotModel.getHand(robotSide), fullRobotModel.getHand(robotSide).getBodyFixedFrame()));
          feetJacobians.put(robotSide, new GeometricJacobian(fullRobotModel.getElevator(), fullRobotModel.getFoot(robotSide), fullRobotModel.getFoot(robotSide).getBodyFixedFrame()));
          handControlPoints.put(robotSide, new FramePoint3D(fullRobotModel.getHandControlFrame(robotSide)));
-      }
 
-      // TODO make a parameter
+         OneDoFJointBasics wristYaw = fullRobotModel.getArmJoint(robotSide, ArmJointName.WRIST_YAW);
+         OneDoFJointBasics wristRoll = fullRobotModel.getArmJoint(robotSide, ArmJointName.WRIST_ROLL);
+         OneDoFJointBasics gripperYaw = fullRobotModel.getArmJoint(robotSide, ArmJointName.GRIPPER_YAW);
+
+         if (wristYaw != null)
+            jointsToIgnore.add(wristYaw);
+         if (wristRoll != null)
+            jointsToIgnore.add(wristRoll);
+         if (gripperYaw != null)
+            jointsToIgnore.add(gripperYaw);
+
+      }
 
       OneDoFJointBasics spinePitch = fullRobotModel.getSpineJoint(SpineJointName.SPINE_PITCH);
       OneDoFJointBasics spineRoll = fullRobotModel.getSpineJoint(SpineJointName.SPINE_ROLL);
-      OneDoFJointBasics wristYaw = fullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.WRIST_YAW);
-      OneDoFJointBasics wristRoll = fullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.WRIST_ROLL);
-      OneDoFJointBasics gripperYaw = fullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.GRIPPER_YAW);
 
       if (spinePitch != null)
          jointsToIgnore.add(spinePitch);
       if (spineRoll != null)
          jointsToIgnore.add(spineRoll);
-      if (wristYaw != null)
-         jointsToIgnore.add(wristYaw);
-      if (wristRoll != null)
-         jointsToIgnore.add(wristRoll);
-      if (gripperYaw != null)
-         jointsToIgnore.add(gripperYaw);
    }
 
    public void compute()
