@@ -27,8 +27,8 @@ public class ConditionNodeState extends BehaviorTreeNodeState<ConditionNodeDefin
 
    public void fromMessage(ConditionNodeStateMessage message)
    {
-      super.fromMessage(message.getState());
-
       getDefinition().fromMessage(message.getDefinition());
+
+      super.fromMessage(message.getState());
    }
 }

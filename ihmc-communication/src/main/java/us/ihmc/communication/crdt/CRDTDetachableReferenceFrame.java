@@ -28,7 +28,7 @@ public class CRDTDetachableReferenceFrame
    public void changeFrame(String newParentFrameName)
    {
       parentFrameName.setValue(newParentFrameName);
-      detachableReferenceFrame.changeFrame(newParentFrameName, transformToParent.getValueAndFreeze());
+      detachableReferenceFrame.changeFrame(newParentFrameName, transformToParent.getValueAndModify());
    }
 
    public boolean isChildOfWorld()

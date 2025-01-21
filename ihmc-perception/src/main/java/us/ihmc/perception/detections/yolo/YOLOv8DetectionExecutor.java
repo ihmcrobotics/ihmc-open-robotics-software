@@ -5,6 +5,7 @@ import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
+import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Rect;
@@ -22,6 +23,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.detections.InstantDetection;
 import us.ihmc.perception.imageMessage.CompressionType;
+import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.opencl.OpenCLDepthImageSegmenter;
 import us.ihmc.perception.opencl.OpenCLPointCloudExtractor;
 import us.ihmc.perception.tools.PerceptionMessageTools;
@@ -158,7 +160,10 @@ public class YOLOv8DetectionExecutor
          yoloExecutorService.submit(() ->
          {
             // Run YOLO to get results
-            YOLOv8DetectionResults yoloResults = yoloDetector.runOnImage(colorImage, yoloConfidenceThreshold, yoloNMSThreshold, yoloMaskThreshold);
+            GpuMat bgrMat = new GpuMat();
+            colorImage.getPixelFormat().convertToPixelFormat(colorImage.getGpuImageMat(), bgrMat, PixelFormat.BGR8);
+            RawImage bgrImage = colorImage.replaceImage(bgrMat, PixelFormat.BGR8);
+            YOLOv8DetectionResults yoloResults = yoloDetector.runOnImage(bgrImage, yoloConfidenceThreshold, yoloNMSThreshold, yoloMaskThreshold);
 
             // TODO: temp hack
             synchronized (yoloDetectionResults)
@@ -167,7 +172,7 @@ public class YOLOv8DetectionExecutor
                   yoloDetectionResults.remove(lastRunDetectorIndex).destroy();
                yoloDetectionResults.put(lastRunDetectorIndex, yoloResults);
             }
-            newestColorImage = colorImage;
+            newestColorImage = bgrImage;
 
             // Get the object masks from the results
             Map<YOLOv8DetectionOutput, RawImage> simpleDetectionMap = yoloResults.getSegmentationImages();
@@ -204,7 +209,7 @@ public class YOLOv8DetectionExecutor
                                                                                     simpleDetection.confidence(),
                                                                                     new Pose3D(centroid, new RotationMatrix()),
                                                                                     objectMask.getAcquisitionTime(),
-                                                                                    colorImage,
+                                                                                    bgrImage,
                                                                                     erodedObjectMask,
                                                                                     depthImage,
                                                                                     pointCloud);
@@ -215,6 +220,7 @@ public class YOLOv8DetectionExecutor
             // Submit the callbacks to be processed
             yoloExecutorService.submit(() -> detectionConsumerCallbacks.forEach(callback -> callback.accept(yoloInstantDetections)));
 
+            bgrImage.release();
             colorImage.release();
             depthImage.release();
          });

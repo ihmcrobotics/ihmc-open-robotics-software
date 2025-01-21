@@ -4,11 +4,11 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.ai2r.AI2RNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStateBuilder;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeBuilder;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
-import us.ihmc.behaviors.behaviorTree.trashCan.TrashCanInteractionDefinition;
 import us.ihmc.behaviors.door.DoorTraversalDefinition;
 import us.ihmc.behaviors.buildingExploration.BuildingExplorationDefinition;
+import us.ihmc.behaviors.sequence.actions.CheckPointNodeDefinition;
 import us.ihmc.behaviors.logic.ConditionNodeDefinition;
 import us.ihmc.behaviors.logic.GotoNodeDefinition;
 import us.ihmc.behaviors.sequence.ActionNodeInitialization;
@@ -21,8 +21,8 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.behavior.actions.*;
 import us.ihmc.rdx.ui.behavior.behaviors.RDXAI2RNode;
 import us.ihmc.rdx.ui.behavior.behaviors.RDXDoorTraversal;
-import us.ihmc.rdx.ui.behavior.behaviors.RDXTrashCanInteraction;
 import us.ihmc.rdx.ui.behavior.behaviors.RDXBuildingExploration;
+import us.ihmc.rdx.ui.behavior.actions.RDXCheckPointNode;
 import us.ihmc.rdx.ui.behavior.logic.RDXConditionNode;
 import us.ihmc.rdx.ui.behavior.logic.RDXGotoNode;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
@@ -35,7 +35,7 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import javax.annotation.Nullable;
 
-public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder<RDXBehaviorTreeNode<?, ?>>
+public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeBuilder<RDXBehaviorTreeNode<?, ?>>
 {
    private final DRCRobotModel robotModel;
    private final ROS2SyncedRobotModel syncedRobot;
@@ -91,13 +91,13 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder<
       {
          return new RDXGotoNode(id, crdtInfo, saveFileDirectory);
       }
+      if (nodeType == CheckPointNodeDefinition.class)
+      {
+         return new RDXCheckPointNode(id, crdtInfo, saveFileDirectory);
+      }
       if (nodeType == DoorTraversalDefinition.class)
       {
          return new RDXDoorTraversal(id, crdtInfo, saveFileDirectory, syncedRobot);
-      }
-      if (nodeType == TrashCanInteractionDefinition.class)
-      {
-         return new RDXTrashCanInteraction(id, crdtInfo, saveFileDirectory, syncedRobot);
       }
       if (nodeType == BuildingExplorationDefinition.class)
       {

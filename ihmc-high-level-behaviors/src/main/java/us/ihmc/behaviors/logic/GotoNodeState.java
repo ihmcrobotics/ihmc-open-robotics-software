@@ -27,8 +27,8 @@ public class GotoNodeState extends BehaviorTreeNodeState<GotoNodeDefinition>
 
    public void fromMessage(GotoNodeStateMessage message)
    {
-      super.fromMessage(message.getState());
-
       getDefinition().fromMessage(message.getDefinition());
+
+      super.fromMessage(message.getState());
    }
 }

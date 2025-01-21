@@ -18,7 +18,7 @@ public enum PixelFormat
    RGB8(1, 3, COLOR_RGB2RGBA, COLOR_RGBA2RGB, AV_PIX_FMT_RGB24),     // 24 bits per pixel, in RGB order
    RGBA8(1, 4, -1, -1, AV_PIX_FMT_RGBA),                             // 32 bits per pixel, in RGBA order
    YUV_I420(1, 1, COLOR_YUV2RGBA_I420, COLOR_RGBA2YUV_I420, -1),     // YUV420 format
-   YUV444P(1, 3, -1, -1, AV_PIX_FMT_YUV444P),                        // 24 bits per pixel, planar YUV
+   YUV444P(1, 3, COLOR_COLORCVT_MAX, COLOR_COLORCVT_MAX, AV_PIX_FMT_YUV444P),                        // 24 bits per pixel, planar YUV
    YUV_444P16(2, 3, -1, -1, AV_PIX_FMT_YUV444P16),                   // 16 bit planar YUV444, 48 bits per pixel.
    GRAY8(1, 1, COLOR_GRAY2RGBA, COLOR_RGBA2GRAY, AV_PIX_FMT_GRAY8),  // monochrome
    GRAY16(2, 1, -1, -1, AV_PIX_FMT_GRAY16),                          // aka depth
@@ -142,7 +142,17 @@ public enum PixelFormat
          return this == RGBA8;
       }
 
-      opencv_imgproc.cvtColor(source, destination, opencvToRGBAConversion);
+      if (this == YUV444P)
+      {
+         try (Mat rgbImage = new Mat())
+         {
+            opencv_imgproc.cvtColor(source, rgbImage, COLOR_YUV2RGB);
+            opencv_imgproc.cvtColor(rgbImage, destination, COLOR_RGB2RGBA);
+         }
+      }
+      else
+         opencv_imgproc.cvtColor(source, destination, opencvToRGBAConversion);
+
       return true;
    }
 
@@ -164,6 +174,14 @@ public enum PixelFormat
             destination.upload(tempDestination);
          }
       }
+      else if (this == YUV444P)
+      {
+         try (GpuMat rgbImage = new GpuMat())
+         {
+            opencv_cudaimgproc.cvtColor(source, rgbImage, COLOR_YUV2RGB);
+            opencv_cudaimgproc.cvtColor(rgbImage, destination, COLOR_RGB2RGBA);
+         }
+      }
       else
          opencv_cudaimgproc.cvtColor(source, destination, opencvToRGBAConversion);
 
@@ -178,7 +196,16 @@ public enum PixelFormat
          return this == RGBA8;
       }
 
-      opencv_imgproc.cvtColor(source, destination, opencvFromRGBAConversion);
+      if (this == YUV444P)
+      {
+         try (Mat rgbImage = new Mat())
+         {
+            opencv_imgproc.cvtColor(source, rgbImage, COLOR_RGBA2RGB);
+            opencv_imgproc.cvtColor(rgbImage, destination, COLOR_RGB2YUV);
+         }
+      }
+      else
+         opencv_imgproc.cvtColor(source, destination, opencvFromRGBAConversion);
       return true;
    }
 
@@ -198,6 +225,14 @@ public enum PixelFormat
             source.download(sourceCopy);
             opencv_imgproc.cvtColor(sourceCopy, tempDestination, opencvFromRGBAConversion);
             destination.upload(tempDestination);
+         }
+      }
+      else if (this == YUV444P)
+      {
+         try (GpuMat rgbImage = new GpuMat())
+         {
+            opencv_cudaimgproc.cvtColor(source, rgbImage, COLOR_RGBA2RGB);
+            opencv_cudaimgproc.cvtColor(rgbImage, destination, COLOR_RGB2YUV);
          }
       }
       else

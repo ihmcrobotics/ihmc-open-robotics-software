@@ -5,12 +5,12 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.ai2r.AI2RNodeDefinition;
 import us.ihmc.behaviors.ai2r.AI2RNodeExecutor;
-import us.ihmc.behaviors.behaviorTree.trashCan.TrashCanInteractionDefinition;
-import us.ihmc.behaviors.behaviorTree.trashCan.TrashCanInteractionExecutor;
 import us.ihmc.behaviors.buildingExploration.BuildingExplorationDefinition;
 import us.ihmc.behaviors.buildingExploration.BuildingExplorationExecutor;
 import us.ihmc.behaviors.door.DoorTraversalDefinition;
 import us.ihmc.behaviors.door.DoorTraversalExecutor;
+import us.ihmc.behaviors.sequence.actions.CheckPointNodeDefinition;
+import us.ihmc.behaviors.sequence.actions.CheckPointNodeExecutor;
 import us.ihmc.behaviors.logic.ConditionNodeDefinition;
 import us.ihmc.behaviors.logic.ConditionNodeExecutor;
 import us.ihmc.behaviors.logic.GotoNodeDefinition;
@@ -47,7 +47,7 @@ import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
-public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBuilder<BehaviorTreeNodeExecutor<?, ?>>
+public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<BehaviorTreeNodeExecutor<?, ?>>
 {
    private final DRCRobotModel robotModel;
    private final ROS2SyncedRobotModel syncedRobot;
@@ -110,13 +110,13 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
       {
          return new GotoNodeExecutor(id, crdtInfo, saveFileDirectory);
       }
+      if (nodeType == CheckPointNodeDefinition.class)
+      {
+         return new CheckPointNodeExecutor(id, crdtInfo, saveFileDirectory);
+      }
       if (nodeType == DoorTraversalDefinition.class)
       {
          return new DoorTraversalExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, syncedRobot, sceneGraph);
-      }
-      if (nodeType == TrashCanInteractionDefinition.class)
-      {
-         return new TrashCanInteractionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, syncedRobot, sceneGraph);
       }
       if (nodeType == BuildingExplorationDefinition.class)
       {

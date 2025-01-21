@@ -147,6 +147,12 @@ public class RigidBodySceneObjectDefinitions
    public static final String COUCH_NAME = "Couch";
    public static final String COUCH_VISUAL_MODEL_FILE_PATH = "environmentObjects/couch/Couch.g3dj";
    public static final RigidBodyTransform COUCH_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
+   static
+   {
+      EuclidCoreMissingTools.setYawPitchRollDegrees(COUCH_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getRotation(), 90, 0, 0);
+      COUCH_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addY(-1);
+      COUCH_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addX(-0.5);
+   }
 
    public static final String TRASHCAN_NAME = "TrashCan";
    public static final String TRASHCAN_VISUAL_MODEL_FILE_PATH = "environmentObjects/trashCan/TrashCan.g3dj";

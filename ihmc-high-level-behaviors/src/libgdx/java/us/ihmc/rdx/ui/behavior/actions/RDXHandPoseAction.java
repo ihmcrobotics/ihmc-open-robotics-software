@@ -187,7 +187,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
                                  FramePose3D previewPalmPose = new FramePose3D();
                                  previewPalmPose.setToZero(previewPalmFrame);
                                  previewPalmPose.changeFrame(actionPalmFrame.getReferenceFrame().getParent());
-                                 palmTransformToParent.getValueAndFreeze().set(previewPalmPose);
+                                 palmTransformToParent.getValueAndModify().set(previewPalmPose);
                                  actionPalmFrame.update();
                               }
                            }
@@ -404,7 +404,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
             FramePose3D syncedPalmPose = new FramePose3D();
             syncedPalmPose.setToZero(syncedPalmFrame);
             syncedPalmPose.changeFrame(actionPalmFrame.getReferenceFrame().getParent());
-            palmTransformToParent.getValueAndFreeze().set(syncedPalmPose);
+            palmTransformToParent.getValueAndModify().set(syncedPalmPose);
             actionPalmFrame.update();
          }
       }

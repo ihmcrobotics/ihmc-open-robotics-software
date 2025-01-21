@@ -123,13 +123,9 @@ public class RDXDepthStreamingDemo
       opencv_imgproc.cvtColor(colorizedDepth.getCpuImageMat(), rgbMat, opencv_imgproc.COLOR_YUV2RGB);
       receivedDepthVisualizer.setImage(rgbMat);
 
-      GpuMat deColorizedDepth = depthColorizer.deColorizeDepth(colorizedDepth.getGpuImageMat());
-      RawImage deColorizedImage = colorizedDepth.replaceImage(deColorizedDepth);
-
-      pointCloudVisualizer.setDepthImage(deColorizedImage);
+      pointCloudVisualizer.setDepthImage(colorizedDepth);
 
       rgbMat.close();
-      deColorizedImage.release();
       colorizedDepth.release();
    }
 

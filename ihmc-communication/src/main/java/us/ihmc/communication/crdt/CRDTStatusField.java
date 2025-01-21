@@ -4,7 +4,7 @@ import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 
 /**
- * A status field does not freeze (is unconfirmed).
+ * A status field is not timestamped, it's one way.
  * It is for data that's continuously computed as a status
  * for an observer but not critical that it is recieved on
  * the other side. Typically, the robot will compute statuses

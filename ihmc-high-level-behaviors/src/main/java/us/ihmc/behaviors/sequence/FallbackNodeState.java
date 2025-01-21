@@ -27,8 +27,8 @@ public class FallbackNodeState extends BehaviorTreeNodeState<FallbackNodeDefinit
 
    public void fromMessage(FallbackNodeStateMessage message)
    {
-      super.fromMessage(message.getState());
-
       getDefinition().fromMessage(message.getDefinition());
+
+      super.fromMessage(message.getState());
    }
 }

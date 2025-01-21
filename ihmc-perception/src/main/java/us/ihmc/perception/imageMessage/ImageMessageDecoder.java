@@ -95,9 +95,6 @@ public class ImageMessageDecoder
             else
             {  // Otherwise use OpenCV
                opencv_imgcodecs.imdecode(messageDataExtractor.getInputMat(), opencv_imgcodecs.IMREAD_UNCHANGED, imageToPack);
-               // RGBA or BGRA will lose the alpha channel in jpeg encoding, so we give it back
-               if (lastImagePixelFormat.elementsPerPixel == 4 && imageToPack.channels() == 3)
-                  opencv_imgproc.cvtColor(imageToPack, imageToPack, opencv_imgproc.COLOR_BGR2BGRA);
             }
             lastImagePixelFormat = PixelFormat.BGR8;
          }

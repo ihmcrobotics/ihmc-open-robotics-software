@@ -14,7 +14,7 @@ public abstract class ImageSensor implements AutoCloseable
 
    private final String sensorName;
    /** Sensor will be in world frame by default, unless a sensor frame supplier is specified through {@link #setSensorFrameSupplier(Supplier)}. */
-   protected volatile Supplier<ReferenceFrame> sensorFrameSupplier;
+   protected volatile Supplier<ReferenceFrame> sensorFrameSupplier = ReferenceFrame::getWorldFrame;
 
    private final RepeatingTaskThread grabThread;
    private final Object grabNotification = new Object();

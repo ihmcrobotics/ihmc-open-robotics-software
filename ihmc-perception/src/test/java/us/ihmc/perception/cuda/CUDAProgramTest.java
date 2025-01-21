@@ -90,7 +90,6 @@ public class CUDAProgramTest
          {
             for (int b = 0; b < runs; ++b)
             {
-               additionKernel.clearParameters();
                additionKernel.withInt(a).withInt(b).withPointer(deviceSum);
                additionKernel.run(stream, new dim3(), new dim3(), 0);
 
