@@ -2,14 +2,16 @@ package us.ihmc.avatar.networkProcessor.footstepStreamingModule;
 
 import toolbox_msgs.msg.dds.FootstepStreamingToolboxOutputStatus;
 import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.footstepStreamingToolboxAPI.FootstepStreamingToolboxInputCommand;
-import us.ihmc.humanoidRobotics.communication.footstepStreamingToolboxAPI.FootstepStreamingToolboxTrackerCommand;
+import us.ihmc.humanoidRobotics.communication.footstepStreamingToolboxAPI.FootstepStreamingToolboxSideCommand;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -34,37 +36,35 @@ public class FSTStreamingState implements State
    private final SideDependentList<Integer> stableIterationCounts = new SideDependentList<>();
    private final SideDependentList<FrameVector2D> directionTrackersCtrl = new SideDependentList<>(); // Controlled direction vector for each foot.
    private final SideDependentList<RigidBodyTransform> initialRobotSwingFootTransformsInWorld = new SideDependentList<>();
+   private double maxFootHeight = 0.0;
+   private double robotStepDuration = 0.0;
+   private double robotElapsedTimeCurrentStep = 0.0;
+   private double currentStrideEstimate;
+   private double velocitySum = 0.0;
+   private int velocityCount = 0;
 
    private final YoDouble timeOfLastInput = new YoDouble("timeOfLastInput", registry);
    private final YoDouble timeSinceLastInput = new YoDouble("timeSinceLastInput", registry);
    private final YoDouble rawInputFrequency = new YoDouble("rawInputFrequency", registry);
    private final AlphaFilteredYoVariable inputFrequency;
-   private final double toolboxControllerPeriod;
 
    private final YoBoolean computeStepFromStance = new YoBoolean("computeStepFromStance", registry);
    private final YoDouble stepThreshold = new YoDouble("stepThreshold", registry);
    private final YoDouble liftThreshold = new YoDouble("liftThreshold", registry);
-   private final YoDouble defaultStrideLength = new YoDouble("defaultStrideLength", registry);
-   private final YoDouble kpDirection = new YoDouble("kpDirection", registry);
-   private final YoDouble defaultTurningThreshold = new YoDouble("defaultTurningThreshold", registry);
-   private final YoDouble defaultTurnDegrees = new YoDouble("defaultTurnDegrees", registry);
    private final YoDouble stabilityThreshold = new YoDouble("stabilityThreshold", registry);
    private final YoInteger stabilityIterations = new YoInteger("stabilityIterations", registry);
-   private final YoDouble defaultVelocityThreshold = new YoDouble("defaultVelocityThreshold", registry);
-   private final YoDouble defaultAccelerationThreshold = new YoDouble("defaultAccelerationThreshold", registry);
-   private final YoDouble defaultHorizontalAccelerationWeight = new YoDouble("defaultHorizontalAccelerationWeight", registry);
-   private final YoDouble defaultVerticalComponentWeight = new YoDouble("defaultVerticalComponentWeight", registry);
-   private final FrameVector3D accumulatedLinearVelocity = new FrameVector3D();
-   private final FrameVector3D accumulatedAngularVelocity = new FrameVector3D();
-
-   private final FrameVector3D displacementEstimatedFromLinearVelocity = new FrameVector3D();
-   private final FrameVector3D angleEstimatedFromAngularVelocity = new FrameVector3D();
+   private final YoDouble defaultStride = new YoDouble("defaultStride", registry);
+   private final YoDouble maxStride = new YoDouble("maxStride", registry);
+   private final YoDouble kpDirection = new YoDouble("kpDirection", registry);
+   private final YoDouble kpStride = new YoDouble("kpStride", registry);
+   private final YoDouble defaultTurningThreshold = new YoDouble("defaultTurningThreshold", registry);
+   private final YoDouble defaultTurnDegrees = new YoDouble("defaultTurnDegrees", registry);
 
    public FSTStreamingState(FSTTools tools)
    {
       FootstepStreamingToolboxParameters parameters = tools.getParameters();
       this.tools = tools;
-      toolboxControllerPeriod = tools.getToolboxControllerPeriod();
+      double toolboxControllerPeriod = tools.getToolboxControllerPeriod();
 
       tools.getRegistry().addChild(registry);
 
@@ -76,15 +76,13 @@ public class FSTStreamingState implements State
       liftThreshold.set(parameters.getLiftThreshold());
       stabilityThreshold.set(parameters.getStabilityThreshold());
       stabilityIterations.set(parameters.getStabilityIterations());
-      defaultStrideLength.set(parameters.getStrideLength());
+      defaultStride.set(parameters.getDefaultStride());
+      maxStride.set(parameters.getMaxStride());
       kpDirection.set(parameters.getKpDirection());
+      kpStride.set(parameters.getKpStride());
       defaultTurningThreshold.set(parameters.getTurningThreshold());
       defaultTurnDegrees.set(parameters.getTurnDegrees());
       computeStepFromStance.set(parameters.getComputeFromStance());
-      defaultVelocityThreshold.set(parameters.getVelocityThreshold());
-      defaultAccelerationThreshold.set(parameters.getAccelerationThreshold());
-      defaultHorizontalAccelerationWeight.set(parameters.getHorizontalAccelerationWeight());
-      defaultVerticalComponentWeight.set(parameters.getVerticalComponentWeight());
    }
 
    @Override
@@ -98,12 +96,16 @@ public class FSTStreamingState implements State
          previousTrackersTransform.put(side, new RigidBodyTransform());
          // Initialize controlled direction
          directionTrackersCtrl.put(side, new FrameVector2D());
+         currentStrideEstimate = defaultStride.getValue();
 
          ankleTrackerFrames.put(side, null);
          initialTrackersTransform.put(side, null);
          initialRobotSwingFootTransformsInWorld.put(side, null);
       }
 
+      maxFootHeight = 0.0;
+      velocitySum = 0.0;
+      velocityCount = 0;
       timeOfLastInput.set(Double.NaN);
       timeSinceLastInput.set(Double.NaN);
       inputFrequency.reset();
@@ -123,9 +125,14 @@ public class FSTStreamingState implements State
 
          if (latestInput.isCommandValid())
          {
+            robotStepDuration = latestInput.getRobotStepDuration();
+            robotElapsedTimeCurrentStep = latestInput.getRobotElapsedTimeCurrentStep();
+            if (robotElapsedTimeCurrentStep > robotStepDuration)
+               robotElapsedTimeCurrentStep = robotStepDuration;
+
             for (RobotSide side : RobotSide.values)
             {
-               FootstepStreamingToolboxTrackerCommand sideCommand = latestInput.getInputFor(side);
+               FootstepStreamingToolboxSideCommand sideCommand = latestInput.getInputFor(side);
                if (sideCommand != null)
                {
                   RigidBodyTransform currentTrackerTransform = new RigidBodyTransform(sideCommand.getCurrentPose());
@@ -145,6 +152,10 @@ public class FSTStreamingState implements State
                   FrameVector2D translationTrackerXY = new FrameVector2D(ReferenceFrame.getWorldFrame(),
                                                                          translationTracker.getX(),
                                                                          translationTracker.getY());
+                  if (translationTracker.getZ() > maxFootHeight)
+                  {
+                     maxFootHeight = translationTracker.getZ();
+                  }
 
                   if (!isUserStepping.get(side)) // Tracker is not moving by a lot yet
                   {
@@ -156,7 +167,7 @@ public class FSTStreamingState implements State
                         translationTrackerXY.normalize();
                         directionTrackersCtrl.put(side, translationTrackerXY);
                         // Scale the normalized direction to the fixed stride distance
-                        translationTrackerXY.scale(defaultStrideLength.getDoubleValue());
+                        translationTrackerXY.scale(defaultStride.getDoubleValue());
 
                         RigidBodyTransformReadOnly robotFootstepTransformInWorld = computeStepFromStance.getValue() ?
                               computeTargetFootstepFromStance(latestInput, side, translationTrackerXY, initialTrackersTransform.get(side)) :
@@ -223,12 +234,16 @@ public class FSTStreamingState implements State
                            }
                            else // Send adjustment
                            {
-                              FrameVector2D adjustedTranslationTrackerXY = computeDirectionAdjustment(side, translationTracker);
-//                                 applyStrideScaling(adjustedTranslationTrackerXY,
-//                                                    translationTracker.norm(),
-//                                                    linearAccelerationXY.norm(),
-//                                                    Math.abs(translationTracker.getZ()));
-                              adjustedTranslationTrackerXY.scale(defaultStrideLength.getDoubleValue());
+                              FrameVector2D adjustedTranslationTrackerXY = new FrameVector2D(ReferenceFrame.getWorldFrame(), translationTracker.getX(), translationTracker.getY());
+                              double stride = defaultStride.getDoubleValue();
+                              if (sideCommand.getHasCurrentVelocity())
+                              {
+                                 stride = computeStrideEstimate(adjustedTranslationTrackerXY.norm(),
+                                                                translationTracker.getZ(),
+                                                                sideCommand.getCurrentVelocity().getLinearPart());
+                              }
+                              adjustedTranslationTrackerXY.normalize();
+                              adjustedTranslationTrackerXY.scale(stride);
 
                               RigidBodyTransformReadOnly robotFootstepTransformInWorld = computeStepFromStance.getValue() ?
                                     computeTargetFootstepFromStance(latestInput, side, adjustedTranslationTrackerXY, initialTrackerTransform) :
@@ -383,20 +398,54 @@ public class FSTStreamingState implements State
       directionTrackerCtrl.normalize();
       directionTrackersCtrl.put(side, new FrameVector2D(directionTrackerCtrl));
 
-      return directionTrackerDesired;
+      return directionTrackerCtrl;
    }
 
-   private void applyStrideScaling(FrameVector2D translationTrackerXYToPack,
-                                   double measuredTrackerDistance,
-                                   double horizontalTrackerAccelerationMag,
-                                   double trackerHeight)
+   public double computeStrideEstimate(double measuredHorizontalDistance,
+                                       double verticalPosition,
+                                       FixedFrameVector3DBasics linearVelocity)
    {
-      double rawStride = measuredTrackerDistance + defaultHorizontalAccelerationWeight.getValue() * horizontalTrackerAccelerationMag
-                         + defaultVerticalComponentWeight.getValue() * trackerHeight;
-      double clampedStride = Math.max(0.0, Math.min(rawStride, defaultStrideLength.getDoubleValue()));
 
-      // Scale the normalized direction to the computed stride distance
-      translationTrackerXYToPack.scale(clampedStride);
+      // 1) Basic horizontal-based raw stride estimate
+      double rawStride = measuredHorizontalDistance + getAverageHorizontalVelocity(linearVelocity) * (robotStepDuration - robotElapsedTimeCurrentStep);
+      // 2) "Landing factor" from vertical motion
+      //    If the foot is descending (verticalVel < 0), we reduce the stride.
+      //    One approach is an interpolation factor landingFactor in [0,1], where 1 => no reduction,
+      //    0 => fully trust measured distance only.
+      double landingFactor = 1.0; // default is 1 => no reduction
+      if (linearVelocity.getZ() < 0.0)
+      {
+         // Normalize foot height to [0, 1]
+         landingFactor = verticalPosition / maxFootHeight;
+         landingFactor = Math.max(0.0, Math.min(1.0, landingFactor));
+      }
+
+      // 3) The stride is pulled toward the measuredDistance if foot is descending
+      double blendedStride = landingFactor * rawStride
+                             + (1.0 - landingFactor) * measuredHorizontalDistance;
+
+      // 4) Clamp to [0, maxStride] pre-P-control
+      double desiredStride = Math.max(0.0, Math.min(blendedStride, maxStride.getValue()));
+
+      // 5) Apply P-control
+      double error = desiredStride - currentStrideEstimate;
+      double newStrideEstimate = currentStrideEstimate + kpStride.getValue() * error;
+
+      // 6) Final clamp
+      newStrideEstimate = Math.max(0.0, Math.min(newStrideEstimate, maxStride.getValue()));
+      currentStrideEstimate = newStrideEstimate;
+
+      return desiredStride;
+   }
+
+   private double getAverageHorizontalVelocity(FixedFrameVector3DBasics currentLinearVelocity)
+   {
+      FrameVector2D currentXY = new FrameVector2D(ReferenceFrame.getWorldFrame());
+      currentXY.set(currentLinearVelocity);
+
+      velocitySum += currentXY.norm();
+      velocityCount++;
+      return velocitySum / velocityCount;
    }
 
    @Override
@@ -404,57 +453,5 @@ public class FSTStreamingState implements State
    {
       LogTools.info("Footstep Streaming disabled");
       tools.flushInputCommands();
-   }
-
-   /**
-    * This method estimate the footstep position using the average velocities and swing time.
-    * Average Velocity is obtained as   <p> <pre>V<sub>bar</sub> =  ∫<sub>i=0</sub><sup>i=N</sup> v<sub>i</sub></pre>, </p>
-    * <pre>v<sub>i</sub> = (P<sup>XY</sup><sub>i</sub> - P<sup>XY</sup><sub>i-1</sub> ) / dt<sub>i</sub></pre>  <br>
-    * P<sub>foot step</sub> = P<sub>foot init </sub> + V\u0305 * T<sub>swing</sub> <br>
-    * P<sub>foot step</sub> is the predicted / estimated footstep over the ground <br>
-    * P<sub>foot init</sub> is the initial swing foot position at the moment the foot starts moving
-    * T<sub>swing</sub> is the constant swing duration <br>
-    * This assumes <br>
-    * - Vive tracker is recorded pretty precise. <br>
-    * - Swing duration is constant
-    *
-    * @param latestInput
-    * @param side
-    * @return
-    */
-   public RigidBodyTransformReadOnly estimateFootstepUsingAverageVelocity(FootstepStreamingToolboxInputCommand latestInput,
-                                                                          RobotSide side,
-                                                                          double swingDuration,
-                                                                          RigidBodyTransformReadOnly initialTrackerTransform,
-                                                                          FootstepStreamingToolboxTrackerCommand latesCommand)
-   {
-      FramePoint2D initialTrackerXY = new FramePoint2D(ReferenceFrame.getWorldFrame(),
-                                                       initialTrackerTransform.getTranslationX(),
-                                                       initialTrackerTransform.getTranslationY());
-      FramePoint2D predictedTrackerXY = new FramePoint2D(initialTrackerXY);
-
-      accumulatedLinearVelocity.add(latesCommand.getCurrentVelocity().getLinearPart());
-      accumulatedAngularVelocity.add(latesCommand.getCurrentVelocity().getAngularPart());
-      displacementEstimatedFromLinearVelocity.scaleAdd(swingDuration, accumulatedLinearVelocity);
-      angleEstimatedFromAngularVelocity.scaleAdd(swingDuration, accumulatedAngularVelocity);
-
-      predictedTrackerXY.add(displacementEstimatedFromLinearVelocity.getX(), displacementEstimatedFromLinearVelocity.getY());
-
-      FramePose3D robotStanceFootTransformInWorld = latestInput.getInputFor(side.getOppositeSide()).getRobotFootPose();
-      ReferenceFrame robotStanceFootFrame = new FixedReferenceFrame("robotStanceFoot", ReferenceFrame.getWorldFrame(), robotStanceFootTransformInWorld);
-      FramePoint2D robotPredictedFootXY = new FramePoint2D(ReferenceFrame.getWorldFrame(),
-                                                           robotStanceFootTransformInWorld.getTranslationX(),
-                                                           robotStanceFootTransformInWorld.getTranslationY());
-      robotPredictedFootXY.changeFrame(robotStanceFootFrame);
-      robotPredictedFootXY.set(predictedTrackerXY);
-      robotPredictedFootXY.changeFrame(ReferenceFrame.getWorldFrame());
-
-      RigidBodyTransform robotFootstepTransformInWorld = new RigidBodyTransform(initialRobotSwingFootTransformsInWorld.get(side));
-
-      robotFootstepTransformInWorld.getTranslation().setX(robotPredictedFootXY.getX());
-      robotFootstepTransformInWorld.getTranslation().setY(robotPredictedFootXY.getY());
-
-
-      return robotFootstepTransformInWorld;
    }
 }

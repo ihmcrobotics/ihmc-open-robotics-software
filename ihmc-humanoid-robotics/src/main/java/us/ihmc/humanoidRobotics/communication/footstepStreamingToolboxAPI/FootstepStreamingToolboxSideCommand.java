@@ -1,13 +1,13 @@
 package us.ihmc.humanoidRobotics.communication.footstepStreamingToolboxAPI;
 
-import toolbox_msgs.msg.dds.FootstepStreamingToolboxTrackerMessage;
+import toolbox_msgs.msg.dds.FootstepStreamingToolboxSideMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class FootstepStreamingToolboxTrackerCommand implements Command<FootstepStreamingToolboxTrackerCommand, FootstepStreamingToolboxTrackerMessage>
+public class FootstepStreamingToolboxSideCommand implements Command<FootstepStreamingToolboxSideCommand, FootstepStreamingToolboxSideMessage>
 {
    private long sequenceId;
    private long timestamp;
@@ -29,7 +29,7 @@ public class FootstepStreamingToolboxTrackerCommand implements Command<FootstepS
    }
 
    @Override
-   public void set(FootstepStreamingToolboxTrackerCommand other)
+   public void set(FootstepStreamingToolboxSideCommand other)
    {
       sequenceId = other.sequenceId;
       timestamp = other.timestamp;
@@ -41,7 +41,7 @@ public class FootstepStreamingToolboxTrackerCommand implements Command<FootstepS
    }
 
    @Override
-   public void setFromMessage(FootstepStreamingToolboxTrackerMessage message)
+   public void setFromMessage(FootstepStreamingToolboxSideMessage message)
    {
       sequenceId = message.getSequenceId();
       timestamp = message.getTimestamp();
@@ -98,9 +98,9 @@ public class FootstepStreamingToolboxTrackerCommand implements Command<FootstepS
    }
 
    @Override
-   public Class<FootstepStreamingToolboxTrackerMessage> getMessageClass()
+   public Class<FootstepStreamingToolboxSideMessage> getMessageClass()
    {
-      return FootstepStreamingToolboxTrackerMessage.class;
+      return FootstepStreamingToolboxSideMessage.class;
    }
 
    @Override

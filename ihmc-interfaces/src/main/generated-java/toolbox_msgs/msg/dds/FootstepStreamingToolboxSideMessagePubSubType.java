@@ -2,20 +2,20 @@ package toolbox_msgs.msg.dds;
 
 /**
 * 
-* Topic data type of the struct "FootstepStreamingToolboxTrackerMessage" defined in "FootstepStreamingToolboxTrackerMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+* Topic data type of the struct "FootstepStreamingToolboxSideMessage" defined in "FootstepStreamingToolboxSideMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
 *
-* This file was automatically generated from FootstepStreamingToolboxTrackerMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit FootstepStreamingToolboxTrackerMessage_.idl instead.
+* This file was automatically generated from FootstepStreamingToolboxSideMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit FootstepStreamingToolboxSideMessage_.idl instead.
 *
 */
-public class FootstepStreamingToolboxTrackerMessagePubSubType implements us.ihmc.pubsub.TopicDataType<toolbox_msgs.msg.dds.FootstepStreamingToolboxTrackerMessage>
+public class FootstepStreamingToolboxSideMessagePubSubType implements us.ihmc.pubsub.TopicDataType<toolbox_msgs.msg.dds.FootstepStreamingToolboxSideMessage>
 {
-   public static final java.lang.String name = "toolbox_msgs::msg::dds_::FootstepStreamingToolboxTrackerMessage_";
+   public static final java.lang.String name = "toolbox_msgs::msg::dds_::FootstepStreamingToolboxSideMessage_";
    
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "233384f3e9ec462a47cc67e92fc06dc23207db66dd97e3b9317502164c3f572c";
+   		return "0896015bff5c97d2fe0c152d64171a9d547f3fe050438757f22f1f8f8a6f34b3";
    }
    
    @Override
@@ -28,7 +28,7 @@ public class FootstepStreamingToolboxTrackerMessagePubSubType implements us.ihmc
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(toolbox_msgs.msg.dds.FootstepStreamingToolboxTrackerMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
+   public void serialize(toolbox_msgs.msg.dds.FootstepStreamingToolboxSideMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -36,7 +36,7 @@ public class FootstepStreamingToolboxTrackerMessagePubSubType implements us.ihmc
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, toolbox_msgs.msg.dds.FootstepStreamingToolboxTrackerMessage data) throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, toolbox_msgs.msg.dds.FootstepStreamingToolboxSideMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -76,12 +76,12 @@ public class FootstepStreamingToolboxTrackerMessagePubSubType implements us.ihmc
       return current_alignment - initial_alignment;
    }
 
-   public final static int getCdrSerializedSize(toolbox_msgs.msg.dds.FootstepStreamingToolboxTrackerMessage data)
+   public final static int getCdrSerializedSize(toolbox_msgs.msg.dds.FootstepStreamingToolboxSideMessage data)
    {
       return getCdrSerializedSize(data, 0);
    }
 
-   public final static int getCdrSerializedSize(toolbox_msgs.msg.dds.FootstepStreamingToolboxTrackerMessage data, int current_alignment)
+   public final static int getCdrSerializedSize(toolbox_msgs.msg.dds.FootstepStreamingToolboxSideMessage data, int current_alignment)
    {
       int initial_alignment = current_alignment;
 
@@ -113,7 +113,7 @@ public class FootstepStreamingToolboxTrackerMessagePubSubType implements us.ihmc
       return current_alignment - initial_alignment;
    }
 
-   public static void write(toolbox_msgs.msg.dds.FootstepStreamingToolboxTrackerMessage data, us.ihmc.idl.CDR cdr)
+   public static void write(toolbox_msgs.msg.dds.FootstepStreamingToolboxSideMessage data, us.ihmc.idl.CDR cdr)
    {
       cdr.write_type_12(data.getSequenceId());
 
@@ -131,7 +131,7 @@ public class FootstepStreamingToolboxTrackerMessagePubSubType implements us.ihmc
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getCurrentAngularVelocityInWorld(), cdr);
    }
 
-   public static void read(toolbox_msgs.msg.dds.FootstepStreamingToolboxTrackerMessage data, us.ihmc.idl.CDR cdr)
+   public static void read(toolbox_msgs.msg.dds.FootstepStreamingToolboxSideMessage data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_12());
       	
@@ -151,7 +151,7 @@ public class FootstepStreamingToolboxTrackerMessagePubSubType implements us.ihmc
    }
 
    @Override
-   public final void serialize(toolbox_msgs.msg.dds.FootstepStreamingToolboxTrackerMessage data, us.ihmc.idl.InterchangeSerializer ser)
+   public final void serialize(toolbox_msgs.msg.dds.FootstepStreamingToolboxSideMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_9("side", data.getSide());
@@ -172,7 +172,7 @@ public class FootstepStreamingToolboxTrackerMessagePubSubType implements us.ihmc
    }
 
    @Override
-   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, toolbox_msgs.msg.dds.FootstepStreamingToolboxTrackerMessage data)
+   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, toolbox_msgs.msg.dds.FootstepStreamingToolboxSideMessage data)
    {
       data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setSide(ser.read_type_9("side"));
@@ -192,15 +192,15 @@ public class FootstepStreamingToolboxTrackerMessagePubSubType implements us.ihmc
 
    }
 
-   public static void staticCopy(toolbox_msgs.msg.dds.FootstepStreamingToolboxTrackerMessage src, toolbox_msgs.msg.dds.FootstepStreamingToolboxTrackerMessage dest)
+   public static void staticCopy(toolbox_msgs.msg.dds.FootstepStreamingToolboxSideMessage src, toolbox_msgs.msg.dds.FootstepStreamingToolboxSideMessage dest)
    {
       dest.set(src);
    }
 
    @Override
-   public toolbox_msgs.msg.dds.FootstepStreamingToolboxTrackerMessage createData()
+   public toolbox_msgs.msg.dds.FootstepStreamingToolboxSideMessage createData()
    {
-      return new toolbox_msgs.msg.dds.FootstepStreamingToolboxTrackerMessage();
+      return new toolbox_msgs.msg.dds.FootstepStreamingToolboxSideMessage();
    }
    @Override
    public int getTypeSize()
@@ -214,24 +214,24 @@ public class FootstepStreamingToolboxTrackerMessagePubSubType implements us.ihmc
       return name;
    }
    
-   public void serialize(toolbox_msgs.msg.dds.FootstepStreamingToolboxTrackerMessage data, us.ihmc.idl.CDR cdr)
+   public void serialize(toolbox_msgs.msg.dds.FootstepStreamingToolboxSideMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
    }
 
-   public void deserialize(toolbox_msgs.msg.dds.FootstepStreamingToolboxTrackerMessage data, us.ihmc.idl.CDR cdr)
+   public void deserialize(toolbox_msgs.msg.dds.FootstepStreamingToolboxSideMessage data, us.ihmc.idl.CDR cdr)
    {
       read(data, cdr);
    }
    
-   public void copy(toolbox_msgs.msg.dds.FootstepStreamingToolboxTrackerMessage src, toolbox_msgs.msg.dds.FootstepStreamingToolboxTrackerMessage dest)
+   public void copy(toolbox_msgs.msg.dds.FootstepStreamingToolboxSideMessage src, toolbox_msgs.msg.dds.FootstepStreamingToolboxSideMessage dest)
    {
       staticCopy(src, dest);
    }
 
    @Override
-   public FootstepStreamingToolboxTrackerMessagePubSubType newInstance()
+   public FootstepStreamingToolboxSideMessagePubSubType newInstance()
    {
-      return new FootstepStreamingToolboxTrackerMessagePubSubType();
+      return new FootstepStreamingToolboxSideMessagePubSubType();
    }
 }

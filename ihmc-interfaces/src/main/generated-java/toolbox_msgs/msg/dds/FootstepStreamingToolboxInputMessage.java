@@ -16,13 +16,21 @@ public class FootstepStreamingToolboxInputMessage extends Packet<FootstepStreami
             */
    public long sequence_id_;
    /**
-            * The list of trackers used as input for the toolbox to estimate footsteps for the robot
+            * Current robot step duration
             */
-   public us.ihmc.idl.IDLSequence.Object<toolbox_msgs.msg.dds.FootstepStreamingToolboxTrackerMessage>  trackers_;
+   public double robot_step_duration_;
+   /**
+            * Time elapsed since the robot has initiated this last step
+            */
+   public double robot_step_elapsed_time_;
+   /**
+            * The list of sides used as input for the toolbox to estimate footsteps for the robot
+            */
+   public us.ihmc.idl.IDLSequence.Object<toolbox_msgs.msg.dds.FootstepStreamingToolboxSideMessage>  side_;
 
    public FootstepStreamingToolboxInputMessage()
    {
-      trackers_ = new us.ihmc.idl.IDLSequence.Object<toolbox_msgs.msg.dds.FootstepStreamingToolboxTrackerMessage> (10, new toolbox_msgs.msg.dds.FootstepStreamingToolboxTrackerMessagePubSubType());
+      side_ = new us.ihmc.idl.IDLSequence.Object<toolbox_msgs.msg.dds.FootstepStreamingToolboxSideMessage> (2, new toolbox_msgs.msg.dds.FootstepStreamingToolboxSideMessagePubSubType());
 
    }
 
@@ -36,7 +44,11 @@ public class FootstepStreamingToolboxInputMessage extends Packet<FootstepStreami
    {
       sequence_id_ = other.sequence_id_;
 
-      trackers_.set(other.trackers_);
+      robot_step_duration_ = other.robot_step_duration_;
+
+      robot_step_elapsed_time_ = other.robot_step_elapsed_time_;
+
+      side_.set(other.side_);
    }
 
    /**
@@ -54,13 +66,43 @@ public class FootstepStreamingToolboxInputMessage extends Packet<FootstepStreami
       return sequence_id_;
    }
 
+   /**
+            * Current robot step duration
+            */
+   public void setRobotStepDuration(double robot_step_duration)
+   {
+      robot_step_duration_ = robot_step_duration;
+   }
+   /**
+            * Current robot step duration
+            */
+   public double getRobotStepDuration()
+   {
+      return robot_step_duration_;
+   }
 
    /**
-            * The list of trackers used as input for the toolbox to estimate footsteps for the robot
+            * Time elapsed since the robot has initiated this last step
             */
-   public us.ihmc.idl.IDLSequence.Object<toolbox_msgs.msg.dds.FootstepStreamingToolboxTrackerMessage>  getTrackers()
+   public void setRobotStepElapsedTime(double robot_step_elapsed_time)
    {
-      return trackers_;
+      robot_step_elapsed_time_ = robot_step_elapsed_time;
+   }
+   /**
+            * Time elapsed since the robot has initiated this last step
+            */
+   public double getRobotStepElapsedTime()
+   {
+      return robot_step_elapsed_time_;
+   }
+
+
+   /**
+            * The list of sides used as input for the toolbox to estimate footsteps for the robot
+            */
+   public us.ihmc.idl.IDLSequence.Object<toolbox_msgs.msg.dds.FootstepStreamingToolboxSideMessage>  getSide()
+   {
+      return side_;
    }
 
 
@@ -83,11 +125,15 @@ public class FootstepStreamingToolboxInputMessage extends Packet<FootstepStreami
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
-      if (this.trackers_.size() != other.trackers_.size()) { return false; }
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_step_duration_, other.robot_step_duration_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_step_elapsed_time_, other.robot_step_elapsed_time_, epsilon)) return false;
+
+      if (this.side_.size() != other.side_.size()) { return false; }
       else
       {
-         for (int i = 0; i < this.trackers_.size(); i++)
-         {  if (!this.trackers_.get(i).epsilonEquals(other.trackers_.get(i), epsilon)) return false; }
+         for (int i = 0; i < this.side_.size(); i++)
+         {  if (!this.side_.get(i).epsilonEquals(other.side_.get(i), epsilon)) return false; }
       }
 
 
@@ -105,7 +151,11 @@ public class FootstepStreamingToolboxInputMessage extends Packet<FootstepStreami
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
-      if (!this.trackers_.equals(otherMyClass.trackers_)) return false;
+      if(this.robot_step_duration_ != otherMyClass.robot_step_duration_) return false;
+
+      if(this.robot_step_elapsed_time_ != otherMyClass.robot_step_elapsed_time_) return false;
+
+      if (!this.side_.equals(otherMyClass.side_)) return false;
 
       return true;
    }
@@ -118,8 +168,12 @@ public class FootstepStreamingToolboxInputMessage extends Packet<FootstepStreami
       builder.append("FootstepStreamingToolboxInputMessage {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-      builder.append("trackers=");
-      builder.append(this.trackers_);
+      builder.append("robot_step_duration=");
+      builder.append(this.robot_step_duration_);      builder.append(", ");
+      builder.append("robot_step_elapsed_time=");
+      builder.append(this.robot_step_elapsed_time_);      builder.append(", ");
+      builder.append("side=");
+      builder.append(this.side_);
       builder.append("}");
       return builder.toString();
    }

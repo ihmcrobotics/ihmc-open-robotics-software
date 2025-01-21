@@ -9,7 +9,7 @@ import us.ihmc.pubsub.TopicDataType;
 /**
        * This message contains all the information needed to estimate footsteps for the robot based on VR trackers
        */
-public class FootstepStreamingToolboxTrackerMessage extends Packet<FootstepStreamingToolboxTrackerMessage> implements Settable<FootstepStreamingToolboxTrackerMessage>, EpsilonComparable<FootstepStreamingToolboxTrackerMessage>
+public class FootstepStreamingToolboxSideMessage extends Packet<FootstepStreamingToolboxSideMessage> implements Settable<FootstepStreamingToolboxSideMessage>, EpsilonComparable<FootstepStreamingToolboxSideMessage>
 {
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
@@ -26,22 +26,22 @@ public class FootstepStreamingToolboxTrackerMessage extends Packet<FootstepStrea
             */
    public long timestamp_;
    /**
-            * This is the current position of the robot foot frame's origin.
+            * Current position of the robot foot frame's origin.
             * The data is assumed to be expressed in world frame.
             */
    public us.ihmc.euclid.tuple3D.Point3D robot_foot_position_in_world_;
    /**
-            * This is the current orientation of the robot foot frame.
+            * Current orientation of the robot foot frame.
             * The data is assumed to be expressed in world frame.
             */
    public us.ihmc.euclid.tuple4D.Quaternion robot_foot_orientation_in_world_;
    /**
-            * This is the current position of the tracker frame's origin.
+            * Current position of the tracker frame's origin.
             * The data is assumed to be expressed in world frame.
             */
    public us.ihmc.euclid.tuple3D.Point3D current_position_in_world_;
    /**
-            * This is the current orientation of the tracker frame.
+            * Current orientation of the tracker frame.
             * The data is assumed to be expressed in world frame.
             */
    public us.ihmc.euclid.tuple4D.Quaternion current_orientation_in_world_;
@@ -58,7 +58,7 @@ public class FootstepStreamingToolboxTrackerMessage extends Packet<FootstepStrea
             */
    public us.ihmc.euclid.tuple3D.Vector3D current_angular_velocity_in_world_;
 
-   public FootstepStreamingToolboxTrackerMessage()
+   public FootstepStreamingToolboxSideMessage()
    {
       robot_foot_position_in_world_ = new us.ihmc.euclid.tuple3D.Point3D();
       robot_foot_orientation_in_world_ = new us.ihmc.euclid.tuple4D.Quaternion();
@@ -68,13 +68,13 @@ public class FootstepStreamingToolboxTrackerMessage extends Packet<FootstepStrea
       current_angular_velocity_in_world_ = new us.ihmc.euclid.tuple3D.Vector3D();
    }
 
-   public FootstepStreamingToolboxTrackerMessage(FootstepStreamingToolboxTrackerMessage other)
+   public FootstepStreamingToolboxSideMessage(FootstepStreamingToolboxSideMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(FootstepStreamingToolboxTrackerMessage other)
+   public void set(FootstepStreamingToolboxSideMessage other)
    {
       sequence_id_ = other.sequence_id_;
 
@@ -139,7 +139,7 @@ public class FootstepStreamingToolboxTrackerMessage extends Packet<FootstepStrea
 
 
    /**
-            * This is the current position of the robot foot frame's origin.
+            * Current position of the robot foot frame's origin.
             * The data is assumed to be expressed in world frame.
             */
    public us.ihmc.euclid.tuple3D.Point3D getRobotFootPositionInWorld()
@@ -149,7 +149,7 @@ public class FootstepStreamingToolboxTrackerMessage extends Packet<FootstepStrea
 
 
    /**
-            * This is the current orientation of the robot foot frame.
+            * Current orientation of the robot foot frame.
             * The data is assumed to be expressed in world frame.
             */
    public us.ihmc.euclid.tuple4D.Quaternion getRobotFootOrientationInWorld()
@@ -159,7 +159,7 @@ public class FootstepStreamingToolboxTrackerMessage extends Packet<FootstepStrea
 
 
    /**
-            * This is the current position of the tracker frame's origin.
+            * Current position of the tracker frame's origin.
             * The data is assumed to be expressed in world frame.
             */
    public us.ihmc.euclid.tuple3D.Point3D getCurrentPositionInWorld()
@@ -169,7 +169,7 @@ public class FootstepStreamingToolboxTrackerMessage extends Packet<FootstepStrea
 
 
    /**
-            * This is the current orientation of the tracker frame.
+            * Current orientation of the tracker frame.
             * The data is assumed to be expressed in world frame.
             */
    public us.ihmc.euclid.tuple4D.Quaternion getCurrentOrientationInWorld()
@@ -211,19 +211,19 @@ public class FootstepStreamingToolboxTrackerMessage extends Packet<FootstepStrea
    }
 
 
-   public static Supplier<FootstepStreamingToolboxTrackerMessagePubSubType> getPubSubType()
+   public static Supplier<FootstepStreamingToolboxSideMessagePubSubType> getPubSubType()
    {
-      return FootstepStreamingToolboxTrackerMessagePubSubType::new;
+      return FootstepStreamingToolboxSideMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return FootstepStreamingToolboxTrackerMessagePubSubType::new;
+      return FootstepStreamingToolboxSideMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(FootstepStreamingToolboxTrackerMessage other, double epsilon)
+   public boolean epsilonEquals(FootstepStreamingToolboxSideMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -251,9 +251,9 @@ public class FootstepStreamingToolboxTrackerMessage extends Packet<FootstepStrea
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof FootstepStreamingToolboxTrackerMessage)) return false;
+      if(!(other instanceof FootstepStreamingToolboxSideMessage)) return false;
 
-      FootstepStreamingToolboxTrackerMessage otherMyClass = (FootstepStreamingToolboxTrackerMessage) other;
+      FootstepStreamingToolboxSideMessage otherMyClass = (FootstepStreamingToolboxSideMessage) other;
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
@@ -278,7 +278,7 @@ public class FootstepStreamingToolboxTrackerMessage extends Packet<FootstepStrea
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("FootstepStreamingToolboxTrackerMessage {");
+      builder.append("FootstepStreamingToolboxSideMessage {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("side=");

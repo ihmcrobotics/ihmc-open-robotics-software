@@ -2,7 +2,7 @@ package us.ihmc.rdx.ui.vr;
 
 import toolbox_msgs.msg.dds.FootstepStreamingToolboxInputMessage;
 import toolbox_msgs.msg.dds.FootstepStreamingToolboxOutputStatus;
-import toolbox_msgs.msg.dds.FootstepStreamingToolboxTrackerMessage;
+import toolbox_msgs.msg.dds.FootstepStreamingToolboxSideMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepStreamingModule.FootstepStreamingToolboxModule;
 import us.ihmc.commons.thread.Notification;
@@ -60,11 +60,13 @@ public class RDXVRFootstepStreaming
             wasEnabled = true;
          }
          FootstepStreamingToolboxInputMessage toolboxInputMessage = new FootstepStreamingToolboxInputMessage();
+         toolboxInputMessage.setRobotStepDuration(footstepPlacer.getStepDuration());
+         toolboxInputMessage.setRobotStepElapsedTime(footstepPlacer.getTimeElapsedAfterStep());
          for (RobotSide side : RobotSide.values)
          {
             if (ankleTrackerFrames.get(side) != null)
             {
-               FootstepStreamingToolboxTrackerMessage footstepMessage = new FootstepStreamingToolboxTrackerMessage();
+               FootstepStreamingToolboxSideMessage footstepMessage = new FootstepStreamingToolboxSideMessage();
                footstepMessage.setTimestamp(ankleTrackerTimestamps.get(side));
                footstepMessage.setSide(side.toByte());
                RigidBodyTransform currentRobotFootTransformInWorld = new RigidBodyTransform(syncedRobot.getReferenceFrames().getSoleFrame(side).getTransformToWorldFrame());
@@ -80,10 +82,10 @@ public class RDXVRFootstepStreaming
                footstepMessage.getCurrentLinearVelocityInWorld().set(ankleTrackerVelocities.get(side).getLinearPart());
                footstepMessage.getCurrentAngularVelocityInWorld().set(ankleTrackerVelocities.get(side).getAngularPart());
 
-               toolboxInputMessage.getTrackers().add().set(footstepMessage);
+               toolboxInputMessage.getSide().add().set(footstepMessage);
             }
          }
-         if (toolboxInputMessage.getTrackers().size() == 2) // Do not publish if we have only the info of one tracker
+         if (toolboxInputMessage.getSide().size() == 2) // Do not publish if we have only the info of one side
             ros2Helper.publish(FootstepStreamingToolboxModule.getInputCommandTopic(syncedRobot.getRobotModel().getSimpleRobotName()), toolboxInputMessage);
       }
       else
@@ -103,7 +105,6 @@ public class RDXVRFootstepStreaming
          {
             if (!latestStatus.getAdjustmentFootstep()) // First value estimate for a footstep
             {
-               footstepPlacer.setActiveAdjustment(true); // The footstep will be adjusted later
                // Place and send footstep
                footstepPlacer.createNewFootstep(side);
                footstepPlacer.setFootstepPose(new FramePose3D(ReferenceFrame.getWorldFrame(),
@@ -123,6 +124,7 @@ public class RDXVRFootstepStreaming
             }
             else if (latestStatus.getAdjustmentFootstep() && !latestStatus.getLastAdjustment()) // Later values of updated estimate
             {
+               footstepPlacer.setActiveAdjustment(true);
                if (!footstepError)
                {
                   footstepPlacer.setFootstepPose(new FramePose3D(ReferenceFrame.getWorldFrame(),

@@ -43,11 +43,19 @@ public class FootstepStreamingToolboxParameters
    /**
     * Default stride length to use as a starting guess
     */
-   private double strideLength;
+   private double defaultStride;
    /**
-    * Default proportional gain for direction control
+    * Maximum stride length
+    */
+   private double maxStride;
+   /**
+    * Proportional gain for direction control
     */
    private double kpDirection;
+   /**
+    * Proportional gain for stride control
+    */
+   private double kpStride;
    /**
     * Default variation in degrees that triggers the turn of the robot step
     */
@@ -64,23 +72,6 @@ public class FootstepStreamingToolboxParameters
     * Default number of iterations required to assess stability
     */
    private int stabilityIterations;
-   /**
-    * Default velocity norm threshold, to consider when the swing foot is not moving much anymore
-    */
-   private double velocityThreshold;
-   /**
-   /**
-    * Default acceleration threshold, to consider when the swing foot is decelerating
-    */
-   private double accelerationThreshold;
-   /**
-    * Default weight for stride length estimation related to a fraction of horizontal tracker acceleration
-    */
-   private double horizontalAccelerationWeight;
-   /**
-    * Default weight for stride length estimation related to a fraction of vertical tracker position
-    */
-   private double verticalComponentWeight;
 
    public static FootstepStreamingToolboxParameters defaultParameters()
    {
@@ -106,18 +97,14 @@ public class FootstepStreamingToolboxParameters
       stabilityThreshold = 0.005;
       stabilityIterations = 5;
 
-      strideLength = 0.20;
+      defaultStride = 0.20;
+      maxStride = 0.4;
       kpDirection = 0.0;
+      kpStride = 0.0;
 
       // TODO. tune these ones below
       turningThreshold = 12;
       turnDegrees = 33.3;
-
-      velocityThreshold = 0.05;
-      accelerationThreshold = 0.02;
-
-      horizontalAccelerationWeight = 0.1;
-      verticalComponentWeight = 0.1;
    }
 
    public ClockType getClockType()
@@ -150,14 +137,24 @@ public class FootstepStreamingToolboxParameters
       return liftThreshold;
    }
 
-   public double getStrideLength()
+   public double getDefaultStride()
    {
-      return strideLength;
+      return defaultStride;
+   }
+
+   public double getMaxStride()
+   {
+      return maxStride;
    }
 
    public double getKpDirection()
    {
       return kpDirection;
+   }
+
+   public double getKpStride()
+   {
+      return kpStride;
    }
 
    public double getTurningThreshold()
@@ -178,26 +175,6 @@ public class FootstepStreamingToolboxParameters
    public double getStabilityThreshold()
    {
       return stabilityThreshold;
-   }
-
-   public double getVelocityThreshold()
-   {
-      return velocityThreshold;
-   }
-
-   public double getAccelerationThreshold()
-   {
-      return accelerationThreshold;
-   }
-
-   public double getHorizontalAccelerationWeight()
-   {
-      return horizontalAccelerationWeight;
-   }
-
-   public double getVerticalComponentWeight()
-   {
-      return verticalComponentWeight;
    }
 
    public void setClockType(ClockType clockType)
@@ -225,9 +202,9 @@ public class FootstepStreamingToolboxParameters
       this.liftThreshold = liftThreshold;
    }
 
-   public void setStrideLength(double strideLength)
+   public void setDefaultStride(double defaultStride)
    {
-      this.strideLength = strideLength;
+      this.defaultStride = defaultStride;
    }
 
    public void setKpDirection(double kpDirection)
@@ -253,25 +230,5 @@ public class FootstepStreamingToolboxParameters
    public void setStabilityThreshold(double stabilityThreshold)
    {
       this.stabilityThreshold = stabilityThreshold;
-   }
-
-   public void setVelocityThreshold(double velocityThreshold)
-   {
-      this.velocityThreshold = velocityThreshold;
-   }
-
-   public void setAccelerationThreshold(double accelerationThreshold)
-   {
-      this.accelerationThreshold = accelerationThreshold;
-   }
-
-   public void setHorizontalAccelerationWeight(double horizontalAccelerationWeight)
-   {
-      this.horizontalAccelerationWeight = horizontalAccelerationWeight;
-   }
-
-   public void setVerticalComponentWeight(double verticalComponentWeight)
-   {
-      this.verticalComponentWeight = verticalComponentWeight;
    }
 }

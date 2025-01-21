@@ -1,7 +1,7 @@
 #ifndef __toolbox_msgs__msg__FootstepStreamingToolboxInputMessage__idl__
 #define __toolbox_msgs__msg__FootstepStreamingToolboxInputMessage__idl__
 
-#include "toolbox_msgs/msg/./FootstepStreamingToolboxTrackerMessage_.idl"
+#include "toolbox_msgs/msg/./FootstepStreamingToolboxSideMessage_.idl"
 module toolbox_msgs
 {
   module msg
@@ -20,9 +20,17 @@ module toolbox_msgs
          */
         unsigned long long sequence_id;
         /**
-         * The list of trackers used as input for the toolbox to estimate footsteps for the robot
+         * Current robot step duration
          */
-        sequence<toolbox_msgs::msg::dds::FootstepStreamingToolboxTrackerMessage, 10> trackers;
+        double robot_step_duration;
+        /**
+         * Time elapsed since the robot has initiated this last step
+         */
+        double robot_step_elapsed_time;
+        /**
+         * The list of sides used as input for the toolbox to estimate footsteps for the robot
+         */
+        sequence<toolbox_msgs::msg::dds::FootstepStreamingToolboxSideMessage, 2> side;
       };
     };
   };

@@ -10,13 +10,17 @@ import java.util.List;
 public class FootstepStreamingToolboxInputCommand implements Command<FootstepStreamingToolboxInputCommand, FootstepStreamingToolboxInputMessage>
 {
    private long sequenceId;
-   private final RecyclingArrayList<FootstepStreamingToolboxTrackerCommand> inputs = new RecyclingArrayList<>(FootstepStreamingToolboxTrackerCommand::new);
+   private double robotStepDuration;
+   private double robotElapsedTimeCurrentStep;
+   private final RecyclingArrayList<FootstepStreamingToolboxSideCommand> inputs = new RecyclingArrayList<>(FootstepStreamingToolboxSideCommand::new);
 
    @Override
    public void clear()
    {
       sequenceId = 0;
       inputs.clear();
+      robotStepDuration = 0.0;
+      robotElapsedTimeCurrentStep = 0.0;
    }
 
    @Override
@@ -26,6 +30,8 @@ public class FootstepStreamingToolboxInputCommand implements Command<FootstepStr
       inputs.clear();
       for (int i = 0; i < other.inputs.size(); i++)
          inputs.add().set(other.inputs.get(i));
+      robotStepDuration = other.robotStepDuration;
+      robotElapsedTimeCurrentStep = other.robotElapsedTimeCurrentStep;
    }
 
    @Override
@@ -33,8 +39,10 @@ public class FootstepStreamingToolboxInputCommand implements Command<FootstepStr
    {
       sequenceId = message.getSequenceId();
       inputs.clear();
-      for (int i = 0; i < message.getTrackers().size(); i++)
-         inputs.add().setFromMessage(message.getTrackers().get(i));
+      for (int i = 0; i < message.getSide().size(); i++)
+         inputs.add().setFromMessage(message.getSide().get(i));
+      robotStepDuration = message.getRobotStepDuration();
+      robotElapsedTimeCurrentStep = message.getRobotStepElapsedTime();
    }
 
    public void removeInput(int index)
@@ -42,7 +50,7 @@ public class FootstepStreamingToolboxInputCommand implements Command<FootstepStr
       inputs.remove(index);
    }
 
-   public void removeInput(FootstepStreamingToolboxTrackerCommand input)
+   public void removeInput(FootstepStreamingToolboxSideCommand input)
    {
       inputs.remove(input);
    }
@@ -52,12 +60,12 @@ public class FootstepStreamingToolboxInputCommand implements Command<FootstepStr
       return inputs.size();
    }
 
-   public FootstepStreamingToolboxTrackerCommand getInput(int index)
+   public FootstepStreamingToolboxSideCommand getInput(int index)
    {
       return inputs.get(index);
    }
 
-   public List<FootstepStreamingToolboxTrackerCommand> getInputs()
+   public List<FootstepStreamingToolboxSideCommand> getInputs()
    {
       return inputs;
    }
@@ -67,7 +75,7 @@ public class FootstepStreamingToolboxInputCommand implements Command<FootstepStr
       return getInputFor(side) != null;
    }
 
-   public FootstepStreamingToolboxTrackerCommand getInputFor(RobotSide side)
+   public FootstepStreamingToolboxSideCommand getInputFor(RobotSide side)
    {
       for (int i = 0; i < inputs.size(); i++)
       {
@@ -75,6 +83,16 @@ public class FootstepStreamingToolboxInputCommand implements Command<FootstepStr
             return inputs.get(i);
       }
       return null;
+   }
+
+   public double getRobotStepDuration()
+   {
+      return robotStepDuration;
+   }
+
+   public double getRobotElapsedTimeCurrentStep()
+   {
+      return robotElapsedTimeCurrentStep;
    }
 
    @Override
@@ -91,8 +109,7 @@ public class FootstepStreamingToolboxInputCommand implements Command<FootstepStr
          if (!inputs.get(i).isCommandValid())
             return false;
       }
-
-      return true;
+      return !Double.isNaN(robotStepDuration) && !Double.isNaN(robotElapsedTimeCurrentStep);
    }
 
    @Override

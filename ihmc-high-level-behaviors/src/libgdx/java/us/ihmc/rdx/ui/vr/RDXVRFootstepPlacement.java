@@ -50,7 +50,7 @@ public class RDXVRFootstepPlacement
    private int footstepIndex = 0;
    private LocomotionParameters locomotionParameters;
    private boolean activeAdjustment = false;
-
+   private double stepTimeStart = -1.0;
 
    public RDXVRFootstepPlacement(RDXVRContext vrContext,
                                  ROS2SyncedRobotModel syncedRobot,
@@ -208,6 +208,11 @@ public class RDXVRFootstepPlacement
       RDXBaseUI.pushNotification("Commanding %d footsteps...".formatted(messageList.getFootstepDataList().size()));
       controllerHelper.publishToController(messageList);
       footstepIndex--;
+
+      if (!activeAdjustment && stepTimeStart < 0.0)
+      { // first step is not and adjustment
+         stepTimeStart = System.nanoTime();
+      }
    }
 
    public boolean checkFootstepValidity()
@@ -254,10 +259,32 @@ public class RDXVRFootstepPlacement
       }
    }
 
+   public double getStepDuration()
+   {
+      if (locomotionParameters != null)
+      {
+         return locomotionParameters.getSwingTime() + locomotionParameters.getTransferTime();
+      }
+      else
+      {
+        return syncedRobot.getRobotModel().getWalkingControllerParameters().getDefaultSwingTime()
+               + syncedRobot.getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
+      }
+   }
+
+   public double getTimeElapsedAfterStep()
+   {
+      if (stepTimeStart < 0.0)
+         return 0.0;
+      else
+         return (System.nanoTime() - stepTimeStart) * 1.0e-9;
+   }
+
    public void reset()
    {
       footstepIndex = 0;
       footstepBeingExternallyPlaced = null;
       handPlacedFootsteps.clear();
+      stepTimeStart = -1.0;
    }
 }

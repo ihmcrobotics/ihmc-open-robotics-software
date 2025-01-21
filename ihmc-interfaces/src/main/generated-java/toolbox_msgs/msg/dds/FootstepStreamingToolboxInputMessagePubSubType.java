@@ -15,7 +15,7 @@ public class FootstepStreamingToolboxInputMessagePubSubType implements us.ihmc.p
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "f708e69c0e473b66556bc5c39327c96d875260c61c70b1008447a7bea0f931e4";
+   		return "7c37db665293cc526a26801b1369e6e8847c0a2ca493fd7ed703359f582ed999";
    }
    
    @Override
@@ -54,9 +54,13 @@ public class FootstepStreamingToolboxInputMessagePubSubType implements us.ihmc.p
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 10; ++i0)
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 2; ++i0)
       {
-          current_alignment += toolbox_msgs.msg.dds.FootstepStreamingToolboxTrackerMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+          current_alignment += toolbox_msgs.msg.dds.FootstepStreamingToolboxSideMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
 
       return current_alignment - initial_alignment;
    }
@@ -73,10 +77,16 @@ public class FootstepStreamingToolboxInputMessagePubSubType implements us.ihmc.p
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for(int i0 = 0; i0 < data.getTrackers().size(); ++i0)
+      for(int i0 = 0; i0 < data.getSide().size(); ++i0)
       {
-          current_alignment += toolbox_msgs.msg.dds.FootstepStreamingToolboxTrackerMessagePubSubType.getCdrSerializedSize(data.getTrackers().get(i0), current_alignment);}
+          current_alignment += toolbox_msgs.msg.dds.FootstepStreamingToolboxSideMessagePubSubType.getCdrSerializedSize(data.getSide().get(i0), current_alignment);}
 
 
       return current_alignment - initial_alignment;
@@ -86,9 +96,13 @@ public class FootstepStreamingToolboxInputMessagePubSubType implements us.ihmc.p
    {
       cdr.write_type_12(data.getSequenceId());
 
-      if(data.getTrackers().size() <= 10)
-      cdr.write_type_e(data.getTrackers());else
-          throw new RuntimeException("trackers field exceeds the maximum length");
+      cdr.write_type_6(data.getRobotStepDuration());
+
+      cdr.write_type_6(data.getRobotStepElapsedTime());
+
+      if(data.getSide().size() <= 2)
+      cdr.write_type_e(data.getSide());else
+          throw new RuntimeException("side field exceeds the maximum length");
 
    }
 
@@ -96,7 +110,11 @@ public class FootstepStreamingToolboxInputMessagePubSubType implements us.ihmc.p
    {
       data.setSequenceId(cdr.read_type_12());
       	
-      cdr.read_type_e(data.getTrackers());	
+      data.setRobotStepDuration(cdr.read_type_6());
+      	
+      data.setRobotStepElapsedTime(cdr.read_type_6());
+      	
+      cdr.read_type_e(data.getSide());	
 
    }
 
@@ -104,14 +122,18 @@ public class FootstepStreamingToolboxInputMessagePubSubType implements us.ihmc.p
    public final void serialize(toolbox_msgs.msg.dds.FootstepStreamingToolboxInputMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_12("sequence_id", data.getSequenceId());
-      ser.write_type_e("trackers", data.getTrackers());
+      ser.write_type_6("robot_step_duration", data.getRobotStepDuration());
+      ser.write_type_6("robot_step_elapsed_time", data.getRobotStepElapsedTime());
+      ser.write_type_e("side", data.getSide());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, toolbox_msgs.msg.dds.FootstepStreamingToolboxInputMessage data)
    {
       data.setSequenceId(ser.read_type_12("sequence_id"));
-      ser.read_type_e("trackers", data.getTrackers());
+      data.setRobotStepDuration(ser.read_type_6("robot_step_duration"));
+      data.setRobotStepElapsedTime(ser.read_type_6("robot_step_elapsed_time"));
+      ser.read_type_e("side", data.getSide());
    }
 
    public static void staticCopy(toolbox_msgs.msg.dds.FootstepStreamingToolboxInputMessage src, toolbox_msgs.msg.dds.FootstepStreamingToolboxInputMessage dest)

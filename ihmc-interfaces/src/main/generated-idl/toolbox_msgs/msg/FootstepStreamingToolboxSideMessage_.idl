@@ -1,5 +1,5 @@
-#ifndef __toolbox_msgs__msg__FootstepStreamingToolboxTrackerMessage__idl__
-#define __toolbox_msgs__msg__FootstepStreamingToolboxTrackerMessage__idl__
+#ifndef __toolbox_msgs__msg__FootstepStreamingToolboxSideMessage__idl__
+#define __toolbox_msgs__msg__FootstepStreamingToolboxSideMessage__idl__
 
 #include "geometry_msgs/msg/./Point_.idl"
 #include "geometry_msgs/msg/./Quaternion_.idl"
@@ -20,8 +20,8 @@ module toolbox_msgs
       /**
        * This message contains all the information needed to estimate footsteps for the robot based on VR trackers
        */
-      @TypeCode(type="toolbox_msgs::msg::dds_::FootstepStreamingToolboxTrackerMessage_")
-      struct FootstepStreamingToolboxTrackerMessage
+      @TypeCode(type="toolbox_msgs::msg::dds_::FootstepStreamingToolboxSideMessage_")
+      struct FootstepStreamingToolboxSideMessage
       {
         /**
          * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -37,22 +37,22 @@ module toolbox_msgs
          */
         long long timestamp;
         /**
-         * This is the current position of the robot foot frame's origin.
+         * Current position of the robot foot frame's origin.
          * The data is assumed to be expressed in world frame.
          */
         geometry_msgs::msg::dds::Point robot_foot_position_in_world;
         /**
-         * This is the current orientation of the robot foot frame.
+         * Current orientation of the robot foot frame.
          * The data is assumed to be expressed in world frame.
          */
         geometry_msgs::msg::dds::Quaternion robot_foot_orientation_in_world;
         /**
-         * This is the current position of the tracker frame's origin.
+         * Current position of the tracker frame's origin.
          * The data is assumed to be expressed in world frame.
          */
         geometry_msgs::msg::dds::Point current_position_in_world;
         /**
-         * This is the current orientation of the tracker frame.
+         * Current orientation of the tracker frame.
          * The data is assumed to be expressed in world frame.
          */
         geometry_msgs::msg::dds::Quaternion current_orientation_in_world;
