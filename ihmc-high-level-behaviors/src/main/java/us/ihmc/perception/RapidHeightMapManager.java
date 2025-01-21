@@ -87,7 +87,7 @@ public class RapidHeightMapManager
       {
          if (latestDepthImage.type() == opencv_core.CV_32FC1) // Support our simulated sensors
          {
-            latestDepthImage.convertTo(hostDepthImage, opencv_core.CV_32FC1);
+            OpenCVTools.convertFloatToShort(latestDepthImage, hostDepthImage, 1000.0, 0.0);
          }
          else
          {
