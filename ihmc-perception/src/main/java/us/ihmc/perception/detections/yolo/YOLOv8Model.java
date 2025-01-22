@@ -22,6 +22,7 @@ import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.imageMessage.PixelFormat;
+import us.ihmc.tools.Destroyable;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -32,7 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class YOLOv8Model
+public class YOLOv8Model implements Destroyable
 {
    private static final double SCALE_FACTOR = 1.0 / 255.0;
    private static final Size DETECTION_SIZE = new Size(1280, 736);
@@ -45,6 +46,10 @@ public class YOLOv8Model
    // OpenCV DNN stuff
    private final Net yoloNet;
    private final StringVector outputNames; // literally list of "output0", "output1", "output2"...
+
+   // Extra data
+   private RawImage bgrInputImage = null;
+   private Mat zeros = null;
 
    public YOLOv8Model(Path modelBaseDirectory)
    {
@@ -87,6 +92,13 @@ public class YOLOv8Model
       outputNames = yoloNet.getUnconnectedOutLayersNames();
    }
 
+   @Override
+   public void destroy()
+   {
+      yoloNet.close();
+      outputNames.close();
+   }
+
    public String getName()
    {
       return modelName;
@@ -97,6 +109,7 @@ public class YOLOv8Model
       return detectionClassNames;
    }
 
+   // TODO: Remove
    public String getObjectClassFromIndex(int i)
    {
       return detectionClassNames.get(i);
@@ -104,147 +117,147 @@ public class YOLOv8Model
 
    public List<YOLOv8Detection> run(RawImage image, float confidenceThreshold, float nmsThreshold, float maskThreshold)
    {
-      RawImage bgrImage;
+      List<YOLOv8Detection> result = new ArrayList<>();
+
+      // Ensure image is in BGR format
       if (image.getPixelFormat() == PixelFormat.BGR8)
       {
-         bgrImage = image.get();
-         if (bgrImage == null)
-            return new ArrayList<>();
+         bgrInputImage = image.get();
+         if (bgrInputImage == null)
+            return result;
       }
       else
       {
          Mat bgrMat = new Mat();
          image.getPixelFormat().convertToPixelFormat(image.getCpuImageMat(), bgrMat, PixelFormat.BGR8);
-         bgrImage = image.replaceImage(bgrMat, PixelFormat.BGR8);
+         bgrInputImage = image.replaceImage(bgrMat, PixelFormat.BGR8);
       }
 
-      Mat blob = opencv_dnn.blobFromImage(bgrImage.getCpuImageMat(), SCALE_FACTOR, DETECTION_SIZE, new Scalar(), true, true, opencv_core.CV_32F);
-      MatVector outputBlobs = new MatVector(outputNames.size());
-
-      yoloNet.setInput(blob);
-      yoloNet.forward(outputBlobs, outputNames);
-
-      processOutput(bgrImage, outputBlobs, confidenceThreshold, nmsThreshold);
-
-      bgrImage.release();
-
-      return null; // TODO: Finish
-   }
-
-   private void processOutput(RawImage detectionImage, MatVector outputBlobs, float confidenceThreshold, float nonMaximumSuppressionThreshold)
-   {
-      int imageWidth = detectionImage.getWidth();
-      int imageHeight = detectionImage.getHeight();
-      int shiftWidth = (imageWidth - DETECTION_SIZE.width()) / 2;
-      int shiftHeight = (imageHeight - DETECTION_SIZE.height()) / 2;
-      int numberOfMasks = outputBlobs.get(1).size(1);
-
-      try (FloatIndexer output0Indexer = outputBlobs.get(0).createIndexer();
-           IntVector detectedClassIds = new IntVector();
-           FloatVector detectedConfidences = new FloatVector();
-           RectVector detectedBoxes = new RectVector();
-           FloatVector detectedMaskWeights = new FloatVector())
+      try (Mat blob = opencv_dnn.blobFromImage(bgrInputImage.getCpuImageMat(), SCALE_FACTOR, DETECTION_SIZE, new Scalar(), true, true, opencv_core.CV_32F);
+           MatVector outputBlobs = new MatVector();
+           IntVector classIDs = new IntVector();
+           FloatVector confidences = new FloatVector();
+           FloatVector maskWeights = new FloatVector();
+           RectVector boundingBoxes = new RectVector();
+           IntPointer reducedIndices = new IntPointer())
       {
-         for (long i = 0; i < output0Indexer.size(2); i++)
-         {
-            // Find most confident class detection
-            float maxConfidence = 0;
-            long maxConfidenceClass = 0;
-            for (long j = 0; j < detectionClassNames.size(); j++)
-            {
-               float confidence = output0Indexer.get(0, 4 + j, i);
-               if (confidence > maxConfidence)
-               {
-                  maxConfidence = confidence;
-                  maxConfidenceClass = j;
-               }
-            }
-            // Ensure confidence is above threshold
-            if (maxConfidence >= confidenceThreshold)
-            {
-               int centerX = (int) (output0Indexer.get(0, 0, i));
-               int centerY = (int) (output0Indexer.get(0, 1, i));
-               int width = (int) (output0Indexer.get(0, 2, i));
-               int height = (int) (output0Indexer.get(0, 3, i));
-               int left = centerX - width / 2;
-               int top = centerY - height / 2;
+         // Run the net
+         yoloNet.setInput(blob);
+         yoloNet.forward(outputBlobs, outputNames);
 
-               detectedClassIds.push_back((int) maxConfidenceClass);
-               detectedConfidences.push_back(maxConfidence);
-               detectedBoxes.push_back(new Rect(left, top, width, height));
-               for (long k = 0; k < numberOfMasks; k++)
-               {
-                  detectedMaskWeights.push_back(output0Indexer.get(0, detectionClassNames.size() + 4 + k, i));
-               }
-            }
-         }
-         IntPointer reducedIndices = new IntPointer(detectedConfidences.size());
-         FloatPointer confidencesPointer = new FloatPointer(detectedConfidences.size());
+         // Get some useful stuff
+         CameraIntrinsics maskIntrinsics = computeMaskIntrinsics(outputBlobs, bgrInputImage);
+         zeros = new Mat(maskIntrinsics.getHeight(), maskIntrinsics.getWidth(), opencv_core.CV_32F, new Scalar(0.0));
+         int shiftWidth = (bgrInputImage.getWidth() - DETECTION_SIZE.width()) / 2;
+         int shiftHeight = (bgrInputImage.getHeight() - DETECTION_SIZE.height()) / 2;
 
-         if (detectedBoxes.size() > 0)
-         {
-            // remove overlapping bounding boxes with NMS
-            confidencesPointer.put(detectedConfidences.get());
-            opencv_dnn.NMSBoxes(detectedBoxes, confidencesPointer, confidenceThreshold, nonMaximumSuppressionThreshold, reducedIndices, 1.0f, 0);
-         }
+         // Get class ids, confidences, mask weights, bounding boxes from YOLO output
+         processOutput(outputBlobs, confidenceThreshold, classIDs, confidences, maskWeights, boundingBoxes);
 
+         // Ensure we have detections
+         if (boundingBoxes.empty())
+            return result;
+
+         // Apply non-maximum suppression
+         FloatPointer confidenceArray = new FloatPointer(confidences.get());
+         opencv_dnn.NMSBoxes(boundingBoxes, confidenceArray, confidenceThreshold, nmsThreshold, reducedIndices, 1.0f, 0);
+         confidenceArray.close();
+
+         // Create YOLOv8Detections from the data
+         int numberOfMasks = outputBlobs.get(1).size(1);
          for (int i = 0; i < reducedIndices.limit(); i++)
          {
             int index = reducedIndices.get(i);
-            float[] maskWeights = new float[numberOfMasks];
+            float[] weights = new float[numberOfMasks];
             for (int j = 0; j < numberOfMasks; j++)
             {
-               maskWeights[j] = detectedMaskWeights.get(((long) numberOfMasks * index) + j);
+               weights[j] = maskWeights.get(((long) numberOfMasks * index) + j);
             }
-            new YOLOv8DetectionOutput(detectionClassNames.get(detectedClassIds.get(index)),
-                                                     detectedConfidences.get(index),
-                                                     detectedBoxes.get(index).x() + shiftWidth,
-                                                     detectedBoxes.get(index).y() + shiftHeight,
-                                                     detectedBoxes.get(index).width(),
-                                                     detectedBoxes.get(index).height(),
-                                                     maskWeights);
-         }
 
-         confidencesPointer.close();
-         reducedIndices.close();
+            Rect boundingBox = boundingBoxes.get(index);
+            Rect shiftedBox = new Rect(boundingBox.x() + shiftWidth, boundingBox.y() + shiftHeight, boundingBox.width(), boundingBox.height());
+            RawImage mask = computeDetectionMask(outputBlobs, weights, shiftedBox, maskThreshold, maskIntrinsics);
+            YOLOv8Detection detection = new YOLOv8Detection(detectionClassNames.get(classIDs.get(index)), confidences.get(index), shiftedBox, mask);
+            result.add(detection);
+         }
       }
+
+      bgrInputImage.release();
+      bgrInputImage = null;
+
+      return result;
    }
 
-   private RawImage computeDetectionMask(RawImage detectionImage,
-                                         MatVector outputBlobs,
-                                         float[] maskWeights,
-                                         int boundingBoxX,
-                                         int boundingBoxY,
-                                         int boundingBoxWidth,
-                                         int boundingBoxHeight,
-                                         float maskThreshold)
+   private void processOutput(MatVector outputBlobs,
+                              float confidenceThreshold,
+                              IntVector classIDs,
+                              FloatVector confidences,
+                              FloatVector maskWeights,
+                              RectVector boundingBoxes)
    {
-      FloatIndexer output1Indexer = outputBlobs.get(1).createIndexer();
-      int numberOfMasks = (int) output1Indexer.size(1);
-      int maskHeight = (int) output1Indexer.size(2);
-      int maskWidth = (int) output1Indexer.size(3);
-      output1Indexer.close();
+      int numberOfMasks = outputBlobs.get(1).size(1);
 
-      float xScaleFactor = (float) maskWidth / detectionImage.getWidth();
-      float yScaleFactor = (float) maskHeight / detectionImage.getHeight();
-      float maskFocalLengthX = xScaleFactor * detectionImage.getFocalLengthX();
-      float maskFocalLengthY = yScaleFactor * detectionImage.getFocalLengthY();
-      float maskPrincipalPointX = xScaleFactor * detectionImage.getPrincipalPointX();
-      float maskPrincipalPointY = yScaleFactor * detectionImage.getPrincipalPointY();
-
-      CameraIntrinsics maskIntrinsics = new CameraIntrinsics(maskHeight,
-                                                             maskWidth,
-                                                             maskFocalLengthX,
-                                                             maskFocalLengthY,
-                                                             maskPrincipalPointX,
-                                                             maskPrincipalPointY);
-
-      // Get float value mask
-      Mat zeros = new Mat(maskHeight, maskWidth, opencv_core.CV_32F, new Scalar(0.0));
-      MatExpr floatMask = new MatExpr(zeros);
-      for (int i = 0; i < numberOfMasks; ++i)
+      FloatIndexer output0Indexer = outputBlobs.get(0).createIndexer();
+      long detectionCount = output0Indexer.size(2);
+      for (long i = 0; i < detectionCount; i++)
       {
-         Mat mask = outputBlobs.get(1).col(i).reshape(1, maskHeight);
+         // Find most confident class detection
+         float maxConfidence = 0;
+         long maxConfidenceClass = 0;
+         for (long j = 0; j < detectionClassNames.size(); j++)
+         {
+            float confidence = output0Indexer.get(0, 4 + j, i);
+            if (confidence > maxConfidence)
+            {
+               maxConfidence = confidence;
+               maxConfidenceClass = j;
+            }
+         }
+         // Ensure confidence is above threshold
+         if (maxConfidence < confidenceThreshold)
+            continue;
+
+         // Get the detection data
+         int centerX = (int) (output0Indexer.get(0, 0, i));
+         int centerY = (int) (output0Indexer.get(0, 1, i));
+         int width = (int) (output0Indexer.get(0, 2, i));
+         int height = (int) (output0Indexer.get(0, 3, i));
+         int left = centerX - width / 2;
+         int top = centerY - height / 2;
+
+         classIDs.push_back((int) maxConfidenceClass);
+         confidences.push_back(maxConfidence);
+         boundingBoxes.push_back(new Rect(left, top, width, height));
+         for (long k = 0; k < numberOfMasks; k++)
+         {
+            maskWeights.push_back(output0Indexer.get(0, detectionClassNames.size() + 4 + k, i));
+         }
+      }
+      output0Indexer.close();
+   }
+
+   private CameraIntrinsics computeMaskIntrinsics(MatVector outputBlobs, RawImage bgrInputImage)
+   {
+      int maskHeight = outputBlobs.get(1).size(2);
+      int maskWidth = outputBlobs.get(1).size(3);
+
+      float xScaleFactor = (float) maskWidth / bgrInputImage.getWidth();
+      float yScaleFactor = (float) maskHeight / bgrInputImage.getHeight();
+      float maskFocalLengthX = xScaleFactor * bgrInputImage.getFocalLengthX();
+      float maskFocalLengthY = yScaleFactor * bgrInputImage.getFocalLengthY();
+      float maskPrincipalPointX = xScaleFactor * bgrInputImage.getPrincipalPointX();
+      float maskPrincipalPointY = yScaleFactor * bgrInputImage.getPrincipalPointY();
+
+      return new CameraIntrinsics(maskHeight, maskWidth, maskFocalLengthX, maskFocalLengthY, maskPrincipalPointX, maskPrincipalPointY);
+   }
+
+   private RawImage computeDetectionMask(MatVector outputBlobs, float[] maskWeights, Rect boundingBox, float maskThreshold, CameraIntrinsics maskIntrinsics)
+   {
+      // Get float value mask
+      MatExpr floatMask = new MatExpr(zeros);
+      for (int i = 0; i < maskWeights.length; ++i)
+      {
+         Mat mask = outputBlobs.get(1).col(i).reshape(1, maskIntrinsics.getHeight());
          MatExpr weightMultipliedMask = opencv_core.multiply(mask, maskWeights[i]);
          floatMask = opencv_core.add(weightMultipliedMask, floatMask);
 
@@ -253,26 +266,30 @@ public class YOLOv8Model
       }
 
       // Apply threshold to get binary mask
-      Mat binaryMask = new Mat(floatMask.size(), opencv_core.CV_8UC1);
+      Mat binaryMask = new Mat();
       opencv_imgproc.threshold(floatMask.asMat(), binaryMask, maskThreshold, 255.0, opencv_imgproc.THRESH_BINARY);
+      binaryMask.convertTo(binaryMask, opencv_core.CV_8UC1);
 
-      Mat boundingBoxMask = new Mat(maskHeight, maskWidth, opencv_core.CV_8UC1, new Scalar(0.0));
+      // Remove other objects from image using bounding box
+      Mat boundingBoxMask = new Mat(maskIntrinsics.getHeight(), maskIntrinsics.getWidth(), opencv_core.CV_8UC1, new Scalar(0.0));
       opencv_imgproc.rectangle(boundingBoxMask,
-                               new Rect(boundingBoxX / 4, boundingBoxY / 4, boundingBoxWidth / 4 + 2, boundingBoxHeight / 4 + 2),
+                               new Rect(boundingBox.x() / 4, boundingBox.y() / 4, boundingBox.width() / 4 + 2, boundingBox.height() / 4 + 2),
                                new Scalar(255.0), opencv_imgproc.FILLED, opencv_imgproc.LINE_8, 0);
 
       opencv_core.bitwise_and(binaryMask, boundingBoxMask, binaryMask);
+
       boundingBoxMask.close();
+      floatMask.close();
 
       return new RawImage(binaryMask,
                           null,
                           PixelFormat.GRAY8,
-                          maskIntrinsics,
+                          new CameraIntrinsics(maskIntrinsics),
                           CameraModel.PINHOLE,
-                          detectionImage.getPose(),
-                          detectionImage.getAcquisitionTime(),
-                          detectionImage.getSequenceNumber(),
-                          detectionImage.getDepthDiscretization());
+                          bgrInputImage.getPose(),
+                          bgrInputImage.getAcquisitionTime(),
+                          bgrInputImage.getSequenceNumber(),
+                          bgrInputImage.getDepthDiscretization());
    }
 
    public byte[] readONNXFile()

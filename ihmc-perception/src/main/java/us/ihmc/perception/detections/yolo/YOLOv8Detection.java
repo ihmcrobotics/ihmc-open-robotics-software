@@ -1,18 +1,40 @@
 package us.ihmc.perception.detections.yolo;
 
+import org.bytedeco.opencv.opencv_core.Rect;
 import us.ihmc.perception.RawImage;
+import us.ihmc.tools.Destroyable;
 
-public class YOLOv8Detection
+public record YOLOv8Detection(String name, float confidence, Rect boundingBox, RawImage mask) implements Destroyable
 {
-   private RawImage originImage;
+   public YOLOv8Detection(String name, float confidence, Rect boundingBox, RawImage mask)
+   {
+      this.name = name;
+      this.confidence = confidence;
+      this.boundingBox = boundingBox.retainReference();
+      this.mask = mask.get();
+   }
 
-   private String className;
-   private float confidence;
+   @Override
+   public Rect boundingBox()
+   {
+      return new Rect(boundingBox);
+   }
 
-   private int boundingBoxX;
-   private int boundingBoxY;
-   private int boundingBoxWidth;
-   private int boundingBoxHeight;
+   /**
+    * Get the mask. {@link RawImage#release()} should be called on the returned mask.
+    *
+    * @return The object's mask.
+    */
+   @Override
+   public RawImage mask()
+   {
+      return mask.get();
+   }
 
-   private RawImage mask;
+   @Override
+   public void destroy()
+   {
+      mask.release();
+      boundingBox.releaseReference();
+   }
 }
