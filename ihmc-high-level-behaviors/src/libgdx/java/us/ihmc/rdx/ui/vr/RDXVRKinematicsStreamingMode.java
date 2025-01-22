@@ -136,9 +136,6 @@ public class RDXVRKinematicsStreamingMode
    private final HandConfiguration[] handConfigurations = {HandConfiguration.HALF_CLOSE, HandConfiguration.CRUSH, HandConfiguration.CLOSE};
    private int leftIndex = -1;
    private int rightIndex = -1;
-   private boolean firstRun = true;
-   private double initialTime = 0.0;
-   private int count = 0;
 
    public RDXVRKinematicsStreamingMode(ROS2SyncedRobotModel syncedRobot,
                                        ROS2ControllerHelper ros2ControllerHelper,
@@ -707,7 +704,7 @@ public class RDXVRKinematicsStreamingMode
                ghostRobotGraphic.update();
 
             footstepStreaming.processToolboxOutput();
-            // Stepping with ankle trackers pauses Streaming until walking is done
+            // Stepping with ankle trackers pauses streaming until walking is done
             if (!controllerStatusTracker.isWalking())
             {
                if (footstepStreaming.getReadyToStepNotification().poll())
@@ -723,7 +720,7 @@ public class RDXVRKinematicsStreamingMode
                   visualizeIKPreviewGraphic(false);
                   footstepStreaming.getReadyToStepNotification().clear();
                   LogTools.warn("Stepping from VR");
-                  footstepStreaming.step();
+                  footstepStreaming.step(false);
                }
             }
             else
@@ -731,7 +728,7 @@ public class RDXVRKinematicsStreamingMode
                if (footstepStreaming.getReadyToStepNotification().poll())
                {
                   LogTools.warn("Consecutive stepping from VR");
-                  footstepStreaming.step();
+                  footstepStreaming.step(false);
                   // This prevents wrong logic. The controller might think we're done walking even if we've just sent a new footstep, that needs to propagate to the controller
                   controllerStatusTracker.getFinishedWalkingNotification().clear();
                }

@@ -90,8 +90,8 @@ public class RDXVRFootstepStreaming
       }
       else
       {
-         footstepStreamingToolbox.sleep();
-         wasEnabled = false;
+         if (wasEnabled)
+            internalReset();
       }
    }
 
@@ -124,18 +124,22 @@ public class RDXVRFootstepStreaming
             }
             else if (latestStatus.getAdjustmentFootstep() && !latestStatus.getLastAdjustment()) // Later values of updated estimate
             {
-               footstepPlacer.setActiveAdjustment(true);
                if (!footstepError)
                {
-                  footstepPlacer.setFootstepPose(new FramePose3D(ReferenceFrame.getWorldFrame(),
-                                                                 latestStatus.getDesiredFootPosition(),
-                                                                 latestStatus.getDesiredFootOrientation()));
-                  step();
+                  if (footstepPlacer.setFootstepPose(new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                                                     latestStatus.getDesiredFootPosition(),
+                                                                     latestStatus.getDesiredFootOrientation())))
+                  {
+                     step(true);
+                  }
+                  else
+                  {
+                     LogTools.error("Could not place step. Please do not release grip on controllers when streaming footsteps");
+                  }
                }
             }
             else if (latestStatus.getLastAdjustment()) // Last estimate
             {
-               footstepPlacer.setActiveAdjustment(false);
                footstepPlacer.reset();
                footstepError = false;
             }
@@ -152,9 +156,9 @@ public class RDXVRFootstepStreaming
       return readyToStep;
    }
 
-   public void step()
+   public void step(boolean activeAdjustment)
    {
-      footstepPlacer.sendStep();
+      footstepPlacer.sendStep(activeAdjustment);
    }
 
    /**
@@ -184,11 +188,15 @@ public class RDXVRFootstepStreaming
       {
          ankleTrackerFrames.put(side, null);
       }
+      internalReset();
+   }
+
+   private void internalReset()
+   {
       footstepStreamingToolbox.sleep();
       wasEnabled = false;
       readyToStep.clear();
       footstepPlacer.reset();
-      footstepPlacer.setActiveAdjustment(false);
       footstepError = false;
    }
 

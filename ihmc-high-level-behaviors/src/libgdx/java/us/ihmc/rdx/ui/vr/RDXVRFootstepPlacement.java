@@ -49,7 +49,6 @@ public class RDXVRFootstepPlacement
    private long sequenceId = (UUID.randomUUID().getLeastSignificantBits() % Integer.MAX_VALUE) + Integer.MAX_VALUE;
    private int footstepIndex = 0;
    private LocomotionParameters locomotionParameters;
-   private boolean activeAdjustment = false;
    private double stepTimeStart = -1.0;
 
    public RDXVRFootstepPlacement(RDXVRContext vrContext,
@@ -174,12 +173,21 @@ public class RDXVRFootstepPlacement
       footstepBeingExternallyPlaced = new RDXVRFootstep(side, footstepModels.get(side), footstepIndex++);
    }
 
-   public void setFootstepPose(FramePose3DReadOnly pose)
+   public boolean setFootstepPose(FramePose3DReadOnly pose)
    {
-      footstepBeingExternallyPlaced.setPose(pose);
+      if (footstepBeingExternallyPlaced != null)
+      {
+         footstepBeingExternallyPlaced.setPose(pose);
+         return true;
+      }
+      else
+      {
+         LogTools.error("Could not set pose because the footstep being placed is null");
+         return false;
+      }
    }
 
-   public void sendStep()
+   public void sendStep(boolean activeAdjustment)
    {
       // send the placed footsteps
       FootstepDataListMessage messageList = new FootstepDataListMessage();
@@ -232,11 +240,6 @@ public class RDXVRFootstepPlacement
          LogTools.error("Could not check validity of step. Footstep planning parameters are null");
          return false;
       }
-   }
-
-   public void setActiveAdjustment(boolean enabled)
-   {
-      activeAdjustment = enabled;
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)

@@ -94,13 +94,13 @@ public class FootstepStreamingToolboxParameters
       liftThreshold = 0.01;
 
       // These stability parameters seem to work great!
-      stabilityThreshold = 0.005;
-      stabilityIterations = 5;
+      stabilityThreshold = 0.003;
+      stabilityIterations = 3;
 
       defaultStride = 0.20;
-      maxStride = 0.4;
+      maxStride = 1.0;
       kpDirection = 0.0;
-      kpStride = 0.0;
+      kpStride = 0.5;
 
       // TODO. tune these ones below
       turningThreshold = 12;

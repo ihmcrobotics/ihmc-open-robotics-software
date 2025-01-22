@@ -350,7 +350,7 @@ public class FSTStreamingState implements State
                                                            robotStanceFootTransformInWorld.getTranslationX(),
                                                            robotStanceFootTransformInWorld.getTranslationY());
       robotPredictedFootXY.changeFrameAndProjectToXYPlane(robotStanceFootFrame); // This has value 0 now
-      LogTools.info(robotPredictedFootXY);
+
       // Apply stance-to-predicted-footstep translation
       robotPredictedFootXY.setX(predictedTrackerXY.getX());
       robotPredictedFootXY.setY(predictedTrackerXY.getY());
@@ -408,6 +408,7 @@ public class FSTStreamingState implements State
 
       // 1) Basic horizontal-based raw stride estimate
       double rawStride = measuredHorizontalDistance + getAverageHorizontalVelocity(linearVelocity) * (robotStepDuration - robotElapsedTimeCurrentStep);
+
       // 2) "Landing factor" from vertical motion
       //    If the foot is descending (verticalVel < 0), we reduce the stride.
       //    One approach is an interpolation factor landingFactor in [0,1], where 1 => no reduction,
@@ -418,6 +419,7 @@ public class FSTStreamingState implements State
          // Normalize foot height to [0, 1]
          landingFactor = verticalPosition / maxFootHeight;
          landingFactor = Math.max(0.0, Math.min(1.0, landingFactor));
+         LogTools.error(landingFactor);
       }
 
       // 3) The stride is pulled toward the measuredDistance if foot is descending
@@ -426,6 +428,7 @@ public class FSTStreamingState implements State
 
       // 4) Clamp to [0, maxStride] pre-P-control
       double desiredStride = Math.max(0.0, Math.min(blendedStride, maxStride.getValue()));
+      LogTools.warn(desiredStride);
 
       // 5) Apply P-control
       double error = desiredStride - currentStrideEstimate;
@@ -435,7 +438,7 @@ public class FSTStreamingState implements State
       newStrideEstimate = Math.max(0.0, Math.min(newStrideEstimate, maxStride.getValue()));
       currentStrideEstimate = newStrideEstimate;
 
-      return desiredStride;
+      return currentStrideEstimate;
    }
 
    private double getAverageHorizontalVelocity(FixedFrameVector3DBasics currentLinearVelocity)
@@ -451,7 +454,7 @@ public class FSTStreamingState implements State
    @Override
    public void onExit(double timeInState)
    {
-      LogTools.info("Footstep Streaming disabled");
+      LogTools.error("RESET. Footstep Streaming disabled");
       tools.flushInputCommands();
    }
 }
