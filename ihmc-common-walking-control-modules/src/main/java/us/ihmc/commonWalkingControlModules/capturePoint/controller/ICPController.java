@@ -34,6 +34,7 @@ import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.parameters.IntegerParameter;
@@ -218,13 +219,16 @@ public class ICPController implements ICPControllerInterface
 
       if (walkingMessageHandler != null)
       {
-         walkingMessageHandler.getUsingQFP().addListener(change ->
+         YoVariableChangedListener listener = change ->
          {
-            if (walkingMessageHandler.getUsingQFP().getBooleanValue())
+            if (walkingMessageHandler.getUsingQFP().getBooleanValue() && walkingMessageHandler.isWalking().getValue())
                usingCoPFeedback.set(false);
             else
                usingCoPFeedback.set(useCoPFeedback.getValue());
-         });
+         };
+
+         walkingMessageHandler.getUsingQFP().addListener(listener);
+         walkingMessageHandler.isWalking().addListener(listener);
       }
 
       if (yoGraphicsListRegistry != null)

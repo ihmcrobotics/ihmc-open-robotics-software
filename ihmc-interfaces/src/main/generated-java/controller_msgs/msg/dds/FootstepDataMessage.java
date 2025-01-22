@@ -18,6 +18,8 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    public static final byte TRAJECTORY_TYPE_OBSTACLE_CLEARANCE = (byte) 1;
    public static final byte TRAJECTORY_TYPE_CUSTOM = (byte) 2;
    public static final byte TRAJECTORY_TYPE_WAYPOINTS = (byte) 3;
+   public static final byte CSG_MODE_STANDARD = (byte) 0;
+   public static final byte CSG_MODE_QFP = (byte) 1;
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
@@ -50,6 +52,10 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
             * This contains information on what the swing trajectory should be for each step. Recommended is TRAJECTORY_TYPE_DEFAULT.
             */
    public byte trajectory_type_;
+   /**
+            * This contains information about what footstep generation approach should be used by the ContinuousStepGenerator.
+            */
+   public byte csg_mode_;
    /**
             * Contains information on how high the robot should swing its foot.
             * This affects trajectory types TRAJECTORY_TYPE_DEFAULT and TRAJECTORY_TYPE_OBSTACLE_CLEARANCE.
@@ -121,6 +127,10 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
             * If the controller should check and fail if the step is not reachable
             */
    public boolean should_check_for_reachability_;
+   /**
+            * If the desired footstep is for walking in place with zero forward or lateral velocity
+            */
+   public boolean walking_in_place_ = true;
 
    public FootstepDataMessage()
    {
@@ -152,6 +162,8 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       predicted_contact_points_2d_.set(other.predicted_contact_points_2d_);
       trajectory_type_ = other.trajectory_type_;
 
+      csg_mode_ = other.csg_mode_;
+
       swing_height_ = other.swing_height_;
 
       custom_waypoint_proportions_.set(other.custom_waypoint_proportions_);
@@ -171,6 +183,8 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
       controller_msgs.msg.dds.StepConstraintsListMessagePubSubType.staticCopy(other.step_constraints_, step_constraints_);
       should_check_for_reachability_ = other.should_check_for_reachability_;
+
+      walking_in_place_ = other.walking_in_place_;
 
    }
 
@@ -252,6 +266,21 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    public byte getTrajectoryType()
    {
       return trajectory_type_;
+   }
+
+   /**
+            * This contains information about what footstep generation approach should be used by the ContinuousStepGenerator.
+            */
+   public void setCsgMode(byte csg_mode)
+   {
+      csg_mode_ = csg_mode;
+   }
+   /**
+            * This contains information about what footstep generation approach should be used by the ContinuousStepGenerator.
+            */
+   public byte getCsgMode()
+   {
+      return csg_mode_;
    }
 
    /**
@@ -445,6 +474,21 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       return should_check_for_reachability_;
    }
 
+   /**
+            * If the desired footstep is for walking in place with zero forward or lateral velocity
+            */
+   public void setWalkingInPlace(boolean walking_in_place)
+   {
+      walking_in_place_ = walking_in_place;
+   }
+   /**
+            * If the desired footstep is for walking in place with zero forward or lateral velocity
+            */
+   public boolean getWalkingInPlace()
+   {
+      return walking_in_place_;
+   }
+
 
    public static Supplier<FootstepDataMessagePubSubType> getPubSubType()
    {
@@ -477,6 +521,8 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       }
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.trajectory_type_, other.trajectory_type_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.csg_mode_, other.csg_mode_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.swing_height_, other.swing_height_, epsilon)) return false;
 
@@ -511,6 +557,8 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       if (!this.step_constraints_.epsilonEquals(other.step_constraints_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.should_check_for_reachability_, other.should_check_for_reachability_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.walking_in_place_, other.walking_in_place_, epsilon)) return false;
+
 
       return true;
    }
@@ -533,6 +581,8 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       if (!this.predicted_contact_points_2d_.equals(otherMyClass.predicted_contact_points_2d_)) return false;
       if(this.trajectory_type_ != otherMyClass.trajectory_type_) return false;
 
+      if(this.csg_mode_ != otherMyClass.csg_mode_) return false;
+
       if(this.swing_height_ != otherMyClass.swing_height_) return false;
 
       if (!this.custom_waypoint_proportions_.equals(otherMyClass.custom_waypoint_proportions_)) return false;
@@ -552,6 +602,8 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
       if (!this.step_constraints_.equals(otherMyClass.step_constraints_)) return false;
       if(this.should_check_for_reachability_ != otherMyClass.should_check_for_reachability_) return false;
+
+      if(this.walking_in_place_ != otherMyClass.walking_in_place_) return false;
 
 
       return true;
@@ -575,6 +627,8 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       builder.append(this.predicted_contact_points_2d_);      builder.append(", ");
       builder.append("trajectory_type=");
       builder.append(this.trajectory_type_);      builder.append(", ");
+      builder.append("csg_mode=");
+      builder.append(this.csg_mode_);      builder.append(", ");
       builder.append("swing_height=");
       builder.append(this.swing_height_);      builder.append(", ");
       builder.append("custom_waypoint_proportions=");
@@ -598,7 +652,9 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       builder.append("step_constraints=");
       builder.append(this.step_constraints_);      builder.append(", ");
       builder.append("should_check_for_reachability=");
-      builder.append(this.should_check_for_reachability_);
+      builder.append(this.should_check_for_reachability_);      builder.append(", ");
+      builder.append("walking_in_place=");
+      builder.append(this.walking_in_place_);
       builder.append("}");
       return builder.toString();
    }

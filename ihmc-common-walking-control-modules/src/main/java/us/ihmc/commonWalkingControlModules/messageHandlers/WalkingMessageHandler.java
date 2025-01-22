@@ -45,6 +45,7 @@ import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -802,6 +803,11 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
    public YoBoolean getUsingQFP()
    {
       return usingQFP;
+   }
+
+   public YoBoolean isWalking()
+   {
+      return isWalking;
    }
 
    public void setDefaultTransferTime(double transferTime)
