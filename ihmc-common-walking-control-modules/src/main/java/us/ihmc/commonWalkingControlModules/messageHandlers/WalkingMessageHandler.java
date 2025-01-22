@@ -123,6 +123,7 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
    private final DoubleProvider maxSwingDistance = new DoubleParameter("MaxSwingDistance", registry, Double.POSITIVE_INFINITY);
 
    private final List<Listener<?>> footstepConsumptionListenerList = new ArrayList<>();
+   private final YoBoolean usingQFP = new YoBoolean("usingQFP", registry);
 
    public WalkingMessageHandler(double defaultTransferTime,
                                 double defaultSwingTime,
@@ -796,6 +797,11 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
       Footstep footstep = footstepsAtCurrentLocation.get(robotSide);
       footstep.setPose(tempPose);
       return footstep;
+   }
+
+   public YoBoolean getUsingQFP()
+   {
+      return usingQFP;
    }
 
    public void setDefaultTransferTime(double transferTime)

@@ -10,7 +10,6 @@ import us.ihmc.math.linearAlgebra.MatrixExponentialCalculator;
 import us.ihmc.robotics.controllers.pidGains.GainCalculator;
 import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
-import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -40,14 +39,16 @@ public class C1ContinuousTrajectorySmoother implements FixedFramePositionTraject
    private final FrameVector3D desiredAcceleration;
 
    private final YoDouble timeToStartErrorCancellation;
-   private final DoubleParameter trackingStiffness;
-   private final DoubleParameter trackingZeta;
+   private final YoDouble trackingStiffness;
+   private final YoDouble trackingZeta;
 
    private final MatrixExponentialCalculator matrixExponentialCalculator = new MatrixExponentialCalculator(2);
    private final DMatrixRMaj closedLoopStateMatrix = new DMatrixRMaj(2, 2);
    private final DMatrixRMaj scaledClosedLoopStateMatrix = new DMatrixRMaj(2, 2);
    private final DMatrixRMaj stateTransitionMatrix = new DMatrixRMaj(2, 2);
 
+   private final double defaultTrackingStiffness = 200.0;
+   private final double defaultTrackingZeta = 0.8;
    private boolean hasDriftDynamicsMatrixBeenSet = false;
    private boolean loaded = false;
 
@@ -57,8 +58,11 @@ public class C1ContinuousTrajectorySmoother implements FixedFramePositionTraject
 
       YoRegistry registry = new YoRegistry(namePrefix + getClass().getSimpleName());
 
-      trackingStiffness = new DoubleParameter(namePrefix + "TrackingStiffness", registry, 200.0);
-      trackingZeta = new DoubleParameter(namePrefix + "TrackingZeta", registry, 0.8);
+      trackingStiffness = new YoDouble(namePrefix + "TrackingStiffness", registry);
+      trackingStiffness.set(defaultTrackingStiffness);
+
+      trackingZeta = new YoDouble(namePrefix + "TrackingZeta", registry);
+      trackingZeta.set(defaultTrackingZeta);
 
       trackingStiffness.addListener((v) -> updateClosedLoopDriftDynamicsMatrix());
       trackingZeta.addListener((v) -> updateClosedLoopDriftDynamicsMatrix());
@@ -174,6 +178,26 @@ public class C1ContinuousTrajectorySmoother implements FixedFramePositionTraject
    @Override
    public void hideVisualization()
    {
+   }
+
+   public void setTrackingStiffness(double trackingStiffness)
+   {
+      this.trackingStiffness.set(trackingStiffness);
+   }
+
+   public void setTrackingZeta(double trackingZeta)
+   {
+      this.trackingZeta.set(trackingZeta);
+   }
+
+   public double getDefaultTrackingStiffness()
+   {
+      return defaultTrackingStiffness;
+   }
+
+   public double getDefaultTrackingZeta()
+   {
+      return defaultTrackingZeta;
    }
 
    FrameVector3DReadOnly getPositionErrorWhenStartingCancellation()

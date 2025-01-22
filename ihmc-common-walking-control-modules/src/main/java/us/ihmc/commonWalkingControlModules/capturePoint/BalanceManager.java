@@ -312,6 +312,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
       if (USE_ERROR_BASED_STEP_ADJUSTMENT)
       {
          stepAdjustmentController = new ErrorBasedStepAdjustmentController(walkingControllerParameters,
+                                                                           walkingMessageHandler,
                                                                            controllerToolbox.getReferenceFrames().getSoleZUpFrames(),
                                                                            bipedSupportPolygons,
                                                                            icpControlPolygons,
@@ -1026,6 +1027,13 @@ public class BalanceManager implements SCS2YoGraphicHolder
                                                                        : maxICPErrorBeforeSingleSupportBackwardX.getValue();
       double maxICPErrorBeforeSingleSupportY = isICPErrorToTheInside ? maxICPErrorBeforeSingleSupportInnerY.getValue()
                                                                      : maxICPErrorBeforeSingleSupportOuterY.getValue();
+
+      if (controllerToolbox.getWalkingMessageHandler().getUsingQFP().getBooleanValue())
+      {
+         maxICPErrorBeforeSingleSupportX += 0.3;
+         maxICPErrorBeforeSingleSupportY += 0.3;
+      }
+
       normalizedICPError.set(MathTools.square(icpError2d.getX() / maxICPErrorBeforeSingleSupportX)
                              + MathTools.square(icpError2d.getY() / maxICPErrorBeforeSingleSupportY));
    }

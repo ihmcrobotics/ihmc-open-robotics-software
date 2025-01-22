@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepCaptureRegionC
 import us.ihmc.commonWalkingControlModules.captureRegion.OneStepCaptureRegionCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
@@ -124,10 +125,13 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
 
    private final BipedSupportPolygons bipedSupportPolygons;
 
+   private final WalkingMessageHandler walkingMessageHandler;
+
    private final FramePoint3D vertexInWorld = new FramePoint3D();
    private final FrameConvexPolygon2D allowableAreaForCoPInFoot = new FrameConvexPolygon2D();
 
    public ErrorBasedStepAdjustmentController(WalkingControllerParameters walkingControllerParameters,
+                                             WalkingMessageHandler walkingMessageHandler,
                                              SideDependentList<? extends ReferenceFrame> soleZUpFrames,
                                              BipedSupportPolygons bipedSupportPolygons,
                                              ICPControlPolygons icpControlPolygons,
@@ -136,6 +140,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
                                              YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this(walkingControllerParameters,
+           walkingMessageHandler,
            walkingControllerParameters.getStepAdjustmentParameters(),
            soleZUpFrames,
            bipedSupportPolygons,
@@ -146,6 +151,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    }
 
    public ErrorBasedStepAdjustmentController(WalkingControllerParameters walkingControllerParameters,
+                                             WalkingMessageHandler walkingMessageHandler,
                                              StepAdjustmentParameters stepAdjustmentParameters,
                                              SideDependentList<? extends ReferenceFrame> soleZUpFrames,
                                              BipedSupportPolygons bipedSupportPolygons,
@@ -155,6 +161,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
                                              YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.bipedSupportPolygons = bipedSupportPolygons;
+      this.walkingMessageHandler = walkingMessageHandler;
 
       allowStepAdjustment = new BooleanParameter(yoNamePrefix + "AllowStepAdjustment", registry, stepAdjustmentParameters.allowStepAdjustment());
 
@@ -231,6 +238,14 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
 
       if (walkingControllerParameters != null)
          swingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
+
+      walkingMessageHandler.getUsingQFP().addListener(change ->
+      {
+         if (walkingMessageHandler.getUsingQFP().getBooleanValue())
+            swingSpeedUpEnabled.set(false);
+         else
+            swingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
+      });
 
       if (yoGraphicsListRegistry != null)
          setupVisualizers(yoGraphicsListRegistry);

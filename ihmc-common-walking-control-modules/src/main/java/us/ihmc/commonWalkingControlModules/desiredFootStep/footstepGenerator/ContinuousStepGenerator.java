@@ -196,8 +196,8 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
                                 if (quicksterFootstepProvider.hasValue())
                                  quicksterFootstepProvider.get().initialize();
                              }
-//                             else
-//                                updateFootstepContinuouslyThroughoutSwing.set(updateFootstepContinuouslyThroughoutSwingDefault);
+                             else
+                                updateFootstepContinuouslyThroughoutSwing.set(updateFootstepContinuouslyThroughoutSwingDefault);
                           });
 
       setSupportFootBasedFootstepAdjustment(true);

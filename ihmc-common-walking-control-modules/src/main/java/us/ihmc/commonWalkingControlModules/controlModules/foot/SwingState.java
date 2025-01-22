@@ -243,6 +243,21 @@ public class SwingState extends AbstractFootControlState
       isSwingSpeedUpEnabled = new YoBoolean(namePrefix + "IsSpeedUpEnabled", registry);
       isSwingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
 
+      controllerToolbox.getWalkingMessageHandler().getUsingQFP().addListener(change ->
+      {
+         if (controllerToolbox.getWalkingMessageHandler().getUsingQFP().getBooleanValue())
+         {
+            isSwingSpeedUpEnabled.set(false);
+            swingTrajectorySmoother.setTrackingZeta(0.0);
+         }
+         else
+         {
+            isSwingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
+            swingTrajectorySmoother.setTrackingZeta(swingTrajectorySmoother.getDefaultTrackingZeta());
+         }
+      });
+
+
       swingTimeSpeedUpFactor.setToNaN();
 
       scaleSecondaryJointWeights.set(walkingControllerParameters.applySecondaryJointScaleDuringSwing());

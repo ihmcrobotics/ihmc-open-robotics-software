@@ -11,8 +11,8 @@ import java.util.List;
 public class QuicksterFootstepProviderParameters
 {
    // Static variables
-   private static final double SWING_DURATION = 0.7;//0.55;
-   private static final double DOUBLE_SUPPORT_FRACTION = 0.1;//0.05;
+   private static final double SWING_DURATION = 0.55;//0.7;//
+   private static final double DOUBLE_SUPPORT_FRACTION = 0.05;//0.1;//
    private static final double STANCE_WIDTH = 0.275;
    private static final double SWING_HEIGHT = 0.09;
    private static final double COM_HEIGHT = 0.95;

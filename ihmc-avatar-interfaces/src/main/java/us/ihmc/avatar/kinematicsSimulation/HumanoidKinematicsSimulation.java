@@ -311,7 +311,7 @@ public class HumanoidKinematicsSimulation
       
       walkingController.setControllerCoreOutput(controllerCore.getOutputForHighLevelController());
 
-      linearMomentumRateControlModule = new LinearMomentumRateControlModule(centerOfMassStateProvider,
+      linearMomentumRateControlModule = new LinearMomentumRateControlModule(controllerToolbox,
                                                                             referenceFrames,
                                                                             controllerToolbox.getContactableFeet(),
                                                                             fullRobotModel.getElevator(),
