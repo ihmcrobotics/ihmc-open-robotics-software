@@ -389,8 +389,8 @@ extern "C" __global__ void heightMapUpdateKernel(unsigned short *in, size_t pitc
     // Scale to the appropriate range
     float heightValue = (averageHeightZ * params[HEIGHT_SCALING_FACTOR]);
 
-    unsigned short *outRow = (unsigned short *)((char *)out + (yIndex * pitchOut));
-    *(outRow + xIndex) = (unsigned short)(heightValue);
+    unsigned short *outRow = (unsigned short *)((char *)out + (xIndex * pitchOut));
+    *(outRow + yIndex) = (unsigned short)(heightValue);
 }
 
 extern "C" __global__ void heightMapRegistrationKernel(unsigned short *localMap, size_t pitchLocal,
@@ -449,7 +449,7 @@ extern "C" __global__ void heightMapRegistrationKernel(unsigned short *localMap,
     // Retrieve local height and global height
     float sensorHeight = sensorToGroundTf[11] - 1.5f;
 
-    unsigned short *heightValue = (unsigned short *)((char *)globalMap + yIndex * pitchGlobal) + xIndex;
+    unsigned short *heightValue = (unsigned short *)((char *)globalMap + xIndex * pitchGlobal) + yIndex;
     float previousHeight = *heightValue / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
     float localHeight = previousHeight;
 
@@ -457,7 +457,7 @@ extern "C" __global__ void heightMapRegistrationKernel(unsigned short *localMap,
         localCellIndex.y >= 0 && localCellIndex.y < localCellsPerAxis)
     {
 
-        unsigned short *newHeightValue = (unsigned short *)((char *)localMap + localCellIndex.y * pitchLocal) + localCellIndex.x;
+        unsigned short *newHeightValue = (unsigned short *)((char *)localMap + localCellIndex.x * pitchLocal) + localCellIndex.y;
         localHeight = *newHeightValue / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
     }
 
@@ -483,7 +483,7 @@ extern "C" __global__ void heightMapRegistrationKernel(unsigned short *localMap,
     finalHeight += params[HEIGHT_OFFSET];
 
     // Store the final height in the global map
-    unsigned short *globalMapElement = (unsigned short *)((char *)globalMap + yIndex * pitchGlobal) + xIndex;
+    unsigned short *globalMapElement = (unsigned short *)((char *)globalMap + xIndex * pitchGlobal) + yIndex;
     *globalMapElement = static_cast<unsigned short>(finalHeight * params[HEIGHT_SCALING_FACTOR]);
 }
 
@@ -509,34 +509,17 @@ extern "C" __global__ void croppingKernel(unsigned short *inputMap, size_t pitch
     int globalCellIndexX = globalSensorIndex.x + xIndex - (params[CROPPED_WINDOW_CENTER_INDEX]);
     int globalCellIndexY = globalSensorIndex.y + yIndex - (params[CROPPED_WINDOW_CENTER_INDEX]);
 
-    int rotate90clock = 1;
-    int verticalflip = 1;
-
-    // Apply rotation (90 degrees clockwise)
-    if (rotate90clock == 1)
-    {
-        int temp = globalCellIndexX;
-        globalCellIndexX = globalCellIndexY;
-        globalCellIndexY = globalMapSizeY - 1 - temp; // Mirror around center after rotation
-    }
-
-    // Apply vertical flip (flip along y-axis)
-    if (verticalflip == 1)
-    {
-        globalCellIndexY = globalMapSizeY - 1 - globalCellIndexY;
-    }
-
     // Check if global cell index is within bounds
     if (globalCellIndexX >= 0 && globalCellIndexX < globalMapSizeX &&
         globalCellIndexY >= 0 && globalCellIndexY < globalMapSizeY)
     {
-        unsigned short *inputRow = (unsigned short *)((char *)inputMap + globalCellIndexY * pitchInput);
-        unsigned short *croppedRow = (unsigned short *)((char *)croppedMap + yIndex * pitchCropped);
-        croppedRow[xIndex] = inputRow[globalCellIndexX];
+        unsigned short *inputRow = (unsigned short *)((char *)inputMap + globalCellIndexX * pitchInput);
+        unsigned short *croppedRow = (unsigned short *)((char *)croppedMap + xIndex * pitchCropped);
+        croppedRow[yIndex] = inputRow[globalCellIndexY];
     }
     else
     {
-        unsigned short *croppedRow = (unsigned short *)((char *)croppedMap + yIndex * pitchCropped);
-        croppedRow[xIndex] = 0; // Assign 0 for out-of-bounds cells
+        unsigned short *croppedRow = (unsigned short *)((char *)croppedMap + xIndex * pitchCropped);
+        croppedRow[yIndex] = 0; // Assign 0 for out-of-bounds cells
     }
 }
