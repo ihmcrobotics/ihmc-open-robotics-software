@@ -49,7 +49,7 @@ public class RDXVRFootstepPlacement
    private long sequenceId = (UUID.randomUUID().getLeastSignificantBits() % Integer.MAX_VALUE) + Integer.MAX_VALUE;
    private int footstepIndex = 0;
    private LocomotionParameters locomotionParameters;
-   private double stepTimeStart = -1.0;
+   private double stepStartTime = -1.0;
 
    public RDXVRFootstepPlacement(RDXVRContext vrContext,
                                  ROS2SyncedRobotModel syncedRobot,
@@ -217,9 +217,9 @@ public class RDXVRFootstepPlacement
       controllerHelper.publishToController(messageList);
       footstepIndex--;
 
-      if (!activeAdjustment && stepTimeStart < 0.0)
-      { // first step is not and adjustment
-         stepTimeStart = System.nanoTime();
+      if (!activeAdjustment && stepStartTime < 0.0)
+      { // first step is not an adjustment
+         stepStartTime = System.nanoTime();
       }
    }
 
@@ -277,10 +277,10 @@ public class RDXVRFootstepPlacement
 
    public double getTimeElapsedAfterStep()
    {
-      if (stepTimeStart < 0.0)
+      if (stepStartTime < 0.0)
          return 0.0;
       else
-         return (System.nanoTime() - stepTimeStart) * 1.0e-9;
+         return (System.nanoTime() - stepStartTime) * 1.0e-9;
    }
 
    public void reset()
@@ -288,6 +288,6 @@ public class RDXVRFootstepPlacement
       footstepIndex = 0;
       footstepBeingExternallyPlaced = null;
       handPlacedFootsteps.clear();
-      stepTimeStart = -1.0;
+      stepStartTime = -1.0;
    }
 }
