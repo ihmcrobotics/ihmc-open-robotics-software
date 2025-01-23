@@ -250,7 +250,7 @@ public class SCS2LogProcessor
                }
             });
 
-            writeCSV(logFolderName, "FootstepSwings", "Time,Duration", writer ->
+            writeCSV(logFolderName, "FootstepSwings", "CompletionTime,Duration,Desired", writer ->
             {
                for (SCS2LogWalk logWalk : locomotionData.getLogWalks())
                {
@@ -263,19 +263,21 @@ public class SCS2LogProcessor
 
                   for (FootSwing footSwing : timeSorted)
                   {
-                     writer.write("%.2f,%.2f".formatted(footSwing.completeTime(), footSwing.swingDuration()));
+                     writer.write("%.2f,%.2f,%.2f".formatted(footSwing.completeTime(), footSwing.swingDuration(), footSwing.desiredSwingDuration()));
                      writer.newLine();
                   }
                }
             });
 
-            writeCSV(logFolderName, "DoubleSupportDurations", "Time,Duration", writer ->
+            writeCSV(logFolderName, "DoubleSupportDurations", "CompletionTime,Duration,Desired", writer ->
             {
                for (SCS2LogWalk logWalk : locomotionData.getLogWalks())
                {
                   for (DoubleSupportDuration doubleSupportDuration : logWalk.getDoubleSupportDurations())
                   {
-                     writer.write("%.2f,%.2f".formatted(doubleSupportDuration.completeTime(), doubleSupportDuration.supportDuration()));
+                     writer.write("%.2f,%.2f,%.2f".formatted(doubleSupportDuration.completeTime(),
+                                                             doubleSupportDuration.supportDuration(),
+                                                             doubleSupportDuration.desiredTransferDuration()));
                      writer.newLine();
                   }
                }

@@ -17,9 +17,9 @@ public class SCS2LogWalk
    private final ArrayList<SCS2LogFootstep> footsteps = new ArrayList<>();
    public record FootStateChange(double time, ConstraintType state) { }
    private final SideDependentList<ArrayList<FootStateChange>> footStateChanges = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
-   public record FootSwing(double completeTime, double swingDuration) { }
+   public record FootSwing(double completeTime, double swingDuration, double desiredSwingDuration) { }
    private final SideDependentList<ArrayList<FootSwing>> footSwings = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
-   public record DoubleSupportDuration(double completeTime, double supportDuration) { }
+   public record DoubleSupportDuration(double completeTime, double supportDuration, double desiredTransferDuration) { }
    private final ArrayList<DoubleSupportDuration> doubleSupportDurations = new ArrayList<>();
    private final TDoubleArrayList times = new TDoubleArrayList();
    private final RecyclingArrayList<Pose3D> pelvisPoses = new RecyclingArrayList<>(Pose3D::new);

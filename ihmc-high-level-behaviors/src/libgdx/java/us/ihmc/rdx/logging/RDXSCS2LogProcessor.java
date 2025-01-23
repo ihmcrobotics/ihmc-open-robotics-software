@@ -439,17 +439,19 @@ public class RDXSCS2LogProcessor
                         ThreadTools.startAsDaemon(() ->
                         {
                            String logFolderName = logDirectory.getFileName().toString();
-                           Path csvFile = logDirectory.resolve(logFolderName + "_FootstepSwings.csv");
+                           Path swingCSVFile = logDirectory.resolve(logFolderName + "_FootstepSwings.csv");
+                           Path transferCSVFile = logDirectory.resolve(logFolderName + "_DoubleSupportDurations.csv");
 
-                           if (Files.exists(csvFile))
+                           if (Files.exists(swingCSVFile))
                            {
                               try
                               {
                                  Plot pyplot = Plot.create();
 
-                                 ArrayList<Double> times = new ArrayList<>();
-                                 ArrayList<Double> durations = new ArrayList<>();
-                                 try (BufferedReader reader = Files.newBufferedReader(csvFile))
+                                 ArrayList<Double> swingTimes = new ArrayList<>();
+                                 ArrayList<Double> swingDurations = new ArrayList<>();
+                                 ArrayList<Double> swingDesireds = new ArrayList<>();
+                                 try (BufferedReader reader = Files.newBufferedReader(swingCSVFile))
                                  {
                                     reader.readLine(); // skip header
 
@@ -459,8 +461,9 @@ public class RDXSCS2LogProcessor
                                     {
                                        String[] values = line.split(",");
 
-                                       times.add(Double.parseDouble(values[0]));
-                                       durations.add(Double.parseDouble(values[1]));
+                                       swingTimes.add(Double.parseDouble(values[0]));
+                                       swingDurations.add(Double.parseDouble(values[1]));
+                                       swingDesireds.add(Double.parseDouble(values[2]));
                                     }
 
                                  }
@@ -469,14 +472,45 @@ public class RDXSCS2LogProcessor
                                     throw new RuntimeException("Error reading CSV file.", e);
                                  }
 
+                                 ArrayList<Double> transferTimes = new ArrayList<>();
+                                 ArrayList<Double> transferDurations = new ArrayList<>();
+                                 ArrayList<Double> transferDesireds = new ArrayList<>();
+                                 try (BufferedReader reader = Files.newBufferedReader(transferCSVFile))
+                                 {
+                                    reader.readLine(); // skip header
+
+                                    String line;
+                                    while ((line = reader.readLine()) != null)
+                                    {
+                                       String[] values = line.split(",");
+
+                                       transferTimes.add(Double.parseDouble(values[0]));
+                                       transferDurations.add(Double.parseDouble(values[1]));
+                                       transferDesireds.add(Double.parseDouble(values[2]));
+                                    }
+
+                                 }
+                                 catch (IOException e)
+                                 {
+                                    throw new RuntimeException("Error reading CSV file.", e);
+                                 }
+
+
                                  // Convert Pascal case to title case
                                  String afterUnderscore = logFolderName.substring(logFolderName.lastIndexOf("_") + 1);
                                  String titleCaseString = WordUtils.capitalizeFully(afterUnderscore.replaceAll("([a-z])([A-Z])", "$1 $2"));
 
-                                 pyplot.plot().add(times, durations).label("swing durations");
-                                 pyplot.ylim(0.0, durations.stream().max(Double::compare).orElse(0.0) + 0.2);
+                                 pyplot.plot().add(swingTimes, swingDurations).label("Swing durations");
+                                 pyplot.plot().add(swingTimes, swingDesireds).label("Swing desireds");
+//                                 pyplot.plot().add(transferTimes, transferDurations).label("Transfer durations");
+//                                 pyplot.plot().add(transferTimes, transferDesireds).label("Transfer desireds").color("black");
+
+                                 double plotYMax = swingDurations.stream().max(Double::compare).orElse(0.0);
+//                                 plotYMax = Math.max(plotYMax, transferDurations.stream().max(Double::compare).orElse(0.0));
+                                 pyplot.ylim(0.0, plotYMax + 0.2);
+
                                  pyplot.xlabel("Time (s)");
-                                 pyplot.title("%s Swing Durations".formatted(titleCaseString));
+                                 pyplot.title("%s Swing and Transfer Durations".formatted(titleCaseString));
                                  pyplot.legend();
                                  pyplot.show();
                               }
@@ -486,56 +520,6 @@ public class RDXSCS2LogProcessor
                               }
                            }
                         }, "Plot Swing Durations");
-                        ThreadTools.startAsDaemon(() ->
-                        {
-                           String logFolderName = logDirectory.getFileName().toString();
-                           Path csvFile = logDirectory.resolve(logFolderName + "_DoubleSupportDurations.csv");
-
-                           if (Files.exists(csvFile))
-                           {
-                              try
-                              {
-                                 Plot pyplot = Plot.create();
-
-                                 ArrayList<Double> times = new ArrayList<>();
-                                 ArrayList<Double> durations = new ArrayList<>();
-                                 try (BufferedReader reader = Files.newBufferedReader(csvFile))
-                                 {
-                                    reader.readLine(); // skip header
-
-                                    String line;
-                                    boolean processingLeft = true;
-                                    while ((line = reader.readLine()) != null)
-                                    {
-                                       String[] values = line.split(",");
-
-                                       times.add(Double.parseDouble(values[0]));
-                                       durations.add(Double.parseDouble(values[1]));
-                                    }
-
-                                 }
-                                 catch (IOException e)
-                                 {
-                                    throw new RuntimeException("Error reading CSV file.", e);
-                                 }
-
-                                 // Convert Pascal case to title case
-                                 String afterUnderscore = logFolderName.substring(logFolderName.lastIndexOf("_") + 1);
-                                 String titleCaseString = WordUtils.capitalizeFully(afterUnderscore.replaceAll("([a-z])([A-Z])", "$1 $2"));
-
-                                 pyplot.plot().add(times, durations).label("double support durations");
-                                 pyplot.ylim(0.0, durations.stream().max(Double::compare).orElse(0.0) + 0.2);
-                                 pyplot.xlabel("Time (s)");
-                                 pyplot.title("%s Double Support Durations".formatted(titleCaseString));
-                                 pyplot.legend();
-                                 pyplot.show();
-                              }
-                              catch (IOException | PythonExecutionException e)
-                              {
-                                 throw new RuntimeException(e);
-                              }
-                           }
-                        }, "Plot Double Support Durations");
                      }
                   }
 

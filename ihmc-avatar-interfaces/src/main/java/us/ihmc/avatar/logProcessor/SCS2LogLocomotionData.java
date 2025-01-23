@@ -37,6 +37,8 @@ public class SCS2LogLocomotionData
    private YoBoolean isRobotFalling;
    private SCS2LogEnum<HighLevelControllerName> controllerState;
    private final Point2D robotStartLocation = new Point2D(Double.NaN, Double.NaN);
+   private YoDouble controllerSwingDuration;
+   private SideDependentList<YoDouble> controllerTransferDuration = new SideDependentList<>();
    private final SideDependentList<SCS2LogFootState> footStates = new SideDependentList<>();
    private final ArrayList<SCS2LogWalk> logWalks = new ArrayList<>();
    private final Point2D lastCenterOfMass = new Point2D(Double.NaN, Double.NaN);
@@ -94,6 +96,18 @@ public class SCS2LogLocomotionData
       if (rootRegistry.findVariable(momentumRateControl + "ICPController.controllerICPErrorX") instanceof YoDouble xVariable
        && rootRegistry.findVariable(momentumRateControl + "ICPController.controllerICPErrorY") instanceof YoDouble yVariable)
          capturePointError = new YoVector2D(xVariable, yVariable);
+
+      String balanceManager = highLevelController + "HighLevelHumanoidControllerFactory.HighLevelControlManagerFactory.BalanceManager.";
+      if (rootRegistry.findVariable(balanceManager + "ErrorBasedStepAdjustmentController.controllerSwingDuration") instanceof YoDouble yoDouble)
+         controllerSwingDuration = yoDouble;
+
+      String walkingController = highLevelController + "WalkingControllerState.WalkingHighLevelHumanoidController.";
+      for (RobotSide side : RobotSide.values)
+      {
+         String currentTransferDuration = walkingController + "ToWalking%sSupport.CurrentTransferDuration".formatted(side.getPascalCaseName());
+         if (rootRegistry.findVariable(currentTransferDuration) instanceof YoDouble yoDouble)
+            controllerTransferDuration.put(side, yoDouble);
+      }
 
       String feetManager = highLevelController + "HighLevelHumanoidControllerFactory.HighLevelControlManagerFactory.FeetManager.";
       for (RobotSide side : RobotSide.values)
@@ -174,7 +188,9 @@ public class SCS2LogLocomotionData
                logWalk.getFootStateChanges().get(footState.getSide()).add(new FootStateChange(currentTime, footState.getStateChanged().read()));
 
             if (footState.getSwingCompleted().poll())
-               logWalk.getFootSwings().get(footState.getSide()).add(new FootSwing(currentTime, footState.getSwingCompleted().read()));
+               logWalk.getFootSwings().get(footState.getSide()).add(new FootSwing(currentTime,
+                                                                                  footState.getSwingCompleted().read(),
+                                                                                  controllerSwingDuration.getDoubleValue()));
 
             if (changedTo != null)
             {
@@ -187,7 +203,9 @@ public class SCS2LogLocomotionData
                else
                {
                   double duration = currentTime - timeInDoubleSupport;
-                  logWalk.getDoubleSupportDurations().add(new DoubleSupportDuration(currentTime, duration));
+                  logWalk.getDoubleSupportDurations().add(new DoubleSupportDuration(currentTime,
+                                                                                    duration,
+                                                                                    controllerTransferDuration.get(footState.getSide()).getDoubleValue()));
                   timeInDoubleSupport = Double.NaN;
                }
             }
