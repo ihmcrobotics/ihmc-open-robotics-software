@@ -1,5 +1,6 @@
 package us.ihmc.perception.detections.yolo;
 
+import org.bytedeco.javacpp.DoublePointer;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacpp.indexer.FloatIndexer;
@@ -9,6 +10,7 @@ import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatExpr;
 import org.bytedeco.opencv.opencv_core.MatVector;
+import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.RectVector;
 import org.bytedeco.opencv.opencv_core.Scalar;
@@ -221,9 +223,35 @@ public class YOLOv8Model implements Destroyable
 
       FloatIndexer output0Indexer = outputBlobs.get(0).createIndexer();
       long detectionCount = output0Indexer.size(2);
+
+      /*
+               (detectionCount)
+      (4 + cls)+---------------------------------------------+
+      centerX  |  |  |
+               |--+--+-----
+      centerY  |  |  |
+               |--+--+-----
+      width    |  |  |
+               |--+--+-----
+      height   |  |  |
+               |--+--+-----
+      cls0Conf |  |  |
+               |--+--+-----
+      cls1Conf |  |  |
+      ...
+       */
+      Mat confidenceMat = new Mat(4 + detectionClassNames.size(), (int) detectionCount, opencv_core.CV_32F, outputBlobs.get(0).data());
+
       for (long i = 0; i < detectionCount; i++)
       {
          // Find most confident class detection
+         Mat confidencePerClass = confidenceMat.col((int) i).rowRange(4, 4 + detectionClassNames.size());
+         DoublePointer minVal = new DoublePointer(1L);
+         DoublePointer maxVal = new DoublePointer(1L);
+         Point minValLocation = new Point(1L);
+         Point maxValLocation = new Point(1L);
+         opencv_core.minMaxLoc(confidencePerClass, minVal, maxVal, minValLocation, maxValLocation, null);
+
          float maxConfidence = 0;
          long maxConfidenceClass = 0;
          for (long j = 0; j < detectionClassNames.size(); j++)
@@ -235,6 +263,7 @@ public class YOLOv8Model implements Destroyable
                maxConfidenceClass = j;
             }
          }
+
          // Ensure confidence is above threshold
          if (maxConfidence < confidenceThreshold)
             continue;

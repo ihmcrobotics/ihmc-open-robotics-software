@@ -202,6 +202,9 @@ public class OpenCVTools
       return resultMat;
    }
 
+   // TODO: Finish this method?
+   // public static void removeRow(Mat in, Mat result, int rowToRemove)
+
    public static Mat convertBufferedImageToMat(BufferedImage image)
    {
       return Java2DFrameUtils.toMat(image);
