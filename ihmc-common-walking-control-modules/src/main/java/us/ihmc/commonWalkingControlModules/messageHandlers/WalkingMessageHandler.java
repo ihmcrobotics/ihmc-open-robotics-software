@@ -29,6 +29,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegionsList;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
+import us.ihmc.humanoidRobotics.communication.packets.walking.ContinuousStepGeneratorMode;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -44,8 +45,8 @@ import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
-import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -98,6 +99,8 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
 
    private final YoBoolean isWalking = new YoBoolean("isWalking", registry);
 
+   private final YoBoolean requestOpenLoopCoPControl = new YoBoolean("requestOpenLoopCoPControl", registry);
+
    private final int numberOfFootstepsToVisualize = 4;
    @SuppressWarnings("unchecked")
    private final YoEnum<RobotSide>[] upcomingFoostepSide = new YoEnum[numberOfFootstepsToVisualize];
@@ -125,6 +128,7 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
 
    private final List<Listener<?>> footstepConsumptionListenerList = new ArrayList<>();
    private final YoBoolean usingQFP = new YoBoolean("usingQFP", registry);
+   private final YoBoolean isWalkingInPlace = new YoBoolean("isWalkingInPlace", registry);
 
    public WalkingMessageHandler(double defaultTransferTime,
                                 double defaultSwingTime,
@@ -169,6 +173,12 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
 
       momentumTrajectoryHandler = new MomentumTrajectoryHandler(yoTime, registry);
       comTrajectoryHandler = new CenterOfMassTrajectoryHandler(yoTime, registry);
+
+      YoVariableChangedListener openLoopCoPListener = change -> requestOpenLoopCoPControl.set(usingQFP.getBooleanValue() && !isWalkingInPlace.getBooleanValue() && !isWalkingPaused.getBooleanValue() && isWalking.getBooleanValue());
+      usingQFP.addListener(openLoopCoPListener);
+      isWalkingInPlace.addListener(openLoopCoPListener);
+      isWalkingPaused.addListener(openLoopCoPListener);
+      isWalking.addListener(openLoopCoPListener);
 
       parentRegistry.addChild(registry);
    }
@@ -285,8 +295,13 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
       boolean areFootstepsAdjustable = command.areFootstepsAdjustable();
       boolean shouldCheckPlanForReachability = command.getShouldCheckForReachability();
 
+      usingQFP.set(command.getFootstep(0).getCsgMode() == ContinuousStepGeneratorMode.QFP);
+      isWalkingInPlace.set(command.getFootstep(0).walkingInPlace);
+
       // TODO make this only for QFP mode once messages for that are made
-      if (footstepStatus.getRobotSide() == command.getFootstep(0).getRobotSide().toByte() && footstepStatus.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED)
+      if (usingQFP.getBooleanValue() &&
+              footstepStatus.getRobotSide() == command.getFootstep(0).getRobotSide().toByte() &&
+              footstepStatus.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED)
          command.removeFootstep(0)
                ;
       for (int i = 0; i < command.getNumberOfFootsteps(); i++)
@@ -805,9 +820,9 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
       return usingQFP;
    }
 
-   public YoBoolean isWalking()
+   public YoBoolean requestOpenLoopCoPControl()
    {
-      return isWalking;
+      return requestOpenLoopCoPControl;
    }
 
    public void setDefaultTransferTime(double transferTime)

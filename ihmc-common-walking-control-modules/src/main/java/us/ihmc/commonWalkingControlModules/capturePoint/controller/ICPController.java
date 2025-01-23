@@ -221,14 +221,14 @@ public class ICPController implements ICPControllerInterface
       {
          YoVariableChangedListener listener = change ->
          {
-            if (walkingMessageHandler.getUsingQFP().getBooleanValue() && walkingMessageHandler.isWalking().getValue())
+            if (walkingMessageHandler.getUsingQFP().getBooleanValue() && walkingMessageHandler.requestOpenLoopCoPControl().getValue())
                usingCoPFeedback.set(false);
             else
                usingCoPFeedback.set(useCoPFeedback.getValue());
          };
 
          walkingMessageHandler.getUsingQFP().addListener(listener);
-         walkingMessageHandler.isWalking().addListener(listener);
+         walkingMessageHandler.requestOpenLoopCoPControl().addListener(listener);
       }
 
       if (yoGraphicsListRegistry != null)

@@ -18,7 +18,6 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.qui
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.communication.packets.ExecutionTiming;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -30,6 +29,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.packets.walking.ContinuousStepGeneratorMode;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactableBody;
@@ -160,11 +160,9 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
    private final MutableObject<FootstepStatus> latestStatusReceived = new MutableObject<>(null);
 
    // All things QFP
-   public enum CSGMode {STANDARD, QFP}
-   private final YoEnum<CSGMode> csgMode = new YoEnum<>("csgMode", registry, CSGMode.class);
+   private final YoEnum<ContinuousStepGeneratorMode> currentCSGMode = new YoEnum<>("currentCSGMode", registry, ContinuousStepGeneratorMode.class);
+   private final YoEnum<ContinuousStepGeneratorMode> requestedCSGMode = new YoEnum<>("requestedCSGMode", registry, ContinuousStepGeneratorMode.class);
    private final OptionalFactoryField<QuicksterFootstepProvider> quicksterFootstepProvider = new OptionalFactoryField<>("QuicksterFootstepProviderField");
-   private final YoBoolean updateFootstepContinuouslyThroughoutSwing = new YoBoolean("updateFootstepContinuouslyThroughoutSwingCSG", registry);
-   private final boolean updateFootstepContinuouslyThroughoutSwingDefault = false;
 
    /**
     * Creates a new step generator, its {@code YoVariable}s will not be attached to any registry.
@@ -188,17 +186,11 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
       numberOfTicksBeforeSubmittingFootsteps.set(0);
       currentFootstepDataListCommandID.set(new Random().nextLong(0, Long.MAX_VALUE / 2)); // To make this command ID unique
 
-      updateFootstepContinuouslyThroughoutSwing.set(updateFootstepContinuouslyThroughoutSwingDefault);
-      csgMode.addListener(change ->
+      currentCSGMode.addListener(change ->
                           {
-                             if (csgMode.getEnumValue() == CSGMode.QFP)
-                             {
-                                updateFootstepContinuouslyThroughoutSwing.set(true);
+                             if (currentCSGMode.getEnumValue() == ContinuousStepGeneratorMode.QFP)
                                 if (quicksterFootstepProvider.hasValue())
-                                 quicksterFootstepProvider.get().initialize();
-                             }
-                             else
-                                updateFootstepContinuouslyThroughoutSwing.set(updateFootstepContinuouslyThroughoutSwingDefault);
+                                   quicksterFootstepProvider.get().initialize();
                           });
 
       setSupportFootBasedFootstepAdjustment(true);
@@ -273,7 +265,7 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
       // Determine swing side
       RobotSide swingSide;
 
-      if (updateFootstepContinuouslyThroughoutSwing.getBooleanValue())
+      if (currentCSGMode.getEnumValue() == ContinuousStepGeneratorMode.QFP)
          footsteps.clear();
 
       if (footsteps.isEmpty())
@@ -296,7 +288,7 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
       }
 
       // Set footstep parameters
-      if (csgMode.getEnumValue() == CSGMode.QFP && quicksterFootstepProvider.hasValue())
+      if (currentCSGMode.getEnumValue() == ContinuousStepGeneratorMode.QFP && quicksterFootstepProvider.hasValue())
       {
          footstepDataListMessage.setDefaultSwingDuration(quicksterFootstepProvider.get().getSwingDuration(swingSide));
          footstepDataListMessage.setDefaultTransferDuration(quicksterFootstepProvider.get().getTransferDuration(swingSide));
@@ -348,7 +340,7 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
       if (quicksterFootstepProvider.hasValue())
       {
          // If in standard mode, keep initializing QFP so its control frame matches pelvis yaw
-         if (csgMode.getEnumValue() == CSGMode.STANDARD)
+         if (currentCSGMode.getEnumValue() == ContinuousStepGeneratorMode.STANDARD)
             quicksterFootstepProvider.get().initialize();
 
          quicksterFootstepProvider.get().update(time);
@@ -357,7 +349,7 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
       for (int i = startingIndexToAdjust; i < parameters.getNumberOfFootstepsToPlan(); i++)
       {
 
-         if (csgMode.getEnumValue() == CSGMode.QFP && quicksterFootstepProvider.hasValue())
+         if (currentCSGMode.getEnumValue() == ContinuousStepGeneratorMode.QFP && quicksterFootstepProvider.hasValue())
          {
             if (i == startingIndexToAdjust)
             {
@@ -410,9 +402,12 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
          //         }
 
          footstep.setRobotSide(swingSide.toByte());
-         if (swingHeightInputProvider == null && csgMode.getEnumValue() == CSGMode.STANDARD)
+         footstep.setCsgMode(currentCSGMode.getEnumValue().toByte());
+         footstep.setWalkingInPlace(desiredVelocityProvider.getDesiredVelocity().getX() == 0 && desiredVelocityProvider.getDesiredVelocity().getY() == 0);
+
+         if (swingHeightInputProvider == null && currentCSGMode.getEnumValue() == ContinuousStepGeneratorMode.STANDARD)
             footstep.setSwingHeight(parameters.getSwingHeight());
-         else if (swingHeightInputProvider == null && csgMode.getEnumValue() == CSGMode.QFP)
+         else if (swingHeightInputProvider == null && currentCSGMode.getEnumValue() == ContinuousStepGeneratorMode.QFP)
             footstep.setSwingHeight(quicksterFootstepProvider.get().getSwingHeight(swingSide));
          else
             footstep.setSwingHeight(swingHeightInputProvider.getValue());
@@ -678,7 +673,9 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
    {
       latestStatusReceived.setValue(FootstepStatus.COMPLETED);
       currentSupportSide.set(robotSide);
-//      update(0.0);
+
+      if (!requestedCSGMode.valueEquals(currentCSGMode.getEnumValue()))
+         currentCSGMode.set(requestedCSGMode.getEnumValue());
    }
 
    /**
