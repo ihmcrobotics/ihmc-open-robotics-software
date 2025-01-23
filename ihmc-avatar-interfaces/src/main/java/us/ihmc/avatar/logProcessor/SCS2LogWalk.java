@@ -19,6 +19,8 @@ public class SCS2LogWalk
    private final SideDependentList<ArrayList<FootStateChange>> footStateChanges = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
    public record FootSwing(double completeTime, double swingDuration) { }
    private final SideDependentList<ArrayList<FootSwing>> footSwings = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
+   public record DoubleSupportDuration(double completeTime, double supportDuration) { }
+   private final ArrayList<DoubleSupportDuration> doubleSupportDurations = new ArrayList<>();
    private final TDoubleArrayList times = new TDoubleArrayList();
    private final RecyclingArrayList<Pose3D> pelvisPoses = new RecyclingArrayList<>(Pose3D::new);
    private final SideDependentList<RecyclingArrayList<Pose3D>> handPoses = new SideDependentList<>(new RecyclingArrayList<>(Pose3D::new),
@@ -66,6 +68,11 @@ public class SCS2LogWalk
    public SideDependentList<ArrayList<FootSwing>> getFootSwings()
    {
       return footSwings;
+   }
+
+   public ArrayList<DoubleSupportDuration> getDoubleSupportDurations()
+   {
+      return doubleSupportDurations;
    }
 
    public boolean isEndedWithFall()

@@ -182,7 +182,7 @@ public class RDXSCS2LogProcessor
                tableFlags += ImGuiTableFlags.BordersV;
                tableFlags += ImGuiTableFlags.NoBordersInBody;
 
-               if (ImGui.beginTable(labels.get("Logs"), 12, tableFlags))
+               if (ImGui.beginTable(labels.get("Logs"), 11, tableFlags))
                {
                   float charWidth = ImGuiTools.calcTextSizeX("A");
                   ImGui.tableSetupColumn(labels.get("Name"), ImGuiTableColumnFlags.WidthFixed, 50 * charWidth);
@@ -196,7 +196,6 @@ public class RDXSCS2LogProcessor
                   ImGui.tableSetupColumn(labels.get("Plot hand poses"), ImGuiTableColumnFlags.WidthFixed, 12 * charWidth);
                   ImGui.tableSetupColumn(labels.get("Plot ICP error"), ImGuiTableColumnFlags.WidthFixed, 12 * charWidth);
                   ImGui.tableSetupColumn(labels.get("Plot step timings"), ImGuiTableColumnFlags.WidthFixed, 12 * charWidth);
-                  ImGui.tableSetupColumn(labels.get("Plot swing durations"), ImGuiTableColumnFlags.WidthFixed, 12 * charWidth);
 
                   ImGui.tableSetupScrollFreeze(0, 1);
                   ImGui.tableHeadersRow();
@@ -437,10 +436,6 @@ public class RDXSCS2LogProcessor
                               }
                            }
                         }, "Plot Step Timings");
-                     }
-                     ImGui.tableNextColumn();
-                     if (ImGuiTools.textWithUnderlineOnHover("Plot swing durations") && ImGui.isMouseClicked(ImGuiMouseButton.Left))
-                     {
                         ThreadTools.startAsDaemon(() ->
                         {
                            String logFolderName = logDirectory.getFileName().toString();
@@ -491,6 +486,56 @@ public class RDXSCS2LogProcessor
                               }
                            }
                         }, "Plot Swing Durations");
+                        ThreadTools.startAsDaemon(() ->
+                        {
+                           String logFolderName = logDirectory.getFileName().toString();
+                           Path csvFile = logDirectory.resolve(logFolderName + "_DoubleSupportDurations.csv");
+
+                           if (Files.exists(csvFile))
+                           {
+                              try
+                              {
+                                 Plot pyplot = Plot.create();
+
+                                 ArrayList<Double> times = new ArrayList<>();
+                                 ArrayList<Double> durations = new ArrayList<>();
+                                 try (BufferedReader reader = Files.newBufferedReader(csvFile))
+                                 {
+                                    reader.readLine(); // skip header
+
+                                    String line;
+                                    boolean processingLeft = true;
+                                    while ((line = reader.readLine()) != null)
+                                    {
+                                       String[] values = line.split(",");
+
+                                       times.add(Double.parseDouble(values[0]));
+                                       durations.add(Double.parseDouble(values[1]));
+                                    }
+
+                                 }
+                                 catch (IOException e)
+                                 {
+                                    throw new RuntimeException("Error reading CSV file.", e);
+                                 }
+
+                                 // Convert Pascal case to title case
+                                 String afterUnderscore = logFolderName.substring(logFolderName.lastIndexOf("_") + 1);
+                                 String titleCaseString = WordUtils.capitalizeFully(afterUnderscore.replaceAll("([a-z])([A-Z])", "$1 $2"));
+
+                                 pyplot.plot().add(times, durations).label("double support durations");
+                                 pyplot.ylim(0.0, durations.stream().max(Double::compare).orElse(0.0) + 0.2);
+                                 pyplot.xlabel("Time (s)");
+                                 pyplot.title("%s Double Support Durations".formatted(titleCaseString));
+                                 pyplot.legend();
+                                 pyplot.show();
+                              }
+                              catch (IOException | PythonExecutionException e)
+                              {
+                                 throw new RuntimeException(e);
+                              }
+                           }
+                        }, "Plot Double Support Durations");
                      }
                   }
 

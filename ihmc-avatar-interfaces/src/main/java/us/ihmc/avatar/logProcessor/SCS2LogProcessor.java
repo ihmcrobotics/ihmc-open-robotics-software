@@ -1,5 +1,6 @@
 package us.ihmc.avatar.logProcessor;
 
+import us.ihmc.avatar.logProcessor.SCS2LogWalk.DoubleSupportDuration;
 import us.ihmc.avatar.logProcessor.SCS2LogWalk.FootStateChange;
 import us.ihmc.avatar.logProcessor.SCS2LogWalk.FootSwing;
 import us.ihmc.commons.thread.ThreadTools;
@@ -263,6 +264,18 @@ public class SCS2LogProcessor
                   for (FootSwing footSwing : timeSorted)
                   {
                      writer.write("%.2f,%.2f".formatted(footSwing.completeTime(), footSwing.swingDuration()));
+                     writer.newLine();
+                  }
+               }
+            });
+
+            writeCSV(logFolderName, "DoubleSupportDurations", "Time,Duration", writer ->
+            {
+               for (SCS2LogWalk logWalk : locomotionData.getLogWalks())
+               {
+                  for (DoubleSupportDuration doubleSupportDuration : logWalk.getDoubleSupportDurations())
+                  {
+                     writer.write("%.2f,%.2f".formatted(doubleSupportDuration.completeTime(), doubleSupportDuration.supportDuration()));
                      writer.newLine();
                   }
                }

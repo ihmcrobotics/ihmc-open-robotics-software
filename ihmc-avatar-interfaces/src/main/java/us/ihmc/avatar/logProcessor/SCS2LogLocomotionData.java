@@ -1,6 +1,7 @@
 package us.ihmc.avatar.logProcessor;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import us.ihmc.avatar.logProcessor.SCS2LogWalk.DoubleSupportDuration;
 import us.ihmc.avatar.logProcessor.SCS2LogWalk.FootStateChange;
 import us.ihmc.avatar.logProcessor.SCS2LogWalk.FootSwing;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
@@ -50,6 +51,8 @@ public class SCS2LogLocomotionData
    private final SideDependentList<ReferenceFrame> footFrames = new SideDependentList<>();
    private boolean requestStopProcessing = false;
    private Robot robot;
+   private final SideDependentList<Boolean> isInSupport = new SideDependentList<>(true, true);
+   private double timeInDoubleSupport = Double.NaN;
 
    public void setup(LogSession logSession)
    {
@@ -163,6 +166,7 @@ public class SCS2LogLocomotionData
          for (SCS2LogFootState footState : footStates.values())
          {
             footState.afterRead(currentTime);
+            ConstraintType changedTo = footState.getStateChanged().peek();
             logWalk.getFootsteps().addAll(footState.getFootsteps());
             footState.getFootsteps().clear();
 
@@ -172,7 +176,21 @@ public class SCS2LogLocomotionData
             if (footState.getSwingCompleted().poll())
                logWalk.getFootSwings().get(footState.getSide()).add(new FootSwing(currentTime, footState.getSwingCompleted().read()));
 
-            // TODO: transfer duration -> BOTH (FULL | TOES) ->
+            if (changedTo != null)
+            {
+               isInSupport.put(footState.getSide(), changedTo == ConstraintType.FULL || changedTo == ConstraintType.TOES);
+
+               if (isInSupport.get(RobotSide.LEFT) && isInSupport.get(RobotSide.RIGHT))
+               {
+                  timeInDoubleSupport = currentTime;
+               }
+               else
+               {
+                  double duration = currentTime - timeInDoubleSupport;
+                  logWalk.getDoubleSupportDurations().add(new DoubleSupportDuration(currentTime, duration));
+                  timeInDoubleSupport = Double.NaN;
+               }
+            }
          }
 
          if (robotStartLocation.containsNaN())
