@@ -438,7 +438,6 @@ extern "C" __global__ void heightMapRegistrationKernel(unsigned short *localMap,
         {
             finalHeight = localHeight;
         }
-        finalHeight = get_spatial_filtered_height(xIndex, yIndex, finalHeight, globalMap, params);
     }
 
     finalHeight += params[HEIGHT_OFFSET];

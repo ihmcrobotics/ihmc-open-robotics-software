@@ -66,7 +66,7 @@ public class StandAloneRealsenseProcess
 
    private void initializeHeightMap()
    {
-      boolean runWithCUDA = false;
+      boolean runWithCUDA = true;
       heightMapUpdateThread = new RapidHeightMapUpdateThread(ros2Helper,
                                                              syncedRobot,
                                                              syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.LEFT),
