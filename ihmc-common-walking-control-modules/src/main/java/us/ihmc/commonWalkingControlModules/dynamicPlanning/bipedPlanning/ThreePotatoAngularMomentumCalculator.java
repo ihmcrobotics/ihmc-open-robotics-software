@@ -5,6 +5,8 @@ import static us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.Co
 import java.util.List;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.time.TimeIntervalProvider;
+import us.ihmc.commons.time.TimeIntervalReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -24,12 +26,10 @@ import us.ihmc.robotics.math.trajectories.FixedFramePolynomialEstimator3D;
 import us.ihmc.robotics.math.trajectories.generators.MultipleSegmentPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.interfaces.PositionTrajectoryGenerator;
+import us.ihmc.robotics.trajectories.interfaces.PositionTrajectoryGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
-import us.ihmc.robotics.time.TimeIntervalProvider;
-import us.ihmc.robotics.time.TimeIntervalReadOnly;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
