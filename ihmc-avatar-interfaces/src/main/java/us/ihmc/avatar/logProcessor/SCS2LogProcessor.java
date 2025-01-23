@@ -1,6 +1,7 @@
 package us.ihmc.avatar.logProcessor;
 
 import us.ihmc.avatar.logProcessor.SCS2LogWalk.FootStateChange;
+import us.ihmc.avatar.logProcessor.SCS2LogWalk.FootSwing;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -24,6 +25,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.function.Consumer;
 
 public class SCS2LogProcessor
@@ -213,11 +216,8 @@ public class SCS2LogProcessor
             ReferenceFrame heelFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(ReferenceFrame.getWorldFrame(),
                                                                                                                 new RigidBodyTransform(footOrientation,
                                                                                                                                        heelPosition));
-
-            try (BufferedWriter writer = Files.newBufferedWriter(logPath.resolve(logFolderName + "_FootstepTimes.csv")))
+            writeCSV(logFolderName, "FootstepTimes", "Index,Time", writer ->
             {
-               writer.write("Index,Time"); // header
-               writer.newLine();
                for (SCS2LogWalk logWalk : locomotionData.getLogWalks())
                {
                   for (int i = 0; i < logWalk.getFootsteps().size(); i++)
@@ -226,16 +226,10 @@ public class SCS2LogProcessor
                      writer.newLine();
                   }
                }
-            }
-            catch (IOException e)
-            {
-               LogTools.error("Failed to write to CSV file.", e);
-            }
+            });
 
-            try (BufferedWriter writer = Files.newBufferedWriter(logPath.resolve(logFolderName + "_FootstepStateTimings.csv")))
+            writeCSV(logFolderName, "FootstepStateTimings", "Side,State,Time", writer ->
             {
-               writer.write("Side,State,Time"); // header
-               writer.newLine();
                for (SCS2LogWalk logWalk : locomotionData.getLogWalks())
                {
                   for (RobotSide side : logWalk.getFootStateChanges().sides())
@@ -253,11 +247,26 @@ public class SCS2LogProcessor
 
                   }
                }
-            }
-            catch (IOException e)
+            });
+
+            writeCSV(logFolderName, "FootstepSwings", "Time,Duration", writer ->
             {
-               LogTools.error("Failed to write to CSV file.", e);
-            }
+               for (SCS2LogWalk logWalk : locomotionData.getLogWalks())
+               {
+                  List<FootSwing> timeSorted = new ArrayList<>();
+
+                  for (RobotSide side : logWalk.getFootSwings().sides())
+                     timeSorted.addAll(logWalk.getFootSwings().get(side));
+
+                  timeSorted.sort(Comparator.comparingDouble(FootSwing::completeTime));
+
+                  for (FootSwing footSwing : timeSorted)
+                  {
+                     writer.write("%.2f,%.2f".formatted(footSwing.completeTime(), footSwing.swingDuration()));
+                     writer.newLine();
+                  }
+               }
+            });
             
             for (RobotSide side : locomotionData.getHandFrames().sides())
             {
@@ -314,6 +323,25 @@ public class SCS2LogProcessor
       }
 
       locomotionData = null;
+   }
+
+   private interface WriteFunction
+   {
+      void accept(BufferedWriter writer) throws IOException;
+   }
+
+   private void writeCSV(String logFolderName, String fileName, String header, WriteFunction writeFunction)
+   {
+      try (BufferedWriter writer = Files.newBufferedWriter(logPath.resolve("%s_%s.csv".formatted(logFolderName, fileName))))
+      {
+         writer.write(header);
+         writer.newLine();
+         writeFunction.accept(writer);
+      }
+      catch (IOException e)
+      {
+         LogTools.error("Failed to write to CSV file.", e);
+      }
    }
 
    private void writeJSON(boolean numEntriesOnly)
