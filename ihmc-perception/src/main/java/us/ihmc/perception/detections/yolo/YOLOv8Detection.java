@@ -4,20 +4,30 @@ import org.bytedeco.opencv.opencv_core.Rect;
 import us.ihmc.perception.RawImage;
 import us.ihmc.tools.Destroyable;
 
-public record YOLOv8Detection(String objectClass, float confidence, Rect boundingBox, RawImage mask) implements Destroyable
+public record YOLOv8Detection(String objectClass, float confidence, int boundingBoxX, int boundingBoxY, int boundingBoxWidth, int boundingBoxHeight, RawImage mask) implements Destroyable
 {
    public YOLOv8Detection(String objectClass, float confidence, Rect boundingBox, RawImage mask)
    {
+      this(objectClass, confidence, boundingBox.x(), boundingBox.y(), boundingBox.width(), boundingBox.height(), mask);
+   }
+
+   public YOLOv8Detection(String objectClass, float confidence, int boundingBoxX, int boundingBoxY, int boundingBoxWidth, int boundingBoxHeight, RawImage mask)
+   {
       this.objectClass = objectClass;
       this.confidence = confidence;
-      this.boundingBox = boundingBox;
+      this.boundingBoxX = boundingBoxX;
+      this.boundingBoxY = boundingBoxY;
+      this.boundingBoxWidth = boundingBoxWidth;
+      this.boundingBoxHeight = boundingBoxHeight;
       this.mask = mask.get();
    }
 
-   @Override
+   /**
+    * @return A new {@link Rect} of the bounding box dimensions.
+    */
    public Rect boundingBox()
    {
-      return new Rect(boundingBox);
+      return new Rect(boundingBoxX, boundingBoxY, boundingBoxWidth, boundingBoxHeight);
    }
 
    /**
@@ -35,6 +45,5 @@ public record YOLOv8Detection(String objectClass, float confidence, Rect boundin
    public void destroy()
    {
       mask.release();
-      boundingBox.close();
    }
 }
