@@ -41,15 +41,10 @@ public class YOLOv8Model implements Destroyable
    // Meta data
    private final String modelName;
    private final List<String> detectionClassNames = new ArrayList<>();
-   private final Path onnxFile;
 
    // OpenCV DNN stuff
    private final Net yoloNet;
    private final StringVector outputNames; // literally list of "output0", "output1", "output2"...
-
-   // Extra data
-   private RawImage bgrInputImage = null;
-   private Mat zeros = null;
 
    public YOLOv8Model(Path modelBaseDirectory)
    {
@@ -59,23 +54,23 @@ public class YOLOv8Model implements Destroyable
 
       // Get name & onnx file path
       modelName = modelBaseDirectory.getFileName().toString();
-      onnxFile = YOLOv8Tools.getONNXFile(modelBaseDirectory);
 
-      // Parse class_names.yaml
       try (InputStream inputStream = new FileInputStream(YOLOv8Tools.getClassNamesFile(modelBaseDirectory).toFile()))
       {
+         // Parse class_names.yaml
          Yaml yaml = new Yaml();
          Map<String, List<String>> classNamesData = yaml.load(inputStream);
          List<String> names = classNamesData.get("names");
          detectionClassNames.addAll(names);
+
+         // Read the YOLO net
+         Path onnxFile = YOLOv8Tools.getONNXFile(modelBaseDirectory);
+         yoloNet = opencv_dnn.readNetFromONNX(Files.readAllBytes(onnxFile));
       }
       catch (IOException e)
       {
          throw new RuntimeException(e);
       }
-
-      // Create OpenCV DNN objects
-      yoloNet = opencv_dnn.readNetFromONNX(readONNXFile());
 
       // Use CUDA if available
       if (opencv_core.getCudaEnabledDeviceCount() > 0)
@@ -109,17 +104,12 @@ public class YOLOv8Model implements Destroyable
       return detectionClassNames;
    }
 
-   // TODO: Remove
-   public String getObjectClassFromIndex(int i)
-   {
-      return detectionClassNames.get(i);
-   }
-
    public YOLOv8DetectionList run(RawImage image, float confidenceThreshold, float nmsThreshold, float maskThreshold)
    {
       YOLOv8DetectionList result = new YOLOv8DetectionList();
 
       // Ensure image is in BGR format
+      RawImage bgrInputImage;
       if (image.getPixelFormat() == PixelFormat.BGR8)
       {
          bgrInputImage = image.get();
@@ -151,7 +141,6 @@ public class YOLOv8Model implements Destroyable
 
          // Get some useful stuff
          CameraIntrinsics maskIntrinsics = computeMaskIntrinsics(outputBlobs, bgrInputImage);
-         zeros = new Mat(maskIntrinsics.getHeight(), maskIntrinsics.getWidth(), opencv_core.CV_32F, new Scalar(0.0));
          int shiftWidth = (bgrInputImage.getWidth() - DETECTION_SIZE.width()) / 2;
          int shiftHeight = (bgrInputImage.getHeight() - DETECTION_SIZE.height()) / 2;
 
@@ -180,14 +169,13 @@ public class YOLOv8Model implements Destroyable
 
             Rect boundingBox = boundingBoxes.get(index);
             Rect shiftedBox = new Rect(boundingBox.x() + shiftWidth, boundingBox.y() + shiftHeight, boundingBox.width(), boundingBox.height());
-            RawImage mask = computeDetectionMask(outputBlobs, weights, shiftedBox, maskThreshold, maskIntrinsics);
+            RawImage mask = computeDetectionMask(outputBlobs, weights, shiftedBox, maskThreshold, maskIntrinsics, bgrInputImage);
             YOLOv8Detection detection = new YOLOv8Detection(detectionClassNames.get(classIDs.get(index)), confidences.get(index), shiftedBox, mask);
             result.add(detection);
          }
       }
 
       bgrInputImage.release();
-      bgrInputImage = null;
 
       return result;
    }
@@ -255,9 +243,10 @@ public class YOLOv8Model implements Destroyable
       return new CameraIntrinsics(maskHeight, maskWidth, maskFocalLengthX, maskFocalLengthY, maskPrincipalPointX, maskPrincipalPointY);
    }
 
-   private RawImage computeDetectionMask(MatVector outputBlobs, float[] maskWeights, Rect boundingBox, float maskThreshold, CameraIntrinsics maskIntrinsics)
+   private RawImage computeDetectionMask(MatVector outputBlobs, float[] maskWeights, Rect boundingBox, float maskThreshold, CameraIntrinsics maskIntrinsics, RawImage bgrInputImage)
    {
       // Get float value mask
+      Mat zeros = new Mat(maskIntrinsics.getHeight(), maskIntrinsics.getWidth(), opencv_core.CV_32F, new Scalar(0.0));
       MatExpr floatMask = new MatExpr(zeros);
       for (int i = 0; i < maskWeights.length; ++i)
       {
@@ -268,6 +257,7 @@ public class YOLOv8Model implements Destroyable
          mask.close();
          weightMultipliedMask.close();
       }
+      zeros.close();
 
       // Apply threshold to get binary mask
       Mat binaryMask = new Mat();
@@ -294,17 +284,5 @@ public class YOLOv8Model implements Destroyable
                           bgrInputImage.getAcquisitionTime(),
                           bgrInputImage.getSequenceNumber(),
                           bgrInputImage.getDepthDiscretization());
-   }
-
-   public byte[] readONNXFile()
-   {
-      try
-      {
-         return Files.readAllBytes(onnxFile);
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
-      }
    }
 }
