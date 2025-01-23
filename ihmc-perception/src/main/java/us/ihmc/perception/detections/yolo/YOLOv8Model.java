@@ -65,8 +65,8 @@ public class YOLOv8Model implements Destroyable
       try (InputStream inputStream = new FileInputStream(YOLOv8Tools.getClassNamesFile(modelBaseDirectory).toFile()))
       {
          Yaml yaml = new Yaml();
-         Map<String, Object> classNamesData = yaml.load(inputStream);
-         List<String> names = (List<String>) classNamesData.get("names");
+         Map<String, List<String>> classNamesData = yaml.load(inputStream);
+         List<String> names = classNamesData.get("names");
          detectionClassNames.addAll(names);
       }
       catch (IOException e)
