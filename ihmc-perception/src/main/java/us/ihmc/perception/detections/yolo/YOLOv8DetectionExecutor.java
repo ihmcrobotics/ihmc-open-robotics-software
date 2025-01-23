@@ -8,7 +8,9 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Size;
 import perception_msgs.msg.dds.ImageMessage;
-import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.thread.RepeatingTaskThread;
+import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -25,16 +27,14 @@ import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2Publisher;
-import us.ihmc.tools.thread.RestartableThrottledThread;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
@@ -45,17 +45,18 @@ public class YOLOv8DetectionExecutor
 
    private final List<Consumer<List<InstantDetection>>> detectionConsumerCallbacks = new ArrayList<>();
 
-   private final BooleanSupplier isDemandedSupplier;
+   private final BooleanSupplier annotatedImageDemanded;
    private final ROS2Publisher<ImageMessage> annotatedImagePublisher;
 
    // TODO: temp hack
    private int lastRunDetectorIndex = 0;
    private final List<YOLOv8Model> yoloModels = new ArrayList<>();
-   private final ExecutorService yoloExecutorService = Executors.newCachedThreadPool(ThreadTools.createNamedThreadFactory("YOLOExecutor"));
+   private final BlockingQueue<Runnable> taskQueue;
+   private final RepeatingTaskThread taskExecutorThread = new RepeatingTaskThread("YOLOExecutor", this::executeTasks, DefaultExceptionHandler.RUNTIME_EXCEPTION);
 
-   private final RestartableThrottledThread annotatedImagePublishedThread;
+   private final RepeatingTaskThread annotatedImagePublishedThread;
    private final Map<Integer, YOLOv8DetectionList> yoloDetectionResults = new ConcurrentHashMap<>();
-   private volatile RawImage newestColorImage = null;
+   private final TypedNotification<RawImage> newestColorImage = new TypedNotification<>();
 
    private float yoloConfidenceThreshold = 0.5f;
    private float yoloNMSThreshold = 0.1f;
@@ -63,9 +64,9 @@ public class YOLOv8DetectionExecutor
    private int erosionKernelRadius = 2;
    private double outlierThreshold = 1.0;
 
-   public YOLOv8DetectionExecutor(ROS2Helper ros2Helper, BooleanSupplier isDemandedSupplier)
+   public YOLOv8DetectionExecutor(ROS2Helper ros2Helper, BooleanSupplier annotatedImageDemanded)
    {
-      this.isDemandedSupplier = isDemandedSupplier;
+      this.annotatedImageDemanded = annotatedImageDemanded;
 
       ROS2Node ros2Node = new ROS2NodeBuilder().build("yolo_detection_manager");
       annotatedImagePublisher = ros2Node.createPublisher(PerceptionAPI.YOLO_ANNOTATED_IMAGE);
@@ -92,8 +93,11 @@ public class YOLOv8DetectionExecutor
       if (yoloModels.isEmpty())
          LogTools.error("No YOLO models found. YOLO will not run.");
 
-      annotatedImagePublishedThread = new RestartableThrottledThread("YOLOAnnotatedImagePublisher", 15.0, this::annotateAndPublishImage);
-      annotatedImagePublishedThread.start();
+      taskQueue = new ArrayBlockingQueue<>(2 * yoloModels.size());
+      taskExecutorThread.startRepeating();
+
+      annotatedImagePublishedThread = new RepeatingTaskThread("YOLOAnnotatedImagePublisher", this::annotateAndPublishImage, DefaultExceptionHandler.RUNTIME_EXCEPTION);
+      annotatedImagePublishedThread.startRepeating();
    }
 
    public void addDetectionConsumerCallback(Consumer<List<InstantDetection>> callback)
@@ -121,13 +125,13 @@ public class YOLOv8DetectionExecutor
     */
    public void runYOLODetection(YOLOv8Model yoloModel, RawImage colorImage, RawImage depthImage)
    {
-      if (!yoloExecutorService.isShutdown())
+      if (!yoloModel.isNetProcessing() && taskQueue.remainingCapacity() > 0)
       {
          // Acquire the images
          if (colorImage.get() == null || depthImage.get() == null)
             return;
 
-         yoloExecutorService.submit(() ->
+         taskQueue.add(() ->
          {
             // Run YOLO to get results
             GpuMat bgrMat = new GpuMat();
@@ -142,7 +146,10 @@ public class YOLOv8DetectionExecutor
                   yoloDetectionResults.remove(lastRunDetectorIndex).destroy();
                yoloDetectionResults.put(lastRunDetectorIndex, yoloResults);
             }
-            newestColorImage = bgrImage;
+
+            if (newestColorImage.poll())
+               newestColorImage.read().release();
+            newestColorImage.set(bgrImage.get());
 
             // Create list of instant detections from results
             List<InstantDetection> yoloInstantDetections = new ArrayList<>();
@@ -183,8 +190,9 @@ public class YOLOv8DetectionExecutor
                erodedMask.release();
             }
 
-            // Submit the callbacks to be processed
-            yoloExecutorService.submit(() -> detectionConsumerCallbacks.forEach(callback -> callback.accept(yoloInstantDetections)));
+            // Process callbacks
+            if (!yoloInstantDetections.isEmpty())
+               detectionConsumerCallbacks.forEach(callback -> callback.accept(yoloInstantDetections));
 
             bgrImage.release();
             colorImage.release();
@@ -196,10 +204,9 @@ public class YOLOv8DetectionExecutor
    public void destroy()
    {
       System.out.println("Destroying " + getClass().getSimpleName());
-      shutdownExecutor();
+      taskExecutorThread.blockingKill();
       segmenter.destroy();
-      extractor.destroy();
-      annotatedImagePublishedThread.blockingStop();
+      annotatedImagePublishedThread.blockingKill();
 
       for (YOLOv8Model yoloModel : yoloModels)
          yoloModel.destroy();
@@ -210,37 +217,21 @@ public class YOLOv8DetectionExecutor
       System.out.println("Destroyed " + getClass().getSimpleName());
    }
 
-   private void shutdownExecutor()
+   private void executeTasks()
    {
-      yoloExecutorService.shutdown();
       try
       {
-         if (!yoloExecutorService.awaitTermination(2, TimeUnit.SECONDS))
-         {
-            yoloExecutorService.shutdownNow();
-            if (!yoloExecutorService.awaitTermination(2, TimeUnit.SECONDS))
-               LogTools.error("YOLO executor failed to shutdown");
-         }
+         taskQueue.take().run();
       }
-      catch (InterruptedException e)
-      {
-         yoloExecutorService.shutdownNow();
-         LogTools.error(e);
-      }
+      catch (InterruptedException ignored) {}
    }
 
-   public void annotateAndPublishImage()
+   private void annotateAndPublishImage()
    {
-      if (!isDemandedSupplier.getAsBoolean())
+      if (!annotatedImageDemanded.getAsBoolean())
          return;
 
-      if (newestColorImage == null)
-         return;
-
-      RawImage colorImage = newestColorImage.get();
-      if (colorImage == null)
-         return;
-
+      RawImage colorImage = newestColorImage.blockingPoll();
       Mat resultMat = new Mat();
       synchronized (yoloDetectionResults)
       {

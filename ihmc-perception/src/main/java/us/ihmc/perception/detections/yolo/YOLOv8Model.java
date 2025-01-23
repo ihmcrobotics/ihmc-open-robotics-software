@@ -46,6 +46,8 @@ public class YOLOv8Model implements Destroyable
    private final Net yoloNet;
    private final StringVector outputNames; // literally list of "output0", "output1", "output2"...
 
+   private volatile boolean netProcessing = false;
+
    public YOLOv8Model(Path modelBaseDirectory)
    {
       // Ensure the passed in directory is a valid YOLO model directory
@@ -104,6 +106,11 @@ public class YOLOv8Model implements Destroyable
       return detectionClassNames;
    }
 
+   public boolean isNetProcessing()
+   {
+      return netProcessing;
+   }
+
    public YOLOv8DetectionList run(RawImage image, float confidenceThreshold, float nmsThreshold, float maskThreshold)
    {
       YOLOv8DetectionList result = new YOLOv8DetectionList();
@@ -130,13 +137,15 @@ public class YOLOv8Model implements Destroyable
            RectVector boundingBoxes = new RectVector();
            IntPointer reducedIndices = new IntPointer())
       {
+
          synchronized (yoloNet)
-         {
-            // Run the net
+         {  // Run the net
+            netProcessing = true;
             Mat blob = opencv_dnn.blobFromImage(bgrInputImage.getCpuImageMat(), SCALE_FACTOR, DETECTION_SIZE, new Scalar(), true, true, opencv_core.CV_32F);
             yoloNet.setInput(blob);
             yoloNet.forward(outputBlobs, outputNames);
             blob.close();
+            netProcessing = false;
          }
 
          // Get some useful stuff
