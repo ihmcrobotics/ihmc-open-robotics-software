@@ -178,7 +178,7 @@ public class YOLOv8DetectionExecutor
                   return;
 
                // Create an instant detection from data
-               YOLOv8InstantDetection instantDetection = new YOLOv8InstantDetection(detection.name(),
+               YOLOv8InstantDetection instantDetection = new YOLOv8InstantDetection(detection.objectClass(),
                                                                                     detection.confidence(),
                                                                                     new Pose3D(centroid, new RotationMatrix()),
                                                                                     objectMask.getAcquisitionTime(),

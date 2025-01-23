@@ -143,7 +143,7 @@ public class YOLOv8Tools
 
       for (YOLOv8Detection detection : detections)
       {
-         String text = String.format("%s: %.2f", detection.name(), detection.confidence());
+         String text = String.format("%s: %.2f", detection.objectClass(), detection.confidence());
 
          // Draw the bounding box
          Rect boundingBox = detection.boundingBox();
