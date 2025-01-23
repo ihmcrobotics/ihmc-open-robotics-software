@@ -7,21 +7,19 @@ import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import org.apache.logging.log4j.core.util.ExecutorServices;
-import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point;
-import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import org.bytedeco.opencv.opencv_core.Size;
-import us.ihmc.commons.MathTools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.detections.yolo.YOLOv8Detection;
+import us.ihmc.perception.detections.yolo.YOLOv8DetectionList;
 import us.ihmc.perception.detections.yolo.YOLOv8Model;
 import us.ihmc.perception.detections.yolo.YOLOv8Tools;
 import us.ihmc.perception.imageMessage.PixelFormat;
@@ -52,13 +50,6 @@ import java.util.concurrent.TimeUnit;
 
 public class RDXYOLOv8PipelineDemo
 {
-   private static final int FONT = opencv_imgproc.FONT_HERSHEY_DUPLEX;
-   private static final double FONT_SCALE = 1.5;
-   private static final int FONT_THICKNESS = 2;
-   private static final int LINE_TYPE = opencv_imgproc.LINE_4;
-   private static final Scalar BOUNDING_BOX_COLOR = new Scalar(0.0, 196.0, 0.0, 255.0);
-   private static final Mat GREEN_MAT = new Mat(1, 1, opencv_core.CV_8UC3, new Scalar(0.0, 255.0, 0.0, 255.0));
-
    private static final String SVO_FILE = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20240715_103234_ZEDRecording_NewONRCourseWalk.svo2").toAbsolutePath().toString();
 
    private static final String SAVE_DIRECTORY = System.getProperty("user.home") + File.separator + "Documents" + File.separator;
@@ -267,7 +258,7 @@ public class RDXYOLOv8PipelineDemo
       Mat bgrMat = new Mat();
       opencv_imgproc.cvtColor(colorImage.getCpuImageMat(), bgrMat, opencv_imgproc.COLOR_BGRA2BGR);
       RawImage bgrImage = colorImage.replaceImage(bgrMat, PixelFormat.BGR8);
-      List<YOLOv8Detection> results = model.run(bgrImage, confidenceThreshold.get(), nmsThreshold.get(), maskThreshold.get());
+      YOLOv8DetectionList results = model.run(bgrImage, confidenceThreshold.get(), nmsThreshold.get(), maskThreshold.get());
       if (results.isEmpty())
          return;
 
@@ -298,8 +289,8 @@ public class RDXYOLOv8PipelineDemo
       detectionMask = detection.mask();
 
       // Get an annotated image
-      annotatedImage = bgrImage.replaceImage(bgrImage.getCpuImageMat().clone());
-      annotateImage(detection, annotatedImage);
+      annotatedImage = bgrImage.replaceImage(new Mat(bgrImage.getCpuImageMat().size(), bgrImage.getOpenCVType()));
+      YOLOv8Tools.annotateImage(bgrImage.getCpuImageMat(), annotatedImage.getCpuImageMat(), List.of(detection));
 
       // Get the eroded mask
       Mat erodedMat = new Mat();
@@ -318,8 +309,7 @@ public class RDXYOLOv8PipelineDemo
 
       // Release stuff
       bgrImage.release();
-      for (YOLOv8Detection yoloDetection : results)
-         yoloDetection.destroy();
+      results.destroy();
    }
 
    private Point3D32 findCentroid(RawImage depthImage)
@@ -333,52 +323,6 @@ public class RDXYOLOv8PipelineDemo
       centroid.scale(1.0 / pointCloud.size());
 
       return centroid;
-   }
-
-   private void annotateImage(YOLOv8Detection detection, RawImage imageToAnnotate)
-   {
-      Mat annotatedMat = imageToAnnotate.getCpuImageMat();
-      String text = String.format("%s: %.2f", detection.name(), detection.confidence());
-
-      // Draw the bounding box
-      Rect boundingBox = detection.boundingBox();
-      opencv_imgproc.rectangle(annotatedMat, boundingBox, BOUNDING_BOX_COLOR, 5, LINE_TYPE, 0);
-
-      // Draw text background
-      Size textSize = opencv_imgproc.getTextSize(text, FONT, FONT_SCALE, FONT_THICKNESS, new IntPointer());
-
-      int textBoxClampedX = MathTools.clamp(boundingBox.x(), 0, imageToAnnotate.getWidth() - textSize.width());
-      int textBoxClampedY = MathTools.clamp(boundingBox.y() - textSize.height(), 0, imageToAnnotate.getHeight() - textSize.height());
-
-      Rect textBox = new Rect(textBoxClampedX, textBoxClampedY, textSize.width(), textSize.height());
-
-      opencv_imgproc.rectangle(annotatedMat, textBox, BOUNDING_BOX_COLOR, opencv_imgproc.FILLED, LINE_TYPE, 0);
-
-      opencv_imgproc.putText(annotatedMat,
-                             text,
-                             new Point(textBoxClampedX, textBoxClampedY + textSize.height()),
-                             opencv_imgproc.CV_FONT_HERSHEY_DUPLEX,
-                             FONT_SCALE,
-                             new Scalar(255.0, 255.0, 255.0, 255.0),
-                             FONT_THICKNESS,
-                             LINE_TYPE,
-                             false);
-
-      // Add green tint to show mask
-      RawImage mask = detection.mask();
-      Mat maskMat = mask.getCpuImageMat().clone();
-
-      // resize the mask to fit the result image
-      opencv_imgproc.resize(maskMat, maskMat, annotatedMat.size(), 0.0, 0.0, opencv_imgproc.INTER_NEAREST);
-
-      // ensure the green Mat is same size as image
-      if (annotatedMat.cols() != GREEN_MAT.cols() || annotatedMat.rows() != GREEN_MAT.rows())
-         opencv_imgproc.resize(GREEN_MAT, GREEN_MAT, annotatedMat.size());
-
-      // add a green tint where mask = 255
-      opencv_core.add(annotatedMat, GREEN_MAT, annotatedMat, maskMat, -1);
-      maskMat.close();
-      mask.release();
    }
 
    private void updateRenderables()

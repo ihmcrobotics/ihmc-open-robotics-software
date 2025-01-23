@@ -115,9 +115,9 @@ public class YOLOv8Model implements Destroyable
       return detectionClassNames.get(i);
    }
 
-   public List<YOLOv8Detection> run(RawImage image, float confidenceThreshold, float nmsThreshold, float maskThreshold)
+   public YOLOv8DetectionList run(RawImage image, float confidenceThreshold, float nmsThreshold, float maskThreshold)
    {
-      List<YOLOv8Detection> result = new ArrayList<>();
+      YOLOv8DetectionList result = new YOLOv8DetectionList();
 
       // Ensure image is in BGR format
       if (image.getPixelFormat() == PixelFormat.BGR8)
@@ -133,17 +133,21 @@ public class YOLOv8Model implements Destroyable
          bgrInputImage = image.replaceImage(bgrMat, PixelFormat.BGR8);
       }
 
-      try (Mat blob = opencv_dnn.blobFromImage(bgrInputImage.getCpuImageMat(), SCALE_FACTOR, DETECTION_SIZE, new Scalar(), true, true, opencv_core.CV_32F);
-           MatVector outputBlobs = new MatVector();
+      try (MatVector outputBlobs = new MatVector();
            IntVector classIDs = new IntVector();
            FloatVector confidences = new FloatVector();
            FloatVector maskWeights = new FloatVector();
            RectVector boundingBoxes = new RectVector();
            IntPointer reducedIndices = new IntPointer())
       {
-         // Run the net
-         yoloNet.setInput(blob);
-         yoloNet.forward(outputBlobs, outputNames);
+         synchronized (yoloNet)
+         {
+            // Run the net
+            Mat blob = opencv_dnn.blobFromImage(bgrInputImage.getCpuImageMat(), SCALE_FACTOR, DETECTION_SIZE, new Scalar(), true, true, opencv_core.CV_32F);
+            yoloNet.setInput(blob);
+            yoloNet.forward(outputBlobs, outputNames);
+            blob.close();
+         }
 
          // Get some useful stuff
          CameraIntrinsics maskIntrinsics = computeMaskIntrinsics(outputBlobs, bgrInputImage);
