@@ -96,21 +96,42 @@ public class YOLOv8Model implements Destroyable
       outputNames.close();
    }
 
+   /**
+    * Get the name of the model. The name of the model's directory is used.
+    *
+    * @return The name of the model.
+    */
    public String getName()
    {
       return modelName;
    }
 
+   /**
+    * @return A list of object classes this model can detect.
+    */
    public List<String> getDetectionClassNames()
    {
       return detectionClassNames;
    }
 
+   /**
+    * @return Whether the YOLO network is currently processing.
+    */
    public boolean isNetProcessing()
    {
       return netProcessing;
    }
 
+   /**
+    * Run YOLO object detection and segmentation on the passed in {@code image}.
+    *
+    * @param image               Image to run YOLO on. If this image isn't in BGR format, it will be converted to BGR.
+    *                            Pass in BGR images for optimal performance.
+    * @param confidenceThreshold Minimum confidence detections must have to be considered valid [0.0, 1.0].
+    * @param nmsThreshold        Non-maximum suppression threshold.
+    * @param maskThreshold       Minimum value for a pixel to be part of the mask [0.0, 1.0].
+    * @return List of {@link YOLOv8Detection}s found in the image.
+    */
    public YOLOv8DetectionList run(RawImage image, float confidenceThreshold, float nmsThreshold, float maskThreshold)
    {
       YOLOv8DetectionList result = new YOLOv8DetectionList();

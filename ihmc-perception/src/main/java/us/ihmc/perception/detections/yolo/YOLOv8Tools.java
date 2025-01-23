@@ -129,6 +129,13 @@ public class YOLOv8Tools
       return centroid;
    }
 
+   /**
+    * Annotates the {@code inputImage} using the {@code detections} and puts the result in {@code annotatedImage}.
+    *
+    * @param inputImage     Image on which YOLO was run on.
+    * @param annotatedImage Annotated output Mat.
+    * @param detections     YOLO detections.
+    */
    public static void annotateImage(Mat inputImage, Mat annotatedImage, List<YOLOv8Detection> detections)
    {
       int font = opencv_imgproc.FONT_HERSHEY_DUPLEX;

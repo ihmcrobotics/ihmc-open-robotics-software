@@ -4,6 +4,10 @@ import us.ihmc.tools.Destroyable;
 
 import java.util.ArrayList;
 
+/**
+ * {@link ArrayList} of YOLO detections.
+ * Helpful for destroying all YOLO detections in the list.
+ */
 public class YOLOv8DetectionList extends ArrayList<YOLOv8Detection> implements Destroyable
 {
    @Override
