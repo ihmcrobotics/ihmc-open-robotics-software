@@ -1,3 +1,5 @@
+#include "HeightMapUtils.cuh"
+#include "MathUtils.cuh"
 
 extern "C"
 #define LOCAL_CELL_SIZE 0
@@ -65,31 +67,6 @@ extern "C"
 #define NOT_ENOUGH_AREA 0
 #define VALID 4
 
-__device__ float index_to_coordinate(int index, float center, float resolution, int center_index)
-{
-    return (index - center_index) * resolution + center;
-}
-
-__device__ float2 indices_to_coordinate(int2 index, float2 center, float resolution, int center_index)
-{
-    return make_float2(index_to_coordinate(index.x, center.x, resolution, center_index), index_to_coordinate(index.y, center.y, resolution, center_index));
-}
-
-__device__ float dot(const float3 a, const float3 b)
-{
-    return a.x * b.x + a.y * b.y + a.z * b.z;
-}
-
-__device__ int coordinate_to_index(float coordinate, float center, float resolution, int center_index)
-{
-    return round((coordinate - center) / resolution) + center_index;
-}
-
-__device__ int2 coordinate_to_indices(float2 coordinates, float2 center, float resolution, int center_index)
-{
-    return make_int2(coordinate_to_index(coordinates.x, center.x, resolution, center_index), coordinate_to_index(coordinates.y, center.y, resolution, center_index));
-}
-
 __device__ int2 spherical_projection(float3 cellCenter, float *params)
 {
     float pitchUnit = VERTICAL_FOV / (params[DEPTH_INPUT_HEIGHT]);
@@ -143,22 +120,6 @@ __device__ float3 back_project_perspective(int2 pos, float Z, float *params)
     float Y = (pos.y - params[DEPTH_CY]) / params[DEPTH_FY] * Z;
     float3 point = make_float3(Z, -X, -Y);
     return point;
-}
-
-__device__ float3 transformPoint3D32_2(float3 point, float3 rotationMatrixRow0, float3 rotationMatrixRow1, float3 rotationMatrixRow2, float3 translation)
-{
-    return make_float3(dot(rotationMatrixRow0, point) + translation.x, dot(rotationMatrixRow1, point) + translation.y,
-                       dot(rotationMatrixRow2, point) + translation.z);
-}
-
-__device__ float clamp(float value, float minVal, float maxVal)
-{
-    return fminf(fmaxf(value, minVal), maxVal);
-}
-
-__device__ float length2D(float2 vec)
-{
-    return sqrtf(vec.x * vec.x + vec.y * vec.y);
 }
 
 __device__ float get_spatial_average(int xIndex, int yIndex, unsigned short *globalMap, float *params)
