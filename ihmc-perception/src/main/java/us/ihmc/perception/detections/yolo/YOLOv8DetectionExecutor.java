@@ -49,13 +49,13 @@ public class YOLOv8DetectionExecutor
    private final ROS2Publisher<ImageMessage> annotatedImagePublisher;
 
    // TODO: temp hack
-   private int lastRunDetectorIndex = 0;
+   private int lastRunModelIndex = 0;
    private final List<YOLOv8Model> yoloModels = new ArrayList<>();
    private final BlockingQueue<Runnable> taskQueue;
    private final RepeatingTaskThread taskExecutorThread = new RepeatingTaskThread("YOLOExecutor", this::executeTasks, DefaultExceptionHandler.RUNTIME_EXCEPTION);
 
    private final RepeatingTaskThread annotatedImagePublishedThread;
-   private final Map<Integer, YOLOv8DetectionList> yoloDetectionResults = new ConcurrentHashMap<>();
+   private final Map<YOLOv8Model, YOLOv8DetectionList> yoloDetectionResults = new ConcurrentHashMap<>();
    private final TypedNotification<RawImage> newestColorImage = new TypedNotification<>();
 
    private float yoloConfidenceThreshold = 0.5f;
@@ -110,10 +110,10 @@ public class YOLOv8DetectionExecutor
       if (yoloModels.isEmpty())
          return;
 
-      if (lastRunDetectorIndex + 1 > yoloModels.size())
-         lastRunDetectorIndex = 0;
+      if (lastRunModelIndex + 1 > yoloModels.size())
+         lastRunModelIndex = 0;
 
-      YOLOv8Model yoloModel = yoloModels.get(lastRunDetectorIndex++);
+      YOLOv8Model yoloModel = yoloModels.get(lastRunModelIndex++);
 
       runYOLODetection(yoloModel, colorImage, depthImage);
    }
@@ -142,9 +142,9 @@ public class YOLOv8DetectionExecutor
             // TODO: temp hack
             synchronized (yoloDetectionResults)
             {
-               if (yoloDetectionResults.containsKey(lastRunDetectorIndex))
-                  yoloDetectionResults.remove(lastRunDetectorIndex).destroy();
-               yoloDetectionResults.put(lastRunDetectorIndex, yoloResults);
+               if (yoloDetectionResults.containsKey(yoloModel))
+                  yoloDetectionResults.remove(yoloModel).destroy();
+               yoloDetectionResults.put(yoloModel, yoloResults);
             }
 
             if (newestColorImage.poll())
