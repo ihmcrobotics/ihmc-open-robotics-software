@@ -4,9 +4,11 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.avatar.logProcessor.SCS2LogWalk.DoubleSupportDuration;
 import us.ihmc.avatar.logProcessor.SCS2LogWalk.FootStateChange;
 import us.ihmc.avatar.logProcessor.SCS2LogWalk.FootSwing;
+import us.ihmc.avatar.logProcessor.SCS2LogWalk.ICPErrorEntry;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -176,6 +178,8 @@ public class SCS2LogLocomotionData
       {
          SCS2LogWalk logWalk = getCurrentLogWalk();
          logWalk.update(currentTime, tick, workingCounterMismatch);
+
+         logWalk.getICPErrors().add(new ICPErrorEntry(currentTime, new Vector2D(capturePointError)));
 
          for (SCS2LogFootState footState : footStates.values())
          {

@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -14,6 +15,8 @@ public class SCS2LogWalk
 {
    private long walkStartTick = -1;
    private final Point2D walkStart = new Point2D();
+   public record ICPErrorEntry(double time, Vector2D icpError) { }
+   private final ArrayList<ICPErrorEntry> icpErrors = new ArrayList<>();
    private final ArrayList<SCS2LogFootstep> footsteps = new ArrayList<>();
    public record FootStateChange(double time, ConstraintType state) { }
    private final SideDependentList<ArrayList<FootStateChange>> footStateChanges = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
@@ -53,6 +56,11 @@ public class SCS2LogWalk
    public Point2D getWalkStart()
    {
       return walkStart;
+   }
+
+   public ArrayList<ICPErrorEntry> getICPErrors()
+   {
+      return icpErrors;
    }
 
    public ArrayList<SCS2LogFootstep> getFootsteps()

@@ -495,7 +495,6 @@ public class RDXSCS2LogProcessor
                                     throw new RuntimeException("Error reading CSV file.", e);
                                  }
 
-
                                  // Convert Pascal case to title case
                                  String afterUnderscore = logFolderName.substring(logFolderName.lastIndexOf("_") + 1);
                                  String titleCaseString = WordUtils.capitalizeFully(afterUnderscore.replaceAll("([a-z])([A-Z])", "$1 $2"));
@@ -520,6 +519,56 @@ public class RDXSCS2LogProcessor
                               }
                            }
                         }, "Plot Swing Durations");
+                        ThreadTools.startAsDaemon(() ->
+                        {
+                           String logFolderName = logDirectory.getFileName().toString();
+                           Path csvFile = logDirectory.resolve(logFolderName + "_ICPError.csv");
+
+                           if (Files.exists(csvFile))
+                           {
+                              try
+                              {
+                                 Plot pyplot = Plot.create();
+
+                                 ArrayList<Double> times = new ArrayList<>();
+                                 ArrayList<Double> errorXs = new ArrayList<>();
+                                 ArrayList<Double> errorYs = new ArrayList<>();
+                                 try (BufferedReader reader = Files.newBufferedReader(csvFile))
+                                 {
+                                    reader.readLine(); // skip header
+                                    String line;
+                                    while ((line = reader.readLine()) != null)
+                                    {
+                                       String[] values = line.split(",");
+
+                                       times.add(Double.parseDouble(values[0]));
+                                       errorXs.add(Double.parseDouble(values[1]));
+                                       errorYs.add(Double.parseDouble(values[2]));
+                                    }
+                                 }
+                                 catch (IOException e)
+                                 {
+                                    throw new RuntimeException("Error reading CSV file.", e);
+                                 }
+
+                                 // Convert Pascal case to title case
+                                 String afterUnderscore = logFolderName.substring(logFolderName.lastIndexOf("_") + 1);
+                                 String titleCaseString = WordUtils.capitalizeFully(afterUnderscore.replaceAll("([a-z])([A-Z])", "$1 $2"));
+
+                                 pyplot.plot().add(times, errorXs).label("ICP Error X");
+                                 pyplot.plot().add(times, errorYs).label("ICP Error Y");
+
+                                 pyplot.xlabel("Time (s)");
+                                 pyplot.title("%s ICP Error".formatted(titleCaseString));
+                                 pyplot.legend();
+                                 pyplot.show();
+                              }
+                              catch (IOException | PythonExecutionException e)
+                              {
+                                 throw new RuntimeException(e);
+                              }
+                           }
+                        }, "Plot ICP Error");
                      }
                   }
 

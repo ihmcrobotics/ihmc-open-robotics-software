@@ -3,6 +3,7 @@ package us.ihmc.avatar.logProcessor;
 import us.ihmc.avatar.logProcessor.SCS2LogWalk.DoubleSupportDuration;
 import us.ihmc.avatar.logProcessor.SCS2LogWalk.FootStateChange;
 import us.ihmc.avatar.logProcessor.SCS2LogWalk.FootSwing;
+import us.ihmc.avatar.logProcessor.SCS2LogWalk.ICPErrorEntry;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -239,7 +240,7 @@ public class SCS2LogProcessor
 
                      for (FootStateChange footStateChange : footStateChanges)
                      {
-                        writer.write("%s,%.2f,%d,%s".formatted(side.getLowerCaseName(),
+                        writer.write("%s,%.5f,%d,%s".formatted(side.getLowerCaseName(),
                                                                footStateChange.time(),
                                                                footStateChange.state().ordinal(),
                                                                footStateChange.state().name()));
@@ -263,7 +264,7 @@ public class SCS2LogProcessor
 
                   for (FootSwing footSwing : timeSorted)
                   {
-                     writer.write("%.2f,%.2f,%.2f".formatted(footSwing.completeTime(), footSwing.swingDuration(), footSwing.desiredSwingDuration()));
+                     writer.write("%.5f,%.5f,%.5f".formatted(footSwing.completeTime(), footSwing.swingDuration(), footSwing.desiredSwingDuration()));
                      writer.newLine();
                   }
                }
@@ -275,14 +276,28 @@ public class SCS2LogProcessor
                {
                   for (DoubleSupportDuration doubleSupportDuration : logWalk.getDoubleSupportDurations())
                   {
-                     writer.write("%.2f,%.2f,%.2f".formatted(doubleSupportDuration.completeTime(),
+                     writer.write("%.5f,%.5f,%.5f".formatted(doubleSupportDuration.completeTime(),
                                                              doubleSupportDuration.supportDuration(),
                                                              doubleSupportDuration.desiredTransferDuration()));
                      writer.newLine();
                   }
                }
             });
-            
+
+            writeCSV(logFolderName, "ICPError", "Time,ErrorX,ErrorY", writer ->
+            {
+               for (SCS2LogWalk logWalk : locomotionData.getLogWalks())
+               {
+                  for (ICPErrorEntry icpError : logWalk.getICPErrors())
+                  {
+                     writer.write("%.5f,%.5f,%.5f".formatted(icpError.time(),
+                                                             icpError.icpError().getX(),
+                                                             icpError.icpError().getY()));
+                     writer.newLine();
+                  }
+               }
+            });
+
             for (RobotSide side : locomotionData.getHandFrames().sides())
             {
                try (BufferedWriter writer = Files.newBufferedWriter(logPath.resolve("%s_%sArmPoses.csv".formatted(logFolderName, side.getPascalCaseName()))))
