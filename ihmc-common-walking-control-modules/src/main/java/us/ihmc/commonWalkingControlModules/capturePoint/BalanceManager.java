@@ -310,24 +310,9 @@ public class BalanceManager implements SCS2YoGraphicHolder
       flamingoCopTrajectory = new FlamingoCoPTrajectoryGenerator(copTrajectoryParameters, registry);
       flamingoCopTrajectory.registerState(copTrajectoryState);
 
-      if (walkingMessageHandler != null)
-      {
-         YoVariableChangedListener disableCoPFeedbackListener = change ->
-         {
-            if (walkingMessageHandler.getUsingQFP().getBooleanValue() && walkingMessageHandler.getRequestDisableCopFeedbackControl().getBooleanValue())
-               linearMomentumRateControlModuleInput.setDisableCoPFeedbackControl(true);
-            else
-               linearMomentumRateControlModuleInput.setDisableCoPFeedbackControl(!walkingControllerParameters.getICPControllerParameters().useCoPFeedback());
-         };
-
-         walkingMessageHandler.getUsingQFP().addListener(disableCoPFeedbackListener);
-         walkingMessageHandler.getRequestDisableCopFeedbackControl().addListener(disableCoPFeedbackListener);
-      }
-
       if (USE_ERROR_BASED_STEP_ADJUSTMENT)
       {
          stepAdjustmentController = new ErrorBasedStepAdjustmentController(walkingControllerParameters,
-                                                                           walkingMessageHandler,
                                                                            controllerToolbox.getReferenceFrames().getSoleZUpFrames(),
                                                                            bipedSupportPolygons,
                                                                            icpControlPolygons,
@@ -342,6 +327,28 @@ public class BalanceManager implements SCS2YoGraphicHolder
                                                                               bipedSupportPolygons,
                                                                               registry,
                                                                               yoGraphicsListRegistry);
+      }
+
+      if (walkingMessageHandler != null)
+      {
+         YoVariableChangedListener qfpParameterListener = change ->
+         {
+            if (walkingMessageHandler.getUsingQFP().getBooleanValue())
+            {
+               stepAdjustmentController.setSwingSpeedUpEnabled(false);
+
+               if (walkingMessageHandler.getRequestDisableCopFeedbackControl().getBooleanValue())
+                  linearMomentumRateControlModuleInput.setDisableCoPFeedbackControl(true);
+            }
+            else
+            {
+               stepAdjustmentController.setSwingSpeedUpEnabled(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
+               linearMomentumRateControlModuleInput.setDisableCoPFeedbackControl(!walkingControllerParameters.getICPControllerParameters().useCoPFeedback());
+            }
+         };
+
+         walkingMessageHandler.getUsingQFP().addListener(qfpParameterListener);
+         walkingMessageHandler.getRequestDisableCopFeedbackControl().addListener(qfpParameterListener);
       }
 
       String graphicListName = getClass().getSimpleName();

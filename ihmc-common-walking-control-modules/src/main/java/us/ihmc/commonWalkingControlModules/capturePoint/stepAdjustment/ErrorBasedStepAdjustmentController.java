@@ -125,13 +125,10 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
 
    private final BipedSupportPolygons bipedSupportPolygons;
 
-   private final WalkingMessageHandler walkingMessageHandler;
-
    private final FramePoint3D vertexInWorld = new FramePoint3D();
    private final FrameConvexPolygon2D allowableAreaForCoPInFoot = new FrameConvexPolygon2D();
 
    public ErrorBasedStepAdjustmentController(WalkingControllerParameters walkingControllerParameters,
-                                             WalkingMessageHandler walkingMessageHandler,
                                              SideDependentList<? extends ReferenceFrame> soleZUpFrames,
                                              BipedSupportPolygons bipedSupportPolygons,
                                              ICPControlPolygons icpControlPolygons,
@@ -140,7 +137,6 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
                                              YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this(walkingControllerParameters,
-           walkingMessageHandler,
            walkingControllerParameters.getStepAdjustmentParameters(),
            soleZUpFrames,
            bipedSupportPolygons,
@@ -151,7 +147,6 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    }
 
    public ErrorBasedStepAdjustmentController(WalkingControllerParameters walkingControllerParameters,
-                                             WalkingMessageHandler walkingMessageHandler,
                                              StepAdjustmentParameters stepAdjustmentParameters,
                                              SideDependentList<? extends ReferenceFrame> soleZUpFrames,
                                              BipedSupportPolygons bipedSupportPolygons,
@@ -161,7 +156,6 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
                                              YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.bipedSupportPolygons = bipedSupportPolygons;
-      this.walkingMessageHandler = walkingMessageHandler;
 
       allowStepAdjustment = new BooleanParameter(yoNamePrefix + "AllowStepAdjustment", registry, stepAdjustmentParameters.allowStepAdjustment());
 
@@ -236,16 +230,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
          allowableAreasForCoP.put(robotSide, allowableAreaForCoP);
       }
 
-      if (walkingControllerParameters != null)
-         swingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
-
-      walkingMessageHandler.getUsingQFP().addListener(change ->
-      {
-         if (walkingMessageHandler.getUsingQFP().getBooleanValue())
-            swingSpeedUpEnabled.set(false);
-         else
-            swingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
-      });
+      swingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
 
       if (yoGraphicsListRegistry != null)
          setupVisualizers(yoGraphicsListRegistry);
@@ -342,6 +327,12 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    public void setStepConstraintRegions(List<StepConstraintRegion> stepConstraintRegion)
    {
       environmentConstraintProvider.setStepConstraintRegions(stepConstraintRegion);
+   }
+
+   @Override
+   public void setSwingSpeedUpEnabled(boolean swingSpeedUpEnabled)
+   {
+      this.swingSpeedUpEnabled.set(swingSpeedUpEnabled);
    }
 
    @Override
