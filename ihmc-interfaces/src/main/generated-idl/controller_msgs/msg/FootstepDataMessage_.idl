@@ -157,7 +157,8 @@ module controller_msgs
          */
         boolean should_check_for_reachability;
         /**
-         * If the desired footstep is for walking in place with zero forward or lateral velocity
+         * If the desired footstep is for walking in place with zero forward or lateral velocity. This logic is only utilized
+         * if csg_mode is set to QFP
          */
         @defaultValue(value=True)
         boolean walking_in_place;

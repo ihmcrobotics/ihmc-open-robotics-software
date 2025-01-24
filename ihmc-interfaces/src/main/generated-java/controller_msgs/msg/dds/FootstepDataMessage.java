@@ -128,7 +128,8 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
             */
    public boolean should_check_for_reachability_;
    /**
-            * If the desired footstep is for walking in place with zero forward or lateral velocity
+            * If the desired footstep is for walking in place with zero forward or lateral velocity. This logic is only utilized
+            * if csg_mode is set to QFP
             */
    public boolean walking_in_place_ = true;
 
@@ -475,14 +476,16 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    }
 
    /**
-            * If the desired footstep is for walking in place with zero forward or lateral velocity
+            * If the desired footstep is for walking in place with zero forward or lateral velocity. This logic is only utilized
+            * if csg_mode is set to QFP
             */
    public void setWalkingInPlace(boolean walking_in_place)
    {
       walking_in_place_ = walking_in_place;
    }
    /**
-            * If the desired footstep is for walking in place with zero forward or lateral velocity
+            * If the desired footstep is for walking in place with zero forward or lateral velocity. This logic is only utilized
+            * if csg_mode is set to QFP
             */
    public boolean getWalkingInPlace()
    {

@@ -111,7 +111,8 @@ controller_msgs/StepConstraintsListMessage step_constraints
 # If the controller should check and fail if the step is not reachable
 bool should_check_for_reachability
 
-# If the desired footstep is for walking in place with zero forward or lateral velocity
+# If the desired footstep is for walking in place with zero forward or lateral velocity. This logic is only utilized
+# if csg_mode is set to QFP
 # Field default value True
 bool walking_in_place
 
