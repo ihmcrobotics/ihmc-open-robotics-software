@@ -146,9 +146,13 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
    {
       stream = CUDAStreamManager.getStream();
 
+      // Load header files
+      URL heightMapUtilsHeaderPath = getClass().getResource("HeightMapUtils.cuh");
+      URL mathUtilsHeaderPath = getClass().getResource("MathUtils.cuh");
+
       // Load CUDA kernels
       URL kernelPath = getClass().getResource("RapidHeightMapExtractor.cu");
-      heightMapCUDAProgram = new CUDAProgram(kernelPath);
+      heightMapCUDAProgram = new CUDAProgram(kernelPath, heightMapUtilsHeaderPath, mathUtilsHeaderPath);
 
       String updateKernelName = "heightMapUpdateKernel";
       String registerKernelName = "heightMapRegistrationKernel";
