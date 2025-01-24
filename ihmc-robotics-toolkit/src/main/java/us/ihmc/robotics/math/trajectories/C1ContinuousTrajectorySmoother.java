@@ -25,6 +25,9 @@ import us.ihmc.yoVariables.variable.YoDouble;
  */
 public class C1ContinuousTrajectorySmoother implements FixedFramePositionTrajectoryGenerator
 {
+   private static final double DEFAULT_TRACKING_STIFFNESS = 200.0;
+   private static final double DEFAULT_TRACKING_ZETA = 0.8;
+
    private final FixedFramePositionTrajectoryGenerator trajectoryToTrack;
 
    private final YoFrameVector3D positionErrorWhenStartingCancellation;
@@ -47,8 +50,6 @@ public class C1ContinuousTrajectorySmoother implements FixedFramePositionTraject
    private final DMatrixRMaj scaledClosedLoopStateMatrix = new DMatrixRMaj(2, 2);
    private final DMatrixRMaj stateTransitionMatrix = new DMatrixRMaj(2, 2);
 
-   private final double defaultTrackingStiffness = 200.0;
-   private final double defaultTrackingZeta = 0.8;
    private boolean hasDriftDynamicsMatrixBeenSet = false;
    private boolean loaded = false;
 
@@ -59,10 +60,10 @@ public class C1ContinuousTrajectorySmoother implements FixedFramePositionTraject
       YoRegistry registry = new YoRegistry(namePrefix + getClass().getSimpleName());
 
       trackingStiffness = new YoDouble(namePrefix + "TrackingStiffness", registry);
-      trackingStiffness.set(defaultTrackingStiffness);
+      trackingStiffness.set(DEFAULT_TRACKING_STIFFNESS);
 
       trackingZeta = new YoDouble(namePrefix + "TrackingZeta", registry);
-      trackingZeta.set(defaultTrackingZeta);
+      trackingZeta.set(DEFAULT_TRACKING_ZETA);
 
       trackingStiffness.addListener((v) -> updateClosedLoopDriftDynamicsMatrix());
       trackingZeta.addListener((v) -> updateClosedLoopDriftDynamicsMatrix());
@@ -192,12 +193,12 @@ public class C1ContinuousTrajectorySmoother implements FixedFramePositionTraject
 
    public double getDefaultTrackingStiffness()
    {
-      return defaultTrackingStiffness;
+      return DEFAULT_TRACKING_STIFFNESS;
    }
 
    public double getDefaultTrackingZeta()
    {
-      return defaultTrackingZeta;
+      return DEFAULT_TRACKING_ZETA;
    }
 
    FrameVector3DReadOnly getPositionErrorWhenStartingCancellation()

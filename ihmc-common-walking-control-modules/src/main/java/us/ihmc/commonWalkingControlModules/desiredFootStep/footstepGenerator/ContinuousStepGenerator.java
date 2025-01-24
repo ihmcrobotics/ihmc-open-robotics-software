@@ -348,9 +348,9 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
 
       for (int i = startingIndexToAdjust; i < parameters.getNumberOfFootstepsToPlan(); i++)
       {
-
          if (currentCSGMode.getEnumValue() == ContinuousStepGeneratorMode.QFP && quicksterFootstepProvider.hasValue())
          {
+            // FIXME we want all steps in plan to be QFP eventually
             if (i == startingIndexToAdjust)
             {
                quicksterFootstepProvider.get().getDesiredTouchdownPose(swingSide, nextFootstepPose2D);
