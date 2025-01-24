@@ -324,7 +324,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(StopAllTrajectoryMessagePubSubType.class);
       registerPacketField(Int8MultiArrayPubSubType.class);
       registerPacketField(DesiredAccelerationsMessagePubSubType.class);
-      registerPacketField(DoorLocationPacketPubSubType.class);
       registerPacketField(MultiDOFJointTrajectoryPointPubSubType.class);
       registerPacketField(ChannelFloat32PubSubType.class);
       registerPacketField(SCSListenerPacketPubSubType.class);
@@ -781,7 +780,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(WallPosePacket.class);
       registerPacketClass(WalkOverTerrainGoalPacket.class);
 
-      registerPacketClass(DoorLocationPacket.class);
       registerPacketClass(ValveLocationPacket.class);
       registerPacketClass(BehaviorStatusPacket.class);
       registerPacketField(CurrentBehaviorStatus.class);

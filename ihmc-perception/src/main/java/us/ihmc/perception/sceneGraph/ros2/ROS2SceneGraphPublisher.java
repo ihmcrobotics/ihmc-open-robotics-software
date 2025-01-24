@@ -60,7 +60,6 @@ public class ROS2SceneGraphPublisher
       sceneGraphMessage.getYoloSceneNodes().clear();
       sceneGraphMessage.getStaticRelativeSceneNodes().clear();
       sceneGraphMessage.getPrimitiveRigidBodySceneNodes().clear();
-      sceneGraphMessage.getDoorSceneNodes().clear();
       sceneGraphMessage.getTrashCanNodes().clear();
 
       packSceneTreeToMessage(sceneGraph.getRootNode());

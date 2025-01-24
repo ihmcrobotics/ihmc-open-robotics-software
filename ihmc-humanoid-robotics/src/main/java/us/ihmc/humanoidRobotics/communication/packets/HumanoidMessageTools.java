@@ -1,13 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
-import static us.ihmc.euclid.tools.EuclidCoreTools.zeroVector3D;
-
-import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import atlas_msgs.msg.dds.AtlasDesiredPumpPSIPacket;
 import atlas_msgs.msg.dds.AtlasElectricMotorAutoEnableFlagPacket;
 import atlas_msgs.msg.dds.AtlasElectricMotorEnablePacket;
@@ -15,58 +7,7 @@ import atlas_msgs.msg.dds.AtlasLowLevelControlModeMessage;
 import atlas_msgs.msg.dds.AtlasWristSensorCalibrationRequestPacket;
 import atlas_msgs.msg.dds.BDIBehaviorCommandPacket;
 import atlas_msgs.msg.dds.BDIBehaviorStatusPacket;
-import controller_msgs.msg.dds.ArmDesiredAccelerationsMessage;
-import controller_msgs.msg.dds.ArmTrajectoryMessage;
-import controller_msgs.msg.dds.AutomaticManipulationAbortMessage;
-import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.ChestHybridJointspaceTaskspaceTrajectoryMessage;
-import controller_msgs.msg.dds.ChestTrajectoryMessage;
-import controller_msgs.msg.dds.ClearDelayQueueMessage;
-import controller_msgs.msg.dds.DesiredAccelerationsMessage;
-import controller_msgs.msg.dds.FootLoadBearingMessage;
-import controller_msgs.msg.dds.FootTrajectoryMessage;
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.FootstepStatusMessage;
-import controller_msgs.msg.dds.GoHomeMessage;
-import controller_msgs.msg.dds.HandCollisionDetectedPacket;
-import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
-import controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage;
-import controller_msgs.msg.dds.HandJointAnglePacket;
-import controller_msgs.msg.dds.HandLoadBearingMessage;
-import controller_msgs.msg.dds.HandPowerCyclePacket;
-import controller_msgs.msg.dds.HandTrajectoryMessage;
-import controller_msgs.msg.dds.HeadHybridJointspaceTaskspaceTrajectoryMessage;
-import controller_msgs.msg.dds.HeadTrajectoryMessage;
-import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
-import controller_msgs.msg.dds.HighLevelStateMessage;
-import controller_msgs.msg.dds.JointspaceTrajectoryMessage;
-import controller_msgs.msg.dds.LegCompliancePacket;
-import controller_msgs.msg.dds.LegTrajectoryMessage;
-import controller_msgs.msg.dds.LocalizationPacket;
-import controller_msgs.msg.dds.LocalizationPointMapPacket;
-import controller_msgs.msg.dds.LocalizationStatusPacket;
-import controller_msgs.msg.dds.ManualHandControlPacket;
-import controller_msgs.msg.dds.NeckDesiredAccelerationsMessage;
-import controller_msgs.msg.dds.NeckTrajectoryMessage;
-import controller_msgs.msg.dds.ObjectWeightPacket;
-import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
-import controller_msgs.msg.dds.PauseWalkingMessage;
-import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
-import controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage;
-import controller_msgs.msg.dds.PelvisPoseErrorPacket;
-import controller_msgs.msg.dds.PelvisTrajectoryMessage;
-import controller_msgs.msg.dds.PlanOffsetStatus;
-import controller_msgs.msg.dds.PrepareForLocomotionMessage;
-import controller_msgs.msg.dds.SnapFootstepPacket;
-import controller_msgs.msg.dds.SpineDesiredAccelerationsMessage;
-import controller_msgs.msg.dds.SpineTrajectoryMessage;
-import controller_msgs.msg.dds.StateEstimatorModePacket;
-import controller_msgs.msg.dds.WalkOverTerrainGoalPacket;
-import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
-import controller_msgs.msg.dds.WholeBodyStreamingMessage;
-import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
-import controller_msgs.msg.dds.WrenchTrajectoryPointMessage;
+import controller_msgs.msg.dds.*;
 import gnu.trove.list.array.TDoubleArrayList;
 import ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessage;
 import ihmc_common_msgs.msg.dds.EuclideanTrajectoryPointMessage;
@@ -80,7 +21,6 @@ import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
 import perception_msgs.msg.dds.BlackFlyParameterPacket;
 import perception_msgs.msg.dds.DetectedObjectPacket;
-import perception_msgs.msg.dds.DoorLocationPacket;
 import perception_msgs.msg.dds.FisheyePacket;
 import perception_msgs.msg.dds.IntrinsicParametersMessage;
 import perception_msgs.msg.dds.MultisenseParameterPacket;
@@ -165,6 +105,14 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.OneDoFTrajector
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.trajectories.TrajectoryType;
+
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static us.ihmc.euclid.tools.EuclidCoreTools.zeroVector3D;
 
 public class HumanoidMessageTools
 {
@@ -497,29 +445,6 @@ public class HumanoidMessageTools
       message.setDutyCycle(dutyCycle);
       message.setAutoExposure(autoExposure);
       message.setAutoWhiteBalance(autoWhiteBalance);
-      return message;
-   }
-
-   public static DoorLocationPacket createDoorLocationPacket(RigidBodyTransform doorTransformToWorld)
-   {
-      return createDoorLocationPacket(new Pose3D(doorTransformToWorld));
-   }
-
-   public static DoorLocationPacket createDoorLocationPacket(RigidBodyTransform doorTransformToWorld, byte doorType)
-   {
-      return createDoorLocationPacket(new Pose3D(doorTransformToWorld), doorType);
-   }
-
-   public static DoorLocationPacket createDoorLocationPacket(Pose3D doorTransformToWorld)
-   {
-      return createDoorLocationPacket(doorTransformToWorld, DoorLocationPacket.UNKNOWN_TYPE);
-   }
-
-   public static DoorLocationPacket createDoorLocationPacket(Pose3D doorTransformToWorld, byte doorType)
-   {
-      DoorLocationPacket message = new DoorLocationPacket();
-      message.getDoorTransformToWorld().set(doorTransformToWorld);
-      message.setDetectedDoorType(doorType);
       return message;
    }
 

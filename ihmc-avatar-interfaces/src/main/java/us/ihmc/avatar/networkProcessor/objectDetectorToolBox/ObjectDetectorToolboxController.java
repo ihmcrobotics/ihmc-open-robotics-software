@@ -1,13 +1,11 @@
 package us.ihmc.avatar.networkProcessor.objectDetectorToolBox;
 
 import perception_msgs.msg.dds.DetectedFiducialPacket;
-import perception_msgs.msg.dds.DoorLocationPacket;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
-import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -80,9 +78,6 @@ public class ObjectDetectorToolboxController extends ToolboxController
       Pose3D pose = new Pose3D(doorFrame.getPosition(), doorFrame.getOrientation());
 
       pose.appendYawRotation(Math.toRadians(-90));
-
-      reportMessage(HumanoidMessageTools.createDoorLocationPacket(pose, DoorLocationPacket.PUSH_HANDLE_RIGHT));
-
    }
   
 
@@ -103,9 +98,6 @@ public class ObjectDetectorToolboxController extends ToolboxController
       Pose3D pose = new Pose3D(doorFrame.getPosition(), doorFrame.getOrientation());
 
       pose.appendYawRotation(Math.toRadians(90));
-
-      reportMessage(HumanoidMessageTools.createDoorLocationPacket(pose, DoorLocationPacket.PULL_HANDLE_LEFT));
-
    }
    
  

@@ -11,9 +11,7 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerPar
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.FireFighterStanceBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.ResetRobotBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.TestDoorOpenBehaviorService;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.TestSetHeightBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkThroughDoorBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DiagnosticBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.dispatcher.BehaviorControlModeSubscriber;
@@ -322,17 +320,17 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
 //                                                               wholeBodyControllerParameters,
 //                                                               atlasPrimitiveActions));
 
-      dispatcher.addBehavior(HumanoidBehaviorType.WALK_THROUGH_DOOR,
-                             new WalkThroughDoorBehavior(robotName,
-                                                         "Human",
-                                                         ros2Node,
-                                                         yoTime,
-                                                         yoDoubleSupport,
-                                                         fullRobotModel,
-                                                         referenceFrames,
-                                                         wholeBodyControllerParameters,
-                                                         atlasPrimitiveActions,
-                                                         yoGraphicsListRegistry));
+//      dispatcher.addBehavior(HumanoidBehaviorType.WALK_THROUGH_DOOR,
+//                             new WalkThroughDoorBehavior(robotName,
+//                                                         "Human",
+//                                                         ros2Node,
+//                                                         yoTime,
+//                                                         yoDoubleSupport,
+//                                                         fullRobotModel,
+//                                                         referenceFrames,
+//                                                         wholeBodyControllerParameters,
+//                                                         atlasPrimitiveActions,
+//                                                         yoGraphicsListRegistry));
       
 //      dispatcher.addBehavior(HumanoidBehaviorType.WALK_THROUGH_DOOR_OPERATOR_TIMING_BEHAVIOR, new DoorTimingBehavior(robotName, yoTime, ros2Node, true));
 //      dispatcher.addBehavior(HumanoidBehaviorType.WALK_THROUGH_DOOR_AUTOMATED_TIMING_BEHAVIOR,
@@ -376,8 +374,8 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
 //
 //      dispatcher.addBehavior(HumanoidBehaviorType.EXAMPLE_BEHAVIOR, new ExampleComplexBehaviorStateMachine(robotName, ros2Node, yoTime, atlasPrimitiveActions));
 //
-      dispatcher.addBehavior(HumanoidBehaviorType.TEST_OPENDOORDETECTOR,
-                             new TestDoorOpenBehaviorService(robotName, "doorOpen", ros2Node, yoGraphicsListRegistry));
+//      dispatcher.addBehavior(HumanoidBehaviorType.TEST_OPENDOORDETECTOR,
+//                             new TestDoorOpenBehaviorService(robotName, "doorOpen", ros2Node, yoGraphicsListRegistry));
 //
 //      dispatcher.addBehavior(HumanoidBehaviorType.LOCATE_FIDUCIAL, new LocateGoalBehavior(robotName, ros2Node, fiducialDetectorBehaviorService));
 //      dispatcher.addBehavior(HumanoidBehaviorType.FOLLOW_FIDUCIAL_50,

@@ -1,51 +1,27 @@
 package us.ihmc.avatar.networkProcessor.modules.uiConnector;
 
-import java.util.HashMap;
-
-import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import atlas_msgs.msg.dds.BDIBehaviorStatusPacket;
-import toolbox_msgs.msg.dds.BehaviorControlModeResponsePacket;
-import toolbox_msgs.msg.dds.BehaviorStatusPacket;
+import controller_msgs.msg.dds.*;
+import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
 import perception_msgs.msg.dds.BlackFlyParameterPacket;
-import controller_msgs.msg.dds.BoundingBoxesPacket;
-import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.ChestTrajectoryMessage;
-import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
 import perception_msgs.msg.dds.DetectedObjectPacket;
-import perception_msgs.msg.dds.DoorLocationPacket;
 import perception_msgs.msg.dds.DrillDetectionPacket;
 import perception_msgs.msg.dds.FisheyePacket;
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import toolbox_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
-import controller_msgs.msg.dds.FootstepStatusMessage;
-import controller_msgs.msg.dds.HandJointAnglePacket;
-import controller_msgs.msg.dds.HandTrajectoryMessage;
-import controller_msgs.msg.dds.HeadTrajectoryMessage;
 import perception_msgs.msg.dds.HeatMapPacket;
 import perception_msgs.msg.dds.HeightQuadTreeMessage;
-import controller_msgs.msg.dds.InvalidPacketNotificationPacket;
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import perception_msgs.msg.dds.LidarScanMessage;
-import controller_msgs.msg.dds.LocalizationPointMapPacket;
-import controller_msgs.msg.dds.ManipulationAbortedStatus;
-import controller_msgs.msg.dds.NeckTrajectoryMessage;
-import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
-import controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage;
-import controller_msgs.msg.dds.PelvisPoseErrorPacket;
-import controller_msgs.msg.dds.PelvisTrajectoryMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import perception_msgs.msg.dds.PointCloudWorldPacket;
-import controller_msgs.msg.dds.RobotConfigurationData;
-import toolbox_msgs.msg.dds.SimpleCoactiveBehaviorDataPacket;
-import controller_msgs.msg.dds.SnapFootstepPacket;
-import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
-import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
-import controller_msgs.msg.dds.UIPositionCheckerPacket;
 import perception_msgs.msg.dds.ValveLocationPacket;
 import perception_msgs.msg.dds.VideoPacket;
-import controller_msgs.msg.dds.WalkingStatusMessage;
-import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
+import toolbox_msgs.msg.dds.BehaviorControlModeResponsePacket;
+import toolbox_msgs.msg.dds.BehaviorStatusPacket;
+import toolbox_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import toolbox_msgs.msg.dds.SimpleCoactiveBehaviorDataPacket;
 import toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxOutputStatus;
+
+import java.util.HashMap;
 
 public class PacketsForwardedToTheUi
 {
@@ -71,7 +47,6 @@ public class PacketsForwardedToTheUi
       ArmTrajectoryMessage.class,
       ValveLocationPacket.class,
       BehaviorStatusPacket.class,
-      DoorLocationPacket.class,
       PointCloudWorldPacket.class,
       HandJointAnglePacket.class,
       WholeBodyTrajectoryMessage.class,

@@ -282,11 +282,6 @@ public final class PerceptionAPI
    public static final ROS2IOTopicPair<RigidBodyTransformMessage> OUSTER_TO_CHEST_TUNING
          = new ROS2IOTopicPair<>(TRANSFORM_TUNING_BASE_TOPIC.withSuffix("ouster_to_chest"));
 
-   public static ROS2Topic<DoorLocationPacket> getDoorLocationTopic(String robotName)
-   {
-      return OBJECT_DETECTOR_TOOLBOX_OUTPUT.withRobot(robotName).withTypeName(DoorLocationPacket.class);
-   }
-
    public static ROS2Topic<BipedalSupportPlanarRegionParametersMessage> getBipedalSupportRegionParametersTopic(String robotName)
    {
       return BIPEDAL_SUPPORT_REGION_PARAMETERS.withRobot(robotName);

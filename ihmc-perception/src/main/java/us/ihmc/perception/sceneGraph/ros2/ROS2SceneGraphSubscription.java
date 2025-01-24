@@ -4,7 +4,6 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import perception_msgs.msg.dds.ArUcoMarkerNodeMessage;
 import perception_msgs.msg.dds.CenterposeNodeMessage;
 import perception_msgs.msg.dds.DetectableSceneNodeMessage;
-import perception_msgs.msg.dds.DoorNodeMessage;
 import perception_msgs.msg.dds.PredefinedRigidBodySceneNodeMessage;
 import perception_msgs.msg.dds.PrimitiveRigidBodySceneNodeMessage;
 import perception_msgs.msg.dds.SceneGraphMessage;
@@ -275,13 +274,6 @@ public class ROS2SceneGraphSubscription
             PrimitiveRigidBodySceneNodeMessage primitiveRigidBodySceneNodeMessage = sceneGraphMessage.getPrimitiveRigidBodySceneNodes().get(indexInTypesList);
             subscriptionNode.setPrimitiveRigidBodySceneNodeMessage(primitiveRigidBodySceneNodeMessage);
             subscriptionNode.setSceneNodeMessage(primitiveRigidBodySceneNodeMessage.getSceneNode());
-         }
-         case SceneGraphMessage.DOOR_NODE_TYPE ->
-         {
-            DoorNodeMessage doorNodeMessage = sceneGraphMessage.getDoorSceneNodes().get(indexInTypesList);
-            subscriptionNode.setDoorNodeMessage(doorNodeMessage);
-            subscriptionNode.setDetectableSceneNodeMessage(doorNodeMessage.getDetectableSceneNode());
-            subscriptionNode.setSceneNodeMessage(doorNodeMessage.getDetectableSceneNode().getSceneNode());
          }
          case SceneGraphMessage.TRASH_CAN_NODE_TYPE ->
          {

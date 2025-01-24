@@ -1,7 +1,6 @@
 package us.ihmc.avatar.networkProcessor.objectDetectorToolBox;
 
 import perception_msgs.msg.dds.DetectedFiducialPacket;
-import perception_msgs.msg.dds.DoorLocationPacket;
 import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorToolboxModule;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
@@ -14,7 +13,6 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class ObjectDetectorToolboxModule extends ToolboxModule
@@ -62,7 +60,7 @@ public class ObjectDetectorToolboxModule extends ToolboxModule
    @Override
    public List<Class<? extends Settable<?>>> createListOfSupportedStatus()
    {
-      return Collections.singletonList(DoorLocationPacket.class);
+      return null;
    }
 
    @Override

@@ -1,5 +1,14 @@
 package us.ihmc.robotEnvironmentAwareness.fusion.objectDetection;
 
+import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
+import sensor_msgs.msg.dds.RegionOfInterest;
+import us.ihmc.commons.Conversions;
+import us.ihmc.log.LogTools;
+import us.ihmc.messager.javafx.SharedMemoryJavaFXMessager;
+import us.ihmc.robotEnvironmentAwareness.communication.LidarImageFusionAPI;
+import us.ihmc.robotEnvironmentAwareness.fusion.tools.ImageVisualizationHelper;
+import us.ihmc.ros2.ROS2Node;
+
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -16,16 +25,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicReference;
 
-import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
-import perception_msgs.msg.dds.DoorParameterPacket;
-import sensor_msgs.msg.dds.RegionOfInterest;
-import us.ihmc.commons.Conversions;
-import us.ihmc.log.LogTools;
-import us.ihmc.messager.javafx.SharedMemoryJavaFXMessager;
-import us.ihmc.robotEnvironmentAwareness.communication.LidarImageFusionAPI;
-import us.ihmc.robotEnvironmentAwareness.fusion.tools.ImageVisualizationHelper;
-import us.ihmc.ros2.ROS2Node;
-
 public class FusionSensorObjectDetectionManager
 {
    private final SharedMemoryJavaFXMessager messager;
@@ -39,15 +38,12 @@ public class FusionSensorObjectDetectionManager
    private final List<ObjectType> selectedObjectTypes = new ArrayList<>();
    private final Map<ObjectType, RegionOfInterest> objectTypeToROIMap = new HashMap<>();
 
-   private final AbstractObjectParameterCalculator<DoorParameterPacket> doorParameterCalculator;
-
    private final AtomicReference<StereoVisionPointCloudMessage> latestStereoVisionPointCloudMessage = new AtomicReference<>(null);
    private final AtomicReference<BufferedImage> leatestBufferedImage = new AtomicReference<BufferedImage>();
 
    public FusionSensorObjectDetectionManager(ROS2Node ros2Node, SharedMemoryJavaFXMessager messager)
    {
       this.messager = messager;
-      doorParameterCalculator = new DoorParameterCalculator(ros2Node, DoorParameterPacket.class);
 
       TimerTask socketTimerTask = new TimerTask()
       {
@@ -198,10 +194,7 @@ public class FusionSensorObjectDetectionManager
    private void calculateAndPublishDoorParameter(RegionOfInterest doorROI, RegionOfInterest handleROI)
    {
       long startTime = System.nanoTime();
-      doorParameterCalculator.initialize();
-      doorParameterCalculator.trimPointCloudInROI(latestStereoVisionPointCloudMessage.get(), doorROI);
-      doorParameterCalculator.calculate(handleROI);
-      doorParameterCalculator.publish();
+
       long computingTime = System.nanoTime() - startTime;
       LogTools.info("Door computing time is " + Conversions.nanosecondsToSeconds(computingTime));
    }

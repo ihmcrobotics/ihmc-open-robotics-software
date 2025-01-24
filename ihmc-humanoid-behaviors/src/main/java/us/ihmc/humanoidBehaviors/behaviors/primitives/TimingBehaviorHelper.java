@@ -1,27 +1,25 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
-import java.util.concurrent.atomic.AtomicReference;
-
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
-import perception_msgs.msg.dds.DoorLocationPacket;
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
-import toolbox_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
 import controller_msgs.msg.dds.WalkOverTerrainGoalPacket;
 import controller_msgs.msg.dds.WalkingStatusMessage;
+import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
+import toolbox_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.RunEvent;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.SQLBehaviorDatabaseManager;
 import us.ihmc.ros2.ROS2Node;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 public class TimingBehaviorHelper extends AbstractBehavior
 {
    public final AtomicReference<FootstepPlanningToolboxOutputStatus> plannerResult = new AtomicReference<>(null);
    public final AtomicReference<FootstepStatusMessage> footstepStatusMessage = new AtomicReference<>(null);
-   public final AtomicReference<DoorLocationPacket> doorLocationMessage = new AtomicReference<>(null);
    public final AtomicReference<WalkOverTerrainGoalPacket> walkOverTerrainGoalMessage = new AtomicReference<>(null);
    public final AtomicReference<HandTrajectoryMessage> handTrajectoryMessage = new AtomicReference<>(null);
    public final AtomicReference<ArmTrajectoryMessage> armTrajectoryMessage = new AtomicReference<>(null);
@@ -49,7 +47,6 @@ public class TimingBehaviorHelper extends AbstractBehavior
       createSubscriber(HumanoidControllerAPI.getTopic(ArmTrajectoryMessage.class, robotName), armTrajectoryMessage::set);
       createSubscriber(HumanoidControllerAPI.getTopic(FootstepDataListMessage.class, robotName), footstepDataListMessage::set);
       createSubscriber(HumanoidControllerAPI.getTopic(WalkingStatusMessage.class, robotName), walkingStatusMessage::set);
-      createBehaviorInputSubscriber(DoorLocationPacket.class, doorLocationMessage::set);
       createBehaviorInputSubscriber(WalkOverTerrainGoalPacket.class, walkOverTerrainGoalMessage::set);
       dataBase = new SQLBehaviorDatabaseManager();
    }
@@ -58,7 +55,6 @@ public class TimingBehaviorHelper extends AbstractBehavior
    {
       plannerResult.set(null);
       footstepStatusMessage.set(null);
-      doorLocationMessage.set(null);
       walkOverTerrainGoalMessage.set(null);
       handTrajectoryMessage.set(null);
       armTrajectoryMessage.set(null);
@@ -99,11 +95,6 @@ public class TimingBehaviorHelper extends AbstractBehavior
       {
          publishTextToSpeech("timer received walkingStatusMessage");
          walkingStatusMessage.set(null);
-      }
-      if (doorLocationMessage.get() != null)
-      {
-         publishTextToSpeech("timer received doorLocationMessage");
-         doorLocationMessage.set(null);
       }
       if (walkOverTerrainGoalMessage.get() != null)
       {

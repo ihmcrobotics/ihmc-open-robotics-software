@@ -3,7 +3,6 @@ package us.ihmc.perception.sceneGraph.ros2;
 import perception_msgs.msg.dds.ArUcoMarkerNodeMessage;
 import perception_msgs.msg.dds.CenterposeNodeMessage;
 import perception_msgs.msg.dds.DetectableSceneNodeMessage;
-import perception_msgs.msg.dds.DoorNodeMessage;
 import perception_msgs.msg.dds.PredefinedRigidBodySceneNodeMessage;
 import perception_msgs.msg.dds.PrimitiveRigidBodySceneNodeMessage;
 import perception_msgs.msg.dds.SceneNodeMessage;
@@ -29,7 +28,6 @@ public class ROS2SceneGraphSubscriptionNode
    private YOLOv8NodeMessage yoloNodeMessage;
    private StaticRelativeSceneNodeMessage staticRelativeSceneNodeMessage;
    private PrimitiveRigidBodySceneNodeMessage primitiveRigidBodySceneNodeMessage;
-   private DoorNodeMessage doorNodeMessage;
    private TrashCanNodeMessage trashCanNodeMessage;
    private final List<ROS2SceneGraphSubscriptionNode> children = new ArrayList<>();
 
@@ -43,7 +41,6 @@ public class ROS2SceneGraphSubscriptionNode
       centerposeNodeMessage = null;
       yoloNodeMessage = null;
       staticRelativeSceneNodeMessage = null;
-      doorNodeMessage = null;
       trashCanNodeMessage = null;
       children.clear();
    }
@@ -136,16 +133,6 @@ public class ROS2SceneGraphSubscriptionNode
    public void setPrimitiveRigidBodySceneNodeMessage(PrimitiveRigidBodySceneNodeMessage primitiveRigidBodySceneNodeMessage)
    {
       this.primitiveRigidBodySceneNodeMessage = primitiveRigidBodySceneNodeMessage;
-   }
-
-   public DoorNodeMessage getDoorNodeMessage()
-   {
-      return doorNodeMessage;
-   }
-
-   public void setDoorNodeMessage(DoorNodeMessage doorNodeMessage)
-   {
-      this.doorNodeMessage = doorNodeMessage;
    }
 
    public TrashCanNodeMessage getTrashCanNodeMessage()
