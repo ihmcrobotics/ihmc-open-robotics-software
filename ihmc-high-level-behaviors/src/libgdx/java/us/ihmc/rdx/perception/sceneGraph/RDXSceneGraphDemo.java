@@ -17,8 +17,6 @@ import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.rapidRegions.RapidRegionsExtractorParameters;
-import us.ihmc.perception.sceneGraph.SceneNode;
-import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
@@ -227,15 +225,6 @@ public class RDXSceneGraphDemo
                }
 
                yolov8DetectionExecutor.runYOLODetectionOnAllModels(zedColorImages.get(RobotSide.LEFT), zedDepthImage);
-
-               // TODO: finish
-               onRobotSceneGraph.updateSubscription();
-               onRobotSceneGraph.updateDetections(detectionManager);
-
-               if (newPlanarRegions.poll())
-                  for (SceneNode sceneNode : onRobotSceneGraph.getSceneNodesByID())
-                     if (sceneNode instanceof DoorNode doorNode)
-                        doorNode.getDoorPanel().filterAndSetPlanarRegionFromPlanarRegionsList(newPlanarRegions.read());
 
                onRobotSceneGraph.updateOnRobotOnly(sensorFrame.getReferenceFrame());
                onRobotSceneGraph.updatePublication();

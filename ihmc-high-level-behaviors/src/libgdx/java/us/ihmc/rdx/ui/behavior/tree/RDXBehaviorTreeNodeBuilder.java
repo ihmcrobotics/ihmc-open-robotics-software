@@ -3,26 +3,40 @@ package us.ihmc.rdx.ui.behavior.tree;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.ai2r.AI2RNodeDefinition;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeBuilder;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
 import us.ihmc.behaviors.door.DoorTraversalDefinition;
-import us.ihmc.behaviors.buildingExploration.BuildingExplorationDefinition;
-import us.ihmc.behaviors.sequence.actions.CheckPointNodeDefinition;
 import us.ihmc.behaviors.logic.ConditionNodeDefinition;
 import us.ihmc.behaviors.logic.GotoNodeDefinition;
 import us.ihmc.behaviors.sequence.ActionNodeInitialization;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.FallbackNodeDefinition;
-import us.ihmc.behaviors.sequence.actions.*;
+import us.ihmc.behaviors.sequence.actions.CheckPointNodeDefinition;
+import us.ihmc.behaviors.sequence.actions.ChestOrientationActionDefinition;
+import us.ihmc.behaviors.sequence.actions.FootPoseActionDefinition;
+import us.ihmc.behaviors.sequence.actions.FootstepPlanActionDefinition;
+import us.ihmc.behaviors.sequence.actions.HandPoseActionDefinition;
+import us.ihmc.behaviors.sequence.actions.HandWrenchActionDefinition;
+import us.ihmc.behaviors.sequence.actions.PelvisHeightOrientationActionDefinition;
+import us.ihmc.behaviors.sequence.actions.SakeHandCommandActionDefinition;
+import us.ihmc.behaviors.sequence.actions.ScrewPrimitiveActionDefinition;
+import us.ihmc.behaviors.sequence.actions.WaitDurationActionDefinition;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.behavior.actions.*;
+import us.ihmc.rdx.ui.behavior.actions.RDXCheckPointNode;
+import us.ihmc.rdx.ui.behavior.actions.RDXChestOrientationAction;
+import us.ihmc.rdx.ui.behavior.actions.RDXFootPoseAction;
+import us.ihmc.rdx.ui.behavior.actions.RDXFootstepPlanAction;
+import us.ihmc.rdx.ui.behavior.actions.RDXHandPoseAction;
+import us.ihmc.rdx.ui.behavior.actions.RDXHandWrenchAction;
+import us.ihmc.rdx.ui.behavior.actions.RDXPelvisHeightOrientationAction;
+import us.ihmc.rdx.ui.behavior.actions.RDXSakeHandCommandAction;
+import us.ihmc.rdx.ui.behavior.actions.RDXScrewPrimitiveAction;
+import us.ihmc.rdx.ui.behavior.actions.RDXWaitDurationAction;
 import us.ihmc.rdx.ui.behavior.behaviors.RDXAI2RNode;
 import us.ihmc.rdx.ui.behavior.behaviors.RDXDoorTraversal;
-import us.ihmc.rdx.ui.behavior.behaviors.RDXBuildingExploration;
-import us.ihmc.rdx.ui.behavior.actions.RDXCheckPointNode;
 import us.ihmc.rdx.ui.behavior.logic.RDXConditionNode;
 import us.ihmc.rdx.ui.behavior.logic.RDXGotoNode;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
@@ -98,10 +112,6 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeBuilder<RDXBe
       if (nodeType == DoorTraversalDefinition.class)
       {
          return new RDXDoorTraversal(id, crdtInfo, saveFileDirectory, syncedRobot);
-      }
-      if (nodeType == BuildingExplorationDefinition.class)
-      {
-         return new RDXBuildingExploration(id, crdtInfo, saveFileDirectory, syncedRobot);
       }
 
       // Actions:

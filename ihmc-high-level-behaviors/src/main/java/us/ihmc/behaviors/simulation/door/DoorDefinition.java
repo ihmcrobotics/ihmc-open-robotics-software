@@ -1,7 +1,6 @@
 package us.ihmc.behaviors.simulation.door;
 
 import us.ihmc.euclid.Axis3D;
-import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
@@ -20,7 +19,7 @@ import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.scs2.simulation.robot.multiBodySystem.SimPrismaticJoint;
 import us.ihmc.scs2.simulation.robot.multiBodySystem.SimRevoluteJoint;
 
-import static us.ihmc.perception.sceneGraph.rigidBody.doors.DoorModelParameters.*;
+import static us.ihmc.behaviors.simulation.door.DoorModelParameters.*;
 
 /**
  * SCS 2 definition of the door we have in the lab.
