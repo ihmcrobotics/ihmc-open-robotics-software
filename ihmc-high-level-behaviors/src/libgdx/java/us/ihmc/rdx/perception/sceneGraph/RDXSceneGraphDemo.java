@@ -20,6 +20,7 @@ import us.ihmc.perception.rapidRegions.RapidRegionsExtractorParameters;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
+import us.ihmc.rdx.perception.RDXDetectedDoorsPanel;
 import us.ihmc.rdx.perception.RDXZEDSVORecorderPanel;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
@@ -163,6 +164,8 @@ public class RDXSceneGraphDemo
             // Setup scene graph
             onRobotSceneGraph = new ROS2SceneGraph(ros2Helper);
             sceneGraphUI = new RDXSceneGraphUI(ros2Helper, baseUI);
+
+            baseUI.getImGuiPanelManager().addPanel(new RDXDetectedDoorsPanel());
 
             // Add rapid region parameters panel
             ImGuiRemoteROS2StoredPropertySet rapidRegionsParameterPanel

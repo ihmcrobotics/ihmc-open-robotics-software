@@ -58,7 +58,7 @@ public class RDXZEDSVORecorderPanel
          if (!holdingOnToTheSlider)
             requestedPosition.set((int) latestMessage.getCurrentPosition());
 
-         if (ImGuiTools.sliderInt(labels.get("Position"), requestedPosition, 0, (int) latestMessage.getLength()))
+         if (requestedPosition.get() != -1 && ImGuiTools.sliderInt(labels.get("Position"), requestedPosition, 0, (int) latestMessage.getLength()))
          {
             holdingOnToTheSlider = true;
 
