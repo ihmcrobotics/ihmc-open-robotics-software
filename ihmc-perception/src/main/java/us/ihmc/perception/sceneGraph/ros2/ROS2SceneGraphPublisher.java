@@ -3,8 +3,6 @@ package us.ihmc.perception.sceneGraph.ros2;
 import perception_msgs.msg.dds.ArUcoMarkerNodeMessage;
 import perception_msgs.msg.dds.CenterposeNodeMessage;
 import perception_msgs.msg.dds.DetectableSceneNodeMessage;
-import perception_msgs.msg.dds.DoorNodeMessage;
-import perception_msgs.msg.dds.DoorOpeningMechanismMessage;
 import perception_msgs.msg.dds.PredefinedRigidBodySceneNodeMessage;
 import perception_msgs.msg.dds.PrimitiveRigidBodySceneNodeMessage;
 import perception_msgs.msg.dds.SceneGraphMessage;
@@ -19,7 +17,6 @@ import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.perception.detections.PersistentDetection;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
@@ -27,13 +24,9 @@ import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
 import us.ihmc.perception.sceneGraph.rigidBody.PredefinedRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
-import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
-import us.ihmc.perception.sceneGraph.rigidBody.doors.components.DoorOpeningMechanism;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.trashcan.TrashCanNode;
 import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
-
-import java.util.UUID;
 
 /**
  * Publishes the current state of the complete scene graph.
@@ -146,26 +139,6 @@ public class ROS2SceneGraphPublisher
             yoloNode.fromMessage(yoloNodeMessage);
 
             detectableSceneNodeMessage = yoloNodeMessage.getDetectableSceneNode();
-         }
-         else if (sceneNode instanceof DoorNode doorNode)
-         {
-            sceneGraphMessage.getSceneTreeTypes().add(SceneGraphMessage.DOOR_NODE_TYPE);
-            sceneGraphMessage.getSceneTreeIndices().add(sceneGraphMessage.getDoorSceneNodes().size());
-            DoorNodeMessage doorNodeMessage = sceneGraphMessage.getDoorSceneNodes().add();
-            doorNodeMessage.getDoorCornerTransformToWorld().set(doorNode.getDoorCornerFrame().getTransformToWorldFrame());
-            doorNodeMessage.setPoseLocked(doorNode.isDoorFramePoseLocked());
-            doorNode.getDoorPanel().toMessage(doorNodeMessage.getDoorPanel());
-            doorNodeMessage.getOpeningMechanisms().clear();
-            for (DoorOpeningMechanism openingMechanism : doorNode.getOpeningMechanisms().values())
-            {
-               DoorOpeningMechanismMessage doorOpeningMechanismMessage = doorNodeMessage.getOpeningMechanisms().add();
-               doorOpeningMechanismMessage.setType(openingMechanism.getType().getByteValue());
-               doorOpeningMechanismMessage.setDoorSide(openingMechanism.getDoorSide().getBooleanValue());
-               doorOpeningMechanismMessage.getMechanismTransformToWorld().set(openingMechanism.getMechanismFrame().getTransformToWorldFrame());
-               UUID id = openingMechanism.hasDetection() ? openingMechanism.getDetection().getID() : PersistentDetection.NULL_DETECTION_ID;
-               MessageTools.toMessage(id, doorOpeningMechanismMessage.getPersistentDetectionId());
-            }
-            detectableSceneNodeMessage = doorNodeMessage.getDetectableSceneNode();
          }
          else if (sceneNode instanceof TrashCanNode trashCanNode)
          {

@@ -4,13 +4,12 @@ import gnu.trove.iterator.TIntIterator;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetectionResults;
-import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
-import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.perception.filters.DetectionFilter;
+import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetectionResults;
 import us.ihmc.perception.sceneGraph.SceneNode;
-import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorSceneNodeDefinitions;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
 import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneObjectDefinitions;
+import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 
 /**
  * This class exists to perform some operations that are like "glue" between the scene based
@@ -37,31 +36,22 @@ public class ArUcoSceneTools
                {
                   // Make sure the marker is one we know about and get the size
                   double markerSize = RigidBodySceneObjectDefinitions.ARUCO_MARKER_SIZES.get(detectedID);
-                  if (markerSize == RigidBodySceneObjectDefinitions.ARUCO_MARKER_SIZES.getNoEntryValue())
+                  DetectionFilter candidateFilter = sceneGraph.getDetectionFilterCollection().getOrCreateFilter(detectedID);
+                  candidateFilter.registerDetection();
+                  if (candidateFilter.isStableDetectionResult())
                   {
-                     markerSize = DoorSceneNodeDefinitions.ARUCO_MARKER_SIZES.get(detectedID);
-                  }
+                     sceneGraph.getDetectionFilterCollection().removeFilter(detectedID);
 
-                  if (markerSize != DoorSceneNodeDefinitions.ARUCO_MARKER_SIZES.getNoEntryValue())
-                  {
-                     DetectionFilter candidateFilter = sceneGraph.getDetectionFilterCollection().getOrCreateFilter(detectedID);
-                     candidateFilter.registerDetection();
-                     if (candidateFilter.isStableDetectionResult())
-                     {
-                        sceneGraph.getDetectionFilterCollection().removeFilter(detectedID);
-
-                        String nodeName = "ArUcoMarker%d".formatted(detectedID);
-                        CRDTInfo crdtInfo = sceneGraph.getCRDTInfo();
-                        arUcoMarkerNode = new ArUcoMarkerNode(sceneGraph.getNextID().getAndIncrement(), nodeName, detectedID, markerSize, crdtInfo);
-                        LogTools.info("Adding detected ArUco marker {} to scene graph as {}", detectedID, nodeName);
-                        modificationQueue.accept(new SceneGraphNodeAddition(arUcoMarkerNode, sceneGraph.getRootNode()));
-                        sceneGraph.getArUcoMarkerIDToNodeMap().put(detectedID, arUcoMarkerNode); // Prevent it getting added twice
-                     }
+                     String nodeName = "ArUcoMarker%d".formatted(detectedID);
+                     CRDTInfo crdtInfo = sceneGraph.getCRDTInfo();
+                     arUcoMarkerNode = new ArUcoMarkerNode(sceneGraph.getNextID().getAndIncrement(), nodeName, detectedID, markerSize, crdtInfo);
+                     LogTools.info("Adding detected ArUco marker {} to scene graph as {}", detectedID, nodeName);
+                     modificationQueue.accept(new SceneGraphNodeAddition(arUcoMarkerNode, sceneGraph.getRootNode()));
+                     sceneGraph.getArUcoMarkerIDToNodeMap().put(detectedID, arUcoMarkerNode); // Prevent it getting added twice
                   }
                }
             }
 
-            DoorSceneNodeDefinitions.ensureNodesAdded(sceneGraph, modificationQueue);
             RigidBodySceneObjectDefinitions.ensureNodesAdded(sceneGraph, modificationQueue);
          });
 

@@ -5,7 +5,6 @@ import perception_msgs.msg.dds.ArUcoMarkerNodeMessage;
 import perception_msgs.msg.dds.CenterposeNodeMessage;
 import perception_msgs.msg.dds.DetectableSceneNodeMessage;
 import perception_msgs.msg.dds.DoorNodeMessage;
-import perception_msgs.msg.dds.DoorOpeningMechanismMessage;
 import perception_msgs.msg.dds.PredefinedRigidBodySceneNodeMessage;
 import perception_msgs.msg.dds.PrimitiveRigidBodySceneNodeMessage;
 import perception_msgs.msg.dds.SceneGraphMessage;
@@ -19,7 +18,6 @@ import us.ihmc.communication.ros2.ROS2IOTopicQualifier;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.perception.detections.PersistentDetection;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
@@ -29,17 +27,12 @@ import us.ihmc.perception.sceneGraph.modification.SceneGraphClearSubtree;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeReplacement;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
-import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
-import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode.DoorSide;
-import us.ihmc.perception.sceneGraph.rigidBody.doors.components.DoorOpeningMechanism;
-import us.ihmc.perception.sceneGraph.rigidBody.doors.components.DoorOpeningMechanism.DoorOpeningMechanismType;
 import us.ihmc.perception.sceneGraph.rigidBody.trashcan.TrashCanNode;
 import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
 import us.ihmc.tools.thread.SwapReference;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.UUID;
 import java.util.function.BiFunction;
 
 /**
@@ -182,31 +175,6 @@ public class ROS2SceneGraphSubscription
          if (localNode instanceof StaticRelativeSceneNode staticRelativeSceneNode)
          {
             staticRelativeSceneNode.setDistanceToDisableTracking(subscriptionNode.getStaticRelativeSceneNodeMessage().getDistanceToDisableTracking());
-         }
-         if (localNode instanceof DoorNode doorNode)
-         {
-            doorNode.updateDoorCornerFrame(subscriptionNode.getDoorNodeMessage().getDoorCornerTransformToWorld());
-            doorNode.setDoorFramePoseLock(subscriptionNode.getDoorNodeMessage().getPoseLocked());
-            doorNode.getDoorPanel().fromMessage(subscriptionNode.getDoorNodeMessage().getDoorPanel());
-            for (DoorOpeningMechanismMessage doorOpeningMechanismMessage : subscriptionNode.getDoorNodeMessage().getOpeningMechanisms())
-            {
-               UUID messageDetectionID = MessageTools.toUUID(doorOpeningMechanismMessage.getPersistentDetectionId());
-               if (!messageDetectionID.equals(PersistentDetection.NULL_DETECTION_ID))
-               {
-                  if (!doorNode.getOpeningMechanisms().containsKey(messageDetectionID))
-                  {
-                     DoorSide doorSide = DoorSide.fromBoolean(doorOpeningMechanismMessage.getDoorSide());
-                     DoorOpeningMechanismType openingMechanismType = DoorOpeningMechanismType.fromByte(doorOpeningMechanismMessage.getType());
-                     DoorOpeningMechanism doorOpeningMechanism = new DoorOpeningMechanism(doorSide, openingMechanismType, messageDetectionID);
-                     doorOpeningMechanism.updateMechanismFrame(doorOpeningMechanismMessage.getMechanismTransformToWorld());
-                     doorNode.getOpeningMechanisms().put(messageDetectionID, doorOpeningMechanism);
-                  }
-                  else
-                  {
-                     doorNode.getOpeningMechanisms().get(messageDetectionID).updateMechanismFrame(doorOpeningMechanismMessage.getMechanismTransformToWorld());
-                  }
-               }
-            }
          }
          if (localNode instanceof TrashCanNode trashCanNode)
          {

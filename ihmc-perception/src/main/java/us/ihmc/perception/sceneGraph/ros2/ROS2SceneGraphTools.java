@@ -1,6 +1,5 @@
 package us.ihmc.perception.sceneGraph.ros2;
 
-import perception_msgs.msg.dds.DoorOpeningMechanismMessage;
 import perception_msgs.msg.dds.PredefinedRigidBodySceneNodeMessage;
 import perception_msgs.msg.dds.PrimitiveRigidBodySceneNodeMessage;
 import perception_msgs.msg.dds.SceneGraphMessage;
@@ -15,10 +14,6 @@ import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
 import us.ihmc.perception.sceneGraph.rigidBody.PredefinedRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
-import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
-import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode.DoorSide;
-import us.ihmc.perception.sceneGraph.rigidBody.doors.components.DoorOpeningMechanism;
-import us.ihmc.perception.sceneGraph.rigidBody.doors.components.DoorOpeningMechanism.DoorOpeningMechanismType;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
 import us.ihmc.perception.sceneGraph.rigidBody.trashcan.TrashCanNode;
@@ -117,24 +112,6 @@ public class ROS2SceneGraphTools
                                                      initialTransformToParent,
                                                      PrimitiveRigidBodyShape.fromString(primitiveRigidBodySceneNodeMessage.getShapeAsString()),
                                                      crdtInfo);
-      }
-      else if (nodeType == SceneGraphMessage.DOOR_NODE_TYPE)
-      {
-         DoorNode doorNode = new DoorNode(nodeID, crdtInfo);
-         doorNode.updateDoorCornerFrame(subscriptionNode.getDoorNodeMessage().getDoorCornerTransformToWorld());
-         doorNode.setDoorFramePoseLock(subscriptionNode.getDoorNodeMessage().getPoseLocked());
-         doorNode.getDoorPanel().fromMessage(subscriptionNode.getDoorNodeMessage().getDoorPanel());
-         for (DoorOpeningMechanismMessage doorOpeningMechanismMessage : subscriptionNode.getDoorNodeMessage().getOpeningMechanisms())
-         {
-            DoorSide doorSide = DoorSide.fromBoolean(doorOpeningMechanismMessage.getDoorSide());
-            DoorOpeningMechanismType openingMechanismType = DoorOpeningMechanismType.fromByte(doorOpeningMechanismMessage.getType());
-            DoorOpeningMechanism doorOpeningMechanism = new DoorOpeningMechanism(doorSide,
-                                                                                 openingMechanismType,
-                                                                                 MessageTools.toUUID(doorOpeningMechanismMessage.getPersistentDetectionId()));
-            doorOpeningMechanism.updateMechanismFrame(doorOpeningMechanismMessage.getMechanismTransformToWorld());
-            doorNode.getOpeningMechanisms().put(doorOpeningMechanism.getDetectionID(), doorOpeningMechanism);
-         }
-         sceneNode = doorNode;
       }
       else if (nodeType == SceneGraphMessage.TRASH_CAN_NODE_TYPE)
       {
