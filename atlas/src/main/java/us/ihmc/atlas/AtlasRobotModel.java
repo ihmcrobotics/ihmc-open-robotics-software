@@ -466,15 +466,6 @@ public class AtlasRobotModel implements DRCRobotModel
    }
 
    @Override
-   public double getWholeBodyControllerCoreDT()
-   {
-      //TODO This is temporaly return values.
-      // We should figure out the atlas simulation really doesn't need this and then tweak the override structure.
-      // This is only called in the Nadia and Alexander later.
-      return 0.0;
-   }
-
-   @Override
    public RobotROSClockCalculator getROSClockCalculator()
    {
       DRCROSPPSTimestampOffsetProvider timestampOffsetProvider = null;
