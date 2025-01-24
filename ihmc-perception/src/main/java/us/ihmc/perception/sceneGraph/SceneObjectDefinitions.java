@@ -1,6 +1,5 @@
 package us.ihmc.perception.sceneGraph;
 
-import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorSceneNodeDefinitions;
 import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneObjectDefinitions;
 
 import java.util.function.Function;
@@ -22,10 +21,6 @@ public class SceneObjectDefinitions
       if (RigidBodySceneObjectDefinitions.ARUCO_MARKER_SIZES.containsKey(markerID))
       {
          return RigidBodySceneObjectDefinitions.ARUCO_MARKER_SIZES.get(markerID);
-      }
-      else if (DoorSceneNodeDefinitions.ARUCO_MARKER_SIZES.containsKey(markerID))
-      {
-         return DoorSceneNodeDefinitions.ARUCO_MARKER_SIZES.get(markerID);
       }
       else
       {

@@ -19,8 +19,6 @@ import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphTreeModification;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
-import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
-import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNodeTools;
 import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameDynamicCollection;
 
@@ -39,7 +37,6 @@ import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * A scene graph implementation that is really a scene tree. There
@@ -205,30 +202,6 @@ public class SceneGraph
       detectionManager.updateDetections();
 
       Set<PersistentDetection> newlyValidDetections = detectionManager.getNewlyValidDetections();
-
-      // Update or add door nodes
-      Set<PersistentDetection> newlyValidDoorDetections = newlyValidDetections.stream()
-                                                                              .filter(DoorNodeTools::detectionIsDoorComponent)
-                                                                              .collect(Collectors.toSet());
-      for (PersistentDetection newlyValidDoorDetection : newlyValidDoorDetections)
-      {
-         // Does this new detection correspond with an existing door node?
-         modifyTree(modificationQueue ->
-         {
-            boolean matched = sceneNodesByID.stream()
-                                            .filter(sceneNode -> sceneNode instanceof DoorNode)
-                                            .anyMatch(sceneNode -> ((DoorNode) sceneNode).acceptDetection(newlyValidDoorDetection));
-            if (!matched)
-            {
-               // Create new door node
-               DoorNode doorNode = new DoorNode(getNextID().getAndIncrement(), newlyValidDoorDetection, getCRDTInfo());
-               modificationQueue.accept(new SceneGraphNodeAddition(doorNode, rootNode));
-            }
-         });
-      }
-
-//      for (PersistentDetection newDetection : newlyValidDetections)
-//         addNodeFromDetection(newDetection);
 
       detectionManager.clearNewlyValidDetections();
    }

@@ -3,13 +3,13 @@ package us.ihmc.rdx.perception.sceneGraph.builder;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.rigidBody.PredefinedRigidBodySceneNode;
-import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorSceneNodeDefinitions;
 import us.ihmc.rdx.perception.sceneGraph.RDXPredefinedRigidBodySceneNode;
 import us.ihmc.rdx.ui.RDXBaseUI;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import static us.ihmc.behaviors.simulation.door.DoorModelParameters.*;
 import static us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneObjectDefinitions.*;
 
 public class RDXPredefinedRigidBodySceneNodeBuilder extends RDXSceneNodeBuilder<RDXPredefinedRigidBodySceneNode>
@@ -230,8 +230,8 @@ public class RDXPredefinedRigidBodySceneNodeBuilder extends RDXSceneNodeBuilder<
                                                                                            sceneGraph.getIDToNodeMap(),
                                                                                            parent.getID(),
                                                                                            new RigidBodyTransform(),
-                                                                                           DoorSceneNodeDefinitions.DOOR_PANEL_VISUAL_MODEL_FILE_PATH,
-                                                                                           DoorSceneNodeDefinitions.PULL_DOOR_PANEL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
+                                                                                           DOOR_PANEL_VISUAL_MODEL_FILE_PATH,
+                                                                                           PULL_DOOR_PANEL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
                                                                                            sceneGraph.getCRDTInfo());
             return new RDXPredefinedRigidBodySceneNode(rightDoorPanel, RDXBaseUI.getInstance().getPrimary3DPanel());
          }
@@ -242,8 +242,8 @@ public class RDXPredefinedRigidBodySceneNodeBuilder extends RDXSceneNodeBuilder<
                                                                                       sceneGraph.getIDToNodeMap(),
                                                                                       parent.getID(),
                                                                                       new RigidBodyTransform(),
-                                                                                      DoorSceneNodeDefinitions.DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH,
-                                                                                      DoorSceneNodeDefinitions.LEFT_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
+                                                                                      DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH,
+                                                                                      LEFT_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
                                                                                       sceneGraph.getCRDTInfo());
             return new RDXPredefinedRigidBodySceneNode(doorLever, RDXBaseUI.getInstance().getPrimary3DPanel());
          }

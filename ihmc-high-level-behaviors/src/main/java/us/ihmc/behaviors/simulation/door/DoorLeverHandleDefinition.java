@@ -3,13 +3,13 @@ package us.ihmc.behaviors.simulation.door;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.mecano.tools.MomentOfInertiaFactory;
-import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorModelParameters;
-import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorSceneNodeDefinitions;
 import us.ihmc.scs2.definition.collision.CollisionShapeDefinition;
 import us.ihmc.scs2.definition.geometry.Cylinder3DDefinition;
 import us.ihmc.scs2.definition.geometry.ModelFileGeometryDefinition;
 import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
+
+import static us.ihmc.behaviors.simulation.door.DoorModelParameters.DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH;
 
 /**
  * A lever style door handle, as an SCS 2 definition.
@@ -41,13 +41,13 @@ public class DoorLeverHandleDefinition extends RigidBodyDefinition
       getInertiaPose().getRotation().setToZero();
 
       VisualDefinition modelVisualDefinition = new VisualDefinition();
-      ModelFileGeometryDefinition geometryDefinition = new ModelFileGeometryDefinition(DoorSceneNodeDefinitions.DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH);
+      ModelFileGeometryDefinition geometryDefinition = new ModelFileGeometryDefinition(DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH);
       modelVisualDefinition.setGeometryDefinition(geometryDefinition);
       addVisualDefinition(modelVisualDefinition);
 
       VisualDefinition modelVisualDefinitionOtherSide = new VisualDefinition();
       ModelFileGeometryDefinition geometryDefinitionOtherSide
-            = new ModelFileGeometryDefinition(DoorSceneNodeDefinitions.DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH);
+            = new ModelFileGeometryDefinition(DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH);
       modelVisualDefinitionOtherSide.setGeometryDefinition(geometryDefinitionOtherSide);
       modelVisualDefinitionOtherSide.getOriginPose().prependPitchRotation(Math.PI);
       modelVisualDefinitionOtherSide.getOriginPose().getTranslation().setX(DoorModelParameters.DOOR_PANEL_THICKNESS);
