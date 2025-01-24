@@ -99,7 +99,7 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
 
    private final YoBoolean isWalking = new YoBoolean("isWalking", registry);
 
-   private final YoBoolean requestOpenLoopCoPControl = new YoBoolean("requestOpenLoopCoPControl", registry);
+   private final YoBoolean requestDisableCoPFeedbackControl = new YoBoolean("requestDisableCoPFeedbackControl", registry);
 
    private final int numberOfFootstepsToVisualize = 4;
    @SuppressWarnings("unchecked")
@@ -174,11 +174,11 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
       momentumTrajectoryHandler = new MomentumTrajectoryHandler(yoTime, registry);
       comTrajectoryHandler = new CenterOfMassTrajectoryHandler(yoTime, registry);
 
-      YoVariableChangedListener openLoopCoPListener = change -> requestOpenLoopCoPControl.set(usingQFP.getBooleanValue() && !isWalkingInPlace.getBooleanValue() && !isWalkingPaused.getBooleanValue() && isWalking.getBooleanValue());
-      usingQFP.addListener(openLoopCoPListener);
-      isWalkingInPlace.addListener(openLoopCoPListener);
-      isWalkingPaused.addListener(openLoopCoPListener);
-      isWalking.addListener(openLoopCoPListener);
+      YoVariableChangedListener requestDisableCoPFeedbackListener = change -> requestDisableCoPFeedbackControl.set(usingQFP.getBooleanValue() && !isWalkingInPlace.getBooleanValue() && !isWalkingPaused.getBooleanValue() && isWalking.getBooleanValue());
+      usingQFP.addListener(requestDisableCoPFeedbackListener);
+      isWalkingInPlace.addListener(requestDisableCoPFeedbackListener);
+      isWalkingPaused.addListener(requestDisableCoPFeedbackListener);
+      isWalking.addListener(requestDisableCoPFeedbackListener);
 
       parentRegistry.addChild(registry);
    }
@@ -298,12 +298,11 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
       usingQFP.set(command.getFootstep(0).getCsgMode() == ContinuousStepGeneratorMode.QFP);
       isWalkingInPlace.set(command.getFootstep(0).walkingInPlace);
 
-      // TODO make this only for QFP mode once messages for that are made
       if (usingQFP.getBooleanValue() &&
-              footstepStatus.getRobotSide() == command.getFootstep(0).getRobotSide().toByte() &&
-              footstepStatus.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED)
-         command.removeFootstep(0)
-               ;
+          footstepStatus.getRobotSide() == command.getFootstep(0).getRobotSide().toByte() &&
+          footstepStatus.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED)
+         command.removeFootstep(0);
+
       for (int i = 0; i < command.getNumberOfFootsteps(); i++)
       {
          boolean shouldCheckStepForReachability = shouldCheckPlanForReachability || command.getFootstep(i).getShouldCheckForReachability();
@@ -820,9 +819,9 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
       return usingQFP;
    }
 
-   public YoBoolean requestOpenLoopCoPControl()
+   public YoBoolean getRequestDisableCopFeedbackControl()
    {
-      return requestOpenLoopCoPControl;
+      return requestDisableCoPFeedbackControl;
    }
 
    public void setDefaultTransferTime(double transferTime)

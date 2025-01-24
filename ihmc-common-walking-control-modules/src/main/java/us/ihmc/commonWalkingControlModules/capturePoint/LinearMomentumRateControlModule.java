@@ -171,7 +171,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
            controllerToolbox.getYoGraphicsListRegistry());
    }
 
-   public LinearMomentumRateControlModule(HighLevelHumanoidControllerToolbox controllerToolbox,
+   public LinearMomentumRateControlModule(CenterOfMassStateProvider centerOfMassStateProvider,
                                           CommonHumanoidReferenceFrames referenceFrames,
                                           SideDependentList<ContactableFoot> contactableFeet,
                                           RigidBodyBasics elevator,
@@ -207,11 +207,11 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
       centerOfMass = new FramePoint3D(centerOfMassFrame);
       controlledCoMAcceleration = new YoFrameVector3D("ControlledCoMAcceleration", "", centerOfMassFrame, registry);
 
-      capturePointCalculator = new CapturePointCalculator(controllerToolbox);
+      capturePointCalculator = new CapturePointCalculator(centerOfMassStateProvider);
       centerOfPressureCommandCalculator = new CenterOfPressureCommandCalculator(referenceFrames.getMidFeetZUpFrame(), contactableFeet, registry);
 
       pelvisHeightController = new PelvisHeightController(referenceFrames.getPelvisFrame(), elevator.getBodyFixedFrame(), registry);
-      comHeightController = new CoMHeightController(controllerToolbox, registry);
+      comHeightController = new CoMHeightController(centerOfMassStateProvider, registry);
 
       DoubleProvider capturePointVelocityAlpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(capturePointVelocityBreakFrequency.getValue(),
                                                                                                                        controlDT);
@@ -253,7 +253,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
 
       else
       {
-         icpController = new ICPController(walkingControllerParameters, controllerToolbox.getWalkingMessageHandler(), icpControlPolygons, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
+         icpController = new ICPController(walkingControllerParameters, icpControlPolygons, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
       }
 
       parentRegistry.addChild(registry);
@@ -305,6 +305,9 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
       {
          this.contactStateCommands.get(robotSide).set(input.getContactStateCommands().get(robotSide));
       }
+
+      if (icpController instanceof ICPController)
+         ((ICPController) icpController).setDisableCoPFeedbackControl(input.getDisableCoPFeedbackControl());
    }
 
    /**

@@ -58,6 +58,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
@@ -308,6 +309,20 @@ public class BalanceManager implements SCS2YoGraphicHolder
       copTrajectory.registerState(copTrajectoryState);
       flamingoCopTrajectory = new FlamingoCoPTrajectoryGenerator(copTrajectoryParameters, registry);
       flamingoCopTrajectory.registerState(copTrajectoryState);
+
+      if (walkingMessageHandler != null)
+      {
+         YoVariableChangedListener disableCoPFeedbackListener = change ->
+         {
+            if (walkingMessageHandler.getUsingQFP().getBooleanValue() && walkingMessageHandler.getRequestDisableCopFeedbackControl().getBooleanValue())
+               linearMomentumRateControlModuleInput.setDisableCoPFeedbackControl(true);
+            else
+               linearMomentumRateControlModuleInput.setDisableCoPFeedbackControl(!walkingControllerParameters.getICPControllerParameters().useCoPFeedback());
+         };
+
+         walkingMessageHandler.getUsingQFP().addListener(disableCoPFeedbackListener);
+         walkingMessageHandler.getRequestDisableCopFeedbackControl().addListener(disableCoPFeedbackListener);
+      }
 
       if (USE_ERROR_BASED_STEP_ADJUSTMENT)
       {
@@ -1029,13 +1044,10 @@ public class BalanceManager implements SCS2YoGraphicHolder
                                                                      : maxICPErrorBeforeSingleSupportOuterY.getValue();
 
       if (controllerToolbox.getWalkingMessageHandler().getUsingQFP().getBooleanValue())
-      {
-         maxICPErrorBeforeSingleSupportX += 0.3;
-         maxICPErrorBeforeSingleSupportY += 0.3;
-      }
-
-      normalizedICPError.set(MathTools.square(icpError2d.getX() / maxICPErrorBeforeSingleSupportX)
-                             + MathTools.square(icpError2d.getY() / maxICPErrorBeforeSingleSupportY));
+         normalizedICPError.set(0.0);
+      else
+         normalizedICPError.set(MathTools.square(icpError2d.getX() / maxICPErrorBeforeSingleSupportX)
+                                + MathTools.square(icpError2d.getY() / maxICPErrorBeforeSingleSupportY));
    }
 
    public double getNormalizedEllipticICPError()

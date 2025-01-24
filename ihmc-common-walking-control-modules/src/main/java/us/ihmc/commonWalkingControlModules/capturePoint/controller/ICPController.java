@@ -15,7 +15,6 @@ import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.ParameterizedICPControlGains;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -34,7 +33,6 @@ import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
-import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.parameters.IntegerParameter;
@@ -57,8 +55,8 @@ public class ICPController implements ICPControllerInterface
 
    private final BooleanProvider useCMPFeedback;
    private final BooleanProvider useAngularMomentum;
-   private final BooleanParameter useCoPFeedback;
-   private final YoBoolean usingCoPFeedback;
+   private final BooleanParameter useCoPFeedbackByDefault;
+   private final YoBoolean disableCoPFeedback;
 
    private final BooleanProvider scaleFeedbackWeightWithGain;
 
@@ -136,7 +134,6 @@ public class ICPController implements ICPControllerInterface
    private final ICPControllerHelper helper = new ICPControllerHelper();
 
    public ICPController(WalkingControllerParameters walkingControllerParameters,
-                        WalkingMessageHandler walkingMessageHandler,
                         ICPControlPolygons icpControlPolygons,
                         SideDependentList<? extends ContactablePlaneBody> contactableFeet,
                         double controlDT,
@@ -144,7 +141,6 @@ public class ICPController implements ICPControllerInterface
                         YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this(walkingControllerParameters,
-           walkingMessageHandler,
            walkingControllerParameters.getICPControllerParameters(),
            icpControlPolygons,
            contactableFeet,
@@ -154,7 +150,6 @@ public class ICPController implements ICPControllerInterface
    }
 
    public ICPController(WalkingControllerParameters walkingControllerParameters,
-                        WalkingMessageHandler walkingMessageHandler,
                         ICPControllerParameters icpOptimizationParameters,
                         ICPControlPolygons icpControlPolygons,
                         SideDependentList<? extends ContactablePlaneBody> contactableFeet,
@@ -168,9 +163,9 @@ public class ICPController implements ICPControllerInterface
 
       useCMPFeedback = new BooleanParameter(yoNamePrefix + "UseCMPFeedback", registry, icpOptimizationParameters.useCMPFeedback());
       useAngularMomentum = new BooleanParameter(yoNamePrefix + "UseAngularMomentum", registry, icpOptimizationParameters.useAngularMomentum());
-      useCoPFeedback = new BooleanParameter(yoNamePrefix + "UseCoPFeedback", registry, icpOptimizationParameters.useCoPFeedback());
-      usingCoPFeedback = new YoBoolean(yoNamePrefix + "CurrentlyUsingCoPFeedback", registry);
-      usingCoPFeedback.set(icpOptimizationParameters.useCoPFeedback());
+      useCoPFeedbackByDefault = new BooleanParameter(yoNamePrefix + "UseCoPFeedbackByDefault", registry, icpOptimizationParameters.useCoPFeedback());
+      disableCoPFeedback = new YoBoolean(yoNamePrefix + "DisableCoPFeedback", registry);
+      disableCoPFeedback.set(!icpOptimizationParameters.useCoPFeedback());
 
       scaleFeedbackWeightWithGain = new BooleanParameter(yoNamePrefix + "ScaleFeedbackWeightWithGain",
                                                          registry,
@@ -216,20 +211,6 @@ public class ICPController implements ICPControllerInterface
       parameters.createFeedForwardAlphaCalculator(registry, yoGraphicsListRegistry);
       parameters.createFeedbackAlphaCalculator(registry, null);
       parameters.createFeedbackProjectionOperator(registry, null);
-
-      if (walkingMessageHandler != null)
-      {
-         YoVariableChangedListener listener = change ->
-         {
-            if (walkingMessageHandler.getUsingQFP().getBooleanValue() && walkingMessageHandler.requestOpenLoopCoPControl().getValue())
-               usingCoPFeedback.set(false);
-            else
-               usingCoPFeedback.set(useCoPFeedback.getValue());
-         };
-
-         walkingMessageHandler.getUsingQFP().addListener(listener);
-         walkingMessageHandler.requestOpenLoopCoPControl().addListener(listener);
-      }
 
       if (yoGraphicsListRegistry != null)
          setupVisualizers(yoGraphicsListRegistry);
@@ -473,7 +454,7 @@ public class ICPController implements ICPControllerInterface
 
    private void computeFeedForwardAndFeedBackAlphas()
    {
-      if (!usingCoPFeedback.getValue())
+      if (disableCoPFeedback.getValue() || !useCoPFeedbackByDefault.getValue())
          feedbackAlpha.set(1.0);
       else if (parameters.getFeedbackAlphaCalculator() != null)
          feedbackAlpha.set(parameters.getFeedbackAlphaCalculator().computeAlpha(currentICP, copConstraintHandler.getCoPConstraint()));
@@ -523,6 +504,11 @@ public class ICPController implements ICPControllerInterface
          double magnitude = helper.transformGainsFromDynamicsFrame(transformedGains, desiredICPVelocity, parallel, orthogonal);
          CommonOps_DDRM.scale(1.0 / magnitude, scaledCoPFeedbackWeight);
       }
+   }
+
+   public void setDisableCoPFeedbackControl(boolean disableCoPFeedbackControl)
+   {
+      disableCoPFeedback.set(disableCoPFeedbackControl);
    }
 
    /**
