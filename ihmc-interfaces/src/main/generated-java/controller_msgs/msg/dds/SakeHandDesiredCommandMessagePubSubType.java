@@ -15,7 +15,7 @@ public class SakeHandDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "41518aa27c33ad5448af9d04ac9dfc7d5434fed4300bdd46c66c797cdaa686b5";
+   		return "a49e35f0553802845ea12f6feb4859bb1609c3e0fb3bbce759274691aa1bf7b1";
    }
    
    @Override
@@ -64,6 +64,8 @@ public class SakeHandDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       return current_alignment - initial_alignment;
    }
@@ -95,6 +97,9 @@ public class SakeHandDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -113,6 +118,8 @@ public class SakeHandDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
 
       cdr.write_type_7(data.getTorqueOn());
 
+      cdr.write_type_11(data.getLogTimestamp());
+
    }
 
    public static void read(controller_msgs.msg.dds.SakeHandDesiredCommandMessage data, us.ihmc.idl.CDR cdr)
@@ -129,6 +136,8 @@ public class SakeHandDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
       	
       data.setTorqueOn(cdr.read_type_7());
       	
+      data.setLogTimestamp(cdr.read_type_11());
+      	
 
    }
 
@@ -141,6 +150,7 @@ public class SakeHandDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
       ser.write_type_6("gripper_desired_position", data.getGripperDesiredPosition());
       ser.write_type_2("raw_gripper_torque_limit", data.getRawGripperTorqueLimit());
       ser.write_type_7("torque_on", data.getTorqueOn());
+      ser.write_type_11("log_timestamp", data.getLogTimestamp());
    }
 
    @Override
@@ -152,6 +162,7 @@ public class SakeHandDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
       data.setGripperDesiredPosition(ser.read_type_6("gripper_desired_position"));
       data.setRawGripperTorqueLimit(ser.read_type_2("raw_gripper_torque_limit"));
       data.setTorqueOn(ser.read_type_7("torque_on"));
+      data.setLogTimestamp(ser.read_type_11("log_timestamp"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.SakeHandDesiredCommandMessage src, controller_msgs.msg.dds.SakeHandDesiredCommandMessage dest)

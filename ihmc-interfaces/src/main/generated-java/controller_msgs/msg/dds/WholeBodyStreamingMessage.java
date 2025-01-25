@@ -12,6 +12,9 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class WholeBodyStreamingMessage extends Packet<WholeBodyStreamingMessage> implements Settable<WholeBodyStreamingMessage>, EpsilonComparable<WholeBodyStreamingMessage>
 {
+   public static final byte POSTURE_MODE_OPTIMIZER = (byte) 0;
+   public static final byte POSTURE_MODE_FREEZE = (byte) 1;
+   public static final byte POSTURE_MODE_NOMINAL = (byte) 2;
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
@@ -71,6 +74,17 @@ public class WholeBodyStreamingMessage extends Packet<WholeBodyStreamingMessage>
             */
    public boolean has_neck_streaming_message_;
    public controller_msgs.msg.dds.JointspaceStreamingMessage neck_streaming_message_;
+   public double posture_sensitivity_;
+   public byte posture_optimizer_mode_;
+   /**
+            * The timestamp (in nanoseconds) at which this message was logged
+            */
+   public long log_timestamp_;
+   /**
+            * Whether the optimizer is enabled
+            */
+   public boolean optimizer_enabled_;
+   public double activation_alpha_;
 
    public WholeBodyStreamingMessage()
    {
@@ -124,6 +138,16 @@ public class WholeBodyStreamingMessage extends Packet<WholeBodyStreamingMessage>
       has_neck_streaming_message_ = other.has_neck_streaming_message_;
 
       controller_msgs.msg.dds.JointspaceStreamingMessagePubSubType.staticCopy(other.neck_streaming_message_, neck_streaming_message_);
+      posture_sensitivity_ = other.posture_sensitivity_;
+
+      posture_optimizer_mode_ = other.posture_optimizer_mode_;
+
+      log_timestamp_ = other.log_timestamp_;
+
+      optimizer_enabled_ = other.optimizer_enabled_;
+
+      activation_alpha_ = other.activation_alpha_;
+
    }
 
    /**
@@ -360,6 +384,63 @@ public class WholeBodyStreamingMessage extends Packet<WholeBodyStreamingMessage>
       return neck_streaming_message_;
    }
 
+   public void setPostureSensitivity(double posture_sensitivity)
+   {
+      posture_sensitivity_ = posture_sensitivity;
+   }
+   public double getPostureSensitivity()
+   {
+      return posture_sensitivity_;
+   }
+
+   public void setPostureOptimizerMode(byte posture_optimizer_mode)
+   {
+      posture_optimizer_mode_ = posture_optimizer_mode;
+   }
+   public byte getPostureOptimizerMode()
+   {
+      return posture_optimizer_mode_;
+   }
+
+   /**
+            * The timestamp (in nanoseconds) at which this message was logged
+            */
+   public void setLogTimestamp(long log_timestamp)
+   {
+      log_timestamp_ = log_timestamp;
+   }
+   /**
+            * The timestamp (in nanoseconds) at which this message was logged
+            */
+   public long getLogTimestamp()
+   {
+      return log_timestamp_;
+   }
+
+   /**
+            * Whether the optimizer is enabled
+            */
+   public void setOptimizerEnabled(boolean optimizer_enabled)
+   {
+      optimizer_enabled_ = optimizer_enabled;
+   }
+   /**
+            * Whether the optimizer is enabled
+            */
+   public boolean getOptimizerEnabled()
+   {
+      return optimizer_enabled_;
+   }
+
+   public void setActivationAlpha(double activation_alpha)
+   {
+      activation_alpha_ = activation_alpha;
+   }
+   public double getActivationAlpha()
+   {
+      return activation_alpha_;
+   }
+
 
    public static Supplier<WholeBodyStreamingMessagePubSubType> getPubSubType()
    {
@@ -410,6 +491,16 @@ public class WholeBodyStreamingMessage extends Packet<WholeBodyStreamingMessage>
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.has_neck_streaming_message_, other.has_neck_streaming_message_, epsilon)) return false;
 
       if (!this.neck_streaming_message_.epsilonEquals(other.neck_streaming_message_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.posture_sensitivity_, other.posture_sensitivity_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.posture_optimizer_mode_, other.posture_optimizer_mode_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.log_timestamp_, other.log_timestamp_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.optimizer_enabled_, other.optimizer_enabled_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.activation_alpha_, other.activation_alpha_, epsilon)) return false;
+
 
       return true;
    }
@@ -455,6 +546,16 @@ public class WholeBodyStreamingMessage extends Packet<WholeBodyStreamingMessage>
       if(this.has_neck_streaming_message_ != otherMyClass.has_neck_streaming_message_) return false;
 
       if (!this.neck_streaming_message_.equals(otherMyClass.neck_streaming_message_)) return false;
+      if(this.posture_sensitivity_ != otherMyClass.posture_sensitivity_) return false;
+
+      if(this.posture_optimizer_mode_ != otherMyClass.posture_optimizer_mode_) return false;
+
+      if(this.log_timestamp_ != otherMyClass.log_timestamp_) return false;
+
+      if(this.optimizer_enabled_ != otherMyClass.optimizer_enabled_) return false;
+
+      if(this.activation_alpha_ != otherMyClass.activation_alpha_) return false;
+
 
       return true;
    }
@@ -504,7 +605,17 @@ public class WholeBodyStreamingMessage extends Packet<WholeBodyStreamingMessage>
       builder.append("has_neck_streaming_message=");
       builder.append(this.has_neck_streaming_message_);      builder.append(", ");
       builder.append("neck_streaming_message=");
-      builder.append(this.neck_streaming_message_);
+      builder.append(this.neck_streaming_message_);      builder.append(", ");
+      builder.append("posture_sensitivity=");
+      builder.append(this.posture_sensitivity_);      builder.append(", ");
+      builder.append("posture_optimizer_mode=");
+      builder.append(this.posture_optimizer_mode_);      builder.append(", ");
+      builder.append("log_timestamp=");
+      builder.append(this.log_timestamp_);      builder.append(", ");
+      builder.append("optimizer_enabled=");
+      builder.append(this.optimizer_enabled_);      builder.append(", ");
+      builder.append("activation_alpha=");
+      builder.append(this.activation_alpha_);
       builder.append("}");
       return builder.toString();
    }

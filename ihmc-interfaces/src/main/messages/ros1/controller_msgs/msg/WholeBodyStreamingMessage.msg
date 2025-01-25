@@ -1,6 +1,12 @@
 # This message is part of the IHMC whole-body controller API.
 # It is a lightweight version of WholeBodyTrajectoryMessage designed for streaming.
 
+int8 POSTURE_MODE_OPTIMIZER=0
+
+int8 POSTURE_MODE_FREEZE=1
+
+int8 POSTURE_MODE_NOMINAL=2
+
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint64 sequence_id
 
@@ -55,5 +61,17 @@ ihmc_common_msgs/EuclideanStreamingMessage center_of_mass_trajectory_message
 bool has_neck_streaming_message
 
 controller_msgs/JointspaceStreamingMessage neck_streaming_message
+
+float64 posture_sensitivity
+
+int8 posture_optimizer_mode
+
+# The timestamp (in nanoseconds) at which this message was logged
+int64 log_timestamp
+
+# Whether the optimizer is enabled
+bool optimizer_enabled
+
+float64 activation_alpha
 
 

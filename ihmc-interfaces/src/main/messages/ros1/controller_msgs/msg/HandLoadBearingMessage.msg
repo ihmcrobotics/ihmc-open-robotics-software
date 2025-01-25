@@ -27,4 +27,7 @@ geometry_msgs/Vector3 contact_normal_in_world
 # The time to delay this command on the controller side before being executed.
 float64 execution_delay_time
 
+# The timestamp (in nanoseconds) at which this message was logged
+int64 log_timestamp
+
 

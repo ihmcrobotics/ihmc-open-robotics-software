@@ -49,6 +49,10 @@ module controller_msgs
          * Keeping the torque off when not needed can help keep the hand's temperature down
          */
         boolean torque_on;
+        /**
+         * The timestamp (in nanoseconds) at which this message was logged
+         */
+        long long log_timestamp;
       };
     };
   };

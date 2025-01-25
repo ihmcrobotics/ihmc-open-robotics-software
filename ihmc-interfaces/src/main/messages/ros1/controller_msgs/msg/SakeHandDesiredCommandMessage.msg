@@ -27,4 +27,7 @@ int32 raw_gripper_torque_limit
 # Keeping the torque off when not needed can help keep the hand's temperature down
 bool torque_on
 
+# The timestamp (in nanoseconds) at which this message was logged
+int64 log_timestamp
+
 

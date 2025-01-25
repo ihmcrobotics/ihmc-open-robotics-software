@@ -41,6 +41,10 @@ public class SakeHandDesiredCommandMessage extends Packet<SakeHandDesiredCommand
             * Keeping the torque off when not needed can help keep the hand's temperature down
             */
    public boolean torque_on_;
+   /**
+            * The timestamp (in nanoseconds) at which this message was logged
+            */
+   public long log_timestamp_;
 
    public SakeHandDesiredCommandMessage()
    {
@@ -65,6 +69,8 @@ public class SakeHandDesiredCommandMessage extends Packet<SakeHandDesiredCommand
       raw_gripper_torque_limit_ = other.raw_gripper_torque_limit_;
 
       torque_on_ = other.torque_on_;
+
+      log_timestamp_ = other.log_timestamp_;
 
    }
 
@@ -164,6 +170,21 @@ public class SakeHandDesiredCommandMessage extends Packet<SakeHandDesiredCommand
       return torque_on_;
    }
 
+   /**
+            * The timestamp (in nanoseconds) at which this message was logged
+            */
+   public void setLogTimestamp(long log_timestamp)
+   {
+      log_timestamp_ = log_timestamp;
+   }
+   /**
+            * The timestamp (in nanoseconds) at which this message was logged
+            */
+   public long getLogTimestamp()
+   {
+      return log_timestamp_;
+   }
+
 
    public static Supplier<SakeHandDesiredCommandMessagePubSubType> getPubSubType()
    {
@@ -194,6 +215,8 @@ public class SakeHandDesiredCommandMessage extends Packet<SakeHandDesiredCommand
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.torque_on_, other.torque_on_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.log_timestamp_, other.log_timestamp_, epsilon)) return false;
+
 
       return true;
    }
@@ -219,6 +242,8 @@ public class SakeHandDesiredCommandMessage extends Packet<SakeHandDesiredCommand
 
       if(this.torque_on_ != otherMyClass.torque_on_) return false;
 
+      if(this.log_timestamp_ != otherMyClass.log_timestamp_) return false;
+
 
       return true;
    }
@@ -240,7 +265,9 @@ public class SakeHandDesiredCommandMessage extends Packet<SakeHandDesiredCommand
       builder.append("raw_gripper_torque_limit=");
       builder.append(this.raw_gripper_torque_limit_);      builder.append(", ");
       builder.append("torque_on=");
-      builder.append(this.torque_on_);
+      builder.append(this.torque_on_);      builder.append(", ");
+      builder.append("log_timestamp=");
+      builder.append(this.log_timestamp_);
       builder.append("}");
       return builder.toString();
    }

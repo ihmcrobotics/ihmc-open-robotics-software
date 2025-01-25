@@ -237,11 +237,4 @@ public class KinematicsStreamingToolboxMessageLogger implements CloseableAndDisp
       ros2Node.destroy();
       executorService.shutdownNow();
    }
-
-   public static void main(String[] args)
-   {
-      String robotName = "Valkyrie"; // "Atlas"; //
-
-      new KinematicsStreamingToolboxMessageLogger(robotName);
-   }
 }
