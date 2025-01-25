@@ -410,16 +410,15 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
 
       Mat temp = new Mat();
       snapHeightImage.download(temp);
-//      PerceptionDebugTools.printMat("CPU Steppability Map", temp, 10);
 
-      snappingKernel.withPointer(sensorCroppedHeightMapImage.data()).withLong(sensorCroppedHeightMapImage.step());
+      snappingKernel.withPointer(globalHeightMapImage.data()).withLong(globalHeightMapImage.step());
       snappingKernel.withPointer(steppabilityImage.data()).withLong(steppabilityImage.step());
       snappingKernel.withPointer(snapHeightImage.data()).withLong(snapHeightImage.step());
       snappingKernel.withPointer(snapNormalXImage.data()).withLong(snapNormalXImage.step());
       snappingKernel.withPointer(snapNormalYImage.data()).withLong(snapNormalYImage.step());
       snappingKernel.withPointer(snapNormalZImage.data()).withLong(snapNormalZImage.step());
       snappingKernel.withPointer(snappedAreaFractionImage.data()).withLong(snappedAreaFractionImage.step());
-      snappingKernel.withPointer(snappingParametersDevicePointer).withFloat((float) sensorOrigin.getX());
+      snappingKernel.withPointer(snappingParametersDevicePointer);
 
       snappingKernel.run(stream, snappingKernelGridDim, blockSize, 0);
 

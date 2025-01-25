@@ -499,31 +499,28 @@ __device__ float get_yaw_from_index(int yaw_discretizations, int idx_yaw)
 // enables a better "sharp" edge around corners, to avoid rounding by averaging. It's also how the support area is calculated. In the future, the support area
 // should be the area of the convex hull, not just the area of the cells, since that will allow "bridging" gaps.
 extern "C"
-__global__ void computeSnappedValuesKernel(unsigned short *croppedContactMap, size_t pitchCroppedContact,
+__global__ void computeSnappedValuesKernel(unsigned short *globalMap, size_t pitchGlobal,
                                            unsigned short *steppabilityMap, size_t pitchSteppability,
                                            unsigned short *snapHeightMap, size_t pitchSnapHeight,
                                            unsigned short *snapNormalXMap, size_t pitchSnapNormalX,
                                            unsigned short *snapNormalYMap, size_t pitchSnapNormalY,
                                            unsigned short *snapNormalZMap, size_t pitchSnapNormalZ,
                                            unsigned short *snappedAreaFractionMap, size_t pitchSnappedAreaFraction,
-                                           float *params, float *idx_yaw_singular_buffer)
+                                           float *params)
 {
     int idx_x = blockIdx.x * blockDim.x + threadIdx.x;
     int idx_y = blockIdx.y * blockDim.y + threadIdx.y;
-    int idx_yaw = static_cast<int>(idx_yaw_singular_buffer[0]);
 
     bool should_print = false;//idx_x == 20 && idx_y == 20;
 
     int2 key = make_int2(idx_x, idx_y);
-
-    float foot_yaw = get_yaw_from_index(2, idx_yaw);
 
     float foot_width = params[SNAP_FOOT_WIDTH];
     float foot_length = params[SNAP_FOOT_LENGTH];
 
     float map_resolution = params[SNAP_GLOBAL_CELL_SIZE];
     float max_dimension = fmaxf(params[SNAP_FOOT_WIDTH], params[SNAP_FOOT_LENGTH]);
-    int map_center_index = static_cast<int>(params[SNAP_CROPPED_WINDOW_CENTER_INDEX]);
+    int map_center_index = static_cast<int>(params[SNAP_GLOBAL_CENTER_INDEX]);
     int cropped_center_index = static_cast<int>(params[SNAP_CROPPED_WINDOW_CENTER_INDEX]);
     float2 center = make_float2(params[SNAP_HEIGHT_MAP_CENTER_Y], params[SNAP_HEIGHT_MAP_CENTER_X]);
     float2 map_center = make_float2(0.0f, 0.0f);
@@ -537,8 +534,9 @@ __global__ void computeSnappedValuesKernel(unsigned short *croppedContactMap, si
     int crop_idx_y = idx_y;
     int2 crop_key = make_int2(crop_idx_x, crop_idx_y);
 
-    float2 foot_position = indices_to_coordinate(crop_key, center, map_resolution, map_center_index);
+    float2 foot_position = indices_to_coordinate(crop_key, center, map_resolution, cropped_center_index);
 
+    // Convert from the world coordinate to the map index.
     int2 map_key = coordinate_to_indices(foot_position, map_center, map_resolution, map_center_index);
 
     float half_length = foot_length / 2.0f;
@@ -566,7 +564,7 @@ __global__ void computeSnappedValuesKernel(unsigned short *croppedContactMap, si
 
             int2 query_key = make_int2(x_query, y_query);
 
-            unsigned short *query_height_int = (unsigned short *)((char *)croppedContactMap + query_key.x * pitchCroppedContact) + query_key.y;
+            unsigned short *query_height_int = (unsigned short *)((char *)globalMap + query_key.x * pitchGlobal) + query_key.y;
             max_height_int = max(*query_height_int, max_height_int);
         }
     }
@@ -612,7 +610,7 @@ __global__ void computeSnappedValuesKernel(unsigned short *croppedContactMap, si
             // We want to put this after the bounds check. That way, if it's outside the FOV, we don't count it against the minimum area.
             max_points_possible_under_support++;
 
-            unsigned short *heightValue = (unsigned short *) ((char *)croppedContactMap + query_key.x * pitchCroppedContact) + query_key.y;
+            unsigned short *heightValue = (unsigned short *) ((char *)globalMap + query_key.x * pitchGlobal) + query_key.y;
             float query_height = (float) *heightValue / params[SNAP_HEIGHT_SCALING_FACTOR] - params[SNAP_HEIGHT_OFFSET];
 
             if (isnan(query_height))
@@ -714,7 +712,7 @@ __global__ void computeSnappedValuesKernel(unsigned short *croppedContactMap, si
                 if (query_key.x >= 0 && query_key.x < localCellsPerAxis &&
                     query_key.y >= 0 && query_key.y < localCellsPerAxis)
                 {
-                    unsigned short *heightValue = (unsigned short *) ((char *)croppedContactMap + query_key.x * pitchCroppedContact) + query_key.y;
+                    unsigned short *heightValue = (unsigned short *) ((char *)globalMap + query_key.x * pitchGlobal) + query_key.y;
                     query_height_int = (int) *heightValue;
                 }
 

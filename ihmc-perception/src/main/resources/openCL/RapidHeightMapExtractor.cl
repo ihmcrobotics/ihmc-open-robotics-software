@@ -613,7 +613,6 @@ float signed_distance_to_foot_circle(int center_index, float resolution, global 
 // should be the area of the convex hull, not just the area of the cells, since that will allow "bridging" gaps.
 void kernel computeSnappedValuesKernel(global float* params,
                                 read_write image2d_t height_map,
-                                global float* idx_yaw_singular_buffer,
                                 read_write image2d_t steppable_map,
                                 read_write image2d_t snapped_height_map,
                                 read_write image2d_t snapped_normal_x_map,
@@ -624,7 +623,6 @@ void kernel computeSnappedValuesKernel(global float* params,
     // Remember, these are x and y in image coordinates, not world
     int idx_x = get_global_id(0); // column, top left
     int idx_y = get_global_id(1); // row, top left
-    int idx_yaw = (int) idx_yaw_singular_buffer[0];
 
     bool should_print = false;//idx_x == 20 && idx_y == 20;
 
