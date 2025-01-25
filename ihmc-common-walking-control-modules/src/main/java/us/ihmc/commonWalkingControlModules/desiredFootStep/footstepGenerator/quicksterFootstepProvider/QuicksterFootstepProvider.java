@@ -315,7 +315,8 @@ public class QuicksterFootstepProvider implements Updatable
       double desiredVelocityY = desiredVelocity.getY();
       double turningVelocity = desiredTurningVelocityProvider.getTurningVelocity();
 
-      this.walk.set(walkInputProvider.getValue());
+      if (walkInputProvider != null)
+         this.walk.set(walkInputProvider.getValue());
       this.desiredVelocity.set(desiredVelocityX, desiredVelocityY);
       this.desiredTurningVelocity.set(turningVelocity);
    }
