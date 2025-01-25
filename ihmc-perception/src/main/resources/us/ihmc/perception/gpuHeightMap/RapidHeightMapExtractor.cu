@@ -522,13 +522,11 @@ __global__ void computeSnappedValuesKernel(unsigned short *globalMap, size_t pit
     float max_dimension = fmaxf(params[SNAP_FOOT_WIDTH], params[SNAP_FOOT_LENGTH]);
     int map_center_index = static_cast<int>(params[SNAP_GLOBAL_CENTER_INDEX]);
     int cropped_center_index = static_cast<int>(params[SNAP_CROPPED_WINDOW_CENTER_INDEX]);
-    float2 center = make_float2(params[SNAP_HEIGHT_MAP_CENTER_Y], params[SNAP_HEIGHT_MAP_CENTER_X]);
+    float2 center = make_float2(params[SNAP_HEIGHT_MAP_CENTER_X], params[SNAP_HEIGHT_MAP_CENTER_Y]);
     float2 map_center = make_float2(0.0f, 0.0f);
 
     int map_cells_per_side = 2 * map_center_index + 1;
     int map_cells_per_side_for_checking = map_cells_per_side - 1;
-
-    int localCellsPerAxis = static_cast<int>(params[LOCAL_CELLS_PER_AXIS]);
 
     int crop_idx_x = idx_x;
     int crop_idx_y = idx_y;
@@ -548,9 +546,9 @@ __global__ void computeSnappedValuesKernel(unsigned short *globalMap, size_t pit
 
     int max_height_int = -100;
     int foot_search_min_x = max(map_key.x - foot_offset_indices, 0);
-    int foot_search_max_x = min(map_key.x + foot_offset_indices + 1, localCellsPerAxis);
+    int foot_search_max_x = min(map_key.x + foot_offset_indices + 1, map_cells_per_side_for_checking);
     int foot_search_min_y = max(map_key.y - foot_offset_indices, 0);
-    int foot_search_max_y = min(map_key.y + foot_offset_indices + 1, localCellsPerAxis);
+    int foot_search_max_y = min(map_key.y + foot_offset_indices + 1, map_cells_per_side_for_checking);
 
     for (int x_query = foot_search_min_x; x_query < foot_search_max_x; ++x_query)
     {
@@ -604,7 +602,7 @@ __global__ void computeSnappedValuesKernel(unsigned short *globalMap, size_t pit
 
             int2 query_key = coordinate_to_indices(point_query, map_center, map_resolution, map_center_index);
 
-            if (query_key.x < 0 || query_key.x > localCellsPerAxis || query_key.y < 0 || query_key.y > localCellsPerAxis)
+            if (query_key.x < 0 || query_key.x > map_cells_per_side_for_checking || query_key.y < 0 || query_key.y > map_cells_per_side_for_checking)
                 continue;
 
             // We want to put this after the bounds check. That way, if it's outside the FOV, we don't count it against the minimum area.
@@ -654,7 +652,6 @@ __global__ void computeSnappedValuesKernel(unsigned short *globalMap, size_t pit
 
     // This is the actual height of the snapped foot
     float snap_height = z / n;
-
 
     float covariance_matrix[9] = {xx, xy, x, xy, yy, y, x, y, n};
     float z_variance_vector[3] = {-xz, -yz, -z};
@@ -707,14 +704,8 @@ __global__ void computeSnappedValuesKernel(unsigned short *globalMap, size_t pit
 
                 int2 query_key = make_int2(x_query, y_query);
 
-                int query_height_int = 0;
-
-                if (query_key.x >= 0 && query_key.x < localCellsPerAxis &&
-                    query_key.y >= 0 && query_key.y < localCellsPerAxis)
-                {
-                    unsigned short *heightValue = (unsigned short *) ((char *)globalMap + query_key.x * pitchGlobal) + query_key.y;
-                    query_height_int = (int) *heightValue;
-                }
+                unsigned short *heightValue = (unsigned short *) ((char *)globalMap + query_key.x * pitchGlobal) + query_key.y;
+                int query_height_int = (int) *heightValue;
 
                 // compute the relative height at this point, compared to the height contained in the current cell.
                 int relative_height_of_query_int = query_height_int - snap_height_int;
@@ -782,4 +773,61 @@ __global__ void computeSnappedValuesKernel(unsigned short *globalMap, size_t pit
 
     unsigned short *areaFractionElement = (unsigned short *)((char *)snappedAreaFractionMap + storage_key.x * pitchSnappedAreaFraction) + storage_key.y;
     *areaFractionElement = static_cast<unsigned short>(area_fraction);
+}
+
+extern "C"
+__global__ void computeSteppabilityConnectionsKernel(float* params,
+                                                     unsigned short *steppableMap, size_t pitchSteppableMap,
+                                                     unsigned short *steppableConnectionsMap, size_t pitchSteppableConnectionsMap)
+{
+    int idx_x = blockIdx.x * blockDim.x + threadIdx.x;
+    int idx_y = blockIdx.y * blockDim.y + threadIdx.y;
+
+    int cells_per_side = 2 * static_cast<int>(params[SNAP_CROPPED_WINDOW_CENTER_INDEX]) + 1;
+
+    int2 key = make_int2(idx_x, idx_y);
+
+    int boundaryConnectionsEncodedAsOnes = 0;
+
+    int counter = 0;
+
+    unsigned short *heightValue = (unsigned short *) ((char *)steppableMap + idx_x * pitchSteppableMap) + idx_y;
+    if (*heightValue == VALID)
+    {
+        for (int x_offset = -1; x_offset <= 1; x_offset++)
+        {
+            for (int y_offset = -1; y_offset <= 1; y_offset++)
+            {
+                if (x_offset == 0 && y_offset == 0)
+                    continue;
+
+                int x_query = idx_x + x_offset;
+                int y_query = idx_y + y_offset;
+
+                // Check bounds
+                if (x_query < 0 || x_query >= cells_per_side || y_query < 0 || y_query >= cells_per_side)
+                {
+                    boundaryConnectionsEncodedAsOnes = (0 << counter) | boundaryConnectionsEncodedAsOnes;
+                }
+                else
+                {
+                    int2 query_key = make_int2(x_query, y_query);
+                    unsigned short *steppableValue = (unsigned short *) ((char *)steppableMap + query_key.x * pitchSteppableMap) + query_key.y;
+                    if (*steppableValue == VALID)
+                    {
+                        boundaryConnectionsEncodedAsOnes = (1 << counter) | boundaryConnectionsEncodedAsOnes;
+                    }
+                    else
+                    {
+                        boundaryConnectionsEncodedAsOnes = (0 << counter) | boundaryConnectionsEncodedAsOnes;
+                    }
+                }
+
+                counter++;
+            }
+        }
+    }
+
+        unsigned short *steppableConnectionsElement = (unsigned short *)((char *)steppableConnectionsMap + key.x * pitchSteppableConnectionsMap) + key.y;
+        *steppableConnectionsElement = static_cast<unsigned short>(boundaryConnectionsEncodedAsOnes);
 }
