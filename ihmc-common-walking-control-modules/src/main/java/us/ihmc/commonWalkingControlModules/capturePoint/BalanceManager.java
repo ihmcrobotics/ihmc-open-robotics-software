@@ -78,6 +78,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
    private static final boolean USE_ERROR_BASED_STEP_ADJUSTMENT = true;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final boolean viewCoPHistory = false;
+   private static final FrameVector2D zeroVector = new FrameVector2D();
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -104,6 +105,12 @@ public class BalanceManager implements SCS2YoGraphicHolder
    private final YoFramePoint3D yoFinalDesiredCoM = new YoFramePoint3D("finalDesiredCoM", worldFrame, registry);
    private final YoFrameVector3D yoFinalDesiredCoMVelocity = new YoFrameVector3D("finalDesiredCoMVelocity", worldFrame, registry);
    private final YoFrameVector3D yoFinalDesiredCoMAcceleration = new YoFrameVector3D("finalDesiredCoMAcceleration", worldFrame, registry);
+
+   private final YoBoolean isUsingPrecomputedTrajectory = new YoBoolean("isUsingPrecomputedTrajectory", registry);
+   private final FramePoint2D previousDesiredCapturePointPrecomputed = new FramePoint2D();
+   private final FrameVector2D previousDesiredCapturePointVelocityPrecomputed = new FrameVector2D();
+   private final FramePoint2D previousDesiredCenterOfPressurePrecomputed = new FramePoint2D();
+   private final YoDouble previousPrecomputedTrajectoryTime = new YoDouble("previousPrecomputedICPTime", registry);
 
    private final TimeAdjustmentCalculator timeAdjustmentCalculator = new TimeAdjustmentCalculator();
    private final ICPControllerParameters.FeedbackAlphaCalculator feedbackAlphaCalculator;
@@ -309,6 +316,8 @@ public class BalanceManager implements SCS2YoGraphicHolder
       flamingoCopTrajectory = new FlamingoCoPTrajectoryGenerator(copTrajectoryParameters, registry);
       flamingoCopTrajectory.registerState(copTrajectoryState);
 
+      previousPrecomputedTrajectoryTime.setToNaN();
+
       if (USE_ERROR_BASED_STEP_ADJUSTMENT)
       {
          stepAdjustmentController = new ErrorBasedStepAdjustmentController(walkingControllerParameters,
@@ -478,8 +487,8 @@ public class BalanceManager implements SCS2YoGraphicHolder
             else
             {
             */
-               feedbackAlpha = 0.5 * (currentFeedbackAlpha.getDoubleValue() + maxAlpha);
-//            }
+            feedbackAlpha = 0.5 * (currentFeedbackAlpha.getDoubleValue() + maxAlpha);
+            //            }
             feedbackAlpha = MathTools.clamp(feedbackAlpha, 0.0, 1.0);
          }
          else
@@ -559,11 +568,27 @@ public class BalanceManager implements SCS2YoGraphicHolder
       {
          if (blendICPTrajectories.getBooleanValue())
          {
-            precomputedICPPlanner.computeAndBlend(yoTime.getDoubleValue(), desiredCapturePoint2d, desiredCapturePointVelocity2d, perfectCMP2d);
+            isUsingPrecomputedTrajectory.set(precomputedICPPlanner.computeAndBlend(yoTime.getDoubleValue(), desiredCapturePoint2d, desiredCapturePointVelocity2d, perfectCMP2d));
          }
          else
          {
-            precomputedICPPlanner.compute(yoTime.getDoubleValue(), desiredCapturePoint2d, desiredCapturePointVelocity2d, perfectCMP2d);
+            isUsingPrecomputedTrajectory.set(precomputedICPPlanner.compute(yoTime.getDoubleValue(), desiredCapturePoint2d, desiredCapturePointVelocity2d, perfectCMP2d));
+         }
+
+         if (isUsingPrecomputedTrajectory.getValue())
+         {
+            previousDesiredCapturePointPrecomputed.set(desiredCapturePoint2d);
+            previousDesiredCapturePointVelocityPrecomputed.set(desiredCapturePointVelocity2d);
+            previousDesiredCenterOfPressurePrecomputed.set(perfectCMP2d);
+            previousPrecomputedTrajectoryTime.set(yoTime.getValue());
+         }
+         else if (!Double.isNaN(previousPrecomputedTrajectoryTime.getDoubleValue()) && precomputedICPPlanner.getBlendingDuration() > 0.0
+                  && yoTime.getValue() - previousPrecomputedTrajectoryTime.getValue() < precomputedICPPlanner.getBlendingDuration())
+         {
+            double alphaPrecomputed = 1.0 - (yoTime.getValue() - previousPrecomputedTrajectoryTime.getValue()) / precomputedICPPlanner.getBlendingDuration();
+            desiredCapturePoint2d.interpolate(previousDesiredCapturePointPrecomputed, alphaPrecomputed);
+            desiredCapturePointVelocity2d.interpolate(zeroVector, alphaPrecomputed);
+            perfectCMP2d.interpolate(previousDesiredCenterOfPressurePrecomputed, alphaPrecomputed);
          }
       }
 
@@ -1023,9 +1048,9 @@ public class BalanceManager implements SCS2YoGraphicHolder
       icpError2d.changeFrame(leadingSoleZUpFrame);
       boolean isICPErrorToTheInside = transferToSide == RobotSide.RIGHT ? icpError2d.getY() > 0.0 : icpError2d.getY() < 0.0;
       double maxICPErrorBeforeSingleSupportX = icpError2d.getX() > 0.0 ? maxICPErrorBeforeSingleSupportForwardX.getValue()
-                                                                       : maxICPErrorBeforeSingleSupportBackwardX.getValue();
+            : maxICPErrorBeforeSingleSupportBackwardX.getValue();
       double maxICPErrorBeforeSingleSupportY = isICPErrorToTheInside ? maxICPErrorBeforeSingleSupportInnerY.getValue()
-                                                                     : maxICPErrorBeforeSingleSupportOuterY.getValue();
+            : maxICPErrorBeforeSingleSupportOuterY.getValue();
       normalizedICPError.set(MathTools.square(icpError2d.getX() / maxICPErrorBeforeSingleSupportX)
                              + MathTools.square(icpError2d.getY() / maxICPErrorBeforeSingleSupportY));
    }
