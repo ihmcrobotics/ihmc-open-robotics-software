@@ -23,7 +23,6 @@ import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParametersBa
 import us.ihmc.perception.steppableRegions.SteppableRegionsCalculator;
 import us.ihmc.perception.steppableRegions.data.SteppableCell;
 import us.ihmc.perception.steppableRegions.data.SteppableRegionsEnvironmentModel;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -459,8 +458,6 @@ public class RapidHeightMapExtractor implements RapidHeightMapExtractorInterface
    {
       yaw.setParameter(0.0f); // we're only doing a single discretization, and then assuming the foot is a big rectangle
       yaw.writeOpenCLBufferObject(openCLManager);
-
-      PerceptionDebugTools.printMat("CPU Steppability Map", snapHeightImage.getBytedecoOpenCVMat(), 10);
 
       openCLManager.setKernelArgument(computeSnappedValuesKernel, 0, snappingParametersBuffer.getOpenCLBufferObject());
       openCLManager.setKernelArgument(computeSnappedValuesKernel, 1, globalHeightMapImage.getOpenCLImageObject());
