@@ -76,6 +76,10 @@ public class RapidHeightMapUpdateThread extends RepeatingTaskThread
       catch (InterruptedException ignored)
       {
       }
+      catch (Exception e)
+      {
+         e.getStackTrace();
+      }
    }
 
    public HeightMapData getLatestHeightMapData()

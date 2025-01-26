@@ -16,7 +16,9 @@ __device__ float computeMedian(float* window, int size) {
     return window[size / 2];
 }
 
- extern "C" __global__ void FilterFlyingPoints(unsigned short *in, size_t pitchIn, unsigned short *out, size_t pitchOut, int rows, int cols)
+ extern "C" __global__ void FilterFlyingPoints(unsigned short *in, size_t pitchIn,
+                                               unsigned short *out, size_t pitchOut,
+                                               int rows, int cols)
  {
 	// Find the X index and stride of this thread
         int indexX = blockIdx.x * blockDim.x + threadIdx.x;

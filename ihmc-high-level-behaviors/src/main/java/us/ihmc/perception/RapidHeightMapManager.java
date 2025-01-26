@@ -51,7 +51,7 @@ public class RapidHeightMapManager
                                 ReferenceFrame leftFootSoleFrame,
                                 ReferenceFrame rightFootSoleFrame,
                                 CameraIntrinsics depthImageIntrinsics,
-                                boolean runWithCUDA)
+                                boolean runWithCUDA) throws Exception
    {
       this.ros2 = ros2;
       this.runWithCUDA = runWithCUDA;
@@ -70,9 +70,6 @@ public class RapidHeightMapManager
       }
 
       rapidHeightMapExtractor.setDepthIntrinsics(depthImageIntrinsics);
-
-      deviceDepthImage = new GpuMat(depthImageIntrinsics.getWidth(), depthImageIntrinsics.getHeight(), opencv_core.CV_16UC1);
-      rapidHeightMapExtractor.create(deviceDepthImage, 1);
 
       flyingPointsFilter = new CUDAFlyingPointsFilter();
 

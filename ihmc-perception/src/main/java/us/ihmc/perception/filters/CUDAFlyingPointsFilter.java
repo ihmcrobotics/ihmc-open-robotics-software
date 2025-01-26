@@ -21,7 +21,7 @@ public class CUDAFlyingPointsFilter
    private final CUDAProgram flyingPointFilterCUDAProgram;
    private final CUstream_st stream;
 
-   public CUDAFlyingPointsFilter()
+   public CUDAFlyingPointsFilter() throws Exception
    {
       stream = CUDAStreamManager.getStream();
       URL kernelPath = getClass().getResource("/CUDA/FlyingPointFilterKernel.cu");

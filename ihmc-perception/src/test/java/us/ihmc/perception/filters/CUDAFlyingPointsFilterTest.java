@@ -28,7 +28,7 @@ public class CUDAFlyingPointsFilterTest
    }
 
    @Test
-   public void testSimpleMatrix()
+   public void testSimpleMatrix() throws Exception
    {
       flyingPointsFilter = new CUDAFlyingPointsFilter();
       Mat inputMat = new Mat(4, 4, opencv_core.CV_8UC3, new Scalar(1));
