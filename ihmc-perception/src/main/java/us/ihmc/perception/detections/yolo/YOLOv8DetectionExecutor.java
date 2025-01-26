@@ -5,6 +5,7 @@ import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
+import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Rect;
@@ -22,6 +23,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.detections.InstantDetection;
 import us.ihmc.perception.imageMessage.CompressionType;
+import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.opencl.OpenCLDepthImageSegmenter;
 import us.ihmc.perception.opencl.OpenCLPointCloudExtractor;
 import us.ihmc.perception.tools.PerceptionMessageTools;
@@ -151,22 +153,26 @@ public class YOLOv8DetectionExecutor
    {
       if (yoloDetector.isReady() && !yoloExecutorService.isShutdown())
       {
+         // Acquire the images
+         if (colorImage.get() == null || depthImage.get() == null)
+            return;
+
          yoloExecutorService.submit(() ->
          {
-            // Acquire the images
-            if (!colorImage.isAvailable() || !depthImage.isAvailable())
-               return;
-            colorImage.get();
-            depthImage.get();
-
             // Run YOLO to get results
-            YOLOv8DetectionResults yoloResults = yoloDetector.runOnImage(colorImage, yoloConfidenceThreshold, yoloNMSThreshold, yoloMaskThreshold);
+            GpuMat bgrMat = new GpuMat();
+            colorImage.getPixelFormat().convertToPixelFormat(colorImage.getGpuImageMat(), bgrMat, PixelFormat.BGR8);
+            RawImage bgrImage = colorImage.replaceImage(bgrMat, PixelFormat.BGR8);
+            YOLOv8DetectionResults yoloResults = yoloDetector.runOnImage(bgrImage, yoloConfidenceThreshold, yoloNMSThreshold, yoloMaskThreshold);
 
             // TODO: temp hack
-            if (yoloDetectionResults.containsKey(lastRunDetectorIndex))
-               yoloDetectionResults.remove(lastRunDetectorIndex).destroy();
-            yoloDetectionResults.put(lastRunDetectorIndex, yoloResults);
-            newestColorImage = colorImage;
+            synchronized (yoloDetectionResults)
+            {
+               if (yoloDetectionResults.containsKey(lastRunDetectorIndex))
+                  yoloDetectionResults.remove(lastRunDetectorIndex).destroy();
+               yoloDetectionResults.put(lastRunDetectorIndex, yoloResults);
+            }
+            newestColorImage = bgrImage;
 
             // Get the object masks from the results
             Map<YOLOv8DetectionOutput, RawImage> simpleDetectionMap = yoloResults.getSegmentationImages();
@@ -203,7 +209,7 @@ public class YOLOv8DetectionExecutor
                                                                                     simpleDetection.confidence(),
                                                                                     new Pose3D(centroid, new RotationMatrix()),
                                                                                     objectMask.getAcquisitionTime(),
-                                                                                    colorImage,
+                                                                                    bgrImage,
                                                                                     erodedObjectMask,
                                                                                     depthImage,
                                                                                     pointCloud);
@@ -214,6 +220,7 @@ public class YOLOv8DetectionExecutor
             // Submit the callbacks to be processed
             yoloExecutorService.submit(() -> detectionConsumerCallbacks.forEach(callback -> callback.accept(yoloInstantDetections)));
 
+            bgrImage.release();
             colorImage.release();
             depthImage.release();
          });
@@ -277,55 +284,60 @@ public class YOLOv8DetectionExecutor
          detectionMasks.putAll(value.getSegmentationImages());
       }
 
-      detectionMasks.entrySet().stream().filter(entry -> entry.getKey().confidence() >= yoloConfidenceThreshold).forEach(entry ->
+      synchronized (yoloDetectionResults)
       {
-         YOLOv8DetectionOutput detection = entry.getKey();
-         RawImage maskImage = entry.getValue();
+         detectionMasks.entrySet().stream().filter(entry -> entry.getKey().confidence() >= yoloConfidenceThreshold).forEach(entry ->
+         {
+            YOLOv8DetectionOutput detection = entry.getKey();
+            RawImage maskImage = entry.getValue().get();
+            if (maskImage == null || maskImage.isEmpty())
+               return;
 
-         String text = String.format("%s: %.2f", detection.objectClass().toString(), detection.confidence());
+            String text = String.format("%s: %.2f", detection.objectClass().toString(), detection.confidence());
 
-         // Draw the bounding box
-         Rect boundingBox = new Rect(detection.x(), detection.y(), detection.width(), detection.height());
-         opencv_imgproc.rectangle(resultMat, boundingBox, BOUNDING_BOX_COLOR, 5, LINE_TYPE, 0);
+            // Draw the bounding box
+            Rect boundingBox = new Rect(detection.x(), detection.y(), detection.width(), detection.height());
+            opencv_imgproc.rectangle(resultMat, boundingBox, BOUNDING_BOX_COLOR, 5, LINE_TYPE, 0);
 
-         // Draw text background
-         Size textSize = opencv_imgproc.getTextSize(text, FONT, FONT_SCALE, FONT_THICKNESS, new IntPointer());
+            // Draw text background
+            Size textSize = opencv_imgproc.getTextSize(text, FONT, FONT_SCALE, FONT_THICKNESS, new IntPointer());
 
-         int textBoxClampedX = MathTools.clamp(detection.x(), 0, colorImage.getWidth() - textSize.width());
-         int textBoxClampedY = MathTools.clamp(detection.y() - textSize.height(), 0, colorImage.getHeight() - textSize.height());
+            int textBoxClampedX = MathTools.clamp(detection.x(), 0, colorImage.getWidth() - textSize.width());
+            int textBoxClampedY = MathTools.clamp(detection.y() - textSize.height(), 0, colorImage.getHeight() - textSize.height());
 
-         Rect textBox = new Rect(textBoxClampedX, textBoxClampedY, textSize.width(), textSize.height());
+            Rect textBox = new Rect(textBoxClampedX, textBoxClampedY, textSize.width(), textSize.height());
 
-         opencv_imgproc.rectangle(resultMat, textBox, BOUNDING_BOX_COLOR, opencv_imgproc.FILLED, LINE_TYPE, 0);
+            opencv_imgproc.rectangle(resultMat, textBox, BOUNDING_BOX_COLOR, opencv_imgproc.FILLED, LINE_TYPE, 0);
 
-         opencv_imgproc.putText(resultMat,
-                                text,
-                                new Point(textBoxClampedX, textBoxClampedY + textSize.height()),
-                                opencv_imgproc.CV_FONT_HERSHEY_DUPLEX,
-                                FONT_SCALE,
-                                new Scalar(255.0, 255.0, 255.0, 255.0),
-                                FONT_THICKNESS,
-                                LINE_TYPE,
-                                false);
+            opencv_imgproc.putText(resultMat,
+                                   text,
+                                   new Point(textBoxClampedX, textBoxClampedY + textSize.height()),
+                                   opencv_imgproc.CV_FONT_HERSHEY_DUPLEX,
+                                   FONT_SCALE,
+                                   new Scalar(255.0, 255.0, 255.0, 255.0),
+                                   FONT_THICKNESS,
+                                   LINE_TYPE,
+                                   false);
 
-         // Add green tint to show mask
-         // first convert 32F mask to 8U
-         Mat maskMat = new Mat(maskImage.getHeight(), maskImage.getWidth(), opencv_core.CV_8U);
-         maskImage.getCpuImageMat().convertTo(maskMat, opencv_core.CV_8U, 255.0, 0.0);
+            // Add green tint to show mask
+            // first convert 32F mask to 8U
+            Mat maskMat = new Mat(maskImage.getHeight(), maskImage.getWidth(), opencv_core.CV_8U);
+            maskImage.getCpuImageMat().convertTo(maskMat, opencv_core.CV_8U, 255.0, 0.0);
 
-         // resize the mask to fit the result image
-         opencv_imgproc.resize(maskMat, maskMat, resultMat.size(), 0.0, 0.0, opencv_imgproc.INTER_NEAREST);
+            // resize the mask to fit the result image
+            opencv_imgproc.resize(maskMat, maskMat, resultMat.size(), 0.0, 0.0, opencv_imgproc.INTER_NEAREST);
 
-         // ensure the green Mat is same size as image
-         if (resultMat.cols() != GREEN_MAT.cols() || resultMat.rows() != GREEN_MAT.rows())
-            opencv_imgproc.resize(GREEN_MAT, GREEN_MAT, resultMat.size());
+            // ensure the green Mat is same size as image
+            if (resultMat.cols() != GREEN_MAT.cols() || resultMat.rows() != GREEN_MAT.rows())
+               opencv_imgproc.resize(GREEN_MAT, GREEN_MAT, resultMat.size());
 
-         // add a green tint where mask = 255
-         opencv_core.add(resultMat, GREEN_MAT, resultMat, maskMat, -1);
+            // add a green tint where mask = 255
+            opencv_core.add(resultMat, GREEN_MAT, resultMat, maskMat, -1);
 
-         maskImage.release();
-         maskMat.release();
-      });
+            maskImage.release();
+            maskMat.release();
+         });
+      }
 
       BytePointer annotatedImagePointer = new BytePointer();
       opencv_imgcodecs.imencode(".jpg", resultMat, annotatedImagePointer); // for some reason using CUDAImageEncoder broke YOLO's CUDNN

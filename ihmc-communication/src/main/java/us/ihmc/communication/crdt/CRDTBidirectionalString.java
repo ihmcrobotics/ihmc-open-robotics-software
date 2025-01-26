@@ -10,8 +10,8 @@ package us.ihmc.communication.crdt;
  */
 public class CRDTBidirectionalString extends CRDTBidirectionalImmutableField<String>
 {
-   public CRDTBidirectionalString(RequestConfirmFreezable requestConfirmFreezable, String initialValue)
+   public CRDTBidirectionalString(LatestTimestampModifiable latestTimestampModifiable, String initialValue)
    {
-      super(requestConfirmFreezable, initialValue);
+      super(latestTimestampModifiable, initialValue);
    }
 }

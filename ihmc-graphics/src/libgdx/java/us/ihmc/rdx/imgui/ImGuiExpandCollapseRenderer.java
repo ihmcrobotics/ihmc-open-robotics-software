@@ -129,4 +129,13 @@ public class ImGuiExpandCollapseRenderer
    {
       return isHovered;
    }
+
+   /** Used to add or remove space that this widget would take up in order to align things visually. */
+   public static float getPlaceholderWidth()
+   {
+      int boxSize = (int) Math.floor(ImGui.getFontSize() * 0.8f);
+      if (boxSize % 2 == 0)
+         ++boxSize;
+      return boxSize + ImGui.getStyle().getItemSpacingX();
+   }
 }

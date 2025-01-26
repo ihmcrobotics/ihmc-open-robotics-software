@@ -243,10 +243,10 @@ public class AtlasRobotModel implements DRCRobotModel
          RobotDefinitionTools.setDefaultMaterial(robotDefinition, new MaterialDefinition(ColorDefinitions.Black()));
 
       getRobotDefinitionMutator().accept(robotDefinition);
-      
+
       if (isUseHandMutatorCollisions())
          getRobotDefinitionHandMutator().accept(robotDefinition);
-      
+
       return robotDefinition;
    }
 
@@ -283,14 +283,13 @@ public class AtlasRobotModel implements DRCRobotModel
          robotDefinitionMutator = new AtlasRobotDefinitionMutator(getJointMap(), getSensorInformation());
       return robotDefinitionMutator;
    }
-   
+
    public Consumer<RobotDefinition> getRobotDefinitionHandMutator()
    {
       if (robotDefinitionHandMutator == null)
          robotDefinitionHandMutator = new AtlasRobotDefinitionHandMutator();
       return robotDefinitionHandMutator;
    }
-
 
    @Override
    public HighLevelControllerParameters getHighLevelControllerParameters()

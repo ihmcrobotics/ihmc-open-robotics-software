@@ -52,7 +52,7 @@ public class PelvisHeightOrientationActionDefinition extends ActionNodeDefinitio
 
       trajectoryDuration.setValue(jsonNode.get("trajectoryDuration").asDouble());
       parentFrameName.setValue(jsonNode.get("parentFrame").textValue());
-      JSONTools.toEuclid(jsonNode, pelvisToParentTransform.getValueAndFreeze());
+      JSONTools.toEuclid(jsonNode, pelvisToParentTransform.getValueAndModify());
    }
 
    @Override
@@ -72,7 +72,7 @@ public class PelvisHeightOrientationActionDefinition extends ActionNodeDefinitio
 
       trajectoryDuration.setValue(onDiskTrajectoryDuration);
       parentFrameName.setValue(onDiskParentFrameName);
-      pelvisToParentTransform.getValueAndFreeze().set(onDiskPelvisToParentTransform);
+      pelvisToParentTransform.getValueAndModify().set(onDiskPelvisToParentTransform);
    }
 
    @Override
@@ -107,27 +107,27 @@ public class PelvisHeightOrientationActionDefinition extends ActionNodeDefinitio
 
    public void setHeight(double height)
    {
-      pelvisToParentTransform.getValueAndFreeze().getTranslation().set(pelvisToParentTransform.getValueAndFreeze().getTranslationX(),
-                                                                       pelvisToParentTransform.getValueAndFreeze().getTranslationY(),
+      pelvisToParentTransform.getValueAndModify().getTranslation().set(pelvisToParentTransform.getValueAndModify().getTranslationX(),
+                                                                       pelvisToParentTransform.getValueAndModify().getTranslationY(),
                                                                        height);
    }
 
    public void setYaw(double yaw)
    {
-      RotationMatrixBasics rotation = pelvisToParentTransform.getValueAndFreeze().getRotation();
-      pelvisToParentTransform.getValueAndFreeze().getRotation().setYawPitchRoll(yaw, rotation.getPitch(), rotation.getRoll());
+      RotationMatrixBasics rotation = pelvisToParentTransform.getValueAndModify().getRotation();
+      pelvisToParentTransform.getValueAndModify().getRotation().setYawPitchRoll(yaw, rotation.getPitch(), rotation.getRoll());
    }
 
    public void setPitch(double pitch)
    {
-      RotationMatrixBasics rotation = pelvisToParentTransform.getValueAndFreeze().getRotation();
-      pelvisToParentTransform.getValueAndFreeze().getRotation().setYawPitchRoll(rotation.getYaw(), pitch, rotation.getRoll());
+      RotationMatrixBasics rotation = pelvisToParentTransform.getValueAndModify().getRotation();
+      pelvisToParentTransform.getValueAndModify().getRotation().setYawPitchRoll(rotation.getYaw(), pitch, rotation.getRoll());
    }
 
    public void setRoll(double roll)
    {
-      RotationMatrixBasics rotation = pelvisToParentTransform.getValueAndFreeze().getRotation();
-      pelvisToParentTransform.getValueAndFreeze().getRotation().setYawPitchRoll(rotation.getYaw(), rotation.getPitch(), roll);
+      RotationMatrixBasics rotation = pelvisToParentTransform.getValueAndModify().getRotation();
+      pelvisToParentTransform.getValueAndModify().getRotation().setYawPitchRoll(rotation.getYaw(), rotation.getPitch(), roll);
    }
 
    public Orientation3DReadOnly getRotation()

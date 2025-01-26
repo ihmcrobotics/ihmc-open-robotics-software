@@ -1,137 +1,113 @@
 package us.ihmc.perception;
 
-import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros2.ROS2DemandGraphNode;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.opencl.OpenCLManager;
-import us.ihmc.perception.realsense.RealsenseConfiguration;
-import us.ihmc.perception.realsense.RealsenseDeviceManager;
+import us.ihmc.sensors.realsense.RealSenseConfiguration;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.sensors.RealsenseColorDepthImagePublisher;
-import us.ihmc.sensors.RealsenseColorDepthImageRetriever;
-import us.ihmc.tools.thread.RestartableThread;
-import us.ihmc.tools.thread.RestartableThrottledThread;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensors.realsense.RealSenseImageSensor;
 
-import java.util.function.Supplier;
+import java.util.Map;
 
 /**
- * This class handles publishing the color and depth of the realsense. Its meant to be a stand alone class that only touches the realsense.
+ * This class handles publishing the color and depth of the realsense. Its meant to be a standalone class that only touches the realsense.
  */
 public class StandAloneRealsenseProcess
 {
-   private static ROS2Node ros2Node;
-
-   private static final String REALSENSE_SERIAL_NUMBER = System.getProperty("d455.serial.number", "215122254074");
-   private static final ROS2Topic<ImageMessage> REALSENSE_COLOR_TOPIC = PerceptionAPI.D455_COLOR_IMAGE;
-   private static final ROS2Topic<ImageMessage> REALSENSE_DEPTH_TOPIC = PerceptionAPI.D455_DEPTH_IMAGE;
-
-   private final RealsenseColorDepthImageRetriever realsenseImageRetriever;
-   private final RealsenseColorDepthImagePublisher realsenseImagePublisher;
+   private static final Map<Integer, ROS2Topic<? extends Packet<?>>> D455_IMAGE_TOPIC_MAP = Map.of(RealSenseImageSensor.COLOR_IMAGE_KEY,
+                                                                                                   PerceptionAPI.SRT_REALSENSE_COLOR_STREAM_STATUS,
+                                                                                                   RealSenseImageSensor.DEPTH_IMAGE_KEY,
+                                                                                                   PerceptionAPI.D455_DEPTH_IMAGE);
 
    private final ROS2DemandGraphNode realsenseDemandNode;
-   private final ROS2SyncedRobotModel syncedRobot;
+   private final ROS2DemandGraphNode realsensePublishDemandNode;
    private final ROS2Helper ros2Helper;
-   private Supplier<ReferenceFrame> realsenseFrameSupplier = ReferenceFrame::getWorldFrame;
-   private Supplier<ReferenceFrame> realsenseZUpFrameSupplier = ReferenceFrame::getWorldFrame;
-   private RapidHeightMapManager heightMapManager;
-   private RawImage realsenseDepthImage;
-   private final SideDependentList<Supplier<ReferenceFrame>> soleFrameSuppliers = new SideDependentList<>(ReferenceFrame::getWorldFrame,
-                                                                                                          ReferenceFrame::getWorldFrame);
+   private final ROS2SyncedRobotModel syncedRobot;
 
-   public StandAloneRealsenseProcess(ROS2Helper ros2Helper, ROS2SyncedRobotModel syncedRobot)
+   private final RealSenseImageSensor d455Sensor;
+   private ImageSensorPublishThread d455PublishThread;
+
+   private final ROS2DemandGraphNode heightMapDemandNode;
+   private final OpenCLManager openCLManager = new OpenCLManager();
+   private RapidHeightMapUpdateThread heightMapUpdateThread;
+
+   public StandAloneRealsenseProcess(ROS2Node ros2Node, ROS2Helper ros2Helper, ROS2SyncedRobotModel syncedRobot)
    {
-      this.syncedRobot = syncedRobot;
       this.ros2Helper = ros2Helper;
+      this.syncedRobot = syncedRobot;
+
+      realsensePublishDemandNode = new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_REALSENSE_PUBLICATION);
+      heightMapDemandNode = new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_HEIGHT_MAP);
+
+      realsenseDemandNode = new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_REALSENSE);
+      realsenseDemandNode.addDependents(realsensePublishDemandNode, heightMapDemandNode);
+
+      d455Sensor = new RealSenseImageSensor(RealSenseConfiguration.D455_COLOR_720P_DEPTH_720P_30HZ);
+
       if (syncedRobot != null)
-
       {
-         realsenseFrameSupplier = syncedRobot.getReferenceFrames()::getSteppingCameraFrame;
-         realsenseZUpFrameSupplier = syncedRobot.getReferenceFrames()::getSteppingCameraZUpFrame;
+         d455Sensor.setSensorFrameSupplier(syncedRobot.getReferenceFrames()::getSteppingCameraFrame);
+         loopOnDemand(d455Sensor.getGrabThread(), realsenseDemandNode);
 
-         for (RobotSide side : RobotSide.values)
-         {
-            soleFrameSuppliers.put(side, () -> syncedRobot.getReferenceFrames().getSoleFrame(side));
-         }
-      }
-      realsenseDemandNode = new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_REALSENSE_POINT_CLOUD);
+         d455PublishThread = new ImageSensorPublishThread(ros2Node, d455Sensor, D455_IMAGE_TOPIC_MAP);
+         loopOnDemand(d455PublishThread, realsensePublishDemandNode);
 
-      realsenseImageRetriever = new RealsenseColorDepthImageRetriever(new RealsenseDeviceManager(),
-                                                                      RealsenseConfiguration.D455_COLOR_720P_DEPTH_720P_30HZ,
-                                                                      realsenseFrameSupplier,
-                                                                      realsenseDemandNode::isDemanded);
-
-      realsenseImagePublisher = new RealsenseColorDepthImagePublisher(REALSENSE_DEPTH_TOPIC, REALSENSE_COLOR_TOPIC);
-
-      RestartableThread realsenseProcessAndPublishThread = new RestartableThread("RealsenseProcess", this::publishRealSense);
-      RestartableThrottledThread heightMapUpdateThread = new RestartableThrottledThread("HeightMapUpdater", 33.0, this::updateHeightMap);
-
-      realsenseProcessAndPublishThread.start();
-      heightMapUpdateThread.start();
-   }
-
-   private void updateHeightMap()
-   {
-      if (realsenseDepthImage != null && realsenseDepthImage.isAvailable())
-      {
-         RawImage latestRealsenseDepthImage = realsenseDepthImage.get();
-         if (heightMapManager == null) // TODO: This should be able to instantiated earlier, but it doesn't reset correctly
-         {
-            heightMapManager = new RapidHeightMapManager(syncedRobot == null ? null : syncedRobot.getRobotModel(),
-                                                         soleFrameSuppliers.get(RobotSide.LEFT).get(),
-                                                         soleFrameSuppliers.get(RobotSide.RIGHT).get(),
-                                                         latestRealsenseDepthImage.getIntrinsicsCopy(),
-                                                         ros2Helper);
-         }
-
-         heightMapManager.update(latestRealsenseDepthImage.getCpuImageMat(),
-                                 latestRealsenseDepthImage.getAcquisitionTime(),
-                                 realsenseFrameSupplier.get(),
-                                 realsenseZUpFrameSupplier.get(),
-                                 ros2Helper);
-
-         latestRealsenseDepthImage.release();
+         initializeHeightMap();
       }
    }
 
-   private void publishRealSense()
+   private void initializeHeightMap()
    {
-      if (realsenseDemandNode.isDemanded())  // This gets demanded from the subscriber
-      {
-         realsenseDepthImage = realsenseImageRetriever.getLatestRawDepthImage();
-         RawImage realsenseColorImage = realsenseImageRetriever.getLatestRawColorImage();
+      boolean runWithCUDA = false;
+      heightMapUpdateThread = new RapidHeightMapUpdateThread(ros2Helper,
+                                                             syncedRobot,
+                                                             syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.LEFT),
+                                                             syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.RIGHT),
+                                                             d455Sensor,
+                                                             RealSenseImageSensor.DEPTH_IMAGE_KEY,
+                                                             runWithCUDA);
+      loopOnDemand(heightMapUpdateThread, heightMapDemandNode);
+   }
 
-         realsenseImagePublisher.setNextDepthImage(realsenseDepthImage.get());
-         realsenseImagePublisher.setNextColorImage(realsenseColorImage.get());
+   public RapidHeightMapManager getHeightMapManager()
+   {
+      return heightMapUpdateThread.getHeightMapManager();
+   }
 
-         realsenseDepthImage.release();
-         realsenseColorImage.release();
-      }
-      else
-         ThreadTools.sleep(500);
+   public HeightMapData getLatestHeightMapData()
+   {
+      return heightMapUpdateThread.getLatestHeightMapData();
+   }
+
+   public TerrainMapData getLatestTerrainMapData()
+   {
+      return heightMapUpdateThread.getLatestTerrainMapData();
    }
 
    public void destroy()
    {
-      realsenseImagePublisher.destroy();
-      realsenseImageRetriever.destroy();
       realsenseDemandNode.destroy();
-      ros2Node.destroy();
+      realsensePublishDemandNode.destroy();
+      d455Sensor.close();
+      d455PublishThread.blockingKill();
    }
 
-   public static void main(String[] args)
+   private static void loopOnDemand(RepeatingTaskThread loopThread, ROS2DemandGraphNode demandNode)
    {
-      ros2Node = new ROS2NodeBuilder().build("nadia_realsense_process");
-      ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
+      if (!loopThread.isAlive())
+         loopThread.start();
 
-      StandAloneRealsenseProcess standAloneRealsenseProcess = new StandAloneRealsenseProcess(ros2Helper, null);
-      Runtime.getRuntime().addShutdownHook(new Thread(standAloneRealsenseProcess::destroy, "RealSenseProcess"));
+      if (demandNode.isDemanded())
+         loopThread.startRepeating();
+
+      demandNode.addDemandChangedCallback(loopThread::setRepeating);
    }
 }

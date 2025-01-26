@@ -116,7 +116,7 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
 
          automaticExecutionCheckbox.renderImGuiWidget();
          if (automaticExecutionCheckbox.changed())
-            getDefinition().freeze();
+            getDefinition().modify();
 
          ImGuiTools.previousWidgetTooltip("Enables autonomous execution. Will immediately start executing when checked.");
          if (!getState().getAutomaticExecution())

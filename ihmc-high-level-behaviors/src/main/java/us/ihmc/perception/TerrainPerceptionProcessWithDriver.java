@@ -20,9 +20,9 @@ import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
-import us.ihmc.perception.realsense.RealsenseConfiguration;
-import us.ihmc.perception.realsense.RealsenseDevice;
-import us.ihmc.perception.realsense.RealsenseDeviceManager;
+import us.ihmc.sensors.realsense.RealSenseConfiguration;
+import us.ihmc.sensors.realsense.RealSenseDevice;
+import us.ihmc.sensors.realsense.RealSenseDeviceManager;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.ROS2Node;
@@ -66,6 +66,7 @@ public class TerrainPerceptionProcessWithDriver
 
    private final ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 8);
    //   private final ExecutorService executorService = Executors.newFixedThreadPool(16);
+   private final RobotConfigurationData robotConfigurationData;
 
    protected final ScheduledExecutorService scheduledExecutorService = ExecutorServiceTools.newScheduledThreadPool(1,
                                                                                                                    getClass(),
@@ -76,8 +77,8 @@ public class TerrainPerceptionProcessWithDriver
 
    private final OpenCLManager openCLManager;
    private final ROS2Helper ros2Helper;
-   private final RealsenseDeviceManager realsenseDeviceManager;
-   private final RealsenseDevice realsense;
+   private final RealSenseDeviceManager realsenseDeviceManager;
+   private final RealSenseDevice realsense;
    private final BytedecoImage depthBytedecoImage;
    private final Runnable syncedRobotUpdater;
    private final HumanoidReferenceFrames referenceFrames;
@@ -93,6 +94,7 @@ public class TerrainPerceptionProcessWithDriver
    private final double outputPeriod = UnitConversions.hertzToSeconds(30.0f);
    private volatile boolean running = true;
 
+
    private final int depthWidth;
    private final int depthHeight;
    private final int colorWidth;
@@ -103,7 +105,7 @@ public class TerrainPerceptionProcessWithDriver
    public TerrainPerceptionProcessWithDriver(String robotName,
                                              CollisionBoxProvider collisionBoxProvider,
                                              FullHumanoidRobotModel fullRobotModel,
-                                             RealsenseConfiguration realsenseConfiguration,
+                                             RealSenseConfiguration realsenseConfiguration,
                                              ROS2StoredPropertySetGroup ros2PropertySetGroup,
                                              ROS2Helper ros2Helper,
                                              ROS2Topic<ImageMessage> depthTopic,
@@ -125,7 +127,7 @@ public class TerrainPerceptionProcessWithDriver
       openCLManager = new OpenCLManager();
       realtimeROS2Node = new ROS2NodeBuilder().buildRealtime("l515_videopub");
       realtimeROS2Node.spin();
-      realsenseDeviceManager = new RealsenseDeviceManager();
+      realsenseDeviceManager = new RealSenseDeviceManager();
 
       LogTools.info("Creating Bytedeco Realsense");
       realsense = realsenseDeviceManager.createBytedecoRealsenseDevice(realsenseConfiguration);
@@ -149,9 +151,10 @@ public class TerrainPerceptionProcessWithDriver
 
       depthBytedecoImage = new BytedecoImage(realsense.getDepthWidth(), realsense.getDepthHeight(), opencv_core.CV_16UC1);
 
+      robotConfigurationData = new RobotConfigurationData();
       ros2Node.createSubscription(StateEstimatorAPI.getRobotConfigurationDataTopic(robotName).withTypeName(RobotConfigurationData.class), s ->
       {
-         LogTools.warn("Realsense focal length is 0.0, not publishing data");
+         s.takeNextData(robotConfigurationData, null);
       });
 
       LogTools.info(String.format("Sensor Fx: %.2f, Sensor Fy: %.2f, Sensor Cx: %.2f, Sensor Cy: %.2f",

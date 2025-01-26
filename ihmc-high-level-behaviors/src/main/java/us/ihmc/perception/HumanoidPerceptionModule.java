@@ -313,9 +313,10 @@ public class HumanoidPerceptionModule
       LogTools.info("Rapid Height Map: {}", cameraIntrinsics);
       rapidHeightMapExtractor = new RapidHeightMapExtractor(openCLManager,
                                                             referenceFrames.getSoleFrame(RobotSide.LEFT),
-                                                            referenceFrames.getSoleFrame(RobotSide.RIGHT));
+                                                            referenceFrames.getSoleFrame(RobotSide.RIGHT),
+                                                            realsenseDepthImage,
+                                                            1);
       rapidHeightMapExtractor.setDepthIntrinsics(cameraIntrinsics);
-      rapidHeightMapExtractor.create(realsenseDepthImage, 1);
 
       if (ros2Helper != null)
          ros2Helper.subscribeViaVolatileCallback(PerceptionAPI.RESET_HEIGHT_MAP, message -> resetHeightMapRequested.set());
@@ -457,7 +458,7 @@ public class HumanoidPerceptionModule
 
    public HeightMapData getLatestHeightMapData()
    {
-      latestHeightMapData = RapidHeightMapExtractor.packHeightMapData(rapidHeightMapExtractor, latestHeightMapData);
+      latestHeightMapData = RapidHeightMapExtractor.packHeightMapData(rapidHeightMapExtractor);
       return latestHeightMapData;
    }
 

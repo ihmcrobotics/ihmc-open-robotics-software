@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTBidirectionalString;
-import us.ihmc.communication.crdt.RequestConfirmFreezable;
+import us.ihmc.communication.crdt.LatestTimestampModifiable;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -19,8 +19,9 @@ import java.util.List;
 /**
  * The base definition of a behavior tree node.
  */
-public class BehaviorTreeNodeDefinition extends RequestConfirmFreezable implements BehaviorTreeNode<BehaviorTreeNodeDefinition>
+public class BehaviorTreeNodeDefinition extends LatestTimestampModifiable implements TreeNode<BehaviorTreeNodeDefinition>
 {
+   private final LatestTimestampModifiable childrenModification;
    /**
     * The name of the node.
     * It should be a set of words that summarize the node and that fits onto one line.
@@ -51,8 +52,12 @@ public class BehaviorTreeNodeDefinition extends RequestConfirmFreezable implemen
 
       this.saveFileDirectory = saveFileDirectory;
 
+      childrenModification = new LatestTimestampModifiable(crdtInfo);
       name = new CRDTBidirectionalString(this, BehaviorTreeDefinitionRegistry.getInitialName(getClass()));
       notes = new CRDTBidirectionalString(this, "");
+
+      setModifierName(name.getValue());
+      childrenModification.setModifierName("children");
    }
 
    /** Save as JSON file root node. */
@@ -145,7 +150,10 @@ public class BehaviorTreeNodeDefinition extends RequestConfirmFreezable implemen
 
    public void toMessage(BehaviorTreeNodeDefinitionMessage message)
    {
-      toMessage(message.getConfirmableRequest());
+      message.setType(BehaviorTreeDefinitionRegistry.getMessageByte(getClass()));
+
+      toMessage(message.getLatestModificationToData());
+      childrenModification.toMessage(message.getLatestModificationToChildren());
 
       message.setName(name.toMessage());
       // message.setNotes(notes.toMessage());
@@ -154,10 +162,22 @@ public class BehaviorTreeNodeDefinition extends RequestConfirmFreezable implemen
 
    public void fromMessage(BehaviorTreeNodeDefinitionMessage message)
    {
-      fromMessage(message.getConfirmableRequest()); // Unpack first, because this also unfreezes
+      fromMessage(message, false);
+   }
+
+   public void fromMessage(BehaviorTreeNodeDefinitionMessage message, boolean checkOnly)
+   {
+      // Needs to be done first to detect incoming modification
+      fromMessage(message.getLatestModificationToData(), checkOnly);
+      childrenModification.fromMessage(message.getLatestModificationToChildren());
 
       name.fromMessage(message.getNameAsString());
       // notes.fromMessage(message.getNotesAsString());
+   }
+
+   public LatestTimestampModifiable getChildrenModification()
+   {
+      return childrenModification;
    }
 
    public void setName(String name)

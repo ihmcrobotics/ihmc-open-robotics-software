@@ -10,11 +10,6 @@ import static us.ihmc.behaviors.activeMapping.ContinuousHikingParameters.*;
  */
 public interface ContinuousHikingParametersReadOnly extends StoredPropertySetReadOnly
 {
-   default boolean getEnableContinuousHiking()
-   {
-      return get(enableContinuousHiking);
-   }
-
    default boolean getStepPublisherEnabled()
    {
       return get(stepPublisherEnabled);

@@ -28,8 +28,8 @@ public class StreamingTools
                          entry("tlpktdrop", "1"),        // "Too late packet drop" - drop packets that arrive/are sent too late
                          entry("rcvlatency", "50"),
                          entry("peerlatency", "50"),     // 50ms of buffer delay for packet loss correction
-                         entry("mss", "1360"),           // Max packet size of MPEG-TS
-                         entry("payload_size", "1316")); // Payload size of MPEG-TS
+                         entry("mss", "1500"),           // Max segment size
+                         entry("payload_size", "1456")); // Max payload size
 
    public static Map<String, String> getLiveSRTOptions()
    {
@@ -49,6 +49,17 @@ public class StreamingTools
    public static Map<String, String> getHEVCNVENCStreamingOptions()
    {
       return new HashMap<>(HEVC_NVENC_STREAMING_OPTIONS);
+   }
+
+   private static final Map<String, String> HEVC_NVENC_HIGH_QUALITY_OPTIONS =
+         Map.ofEntries(entry("tune", "ull"),
+                       entry("zerolatency", "1"),
+                       entry("rc", "constqp"),
+                       entry("qp", "30"));
+
+   public static Map<String, String> getHEVCNVENCHighQualityOptions()
+   {
+      return new HashMap<>(HEVC_NVENC_HIGH_QUALITY_OPTIONS);
    }
 
    /** FFV1 options can be found <a href="https://trac.ffmpeg.org/wiki/Encode/FFV1">here</a>. */
