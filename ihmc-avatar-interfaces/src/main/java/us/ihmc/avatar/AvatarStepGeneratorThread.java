@@ -78,6 +78,7 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
       humanoidRobotContextData = contextDataFactory.createHumanoidRobotContextData();
 
       csgCommandInputManager = pluginFactory.getStepGeneratorCommandInputManager();
+      csgRegistry.addChild(csgCommandInputManager.getRegistry());
 
       if (environmentalConstraints != null)
       {
@@ -98,12 +99,13 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
          pluginFactory.createStepGeneratorNetworkSubscriber(drcRobotModel.getSimpleRobotName(), ros2Node);
 
       humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
-      continuousStepGeneratorPlugin = pluginFactory.buildPlugin(humanoidReferenceFrames,
+      continuousStepGeneratorPlugin = pluginFactory.buildPlugin(fullRobotModel,
+                                                                humanoidReferenceFrames,
                                                                 drcRobotModel.getStepGeneratorDT(),
                                                                 drcRobotModel.getWalkingControllerParameters(),
                                                                 walkingOutputManager,
                                                                 walkingCommandInputManager,
-                                                                null,
+                                                                csgGraphics,
                                                                 null,
                                                                 csgTime);
       csgRegistry.addChild(continuousStepGeneratorPlugin.getRegistry());
