@@ -5,13 +5,12 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.time.TimeInterval;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This is used to define contact transitions for bipeds. This essentially converts {@link TimeInterval} to step transition events, including
+ * This is used to define contact transitions for bipeds. This essentially converts  TimeIntervals to step transition events, including
  * touchdowns and lift offs. This is used then to convert to contact sequences.
  */
 public class BipedStepTransition
