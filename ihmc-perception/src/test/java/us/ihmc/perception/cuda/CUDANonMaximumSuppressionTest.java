@@ -1,7 +1,7 @@
 package us.ihmc.perception.cuda;
 
-import org.bytedeco.javacpp.BoolPointer;
 import org.bytedeco.javacpp.FloatPointer;
+import org.bytedeco.javacpp.IntPointer;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -12,14 +12,14 @@ import static org.junit.jupiter.api.Assertions.*;
 public class CUDANonMaximumSuppressionTest
 {
    @Test
-   public void testNMS() throws Exception
+   public void testNMS()
    {
       int boxesPerCluster = 3;
       int numberOfClusters = 3;
       int boxCount = numberOfClusters * boxesPerCluster;
       int floatsPerBox = 5;
       try (FloatPointer boxes = new FloatPointer(floatsPerBox * boxCount);
-           BoolPointer inclusionVector = new BoolPointer(boxCount);
+           IntPointer includedIndices = new IntPointer(boxCount);
            CUDANonMaximumSuppression nms = new CUDANonMaximumSuppression())
       {
          boxes.put(0.0f, 0.0f, 10.0f, 10.0f, 0.9f,    // 0
@@ -35,49 +35,34 @@ public class CUDANonMaximumSuppressionTest
                    18.0f, 19.0f, 13.0f, 3.0f, 0.8f);  // 8
 
          // Test slow NMS
-         nms.runSlow(boxes, boxCount, 0.2f, inclusionVector);
+         long includedCount = nms.runSlow(boxes, boxCount, 0.2f, includedIndices);
 
          List<Integer> includedBoxIndices = new ArrayList<>();
-         for (int i = 0; i < boxCount; ++i)
-         {
-            if (inclusionVector.get(i))
-               includedBoxIndices.add(i);
-         }
+         for (int i = 0; i < includedCount; ++i)
+            includedBoxIndices.add(includedIndices.get(i));
 
-         assertEquals(3, includedBoxIndices.size());
-         assertEquals(0, includedBoxIndices.get(0));
-         assertEquals(4, includedBoxIndices.get(1));
-         assertEquals(7, includedBoxIndices.get(2));
+         assertEquals(3, includedCount);
+         assertTrue(includedBoxIndices.containsAll(List.of(0, 4, 7)));
 
          // Test fast NMS
-         nms.runFast(boxes, boxCount, 0.2f, inclusionVector);
+         includedCount = nms.runFast(boxes, boxCount, 0.2f, includedIndices);
 
-         includedBoxIndices = new ArrayList<>();
-         for (int i = 0; i < boxCount; ++i)
-         {
-            if (inclusionVector.get(i))
-               includedBoxIndices.add(i);
-         }
+         includedBoxIndices.clear();
+         for (int i = 0; i < includedCount; ++i)
+            includedBoxIndices.add(includedIndices.get(i));
 
-         assertEquals(3, includedBoxIndices.size());
-         assertEquals(0, includedBoxIndices.get(0));
-         assertEquals(4, includedBoxIndices.get(1));
-         assertEquals(7, includedBoxIndices.get(2));
+         assertEquals(3, includedCount);
+         assertTrue(includedBoxIndices.containsAll(List.of(0, 4, 7)));
 
          // Test auto fast/slow NMS
-         nms.run(boxes, boxCount, 0.2f, inclusionVector);
+         includedCount = nms.run(boxes, boxCount, 0.2f, includedIndices);
 
-         includedBoxIndices = new ArrayList<>();
-         for (int i = 0; i < boxCount; ++i)
-         {
-            if (inclusionVector.get(i))
-               includedBoxIndices.add(i);
-         }
+         includedBoxIndices.clear();
+         for (int i = 0; i < includedCount; ++i)
+            includedBoxIndices.add(includedIndices.get(i));
 
-         assertEquals(3, includedBoxIndices.size());
-         assertEquals(0, includedBoxIndices.get(0));
-         assertEquals(4, includedBoxIndices.get(1));
-         assertEquals(7, includedBoxIndices.get(2));
+         assertEquals(3, includedCount);
+         assertTrue(includedBoxIndices.containsAll(List.of(0, 4, 7)));
       }
    }
 

@@ -1,7 +1,10 @@
 package us.ihmc.perception.detections.yolo;
 
+import org.bytedeco.cuda.cudart.CUstream_st;
+import org.bytedeco.cuda.cudart.dim3;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.IntPointer;
+import org.bytedeco.javacpp.LongPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_dnn;
 import org.bytedeco.opencv.global.opencv_imgproc;
@@ -20,22 +23,35 @@ import org.yaml.snakeyaml.Yaml;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
+import us.ihmc.perception.cuda.CUDAKernel;
+import us.ihmc.perception.cuda.CUDANonMaximumSuppression;
+import us.ihmc.perception.cuda.CUDAProgram;
+import us.ihmc.perception.cuda.CUDAStreamManager;
+import us.ihmc.perception.cuda.CUDATools;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.tools.Destroyable;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static org.bytedeco.cuda.global.cudart.*;
+
 public class YOLOv8Model implements Destroyable
 {
    private static final double SCALE_FACTOR = 1.0 / 255.0;
    private static final Size DETECTION_SIZE = new Size(1280, 736);
+
+   private static final int FILTERED_FLOATS_PER_COLUMN = 38;
+   private static final int FLOATS_PER_BOX = 5;
+
+   private static final int BLOCK_SIZE = 256;
 
    // Meta data
    private final String modelName;
@@ -44,6 +60,12 @@ public class YOLOv8Model implements Destroyable
    // OpenCV DNN stuff
    private final Net yoloNet;
    private final StringVector outputNames; // literally list of "output0", "output1", "output2"...
+
+   // CUDA post-processing stuff
+   private final CUstream_st cudaStream;
+   private final CUDAProgram postProcessProgram;
+   private final CUDAKernel filterKernel;
+   private final CUDANonMaximumSuppression nms;
 
    private volatile boolean netProcessing = false;
 
@@ -78,6 +100,21 @@ public class YOLOv8Model implements Destroyable
       yoloNet.setPreferableTarget(opencv_dnn.DNN_TARGET_CUDA);
 
       outputNames = yoloNet.getUnconnectedOutLayersNames();
+
+      // Initialize CUDA stuff
+      cudaStream = CUDAStreamManager.getStream();
+      try
+      {
+         URL postProcessProgramURL = YOLOv8Model.class.getResource("YOLOv8PostProcess");
+         postProcessProgram = new CUDAProgram(postProcessProgramURL, CUDATools.getUtilsFile());
+         filterKernel = postProcessProgram.loadKernel("filterDetections");
+      }
+      catch (Exception e)
+      {
+         throw new RuntimeException(e);
+      }
+
+      nms = new CUDANonMaximumSuppression();
    }
 
    @Override
@@ -85,6 +122,11 @@ public class YOLOv8Model implements Destroyable
    {
       yoloNet.close();
       outputNames.close();
+
+      CUDAStreamManager.releaseStream(cudaStream);
+      filterKernel.close();
+      postProcessProgram.close();
+      nms.close();
    }
 
    /**
@@ -123,7 +165,7 @@ public class YOLOv8Model implements Destroyable
     * @param maskThreshold       Minimum value for a pixel to be part of the mask [0.0, 1.0].
     * @return List of {@link YOLOv8Detection}s found in the image.
     */
-   public YOLOv8DetectionList run(RawImage image, float confidenceThreshold, float nmsThreshold, float maskThreshold)
+   public synchronized YOLOv8DetectionList run(RawImage image, float confidenceThreshold, float nmsThreshold, float maskThreshold)
    {
       YOLOv8DetectionList result = new YOLOv8DetectionList();
 
@@ -150,15 +192,13 @@ public class YOLOv8Model implements Destroyable
            IntPointer reducedIndices = new IntPointer())
       {
 
-         synchronized (yoloNet)
-         {  // Run the net
-            netProcessing = true;
-            Mat blob = opencv_dnn.blobFromImage(bgrInputImage.getCpuImageMat(), SCALE_FACTOR, DETECTION_SIZE, new Scalar(), true, true, opencv_core.CV_32F);
-            yoloNet.setInput(blob);
-            yoloNet.forward(outputBlobs, outputNames);
-            blob.close();
-            netProcessing = false;
-         }
+         // Run the net
+         netProcessing = true;
+         Mat blob = opencv_dnn.blobFromImage(bgrInputImage.getCpuImageMat(), SCALE_FACTOR, DETECTION_SIZE, new Scalar(), true, true, opencv_core.CV_32F);
+         yoloNet.setInput(blob);
+         yoloNet.forward(outputBlobs, outputNames);
+         blob.close();
+         netProcessing = false;
 
          // Get some useful stuff
          CameraIntrinsics maskIntrinsics = computeMaskIntrinsics(outputBlobs, bgrInputImage);
@@ -166,7 +206,7 @@ public class YOLOv8Model implements Destroyable
          int shiftHeight = (bgrInputImage.getHeight() - DETECTION_SIZE.height()) / 2;
 
          // Get class ids, confidences, mask weights, bounding boxes from YOLO output
-         processOutput(outputBlobs, confidenceThreshold, classIDs, confidences, maskWeights, boundingBoxes);
+         processOutput(outputBlobs, confidenceThreshold, nmsThreshold, classIDs, confidences, maskWeights, boundingBoxes);
 
          // Ensure we have detections
          if (boundingBoxes.empty())
@@ -203,6 +243,7 @@ public class YOLOv8Model implements Destroyable
 
    private void processOutput(MatVector outputBlobs,
                               float confidenceThreshold,
+                              float nmsThreshold,
                               IntVector classIDs,
                               FloatVector confidences,
                               FloatVector maskWeights,
@@ -250,45 +291,60 @@ public class YOLOv8Model implements Destroyable
        * mskWht32 |   |   |   |   |   |   |   |   |   | . |   |
        *          +------------------------------------ . ----+
        */
-      Mat output0Blob = outputBlobs.get(0);
-      Mat output0Mat = new Mat(output0Blob.size(1), output0Blob.size(2), output0Blob.type(), output0Blob.data());
+      try (Mat output0Blob = outputBlobs.get(0);
+           FloatPointer unfilteredDetections = new FloatPointer();
 
-//      FloatIndexer output0Indexer = outputBlobs.get(0).createIndexer();
-//      for (long i = 0; i < detectionCount; i++)
-//      {
-//         float maxConfidence = 0;
-//         long maxConfidenceClass = 0;
-//         for (long j = 0; j < detectionClassNames.size(); j++)
-//         {
-//            float confidence = output0Indexer.get(0, 4 + j, i);
-//            if (confidence > maxConfidence)
-//            {
-//               maxConfidence = confidence;
-//               maxConfidenceClass = j;
-//            }
-//         }
-//
-//         // Ensure confidence is above threshold
-//         if (maxConfidence < confidenceThreshold)
-//            continue;
-//
-//         // Get the detection data
-//         int centerX = (int) (output0Indexer.get(0, 0, i));
-//         int centerY = (int) (output0Indexer.get(0, 1, i));
-//         int width = (int) (output0Indexer.get(0, 2, i));
-//         int height = (int) (output0Indexer.get(0, 3, i));
-//         int left = centerX - width / 2;
-//         int top = centerY - height / 2;
-//
-//         classIDs.push_back((int) maxConfidenceClass);
-//         confidences.push_back(maxConfidence);
-//         boundingBoxes.push_back(new Rect(left, top, width, height));
-//         for (long k = 0; k < numberOfMasks; k++)
-//         {
-//            maskWeights.push_back(output0Indexer.get(0, detectionClassNames.size() + 4 + k, i));
-//         }
-//      }
-//      output0Indexer.close();
+           FloatPointer filteredDetections = new FloatPointer();
+           LongPointer filteredDetectionCountPointer = new LongPointer();
+
+           dim3 blockDims = new dim3();
+           dim3 gridDims = new dim3();
+
+           FloatPointer boxes = new FloatPointer())
+      {
+         int unfilteredFloatsPerDetection = output0Blob.size(1);
+         int unfilteredDetectionCount = output0Blob.size(2);
+
+         // Upload unfiltered results to GPU
+         long totalUnfilteredFloats = (long) unfilteredFloatsPerDetection * unfilteredDetectionCount;
+         CUDATools.mallocAsync(unfilteredDetections, totalUnfilteredFloats, cudaStream);
+         CUDATools.memcpyAsync(unfilteredDetections, output0Blob.data(), totalUnfilteredFloats, cudaStream);
+
+         // Allocate memory for filtered detections
+         long totalFilteredFloats = (long) FILTERED_FLOATS_PER_COLUMN * unfilteredDetectionCount;
+         CUDATools.mallocAsync(filteredDetections, totalFilteredFloats, cudaStream);
+
+         // Allocate memory for the filtered detection count
+         cudaMallocHost(filteredDetectionCountPointer, filteredDetectionCountPointer.sizeof());
+
+         // Calculate kernel launch dimensions
+         blockDims.x(BLOCK_SIZE);
+         gridDims.x((unfilteredDetectionCount + BLOCK_SIZE - 1) / BLOCK_SIZE);
+
+         // Run the filter kernel
+         filterKernel.withPointer(unfilteredDetections)
+                     .withInt(detectionClassNames.size())
+                     .withLong(unfilteredDetectionCount)
+                     .withFloat(confidenceThreshold)
+                     .withPointer(filteredDetections)
+                     .withPointer(filteredDetectionCountPointer)
+                     .run(cudaStream, gridDims, blockDims, 0);
+         CUDATools.checkCUDAError(cudaStreamSynchronize(cudaStream));
+
+         // Copy boxes into separate memory to run NMS
+         long filteredDetectionCount = filteredDetectionCountPointer.get();
+         CUDATools.mallocAsync(boxes, FLOATS_PER_BOX * filteredDetectionCount, cudaStream);
+         cudaMemcpy2DAsync(boxes,
+                           filteredDetectionCount,
+                           filteredDetections,
+                           filteredDetectionCount,
+                           filteredDetectionCount,
+                           FLOATS_PER_BOX,
+                           cudaMemcpyDefault,
+                           cudaStream);
+
+//         nms.run(boxes, filteredDetectionCount, nmsThreshold, )
+      }
    }
 
    private CameraIntrinsics computeMaskIntrinsics(MatVector outputBlobs, RawImage bgrInputImage)

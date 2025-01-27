@@ -1,14 +1,12 @@
-// https://hertasecurity.com/wp-content/uploads/work-efficient-parallel-non-maximum-suppression.pdf
-
 #include "Utils.cu"
 
 typedef struct
 {
     float x, y, width, height, score;
-} box;
+} Box;
 
 extern "C"
-__global__ void checkInclusion(box* boxes, size_t boxCount, float overlapThreshold, bool* inclusionMatrix)
+__global__ void checkInclusion(Box* boxes, int boxCount, float overlapThreshold, bool* inclusionMatrix)
 {
     int startX = Utils::getThreadCoordX();
     int startY = Utils::getThreadCoordY();
@@ -17,8 +15,8 @@ __global__ void checkInclusion(box* boxes, size_t boxCount, float overlapThresho
     int strideY = Utils::getStrideY();
 
     // Declare variables
-    box boxI;
-    box boxJ;
+    Box boxI;
+    Box boxJ;
 
     float boxIArea;
     float boxJArea;
@@ -69,7 +67,7 @@ __global__ void checkInclusion(box* boxes, size_t boxCount, float overlapThresho
  *  - blockDim.x >= boxCount
  */
 extern "C"
-__global__ void reduceFast(bool* inclusionMatrix, size_t boxCount, bool* inclusionVector)
+__global__ void reduceFast(bool* inclusionMatrix, int boxCount, int* includedIndices, int* includedBoxCount)
 {
     // Each box must have a dedicated thread to itself
     assert(boxCount <= blockDim.x);
@@ -85,7 +83,21 @@ __global__ void reduceFast(bool* inclusionMatrix, size_t boxCount, bool* inclusi
     if (row >= boxCount || column >= boxCount)
         return;
 
-    inclusionVector[row] = __syncthreads_and(inclusionMatrix[row * boxCount + column]);
+    // Initialize the count to 0
+    if (Utils::getThreadCoordX() == 0)
+        *includedBoxCount = 0;
+    __syncthreads();
+
+    // If non of the columns indicate to exclude this detection matrix
+    if (__syncthreads_and(inclusionMatrix[row * boxCount + column]))
+    {
+        // Use one thread to add this detection to included indices
+        if (threadIdx.x == 0)
+        {
+            int nextIndex = atomicAdd(includedBoxCount, 1);
+            includedIndices[nextIndex] = row;
+        }
+    }
 }
 
 /*
@@ -93,7 +105,7 @@ __global__ void reduceFast(bool* inclusionMatrix, size_t boxCount, bool* inclusi
  * Works on any number of boxes.
  */
 extern "C"
-__global__ void reduceSlow(bool* inclusionMatrix, size_t boxCount, bool* inclusionVector)
+__global__ void reduceSlow(bool* inclusionMatrix, int boxCount, int* includedIndices, int* includedBoxCount)
 {
     int row = Utils::getThreadCoordX();
 
@@ -101,9 +113,18 @@ __global__ void reduceSlow(bool* inclusionMatrix, size_t boxCount, bool* inclusi
     if (row >= boxCount)
         return;
 
-    bool keep = true;
-    for (int column = 0; column < boxCount && keep; ++column)
-        keep &= inclusionMatrix[row * boxCount + column];
+    // Initialize the count to 0
+    if (Utils::getThreadCoordX() == 0)
+        *includedBoxCount = 0;
+    __syncthreads();
 
-    inclusionVector[row] = keep;
+    bool include = true;
+    for (int column = 0; column < boxCount && include; ++column)
+        include &= inclusionMatrix[row * boxCount + column];
+
+    if (include)
+    {
+        int nextIndex = atomicAdd(includedBoxCount, 1);
+        includedIndices[nextIndex] = row;
+    }
 }
