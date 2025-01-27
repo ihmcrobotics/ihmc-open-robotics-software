@@ -2,7 +2,7 @@ package us.ihmc.perception;
 
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.commons.thread.RepeatingTaskThread;
-import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
+import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
@@ -10,7 +10,7 @@ import us.ihmc.sensors.ImageSensor;
 
 public class RapidHeightMapUpdateThread extends RepeatingTaskThread
 {
-   private final ROS2PublishSubscribeAPI ros2;
+   private final ROS2Helper ros2Helper;
    private final ROS2SyncedRobotModel syncedRobotModel;
    private final ReferenceFrame leftFootFrame;
    private final ReferenceFrame rightFootFrame;
@@ -24,7 +24,7 @@ public class RapidHeightMapUpdateThread extends RepeatingTaskThread
    private final boolean runWithCUDA;
    private final int depthImageKey;
 
-   public RapidHeightMapUpdateThread(ROS2PublishSubscribeAPI ros2,
+   public RapidHeightMapUpdateThread(ROS2Helper ros2Helper,
                                      ROS2SyncedRobotModel syncedRobotModel,
                                      ReferenceFrame leftFootFrame,
                                      ReferenceFrame rightFootFrame,
@@ -34,7 +34,7 @@ public class RapidHeightMapUpdateThread extends RepeatingTaskThread
    {
       super(imageSensor.getSensorName() + RapidHeightMapUpdateThread.class.getSimpleName());
 
-      this.ros2 = ros2;
+      this.ros2Helper = ros2Helper;
       this.syncedRobotModel = syncedRobotModel;
       this.leftFootFrame = leftFootFrame;
       this.rightFootFrame = rightFootFrame;
@@ -57,7 +57,7 @@ public class RapidHeightMapUpdateThread extends RepeatingTaskThread
          // Initialize
          if (heightMapManager == null)
          {
-            heightMapManager = new RapidHeightMapManager(ros2,
+            heightMapManager = new RapidHeightMapManager(ros2Helper,
                                                          syncedRobotModel.getRobotModel(),
                                                          leftFootFrame,
                                                          rightFootFrame,

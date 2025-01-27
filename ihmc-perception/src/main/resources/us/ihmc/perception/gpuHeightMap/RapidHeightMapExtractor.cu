@@ -834,3 +834,29 @@ __global__ void computeSteppabilityConnectionsKernel(float* params,
         unsigned short *steppableConnectionsElement = (unsigned short *)((char *)steppableConnectionsMap + key.x * pitchSteppableConnectionsMap) + key.y;
         *steppableConnectionsElement = static_cast<unsigned short>(boundaryConnectionsEncodedAsOnes);
 }
+
+extern "C"
+__global__ void planOffsetKernel(unsigned short * matrixA, size_t pitchA,
+                                 unsigned short * result, size_t pitchResult,
+                                 float offsetInZ, int rows, int cols)
+{
+    int indexX = blockIdx.x * blockDim.x + threadIdx.x;
+    int strideX = blockDim.x * gridDim.x;
+
+    int indexY = blockIdx.y * blockDim.y + threadIdx.y;
+    int strideY = blockDim.y * gridDim.y;
+
+    if (indexX >= rows || indexY >= cols)
+        return;
+
+    for (int y = indexY; y < rows; y += strideY)
+    {
+        unsigned short * matrixARow = (unsigned short*)((char*) matrixA + y * pitchA);
+        unsigned short * resultRow = (unsigned short*)((char*) result + y * pitchResult);
+
+        for (int x = indexX; x < cols; x += strideX)
+        {
+            resultRow[x] = matrixARow[x] + offsetInZ;
+        }
+    }
+}
