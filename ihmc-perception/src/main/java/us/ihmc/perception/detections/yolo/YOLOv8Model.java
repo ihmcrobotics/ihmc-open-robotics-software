@@ -1,16 +1,13 @@
 package us.ihmc.perception.detections.yolo;
 
-import org.bytedeco.javacpp.DoublePointer;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.IntPointer;
-import org.bytedeco.javacpp.indexer.FloatIndexer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_dnn;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatExpr;
 import org.bytedeco.opencv.opencv_core.MatVector;
-import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.RectVector;
 import org.bytedeco.opencv.opencv_core.Scalar;
@@ -76,17 +73,9 @@ public class YOLOv8Model implements Destroyable
          throw new RuntimeException(e);
       }
 
-      // Use CUDA if available
-      if (opencv_core.getCudaEnabledDeviceCount() > 0)
-      {
-         yoloNet.setPreferableBackend(opencv_dnn.DNN_BACKEND_CUDA);
-         yoloNet.setPreferableTarget(opencv_dnn.DNN_TARGET_CUDA);
-      }
-      else
-      {
-         yoloNet.setPreferableBackend(opencv_dnn.DNN_BACKEND_OPENCV);
-         yoloNet.setPreferableTarget(opencv_dnn.DNN_TARGET_CPU);
-      }
+      // Use CUDA backends
+      yoloNet.setPreferableBackend(opencv_dnn.DNN_BACKEND_CUDA);
+      yoloNet.setPreferableTarget(opencv_dnn.DNN_TARGET_CUDA);
 
       outputNames = yoloNet.getUnconnectedOutLayersNames();
    }
@@ -219,72 +208,87 @@ public class YOLOv8Model implements Destroyable
                               FloatVector maskWeights,
                               RectVector boundingBoxes)
    {
-      int numberOfMasks = outputBlobs.get(1).size(1);
-
-      FloatIndexer output0Indexer = outputBlobs.get(0).createIndexer();
-      long detectionCount = output0Indexer.size(2);
-
       /*
-               (detectionCount)
-      (4 + cls)+---------------------------------------------+
-      centerX  |  |  |
-               |--+--+-----
-      centerY  |  |  |
-               |--+--+-----
-      width    |  |  |
-               |--+--+-----
-      height   |  |  |
-               |--+--+-----
-      cls0Conf |  |  |
-               |--+--+-----
-      cls1Conf |  |  |
-      ...
+       * Output 0 contains data of all bounding boxes + mask weights detected by the model.
+       * It is structured such that each column contains:
+       *  - BBox center (X, Y) and dimensions (width & height)
+       *  - Confidence values for each class (how confident the model is that this BBox bounds an object of a given class)
+       *  - 32 mask weights associated with the 32 prototype masks (the prototype masks are contained in output 1)
+       *
+       * Typically, the model produces a ridiculous number of bounding boxes (~19K) for each run.
+       * Most of those boxes are garbage with low confidences, and they must be discarded.
+       * The good bounding boxes are collected, and put through non-maximum suppression to remove overlapping ones.
+       * Finally, the bounding boxes and mask weights are combined with output 1 to get the object masks.
+       *
+       * OUTPUT 0:
+       * BBox#      0   1   2   3   4   5   6   7   8       N
+       *          +------------------------------------ . ----+
+       * centerX  |   |   |   |   |   |   |   |   |   | . |   |
+       *          |---+---+---+---+---+---+---+---+---+ . +---+
+       * centerY  |   |   |   |   |   |   |   |   |   |   |   |
+       *          |---+---+---+---+---+---+---+---+---+   +---+
+       * width    |   |   |   |   |   |   |   |   |   |   |   |
+       *          |---+---+---+---+---+---+---+---+---+   +---+
+       * height   |   |   |   |   |   |   |   |   |   |   |   |
+       *          |---+---+---+---+---+---+---+---+---+   +---+
+       * cls0Conf |   |   |   |   |   |   |   |   |   |   |   |
+       *          |---+---+---+---+---+---+---+---+---+   +---+
+       * cls1Conf |   |   |   |   |   |   |   |   |   |   |   |
+       *          |---+---+---+---+---+---+---+---+---+   +---+
+       *          ...
+       *          |---+---+---+---+---+---+---+---+---+   +---+
+       * clsNConf |   |   |   |   |   |   |   |   |   |   |   |
+       *          |---+---+---+---+---+---+---+---+---+   +---+
+       * mskWht0  |   |   |   |   |   |   |   |   |   |   |   |
+       *          |---+---+---+---+---+---+---+---+---+   +---+
+       * mskWht1  |   |   |   |   |   |   |   |   |   |   |   |
+       *          |---+---+---+---+---+---+---+---+---+   +---+
+       * mskWht2  |   |   |   |   |   |   |   |   |   |   |   |
+       *          |---+---+---+---+---+---+---+---+---+   +---+
+       *          ...
+       *          |---+---+---+---+---+---+---+---+---+ . +---+
+       * mskWht32 |   |   |   |   |   |   |   |   |   | . |   |
+       *          +------------------------------------ . ----+
        */
-      Mat confidenceMat = new Mat(4 + detectionClassNames.size(), (int) detectionCount, opencv_core.CV_32F, outputBlobs.get(0).data());
+      Mat output0Blob = outputBlobs.get(0);
+      Mat output0Mat = new Mat(output0Blob.size(1), output0Blob.size(2), output0Blob.type(), output0Blob.data());
 
-      for (long i = 0; i < detectionCount; i++)
-      {
-         // Find most confident class detection
-         Mat confidencePerClass = confidenceMat.col((int) i).rowRange(4, 4 + detectionClassNames.size());
-         DoublePointer minVal = new DoublePointer(1L);
-         DoublePointer maxVal = new DoublePointer(1L);
-         Point minValLocation = new Point(1L);
-         Point maxValLocation = new Point(1L);
-         opencv_core.minMaxLoc(confidencePerClass, minVal, maxVal, minValLocation, maxValLocation, null);
-
-         float maxConfidence = 0;
-         long maxConfidenceClass = 0;
-         for (long j = 0; j < detectionClassNames.size(); j++)
-         {
-            float confidence = output0Indexer.get(0, 4 + j, i);
-            if (confidence > maxConfidence)
-            {
-               maxConfidence = confidence;
-               maxConfidenceClass = j;
-            }
-         }
-
-         // Ensure confidence is above threshold
-         if (maxConfidence < confidenceThreshold)
-            continue;
-
-         // Get the detection data
-         int centerX = (int) (output0Indexer.get(0, 0, i));
-         int centerY = (int) (output0Indexer.get(0, 1, i));
-         int width = (int) (output0Indexer.get(0, 2, i));
-         int height = (int) (output0Indexer.get(0, 3, i));
-         int left = centerX - width / 2;
-         int top = centerY - height / 2;
-
-         classIDs.push_back((int) maxConfidenceClass);
-         confidences.push_back(maxConfidence);
-         boundingBoxes.push_back(new Rect(left, top, width, height));
-         for (long k = 0; k < numberOfMasks; k++)
-         {
-            maskWeights.push_back(output0Indexer.get(0, detectionClassNames.size() + 4 + k, i));
-         }
-      }
-      output0Indexer.close();
+//      FloatIndexer output0Indexer = outputBlobs.get(0).createIndexer();
+//      for (long i = 0; i < detectionCount; i++)
+//      {
+//         float maxConfidence = 0;
+//         long maxConfidenceClass = 0;
+//         for (long j = 0; j < detectionClassNames.size(); j++)
+//         {
+//            float confidence = output0Indexer.get(0, 4 + j, i);
+//            if (confidence > maxConfidence)
+//            {
+//               maxConfidence = confidence;
+//               maxConfidenceClass = j;
+//            }
+//         }
+//
+//         // Ensure confidence is above threshold
+//         if (maxConfidence < confidenceThreshold)
+//            continue;
+//
+//         // Get the detection data
+//         int centerX = (int) (output0Indexer.get(0, 0, i));
+//         int centerY = (int) (output0Indexer.get(0, 1, i));
+//         int width = (int) (output0Indexer.get(0, 2, i));
+//         int height = (int) (output0Indexer.get(0, 3, i));
+//         int left = centerX - width / 2;
+//         int top = centerY - height / 2;
+//
+//         classIDs.push_back((int) maxConfidenceClass);
+//         confidences.push_back(maxConfidence);
+//         boundingBoxes.push_back(new Rect(left, top, width, height));
+//         for (long k = 0; k < numberOfMasks; k++)
+//         {
+//            maskWeights.push_back(output0Indexer.get(0, detectionClassNames.size() + 4 + k, i));
+//         }
+//      }
+//      output0Indexer.close();
    }
 
    private CameraIntrinsics computeMaskIntrinsics(MatVector outputBlobs, RawImage bgrInputImage)
@@ -302,7 +306,12 @@ public class YOLOv8Model implements Destroyable
       return new CameraIntrinsics(maskHeight, maskWidth, maskFocalLengthX, maskFocalLengthY, maskPrincipalPointX, maskPrincipalPointY);
    }
 
-   private RawImage computeDetectionMask(MatVector outputBlobs, float[] maskWeights, Rect boundingBox, float maskThreshold, CameraIntrinsics maskIntrinsics, RawImage bgrInputImage)
+   private RawImage computeDetectionMask(MatVector outputBlobs,
+                                         float[] maskWeights,
+                                         Rect boundingBox,
+                                         float maskThreshold,
+                                         CameraIntrinsics maskIntrinsics,
+                                         RawImage bgrInputImage)
    {
       // Get float value mask
       Mat zeros = new Mat(maskIntrinsics.getHeight(), maskIntrinsics.getWidth(), opencv_core.CV_32F, new Scalar(0.0));

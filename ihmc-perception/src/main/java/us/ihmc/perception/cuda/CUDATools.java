@@ -1,10 +1,12 @@
 package us.ihmc.perception.cuda;
 
 import org.bytedeco.cuda.cudart.CUstream_st;
+import org.bytedeco.cuda.cudart.cudaDeviceProp;
 import org.bytedeco.cuda.global.cudart;
 import org.bytedeco.cuda.global.nvcomp;
 import org.bytedeco.cuda.global.nvjpeg;
 import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacpp.Loader;
 import org.bytedeco.javacpp.Pointer;
 import us.ihmc.log.LogTools;
@@ -59,6 +61,17 @@ public class CUDATools
    public static boolean hasCUDADevice()
    {
       return getCUDADeviceCount() > 0;
+   }
+
+   public static int maxThreadsPerBlock()
+   {
+      try (IntPointer device = new IntPointer(1);
+           cudaDeviceProp deviceProperties = new cudaDeviceProp())
+      {
+         cudaGetDevice(device);
+         cudaGetDeviceProperties(deviceProperties, device.get());
+         return deviceProperties.maxThreadsPerBlock();
+      }
    }
 
    /**
