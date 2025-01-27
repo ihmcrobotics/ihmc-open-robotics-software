@@ -511,6 +511,9 @@ __global__ void computeSnappedValuesKernel(unsigned short *globalMap, size_t pit
     int idx_x = blockIdx.x * blockDim.x + threadIdx.x;
     int idx_y = blockIdx.y * blockDim.y + threadIdx.y;
 
+    if (idx_x >= 201 || idx_y >= 201)
+        return;
+
     bool should_print = false;//idx_x == 20 && idx_y == 20;
 
     int2 key = make_int2(idx_x, idx_y);
@@ -522,7 +525,7 @@ __global__ void computeSnappedValuesKernel(unsigned short *globalMap, size_t pit
     float max_dimension = fmaxf(params[SNAP_FOOT_WIDTH], params[SNAP_FOOT_LENGTH]);
     int map_center_index = static_cast<int>(params[SNAP_GLOBAL_CENTER_INDEX]);
     int cropped_center_index = static_cast<int>(params[SNAP_CROPPED_WINDOW_CENTER_INDEX]);
-    float2 center = make_float2(params[SNAP_HEIGHT_MAP_CENTER_X], params[SNAP_HEIGHT_MAP_CENTER_Y]);
+    float2 center = make_float2(params[SNAP_HEIGHT_MAP_CENTER_Y], params[SNAP_HEIGHT_MAP_CENTER_X]);
     float2 map_center = make_float2(0.0f, 0.0f);
 
     int map_cells_per_side = 2 * map_center_index + 1;
@@ -562,7 +565,7 @@ __global__ void computeSnappedValuesKernel(unsigned short *globalMap, size_t pit
 
             int2 query_key = make_int2(x_query, y_query);
 
-            unsigned short *query_height_int = (unsigned short *)((char *)globalMap + query_key.x * pitchGlobal) + query_key.y;
+            unsigned short *query_height_int = (unsigned short *)((char *)globalMap + query_key.y * pitchGlobal) + query_key.x;
             max_height_int = max(*query_height_int, max_height_int);
         }
     }
@@ -608,7 +611,7 @@ __global__ void computeSnappedValuesKernel(unsigned short *globalMap, size_t pit
             // We want to put this after the bounds check. That way, if it's outside the FOV, we don't count it against the minimum area.
             max_points_possible_under_support++;
 
-            unsigned short *heightValue = (unsigned short *) ((char *)globalMap + query_key.x * pitchGlobal) + query_key.y;
+            unsigned short *heightValue = (unsigned short *) ((char *)globalMap + query_key.y * pitchGlobal) + query_key.x;
             float query_height = (float) *heightValue / params[SNAP_HEIGHT_SCALING_FACTOR] - params[SNAP_HEIGHT_OFFSET];
 
             if (isnan(query_height))
@@ -704,7 +707,7 @@ __global__ void computeSnappedValuesKernel(unsigned short *globalMap, size_t pit
 
                 int2 query_key = make_int2(x_query, y_query);
 
-                unsigned short *heightValue = (unsigned short *) ((char *)globalMap + query_key.x * pitchGlobal) + query_key.y;
+                unsigned short *heightValue = (unsigned short *) ((char *)globalMap + query_key.y * pitchGlobal) + query_key.x;
                 int query_height_int = (int) *heightValue;
 
                 // compute the relative height at this point, compared to the height contained in the current cell.
@@ -756,22 +759,22 @@ __global__ void computeSnappedValuesKernel(unsigned short *globalMap, size_t pit
     int normal_z_int = static_cast<int>(255 * (normal.z + 1.0f) / 2.0f);
     int2 storage_key = make_int2(idx_x, idx_y);
 
-    unsigned short *steppabilityMapElement = (unsigned short *)((char *)steppabilityMap + storage_key.x * pitchSteppability) + storage_key.y;
+    unsigned short *steppabilityMapElement = (unsigned short *)((char *)steppabilityMap + storage_key.y * pitchSteppability) + storage_key.x;
     *steppabilityMapElement = static_cast<unsigned short>(snap_result);
 
-    unsigned short *snapHeightMapElement = (unsigned short *)((char *)snapHeightMap + storage_key.x * pitchSnapHeight) + storage_key.y;
+    unsigned short *snapHeightMapElement = (unsigned short *)((char *)snapHeightMap + storage_key.y * pitchSnapHeight) + storage_key.x;
     *snapHeightMapElement = static_cast<unsigned short>(snap_height_int);
 
-    unsigned short *snappedNormalXMapElement = (unsigned short *)((char *)snapNormalXMap + storage_key.x * pitchSnapNormalX) + storage_key.y;
+    unsigned short *snappedNormalXMapElement = (unsigned short *)((char *)snapNormalXMap + storage_key.y * pitchSnapNormalX) + storage_key.x;
     *snappedNormalXMapElement = static_cast<unsigned short>(normal_x_int);
 
-    unsigned short *snappedNormalYMapElement = (unsigned short *)((char *)snapNormalYMap + storage_key.x * pitchSnapNormalY) + storage_key.y;
+    unsigned short *snappedNormalYMapElement = (unsigned short *)((char *)snapNormalYMap + storage_key.y * pitchSnapNormalY) + storage_key.x;
     *snappedNormalYMapElement = static_cast<unsigned short>(normal_y_int);
 
-    unsigned short *snappedNormalZMapElement = (unsigned short *)((char *)snapNormalZMap + storage_key.x * pitchSnapNormalZ) + storage_key.y;
+    unsigned short *snappedNormalZMapElement = (unsigned short *)((char *)snapNormalZMap + storage_key.y * pitchSnapNormalZ) + storage_key.x;
     *snappedNormalZMapElement = static_cast<unsigned short>(normal_z_int);
 
-    unsigned short *areaFractionElement = (unsigned short *)((char *)snappedAreaFractionMap + storage_key.x * pitchSnappedAreaFraction) + storage_key.y;
+    unsigned short *areaFractionElement = (unsigned short *)((char *)snappedAreaFractionMap + storage_key.y * pitchSnappedAreaFraction) + storage_key.x;
     *areaFractionElement = static_cast<unsigned short>(area_fraction);
 }
 
