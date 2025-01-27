@@ -8,8 +8,8 @@ import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.robotics.math.trajectories.ConstantVelocityTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.interfaces.DoubleTrajectoryGenerator;
+import us.ihmc.robotics.trajectories.ConstantVelocityTrajectoryGenerator;
+import us.ihmc.robotics.trajectories.interfaces.DoubleTrajectoryGenerator;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;

@@ -3,13 +3,13 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 import org.ejml.data.DMatrix;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.commons.time.TimeInterval;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.robotics.time.TimeInterval;
 
 import java.util.Random;
 
