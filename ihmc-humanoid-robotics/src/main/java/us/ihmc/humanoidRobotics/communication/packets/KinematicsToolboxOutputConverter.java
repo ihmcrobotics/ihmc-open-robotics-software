@@ -13,6 +13,8 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.idl.IDLSequence.Object;
@@ -278,6 +280,26 @@ public class KinematicsToolboxOutputConverter
       packSE3TrajectoryPointMessage(trajectoryTime, desiredPose, desiredSpatialVelocity, taskspaceTrajectoryPoints.add());
    }
 
+   public void computeCenterOfMassTrajectoryMessage()
+   {
+      checkIfDataHasBeenSet();
+
+      desiredPose.setToZero(referenceFrames.getCenterOfMassFrame());
+      desiredPose.changeFrame(worldFrame);
+
+      spatialVelocity((MovingReferenceFrame) referenceFrames.getCenterOfMassFrame(), worldFrame, enableVelocity, desiredSpatialVelocity);
+
+      CenterOfMassTrajectoryMessage centerOfMassTrajectoryMessage = output.getCenterOfMassTrajectoryMessage();
+      EuclideanTrajectoryMessage euclideanTrajectory = centerOfMassTrajectoryMessage.getEuclideanTrajectory();
+      euclideanTrajectory.getFrameInformation().setTrajectoryReferenceFrameId(worldFrame.getFrameNameHashCode());
+      euclideanTrajectory.getFrameInformation().setDataReferenceFrameId(worldFrame.getFrameNameHashCode());
+
+      Object<EuclideanTrajectoryPointMessage> taskspaceTrajectoryPoints = euclideanTrajectory.getTaskspaceTrajectoryPoints();
+      taskspaceTrajectoryPoints.clear();
+
+      packEuclideanTrajectoryPointMessage(trajectoryTime, desiredPose.getPosition(), desiredSpatialVelocity.getLinearPart(), taskspaceTrajectoryPoints.add());
+   }
+
    public void computeFootTrajectoryMessages()
    {
       for (RobotSide robotSide : RobotSide.values)
@@ -379,6 +401,16 @@ public class KinematicsToolboxOutputConverter
       messageToPack.getOrientation().set(pose.getOrientation());
       messageToPack.getLinearVelocity().set(spatialVelocity.getLinearPart());
       messageToPack.getAngularVelocity().set(spatialVelocity.getAngularPart());
+   }
+
+   public static void packEuclideanTrajectoryPointMessage(double time,
+                                                          Point3DReadOnly position,
+                                                          FrameVector3DReadOnly linearVelocity,
+                                                          EuclideanTrajectoryPointMessage messageToPack)
+   {
+      messageToPack.setTime(time);
+      messageToPack.getPosition().set(position);
+      messageToPack.getLinearVelocity().set(linearVelocity);
    }
 
    public FullHumanoidRobotModel getFullRobotModel()

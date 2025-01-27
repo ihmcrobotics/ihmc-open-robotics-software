@@ -134,9 +134,9 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
 
    public void fromMessage(DoorTraversalStateMessage message)
    {
-      super.fromMessage(message.getState());
-
       getDefinition().fromMessage(message.getDefinition());
+
+      super.fromMessage(message.getState());
 
       doorHingeJointAngle.fromMessage(message.getDoorHingeJointAngle());
       doorHandleDistanceFromStart.fromMessage(message.getDoorHandleDistanceFromStart());

@@ -317,7 +317,7 @@ public class KinematicsToolboxController extends ToolboxController
    private final ConvexPolygonScaler convexPolygonScaler = new ConvexPolygonScaler();
    private final FrameConvexPolygon2D newSupportPolygon = new FrameConvexPolygon2D();
    protected final ConvexPolygon2D shrunkSupportPolygon = new ConvexPolygon2D();
-   private final FramePoint3D centerOfMass = new FramePoint3D();
+   protected final FramePoint3D centerOfMass = new FramePoint3D();
    /**
     * Distance to shrink the support polygon for safety purpose.
     */
@@ -1605,6 +1605,35 @@ public class KinematicsToolboxController extends ToolboxController
       for (int i = 0; i < previousFBCommands.size(); i++)
       {
          if (previousFBCommands.get(i).getEndEffector() == rigidBody)
+            return true;
+      }
+
+      return false;
+   }
+
+   public boolean isUserControllingRigidBodyPosition(RigidBodyBasics rigidBody)
+   {
+      RecyclingArrayList<SpatialFeedbackControlCommand> currentFBCommands = userFBCommands.getSpatialFeedbackControlCommandBuffer();
+
+      for (int i = 0; i < currentFBCommands.size(); i++)
+      {
+         SpatialFeedbackControlCommand command = currentFBCommands.get(i);
+         if (command.getEndEffector() != rigidBody)
+            continue;
+         SelectionMatrix6D selectionMatrix = command.getSpatialAccelerationCommand().getSelectionMatrix();
+         if (selectionMatrix.isLinearPartActive())
+            return true;
+      }
+
+      RecyclingArrayList<SpatialFeedbackControlCommand> previousFBCommands = previousUserFBCommands.getSpatialFeedbackControlCommandBuffer();
+
+      for (int i = 0; i < previousFBCommands.size(); i++)
+      {
+         SpatialFeedbackControlCommand command = previousFBCommands.get(i);
+         if (command.getEndEffector() != rigidBody)
+            continue;
+         SelectionMatrix6D selectionMatrix = command.getSpatialAccelerationCommand().getSelectionMatrix();
+         if (selectionMatrix.isLinearPartActive())
             return true;
       }
 

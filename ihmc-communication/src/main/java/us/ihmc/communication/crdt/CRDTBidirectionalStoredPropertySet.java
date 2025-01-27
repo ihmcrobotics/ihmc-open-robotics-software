@@ -15,9 +15,9 @@ import us.ihmc.tools.property.StoredPropertySetReadOnly;
  */
 public class CRDTBidirectionalStoredPropertySet extends CRDTBidirectionalMutableField<StoredPropertySetBasics>
 {
-   public CRDTBidirectionalStoredPropertySet(RequestConfirmFreezable requestConfirmFreezable, StoredPropertySetBasics storedPropertySet)
+   public CRDTBidirectionalStoredPropertySet(LatestTimestampModifiable latestTimestampModifiable, StoredPropertySetBasics storedPropertySet)
    {
-      super(requestConfirmFreezable, storedPropertySet);
+      super(latestTimestampModifiable, storedPropertySet);
    }
 
    public StoredPropertySetReadOnly getValueReadOnly()
@@ -40,7 +40,7 @@ public class CRDTBidirectionalStoredPropertySet extends CRDTBidirectionalMutable
 
    public void fromMessage(PrimitiveDataVectorMessage message)
    {
-      if (!isFrozen())
+      if (isModificationIncoming())
       {
          StoredPropertySetMessageTools.fromMessage(message, getValueInternal());
       }

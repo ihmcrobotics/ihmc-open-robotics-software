@@ -4,6 +4,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.commons.thread.RepeatingTaskThread;
+import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.detections.DetectionManager;
 import us.ihmc.perception.sceneGraph.SceneGraph;
@@ -15,22 +16,33 @@ import java.util.Collections;
 public class ROS2BehaviorTreeUpdateThread extends RepeatingTaskThread
 {
    private final ROS2SyncedRobotModel syncedRobot;
+   private final ROS2PeerClockOffsetEstimator peerClockEstimator;
    private final ROS2BehaviorTreeExecutor executor;
 
-   public ROS2BehaviorTreeUpdateThread(ROS2Node ros2Node, DRCRobotModel robotModel, SceneGraph sceneGraph, DetectionManager detectionManager)
+   public ROS2BehaviorTreeUpdateThread(ROS2Node ros2Node,
+                                       DRCRobotModel robotModel,
+                                       SceneGraph sceneGraph,
+                                       DetectionManager detectionManager)
    {
       super(ROS2BehaviorTreeUpdateThread.class.getSimpleName());
-      setFrequencyLimit(ROS2BehaviorTreeState.SYNC_FREQUENCY);
+      setFrequencyLimit(ROS2BehaviorTree.SYNC_FREQUENCY);
 
       ROS2ControllerHelper ros2ControllerHelper = new ROS2ControllerHelper(ros2Node, robotModel);
       syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2ControllerHelper.getROS2Node());
+      peerClockEstimator = new ROS2PeerClockOffsetEstimator(ros2Node);
 
       ReferenceFrameLibrary referenceFrameLibrary = new ReferenceFrameLibrary();
       referenceFrameLibrary.addAll(Collections.singleton(ReferenceFrame.getWorldFrame()));
       referenceFrameLibrary.addAll(syncedRobot.getReferenceFrames().getCommonReferenceFrames());
       referenceFrameLibrary.addDynamicCollection(sceneGraph.asNewDynamicReferenceFrameCollection());
 
-      executor = new ROS2BehaviorTreeExecutor(ros2ControllerHelper, robotModel, syncedRobot, referenceFrameLibrary, sceneGraph, detectionManager);
+      executor = new ROS2BehaviorTreeExecutor(ros2ControllerHelper,
+                                              robotModel,
+                                              syncedRobot,
+                                              peerClockEstimator,
+                                              referenceFrameLibrary,
+                                              sceneGraph,
+                                              detectionManager);
    }
 
    @Override
@@ -46,6 +58,7 @@ public class ROS2BehaviorTreeUpdateThread extends RepeatingTaskThread
       super.kill();
 
       syncedRobot.destroy();
+      peerClockEstimator.destroy();
       executor.destroy();
    }
 }

@@ -8,6 +8,8 @@ import java.util.List;
 
 public class ROS2BehaviorTreeSubscriptionNode
 {
+   private long sequenceId;
+   private byte packedMessageType;
    private Class<?> nodeDefinitionClass;
    private BehaviorTreeNodeDefinitionMessage behaviorTreeNodeDefinitionMessage;
    private BehaviorTreeNodeStateMessage behaviorTreeNodeStateMessage;
@@ -34,6 +36,8 @@ public class ROS2BehaviorTreeSubscriptionNode
 
    public void clear()
    {
+      sequenceId = -1;
+      packedMessageType = -1;
       nodeDefinitionClass = null;
       behaviorTreeNodeDefinitionMessage = null;
       behaviorTreeNodeStateMessage = null;
@@ -59,14 +63,29 @@ public class ROS2BehaviorTreeSubscriptionNode
       children.clear();
    }
 
-   public Class<?> getType()
+   public long getSequenceId()
    {
-      return nodeDefinitionClass;
+      return sequenceId;
    }
 
-   public void setType(byte type)
+   public void setSequenceId(long sequenceId)
    {
-      nodeDefinitionClass = BehaviorTreeDefinitionRegistry.getNodeDefinitionClass(type);
+      this.sequenceId = sequenceId;
+   }
+
+   public byte getPackedType()
+   {
+      return packedMessageType;
+   }
+
+   public void setPackedType(byte type)
+   {
+      packedMessageType = type;
+   }
+
+   public Class<?> getDefinitionClass()
+   {
+      return nodeDefinitionClass;
    }
 
    public BehaviorTreeNodeDefinitionMessage getBehaviorTreeNodeDefinitionMessage()
@@ -77,6 +96,7 @@ public class ROS2BehaviorTreeSubscriptionNode
    public void setBehaviorTreeNodeDefinitionMessage(BehaviorTreeNodeDefinitionMessage behaviorTreeNodeDefinitionMessage)
    {
       this.behaviorTreeNodeDefinitionMessage = behaviorTreeNodeDefinitionMessage;
+      nodeDefinitionClass = BehaviorTreeDefinitionRegistry.getNodeDefinitionClass(behaviorTreeNodeDefinitionMessage.getType());
    }
 
    public BehaviorTreeNodeStateMessage getBehaviorTreeNodeStateMessage()
