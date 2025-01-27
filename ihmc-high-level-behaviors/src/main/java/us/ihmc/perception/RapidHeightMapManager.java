@@ -9,6 +9,7 @@ import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.PerceptionAPI;
@@ -29,6 +30,7 @@ import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 import java.time.Instant;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.communication.HumanoidControllerAPI.getTopic;
 
@@ -49,7 +51,9 @@ public class RapidHeightMapManager
    private final Notification resetHeightMapRequested = new Notification();
    private final BytePointer compressedCroppedHeightMapPointer = new BytePointer();
 
+   private final AtomicReference<Vector3D> totalPlanOffsetToProcess = new AtomicReference<>();
    private final Vector3D lastPlanOffset = new Vector3D();
+   private final Vector3D mostRecentPlanOffsetProcessed = new Vector3D();
 
    public RapidHeightMapManager(ROS2Helper ros2Helper,
                                 DRCRobotModel robotModel,
@@ -123,6 +127,8 @@ public class RapidHeightMapManager
 
       if (resetHeightMapRequested.poll())
       {
+         totalPlanOffsetToProcess.set(null);
+         mostRecentPlanOffsetProcessed.setToZero();
          rapidHeightMapExtractor.reset();
       }
 
@@ -132,6 +138,14 @@ public class RapidHeightMapManager
 
       cameraPose.setToZero(cameraFrame);
       cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+      if (totalPlanOffsetToProcess.get() != null)
+      {
+         Vector3D incrementalOffset = new Vector3D(totalPlanOffsetToProcess.getAndSet(null));
+         incrementalOffset.sub(mostRecentPlanOffsetProcessed);
+         rapidHeightMapExtractor.updateHeightOffset((float) incrementalOffset.getZ());
+         mostRecentPlanOffsetProcessed.add(incrementalOffset);
+      }
 
       rapidHeightMapExtractor.update(sensorToWorld, sensorToGround, groundToWorld);
 
@@ -165,10 +179,16 @@ public class RapidHeightMapManager
       rapidHeightMapExtractor.destroy();
    }
 
+   private static final double epsilon = 5e-3;
    private void acceptPlanOffsetStatus(PlanOffsetStatus planOffsetMessage)
    {
-      LogTools.info("Plan offset status: " + planOffsetMessage);
-      lastPlanOffset.set(planOffsetMessage.getOffsetVector());
-      rapidHeightMapExtractor.updateHeightOffset((float) planOffsetMessage.getOffsetVector().getZ());
+      Vector3D planOffset = planOffsetMessage.getOffsetVector();
+
+      if (!MathTools.epsilonEquals(planOffset.getZ(), lastPlanOffset.getZ(), epsilon))
+      {
+         LogTools.info("Plan offset status has changed! Last offset: " + lastPlanOffset.getZ() + " current offset: " + planOffset.getZ());
+         totalPlanOffsetToProcess.set(planOffset);
+         lastPlanOffset.set(planOffsetMessage.getOffsetVector());
+      }
    }
 }

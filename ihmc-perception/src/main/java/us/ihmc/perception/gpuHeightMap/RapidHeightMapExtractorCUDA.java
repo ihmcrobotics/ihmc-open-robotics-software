@@ -12,6 +12,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
@@ -527,10 +528,10 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
 
       // Run the snapping kernel
       planOffsetKernel.withPointer(globalHeightMapImage.data()).withLong(globalHeightMapImage.step());
-      planOffsetKernel.withPointer(newGlobalHeightMapImage.data()).withLong(newGlobalHeightMapImage.step());
       planOffsetKernel.withFloat(z).withInt(globalHeightMapImage.rows()).withInt(globalHeightMapImage.cols());
 
       planOffsetKernel.run(stream, planOffsetKernelGridDim, blockSize, 0);
+      LogTools.info("Running kernel, from Java side");
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
    }
