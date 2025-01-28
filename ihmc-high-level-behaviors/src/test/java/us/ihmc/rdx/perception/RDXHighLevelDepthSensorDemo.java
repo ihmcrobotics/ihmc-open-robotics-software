@@ -3,6 +3,7 @@ package us.ihmc.rdx.perception;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import imgui.ImGui;
+import imgui.flag.ImGuiMouseButton;
 import org.bytedeco.opencv.global.opencv_core;
 import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
@@ -104,6 +105,11 @@ public class RDXHighLevelDepthSensorDemo
             baseUI.getImGuiPanelManager().addPanel("Mouse Picking", () ->
             {
                ImGui.text("Mouse x: " + mousePosX + " y: " + mousePosY);
+
+               if (ImGui.isMouseClicked(ImGuiMouseButton.Right))
+               {  // Place breakpoint here for debugging
+                  ImGui.text("Right mouse button clicked at x: " + mousePosX + " y: " + mousePosY);
+               }
             });
 
             RDX3DPanel panel3D = new RDX3DPanel("3D View 2", true);
@@ -111,7 +117,12 @@ public class RDXHighLevelDepthSensorDemo
 
             frustumVisualizer = new RDXFrustumGraphic();
             baseUI.getPrimaryScene().addRenderableProvider(frustumVisualizer, RDXSceneLevel.VIRTUAL);
-            
+
+            ModelInstance box = RDXModelBuilder.createBox(0.2f, 0.2f, 0.2f, Color.YELLOW);
+            box.transform.translate(0.4f, 0.3f, 0.25f);
+            baseUI.getPrimaryScene().addRenderableProvider(box, RDXSceneLevel.MODEL);
+            baseUI.getPrimaryScene().addRenderableProvider(box, RDXSceneLevel.GROUND_TRUTH);
+
             heightMap = new RDXHeightMapGraphicNew();
             HeightMapMessage heightMapMessage = new HeightMapMessage();
             heightMapMessage.setXyResolution(0.1);
