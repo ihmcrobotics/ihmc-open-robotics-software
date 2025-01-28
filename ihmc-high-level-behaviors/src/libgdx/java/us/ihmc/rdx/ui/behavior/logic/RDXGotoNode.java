@@ -37,6 +37,12 @@ public class RDXGotoNode extends RDXBehaviorTreeNode<GotoNodeState, GotoNodeDefi
    {
       ImGui.text("Type: %s   ID: %d".formatted(getDefinition().getClass().getSimpleName(), getState().getID()));
 
+      String selectedText = GotoNodeDefinition.GOTO_NEXT;
+      if (ImGui.beginCombo(labels.get("Goto"), selectedText))
+      {
+
+      }
+
       super.renderNodeSettingsWidgets();
    }
 }

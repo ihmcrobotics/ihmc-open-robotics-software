@@ -12,6 +12,10 @@ public class GotoNodeDefinitionMessage extends Packet<GotoNodeDefinitionMessage>
             * Parent definition fields
             */
    public behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage definition_;
+   /**
+            * The ID of the node to goto
+            */
+   public long goto_node_id_;
 
    public GotoNodeDefinitionMessage()
    {
@@ -26,7 +30,10 @@ public class GotoNodeDefinitionMessage extends Packet<GotoNodeDefinitionMessage>
 
    public void set(GotoNodeDefinitionMessage other)
    {
-      behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);   }
+      behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
+      goto_node_id_ = other.goto_node_id_;
+
+   }
 
 
    /**
@@ -35,6 +42,21 @@ public class GotoNodeDefinitionMessage extends Packet<GotoNodeDefinitionMessage>
    public behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage getDefinition()
    {
       return definition_;
+   }
+
+   /**
+            * The ID of the node to goto
+            */
+   public void setGotoNodeId(long goto_node_id)
+   {
+      goto_node_id_ = goto_node_id;
+   }
+   /**
+            * The ID of the node to goto
+            */
+   public long getGotoNodeId()
+   {
+      return goto_node_id_;
    }
 
 
@@ -56,6 +78,8 @@ public class GotoNodeDefinitionMessage extends Packet<GotoNodeDefinitionMessage>
       if(other == this) return true;
 
       if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.goto_node_id_, other.goto_node_id_, epsilon)) return false;
+
 
       return true;
    }
@@ -70,6 +94,8 @@ public class GotoNodeDefinitionMessage extends Packet<GotoNodeDefinitionMessage>
       GotoNodeDefinitionMessage otherMyClass = (GotoNodeDefinitionMessage) other;
 
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
+      if(this.goto_node_id_ != otherMyClass.goto_node_id_) return false;
+
 
       return true;
    }
@@ -81,7 +107,9 @@ public class GotoNodeDefinitionMessage extends Packet<GotoNodeDefinitionMessage>
 
       builder.append("GotoNodeDefinitionMessage {");
       builder.append("definition=");
-      builder.append(this.definition_);
+      builder.append(this.definition_);      builder.append(", ");
+      builder.append("goto_node_id=");
+      builder.append(this.goto_node_id_);
       builder.append("}");
       return builder.toString();
    }
