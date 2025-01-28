@@ -19,7 +19,11 @@ import us.ihmc.perception.cuda.CUDAProgram;
 import us.ihmc.perception.cuda.CUDAStreamManager;
 import us.ihmc.perception.cuda.CUDATools;
 import us.ihmc.perception.heightMap.TerrainMapData;
+import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParameters;
+import us.ihmc.perception.tools.PerceptionDataTools;
+import us.ihmc.perception.tools.PerceptionDebugTools;
+import us.ihmc.perception.tools.PerceptionEuclidTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -340,6 +344,10 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
 
       //Update the terrain map data with the new results
       terrainMapData.setSensorOrigin(groundToWorldTransform.getTranslationX(), groundToWorldTransform.getTranslationY());
+
+      Mat test = new Mat();
+      sensorCroppedHeightMapImage.download(test);
+      PerceptionDebugTools.printMat("ee", test, 20);
 
       Mat finalCroppedHeightMap = new Mat();  // Assuming the height map is 201x201
       sensorCroppedHeightMapImage.download(finalCroppedHeightMap);  // Download the image from the GPU to the Mat object

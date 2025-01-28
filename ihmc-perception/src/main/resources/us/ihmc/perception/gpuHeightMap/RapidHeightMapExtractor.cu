@@ -851,6 +851,9 @@ __global__ void planOffsetKernel(unsigned short * matrixToModify, size_t pitchMa
     if (indexX == 50 && indexY == 50)
         printf("Kernel print statement: offset in Z to adjust: %f\n", offsetInZ);
 
+    // This converts the float value to a short
+    offsetInZ *= 32768;
+
     for (int y = indexY; y < rows; y += strideY)
     {
         unsigned short * matrixToModifyRow = (unsigned short*)((char*) matrixToModify + y * pitchMatrixToModify);
