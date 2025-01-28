@@ -10,13 +10,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
 /**
- * YoMatrix. Object for holding a matrix of YoVariables so that Matrices can be rewound. Has a
- * maximum number of rows and columns and an actual number of rows and columns. If you set with a
- * smaller matrix, then the actual size will be the size of the passed in matrix. extra entries will
- * be set to NaN. If you get the contents the matrix you pack must be the correct size.
- *
- * @author JerryPratt
+ * @deprecated please use {@link us.ihmc.yoVariables.math.YoMatrix}
  */
+@Deprecated
 public class YoMatrix implements DMatrix, ReshapeMatrix
 {
    // TODO: eventually consolidate YoMatrix implementations

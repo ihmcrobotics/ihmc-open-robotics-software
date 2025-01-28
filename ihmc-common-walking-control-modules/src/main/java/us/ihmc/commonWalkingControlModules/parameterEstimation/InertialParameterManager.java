@@ -21,7 +21,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModelWrapper;
 import us.ihmc.robotics.MatrixMissingTools;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.math.filters.*;
-import us.ihmc.robotics.math.frames.YoMatrix;
+import us.ihmc.yoVariables.math.YoMatrix;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
