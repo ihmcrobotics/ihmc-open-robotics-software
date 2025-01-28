@@ -838,7 +838,8 @@ __global__ void computeSteppabilityConnectionsKernel(float* params,
 extern "C"
 __global__ void planOffsetKernel(unsigned short * matrixToModify, size_t pitchMatrixToModify,
                                  unsigned short * matrixValuesToSkip, size_t pitchMatrixValuesToSkip,
-                                 float offsetInZ, int rowsMatrixToModify, int colsMatrixToModify)
+                                 float offsetInZ, int rowsMatrixToModify, int colsMatrixToModify,
+                                 float resetOffset)
 {
     int indexX = blockIdx.x * blockDim.x + threadIdx.x;
     int indexY = blockIdx.y * blockDim.y + threadIdx.y;
@@ -847,7 +848,7 @@ __global__ void planOffsetKernel(unsigned short * matrixToModify, size_t pitchMa
         return;
 
     unsigned short *skipRow = (unsigned short *)((char *)matrixValuesToSkip + indexY * pitchMatrixValuesToSkip);
-    if (skipRow[indexX] > 0)
+    if (skipRow[indexX] != resetOffset)
         return;
 
     unsigned short *matrixRow = (unsigned short *)((char *)matrixToModify + indexY * pitchMatrixToModify);

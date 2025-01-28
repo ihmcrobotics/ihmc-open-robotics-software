@@ -265,24 +265,24 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
 
    public void renderImGuiWidgets()
    {
-//      if (ImGui.button("Do some shit"))
-//      {
-//         StatusMessageOutputManager statusMessageOutputManager = new StatusMessageOutputManager(ControllerAPIDefinition.getControllerSupportedStatusMessages());
-//         Vector3D planOffset = new Vector3D(0, 0, value);
-//         planOffsetStatus.getOffsetVector().set(planOffset);
-////         statusMessageOutputManager.reportStatusMessage(planOffsetStatus);
-//         LogTools.info("Plan Offset Status: " + planOffsetStatus.getOffsetVector());
-//         ros2Helper.publish(getTopic(PlanOffsetStatus.class, "Nadia"), planOffsetStatus);
-//
-//         if (value > 5)
-//         {
-//            value -= 0.1;
-//         }
-//         else
-//         {
-//            value += 0.1;
-//         }
-//      }
+      if (ImGui.button("Do some shit"))
+      {
+         StatusMessageOutputManager statusMessageOutputManager = new StatusMessageOutputManager(ControllerAPIDefinition.getControllerSupportedStatusMessages());
+         Vector3D planOffset = new Vector3D(0, 0, value);
+         planOffsetStatus.getOffsetVector().set(planOffset);
+//         statusMessageOutputManager.reportStatusMessage(planOffsetStatus);
+         LogTools.info("Plan Offset Status: " + planOffsetStatus.getOffsetVector());
+         ros2Helper.publish(getTopic(PlanOffsetStatus.class, "Nadia"), planOffsetStatus);
+
+         if (value > 5)
+         {
+            value -= 0.1;
+         }
+         else
+         {
+            value += 0.1;
+         }
+      }
 
       ImGui.text("The ContinuousHikingProcess must be running");
       ImGui.text("And the enabled checkbox must be checked");

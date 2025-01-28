@@ -19,11 +19,7 @@ import us.ihmc.perception.cuda.CUDAProgram;
 import us.ihmc.perception.cuda.CUDAStreamManager;
 import us.ihmc.perception.cuda.CUDATools;
 import us.ihmc.perception.heightMap.TerrainMapData;
-import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParameters;
-import us.ihmc.perception.tools.PerceptionDataTools;
-import us.ihmc.perception.tools.PerceptionDebugTools;
-import us.ihmc.perception.tools.PerceptionEuclidTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -104,6 +100,7 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
    private dim3 croppingKernelGridDim;
    private dim3 snappingKernelGridDim;
    private dim3 planOffsetKernelGridDim;
+   private int resetOffset;
 
    public RapidHeightMapExtractorCUDA(ReferenceFrame leftFootSoleFrame, ReferenceFrame rightFootSoleFrame, GpuMat depthImage, int mode)
    {
@@ -221,13 +218,13 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
          height = Math.min(footSoleFrames.get(RobotSide.LEFT).getTransformToWorldFrame().getTranslationZ(),
                            footSoleFrames.get(RobotSide.RIGHT).getTransformToWorldFrame().getTranslationZ()) - thicknessOfTheFoot;
       }
-      int offset = (int) ((height + heightMapParameters.getHeightOffset()) * heightMapParameters.getHeightScaleFactor());
+      resetOffset = (int) ((height + heightMapParameters.getHeightOffset()) * heightMapParameters.getHeightScaleFactor());
 
-      localHeightMapImage.setTo(new Scalar(offset));
-      globalHeightMapImage.setTo(new Scalar(offset));
+      localHeightMapImage.setTo(new Scalar(resetOffset));
+      globalHeightMapImage.setTo(new Scalar(resetOffset));
       snapHeightImage.setTo(new Scalar(32768));
 
-      emptyGlobalHeightMapImage.setTo(new Scalar(0));
+      emptyGlobalHeightMapImage.setTo(new Scalar(resetOffset));
 
       sequenceNumber = 0;
    }
@@ -563,6 +560,7 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
       planOffsetKernel.withPointer(globalHeightMapImage.data()).withLong(globalHeightMapImage.step());
       planOffsetKernel.withPointer(emptyGlobalHeightMapImage.data()).withLong(emptyGlobalHeightMapImage.step());
       planOffsetKernel.withFloat(z).withInt(globalHeightMapImage.rows()).withInt(globalHeightMapImage.cols());
+      planOffsetKernel.withFloat(resetOffset);
 
       planOffsetKernel.run(stream, planOffsetKernelGridDim, blockSize, 0);
       LogTools.info("Running kernel, from Java side");
