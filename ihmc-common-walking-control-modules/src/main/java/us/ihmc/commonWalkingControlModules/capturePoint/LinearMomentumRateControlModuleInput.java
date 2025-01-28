@@ -105,6 +105,11 @@ public class LinearMomentumRateControlModuleInput
    private boolean minimizeAngularMomentumRateZ;
 
    /**
+    * Is a flag that disables CoPFeedbackControl by setting CoP feedback alpha to 1.
+    */
+   private boolean disableCoPFeedbackControl = false;
+
+   /**
     * The contact state of the robot. Effectively updates the support polygon for the ICP feedback controller.
     */
    private final SideDependentList<PlaneContactStateCommand> contactStateCommands = new SideDependentList<>(new PlaneContactStateCommand(),
@@ -210,6 +215,16 @@ public class LinearMomentumRateControlModuleInput
       return minimizeAngularMomentumRateZ;
    }
 
+   public void setDisableCoPFeedbackControl(boolean disableCoPFeedbackControl)
+   {
+      this.disableCoPFeedbackControl = disableCoPFeedbackControl;
+   }
+
+   public boolean getDisableCoPFeedbackControl()
+   {
+      return disableCoPFeedbackControl;
+   }
+
    public void setPerfectCMP(FramePoint2DReadOnly perfectCMP)
    {
       this.perfectCMP.setIncludingFrame(perfectCMP);
@@ -286,6 +301,7 @@ public class LinearMomentumRateControlModuleInput
       initializeOnStateChange = other.initializeOnStateChange;
       multiContactStabilityRegion.setIncludingFrame(other.multiContactStabilityRegion);
       minimizeAngularMomentumRateZ = other.minimizeAngularMomentumRateZ;
+      disableCoPFeedbackControl = other.disableCoPFeedbackControl;
       setUsePelvisHeightCommand(other.getUsePelvisHeightCommand());
       setHasHeightCommand(other.getHasHeightCommand());
       setPelvisHeightControlCommand(other.getPelvisHeightControlCommand());
@@ -325,6 +341,8 @@ public class LinearMomentumRateControlModuleInput
          if (!multiContactStabilityRegion.equals(other.multiContactStabilityRegion))
             return false;
          if (minimizeAngularMomentumRateZ ^ other.minimizeAngularMomentumRateZ)
+            return false;
+         if (disableCoPFeedbackControl ^ other.disableCoPFeedbackControl)
             return false;
          if (hasHeightCommand ^ other.hasHeightCommand)
             return false;

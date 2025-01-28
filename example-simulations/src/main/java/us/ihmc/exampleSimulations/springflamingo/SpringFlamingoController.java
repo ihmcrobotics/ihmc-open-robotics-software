@@ -11,7 +11,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
-import us.ihmc.robotics.stateMachine.extra.StateMachinesJPanel;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.simulationconstructionset.gui.EventDispatchThreadHelper;
 import us.ihmc.simulationconstructionset.util.RobotController;
@@ -178,48 +177,8 @@ public class SpringFlamingoController implements RobotController
       // Create the state machines:
       stateMachines = setupStateMachines();
 
-      createStateMachineWindow();
       initControl();
    }
-
-   //////////////////////////////////////////////////////
-   public void createStateMachineWindow()
-   {
-      EventDispatchThreadHelper.invokeAndWait(new Runnable()
-      {
-         @Override
-         public void run()
-         {
-            createStateMachineWindowLocal();
-         }
-      });
-   }
-
-   public void createStateMachineWindowLocal()
-   {
-      JFrame jFrame = new JFrame("Spring Flamingo State Machines");
-      Container contentPane = jFrame.getContentPane();
-      contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.X_AXIS));
-
-      boolean oldViz = false;
-
-      for (StateMachine<States, State> stateMachine : stateMachines)
-      {
-         StateMachinesJPanel<States> stateMachinePanel = new StateMachinesJPanel<States>(stateMachine, oldViz);
-         oldViz = !oldViz;
-         // Doing the following will cause redraw when the state changes, but not during replay or rewind:
-         stateMachine.addStateChangedListener(stateMachinePanel);
-         jFrame.getContentPane().add(stateMachinePanel);
-         // Doing this will cause redraw every specified milliseconds:
-         // stateMachinePanel.createUpdaterThread(250);
-      }
-
-      jFrame.pack();
-      jFrame.setSize(450, 300);
-      jFrame.setAlwaysOnTop(false);
-      jFrame.setVisible(true);
-   }
-   //////////////////////////////////////////////////////////
 
    @Override
    public YoRegistry getYoRegistry()
