@@ -5,11 +5,58 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
+import java.util.List;
+
 public class GotoNodeState extends BehaviorTreeNodeState<GotoNodeDefinition>
 {
+   private final GotoNodeDefinition definition;
+
    public GotoNodeState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(id, new GotoNodeDefinition(crdtInfo, saveFileDirectory), crdtInfo);
+
+      this.definition = getDefinition();
+   }
+
+   /**
+    * Updates the definition gotoNodeName string for
+    * saving an up to date human readable name in the JSON.
+    * It also finds the correct node upon loading the name from JSON.
+    */
+   public void updateAndValidateGotoNode(List<BehaviorTreeNodeState<?>> allNodes)
+   {
+      String gotoNodeName = null;
+
+      if (!definition.getGotoNext().getValue())
+      {
+         // We need to find the node by name
+         // This happens when we load from JSON
+         if (definition.getGotoNodeID().getValue() == 0)
+         {
+            for (BehaviorTreeNodeState<?> nodeToCompare : allNodes)
+            {
+               if (nodeToCompare.getDefinition().getName().equals(definition.getGotoNodeName()))
+               {
+                  gotoNodeName = nodeToCompare.getDefinition().getName();
+                  definition.getGotoNodeID().setValue(nodeToCompare.getID());
+                  break;
+               }
+            }
+         }
+         else // Update the node's name for saving in human readable format
+         {
+            long gotoNodeID = definition.getGotoNodeID().getValue();
+            for (BehaviorTreeNodeState<?> nodeToCompare : allNodes)
+            {
+               if (nodeToCompare.getID() == gotoNodeID)
+               {
+                  gotoNodeName = nodeToCompare.getDefinition().getName();
+               }
+            }
+         }
+      }
+
+      definition.updateAndSanitizeGotoNodeFields(gotoNodeName);
    }
 
    @Override

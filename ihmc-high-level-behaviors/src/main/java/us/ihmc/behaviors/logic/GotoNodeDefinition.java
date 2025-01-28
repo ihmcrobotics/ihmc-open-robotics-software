@@ -4,14 +4,18 @@ import behavior_msgs.msg.dds.GotoNodeDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
+import us.ihmc.communication.crdt.CRDTBidirectionalBoolean;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTBidirectionalLong;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
+
+import javax.annotation.Nullable;
 
 public class GotoNodeDefinition extends BehaviorTreeNodeDefinition
 {
    public static final String GOTO_NEXT = "Next";
 
+   private final CRDTBidirectionalBoolean gotoNext;
    private final CRDTBidirectionalLong gotoNodeID;
    /** We use this to save the goto node name to file instead of the number for human readability. */
    private String gotoNodeName = GOTO_NEXT;
@@ -23,7 +27,22 @@ public class GotoNodeDefinition extends BehaviorTreeNodeDefinition
    {
       super(crdtInfo, saveFileDirectory);
 
+      gotoNext = new CRDTBidirectionalBoolean(this, true);
       gotoNodeID = new CRDTBidirectionalLong(this, 0);
+   }
+
+   public void updateAndSanitizeGotoNodeFields(@Nullable String gotoNodeName)
+   {
+      if (gotoNodeName != null)
+      {
+         this.gotoNodeName = gotoNodeName;
+      }
+      else // Default to next
+      {
+         gotoNext.setValue(true);
+         this.gotoNodeName = GOTO_NEXT;
+         gotoNodeID.setValue(0);
+      }
    }
 
    @Override
@@ -40,6 +59,7 @@ public class GotoNodeDefinition extends BehaviorTreeNodeDefinition
       super.loadFromFile(jsonNode);
 
       gotoNodeName = jsonNode.get("gotoNode").textValue();
+      gotoNext.setValue(gotoNodeName.equals(GOTO_NEXT));
       gotoNodeID.setValue(0); // Invalidate until we can find it
    }
 
@@ -57,6 +77,7 @@ public class GotoNodeDefinition extends BehaviorTreeNodeDefinition
       super.undoAllNontopologicalChanges();
 
       gotoNodeName = onDiskGotoNodeName;
+      gotoNext.setValue(onDiskGotoNodeName.equals(GOTO_NEXT));
       gotoNodeID.setValue(0); // Invalidate until we can find it
    }
 
@@ -74,6 +95,7 @@ public class GotoNodeDefinition extends BehaviorTreeNodeDefinition
    {
       super.toMessage(message.getDefinition());
 
+      message.setGotoNext(gotoNext.toMessage());
       message.setGotoNodeId(gotoNodeID.toMessage());
    }
 
@@ -81,7 +103,13 @@ public class GotoNodeDefinition extends BehaviorTreeNodeDefinition
    {
       super.fromMessage(message.getDefinition());
 
+      gotoNext.fromMessage(message.getGotoNext());
       gotoNodeID.fromMessage(message.getGotoNodeId());
+   }
+
+   public CRDTBidirectionalBoolean getGotoNext()
+   {
+      return gotoNext;
    }
 
    public CRDTBidirectionalLong getGotoNodeID()

@@ -15,7 +15,7 @@ public class GotoNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "923b33f34ad98c8d059bbfbe8297d1ccc0499845ecca275711376f0d2ca52197";
+   		return "9b402df421f5af9c326107734b4f642148e5abc836c299bab59971238f817c92";
    }
    
    @Override
@@ -54,6 +54,8 @@ public class GotoNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.Topic
 
       current_alignment += behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
@@ -71,6 +73,9 @@ public class GotoNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.Topic
 
       current_alignment += behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.getCdrSerializedSize(data.getDefinition(), current_alignment);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
@@ -81,6 +86,8 @@ public class GotoNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.Topic
    public static void write(behavior_msgs.msg.dds.GotoNodeDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
+      cdr.write_type_7(data.getGotoNext());
+
       cdr.write_type_4(data.getGotoNodeId());
 
    }
@@ -88,6 +95,8 @@ public class GotoNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.Topic
    public static void read(behavior_msgs.msg.dds.GotoNodeDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
+      data.setGotoNext(cdr.read_type_7());
+      	
       data.setGotoNodeId(cdr.read_type_4());
       	
 
@@ -98,6 +107,7 @@ public class GotoNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.Topic
    {
       ser.write_type_a("definition", new behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType(), data.getDefinition());
 
+      ser.write_type_7("goto_next", data.getGotoNext());
       ser.write_type_4("goto_node_id", data.getGotoNodeId());
    }
 
@@ -106,6 +116,7 @@ public class GotoNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.Topic
    {
       ser.read_type_a("definition", new behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType(), data.getDefinition());
 
+      data.setGotoNext(ser.read_type_7("goto_next"));
       data.setGotoNodeId(ser.read_type_4("goto_node_id"));
    }
 

@@ -13,6 +13,10 @@ public class GotoNodeDefinitionMessage extends Packet<GotoNodeDefinitionMessage>
             */
    public behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage definition_;
    /**
+            * If this node is simply set to goto the next node (i.e. no-op)
+            */
+   public boolean goto_next_;
+   /**
             * The ID of the node to goto
             */
    public long goto_node_id_;
@@ -31,6 +35,8 @@ public class GotoNodeDefinitionMessage extends Packet<GotoNodeDefinitionMessage>
    public void set(GotoNodeDefinitionMessage other)
    {
       behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
+      goto_next_ = other.goto_next_;
+
       goto_node_id_ = other.goto_node_id_;
 
    }
@@ -42,6 +48,21 @@ public class GotoNodeDefinitionMessage extends Packet<GotoNodeDefinitionMessage>
    public behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage getDefinition()
    {
       return definition_;
+   }
+
+   /**
+            * If this node is simply set to goto the next node (i.e. no-op)
+            */
+   public void setGotoNext(boolean goto_next)
+   {
+      goto_next_ = goto_next;
+   }
+   /**
+            * If this node is simply set to goto the next node (i.e. no-op)
+            */
+   public boolean getGotoNext()
+   {
+      return goto_next_;
    }
 
    /**
@@ -78,6 +99,8 @@ public class GotoNodeDefinitionMessage extends Packet<GotoNodeDefinitionMessage>
       if(other == this) return true;
 
       if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.goto_next_, other.goto_next_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.goto_node_id_, other.goto_node_id_, epsilon)) return false;
 
 
@@ -94,6 +117,8 @@ public class GotoNodeDefinitionMessage extends Packet<GotoNodeDefinitionMessage>
       GotoNodeDefinitionMessage otherMyClass = (GotoNodeDefinitionMessage) other;
 
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
+      if(this.goto_next_ != otherMyClass.goto_next_) return false;
+
       if(this.goto_node_id_ != otherMyClass.goto_node_id_) return false;
 
 
@@ -108,6 +133,8 @@ public class GotoNodeDefinitionMessage extends Packet<GotoNodeDefinitionMessage>
       builder.append("GotoNodeDefinitionMessage {");
       builder.append("definition=");
       builder.append(this.definition_);      builder.append(", ");
+      builder.append("goto_next=");
+      builder.append(this.goto_next_);      builder.append(", ");
       builder.append("goto_node_id=");
       builder.append(this.goto_node_id_);
       builder.append("}");
