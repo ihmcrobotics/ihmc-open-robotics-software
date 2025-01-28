@@ -13,6 +13,11 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 
+/**
+ * Used to plot footsteps and balance data onto an SVG document for presentation
+ * in scientific publications and perhaps other log analysis use cases. This will plot
+ * where the robot walked and show the path of the CoM & ICP over the course of a run.
+ */
 public class SCS2LogOverheadSVGPlot
 {
    /** Square document size in meters. */

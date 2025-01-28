@@ -30,6 +30,10 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.ArrayList;
 
+/**
+ * Scrubs a log and loads locomotion data into data structures that support processing
+ * the data for presentation in scientific publications.
+ */
 public class SCS2LogLocomotionData
 {
    private double dt;

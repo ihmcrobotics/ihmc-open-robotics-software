@@ -10,6 +10,7 @@ import us.ihmc.yoVariables.variable.YoVariable;
 
 import java.util.ArrayList;
 
+/** Data holder for YoVariable information relating to foot state for data post-processing. */
 public class SCS2LogFootState
 {
    private final RobotSide side;

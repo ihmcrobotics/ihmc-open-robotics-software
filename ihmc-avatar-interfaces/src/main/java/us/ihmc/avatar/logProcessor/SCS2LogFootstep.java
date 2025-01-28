@@ -2,6 +2,7 @@ package us.ihmc.avatar.logProcessor;
 
 import us.ihmc.robotics.robotSide.RobotSide;
 
+/** Holder for foostep data for post-processing. */
 public class SCS2LogFootstep
 {
    private final double time;

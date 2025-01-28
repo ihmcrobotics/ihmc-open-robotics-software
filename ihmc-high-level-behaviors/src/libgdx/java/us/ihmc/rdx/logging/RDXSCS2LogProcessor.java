@@ -28,6 +28,11 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 
+/**
+ * Application that allows processing entire folders of logs, plotting data,
+ * and doing other post-analysis of logged robot runs for the purpose of data
+ * processing for scientific publications and other types of log analysis.
+ */
 public class RDXSCS2LogProcessor
 {
    private final RDXBaseUI baseUI = new RDXBaseUI("RDX Log Processor");

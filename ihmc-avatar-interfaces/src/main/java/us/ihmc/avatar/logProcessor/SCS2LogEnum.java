@@ -2,6 +2,7 @@ package us.ihmc.avatar.logProcessor;
 
 import us.ihmc.yoVariables.variable.YoEnum;
 
+/** Used to process YoEnum changes for data post-processing. */
 public class SCS2LogEnum<E extends Enum<E>>
 {
    private final YoEnum<?> yoEnum;

@@ -11,6 +11,12 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.ArrayList;
 
+/**
+ * Holds the walking data for a single run of walking.
+ * When the robot falls or is frozen, the "log walk" ends.
+ * There can be multiple of these in a single log.
+ * For use in data post-processing for scientific publications.
+ */
 public class SCS2LogWalk
 {
    private long walkStartTick = -1;

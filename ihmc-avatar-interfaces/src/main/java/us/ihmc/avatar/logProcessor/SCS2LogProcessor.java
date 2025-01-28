@@ -31,6 +31,12 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
 
+/**
+ * Loads a log into data structure useful for data post-processing for scientific publication
+ * and perhaps other forms of log anaylsis.
+ *
+ * The best way to use this is via the UI provided by RDXSCS2LogProcessor.
+ */
 public class SCS2LogProcessor
 {
    private Path logPath;

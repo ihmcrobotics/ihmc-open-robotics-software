@@ -12,6 +12,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
+/**
+ * Helps draw the tree to an SVG format for formal presentation such
+ * as in scientific publications.
+ */
 public class BehaviorTreeSVGWriter
 {
    private int i = 0;

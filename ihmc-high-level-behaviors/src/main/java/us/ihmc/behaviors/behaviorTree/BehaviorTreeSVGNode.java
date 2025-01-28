@@ -21,6 +21,10 @@ import us.ihmc.behaviors.sequence.actions.WaitDurationActionState;
 import java.awt.*;
 import java.util.Random;
 
+/**
+ * Helps draw the tree node to an SVG format for formal presentation such
+ * as in scientific publications.
+ */
 public class BehaviorTreeSVGNode
 {
    private static final Random random = new Random(0L);
