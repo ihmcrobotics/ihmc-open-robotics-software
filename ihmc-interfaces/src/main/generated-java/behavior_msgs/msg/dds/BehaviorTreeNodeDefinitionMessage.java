@@ -18,9 +18,17 @@ import us.ihmc.pubsub.TopicDataType;
 public class BehaviorTreeNodeDefinitionMessage extends Packet<BehaviorTreeNodeDefinitionMessage> implements Settable<BehaviorTreeNodeDefinitionMessage>, EpsilonComparable<BehaviorTreeNodeDefinitionMessage>
 {
    /**
-            * A mechanism for confirming and ending a freeze early
+            * The type of this node
             */
-   public ihmc_common_msgs.msg.dds.ConfirmableRequestMessage confirmable_request_;
+   public byte type_;
+   /**
+            * The timestamp and modifer ID of the latest modification to this node's data fields
+            */
+   public ihmc_common_msgs.msg.dds.LatestModificationMessage latest_modification_to_data_;
+   /**
+            * The timestamp and modifer ID of the latest modification to this node's children set
+            */
+   public ihmc_common_msgs.msg.dds.LatestModificationMessage latest_modification_to_children_;
    /**
             * The name of the node including .json if it's a JSON root node
             */
@@ -32,7 +40,8 @@ public class BehaviorTreeNodeDefinitionMessage extends Packet<BehaviorTreeNodeDe
 
    public BehaviorTreeNodeDefinitionMessage()
    {
-      confirmable_request_ = new ihmc_common_msgs.msg.dds.ConfirmableRequestMessage();
+      latest_modification_to_data_ = new ihmc_common_msgs.msg.dds.LatestModificationMessage();
+      latest_modification_to_children_ = new ihmc_common_msgs.msg.dds.LatestModificationMessage();
       name_ = new java.lang.StringBuilder(255);
    }
 
@@ -44,7 +53,10 @@ public class BehaviorTreeNodeDefinitionMessage extends Packet<BehaviorTreeNodeDe
 
    public void set(BehaviorTreeNodeDefinitionMessage other)
    {
-      ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType.staticCopy(other.confirmable_request_, confirmable_request_);
+      type_ = other.type_;
+
+      ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.staticCopy(other.latest_modification_to_data_, latest_modification_to_data_);
+      ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.staticCopy(other.latest_modification_to_children_, latest_modification_to_children_);
       name_.setLength(0);
       name_.append(other.name_);
 
@@ -52,13 +64,37 @@ public class BehaviorTreeNodeDefinitionMessage extends Packet<BehaviorTreeNodeDe
 
    }
 
+   /**
+            * The type of this node
+            */
+   public void setType(byte type)
+   {
+      type_ = type;
+   }
+   /**
+            * The type of this node
+            */
+   public byte getType()
+   {
+      return type_;
+   }
+
 
    /**
-            * A mechanism for confirming and ending a freeze early
+            * The timestamp and modifer ID of the latest modification to this node's data fields
             */
-   public ihmc_common_msgs.msg.dds.ConfirmableRequestMessage getConfirmableRequest()
+   public ihmc_common_msgs.msg.dds.LatestModificationMessage getLatestModificationToData()
    {
-      return confirmable_request_;
+      return latest_modification_to_data_;
+   }
+
+
+   /**
+            * The timestamp and modifer ID of the latest modification to this node's children set
+            */
+   public ihmc_common_msgs.msg.dds.LatestModificationMessage getLatestModificationToChildren()
+   {
+      return latest_modification_to_children_;
    }
 
    /**
@@ -118,7 +154,10 @@ public class BehaviorTreeNodeDefinitionMessage extends Packet<BehaviorTreeNodeDe
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!this.confirmable_request_.epsilonEquals(other.confirmable_request_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.type_, other.type_, epsilon)) return false;
+
+      if (!this.latest_modification_to_data_.epsilonEquals(other.latest_modification_to_data_, epsilon)) return false;
+      if (!this.latest_modification_to_children_.epsilonEquals(other.latest_modification_to_children_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.name_, other.name_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.number_of_children_, other.number_of_children_, epsilon)) return false;
@@ -136,7 +175,10 @@ public class BehaviorTreeNodeDefinitionMessage extends Packet<BehaviorTreeNodeDe
 
       BehaviorTreeNodeDefinitionMessage otherMyClass = (BehaviorTreeNodeDefinitionMessage) other;
 
-      if (!this.confirmable_request_.equals(otherMyClass.confirmable_request_)) return false;
+      if(this.type_ != otherMyClass.type_) return false;
+
+      if (!this.latest_modification_to_data_.equals(otherMyClass.latest_modification_to_data_)) return false;
+      if (!this.latest_modification_to_children_.equals(otherMyClass.latest_modification_to_children_)) return false;
       if (!us.ihmc.idl.IDLTools.equals(this.name_, otherMyClass.name_)) return false;
 
       if(this.number_of_children_ != otherMyClass.number_of_children_) return false;
@@ -151,8 +193,12 @@ public class BehaviorTreeNodeDefinitionMessage extends Packet<BehaviorTreeNodeDe
       StringBuilder builder = new StringBuilder();
 
       builder.append("BehaviorTreeNodeDefinitionMessage {");
-      builder.append("confirmable_request=");
-      builder.append(this.confirmable_request_);      builder.append(", ");
+      builder.append("type=");
+      builder.append(this.type_);      builder.append(", ");
+      builder.append("latest_modification_to_data=");
+      builder.append(this.latest_modification_to_data_);      builder.append(", ");
+      builder.append("latest_modification_to_children=");
+      builder.append(this.latest_modification_to_children_);      builder.append(", ");
       builder.append("name=");
       builder.append(this.name_);      builder.append(", ");
       builder.append("number_of_children=");

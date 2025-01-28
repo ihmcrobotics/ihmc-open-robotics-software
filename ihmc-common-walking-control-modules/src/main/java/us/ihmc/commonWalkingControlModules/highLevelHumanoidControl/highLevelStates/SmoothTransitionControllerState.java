@@ -6,7 +6,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
+import us.ihmc.robotics.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.commons.lists.PairList;

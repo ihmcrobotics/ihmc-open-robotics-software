@@ -14,18 +14,18 @@ import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
 
 public class RDXBehaviorTreeWidgetsVerticalLayout
 {
-   private final RDXBehaviorTree tree;
-   private final BehaviorTreeTopologyOperationQueue topologyOperationQueue;
+   private final RDXBehaviorTree behaviorTree;
+   private final BehaviorTreeTopologyOperationQueue<RDXBehaviorTreeNode<?, ?>> topologyOperationQueue;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private BehaviorTreeNodeInsertionType insertionType = null;
    private RDXBehaviorTreeNode<?, ?> modalPopupNode;
    private final TypedNotification<Runnable> queuePopupModal = new TypedNotification<>();
 
-   public RDXBehaviorTreeWidgetsVerticalLayout(RDXBehaviorTree tree)
+   public RDXBehaviorTreeWidgetsVerticalLayout(RDXBehaviorTree behaviorTree)
    {
-      this.tree = tree;
+      this.behaviorTree = behaviorTree;
 
-      topologyOperationQueue = tree.getBehaviorTreeState().getTopologyChangeQueue();
+      topologyOperationQueue = behaviorTree.getTopologyChangeQueue();
    }
 
    public void renderImGuiWidgets(RDXBehaviorTreeNode<?, ?> node)
@@ -93,13 +93,10 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
          ImGui.pushStyleColor(ImGuiCol.Text, ImGuiTools.RED);
          if (ImGui.menuItem(labels.get("Delete Node")))
          {
-            topologyOperationQueue.queueDestroySubtree(node);
-
-            if (node.isRootNode()) // Root node
-            {
-               tree.setRootNode(null);
-               tree.getBehaviorTreeState().freeze();
-            }
+            if (node.isRootNode())
+               topologyOperationQueue.queueDestroyEntireTreeModify();
+            else
+               topologyOperationQueue.queueDestroySubtreeModify(node);
          }
          ImGui.popStyleColor();
 
@@ -143,7 +140,7 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
       }
 
       // Update listings every time we pop the node creation dialog
-      tree.getNodeCreationMenu().reindexDirectory();
+      behaviorTree.getNodeCreationMenu().reindexDirectory();
 
       ImGui.openPopup(node.getModalPopupID());
       LogTools.info("Opening popup {}", node.getModalPopupID());
@@ -161,7 +158,7 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
       if (ImGui.beginPopupModal(node.getModalPopupID(), windowFlags))
       {
          ImGui.beginChild(labels.get("Node Creation Modal Section"), 50.0f * ImGuiTools.calcTextSizeX("A"), 0.8f * parentWindowHeight);
-         tree.getNodeCreationMenu().renderImGuiWidgets(modalPopupNode, insertionType);
+         behaviorTree.getNodeCreationMenu().renderImGuiWidgets(modalPopupNode, insertionType);
          ImGui.endChild();
 
          ImGui.separator();
@@ -186,7 +183,7 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
                {
                   if (ImGui.menuItem(relativeNode.getDefinition().getName()))
                   {
-                     topologyOperationQueue.queueMoveAndFreezeNode(nodeToMove, nodeToMove.getParent(), relativeNode, relativeNode, insertionType);
+                     topologyOperationQueue.queueMoveChildModify(nodeToMove.getParent(), relativeNode, nodeToMove, relativeNode, insertionType);
                   }
                }
             }
@@ -194,7 +191,7 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
             {
                if (ImGui.menuItem(relativeNode.getDefinition().getName()))
                {
-                  topologyOperationQueue.queueMoveAndFreezeNode(nodeToMove, nodeToMove.getParent(), relativeNode.getParent(), relativeNode, insertionType);
+                  topologyOperationQueue.queueMoveChildModify(nodeToMove.getParent(), relativeNode.getParent(), nodeToMove, relativeNode, insertionType);
                }
             }
          }

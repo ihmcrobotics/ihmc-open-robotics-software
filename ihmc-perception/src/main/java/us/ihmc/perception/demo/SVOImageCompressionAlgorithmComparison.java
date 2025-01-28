@@ -22,8 +22,8 @@ import us.ihmc.perception.streaming.StreamingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.sensors.ZEDColorDepthImageRetrieverSVO;
-import us.ihmc.sensors.ZEDColorDepthImageRetrieverSVO.RecordMode;
+import us.ihmc.sensors.deprecated.ZEDColorDepthImageRetrieverSVO;
+import us.ihmc.sensors.deprecated.ZEDColorDepthImageRetrieverSVO.RecordMode;
 import us.ihmc.tools.IHMCCommonPaths;
 
 import java.io.IOException;

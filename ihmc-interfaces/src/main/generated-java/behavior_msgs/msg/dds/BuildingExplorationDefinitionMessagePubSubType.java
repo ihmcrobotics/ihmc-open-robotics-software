@@ -15,7 +15,7 @@ public class BuildingExplorationDefinitionMessagePubSubType implements us.ihmc.p
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "49c5068a7018f6849a79572693bd89c6e5c8fb47ace3fc3117e6042e7b71a522";
+   		return "743bb4b420efdc44b4fb25aab7d715e935f0be66922734d07352931fbcf40bb8";
    }
    
    @Override

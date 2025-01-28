@@ -17,28 +17,34 @@ import java.util.List;
 
 import static org.bytedeco.cuda.global.cudart.cuLaunchKernel;
 import static org.bytedeco.cuda.global.cudart.cuModuleGetFunction;
-import static us.ihmc.perception.cuda.CUDATools.checkCUDAError;
+import static us.ihmc.perception.cuda.CUDATools.throwCUDAError;
 
 @SuppressWarnings("resource")
 public class CUDAKernel implements AutoCloseable
 {
    private final CUfunc_st kernelFunction = new CUfunc_st();
    private final List<Pointer> parameters = new ArrayList<>();
+   private boolean retainParameters = false;
 
    private int error;
 
-   public CUDAKernel(String name, CUmod_st kernelModule)
+   public CUDAKernel(String name, CUmod_st kernelModule) throws Exception
    {
       error = cuModuleGetFunction(kernelFunction, kernelModule, name);
-      checkCUDAError(error);
+      throwCUDAError(error);
+   }
+
+   public void retainParameters(boolean retainParameters)
+   {
+      this.retainParameters = retainParameters;
    }
 
    /**
-    * Launches the CUDA kernel.
+    * Launches the CUDA kernel. The parameters used for this launch are cleared unless {@code retainParameters == true}.
     *
-    * @param stream CUDA stream on which the kernel will be synchronized.
-    * @param gridSize Grid size of the kernel execution.
-    * @param blockSize Block size of the kernel execution. Should not exceed maximum block size of the device.
+    * @param stream           CUDA stream on which the kernel will be synchronized.
+    * @param gridSize         Grid size of the kernel execution.
+    * @param blockSize        Block size of the kernel execution. Should not exceed maximum block size of the device.
     * @param sharedMemorySize Size, in byte, of the memory shared by threads in each block.
     */
    public void run(CUstream_st stream, dim3 gridSize, dim3 blockSize, int sharedMemorySize)
@@ -59,6 +65,9 @@ public class CUDAKernel implements AutoCloseable
                              parametersPointer,
                              new PointerPointer<>());
       CUDATools.checkCUDAError(error);
+
+      if (!retainParameters)
+         clearParameters();
       parametersPointer.close();
    }
 

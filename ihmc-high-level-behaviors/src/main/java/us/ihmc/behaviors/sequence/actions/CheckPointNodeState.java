@@ -1,0 +1,34 @@
+package us.ihmc.behaviors.sequence.actions;
+
+import behavior_msgs.msg.dds.CheckPointNodeStateMessage;
+import us.ihmc.behaviors.sequence.ActionNodeState;
+import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
+
+public class CheckPointNodeState extends ActionNodeState<CheckPointNodeDefinition>
+{
+   public CheckPointNodeState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   {
+      super(id, new CheckPointNodeDefinition(crdtInfo, saveFileDirectory), crdtInfo);
+   }
+
+   @Override
+   public void update()
+   {
+      super.update();
+   }
+
+   public void toMessage(CheckPointNodeStateMessage message)
+   {
+      getDefinition().toMessage(message.getDefinition());
+
+      super.toMessage(message.getState());
+   }
+
+   public void fromMessage(CheckPointNodeStateMessage message)
+   {
+      super.fromMessage(message.getState());
+
+      getDefinition().fromMessage(message.getDefinition());
+   }
+}

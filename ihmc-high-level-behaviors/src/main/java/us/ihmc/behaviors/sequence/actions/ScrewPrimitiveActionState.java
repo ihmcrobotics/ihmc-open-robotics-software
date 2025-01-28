@@ -91,9 +91,9 @@ public class ScrewPrimitiveActionState extends ActionNodeState<ScrewPrimitiveAct
 
    public void fromMessage(ScrewPrimitiveActionStateMessage message)
    {
-      super.fromMessage(message.getState());
-
       getDefinition().fromMessage(message.getDefinition());
+
+      super.fromMessage(message.getState());
 
       previewTrajectory.fromMessage(message.getPreviewTrajectory());
       force.fromMessage(message.getForce());

@@ -18,7 +18,6 @@ import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityCheck
 import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.validateSpineTrajectoryMessage;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +26,7 @@ import controller_msgs.msg.dds.*;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber.MessageValidator;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector.MessageIDExtractor;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.BipedTimedStepListCommand;
 import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
@@ -79,6 +79,7 @@ public class ControllerAPIDefinition
       commands.add(MomentumTrajectoryCommand.class);
       commands.add(CenterOfMassTrajectoryCommand.class);
       commands.add(HandWrenchTrajectoryCommand.class);
+      commands.add(BipedTimedStepListCommand.class);
 
       /** Commands supported by the fast-walking controller, not in this repo */
       commands.add(DirectionalControlInputCommand.class);
@@ -96,7 +97,7 @@ public class ControllerAPIDefinition
       /** Command supported by the joint-space controller {@link JointspacePositionControllerState} */
       commands.add(WholeBodyJointspaceTrajectoryCommand.class);
 
-      controllerSupportedCommands = Collections.unmodifiableList(commands);
+      controllerSupportedCommands = new ArrayList<>(commands);
 
       controllerSupportedStatusMessages = ControllerAPI.outputMessageClasses.stream().toList();
    }

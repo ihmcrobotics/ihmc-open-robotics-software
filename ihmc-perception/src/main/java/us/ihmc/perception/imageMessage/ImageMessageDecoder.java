@@ -7,10 +7,18 @@ import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
+import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.CameraModel;
+import us.ihmc.perception.RawImage;
+import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.cuda.CUDACompressionTools;
 import us.ihmc.perception.cuda.CUDAJPEGProcessor;
 import us.ihmc.perception.cuda.CUDATools;
+
+import java.time.Instant;
 
 public class ImageMessageDecoder
 {
@@ -29,6 +37,30 @@ public class ImageMessageDecoder
          if (CUDATools.hasNVCOMP())
             cudaCompressionTools = new CUDACompressionTools();
       }
+   }
+
+   public RawImage decodeMessageCPU(ImageMessage messageToDecode)
+   {
+      Mat image = new Mat();
+      decodeMessage(messageToDecode, image);
+
+      PixelFormat pixelFormat = PixelFormat.fromByte(messageToDecode.getPixelFormat());
+
+      CameraIntrinsics intrinsics = new CameraIntrinsics();
+      intrinsics.setWidth(messageToDecode.getImageWidth());
+      intrinsics.setHeight(messageToDecode.getImageHeight());
+      intrinsics.setFx(messageToDecode.getFocalLengthXPixels());
+      intrinsics.setFy(messageToDecode.getFocalLengthYPixels());
+      intrinsics.setCx(messageToDecode.getPrincipalPointXPixels());
+      intrinsics.setCy(messageToDecode.getPrincipalPointYPixels());
+
+      CameraModel cameraModel = CameraModel.fromByte(messageToDecode.getCameraModel());
+      FramePose3D sensorPose = new FramePose3D(ReferenceFrame.getWorldFrame(), messageToDecode.getPosition(), messageToDecode.getOrientation());
+      Instant acquisitionTime = MessageTools.toInstant(messageToDecode.getAcquisitionTime());
+      long sequenceNumber = messageToDecode.getSequenceNumber();
+      float depthDiscretization = messageToDecode.getDepthDiscretization();
+
+      return new RawImage(image, null, pixelFormat, intrinsics, cameraModel, sensorPose, acquisitionTime, sequenceNumber, depthDiscretization);
    }
 
    /**
@@ -63,9 +95,6 @@ public class ImageMessageDecoder
             else
             {  // Otherwise use OpenCV
                opencv_imgcodecs.imdecode(messageDataExtractor.getInputMat(), opencv_imgcodecs.IMREAD_UNCHANGED, imageToPack);
-               // RGBA or BGRA will lose the alpha channel in jpeg encoding, so we give it back
-               if (lastImagePixelFormat.elementsPerPixel == 4 && imageToPack.channels() == 3)
-                  opencv_imgproc.cvtColor(imageToPack, imageToPack, opencv_imgproc.COLOR_BGR2BGRA);
             }
             lastImagePixelFormat = PixelFormat.BGR8;
          }

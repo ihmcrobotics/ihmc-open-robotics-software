@@ -1,5 +1,7 @@
 package us.ihmc.footstepPlanning.monteCarloPlanning;
 
+import org.bytedeco.opencl.global.OpenCL;
+import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
@@ -13,6 +15,7 @@ import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.tools.HeightMapTerrainGeneratorTools;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.heightMap.TerrainMapData;
@@ -28,12 +31,16 @@ public class MonteCarloFootstepPlanningTest
 //   private TerrainPlanningDebugger debugger = new TerrainPlanningDebugger(null, plannerParameters);
    private MonteCarloFootstepPlanner planner = new MonteCarloFootstepPlanner(plannerParameters, PlannerTools.createFootPolygons(0.2, 0.1, 0.08));
    private CameraIntrinsics cameraIntrinsics = new CameraIntrinsics();
-   private RapidHeightMapExtractor heightMapExtractor = new RapidHeightMapExtractor(openCLManager);
 
    @Disabled
    @Test
    public void testMonteCarloFootstepPlanning()
    {
+      CameraIntrinsics depthImageIntrinsics = new CameraIntrinsics();
+      BytedecoImage heightMapBytedecoImage = new BytedecoImage(depthImageIntrinsics.getWidth(), depthImageIntrinsics.getHeight(), opencv_core.CV_16UC1);
+      heightMapBytedecoImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+      RapidHeightMapExtractor heightMapExtractor = new RapidHeightMapExtractor(openCLManager, heightMapBytedecoImage, 1);
+
       LogTools.info("Initializing");
 
       RapidHeightMapExtractor.getHeightMapParameters().setInternalGlobalWidthInMeters(4.0);

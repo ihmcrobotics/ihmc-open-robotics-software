@@ -14,8 +14,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial3D;
+import us.ihmc.robotics.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 

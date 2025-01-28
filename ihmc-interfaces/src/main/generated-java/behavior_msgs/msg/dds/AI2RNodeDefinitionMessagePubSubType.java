@@ -15,7 +15,7 @@ public class AI2RNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "a40712f94ba6ad8aa2008fa5520ec5e073be4688f730e147acc18a5337b26ee3";
+   		return "4c707468a89546fd1d37ab03f491200a402727ad2b03402586ec1ae612586d7a";
    }
    
    @Override

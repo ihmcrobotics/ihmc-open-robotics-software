@@ -21,7 +21,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
-import us.ihmc.footstepPlanning.communication.ContinuousWalkingAPI;
+import us.ihmc.footstepPlanning.communication.ContinuousHikingAPI;
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloPlannerTools;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.log.LogTools;
@@ -29,7 +29,7 @@ import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
-import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
+import us.ihmc.robotics.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -72,8 +72,8 @@ public class RDXTerrainPlanningDebugger implements RenderableProvider
    {
 
       this.monteCarloFootstepPlannerParameters = monteCarloFootstepPlannerParameters;
-      ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.MONTE_CARLO_TREE_NODES, this::onMonteCarloTreeNodesReceived);
-      ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.MONTE_CARLO_FOOTSTEP_PLAN, this::onMonteCarloPlanReceived);
+      ros2Helper.subscribeViaCallback(ContinuousHikingAPI.MONTE_CARLO_TREE_NODES, this::onMonteCarloTreeNodesReceived);
+      ros2Helper.subscribeViaCallback(ContinuousHikingAPI.MONTE_CARLO_FOOTSTEP_PLAN, this::onMonteCarloPlanReceived);
 
       goalFootstepGraphics = new SideDependentList<>(new RDXFootstepGraphic(contactPoints, RobotSide.LEFT),
                                                      new RDXFootstepGraphic(contactPoints, RobotSide.RIGHT));

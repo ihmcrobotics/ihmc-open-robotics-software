@@ -1,176 +1,119 @@
 package us.ihmc.behaviors.behaviorTree.topology;
 
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNode;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeLayer;
-import us.ihmc.communication.crdt.Freezable;
-import us.ihmc.tools.Destroyable;
+import us.ihmc.behaviors.behaviorTree.TreeNode;
 
 /**
  * Static topological behavior tree operations to keep the logic in one place.
- * We are intentionally not checking the types in this class, because it gets
- * to complicated to use and doesn't add much value.
+ * The {@code *Modify} methods are for the purpose of CRDT synchronization.
+ * When a user or automated algorithm initiates a modification to the tree topology
+ * (i.e. changing the set of children), then we mark the children field as modified
+ * through the associated LatestTimestampModifiable.
+ * The methods without {@code *Modify} would be exclusively operations as a result
+ * of getting in sync with the changes that happened on other networked peers.
  */
 public class BehaviorTreeTopologyOperations
 {
-
-   public static void detachAndDestroySubtree(BehaviorTreeNodeLayer<?, ?, ?, ?> node)
+   static <HLT extends BehaviorTreeNode<HLT, ?, ?>> void destroySubtreeModify(HLT subtreeRoot)
    {
-      detachAndDestroySubtreeBasic(node);
-      if (node.isLayerOverState())
-         detachAndDestroySubtreeBasic(node.getState());
-      detachAndDestroySubtreeBasic(node.getDefinition());
+      // Avoiding concurrent modifications
+      while (!subtreeRoot.getChildren().isEmpty())
+         destroySubtreeModify(subtreeRoot.getChildren().get(0));
+
+      detachChildModify(subtreeRoot);
+      subtreeRoot.destroy();
    }
 
-   public static void clearChildren(BehaviorTreeNodeLayer<?, ?, ?, ?> node)
+   static <HLT extends BehaviorTreeNode<HLT, ?, ?>> void destroySubtree(HLT subtreeRoot)
    {
-      clearChildrenBasic(node);
-      if (node.isLayerOverState())
-         clearChildrenBasic(node.getState());
-      clearChildrenBasic(node.getDefinition());
+      // Avoiding concurrent modifications
+      while (!subtreeRoot.getChildren().isEmpty())
+         destroySubtree(subtreeRoot.getChildren().get(0));
+
+      detachChild(subtreeRoot);
+      subtreeRoot.destroy();
    }
 
-   public static <T extends BehaviorTreeNodeLayer<T, ?, ?, ?>> void addAndFreeze(T nodeToAdd, T parent)
+   static <HLT extends BehaviorTreeNode<HLT, ?, ?>> void moveChildModify(HLT toParent, HLT child, int insertionIndex)
    {
-      insertAndFreeze(nodeToAdd, parent, parent.getChildren().size());
+      detachChildModify(child);
+      insertChildModify(toParent, child, insertionIndex);
    }
 
-   public static <T extends BehaviorTreeNodeLayer<T, ?, ?, ?>> void add(T nodeToAdd, T parent)
+   static <HLT extends BehaviorTreeNode<HLT, ?, ?>> void appendChildModify(HLT parent, HLT child)
    {
-      insert(nodeToAdd, parent, parent.getChildren().size());
+      appendChildAbstract(parent, child);
+      appendChildAbstract(parent.getState(), child.getState());
+      appendChildAbstract(parent.getDefinition(), child.getDefinition());
+      parent.getDefinition().getChildrenModification().modify();
    }
 
-   public static <T extends BehaviorTreeNodeLayer<T, ?, ?, ?>> void moveAndFreeze(T nodeToAdd, T previousParent, T nextParent, int insertionIndex)
+   static <HLT extends BehaviorTreeNode<HLT, ?, ?>> void insertChildModify(HLT parent, HLT child, int insertionIndex)
    {
-      removeAndFreeze(nodeToAdd, previousParent);
-      insertAndFreeze(nodeToAdd, nextParent, insertionIndex);
+      insertChildAbstract(parent, child, insertionIndex);
+      insertChildAbstract(parent.getState(), child.getState(), insertionIndex);
+      insertChildAbstract(parent.getDefinition(), child.getDefinition(), insertionIndex);
+      parent.getDefinition().getChildrenModification().modify();
    }
 
-   public static <T extends BehaviorTreeNodeLayer<T, ?, ?, ?>> void removeAndFreeze(T nodeToRemove, T parent)
+   static <HLT extends BehaviorTreeNode<HLT, ?, ?>> void detachChild(HLT child)
    {
-      removeAndFreezeBasic(nodeToRemove, parent);
-      if (nodeToRemove.isLayerOverState())
-         removeAndFreezeBasic(nodeToRemove.getState(), parent.getState());
-      removeAndFreezeBasic(nodeToRemove.getDefinition(), parent.getDefinition());
+      detachChildAbstract(child);
+      detachChildAbstract(child.getState());
+      detachChildAbstract(child.getDefinition());
    }
 
-   public static <T extends BehaviorTreeNodeLayer<T, ?, ?, ?>> void remove(T nodeToRemove, T parent)
+   static <HLT extends BehaviorTreeNode<HLT, ?, ?>> void detachChildModify(HLT child)
    {
-      removeBasic(nodeToRemove, parent);
-      if (nodeToRemove.isLayerOverState())
-         removeBasic(nodeToRemove.getState(), parent.getState());
-      removeBasic(nodeToRemove.getDefinition(), parent.getDefinition());
-   }
-
-   public static <T extends BehaviorTreeNodeLayer<T, ?, ?, ?>> void insertAndFreeze(T nodeToAdd, T parent, int insertionIndex)
-   {
-      insertChildAndFreezeBasic(nodeToAdd, parent, insertionIndex);
-      if (nodeToAdd.isLayerOverState())
-         insertChildAndFreezeBasic(nodeToAdd.getState(), parent.getState(), insertionIndex);
-      insertChildAndFreezeBasic(nodeToAdd.getDefinition(), parent.getDefinition(), insertionIndex);
-   }
-
-   public static <T extends BehaviorTreeNodeLayer<T, ?, ?, ?>> void insert(T nodeToAdd, T parent, int insertionIndex)
-   {
-      insertBasic(nodeToAdd, parent, insertionIndex);
-      if (nodeToAdd.isLayerOverState())
-         insertBasic(nodeToAdd.getState(), parent.getState(), insertionIndex);
-      insertBasic(nodeToAdd.getDefinition(), parent.getDefinition(), insertionIndex);
-   }
-
-   // PRIVATE BASIC OPERATIONS
-
-   public static void detachAndDestroySubtreeBasic(BehaviorTreeNode<?> node)
-   {
-      BehaviorTreeNode<?> parent = node.getParent();
+      HLT parent = child.getParent();
       if (parent != null)
-      {
-         parent.getChildren().remove(node);
-         attemptFreeze(parent);
-      }
-      node.setParent(null);
+         parent.getDefinition().getChildrenModification().modify();
 
-      clearSubtreeAndDestroyBasic(node);
+      detachChildAbstract(child);
+      detachChildAbstract(child.getState());
+      detachChildAbstract(child.getDefinition());
    }
 
-   public static void clearSubtreeAndDestroyBasic(BehaviorTreeNode<?> node)
+   static <HLT extends BehaviorTreeNode<HLT, ?, ?>> void clearImmediateChildren(HLT parent)
    {
-      for (BehaviorTreeNode<?> child : node.getChildren())
-      {
-         clearSubtreeAndDestroyBasic(child);
-      }
-
-      clearChildrenBasic(node);
-      attemptDestroy(node);
+      clearImmediateChildrenAbstract(parent);
+      clearImmediateChildrenAbstract(parent.getState());
+      clearImmediateChildrenAbstract(parent.getDefinition());
    }
 
-   public static void clearSubtreeBasic(BehaviorTreeNode<?> node)
+   static <HLT extends BehaviorTreeNode<HLT, ?, ?>> void appendChild(HLT parent, HLT child)
    {
-      for (BehaviorTreeNode<?> child : node.getChildren())
-      {
-         clearSubtreeBasic(child);
-      }
-
-      clearChildrenBasic(node);
+      appendChildAbstract(parent, child);
+      appendChildAbstract(parent.getState(), child.getState());
+      appendChildAbstract(parent.getDefinition(), child.getDefinition());
    }
 
-   public static <T extends BehaviorTreeNode<T>> void addChildAndFreezeBasic(T nodeToAdd, T parent)
+   // PRIVATE ABSTRACT OPERATIONS
+
+   private static <LT extends TreeNode<LT>> void appendChildAbstract(LT parent, LT child)
    {
-      addChildBasic(nodeToAdd, parent);
-      attemptFreeze(nodeToAdd);
-      attemptFreeze(parent);
+      insertChildAbstract(parent, child, parent.getChildren().size());
    }
 
-   public static <T extends BehaviorTreeNode<T>> void insertChildAndFreezeBasic(T nodeToAdd, T parent, int insertionIndex)
+   private static <LT extends TreeNode<LT>> void detachChildAbstract(LT child)
    {
-      insertBasic(nodeToAdd, parent, insertionIndex);
-      attemptFreeze(nodeToAdd);
-      attemptFreeze(parent);
+      LT parent = child.getParent();
+      if (parent != null)
+         parent.getChildren().remove(child);
+      child.setParent(null);
    }
 
-   public static <T extends BehaviorTreeNode<T>> void removeAndFreezeBasic(T nodeToRemove, T parent)
+   private static <LT extends TreeNode<LT>> void insertChildAbstract(LT parent, LT child, int insertionIndex)
    {
-      removeBasic(nodeToRemove, parent);
-      attemptFreeze(parent);
+      child.setParent(parent);
+      parent.getChildren().add(insertionIndex, child);
    }
 
-   public static <T extends BehaviorTreeNode<T>> void addChildBasic(T nodeToAdd, T parent)
+   private static <LT extends TreeNode<LT>> void clearImmediateChildrenAbstract(LT parent)
    {
-      insertBasic(nodeToAdd, parent, parent.getChildren().size());
-   }
-
-   // FUNDAMENTAL OPERATIONS
-
-   public static void clearChildrenBasic(BehaviorTreeNode<?> node)
-   {
-      for (BehaviorTreeNode<?> child : node.getChildren())
-      {
+      for (LT child : parent.getChildren())
          child.setParent(null);
-      }
 
-      node.getChildren().clear();
-   }
-
-   public static <T extends BehaviorTreeNode<T>> void removeBasic(T nodeToRemove, T parent)
-   {
-      parent.getChildren().remove(nodeToRemove);
-      nodeToRemove.setParent(null);
-   }
-
-   public static <T extends BehaviorTreeNode<T>> void insertBasic(T nodeToAdd, T parent, int insertionIndex)
-   {
-      parent.getChildren().add(insertionIndex, nodeToAdd);
-      nodeToAdd.setParent(parent);
-   }
-
-   public static void attemptFreeze(Object thingToFreeze)
-   {
-      if (thingToFreeze instanceof Freezable freezable)
-         freezable.freeze();
-   }
-
-   public static void attemptDestroy(Object thingToDestroy)
-   {
-      if (thingToDestroy instanceof Destroyable destroyable)
-         destroyable.destroy();
+      parent.getChildren().clear();
    }
 }

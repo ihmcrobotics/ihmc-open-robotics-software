@@ -54,9 +54,9 @@ import java.util.List;
  * <br>
  *
  * <pre>
- * max<sub>x,f</sub> c · x                           (max com displacement)
+ * max<sub>x,f</sub> c^T x                           (max com displacement)
  *    s.t.  mg + &Sigma f = 0                  (lin static equilibrium)
- *          &Sigma x × f + x × mg = 0          (ang static equilibrium)
+ *          &Sigma (x) x (f) + (x) x (mg) = 0          (ang static equilibrium)
  *          f is friction constrained
  *          &tau<sub>min</sub> <= G - J^T f <= &tau<sub>max</sub>      (actuation constraints)
  * </pre>

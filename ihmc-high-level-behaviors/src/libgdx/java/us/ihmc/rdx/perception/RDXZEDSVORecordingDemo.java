@@ -15,9 +15,9 @@ import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2ColoredPointCloudVisualize
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.sensors.ZEDColorDepthImagePublisher;
-import us.ihmc.sensors.ZEDColorDepthImageRetrieverSVO;
-import us.ihmc.sensors.ZEDColorDepthImageRetrieverSVO.RecordMode;
+import us.ihmc.sensors.deprecated.ZEDColorDepthImagePublisher;
+import us.ihmc.sensors.deprecated.ZEDColorDepthImageRetrieverSVO;
+import us.ihmc.sensors.deprecated.ZEDColorDepthImageRetrieverSVO.RecordMode;
 import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.thread.RestartableThrottledThread;
 
@@ -29,7 +29,7 @@ public class RDXZEDSVORecordingDemo
    // Demo file on Google Drive https://drive.google.com/file/d/1wF5tFVqEJM21uK12g_O5GpvACPJhXKZ1/view
    // Uncomment below lines to play it back
    private static final RecordMode RECORD_MODE = RecordMode.PLAYBACK;
-   private static final String SVO_FILE_NAME = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.toAbsolutePath() + "/20240625_154000_ZEDRecording_Demo.svo2";
+   private static final String SVO_FILE_NAME = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.toAbsolutePath() + "/20240715_103234_ZEDRecording_NewONRCourseWalk.svo2";
 
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private final ROS2Node ros2Node;
@@ -136,7 +136,7 @@ public class RDXZEDSVORecordingDemo
                }
             }
          };
-         zed2ColoredPointCloudVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_POINT_CLOUD);
+         zed2ColoredPointCloudVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_PUBLICATION);
          zed2ColoredPointCloudVisualizer.setActive(true);
          perceptionVisualizerPanel.addVisualizer(zed2ColoredPointCloudVisualizer);
       }
@@ -146,7 +146,7 @@ public class RDXZEDSVORecordingDemo
          RDXROS2ImageMessageVisualizer zedLeftColorImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED 2 Color Left",
                                                                                                        ros2Node,
                                                                                                        PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
-         zedLeftColorImageVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_COLOR);
+         zedLeftColorImageVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_PUBLICATION);
          perceptionVisualizerPanel.addVisualizer(zedLeftColorImageVisualizer);
       }
 
@@ -155,7 +155,7 @@ public class RDXZEDSVORecordingDemo
          RDXROS2ImageMessageVisualizer zedRightColorImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED 2 Color Right",
                                                                                                         ros2Node,
                                                                                                         PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.RIGHT));
-         zedRightColorImageVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_COLOR);
+         zedRightColorImageVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_PUBLICATION);
          perceptionVisualizerPanel.addVisualizer(zedRightColorImageVisualizer);
       }
 
@@ -164,7 +164,7 @@ public class RDXZEDSVORecordingDemo
          RDXROS2ImageMessageVisualizer zed2DepthImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED 2 Depth Image",
                                                                                                     ros2Node,
                                                                                                     PerceptionAPI.ZED2_DEPTH);
-         zed2DepthImageVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_DEPTH);
+         zed2DepthImageVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_PUBLICATION);
          perceptionVisualizerPanel.addVisualizer(zed2DepthImageVisualizer);
       }
    }

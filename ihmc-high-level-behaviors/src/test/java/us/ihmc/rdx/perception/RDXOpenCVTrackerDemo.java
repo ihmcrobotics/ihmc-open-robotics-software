@@ -26,8 +26,8 @@ import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.sensors.ZEDColorDepthImagePublisher;
-import us.ihmc.sensors.ZEDColorDepthImageRetriever;
+import us.ihmc.sensors.deprecated.ZEDColorDepthImagePublisher;
+import us.ihmc.sensors.deprecated.ZEDColorDepthImageRetriever;
 import us.ihmc.tools.io.WorkspaceFile;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
@@ -65,8 +65,8 @@ public class RDXOpenCVTrackerDemo
 
       imageRetriever = new ZEDColorDepthImageRetriever(0,
                                                        ReferenceFrame::getWorldFrame,
-                                                       new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_ZED_DEPTH)::isDemanded,
-                                                       new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_ZED_COLOR)::isDemanded);
+                                                       new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_ZED_PUBLICATION)::isDemanded,
+                                                       new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_ZED_PUBLICATION)::isDemanded);
       imageRetriever.start();
       imagePublisher = new ZEDColorDepthImagePublisher(PerceptionAPI.ZED2_COLOR_IMAGES, PerceptionAPI.ZED2_DEPTH, PerceptionAPI.ZED2_CUT_OUT_DEPTH);
 
@@ -171,7 +171,7 @@ public class RDXOpenCVTrackerDemo
             RDXROS2ImageMessageVisualizer colorImageVisualizer = new RDXROS2ImageMessageVisualizer("Color Image",
                                                                                                    ros2Node,
                                                                                                    PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
-            colorImageVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_COLOR);
+            colorImageVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_PUBLICATION);
             perceptionVisualizerPanel.addVisualizer(colorImageVisualizer);
 
             perceptionVisualizerPanel.create(baseUI);

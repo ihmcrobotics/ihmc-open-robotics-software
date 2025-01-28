@@ -7,10 +7,10 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionDefinition;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionType;
-import us.ihmc.behaviors.behaviorTree.trashCan.TrashCanInteractionDefinition;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
 import us.ihmc.behaviors.buildingExploration.BuildingExplorationDefinition;
 import us.ihmc.behaviors.door.DoorTraversalDefinition;
+import us.ihmc.behaviors.sequence.actions.CheckPointNodeDefinition;
 import us.ihmc.behaviors.logic.ConditionNodeDefinition;
 import us.ihmc.behaviors.logic.GotoNodeDefinition;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
@@ -27,17 +27,23 @@ import javax.annotation.Nullable;
 
 public class RDXBehaviorTreeNodeCreationMenu
 {
-   private final RDXBehaviorTree tree;
-   private final BehaviorTreeTopologyOperationQueue topologyOperationQueue;
+   private final RDXBehaviorTree behaviorTree;
+   private final BehaviorTreeTopologyOperationQueue<RDXBehaviorTreeNode<?, ?>> topologyOperationQueue;
    private final RDXAvailableBehaviorTreeDirectory behaviorTreesDirectory;
 
-   public RDXBehaviorTreeNodeCreationMenu(RDXBehaviorTree tree, WorkspaceResourceDirectory treeFilesDirectory, ReferenceFrameLibrary referenceFrameLibrary)
+   public RDXBehaviorTreeNodeCreationMenu(RDXBehaviorTree behaviorTree,
+                                          WorkspaceResourceDirectory treeFilesDirectory,
+                                          ReferenceFrameLibrary referenceFrameLibrary)
    {
-      this.tree = tree;
+      this.behaviorTree = behaviorTree;
 
-      topologyOperationQueue = tree.getBehaviorTreeState().getTopologyChangeQueue();
+      topologyOperationQueue = behaviorTree.getTopologyChangeQueue();
 
-      behaviorTreesDirectory = new RDXAvailableBehaviorTreeDirectory(treeFilesDirectory, tree, topologyOperationQueue, referenceFrameLibrary, this::complete);
+      behaviorTreesDirectory = new RDXAvailableBehaviorTreeDirectory(treeFilesDirectory,
+                                                                     behaviorTree,
+                                                                     topologyOperationQueue,
+                                                                     referenceFrameLibrary,
+                                                                     this::complete);
       behaviorTreesDirectory.reindexDirectory();
    }
 
@@ -69,8 +75,8 @@ public class RDXBehaviorTreeNodeCreationMenu
          renderNodeCreationClickable(relativeNode, insertionType, "Fallback Node", FallbackNodeDefinition.class, null);
          renderNodeCreationClickable(relativeNode, insertionType, "Condition Node", ConditionNodeDefinition.class, null);
          renderNodeCreationClickable(relativeNode, insertionType, "Goto Node", GotoNodeDefinition.class, null);
+         renderNodeCreationClickable(relativeNode, insertionType, "Check Point Node", CheckPointNodeDefinition.class, null);
          renderNodeCreationClickable(relativeNode, insertionType, "Door Traversal", DoorTraversalDefinition.class, null);
-         renderNodeCreationClickable(relativeNode, insertionType, "Trash Can Interaction", TrashCanInteractionDefinition.class, null);
          renderNodeCreationClickable(relativeNode, insertionType, "Building Exploration", BuildingExplorationDefinition.class, null);
 
          ImGui.unindent();
@@ -140,20 +146,21 @@ public class RDXBehaviorTreeNodeCreationMenu
       {
          if (ImGui.isMouseClicked(ImGuiMouseButton.Left))
          {
-            RDXBehaviorTreeNode<?, ?> newNode = tree.getNodeBuilder()
-                                                    .createNode(nodeType,
-                                                                tree.getBehaviorTreeState().getAndIncrementNextID(),
-                                                                tree.getBehaviorTreeState().getCRDTInfo(),
-                                                                tree.getBehaviorTreeState().getSaveFileDirectory());
-
+            RDXBehaviorTreeNode<?, ?> newNode = behaviorTree.getNodeBuilder()
+                                                            .createNode(nodeType,
+                                                                        behaviorTree.getAndIncrementNextID(),
+                                                                        behaviorTree.getCRDTInfo(),
+                                                                        behaviorTree.getSaveFileDirectory());
+            newNode.getDefinition().modify();
             BehaviorTreeNodeInsertionDefinition<RDXBehaviorTreeNode<?, ?>> insertionDefinition
-                  = BehaviorTreeNodeInsertionDefinition.build(newNode, tree.getBehaviorTreeState(), tree::setRootNode, relativeNode, insertionType);
+                  = new BehaviorTreeNodeInsertionDefinition<>(insertionType, newNode, relativeNode);
 
             if (insertionDefinition.getNodeToInsert() instanceof RDXActionNode<?, ?> newAction)
             {
                // We want to do best effort initialization
-               RDXBehaviorTreeRootNode actionSequenceOrNull = tree.getRootNode();
-               tree.getNodeBuilder().initializeActionNode(actionSequenceOrNull, newAction, insertionDefinition.getInsertionIndex(), side);
+               RDXBehaviorTreeRootNode actionSequenceOrNull = behaviorTree.getRootNode();
+               if (behaviorTree.getNodeBuilder() instanceof RDXBehaviorTreeNodeBuilder rdxNodeBuilder)
+                  rdxNodeBuilder.initializeActionNode(actionSequenceOrNull, newAction, insertionDefinition.getInsertionIndex(), side);
             }
 
             complete(insertionDefinition);
@@ -163,7 +170,7 @@ public class RDXBehaviorTreeNodeCreationMenu
 
    private void complete(BehaviorTreeNodeInsertionDefinition<RDXBehaviorTreeNode<?, ?>> insertionDefinition)
    {
-      topologyOperationQueue.queueInsertNode(insertionDefinition);
+      topologyOperationQueue.queueInsertNodeModify(insertionDefinition);
       ImGui.closeCurrentPopup();
 
       if (insertionDefinition.getParent() != null)
