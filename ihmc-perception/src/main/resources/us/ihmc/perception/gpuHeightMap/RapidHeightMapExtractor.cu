@@ -837,30 +837,19 @@ __global__ void computeSteppabilityConnectionsKernel(float* params,
 
 extern "C"
 __global__ void planOffsetKernel(unsigned short * matrixToModify, size_t pitchMatrixToModify,
-                                 float offsetInZ, int rows, int cols)
+                                 unsigned short * matrixValuesToSkip, size_t pitchMatrixValuesToSkip,
+                                 float offsetInZ, int rowsMatrixToModify, int colsMatrixToModify)
 {
     int indexX = blockIdx.x * blockDim.x + threadIdx.x;
-    int strideX = blockDim.x * gridDim.x;
-
     int indexY = blockIdx.y * blockDim.y + threadIdx.y;
-    int strideY = blockDim.y * gridDim.y;
 
-    if (indexX >= rows || indexY >= cols)
+    if (indexX >= colsMatrixToModify || indexY >= rowsMatrixToModify)
         return;
 
-    if (indexX == 50 && indexY == 50)
-        printf("Kernel print statement: offset in Z to adjust: %f\n", offsetInZ);
+    unsigned short *skipRow = (unsigned short *)((char *)matrixValuesToSkip + indexY * pitchMatrixValuesToSkip);
+    if (skipRow[indexX] > 0)
+        return;
 
-    // This converts the float value to a short
-    offsetInZ *= 32768;
-
-    for (int y = indexY; y < rows; y += strideY)
-    {
-        unsigned short * matrixToModifyRow = (unsigned short*)((char*) matrixToModify + y * pitchMatrixToModify);
-
-        for (int x = indexX; x < cols; x += strideX)
-        {
-            matrixToModifyRow[x] += offsetInZ;
-        }
-    }
+    unsigned short *matrixRow = (unsigned short *)((char *)matrixToModify + indexY * pitchMatrixToModify);
+    matrixRow[indexX] += static_cast<unsigned short>(offsetInZ * 10000.0f);
 }

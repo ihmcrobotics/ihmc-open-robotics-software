@@ -8,18 +8,22 @@ import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.PlanOffsetStatus;
 import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import ihmc_common_msgs.msg.dds.PoseListMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
+import org.bytedeco.opencl._cl_sampler;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
 import us.ihmc.behaviors.activeMapping.ContinuousPlannerSchedulingTask;
 import us.ihmc.behaviors.activeMapping.StancePoseCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.trajectories.PositionOptimizedTrajectoryGenerator;
 import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.property.StoredPropertySetROS2TopicPair;
@@ -29,6 +33,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
@@ -58,6 +63,8 @@ import us.ihmc.tools.property.StoredPropertySetBasics;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
+
+import static us.ihmc.communication.HumanoidControllerAPI.getTopic;
 
 public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProvider
 {
@@ -253,8 +260,30 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       }
    }
 
+   private final PlanOffsetStatus planOffsetStatus = new PlanOffsetStatus();
+   private double value = 0.1;
+
    public void renderImGuiWidgets()
    {
+//      if (ImGui.button("Do some shit"))
+//      {
+//         StatusMessageOutputManager statusMessageOutputManager = new StatusMessageOutputManager(ControllerAPIDefinition.getControllerSupportedStatusMessages());
+//         Vector3D planOffset = new Vector3D(0, 0, value);
+//         planOffsetStatus.getOffsetVector().set(planOffset);
+////         statusMessageOutputManager.reportStatusMessage(planOffsetStatus);
+//         LogTools.info("Plan Offset Status: " + planOffsetStatus.getOffsetVector());
+//         ros2Helper.publish(getTopic(PlanOffsetStatus.class, "Nadia"), planOffsetStatus);
+//
+//         if (value > 5)
+//         {
+//            value -= 0.1;
+//         }
+//         else
+//         {
+//            value += 0.1;
+//         }
+//      }
+
       ImGui.text("The ContinuousHikingProcess must be running");
       ImGui.text("And the enabled checkbox must be checked");
       ImGui.text("By holding CTRL the robot will walk forward");

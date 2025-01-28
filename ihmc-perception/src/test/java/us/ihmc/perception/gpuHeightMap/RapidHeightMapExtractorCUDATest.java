@@ -40,10 +40,12 @@ public class RapidHeightMapExtractorCUDATest
       URL mathUtilsHeaderPath = getClass().getResource("MathUtils.cuh");
       URL kernelPath = getClass().getResource("RapidHeightMapExtractor.cu");
 
-      int cellsPerAxis = 100;
+      int cellsPerAxis = 10;
       GpuMat matImage = new GpuMat(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1);
+      GpuMat emptyMatImage = new GpuMat(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1);
       // Fill the mat with 1's
       matImage.setTo(new Scalar(1));
+      emptyMatImage.setTo(new Scalar(0));
       CUstream_st stream = CUDAStreamManager.getStream();
 
       try
@@ -58,6 +60,7 @@ public class RapidHeightMapExtractorCUDATest
 
          // Run the snapping kernel
          planOffsetKernel.withPointer(matImage.data()).withLong(matImage.step());
+         planOffsetKernel.withPointer(emptyMatImage.data()).withLong(emptyMatImage.step());
          planOffsetKernel.withFloat(offsetToAdjustBy).withInt(matImage.rows()).withInt(matImage.cols());
 
          planOffsetKernel.run(stream, gridDim, blockSize, 0);
@@ -72,8 +75,8 @@ public class RapidHeightMapExtractorCUDATest
       Mat cpuMat = new Mat();
       matImage.download(cpuMat);
 
-      // The expected value
-      float expectedValue = (float) ((float) 1.0 + (0.1 * 32768));
+      // The expected value should be scaled by 10000
+      float expectedValue = (float) ((float) 1.0 + (0.1 * 10000));
       short shortExpectedValue = (short) expectedValue;
 
       for (int i = 0; i < cpuMat.rows(); i++)

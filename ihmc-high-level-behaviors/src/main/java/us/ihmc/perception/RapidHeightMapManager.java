@@ -65,6 +65,9 @@ public class RapidHeightMapManager
       this.ros2Helper = ros2Helper;
       this.runWithCUDA = runWithCUDA;
 
+      // On the perception test bench we don't have a robot model so we need to create a name for our robot
+      String simpleRobotName = "Simulation Robot";
+
       if (runWithCUDA)
       {
          deviceDepthImage = new GpuMat(depthImageIntrinsics.getHeight(), depthImageIntrinsics.getWidth(), opencv_core.CV_16UC1);
@@ -91,10 +94,12 @@ public class RapidHeightMapManager
                                                        resetHeightMapRequested.set();
                                                  });
 
-         if (runWithCUDA)
-         {
-            ros2Helper.subscribeViaCallback(getTopic(PlanOffsetStatus.class, robotModel.getSimpleRobotName()), this::acceptPlanOffsetStatus);
-         }
+         simpleRobotName = robotModel.getSimpleRobotName();
+      }
+
+      if (runWithCUDA)
+      {
+         ros2Helper.subscribeViaCallback(getTopic(PlanOffsetStatus.class, simpleRobotName), this::acceptPlanOffsetStatus);
       }
    }
 
