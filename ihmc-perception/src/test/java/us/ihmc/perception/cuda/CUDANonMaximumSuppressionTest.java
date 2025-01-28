@@ -31,7 +31,7 @@ public class CUDANonMaximumSuppressionTest
                    19.0f, 0.0f, 8.0f, 3.0f, 0.3f,     // 5
 
                    20.0f, 20.0f, 12.0f, 2.0f, 0.7f,   // 6
-                   20.0f, 21.0f, 10.0f, 1.0f, 0.9f,   // 7
+                   20.0f, 21.0f, 10.0f, 0.0f, 0.9f,   // 7
                    18.0f, 19.0f, 13.0f, 3.0f, 0.8f);  // 8
 
          // Test slow NMS
@@ -42,7 +42,7 @@ public class CUDANonMaximumSuppressionTest
             includedBoxIndices.add(includedIndices.get(i));
 
          assertEquals(3, includedCount);
-         assertTrue(includedBoxIndices.containsAll(List.of(0, 4, 7)));
+         assertTrue(includedBoxIndices.containsAll(List.of(0, 4, 8)));
 
          // Test fast NMS
          includedCount = nms.runFast(boxes, boxCount, 0.2f, includedIndices);
@@ -52,7 +52,7 @@ public class CUDANonMaximumSuppressionTest
             includedBoxIndices.add(includedIndices.get(i));
 
          assertEquals(3, includedCount);
-         assertTrue(includedBoxIndices.containsAll(List.of(0, 4, 7)));
+         assertTrue(includedBoxIndices.containsAll(List.of(0, 4, 8)));
 
          // Test auto fast/slow NMS
          includedCount = nms.run(boxes, boxCount, 0.2f, includedIndices);
@@ -62,7 +62,7 @@ public class CUDANonMaximumSuppressionTest
             includedBoxIndices.add(includedIndices.get(i));
 
          assertEquals(3, includedCount);
-         assertTrue(includedBoxIndices.containsAll(List.of(0, 4, 7)));
+         assertTrue(includedBoxIndices.containsAll(List.of(0, 4, 8)));
       }
    }
 

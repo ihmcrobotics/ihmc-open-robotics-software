@@ -27,16 +27,25 @@ __global__ void checkInclusion(Box* boxes, int boxCount, float overlapThreshold,
 
     for (int i = startY; i < boxCount; i += strideY)
     {
+        // Box is removed if its area is 0 (it's a line, or a point... not a box)
+        if (boxes[i].width == 0.0f || boxes[i].height == 0.0f)
+        {
+            inclusionMatrix[i * boxCount] = false;
+            continue;
+        }
+
+        // Compare box against all other boxes
         for (int j = startX; j < boxCount; j += strideX)
         {
-            bool keep = true;
-
-            if (i == j)
+            if (i == j) // No need to compare against itself
             {
-                inclusionMatrix[i * boxCount + j] = keep;
+                inclusionMatrix[i * boxCount + j] = true;
                 continue;
             }
 
+            bool keep = true;
+
+            // Find IoU
             boxI = boxes[i];
             boxJ = boxes[j];
 
@@ -49,6 +58,7 @@ __global__ void checkInclusion(Box* boxes, int boxCount, float overlapThreshold,
 
             intersectionOverUnion = intersectionArea / (boxIArea + boxJArea - intersectionArea);
 
+            // If the box overlaps another and its score is lower than the other, remove it
             if (intersectionOverUnion > overlapThreshold && boxI.score < boxJ.score)
                 keep = false;
 

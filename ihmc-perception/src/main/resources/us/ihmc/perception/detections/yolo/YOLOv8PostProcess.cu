@@ -1,12 +1,12 @@
 /*
  * Kernels for post processing YOLOv8 output
  *
- * Unfiltered data contains columns of floats as such:
+ * Unfiltered data contains COLUMNS of floats as such:
  *  - 4 floats:  bounding box dimensions (center X, center Y, width, height)
  *  - n floats:  confidence values, one for each object class the model can detect
  *  - 32 floats: mask weights
  *
- * Filtered data contains columns of floats as such:
+ * Filtered data contains ROWS of floats as such:
  *  - 4 floats:  bounding box dimensions (x, y, width, height)
  *  - 1 float:   confidence
  *  - 1 float:   object class index
@@ -20,18 +20,28 @@
 #define CONFIDENCE_INDEX 4
 #define CLASS_INDEX 5
 
-#define FILTERED_FLOATS_PER_COLUMN 38
+#define FILTERED_FLOATS_PER_ROW 38
 #define UNFILTERED_FLOATS_PER_COLUMN(n) (4 + n + 32)
 
 #include "Utils.cu"
 
-extern "C"
-__global__ void filterDetections(float* unfilteredDetection, int classCount, size_t detectionCount, float confidenceThreshold, float* filteredDetections, size_t* filteredDetectionCount)
+template<typename T>
+__device__ T* row(const T* matrix, long pitch, int row)
 {
-    if (Utils::getThreadCoordX == 0)
-    {
+    return (T*)((char*) matrix + pitch * row);
+}
+
+template<typename T>
+__device__ T* col(const T* matrix, int column)
+{
+    return (T*)(matrix + column);
+}
+
+extern "C"
+__global__ void filterDetections(float* unfilteredDetection, int classCount, int detectionCount, float confidenceThreshold, float* filteredDetections, int* filteredDetectionCount)
+{
+    if (Utils::getThreadCoordX() == 0)
         *filteredDetectionCount = 0;
-    }
     __syncthreads();
 
     int start = Utils::getThreadCoordX();
@@ -40,17 +50,17 @@ __global__ void filterDetections(float* unfilteredDetection, int classCount, siz
     for (int i = start; i < detectionCount; i += stride)
     {
         // Get a pointer to the unfiltered column we want to process
-        float* unfilteredColumn = unfilteredDetection + (i * UNFILTERED_FLOATS_PER_COLUMN(classCount));
+        float* unfilteredColumn = col(unfilteredDetection, i);
 
         // Find the class with maximum confidence, and the confidence value
-        float mostConfidentClass = 0; // class 0
-        float maxConfidence = unfilteredColumn[4];
+        int mostConfidentClass = 0; // class 0
+        float maxConfidence = *row(unfilteredColumn, sizeof(float) * detectionCount, 4);
         for (int classIndex = 1; classIndex < classCount; ++classIndex)
         {
-            float confidence = unfilteredColumn[4 + i];
+            float confidence = *row(unfilteredColumn, sizeof(float) * detectionCount, 4 + classIndex);
             if (confidence > maxConfidence)
             {
-                mostConfidentClass = i;
+                mostConfidentClass = classIndex;
                 maxConfidence = confidence;
             }
         }
@@ -59,28 +69,28 @@ __global__ void filterDetections(float* unfilteredDetection, int classCount, siz
         if (maxConfidence < confidenceThreshold)
             continue;
 
-        // Get the next column index, and atomically increment the filteredDetectionCount by 1
-        int filteredColumnIndex = atomicAdd(filteredDetectionCount, 1);
+        // Get the next row index, and atomically increment the filteredDetectionCount by 1
+        int filteredRowIndex = atomicAdd(filteredDetectionCount, 1);
 
         // Get values
-        int width = unfilteredColumn[WIDTH_INDEX];
-        int height = unfilteredColumn[HEIGHT_INDEX];
-        int x = unfilteredColumn[X_INDEX] - width / 2.0f;
-        int y = unfilteredColumn[Y_INDEX] - height / 2.0f
+        float width = *row(unfilteredColumn, sizeof(float) * detectionCount, WIDTH_INDEX);
+        float height = *row(unfilteredColumn, sizeof(float) * detectionCount, HEIGHT_INDEX);
+        float x = *row(unfilteredColumn, sizeof(float) * detectionCount, X_INDEX) - width / 2.0f;
+        float y = *row(unfilteredColumn, sizeof(float) * detectionCount, Y_INDEX) - height / 2.0f;
 
         // Assign the values to the filtered column
-        float* filteredColumn = filteredDetections + (filteredColumnIndex * FILTERED_FLOATS_PER_COLUMN);
-        filteredColumn[X_INDEX] = x;
-        filteredColumn[Y_INDEX] = y;
-        filteredColumn[WIDTH_INDEX] = width;
-        filteredColumn[HEIGHT_INDEX] = height;
-        filteredColumn[CLASS_INDEX] = mostConfidentClass;
-        filteredColumn[CONFIDENCE_INDEX] = maxConfidence;
+        float* filteredRow = row(filteredDetections, sizeof(float) * FILTERED_FLOATS_PER_ROW, filteredRowIndex);
+        filteredRow[X_INDEX] = x;
+        filteredRow[Y_INDEX] = y;
+        filteredRow[WIDTH_INDEX] = width;
+        filteredRow[HEIGHT_INDEX] = height;
+        filteredRow[CONFIDENCE_INDEX] = maxConfidence;
+        filteredRow[CLASS_INDEX] = (float) mostConfidentClass;
 
         // Copy mask weights over
         for (int j = 0; j < 32; ++j)
         {
-            filteredColumn[6 + j] = unfilteredColumn[4 + classCount + j];
+            filteredRow[6 + j] = *row(unfilteredColumn, sizeof(float) * detectionCount, 4 + classCount + j);
         }
     }
 }

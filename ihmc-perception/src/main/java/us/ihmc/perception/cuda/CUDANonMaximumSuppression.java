@@ -55,7 +55,7 @@ public class CUDANonMaximumSuppression implements AutoCloseable
     *                              Should have memory allocated for at least {@code boxCount} elements.
     * @return Number of included indices.
     */
-   public long run(FloatPointer inputBoxes, int boxCount, float overlapThreshold, IntPointer outputIncludedIndices)
+   public int run(FloatPointer inputBoxes, int boxCount, float overlapThreshold, IntPointer outputIncludedIndices)
    {
       if (boxCount > CUDATools.maxThreadsPerBlock())
          return runSlow(inputBoxes, boxCount, overlapThreshold, outputIncludedIndices);
@@ -78,7 +78,7 @@ public class CUDANonMaximumSuppression implements AutoCloseable
     *                              Should have memory allocated for at least {@code boxCount} elements.
     * @return Number of included indices.
     */
-   public long runFast(FloatPointer inputBoxes, int boxCount, float overlapThreshold, IntPointer outputIncludedIndices)
+   public int runFast(FloatPointer inputBoxes, int boxCount, float overlapThreshold, IntPointer outputIncludedIndices)
    {
       int divisor = 4 * BLOCK_DIM_2D;
       int gridSize2D = (boxCount + divisor - 1) / divisor;
@@ -113,13 +113,14 @@ public class CUDANonMaximumSuppression implements AutoCloseable
                             .run(stream, reduceGridSize, reduceBlockSize, 0);
 
          CUDATools.memcpyAsync(outputIncludedIndices, includedIndices, boxCount, stream);
-         cudaStreamSynchronize(stream);
+         CUDATools.checkCUDAError(cudaStreamSynchronize(stream));
          int count = includedCount.get();
+         outputIncludedIndices.limit(count);
 
-         cudaFreeHost(includedCount);
-         cudaFreeAsync(boxes, stream);
-         cudaFreeAsync(inclusionMatrix, stream);
-         cudaFreeAsync(includedIndices, stream);
+         CUDATools.checkCUDAError(cudaFreeHost(includedCount));
+         CUDATools.checkCUDAError(cudaFreeAsync(boxes, stream));
+         CUDATools.checkCUDAError(cudaFreeAsync(inclusionMatrix, stream));
+         CUDATools.checkCUDAError(cudaFreeAsync(includedIndices, stream));
 
          return count;
       }
@@ -138,7 +139,7 @@ public class CUDANonMaximumSuppression implements AutoCloseable
     *                              Should have memory allocated for at least {@code boxCount} elements.
     * @return Number of included indices.
     */
-   public long runSlow(FloatPointer inputBoxes, int boxCount, float overlapThreshold, IntPointer outputIncludedIndices)
+   public int runSlow(FloatPointer inputBoxes, int boxCount, float overlapThreshold, IntPointer outputIncludedIndices)
    {
       int divisor = 4 * BLOCK_DIM_2D;
       int gridSize2D = (boxCount + divisor - 1) / divisor;
@@ -175,13 +176,14 @@ public class CUDANonMaximumSuppression implements AutoCloseable
                             .run(stream, reduceGridSize, reduceBlockSize, 0);
 
          CUDATools.memcpyAsync(outputIncludedIndices, includedIndices, boxCount, stream);
-         cudaStreamSynchronize(stream);
+         CUDATools.checkCUDAError(cudaStreamSynchronize(stream));
          int count = includedCount.get();
+         outputIncludedIndices.limit(count);
 
-         cudaFreeHost(includedCount);
-         cudaFreeAsync(boxes, stream);
-         cudaFreeAsync(inclusionMatrix, stream);
-         cudaFreeAsync(includedIndices, stream);
+         CUDATools.checkCUDAError(cudaFreeHost(includedCount));
+         CUDATools.checkCUDAError(cudaFreeAsync(boxes, stream));
+         CUDATools.checkCUDAError(cudaFreeAsync(inclusionMatrix, stream));
+         CUDATools.checkCUDAError(cudaFreeAsync(includedIndices, stream));
 
          return count;
       }

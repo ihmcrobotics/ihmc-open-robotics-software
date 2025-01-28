@@ -4,7 +4,6 @@ import org.bytedeco.cuda.cudart.CUstream_st;
 import org.bytedeco.cuda.cudart.dim3;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.IntPointer;
-import org.bytedeco.javacpp.LongPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_dnn;
 import org.bytedeco.opencv.global.opencv_imgproc;
@@ -12,13 +11,10 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatExpr;
 import org.bytedeco.opencv.opencv_core.MatVector;
 import org.bytedeco.opencv.opencv_core.Rect;
-import org.bytedeco.opencv.opencv_core.RectVector;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import org.bytedeco.opencv.opencv_core.Size;
 import org.bytedeco.opencv.opencv_core.StringVector;
 import org.bytedeco.opencv.opencv_dnn.Net;
-import org.bytedeco.opencv.opencv_text.FloatVector;
-import org.bytedeco.opencv.opencv_text.IntVector;
 import org.yaml.snakeyaml.Yaml;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
@@ -48,7 +44,7 @@ public class YOLOv8Model implements Destroyable
    private static final double SCALE_FACTOR = 1.0 / 255.0;
    private static final Size DETECTION_SIZE = new Size(1280, 736);
 
-   private static final int FILTERED_FLOATS_PER_COLUMN = 38;
+   private static final int FILTERED_FLOATS_PER_ROW = 38;
    private static final int FLOATS_PER_BOX = 5;
 
    private static final int BLOCK_SIZE = 256;
@@ -105,7 +101,7 @@ public class YOLOv8Model implements Destroyable
       cudaStream = CUDAStreamManager.getStream();
       try
       {
-         URL postProcessProgramURL = YOLOv8Model.class.getResource("YOLOv8PostProcess");
+         URL postProcessProgramURL = YOLOv8Model.class.getResource("YOLOv8PostProcess.cu");
          postProcessProgram = new CUDAProgram(postProcessProgramURL, CUDATools.getUtilsFile());
          filterKernel = postProcessProgram.loadKernel("filterDetections");
       }
@@ -184,14 +180,8 @@ public class YOLOv8Model implements Destroyable
          bgrInputImage = image.replaceImage(bgrMat, PixelFormat.BGR8);
       }
 
-      try (MatVector outputBlobs = new MatVector();
-           IntVector classIDs = new IntVector();
-           FloatVector confidences = new FloatVector();
-           FloatVector maskWeights = new FloatVector();
-           RectVector boundingBoxes = new RectVector();
-           IntPointer reducedIndices = new IntPointer())
+      try (MatVector outputBlobs = new MatVector())
       {
-
          // Run the net
          netProcessing = true;
          Mat blob = opencv_dnn.blobFromImage(bgrInputImage.getCpuImageMat(), SCALE_FACTOR, DETECTION_SIZE, new Scalar(), true, true, opencv_core.CV_32F);
@@ -205,146 +195,165 @@ public class YOLOv8Model implements Destroyable
          int shiftWidth = (bgrInputImage.getWidth() - DETECTION_SIZE.width()) / 2;
          int shiftHeight = (bgrInputImage.getHeight() - DETECTION_SIZE.height()) / 2;
 
-         // Get class ids, confidences, mask weights, bounding boxes from YOLO output
-         processOutput(outputBlobs, confidenceThreshold, nmsThreshold, classIDs, confidences, maskWeights, boundingBoxes);
+         /*
+          * Output 0 contains data of all bounding boxes + mask weights detected by the model.
+          * It is structured such that each column contains:
+          *  - BBox center (X, Y) and dimensions (width & height)
+          *  - Confidence values for each class (how confident the model is that this BBox bounds an object of a given class)
+          *  - 32 mask weights associated with the 32 prototype masks (the prototype masks are contained in output 1)
+          *
+          * Typically, the model produces a ridiculous number of bounding boxes (~19K) for each run.
+          * Most of those boxes are garbage with low confidences, and they must be discarded.
+          * The good bounding boxes are collected, and put through non-maximum suppression to remove overlapping ones.
+          * Finally, the bounding boxes and mask weights are combined with output 1 to get the object masks.
+          *
+          * OUTPUT 0:
+          * BBox#      0   1   2   3   4   5   6   7   8       N
+          *          +------------------------------------ . ----+
+          * centerX  |   |   |   |   |   |   |   |   |   | . |   |
+          *          |---+---+---+---+---+---+---+---+---+ . +---+
+          * centerY  |   |   |   |   |   |   |   |   |   |   |   |
+          *          |---+---+---+---+---+---+---+---+---+   +---+
+          * width    |   |   |   |   |   |   |   |   |   |   |   |
+          *          |---+---+---+---+---+---+---+---+---+   +---+
+          * height   |   |   |   |   |   |   |   |   |   |   |   |
+          *          |---+---+---+---+---+---+---+---+---+   +---+
+          * cls0Conf |   |   |   |   |   |   |   |   |   |   |   |
+          *          |---+---+---+---+---+---+---+---+---+   +---+
+          * cls1Conf |   |   |   |   |   |   |   |   |   |   |   |
+          *          |---+---+---+---+---+---+---+---+---+   +---+
+          *          ...
+          *          |---+---+---+---+---+---+---+---+---+   +---+
+          * clsNConf |   |   |   |   |   |   |   |   |   |   |   |
+          *          |---+---+---+---+---+---+---+---+---+   +---+
+          * mskWht0  |   |   |   |   |   |   |   |   |   |   |   |
+          *          |---+---+---+---+---+---+---+---+---+   +---+
+          * mskWht1  |   |   |   |   |   |   |   |   |   |   |   |
+          *          |---+---+---+---+---+---+---+---+---+   +---+
+          * mskWht2  |   |   |   |   |   |   |   |   |   |   |   |
+          *          |---+---+---+---+---+---+---+---+---+   +---+
+          *          ...
+          *          |---+---+---+---+---+---+---+---+---+ . +---+
+          * mskWht32 |   |   |   |   |   |   |   |   |   | . |   |
+          *          +------------------------------------ . ----+
+          */
+         try (Mat output0Blob = outputBlobs.get(0);
+              FloatPointer unfilteredDetections = new FloatPointer();
 
-         // Ensure we have detections
-         if (boundingBoxes.empty())
-            return result;
+              FloatPointer filteredDetections = new FloatPointer();
+              IntPointer filteredDetectionCountPointer = new IntPointer();
 
-         // Apply non-maximum suppression
-         FloatPointer confidenceArray = new FloatPointer(confidences.get());
-         opencv_dnn.NMSBoxes(boundingBoxes, confidenceArray, confidenceThreshold, nmsThreshold, reducedIndices, 1.0f, 0);
-         confidenceArray.close();
+              dim3 blockDims = new dim3();
+              dim3 gridDims = new dim3();
 
-         // Create YOLOv8Detections from the data
-         int numberOfMasks = outputBlobs.get(1).size(1);
-         for (int i = 0; i < reducedIndices.limit(); i++)
+              FloatPointer boxes = new FloatPointer())
          {
-            int index = reducedIndices.get(i);
-            float[] weights = new float[numberOfMasks];
-            for (int j = 0; j < numberOfMasks; j++)
+            int unfilteredFloatsPerDetection = output0Blob.size(1);
+            int unfilteredDetectionCount = output0Blob.size(2);
+
+            // Upload unfiltered results to GPU
+            long totalUnfilteredFloats = (long) unfilteredFloatsPerDetection * unfilteredDetectionCount;
+            CUDATools.mallocAsync(unfilteredDetections, totalUnfilteredFloats, cudaStream);
+            CUDATools.memcpyAsync(unfilteredDetections, output0Blob.data(), totalUnfilteredFloats, cudaStream);
+
+            // Allocate memory for filtered detections
+            long maxFilteredFloats = (long) FILTERED_FLOATS_PER_ROW * unfilteredDetectionCount;
+            CUDATools.mallocAsync(filteredDetections, maxFilteredFloats, cudaStream);
+
+            // Allocate memory for the filtered detection count
+            CUDATools.checkCUDAError(cudaMallocHost(filteredDetectionCountPointer, filteredDetectionCountPointer.sizeof()));
+
+            // Calculate kernel launch dimensions
+            blockDims.x(BLOCK_SIZE);
+            gridDims.x((unfilteredDetectionCount + BLOCK_SIZE - 1) / BLOCK_SIZE);
+
+            // Run the filter kernel
+            filterKernel.withPointer(unfilteredDetections)
+                        .withInt(detectionClassNames.size())
+                        .withInt(unfilteredDetectionCount)
+                        .withFloat(confidenceThreshold)
+                        .withPointer(filteredDetections)
+                        .withPointer(filteredDetectionCountPointer)
+                        .run(cudaStream, gridDims, blockDims, 0);
+            CUDATools.checkCUDAError(cudaStreamSynchronize(cudaStream));
+
+            // Ensure that we have valid detections
+            int filteredDetectionCount = filteredDetectionCountPointer.get();
+            if (filteredDetectionCount == 0)
             {
-               weights[j] = maskWeights.get(((long) numberOfMasks * index) + j);
+               CUDATools.checkCUDAError(cudaFreeAsync(unfilteredDetections, cudaStream));
+               CUDATools.checkCUDAError(cudaFreeAsync(filteredDetections, cudaStream));
+               CUDATools.checkCUDAError(cudaFreeHost(filteredDetectionCountPointer));
+               return result;
             }
 
-            Rect boundingBox = boundingBoxes.get(index);
-            Rect shiftedBox = new Rect(boundingBox.x() + shiftWidth, boundingBox.y() + shiftHeight, boundingBox.width(), boundingBox.height());
-            RawImage mask = computeDetectionMask(outputBlobs, weights, shiftedBox, maskThreshold, maskIntrinsics, bgrInputImage);
-            YOLOv8Detection detection = new YOLOv8Detection(detectionClassNames.get(classIDs.get(index)), confidences.get(index), shiftedBox, mask);
-            result.add(detection);
+            // Copy boxes into separate memory to run NMS
+            CUDATools.mallocAsync(boxes, (long) FLOATS_PER_BOX * filteredDetectionCount, cudaStream);
+            cudaMemcpy2DAsync(boxes,
+                              Float.BYTES * FLOATS_PER_BOX,
+                              filteredDetections,
+                              Float.BYTES * FILTERED_FLOATS_PER_ROW,
+                              Float.BYTES * FLOATS_PER_BOX,
+                              filteredDetectionCount,
+                              cudaMemcpyDefault,
+                              cudaStream);
+            CUDATools.checkCUDAError(cudaStreamSynchronize(cudaStream));
+
+            // Run NMS on boxFLOATS_PER_BOXes
+            //         CUDATools.mallocAsync(includedRows, filteredDetectionCount, cudaStream);
+            IntPointer includedRows = new IntPointer(filteredDetectionCount);
+            int remainingDetectionCount = nms.run(boxes, filteredDetectionCount, nmsThreshold, includedRows);
+
+            if (remainingDetectionCount == 0)
+            {
+               CUDATools.checkCUDAError(cudaFreeAsync(unfilteredDetections, cudaStream));
+               CUDATools.checkCUDAError(cudaFreeAsync(filteredDetections, cudaStream));
+               CUDATools.checkCUDAError(cudaFreeAsync(boxes, cudaStream));
+               CUDATools.checkCUDAError(cudaFreeHost(filteredDetectionCountPointer));
+               return result;
+            }
+
+            FloatPointer cpuFilteredData = new FloatPointer((long) FILTERED_FLOATS_PER_ROW * filteredDetectionCount);
+            CUDATools.memcpyAsync(cpuFilteredData, filteredDetections, (long) FILTERED_FLOATS_PER_ROW * filteredDetectionCount, cudaStream);
+            Mat filteredDetectionMat = new Mat(filteredDetectionCount, FILTERED_FLOATS_PER_ROW, opencv_core.CV_32F, cpuFilteredData);
+            for (int i = 0; i < remainingDetectionCount; ++i)
+            {
+               int index = includedRows.get(i);
+               FloatPointer weights = new FloatPointer(32L);
+
+               int x = (int) filteredDetectionMat.row(index).col(0).data().getFloat();
+               int y = (int) filteredDetectionMat.row(index).col(1).data().getFloat();
+               int width = (int) filteredDetectionMat.row(index).col(2).data().getFloat();
+               int height = (int) filteredDetectionMat.row(index).col(3).data().getFloat();
+               float confidence = filteredDetectionMat.row(index).col(4).data().getFloat();
+               int classID = (int) filteredDetectionMat.row(index).col(5).data().getFloat();
+
+               for (int j = 0; j < 32; ++j)
+                  weights.put(j, filteredDetectionMat.row(index).col(6 + j).data().getFloat());
+
+               Rect boundingBox = new Rect(x, y, width, height);
+               Rect shiftedBox = new Rect(boundingBox.x() + shiftWidth, boundingBox.y() + shiftHeight, boundingBox.width(), boundingBox.height());
+               RawImage mask = computeDetectionMask(outputBlobs, weights, shiftedBox, maskThreshold, maskIntrinsics, bgrInputImage);
+               YOLOv8Detection detection = new YOLOv8Detection(detectionClassNames.get(classID), confidence, shiftedBox, mask);
+               result.add(detection);
+
+               boundingBox.close();
+               shiftedBox.close();
+            }
+
+            includedRows.close();
+
+            // Deallocate stuff
+            CUDATools.checkCUDAError(cudaFreeAsync(unfilteredDetections, cudaStream));
+            CUDATools.checkCUDAError(cudaFreeAsync(filteredDetections, cudaStream));
+            CUDATools.checkCUDAError(cudaFreeAsync(boxes, cudaStream));
+            CUDATools.checkCUDAError(cudaFreeHost(filteredDetectionCountPointer));
          }
       }
 
       bgrInputImage.release();
 
       return result;
-   }
-
-   private void processOutput(MatVector outputBlobs,
-                              float confidenceThreshold,
-                              float nmsThreshold,
-                              IntVector classIDs,
-                              FloatVector confidences,
-                              FloatVector maskWeights,
-                              RectVector boundingBoxes)
-   {
-      /*
-       * Output 0 contains data of all bounding boxes + mask weights detected by the model.
-       * It is structured such that each column contains:
-       *  - BBox center (X, Y) and dimensions (width & height)
-       *  - Confidence values for each class (how confident the model is that this BBox bounds an object of a given class)
-       *  - 32 mask weights associated with the 32 prototype masks (the prototype masks are contained in output 1)
-       *
-       * Typically, the model produces a ridiculous number of bounding boxes (~19K) for each run.
-       * Most of those boxes are garbage with low confidences, and they must be discarded.
-       * The good bounding boxes are collected, and put through non-maximum suppression to remove overlapping ones.
-       * Finally, the bounding boxes and mask weights are combined with output 1 to get the object masks.
-       *
-       * OUTPUT 0:
-       * BBox#      0   1   2   3   4   5   6   7   8       N
-       *          +------------------------------------ . ----+
-       * centerX  |   |   |   |   |   |   |   |   |   | . |   |
-       *          |---+---+---+---+---+---+---+---+---+ . +---+
-       * centerY  |   |   |   |   |   |   |   |   |   |   |   |
-       *          |---+---+---+---+---+---+---+---+---+   +---+
-       * width    |   |   |   |   |   |   |   |   |   |   |   |
-       *          |---+---+---+---+---+---+---+---+---+   +---+
-       * height   |   |   |   |   |   |   |   |   |   |   |   |
-       *          |---+---+---+---+---+---+---+---+---+   +---+
-       * cls0Conf |   |   |   |   |   |   |   |   |   |   |   |
-       *          |---+---+---+---+---+---+---+---+---+   +---+
-       * cls1Conf |   |   |   |   |   |   |   |   |   |   |   |
-       *          |---+---+---+---+---+---+---+---+---+   +---+
-       *          ...
-       *          |---+---+---+---+---+---+---+---+---+   +---+
-       * clsNConf |   |   |   |   |   |   |   |   |   |   |   |
-       *          |---+---+---+---+---+---+---+---+---+   +---+
-       * mskWht0  |   |   |   |   |   |   |   |   |   |   |   |
-       *          |---+---+---+---+---+---+---+---+---+   +---+
-       * mskWht1  |   |   |   |   |   |   |   |   |   |   |   |
-       *          |---+---+---+---+---+---+---+---+---+   +---+
-       * mskWht2  |   |   |   |   |   |   |   |   |   |   |   |
-       *          |---+---+---+---+---+---+---+---+---+   +---+
-       *          ...
-       *          |---+---+---+---+---+---+---+---+---+ . +---+
-       * mskWht32 |   |   |   |   |   |   |   |   |   | . |   |
-       *          +------------------------------------ . ----+
-       */
-      try (Mat output0Blob = outputBlobs.get(0);
-           FloatPointer unfilteredDetections = new FloatPointer();
-
-           FloatPointer filteredDetections = new FloatPointer();
-           LongPointer filteredDetectionCountPointer = new LongPointer();
-
-           dim3 blockDims = new dim3();
-           dim3 gridDims = new dim3();
-
-           FloatPointer boxes = new FloatPointer())
-      {
-         int unfilteredFloatsPerDetection = output0Blob.size(1);
-         int unfilteredDetectionCount = output0Blob.size(2);
-
-         // Upload unfiltered results to GPU
-         long totalUnfilteredFloats = (long) unfilteredFloatsPerDetection * unfilteredDetectionCount;
-         CUDATools.mallocAsync(unfilteredDetections, totalUnfilteredFloats, cudaStream);
-         CUDATools.memcpyAsync(unfilteredDetections, output0Blob.data(), totalUnfilteredFloats, cudaStream);
-
-         // Allocate memory for filtered detections
-         long totalFilteredFloats = (long) FILTERED_FLOATS_PER_COLUMN * unfilteredDetectionCount;
-         CUDATools.mallocAsync(filteredDetections, totalFilteredFloats, cudaStream);
-
-         // Allocate memory for the filtered detection count
-         cudaMallocHost(filteredDetectionCountPointer, filteredDetectionCountPointer.sizeof());
-
-         // Calculate kernel launch dimensions
-         blockDims.x(BLOCK_SIZE);
-         gridDims.x((unfilteredDetectionCount + BLOCK_SIZE - 1) / BLOCK_SIZE);
-
-         // Run the filter kernel
-         filterKernel.withPointer(unfilteredDetections)
-                     .withInt(detectionClassNames.size())
-                     .withLong(unfilteredDetectionCount)
-                     .withFloat(confidenceThreshold)
-                     .withPointer(filteredDetections)
-                     .withPointer(filteredDetectionCountPointer)
-                     .run(cudaStream, gridDims, blockDims, 0);
-         CUDATools.checkCUDAError(cudaStreamSynchronize(cudaStream));
-
-         // Copy boxes into separate memory to run NMS
-         long filteredDetectionCount = filteredDetectionCountPointer.get();
-         CUDATools.mallocAsync(boxes, FLOATS_PER_BOX * filteredDetectionCount, cudaStream);
-         cudaMemcpy2DAsync(boxes,
-                           filteredDetectionCount,
-                           filteredDetections,
-                           filteredDetectionCount,
-                           filteredDetectionCount,
-                           FLOATS_PER_BOX,
-                           cudaMemcpyDefault,
-                           cudaStream);
-
-//         nms.run(boxes, filteredDetectionCount, nmsThreshold, )
-      }
    }
 
    private CameraIntrinsics computeMaskIntrinsics(MatVector outputBlobs, RawImage bgrInputImage)
@@ -363,7 +372,7 @@ public class YOLOv8Model implements Destroyable
    }
 
    private RawImage computeDetectionMask(MatVector outputBlobs,
-                                         float[] maskWeights,
+                                         FloatPointer maskWeights,
                                          Rect boundingBox,
                                          float maskThreshold,
                                          CameraIntrinsics maskIntrinsics,
@@ -372,10 +381,10 @@ public class YOLOv8Model implements Destroyable
       // Get float value mask
       Mat zeros = new Mat(maskIntrinsics.getHeight(), maskIntrinsics.getWidth(), opencv_core.CV_32F, new Scalar(0.0));
       MatExpr floatMask = new MatExpr(zeros);
-      for (int i = 0; i < maskWeights.length; ++i)
+      for (int i = 0; i < maskWeights.limit(); ++i)
       {
          Mat mask = outputBlobs.get(1).col(i).reshape(1, maskIntrinsics.getHeight());
-         MatExpr weightMultipliedMask = opencv_core.multiply(mask, maskWeights[i]);
+         MatExpr weightMultipliedMask = opencv_core.multiply(mask, maskWeights.get(i));
          floatMask = opencv_core.add(weightMultipliedMask, floatMask);
 
          mask.close();
