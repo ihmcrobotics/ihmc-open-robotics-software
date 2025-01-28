@@ -254,7 +254,11 @@ public class YOLOv8Model implements Destroyable
             // Upload unfiltered results to GPU
             long totalUnfilteredFloats = (long) unfilteredFloatsPerDetection * unfilteredDetectionCount;
             CUDATools.mallocAsync(unfilteredDetections, totalUnfilteredFloats, cudaStream);
-            CUDATools.memcpyAsync(unfilteredDetections, output0Blob.data(), totalUnfilteredFloats, cudaStream);
+            CUDATools.checkCUDAError(cudaMemcpyAsync(unfilteredDetections,
+                                                     output0Blob.data(),
+                                                     unfilteredDetections.sizeof() * totalUnfilteredFloats,
+                                                     cudaMemcpyDefault,
+                                                     cudaStream));
 
             // Allocate memory for filtered detections
             long maxFilteredFloats = (long) FILTERED_FLOATS_PER_ROW * unfilteredDetectionCount;
@@ -321,10 +325,10 @@ public class YOLOv8Model implements Destroyable
                int index = includedRows.get(i);
                FloatPointer weights = new FloatPointer(32L);
 
-               int x = (int) filteredDetectionMat.row(index).col(0).data().getFloat();
-               int y = (int) filteredDetectionMat.row(index).col(1).data().getFloat();
-               int width = (int) filteredDetectionMat.row(index).col(2).data().getFloat();
-               int height = (int) filteredDetectionMat.row(index).col(3).data().getFloat();
+               int x = Math.round(filteredDetectionMat.row(index).col(0).data().getFloat());
+               int y = Math.round(filteredDetectionMat.row(index).col(1).data().getFloat());
+               int width = Math.round(filteredDetectionMat.row(index).col(2).data().getFloat());
+               int height = Math.round(filteredDetectionMat.row(index).col(3).data().getFloat());
                float confidence = filteredDetectionMat.row(index).col(4).data().getFloat();
                int classID = (int) filteredDetectionMat.row(index).col(5).data().getFloat();
 
@@ -400,7 +404,7 @@ public class YOLOv8Model implements Destroyable
       // Remove other objects from image using bounding box
       Mat boundingBoxMask = new Mat(maskIntrinsics.getHeight(), maskIntrinsics.getWidth(), opencv_core.CV_8UC1, new Scalar(0.0));
       opencv_imgproc.rectangle(boundingBoxMask,
-                               new Rect(boundingBox.x() / 4, boundingBox.y() / 4, boundingBox.width() / 4 + 2, boundingBox.height() / 4 + 2),
+                               new Rect(boundingBox.x() / 4, boundingBox.y() / 4, (boundingBox.width() + 3) / 4, (boundingBox.height() + 3) / 4),
                                new Scalar(255.0), opencv_imgproc.FILLED, opencv_imgproc.LINE_8, 0);
 
       opencv_core.bitwise_and(binaryMask, boundingBoxMask, binaryMask);

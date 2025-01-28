@@ -54,10 +54,10 @@ __global__ void filterDetections(float* unfilteredDetection, int classCount, int
 
         // Find the class with maximum confidence, and the confidence value
         int mostConfidentClass = 0; // class 0
-        float maxConfidence = *row(unfilteredColumn, sizeof(float) * detectionCount, 4);
+        float maxConfidence = *row(unfilteredColumn, sizeof(float) * detectionCount, CONFIDENCE_INDEX);
         for (int classIndex = 1; classIndex < classCount; ++classIndex)
         {
-            float confidence = *row(unfilteredColumn, sizeof(float) * detectionCount, 4 + classIndex);
+            float confidence = *row(unfilteredColumn, sizeof(float) * detectionCount, CONFIDENCE_INDEX + classIndex);
             if (confidence > maxConfidence)
             {
                 mostConfidentClass = classIndex;
