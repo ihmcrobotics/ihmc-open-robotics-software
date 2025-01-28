@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import imgui.ImGui;
 import org.bytedeco.opencv.global.opencv_core;
+import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.environment.RDXEnvironmentBuilder;
@@ -13,8 +14,10 @@ import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
+import us.ihmc.rdx.ui.graphics.RDXHeightMapGraphicNew;
 import us.ihmc.rdx.visualizers.RDXFrustumGraphic;
 import us.ihmc.perception.BytedecoImage;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 
 import java.nio.ByteBuffer;
 
@@ -31,6 +34,7 @@ public class RDXHighLevelDepthSensorDemo
    private RDXFrustumGraphic frustumVisualizer;
    private RDXBytedecoImagePanel mainViewDepthPanel;
    private BytedecoImage image;
+   private RDXHeightMapGraphicNew heightMap;
 
    public RDXHighLevelDepthSensorDemo()
    {
@@ -40,6 +44,7 @@ public class RDXHighLevelDepthSensorDemo
          public void create()
          {
             baseUI.create();
+            baseUI.setModelSceneMouseCollisionEnabled(true);
 
             environmentBuilder = new RDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
             environmentBuilder.create();
@@ -105,9 +110,19 @@ public class RDXHighLevelDepthSensorDemo
             baseUI.add3DPanel(panel3D);
 
             frustumVisualizer = new RDXFrustumGraphic();
-            baseUI.getPrimaryScene().addRenderableProvider(frustumVisualizer::getRenderables, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimaryScene().addRenderableProvider(frustumVisualizer, RDXSceneLevel.VIRTUAL);
+            
+            heightMap = new RDXHeightMapGraphicNew();
+            HeightMapMessage heightMapMessage = new HeightMapMessage();
+            heightMapMessage.setXyResolution(0.1);
+            heightMapMessage.setGridSizeXy(2.0);
+            heightMapMessage.setGridCenterX(1.0);
+            heightMapMessage.setGridCenterY(1.0);
+            heightMapMessage.setEstimatedGroundHeight(0.0);
+            HeightMapMessageTools.setToFlatGround(heightMapMessage);
+            heightMap.generateMeshesAsync(heightMapMessage);
+            baseUI.getPrimaryScene().addRenderableProvider(heightMap, RDXSceneLevel.MODEL);
          }
-
 
          @Override
          public void render()
@@ -142,6 +157,8 @@ public class RDXHighLevelDepthSensorDemo
             frustumVisualizer.generateMeshAsync(baseUI.getPrimary3DPanel().getCamera3D().frustum);
             frustumVisualizer.update();
 
+            heightMap.update();
+
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
          }
@@ -152,6 +169,7 @@ public class RDXHighLevelDepthSensorDemo
             baseUI.dispose();
             environmentBuilder.destroy();
             highLevelDepthSensorSimulator.dispose();
+            heightMap.destroy();
          }
       });
    }
