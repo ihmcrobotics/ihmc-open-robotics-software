@@ -58,7 +58,6 @@ public class QuicksterFootstepProvider implements Updatable
    private final SideDependentList<FramePoint2D> desiredTouchdownPositions = new SideDependentList<>();
    private final SideDependentList<FramePose2D> desiredTouchdownPoses = new SideDependentList<>();
    private final SideDependentList<YoFramePoint3D> desiredTouchdownPosition3DInWorld = new SideDependentList<>();
-   private final SideDependentList<YoGraphicPosition> desiredTouchdownPositionViz = new SideDependentList<>();
 
    // Desired inputs
    private final YoDouble desiredTurningVelocity = new YoDouble("desiredTurningVelocity" + variableNameSuffix, registry);
@@ -80,8 +79,6 @@ public class QuicksterFootstepProvider implements Updatable
    private final FramePoint2D netPendulumBase = new FramePoint2D();
    private final SideDependentList<YoFramePoint3D> pendulumBase3DInWorld = new SideDependentList<>();
    private final YoFramePoint3D netPendulumBase3DInWorld = new YoFramePoint3D("netPendulumBase3DInWorld" + variableNameSuffix, ReferenceFrame.getWorldFrame(), registry);
-   private final SideDependentList<YoGraphicPosition> pendulumBaseViz = new SideDependentList<>();
-   private final YoGraphicPosition netPendulumBaseViz;
 
    // Temp variables for changing frames and stuff
    private final FramePoint2DBasics tempPendulumBase = new FramePoint2D();
@@ -119,11 +116,6 @@ public class QuicksterFootstepProvider implements Updatable
       centerOfMassControlZUpFrame = estimates.getCenterOfMassControlZUpFrame();
 
 
-      netPendulumBaseViz = new YoGraphicPosition("netPendulumBase" + variableNameSuffix,
-                                                 netPendulumBase3DInWorld,
-                                                 0.015,
-                                                 YoAppearance.Red(),
-                                                 YoGraphicPosition.GraphicType.SQUARE);
 
       // Side-dependant stuff, most of the desired-related things
       for (RobotSide robotSide : RobotSide.values)
@@ -135,16 +127,6 @@ public class QuicksterFootstepProvider implements Updatable
          pendulumBase3DInWorld.put(robotSide, new YoFramePoint3D(robotSide.getLowerCaseName() + "PendulumBase3DInWorld" + variableNameSuffix,
                                                                  ReferenceFrame.getWorldFrame(),
                                                                  registry));
-
-         AppearanceDefinition pendulumBaseVizColor = robotSide == RobotSide.LEFT ? YoAppearance.Magenta() : YoAppearance.Green();
-         pendulumBaseViz.put(robotSide, new YoGraphicPosition(robotSide.getLowerCaseName() + "PendulumBase" + variableNameSuffix,
-                                                              pendulumBase3DInWorld.get(robotSide),
-                                                              0.015,
-                                                              pendulumBaseVizColor,
-                                                              YoGraphicPosition.GraphicType.SQUARE));
-
-         yoGraphicsListRegistry.registerYoGraphic(variableNameSuffix, pendulumBaseViz.get(robotSide));
-         yoGraphicsListRegistry.registerArtifact(variableNameSuffix, pendulumBaseViz.get(robotSide).createArtifact());
 
          touchdownCalculator.put(robotSide, new QuicksterFootstepProviderTouchdownCalculator(robotSide,
                                                                                              centerOfMassControlZUpFrame,
@@ -163,15 +145,7 @@ public class QuicksterFootstepProvider implements Updatable
                                                                              ReferenceFrame.getWorldFrame(),
                                                                              registry));
 
-         AppearanceDefinition touchdownVizColor = robotSide == RobotSide.LEFT ? YoAppearance.Magenta() : YoAppearance.Green();
-         desiredTouchdownPositionViz.put(robotSide, new YoGraphicPosition(robotSide.getLowerCaseName() + "DesiredTouchdownPosition" + variableNameSuffix,
-                                                                          desiredTouchdownPosition3DInWorld.get(robotSide),
-                                                                          0.015,
-                                                                          touchdownVizColor,
-                                                                          YoGraphicPosition.GraphicType.DIAMOND_WITH_CROSS));
 
-         yoGraphicsListRegistry.registerYoGraphic(variableNameSuffix, desiredTouchdownPositionViz.get(robotSide));
-         yoGraphicsListRegistry.registerArtifact(variableNameSuffix, desiredTouchdownPositionViz.get(robotSide).createArtifact());
 
          StateMachineFactory<FootState, State> stateMachineFactory = new StateMachineFactory<>(FootState.class);
          stateMachineFactory.setRegistry(registry).setNamePrefix(robotSide.getLowerCaseName() + variableNameSuffix).buildYoClock(yoTime);
@@ -181,10 +155,43 @@ public class QuicksterFootstepProvider implements Updatable
 
          footStateMachines.put(robotSide, stateMachineFactory.build(FootState.SUPPORT));
          footStateMachines.get(robotSide).resetToInitialState();
+
+         if (yoGraphicsListRegistry != null)
+         {
+            AppearanceDefinition pendulumBaseVizColor = robotSide == RobotSide.LEFT ? YoAppearance.Magenta() : YoAppearance.Green();
+            YoGraphicPosition pendulumBaseViz = new YoGraphicPosition(robotSide.getLowerCaseName() + "PendulumBase" + variableNameSuffix,
+                                                                      pendulumBase3DInWorld.get(robotSide),
+                                                                      0.015,
+                                                                      pendulumBaseVizColor,
+                                                                      YoGraphicPosition.GraphicType.SQUARE);
+
+            yoGraphicsListRegistry.registerYoGraphic(variableNameSuffix, pendulumBaseViz);
+            yoGraphicsListRegistry.registerArtifact(variableNameSuffix, pendulumBaseViz.createArtifact());
+
+            AppearanceDefinition touchdownVizColor = robotSide == RobotSide.LEFT ? YoAppearance.Magenta() : YoAppearance.Green();
+            YoGraphicPosition desiredTouchdownPositionViz = new YoGraphicPosition(
+                  robotSide.getLowerCaseName() + "DesiredTouchdownPosition" + variableNameSuffix,
+                  desiredTouchdownPosition3DInWorld.get(robotSide),
+                  0.015,
+                  touchdownVizColor,
+                  YoGraphicPosition.GraphicType.DIAMOND_WITH_CROSS);
+
+            yoGraphicsListRegistry.registerYoGraphic(variableNameSuffix, desiredTouchdownPositionViz);
+            yoGraphicsListRegistry.registerArtifact(variableNameSuffix, desiredTouchdownPositionViz.createArtifact());
+         }
       }
 
-      yoGraphicsListRegistry.registerYoGraphic(variableNameSuffix, netPendulumBaseViz);
-      yoGraphicsListRegistry.registerArtifact(variableNameSuffix, netPendulumBaseViz.createArtifact());
+
+      if (yoGraphicsListRegistry != null)
+      {
+         YoGraphicPosition netPendulumBaseViz = new YoGraphicPosition("netPendulumBase" + variableNameSuffix,
+                                                                      netPendulumBase3DInWorld,
+                                                                      0.015,
+                                                                      YoAppearance.Red(),
+                                                                      YoGraphicPosition.GraphicType.SQUARE);
+         yoGraphicsListRegistry.registerYoGraphic(variableNameSuffix, netPendulumBaseViz);
+         yoGraphicsListRegistry.registerArtifact(variableNameSuffix, netPendulumBaseViz.createArtifact());
+      }
 
       parentRegistry.addChild(registry);
    }
