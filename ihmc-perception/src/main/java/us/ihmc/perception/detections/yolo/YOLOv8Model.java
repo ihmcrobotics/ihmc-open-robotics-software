@@ -170,8 +170,9 @@ public class YOLOv8Model
     * @param image               Image to run YOLO on. If this image isn't in BGR format, it will be converted to BGR.
     *                            Pass in BGR images for optimal performance.
     * @param confidenceThreshold Minimum confidence detections must have to be considered valid [0.0, 1.0].
-    * @param nmsThreshold        Non-maximum suppression threshold.
-    * @param maskThreshold       Minimum value for a pixel to be part of the mask [0.0, 1.0].
+    * @param nmsThreshold        Non-maximum suppression threshold for determining whether bounding boxes overlap.
+    *                            The smaller the value, the less overlap is required for a box to be removed [0.0, 1.0].
+    * @param maskThreshold       Minimum value for a pixel to be part of the mask.
     * @return List of {@link YOLOv8Detection}s found in the image.
     */
    public synchronized YOLOv8DetectionList run(RawImage image, float confidenceThreshold, float nmsThreshold, float maskThreshold)
