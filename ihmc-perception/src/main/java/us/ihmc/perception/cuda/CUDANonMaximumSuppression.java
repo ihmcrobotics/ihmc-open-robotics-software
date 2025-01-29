@@ -17,7 +17,7 @@ public class CUDANonMaximumSuppression implements AutoCloseable
 
    private final CUstream_st stream;
    private final CUDAProgram program;
-   private final CUDAKernel mappingKernel;
+   private final CUDAKernel checkInclusionKernel;
    private final CUDAKernel fastReductionKernel;
    private final CUDAKernel slowReductionKernel;
 
@@ -31,7 +31,7 @@ public class CUDANonMaximumSuppression implements AutoCloseable
       {
          program = new CUDAProgram(programURL, utilsURL);
 
-         mappingKernel = program.loadKernel("checkInclusion");
+         checkInclusionKernel = program.loadKernel("checkInclusion");
          fastReductionKernel = program.loadKernel("reduceFast");
          slowReductionKernel = program.loadKernel("reduceSlow");
       }
@@ -57,10 +57,30 @@ public class CUDANonMaximumSuppression implements AutoCloseable
     */
    public int run(FloatPointer inputBoxes, int boxCount, float overlapThreshold, IntPointer outputIncludedIndices)
    {
+      return runAsync(inputBoxes, boxCount, overlapThreshold, outputIncludedIndices, stream);
+   }
+
+   /**
+    * Run a non-maximum suppression algorithm on boxes.
+    * <p>
+    * This method uses the fast reduction kernel if possible,
+    * and defaults to the slow kernel otherwise.
+    *
+    * @param inputBoxes            Boxes to run NMS on (x, y, width, height, score)
+    * @param boxCount              Number of boxes in the input
+    * @param overlapThreshold      Minimum Intersection over Union (IoU) value used for grouping boxes. Between 0.0 and 1.0.
+    *                              The highest score box of each group will be kept, and the rest removed.
+    * @param outputIncludedIndices Array of indices which have been included.
+    *                              Should have memory allocated for at least {@code boxCount} elements.
+    * @param cudaStream            CUDA stream to run on.
+    * @return Number of included indices.
+    */
+   public int runAsync(FloatPointer inputBoxes, int boxCount, float overlapThreshold, IntPointer outputIncludedIndices, CUstream_st cudaStream)
+   {
       if (boxCount > CUDATools.maxThreadsPerBlock())
-         return runSlow(inputBoxes, boxCount, overlapThreshold, outputIncludedIndices);
+         return runSlowAsync(inputBoxes, boxCount, overlapThreshold, outputIncludedIndices, cudaStream);
       else
-         return runFast(inputBoxes, boxCount, overlapThreshold, outputIncludedIndices);
+         return runFastAsync(inputBoxes, boxCount, overlapThreshold, outputIncludedIndices, cudaStream);
    }
 
    /**
@@ -68,7 +88,7 @@ public class CUDANonMaximumSuppression implements AutoCloseable
     * <p>
     * The fast reduction kernel is limited on the number of boxes it can handle.
     * Typically, the maximum number of boxes is 512 or 1024 (depending on the GPU).
-    * If you're unsure if there are too many boxes, use {@link #run(FloatPointer, int, float, IntPointer)}.
+    * If you're unsure if there are too many boxes, use {@link #runAsync(FloatPointer, int, float, IntPointer, CUstream_st)}.
     *
     * @param inputBoxes            Boxes to run NMS on (x, y, width, height, score)
     * @param boxCount              Number of boxes in the input
@@ -80,47 +100,38 @@ public class CUDANonMaximumSuppression implements AutoCloseable
     */
    public int runFast(FloatPointer inputBoxes, int boxCount, float overlapThreshold, IntPointer outputIncludedIndices)
    {
-      int divisor = 4 * BLOCK_DIM_2D;
-      int gridSize2D = (boxCount + divisor - 1) / divisor;
+      int count = runFastAsync(inputBoxes, boxCount, overlapThreshold, outputIncludedIndices, stream);
+      CUDATools.checkCUDAError(cudaStreamSynchronize(stream));
+      return count;
+   }
 
-      try (dim3 mappingBlockSize = new dim3(BLOCK_DIM_2D, BLOCK_DIM_2D, 1);
-           dim3 mappingGridSize = new dim3(gridSize2D, gridSize2D, 1);
-           dim3 reduceBlockSize = new dim3(boxCount, 1, 1);
-           dim3 reduceGridSize = new dim3(boxCount, 1, 1);
-           FloatPointer boxes = new FloatPointer();
-           BoolPointer inclusionMatrix = new BoolPointer();
-           IntPointer includedIndices = new IntPointer();
-           IntPointer includedCount = new IntPointer())
+   /**
+    * Run a non-maximum suppression algorithm on boxes, using a fast reduction kernel.
+    * <p>
+    * The fast reduction kernel is limited on the number of boxes it can handle.
+    * Typically, the maximum number of boxes is 512 or 1024 (depending on the GPU).
+    * If you're unsure if there are too many boxes, use {@link #runAsync(FloatPointer, int, float, IntPointer, CUstream_st)}.
+    *
+    * @param inputBoxes            Boxes to run NMS on (x, y, width, height, score)
+    * @param boxCount              Number of boxes in the input
+    * @param overlapThreshold      Minimum Intersection over Union (IoU) value used for grouping boxes. Between 0.0 and 1.0.
+    *                              The highest score box of each group will be kept, and the rest removed.
+    * @param outputIncludedIndices Array of indices which have been included.
+    *                              Should have memory allocated for at least {@code boxCount} elements.
+    * @param cudaStream            CUDA stream to run on.
+    * @return Number of included indices.
+    */
+   public int runFastAsync(FloatPointer inputBoxes, int boxCount, float overlapThreshold, IntPointer outputIncludedIndices, CUstream_st cudaStream)
+   {
+      try (BoolPointer inclusionMatrix = new BoolPointer())
       {
-         CUDATools.checkCUDAError(cudaMallocHost(includedCount, includedCount.sizeof()));
+         CUDATools.mallocAsync(inclusionMatrix, (long) boxCount * boxCount, cudaStream);
 
-         CUDATools.mallocAsync(boxes, 5L * boxCount, stream);
-         CUDATools.memcpyAsync(boxes, inputBoxes, 5L * boxCount, stream);
+         createInclusionMatrix(inputBoxes, boxCount, overlapThreshold, inclusionMatrix, cudaStream);
 
-         CUDATools.mallocAsync(inclusionMatrix, (long) boxCount * boxCount, stream);
-         CUDATools.mallocAsync(includedIndices, boxCount, stream);
+         int count = runFastReduction(inclusionMatrix, boxCount, outputIncludedIndices, cudaStream);
 
-         mappingKernel.withPointer(boxes)
-                      .withInt(boxCount)
-                      .withFloat(overlapThreshold)
-                      .withPointer(inclusionMatrix)
-                      .run(stream, mappingGridSize, mappingBlockSize, 0);
-
-         fastReductionKernel.withPointer(inclusionMatrix)
-                            .withInt(boxCount)
-                            .withPointer(includedIndices)
-                            .withPointer(includedCount)
-                            .run(stream, reduceGridSize, reduceBlockSize, 0);
-
-         CUDATools.memcpyAsync(outputIncludedIndices, includedIndices, boxCount, stream);
-         CUDATools.checkCUDAError(cudaStreamSynchronize(stream));
-         int count = includedCount.get();
-         outputIncludedIndices.limit(count);
-
-         CUDATools.checkCUDAError(cudaFreeHost(includedCount));
-         CUDATools.checkCUDAError(cudaFreeAsync(boxes, stream));
-         CUDATools.checkCUDAError(cudaFreeAsync(inclusionMatrix, stream));
-         CUDATools.checkCUDAError(cudaFreeAsync(includedIndices, stream));
+         CUDATools.checkCUDAError(cudaFreeAsync(inclusionMatrix, cudaStream));
 
          return count;
       }
@@ -141,33 +152,101 @@ public class CUDANonMaximumSuppression implements AutoCloseable
     */
    public int runSlow(FloatPointer inputBoxes, int boxCount, float overlapThreshold, IntPointer outputIncludedIndices)
    {
+      int count = runSlowAsync(inputBoxes, boxCount, overlapThreshold, outputIncludedIndices, stream);
+      CUDATools.checkCUDAError(cudaStreamSynchronize(stream));
+      return count;
+   }
+
+   /**
+    * Run a non-maximum suppression algorithm on boxes, using a slow reduction kernel.
+    * <p>
+    * Use this method if the number of boxes is always greater than what the fast reduction kernel can handle.
+    *
+    * @param inputBoxes            Boxes to run NMS on (x, y, width, height, score)
+    * @param boxCount              Number of boxes in the input
+    * @param overlapThreshold      Minimum Intersection over Union (IoU) value used for grouping boxes. Between 0.0 and 1.0.
+    *                              The highest score box of each group will be kept, and the rest removed.
+    * @param outputIncludedIndices Array of indices which have been included.
+    *                              Should have memory allocated for at least {@code boxCount} elements.
+    * @param cudaStream            CUDA stream to run on.
+    * @return Number of included indices.
+    */
+   public int runSlowAsync(FloatPointer inputBoxes, int boxCount, float overlapThreshold, IntPointer outputIncludedIndices, CUstream_st cudaStream)
+   {
+      try (BoolPointer inclusionMatrix = new BoolPointer())
+      {
+         CUDATools.mallocAsync(inclusionMatrix, (long) boxCount * boxCount, cudaStream);
+
+         createInclusionMatrix(inputBoxes, boxCount, overlapThreshold, inclusionMatrix, cudaStream);
+
+         int count = runSlowReduction(inclusionMatrix, boxCount, outputIncludedIndices, cudaStream);
+
+         CUDATools.checkCUDAError(cudaFreeAsync(inclusionMatrix, cudaStream));
+
+         return count;
+      }
+   }
+
+   private void createInclusionMatrix(FloatPointer inputBoxes, int boxCount, float overlapThreshold, BoolPointer outputInclusionMatrix, CUstream_st stream)
+   {
       int divisor = 4 * BLOCK_DIM_2D;
       int gridSize2D = (boxCount + divisor - 1) / divisor;
 
-      int gridSize1D = (boxCount + BLOCK_DIM_1D - 1) / BLOCK_DIM_1D;
-
       try (dim3 mappingBlockSize = new dim3(BLOCK_DIM_2D, BLOCK_DIM_2D, 1);
            dim3 mappingGridSize = new dim3(gridSize2D, gridSize2D, 1);
-           dim3 reduceBlockSize = new dim3(BLOCK_DIM_1D, 1, 1);
-           dim3 reduceGridSize = new dim3(gridSize1D, 1, 1);
-           FloatPointer boxes = new FloatPointer();
-           BoolPointer inclusionMatrix = new BoolPointer();
-           IntPointer includedIndices = new IntPointer();
-           IntPointer includedCount = new IntPointer())
+           FloatPointer boxes = new FloatPointer();)
       {
-         CUDATools.checkCUDAError(cudaMallocHost(includedCount, includedCount.sizeof()));
-
          CUDATools.mallocAsync(boxes, 5L * boxCount, stream);
          CUDATools.memcpyAsync(boxes, inputBoxes, 5L * boxCount, stream);
 
-         CUDATools.mallocAsync(inclusionMatrix, (long) boxCount * boxCount, stream);
+         checkInclusionKernel.withPointer(boxes)
+                             .withInt(boxCount)
+                             .withFloat(overlapThreshold)
+                             .withPointer(outputInclusionMatrix)
+                             .run(stream, mappingGridSize, mappingBlockSize, 0);
+
+         CUDATools.checkCUDAError(cudaFreeAsync(boxes, stream));
+      }
+   }
+
+   private int runFastReduction(BoolPointer inclusionMatrix, int boxCount, IntPointer outputIncludedIndices, CUstream_st stream)
+   {
+      try (dim3 reduceBlockSize = new dim3(boxCount, 1, 1);
+           dim3 reduceGridSize = new dim3(boxCount, 1, 1);
+           IntPointer includedIndices = new IntPointer();
+           IntPointer includedCount = new IntPointer())
+      {
+         CUDATools.checkCUDAError(cudaMallocHost(includedCount, 1));
          CUDATools.mallocAsync(includedIndices, boxCount, stream);
 
-         mappingKernel.withPointer(boxes)
-                      .withInt(boxCount)
-                      .withFloat(overlapThreshold)
-                      .withPointer(inclusionMatrix)
-                      .run(stream, mappingGridSize, mappingBlockSize, 0);
+         fastReductionKernel.withPointer(inclusionMatrix)
+                            .withInt(boxCount)
+                            .withPointer(includedIndices)
+                            .withPointer(includedCount)
+                            .run(stream, reduceGridSize, reduceBlockSize, 0);
+
+         CUDATools.checkCUDAError(cudaStreamSynchronize(stream));
+         int count = includedCount.get();
+         CUDATools.checkCUDAError(cudaFreeHost(includedCount));
+
+         CUDATools.memcpyAsync(outputIncludedIndices, includedIndices, count, stream);
+         CUDATools.checkCUDAError(cudaFreeAsync(includedIndices, stream));
+
+         return count;
+      }
+   }
+
+   private int runSlowReduction(BoolPointer inclusionMatrix, int boxCount, IntPointer outputIncludedIndices, CUstream_st stream)
+   {
+      int gridSize1D = (boxCount + BLOCK_DIM_1D - 1) / BLOCK_DIM_1D;
+
+      try (dim3 reduceBlockSize = new dim3(BLOCK_DIM_1D, 1, 1);
+           dim3 reduceGridSize = new dim3(gridSize1D, 1, 1);
+           IntPointer includedIndices = new IntPointer();
+           IntPointer includedCount = new IntPointer())
+      {
+         CUDATools.checkCUDAError(cudaMallocHost(includedCount, 1));
+         CUDATools.mallocAsync(includedIndices, boxCount, stream);
 
          slowReductionKernel.withPointer(inclusionMatrix)
                             .withInt(boxCount)
@@ -175,14 +254,11 @@ public class CUDANonMaximumSuppression implements AutoCloseable
                             .withPointer(includedCount)
                             .run(stream, reduceGridSize, reduceBlockSize, 0);
 
-         CUDATools.memcpyAsync(outputIncludedIndices, includedIndices, boxCount, stream);
          CUDATools.checkCUDAError(cudaStreamSynchronize(stream));
          int count = includedCount.get();
-         outputIncludedIndices.limit(count);
-
          CUDATools.checkCUDAError(cudaFreeHost(includedCount));
-         CUDATools.checkCUDAError(cudaFreeAsync(boxes, stream));
-         CUDATools.checkCUDAError(cudaFreeAsync(inclusionMatrix, stream));
+
+         CUDATools.memcpyAsync(outputIncludedIndices, includedIndices, count, stream);
          CUDATools.checkCUDAError(cudaFreeAsync(includedIndices, stream));
 
          return count;
@@ -193,7 +269,7 @@ public class CUDANonMaximumSuppression implements AutoCloseable
    public void close()
    {
       program.close();
-      mappingKernel.close();
+      checkInclusionKernel.close();
       fastReductionKernel.close();
       slowReductionKernel.close();
       CUDAStreamManager.releaseStream(stream);

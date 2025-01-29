@@ -6,10 +6,8 @@ import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_dnn;
-import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.opencv.opencv_core.MatExpr;
 import org.bytedeco.opencv.opencv_core.MatVector;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Scalar;
@@ -295,11 +293,10 @@ public class YOLOv8Model implements Destroyable
                            filteredDetectionCount,
                            cudaMemcpyDefault,
                            cudaStream);
-         CUDATools.checkCUDAError(cudaStreamSynchronize(cudaStream));
 
          // Run NMS on boxes
          IntPointer includedRows = new IntPointer(filteredDetectionCount);
-         int remainingDetectionCount = nms.run(boxes, filteredDetectionCount, nmsThreshold, includedRows);
+         int remainingDetectionCount = nms.runAsync(boxes, filteredDetectionCount, nmsThreshold, includedRows, cudaStream);
 
          // Ensure we still have detections
          if (remainingDetectionCount == 0)
