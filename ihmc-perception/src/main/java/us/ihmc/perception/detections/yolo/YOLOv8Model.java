@@ -55,7 +55,7 @@ public class YOLOv8Model
 
    // OpenCV DNN stuff
    private final Net yoloNet;
-   private final StringVector outputNames; // literally list of "output0", "output1", "output2"...
+   private final StringVector outputNames; // literally list of "output0", "output1"
 
    // CUDA post-processing stuff
    private final CUstream_st cudaStream;
@@ -88,9 +88,9 @@ public class YOLOv8Model
       {
          // Parse class_names.yaml
          Yaml yaml = new Yaml();
-         Map<String, List<String>> classNamesData = yaml.load(inputStream);
-         List<String> names = classNamesData.get("names");
-         detectionClassNames.addAll(names);
+         Map<String, List<Object>> classNamesData = yaml.load(inputStream);
+         List<Object> names = classNamesData.get("names");
+         detectionClassNames.addAll(names.stream().map(Object::toString).toList());
 
          // Read the YOLO net
          Path onnxFile = YOLOv8Tools.getONNXFile(modelBaseDirectory);
@@ -211,7 +211,7 @@ public class YOLOv8Model
        *  - 32 mask weights associated with the 32 prototype masks (the prototype masks are contained in output 1)
        *
        * Typically, the model produces a ridiculous number of bounding boxes (~19K) for each run.
-       * Most of those boxes are garbage with low confidences, and they must be discarded.
+       * Most of those boxes are garbage with low confidences, and they must be filtered out.
        * The good bounding boxes are collected, and put through non-maximum suppression to remove overlapping ones.
        * Finally, the bounding boxes and mask weights are combined with output 1 to get the object masks.
        *
