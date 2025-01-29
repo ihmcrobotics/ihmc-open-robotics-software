@@ -152,7 +152,7 @@ public class RapidHeightMapManager
       cameraPose.setToZero(cameraFrame);
       cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      if (controllerFootstepQueueMonitor.isFootstepStarted())
+      if (controllerFootstepQueueMonitor.isFootstepStarted() && totalPlanOffsetToProcess.get() != null)
       {
          Vector3D incrementalOffset = new Vector3D(totalPlanOffsetToProcess.getAndSet(null));
          incrementalOffset.sub(mostRecentPlanOffsetProcessed);
@@ -198,6 +198,7 @@ public class RapidHeightMapManager
    private void acceptPlanOffsetStatus(PlanOffsetStatus planOffsetMessage)
    {
       Vector3D planOffset = planOffsetMessage.getOffsetVector();
+      System.out.println("Plan offset while in double support: " + planOffset.getZ());
 
 //      if (!MathTools.epsilonEquals(planOffset.getZ(), lastPlanOffset.getZ(), epsilon))
 //      {

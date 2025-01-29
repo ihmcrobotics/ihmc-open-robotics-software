@@ -14,6 +14,7 @@ import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.Random;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Stream;
@@ -29,7 +30,9 @@ public class ContinuousHikingLogger
    private static final int NUMBER_OF_LOGS_TO_KEEP = 100;
    private File file;
 
-   private static final String CONTINUOUS_HIKING_FILE_SUFFIX = "ContinuousHikingLog.txt";
+   private Random random;
+
+   private static String CONTINUOUS_HIKING_FILE_SUFFIX = "ContinuousHikingLog.txt";
    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
    private static final String logFileName = dateFormat.format(new Date()) + "_" + CONTINUOUS_HIKING_FILE_SUFFIX;
    private static final String filePath = IHMCCommonPaths.CONTINUOUS_HIKING_DIRECTORY.resolve(logFileName).toString();
@@ -38,41 +41,42 @@ public class ContinuousHikingLogger
 
    public ContinuousHikingLogger()
    {
-      FileTools.ensureDirectoryExists(IHMCCommonPaths.CONTINUOUS_HIKING_DIRECTORY, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
-      deleteOldLogs();
-
-      try
-      {
-         if(!Files.exists(IHMCCommonPaths.CONTINUOUS_HIKING_DIRECTORY))
-         {
-            Files.createDirectory(IHMCCommonPaths.CONTINUOUS_HIKING_DIRECTORY);
-         }
-         if (!Files.exists(IHMCCommonPaths.TERRAIN_MAP_DIRECTORY.resolve(logFileName)))
-         {
-            Files.createFile(Paths.get(filePath));
-            file = new File(filePath);
-         }
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
-      }
+//      CONTINUOUS_HIKING_FILE_SUFFIX += random.nextInt();
+//      FileTools.ensureDirectoryExists(IHMCCommonPaths.CONTINUOUS_HIKING_DIRECTORY, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+//      deleteOldLogs();
+//
+//      try
+//      {
+//         if(!Files.exists(IHMCCommonPaths.CONTINUOUS_HIKING_DIRECTORY))
+//         {
+//            Files.createDirectory(IHMCCommonPaths.CONTINUOUS_HIKING_DIRECTORY);
+//         }
+//         if (!Files.exists(IHMCCommonPaths.TERRAIN_MAP_DIRECTORY.resolve(logFileName)))
+//         {
+//            Files.createFile(Paths.get(filePath));
+//            file = new File(filePath);
+//         }
+//      }
+//      catch (IOException e)
+//      {
+//         throw new RuntimeException(e);
+//      }
    }
 
    public void logToFile(boolean logToFile, boolean printToConsole)
    {
-      if (logToFile || printToConsole)
-      {
-         if (printToConsole)
-            System.out.println(this);
-
-         if (logToFile)
-         {
-            FileTools.write(file.getAbsoluteFile().toPath(), toString().getBytes(), WriteOption.APPEND, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
-         }
-
-         additionalString.setLength(0);
-      }
+//      if (logToFile || printToConsole)
+//      {
+//         if (printToConsole)
+//            System.out.println(this);
+//
+//         if (logToFile)
+//         {
+//            FileTools.write(file.getAbsoluteFile().toPath(), toString().getBytes(), WriteOption.APPEND, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+//         }
+//
+//         additionalString.setLength(0);
+//      }
    }
 
    public String toString()
@@ -96,7 +100,7 @@ public class ContinuousHikingLogger
    /** Keeps around the recommended number of logs. */
    public static void deleteOldLogs()
    {
-      deleteOldLogs(NUMBER_OF_LOGS_TO_KEEP, IHMCCommonPaths.CONTINUOUS_HIKING_DIRECTORY.toString());
+//      deleteOldLogs(NUMBER_OF_LOGS_TO_KEEP, IHMCCommonPaths.CONTINUOUS_HIKING_DIRECTORY.toString());
    }
 
    /**
