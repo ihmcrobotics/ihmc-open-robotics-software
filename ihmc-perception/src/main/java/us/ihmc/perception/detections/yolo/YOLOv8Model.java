@@ -15,6 +15,7 @@ import org.bytedeco.opencv.opencv_core.Size;
 import org.bytedeco.opencv.opencv_core.StringVector;
 import org.bytedeco.opencv.opencv_dnn.Net;
 import org.yaml.snakeyaml.Yaml;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
@@ -38,7 +39,7 @@ import java.util.Map;
 
 import static org.bytedeco.cuda.global.cudart.*;
 
-public class YOLOv8Model implements Destroyable
+public class YOLOv8Model
 {
    private static final double SCALE_FACTOR = 1.0 / 255.0;
    private static final Size DETECTION_SIZE = new Size(1280, 736);
@@ -63,6 +64,17 @@ public class YOLOv8Model implements Destroyable
    private final CUDAKernel filterKernel;
    private final CUDAKernel detectionMaskKernel;
    private final CUDANonMaximumSuppression nms;
+
+   // CPU memory
+   private final MatVector outputBlobs = new MatVector();
+
+   // CUDA memory
+   private final FloatPointer unfilteredDetections = new FloatPointer();
+   private final FloatPointer filteredDetections = new FloatPointer();
+   private final IntPointer filteredDetectionCountPointer = new IntPointer();
+   private final FloatPointer boxes = new FloatPointer();
+   private final FloatPointer prototypeMasks = new FloatPointer();
+   private boolean firstAllocation = true;
 
    public YOLOv8Model(Path modelBaseDirectory)
    {
@@ -113,8 +125,7 @@ public class YOLOv8Model implements Destroyable
       nms = new CUDANonMaximumSuppression();
    }
 
-   @Override
-   public void destroy()
+   public synchronized void destroy()
    {
       yoloNet.close();
       outputNames.close();
@@ -123,6 +134,16 @@ public class YOLOv8Model implements Destroyable
       filterKernel.close();
       postProcessProgram.close();
       nms.close();
+
+      outputBlobs.close();
+
+      freeCUDAMemory();
+
+      unfilteredDetections.close();
+      filteredDetections.close();
+      filteredDetectionCountPointer.close();
+      boxes.close();
+      prototypeMasks.close();
    }
 
    /**
@@ -173,14 +194,13 @@ public class YOLOv8Model implements Destroyable
       }
 
       // Run the net
-      MatVector outputBlobs = new MatVector();
       Mat blob = opencv_dnn.blobFromImage(bgrInputImage.getCpuImageMat(), SCALE_FACTOR, DETECTION_SIZE, new Scalar(), true, true, opencv_core.CV_32F);
       yoloNet.setInput(blob);
       yoloNet.forward(outputBlobs, outputNames);
       blob.close();
 
       // Get some useful stuff
-      CameraIntrinsics maskIntrinsics = computeMaskIntrinsics(outputBlobs, bgrInputImage);
+      CameraIntrinsics maskIntrinsics = computeMaskIntrinsics(bgrInputImage);
       int shiftWidth = (bgrInputImage.getWidth() - DETECTION_SIZE.width()) / 2;
       int shiftHeight = (bgrInputImage.getHeight() - DETECTION_SIZE.height()) / 2;
 
@@ -229,33 +249,21 @@ public class YOLOv8Model implements Destroyable
       try (Mat output0Blob = outputBlobs.get(0);
            Mat output1Blob = outputBlobs.get(1);
 
-           FloatPointer unfilteredDetections = new FloatPointer();
-           FloatPointer filteredDetections = new FloatPointer();
-           IntPointer filteredDetectionCountPointer = new IntPointer();
-
            dim3 blockDims = new dim3();
-           dim3 gridDims = new dim3();
-
-           FloatPointer boxes = new FloatPointer();
-
-           FloatPointer prototypeMasks = new FloatPointer())
+           dim3 gridDims = new dim3();)
       {
+         updateCUDAMemoryAllocation(output0Blob, output1Blob);
+
          int unfilteredFloatsPerDetection = output0Blob.size(1);
          int unfilteredDetectionCount = output0Blob.size(2);
 
          // Upload unfiltered results to GPU
          long totalUnfilteredFloats = (long) unfilteredFloatsPerDetection * unfilteredDetectionCount;
-         CUDATools.mallocAsync(unfilteredDetections, totalUnfilteredFloats, cudaStream);
          CUDATools.checkCUDAError(cudaMemcpyAsync(unfilteredDetections,
                                                   output0Blob.data(),
                                                   unfilteredDetections.sizeof() * totalUnfilteredFloats,
                                                   cudaMemcpyDefault,
                                                   cudaStream));
-
-         // Allocate memory for filtered detections
-         long maxFilteredFloats = (long) FILTERED_FLOATS_PER_ROW * unfilteredDetectionCount;
-         CUDATools.checkCUDAError(cudaMallocHost(filteredDetections, filteredDetections.sizeof() * maxFilteredFloats));
-         CUDATools.checkCUDAError(cudaMallocHost(filteredDetectionCountPointer, filteredDetectionCountPointer.sizeof()));
 
          // Calculate kernel launch dimensions
          blockDims.x(BLOCK_SIZE_1D);
@@ -276,15 +284,9 @@ public class YOLOv8Model implements Destroyable
          // Ensure that we have valid detections
          int filteredDetectionCount = filteredDetectionCountPointer.get();
          if (filteredDetectionCount == 0)
-         {
-            CUDATools.checkCUDAError(cudaFreeAsync(unfilteredDetections, cudaStream));
-            CUDATools.checkCUDAError(cudaFreeHost(filteredDetections));
-            CUDATools.checkCUDAError(cudaFreeHost(filteredDetectionCountPointer));
             return result;
-         }
 
          // Copy boxes into separate memory to run NMS
-         CUDATools.mallocAsync(boxes, (long) FLOATS_PER_BOX * filteredDetectionCount, cudaStream);
          cudaMemcpy2DAsync(boxes,
                            (long) boxes.sizeof() * FLOATS_PER_BOX,
                            filteredDetections,
@@ -300,17 +302,10 @@ public class YOLOv8Model implements Destroyable
 
          // Ensure we still have detections
          if (remainingDetectionCount == 0)
-         {
-            CUDATools.checkCUDAError(cudaFreeAsync(unfilteredDetections, cudaStream));
-            CUDATools.checkCUDAError(cudaFreeAsync(boxes, cudaStream));
-            CUDATools.checkCUDAError(cudaFreeHost(filteredDetections));
-            CUDATools.checkCUDAError(cudaFreeHost(filteredDetectionCountPointer));
             return result;
-         }
 
          // Upload prototype masks to GPU
          long totalMaskFloats = (long) output1Blob.size(1) * output1Blob.size(2) * output1Blob.size(3);
-         CUDATools.mallocAsync(prototypeMasks, totalMaskFloats, cudaStream);
          CUDATools.checkCUDAError(cudaMemcpyAsync(prototypeMasks,
                                                   output1Blob.data(),
                                                   prototypeMasks.sizeof() * totalMaskFloats,
@@ -335,22 +330,14 @@ public class YOLOv8Model implements Destroyable
          }
 
          includedRows.close();
-
-         // Deallocate stuff
-         CUDATools.checkCUDAError(cudaFreeAsync(unfilteredDetections, cudaStream));
-         CUDATools.checkCUDAError(cudaFreeAsync(boxes, cudaStream));
-         CUDATools.checkCUDAError(cudaFreeAsync(prototypeMasks, cudaStream));
-         CUDATools.checkCUDAError(cudaFreeHost(filteredDetections));
-         CUDATools.checkCUDAError(cudaFreeHost(filteredDetectionCountPointer));
       }
 
-      outputBlobs.close();
       bgrInputImage.release();
 
       return result;
    }
 
-   private CameraIntrinsics computeMaskIntrinsics(MatVector outputBlobs, RawImage bgrInputImage)
+   private CameraIntrinsics computeMaskIntrinsics(RawImage bgrInputImage)
    {
       int maskHeight = outputBlobs.get(1).size(2);
       int maskWidth = outputBlobs.get(1).size(3);
@@ -363,6 +350,81 @@ public class YOLOv8Model implements Destroyable
       float maskPrincipalPointY = yScaleFactor * bgrInputImage.getPrincipalPointY();
 
       return new CameraIntrinsics(maskHeight, maskWidth, maskFocalLengthX, maskFocalLengthY, maskPrincipalPointX, maskPrincipalPointY);
+   }
+
+   private void updateCUDAMemoryAllocation(Mat output0Blob, Mat output1Blob)
+   {
+      // Ensure enough memory allocated for unfiltered detections
+      int unfilteredFloatsPerDetection = output0Blob.size(1);
+      int unfilteredDetectionCount = output0Blob.size(2);
+      long totalUnfilteredFloats = (long) unfilteredFloatsPerDetection * unfilteredDetectionCount;
+      if (firstAllocation || unfilteredDetections.limit() < totalUnfilteredFloats)
+      {
+         if (!firstAllocation)
+            CUDATools.checkCUDAError(cudaFreeAsync(unfilteredDetections, cudaStream));
+         CUDATools.mallocAsync(unfilteredDetections, totalUnfilteredFloats, cudaStream);
+         unfilteredDetections.limit(totalUnfilteredFloats);
+      }
+
+      // Ensure enough memory allocated for filtered detections
+      long maxFilteredFloats = (long) FILTERED_FLOATS_PER_ROW * unfilteredDetectionCount;
+      if (firstAllocation || filteredDetections.limit() < maxFilteredFloats)
+      {
+         if (!firstAllocation)
+            CUDATools.checkCUDAError(cudaFreeHost(filteredDetections));
+         CUDATools.checkCUDAError(cudaMallocHost(filteredDetections, filteredDetections.sizeof() * maxFilteredFloats));
+         filteredDetections.limit(maxFilteredFloats);
+      }
+      if (firstAllocation)
+         CUDATools.checkCUDAError(cudaMallocHost(filteredDetectionCountPointer, filteredDetectionCountPointer.sizeof()));
+
+      // Ensure enough memory allocated for boxes
+      long maxBoxFloats = (long) FLOATS_PER_BOX * unfilteredDetectionCount;
+      if (firstAllocation || boxes.limit() < maxBoxFloats)
+      {
+         if (!firstAllocation)
+            CUDATools.checkCUDAError(cudaFreeAsync(boxes, cudaStream));
+         CUDATools.mallocAsync(boxes, maxBoxFloats, cudaStream);
+         boxes.limit(maxBoxFloats);
+      }
+
+      // Ensure enough memory allocated for prototype masks
+      long totalMaskFloats = (long) output1Blob.size(1) * output1Blob.size(2) * output1Blob.size(3);
+      if (firstAllocation || prototypeMasks.limit() < totalMaskFloats)
+      {
+         if (!firstAllocation)
+            CUDATools.checkCUDAError(cudaFreeAsync(prototypeMasks, cudaStream));
+         CUDATools.mallocAsync(prototypeMasks, totalMaskFloats, cudaStream);
+         prototypeMasks.limit(totalMaskFloats);
+      }
+
+      firstAllocation = false;
+   }
+
+   private void freeCUDAMemory()
+   {
+      if (firstAllocation)
+         return;
+
+      try
+      {
+         CUDATools.throwCUDAError(cudaFreeAsync(unfilteredDetections, cudaStream));
+         CUDATools.throwCUDAError(cudaFreeAsync(boxes, cudaStream));
+         CUDATools.throwCUDAError(cudaFreeAsync(prototypeMasks, cudaStream));
+         CUDATools.throwCUDAError(cudaFreeHost(filteredDetections));
+         CUDATools.throwCUDAError(cudaFreeHost(filteredDetectionCountPointer));
+      }
+      catch (Exception cudaException)
+      {
+         // If the CUDA context is already destroyed, we only need to free host memory
+         if (cudaException.getMessage().contains("cudaErrorContextIsDestroyed"))
+         {
+            CUDATools.checkCUDAError(cudaFreeHost(filteredDetections));
+            CUDATools.checkCUDAError(cudaFreeHost(filteredDetectionCountPointer));
+         }
+         else
+            LogTools.error(cudaException);
+      }
    }
 
    private RawImage computeDetectionMask(FloatPointer filteredOutput,
