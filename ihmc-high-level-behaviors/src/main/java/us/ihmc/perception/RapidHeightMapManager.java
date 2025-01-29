@@ -54,7 +54,7 @@ public class RapidHeightMapManager
    private final Notification resetHeightMapRequested = new Notification();
    private final BytePointer compressedCroppedHeightMapPointer = new BytePointer();
 
-   private final AtomicReference<Vector3D> totalPlanOffsetToProcess = new AtomicReference<>();
+   private final AtomicReference<Vector3D> totalPlanOffset = new AtomicReference<>();
    private final Vector3D lastPlanOffset = new Vector3D();
    private final Vector3D mostRecentPlanOffsetProcessed = new Vector3D();
 
@@ -140,7 +140,7 @@ public class RapidHeightMapManager
 
       if (resetHeightMapRequested.poll())
       {
-         totalPlanOffsetToProcess.set(null);
+         totalPlanOffset.set(null);
          mostRecentPlanOffsetProcessed.setToZero();
          rapidHeightMapExtractor.reset();
       }
@@ -152,9 +152,16 @@ public class RapidHeightMapManager
       cameraPose.setToZero(cameraFrame);
       cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      if (controllerFootstepQueueMonitor.isFootstepStarted() && totalPlanOffsetToProcess.get() != null)
+      if (controllerFootstepQueueMonitor.isWalkingStarted())
       {
-         Vector3D incrementalOffset = new Vector3D(totalPlanOffsetToProcess.getAndSet(null));
+         // We reset this because the controller resets the drift on its end. So we need to reset ours as well.
+         // The existing drift is already captured in the height map by the previous offsets
+         mostRecentPlanOffsetProcessed.setToZero();
+      }
+
+      if (controllerFootstepQueueMonitor.isFootstepStarted() && totalPlanOffset.get() != null)
+      {
+         Vector3D incrementalOffset = new Vector3D(totalPlanOffset.getAndSet(null));
          incrementalOffset.sub(mostRecentPlanOffsetProcessed);
          LogTools.info("Incremental offset: " + incrementalOffset.getZ());
          rapidHeightMapExtractor.updateHeightOffset((float) incrementalOffset.getZ());
@@ -200,13 +207,6 @@ public class RapidHeightMapManager
       Vector3D planOffset = planOffsetMessage.getOffsetVector();
       System.out.println("Plan offset while in double support: " + planOffset.getZ());
 
-//      if (!MathTools.epsilonEquals(planOffset.getZ(), lastPlanOffset.getZ(), epsilon))
-//      {
-//         LogTools.info("Plan offset status has changed! Last offset: " + lastPlanOffset.getZ() + " current offset: " + planOffset.getZ());
-//         totalPlanOffsetToProcess.set(planOffset);
-//         lastPlanOffset.set(planOffsetMessage.getOffsetVector());
-//      }
-
-      totalPlanOffsetToProcess.set(planOffset);
+      totalPlanOffset.set(planOffset);
    }
 }
