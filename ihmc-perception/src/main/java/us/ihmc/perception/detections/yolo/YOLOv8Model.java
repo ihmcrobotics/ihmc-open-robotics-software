@@ -250,7 +250,7 @@ public class YOLOv8Model
            Mat output1Blob = outputBlobs.get(1);
 
            dim3 blockDims = new dim3();
-           dim3 gridDims = new dim3();)
+           dim3 gridDims = new dim3())
       {
          updateCUDAMemoryAllocation(output0Blob, output1Blob);
 

@@ -3,7 +3,8 @@ package us.ihmc.perception.detections.yolo;
 import org.bytedeco.opencv.opencv_core.Rect;
 import us.ihmc.perception.RawImage;
 
-public record YOLOv8Detection(String objectClass, float confidence, int boundingBoxX, int boundingBoxY, int boundingBoxWidth, int boundingBoxHeight, RawImage mask)
+public record YOLOv8Detection(String objectClass, float confidence, int boundingBoxX, int boundingBoxY, int boundingBoxWidth, int boundingBoxHeight,
+                              RawImage mask)
 {
    public YOLOv8Detection(String objectClass, float confidence, Rect boundingBox, RawImage mask)
    {
