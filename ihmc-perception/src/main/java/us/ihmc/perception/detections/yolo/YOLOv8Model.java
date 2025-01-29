@@ -25,7 +25,6 @@ import us.ihmc.perception.cuda.CUDAProgram;
 import us.ihmc.perception.cuda.CUDAStreamManager;
 import us.ihmc.perception.cuda.CUDATools;
 import us.ihmc.perception.imageMessage.PixelFormat;
-import us.ihmc.tools.Destroyable;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -129,12 +128,6 @@ public class YOLOv8Model
    {
       yoloNet.close();
       outputNames.close();
-
-      CUDAStreamManager.releaseStream(cudaStream);
-      filterKernel.close();
-      postProcessProgram.close();
-      nms.close();
-
       outputBlobs.close();
 
       freeCUDAMemory();
@@ -144,6 +137,11 @@ public class YOLOv8Model
       filteredDetectionCountPointer.close();
       boxes.close();
       prototypeMasks.close();
+
+      CUDAStreamManager.releaseStream(cudaStream);
+      filterKernel.close();
+      postProcessProgram.close();
+      nms.close();
    }
 
    /**

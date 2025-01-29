@@ -206,6 +206,7 @@ public class YOLOv8DetectionExecutor
       System.out.println("Destroying " + getClass().getSimpleName());
       taskExecutorThread.blockingKill();
       segmenter.destroy();
+      newestColorImage.set(null);
       annotatedImagePublishedThread.blockingKill();
 
       for (YOLOv8Model yoloModel : yoloModels)
@@ -232,6 +233,9 @@ public class YOLOv8DetectionExecutor
          return;
 
       RawImage colorImage = newestColorImage.blockingPoll();
+      if (colorImage == null)
+         return;
+
       Mat resultMat = new Mat();
       synchronized (yoloDetectionResults)
       {
