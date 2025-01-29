@@ -261,7 +261,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    }
 
    private final PlanOffsetStatus planOffsetStatus = new PlanOffsetStatus();
-   private double value = 0.1;
+   private double value = -0.1;
 
    public void renderImGuiWidgets()
    {
@@ -274,7 +274,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
          LogTools.info("Plan Offset Status: " + planOffsetStatus.getOffsetVector());
          ros2Helper.publish(getTopic(PlanOffsetStatus.class, "Nadia"), planOffsetStatus);
 
-         if (value > 5)
+         if (value < 5)
          {
             value -= 0.1;
          }

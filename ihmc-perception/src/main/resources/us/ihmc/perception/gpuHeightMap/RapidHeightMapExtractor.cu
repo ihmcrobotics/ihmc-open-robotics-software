@@ -857,5 +857,5 @@ __global__ void planOffsetKernel(unsigned short * matrixToModify, size_t pitchMa
 
 
     unsigned short *matrixRow = (unsigned short *)((char *)matrixToModify + indexY * pitchMatrixToModify);
-    matrixRow[indexX] += static_cast<unsigned short>(offsetInZ * 10000.0f);
+    matrixRow[indexX] += static_cast<short>(offsetInZ * 10000.0f);
 }
