@@ -20,4 +20,4 @@ install(TARGETS external-control
     ARCHIVE DESTINATION lib)
 install(DIRECTORY src/main/cpp/ DESTINATION ${CMAKE_INSTALL_PREFIX}/include FILES_MATCHING PATTERN "*.hpp")
 
-target_link_libraries(external-control Eigen3::Eigen)
+target_link_libraries(external-control Eigen3::Eigen zmq)

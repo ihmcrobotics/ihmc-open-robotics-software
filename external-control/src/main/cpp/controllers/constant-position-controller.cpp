@@ -49,10 +49,6 @@ namespace ihmc
         return true;
     }
 
-    void compute()
-    {
-    }
-
     Eigen::VectorXd ConstantPositionController::get_desired_joint_positions() const
     {
         return home_configuration_;

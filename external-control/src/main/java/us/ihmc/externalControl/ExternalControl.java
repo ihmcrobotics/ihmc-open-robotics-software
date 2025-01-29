@@ -113,7 +113,7 @@ public class ExternalControl
          data.stiffness = solutionStiffnessVector.get(i, 0);
          data.damping = solutionDampingVector.get(i, 0);
       }
-      LogTools.info("returned stiffness" + solutionStiffnessVector);
+//      LogTools.info("returned stiffness" + solutionStiffnessVector);
    }
 
    public SolutionJointData getSolutionData(OneDoFJointReadOnly joint)

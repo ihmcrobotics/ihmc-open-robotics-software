@@ -6,6 +6,7 @@
 namespace ihmc
 {
     ExternalControlImpl::ExternalControlImpl(const double default_stiffness, const double default_damping, const int number_of_joints)
+        : zmq_controller_(default_stiffness, default_damping, number_of_joints)
     {
        std::cout << "Creating external control object." << std::endl;
 
@@ -67,6 +68,29 @@ namespace ihmc
 
             return true;
         }
+        else if (hardware_status == 1)
+        {
+            const VectorViewReadOnly state(x_data, x_rows);
+            const Eigen::Vector3d base_position = state.head(3);
+            const Eigen::Vector4d base_orientation = state.segment(3, 4);
+            const Eigen::VectorXd joint_positions = state.segment(7, number_of_joints_);
+            const Eigen::Vector3d base_linear_velocity = state.segment(7 + number_of_joints_, 3);
+            const Eigen::Vector3d base_angular_velocity = state.segment(10 + number_of_joints_, 3);
+            const Eigen::VectorXd joint_velocities = state.tail(number_of_joints_);
+
+            desired_state_data_.head(7) << base_position, base_orientation;
+            desired_state_data_.segment(7, number_of_joints_) = zmq_controller_.get_desired_joint_positions();
+            desired_state_data_.segment(7 + number_of_joints_, 6) << base_linear_velocity, base_angular_velocity;
+            desired_state_data_.tail(number_of_joints_) = zmq_controller_.get_desired_joint_velocities();
+
+            zmq_controller_.compute(current_time, x_data, x_rows, u_data, u_rows);
+
+            desired_control_data_ = zmq_controller_.get_desired_joint_torques();
+            p_gains_ = zmq_controller_.get_desired_joint_stiffnesses();
+            d_gains_ = zmq_controller_.get_desired_joint_damping();
+
+            return true;
+        }
         else
         {
             std::cout << "There is no control mode defined for " << hardware_status << std::endl;
@@ -95,6 +119,7 @@ namespace ihmc
     bool ExternalControlImpl::setHomeJointConfiguration(const double* configuration_data, int rows)
     {
         std::cout << "Setting home configuration" << std::endl;
+        zmq_controller_.setHomeJointConfiguration(configuration_data, rows);
         return constant_position_controller_.setHomeJointConfiguration(configuration_data, rows);
     }
 }

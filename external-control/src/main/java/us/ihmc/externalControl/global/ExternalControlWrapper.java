@@ -16,6 +16,7 @@ public class ExternalControlWrapper extends us.ihmc.externalControl.ExternalCont
 // #include <Eigen/Core>
 
 // #include "controllers/constant-position-controller.hpp"
+// #include "controllers/zmq-controller.hpp"
     @Namespace("ihmc") @NoOffset public static class ExternalControlImpl extends Pointer {
         static { Loader.load(); }
         /** Pointer cast constructor. Invokes {@link Pointer#Pointer(Pointer)}. */
