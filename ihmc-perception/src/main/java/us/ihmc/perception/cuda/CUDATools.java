@@ -63,7 +63,7 @@ public class CUDATools
       return getCUDADeviceCount() > 0;
    }
 
-   public static int maxThreadsPerBlock()
+   public static int getMaxThreadsPerBlock()
    {
       try (IntPointer device = new IntPointer(1);
            cudaDeviceProp deviceProperties = new cudaDeviceProp())

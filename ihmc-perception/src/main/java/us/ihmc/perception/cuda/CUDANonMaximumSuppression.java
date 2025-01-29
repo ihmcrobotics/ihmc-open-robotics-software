@@ -12,6 +12,7 @@ import static org.bytedeco.cuda.global.cudart.*;
 
 public class CUDANonMaximumSuppression implements AutoCloseable
 {
+   private static final int MAX_THREADS_PER_BLOCK = CUDATools.getMaxThreadsPerBlock();
    private static final int BLOCK_DIM_2D = 16;
    private static final int BLOCK_DIM_1D = 256;
 
@@ -77,7 +78,7 @@ public class CUDANonMaximumSuppression implements AutoCloseable
     */
    public int runAsync(FloatPointer inputBoxes, int boxCount, float overlapThreshold, IntPointer outputIncludedIndices, CUstream_st cudaStream)
    {
-      if (boxCount > CUDATools.maxThreadsPerBlock())
+      if (boxCount > MAX_THREADS_PER_BLOCK)
          return runSlowAsync(inputBoxes, boxCount, overlapThreshold, outputIncludedIndices, cudaStream);
       else
          return runFastAsync(inputBoxes, boxCount, overlapThreshold, outputIncludedIndices, cudaStream);
