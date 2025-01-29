@@ -20,6 +20,7 @@ public class ControllerFootstepQueueMonitor
 
    private final HumanoidReferenceFrames referenceFrames;
    private final ContinuousHikingLogger continuousHikingLogger;
+   private boolean footstepStarted;
 
    public ControllerFootstepQueueMonitor(ROS2Helper ros2Helper,
                                          String simpleRobotName,
@@ -56,6 +57,15 @@ public class ControllerFootstepQueueMonitor
                                           .norm();
       }
 
+      if (footstepStatusMessage.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_STARTED)
+      {
+         footstepStarted = true;
+      }
+      else
+      {
+         footstepStarted = false;
+      }
+
       this.footstepStatusMessage.set(footstepStatusMessage);
    }
 
@@ -67,5 +77,10 @@ public class ControllerFootstepQueueMonitor
    public AtomicReference<FootstepStatusMessage> getFootstepStatusMessage()
    {
       return footstepStatusMessage;
+   }
+
+   public boolean isFootstepStarted()
+   {
+      return footstepStarted;
    }
 }

@@ -9,7 +9,8 @@ import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.commons.MathTools;
+import us.ihmc.behaviors.activeMapping.ContinuousHikingLogger;
+import us.ihmc.behaviors.activeMapping.ControllerFootstepQueueMonitor;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.PerceptionAPI;
@@ -18,6 +19,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
@@ -44,6 +46,7 @@ public class RapidHeightMapManager
    private final FramePose3D cameraPose = new FramePose3D();
    private final ROS2Helper ros2Helper;
    private final boolean runWithCUDA;
+   private ControllerFootstepQueueMonitor controllerFootstepQueueMonitor;
    private GpuMat deviceDepthImage;
    private final Mat hostDepthImage = new Mat();
    private BytedecoImage heightMapBytedecoImage;
@@ -95,6 +98,11 @@ public class RapidHeightMapManager
                                                  });
 
          simpleRobotName = robotModel.getSimpleRobotName();
+         ContinuousHikingLogger continuousHikingLogger = new ContinuousHikingLogger();
+         controllerFootstepQueueMonitor = new ControllerFootstepQueueMonitor(ros2Helper,
+                                                                             simpleRobotName,
+                                                                             new HumanoidReferenceFrames(robotModel.createFullRobotModel()),
+                                                                             continuousHikingLogger);
       }
 
       if (runWithCUDA)
@@ -144,10 +152,11 @@ public class RapidHeightMapManager
       cameraPose.setToZero(cameraFrame);
       cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      if (totalPlanOffsetToProcess.get() != null)
+      if (controllerFootstepQueueMonitor.isFootstepStarted())
       {
          Vector3D incrementalOffset = new Vector3D(totalPlanOffsetToProcess.getAndSet(null));
          incrementalOffset.sub(mostRecentPlanOffsetProcessed);
+         LogTools.info("Incremental offset: " + incrementalOffset.getZ());
          rapidHeightMapExtractor.updateHeightOffset((float) incrementalOffset.getZ());
          mostRecentPlanOffsetProcessed.add(incrementalOffset);
       }
@@ -185,15 +194,18 @@ public class RapidHeightMapManager
    }
 
    private static final double epsilon = 5e-3;
+
    private void acceptPlanOffsetStatus(PlanOffsetStatus planOffsetMessage)
    {
       Vector3D planOffset = planOffsetMessage.getOffsetVector();
 
-      if (!MathTools.epsilonEquals(planOffset.getZ(), lastPlanOffset.getZ(), epsilon))
-      {
-         LogTools.info("Plan offset status has changed! Last offset: " + lastPlanOffset.getZ() + " current offset: " + planOffset.getZ());
-         totalPlanOffsetToProcess.set(planOffset);
-         lastPlanOffset.set(planOffsetMessage.getOffsetVector());
-      }
+//      if (!MathTools.epsilonEquals(planOffset.getZ(), lastPlanOffset.getZ(), epsilon))
+//      {
+//         LogTools.info("Plan offset status has changed! Last offset: " + lastPlanOffset.getZ() + " current offset: " + planOffset.getZ());
+//         totalPlanOffsetToProcess.set(planOffset);
+//         lastPlanOffset.set(planOffsetMessage.getOffsetVector());
+//      }
+
+      totalPlanOffsetToProcess.set(planOffset);
    }
 }
