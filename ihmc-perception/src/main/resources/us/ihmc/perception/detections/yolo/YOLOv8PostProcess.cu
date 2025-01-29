@@ -24,18 +24,9 @@
 #define UNFILTERED_FLOATS_PER_COLUMN(n) (4 + n + 32)
 
 #include "Utils.cu"
+#include "PerceptionUtils.cu"
 
-template<typename T>
-__device__ T* row(const T* matrix, long pitch, int row)
-{
-    return (T*)((char*) matrix + pitch * row);
-}
-
-template<typename T>
-__device__ T* col(const T* matrix, int column)
-{
-    return (T*)(matrix + column);
-}
+using namespace PerceptionUtils;
 
 extern "C"
 __global__ void filterDetections(float* unfilteredDetection, int classCount,

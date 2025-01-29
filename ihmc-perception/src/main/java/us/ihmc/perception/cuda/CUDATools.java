@@ -149,6 +149,14 @@ public class CUDATools
    }
 
    /**
+    * @return The URL to the PerceptionUtils.cu file
+    */
+   public static URL getPerceptionUtilsFile()
+   {
+      return CUDATools.class.getResource("PerceptionUtils.cu");
+   }
+
+   /**
     * Helper function for nvjpeg error checking.
     *
     * @param errorCode The returned error code from an nvJPEG function.

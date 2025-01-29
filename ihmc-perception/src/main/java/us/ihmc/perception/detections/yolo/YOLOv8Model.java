@@ -113,7 +113,7 @@ public class YOLOv8Model
       try
       {
          URL postProcessProgramURL = YOLOv8Model.class.getResource("YOLOv8PostProcess.cu");
-         postProcessProgram = new CUDAProgram(postProcessProgramURL, CUDATools.getUtilsFile());
+         postProcessProgram = new CUDAProgram(postProcessProgramURL, CUDATools.getUtilsFile(), CUDATools.getPerceptionUtilsFile());
          filterKernel = postProcessProgram.loadKernel("filterDetections");
          detectionMaskKernel = postProcessProgram.loadKernel("computeDetectionMask");
       }
