@@ -846,10 +846,15 @@ __global__ void planOffsetKernel(unsigned short * matrixToModify, size_t pitchMa
 
     if (indexX >= colsMatrixToModify || indexY >= rowsMatrixToModify)
         return;
+    if (indexX == 20 && indexY == 20)
+    {
+        printf("OffsetInZ from inside kernel: %f", offsetInZ);
+    }
 
     unsigned short *skipRow = (unsigned short *)((char *)matrixValuesToSkip + indexY * pitchMatrixValuesToSkip);
     if (skipRow[indexX] != resetOffset)
         return;
+
 
     unsigned short *matrixRow = (unsigned short *)((char *)matrixToModify + indexY * pitchMatrixToModify);
     matrixRow[indexX] += static_cast<unsigned short>(offsetInZ * 10000.0f);

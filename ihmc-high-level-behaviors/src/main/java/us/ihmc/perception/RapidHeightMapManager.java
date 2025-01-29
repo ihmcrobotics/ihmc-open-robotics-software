@@ -29,6 +29,7 @@ import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
+import us.ihmc.robotDataVisualizer.logger.converters.LogTimeStampedIndexGenerator;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 import java.time.Instant;
@@ -154,6 +155,7 @@ public class RapidHeightMapManager
 
       if (controllerFootstepQueueMonitor.isWalkingStarted())
       {
+         LogTools.info("Walking has just started");
          // We reset this because the controller resets the drift on its end. So we need to reset ours as well.
          // The existing drift is already captured in the height map by the previous offsets
          mostRecentPlanOffsetProcessed.setToZero();
@@ -161,11 +163,15 @@ public class RapidHeightMapManager
 
       if (controllerFootstepQueueMonitor.isFootstepStarted() && totalPlanOffset.get() != null)
       {
+         LogTools.info("totalPlanOffset: " + totalPlanOffset.get().getZ());
          Vector3D incrementalOffset = new Vector3D(totalPlanOffset.getAndSet(null));
+         LogTools.info("Incremental offset before subtarcking: " + incrementalOffset.getZ());
          incrementalOffset.sub(mostRecentPlanOffsetProcessed);
-         LogTools.info("Incremental offset: " + incrementalOffset.getZ());
+         LogTools.info("Most recent to be subtracked from incremental: " + mostRecentPlanOffsetProcessed.getZ());
+         LogTools.info("Incremental offset after subtraction: " + incrementalOffset.getZ());
          rapidHeightMapExtractor.updateHeightOffset((float) incrementalOffset.getZ());
          mostRecentPlanOffsetProcessed.add(incrementalOffset);
+         LogTools.info("Most recent after adding incremental: " + mostRecentPlanOffsetProcessed.getZ());
       }
 
       rapidHeightMapExtractor.update(sensorToWorld, sensorToGround, groundToWorld);

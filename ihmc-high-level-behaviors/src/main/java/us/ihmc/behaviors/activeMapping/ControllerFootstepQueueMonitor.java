@@ -13,6 +13,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.communication.HumanoidControllerAPI.getTopic;
@@ -26,7 +27,7 @@ public class ControllerFootstepQueueMonitor
    private final HumanoidReferenceFrames referenceFrames;
    private final ContinuousHikingLogger continuousHikingLogger;
    private boolean footstepStarted;
-   private boolean walkingStarted;
+   private final AtomicBoolean walkingStarted = new AtomicBoolean(false);
 
    public ControllerFootstepQueueMonitor(ROS2Helper ros2Helper,
                                          String simpleRobotName,
@@ -79,12 +80,12 @@ public class ControllerFootstepQueueMonitor
    private void acceptWalkingStatusMessage(WalkingStatusMessage message)
    {
       // Declared locally since this represents the absolute state which other threads can access
-      walkingStarted = false;
+      walkingStarted.set(false);
       WalkingStatus walkingStatus = WalkingStatus.fromByte(message.getWalkingStatus());
 
       if (walkingStatus == WalkingStatus.STARTED || walkingStatus == WalkingStatus.RESUMED)
       {
-         walkingStarted = true;
+         walkingStarted.set(true);
       }
       else if (walkingStatus == WalkingStatus.ABORT_REQUESTED)
       {
@@ -114,6 +115,6 @@ public class ControllerFootstepQueueMonitor
 
    public boolean isWalkingStarted()
    {
-      return walkingStarted;
+      return walkingStarted.getAndSet(false);
    }
 }
