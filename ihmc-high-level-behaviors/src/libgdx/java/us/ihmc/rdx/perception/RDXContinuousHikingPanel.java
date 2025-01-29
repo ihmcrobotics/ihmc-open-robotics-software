@@ -270,7 +270,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
          StatusMessageOutputManager statusMessageOutputManager = new StatusMessageOutputManager(ControllerAPIDefinition.getControllerSupportedStatusMessages());
          Vector3D planOffset = new Vector3D(0, 0, value);
          planOffsetStatus.getOffsetVector().set(planOffset);
-//         statusMessageOutputManager.reportStatusMessage(planOffsetStatus);
+         statusMessageOutputManager.reportStatusMessage(planOffsetStatus);
          LogTools.info("Plan Offset Status: " + planOffsetStatus.getOffsetVector());
          ros2Helper.publish(getTopic(PlanOffsetStatus.class, "Nadia"), planOffsetStatus);
 

@@ -546,6 +546,9 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
 
+      // Need to reset the empty global map before using it so when its filled it starts with all "zero" values
+      emptyGlobalHeightMapImage.setTo(new Scalar(resetOffset));
+
       emptyRegisterKernl.withPointer(localHeightMapImage.data()).withLong(localHeightMapImage.step());
       emptyRegisterKernl.withPointer(emptyGlobalHeightMapImage.data()).withLong(emptyGlobalHeightMapImage.step());
       emptyRegisterKernl.withPointer(parametersDevicePointer);
