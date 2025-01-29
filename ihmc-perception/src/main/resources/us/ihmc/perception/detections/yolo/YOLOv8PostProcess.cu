@@ -38,7 +38,10 @@ __device__ T* col(const T* matrix, int column)
 }
 
 extern "C"
-__global__ void filterDetections(float* unfilteredDetection, int classCount, int detectionCount, float confidenceThreshold, float* filteredDetections, int* filteredDetectionCount)
+__global__ void filterDetections(float* unfilteredDetection, int classCount,
+                                 int detectionCount, float confidenceThreshold,
+                                 int shiftX, int shiftY,
+                                 float* filteredDetections, int* filteredDetectionCount)
 {
     if (Utils::getThreadCoordX() == 0)
         *filteredDetectionCount = 0;
@@ -78,6 +81,10 @@ __global__ void filterDetections(float* unfilteredDetection, int classCount, int
         float x = *row(unfilteredColumn, sizeof(float) * detectionCount, X_INDEX) - width / 2.0f;
         float y = *row(unfilteredColumn, sizeof(float) * detectionCount, Y_INDEX) - height / 2.0f;
 
+        // Apply shift to X and Y
+        x += shiftX;
+        y += shiftY;
+
         // Assign the values to the filtered column
         float* filteredRow = row(filteredDetections, sizeof(float) * FILTERED_FLOATS_PER_ROW, filteredRowIndex);
         filteredRow[X_INDEX] = x;
@@ -91,6 +98,57 @@ __global__ void filterDetections(float* unfilteredDetection, int classCount, int
         for (int j = 0; j < 32; ++j)
         {
             filteredRow[6 + j] = *row(unfilteredColumn, sizeof(float) * detectionCount, 4 + classCount + j);
+        }
+    }
+}
+
+extern "C"
+__global__ void computeDetectionMask(float* prototypeMasks, float* weights,
+                                     float* boundingBox, float maskThreshold,
+                                     unsigned char* mask, size_t maskPitch,
+                                     int maskWidth, int maskHeight)
+{
+    int startX = Utils::getThreadCoordX();
+    int strideX = Utils::getStrideX();
+
+    int startY = Utils::getThreadCoordY();
+    int strideY = Utils::getStrideY();
+
+    const float boundingBoxLeft = 0.25f * boundingBox[0];                       // X
+    const float boundingBoxRight = 0.25f * (boundingBox[0] + boundingBox[2]);   // X + width
+    const float boundingBoxTop = 0.25f * boundingBox[1];                        // Y
+    const float boundingBoxBottom = 0.25f * (boundingBox[1] + boundingBox[3]);  // Y + height
+
+    float* prototypeMask;
+    float prototypeValue;
+    float floatMaskValue;
+    unsigned char maskValue;
+
+    for (int y = startY; y < maskHeight; y += strideY)
+    {
+        for (int x = startX; x < maskWidth; x += strideX)
+        {
+            maskValue = 0x00;
+
+            // If we're in the bounding box
+            if (!(x < boundingBoxLeft || x > boundingBoxRight ||
+                  y < boundingBoxTop || y > boundingBoxBottom))
+            {
+                // Calculate float mask value
+                floatMaskValue = 0.0f;
+                for (int i = 0; i < 32; ++i)
+                {
+                    prototypeMask = prototypeMasks + i * maskWidth * maskHeight;
+                    prototypeValue = prototypeMask[y * maskWidth + x];
+                    floatMaskValue += weights[i] * prototypeValue;
+                }
+
+                // If the value is greater than the threshold, we have a valid point!
+                if (floatMaskValue > maskThreshold)
+                    maskValue = 0xFF;
+            }
+
+            *col(row(mask, maskPitch, y), x) = maskValue;
         }
     }
 }

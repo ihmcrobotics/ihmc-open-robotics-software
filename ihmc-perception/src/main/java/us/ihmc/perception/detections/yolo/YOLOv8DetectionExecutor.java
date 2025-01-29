@@ -125,7 +125,7 @@ public class YOLOv8DetectionExecutor
     */
    public void runYOLODetection(YOLOv8Model yoloModel, RawImage colorImage, RawImage depthImage)
    {
-      if (!yoloModel.isNetProcessing() && taskQueue.remainingCapacity() > 0)
+      if (taskQueue.remainingCapacity() > 0)
       {
          // Acquire the images
          if (colorImage.get() == null || depthImage.get() == null)
