@@ -1,3 +1,5 @@
+const float PI_F = 3.1415927f;
+
 __device__ float dot(const float3 a, const float3 b)
 {
     return a.x * b.x + a.y * b.y + a.z * b.z;

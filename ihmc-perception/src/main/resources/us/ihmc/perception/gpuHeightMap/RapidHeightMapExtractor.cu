@@ -484,9 +484,6 @@ extern "C" __global__ void croppingKernel(unsigned short *inputMap, size_t pitch
     }
 }
 
-
-const float PI_F = 3.1415927f;
-
 __device__ float get_yaw_from_index(int yaw_discretizations, int idx_yaw)
 {
     return PI_F * ((float)idx_yaw) / ((yaw_discretizations - 1));
@@ -506,12 +503,12 @@ __global__ void computeSnappedValuesKernel(unsigned short *globalMap, size_t pit
                                            unsigned short *snapNormalYMap, size_t pitchSnapNormalY,
                                            unsigned short *snapNormalZMap, size_t pitchSnapNormalZ,
                                            unsigned short *snappedAreaFractionMap, size_t pitchSnappedAreaFraction,
-                                           float *params)
+                                           float *params, int croppedMapXY)
 {
     int idx_x = blockIdx.x * blockDim.x + threadIdx.x;
     int idx_y = blockIdx.y * blockDim.y + threadIdx.y;
 
-    if (idx_x >= 201 || idx_y >= 201)
+    if (idx_x >= croppedMapXY || idx_y >= croppedMapXY)
         return;
 
     bool should_print = false;//idx_x == 20 && idx_y == 20;

@@ -327,7 +327,7 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
       snappingKernel.withPointer(snapNormalYImage.data()).withLong(snapNormalYImage.step());
       snappingKernel.withPointer(snapNormalZImage.data()).withLong(snapNormalZImage.step());
       snappingKernel.withPointer(snappedAreaFractionImage.data()).withLong(snappedAreaFractionImage.step());
-      snappingKernel.withPointer(snappingParametersDevicePointer);
+      snappingKernel.withPointer(snappingParametersDevicePointer).withInt(heightMapParameters.getCropWindowSize());
 
       snappingKernel.run(stream, snappingKernelGridDim, blockSize, 0);
       error = cudaStreamSynchronize(stream);
