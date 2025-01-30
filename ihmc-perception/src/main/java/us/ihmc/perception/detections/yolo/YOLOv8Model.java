@@ -33,6 +33,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -51,7 +52,7 @@ public class YOLOv8Model
 
    // Meta data
    private final String modelName;
-   private final List<String> detectionClassNames = new ArrayList<>();
+   private final List<String> objectClasses = new ArrayList<>();
 
    // OpenCV DNN stuff
    private final Net yoloNet;
@@ -73,7 +74,13 @@ public class YOLOv8Model
    private final IntPointer filteredDetectionCountPointer = new IntPointer();
    private final FloatPointer boxes = new FloatPointer();
    private final FloatPointer prototypeMasks = new FloatPointer();
-   private boolean firstAllocation = true;
+   private boolean cudaMemoryAllocated = false;
+
+   // Parameters
+   private final float[] maskThresholds;
+   private final FloatPointer hostConfidenceThresholds;
+   private final FloatPointer deviceConfidenceThresholds = new FloatPointer();
+
 
    public YOLOv8Model(Path modelBaseDirectory)
    {
@@ -90,7 +97,7 @@ public class YOLOv8Model
          Yaml yaml = new Yaml();
          Map<String, List<Object>> classNamesData = yaml.load(inputStream);
          List<Object> names = classNamesData.get("names");
-         detectionClassNames.addAll(names.stream().map(Object::toString).toList());
+         objectClasses.addAll(names.stream().map(Object::toString).toList());
 
          // Read the YOLO net
          Path onnxFile = YOLOv8Tools.getONNXFile(modelBaseDirectory);
@@ -122,6 +129,15 @@ public class YOLOv8Model
       }
 
       nms = new CUDANonMaximumSuppression();
+
+      // Allocate parameters
+      maskThresholds = new float[objectClasses.size()];
+      hostConfidenceThresholds = new FloatPointer(objectClasses.size());
+      CUDATools.mallocAsync(deviceConfidenceThresholds, objectClasses.size(), cudaStream);
+
+      // Set to default values
+      setMaskThresholds(0.2f);
+      setConfidenceThresholds(0.8f);
    }
 
    public synchronized void destroy()
@@ -157,9 +173,45 @@ public class YOLOv8Model
    /**
     * @return A list of object classes this model can detect.
     */
-   public List<String> getDetectionClassNames()
+   public List<String> getObjectClasses()
    {
-      return detectionClassNames;
+      return objectClasses;
+   }
+
+
+   public void setConfidenceThresholds(float confidenceThreshold)
+   {
+      float[] confidenceArray = new float[objectClasses.size()];
+      Arrays.fill(confidenceArray, confidenceThreshold);
+      hostConfidenceThresholds.put(confidenceArray);
+      CUDATools.memcpyAsync(deviceConfidenceThresholds, hostConfidenceThresholds, objectClasses.size(), cudaStream);
+   }
+
+   public void setConfidenceThresholds(Map<String, Float> confidenceThresholds)
+   {
+      confidenceThresholds.forEach((objectClass, threshold) -> hostConfidenceThresholds.put(objectClasses.indexOf(objectClass), threshold));
+      CUDATools.memcpyAsync(deviceConfidenceThresholds, hostConfidenceThresholds, objectClasses.size(), cudaStream);
+   }
+
+   public void setConfidenceThreshold(String objectClass, float confidenceThreshold)
+   {
+      hostConfidenceThresholds.put(objectClasses.indexOf(objectClass), confidenceThreshold);
+      CUDATools.memcpyAsync(deviceConfidenceThresholds, hostConfidenceThresholds, objectClasses.size(), cudaStream);
+   }
+
+   public void setMaskThresholds(float threshold)
+   {
+      objectClasses.forEach(objectClass -> setMaskThreshold(objectClass, threshold));
+   }
+
+   public void setMaskThresholds(Map<String, Float> thresholds)
+   {
+      thresholds.forEach(this::setMaskThreshold);
+   }
+
+   public void setMaskThreshold(String objectClass, float maskThreshold)
+   {
+      maskThresholds[objectClasses.indexOf(objectClass)] = maskThreshold;
    }
 
    /**
@@ -167,13 +219,11 @@ public class YOLOv8Model
     *
     * @param image               Image to run YOLO on. If this image isn't in BGR format, it will be converted to BGR.
     *                            Pass in BGR images for optimal performance.
-    * @param confidenceThreshold Minimum confidence detections must have to be considered valid [0.0, 1.0].
     * @param nmsThreshold        Non-maximum suppression threshold for determining whether bounding boxes overlap.
     *                            The smaller the value, the less overlap is required for a box to be removed [0.0, 1.0].
-    * @param maskThreshold       Minimum value for a pixel to be part of the mask.
     * @return List of {@link YOLOv8Detection}s found in the image.
     */
-   public synchronized YOLOv8DetectionList run(RawImage image, float confidenceThreshold, float nmsThreshold, float maskThreshold)
+   public synchronized YOLOv8DetectionList run(RawImage image, float nmsThreshold)
    {
       YOLOv8DetectionList result = new YOLOv8DetectionList();
 
@@ -270,9 +320,9 @@ public class YOLOv8Model
 
          // Run the filter kernel
          filterKernel.withPointer(unfilteredDetections)
-                     .withInt(detectionClassNames.size())
+                     .withInt(objectClasses.size())
                      .withInt(unfilteredDetectionCount)
-                     .withFloat(confidenceThreshold)
+                     .withPointer(deviceConfidenceThresholds)
                      .withInt(shiftWidth)
                      .withInt(shiftHeight)
                      .withPointer(filteredDetections)
@@ -319,9 +369,9 @@ public class YOLOv8Model
             Rect boundingBox = new Rect(Math.round(row.get(0)), Math.round(row.get(1)), Math.round(row.get(2)), Math.round(row.get(3)));
             float confidence = row.get(4);
             int classID = (int) row.get(5);
-            RawImage mask = computeDetectionMask(filteredDetections, prototypeMasks, index, maskThreshold, maskIntrinsics, bgrInputImage);
+            RawImage mask = computeDetectionMask(filteredDetections, prototypeMasks, index, maskThresholds[classID], maskIntrinsics, bgrInputImage);
 
-            YOLOv8Detection detection = new YOLOv8Detection(detectionClassNames.get(classID), confidence, boundingBox, mask);
+            YOLOv8Detection detection = new YOLOv8Detection(objectClasses.get(classID), confidence, boundingBox, mask);
             result.add(detection);
 
             boundingBox.close();
@@ -353,56 +403,79 @@ public class YOLOv8Model
 
    private void updateCUDAMemoryAllocation(Mat output0Blob, Mat output1Blob)
    {
+      if (!cudaMemoryAllocated)
+      {
+         allocateCUDAMemory(output0Blob, output1Blob);
+         return;
+      }
+
       // Ensure enough memory allocated for unfiltered detections
       int unfilteredFloatsPerDetection = output0Blob.size(1);
       int unfilteredDetectionCount = output0Blob.size(2);
       long totalUnfilteredFloats = (long) unfilteredFloatsPerDetection * unfilteredDetectionCount;
-      if (firstAllocation || unfilteredDetections.limit() < totalUnfilteredFloats)
+      if (unfilteredDetections.limit() < totalUnfilteredFloats)
       {
-         if (!firstAllocation)
-            CUDATools.checkCUDAError(cudaFreeAsync(unfilteredDetections, cudaStream));
+         CUDATools.checkCUDAError(cudaFreeAsync(unfilteredDetections, cudaStream));
          CUDATools.mallocAsync(unfilteredDetections, totalUnfilteredFloats, cudaStream);
          unfilteredDetections.limit(totalUnfilteredFloats);
       }
 
       // Ensure enough memory allocated for filtered detections
       long maxFilteredFloats = (long) FILTERED_FLOATS_PER_ROW * unfilteredDetectionCount;
-      if (firstAllocation || filteredDetections.limit() < maxFilteredFloats)
+      if (filteredDetections.limit() < maxFilteredFloats)
       {
-         if (!firstAllocation)
-            CUDATools.checkCUDAError(cudaFreeHost(filteredDetections));
+         CUDATools.checkCUDAError(cudaFreeHost(filteredDetections));
          CUDATools.checkCUDAError(cudaMallocHost(filteredDetections, filteredDetections.sizeof() * maxFilteredFloats));
          filteredDetections.limit(maxFilteredFloats);
       }
-      if (firstAllocation)
-         CUDATools.checkCUDAError(cudaMallocHost(filteredDetectionCountPointer, filteredDetectionCountPointer.sizeof()));
 
       // Ensure enough memory allocated for boxes
       long maxBoxFloats = (long) FLOATS_PER_BOX * unfilteredDetectionCount;
-      if (firstAllocation || boxes.limit() < maxBoxFloats)
+      if (boxes.limit() < maxBoxFloats)
       {
-         if (!firstAllocation)
-            CUDATools.checkCUDAError(cudaFreeAsync(boxes, cudaStream));
+         CUDATools.checkCUDAError(cudaFreeAsync(boxes, cudaStream));
          CUDATools.mallocAsync(boxes, maxBoxFloats, cudaStream);
          boxes.limit(maxBoxFloats);
       }
 
       // Ensure enough memory allocated for prototype masks
       long totalMaskFloats = (long) output1Blob.size(1) * output1Blob.size(2) * output1Blob.size(3);
-      if (firstAllocation || prototypeMasks.limit() < totalMaskFloats)
+      if (prototypeMasks.limit() < totalMaskFloats)
       {
-         if (!firstAllocation)
-            CUDATools.checkCUDAError(cudaFreeAsync(prototypeMasks, cudaStream));
+         CUDATools.checkCUDAError(cudaFreeAsync(prototypeMasks, cudaStream));
          CUDATools.mallocAsync(prototypeMasks, totalMaskFloats, cudaStream);
          prototypeMasks.limit(totalMaskFloats);
       }
+   }
 
-      firstAllocation = false;
+   private void allocateCUDAMemory(Mat output0Blob, Mat output1Blob)
+   {
+      int unfilteredFloatsPerDetection = output0Blob.size(1);
+      int unfilteredDetectionCount = output0Blob.size(2);
+      long totalUnfilteredFloats = (long) unfilteredFloatsPerDetection * unfilteredDetectionCount;
+      CUDATools.mallocAsync(unfilteredDetections, totalUnfilteredFloats, cudaStream);
+      unfilteredDetections.limit(totalUnfilteredFloats);
+
+      long maxFilteredFloats = (long) FILTERED_FLOATS_PER_ROW * unfilteredDetectionCount;
+      CUDATools.checkCUDAError(cudaMallocHost(filteredDetections, filteredDetections.sizeof() * maxFilteredFloats));
+      filteredDetections.limit(maxFilteredFloats);
+
+      CUDATools.checkCUDAError(cudaMallocHost(filteredDetectionCountPointer, filteredDetectionCountPointer.sizeof()));
+
+      long maxBoxFloats = (long) FLOATS_PER_BOX * unfilteredDetectionCount;
+      CUDATools.mallocAsync(boxes, maxBoxFloats, cudaStream);
+      boxes.limit(maxBoxFloats);
+
+      long totalMaskFloats = (long) output1Blob.size(1) * output1Blob.size(2) * output1Blob.size(3);
+      CUDATools.mallocAsync(prototypeMasks, totalMaskFloats, cudaStream);
+      prototypeMasks.limit(totalMaskFloats);
+
+      cudaMemoryAllocated = true;
    }
 
    private void freeCUDAMemory()
    {
-      if (firstAllocation)
+      if (!cudaMemoryAllocated)
          return;
 
       try
@@ -410,6 +483,7 @@ public class YOLOv8Model
          CUDATools.throwCUDAError(cudaFreeAsync(unfilteredDetections, cudaStream));
          CUDATools.throwCUDAError(cudaFreeAsync(boxes, cudaStream));
          CUDATools.throwCUDAError(cudaFreeAsync(prototypeMasks, cudaStream));
+         CUDATools.throwCUDAError(cudaFreeAsync(deviceConfidenceThresholds, cudaStream));
          CUDATools.throwCUDAError(cudaFreeHost(filteredDetections));
          CUDATools.throwCUDAError(cudaFreeHost(filteredDetectionCountPointer));
       }

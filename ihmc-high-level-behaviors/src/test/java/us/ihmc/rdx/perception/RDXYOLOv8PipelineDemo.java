@@ -12,7 +12,6 @@ import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point;
-import org.bytedeco.opencv.opencv_core.Scalar;
 import org.bytedeco.opencv.opencv_core.Size;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.tuple3D.Point3D32;
@@ -106,7 +105,7 @@ public class RDXYOLOv8PipelineDemo
          YOLOv8Model model = new YOLOv8Model(yoloModelDirectory);
 
          LogTools.info("Loaded YOLOv8 model: " + YOLOv8Tools.getONNXFile(yoloModelDirectory));
-         LogTools.info("\t\t\tClasses: " + model.getDetectionClassNames().size());
+         LogTools.info("\t\t\tClasses: " + model.getObjectClasses().size());
 
          yoloModels.add(model);
          availableModels.add(model.getName());
@@ -258,7 +257,9 @@ public class RDXYOLOv8PipelineDemo
       Mat bgrMat = new Mat();
       opencv_imgproc.cvtColor(colorImage.getCpuImageMat(), bgrMat, opencv_imgproc.COLOR_BGRA2BGR);
       RawImage bgrImage = colorImage.replaceImage(bgrMat, PixelFormat.BGR8);
-      YOLOv8DetectionList results = model.run(bgrImage, confidenceThreshold.get(), nmsThreshold.get(), maskThreshold.get());
+      model.setMaskThresholds(maskThreshold.get());
+      model.setConfidenceThresholds(confidenceThreshold.get());
+      YOLOv8DetectionList results = model.run(bgrImage, nmsThreshold.get());
       if (results.isEmpty())
          return;
 

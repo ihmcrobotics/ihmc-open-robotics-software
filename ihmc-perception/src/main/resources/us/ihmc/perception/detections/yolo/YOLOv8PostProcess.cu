@@ -32,7 +32,7 @@ extern "C"
 __global__ void filterDetections(float* unfilteredDetection,
                                  int classCount,
                                  int detectionCount,
-                                 float confidenceThreshold,
+                                 float* confidenceThresholds,
                                  int shiftX,
                                  int shiftY,
                                  float* filteredDetections,
@@ -64,7 +64,7 @@ __global__ void filterDetections(float* unfilteredDetection,
         }
 
         // If the confidence is below our threshold, we skip this detection
-        if (maxConfidence < confidenceThreshold)
+        if (maxConfidence < confidenceThresholds[mostConfidentClass])
             continue;
 
         // Get the next row index, and atomically increment the filteredDetectionCount by 1

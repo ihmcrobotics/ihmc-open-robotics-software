@@ -58,9 +58,7 @@ public class YOLOv8DetectionExecutor
    private final Map<YOLOv8Model, YOLOv8DetectionList> yoloDetectionResults = new ConcurrentHashMap<>();
    private final TypedNotification<RawImage> newestColorImage = new TypedNotification<>();
 
-   private float yoloConfidenceThreshold = 0.5f;
    private float yoloNMSThreshold = 0.1f;
-   private float yoloMaskThreshold = 0.0f;
    private int erosionKernelRadius = 2;
    private double outlierThreshold = 1.0;
 
@@ -73,9 +71,12 @@ public class YOLOv8DetectionExecutor
 
       ros2Helper.subscribe(PerceptionAPI.YOLO_PARAMETERS).addCallback(parametersMessage ->
       {
-         yoloConfidenceThreshold = parametersMessage.getConfidenceThreshold();
+         yoloModels.forEach(model ->
+         {
+            model.setConfidenceThresholds(parametersMessage.getConfidenceThreshold());
+            model.setMaskThresholds(parametersMessage.getSegmentationThreshold());
+         });
          yoloNMSThreshold = parametersMessage.getNonMaximumSuppressionThreshold();
-         yoloMaskThreshold = parametersMessage.getSegmentationThreshold();
          erosionKernelRadius = parametersMessage.getErosionKernelRadius();
          outlierThreshold = parametersMessage.getOutlierThreshold();
       });
@@ -85,7 +86,7 @@ public class YOLOv8DetectionExecutor
          YOLOv8Model model = new YOLOv8Model(yoloModelDirectory);
 
          LogTools.info("Loaded YOLOv8 model: " + YOLOv8Tools.getONNXFile(yoloModelDirectory));
-         LogTools.info("\t\t\tClasses: " + model.getDetectionClassNames().size());
+         LogTools.info("\t\t\tClasses: " + model.getObjectClasses().size());
 
          yoloModels.add(model);
       }
@@ -137,7 +138,7 @@ public class YOLOv8DetectionExecutor
             GpuMat bgrMat = new GpuMat();
             colorImage.getPixelFormat().convertToPixelFormat(colorImage.getGpuImageMat(), bgrMat, PixelFormat.BGR8);
             RawImage bgrImage = colorImage.replaceImage(bgrMat, PixelFormat.BGR8);
-            YOLOv8DetectionList yoloResults = yoloModel.run(bgrImage, yoloConfidenceThreshold, yoloNMSThreshold, yoloMaskThreshold);
+            YOLOv8DetectionList yoloResults = yoloModel.run(bgrImage, yoloNMSThreshold);
 
             // TODO: temp hack
             synchronized (yoloDetectionResults)
