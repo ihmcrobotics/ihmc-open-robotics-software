@@ -18,14 +18,8 @@ bool hold_current_center_of_mass_xy_position
 # Field default value True
 bool enable_auto_support_polygon
 
-# When set to true, the solver will hold the pose of the rigid-bodies with active contact points.
-# - when the walking controller is running, the rigid-bodies in question are the feet.
-# - when a multi-contact controller is running, any rigid-body of the robot can be in contact.
-# Field default value True
-bool hold_support_rigid_bodies
-
-# If this is true and the solver receives a MultiContactBalanceStatus, it will solve for the multi-contact support region
-bool enable_multi_contact_support_region_solver
+# If true, enables an objective for improving the stability margin of the robot when the upper body is load-bearing.
+bool enable_stability_objective
 
 # Whether restrictive joint limits are enabled, in order to have the IK avoid a solution at the joint limit.
 # Field default value True

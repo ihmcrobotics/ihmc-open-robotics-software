@@ -15,7 +15,7 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "30c4766b4e1c8444c3d6605247d0fed14ed44cc14c0f3a77ac2faf88de4c117b";
+   		return "2ee8531c108e60a6b56d08fc8ef8de994a5c08eb2418aa9602cec1f553c0c8b6";
    }
    
    @Override
@@ -62,8 +62,6 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (20 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (20 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -82,9 +80,6 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
       int initial_alignment = current_alignment;
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -119,9 +114,7 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
 
       cdr.write_type_7(data.getEnableAutoSupportPolygon());
 
-      cdr.write_type_7(data.getHoldSupportRigidBodies());
-
-      cdr.write_type_7(data.getEnableMultiContactSupportRegionSolver());
+      cdr.write_type_7(data.getEnableStabilityObjective());
 
       cdr.write_type_7(data.getEnableJointLimitReduction());
 
@@ -143,9 +136,7 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
       	
       data.setEnableAutoSupportPolygon(cdr.read_type_7());
       	
-      data.setHoldSupportRigidBodies(cdr.read_type_7());
-      	
-      data.setEnableMultiContactSupportRegionSolver(cdr.read_type_7());
+      data.setEnableStabilityObjective(cdr.read_type_7());
       	
       data.setEnableJointLimitReduction(cdr.read_type_7());
       	
@@ -160,8 +151,7 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
       ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_7("hold_current_center_of_mass_xy_position", data.getHoldCurrentCenterOfMassXyPosition());
       ser.write_type_7("enable_auto_support_polygon", data.getEnableAutoSupportPolygon());
-      ser.write_type_7("hold_support_rigid_bodies", data.getHoldSupportRigidBodies());
-      ser.write_type_7("enable_multi_contact_support_region_solver", data.getEnableMultiContactSupportRegionSolver());
+      ser.write_type_7("enable_stability_objective", data.getEnableStabilityObjective());
       ser.write_type_7("enable_joint_limit_reduction", data.getEnableJointLimitReduction());
       ser.write_type_e("joint_limit_reduction_factors", data.getJointLimitReductionFactors());
       ser.write_type_e("joint_limit_reduction_hash_codes", data.getJointLimitReductionHashCodes());
@@ -173,8 +163,7 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
       data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setHoldCurrentCenterOfMassXyPosition(ser.read_type_7("hold_current_center_of_mass_xy_position"));
       data.setEnableAutoSupportPolygon(ser.read_type_7("enable_auto_support_polygon"));
-      data.setHoldSupportRigidBodies(ser.read_type_7("hold_support_rigid_bodies"));
-      data.setEnableMultiContactSupportRegionSolver(ser.read_type_7("enable_multi_contact_support_region_solver"));
+      data.setEnableStabilityObjective(ser.read_type_7("enable_stability_objective"));
       data.setEnableJointLimitReduction(ser.read_type_7("enable_joint_limit_reduction"));
       ser.read_type_e("joint_limit_reduction_factors", data.getJointLimitReductionFactors());
       ser.read_type_e("joint_limit_reduction_hash_codes", data.getJointLimitReductionHashCodes());
