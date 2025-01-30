@@ -13,7 +13,7 @@ import us.ihmc.parameterEstimation.inertial.RigidBodyInertialParameters;
 import us.ihmc.parameterEstimation.inertial.RigidBodyInertialParametersTools;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.MatrixMissingTools;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoMatrix;
+import us.ihmc.yoVariables.filters.AlphaFilteredYoMatrix;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoVariables.math.YoMatrix;
 import us.ihmc.robotics.robotSide.RobotSide;
