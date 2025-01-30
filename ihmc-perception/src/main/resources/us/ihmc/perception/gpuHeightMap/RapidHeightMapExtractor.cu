@@ -759,23 +759,23 @@ __global__ void computeSnappedValuesKernel(unsigned short *globalMap, size_t pit
     int normal_z_int = static_cast<int>(255 * (normal.z + 1.0f) / 2.0f);
     int2 storage_key = make_int2(idx_x, idx_y);
 
-    unsigned short *steppabilityMapElement = (unsigned short *)((char *)steppabilityMap + storage_key.y * pitchSteppability) + storage_key.x;
-    *steppabilityMapElement = static_cast<unsigned short>(snap_result);
+    unsigned char *steppabilityMapElement = (unsigned char *)((char *)steppabilityMap + storage_key.y * pitchSteppability) + storage_key.x;
+    *steppabilityMapElement = static_cast<unsigned char>(snap_result);
 
     unsigned short *snapHeightMapElement = (unsigned short *)((char *)snapHeightMap + storage_key.y * pitchSnapHeight) + storage_key.x;
     *snapHeightMapElement = static_cast<unsigned short>(snap_height_int);
 
-    unsigned short *snappedNormalXMapElement = (unsigned short *)((char *)snapNormalXMap + storage_key.y * pitchSnapNormalX) + storage_key.x;
-    *snappedNormalXMapElement = static_cast<unsigned short>(normal_x_int);
+    unsigned char *snappedNormalXMapElement = (unsigned char *)((char *)snapNormalXMap + storage_key.y * pitchSnapNormalX) + storage_key.x;
+    *snappedNormalXMapElement = static_cast<unsigned char>(normal_x_int);
 
-    unsigned short *snappedNormalYMapElement = (unsigned short *)((char *)snapNormalYMap + storage_key.y * pitchSnapNormalY) + storage_key.x;
-    *snappedNormalYMapElement = static_cast<unsigned short>(normal_y_int);
+    unsigned char *snappedNormalYMapElement = (unsigned char *)((char *)snapNormalYMap + storage_key.y * pitchSnapNormalY) + storage_key.x;
+    *snappedNormalYMapElement = static_cast<unsigned char>(normal_y_int);
 
-    unsigned short *snappedNormalZMapElement = (unsigned short *)((char *)snapNormalZMap + storage_key.y * pitchSnapNormalZ) + storage_key.x;
-    *snappedNormalZMapElement = static_cast<unsigned short>(normal_z_int);
+    unsigned char *snappedNormalZMapElement = (unsigned char *)((char *)snapNormalZMap + storage_key.y * pitchSnapNormalZ) + storage_key.x;
+    *snappedNormalZMapElement = static_cast<unsigned char>(normal_z_int);
 
-    unsigned short *areaFractionElement = (unsigned short *)((char *)snappedAreaFractionMap + storage_key.y * pitchSnappedAreaFraction) + storage_key.x;
-    *areaFractionElement = static_cast<unsigned short>(area_fraction);
+    unsigned char *areaFractionElement = (unsigned char *)((char *)snappedAreaFractionMap + storage_key.y * pitchSnappedAreaFraction) + storage_key.x;
+    *areaFractionElement = static_cast<unsigned char>(area_fraction);
 }
 
 extern "C"
