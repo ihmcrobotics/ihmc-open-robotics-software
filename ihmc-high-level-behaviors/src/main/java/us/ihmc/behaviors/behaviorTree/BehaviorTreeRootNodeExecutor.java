@@ -51,13 +51,13 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
 
       for (ActionNodeExecutor<?, ?> actionChild : actionChildren)
       {
-         actionChild.getState().updateAndValidateExecuteAfter(state.getActionChildren());
+         actionChild.getState().updateAndValidateExecuteAfter(state.getOrderedLeafNodes());
       }
 
       // Update concurrency ranks
-      for (int i = 0; i < state.getActionChildren().size(); i++)
+      for (int i = 0; i < state.getOrderedLeafNodes().size(); i++)
       {
-         state.getActionChildren().get(i).setConcurrencyRank(1);
+         state.getOrderedLeafNodes().get(i).setConcurrencyRank(1);
 
 //         int j = i + 1;
 //         for (; j < state.getActionChildren().size()
@@ -66,34 +66,34 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
          int j = i - 1;
          for (; j >= 0; j--)
          {
-            int thisExecuteAfterActionIndex = state.getActionChildren().get(i).calculateExecuteAfterActionIndex();
-            int executeAfterActionIndexToCompare = state.getActionChildren().get(j).calculateExecuteAfterActionIndex();
+            int thisExecuteAfterActionIndex = state.getOrderedLeafNodes().get(i).calculateExecuteAfterActionIndex();
+            int executeAfterActionIndexToCompare = state.getOrderedLeafNodes().get(j).calculateExecuteAfterActionIndex();
             if (thisExecuteAfterActionIndex == executeAfterActionIndexToCompare)
             {
-               state.getActionChildren().get(i).setConcurrencyRank(2);
+               state.getOrderedLeafNodes().get(i).setConcurrencyRank(2);
             }
          }
       }
 
       // Update is next for execution
-      for (int i = 0; i < state.getActionChildren().size(); i++)
+      for (int i = 0; i < state.getOrderedLeafNodes().size(); i++)
       {
          int executionNextIndex = state.getExecutionNextIndex();
          if (i < executionNextIndex)
          {
-            state.getActionChildren().get(i).setIsNextForExecution(false);
+            state.getOrderedLeafNodes().get(i).setIsNextForExecution(false);
          }
          else if (i == executionNextIndex)
          {
-            state.getActionChildren().get(i).setIsNextForExecution(true);
+            state.getOrderedLeafNodes().get(i).setIsNextForExecution(true);
          }
-         else if (state.getActionChildren().get(i).calculateExecuteAfterActionIndex() < executionNextIndex)
+         else if (state.getOrderedLeafNodes().get(i).calculateExecuteAfterActionIndex() < executionNextIndex)
          {
-            state.getActionChildren().get(i).setIsNextForExecution(true);
+            state.getOrderedLeafNodes().get(i).setIsNextForExecution(true);
          }
          else
          {
-            state.getActionChildren().get(i).setIsNextForExecution(false);
+            state.getOrderedLeafNodes().get(i).setIsNextForExecution(false);
          }
       }
 

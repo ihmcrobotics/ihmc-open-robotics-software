@@ -123,9 +123,9 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
                }
                else
                {
-                  HandPoseActionState previousHandPose = actionSequence.findNextPreviousAction(HandPoseActionState.class,
-                                                                                               state.getActionIndex(),
-                                                                                               definition.getSide());
+                  HandPoseActionState previousHandPose = actionSequence.findNextPreviousLeaf(HandPoseActionState.class,
+                                                                                             state.getActionIndex(),
+                                                                                             definition.getSide());
                   if (previousHandPose != null && previousHandPose.getPalmFrame().isChildOfWorld())
                   {
                      initialHandFrame = previousHandPose.getPalmFrame().getReferenceFrame();

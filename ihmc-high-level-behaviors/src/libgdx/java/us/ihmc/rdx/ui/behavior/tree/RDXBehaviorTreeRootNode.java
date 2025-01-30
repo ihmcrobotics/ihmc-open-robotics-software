@@ -54,7 +54,7 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
 
       for (RDXActionNode<?, ?> actionChild : actionChildren)
       {
-         actionChild.getState().updateAndValidateExecuteAfter(state.getActionChildren());
+         actionChild.getState().updateAndValidateExecuteAfter(state.getOrderedLeafNodes());
       }
    }
 
@@ -107,7 +107,7 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
       }
       ImGuiTools.previousWidgetTooltip("Go to next action");
 
-      boolean endOfSequence = getState().getExecutionNextIndex() >= getState().getActionChildren().size();
+      boolean endOfSequence = getState().getExecutionNextIndex() >= getState().getOrderedLeafNodes().size();
       if (!endOfSequence)
       {
          ImGui.sameLine();

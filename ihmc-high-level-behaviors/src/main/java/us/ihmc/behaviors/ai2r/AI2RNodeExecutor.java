@@ -59,7 +59,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
          String referenceFrame = message.getGotoReferenceFrameName().toString();
          Point3D goalStancePoint = message.getGotoGoalStancePoint();
          Point3D goalFocalPoint = message.getGotoGoalFocalPoint();
-         for (var actionChild : state.getActionSequence().getActionChildren())
+         for (var actionChild : state.getActionSequence().getOrderedActions())
          {
             if (actionChild.getDefinition().getName().contains("Go to Action") && actionChild instanceof FootstepPlanActionState gotoActionState)
             {
@@ -115,7 +115,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
          }
 
          statusMessage.setFailedBehavior("");
-         for (var actionChild : state.getActionSequence().getActionChildren())
+         for (var actionChild : state.getActionSequence().getOrderedActions())
          {
             if (actionChild.getFailed() && !state.getActionSequence().getAutomaticExecution())
             {
@@ -163,7 +163,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
 
       // Check if Goto action is executing and if next steps are colliding with objects in the scene
       goToCollisionLoop:
-      for (var actionChild : state.getActionSequence().getActionChildren())
+      for (var actionChild : state.getActionSequence().getOrderedActions())
       {
          if (actionChild.getDefinition().getName().contains("Go to Action") && actionChild instanceof FootstepPlanActionState gotoActionState)
          {

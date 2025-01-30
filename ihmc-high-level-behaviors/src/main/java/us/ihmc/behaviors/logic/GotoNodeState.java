@@ -2,12 +2,13 @@ package us.ihmc.behaviors.logic;
 
 import behavior_msgs.msg.dds.GotoNodeStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
+import us.ihmc.behaviors.sequence.LeafNodeState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.util.List;
 
-public class GotoNodeState extends BehaviorTreeNodeState<GotoNodeDefinition>
+public class GotoNodeState extends LeafNodeState<GotoNodeDefinition>
 {
    private final GotoNodeDefinition definition;
 

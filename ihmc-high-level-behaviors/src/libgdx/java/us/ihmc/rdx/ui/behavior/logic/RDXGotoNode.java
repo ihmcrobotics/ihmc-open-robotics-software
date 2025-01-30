@@ -5,10 +5,10 @@ import us.ihmc.behaviors.logic.GotoNodeDefinition;
 import us.ihmc.behaviors.logic.GotoNodeState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.behavior.tree.RDXBehaviorTreeNode;
+import us.ihmc.rdx.ui.behavior.sequence.RDXLeafNode;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
-public class RDXGotoNode extends RDXBehaviorTreeNode<GotoNodeState, GotoNodeDefinition>
+public class RDXGotoNode extends RDXLeafNode<GotoNodeState, GotoNodeDefinition>
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final GotoNodeState state;
@@ -33,16 +33,19 @@ public class RDXGotoNode extends RDXBehaviorTreeNode<GotoNodeState, GotoNodeDefi
    }
 
    @Override
-   public void renderNodeSettingsWidgets()
+   protected void renderImGuiWidgetsInternal()
    {
-      ImGui.text("Type: %s   ID: %d".formatted(getDefinition().getClass().getSimpleName(), getState().getID()));
-
       String selectedText = GotoNodeDefinition.GOTO_NEXT;
       if (ImGui.beginCombo(labels.get("Goto"), selectedText))
       {
 
+         ImGui.endCombo();
       }
+   }
 
-      super.renderNodeSettingsWidgets();
+   @Override
+   public String getActionTypeTitle()
+   {
+      return "Goto Node";
    }
 }

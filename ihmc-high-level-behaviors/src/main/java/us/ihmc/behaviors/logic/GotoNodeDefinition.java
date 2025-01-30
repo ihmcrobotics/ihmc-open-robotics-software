@@ -3,7 +3,7 @@ package us.ihmc.behaviors.logic;
 import behavior_msgs.msg.dds.GotoNodeDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
+import us.ihmc.behaviors.sequence.LeafNodeDefinition;
 import us.ihmc.communication.crdt.CRDTBidirectionalBoolean;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTBidirectionalLong;
@@ -11,7 +11,7 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import javax.annotation.Nullable;
 
-public class GotoNodeDefinition extends BehaviorTreeNodeDefinition
+public class GotoNodeDefinition extends LeafNodeDefinition
 {
    public static final String GOTO_NEXT = "Next";
 
