@@ -1,8 +1,8 @@
 #ifndef __behavior_msgs__msg__GotoNodeStateMessage__idl__
 #define __behavior_msgs__msg__GotoNodeStateMessage__idl__
 
-#include "behavior_msgs/msg/./BehaviorTreeNodeStateMessage_.idl"
 #include "behavior_msgs/msg/./GotoNodeDefinitionMessage_.idl"
+#include "behavior_msgs/msg/./LeafNodeStateMessage_.idl"
 module behavior_msgs
 {
   module msg
@@ -16,7 +16,7 @@ module behavior_msgs
         /**
          * Parent state fields
          */
-        behavior_msgs::msg::dds::BehaviorTreeNodeStateMessage state;
+        behavior_msgs::msg::dds::LeafNodeStateMessage state;
         /**
          * Definition
          */

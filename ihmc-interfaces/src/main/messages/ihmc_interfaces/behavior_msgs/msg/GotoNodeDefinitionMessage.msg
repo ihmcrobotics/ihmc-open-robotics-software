@@ -1,5 +1,5 @@
 # Parent definition fields
-behavior_msgs/BehaviorTreeNodeDefinitionMessage definition
+behavior_msgs/LeafNodeDefinitionMessage definition
 
 # If this node is simply set to goto the next node (i.e. no-op)
 bool goto_next

@@ -15,7 +15,7 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "d844f30b8344d8ebcc449e2683c2d878b6a2f040b02e9421cbfed6084138d6a2";
+   		return "bd0435bd71c6bb3f38675d0da23471ba3eb5b7f12ae23c52e945b56e1516b49f";
    }
    
    @Override

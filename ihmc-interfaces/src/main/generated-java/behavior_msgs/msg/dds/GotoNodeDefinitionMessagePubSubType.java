@@ -15,7 +15,7 @@ public class GotoNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "9b402df421f5af9c326107734b4f642148e5abc836c299bab59971238f817c92";
+   		return "7aae06d3cb818e8fb94ed7d51698837efe139849a400b936b4e17cd7f1c34bb7";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class GotoNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.Topic
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += behavior_msgs.msg.dds.LeafNodeDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -71,7 +71,7 @@ public class GotoNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.Topic
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.getCdrSerializedSize(data.getDefinition(), current_alignment);
+      current_alignment += behavior_msgs.msg.dds.LeafNodeDefinitionMessagePubSubType.getCdrSerializedSize(data.getDefinition(), current_alignment);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -85,7 +85,7 @@ public class GotoNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.Topic
 
    public static void write(behavior_msgs.msg.dds.GotoNodeDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
-      behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
+      behavior_msgs.msg.dds.LeafNodeDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
       cdr.write_type_7(data.getGotoNext());
 
       cdr.write_type_4(data.getGotoNodeId());
@@ -94,7 +94,7 @@ public class GotoNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.Topic
 
    public static void read(behavior_msgs.msg.dds.GotoNodeDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
-      behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
+      behavior_msgs.msg.dds.LeafNodeDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
       data.setGotoNext(cdr.read_type_7());
       	
       data.setGotoNodeId(cdr.read_type_4());
@@ -105,7 +105,7 @@ public class GotoNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final void serialize(behavior_msgs.msg.dds.GotoNodeDefinitionMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_a("definition", new behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType(), data.getDefinition());
+      ser.write_type_a("definition", new behavior_msgs.msg.dds.LeafNodeDefinitionMessagePubSubType(), data.getDefinition());
 
       ser.write_type_7("goto_next", data.getGotoNext());
       ser.write_type_4("goto_node_id", data.getGotoNodeId());
@@ -114,7 +114,7 @@ public class GotoNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.GotoNodeDefinitionMessage data)
    {
-      ser.read_type_a("definition", new behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType(), data.getDefinition());
+      ser.read_type_a("definition", new behavior_msgs.msg.dds.LeafNodeDefinitionMessagePubSubType(), data.getDefinition());
 
       data.setGotoNext(ser.read_type_7("goto_next"));
       data.setGotoNodeId(ser.read_type_4("goto_node_id"));

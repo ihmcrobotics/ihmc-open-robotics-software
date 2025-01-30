@@ -11,7 +11,7 @@ public class GotoNodeDefinitionMessage extends Packet<GotoNodeDefinitionMessage>
    /**
             * Parent definition fields
             */
-   public behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage definition_;
+   public behavior_msgs.msg.dds.LeafNodeDefinitionMessage definition_;
    /**
             * If this node is simply set to goto the next node (i.e. no-op)
             */
@@ -23,7 +23,7 @@ public class GotoNodeDefinitionMessage extends Packet<GotoNodeDefinitionMessage>
 
    public GotoNodeDefinitionMessage()
    {
-      definition_ = new behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage();
+      definition_ = new behavior_msgs.msg.dds.LeafNodeDefinitionMessage();
    }
 
    public GotoNodeDefinitionMessage(GotoNodeDefinitionMessage other)
@@ -34,7 +34,7 @@ public class GotoNodeDefinitionMessage extends Packet<GotoNodeDefinitionMessage>
 
    public void set(GotoNodeDefinitionMessage other)
    {
-      behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
+      behavior_msgs.msg.dds.LeafNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
       goto_next_ = other.goto_next_;
 
       goto_node_id_ = other.goto_node_id_;
@@ -45,7 +45,7 @@ public class GotoNodeDefinitionMessage extends Packet<GotoNodeDefinitionMessage>
    /**
             * Parent definition fields
             */
-   public behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage getDefinition()
+   public behavior_msgs.msg.dds.LeafNodeDefinitionMessage getDefinition()
    {
       return definition_;
    }

@@ -11,31 +11,7 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
    /**
             * Parent state fields
             */
-   public behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage state_;
-   /**
-            * The action's unique ID
-            */
-   public long id_;
-   /**
-            * If the action is next for execution
-            */
-   public boolean is_next_for_execution_;
-   /**
-            * The maximum number of actions that might be executing while this one is
-            */
-   public int concurrency_rank_;
-   /**
-            * If the node is able to execution
-            */
-   public boolean can_execute_;
-   /**
-            * If the node is currently executing
-            */
-   public boolean is_executing_;
-   /**
-            * If the node had a failure during it's last execution
-            */
-   public boolean failed_;
+   public behavior_msgs.msg.dds.LeafNodeStateMessage state_;
    /**
             * Nominal execution duration
             */
@@ -71,7 +47,7 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
 
    public ActionNodeStateMessage()
    {
-      state_ = new behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage();
+      state_ = new behavior_msgs.msg.dds.LeafNodeStateMessage();
       commanded_trajectory_ = new us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage> (500, new ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType());
       current_pose_ = new us.ihmc.euclid.geometry.Pose3D();
       commanded_joint_trajectories_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.OneDoFJointTrajectoryMessage> (7, new controller_msgs.msg.dds.OneDoFJointTrajectoryMessagePubSubType());
@@ -88,19 +64,7 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
 
    public void set(ActionNodeStateMessage other)
    {
-      behavior_msgs.msg.dds.BehaviorTreeNodeStateMessagePubSubType.staticCopy(other.state_, state_);
-      id_ = other.id_;
-
-      is_next_for_execution_ = other.is_next_for_execution_;
-
-      concurrency_rank_ = other.concurrency_rank_;
-
-      can_execute_ = other.can_execute_;
-
-      is_executing_ = other.is_executing_;
-
-      failed_ = other.failed_;
-
+      behavior_msgs.msg.dds.LeafNodeStateMessagePubSubType.staticCopy(other.state_, state_);
       nominal_execution_duration_ = other.nominal_execution_duration_;
 
       elapsed_execution_time_ = other.elapsed_execution_time_;
@@ -124,99 +88,9 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
    /**
             * Parent state fields
             */
-   public behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage getState()
+   public behavior_msgs.msg.dds.LeafNodeStateMessage getState()
    {
       return state_;
-   }
-
-   /**
-            * The action's unique ID
-            */
-   public void setId(long id)
-   {
-      id_ = id;
-   }
-   /**
-            * The action's unique ID
-            */
-   public long getId()
-   {
-      return id_;
-   }
-
-   /**
-            * If the action is next for execution
-            */
-   public void setIsNextForExecution(boolean is_next_for_execution)
-   {
-      is_next_for_execution_ = is_next_for_execution;
-   }
-   /**
-            * If the action is next for execution
-            */
-   public boolean getIsNextForExecution()
-   {
-      return is_next_for_execution_;
-   }
-
-   /**
-            * The maximum number of actions that might be executing while this one is
-            */
-   public void setConcurrencyRank(int concurrency_rank)
-   {
-      concurrency_rank_ = concurrency_rank;
-   }
-   /**
-            * The maximum number of actions that might be executing while this one is
-            */
-   public int getConcurrencyRank()
-   {
-      return concurrency_rank_;
-   }
-
-   /**
-            * If the node is able to execution
-            */
-   public void setCanExecute(boolean can_execute)
-   {
-      can_execute_ = can_execute;
-   }
-   /**
-            * If the node is able to execution
-            */
-   public boolean getCanExecute()
-   {
-      return can_execute_;
-   }
-
-   /**
-            * If the node is currently executing
-            */
-   public void setIsExecuting(boolean is_executing)
-   {
-      is_executing_ = is_executing;
-   }
-   /**
-            * If the node is currently executing
-            */
-   public boolean getIsExecuting()
-   {
-      return is_executing_;
-   }
-
-   /**
-            * If the node had a failure during it's last execution
-            */
-   public void setFailed(boolean failed)
-   {
-      failed_ = failed;
-   }
-   /**
-            * If the node had a failure during it's last execution
-            */
-   public boolean getFailed()
-   {
-      return failed_;
    }
 
    /**
@@ -334,18 +208,6 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
       if(other == this) return true;
 
       if (!this.state_.epsilonEquals(other.state_, epsilon)) return false;
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.id_, other.id_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_next_for_execution_, other.is_next_for_execution_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.concurrency_rank_, other.concurrency_rank_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.can_execute_, other.can_execute_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_executing_, other.is_executing_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.failed_, other.failed_, epsilon)) return false;
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.nominal_execution_duration_, other.nominal_execution_duration_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.elapsed_execution_time_, other.elapsed_execution_time_, epsilon)) return false;
@@ -388,18 +250,6 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
       ActionNodeStateMessage otherMyClass = (ActionNodeStateMessage) other;
 
       if (!this.state_.equals(otherMyClass.state_)) return false;
-      if(this.id_ != otherMyClass.id_) return false;
-
-      if(this.is_next_for_execution_ != otherMyClass.is_next_for_execution_) return false;
-
-      if(this.concurrency_rank_ != otherMyClass.concurrency_rank_) return false;
-
-      if(this.can_execute_ != otherMyClass.can_execute_) return false;
-
-      if(this.is_executing_ != otherMyClass.is_executing_) return false;
-
-      if(this.failed_ != otherMyClass.failed_) return false;
-
       if(this.nominal_execution_duration_ != otherMyClass.nominal_execution_duration_) return false;
 
       if(this.elapsed_execution_time_ != otherMyClass.elapsed_execution_time_) return false;
@@ -428,18 +278,6 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
       builder.append("ActionNodeStateMessage {");
       builder.append("state=");
       builder.append(this.state_);      builder.append(", ");
-      builder.append("id=");
-      builder.append(this.id_);      builder.append(", ");
-      builder.append("is_next_for_execution=");
-      builder.append(this.is_next_for_execution_);      builder.append(", ");
-      builder.append("concurrency_rank=");
-      builder.append(this.concurrency_rank_);      builder.append(", ");
-      builder.append("can_execute=");
-      builder.append(this.can_execute_);      builder.append(", ");
-      builder.append("is_executing=");
-      builder.append(this.is_executing_);      builder.append(", ");
-      builder.append("failed=");
-      builder.append(this.failed_);      builder.append(", ");
       builder.append("nominal_execution_duration=");
       builder.append(this.nominal_execution_duration_);      builder.append(", ");
       builder.append("elapsed_execution_time=");
