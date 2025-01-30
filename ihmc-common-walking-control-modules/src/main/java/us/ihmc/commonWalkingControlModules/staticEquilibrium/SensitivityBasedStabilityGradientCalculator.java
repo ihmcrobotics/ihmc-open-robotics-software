@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.staticEquilibrium;
 import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+import us.ihmc.convexOptimization.linearProgram.LinearProgramSolver;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
@@ -26,7 +27,10 @@ import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.DefaultPoint
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
+import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
+import us.ihmc.yoVariables.filters.RateLimitedYoVariable;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -90,10 +94,14 @@ public class SensitivityBasedStabilityGradientCalculator
    /* Postural sensitivity, given as |N grad m(q)|, where N is the nullspace projector */
    private final YoDouble yoPostureSensitivity = new YoDouble("postureSensitivity", registry);
    /* YoVariable data of stability margin gradient */
-   private final YoDouble[] yoStabilityMarginGradient;
+   private final AlphaFilteredYoVariable[] yoStabilityMarginGradient;
+   /* Max rate of the stability margin gradient, used to smooth when switching active sets */
+   private final YoDouble stabilityGradientFilterAlpha = new YoDouble("stabilityGradientFilterAlpha", registry);
 
    /* To compute the CoM component of the margin objective */
    private final CentroidalMomentumCalculator centroidalMomentumCalculator;
+
+   private final YoBoolean applyFilter = new YoBoolean("applyFilter", registry);
 
    private int vertexIndexA;
    private int vertexIndexB;
@@ -127,7 +135,9 @@ public class SensitivityBasedStabilityGradientCalculator
       MultiBodySystemBasics multiBodySystemInput = MultiBodySystemBasics.toMultiBodySystemBasics(controlledJoints);
       centroidalMomentumCalculator = new CentroidalMomentumCalculator(multiBodySystemInput, ReferenceFrame.getWorldFrame());
 
-      yoStabilityMarginGradient = new YoDouble[Twist.SIZE + controllableOneDoFJoints.length];
+      yoStabilityMarginGradient = new AlphaFilteredYoVariable[Twist.SIZE + controllableOneDoFJoints.length];
+      stabilityGradientFilterAlpha.set(0.4);
+
       for (int i = 0; i < yoStabilityMarginGradient.length; i++)
       {
          if (i < Twist.SIZE)
@@ -135,22 +145,24 @@ public class SensitivityBasedStabilityGradientCalculator
             int numAxes = Axis3D.values().length;
             Axis3D axis = Axis3D.values()[i % numAxes];
             String prefix = i < numAxes ? "w" : "v";
-            yoStabilityMarginGradient[i] = new YoDouble("stabilityMarginGrad_" + prefix + axis, registry);
+            yoStabilityMarginGradient[i] = new AlphaFilteredYoVariable("stabilityMarginGrad_" + prefix + axis, registry, stabilityGradientFilterAlpha);
          }
          else
          {
             String jointName = controllableOneDoFJoints[i - Twist.SIZE].getName();
-            yoStabilityMarginGradient[i] = new YoDouble("stabilityMarginGrad_" + jointName, registry);
+            yoStabilityMarginGradient[i] = new AlphaFilteredYoVariable("stabilityMarginGrad_" + jointName, registry, stabilityGradientFilterAlpha);
          }
       }
 
       jointsToIgnore.addAll(multiBodySystemInput.getJointMatrixIndexProvider().getJointDoFIndices(fullRobotModel.getSpineJoint(SpineJointName.SPINE_ROLL)));
       jointsToIgnore.addAll(multiBodySystemInput.getJointMatrixIndexProvider().getJointDoFIndices(fullRobotModel.getSpineJoint(SpineJointName.SPINE_PITCH)));
 
+      applyFilter.set(true);
+
       parentRegistry.addChild(registry);
    }
 
-   public void update()
+   public void update(boolean firstTick)
    {
       updateNullspace();
 
@@ -193,7 +205,17 @@ public class SensitivityBasedStabilityGradientCalculator
 
       for (int i = 0; i < stabilityMarginGradient.getNumRows(); i++)
       {
-         yoStabilityMarginGradient[i].set(stabilityMarginGradient.get(i));
+         if (firstTick || !applyFilter.getValue())
+         {
+            yoStabilityMarginGradient[i].set(stabilityMarginGradient.get(i));
+         }
+         else
+         {
+            // Apply filter
+            yoStabilityMarginGradient[i].update(stabilityMarginGradient.get(i));
+            // Update matrix with filtered value
+            stabilityMarginGradient.set(i, yoStabilityMarginGradient[i].getValue());
+         }
       }
    }
 

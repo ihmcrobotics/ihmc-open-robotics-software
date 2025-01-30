@@ -8,14 +8,18 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.SensitivityBasedStabilityGradientCalculator;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.StabilityMarginRegionCalculator;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.geometry.ConvexPolygon2dCalculator;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -35,6 +39,7 @@ public class StabilityMarginKinematicsCostCalculator
    private final DoubleProvider minStabilityMargin;
 
    private final YoBoolean isEnabled = new YoBoolean("isStabilityObjectiveEnabled", registry);
+
    private final YoDouble desiredStabilityMarginVelocity = new YoDouble("desiredStabilityMarginVelocity", registry);
    private final YoDouble maxMarginToPenalize = new YoDouble("maxMarginToPenalize", registry);
    private final YoDouble stabilityMarginWeight = new YoDouble("stabilityMarginWeight", registry);
@@ -42,6 +47,8 @@ public class StabilityMarginKinematicsCostCalculator
    private final FramePose3D pelvisControlFramePose = new FramePose3D();
    private final FramePose3D pelvisPose = new FramePose3D();
    private final SpatialVector desiredPelvisSpatialVelocity = new SpatialVector();
+
+   private boolean enabledPreviousTick = false;
 
    public StabilityMarginKinematicsCostCalculator(WholeBodyContactState wholeBodyContactState,
                                                   StabilityMarginRegionCalculator multiContactRegionCalculator,
@@ -57,15 +64,16 @@ public class StabilityMarginKinematicsCostCalculator
       this.isUpperBodyLoadBearing = isUpperBodyLoadBearing;
       this.minStabilityMargin = minStabilityMargin;
 
-      desiredStabilityMarginVelocity.set(0.15);
+      desiredStabilityMarginVelocity.set(0.2);
       maxMarginToPenalize.set(0.12);
-      stabilityMarginWeight.set(0.5);
+      stabilityMarginWeight.set(1.0);
 
       MovingReferenceFrame afterRootJointFrame = fullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint();
       pelvisControlFramePose.setToZero(afterRootJointFrame);
       pelvisControlFramePose.changeFrame(fullRobotModel.getPelvis().getBodyFixedFrame());
 
       this.stabilityGradientCalculator = new SensitivityBasedStabilityGradientCalculator(fullRobotModel, wholeBodyContactState, multiContactRegionCalculator, registry);
+
       parentRegistry.addChild(registry);
    }
 
@@ -77,17 +85,22 @@ public class StabilityMarginKinematicsCostCalculator
    public void addPostureFeedbackCommands(FeedbackControlCommandBuffer bufferToPack)
    {
       if (!isEnabled.getBooleanValue() || !isUpperBodyLoadBearing.getValue())
+      {
+         enabledPreviousTick = false;
          return;
+      }
 
       double stabilityMargin = multiContactRegionCalculator.getStabilityMargin();
       if (stabilityMargin > maxMarginToPenalize.getValue())
          return;
 
       double deltaStabilityMargin = stabilityMargin - minStabilityMargin.getValue();
-      double alpha = EuclidCoreTools.clamp(deltaStabilityMargin / minStabilityMargin.getValue(), 0.0, 1.0);
+      double stabilityMarginWindow = maxMarginToPenalize.getValue() - minStabilityMargin.getValue();
+
+      double alpha = EuclidCoreTools.clamp(1.0 - deltaStabilityMargin / stabilityMarginWindow, 0.0, 1.0);
       double weight = alpha * stabilityMarginWeight.getValue();
 
-      stabilityGradientCalculator.update();
+      stabilityGradientCalculator.update(!enabledPreviousTick);
       DMatrixRMaj stabilityMarginGradient = stabilityGradientCalculator.getStabilityMarginGradient();
       double stabilityGradientMagnitude = CommonOps_DDRM.dot(stabilityMarginGradient, stabilityMarginGradient);
       if (stabilityGradientMagnitude < 1.0e-5)
@@ -131,5 +144,7 @@ public class StabilityMarginKinematicsCostCalculator
       spatialFeedbackControlCommand.getGains().getPositionGains().setDerivativeGains(0.0);
       spatialFeedbackControlCommand.getGains().getOrientationGains().setProportionalGains(0.0);
       spatialFeedbackControlCommand.getGains().getOrientationGains().setDerivativeGains(0.0);
+
+      enabledPreviousTick = true;
    }
 }

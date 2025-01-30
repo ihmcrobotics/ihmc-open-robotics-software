@@ -4,14 +4,11 @@ import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.convexOptimization.linearProgram.LinearProgramSolver;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
@@ -35,6 +32,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.YoLong;
 
 import java.awt.*;
 import java.util.Arrays;
@@ -97,6 +95,11 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
    private final YoInteger lowestMarginEdgeIndex;
    private final YoDouble stabilityMargin;
 
+   private final YoBoolean marginEdgeChanged;
+   private final YoBoolean activeSetChanged;
+   private final TIntArrayList previousBasisIndicesA = new TIntArrayList();
+   private final TIntArrayList previousBasisIndicesB = new TIntArrayList();
+
    /* Entry i corresponds to the distance of the CoM to the line segment connecting vertex (i) and (i+1) */
    private final YoDouble[] comEdgeMargin = new YoDouble[DIRECTIONS_TO_OPTIMIZE];
 
@@ -147,6 +150,9 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
 
       yoCenterOfMass = new YoFramePoint2D("centerOfMass", ReferenceFrame.getWorldFrame(), registry);
       yoStabilityMarginPoint = new YoFramePoint2D("stabilityMarginPoint", ReferenceFrame.getWorldFrame(), registry);
+
+      marginEdgeChanged = new YoBoolean("marginEdgeChanged", registry);
+      activeSetChanged = new YoBoolean("activeSetChanged", registry);
 
       if (parentRegistry != null)
          parentRegistry.addChild(registry);
@@ -263,7 +269,6 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
       {
          saturatedConstraintIndices[vertexIndex].reset();
          solutionBasisIndices[vertexIndex].reset();
-
          solutionBasisIndices[vertexIndex].addAll(optimizationModule.getLinearProgramSolver().getBasisIndices());
          TIntArrayList nonBasisIndices = optimizationModule.getLinearProgramSolver().getNonBasisIndices();
          for (int i = 1; i < nonBasisIndices.size(); i++)
@@ -362,6 +367,8 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
     */
    private void updateMinimumMarginEdge()
    {
+      int previousLowestMarginEdgeIndex = lowestMarginEdgeIndex.getValue();
+
       FramePoint3DReadOnly centerOfMass = centerOfMassSupplier.get();
       double comX = centerOfMass.getX();
       double comY = centerOfMass.getY();
@@ -407,6 +414,7 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
 
       lowestMarginEdgeIndex.set(isQueryOutsidePolygon ? outsideIndex : insideIndex);
       stabilityMargin.set(Math.sqrt(isQueryOutsidePolygon ? minOutsideDistanceSquared : minInsideDistanceSquared));
+      marginEdgeChanged.set(previousLowestMarginEdgeIndex != lowestMarginEdgeIndex.getValue());
 
       FramePoint2DReadOnly v1 = feasibleRegion.getVertex(lowestMarginEdgeIndex.getValue());
       FramePoint2DReadOnly v2 = feasibleRegion.getNextVertex(lowestMarginEdgeIndex.getValue());
@@ -420,6 +428,30 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
 
       nearestConstraintVertexA[lowestMarginEdgeIndex.getValue()].set(feasibleRegion.getVertex(lowestMarginEdgeIndex.getValue()));
       nearestConstraintVertexB[lowestMarginEdgeIndex.getValue()].set(feasibleRegion.getNextVertex(lowestMarginEdgeIndex.getValue()));
+
+      if (marginEdgeChanged.getValue())
+      {
+         activeSetChanged.set(true);
+      }
+      else
+      {
+         int euclidIndexA = lowestMarginEdgeIndex.getValue();
+         int euclidIndexB = feasibleRegion.getNextVertexIndex(lowestMarginEdgeIndex.getValue());
+
+         int enumeratedIndexA = fromEuclidIndex(euclidIndexA);
+         int enumeratedIndexB = fromEuclidIndex(euclidIndexB);
+
+         TIntArrayList solutionBasisIndicesA = solutionBasisIndices[enumeratedIndexA];
+         TIntArrayList solutionBasisIndicesB = solutionBasisIndices[enumeratedIndexB];
+
+         activeSetChanged.set(!solutionBasisIndicesA.equals(previousBasisIndicesA) || !solutionBasisIndicesB.equals(previousBasisIndicesB));
+
+         previousBasisIndicesA.reset();
+         previousBasisIndicesB.reset();
+
+         previousBasisIndicesA.addAll(solutionBasisIndicesA);
+         previousBasisIndicesB.addAll(solutionBasisIndicesB);
+      }
    }
 
    private void performFixedBasisUpdateForVertex(int vertexIndex)
@@ -441,6 +473,16 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
    public StabilityMarginOptimizationModule getOptimizationModule()
    {
       return optimizationModule;
+   }
+
+   public boolean didLowestMarginIndexChange()
+   {
+      return marginEdgeChanged.getValue();
+   }
+
+   public boolean didActiveSetChange()
+   {
+      return activeSetChanged.getValue();
    }
 
    /**
