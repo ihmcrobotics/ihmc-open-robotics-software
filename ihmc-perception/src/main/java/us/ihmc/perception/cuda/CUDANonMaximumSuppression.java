@@ -10,6 +10,19 @@ import java.net.URL;
 
 import static org.bytedeco.cuda.global.cudart.*;
 
+/**
+ * Implementation of Non-Maximum Suppression (NMS) using CUDA for parallel processing.
+ * <p>
+ * Given a set of bounding boxes, NMS groups the overlapping boxes and selects the best box in each group.
+ * Since object detection algorithms tend to produce many potential bounding boxes
+ * for each detected object, NMS is applied to find the most representative box of each object.
+ * <p>
+ * Intersection over Union (IoU) is used to measure overlap.
+ * Essentially, if two boxes don't overlap their IoU = 0 and if they are identical their IoU = 1.
+ * Lower threshold values will result in more boxes being removed, while higher values will remove fewer boxes.
+ * <p>
+ * For further reading, see: <a href="https://www.geeksforgeeks.org/what-is-non-maximum-suppression/">What is Non-Maximum Suppression</a>
+ */
 public class CUDANonMaximumSuppression implements AutoCloseable
 {
    private static final int MAX_THREADS_PER_BLOCK = CUDATools.getMaxThreadsPerBlock();

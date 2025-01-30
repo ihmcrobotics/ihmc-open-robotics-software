@@ -29,10 +29,14 @@
 using namespace PerceptionUtils;
 
 extern "C"
-__global__ void filterDetections(float* unfilteredDetection, int classCount,
-                                 int detectionCount, float confidenceThreshold,
-                                 int shiftX, int shiftY,
-                                 float* filteredDetections, int* filteredDetectionCount)
+__global__ void filterDetections(float* unfilteredDetection,
+                                 int classCount,
+                                 int detectionCount,
+                                 float confidenceThreshold,
+                                 int shiftX,
+                                 int shiftY,
+                                 float* filteredDetections,
+                                 int* filteredDetectionCount)
 {
     if (Utils::getThreadCoordX() == 0)
         *filteredDetectionCount = 0;
@@ -94,10 +98,14 @@ __global__ void filterDetections(float* unfilteredDetection, int classCount,
 }
 
 extern "C"
-__global__ void computeDetectionMask(float* prototypeMasks, float* weights,
-                                     float* boundingBox, float maskThreshold,
-                                     unsigned char* mask, size_t maskPitch,
-                                     int maskWidth, int maskHeight)
+__global__ void computeDetectionMask(float* prototypeMasks,
+                                     float* weights,
+                                     float* boundingBox,
+                                     float maskThreshold,
+                                     unsigned char* mask,
+                                     size_t maskPitch,
+                                     int maskWidth,
+                                     int maskHeight)
 {
     int startX = Utils::getThreadCoordX();
     int strideX = Utils::getStrideX();

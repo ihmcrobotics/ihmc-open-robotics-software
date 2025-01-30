@@ -14,6 +14,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.RawImage;
+import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.tools.IHMCCommonPaths;
 
 import java.io.File;
@@ -28,6 +29,14 @@ import java.util.stream.Stream;
 
 public class YOLOv8Tools
 {
+   private static final int FONT = opencv_imgproc.FONT_HERSHEY_DUPLEX;
+   private static final int FONT_THICKNESS = 2;
+   private static final double FONT_SCALE = 1.5;
+   private static final int LINE_TYPE = opencv_imgproc.LINE_4;
+   private static final Scalar GREEN = new Scalar(0.0, 196.0, 0.0, 255.0);
+   private static final Scalar WHITE = new Scalar(255.0, 255.0, 255.0, 255.0);
+   private static final ThreadLocal<Mat> GREEN_MAT = ThreadLocal.withInitial(() -> new Mat(1, 1, opencv_core.CV_8UC3, GREEN));
+
    public static final String CLASS_NAME_FILE_NAME = "class_names.yaml";
 //   private static final WorkspaceResourceDirectory POINT_CLOUD_DIRECTORY = new WorkspaceResourceDirectory(YOLOv8DetectionClass.class, "/yoloICPPointClouds/");
 
@@ -138,13 +147,9 @@ public class YOLOv8Tools
     */
    public static void annotateImage(Mat inputImage, Mat annotatedImage, List<YOLOv8Detection> detections)
    {
-      int font = opencv_imgproc.FONT_HERSHEY_DUPLEX;
-      int lineType = opencv_imgproc.LINE_4;
-      double fontScale = 1.5;
-      int fontThickness = 2;
-      Scalar green = new Scalar(0.0, 196.0, 0.0, 255.0);
-      Scalar white = new Scalar(255.0, 255.0, 255.0, 255.0);
-      Mat greenMat = new Mat(inputImage.size(), opencv_core.CV_8UC3, green);
+      Mat greenMat = GREEN_MAT.get();
+      if (!OpenCVTools.dimensionsMatch(inputImage, greenMat))
+         opencv_imgproc.resize(greenMat, greenMat, inputImage.size());
 
       inputImage.copyTo(annotatedImage);
 
@@ -154,20 +159,20 @@ public class YOLOv8Tools
 
          // Draw the bounding box
          Rect boundingBox = detection.boundingBox();
-         opencv_imgproc.rectangle(annotatedImage, boundingBox, green, 5, lineType, 0);
+         opencv_imgproc.rectangle(annotatedImage, boundingBox, GREEN, 5, LINE_TYPE, 0);
 
          // Draw text background
-         Size textSize = opencv_imgproc.getTextSize(text, font, fontScale, fontThickness, new IntPointer());
+         Size textSize = opencv_imgproc.getTextSize(text, FONT, FONT_SCALE, FONT_THICKNESS, new IntPointer());
 
          int textBoxClampedX = MathTools.clamp(boundingBox.x(), 0, annotatedImage.cols() - textSize.width());
          int textBoxClampedY = MathTools.clamp(boundingBox.y() - textSize.height(), 0, annotatedImage.rows() - textSize.height());
 
          Rect textBox = new Rect(textBoxClampedX, textBoxClampedY, textSize.width(), textSize.height());
-         opencv_imgproc.rectangle(annotatedImage, textBox, green, opencv_imgproc.FILLED, lineType, 0);
+         opencv_imgproc.rectangle(annotatedImage, textBox, GREEN, opencv_imgproc.FILLED, LINE_TYPE, 0);
 
          // Draw the text
          Point textLocation = new Point(textBoxClampedX, textBoxClampedY + textSize.height());
-         opencv_imgproc.putText(annotatedImage, text, textLocation, font, fontScale, white, fontThickness, lineType, false);
+         opencv_imgproc.putText(annotatedImage, text, textLocation, FONT, FONT_SCALE, WHITE, FONT_THICKNESS, LINE_TYPE, false);
 
          // Add green tint to show mask
          RawImage mask = detection.mask();
@@ -179,10 +184,6 @@ public class YOLOv8Tools
          textBox.close();
          mask.release();
       }
-
-      green.close();
-      white.close();
-      greenMat.close();
    }
 
    public static List<Path> getYOLOModelDirectories()

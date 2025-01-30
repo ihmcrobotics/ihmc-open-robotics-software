@@ -63,6 +63,12 @@ public class CUDATools
       return getCUDADeviceCount() > 0;
    }
 
+   /**
+    * Each block of a CUDA kernel has a maximum number of threads it can run.
+    * The block dimensions must not multiply to be greater than this number.
+    * On older GPUs it is 512 threads and on newer models it is 1024.
+    * @return The maximum number of threads per block of the device.
+    */
    public static int getMaxThreadsPerBlock()
    {
       try (IntPointer device = new IntPointer(1);
