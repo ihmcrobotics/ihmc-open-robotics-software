@@ -39,7 +39,7 @@ public class MonteCarloFootstepPlanningTest
       CameraIntrinsics depthImageIntrinsics = new CameraIntrinsics();
       BytedecoImage heightMapBytedecoImage = new BytedecoImage(depthImageIntrinsics.getWidth(), depthImageIntrinsics.getHeight(), opencv_core.CV_16UC1);
       heightMapBytedecoImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
-      RapidHeightMapExtractor heightMapExtractor = new RapidHeightMapExtractor(openCLManager, heightMapBytedecoImage, 1);
+      RapidHeightMapExtractor heightMapExtractor = new RapidHeightMapExtractor(openCLManager, heightMapBytedecoImage, depthImageIntrinsics, 1);
 
       LogTools.info("Initializing");
 
