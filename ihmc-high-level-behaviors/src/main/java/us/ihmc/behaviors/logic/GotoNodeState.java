@@ -2,8 +2,11 @@ package us.ihmc.behaviors.logic;
 
 import behavior_msgs.msg.dds.GotoNodeStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.sequence.LeafNodeState;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.util.List;
@@ -24,7 +27,7 @@ public class GotoNodeState extends LeafNodeState<GotoNodeDefinition>
     * saving an up to date human readable name in the JSON.
     * It also finds the correct node upon loading the name from JSON.
     */
-   public void updateAndValidateGotoNode(List<BehaviorTreeNodeState<?>> allNodes)
+   public void updateAndValidateGotoNode(List<LeafNodeState<?>> leafNodes)
    {
       String gotoNodeName = null;
 
@@ -34,7 +37,7 @@ public class GotoNodeState extends LeafNodeState<GotoNodeDefinition>
          // This happens when we load from JSON
          if (definition.getGotoNodeID().getValue() == 0)
          {
-            for (BehaviorTreeNodeState<?> nodeToCompare : allNodes)
+            for (BehaviorTreeNodeState<?> nodeToCompare : leafNodes)
             {
                if (nodeToCompare.getDefinition().getName().equals(definition.getGotoNodeName()))
                {
@@ -47,7 +50,7 @@ public class GotoNodeState extends LeafNodeState<GotoNodeDefinition>
          else // Update the node's name for saving in human readable format
          {
             long gotoNodeID = definition.getGotoNodeID().getValue();
-            for (BehaviorTreeNodeState<?> nodeToCompare : allNodes)
+            for (BehaviorTreeNodeState<?> nodeToCompare : leafNodes)
             {
                if (nodeToCompare.getID() == gotoNodeID)
                {
@@ -78,5 +81,20 @@ public class GotoNodeState extends LeafNodeState<GotoNodeDefinition>
       getDefinition().fromMessage(message.getDefinition());
 
       super.fromMessage(message.getState());
+   }
+
+   public LeafNodeState<?> findNodeToGoto()
+   {
+      BehaviorTreeRootNodeState rootState = BehaviorTreeTools.findRootNode(this);
+      BehaviorTreeNodeState<?> nodeToGoto = rootState.getIDToNodeMap().get(definition.getGotoNodeID().getValue());
+      if (nodeToGoto instanceof LeafNodeState<?> leafState)
+      {
+         return leafState;
+      }
+      else
+      {
+         LogTools.error("Node to goto is not a leaf node.");
+         return null;
+      }
    }
 }

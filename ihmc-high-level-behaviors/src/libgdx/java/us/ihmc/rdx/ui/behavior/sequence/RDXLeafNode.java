@@ -94,7 +94,7 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
 
       if (actionSequence != null)
       {
-         // Validate state case something earlier in this UI tick messed with things.
+         // Validate state in case something earlier in this UI tick messed with things.
          // This happens with the Undo non-topological changes button.
          state.updateAndValidateExecuteAfter(actionSequence.getOrderedLeafNodes());
 
