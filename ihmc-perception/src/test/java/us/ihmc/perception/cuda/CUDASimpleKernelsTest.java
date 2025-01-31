@@ -43,7 +43,7 @@ public class CUDASimpleKernelsTest
    @Test
    public void testPassVariableToGPU() throws Exception
    {
-      URL kernelPath = getClass().getResource("CUDASimpleKernels.cu");
+      URL kernelPath = getClass().getResource("/cuda/CUDASimpleKernels.cu");
 
       stream = CUDAStreamManager.getStream();
       program = new CUDAProgram(kernelPath);
@@ -84,7 +84,7 @@ public class CUDASimpleKernelsTest
    @Test
    public void testPassingInWrongTypeToGPU() throws Exception
    {
-      URL kernelPath = getClass().getResource("CUDASimpleKernels.cu");
+      URL kernelPath = getClass().getResource("/cuda/CUDASimpleKernels.cu");
       stream = CUDAStreamManager.getStream();
       program = new CUDAProgram(kernelPath);
       kernel = program.loadKernel("pass_in_variable");
@@ -124,7 +124,7 @@ public class CUDASimpleKernelsTest
    @Test
    public void testWrongNumberOfKernelVariables() throws Exception
    {
-      URL kernelPath = getClass().getResource("CUDASimpleKernels.cu");
+      URL kernelPath = getClass().getResource("/cuda/CUDASimpleKernels.cu");
 
       // This test creates its own stream to not interfere with other tests
       CUstream_st streamLocal = new CUstream_st();
@@ -162,7 +162,7 @@ public class CUDASimpleKernelsTest
    @Test
    public void testNoExternCInGPUKernel() throws Exception
    {
-      URL kernelPath = getClass().getResource("CUDASimpleKernels.cu");
+      URL kernelPath = getClass().getResource("/cuda/CUDASimpleKernels.cu");
 
       stream = CUDAStreamManager.getStream();
       program = new CUDAProgram(kernelPath);
@@ -175,7 +175,7 @@ public class CUDASimpleKernelsTest
    @Test
    public void testNoSemicolonInKernel()
    {
-      URL kernelPath = getClass().getResource("CUDAKernelCodeWrong.cu");
+      URL kernelPath = getClass().getResource("/cuda/CUDAKernelCodeWrong.cu");
 
       stream = CUDAStreamManager.getStream();
 

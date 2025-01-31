@@ -24,7 +24,7 @@ public class CUDAExampleKernel2D
    public CUDAExampleKernel2D()
    {
       // We load the kernel from resources; this is a good place to store kernels to separate them from the Java classes
-      URL programPath = getClass().getResource("matrix_element_wise_addition.cu");
+      URL programPath = getClass().getResource("/cuda/examples/matrix_element_wise_addition.cu");
       // Create the stream
       CUstream_st stream = CUDAStreamManager.getStream();
 

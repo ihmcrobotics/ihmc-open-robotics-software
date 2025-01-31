@@ -65,7 +65,7 @@ public class CUDAProgramTest
       }
       catch (Exception e)
       {
-         e.getStackTrace();
+         fail(e);
       }
 
       CUDAStreamManager.releaseStream(stream);
@@ -107,7 +107,7 @@ public class CUDAProgramTest
       }
       catch (Exception e)
       {
-         e.getStackTrace();
+         fail(e);
       }
 
       CUDAStreamManager.releaseStream(stream);
@@ -142,7 +142,7 @@ public class CUDAProgramTest
       }
       catch (Exception e)
       {
-         e.getStackTrace();
+         fail(e);
       }
 
       CUDAStreamManager.releaseStream(stream);
@@ -155,8 +155,8 @@ public class CUDAProgramTest
       CUstream_st stream = CUDAStreamManager.getStream();
 
       // Create a CUDA program with files
-      URL kernelPath = getClass().getResource("test_add_values.cu");
-      URL headerPath = getClass().getResource("test_values.cuh");
+      URL kernelPath = getClass().getResource("/cuda/test_add_values.cu");
+      URL headerPath = getClass().getResource("/cuda/test_values.cuh");
 
       try (CUDAProgram program = new CUDAProgram(kernelPath, headerPath);
 
@@ -192,7 +192,7 @@ public class CUDAProgramTest
       }
       catch (Exception e)
       {
-         e .getStackTrace();
+         fail(e);
       }
 
       CUDAStreamManager.releaseStream(stream);
