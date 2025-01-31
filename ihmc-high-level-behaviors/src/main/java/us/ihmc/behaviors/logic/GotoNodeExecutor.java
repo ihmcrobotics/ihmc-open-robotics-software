@@ -22,18 +22,12 @@ public class GotoNodeExecutor extends LeafNodeExecutor<GotoNodeState, GotoNodeDe
    @Override
    public void updateCurrentlyExecuting()
    {
-      state.setIsExecuting(false); // Completes immediately
-   }
-
-   @Override
-   public void triggerExecution()
-   {
-      super.triggerExecution();
-
       if (!definition.getGotoNext().getValue())
       {
          LeafNodeState<?> nodeToGoto = state.findNodeToGoto();
          BehaviorTreeTools.findRootNode(this).getState().setExecutionNextIndex(nodeToGoto.getLeafIndex());
       }
+
+      state.setIsExecuting(false); // Completes immediately
    }
 }

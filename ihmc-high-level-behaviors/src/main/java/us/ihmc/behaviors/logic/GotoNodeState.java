@@ -27,8 +27,11 @@ public class GotoNodeState extends LeafNodeState<GotoNodeDefinition>
     * saving an up to date human readable name in the JSON.
     * It also finds the correct node upon loading the name from JSON.
     */
-   public void updateAndValidateGotoNode(List<LeafNodeState<?>> leafNodes)
+   @Override
+   public void validateFields(List<LeafNodeState<?>> leafNodes)
    {
+      super.validateFields(leafNodes);
+
       String gotoNodeName = null;
 
       if (!definition.getGotoNext().getValue())

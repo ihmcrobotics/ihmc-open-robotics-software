@@ -56,7 +56,7 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
 
       for (LeafNodeExecutor<?, ?> leaf : orderedLeaves)
       {
-         leaf.getState().updateAndValidateExecuteAfter(state.getOrderedLeaves());
+         leaf.getState().validateFields(state.getOrderedLeaves());
       }
 
       // Update concurrency ranks

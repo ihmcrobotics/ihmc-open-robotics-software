@@ -57,7 +57,7 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
 
       for (RDXLeafNode<?, ?> leaf : orderedLeaves)
       {
-         leaf.getState().updateAndValidateExecuteAfter(state.getOrderedLeaves());
+         leaf.getState().validateFields(state.getOrderedLeaves());
       }
    }
 
@@ -109,7 +109,7 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
       ImGuiTools.previousWidgetTooltip("Go to next leaf");
 
       boolean endOfSequence = getState().getExecutionNextIndex() >= getState().getOrderedLeaves().size();
-      if (!endOfSequence)
+      ImGui.beginDisabled(endOfSequence); // Use disabled so stuff doesn't glitch around
       {
          ImGui.sameLine();
          ImGui.text("Execute");
@@ -120,27 +120,25 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
             getDefinition().modify();
 
          ImGuiTools.previousWidgetTooltip("Enables autonomous execution. Will immediately start executing when checked.");
-         if (!getState().getAutomaticExecution())
+
+         ImGui.beginDisabled(getState().getAutomaticExecution());
          {
             ImGui.sameLine();
 
             boolean disableManuallyExecuteButton = getState().getManualExecutionRequested();
-            if (disableManuallyExecuteButton)
-               ImGui.beginDisabled();
-            if (ImGui.button(labels.get("Manually")))
+            ImGui.beginDisabled(disableManuallyExecuteButton);
             {
-               getState().setManualExecutionRequested();
+               if (ImGui.button(labels.get("Manually")))
+               {
+                  getState().setManualExecutionRequested();
+               }
             }
-            if (disableManuallyExecuteButton)
-               ImGui.endDisabled();
+            ImGui.endDisabled();
             ImGuiTools.previousWidgetTooltip("Executes the next leaf.");
          }
-
-         if (endOfSequence)
-         {
-            ImGui.text("End of sequence.");
-         }
+         ImGui.endDisabled();
       }
+      ImGui.endDisabled();
 
       ImGui.sameLine();
       concurrencyEnabledCheckbox.renderImGuiWidget();

@@ -42,7 +42,7 @@ public class LeafNodeState<D extends LeafNodeDefinition> extends BehaviorTreeNod
     * saving an up to date human readable name in the JSON.
     * It also finds the correct node upon loading the name from JSON.
     */
-   public void updateAndValidateExecuteAfter(List<LeafNodeState<?>> leaves)
+   public void validateFields(List<LeafNodeState<?>> leaves)
    {
       String executeAfterLeafName = null;
 
