@@ -25,10 +25,10 @@ public class LeafNodeDefinition extends BehaviorTreeNodeDefinition
    private final CRDTBidirectionalBoolean executeAfterBeginning;
    private final CRDTBidirectionalLong executeAfterNodeID;
    /** We use this to save the action name to file instead of the number for human readability. */
-   private String executeAfterActionName = EXECUTE_AFTER_PREVIOUS;
+   private String executeAfterLeafName = EXECUTE_AFTER_PREVIOUS;
 
    // On disk fields
-   private String onDiskExecuteAfterActionName;
+   private String onDiskExecuteAfterLeafName;
 
    public LeafNodeDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
@@ -39,21 +39,21 @@ public class LeafNodeDefinition extends BehaviorTreeNodeDefinition
       executeAfterNodeID = new CRDTBidirectionalLong(this, 0);
    }
 
-   public void updateAndSanitizeExecuteAfterFields(@Nullable String executeAfterActionName)
+   public void updateAndSanitizeExecuteAfterFields(@Nullable String executeAfterLeafName)
    {
       if (executeAfterBeginning.getValue())
       {
-         this.executeAfterActionName = EXECUTE_AFTER_BEGINNING;
+         this.executeAfterLeafName = EXECUTE_AFTER_BEGINNING;
          executeAfterNodeID.setValue(0);
       }
-      else if (executeAfterActionName != null)
+      else if (executeAfterLeafName != null)
       {
-         this.executeAfterActionName = executeAfterActionName;
+         this.executeAfterLeafName = executeAfterLeafName;
       }
       else // Default to previous
       {
          executeAfterPrevious.setValue(true);
-         this.executeAfterActionName = EXECUTE_AFTER_PREVIOUS;
+         this.executeAfterLeafName = EXECUTE_AFTER_PREVIOUS;
          executeAfterNodeID.setValue(0);
       }
    }
@@ -63,7 +63,7 @@ public class LeafNodeDefinition extends BehaviorTreeNodeDefinition
    {
       super.saveToFile(jsonNode);
 
-      jsonNode.put("executeAfterAction", executeAfterActionName);
+      jsonNode.put("executeAfterAction", executeAfterLeafName);
    }
 
    @Override
@@ -71,9 +71,9 @@ public class LeafNodeDefinition extends BehaviorTreeNodeDefinition
    {
       super.loadFromFile(jsonNode);
 
-      executeAfterActionName = jsonNode.get("executeAfterAction").textValue();
-      executeAfterPrevious.setValue(executeAfterActionName.equals(EXECUTE_AFTER_PREVIOUS));
-      executeAfterBeginning.setValue(executeAfterActionName.equals(EXECUTE_AFTER_BEGINNING));
+      executeAfterLeafName = jsonNode.get("executeAfterAction").textValue();
+      executeAfterPrevious.setValue(executeAfterLeafName.equals(EXECUTE_AFTER_PREVIOUS));
+      executeAfterBeginning.setValue(executeAfterLeafName.equals(EXECUTE_AFTER_BEGINNING));
       executeAfterNodeID.setValue(0); // Invalidate until we can find it
    }
 
@@ -82,7 +82,7 @@ public class LeafNodeDefinition extends BehaviorTreeNodeDefinition
    {
       super.setOnDiskFields();
 
-      onDiskExecuteAfterActionName = executeAfterActionName;
+      onDiskExecuteAfterLeafName = executeAfterLeafName;
    }
 
    @Override
@@ -90,9 +90,9 @@ public class LeafNodeDefinition extends BehaviorTreeNodeDefinition
    {
       super.undoAllNontopologicalChanges();
 
-      executeAfterActionName = onDiskExecuteAfterActionName;
-      executeAfterPrevious.setValue(onDiskExecuteAfterActionName.equals(EXECUTE_AFTER_PREVIOUS));
-      executeAfterBeginning.setValue(onDiskExecuteAfterActionName.equals(EXECUTE_AFTER_BEGINNING));
+      executeAfterLeafName = onDiskExecuteAfterLeafName;
+      executeAfterPrevious.setValue(onDiskExecuteAfterLeafName.equals(EXECUTE_AFTER_PREVIOUS));
+      executeAfterBeginning.setValue(onDiskExecuteAfterLeafName.equals(EXECUTE_AFTER_BEGINNING));
       executeAfterNodeID.setValue(0); // Invalidate until we can find it
    }
 
@@ -101,7 +101,7 @@ public class LeafNodeDefinition extends BehaviorTreeNodeDefinition
    {
       boolean unchanged = !super.hasChanges();
 
-      unchanged &= executeAfterActionName.equals(onDiskExecuteAfterActionName);
+      unchanged &= executeAfterLeafName.equals(onDiskExecuteAfterLeafName);
 
       return !unchanged;
    }
@@ -140,8 +140,8 @@ public class LeafNodeDefinition extends BehaviorTreeNodeDefinition
    }
 
    /** Only used for finding the ID after loading */
-   public String getExecuteAfterActionName()
+   public String getExecuteAfterLeafName()
    {
-      return executeAfterActionName;
+      return executeAfterLeafName;
    }
 }

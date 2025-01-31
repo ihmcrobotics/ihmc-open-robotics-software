@@ -22,7 +22,7 @@ public class LeafNodeState<D extends LeafNodeDefinition> extends BehaviorTreeNod
    private final CRDTStatusBoolean failed;
 
    /** The index is not CRDT synced because it's a simple local calculation. */
-   private int actionIndex = -1;
+   private int leafIndex = -1;
 
    public LeafNodeState(long id, D definition, CRDTInfo crdtInfo)
    {
@@ -42,9 +42,9 @@ public class LeafNodeState<D extends LeafNodeDefinition> extends BehaviorTreeNod
     * saving an up to date human readable name in the JSON.
     * It also finds the correct node upon loading the name from JSON.
     */
-   public void updateAndValidateExecuteAfter(List<LeafNodeState<?>> actionStateChildren)
+   public void updateAndValidateExecuteAfter(List<LeafNodeState<?>> leaves)
    {
-      String executeAfterActionName = null;
+      String executeAfterLeafName = null;
 
       if (!definition.getExecuteAfterPrevious().getValue() && !definition.getExecuteAfterBeginning().getValue())
       {
@@ -52,12 +52,12 @@ public class LeafNodeState<D extends LeafNodeDefinition> extends BehaviorTreeNod
          // This happens when we load from JSON
          if (definition.getExecuteAfterNodeID().getValue() == 0)
          {
-            for (int j = actionIndex - 1; j >= 0; j--)
+            for (int j = leafIndex - 1; j >= 0; j--)
             {
-               LeafNodeState<?> stateToCompare = actionStateChildren.get(j);
-               if (stateToCompare.getDefinition().getName().equals(definition.getExecuteAfterActionName()))
+               LeafNodeState<?> stateToCompare = leaves.get(j);
+               if (stateToCompare.getDefinition().getName().equals(definition.getExecuteAfterLeafName()))
                {
-                  executeAfterActionName = stateToCompare.getDefinition().getName();
+                  executeAfterLeafName = stateToCompare.getDefinition().getName();
                   definition.getExecuteAfterNodeID().setValue(stateToCompare.getID());
                   break;
                }
@@ -66,18 +66,18 @@ public class LeafNodeState<D extends LeafNodeDefinition> extends BehaviorTreeNod
          else // Update the node's name for saving in human readable format
          {
             long executeAfterID = definition.getExecuteAfterNodeID().getValue();
-            for (int j = actionIndex - 1; j >= 0; j--)
+            for (int j = leafIndex - 1; j >= 0; j--)
             {
-               LeafNodeState<?> actionStateToCompare = actionStateChildren.get(j);
-               if (actionStateToCompare.getID() == executeAfterID)
+               LeafNodeState<?> leafStateToCompare = leaves.get(j);
+               if (leafStateToCompare.getID() == executeAfterID)
                {
-                  executeAfterActionName = actionStateToCompare.getDefinition().getName();
+                  executeAfterLeafName = leafStateToCompare.getDefinition().getName();
                }
             }
          }
       }
 
-      definition.updateAndSanitizeExecuteAfterFields(executeAfterActionName);
+      definition.updateAndSanitizeExecuteAfterFields(executeAfterLeafName);
    }
 
    @Override
@@ -114,14 +114,14 @@ public class LeafNodeState<D extends LeafNodeDefinition> extends BehaviorTreeNod
       failed.fromMessage(message.getFailed());
    }
 
-   public void setActionIndex(int actionIndex)
+   public void setLeafIndex(int leafIndex)
    {
-      this.actionIndex = actionIndex;
+      this.leafIndex = leafIndex;
    }
 
-   public int getActionIndex()
+   public int getLeafIndex()
    {
-      return actionIndex;
+      return leafIndex;
    }
 
    public void setIsNextForExecution(boolean isNextForExecution)
@@ -140,8 +140,8 @@ public class LeafNodeState<D extends LeafNodeDefinition> extends BehaviorTreeNod
    }
 
    /**
-    * Gives an idea how many actions will be executing all together with this one.
-    * How many actions will be started when the execute next index is set to this action.
+    * Gives an idea how many leaves will be executing all together with this one.
+    * How many leaves will be started when the execute next index is set to this action.
     */
    public int getConcurrencyRank()
    {
@@ -158,13 +158,13 @@ public class LeafNodeState<D extends LeafNodeDefinition> extends BehaviorTreeNod
       this.canExecute.setValue(canExecute);
    }
 
-   /** @return whether this action is valid for execution. This is checked before triggering the action. */
+   /** @return whether this leaf is valid for execution. This is checked before triggering the leaf. */
    public boolean getCanExecute()
    {
       return canExecute.getValue();
    }
 
-   /** Set from within {@link ActionNodeExecutor#updateCurrentlyExecuting} only. */
+   /** Set from within {@link LeafNodeExecutor#updateCurrentlyExecuting} only. */
    public void setIsExecuting(boolean isExecuting)
    {
       this.isExecuting.setValue(isExecuting);
@@ -180,13 +180,13 @@ public class LeafNodeState<D extends LeafNodeDefinition> extends BehaviorTreeNod
       return failed.getValue();
    }
 
-   /** Should return a precalculated value from {@link ActionNodeExecutor#updateCurrentlyExecuting} */
+   /** Should return a precalculated value from {@link LeafNodeExecutor#updateCurrentlyExecuting} */
    public boolean getIsExecuting()
    {
       return isExecuting.getValue();
    }
 
-   public int calculateExecuteAfterActionIndex()
+   public int calculateExecuteAfterLeafIndex()
    {
       if (definition.getExecuteAfterBeginning().getValue())
       {
@@ -194,16 +194,16 @@ public class LeafNodeState<D extends LeafNodeDefinition> extends BehaviorTreeNod
       }
       else if (!definition.getExecuteAfterPrevious().getValue())
       {
-         LeafNodeState<?> executeAfterNode = findExecuteAfterAction();
+         LeafNodeState<?> executeAfterNode = findExecuteAfterLeaf();
 
          if (executeAfterNode != null)
-            return executeAfterNode.getActionIndex();
+            return executeAfterNode.getLeafIndex();
       }
 
-      return actionIndex - 1; // previous
+      return leafIndex - 1; // previous
    }
 
-   public LeafNodeState<?> findExecuteAfterAction()
+   public LeafNodeState<?> findExecuteAfterLeaf()
    {
       long executeAfterID = definition.getExecuteAfterNodeID().getValue();
 

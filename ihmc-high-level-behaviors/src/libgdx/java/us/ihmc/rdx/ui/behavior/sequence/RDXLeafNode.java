@@ -79,7 +79,7 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
          if (hollowArrowRenderer.render(colorArrow, arrowColor, ImGui.getFrameHeight()))
          {
             setSpecificWidgetOnRowClicked();
-            actionSequence.getState().setExecutionNextIndex(state.getActionIndex());
+            actionSequence.getState().setExecutionNextIndex(state.getLeafIndex());
          }
          ImGui.sameLine();
       }
@@ -88,7 +88,7 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
    @Override
    public void renderNodeSettingsWidgets()
    {
-      ImGui.text("Type: %s   Index: %d".formatted(getActionTypeTitle(), state.getActionIndex()));
+      ImGui.text("Type: %s   Index: %d".formatted(getLeafTypeTitle(), state.getLeafIndex()));
 
       BehaviorTreeRootNodeState actionSequence = BehaviorTreeTools.findRootNode(state);
 
@@ -96,7 +96,7 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
       {
          // Validate state in case something earlier in this UI tick messed with things.
          // This happens with the Undo non-topological changes button.
-         state.updateAndValidateExecuteAfter(actionSequence.getOrderedLeafNodes());
+         state.updateAndValidateExecuteAfter(actionSequence.getOrderedLeaves());
 
          String selectedText;
          if (definition.getExecuteAfterPrevious().getValue())
@@ -109,7 +109,7 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
          }
          else
          {
-            LeafNodeState<?> executeAfterNode = state.findExecuteAfterAction();
+            LeafNodeState<?> executeAfterNode = state.findExecuteAfterLeaf();
             selectedText = executeAfterNode.getDefinition().getName();
          }
 
@@ -128,9 +128,9 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
                definition.updateAndSanitizeExecuteAfterFields(null);
             }
 
-            for (LeafNodeState<?> leafNode : actionSequence.getOrderedLeafNodes())
+            for (LeafNodeState<?> leafNode : actionSequence.getOrderedLeaves())
             {
-               if (leafNode.getActionIndex() < state.getActionIndex())
+               if (leafNode.getLeafIndex() < state.getLeafIndex())
                {
                   if (ImGui.selectable(labels.get(leafNode.getDefinition().getName()), definition.getExecuteAfterNodeID().getValue() == leafNode.getID()))
                   {
@@ -170,7 +170,7 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
 
    }
 
-   public abstract String getActionTypeTitle();
+   public abstract String getLeafTypeTitle();
 
    @Override
    public int getNameColor()

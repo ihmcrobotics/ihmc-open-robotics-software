@@ -21,7 +21,7 @@ public class LeafNodeExecutor<S extends LeafNodeState<D>,
    }
 
    /** Trigger the action to begin executing. Called once per execution. */
-   public void triggerActionExecution()
+   public void triggerExecution()
    {
       state.setIsExecuting(true);
       state.setFailed(false);

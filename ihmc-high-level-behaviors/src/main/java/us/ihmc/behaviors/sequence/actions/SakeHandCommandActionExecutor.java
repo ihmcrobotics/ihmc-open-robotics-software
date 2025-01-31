@@ -97,9 +97,9 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
    }
 
    @Override
-   public void triggerActionExecution()
+   public void triggerExecution()
    {
-      super.triggerActionExecution();
+      super.triggerExecution();
 
       trackingCalculator.reset();
 

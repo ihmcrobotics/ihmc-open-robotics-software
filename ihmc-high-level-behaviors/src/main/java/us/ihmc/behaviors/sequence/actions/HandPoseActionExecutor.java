@@ -81,33 +81,33 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
          ChestOrientationActionState concurrentChestOrientationAction = null;
          PelvisHeightOrientationActionState concurrentPelvisHeightPitchAction = null;
 
-         BehaviorTreeRootNodeExecutor actionSequenceExecutor = BehaviorTreeTools.findRootNode(this);
-         if (actionSequenceExecutor != null)
+         BehaviorTreeRootNodeExecutor rootExecutor = BehaviorTreeTools.findRootNode(this);
+         if (rootExecutor != null)
          {
             if (state.getIsToBeExecutedConcurrently())
             {
-               List<ActionNodeState<?>> actionChildren = actionSequenceExecutor.getState().getOrderedActions();
+               List<LeafNodeState<?>> orderedLeaves = rootExecutor.getState().getOrderedLeaves();
 
-               for (int i = state.getActionIndex() - 1; i >= 0 && actionChildren.get(i + 1).getIsToBeExecutedConcurrently(); i--)
+               for (int i = state.getLeafIndex() - 1; i >= 0 && orderedLeaves.get(i + 1).getIsToBeExecutedConcurrently(); i--)
                {
-                  if (actionChildren.get(i) instanceof ChestOrientationActionState chestOrientationAction)
+                  if (orderedLeaves.get(i) instanceof ChestOrientationActionState chestOrientationAction)
                   {
                      concurrentChestOrientationAction = chestOrientationAction;
                   }
-                  if (actionChildren.get(i) instanceof PelvisHeightOrientationActionState pelvisHeightPitchAction)
+                  if (orderedLeaves.get(i) instanceof PelvisHeightOrientationActionState pelvisHeightPitchAction)
                   {
                      concurrentPelvisHeightPitchAction = pelvisHeightPitchAction;
                   }
                }
             }
 
-            for (ActionNodeExecutor<?, ?> currentlyExecutingAction : actionSequenceExecutor.getCurrentlyExecutingActions())
+            for (LeafNodeExecutor<?, ?> currentlyExecutingLeaf : rootExecutor.getCurrentlyExecutingLeaves())
             {
-               if (currentlyExecutingAction.getState() instanceof ChestOrientationActionState chestOrientationAction)
+               if (currentlyExecutingLeaf.getState() instanceof ChestOrientationActionState chestOrientationAction)
                {
                   concurrentChestOrientationAction = chestOrientationAction;
                }
-               if (currentlyExecutingAction.getState() instanceof PelvisHeightOrientationActionState pelvisHeightPitchAction)
+               if (currentlyExecutingLeaf.getState() instanceof PelvisHeightOrientationActionState pelvisHeightPitchAction)
                {
                   concurrentPelvisHeightPitchAction = pelvisHeightPitchAction;
                }
@@ -181,9 +181,9 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
    }
 
    @Override
-   public void triggerActionExecution()
+   public void triggerExecution()
    {
-      super.triggerActionExecution();
+      super.triggerExecution();
 
       state.setNominalExecutionDuration(definition.getTrajectoryDuration());
       trackingCalculator.reset();

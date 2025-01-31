@@ -44,7 +44,7 @@ public class RDXGotoNode extends RDXLeafNode<GotoNodeState, GotoNodeDefinition>
 
       // Validate state in case something earlier in this UI tick messed with things.
       // This happens with the Undo non-topological changes button.
-      state.updateAndValidateGotoNode(rootNode.getOrderedLeafNodes());
+      state.updateAndValidateGotoNode(rootNode.getOrderedLeaves());
 
       String selectedText;
       if (definition.getGotoNext().getValue())
@@ -65,7 +65,7 @@ public class RDXGotoNode extends RDXLeafNode<GotoNodeState, GotoNodeDefinition>
             definition.updateAndSanitizeGotoNodeFields(null);
          }
 
-         for (LeafNodeState<?> leafNode : rootNode.getOrderedLeafNodes())
+         for (LeafNodeState<?> leafNode : rootNode.getOrderedLeaves())
          {
             if (leafNode != state) // Exclude self
             {
@@ -83,7 +83,7 @@ public class RDXGotoNode extends RDXLeafNode<GotoNodeState, GotoNodeDefinition>
    }
 
    @Override
-   public String getActionTypeTitle()
+   public String getLeafTypeTitle()
    {
       return "Goto Node";
    }

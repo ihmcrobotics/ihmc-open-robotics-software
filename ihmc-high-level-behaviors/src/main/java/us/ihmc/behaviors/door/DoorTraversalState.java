@@ -59,10 +59,10 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
 
       actionSequence = BehaviorTreeTools.findRootNode(this);
 
-      updateActionSubtree(this);
+      updateSubtree(this);
    }
 
-   public void updateActionSubtree(BehaviorTreeNodeState<?> node)
+   public void updateSubtree(BehaviorTreeNodeState<?> node)
    {
       setStaticForApproachActions.clear();
       setStaticForGraspActions.clear();
@@ -108,7 +108,7 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
          }
          else
          {
-            updateActionSubtree(child);
+            updateSubtree(child);
          }
       }
    }

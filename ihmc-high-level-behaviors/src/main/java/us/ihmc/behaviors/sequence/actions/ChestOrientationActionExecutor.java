@@ -53,9 +53,9 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
    }
 
    @Override
-   public void triggerActionExecution()
+   public void triggerExecution()
    {
-      super.triggerActionExecution();
+      super.triggerExecution();
 
       if (state.getChestFrame().isChildOfWorld())
       {

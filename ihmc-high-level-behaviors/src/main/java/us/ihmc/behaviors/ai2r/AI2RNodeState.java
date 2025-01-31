@@ -29,10 +29,10 @@ public class AI2RNodeState extends BehaviorTreeNodeState<AI2RNodeDefinition>
 
       actionSequence = BehaviorTreeTools.findRootNode(this);
       checkPoints.clear();
-      updateActionSubtree(this);
+      updateSubtree(this);
    }
 
-   public void updateActionSubtree(BehaviorTreeNodeState<?> node)
+   public void updateSubtree(BehaviorTreeNodeState<?> node)
    {
       for (BehaviorTreeNodeState<?> child : node.getChildren())
       {
@@ -41,7 +41,7 @@ public class AI2RNodeState extends BehaviorTreeNodeState<AI2RNodeDefinition>
             checkPoints.add(checkPoint);
          }
          if (child instanceof ActionSequenceState sequence)
-            updateActionSubtree(sequence);
+            updateSubtree(sequence);
       }
    }
 

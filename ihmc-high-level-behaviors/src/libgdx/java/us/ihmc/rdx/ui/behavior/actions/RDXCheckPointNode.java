@@ -20,7 +20,7 @@ public class RDXCheckPointNode extends RDXLeafNode<CheckPointNodeState, CheckPoi
    }
 
    @Override
-   public String getActionTypeTitle()
+   public String getLeafTypeTitle()
    {
       return "Check point";
    }

@@ -17,9 +17,9 @@ public abstract class ActionNodeExecutor<S extends ActionNodeState<D>,
    }
 
    /** Trigger the action to begin executing. Called once per execution. */
-   public void triggerActionExecution()
+   public void triggerExecution()
    {
-      super.triggerActionExecution();
+      super.triggerExecution();
 
       state.setNominalExecutionDuration(0.0);
       state.setElapsedExecutionTime(0.0);
