@@ -24,8 +24,8 @@ public class MathUtilsTest
    @Test
    public void testDotProductCUDA() throws Exception
    {
-      URL programPath = getClass().getClassLoader().getResource("us/ihmc/perception/gpuHeightMap/MathUtilsTest.cu");
-      URL headerPath = getClass().getClassLoader().getResource("us/ihmc/perception/gpuHeightMap/MathUtils.cuh");
+      URL programPath = getClass().getClassLoader().getResource("us/ihmc/perception/cuda/MathUtilsTest.cu");
+      URL headerPath = getClass().getClassLoader().getResource("us/ihmc/perception/cuda/utils/MathUtils.cuh");
 
       CUstream_st stream = CUDAStreamManager.getStream();
       CUDAProgram program = new CUDAProgram(programPath, headerPath);
@@ -82,8 +82,8 @@ public class MathUtilsTest
       float minValue = 1;
       float maxValue = 5;
 
-      URL programFile = getClass().getClassLoader().getResource("us/ihmc/perception/gpuHeightMap/MathUtilsTest.cu");
-      URL headerFile = getClass().getClassLoader().getResource("us/ihmc/perception/gpuHeightMap/MathUtils.cuh");
+      URL programFile = getClass().getClassLoader().getResource("us/ihmc/perception/cuda/MathUtilsTest.cu");
+      URL headerFile = getClass().getClassLoader().getResource("us/ihmc/perception/cuda/utils/MathUtils.cuh");
 
       CUstream_st stream = CUDAStreamManager.getStream();
       CUDAProgram program = new CUDAProgram(programFile, headerFile);
@@ -132,8 +132,8 @@ public class MathUtilsTest
 
    private float[] runTransformPoint3d32_2OnCUDA() throws Exception
    {
-      URL programPath = getClass().getClassLoader().getResource("us/ihmc/perception/gpuHeightMap/MathUtilsTest.cu");
-      URL headerPath = getClass().getClassLoader().getResource("us/ihmc/perception/gpuHeightMap/MathUtils.cuh");
+      URL programPath = getClass().getClassLoader().getResource("us/ihmc/perception/cuda/MathUtilsTest.cu");
+      URL headerPath = getClass().getClassLoader().getResource("us/ihmc/perception/cuda/utils/MathUtils.cuh");
 
       CUstream_st stream = CUDAStreamManager.getStream();
       CUDAProgram program = new CUDAProgram(programPath, headerPath);

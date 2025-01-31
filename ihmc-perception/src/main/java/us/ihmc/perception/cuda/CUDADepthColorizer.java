@@ -25,8 +25,8 @@ public class CUDADepthColorizer
    {
       stream = CUDAStreamManager.getStream();
 
-      URL programURL = CUDADepthColorizer.class.getResource("DepthColorization.cu");
-      URL utilsURL = CUDATools.getUtilsFile();
+      URL programURL = getClass().getResource("DepthColorization.cu");
+      URL utilsURL = getClass().getResource("utils/Utils.cu");
       program = new CUDAProgram(programURL, utilsURL);
 
       encoder = program.loadKernel("colorizeDepth");
