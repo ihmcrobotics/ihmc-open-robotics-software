@@ -1,6 +1,7 @@
 package us.ihmc.perception;
 
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.behaviors.activeMapping.ControllerFootstepQueueMonitor;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -18,6 +19,7 @@ public class RapidHeightMapUpdateThread extends RepeatingTaskThread
    private RapidHeightMapManager heightMapManager;
    private final Object heightMapLock = new Object();
 
+   private final ControllerFootstepQueueMonitor controllerFootstepQueueMonitor;
    private final ImageSensor imageSensor;
    private final ReferenceFrame sensorFrame;
    private final ReferenceFrame zUpSensorFrame;
@@ -28,6 +30,7 @@ public class RapidHeightMapUpdateThread extends RepeatingTaskThread
                                      ROS2SyncedRobotModel syncedRobotModel,
                                      ReferenceFrame leftFootFrame,
                                      ReferenceFrame rightFootFrame,
+                                     ControllerFootstepQueueMonitor controllerFootstepQueueMonitor,
                                      ImageSensor imageSensor,
                                      int depthImageKey,
                                      boolean runWithCUDA)
@@ -38,6 +41,7 @@ public class RapidHeightMapUpdateThread extends RepeatingTaskThread
       this.syncedRobotModel = syncedRobotModel;
       this.leftFootFrame = leftFootFrame;
       this.rightFootFrame = rightFootFrame;
+      this.controllerFootstepQueueMonitor = controllerFootstepQueueMonitor;
       this.imageSensor = imageSensor;
       this.depthImageKey = depthImageKey;
 
@@ -61,6 +65,7 @@ public class RapidHeightMapUpdateThread extends RepeatingTaskThread
                                                          syncedRobotModel.getRobotModel(),
                                                          leftFootFrame,
                                                          rightFootFrame,
+                                                         controllerFootstepQueueMonitor,
                                                          depthImage.getIntrinsicsCopy(),
                                                          runWithCUDA);
          }

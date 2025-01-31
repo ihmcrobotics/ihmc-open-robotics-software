@@ -9,7 +9,6 @@ import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.behaviors.activeMapping.ContinuousHikingLogger;
 import us.ihmc.behaviors.activeMapping.ControllerFootstepQueueMonitor;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.HumanoidControllerAPI;
@@ -19,7 +18,6 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
@@ -53,7 +51,7 @@ public class RapidHeightMapManager
    private final AtomicReference<Vector3D> totalPlanOffset = new AtomicReference<>();
    private final Vector3D lastPlanOffset = new Vector3D();
    private final Vector3D mostRecentPlanOffsetProcessed = new Vector3D();
-   private ControllerFootstepQueueMonitor controllerFootstepQueueMonitor;
+   private final ControllerFootstepQueueMonitor controllerFootstepQueueMonitor;
    private GpuMat deviceDepthImage;
    private BytedecoImage heightMapBytedecoImage;
 
@@ -61,11 +59,13 @@ public class RapidHeightMapManager
                                 DRCRobotModel robotModel,
                                 ReferenceFrame leftFootSoleFrame,
                                 ReferenceFrame rightFootSoleFrame,
+                                ControllerFootstepQueueMonitor controllerFootstepQueueMonitor,
                                 CameraIntrinsics depthImageIntrinsics,
                                 boolean runWithCUDA)
    {
       this.ros2Helper = ros2Helper;
       this.runWithCUDA = runWithCUDA;
+      this.controllerFootstepQueueMonitor = controllerFootstepQueueMonitor;
 
       // On the perception test bench we don't have a robot model so we need to create a name for our robot
       String simpleRobotName = "Simulation Robot";
@@ -100,11 +100,6 @@ public class RapidHeightMapManager
                                                  });
 
          simpleRobotName = robotModel.getSimpleRobotName();
-         ContinuousHikingLogger continuousHikingLogger = new ContinuousHikingLogger();
-         controllerFootstepQueueMonitor = new ControllerFootstepQueueMonitor(ros2Helper,
-                                                                             simpleRobotName,
-                                                                             new HumanoidReferenceFrames(robotModel.createFullRobotModel()),
-                                                                             continuousHikingLogger);
       }
 
       if (runWithCUDA)

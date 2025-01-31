@@ -1,6 +1,7 @@
 package us.ihmc.perception;
 
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.behaviors.activeMapping.ControllerFootstepQueueMonitor;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.Packet;
@@ -39,7 +40,15 @@ public class StandAloneRealsenseProcess
    private final OpenCLManager openCLManager = new OpenCLManager();
    private RapidHeightMapUpdateThread heightMapUpdateThread;
 
-   public StandAloneRealsenseProcess(ROS2Node ros2Node, ROS2Helper ros2Helper, ROS2SyncedRobotModel syncedRobot)
+   public StandAloneRealsenseProcess(ROS2Node ros2Node, ROS2Helper ros2Helper)
+   {
+      this(ros2Node, ros2Helper, null, null);
+   }
+
+   public StandAloneRealsenseProcess(ROS2Node ros2Node,
+                                     ROS2Helper ros2Helper,
+                                     ROS2SyncedRobotModel syncedRobot,
+                                     ControllerFootstepQueueMonitor controllerFootstepQueueMonitor)
    {
       this.ros2Helper = ros2Helper;
       this.syncedRobot = syncedRobot;
@@ -60,17 +69,18 @@ public class StandAloneRealsenseProcess
          d455PublishThread = new ImageSensorPublishThread(ros2Node, d455Sensor, D455_IMAGE_TOPIC_MAP);
          loopOnDemand(d455PublishThread, realsensePublishDemandNode);
 
-         initializeHeightMap();
+         initializeHeightMap(controllerFootstepQueueMonitor);
       }
    }
 
-   private void initializeHeightMap()
+   private void initializeHeightMap(ControllerFootstepQueueMonitor controllerFootstepQueueMonitor)
    {
       boolean runWithCUDA = true;
       heightMapUpdateThread = new RapidHeightMapUpdateThread(ros2Helper,
                                                              syncedRobot,
                                                              syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.LEFT),
                                                              syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.RIGHT),
+                                                             controllerFootstepQueueMonitor,
                                                              d455Sensor,
                                                              RealSenseImageSensor.DEPTH_IMAGE_KEY,
                                                              runWithCUDA);
