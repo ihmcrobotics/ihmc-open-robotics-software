@@ -65,7 +65,7 @@ public class CUDAProgramTest
       }
       catch (Exception e)
       {
-         e.getStackTrace();
+         fail(e);
       }
 
       CUDAStreamManager.releaseStream(stream);
@@ -107,7 +107,7 @@ public class CUDAProgramTest
       }
       catch (Exception e)
       {
-         e.getStackTrace();
+         fail(e);
       }
 
       CUDAStreamManager.releaseStream(stream);
@@ -142,7 +142,7 @@ public class CUDAProgramTest
       }
       catch (Exception e)
       {
-         e.getStackTrace();
+         fail(e);
       }
 
       CUDAStreamManager.releaseStream(stream);
