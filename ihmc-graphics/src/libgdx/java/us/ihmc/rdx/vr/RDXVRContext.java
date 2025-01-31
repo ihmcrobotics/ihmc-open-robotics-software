@@ -195,17 +195,26 @@ public class RDXVRContext
             savedTrackersRoleMap.put(role, node.get(role).asText());
          }
       });
-      int[] deviceIndices = new int[5]; // maximum number of trackers per dongle
-      IntBuffer trackerIndices = IntBuffer.wrap(deviceIndices);
-      int numberOfTrackers = VRSystem.VRSystem_GetSortedTrackedDeviceIndicesOfClass(VR.ETrackedDeviceClass_TrackedDeviceClass_GenericTracker,
-                                                                                    trackerIndices,
-                                                                                    -1);
-      for (int i = 0; i < numberOfTrackers; i++)
+
+      int[] deviceIndices = new int[VR.k_unMaxTrackedDeviceCount];
+      // Create all potential indexes
+      for (int i=0; i<deviceIndices.length; i++)
       {
-         int deviceIndex = trackerIndices.get(i);
-         if (!trackers.containsKey(getSerialNumber(deviceIndex)))
+         deviceIndices[i] = i;
+      }
+      // Iterate over all potential indexes to see which one is a tracker and add it
+      // NOTE. lgwjl openvr API is not stable and functions like VRSystem_GetSortedTrackedDeviceIndicesOfClass do not work
+      for (int deviceIndex : deviceIndices)
+      {
+         int deviceClass = VRSystem.VRSystem_GetTrackedDeviceClass(deviceIndex);
+         if (deviceClass == VR.ETrackedDeviceClass_TrackedDeviceClass_GenericTracker)
          {
-            trackers.put(getSerialNumber(deviceIndex), new RDXVRTracker(vrPlayAreaYUpZBackFrame, deviceIndex));
+            if (!trackers.containsKey(getSerialNumber(deviceIndex)))
+            {
+               trackers.put(getSerialNumber(deviceIndex), new RDXVRTracker(vrPlayAreaYUpZBackFrame, deviceIndex));
+               newTrackerSerialNumber.add(getSerialNumber(deviceIndex));
+               LogTools.info("Tracker {} connected", getSerialNumber(deviceIndex));
+            }
          }
       }
 
