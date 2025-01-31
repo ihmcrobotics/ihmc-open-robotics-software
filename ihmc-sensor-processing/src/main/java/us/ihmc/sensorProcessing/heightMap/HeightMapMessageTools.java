@@ -65,4 +65,20 @@ public class HeightMapMessageTools
       messageToClear.getVariances().clear();
       messageToClear.getCentroids().clear();
    }
+
+   public static void setToFlatGround(HeightMapMessage message)
+   {
+      int centerIndex = HeightMapTools.computeCenterIndex(message.getGridSizeXy(), message.getXyResolution());
+      int cellsPerAxis = 2 * centerIndex + 1;
+
+      for (int xIndex = 0; xIndex < cellsPerAxis; xIndex++)
+      {
+         for (int yIndex = 0; yIndex < cellsPerAxis; yIndex++)
+         {
+            int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
+            message.getKeys().add(key);
+            message.getHeights().add(0.0f);
+         }
+      }
+   }
 }

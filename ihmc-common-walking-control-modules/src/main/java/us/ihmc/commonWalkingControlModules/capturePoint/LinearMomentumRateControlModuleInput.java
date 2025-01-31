@@ -1,10 +1,9 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
-import us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStabilityMarginRegionCalculator;
+import us.ihmc.commonWalkingControlModules.staticEquilibrium.StabilityMarginRegionCalculator;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
@@ -14,8 +13,6 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-
-import java.util.Objects;
 
 /**
  * Command that holds input for the {@link LinearMomentumRateControlModule} coming from the walking controller state
@@ -92,7 +89,7 @@ public class LinearMomentumRateControlModuleInput
    private boolean initializeOnStateChange;
 
    /**
-    * CoM stability region computed by {@link CenterOfMassStabilityMarginRegionCalculator}. This region is enabled when the robot's
+    * CoM stability region computed by {@link StabilityMarginRegionCalculator}. This region is enabled when the robot's
     * upper body is load-bearing, resulting in a modified support region. When this polygon is not empty, the ICP controller can place
     * the feedback CoP in this modified support region.
     */
@@ -103,6 +100,11 @@ public class LinearMomentumRateControlModuleInput
     * momentum will generally be zero.
     */
    private boolean minimizeAngularMomentumRateZ;
+
+   /**
+    * Is a flag that disables CoPFeedbackControl by setting CoP feedback alpha to 1.
+    */
+   private boolean disableCoPFeedbackControl = false;
 
    /**
     * The contact state of the robot. Effectively updates the support polygon for the ICP feedback controller.
@@ -210,6 +212,16 @@ public class LinearMomentumRateControlModuleInput
       return minimizeAngularMomentumRateZ;
    }
 
+   public void setDisableCoPFeedbackControl(boolean disableCoPFeedbackControl)
+   {
+      this.disableCoPFeedbackControl = disableCoPFeedbackControl;
+   }
+
+   public boolean getDisableCoPFeedbackControl()
+   {
+      return disableCoPFeedbackControl;
+   }
+
    public void setPerfectCMP(FramePoint2DReadOnly perfectCMP)
    {
       this.perfectCMP.setIncludingFrame(perfectCMP);
@@ -286,6 +298,7 @@ public class LinearMomentumRateControlModuleInput
       initializeOnStateChange = other.initializeOnStateChange;
       multiContactStabilityRegion.setIncludingFrame(other.multiContactStabilityRegion);
       minimizeAngularMomentumRateZ = other.minimizeAngularMomentumRateZ;
+      disableCoPFeedbackControl = other.disableCoPFeedbackControl;
       setUsePelvisHeightCommand(other.getUsePelvisHeightCommand());
       setHasHeightCommand(other.getHasHeightCommand());
       setPelvisHeightControlCommand(other.getPelvisHeightControlCommand());
@@ -325,6 +338,8 @@ public class LinearMomentumRateControlModuleInput
          if (!multiContactStabilityRegion.equals(other.multiContactStabilityRegion))
             return false;
          if (minimizeAngularMomentumRateZ ^ other.minimizeAngularMomentumRateZ)
+            return false;
+         if (disableCoPFeedbackControl ^ other.disableCoPFeedbackControl)
             return false;
          if (hasHeightCommand ^ other.hasHeightCommand)
             return false;

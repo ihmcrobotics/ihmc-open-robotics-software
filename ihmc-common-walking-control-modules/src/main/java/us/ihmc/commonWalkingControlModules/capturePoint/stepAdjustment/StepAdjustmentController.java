@@ -23,6 +23,8 @@ public interface StepAdjustmentController extends SCS2YoGraphicHolder
 
    void setStepConstraintRegions(List<StepConstraintRegion> stepConstraintRegion);
 
+   void setSwingSpeedUpEnabled(boolean swingSpeedUpEnabled);
+
    void initialize(double initialTime, RobotSide supportSide);
 
    void compute(double currentTime,

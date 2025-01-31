@@ -305,6 +305,9 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
       {
          this.contactStateCommands.get(robotSide).set(input.getContactStateCommands().get(robotSide));
       }
+
+      if (icpController instanceof ICPController)
+         ((ICPController) icpController).setDisableCoPFeedbackControl(input.getDisableCoPFeedbackControl());
    }
 
    /**

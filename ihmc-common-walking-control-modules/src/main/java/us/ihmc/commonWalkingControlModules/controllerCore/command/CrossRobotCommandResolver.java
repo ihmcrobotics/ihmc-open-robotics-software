@@ -929,6 +929,7 @@ public class CrossRobotCommandResolver
       out.setInitializeOnStateChange(in.getInitializeOnStateChange());
       resolveFrameConvexPolygon2D(in.getMultiContactStabilityRegion(), out.getMultiContactStabilityRegion());
       out.setMinimizeAngularMomentumRateZ(in.getMinimizeAngularMomentumRateZ());
+      out.setDisableCoPFeedbackControl(in.getDisableCoPFeedbackControl());
       for (RobotSide robotSide : RobotSide.values)
          resolvePlaneContactStateCommand(in.getContactStateCommands().get(robotSide), out.getContactStateCommands().get(robotSide));
    }

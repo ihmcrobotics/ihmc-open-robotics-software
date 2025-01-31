@@ -11,7 +11,7 @@ import us.ihmc.math.ComplexNumber;
  * Polynomial Function with real coefficients. Immuatable.
  * </p>
  *
- * Has been replaced with {@link us.ihmc.robotics.math.trajectories.core.Polynomial}
+ * Has been replaced with {@link us.ihmc.robotics.trajectories.core.Polynomial}
  *
  * @author IHMC Biped Team
  * @version 1.0

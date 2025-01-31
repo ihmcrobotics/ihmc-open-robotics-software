@@ -1934,6 +1934,7 @@ public class CrossRobotCommandRandomTools
       next.setInitializeOnStateChange(random.nextBoolean());
       next.setMultiContactStabilityRegion(nextFrameConvexPolygon2D(random, possibleFrames));
       next.setMinimizeAngularMomentumRateZ(random.nextBoolean());
+      next.setDisableCoPFeedbackControl(random.nextBoolean());
       next.setOmega0(random.nextDouble());
       next.setPerfectCMP(nextFramePoint2D(random, possibleFrames));
       next.setPerfectCoP(nextFramePoint2D(random, possibleFrames));

@@ -17,9 +17,9 @@ import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.swing.SwingKnotPoint;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.math.trajectories.core.Polynomial;
-import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
-import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
+import us.ihmc.robotics.trajectories.core.Polynomial;
+import us.ihmc.robotics.trajectories.interfaces.PolynomialReadOnly;
+import us.ihmc.robotics.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;

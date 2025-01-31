@@ -58,6 +58,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
@@ -335,6 +336,21 @@ public class BalanceManager implements SCS2YoGraphicHolder
                                                                               bipedSupportPolygons,
                                                                               registry,
                                                                               yoGraphicsListRegistry);
+      }
+
+      if (walkingMessageHandler != null)
+      {
+         YoVariableChangedListener qfpParameterListener = change ->
+         {
+            boolean usingQFP = walkingMessageHandler.getUsingQFP().getBooleanValue();
+            boolean requestDisableCoPFeedbackControl = walkingMessageHandler.getRequestDisableCopFeedbackControl().getBooleanValue();
+
+            stepAdjustmentController.setSwingSpeedUpEnabled(usingQFP ? false : walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
+            linearMomentumRateControlModuleInput.setDisableCoPFeedbackControl(usingQFP && requestDisableCoPFeedbackControl ? true : !walkingControllerParameters.getICPControllerParameters().useCoPFeedback());
+         };
+
+         walkingMessageHandler.getUsingQFP().addListener(qfpParameterListener);
+         walkingMessageHandler.getRequestDisableCopFeedbackControl().addListener(qfpParameterListener);
       }
 
       String graphicListName = getClass().getSimpleName();
@@ -1050,9 +1066,13 @@ public class BalanceManager implements SCS2YoGraphicHolder
       double maxICPErrorBeforeSingleSupportX = icpError2d.getX() > 0.0 ? maxICPErrorBeforeSingleSupportForwardX.getValue()
             : maxICPErrorBeforeSingleSupportBackwardX.getValue();
       double maxICPErrorBeforeSingleSupportY = isICPErrorToTheInside ? maxICPErrorBeforeSingleSupportInnerY.getValue()
-            : maxICPErrorBeforeSingleSupportOuterY.getValue();
-      normalizedICPError.set(MathTools.square(icpError2d.getX() / maxICPErrorBeforeSingleSupportX)
-                             + MathTools.square(icpError2d.getY() / maxICPErrorBeforeSingleSupportY));
+                                                                     : maxICPErrorBeforeSingleSupportOuterY.getValue();
+
+      if (controllerToolbox.getWalkingMessageHandler().getUsingQFP().getBooleanValue())
+         normalizedICPError.set(0.0);
+      else
+         normalizedICPError.set(MathTools.square(icpError2d.getX() / maxICPErrorBeforeSingleSupportX)
+                                + MathTools.square(icpError2d.getY() / maxICPErrorBeforeSingleSupportY));
    }
 
    public double getNormalizedEllipticICPError()
