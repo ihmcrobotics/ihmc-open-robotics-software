@@ -199,13 +199,13 @@ public class RDXVRKinematicsStreamingMode
          Pose3D ikControlFramePose = new Pose3D();
          if (side == RobotSide.LEFT)
          {
-            ikControlFramePose.getPosition().setAndNegate(retargetingParameters.getTranslationFromTracker(VRTrackedSegmentType.LEFT_HAND));
-            ikControlFramePose.getOrientation().setAndInvert(retargetingParameters.getYawPitchRollFromTracker(VRTrackedSegmentType.LEFT_HAND));
+            ikControlFramePose.getPosition().set(retargetingParameters.getControlFrameOffsetInBodyFrame(VRTrackedSegmentType.LEFT_HAND));
+            ikControlFramePose.getOrientation().set(retargetingParameters.getControlFrameOrientationInBodyFrame(VRTrackedSegmentType.LEFT_HAND));
          }
          else
          {
-            ikControlFramePose.getPosition().setAndNegate(retargetingParameters.getTranslationFromTracker(VRTrackedSegmentType.RIGHT_HAND));
-            ikControlFramePose.getOrientation().setAndInvert(retargetingParameters.getYawPitchRollFromTracker(VRTrackedSegmentType.RIGHT_HAND));
+            ikControlFramePose.getPosition().set(retargetingParameters.getControlFrameOffsetInBodyFrame(VRTrackedSegmentType.RIGHT_HAND));
+            ikControlFramePose.getOrientation().set(retargetingParameters.getControlFrameOrientationInBodyFrame(VRTrackedSegmentType.RIGHT_HAND));
          }
          ikControlFramePoses.put(side, ikControlFramePose);
       }
@@ -422,7 +422,7 @@ public class RDXVRKinematicsStreamingMode
                   if (!trackerReferenceFrames.containsKey(segmentType.getSegmentName()))
                   {
                      MutableReferenceFrame trackerDesiredControlFrame = new MutableReferenceFrame(tracker.getXForwardZUpTrackerFrame());
-                     trackerDesiredControlFrame.getTransformToParent().appendOrientation(retargetingParameters.getYawPitchRollFromTracker(segmentType));
+                     trackerDesiredControlFrame.getTransformToParent().getRotation().appendInvertOther(retargetingParameters.getControlFrameOrientationInBodyFrame(segmentType));
                      trackerDesiredControlFrame.getReferenceFrame().update();
                      trackerReferenceFrames.put(segmentType.getSegmentName(), trackerDesiredControlFrame);
                   }
