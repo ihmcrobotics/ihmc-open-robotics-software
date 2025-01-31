@@ -217,6 +217,7 @@ public class RDXVRContext
             }
          }
       }
+      loadTrackerRolesFromFile();
 
       activeActionSets = VRActiveActionSet.create(1);
       activeActionSets.ulActionSet(mainActionSetHandle.get(0));
