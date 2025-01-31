@@ -321,6 +321,7 @@ public class RDXVRContext
                   trackers.put(getSerialNumber(deviceIndex), new RDXVRTracker(vrPlayAreaYUpZBackFrame, deviceIndex));
                   newTrackerSerialNumber.add(getSerialNumber(deviceIndex));
                   LogTools.info("Tracker {} connected", getSerialNumber(deviceIndex));
+                  loadTrackerRolesFromFile();
                }
             }
             else if (event.eventType() == VR.EVREventType_VREvent_TrackedDeviceDeactivated)
