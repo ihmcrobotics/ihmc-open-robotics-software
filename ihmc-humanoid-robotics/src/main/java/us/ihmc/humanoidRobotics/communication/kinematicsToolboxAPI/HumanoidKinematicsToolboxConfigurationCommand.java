@@ -12,6 +12,7 @@ public class HumanoidKinematicsToolboxConfigurationCommand
    private boolean holdCurrentCenterOfMassXYPosition = true;
    private boolean enableAutoSupportPolygon = true;
    private boolean enableJointLimitReduction = true;
+   private boolean enableStabilityObjective = false;
    private final TDoubleArrayList jointLimitReductionValues = new TDoubleArrayList();
    private final TIntArrayList jointLimitReductionHashCodes = new TIntArrayList();
 
@@ -22,6 +23,7 @@ public class HumanoidKinematicsToolboxConfigurationCommand
       holdCurrentCenterOfMassXYPosition = true;
       enableAutoSupportPolygon = true;
       enableJointLimitReduction = true;
+      enableStabilityObjective = false;
       jointLimitReductionValues.reset();
       jointLimitReductionHashCodes.reset();
    }
@@ -35,6 +37,7 @@ public class HumanoidKinematicsToolboxConfigurationCommand
       holdCurrentCenterOfMassXYPosition = other.holdCurrentCenterOfMassXYPosition;
       enableAutoSupportPolygon = other.enableAutoSupportPolygon;
       enableJointLimitReduction = other.enableJointLimitReduction;
+      enableStabilityObjective = other.enableStabilityObjective;
 
       for (int i = 0; i < other.jointLimitReductionValues.size(); i++)
       {
@@ -55,6 +58,7 @@ public class HumanoidKinematicsToolboxConfigurationCommand
       holdCurrentCenterOfMassXYPosition = message.getHoldCurrentCenterOfMassXyPosition();
       enableAutoSupportPolygon = message.getEnableAutoSupportPolygon();
       enableJointLimitReduction = message.getEnableJointLimitReduction();
+      enableStabilityObjective = message.getEnableStabilityObjective();
 
       for (int i = 0; i < message.getJointLimitReductionFactors().size(); i++)
       {
@@ -79,6 +83,11 @@ public class HumanoidKinematicsToolboxConfigurationCommand
    public boolean enableJointLimitReduction()
    {
       return enableJointLimitReduction;
+   }
+
+   public boolean enableStabilityObjective()
+   {
+      return enableStabilityObjective;
    }
 
    public boolean hasCustomJointRestrictionLimits()
