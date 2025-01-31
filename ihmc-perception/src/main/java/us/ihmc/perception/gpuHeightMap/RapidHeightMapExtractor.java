@@ -188,7 +188,6 @@ public class RapidHeightMapExtractor implements RapidHeightMapExtractorInterface
       if (computeSteppability)
       {
          computeSnappedValuesKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "computeSnappedValuesKernel");
-         computeSnappedValuesKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "computeSnappedValuesKernel");
          computeSteppabilityConnectionsKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "computeSteppabilityConnectionsKernel");
       }
    }
@@ -462,13 +461,12 @@ public class RapidHeightMapExtractor implements RapidHeightMapExtractorInterface
 
       openCLManager.setKernelArgument(computeSnappedValuesKernel, 0, snappingParametersBuffer.getOpenCLBufferObject());
       openCLManager.setKernelArgument(computeSnappedValuesKernel, 1, globalHeightMapImage.getOpenCLImageObject());
-      openCLManager.setKernelArgument(computeSnappedValuesKernel, 2, yaw.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(computeSnappedValuesKernel, 3, steppabilityImage.getOpenCLImageObject());
-      openCLManager.setKernelArgument(computeSnappedValuesKernel, 4, snapHeightImage.getOpenCLImageObject());
-      openCLManager.setKernelArgument(computeSnappedValuesKernel, 5, snapNormalXImage.getOpenCLImageObject());
-      openCLManager.setKernelArgument(computeSnappedValuesKernel, 6, snapNormalYImage.getOpenCLImageObject());
-      openCLManager.setKernelArgument(computeSnappedValuesKernel, 7, snapNormalZImage.getOpenCLImageObject());
-      openCLManager.setKernelArgument(computeSnappedValuesKernel, 8, snappedAreaFractionImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(computeSnappedValuesKernel, 2, steppabilityImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(computeSnappedValuesKernel, 3, snapHeightImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(computeSnappedValuesKernel, 4, snapNormalXImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(computeSnappedValuesKernel, 5, snapNormalYImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(computeSnappedValuesKernel, 6, snapNormalZImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(computeSnappedValuesKernel, 7, snappedAreaFractionImage.getOpenCLImageObject());
 
       openCLManager.execute2D(computeSnappedValuesKernel, heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize());
 

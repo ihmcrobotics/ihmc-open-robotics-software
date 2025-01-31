@@ -4,7 +4,6 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.inverseKinematics.RobotJointVelocityAccelerationIntegrator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.mecano.algorithms.GeometricJacobianCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -15,15 +14,13 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 public class PostureConstraintMatrixVariationCalculator
 {
    private final FullHumanoidRobotModel fullRobotModel;
    private final JointBasics[] controlledJoints;
    private final WholeBodyContactState wholeBodyContactState;
-   private final CenterOfMassStabilityMarginOptimizationModule stabilityMarginOptimizationModule;
+   private final StabilityMarginOptimizationModule stabilityMarginOptimizationModule;
 
    private final RobotJointVelocityAccelerationIntegrator integrator;
    private final double integrationDT;
@@ -37,14 +34,13 @@ public class PostureConstraintMatrixVariationCalculator
 
    private final ExecutionTimer constraintVarCalculatorFramesTimer;
    private final ExecutionTimer constraintVarCalculatorContactUpdateTimer;
-   private final ExecutionTimer constraintVarCalculatorSolverUpdateTimer;
    private final ExecutionTimer constraintVarCalculatorSolverMathTimer;
 
    private final SideDependentList<GeometricJacobianCalculator> jacobianCalculator = new SideDependentList<>(s -> new GeometricJacobianCalculator());
 
    public PostureConstraintMatrixVariationCalculator(FullHumanoidRobotModel fullRobotModel,
                                                      WholeBodyContactState wholeBodyContactState,
-                                                     CenterOfMassStabilityMarginOptimizationModule stabilityMarginOptimizationModule,
+                                                     StabilityMarginOptimizationModule stabilityMarginOptimizationModule,
                                                      double integrationDT,
                                                      YoRegistry registry)
    {
@@ -66,7 +62,6 @@ public class PostureConstraintMatrixVariationCalculator
 
       constraintVarCalculatorFramesTimer = new ExecutionTimer("constraintVarCalculatorFramesTimer", registry);
       constraintVarCalculatorContactUpdateTimer = new ExecutionTimer("constraintVarCalculatorContactUpdateTimer", registry);
-      constraintVarCalculatorSolverUpdateTimer = new ExecutionTimer("constraintVarCalculatorSolverUpdateTimer", registry);
       constraintVarCalculatorSolverMathTimer = new ExecutionTimer("constraintVarCalculatorSolverMathTimer", registry);
    }
 
@@ -88,27 +83,28 @@ public class PostureConstraintMatrixVariationCalculator
 
       /* Finite difference constraint matrix */
       constraintVarCalculatorContactUpdateTimer.startMeasurement();
-      //      wholeBodyContactState.update();
-      wholeBodyContactState.updateActuationConstraintMatrix(false);
+      wholeBodyContactState.updateActuationConstraintMatrix();
       constraintVarCalculatorContactUpdateTimer.stopMeasurement();
-
-      constraintVarCalculatorSolverUpdateTimer.startMeasurement();
-//      stabilityMarginOptimizationModule.updateContactState(wholeBodyContactState);
-      constraintVarCalculatorSolverUpdateTimer.stopMeasurement();
 
       constraintVarCalculatorSolverMathTimer.startMeasurement();
       CommonOps_DDRM.subtract(wholeBodyContactState.getActuationConstraintMatrix(), actuationConstraintNominal, actuationConstraintVariation);
       CommonOps_DDRM.scale(1.0 / integrationDT, actuationConstraintVariation);
 
-      int numCoMVariables = 2;
-      int numEquilibriumConstraints = 12;
-      constraintMatrixVariation.reshape(actuationConstraintVariation.getNumRows() + numEquilibriumConstraints,
-                                        actuationConstraintVariation.getNumCols() + numCoMVariables);
-      MatrixTools.setMatrixBlock(constraintMatrixVariation, numEquilibriumConstraints, 0, actuationConstraintVariation, 0, 0,
+      DMatrixRMaj solverToNominalTransformation = stabilityMarginOptimizationModule.getSolverToNominalTransformation();
+      DMatrixRMaj nominalConstraintMatrix = stabilityMarginOptimizationModule.getNominalConstraintMatrix();
+
+      int numInequalityDynamicsConstraints = stabilityMarginOptimizationModule.getNumDynamicsConstraints();
+      int numEqualityDynamicsConstraints = 2 * numInequalityDynamicsConstraints;
+
+      constraintMatrixVariation.reshape(nominalConstraintMatrix.getNumRows(), nominalConstraintMatrix.getNumCols());
+      MatrixTools.setMatrixBlock(constraintMatrixVariation, numEqualityDynamicsConstraints, 0, actuationConstraintVariation, 0, 0,
                                  actuationConstraintVariation.getNumRows(), actuationConstraintVariation.getNumCols(), 1.0);
 
       /* Transform constraint matrix variation to rho-space */
-      CommonOps_DDRM.mult(constraintMatrixVariation, stabilityMarginOptimizationModule.getRhoToForceTransformationMatrix(), solverConstraintVariation);
+      CommonOps_DDRM.mult(constraintMatrixVariation, solverToNominalTransformation, solverConstraintVariation);
+
+      /* Soft reset to initial configuration (don't call update frames by default) */
+      MultiBodySystemTools.insertJointsState(controlledJoints, JointStateType.CONFIGURATION, initialJointConfiguration);
 
       constraintVarCalculatorSolverMathTimer.stopMeasurement();
       return solverConstraintVariation;
@@ -120,7 +116,7 @@ public class PostureConstraintMatrixVariationCalculator
       MultiBodySystemTools.insertJointsState(controlledJoints, JointStateType.CONFIGURATION, initialJointConfiguration);
 
       fullRobotModel.updateFrames();
-      wholeBodyContactState.updateActuationConstraintMatrix(false);
+      wholeBodyContactState.getActuationConstraintMatrix().set(actuationConstraintNominal);
    }
 
    public DMatrixRMaj computeJacobianRate(DMatrixRMaj qd)
@@ -128,15 +124,18 @@ public class PostureConstraintMatrixVariationCalculator
       /* Integrate one preview tick and copy to robot model */
       MultiBodySystemTools.insertJointsState(controlledJoints, JointStateType.VELOCITY, qd);
 
-      int numCoMVariables = 2;
-      int numEquilibriumConstraints = 12;
-      constraintMatrixVariation.reshape(actuationConstraintVariation.getNumRows() + numEquilibriumConstraints,
-                                        actuationConstraintVariation.getNumCols() + numCoMVariables);
-      MatrixTools.setMatrixBlock(constraintMatrixVariation, numEquilibriumConstraints, 0, actuationConstraintVariation, 0, 0,
+      DMatrixRMaj solverToNominalTransformation = stabilityMarginOptimizationModule.getSolverToNominalTransformation();
+      DMatrixRMaj nominalConstraintMatrix = stabilityMarginOptimizationModule.getNominalConstraintMatrix();
+
+      int numInequalityDynamicsConstraints = stabilityMarginOptimizationModule.getNumDynamicsConstraints();
+      int numEqualityDynamicsConstraints = 2 * numInequalityDynamicsConstraints;
+
+      constraintMatrixVariation.reshape(nominalConstraintMatrix.getNumRows(), nominalConstraintMatrix.getNumCols());
+      MatrixTools.setMatrixBlock(constraintMatrixVariation, numEqualityDynamicsConstraints, 0, actuationConstraintVariation, 0, 0,
                                  actuationConstraintVariation.getNumRows(), actuationConstraintVariation.getNumCols(), 1.0);
 
       /* Transform constraint matrix variation to rho-space */
-      CommonOps_DDRM.mult(constraintMatrixVariation, stabilityMarginOptimizationModule.getRhoToForceTransformationMatrix(), solverConstraintVariation);
+      CommonOps_DDRM.mult(constraintMatrixVariation, solverToNominalTransformation, solverConstraintVariation);
 
       /* Reset joint configuration to initial */
       MultiBodySystemTools.insertJointsState(controlledJoints, JointStateType.CONFIGURATION, initialJointConfiguration);
