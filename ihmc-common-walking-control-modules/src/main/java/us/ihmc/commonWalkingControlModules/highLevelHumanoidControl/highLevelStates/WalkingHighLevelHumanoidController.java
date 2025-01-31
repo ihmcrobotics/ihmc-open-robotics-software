@@ -44,7 +44,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
-import us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStabilityMarginRegionCalculator;
+import us.ihmc.commonWalkingControlModules.staticEquilibrium.StabilityMarginRegionCalculator;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -785,7 +785,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       }
 
       this.isUpperBodyLoadBearing.set(isUpperBodyLoadBearing);
-      CenterOfMassStabilityMarginRegionCalculator multiContactRegionCalculator = controllerToolbox.getMultiContactRegionCalculator();
+      StabilityMarginRegionCalculator multiContactRegionCalculator = controllerToolbox.getMultiContactStabilityRegionCalculator();
       boolean useMultiContactStabilityRegion = false;
 
       if (isUpperBodyLoadBearing)
@@ -799,7 +799,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          multiContactRegionCalculator.clear();
       }
 
-      FrameConvexPolygon2DReadOnly multiContactStabilityRegion = useMultiContactStabilityRegion ? multiContactRegionCalculator.getFeasibleCoMRegion() : zeroRegion;
+      FrameConvexPolygon2DReadOnly multiContactStabilityRegion = useMultiContactStabilityRegion ? multiContactRegionCalculator.getFeasibleRegion() : zeroRegion;
 
       pelvisOrientationManager.compute();
       if (naturalPostureManager != null && naturalPostureManager.isEnabled())
