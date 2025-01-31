@@ -1,7 +1,6 @@
 package us.ihmc.perception;
 
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
-import controller_msgs.msg.dds.PlanOffsetStatus;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
@@ -17,8 +16,6 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractorCUDA;
@@ -30,16 +27,12 @@ import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 import java.time.Instant;
-import java.util.concurrent.atomic.AtomicReference;
-
-import static us.ihmc.communication.HumanoidControllerAPI.getTopic;
 
 /**
  * This class takes care of managing a {@link RapidHeightMapExtractor}. This class can be used on remote process's or locally as well.
  */
 public class RapidHeightMapManager
 {
-   private static final double epsilon = 5e-3;
    private final RapidHeightMapExtractorInterface rapidHeightMapExtractor;
    private final ImageMessage croppedHeightMapImageMessage = new ImageMessage();
    private final FramePose3D cameraPose = new FramePose3D();
@@ -48,10 +41,9 @@ public class RapidHeightMapManager
    private final Mat hostDepthImage = new Mat();
    private final Notification resetHeightMapRequested = new Notification();
    private final BytePointer compressedCroppedHeightMapPointer = new BytePointer();
-   private final AtomicReference<Vector3D> totalPlanOffset = new AtomicReference<>();
-   private final Vector3D lastPlanOffset = new Vector3D();
-   private final Vector3D mostRecentPlanOffsetProcessed = new Vector3D();
-   private final ControllerFootstepQueueMonitor controllerFootstepQueueMonitor;
+
+   private RapidHeightMapDriftOffset rapidHeightMapDriftOffset;
+
    private GpuMat deviceDepthImage;
    private BytedecoImage heightMapBytedecoImage;
 
@@ -65,15 +57,12 @@ public class RapidHeightMapManager
    {
       this.ros2Helper = ros2Helper;
       this.runWithCUDA = runWithCUDA;
-      this.controllerFootstepQueueMonitor = controllerFootstepQueueMonitor;
-
-      // On the perception test bench we don't have a robot model so we need to create a name for our robot
-      String simpleRobotName = "Simulation Robot";
 
       if (runWithCUDA)
       {
          deviceDepthImage = new GpuMat(depthImageIntrinsics.getHeight(), depthImageIntrinsics.getWidth(), opencv_core.CV_16UC1);
          rapidHeightMapExtractor = new RapidHeightMapExtractorCUDA(leftFootSoleFrame, rightFootSoleFrame, deviceDepthImage, depthImageIntrinsics, 1);
+         rapidHeightMapDriftOffset = new RapidHeightMapDriftOffset(controllerFootstepQueueMonitor);
       }
       else
       {
@@ -98,13 +87,6 @@ public class RapidHeightMapManager
                                                     if (message.getEndHighLevelControllerName() == HighLevelStateChangeStatusMessage.WALKING)
                                                        resetHeightMapRequested.set();
                                                  });
-
-         simpleRobotName = robotModel.getSimpleRobotName();
-      }
-
-      if (runWithCUDA)
-      {
-         ros2Helper.subscribeViaCallback(getTopic(PlanOffsetStatus.class, simpleRobotName), this::acceptPlanOffsetStatus);
       }
    }
 
@@ -137,9 +119,8 @@ public class RapidHeightMapManager
 
       if (resetHeightMapRequested.poll())
       {
-         totalPlanOffset.set(null);
-         mostRecentPlanOffsetProcessed.setToZero();
          rapidHeightMapExtractor.reset();
+         rapidHeightMapDriftOffset.reset();
       }
 
       RigidBodyTransform sensorToWorld = cameraFrame.getTransformToWorldFrame();
@@ -149,25 +130,10 @@ public class RapidHeightMapManager
       cameraPose.setToZero(cameraFrame);
       cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      if (controllerFootstepQueueMonitor.isWalkingStarted())
+      float driftOffsetInZ = rapidHeightMapDriftOffset.getUpdateDriftOffset();
+      if (!Float.isNaN(driftOffsetInZ))
       {
-         LogTools.info("Walking has just started");
-         // We reset this because the controller resets the drift on its end. So we need to reset ours as well.
-         // The existing drift is already captured in the height map by the previous offsets
-         mostRecentPlanOffsetProcessed.setToZero();
-      }
-
-      if (controllerFootstepQueueMonitor.isFootstepStarted() && totalPlanOffset.get() != null)
-      {
-         LogTools.info("totalPlanOffset: " + totalPlanOffset.get().getZ());
-         Vector3D incrementalOffset = new Vector3D(totalPlanOffset.getAndSet(null));
-         LogTools.info("Incremental offset before subtarcking: " + incrementalOffset.getZ());
-         incrementalOffset.sub(mostRecentPlanOffsetProcessed);
-         LogTools.info("Most recent to be subtracked from incremental: " + mostRecentPlanOffsetProcessed.getZ());
-         LogTools.info("Incremental offset after subtraction: " + incrementalOffset.getZ());
-         rapidHeightMapExtractor.updateHeightOffset((float) incrementalOffset.getZ());
-         mostRecentPlanOffsetProcessed.add(incrementalOffset);
-         LogTools.info("Most recent after adding incremental: " + mostRecentPlanOffsetProcessed.getZ());
+         rapidHeightMapExtractor.updateHeightOffset(driftOffsetInZ);
       }
 
       rapidHeightMapExtractor.update(sensorToWorld, sensorToGround, groundToWorld);
@@ -200,13 +166,5 @@ public class RapidHeightMapManager
    public void destroy()
    {
       rapidHeightMapExtractor.destroy();
-   }
-
-   private void acceptPlanOffsetStatus(PlanOffsetStatus planOffsetMessage)
-   {
-      Vector3D planOffset = planOffsetMessage.getOffsetVector();
-      System.out.println("Plan offset while in double support: " + planOffset.getZ());
-
-      totalPlanOffset.set(planOffset);
    }
 }

@@ -200,7 +200,6 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
 
       localHeightMapImage.setTo(new Scalar(resetOffset));
       globalHeightMapImage.setTo(new Scalar(resetOffset));
-
       emptyGlobalHeightMapImage.setTo(new Scalar(resetOffset));
 
       snappedFootstepsExtractorCUDA.reset(resetOffset);
@@ -269,7 +268,6 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
       updateKernelGridDim = new dim3(updateKernelGridSizeXY, updateKernelGridSizeXY, 1);
       registerKernelGridDim = new dim3(registerKernelGridSizeXY, registerKernelGridSizeXY, 1);
       croppingKernelGridDim = new dim3(croppingKernelGridSizeXY, croppingKernelGridSizeXY, 1);
-      planOffsetKernelGridDim = new dim3(registerKernelGridSizeXY, registerKernelGridSizeXY, 1);
 
       // Run the update kernel
       updateKernel.withPointer(inputDepthImage.data()).withLong(inputDepthImage.step());
@@ -316,6 +314,57 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
       terrainMapData.setHeightMap(finalCroppedHeightMap);
+   }
+
+   public void updateHeightOffset(float z)
+   {
+      int error;
+
+      // Populate parameter buffers with the necessary values
+      float[] parametersArray = populateParameterArray(heightMapParameters, cameraIntrinsics, sensorOrigin);
+      parametersHostPointer.put(parametersArray);
+
+      CUDATools.mallocAsync(worldToGroundTransformDevicePointer, worldToGroundTransformArray.length, stream);
+      CUDATools.mallocAsync(sensorToGroundTransformDevicePointer, sensorToGroundTransformArray.length, stream);
+      CUDATools.mallocAsync(parametersDevicePointer, parametersArray.length, stream);
+      error = cudaStreamSynchronize(stream);
+      CUDATools.checkCUDAError(error);
+
+      CUDATools.memcpyAsync(worldToGroundTransformDevicePointer, worldToGroundTransformHostPointer, worldToGroundTransformArray.length, stream);
+      CUDATools.memcpyAsync(sensorToGroundTransformDevicePointer, sensorToGroundTransformHostPointer, sensorToGroundTransformArray.length, stream);
+      CUDATools.memcpyAsync(parametersDevicePointer, parametersHostPointer, parametersArray.length, stream);
+
+      error = cudaStreamSynchronize(stream);
+      CUDATools.checkCUDAError(error);
+
+      blockSize = new dim3(BLOCK_SIZE_XY, BLOCK_SIZE_XY, 1);
+      int registerKernelGridSizeXY = (globalCellsPerAxis + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
+      planOffsetKernelGridDim = new dim3(registerKernelGridSizeXY, registerKernelGridSizeXY, 1);
+      registerKernelGridDim = new dim3(registerKernelGridSizeXY, registerKernelGridSizeXY, 1);
+
+      // Need to reset the empty global map before using it so when its filled it starts with all "zero" values
+      emptyGlobalHeightMapImage.setTo(new Scalar(resetOffset));
+
+      emptyRegisterKernl.withPointer(localHeightMapImage.data()).withLong(localHeightMapImage.step());
+      emptyRegisterKernl.withPointer(emptyGlobalHeightMapImage.data()).withLong(emptyGlobalHeightMapImage.step());
+      emptyRegisterKernl.withPointer(parametersDevicePointer);
+      emptyRegisterKernl.withPointer(worldToGroundTransformDevicePointer);
+      emptyRegisterKernl.withPointer(sensorToGroundTransformDevicePointer);
+
+      emptyRegisterKernl.run(stream, registerKernelGridDim, blockSize, 0);
+      error = cudaStreamSynchronize(stream);
+      CUDATools.checkCUDAError(error);
+
+      // Run the snapping kernel
+      planOffsetKernel.withPointer(globalHeightMapImage.data()).withLong(globalHeightMapImage.step());
+      planOffsetKernel.withPointer(emptyGlobalHeightMapImage.data()).withLong(emptyGlobalHeightMapImage.step());
+      planOffsetKernel.withFloat(z).withInt(globalHeightMapImage.rows()).withInt(globalHeightMapImage.cols());
+      planOffsetKernel.withFloat(resetOffset);
+
+      planOffsetKernel.run(stream, planOffsetKernelGridDim, blockSize, 0);
+      LogTools.info("Running kernel, from Java side");
+      error = cudaStreamSynchronize(stream);
+      CUDATools.checkCUDAError(error);
    }
 
    public float[] populateParameterArray(HeightMapParameters parameters, CameraIntrinsics cameraIntrinsics, Tuple3DReadOnly gridCenter)
@@ -429,45 +478,4 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
    {
       return centerIndex;
    }
-
-   public void updateHeightOffset(float z)
-   {
-      int error;
-
-      CUDATools.mallocAsync(worldToGroundTransformDevicePointer, worldToGroundTransformArray.length, stream);
-      CUDATools.mallocAsync(sensorToGroundTransformDevicePointer, sensorToGroundTransformArray.length, stream);
-      error = cudaStreamSynchronize(stream);
-      CUDATools.checkCUDAError(error);
-
-      CUDATools.memcpyAsync(worldToGroundTransformDevicePointer, worldToGroundTransformHostPointer, worldToGroundTransformArray.length, stream);
-      CUDATools.memcpyAsync(sensorToGroundTransformDevicePointer, sensorToGroundTransformHostPointer, sensorToGroundTransformArray.length, stream);
-      error = cudaStreamSynchronize(stream);
-      CUDATools.checkCUDAError(error);
-
-      // Need to reset the empty global map before using it so when its filled it starts with all "zero" values
-      emptyGlobalHeightMapImage.setTo(new Scalar(resetOffset));
-
-      emptyRegisterKernl.withPointer(localHeightMapImage.data()).withLong(localHeightMapImage.step());
-      emptyRegisterKernl.withPointer(emptyGlobalHeightMapImage.data()).withLong(emptyGlobalHeightMapImage.step());
-      emptyRegisterKernl.withPointer(parametersDevicePointer);
-      emptyRegisterKernl.withPointer(worldToGroundTransformDevicePointer);
-      emptyRegisterKernl.withPointer(sensorToGroundTransformDevicePointer);
-
-      emptyRegisterKernl.run(stream, registerKernelGridDim, blockSize, 0);
-      error = cudaStreamSynchronize(stream);
-      CUDATools.checkCUDAError(error);
-
-      // Run the snapping kernel
-      planOffsetKernel.withPointer(globalHeightMapImage.data()).withLong(globalHeightMapImage.step());
-      planOffsetKernel.withPointer(emptyGlobalHeightMapImage.data()).withLong(emptyGlobalHeightMapImage.step());
-      planOffsetKernel.withFloat(z).withInt(globalHeightMapImage.rows()).withInt(globalHeightMapImage.cols());
-      planOffsetKernel.withFloat(resetOffset);
-
-      planOffsetKernel.run(stream, planOffsetKernelGridDim, blockSize, 0);
-      LogTools.info("Running kernel, from Java side");
-      error = cudaStreamSynchronize(stream);
-      CUDATools.checkCUDAError(error);
-   }
 }
-
-

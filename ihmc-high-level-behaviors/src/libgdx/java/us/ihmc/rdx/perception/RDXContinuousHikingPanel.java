@@ -97,8 +97,8 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    private ROS2StoredPropertySetGroup clientStoredPropertySets;
    private boolean runSubscriberOnly = false;
    private boolean publishAndSubscribe;
-   private ControllerFootstepQueueMonitor controllerFootstepQueueMonitor;
-   private ContinuousHikingLogger continuousHikingLogger;
+   private final ControllerFootstepQueueMonitor controllerFootstepQueueMonitor;
+   private final ContinuousHikingLogger continuousHikingLogger;
 
    public RDXContinuousHikingPanel(RDXBaseUI baseUI, ROS2Node ros2Node, ROS2Helper ros2Helper, DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobotModel)
    {
@@ -165,6 +165,12 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
                             heightMapParametersPanel,
                             hostStoredPropertySets,
                             PerceptionComms.HEIGHT_MAP_PARAMETERS);
+
+      continuousHikingLogger = new ContinuousHikingLogger();
+      controllerFootstepQueueMonitor = new ControllerFootstepQueueMonitor(ros2Helper,
+                                                                          robotModel.getSimpleRobotName(),
+                                                                          syncedRobotModel.getReferenceFrames(),
+                                                                          continuousHikingLogger);
    }
 
    /**
@@ -207,12 +213,6 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       // Add Swing Planner Parameters to be synced between the UI and this process
       SwingPlannerParametersBasics swingPlannerParameters = robotModel.getSwingPlannerParameters();
       clientStoredPropertySets.registerStoredPropertySet(ContinuousHikingAPI.SWING_PLANNING_PARAMETERS, swingPlannerParameters);
-
-      continuousHikingLogger = new ContinuousHikingLogger();
-      controllerFootstepQueueMonitor = new ControllerFootstepQueueMonitor(ros2Helper,
-                                                                          robotModel.getSimpleRobotName(),
-                                                                          syncedRobotModel.getReferenceFrames(),
-                                                                          continuousHikingLogger);
 
       continuousPlannerSchedulingTask = new ContinuousPlannerSchedulingTask(robotModel,
                                                                             ros2Node,
@@ -491,11 +491,6 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    public ControllerFootstepQueueMonitor getControllerFootstepQueueMonitor()
    {
       return controllerFootstepQueueMonitor;
-   }
-
-   public ContinuousHikingLogger getContinuousHikingLogger()
-   {
-      return continuousHikingLogger;
    }
 
    public RDXStancePoseSelectionPanel getStancePoseSelectionPanel()

@@ -2,9 +2,9 @@ package us.ihmc.behaviors.activeMapping;
 
 import controller_msgs.msg.dds.FootstepQueueStatusMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.msg.dds.PlanOffsetStatus;
 import controller_msgs.msg.dds.QueuedFootstepStatusMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
-import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
@@ -23,6 +23,7 @@ public class ControllerFootstepQueueMonitor
    private int controllerQueueSize = 0;
    private List<QueuedFootstepStatusMessage> controllerQueue;
    private final AtomicReference<FootstepStatusMessage> footstepStatusMessage = new AtomicReference<>(new FootstepStatusMessage());
+   private final AtomicReference<PlanOffsetStatus> planOffsetMessage = new AtomicReference<>(new PlanOffsetStatus());
 
    private final HumanoidReferenceFrames referenceFrames;
    private final ContinuousHikingLogger continuousHikingLogger;
@@ -38,6 +39,7 @@ public class ControllerFootstepQueueMonitor
       this.continuousHikingLogger = continuousHikingLogger;
       ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(FootstepQueueStatusMessage.class, simpleRobotName), this::footstepQueueStatusReceived);
       ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(FootstepStatusMessage.class, simpleRobotName), this::footstepStatusReceived);
+      ros2Helper.subscribeViaCallback(getTopic(PlanOffsetStatus.class, simpleRobotName), this::acceptPlanOffsetStatus);
       ros2Helper.subscribeViaCallback(getTopic(WalkingStatusMessage.class, simpleRobotName), this::acceptWalkingStatusMessage);
    }
 
@@ -98,6 +100,11 @@ public class ControllerFootstepQueueMonitor
       }
    }
 
+   private void acceptPlanOffsetStatus(PlanOffsetStatus planOffsetMessage)
+   {
+      this.planOffsetMessage.set(planOffsetMessage);
+   }
+
    public List<QueuedFootstepStatusMessage> getControllerFootstepQueue()
    {
       return controllerQueue;
@@ -106,6 +113,11 @@ public class ControllerFootstepQueueMonitor
    public AtomicReference<FootstepStatusMessage> getFootstepStatusMessage()
    {
       return footstepStatusMessage;
+   }
+
+   public PlanOffsetStatus getPlanOffsetMessage()
+   {
+      return planOffsetMessage.getAndSet(null);
    }
 
    public boolean isFootstepStarted()
