@@ -29,7 +29,6 @@ import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
-import us.ihmc.robotDataVisualizer.logger.converters.LogTimeStampedIndexGenerator;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 import java.time.Instant;
@@ -42,22 +41,21 @@ import static us.ihmc.communication.HumanoidControllerAPI.getTopic;
  */
 public class RapidHeightMapManager
 {
+   private static final double epsilon = 5e-3;
    private final RapidHeightMapExtractorInterface rapidHeightMapExtractor;
    private final ImageMessage croppedHeightMapImageMessage = new ImageMessage();
    private final FramePose3D cameraPose = new FramePose3D();
    private final ROS2Helper ros2Helper;
    private final boolean runWithCUDA;
-   private ControllerFootstepQueueMonitor controllerFootstepQueueMonitor;
-   private GpuMat deviceDepthImage;
    private final Mat hostDepthImage = new Mat();
-   private BytedecoImage heightMapBytedecoImage;
-
    private final Notification resetHeightMapRequested = new Notification();
    private final BytePointer compressedCroppedHeightMapPointer = new BytePointer();
-
    private final AtomicReference<Vector3D> totalPlanOffset = new AtomicReference<>();
    private final Vector3D lastPlanOffset = new Vector3D();
    private final Vector3D mostRecentPlanOffsetProcessed = new Vector3D();
+   private ControllerFootstepQueueMonitor controllerFootstepQueueMonitor;
+   private GpuMat deviceDepthImage;
+   private BytedecoImage heightMapBytedecoImage;
 
    public RapidHeightMapManager(ROS2Helper ros2Helper,
                                 DRCRobotModel robotModel,
@@ -75,17 +73,20 @@ public class RapidHeightMapManager
       if (runWithCUDA)
       {
          deviceDepthImage = new GpuMat(depthImageIntrinsics.getHeight(), depthImageIntrinsics.getWidth(), opencv_core.CV_16UC1);
-         rapidHeightMapExtractor = new RapidHeightMapExtractorCUDA(leftFootSoleFrame, rightFootSoleFrame, deviceDepthImage, 1);
+         rapidHeightMapExtractor = new RapidHeightMapExtractorCUDA(leftFootSoleFrame, rightFootSoleFrame, deviceDepthImage, depthImageIntrinsics, 1);
       }
       else
       {
          OpenCLManager openCLManager = new OpenCLManager();
          heightMapBytedecoImage = new BytedecoImage(depthImageIntrinsics.getWidth(), depthImageIntrinsics.getHeight(), opencv_core.CV_16UC1);
          heightMapBytedecoImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
-         rapidHeightMapExtractor = new RapidHeightMapExtractor(openCLManager, leftFootSoleFrame, rightFootSoleFrame, heightMapBytedecoImage, 1);
+         rapidHeightMapExtractor = new RapidHeightMapExtractor(openCLManager,
+                                                               leftFootSoleFrame,
+                                                               rightFootSoleFrame,
+                                                               heightMapBytedecoImage,
+                                                               depthImageIntrinsics,
+                                                               1);
       }
-
-      rapidHeightMapExtractor.setDepthIntrinsics(depthImageIntrinsics);
 
       // We use a notification in order to only call resetting the height map in one place
       ros2Helper.subscribeViaVolatileCallback(PerceptionAPI.RESET_HEIGHT_MAP, message -> resetHeightMapRequested.set());
@@ -205,8 +206,6 @@ public class RapidHeightMapManager
    {
       rapidHeightMapExtractor.destroy();
    }
-
-   private static final double epsilon = 5e-3;
 
    private void acceptPlanOffsetStatus(PlanOffsetStatus planOffsetMessage)
    {

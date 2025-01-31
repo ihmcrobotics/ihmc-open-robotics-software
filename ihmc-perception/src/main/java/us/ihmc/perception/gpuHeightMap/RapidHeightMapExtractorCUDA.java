@@ -40,11 +40,9 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
 
    private final SideDependentList<ReferenceFrame> footSoleFrames = new SideDependentList<>();
    private final TerrainMapData terrainMapData;
-   private CameraIntrinsics cameraIntrinsics;
+   private final CameraIntrinsics cameraIntrinsics;
    private final Point3D sensorOrigin = new Point3D();
    private final int mode; // 0 -> Ouster, 1 -> Realsense
-   public int sequenceNumber = 0;
-
    private final GpuMat inputDepthImage;
    private final GpuMat localHeightMapImage;
    private final GpuMat globalHeightMapImage;
@@ -57,25 +55,19 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
    private final GpuMat snapNormalYImage;
    private final GpuMat snapNormalZImage;
    private final GpuMat snappedAreaFractionImage;
-
    private final GpuMat emptyGlobalHeightMapImage;
-
    private final CUDAProgram heightMapCUDAProgram;
    private final CUstream_st stream;
-
    private final CUDAKernel updateKernel;
    private final CUDAKernel registerKernel;
    private final CUDAKernel croppingKernel;
    private final CUDAKernel snappingKernel;
    private final CUDAKernel planOffsetKernel;
-
    private final CUDAKernel emptyRegisterKernl;
-
    private final float[] worldToGroundTransformArray = new float[16];
    private final float[] groundToWorldTransformArray = new float[16];
    private final float[] groundToSensorTransformArray = new float[16];
    private final float[] sensorToGroundTransformArray = new float[16];
-
    private final FloatPointer groundToSensorTransformHostPointer;
    private final FloatPointer groundToSensorTransformDevicePointer;
    private final FloatPointer sensorToGroundTransformHostPointer;
@@ -86,7 +78,7 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
    private final FloatPointer parametersDevicePointer;
    private final FloatPointer snappingParametersHostPointer;
    private final FloatPointer snappingParametersDevicePointer;
-
+   public int sequenceNumber = 0;
    private float gridOffsetX;
    private int centerIndex;
    private int localCellsPerAxis;
@@ -102,9 +94,14 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
    private dim3 planOffsetKernelGridDim;
    private int resetOffset;
 
-   public RapidHeightMapExtractorCUDA(ReferenceFrame leftFootSoleFrame, ReferenceFrame rightFootSoleFrame, GpuMat depthImage, int mode)
+   public RapidHeightMapExtractorCUDA(ReferenceFrame leftFootSoleFrame,
+                                      ReferenceFrame rightFootSoleFrame,
+                                      GpuMat depthImage,
+                                      CameraIntrinsics depthImageIntrinsics,
+                                      int mode)
    {
       inputDepthImage = depthImage;
+      this.cameraIntrinsics = depthImageIntrinsics;
       this.mode = mode;
 
       footSoleFrames.put(RobotSide.LEFT, leftFootSoleFrame);
@@ -117,8 +114,9 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
       URL mathUtilsHeaderPath = getClass().getResource("MathUtils.cuh");
       URL kernelPath = getClass().getResource("RapidHeightMapExtractor.cu");
 
-      recomputeDerivedParameters();
       terrainMapData = new TerrainMapData(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize());
+
+      recomputeDerivedParameters();
 
       try
       {
@@ -505,11 +503,6 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
          cudaFree(devicePointer);
          System.out.println("Deallocated device pointer.");
       }
-   }
-
-   public void setDepthIntrinsics(CameraIntrinsics cameraIntrinsics)
-   {
-      this.cameraIntrinsics = cameraIntrinsics;
    }
 
    public int getSequenceNumber()

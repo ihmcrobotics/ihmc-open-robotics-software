@@ -78,7 +78,7 @@ public class RapidHeightMapExtractor implements RapidHeightMapExtractorInterface
 
    private final OpenCLFloatParameters yaw = new OpenCLFloatParameters();
 
-   private CameraIntrinsics cameraIntrinsics;
+   private CameraIntrinsics depthImageIntrinsics;
    private BytedecoImage inputDepthImage;
    private BytedecoImage localHeightMapImage;
    private BytedecoImage globalHeightMapImage;
@@ -119,21 +119,21 @@ public class RapidHeightMapExtractor implements RapidHeightMapExtractorInterface
    private Mat denoisedHeightMapImage;
    private Rect cropWindowRectangle;
 
-   public RapidHeightMapExtractor(OpenCLManager openCLManager, ReferenceFrame leftFootSoleFrame, ReferenceFrame rightFootSoleFrame, BytedecoImage depthImage, int mode)
+   public RapidHeightMapExtractor(OpenCLManager openCLManager, ReferenceFrame leftFootSoleFrame, ReferenceFrame rightFootSoleFrame, BytedecoImage depthImage, CameraIntrinsics depthImageIntrinsics, int mode)
    {
-      this(openCLManager,  depthImage, mode);
+      this(openCLManager,  depthImage, depthImageIntrinsics, mode);
       footSoleFrames.put(RobotSide.LEFT, leftFootSoleFrame);
       footSoleFrames.put(RobotSide.RIGHT, rightFootSoleFrame);
    }
 
-   public RapidHeightMapExtractor(OpenCLManager openCLManager, BytedecoImage depthImage, int mode)
+   public RapidHeightMapExtractor(OpenCLManager openCLManager, BytedecoImage depthImage, CameraIntrinsics depthImageIntrinsics, int mode)
    {
       this.openCLManager = openCLManager;
+      this.inputDepthImage = depthImage;
+      this.depthImageIntrinsics = depthImageIntrinsics;
+      this.mode = mode;
 
       rapidHeightMapUpdaterProgram = openCLManager.loadProgram("RapidHeightMapExtractor", "HeightMapUtils.cl");
-
-      this.inputDepthImage = depthImage;
-      this.mode = mode;
 
       initialize();
       reset();
@@ -231,7 +231,7 @@ public class RapidHeightMapExtractor implements RapidHeightMapExtractorInterface
 
          sensorOrigin.set(sensorToWorldTransform.getTranslation());
 
-         populateParameterBuffers(heightMapParameters, cameraIntrinsics, sensorOrigin);
+         populateParameterBuffers(heightMapParameters, depthImageIntrinsics, sensorOrigin);
 
          // Fill world-to-sensor transform buffer
          groundToSensorTransform.get(groundToSensorTransformArray);
@@ -836,11 +836,6 @@ public class RapidHeightMapExtractor implements RapidHeightMapExtractorInterface
    public int getSequenceNumber()
    {
       return sequenceNumber;
-   }
-
-   public void setDepthIntrinsics(CameraIntrinsics cameraIntrinsics)
-   {
-      this.cameraIntrinsics = cameraIntrinsics;
    }
 
    public RigidBodyTransform getSensorToWorldTransform()
