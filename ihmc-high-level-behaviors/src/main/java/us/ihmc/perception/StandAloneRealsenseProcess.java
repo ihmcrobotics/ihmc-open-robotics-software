@@ -29,6 +29,7 @@ public class StandAloneRealsenseProcess
                                                                                                    PerceptionAPI.D455_DEPTH_IMAGE);
 
    private final ROS2DemandGraphNode realsenseDemandNode;
+   private final ControllerFootstepQueueMonitor controllerFootstepQueueMonitor;
    private final ROS2DemandGraphNode realsensePublishDemandNode;
    private final ROS2Helper ros2Helper;
    private final ROS2SyncedRobotModel syncedRobot;
@@ -50,8 +51,17 @@ public class StandAloneRealsenseProcess
                                      ROS2SyncedRobotModel syncedRobot,
                                      ControllerFootstepQueueMonitor controllerFootstepQueueMonitor)
    {
+      this(ros2Node, ros2Helper, syncedRobot, null);
+   }
+
+   public StandAloneRealsenseProcess(ROS2Node ros2Node,
+                                     ROS2Helper ros2Helper,
+                                     ROS2SyncedRobotModel syncedRobot,
+                                     ControllerFootstepQueueMonitor controllerFootstepQueueMonitor)
+   {
       this.ros2Helper = ros2Helper;
       this.syncedRobot = syncedRobot;
+      this.controllerFootstepQueueMonitor = controllerFootstepQueueMonitor;
 
       realsensePublishDemandNode = new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_REALSENSE_PUBLICATION);
       heightMapDemandNode = new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_HEIGHT_MAP);
