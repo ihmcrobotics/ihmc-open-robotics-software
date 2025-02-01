@@ -14,7 +14,6 @@ import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.Random;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Stream;
@@ -30,9 +29,7 @@ public class ContinuousHikingLogger
    private static final int NUMBER_OF_LOGS_TO_KEEP = 100;
    private File file;
 
-   private Random random;
-
-   private static String CONTINUOUS_HIKING_FILE_SUFFIX = "ContinuousHikingLog.txt";
+   private static final String CONTINUOUS_HIKING_FILE_SUFFIX = "ContinuousHikingLog.txt";
    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
    private static final String logFileName = dateFormat.format(new Date()) + "_" + CONTINUOUS_HIKING_FILE_SUFFIX;
    private static final String filePath = IHMCCommonPaths.CONTINUOUS_HIKING_DIRECTORY.resolve(logFileName).toString();
@@ -41,7 +38,6 @@ public class ContinuousHikingLogger
 
    public ContinuousHikingLogger()
    {
-      CONTINUOUS_HIKING_FILE_SUFFIX += random.nextInt();
       FileTools.ensureDirectoryExists(IHMCCommonPaths.CONTINUOUS_HIKING_DIRECTORY, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
       deleteOldLogs();
 
@@ -100,7 +96,7 @@ public class ContinuousHikingLogger
    /** Keeps around the recommended number of logs. */
    public static void deleteOldLogs()
    {
-//      deleteOldLogs(NUMBER_OF_LOGS_TO_KEEP, IHMCCommonPaths.CONTINUOUS_HIKING_DIRECTORY.toString());
+      deleteOldLogs(NUMBER_OF_LOGS_TO_KEEP, IHMCCommonPaths.CONTINUOUS_HIKING_DIRECTORY.toString());
    }
 
    /**
