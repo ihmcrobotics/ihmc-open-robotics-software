@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.PlanOffsetStatus;
 import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import ihmc_common_msgs.msg.dds.PoseListMessage;
@@ -21,10 +22,8 @@ import us.ihmc.behaviors.activeMapping.ContinuousPlannerSchedulingTask;
 import us.ihmc.behaviors.activeMapping.ControllerFootstepQueueMonitor;
 import us.ihmc.behaviors.activeMapping.StancePoseCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.trajectories.PositionOptimizedTrajectoryGenerator;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.property.StoredPropertySetROS2TopicPair;
@@ -89,6 +88,8 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    private final ImBoolean useAStarFootstepPlanner = new ImBoolean(true);
    private final ImBoolean useMonteCarloReference = new ImBoolean(false);
    private final ImBoolean useMonteCarloFootstepPlanner = new ImBoolean(false);
+   private final ControllerFootstepQueueMonitor controllerFootstepQueueMonitor;
+   private final ContinuousHikingLogger continuousHikingLogger;
    private SideDependentList<FramePose3D> startStancePose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
    private FootstepPlan latestFootstepPlan;
    private List<EnumMap<Axis3D, List<PolynomialReadOnly>>> swingTrajectories;
@@ -97,8 +98,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    private ROS2StoredPropertySetGroup clientStoredPropertySets;
    private boolean runSubscriberOnly = false;
    private boolean publishAndSubscribe;
-   private final ControllerFootstepQueueMonitor controllerFootstepQueueMonitor;
-   private final ContinuousHikingLogger continuousHikingLogger;
+   private double value = -0.1;
 
    public RDXContinuousHikingPanel(RDXBaseUI baseUI, ROS2Node ros2Node, ROS2Helper ros2Helper, DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobotModel)
    {
@@ -271,30 +271,8 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       }
    }
 
-   private final PlanOffsetStatus planOffsetStatus = new PlanOffsetStatus();
-   private double value = -0.1;
-
    public void renderImGuiWidgets()
    {
-      if (ImGui.button("Do some shit"))
-      {
-         StatusMessageOutputManager statusMessageOutputManager = new StatusMessageOutputManager(ControllerAPIDefinition.getControllerSupportedStatusMessages());
-         Vector3D planOffset = new Vector3D(0, 0, value);
-         planOffsetStatus.getOffsetVector().set(planOffset);
-         statusMessageOutputManager.reportStatusMessage(planOffsetStatus);
-         LogTools.info("Plan Offset Status: " + planOffsetStatus.getOffsetVector());
-         ros2Helper.publish(getTopic(PlanOffsetStatus.class, "Nadia"), planOffsetStatus);
-
-         if (value < 5)
-         {
-            value -= 0.1;
-         }
-         else
-         {
-            value += 0.1;
-         }
-      }
-
       ImGui.text("The ContinuousHikingProcess must be running");
       ImGui.text("And the enabled checkbox must be checked");
       ImGui.text("By holding CTRL the robot will walk forward");
@@ -309,13 +287,38 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       {
          clearPlannedFootsteps();
       }
-      ImGui.sameLine();
       stepsBeforeSafetyStop.render(0.0, 50.0);
       ImGui.checkbox("Use A* Footstep Planner", useAStarFootstepPlanner);
       ImGui.checkbox("Use Monte-Carlo Footstep Planner", useMonteCarloFootstepPlanner);
       ImGui.checkbox("Use Monte-Carlo Reference", useMonteCarloReference);
       ImGui.unindent();
       ImGui.separator();
+
+      if (ImGui.button("Fake Controller Drift"))
+      {
+         // Simulate that the controller started a step, this part triggers the drift offset kernel
+         FootstepStatusMessage footstepStatusMessage = new FootstepStatusMessage();
+         footstepStatusMessage.setFootstepStatus(FootstepStatusMessage.FOOTSTEP_STATUS_STARTED);
+         ros2Helper.publish(getTopic(FootstepStatusMessage.class, "Nadia"), footstepStatusMessage);
+
+         // Simulate that the controller has drifted by some z value
+         PlanOffsetStatus planOffsetStatus = new PlanOffsetStatus();
+         Vector3D planOffset = new Vector3D(0, 0, value);
+         planOffsetStatus.getOffsetVector().set(planOffset);
+         LogTools.info("Plan Offset Status: " + planOffsetStatus.getOffsetVector());
+         ros2Helper.publish(getTopic(PlanOffsetStatus.class, "Nadia"), planOffsetStatus);
+
+         // The amount of drift that we want to simulation and adjust for if we do this over and over
+         if (value < 5)
+         {
+            value -= 0.1;
+         }
+         else
+         {
+            value += 0.1;
+         }
+      }
+
       terrainPlanningDebugger.renderImGuiWidgets();
 
       // Check to see if a controller is plugged into the computer
