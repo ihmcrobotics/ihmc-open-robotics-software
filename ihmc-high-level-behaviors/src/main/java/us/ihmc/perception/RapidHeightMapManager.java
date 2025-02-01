@@ -12,7 +12,7 @@ import us.ihmc.behaviors.activeMapping.ControllerFootstepQueueMonitor;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -36,7 +36,7 @@ public class RapidHeightMapManager
    private final RapidHeightMapExtractorInterface rapidHeightMapExtractor;
    private final ImageMessage croppedHeightMapImageMessage = new ImageMessage();
    private final FramePose3D cameraPose = new FramePose3D();
-   private final ROS2Helper ros2Helper;
+   private final ROS2PublishSubscribeAPI ros2;
    private final boolean runWithCUDA;
    private final Mat hostDepthImage = new Mat();
    private final Notification resetHeightMapRequested = new Notification();
@@ -47,7 +47,7 @@ public class RapidHeightMapManager
    private GpuMat deviceDepthImage;
    private BytedecoImage heightMapBytedecoImage;
 
-   public RapidHeightMapManager(ROS2Helper ros2Helper,
+   public RapidHeightMapManager(ROS2PublishSubscribeAPI ros2,
                                 DRCRobotModel robotModel,
                                 ReferenceFrame leftFootSoleFrame,
                                 ReferenceFrame rightFootSoleFrame,
@@ -55,7 +55,7 @@ public class RapidHeightMapManager
                                 CameraIntrinsics depthImageIntrinsics,
                                 boolean runWithCUDA)
    {
-      this.ros2Helper = ros2Helper;
+      this.ros2 = ros2;
       this.runWithCUDA = runWithCUDA;
 
       if (runWithCUDA)
@@ -78,15 +78,14 @@ public class RapidHeightMapManager
       }
 
       // We use a notification in order to only call resetting the height map in one place
-      ros2Helper.subscribeViaVolatileCallback(PerceptionAPI.RESET_HEIGHT_MAP, message -> resetHeightMapRequested.set());
+      ros2.subscribeViaVolatileCallback(PerceptionAPI.RESET_HEIGHT_MAP, message -> resetHeightMapRequested.set());
       if (robotModel != null) // Will be null on test bench
       {
-         ros2Helper.subscribeViaVolatileCallback(HumanoidControllerAPI.getTopic(HighLevelStateChangeStatusMessage.class, robotModel.getSimpleRobotName()),
-                                                 message ->
-                                                 { // Automatically reset the height map when the robot goes into the walking state
-                                                    if (message.getEndHighLevelControllerName() == HighLevelStateChangeStatusMessage.WALKING)
-                                                       resetHeightMapRequested.set();
-                                                 });
+         ros2.subscribeViaVolatileCallback(HumanoidControllerAPI.getTopic(HighLevelStateChangeStatusMessage.class, robotModel.getSimpleRobotName()), message ->
+         { // Automatically reset the height map when the robot goes into the walking state
+            if (message.getEndHighLevelControllerName() == HighLevelStateChangeStatusMessage.WALKING)
+               resetHeightMapRequested.set();
+         });
       }
    }
 
@@ -144,7 +143,7 @@ public class RapidHeightMapManager
       PerceptionMessageTools.publishCompressedDepthImage(compressedCroppedHeightMapPointer,
                                                          PerceptionAPI.HEIGHT_MAP_CROPPED,
                                                          croppedHeightMapImageMessage,
-                                                         ros2Helper,
+                                                         ros2,
                                                          cameraPose,
                                                          imageAcquisitionTime,
                                                          rapidHeightMapExtractor.getSequenceNumber(),
