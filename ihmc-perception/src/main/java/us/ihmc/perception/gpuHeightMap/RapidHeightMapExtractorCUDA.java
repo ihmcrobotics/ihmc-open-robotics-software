@@ -82,6 +82,8 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
    private dim3 planOffsetKernelGridDim;
    private int resetOffset;
 
+   private final SnappingHeightMapExtractor snappedFootstepsExtractor;
+
    public RapidHeightMapExtractorCUDA(ReferenceFrame leftFootSoleFrame,
                                       ReferenceFrame rightFootSoleFrame,
                                       GpuMat depthImage,
@@ -138,7 +140,7 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
          parametersHostPointer = new FloatPointer(37);
          parametersDevicePointer = new FloatPointer();
 
-         snappedFootstepsExtractorCUDA = new SnappingHeightMapExtractor(terrainMapData);
+         snappedFootstepsExtractor = new SnappingHeightMapExtractor(terrainMapData);
       }
       catch (Exception e)
       {
@@ -200,7 +202,7 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
       globalHeightMapImage.setTo(new Scalar(resetOffset));
       emptyGlobalHeightMapImage.setTo(new Scalar(resetOffset));
 
-      snappedFootstepsExtractorCUDA.reset(resetOffset);
+      snappedFootstepsExtractor.reset(resetOffset);
 
       sequenceNumber = 0;
    }
@@ -302,7 +304,7 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
 
-      snappedFootstepsExtractorCUDA.update(globalHeightMapImage, sensorOrigin, globalCenterIndex, cropCenterIndex);
+      snappedFootstepsExtractor.update(globalHeightMapImage, sensorOrigin, globalCenterIndex, cropCenterIndex);
 
       //Update the terrain map data with the new results
       terrainMapData.setSensorOrigin(groundToWorldTransform.getTranslationX(), groundToWorldTransform.getTranslationY());
@@ -435,7 +437,7 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
       contactMapImage.close();
       sensorCroppedHeightMapImage.close();
 
-      snappedFootstepsExtractorCUDA.destroy();
+      snappedFootstepsExtractor.destroy();
 
       // At the end we have to destroy the stream to release the memory
       CUDAStreamManager.releaseStream(stream);
