@@ -41,15 +41,7 @@ public class StandAloneRealsenseProcess
    private final OpenCLManager openCLManager = new OpenCLManager();
    private RapidHeightMapUpdateThread heightMapUpdateThread;
 
-   public StandAloneRealsenseProcess(ROS2Node ros2Node, ROS2Helper ros2Helper)
-   {
-      this(ros2Node, ros2Helper, null, null);
-   }
-
-   public StandAloneRealsenseProcess(ROS2Node ros2Node,
-                                     ROS2Helper ros2Helper,
-                                     ROS2SyncedRobotModel syncedRobot,
-                                     ControllerFootstepQueueMonitor controllerFootstepQueueMonitor)
+   public StandAloneRealsenseProcess(ROS2Node ros2Node, ROS2Helper ros2Helper, ROS2SyncedRobotModel syncedRobot)
    {
       this(ros2Node, ros2Helper, syncedRobot, null);
    }
