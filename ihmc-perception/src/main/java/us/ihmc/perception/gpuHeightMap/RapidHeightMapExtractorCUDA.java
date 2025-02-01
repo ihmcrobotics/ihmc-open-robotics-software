@@ -82,8 +82,6 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
    private dim3 planOffsetKernelGridDim;
    private int resetOffset;
 
-   private final SnappingHeightMapExtractor snappedFootstepsExtractorCUDA;
-
    public RapidHeightMapExtractorCUDA(ReferenceFrame leftFootSoleFrame,
                                       ReferenceFrame rightFootSoleFrame,
                                       GpuMat depthImage,
