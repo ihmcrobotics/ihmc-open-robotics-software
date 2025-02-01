@@ -41,42 +41,42 @@ public class ContinuousHikingLogger
 
    public ContinuousHikingLogger()
    {
-//      CONTINUOUS_HIKING_FILE_SUFFIX += random.nextInt();
-//      FileTools.ensureDirectoryExists(IHMCCommonPaths.CONTINUOUS_HIKING_DIRECTORY, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
-//      deleteOldLogs();
-//
-//      try
-//      {
-//         if(!Files.exists(IHMCCommonPaths.CONTINUOUS_HIKING_DIRECTORY))
-//         {
-//            Files.createDirectory(IHMCCommonPaths.CONTINUOUS_HIKING_DIRECTORY);
-//         }
-//         if (!Files.exists(IHMCCommonPaths.TERRAIN_MAP_DIRECTORY.resolve(logFileName)))
-//         {
-//            Files.createFile(Paths.get(filePath));
-//            file = new File(filePath);
-//         }
-//      }
-//      catch (IOException e)
-//      {
-//         throw new RuntimeException(e);
-//      }
+      CONTINUOUS_HIKING_FILE_SUFFIX += random.nextInt();
+      FileTools.ensureDirectoryExists(IHMCCommonPaths.CONTINUOUS_HIKING_DIRECTORY, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+      deleteOldLogs();
+
+      try
+      {
+         if(!Files.exists(IHMCCommonPaths.CONTINUOUS_HIKING_DIRECTORY))
+         {
+            Files.createDirectory(IHMCCommonPaths.CONTINUOUS_HIKING_DIRECTORY);
+         }
+         if (!Files.exists(IHMCCommonPaths.TERRAIN_MAP_DIRECTORY.resolve(logFileName)))
+         {
+            Files.createFile(Paths.get(filePath));
+            file = new File(filePath);
+         }
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
    }
 
    public void logToFile(boolean logToFile, boolean printToConsole)
    {
-//      if (logToFile || printToConsole)
-//      {
-//         if (printToConsole)
-//            System.out.println(this);
-//
-//         if (logToFile)
-//         {
-//            FileTools.write(file.getAbsoluteFile().toPath(), toString().getBytes(), WriteOption.APPEND, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
-//         }
-//
-//         additionalString.setLength(0);
-//      }
+      if (logToFile || printToConsole)
+      {
+         if (printToConsole)
+            System.out.println(this);
+
+         if (logToFile)
+         {
+            FileTools.write(file.getAbsoluteFile().toPath(), toString().getBytes(), WriteOption.APPEND, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+         }
+
+         additionalString.setLength(0);
+      }
    }
 
    public String toString()
