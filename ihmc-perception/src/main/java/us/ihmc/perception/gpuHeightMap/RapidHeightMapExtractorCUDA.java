@@ -39,7 +39,7 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
 
    private final SideDependentList<ReferenceFrame> footSoleFrames = new SideDependentList<>();
    private final TerrainMapData terrainMapData;
-   private CameraIntrinsics cameraIntrinsics;
+   private final CameraIntrinsics  cameraIntrinsics;
    private final Point3D sensorOrigin = new Point3D();
    private final int mode; // 0 -> Ouster, 1 -> Realsense
    public int sequenceNumber = 0;
@@ -94,9 +94,14 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
    private dim3 croppingKernelGridDim;
    private dim3 snappingKernelGridDim;
 
-   public RapidHeightMapExtractorCUDA(ReferenceFrame leftFootSoleFrame, ReferenceFrame rightFootSoleFrame, GpuMat depthImage, int mode)
+   public RapidHeightMapExtractorCUDA(ReferenceFrame leftFootSoleFrame,
+                                      ReferenceFrame rightFootSoleFrame,
+                                      CameraIntrinsics cameraIntrinsics,
+                                      GpuMat depthImage,
+                                      int mode)
    {
       inputDepthImage = depthImage;
+      this.cameraIntrinsics = cameraIntrinsics;
       this.mode = mode;
 
       footSoleFrames.put(RobotSide.LEFT, leftFootSoleFrame);
@@ -486,11 +491,6 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
          cudaFree(devicePointer);
          System.out.println("Deallocated device pointer.");
       }
-   }
-
-   public void setDepthIntrinsics(CameraIntrinsics cameraIntrinsics)
-   {
-      this.cameraIntrinsics = cameraIntrinsics;
    }
 
    public int getSequenceNumber()
