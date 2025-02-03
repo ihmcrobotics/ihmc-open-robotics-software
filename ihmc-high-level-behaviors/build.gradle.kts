@@ -17,9 +17,7 @@ mainDependencies {
       exclude(group = "org.jmonkeyengine")
       exclude(group = "org.lwjgl.lwjgl") // exclude lwjgl 2
    }
-   api("us.ihmc:promp-java:1.0.0") {
-      exclude("org.bytedeco", "javacpp")
-   }
+   api("us.ihmc:promp-java:1.0.1")
 }
 
 libgdxDependencies {
