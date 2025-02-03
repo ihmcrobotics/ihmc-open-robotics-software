@@ -1,7 +1,7 @@
 package us.ihmc.motionRetargeting;
 
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
@@ -12,7 +12,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public abstract class RetargetingParameters
 {
-   protected final SideDependentList<FramePoint3DReadOnly> handControlFrameOffsetsInBodyFrame = new SideDependentList<>();
+   protected final SideDependentList<FramePose3DReadOnly> handControlFrameOffsetsInBodyFrame = new SideDependentList<>();
 
    public RetargetingParameters()
    {
@@ -29,7 +29,7 @@ public abstract class RetargetingParameters
    {
       for (RobotSide robotSide : RobotSide.values())
       {
-         FramePoint3D handControlFrameOffset = new FramePoint3D(fullRobotModel.getHandControlFrame(robotSide));
+         FramePose3D handControlFrameOffset = new FramePose3D(fullRobotModel.getHandControlFrame(robotSide));
          handControlFrameOffset.changeFrame(fullRobotModel.getHand(robotSide).getBodyFixedFrame());
          handControlFrameOffsetsInBodyFrame.put(robotSide, handControlFrameOffset);
       }
@@ -84,11 +84,11 @@ public abstract class RetargetingParameters
 
       if (tracker == VRTrackedSegmentType.LEFT_HAND)
       {
-         translationFromTracker.set(handControlFrameOffsetsInBodyFrame.get(RobotSide.LEFT));
+         translationFromTracker.set(handControlFrameOffsetsInBodyFrame.get(RobotSide.LEFT).getPosition());
       }
       else if (tracker == VRTrackedSegmentType.RIGHT_HAND)
       {
-         translationFromTracker.set(handControlFrameOffsetsInBodyFrame.get(RobotSide.RIGHT));
+         translationFromTracker.set(handControlFrameOffsetsInBodyFrame.get(RobotSide.RIGHT).getPosition());
       }
 
       return translationFromTracker;
@@ -96,6 +96,19 @@ public abstract class RetargetingParameters
 
    public YawPitchRoll getControlFrameOrientationInBodyFrame(VRTrackedSegmentType tracker)
    {
-      return new YawPitchRoll();
+      YawPitchRoll orientationFromTracker = new YawPitchRoll();
+      if (handControlFrameOffsetsInBodyFrame.isEmpty())
+         return orientationFromTracker;
+
+      if (tracker == VRTrackedSegmentType.LEFT_HAND)
+      {
+         orientationFromTracker.set(handControlFrameOffsetsInBodyFrame.get(RobotSide.LEFT).getOrientation());
+      }
+      else if (tracker == VRTrackedSegmentType.RIGHT_HAND)
+      {
+         orientationFromTracker.set(handControlFrameOffsetsInBodyFrame.get(RobotSide.RIGHT).getOrientation());
+      }
+
+      return orientationFromTracker;
    }
 }
