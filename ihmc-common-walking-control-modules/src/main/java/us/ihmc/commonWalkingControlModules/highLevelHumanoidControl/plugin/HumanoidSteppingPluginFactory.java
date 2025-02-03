@@ -15,6 +15,7 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.contactable.ContactableBody;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Topic;
@@ -51,7 +52,8 @@ public interface HumanoidSteppingPluginFactory extends HighLevelHumanoidControll
    {
       HighLevelHumanoidControllerToolbox controllerToolbox = controllerFactoryHelper.getHighLevelHumanoidControllerToolbox();
 
-      return buildPlugin(controllerToolbox.getReferenceFrames(),
+      return buildPlugin(controllerToolbox.getFullRobotModel(),
+                         controllerToolbox.getReferenceFrames(),
                          controllerToolbox.getControlDT(),
                          controllerFactoryHelper.getWalkingControllerParameters(),
                          controllerFactoryHelper.getStatusMessageOutputManager(),
@@ -61,7 +63,8 @@ public interface HumanoidSteppingPluginFactory extends HighLevelHumanoidControll
                          controllerToolbox.getYoTime());
    }
 
-   HumanoidSteppingPlugin buildPlugin(CommonHumanoidReferenceFrames referenceFrames,
+   HumanoidSteppingPlugin buildPlugin(FullHumanoidRobotModel robotModel,
+                                      CommonHumanoidReferenceFrames referenceFrames,
                                       double updateDT,
                                       WalkingControllerParameters walkingControllerParameters,
                                       StatusMessageOutputManager walkingStatusMessageOutputManager,

@@ -1,7 +1,7 @@
 package us.ihmc.robotics.math.trajectories.generators;
 
 import us.ihmc.robotics.math.interpolators.QuinticSplineInterpolator;
-import us.ihmc.robotics.math.trajectories.interfaces.DoubleTrajectoryGenerator;
+import us.ihmc.robotics.trajectories.interfaces.DoubleTrajectoryGenerator;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**

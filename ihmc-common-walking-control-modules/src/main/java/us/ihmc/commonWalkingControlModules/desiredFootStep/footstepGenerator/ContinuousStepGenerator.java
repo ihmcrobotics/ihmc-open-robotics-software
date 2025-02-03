@@ -14,6 +14,7 @@ import controller_msgs.msg.dds.FootstepStatusMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepVisualizer;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.quicksterFootstepProvider.QuicksterFootstepProvider;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -28,6 +29,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.packets.walking.ContinuousStepGeneratorMode;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactableBody;
@@ -36,6 +38,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
+import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.yoVariables.euclid.YoVector2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.providers.BooleanProvider;
@@ -155,7 +158,11 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
    private final SideDependentList<List<FootstepVisualizer>> footstepSideDependentVisualizers = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
 
    private final MutableObject<FootstepStatus> latestStatusReceived = new MutableObject<>(null);
-   private final MutableObject<RobotSide> footstepCompletionSide = new MutableObject<>(null);
+
+   // All things QFP
+   private final YoEnum<ContinuousStepGeneratorMode> currentCSGMode = new YoEnum<>("currentCSGMode", registry, ContinuousStepGeneratorMode.class);
+   private final YoEnum<ContinuousStepGeneratorMode> requestedCSGMode = new YoEnum<>("requestedCSGMode", registry, ContinuousStepGeneratorMode.class);
+   private final OptionalFactoryField<QuicksterFootstepProvider> quicksterFootstepProvider = new OptionalFactoryField<>("QuicksterFootstepProviderField");
 
    /**
     * Creates a new step generator, its {@code YoVariable}s will not be attached to any registry.
@@ -176,8 +183,15 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
          parentRegistry.addChild(registry);
 
       parameters.clear();
-      numberOfTicksBeforeSubmittingFootsteps.set(2);
-      currentFootstepDataListCommandID.set(new Random().nextLong(0, Long.MAX_VALUE / 2)); // To make this command ID unique 
+      numberOfTicksBeforeSubmittingFootsteps.set(0);
+      currentFootstepDataListCommandID.set(new Random().nextLong(0, Long.MAX_VALUE / 2)); // To make this command ID unique
+
+      currentCSGMode.addListener(change ->
+                          {
+                             if (currentCSGMode.getEnumValue() == ContinuousStepGeneratorMode.QFP)
+                                if (quicksterFootstepProvider.hasValue())
+                                   quicksterFootstepProvider.get().initialize();
+                          });
 
       setSupportFootBasedFootstepAdjustment(true);
    }
@@ -197,12 +211,6 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
    public void update(double time)
    {
       stepGeneratorTimer.startMeasurement();
-
-      footstepDataListMessage.setDefaultSwingDuration(parameters.getSwingDuration());
-      footstepDataListMessage.setDefaultTransferDuration(parameters.getTransferDuration());
-      footstepDataListMessage.setFinalTransferDuration(parameters.getTransferDuration());
-      footstepDataListMessage.setAreFootstepsAdjustable(parameters.getStepsAreAdjustable());
-      footstepDataListMessage.setOffsetFootstepsWithExecutionError(parameters.getShiftUpcomingStepsWithTouchdown());
 
       if (!ignoreWalkInputProvider.getBooleanValue() && walkInputProvider != null)
          walk.set(walkInputProvider.getValue());
@@ -230,11 +238,14 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
          counter = numberOfTicksBeforeSubmittingFootsteps.getValue(); // To make footsteps being sent right away.
       }
 
-      { // Processing footstep status
+      // Processing footstep status
+      {
          FootstepStatus statusToProcess = latestStatusReceived.getValue();
 
          if (statusToProcess != null)
          {
+            currentSupportFootPose.setMatchingFrame(footPoseProvider.getCurrentFootPose(currentSupportSide.getValue()));
+
             if (statusToProcess == FootstepStatus.STARTED)
             {
                if (!footsteps.isEmpty())
@@ -242,18 +253,20 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
             }
             else if (statusToProcess == FootstepStatus.COMPLETED)
             {
-               currentSupportSide.set(footstepCompletionSide.getValue());
-               currentSupportFootPose.setMatchingFrame(footPoseProvider.getCurrentFootPose(currentSupportSide.getValue()));
+
                if (parameters.getNumberOfFixedFootsteps() == 0)
                   footsteps.clear();
             }
          }
 
          latestStatusReceived.setValue(null);
-         footstepCompletionSide.setValue(null);
       }
 
+      // Determine swing side
       RobotSide swingSide;
+
+      if (currentCSGMode.getEnumValue() == ContinuousStepGeneratorMode.QFP)
+         footsteps.clear();
 
       if (footsteps.isEmpty())
       {
@@ -272,6 +285,24 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
          swingSide = RobotSide.fromByte(previousFootstep.getRobotSide()).getOppositeSide();
 
          previousFootstepPose.set(previousFootstep.getLocation(), previousFootstep.getOrientation());
+      }
+
+      // Set footstep parameters
+      if (currentCSGMode.getEnumValue() == ContinuousStepGeneratorMode.QFP && quicksterFootstepProvider.hasValue())
+      {
+         footstepDataListMessage.setDefaultSwingDuration(quicksterFootstepProvider.get().getSwingDuration(swingSide));
+         footstepDataListMessage.setDefaultTransferDuration(quicksterFootstepProvider.get().getTransferDuration(swingSide));
+         footstepDataListMessage.setFinalTransferDuration(quicksterFootstepProvider.get().getTransferDuration(swingSide));
+         footstepDataListMessage.setAreFootstepsAdjustable(false);
+         footstepDataListMessage.setOffsetFootstepsWithExecutionError(false);
+      }
+      else
+      {
+         footstepDataListMessage.setDefaultSwingDuration(parameters.getSwingDuration());
+         footstepDataListMessage.setDefaultTransferDuration(parameters.getTransferDuration());
+         footstepDataListMessage.setFinalTransferDuration(parameters.getTransferDuration());
+         footstepDataListMessage.setAreFootstepsAdjustable(parameters.getStepsAreAdjustable());
+         footstepDataListMessage.setOffsetFootstepsWithExecutionError(parameters.getShiftUpcomingStepsWithTouchdown());
       }
 
       double maxStepLength = parameters.getMaxStepLength();
@@ -305,31 +336,58 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
 
       int startingIndexToAdjust = footsteps.size();
 
+      // Continuously update QFP for data visualization purposes
+      if (quicksterFootstepProvider.hasValue())
+      {
+         // If in standard mode, keep initializing QFP so its control frame matches pelvis yaw
+         if (currentCSGMode.getEnumValue() == ContinuousStepGeneratorMode.STANDARD)
+            quicksterFootstepProvider.get().initialize();
+
+         quicksterFootstepProvider.get().update(time);
+      }
+
       for (int i = startingIndexToAdjust; i < parameters.getNumberOfFootstepsToPlan(); i++)
       {
-         double xDisplacement = MathTools.clamp(stepTime.getValue() * desiredVelocityX, maxStepLength);
-         double yDisplacement = stepTime.getValue() * desiredVelocityY + swingSide.negateIfRightSide(defaultStepWidth);
-         double headingDisplacement = stepTime.getValue() * turningVelocity;
-
-         if (swingSide == RobotSide.LEFT)
+         if (currentCSGMode.getEnumValue() == ContinuousStepGeneratorMode.QFP && quicksterFootstepProvider.hasValue())
          {
-            yDisplacement = MathTools.clamp(yDisplacement, minStepWidth, maxStepWidth);
-            headingDisplacement = MathTools.clamp(headingDisplacement, turnMaxAngleInward, turnMaxAngleOutward);
+            // FIXME we want all steps in plan to be QFP eventually
+            if (i == startingIndexToAdjust)
+            {
+               quicksterFootstepProvider.get().getDesiredTouchdownPose(swingSide, nextFootstepPose2D);
+            }
+            else
+            {
+               calculateNextFootstepPose2D(stepTime.getValue(),
+                                           desiredVelocityX,
+                                           desiredVelocityY,
+                                           desiredTurningVelocity.getDoubleValue(),
+                                           swingSide,
+                                           maxStepLength,
+                                           maxStepWidth,
+                                           defaultStepWidth,
+                                           minStepWidth,
+                                           turnMaxAngleInward,
+                                           turnMaxAngleOutward,
+                                           footstepPose2D,
+                                           nextFootstepPose2D);
+            }
          }
          else
          {
-            yDisplacement = MathTools.clamp(yDisplacement, -maxStepWidth, -minStepWidth);
-            headingDisplacement = MathTools.clamp(headingDisplacement, -turnMaxAngleOutward, -turnMaxAngleInward);
+            calculateNextFootstepPose2D(stepTime.getValue(),
+                                        desiredVelocityX,
+                                        desiredVelocityY,
+                                        desiredTurningVelocity.getDoubleValue(),
+                                        swingSide,
+                                        maxStepLength,
+                                        maxStepWidth,
+                                        defaultStepWidth,
+                                        minStepWidth,
+                                        turnMaxAngleInward,
+                                        turnMaxAngleOutward,
+                                        footstepPose2D,
+                                        nextFootstepPose2D);
          }
-
-         double halfInPlaceWidth = 0.5 * swingSide.negateIfRightSide(defaultStepWidth);
-         nextFootstepPose2D.set(footstepPose2D);
-         // Applying the translation before the rotation allows the rotation to be centered in between the feet.
-         // This ordering seems to provide the most natural footsteps.
-         nextFootstepPose2D.appendTranslation(0.0, halfInPlaceWidth);
-         nextFootstepPose2D.appendRotation(headingDisplacement);
-         nextFootstepPose2D.appendTranslation(0.0, -halfInPlaceWidth);
-         nextFootstepPose2D.appendTranslation(xDisplacement, yDisplacement);
 
          nextFootstepPose3D.set(nextFootstepPose2D);
          FootstepDataMessage footstep = footsteps.add();
@@ -344,8 +402,13 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
          //         }
 
          footstep.setRobotSide(swingSide.toByte());
-         if (swingHeightInputProvider == null)
+         footstep.setCsgMode(currentCSGMode.getEnumValue().toByte());
+         footstep.setWalkingInPlace(desiredVelocityProvider.getDesiredVelocity().getX() == 0 && desiredVelocityProvider.getDesiredVelocity().getY() == 0);
+
+         if (swingHeightInputProvider == null && currentCSGMode.getEnumValue() == ContinuousStepGeneratorMode.STANDARD)
             footstep.setSwingHeight(parameters.getSwingHeight());
+         else if (swingHeightInputProvider == null && currentCSGMode.getEnumValue() == ContinuousStepGeneratorMode.QFP)
+            footstep.setSwingHeight(quicksterFootstepProvider.get().getSwingHeight(swingSide));
          else
             footstep.setSwingHeight(swingHeightInputProvider.getValue());
 
@@ -441,6 +504,36 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
       stepGeneratorTimer.stopMeasurement();
    }
 
+   private static void calculateNextFootstepPose2D(double stepTime, double desiredVelocityX, double desiredVelocityY, double desiredTurningVelocity,
+                                                   RobotSide swingSide, double maxStepLength, double maxStepWidth, double defaultStepWidth,
+                                                   double minStepWidth, double turnMaxAngleInward, double turnMaxAngleOutward,
+                                                   FramePose2D stanceFootPose2D, FramePose2D nextFootstepPose2DToPack)
+   {
+      double xDisplacement = MathTools.clamp(stepTime * desiredVelocityX, maxStepLength);
+      double yDisplacement = stepTime * desiredVelocityY + swingSide.negateIfRightSide(defaultStepWidth);
+      double headingDisplacement = stepTime * desiredTurningVelocity;
+
+      if (swingSide == RobotSide.LEFT)
+      {
+         yDisplacement = MathTools.clamp(yDisplacement, minStepWidth, maxStepWidth);
+         headingDisplacement = MathTools.clamp(headingDisplacement, turnMaxAngleInward, turnMaxAngleOutward);
+      }
+      else
+      {
+         yDisplacement = MathTools.clamp(yDisplacement, -maxStepWidth, -minStepWidth);
+         headingDisplacement = MathTools.clamp(headingDisplacement, -turnMaxAngleOutward, -turnMaxAngleInward);
+      }
+
+      double halfInPlaceWidth = 0.5 * swingSide.negateIfRightSide(defaultStepWidth);
+      nextFootstepPose2DToPack.set(stanceFootPose2D);
+      // Applying the translation before the rotation allows the rotation to be centered in between the feet.
+      // This ordering seems to provide the most natural footsteps.
+      nextFootstepPose2DToPack.appendTranslation(0.0, halfInPlaceWidth);
+      nextFootstepPose2DToPack.appendRotation(headingDisplacement);
+      nextFootstepPose2DToPack.appendTranslation(0.0, -halfInPlaceWidth);
+      nextFootstepPose2DToPack.appendTranslation(xDisplacement, yDisplacement);
+   }
+
    /**
     * Sets the number of footsteps that are to be planned every tick.
     *
@@ -510,6 +603,9 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
    public void setDesiredTurningVelocityProvider(DesiredTurningVelocityProvider desiredTurningVelocityProvider)
    {
       this.desiredTurningVelocityProvider = desiredTurningVelocityProvider;
+
+      if (quicksterFootstepProvider.hasValue())
+         quicksterFootstepProvider.get().setDesiredTurningVelocityProvider(desiredTurningVelocityProvider);
    }
 
    /**
@@ -520,6 +616,9 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
    public void setDesiredVelocityProvider(DesiredVelocityProvider desiredVelocityProvider)
    {
       this.desiredVelocityProvider = desiredVelocityProvider;
+
+      if (quicksterFootstepProvider.hasValue())
+         quicksterFootstepProvider.get().setDesiredVelocityProvider(desiredVelocityProvider);
    }
 
    /**
@@ -573,7 +672,10 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
    public void notifyFootstepCompleted(RobotSide robotSide)
    {
       latestStatusReceived.setValue(FootstepStatus.COMPLETED);
-      footstepCompletionSide.setValue(robotSide);
+      currentSupportSide.set(robotSide);
+
+      if (!requestedCSGMode.valueEquals(currentCSGMode.getEnumValue()))
+         currentCSGMode.set(requestedCSGMode.getEnumValue());
    }
 
    /**
@@ -583,16 +685,16 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
     * while the swing foot is targeting it.
     * </p>
     */
-   public void notifyFootstepStarted()
+   public void notifyFootstepStarted(RobotSide robotSide)
    {
       latestStatusReceived.setValue(FootstepStatus.STARTED);
-      footstepCompletionSide.setValue(null);
+      currentSupportSide.set(robotSide.getOppositeSide());
    }
 
    /**
     * Attaches a listener for {@code FootstepStatusMessage} to the manager.
     * <p>
-    * This listener will automatically call {@link #notifyFootstepStarted()} and
+    * This listener will automatically call {@link #notifyFootstepStarted(RobotSide robotSide)} and
     * {@link #notifyFootstepCompleted(RobotSide)}.
     * </p>
     *
@@ -601,10 +703,13 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
    public void setFootstepStatusListener(StatusMessageOutputManager statusMessageOutputManager)
    {
       statusMessageOutputManager.attachStatusMessageListener(FootstepStatusMessage.class, this::consumeFootstepStatus);
+
+      if (quicksterFootstepProvider.hasValue())
+         quicksterFootstepProvider.get().setFootstepStatusListener(statusMessageOutputManager);
    }
 
    /**
-    * Consumes a newly received message and calls {@link #notifyFootstepStarted()} or
+    * Consumes a newly received message and calls {@link #notifyFootstepStarted(RobotSide robotSide)} or
     * {@link #notifyFootstepCompleted(RobotSide)} according to the status.
     *
     * @param statusMessage the newly received footstep status.
@@ -615,7 +720,7 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
       if (status == FootstepStatus.COMPLETED)
          notifyFootstepCompleted(RobotSide.fromByte(statusMessage.getRobotSide()));
       else if (status == FootstepStatus.STARTED)
-         notifyFootstepStarted();
+         notifyFootstepStarted(RobotSide.fromByte(statusMessage.getRobotSide()));
    }
 
    /**
@@ -756,6 +861,11 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
       this.alternateStepChooser = alternateStepChooser;
    }
 
+   public void setQuicksterFootstepProvider(QuicksterFootstepProvider quicksterFootstepProvider)
+   {
+      this.quicksterFootstepProvider.set(quicksterFootstepProvider);
+   }
+
    /**
     * Sets a footstep adjustment that uses the current support foot pose to adjust the generated
     * footsteps.
@@ -805,6 +915,9 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
    public void setWalkInputProvider(BooleanProvider walkInputProvider)
    {
       this.walkInputProvider = walkInputProvider;
+
+      if (quicksterFootstepProvider.hasValue())
+         quicksterFootstepProvider.get().setWalkInputProvider(walkInputProvider);
    }
 
    /**

@@ -25,7 +25,6 @@ import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
-import java.nio.ByteBuffer;
 import java.time.Instant;
 
 /**
@@ -58,17 +57,20 @@ public class RapidHeightMapManager
       if (runWithCUDA)
       {
          deviceDepthImage = new GpuMat(depthImageIntrinsics.getHeight(), depthImageIntrinsics.getWidth(), opencv_core.CV_16UC1);
-         rapidHeightMapExtractor = new RapidHeightMapExtractorCUDA(leftFootSoleFrame, rightFootSoleFrame, deviceDepthImage, 1);
+         rapidHeightMapExtractor = new RapidHeightMapExtractorCUDA(leftFootSoleFrame, rightFootSoleFrame, depthImageIntrinsics, deviceDepthImage, 1);
       }
       else
       {
          OpenCLManager openCLManager = new OpenCLManager();
          heightMapBytedecoImage = new BytedecoImage(depthImageIntrinsics.getWidth(), depthImageIntrinsics.getHeight(), opencv_core.CV_16UC1);
          heightMapBytedecoImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
-         rapidHeightMapExtractor = new RapidHeightMapExtractor(openCLManager, leftFootSoleFrame, rightFootSoleFrame, heightMapBytedecoImage, 1);
+         rapidHeightMapExtractor = new RapidHeightMapExtractor(openCLManager,
+                                                               leftFootSoleFrame,
+                                                               rightFootSoleFrame,
+                                                               heightMapBytedecoImage,
+                                                               depthImageIntrinsics,
+                                                               1);
       }
-
-      rapidHeightMapExtractor.setDepthIntrinsics(depthImageIntrinsics);
 
       // We use a notification in order to only call resetting the height map in one place
       ros2.subscribeViaVolatileCallback(PerceptionAPI.RESET_HEIGHT_MAP, message -> resetHeightMapRequested.set());

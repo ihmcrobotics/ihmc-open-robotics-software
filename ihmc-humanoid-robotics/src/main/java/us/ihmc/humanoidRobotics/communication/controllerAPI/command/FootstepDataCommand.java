@@ -16,6 +16,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.humanoidRobotics.communication.packets.walking.ContinuousStepGeneratorMode;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -28,6 +29,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    private long sequenceId;
    private RobotSide robotSide;
    private TrajectoryType trajectoryType = TrajectoryType.DEFAULT;
+   private ContinuousStepGeneratorMode csgMode = ContinuousStepGeneratorMode.STANDARD;
    private double swingHeight = 0.0;
    private final FramePoint3D position = new FramePoint3D();
    private final FrameQuaternion orientation = new FrameQuaternion();
@@ -53,6 +55,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    /** the execution time. This number is set if the execution delay is non zero **/
    public double adjustedExecutionTime;
    public boolean shouldCheckForReachability;
+   public boolean walkingInPlace;
 
    private final StepConstraintsListCommand stepConstraints = new StepConstraintsListCommand();
 
@@ -67,6 +70,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       sequenceId = 0;
       robotSide = null;
       trajectoryType = TrajectoryType.DEFAULT;
+      csgMode = ContinuousStepGeneratorMode.STANDARD;
       swingHeight = 0.0;
       position.set(0.0, 0.0, 0.0);
       orientation.set(0.0, 0.0, 0.0, 1.0);
@@ -83,6 +87,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
 
       stepConstraints.clear();
       shouldCheckForReachability = false;
+      walkingInPlace = true;
    }
 
    @Override
@@ -91,8 +96,10 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       sequenceId = message.getSequenceId();
       robotSide = RobotSide.fromByte(message.getRobotSide());
       trajectoryType = TrajectoryType.fromByte(message.getTrajectoryType());
+      csgMode = ContinuousStepGeneratorMode.fromByte(message.getCsgMode());
       swingHeight = message.getSwingHeight();
       shouldCheckForReachability = message.getShouldCheckForReachability();
+      walkingInPlace = message.getWalkingInPlace();
       swingTrajectoryBlendDuration = message.getSwingTrajectoryBlendDuration();
       position.setIncludingFrame(worldFrame, message.getLocation());
       orientation.setIncludingFrame(worldFrame, message.getOrientation());
@@ -157,11 +164,13 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       sequenceId = other.sequenceId;
       robotSide = other.robotSide;
       trajectoryType = other.trajectoryType;
+      csgMode = other.csgMode;
       swingHeight = other.swingHeight;
       swingTrajectoryBlendDuration = other.swingTrajectoryBlendDuration;
       position.setIncludingFrame(other.position);
       orientation.setIncludingFrame(other.orientation);
       shouldCheckForReachability = other.shouldCheckForReachability;
+      walkingInPlace = other.walkingInPlace;
 
       RecyclingArrayList<MutableDouble> otherWaypointProportions = other.customWaypointProportions;
       customWaypointProportions.clear();
@@ -225,9 +234,19 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       this.shouldCheckForReachability = shouldCheckForReachability;
    }
 
+   public void setWalkingInPlace(boolean walkingInPlace)
+   {
+      this.walkingInPlace = walkingInPlace;
+   }
+
    public void setTrajectoryType(TrajectoryType trajectoryType)
    {
       this.trajectoryType = trajectoryType;
+   }
+
+   public void setCsgMode(ContinuousStepGeneratorMode csgMode)
+   {
+      this.csgMode = csgMode;
    }
 
    public void setPredictedContactPoints(RecyclingArrayList<Point2D> predictedContactPoints)
@@ -245,6 +264,11 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    public TrajectoryType getTrajectoryType()
    {
       return trajectoryType;
+   }
+
+   public ContinuousStepGeneratorMode getCsgMode()
+   {
+      return csgMode;
    }
 
    public ReferenceFrame getTrajectoryFrame()
@@ -320,6 +344,11 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    public boolean getShouldCheckForReachability()
    {
       return shouldCheckForReachability;
+   }
+
+   public boolean getWalkingInPlace()
+   {
+      return walkingInPlace;
    }
 
    @Override

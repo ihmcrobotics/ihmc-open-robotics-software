@@ -1,8 +1,13 @@
 package us.ihmc.rdx.tools.assimp;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.mutable.MutableLong;
-import org.lwjgl.assimp.*;
+import org.lwjgl.assimp.AIFile;
+import org.lwjgl.assimp.AIFileFlushProcI;
+import org.lwjgl.assimp.AIFileReadProcI;
+import org.lwjgl.assimp.AIFileSeekI;
+import org.lwjgl.assimp.AIFileTellProcI;
+import org.lwjgl.assimp.AIFileWriteProcI;
+import org.lwjgl.assimp.Assimp;
 import org.lwjgl.system.MemoryUtil;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
@@ -12,6 +17,7 @@ import us.ihmc.tools.string.StringTools;
 
 import java.net.URL;
 import java.nio.ByteBuffer;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.Supplier;
@@ -36,7 +42,7 @@ public class AssimpOpenedFile
          throw new RuntimeException(message.get());
       }
 
-      byte[] byteArray = ExceptionTools.handle(() -> IOUtils.toByteArray(url), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+      byte[] byteArray = ExceptionTools.handle(() -> Files.readAllBytes(filePath), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
 
       final MutableLong position = new MutableLong(0);
 

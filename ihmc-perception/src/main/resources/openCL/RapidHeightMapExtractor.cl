@@ -612,7 +612,6 @@ float signed_distance_to_foot_circle(int center_index, float resolution, global 
 // should be the area of the convex hull, not just the area of the cells, since that will allow "bridging" gaps.
 void kernel computeSnappedValuesKernel(global float* params,
                                 read_write image2d_t height_map,
-                                global float* idx_yaw_singular_buffer,
                                 read_write image2d_t steppable_map,
                                 read_write image2d_t snapped_height_map,
                                 read_write image2d_t snapped_normal_x_map,
@@ -623,20 +622,13 @@ void kernel computeSnappedValuesKernel(global float* params,
     // Remember, these are x and y in image coordinates, not world
     int idx_x = get_global_id(0); // column, top left
     int idx_y = get_global_id(1); // row, top left
-    int idx_yaw = (int) idx_yaw_singular_buffer[0];
 
     bool should_print = false;//idx_x == 20 && idx_y == 20;
 
     int2 key = (int2) (idx_x, idx_y);
-    uint foot_height_int = read_imageui(height_map, key).x;
-
-    float foot_height = (float) foot_height_int / params[SNAP_HEIGHT_SCALING_FACTOR] - params[SNAP_HEIGHT_OFFSET];
-    float foot_yaw = get_yaw_from_index(2, idx_yaw);
 
     float foot_width = params[SNAP_FOOT_WIDTH];
     float foot_length = params[SNAP_FOOT_LENGTH];
-    float distance_from_bottom = params[MIN_DISTANCE_FROM_CLIFF_BOTTOMS];
-    float distance_from_top = params[MIN_DISTANCE_FROM_CLIFF_TOPS];
 
     float map_resolution = params[SNAP_GLOBAL_CELL_SIZE];
     float max_dimension = max(params[SNAP_FOOT_WIDTH], params[SNAP_FOOT_LENGTH]);
@@ -647,7 +639,6 @@ void kernel computeSnappedValuesKernel(global float* params,
 
     int map_cells_per_side = 2 * map_center_index + 1;
     int map_cells_per_side_for_checking = map_cells_per_side - 1;
-    int cropped_cells_per_side = 2 * cropped_center_index + 1;
 
     int crop_idx_x = idx_x;
     int crop_idx_y = idx_y;
@@ -738,14 +729,11 @@ void kernel computeSnappedValuesKernel(global float* params,
             uint query_height_int = read_imageui(height_map, query_key).x;
             float query_height = (float) query_height_int / params[SNAP_HEIGHT_SCALING_FACTOR] - params[SNAP_HEIGHT_OFFSET];
 
-            if (isnan(query_height))
+            if (isnan(query_height)) // || query_height < min_height_under_foot_to_consider)
                continue;
 
             float snap_height_threshold = params[MIN_SNAP_HEIGHT_THRESHOLD] + params[SNAP_HEIGHT_THRESHOLD_AT_SEARCH_EDGE] * clamp(offset_distance / foot_search_radius, 0.0f, 1.0f);
             float min_height_under_foot_to_consider = max_height_under_foot - snap_height_threshold;
-
-            if (isnan(query_height)) // || query_height < min_height_under_foot_to_consider)
-               continue;
 
             // This activation gain is a way of doing a soft inequality. If the query height is less than the min height, as an inequality constraint, the
             // activation value is zero, and if it's greater, the activation is 1.0. In this formulation, we're blurring around that hard inequality. If the
@@ -786,10 +774,6 @@ void kernel computeSnappedValuesKernel(global float* params,
     float z_variance_vector[3] = {-xz, -yz, -z};
     float coefficients[3] = {0.0f, 0.0f, 0.0f};
     solveForPlaneCoefficients(covariance_matrix, z_variance_vector, coefficients);
-
-    float x_solution = x / n;  // average of x positions
-    float y_solution = y / n;  // average of y positions
-    float z_solution = -coefficients[0] * x_solution - coefficients[1] * y_solution - coefficients[2];
 
     float3 normal = (float3) (coefficients[0], coefficients[1], 1.0);
     normal = normalize(normal);

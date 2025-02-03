@@ -213,6 +213,12 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
    }
 
    @Override
+   public void setSwingSpeedUpEnabled(boolean swingSpeedUpEnabled)
+   {
+      this.swingSpeedUpEnabled.set(swingSpeedUpEnabled);
+   }
+
+   @Override
    public List<StepConstraintRegion> getStepConstraintRegions()
    {
       return null;

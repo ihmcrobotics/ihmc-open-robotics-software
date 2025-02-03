@@ -1,18 +1,16 @@
 package us.ihmc.perception.detections.yolo;
 
 import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.javacpp.IntPointer;
-import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
+import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point;
-import org.bytedeco.opencv.opencv_core.Rect;
-import org.bytedeco.opencv.opencv_core.Scalar;
 import org.bytedeco.opencv.opencv_core.Size;
 import perception_msgs.msg.dds.ImageMessage;
-import us.ihmc.commons.MathTools;
-import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.thread.RepeatingTaskThread;
+import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -22,51 +20,43 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.detections.InstantDetection;
 import us.ihmc.perception.imageMessage.CompressionType;
+import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.opencl.OpenCLDepthImageSegmenter;
 import us.ihmc.perception.opencl.OpenCLPointCloudExtractor;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2Publisher;
-import us.ihmc.tools.thread.RestartableThrottledThread;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
 public class YOLOv8DetectionExecutor
 {
-   private static final int FONT = opencv_imgproc.FONT_HERSHEY_DUPLEX;
-   private static final double FONT_SCALE = 1.5;
-   private static final int FONT_THICKNESS = 2;
-   private static final int LINE_TYPE = opencv_imgproc.LINE_4;
-   private static final Scalar BOUNDING_BOX_COLOR = new Scalar(0.0, 196.0, 0.0, 255.0);
-   private static final Mat GREEN_MAT = new Mat(1, 1, opencv_core.CV_8UC3, new Scalar(0.0, 255.0, 0.0, 255.0));
-
    private final OpenCLPointCloudExtractor extractor = new OpenCLPointCloudExtractor();
    private final OpenCLDepthImageSegmenter segmenter = new OpenCLDepthImageSegmenter();
 
    private final List<Consumer<List<InstantDetection>>> detectionConsumerCallbacks = new ArrayList<>();
 
-   private final BooleanSupplier isDemandedSupplier;
+   private final BooleanSupplier annotatedImageDemanded;
    private final ROS2Publisher<ImageMessage> annotatedImagePublisher;
 
    // TODO: temp hack
-   private int lastRunDetectorIndex = 0;
-   private final List<YOLOv8ObjectDetector> yoloObjectDetectors = new ArrayList<>();
-   private final ExecutorService yoloExecutorService = Executors.newCachedThreadPool(ThreadTools.createNamedThreadFactory("YOLOExecutor"));
+   private int lastRunModelIndex = 0;
+   private final List<YOLOv8Model> yoloModels = new ArrayList<>();
+   private final BlockingQueue<Runnable> taskQueue;
+   private final RepeatingTaskThread taskExecutorThread = new RepeatingTaskThread("YOLOExecutor", this::executeTasks, DefaultExceptionHandler.RUNTIME_EXCEPTION);
 
-   private final RestartableThrottledThread annotatedImagePublishedThread;
-   private final Map<Integer, YOLOv8DetectionResults> yoloDetectionResults = new ConcurrentHashMap<>();
-   private volatile RawImage newestColorImage = null;
+   private final RepeatingTaskThread annotatedImagePublishedThread;
+   private final Map<YOLOv8Model, YOLOv8DetectionList> yoloDetectionResults = new ConcurrentHashMap<>();
+   private final TypedNotification<RawImage> newestColorImage = new TypedNotification<>();
 
    private float yoloConfidenceThreshold = 0.5f;
    private float yoloNMSThreshold = 0.1f;
@@ -74,14 +64,9 @@ public class YOLOv8DetectionExecutor
    private int erosionKernelRadius = 2;
    private double outlierThreshold = 1.0;
 
-   private boolean printNoModelsFoundError = true;
-
-   // TODO: add back
-//   private Set<String> targetDetections = new HashSet<>();
-
-   public YOLOv8DetectionExecutor(ROS2Helper ros2Helper, BooleanSupplier isDemandedSupplier)
+   public YOLOv8DetectionExecutor(ROS2Helper ros2Helper, BooleanSupplier annotatedImageDemanded)
    {
-      this.isDemandedSupplier = isDemandedSupplier;
+      this.annotatedImageDemanded = annotatedImageDemanded;
 
       ROS2Node ros2Node = new ROS2NodeBuilder().build("yolo_detection_manager");
       annotatedImagePublisher = ros2Node.createPublisher(PerceptionAPI.YOLO_ANNOTATED_IMAGE);
@@ -93,28 +78,26 @@ public class YOLOv8DetectionExecutor
          yoloMaskThreshold = parametersMessage.getSegmentationThreshold();
          erosionKernelRadius = parametersMessage.getErosionKernelRadius();
          outlierThreshold = parametersMessage.getOutlierThreshold();
-
-         // Create a new set of target detections to use
-//         Set<String> newTargetDetections = new HashSet<>(parametersMessage.getTargetDetectionClasses().size());
-//         for (int i = 0; i < parametersMessage.getTargetDetectionClasses().size(); ++i)
-//            newTargetDetections.add(YOLOv8DetectionClass.fromByte(parametersMessage.getTargetDetectionClasses().get(i)));
-//
-//         targetDetections = newTargetDetections;
       });
 
       for (Path yoloModelDirectory : YOLOv8Tools.getYOLOModelDirectories())
       {
          YOLOv8Model model = new YOLOv8Model(yoloModelDirectory);
-         YOLOv8ObjectDetector objectDetector = new YOLOv8ObjectDetector(model);
 
          LogTools.info("Loaded YOLOv8 model: " + YOLOv8Tools.getONNXFile(yoloModelDirectory));
          LogTools.info("\t\t\tClasses: " + model.getDetectionClassNames().size());
 
-         yoloObjectDetectors.add(objectDetector);
+         yoloModels.add(model);
       }
 
-      annotatedImagePublishedThread = new RestartableThrottledThread("YOLOAnnotatedImagePublisher", 15.0, this::annotateAndPublishImage);
-      annotatedImagePublishedThread.start();
+      if (yoloModels.isEmpty())
+         LogTools.error("No YOLO models found. YOLO will not run.");
+
+      taskQueue = new ArrayBlockingQueue<>(2 * yoloModels.size());
+      taskExecutorThread.startRepeating();
+
+      annotatedImagePublishedThread = new RepeatingTaskThread("YOLOAnnotatedImagePublisher", this::annotateAndPublishImage, DefaultExceptionHandler.RUNTIME_EXCEPTION);
+      annotatedImagePublishedThread.startRepeating();
    }
 
    public void addDetectionConsumerCallback(Consumer<List<InstantDetection>> callback)
@@ -124,22 +107,15 @@ public class YOLOv8DetectionExecutor
 
    public void runYOLODetectionOnAllModels(RawImage colorImage, RawImage depthImage)
    {
-      if (yoloObjectDetectors.isEmpty())
-      {
-         if (printNoModelsFoundError)
-         {
-            LogTools.error("No YOLOv8 models were found. Cannot run YOLO.");
-            printNoModelsFoundError = false;
-         }
+      if (yoloModels.isEmpty())
          return;
-      }
 
-      if (lastRunDetectorIndex + 1 > yoloObjectDetectors.size())
-         lastRunDetectorIndex = 0;
+      if (lastRunModelIndex + 1 > yoloModels.size())
+         lastRunModelIndex = 0;
 
-      YOLOv8ObjectDetector yoloDetector = yoloObjectDetectors.get(lastRunDetectorIndex++);
+      YOLOv8Model yoloModel = yoloModels.get(lastRunModelIndex++);
 
-      runYOLODetection(yoloDetector, colorImage, depthImage);
+      runYOLODetection(yoloModel, colorImage, depthImage);
    }
 
    /**
@@ -147,37 +123,39 @@ public class YOLOv8DetectionExecutor
     * @param colorImage BGR color image, used for YOLO detection
     * @param depthImage 16UC1 depth image, used to get points of detected objects
     */
-   public void runYOLODetection(YOLOv8ObjectDetector yoloDetector, RawImage colorImage, RawImage depthImage)
+   public void runYOLODetection(YOLOv8Model yoloModel, RawImage colorImage, RawImage depthImage)
    {
-      if (yoloDetector.isReady() && !yoloExecutorService.isShutdown())
+      if (taskQueue.remainingCapacity() > 0)
       {
          // Acquire the images
          if (colorImage.get() == null || depthImage.get() == null)
             return;
 
-         yoloExecutorService.submit(() ->
+         taskQueue.add(() ->
          {
             // Run YOLO to get results
-            YOLOv8DetectionResults yoloResults = yoloDetector.runOnImage(colorImage, yoloConfidenceThreshold, yoloNMSThreshold, yoloMaskThreshold);
+            GpuMat bgrMat = new GpuMat();
+            colorImage.getPixelFormat().convertToPixelFormat(colorImage.getGpuImageMat(), bgrMat, PixelFormat.BGR8);
+            RawImage bgrImage = colorImage.replaceImage(bgrMat, PixelFormat.BGR8);
+            YOLOv8DetectionList yoloResults = yoloModel.run(bgrImage, yoloConfidenceThreshold, yoloNMSThreshold, yoloMaskThreshold);
 
             // TODO: temp hack
             synchronized (yoloDetectionResults)
             {
-               if (yoloDetectionResults.containsKey(lastRunDetectorIndex))
-                  yoloDetectionResults.remove(lastRunDetectorIndex).destroy();
-               yoloDetectionResults.put(lastRunDetectorIndex, yoloResults);
+               if (yoloDetectionResults.containsKey(yoloModel))
+                  yoloDetectionResults.remove(yoloModel).destroy();
+               yoloDetectionResults.put(yoloModel, yoloResults);
             }
-            newestColorImage = colorImage;
 
-            // Get the object masks from the results
-            Map<YOLOv8DetectionOutput, RawImage> simpleDetectionMap = yoloResults.getSegmentationImages();
+            if (newestColorImage.poll())
+               newestColorImage.read().release();
+            newestColorImage.set(bgrImage.get());
 
             // Create list of instant detections from results
             List<InstantDetection> yoloInstantDetections = new ArrayList<>();
-            for (Map.Entry<YOLOv8DetectionOutput, RawImage> simpleDetectionEntry : simpleDetectionMap.entrySet())
+            for (YOLOv8Detection detection : yoloResults)
             {
-               YOLOv8DetectionOutput simpleDetection = simpleDetectionEntry.getKey();
-               RawImage objectMask = simpleDetectionEntry.getValue();
+               RawImage objectMask = detection.mask();
 
                // Erode mask to get better segmentation
                Mat erodedMask = new Mat(objectMask.getHeight(), objectMask.getWidth(), objectMask.getOpenCVType());
@@ -200,11 +178,11 @@ public class YOLOv8DetectionExecutor
                   return;
 
                // Create an instant detection from data
-               YOLOv8InstantDetection instantDetection = new YOLOv8InstantDetection(simpleDetection.objectClass(),
-                                                                                    simpleDetection.confidence(),
+               YOLOv8InstantDetection instantDetection = new YOLOv8InstantDetection(detection.objectClass(),
+                                                                                    detection.confidence(),
                                                                                     new Pose3D(centroid, new RotationMatrix()),
                                                                                     objectMask.getAcquisitionTime(),
-                                                                                    colorImage,
+                                                                                    bgrImage,
                                                                                     erodedObjectMask,
                                                                                     depthImage,
                                                                                     pointCloud);
@@ -212,9 +190,11 @@ public class YOLOv8DetectionExecutor
                erodedMask.release();
             }
 
-            // Submit the callbacks to be processed
-            yoloExecutorService.submit(() -> detectionConsumerCallbacks.forEach(callback -> callback.accept(yoloInstantDetections)));
+            // Process callbacks
+            if (!yoloInstantDetections.isEmpty())
+               detectionConsumerCallbacks.forEach(callback -> callback.accept(yoloInstantDetections));
 
+            bgrImage.release();
             colorImage.release();
             depthImage.release();
          });
@@ -224,113 +204,44 @@ public class YOLOv8DetectionExecutor
    public void destroy()
    {
       System.out.println("Destroying " + getClass().getSimpleName());
-      shutdownExecutor();
+      taskExecutorThread.blockingKill();
       segmenter.destroy();
-      extractor.destroy();
-      annotatedImagePublishedThread.blockingStop();
+      newestColorImage.set(null);
+      annotatedImagePublishedThread.blockingKill();
 
-      for (YOLOv8ObjectDetector yoloDetector : yoloObjectDetectors)
-         yoloDetector.destroy();
+      for (YOLOv8Model yoloModel : yoloModels)
+         yoloModel.destroy();
 
-      for (YOLOv8DetectionResults yoloResults : yoloDetectionResults.values())
+      for (YOLOv8DetectionList yoloResults : yoloDetectionResults.values())
          yoloResults.destroy();
 
       System.out.println("Destroyed " + getClass().getSimpleName());
    }
 
-   private void shutdownExecutor()
+   private void executeTasks()
    {
-      yoloExecutorService.shutdown();
       try
       {
-         if (!yoloExecutorService.awaitTermination(2, TimeUnit.SECONDS))
-         {
-            yoloExecutorService.shutdownNow();
-            if (!yoloExecutorService.awaitTermination(2, TimeUnit.SECONDS))
-               LogTools.error("YOLO executor failed to shutdown");
-         }
+         taskQueue.take().run();
       }
-      catch (InterruptedException e)
-      {
-         yoloExecutorService.shutdownNow();
-         LogTools.error(e);
-      }
+      catch (InterruptedException ignored) {}
    }
 
-   public void annotateAndPublishImage()
+   private void annotateAndPublishImage()
    {
-      if (!isDemandedSupplier.getAsBoolean())
+      if (!annotatedImageDemanded.getAsBoolean())
          return;
 
-      if (newestColorImage == null)
-         return;
-
-      RawImage colorImage = newestColorImage.get();
+      RawImage colorImage = newestColorImage.blockingPoll();
       if (colorImage == null)
          return;
 
-      Mat resultMat = colorImage.get().getCpuImageMat().clone();
-
-      Map<YOLOv8DetectionOutput, RawImage> detectionMasks = new HashMap<>();
-
-      for (YOLOv8DetectionResults value : yoloDetectionResults.values())
-      {
-         detectionMasks.putAll(value.getSegmentationImages());
-      }
-
+      Mat resultMat = new Mat();
       synchronized (yoloDetectionResults)
       {
-         detectionMasks.entrySet().stream().filter(entry -> entry.getKey().confidence() >= yoloConfidenceThreshold).forEach(entry ->
-         {
-            YOLOv8DetectionOutput detection = entry.getKey();
-            RawImage maskImage = entry.getValue().get();
-            if (maskImage == null || maskImage.isEmpty())
-               return;
-
-            String text = String.format("%s: %.2f", detection.objectClass().toString(), detection.confidence());
-
-            // Draw the bounding box
-            Rect boundingBox = new Rect(detection.x(), detection.y(), detection.width(), detection.height());
-            opencv_imgproc.rectangle(resultMat, boundingBox, BOUNDING_BOX_COLOR, 5, LINE_TYPE, 0);
-
-            // Draw text background
-            Size textSize = opencv_imgproc.getTextSize(text, FONT, FONT_SCALE, FONT_THICKNESS, new IntPointer());
-
-            int textBoxClampedX = MathTools.clamp(detection.x(), 0, colorImage.getWidth() - textSize.width());
-            int textBoxClampedY = MathTools.clamp(detection.y() - textSize.height(), 0, colorImage.getHeight() - textSize.height());
-
-            Rect textBox = new Rect(textBoxClampedX, textBoxClampedY, textSize.width(), textSize.height());
-
-            opencv_imgproc.rectangle(resultMat, textBox, BOUNDING_BOX_COLOR, opencv_imgproc.FILLED, LINE_TYPE, 0);
-
-            opencv_imgproc.putText(resultMat,
-                                   text,
-                                   new Point(textBoxClampedX, textBoxClampedY + textSize.height()),
-                                   opencv_imgproc.CV_FONT_HERSHEY_DUPLEX,
-                                   FONT_SCALE,
-                                   new Scalar(255.0, 255.0, 255.0, 255.0),
-                                   FONT_THICKNESS,
-                                   LINE_TYPE,
-                                   false);
-
-            // Add green tint to show mask
-            // first convert 32F mask to 8U
-            Mat maskMat = new Mat(maskImage.getHeight(), maskImage.getWidth(), opencv_core.CV_8U);
-            maskImage.getCpuImageMat().convertTo(maskMat, opencv_core.CV_8U, 255.0, 0.0);
-
-            // resize the mask to fit the result image
-            opencv_imgproc.resize(maskMat, maskMat, resultMat.size(), 0.0, 0.0, opencv_imgproc.INTER_NEAREST);
-
-            // ensure the green Mat is same size as image
-            if (resultMat.cols() != GREEN_MAT.cols() || resultMat.rows() != GREEN_MAT.rows())
-               opencv_imgproc.resize(GREEN_MAT, GREEN_MAT, resultMat.size());
-
-            // add a green tint where mask = 255
-            opencv_core.add(resultMat, GREEN_MAT, resultMat, maskMat, -1);
-
-            maskImage.release();
-            maskMat.release();
-         });
+         List<YOLOv8Detection> allDetections = new ArrayList<>();
+         yoloDetectionResults.values().forEach(allDetections::addAll);
+         YOLOv8Tools.annotateImage(colorImage.getCpuImageMat(), resultMat, allDetections);
       }
 
       BytePointer annotatedImagePointer = new BytePointer();
