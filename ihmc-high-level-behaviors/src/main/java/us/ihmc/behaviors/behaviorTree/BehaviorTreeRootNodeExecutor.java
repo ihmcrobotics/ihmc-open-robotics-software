@@ -64,10 +64,6 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
       {
          state.getOrderedLeaves().get(i).setConcurrencyRank(1);
 
-//         int j = i + 1;
-//         for (; j < state.getLeafChildren().size()
-//              && state.getLeafChildren().get(j).calculateExecuteAfterLeafIndex(state.getLeafChildren()) < i; j++);
-
          int j = i - 1;
          for (; j >= 0; j--)
          {
