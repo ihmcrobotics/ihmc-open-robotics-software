@@ -81,7 +81,7 @@ public class ZEDImageSensor extends ImageSensor
       // Set runtime parameters to default values
       zedRuntimeParameters.reference_frame(SL_REFERENCE_FRAME_CAMERA);
       zedRuntimeParameters.enable_depth(true);
-      zedRuntimeParameters.confidence_threshold(100);
+      zedRuntimeParameters.confidence_threshold(70);
       zedRuntimeParameters.texture_confidence_threshold(100);
       zedRuntimeParameters.remove_saturated_areas(true);
       zedRuntimeParameters.enable_fill_mode(false);

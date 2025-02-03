@@ -58,20 +58,6 @@ public class HumanoidActivePerceptionModule
                                                                          true);
    }
 
-   public void initializeContinuousPlannerSchedulingTask(DRCRobotModel robotModel,
-                                                         ROS2Node ros2Node,
-                                                         HumanoidReferenceFrames referenceFrames,
-                                                         ContinuousHikingParameters continuousHikingParameters)
-   {
-      continuousPlannerSchedulingTask = new ContinuousPlannerSchedulingTask(robotModel,
-                                                                            ros2Node,
-                                                                            referenceFrames,
-                                                                            continuousHikingParameters,
-                                                                            new MonteCarloFootstepPlannerParameters(),
-                                                                            robotModel.getFootstepPlannerParameters("ForContinuousWalking"),
-                                                                            robotModel.getSwingPlannerParameters());
-   }
-
    public void update(ReferenceFrame sensorFrame, boolean display)
    {
       if (activePlaneMappingRemoteThread == null)

@@ -10,7 +10,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
-import us.ihmc.robotics.stateMachine.extra.StateMachinesJPanel;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.simulationconstructionset.gui.EventDispatchThreadHelper;
 import us.ihmc.simulationconstructionset.util.RobotController;
@@ -346,52 +345,11 @@ public class SpringFlamingoFastWalkingController implements RobotController
       this.robot = robot;
       initControl(gravity);
       setupStateMachines();
-
-      if (CREATE_STATE_MACHINE_WINDOW)
-         createStateMachineWindow();
    }
 
    public YoRegistry getYoRegistry()
    {
       return registry;
-   }
-
-   public void createStateMachineWindow()
-   {
-      EventDispatchThreadHelper.invokeAndWait(new Runnable()
-      {
-         public void run()
-         {
-            createStateMachineWindowLocal();
-         }
-      });
-   }
-
-   public void createStateMachineWindowLocal()
-   {
-      JFrame jFrame = new JFrame("Spring Flamingo State Machines");
-
-      Container contentPane = jFrame.getContentPane();
-
-      contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.X_AXIS));
-      StateMachinesJPanel<WalkingState> leftStateMachinePanel = new StateMachinesJPanel<>(leftStateMachine, true);
-      StateMachinesJPanel<WalkingState> rightStateMachinePanel = new StateMachinesJPanel<>(rightStateMachine, true);
-
-      jFrame.getContentPane().add(leftStateMachinePanel);
-      jFrame.getContentPane().add(rightStateMachinePanel);
-
-      jFrame.pack();
-      jFrame.setSize(450, 300);
-      jFrame.setAlwaysOnTop(true);
-      jFrame.setVisible(true);
-
-      // Doing the following will cause redraw when the state changes, but not during replay or rewind:
-      leftStateMachine.addStateChangedListener(leftStateMachinePanel);
-      rightStateMachine.addStateChangedListener(rightStateMachinePanel);
-
-      // Doing this will cause redraw every specified miliseconds:
-//      leftStateMachinePanel.createUpdaterThread(250);
-//      rightStateMachinePanel.createUpdaterThread(250);
    }
 
    private void initControl(double gravity)

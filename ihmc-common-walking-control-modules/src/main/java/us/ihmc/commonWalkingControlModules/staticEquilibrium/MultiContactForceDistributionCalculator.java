@@ -7,15 +7,16 @@ import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.matrixlib.MatrixTools;
 
-import static us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStabilityMarginOptimizationModule.*;
+import static us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStabilityMarginOptimizationModule.NUM_DYNAMICS_CONSTRAINTS;
+import static us.ihmc.commonWalkingControlModules.staticEquilibrium.StabilityMarginOptimizationModule.*;
 
 /**
- * Static whole-body force distribution calculator using the constraints from {@link CenterOfMassStabilityMarginOptimizationModule},
+ * Static whole-body force distribution calculator using the constraints from {@link StabilityMarginOptimizationModule},
  * but instead of varying CoM position and solving with an LP, it keeps the CoM fixed and solves with a QP.
  */
 public class MultiContactForceDistributionCalculator
 {
-   private final CenterOfMassStabilityMarginOptimizationModule comOptimizationModule;
+   private final StabilityMarginOptimizationModule comOptimizationModule;
    private final SimpleEfficientActiveSetQPSolver qpSolver = new SimpleEfficientActiveSetQPSolver();
    private final double mg;
 
@@ -64,8 +65,8 @@ public class MultiContactForceDistributionCalculator
       /* Compute nominal equality constraint to enforce static equilibrium */
 
       forceDecisionVariables = LINEAR_DIMENSIONS * contactState.getNumberOfContactPoints();
-      Aeq.reshape(STATIC_EQUILIBRIUM_CONSTRAINTS, forceDecisionVariables);
-      beq.reshape(STATIC_EQUILIBRIUM_CONSTRAINTS, 1);
+      Aeq.reshape(NUM_DYNAMICS_CONSTRAINTS, forceDecisionVariables);
+      beq.reshape(NUM_DYNAMICS_CONSTRAINTS, 1);
 
       MatrixTools.setMatrixBlock(Aeq, 0, 0, comOptimizationModule.Aeq, 0, 0, Aeq.getNumRows(), Aeq.getNumCols(), 1.0);
 
@@ -78,7 +79,7 @@ public class MultiContactForceDistributionCalculator
       rhoDecisionVariables = NUM_BASIS_VECTORS * contactState.getNumberOfContactPoints();
       rhoToForce.reshape(forceDecisionVariables, rhoDecisionVariables);
 
-      MatrixTools.setMatrixBlock(rhoToForce, 0, 0, comOptimizationModule.getRhoToForceTransformationMatrix(), 0, 0, rhoToForce.getNumRows(), rhoToForce.getNumCols(), 1.0);
+      MatrixTools.setMatrixBlock(rhoToForce, 0, 0, comOptimizationModule.getSolverToNominalTransformation(), 0, 0, rhoToForce.getNumRows(), rhoToForce.getNumCols(), 1.0);
 
       /* Compute constraint matrices */
       CommonOps_DDRM.mult(Aeq, rhoToForce, Aeq_rho);
@@ -102,6 +103,11 @@ public class MultiContactForceDistributionCalculator
       /* Compute optimal force distribution */
       qpSolver.clear();
       qpSolver.resetActiveSet();
+
+      quadraticCost.reshape(Aeq_rho.getNumCols(), Aeq_rho.getNumCols());
+      CommonOps_DDRM.setIdentity(quadraticCost);
+
+      linearCost.reshape(Aeq_rho.getNumCols(), 1);
 
       qpSolver.setMaxNumberOfIterations(feasibilityMode ? 100 : 500);
       qpSolver.setConvergenceThreshold(feasibilityMode ? 1e-2 : 1e-9);

@@ -193,10 +193,10 @@ public class RDX3DPanel extends RDXPanel
             renderScene(RDXSceneLevel.MODEL.SINGLETON_SET);
 
             normalizedDeviceCoordinateDepthDirectByteBuffer.rewind(); // SIGSEV otherwise
-            GL41.glReadBuffer(GL41.GL_COLOR_ATTACHMENT1);
+            GL41.glReadBuffer(GL41.GL_DEPTH_ATTACHMENT);
             GL41.glPixelStorei(GL41.GL_UNPACK_ALIGNMENT, 4); // to read floats
             // Note: This line has significant performance impact
-            GL41.glReadPixels(0, 0, (int) renderSizeX, (int) renderSizeY, GL41.GL_RED, GL41.GL_FLOAT, normalizedDeviceCoordinateDepthDirectByteBuffer);
+            GL41.glReadPixels(0, 0, (int) renderSizeX, (int) renderSizeY, GL41.GL_DEPTH_COMPONENT, GL41.GL_FLOAT, normalizedDeviceCoordinateDepthDirectByteBuffer);
             GL41.glPixelStorei(GL41.GL_UNPACK_ALIGNMENT, 1); // undo what we did
 
             frameBuffer.end();

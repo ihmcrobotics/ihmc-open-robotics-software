@@ -31,15 +31,9 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
             */
    public boolean enable_auto_support_polygon_ = true;
    /**
-            * When set to true, the solver will hold the pose of the rigid-bodies with active contact points.
-            * - when the walking controller is running, the rigid-bodies in question are the feet.
-            * - when a multi-contact controller is running, any rigid-body of the robot can be in contact.
+            * If true, enables an objective for improving the stability margin of the robot when the upper body is load-bearing.
             */
-   public boolean hold_support_rigid_bodies_ = true;
-   /**
-            * If this is true and the solver receives a MultiContactBalanceStatus, it will solve for the multi-contact support region
-            */
-   public boolean enable_multi_contact_support_region_solver_;
+   public boolean enable_stability_objective_;
    /**
             * Whether restrictive joint limits are enabled, in order to have the IK avoid a solution at the joint limit.
             */
@@ -77,9 +71,7 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
 
       enable_auto_support_polygon_ = other.enable_auto_support_polygon_;
 
-      hold_support_rigid_bodies_ = other.hold_support_rigid_bodies_;
-
-      enable_multi_contact_support_region_solver_ = other.enable_multi_contact_support_region_solver_;
+      enable_stability_objective_ = other.enable_stability_objective_;
 
       enable_joint_limit_reduction_ = other.enable_joint_limit_reduction_;
 
@@ -143,37 +135,18 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
    }
 
    /**
-            * When set to true, the solver will hold the pose of the rigid-bodies with active contact points.
-            * - when the walking controller is running, the rigid-bodies in question are the feet.
-            * - when a multi-contact controller is running, any rigid-body of the robot can be in contact.
+            * If true, enables an objective for improving the stability margin of the robot when the upper body is load-bearing.
             */
-   public void setHoldSupportRigidBodies(boolean hold_support_rigid_bodies)
+   public void setEnableStabilityObjective(boolean enable_stability_objective)
    {
-      hold_support_rigid_bodies_ = hold_support_rigid_bodies;
+      enable_stability_objective_ = enable_stability_objective;
    }
    /**
-            * When set to true, the solver will hold the pose of the rigid-bodies with active contact points.
-            * - when the walking controller is running, the rigid-bodies in question are the feet.
-            * - when a multi-contact controller is running, any rigid-body of the robot can be in contact.
+            * If true, enables an objective for improving the stability margin of the robot when the upper body is load-bearing.
             */
-   public boolean getHoldSupportRigidBodies()
+   public boolean getEnableStabilityObjective()
    {
-      return hold_support_rigid_bodies_;
-   }
-
-   /**
-            * If this is true and the solver receives a MultiContactBalanceStatus, it will solve for the multi-contact support region
-            */
-   public void setEnableMultiContactSupportRegionSolver(boolean enable_multi_contact_support_region_solver)
-   {
-      enable_multi_contact_support_region_solver_ = enable_multi_contact_support_region_solver;
-   }
-   /**
-            * If this is true and the solver receives a MultiContactBalanceStatus, it will solve for the multi-contact support region
-            */
-   public boolean getEnableMultiContactSupportRegionSolver()
-   {
-      return enable_multi_contact_support_region_solver_;
+      return enable_stability_objective_;
    }
 
    /**
@@ -235,9 +208,7 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_auto_support_polygon_, other.enable_auto_support_polygon_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.hold_support_rigid_bodies_, other.hold_support_rigid_bodies_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_multi_contact_support_region_solver_, other.enable_multi_contact_support_region_solver_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_stability_objective_, other.enable_stability_objective_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_joint_limit_reduction_, other.enable_joint_limit_reduction_, epsilon)) return false;
 
@@ -264,9 +235,7 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
 
       if(this.enable_auto_support_polygon_ != otherMyClass.enable_auto_support_polygon_) return false;
 
-      if(this.hold_support_rigid_bodies_ != otherMyClass.hold_support_rigid_bodies_) return false;
-
-      if(this.enable_multi_contact_support_region_solver_ != otherMyClass.enable_multi_contact_support_region_solver_) return false;
+      if(this.enable_stability_objective_ != otherMyClass.enable_stability_objective_) return false;
 
       if(this.enable_joint_limit_reduction_ != otherMyClass.enable_joint_limit_reduction_) return false;
 
@@ -288,10 +257,8 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
       builder.append(this.hold_current_center_of_mass_xy_position_);      builder.append(", ");
       builder.append("enable_auto_support_polygon=");
       builder.append(this.enable_auto_support_polygon_);      builder.append(", ");
-      builder.append("hold_support_rigid_bodies=");
-      builder.append(this.hold_support_rigid_bodies_);      builder.append(", ");
-      builder.append("enable_multi_contact_support_region_solver=");
-      builder.append(this.enable_multi_contact_support_region_solver_);      builder.append(", ");
+      builder.append("enable_stability_objective=");
+      builder.append(this.enable_stability_objective_);      builder.append(", ");
       builder.append("enable_joint_limit_reduction=");
       builder.append(this.enable_joint_limit_reduction_);      builder.append(", ");
       builder.append("joint_limit_reduction_factors=");
