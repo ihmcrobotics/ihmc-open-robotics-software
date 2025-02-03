@@ -42,15 +42,15 @@ public class CUDAFlyingPointsFilterTest
       Mat inputMat = new Mat(3, 3, opencv_core.CV_16UC1);
 
       // Populating the matrix with test values
-      inputMat.ptr(0, 0).putShort((short) 1);
-      inputMat.ptr(0, 1).putShort((short) 1);
-      inputMat.ptr(0, 2).putShort((short) 1);
-      inputMat.ptr(1, 0).putShort((short) 1);
-      inputMat.ptr(1, 1).putShort((short) 3);
-      inputMat.ptr(1, 2).putShort((short) 1);
-      inputMat.ptr(2, 0).putShort((short) 1);
-      inputMat.ptr(2, 1).putShort((short) 1);
-      inputMat.ptr(2, 2).putShort((short) 1);
+      inputMat.ptr(0, 0).putShort((short) 10);
+      inputMat.ptr(0, 1).putShort((short) 10);
+      inputMat.ptr(0, 2).putShort((short) 10);
+      inputMat.ptr(1, 0).putShort((short) 10);
+      inputMat.ptr(1, 1).putShort((short) 11);
+      inputMat.ptr(1, 2).putShort((short) 10);
+      inputMat.ptr(2, 0).putShort((short) 10);
+      inputMat.ptr(2, 1).putShort((short) 10);
+      inputMat.ptr(2, 2).putShort((short) 10);
 
       // Printing the input matrix before processing
       printResult(inputMat);
