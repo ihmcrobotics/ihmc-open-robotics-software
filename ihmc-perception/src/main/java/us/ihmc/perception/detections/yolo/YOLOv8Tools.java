@@ -1,16 +1,23 @@
 package us.ihmc.perception.detections.yolo;
 
+import org.bytedeco.javacpp.IntPointer;
+import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_imgproc;
+import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.Point;
+import org.bytedeco.opencv.opencv_core.Rect;
+import org.bytedeco.opencv.opencv_core.Scalar;
+import org.bytedeco.opencv.opencv_core.Size;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.perception.RawImage;
+import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.tools.IHMCCommonPaths;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
-import us.ihmc.tools.io.WorkspaceResourceFile;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -22,6 +29,14 @@ import java.util.stream.Stream;
 
 public class YOLOv8Tools
 {
+   private static final int FONT = opencv_imgproc.FONT_HERSHEY_DUPLEX;
+   private static final int FONT_THICKNESS = 2;
+   private static final double FONT_SCALE = 1.5;
+   private static final int LINE_TYPE = opencv_imgproc.LINE_4;
+   private static final Scalar GREEN = new Scalar(0.0, 196.0, 0.0, 255.0);
+   private static final Scalar WHITE = new Scalar(255.0, 255.0, 255.0, 255.0);
+   private static final ThreadLocal<Mat> GREEN_MAT = ThreadLocal.withInitial(() -> new Mat(1, 1, opencv_core.CV_8UC3, GREEN));
+
    public static final String CLASS_NAME_FILE_NAME = "class_names.yaml";
 //   private static final WorkspaceResourceDirectory POINT_CLOUD_DIRECTORY = new WorkspaceResourceDirectory(YOLOv8DetectionClass.class, "/yoloICPPointClouds/");
 
@@ -121,6 +136,54 @@ public class YOLOv8Tools
       centroid.scale(1.0 / numberOfPointsToUse);
 
       return centroid;
+   }
+
+   /**
+    * Annotates the {@code inputImage} using the {@code detections} and puts the result in {@code annotatedImage}.
+    *
+    * @param inputImage     Image on which YOLO was run on.
+    * @param annotatedImage Annotated output Mat.
+    * @param detections     YOLO detections.
+    */
+   public static void annotateImage(Mat inputImage, Mat annotatedImage, List<YOLOv8Detection> detections)
+   {
+      Mat greenMat = GREEN_MAT.get();
+      if (!OpenCVTools.dimensionsMatch(inputImage, greenMat))
+         opencv_imgproc.resize(greenMat, greenMat, inputImage.size());
+
+      inputImage.copyTo(annotatedImage);
+
+      for (YOLOv8Detection detection : detections)
+      {
+         String text = String.format("%s: %.2f", detection.objectClass(), detection.confidence());
+
+         // Draw the bounding box
+         Rect boundingBox = detection.boundingBox();
+         opencv_imgproc.rectangle(annotatedImage, boundingBox, GREEN, 5, LINE_TYPE, 0);
+
+         // Draw text background
+         Size textSize = opencv_imgproc.getTextSize(text, FONT, FONT_SCALE, FONT_THICKNESS, new IntPointer());
+
+         int textBoxClampedX = MathTools.clamp(boundingBox.x(), 0, annotatedImage.cols() - textSize.width());
+         int textBoxClampedY = MathTools.clamp(boundingBox.y() - textSize.height(), 0, annotatedImage.rows() - textSize.height());
+
+         Rect textBox = new Rect(textBoxClampedX, textBoxClampedY, textSize.width(), textSize.height());
+         opencv_imgproc.rectangle(annotatedImage, textBox, GREEN, opencv_imgproc.FILLED, LINE_TYPE, 0);
+
+         // Draw the text
+         Point textLocation = new Point(textBoxClampedX, textBoxClampedY + textSize.height());
+         opencv_imgproc.putText(annotatedImage, text, textLocation, FONT, FONT_SCALE, WHITE, FONT_THICKNESS, LINE_TYPE, false);
+
+         // Add green tint to show mask
+         RawImage mask = detection.mask();
+         Mat resizedMask = new Mat();
+         opencv_imgproc.resize(mask.getCpuImageMat(), resizedMask, annotatedImage.size());
+         opencv_core.add(annotatedImage, greenMat, annotatedImage, resizedMask, -1);
+
+         boundingBox.close();
+         textBox.close();
+         mask.release();
+      }
    }
 
    public static List<Path> getYOLOModelDirectories()

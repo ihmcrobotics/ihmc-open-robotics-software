@@ -7,24 +7,20 @@ import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import org.apache.logging.log4j.core.util.ExecutorServices;
-import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point;
-import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import org.bytedeco.opencv.opencv_core.Size;
-import us.ihmc.commons.MathTools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.detections.yolo.YOLOv8DetectionOutput;
-import us.ihmc.perception.detections.yolo.YOLOv8DetectionResults;
+import us.ihmc.perception.detections.yolo.YOLOv8Detection;
+import us.ihmc.perception.detections.yolo.YOLOv8DetectionList;
 import us.ihmc.perception.detections.yolo.YOLOv8Model;
-import us.ihmc.perception.detections.yolo.YOLOv8ObjectDetector;
 import us.ihmc.perception.detections.yolo.YOLOv8Tools;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.opencl.OpenCLDepthImageSegmenter;
@@ -47,9 +43,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -57,13 +50,6 @@ import java.util.concurrent.TimeUnit;
 
 public class RDXYOLOv8PipelineDemo
 {
-   private static final int FONT = opencv_imgproc.FONT_HERSHEY_DUPLEX;
-   private static final double FONT_SCALE = 1.5;
-   private static final int FONT_THICKNESS = 2;
-   private static final int LINE_TYPE = opencv_imgproc.LINE_4;
-   private static final Scalar BOUNDING_BOX_COLOR = new Scalar(0.0, 196.0, 0.0, 255.0);
-   private static final Mat GREEN_MAT = new Mat(1, 1, opencv_core.CV_8UC3, new Scalar(0.0, 255.0, 0.0, 255.0));
-
    private static final String SVO_FILE = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20240715_103234_ZEDRecording_NewONRCourseWalk.svo2").toAbsolutePath().toString();
 
    private static final String SAVE_DIRECTORY = System.getProperty("user.home") + File.separator + "Documents" + File.separator;
@@ -79,8 +65,8 @@ public class RDXYOLOv8PipelineDemo
    private final RDXRawImagePointCloudVisualizer zedPointCloudVisualizer = new RDXRawImagePointCloudVisualizer("ZED Point Cloud", true);
    private final ImBoolean renderZEDPointCloud = new ImBoolean(true);
 
-   private final List<YOLOv8ObjectDetector> yoloObjectDetectors = new ArrayList<>();
-   private final List<String> availableDetectors = new ArrayList<>();
+   private final List<YOLOv8Model> yoloModels = new ArrayList<>();
+   private final List<String> availableModels = new ArrayList<>();
    private final ImInt selectedDetector = new ImInt(0);
 
    private RawImage detectionMask;
@@ -118,13 +104,12 @@ public class RDXYOLOv8PipelineDemo
       for (Path yoloModelDirectory : YOLOv8Tools.getYOLOModelDirectories())
       {
          YOLOv8Model model = new YOLOv8Model(yoloModelDirectory);
-         YOLOv8ObjectDetector objectDetector = new YOLOv8ObjectDetector(model);
 
          LogTools.info("Loaded YOLOv8 model: " + YOLOv8Tools.getONNXFile(yoloModelDirectory));
          LogTools.info("\t\t\tClasses: " + model.getDetectionClassNames().size());
 
-         yoloObjectDetectors.add(objectDetector);
-         availableDetectors.add(model.getModelName());
+         yoloModels.add(model);
+         availableModels.add(model.getName());
       }
 
       zed.useTrackedPose(false);
@@ -193,7 +178,7 @@ public class RDXYOLOv8PipelineDemo
 
          private void frameSettings()
          {
-            ImGui.combo("YOLO Model", selectedDetector, availableDetectors.toArray(String[]::new));
+            ImGui.combo("YOLO Model", selectedDetector, availableModels.toArray(String[]::new));
             if (ImGui.sliderInt("Frame", frameToGrab.getData(), 0, zed.getLength() - 1))
             {
                task = executor.submit(() -> grabFrame(frameToGrab.get()));
@@ -266,14 +251,16 @@ public class RDXYOLOv8PipelineDemo
 
    private void runYOLO()
    {
-      // Get the detector
-      YOLOv8ObjectDetector detector = yoloObjectDetectors.get(selectedDetector.get());
+      // Get the model
+      YOLOv8Model model = yoloModels.get(selectedDetector.get());
 
       // Run YOLO on a BGR image
       Mat bgrMat = new Mat();
       opencv_imgproc.cvtColor(colorImage.getCpuImageMat(), bgrMat, opencv_imgproc.COLOR_BGRA2BGR);
       RawImage bgrImage = colorImage.replaceImage(bgrMat, PixelFormat.BGR8);
-      YOLOv8DetectionResults results = detector.runOnImage(bgrImage, confidenceThreshold.get(), nmsThreshold.get(), maskThreshold.get());
+      YOLOv8DetectionList results = model.run(bgrImage, confidenceThreshold.get(), nmsThreshold.get(), maskThreshold.get());
+      if (results.isEmpty())
+         return;
 
       // Release previous result images
       if (detectionMask != null)
@@ -297,17 +284,13 @@ public class RDXYOLOv8PipelineDemo
          annotatedImage = null;
       }
 
-      // Get the results
-      Map<YOLOv8DetectionOutput, RawImage> detections = results.getSegmentationImages();
-      Optional<Entry<YOLOv8DetectionOutput, RawImage>> detectionOption = detections.entrySet().stream().findAny();
-      if (detectionOption.isEmpty())
-         return;
-      YOLOv8DetectionOutput detection = detectionOption.get().getKey();
-      detectionMask = detectionOption.get().getValue().get();
+      // Get a detection
+      YOLOv8Detection detection = results.get(0);
+      detectionMask = detection.mask();
 
       // Get an annotated image
-      annotatedImage = bgrImage.replaceImage(bgrImage.getCpuImageMat().clone());
-      annotateImage(detection, detectionMask, annotatedImage);
+      annotatedImage = bgrImage.replaceImage(new Mat(bgrImage.getCpuImageMat().size(), bgrImage.getOpenCVType()));
+      YOLOv8Tools.annotateImage(bgrImage.getCpuImageMat(), annotatedImage.getCpuImageMat(), List.of(detection));
 
       // Get the eroded mask
       Mat erodedMat = new Mat();
@@ -340,52 +323,6 @@ public class RDXYOLOv8PipelineDemo
       centroid.scale(1.0 / pointCloud.size());
 
       return centroid;
-   }
-
-   private void annotateImage(YOLOv8DetectionOutput detection, RawImage mask, RawImage imageToAnnotate)
-   {
-      Mat annotatedMat = imageToAnnotate.getCpuImageMat();
-      String text = String.format("%s: %.2f", detection.objectClass(), detection.confidence());
-
-      // Draw the bounding box
-      Rect boundingBox = new Rect(detection.x(), detection.y(), detection.width(), detection.height());
-      opencv_imgproc.rectangle(annotatedMat, boundingBox, BOUNDING_BOX_COLOR, 5, LINE_TYPE, 0);
-
-      // Draw text background
-      Size textSize = opencv_imgproc.getTextSize(text, FONT, FONT_SCALE, FONT_THICKNESS, new IntPointer());
-
-      int textBoxClampedX = MathTools.clamp(detection.x(), 0, imageToAnnotate.getWidth() - textSize.width());
-      int textBoxClampedY = MathTools.clamp(detection.y() - textSize.height(), 0, imageToAnnotate.getHeight() - textSize.height());
-
-      Rect textBox = new Rect(textBoxClampedX, textBoxClampedY, textSize.width(), textSize.height());
-
-      opencv_imgproc.rectangle(annotatedMat, textBox, BOUNDING_BOX_COLOR, opencv_imgproc.FILLED, LINE_TYPE, 0);
-
-      opencv_imgproc.putText(annotatedMat,
-                             text,
-                             new Point(textBoxClampedX, textBoxClampedY + textSize.height()),
-                             opencv_imgproc.CV_FONT_HERSHEY_DUPLEX,
-                             FONT_SCALE,
-                             new Scalar(255.0, 255.0, 255.0, 255.0),
-                             FONT_THICKNESS,
-                             LINE_TYPE,
-                             false);
-
-      // Add green tint to show mask
-      // first convert 32F mask to 8U
-      Mat maskMat = new Mat(mask.getHeight(), mask.getWidth(), opencv_core.CV_8U);
-      mask.getCpuImageMat().convertTo(maskMat, opencv_core.CV_8U, 255.0, 0.0);
-
-      // resize the mask to fit the result image
-      opencv_imgproc.resize(maskMat, maskMat, annotatedMat.size(), 0.0, 0.0, opencv_imgproc.INTER_NEAREST);
-
-      // ensure the green Mat is same size as image
-      if (annotatedMat.cols() != GREEN_MAT.cols() || annotatedMat.rows() != GREEN_MAT.rows())
-         opencv_imgproc.resize(GREEN_MAT, GREEN_MAT, annotatedMat.size());
-
-      // add a green tint where mask = 255
-      opencv_core.add(annotatedMat, GREEN_MAT, annotatedMat, maskMat, -1);
-      maskMat.close();
    }
 
    private void updateRenderables()
@@ -516,8 +453,8 @@ public class RDXYOLOv8PipelineDemo
       if (annotatedImage != null)
          annotatedImage.release();
 
-      for (YOLOv8ObjectDetector detector : yoloObjectDetectors)
-         detector.destroy();
+      for (YOLOv8Model model : yoloModels)
+         model.destroy();
 
       zedPointCloudVisualizer.destroy();
       segmentedPointCloudVisualizer.destroy();
