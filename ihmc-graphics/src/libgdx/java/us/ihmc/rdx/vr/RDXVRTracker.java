@@ -18,23 +18,31 @@ import static org.lwjgl.openvr.VRSystem.VRSystem_GetStringTrackedDeviceProperty;
 
 public class RDXVRTracker extends RDXVRTrackedDevice
 {
-   private static final RigidBodyTransformReadOnly trackerYBackZLeftXRightToXForwardZUp = new RigidBodyTransform(
-         new YawPitchRoll(          // For this transformation, we start with IHMC ZUp with index forward and thumb up
-                                    Math.toRadians(0.0),
-                                    Math.toRadians(90.0),
-                                    Math.toRadians(0.0)
-         ),
-         new Point3D()
-   );
+   private final RigidBodyTransformReadOnly trackerYBackZLeftXRightToXForwardZUp; // For this transformation, we start with IHMC ZUp with index forward and thumb up
    private final ReferenceFrame xForwardZUpTrackerFrame;
    private final FramePose3D tempFramePose = new FramePose3D();
    private final RigidBodyTransform tempRigidBodyTransform = new RigidBodyTransform();
 
-   public RDXVRTracker(ReferenceFrame vrPlayAreaYUpZBackFrame, int deviceIndex)
+   public RDXVRTracker(ReferenceFrame vrPlayAreaYUpZBackFrame, int deviceIndex, RDXVRModel model)
    {
       super(vrPlayAreaYUpZBackFrame);
       setDeviceIndex(deviceIndex);
       setConnected(true);
+      switch (model)
+      {
+         case FOCUS3 ->
+         {
+            trackerYBackZLeftXRightToXForwardZUp = new RigidBodyTransform(new YawPitchRoll(Math.toRadians(0.0), Math.toRadians(90.0), Math.toRadians(0.0)),
+                                                                          new Point3D());
+         }
+         default ->
+         {
+            trackerYBackZLeftXRightToXForwardZUp = new RigidBodyTransform(new YawPitchRoll(Math.toRadians(-90.0), Math.toRadians(0.0), Math.toRadians(-90.0)),
+                                                                          new Point3D());
+         }
+      }
+
+
 
       xForwardZUpTrackerFrame
             = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("xForwardZUpTrackerFrame",

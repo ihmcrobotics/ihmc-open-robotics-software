@@ -64,7 +64,7 @@ public class RDXVRController extends RDXVRTrackedDevice
    public static final double JOYSTICK_ZERO_THRESHOLD = 0.3;
 
    private final RobotSide side;
-   private RDXVRControllerModel model;
+   private RDXVRModel model;
 
    private final LongBuffer inputSourceHandle = BufferUtils.newLongBuffer(1);
    private InputOriginInfo.Buffer inputOriginInfo;
@@ -137,7 +137,7 @@ public class RDXVRController extends RDXVRTrackedDevice
    private final RDXVRDragData triggerDragData;
    private final RDXVRDragData gripDragData;
 
-   public RDXVRController(RDXVRControllerModel model, RobotSide side, ReferenceFrame vrPlayAreaYUpZBackFrame)
+   public RDXVRController(RDXVRModel model, RobotSide side, ReferenceFrame vrPlayAreaYUpZBackFrame)
    {
       super(vrPlayAreaYUpZBackFrame);
       this.model = model;
@@ -364,12 +364,12 @@ public class RDXVRController extends RDXVRTrackedDevice
       LibGDXTools.toLibGDX(closestPointOnSurface, pickRayCollisionPointGraphic.transform);
    }
 
-   public RDXVRControllerModel getModel()
+   public RDXVRModel getModel()
    {
       return model;
    }
 
-   public void setModel(RDXVRControllerModel model)
+   public void setModel(RDXVRModel model)
    {
       this.model = model;
    }

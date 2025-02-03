@@ -1,6 +1,6 @@
 package us.ihmc.rdx.vr;
 
-public enum RDXVRControllerModel
+public enum RDXVRModel
 {
    UNKNOWN, INDEX, FOCUS3
 }

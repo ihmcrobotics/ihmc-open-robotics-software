@@ -28,7 +28,6 @@ import us.ihmc.rdx.sceneManager.RDX3DScene;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.JSONFileTools;
-import us.ihmc.tools.io.JSONTools;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.tools.io.WorkspaceResourceFile;
 
@@ -111,12 +110,12 @@ public class RDXVRContext
    private final ReferenceFrame vrPlayAreaYUpZBackFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("vrPlayAreaFrame",
                                                                                                                             teleportFrameIHMCZUp,
                                                                                                                             openVRYUpToIHMCZUpSpace);
-   private RDXVRControllerModel controllerModel = RDXVRControllerModel.UNKNOWN;
+   private RDXVRModel vrModel = RDXVRModel.UNKNOWN;
    private final RDXVRHeadset headset = new RDXVRHeadset(vrPlayAreaYUpZBackFrame);
-   private final SideDependentList<RDXVRController> controllers = new SideDependentList<>(new RDXVRController(RDXVRControllerModel.UNKNOWN,
+   private final SideDependentList<RDXVRController> controllers = new SideDependentList<>(new RDXVRController(RDXVRModel.UNKNOWN,
                                                                                                               RobotSide.LEFT,
                                                                                                               vrPlayAreaYUpZBackFrame),
-                                                                                          new RDXVRController(RDXVRControllerModel.UNKNOWN,
+                                                                                          new RDXVRController(RDXVRModel.UNKNOWN,
                                                                                                               RobotSide.RIGHT,
                                                                                                               vrPlayAreaYUpZBackFrame));
    private final Map<Integer, RDXVRBaseStation> baseStations = new HashMap<>();
@@ -165,27 +164,10 @@ public class RDXVRContext
 
       WorkspaceResourceDirectory directory = new WorkspaceResourceDirectory(getClass(), "/vr");
       WorkspaceResourceFile actionManifestFile = new WorkspaceResourceFile(directory, "actions.json");
-      JSONFileTools.load(actionManifestFile, node ->
-      {
-         JSONTools.forEachArrayElement(node, "default_bindings", objectNode ->
-         {
-            String controllerBindings = objectNode.get("binding_url").asText();
-            if (controllerBindings.contains("focus3"))
-               controllerModel = RDXVRControllerModel.FOCUS3;
-            else
-               controllerModel = RDXVRControllerModel.INDEX;
-         });
-      });
-      LogTools.info("Using VR controller model: {}", controllerModel);
       VRInput.VRInput_SetActionManifestPath(actionManifestFile.getFilesystemFile().toString());
 
       VRInput.VRInput_GetActionSetHandle("/actions/main", mainActionSetHandle);
       headset.initSystem();
-      for (RDXVRController controller : controllers)
-      {
-         controller.setModel(controllerModel);
-         controller.initSystem();
-      }
 
       trackerRolesFile = new WorkspaceResourceFile(directory, "tracker_roles.json");
       JSONFileTools.load(trackerRolesFile, node ->
@@ -198,7 +180,7 @@ public class RDXVRContext
 
       int[] deviceIndices = new int[VR.k_unMaxTrackedDeviceCount];
       // Create all potential indexes
-      for (int i=0; i<deviceIndices.length; i++)
+      for (int i = 0; i<deviceIndices.length; i++)
       {
          deviceIndices[i] = i;
       }
@@ -207,17 +189,33 @@ public class RDXVRContext
       for (int deviceIndex : deviceIndices)
       {
          int deviceClass = VRSystem.VRSystem_GetTrackedDeviceClass(deviceIndex);
+         if (deviceClass == VR.ETrackedDeviceClass_TrackedDeviceClass_HMD)
+         {
+            String modelNumber = VRSystem.VRSystem_GetStringTrackedDeviceProperty(deviceIndex, VR.ETrackedDeviceProperty_Prop_ModelNumber_String, null);
+            if (modelNumber.toLowerCase().contains("focus3"))
+               vrModel = RDXVRModel.FOCUS3;
+            else
+               vrModel = RDXVRModel.INDEX;
+         }
          if (deviceClass == VR.ETrackedDeviceClass_TrackedDeviceClass_GenericTracker)
          {
             if (!trackers.containsKey(getSerialNumber(deviceIndex)))
             {
-               trackers.put(getSerialNumber(deviceIndex), new RDXVRTracker(vrPlayAreaYUpZBackFrame, deviceIndex));
+               trackers.put(getSerialNumber(deviceIndex), new RDXVRTracker(vrPlayAreaYUpZBackFrame, deviceIndex, vrModel));
                newTrackerSerialNumber.add(getSerialNumber(deviceIndex));
                LogTools.info("Tracker {} connected", getSerialNumber(deviceIndex));
             }
          }
       }
-      loadTrackerRolesFromFile();
+      if (!trackers.isEmpty())
+         loadTrackerRolesFromFile();
+
+      LogTools.info("Using VR headset/controller model: {}", vrModel);
+      for (RDXVRController controller : controllers)
+      {
+         controller.setModel(vrModel);
+         controller.initSystem();
+      }
 
       activeActionSets = VRActiveActionSet.create(1);
       activeActionSets.ulActionSet(mainActionSetHandle.get(0));
@@ -318,7 +316,7 @@ public class RDXVRContext
             {
                if (!trackers.containsKey(getSerialNumber(deviceIndex)))
                {
-                  trackers.put(getSerialNumber(deviceIndex), new RDXVRTracker(vrPlayAreaYUpZBackFrame, deviceIndex));
+                  trackers.put(getSerialNumber(deviceIndex), new RDXVRTracker(vrPlayAreaYUpZBackFrame, deviceIndex, vrModel));
                   newTrackerSerialNumber.add(getSerialNumber(deviceIndex));
                   LogTools.info("Tracker {} connected", getSerialNumber(deviceIndex));
                   loadTrackerRolesFromFile();
@@ -552,7 +550,7 @@ public class RDXVRContext
 
    public void loadTrackerRolesFromFile()
    {
-      LogTools.info("Loading from file tracker roles");
+      LogTools.info("Loading tracker roles from file");
       resetTrackerRoles();
       for (var roleMap : savedTrackersRoleMap.entrySet())
       {
@@ -619,9 +617,9 @@ public class RDXVRContext
       return teleportIHMCZUpToIHMCZUpWorld;
    }
 
-   public RDXVRControllerModel getControllerModel()
+   public RDXVRModel getVRModel()
    {
-      return controllerModel;
+      return vrModel;
    }
 
    private static sun.misc.Unsafe getUnsafeInstance()

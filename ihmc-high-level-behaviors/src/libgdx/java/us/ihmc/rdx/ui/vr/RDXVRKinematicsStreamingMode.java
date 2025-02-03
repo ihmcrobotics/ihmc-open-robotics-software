@@ -49,7 +49,7 @@ import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.tools.KinematicsRecordReplay;
 import us.ihmc.rdx.vr.RDXVRContext;
-import us.ihmc.rdx.vr.RDXVRControllerModel;
+import us.ihmc.rdx.vr.RDXVRModel;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.partNames.ArmJointName;
@@ -255,7 +255,7 @@ public class RDXVRKinematicsStreamingMode
          toolbox = new KinematicsStreamingToolboxModule(robotModel, parameters, startYoVariableServer);
       }
 
-      if (vrContext.getControllerModel() == RDXVRControllerModel.FOCUS3)
+      if (vrContext.getVRModel() == RDXVRModel.FOCUS3)
       {
          RDXBaseUI.getInstance().getKeyBindings().register("Streaming - Enable IK (toggle)", "A button");
          RDXBaseUI.getInstance().getKeyBindings().register("Streaming - Control robot (toggle)", "X button");
@@ -326,7 +326,6 @@ public class RDXVRKinematicsStreamingMode
          {
             HandConfiguration handConfiguration = nextHandConfiguration(RobotSide.LEFT);
             sendHandCommand(RobotSide.LEFT, handConfiguration);
-            vrContext.loadTrackerRolesFromFile();
          }
 
          // Check if left joystick is pressed in order to trigger recording or replay of motion

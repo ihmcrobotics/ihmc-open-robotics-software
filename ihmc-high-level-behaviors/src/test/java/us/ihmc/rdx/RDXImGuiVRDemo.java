@@ -1,6 +1,5 @@
 package us.ihmc.rdx;
 
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
@@ -9,11 +8,10 @@ import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.rdx.tools.BoxesDemoModel;
-import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.vr.RDXVRContext;
-import us.ihmc.rdx.vr.RDXVRControllerModel;
+import us.ihmc.rdx.vr.RDXVRModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class RDXImGuiVRDemo
@@ -54,7 +52,7 @@ public class RDXImGuiVRDemo
    private final ImFloat rightGripValue = new ImFloat();
    private final ImFloat leftTriggerValue = new ImFloat();
    private final ImFloat rightTriggerValue = new ImFloat();
-   private RDXVRControllerModel controllerModel = RDXVRControllerModel.UNKNOWN;
+   private RDXVRModel controllerModel = RDXVRModel.UNKNOWN;
 
    public RDXImGuiVRDemo()
    {
@@ -84,8 +82,8 @@ public class RDXImGuiVRDemo
 
          private void handleVREvents(RDXVRContext vrContext)
          {
-            if(controllerModel == RDXVRControllerModel.UNKNOWN)
-               controllerModel = baseUI.getVRManager().getContext().getControllerModel();
+            if(controllerModel == RDXVRModel.UNKNOWN)
+               controllerModel = baseUI.getVRManager().getContext().getVRModel();
             headsetZUpFrameGraphic.setToReferenceFrame(vrContext.getHeadset().getXForwardZUpHeadsetFrame());
             headsetZBackFrameGraphic.setToReferenceFrame(vrContext.getHeadset().getDeviceYUpZBackFrame());
             leftControllerZUpFrameGraphic.setToReferenceFrame(vrContext.getController(RobotSide.LEFT).getXForwardZUpControllerFrame());
@@ -137,9 +135,9 @@ public class RDXImGuiVRDemo
             ImGui.checkbox("Show Right Eye ZUp Frame", showRightEyeZUpFrame);
             ImGui.checkbox("Show Right Eye ZBack Frame", showRightEyeZBackFrame);
 
-            if (controllerModel != RDXVRControllerModel.UNKNOWN)
+            if (controllerModel != RDXVRModel.UNKNOWN)
             {
-               if (controllerModel == RDXVRControllerModel.FOCUS3)
+               if (controllerModel == RDXVRModel.FOCUS3)
                {
                   ImGui.text("X button pressed: " + leftAButton.bState());
                   ImGui.text("Y button pressed: " + leftBButton.bState());
