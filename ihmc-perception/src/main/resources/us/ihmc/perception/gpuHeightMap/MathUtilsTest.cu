@@ -59,3 +59,15 @@ __global__ void test_math_utils_transform_point(float px, float py, float pz,
 
     printf("Transformed Point: (%f, %f, %f)\n", transformedPoint.x, transformedPoint.y, transformedPoint.z);
 }
+
+extern "C"
+__global__ void test_math_utils_transform_point_2(float px, float py, float pz, float* transformMatrix, float3& result)
+{
+    float3 transformedPoint = transformPoint3D(make_float3(px, py, pz), transformMatrix);
+
+    result.x = transformedPoint.x;
+    result.y = transformedPoint.y;
+    result.z = transformedPoint.z;
+
+    printf("Transformed Point: (%f, %f, %f)\n", transformedPoint.x, transformedPoint.y, transformedPoint.z);
+}

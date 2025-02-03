@@ -18,11 +18,11 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
+import us.ihmc.perception.cuda.CUDAPointCloudExtractor;
 import us.ihmc.perception.detections.InstantDetection;
 import us.ihmc.perception.imageMessage.CompressionType;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.opencl.OpenCLDepthImageSegmenter;
-import us.ihmc.perception.opencl.OpenCLPointCloudExtractor;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
@@ -40,7 +40,7 @@ import java.util.function.Consumer;
 
 public class YOLOv8DetectionExecutor
 {
-   private final OpenCLPointCloudExtractor extractor = new OpenCLPointCloudExtractor();
+   private final CUDAPointCloudExtractor extractor = new CUDAPointCloudExtractor();
    private final OpenCLDepthImageSegmenter segmenter = new OpenCLDepthImageSegmenter();
 
    private final List<Consumer<List<InstantDetection>>> detectionConsumerCallbacks = new ArrayList<>();
@@ -218,6 +218,9 @@ public class YOLOv8DetectionExecutor
 
       for (YOLOv8DetectionList yoloResults : yoloDetectionResults.values())
          yoloResults.destroy();
+
+      extractor.close();
+      segmenter.destroy();
 
       System.out.println("Destroyed " + getClass().getSimpleName());
    }

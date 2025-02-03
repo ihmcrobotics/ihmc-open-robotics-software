@@ -12,19 +12,18 @@ import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point;
-import org.bytedeco.opencv.opencv_core.Scalar;
 import org.bytedeco.opencv.opencv_core.Size;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
+import us.ihmc.perception.cuda.CUDAPointCloudExtractor;
 import us.ihmc.perception.detections.yolo.YOLOv8Detection;
 import us.ihmc.perception.detections.yolo.YOLOv8DetectionList;
 import us.ihmc.perception.detections.yolo.YOLOv8Model;
 import us.ihmc.perception.detections.yolo.YOLOv8Tools;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.opencl.OpenCLDepthImageSegmenter;
-import us.ihmc.perception.opencl.OpenCLPointCloudExtractor;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -87,7 +86,7 @@ public class RDXYOLOv8PipelineDemo
    private final RDXRawImagePointCloudVisualizer segmentedPointCloudVisualizer = new RDXRawImagePointCloudVisualizer("Segmented Point Cloud", true);
    private final ImBoolean renderSegmentedPointCloud = new ImBoolean(false);
 
-   private final OpenCLPointCloudExtractor pointCloudExtractor = new OpenCLPointCloudExtractor();
+   private final CUDAPointCloudExtractor pointCloudExtractor = new CUDAPointCloudExtractor();
    private final Point3D32 centroid = new Point3D32();
    private ModelInstance centroidBall;
    private final ImBoolean renderCentroid = new ImBoolean(false);
@@ -467,7 +466,7 @@ public class RDXYOLOv8PipelineDemo
       annotatedImageVisualizer.destroy();
 
       depthImageSegmenter.destroy();
-      pointCloudExtractor.destroy();
+      pointCloudExtractor.close();
       zed.close();
       ros2Node.destroy();
    }

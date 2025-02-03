@@ -1,3 +1,6 @@
+#ifndef MATH_UTILS
+#define MATH_UTILS
+
 const float PI_F = 3.1415927f;
 
 __device__ float dot(const float3 a, const float3 b)
@@ -8,6 +11,13 @@ __device__ float dot(const float3 a, const float3 b)
 __device__ float dot2D(const float2 a, const float2 b)
 {
     return a.x * b.x + a.y * b.y;
+}
+
+__device__ float3 transformPoint3D(float3 point, const float* transform)
+{
+    return make_float3(dot(make_float3(transform[0], transform[1], transform[2]), point) + transform[3],
+                       dot(make_float3(transform[4], transform[5], transform[6]), point) + transform[7],
+                       dot(make_float3(transform[8], transform[9], transform[10]), point) + transform[11]);
 }
 
 __device__ float3 transformPoint3D32_2(float3 point, float3 rotationMatrixRow0, float3 rotationMatrixRow1, float3 rotationMatrixRow2, float3 translation)
@@ -104,3 +114,4 @@ __device__ void solveForPlaneCoefficients(float* covariance_matrix, float* z_var
     }
 }
 
+#endif // MATH_UTILS

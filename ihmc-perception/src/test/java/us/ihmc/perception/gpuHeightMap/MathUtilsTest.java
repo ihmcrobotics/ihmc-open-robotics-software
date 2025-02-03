@@ -7,6 +7,8 @@ import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_mem;
 import org.bytedeco.opencl._cl_program;
 import org.junit.jupiter.api.Test;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
@@ -173,6 +175,52 @@ public class MathUtilsTest
       CUDAStreamManager.releaseStream(stream);
 
       return resultFromGKernel;
+   }
+
+   @Test
+   public void testTransformPoint2CUDA() throws Exception
+   {
+      URL programPath = getClass().getClassLoader().getResource("us/ihmc/perception/gpuHeightMap/MathUtilsTest.cu");
+      URL headerPath = getClass().getClassLoader().getResource("us/ihmc/perception/gpuHeightMap/MathUtils.cuh");
+
+      CUstream_st stream = CUDAStreamManager.getStream();
+      try (CUDAProgram program = new CUDAProgram(programPath, headerPath);
+           CUDAKernel kernel = program.loadKernel("test_math_utils_transform_point_2");
+           FloatPointer transformCPUPointer = new FloatPointer(4L * 4L);
+           FloatPointer transformGPUPointer = new FloatPointer();
+           FloatPointer resultPoint = new FloatPointer())
+      {
+         Point3D point = new Point3D(1.0, 2.0, 3.0);
+         RigidBodyTransform transform = new RigidBodyTransform(1.0, 0.0, 0.0, 4.0, 0.0, 1.0, 0.0, 5.0, 0.0, 0.0, 1.0, 6.0);
+         float[] transformArray = new float[4 * 4];
+         transform.get(transformArray);
+         transformCPUPointer.put(transformArray);
+
+         CUDATools.mallocAsync(transformGPUPointer, 4 * 4, stream);
+         CUDATools.memcpyAsync(transformGPUPointer, transformCPUPointer, 4 * 4, stream);
+
+         cudaMallocHost(resultPoint, 3L * resultPoint.sizeof());
+
+         // Calculate transformation on GPU
+         kernel.withFloat(point.getX32())
+               .withFloat(point.getY32())
+               .withFloat(point.getZ32())
+               .withPointer(transformGPUPointer)
+               .withPointer(resultPoint)
+               .run(stream, new dim3(), new dim3(), 0);
+
+         // Calculate transform using Euclid library (on CPU)
+         point.applyTransform(transform);
+
+         // Ensure results match
+         assertEquals(resultPoint.get(0), point.getX32(), 1E-6);
+         assertEquals(resultPoint.get(1), point.getY32(), 1E-6);
+         assertEquals(resultPoint.get(2), point.getZ32(), 1E-6);
+
+         cudaFreeHost(resultPoint);
+         cudaFreeAsync(transformGPUPointer, stream);
+      }
+      CUDAStreamManager.releaseStream(stream);
    }
 
    @Test
