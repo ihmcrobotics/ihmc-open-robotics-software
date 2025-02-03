@@ -16,6 +16,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.camera.CameraIntrinsics;
+import us.ihmc.perception.filters.CUDAFlyingPointsFilter;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractorCUDA;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractorInterface;
@@ -33,6 +34,7 @@ import java.time.Instant;
 public class RapidHeightMapManager
 {
    private final RapidHeightMapExtractorInterface rapidHeightMapExtractor;
+   private CUDAFlyingPointsFilter cudaFlyingPointsFilter;
    private final ImageMessage croppedHeightMapImageMessage = new ImageMessage();
    private final FramePose3D cameraPose = new FramePose3D();
    private final ROS2PublishSubscribeAPI ros2;
@@ -49,7 +51,7 @@ public class RapidHeightMapManager
                                 ReferenceFrame leftFootSoleFrame,
                                 ReferenceFrame rightFootSoleFrame,
                                 CameraIntrinsics depthImageIntrinsics,
-                                boolean runWithCUDA)
+                                boolean runWithCUDA) throws Exception
    {
       this.ros2 = ros2;
       this.runWithCUDA = runWithCUDA;
@@ -58,6 +60,7 @@ public class RapidHeightMapManager
       {
          deviceDepthImage = new GpuMat(depthImageIntrinsics.getHeight(), depthImageIntrinsics.getWidth(), opencv_core.CV_16UC1);
          rapidHeightMapExtractor = new RapidHeightMapExtractorCUDA(leftFootSoleFrame, rightFootSoleFrame, depthImageIntrinsics, deviceDepthImage, 1);
+         cudaFlyingPointsFilter = new CUDAFlyingPointsFilter();
       }
       else
       {
@@ -88,6 +91,10 @@ public class RapidHeightMapManager
    {
       if (runWithCUDA)
       {
+         GpuMat latestDepthImageGpuMat = new GpuMat();
+         latestDepthImageGpuMat.upload(latestDepthImage);
+         latestDepthImage = cudaFlyingPointsFilter.applyFilter(latestDepthImageGpuMat);
+
          if (latestDepthImage.type() == opencv_core.CV_32FC1) // Support our simulated sensors
          {
             OpenCVTools.convertFloatToShort(latestDepthImage, hostDepthImage, 1000.0, 0.0);

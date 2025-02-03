@@ -1,9 +1,14 @@
 extern "C"
-#define TILE_SIZE 16
-
+/**
+ * Computes the median value from a given window of pixel values.
+ *
+ * @param window Pointer to an array containing pixel values.
+ * @param size Number of elements in the window.
+ * @return The median value.
+ */
 __device__ float computeMedian(float* window, int size)
 {
-    // Sort the window (bubble sort for simplicity; replace with better sorting if needed)
+    // Sort the window using Bubble Sort (can be replaced with a faster sort)
     for (int i = 0; i < size - 1; ++i)
     {
         for (int j = 0; j < size - i - 1; ++j)
@@ -16,70 +21,92 @@ __device__ float computeMedian(float* window, int size)
             }
         }
     }
-    // Return the median value
-    return window[size / 2];
+
+    // Return median based on even or odd size
+    if (size % 2 == 0)
+    {
+        return (window[size / 2 - 1] + window[size / 2]) / 2.0f;
+    }
+    else
+    {
+        return window[size / 2];
+    }
 }
 
 extern "C"
+/**
+ * CUDA kernel to remove flying points from a depth map.
+ *
+ * @param in Input depth map (GPU memory).
+ * @param pitchIn Pitch (stride) of input memory layout.
+ * @param out Output depth map (GPU memory).
+ * @param pitchOut Pitch (stride) of output memory layout.
+ * @param rows Number of rows in the depth map.
+ * @param cols Number of columns in the depth map.
+ */
 __global__ void filterFlyingPoints(unsigned short *in, size_t pitchIn,
                                    unsigned short *out, size_t pitchOut,
                                    int rows, int cols)
 {
-    // Get the thread's pixel coordinates
-    int x = blockIdx.x * blockDim.x + threadIdx.x;
-    int y = blockIdx.y * blockDim.y + threadIdx.y;
+    // Compute the pixel coordinates for this thread
+    int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
+    int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
 
-    if (x >= rows || y >= cols) return;
+    // Ensure thread operates within valid image boundaries
+    if (xIndex >= cols || yIndex >= rows) return;
 
-    // Pointer to this thread's pixel in the depth map
-    unsigned short *inRow = (unsigned short *)((char *)in + x * pitchIn);
-    unsigned short depthValue = *(inRow + y);
+    // Read the depth value of the current pixel
+    unsigned short *inputPixel = (unsigned short *)((char *)in + yIndex * pitchIn) + xIndex;
+    unsigned short depthValue = *inputPixel;
 
-    unsigned short *outRow = (unsigned short *)((char *)out + (x * pitchOut));
-    *(outRow + y)= static_cast<unsigned short>(depthValue);
-
-    // Neighborhood window for smoothing (e.g., 3x3)
+    // Define a 3x3 neighborhood window
     const int windowSize = 3;
     const int halfWindow = windowSize / 2;
     float window[windowSize * windowSize];
     int count = 0;
 
-    // Collect neighbor values
+    // Collect neighboring pixel values into the window
     for (int dx = -halfWindow; dx <= halfWindow; ++dx)
     {
         for (int dy = -halfWindow; dy <= halfWindow; ++dy)
         {
-            int nx = x + dx;
-            int ny = y + dy;
+            int nx = xIndex + dx;
+            int ny = yIndex + dy;
+
             if (nx >= 0 && nx < cols && ny >= 0 && ny < rows)
             {
-               unsigned short* neighborRow = (unsigned short*)((char*)in + (ny * pitchIn));
-               unsigned short neighborPixelValue = *(neighborRow + nx);
-               window[count++] = neighborPixelValue;
+                unsigned short *neighborPixel = (unsigned short *)((char *)in + ny * pitchIn) + nx;
+                window[count++] = *neighborPixel;
             }
         }
     }
 
-    // Compute the median value for smoothing
+    // Compute the median value for filtering
     float median = computeMedian(window, count);
 
-    // Replace current pixel value with the median
-     *(outRow + x) = static_cast<unsigned short>(median);
-
-    // Statistical analysis: compute local mean and standard deviation
+    // Compute local mean and standard deviation
     float sum = 0.0f, sumSquared = 0.0f;
     for (int i = 0; i < count; ++i)
     {
         sum += window[i];
         sumSquared += window[i] * window[i];
     }
+
     float mean = sum / count;
     float variance = (sumSquared / count) - (mean * mean);
     float stdDev = sqrtf(variance);
 
-    // Invalidate pixel if it deviates too much from the local mean
+    // Write the filtered value to the output depth map
+    unsigned short *outputPixel = (unsigned short *)((char *)out + yIndex * pitchOut) + xIndex;
+
+    // If the depth value deviates too much, mark as invalid (flying point removal)
     if (fabsf(depthValue - mean) > 1.5 * stdDev)
     {
-        *(outRow + x)= static_cast<unsigned short>(0.0f);
+        *outputPixel = 0;  // Set to zero to indicate an invalid depth point
+    }
+    else
+    {
+        *outputPixel = static_cast<unsigned short>(median);
     }
 }
+

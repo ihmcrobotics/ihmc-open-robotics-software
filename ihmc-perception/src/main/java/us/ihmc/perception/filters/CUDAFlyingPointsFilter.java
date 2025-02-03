@@ -5,6 +5,7 @@ import org.bytedeco.cuda.cudart.dim3;
 import org.bytedeco.cuda.global.cudart;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
+import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
 
@@ -37,7 +38,7 @@ public class CUDAFlyingPointsFilter
       CUDAStreamManager.releaseStream(stream);
    }
 
-   public GpuMat applyFilter(GpuMat inputImage)
+   public Mat applyFilter(GpuMat inputImage)
    {
       GpuMat deviceOutputImage = new GpuMat(inputImage.rows(), inputImage.cols(), opencv_core.CV_16UC1);
 
@@ -54,8 +55,10 @@ public class CUDAFlyingPointsFilter
 
       blockSize.close();
       gridSize.close();
+      Mat filteredDepthImage = new Mat();
+      deviceOutputImage.download(filteredDepthImage);
+      return filteredDepthImage;
 
-      return deviceOutputImage;
    }
 }
 
