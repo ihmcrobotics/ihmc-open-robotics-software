@@ -67,14 +67,7 @@ public class ControllerFootstepQueueMonitor
                                           .norm();
       }
 
-      if (footstepStatusMessage.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_STARTED)
-      {
-         footstepStarted = true;
-      }
-      else
-      {
-         footstepStarted = false;
-      }
+      footstepStarted = footstepStatusMessage.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_STARTED;
 
       this.footstepStatusMessage.set(footstepStatusMessage);
    }
@@ -88,15 +81,6 @@ public class ControllerFootstepQueueMonitor
       if (walkingStatus == WalkingStatus.STARTED || walkingStatus == WalkingStatus.RESUMED)
       {
          walkingStarted.set(true);
-      }
-      else if (walkingStatus == WalkingStatus.ABORT_REQUESTED)
-      {
-      }
-      else if (walkingStatus == WalkingStatus.PAUSED)
-      {
-      }
-      else
-      {
       }
    }
 
