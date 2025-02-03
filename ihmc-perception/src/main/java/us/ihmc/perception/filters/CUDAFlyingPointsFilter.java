@@ -38,16 +38,19 @@ public class CUDAFlyingPointsFilter
       CUDAStreamManager.releaseStream(stream);
    }
 
-   public Mat applyFilter(GpuMat inputImage)
+   public GpuMat applyFilter(Mat inputImage)
    {
+      GpuMat deviceInputImage = new GpuMat(inputImage.rows(), inputImage.cols(), opencv_core.CV_16UC1);
       GpuMat deviceOutputImage = new GpuMat(inputImage.rows(), inputImage.cols(), opencv_core.CV_16UC1);
+
+      deviceInputImage.upload(inputImage);
 
       int gridSizeX = (inputImage.cols() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
       int gridSizeY = (inputImage.rows() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
       dim3 blockSize = new dim3(BLOCK_SIZE_XY, BLOCK_SIZE_XY, 1);
       dim3 gridSize = new dim3(gridSizeX, gridSizeY, 1);
 
-      flyingPointFilterKernel.withPointer(inputImage.data()).withLong(inputImage.step());
+      flyingPointFilterKernel.withPointer(deviceInputImage.data()).withLong(deviceInputImage.step());
       flyingPointFilterKernel.withPointer(deviceOutputImage.data()).withLong(deviceOutputImage.step());
       flyingPointFilterKernel.withInt(inputImage.rows()).withInt(inputImage.cols());
       flyingPointFilterKernel.run(stream, gridSize, blockSize, 0);
@@ -55,10 +58,8 @@ public class CUDAFlyingPointsFilter
 
       blockSize.close();
       gridSize.close();
-      Mat filteredDepthImage = new Mat();
-      deviceOutputImage.download(filteredDepthImage);
-      return filteredDepthImage;
 
+      return deviceOutputImage;
    }
 }
 

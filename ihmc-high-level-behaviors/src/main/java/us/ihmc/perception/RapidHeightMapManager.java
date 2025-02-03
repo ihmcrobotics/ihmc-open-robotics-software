@@ -91,10 +91,6 @@ public class RapidHeightMapManager
    {
       if (runWithCUDA)
       {
-         GpuMat latestDepthImageGpuMat = new GpuMat();
-         latestDepthImageGpuMat.upload(latestDepthImage);
-         latestDepthImage = cudaFlyingPointsFilter.applyFilter(latestDepthImageGpuMat);
-
          if (latestDepthImage.type() == opencv_core.CV_32FC1) // Support our simulated sensors
          {
             OpenCVTools.convertFloatToShort(latestDepthImage, hostDepthImage, 1000.0, 0.0);
@@ -104,7 +100,9 @@ public class RapidHeightMapManager
             latestDepthImage.convertTo(hostDepthImage, opencv_core.CV_16UC1);
          }
 
-         deviceDepthImage.upload(hostDepthImage);
+         deviceDepthImage = cudaFlyingPointsFilter.applyFilter(hostDepthImage);
+
+//                  deviceDepthImage.upload(hostDepthImage);
       }
       else
       {
