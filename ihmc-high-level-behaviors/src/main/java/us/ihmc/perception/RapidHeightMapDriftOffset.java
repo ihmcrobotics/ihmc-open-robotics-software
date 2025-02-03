@@ -25,6 +25,10 @@ public class RapidHeightMapDriftOffset
       mostRecentPlanOffsetProcessed.setToZero();
    }
 
+   /**
+    * The method returns the amount of drift that has happened in meters from the controller.
+    * If no drift has happened then {@link Float#NaN} is returned
+    */
    public float getUpdateDriftOffset()
    {
       incrementalOffset.setToNaN();
