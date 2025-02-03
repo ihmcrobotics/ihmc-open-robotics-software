@@ -16,7 +16,6 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.camera.CameraIntrinsics;
-import us.ihmc.perception.filters.CUDAFlyingPointsFilter;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractorCUDA;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractorInterface;
@@ -44,14 +43,13 @@ public class RapidHeightMapManager
 
    private final Notification resetHeightMapRequested = new Notification();
    private final BytePointer compressedCroppedHeightMapPointer = new BytePointer();
-   private CUDAFlyingPointsFilter flyingPointsFilter;
 
    public RapidHeightMapManager(ROS2PublishSubscribeAPI ros2,
                                 DRCRobotModel robotModel,
                                 ReferenceFrame leftFootSoleFrame,
                                 ReferenceFrame rightFootSoleFrame,
                                 CameraIntrinsics depthImageIntrinsics,
-                                boolean runWithCUDA) throws Exception
+                                boolean runWithCUDA)
    {
       this.ros2 = ros2;
       this.runWithCUDA = runWithCUDA;
@@ -59,19 +57,20 @@ public class RapidHeightMapManager
       if (runWithCUDA)
       {
          deviceDepthImage = new GpuMat(depthImageIntrinsics.getHeight(), depthImageIntrinsics.getWidth(), opencv_core.CV_16UC1);
-         rapidHeightMapExtractor = new RapidHeightMapExtractorCUDA(leftFootSoleFrame, rightFootSoleFrame, deviceDepthImage, 1);
+         rapidHeightMapExtractor = new RapidHeightMapExtractorCUDA(leftFootSoleFrame, rightFootSoleFrame, depthImageIntrinsics, deviceDepthImage, 1);
       }
       else
       {
          OpenCLManager openCLManager = new OpenCLManager();
          heightMapBytedecoImage = new BytedecoImage(depthImageIntrinsics.getWidth(), depthImageIntrinsics.getHeight(), opencv_core.CV_16UC1);
          heightMapBytedecoImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
-         rapidHeightMapExtractor = new RapidHeightMapExtractor(openCLManager, leftFootSoleFrame, rightFootSoleFrame, heightMapBytedecoImage, 1);
+         rapidHeightMapExtractor = new RapidHeightMapExtractor(openCLManager,
+                                                               leftFootSoleFrame,
+                                                               rightFootSoleFrame,
+                                                               heightMapBytedecoImage,
+                                                               depthImageIntrinsics,
+                                                               1);
       }
-
-      rapidHeightMapExtractor.setDepthIntrinsics(depthImageIntrinsics);
-
-      flyingPointsFilter = new CUDAFlyingPointsFilter();
 
       // We use a notification in order to only call resetting the height map in one place
       ros2.subscribeViaVolatileCallback(PerceptionAPI.RESET_HEIGHT_MAP, message -> resetHeightMapRequested.set());
@@ -111,13 +110,6 @@ public class RapidHeightMapManager
             latestDepthImage.convertTo(heightMapBytedecoImage.getBytedecoOpenCVMat(), opencv_core.CV_16UC1);
          }
       }
-
-      GpuMat latestDepthGpuMat = new GpuMat();
-      latestDepthGpuMat.upload(hostDepthImage);
-
-      GpuMat filteredDepthMat = flyingPointsFilter.applyFilter(latestDepthGpuMat);
-      filteredDepthMat.copyTo(deviceDepthImage);
-      filteredDepthMat.close();
 
       if (resetHeightMapRequested.poll())
       {

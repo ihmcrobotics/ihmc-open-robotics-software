@@ -1,6 +1,7 @@
 package us.ihmc.perception;
 
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.behaviors.activeMapping.ControllerFootstepQueueMonitor;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.Packet;
@@ -28,6 +29,7 @@ public class StandAloneRealsenseProcess
                                                                                                    PerceptionAPI.D455_DEPTH_IMAGE);
 
    private final ROS2DemandGraphNode realsenseDemandNode;
+   private final ControllerFootstepQueueMonitor controllerFootstepQueueMonitor;
    private final ROS2DemandGraphNode realsensePublishDemandNode;
    private final ROS2Helper ros2Helper;
    private final ROS2SyncedRobotModel syncedRobot;
@@ -41,8 +43,17 @@ public class StandAloneRealsenseProcess
 
    public StandAloneRealsenseProcess(ROS2Node ros2Node, ROS2Helper ros2Helper, ROS2SyncedRobotModel syncedRobot)
    {
+      this(ros2Node, ros2Helper, syncedRobot, null);
+   }
+
+   public StandAloneRealsenseProcess(ROS2Node ros2Node,
+                                     ROS2Helper ros2Helper,
+                                     ROS2SyncedRobotModel syncedRobot,
+                                     ControllerFootstepQueueMonitor controllerFootstepQueueMonitor)
+   {
       this.ros2Helper = ros2Helper;
       this.syncedRobot = syncedRobot;
+      this.controllerFootstepQueueMonitor = controllerFootstepQueueMonitor;
 
       realsensePublishDemandNode = new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_REALSENSE_PUBLICATION);
       heightMapDemandNode = new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_HEIGHT_MAP);
@@ -60,11 +71,11 @@ public class StandAloneRealsenseProcess
          d455PublishThread = new ImageSensorPublishThread(ros2Node, d455Sensor, D455_IMAGE_TOPIC_MAP);
          loopOnDemand(d455PublishThread, realsensePublishDemandNode);
 
-         initializeHeightMap();
+         initializeHeightMap(controllerFootstepQueueMonitor);
       }
    }
 
-   private void initializeHeightMap()
+   private void initializeHeightMap(ControllerFootstepQueueMonitor controllerFootstepQueueMonitor)
    {
       boolean runWithCUDA = true;
       heightMapUpdateThread = new RapidHeightMapUpdateThread(ros2Helper,
