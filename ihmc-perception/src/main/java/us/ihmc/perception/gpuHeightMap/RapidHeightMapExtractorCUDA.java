@@ -105,7 +105,7 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
 
       // Load header and main file
       URL heightMapUtilsHeaderPath = getClass().getResource("HeightMapUtils.cuh");
-      URL mathUtilsHeaderPath = getClass().getResource("MathUtils.cuh");
+      URL mathUtilsHeaderPath = getClass().getResource("/us/ihmc/perception/cuda/MathUtils.cuh");
       URL kernelPath = getClass().getResource("RapidHeightMapExtractor.cu");
 
       terrainMapData = new TerrainMapData(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize());

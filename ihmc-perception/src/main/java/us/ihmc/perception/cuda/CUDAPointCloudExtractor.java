@@ -42,7 +42,7 @@ public class CUDAPointCloudExtractor implements AutoCloseable
       URL pointCloudExtractionURL = getClass().getResource("PointCloudExtraction.cu");
       URL utilsURL = getClass().getResource("Utils.cu");
       URL perceptionUtilsURL = getClass().getResource("PerceptionUtils.cu");
-      URL mathUtilsURL = getClass().getResource("/us/ihmc/perception/gpuHeightMap/MathUtils.cuh");
+      URL mathUtilsURL = getClass().getResource("MathUtils.cuh");
 
       // Compile the program, and get the kernel
       try
