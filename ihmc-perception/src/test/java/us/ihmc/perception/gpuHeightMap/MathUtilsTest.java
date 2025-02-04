@@ -177,6 +177,7 @@ public class MathUtilsTest
       return resultFromGKernel;
    }
 
+   // Test for CUDA MathUtils::transformPoint3D function. Compares results against Euclid methods.
    @Test
    public void testTransformPoint2CUDA() throws Exception
    {
@@ -191,7 +192,9 @@ public class MathUtilsTest
            FloatPointer resultPoint = new FloatPointer())
       {
          Point3D point = new Point3D(1.0, 2.0, 3.0);
-         RigidBodyTransform transform = new RigidBodyTransform(1.0, 0.0, 0.0, 4.0, 0.0, 1.0, 0.0, 5.0, 0.0, 0.0, 1.0, 6.0);
+         RigidBodyTransform transform = new RigidBodyTransform(1.0, 0.0, 0.0, 4.0,
+                                                               0.0, 1.0, 0.0, 5.0,
+                                                               0.0, 0.0, 1.0, 6.0);
          float[] transformArray = new float[4 * 4];
          transform.get(transformArray);
          transformCPUPointer.put(transformArray);

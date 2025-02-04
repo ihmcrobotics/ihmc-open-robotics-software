@@ -6,12 +6,13 @@ import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.IntPointer;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D32;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import static org.bytedeco.cuda.global.cudart.*;
 
@@ -32,6 +33,8 @@ public class CUDAPointCloudExtractor implements AutoCloseable
    private final FloatPointer transformPointer = new FloatPointer();
    private final FloatPointer gpuPointCloudPointer = new FloatPointer();
    private final IntPointer pointCloudSize = new IntPointer();
+
+   private int error;
 
    public CUDAPointCloudExtractor()
    {
@@ -56,8 +59,10 @@ public class CUDAPointCloudExtractor implements AutoCloseable
       stream = CUDAStreamManager.getStream();
 
       // Allocate fixed size page-locked memory (on host)
-      CUDATools.checkCUDAError(cudaMallocHost(transformPointer, 16L * transformPointer.sizeof())); // 16 floats for transform matrix
-      CUDATools.checkCUDAError(cudaMallocHost(pointCloudSize, pointCloudSize.sizeof()));           // 1 int for point cloud size
+      error = cudaMallocHost(transformPointer, 16L * transformPointer.sizeof()); // 16 floats for transform matrix
+      CUDATools.checkCUDAError(error);
+      error = cudaMallocHost(pointCloudSize, pointCloudSize.sizeof());           // 1 int for point cloud size
+      CUDATools.checkCUDAError(error);
    }
 
    /**
@@ -77,8 +82,11 @@ public class CUDAPointCloudExtractor implements AutoCloseable
       long maxPointCloudFloats = 3L * depthImage.getWidth() * depthImage.getHeight();
       if (gpuPointCloudPointer.isNull() || gpuPointCloudPointer.limit() < maxPointCloudFloats)
       {
-         if (!gpuPointCloudPointer.isNull()) // de-allocate existing allocation
-            cudaFreeAsync(gpuPointCloudPointer, stream);
+         if (!gpuPointCloudPointer.isNull())
+         {  // de-allocate existing allocation
+            error = cudaFreeAsync(gpuPointCloudPointer, stream);
+            CUDATools.checkCUDAError(error);
+         }
          CUDATools.mallocAsync(gpuPointCloudPointer, maxPointCloudFloats, stream); // allocate enough memory
          gpuPointCloudPointer.limit(maxPointCloudFloats);
       }
@@ -111,7 +119,8 @@ public class CUDAPointCloudExtractor implements AutoCloseable
             .run(stream, gridSize, blockSize, 0);
 
       // Synchronize the stream to ensure we can read the point cloud size
-      CUDATools.checkCUDAError(cudaStreamSynchronize(stream));
+      error = cudaStreamSynchronize(stream);
+      CUDATools.checkCUDAError(error);
       int numberOfPoints = pointCloudSize.get();
       long numberOfFloats = 3L * numberOfPoints;
 
@@ -119,18 +128,19 @@ public class CUDAPointCloudExtractor implements AutoCloseable
       FloatPointer cpuPointCloudPointer = new FloatPointer(numberOfFloats);
       float[] pointsArray = new float[(int) numberOfFloats];
       CUDATools.memcpyAsync(cpuPointCloudPointer, gpuPointCloudPointer, numberOfFloats, stream);
-      CUDATools.checkCUDAError(cudaStreamSynchronize(stream));
+      error = cudaStreamSynchronize(stream);
+      CUDATools.checkCUDAError(error);
       cpuPointCloudPointer.get(pointsArray);
 
       // Create a list of points from the float[]
-      List<Point3D32> result = new ArrayList<>(numberOfPoints);
-      for (int i = 0; i < numberOfPoints; ++i)
+      Point3D32[] result = new Point3D32[numberOfPoints];
+      IntStream.range(0, numberOfPoints).parallel().forEach(i ->
       {
          float x = pointsArray[3 * i];
          float y = pointsArray[3 * i + 1];
          float z = pointsArray[3 * i + 2];
-         result.add(new Point3D32(x, y, z));
-      }
+         result[i] = new Point3D32(x, y, z);
+      });
 
       // Release stuff
       blockSize.close();
@@ -138,25 +148,16 @@ public class CUDAPointCloudExtractor implements AutoCloseable
       cpuPointCloudPointer.close();
       depthImage.release();
 
-      return result;
+      return Arrays.asList(result);
    }
 
    @Override
    public void close()
    {
-      try
-      {  // Try to de-allocate CUDA memory (might fail if the context has already been deleted)
-         CUDATools.throwCUDAError(cudaFreeHost(transformPointer));
-         CUDATools.throwCUDAError(cudaFreeHost(pointCloudSize));
-         if (!gpuPointCloudPointer.isNull())
-            CUDATools.throwCUDAError(cudaFreeAsync(gpuPointCloudPointer, stream));
-      }
-      catch (Exception cudaException)
-      {
-         // If the CUDA context is already destroyed, we don't have to worry about freeing GPU memory
-         if (!cudaException.getMessage().contains("cudaErrorContextIsDestroyed"))
-            LogTools.error(cudaException);
-      }
+      CUDATools.checkCUDAError(cudaFreeHost(transformPointer));
+      CUDATools.checkCUDAError(cudaFreeHost(pointCloudSize));
+      if (!gpuPointCloudPointer.isNull())
+         CUDATools.checkCUDAError(cudaFreeAsync(gpuPointCloudPointer, stream));
 
       kernel.close();
       program.close();
