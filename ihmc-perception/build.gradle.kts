@@ -23,7 +23,7 @@ mainDependencies {
    api("org.georegression:georegression:0.22")
    api("net.java.dev.jna:jna:4.1.0")
 
-   // ffmpeg, openblas, opencv come from the logger
+   // ffmpeg, openblas, opencv, zed-java-api come from the logger
 
    val cudaVersion = "12.6-9.5-1.5.11-ihmc-2"
    api("us.ihmc:cuda:$cudaVersion")
@@ -48,8 +48,6 @@ mainDependencies {
    api("us.ihmc:hdf5:$hdf5Version")
    api("us.ihmc:hdf5:$hdf5Version:linux-x86_64")
    api("us.ihmc:hdf5:$hdf5Version:windows-x86_64")
-
-   api("us.ihmc:zed-java-api:4.2.0_2")
 
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:robot-environment-awareness:source")
