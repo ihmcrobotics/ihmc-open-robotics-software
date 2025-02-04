@@ -7,6 +7,7 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.sequence.ActionNodeDefinition;
 import us.ihmc.behaviors.sequence.ActionNodeState;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiExpandCollapseRenderer;
 import us.ihmc.rdx.imgui.ImGuiFlashingColors;
 import us.ihmc.rdx.imgui.ImGuiFlashingText;
@@ -140,6 +141,8 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
                   {
                      definition.getExecuteAfterPrevious().setValue(false);
                      definition.getExecuteAfterBeginning().setValue(false);
+                     if (definition.getName().equals("Left hand down and out"))
+                        LogTools.debug("{}: selectable {} -> {}}", definition.getCRDTInfo().getActorDesignation().name(), definition.getExecuteAfterNodeID().getValue(), (int) actionChild.getID());
                      definition.getExecuteAfterNodeID().setValue((int) actionChild.getID());
                      definition.updateAndSanitizeExecuteAfterFields(actionChild.getDefinition().getName());
                   }

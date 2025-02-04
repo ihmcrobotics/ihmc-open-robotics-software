@@ -7,6 +7,7 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTBidirectionalBoolean;
 import us.ihmc.communication.crdt.CRDTBidirectionalLong;
+import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import javax.annotation.Nullable;
@@ -48,6 +49,8 @@ public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
       if (executeAfterBeginning.getValue())
       {
          this.executeAfterActionName = EXECUTE_AFTER_BEGINNING;
+         if (getName().equals("Left hand down and out"))
+            LogTools.debug("{}: beginning {} -> 0", getCRDTInfo().getActorDesignation().name(), executeAfterNodeID.getValue());
          executeAfterNodeID.setValue(0);
       }
       else if (executeAfterActionName != null)
@@ -58,6 +61,8 @@ public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
       {
          executeAfterPrevious.setValue(true);
          this.executeAfterActionName = EXECUTE_AFTER_PREVIOUS;
+         if (getName().equals("Left hand down and out") && executeAfterNodeID.getValue() != 0)
+            LogTools.debug("{}: Defaulting to previous {} -> 0", getCRDTInfo().getActorDesignation().name(), executeAfterNodeID.getValue());
          executeAfterNodeID.setValue(0);
       }
    }
@@ -76,6 +81,8 @@ public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
       super.loadFromFile(jsonNode);
 
       executeAfterActionName = jsonNode.get("executeAfterAction").textValue();
+      if (getName().equals("Left hand down and out"))
+         LogTools.debug("Loaded {}", executeAfterActionName);
       executeAfterPrevious.setValue(executeAfterActionName.equals(EXECUTE_AFTER_PREVIOUS));
       executeAfterBeginning.setValue(executeAfterActionName.equals(EXECUTE_AFTER_BEGINNING));
       executeAfterNodeID.setValue(0); // Invalidate until we can find it
@@ -119,6 +126,9 @@ public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
 
       message.setExecuteAfterPrevious(executeAfterPrevious.toMessage());
       message.setExecuteAfterBeginning(executeAfterBeginning.toMessage());
+      if (getName().equals("Left hand down and out") && executeAfterNodeID.getValue() != message.getExecuteAfterNodeId())
+         LogTools.debug("{}: toMessage {} -> {}", getCRDTInfo().getActorDesignation().name(), message.getExecuteAfterNodeId(),
+                        executeAfterNodeID.getValue());
       message.setExecuteAfterNodeId(executeAfterNodeID.toMessage());
    }
 
@@ -128,6 +138,8 @@ public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
 
       executeAfterPrevious.fromMessage(message.getExecuteAfterPrevious());
       executeAfterBeginning.fromMessage(message.getExecuteAfterBeginning());
+      if (getName().equals("Left hand down and out") && executeAfterNodeID.getValue() != message.getExecuteAfterNodeId())
+         LogTools.debug("{}: fromMessage {} -> {}", getCRDTInfo().getActorDesignation().name(), executeAfterNodeID.getValue(), message.getExecuteAfterNodeId());
       executeAfterNodeID.fromMessage(message.getExecuteAfterNodeId());
    }
 
