@@ -99,7 +99,9 @@ public class ControllerFootstepQueueMonitor
       return footstepStatusMessage;
    }
 
-   public PlanOffsetStatus getPlanOffsetMessage()
+   // TODO Polling this in multiple threads may cause issues as the second time its pulled the value will be null.
+   // TODO If needed this should change to handle that case correctly.
+   public PlanOffsetStatus pollPlanOffsetMessage()
    {
       return planOffsetMessage.getAndSet(null);
    }
@@ -109,6 +111,8 @@ public class ControllerFootstepQueueMonitor
       return footstepStarted;
    }
 
+   // TODO Polling this in multiple threads may cause issues as the second time its pulled the value will be null.
+   // TODO If needed this should change to handle that case correctly.
    public boolean pollIsWalking()
    {
       return isWalking.getAndSet(false);

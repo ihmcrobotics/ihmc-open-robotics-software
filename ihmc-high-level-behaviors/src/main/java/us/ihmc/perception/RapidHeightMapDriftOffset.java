@@ -12,7 +12,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 public class RapidHeightMapDriftOffset
 {
    private final ControllerFootstepQueueMonitor controllerFootstepQueueMonitor;
-   private final Vector3D mostRecentPlanOffsetProcessed = new Vector3D();
+   private final Vector3D previousPlanOffsetProcessed = new Vector3D();
    private final Vector3D incrementalOffset = new Vector3D();
 
    public RapidHeightMapDriftOffset(ControllerFootstepQueueMonitor controllerFootstepQueueMonitor)
@@ -22,7 +22,7 @@ public class RapidHeightMapDriftOffset
 
    public void reset()
    {
-      mostRecentPlanOffsetProcessed.setToZero();
+      previousPlanOffsetProcessed.setToZero();
    }
 
    /**
@@ -37,11 +37,11 @@ public class RapidHeightMapDriftOffset
       {
          // We reset this because the controller resets the drift on its end. So we need to reset ours as well.
          // The existing drift is already captured in the height map by the previous offsets
-         mostRecentPlanOffsetProcessed.setToZero();
+         previousPlanOffsetProcessed.setToZero();
       }
 
       // While the robot isn't walking, this message will be null
-      PlanOffsetStatus latestPlanOffsetMessage = controllerFootstepQueueMonitor.getPlanOffsetMessage();
+      PlanOffsetStatus latestPlanOffsetMessage = controllerFootstepQueueMonitor.pollPlanOffsetMessage();
       if (latestPlanOffsetMessage == null)
          return Float.NaN;
 
@@ -51,9 +51,8 @@ public class RapidHeightMapDriftOffset
       {
          incrementalOffset.set(latestPlanOffset);
          // We subtract the drift that has already been accounted for to only adjust by the new drift
-         incrementalOffset.sub(mostRecentPlanOffsetProcessed);
-         // Our internal tracker needs to add the drift because that is the new value being accounted for, so add it to the running total
-         mostRecentPlanOffsetProcessed.add(incrementalOffset);
+         incrementalOffset.sub(previousPlanOffsetProcessed);
+         previousPlanOffsetProcessed.set(latestPlanOffset);
       }
 
       return (float) incrementalOffset.getZ();
