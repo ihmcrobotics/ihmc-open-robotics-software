@@ -94,9 +94,11 @@ public class YOLOv8DetectionExecutor
          LogTools.error("No YOLO models found. YOLO will not run.");
 
       taskQueue = new ArrayBlockingQueue<>(2 * yoloModels.size());
+      taskExecutorThread.setDaemon(true);
       taskExecutorThread.startRepeating();
 
       annotatedImagePublishedThread = new RepeatingTaskThread("YOLOAnnotatedImagePublisher", this::annotateAndPublishImage, DefaultExceptionHandler.RUNTIME_EXCEPTION);
+      annotatedImagePublishedThread.setDaemon(true);
       annotatedImagePublishedThread.startRepeating();
    }
 
@@ -204,10 +206,12 @@ public class YOLOv8DetectionExecutor
    public void destroy()
    {
       System.out.println("Destroying " + getClass().getSimpleName());
-      taskExecutorThread.blockingKill();
-      segmenter.destroy();
+      taskExecutorThread.kill();
+      annotatedImagePublishedThread.kill();
       newestColorImage.set(null);
-      annotatedImagePublishedThread.blockingKill();
+
+      segmenter.destroy();
+      extractor.destroy();
 
       for (YOLOv8Model yoloModel : yoloModels)
          yoloModel.destroy();

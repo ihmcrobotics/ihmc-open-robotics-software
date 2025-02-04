@@ -15,7 +15,6 @@ import org.bytedeco.opencv.opencv_core.Size;
 import org.bytedeco.opencv.opencv_core.StringVector;
 import org.bytedeco.opencv.opencv_dnn.Net;
 import org.yaml.snakeyaml.Yaml;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
@@ -405,25 +404,11 @@ public class YOLOv8Model
       if (firstAllocation)
          return;
 
-      try
-      {
-         CUDATools.throwCUDAError(cudaFreeAsync(unfilteredDetections, cudaStream));
-         CUDATools.throwCUDAError(cudaFreeAsync(boxes, cudaStream));
-         CUDATools.throwCUDAError(cudaFreeAsync(prototypeMasks, cudaStream));
-         CUDATools.throwCUDAError(cudaFreeHost(filteredDetections));
-         CUDATools.throwCUDAError(cudaFreeHost(filteredDetectionCountPointer));
-      }
-      catch (Exception cudaException)
-      {
-         // If the CUDA context is already destroyed, we only need to free host memory
-         if (cudaException.getMessage().contains("cudaErrorContextIsDestroyed"))
-         {
-            CUDATools.checkCUDAError(cudaFreeHost(filteredDetections));
-            CUDATools.checkCUDAError(cudaFreeHost(filteredDetectionCountPointer));
-         }
-         else
-            LogTools.error(cudaException);
-      }
+      CUDATools.checkCUDAError(cudaFreeAsync(unfilteredDetections, cudaStream));
+      CUDATools.checkCUDAError(cudaFreeAsync(boxes, cudaStream));
+      CUDATools.checkCUDAError(cudaFreeAsync(prototypeMasks, cudaStream));
+      CUDATools.checkCUDAError(cudaFreeHost(filteredDetections));
+      CUDATools.checkCUDAError(cudaFreeHost(filteredDetectionCountPointer));
    }
 
    private RawImage computeDetectionMask(FloatPointer filteredOutput,
