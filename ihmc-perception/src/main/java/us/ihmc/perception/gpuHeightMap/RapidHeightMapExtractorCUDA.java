@@ -315,6 +315,7 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
       terrainMapData.setHeightMap(finalCroppedHeightMap);
    }
 
+   @Override
    public void updateHeightOffset(float z)
    {
       int error;
@@ -354,7 +355,7 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
 
-      // Run the snapping kernel
+      // Run the plan offset kernel
       planOffsetKernel.withPointer(globalHeightMapImage.data()).withLong(globalHeightMapImage.step());
       planOffsetKernel.withPointer(emptyGlobalHeightMapImage.data()).withLong(emptyGlobalHeightMapImage.step());
       planOffsetKernel.withFloat(z).withInt(globalHeightMapImage.rows()).withInt(globalHeightMapImage.cols());

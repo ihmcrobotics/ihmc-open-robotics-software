@@ -28,7 +28,7 @@ public class ControllerFootstepQueueMonitor
    private final HumanoidReferenceFrames referenceFrames;
    private final ContinuousHikingLogger continuousHikingLogger;
    private boolean footstepStarted;
-   private final AtomicBoolean walkingStarted = new AtomicBoolean(false);
+   private final AtomicBoolean isWalking = new AtomicBoolean(false);
 
    public ControllerFootstepQueueMonitor(ROS2Helper ros2Helper,
                                          String simpleRobotName,
@@ -75,12 +75,12 @@ public class ControllerFootstepQueueMonitor
    private void acceptWalkingStatusMessage(WalkingStatusMessage message)
    {
       // Declared locally since this represents the absolute state which other threads can access
-      walkingStarted.set(false);
+      isWalking.set(false);
       WalkingStatus walkingStatus = WalkingStatus.fromByte(message.getWalkingStatus());
 
       if (walkingStatus == WalkingStatus.STARTED || walkingStatus == WalkingStatus.RESUMED)
       {
-         walkingStarted.set(true);
+         isWalking.set(true);
       }
    }
 
@@ -109,8 +109,8 @@ public class ControllerFootstepQueueMonitor
       return footstepStarted;
    }
 
-   public boolean isWalkingStarted()
+   public boolean pollIsWalking()
    {
-      return walkingStarted.getAndSet(false);
+      return isWalking.getAndSet(false);
    }
 }

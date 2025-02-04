@@ -98,7 +98,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    private ROS2StoredPropertySetGroup clientStoredPropertySets;
    private boolean runSubscriberOnly = false;
    private boolean publishAndSubscribe;
-   private double value = -0.1;
+   private double simulatedDriftInMeters = -0.1;
 
    public RDXContinuousHikingPanel(RDXBaseUI baseUI, ROS2Node ros2Node, ROS2Helper ros2Helper, DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobotModel)
    {
@@ -303,19 +303,19 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
 
          // Simulate that the controller has drifted by some z value
          PlanOffsetStatus planOffsetStatus = new PlanOffsetStatus();
-         Vector3D planOffset = new Vector3D(0, 0, value);
+         Vector3D planOffset = new Vector3D(0, 0, simulatedDriftInMeters);
          planOffsetStatus.getOffsetVector().set(planOffset);
          LogTools.info("Plan Offset Status: " + planOffsetStatus.getOffsetVector());
          ros2Helper.publish(getTopic(PlanOffsetStatus.class, "Nadia"), planOffsetStatus);
 
          // The amount of drift that we want to simulation and adjust for if we do this over and over
-         if (value < 5)
+         if (simulatedDriftInMeters > -1.0)
          {
-            value -= 0.1;
+            simulatedDriftInMeters -= 0.1;
          }
          else
          {
-            value += 0.1;
+            simulatedDriftInMeters += 0.1;
          }
       }
 
