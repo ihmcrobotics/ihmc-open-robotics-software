@@ -49,10 +49,7 @@ mainDependencies {
    api("us.ihmc:hdf5:$hdf5Version:linux-x86_64")
    api("us.ihmc:hdf5:$hdf5Version:windows-x86_64")
 
-   // TODO: Upgrade to javacpp 1.5.11
-   api("us.ihmc:zed-java-api:4.2.0_1") {
-      exclude(group = "org.bytedeco")
-   }
+   api("us.ihmc:zed-java-api:4.2.0_2")
 
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:robot-environment-awareness:source")
