@@ -45,7 +45,7 @@ jmonkeyengineTestDependencies {
 libgdxDependencies {
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
-   api("us.ihmc:ihmc-robot-data-logger:0.30.2")
+   api("us.ihmc:ihmc-robot-data-logger:0.31.1")
 
    val gdxVersion = "1.12.1"
    api("com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion")
