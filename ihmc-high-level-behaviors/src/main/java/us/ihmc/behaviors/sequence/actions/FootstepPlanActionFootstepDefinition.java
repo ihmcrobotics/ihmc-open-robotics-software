@@ -65,8 +65,11 @@ public class FootstepPlanActionFootstepDefinition implements SidedObject
 
    public void undoAllNontopologicalChanges()
    {
-      side.setValue(onDiskSide);
-      soleToPlanFrameTransform.getValueAndModify().set(onDiskSoleToPlanFrameTransform);
+      if (onDiskSide != null)
+      {
+         side.setValue(onDiskSide);
+         soleToPlanFrameTransform.getValueAndModify().set(onDiskSoleToPlanFrameTransform);
+      }
    }
 
    public boolean hasChanges()

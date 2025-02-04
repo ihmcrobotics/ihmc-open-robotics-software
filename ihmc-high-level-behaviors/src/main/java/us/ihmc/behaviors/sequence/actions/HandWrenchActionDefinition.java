@@ -66,9 +66,12 @@ public class HandWrenchActionDefinition extends ActionNodeDefinition implements 
    {
       super.undoAllNontopologicalChanges();
 
-      side.setValue(onDiskSide);
-      trajectoryDuration.setValue(onDiskTrajectoryDuration);
-      force.setValue(onDiskForce);
+      if (isUndoAvailable())
+      {
+         side.setValue(onDiskSide);
+         trajectoryDuration.setValue(onDiskTrajectoryDuration);
+         force.setValue(onDiskForce);
+      }
    }
 
    @Override

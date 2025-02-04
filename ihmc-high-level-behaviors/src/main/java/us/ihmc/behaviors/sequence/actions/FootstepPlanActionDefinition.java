@@ -190,29 +190,32 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
    {
       super.undoAllNontopologicalChanges();
 
-      swingDuration.setValue(onDiskSwingDuration);
-      transferDuration.setValue(onDiskTransferDuration);
-      executionMode.setValue(onDiskExecutionMode);
-      parentFrameName.setValue(onDiskParentFrameName);
-      isManuallyPlaced.setValue(onDiskIsManuallyPlaced);
-      manuallyPlacedFootsteps.getValueAndModify().clear();
-      for (int i = 0; i < onDiskNumberOfFootsteps; i++)
-         manuallyPlacedFootsteps.getValueAndModify().add();
-      goalStancePoint.getValueAndModify().set(onDiskGoalStancePoint);
-      goalFocalPoint.getValueAndModify().set(onDiskGoalFocalPoint);
-      for (RobotSide side : onDiskGoalFootstepToGoalXs.sides())
+      if (isUndoAvailable())
       {
-         goalFootstepToGoalXs.get(side).setValue(onDiskGoalFootstepToGoalXs.get(side));
-         goalFootstepToGoalYs.get(side).setValue(onDiskGoalFootstepToGoalYs.get(side));
-         goalFootstepToGoalYaws.get(side).setValue(onDiskGoalFootstepToGoalYaws.get(side));
-      }
+         swingDuration.setValue(onDiskSwingDuration);
+         transferDuration.setValue(onDiskTransferDuration);
+         executionMode.setValue(onDiskExecutionMode);
+         parentFrameName.setValue(onDiskParentFrameName);
+         isManuallyPlaced.setValue(onDiskIsManuallyPlaced);
+         manuallyPlacedFootsteps.getValueAndModify().clear();
+         for (int i = 0; i < onDiskNumberOfFootsteps; i++)
+            manuallyPlacedFootsteps.getValueAndModify().add();
+         goalStancePoint.getValueAndModify().set(onDiskGoalStancePoint);
+         goalFocalPoint.getValueAndModify().set(onDiskGoalFocalPoint);
+         for (RobotSide side : onDiskGoalFootstepToGoalXs.sides())
+         {
+            goalFootstepToGoalXs.get(side).setValue(onDiskGoalFootstepToGoalXs.get(side));
+            goalFootstepToGoalYs.get(side).setValue(onDiskGoalFootstepToGoalYs.get(side));
+            goalFootstepToGoalYaws.get(side).setValue(onDiskGoalFootstepToGoalYaws.get(side));
+         }
 
-      for (int i = 0; i < manuallyPlacedFootsteps.getSize(); i++)
-         manuallyPlacedFootsteps.getValueAndModify().get(i).undoAllNontopologicalChanges();
-      plannerInitialStanceSide.setValue(onDiskPlannerInitialStanceSide);
-      plannerPerformAStarSearch.setValue(onDiskPlannerPerformAStarSearch);
-      plannerWalkWithGoalOrientation.setValue(onDiskPlannerWalkWithGoalOrientation);
-      plannerParameters.undoAllNontopologicalChanges();
+         for (int i = 0; i < manuallyPlacedFootsteps.getSize(); i++)
+            manuallyPlacedFootsteps.getValueAndModify().get(i).undoAllNontopologicalChanges();
+         plannerInitialStanceSide.setValue(onDiskPlannerInitialStanceSide);
+         plannerPerformAStarSearch.setValue(onDiskPlannerPerformAStarSearch);
+         plannerWalkWithGoalOrientation.setValue(onDiskPlannerWalkWithGoalOrientation);
+         plannerParameters.undoAllNontopologicalChanges();
+      }
    }
 
    @Override
