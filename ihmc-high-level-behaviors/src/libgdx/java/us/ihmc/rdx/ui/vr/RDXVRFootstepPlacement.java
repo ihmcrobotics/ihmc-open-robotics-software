@@ -23,7 +23,7 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.footstepPlanning.LocomotionParameters;
 import us.ihmc.rdx.vr.RDXVRContext;
-import us.ihmc.rdx.vr.RDXVRModel;
+import us.ihmc.rdx.vr.RDXVRHardwareModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -33,7 +33,7 @@ import java.util.UUID;
 
 public class RDXVRFootstepPlacement
 {
-   private RDXVRModel controllerModel = RDXVRModel.UNKNOWN;
+   private RDXVRHardwareModel controllerModel = RDXVRHardwareModel.UNKNOWN;
    private static final double MAX_DISTANCE_MULTIPLIER = 3.0;
    private final RDXVRContext vrContext;
    private final ROS2SyncedRobotModel syncedRobot;
@@ -67,7 +67,7 @@ public class RDXVRFootstepPlacement
          footstepModels.put(side, footModelInstance);
       }
 
-      if (controllerModel == RDXVRModel.FOCUS3)
+      if (controllerModel == RDXVRHardwareModel.FOCUS3)
       {
          RDXBaseUI.getInstance().getKeyBindings().register("Clear footsteps", "Y button");
          RDXBaseUI.getInstance().getKeyBindings().register("Walk", "A button");
@@ -91,7 +91,7 @@ public class RDXVRFootstepPlacement
 
    public void processVRInput()
    {
-      if (controllerModel == RDXVRModel.UNKNOWN)
+      if (controllerModel == RDXVRHardwareModel.UNKNOWN)
          controllerModel = vrContext.getVRModel();
       for (RobotSide side : RobotSide.values)
       {

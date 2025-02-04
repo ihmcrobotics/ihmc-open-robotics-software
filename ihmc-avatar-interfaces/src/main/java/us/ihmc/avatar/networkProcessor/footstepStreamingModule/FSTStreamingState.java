@@ -11,7 +11,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.footstepStreamingToolboxAPI.FootstepStreamingToolboxInputCommand;
 import us.ihmc.humanoidRobotics.communication.footstepStreamingToolboxAPI.FootstepStreamingToolboxSideCommand;
 import us.ihmc.log.LogTools;
-import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -36,12 +35,12 @@ public class FSTStreamingState implements State
    private final SideDependentList<Integer> stableIterationCounts = new SideDependentList<>();
    private final SideDependentList<FrameVector2D> directionTrackersCtrl = new SideDependentList<>(); // Controlled direction vector for each foot.
    private final SideDependentList<RigidBodyTransform> initialRobotSwingFootTransformsInWorld = new SideDependentList<>();
-   private double maxFootHeight = 0.0;
+   private final SideDependentList<Double> maxFeetHeight = new SideDependentList<>(0.0, 0.0);
+   private double velocitySum = 0.0;
+   private int velocityCount = 0;
    private double robotStepDuration = 0.0;
    private double robotElapsedTimeCurrentStep = 0.0;
    private double currentStrideEstimate;
-   private double velocitySum = 0.0;
-   private int velocityCount = 0;
 
    private final YoDouble timeOfLastInput = new YoDouble("timeOfLastInput", registry);
    private final YoDouble timeSinceLastInput = new YoDouble("timeSinceLastInput", registry);
@@ -101,9 +100,9 @@ public class FSTStreamingState implements State
          ankleTrackerFrames.put(side, null);
          initialTrackersTransform.put(side, null);
          initialRobotSwingFootTransformsInWorld.put(side, null);
+         maxFeetHeight.put(side, 0.0);
       }
 
-      maxFootHeight = 0.0;
       velocitySum = 0.0;
       velocityCount = 0;
       timeOfLastInput.set(Double.NaN);
@@ -152,9 +151,9 @@ public class FSTStreamingState implements State
                   FrameVector2D translationTrackerXY = new FrameVector2D(ReferenceFrame.getWorldFrame(),
                                                                          translationTracker.getX(),
                                                                          translationTracker.getY());
-                  if (translationTracker.getZ() > maxFootHeight)
+                  if (translationTracker.getZ() > maxFeetHeight.get(side))
                   {
-                     maxFootHeight = translationTracker.getZ();
+                     maxFeetHeight.put(side, translationTracker.getZ());
                   }
 
                   if (!isUserStepping.get(side)) // Tracker is not moving by a lot yet
@@ -181,6 +180,8 @@ public class FSTStreamingState implements State
                         outputStatus.getDesiredFootPosition().set(robotFootstepTransformInWorld.getTranslation());
                         tools.getStatusOutputManager().reportStatusMessage(outputStatus);
                         isUserStepping.put(side, true);
+                        // Avoid false stepping detection when already in swing with one side
+                        isUserStepping.put(side.getOppositeSide(), false);
                      }
                      else
                      {
@@ -192,6 +193,8 @@ public class FSTStreamingState implements State
                   }
                   else // Already stepping, tracker is moving
                   {
+                     // Avoid false stepping detection when already in swing with one side
+                     isUserStepping.put(side.getOppositeSide(), false);
                      if (initialTrackerTransform != null)
                      {
                         // Check if tracker is not moving much anymore
@@ -208,10 +211,7 @@ public class FSTStreamingState implements State
 
                            if (stableCount >= stabilityIterations.getIntegerValue())
                            {
-                              isUserStepping.put(side, false);
-                              directionTrackersCtrl.put(side, new FrameVector2D());
-                              initialTrackersTransform.put(side, new RigidBodyTransform(currentTrackerTransform));
-                              stableIterationCounts.put(side, 0);
+                              reset(side, currentTrackerTransform);
 
                               // Do not update direction any further.
                               // Just keep the desired direction as is
@@ -238,7 +238,8 @@ public class FSTStreamingState implements State
                               double stride = defaultStride.getDoubleValue();
                               if (sideCommand.getHasCurrentVelocity())
                               {
-                                 stride = computeStrideEstimate(adjustedTranslationTrackerXY.norm(),
+                                 stride = computeStrideEstimate(side,
+                                                                adjustedTranslationTrackerXY.norm(),
                                                                 translationTracker.getZ(),
                                                                 sideCommand.getCurrentVelocity().getLinearPart());
                               }
@@ -286,6 +287,17 @@ public class FSTStreamingState implements State
       {
          timeSinceLastInput.set(timeInState - timeOfLastInput.getValue());
       }
+   }
+
+   private void reset(RobotSide side, RigidBodyTransform currentTrackerTransform)
+   {
+      isUserStepping.put(side, false);
+      directionTrackersCtrl.put(side, new FrameVector2D());
+      initialTrackersTransform.put(side, new RigidBodyTransform(currentTrackerTransform));
+      stableIterationCounts.put(side, 0);
+      maxFeetHeight.put(side, 0.0);
+      velocitySum = 0.0;
+      velocityCount = 0;
    }
 
    private RigidBodyTransformReadOnly computeTargetFootstepFromInitialSwing(RobotSide side,
@@ -401,7 +413,8 @@ public class FSTStreamingState implements State
       return directionTrackerCtrl;
    }
 
-   public double computeStrideEstimate(double measuredHorizontalDistance,
+   public double computeStrideEstimate(RobotSide side,
+                                       double measuredHorizontalDistance,
                                        double verticalPosition,
                                        FixedFrameVector3DBasics linearVelocity)
    {
@@ -417,7 +430,7 @@ public class FSTStreamingState implements State
       if (linearVelocity.getZ() < 0.0)
       {
          // Normalize foot height to [0, 1]
-         landingFactor = verticalPosition / maxFootHeight;
+         landingFactor = verticalPosition / maxFeetHeight.get(side);
          landingFactor = Math.max(0.0, Math.min(1.0, landingFactor));
          LogTools.error(landingFactor);
       }

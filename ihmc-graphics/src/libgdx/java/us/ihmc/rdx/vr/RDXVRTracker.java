@@ -23,7 +23,7 @@ public class RDXVRTracker extends RDXVRTrackedDevice
    private final FramePose3D tempFramePose = new FramePose3D();
    private final RigidBodyTransform tempRigidBodyTransform = new RigidBodyTransform();
 
-   public RDXVRTracker(ReferenceFrame vrPlayAreaYUpZBackFrame, int deviceIndex, RDXVRModel model)
+   public RDXVRTracker(ReferenceFrame vrPlayAreaYUpZBackFrame, int deviceIndex, RDXVRHardwareModel model)
    {
       super(vrPlayAreaYUpZBackFrame);
       setDeviceIndex(deviceIndex);

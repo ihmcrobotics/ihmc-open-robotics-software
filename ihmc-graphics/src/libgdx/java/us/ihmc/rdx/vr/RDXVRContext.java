@@ -110,12 +110,12 @@ public class RDXVRContext
    private final ReferenceFrame vrPlayAreaYUpZBackFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("vrPlayAreaFrame",
                                                                                                                             teleportFrameIHMCZUp,
                                                                                                                             openVRYUpToIHMCZUpSpace);
-   private RDXVRModel vrModel = RDXVRModel.UNKNOWN;
+   private RDXVRHardwareModel vrModel = RDXVRHardwareModel.UNKNOWN;
    private final RDXVRHeadset headset = new RDXVRHeadset(vrPlayAreaYUpZBackFrame);
-   private final SideDependentList<RDXVRController> controllers = new SideDependentList<>(new RDXVRController(RDXVRModel.UNKNOWN,
+   private final SideDependentList<RDXVRController> controllers = new SideDependentList<>(new RDXVRController(RDXVRHardwareModel.UNKNOWN,
                                                                                                               RobotSide.LEFT,
                                                                                                               vrPlayAreaYUpZBackFrame),
-                                                                                          new RDXVRController(RDXVRModel.UNKNOWN,
+                                                                                          new RDXVRController(RDXVRHardwareModel.UNKNOWN,
                                                                                                               RobotSide.RIGHT,
                                                                                                               vrPlayAreaYUpZBackFrame));
    private final Map<Integer, RDXVRBaseStation> baseStations = new HashMap<>();
@@ -193,9 +193,9 @@ public class RDXVRContext
          {
             String modelNumber = VRSystem.VRSystem_GetStringTrackedDeviceProperty(deviceIndex, VR.ETrackedDeviceProperty_Prop_ModelNumber_String, null);
             if (modelNumber.toLowerCase().contains("focus3"))
-               vrModel = RDXVRModel.FOCUS3;
+               vrModel = RDXVRHardwareModel.FOCUS3;
             else
-               vrModel = RDXVRModel.INDEX;
+               vrModel = RDXVRHardwareModel.INDEX;
          }
          if (deviceClass == VR.ETrackedDeviceClass_TrackedDeviceClass_GenericTracker)
          {
@@ -617,7 +617,7 @@ public class RDXVRContext
       return teleportIHMCZUpToIHMCZUpWorld;
    }
 
-   public RDXVRModel getVRModel()
+   public RDXVRHardwareModel getVRModel()
    {
       return vrModel;
    }

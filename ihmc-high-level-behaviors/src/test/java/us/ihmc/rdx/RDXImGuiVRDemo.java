@@ -11,7 +11,7 @@ import us.ihmc.rdx.tools.BoxesDemoModel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.vr.RDXVRContext;
-import us.ihmc.rdx.vr.RDXVRModel;
+import us.ihmc.rdx.vr.RDXVRHardwareModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class RDXImGuiVRDemo
@@ -52,7 +52,7 @@ public class RDXImGuiVRDemo
    private final ImFloat rightGripValue = new ImFloat();
    private final ImFloat leftTriggerValue = new ImFloat();
    private final ImFloat rightTriggerValue = new ImFloat();
-   private RDXVRModel controllerModel = RDXVRModel.UNKNOWN;
+   private RDXVRHardwareModel controllerModel = RDXVRHardwareModel.UNKNOWN;
 
    public RDXImGuiVRDemo()
    {
@@ -82,7 +82,7 @@ public class RDXImGuiVRDemo
 
          private void handleVREvents(RDXVRContext vrContext)
          {
-            if(controllerModel == RDXVRModel.UNKNOWN)
+            if(controllerModel == RDXVRHardwareModel.UNKNOWN)
                controllerModel = baseUI.getVRManager().getContext().getVRModel();
             headsetZUpFrameGraphic.setToReferenceFrame(vrContext.getHeadset().getXForwardZUpHeadsetFrame());
             headsetZBackFrameGraphic.setToReferenceFrame(vrContext.getHeadset().getDeviceYUpZBackFrame());
@@ -135,9 +135,9 @@ public class RDXImGuiVRDemo
             ImGui.checkbox("Show Right Eye ZUp Frame", showRightEyeZUpFrame);
             ImGui.checkbox("Show Right Eye ZBack Frame", showRightEyeZBackFrame);
 
-            if (controllerModel != RDXVRModel.UNKNOWN)
+            if (controllerModel != RDXVRHardwareModel.UNKNOWN)
             {
-               if (controllerModel == RDXVRModel.FOCUS3)
+               if (controllerModel == RDXVRHardwareModel.FOCUS3)
                {
                   ImGui.text("X button pressed: " + leftAButton.bState());
                   ImGui.text("Y button pressed: " + leftBButton.bState());
