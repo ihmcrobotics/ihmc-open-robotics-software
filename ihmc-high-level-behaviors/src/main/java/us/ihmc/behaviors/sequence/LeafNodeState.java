@@ -119,6 +119,7 @@ public class LeafNodeState<D extends LeafNodeDefinition> extends BehaviorTreeNod
       this.leafIndex = leafIndex;
    }
 
+   /** The index of the leaf, depth first over the entire tree. The first leaf is 0. */
    public int getLeafIndex()
    {
       return leafIndex;
@@ -186,7 +187,8 @@ public class LeafNodeState<D extends LeafNodeDefinition> extends BehaviorTreeNod
       return isExecuting.getValue();
    }
 
-   public int calculateExecuteAfterLeafIndex()
+   /** @return the index of the leaf to execute after as part of the concurrency system */
+   public int getExecuteAfterLeafIndex()
    {
       if (definition.getExecuteAfterBeginning().getValue())
       {
@@ -194,7 +196,7 @@ public class LeafNodeState<D extends LeafNodeDefinition> extends BehaviorTreeNod
       }
       else if (!definition.getExecuteAfterPrevious().getValue())
       {
-         LeafNodeState<?> executeAfterNode = findExecuteAfterLeaf();
+         LeafNodeState<?> executeAfterNode = getExecuteAfterLeaf();
 
          if (executeAfterNode != null)
             return executeAfterNode.getLeafIndex();
@@ -203,7 +205,8 @@ public class LeafNodeState<D extends LeafNodeDefinition> extends BehaviorTreeNod
       return leafIndex - 1; // previous
    }
 
-   public LeafNodeState<?> findExecuteAfterLeaf()
+   /** @return the leaf to execute after as part of the concurrency system */
+   public LeafNodeState<?> getExecuteAfterLeaf()
    {
       long executeAfterID = definition.getExecuteAfterNodeID().getValue();
 

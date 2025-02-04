@@ -67,8 +67,8 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
          int j = i - 1;
          for (; j >= 0; j--)
          {
-            int thisExecuteAfterLeafIndex = state.getOrderedLeaves().get(i).calculateExecuteAfterLeafIndex();
-            int executeAfterLeafIndexToCompare = state.getOrderedLeaves().get(j).calculateExecuteAfterLeafIndex();
+            int thisExecuteAfterLeafIndex = state.getOrderedLeaves().get(i).getExecuteAfterLeafIndex();
+            int executeAfterLeafIndexToCompare = state.getOrderedLeaves().get(j).getExecuteAfterLeafIndex();
             if (thisExecuteAfterLeafIndex == executeAfterLeafIndexToCompare)
             {
                state.getOrderedLeaves().get(i).setConcurrencyRank(2);
@@ -88,7 +88,7 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
          {
             state.getOrderedLeaves().get(i).setIsNextForExecution(true);
          }
-         else if (state.getOrderedLeaves().get(i).calculateExecuteAfterLeafIndex() < executionNextIndex)
+         else if (state.getOrderedLeaves().get(i).getExecuteAfterLeafIndex() < executionNextIndex)
          {
             state.getOrderedLeaves().get(i).setIsNextForExecution(true);
          }
@@ -283,7 +283,7 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
 
       if (state.getConcurrencyEnabled())
       {
-         int executeAfterLeafIndex = nextNodeToExecute.getState().calculateExecuteAfterLeafIndex();
+         int executeAfterLeafIndex = nextNodeToExecute.getState().getExecuteAfterLeafIndex();
 
          if (executeAfterLeafIndex < 0) // Execute after beginning
          {

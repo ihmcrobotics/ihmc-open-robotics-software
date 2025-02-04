@@ -30,6 +30,7 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
    private final ImGuiFlashingColors isExecutingFlashingColor = new ImGuiFlashingColors(0.1, ImGuiTools.PURPLE, ImGuiTools.DARK_PURPLE);
    private final ImGuiHollowArrowRenderer hollowArrowRenderer = new ImGuiHollowArrowRenderer();
    private final ImGuiFlashingText flashingDescriptionColor = new ImGuiFlashingText(ImGuiTools.RED);
+   /** Used to trigger a UI notification when the action goes from !failed -> failed. */
    private boolean wasFailed = false;
 
    public RDXLeafNode(S state)
@@ -109,7 +110,7 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
          }
          else
          {
-            LeafNodeState<?> executeAfterNode = state.findExecuteAfterLeaf();
+            LeafNodeState<?> executeAfterNode = state.getExecuteAfterLeaf();
             selectedText = executeAfterNode.getDefinition().getName();
          }
 

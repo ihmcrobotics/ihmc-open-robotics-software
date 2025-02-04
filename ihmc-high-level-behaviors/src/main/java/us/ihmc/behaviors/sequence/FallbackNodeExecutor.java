@@ -52,7 +52,7 @@ public class FallbackNodeExecutor extends BehaviorTreeNodeExecutor<FallbackNodeS
 
          for (LeafNodeExecutor<?, ?> child : leafChildren)
          {
-            if (child.getState().calculateExecuteAfterLeafIndex() < firstLeafIndex)
+            if (child.getState().getExecuteAfterLeafIndex() < firstLeafIndex)
             {
                tryLeaves.add(child);
             }
