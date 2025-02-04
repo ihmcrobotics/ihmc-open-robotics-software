@@ -59,10 +59,10 @@ public class CUDAFlyingPointsFilterTest
       inputGpuMat.upload(inputMat);
 
       // Applying the CUDA filter
-      outputGpuMat = flyingPointsFilter.applyFilter(inputMat);
+      outputMat = flyingPointsFilter.applyFilter(inputMat);
 
       // Downloading processed matrix back to CPU memory
-      outputGpuMat.download(outputMat);
+//      outputGpuMat.download(outputMat);
 
       // Printing the filtered output matrix
       printResult(outputMat);

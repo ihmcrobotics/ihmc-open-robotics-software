@@ -38,7 +38,7 @@ public class CUDAFlyingPointsFilter
       CUDAStreamManager.releaseStream(stream);
    }
 
-   public GpuMat applyFilter(Mat inputImage)
+   public Mat applyFilter(Mat inputImage)
    {
       GpuMat deviceInputImage = new GpuMat(inputImage.rows(), inputImage.cols(), opencv_core.CV_16UC1);
       GpuMat deviceOutputImage = new GpuMat(inputImage.rows(), inputImage.cols(), opencv_core.CV_16UC1);
@@ -56,10 +56,13 @@ public class CUDAFlyingPointsFilter
       flyingPointFilterKernel.run(stream, gridSize, blockSize, 0);
       CUDATools.checkCUDAError(cudart.cudaStreamSynchronize(stream));
 
+      Mat hostOutputImage = new Mat();
+      deviceOutputImage.download(hostOutputImage);
+
       blockSize.close();
       gridSize.close();
 
-      return deviceOutputImage;
+      return hostOutputImage;
    }
 }
 

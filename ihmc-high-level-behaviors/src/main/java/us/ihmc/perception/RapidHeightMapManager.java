@@ -100,9 +100,10 @@ public class RapidHeightMapManager
             latestDepthImage.convertTo(hostDepthImage, opencv_core.CV_16UC1);
          }
 
-         deviceDepthImage = cudaFlyingPointsFilter.applyFilter(hostDepthImage);
+         Mat filteredDepthImage;
+         filteredDepthImage = cudaFlyingPointsFilter.applyFilter(hostDepthImage);
 
-//                  deviceDepthImage.upload(hostDepthImage);
+         deviceDepthImage.upload(filteredDepthImage);
       }
       else
       {
