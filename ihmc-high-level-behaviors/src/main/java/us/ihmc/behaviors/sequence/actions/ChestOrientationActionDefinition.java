@@ -73,10 +73,13 @@ public class ChestOrientationActionDefinition extends ActionNodeDefinition
    {
       super.undoAllNontopologicalChanges();
 
-      trajectoryDuration.setValue(onDiskTrajectoryDuration);
-      holdPoseInWorldLater.setValue(onDiskHoldPoseInWorldLater);
-      parentFrameName.setValue(onDiskParentFrameName);
-      chestToParentTransform.getValueAndModify().set(onDiskChestToParentTransform);
+      if (isUndoAvailable())
+      {
+         trajectoryDuration.setValue(onDiskTrajectoryDuration);
+         holdPoseInWorldLater.setValue(onDiskHoldPoseInWorldLater);
+         parentFrameName.setValue(onDiskParentFrameName);
+         chestToParentTransform.getValueAndModify().set(onDiskChestToParentTransform);
+      }
    }
 
    @Override

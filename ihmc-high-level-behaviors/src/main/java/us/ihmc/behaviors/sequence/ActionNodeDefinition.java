@@ -94,10 +94,13 @@ public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
    {
       super.undoAllNontopologicalChanges();
 
-      executeAfterActionName = onDiskExecuteAfterActionName;
-      executeAfterPrevious.setValue(onDiskExecuteAfterActionName.equals(EXECUTE_AFTER_PREVIOUS));
-      executeAfterBeginning.setValue(onDiskExecuteAfterActionName.equals(EXECUTE_AFTER_BEGINNING));
-      executeAfterNodeID.setValue(0); // Invalidate until we can find it
+      if (isUndoAvailable())
+      {
+         executeAfterActionName = onDiskExecuteAfterActionName;
+         executeAfterPrevious.setValue(onDiskExecuteAfterActionName.equals(EXECUTE_AFTER_PREVIOUS));
+         executeAfterBeginning.setValue(onDiskExecuteAfterActionName.equals(EXECUTE_AFTER_BEGINNING));
+         executeAfterNodeID.setValue(0); // Invalidate until we can find it
+      }
    }
 
    @Override

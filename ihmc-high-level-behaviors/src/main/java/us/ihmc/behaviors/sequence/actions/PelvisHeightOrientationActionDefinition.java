@@ -70,9 +70,12 @@ public class PelvisHeightOrientationActionDefinition extends ActionNodeDefinitio
    {
       super.undoAllNontopologicalChanges();
 
-      trajectoryDuration.setValue(onDiskTrajectoryDuration);
-      parentFrameName.setValue(onDiskParentFrameName);
-      pelvisToParentTransform.getValueAndModify().set(onDiskPelvisToParentTransform);
+      if (isUndoAvailable())
+      {
+         trajectoryDuration.setValue(onDiskTrajectoryDuration);
+         parentFrameName.setValue(onDiskParentFrameName);
+         pelvisToParentTransform.getValueAndModify().set(onDiskPelvisToParentTransform);
+      }
    }
 
    @Override
