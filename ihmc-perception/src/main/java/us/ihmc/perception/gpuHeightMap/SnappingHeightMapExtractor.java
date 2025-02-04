@@ -94,8 +94,6 @@ public class SnappingHeightMapExtractor
 
       // Handle memory allocation and copy values to the GPU
       CUDATools.mallocAsync(snappingParametersDevicePointer, snappingParametersArray.length, stream);
-      error = cudaStreamSynchronize(stream);
-      CUDATools.checkCUDAError(error);
       CUDATools.memcpyAsync(snappingParametersDevicePointer, snappingParametersHostPointer, snappingParametersArray.length, stream);
 
       // Pass all the parameters to the kernel so that its setup to run correctly
@@ -191,7 +189,9 @@ public class SnappingHeightMapExtractor
 
       snappingParametersHostPointer.close();
       snappingParametersDevicePointer.close();
-      cudaFree(snappingParametersDevicePointer);
+
+      int error = cudaFree(snappingParametersDevicePointer);
+      CUDATools.checkCUDAError(error);
 
       // At the end we have to destroy the stream to release the memory
       CUDAStreamManager.releaseStream(stream);
