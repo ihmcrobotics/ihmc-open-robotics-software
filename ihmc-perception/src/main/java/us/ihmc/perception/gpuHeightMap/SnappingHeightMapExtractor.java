@@ -56,7 +56,7 @@ public class SnappingHeightMapExtractor
 
          // Load header and main file
          URL heightMapUtilsHeaderPath = getClass().getResource("HeightMapUtils.cuh");
-         URL mathUtilsHeaderPath = getClass().getResource("MathUtils.cuh");
+         URL mathUtilsHeaderPath = getClass().getResource("/us/ihmc/perception/cuda/MathUtils.cuh");
          URL kernelPath = getClass().getResource("SnappingHeightMapExtractor.cu");
 
          snappingHeightMapProgram = new CUDAProgram(kernelPath, heightMapUtilsHeaderPath, mathUtilsHeaderPath);

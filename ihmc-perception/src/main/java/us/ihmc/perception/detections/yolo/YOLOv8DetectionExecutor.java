@@ -211,7 +211,7 @@ public class YOLOv8DetectionExecutor
       newestColorImage.set(null);
 
       segmenter.destroy();
-      extractor.destroy();
+      extractor.close();
 
       for (YOLOv8Model yoloModel : yoloModels)
          yoloModel.destroy();
