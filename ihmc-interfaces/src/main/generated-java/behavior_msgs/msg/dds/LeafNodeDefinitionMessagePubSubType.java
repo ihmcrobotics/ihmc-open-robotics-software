@@ -15,7 +15,7 @@ public class LeafNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "5e924c1c0332f1e400b9149028e2efff862fbc9ee2db50143ca4dc100739c321";
+   		return "71dddbd6dca255de55108ac424743aa5d6f9152c91df92faafbe937c873a348a";
    }
    
    @Override
@@ -52,13 +52,7 @@ public class LeafNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.Topic
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       return current_alignment - initial_alignment;
@@ -73,15 +67,7 @@ public class LeafNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.Topic
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.getCdrSerializedSize(data.getDefinition(), current_alignment);
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
 
@@ -90,23 +76,13 @@ public class LeafNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.Topic
 
    public static void write(behavior_msgs.msg.dds.LeafNodeDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
-      behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
-      cdr.write_type_7(data.getExecuteAfterPrevious());
-
-      cdr.write_type_7(data.getExecuteAfterBeginning());
-
-      cdr.write_type_4(data.getExecuteAfterNodeId());
+      cdr.write_type_11(data.getExecuteAfterNodeId());
 
    }
 
    public static void read(behavior_msgs.msg.dds.LeafNodeDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
-      behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
-      data.setExecuteAfterPrevious(cdr.read_type_7());
-      	
-      data.setExecuteAfterBeginning(cdr.read_type_7());
-      	
-      data.setExecuteAfterNodeId(cdr.read_type_4());
+      data.setExecuteAfterNodeId(cdr.read_type_11());
       	
 
    }
@@ -114,22 +90,13 @@ public class LeafNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final void serialize(behavior_msgs.msg.dds.LeafNodeDefinitionMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_a("definition", new behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType(), data.getDefinition());
-
-      ser.write_type_7("execute_after_previous", data.getExecuteAfterPrevious());
-      ser.write_type_7("execute_after_beginning", data.getExecuteAfterBeginning());
-      ser.write_type_4("execute_after_node_id", data.getExecuteAfterNodeId());
+      ser.write_type_11("execute_after_node_id", data.getExecuteAfterNodeId());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.LeafNodeDefinitionMessage data)
    {
-      ser.read_type_a("definition", new behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType(), data.getDefinition());
-
-      data.setExecuteAfterPrevious(ser.read_type_7("execute_after_previous"));
-      data.setExecuteAfterBeginning(ser.read_type_7("execute_after_beginning"));
-      data.setExecuteAfterNodeId(ser.read_type_4("execute_after_node_id"));
-   }
+      data.setExecuteAfterNodeId(ser.read_type_11("execute_after_node_id"));   }
 
    public static void staticCopy(behavior_msgs.msg.dds.LeafNodeDefinitionMessage src, behavior_msgs.msg.dds.LeafNodeDefinitionMessage dest)
    {

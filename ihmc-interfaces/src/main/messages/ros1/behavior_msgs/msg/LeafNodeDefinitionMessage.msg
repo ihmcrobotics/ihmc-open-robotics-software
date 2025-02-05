@@ -1,14 +1,14 @@
 
-# Parent definition fields
-behavior_msgs/BehaviorTreeNodeDefinitionMessage definition
+# Value of execute after node ID when we have a name but still need to find the ID
+int64 INVALID=-1
 
-# If the node is set to execute after the previous node
-bool execute_after_previous
+# Value of execute after node ID when this action is set to execute after the previous node
+int64 EXECUTE_AFTER_PREVIOUS=-2
 
-# If the node is set to execute after the beginning
-bool execute_after_beginning
+# Value of execute after node ID when this action is set to execute after the beginning of the sequence
+int64 EXECUTE_AFTER_BEGINNING=-3
 
-# The ID of the node to execute after
-uint32 execute_after_node_id
+# The ID of the node to execute after or one of the invalid, previous, or beginning constants
+int64 execute_after_node_id
 
 
