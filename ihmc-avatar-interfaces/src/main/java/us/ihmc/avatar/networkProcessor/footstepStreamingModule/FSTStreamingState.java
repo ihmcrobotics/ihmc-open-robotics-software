@@ -156,6 +156,8 @@ public class FSTStreamingState implements State
                      maxFeetHeight.put(side, translationTracker.getZ());
                   }
 
+                  double rotationTracker = currentTrackerTransform.getRotation().getYaw() - initialTrackersTransform.get(side).getRotation().getYaw();
+
                   if (!isUserStepping.get(side)) // Tracker is not moving by a lot yet
                   {
                      // Check if the tracker has moved in any direction AND the foot has been lifted
@@ -168,9 +170,13 @@ public class FSTStreamingState implements State
                         // Scale the normalized direction to the fixed stride distance
                         translationTrackerXY.scale(defaultStride.getDoubleValue());
 
+                        // Use default rotation is the yaw variation exceeds threshold
+                        double defaultYawRotation = Math.abs(Math.toDegrees(rotationTracker)) > defaultTurningThreshold.getValue() ? Math.toRadians(defaultTurnDegrees.getValue()) * Math.signum(rotationTracker) : 0.0;
+
+                        // Compute robot footstep from estimate
                         RigidBodyTransformReadOnly robotFootstepTransformInWorld = computeStepFromStance.getValue() ?
-                              computeTargetFootstepFromStance(latestInput, side, translationTrackerXY, initialTrackersTransform.get(side)) :
-                              computeTargetFootstepFromInitialSwing(side, translationTrackerXY, initialTrackersTransform.get(side));
+                              computeTargetFootstepFromStance(latestInput, side, translationTrackerXY, defaultYawRotation, initialTrackersTransform.get(side)) :
+                              computeTargetFootstepFromInitialSwing(side, translationTrackerXY, defaultYawRotation, initialTrackersTransform.get(side));
                         // Publish footstep to UI
                         FootstepStreamingToolboxOutputStatus outputStatus = new FootstepStreamingToolboxOutputStatus();
                         outputStatus.setAdjustmentFootstep(false); // first estimate
@@ -246,9 +252,11 @@ public class FSTStreamingState implements State
                               adjustedTranslationTrackerXY.normalize();
                               adjustedTranslationTrackerXY.scale(stride);
 
+                              double adjustedYawRotation = 0.0;
+
                               RigidBodyTransformReadOnly robotFootstepTransformInWorld = computeStepFromStance.getValue() ?
-                                    computeTargetFootstepFromStance(latestInput, side, adjustedTranslationTrackerXY, initialTrackerTransform) :
-                                    computeTargetFootstepFromInitialSwing(side, adjustedTranslationTrackerXY, initialTrackerTransform);
+                                    computeTargetFootstepFromStance(latestInput, side, adjustedTranslationTrackerXY, adjustedYawRotation, initialTrackerTransform) :
+                                    computeTargetFootstepFromInitialSwing(side, adjustedTranslationTrackerXY, adjustedYawRotation, initialTrackerTransform);
 
                               FootstepStreamingToolboxOutputStatus outputStatus = new FootstepStreamingToolboxOutputStatus();
                               outputStatus.setRobotSide(side.toByte());
@@ -302,6 +310,7 @@ public class FSTStreamingState implements State
 
    private RigidBodyTransformReadOnly computeTargetFootstepFromInitialSwing(RobotSide side,
                                                                             FrameVector2DReadOnly translationTrackerXY,
+                                                                            double yawRotationTracker,
                                                                             RigidBodyTransformReadOnly initialTrackerTransform)
    {
       // Apply the translation to the initial tracker position
@@ -310,6 +319,7 @@ public class FSTStreamingState implements State
                                                        initialTrackerTransform.getTranslationY());
       FramePoint2D predictedTrackerXY = new FramePoint2D(initialTrackerXY);
       predictedTrackerXY.add(translationTrackerXY);
+
       // Create the initial swing frame
       ReferenceFrame initialSwingTrackerFrame = new FixedReferenceFrame("initialSwingTracker",
                                                                   ReferenceFrame.getWorldFrame(),
@@ -330,9 +340,15 @@ public class FSTStreamingState implements State
       robotPredictedFootXY.setY(predictedTrackerXY.getY());
       robotPredictedFootXY.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
 
+      // Compute yaw rotation
+      double newYaw = robotInitialSwingFootTransformInWorld.getRotation().getYaw() + yawRotationTracker;
+
       RigidBodyTransform robotFootstepTransformInWorld = new RigidBodyTransform(robotInitialSwingFootTransformInWorld);
       robotFootstepTransformInWorld.getTranslation().setX(robotPredictedFootXY.getX());
       robotFootstepTransformInWorld.getTranslation().setY(robotPredictedFootXY.getY());
+      robotFootstepTransformInWorld.getRotation().setYawPitchRoll(newYaw,
+                                                                  robotFootstepTransformInWorld.getRotation().getPitch(),
+                                                                  robotFootstepTransformInWorld.getRotation().getRoll());
 
       return robotFootstepTransformInWorld;
    }
@@ -340,6 +356,7 @@ public class FSTStreamingState implements State
    private RigidBodyTransformReadOnly computeTargetFootstepFromStance(FootstepStreamingToolboxInputCommand latestInput,
                                                                       RobotSide side,
                                                                       FrameVector2DReadOnly translationTrackerXY,
+                                                                      double yawRotationTracker,
                                                                       RigidBodyTransformReadOnly initialTrackerTransform)
    {
       // Apply the translation to the initial tracker position
@@ -348,6 +365,7 @@ public class FSTStreamingState implements State
                                                        initialTrackerTransform.getTranslationY());
       FramePoint2D predictedTrackerXY = new FramePoint2D(initialTrackerXY);
       predictedTrackerXY.add(translationTrackerXY);
+
       // Create the stance frame
       ReferenceFrame stanceTrackerFrame = new FixedReferenceFrame("stanceTracker",
                                                                   ReferenceFrame.getWorldFrame(),
@@ -368,25 +386,20 @@ public class FSTStreamingState implements State
       robotPredictedFootXY.setY(predictedTrackerXY.getY());
       robotPredictedFootXY.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
 
-      //                     // Compute yaw variation
-      //                     double newYaw = initialRobotSwingFootTransformsInWorld.get(side).getRotation().getYaw();
-      //                     double yawVariation = currentTrackerTransform.getRotation().getYaw() - initialTrackerTransform.getRotation().getYaw();
-      //                     if (Math.toDegrees(yawVariation) >= defaultTurningThreshold.getDoubleValue())
-      //                     {
-      //                        newYaw += Math.toRadians(defaultTurnDegrees.getDoubleValue());
-      //                     }
-      //                     else if (Math.toDegrees(yawVariation) <= -defaultTurningThreshold.getDoubleValue())
-      //                     {
-      //                        newYaw -= Math.toRadians(defaultTurnDegrees.getDoubleValue());
-      //                     }
-      //                     // Update yaw of footstep
-      //                     initialRobotSwingFootTransformsInWorld.get(side).getRotation().setYawPitchRoll(newYaw,
-      //                                                                                                    initialRobotSwingFootTransformsInWorld.get(side).getRotation().getPitch(),
-      //                                                                                                    initialRobotSwingFootTransformsInWorld.get(side).getRotation().getRoll());
+      // Compute predicted rotation relative to stance frame
+      double initialSwingTrackerYaw = initialTrackerTransform.getRotation().getYaw();
+      double initialStanceTrackerYaw = initialTrackersTransform.get(side.getOppositeSide()).getRotation().getYaw();
+      double newYawInStanceFrame = yawRotationTracker + (initialSwingTrackerYaw - initialStanceTrackerYaw);
+
+      // Update yaw value based on prediction expressed in robot stance foot
+      double newYaw = robotStanceFootTransformInWorld.getRotation().getYaw() + newYawInStanceFrame;
 
       RigidBodyTransform robotFootstepTransformInWorld = new RigidBodyTransform(robotStanceFootTransformInWorld);
       robotFootstepTransformInWorld.getTranslation().setX(robotPredictedFootXY.getX());
       robotFootstepTransformInWorld.getTranslation().setY(robotPredictedFootXY.getY());
+      robotFootstepTransformInWorld.getRotation().setYawPitchRoll(newYaw,
+                                                                  robotFootstepTransformInWorld.getRotation().getPitch(),
+                                                                  robotFootstepTransformInWorld.getRotation().getRoll());
 
       return robotFootstepTransformInWorld;
    }

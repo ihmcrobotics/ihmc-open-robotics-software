@@ -102,7 +102,6 @@ public class FootstepStreamingToolboxParameters
       kpDirection = 0.0;
       kpStride = 0.5;
 
-      // TODO. tune these ones below
       turningThreshold = 12;
       turnDegrees = 33.3;
    }
