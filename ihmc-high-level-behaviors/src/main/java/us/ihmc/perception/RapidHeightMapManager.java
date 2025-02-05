@@ -17,6 +17,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.camera.CameraIntrinsics;
+import us.ihmc.perception.filters.CUDAFlyingPointsFilter;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractorCUDA;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractorInterface;
@@ -46,6 +47,7 @@ public class RapidHeightMapManager
 
    private GpuMat deviceDepthImage;
    private BytedecoImage heightMapBytedecoImage;
+   private CUDAFlyingPointsFilter flyingPointsFilter;
 
    public RapidHeightMapManager(ROS2PublishSubscribeAPI ros2,
                                 DRCRobotModel robotModel,
@@ -53,16 +55,18 @@ public class RapidHeightMapManager
                                 ReferenceFrame rightFootSoleFrame,
                                 ControllerFootstepQueueMonitor controllerFootstepQueueMonitor,
                                 CameraIntrinsics depthImageIntrinsics,
-                                boolean runWithCUDA)
+                                boolean runWithCUDA) throws Exception
    {
       this.ros2 = ros2;
       this.runWithCUDA = runWithCUDA;
+      flyingPointsFilter = new CUDAFlyingPointsFilter();
 
       if (runWithCUDA)
       {
          deviceDepthImage = new GpuMat(depthImageIntrinsics.getHeight(), depthImageIntrinsics.getWidth(), opencv_core.CV_16UC1);
          rapidHeightMapExtractor = new RapidHeightMapExtractorCUDA(leftFootSoleFrame, rightFootSoleFrame, deviceDepthImage, depthImageIntrinsics, 1);
          rapidHeightMapDriftOffset = new RapidHeightMapDriftOffset(controllerFootstepQueueMonitor);
+
       }
       else
       {
@@ -142,6 +146,7 @@ public class RapidHeightMapManager
       rapidHeightMapExtractor.update(sensorToWorld, sensorToGround, groundToWorld);
 
       Mat croppedHeightMapImage = rapidHeightMapExtractor.getTerrainMapData().getHeightMap();
+      croppedHeightMapImage = flyingPointsFilter.applyFilter(croppedHeightMapImage);
 
       float heightScaleFactor;
       if (runWithCUDA)
