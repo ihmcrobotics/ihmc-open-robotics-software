@@ -1,5 +1,6 @@
 {
   "title" : "Atlas footstep planner parameters",
+  "Use GPU" : true,
   "AStar heuristics weight" : 1.5,
   "Max branch factor" : 175,
   "Enable expansion mask" : true,

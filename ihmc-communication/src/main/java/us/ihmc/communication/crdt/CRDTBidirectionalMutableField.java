@@ -6,13 +6,13 @@ package us.ihmc.communication.crdt;
  */
 public class CRDTBidirectionalMutableField<T>
 {
-   private final RequestConfirmFreezable requestConfirmFreezable;
+   private final LatestTimestampModifiable latestTimestampModifiable;
 
    private final T value;
 
-   public CRDTBidirectionalMutableField(RequestConfirmFreezable requestConfirmFreezable, T initialValue)
+   public CRDTBidirectionalMutableField(LatestTimestampModifiable latestTimestampModifiable, T initialValue)
    {
-      this.requestConfirmFreezable = requestConfirmFreezable;
+      this.latestTimestampModifiable = latestTimestampModifiable;
 
       value = initialValue;
    }
@@ -30,16 +30,17 @@ public class CRDTBidirectionalMutableField<T>
     * Do not call this every tick.
     * @return modifiable interface
     */
-   public T getValueAndFreeze()
+   public T getValueAndModify()
    {
-      requestConfirmFreezable.freeze(); // Freeze to prevent it getting overwritten immediately
+      // Mark and timestamp modification
+      latestTimestampModifiable.modify();
       return value;
    }
 
    /**
     * Call this to update the data every tick, but it can get overritten immediately by
     * incoming data. And example is to update a calculation on the robot side, but allow
-    * the UI to also modify that using {@link #getValueAndFreeze}.
+    * the UI to also modify that using {@link #getValueAndModify}.
     */
    public T getValue()
    {
@@ -51,8 +52,8 @@ public class CRDTBidirectionalMutableField<T>
       return value;
    }
 
-   protected boolean isFrozen()
+   protected boolean isModificationIncoming()
    {
-      return requestConfirmFreezable.isFrozen();
+      return latestTimestampModifiable.isModificationIncoming();
    }
 }

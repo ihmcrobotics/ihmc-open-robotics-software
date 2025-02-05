@@ -1,13 +1,17 @@
 package us.ihmc.perception.cuda;
 
 import org.bytedeco.cuda.cudart.CUstream_st;
+import org.bytedeco.cuda.cudart.cudaDeviceProp;
 import org.bytedeco.cuda.global.cudart;
 import org.bytedeco.cuda.global.nvcomp;
 import org.bytedeco.cuda.global.nvjpeg;
 import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacpp.Loader;
 import org.bytedeco.javacpp.Pointer;
 import us.ihmc.log.LogTools;
+
+import java.net.URL;
 
 import static org.bytedeco.cuda.global.cudart.*;
 import static org.bytedeco.cuda.global.nvjpeg.NVJPEG_STATUS_SUCCESS;
@@ -60,6 +64,23 @@ public class CUDATools
    }
 
    /**
+    * Each block of a CUDA kernel has a maximum number of threads it can run.
+    * The block dimensions must not multiply to be greater than this number.
+    * On older GPUs it is 512 threads and on newer models it is 1024.
+    * @return The maximum number of threads per block of the device.
+    */
+   public static int getMaxThreadsPerBlock()
+   {
+      try (IntPointer device = new IntPointer(1);
+           cudaDeviceProp deviceProperties = new cudaDeviceProp())
+      {
+         cudaGetDevice(device);
+         cudaGetDeviceProperties(deviceProperties, device.get());
+         return deviceProperties.maxThreadsPerBlock();
+      }
+   }
+
+   /**
     * Allocate GPU memory for {@code elementCount} elements of the {@code cudaPointer}'s type.
     * <p>
     * THE TYPE OF THE PASSED IN POINTER MATTERS.
@@ -106,9 +127,39 @@ public class CUDATools
          try (BytePointer errorName = cudaGetErrorName(errorCode);
               BytePointer errorString = cudaGetErrorString(errorCode))
          {
-            LogTools.error("CUDA Error ({}): {}", errorName.getString(), errorString.getString());
+            String errorMessage = String.format("CUDA Error (%s): %s", errorName.getString(), errorString.getString());
+            LogTools.error(errorMessage);
          }
       }
+   }
+
+   public static void throwCUDAError(int errorCode) throws Exception
+   {
+      if (errorCode != CUDA_SUCCESS)
+      {
+         try (BytePointer errorName = cudaGetErrorName(errorCode);
+              BytePointer errorString = cudaGetErrorString(errorCode))
+         {
+            String errorMessage = String.format("CUDA Error (%s): %s", errorName.getString(), errorString.getString());
+            throw new Exception("CUDA Error code: " + errorMessage);
+         }
+      }
+   }
+
+   /**
+    * @return The URL to the Utils.cu file
+    */
+   public static URL getUtilsFile()
+   {
+      return CUDATools.class.getResource("Utils.cu");
+   }
+
+   /**
+    * @return The URL to the PerceptionUtils.cu file
+    */
+   public static URL getPerceptionUtilsFile()
+   {
+      return CUDATools.class.getResource("PerceptionUtils.cu");
    }
 
    /**
@@ -134,7 +185,9 @@ public class CUDATools
             case 10 -> "NVJPEG_STATUS_INCOMPLETE_BITSTREAM";
             default -> "UNKNOWN";
          };
-         LogTools.error("NVJPEG Error ({}): {}", errorCode, errorName);
+
+         String errorMessage = String.format("NVJPEG Error (%d): %s", errorCode, errorName);
+         LogTools.error(errorMessage);
       }
    }
 
@@ -145,7 +198,8 @@ public class CUDATools
 
       try (BytePointer errorString = nvrtcGetErrorString(errorCode))
       {
-         LogTools.error("NVRTC error: {}", errorString.getString());
+         String errorMessage = String.format("NVRTC Error (%d): %s", errorCode, errorString.getString());
+         LogTools.error(errorMessage);
       }
    }
 }

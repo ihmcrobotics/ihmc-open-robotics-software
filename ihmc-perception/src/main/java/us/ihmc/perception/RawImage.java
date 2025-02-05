@@ -49,8 +49,10 @@ public class RawImage
     */
    @Nullable
    private Mat cpuImageMat = null;
+   private final Object cpuImageMutex = new Object();
    @Nullable
    private GpuMat gpuImageMat = null;
+   private final Object gpuImageMutex = new Object();
    private final PixelFormat pixelFormat;
    private final CameraIntrinsics cameraIntrinsics;
    private final CameraModel cameraModel;
@@ -271,10 +273,13 @@ public class RawImage
     */
    public Mat getCpuImageMat()
    {
-      if (cpuImageMat == null && !gpuImageMat.isNull())
+      synchronized (cpuImageMutex)
       {
-         cpuImageMat = new Mat(gpuImageMat.size(), gpuImageMat.type());
-         gpuImageMat.download(cpuImageMat);
+         if (cpuImageMat == null && !gpuImageMat.isNull())
+         {
+            cpuImageMat = new Mat(gpuImageMat.size(), gpuImageMat.type());
+            gpuImageMat.download(cpuImageMat);
+         }
       }
 
       return cpuImageMat;
@@ -292,10 +297,13 @@ public class RawImage
     */
    public GpuMat getGpuImageMat()
    {
-      if (gpuImageMat == null)
+      synchronized (gpuImageMutex)
       {
-         gpuImageMat = new GpuMat(cpuImageMat.size(), cpuImageMat.type());
-         gpuImageMat.upload(cpuImageMat);
+         if (gpuImageMat == null)
+         {
+            gpuImageMat = new GpuMat(cpuImageMat.size(), cpuImageMat.type());
+            gpuImageMat.upload(cpuImageMat);
+         }
       }
 
       return gpuImageMat;

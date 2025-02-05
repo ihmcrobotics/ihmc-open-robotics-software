@@ -3,13 +3,13 @@ package us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPlane;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPolygons;
 import us.ihmc.commonWalkingControlModules.captureRegion.CaptureRegionSafetyHeuristics;
 import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepCaptureRegionCalculator;
 import us.ihmc.commonWalkingControlModules.captureRegion.OneStepCaptureRegionCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
@@ -230,8 +230,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
          allowableAreasForCoP.put(robotSide, allowableAreaForCoP);
       }
 
-      if (walkingControllerParameters != null)
-         swingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
+      swingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
 
       if (yoGraphicsListRegistry != null)
          setupVisualizers(yoGraphicsListRegistry);
@@ -328,6 +327,12 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    public void setStepConstraintRegions(List<StepConstraintRegion> stepConstraintRegion)
    {
       environmentConstraintProvider.setStepConstraintRegions(stepConstraintRegion);
+   }
+
+   @Override
+   public void setSwingSpeedUpEnabled(boolean swingSpeedUpEnabled)
+   {
+      this.swingSpeedUpEnabled.set(swingSpeedUpEnabled);
    }
 
    @Override

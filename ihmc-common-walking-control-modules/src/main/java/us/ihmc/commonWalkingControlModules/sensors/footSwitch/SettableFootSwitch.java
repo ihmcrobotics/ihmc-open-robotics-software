@@ -57,7 +57,7 @@ public class SettableFootSwitch implements FootSwitchInterface
    @Override
    public ReferenceFrame getMeasurementFrame()
    {
-      return foot.getSoleFrame();
+      return foot.getContactFrame();
    }
 
    @Override

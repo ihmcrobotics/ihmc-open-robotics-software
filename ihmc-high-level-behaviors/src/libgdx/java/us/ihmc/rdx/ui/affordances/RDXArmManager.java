@@ -151,14 +151,6 @@ public class RDXArmManager
          boolean desiredHandPoseChanged = false;
          for (RobotSide side : interactableHands.sides())
          {
-            if (syncedRobot.getHandWrenchCalculators().get(side) == null)
-               continue;
-
-            // wrench expressed in wrist pitch body fixed-frame
-            if (interactableHands.get(side).getEstimatedHandWrenchArrows().getShow() != showWrench)
-               interactableHands.get(side).getEstimatedHandWrenchArrows().setShow(showWrench);
-            interactableHands.get(side).updateEstimatedWrench(syncedRobot.getHandWrenchCalculators().get(side).getFilteredWrench());
-
             if (!interactableHands.get(side).isDeleted())
             {
                armIKSolvers.get(side).update(syncedRobot.getReferenceFrames().getChestFrame(), interactableHands.get(side).getControlReferenceFrame());
@@ -171,6 +163,14 @@ public class RDXArmManager
                   desiredHandPoseChanged |= armIKSolvers.get(side).getDesiredHandControlPoseChanged();
                }
             }
+            
+            if (syncedRobot.getHandWrenchCalculators().get(side) == null)
+               continue;
+
+            // wrench expressed in wrist pitch body fixed-frame
+            if (interactableHands.get(side).getEstimatedHandWrenchArrows().getShow() != showWrench)
+               interactableHands.get(side).getEstimatedHandWrenchArrows().setShow(showWrench);
+            interactableHands.get(side).updateEstimatedWrench(syncedRobot.getHandWrenchCalculators().get(side).getFilteredWrench());
          }
 
          // The following puts the solver on a thread as to not slow down the UI

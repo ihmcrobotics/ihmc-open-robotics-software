@@ -1,3 +1,5 @@
+#include "HeightMapUtils.cuh"
+#include "MathUtils.cuh"
 
 extern "C"
 #define LOCAL_CELL_SIZE 0
@@ -40,55 +42,6 @@ extern "C"
 
 #define VERTICAL_FOV 1.5707963267948966f
 #define HORIZONTAL_FOV 6.2831853f
-
-#define SNAP_HEIGHT_MAP_CENTER_X 0
-#define SNAP_HEIGHT_MAP_CENTER_Y 1
-#define SNAP_GLOBAL_CELL_SIZE 2
-#define SNAP_GLOBAL_CENTER_INDEX 3
-#define SNAP_CROPPED_WINDOW_CENTER_INDEX 4
-#define SNAP_HEIGHT_SCALING_FACTOR 5
-#define SNAP_HEIGHT_OFFSET 6
-#define SNAP_FOOT_LENGTH 7
-#define SNAP_FOOT_WIDTH 8
-#define MIN_DISTANCE_FROM_CLIFF_TOPS 9
-#define MIN_DISTANCE_FROM_CLIFF_BOTTOMS 10
-#define CLIFF_START_HEIGHT_TO_AVOID 11
-#define CLIFF_END_HEIGHT_TO_AVOID 12
-#define MIN_SUPPORT_AREA_FRACTION 13
-#define MIN_SNAP_HEIGHT_THRESHOLD 14
-#define SNAP_HEIGHT_THRESHOLD_AT_SEARCH_EDGE 15
-#define INEQUALITY_ACTIVATION_SLOPE 16
-
-#define SNAP_FAILED 0
-#define CLIFF_TOP 1
-#define CLIFF_BOTTOM 2
-#define NOT_ENOUGH_AREA 0
-#define VALID 4
-
-__device__ float index_to_coordinate(int index, float center, float resolution, int center_index)
-{
-    return (index - center_index) * resolution + center;
-}
-
-__device__ float2 indices_to_coordinate(int2 index, float2 center, float resolution, int center_index)
-{
-    return make_float2(index_to_coordinate(index.x, center.x, resolution, center_index), index_to_coordinate(index.y, center.y, resolution, center_index));
-}
-
-__device__ float dot(const float3 a, const float3 b)
-{
-    return a.x * b.x + a.y * b.y + a.z * b.z;
-}
-
-__device__ int coordinate_to_index(float coordinate, float center, float resolution, int center_index)
-{
-    return round((coordinate - center) / resolution) + center_index;
-}
-
-__device__ int2 coordinate_to_indices(float2 coordinates, float2 center, float resolution, int center_index)
-{
-    return make_int2(coordinate_to_index(coordinates.x, center.x, resolution, center_index), coordinate_to_index(coordinates.y, center.y, resolution, center_index));
-}
 
 __device__ int2 spherical_projection(float3 cellCenter, float *params)
 {
@@ -143,22 +96,6 @@ __device__ float3 back_project_perspective(int2 pos, float Z, float *params)
     float Y = (pos.y - params[DEPTH_CY]) / params[DEPTH_FY] * Z;
     float3 point = make_float3(Z, -X, -Y);
     return point;
-}
-
-__device__ float3 transformPoint3D32_2(float3 point, float3 rotationMatrixRow0, float3 rotationMatrixRow1, float3 rotationMatrixRow2, float3 translation)
-{
-    return make_float3(dot(rotationMatrixRow0, point) + translation.x, dot(rotationMatrixRow1, point) + translation.y,
-                       dot(rotationMatrixRow2, point) + translation.z);
-}
-
-__device__ float clamp(float value, float minVal, float maxVal)
-{
-    return fminf(fmaxf(value, minVal), maxVal);
-}
-
-__device__ float length2D(float2 vec)
-{
-    return sqrtf(vec.x * vec.x + vec.y * vec.y);
 }
 
 __device__ float get_spatial_average(int xIndex, int yIndex, unsigned short *globalMap, float *params)
@@ -389,8 +326,8 @@ extern "C" __global__ void heightMapUpdateKernel(unsigned short *in, size_t pitc
     // Scale to the appropriate range
     float heightValue = (averageHeightZ * params[HEIGHT_SCALING_FACTOR]);
 
-    unsigned short *outRow = (unsigned short *)((char *)out + (yIndex * pitchOut));
-    *(outRow + xIndex) = (unsigned short)(heightValue);
+    unsigned short *outRow = (unsigned short *)((char *)out + (xIndex * pitchOut));
+    *(outRow + yIndex) = (unsigned short)(heightValue);
 }
 
 extern "C" __global__ void heightMapRegistrationKernel(unsigned short *localMap, size_t pitchLocal,
@@ -449,7 +386,7 @@ extern "C" __global__ void heightMapRegistrationKernel(unsigned short *localMap,
     // Retrieve local height and global height
     float sensorHeight = sensorToGroundTf[11] - 1.5f;
 
-    unsigned short *heightValue = (unsigned short *)((char *)globalMap + yIndex * pitchGlobal) + xIndex;
+    unsigned short *heightValue = (unsigned short *)((char *)globalMap + xIndex * pitchGlobal) + yIndex;
     float previousHeight = *heightValue / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
     float localHeight = previousHeight;
 
@@ -457,7 +394,7 @@ extern "C" __global__ void heightMapRegistrationKernel(unsigned short *localMap,
         localCellIndex.y >= 0 && localCellIndex.y < localCellsPerAxis)
     {
 
-        unsigned short *newHeightValue = (unsigned short *)((char *)localMap + localCellIndex.y * pitchLocal) + localCellIndex.x;
+        unsigned short *newHeightValue = (unsigned short *)((char *)localMap + localCellIndex.x * pitchLocal) + localCellIndex.y;
         localHeight = *newHeightValue / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
     }
 
@@ -477,13 +414,12 @@ extern "C" __global__ void heightMapRegistrationKernel(unsigned short *localMap,
         {
             finalHeight = localHeight;
         }
-        finalHeight = get_spatial_filtered_height(xIndex, yIndex, finalHeight, globalMap, params);
     }
 
     finalHeight += params[HEIGHT_OFFSET];
 
     // Store the final height in the global map
-    unsigned short *globalMapElement = (unsigned short *)((char *)globalMap + yIndex * pitchGlobal) + xIndex;
+    unsigned short *globalMapElement = (unsigned short *)((char *)globalMap + xIndex * pitchGlobal) + yIndex;
     *globalMapElement = static_cast<unsigned short>(finalHeight * params[HEIGHT_SCALING_FACTOR]);
 }
 
@@ -509,34 +445,37 @@ extern "C" __global__ void croppingKernel(unsigned short *inputMap, size_t pitch
     int globalCellIndexX = globalSensorIndex.x + xIndex - (params[CROPPED_WINDOW_CENTER_INDEX]);
     int globalCellIndexY = globalSensorIndex.y + yIndex - (params[CROPPED_WINDOW_CENTER_INDEX]);
 
-    int rotate90clock = 1;
-    int verticalflip = 1;
-
-    // Apply rotation (90 degrees clockwise)
-    if (rotate90clock == 1)
-    {
-        int temp = globalCellIndexX;
-        globalCellIndexX = globalCellIndexY;
-        globalCellIndexY = globalMapSizeY - 1 - temp; // Mirror around center after rotation
-    }
-
-    // Apply vertical flip (flip along y-axis)
-    if (verticalflip == 1)
-    {
-        globalCellIndexY = globalMapSizeY - 1 - globalCellIndexY;
-    }
-
     // Check if global cell index is within bounds
     if (globalCellIndexX >= 0 && globalCellIndexX < globalMapSizeX &&
         globalCellIndexY >= 0 && globalCellIndexY < globalMapSizeY)
     {
-        unsigned short *inputRow = (unsigned short *)((char *)inputMap + globalCellIndexY * pitchInput);
-        unsigned short *croppedRow = (unsigned short *)((char *)croppedMap + yIndex * pitchCropped);
-        croppedRow[xIndex] = inputRow[globalCellIndexX];
+        unsigned short *inputRow = (unsigned short *)((char *)inputMap + globalCellIndexX * pitchInput);
+        unsigned short *croppedRow = (unsigned short *)((char *)croppedMap + xIndex * pitchCropped);
+        croppedRow[yIndex] = inputRow[globalCellIndexY];
     }
     else
     {
-        unsigned short *croppedRow = (unsigned short *)((char *)croppedMap + yIndex * pitchCropped);
-        croppedRow[xIndex] = 0; // Assign 0 for out-of-bounds cells
+        unsigned short *croppedRow = (unsigned short *)((char *)croppedMap + xIndex * pitchCropped);
+        croppedRow[yIndex] = 0; // Assign 0 for out-of-bounds cells
     }
+}
+
+extern "C"
+__global__ void planOffsetKernel(unsigned short * matrixToModify, size_t pitchMatrixToModify,
+                                 unsigned short * matrixValuesToSkip, size_t pitchMatrixValuesToSkip,
+                                 float offsetInZ, int rowsMatrixToModify, int colsMatrixToModify,
+                                 float resetOffset)
+{
+    int indexX = blockIdx.x * blockDim.x + threadIdx.x;
+    int indexY = blockIdx.y * blockDim.y + threadIdx.y;
+
+    if (indexX >= colsMatrixToModify || indexY >= rowsMatrixToModify)
+        return;
+
+    unsigned short *skipRow = (unsigned short *)((char *)matrixValuesToSkip + indexY * pitchMatrixValuesToSkip);
+    if (skipRow[indexX] != resetOffset)
+        return;
+
+    unsigned short *matrixRow = (unsigned short *)((char *)matrixToModify + indexY * pitchMatrixToModify);
+    matrixRow[indexX] += static_cast<short>(offsetInZ * 10000.0f);
 }

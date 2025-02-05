@@ -7,8 +7,6 @@ import us.ihmc.perception.heightMap.TerrainMapData;
 
 public interface RapidHeightMapExtractorInterface
 {
-   void setDepthIntrinsics(CameraIntrinsics cameraIntrinsics);
-
    Point3D getSensorOrigin();
 
    int getSequenceNumber();
@@ -17,6 +15,10 @@ public interface RapidHeightMapExtractorInterface
 
    void update(RigidBodyTransform sensorToWorldTransform, RigidBodyTransform sensorToGroundTransform, RigidBodyTransform groundToWorldTransform);
 
+   default void updateHeightOffset(float z)
+   {
+      //Do Nothing
+   }
    void reset();
 
    void destroy();

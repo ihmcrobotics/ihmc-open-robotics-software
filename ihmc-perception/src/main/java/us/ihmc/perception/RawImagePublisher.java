@@ -12,6 +12,7 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.perception.cuda.CUDACompressionTools;
 import us.ihmc.perception.cuda.CUDAJPEGProcessor;
 import us.ihmc.perception.imageMessage.CompressionType;
+import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.streaming.ROS2SRTSensorStreamer;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.ros2.ROS2Node;
@@ -29,6 +30,8 @@ public class RawImagePublisher implements AutoCloseable
    private final ROS2Helper ros2Helper;
    private final ImageMessage imageMessage;
 
+   private boolean destroyed = false;
+
    public RawImagePublisher(ROS2Node ros2Node)
    {
       compressionTools = new CUDACompressionTools();
@@ -42,6 +45,9 @@ public class RawImagePublisher implements AutoCloseable
    @SuppressWarnings("unchecked") // Trust me bro, I know what I'm doing
    public synchronized void publishImage(ROS2Topic<? extends Packet<?>> imageTopic, RawImage imageToPublish)
    {
+      if (destroyed)
+         return;
+
       if (imageTopic.getType().equals(ImageMessage.class))
       {  // Topic is an ImageMessage topic -> publish as image message
          publishAsImageMessage((ROS2Topic<ImageMessage>) imageTopic, imageToPublish);
@@ -69,7 +75,7 @@ public class RawImagePublisher implements AutoCloseable
             opencv_cudaimgproc.cvtColor(imageToCompress, bgr8Image, opencv_imgproc.COLOR_BGRA2BGR);
             imageToCompress = bgr8Image;
          case BGR8: // BGR image -> compress using nvJPEG
-            compressedImage = new BytePointer(imageToCompress.limit());
+            compressedImage = new BytePointer(OpenCVTools.dataSize(imageToCompress));
             jpegProcessor.encodeBGR(imageToCompress, compressedImage);
             compressionType = NVJPEG;
             break;
@@ -78,12 +84,12 @@ public class RawImagePublisher implements AutoCloseable
             opencv_cudaimgproc.cvtColor(imageToCompress, rgb8Image, opencv_imgproc.COLOR_RGBA2RGB);
             imageToCompress = rgb8Image;
          case RGB8: // RGB image -> compress using nvJPEG
-            compressedImage = new BytePointer(imageToCompress.limit());
+            compressedImage = new BytePointer(OpenCVTools.dataSize(imageToCompress));
             jpegProcessor.encodeRGB(imageToCompress, compressedImage);
             compressionType = NVJPEG;
             break;
          case GRAY8: // Black and white image -> compress using nvJPEG
-            compressedImage = new BytePointer(imageToCompress.limit());
+            compressedImage = new BytePointer(OpenCVTools.dataSize(imageToCompress));
             jpegProcessor.encodeGray(imageToCompress, compressedImage);
             compressionType = NVJPEG;
             break;
@@ -103,6 +109,7 @@ public class RawImagePublisher implements AutoCloseable
       compressionTools.destroy();
       jpegProcessor.destroy();
       sensorStreamer.destroy();
+      destroyed = true;
       System.out.println("Closed " + getClass().getSimpleName());
    }
 }

@@ -25,7 +25,6 @@ import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
-import us.ihmc.robotics.stateMachine.extra.StateMachinesJPanel;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.FloatingJoint;
@@ -234,7 +233,6 @@ public class SkippyController implements RobotController
       if (skippyToDo.getEnumValue() != SkippyToDo.BALANCE && skippyToDo.getEnumValue() != SkippyToDo.POSITION || true)
       {
          stateMachine = setUpStateMachines();
-         createStateMachineWindow();
       }
       /*
        * Boolean variables for artifacts drawing
@@ -1034,34 +1032,6 @@ public class SkippyController implements RobotController
       return factory.build(States.BALANCE);
    }
 
-   public void createStateMachineWindow()
-   {
-      EventDispatchThreadHelper.invokeAndWait(new Runnable()
-      {
-         public void run()
-         {
-            createStateMachineWindowLocal();
-         }
-      });
-   }
-
-   public void createStateMachineWindowLocal()
-   {
-      JFrame frame = new JFrame("Skippy Jump State Machine");
-      Container contentPane = frame.getContentPane();
-      contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.X_AXIS));
-
-      StateMachinesJPanel<States> stateMachinePanel = new StateMachinesJPanel<States>(stateMachine, true);
-
-      frame.getContentPane().add(stateMachinePanel);
-
-      frame.pack();
-      frame.setSize(450, 300);
-      frame.setAlwaysOnTop(false);
-      frame.setVisible(true);
-
-      stateMachine.addStateChangedListener(stateMachinePanel);
-   }
 
    private void setHipPlaneParametersForPositionControl()
    {

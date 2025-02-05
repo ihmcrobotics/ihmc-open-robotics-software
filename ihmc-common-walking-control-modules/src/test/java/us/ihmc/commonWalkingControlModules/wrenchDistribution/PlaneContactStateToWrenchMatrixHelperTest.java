@@ -59,7 +59,7 @@ public class PlaneContactStateToWrenchMatrixHelperTest
          planeContactStateCommand.setCoefficientOfFriction(1.0);
          planeContactStateCommand.setContactNormal(new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 1.0));
          planeContactStateCommand.setHasContactStateChanged(true);
-         contactablePlaneBody.getContactPoints2d().forEach(planeContactStateCommand::addPointInContact);
+         contactablePlaneBody.getContactPoints2D().forEach(planeContactStateCommand::addPointInContact);
 
          helper.setPlaneContactStateCommand(planeContactStateCommand);
          helper.computeMatrices(1e-8, 1e-9, new Vector2D(1e-5, 1e-5), new Vector2D(1e-6, 1e-6));

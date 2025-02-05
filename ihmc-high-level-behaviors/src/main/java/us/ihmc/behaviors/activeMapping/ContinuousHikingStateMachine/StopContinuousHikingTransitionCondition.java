@@ -21,6 +21,6 @@ public class StopContinuousHikingTransitionCondition implements StateTransitionC
    @Override
    public boolean testCondition(double timeInCurrentState)
    {
-      return !commandMessage.get().getEnableContinuousHiking();
+      return !commandMessage.get().getEnableContinuousHiking() && !commandMessage.get().getSquareUpToGoal();
    }
 }

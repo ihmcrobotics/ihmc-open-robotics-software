@@ -17,9 +17,9 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
  */
 public class CRDTBidirectionalRigidBodyTransform extends CRDTBidirectionalMutableField<RigidBodyTransform>
 {
-   public CRDTBidirectionalRigidBodyTransform(RequestConfirmFreezable requestConfirmFreezable)
+   public CRDTBidirectionalRigidBodyTransform(LatestTimestampModifiable latestTimestampModifiable)
    {
-      super(requestConfirmFreezable, new RigidBodyTransform());
+      super(latestTimestampModifiable, new RigidBodyTransform());
    }
 
    public RigidBodyTransformReadOnly getValueReadOnly()
@@ -47,7 +47,7 @@ public class CRDTBidirectionalRigidBodyTransform extends CRDTBidirectionalMutabl
 
    public void fromMessage(RigidBodyTransformMessage rigidBodyTransformMessage)
    {
-      if (!isFrozen()) // Ignore updates if we are frozen
+      if (isModificationIncoming())
       {
          MessageTools.toEuclid(rigidBodyTransformMessage, getValueInternal());
       }
@@ -55,7 +55,7 @@ public class CRDTBidirectionalRigidBodyTransform extends CRDTBidirectionalMutabl
 
    public void fromMessage(Pose3D poseMessage)
    {
-      if (!isFrozen()) // Ignore updates if we are frozen
+      if (isModificationIncoming())
       {
          getValueInternal().set(poseMessage);
       }

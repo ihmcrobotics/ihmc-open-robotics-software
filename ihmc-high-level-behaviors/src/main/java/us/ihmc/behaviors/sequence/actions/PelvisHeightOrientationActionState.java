@@ -35,9 +35,9 @@ public class PelvisHeightOrientationActionState extends ActionNodeState<PelvisHe
 
    public void fromMessage(PelvisHeightOrientationActionStateMessage message)
    {
-      super.fromMessage(message.getState());
-
       getDefinition().fromMessage(message.getDefinition());
+
+      super.fromMessage(message.getState());
    }
 
    public CRDTDetachableReferenceFrame getPelvisFrame()

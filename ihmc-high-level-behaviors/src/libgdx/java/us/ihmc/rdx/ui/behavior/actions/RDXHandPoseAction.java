@@ -187,7 +187,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
                                  FramePose3D previewPalmPose = new FramePose3D();
                                  previewPalmPose.setToZero(previewPalmFrame);
                                  previewPalmPose.changeFrame(actionPalmFrame.getReferenceFrame().getParent());
-                                 palmTransformToParent.getValueAndFreeze().set(previewPalmPose);
+                                 palmTransformToParent.getValueAndModify().set(previewPalmPose);
                                  actionPalmFrame.update();
                               }
                            }
@@ -361,7 +361,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
             ImGui.popItemWidth();
             if (ImGui.button(labels.get("Set Configuration to Synced Arm")))
             {
-               for (int i = 0; i < getDefinition().getJointAngles().getLength(); i++)
+               for (int i = 0; i < armJointNames.length; i++)
                {
                   OneDoFJointBasics syncedJoint = syncedRobot.getFullRobotModel().getArmJoint(getDefinition().getSide(), armJointNames[i]);
                   if (syncedJoint != null)
@@ -404,7 +404,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
             FramePose3D syncedPalmPose = new FramePose3D();
             syncedPalmPose.setToZero(syncedPalmFrame);
             syncedPalmPose.changeFrame(actionPalmFrame.getReferenceFrame().getParent());
-            palmTransformToParent.getValueAndFreeze().set(syncedPalmPose);
+            palmTransformToParent.getValueAndModify().set(syncedPalmPose);
             actionPalmFrame.update();
          }
       }
