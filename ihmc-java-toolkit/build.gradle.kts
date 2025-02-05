@@ -22,7 +22,7 @@ mainDependencies {
    api("xml-apis:xml-apis:2.0.2")
    api("com.sun.xml.bind:jaxb-impl:4.0.5")
 
-   api("us.ihmc:ihmc-commons:0.35.0")
+   api("us.ihmc:ihmc-commons:0.35.1")
    api("us.ihmc:euclid-shape:0.21.0")
    api("us.ihmc:euclid-geometry:0.21.0")
    api("us.ihmc:ihmc-graphics-description:0.26.0")
