@@ -110,17 +110,6 @@ public class KinematicsToolboxModule extends ToolboxModule
             kinematicsToolBoxController.updateCapturabilityBasedStatus(capturabilityBasedStatus);
          }
       });
-
-      MultiContactBalanceStatus multiContactBalanceStatus = new MultiContactBalanceStatus();
-
-      ros2Node.createSubscription(HumanoidControllerAPI.getTopic(MultiContactBalanceStatus.class, robotName), s ->
-      {
-         if (kinematicsToolBoxController != null)
-         {
-            s.takeNextData(multiContactBalanceStatus, null);
-            kinematicsToolBoxController.updateMultiContactBalanceStatus(multiContactBalanceStatus);
-         }
-      });
    }
 
    /**

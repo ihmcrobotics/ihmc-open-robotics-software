@@ -315,8 +315,8 @@ public class HumanoidPerceptionModule
                                                             referenceFrames.getSoleFrame(RobotSide.LEFT),
                                                             referenceFrames.getSoleFrame(RobotSide.RIGHT),
                                                             realsenseDepthImage,
+                                                            cameraIntrinsics,
                                                             1);
-      rapidHeightMapExtractor.setDepthIntrinsics(cameraIntrinsics);
 
       if (ros2Helper != null)
          ros2Helper.subscribeViaVolatileCallback(PerceptionAPI.RESET_HEIGHT_MAP, message -> resetHeightMapRequested.set());

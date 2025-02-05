@@ -2,7 +2,6 @@ package us.ihmc.behaviors.behaviorTree;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.commons.lang3.mutable.MutableObject;
-import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperations;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
@@ -22,7 +21,7 @@ import java.nio.file.Path;
  */
 public class BehaviorTreeJSONSanitizer
 {
-   private final CRDTInfo crdtInfo = new CRDTInfo(ROS2ActorDesignation.OPERATOR, 1);
+   private final CRDTInfo crdtInfo = new CRDTInfo(ROS2ActorDesignation.OPERATOR, null);
    private final DefaultFootstepPlannerParametersReadOnly defaultFootstepPlannerParameters;
    private final WorkspaceResourceDirectory treeFilesDirectory;
 
@@ -128,7 +127,8 @@ public class BehaviorTreeJSONSanitizer
 
          if (parentNode != null)
          {
-            BehaviorTreeTopologyOperations.addChildBasic(node, parentNode);
+            node.setParent(parentNode);
+            parentNode.getChildren().add(parentNode.getChildren().size(), node);
          }
 
          JSONTools.forEachArrayElement(jsonNode, "children", childJsonNode ->

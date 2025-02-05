@@ -15,7 +15,7 @@ public class EuclideanStreamingMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "81d04be4ae512d97ae0d2f7408ab01efae887afcddda97d534a85923f690b1a0";
+   		return "0db68034bf81995f60c1709e965459149dc13a9703ed84245a87bda7147a9c55";
    }
    
    @Override
@@ -62,6 +62,8 @@ public class EuclideanStreamingMessagePubSubType implements us.ihmc.pubsub.Topic
 
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -86,6 +88,8 @@ public class EuclideanStreamingMessagePubSubType implements us.ihmc.pubsub.Topic
 
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getLinearVelocity(), current_alignment);
 
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getLinearAcceleration(), current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -98,6 +102,7 @@ public class EuclideanStreamingMessagePubSubType implements us.ihmc.pubsub.Topic
       geometry_msgs.msg.dds.PosePubSubType.write(data.getControlFramePose(), cdr);
       geometry_msgs.msg.dds.PointPubSubType.write(data.getPosition(), cdr);
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getLinearVelocity(), cdr);
+      geometry_msgs.msg.dds.Vector3PubSubType.write(data.getLinearAcceleration(), cdr);
    }
 
    public static void read(ihmc_common_msgs.msg.dds.EuclideanStreamingMessage data, us.ihmc.idl.CDR cdr)
@@ -108,6 +113,7 @@ public class EuclideanStreamingMessagePubSubType implements us.ihmc.pubsub.Topic
       geometry_msgs.msg.dds.PosePubSubType.read(data.getControlFramePose(), cdr);	
       geometry_msgs.msg.dds.PointPubSubType.read(data.getPosition(), cdr);	
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getLinearVelocity(), cdr);	
+      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getLinearAcceleration(), cdr);	
 
    }
 
@@ -123,6 +129,8 @@ public class EuclideanStreamingMessagePubSubType implements us.ihmc.pubsub.Topic
 
       ser.write_type_a("linear_velocity", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getLinearVelocity());
 
+      ser.write_type_a("linear_acceleration", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getLinearAcceleration());
+
    }
 
    @Override
@@ -136,6 +144,8 @@ public class EuclideanStreamingMessagePubSubType implements us.ihmc.pubsub.Topic
       ser.read_type_a("position", new geometry_msgs.msg.dds.PointPubSubType(), data.getPosition());
 
       ser.read_type_a("linear_velocity", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getLinearVelocity());
+
+      ser.read_type_a("linear_acceleration", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getLinearAcceleration());
 
    }
 

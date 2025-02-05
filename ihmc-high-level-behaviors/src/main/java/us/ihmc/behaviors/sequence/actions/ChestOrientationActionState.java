@@ -62,9 +62,9 @@ public class ChestOrientationActionState extends ActionNodeState<ChestOrientatio
 
    public void fromMessage(ChestOrientationActionStateMessage message)
    {
-      super.fromMessage(message.getState());
-
       getDefinition().fromMessage(message.getDefinition());
+
+      super.fromMessage(message.getState());
 
       goalPelvisToWorldTransform.fromMessage(message.getGoalPelvisTransformToWorld());
       goalPelvisFrame.update();

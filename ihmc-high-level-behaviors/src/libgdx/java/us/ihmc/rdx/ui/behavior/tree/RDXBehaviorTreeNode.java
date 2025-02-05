@@ -12,7 +12,6 @@ import imgui.type.ImString;
 import us.ihmc.behaviors.behaviorTree.*;
 import us.ihmc.behaviors.behaviorTree.log.BehaviorTreeNodeMessageLogger.LogMessage;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiExpandCollapseRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -27,9 +26,16 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The base class for an RDX node, which is the type that solely exists
+ * in the UIs and is used by an operator to interact with the behavior system.
+ *
+ * @param <S> The type of this node's state instance.
+ * @param <D> The type of this node's definition instance.
+ */
 public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
                                  D extends BehaviorTreeNodeDefinition>
-      implements BehaviorTreeNodeLayer<RDXBehaviorTreeNode<?, ?>, S, S, D>
+      implements BehaviorTreeNode<RDXBehaviorTreeNode<?, ?>, S, D>
 {
    private final S state;
    private final D definition;
@@ -71,7 +77,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    @Override
    public void update()
    {
-      BehaviorTreeNodeLayer.super.update();
+      BehaviorTreeNode.super.update();
 
       // Automatically expand if less than 5 children are added at once
       int deltaChildren = getChildren().size() - previousNumberOfChildren;
@@ -233,6 +239,11 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
             definition.setName(definition.getName() + ".json");
          }
       }
+
+      if (ImGui.menuItem(labels.get("Draw to SVG")))
+      {
+         state.drawToSVG();
+      }
    }
 
    public void renderNodeSettingsWidgets()
@@ -257,13 +268,6 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
 
-   }
-
-   @Override
-   public void destroy()
-   {
-      LogTools.info("Destroying node: {}:{}", definition.getName(), state.getID());
-      state.destroy();
    }
 
    public boolean getSelected()
@@ -337,12 +341,6 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    public RDXBehaviorTreeNode<?, ?> getParent()
    {
       return parent;
-   }
-
-   @Override
-   public S getNextLowerLayer()
-   {
-      return state;
    }
 
    @Override

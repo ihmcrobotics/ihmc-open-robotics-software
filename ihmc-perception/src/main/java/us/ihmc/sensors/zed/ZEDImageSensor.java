@@ -4,6 +4,7 @@ import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
@@ -39,7 +40,7 @@ public class ZEDImageSensor extends ImageSensor
 
    public static final int OUTPUT_IMAGE_COUNT = 3;
 
-   protected static final int CAMERA_FPS = 30;
+   protected static final int CAMERA_FPS = 15;
    private static final float MILLIMETER_TO_METERS = 0.001f;
 
    private final int cameraID;
@@ -80,7 +81,7 @@ public class ZEDImageSensor extends ImageSensor
       // Set runtime parameters to default values
       zedRuntimeParameters.reference_frame(SL_REFERENCE_FRAME_CAMERA);
       zedRuntimeParameters.enable_depth(true);
-      zedRuntimeParameters.confidence_threshold(100);
+      zedRuntimeParameters.confidence_threshold(70);
       zedRuntimeParameters.texture_confidence_threshold(100);
       zedRuntimeParameters.remove_saturated_areas(true);
       zedRuntimeParameters.enable_fill_mode(false);
@@ -105,7 +106,7 @@ public class ZEDImageSensor extends ImageSensor
 
          if (positionalTrackingEnabled)
          {
-            SL_PositionalTrackingParameters positionalTrackingParameters = new SL_PositionalTrackingParameters();
+            SL_PositionalTrackingParameters positionalTrackingParameters = sl_get_positional_tracking_parameters(cameraID);
             sl_enable_positional_tracking(cameraID, positionalTrackingParameters, "");
          }
 
@@ -158,7 +159,7 @@ public class ZEDImageSensor extends ImageSensor
       parametersToSet.camera_image_flip(SL_FLIP_MODE_OFF);
       parametersToSet.camera_disable_self_calib(false);
       parametersToSet.enable_image_enhancement(true);
-      parametersToSet.depth_mode(SL_DEPTH_MODE_ULTRA);
+      parametersToSet.depth_mode(SL_DEPTH_MODE_NEURAL);
       parametersToSet.depth_stabilization(1);
       parametersToSet.depth_maximum_distance(zedModel.getMaximumDepthDistance());
       parametersToSet.depth_minimum_distance(zedModel.getMinimumDepthDistance());
@@ -205,6 +206,22 @@ public class ZEDImageSensor extends ImageSensor
          if (returnCode == SL_ERROR_CODE_END_OF_SVOFILE_REACHED)
          {
             sl_set_svo_position(0, 0);
+
+            if (positionalTrackingEnabled)
+            {
+               sensorRotation.x(0.0f);
+               sensorRotation.y(0.0f);
+               sensorRotation.z(0.0f);
+               sensorRotation.w(1.0f);
+
+               sensorTranslation.x(0.0f);
+               sensorTranslation.y(0.0f);
+               sensorTranslation.z(0.0f);
+
+               sl_reset_positional_tracking(cameraID, sensorRotation, sensorTranslation);
+               trackedSensorFrame.update(RigidBodyTransformBasics::setToZero);
+            }
+
             return false;
          }
 

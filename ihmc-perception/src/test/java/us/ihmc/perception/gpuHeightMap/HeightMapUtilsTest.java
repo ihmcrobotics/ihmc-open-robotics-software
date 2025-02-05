@@ -107,7 +107,7 @@ public class HeightMapUtilsTest
     * The method {@link HeightMapUtilsTest#runIndicesToCoordinateOnCUDA()} returns the result from the GPU so we can compare it with the expected values.
     */
    @Test
-   public void testIndicesToCoordinateCUDA()
+   public void testIndicesToCoordinateCUDA() throws Exception
    {
       float[] result = runIndicesToCoordinateOnCUDA();
 
@@ -129,7 +129,7 @@ public class HeightMapUtilsTest
     * from the GPU are the same for each kernel.
     */
    @Test
-   public void testOpenCLMatchesCUDAResultForIndicesToCoordinate()
+   public void testOpenCLMatchesCUDAResultForIndicesToCoordinate() throws Exception
    {
       float[] openCLResult = runIndexToCoordinateOnOpenCL();
       float[] cudaResult = runIndicesToCoordinateOnCUDA();
@@ -162,7 +162,7 @@ public class HeightMapUtilsTest
       Assert.assertEquals("Expected value: " + expectedXValueFromKernel + " and actual value: " + result[0], expectedYValueFromKernel, (int) result[1]);   }
 
    @Test
-   public void testCoordinateToIndicesCUDA()
+   public void testCoordinateToIndicesCUDA() throws Exception
    {
       float[] result = runCoordinateToIndicesOnCUDA();
 
@@ -185,7 +185,7 @@ public class HeightMapUtilsTest
     * from the GPU are the same for each kernel.
     */
    @Test
-   public void testOpenCLMatchesCUDAResultForCoordinateToIndices()
+   public void testOpenCLMatchesCUDAResultForCoordinateToIndices() throws Exception
    {
       float[] openCLResult = runCoordinateToIndicesOnOpenCL();
       float[] cudaResult = runCoordinateToIndicesOnCUDA();
@@ -245,7 +245,7 @@ public class HeightMapUtilsTest
       return new float[] {xHostPointer.get(0), yHostPointer.get(0)};
    }
 
-   private float[] runIndicesToCoordinateOnCUDA()
+   private float[] runIndicesToCoordinateOnCUDA() throws Exception
    {
       URL programPath = getClass().getClassLoader().getResource("us/ihmc/perception/gpuHeightMap/HeightMapUtilsTest.cu");
       URL headerPath = getClass().getClassLoader().getResource("us/ihmc/perception/gpuHeightMap/HeightMapUtils.cuh");
@@ -357,7 +357,7 @@ public class HeightMapUtilsTest
    }
 
 
-   private float[] runCoordinateToIndicesOnCUDA()
+   private float[] runCoordinateToIndicesOnCUDA() throws Exception
    {
       URL programPath = getClass().getClassLoader().getResource("us/ihmc/perception/gpuHeightMap/HeightMapUtilsTest.cu");
       URL headerPath = getClass().getClassLoader().getResource("us/ihmc/perception/gpuHeightMap/HeightMapUtils.cuh");

@@ -141,7 +141,7 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
       else
       {
          palmParentFrameName.setValue(jsonNode.get("parentFrame").textValue());
-         JSONTools.toEuclid(jsonNode, palmTransformToParent.getValueAndFreeze());
+         JSONTools.toEuclid(jsonNode, palmTransformToParent.getValueAndModify());
          holdPoseInWorldLater.setValue(jsonNode.get("holdPoseInWorldLater").asBoolean());
          jointspaceOnly.setValue(jsonNode.get("jointspaceOnly").asBoolean());
          linearPositionWeight.setValue(jsonNode.get("linearPositionWeight").asDouble());
@@ -189,7 +189,7 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
       for (int i = 0; i < jointAngles.getLength(); i++)
          jointAngles.setValue(i, onDiskJointAngles[i]);
       palmParentFrameName.setValue(onDiskPalmParentFrameName);
-      palmTransformToParent.getValueAndFreeze().set(onDiskPalmTransformToParent);
+      palmTransformToParent.getValueAndModify().set(onDiskPalmTransformToParent);
       linearPositionWeight.setValue(onDiskLinearPositionWeight);
       angularPositionWeight.setValue(onDiskAngularPositionWeight);
       jointspaceWeight.setValue(onDiskJointspaceWeight);

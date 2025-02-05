@@ -460,7 +460,7 @@ public class SCS2AvatarSimulationFactory
       else
       {
          JoystickBasedSteppingPluginFactory joystickPluginFactory = new JoystickBasedSteppingPluginFactory();
-         if (heightMapForFootstepZ.hasValue())
+         if (heightMapForFootstepZ.hasValue() && heightMapForFootstepZ.get() != null)
             joystickPluginFactory.setFootStepAdjustment(new HeightMapBasedFootstepAdjustment(heightMapForFootstepZ.get()));
          else
          {

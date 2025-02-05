@@ -3,10 +3,14 @@ package us.ihmc.rdx.ui.vr;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.HandLoadBearingMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
+import org.apache.commons.lang.mutable.MutableBoolean;
 import org.lwjgl.openvr.InputDigitalActionData;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInitialConfigurationMessage;
+import toolbox_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
@@ -18,15 +22,18 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxModule;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.avatar.sakeGripper.SakeHandPreset;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.commons.UnitConversions;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.Throttler;
-import us.ihmc.communication.OldHandAPI;
+import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -46,7 +53,9 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
+import us.ihmc.rdx.ui.graphics.RDXMultiContactRegionGraphic;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
+import us.ihmc.rdx.ui.teleoperation.RDXHandConfigurationManager;
 import us.ihmc.rdx.ui.tools.KinematicsRecordReplay;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.rdx.vr.RDXVRHardwareModel;
@@ -131,11 +140,16 @@ public class RDXVRKinematicsStreamingMode
    private boolean pausedForWalking = false;
    private final RDXVRFootstepPlacement footstepPlacer;
    private final ControllerStatusTracker controllerStatusTracker;
-   private final SideDependentList<Float> gripButtonsValue = new SideDependentList<>();
 
-   private final HandConfiguration[] handConfigurations = {HandConfiguration.HALF_CLOSE, HandConfiguration.CRUSH, HandConfiguration.CLOSE};
-   private int leftIndex = -1;
-   private int rightIndex = -1;
+   private ROS2Input<CapturabilityBasedStatus> capturabilityBasedStatus;
+   private RDXMultiContactRegionGraphic multiContactStabilityGraphic;
+   private final HumanoidKinematicsToolboxConfigurationMessage ikHumanoidSolverConfigurationMessage = new HumanoidKinematicsToolboxConfigurationMessage();
+
+   private final RDXHandConfigurationManager handManager;
+   private final SideDependentList<Float> gripButtonsValue = new SideDependentList<>();
+   private SideDependentList<MutableBoolean> handsAreOpen = new SideDependentList<>(new MutableBoolean(false), new MutableBoolean(false));
+   private final SideDependentList<Boolean> handsAreLoaded = new SideDependentList<>(false, false);
+   private final SideDependentList<RDXHandControlMode> handControlModes = new SideDependentList<>(RDXHandControlMode.GRIPPER, RDXHandControlMode.GRIPPER);
 
    public RDXVRKinematicsStreamingMode(ROS2SyncedRobotModel syncedRobot,
                                        ROS2ControllerHelper ros2ControllerHelper,
@@ -143,7 +157,8 @@ public class RDXVRKinematicsStreamingMode
                                        RetargetingParameters retargetingParameters,
                                        SceneGraph sceneGraph,
                                        ControllerStatusTracker controllerStatusTracker,
-                                       RDXVRFootstepPlacement footstepPlacer)
+                                       RDXVRFootstepPlacement footstepPlacer,
+                                       RDXHandConfigurationManager handManager)
    {
       this.syncedRobot = syncedRobot;
       this.robotModel = syncedRobot.getRobotModel();
@@ -153,6 +168,7 @@ public class RDXVRKinematicsStreamingMode
       this.vrContext = vrContext;
       this.controllerStatusTracker = controllerStatusTracker;
       this.footstepPlacer = footstepPlacer;
+      this.handManager = handManager;
    }
 
    public void create(boolean createToolbox)
@@ -169,6 +185,8 @@ public class RDXVRKinematicsStreamingMode
       ghostRobotGraphic.setActive(true);
       ghostRobotGraphic.create();
 
+      multiContactStabilityGraphic = new RDXMultiContactRegionGraphic(ghostFullRobotModel);
+
       for (RobotSide side : RobotSide.values)
       {
          handFrameGraphics.put(side, new RDXReferenceFrameGraphic(FRAME_AXIS_GRAPHICS_LENGTH));
@@ -177,19 +195,20 @@ public class RDXVRKinematicsStreamingMode
          Pose3D ikControlFramePose = new Pose3D();
          if (side == RobotSide.LEFT)
          {
-            ikControlFramePose.getPosition().setAndNegate(retargetingParameters.getTranslationFromTracker(VRTrackedSegmentType.LEFT_HAND));
-            ikControlFramePose.getOrientation().setAndInvert(retargetingParameters.getYawPitchRollFromTracker(VRTrackedSegmentType.LEFT_HAND));
+            ikControlFramePose.getPosition().set(retargetingParameters.getControlFrameOffsetInBodyFrame(VRTrackedSegmentType.LEFT_HAND));
+            ikControlFramePose.getOrientation().set(retargetingParameters.getControlFrameOrientationInBodyFrame(VRTrackedSegmentType.LEFT_HAND));
          }
          else
          {
-            ikControlFramePose.getPosition().setAndNegate(retargetingParameters.getTranslationFromTracker(VRTrackedSegmentType.RIGHT_HAND));
-            ikControlFramePose.getOrientation().setAndInvert(retargetingParameters.getYawPitchRollFromTracker(VRTrackedSegmentType.RIGHT_HAND));
+            ikControlFramePose.getPosition().set(retargetingParameters.getControlFrameOffsetInBodyFrame(VRTrackedSegmentType.RIGHT_HAND));
+            ikControlFramePose.getOrientation().set(retargetingParameters.getControlFrameOrientationInBodyFrame(VRTrackedSegmentType.RIGHT_HAND));
          }
          ikControlFramePoses.put(side, ikControlFramePose);
       }
       headsetReferenceFrame = new MutableReferenceFrame(vrContext.getHeadset().getXForwardZUpHeadsetFrame());
 
       status = ros2ControllerHelper.subscribe(KinematicsStreamingToolboxModule.getOutputStatusTopic(syncedRobot.getRobotModel().getSimpleRobotName()));
+      capturabilityBasedStatus = ros2ControllerHelper.subscribeToController(CapturabilityBasedStatus.class);
 
       kinematicsRecorder = new KinematicsRecordReplay(sceneGraph, enabled);
       motionRetargeting = new RDXVRMotionRetargeting(syncedRobot, handDesiredControlFrames, trackerReferenceFrames, headsetReferenceFrame, retargetingParameters);
@@ -324,8 +343,7 @@ public class RDXVRKinematicsStreamingMode
          InputDigitalActionData clickTriggerButton = controller.getClickTriggerActionData();
          if (clickTriggerButton.bChanged() && !clickTriggerButton.bState())
          {
-            HandConfiguration handConfiguration = nextHandConfiguration(RobotSide.LEFT);
-            sendHandCommand(RobotSide.LEFT, handConfiguration);
+            performHandAction(RobotSide.LEFT);
          }
 
          // Check if left joystick is pressed in order to trigger recording or replay of motion
@@ -360,8 +378,7 @@ public class RDXVRKinematicsStreamingMode
         InputDigitalActionData clickTriggerButton = controller.getClickTriggerActionData();
         if (clickTriggerButton.bChanged() && !clickTriggerButton.bState())
         { // do not want to close grippers while interacting with the panel
-           HandConfiguration handConfiguration = nextHandConfiguration(RobotSide.RIGHT);
-           sendHandCommand(RobotSide.RIGHT, handConfiguration);
+           performHandAction(RobotSide.RIGHT);
 
            // TODO discuss and possibly remap to different button...
 
@@ -397,7 +414,7 @@ public class RDXVRKinematicsStreamingMode
                   if (!trackerReferenceFrames.containsKey(segmentType.getSegmentName()))
                   {
                      MutableReferenceFrame trackerDesiredControlFrame = new MutableReferenceFrame(tracker.getXForwardZUpTrackerFrame());
-                     trackerDesiredControlFrame.getTransformToParent().appendOrientation(retargetingParameters.getYawPitchRollFromTracker(segmentType));
+                     trackerDesiredControlFrame.getTransformToParent().getRotation().appendInvertOther(retargetingParameters.getControlFrameOrientationInBodyFrame(segmentType));
                      trackerDesiredControlFrame.getReferenceFrame().update();
                      trackerReferenceFrames.put(segmentType.getSegmentName(), trackerDesiredControlFrame);
 
@@ -697,6 +714,15 @@ public class RDXVRKinematicsStreamingMode
                      ghostOneDoFJointsExcludingHands[i].setQ(latestStatus.getDesiredJointAngles().get(i));
                   }
                   ghostFullRobotModel.getElevator().updateFramesRecursively();
+                  multiContactStabilityGraphic.update(latestStatus);
+               }
+            }
+            if (capturabilityBasedStatus.getMessageNotification().poll())
+            {
+               CapturabilityBasedStatus capturabilityBasedStatus = this.capturabilityBasedStatus.getMessageNotification().read();
+               for (RobotSide robotSide : RobotSide.values)
+               {
+                  handsAreLoaded.put(robotSide, HumanoidMessageTools.isHandLoadBearing(robotSide, capturabilityBasedStatus));
                }
             }
             if (ghostRobotGraphic.isActive())
@@ -909,6 +935,8 @@ public class RDXVRKinematicsStreamingMode
 
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
+      multiContactStabilityGraphic.getRenderables(renderables, pool);
+
       if (status.hasReceivedFirstMessage())
       {
          ghostRobotGraphic.getRenderables(renderables, pool, sceneLevels);
@@ -963,20 +991,81 @@ public class RDXVRKinematicsStreamingMode
       }
    }
 
-   public void sendHandCommand(RobotSide robotSide, HandConfiguration desiredHandConfiguration)
+   /**
+    * Performs hand action based on handControlMode:
+    * - GRIPPER: sends a HandConfiguration based on the next entry in handConfigurations.
+    * - LOAD_BEARING: loads the hand at the hand control frame with the normal handContactNormalInMidFeetZUpFrame.
+    * - NONE: you guessed it, nothing.
+    */
+   private void performHandAction(RobotSide robotSide)
    {
-      ros2ControllerHelper.publish(robotName -> OldHandAPI.getHandDesiredConfigurationTopic(robotName),
-                                   HumanoidMessageTools.createHandDesiredConfigurationMessage(robotSide, desiredHandConfiguration));
+      if (handControlModes.get(robotSide) == RDXHandControlMode.GRIPPER)
+      {
+         publishHandCommand(robotSide);
+      }
+      else if (handControlModes.get(robotSide) == RDXHandControlMode.LOAD_BEARING)
+      {
+         if (enabled.get())
+         {
+            LogTools.error("Ignoring hand load bearing message, cannot live-update while IK is running. TODO fixme :)");
+         }
+         else
+         {
+            sendHandLoadBearingMessage(robotSide);
+         }
+      }
    }
 
-   public HandConfiguration nextHandConfiguration(RobotSide robotSide)
+   private void sendHandLoadBearingMessage(RobotSide robotSide)
    {
-      if (robotSide == RobotSide.LEFT)
+      HandLoadBearingMessage handLoadBearingMessage = new HandLoadBearingMessage();
+      handLoadBearingMessage.setRobotSide(robotSide.toByte());
+
+      if (handsAreLoaded.get(robotSide))
       {
-         leftIndex++;
-         return handConfigurations[leftIndex % handConfigurations.length];
+         handLoadBearingMessage.setLoad(false);
+         handsAreLoaded.put(robotSide, false);
+
+         ikHumanoidSolverConfigurationMessage.setHoldCurrentCenterOfMassXyPosition(false);
+         ros2ControllerHelper.publish(ControllerAPI.getTopic(KinematicsStreamingToolboxModule.getInputTopic(robotModel.getSimpleRobotName()), HumanoidKinematicsToolboxConfigurationMessage.class), ikHumanoidSolverConfigurationMessage);
       }
-      rightIndex++;
-      return handConfigurations[rightIndex % handConfigurations.length];
+      else
+      {
+         handLoadBearingMessage.setLoad(true);
+
+         double handCoefficientOfFriction = 0.4;
+         handLoadBearingMessage.setCoefficientOfFriction(handCoefficientOfFriction);
+
+         // Contact point assumed to be at hand control frame and is using the nubs
+         FramePoint3D contactPoint = new FramePoint3D(syncedRobot.getFullRobotModel().getHandControlFrame(robotSide));
+         contactPoint.changeFrame(syncedRobot.getFullRobotModel().getHand(robotSide).getBodyFixedFrame());
+         handLoadBearingMessage.getContactPointInBodyFrame().set(contactPoint);
+
+         // Currently hard-coded. Need to integrate with perception
+         FrameVector3D contactNormal = new FrameVector3D(syncedRobot.getReferenceFrames().getMidFeetZUpFrame(), -1.0, 0.0, 0.0);
+         contactNormal.changeFrame(ReferenceFrame.getWorldFrame());
+         handLoadBearingMessage.getContactNormalInWorld().set(contactNormal);
+
+         handsAreLoaded.put(robotSide, true);
+
+         ikHumanoidSolverConfigurationMessage.setHoldCurrentCenterOfMassXyPosition(false);
+         ros2ControllerHelper.publish(ControllerAPI.getTopic(KinematicsStreamingToolboxModule.getInputTopic(robotModel.getSimpleRobotName()), HumanoidKinematicsToolboxConfigurationMessage.class), ikHumanoidSolverConfigurationMessage);
+      }
+
+      LogTools.info("publishing hand load bearing message " + robotSide + " hand, loading = " + handLoadBearingMessage.getLoad());
+      ros2ControllerHelper.publishToController(handLoadBearingMessage);
+   }
+
+   public void publishHandCommand(RobotSide side)
+   {
+      boolean close = handsAreOpen.get(side).booleanValue();
+      handsAreOpen.get(side).setValue(!close);
+      handManager.publishHandCommand(side, close ? SakeHandPreset.GRIP : SakeHandPreset.OPEN, false, false);
+   }
+
+   public void setVRHandConfiguration(RDXHandControlMode leftHandControlMode, RDXHandControlMode rightHandControlMode)
+   {
+      handControlModes.put(RobotSide.LEFT, leftHandControlMode);
+      handControlModes.put(RobotSide.RIGHT, rightHandControlMode);
    }
 }

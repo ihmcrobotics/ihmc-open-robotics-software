@@ -37,7 +37,7 @@ public class FootstepPlanActionPlanningThread
       this.isPreviewPlanner = isPreviewPlanner;
       this.state = state;
       this.definition = definition;
-      footstepPlanner = new FootstepPlanningModule();
+      footstepPlanner = new FootstepPlanningModule(definition.getPlannerParametersReadOnly().getUseGPU());
    }
 
    public void triggerPlan(ROS2SyncedRobotModel syncedRobot, SideDependentList<FramePose3D> liveGoalFeetPoses)
@@ -124,7 +124,7 @@ public class FootstepPlanActionPlanningThread
       if (!isPreviewPlanner)
          state.getLogger().info("Planning footsteps...");
       FootstepPlannerOutput footstepPlannerOutput = footstepPlanner.handleRequest(footstepPlannerRequest, isPreviewPlanner);
-      FootstepPlan footstepPlan = footstepPlannerOutput.getFootstepPlan();
+      FootstepPlan footstepPlan = footstepPlannerOutput == null ? new FootstepPlan() : footstepPlannerOutput.getFootstepPlan();
       if (!isPreviewPlanner)
          state.getLogger().info("Footstep planner completed with {}, {} step(s)", footstepPlannerOutput.getFootstepPlanningResult(), footstepPlan.getNumberOfSteps());
 

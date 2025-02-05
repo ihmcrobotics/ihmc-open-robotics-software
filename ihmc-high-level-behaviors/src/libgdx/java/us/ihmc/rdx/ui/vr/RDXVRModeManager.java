@@ -23,6 +23,7 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.RDXJoystickBasedStepping;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2RobotVisualizer;
+import us.ihmc.rdx.ui.teleoperation.RDXHandConfigurationManager;
 import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationManager;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -48,6 +49,7 @@ public class RDXVRModeManager
    private RDXROS2RobotVisualizer robotVisualizer;
    private ImBoolean interactablesEnabled;
    private ControllerStatusTracker controllerStatusTracker;
+   private RDXHandConfigurationManager handManager;
 
    public void create(RDXBaseUI baseUI,
                       ROS2SyncedRobotModel syncedRobot,
@@ -91,6 +93,7 @@ public class RDXVRModeManager
          {
             interactablesEnabled = teleoperationPanel.getInteractablesEnabled();
             controllerStatusTracker = teleoperationPanel.getControllerStatusTracker();
+            handManager = teleoperationPanel.getArmManager().getHandManager();
             break;
          }
       }
@@ -105,7 +108,8 @@ public class RDXVRModeManager
                                                                     retargetingParameters,
                                                                     sceneGraph,
                                                                     controllerStatusTracker,
-                                                                    footstepPlacer);
+                                                                    footstepPlacer,
+                                                                    handManager);
          kinematicsStreamingMode.create(createKinematicsStreamingToolboxModule);
       }
 

@@ -11,9 +11,8 @@ public class HumanoidKinematicsToolboxConfigurationCommand
    private long sequenceId;
    private boolean holdCurrentCenterOfMassXYPosition = true;
    private boolean enableAutoSupportPolygon = true;
-   private boolean holdSupportRigidBodies = true;
-   private boolean enableMultiContactSupportRegionSolver = false;
    private boolean enableJointLimitReduction = true;
+   private boolean enableStabilityObjective = false;
    private final TDoubleArrayList jointLimitReductionValues = new TDoubleArrayList();
    private final TIntArrayList jointLimitReductionHashCodes = new TIntArrayList();
 
@@ -23,9 +22,8 @@ public class HumanoidKinematicsToolboxConfigurationCommand
       sequenceId = 0;
       holdCurrentCenterOfMassXYPosition = true;
       enableAutoSupportPolygon = true;
-      holdSupportRigidBodies = true;
-      enableMultiContactSupportRegionSolver = false;
       enableJointLimitReduction = true;
+      enableStabilityObjective = false;
       jointLimitReductionValues.reset();
       jointLimitReductionHashCodes.reset();
    }
@@ -38,9 +36,8 @@ public class HumanoidKinematicsToolboxConfigurationCommand
       sequenceId = other.sequenceId;
       holdCurrentCenterOfMassXYPosition = other.holdCurrentCenterOfMassXYPosition;
       enableAutoSupportPolygon = other.enableAutoSupportPolygon;
-      holdSupportRigidBodies = other.holdSupportRigidBodies;
-      enableMultiContactSupportRegionSolver = other.enableMultiContactSupportRegionSolver;
       enableJointLimitReduction = other.enableJointLimitReduction;
+      enableStabilityObjective = other.enableStabilityObjective;
 
       for (int i = 0; i < other.jointLimitReductionValues.size(); i++)
       {
@@ -60,9 +57,8 @@ public class HumanoidKinematicsToolboxConfigurationCommand
       sequenceId = message.getSequenceId();
       holdCurrentCenterOfMassXYPosition = message.getHoldCurrentCenterOfMassXyPosition();
       enableAutoSupportPolygon = message.getEnableAutoSupportPolygon();
-      holdSupportRigidBodies = message.getHoldSupportRigidBodies();
-      enableMultiContactSupportRegionSolver = message.getEnableMultiContactSupportRegionSolver();
       enableJointLimitReduction = message.getEnableJointLimitReduction();
+      enableStabilityObjective = message.getEnableStabilityObjective();
 
       for (int i = 0; i < message.getJointLimitReductionFactors().size(); i++)
       {
@@ -84,19 +80,14 @@ public class HumanoidKinematicsToolboxConfigurationCommand
       return enableAutoSupportPolygon;
    }
 
-   public boolean holdSupportRigidBodies()
-   {
-      return holdSupportRigidBodies;
-   }
-
-   public boolean enableMultiContactSupportRegionSolver()
-   {
-      return enableMultiContactSupportRegionSolver;
-   }
-
    public boolean enableJointLimitReduction()
    {
       return enableJointLimitReduction;
+   }
+
+   public boolean enableStabilityObjective()
+   {
+      return enableStabilityObjective;
    }
 
    public boolean hasCustomJointRestrictionLimits()

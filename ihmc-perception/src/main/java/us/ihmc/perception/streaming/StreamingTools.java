@@ -28,8 +28,8 @@ public class StreamingTools
                          entry("tlpktdrop", "1"),        // "Too late packet drop" - drop packets that arrive/are sent too late
                          entry("rcvlatency", "50"),
                          entry("peerlatency", "50"),     // 50ms of buffer delay for packet loss correction
-                         entry("mss", "1360"),           // Max packet size of MPEG-TS
-                         entry("payload_size", "1316")); // Payload size of MPEG-TS
+                         entry("mss", "1500"),           // Max segment size
+                         entry("payload_size", "1456")); // Max payload size
 
    public static Map<String, String> getLiveSRTOptions()
    {

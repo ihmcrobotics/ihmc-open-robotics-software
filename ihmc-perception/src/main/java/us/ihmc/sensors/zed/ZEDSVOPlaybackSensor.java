@@ -48,7 +48,7 @@ public class ZEDSVOPlaybackSensor extends ZEDImageSensor
 
          ros2.publish(PerceptionAPI.ZED_SVO_CURRENT_FILE, svoStatusMessage);
       }).setFrequencyLimit(ZEDImageSensor.CAMERA_FPS);
-      publishInfoThread.start();
+      publishInfoThread.startRepeating();
    }
 
    public void useTrackedPose(boolean useTrackedPose)

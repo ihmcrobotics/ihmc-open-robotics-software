@@ -21,7 +21,7 @@ public class CUDADepthColorizer
    private final CUDAKernel encoder;
    private final CUDAKernel decoder;
 
-   public CUDADepthColorizer()
+   public CUDADepthColorizer() throws Exception
    {
       stream = CUDAStreamManager.getStream();
 
@@ -49,7 +49,6 @@ public class CUDADepthColorizer
       try (dim3 gridSize = new dim3(gridSizeX, gridSizeY, 1);
            dim3 blockSize = new dim3(BLOCK_DIM_XY, BLOCK_DIM_XY, 1))
       {
-         encoder.clearParameters();
          encoder.withPointer(depthImage.data()).withLong(depthImage.step())
                 .withPointer(colorizedDepth.data()).withLong(colorizedDepth.step())
                 .withInt(depthImage.rows()).withInt(depthImage.cols())
@@ -78,7 +77,6 @@ public class CUDADepthColorizer
       try (dim3 gridSize = new dim3(gridSizeX, gridSizeY, 1);
            dim3 blockSize = new dim3(BLOCK_DIM_XY, BLOCK_DIM_XY, 1))
       {
-         decoder.clearParameters();
          decoder.withPointer(colorizedDepthImage.data()).withLong(colorizedDepthImage.step())
                 .withPointer(deColorizedDepth.data()).withLong(deColorizedDepth.step())
                 .withInt(colorizedDepthImage.rows()).withInt(colorizedDepthImage.cols())

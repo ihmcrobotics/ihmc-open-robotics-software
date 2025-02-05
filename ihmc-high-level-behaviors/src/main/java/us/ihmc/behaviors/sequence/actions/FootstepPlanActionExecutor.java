@@ -88,9 +88,6 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
       Point3DReadOnly definitionGoalFocalPoint = definition.getGoalFocalPoint().getValueReadOnly();
       boolean invalidDefinition = definitionGoalStancePoint.geometricallyEquals(definitionGoalFocalPoint, 1e-4);
 
-      if (invalidDefinition)
-         state.getLogger().error("Approach point can not be in the same place as the focus point.");
-
       state.setCanExecute(state.areFramesInWorld() && !invalidDefinition);
       if (state.getCanExecute() && !definition.getIsManuallyPlaced())
       {
@@ -144,7 +141,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
 
          for (RobotSide side : RobotSide.values)
          {
-            state.copyDefinitionToGoalFoostepToGoalTransform(side);
+            state.copyDefinitionToGoalFootstepToGoalTransform(side);
 
             liveGoalFeetPoses.get(side)
                              .setIncludingFrame(state.getGoalFrame().getReferenceFrame(),
