@@ -44,6 +44,7 @@ import us.ihmc.footstepPlanning.tools.SwingPlannerTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
+import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractorCUDA;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.rdx.imgui.ImGuiSliderDouble;
 import us.ihmc.rdx.imgui.RDXPanel;
@@ -163,6 +164,11 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       RDXStoredPropertySetTuner heightMapParametersPanel = new RDXStoredPropertySetTuner("Height Map Parameters (CH)");
       createParametersPanel(RapidHeightMapExtractor.getHeightMapParameters(),
                             heightMapParametersPanel,
+                            hostStoredPropertySets,
+                            PerceptionComms.HEIGHT_MAP_PARAMETERS);
+      RDXStoredPropertySetTuner heightMapParametersPanelCUDA = new RDXStoredPropertySetTuner("CUDA Height Map Parameters (CH)");
+      createParametersPanel(RapidHeightMapExtractorCUDA.getHeightMapParameters(),
+                            heightMapParametersPanelCUDA,
                             hostStoredPropertySets,
                             PerceptionComms.HEIGHT_MAP_PARAMETERS);
 

@@ -27,7 +27,6 @@ import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.commons.UnitConversions;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.Throttler;
-import us.ihmc.communication.OldHandAPI;
 import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.ToolboxState;
@@ -59,7 +58,7 @@ import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.teleoperation.RDXHandConfigurationManager;
 import us.ihmc.rdx.ui.tools.KinematicsRecordReplay;
 import us.ihmc.rdx.vr.RDXVRContext;
-import us.ihmc.rdx.vr.RDXVRControllerModel;
+import us.ihmc.rdx.vr.RDXVRHardwareModel;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.partNames.ArmJointName;
@@ -83,7 +82,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static us.ihmc.communication.packets.MessageTools.toFrameId;
 import static us.ihmc.motionRetargeting.VRTrackedSegmentType.*;
@@ -199,13 +197,13 @@ public class RDXVRKinematicsStreamingMode
          Pose3D ikControlFramePose = new Pose3D();
          if (side == RobotSide.LEFT)
          {
-            ikControlFramePose.getPosition().setAndNegate(retargetingParameters.getTranslationFromTracker(VRTrackedSegmentType.LEFT_HAND));
-            ikControlFramePose.getOrientation().setAndInvert(retargetingParameters.getYawPitchRollFromTracker(VRTrackedSegmentType.LEFT_HAND));
+            ikControlFramePose.getPosition().set(retargetingParameters.getControlFrameOffsetInBodyFrame(VRTrackedSegmentType.LEFT_HAND));
+            ikControlFramePose.getOrientation().set(retargetingParameters.getControlFrameOrientationInBodyFrame(VRTrackedSegmentType.LEFT_HAND));
          }
          else
          {
-            ikControlFramePose.getPosition().setAndNegate(retargetingParameters.getTranslationFromTracker(VRTrackedSegmentType.RIGHT_HAND));
-            ikControlFramePose.getOrientation().setAndInvert(retargetingParameters.getYawPitchRollFromTracker(VRTrackedSegmentType.RIGHT_HAND));
+            ikControlFramePose.getPosition().set(retargetingParameters.getControlFrameOffsetInBodyFrame(VRTrackedSegmentType.RIGHT_HAND));
+            ikControlFramePose.getOrientation().set(retargetingParameters.getControlFrameOrientationInBodyFrame(VRTrackedSegmentType.RIGHT_HAND));
          }
          ikControlFramePoses.put(side, ikControlFramePose);
       }
@@ -278,7 +276,7 @@ public class RDXVRKinematicsStreamingMode
          toolbox = new KinematicsStreamingToolboxModule(robotModel, parameters, startYoVariableServer);
       }
 
-      if (vrContext.getControllerModel() == RDXVRControllerModel.FOCUS3)
+      if (vrContext.getVRModel() == RDXVRHardwareModel.FOCUS3)
       {
          RDXBaseUI.getInstance().getKeyBindings().register("Streaming - Enable IK (toggle)", "A button");
          RDXBaseUI.getInstance().getKeyBindings().register("Streaming - Control robot (toggle)", "X button");
@@ -348,7 +346,6 @@ public class RDXVRKinematicsStreamingMode
          if (clickTriggerButton.bChanged() && !clickTriggerButton.bState())
          {
             performHandAction(RobotSide.LEFT);
-            vrContext.loadTrackerRolesFromFile();
          }
 
          // Check if left joystick is pressed in order to trigger recording or replay of motion
@@ -422,7 +419,7 @@ public class RDXVRKinematicsStreamingMode
                   if (!trackerReferenceFrames.containsKey(segmentType.getSegmentName()))
                   {
                      MutableReferenceFrame trackerDesiredControlFrame = new MutableReferenceFrame(tracker.getXForwardZUpTrackerFrame());
-                     trackerDesiredControlFrame.getTransformToParent().appendOrientation(retargetingParameters.getYawPitchRollFromTracker(segmentType));
+                     trackerDesiredControlFrame.getTransformToParent().getRotation().appendInvertOther(retargetingParameters.getControlFrameOrientationInBodyFrame(segmentType));
                      trackerDesiredControlFrame.getReferenceFrame().update();
                      trackerReferenceFrames.put(segmentType.getSegmentName(), trackerDesiredControlFrame);
                   }

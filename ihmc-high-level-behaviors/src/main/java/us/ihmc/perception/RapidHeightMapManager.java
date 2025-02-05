@@ -143,6 +143,16 @@ public class RapidHeightMapManager
 
       Mat croppedHeightMapImage = rapidHeightMapExtractor.getTerrainMapData().getHeightMap();
 
+      float heightScaleFactor;
+      if (runWithCUDA)
+      {
+         heightScaleFactor = (float) RapidHeightMapExtractorCUDA.getHeightMapParameters().getHeightScaleFactor();
+      }
+      else
+      {
+         heightScaleFactor = (float) RapidHeightMapExtractor.getHeightMapParameters().getHeightScaleFactor();
+      }
+
       OpenCVTools.compressImagePNG(croppedHeightMapImage, compressedCroppedHeightMapPointer);
       PerceptionMessageTools.publishCompressedDepthImage(compressedCroppedHeightMapPointer,
                                                          PerceptionAPI.HEIGHT_MAP_CROPPED,
@@ -153,12 +163,19 @@ public class RapidHeightMapManager
                                                          rapidHeightMapExtractor.getSequenceNumber(),
                                                          croppedHeightMapImage.rows(),
                                                          croppedHeightMapImage.cols(),
-                                                         (float) RapidHeightMapExtractor.getHeightMapParameters().getHeightScaleFactor());
+                                                         heightScaleFactor);
    }
 
    public HeightMapData getLatestHeightMapData()
    {
-      return RapidHeightMapExtractorCUDA.packHeightMapData(rapidHeightMapExtractor);
+      if (runWithCUDA)
+      {
+         return RapidHeightMapExtractorCUDA.packHeightMapData(rapidHeightMapExtractor);
+      }
+      else
+      {
+         return RapidHeightMapExtractor.packHeightMapData(rapidHeightMapExtractor);
+      }
    }
 
    public TerrainMapData getTerrainMapData()
