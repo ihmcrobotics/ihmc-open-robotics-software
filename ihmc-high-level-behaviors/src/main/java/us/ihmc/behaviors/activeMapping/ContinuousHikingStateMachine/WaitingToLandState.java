@@ -20,7 +20,7 @@ public class WaitingToLandState implements State
    private final ROS2Topic<FootstepDataListMessage> controllerFootstepDataTopic;
    private final ContinuousPlanner continuousPlanner;
    private final ControllerFootstepQueueMonitor controllerQueueMonitor;
-   private FootstepStatusMessage previousFootstepStatusMessage = null;
+   private FootstepStatusMessage previousFootstepStatusMessage = new FootstepStatusMessage();
    private final ContinuousHikingLogger continuousHikingLogger;
 
    /**
@@ -86,17 +86,11 @@ public class WaitingToLandState implements State
    @Override
    public boolean isDone(double timeInState)
    {
-      //TODO this is a bit messy, cleanup please
-      if (controllerQueueMonitor.getFootstepStatusMessage() != null)
-      {
-         FootstepStatusMessage footstepStatusMessage = controllerQueueMonitor.getFootstepStatusMessage().get();
-         if (previousFootstepStatusMessage != null && previousFootstepStatusMessage.getSequenceId() == footstepStatusMessage.getSequenceId())
-            return false;
+      FootstepStatusMessage footstepStatusMessage = controllerQueueMonitor.getFootstepStatusMessage().get();
+      if (previousFootstepStatusMessage.getSequenceId() == footstepStatusMessage.getSequenceId())
+         return false;
 
-         previousFootstepStatusMessage = footstepStatusMessage;
-         return footstepStatusMessage.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_STARTED;
-      }
-
-      return false;
+      previousFootstepStatusMessage = footstepStatusMessage;
+      return footstepStatusMessage.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_STARTED;
    }
 }
