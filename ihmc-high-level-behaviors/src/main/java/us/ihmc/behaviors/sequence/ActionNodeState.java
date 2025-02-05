@@ -82,7 +82,7 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
                if (actionStateToCompare.getDefinition().getName().equals(definition.getExecuteAfterActionName()))
                {
                   executeAfterActionName = actionStateToCompare.getDefinition().getName();
-                  if (definition.getName().equals("Left hand down and out"))
+                  if (definition.getName().contains("Wait"))
                      LogTools.debug("{}: updateAndValidateExecuteAfter {} -> {}", definition.getCRDTInfo().getActorDesignation().name(),
                                     definition.getExecuteAfterNodeID().getValue(),
                                     actionStateToCompare.getID());

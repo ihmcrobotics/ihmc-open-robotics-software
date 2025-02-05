@@ -26,8 +26,6 @@ public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
    public static final String EXECUTE_AFTER_PREVIOUS = "Previous";
    public static final String EXECUTE_AFTER_BEGINNING = "Beginning";
 
-   private final CRDTBidirectionalBoolean executeAfterPrevious;
-   private final CRDTBidirectionalBoolean executeAfterBeginning;
    private final CRDTBidirectionalLong executeAfterNodeID;
    /** We use this to save the action name to file instead of the number for human readability. */
    private String executeAfterActionName = EXECUTE_AFTER_PREVIOUS;
@@ -39,9 +37,7 @@ public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
    {
       super(crdtInfo, saveFileDirectory);
 
-      executeAfterPrevious = new CRDTBidirectionalBoolean(this, true);
-      executeAfterBeginning = new CRDTBidirectionalBoolean(this, false);
-      executeAfterNodeID = new CRDTBidirectionalLong(this, 0);
+      executeAfterNodeID = new CRDTBidirectionalLong(this, ActionNodeDefinitionMessage.EXECUTE_AFTER_PREVIOUS);
    }
 
    public void updateAndSanitizeExecuteAfterFields(@Nullable String executeAfterActionName)
@@ -49,7 +45,7 @@ public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
       if (executeAfterBeginning.getValue())
       {
          this.executeAfterActionName = EXECUTE_AFTER_BEGINNING;
-         if (getName().equals("Left hand down and out"))
+         if (getName().contains("Wait"))
             LogTools.debug("{}: beginning {} -> 0", getCRDTInfo().getActorDesignation().name(), executeAfterNodeID.getValue());
          executeAfterNodeID.setValue(0);
       }
@@ -61,7 +57,7 @@ public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
       {
          executeAfterPrevious.setValue(true);
          this.executeAfterActionName = EXECUTE_AFTER_PREVIOUS;
-         if (getName().equals("Left hand down and out") && executeAfterNodeID.getValue() != 0)
+         if (getName().contains("Wait") && executeAfterNodeID.getValue() != 0)
             LogTools.debug("{}: Defaulting to previous {} -> 0", getCRDTInfo().getActorDesignation().name(), executeAfterNodeID.getValue());
          executeAfterNodeID.setValue(0);
       }
@@ -81,7 +77,7 @@ public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
       super.loadFromFile(jsonNode);
 
       executeAfterActionName = jsonNode.get("executeAfterAction").textValue();
-      if (getName().equals("Left hand down and out"))
+      if (getName().contains("Wait"))
          LogTools.debug("Loaded {}", executeAfterActionName);
       executeAfterPrevious.setValue(executeAfterActionName.equals(EXECUTE_AFTER_PREVIOUS));
       executeAfterBeginning.setValue(executeAfterActionName.equals(EXECUTE_AFTER_BEGINNING));
@@ -104,8 +100,6 @@ public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
       if (isUndoAvailable())
       {
          executeAfterActionName = onDiskExecuteAfterActionName;
-         executeAfterPrevious.setValue(onDiskExecuteAfterActionName.equals(EXECUTE_AFTER_PREVIOUS));
-         executeAfterBeginning.setValue(onDiskExecuteAfterActionName.equals(EXECUTE_AFTER_BEGINNING));
          executeAfterNodeID.setValue(0); // Invalidate until we can find it
       }
    }
@@ -124,9 +118,7 @@ public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
    {
       super.toMessage(message.getDefinition());
 
-      message.setExecuteAfterPrevious(executeAfterPrevious.toMessage());
-      message.setExecuteAfterBeginning(executeAfterBeginning.toMessage());
-      if (getName().equals("Left hand down and out") && executeAfterNodeID.getValue() != message.getExecuteAfterNodeId())
+      if (getName().contains("Wait") && executeAfterNodeID.getValue() != message.getExecuteAfterNodeId())
          LogTools.debug("{}: toMessage {} -> {}", getCRDTInfo().getActorDesignation().name(), message.getExecuteAfterNodeId(),
                         executeAfterNodeID.getValue());
       message.setExecuteAfterNodeId(executeAfterNodeID.toMessage());
@@ -136,21 +128,19 @@ public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
    {
       super.fromMessage(message.getDefinition());
 
-      executeAfterPrevious.fromMessage(message.getExecuteAfterPrevious());
-      executeAfterBeginning.fromMessage(message.getExecuteAfterBeginning());
-      if (getName().equals("Left hand down and out") && executeAfterNodeID.getValue() != message.getExecuteAfterNodeId())
+      if (getName().contains("Wait") && executeAfterNodeID.getValue() != message.getExecuteAfterNodeId())
          LogTools.debug("{}: fromMessage {} -> {}", getCRDTInfo().getActorDesignation().name(), executeAfterNodeID.getValue(), message.getExecuteAfterNodeId());
       executeAfterNodeID.fromMessage(message.getExecuteAfterNodeId());
    }
 
-   public CRDTBidirectionalBoolean getExecuteAfterPrevious()
+   public boolean getExecuteAfterPrevious()
    {
-      return executeAfterPrevious;
+      return executeAfterNodeID.getValue() == ActionNodeDefinitionMessage.EXECUTE_AFTER_PREVIOUS;
    }
 
-   public CRDTBidirectionalBoolean getExecuteAfterBeginning()
+   public boolean getExecuteAfterBeginning()
    {
-      return executeAfterBeginning;
+      return executeAfterNodeID.getValue() == ActionNodeDefinitionMessage.EXECUTE_AFTER_BEGINNING;
    }
 
    public CRDTBidirectionalLong getExecuteAfterNodeID()

@@ -141,7 +141,7 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
                   {
                      definition.getExecuteAfterPrevious().setValue(false);
                      definition.getExecuteAfterBeginning().setValue(false);
-                     if (definition.getName().equals("Left hand down and out"))
+                     if (definition.getName().contains("Wait"))
                         LogTools.debug("{}: selectable {} -> {}}", definition.getCRDTInfo().getActorDesignation().name(), definition.getExecuteAfterNodeID().getValue(), (int) actionChild.getID());
                      definition.getExecuteAfterNodeID().setValue((int) actionChild.getID());
                      definition.updateAndSanitizeExecuteAfterFields(actionChild.getDefinition().getName());
