@@ -82,6 +82,7 @@ public class StandAloneRealsenseProcess
                                                              syncedRobot,
                                                              syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.LEFT),
                                                              syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.RIGHT),
+                                                             controllerFootstepQueueMonitor,
                                                              d455Sensor,
                                                              RealSenseImageSensor.DEPTH_IMAGE_KEY,
                                                              runWithCUDA);
