@@ -51,16 +51,6 @@ public class BehaviorTreeTools
       }
    }
 
-   public static void runForSubtreeNodes(BehaviorTreeNodeState<?> node, Consumer<BehaviorTreeNodeState<?>> operation)
-   {
-      operation.accept(node);
-
-      for (BehaviorTreeNodeState<?> child : node.getChildren())
-      {
-         runForSubtreeNodes(child, operation);
-      }
-   }
-
    public static <HLT extends BehaviorTreeNode<HLT, ?, ?>> void runForSubtreeNodes(HLT node, Consumer<HLT> operation)
    {
       operation.accept(node);
@@ -87,5 +77,21 @@ public class BehaviorTreeTools
          }
       });
       return actionDefinitions;
+   }
+
+   public static int getNodeDepth(BehaviorTreeNodeState<?> node)
+   {
+      int depth = 0;
+      while (!node.isRootNode())
+      {
+         ++depth;
+         node = node.getParent();
+      }
+      return depth;
+   }
+
+   public static int getChildIndex(BehaviorTreeNodeState<?> node)
+   {
+      return node.isRootNode() ? 0 : node.getParent().getChildren().indexOf(node);
    }
 }

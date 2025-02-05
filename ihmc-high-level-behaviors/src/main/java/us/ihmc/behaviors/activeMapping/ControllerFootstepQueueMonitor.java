@@ -2,24 +2,33 @@ package us.ihmc.behaviors.activeMapping;
 
 import controller_msgs.msg.dds.FootstepQueueStatusMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.msg.dds.PlanOffsetStatus;
 import controller_msgs.msg.dds.QueuedFootstepStatusMessage;
+import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+
+import static us.ihmc.communication.HumanoidControllerAPI.getTopic;
 
 public class ControllerFootstepQueueMonitor
 {
    private int controllerQueueSize = 0;
    private List<QueuedFootstepStatusMessage> controllerQueue;
    private final AtomicReference<FootstepStatusMessage> footstepStatusMessage = new AtomicReference<>(new FootstepStatusMessage());
+   private final AtomicReference<PlanOffsetStatus> planOffsetMessage = new AtomicReference<>(new PlanOffsetStatus());
 
    private final HumanoidReferenceFrames referenceFrames;
    private final ContinuousHikingLogger continuousHikingLogger;
+   private boolean footstepStarted;
+   private final AtomicBoolean isWalking = new AtomicBoolean(false);
 
    public ControllerFootstepQueueMonitor(ROS2Helper ros2Helper,
                                          String simpleRobotName,
@@ -30,6 +39,8 @@ public class ControllerFootstepQueueMonitor
       this.continuousHikingLogger = continuousHikingLogger;
       ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(FootstepQueueStatusMessage.class, simpleRobotName), this::footstepQueueStatusReceived);
       ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(FootstepStatusMessage.class, simpleRobotName), this::footstepStatusReceived);
+      ros2Helper.subscribeViaCallback(getTopic(PlanOffsetStatus.class, simpleRobotName), this::acceptPlanOffsetStatus);
+      ros2Helper.subscribeViaCallback(getTopic(WalkingStatusMessage.class, simpleRobotName), this::acceptWalkingStatusMessage);
    }
 
    private void footstepQueueStatusReceived(FootstepQueueStatusMessage footstepQueueStatusMessage)
@@ -56,7 +67,26 @@ public class ControllerFootstepQueueMonitor
                                           .norm();
       }
 
+      footstepStarted = footstepStatusMessage.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_STARTED;
+
       this.footstepStatusMessage.set(footstepStatusMessage);
+   }
+
+   private void acceptWalkingStatusMessage(WalkingStatusMessage message)
+   {
+      // Declared locally since this represents the absolute state which other threads can access
+      isWalking.set(false);
+      WalkingStatus walkingStatus = WalkingStatus.fromByte(message.getWalkingStatus());
+
+      if (walkingStatus == WalkingStatus.STARTED || walkingStatus == WalkingStatus.RESUMED)
+      {
+         isWalking.set(true);
+      }
+   }
+
+   private void acceptPlanOffsetStatus(PlanOffsetStatus planOffsetMessage)
+   {
+      this.planOffsetMessage.set(planOffsetMessage);
    }
 
    public List<QueuedFootstepStatusMessage> getControllerFootstepQueue()
@@ -67,5 +97,24 @@ public class ControllerFootstepQueueMonitor
    public AtomicReference<FootstepStatusMessage> getFootstepStatusMessage()
    {
       return footstepStatusMessage;
+   }
+
+   // TODO Polling this in multiple threads may cause issues as the second time its pulled the value will be null.
+   // TODO If needed this should change to handle that case correctly.
+   public PlanOffsetStatus pollPlanOffsetMessage()
+   {
+      return planOffsetMessage.getAndSet(null);
+   }
+
+   public boolean isFootstepStarted()
+   {
+      return footstepStarted;
+   }
+
+   // TODO Polling this in multiple threads may cause issues as the second time its pulled the value will be null.
+   // TODO If needed this should change to handle that case correctly.
+   public boolean pollIsWalking()
+   {
+      return isWalking.getAndSet(false);
    }
 }

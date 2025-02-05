@@ -8,6 +8,8 @@ import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.msg.dds.PlanOffsetStatus;
 import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import ihmc_common_msgs.msg.dds.PoseListMessage;
 import imgui.ImGui;
@@ -31,6 +33,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
@@ -41,6 +44,7 @@ import us.ihmc.footstepPlanning.tools.SwingPlannerTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
+import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractorCUDA;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.rdx.imgui.ImGuiSliderDouble;
 import us.ihmc.rdx.imgui.RDXPanel;
@@ -60,6 +64,8 @@ import us.ihmc.tools.property.StoredPropertySetBasics;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
+
+import static us.ihmc.communication.HumanoidControllerAPI.getTopic;
 
 public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProvider
 {
@@ -83,6 +89,8 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    private final ImBoolean useAStarFootstepPlanner = new ImBoolean(true);
    private final ImBoolean useMonteCarloReference = new ImBoolean(false);
    private final ImBoolean useMonteCarloFootstepPlanner = new ImBoolean(false);
+   private final ControllerFootstepQueueMonitor controllerFootstepQueueMonitor;
+   private final ContinuousHikingLogger continuousHikingLogger;
    private SideDependentList<FramePose3D> startStancePose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
    private FootstepPlan latestFootstepPlan;
    private List<EnumMap<Axis3D, List<PolynomialReadOnly>>> swingTrajectories;
@@ -91,8 +99,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    private ROS2StoredPropertySetGroup clientStoredPropertySets;
    private boolean runSubscriberOnly = false;
    private boolean publishAndSubscribe;
-   private final ControllerFootstepQueueMonitor controllerFootstepQueueMonitor;
-   private final ContinuousHikingLogger continuousHikingLogger;
+   private double simulatedDriftInMeters = -0.1;
 
    public RDXContinuousHikingPanel(RDXBaseUI baseUI, ROS2Node ros2Node, ROS2Helper ros2Helper, DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobotModel)
    {
@@ -157,6 +164,11 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       RDXStoredPropertySetTuner heightMapParametersPanel = new RDXStoredPropertySetTuner("Height Map Parameters (CH)");
       createParametersPanel(RapidHeightMapExtractor.getHeightMapParameters(),
                             heightMapParametersPanel,
+                            hostStoredPropertySets,
+                            PerceptionComms.HEIGHT_MAP_PARAMETERS);
+      RDXStoredPropertySetTuner heightMapParametersPanelCUDA = new RDXStoredPropertySetTuner("CUDA Height Map Parameters (CH)");
+      createParametersPanel(RapidHeightMapExtractorCUDA.getHeightMapParameters(),
+                            heightMapParametersPanelCUDA,
                             hostStoredPropertySets,
                             PerceptionComms.HEIGHT_MAP_PARAMETERS);
 
@@ -281,13 +293,38 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       {
          clearPlannedFootsteps();
       }
-      ImGui.sameLine();
       stepsBeforeSafetyStop.render(0.0, 50.0);
       ImGui.checkbox("Use A* Footstep Planner", useAStarFootstepPlanner);
       ImGui.checkbox("Use Monte-Carlo Footstep Planner", useMonteCarloFootstepPlanner);
       ImGui.checkbox("Use Monte-Carlo Reference", useMonteCarloReference);
       ImGui.unindent();
       ImGui.separator();
+
+      if (ImGui.button("Fake Controller Drift"))
+      {
+         // Simulate that the controller started a step, this part triggers the drift offset kernel
+         FootstepStatusMessage footstepStatusMessage = new FootstepStatusMessage();
+         footstepStatusMessage.setFootstepStatus(FootstepStatusMessage.FOOTSTEP_STATUS_STARTED);
+         ros2Helper.publish(getTopic(FootstepStatusMessage.class, "Nadia"), footstepStatusMessage);
+
+         // Simulate that the controller has drifted by some z value
+         PlanOffsetStatus planOffsetStatus = new PlanOffsetStatus();
+         Vector3D planOffset = new Vector3D(0, 0, simulatedDriftInMeters);
+         planOffsetStatus.getOffsetVector().set(planOffset);
+         LogTools.info("Plan Offset Status: " + planOffsetStatus.getOffsetVector());
+         ros2Helper.publish(getTopic(PlanOffsetStatus.class, "Nadia"), planOffsetStatus);
+
+         // The amount of drift that we want to simulation and adjust for if we do this over and over
+         if (simulatedDriftInMeters > -1.0)
+         {
+            simulatedDriftInMeters -= 0.1;
+         }
+         else
+         {
+            simulatedDriftInMeters += 0.1;
+         }
+      }
+
       terrainPlanningDebugger.renderImGuiWidgets();
 
       // Check to see if a controller is plugged into the computer
@@ -458,6 +495,11 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    public ContinuousPlannerSchedulingTask getContinuousPlannerSchedulingTask()
    {
       return continuousPlannerSchedulingTask;
+   }
+
+   public ControllerFootstepQueueMonitor getControllerFootstepQueueMonitor()
+   {
+      return controllerFootstepQueueMonitor;
    }
 
    public RDXStancePoseSelectionPanel getStancePoseSelectionPanel()

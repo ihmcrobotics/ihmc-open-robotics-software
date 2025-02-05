@@ -15,6 +15,10 @@ public interface RapidHeightMapExtractorInterface
 
    void update(RigidBodyTransform sensorToWorldTransform, RigidBodyTransform sensorToGroundTransform, RigidBodyTransform groundToWorldTransform);
 
+   default void updateHeightOffset(float z)
+   {
+      //Do Nothing
+   }
    void reset();
 
    void destroy();
