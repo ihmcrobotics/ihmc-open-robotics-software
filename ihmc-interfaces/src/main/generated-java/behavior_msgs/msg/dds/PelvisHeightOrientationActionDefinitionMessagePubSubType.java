@@ -15,7 +15,7 @@ public class PelvisHeightOrientationActionDefinitionMessagePubSubType implements
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "e067edb17a2f65a052bc658b860192c20d213c59d76a189a38024a35be9fde01";
+   		return "7dac55a8fcb587418af30eeaea4b13196602d9321d4369ec4df1e959363a4300";
    }
    
    @Override
