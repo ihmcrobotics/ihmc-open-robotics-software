@@ -36,11 +36,14 @@ public class FSTStreamingState implements State
    private final SideDependentList<FrameVector2D> directionTrackersCtrl = new SideDependentList<>(); // Controlled direction vector for each foot.
    private final SideDependentList<RigidBodyTransform> initialRobotSwingFootTransformsInWorld = new SideDependentList<>();
    private final SideDependentList<Double> maxFeetHeight = new SideDependentList<>(0.0, 0.0);
-   private double velocitySum = 0.0;
-   private int velocityCount = 0;
    private double robotStepDuration = 0.0;
    private double robotElapsedTimeCurrentStep = 0.0;
    private double currentStrideEstimate;
+   private double currentYawEstimate;
+   private double velocitySum = 0.0;
+   private int velocityCount = 0;
+   private double yawDotSum = 0.0;
+   private int yawDotCount = 0;
 
    private final YoDouble timeOfLastInput = new YoDouble("timeOfLastInput", registry);
    private final YoDouble timeSinceLastInput = new YoDouble("timeSinceLastInput", registry);
@@ -56,8 +59,10 @@ public class FSTStreamingState implements State
    private final YoDouble maxStride = new YoDouble("maxStride", registry);
    private final YoDouble kpDirection = new YoDouble("kpDirection", registry);
    private final YoDouble kpStride = new YoDouble("kpStride", registry);
-   private final YoDouble defaultTurningThreshold = new YoDouble("defaultTurningThreshold", registry);
-   private final YoDouble defaultTurnDegrees = new YoDouble("defaultTurnDegrees", registry);
+   private final YoDouble defaultTurningThresholdDegrees = new YoDouble("defaultTurningThreshold", registry);
+   private final YoDouble defaultTurnDegrees = new YoDouble("defaultTurn", registry);
+   private final YoDouble maxYawRotationDegrees = new YoDouble("maxYawRotation", registry);
+   private final YoDouble kpYaw = new YoDouble("kpYaw", registry);
 
    public FSTStreamingState(FSTTools tools)
    {
@@ -79,8 +84,10 @@ public class FSTStreamingState implements State
       maxStride.set(parameters.getMaxStride());
       kpDirection.set(parameters.getKpDirection());
       kpStride.set(parameters.getKpStride());
-      defaultTurningThreshold.set(parameters.getTurningThreshold());
+      defaultTurningThresholdDegrees.set(parameters.getTurningThresholdDegrees());
       defaultTurnDegrees.set(parameters.getTurnDegrees());
+      maxYawRotationDegrees.set(parameters.getMaxYawRotationDegrees());
+      kpYaw.set(parameters.getKpYaw());
       computeStepFromStance.set(parameters.getComputeFromStance());
    }
 
@@ -96,6 +103,7 @@ public class FSTStreamingState implements State
          // Initialize controlled direction
          directionTrackersCtrl.put(side, new FrameVector2D());
          currentStrideEstimate = defaultStride.getValue();
+         currentYawEstimate = Math.toRadians(defaultTurnDegrees.getValue());
 
          ankleTrackerFrames.put(side, null);
          initialTrackersTransform.put(side, null);
@@ -105,6 +113,8 @@ public class FSTStreamingState implements State
 
       velocitySum = 0.0;
       velocityCount = 0;
+      yawDotSum = 0.0;
+      yawDotCount = 0;
       timeOfLastInput.set(Double.NaN);
       timeSinceLastInput.set(Double.NaN);
       inputFrequency.reset();
@@ -171,7 +181,7 @@ public class FSTStreamingState implements State
                         translationTrackerXY.scale(defaultStride.getDoubleValue());
 
                         // Use default rotation is the yaw variation exceeds threshold
-                        double defaultYawRotation = Math.abs(Math.toDegrees(rotationTracker)) > defaultTurningThreshold.getValue() ? Math.toRadians(defaultTurnDegrees.getValue()) * Math.signum(rotationTracker) : 0.0;
+                        double defaultYawRotation = Math.abs(rotationTracker) > Math.toRadians(defaultTurningThresholdDegrees.getValue()) ? Math.toRadians(defaultTurnDegrees.getValue()) * Math.signum(rotationTracker) : 0.0;
 
                         // Compute robot footstep from estimate
                         RigidBodyTransformReadOnly robotFootstepTransformInWorld = computeStepFromStance.getValue() ?
@@ -252,7 +262,11 @@ public class FSTStreamingState implements State
                               adjustedTranslationTrackerXY.normalize();
                               adjustedTranslationTrackerXY.scale(stride);
 
-                              double adjustedYawRotation = 0.0;
+                              double adjustedYawRotation = computeYawEstimate(side,
+                                                                              rotationTracker,
+                                                                              translationTracker.getZ(),
+                                                                              sideCommand.getCurrentVelocity().getLinearPartZ(),
+                                                                              sideCommand.getCurrentVelocity().getAngularPartZ());
 
                               RigidBodyTransformReadOnly robotFootstepTransformInWorld = computeStepFromStance.getValue() ?
                                     computeTargetFootstepFromStance(latestInput, side, adjustedTranslationTrackerXY, adjustedYawRotation, initialTrackerTransform) :
@@ -306,6 +320,8 @@ public class FSTStreamingState implements State
       maxFeetHeight.put(side, 0.0);
       velocitySum = 0.0;
       velocityCount = 0;
+      yawDotSum = 0.0;
+      yawDotCount = 0;
    }
 
    private RigidBodyTransformReadOnly computeTargetFootstepFromInitialSwing(RobotSide side,
@@ -445,7 +461,6 @@ public class FSTStreamingState implements State
          // Normalize foot height to [0, 1]
          landingFactor = verticalPosition / maxFeetHeight.get(side);
          landingFactor = Math.max(0.0, Math.min(1.0, landingFactor));
-         LogTools.error(landingFactor);
       }
 
       // 3) The stride is pulled toward the measuredDistance if foot is descending
@@ -454,7 +469,6 @@ public class FSTStreamingState implements State
 
       // 4) Clamp to [0, maxStride] pre-P-control
       double desiredStride = Math.max(0.0, Math.min(blendedStride, maxStride.getValue()));
-      LogTools.warn(desiredStride);
 
       // 5) Apply P-control
       double error = desiredStride - currentStrideEstimate;
@@ -475,6 +489,51 @@ public class FSTStreamingState implements State
       velocitySum += currentXY.norm();
       velocityCount++;
       return velocitySum / velocityCount;
+   }
+
+   public double computeYawEstimate(RobotSide side,
+                                    double measuredYawRotation,
+                                    double verticalPosition,
+                                    double linearVerticalVelocity,
+                                    double angularVelocity)
+   {
+      // 1) Basic raw yaw rotation estimate
+      double rawYawRotation = measuredYawRotation + getAverageAngularVelocity(angularVelocity) * (robotStepDuration - robotElapsedTimeCurrentStep);
+
+      // 2) "Landing factor" from vertical motion
+      //    Interpolation factor landingFactor in [0,1], where 1 => no reduction,
+      //    0 => fully trust measured rotation only.
+      double landingFactor = 1.0; // default is 1 => no reduction
+      if (linearVerticalVelocity < 0.0)
+      {
+         // Normalize foot height to [0, 1]
+         landingFactor = verticalPosition / maxFeetHeight.get(side);
+         landingFactor = Math.max(0.0, Math.min(1.0, landingFactor));
+      }
+
+      // 3) The rotation is pulled toward the measuredYaw if foot is descending
+      double blendedYawRotation = landingFactor * rawYawRotation
+                             + (1.0 - landingFactor) * measuredYawRotation;
+
+      // 4) Clamp to [0, maxYawRotation] pre-P-control
+      double desiredYawRotation = Math.max(0.0, Math.min(blendedYawRotation, Math.toRadians(maxYawRotationDegrees.getValue())));
+
+      // 5) Apply P-control
+      double error = desiredYawRotation - currentYawEstimate;
+      double newYawEstimate = currentYawEstimate + kpYaw.getValue() * error;
+
+      // 6) Final clamp
+      newYawEstimate = Math.max(0.0, Math.min(newYawEstimate, Math.toRadians(maxYawRotationDegrees.getValue())));
+      currentYawEstimate = newYawEstimate;
+
+      return currentYawEstimate;
+   }
+
+   private double getAverageAngularVelocity(double currentAngularVelocity)
+   {
+      yawDotSum += currentAngularVelocity;
+      yawDotCount++;
+      return yawDotSum / yawDotCount;
    }
 
    @Override

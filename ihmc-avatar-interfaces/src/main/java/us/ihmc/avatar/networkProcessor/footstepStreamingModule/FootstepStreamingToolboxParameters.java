@@ -57,6 +57,10 @@ public class FootstepStreamingToolboxParameters
     */
    private double kpStride;
    /**
+    * Proportional gain for yaw rotation control
+    */
+   private double kpYaw;
+   /**
     * Default variation in degrees that triggers the turn of the robot step
     */
    private double turningThreshold;
@@ -64,6 +68,10 @@ public class FootstepStreamingToolboxParameters
     * Default turn of the robot step to use as a starting guess
     */
    private double turnDegrees;
+   /**
+    * Maximum yaw rotation
+    */
+   private double maxYawRotationDegrees;
    /**
     * Default stability threshold to determine when the user has stopped stepping with a given foot.
     */
@@ -104,6 +112,8 @@ public class FootstepStreamingToolboxParameters
 
       turningThreshold = 12;
       turnDegrees = 33.3;
+      maxYawRotationDegrees = 90.0;
+      kpYaw = 0.3;
    }
 
    public ClockType getClockType()
@@ -156,7 +166,12 @@ public class FootstepStreamingToolboxParameters
       return kpStride;
    }
 
-   public double getTurningThreshold()
+   public double getKpYaw()
+   {
+      return kpYaw;
+   }
+
+   public double getTurningThresholdDegrees()
    {
       return turningThreshold;
    }
@@ -164,6 +179,11 @@ public class FootstepStreamingToolboxParameters
    public double getTurnDegrees()
    {
       return turnDegrees;
+   }
+
+   public double getMaxYawRotationDegrees()
+   {
+      return maxYawRotationDegrees;
    }
 
    public int getStabilityIterations()
@@ -174,60 +194,5 @@ public class FootstepStreamingToolboxParameters
    public double getStabilityThreshold()
    {
       return stabilityThreshold;
-   }
-
-   public void setClockType(ClockType clockType)
-   {
-      this.clockType = clockType;
-   }
-
-   public void setToolboxUpdatePeriod(double toolboxUpdatePeriod)
-   {
-      this.toolboxUpdatePeriod = toolboxUpdatePeriod;
-   }
-
-   public void setTimeThresholdForSleeping(double timeThresholdForSleeping)
-   {
-      this.timeThresholdForSleeping = timeThresholdForSleeping;
-   }
-
-   public void setStepThreshold(double stepThreshold)
-   {
-      this.stepThreshold = stepThreshold;
-   }
-
-   public void setLiftThreshold(double liftThreshold)
-   {
-      this.liftThreshold = liftThreshold;
-   }
-
-   public void setDefaultStride(double defaultStride)
-   {
-      this.defaultStride = defaultStride;
-   }
-
-   public void setKpDirection(double kpDirection)
-   {
-      this.kpDirection = kpDirection;
-   }
-
-   public void setTurningThreshold(double turningThreshold)
-   {
-      this.turningThreshold = turningThreshold;
-   }
-
-   public void setTurnDegrees(double turnDegrees)
-   {
-      this.turnDegrees = turnDegrees;
-   }
-
-   public void setStabilityIterations(int stabilityIterations)
-   {
-      this.stabilityIterations = stabilityIterations;
-   }
-
-   public void setStabilityThreshold(double stabilityThreshold)
-   {
-      this.stabilityThreshold = stabilityThreshold;
    }
 }
