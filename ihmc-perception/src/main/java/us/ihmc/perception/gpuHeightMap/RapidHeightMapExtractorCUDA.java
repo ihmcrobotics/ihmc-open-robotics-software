@@ -40,6 +40,7 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
    private final CameraIntrinsics cameraIntrinsics;
    private final Point3D sensorOrigin = new Point3D();
    private final int mode; // 0 -> Ouster, 1 -> Realsense
+
    private final GpuMat inputDepthImage;
    private final GpuMat localHeightMapImage;
    private final GpuMat globalHeightMapImage;
@@ -48,16 +49,19 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
    private final GpuMat sensorCroppedHeightMapImage;
    private final GpuMat emptyGlobalHeightMapImage;
    private final CUDAProgram heightMapCUDAProgram;
+
    private final CUstream_st stream;
    private final CUDAKernel updateKernel;
    private final CUDAKernel registerKernel;
    private final CUDAKernel croppingKernel;
    private final CUDAKernel planOffsetKernel;
-   private final CUDAKernel emptyRegisterKernl;
+   private final CUDAKernel emptyRegisterKernel;
+
    private final float[] worldToGroundTransformArray = new float[16];
    private final float[] groundToWorldTransformArray = new float[16];
    private final float[] groundToSensorTransformArray = new float[16];
    private final float[] sensorToGroundTransformArray = new float[16];
+
    private final FloatPointer groundToSensorTransformHostPointer;
    private final FloatPointer groundToSensorTransformDevicePointer;
    private final FloatPointer sensorToGroundTransformHostPointer;
@@ -66,6 +70,7 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
    private final FloatPointer worldToGroundTransformDevicePointer;
    private final FloatPointer parametersHostPointer;
    private final FloatPointer parametersDevicePointer;
+
    public int sequenceNumber = 0;
    private float gridOffsetX;
    private int centerIndex;
@@ -115,7 +120,7 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
          registerKernel = heightMapCUDAProgram.loadKernel("heightMapRegistrationKernel");
          croppingKernel = heightMapCUDAProgram.loadKernel("croppingKernel");
          planOffsetKernel = heightMapCUDAProgram.loadKernel("planOffsetKernel");
-         emptyRegisterKernl = heightMapCUDAProgram.loadKernel("heightMapRegistrationKernel");
+         emptyRegisterKernel = heightMapCUDAProgram.loadKernel("heightMapRegistrationKernel");
 
          // Initialize matrices and images
          localHeightMapImage = new GpuMat(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_16UC1);
@@ -345,13 +350,13 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
       // Need to reset the empty global map before using it so when its filled it starts with all "zero" values
       emptyGlobalHeightMapImage.setTo(new Scalar(resetOffset));
 
-      emptyRegisterKernl.withPointer(localHeightMapImage.data()).withLong(localHeightMapImage.step());
-      emptyRegisterKernl.withPointer(emptyGlobalHeightMapImage.data()).withLong(emptyGlobalHeightMapImage.step());
-      emptyRegisterKernl.withPointer(parametersDevicePointer);
-      emptyRegisterKernl.withPointer(worldToGroundTransformDevicePointer);
-      emptyRegisterKernl.withPointer(sensorToGroundTransformDevicePointer);
+      emptyRegisterKernel.withPointer(localHeightMapImage.data()).withLong(localHeightMapImage.step());
+      emptyRegisterKernel.withPointer(emptyGlobalHeightMapImage.data()).withLong(emptyGlobalHeightMapImage.step());
+      emptyRegisterKernel.withPointer(parametersDevicePointer);
+      emptyRegisterKernel.withPointer(worldToGroundTransformDevicePointer);
+      emptyRegisterKernel.withPointer(sensorToGroundTransformDevicePointer);
 
-      emptyRegisterKernl.run(stream, registerKernelGridDim, blockSize, 0);
+      emptyRegisterKernel.run(stream, registerKernelGridDim, blockSize, 0);
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
 
