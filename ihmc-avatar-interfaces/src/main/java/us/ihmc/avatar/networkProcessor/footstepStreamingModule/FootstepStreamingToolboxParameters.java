@@ -48,6 +48,8 @@ public class FootstepStreamingToolboxParameters
     * Maximum stride length
     */
    private double maxStride;
+   private double maxDistanceToStance;
+   private double minDistanceToStance;
    /**
     * Proportional gain for direction control
     */
@@ -72,6 +74,9 @@ public class FootstepStreamingToolboxParameters
     * Maximum yaw rotation
     */
    private double maxYawRotationDegrees;
+   private double maxYawToStanceDegrees;
+   private double minYawToStanceDegrees;
+
    /**
     * Default stability threshold to determine when the user has stopped stepping with a given foot.
     */
@@ -114,6 +119,11 @@ public class FootstepStreamingToolboxParameters
       turnDegrees = 33.3;
       maxYawRotationDegrees = 90.0;
       kpYaw = 0.3;
+
+      minDistanceToStance = 0.15;
+      maxDistanceToStance = 1.0;
+      minYawToStanceDegrees = 0.0;
+      maxYawToStanceDegrees = 90.0;
    }
 
    public ClockType getClockType()
@@ -184,6 +194,26 @@ public class FootstepStreamingToolboxParameters
    public double getMaxYawRotationDegrees()
    {
       return maxYawRotationDegrees;
+   }
+
+   public double getMaxDistanceToStance()
+   {
+      return maxDistanceToStance;
+   }
+
+   public double getMinDistanceToStance()
+   {
+      return minDistanceToStance;
+   }
+
+   public double getMaxYawToStanceDegrees()
+   {
+      return maxYawToStanceDegrees;
+   }
+
+   public double getMinYawToStanceDegrees()
+   {
+      return minYawToStanceDegrees;
    }
 
    public int getStabilityIterations()

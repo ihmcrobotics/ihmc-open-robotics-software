@@ -57,12 +57,16 @@ public class FSTStreamingState implements State
    private final YoInteger stabilityIterations = new YoInteger("stabilityIterations", registry);
    private final YoDouble defaultStride = new YoDouble("defaultStride", registry);
    private final YoDouble maxStride = new YoDouble("maxStride", registry);
+   private final YoDouble maxDistanceToStance = new YoDouble("maxDistanceToStance", registry);
+   private final YoDouble minDistanceToStance = new YoDouble("minDistanceToStance", registry);
    private final YoDouble kpDirection = new YoDouble("kpDirection", registry);
    private final YoDouble kpStride = new YoDouble("kpStride", registry);
    private final YoDouble defaultTurningThresholdDegrees = new YoDouble("defaultTurningThreshold", registry);
    private final YoDouble defaultTurnDegrees = new YoDouble("defaultTurn", registry);
    private final YoDouble maxYawRotationDegrees = new YoDouble("maxYawRotation", registry);
    private final YoDouble kpYaw = new YoDouble("kpYaw", registry);
+   private final YoDouble maxYawToStanceDegrees = new YoDouble("maxYawToStance", registry);
+   private final YoDouble minYawToStanceDegrees = new YoDouble("minYawToStance", registry);
 
    public FSTStreamingState(FSTTools tools)
    {
@@ -82,12 +86,16 @@ public class FSTStreamingState implements State
       stabilityIterations.set(parameters.getStabilityIterations());
       defaultStride.set(parameters.getDefaultStride());
       maxStride.set(parameters.getMaxStride());
+      maxDistanceToStance.set(parameters.getMaxDistanceToStance());
+      minDistanceToStance.set(parameters.getMinDistanceToStance());
       kpDirection.set(parameters.getKpDirection());
       kpStride.set(parameters.getKpStride());
       defaultTurningThresholdDegrees.set(parameters.getTurningThresholdDegrees());
       defaultTurnDegrees.set(parameters.getTurnDegrees());
       maxYawRotationDegrees.set(parameters.getMaxYawRotationDegrees());
       kpYaw.set(parameters.getKpYaw());
+      maxYawToStanceDegrees.set(parameters.getMaxYawToStanceDegrees());
+      minYawToStanceDegrees.set(parameters.getMinYawToStanceDegrees());
       computeStepFromStance.set(parameters.getComputeFromStance());
    }
 
@@ -400,12 +408,21 @@ public class FSTStreamingState implements State
       // Apply stance-to-predicted-footstep translation
       robotPredictedFootXY.setX(predictedTrackerXY.getX());
       robotPredictedFootXY.setY(predictedTrackerXY.getY());
+      // Clamp value of lateral distance according to limits relative to stance foot
+      if (side == RobotSide.RIGHT)
+         robotPredictedFootXY.setY(Math.max(minDistanceToStance.getValue(), Math.min(maxDistanceToStance.getValue(), robotPredictedFootXY.getY())));
+      else
+         robotPredictedFootXY.setY(Math.max(-maxDistanceToStance.getValue(), Math.min(minDistanceToStance.getValue(), robotPredictedFootXY.getY())));
       robotPredictedFootXY.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
 
       // Compute predicted rotation relative to stance frame
       double initialSwingTrackerYaw = initialTrackerTransform.getRotation().getYaw();
       double initialStanceTrackerYaw = initialTrackersTransform.get(side.getOppositeSide()).getRotation().getYaw();
       double newYawInStanceFrame = yawRotationTracker + (initialSwingTrackerYaw - initialStanceTrackerYaw);
+      // Clamp value of yaw according to limits relative to stance foot
+      newYawInStanceFrame = side == RobotSide.LEFT ?
+            Math.toRadians(Math.max(minYawToStanceDegrees.getValue(), Math.min(maxYawToStanceDegrees.getValue(), newYawInStanceFrame))) :
+            Math.toRadians(Math.max(-maxYawToStanceDegrees.getValue(), Math.min(minYawToStanceDegrees.getValue(), newYawInStanceFrame)));
 
       // Update yaw value based on prediction expressed in robot stance foot
       double newYaw = robotStanceFootTransformInWorld.getRotation().getYaw() + newYawInStanceFrame;
