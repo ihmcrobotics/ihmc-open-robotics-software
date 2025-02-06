@@ -20,6 +20,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.function.Consumer;
 
 /**
@@ -125,7 +126,7 @@ public class KinematicsRecordReplay
       }
    }
 
-   public void recordControllerData(RobotSide robotSide, boolean aButtonPressed, boolean bButtonPressed, boolean triggerPressed, Vector3D angularVelocity, Vector3D linearVelocity, ReferenceFrame recordFrame)
+   public void recordInputData(RobotSide robotSide, boolean aButtonPressed, boolean bButtonPressed, boolean triggerPressed, Vector3D angularVelocity, Vector3D linearVelocity, ReferenceFrame recordFrame)
    {
       if (!isRecording)
          return;

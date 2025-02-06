@@ -128,6 +128,8 @@ public class SensitivityBasedStabilityGradientCalculator
       centroidalMomentumCalculator = new CentroidalMomentumCalculator(multiBodySystemInput, ReferenceFrame.getWorldFrame());
 
       yoStabilityMarginGradient = new YoDouble[Twist.SIZE + controllableOneDoFJoints.length];
+      String namePrefix = "stabilityMarginGrad_";
+
       for (int i = 0; i < yoStabilityMarginGradient.length; i++)
       {
          if (i < Twist.SIZE)
@@ -135,12 +137,12 @@ public class SensitivityBasedStabilityGradientCalculator
             int numAxes = Axis3D.values().length;
             Axis3D axis = Axis3D.values()[i % numAxes];
             String prefix = i < numAxes ? "w" : "v";
-            yoStabilityMarginGradient[i] = new YoDouble("stabilityMarginGrad_" + prefix + axis, registry);
+            yoStabilityMarginGradient[i] = new YoDouble(namePrefix + prefix + axis, registry);
          }
          else
          {
             String jointName = controllableOneDoFJoints[i - Twist.SIZE].getName();
-            yoStabilityMarginGradient[i] = new YoDouble("stabilityMarginGrad_" + jointName, registry);
+            yoStabilityMarginGradient[i] = new YoDouble(namePrefix + jointName, registry);
          }
       }
 

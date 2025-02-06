@@ -287,7 +287,7 @@ public class KinematicsStreamingToolboxParameters
       timeThresholdForSleeping = 3.0;
       streamIntegrationDuration = 0.3;
 
-      centerOfMassSafeMargin = 0.05;
+      centerOfMassSafeMargin = 0.04;
       centerOfMassHoldWeight = 0.001;
       publishingSolutionPeriod = UnitConversions.hertzToSeconds(60.0);
       holdArmWeight = 10.0;

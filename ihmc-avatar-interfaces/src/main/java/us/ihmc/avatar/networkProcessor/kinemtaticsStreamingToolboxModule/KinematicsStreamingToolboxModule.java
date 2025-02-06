@@ -5,6 +5,7 @@ import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.WholeBodyStreamingMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
+import toolbox_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
@@ -25,6 +26,7 @@ import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.HumanoidKinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxInitialConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxPrivilegedConfigurationCommand;
@@ -55,7 +57,7 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
    private ROS2Publisher<WholeBodyTrajectoryMessage> trajectoryMessagePublisher;
    private ROS2Publisher<WholeBodyStreamingMessage> streamingMessagePublisher;
 
-   RobotConfigurationDataBasedUpdater robotStateUpdater = new RobotConfigurationDataBasedUpdater();
+   private final RobotConfigurationDataBasedUpdater robotStateUpdater = new RobotConfigurationDataBasedUpdater();
 
    public KinematicsStreamingToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer)
    {
@@ -163,6 +165,7 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
       commands.add(KinematicsToolboxConfigurationCommand.class);
       commands.add(KinematicsToolboxPrivilegedConfigurationCommand.class);
       commands.add(KinematicsToolboxInitialConfigurationCommand.class);
+      commands.add(HumanoidKinematicsToolboxConfigurationCommand.class);
       return commands;
    }
 
@@ -220,6 +223,11 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
    public static ROS2Topic<KinematicsToolboxConfigurationMessage> getInputToolboxConfigurationTopic(String robotName)
    {
       return ControllerAPI.getTopic(getInputTopic(robotName), KinematicsToolboxConfigurationMessage.class);
+   }
+
+   public static ROS2Topic<HumanoidKinematicsToolboxConfigurationMessage> getInputToolboxHumanoidConfigurationTopic(String robotName)
+   {
+      return ControllerAPI.getTopic(getInputTopic(robotName), HumanoidKinematicsToolboxConfigurationMessage.class);
    }
 
    public static ROS2Topic<KinematicsToolboxPrivilegedConfigurationMessage> getInputStreamingPrivilegedConfigurationTopic(String robotName)

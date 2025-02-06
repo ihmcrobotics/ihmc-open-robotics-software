@@ -36,6 +36,7 @@ import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.HumanoidKinem
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.idl.IDLSequence.Object;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -495,6 +496,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       {
          HumanoidKinematicsToolboxConfigurationCommand command = commandInputManager.pollNewestCommand(HumanoidKinematicsToolboxConfigurationCommand.class);
 
+         LogTools.info("holdCenterOfMassXYPosition: " + command.holdCurrentCenterOfMassXYPosition());
          holdCenterOfMassXYPosition.set(command.holdCurrentCenterOfMassXYPosition());
          enableJointLimitReduction.set(command.enableJointLimitReduction());
          stabilityCostCalculator.setEnabled(command.enableStabilityObjective());

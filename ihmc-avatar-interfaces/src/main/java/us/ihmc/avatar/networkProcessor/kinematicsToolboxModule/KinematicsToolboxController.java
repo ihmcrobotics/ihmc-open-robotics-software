@@ -523,6 +523,7 @@ public class KinematicsToolboxController extends ToolboxController
       collisionMinDistance.set(0.001);
       maxSelfCollisionResolutionVelocity.set(0.10);
       maxStaticCollisionResolutionVelocity.set(100.0);
+
       setupCollisionVisualization();
    }
 
@@ -542,11 +543,11 @@ public class KinematicsToolboxController extends ToolboxController
 
          if (yoGraphicsListRegistry != null)
          {
-            AppearanceDefinition appearance = new YoAppearanceRGBColor(new Color(random.nextInt()), 0.7);
-            yoGraphicsListRegistry.registerYoGraphic("Collisions", new YoGraphicPosition("collision_" + i + "_pointA", collisionPointA, 0.01, appearance));
-            yoGraphicsListRegistry.registerYoGraphic("Collisions", new YoGraphicPosition("collision_" + i + "_pointB", collisionPointB, 0.01, appearance));
-            yoGraphicsListRegistry.registerYoGraphic("Collisions",
-                                                     new YoGraphicCoordinateSystem("collision_" + i + "_frame", collisionFramePose, 0.1, appearance));
+//            AppearanceDefinition appearance = new YoAppearanceRGBColor(new Color(random.nextInt()), 0.7);
+//            yoGraphicsListRegistry.registerYoGraphic("Collisions", new YoGraphicPosition("collision_" + i + "_pointA", collisionPointA, 0.01, appearance));
+//            yoGraphicsListRegistry.registerYoGraphic("Collisions", new YoGraphicPosition("collision_" + i + "_pointB", collisionPointB, 0.01, appearance));
+//            yoGraphicsListRegistry.registerYoGraphic("Collisions",
+//                                                     new YoGraphicCoordinateSystem("collision_" + i + "_frame", collisionFramePose, 0.1, appearance));
          }
 
          yoCollisionDistances[i] = collisionDistance;
