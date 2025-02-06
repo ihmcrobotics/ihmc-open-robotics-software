@@ -13,13 +13,17 @@ public class LeafNodeDefinitionMessage extends Packet<LeafNodeDefinitionMessage>
           */
    public static final long INVALID = -1;
    /**
-          * Value of execute after node ID when this action is set to execute after the previous node
+          * Value of execute after node ID when this leaf is set to execute after the previous node
           */
    public static final long EXECUTE_AFTER_PREVIOUS = -2;
    /**
-          * Value of execute after node ID when this action is set to execute after the beginning of the sequence
+          * Value of execute after node ID when this leaf is set to execute after the beginning of the sequence
           */
    public static final long EXECUTE_AFTER_BEGINNING = -3;
+   /**
+            * Parent definition fields
+            */
+   public behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage definition_;
    /**
             * The ID of the node to execute after or one of the invalid, previous, or beginning constants
             */
@@ -27,6 +31,7 @@ public class LeafNodeDefinitionMessage extends Packet<LeafNodeDefinitionMessage>
 
    public LeafNodeDefinitionMessage()
    {
+      definition_ = new behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage();
    }
 
    public LeafNodeDefinitionMessage(LeafNodeDefinitionMessage other)
@@ -37,8 +42,18 @@ public class LeafNodeDefinitionMessage extends Packet<LeafNodeDefinitionMessage>
 
    public void set(LeafNodeDefinitionMessage other)
    {
+      behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
       execute_after_node_id_ = other.execute_after_node_id_;
 
+   }
+
+
+   /**
+            * Parent definition fields
+            */
+   public behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage getDefinition()
+   {
+      return definition_;
    }
 
    /**
@@ -74,7 +89,9 @@ public class LeafNodeDefinitionMessage extends Packet<LeafNodeDefinitionMessage>
       if(other == null) return false;
       if(other == this) return true;
 
+      if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.execute_after_node_id_, other.execute_after_node_id_, epsilon)) return false;
+
 
       return true;
    }
@@ -88,6 +105,7 @@ public class LeafNodeDefinitionMessage extends Packet<LeafNodeDefinitionMessage>
 
       LeafNodeDefinitionMessage otherMyClass = (LeafNodeDefinitionMessage) other;
 
+      if (!this.definition_.equals(otherMyClass.definition_)) return false;
       if(this.execute_after_node_id_ != otherMyClass.execute_after_node_id_) return false;
 
 
@@ -100,6 +118,8 @@ public class LeafNodeDefinitionMessage extends Packet<LeafNodeDefinitionMessage>
       StringBuilder builder = new StringBuilder();
 
       builder.append("LeafNodeDefinitionMessage {");
+      builder.append("definition=");
+      builder.append(this.definition_);      builder.append(", ");
       builder.append("execute_after_node_id=");
       builder.append(this.execute_after_node_id_);
       builder.append("}");

@@ -15,7 +15,7 @@ public class WaitDurationActionStateMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "a0d0e06bee728bf7b5b6d5664acaf9acec57540766305bb5eea01abc79c48855";
+   		return "281c265c44ab840a8226fad99023afe50f60a90fe00ed8b5cb57d03c85de685d";
    }
    
    @Override

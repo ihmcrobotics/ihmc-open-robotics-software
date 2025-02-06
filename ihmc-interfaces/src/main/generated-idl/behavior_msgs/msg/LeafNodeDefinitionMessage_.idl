@@ -1,6 +1,7 @@
 #ifndef __behavior_msgs__msg__LeafNodeDefinitionMessage__idl__
 #define __behavior_msgs__msg__LeafNodeDefinitionMessage__idl__
 
+#include "behavior_msgs/msg/./BehaviorTreeNodeDefinitionMessage_.idl"
 module behavior_msgs
 {
   module msg
@@ -14,13 +15,13 @@ module behavior_msgs
       -1;
 
       /**
-       * Value of execute after node ID when this action is set to execute after the previous node
+       * Value of execute after node ID when this leaf is set to execute after the previous node
        */
       const long long EXECUTE_AFTER_PREVIOUS =
       -2;
 
       /**
-       * Value of execute after node ID when this action is set to execute after the beginning of the sequence
+       * Value of execute after node ID when this leaf is set to execute after the beginning of the sequence
        */
       const long long EXECUTE_AFTER_BEGINNING =
       -3;
@@ -29,6 +30,10 @@ module behavior_msgs
       @TypeCode(type="behavior_msgs::msg::dds_::LeafNodeDefinitionMessage_")
       struct LeafNodeDefinitionMessage
       {
+        /**
+         * Parent definition fields
+         */
+        behavior_msgs::msg::dds::BehaviorTreeNodeDefinitionMessage definition;
         /**
          * The ID of the node to execute after or one of the invalid, previous, or beginning constants
          */
