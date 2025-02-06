@@ -16,7 +16,7 @@ public enum VRTrackedSegmentType
    private final String segmentName;
    private final RobotSide robotSide;
 
-   public static VRTrackedSegmentType[] TRACKER_TYPES = new VRTrackedSegmentType[] {LEFT_WRIST, RIGHT_WRIST, CHEST, WAIST, LEFT_ANKLE, RIGHT_ANKLE};
+   public static VRTrackedSegmentType[] TRACKER_TYPES = new VRTrackedSegmentType[] {WAIST, CHEST};
    public static VRTrackedSegmentType[] CONTROLLER_TYPES = new VRTrackedSegmentType[] {LEFT_HAND, RIGHT_HAND};
 
    VRTrackedSegmentType(String segmentName,

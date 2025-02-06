@@ -32,12 +32,13 @@ import static us.ihmc.rdx.ui.vr.RDXVRKinematicsStreamingMode.FRAME_AXIS_GRAPHICS
 public class RDXVRMotionRetargeting
 {
    // Set of trackers whose references are unchanged during retargeting
-   private final Set<VRTrackedSegmentType> UNCHANGED_TRACKER_REFERENCES = new HashSet<>()
+   private static final Set<VRTrackedSegmentType> UNCHANGED_TRACKER_REFERENCES = new HashSet<>()
    {
       {
          add(CHEST);
          add(LEFT_WRIST);
          add(RIGHT_WRIST);
+         add(WAIST);
       }
    };
    private final ROS2SyncedRobotModel syncedRobot;
