@@ -18,7 +18,7 @@ mainDependencies {
    api("com.github.sh0nk:matplotlib4j:0.5.0")
 
    api("us.ihmc:mecano-graphviz:17-0.19.2")
-   api("us.ihmc:scs2-bullet-simulation:17-0.28.6")
+   api("us.ihmc:scs2-bullet-simulation:17-0.28.7")
 
    api("us.ihmc:ihmc-humanoid-behaviors:source")
    api("us.ihmc:ihmc-graphics-jmonkeyengine:source")
