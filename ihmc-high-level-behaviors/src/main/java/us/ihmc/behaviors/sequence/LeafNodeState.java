@@ -44,40 +44,34 @@ public class LeafNodeState<D extends LeafNodeDefinition> extends BehaviorTreeNod
     */
    public void validateFields(List<LeafNodeState<?>> leaves)
    {
-      String executeAfterLeafName = null;
-
-      if (!definition.getExecuteAfterPrevious().getValue() && !definition.getExecuteAfterBeginning().getValue())
+      if (definition.getExecuteAfterIsInvalid())
       {
          // We need to find the node by name
          // This happens when we load from JSON
-         if (definition.getExecuteAfterNodeID().getValue() == 0)
+         for (int j = leafIndex - 1; j >= 0; j--) // Search backwards from previous
          {
-            for (int j = leafIndex - 1; j >= 0; j--)
+            if (leaves.get(j).getDefinition().getName().equals(definition.getExecuteAfterLeafName()))
             {
-               LeafNodeState<?> stateToCompare = leaves.get(j);
-               if (stateToCompare.getDefinition().getName().equals(definition.getExecuteAfterLeafName()))
-               {
-                  executeAfterLeafName = stateToCompare.getDefinition().getName();
-                  definition.getExecuteAfterNodeID().setValue(stateToCompare.getID());
-                  break;
-               }
+               definition.getExecuteAfterNodeID().setValue(leaves.get(j).getID());
+               break;
             }
          }
-         else // Update the node's name for saving in human readable format
+      }
+      else if (definition.getExecuteAfterNodeID().getValue() >= 0)
+      {
+         // Dynamically update the node name -- it can change independently of the node's ID
+         // This is necessary for saving the definition
+         for (int j = leafIndex - 1; j >= 0; j--) // Search backwards from previous
          {
-            long executeAfterID = definition.getExecuteAfterNodeID().getValue();
-            for (int j = leafIndex - 1; j >= 0; j--)
+            if (leaves.get(j).getID() == definition.getExecuteAfterNodeID().getValue())
             {
-               LeafNodeState<?> leafStateToCompare = leaves.get(j);
-               if (leafStateToCompare.getID() == executeAfterID)
-               {
-                  executeAfterLeafName = leafStateToCompare.getDefinition().getName();
-               }
+               definition.setExecuteAfterLeafName(leaves.get(j).getDefinition().getName());
             }
          }
       }
 
-      definition.updateAndSanitizeExecuteAfterFields(executeAfterLeafName);
+      if (definition.getExecuteAfterIsInvalid())
+         LogTools.debug("Hmm");
    }
 
    @Override
@@ -190,11 +184,11 @@ public class LeafNodeState<D extends LeafNodeDefinition> extends BehaviorTreeNod
    /** @return the index of the leaf to execute after as part of the concurrency system */
    public int getExecuteAfterLeafIndex()
    {
-      if (definition.getExecuteAfterBeginning().getValue())
+      if (definition.getExecuteAfterBeginning())
       {
          return -1;
       }
-      else if (!definition.getExecuteAfterPrevious().getValue())
+      else if (!definition.getExecuteAfterPrevious())
       {
          LeafNodeState<?> executeAfterNode = getExecuteAfterLeaf();
 

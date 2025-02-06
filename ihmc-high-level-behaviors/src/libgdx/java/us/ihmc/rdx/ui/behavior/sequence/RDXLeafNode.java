@@ -99,34 +99,15 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
          // This happens with the Undo non-topological changes button.
          state.validateFields(actionSequence.getOrderedLeaves());
 
-         String selectedText;
-         if (definition.getExecuteAfterPrevious().getValue())
+         if (ImGui.beginCombo(labels.get("Execute after"), definition.getExecuteAfterLeafName()))
          {
-            selectedText = LeafNodeDefinition.EXECUTE_AFTER_PREVIOUS;
-         }
-         else if (definition.getExecuteAfterBeginning().getValue())
-         {
-            selectedText = LeafNodeDefinition.EXECUTE_AFTER_BEGINNING;
-         }
-         else
-         {
-            LeafNodeState<?> executeAfterNode = state.getExecuteAfterLeaf();
-            selectedText = executeAfterNode.getDefinition().getName();
-         }
-
-         if (ImGui.beginCombo(labels.get("Execute after"), selectedText))
-         {
-            if (ImGui.selectable(labels.get("Previous"), definition.getExecuteAfterPrevious().getValue()))
+            if (ImGui.selectable(labels.get("Previous"), definition.getExecuteAfterPrevious()))
             {
-               definition.getExecuteAfterPrevious().setValue(true);
-               definition.getExecuteAfterBeginning().setValue(false);
-               definition.updateAndSanitizeExecuteAfterFields(null);
+               definition.setExecuteAfterPrevious();
             }
-            if (ImGui.selectable(labels.get("Beginning"), definition.getExecuteAfterBeginning().getValue()))
+            if (ImGui.selectable(labels.get("Beginning"), definition.getExecuteAfterBeginning()))
             {
-               definition.getExecuteAfterPrevious().setValue(false);
-               definition.getExecuteAfterBeginning().setValue(true);
-               definition.updateAndSanitizeExecuteAfterFields(null);
+               definition.setExecuteAfterBeginning();
             }
 
             for (LeafNodeState<?> leafNode : actionSequence.getOrderedLeaves())
@@ -135,10 +116,7 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
                {
                   if (ImGui.selectable(labels.get(leafNode.getDefinition().getName()), definition.getExecuteAfterNodeID().getValue() == leafNode.getID()))
                   {
-                     definition.getExecuteAfterPrevious().setValue(false);
-                     definition.getExecuteAfterBeginning().setValue(false);
-                     definition.getExecuteAfterNodeID().setValue((int) leafNode.getID());
-                     definition.updateAndSanitizeExecuteAfterFields(leafNode.getDefinition().getName());
+                     definition.setExecuteAfterLeaf(leafNode.getID(), leafNode.getDefinition().getName());
                   }
                }
             }

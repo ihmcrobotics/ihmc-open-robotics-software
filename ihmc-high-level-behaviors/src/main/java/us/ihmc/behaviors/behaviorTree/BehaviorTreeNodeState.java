@@ -74,6 +74,7 @@ public class BehaviorTreeNodeState<D extends BehaviorTreeNodeDefinition> impleme
    public void update()
    {
       definition.checkModified();
+      definition.updateName();
    }
 
    public void drawToSVG()

@@ -36,11 +36,11 @@ public class BehaviorTreeSVGWriter
          {
             if (actionNode.getDefinition() instanceof ActionNodeDefinition actionNodeDefinition)
             {
-               if (actionNodeDefinition.getExecuteAfterPrevious().getValue())
+               if (actionNodeDefinition.getExecuteAfterPrevious())
                {
                   nodeToExecuteAfter = svgNodes.get(svgNodes.size() - 1);
                }
-               else if (actionNodeDefinition.getExecuteAfterBeginning().getValue())
+               else if (actionNodeDefinition.getExecuteAfterBeginning())
                {
                   nodeToExecuteAfter = actionSequenceSVGNode;
                }

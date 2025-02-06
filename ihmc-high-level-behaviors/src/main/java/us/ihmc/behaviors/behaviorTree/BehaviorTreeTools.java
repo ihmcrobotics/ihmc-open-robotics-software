@@ -23,6 +23,14 @@ public class BehaviorTreeTools
       return (BehaviorTreeRootNodeDefinition) findRootNodeGeneral(node);
    }
 
+   public static <HLT extends BehaviorTreeNode<HLT, ?, ?>> HLT findRootNode(HLT node)
+   {
+      while (!node.isRootNode())
+         node = node.getParent();
+
+      return node;
+   }
+
    public static TreeNode<?> findRootNodeGeneral(TreeNode<?> node)
    {
       while (!node.isRootNode())
