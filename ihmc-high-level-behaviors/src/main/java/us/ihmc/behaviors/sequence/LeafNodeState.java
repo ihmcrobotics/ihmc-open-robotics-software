@@ -52,26 +52,23 @@ public class LeafNodeState<D extends LeafNodeDefinition> extends BehaviorTreeNod
          {
             if (leaves.get(j).getDefinition().getName().equals(definition.getExecuteAfterLeafName()))
             {
-               definition.getExecuteAfterNodeID().setValue(leaves.get(j).getID());
+               definition.setExecuteAfterLeaf(leaves.get(j).getID(), definition.getExecuteAfterLeafName());
                break;
             }
          }
       }
-      else if (definition.getExecuteAfterNodeID().getValue() >= 0)
+      else if (definition.getExecuteAfterNodeID() >= 0)
       {
          // Dynamically update the node name -- it can change independently of the node's ID
          // This is necessary for saving the definition
          for (int j = leafIndex - 1; j >= 0; j--) // Search backwards from previous
          {
-            if (leaves.get(j).getID() == definition.getExecuteAfterNodeID().getValue())
+            if (leaves.get(j).getID() == definition.getExecuteAfterNodeID())
             {
                definition.setExecuteAfterLeafName(leaves.get(j).getDefinition().getName());
             }
          }
       }
-
-      if (definition.getExecuteAfterIsInvalid())
-         LogTools.debug("Hmm");
    }
 
    @Override
@@ -202,14 +199,12 @@ public class LeafNodeState<D extends LeafNodeDefinition> extends BehaviorTreeNod
    /** @return the leaf to execute after as part of the concurrency system */
    public LeafNodeState<?> getExecuteAfterLeaf()
    {
-      long executeAfterID = definition.getExecuteAfterNodeID().getValue();
-
-      if (BehaviorTreeTools.findRootNode(this).getIDToNodeMap().get(executeAfterID) instanceof LeafNodeState<?> executeAfterNode)
+      if (BehaviorTreeTools.findRootNode(this).getIDToNodeMap().get(definition.getExecuteAfterNodeID()) instanceof LeafNodeState<?> executeAfterNode)
       {
          return executeAfterNode;
       }
 
-      LogTools.error("Node ID not found: {}", executeAfterID);
+      LogTools.error("Node ID not found: {}", definition.getExecuteAfterNodeID());
 
       return null;
    }

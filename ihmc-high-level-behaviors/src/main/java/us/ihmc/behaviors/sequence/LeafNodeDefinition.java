@@ -9,8 +9,6 @@ import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
-import javax.annotation.Nullable;
-
 /**
  * Definition of a leaf node which gets executed as part of the concurrency system.
  *
@@ -51,10 +49,7 @@ public class LeafNodeDefinition extends BehaviorTreeNodeDefinition
    {
       super.loadFromFile(jsonNode);
 
-      executeAfterLeafName = jsonNode.get("executeAfterAction").textValue();
-      if (getName().contains("Wait"))
-         LogTools.debug("Loaded {}", executeAfterLeafName);
-      executeAfterNodeID.setValue(EXECUTE_AFTER_INVALID_ID); // Invalidate until we can find it
+      setExecuteAfterLeafUnknownID(jsonNode.get("executeAfterAction").textValue());
    }
 
    @Override
@@ -72,8 +67,7 @@ public class LeafNodeDefinition extends BehaviorTreeNodeDefinition
 
       if (isUndoAvailable())
       {
-         executeAfterLeafName = onDiskExecuteAfterLeafName;
-         executeAfterNodeID.setValue(EXECUTE_AFTER_INVALID_ID); // Invalidate until we can find it
+         setExecuteAfterLeafUnknownID(onDiskExecuteAfterLeafName);
       }
    }
 
@@ -124,6 +118,20 @@ public class LeafNodeDefinition extends BehaviorTreeNodeDefinition
       return executeAfterNodeID.getValue() == EXECUTE_AFTER_BEGINNING_ID;
    }
 
+   private void setExecuteAfterLeafUnknownID(String name)
+   {
+      switch (name)
+      {
+         case EXECUTE_AFTER_PREVIOUS_NAME -> setExecuteAfterPrevious();
+         case EXECUTE_AFTER_BEGINNING_NAME -> setExecuteAfterBeginning();
+         default ->
+         {
+            executeAfterNodeID.setValue(EXECUTE_AFTER_INVALID_ID);
+            executeAfterLeafName = name;
+         }
+      }
+   }
+
    public void setExecuteAfterLeaf(long id, String name)
    {
       executeAfterNodeID.setValue(id);
@@ -142,9 +150,9 @@ public class LeafNodeDefinition extends BehaviorTreeNodeDefinition
       executeAfterLeafName = EXECUTE_AFTER_BEGINNING_NAME;
    }
 
-   public CRDTBidirectionalLong getExecuteAfterNodeID()
+   public long getExecuteAfterNodeID()
    {
-      return executeAfterNodeID;
+      return executeAfterNodeID.getValue();
    }
 
    public void setExecuteAfterLeafName(String executeAfterLeafName)

@@ -46,12 +46,11 @@ public class BehaviorTreeSVGWriter
                }
                else
                {
-                  long afterID = actionNodeDefinition.getExecuteAfterNodeID().getValue();
                   for (BehaviorTreeSVGNode otherNode : svgNodes)
                   {
                      if (otherNode.getNode() instanceof ActionNodeState existingActionNode)
                      {
-                        if (existingActionNode.getID() == afterID)
+                        if (existingActionNode.getID() == actionNodeDefinition.getExecuteAfterNodeID())
                         {
                            nodeToExecuteAfter = otherNode;
                         }

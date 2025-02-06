@@ -114,7 +114,7 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
             {
                if (leafNode.getLeafIndex() < state.getLeafIndex())
                {
-                  if (ImGui.selectable(labels.get(leafNode.getDefinition().getName()), definition.getExecuteAfterNodeID().getValue() == leafNode.getID()))
+                  if (ImGui.selectable(labels.get(leafNode.getDefinition().getName()), definition.getExecuteAfterNodeID() == leafNode.getID()))
                   {
                      definition.setExecuteAfterLeaf(leafNode.getID(), leafNode.getDefinition().getName());
                   }
