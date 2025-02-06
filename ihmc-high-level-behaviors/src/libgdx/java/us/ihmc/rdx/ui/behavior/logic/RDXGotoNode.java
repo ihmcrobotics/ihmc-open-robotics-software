@@ -46,34 +46,20 @@ public class RDXGotoNode extends RDXLeafNode<GotoNodeState, GotoNodeDefinition>
       // This happens with the Undo non-topological changes button.
       state.validateFields(rootNode.getOrderedLeaves());
 
-      String selectedText;
-      if (definition.getGotoNext().getValue())
+      if (ImGui.beginCombo(labels.get("Goto"), definition.getNodeToGotoName()))
       {
-         selectedText = GotoNodeDefinition.GOTO_NEXT;
-      }
-      else
-      {
-         LeafNodeState<?> nodeToGoto = state.findNodeToGoto();
-         selectedText = nodeToGoto.getDefinition().getName();
-      }
-
-      if (ImGui.beginCombo(labels.get("Goto"), selectedText))
-      {
-         if (ImGui.selectable(labels.get("Next"), definition.getGotoNext().getValue()))
+         if (ImGui.selectable(labels.get("Next"), definition.getGotoNextNode()))
          {
-            definition.getGotoNext().setValue(true);
-            definition.updateAndSanitizeGotoNodeFields(null);
+            definition.setGotoNextNode();
          }
 
          for (LeafNodeState<?> leafNode : rootNode.getOrderedLeaves())
          {
             if (leafNode != state) // Exclude self
             {
-               if (ImGui.selectable(leafNode.getDefinition().getName(), definition.getGotoNodeID().getValue() == leafNode.getID()))
+               if (ImGui.selectable(leafNode.getDefinition().getName(), definition.getNodeToGotoID() == leafNode.getID()))
                {
-                  definition.getGotoNext().setValue(false);
-                  definition.getGotoNodeID().setValue((int) leafNode.getID());
-                  definition.updateAndSanitizeGotoNodeFields(leafNode.getDefinition().getName());
+                  definition.setNodeToGoto(leafNode.getID(), leafNode.getDefinition().getName());
                }
             }
          }

@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 import us.ihmc.communication.crdt.CRDTBidirectionalLong;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 /**
@@ -85,10 +84,6 @@ public class LeafNodeDefinition extends BehaviorTreeNodeDefinition
    {
       super.toMessage(message.getDefinition());
 
-      if (getName().contains("Wait") && executeAfterNodeID.getValue() != message.getExecuteAfterNodeId())
-         LogTools.debug("{}: toMessage {} -> {}", getCRDTInfo().getActorDesignation().name(),
-                        message.getExecuteAfterNodeId(),
-                        executeAfterNodeID.getValue());
       message.setExecuteAfterNodeId(executeAfterNodeID.toMessage());
    }
 
@@ -96,10 +91,6 @@ public class LeafNodeDefinition extends BehaviorTreeNodeDefinition
    {
       super.fromMessage(message.getDefinition());
 
-      if (getName().contains("Wait") && executeAfterNodeID.getValue() != message.getExecuteAfterNodeId())
-         LogTools.debug("{}: fromMessage {} -> {}", getCRDTInfo().getActorDesignation().name(),
-                        executeAfterNodeID.getValue(),
-                        message.getExecuteAfterNodeId());
       executeAfterNodeID.fromMessage(message.getExecuteAfterNodeId());
    }
 
@@ -124,11 +115,7 @@ public class LeafNodeDefinition extends BehaviorTreeNodeDefinition
       {
          case EXECUTE_AFTER_PREVIOUS_NAME -> setExecuteAfterPrevious();
          case EXECUTE_AFTER_BEGINNING_NAME -> setExecuteAfterBeginning();
-         default ->
-         {
-            executeAfterNodeID.setValue(EXECUTE_AFTER_INVALID_ID);
-            executeAfterLeafName = name;
-         }
+         default -> setExecuteAfterLeaf(EXECUTE_AFTER_INVALID_ID, name);
       }
    }
 

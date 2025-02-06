@@ -37,11 +37,6 @@ public class LeafNodeState<D extends LeafNodeDefinition> extends BehaviorTreeNod
       failed = new CRDTStatusBoolean(ROS2ActorDesignation.ROBOT, crdtInfo, false);
    }
 
-   /**
-    * Updates the definition executeAfterNodeName string for
-    * saving an up to date human readable name in the JSON.
-    * It also finds the correct node upon loading the name from JSON.
-    */
    public void validateFields(List<LeafNodeState<?>> leaves)
    {
       if (definition.getExecuteAfterIsInvalid())
