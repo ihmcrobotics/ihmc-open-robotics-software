@@ -173,14 +173,7 @@ public class RapidHeightMapManager
 
    public HeightMapData getLatestHeightMapData()
    {
-      if (runWithCUDA)
-      {
-         return RapidHeightMapExtractorCUDA.packHeightMapData(rapidHeightMapExtractor);
-      }
-      else
-      {
-         return RapidHeightMapExtractor.packHeightMapData(rapidHeightMapExtractor);
-      }
+      return rapidHeightMapExtractor.getHeightMapData();
    }
 
    public TerrainMapData getTerrainMapData()

@@ -40,8 +40,8 @@ public class CUDACompressionTools
 
    private static final long CHUNK_SIZE = 1 << 16;
 
-   private final Mat depthMSBExtractorCPU = new Mat(1, 1, opencv_core.CV_16UC1, new Scalar(65280.0));
-   private final Mat depthLSBExtractorCPU = new Mat(1, 1, opencv_core.CV_16UC1, new Scalar(255.0));
+   private final Mat depthMSBExtractorCPU = new Mat(1, 1, opencv_core.CV_16UC1, new Scalar(0xFF00));
+   private final Mat depthLSBExtractorCPU = new Mat(1, 1, opencv_core.CV_16UC1, new Scalar(0x00FF));
    private final GpuMat depthMSBExtractorGPU = new GpuMat(1, 1, opencv_core.CV_16UC1);
    private final GpuMat depthLSBExtractorGPU = new GpuMat(1, 1, opencv_core.CV_16UC1);
 
@@ -56,7 +56,7 @@ public class CUDACompressionTools
       stream = CUDAStreamManager.getStream();
 
       nvcompBatchedZstdOpts_t zstdOptions = nvcomp.nvcompBatchedZstdDefaultOpts();
-      compressionManager = new ZstdManager(CHUNK_SIZE, zstdOptions, stream, 0, nvcomp.NoComputeNoVerify);
+      compressionManager = new ZstdManager(CHUNK_SIZE, zstdOptions, stream, nvcomp.NoComputeNoVerify, 0 /*NVCOMP_NATIVE*/);
 
       depthMSBExtractorGPU.upload(depthMSBExtractorCPU);
       depthLSBExtractorGPU.upload(depthLSBExtractorCPU );
@@ -64,9 +64,8 @@ public class CUDACompressionTools
 
    public void destroy()
    {
-      checkCUDAError(cudaStreamSynchronize(stream));
-      CUDAStreamManager.releaseStream(stream);
       compressionManager.close();
+      CUDAStreamManager.releaseStream(stream);
       jpegProcessor.destroy();
 
       depthMSBExtractorCPU.close();
@@ -298,6 +297,7 @@ public class CUDACompressionTools
       return packedBuffer;
    }
 
+   @SuppressWarnings("resource")
    private BytePointer[] unpackCompressedDepth(BytePointer packedBuffer)
    {
       long offset = 0;
@@ -387,7 +387,7 @@ public class CUDACompressionTools
       checkCUDAError(cudaMemcpyAsync(compressedDeviceBuffer, compressedData, compressedDataSize, cudart.cudaMemcpyDefault, cudaStream));
 
       // Create a decompression manager
-      nvcompManagerBase decompressionManager = nvcomp.create_manager(compressedDeviceBuffer, cudaStream, 0, nvcomp.NoComputeNoVerify);
+      nvcompManagerBase decompressionManager = nvcomp.create_manager(compressedDeviceBuffer, cudaStream, nvcomp.NoComputeNoVerify);
       DecompressionConfig decompressionConfig = decompressionManager.configure_decompression(compressedDeviceBuffer);
       long decompressedDataSize = decompressionConfig.decomp_data_size();
 

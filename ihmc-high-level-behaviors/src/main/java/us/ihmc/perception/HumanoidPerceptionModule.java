@@ -458,7 +458,7 @@ public class HumanoidPerceptionModule
 
    public HeightMapData getLatestHeightMapData()
    {
-      latestHeightMapData = RapidHeightMapExtractor.packHeightMapData(rapidHeightMapExtractor);
+      latestHeightMapData = rapidHeightMapExtractor.getHeightMapData();
       return latestHeightMapData;
    }
 
