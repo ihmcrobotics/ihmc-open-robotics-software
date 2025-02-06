@@ -15,7 +15,7 @@ public class YOLOv8AvailableModelsPubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "d7675ac92854eb69a6e601301d1b20e0324442708e31828c9d5f0f3d14ba1134";
+   		return "b91d143b621093319bc35937a6d6374ca1283278d0c2754acf124d46e83a3f75";
    }
    
    @Override
@@ -52,9 +52,12 @@ public class YOLOv8AvailableModelsPubSubType implements us.ihmc.pubsub.TopicData
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 8; ++i0)
       {
           current_alignment += perception_msgs.msg.dds.YOLOv8ModelInfoPubSubType.getMaxCdrSerializedSize(current_alignment);}
+
       return current_alignment - initial_alignment;
    }
 
@@ -67,16 +70,22 @@ public class YOLOv8AvailableModelsPubSubType implements us.ihmc.pubsub.TopicData
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getAvailableYoloModels().size(); ++i0)
       {
           current_alignment += perception_msgs.msg.dds.YOLOv8ModelInfoPubSubType.getCdrSerializedSize(data.getAvailableYoloModels().get(i0), current_alignment);}
+
 
       return current_alignment - initial_alignment;
    }
 
    public static void write(perception_msgs.msg.dds.YOLOv8AvailableModels data, us.ihmc.idl.CDR cdr)
    {
+      cdr.write_type_7(data.getRequest());
+
       if(data.getAvailableYoloModels().size() <= 8)
       cdr.write_type_e(data.getAvailableYoloModels());else
           throw new RuntimeException("available_yolo_models field exceeds the maximum length");
@@ -85,6 +94,8 @@ public class YOLOv8AvailableModelsPubSubType implements us.ihmc.pubsub.TopicData
 
    public static void read(perception_msgs.msg.dds.YOLOv8AvailableModels data, us.ihmc.idl.CDR cdr)
    {
+      data.setRequest(cdr.read_type_7());
+      	
       cdr.read_type_e(data.getAvailableYoloModels());	
 
    }
@@ -92,12 +103,14 @@ public class YOLOv8AvailableModelsPubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final void serialize(perception_msgs.msg.dds.YOLOv8AvailableModels data, us.ihmc.idl.InterchangeSerializer ser)
    {
+      ser.write_type_7("request", data.getRequest());
       ser.write_type_e("available_yolo_models", data.getAvailableYoloModels());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.YOLOv8AvailableModels data)
    {
+      data.setRequest(ser.read_type_7("request"));
       ser.read_type_e("available_yolo_models", data.getAvailableYoloModels());
    }
 

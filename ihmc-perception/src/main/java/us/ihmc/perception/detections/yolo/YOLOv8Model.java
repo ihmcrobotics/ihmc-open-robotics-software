@@ -52,7 +52,7 @@ public class YOLOv8Model
 
    // Meta data
    private final String modelName;
-   private final List<String> detectionClassNames = new ArrayList<>();
+   private final List<String> detectableObjects = new ArrayList<>();
 
    // OpenCV DNN stuff
    private final Net yoloNet;
@@ -97,7 +97,7 @@ public class YOLOv8Model
          Yaml yaml = new Yaml();
          Map<String, List<Object>> classNamesData = yaml.load(inputStream);
          List<Object> names = classNamesData.get("names");
-         detectionClassNames.addAll(names.stream().map(Object::toString).toList());
+         detectableObjects.addAll(names.stream().map(Object::toString).toList());
 
          // Read the YOLO net
          Path onnxFile = YOLOv8Tools.getONNXFile(modelBaseDirectory);
@@ -131,12 +131,12 @@ public class YOLOv8Model
       nms = new CUDANonMaximumSuppression();
 
       // Initialize parameters
-      cudaMallocHost(ignoredObjectClasses, (long) ignoredObjectClasses.sizeof() * detectionClassNames.size());
-      cudaMallocHost(confidenceThresholds, (long) confidenceThresholds.sizeof() * detectionClassNames.size());
-      maskThresholds = new float[detectionClassNames.size()];
+      cudaMallocHost(ignoredObjectClasses, (long) ignoredObjectClasses.sizeof() * detectableObjects.size());
+      cudaMallocHost(confidenceThresholds, (long) confidenceThresholds.sizeof() * detectableObjects.size());
+      maskThresholds = new float[detectableObjects.size()];
 
       // Set parameters to default values
-      boolean[] ignoredClasses = new boolean[detectionClassNames.size()];
+      boolean[] ignoredClasses = new boolean[detectableObjects.size()];
       Arrays.fill(ignoredClasses, false); // Don't ignore any by default
       setIgnoredClasses(ignoredClasses);
       setConfidenceThresholds(0.7f);
@@ -177,9 +177,14 @@ public class YOLOv8Model
    /**
     * @return A list of object classes this model can detect.
     */
-   public List<String> getDetectionClassNames()
+   public List<String> getDetectableObjects()
    {
-      return detectionClassNames;
+      return detectableObjects;
+   }
+
+   public int getDetectableObjectCount()
+   {
+      return detectableObjects.size();
    }
 
    /**
@@ -190,7 +195,7 @@ public class YOLOv8Model
     */
    public void ignore(String objectClass, boolean ignore)
    {
-      ignoredObjectClasses.put(detectionClassNames.indexOf(objectClass), ignore);
+      ignoredObjectClasses.put(detectableObjects.indexOf(objectClass), ignore);
    }
 
    /**
@@ -230,7 +235,7 @@ public class YOLOv8Model
     */
    public void setConfidenceThresholds(float confidenceThreshold)
    {
-      float[] confidenceArray = new float[detectionClassNames.size()];
+      float[] confidenceArray = new float[detectableObjects.size()];
       Arrays.fill(confidenceArray, confidenceThreshold);
       setConfidenceThresholds(confidenceArray);
    }
@@ -360,7 +365,7 @@ public class YOLOv8Model
 
          // Run the filter kernel
          filterKernel.withPointer(unfilteredDetections)
-                     .withInt(detectionClassNames.size())
+                     .withInt(detectableObjects.size())
                      .withInt(unfilteredDetectionCount)
                      .withPointer(confidenceThresholds)
                      .withPointer(ignoredObjectClasses)
@@ -412,7 +417,7 @@ public class YOLOv8Model
             int classID = (int) row.get(5);
             RawImage mask = computeDetectionMask(filteredDetections, prototypeMasks, index, maskThresholds[classID], maskIntrinsics, bgrInputImage);
 
-            YOLOv8Detection detection = new YOLOv8Detection(detectionClassNames.get(classID), confidence, boundingBox, mask);
+            YOLOv8Detection detection = new YOLOv8Detection(detectableObjects.get(classID), classID, confidence, boundingBox, mask);
             result.add(detection);
 
             boundingBox.close();

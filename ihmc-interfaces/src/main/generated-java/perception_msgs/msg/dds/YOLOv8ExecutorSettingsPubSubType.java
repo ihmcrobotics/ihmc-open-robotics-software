@@ -15,7 +15,7 @@ public class YOLOv8ExecutorSettingsPubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "0998d68f51017332e21bfca18cebc3e08fe8b5338a82ef5bd2c361474bb93b88";
+   		return "bcdeeeef907d2e79a9810120d1f448b9364d22e47fc145d914744f95ace83eb9";
    }
    
    @Override

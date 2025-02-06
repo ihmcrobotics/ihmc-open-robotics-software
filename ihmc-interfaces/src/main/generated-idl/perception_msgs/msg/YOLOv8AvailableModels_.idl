@@ -9,11 +9,18 @@ module perception_msgs
     module dds
     {
 
+      /**
+       * Message listing available YOLO models
+       */
       @TypeCode(type="perception_msgs::msg::dds_::YOLOv8AvailableModels_")
       struct YOLOv8AvailableModels
       {
         /**
-         * Message listing available YOLO models
+         * Whether this is a request to receive the available models
+         */
+        boolean request;
+        /**
+         * List of the available models
          */
         sequence<perception_msgs::msg::dds::YOLOv8ModelInfo, 8> available_yolo_models;
       };

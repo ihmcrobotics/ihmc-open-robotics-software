@@ -105,7 +105,7 @@ public class RDXYOLOv8PipelineDemo
          YOLOv8Model model = new YOLOv8Model(yoloModelDirectory);
 
          LogTools.info("Loaded YOLOv8 model: " + YOLOv8Tools.getONNXFile(yoloModelDirectory));
-         LogTools.info("\t\t\tClasses: " + model.getDetectionClassNames().size());
+         LogTools.info("\t\t\tClasses: " + model.getDetectableObjectCount());
 
          yoloModels.add(model);
          availableModels.add(model.getName());

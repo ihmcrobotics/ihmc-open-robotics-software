@@ -32,7 +32,7 @@ import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizersPanel;
 import us.ihmc.rdx.ui.graphics.ros2.RDXDetectionManagerSettings;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2FramePlanarRegionsVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
-import us.ihmc.rdx.ui.graphics.ros2.RDXYOLOv8Settings;
+import us.ihmc.rdx.ui.graphics.ros2.yolo.RDXROS2YOLOv8Settings;
 import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2ColoredPointCloudVisualizer;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -128,7 +128,7 @@ public class RDXSceneGraphDemo
 
             perceptionVisualizerPanel.addVisualizer(new RDXDetectionManagerSettings("Detection Manager Settings", ros2Helper));
 
-            RDXYOLOv8Settings yoloSettingsVisualizer = new RDXYOLOv8Settings("YOLOv8", ros2Helper);
+            RDXROS2YOLOv8Settings yoloSettingsVisualizer = new RDXROS2YOLOv8Settings("YOLOv8", ros2Node);
             yoloSettingsVisualizer.setActive(true);
             perceptionVisualizerPanel.addVisualizer(yoloSettingsVisualizer);
 
@@ -222,11 +222,11 @@ public class RDXSceneGraphDemo
 
                if (yolov8DetectionExecutor == null)
                {
-                  yolov8DetectionExecutor = new YOLOv8DetectionExecutor(ros2Helper, yoloAnnotatedImageVisualizer::isActive);
+                  yolov8DetectionExecutor = new YOLOv8DetectionExecutor(yoloAnnotatedImageVisualizer::isActive);
                   yolov8DetectionExecutor.addDetectionConsumerCallback(detectionManager::addDetections);
                }
 
-               yolov8DetectionExecutor.runYOLODetectionOnAllModels(zedColorImages.get(RobotSide.LEFT), zedDepthImage);
+               yolov8DetectionExecutor.runNextEnabledModel(zedColorImages.get(RobotSide.LEFT), zedDepthImage);
 
                // TODO: finish
                onRobotSceneGraph.updateSubscription();

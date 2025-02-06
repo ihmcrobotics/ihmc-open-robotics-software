@@ -16,6 +16,7 @@ module perception_msgs
       @TypeCode(type="perception_msgs::msg::dds_::YOLOv8ModelSettings_")
       struct YOLOv8ModelSettings
       {
+        string model_name;
         /**
          * A boolean for each object class, whether its detections should be ignored
          */

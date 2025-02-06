@@ -1,5 +1,7 @@
 # Settings for an individual YOLOv8 Model
 
+string model_name
+
 # A boolean for each object class, whether its detections should be ignored
 bool[<=96] ignored_object_classes
 
