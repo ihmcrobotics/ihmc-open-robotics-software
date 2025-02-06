@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.commons.time.TimeIntervalProvider;
 import us.ihmc.commons.time.TimeIntervalTools;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -177,7 +178,7 @@ public class BipedContactSequenceTools
       return true;
    }
 
-   public static void shiftContactSequencesToRelativeTime(List<SimpleBipedContactPhase> contactSequenceToPack, double currentAbsoluteTime)
+   public static void shiftContactSequencesToRelativeTime(List<? extends TimeIntervalProvider> contactSequenceToPack, double currentAbsoluteTime)
    {
       double shiftTime = -currentAbsoluteTime;
       for (int sequence = 0; sequence < contactSequenceToPack.size(); sequence++)

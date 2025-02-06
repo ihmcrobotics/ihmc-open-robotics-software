@@ -105,7 +105,7 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
 
       // Load header and main file
       URL heightMapUtilsHeaderPath = getClass().getResource("HeightMapUtils.cuh");
-      URL mathUtilsHeaderPath = getClass().getResource("MathUtils.cuh");
+      URL mathUtilsHeaderPath = getClass().getResource("/us/ihmc/perception/cuda/MathUtils.cuh");
       URL kernelPath = getClass().getResource("RapidHeightMapExtractor.cu");
 
       terrainMapData = new TerrainMapData(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize());
@@ -152,22 +152,6 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
       }
 
       reset();
-   }
-
-   public static HeightMapData packHeightMapData(RapidHeightMapExtractorInterface heightMapExtractor)
-   {
-      HeightMapData latestHeightMapData = new HeightMapData((float) RapidHeightMapExtractorCUDA.getHeightMapParameters().getGlobalCellSizeInMeters(),
-                                                            (float) RapidHeightMapExtractorCUDA.getHeightMapParameters().getGlobalWidthInMeters(),
-                                                            heightMapExtractor.getSensorOrigin().getX(),
-                                                            heightMapExtractor.getSensorOrigin().getY());
-      Mat heightMapMat = heightMapExtractor.getTerrainMapData().getHeightMap();
-      PerceptionMessageTools.convertToHeightMapData(heightMapMat,
-                                                    latestHeightMapData,
-                                                    heightMapExtractor.getSensorOrigin(),
-                                                    (float) RapidHeightMapExtractorCUDA.getHeightMapParameters().getGlobalWidthInMeters(),
-                                                    (float) RapidHeightMapExtractorCUDA.getHeightMapParameters().getGlobalCellSizeInMeters());
-
-      return latestHeightMapData;
    }
 
    public static HeightMapParameters getHeightMapParameters()
@@ -466,6 +450,23 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
    public int getSequenceNumber()
    {
       return sequenceNumber;
+   }
+
+   public HeightMapData getHeightMapData()
+   {
+      HeightMapData latestHeightMapData = new HeightMapData((float) getHeightMapParameters().getGlobalCellSizeInMeters(),
+                                                            (float) getHeightMapParameters().getGlobalWidthInMeters(),
+                                                            getSensorOrigin().getX(),
+                                                            getSensorOrigin().getY());
+
+      Mat heightMapMat = getTerrainMapData().getHeightMap();
+      PerceptionMessageTools.convertToHeightMapData(heightMapMat,
+                                                    latestHeightMapData,
+                                                    getSensorOrigin(),
+                                                    (float) getHeightMapParameters().getGlobalWidthInMeters(),
+                                                    (float) getHeightMapParameters().getGlobalCellSizeInMeters());
+
+      return latestHeightMapData;
    }
 
    public TerrainMapData getTerrainMapData()

@@ -36,9 +36,9 @@ public class ContinuousPlannerSchedulingTask
    protected final ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(1,
                                                                                                           getClass(),
                                                                                                           ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
-   private final ContinuousPlanner continuousPlanner;
    public StateMachine<ContinuousHikingState, State> stateMachine;
    private TerrainMapData terrainMap;
+   private HeightMapData heightMapData;
 
    public ContinuousPlannerSchedulingTask(DRCRobotModel robotModel,
                                           ROS2Node ros2Node,
@@ -57,15 +57,15 @@ public class ContinuousPlannerSchedulingTask
       ros2Helper.subscribeViaCallback(ContinuousHikingAPI.CONTINUOUS_HIKING_COMMAND, commandMessage::set);
 
       TerrainPlanningDebugger debugger = new TerrainPlanningDebugger(ros2Node, monteCarloFootstepPlannerParameters);
-      continuousPlanner = new ContinuousPlanner(robotModel,
-                                                referenceFrames,
-                                                commandMessage,
-                                                continuousHikingParameters,
-                                                monteCarloFootstepPlannerParameters,
-                                                footstepPlannerParameters,
-                                                swingPlannerParameters,
-                                                debugger,
-                                                continuousHikingLogger);
+      ContinuousPlanner continuousPlanner = new ContinuousPlanner(robotModel,
+                                                                  referenceFrames,
+                                                                  commandMessage,
+                                                                  continuousHikingParameters,
+                                                                  monteCarloFootstepPlannerParameters,
+                                                                  footstepPlannerParameters,
+                                                                  swingPlannerParameters,
+                                                                  debugger,
+                                                                  continuousHikingLogger);
 
       YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -81,7 +81,8 @@ public class ContinuousPlannerSchedulingTask
                                                     continuousPlanner,
                                                     controllerFootstepQueueMonitor,
                                                     continuousHikingParameters,
-                                                    terrainMap,
+                                                    this::getHeightMapData,
+                                                    this::getTerrainMap,
                                                     debugger,
                                                     continuousHikingLogger);
       State waitingtoLandState = new WaitingToLandState(ros2Helper,
@@ -139,6 +140,16 @@ public class ContinuousPlannerSchedulingTask
       executorService.scheduleWithFixedDelay(this::tickStateMachine, 1500, CONTINUOUS_PLANNING_DELAY_MS, TimeUnit.MILLISECONDS);
    }
 
+   public TerrainMapData getTerrainMap()
+   {
+      return terrainMap;
+   }
+
+   public HeightMapData getHeightMapData()
+   {
+      return heightMapData;
+   }
+
    /**
     * Runs the continuous hiking state machine every {@link #CONTINUOUS_PLANNING_DELAY_MS} milliseconds. The state is stored in the
     * {@link ContinuousHikingState}
@@ -150,13 +161,12 @@ public class ContinuousPlannerSchedulingTask
 
    public void setLatestHeightMapData(HeightMapData heightMapData)
    {
-      this.continuousPlanner.setLatestHeightMapData(heightMapData);
+      this.heightMapData = heightMapData;
    }
 
    public void setTerrainMapData(TerrainMapData terrainMapData)
    {
-      this.terrainMap = new TerrainMapData(terrainMapData);
-      this.continuousPlanner.setLatestTerrainMapData(terrainMapData);
+      this.terrainMap = terrainMapData;
    }
 
    public void destroy()
