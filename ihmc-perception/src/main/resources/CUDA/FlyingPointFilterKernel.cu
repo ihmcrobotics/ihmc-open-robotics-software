@@ -83,7 +83,7 @@ __global__ void filterFlyingPoints(unsigned short *in, size_t pitchIn,
     unsigned short depthValue = *inputPixel;
 
     // Define a 3x3 neighborhood window
-    const int windowSize = 3;
+    const int windowSize = 5;
     const int halfWindow = windowSize / 2;
     float window[windowSize * windowSize];
     int count = 0;
