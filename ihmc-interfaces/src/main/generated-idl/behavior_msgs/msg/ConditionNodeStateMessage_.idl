@@ -21,6 +21,10 @@ module behavior_msgs
          * Definition
          */
         behavior_msgs::msg::dds::ConditionNodeDefinitionMessage definition;
+        /**
+         * The current count of the counter
+         */
+        unsigned long count;
       };
     };
   };

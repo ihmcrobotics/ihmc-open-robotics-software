@@ -16,6 +16,10 @@ module behavior_msgs
          * Parent definition fields
          */
         behavior_msgs::msg::dds::BehaviorTreeNodeDefinitionMessage definition;
+        /**
+         * The number of times to fail before passing
+         */
+        unsigned long count_to;
       };
     };
   };

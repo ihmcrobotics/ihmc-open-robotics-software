@@ -12,6 +12,10 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
             * Parent definition fields
             */
    public behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage definition_;
+   /**
+            * The number of times to fail before passing
+            */
+   public long count_to_;
 
    public ConditionNodeDefinitionMessage()
    {
@@ -26,7 +30,10 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
 
    public void set(ConditionNodeDefinitionMessage other)
    {
-      behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);   }
+      behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
+      count_to_ = other.count_to_;
+
+   }
 
 
    /**
@@ -35,6 +42,21 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
    public behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage getDefinition()
    {
       return definition_;
+   }
+
+   /**
+            * The number of times to fail before passing
+            */
+   public void setCountTo(long count_to)
+   {
+      count_to_ = count_to;
+   }
+   /**
+            * The number of times to fail before passing
+            */
+   public long getCountTo()
+   {
+      return count_to_;
    }
 
 
@@ -56,6 +78,8 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
       if(other == this) return true;
 
       if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.count_to_, other.count_to_, epsilon)) return false;
+
 
       return true;
    }
@@ -70,6 +94,8 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
       ConditionNodeDefinitionMessage otherMyClass = (ConditionNodeDefinitionMessage) other;
 
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
+      if(this.count_to_ != otherMyClass.count_to_) return false;
+
 
       return true;
    }
@@ -81,7 +107,9 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
 
       builder.append("ConditionNodeDefinitionMessage {");
       builder.append("definition=");
-      builder.append(this.definition_);
+      builder.append(this.definition_);      builder.append(", ");
+      builder.append("count_to=");
+      builder.append(this.count_to_);
       builder.append("}");
       return builder.toString();
    }
