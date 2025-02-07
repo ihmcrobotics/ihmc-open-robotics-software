@@ -33,6 +33,29 @@ __device__ float computeMedian(float* window, int size)
     }
 }
 
+__device__ float computeMean(float* window, int size)
+{
+    float sum = 0.0f;
+    for (int i = 0; i < size; ++i)
+    {
+        sum += window[i];
+    }
+    return sum / size;
+}
+
+__device__ float computeStdDev(float* window, int size, float mean)
+{
+    float sumSquares = 0.0f;
+    for (int i = 0; i < size; ++i)
+    {
+        sumSquares += (window[i] - mean) * (window[i] - mean);
+    }
+    return sqrtf(sumSquares / size);
+}
+
+
+
+
 extern "C"
 /**
  * CUDA kernel to remove flying points from a depth map.
@@ -83,12 +106,14 @@ __global__ void filterFlyingPoints(unsigned short *in, size_t pitchIn,
 
     // Compute the median value for filtering
     float median = computeMedian(window, count);
+    float mean = computeMean(window, count);
+    float stdDev = computeStdDev(window, count, mean);
 
     // Write the filtered value to the output depth map
     unsigned short *outputPixel = (unsigned short *)((char *)out + yIndex * pitchOut) + xIndex;
 
     // If the depth value deviates too much from the median, mark it as a flying point
-    if (fabsf(depthValue - median) >= 0.2f * median)
+    if (fabsf(depthValue - median) >= 0.02f * median || fabsf(depthValue - median) > 1.5f * stdDev)
     {
         *outputPixel = static_cast<unsigned short>(median); // Set to median to remove flying point
     }
