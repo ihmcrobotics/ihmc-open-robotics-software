@@ -1,7 +1,7 @@
 #ifndef __behavior_msgs__msg__GotoNodeDefinitionMessage__idl__
 #define __behavior_msgs__msg__GotoNodeDefinitionMessage__idl__
 
-#include "behavior_msgs/msg/./BehaviorTreeNodeDefinitionMessage_.idl"
+#include "behavior_msgs/msg/./LeafNodeDefinitionMessage_.idl"
 module behavior_msgs
 {
   module msg
@@ -15,7 +15,15 @@ module behavior_msgs
         /**
          * Parent definition fields
          */
-        behavior_msgs::msg::dds::BehaviorTreeNodeDefinitionMessage definition;
+        behavior_msgs::msg::dds::LeafNodeDefinitionMessage definition;
+        /**
+         * If this node is simply set to goto the next node (i.e. no-op)
+         */
+        boolean goto_next;
+        /**
+         * The ID of the node to goto
+         */
+        unsigned long goto_node_id;
       };
     };
   };

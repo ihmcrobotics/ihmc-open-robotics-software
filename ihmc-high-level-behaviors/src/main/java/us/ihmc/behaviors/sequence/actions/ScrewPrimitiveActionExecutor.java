@@ -113,7 +113,7 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
          BehaviorTreeRootNodeState actionSequence = BehaviorTreeTools.findRootNode(state);
          if (actionSequence != null)
          {
-            if (actionSequence.getExecutionNextIndex() <= state.getActionIndex())
+            if (actionSequence.getExecutionNextIndex() <= state.getLeafIndex())
             {
                ReferenceFrame initialHandFrame = null;
 
@@ -123,9 +123,9 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
                }
                else
                {
-                  HandPoseActionState previousHandPose = actionSequence.findNextPreviousAction(HandPoseActionState.class,
-                                                                                               state.getActionIndex(),
-                                                                                               definition.getSide());
+                  HandPoseActionState previousHandPose = actionSequence.findNextPreviousLeaf(HandPoseActionState.class,
+                                                                                             state.getLeafIndex(),
+                                                                                             definition.getSide());
                   if (previousHandPose != null && previousHandPose.getPalmFrame().isChildOfWorld())
                   {
                      initialHandFrame = previousHandPose.getPalmFrame().getReferenceFrame();
@@ -299,9 +299,9 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
    }
 
    @Override
-   public void triggerActionExecution()
+   public void triggerExecution()
    {
-      super.triggerActionExecution();
+      super.triggerExecution();
 
       // Fail if invalid
       if (Double.isNaN(state.getPreviewTrajectoryLinearVelocity().getValue())

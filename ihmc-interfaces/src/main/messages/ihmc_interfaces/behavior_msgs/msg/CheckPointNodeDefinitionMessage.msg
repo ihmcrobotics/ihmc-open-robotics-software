@@ -1,2 +1,2 @@
 # Parent definition fields
-behavior_msgs/ActionNodeDefinitionMessage definition
+behavior_msgs/LeafNodeDefinitionMessage definition

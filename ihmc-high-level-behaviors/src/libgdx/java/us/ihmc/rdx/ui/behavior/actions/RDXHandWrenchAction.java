@@ -40,7 +40,7 @@ public class RDXHandWrenchAction extends RDXActionNode<HandWrenchActionState, Ha
    }
 
    @Override
-   public String getActionTypeTitle()
+   public String getLeafTypeTitle()
    {
       return getDefinition().getSide().getPascalCaseName() + " Hand Wrench";
    }

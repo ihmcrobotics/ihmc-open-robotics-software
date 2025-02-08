@@ -1,8 +1,11 @@
 package us.ihmc.behaviors.behaviorTree;
 
 import gnu.trove.map.hash.TLongObjectHashMap;
+import org.apache.logging.log4j.Level;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
+import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.behaviors.sequence.FallbackNodeExecutor;
+import us.ihmc.behaviors.sequence.LeafNodeExecutor;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -15,12 +18,13 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
    private final BehaviorTreeRootNodeState state;
    private final BehaviorTreeRootNodeDefinition definition;
    private final TLongObjectHashMap<BehaviorTreeNodeExecutor<?, ?>> idToNodeMap = new TLongObjectHashMap<>();
-   private final List<ActionNodeExecutor<?, ?>> actionChildren = new ArrayList<>();
+   private final List<LeafNodeExecutor<?, ?>> orderedLeaves = new ArrayList<>();
+   private final List<ActionNodeExecutor<?, ?>> orderedActions = new ArrayList<>();
    private final List<FallbackNodeExecutor> fallbackNodes = new ArrayList<>();
-   private final List<ActionNodeExecutor<?, ?>> currentlyExecutingActions = new ArrayList<>();
-   private final List<ActionNodeExecutor<?, ?>> failedActions = new ArrayList<>();
-   private final List<ActionNodeExecutor<?, ?>> successfulActions = new ArrayList<>();
-   private final List<ActionNodeExecutor<?, ?>> failedActionsWithoutFallback = new ArrayList<>();
+   private final List<LeafNodeExecutor<?, ?>> currentlyExecutingLeaves = new ArrayList<>();
+   private final List<LeafNodeExecutor<?, ?>> failedLeaves = new ArrayList<>();
+   private final List<LeafNodeExecutor<?, ?>> successfulLeaves = new ArrayList<>();
+   private final List<LeafNodeExecutor<?, ?>> failedLeavesWithoutFallback = new ArrayList<>();
 
    public BehaviorTreeRootNodeExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
@@ -44,126 +48,129 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
       super.update();
 
       idToNodeMap.clear();
-      actionChildren.clear();
+      orderedLeaves.clear();
+      orderedActions.clear();
       fallbackNodes.clear();
-      currentlyExecutingActions.clear();
-      updateActionSubtree(this);
+      currentlyExecutingLeaves.clear();
+      updateSubtree(this);
 
-      for (ActionNodeExecutor<?, ?> actionChild : actionChildren)
+      for (LeafNodeExecutor<?, ?> leaf : orderedLeaves)
       {
-         actionChild.getState().updateAndValidateExecuteAfter(state.getActionChildren());
+         leaf.getState().validateFields(state.getOrderedLeaves());
       }
 
       // Update concurrency ranks
-      for (int i = 0; i < state.getActionChildren().size(); i++)
+      for (int i = 0; i < state.getOrderedLeaves().size(); i++)
       {
-         state.getActionChildren().get(i).setConcurrencyRank(1);
-
-//         int j = i + 1;
-//         for (; j < state.getActionChildren().size()
-//              && state.getActionChildren().get(j).calculateExecuteAfterActionIndex(state.getActionChildren()) < i; j++);
+         state.getOrderedLeaves().get(i).setConcurrencyRank(1);
 
          int j = i - 1;
          for (; j >= 0; j--)
          {
-            int thisExecuteAfterActionIndex = state.getActionChildren().get(i).calculateExecuteAfterActionIndex();
-            int executeAfterActionIndexToCompare = state.getActionChildren().get(j).calculateExecuteAfterActionIndex();
-            if (thisExecuteAfterActionIndex == executeAfterActionIndexToCompare)
+            int thisExecuteAfterLeafIndex = state.getOrderedLeaves().get(i).getExecuteAfterLeafIndex();
+            int executeAfterLeafIndexToCompare = state.getOrderedLeaves().get(j).getExecuteAfterLeafIndex();
+            if (thisExecuteAfterLeafIndex == executeAfterLeafIndexToCompare)
             {
-               state.getActionChildren().get(i).setConcurrencyRank(2);
+               state.getOrderedLeaves().get(i).setConcurrencyRank(2);
             }
          }
       }
 
       // Update is next for execution
-      for (int i = 0; i < state.getActionChildren().size(); i++)
+      for (int i = 0; i < state.getOrderedLeaves().size(); i++)
       {
          int executionNextIndex = state.getExecutionNextIndex();
          if (i < executionNextIndex)
          {
-            state.getActionChildren().get(i).setIsNextForExecution(false);
+            state.getOrderedLeaves().get(i).setIsNextForExecution(false);
          }
          else if (i == executionNextIndex)
          {
-            state.getActionChildren().get(i).setIsNextForExecution(true);
+            state.getOrderedLeaves().get(i).setIsNextForExecution(true);
          }
-         else if (state.getActionChildren().get(i).calculateExecuteAfterActionIndex() < executionNextIndex)
+         else if (state.getOrderedLeaves().get(i).getExecuteAfterLeafIndex() < executionNextIndex)
          {
-            state.getActionChildren().get(i).setIsNextForExecution(true);
+            state.getOrderedLeaves().get(i).setIsNextForExecution(true);
          }
          else
          {
-            state.getActionChildren().get(i).setIsNextForExecution(false);
+            state.getOrderedLeaves().get(i).setIsNextForExecution(false);
          }
       }
 
-      failedActions.clear();
-      successfulActions.clear();
-      for (ActionNodeExecutor<?, ?> currentlyExecutingAction : currentlyExecutingActions)
+      failedLeaves.clear();
+      successfulLeaves.clear();
+      for (LeafNodeExecutor<?, ?> currentlyExecutingLeaf : currentlyExecutingLeaves)
       {
-         currentlyExecutingAction.updateCurrentlyExecuting();
+         currentlyExecutingLeaf.updateCurrentlyExecuting();
 
-         // This action has completed on this update
-         if (!currentlyExecutingAction.getState().getIsExecuting())
+         // This leaf has completed on this update
+         if (!currentlyExecutingLeaf.getState().getIsExecuting())
          {
-            String name = currentlyExecutingAction.getDefinition().getName();
-            double elapsedExecutionTime = currentlyExecutingAction.getState().getElapsedExecutionTime();
-            if (currentlyExecutingAction.getState().getFailed())
+            boolean success = !currentlyExecutingLeaf.getState().getFailed();
+            if (success)
+               successfulLeaves.add(currentlyExecutingLeaf);
+            else
+               failedLeaves.add(currentlyExecutingLeaf);
+
+            String name = currentlyExecutingLeaf.getDefinition().getName();
+            if (currentlyExecutingLeaf.getState() instanceof ActionNodeState<?> actionNodeState)
             {
-               failedActions.add(currentlyExecutingAction);
-               LogTools.error("Action failed after %.2f s: %s".formatted(elapsedExecutionTime, name));
+               String resultMessage = success ? "completed successfully in" : "failed after";
+               double elapsedExecutionTime = actionNodeState.getElapsedExecutionTime();
+               LogTools.log(success ? Level.INFO : Level.ERROR, "Action %s %.2f s: %s".formatted(resultMessage, elapsedExecutionTime, name));
             }
             else
             {
-               successfulActions.add(currentlyExecutingAction);
-               LogTools.info("Action completed successfully in %.2f s: %s".formatted(elapsedExecutionTime, name));
+               String resultMessage = success ? "completed successfully" : "failed";
+               LogTools.log(success ? Level.INFO : Level.ERROR, "Leaf %s: %s".formatted(resultMessage, name));
             }
          }
       }
-      currentlyExecutingActions.removeAll(failedActions);
-      currentlyExecutingActions.removeAll(successfulActions);
+      currentlyExecutingLeaves.removeAll(failedLeaves);
+      currentlyExecutingLeaves.removeAll(successfulLeaves);
 
-      failedActionsWithoutFallback.clear();
-      failedActionsWithoutFallback.addAll(failedActions);
+      failedLeavesWithoutFallback.clear();
+      failedLeavesWithoutFallback.addAll(failedLeaves);
       for (FallbackNodeExecutor fallbackNode : fallbackNodes)
       {
          fallbackNode.update();
 
-         if (!fallbackNode.getFallbackActions().isEmpty())
+         if (!fallbackNode.getFallbackLeaves().isEmpty())
          {
-            failedActionsWithoutFallback.removeAll(fallbackNode.getTryActions());
+            failedLeavesWithoutFallback.removeAll(fallbackNode.getTryLeaves());
          }
       }
 
-      // Handle skipping the fallback if try action group is successful
-      boolean actionEnded = !failedActions.isEmpty() || !successfulActions.isEmpty();
-      if (actionEnded && currentlyExecutingActions.isEmpty() && !isEndOfSequence())
+      // Handle skipping the fallback if try leaf group is successful
+      boolean leafEnded = !failedLeaves.isEmpty() || !successfulLeaves.isEmpty();
+      if (leafEnded && currentlyExecutingLeaves.isEmpty() && !isEndOfSequence())
       {
-         ActionNodeExecutor<?, ?> nextNodeToExecute = actionChildren.get(state.getExecutionNextIndex());
+         LeafNodeExecutor<?, ?> nextNodeToExecute = orderedLeaves.get(state.getExecutionNextIndex());
 
          for (FallbackNodeExecutor fallbackNode : fallbackNodes)
          {
-            if (fallbackNode.getFallbackActions().indexOf(nextNodeToExecute) == 0)
+            if (fallbackNode.getFallbackLeaves().indexOf(nextNodeToExecute) == 0)
             {
                boolean anyFailed = false;
-               for (ActionNodeExecutor<?, ?> tryAction : fallbackNode.getTryActions())
+               for (LeafNodeExecutor<?, ?> tryLeaf : fallbackNode.getTryLeaves())
                {
-                  if (tryAction.getState().getFailed())
+                  if (tryLeaf.getState().getFailed())
                   {
                      anyFailed = true;
                      break;
                   }
                }
 
-               if (anyFailed) // Nothing is executing and a tried action failed -- falling back
+               if (anyFailed) // Nothing is executing and a tried leaf failed -- falling back
                {
-                  LogTools.warn("Actions failed, fallback actions are next for execution.");
+                  LogTools.warn("Leaves failed, fallback leaves are next for execution.");
                }
-               else // Nothing is executing and none of the try actions failed -- skip fallback
+               else // Nothing is executing and none of the try leaves failed -- skip fallback
                {
-                  ActionNodeExecutor<?, ?> lastFallbackAction = fallbackNode.getFallbackActions().get(fallbackNode.getFallbackActions().size() - 1);
-                  LogTools.info("Actions successful, skipping fallback actions(s)");
-                  state.setExecutionNextIndex(lastFallbackAction.getState().getActionIndex() + 1);
+                  LeafNodeExecutor<?, ?> lastFallbackLeaf = fallbackNode.getFallbackLeaves().get(fallbackNode.getFallbackLeaves().size() - 1);
+                  LogTools.info("Leaves successful, skipping fallback leaves(s)");
+                  state.setExecutionNextIndex(lastFallbackLeaf.getState().getLeafIndex() + 1);
                }
             }
          }
@@ -176,86 +183,89 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
             state.getLogger().info("End of sequence.");
             state.setAutomaticExecution(false);
          }
-         else if (!failedActionsWithoutFallback.isEmpty())
+         else if (!failedLeavesWithoutFallback.isEmpty())
          {
-            state.getLogger().error("An action failed. Disabling automatic execution.\n   Failed: %s".formatted(failedActionsWithoutFallback));
+            state.getLogger().error("A leaf failed. Disabling automatic execution.\n   Failed: %s".formatted(failedLeavesWithoutFallback));
             state.setAutomaticExecution(false);
          }
          else
          {
-            while (shouldExecuteNextAction())
+            while (shouldExecuteNextLeaf())
             {
-               var nextAction = actionChildren.get(state.getExecutionNextIndex());
-               state.getLogger().info("Automatically executing action: %s (%s)".formatted(nextAction.getDefinition().getName(),
-                                                                                          nextAction.getClass().getSimpleName()));
-               executeNextAction();
+               var nextLeaf = orderedLeaves.get(state.getExecutionNextIndex());
+               state.getLogger().info("Automatically executing leaf: %s (%s)".formatted(nextLeaf.getDefinition().getName(),
+                                                                                        nextLeaf.getClass().getSimpleName()));
+               executeNextLeaf();
             }
          }
       }
       else if (state.pollManualExecutionRequested())
       {
-         while (shouldExecuteNextAction())
+         while (shouldExecuteNextLeaf())
          {
-            var nextAction = actionChildren.get(state.getExecutionNextIndex());
-            state.getLogger().info("Manually executing action: %s (%s)".formatted(nextAction.getDefinition().getName(),
-                                                                                  nextAction.getClass().getSimpleName()));
-            executeNextAction();
+            var nextLeaf = orderedLeaves.get(state.getExecutionNextIndex());
+            state.getLogger().info("Manually executing leaf: %s (%s)".formatted(nextLeaf.getDefinition().getName(),
+                                                                                nextLeaf.getClass().getSimpleName()));
+            executeNextLeaf();
          }
       }
    }
 
-   public void updateActionSubtree(BehaviorTreeNodeExecutor<?, ?> node)
+   public void updateSubtree(BehaviorTreeNodeExecutor<?, ?> node)
    {
       idToNodeMap.put(node.getState().getID(), node);
 
       for (BehaviorTreeNodeExecutor<?, ?> child : node.getChildren())
       {
-         if (child instanceof ActionNodeExecutor<?, ?> actionNode)
+         if (child instanceof LeafNodeExecutor<?, ?> leaf)
          {
-            actionChildren.add(actionNode);
-            if (actionNode.getState().getIsExecuting())
+            orderedLeaves.add(leaf);
+            if (leaf.getState().getIsExecuting())
             {
-               currentlyExecutingActions.add(actionNode);
+               currentlyExecutingLeaves.add(leaf);
             }
+
+            if (child instanceof ActionNodeExecutor<?, ?> actionNode)
+               orderedActions.add(actionNode);
          }
          else if (child instanceof FallbackNodeExecutor fallbackNode)
          {
             fallbackNodes.add(fallbackNode);
          }
 
-         updateActionSubtree(child);
+         updateSubtree(child);
       }
    }
 
-   private void executeNextAction()
+   private void executeNextLeaf()
    {
-      ActionNodeExecutor<?, ?> actionToExecute = actionChildren.get(state.getExecutionNextIndex());
+      LeafNodeExecutor<?, ?> leafToExecute = orderedLeaves.get(state.getExecutionNextIndex());
 
-      state.getLogger().info("Triggering action execution: %s (%s)".formatted(actionToExecute.getDefinition().getName(),
-                                                                              actionToExecute.getClass().getSimpleName()));
-      actionToExecute.update();
-      actionToExecute.triggerActionExecution();
-      currentlyExecutingActions.add(actionToExecute);
+      state.getLogger().info("Triggering leaf execution: %s (%s)".formatted(leafToExecute.getDefinition().getName(),
+                                                                            leafToExecute.getClass().getSimpleName()));
+      leafToExecute.update();
+      leafToExecute.triggerExecution();
+      currentlyExecutingLeaves.add(leafToExecute);
       state.stepForwardNextExecutionIndex();
    }
 
-   private boolean shouldExecuteNextAction()
+   private boolean shouldExecuteNextLeaf()
    {
       if (isEndOfSequence())
       {
          return false;
       }
 
-      ActionNodeExecutor<?, ?> nextNodeToExecute = actionChildren.get(state.getExecutionNextIndex());
+      LeafNodeExecutor<?, ?> nextNodeToExecute = orderedLeaves.get(state.getExecutionNextIndex());
 
-      // If a fallback sequence is up next, block if any corresponding try actions are executing
+      // If a fallback sequence is up next, block if any corresponding try leaves are executing
       for (FallbackNodeExecutor fallbackNode : fallbackNodes)
       {
-         if (fallbackNode.getFallbackActions().indexOf(nextNodeToExecute) == 0) // The first fallback action is next
+         if (fallbackNode.getFallbackLeaves().indexOf(nextNodeToExecute) == 0) // The first fallback leaf is next
          {
-            for (ActionNodeExecutor<?, ?> tryAction : fallbackNode.getTryActions())
+            for (LeafNodeExecutor<?, ?> tryLeaf : fallbackNode.getTryLeaves())
             {
-               if (tryAction.getState().getIsExecuting())
+               if (tryLeaf.getState().getIsExecuting())
                {
                   return false;
                }
@@ -265,34 +275,34 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
 
       if (!nextNodeToExecute.getState().getCanExecute())
       {
-         state.getLogger().error("Cannot execute action: %s\n%s".formatted(nextNodeToExecute.getDefinition().getName(),
-                                                                           nextNodeToExecute.getCantExecuteMessage()));
+         state.getLogger().error("Cannot execute leaf: %s\n%s".formatted(nextNodeToExecute.getDefinition().getName(),
+                                                                         nextNodeToExecute.getCantExecuteMessage()));
          state.setAutomaticExecution(false);
          return false;
       }
 
       if (state.getConcurrencyEnabled())
       {
-         int executeAfterActionIndex = nextNodeToExecute.getState().calculateExecuteAfterActionIndex();
+         int executeAfterLeafIndex = nextNodeToExecute.getState().getExecuteAfterLeafIndex();
 
-         if (executeAfterActionIndex < 0) // Execute after beginning
+         if (executeAfterLeafIndex < 0) // Execute after beginning
          {
             return true;
          }
          else
          {
-            return !actionChildren.get(executeAfterActionIndex).getState().getIsExecuting();
+            return !orderedLeaves.get(executeAfterLeafIndex).getState().getIsExecuting();
          }
       }
       else
       {
-         return !currentlyExecutingActions.isEmpty();
+         return !currentlyExecutingLeaves.isEmpty();
       }
    }
 
    public boolean isEndOfSequence()
    {
-      return state.getExecutionNextIndex() >= actionChildren.size();
+      return state.getExecutionNextIndex() >= orderedLeaves.size();
    }
    
    public TLongObjectHashMap<BehaviorTreeNodeExecutor<?, ?>> getIDToNodeMap()
@@ -300,23 +310,28 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
       return idToNodeMap;
    }
 
-   public List<ActionNodeExecutor<?, ?>> getActionChildren()
+   public List<ActionNodeExecutor<?, ?>> getOrderedActions()
    {
-      return actionChildren;
+      return orderedActions;
    }
 
-   public List<ActionNodeExecutor<?, ?>> getFailedActions()
+   public List<LeafNodeExecutor<?, ?>> getOrderedLeaves()
    {
-      return failedActions;
+      return orderedLeaves;
    }
 
-   public List<ActionNodeExecutor<?, ?>> getSuccessfulActions()
+   public List<LeafNodeExecutor<?, ?>> getFailedLeaves()
    {
-      return successfulActions;
+      return failedLeaves;
    }
 
-   public List<ActionNodeExecutor<?, ?>> getCurrentlyExecutingActions()
+   public List<LeafNodeExecutor<?, ?>> getSuccessfulLeaves()
    {
-      return currentlyExecutingActions;
+      return successfulLeaves;
+   }
+
+   public List<LeafNodeExecutor<?, ?>> getCurrentlyExecutingLeaves()
+   {
+      return currentlyExecutingLeaves;
    }
 }

@@ -31,9 +31,9 @@ public class WaitDurationActionExecutor extends ActionNodeExecutor<WaitDurationA
    }
 
    @Override
-   public void triggerActionExecution()
+   public void triggerExecution()
    {
-      super.triggerActionExecution();
+      super.triggerExecution();
 
       state.getLogger().info("Waiting for %.2f s...".formatted(getDefinition().getWaitDuration()));
 

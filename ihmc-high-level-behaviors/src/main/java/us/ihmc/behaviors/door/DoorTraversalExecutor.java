@@ -57,7 +57,7 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
    {
       super.update();
 
-      updateActionSubtree(this);
+      updateSubtree(this);
 
       DetectableSceneNode yoloDoorHandleNode = (DetectableSceneNode) sceneGraph.getNamesToNodesMap().get("YOLO door lever");
       StaticRelativeSceneNode staticHandleClosedDoor = (StaticRelativeSceneNode) sceneGraph.getNamesToNodesMap().get(DoorNodeTools.DOOR_HELPER_NODE_NAME_PREFIX);
@@ -107,7 +107,7 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
                                          """.formatted(state.getDoorHandleDistanceFromStart().getValue(), openedDoorHandleDistanceFromStart, state.getWaitToOpenRightHandAction().getDefinition().getName()));
                   ros2ControllerHelper.publishToController(stopAllTrajectoryMessage);
                   waitForPullScrewToFinish = true;
-                  state.getActionSequence().setExecutionNextIndex(state.getWaitToOpenRightHandAction().getActionIndex());
+                  state.getActionSequence().setExecutionNextIndex(state.getWaitToOpenRightHandAction().getLeafIndex());
                }
             }
          }
@@ -132,14 +132,14 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
                                       """.formatted(handToHandleDistance, 0.19, state.getWaitToOpenRightHandAction().getDefinition().getName()));
                   ros2ControllerHelper.publishToController(stopAllTrajectoryMessage);
                   waitForGraspToFinish = true;
-                  state.getActionSequence().setExecutionNextIndex(state.getWaitToOpenRightHandAction().getActionIndex());
+                  state.getActionSequence().setExecutionNextIndex(state.getWaitToOpenRightHandAction().getLeafIndex());
                }
             }
          }
       }
    }
 
-   public void updateActionSubtree(BehaviorTreeNodeExecutor<?, ?> node)
+   public void updateSubtree(BehaviorTreeNodeExecutor<?, ?> node)
    {
       for (BehaviorTreeNodeExecutor<?, ?> child : node.getChildren())
       {
@@ -149,7 +149,7 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
          }
          else
          {
-            updateActionSubtree(child);
+            updateSubtree(child);
          }
       }
    }
