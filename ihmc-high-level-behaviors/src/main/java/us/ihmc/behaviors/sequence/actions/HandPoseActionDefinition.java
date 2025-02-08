@@ -180,21 +180,24 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
    {
       super.undoAllNontopologicalChanges();
 
-      side.setValue(onDiskSide);
-      trajectoryDuration.setValue(onDiskTrajectoryDuration);
-      holdPoseInWorldLater.setValue(onDiskHoldPoseInWorldLater);
-      jointspaceOnly.setValue(onDiskJointspaceOnly);
-      usePredefinedJointAngles.setValue(onDiskUsePredefinedJointAngles);
-      preset.setValue(onDiskPreset);
-      for (int i = 0; i < jointAngles.getLength(); i++)
-         jointAngles.setValue(i, onDiskJointAngles[i]);
-      palmParentFrameName.setValue(onDiskPalmParentFrameName);
-      palmTransformToParent.getValueAndModify().set(onDiskPalmTransformToParent);
-      linearPositionWeight.setValue(onDiskLinearPositionWeight);
-      angularPositionWeight.setValue(onDiskAngularPositionWeight);
-      jointspaceWeight.setValue(onDiskJointspaceWeight);
-      positionErrorTolerance.setValue(onDiskPositionErrorTolerance);
-      orientationErrorTolerance.setValue(onDiskOrientationErrorTolerance);
+      if (isUndoAvailable())
+      {
+         side.setValue(onDiskSide);
+         trajectoryDuration.setValue(onDiskTrajectoryDuration);
+         holdPoseInWorldLater.setValue(onDiskHoldPoseInWorldLater);
+         jointspaceOnly.setValue(onDiskJointspaceOnly);
+         usePredefinedJointAngles.setValue(onDiskUsePredefinedJointAngles);
+         preset.setValue(onDiskPreset);
+         for (int i = 0; i < jointAngles.getLength(); i++)
+            jointAngles.setValue(i, onDiskJointAngles[i]);
+         palmParentFrameName.setValue(onDiskPalmParentFrameName);
+         palmTransformToParent.getValueAndModify().set(onDiskPalmTransformToParent);
+         linearPositionWeight.setValue(onDiskLinearPositionWeight);
+         angularPositionWeight.setValue(onDiskAngularPositionWeight);
+         jointspaceWeight.setValue(onDiskJointspaceWeight);
+         positionErrorTolerance.setValue(onDiskPositionErrorTolerance);
+         orientationErrorTolerance.setValue(onDiskOrientationErrorTolerance);
+      }
    }
 
    @Override

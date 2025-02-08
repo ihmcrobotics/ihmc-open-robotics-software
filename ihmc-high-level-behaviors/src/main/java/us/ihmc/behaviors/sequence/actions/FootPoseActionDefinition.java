@@ -74,10 +74,13 @@ public class FootPoseActionDefinition extends ActionNodeDefinition implements Si
    {
       super.undoAllNontopologicalChanges();
 
-      side.setValue(onDiskSide);
-      trajectoryDuration.setValue(onDiskTrajectoryDuration);
-      parentFrameName.setValue(onDiskParentFrameName);
-      footToParentTransform.getValueAndModify().set(onDiskFootToParentTransform);
+      if (isUndoAvailable())
+      {
+         side.setValue(onDiskSide);
+         trajectoryDuration.setValue(onDiskTrajectoryDuration);
+         parentFrameName.setValue(onDiskParentFrameName);
+         footToParentTransform.getValueAndModify().set(onDiskFootToParentTransform);
+      }
    }
 
    @Override

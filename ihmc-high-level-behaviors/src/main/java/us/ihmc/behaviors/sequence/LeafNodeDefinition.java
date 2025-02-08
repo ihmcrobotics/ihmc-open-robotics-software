@@ -90,10 +90,13 @@ public class LeafNodeDefinition extends BehaviorTreeNodeDefinition
    {
       super.undoAllNontopologicalChanges();
 
-      executeAfterLeafName = onDiskExecuteAfterLeafName;
-      executeAfterPrevious.setValue(onDiskExecuteAfterLeafName.equals(EXECUTE_AFTER_PREVIOUS));
-      executeAfterBeginning.setValue(onDiskExecuteAfterLeafName.equals(EXECUTE_AFTER_BEGINNING));
-      executeAfterNodeID.setValue(0); // Invalidate until we can find it
+      if (isUndoAvailable())
+      {
+         executeAfterLeafName = onDiskExecuteAfterLeafName;
+         executeAfterPrevious.setValue(onDiskExecuteAfterLeafName.equals(EXECUTE_AFTER_PREVIOUS));
+         executeAfterBeginning.setValue(onDiskExecuteAfterLeafName.equals(EXECUTE_AFTER_BEGINNING));
+         executeAfterNodeID.setValue(0); // Invalidate until we can find it
+      }
    }
 
    @Override
