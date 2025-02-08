@@ -4,11 +4,12 @@ import imgui.ImGui;
 import us.ihmc.behaviors.logic.ConditionNodeDefinition;
 import us.ihmc.behaviors.logic.ConditionNodeState;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.behavior.tree.RDXBehaviorTreeNode;
+import us.ihmc.rdx.ui.behavior.sequence.RDXLeafNode;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
-public class RDXConditionNode extends RDXBehaviorTreeNode<ConditionNodeState, ConditionNodeDefinition>
+public class RDXConditionNode extends RDXLeafNode<ConditionNodeState, ConditionNodeDefinition>
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ConditionNodeState state;
@@ -33,10 +34,23 @@ public class RDXConditionNode extends RDXBehaviorTreeNode<ConditionNodeState, Co
    }
 
    @Override
-   public void renderNodeSettingsWidgets()
+   protected void renderImGuiWidgetsInternal()
    {
-      ImGui.text("Type: %s   ID: %d".formatted(getDefinition().getClass().getSimpleName(), getState().getID()));
+      ImGui.text("Count: %d".formatted(state.getCount().getValue()));
 
-      super.renderNodeSettingsWidgets();
+      ImGuiTools.volatileInputLong(labels.get("Count to"), )
+
+      long[] countTo = {definition.getCountTo().getValue()};
+      if (ImGui.sliderLong("Set Count To", countTo, 0, Long.MAX_VALUE))
+      {
+         definition.getCountTo().setValue(countTo[0]);
+      }
+       
+   }
+
+   @Override
+   public String getLeafTypeTitle()
+   {
+      return "Condition Node";
    }
 }

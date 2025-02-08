@@ -1,13 +1,13 @@
 package us.ihmc.behaviors.logic;
 
 import behavior_msgs.msg.dds.ConditionNodeStateMessage;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
+import us.ihmc.behaviors.sequence.LeafNodeState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTStatusLong;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
-public class ConditionNodeState extends BehaviorTreeNodeState<ConditionNodeDefinition>
+public class ConditionNodeState extends LeafNodeState<ConditionNodeDefinition>
 {
    private final CRDTStatusLong count;
 
@@ -37,6 +37,8 @@ public class ConditionNodeState extends BehaviorTreeNodeState<ConditionNodeDefin
       getDefinition().toMessage(message.getDefinition());
 
       super.toMessage(message.getState());
+
+      message.setCount(count.getValue());
    }
 
    public void fromMessage(ConditionNodeStateMessage message)
@@ -44,5 +46,12 @@ public class ConditionNodeState extends BehaviorTreeNodeState<ConditionNodeDefin
       getDefinition().fromMessage(message.getDefinition());
 
       super.fromMessage(message.getState());
+      
+      count.setValue(message.getCount());
+   }
+
+   public CRDTStatusLong getCount()
+   {
+      return count;
    }
 }
