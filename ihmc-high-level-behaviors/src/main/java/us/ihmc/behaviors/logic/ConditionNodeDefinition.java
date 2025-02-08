@@ -75,11 +75,15 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
    public void toMessage(ConditionNodeDefinitionMessage message)
    {
       super.toMessage(message.getDefinition());
+
+      message.setCountTo(countTo.toMessage());
    }
 
    public void fromMessage(ConditionNodeDefinitionMessage message)
    {
       super.fromMessage(message.getDefinition());
+
+      countTo.fromMessage(message.getCountTo());
    }
 
    public CRDTBidirectionalLong getCountTo()

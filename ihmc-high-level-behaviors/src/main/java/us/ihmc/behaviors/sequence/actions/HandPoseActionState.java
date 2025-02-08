@@ -76,7 +76,7 @@ public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinitio
 
    public void toMessage(HandPoseActionStateMessage message)
    {
-      getDefinition().toMessage(message.getDefinition());
+      definition.toMessage(message.getDefinition());
 
       super.toMessage(message.getState());
 
@@ -92,7 +92,7 @@ public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinitio
 
    public void fromMessage(HandPoseActionStateMessage message)
    {
-      getDefinition().fromMessage(message.getDefinition());
+      definition.fromMessage(message.getDefinition());
 
       super.fromMessage(message.getState());
 

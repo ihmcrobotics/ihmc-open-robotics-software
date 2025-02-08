@@ -62,14 +62,14 @@ public class GotoNodeState extends LeafNodeState<GotoNodeDefinition>
 
    public void toMessage(GotoNodeStateMessage message)
    {
-      getDefinition().toMessage(message.getDefinition());
+      definition.toMessage(message.getDefinition());
 
       super.toMessage(message.getState());
    }
 
    public void fromMessage(GotoNodeStateMessage message)
    {
-      getDefinition().fromMessage(message.getDefinition());
+      definition.fromMessage(message.getDefinition());
 
       super.fromMessage(message.getState());
    }

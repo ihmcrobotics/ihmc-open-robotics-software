@@ -2,20 +2,23 @@ package us.ihmc.behaviors.logic;
 
 import behavior_msgs.msg.dds.ConditionNodeStateMessage;
 import us.ihmc.behaviors.sequence.LeafNodeState;
+import us.ihmc.communication.crdt.CRDTBidirectionalLong;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.communication.crdt.CRDTStatusLong;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class ConditionNodeState extends LeafNodeState<ConditionNodeDefinition>
 {
-   private final CRDTStatusLong count;
+   private final ConditionNodeDefinition definition;
+
+   private final CRDTBidirectionalLong count;
 
    public ConditionNodeState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(id, new ConditionNodeDefinition(crdtInfo, saveFileDirectory), crdtInfo);
 
-      count = new CRDTStatusLong(ROS2ActorDesignation.ROBOT, crdtInfo, 0);
+      this.definition = getDefinition();
+
+      count = new CRDTBidirectionalLong(definition, 0);
    }
 
    @Override
@@ -24,33 +27,25 @@ public class ConditionNodeState extends LeafNodeState<ConditionNodeDefinition>
       super.update();
    }
 
-   @Override
-   public boolean hasStatus()
-   {
-      boolean hasStatus = false;
-      hasStatus |= count.pollHasStatus();
-      return hasStatus;
-   }
-
    public void toMessage(ConditionNodeStateMessage message)
    {
-      getDefinition().toMessage(message.getDefinition());
+      definition.toMessage(message.getDefinition());
 
       super.toMessage(message.getState());
 
-      message.setCount(count.getValue());
+      message.setCount(count.toMessage());
    }
 
    public void fromMessage(ConditionNodeStateMessage message)
    {
-      getDefinition().fromMessage(message.getDefinition());
+      definition.fromMessage(message.getDefinition());
 
       super.fromMessage(message.getState());
       
-      count.setValue(message.getCount());
+      count.fromMessage(message.getCount());
    }
 
-   public CRDTStatusLong getCount()
+   public CRDTBidirectionalLong getCount()
    {
       return count;
    }
