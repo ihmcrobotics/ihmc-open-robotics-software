@@ -1,6 +1,6 @@
 
 # Parent state fields
-behavior_msgs/BehaviorTreeNodeStateMessage state
+behavior_msgs/LeafNodeStateMessage state
 
 # Definition
 behavior_msgs/ConditionNodeDefinitionMessage definition

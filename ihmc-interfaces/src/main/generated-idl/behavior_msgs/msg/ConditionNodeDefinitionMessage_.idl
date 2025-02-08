@@ -1,7 +1,7 @@
 #ifndef __behavior_msgs__msg__ConditionNodeDefinitionMessage__idl__
 #define __behavior_msgs__msg__ConditionNodeDefinitionMessage__idl__
 
-#include "behavior_msgs/msg/./BehaviorTreeNodeDefinitionMessage_.idl"
+#include "behavior_msgs/msg/./LeafNodeDefinitionMessage_.idl"
 module behavior_msgs
 {
   module msg
@@ -15,7 +15,7 @@ module behavior_msgs
         /**
          * Parent definition fields
          */
-        behavior_msgs::msg::dds::BehaviorTreeNodeDefinitionMessage definition;
+        behavior_msgs::msg::dds::LeafNodeDefinitionMessage definition;
         /**
          * The number of times to fail before passing
          */

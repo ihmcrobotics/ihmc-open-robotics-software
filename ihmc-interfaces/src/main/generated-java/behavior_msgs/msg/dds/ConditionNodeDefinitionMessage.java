@@ -11,7 +11,7 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
    /**
             * Parent definition fields
             */
-   public behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage definition_;
+   public behavior_msgs.msg.dds.LeafNodeDefinitionMessage definition_;
    /**
             * The number of times to fail before passing
             */
@@ -19,7 +19,7 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
 
    public ConditionNodeDefinitionMessage()
    {
-      definition_ = new behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage();
+      definition_ = new behavior_msgs.msg.dds.LeafNodeDefinitionMessage();
    }
 
    public ConditionNodeDefinitionMessage(ConditionNodeDefinitionMessage other)
@@ -30,7 +30,7 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
 
    public void set(ConditionNodeDefinitionMessage other)
    {
-      behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
+      behavior_msgs.msg.dds.LeafNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
       count_to_ = other.count_to_;
 
    }
@@ -39,7 +39,7 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
    /**
             * Parent definition fields
             */
-   public behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage getDefinition()
+   public behavior_msgs.msg.dds.LeafNodeDefinitionMessage getDefinition()
    {
       return definition_;
    }

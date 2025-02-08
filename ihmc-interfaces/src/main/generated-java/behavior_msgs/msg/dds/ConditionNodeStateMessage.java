@@ -11,7 +11,7 @@ public class ConditionNodeStateMessage extends Packet<ConditionNodeStateMessage>
    /**
             * Parent state fields
             */
-   public behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage state_;
+   public behavior_msgs.msg.dds.LeafNodeStateMessage state_;
    /**
             * Definition
             */
@@ -23,7 +23,7 @@ public class ConditionNodeStateMessage extends Packet<ConditionNodeStateMessage>
 
    public ConditionNodeStateMessage()
    {
-      state_ = new behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage();
+      state_ = new behavior_msgs.msg.dds.LeafNodeStateMessage();
       definition_ = new behavior_msgs.msg.dds.ConditionNodeDefinitionMessage();
    }
 
@@ -35,7 +35,7 @@ public class ConditionNodeStateMessage extends Packet<ConditionNodeStateMessage>
 
    public void set(ConditionNodeStateMessage other)
    {
-      behavior_msgs.msg.dds.BehaviorTreeNodeStateMessagePubSubType.staticCopy(other.state_, state_);
+      behavior_msgs.msg.dds.LeafNodeStateMessagePubSubType.staticCopy(other.state_, state_);
       behavior_msgs.msg.dds.ConditionNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
       count_ = other.count_;
 
@@ -45,7 +45,7 @@ public class ConditionNodeStateMessage extends Packet<ConditionNodeStateMessage>
    /**
             * Parent state fields
             */
-   public behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage getState()
+   public behavior_msgs.msg.dds.LeafNodeStateMessage getState()
    {
       return state_;
    }
