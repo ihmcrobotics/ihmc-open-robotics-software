@@ -11,7 +11,7 @@ public class GotoNodeStateMessage extends Packet<GotoNodeStateMessage> implement
    /**
             * Parent state fields
             */
-   public behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage state_;
+   public behavior_msgs.msg.dds.LeafNodeStateMessage state_;
    /**
             * Definition
             */
@@ -19,7 +19,7 @@ public class GotoNodeStateMessage extends Packet<GotoNodeStateMessage> implement
 
    public GotoNodeStateMessage()
    {
-      state_ = new behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage();
+      state_ = new behavior_msgs.msg.dds.LeafNodeStateMessage();
       definition_ = new behavior_msgs.msg.dds.GotoNodeDefinitionMessage();
    }
 
@@ -31,7 +31,7 @@ public class GotoNodeStateMessage extends Packet<GotoNodeStateMessage> implement
 
    public void set(GotoNodeStateMessage other)
    {
-      behavior_msgs.msg.dds.BehaviorTreeNodeStateMessagePubSubType.staticCopy(other.state_, state_);
+      behavior_msgs.msg.dds.LeafNodeStateMessagePubSubType.staticCopy(other.state_, state_);
       behavior_msgs.msg.dds.GotoNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
    }
 
@@ -39,7 +39,7 @@ public class GotoNodeStateMessage extends Packet<GotoNodeStateMessage> implement
    /**
             * Parent state fields
             */
-   public behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage getState()
+   public behavior_msgs.msg.dds.LeafNodeStateMessage getState()
    {
       return state_;
    }

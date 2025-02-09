@@ -43,30 +43,6 @@ extern "C"
 #define VERTICAL_FOV 1.5707963267948966f
 #define HORIZONTAL_FOV 6.2831853f
 
-#define SNAP_HEIGHT_MAP_CENTER_X 0
-#define SNAP_HEIGHT_MAP_CENTER_Y 1
-#define SNAP_GLOBAL_CELL_SIZE 2
-#define SNAP_GLOBAL_CENTER_INDEX 3
-#define SNAP_CROPPED_WINDOW_CENTER_INDEX 4
-#define SNAP_HEIGHT_SCALING_FACTOR 5
-#define SNAP_HEIGHT_OFFSET 6
-#define SNAP_FOOT_LENGTH 7
-#define SNAP_FOOT_WIDTH 8
-#define MIN_DISTANCE_FROM_CLIFF_TOPS 9
-#define MIN_DISTANCE_FROM_CLIFF_BOTTOMS 10
-#define CLIFF_START_HEIGHT_TO_AVOID 11
-#define CLIFF_END_HEIGHT_TO_AVOID 12
-#define MIN_SUPPORT_AREA_FRACTION 13
-#define MIN_SNAP_HEIGHT_THRESHOLD 14
-#define SNAP_HEIGHT_THRESHOLD_AT_SEARCH_EDGE 15
-#define INEQUALITY_ACTIVATION_SLOPE 16
-
-#define SNAP_FAILED 0
-#define CLIFF_TOP 1
-#define CLIFF_BOTTOM 2
-#define NOT_ENOUGH_AREA 0
-#define VALID 4
-
 __device__ int2 spherical_projection(float3 cellCenter, float *params)
 {
     float pitchUnit = VERTICAL_FOV / (params[DEPTH_INPUT_HEIGHT]);
@@ -438,7 +414,6 @@ extern "C" __global__ void heightMapRegistrationKernel(unsigned short *localMap,
         {
             finalHeight = localHeight;
         }
-        finalHeight = get_spatial_filtered_height(xIndex, yIndex, finalHeight, globalMap, params);
     }
 
     finalHeight += params[HEIGHT_OFFSET];
@@ -483,4 +458,24 @@ extern "C" __global__ void croppingKernel(unsigned short *inputMap, size_t pitch
         unsigned short *croppedRow = (unsigned short *)((char *)croppedMap + xIndex * pitchCropped);
         croppedRow[yIndex] = 0; // Assign 0 for out-of-bounds cells
     }
+}
+
+extern "C"
+__global__ void planOffsetKernel(unsigned short * matrixToModify, size_t pitchMatrixToModify,
+                                 unsigned short * matrixValuesToSkip, size_t pitchMatrixValuesToSkip,
+                                 float offsetInZ, int rowsMatrixToModify, int colsMatrixToModify,
+                                 float resetOffset)
+{
+    int indexX = blockIdx.x * blockDim.x + threadIdx.x;
+    int indexY = blockIdx.y * blockDim.y + threadIdx.y;
+
+    if (indexX >= colsMatrixToModify || indexY >= rowsMatrixToModify)
+        return;
+
+    unsigned short *skipRow = (unsigned short *)((char *)matrixValuesToSkip + indexY * pitchMatrixValuesToSkip);
+    if (skipRow[indexX] != resetOffset)
+        return;
+
+    unsigned short *matrixRow = (unsigned short *)((char *)matrixToModify + indexY * pitchMatrixToModify);
+    matrixRow[indexX] += static_cast<short>(offsetInZ * 10000.0f);
 }

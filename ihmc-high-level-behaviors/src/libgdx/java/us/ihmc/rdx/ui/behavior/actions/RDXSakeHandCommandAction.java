@@ -95,7 +95,7 @@ public class RDXSakeHandCommandAction extends RDXActionNode<SakeHandCommandActio
    }
 
    @Override
-   public String getActionTypeTitle()
+   public String getLeafTypeTitle()
    {
       return "Hand Configuration";
    }

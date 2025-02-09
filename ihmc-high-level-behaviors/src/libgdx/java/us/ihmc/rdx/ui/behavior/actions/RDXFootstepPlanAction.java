@@ -518,7 +518,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    }
 
    @Override
-   public String getActionTypeTitle()
+   public String getLeafTypeTitle()
    {
       return "Footstep Plan";
    }

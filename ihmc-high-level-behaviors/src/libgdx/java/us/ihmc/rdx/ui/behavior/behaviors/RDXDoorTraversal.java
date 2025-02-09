@@ -55,10 +55,10 @@ public class RDXDoorTraversal extends RDXBehaviorTreeNode<DoorTraversalState, Do
    {
       super.update();
 
-      updateActionSubtree(this);
+      updateSubtree(this);
    }
 
-   public void updateActionSubtree(RDXBehaviorTreeNode<?, ?> node)
+   public void updateSubtree(RDXBehaviorTreeNode<?, ?> node)
    {
       for (RDXBehaviorTreeNode<?, ?> child : node.getChildren())
       {
@@ -68,7 +68,7 @@ public class RDXDoorTraversal extends RDXBehaviorTreeNode<DoorTraversalState, Do
          }
          else
          {
-            updateActionSubtree(child);
+            updateSubtree(child);
          }
       }
    }

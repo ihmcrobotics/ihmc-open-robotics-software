@@ -1,7 +1,6 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.MultiContactBalanceStatus;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import toolbox_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
@@ -14,7 +13,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandBuffer;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
-import us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStabilityMarginRegionCalculator;
+import us.ihmc.commonWalkingControlModules.staticEquilibrium.StabilityMarginRegionCalculator;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -31,13 +30,11 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.HumanoidKinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.idl.IDLSequence.Integer;
 import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -61,11 +58,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 
 import static toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_FAILURE_MISSING_RCD;
 import static toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL;
@@ -173,8 +168,9 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
    private final ExecutionTimer executionTimer = new ExecutionTimer("ikTotal", registry);
 
-   private final CenterOfMassStabilityMarginRegionCalculator multiContactRegionCalculator;
+   private final StabilityMarginRegionCalculator multiContactRegionCalculator;
    private final WholeBodyContactState wholeBodyContactState;
+   private final StabilityMarginKinematicsCostCalculator stabilityCostCalculator;
    private final FramePoint3D tempContactPoint = new FramePoint3D();
    private final FrameVector3D tempContactNormal = new FrameVector3D();
 
@@ -231,9 +227,16 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       supportRigidBodyWeight.set(200.0);
       momentumWeight.set(0.001);
 
-      multiContactRegionCalculator = new CenterOfMassStabilityMarginRegionCalculator(desiredFullRobotModel.getTotalMass(), parentRegistry, yoGraphicsListRegistry);
+      multiContactRegionCalculator = StabilityMarginRegionCalculator.createForCoPStabilityMargin("", desiredFullRobotModel.getTotalMass(), desiredReferenceFrames.getCenterOfMassFrame(), desiredReferenceFrames.getMidFeetZUpFrame(), registry, yoGraphicsListRegistry);
       multiContactRegionCalculator.setupForStabilityMarginCalculation(() -> centerOfMass);
       wholeBodyContactState = new WholeBodyContactState(desiredOneDoFJoints, rootJoint);
+
+      stabilityCostCalculator = new StabilityMarginKinematicsCostCalculator(wholeBodyContactState,
+                                                                            multiContactRegionCalculator,
+                                                                            desiredFullRobotModel,
+                                                                            isUpperBodyLoadBearing,
+                                                                            getCenterOfMassSafeMargin(),
+                                                                            registry);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -492,6 +495,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
          holdCenterOfMassXYPosition.set(command.holdCurrentCenterOfMassXYPosition());
          enableJointLimitReduction.set(command.enableJointLimitReduction());
+         stabilityCostCalculator.setEnabled(command.enableStabilityObjective());
 
          if (command.hasCustomJointRestrictionLimits())
          {
@@ -518,7 +522,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       {
          // update actuation limits based on current configuration
          wholeBodyContactState.updateActuationConstraintVector();
-         wholeBodyContactState.updateActuationConstraintMatrix(true);
+         wholeBodyContactState.updateActuationConstraintMatrix();
          multiContactRegionCalculator.updateContactState(wholeBodyContactState);
          multiContactRegionCalculator.performUpdateForNextVertex();
 
@@ -809,6 +813,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    {
       addHoldSupportEndEffectorCommands(bufferToPack);
       addHoldCenterOfMassXYCommand(bufferToPack);
+      stabilityCostCalculator.addPostureFeedbackCommands(bufferToPack);
    }
 
    @Override

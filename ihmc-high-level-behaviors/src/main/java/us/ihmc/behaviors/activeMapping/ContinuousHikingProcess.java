@@ -54,11 +54,19 @@ public class ContinuousHikingProcess
       SwingPlannerParametersBasics swingPlannerParameters = robotModel.getSwingPlannerParameters();
       ros2PropertySetGroup.registerStoredPropertySet(ContinuousHikingAPI.SWING_PLANNING_PARAMETERS, swingPlannerParameters);
 
-      standAloneRealsenseProcess = new StandAloneRealsenseProcess(ros2Node, ros2Helper, syncedRobot);
+      ContinuousHikingLogger continuousHikingLogger = new ContinuousHikingLogger();
+      ControllerFootstepQueueMonitor controllerFootstepQueueMonitor = new ControllerFootstepQueueMonitor(ros2Helper,
+                                                                                                         robotModel.getSimpleRobotName(),
+                                                                                                         syncedRobot.getReferenceFrames(),
+                                                                                                         continuousHikingLogger);
+
+      standAloneRealsenseProcess = new StandAloneRealsenseProcess(ros2Node, ros2Helper, syncedRobot, controllerFootstepQueueMonitor);
 
       continuousPlannerSchedulingTask = new ContinuousPlannerSchedulingTask(robotModel,
                                                                             ros2Node,
                                                                             syncedRobot.getReferenceFrames(),
+                                                                            controllerFootstepQueueMonitor,
+                                                                            continuousHikingLogger,
                                                                             continuousHikingParameters,
                                                                             monteCarloPlannerParameters,
                                                                             footstepPlannerParameters,

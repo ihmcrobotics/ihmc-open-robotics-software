@@ -8,18 +8,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * If the first concurrent action group of a fallback node succeeds, the rest of the children are skipped.
+ * If the first concurrent leaf group of a fallback node succeeds, the rest of the children are skipped.
  * If it fails, the rest of the children are executed.
  */
 public class FallbackNodeExecutor extends BehaviorTreeNodeExecutor<FallbackNodeState, FallbackNodeDefinition>
 {
    private final FallbackNodeState state;
    private final FallbackNodeDefinition definition;
-   private final List<ActionNodeExecutor<?, ?>> actionChildren = new ArrayList<>();
+   private final List<LeafNodeExecutor<?, ?>> leafChildren = new ArrayList<>();
 
    // TODO: Add these to state & add UI elements
-   private final List<ActionNodeExecutor<?, ?>> tryActions = new ArrayList<>();
-   private final List<ActionNodeExecutor<?, ?>> fallbackActions = new ArrayList<>();
+   private final List<LeafNodeExecutor<?, ?>> tryLeaves = new ArrayList<>();
+   private final List<LeafNodeExecutor<?, ?>> fallbackLeaves = new ArrayList<>();
 
    public FallbackNodeExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
@@ -34,48 +34,48 @@ public class FallbackNodeExecutor extends BehaviorTreeNodeExecutor<FallbackNodeS
    {
       super.update();
 
-      actionChildren.clear();
-      tryActions.clear();
-      fallbackActions.clear();
+      leafChildren.clear();
+      tryLeaves.clear();
+      fallbackLeaves.clear();
 
       for (BehaviorTreeNodeExecutor<?, ?> child : getChildren())
       {
-         if (child instanceof ActionNodeExecutor<?, ?> actionNode)
+         if (child instanceof LeafNodeExecutor<?, ?> leafNode)
          {
-            actionChildren.add(actionNode);
+            leafChildren.add(leafNode);
          }
       }
 
-      if (!actionChildren.isEmpty())
+      if (!leafChildren.isEmpty())
       {
-         int firstActionIndex = actionChildren.get(0).getState().getActionIndex();
+         int firstLeafIndex = leafChildren.get(0).getState().getLeafIndex();
 
-         for (ActionNodeExecutor<?, ?> child : actionChildren)
+         for (LeafNodeExecutor<?, ?> child : leafChildren)
          {
-            if (child.getState().calculateExecuteAfterActionIndex() < firstActionIndex)
+            if (child.getState().getExecuteAfterLeafIndex() < firstLeafIndex)
             {
-               tryActions.add(child);
+               tryLeaves.add(child);
             }
             else
             {
-               fallbackActions.add(child);
+               fallbackLeaves.add(child);
             }
          }
       }
    }
 
-   public List<ActionNodeExecutor<?, ?>> getActionChildren()
+   public List<LeafNodeExecutor<?, ?>> getLeafChildren()
    {
-      return actionChildren;
+      return leafChildren;
    }
 
-   public List<ActionNodeExecutor<?, ?>> getTryActions()
+   public List<LeafNodeExecutor<?, ?>> getTryLeaves()
    {
-      return tryActions;
+      return tryLeaves;
    }
 
-   public List<ActionNodeExecutor<?, ?>> getFallbackActions()
+   public List<LeafNodeExecutor<?, ?>> getFallbackLeaves()
    {
-      return fallbackActions;
+      return fallbackLeaves;
    }
 }

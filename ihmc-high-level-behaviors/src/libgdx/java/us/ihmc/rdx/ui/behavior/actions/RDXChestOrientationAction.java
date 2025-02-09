@@ -159,7 +159,7 @@ public class RDXChestOrientationAction extends RDXActionNode<ChestOrientationAct
    {
       if (isMouseHovering)
       {
-         tooltip.render("%s Action\nIndex: %d\nName: %s".formatted(getActionTypeTitle(), state.getActionIndex(), definition.getName()));
+         tooltip.render("%s Action\nIndex: %d\nName: %s".formatted(getLeafTypeTitle(), state.getLeafIndex(), definition.getName()));
       }
    }
 
@@ -211,7 +211,7 @@ public class RDXChestOrientationAction extends RDXActionNode<ChestOrientationAct
    }
 
    @Override
-   public String getActionTypeTitle()
+   public String getLeafTypeTitle()
    {
       return "Chest Orientation";
    }

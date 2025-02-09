@@ -138,7 +138,7 @@ public class RDXFootPoseAction extends RDXActionNode<FootPoseActionState, FootPo
    {
       if (isMouseHovering)
       {
-         tooltip.render("%s Action\nIndex: %d\nName: %s".formatted(getActionTypeTitle(), state.getActionIndex(), getDefinition().getName()));
+         tooltip.render("%s Action\nIndex: %d\nName: %s".formatted(getLeafTypeTitle(), state.getLeafIndex(), getDefinition().getName()));
       }
    }
 
@@ -190,7 +190,7 @@ public class RDXFootPoseAction extends RDXActionNode<FootPoseActionState, FootPo
    }
 
    @Override
-   public String getActionTypeTitle()
+   public String getLeafTypeTitle()
    {
       return definition.getSide().getPascalCaseName() + " Foot Pose";
    }
