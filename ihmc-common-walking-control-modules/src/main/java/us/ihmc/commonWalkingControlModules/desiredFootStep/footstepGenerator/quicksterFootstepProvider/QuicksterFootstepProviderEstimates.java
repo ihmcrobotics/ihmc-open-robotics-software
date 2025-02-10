@@ -82,15 +82,21 @@ public class QuicksterFootstepProviderEstimates
       };
 
       centerOfMassControlZUpFrame = new MovingZUpFrame(centerOfMassControlFrame, "centerOfMassControlZUpFrame" + variableNameSuffix);
-
-      centerOfMassControlZUpFrameGraphic = new YoGraphicReferenceFrame(centerOfMassControlZUpFrame, registry, false, 1.25);
-      yoGraphicsListRegistry.registerYoGraphic("QFP", centerOfMassControlZUpFrameGraphic);
-
       angularExcursionCalculator = new AngularExcursionCalculator(centerOfMassFrame, robotModel.getElevator(), updateDT, registry, null);
-
       acp = new YoFramePoint3D("ACP_" + variableNameSuffix, ReferenceFrame.getWorldFrame(), registry);
-      YoGraphicPosition acpViz = new YoGraphicPosition("ACP", acp, 0.01, YoAppearance.Red(), YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
-      yoGraphicsListRegistry.registerArtifact("QFP", acpViz.createArtifact());
+
+      if (yoGraphicsListRegistry != null)
+      {
+         centerOfMassControlZUpFrameGraphic = new YoGraphicReferenceFrame(centerOfMassControlZUpFrame, registry, false, 1.25);
+         yoGraphicsListRegistry.registerYoGraphic("QFP", centerOfMassControlZUpFrameGraphic);
+
+         YoGraphicPosition acpViz = new YoGraphicPosition("ACP", acp, 0.01, YoAppearance.Red(), YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
+         yoGraphicsListRegistry.registerArtifact("QFP", acpViz.createArtifact());
+      }
+      else
+      {
+         centerOfMassControlZUpFrameGraphic = null;
+      }
    }
 
    public void update(RobotSide swingSide)
@@ -107,7 +113,8 @@ public class QuicksterFootstepProviderEstimates
       // Update CoM control frames
       centerOfMassControlFrame.update();
       centerOfMassControlZUpFrame.update();
-      centerOfMassControlZUpFrameGraphic.update();
+      if (centerOfMassControlZUpFrameGraphic != null)
+         centerOfMassControlZUpFrameGraphic.update();
 
       // Update Measured ACP
       double wmh = parameters.getOmega(swingSide).getDoubleValue() * mass * parameters.getDesiredCoMHeight(swingSide).getDoubleValue();

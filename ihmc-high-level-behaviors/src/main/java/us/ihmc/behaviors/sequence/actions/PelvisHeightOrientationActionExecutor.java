@@ -54,9 +54,9 @@ public class PelvisHeightOrientationActionExecutor extends ActionNodeExecutor<Pe
    }
 
    @Override
-   public void triggerActionExecution()
+   public void triggerExecution()
    {
-      super.triggerActionExecution();
+      super.triggerExecution();
 
       if (state.getPelvisFrame().isChildOfWorld())
       {

@@ -4,7 +4,6 @@ import behavior_msgs.msg.dds.AI2RNodeStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
-import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.behaviors.sequence.ActionSequenceState;
 import us.ihmc.behaviors.sequence.actions.CheckPointNodeState;
 import us.ihmc.communication.crdt.CRDTInfo;
@@ -16,7 +15,7 @@ import java.util.List;
 public class AI2RNodeState extends BehaviorTreeNodeState<AI2RNodeDefinition>
 {
    private BehaviorTreeRootNodeState actionSequence;
-   private List<CheckPointNodeState> checkPoints = new ArrayList<>();
+   private final List<CheckPointNodeState> checkPoints = new ArrayList<>();
 
    public AI2RNodeState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
@@ -30,22 +29,19 @@ public class AI2RNodeState extends BehaviorTreeNodeState<AI2RNodeDefinition>
 
       actionSequence = BehaviorTreeTools.findRootNode(this);
       checkPoints.clear();
-      updateActionSubtree(this);
+      updateSubtree(this);
    }
 
-   public void updateActionSubtree(BehaviorTreeNodeState<?> node)
+   public void updateSubtree(BehaviorTreeNodeState<?> node)
    {
       for (BehaviorTreeNodeState<?> child : node.getChildren())
       {
-         if (child instanceof ActionNodeState<?> actionNode)
+         if (child instanceof CheckPointNodeState checkPoint)
          {
-            if (actionNode instanceof CheckPointNodeState checkPoint)
-            {
-               checkPoints.add(checkPoint);
-            }
+            checkPoints.add(checkPoint);
          }
          if (child instanceof ActionSequenceState sequence)
-            updateActionSubtree(child);
+            updateSubtree(sequence);
       }
    }
 

@@ -62,6 +62,7 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
    private final RigidBodyBasics pelvis;
    private final MovingReferenceFrame pelvisFrame;
    private final ReferenceFrame baseFrame;
+   private final ReferenceFrame midFeetZUpFrame;
 
    private final DoubleProvider defaultHeight;
    private final DoubleProvider minHeight;
@@ -105,6 +106,7 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
       pelvisFrame = referenceFrames.getPelvisFrame();
       // The base frame could be switched to the mid foot frame at some point.
       baseFrame = elevator.getBodyFixedFrame();
+      midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
 
       YoDouble yoTime = controllerToolbox.getYoTime();
       YoGraphicsListRegistry graphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
@@ -325,8 +327,9 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
    @Override
    public void goHome(double trajectoryTime)
    {
-      tempPosition.setToZero(baseFrame);
+      tempPosition.setToZero(midFeetZUpFrame);
       tempPosition.setZ(defaultHeight.getValue());
+      tempPosition.changeFrame(baseFrame);
       positionController.goToPositionFromCurrent(tempPosition, trajectoryTime);
    }
 

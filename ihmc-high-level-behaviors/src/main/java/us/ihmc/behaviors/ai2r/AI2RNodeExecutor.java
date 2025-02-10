@@ -6,7 +6,7 @@ import controller_msgs.msg.dds.AbortWalkingMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
-import us.ihmc.behaviors.sequence.ActionNodeState;
+import us.ihmc.behaviors.sequence.LeafNodeState;
 import us.ihmc.behaviors.sequence.actions.FootstepPlanActionState;
 import us.ihmc.communication.AutonomyAPI;
 import us.ihmc.communication.crdt.CRDTInfo;
@@ -33,7 +33,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
    private final Throttler statusThrottler = new Throttler().setFrequency(1.0);
    private final AI2RStatusMessage statusMessage = new AI2RStatusMessage();
    private final AI2RNodeState state;
-   private final List<ActionNodeState<?>> failedActions = new ArrayList<>();
+   private final List<LeafNodeState<?>> failedLeaves = new ArrayList<>();
    private CRDTStatusFootstepList plannedSteps;
    private static final double DISTANCE_COLLISION_THRESHOLD = 0.3;
 
@@ -59,9 +59,9 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
          String referenceFrame = message.getGotoReferenceFrameName().toString();
          Point3D goalStancePoint = message.getGotoGoalStancePoint();
          Point3D goalFocalPoint = message.getGotoGoalFocalPoint();
-         for (var actionChild : state.getActionSequence().getActionChildren())
+         for (var leaf : state.getActionSequence().getOrderedLeaves())
          {
-            if (actionChild.getDefinition().getName().contains("Go to Action") && actionChild instanceof FootstepPlanActionState gotoActionState)
+            if (leaf.getDefinition().getName().contains("Go to Action") && leaf instanceof FootstepPlanActionState gotoActionState)
             {
                gotoActionState.getDefinition().setParentFrameName(referenceFrame);
                gotoActionState.getDefinition().getGoalStancePoint().getValue().set(goalStancePoint);
@@ -76,12 +76,12 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
          {
             if (state.getCheckPoints().get(i).getDefinition().getName().equals(checkPointName))
             {
-               for (int j=0; j < failedActions.size(); j++)
+               for (int j = 0; j < failedLeaves.size(); j++)
                {
-                  failedActions.get(j).setFailed(false);
+                  failedLeaves.get(j).setFailed(false);
                }
-               failedActions.clear();
-               state.getActionSequence().setExecutionNextIndex(state.getCheckPoints().get(i).getActionIndex());
+               failedLeaves.clear();
+               state.getActionSequence().setExecutionNextIndex(state.getCheckPoints().get(i).getLeafIndex());
                state.getActionSequence().setAutomaticExecution(true);
                break;
             }
@@ -115,25 +115,25 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
          }
 
          statusMessage.setFailedBehavior("");
-         for (var actionChild : state.getActionSequence().getActionChildren())
+         for (var leaf : state.getActionSequence().getOrderedLeaves())
          {
-            if (actionChild.getFailed() && !state.getActionSequence().getAutomaticExecution())
+            if (leaf.getFailed() && !state.getActionSequence().getAutomaticExecution())
             {
-               // Find the previous checkpoint action by iterating backwards through the checkpoints
+               // Find the previous checkpoint by iterating backwards through the checkpoints
                for (int i = state.getCheckPoints().size() - 1; i >= 0; i--) {
                   var checkpoint = state.getCheckPoints().get(i);
 
-                  // Check if the checkpoint is before the failed action
-                  if (checkpoint.getActionIndex() < actionChild.getActionIndex())
+                  // Check if the checkpoint is before the failed leaf
+                  if (checkpoint.getLeafIndex() < leaf.getLeafIndex())
                   {
                      // Retrieve the name of the closest previous checkpoint
-                     String checkpointActionName = checkpoint.getDefinition().getName();
+                     String checkpointName = checkpoint.getDefinition().getName();
 
-                     LogTools.info("Action failed at index: {}, closest previous checkpoint: {}",
-                                   actionChild.getActionIndex(), checkpointActionName);
+                     LogTools.info("Leaf failed at index: {}, closest previous checkpoint: {}",
+                                   leaf.getLeafIndex(), checkpointName);
 
-                     statusMessage.setFailedBehavior(checkpointActionName);
-                     failedActions.add(actionChild);
+                     statusMessage.setFailedBehavior(checkpointName);
+                     failedLeaves.add(leaf);
                      break;
                   }
                }
@@ -153,7 +153,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
             statusMessage.setCompletedBehavior(state.getCheckPoints().get(i - 1).getDefinition().getName());
             LogTools.info("Completed behavior: {}", statusMessage.getCompletedBehavior());
             // Jump to end of sequence
-            state.getActionSequence().setExecutionNextIndex(state.getCheckPoints().get(state.getCheckPoints().size()-1).getActionIndex());
+            state.getActionSequence().setExecutionNextIndex(state.getCheckPoints().get(state.getCheckPoints().size()-1).getLeafIndex());
          }
          else if (!state.getCheckPoints().get(i).getDefinition().getName().contains("END") && state.getCheckPoints().get(i).getIsExecuting())
          { // If we are executing another behavior checkpoint
@@ -163,9 +163,9 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
 
       // Check if Goto action is executing and if next steps are colliding with objects in the scene
       goToCollisionLoop:
-      for (var actionChild : state.getActionSequence().getActionChildren())
+      for (var leaf : state.getActionSequence().getOrderedLeaves())
       {
-         if (actionChild.getDefinition().getName().contains("Go to Action") && actionChild instanceof FootstepPlanActionState gotoActionState)
+         if (leaf.getDefinition().getName().contains("Go to Action") && leaf instanceof FootstepPlanActionState gotoActionState)
          {
             if (gotoActionState.getIsExecuting())
             {

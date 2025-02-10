@@ -23,17 +23,17 @@ mainDependencies {
    api("com.google.guava:guava:18.0")
    api("org.yaml:snakeyaml:1.17") //1.11
 
-   api("us.ihmc:euclid-frame-shape:0.21.0")
-   api("us.ihmc:mecano:17-0.19.1")
-   api("us.ihmc:mecano-yovariables:17-0.19.1")
-   api("us.ihmc:ihmc-commons:0.35.0")
-   api("us.ihmc:ihmc-messager-kryo:0.2.0")
-   api("us.ihmc:ihmc-matrix-library:0.19.0")
-   api("us.ihmc:ihmc-graphics-description:0.26.0")
+   api("us.ihmc:euclid-frame-shape:0.22.3")
+   api("us.ihmc:mecano:17-0.19.2")
+   api("us.ihmc:mecano-yovariables:17-0.19.2")
+   api("us.ihmc:ihmc-commons:0.35.1")
+   api("us.ihmc:ihmc-messager-kryo:0.2.1")
+   api("us.ihmc:ihmc-matrix-library:0.19.3")
+   api("us.ihmc:ihmc-graphics-description:0.26.2")
    api("us.ihmc:simulation-construction-set-utilities:0.25.3")
    api("us.ihmc:ihmc-native-library-loader:2.0.3")
-   api("us.ihmc:scs2-definition:17-0.28.3")
-   api("us.ihmc:ihmc-math-linear-algebra:0.15.1")
+   api("us.ihmc:scs2-definition:17-0.28.7")
+   api("us.ihmc:ihmc-math-linear-algebra:0.15.3")
    // NOTE: IHMCRoboticsToolkit should not depend on any other IHMC project(!), especially it should not depend on IHMCJavaToolkit.
 }
 
@@ -42,9 +42,9 @@ testDependencies {
    api("org.jfree:jcommon:1.0.24")
    api("org.hamcrest:hamcrest:2.2")
 
-   api("us.ihmc:euclid-test:0.21.0")
+   api("us.ihmc:euclid-test:0.22.3")
    api("us.ihmc:simulation-construction-set:0.25.3")
-   api("us.ihmc:ihmc-matrix-library-test:0.19.0")
-   api("us.ihmc:ihmc-math-linear-dynamic-systems:0.15.1")
-   api("us.ihmc:ihmc-commons-testing:0.35.0")
+   api("us.ihmc:ihmc-matrix-library-test:0.19.3")
+   api("us.ihmc:ihmc-math-linear-dynamic-systems:0.15.3")
+   api("us.ihmc:ihmc-commons-testing:0.35.1")
 }

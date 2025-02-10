@@ -180,9 +180,9 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
    }
 
    @Override
-   public void triggerActionExecution()
+   public void triggerExecution()
    {
-      super.triggerActionExecution();
+      super.triggerExecution();
 
       // Reset state
       state.setTotalNumberOfFootsteps(0);

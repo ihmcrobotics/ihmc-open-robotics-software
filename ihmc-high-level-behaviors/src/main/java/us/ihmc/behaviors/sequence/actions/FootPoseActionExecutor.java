@@ -51,9 +51,9 @@ public class FootPoseActionExecutor extends ActionNodeExecutor<FootPoseActionSta
    }
 
    @Override
-   public void triggerActionExecution()
+   public void triggerExecution()
    {
-      super.triggerActionExecution();
+      super.triggerExecution();
 
       if (state.getFootFrame().isChildOfWorld())
       {

@@ -91,12 +91,12 @@ public class CUDACompressionToolsTest
    @Test
    public void testBasicCompression() throws IOException
    {
+      CUDACompressionTools compressor = new CUDACompressionTools();
+
       // Read ZED color image data
       byte[] colorImageData = Files.readAllBytes(zedColorBGRPath);
       long originalDataSize = colorImageData.length;
       BytePointer originalData = new BytePointer(colorImageData);
-
-      CUDACompressionTools compressor = new CUDACompressionTools();
 
       // Compress the data
       BytePointer compressedData = compressor.compress(originalData, originalDataSize);

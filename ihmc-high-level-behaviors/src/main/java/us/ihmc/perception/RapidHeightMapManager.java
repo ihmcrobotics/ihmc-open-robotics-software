@@ -8,6 +8,7 @@ import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.behaviors.activeMapping.ControllerFootstepQueueMonitor;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.PerceptionAPI;
@@ -37,17 +38,20 @@ public class RapidHeightMapManager
    private final FramePose3D cameraPose = new FramePose3D();
    private final ROS2PublishSubscribeAPI ros2;
    private final boolean runWithCUDA;
-   private GpuMat deviceDepthImage;
    private final Mat hostDepthImage = new Mat();
-   private BytedecoImage heightMapBytedecoImage;
-
    private final Notification resetHeightMapRequested = new Notification();
    private final BytePointer compressedCroppedHeightMapPointer = new BytePointer();
+
+   private RapidHeightMapDriftOffset rapidHeightMapDriftOffset;
+
+   private GpuMat deviceDepthImage;
+   private BytedecoImage heightMapBytedecoImage;
 
    public RapidHeightMapManager(ROS2PublishSubscribeAPI ros2,
                                 DRCRobotModel robotModel,
                                 ReferenceFrame leftFootSoleFrame,
                                 ReferenceFrame rightFootSoleFrame,
+                                ControllerFootstepQueueMonitor controllerFootstepQueueMonitor,
                                 CameraIntrinsics depthImageIntrinsics,
                                 boolean runWithCUDA)
    {
@@ -57,7 +61,8 @@ public class RapidHeightMapManager
       if (runWithCUDA)
       {
          deviceDepthImage = new GpuMat(depthImageIntrinsics.getHeight(), depthImageIntrinsics.getWidth(), opencv_core.CV_16UC1);
-         rapidHeightMapExtractor = new RapidHeightMapExtractorCUDA(leftFootSoleFrame, rightFootSoleFrame, depthImageIntrinsics, deviceDepthImage, 1);
+         rapidHeightMapExtractor = new RapidHeightMapExtractorCUDA(leftFootSoleFrame, rightFootSoleFrame, deviceDepthImage, depthImageIntrinsics, 1);
+         rapidHeightMapDriftOffset = new RapidHeightMapDriftOffset(controllerFootstepQueueMonitor);
       }
       else
       {
@@ -114,6 +119,8 @@ public class RapidHeightMapManager
       if (resetHeightMapRequested.poll())
       {
          rapidHeightMapExtractor.reset();
+         if (rapidHeightMapDriftOffset != null)
+            rapidHeightMapDriftOffset.reset();
       }
 
       RigidBodyTransform sensorToWorld = cameraFrame.getTransformToWorldFrame();
@@ -123,9 +130,28 @@ public class RapidHeightMapManager
       cameraPose.setToZero(cameraFrame);
       cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
 
+      if (runWithCUDA)
+      {
+         float driftOffsetInZ = rapidHeightMapDriftOffset.getUpdateDriftOffset();
+         if (!Float.isNaN(driftOffsetInZ))
+         {
+            rapidHeightMapExtractor.updateHeightOffset(driftOffsetInZ);
+         }
+      }
+      
       rapidHeightMapExtractor.update(sensorToWorld, sensorToGround, groundToWorld);
 
       Mat croppedHeightMapImage = rapidHeightMapExtractor.getTerrainMapData().getHeightMap();
+
+      float heightScaleFactor;
+      if (runWithCUDA)
+      {
+         heightScaleFactor = (float) RapidHeightMapExtractorCUDA.getHeightMapParameters().getHeightScaleFactor();
+      }
+      else
+      {
+         heightScaleFactor = (float) RapidHeightMapExtractor.getHeightMapParameters().getHeightScaleFactor();
+      }
 
       OpenCVTools.compressImagePNG(croppedHeightMapImage, compressedCroppedHeightMapPointer);
       PerceptionMessageTools.publishCompressedDepthImage(compressedCroppedHeightMapPointer,
@@ -137,12 +163,12 @@ public class RapidHeightMapManager
                                                          rapidHeightMapExtractor.getSequenceNumber(),
                                                          croppedHeightMapImage.rows(),
                                                          croppedHeightMapImage.cols(),
-                                                         (float) RapidHeightMapExtractor.getHeightMapParameters().getHeightScaleFactor());
+                                                         heightScaleFactor);
    }
 
    public HeightMapData getLatestHeightMapData()
    {
-      return RapidHeightMapExtractorCUDA.packHeightMapData(rapidHeightMapExtractor);
+      return rapidHeightMapExtractor.getHeightMapData();
    }
 
    public TerrainMapData getTerrainMapData()

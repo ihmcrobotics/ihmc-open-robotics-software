@@ -98,6 +98,7 @@ public class TerrainMapData
       setSnapNormalXImage(other.snapNormalXImage);
       setSnapNormalYImage(other.snapNormalYImage);
       setSnapNormalZImage(other.snapNormalZImage);
+      setSnappedAreaFractionImage(other.snappedAreaFractionImage);
    }
 
    private int getLocalIndex(double coordinate, double center)

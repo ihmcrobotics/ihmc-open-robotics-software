@@ -121,8 +121,11 @@ public class BehaviorTreeNodeDefinition extends LatestTimestampModifiable implem
 
    public void undoAllNontopologicalChanges()
    {
-      name.setValue(onDiskName);
-      notes.setValue(onDiskNotes);
+      if (isUndoAvailable())
+      {
+         name.setValue(onDiskName);
+         notes.setValue(onDiskNotes);
+      }
 
       // We are not able to undo changes to children topology.
       // The user must delete and reload the entire tree.
@@ -178,6 +181,11 @@ public class BehaviorTreeNodeDefinition extends LatestTimestampModifiable implem
    public LatestTimestampModifiable getChildrenModification()
    {
       return childrenModification;
+   }
+
+   public boolean isUndoAvailable()
+   {
+      return onDiskName != null;
    }
 
    public void setName(String name)

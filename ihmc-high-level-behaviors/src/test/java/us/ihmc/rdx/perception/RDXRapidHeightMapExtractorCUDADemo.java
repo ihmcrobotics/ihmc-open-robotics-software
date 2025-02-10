@@ -94,7 +94,7 @@ public class RDXRapidHeightMapExtractorCUDADemo
 
             heightMapImage = new GpuMat(intrinsics.getWidth(), intrinsics.getHeight(), opencv_core.CV_16UC1);
 
-            extractor = new RapidHeightMapExtractorCUDA(leftFootSoleFrame, rightFootSoleFrame, intrinsics, heightMapImage, 1);
+            extractor = new RapidHeightMapExtractorCUDA(leftFootSoleFrame, rightFootSoleFrame, heightMapImage, intrinsics, 1);
 
             baseUI.getPrimaryScene().addRenderableProvider(heightMapGraphic, RDXSceneLevel.MODEL);
          }
@@ -115,7 +115,7 @@ public class RDXRapidHeightMapExtractorCUDADemo
 
                extractor.update(sensorPoseGizmo.getTransformToParent(), sensorToSensorZUp, sensorZUpToWorld);
 
-               heightMapData = RapidHeightMapExtractorCUDA.packHeightMapData(extractor);
+               heightMapData = extractor.getHeightMapData();
 
                Mat croppedHeightMapImage = extractor.getTerrainMapData().getHeightMap();
 
