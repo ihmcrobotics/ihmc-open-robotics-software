@@ -35,6 +35,18 @@ public class CRDTBidirectionalRigidBodyTransform extends CRDTBidirectionalMutabl
       return getValueInternal();
    }
 
+   /** Prefer this method in the case you need to call it every tick, as it no-ops in the case the value is the same. */
+   public void setValue(RigidBodyTransformReadOnly value, double epsilon)
+   {
+      // rotation and translation must be checked separately to handle pose-transform comparison case
+      // translation must use epsilonEquals because it can be vector vs. point
+      if (!(getValueInternal().getRotation().geometricallyEquals(value.getRotation(), epsilon)
+         && getValueInternal().getTranslation().epsilonEquals(value.getTranslation(), epsilon)))
+      {
+         getValueAndModify().set(value);
+      }
+   }
+
    public void toMessage(Pose3D poseMessage)
    {
       poseMessage.set(getValueReadOnly());
