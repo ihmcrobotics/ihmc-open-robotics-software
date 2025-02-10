@@ -493,6 +493,9 @@ public class ImGuiTools
     *
     * @param renderMethod Method to render UI.
     * @return Size of the rendered UI.
+    * @apiNote Since this method renders UI which is typically rendered over later on,
+    *       the {@code renderMethod} should allow UI items to overlap by using {@link ImGui#setItemAllowOverlap()}.
+    *       Otherwise, there may be issues interacting with the rendered items.
     */
    public static ImVec2 calcRenderSize(Runnable renderMethod)
    {
@@ -504,7 +507,9 @@ public class ImGuiTools
       ImVec2 start = ImGui.getCursorPos();
 
       // Render
+      ImGui.pushID("calcRenderSize");
       renderMethod.run();
+      ImGui.popID();
 
       // Record ending cursor position
       ImVec2 end = ImGui.getCursorPos();

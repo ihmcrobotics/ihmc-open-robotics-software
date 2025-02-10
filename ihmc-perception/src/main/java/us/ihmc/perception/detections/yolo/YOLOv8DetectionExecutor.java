@@ -299,9 +299,6 @@ public class YOLOv8DetectionExecutor
       annotatedImagePublishedThread.kill();
       newestColorImage.set(null);
 
-      segmenter.destroy();
-      extractor.close();
-
       for (YOLOv8Model yoloModel : availableModels.values())
          yoloModel.destroy();
 

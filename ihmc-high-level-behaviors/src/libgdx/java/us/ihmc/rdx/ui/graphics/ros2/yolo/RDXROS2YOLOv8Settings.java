@@ -3,7 +3,6 @@ package us.ihmc.rdx.ui.graphics.ros2.yolo;
 import imgui.ImGui;
 import imgui.ImGuiStyle;
 import imgui.type.ImBoolean;
-import imgui.type.ImInt;
 import perception_msgs.msg.dds.YOLOv8AvailableModels;
 import perception_msgs.msg.dds.YOLOv8ExecutorSettings;
 import perception_msgs.msg.dds.YOLOv8ModelInfo;
@@ -11,54 +10,34 @@ import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.graphics.RDXVisualizer;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
-import us.ihmc.ros2.ROS2Subscription;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-/*
- *  FIXME: It doesn't make sense to have a visualizer for settings.
- *  This is only meant to be a short-term solution
- *  We should really make a better system to house settings for detections.
- */
-public class RDXROS2YOLOv8Settings extends RDXVisualizer
+public class RDXROS2YOLOv8Settings
 {
-   private static final String[] AVAILABLE_SENSORS = {"ZED", "D455"};
-
-   private final ROS2Subscription<YOLOv8AvailableModels> availableModelsSubscriber;
-   private final ROS2Publisher<YOLOv8ExecutorSettings> settingsPublisher;
-   private final YOLOv8ExecutorSettings settingsMessage = new YOLOv8ExecutorSettings();
-
-   private final ROS2Heartbeat demandYOLOv8ZED;
-   private final ROS2Heartbeat demandYOLOv8D455;
-
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-
-   private final ImInt selectedSensor = new ImInt(0); // 0 = ZED, 1 = Realsense
    private final List<RDXROS2YOLOv8ModelSettings> modelSettings = new ArrayList<>();
    private final List<ImBoolean> modelEnables = new ArrayList<>();
 
+   private final YOLOv8ExecutorSettings settingsMessage = new YOLOv8ExecutorSettings();
+   private final ROS2Publisher<YOLOv8ExecutorSettings> settingsPublisher;
    private final Notification parametersChanged = new Notification();
 
-   private boolean initialized = false;
+   private final AtomicBoolean initialized = new AtomicBoolean(false);
+   private boolean enableModelsOnInitialize = false;
 
-   public RDXROS2YOLOv8Settings(String title, ROS2Node ros2Node)
+   public RDXROS2YOLOv8Settings(ROS2Node ros2Node)
    {
-      super(title);
-
       settingsPublisher = ros2Node.createPublisher(PerceptionAPI.YOLO_SETTINGS);
 
-      demandYOLOv8ZED = new ROS2Heartbeat(ros2Node, PerceptionAPI.REQUEST_YOLO_ZED);
-      demandYOLOv8D455 = new ROS2Heartbeat(ros2Node, PerceptionAPI.REQUEST_YOLO_REALSENSE);
-
       // Subscribe to available models message
-      availableModelsSubscriber = ros2Node.createSubscription2(PerceptionAPI.YOLO_AVAILABLE_MODELS, this::initialize);
+      ros2Node.createSubscription2(PerceptionAPI.YOLO_AVAILABLE_MODELS, this::initialize);
 
       // Start requesting available models
       ROS2Publisher<YOLOv8AvailableModels> availableModelsRequestPublisher = ros2Node.createPublisher(PerceptionAPI.YOLO_AVAILABLE_MODELS);
@@ -67,47 +46,38 @@ public class RDXROS2YOLOv8Settings extends RDXVisualizer
       requestMessage.setRequest(true);
       ThreadTools.startAsDaemon(() ->
       {
-         while (!initialized)
+         while (!initialized.get())
          {
             availableModelsRequestThrottler.waitAndRun();
             availableModelsRequestPublisher.publish(requestMessage);
          }
-         availableModelsRequestPublisher.remove();
+
+         // TODO: Call this when the remove method is fixed
+         // availableModelsRequestPublisher.remove();
       }, "AvailableYOLOModelRequester");
    }
 
    private void initialize(YOLOv8AvailableModels availableModelsMessage)
    {
-      if (availableModelsMessage.getRequest())
+      if (availableModelsMessage.getRequest() || initialized.getAndSet(true))
          return;
 
       for (YOLOv8ModelInfo modelInfo : availableModelsMessage.getAvailableYoloModels())
       {
-         modelSettings.add(new RDXROS2YOLOv8ModelSettings(modelInfo.getModelNameAsString(), modelInfo.getDetectableObjectClasses().toStringArray(), labels));
-         modelEnables.add(new ImBoolean(false));
+         modelSettings.add(new RDXROS2YOLOv8ModelSettings(modelInfo.getModelNameAsString(), modelInfo.getDetectableObjectClasses().toStringArray()));
+         modelEnables.add(new ImBoolean(enableModelsOnInitialize));
       }
 
-      availableModelsSubscriber.remove();
-      initialized = true;
+      // TODO: Call this when the remove method is fixed
+      // availableModelsSubscriber.remove();
    }
 
-   @Override
-   public void updateHeartbeat()
+   public void renderSettings()
    {
-      demandYOLOv8ZED.setAlive(isActive() && selectedSensor.get() == 0);
-      demandYOLOv8D455.setAlive(isActive() && selectedSensor.get() == 1);
-   }
-
-   @Override
-   public void renderImGuiWidgets()
-   {
-      ImGui.beginDisabled(initialized);
+      ImGui.beginDisabled(!initialized.get());
 
       ImGuiStyle style = new ImGuiStyle();
       float indent = ImGui.getFrameHeight() + style.getItemInnerSpacingX() + 1.0f;
-      ImGui.indent(indent);
-
-      ImGui.combo(labels.get("Sensor Selection"), selectedSensor, AVAILABLE_SENSORS);
 
       // Render each model's settings
       for (int i = 0; i < modelSettings.size(); ++i)
@@ -116,7 +86,7 @@ public class RDXROS2YOLOv8Settings extends RDXVisualizer
          ImBoolean enable = modelEnables.get(i);
 
          // Render checkbox for enabling/disabling the model
-         if (ImGui.checkbox(labels.getHidden("enable" + settings.getModelName()), enable))
+         if (ImGui.checkbox(labels.getHidden("enable" + i), enable))
             parametersChanged.set();
 
          ImGuiTools.previousWidgetTooltip("Enable/Disable");
@@ -132,15 +102,11 @@ public class RDXROS2YOLOv8Settings extends RDXVisualizer
          }
       }
 
-      ImGui.unindent(indent);
       ImGui.endDisabled();
    }
 
-   @Override
-   public void update()
+   public void publishSettingsMessageIfChanged()
    {
-      super.update();
-
       // If the user adjusted parameters, publish the settings message
       if (parametersChanged.poll())
       {
@@ -158,14 +124,31 @@ public class RDXROS2YOLOv8Settings extends RDXVisualizer
       }
    }
 
-   @Override
+   public boolean anyModelEnabled()
+   {
+      return modelEnables.stream().anyMatch(ImBoolean::get);
+   }
+
+   public void enableAllModels()
+   {
+      enableModelsOnInitialize = true;
+      for (ImBoolean enabled : modelEnables)
+         enabled.set(true);
+
+      parametersChanged.set();
+   }
+
+   public void disableAllModels()
+   {
+      enableModelsOnInitialize = false;
+      for (ImBoolean enabled : modelEnables)
+         enabled.set(false);
+
+      parametersChanged.set();
+   }
+
    public void destroy()
    {
-      super.destroy();
-
-      demandYOLOv8ZED.destroy();
-      demandYOLOv8D455.destroy();
-
       settingsPublisher.remove();
    }
 }

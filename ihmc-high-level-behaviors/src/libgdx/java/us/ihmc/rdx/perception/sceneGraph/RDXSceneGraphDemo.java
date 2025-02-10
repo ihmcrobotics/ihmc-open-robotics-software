@@ -32,8 +32,8 @@ import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizersPanel;
 import us.ihmc.rdx.ui.graphics.ros2.RDXDetectionManagerSettings;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2FramePlanarRegionsVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
-import us.ihmc.rdx.ui.graphics.ros2.yolo.RDXROS2YOLOv8Settings;
 import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2ColoredPointCloudVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.yolo.RDXROS2YOLOv8Visualizer;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
@@ -62,7 +62,6 @@ public class RDXSceneGraphDemo
    private ROS2Helper ros2Helper;
    private ModelInstance sensorPoseGraphic;
    private RDXPerceptionVisualizersPanel perceptionVisualizerPanel;
-   private RDXROS2ImageMessageVisualizer yoloAnnotatedImageVisualizer;
    private DetectionManager detectionManager;
    private YOLOv8DetectionExecutor yolov8DetectionExecutor;
    private ROS2SceneGraph onRobotSceneGraph;
@@ -128,15 +127,9 @@ public class RDXSceneGraphDemo
 
             perceptionVisualizerPanel.addVisualizer(new RDXDetectionManagerSettings("Detection Manager Settings", ros2Helper));
 
-            RDXROS2YOLOv8Settings yoloSettingsVisualizer = new RDXROS2YOLOv8Settings("YOLOv8", ros2Node);
+            RDXROS2YOLOv8Visualizer yoloSettingsVisualizer = new RDXROS2YOLOv8Visualizer("YOLOv8", ros2Node, PerceptionAPI.YOLO_ANNOTATED_IMAGE);
             yoloSettingsVisualizer.setActive(true);
             perceptionVisualizerPanel.addVisualizer(yoloSettingsVisualizer);
-
-            yoloAnnotatedImageVisualizer = new RDXROS2ImageMessageVisualizer("YOLOv8 Annotated Image",
-                                                                             ros2Node,
-                                                                             PerceptionAPI.YOLO_ANNOTATED_IMAGE);
-            yoloAnnotatedImageVisualizer.setActive(true);
-            perceptionVisualizerPanel.addVisualizer(yoloAnnotatedImageVisualizer);
 
             RDXROS2FramePlanarRegionsVisualizer planarRegionsVisualizer
                   = new RDXROS2FramePlanarRegionsVisualizer("Planar Regions", ros2Node, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS);
@@ -222,7 +215,7 @@ public class RDXSceneGraphDemo
 
                if (yolov8DetectionExecutor == null)
                {
-                  yolov8DetectionExecutor = new YOLOv8DetectionExecutor(yoloAnnotatedImageVisualizer::isActive);
+                  yolov8DetectionExecutor = new YOLOv8DetectionExecutor(yoloSettingsVisualizer::isActive);
                   yolov8DetectionExecutor.addDetectionConsumerCallback(detectionManager::addDetections);
                }
 

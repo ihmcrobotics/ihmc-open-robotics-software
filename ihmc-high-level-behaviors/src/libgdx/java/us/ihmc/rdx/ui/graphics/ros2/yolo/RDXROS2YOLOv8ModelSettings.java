@@ -18,12 +18,13 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 public class RDXROS2YOLOv8ModelSettings
 {
    private static final int TABLE_COLUMN_COUNT = 6;
+   private static final float MAX_TABLE_HEIGHT = 200.0f;
 
    private final String modelName;
    private final String[] detectableObjectClasses;
    private final int detectableObjectClassCount;
 
-   private final ImGuiUniqueLabelMap labels;
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
    // Adjustors for all object classes
    private final ImFloat nmsThreshold = new ImFloat(0.1f);
@@ -43,13 +44,11 @@ public class RDXROS2YOLOv8ModelSettings
    private final YOLOv8ModelSettings settingsMessage;
    private final Notification updateSettingsMessage = new Notification();
 
-   public RDXROS2YOLOv8ModelSettings(String modelName, String[] detectableObjectClasses, ImGuiUniqueLabelMap labels)
+   public RDXROS2YOLOv8ModelSettings(String modelName, String[] detectableObjectClasses)
    {
       this.modelName = modelName;
       this.detectableObjectClasses = detectableObjectClasses;
       detectableObjectClassCount = detectableObjectClasses.length;
-
-      this.labels = labels;
 
       settingsMessage = new YOLOv8ModelSettings();
       settingsMessage.setModelName(modelName);
@@ -93,15 +92,25 @@ public class RDXROS2YOLOv8ModelSettings
    public boolean renderSettings()
    {
       boolean changed = false;
-      ImGuiStyle style = new ImGuiStyle();
 
-      changed |= ImGui.sliderFloat("NMS Threshold", nmsThreshold.getData(), 0.0f, 1.0f);
+      changed |= ImGui.sliderFloat(labels.get("NMS Threshold"), nmsThreshold.getData(), 0.0f, 1.0f);
 
-      float tableHeight = ImGuiTools.calcRenderSize(() -> renderTable(style)).y;
+      final ImGuiStyle style = new ImGuiStyle();
+      final int noScrollTableFlags = ImGuiTableFlags.BordersV
+                                     | ImGuiTableFlags.BordersOuterH
+                                     | ImGuiTableFlags.NoKeepColumnsVisible
+                                     | ImGuiTableFlags.RowBg;
+      float noScrollTableHeight = ImGuiTools.calcRenderSize(() -> renderSettingsTable(style, noScrollTableFlags, 0.0f)).y;
 
-      ImGui.beginChild(labels.get("table" + getModelName()), 0.0f, Math.min(tableHeight, 200.0f));
-      changed |= renderTable(style);
-      ImGui.endChild();
+      int tableFlags = noScrollTableFlags;
+      float tableHeight = 0.0f;
+      if (noScrollTableHeight > MAX_TABLE_HEIGHT)
+      {
+         tableFlags |= ImGuiTableFlags.ScrollY;
+         tableHeight = MAX_TABLE_HEIGHT;
+      }
+
+      changed |= renderSettingsTable(style, tableFlags, tableHeight);
 
       if (changed)
          updateSettingsMessage.set();
@@ -109,15 +118,15 @@ public class RDXROS2YOLOv8ModelSettings
       return changed;
    }
 
-   private boolean renderTable(ImGuiStyle style)
+   private boolean renderSettingsTable(ImGuiStyle style, int tableFlags, float height)
    {
       boolean changed = false;
-      if (ImGui.beginTable(labels.getHidden("Object Class Settings"),
-                           TABLE_COLUMN_COUNT,
-                           ImGuiTableFlags.BordersV | ImGuiTableFlags.BordersOuterH | ImGuiTableFlags.NoKeepColumnsVisible | ImGuiTableFlags.RowBg))
+      if (ImGui.beginTable(labels.getHidden("Object Class Settings"), TABLE_COLUMN_COUNT, tableFlags, 0.0f, height))
       {
-         float widgetWidth = ImGui.calcTextSize("0.00").x + (2.0f * style.getItemInnerSpacingX()) + 1.0f;
+         // Always show first two rows (header + universal adjusters)
+         ImGui.tableSetupScrollFreeze(0, 2);
 
+         float widgetWidth = ImGui.calcTextSize("0.00").x + (2.0f * style.getItemInnerSpacingX()) + 1.0f;
          ImGui.tableSetupColumn(labels.get("Enable"), ImGuiTableColumnFlags.WidthFixed | ImGuiTableColumnFlags.NoHeaderWidth);
          ImGui.tableSetupColumn(labels.get("Object Class"), ImGuiTableColumnFlags.WidthStretch);
          ImGui.tableSetupColumn(labels.get("Confidence Threshold"), ImGuiTableColumnFlags.WidthFixed, widgetWidth);
@@ -127,6 +136,7 @@ public class RDXROS2YOLOv8ModelSettings
 
          // Render header
          ImGui.tableHeadersRow();
+         ImGui.setItemAllowOverlap();
 
          changed |= renderUniversalAdjustors();
          changed |= renderIndividualAdjustors();
@@ -152,6 +162,7 @@ public class RDXROS2YOLOv8ModelSettings
                enables[i].set(universalEnable);
             changed = true;
          }
+         ImGui.setItemAllowOverlap();
       }
 
       if (ImGui.tableNextColumn()) // Object Class
@@ -215,6 +226,7 @@ public class RDXROS2YOLOv8ModelSettings
          {
             ImGui.setNextItemWidth(-1.0f);
             changed |= ImGui.checkbox(labels.getHidden("enable" + i), enables[i]);
+            ImGui.setItemAllowOverlap();
          }
 
          if (ImGui.tableNextColumn()) // Object class
@@ -245,6 +257,8 @@ public class RDXROS2YOLOv8ModelSettings
 
       ImGui.setNextItemWidth(-1.0f);
       boolean changed = ImGui.inputFloat(labels.getHidden(label), value, 0.0f, 0.0f, "%.2f", ImGuiInputTextFlags.EnterReturnsTrue);
+      ImGui.setItemAllowOverlap();
+
       if (changed && min < max)
          value.set((float) MathTools.clamp(value.get(), min, max));
 
@@ -253,10 +267,12 @@ public class RDXROS2YOLOv8ModelSettings
 
    private boolean tableInputInt(ImInt value, int min, int max)
    {
-      String label = ImGui.tableGetColumnName() + ImGui.tableGetColumnIndex() + ImGui.tableGetRowIndex();
+      String label = ImGui.tableGetColumnName() + ":" + ImGui.tableGetColumnIndex() + ":" + ImGui.tableGetRowIndex();
 
       ImGui.setNextItemWidth(-1.0f);
       boolean changed = ImGui.inputInt(labels.getHidden(label), value, 0, 0, ImGuiInputTextFlags.EnterReturnsTrue);
+      ImGui.setItemAllowOverlap();
+
       if (changed && min < max)
          value.set(MathTools.clamp(value.get(), min, max));
 
