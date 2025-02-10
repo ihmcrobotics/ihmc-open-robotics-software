@@ -9,17 +9,21 @@ import us.ihmc.pubsub.TopicDataType;
 public class GotoNodeDefinitionMessage extends Packet<GotoNodeDefinitionMessage> implements Settable<GotoNodeDefinitionMessage>, EpsilonComparable<GotoNodeDefinitionMessage>
 {
    /**
+          * Value of the node to goto ID when we have a name but still need to find the ID
+          */
+   public static final long INVALID = -1;
+   /**
+          * Value of the node to goto ID when the node is simply set to goto the next node (i.e. no-op)
+          */
+   public static final long GOTO_NEXT = -2;
+   /**
             * Parent definition fields
             */
    public behavior_msgs.msg.dds.LeafNodeDefinitionMessage definition_;
    /**
-            * If this node is simply set to goto the next node (i.e. no-op)
+            * The ID of the node to goto or one of the invalid or next constants
             */
-   public boolean goto_next_;
-   /**
-            * The ID of the node to goto
-            */
-   public long goto_node_id_;
+   public long node_to_goto_id_;
 
    public GotoNodeDefinitionMessage()
    {
@@ -35,9 +39,7 @@ public class GotoNodeDefinitionMessage extends Packet<GotoNodeDefinitionMessage>
    public void set(GotoNodeDefinitionMessage other)
    {
       behavior_msgs.msg.dds.LeafNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
-      goto_next_ = other.goto_next_;
-
-      goto_node_id_ = other.goto_node_id_;
+      node_to_goto_id_ = other.node_to_goto_id_;
 
    }
 
@@ -51,33 +53,18 @@ public class GotoNodeDefinitionMessage extends Packet<GotoNodeDefinitionMessage>
    }
 
    /**
-            * If this node is simply set to goto the next node (i.e. no-op)
+            * The ID of the node to goto or one of the invalid or next constants
             */
-   public void setGotoNext(boolean goto_next)
+   public void setNodeToGotoId(long node_to_goto_id)
    {
-      goto_next_ = goto_next;
+      node_to_goto_id_ = node_to_goto_id;
    }
    /**
-            * If this node is simply set to goto the next node (i.e. no-op)
+            * The ID of the node to goto or one of the invalid or next constants
             */
-   public boolean getGotoNext()
+   public long getNodeToGotoId()
    {
-      return goto_next_;
-   }
-
-   /**
-            * The ID of the node to goto
-            */
-   public void setGotoNodeId(long goto_node_id)
-   {
-      goto_node_id_ = goto_node_id;
-   }
-   /**
-            * The ID of the node to goto
-            */
-   public long getGotoNodeId()
-   {
-      return goto_node_id_;
+      return node_to_goto_id_;
    }
 
 
@@ -99,9 +86,7 @@ public class GotoNodeDefinitionMessage extends Packet<GotoNodeDefinitionMessage>
       if(other == this) return true;
 
       if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.goto_next_, other.goto_next_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.goto_node_id_, other.goto_node_id_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.node_to_goto_id_, other.node_to_goto_id_, epsilon)) return false;
 
 
       return true;
@@ -117,9 +102,7 @@ public class GotoNodeDefinitionMessage extends Packet<GotoNodeDefinitionMessage>
       GotoNodeDefinitionMessage otherMyClass = (GotoNodeDefinitionMessage) other;
 
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
-      if(this.goto_next_ != otherMyClass.goto_next_) return false;
-
-      if(this.goto_node_id_ != otherMyClass.goto_node_id_) return false;
+      if(this.node_to_goto_id_ != otherMyClass.node_to_goto_id_) return false;
 
 
       return true;
@@ -133,10 +116,8 @@ public class GotoNodeDefinitionMessage extends Packet<GotoNodeDefinitionMessage>
       builder.append("GotoNodeDefinitionMessage {");
       builder.append("definition=");
       builder.append(this.definition_);      builder.append(", ");
-      builder.append("goto_next=");
-      builder.append(this.goto_next_);      builder.append(", ");
-      builder.append("goto_node_id=");
-      builder.append(this.goto_node_id_);
+      builder.append("node_to_goto_id=");
+      builder.append(this.node_to_goto_id_);
       builder.append("}");
       return builder.toString();
    }

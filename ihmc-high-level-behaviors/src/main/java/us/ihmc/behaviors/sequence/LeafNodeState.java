@@ -37,47 +37,33 @@ public class LeafNodeState<D extends LeafNodeDefinition> extends BehaviorTreeNod
       failed = new CRDTStatusBoolean(ROS2ActorDesignation.ROBOT, crdtInfo, false);
    }
 
-   /**
-    * Updates the definition executeAfterNodeName string for
-    * saving an up to date human readable name in the JSON.
-    * It also finds the correct node upon loading the name from JSON.
-    */
    public void validateFields(List<LeafNodeState<?>> leaves)
    {
-      String executeAfterLeafName = null;
-
-      if (!definition.getExecuteAfterPrevious().getValue() && !definition.getExecuteAfterBeginning().getValue())
+      if (definition.getExecuteAfterIsInvalid())
       {
          // We need to find the node by name
          // This happens when we load from JSON
-         if (definition.getExecuteAfterNodeID().getValue() == 0)
+         for (int j = leafIndex - 1; j >= 0; j--) // Search backwards from previous
          {
-            for (int j = leafIndex - 1; j >= 0; j--)
+            if (leaves.get(j).getDefinition().getName().equals(definition.getExecuteAfterLeafName()))
             {
-               LeafNodeState<?> stateToCompare = leaves.get(j);
-               if (stateToCompare.getDefinition().getName().equals(definition.getExecuteAfterLeafName()))
-               {
-                  executeAfterLeafName = stateToCompare.getDefinition().getName();
-                  definition.getExecuteAfterNodeID().setValue(stateToCompare.getID());
-                  break;
-               }
-            }
-         }
-         else // Update the node's name for saving in human readable format
-         {
-            long executeAfterID = definition.getExecuteAfterNodeID().getValue();
-            for (int j = leafIndex - 1; j >= 0; j--)
-            {
-               LeafNodeState<?> leafStateToCompare = leaves.get(j);
-               if (leafStateToCompare.getID() == executeAfterID)
-               {
-                  executeAfterLeafName = leafStateToCompare.getDefinition().getName();
-               }
+               definition.setExecuteAfterLeaf(leaves.get(j).getID(), definition.getExecuteAfterLeafName());
+               break;
             }
          }
       }
-
-      definition.updateAndSanitizeExecuteAfterFields(executeAfterLeafName);
+      else if (definition.getExecuteAfterNodeID() >= 0)
+      {
+         // Dynamically update the node name -- it can change independently of the node's ID
+         // This is necessary for saving the definition
+         for (int j = leafIndex - 1; j >= 0; j--) // Search backwards from previous
+         {
+            if (leaves.get(j).getID() == definition.getExecuteAfterNodeID())
+            {
+               definition.setExecuteAfterLeafName(leaves.get(j).getDefinition().getName());
+            }
+         }
+      }
    }
 
    @Override
@@ -190,11 +176,11 @@ public class LeafNodeState<D extends LeafNodeDefinition> extends BehaviorTreeNod
    /** @return the index of the leaf to execute after as part of the concurrency system */
    public int getExecuteAfterLeafIndex()
    {
-      if (definition.getExecuteAfterBeginning().getValue())
+      if (definition.getExecuteAfterBeginning())
       {
          return -1;
       }
-      else if (!definition.getExecuteAfterPrevious().getValue())
+      else if (!definition.getExecuteAfterPrevious())
       {
          LeafNodeState<?> executeAfterNode = getExecuteAfterLeaf();
 
@@ -208,14 +194,12 @@ public class LeafNodeState<D extends LeafNodeDefinition> extends BehaviorTreeNod
    /** @return the leaf to execute after as part of the concurrency system */
    public LeafNodeState<?> getExecuteAfterLeaf()
    {
-      long executeAfterID = definition.getExecuteAfterNodeID().getValue();
-
-      if (BehaviorTreeTools.findRootNode(this).getIDToNodeMap().get(executeAfterID) instanceof LeafNodeState<?> executeAfterNode)
+      if (BehaviorTreeTools.findRootNode(this).getIDToNodeMap().get(definition.getExecuteAfterNodeID()) instanceof LeafNodeState<?> executeAfterNode)
       {
          return executeAfterNode;
       }
 
-      LogTools.error("Node ID not found: {}", executeAfterID);
+      LogTools.error("Node ID not found: {}", definition.getExecuteAfterNodeID());
 
       return null;
    }
