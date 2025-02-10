@@ -5,15 +5,11 @@ import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import perception_msgs.msg.dds.YOLOv8ParametersMessage;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Heartbeat;
-import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
-import us.ihmc.rdx.imgui.ImGuiTools;
+import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.rdx.ui.graphics.RDXVisualizer;
-import us.ihmc.commons.thread.Throttler;
-
-import java.util.Arrays;
-import java.util.HashSet;
 
 /*
  *  FIXME: It doesn't make sense to have a visualizer for settings.
@@ -25,7 +21,7 @@ public class RDXYOLOv8Settings extends RDXVisualizer
    private static final String[] AVAILABLE_SENSORS = {"ZED", "D455"};
    private static final double MESSAGE_PUBLISH_PERIOD = 2; // publish messages every 2 seconds
 
-   private final ROS2PublishSubscribeAPI ros2;
+   private ROS2Helper ros2Helper;
 
    private final ImFloat confidenceThreshold = new ImFloat(0.8f);
    private final ImFloat nmsThreshold = new ImFloat(0.1f);
@@ -41,14 +37,14 @@ public class RDXYOLOv8Settings extends RDXVisualizer
    private final Throttler messagePublishThrottler = new Throttler().setPeriod(MESSAGE_PUBLISH_PERIOD);
    private final Notification parametersChanged = new Notification();
 
-   public RDXYOLOv8Settings(String title, ROS2PublishSubscribeAPI ros2)
+   public RDXYOLOv8Settings(String title, ROS2Helper ros2Helper)
    {
       super(title);
 
-      this.ros2 = ros2;
+      this.ros2Helper = ros2Helper;
 
-      demandYOLOv8ICPZed = new ROS2Heartbeat(ros2, PerceptionAPI.REQUEST_YOLO_ZED);
-      demandYOLOv8ICPRealsense = new ROS2Heartbeat(ros2, PerceptionAPI.REQUEST_YOLO_REALSENSE);
+      demandYOLOv8ICPZed = new ROS2Heartbeat(ros2Helper.getROS2Node(), PerceptionAPI.REQUEST_YOLO_ZED);
+      demandYOLOv8ICPRealsense = new ROS2Heartbeat(ros2Helper.getROS2Node(), PerceptionAPI.REQUEST_YOLO_REALSENSE);
 
       // Select all target detections at beginning
 //      targetDetections.addAll(Arrays.asList(YOLOv8DetectionClass.values()));
@@ -122,7 +118,7 @@ public class RDXYOLOv8Settings extends RDXVisualizer
 //         for (YOLOv8DetectionClass targetDetection : targetDetections)
 //            message.getTargetDetectionClasses().add(targetDetection.toByte());
 
-         ros2.publish(PerceptionAPI.YOLO_PARAMETERS, message);
+         ros2Helper.publish(PerceptionAPI.YOLO_PARAMETERS, message);
       }
    }
 
