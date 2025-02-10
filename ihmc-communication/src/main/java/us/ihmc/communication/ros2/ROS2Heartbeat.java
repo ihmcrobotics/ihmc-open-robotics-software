@@ -58,7 +58,7 @@ public class ROS2Heartbeat
    {
       if (alive && !publishThread.isRunning())
          publishThread.startRepeating();
-      else
+      else if (!alive)
          publishThread.stopRepeating();
    }
 
