@@ -2,10 +2,7 @@ package us.ihmc.communication.ros2;
 
 import std_msgs.msg.dds.Empty;
 import us.ihmc.commons.UnitConversions;
-import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.commons.exception.ExceptionTools;
-import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.commons.thread.Throttler;
+import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
@@ -42,23 +39,16 @@ public class ROS2Heartbeat
     */
    public static final double STATUS_FREQUENCY = 2.5;
    public static final double HEARTBEAT_PERIOD = UnitConversions.hertzToSeconds(STATUS_FREQUENCY);
-   private ROS2PublishSubscribeAPI ros2;
-   private ROS2Publisher<Empty> heartbeatPublisher;
-   private final Empty emptyMessage = new Empty();
-   private final ROS2Topic<Empty> heartbeatTopic;
-   private volatile boolean alive = false;
-   private final Throttler throttler = new Throttler();
+   private static final Empty EMPTY_MESSAGE = new Empty();
 
-   public ROS2Heartbeat(ROS2PublishSubscribeAPI ros2, ROS2Topic<Empty> heartbeatTopic)
-   {
-      this.ros2 = ros2;
-      this.heartbeatTopic = heartbeatTopic;
-   }
+   private final ROS2Publisher<Empty> heartbeatPublisher;
+   private final RepeatingTaskThread publishThread;
 
    public ROS2Heartbeat(ROS2Node ros2Node, ROS2Topic<Empty> heartbeatTopic)
    {
-      this.heartbeatTopic = heartbeatTopic;
       heartbeatPublisher = ros2Node.createPublisher(heartbeatTopic);
+      publishThread = new RepeatingTaskThread("Heartbeat-" + heartbeatTopic.getName(), () -> heartbeatPublisher.publish(EMPTY_MESSAGE));
+      publishThread.setFrequencyLimit(STATUS_FREQUENCY);
    }
 
    /**
@@ -66,35 +56,15 @@ public class ROS2Heartbeat
     */
    public void setAlive(boolean alive)
    {
-      if (alive)
-      {
-         if (!this.alive)
-            ThreadTools.startAsDaemon(() -> ExceptionTools.handle(this::publishThread, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE),
-                                      "Heartbeat-" + heartbeatTopic.getName());
-         this.alive = true;
-      }
+      if (alive && !publishThread.isRunning())
+         publishThread.startRepeating();
       else
-      {
-         this.alive = false;
-      }
-   }
-
-   private void publishThread()
-   {
-      while (alive)
-      {
-         if (ros2 != null)
-            ros2.publish(heartbeatTopic);
-         else
-            heartbeatPublisher.publish(emptyMessage);
-         throttler.waitAndRun(HEARTBEAT_PERIOD);
-      }
+         publishThread.stopRepeating();
    }
 
    public void destroy()
    {
-      setAlive(false);
-      if (heartbeatPublisher != null)
-         heartbeatPublisher.remove();
+      publishThread.kill();
+      heartbeatPublisher.remove();
    }
 }
