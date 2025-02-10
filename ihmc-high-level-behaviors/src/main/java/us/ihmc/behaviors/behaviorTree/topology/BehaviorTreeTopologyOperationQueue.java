@@ -35,6 +35,9 @@ public class BehaviorTreeTopologyOperationQueue<HLT extends BehaviorTreeNode<HLT
          topologyOperation.performOperation();
       }
 
+      if (atLeastOneOperationPerformed && behaviorTree.getRootNode() != null)
+         behaviorTree.getRootNode().update(); // Must validate fields after topology changes
+
       return atLeastOneOperationPerformed;
    }
 

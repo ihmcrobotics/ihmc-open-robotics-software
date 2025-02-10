@@ -4,12 +4,9 @@ import behavior_msgs.msg.dds.LeafNodeDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
-import us.ihmc.communication.crdt.CRDTBidirectionalBoolean;
 import us.ihmc.communication.crdt.CRDTBidirectionalLong;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
-
-import javax.annotation.Nullable;
 
 /**
  * Definition of a leaf node which gets executed as part of the concurrency system.
@@ -18,14 +15,15 @@ import javax.annotation.Nullable;
  */
 public class LeafNodeDefinition extends BehaviorTreeNodeDefinition
 {
-   public static final String EXECUTE_AFTER_PREVIOUS = "Previous";
-   public static final String EXECUTE_AFTER_BEGINNING = "Beginning";
+   public static final long EXECUTE_AFTER_INVALID_ID = LeafNodeDefinitionMessage.INVALID;
+   public static final long EXECUTE_AFTER_PREVIOUS_ID = LeafNodeDefinitionMessage.EXECUTE_AFTER_PREVIOUS;
+   public static final long EXECUTE_AFTER_BEGINNING_ID = LeafNodeDefinitionMessage.EXECUTE_AFTER_BEGINNING;
+   public static final String EXECUTE_AFTER_PREVIOUS_NAME = "Previous";
+   public static final String EXECUTE_AFTER_BEGINNING_NAME = "Beginning";
 
-   private final CRDTBidirectionalBoolean executeAfterPrevious;
-   private final CRDTBidirectionalBoolean executeAfterBeginning;
    private final CRDTBidirectionalLong executeAfterNodeID;
    /** We use this to save the action name to file instead of the number for human readability. */
-   private String executeAfterLeafName = EXECUTE_AFTER_PREVIOUS;
+   private String executeAfterLeafName = EXECUTE_AFTER_PREVIOUS_NAME;
 
    // On disk fields
    private String onDiskExecuteAfterLeafName;
@@ -34,28 +32,7 @@ public class LeafNodeDefinition extends BehaviorTreeNodeDefinition
    {
       super(crdtInfo, saveFileDirectory);
 
-      executeAfterPrevious = new CRDTBidirectionalBoolean(this, true);
-      executeAfterBeginning = new CRDTBidirectionalBoolean(this, false);
-      executeAfterNodeID = new CRDTBidirectionalLong(this, 0);
-   }
-
-   public void updateAndSanitizeExecuteAfterFields(@Nullable String executeAfterLeafName)
-   {
-      if (executeAfterBeginning.getValue())
-      {
-         this.executeAfterLeafName = EXECUTE_AFTER_BEGINNING;
-         executeAfterNodeID.setValue(0);
-      }
-      else if (executeAfterLeafName != null)
-      {
-         this.executeAfterLeafName = executeAfterLeafName;
-      }
-      else // Default to previous
-      {
-         executeAfterPrevious.setValue(true);
-         this.executeAfterLeafName = EXECUTE_AFTER_PREVIOUS;
-         executeAfterNodeID.setValue(0);
-      }
+      executeAfterNodeID = new CRDTBidirectionalLong(this, EXECUTE_AFTER_PREVIOUS_ID);
    }
 
    @Override
@@ -71,10 +48,7 @@ public class LeafNodeDefinition extends BehaviorTreeNodeDefinition
    {
       super.loadFromFile(jsonNode);
 
-      executeAfterLeafName = jsonNode.get("executeAfterAction").textValue();
-      executeAfterPrevious.setValue(executeAfterLeafName.equals(EXECUTE_AFTER_PREVIOUS));
-      executeAfterBeginning.setValue(executeAfterLeafName.equals(EXECUTE_AFTER_BEGINNING));
-      executeAfterNodeID.setValue(0); // Invalidate until we can find it
+      setExecuteAfterLeafUnknownID(jsonNode.get("executeAfterAction").textValue());
    }
 
    @Override
@@ -92,10 +66,7 @@ public class LeafNodeDefinition extends BehaviorTreeNodeDefinition
 
       if (isUndoAvailable())
       {
-         executeAfterLeafName = onDiskExecuteAfterLeafName;
-         executeAfterPrevious.setValue(onDiskExecuteAfterLeafName.equals(EXECUTE_AFTER_PREVIOUS));
-         executeAfterBeginning.setValue(onDiskExecuteAfterLeafName.equals(EXECUTE_AFTER_BEGINNING));
-         executeAfterNodeID.setValue(0); // Invalidate until we can find it
+         setExecuteAfterLeafUnknownID(onDiskExecuteAfterLeafName);
       }
    }
 
@@ -113,8 +84,6 @@ public class LeafNodeDefinition extends BehaviorTreeNodeDefinition
    {
       super.toMessage(message.getDefinition());
 
-      message.setExecuteAfterPrevious(executeAfterPrevious.toMessage());
-      message.setExecuteAfterBeginning(executeAfterBeginning.toMessage());
       message.setExecuteAfterNodeId(executeAfterNodeID.toMessage());
    }
 
@@ -122,24 +91,60 @@ public class LeafNodeDefinition extends BehaviorTreeNodeDefinition
    {
       super.fromMessage(message.getDefinition());
 
-      executeAfterPrevious.fromMessage(message.getExecuteAfterPrevious());
-      executeAfterBeginning.fromMessage(message.getExecuteAfterBeginning());
       executeAfterNodeID.fromMessage(message.getExecuteAfterNodeId());
    }
 
-   public CRDTBidirectionalBoolean getExecuteAfterPrevious()
+   public boolean getExecuteAfterIsInvalid()
    {
-      return executeAfterPrevious;
+      return executeAfterNodeID.getValue() == EXECUTE_AFTER_INVALID_ID;
    }
 
-   public CRDTBidirectionalBoolean getExecuteAfterBeginning()
+   public boolean getExecuteAfterPrevious()
    {
-      return executeAfterBeginning;
+      return executeAfterNodeID.getValue() == EXECUTE_AFTER_PREVIOUS_ID;
    }
 
-   public CRDTBidirectionalLong getExecuteAfterNodeID()
+   public boolean getExecuteAfterBeginning()
    {
-      return executeAfterNodeID;
+      return executeAfterNodeID.getValue() == EXECUTE_AFTER_BEGINNING_ID;
+   }
+
+   private void setExecuteAfterLeafUnknownID(String name)
+   {
+      switch (name)
+      {
+         case EXECUTE_AFTER_PREVIOUS_NAME -> setExecuteAfterPrevious();
+         case EXECUTE_AFTER_BEGINNING_NAME -> setExecuteAfterBeginning();
+         default -> setExecuteAfterLeaf(EXECUTE_AFTER_INVALID_ID, name);
+      }
+   }
+
+   public void setExecuteAfterLeaf(long id, String name)
+   {
+      executeAfterNodeID.setValue(id);
+      executeAfterLeafName = name;
+   }
+   
+   public void setExecuteAfterPrevious()
+   {
+      executeAfterNodeID.setValue(EXECUTE_AFTER_PREVIOUS_ID);
+      executeAfterLeafName = EXECUTE_AFTER_PREVIOUS_NAME;
+   }
+
+   public void setExecuteAfterBeginning()
+   {
+      executeAfterNodeID.setValue(EXECUTE_AFTER_BEGINNING_ID);
+      executeAfterLeafName = EXECUTE_AFTER_BEGINNING_NAME;
+   }
+
+   public long getExecuteAfterNodeID()
+   {
+      return executeAfterNodeID.getValue();
+   }
+
+   public void setExecuteAfterLeafName(String executeAfterLeafName)
+   {
+      this.executeAfterLeafName = executeAfterLeafName;
    }
 
    /** Only used for finding the ID after loading */

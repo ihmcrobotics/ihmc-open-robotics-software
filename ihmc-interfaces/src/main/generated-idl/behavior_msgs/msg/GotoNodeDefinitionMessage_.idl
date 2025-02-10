@@ -8,6 +8,18 @@ module behavior_msgs
   {
     module dds
     {
+      /**
+       * Value of the node to goto ID when we have a name but still need to find the ID
+       */
+      const long long INVALID =
+      -1;
+
+      /**
+       * Value of the node to goto ID when the node is simply set to goto the next node (i.e. no-op)
+       */
+      const long long GOTO_NEXT =
+      -2;
+
 
       @TypeCode(type="behavior_msgs::msg::dds_::GotoNodeDefinitionMessage_")
       struct GotoNodeDefinitionMessage
@@ -17,13 +29,9 @@ module behavior_msgs
          */
         behavior_msgs::msg::dds::LeafNodeDefinitionMessage definition;
         /**
-         * If this node is simply set to goto the next node (i.e. no-op)
+         * The ID of the node to goto or one of the invalid or next constants
          */
-        boolean goto_next;
-        /**
-         * The ID of the node to goto
-         */
-        unsigned long goto_node_id;
+        long long node_to_goto_id;
       };
     };
   };

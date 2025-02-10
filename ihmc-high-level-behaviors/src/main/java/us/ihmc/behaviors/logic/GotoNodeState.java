@@ -22,48 +22,36 @@ public class GotoNodeState extends LeafNodeState<GotoNodeDefinition>
       this.definition = getDefinition();
    }
 
-   /**
-    * Updates the definition gotoNodeName string for
-    * saving an up to date human readable name in the JSON.
-    * It also finds the correct node upon loading the name from JSON.
-    */
    @Override
-   public void validateFields(List<LeafNodeState<?>> leafNodes)
+   public void validateFields(List<LeafNodeState<?>> leaves)
    {
-      super.validateFields(leafNodes);
+      super.validateFields(leaves);
 
-      String gotoNodeName = null;
-
-      if (!definition.getGotoNext().getValue())
+      if (definition.getNodeToGotoIsInvalid())
       {
          // We need to find the node by name
          // This happens when we load from JSON
-         if (definition.getGotoNodeID().getValue() == 0)
+         for (BehaviorTreeNodeState<?> leaf : leaves)
          {
-            for (BehaviorTreeNodeState<?> nodeToCompare : leafNodes)
+            if (leaf.getDefinition().getName().equals(definition.getNodeToGotoName()))
             {
-               if (nodeToCompare.getDefinition().getName().equals(definition.getGotoNodeName()))
-               {
-                  gotoNodeName = nodeToCompare.getDefinition().getName();
-                  definition.getGotoNodeID().setValue(nodeToCompare.getID());
-                  break;
-               }
-            }
-         }
-         else // Update the node's name for saving in human readable format
-         {
-            long gotoNodeID = definition.getGotoNodeID().getValue();
-            for (BehaviorTreeNodeState<?> nodeToCompare : leafNodes)
-            {
-               if (nodeToCompare.getID() == gotoNodeID)
-               {
-                  gotoNodeName = nodeToCompare.getDefinition().getName();
-               }
+               definition.setNodeToGoto(leaf.getID(), definition.getNodeToGotoName());
+               break;
             }
          }
       }
-
-      definition.updateAndSanitizeGotoNodeFields(gotoNodeName);
+      else if (definition.getNodeToGotoID() >= 0)
+      {
+         // Dynamically update the node name -- it can change independently of the node's ID
+         // This is necessary for saving the definition
+         for (BehaviorTreeNodeState<?> leaf : leaves)
+         {
+            if (leaf.getID() == definition.getNodeToGotoID())
+            {
+               definition.setNodeToGotoName(leaf.getDefinition().getName());
+            }
+         }
+      }
    }
 
    @Override
@@ -89,7 +77,7 @@ public class GotoNodeState extends LeafNodeState<GotoNodeDefinition>
    public LeafNodeState<?> findNodeToGoto()
    {
       BehaviorTreeRootNodeState rootState = BehaviorTreeTools.findRootNode(this);
-      BehaviorTreeNodeState<?> nodeToGoto = rootState.getIDToNodeMap().get(definition.getGotoNodeID().getValue());
+      BehaviorTreeNodeState<?> nodeToGoto = rootState.getIDToNodeMap().get(definition.getNodeToGotoID());
       if (nodeToGoto instanceof LeafNodeState<?> leafState)
       {
          return leafState;

@@ -4,45 +4,28 @@ import behavior_msgs.msg.dds.GotoNodeDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.LeafNodeDefinition;
-import us.ihmc.communication.crdt.CRDTBidirectionalBoolean;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTBidirectionalLong;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
-import javax.annotation.Nullable;
-
 public class GotoNodeDefinition extends LeafNodeDefinition
 {
-   public static final String GOTO_NEXT = "Next";
+   public static final long GOTO_INVALID_ID = GotoNodeDefinitionMessage.INVALID;
+   public static final long GOTO_NEXT_ID = GotoNodeDefinitionMessage.GOTO_NEXT;
+   public static final String GOTO_NEXT_NAME = "Next";
 
-   private final CRDTBidirectionalBoolean gotoNext;
-   private final CRDTBidirectionalLong gotoNodeID;
-   /** We use this to save the goto node name to file instead of the number for human readability. */
-   private String gotoNodeName = GOTO_NEXT;
+   private final CRDTBidirectionalLong nodeToGotoID;
+   /** We use this to save the node to goto name to file instead of the number for human readability. */
+   private String nodeToGotoName = GOTO_NEXT_NAME;
 
    // On disk fields
-   private String onDiskGotoNodeName;
+   private String onDiskNodeToGotoName;
 
    public GotoNodeDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(crdtInfo, saveFileDirectory);
 
-      gotoNext = new CRDTBidirectionalBoolean(this, true);
-      gotoNodeID = new CRDTBidirectionalLong(this, 0);
-   }
-
-   public void updateAndSanitizeGotoNodeFields(@Nullable String gotoNodeName)
-   {
-      if (gotoNodeName != null)
-      {
-         this.gotoNodeName = gotoNodeName;
-      }
-      else // Default to next
-      {
-         gotoNext.setValue(true);
-         this.gotoNodeName = GOTO_NEXT;
-         gotoNodeID.setValue(0);
-      }
+      nodeToGotoID = new CRDTBidirectionalLong(this, GOTO_NEXT_ID);
    }
 
    @Override
@@ -50,7 +33,7 @@ public class GotoNodeDefinition extends LeafNodeDefinition
    {
       super.saveToFile(jsonNode);
 
-      jsonNode.put("gotoNode", gotoNodeName);
+      jsonNode.put("nodeToGoto", nodeToGotoName);
    }
 
    @Override
@@ -58,9 +41,7 @@ public class GotoNodeDefinition extends LeafNodeDefinition
    {
       super.loadFromFile(jsonNode);
 
-      gotoNodeName = jsonNode.get("gotoNode").textValue();
-      gotoNext.setValue(gotoNodeName.equals(GOTO_NEXT));
-      gotoNodeID.setValue(0); // Invalidate until we can find it
+      setNodeToGotoNameUnknownID(jsonNode.get("nodeToGoto").textValue());
    }
 
    @Override
@@ -68,7 +49,7 @@ public class GotoNodeDefinition extends LeafNodeDefinition
    {
       super.setOnDiskFields();
 
-      onDiskGotoNodeName = gotoNodeName;
+      onDiskNodeToGotoName = nodeToGotoName;
    }
 
    @Override
@@ -76,9 +57,10 @@ public class GotoNodeDefinition extends LeafNodeDefinition
    {
       super.undoAllNontopologicalChanges();
 
-      gotoNodeName = onDiskGotoNodeName;
-      gotoNext.setValue(onDiskGotoNodeName.equals(GOTO_NEXT));
-      gotoNodeID.setValue(0); // Invalidate until we can find it
+      if (isUndoAvailable())
+      {
+         setNodeToGotoNameUnknownID(onDiskNodeToGotoName);
+      }
    }
 
    @Override
@@ -86,7 +68,7 @@ public class GotoNodeDefinition extends LeafNodeDefinition
    {
       boolean unchanged = !super.hasChanges();
 
-      unchanged &= gotoNodeName.equals(onDiskGotoNodeName);
+      unchanged &= nodeToGotoName.equals(onDiskNodeToGotoName);
 
       return !unchanged;
    }
@@ -95,31 +77,60 @@ public class GotoNodeDefinition extends LeafNodeDefinition
    {
       super.toMessage(message.getDefinition());
 
-      message.setGotoNext(gotoNext.toMessage());
-      message.setGotoNodeId(gotoNodeID.toMessage());
+      message.setNodeToGotoId(nodeToGotoID.toMessage());
    }
 
    public void fromMessage(GotoNodeDefinitionMessage message)
    {
       super.fromMessage(message.getDefinition());
 
-      gotoNext.fromMessage(message.getGotoNext());
-      gotoNodeID.fromMessage(message.getGotoNodeId());
+      nodeToGotoID.fromMessage(message.getNodeToGotoId());
    }
 
-   public CRDTBidirectionalBoolean getGotoNext()
+   public boolean getNodeToGotoIsInvalid()
    {
-      return gotoNext;
+      return nodeToGotoID.getValue() == GOTO_INVALID_ID;
    }
 
-   public CRDTBidirectionalLong getGotoNodeID()
+   public boolean getGotoNextNode()
    {
-      return gotoNodeID;
+      return nodeToGotoID.getValue() == GOTO_NEXT_ID;
+   }
+
+   private void setNodeToGotoNameUnknownID(String name)
+   {
+      switch (name)
+      {
+         case GOTO_NEXT_NAME -> setGotoNextNode();
+         default -> setNodeToGoto(GOTO_INVALID_ID, name);
+      }
+   }
+
+   public void setNodeToGoto(long id, String name)
+   {
+      nodeToGotoID.setValue(id);
+      nodeToGotoName = name;
+   }
+
+   public void setGotoNextNode()
+   {
+      nodeToGotoID.setValue(GOTO_NEXT_ID);
+      nodeToGotoName = GOTO_NEXT_NAME;
+   }
+
+   public long getNodeToGotoID()
+   {
+      return nodeToGotoID.getValue();
+   }
+
+   public void setNodeToGotoName(String nodeToGotoName)
+   {
+      this.nodeToGotoName = nodeToGotoName;
    }
 
    /** Only used for finding the ID after loading */
-   public String getGotoNodeName()
+   public String getNodeToGotoName()
    {
-      return gotoNodeName;
+      return nodeToGotoName;
    }
 }

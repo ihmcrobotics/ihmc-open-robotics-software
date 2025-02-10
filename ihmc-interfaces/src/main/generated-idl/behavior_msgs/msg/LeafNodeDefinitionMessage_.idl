@@ -8,6 +8,24 @@ module behavior_msgs
   {
     module dds
     {
+      /**
+       * Value of execute after node ID when we have a name but still need to find the ID
+       */
+      const long long INVALID =
+      -1;
+
+      /**
+       * Value of execute after node ID when this leaf is set to execute after the previous node
+       */
+      const long long EXECUTE_AFTER_PREVIOUS =
+      -2;
+
+      /**
+       * Value of execute after node ID when this leaf is set to execute after the beginning of the sequence
+       */
+      const long long EXECUTE_AFTER_BEGINNING =
+      -3;
+
 
       @TypeCode(type="behavior_msgs::msg::dds_::LeafNodeDefinitionMessage_")
       struct LeafNodeDefinitionMessage
@@ -17,17 +35,9 @@ module behavior_msgs
          */
         behavior_msgs::msg::dds::BehaviorTreeNodeDefinitionMessage definition;
         /**
-         * If the node is set to execute after the previous node
+         * The ID of the node to execute after or one of the invalid, previous, or beginning constants
          */
-        boolean execute_after_previous;
-        /**
-         * If the node is set to execute after the beginning
-         */
-        boolean execute_after_beginning;
-        /**
-         * The ID of the node to execute after
-         */
-        unsigned long execute_after_node_id;
+        long long execute_after_node_id;
       };
     };
   };

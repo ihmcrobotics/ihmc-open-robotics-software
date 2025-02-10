@@ -15,7 +15,7 @@ public class CheckPointNodeDefinitionMessagePubSubType implements us.ihmc.pubsub
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "2b709822cc6ba30bcde2bab10bd7d8338d3b08b95b6dbd38b6327f0d1d1151a7";
+   		return "8d24147079738e3718905b4c5e1b09ca56ebcde0cb37bd767d6a3eff9a717218";
    }
    
    @Override
