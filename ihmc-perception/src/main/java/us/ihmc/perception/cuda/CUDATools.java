@@ -1,10 +1,12 @@
 package us.ihmc.perception.cuda;
 
 import org.bytedeco.cuda.cudart.CUstream_st;
+import org.bytedeco.cuda.cudart.cudaDeviceProp;
 import org.bytedeco.cuda.global.cudart;
 import org.bytedeco.cuda.global.nvcomp;
 import org.bytedeco.cuda.global.nvjpeg;
 import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacpp.Loader;
 import org.bytedeco.javacpp.Pointer;
 import us.ihmc.log.LogTools;
@@ -59,6 +61,23 @@ public class CUDATools
    public static boolean hasCUDADevice()
    {
       return getCUDADeviceCount() > 0;
+   }
+
+   /**
+    * Each block of a CUDA kernel has a maximum number of threads it can run.
+    * The block dimensions must not multiply to be greater than this number.
+    * On older GPUs it is 512 threads and on newer models it is 1024.
+    * @return The maximum number of threads per block of the device.
+    */
+   public static int getMaxThreadsPerBlock()
+   {
+      try (IntPointer device = new IntPointer(1);
+           cudaDeviceProp deviceProperties = new cudaDeviceProp())
+      {
+         cudaGetDevice(device);
+         cudaGetDeviceProperties(deviceProperties, device.get());
+         return deviceProperties.maxThreadsPerBlock();
+      }
    }
 
    /**
@@ -133,6 +152,14 @@ public class CUDATools
    public static URL getUtilsFile()
    {
       return CUDATools.class.getResource("Utils.cu");
+   }
+
+   /**
+    * @return The URL to the PerceptionUtils.cu file
+    */
+   public static URL getPerceptionUtilsFile()
+   {
+      return CUDATools.class.getResource("PerceptionUtils.cu");
    }
 
    /**

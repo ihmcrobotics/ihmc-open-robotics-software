@@ -2,58 +2,66 @@ package us.ihmc.commonWalkingControlModules.staticEquilibrium;
 
 import gnu.trove.map.hash.TObjectIntHashMap;
 import org.ejml.data.DMatrixRMaj;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.math.linearAlgebra.NullspaceCalculator;
 import us.ihmc.math.linearAlgebra.QRNullspaceCalculator;
 import us.ihmc.math.linearAlgebra.SVDNullspaceCalculator;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.mecano.algorithms.CentroidalMomentumCalculator;
+import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.PointJacobian;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class WholeBodyContactNullspaceCalculator
+/**
+ * Computes the contact nullspace Jv = 0, where J = {J_0...J_n}^T and J_i is the Jacobian of contact point i.
+ * Assumes planar foot and point hand contacts.
+ */
+public class ContactNullspaceCalculator
 {
    private static final boolean USE_SVD = false;
-   private static final int LINEAR_DIMENSIONS = 3;
    private static final int SPATIAL_DIMENSIONS = 6;
-   private static final boolean INCLUDE_COM_Z = false;
 
-   private final JointBasics[] controlledJoints;
    private final OneDoFJointBasics[] controlledOneDoFJoints;
 
    private final DMatrixRMaj stackedContactJacobian = new DMatrixRMaj(0);
    private final SVDNullspaceCalculator svdNullspaceCalculator = new SVDNullspaceCalculator(40, false);
    private final QRNullspaceCalculator qrNullspaceCalculator = new QRNullspaceCalculator(40);
-   private final CentroidalMomentumCalculator centroidalMomentumCalculator;
    private final TObjectIntHashMap<OneDoFJointBasics> jointToIndexMap = new TObjectIntHashMap<>(30);
 
-   private final SideDependentList<GeometricJacobian> handJacobians = new SideDependentList<>();
-   private final SideDependentList<GeometricJacobian> feetJacobians = new SideDependentList<>();
+   private final WholeBodyContactState wholeBodyContactState;
+
+   private final SideDependentList<RigidBodyBasics> hands = new SideDependentList<>();
+   private final SideDependentList<RigidBodyBasics> feet = new SideDependentList<>();
+   private final SideDependentList<YoBoolean> handInContact = new SideDependentList<>();
+   private final SideDependentList<YoBoolean> footInContact = new SideDependentList<>();
+
    private final PointJacobian pointJacobian = new PointJacobian();
    private final SideDependentList<FramePoint3DReadOnly> handControlPoints = new SideDependentList<>();
+
    private final List<OneDoFJointBasics> jointsToIgnore = new ArrayList<>();
 
-   public WholeBodyContactNullspaceCalculator(JointBasics[] controlledJoints, ReferenceFrame centerOfMassFrame, FullHumanoidRobotModel fullRobotModel)
+   public ContactNullspaceCalculator(FullHumanoidRobotModel fullRobotModel,
+                                     WholeBodyContactState wholeBodyContactState,
+                                     YoRegistry registry)
    {
-      this.controlledJoints = controlledJoints;
+      JointBasics[] controlledJoints = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(fullRobotModel);
       this.controlledOneDoFJoints = MultiBodySystemTools.filterJoints(controlledJoints, OneDoFJointBasics.class);
-
-      MultiBodySystemBasics multiBodySystemInput = MultiBodySystemBasics.toMultiBodySystemBasics(controlledJoints);
-      centroidalMomentumCalculator = new CentroidalMomentumCalculator(multiBodySystemInput, centerOfMassFrame);
+      this.wholeBodyContactState = wholeBodyContactState;
 
       for (int jointIdx = 0; jointIdx < controlledOneDoFJoints.length; jointIdx++)
       {
@@ -63,75 +71,69 @@ public class WholeBodyContactNullspaceCalculator
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         handJacobians.put(robotSide, new GeometricJacobian(fullRobotModel.getElevator(), fullRobotModel.getHand(robotSide), fullRobotModel.getHand(robotSide).getBodyFixedFrame()));
-         feetJacobians.put(robotSide, new GeometricJacobian(fullRobotModel.getElevator(), fullRobotModel.getFoot(robotSide), fullRobotModel.getFoot(robotSide).getBodyFixedFrame()));
+         hands.put(robotSide, fullRobotModel.getHand(robotSide));
+         feet.put(robotSide, fullRobotModel.getFoot(robotSide));
+
+         handInContact.put(robotSide, new YoBoolean(robotSide + "HandInContact", registry));
+         footInContact.put(robotSide, new YoBoolean(robotSide + "FootInContact", registry));
+
          handControlPoints.put(robotSide, new FramePoint3D(fullRobotModel.getHandControlFrame(robotSide)));
       }
 
-      // TODO make a parameter
-
       OneDoFJointBasics spinePitch = fullRobotModel.getSpineJoint(SpineJointName.SPINE_PITCH);
       OneDoFJointBasics spineRoll = fullRobotModel.getSpineJoint(SpineJointName.SPINE_ROLL);
-      OneDoFJointBasics wristYaw = fullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.WRIST_YAW);
-      OneDoFJointBasics wristRoll = fullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.WRIST_ROLL);
-      OneDoFJointBasics gripperYaw = fullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.GRIPPER_YAW);
 
       if (spinePitch != null)
          jointsToIgnore.add(spinePitch);
       if (spineRoll != null)
          jointsToIgnore.add(spineRoll);
-      if (wristYaw != null)
-         jointsToIgnore.add(wristYaw);
-      if (wristRoll != null)
-         jointsToIgnore.add(wristRoll);
-      if (gripperYaw != null)
-         jointsToIgnore.add(gripperYaw);
    }
 
    public void compute()
    {
       /* Setup matrix based on constraint dimensionality */
       int numConstraints = 0;
-      numConstraints += 2; // xy centroidal motion
-      numConstraints += INCLUDE_COM_Z ? 1 : 0; // z centroidal motion
-      numConstraints += 2 * LINEAR_DIMENSIONS; // hand linear position
-      numConstraints += 2 * SPATIAL_DIMENSIONS; // foot spatial pose
-      numConstraints += jointsToIgnore.size(); // joints to ignore
+      numConstraints += jointsToIgnore.size(); // hard-coded spine joints
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         handInContact.get(robotSide).set(wholeBodyContactState.isBodyInContact(hands.get(robotSide)));
+         footInContact.get(robotSide).set(wholeBodyContactState.isBodyInContact(feet.get(robotSide)));
+
+         if (handInContact.get(robotSide).getValue())
+            numConstraints += 3;
+         if (footInContact.get(robotSide).getValue())
+            numConstraints += 6;
+      }
 
       stackedContactJacobian.reshape(numConstraints, SPATIAL_DIMENSIONS + controlledOneDoFJoints.length);
       stackedContactJacobian.zero();
 
-      /* Compute and set centroidal mass momentum matrix */
-      centroidalMomentumCalculator.reset();
-      DMatrixRMaj centroidalMomentumMatrix = centroidalMomentumCalculator.getCentroidalMomentumMatrix();
-
-      int centroidalMomentumRowOffset = 3;
-      int centroidalMomentumNumRows = INCLUDE_COM_Z ? 3 : 2;
       int rowOffset = 0;
-
-      MatrixTools.setMatrixBlock(stackedContactJacobian, rowOffset, 0, centroidalMomentumMatrix, centroidalMomentumRowOffset, 0, centroidalMomentumNumRows, centroidalMomentumMatrix.getNumCols(), 1.0);
-      rowOffset += centroidalMomentumNumRows;
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         /* Compute and set foot jacobian */
-         GeometricJacobian footJacobian = feetJacobians.get(robotSide);
-         footJacobian.compute();
-         rowOffset = stackJacobian(rowOffset, footJacobian.getJacobianMatrix(), footJacobian.getJointsInOrder());
-
-         /* Compute and set hand jacobian */
-         GeometricJacobian handJacobian = handJacobians.get(robotSide);
-         handJacobian.changeFrame(handJacobian.getBaseFrame());
-         handJacobian.compute();
-         pointJacobian.set(handJacobian, handControlPoints.get(robotSide));
-         pointJacobian.compute();
-         rowOffset = stackJacobian(rowOffset, pointJacobian.getJacobianMatrix(), handJacobian.getJointsInOrder());
-      }
 
       for (int i = 0; i < jointsToIgnore.size(); i++)
       {
          stackedContactJacobian.set(rowOffset, getSystemJacobianColumn(jointsToIgnore.get(i)), 1.0);
          rowOffset++;
+      }
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         if (footInContact.get(robotSide).getValue())
+         {
+            /* Compute and set foot jacobian */
+            GeometricJacobian footJacobian = wholeBodyContactState.getJacobian(feet.get(robotSide));
+            rowOffset = stackJacobian(rowOffset, footJacobian.getJacobianMatrix(), footJacobian.getJointsInOrder());
+         }
+         if (handInContact.get(robotSide).getValue())
+         {
+            GeometricJacobian handJacobian = wholeBodyContactState.getJacobian(hands.get(robotSide));
+            handJacobian.changeFrame(handJacobian.getBaseFrame());
+            handJacobian.compute();
+            pointJacobian.set(handJacobian, handControlPoints.get(robotSide));
+            pointJacobian.compute();
+            rowOffset = stackJacobian(rowOffset, pointJacobian.getJacobianMatrix(), handJacobian.getJointsInOrder());
+         }
       }
 
       if (USE_SVD)
@@ -142,9 +144,6 @@ public class WholeBodyContactNullspaceCalculator
       {
          qrNullspaceCalculator.computeNullspaceProjector(stackedContactJacobian, null);
       }
-
-//      nullspaceCalculator.projectOntoNullspace(matrixToProjectOntoNullspace, stackedContactJacobian, projectedMatrixToPack);
-//      qrNullspaceCalculator.projectOntoNullspace(matrixToProjectOntoNullspace, stackedContactJacobian, projectedMatrixToPack);
    }
 
    public DMatrixRMaj getNullspace()
@@ -157,11 +156,6 @@ public class WholeBodyContactNullspaceCalculator
       {
          return qrNullspaceCalculator.getNullspace();
       }
-   }
-
-   public NullspaceCalculator getSvdNullspaceCalculator()
-   {
-      return svdNullspaceCalculator;
    }
 
    public void project(DMatrixRMaj velocityToProject, DMatrixRMaj projectedVelocity)
@@ -203,18 +197,5 @@ public class WholeBodyContactNullspaceCalculator
    private int getSystemJacobianColumn(OneDoFJointBasics joint)
    {
       return SPATIAL_DIMENSIONS + jointToIndexMap.get(joint);
-   }
-
-   public void addJointToIgnore(OneDoFJointBasics jointToIgnore)
-   {
-      if (!jointsToIgnore.contains(jointToIgnore))
-      {
-         jointsToIgnore.add(jointToIgnore);
-      }
-   }
-
-   public void clearJointsToIgnore()
-   {
-      jointsToIgnore.clear();
    }
 }

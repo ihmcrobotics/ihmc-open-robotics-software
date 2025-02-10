@@ -263,7 +263,7 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
    }
 
    @Override
-   public String getActionTypeTitle()
+   public String getLeafTypeTitle()
    {
       return definition.getSide().getPascalCaseName() + " Screw Primitive";
    }

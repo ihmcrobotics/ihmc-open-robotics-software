@@ -35,7 +35,7 @@ public class RDXWaitDurationAction extends RDXActionNode<WaitDurationActionState
    }
 
    @Override
-   public String getActionTypeTitle()
+   public String getLeafTypeTitle()
    {
       return String.format("Wait %.1f s", getDefinition().getWaitDuration());
    }

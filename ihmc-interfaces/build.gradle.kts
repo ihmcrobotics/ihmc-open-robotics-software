@@ -26,25 +26,25 @@ ihmc {
 }
 
 mainDependencies {
-   api("us.ihmc:euclid-geometry:0.21.0")
-   api("us.ihmc:ihmc-pub-sub:1.1.5")
-   api("us.ihmc:ros2-common-interfaces:1.1.5") {
+   api("us.ihmc:euclid-geometry:0.22.3")
+   api("us.ihmc:ihmc-pub-sub:1.1.8")
+   api("us.ihmc:ros2-common-interfaces:1.1.8") {
       exclude(group = "org.junit.jupiter", module = "junit-jupiter-api")
       exclude(group = "org.junit.jupiter", module = "junit-jupiter-engine")
       exclude(group = "org.junit.platform", module = "junit-platform-commons")
       exclude(group = "org.junit.platform", module = "junit-platform-launcher")
    }
-   api("us.ihmc:ihmc-commons:0.35.0")
+   api("us.ihmc:ihmc-commons:0.35.1")
 }
 
 testDependencies {
-   api("us.ihmc:ros2-library:1.1.5")
+   api("us.ihmc:ros2-library:1.1.8")
 }
 
 generatorDependencies {
-   api("us.ihmc:euclid:0.21.0")
-   api("us.ihmc:ihmc-commons:0.35.0")
-   api("us.ihmc:ros2-msg-to-pubsub-generator:1.1.5")
+   api("us.ihmc:euclid:0.22.3")
+   api("us.ihmc:ihmc-commons:0.35.1")
+   api("us.ihmc:ros2-msg-to-pubsub-generator:1.1.8")
 }
 
 val generator = us.ihmc.ros2.rosidl.ROS2InterfaceGenerator()

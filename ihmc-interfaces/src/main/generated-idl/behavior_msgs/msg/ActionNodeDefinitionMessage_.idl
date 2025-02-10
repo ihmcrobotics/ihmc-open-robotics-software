@@ -1,7 +1,7 @@
 #ifndef __behavior_msgs__msg__ActionNodeDefinitionMessage__idl__
 #define __behavior_msgs__msg__ActionNodeDefinitionMessage__idl__
 
-#include "behavior_msgs/msg/./BehaviorTreeNodeDefinitionMessage_.idl"
+#include "behavior_msgs/msg/./LeafNodeDefinitionMessage_.idl"
 module behavior_msgs
 {
   module msg
@@ -15,19 +15,7 @@ module behavior_msgs
         /**
          * Parent definition fields
          */
-        behavior_msgs::msg::dds::BehaviorTreeNodeDefinitionMessage definition;
-        /**
-         * If the node is set to execute after the previous node
-         */
-        boolean execute_after_previous;
-        /**
-         * If the node is set to execute after the beginning
-         */
-        boolean execute_after_beginning;
-        /**
-         * The ID of the node to execute after
-         */
-        unsigned long execute_after_node_id;
+        behavior_msgs::msg::dds::LeafNodeDefinitionMessage definition;
       };
     };
   };

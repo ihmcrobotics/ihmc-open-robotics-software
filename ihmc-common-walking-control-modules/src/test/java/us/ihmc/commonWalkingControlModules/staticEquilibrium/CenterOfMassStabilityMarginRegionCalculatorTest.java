@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.staticEquilibrium;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import static us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStabilityMarginRegionCalculator.*;
+import static us.ihmc.commonWalkingControlModules.staticEquilibrium.StabilityMarginRegionCalculator.*;
 
 public class CenterOfMassStabilityMarginRegionCalculatorTest
 {

@@ -11,7 +11,7 @@ public class CheckPointNodeStateMessage extends Packet<CheckPointNodeStateMessag
    /**
             * Parent state fields
             */
-   public behavior_msgs.msg.dds.ActionNodeStateMessage state_;
+   public behavior_msgs.msg.dds.LeafNodeStateMessage state_;
    /**
             * Definition
             */
@@ -19,7 +19,7 @@ public class CheckPointNodeStateMessage extends Packet<CheckPointNodeStateMessag
 
    public CheckPointNodeStateMessage()
    {
-      state_ = new behavior_msgs.msg.dds.ActionNodeStateMessage();
+      state_ = new behavior_msgs.msg.dds.LeafNodeStateMessage();
       definition_ = new behavior_msgs.msg.dds.CheckPointNodeDefinitionMessage();
    }
 
@@ -31,7 +31,7 @@ public class CheckPointNodeStateMessage extends Packet<CheckPointNodeStateMessag
 
    public void set(CheckPointNodeStateMessage other)
    {
-      behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.staticCopy(other.state_, state_);
+      behavior_msgs.msg.dds.LeafNodeStateMessagePubSubType.staticCopy(other.state_, state_);
       behavior_msgs.msg.dds.CheckPointNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
    }
 
@@ -39,7 +39,7 @@ public class CheckPointNodeStateMessage extends Packet<CheckPointNodeStateMessag
    /**
             * Parent state fields
             */
-   public behavior_msgs.msg.dds.ActionNodeStateMessage getState()
+   public behavior_msgs.msg.dds.LeafNodeStateMessage getState()
    {
       return state_;
    }

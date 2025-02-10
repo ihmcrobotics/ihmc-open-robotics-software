@@ -24,9 +24,9 @@ public class BehaviorStoredPropertySetDefinition extends CRDTBidirectionalStored
    private final TObjectDoubleHashMap<DoubleStoredPropertyKey> defaultDoubleValues = new TObjectDoubleHashMap<>();
    private final TObjectIntHashMap<IntegerStoredPropertyKey> defaultIntegerValues = new TObjectIntHashMap<>();
    private final TObjectByteHashMap<BooleanStoredPropertyKey> defaultBooleanValues = new TObjectByteHashMap<>();
-   private final TDoubleArrayList onDiskDoubleValues = new TDoubleArrayList();
-   private final TIntArrayList onDiskIntegerValues = new TIntArrayList();
-   private final TByteArrayList onDiskBooleanValues = new TByteArrayList();
+   private TDoubleArrayList onDiskDoubleValues;
+   private TIntArrayList onDiskIntegerValues;
+   private TByteArrayList onDiskBooleanValues;
 
    public BehaviorStoredPropertySetDefinition(LatestTimestampModifiable latestTimestampModifiable,
                                               String name,
@@ -112,6 +112,12 @@ public class BehaviorStoredPropertySetDefinition extends CRDTBidirectionalStored
 
    public void setOnDiskFields()
    {
+      if (onDiskDoubleValues == null)
+      {
+         onDiskDoubleValues = new TDoubleArrayList();
+         onDiskIntegerValues = new TIntArrayList();
+         onDiskBooleanValues = new TByteArrayList();
+      }
       onDiskDoubleValues.clear();
       onDiskIntegerValues.clear();
       onDiskBooleanValues.clear();
@@ -136,60 +142,70 @@ public class BehaviorStoredPropertySetDefinition extends CRDTBidirectionalStored
 
    public void undoAllNontopologicalChanges()
    {
-      int doubleIndex = 0;
-      int integerIndex = 0;
-      int booleanIndex = 0;
-
-      StoredPropertySetBasics storedPropertySet = getValueAndModify();
-      for (StoredPropertyKey<?> key : storedPropertySet.getKeyList().keys())
+      if (onDiskDoubleValues != null)
       {
-         if (key instanceof DoubleStoredPropertyKey doubleKey)
+         int doubleIndex = 0;
+         int integerIndex = 0;
+         int booleanIndex = 0;
+
+         StoredPropertySetBasics storedPropertySet = getValueAndModify();
+         for (StoredPropertyKey<?> key : storedPropertySet.getKeyList().keys())
          {
-            storedPropertySet.set(doubleKey, onDiskDoubleValues.get(doubleIndex));
-            ++doubleIndex;
-         }
-         else if (key instanceof IntegerStoredPropertyKey integerKey)
-         {
-            storedPropertySet.set(integerKey, onDiskIntegerValues.get(integerIndex));
-            ++integerIndex;
-         }
-         else if (key instanceof BooleanStoredPropertyKey booleanKey)
-         {
-            storedPropertySet.set(booleanKey, byteToBoolean(onDiskBooleanValues.get(booleanIndex)));
-            ++booleanIndex;
+            if (key instanceof DoubleStoredPropertyKey doubleKey)
+            {
+               storedPropertySet.set(doubleKey, onDiskDoubleValues.get(doubleIndex));
+               ++doubleIndex;
+            }
+            else if (key instanceof IntegerStoredPropertyKey integerKey)
+            {
+               storedPropertySet.set(integerKey, onDiskIntegerValues.get(integerIndex));
+               ++integerIndex;
+            }
+            else if (key instanceof BooleanStoredPropertyKey booleanKey)
+            {
+               storedPropertySet.set(booleanKey, byteToBoolean(onDiskBooleanValues.get(booleanIndex)));
+               ++booleanIndex;
+            }
          }
       }
    }
 
    public boolean isUnchanged()
    {
-      boolean unchanged = true;
-
-      int doubleIndex = 0;
-      int integerIndex = 0;
-      int booleanIndex = 0;
-
-      StoredPropertySetReadOnly storedPropertySet = getValueReadOnly();
-      for (StoredPropertyKey<?> key : storedPropertySet.getKeyList().keys())
+      if (onDiskDoubleValues == null)
       {
-         if (key instanceof DoubleStoredPropertyKey doubleKey)
-         {
-            unchanged &= storedPropertySet.get(doubleKey) == onDiskDoubleValues.get(doubleIndex);
-            ++doubleIndex;
-         }
-         else if (key instanceof IntegerStoredPropertyKey integerKey)
-         {
-            unchanged &= storedPropertySet.get(integerKey) == onDiskIntegerValues.get(integerIndex);
-            ++integerIndex;
-         }
-         else if (key instanceof BooleanStoredPropertyKey booleanKey)
-         {
-            unchanged &= storedPropertySet.get(booleanKey) == byteToBoolean(onDiskBooleanValues.get(booleanIndex));
-            ++booleanIndex;
-         }
+         return false; // We mark this as changed -- that's the initial state i.e. marked with '*'
       }
+      else
+      {
+         boolean unchanged = true;
 
-      return unchanged;
+         int doubleIndex = 0;
+         int integerIndex = 0;
+         int booleanIndex = 0;
+
+         StoredPropertySetReadOnly storedPropertySet = getValueReadOnly();
+         for (StoredPropertyKey<?> key : storedPropertySet.getKeyList().keys())
+         {
+            if (key instanceof DoubleStoredPropertyKey doubleKey)
+            {
+               unchanged &= storedPropertySet.get(doubleKey) == onDiskDoubleValues.get(doubleIndex);
+               ++doubleIndex;
+            }
+            else if (key instanceof IntegerStoredPropertyKey integerKey)
+            {
+               unchanged &= storedPropertySet.get(integerKey) == onDiskIntegerValues.get(integerIndex);
+               ++integerIndex;
+            }
+            else if (key instanceof BooleanStoredPropertyKey booleanKey)
+            {
+               unchanged &= storedPropertySet.get(booleanKey) == byteToBoolean(onDiskBooleanValues.get(booleanIndex));
+               ++booleanIndex;
+            }
+         }
+
+         return unchanged;
+      }
    }
 
    private boolean byteToBoolean(byte b)

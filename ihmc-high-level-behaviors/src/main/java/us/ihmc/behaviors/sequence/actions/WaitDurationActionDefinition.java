@@ -51,7 +51,10 @@ public class WaitDurationActionDefinition extends ActionNodeDefinition
    {
       super.undoAllNontopologicalChanges();
 
-      waitDuration.setValue(onDiskWaitDuration);
+      if (isUndoAvailable())
+      {
+         waitDuration.setValue(onDiskWaitDuration);
+      }
    }
 
    @Override
