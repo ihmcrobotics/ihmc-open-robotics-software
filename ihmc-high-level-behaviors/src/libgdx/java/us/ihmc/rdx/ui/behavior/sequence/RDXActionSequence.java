@@ -11,13 +11,10 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, ActionSequenceDefinition>
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ActionSequenceState state;
 
    public RDXActionSequence(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(new ActionSequenceState(id, crdtInfo, saveFileDirectory));
-
-      state = getState();
    }
 
    @Override
@@ -35,7 +32,7 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
    @Override
    public void renderNodeSettingsWidgets()
    {
-      ImGui.text("Type: %s   ID: %d".formatted(getDefinition().getClass().getSimpleName(), getState().getID()));
+      ImGui.text("Type: %s   ID: %d".formatted(definition.getClass().getSimpleName(), state.getID()));
 
       super.renderNodeSettingsWidgets();
    }

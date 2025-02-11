@@ -20,7 +20,7 @@ public class CheckPointNodeState extends LeafNodeState<CheckPointNodeDefinition>
 
    public void toMessage(CheckPointNodeStateMessage message)
    {
-      getDefinition().toMessage(message.getDefinition());
+      definition.toMessage(message.getDefinition());
 
       super.toMessage(message.getState());
    }
@@ -29,6 +29,6 @@ public class CheckPointNodeState extends LeafNodeState<CheckPointNodeDefinition>
    {
       super.fromMessage(message.getState());
 
-      getDefinition().fromMessage(message.getDefinition());
+      definition.fromMessage(message.getDefinition());
    }
 }

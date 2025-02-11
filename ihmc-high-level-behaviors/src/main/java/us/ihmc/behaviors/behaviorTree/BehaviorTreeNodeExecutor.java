@@ -18,8 +18,10 @@ public class BehaviorTreeNodeExecutor<S extends BehaviorTreeNodeState<D>,
                                       D extends BehaviorTreeNodeDefinition>
       implements BehaviorTreeNode<BehaviorTreeNodeExecutor<?, ?>, S, D>
 {
-   private final S state;
-   private final D definition;
+   /** Convenient accessor to the state to keep the code clean, available to all inheriting classes. */
+   protected final S state;
+   /** Convenient accessor to the definition to keep the code clean, available to all inheriting classes. */
+   protected final D definition;
    private final List<BehaviorTreeNodeExecutor<?, ?>> children = new ArrayList<>();
    private transient BehaviorTreeNodeExecutor<?, ?> parent;
 
@@ -44,7 +46,7 @@ public class BehaviorTreeNodeExecutor<S extends BehaviorTreeNodeState<D>,
     */
    public void clock()
    {
-      getState().setIsActive(false);
+      state.setIsActive(false);
 
       for (BehaviorTreeNodeExecutor<?, ?> child : children)
       {
@@ -54,7 +56,7 @@ public class BehaviorTreeNodeExecutor<S extends BehaviorTreeNodeState<D>,
 
    public void tick()
    {
-      getState().setIsActive(true);
+      state.setIsActive(true);
    }
 
    public List<BehaviorTreeNodeExecutor<?, ?>> getChildren()

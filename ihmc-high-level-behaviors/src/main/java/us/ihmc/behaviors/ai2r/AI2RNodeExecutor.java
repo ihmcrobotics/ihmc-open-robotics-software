@@ -32,7 +32,6 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
    private final SceneGraph sceneGraph;
    private final Throttler statusThrottler = new Throttler().setFrequency(1.0);
    private final AI2RStatusMessage statusMessage = new AI2RStatusMessage();
-   private final AI2RNodeState state;
    private final List<LeafNodeState<?>> failedLeaves = new ArrayList<>();
    private CRDTStatusFootstepList plannedSteps;
    private static final double DISTANCE_COLLISION_THRESHOLD = 0.3;
@@ -49,7 +48,6 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
       this.ros2 = ros2;
       this.syncedRobot = syncedRobot;
       this.sceneGraph = sceneGraph;
-      state = getState();
 
       ros2.subscribeViaCallback(AutonomyAPI.AI2R_COMMAND, message ->
       {

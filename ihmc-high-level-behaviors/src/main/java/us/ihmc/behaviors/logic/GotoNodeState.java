@@ -13,13 +13,9 @@ import java.util.List;
 
 public class GotoNodeState extends LeafNodeState<GotoNodeDefinition>
 {
-   private final GotoNodeDefinition definition;
-
    public GotoNodeState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(id, new GotoNodeDefinition(crdtInfo, saveFileDirectory), crdtInfo);
-
-      this.definition = getDefinition();
    }
 
    @Override

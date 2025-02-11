@@ -8,15 +8,9 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class GotoNodeExecutor extends LeafNodeExecutor<GotoNodeState, GotoNodeDefinition>
 {
-   private final GotoNodeState state;
-   private final GotoNodeDefinition definition;
-
    public GotoNodeExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(new GotoNodeState(id, crdtInfo, saveFileDirectory));
-
-      state = getState();
-      definition = getDefinition();
    }
 
    @Override

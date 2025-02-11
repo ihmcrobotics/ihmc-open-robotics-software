@@ -20,14 +20,14 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
 
    public void toMessage(ActionSequenceStateMessage message)
    {
-      getDefinition().toMessage(message.getDefinition());
+      definition.toMessage(message.getDefinition());
 
       super.toMessage(message.getState());
    }
 
    public void fromMessage(ActionSequenceStateMessage message)
    {
-      getDefinition().fromMessage(message.getDefinition());
+      definition.fromMessage(message.getDefinition());
 
       super.fromMessage(message.getState());
    }

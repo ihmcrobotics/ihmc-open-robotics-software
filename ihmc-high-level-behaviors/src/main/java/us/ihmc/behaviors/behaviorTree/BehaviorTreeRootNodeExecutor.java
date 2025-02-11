@@ -15,8 +15,6 @@ import java.util.List;
 
 public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<BehaviorTreeRootNodeState, BehaviorTreeRootNodeDefinition>
 {
-   private final BehaviorTreeRootNodeState state;
-   private final BehaviorTreeRootNodeDefinition definition;
    private final TLongObjectHashMap<BehaviorTreeNodeExecutor<?, ?>> idToNodeMap = new TLongObjectHashMap<>();
    private final List<LeafNodeExecutor<?, ?>> orderedLeaves = new ArrayList<>();
    private final List<ActionNodeExecutor<?, ?>> orderedActions = new ArrayList<>();
@@ -29,9 +27,6 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
    public BehaviorTreeRootNodeExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(new BehaviorTreeRootNodeState(id, crdtInfo, saveFileDirectory));
-
-      state = getState();
-      definition = getDefinition();
    }
 
    @Override

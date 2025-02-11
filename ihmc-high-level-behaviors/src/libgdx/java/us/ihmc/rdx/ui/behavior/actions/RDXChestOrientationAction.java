@@ -35,8 +35,6 @@ import java.util.List;
 
 public class RDXChestOrientationAction extends RDXActionNode<ChestOrientationActionState, ChestOrientationActionDefinition>
 {
-   private final ChestOrientationActionDefinition definition;
-   private final ChestOrientationActionState state;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBooleanWrapper holdPoseInWorldLaterWrapper;
    private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
@@ -65,9 +63,6 @@ public class RDXChestOrientationAction extends RDXActionNode<ChestOrientationAct
    {
       super(new ChestOrientationActionState(id, crdtInfo,saveFileDirectory, referenceFrameLibrary));
 
-      definition = getDefinition();
-      state = getState();
-
       poseGizmo = new RDXSelectablePose3DGizmo();
       poseGizmo.create(panel3D);
 
@@ -78,7 +73,7 @@ public class RDXChestOrientationAction extends RDXActionNode<ChestOrientationAct
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
                                                                 referenceFrameLibrary,
                                                                 definition::getParentFrameName,
-                                                                getState().getChestFrame()::changeFrame);
+                                                                state.getChestFrame()::changeFrame);
       yawWidget = new ImDoubleWrapper(definition.getRotationReadOnly()::getYaw, definition::setYaw,
                                       imDouble -> ImGuiTools.volatileInputDouble(labels.get("Yaw"), imDouble));
       pitchWidget = new ImDoubleWrapper(definition.getRotationReadOnly()::getPitch, definition::setPitch,

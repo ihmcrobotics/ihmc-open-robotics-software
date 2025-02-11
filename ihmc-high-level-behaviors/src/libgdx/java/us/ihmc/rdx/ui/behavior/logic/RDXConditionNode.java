@@ -12,17 +12,12 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 public class RDXConditionNode extends RDXLeafNode<ConditionNodeState, ConditionNodeDefinition>
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ConditionNodeDefinition definition;
-   private final ConditionNodeState state;
    private final ImLongWrapper countWidget;
    private final ImLongWrapper countToWidget;
 
    public RDXConditionNode(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(new ConditionNodeState(id, crdtInfo, saveFileDirectory));
-
-      definition = getDefinition();
-      state = getState();
 
       countWidget = new ImLongWrapper(state.getCount()::getValue,
                                       state.getCount()::setValue,

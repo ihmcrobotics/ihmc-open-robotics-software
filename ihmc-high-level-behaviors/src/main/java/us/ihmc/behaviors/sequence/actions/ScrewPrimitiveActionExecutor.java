@@ -42,8 +42,6 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimitiveActionState, ScrewPrimitiveActionDefinition>
 {
-   private final ScrewPrimitiveActionState state;
-   private final ScrewPrimitiveActionDefinition definition;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
    private final FramePose3D desiredHandControlPose = new FramePose3D();
@@ -89,9 +87,6 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
 
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
-
-      state = getState();
-      definition = getDefinition();
 
       for (RobotSide side : RobotSide.values)
       {

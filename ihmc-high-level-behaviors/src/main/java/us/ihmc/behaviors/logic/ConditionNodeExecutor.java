@@ -6,15 +6,9 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class ConditionNodeExecutor extends LeafNodeExecutor<ConditionNodeState, ConditionNodeDefinition>
 {
-   private final ConditionNodeState state;
-   private final ConditionNodeDefinition definition;
-
    public ConditionNodeExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(new ConditionNodeState(id, crdtInfo, saveFileDirectory));
-
-      state = getState();
-      definition = getDefinition();
    }
 
    @Override

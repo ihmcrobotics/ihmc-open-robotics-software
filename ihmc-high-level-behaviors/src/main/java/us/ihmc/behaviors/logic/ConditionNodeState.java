@@ -8,15 +8,11 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class ConditionNodeState extends LeafNodeState<ConditionNodeDefinition>
 {
-   private final ConditionNodeDefinition definition;
-
    private final CRDTBidirectionalLong count;
 
    public ConditionNodeState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(id, new ConditionNodeDefinition(crdtInfo, saveFileDirectory), crdtInfo);
-
-      this.definition = getDefinition();
 
       count = new CRDTBidirectionalLong(definition, 0);
    }

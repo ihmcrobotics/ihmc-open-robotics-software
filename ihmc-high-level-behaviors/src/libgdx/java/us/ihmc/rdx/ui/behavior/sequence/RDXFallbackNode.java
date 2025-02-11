@@ -11,13 +11,10 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 public class RDXFallbackNode extends RDXBehaviorTreeNode<FallbackNodeState, FallbackNodeDefinition>
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final FallbackNodeState state;
 
    public RDXFallbackNode(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(new FallbackNodeState(id, crdtInfo, saveFileDirectory));
-
-      state = getState();
    }
 
    @Override
@@ -35,7 +32,7 @@ public class RDXFallbackNode extends RDXBehaviorTreeNode<FallbackNodeState, Fall
    @Override
    public void renderNodeSettingsWidgets()
    {
-      ImGui.text("Type: %s   ID: %d".formatted(getDefinition().getClass().getSimpleName(), getState().getID()));
+      ImGui.text("Type: %s   ID: %d".formatted(definition.getClass().getSimpleName(), state.getID()));
 
       super.renderNodeSettingsWidgets();
    }
