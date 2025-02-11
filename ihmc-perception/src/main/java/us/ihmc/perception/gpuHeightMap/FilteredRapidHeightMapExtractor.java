@@ -1,29 +1,26 @@
 package us.ihmc.perception.gpuHeightMap;
 
 import org.bytedeco.cuda.cudart.CUstream_st;
+import org.bytedeco.cuda.cudart.cudaExtent;
+import org.bytedeco.cuda.cudart.cudaPitchedPtr;
 import org.bytedeco.cuda.cudart.dim3;
-import org.bytedeco.javacpp.ShortPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
+import org.jetbrains.annotations.NotNull;
 import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
 import us.ihmc.perception.cuda.CUDATools;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.bytedeco.cuda.global.cudart.*;
 
 public class FilteredRapidHeightMapExtractor
 {
-   private final List<GpuMat> gpuLayers;
-   private final ShortPointer pointerTo3DArray;
-   private final long pitchForLayer;
-   private final GpuMat gpuMatExample;
+   private final cudaPitchedPtr pointerTo3DArray;
    private int currentIndex;
    int layers = 2;
 
@@ -52,15 +49,11 @@ public class FilteredRapidHeightMapExtractor
          throw new RuntimeException(e);
       }
 
-      gpuMatExample = new GpuMat(rows, cols, opencv_core.CV_16UC1);
-      pitchForLayer = gpuMatExample.step();
-
-      pointerTo3DArray = new ShortPointer();
-      cudaMalloc(pointerTo3DArray, layers * pitchForLayer * rows);
-      int error = cudaStreamSynchronize(stream);
+      pointerTo3DArray = new cudaPitchedPtr();
+      cudaExtent extent = make_cudaExtent((long) cols * Short.BYTES, rows, layers);
+      int error = cudaMalloc3D(pointerTo3DArray, extent);
       CUDATools.checkCUDAError(error);
 
-      gpuLayers = new ArrayList<>(layers);
       currentIndex = 0;
 
       for (int i = 0; i < layers; i++)
@@ -68,34 +61,40 @@ public class FilteredRapidHeightMapExtractor
          // To get the average to be a whole number do (i * 2 + 2)
          Mat cpuData = new Mat(rows, cols, opencv_core.CV_16UC1, new Scalar(0));
 
-         // Upload that data to the gpu so we can allocate the memory for it
-         GpuMat gpuData = new GpuMat();
-         gpuData.upload(cpuData);
-
          // Allocate memory for each layer, creating a 3d array
-         cudaMemcpy2D(pointerTo3DArray.position(i * pitchForLayer * rows),
-                      pitchForLayer,
-                      gpuData.data(),
-                      gpuData.step(),
-                      cols * Short.BYTES,
-                      rows,
-                      cudaMemcpyHostToDevice);
-
-         // Note we can't close the GpuMat here cause we need to access the data later in the program, so add it to a list, and close the list at the end
-         gpuLayers.add(gpuData);
+         cudaMemcpy2D(pointerTo3DArray.ptr().position(i * pointerTo3DArray.pitch() * pointerTo3DArray.ysize()),
+                      pointerTo3DArray.pitch(),
+                      cpuData.data(),
+                      cpuData.step(),
+                      pointerTo3DArray.xsize(),
+                      pointerTo3DArray.ysize(),
+                      cudaMemcpyDefault);
       }
    }
 
    public GpuMat update(GpuMat latestGlobalHeightMap)
    {
+      GpuMat heightMapAverage = computerHeightMapHistoryAverage(latestGlobalHeightMap);
+
+      return latestGlobalHeightMap;
+   }
+
+   @NotNull
+   private GpuMat computerHeightMapHistoryAverage(GpuMat latestGlobalHeightMap)
+   {
       // Only want to compute the average if we have the past values to use
       if (loopTracker < layers)
       {
          loopTracker++;
-         latestGlobalHeightMap.convertTo(gpuLayers.get(currentIndex), latestGlobalHeightMap.type());
-         Mat temp = new Mat();
-         gpuLayers.get(currentIndex).download(temp);
-         PerceptionDebugTools.printMat("s", temp, 1);
+
+         cudaMemcpy2D(pointerTo3DArray.ptr().position(currentIndex * pointerTo3DArray.pitch() * pointerTo3DArray.ysize()),
+                      pointerTo3DArray.pitch(),
+                      latestGlobalHeightMap.data(),
+                      latestGlobalHeightMap.step(),
+                      pointerTo3DArray.xsize(),
+                      pointerTo3DArray.ysize(),
+                      cudaMemcpyDefault);
+
          currentIndex = (currentIndex + 1) % layers;
          return latestGlobalHeightMap;
       }
@@ -104,9 +103,9 @@ public class FilteredRapidHeightMapExtractor
 
       GpuMat result = new GpuMat(rows, cols, opencv_core.CV_16UC1);
 
-      kernel.withPointer(pointerTo3DArray).withLong(gpuMatExample.step());
+      kernel.withPointer(pointerTo3DArray.ptr()).withLong(pointerTo3DArray.pitch());
       kernel.withPointer(result.data()).withLong(result.step());
-      kernel.withLong(pitchForLayer * rows);
+      kernel.withLong(pointerTo3DArray.pitch() * rows);
       kernel.withInt(rows);
       kernel.withInt(cols);
       kernel.withInt(layers);
@@ -124,7 +123,14 @@ public class FilteredRapidHeightMapExtractor
       result.download(cpuResult);
       PerceptionDebugTools.printMat("Result", cpuResult, 1);
 
-      gpuLayers.get(currentIndex).setTo(new Scalar(1), latestGlobalHeightMap);
+      cudaMemcpy2D(pointerTo3DArray.ptr().position(currentIndex * pointerTo3DArray.pitch() * pointerTo3DArray.ysize()),
+                   pointerTo3DArray.pitch(),
+                   latestGlobalHeightMap.data(),
+                   latestGlobalHeightMap.step(),
+                   pointerTo3DArray.xsize(),
+                   pointerTo3DArray.ysize(),
+                   cudaMemcpyDefault);
+
       currentIndex = (currentIndex + 1) % layers;
 
       return result;

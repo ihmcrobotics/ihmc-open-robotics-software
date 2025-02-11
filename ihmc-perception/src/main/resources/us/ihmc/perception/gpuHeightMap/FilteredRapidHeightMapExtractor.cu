@@ -20,7 +20,7 @@ void filterRapidHeightMap(unsigned short * matrixPointer, size_t pitchA,
         // Compute row offset using pitchA
         unsigned short * matrixPointerRow = (unsigned short*)((char*) currentLayer + indexY * pitchA) + indexX;
 
-        printf("Layer: %d, Value: %d, %d, and: %d\n", layer, indexY, indexX, (int) *matrixPointerRow);
+        printf("Layer: %d, Value: %d, %d, and %d\n", layer, indexY, indexX, (int) *matrixPointerRow);
         sum += (int) *matrixPointerRow;
     }
 
@@ -28,5 +28,6 @@ void filterRapidHeightMap(unsigned short * matrixPointer, size_t pitchA,
 
     unsigned short *outputPointer = (unsigned short *)((char*) resultPointer + indexY * pitchResult) + indexX;
     *outputPointer = avg;
+    printf("GPU Average: %d, ", avg);
 }
 
