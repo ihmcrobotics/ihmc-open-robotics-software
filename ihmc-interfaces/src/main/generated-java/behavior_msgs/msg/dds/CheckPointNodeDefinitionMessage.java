@@ -11,11 +11,11 @@ public class CheckPointNodeDefinitionMessage extends Packet<CheckPointNodeDefini
    /**
             * Parent definition fields
             */
-   public behavior_msgs.msg.dds.ActionNodeDefinitionMessage definition_;
+   public behavior_msgs.msg.dds.LeafNodeDefinitionMessage definition_;
 
    public CheckPointNodeDefinitionMessage()
    {
-      definition_ = new behavior_msgs.msg.dds.ActionNodeDefinitionMessage();
+      definition_ = new behavior_msgs.msg.dds.LeafNodeDefinitionMessage();
    }
 
    public CheckPointNodeDefinitionMessage(CheckPointNodeDefinitionMessage other)
@@ -26,13 +26,13 @@ public class CheckPointNodeDefinitionMessage extends Packet<CheckPointNodeDefini
 
    public void set(CheckPointNodeDefinitionMessage other)
    {
-      behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);   }
+      behavior_msgs.msg.dds.LeafNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);   }
 
 
    /**
             * Parent definition fields
             */
-   public behavior_msgs.msg.dds.ActionNodeDefinitionMessage getDefinition()
+   public behavior_msgs.msg.dds.LeafNodeDefinitionMessage getDefinition()
    {
       return definition_;
    }

@@ -174,7 +174,7 @@ public class ActionNodeInitialization
       T previousAction = null;
       if (actionSequence != null)
       {
-         previousAction = actionSequence.findNextPreviousAction(actionClass, indexOfInsertion, side);
+         previousAction = actionSequence.findNextPreviousLeaf(actionClass, indexOfInsertion, side);
       }
       return previousAction;
    }

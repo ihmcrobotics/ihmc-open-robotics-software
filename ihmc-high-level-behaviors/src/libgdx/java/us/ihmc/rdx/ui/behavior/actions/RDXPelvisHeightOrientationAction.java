@@ -172,7 +172,7 @@ public class RDXPelvisHeightOrientationAction extends RDXActionNode<PelvisHeight
    {
       if (isMouseHovering)
       {
-         tooltip.render("%s Action\nIndex: %d\nName: %s".formatted(getActionTypeTitle(), state.getActionIndex(), definition.getName()));
+         tooltip.render("%s Action\nIndex: %d\nName: %s".formatted(getLeafTypeTitle(), state.getLeafIndex(), definition.getName()));
       }
    }
 
@@ -230,7 +230,7 @@ public class RDXPelvisHeightOrientationAction extends RDXActionNode<PelvisHeight
    }
 
    @Override
-   public String getActionTypeTitle()
+   public String getLeafTypeTitle()
    {
       return "Pelvis Height and Orientation";
    }

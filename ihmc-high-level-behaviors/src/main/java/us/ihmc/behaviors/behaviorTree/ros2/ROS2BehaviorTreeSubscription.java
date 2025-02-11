@@ -16,13 +16,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
- * @param <HLT> The generic type of this node: RDX or Executor
+ * @param <T> The generic type of this node: RDX or Executor
  */
-public class ROS2BehaviorTreeSubscription<HLT extends BehaviorTreeNode<HLT, ? ,?>>
+public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNode<T, ? ,?>>
 {
    private final ROS2Topic<BehaviorTreeStateMessage> topic;
    private final ArrayList<Runnable> messageRecievedCallbacks = new ArrayList<>();
-   private final BehaviorTree<HLT> behaviorTree;
+   private final BehaviorTree<T> behaviorTree;
    private long numberOfMessagesReceived = 0;
    private long previousSequenceID = -1;
    private long messageDropCount = 0;
@@ -32,9 +32,9 @@ public class ROS2BehaviorTreeSubscription<HLT extends BehaviorTreeNode<HLT, ? ,?
    private final ROS2BehaviorTreeSubscriptionNode subscriptionRootNode = new ROS2BehaviorTreeSubscriptionNode();
    private final HashMap<Long, ROS2BehaviorTreeSubscriptionNode> idToSubscriptionNodesMap = new HashMap<>();
    private final MutableInt subscriptionNodeDepthFirstIndex = new MutableInt();
-   private final HashMap<Long, HLT> idToLocalNodesMap = new HashMap<>();
+   private final HashMap<Long, T> idToLocalNodesMap = new HashMap<>();
 
-   public ROS2BehaviorTreeSubscription(BehaviorTree<HLT> behaviorTree, ROS2PublishSubscribeAPI ros2PublishSubscribeAPI)
+   public ROS2BehaviorTreeSubscription(BehaviorTree<T> behaviorTree, ROS2PublishSubscribeAPI ros2PublishSubscribeAPI)
    {
       this.behaviorTree = behaviorTree;
 
@@ -101,7 +101,7 @@ public class ROS2BehaviorTreeSubscription<HLT extends BehaviorTreeNode<HLT, ? ,?
 
          behaviorTree.modifyTreeTopology(topologyOperationQueue ->
          {
-            HLT rootNode = behaviorTree.getRootNode();
+            T rootNode = behaviorTree.getRootNode();
 
             boolean rootReferenceModificationIncoming = behaviorTree.getRootReferenceModification().isModificationIncoming();
             if (rootReferenceModificationIncoming)
@@ -119,7 +119,7 @@ public class ROS2BehaviorTreeSubscription<HLT extends BehaviorTreeNode<HLT, ? ,?
                retrieveOrReplicateSubreeFromSubscription(subscriptionRootNode, rootNode, topologyOperationQueue);
 
             // These nodes were removed from the tree
-            for (HLT value : idToLocalNodesMap.values())
+            for (T value : idToLocalNodesMap.values())
                value.destroy();
             idToLocalNodesMap.clear();
          });
@@ -129,8 +129,8 @@ public class ROS2BehaviorTreeSubscription<HLT extends BehaviorTreeNode<HLT, ? ,?
    }
 
    private void retrieveOrReplicateSubreeFromSubscription(ROS2BehaviorTreeSubscriptionNode subscriptionNode,
-                                                          HLT localNode,
-                                                          BehaviorTreeTopologyOperationQueue<HLT> topologyOperationQueue)
+                                                          T localNode,
+                                                          BehaviorTreeTopologyOperationQueue<T> topologyOperationQueue)
    {
       boolean existsMatchingSubscriptionNode = subscriptionNode != null && subscriptionNode.getDefinitionClass() != null;
 
@@ -165,7 +165,7 @@ public class ROS2BehaviorTreeSubscription<HLT extends BehaviorTreeNode<HLT, ? ,?
          topologyOperationQueue.queueClearImmediateChildren(localNode);
          for (ROS2BehaviorTreeSubscriptionNode subscriptionChild : subscriptionNode.getChildren())
          {
-            HLT localChildNode = retrieveOrReplicateLocalNode(subscriptionChild, true);
+            T localChildNode = retrieveOrReplicateLocalNode(subscriptionChild, true);
             if (localChildNode != null)
             {
                topologyOperationQueue.queueAppendChild(localNode, localChildNode);
@@ -176,7 +176,7 @@ public class ROS2BehaviorTreeSubscription<HLT extends BehaviorTreeNode<HLT, ? ,?
       }
       else
       {
-         for (HLT localChildNode : localNode.getChildren())
+         for (T localChildNode : localNode.getChildren())
          {
             ROS2BehaviorTreeSubscriptionNode subscriptionChild = idToSubscriptionNodesMap.get(localChildNode.getState().getID());
             retrieveOrReplicateSubreeFromSubscription(subscriptionChild, localChildNode, topologyOperationQueue);
@@ -185,10 +185,10 @@ public class ROS2BehaviorTreeSubscription<HLT extends BehaviorTreeNode<HLT, ? ,?
       }
    }
 
-   private HLT retrieveOrReplicateLocalNode(ROS2BehaviorTreeSubscriptionNode subscriptionNode, boolean allowReplication)
+   private T retrieveOrReplicateLocalNode(ROS2BehaviorTreeSubscriptionNode subscriptionNode, boolean allowReplication)
    {
       long nodeID = subscriptionNode.getBehaviorTreeNodeStateMessage().getId();
-      HLT localNode = idToLocalNodesMap.get(nodeID);
+      T localNode = idToLocalNodesMap.get(nodeID);
       if (localNode == null && allowReplication) // New node that wasn't in the local tree; duplicate of one on the other side
       {
          LogTools.info("%s: Seq # %d Replicating node: %s:%d Packed as: %s Definition: %s Actor: %s".formatted(

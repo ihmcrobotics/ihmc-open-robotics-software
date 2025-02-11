@@ -15,7 +15,7 @@ public class CheckPointNodeDefinitionMessagePubSubType implements us.ihmc.pubsub
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "10d0c822f0ca02695af26a856d2de1520fd274646ffa5019ac47e458cba769f8";
+   		return "8d24147079738e3718905b4c5e1b09ca56ebcde0cb37bd767d6a3eff9a717218";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class CheckPointNodeDefinitionMessagePubSubType implements us.ihmc.pubsub
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += behavior_msgs.msg.dds.LeafNodeDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -67,7 +67,7 @@ public class CheckPointNodeDefinitionMessagePubSubType implements us.ihmc.pubsub
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.getCdrSerializedSize(data.getDefinition(), current_alignment);
+      current_alignment += behavior_msgs.msg.dds.LeafNodeDefinitionMessagePubSubType.getCdrSerializedSize(data.getDefinition(), current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -75,25 +75,25 @@ public class CheckPointNodeDefinitionMessagePubSubType implements us.ihmc.pubsub
 
    public static void write(behavior_msgs.msg.dds.CheckPointNodeDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
-      behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.write(data.getDefinition(), cdr);   }
+      behavior_msgs.msg.dds.LeafNodeDefinitionMessagePubSubType.write(data.getDefinition(), cdr);   }
 
    public static void read(behavior_msgs.msg.dds.CheckPointNodeDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
-      behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
+      behavior_msgs.msg.dds.LeafNodeDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
 
    }
 
    @Override
    public final void serialize(behavior_msgs.msg.dds.CheckPointNodeDefinitionMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_a("definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getDefinition());
+      ser.write_type_a("definition", new behavior_msgs.msg.dds.LeafNodeDefinitionMessagePubSubType(), data.getDefinition());
 
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.CheckPointNodeDefinitionMessage data)
    {
-      ser.read_type_a("definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getDefinition());
+      ser.read_type_a("definition", new behavior_msgs.msg.dds.LeafNodeDefinitionMessagePubSubType(), data.getDefinition());
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.CheckPointNodeDefinitionMessage src, behavior_msgs.msg.dds.CheckPointNodeDefinitionMessage dest)

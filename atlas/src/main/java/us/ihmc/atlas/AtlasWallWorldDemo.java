@@ -25,7 +25,6 @@ public class AtlasWallWorldDemo
 
       boolean automaticallyStartSimulation = true;
       HumanoidNetworkProcessorParameters networkProcessorParameters = new HumanoidNetworkProcessorParameters();
-      networkProcessorParameters.setUseBehaviorModule(true);
       networkProcessorParameters.setUseSensorModule(true);
       simulationStarter.startSimulation(networkProcessorParameters, automaticallyStartSimulation);
    }

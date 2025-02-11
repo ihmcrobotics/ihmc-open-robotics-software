@@ -56,8 +56,13 @@ public class BehaviorTreeNodeDefinition extends LatestTimestampModifiable implem
       name = new CRDTBidirectionalString(this, BehaviorTreeDefinitionRegistry.getInitialName(getClass()));
       notes = new CRDTBidirectionalString(this, "");
 
+      updateName();
+   }
+
+   public void updateName()
+   {
       setModifierName(name.getValue());
-      childrenModification.setModifierName("children");
+      childrenModification.setModifierName(name.getValue() + " children");
    }
 
    /** Save as JSON file root node. */
@@ -107,6 +112,8 @@ public class BehaviorTreeNodeDefinition extends LatestTimestampModifiable implem
    {
       name.setValue(jsonNode.get("name").textValue());
       notes.setValue(jsonNode.get("notes").textValue());
+
+      updateName();
    }
 
    public void setOnDiskFields()
@@ -121,8 +128,13 @@ public class BehaviorTreeNodeDefinition extends LatestTimestampModifiable implem
 
    public void undoAllNontopologicalChanges()
    {
-      name.setValue(onDiskName);
-      notes.setValue(onDiskNotes);
+      if (isUndoAvailable())
+      {
+         name.setValue(onDiskName);
+         notes.setValue(onDiskNotes);
+
+         updateName();
+      }
 
       // We are not able to undo changes to children topology.
       // The user must delete and reload the entire tree.
@@ -173,11 +185,18 @@ public class BehaviorTreeNodeDefinition extends LatestTimestampModifiable implem
 
       name.fromMessage(message.getNameAsString());
       // notes.fromMessage(message.getNotesAsString());
+
+      updateName();
    }
 
    public LatestTimestampModifiable getChildrenModification()
    {
       return childrenModification;
+   }
+
+   public boolean isUndoAvailable()
+   {
+      return onDiskName != null;
    }
 
    public void setName(String name)

@@ -23,6 +23,14 @@ public class BehaviorTreeTools
       return (BehaviorTreeRootNodeDefinition) findRootNodeGeneral(node);
    }
 
+   public static <T extends BehaviorTreeNode<T, ?, ?>> T findRootNode(T node)
+   {
+      while (!node.isRootNode())
+         node = node.getParent();
+
+      return node;
+   }
+
    public static TreeNode<?> findRootNodeGeneral(TreeNode<?> node)
    {
       while (!node.isRootNode())
@@ -51,11 +59,11 @@ public class BehaviorTreeTools
       }
    }
 
-   public static <HLT extends BehaviorTreeNode<HLT, ?, ?>> void runForSubtreeNodes(HLT node, Consumer<HLT> operation)
+   public static <T extends BehaviorTreeNode<T, ?, ?>> void runForSubtreeNodes(T node, Consumer<T> operation)
    {
       operation.accept(node);
 
-      for (HLT child : node.getChildren())
+      for (T child : node.getChildren())
       {
          runForSubtreeNodes(child, operation);
       }

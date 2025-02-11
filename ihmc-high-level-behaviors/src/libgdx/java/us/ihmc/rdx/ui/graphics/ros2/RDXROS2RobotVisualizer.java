@@ -245,6 +245,7 @@ public class RDXROS2RobotVisualizer extends RDXROS2SingleTopicVisualizer<RobotCo
    public void destroy()
    {
       super.destroy();
+      footstepHistoryGraphic.destroy();
       multiBodyGraphic.destroy();
    }
 

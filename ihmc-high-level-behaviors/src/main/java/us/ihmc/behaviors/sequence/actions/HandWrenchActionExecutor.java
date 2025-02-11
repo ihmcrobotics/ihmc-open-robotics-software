@@ -33,9 +33,9 @@ public class HandWrenchActionExecutor extends ActionNodeExecutor<HandWrenchActio
    }
 
    @Override
-   public void triggerActionExecution()
+   public void triggerExecution()
    {
-      super.triggerActionExecution();
+      super.triggerExecution();
 
       state.getLogger().info("Executing hand trajectory command.");
 

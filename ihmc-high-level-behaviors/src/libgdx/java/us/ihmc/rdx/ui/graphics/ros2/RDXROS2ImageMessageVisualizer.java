@@ -33,7 +33,7 @@ public class RDXROS2ImageMessageVisualizer extends RDXROS2OpenCVVideoVisualizer<
 
       this.ros2Node = ros2Node;
 
-      setActivenessChangeCallback(isActive ->
+      addActivenessChangeCallback(isActive ->
       {
          if (isActive && subscription == null)
             subscribe();
@@ -135,8 +135,8 @@ public class RDXROS2ImageMessageVisualizer extends RDXROS2OpenCVVideoVisualizer<
    @Override
    public void destroy()
    {
-      unsubscribe();
       super.destroy();
+      unsubscribe();
       getOpenCVVideoVisualizer().destroy();
       decoder.destroy();
    }

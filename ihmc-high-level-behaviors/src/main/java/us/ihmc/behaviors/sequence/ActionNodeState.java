@@ -1,33 +1,20 @@
 package us.ihmc.behaviors.sequence;
 
 import behavior_msgs.msg.dds.ActionNodeStateMessage;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTStatusDoubleArray;
 import us.ihmc.communication.crdt.CRDTStatusOneDoFJointTrajectoryList;
 import us.ihmc.communication.crdt.CRDTStatusPose3D;
 import us.ihmc.communication.crdt.CRDTStatusSE3Trajectory;
-import us.ihmc.communication.crdt.CRDTStatusBoolean;
 import us.ihmc.communication.crdt.CRDTStatusDouble;
-import us.ihmc.communication.crdt.CRDTStatusInteger;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
-import us.ihmc.log.LogTools;
 
-import java.util.List;
-
-public abstract class ActionNodeState<D extends ActionNodeDefinition> extends BehaviorTreeNodeState<D>
+public abstract class ActionNodeState<D extends ActionNodeDefinition> extends LeafNodeState<D>
 {
    public static final int SUPPORTED_NUMBER_OF_JOINTS = 7;
 
    private final D definition;
 
-   private final CRDTStatusBoolean isNextForExecution;
-   private final CRDTStatusInteger concurrencyRank;
-   private final CRDTStatusBoolean canExecute;
-   private final CRDTStatusBoolean isExecuting;
-   private final CRDTStatusBoolean failed;
    private final CRDTStatusDouble nominalExecutionDuration;
    private final CRDTStatusDouble elapsedExecutionTime;
    private final CRDTStatusSE3Trajectory commandedTrajectory;
@@ -37,20 +24,12 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
    private final CRDTStatusDouble positionDistanceToGoalTolerance;
    private final CRDTStatusDouble orientationDistanceToGoalTolerance;
 
-   /** The index is not CRDT synced because it's a simple local calculation. */
-   private int actionIndex = -1;
-
    public ActionNodeState(long id, D definition, CRDTInfo crdtInfo)
    {
       super(id, definition, crdtInfo);
 
       this.definition = definition;
 
-      isNextForExecution = new CRDTStatusBoolean(ROS2ActorDesignation.ROBOT, crdtInfo, false);
-      concurrencyRank = new CRDTStatusInteger(ROS2ActorDesignation.ROBOT, crdtInfo, 1);
-      canExecute = new CRDTStatusBoolean(ROS2ActorDesignation.ROBOT, crdtInfo, true);
-      isExecuting = new CRDTStatusBoolean(ROS2ActorDesignation.ROBOT, crdtInfo, false);
-      failed = new CRDTStatusBoolean(ROS2ActorDesignation.ROBOT, crdtInfo, false);
       nominalExecutionDuration = new CRDTStatusDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
       elapsedExecutionTime = new CRDTStatusDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
       commandedTrajectory = new CRDTStatusSE3Trajectory(ROS2ActorDesignation.ROBOT, crdtInfo);
@@ -61,58 +40,10 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
       orientationDistanceToGoalTolerance = new CRDTStatusDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
    }
 
-   /**
-    * Updates the definition executeAfterActionName string for
-    * saving an up to date human readable name in the JSON.
-    * It also finds the correct node upon loading the name from JSON.
-    */
-   public void updateAndValidateExecuteAfter(List<ActionNodeState<?>> actionStateChildren)
-   {
-      String executeAfterActionName = null;
-
-      if (!definition.getExecuteAfterPrevious().getValue() && !definition.getExecuteAfterBeginning().getValue())
-      {
-         // We need to find the node by name
-         // This happens when we load from JSON
-         if (definition.getExecuteAfterNodeID().getValue() == 0)
-         {
-            for (int j = actionIndex - 1; j >= 0; j--)
-            {
-               ActionNodeState<?> actionStateToCompare = actionStateChildren.get(j);
-               if (actionStateToCompare.getDefinition().getName().equals(definition.getExecuteAfterActionName()))
-               {
-                  executeAfterActionName = actionStateToCompare.getDefinition().getName();
-                  definition.getExecuteAfterNodeID().setValue(actionStateToCompare.getID());
-                  break;
-               }
-            }
-         }
-         else // Update the node's name for saving in human readable format
-         {
-            long executeAfterID = definition.getExecuteAfterNodeID().getValue();
-            for (int j = actionIndex - 1; j >= 0; j--)
-            {
-               ActionNodeState<?> actionStateToCompare = actionStateChildren.get(j);
-               if (actionStateToCompare.getID() == executeAfterID)
-               {
-                  executeAfterActionName = actionStateToCompare.getDefinition().getName();
-               }
-            }
-         }
-      }
-
-      definition.updateAndSanitizeExecuteAfterFields(executeAfterActionName);
-   }
-
    @Override
    public boolean hasStatus()
    {
-      boolean hasStatus = false;
-      hasStatus |= isNextForExecution.pollHasStatus();
-      hasStatus |= concurrencyRank.pollHasStatus();
-      hasStatus |= canExecute.pollHasStatus();
-      hasStatus |= isExecuting.pollHasStatus();
-      hasStatus |= failed.pollHasStatus();
+      boolean hasStatus = super.hasStatus();
       hasStatus |= nominalExecutionDuration.pollHasStatus();
       hasStatus |= elapsedExecutionTime.pollHasStatus();
       hasStatus |= commandedTrajectory.pollHasStatus();
@@ -128,11 +59,6 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
    {
       super.toMessage(message.getState());
 
-      message.setIsNextForExecution(isNextForExecution.toMessage());
-      message.setConcurrencyRank(concurrencyRank.toMessage());
-      message.setCanExecute(canExecute.toMessage());
-      message.setIsExecuting(isExecuting.toMessage());
-      message.setFailed(failed.toMessage());
       message.setNominalExecutionDuration(nominalExecutionDuration.toMessage());
       message.setElapsedExecutionTime(elapsedExecutionTime.toMessage());
       commandedTrajectory.toMessage(message.getCommandedTrajectory());
@@ -147,11 +73,6 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
    {
       super.fromMessage(message.getState());
 
-      isNextForExecution.fromMessage(message.getIsNextForExecution());
-      concurrencyRank.fromMessage(message.getConcurrencyRank());
-      canExecute.fromMessage(message.getCanExecute());
-      isExecuting.fromMessage(message.getIsExecuting());
-      failed.fromMessage(message.getFailed());
       nominalExecutionDuration.fromMessage(message.getNominalExecutionDuration());
       elapsedExecutionTime.fromMessage(message.getElapsedExecutionTime());
       commandedTrajectory.fromMessage(message.getCommandedTrajectory());
@@ -160,72 +81,6 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
       currentJointAngles.fromMessage(message.getCurrentJointAngles());
       positionDistanceToGoalTolerance.fromMessage(message.getPositionDistanceToGoalTolerance());
       orientationDistanceToGoalTolerance.fromMessage(message.getOrientationDistanceToGoalTolerance());
-   }
-
-   public void setActionIndex(int actionIndex)
-   {
-      this.actionIndex = actionIndex;
-   }
-
-   public int getActionIndex()
-   {
-      return actionIndex;
-   }
-
-   public void setIsNextForExecution(boolean isNextForExecution)
-   {
-      this.isNextForExecution.setValue(isNextForExecution);
-   }
-
-   public boolean getIsNextForExecution()
-   {
-      return isNextForExecution.getValue();
-   }
-
-   public void setConcurrencyRank(int concurrencyRank)
-   {
-      this.concurrencyRank.setValue(concurrencyRank);
-   }
-
-   /**
-    * Gives an idea how many actions will be executing all together with this one.
-    * How many actions will be started when the execute next index is set to this action.
-    */
-   public int getConcurrencyRank()
-   {
-      return concurrencyRank.getValue();
-   }
-
-   public boolean getIsToBeExecutedConcurrently()
-   {
-      return concurrencyRank.getValue() > 1;
-   }
-
-   public void setCanExecute(boolean canExecute)
-   {
-      this.canExecute.setValue(canExecute);
-   }
-
-   /** @return whether this action is valid for execution. This is checked before triggering the action. */
-   public boolean getCanExecute()
-   {
-      return canExecute.getValue();
-   }
-
-   /** Set from within {@link ActionNodeExecutor#updateCurrentlyExecuting} only. */
-   public void setIsExecuting(boolean isExecuting)
-   {
-      this.isExecuting.setValue(isExecuting);
-   }
-
-   public void setFailed(boolean failed)
-   {
-      this.failed.setValue(failed);
-   }
-
-   public boolean getFailed()
-   {
-      return failed.getValue();
    }
 
    public void setNominalExecutionDuration(double nominalExecutionDuration)
@@ -286,42 +141,5 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
    public void setOrientationDistanceToGoalTolerance(double orientationDistanceToGoalTolerance)
    {
       this.orientationDistanceToGoalTolerance.setValue(orientationDistanceToGoalTolerance);
-   }
-
-   /** Should return a precalculated value from {@link ActionNodeExecutor#updateCurrentlyExecuting} */
-   public boolean getIsExecuting()
-   {
-      return isExecuting.getValue();
-   }
-
-   public int calculateExecuteAfterActionIndex()
-   {
-      if (definition.getExecuteAfterBeginning().getValue())
-      {
-         return -1;
-      }
-      else if (!definition.getExecuteAfterPrevious().getValue())
-      {
-         ActionNodeState<?> executeAfterAction = findExecuteAfterAction();
-
-         if (executeAfterAction != null)
-            return executeAfterAction.getActionIndex();
-      }
-
-      return actionIndex - 1; // previous
-   }
-
-   public ActionNodeState<?> findExecuteAfterAction()
-   {
-      long executeAfterID = definition.getExecuteAfterNodeID().getValue();
-
-      if (BehaviorTreeTools.findRootNode(this).getIDToNodeMap().get(executeAfterID) instanceof ActionNodeState<?> executeAfterAction)
-      {
-         return executeAfterAction;
-      }
-
-      LogTools.error("Action ID not found: {}", executeAfterID);
-
-      return null;
    }
 }

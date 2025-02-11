@@ -1,23 +1,35 @@
 package us.ihmc.rdx.ui.behavior.logic;
 
-import imgui.ImGui;
 import us.ihmc.behaviors.logic.ConditionNodeDefinition;
 import us.ihmc.behaviors.logic.ConditionNodeState;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.behavior.tree.RDXBehaviorTreeNode;
+import us.ihmc.rdx.imgui.ImLongWrapper;
+import us.ihmc.rdx.ui.behavior.sequence.RDXLeafNode;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
-public class RDXConditionNode extends RDXBehaviorTreeNode<ConditionNodeState, ConditionNodeDefinition>
+public class RDXConditionNode extends RDXLeafNode<ConditionNodeState, ConditionNodeDefinition>
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final ConditionNodeDefinition definition;
    private final ConditionNodeState state;
+   private final ImLongWrapper countWidget;
+   private final ImLongWrapper countToWidget;
 
    public RDXConditionNode(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(new ConditionNodeState(id, crdtInfo, saveFileDirectory));
 
+      definition = getDefinition();
       state = getState();
+
+      countWidget = new ImLongWrapper(state.getCount()::getValue,
+                                      state.getCount()::setValue,
+                                      imLong -> ImGuiTools.volatileInputLong(labels.get("Count"), imLong));
+      countToWidget = new ImLongWrapper(definition.getCountTo()::getValue,
+                                        definition.getCountTo()::setValue,
+                                        imLong -> ImGuiTools.volatileInputLong(labels.get("Count to"), imLong));
    }
 
    @Override
@@ -33,10 +45,15 @@ public class RDXConditionNode extends RDXBehaviorTreeNode<ConditionNodeState, Co
    }
 
    @Override
-   public void renderNodeSettingsWidgets()
+   protected void renderImGuiWidgetsInternal()
    {
-      ImGui.text("Type: %s   ID: %d".formatted(getDefinition().getClass().getSimpleName(), getState().getID()));
+      countWidget.renderImGuiWidget();
+      countToWidget.renderImGuiWidget();
+   }
 
-      super.renderNodeSettingsWidgets();
+   @Override
+   public String getLeafTypeTitle()
+   {
+      return "Condition Node";
    }
 }

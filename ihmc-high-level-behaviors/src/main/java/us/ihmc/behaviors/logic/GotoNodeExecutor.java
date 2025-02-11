@@ -1,10 +1,12 @@
 package us.ihmc.behaviors.logic;
 
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
+import us.ihmc.behaviors.sequence.LeafNodeExecutor;
+import us.ihmc.behaviors.sequence.LeafNodeState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
-public class GotoNodeExecutor extends BehaviorTreeNodeExecutor<GotoNodeState, GotoNodeDefinition>
+public class GotoNodeExecutor extends LeafNodeExecutor<GotoNodeState, GotoNodeDefinition>
 {
    private final GotoNodeState state;
    private final GotoNodeDefinition definition;
@@ -18,8 +20,14 @@ public class GotoNodeExecutor extends BehaviorTreeNodeExecutor<GotoNodeState, Go
    }
 
    @Override
-   public void update()
+   public void updateCurrentlyExecuting()
    {
-      super.update();
+      if (!definition.getGotoNextNode())
+      {
+         LeafNodeState<?> nodeToGoto = state.findNodeToGoto();
+         BehaviorTreeTools.findRootNode(this).getState().setExecutionNextIndex(nodeToGoto.getLeafIndex());
+      }
+
+      state.setIsExecuting(false); // Completes immediately
    }
 }

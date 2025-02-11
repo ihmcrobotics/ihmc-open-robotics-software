@@ -1,0 +1,31 @@
+#ifndef __perception_msgs__msg__YOLOv8ExecutorSettings__idl__
+#define __perception_msgs__msg__YOLOv8ExecutorSettings__idl__
+
+#include "perception_msgs/msg/./YOLOv8ModelSettings_.idl"
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * Settings for the YOLOv8DetectionExecutor class
+       */
+      @TypeCode(type="perception_msgs::msg::dds_::YOLOv8ExecutorSettings_")
+      struct YOLOv8ExecutorSettings
+      {
+        /**
+         * List of models to run
+         */
+        sequence<string, 8> models_to_run;
+        /**
+         * Settings for each model
+         */
+        sequence<perception_msgs::msg::dds::YOLOv8ModelSettings, 8> model_settings;
+      };
+    };
+  };
+};
+
+#endif

@@ -127,8 +127,10 @@ public class RDXSteppableRegionsVisualizer extends RDXROS2SingleTopicVisualizer<
       }
    }
 
+   @Override
    public void destroy()
    {
+      super.destroy();
       steppableRegionGraphic.destroy();
    }
 }

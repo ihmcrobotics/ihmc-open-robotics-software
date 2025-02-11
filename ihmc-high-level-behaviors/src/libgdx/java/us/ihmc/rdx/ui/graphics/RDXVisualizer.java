@@ -20,6 +20,8 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -30,7 +32,7 @@ public abstract class RDXVisualizer implements RDXRenderableProvider
    private final String title;
    private boolean createdYet = false;
    private Set<RDXSceneLevel> sceneLevels = Set.of(RDXSceneLevel.MODEL);
-   private Consumer<Boolean> activenessChangeCallback;
+   private final List<Consumer<Boolean>> activenessChangeCallbacks = new ArrayList<>();
    private boolean wasActive = false;
 
    @Nullable
@@ -163,10 +165,11 @@ public abstract class RDXVisualizer implements RDXRenderableProvider
    {
       this.active.set(active);
 
-      if (activenessChangeCallback != null && active != wasActive)
+      if (active != wasActive)
       {
          wasActive = active;
-         activenessChangeCallback.accept(active);
+         for (Consumer<Boolean> activenessChangeCallback : activenessChangeCallbacks)
+            activenessChangeCallback.accept(active);
       }
    }
 
@@ -197,9 +200,9 @@ public abstract class RDXVisualizer implements RDXRenderableProvider
       return false;
    }
 
-   public void setActivenessChangeCallback(Consumer<Boolean> activenessChangeCallback)
+   public void addActivenessChangeCallback(Consumer<Boolean> activenessChangeCallback)
    {
-      this.activenessChangeCallback = activenessChangeCallback;
+      activenessChangeCallbacks.add(activenessChangeCallback);
    }
 
    @Nullable

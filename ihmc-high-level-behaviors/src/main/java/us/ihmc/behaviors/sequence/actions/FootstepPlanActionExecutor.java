@@ -135,7 +135,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
          snappedGoalStancePose.getRotation().set(stanceOrientation);
          snappedGoalStancePose.changeFrame(state.getParentFrame());
 
-         state.getGoalToParentTransform().getValue().set(snappedGoalStancePose);
+         state.getGoalToParentTransform().setValue(snappedGoalStancePose, 1e-5);
          state.getGoalFrame().getReferenceFrame().update();
 
          for (RobotSide side : RobotSide.values)
@@ -180,9 +180,9 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
    }
 
    @Override
-   public void triggerActionExecution()
+   public void triggerExecution()
    {
-      super.triggerActionExecution();
+      super.triggerExecution();
 
       // Reset state
       state.setTotalNumberOfFootsteps(0);

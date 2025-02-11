@@ -73,7 +73,7 @@ public class RDXROS2BallTrackingVisualizer extends RDXROS2SingleTopicVisualizer<
       this.ballPositionTopic = ballPositionTopic;
       this.ros2 = ros2PubSubAPI;
 
-      setActivenessChangeCallback(isActive ->
+      addActivenessChangeCallback(isActive ->
       {
          if (isActive && realtimeROS2Node == null)
             subscribe();
@@ -207,8 +207,8 @@ public class RDXROS2BallTrackingVisualizer extends RDXROS2SingleTopicVisualizer<
    @Override
    public void destroy()
    {
-      unsubscribe();
       super.destroy();
+      unsubscribe();
    }
 
    @Override
