@@ -14,7 +14,7 @@ import us.ihmc.behaviors.behaviorTree.TreeNode;
  */
 public class BehaviorTreeTopologyOperations
 {
-   static <HLT extends BehaviorTreeNode<HLT, ?, ?>> void destroySubtreeModify(HLT subtreeRoot)
+   static <T extends BehaviorTreeNode<T, ?, ?>> void destroySubtreeModify(T subtreeRoot)
    {
       // Avoiding concurrent modifications
       while (!subtreeRoot.getChildren().isEmpty())
@@ -24,7 +24,7 @@ public class BehaviorTreeTopologyOperations
       subtreeRoot.destroy();
    }
 
-   static <HLT extends BehaviorTreeNode<HLT, ?, ?>> void destroySubtree(HLT subtreeRoot)
+   static <T extends BehaviorTreeNode<T, ?, ?>> void destroySubtree(T subtreeRoot)
    {
       // Avoiding concurrent modifications
       while (!subtreeRoot.getChildren().isEmpty())
@@ -34,13 +34,13 @@ public class BehaviorTreeTopologyOperations
       subtreeRoot.destroy();
    }
 
-   static <HLT extends BehaviorTreeNode<HLT, ?, ?>> void moveChildModify(HLT toParent, HLT child, int insertionIndex)
+   static <T extends BehaviorTreeNode<T, ?, ?>> void moveChildModify(T toParent, T child, int insertionIndex)
    {
       detachChildModify(child);
       insertChildModify(toParent, child, insertionIndex);
    }
 
-   static <HLT extends BehaviorTreeNode<HLT, ?, ?>> void appendChildModify(HLT parent, HLT child)
+   static <T extends BehaviorTreeNode<T, ?, ?>> void appendChildModify(T parent, T child)
    {
       appendChildAbstract(parent, child);
       appendChildAbstract(parent.getState(), child.getState());
@@ -48,7 +48,7 @@ public class BehaviorTreeTopologyOperations
       parent.getDefinition().getChildrenModification().modify();
    }
 
-   static <HLT extends BehaviorTreeNode<HLT, ?, ?>> void insertChildModify(HLT parent, HLT child, int insertionIndex)
+   static <T extends BehaviorTreeNode<T, ?, ?>> void insertChildModify(T parent, T child, int insertionIndex)
    {
       insertChildAbstract(parent, child, insertionIndex);
       insertChildAbstract(parent.getState(), child.getState(), insertionIndex);
@@ -56,16 +56,16 @@ public class BehaviorTreeTopologyOperations
       parent.getDefinition().getChildrenModification().modify();
    }
 
-   static <HLT extends BehaviorTreeNode<HLT, ?, ?>> void detachChild(HLT child)
+   static <T extends BehaviorTreeNode<T, ?, ?>> void detachChild(T child)
    {
       detachChildAbstract(child);
       detachChildAbstract(child.getState());
       detachChildAbstract(child.getDefinition());
    }
 
-   static <HLT extends BehaviorTreeNode<HLT, ?, ?>> void detachChildModify(HLT child)
+   static <T extends BehaviorTreeNode<T, ?, ?>> void detachChildModify(T child)
    {
-      HLT parent = child.getParent();
+      T parent = child.getParent();
       if (parent != null)
          parent.getDefinition().getChildrenModification().modify();
 
@@ -74,14 +74,14 @@ public class BehaviorTreeTopologyOperations
       detachChildAbstract(child.getDefinition());
    }
 
-   static <HLT extends BehaviorTreeNode<HLT, ?, ?>> void clearImmediateChildren(HLT parent)
+   static <T extends BehaviorTreeNode<T, ?, ?>> void clearImmediateChildren(T parent)
    {
       clearImmediateChildrenAbstract(parent);
       clearImmediateChildrenAbstract(parent.getState());
       clearImmediateChildrenAbstract(parent.getDefinition());
    }
 
-   static <HLT extends BehaviorTreeNode<HLT, ?, ?>> void appendChild(HLT parent, HLT child)
+   static <T extends BehaviorTreeNode<T, ?, ?>> void appendChild(T parent, T child)
    {
       appendChildAbstract(parent, child);
       appendChildAbstract(parent.getState(), child.getState());
