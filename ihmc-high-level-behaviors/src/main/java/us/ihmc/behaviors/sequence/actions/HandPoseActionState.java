@@ -16,7 +16,6 @@ import static us.ihmc.behaviors.sequence.actions.HandPoseActionDefinition.MAX_NU
 
 public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinition>
 {
-   private final HandPoseActionDefinition definition;
    private final CRDTDetachableReferenceFrame palmFrame;
    /**
     * This is the estimated goal chest frame as the robot executes a potential whole body action.
@@ -39,11 +38,9 @@ public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinitio
    {
       super(id, new HandPoseActionDefinition(crdtInfo, saveFileDirectory), crdtInfo);
 
-      definition = getDefinition();
-
       palmFrame = new CRDTDetachableReferenceFrame(referenceFrameLibrary,
-                                                   getDefinition().getCRDTPalmParentFrameName(),
-                                                   getDefinition().getPalmTransformToParent());
+                                                   definition.getCRDTPalmParentFrameName(),
+                                                   definition.getPalmTransformToParent());
       goalChestToWorldTransform = new CRDTStatusRigidBodyTransform(ROS2ActorDesignation.ROBOT, crdtInfo);
       goalChestFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
                                                                                               goalChestToWorldTransform.getValueReadOnly());
@@ -136,7 +133,7 @@ public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinitio
 
    public int getNumberOfJoints()
    {
-      return numberOfJoints.get(getDefinition().getSide());
+      return numberOfJoints.get(definition.getSide());
    }
 
    public double getSolutionQuality()

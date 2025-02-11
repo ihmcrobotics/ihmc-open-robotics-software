@@ -30,8 +30,6 @@ import java.util.List;
 
 public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionState, HandPoseActionDefinition>
 {
-   private final HandPoseActionState state;
-   private final HandPoseActionDefinition definition;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
    private final SideDependentList<ArmIKSolver> armIKSolvers = new SideDependentList<>();
@@ -51,9 +49,6 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
                                  ROS2SyncedRobotModel syncedRobot)
    {
       super(new HandPoseActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary, robotModel));
-
-      state = getState();
-      definition = getDefinition();
 
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;

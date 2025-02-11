@@ -13,8 +13,6 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Le
 {
    public static final int SUPPORTED_NUMBER_OF_JOINTS = 7;
 
-   private final D definition;
-
    private final CRDTStatusDouble nominalExecutionDuration;
    private final CRDTStatusDouble elapsedExecutionTime;
    private final CRDTStatusSE3Trajectory commandedTrajectory;
@@ -27,8 +25,6 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Le
    public ActionNodeState(long id, D definition, CRDTInfo crdtInfo)
    {
       super(id, definition, crdtInfo);
-
-      this.definition = definition;
 
       nominalExecutionDuration = new CRDTStatusDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
       elapsedExecutionTime = new CRDTStatusDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);

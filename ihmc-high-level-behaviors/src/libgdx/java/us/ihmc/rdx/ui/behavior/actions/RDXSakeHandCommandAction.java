@@ -18,7 +18,6 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class RDXSakeHandCommandAction extends RDXActionNode<SakeHandCommandActionState, SakeHandCommandActionDefinition>
 {
-   private final SakeHandCommandActionDefinition definition;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImIntegerWrapper sideWidget;
    private final ImGuiSliderDoubleWrapper handOpenAngleSlider;
@@ -30,8 +29,6 @@ public class RDXSakeHandCommandAction extends RDXActionNode<SakeHandCommandActio
    public RDXSakeHandCommandAction(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(new SakeHandCommandActionState(id, crdtInfo, saveFileDirectory));
-
-      definition = getDefinition();
 
       sideWidget = new ImIntegerWrapper(definition::getSide, definition::setSide, labels.get("Side"));
       ImGuiLabelledWidgetAligner widgetAligner = new ImGuiLabelledWidgetAligner();

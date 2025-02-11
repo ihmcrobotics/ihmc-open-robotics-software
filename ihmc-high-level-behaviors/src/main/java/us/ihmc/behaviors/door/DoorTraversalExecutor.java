@@ -17,8 +17,6 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversalState, DoorTraversalDefinition>
 {
-   private final DoorTraversalState state;
-   private final DoorTraversalDefinition definition;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
    private final SceneGraph sceneGraph;
@@ -35,9 +33,6 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
                                 SceneGraph sceneGraph)
    {
       super(new DoorTraversalState(id, crdtInfo, saveFileDirectory));
-
-      state = getState();
-      definition = getDefinition();
 
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
@@ -94,7 +89,7 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
          {
             if (yoloDoorHandleNode != null)
             {
-               double openedDoorHandleDistanceFromStart = getDefinition().getOpenedDoorHandleDistanceFromStart().getValue();
+               double openedDoorHandleDistanceFromStart = definition.getOpenedDoorHandleDistanceFromStart().getValue();
                double distanceHandleFromStart = yoloDoorHandleNode.getNodeToParentFrameTransformReadOnly().getTranslation()
                                                                   .differenceNorm(staticHandleClosedDoor.getNodeToParentFrameTransformReadOnly().getTranslation());
                state.getDoorHandleDistanceFromStart().setValue(distanceHandleFromStart);

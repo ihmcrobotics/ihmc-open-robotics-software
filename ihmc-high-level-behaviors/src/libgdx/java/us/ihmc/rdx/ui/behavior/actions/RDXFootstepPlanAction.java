@@ -52,8 +52,6 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
 {
    private final DRCRobotModel robotModel;
    private final ROS2SyncedRobotModel syncedRobot;
-   private final FootstepPlanActionState state;
-   private final FootstepPlanActionDefinition definition;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
    private final ImBoolean editManuallyPlacedSteps = new ImBoolean();
@@ -86,9 +84,6 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
                                 ReferenceFrameLibrary referenceFrameLibrary)
    {
       super(new FootstepPlanActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary, robotModel));
-
-      state = getState();
-      definition = getDefinition();
 
       this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
@@ -395,7 +390,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
                if (ImGui.button(labels.get(side.getPascalCaseName())))
                   userAddedFootstep.set(side);
             }
-            if (!getState().getManuallyPlacedFootsteps().isEmpty())
+            if (!state.getManuallyPlacedFootsteps().isEmpty())
             {
                ImGui.sameLine();
                ImGui.text("Remove:");
@@ -527,7 +522,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
       goalStancePointGizmo.getPoseGizmo().update();
       goalFocalPointGizmo.getPoseGizmo().update();
 
-      for (FootstepPlanActionFootstepState footstepState : getState().getManuallyPlacedFootsteps())
+      for (FootstepPlanActionFootstepState footstepState : state.getManuallyPlacedFootsteps())
       {
          footstepState.getSoleFrame().changeFrame(newParentFrameName);
       }

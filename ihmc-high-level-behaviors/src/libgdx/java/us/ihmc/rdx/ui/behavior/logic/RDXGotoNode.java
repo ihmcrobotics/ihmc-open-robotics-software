@@ -14,15 +14,10 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 public class RDXGotoNode extends RDXLeafNode<GotoNodeState, GotoNodeDefinition>
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final GotoNodeState state;
-   private final GotoNodeDefinition definition;
 
    public RDXGotoNode(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(new GotoNodeState(id, crdtInfo, saveFileDirectory));
-
-      state = getState();
-      definition = getDefinition();
    }
 
    @Override
