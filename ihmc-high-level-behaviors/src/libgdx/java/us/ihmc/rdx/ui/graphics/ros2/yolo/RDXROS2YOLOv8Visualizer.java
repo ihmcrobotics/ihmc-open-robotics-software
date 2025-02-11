@@ -11,10 +11,9 @@ import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 
-
 public class RDXROS2YOLOv8Visualizer extends RDXROS2ImageMessageVisualizer
 {
-   private static final String[] AVAILABLE_SENSORS = {"ZED", "D455"};
+   private static final String[] AVAILABLE_SENSORS = {"ZED", "D455"}; // FIXME: This is robot specific :( This class can't be used with any arbitrary robot
 
    private final ROS2Heartbeat demandYOLOv8ZED;
    private final ROS2Heartbeat demandYOLOv8D455;
