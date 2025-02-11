@@ -321,8 +321,8 @@ public class ROS2BehaviorTreeMessageTools
          {
             ConditionNodeStateMessage conditionNodeStateMessage = treeStateMessage.getConditionNodes().get(indexInTypesList);
             subscriptionNode.setConditionNodeStateMessage(conditionNodeStateMessage);
-            subscriptionNode.setBehaviorTreeNodeStateMessage(conditionNodeStateMessage.getState());
-            subscriptionNode.setBehaviorTreeNodeDefinitionMessage(conditionNodeStateMessage.getDefinition().getDefinition());
+            subscriptionNode.setBehaviorTreeNodeStateMessage(conditionNodeStateMessage.getState().getState());
+            subscriptionNode.setBehaviorTreeNodeDefinitionMessage(conditionNodeStateMessage.getDefinition().getDefinition().getDefinition());
          }
          case BehaviorTreeStateMessage.GOTO_NODE ->
          {
