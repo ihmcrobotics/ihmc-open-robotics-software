@@ -8,24 +8,24 @@ import us.ihmc.perception.sceneGraph.SceneGraph;
 /**
  * Manages syncing a behavior tree over ROS 2 as a CRDT.
  *
- * @param <HLT> The generic type of this node: RDX or Executor
+ * @param <T> The generic type of this node: RDX or Executor
  */
-public class ROS2BehaviorTree<HLT extends BehaviorTreeNode<HLT, ? ,?>>
+public class ROS2BehaviorTree<T extends BehaviorTreeNode<T, ? ,?>>
 {
    /**
     * The SYNC_FREQUENCY should be a multiple of the scene graph's update frequency.
     */
    public static final double SYNC_FREQUENCY = SceneGraph.UPDATE_FREQUENCY / 2.0;
 
-   private final BehaviorTree<HLT> behaviorTree;
+   private final BehaviorTree<T> behaviorTree;
    private final ROS2BehaviorTreePublisher behaviorTreePublisher;
-   private final ROS2BehaviorTreeSubscription<HLT> behaviorTreeSubscription;
+   private final ROS2BehaviorTreeSubscription<T> behaviorTreeSubscription;
 
    /**
     * The complexity of this constructor is to support the UI having nodes that extend the base
     * on-robot ones.
     */
-   public ROS2BehaviorTree(BehaviorTree<HLT> behaviorTree, ROS2PublishSubscribeAPI ros2PublishSubscribeAPI)
+   public ROS2BehaviorTree(BehaviorTree<T> behaviorTree, ROS2PublishSubscribeAPI ros2PublishSubscribeAPI)
    {
       this.behaviorTree = behaviorTree;
 
@@ -66,12 +66,12 @@ public class ROS2BehaviorTree<HLT extends BehaviorTreeNode<HLT, ? ,?>>
       behaviorTreeSubscription.destroy();
    }
 
-   public BehaviorTree<HLT> getBehaviorTree()
+   public BehaviorTree<T> getBehaviorTree()
    {
       return behaviorTree;
    }
 
-   public ROS2BehaviorTreeSubscription<HLT> getBehaviorTreeSubscription()
+   public ROS2BehaviorTreeSubscription<T> getBehaviorTreeSubscription()
    {
       return behaviorTreeSubscription;
    }

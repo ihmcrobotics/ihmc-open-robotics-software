@@ -14,9 +14,9 @@ import java.util.function.Consumer;
 /**
  * Common code for managing the tree between node implementations. i.e. RDX or Executor.
  *
- * @param <HLT> The generic type of this node: RDX or Executor
+ * @param <T> The generic type of this node: RDX or Executor
  */
-public abstract class BehaviorTree<HLT extends BehaviorTreeNode<HLT, ? ,?>>
+public abstract class BehaviorTree<T extends BehaviorTreeNode<T, ? ,?>>
 {
    private int numberOfNodes = 0;
    private final CRDTInfo crdtInfo;
@@ -24,14 +24,14 @@ public abstract class BehaviorTree<HLT extends BehaviorTreeNode<HLT, ? ,?>>
    private final LatestTimestampModifiable rootReferenceModification;
    private final LatestTimestampModifiable dataModification;
    private final WorkspaceResourceDirectory saveFileDirectory;
-   private final BehaviorTreeFileLoader<HLT> fileLoader;
-   private final BehaviorTreeNodeBuilder<HLT> nodeBuilder;
-   private final BehaviorTreeTopologyOperationQueue<HLT> topologyChangeQueue;
+   private final BehaviorTreeFileLoader<T> fileLoader;
+   private final BehaviorTreeNodeBuilder<T> nodeBuilder;
+   private final BehaviorTreeTopologyOperationQueue<T> topologyChangeQueue;
 
    public BehaviorTree(ROS2ActorDesignation actor,
                        ROS2PeerClockOffsetEstimator peerClockEstimator,
                        WorkspaceResourceDirectory saveFileDirectory,
-                       BehaviorTreeNodeBuilder<HLT> nodeBuilder)
+                       BehaviorTreeNodeBuilder<T> nodeBuilder)
    {
       this.nodeBuilder = nodeBuilder;
       this.saveFileDirectory = saveFileDirectory;
@@ -52,13 +52,13 @@ public abstract class BehaviorTree<HLT extends BehaviorTreeNode<HLT, ? ,?>>
       update(getRootNode());
    }
 
-   private void update(HLT node)
+   private void update(T node)
    {
       if (node != null)
       {
          ++numberOfNodes;
 
-         for (HLT child : node.getChildren())
+         for (T child : node.getChildren())
          {
             update(child);
          }
@@ -68,7 +68,7 @@ public abstract class BehaviorTree<HLT extends BehaviorTreeNode<HLT, ? ,?>>
    /**
     * Use to safely modify the tree, ensuring it's updated afterwards.
     */
-   public void modifyTreeTopology(Consumer<BehaviorTreeTopologyOperationQueue<HLT>> modifier)
+   public void modifyTreeTopology(Consumer<BehaviorTreeTopologyOperationQueue<T>> modifier)
    {
       modifier.accept(topologyChangeQueue);
       modifyTreeTopology();
@@ -107,9 +107,9 @@ public abstract class BehaviorTree<HLT extends BehaviorTreeNode<HLT, ? ,?>>
          nextID.setValue(message.getNextId());
    }
 
-   public abstract void setRootNode(HLT rootNode);
+   public abstract void setRootNode(T rootNode);
 
-   public abstract HLT getRootNode();
+   public abstract T getRootNode();
 
    public int getNumberOfNodes()
    {
@@ -147,17 +147,17 @@ public abstract class BehaviorTree<HLT extends BehaviorTreeNode<HLT, ? ,?>>
       return saveFileDirectory;
    }
 
-   public BehaviorTreeFileLoader<HLT> getFileLoader()
+   public BehaviorTreeFileLoader<T> getFileLoader()
    {
       return fileLoader;
    }
 
-   public BehaviorTreeNodeBuilder<HLT> getNodeBuilder()
+   public BehaviorTreeNodeBuilder<T> getNodeBuilder()
    {
       return nodeBuilder;
    }
 
-   public BehaviorTreeTopologyOperationQueue<HLT> getTopologyChangeQueue()
+   public BehaviorTreeTopologyOperationQueue<T> getTopologyChangeQueue()
    {
       return topologyChangeQueue;
    }
