@@ -27,7 +27,7 @@ namespace ihmc
                                                const double* u_data, int u_rows,
                                                const bool left_in_contact, const bool right_in_contact,
                                                const double* foot_locations, int foot_locations_rows,
-                                               const int hardware_status)
+                                               const int hardware_status, const int behavior_status)
     {
         if (x_rows != 13 + 2 * number_of_joints_)
         {
@@ -83,7 +83,7 @@ namespace ihmc
             desired_state_data_.segment(7 + number_of_joints_, 6) << base_linear_velocity, base_angular_velocity;
             desired_state_data_.tail(number_of_joints_) = zmq_controller_.get_desired_joint_velocities();
 
-            zmq_controller_.compute(current_time, x_data, x_rows, u_data, u_rows);
+            zmq_controller_.compute(current_time, x_data, x_rows, u_data, u_rows, behavior_status);
 
             desired_control_data_ = zmq_controller_.get_desired_joint_torques();
             p_gains_ = zmq_controller_.get_desired_joint_stiffnesses();

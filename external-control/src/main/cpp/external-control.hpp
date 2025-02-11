@@ -29,7 +29,7 @@ namespace ihmc
                               const double* u_data, int u_rows,
                               const bool left_in_contact, const bool right_in_contact,
                               const double* foot_locations, int foot_locations_rows,
-                              const int hardware_status);
+                              const int hardware_status, const int behavior_status);
 
         bool getSolution(double* state_data_to_pack, int state_rows,
                          double* control_data_to_pack, int control_rows,

@@ -19,7 +19,8 @@ namespace ihmc
 
         void compute(const double current_time,
                     const double* x_data, int x_rows,
-                    const double* u_data, int u_rows);
+                    const double* u_data, int u_rows,
+                    int behavior_status);
 
         Eigen::VectorXd get_desired_joint_positions() const;
 
@@ -37,7 +38,7 @@ namespace ihmc
 
     private:
         int number_of_joints_;
-        const int debug_data_size_ = 4;
+        const int debug_data_size_ = 5;
 
         Eigen::VectorXd home_configuration_;
         Eigen::VectorXd desired_joint_velocities_;

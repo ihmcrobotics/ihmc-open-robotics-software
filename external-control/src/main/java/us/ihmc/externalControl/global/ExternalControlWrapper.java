@@ -42,19 +42,19 @@ public class ExternalControlWrapper extends us.ihmc.externalControl.ExternalCont
                                       @Const DoublePointer u_data, int u_rows,
                                       @Cast("const bool") boolean left_in_contact, @Cast("const bool") boolean right_in_contact,
                                       @Const DoublePointer foot_locations, int foot_locations_rows,
-                                      int hardware_status);
+                                      int hardware_status, int behavior_status);
         public native @Cast("bool") boolean updateRobotState(double current_time,
                                       @Const DoubleBuffer x_data, int x_rows,
                                       @Const DoubleBuffer u_data, int u_rows,
                                       @Cast("const bool") boolean left_in_contact, @Cast("const bool") boolean right_in_contact,
                                       @Const DoubleBuffer foot_locations, int foot_locations_rows,
-                                      int hardware_status);
+                                      int hardware_status, int behavior_status);
         public native @Cast("bool") boolean updateRobotState(double current_time,
                                       @Const double[] x_data, int x_rows,
                                       @Const double[] u_data, int u_rows,
                                       @Cast("const bool") boolean left_in_contact, @Cast("const bool") boolean right_in_contact,
                                       @Const double[] foot_locations, int foot_locations_rows,
-                                      int hardware_status);
+                                      int hardware_status, int behavior_status);
 
         public native @Cast("bool") boolean getSolution(DoublePointer state_data_to_pack, int state_rows,
                                  DoublePointer control_data_to_pack, int control_rows,

@@ -60,12 +60,14 @@ namespace ihmc
 
     void ZMQController::compute(const double current_time,
                                const double* x_data, int x_rows,
-                               const double* u_data, int u_rows) {
+                               const double* u_data, int u_rows,
+                               int behavior_status) {
         // Send zmq message
-        std::vector<double> zmq_outgoing_msg(1 + x_rows + u_rows);
+        std::vector<double> zmq_outgoing_msg(1 + x_rows + u_rows + 1);
         zmq_outgoing_msg[0] = current_time;
         std::copy(x_data, x_data + x_rows, zmq_outgoing_msg.begin() + 1);
         std::copy(u_data, u_data + u_rows, zmq_outgoing_msg.begin() + 1 + x_rows);
+        zmq_outgoing_msg[1 + x_rows + u_rows] = behavior_status;
         socket_cpp.send(zmq_outgoing_msg.data(), zmq_outgoing_msg.size() * sizeof(double));
 
         // Receive reply
@@ -82,7 +84,7 @@ namespace ihmc
         desired_joint_torques_= data.segment<23>(1 + 30 + 29);
         desired_joint_stiffnesses_ = data.segment<23>(1 + 30 + 29 + 23);
         desired_joint_damping_ = data.segment<23>(1 + 30 + 29 + 23 + 23);
-        debug_data_ = data.segment<4>(1 + 30 + 29 + 23 + 23 + 23);
+        debug_data_ = data.segment(1 + 30 + 29 + 23 + 23 + 23, debug_data_size_);
 
     }
 

@@ -28,6 +28,7 @@ public class ExternalControllerState extends HighLevelControllerState
    public static boolean REDUCE_YOVARIABLES = false;
 
    private enum DesiredMode {HOLD_POSITION, REXXXXXXX}
+   private enum DesiredBehavior {STAND, WALK_IN_PLACE}
 
    private final YoDouble blendRatioCurrentValue;
 
@@ -39,6 +40,7 @@ public class ExternalControllerState extends HighLevelControllerState
    private final LowLevelOneDoFJointDesiredDataHolder externalJointDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
 
    private final YoEnum<DesiredMode> desiredMode = new YoEnum<>("DesiredExternalMode", registry, DesiredMode.class);
+   private final YoEnum<DesiredBehavior> desiredBehavior = new YoEnum<>("DesiredExternalBehavior", registry, DesiredBehavior.class);
 
    private final CommandInputManager commandInputManager;
 
@@ -68,6 +70,7 @@ public class ExternalControllerState extends HighLevelControllerState
       ExternalControlNativeLibrary.load();
 
       desiredMode.set(DesiredMode.HOLD_POSITION);
+      desiredBehavior.set(DesiredBehavior.STAND);
       externalControl = new ExternalControl(controllerToolbox.getFullRobotModel().getRootBody(), highLevelControllerParameters.getStandPrepParameters(),
                                             controlledJoints, 1000.0, 5.0);
 
@@ -123,7 +126,7 @@ public class ExternalControllerState extends HighLevelControllerState
       externalControl.setFootStates(controllerToolbox.getReferenceFrames().getSoleFrames(),
                                     controllerToolbox.getFootSwitches().get(RobotSide.LEFT).hasFootHitGroundFiltered(),
                                     controllerToolbox.getFootSwitches().get(RobotSide.RIGHT).hasFootHitGroundFiltered());
-      externalControl.writeRobotState(controllerToolbox.getYoTime().getDoubleValue(), desiredMode.getOrdinal());
+      externalControl.writeRobotState(controllerToolbox.getYoTime().getDoubleValue(), desiredMode.getOrdinal(), desiredBehavior.getOrdinal());
 
       externalControl.readControlSolution();
 

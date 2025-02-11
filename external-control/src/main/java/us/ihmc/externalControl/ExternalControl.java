@@ -28,7 +28,7 @@ public class ExternalControl
    private final DMatrixRMaj solutionStiffnessVector;
    private final DMatrixRMaj solutionDampingVector;
    public final DMatrixRMaj solutionDebugData;
-   public final String[] debugDataNames = {"primal_res", "dual_res", "qp_iters", "solve_time"}; // TODO: query the ext controller for this?
+   public final String[] debugDataNames = {"behavior", "primal_res", "dual_res", "qp_iters", "solve_time"}; // TODO: query the ext controller for this?
    private final RigidBodyBasics baseBody;
    private final OneDoFJointReadOnly[] joints;
    private final FramePose3D basePose = new FramePose3D();
@@ -74,7 +74,7 @@ public class ExternalControl
       this.rightInContact = rightInContact;
    }
 
-   public void writeRobotState(double currentTime, int hardwareStatus)
+   public void writeRobotState(double currentTime, int hardwareStatus, int behaviorStatus)
    {
       setRobotState();
       setRobotControl();
@@ -87,7 +87,8 @@ public class ExternalControl
                                                 rightInContact,
                                                 feetPositions.data,
                                                 feetPositions.getNumRows(),
-                                                hardwareStatus))
+                                                hardwareStatus,
+                                                behaviorStatus))
          throw new RuntimeException("Failed to successfully write the hardware state across the barrier.");
    }
 
