@@ -116,8 +116,8 @@ public class RDXROS2BigDepthVideoVisualizer extends RDXROS2OpenCVVideoVisualizer
    @Override
    public void destroy()
    {
-      unsubscribe();
       super.destroy();
+      unsubscribe();
    }
 
    private void unsubscribe()

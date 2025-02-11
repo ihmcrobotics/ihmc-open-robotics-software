@@ -122,8 +122,8 @@ public class RDXROS2RigidBodyPoseVisualizer extends RDXROS2SingleTopicVisualizer
    @Override
    public void destroy()
    {
-      unsubscribe();
       super.destroy();
+      unsubscribe();
    }
 
    @Override

@@ -135,8 +135,8 @@ public class RDXROS2ImageMessageVisualizer extends RDXROS2OpenCVVideoVisualizer<
    @Override
    public void destroy()
    {
-      unsubscribe();
       super.destroy();
+      unsubscribe();
       getOpenCVVideoVisualizer().destroy();
       decoder.destroy();
    }

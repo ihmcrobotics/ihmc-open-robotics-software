@@ -64,7 +64,7 @@ public class ROS2Heartbeat
 
    public void destroy()
    {
-      publishThread.kill();
+      publishThread.blockingKill(); // Important to use blockingKill() - we don't want the publisher to get removed before this finishes
       heartbeatPublisher.remove();
    }
 }
