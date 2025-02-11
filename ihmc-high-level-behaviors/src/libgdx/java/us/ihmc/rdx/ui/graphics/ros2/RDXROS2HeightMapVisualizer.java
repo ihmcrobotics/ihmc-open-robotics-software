@@ -287,8 +287,10 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       }
    }
 
+   @Override
    public void destroy()
    {
+      super.destroy();
       executorService.destroy();
       heightMapGraphicNew.destroy();
       globalHeightMapGraphic.destroy();
