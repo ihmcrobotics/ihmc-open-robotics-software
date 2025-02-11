@@ -59,6 +59,7 @@ public class RDXFootstepGraphicDemo
          @Override
          public void dispose()
          {
+            footstepPlanGraphic.destroy();
             baseUI.dispose();
          }
       }, getClass());

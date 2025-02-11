@@ -561,6 +561,13 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
       }
    }
 
+   @Override
+   public void destroy()
+   {
+      super.destroy();
+      previewFootstepPlan.destroy(); // It is important to destroy this because its thread needs to be shutdown
+   }
+
    public ImBoolean getEditManuallyPlacedSteps()
    {
       return editManuallyPlacedSteps;
