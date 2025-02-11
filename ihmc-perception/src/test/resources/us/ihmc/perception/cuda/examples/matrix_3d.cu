@@ -1,14 +1,17 @@
 extern "C"
 __global__
-void matrix_3d_example(unsigned short * matrixPointer, size_t pitchA, size_t layerSize, int rows, int cols, int layers)
+void matrix_3d_example(unsigned short * matrixPointer, size_t pitchA,
+                       unsigned short * resultPointer, size_t pitchResult,
+                       size_t layerSize, int rows, int cols, int layers)
 {
-    int indexX = blockIdx.x * blockDim.x + threadIdx.x;  // Column index
-    int indexY = blockIdx.y * blockDim.y + threadIdx.y;  // Row index
+    int indexX = blockIdx.x * blockDim.x + threadIdx.x;
+    int indexY = blockIdx.y * blockDim.y + threadIdx.y;
 
     if (indexX >= cols || indexY >= rows)
-        return; // Prevent out-of-bounds access
+        return;
 
-    // Loop over layers
+    int sum = 0;
+
     for (int layer = 0; layer < layers; layer++)
     {
         // Compute the base address of the current layer
@@ -17,11 +20,13 @@ void matrix_3d_example(unsigned short * matrixPointer, size_t pitchA, size_t lay
         // Compute row offset using pitchA
         unsigned short * matrixPointerRow = (unsigned short*)((char*) currentLayer + indexY * pitchA) + indexX;
 
-        // Fetch value from the current layer
-        int query_height_int = (int)(*matrixPointerRow);
-
-        // Print out the value along with its position in the 3D matrix
-        printf("Layer %d, Value at (%d, %d): %d\n", layer, indexX, indexY, query_height_int);
+        sum += (int) *matrixPointerRow;
     }
+
+    unsigned short avg = sum / layers;
+
+    unsigned short *outputPointer = (unsigned short *)((char*) resultPointer + indexY * pitchResult) + indexX;
+    *outputPointer = avg;
+    printf("GPU Average: %d, ", avg);
 }
 
