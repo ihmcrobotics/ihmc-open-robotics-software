@@ -47,7 +47,6 @@ public class RapidHeightMapManager
 
    private GpuMat deviceDepthImage;
    private BytedecoImage heightMapBytedecoImage;
-   private CUDAFlyingPointsFilter flyingPointsFilter;
 
    public RapidHeightMapManager(ROS2PublishSubscribeAPI ros2,
                                 DRCRobotModel robotModel,
@@ -59,14 +58,12 @@ public class RapidHeightMapManager
    {
       this.ros2 = ros2;
       this.runWithCUDA = runWithCUDA;
-      flyingPointsFilter = new CUDAFlyingPointsFilter();
 
       if (runWithCUDA)
       {
          deviceDepthImage = new GpuMat(depthImageIntrinsics.getHeight(), depthImageIntrinsics.getWidth(), opencv_core.CV_16UC1);
          rapidHeightMapExtractor = new RapidHeightMapExtractorCUDA(leftFootSoleFrame, rightFootSoleFrame, deviceDepthImage, depthImageIntrinsics, 1);
          rapidHeightMapDriftOffset = new RapidHeightMapDriftOffset(controllerFootstepQueueMonitor);
-
       }
       else
       {
@@ -93,7 +90,7 @@ public class RapidHeightMapManager
       }
    }
 
-   public void update(Mat latestDepthImage, Instant imageAcquisitionTime, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame)
+   public void update(Mat latestDepthImage, Instant imageAcquisitionTime, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame) throws Exception
    {
       if (runWithCUDA)
       {
@@ -142,14 +139,22 @@ public class RapidHeightMapManager
             rapidHeightMapExtractor.updateHeightOffset(driftOffsetInZ);
          }
       }
-      
+
       rapidHeightMapExtractor.update(sensorToWorld, sensorToGround, groundToWorld);
 
       Mat croppedHeightMapImage = rapidHeightMapExtractor.getTerrainMapData().getHeightMap();
 
-      if (RapidHeightMapExtractorCUDA.getHeightMapParameters().getFlyingPointsFilter())
+      if (runWithCUDA && RapidHeightMapExtractorCUDA.getHeightMapParameters().getFlyingPointsFilter())
       {
-         croppedHeightMapImage = flyingPointsFilter.applyFilter(croppedHeightMapImage);
+         CUDAFlyingPointsFilter flyingPointsFilter = new CUDAFlyingPointsFilter();
+
+         GpuMat deviceCroppedHeightMapImage = new GpuMat();
+
+         deviceCroppedHeightMapImage.upload(croppedHeightMapImage);
+         deviceCroppedHeightMapImage = flyingPointsFilter.applyFilter(deviceCroppedHeightMapImage);
+         deviceCroppedHeightMapImage.download(croppedHeightMapImage);
+
+         deviceCroppedHeightMapImage.close();
       }
 
       float heightScaleFactor;

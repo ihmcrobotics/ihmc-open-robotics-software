@@ -4,68 +4,53 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.junit.jupiter.api.Test;
+import us.ihmc.perception.tools.PerceptionDebugTools;
+
+import static us.ihmc.robotics.Assert.assertEquals;
 
 public class CUDAFlyingPointsFilterTest
 {
-   private CUDAFlyingPointsFilter flyingPointsFilter;
-   private GpuMat inputGpuMat = new GpuMat();
-   private GpuMat outputGpuMat;
-   private Mat outputMat = new Mat();
 
-   /**
-    * Utility method to print the matrix values for debugging.
-    *
-    * @param cpuResult The matrix to be printed.
-    */
-   private static void printResult(Mat cpuResult)
-   {
-      for (int i = 0; i < cpuResult.rows(); ++i)
-      {
-         for (int j = 0; j < cpuResult.cols(); ++j)
-         {
-            // Extracting and printing matrix values
-            System.out.print(cpuResult.row(i).col(j).data().getShort() + " ");
-         }
-         System.out.println();
-      }
-   }
+   // Tests a simple 3x3 matrix where the input contains an outlier.
+   // The test validates whether the kernel correctly replaces the outlier with the median of the surrounding values.
 
-   /**
-    * Test case for validating the CUDA flying points filter with a simple 3x3 matrix.
-    */
    @Test
    public void testSimpleMatrix() throws Exception
    {
+      CUDAFlyingPointsFilter flyingPointsFilter;
+      GpuMat filterGpuMat = new GpuMat();
+      Mat outputMat = new Mat();
       flyingPointsFilter = new CUDAFlyingPointsFilter();
 
-      // Creating a 3x3 matrix with 16-bit unsigned integer values
       Mat inputMat = new Mat(3, 3, opencv_core.CV_16UC1);
-
-      // Populating the matrix with test values
       inputMat.ptr(0, 0).putShort((short) 10);
       inputMat.ptr(0, 1).putShort((short) 10);
       inputMat.ptr(0, 2).putShort((short) 10);
       inputMat.ptr(1, 0).putShort((short) 10);
-      inputMat.ptr(1, 1).putShort((short) 11);
+      inputMat.ptr(1, 1).putShort((short) 1100); // outlier
       inputMat.ptr(1, 2).putShort((short) 10);
       inputMat.ptr(2, 0).putShort((short) 10);
       inputMat.ptr(2, 1).putShort((short) 10);
       inputMat.ptr(2, 2).putShort((short) 10);
 
-      // Printing the input matrix before processing
-      printResult(inputMat);
+      PerceptionDebugTools.printMat("input_matrix", inputMat, 1);
 
-      // Uploading input matrix to GPU memory
-      inputGpuMat.upload(inputMat);
+      filterGpuMat.upload(inputMat);
+      filterGpuMat = flyingPointsFilter.applyFilter(filterGpuMat);
+      filterGpuMat.download(outputMat);
 
-      // Applying the CUDA filter
-      outputMat = flyingPointsFilter.applyFilter(inputMat);
+      PerceptionDebugTools.printMat("output_matrix", outputMat, 1);
 
-      // Downloading processed matrix back to CPU memory
-//      outputGpuMat.download(outputMat);
+      // Validate that all elements in outputMat are 10
+      for (int i = 0; i < outputMat.rows(); i++)
+      {
+         for (int j = 0; j < outputMat.cols(); j++)
+         {
+            assertEquals("Element [" + i + "][" + j + "]", 10, outputMat.ptr(i, j).get(), 0.0);
+         }
+      }
 
-      // Printing the filtered output matrix
-      printResult(outputMat);
+      filterGpuMat.close();
+      outputMat.close();
    }
 }
-

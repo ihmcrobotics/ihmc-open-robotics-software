@@ -1,10 +1,7 @@
-extern "C"
-/**
- * Computes the median value from a given window of pixel values.
- * @param window The size of the kernel to check its neighbors.
- * @param size Number of elements in the window.
- * @return The median value.
- */
+
+// Computes the median value from a given window of pixel values.
+// window = The size of the kernel to check its neighbors.
+
 __device__ float computeMedian(float* window, int size)
 {
     // Sort the window using Bubble Sort (can be replaced with a faster sort)
