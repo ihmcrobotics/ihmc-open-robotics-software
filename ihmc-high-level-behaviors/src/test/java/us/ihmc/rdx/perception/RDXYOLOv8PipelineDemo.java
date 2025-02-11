@@ -105,7 +105,7 @@ public class RDXYOLOv8PipelineDemo
          YOLOv8Model model = new YOLOv8Model(yoloModelDirectory);
 
          LogTools.info("Loaded YOLOv8 model: " + YOLOv8Tools.getONNXFile(yoloModelDirectory));
-         LogTools.info("\t\t\tClasses: " + model.getDetectionClassNames().size());
+         LogTools.info("\t\t\tClasses: " + model.getDetectableObjectCount());
 
          yoloModels.add(model);
          availableModels.add(model.getName());
@@ -253,11 +253,16 @@ public class RDXYOLOv8PipelineDemo
       // Get the model
       YOLOv8Model model = yoloModels.get(selectedDetector.get());
 
+      // Set parameters
+      model.setConfidenceThresholds(confidenceThreshold.get());
+      model.setMaskThresholds(maskThreshold.get());
+      model.setNMSThreshold(nmsThreshold.get());
+
       // Run YOLO on a BGR image
       Mat bgrMat = new Mat();
       opencv_imgproc.cvtColor(colorImage.getCpuImageMat(), bgrMat, opencv_imgproc.COLOR_BGRA2BGR);
       RawImage bgrImage = colorImage.replaceImage(bgrMat, PixelFormat.BGR8);
-      YOLOv8DetectionList results = model.run(bgrImage, confidenceThreshold.get(), nmsThreshold.get(), maskThreshold.get());
+      YOLOv8DetectionList results = model.run(bgrImage);
       if (results.isEmpty())
          return;
 

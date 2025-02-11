@@ -1,0 +1,31 @@
+#ifndef __perception_msgs__msg__YOLOv8AvailableModels__idl__
+#define __perception_msgs__msg__YOLOv8AvailableModels__idl__
+
+#include "perception_msgs/msg/./YOLOv8ModelInfo_.idl"
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * Message listing available YOLO models
+       */
+      @TypeCode(type="perception_msgs::msg::dds_::YOLOv8AvailableModels_")
+      struct YOLOv8AvailableModels
+      {
+        /**
+         * Whether this is a request to receive the available models
+         */
+        boolean request;
+        /**
+         * List of the available models
+         */
+        sequence<perception_msgs::msg::dds::YOLOv8ModelInfo, 8> available_yolo_models;
+      };
+    };
+  };
+};
+
+#endif

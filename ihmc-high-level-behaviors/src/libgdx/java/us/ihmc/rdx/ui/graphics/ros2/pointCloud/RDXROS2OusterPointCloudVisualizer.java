@@ -71,7 +71,7 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXROS2SingleTopicVisuali
       titleBeforeAdditions = title;
       this.topic = topic;
 
-      setActivenessChangeCallback(isActive ->
+      addActivenessChangeCallback(isActive ->
       {
          if (isActive && realtimeROS2Node == null)
          {
