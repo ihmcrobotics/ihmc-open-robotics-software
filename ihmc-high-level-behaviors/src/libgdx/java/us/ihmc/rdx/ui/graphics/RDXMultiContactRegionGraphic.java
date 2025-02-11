@@ -31,21 +31,22 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class RDXMultiContactRegionGraphic implements RenderableProvider
 {
-   private static final Color POLYGON_GRAPHIC_COLOR = Color.valueOf("DEE933");
+   private static final Color NOMINAL_POLYGON_GRAPHIC_COLOR = Color.valueOf("DEE933");
+   private static final Color LOW_STABILITY_POLYGON_GRAPHIC_COLOR = Color.valueOf("EB3D40");
    private static final double STABILITY_GRAPHIC_HEIGHT = 2.0;
 
-   private final ConvexPolygon2D multiContactSupportRegion = new ConvexPolygon2D();
+   private final ConvexPolygon2D supportRegion = new ConvexPolygon2D();
 
    private final FramePoint3D comCurrent = new FramePoint3D();
+   private final FramePoint3D comDesired = new FramePoint3D();
    private final FramePoint3D comXYAtFootHeight = new FramePoint3D();
-   private final ConvexPolygon2D closestProximityEdge = new ConvexPolygon2D();
+   private final FramePoint3D desiredCoMXYAtFootHeight = new FramePoint3D();
 
    private int minimumEdgeIndex;
    private double minimumEdgeDistance;
 
    private final ModelBuilder modelBuilder = new ModelBuilder();
    private final RDXMultiColorMeshBuilder meshBuilder = new RDXMultiColorMeshBuilder();
-   private final FullHumanoidRobotModel ghostFullRobotModel;
    private final CenterOfMassReferenceFrame centerOfMassFrame;
    private final MidFrameZUpFrame midFeetZUpFrame;
    private final RigidBodyTransform transform = new RigidBodyTransform();
@@ -55,7 +56,6 @@ public class RDXMultiContactRegionGraphic implements RenderableProvider
 
    public RDXMultiContactRegionGraphic(FullHumanoidRobotModel ghostFullRobotModel)
    {
-      this.ghostFullRobotModel = ghostFullRobotModel;
       this.centerOfMassFrame = new CenterOfMassReferenceFrame("ghostCoMFrame", ReferenceFrame.getWorldFrame(), ghostFullRobotModel.getRootBody());
       this.midFeetZUpFrame = new MidFrameZUpFrame("midFeedZUpWhost",
                                                   ReferenceFrame.getWorldFrame(),
@@ -63,60 +63,90 @@ public class RDXMultiContactRegionGraphic implements RenderableProvider
                                                   ghostFullRobotModel.getSoleFrame(RobotSide.RIGHT));
    }
 
-   public void update(KinematicsToolboxOutputStatus kinematicsToolboxOutputStatus)
+   public void update(KinematicsToolboxOutputStatus kinematicsToolboxOutputStatus, FramePoint3D desiredCoMPosition)
    {
-      multiContactSupportRegion.clear();
-      Object<Point3D> supportRegion = kinematicsToolboxOutputStatus.getSupportRegion();
-
-      for (int i = 0; i < supportRegion.size(); i++)
-      {
-         multiContactSupportRegion.addVertex(supportRegion.get(i));
-      }
-
-      multiContactSupportRegion.update();
-
-      if (multiContactSupportRegion.getNumberOfVertices() < 3)
-      {
-         modelInstance = null;
-         lastModel = null;
-         return;
-      }
-
       meshBuilder.clear();
 
+      // Update frames and compute mid-feet height
       centerOfMassFrame.update();
       midFeetZUpFrame.update();
-      updateMinimumEdge();
 
       FramePoint3D midFoot = new FramePoint3D(midFeetZUpFrame);
       midFoot.changeFrame(ReferenceFrame.getWorldFrame());
       double footZ = midFoot.getZ();
 
-      transform.setTranslationAndIdentityRotation(0.0, 0.0, footZ);
-
-      for (int i = 0; i < multiContactSupportRegion.getNumberOfVertices(); i++)
+      // Update desired and achieved CoM graphic
       {
-         Point2DReadOnly v0 = multiContactSupportRegion.getVertex(i);
-         Point2DReadOnly v1 = multiContactSupportRegion.getNextVertex(i);
+         comCurrent.setToZero(centerOfMassFrame);
+         comCurrent.changeFrame(ReferenceFrame.getWorldFrame());
 
-         Color color = i == minimumEdgeIndex ? Color.RED : POLYGON_GRAPHIC_COLOR;
-         meshBuilder.addLine(v0.getX(), v0.getY(), footZ, v1.getX(), v1.getY(), footZ, 0.01f, color);
+         meshBuilder.addSphere(0.03f, comCurrent, Color.BLACK);
+
+         comXYAtFootHeight.setIncludingFrame(comCurrent);
+         comXYAtFootHeight.setZ(footZ);
+         meshBuilder.addSphere(0.03f, comXYAtFootHeight, Color.BLACK);
+
+         FramePoint3D comXYElevated = new FramePoint3D(comXYAtFootHeight);
+         comXYElevated.addZ(STABILITY_GRAPHIC_HEIGHT);
+         meshBuilder.addLine(comXYAtFootHeight, comXYElevated, 0.005f, Color.BLACK);
+
+         if (desiredCoMPosition != null)
+         {
+            comDesired.setMatchingFrame(desiredCoMPosition);
+            meshBuilder.addSphere(0.03f, comDesired, Color.GREEN);
+
+            desiredCoMXYAtFootHeight.setIncludingFrame(comDesired);
+            desiredCoMXYAtFootHeight.setZ(footZ);
+            meshBuilder.addSphere(0.03f, desiredCoMXYAtFootHeight, Color.GREEN);
+
+            FramePoint3D desiredComXYElevated = new FramePoint3D(desiredCoMXYAtFootHeight);
+            desiredComXYElevated.addZ(STABILITY_GRAPHIC_HEIGHT);
+            meshBuilder.addLine(desiredCoMXYAtFootHeight, desiredComXYElevated, 0.005f, Color.GREEN);
+         }
       }
 
-      meshBuilder.addPolygon(transform, multiContactSupportRegion, POLYGON_GRAPHIC_COLOR);
+      // Update region graphic
+      Object<Point3D> ikSupportRegion = kinematicsToolboxOutputStatus.getSupportRegion();
+      if (ikSupportRegion.size() >= 3)
+      {
+         this.supportRegion.clear();
 
-      comCurrent.setToZero(centerOfMassFrame);
-      comCurrent.changeFrame(ReferenceFrame.getWorldFrame());
+         for (int i = 0; i < ikSupportRegion.size(); i++)
+         {
+            this.supportRegion.addVertex(ikSupportRegion.get(i));
+         }
 
-      meshBuilder.addSphere(0.03f, comCurrent, Color.BLACK);
+         this.supportRegion.update();
 
-      comXYAtFootHeight.setIncludingFrame(comCurrent);
-      comXYAtFootHeight.setZ(footZ);
-      meshBuilder.addSphere(0.03f, comXYAtFootHeight, Color.BLACK);
+         if (this.supportRegion.getNumberOfVertices() < 3)
+         {
+            modelInstance = null;
+            lastModel = null;
+            return;
+         }
 
-      FramePoint3D comXYElevated = new FramePoint3D(comXYAtFootHeight);
-      comXYElevated.addZ(STABILITY_GRAPHIC_HEIGHT);
-      meshBuilder.addLine(comXYAtFootHeight, comXYElevated, 0.005f, Color.BLACK);
+         updateMinimumEdge();
+
+         transform.setTranslationAndIdentityRotation(0.0, 0.0, footZ);
+
+         for (int i = 0; i < this.supportRegion.getNumberOfVertices(); i++)
+         {
+            Point2DReadOnly v0 = this.supportRegion.getVertex(i);
+            Point2DReadOnly v1 = this.supportRegion.getNextVertex(i);
+
+            Color color = i == minimumEdgeIndex ? Color.RED : NOMINAL_POLYGON_GRAPHIC_COLOR;
+            meshBuilder.addLine(v0.getX(), v0.getY(), footZ, v1.getX(), v1.getY(), footZ, 0.01f, color);
+         }
+
+         double postureSensitivityThreshold = 0.045;
+         double stabilityMarginThreshold = 0.12;
+
+         boolean isPostureHighlySensitive = kinematicsToolboxOutputStatus.getSupportRegionSensitivity() > postureSensitivityThreshold;
+         boolean hasLowStabilityMargin = minimumEdgeDistance < stabilityMarginThreshold;
+
+         Color polygonGraphicColor = (isPostureHighlySensitive && hasLowStabilityMargin) ? LOW_STABILITY_POLYGON_GRAPHIC_COLOR : NOMINAL_POLYGON_GRAPHIC_COLOR;
+         meshBuilder.addPolygon(transform, this.supportRegion, polygonGraphicColor);
+      }
 
       modelBuilder.begin();
       Mesh mesh = meshBuilder.generateMesh();
@@ -139,10 +169,10 @@ public class RDXMultiContactRegionGraphic implements RenderableProvider
    {
       minimumEdgeDistance = Double.POSITIVE_INFINITY;
 
-      for (int i = 0; i < multiContactSupportRegion.getNumberOfVertices(); i++)
+      for (int i = 0; i < supportRegion.getNumberOfVertices(); i++)
       {
-         Point2DReadOnly v0 = multiContactSupportRegion.getVertex(i);
-         Point2DReadOnly v1 = multiContactSupportRegion.getNextVertex(i);
+         Point2DReadOnly v0 = supportRegion.getVertex(i);
+         Point2DReadOnly v1 = supportRegion.getNextVertex(i);
 
          double margin = EuclidGeometryTools.distanceFromPoint2DToLine2D(comXYAtFootHeight.getX(), comXYAtFootHeight.getY(), v0, v1);
          if (margin < minimumEdgeDistance)
@@ -156,7 +186,7 @@ public class RDXMultiContactRegionGraphic implements RenderableProvider
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (multiContactSupportRegion.isEmpty())
+      if (supportRegion.isEmpty())
       {
          return;
       }

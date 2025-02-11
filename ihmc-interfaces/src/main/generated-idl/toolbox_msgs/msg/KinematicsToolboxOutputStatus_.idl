@@ -80,6 +80,11 @@ module toolbox_msgs
          * Support region used by the toolbox
          */
         sequence<geometry_msgs::msg::dds::Point, 32> support_region;
+        /**
+         * Sensitivity of the support region with respect to the posture. Indicates postures where the StabilityMarginKinematicsCostCalculator is more effective.
+         */
+        @defaultValue(value=-1.0)
+        double support_region_sensitivity;
         @defaultValue(value=-1.0)
         double solution_quality;
       };

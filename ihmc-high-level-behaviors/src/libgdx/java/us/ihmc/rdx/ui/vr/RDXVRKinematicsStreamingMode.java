@@ -745,7 +745,7 @@ public class RDXVRKinematicsStreamingMode
                      ghostOneDoFJointsExcludingHands[i].setQ(latestStatus.getDesiredJointAngles().get(i));
                   }
                   ghostFullRobotModel.getElevator().updateFramesRecursively();
-                  multiContactStabilityGraphic.update(latestStatus);
+                  multiContactStabilityGraphic.update(latestStatus, null);
                }
             }
             if (capturabilityBasedStatus.getMessageNotification().poll())

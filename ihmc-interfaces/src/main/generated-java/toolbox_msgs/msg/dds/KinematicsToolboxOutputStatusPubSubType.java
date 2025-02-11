@@ -15,7 +15,7 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "624cc92872f1d8473b47e098815669b6fb9c0a5c2459a80441afc9913a518f73";
+   		return "24e1c048ab9f7fc5b8bb75a4b51d96efd5aad483599cdaba27efc225e88dbebd";
    }
    
    @Override
@@ -75,6 +75,8 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       return current_alignment - initial_alignment;
    }
@@ -121,6 +123,9 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -149,6 +154,8 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
       cdr.write_type_e(data.getSupportRegion());else
           throw new RuntimeException("support_region field exceeds the maximum length");
 
+      cdr.write_type_6(data.getSupportRegionSensitivity());
+
       cdr.write_type_6(data.getSolutionQuality());
 
    }
@@ -168,6 +175,8 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getDesiredRootLinearVelocity(), cdr);	
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getDesiredRootAngularVelocity(), cdr);	
       cdr.read_type_e(data.getSupportRegion());	
+      data.setSupportRegionSensitivity(cdr.read_type_6());
+      	
       data.setSolutionQuality(cdr.read_type_6());
       	
 
@@ -190,6 +199,7 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
       ser.write_type_a("desired_root_angular_velocity", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getDesiredRootAngularVelocity());
 
       ser.write_type_e("support_region", data.getSupportRegion());
+      ser.write_type_6("support_region_sensitivity", data.getSupportRegionSensitivity());
       ser.write_type_6("solution_quality", data.getSolutionQuality());
    }
 
@@ -210,6 +220,7 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
       ser.read_type_a("desired_root_angular_velocity", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getDesiredRootAngularVelocity());
 
       ser.read_type_e("support_region", data.getSupportRegion());
+      data.setSupportRegionSensitivity(ser.read_type_6("support_region_sensitivity"));
       data.setSolutionQuality(ser.read_type_6("solution_quality"));
    }
 

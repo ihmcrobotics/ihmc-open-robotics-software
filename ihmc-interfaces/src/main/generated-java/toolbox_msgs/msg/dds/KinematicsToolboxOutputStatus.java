@@ -66,6 +66,10 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
             * Support region used by the toolbox
             */
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  support_region_;
+   /**
+            * Sensitivity of the support region with respect to the posture. Indicates postures where the StabilityMarginKinematicsCostCalculator is more effective.
+            */
+   public double support_region_sensitivity_ = -1.0;
    public double solution_quality_ = -1.0;
 
    public KinematicsToolboxOutputStatus()
@@ -103,6 +107,8 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
       geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.desired_root_linear_velocity_, desired_root_linear_velocity_);
       geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.desired_root_angular_velocity_, desired_root_angular_velocity_);
       support_region_.set(other.support_region_);
+      support_region_sensitivity_ = other.support_region_sensitivity_;
+
       solution_quality_ = other.solution_quality_;
 
    }
@@ -209,6 +215,21 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
       return support_region_;
    }
 
+   /**
+            * Sensitivity of the support region with respect to the posture. Indicates postures where the StabilityMarginKinematicsCostCalculator is more effective.
+            */
+   public void setSupportRegionSensitivity(double support_region_sensitivity)
+   {
+      support_region_sensitivity_ = support_region_sensitivity;
+   }
+   /**
+            * Sensitivity of the support region with respect to the posture. Indicates postures where the StabilityMarginKinematicsCostCalculator is more effective.
+            */
+   public double getSupportRegionSensitivity()
+   {
+      return support_region_sensitivity_;
+   }
+
    public void setSolutionQuality(double solution_quality)
    {
       solution_quality_ = solution_quality;
@@ -257,6 +278,8 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
          {  if (!this.support_region_.get(i).epsilonEquals(other.support_region_.get(i), epsilon)) return false; }
       }
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.support_region_sensitivity_, other.support_region_sensitivity_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.solution_quality_, other.solution_quality_, epsilon)) return false;
 
 
@@ -285,6 +308,8 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
       if (!this.desired_root_linear_velocity_.equals(otherMyClass.desired_root_linear_velocity_)) return false;
       if (!this.desired_root_angular_velocity_.equals(otherMyClass.desired_root_angular_velocity_)) return false;
       if (!this.support_region_.equals(otherMyClass.support_region_)) return false;
+      if(this.support_region_sensitivity_ != otherMyClass.support_region_sensitivity_) return false;
+
       if(this.solution_quality_ != otherMyClass.solution_quality_) return false;
 
 
@@ -317,6 +342,8 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
       builder.append(this.desired_root_angular_velocity_);      builder.append(", ");
       builder.append("support_region=");
       builder.append(this.support_region_);      builder.append(", ");
+      builder.append("support_region_sensitivity=");
+      builder.append(this.support_region_sensitivity_);      builder.append(", ");
       builder.append("solution_quality=");
       builder.append(this.solution_quality_);
       builder.append("}");

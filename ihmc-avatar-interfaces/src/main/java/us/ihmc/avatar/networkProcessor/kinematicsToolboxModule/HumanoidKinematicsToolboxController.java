@@ -69,7 +69,6 @@ import static us.ihmc.robotModels.FullRobotModelUtils.getAllJointsExcludingHands
 public class HumanoidKinematicsToolboxController extends KinematicsToolboxController
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final Vector3D zeroVector = new Vector3D();
    private static final double FOOT_COEFFICIENT_OF_FRICTION = 0.8;
    private static final double HAND_COEFFICIENT_OF_FRICTION = 0.4;
 
@@ -244,6 +243,9 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
             setupVisualization(desiredFullRobotModel.getHand(robotSide));
          setupVisualization(desiredFullRobotModel.getFoot(robotSide));
       }
+
+      setupVisualization(desiredFullRobotModel.getPelvis());
+      setupVisualization(desiredFullRobotModel.getChest());
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -529,14 +531,10 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          if (multiContactRegionCalculator.hasSolvedWholeRegion())
          {
             activeContactPointPositions.clear();
-            getSolution().getSupportRegion().clear();
-
             for (int i = 0; i < multiContactRegionCalculator.getNumberOfVertices(); i++)
             {
                activeContactPointPositions.add().set(multiContactRegionCalculator.getOptimizedVertex(i));
-               getSolution().getSupportRegion().add().set(multiContactRegionCalculator.getOptimizedVertex(i));
             }
-
             updateSupportPolygonConstraint(activeContactPointPositions);
          }
       }
@@ -733,6 +731,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       }
 
       // CoM constraint polygon is the convex hull of the feet contact points. Even when upper body is load-bearing, initialize to this.
+      activeContactPointPositions.clear();
       Object<Point3D> leftFootSupportPolygon2d = capturabilityBasedStatus.getLeftFootSupportPolygon3d();
       Object<Point3D> rightFootSupportPolygon2d = capturabilityBasedStatus.getRightFootSupportPolygon3d();
       for (int i = 0; i < leftFootSupportPolygon2d.size(); i++)
@@ -813,7 +812,9 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    {
       addHoldSupportEndEffectorCommands(bufferToPack);
       addHoldCenterOfMassXYCommand(bufferToPack);
-      stabilityCostCalculator.addPostureFeedbackCommands(bufferToPack);
+
+      double supportRegionSensitivity = stabilityCostCalculator.addPostureFeedbackCommands(bufferToPack);
+      getSolution().setSupportRegionSensitivity(supportRegionSensitivity);
    }
 
    @Override

@@ -25,6 +25,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class StabilityMarginKinematicsCostCalculator
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+   private static final double NULL_POSTURAL_SENSITIVITY = -1.0;
 
    private final WholeBodyContactState wholeBodyContactState;
    private final StabilityMarginRegionCalculator multiContactRegionCalculator;
@@ -65,7 +66,10 @@ public class StabilityMarginKinematicsCostCalculator
       pelvisControlFramePose.setToZero(afterRootJointFrame);
       pelvisControlFramePose.changeFrame(fullRobotModel.getPelvis().getBodyFixedFrame());
 
-      this.stabilityGradientCalculator = new SensitivityBasedStabilityGradientCalculator(fullRobotModel, wholeBodyContactState, multiContactRegionCalculator, registry);
+      this.stabilityGradientCalculator = new SensitivityBasedStabilityGradientCalculator(fullRobotModel,
+                                                                                         wholeBodyContactState,
+                                                                                         multiContactRegionCalculator,
+                                                                                         registry);
       parentRegistry.addChild(registry);
    }
 
@@ -74,26 +78,32 @@ public class StabilityMarginKinematicsCostCalculator
       isEnabled.set(enable);
    }
 
-   public void addPostureFeedbackCommands(FeedbackControlCommandBuffer bufferToPack)
+   public boolean isEnabled()
    {
-      if (!isEnabled.getBooleanValue() || !isUpperBodyLoadBearing.getValue())
-         return;
+      return isEnabled.getBooleanValue();
+   }
+
+   /**
+    * Computes and packs the feedback objective. Returns the postural sensitivity
+    */
+   public double addPostureFeedbackCommands(FeedbackControlCommandBuffer bufferToPack)
+   {
+      if (!isUpperBodyLoadBearing.getValue() || !multiContactRegionCalculator.hasSolvedWholeRegion())
+         return NULL_POSTURAL_SENSITIVITY;
 
       double stabilityMargin = multiContactRegionCalculator.getStabilityMargin();
-      if (stabilityMargin > maxMarginToPenalize.getValue())
-         return;
-
       double deltaStabilityMargin = stabilityMargin - minStabilityMargin.getValue();
       double alpha = EuclidCoreTools.clamp(deltaStabilityMargin / minStabilityMargin.getValue(), 0.0, 1.0);
       double weight = alpha * stabilityMarginWeight.getValue();
 
       stabilityGradientCalculator.update();
-      DMatrixRMaj stabilityMarginGradient = stabilityGradientCalculator.getStabilityMarginGradient();
-      double stabilityGradientMagnitude = CommonOps_DDRM.dot(stabilityMarginGradient, stabilityMarginGradient);
-      if (stabilityGradientMagnitude < 1.0e-5)
-         return;
+      double posturalSensitivity = stabilityGradientCalculator.getPostureSensitivity();
 
-      double gradientScalar = desiredStabilityMarginVelocity.getValue() / stabilityGradientMagnitude;
+      if (!isEnabled.getValue() || posturalSensitivity < 1.0e-3)
+         return posturalSensitivity;
+
+      DMatrixRMaj stabilityMarginGradient = stabilityGradientCalculator.getStabilityMarginGradient();
+      double gradientScalar = desiredStabilityMarginVelocity.getValue() / EuclidCoreTools.square(posturalSensitivity);
 
       // Feed-forward joint velocities
       OneDoFJointBasics[] oneDoFJoints = wholeBodyContactState.getOneDoFJoints();
@@ -131,5 +141,7 @@ public class StabilityMarginKinematicsCostCalculator
       spatialFeedbackControlCommand.getGains().getPositionGains().setDerivativeGains(0.0);
       spatialFeedbackControlCommand.getGains().getOrientationGains().setProportionalGains(0.0);
       spatialFeedbackControlCommand.getGains().getOrientationGains().setDerivativeGains(0.0);
+
+      return posturalSensitivity;
    }
 }

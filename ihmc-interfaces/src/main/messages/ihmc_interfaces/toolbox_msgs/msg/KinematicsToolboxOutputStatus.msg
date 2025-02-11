@@ -38,4 +38,7 @@ geometry_msgs/Vector3 desired_root_angular_velocity
 # Support region used by the toolbox
 geometry_msgs/Point[<=32] support_region
 
+# Sensitivity of the support region with respect to the posture. Indicates postures where the StabilityMarginKinematicsCostCalculator is more effective.
+float64 support_region_sensitivity -1
+
 float64 solution_quality -1
