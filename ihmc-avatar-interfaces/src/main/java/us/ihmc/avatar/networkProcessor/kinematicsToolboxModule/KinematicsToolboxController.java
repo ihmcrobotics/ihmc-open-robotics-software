@@ -1312,6 +1312,12 @@ public class KinematicsToolboxController extends ToolboxController
          return;
       }
 
+      inverseKinematicsSolution.getSupportRegion().clear();
+      for (int i = 0; i < contactPoints.size(); i++)
+      {
+         inverseKinematicsSolution.getSupportRegion().add().set(contactPoints.get(i));
+      }
+
       if (!newSupportPolygon.epsilonEquals(supportPolygon, 5.0e-3))
       { // Update the polygon only if there is an actual update.
          supportPolygon.set(newSupportPolygon);

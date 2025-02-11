@@ -47,7 +47,8 @@ public class KinematicsRecordReplay
       this.enabledKinematicsStreaming = enabledKinematicsStreaming;
       this.handDesiredControlFrames = handDesiredControlFrames;
 
-      loadLatestReplayFile();
+//      loadLatestReplayFile();
+      replayPath.set(Paths.get(System.getProperty("user.home"), ".ihmc/logs/250207_wall0_good.csv").toString());
    }
 
    public void loadLatestReplayFile()
@@ -139,6 +140,14 @@ public class KinematicsRecordReplay
                                               angularVelocity,
                                               linearVelocity,
                                               recordFrame);
+   }
+
+   public void recordTrackerData(VRTrackedSegmentType segmentType, ReferenceFrame desiredControlFrame, Vector3D angularVelocity, Vector3D linearVelocity, ReferenceFrame recordFrame)
+   {
+      if (!isRecording)
+         return;
+
+      trajectoryRecorder.recordTrackerData(segmentType, desiredControlFrame, angularVelocity, linearVelocity, recordFrame);
    }
 
    /**

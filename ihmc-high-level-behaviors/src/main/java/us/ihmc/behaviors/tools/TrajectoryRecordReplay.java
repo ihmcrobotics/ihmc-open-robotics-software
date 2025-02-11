@@ -38,7 +38,7 @@ public class TrajectoryRecordReplay
    private int lastReplayIndex = -1;
 
    public static final int numberOfTrackers = VRTrackedSegmentType.TRACKER_TYPES.length;
-   public static final HashMap<VRTrackedSegmentType, Integer> trackerIndex = new HashMap<>();
+   public static final EnumMap<VRTrackedSegmentType, Integer> trackerIndex = new EnumMap<>(VRTrackedSegmentType.class);
 
    static
    {
@@ -142,6 +142,15 @@ public class TrajectoryRecordReplay
                                                                  angularVelocity,
                                                                  linearVelocity,
                                                                  recordFrame);
+   }
+
+   public void recordTrackerData(VRTrackedSegmentType segmentType,
+                                 ReferenceFrame desiredControlFrame,
+                                 Vector3D angularVelocity,
+                                 Vector3D linearVelocity,
+                                 ReferenceFrame recordFrame)
+   {
+      vrInputData.get(vrInputData.size() - 1).trackerData.get(trackerIndex.get(segmentType)).set(desiredControlFrame, angularVelocity, linearVelocity, recordFrame);
    }
 
    public void onRecordStart()

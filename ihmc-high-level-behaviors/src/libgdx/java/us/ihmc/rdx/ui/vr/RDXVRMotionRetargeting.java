@@ -17,6 +17,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -43,7 +44,7 @@ public class RDXVRMotionRetargeting
    };
    private final ROS2SyncedRobotModel syncedRobot;
    private final SideDependentList<MutableReferenceFrame> controllerReferenceFrames;
-   private final Map<String, MutableReferenceFrame> trackerReferenceFrames;
+   private final EnumMap<VRTrackedSegmentType, ? extends ReferenceFrame> trackerReferenceFrames;
    private final MutableReferenceFrame headsetReferenceFrame;
    private final RetargetingParameters retargetingParameters;
 
@@ -75,7 +76,7 @@ public class RDXVRMotionRetargeting
     */
    public RDXVRMotionRetargeting(ROS2SyncedRobotModel syncedRobot,
                                  SideDependentList<MutableReferenceFrame> controllerReferenceFrames,
-                                 Map<String, MutableReferenceFrame> trackerReferenceFrames,
+                                 EnumMap<VRTrackedSegmentType, ? extends ReferenceFrame> trackerReferenceFrames,
                                  MutableReferenceFrame headsetReferenceFrame,
                                  RetargetingParameters retargetingParameters)
    {
@@ -111,20 +112,19 @@ public class RDXVRMotionRetargeting
     */
    private void retargetPelvis()
    {
-      if (trackerReferenceFrames.containsKey(WAIST.getSegmentName()) && !controlArmsOnly)
+      if (trackerReferenceFrames.containsKey(WAIST) && !controlArmsOnly)
       {
          if (initialPelvisFrame == null)
          {
             initialPelvisTransformToWorld.set(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame().getTransformToWorldFrame());
             initialPelvisFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(ReferenceFrame.getWorldFrame(),
                                                                                                           initialPelvisTransformToWorld);
-            initialWaistTrackerTransformToWorld.set(trackerReferenceFrames.get(WAIST.getSegmentName()).getReferenceFrame().getTransformToWorldFrame());
+            initialWaistTrackerTransformToWorld.set(trackerReferenceFrames.get(WAIST).getTransformToWorldFrame());
 
             scaledPelvisFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(), newPelvisFramePose);
          }
          // Calculate the variation of the tracker's frame from its initial value
-         RigidBodyTransform waistTrackerVariationFromInitialValue = new RigidBodyTransform(trackerReferenceFrames.get(WAIST.getSegmentName())
-                                                                                                                 .getReferenceFrame()
+         RigidBodyTransform waistTrackerVariationFromInitialValue = new RigidBodyTransform(trackerReferenceFrames.get(WAIST)
                                                                                                                  .getTransformToWorldFrame());
          // Get variation from initial value
          initialWaistTrackerTransformToWorld.inverseTransform(waistTrackerVariationFromInitialValue);
@@ -156,8 +156,8 @@ public class RDXVRMotionRetargeting
    {
       if (comTracking)
       {
-         if (trackerReferenceFrames.containsKey(WAIST.getSegmentName()) && trackerReferenceFrames.containsKey(LEFT_ANKLE.getSegmentName())
-             && trackerReferenceFrames.containsKey(RIGHT_ANKLE.getSegmentName()) && !controlArmsOnly)
+         if (trackerReferenceFrames.containsKey(WAIST) && trackerReferenceFrames.containsKey(LEFT_ANKLE)
+             && trackerReferenceFrames.containsKey(RIGHT_ANKLE) && !controlArmsOnly)
          {
             if (centerOfMassDesiredXYInWorld == null)
             {
@@ -165,11 +165,11 @@ public class RDXVRMotionRetargeting
                centerOfMassDesiredXYInWorld.set(syncedRobot.getReferenceFrames().getMidFeetZUpFrame().getTransformToWorldFrame().getTranslation());
             }
             // Fetch the current frames for left and right ankle
-            ReferenceFrame leftAnkleFrame = trackerReferenceFrames.get(LEFT_ANKLE.getSegmentName()).getReferenceFrame();
-            ReferenceFrame rightAnkleFrame = trackerReferenceFrames.get(RIGHT_ANKLE.getSegmentName()).getReferenceFrame();
+            ReferenceFrame leftAnkleFrame = trackerReferenceFrames.get(LEFT_ANKLE);
+            ReferenceFrame rightAnkleFrame = trackerReferenceFrames.get(RIGHT_ANKLE);
 
             // Get the waist tracker ground projection of the user (assuming this can approximate the ground projection of the center of mass)
-            Point3D waistTrackerXYInWorld = new Point3D(trackerReferenceFrames.get(WAIST.getSegmentName()).getReferenceFrame().getTransformToWorldFrame().getTranslation());
+            Point3D waistTrackerXYInWorld = new Point3D(trackerReferenceFrames.get(WAIST).getTransformToWorldFrame().getTranslation());
             waistTrackerXYInWorld.setZ(0.0);
 
             // Get the positions of the left and right foot on the ground
@@ -226,9 +226,9 @@ public class RDXVRMotionRetargeting
    {
       if (armScaling)
       {
-         if (trackerReferenceFrames.containsKey(CHEST.getSegmentName()) && headsetReferenceFrame != null)
+         if (trackerReferenceFrames.containsKey(CHEST) && headsetReferenceFrame != null)
          {
-            ReferenceFrame chestTrackerFrame = trackerReferenceFrames.get(CHEST.getSegmentName()).getReferenceFrame();
+            ReferenceFrame chestTrackerFrame = trackerReferenceFrames.get(CHEST);
             ReferenceFrame headsetFrame = headsetReferenceFrame.getReferenceFrame();
 
             // Estimate shoulder positions based on chest and headset positions

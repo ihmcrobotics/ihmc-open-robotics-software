@@ -114,18 +114,18 @@ public class KSTInputFilter
 
       if (previousInput != null)
       {
-//         double linearDelta = input.getDesiredPose().getPositionDistance(previousInput.getDesiredPose());
-//         if (linearDelta > maxLinearDelta.getValue())
-//         {
-//            LogTools.warn("Invalid rigid body input. Linear delta {} > maximum delta {}", linearDelta, maxLinearDelta.getValue());
-//            return false;
-//         }
-//         double angularDelta = input.getDesiredPose().getOrientationDistance(previousInput.getDesiredPose());
-//         if (angularDelta > maxAngularDelta.getValue())
-//         {
-//            LogTools.warn("Invalid rigid body input. Angular delta {} > maximum delta {}", angularDelta, maxAngularDelta.getValue());
-//            return false;
-//         }
+         double linearDelta = input.getDesiredPose().getPositionDistance(previousInput.getDesiredPose());
+         if (linearDelta > maxLinearDelta.getValue())
+         {
+            LogTools.warn("Invalid rigid body input. Linear delta {} > maximum delta {}", linearDelta, maxLinearDelta.getValue());
+            return false;
+         }
+         double angularDelta = input.getDesiredPose().getOrientationDistance(previousInput.getDesiredPose());
+         if (angularDelta > maxAngularDelta.getValue())
+         {
+            LogTools.warn("Invalid rigid body input. Angular delta {} > maximum delta {}", angularDelta, maxAngularDelta.getValue());
+            return false;
+         }
       }
 
       if (input.getDesiredPose().containsNaN())
