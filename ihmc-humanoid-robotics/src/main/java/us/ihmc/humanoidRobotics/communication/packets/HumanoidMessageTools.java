@@ -29,7 +29,6 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.GoHomeMessage;
-import controller_msgs.msg.dds.HandCollisionDetectedPacket;
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
 import controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage;
 import controller_msgs.msg.dds.HandJointAnglePacket;
@@ -1242,14 +1241,6 @@ public class HumanoidMessageTools
       message.getJointAngles().add(jointAngles);
       message.setConnected(connected);
       message.setCalibrated(calibrated);
-      return message;
-   }
-
-   public static HandCollisionDetectedPacket createHandCollisionDetectedPacket(RobotSide robotSide, int collisionSeverityLevelZeroToThree)
-   {
-      HandCollisionDetectedPacket message = new HandCollisionDetectedPacket();
-      message.setRobotSide(robotSide.toByte());
-      message.setCollisionSeverityLevelOneToThree(MathTools.clamp(collisionSeverityLevelZeroToThree, 1, 3));
       return message;
    }
 
