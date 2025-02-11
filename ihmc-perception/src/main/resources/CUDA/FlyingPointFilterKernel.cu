@@ -101,9 +101,3 @@ __global__ void filterFlyingPoints(unsigned short *in, size_t pitchIn,
         *outputPixel = static_cast<unsigned short>(depthValue); // Keep original depth value
     }
 }
-
-
-
-
-
-

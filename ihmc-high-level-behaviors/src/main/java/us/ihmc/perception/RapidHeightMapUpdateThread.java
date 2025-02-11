@@ -5,6 +5,7 @@ import us.ihmc.behaviors.activeMapping.ControllerFootstepQueueMonitor;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensors.ImageSensor;
@@ -83,7 +84,7 @@ public class RapidHeightMapUpdateThread extends RepeatingTaskThread
       }
       catch (Exception e)
       {
-         e.getStackTrace();
+         LogTools.error(e);
       }
    }
 
