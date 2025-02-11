@@ -20,6 +20,7 @@ void matrix_3d_example(unsigned short * matrixPointer, size_t pitchA,
         // Compute row offset using pitchA
         unsigned short * matrixPointerRow = (unsigned short*)((char*) currentLayer + indexY * pitchA) + indexX;
 
+        printf("Layer: %d, Value: %d, %d, and %d\n", layer, indexY, indexX, (int) *matrixPointerRow);
         sum += (int) *matrixPointerRow;
     }
 

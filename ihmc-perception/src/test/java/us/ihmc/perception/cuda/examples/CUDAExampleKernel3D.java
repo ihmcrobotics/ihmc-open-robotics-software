@@ -1,6 +1,8 @@
 package us.ihmc.perception.cuda.examples;
 
 import org.bytedeco.cuda.cudart.CUstream_st;
+import org.bytedeco.cuda.cudart.cudaExtent;
+import org.bytedeco.cuda.cudart.cudaPitchedPtr;
 import org.bytedeco.cuda.cudart.dim3;
 import org.bytedeco.javacpp.ShortPointer;
 import org.bytedeco.opencv.global.opencv_core;
@@ -40,44 +42,35 @@ public class CUDAExampleKernel3D
       CUDAProgram program = new CUDAProgram(programPath);
       CUDAKernel kernel = program.loadKernel(kernelName);
 
-      GpuMat gpuMatExample = new GpuMat(rows, cols, opencv_core.CV_16UC1);
-      long pitchForLayer = gpuMatExample.step();
-
       // Allocate enough memory for all layers
-      ShortPointer pointerTo3DArray = new ShortPointer();
-      cudaMalloc(pointerTo3DArray, layers * pitchForLayer * rows);
-      int error = cudaStreamSynchronize(stream);
+      cudaPitchedPtr pointerTo3DArray = new cudaPitchedPtr();
+      cudaExtent extent = make_cudaExtent(cols * Short.BYTES, rows, layers);
+      int error = cudaMalloc3D(pointerTo3DArray, extent);
       CUDATools.checkCUDAError(error);
-
-      List<GpuMat> gpuLayers = new ArrayList<>();
 
       for (int i = 0; i < layers; i++)
       {
          // To get the average to be a whole number do (i * 2 + 2)
          Mat cpuData = new Mat(rows, cols, opencv_core.CV_16UC1, new Scalar(i * 2 + 2));
 
-         // Upload that data to the gpu so we can allocate the memory for it
-         GpuMat gpuData = new GpuMat();
-         gpuData.upload(cpuData);
-
          // Allocate memory for each layer, creating a 3d array
-         cudaMemcpy2D(pointerTo3DArray.position(i * pitchForLayer * rows),
-                      pitchForLayer,
-                      gpuData.data(),
-                      gpuData.step(),
-                      cols * Short.BYTES,
-                      rows,
-                      cudaMemcpyHostToDevice);
+         cudaMemcpy2D(pointerTo3DArray.ptr().position(i * pointerTo3DArray.pitch() * pointerTo3DArray.ysize()),
+                      pointerTo3DArray.pitch(),
+                      cpuData.data(),
+                      cpuData.step(),
+                      pointerTo3DArray.xsize(),
+                      pointerTo3DArray.ysize(),
+                      cudaMemcpyDefault);
 
          // Note we can't close the GpuMat here cause we need to access the data later in the program, so add it to a list, and close the list at the end
-         gpuLayers.add(gpuData);
+         cpuData.close();
       }
 
       GpuMat result = new GpuMat(rows, cols, opencv_core.CV_16UC1);
 
-      kernel.withPointer(pointerTo3DArray).withLong(gpuMatExample.step());
+      kernel.withPointer(pointerTo3DArray.ptr()).withLong(pointerTo3DArray.pitch());
       kernel.withPointer(result.data()).withLong(result.step());
-      kernel.withLong(pitchForLayer * rows);
+      kernel.withLong(pointerTo3DArray.pitch() * rows);
       kernel.withInt(rows);
       kernel.withInt(cols);
       kernel.withInt(layers);
@@ -99,13 +92,6 @@ public class CUDAExampleKernel3D
       program.close();
       gridDim.close();
       blockDim.close();
-
-      // This is where we close the individual gpu layers
-      for (int i = 0; i < layers; i++)
-      {
-         gpuLayers.get(i).release();
-         gpuLayers.get(i).close();
-      }
 
       CUDAStreamManager.releaseStream(stream);
    }
