@@ -12,7 +12,6 @@ import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
-import us.ihmc.rdx.ui.processes.BehaviorManagerProcess;
 import us.ihmc.rdx.ui.processes.FootstepPlanningModuleProcess;
 import us.ihmc.rdx.ui.processes.LidarREAProcess;
 import us.ihmc.rdx.ui.processes.MapSenseHeadlessProcess;
@@ -58,13 +57,11 @@ public abstract class RDXProcessManagerPanel extends RDXPanel
       this.environmentInitialSetup = environmentInitialSetup;
 
       // TODO: GUI selection
-      BehaviorManagerProcess behaviorManagerProcess = new BehaviorManagerProcess(this::getRobotModel);
       footstepPlanningModuleProcess = new FootstepPlanningModuleProcess(this::getRobotModel);
       mapsenseHeadlessProcess = new MapSenseHeadlessProcess();
       objectDetectionProcess = new ObjectDetectionProcess(this::getRobotModel, this::getRobotTarget);
       lidarREAProcess = new LidarREAProcess();
 
-      processes.add(behaviorManagerProcess);
       processes.add(footstepPlanningModuleProcess);
       processes.add(mapsenseHeadlessProcess);
       processes.add(objectDetectionProcess);
