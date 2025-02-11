@@ -36,6 +36,10 @@ namespace ihmc
                          double* p_gains_to_pack, int p_gain_rows,
                          double* d_gains_to_pack, int d_gain_rows) const;
 
+        int getDebugDataSize();
+
+        bool getDebugData(double* debug_data_to_pack);
+
     private:
         ConstantPositionController constant_position_controller_;
         ZMQController zmq_controller_;

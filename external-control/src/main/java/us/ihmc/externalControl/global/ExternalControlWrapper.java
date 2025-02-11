@@ -68,6 +68,12 @@ public class ExternalControlWrapper extends us.ihmc.externalControl.ExternalCont
                                  double[] control_data_to_pack, int control_rows,
                                  double[] p_gains_to_pack, int p_gain_rows,
                                  double[] d_gains_to_pack, int d_gain_rows);
+
+        public native int getDebugDataSize();
+
+        public native @Cast("bool") boolean getDebugData(DoublePointer debug_data_to_pack);
+        public native @Cast("bool") boolean getDebugData(DoubleBuffer debug_data_to_pack);
+        public native @Cast("bool") boolean getDebugData(double[] debug_data_to_pack);
     }
 
 

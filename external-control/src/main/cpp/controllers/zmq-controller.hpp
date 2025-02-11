@@ -31,14 +31,20 @@ namespace ihmc
 
         Eigen::VectorXd get_desired_joint_damping() const;
 
+        int get_debug_data_size();
+
+        Eigen::VectorXd get_debug_data() const;
+
     private:
         int number_of_joints_;
+        const int debug_data_size_ = 4;
 
         Eigen::VectorXd home_configuration_;
         Eigen::VectorXd desired_joint_velocities_;
         Eigen::VectorXd desired_joint_torques_;
         Eigen::VectorXd desired_joint_stiffnesses_;
         Eigen::VectorXd desired_joint_damping_;
+        Eigen::VectorXd debug_data_;
 
         // zmq
         zmq::context_t context;

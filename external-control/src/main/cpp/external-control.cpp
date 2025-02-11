@@ -122,4 +122,17 @@ namespace ihmc
         zmq_controller_.setHomeJointConfiguration(configuration_data, rows);
         return constant_position_controller_.setHomeJointConfiguration(configuration_data, rows);
     }
+
+    int ExternalControlImpl::getDebugDataSize()
+    {
+        return zmq_controller_.get_debug_data_size();
+    }
+
+    bool ExternalControlImpl::getDebugData(double* debug_data_to_pack) {
+        VectorView debug_data(debug_data_to_pack, zmq_controller_.get_debug_data_size());
+
+        debug_data = zmq_controller_.get_debug_data();
+
+        return true;
+    }
 }

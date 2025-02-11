@@ -17,6 +17,9 @@ namespace ihmc
         desired_joint_stiffnesses_.fill(default_stiffness);
         desired_joint_damping_.fill(default_damping);
 
+        debug_data_.resize(debug_data_size_);
+        debug_data_.setZero();
+
         // Init ZMQ
         context = zmq::context_t(1);
         socket_cpp = zmq::socket_t(context, zmq::socket_type::req);
@@ -79,6 +82,7 @@ namespace ihmc
         desired_joint_torques_= data.segment<23>(1 + 30 + 29);
         desired_joint_stiffnesses_ = data.segment<23>(1 + 30 + 29 + 23);
         desired_joint_damping_ = data.segment<23>(1 + 30 + 29 + 23 + 23);
+        debug_data_ = data.segment<4>(1 + 30 + 29 + 23 + 23 + 23);
 
     }
 
@@ -106,4 +110,15 @@ namespace ihmc
     {
         return desired_joint_damping_;
     }
+
+    int ZMQController::get_debug_data_size()
+    {
+        return debug_data_size_;
+    }
+
+    Eigen::VectorXd ZMQController::get_debug_data() const
+    {
+        return debug_data_;
+    }
+
 }

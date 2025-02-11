@@ -27,6 +27,8 @@ public class ExternalControl
    private final DMatrixRMaj solutionTorqueVector;
    private final DMatrixRMaj solutionStiffnessVector;
    private final DMatrixRMaj solutionDampingVector;
+   public final DMatrixRMaj solutionDebugData;
+   public final String[] debugDataNames = {"primal_res", "dual_res", "qp_iters", "solve_time"}; // TODO: query the ext controller for this?
    private final RigidBodyBasics baseBody;
    private final OneDoFJointReadOnly[] joints;
    private final FramePose3D basePose = new FramePose3D();
@@ -54,6 +56,8 @@ public class ExternalControl
       for (int i = 0; i < joints.length; i++)
          homeConfigurationVector.set(i, 0, homeConfiguration.getSetpoint(joints[i].getName()));
       externalControlImpl.setHomeJointConfiguration(homeConfigurationVector.data, homeConfigurationVector.numRows);
+
+      solutionDebugData = new DMatrixRMaj(externalControlImpl.getDebugDataSize(), 1);
    }
 
    public void setFootStates(SideDependentList<? extends ReferenceFrame> soleFrames, boolean leftInContact, boolean rightInContact)
@@ -114,6 +118,14 @@ public class ExternalControl
          data.damping = solutionDampingVector.get(i, 0);
       }
 //      LogTools.info("returned stiffness" + solutionStiffnessVector);
+   }
+
+   public void readDebugData()
+   {
+      if (!externalControlImpl.getDebugData(solutionDebugData.data))
+      {
+         throw new RuntimeException("Failed to retrieve debug data.");
+      }
    }
 
    public SolutionJointData getSolutionData(OneDoFJointReadOnly joint)

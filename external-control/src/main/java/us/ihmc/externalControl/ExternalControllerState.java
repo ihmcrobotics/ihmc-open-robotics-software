@@ -21,6 +21,8 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
+import java.util.HashMap;
+
 public class ExternalControllerState extends HighLevelControllerState
 {
    public static boolean REDUCE_YOVARIABLES = false;
@@ -45,6 +47,8 @@ public class ExternalControllerState extends HighLevelControllerState
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
 
    private final ExternalControl externalControl;
+
+   private final HashMap<String, YoDouble> debugData = new HashMap<>();
 
    public ExternalControllerState(HighLevelControllerParameters highLevelControllerParameters,
                                   HighLevelHumanoidControllerToolbox controllerToolbox,
@@ -85,6 +89,10 @@ public class ExternalControllerState extends HighLevelControllerState
          JointControlBlender jointControlBlender = new JointControlBlender("_ExternalBlender", controlledJoint, registryForBlenders);
          jointCommandBlenders.add(controlledJoint, jointControlBlender);
       }
+
+      for (String name : externalControl.debugDataNames) {
+         debugData.put(name, new YoDouble("zmq_mpc_" + name, registry));
+      }
    }
 
    @Override
@@ -118,7 +126,6 @@ public class ExternalControllerState extends HighLevelControllerState
       externalControl.writeRobotState(controllerToolbox.getYoTime().getDoubleValue(), desiredMode.getOrdinal());
 
       externalControl.readControlSolution();
-
 
       double gainRatio = blendRatioCurrentValue.getValue();
 
@@ -161,6 +168,14 @@ public class ExternalControllerState extends HighLevelControllerState
       }
 
       lowLevelOneDoFJointDesiredDataHolder.completeWith(getStateSpecificJointSettings());
+
+      externalControl.readDebugData();
+
+      for (int i = 0; i < externalControl.solutionDebugData.numRows; i++)
+      {
+         debugData.get(externalControl.debugDataNames[i]).set(externalControl.solutionDebugData.get(i));
+      }
+
    }
 
    @Override
