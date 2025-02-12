@@ -1,38 +1,101 @@
 package us.ihmc.rdx.ui.teleoperation;
 
+import controller_msgs.msg.dds.EnableHPUCommandMessage;
+import controller_msgs.msg.dds.EnableHPUStatusMessage;
 import controller_msgs.msg.dds.GoHomeMessage;
+import controller_msgs.msg.dds.MasterGainScaleControllerCommandMessage;
+import controller_msgs.msg.dds.MasterGainScaleControllerStatusMessage;
 import controller_msgs.msg.dds.StopAllTrajectoryMessage;
 import imgui.ImGui;
-import imgui.type.ImInt;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.tools.Timer;
 
 public class RDXRobotLowLevelMessenger
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final RobotLowLevelMessenger robotLowLevelMessenger;
    private final CommunicationHelper communicationHelper;
-   private final RDXTeleoperationParameters teleoperationParameters;
-   private final ImInt pumpPSI = new ImInt(1);
-   private final String[] psiValues = new String[] {"1500", "2300", "2500", "2800"};
+   private final Timer hpuConnectedTimer = new Timer();
+   private final Timer robotServoedConnectedTimer = new Timer();
+   private boolean hpuEnabled = false;
+   private boolean isRobotServoed = false;
 
-   public RDXRobotLowLevelMessenger(CommunicationHelper communicationHelper, RDXTeleoperationParameters teleoperationParameters)
+   public RDXRobotLowLevelMessenger(CommunicationHelper communicationHelper)
    {
       this.communicationHelper = communicationHelper;
-      this.teleoperationParameters = teleoperationParameters;
-      robotLowLevelMessenger = communicationHelper.getOrCreateRobotLowLevelMessenger();
 
+      robotLowLevelMessenger = communicationHelper.getOrCreateRobotLowLevelMessenger();
       if (robotLowLevelMessenger == null)
       {
          String robotName = communicationHelper.getRobotModel().getSimpleRobotName();
          throw new RuntimeException("Please add implementation of RobotLowLevelMessenger for " + robotName);
       }
+
+      communicationHelper.subscribeToControllerViaVolatileCallback(EnableHPUStatusMessage.class, message ->
+      {
+         hpuConnectedTimer.reset();
+         hpuEnabled = message.getHpuEnabled();
+      });
+      communicationHelper.subscribeToControllerViaVolatileCallback(MasterGainScaleControllerStatusMessage.class, message ->
+      {
+         robotServoedConnectedTimer.reset();
+         isRobotServoed = message.getIsRobotServoed();
+      });
    }
 
    public void renderImGuiWidgets()
    {
+      if (hpuConnectedTimer.isRunning(1.0))
+      {
+         if (hpuEnabled)
+         {
+            ImGui.text("HPU is enabled.");
+         }
+         else
+         {
+            if (ImGui.button(labels.get("Enable HPU")))
+            {
+               EnableHPUCommandMessage enableHPUCommandMessage = new EnableHPUCommandMessage();
+               enableHPUCommandMessage.setEnableHpu(true);
+               communicationHelper.publishToController(enableHPUCommandMessage);
+            }
+         }
+      }
+      else
+      {
+         ImGui.textColored(ImGuiTools.DARK_RED, "HPU variable not connected.");
+      }
+
+      if (robotServoedConnectedTimer.isRunning(1.0))
+      {
+         if (isRobotServoed)
+         {
+            if (ImGui.button(labels.get("Unservo slowly")))
+            {
+               MasterGainScaleControllerCommandMessage masterGainScaleControllerCommandMessage = new MasterGainScaleControllerCommandMessage();
+               masterGainScaleControllerCommandMessage.setUnservoSlowly(true);
+               communicationHelper.publishToController(masterGainScaleControllerCommandMessage);
+            }
+         }
+         else
+         {
+            if (ImGui.button(labels.get("Servo robot")))
+            {
+               MasterGainScaleControllerCommandMessage masterGainScaleControllerCommandMessage = new MasterGainScaleControllerCommandMessage();
+               masterGainScaleControllerCommandMessage.setServoRobot(true);
+               communicationHelper.publishToController(masterGainScaleControllerCommandMessage);
+            }
+         }
+      }
+      else
+      {
+         ImGui.textColored(ImGuiTools.DARK_RED, "Robot servoed variable not connected.");
+      }
+
       if (ImGui.button(labels.get("Freeze")))
       {
          RDXBaseUI.pushNotification("Commanding freeze...");
@@ -83,19 +146,6 @@ public class RDXRobotLowLevelMessenger
          StopAllTrajectoryMessage stopAllTrajectoryMessage = new StopAllTrajectoryMessage();
          communicationHelper.publishToController(stopAllTrajectoryMessage);
       }
-
-      if (teleoperationParameters.getPSIAdjustable())
-      {
-         if (ImGui.combo("PSI", pumpPSI, psiValues, psiValues.length))
-         {
-            sendPSIRequest();
-         }
-         ImGui.sameLine();
-         if (ImGui.button("Resend PSI"))
-         {
-            sendPSIRequest();
-         }
-      }
    }
 
    public void sendStandRequest()
@@ -106,10 +156,5 @@ public class RDXRobotLowLevelMessenger
    public void sendFreezeRequest()
    {
       robotLowLevelMessenger.sendFreezeRequest();
-   }
-
-   private void sendPSIRequest()
-   {
-      robotLowLevelMessenger.setHydraulicPumpPSI(Integer.parseInt(psiValues[pumpPSI.get()]));
    }
 }

@@ -157,7 +157,7 @@ public class RDXTeleoperationManager extends RDXPanel
 
       syncedRobot = communicationHelper.newSyncedRobot(false);
 
-      robotLowLevelMessenger = new RDXRobotLowLevelMessenger(communicationHelper, teleoperationParameters);
+      robotLowLevelMessenger = new RDXRobotLowLevelMessenger(communicationHelper);
 
       desiredRobot = new RDXDesiredRobot(robotModel);
       desiredRobot.setSceneLevels(RDXSceneLevel.VIRTUAL);
