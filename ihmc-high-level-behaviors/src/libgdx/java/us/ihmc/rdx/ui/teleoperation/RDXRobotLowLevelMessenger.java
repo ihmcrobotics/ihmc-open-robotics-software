@@ -110,36 +110,21 @@ public class RDXRobotLowLevelMessenger
          ImGui.textColored(ImGuiTools.DARK_RED, "Robot servoed variable not connected.");
       }
 
-      ImGui.pushItemWidth(ImGuiTools.calcTextSizeX("DO_NOTHING_BEHAVIOR   "));
-      if (ImGui.beginCombo(labels.getHidden("highLevelStateToRequest"), highLevelStateToRequest.name()))
-      {
-         for (HighLevelControllerName controllerName : HighLevelControllerName.values)
-         {
-            if (ImGui.selectable(labels.get(controllerName.name()), highLevelStateToRequest == controllerName))
-            {
-               highLevelStateToRequest = controllerName;
-            }
-         }
-         ImGui.endCombo();
-      }
+      ImGui.text("Current controller state: %s".formatted(currentHighLevelState == null ? "Unknown" : currentHighLevelState.name()));
+      ImGui.text("Request:");
       ImGui.sameLine();
-      if (ImGui.button(labels.get("Request")))
+      if (ImGui.button(labels.get("Calibration")))
       {
          HighLevelStateMessage highLevelStateMessage = new HighLevelStateMessage();
-         highLevelStateMessage.setHighLevelControllerName(highLevelStateToRequest.toByte());
+         highLevelStateMessage.setHighLevelControllerName(HighLevelControllerName.CALIBRATION.toByte());
          communicationHelper.publishToController(highLevelStateMessage);
       }
       ImGui.sameLine();
-      ImGui.text("Current controller state: %s".formatted(currentHighLevelState == null ? "Unknown" : currentHighLevelState.name()));
-
-      
-
       if (ImGui.button(labels.get("Freeze")))
       {
          RDXBaseUI.pushNotification("Commanding freeze...");
          sendFreezeRequest();
       }
-
       ImGui.sameLine();
       if (ImGui.button(labels.get("Stand prep")))
       {
@@ -147,6 +132,7 @@ public class RDXRobotLowLevelMessenger
          sendStandRequest();
       }
 
+      ImGui.text("Command:");
       ImGui.sameLine();
       if (ImGui.button(labels.get("Home Pose")))
       {
