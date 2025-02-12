@@ -105,6 +105,7 @@ public final class ControllerAPI
 
       // Robot startup messages
       inputMessageClasses.add(EnableHPUCommandMessage.class);
+      inputMessageClasses.add(MasterGainScaleControllerCommandMessage.class);
 
       // Statuses supported by bipedal walking controller {@link WalkingControllerState}
       outputMessageClasses.add(CapturabilityBasedStatus.class);
@@ -135,6 +136,7 @@ public final class ControllerAPI
 
       // Robot hardware status messages
       outputMessageClasses.add(EnableHPUStatusMessage.class);
+      outputMessageClasses.add(MasterGainScaleControllerStatusMessage.class);
 
       // Setting the input messages with specific QoS
       inputMessageClassSpecificQoS.put(WholeBodyStreamingMessage.class, ROS2QosProfile.BEST_EFFORT());
