@@ -43,7 +43,7 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
 
    private final GpuMat inputDepthImage;
    private final GpuMat localHeightMapImage;
-   private final GpuMat globalHeightMapImage;
+   private GpuMat globalHeightMapImage;
    private final GpuMat terrainCostImage;
    private final GpuMat contactMapImage;
    private final GpuMat sensorCroppedHeightMapImage;
@@ -70,6 +70,7 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
    private final FloatPointer worldToGroundTransformDevicePointer;
    private final FloatPointer parametersHostPointer;
    private final FloatPointer parametersDevicePointer;
+   private final FilteredRapidHeightMapExtractor filteredRapidHeightMapExtractor;
 
    public int sequenceNumber = 0;
    private float gridOffsetX;
@@ -111,6 +112,8 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
       terrainMapData = new TerrainMapData(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize());
 
       recomputeDerivedParameters();
+      // Need to initialize this after the parameters have been computed to get the right size
+      filteredRapidHeightMapExtractor = new FilteredRapidHeightMapExtractor(stream, globalCellsPerAxis, globalCellsPerAxis);
 
       try
       {
@@ -206,6 +209,7 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
       globalHeightMapImage.setTo(new Scalar(resetOffset));
       emptyGlobalHeightMapImage.setTo(new Scalar(resetOffset));
 
+      filteredRapidHeightMapExtractor.reset();
       snappedFootstepsExtractor.reset(resetOffset);
 
       sequenceNumber = 0;
@@ -295,6 +299,9 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
       registerKernel.run(stream, registerKernelGridDim, blockSize, 0);
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
+
+      if (heightMapParameters.getEnableAlphaFilter())
+         globalHeightMapImage = filteredRapidHeightMapExtractor.update(globalHeightMapImage, 0);
 
       // Run the cropping kernel
       croppingKernel.withPointer(globalHeightMapImage.data()).withLong(globalHeightMapImage.step());
@@ -442,6 +449,7 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
       sensorCroppedHeightMapImage.close();
 
       snappedFootstepsExtractor.destroy();
+      filteredRapidHeightMapExtractor.destroy();
 
       // At the end we have to destroy the stream to release the memory
       CUDAStreamManager.releaseStream(stream);

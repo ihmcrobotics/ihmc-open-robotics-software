@@ -13,6 +13,11 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
       set(HeightMapParameters.resetHeightMap, resetHeightMap);
    }
 
+   default void setEnableAlphaFilter(boolean enableAlphaFilter)
+   {
+      set(HeightMapParameters.enableAlphaFilter, enableAlphaFilter);
+   }
+
    default void setSearchWindowHeight(int searchWindowHeight)
    {
       set(HeightMapParameters.searchWindowHeight, searchWindowHeight);

@@ -1,4 +1,4 @@
-#define LAYERS 2  // Set a fixed size
+#define LAYERS 10  // Set a fixed size
 
 extern "C"
 __global__
@@ -22,7 +22,7 @@ void filterRapidHeightMap(unsigned short * matrixPointer, size_t pitchA,
         unsigned short * currentLayer = (unsigned short*)((char*) matrixPointer + layer * layerSize);
         unsigned short * matrixPointerRow = (unsigned short*)((char*) currentLayer + indexY * pitchA) + indexX;
 
-        printf("Layer: %d, Value: %d, %d, and %d\n", layer, indexY, indexX, (int) *matrixPointerRow);
+//         printf("Layer: %d, Value: %d, %d, and %d\n", layer, indexY, indexX, (int) *matrixPointerRow);
         sum += (int) *matrixPointerRow;
     }
 
@@ -35,7 +35,7 @@ void filterRapidHeightMap(unsigned short * matrixPointer, size_t pitchA,
         unsigned short * matrixPointerRow = (unsigned short*)((char*) currentLayer + indexY * pitchA) + indexX;
 
         float diff = (float)(*matrixPointerRow) - avg;
-        variance[layer] = diff * diff;
+        variance[layer] = abs(diff);
     }
 
     double heightSum = 0;
@@ -47,26 +47,34 @@ void filterRapidHeightMap(unsigned short * matrixPointer, size_t pitchA,
         unsigned short * currentLayer = (unsigned short*)((char*) matrixPointer + layer * layerSize);
         unsigned short * matrixPointerRow = (unsigned short*)((char*) currentLayer + indexY * pitchA) + indexX;
 
-        heightSum += (float)(*matrixPointerRow) / variance[layer];
-        varianceSum += 1.0 / variance[layer];
+        if (variance[layer] > 0.0f)  // Prevent division by zero
+        {
+            heightSum += (double)(*matrixPointerRow) / (double)variance[layer];
+            varianceSum += 1.0 / (double)variance[layer];
+        }
     }
 
+//     printf("Height sum: %f\n", heightSum);
+//     printf("Variance sum: %f\n", varianceSum);
     unsigned short newHeight = heightSum / varianceSum;
 
-
     unsigned short * heightValue = (unsigned short*)((char*) newestHeightMap + indexY * pitchNewestHeightMap) + indexX;
-    float diff = (float) (*heightValue) - avg;
-    double newVariance = diff * diff;
+
+    int heightValueInt = (int) *heightValue;
+    float diff = (float) heightValueInt - avg;
+    float newVariance = abs(diff);
 
     if (*heightValue == defaultValue)
         return;
 
-    unsigned short heightEstimate = (unsigned short) *heightValue + (newHeight * newVariance) / newVariance;
 
+    float alpha = 0.2;
+//     printf("Equation parameters (heightValue %hu) (alpha %f) (avg %hu)\n", *heightValue, alpha, avg);
+    float heightEstimate = (float) *heightValue * alpha + (avg * (1.0 - alpha)); // (newHeight * newVariance) / newVariance;
 
     unsigned short *outputPointer = (unsigned short *)((char*) resultPointer + indexY * pitchResult) + indexX;
-    *outputPointer = heightEstimate;
+    *outputPointer = (unsigned short) heightEstimate;
 
-    printf("GPU Height Estimate: %d\n", heightEstimate);
+//     printf("GPU Height Estimate: %f\n", heightEstimate);
 }
 
