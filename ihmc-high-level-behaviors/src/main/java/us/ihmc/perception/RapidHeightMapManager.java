@@ -44,6 +44,7 @@ public class RapidHeightMapManager
    private final BytePointer compressedCroppedHeightMapPointer = new BytePointer();
 
    private RapidHeightMapDriftOffset rapidHeightMapDriftOffset;
+   private CUDAFlyingPointsFilter flyingPointsFilter;
 
    private GpuMat deviceDepthImage;
    private BytedecoImage heightMapBytedecoImage;
@@ -64,6 +65,7 @@ public class RapidHeightMapManager
          deviceDepthImage = new GpuMat(depthImageIntrinsics.getHeight(), depthImageIntrinsics.getWidth(), opencv_core.CV_16UC1);
          rapidHeightMapExtractor = new RapidHeightMapExtractorCUDA(leftFootSoleFrame, rightFootSoleFrame, deviceDepthImage, depthImageIntrinsics, 1);
          rapidHeightMapDriftOffset = new RapidHeightMapDriftOffset(controllerFootstepQueueMonitor);
+         flyingPointsFilter = new CUDAFlyingPointsFilter();
       }
       else
       {
@@ -146,14 +148,11 @@ public class RapidHeightMapManager
 
       if (runWithCUDA && RapidHeightMapExtractorCUDA.getHeightMapParameters().getFlyingPointsFilter())
       {
-         CUDAFlyingPointsFilter flyingPointsFilter = new CUDAFlyingPointsFilter();
-
          GpuMat deviceCroppedHeightMapImage = new GpuMat();
-
          deviceCroppedHeightMapImage.upload(croppedHeightMapImage);
-         deviceCroppedHeightMapImage = flyingPointsFilter.applyFilter(deviceCroppedHeightMapImage);
-         deviceCroppedHeightMapImage.download(croppedHeightMapImage);
-
+         GpuMat filteredDeviceCroppedHeightMapImage = flyingPointsFilter.applyFilter(deviceCroppedHeightMapImage);
+         filteredDeviceCroppedHeightMapImage.download(croppedHeightMapImage);
+         filteredDeviceCroppedHeightMapImage.close();
          deviceCroppedHeightMapImage.close();
       }
 
@@ -193,5 +192,6 @@ public class RapidHeightMapManager
    public void destroy()
    {
       rapidHeightMapExtractor.destroy();
+      flyingPointsFilter.destroy();
    }
 }

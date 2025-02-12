@@ -38,7 +38,7 @@ __device__ float computeMean(float* window, int size)
     return sum / size;
 }
 
-__device__ float computeStdDev(float* window, int size, float mean)
+__device__ float computePopulationStdDev(float* window, int size, float mean)
 {
     float sumSquares = 0.0f;
     for (int i = 0; i < size; ++i)
@@ -61,8 +61,9 @@ __global__ void filterFlyingPoints(unsigned short *in, size_t pitchIn,
     unsigned short *inputPixel = (unsigned short *)((char *)in + yIndex * pitchIn) + xIndex;
     unsigned short depthValue = *inputPixel;
 
-    // windowSize = 5 was chosen after visualizing 3x3, 5x5, and 7x7, as it gave the best result. It's a tuning parameter.
+    // windowSize = 5 was chosen after visualizing 3x3, 5x5, and 7x7, as it gave the best result for the height map. It's a tuning parameter.
     const int windowSize = 5;
+
     const int halfWindow = windowSize / 2;
     float window[windowSize * windowSize];
     int count = 0;
@@ -85,7 +86,7 @@ __global__ void filterFlyingPoints(unsigned short *in, size_t pitchIn,
 
     float median = computeMedian(window, count);
     float mean = computeMean(window, count);
-    float stdDev = computeStdDev(window, count, mean);
+    float stdDev = computePopulationStdDev(window, count, mean);
 
     unsigned short *outputPixel = (unsigned short *)((char *)out + yIndex * pitchOut) + xIndex;
 

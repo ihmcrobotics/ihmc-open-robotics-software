@@ -6,14 +6,12 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.junit.jupiter.api.Test;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 
-import static us.ihmc.robotics.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class CUDAFlyingPointsFilterTest
 {
-
    // Tests a simple 3x3 matrix where the input contains an outlier.
    // The test validates whether the kernel correctly replaces the outlier with the median of the surrounding values.
-
    @Test
    public void testSimpleMatrix() throws Exception
    {
@@ -27,7 +25,7 @@ public class CUDAFlyingPointsFilterTest
       inputMat.ptr(0, 1).putShort((short) 10);
       inputMat.ptr(0, 2).putShort((short) 10);
       inputMat.ptr(1, 0).putShort((short) 10);
-      inputMat.ptr(1, 1).putShort((short) 1100); // outlier
+      inputMat.ptr(1, 1).putShort((short) 15); // outlier
       inputMat.ptr(1, 2).putShort((short) 10);
       inputMat.ptr(2, 0).putShort((short) 10);
       inputMat.ptr(2, 1).putShort((short) 10);
@@ -46,11 +44,11 @@ public class CUDAFlyingPointsFilterTest
       {
          for (int j = 0; j < outputMat.cols(); j++)
          {
-            assertEquals("Element [" + i + "][" + j + "]", 10, outputMat.ptr(i, j).get(), 0.0);
+            assertEquals(10, outputMat.ptr(i, j).get(), "Element [" + i + "][" + j + "]");
          }
       }
-
       filterGpuMat.close();
       outputMat.close();
+      flyingPointsFilter.destroy();
    }
 }

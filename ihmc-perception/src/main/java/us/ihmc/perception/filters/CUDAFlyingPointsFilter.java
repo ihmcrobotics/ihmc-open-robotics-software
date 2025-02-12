@@ -5,7 +5,6 @@ import org.bytedeco.cuda.cudart.dim3;
 import org.bytedeco.cuda.global.cudart;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
-import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
 
@@ -24,7 +23,7 @@ public class CUDAFlyingPointsFilter
    public CUDAFlyingPointsFilter() throws Exception
    {
       stream = CUDAStreamManager.getStream();
-      URL kernelPath = getClass().getResource("/CUDA/FlyingPointFilterKernel.cu");
+      URL kernelPath = getClass().getResource("/us/ihmc/perception/cuda/FlyingPointFilter.cu");
       flyingPointFilterCUDAProgram = new CUDAProgram(kernelPath);
       String filterKernelName = "filterFlyingPoints";
       flyingPointFilterKernel = flyingPointFilterCUDAProgram.loadKernel(filterKernelName);
@@ -38,6 +37,11 @@ public class CUDAFlyingPointsFilter
    }
 
    public GpuMat applyFilter(GpuMat deviceInputImage)
+   {
+      return applyFilterAsync(deviceInputImage, stream);
+   }
+
+   public GpuMat applyFilterAsync(GpuMat deviceInputImage, CUstream_st stream)
    {
       GpuMat deviceOutputImage = new GpuMat(deviceInputImage.rows(), deviceInputImage.cols(), opencv_core.CV_16UC1);
 
