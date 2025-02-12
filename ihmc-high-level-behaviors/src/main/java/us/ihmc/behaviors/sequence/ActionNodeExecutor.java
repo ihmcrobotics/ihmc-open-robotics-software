@@ -7,13 +7,9 @@ public abstract class ActionNodeExecutor<S extends ActionNodeState<D>,
                                          D extends ActionNodeDefinition>
       extends LeafNodeExecutor<S, D>
 {
-   private final S state;
-
    public ActionNodeExecutor(S state)
    {
       super(state);
-
-      this.state = state;
    }
 
    /** Trigger the action to begin executing. Called once per execution. */

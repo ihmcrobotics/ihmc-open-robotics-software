@@ -33,8 +33,6 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionState, ScrewPrimitiveActionDefinition>
 {
-   private final ScrewPrimitiveActionState state;
-   private final ScrewPrimitiveActionDefinition definition;
    private final ROS2SyncedRobotModel syncedRobot;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiReferenceFrameLibraryCombo objectFrameComboBox;
@@ -65,9 +63,6 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
                                   ROS2SyncedRobotModel syncedRobot)
    {
       super(new ScrewPrimitiveActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
-
-      state = getState();
-      definition = getDefinition();
 
       this.syncedRobot = syncedRobot;
 
@@ -164,7 +159,7 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
 
          if (state.getIsNextForExecution())
          {
-            RDXArmMultiBodyGraphic armMultiBodyGraphic = armMultiBodyGraphics.get(getDefinition().getSide());
+            RDXArmMultiBodyGraphic armMultiBodyGraphic = armMultiBodyGraphics.get(definition.getSide());
             armMultiBodyGraphic.getFloatingJoint().getJointPose().set(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getChestFrame));
             for (int i = 0; i < armMultiBodyGraphic.getJoints().length; i++)
             {
@@ -258,7 +253,7 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
          trajectoryGraphic.getRenderables(renderables, pool);
 
          if (state.getIsNextForExecution())
-            armMultiBodyGraphics.get(getDefinition().getSide()).getRootBody().getVisualRenderables(renderables, pool);
+            armMultiBodyGraphics.get(definition.getSide()).getRootBody().getVisualRenderables(renderables, pool);
       }
    }
 

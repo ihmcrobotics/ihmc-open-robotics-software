@@ -11,16 +11,11 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
                                     D extends ActionNodeDefinition>
       extends RDXLeafNode<S, D>
 {
-   private final S state;
-   private final D definition;
    private final RDXActionProgressWidgets progressWidgets = new RDXActionProgressWidgets(this);
 
    public RDXActionNode(S state)
    {
       super(state);
-
-      this.state = state;
-      definition = getDefinition();
    }
 
    public RDXActionProgressWidgets getProgressWidgets()

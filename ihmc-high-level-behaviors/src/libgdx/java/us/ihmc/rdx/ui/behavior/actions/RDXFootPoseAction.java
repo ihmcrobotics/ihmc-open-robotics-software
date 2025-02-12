@@ -37,8 +37,6 @@ import java.util.List;
 
 public class RDXFootPoseAction extends RDXActionNode<FootPoseActionState, FootPoseActionDefinition>
 {
-   private final FootPoseActionState state;
-   private final FootPoseActionDefinition definition;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
    private final ImDoubleWrapper trajectoryDurationWidget;
@@ -63,9 +61,6 @@ public class RDXFootPoseAction extends RDXActionNode<FootPoseActionState, FootPo
    {
       super(new FootPoseActionState(id, crdtInfo,saveFileDirectory, referenceFrameLibrary));
 
-      state = getState();
-      definition = getDefinition();
-
       poseGizmo = new RDXSelectablePose3DGizmo();
       poseGizmo.create(panel3D);
 
@@ -73,8 +68,8 @@ public class RDXFootPoseAction extends RDXActionNode<FootPoseActionState, FootPo
                                                                 referenceFrameLibrary,
                                                                 definition::getParentFrameName,
                                                                 state.getFootFrame()::changeFrame);
-      trajectoryDurationWidget = new ImDoubleWrapper(getDefinition()::getTrajectoryDuration,
-                                                     getDefinition()::setTrajectoryDuration,
+      trajectoryDurationWidget = new ImDoubleWrapper(definition::getTrajectoryDuration,
+                                                     definition::setTrajectoryDuration,
                                                      imDouble -> ImGuiTools.volatileInputDouble(labels.get("Trajectory duration"), imDouble));
 
       for (RobotSide side : RobotSide.values)
@@ -138,7 +133,7 @@ public class RDXFootPoseAction extends RDXActionNode<FootPoseActionState, FootPo
    {
       if (isMouseHovering)
       {
-         tooltip.render("%s Action\nIndex: %d\nName: %s".formatted(getLeafTypeTitle(), state.getLeafIndex(), getDefinition().getName()));
+         tooltip.render("%s Action\nIndex: %d\nName: %s".formatted(getLeafTypeTitle(), state.getLeafIndex(), definition.getName()));
       }
    }
 
