@@ -614,7 +614,7 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
    private int getStepsBeforePause()
    {
       // Check if we can continue walking if we are paused.
-      if (isPausedWithSteps.getValue() && yoTime.getValue() >= timeToContinueWalking.getValue())
+      /*if (isPausedWithSteps.getValue() && yoTime.getValue() >= timeToContinueWalking.getValue())
       {
          isPausedWithSteps.set(false);
       }
@@ -622,7 +622,7 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
       if (isWalkingPaused.getValue() || isPausedWithSteps.getValue())
       {
          return 0;
-      }
+      }*/
 
       int stepIndex = 0;
       while (stepIndex < upcomingFootsteps.size())

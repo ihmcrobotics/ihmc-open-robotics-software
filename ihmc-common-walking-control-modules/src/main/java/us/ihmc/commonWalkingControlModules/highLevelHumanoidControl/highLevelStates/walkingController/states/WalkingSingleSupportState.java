@@ -147,7 +147,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
                                                        });
 
-      updateFootstepContinuouslyThroughoutSwing.set(false);
+      updateFootstepContinuouslyThroughoutSwing.set(true);
    }
 
    int stepsToAdd;
