@@ -25,7 +25,7 @@ public class FilteredRapidHeightMapExtractorTest
          GpuMat latestDepthMat = new GpuMat();
          latestDepthMat.upload(cpuData);
 
-         GpuMat currentAverage = filteredRapidHeightMapExtractor.update(latestDepthMat);
+         GpuMat currentAverage = filteredRapidHeightMapExtractor.update(latestDepthMat, 0);
          Mat temp = new Mat();
          currentAverage.download(temp);
          PerceptionDebugTools.printMat("current", temp, 1);

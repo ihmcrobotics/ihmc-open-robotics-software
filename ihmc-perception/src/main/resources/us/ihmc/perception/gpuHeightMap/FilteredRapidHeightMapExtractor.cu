@@ -1,8 +1,11 @@
+#define LAYERS 2  // Set a fixed size
+
 extern "C"
 __global__
 void filterRapidHeightMap(unsigned short * matrixPointer, size_t pitchA,
                          unsigned short * resultPointer, size_t pitchResult,
-                         size_t layerSize, int rows, int cols, int layers)
+                         unsigned short * newestHeightMap, size_t pitchNewestHeightMap,
+                         size_t layerSize, int rows, int cols, int defaultValue)
 {
     int indexX = blockIdx.x * blockDim.x + threadIdx.x;
     int indexY = blockIdx.y * blockDim.y + threadIdx.y;
@@ -11,23 +14,59 @@ void filterRapidHeightMap(unsigned short * matrixPointer, size_t pitchA,
         return;
 
     int sum = 0;
+    float variance[LAYERS] = {0};
 
-    for (int layer = 0; layer < layers; layer++)
+    // Compute the average height of the history in order to get the variance at each layer
+    for (int layer = 0; layer < LAYERS; layer++)
     {
-        // Compute the base address of the current layer
         unsigned short * currentLayer = (unsigned short*)((char*) matrixPointer + layer * layerSize);
-
-        // Compute row offset using pitchA
         unsigned short * matrixPointerRow = (unsigned short*)((char*) currentLayer + indexY * pitchA) + indexX;
 
         printf("Layer: %d, Value: %d, %d, and %d\n", layer, indexY, indexX, (int) *matrixPointerRow);
         sum += (int) *matrixPointerRow;
     }
 
-    unsigned short avg = sum / layers;
+    unsigned short avg = sum / LAYERS;
+
+    // Compute the variance for each layer
+    for (int layer = 0; layer < LAYERS; layer++)
+    {
+        unsigned short * currentLayer = (unsigned short*)((char*) matrixPointer + layer * layerSize);
+        unsigned short * matrixPointerRow = (unsigned short*)((char*) currentLayer + indexY * pitchA) + indexX;
+
+        float diff = (float)(*matrixPointerRow) - avg;
+        variance[layer] = diff * diff;
+    }
+
+    double heightSum = 0;
+    double varianceSum = 0;
+
+    // Compute the height and variance sum
+    for (int layer = 0; layer < LAYERS; layer++)
+    {
+        unsigned short * currentLayer = (unsigned short*)((char*) matrixPointer + layer * layerSize);
+        unsigned short * matrixPointerRow = (unsigned short*)((char*) currentLayer + indexY * pitchA) + indexX;
+
+        heightSum += (float)(*matrixPointerRow) / variance[layer];
+        varianceSum += 1.0 / variance[layer];
+    }
+
+    unsigned short newHeight = heightSum / varianceSum;
+
+
+    unsigned short * heightValue = (unsigned short*)((char*) newestHeightMap + indexY * pitchNewestHeightMap) + indexX;
+    float diff = (float) (*heightValue) - avg;
+    double newVariance = diff * diff;
+
+    if (*heightValue == defaultValue)
+        return;
+
+    unsigned short heightEstimate = (unsigned short) *heightValue + (newHeight * newVariance) / newVariance;
+
 
     unsigned short *outputPointer = (unsigned short *)((char*) resultPointer + indexY * pitchResult) + indexX;
-    *outputPointer = avg;
-    printf("GPU Average: %d, ", avg);
+    *outputPointer = heightEstimate;
+
+    printf("GPU Height Estimate: %d\n", heightEstimate);
 }
 

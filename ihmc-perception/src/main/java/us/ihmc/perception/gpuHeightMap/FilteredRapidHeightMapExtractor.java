@@ -30,6 +30,7 @@ public class FilteredRapidHeightMapExtractor
    private final CUDAKernel kernel;
    private final CUDAProgram program;
    private int loopTracker = 0;
+   private int defaultValue;
 
    public FilteredRapidHeightMapExtractor(CUstream_st stream, int rows, int cols)
    {
@@ -72,8 +73,10 @@ public class FilteredRapidHeightMapExtractor
       }
    }
 
-   public GpuMat update(GpuMat latestGlobalHeightMap)
+   public GpuMat update(GpuMat latestGlobalHeightMap, int defaultValue)
    {
+      this.defaultValue = defaultValue;
+
       GpuMat heightMapAverage = computerHeightMapHistoryAverage(latestGlobalHeightMap);
 
       return latestGlobalHeightMap;
@@ -102,13 +105,16 @@ public class FilteredRapidHeightMapExtractor
       int error;
 
       GpuMat result = new GpuMat(rows, cols, opencv_core.CV_16UC1);
+      GpuMat variance = new GpuMat(rows, cols, opencv_core.CV_16UC1);
 
       kernel.withPointer(pointerTo3DArray.ptr()).withLong(pointerTo3DArray.pitch());
       kernel.withPointer(result.data()).withLong(result.step());
+      kernel.withPointer(variance.data()).withLong(variance.step());
       kernel.withLong(pointerTo3DArray.pitch() * rows);
       kernel.withInt(rows);
       kernel.withInt(cols);
       kernel.withInt(layers);
+      kernel.withInt(defaultValue);
 
       dim3 gridDim = new dim3();
       dim3 blockDim = new dim3(cols, rows, 1);
