@@ -67,6 +67,18 @@ public class RDXPredefinedRigidBodySceneNodeBuilder extends RDXSceneNodeBuilder<
    {
       switch (modelName)
       {
+         case "Barrier" ->
+         {
+            PredefinedRigidBodySceneNode barrier = new PredefinedRigidBodySceneNode(nextID,
+                                                                                    name,
+                                                                                    sceneGraph.getIDToNodeMap(),
+                                                                                    parent.getID(),
+                                                                                    new RigidBodyTransform(),
+                                                                                    BARRIER_VISUAL_MODEL_FILE_PATH,
+                                                                                    BARRIER_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
+                                                                                    sceneGraph.getCRDTInfo());
+            return new RDXPredefinedRigidBodySceneNode(barrier, RDXBaseUI.getInstance().getPrimary3DPanel());
+         }
          case "Box" ->
          {
             PredefinedRigidBodySceneNode box = new PredefinedRigidBodySceneNode(nextID,
@@ -91,7 +103,7 @@ public class RDXPredefinedRigidBodySceneNodeBuilder extends RDXSceneNodeBuilder<
                                                                                       sceneGraph.getCRDTInfo());
             return new RDXPredefinedRigidBodySceneNode(canOfSoup, RDXBaseUI.getInstance().getPrimary3DPanel());
          }
-         case "2X4" ->
+         case "PieceOfWood" ->
          {
             PredefinedRigidBodySceneNode twoByFour = new PredefinedRigidBodySceneNode(nextID,
                                                                                       name,
@@ -223,9 +235,9 @@ public class RDXPredefinedRigidBodySceneNodeBuilder extends RDXSceneNodeBuilder<
                                                                                      sceneGraph.getCRDTInfo());
             return new RDXPredefinedRigidBodySceneNode(trashCan, RDXBaseUI.getInstance().getPrimary3DPanel());
          }
-         case "RightDoorPanel" ->
+         case "DoorPanel" ->
          {
-            PredefinedRigidBodySceneNode rightDoorPanel = new PredefinedRigidBodySceneNode(nextID,
+            PredefinedRigidBodySceneNode doorPanel = new PredefinedRigidBodySceneNode(nextID,
                                                                                            name,
                                                                                            sceneGraph.getIDToNodeMap(),
                                                                                            parent.getID(),
@@ -233,7 +245,7 @@ public class RDXPredefinedRigidBodySceneNodeBuilder extends RDXSceneNodeBuilder<
                                                                                            DoorSceneNodeDefinitions.DOOR_PANEL_VISUAL_MODEL_FILE_PATH,
                                                                                            DoorSceneNodeDefinitions.PULL_DOOR_PANEL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
                                                                                            sceneGraph.getCRDTInfo());
-            return new RDXPredefinedRigidBodySceneNode(rightDoorPanel, RDXBaseUI.getInstance().getPrimary3DPanel());
+            return new RDXPredefinedRigidBodySceneNode(doorPanel, RDXBaseUI.getInstance().getPrimary3DPanel());
          }
          case "DoorLever" ->
          {
@@ -258,6 +270,30 @@ public class RDXPredefinedRigidBodySceneNodeBuilder extends RDXSceneNodeBuilder<
                                                                                    CHARGE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
                                                                                    sceneGraph.getCRDTInfo());
             return new RDXPredefinedRigidBodySceneNode(charge, RDXBaseUI.getInstance().getPrimary3DPanel());
+         }
+         case "Person" ->
+         {
+            PredefinedRigidBodySceneNode person = new PredefinedRigidBodySceneNode(nextID,
+                                                                                   name,
+                                                                                   sceneGraph.getIDToNodeMap(),
+                                                                                   parent.getID(),
+                                                                                   new RigidBodyTransform(),
+                                                                                   PERSON_VISUAL_MODEL_FILE_PATH,
+                                                                                   PERSON_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
+                                                                                   sceneGraph.getCRDTInfo());
+            return new RDXPredefinedRigidBodySceneNode(person, RDXBaseUI.getInstance().getPrimary3DPanel());
+         }
+         case "Table" ->
+         {
+            PredefinedRigidBodySceneNode table = new PredefinedRigidBodySceneNode(nextID,
+                                                                                   name,
+                                                                                   sceneGraph.getIDToNodeMap(),
+                                                                                   parent.getID(),
+                                                                                   new RigidBodyTransform(),
+                                                                                   TABLE_VISUAL_MODEL_FILE_PATH,
+                                                                                   TABLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
+                                                                                   sceneGraph.getCRDTInfo());
+            return new RDXPredefinedRigidBodySceneNode(table, RDXBaseUI.getInstance().getPrimary3DPanel());
          }
          default -> throw new IllegalStateException("Unexpected value: " + name);
       }
