@@ -6,8 +6,9 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.rdx.gdx.RDXLwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.RDXSingleContext3DSituatedImGuiPanel;
-import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.scene.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2PointCloudVisualizer;
 import us.ihmc.rdx.vr.RDXVRApplication;
 import us.ihmc.rdx.vr.RDXVRContext;
@@ -26,7 +27,7 @@ public class RDXVROnlyPointCloudWithImGuiPanelDemo
 
    public RDXVROnlyPointCloudWithImGuiPanelDemo()
    {
-      vrApplication.launch(new Lwjgl3ApplicationAdapter()
+      vrApplication.launch(new RDXLwjgl3ApplicationAdapter()
       {
          @Override
          public void create()

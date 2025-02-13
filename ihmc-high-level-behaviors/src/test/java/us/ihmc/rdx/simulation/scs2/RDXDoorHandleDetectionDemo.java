@@ -2,14 +2,14 @@ package us.ihmc.rdx.simulation.scs2;
 
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
-import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
+import us.ihmc.rdx.gdx.RDXLwjgl3ApplicationAdapter;
 import us.ihmc.rdx.perception.RDXOpenCVOpticalFlowTrackingUI;
-import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.scene.RDXSceneLevel;
 import us.ihmc.rdx.simulation.environment.RDXEnvironmentBuilder;
 import us.ihmc.rdx.simulation.sensors.RDXHighLevelDepthSensorSimulator;
 import us.ihmc.rdx.simulation.sensors.RDXSimulatedSensorFactory;
-import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
+import us.ihmc.rdx.RDXBaseUI;
+import us.ihmc.rdx.gizmo.RDXPose3DGizmo;
 
 public class RDXDoorHandleDetectionDemo
 {
@@ -22,7 +22,7 @@ public class RDXDoorHandleDetectionDemo
 
    public RDXDoorHandleDetectionDemo()
    {
-      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
+      baseUI.launchRDXApplication(new RDXLwjgl3ApplicationAdapter()
       {
          @Override
          public void create()

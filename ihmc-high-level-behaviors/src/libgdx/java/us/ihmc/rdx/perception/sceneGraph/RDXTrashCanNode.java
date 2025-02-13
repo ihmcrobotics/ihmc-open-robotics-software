@@ -10,7 +10,7 @@ import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.rigidBody.trashcan.TrashCanNode;
 import us.ihmc.rdx.imgui.ImGuiTools;
-import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.scene.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 
 import java.util.Set;

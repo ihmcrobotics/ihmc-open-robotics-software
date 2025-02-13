@@ -12,8 +12,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.rdx.imgui.ImGuiTools;
-import us.ihmc.rdx.tools.LibGDXTools;
-import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.rdx.gdx.LibGDXTools;
+import us.ihmc.rdx.RDX3DPanel;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;

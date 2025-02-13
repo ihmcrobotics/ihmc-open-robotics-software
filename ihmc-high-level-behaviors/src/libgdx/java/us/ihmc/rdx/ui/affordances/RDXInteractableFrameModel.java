@@ -21,12 +21,12 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.input.ImGui3DViewPickResult;
-import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.tools.RDXModelInstance;
-import us.ihmc.rdx.tools.LibGDXTools;
-import us.ihmc.rdx.ui.RDX3DPanel;
-import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
-import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
+import us.ihmc.rdx.scene.RDXSceneLevel;
+import us.ihmc.rdx.model.RDXModelInstance;
+import us.ihmc.rdx.gdx.LibGDXTools;
+import us.ihmc.rdx.RDX3DPanel;
+import us.ihmc.rdx.gizmo.RDXPose3DGizmo;
+import us.ihmc.rdx.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 

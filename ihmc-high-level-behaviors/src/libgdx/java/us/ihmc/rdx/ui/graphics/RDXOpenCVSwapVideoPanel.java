@@ -1,9 +1,7 @@
 package us.ihmc.rdx.ui.graphics;
 
-import us.ihmc.rdx.ui.RDXImagePanel;
+import us.ihmc.rdx.RDXImagePanel;
 import us.ihmc.tools.thread.SwapReference;
-
-import java.util.function.Consumer;
 
 /**
  * This class is designed to (at most) double the display frame rate of images which

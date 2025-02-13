@@ -15,7 +15,7 @@ import com.badlogic.gdx.graphics.g3d.utils.TextureProvider;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import org.lwjgl.opengl.GL41;
-import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.gdx.RDXLwjgl3ApplicationAdapter;
 
 import static com.badlogic.gdx.graphics.VertexAttributes.Usage.*;
 
@@ -24,7 +24,7 @@ public class RDX3DImageTextureDemo
    public RDX3DImageTextureDemo()
    {
       RDXBaseUI baseUI = new RDXBaseUI();
-      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
+      baseUI.launchRDXApplication(new RDXLwjgl3ApplicationAdapter()
       {
          private int width = 800;
          private int height = 600;

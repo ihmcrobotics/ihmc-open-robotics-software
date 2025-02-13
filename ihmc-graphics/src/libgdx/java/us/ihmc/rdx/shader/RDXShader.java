@@ -7,7 +7,7 @@ import com.badlogic.gdx.graphics.g3d.shaders.BaseShader;
 import com.badlogic.gdx.graphics.g3d.utils.ShaderProvider;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import org.apache.commons.lang3.tuple.Pair;
-import us.ihmc.rdx.tools.LibGDXTools;
+import us.ihmc.rdx.gdx.LibGDXTools;
 import us.ihmc.log.LogTools;
 
 public class RDXShader implements ShaderProvider

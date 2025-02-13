@@ -1,6 +1,6 @@
 package us.ihmc.rdx.ui.graphics;
 
-import us.ihmc.rdx.ui.RDXImagePanel;
+import us.ihmc.rdx.RDXImagePanel;
 import us.ihmc.tools.thread.GuidedSwapReference;
 
 import java.util.function.Consumer;

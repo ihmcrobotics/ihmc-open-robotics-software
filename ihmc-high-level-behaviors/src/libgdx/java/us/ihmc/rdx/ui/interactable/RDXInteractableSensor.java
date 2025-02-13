@@ -4,8 +4,8 @@ import com.badlogic.gdx.graphics.g3d.model.data.ModelData;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.rdx.tools.RDXModelLoader;
-import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.rdx.model.RDXModelLoader;
+import us.ihmc.rdx.RDX3DPanel;
 import us.ihmc.rdx.ui.affordances.RDXInteractableFrameModel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 

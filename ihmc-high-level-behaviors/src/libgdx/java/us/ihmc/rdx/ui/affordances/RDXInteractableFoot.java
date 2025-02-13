@@ -3,7 +3,7 @@ package us.ihmc.rdx.ui.affordances;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.RDXBaseUI;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 

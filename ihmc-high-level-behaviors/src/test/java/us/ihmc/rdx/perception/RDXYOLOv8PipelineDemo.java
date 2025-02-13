@@ -24,9 +24,9 @@ import us.ihmc.perception.detections.yolo.YOLOv8Model;
 import us.ihmc.perception.detections.yolo.YOLOv8Tools;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.opencl.OpenCLDepthImageSegmenter;
-import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.tools.RDXModelBuilder;
-import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.gdx.RDXLwjgl3ApplicationAdapter;
+import us.ihmc.rdx.model.RDXModelBuilder;
+import us.ihmc.rdx.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer;
 import us.ihmc.rdx.ui.graphics.RDXRawImagePointCloudVisualizer;
 import us.ihmc.ros2.ROS2Node;
@@ -121,7 +121,7 @@ public class RDXYOLOv8PipelineDemo
 
       task = executor.submit(() -> grabFrame(frameToGrab.get()));
 
-      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
+      baseUI.launchRDXApplication(new RDXLwjgl3ApplicationAdapter()
       {
          @Override
          public void create()

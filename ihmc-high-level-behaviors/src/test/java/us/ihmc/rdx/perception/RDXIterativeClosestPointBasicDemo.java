@@ -16,11 +16,11 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneObjectDefinitions;
-import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.RDXPointCloudRendererOld;
-import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.ui.RDX3DPanel;
-import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.gdx.RDXLwjgl3ApplicationAdapter;
+import us.ihmc.rdx.graphics.RDXPointCloudRendererOld;
+import us.ihmc.rdx.scene.RDXSceneLevel;
+import us.ihmc.rdx.RDX3DPanel;
+import us.ihmc.rdx.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXInteractableReferenceFrame;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
@@ -90,7 +90,7 @@ public class RDXIterativeClosestPointBasicDemo
 
    public RDXIterativeClosestPointBasicDemo()
    {
-      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
+      baseUI.launchRDXApplication(new RDXLwjgl3ApplicationAdapter()
       {
          @Override
          public void create()

@@ -1,7 +1,7 @@
 package us.ihmc.rdx.ui.plotting;
 
-import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.gdx.RDXLwjgl3ApplicationAdapter;
+import us.ihmc.rdx.RDXBaseUI;
 
 public class RDXSCS2StyleChartDemo
 {
@@ -11,7 +11,7 @@ public class RDXSCS2StyleChartDemo
    {
       baseUI = new RDXBaseUI();
 
-      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
+      baseUI.launchRDXApplication(new RDXLwjgl3ApplicationAdapter()
       {
          @Override
          public void create()

@@ -3,7 +3,7 @@ package us.ihmc.rdx.ui.affordances;
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.rdx.RDX3DPanel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 

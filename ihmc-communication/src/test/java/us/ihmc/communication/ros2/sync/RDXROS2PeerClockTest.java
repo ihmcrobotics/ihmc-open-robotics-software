@@ -3,10 +3,10 @@ package us.ihmc.communication.ros2.sync;
 import imgui.ImGui;
 import us.ihmc.commons.thread.Throttler;
 import us.ihmc.pubsub.common.Guid;
-import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
+import us.ihmc.rdx.gdx.RDXLwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.RDXBaseUI;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
 
@@ -21,7 +21,7 @@ public class RDXROS2PeerClockTest
    public RDXROS2PeerClockTest()
    {
       RDXBaseUI baseUI = new RDXBaseUI();
-      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
+      baseUI.launchRDXApplication(new RDXLwjgl3ApplicationAdapter()
       {
          private ROS2Node ros2Node;
          private ROS2PeerClockOffsetEstimator clockEstimator;

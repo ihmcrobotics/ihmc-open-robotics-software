@@ -7,8 +7,8 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneObjectDefinitions;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObject;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObjectFactory;
-import us.ihmc.rdx.tools.LibGDXTools;
-import us.ihmc.rdx.tools.RDXModelLoader;
+import us.ihmc.rdx.gdx.LibGDXTools;
+import us.ihmc.rdx.model.RDXModelLoader;
 
 public class RDXWorkPlatformObject extends RDXEnvironmentObject
 {

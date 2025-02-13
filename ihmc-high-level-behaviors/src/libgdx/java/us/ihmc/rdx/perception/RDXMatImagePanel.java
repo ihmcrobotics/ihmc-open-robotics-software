@@ -8,7 +8,7 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.MutableBytePointer;
-import us.ihmc.rdx.ui.RDXImagePanel;
+import us.ihmc.rdx.RDXImagePanel;
 
 public class RDXMatImagePanel
 {

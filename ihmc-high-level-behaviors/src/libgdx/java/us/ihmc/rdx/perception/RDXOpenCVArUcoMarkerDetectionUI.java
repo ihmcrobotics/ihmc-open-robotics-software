@@ -22,9 +22,9 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.ImPlotDoublePlotLine;
 import us.ihmc.rdx.imgui.ImPlotPlot;
 import us.ihmc.rdx.imgui.RDXPanel;
-import us.ihmc.rdx.tools.RDXModelBuilder;
-import us.ihmc.rdx.tools.RDXModelInstance;
-import us.ihmc.rdx.ui.RDXImagePanel;
+import us.ihmc.rdx.model.RDXModelBuilder;
+import us.ihmc.rdx.model.RDXModelInstance;
+import us.ihmc.rdx.RDXImagePanel;
 import us.ihmc.tools.thread.SwapReference;
 
 import java.util.ArrayList;

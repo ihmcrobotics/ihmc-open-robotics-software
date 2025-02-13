@@ -26,7 +26,7 @@ import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.RDXBaseUI;
 import us.ihmc.footstepPlanning.LocomotionParameters;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;

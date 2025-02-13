@@ -8,9 +8,9 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import org.lwjgl.opengl.GL41;
-import us.ihmc.rdx.tools.BoxesDemoModel;
-import us.ihmc.rdx.tools.RDXModelBuilder;
-import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.gdx.RDXLwjgl3ApplicationAdapter;
+import us.ihmc.rdx.demo.BoxesDemoModel;
+import us.ihmc.rdx.model.RDXModelBuilder;
 
 /**
  * Not working anymore.
@@ -23,7 +23,7 @@ public class RDX3DWith2DUIDemo
    public RDX3DWith2DUIDemo()
    {
       RDXBaseUI baseUI = new RDXBaseUI();
-      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
+      baseUI.launchRDXApplication(new RDXLwjgl3ApplicationAdapter()
       {
          @Override
          public void create()

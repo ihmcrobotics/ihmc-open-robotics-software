@@ -3,10 +3,11 @@ package us.ihmc.rdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Matrix4;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.gdx.RDXLwjgl3ApplicationAdapter;
+import us.ihmc.rdx.graphics.RDXPointCloudRendererOld;
+import us.ihmc.rdx.scene.RDXSceneLevel;
 import us.ihmc.rdx.simulation.sensors.RDXLowLevelDepthSensorSimulator;
-import us.ihmc.rdx.tools.LibGDXTools;
-import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.gdx.LibGDXTools;
 
 public class RDXDepthSensorDemo
 {
@@ -16,7 +17,7 @@ public class RDXDepthSensorDemo
    public RDXDepthSensorDemo()
    {
       RDXBaseUI baseUI = new RDXBaseUI();
-      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
+      baseUI.launchRDXApplication(new RDXLwjgl3ApplicationAdapter()
       {
          @Override
          public void create()

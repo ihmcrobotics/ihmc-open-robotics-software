@@ -4,11 +4,11 @@ import imgui.type.ImDouble;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.perception.parameters.IntrinsicCameraMatrixProperties;
 import us.ihmc.perception.sensorHead.SensorHeadParameters;
-import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
+import us.ihmc.rdx.gdx.RDXLwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.RDXBaseUI;
 import us.ihmc.rdx.ui.interactable.RDXInteractableBlackflyFujinon;
 
 public class RDXNettyOusterFisheyeColorDemo
@@ -29,7 +29,7 @@ public class RDXNettyOusterFisheyeColorDemo
 
    public RDXNettyOusterFisheyeColorDemo()
    {
-      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
+      baseUI.launchRDXApplication(new RDXLwjgl3ApplicationAdapter()
       {
          @Override
          public void create()

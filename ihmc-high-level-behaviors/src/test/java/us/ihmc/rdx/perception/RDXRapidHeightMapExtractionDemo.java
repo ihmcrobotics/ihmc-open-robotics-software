@@ -16,10 +16,10 @@ import us.ihmc.perception.HumanoidPerceptionModule;
 import us.ihmc.perception.logging.PerceptionDataLoader;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.perception.opencl.OpenCLManager;
-import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
+import us.ihmc.rdx.gdx.RDXLwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.RDXPanel;
-import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.RDXBaseUI;
 import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.ros2.ROS2Node;
@@ -80,7 +80,7 @@ public class RDXRapidHeightMapExtractionDemo
       ROS2Node ros2Node = new ROS2NodeBuilder().build("simulation_ui");
       ros2Helper = new ROS2Helper(ros2Node);
 
-      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
+      baseUI.launchRDXApplication(new RDXLwjgl3ApplicationAdapter()
       {
          @Override
          public void create()

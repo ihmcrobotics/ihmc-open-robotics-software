@@ -15,12 +15,12 @@ import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneNode;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.tools.RDXModelInstance;
-import us.ihmc.rdx.ui.RDX3DPanel;
-import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.scene.RDXSceneLevel;
+import us.ihmc.rdx.model.RDXModelInstance;
+import us.ihmc.rdx.RDX3DPanel;
+import us.ihmc.rdx.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXBallAndArrowPosePlacement;
-import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
+import us.ihmc.rdx.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 

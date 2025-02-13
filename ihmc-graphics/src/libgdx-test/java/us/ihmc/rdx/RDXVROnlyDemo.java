@@ -1,7 +1,8 @@
 package us.ihmc.rdx;
 
 import org.lwjgl.openvr.InputDigitalActionData;
-import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.gdx.RDXLwjgl3ApplicationAdapter;
+import us.ihmc.rdx.scene.RDXSceneLevel;
 import us.ihmc.rdx.vr.RDXVRApplication;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -11,7 +12,7 @@ public class RDXVROnlyDemo
 
    public RDXVROnlyDemo()
    {
-      vrApplication.launch(new Lwjgl3ApplicationAdapter()
+      vrApplication.launch(new RDXLwjgl3ApplicationAdapter()
       {
          @Override
          public void create()

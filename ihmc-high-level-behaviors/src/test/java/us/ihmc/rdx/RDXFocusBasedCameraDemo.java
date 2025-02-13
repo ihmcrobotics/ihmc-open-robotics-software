@@ -1,11 +1,10 @@
 package us.ihmc.rdx;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.rdx.tools.RDXModelBuilder;
-import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.gdx.RDXLwjgl3ApplicationAdapter;
+import us.ihmc.rdx.scene.RDXFocusBasedCamera;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 
 public class RDXFocusBasedCameraDemo
@@ -19,7 +18,7 @@ public class RDXFocusBasedCameraDemo
 
    public RDXFocusBasedCameraDemo()
    {
-      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
+      baseUI.launchRDXApplication(new RDXLwjgl3ApplicationAdapter()
       {
          @Override
          public void create()

@@ -3,7 +3,7 @@ package us.ihmc.rdx.ui.behavior.tools;
 import us.ihmc.communication.crdt.CRDTBidirectionalPoint3D;
 import us.ihmc.communication.crdt.CRDTBidirectionalRigidBodyTransform;
 import us.ihmc.communication.crdt.LatestTimestampModifiable;
-import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
+import us.ihmc.rdx.gizmo.RDXPose3DGizmo;
 
 public class RDXCRDTTools
 {

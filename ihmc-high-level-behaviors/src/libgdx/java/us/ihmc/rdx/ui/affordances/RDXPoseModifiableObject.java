@@ -7,8 +7,8 @@ import imgui.flag.ImGuiMouseButton;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObject;
-import us.ihmc.rdx.ui.RDX3DPanel;
-import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
+import us.ihmc.rdx.RDX3DPanel;
+import us.ihmc.rdx.gizmo.RDXPose3DGizmo;
 
 public class RDXPoseModifiableObject
 {

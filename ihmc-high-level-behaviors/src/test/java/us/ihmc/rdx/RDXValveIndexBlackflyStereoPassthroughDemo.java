@@ -17,11 +17,11 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.ImageDimensions;
+import us.ihmc.rdx.gdx.RDXLwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.perception.RDXProjectionSphere;
-import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.tools.LibGDXTools;
-import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.scene.RDXSceneLevel;
+import us.ihmc.rdx.gdx.LibGDXTools;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -55,7 +55,7 @@ public class RDXValveIndexBlackflyStereoPassthroughDemo
 
       projectionSpheres.get(RobotSide.LEFT).setPrinciplePointX(-0.013812);
 
-      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
+      baseUI.launchRDXApplication(new RDXLwjgl3ApplicationAdapter()
       {
          @Override
          public void create()

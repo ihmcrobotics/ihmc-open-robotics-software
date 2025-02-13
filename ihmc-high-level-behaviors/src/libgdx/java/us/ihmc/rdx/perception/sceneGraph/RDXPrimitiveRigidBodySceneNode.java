@@ -15,10 +15,10 @@ import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyScene
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.tools.RDXModelBuilder;
-import us.ihmc.rdx.tools.RDXModelInstance;
-import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.rdx.scene.RDXSceneLevel;
+import us.ihmc.rdx.model.RDXModelBuilder;
+import us.ihmc.rdx.model.RDXModelInstance;
+import us.ihmc.rdx.RDX3DPanel;
 
 import java.util.Set;
 

@@ -8,7 +8,7 @@ import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import perception_msgs.msg.dds.SteppableRegionsListCollectionMessage;
 import us.ihmc.perception.steppableRegions.SteppableRegionsAPI;
-import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.scene.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXSteppableRegionGraphic;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;

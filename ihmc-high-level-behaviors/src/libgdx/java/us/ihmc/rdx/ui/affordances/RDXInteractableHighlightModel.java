@@ -7,9 +7,9 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.rdx.tools.RDXModelLoader;
-import us.ihmc.rdx.tools.LibGDXTools;
-import us.ihmc.rdx.tools.RDXModelInstanceScaler;
+import us.ihmc.rdx.model.RDXModelLoader;
+import us.ihmc.rdx.gdx.LibGDXTools;
+import us.ihmc.rdx.model.RDXModelInstanceScaler;
 
 /**
  * This class creates a model that's slightly larger and half transparent

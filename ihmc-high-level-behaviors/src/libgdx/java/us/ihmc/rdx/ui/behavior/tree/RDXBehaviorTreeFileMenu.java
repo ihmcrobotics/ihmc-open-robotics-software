@@ -3,7 +3,7 @@ package us.ihmc.rdx.ui.behavior.tree;
 import imgui.ImGui;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.RDXBaseUI;
 
 import javax.annotation.Nullable;
 

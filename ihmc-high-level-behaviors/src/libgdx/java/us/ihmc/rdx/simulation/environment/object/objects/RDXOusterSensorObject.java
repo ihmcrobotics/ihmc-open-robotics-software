@@ -5,7 +5,7 @@ import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObject;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObjectFactory;
-import us.ihmc.rdx.tools.RDXModelLoader;
+import us.ihmc.rdx.model.RDXModelLoader;
 
 public class RDXOusterSensorObject extends RDXEnvironmentObject
 {

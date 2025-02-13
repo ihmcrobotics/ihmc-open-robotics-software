@@ -4,8 +4,9 @@ import imgui.ImGui;
 import imgui.type.ImFloat;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.perception.RawImage;
-import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
+import us.ihmc.rdx.RDXBaseUI;
+import us.ihmc.rdx.gdx.RDXLwjgl3ApplicationAdapter;
+import us.ihmc.rdx.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXRawImagePointCloudVisualizer;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.time.TimeTools;
@@ -32,7 +33,7 @@ public class RDXRawImagePointCloudVisualizerDemo
    private RDXRawImagePointCloudVisualizerDemo()
    {
       RDXBaseUI baseUI = new RDXBaseUI();
-      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
+      baseUI.launchRDXApplication(new RDXLwjgl3ApplicationAdapter()
       {
          @Override
          public void create()

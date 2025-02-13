@@ -2,14 +2,14 @@ package us.ihmc.rdx.simulation;
 
 import us.ihmc.commons.thread.Throttler;
 import us.ihmc.perception.RawImage;
-import us.ihmc.rdx.AbstractRDXPointCloudRenderer.ColoringMethod;
+import us.ihmc.rdx.graphics.AbstractRDXPointCloudRenderer.ColoringMethod;
 import us.ihmc.rdx.DepthSensorDemoObjectsModel;
-import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
+import us.ihmc.rdx.gdx.RDXLwjgl3ApplicationAdapter;
 import us.ihmc.rdx.perception.RDXMatImagePanel;
-import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.scene.RDXSceneLevel;
 import us.ihmc.rdx.simulation.sensors.RDXSensorSimulator;
-import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
+import us.ihmc.rdx.RDXBaseUI;
+import us.ihmc.rdx.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXRawImagePointCloudRenderer;
 
 public class RDXSensorSimulatorDemo
@@ -33,7 +33,7 @@ public class RDXSensorSimulatorDemo
       sensorSimulator = new RDXSensorSimulator(WIDTH, HEIGHT, FOV, MIN_RANGE, MAX_RANGE);
 
       RDXBaseUI baseUI = new RDXBaseUI();
-      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
+      baseUI.launchRDXApplication(new RDXLwjgl3ApplicationAdapter()
       {
          @Override
          public void create()

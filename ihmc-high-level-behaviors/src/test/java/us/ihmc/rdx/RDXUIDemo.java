@@ -7,14 +7,12 @@ import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import org.apache.logging.log4j.Level;
 import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.rdx.gdx.RDXLwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiMovingPlot;
 import us.ihmc.rdx.imgui.ImGuiTools;
-import us.ihmc.rdx.tools.BoxesDemoModel;
-import us.ihmc.rdx.tools.RDXModelInstance;
-import us.ihmc.rdx.tools.RDXModelLoader;
-import us.ihmc.rdx.ui.RDX3DPanel;
-import us.ihmc.rdx.ui.RDX3DPanelToolbarButton;
-import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.demo.BoxesDemoModel;
+import us.ihmc.rdx.model.RDXModelInstance;
+import us.ihmc.rdx.model.RDXModelLoader;
 import us.ihmc.rdx.ui.tools.ImGuiScrollableLogArea;
 import us.ihmc.rdx.ui.widgets.ImGuiHandWidget;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -35,7 +33,7 @@ public class RDXUIDemo
 
    public RDXUIDemo()
    {
-      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
+      baseUI.launchRDXApplication(new RDXLwjgl3ApplicationAdapter()
       {
          @Override
          public void create()

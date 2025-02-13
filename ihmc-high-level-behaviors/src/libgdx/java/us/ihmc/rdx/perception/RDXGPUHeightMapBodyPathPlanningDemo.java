@@ -24,16 +24,16 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.gpuHeightMap.SimpleGPUHeightMap;
 import us.ihmc.perception.gpuHeightMap.SimpleGPUHeightMapParameters;
 import us.ihmc.perception.gpuHeightMap.SimpleGPUHeightMapUpdater;
-import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
+import us.ihmc.rdx.gdx.RDXLwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.scene.RDXSceneLevel;
 import us.ihmc.rdx.simulation.environment.RDXEnvironmentBuilder;
 import us.ihmc.rdx.simulation.sensors.RDXHighLevelDepthSensorSimulator;
 import us.ihmc.rdx.simulation.sensors.RDXSimulatedSensorFactory;
 import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
-import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXInteractableReferenceFrame;
-import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
+import us.ihmc.rdx.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXBodyPathPlanGraphic;
 import us.ihmc.rdx.ui.graphics.RDXHeightMapGraphicNew;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -75,7 +75,7 @@ public class RDXGPUHeightMapBodyPathPlanningDemo
    public RDXGPUHeightMapBodyPathPlanningDemo(RDXBaseUI baseUI, DRCRobotModel robotModel)
    {
       this.baseUI = baseUI;
-      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
+      baseUI.launchRDXApplication(new RDXLwjgl3ApplicationAdapter()
       {
          @Override
          public void create()

@@ -6,11 +6,9 @@ import com.badlogic.gdx.utils.Pool;
 import perception_msgs.msg.dds.ArUcoMarkerPoses;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.rdx.imgui.ImGuiAveragedFrequencyText;
-import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.tools.RDXModelBuilder;
-import us.ihmc.rdx.tools.RDXModelInstance;
-import us.ihmc.rdx.ui.graphics.RDXVisualizer;
+import us.ihmc.rdx.scene.RDXSceneLevel;
+import us.ihmc.rdx.model.RDXModelBuilder;
+import us.ihmc.rdx.model.RDXModelInstance;
 import us.ihmc.ros2.ROS2Input;
 import us.ihmc.ros2.ROS2Topic;
 

@@ -8,14 +8,14 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.PlanarRegionMappingHandler;
 import us.ihmc.perception.tools.MocapTools;
-import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.RDXPointCloudRendererOld;
-import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.tools.LibGDXTools;
-import us.ihmc.rdx.tools.RDXModelBuilder;
-import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.visualizers.RDXLineGraphic;
-import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
+import us.ihmc.rdx.gdx.RDXLwjgl3ApplicationAdapter;
+import us.ihmc.rdx.graphics.RDXPointCloudRendererOld;
+import us.ihmc.rdx.scene.RDXSceneLevel;
+import us.ihmc.rdx.gdx.LibGDXTools;
+import us.ihmc.rdx.model.RDXModelBuilder;
+import us.ihmc.rdx.RDXBaseUI;
+import us.ihmc.rdx.graphics.RDXLineGraphic;
+import us.ihmc.rdx.graphics.RDXPlanarRegionsGraphic;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.tools.IHMCCommonPaths;
@@ -54,7 +54,7 @@ public class RDXPlanarRegionMappingDemo
 
    public RDXPlanarRegionMappingDemo()
    {
-      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
+      baseUI.launchRDXApplication(new RDXLwjgl3ApplicationAdapter()
       {
          @Override
          public void create()

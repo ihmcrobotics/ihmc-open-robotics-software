@@ -1,11 +1,11 @@
 package us.ihmc.rdx.simulation;
 
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.gdx.RDXLwjgl3ApplicationAdapter;
+import us.ihmc.rdx.scene.RDXSceneLevel;
 import us.ihmc.rdx.simulation.environment.RDXEnvironmentBuilder;
 import us.ihmc.rdx.simulation.environment.object.objects.RDXLabFloorObject;
-import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.RDXBaseUI;
 
 public class RDXPhysicsEnvironmentDemo
 {
@@ -14,7 +14,7 @@ public class RDXPhysicsEnvironmentDemo
 
    public RDXPhysicsEnvironmentDemo()
    {
-      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
+      baseUI.launchRDXApplication(new RDXLwjgl3ApplicationAdapter()
       {
          @Override
          public void create()

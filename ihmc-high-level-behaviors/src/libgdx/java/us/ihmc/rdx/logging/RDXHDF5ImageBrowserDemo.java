@@ -1,7 +1,7 @@
 package us.ihmc.rdx.logging;
 
-import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.gdx.RDXLwjgl3ApplicationAdapter;
+import us.ihmc.rdx.RDXBaseUI;
 
 public class RDXHDF5ImageBrowserDemo
 {
@@ -10,7 +10,7 @@ public class RDXHDF5ImageBrowserDemo
 
    public RDXHDF5ImageBrowserDemo()
    {
-      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
+      baseUI.launchRDXApplication(new RDXLwjgl3ApplicationAdapter()
       {
          @Override
          public void create()

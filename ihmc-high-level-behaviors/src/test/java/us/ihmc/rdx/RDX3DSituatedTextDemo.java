@@ -1,15 +1,17 @@
 package us.ihmc.rdx;
 
 import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.rdx.tools.BoxesDemoModel;
-import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.gdx.RDXLwjgl3ApplicationAdapter;
+import us.ihmc.rdx.graphics.RDX3DSituatedText;
+import us.ihmc.rdx.graphics.RDX3DSituatedTextData;
+import us.ihmc.rdx.demo.BoxesDemoModel;
 
 public class RDX3DSituatedTextDemo
 {
    public RDX3DSituatedTextDemo()
    {
       RDXBaseUI baseUI = new RDXBaseUI();
-      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
+      baseUI.launchRDXApplication(new RDXLwjgl3ApplicationAdapter()
       {
          private RDX3DSituatedText text;
          private RDX3DSituatedText rapidlyChangingText;

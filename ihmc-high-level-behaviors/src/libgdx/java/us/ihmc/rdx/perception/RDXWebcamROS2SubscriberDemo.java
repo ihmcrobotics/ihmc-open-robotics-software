@@ -11,12 +11,12 @@ import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.pubsub.common.SampleInfo;
-import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
+import us.ihmc.rdx.gdx.RDXLwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImPlotDoublePlot;
 import us.ihmc.rdx.imgui.ImPlotFrequencyPlot;
 import us.ihmc.rdx.imgui.ImPlotStopwatchPlot;
 import us.ihmc.rdx.imgui.RDXPanel;
-import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.RDXBaseUI;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.RealtimeROS2Node;
@@ -55,7 +55,7 @@ public class RDXWebcamROS2SubscriberDemo
    public RDXWebcamROS2SubscriberDemo()
    {
       baseUI.getImGuiPanelManager().addPanel(diagnosticPanel);
-      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
+      baseUI.launchRDXApplication(new RDXLwjgl3ApplicationAdapter()
       {
          @Override
          public void create()

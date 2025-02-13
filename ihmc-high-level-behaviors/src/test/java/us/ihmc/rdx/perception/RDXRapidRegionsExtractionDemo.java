@@ -24,12 +24,12 @@ import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.logging.PerceptionDataLoader;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
-import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.RDXPointCloudRendererOld;
+import us.ihmc.rdx.gdx.RDXLwjgl3ApplicationAdapter;
+import us.ihmc.rdx.graphics.RDXPointCloudRendererOld;
 import us.ihmc.rdx.imgui.RDXPanel;
-import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.visualizers.RDXLineGraphic;
+import us.ihmc.rdx.scene.RDXSceneLevel;
+import us.ihmc.rdx.RDXBaseUI;
+import us.ihmc.rdx.graphics.RDXLineGraphic;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -89,7 +89,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
    {
       perceptionDataLoader = new PerceptionDataLoader();
 
-      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
+      baseUI.launchRDXApplication(new RDXLwjgl3ApplicationAdapter()
       {
          @Override
          public void create()

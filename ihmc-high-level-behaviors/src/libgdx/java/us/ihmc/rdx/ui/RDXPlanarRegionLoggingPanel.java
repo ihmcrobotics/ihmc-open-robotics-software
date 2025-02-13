@@ -11,7 +11,7 @@ import us.ihmc.avatar.logging.PlanarRegionsReplayBuffer;
 import us.ihmc.avatar.logging.PlanarRegionsListLogger;
 import us.ihmc.commons.Conversions;
 import us.ihmc.rdx.imgui.RDXPanel;
-import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
+import us.ihmc.rdx.graphics.RDXPlanarRegionsGraphic;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 

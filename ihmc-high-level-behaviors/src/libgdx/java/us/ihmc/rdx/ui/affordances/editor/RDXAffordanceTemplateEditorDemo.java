@@ -1,7 +1,7 @@
 package us.ihmc.rdx.ui.affordances.editor;
 
-import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.gdx.RDXLwjgl3ApplicationAdapter;
+import us.ihmc.rdx.RDXBaseUI;
 
 public class RDXAffordanceTemplateEditorDemo
 {
@@ -10,7 +10,7 @@ public class RDXAffordanceTemplateEditorDemo
 
    public RDXAffordanceTemplateEditorDemo()
    {
-      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
+      baseUI.launchRDXApplication(new RDXLwjgl3ApplicationAdapter()
       {
          @Override
          public void create()

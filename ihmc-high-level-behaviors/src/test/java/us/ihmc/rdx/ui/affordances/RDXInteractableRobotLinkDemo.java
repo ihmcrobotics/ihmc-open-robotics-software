@@ -6,9 +6,9 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
-import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.gdx.RDXLwjgl3ApplicationAdapter;
+import us.ihmc.rdx.scene.RDXSceneLevel;
+import us.ihmc.rdx.RDXBaseUI;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.scs2.simulation.collision.Collidable;
 
@@ -20,7 +20,7 @@ public class RDXInteractableRobotLinkDemo
 
    public RDXInteractableRobotLinkDemo()
    {
-      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
+      baseUI.launchRDXApplication(new RDXLwjgl3ApplicationAdapter()
       {
          @Override
          public void create()

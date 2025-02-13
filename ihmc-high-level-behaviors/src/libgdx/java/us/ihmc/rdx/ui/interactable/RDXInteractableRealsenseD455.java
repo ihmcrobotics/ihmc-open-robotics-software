@@ -5,7 +5,7 @@ import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.rdx.RDX3DPanel;
 import us.ihmc.robotics.interaction.CylinderRayIntersection;
 
 /**

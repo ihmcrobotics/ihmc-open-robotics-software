@@ -18,15 +18,15 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
-import us.ihmc.rdx.AbstractRDXPointCloudRenderer;
+import us.ihmc.rdx.graphics.AbstractRDXPointCloudRenderer;
 import us.ihmc.rdx.shader.RDXShader;
 import us.ihmc.rdx.shader.RDXUniform;
-import us.ihmc.rdx.tools.LibGDXTools;
+import us.ihmc.rdx.gdx.LibGDXTools;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 
-import static us.ihmc.rdx.AbstractRDXPointCloudRenderer.ColoringMethod.*;
+import static us.ihmc.rdx.graphics.AbstractRDXPointCloudRenderer.ColoringMethod.*;
 
 public class RDXRawImagePointCloudRenderer extends AbstractRDXPointCloudRenderer
 {

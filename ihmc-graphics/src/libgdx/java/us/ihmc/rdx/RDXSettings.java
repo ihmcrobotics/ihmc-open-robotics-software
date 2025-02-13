@@ -2,7 +2,7 @@ package us.ihmc.rdx;
 
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
-import us.ihmc.rdx.sceneManager.RDX3DSceneTools;
+import us.ihmc.rdx.scene.RDX3DSceneTools;
 import us.ihmc.tools.IHMCCommonPaths;
 
 import java.io.File;

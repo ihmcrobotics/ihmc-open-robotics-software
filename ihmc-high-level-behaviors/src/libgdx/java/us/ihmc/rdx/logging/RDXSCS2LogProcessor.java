@@ -11,10 +11,10 @@ import imgui.type.ImString;
 import org.apache.commons.lang.WordUtils;
 import us.ihmc.avatar.logProcessor.SCS2LogProcessor;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
+import us.ihmc.rdx.gdx.RDXLwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.RDXBaseUI;
 import us.ihmc.tools.IHMCCommonPaths;
 
 import java.io.BufferedReader;
@@ -52,7 +52,7 @@ public class RDXSCS2LogProcessor
       directoryOfLogsExists = Files.exists(directoryOfLogsPath);
       refreshDirectoryListing();
 
-      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
+      baseUI.launchRDXApplication(new RDXLwjgl3ApplicationAdapter()
       {
          @Override
          public void create()

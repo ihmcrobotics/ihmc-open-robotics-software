@@ -10,10 +10,10 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
-import us.ihmc.rdx.tools.EuclidModelInstance;
-import us.ihmc.rdx.tools.RDXModelInstance;
-import us.ihmc.rdx.tools.RDXModelLoader;
-import us.ihmc.rdx.tools.LibGDXTools;
+import us.ihmc.rdx.model.EuclidModelInstance;
+import us.ihmc.rdx.model.RDXModelInstance;
+import us.ihmc.rdx.model.RDXModelLoader;
+import us.ihmc.rdx.gdx.LibGDXTools;
 
 import java.util.ArrayList;
 

@@ -1,8 +1,8 @@
 package us.ihmc.rdx;
 
 import us.ihmc.avatar.environments.BehaviorPlanarRegionEnvironments;
-import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
+import us.ihmc.rdx.gdx.RDXLwjgl3ApplicationAdapter;
+import us.ihmc.rdx.graphics.RDXPlanarRegionsGraphic;
 
 public class RDXPlanarRegionVisualizerDemo
 {
@@ -11,7 +11,7 @@ public class RDXPlanarRegionVisualizerDemo
    public RDXPlanarRegionVisualizerDemo()
    {
       RDXBaseUI baseUI = new RDXBaseUI();
-      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
+      baseUI.launchRDXApplication(new RDXLwjgl3ApplicationAdapter()
       {
          @Override
          public void create()

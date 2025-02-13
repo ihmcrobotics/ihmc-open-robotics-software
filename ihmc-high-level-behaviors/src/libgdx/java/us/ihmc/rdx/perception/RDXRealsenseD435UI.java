@@ -8,10 +8,10 @@ import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.MutableBytePointer;
 import us.ihmc.sensors.realsense.RealSenseDevice;
 import us.ihmc.sensors.realsense.RealSenseDeviceManager;
-import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
+import us.ihmc.rdx.gdx.RDXLwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.RDXBaseUI;
 import us.ihmc.rdx.ui.interactable.RDXInteractableRealsenseD435;
 import us.ihmc.commons.time.FrequencyCalculator;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -34,7 +34,7 @@ public class RDXRealsenseD435UI
 
    public RDXRealsenseD435UI()
    {
-      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
+      baseUI.launchRDXApplication(new RDXLwjgl3ApplicationAdapter()
       {
          @Override
          public void create()

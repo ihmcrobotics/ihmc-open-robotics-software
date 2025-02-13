@@ -1,10 +1,10 @@
 package us.ihmc.rdx.simulation.environment;
 
-import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.gdx.RDXLwjgl3ApplicationAdapter;
+import us.ihmc.rdx.RDXBaseUI;
 import us.ihmc.rdx.ui.ImGui3DViewInputDebugger;
 
-public class RDXSCS2EnvironmentBuilderUI extends Lwjgl3ApplicationAdapter
+public class RDXSCS2EnvironmentBuilderUI extends RDXLwjgl3ApplicationAdapter
 {
    private final RDXBaseUI baseUI = new RDXBaseUI("SCS 2 Environment Builder");
    private final RDXSCS2EnvironmentBuilder environmentBuilder = new RDXSCS2EnvironmentBuilder(baseUI.getPrimary3DPanel());

@@ -8,7 +8,7 @@ import imgui.internal.ImGui;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.PathTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
-import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
+import us.ihmc.rdx.graphics.RDXPlanarRegionsGraphic;
 import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 

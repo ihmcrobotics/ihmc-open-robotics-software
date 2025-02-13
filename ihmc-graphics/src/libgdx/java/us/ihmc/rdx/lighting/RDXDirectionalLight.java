@@ -4,8 +4,8 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector3;
 import net.mgsx.gltf.scene3d.lights.DirectionalLightEx;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.rdx.sceneManager.RDX3DScene;
-import us.ihmc.rdx.tools.LibGDXTools;
+import us.ihmc.rdx.scene.RDX3DScene;
+import us.ihmc.rdx.gdx.LibGDXTools;
 
 public class RDXDirectionalLight
 {

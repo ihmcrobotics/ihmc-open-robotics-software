@@ -18,14 +18,14 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.graphicsDescription.TexCoord2f;
 import us.ihmc.perception.ImageDimensions;
 import us.ihmc.perception.sensorHead.BlackflyLensProperties;
-import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
+import us.ihmc.rdx.gdx.RDXLwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.perception.RDXProjectionHemisphere.FisheyeTextureCalculator;
 import us.ihmc.rdx.perception.RDXProjectionHemisphere.FisheyeTextureCalculator.CameraOrientation;
-import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.tools.LibGDXTools;
-import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.scene.RDXSceneLevel;
+import us.ihmc.rdx.gdx.LibGDXTools;
+import us.ihmc.rdx.RDXBaseUI;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -45,7 +45,7 @@ public class RDXDualBlackflySphericalProjectionDemo
 
    public RDXDualBlackflySphericalProjectionDemo()
    {
-      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
+      baseUI.launchRDXApplication(new RDXLwjgl3ApplicationAdapter()
       {
          @Override
          public void create()

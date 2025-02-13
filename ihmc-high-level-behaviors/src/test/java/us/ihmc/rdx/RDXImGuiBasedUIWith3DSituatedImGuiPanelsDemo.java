@@ -2,9 +2,9 @@ package us.ihmc.rdx;
 
 import com.badlogic.gdx.graphics.Color;
 import imgui.ImGui;
+import us.ihmc.rdx.gdx.RDXLwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.RDX3DSituatedImGuiPanel;
-import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
+import us.ihmc.rdx.gizmo.RDXPose3DGizmo;
 
 public class RDXImGuiBasedUIWith3DSituatedImGuiPanelsDemo
 {
@@ -16,7 +16,7 @@ public class RDXImGuiBasedUIWith3DSituatedImGuiPanelsDemo
 
    public RDXImGuiBasedUIWith3DSituatedImGuiPanelsDemo()
    {
-      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
+      baseUI.launchRDXApplication(new RDXLwjgl3ApplicationAdapter()
       {
          @Override
          public void create()

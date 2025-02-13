@@ -21,9 +21,9 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
-import us.ihmc.rdx.sceneManager.RDX3DScene;
-import us.ihmc.rdx.sceneManager.RDX3DSceneTools;
-import us.ihmc.rdx.tools.LibGDXTools;
+import us.ihmc.rdx.scene.RDX3DScene;
+import us.ihmc.rdx.scene.RDX3DSceneTools;
+import us.ihmc.rdx.gdx.LibGDXTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class RDXVREye extends Camera

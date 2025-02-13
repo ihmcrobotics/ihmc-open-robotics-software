@@ -3,7 +3,7 @@ package us.ihmc.rdx.input;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
 import us.ihmc.rdx.imgui.ImGuiTools;
-import us.ihmc.rdx.sceneManager.RDX2DOrthographicCamera;
+import us.ihmc.rdx.scene.RDX2DOrthographicCamera;
 
 import java.util.function.Supplier;
 

@@ -10,11 +10,11 @@ import imgui.type.ImInt;
 import org.bytedeco.opencv.global.opencv_core;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.perception.RawImage;
-import us.ihmc.rdx.AbstractRDXPointCloudRenderer.ColoringMethod;
+import us.ihmc.rdx.graphics.AbstractRDXPointCloudRenderer.ColoringMethod;
 import us.ihmc.rdx.imgui.ImGuiExpandCollapseRenderer;
 import us.ihmc.rdx.imgui.ImGuiPlot;
 import us.ihmc.rdx.imgui.ImGuiTools;
-import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.scene.RDXSceneLevel;
 import us.ihmc.robotics.time.TimeTools;
 
 import java.time.Instant;

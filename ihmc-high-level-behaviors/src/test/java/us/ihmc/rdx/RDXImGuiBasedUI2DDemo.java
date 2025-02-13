@@ -3,8 +3,8 @@ package us.ihmc.rdx;
 import imgui.internal.ImGui;
 import org.apache.logging.log4j.Level;
 import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.rdx.gdx.RDXLwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiMovingPlot;
-import us.ihmc.rdx.ui.RDXBaseUI2D;
 import us.ihmc.rdx.ui.tools.ImGuiScrollableLogArea;
 import us.ihmc.tools.string.StringTools;
 
@@ -21,7 +21,7 @@ public class RDXImGuiBasedUI2DDemo
 
    public RDXImGuiBasedUI2DDemo()
    {
-      baseUI.launchGDXApplication(new Lwjgl3ApplicationAdapter()
+      baseUI.launchGDXApplication(new RDXLwjgl3ApplicationAdapter()
       {
          @Override
          public void create()

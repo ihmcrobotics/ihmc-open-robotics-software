@@ -9,12 +9,12 @@ import perception_msgs.msg.dds.BigVideoPacket;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
+import us.ihmc.rdx.gdx.RDXLwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImPlotFrequencyPlot;
 import us.ihmc.rdx.imgui.ImPlotIntegerPlot;
 import us.ihmc.rdx.imgui.ImPlotStopwatchPlot;
 import us.ihmc.rdx.imgui.RDXPanel;
-import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.RDXBaseUI;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2Publisher;
@@ -50,7 +50,7 @@ public class RDXWebcamROS2PublisherDemo
    public RDXWebcamROS2PublisherDemo()
    {
       baseUI.getImGuiPanelManager().addPanel(diagnosticPanel);
-      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
+      baseUI.launchRDXApplication(new RDXLwjgl3ApplicationAdapter()
       {
          @Override
          public void create()

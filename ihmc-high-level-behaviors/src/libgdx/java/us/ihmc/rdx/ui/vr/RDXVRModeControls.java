@@ -3,7 +3,7 @@ package us.ihmc.rdx.ui.vr;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.rdx.imgui.ImGuiTools;
-import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.RDXBaseUI;
 import us.ihmc.rdx.ui.RDXJoystickBasedStepping;
 
 public class RDXVRModeControls

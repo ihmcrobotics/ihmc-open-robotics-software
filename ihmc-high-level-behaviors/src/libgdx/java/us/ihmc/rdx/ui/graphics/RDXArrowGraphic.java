@@ -8,7 +8,7 @@ import com.badlogic.gdx.utils.Pool;
 import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
-import us.ihmc.rdx.ui.gizmo.DynamicLibGDXModel;
+import us.ihmc.rdx.model.DynamicLibGDXModel;
 
 public class RDXArrowGraphic
 {

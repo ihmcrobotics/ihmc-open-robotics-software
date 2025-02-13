@@ -4,9 +4,9 @@ import com.badlogic.gdx.graphics.Color;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.rdx.tools.RDXModelInstance;
-import us.ihmc.rdx.tools.RDXModelBuilder;
-import us.ihmc.rdx.tools.LibGDXTools;
+import us.ihmc.rdx.model.RDXModelInstance;
+import us.ihmc.rdx.model.RDXModelBuilder;
+import us.ihmc.rdx.gdx.LibGDXTools;
 
 public class RDXReferenceFrameGraphic extends RDXModelInstance
 {

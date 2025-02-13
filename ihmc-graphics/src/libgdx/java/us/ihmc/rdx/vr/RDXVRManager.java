@@ -16,9 +16,9 @@ import us.ihmc.rdx.imgui.ImGuiPlot;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
-import us.ihmc.rdx.sceneManager.RDX3DScene;
-import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
+import us.ihmc.rdx.scene.RDX3DScene;
+import us.ihmc.rdx.RDXBaseUI;
+import us.ihmc.rdx.gizmo.RDXPose3DGizmo;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;

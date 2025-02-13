@@ -5,7 +5,7 @@ import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
 import us.ihmc.rdx.imgui.ImGuiInputDoubleWrapper;
-import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.rdx.RDX3DPanel;
 
 public class RDXStaticRelativeSceneNode extends RDXPredefinedRigidBodySceneNode
 {

@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
-import us.ihmc.rdx.ui.RDXImagePanel;
+import us.ihmc.rdx.RDXImagePanel;
 import us.ihmc.perception.BytedecoImage;
 
 /**

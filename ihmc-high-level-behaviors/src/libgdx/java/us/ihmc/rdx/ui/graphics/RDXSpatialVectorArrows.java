@@ -13,7 +13,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
-import us.ihmc.rdx.tools.LibGDXTools;
+import us.ihmc.rdx.gdx.LibGDXTools;
 
 public class RDXSpatialVectorArrows
 {

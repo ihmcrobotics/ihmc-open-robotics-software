@@ -1,8 +1,7 @@
 package us.ihmc.rdx.ui;
 
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.tools.RDXModelBuilder;
+import us.ihmc.rdx.RDXBaseUI;
+import us.ihmc.rdx.gdx.RDXLwjgl3ApplicationAdapter;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -32,7 +31,7 @@ public class RDXPlanarRegionLoggingDevelopmentUI
 
    public void launch()
    {
-      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
+      baseUI.launchRDXApplication(new RDXLwjgl3ApplicationAdapter()
       {
          @Override
          public void create()

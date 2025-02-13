@@ -5,7 +5,8 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.gdx.RDXLwjgl3ApplicationAdapter;
+import us.ihmc.rdx.scene.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2PointCloudVisualizer;
 import us.ihmc.rdx.vr.RDXVRApplication;
 import us.ihmc.rdx.vr.RDXVRContext;
@@ -23,7 +24,7 @@ public class RDXVROnlyPointCloudDemo
 
    public RDXVROnlyPointCloudDemo()
    {
-      vrApplication.launch(new Lwjgl3ApplicationAdapter()
+      vrApplication.launch(new RDXLwjgl3ApplicationAdapter()
       {
          @Override
          public void create()

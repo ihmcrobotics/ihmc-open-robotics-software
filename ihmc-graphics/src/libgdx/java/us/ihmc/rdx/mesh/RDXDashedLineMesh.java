@@ -10,8 +10,8 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.MeshDataBuilder;
-import us.ihmc.rdx.tools.RDXModelBuilder;
-import us.ihmc.rdx.tools.RDXModelInstance;
+import us.ihmc.rdx.model.RDXModelBuilder;
+import us.ihmc.rdx.model.RDXModelInstance;
 
 /**
  * Dashes along an axis.

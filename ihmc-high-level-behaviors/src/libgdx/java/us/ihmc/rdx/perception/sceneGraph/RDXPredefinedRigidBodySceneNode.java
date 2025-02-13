@@ -4,10 +4,10 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.perception.sceneGraph.rigidBody.PredefinedRigidBodySceneNode;
-import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.tools.RDXModelInstance;
-import us.ihmc.rdx.tools.RDXModelLoader;
-import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.rdx.scene.RDXSceneLevel;
+import us.ihmc.rdx.model.RDXModelInstance;
+import us.ihmc.rdx.model.RDXModelLoader;
+import us.ihmc.rdx.RDX3DPanel;
 
 import java.util.Set;
 

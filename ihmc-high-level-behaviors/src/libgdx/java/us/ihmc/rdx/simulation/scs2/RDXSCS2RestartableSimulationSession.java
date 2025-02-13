@@ -2,7 +2,7 @@ package us.ihmc.rdx.simulation.scs2;
 
 import imgui.ImGui;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.RDXBaseUI;
 import us.ihmc.scs2.simulation.SimulationSession;
 
 import java.util.ArrayList;

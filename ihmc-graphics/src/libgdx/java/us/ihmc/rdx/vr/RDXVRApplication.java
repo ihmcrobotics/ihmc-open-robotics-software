@@ -7,9 +7,9 @@ import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryUtil;
-import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.sceneManager.RDX3DScene;
-import us.ihmc.rdx.tools.LibGDXTools;
+import us.ihmc.rdx.gdx.RDXLwjgl3ApplicationAdapter;
+import us.ihmc.rdx.scene.RDX3DScene;
+import us.ihmc.rdx.gdx.LibGDXTools;
 import us.ihmc.rdx.vr.minimalLibGDX.MinimalLibGDXApplication;
 import us.ihmc.rdx.vr.minimalLibGDX.MinimalLibGDXGraphics;
 import us.ihmc.rdx.vr.minimalLibGDX.MinimalLwjgl3GL30;
@@ -28,7 +28,7 @@ public class RDXVRApplication
    private int renderNumber = 0;
    private Runnable thingToRunAfter10Frames;
 
-   public void launch(Lwjgl3ApplicationAdapter applicationAdapter)
+   public void launch(RDXLwjgl3ApplicationAdapter applicationAdapter)
    {
       Lwjgl3NativesLoader.load();
 

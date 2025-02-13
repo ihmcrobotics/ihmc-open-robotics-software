@@ -4,7 +4,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.rdx.ui.gizmo.RDXVisualModelInstance;
+import us.ihmc.rdx.model.RDXVisualModelInstance;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletTerrainObject;

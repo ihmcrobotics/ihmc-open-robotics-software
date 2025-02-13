@@ -1,9 +1,9 @@
 package us.ihmc.rdx;
 
 import imgui.internal.ImGui;
+import us.ihmc.rdx.gdx.RDXLwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.RDX3DSituatedImGuiPanel;
-import us.ihmc.rdx.tools.BoxesDemoModel;
-import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.demo.BoxesDemoModel;
 
 public class RDX3DSituatedImGuiPanelsDemo
 {
@@ -12,7 +12,7 @@ public class RDX3DSituatedImGuiPanelsDemo
    public RDX3DSituatedImGuiPanelsDemo()
    {
       RDXBaseUI baseUI = new RDXBaseUI();
-      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
+      baseUI.launchRDXApplication(new RDXLwjgl3ApplicationAdapter()
       {
          @Override
          public void create()

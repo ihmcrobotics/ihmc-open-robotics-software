@@ -6,7 +6,7 @@ import com.badlogic.gdx.utils.Pool;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.imageMessage.ImageMessageDecoder;
-import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.scene.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
 import us.ihmc.rdx.ui.graphics.RDXRawImagePointCloudVisualizer;
 import us.ihmc.rdx.ui.graphics.RDXSequenceDiscontinuityPlot;

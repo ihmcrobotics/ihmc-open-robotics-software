@@ -1,8 +1,8 @@
 package us.ihmc.rdx.perception;
 
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.gdx.RDXLwjgl3ApplicationAdapter;
+import us.ihmc.rdx.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXImagePanelTexture;
 
 /**
@@ -20,7 +20,7 @@ public class RDXBlackflyCalibrationPatternDemo
 
    public RDXBlackflyCalibrationPatternDemo()
    {
-      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
+      baseUI.launchRDXApplication(new RDXLwjgl3ApplicationAdapter()
       {
          @Override
          public void create()

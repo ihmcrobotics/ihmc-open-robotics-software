@@ -2,7 +2,6 @@ package us.ihmc.rdx.ui.interactable;
 
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.graphics.g3d.model.data.ModelData;
 import com.badlogic.gdx.math.Frustum;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
@@ -16,14 +15,11 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.tools.RDXModelLoader;
-import us.ihmc.rdx.tools.LibGDXTools;
-import us.ihmc.rdx.ui.RDX3DPanel;
-import us.ihmc.rdx.ui.affordances.RDXInteractableFrameModel;
+import us.ihmc.rdx.scene.RDXSceneLevel;
+import us.ihmc.rdx.gdx.LibGDXTools;
+import us.ihmc.rdx.RDX3DPanel;
 import us.ihmc.robotics.interaction.CylinderRayIntersection;
-import us.ihmc.rdx.visualizers.RDXFrustumGraphic;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
+import us.ihmc.rdx.graphics.RDXFrustumGraphic;
 
 public class RDXInteractableBlackflyFujinon extends RDXInteractableSensor
 {

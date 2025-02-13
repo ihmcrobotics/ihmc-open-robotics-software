@@ -11,7 +11,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.rdx.simulation.environment.object.RDXSimpleObject;
-import us.ihmc.rdx.tools.RDXModelBuilder;
+import us.ihmc.rdx.model.RDXModelBuilder;
 
 import java.util.ArrayList;
 import java.util.HashMap;

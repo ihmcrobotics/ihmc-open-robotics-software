@@ -4,7 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Vector3;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.rdx.tools.RDXModifiableMultiColorMeshModel;
+import us.ihmc.rdx.model.RDXModifiableMultiColorMeshModel;
 
 public class RDXBulletPhysicsDebuggerModel
 {

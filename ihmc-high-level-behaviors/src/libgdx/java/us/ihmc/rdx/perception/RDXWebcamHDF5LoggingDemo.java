@@ -1,9 +1,9 @@
 package us.ihmc.rdx.perception;
 
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
+import us.ihmc.rdx.gdx.RDXLwjgl3ApplicationAdapter;
 import us.ihmc.rdx.logging.RDXHDF5ImageLoggingUI;
-import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.RDXBaseUI;
 
 /**
  * Log webcam images to HDF5.
@@ -17,7 +17,7 @@ public class RDXWebcamHDF5LoggingDemo
 
    public RDXWebcamHDF5LoggingDemo()
    {
-      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
+      baseUI.launchRDXApplication(new RDXLwjgl3ApplicationAdapter()
       {
          @Override
          public void create()

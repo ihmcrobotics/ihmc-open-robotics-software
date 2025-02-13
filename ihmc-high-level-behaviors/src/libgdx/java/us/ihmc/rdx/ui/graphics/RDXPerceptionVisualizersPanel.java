@@ -8,9 +8,9 @@ import imgui.type.ImString;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.input.ImGui3DViewInput;
-import us.ihmc.rdx.sceneManager.RDXRenderableProvider;
-import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.scene.RDXRenderableProvider;
+import us.ihmc.rdx.scene.RDXSceneLevel;
+import us.ihmc.rdx.RDXBaseUI;
 
 import java.util.Comparator;
 import java.util.Locale;

@@ -10,11 +10,11 @@ import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
-import us.ihmc.rdx.RDXPointCloudRendererOld;
+import us.ihmc.rdx.graphics.RDXPointCloudRendererOld;
 import us.ihmc.rdx.imgui.ImGuiPlot;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.scene.RDXSceneLevel;
 
 import java.util.List;
 import java.util.Set;

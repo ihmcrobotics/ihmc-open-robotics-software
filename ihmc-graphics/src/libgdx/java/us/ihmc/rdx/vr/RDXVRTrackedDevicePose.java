@@ -4,7 +4,7 @@ import org.lwjgl.openvr.TrackedDevicePose;
 import org.lwjgl.openvr.VR;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.rdx.tools.LibGDXTools;
+import us.ihmc.rdx.gdx.LibGDXTools;
 
 public class RDXVRTrackedDevicePose
 {

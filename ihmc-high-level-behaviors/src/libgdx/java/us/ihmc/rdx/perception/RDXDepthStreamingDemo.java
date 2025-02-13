@@ -11,8 +11,8 @@ import us.ihmc.perception.cuda.CUDADepthColorizer;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.streaming.ROS2SRTSensorStreamer;
 import us.ihmc.perception.streaming.ROS2SRTVideoSubscriber;
-import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.gdx.RDXLwjgl3ApplicationAdapter;
+import us.ihmc.rdx.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer;
 import us.ihmc.rdx.ui.graphics.RDXRawImagePointCloudVisualizer;
 import us.ihmc.ros2.ROS2Node;
@@ -55,7 +55,7 @@ public class RDXDepthStreamingDemo
       colorSubscriber.addNewFrameConsumer(this::receiveColorImage);
       colorSubscriber.subscribe();
 
-      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
+      baseUI.launchRDXApplication(new RDXLwjgl3ApplicationAdapter()
       {
          @Override
          public void create()

@@ -7,7 +7,7 @@ import imgui.type.ImInt;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.RDXBaseUI;
 
 public class RDXRobotLowLevelMessenger
 {

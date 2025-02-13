@@ -1,6 +1,7 @@
 package us.ihmc.rdx.ui;
 
 import imgui.flag.ImGuiMouseButton;
+import us.ihmc.rdx.RDX3DPanel;
 import us.ihmc.rdx.imgui.ImGuiPlot;
 
 public class ImGui3DViewInputDebugger

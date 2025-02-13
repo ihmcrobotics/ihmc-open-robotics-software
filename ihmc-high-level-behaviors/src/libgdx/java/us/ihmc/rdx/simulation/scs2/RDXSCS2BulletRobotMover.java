@@ -3,8 +3,8 @@ package us.ihmc.rdx.simulation.scs2;
 import imgui.ImGui;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.RDX3DPanel;
-import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
+import us.ihmc.rdx.RDX3DPanel;
+import us.ihmc.rdx.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletRobot;
 
 /**

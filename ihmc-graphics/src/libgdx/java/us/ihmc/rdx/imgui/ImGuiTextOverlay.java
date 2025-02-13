@@ -2,7 +2,7 @@ package us.ihmc.rdx.imgui;
 
 import imgui.ImGui;
 import imgui.ImVec2;
-import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.rdx.RDX3DPanel;
 
 public class ImGuiTextOverlay
 {

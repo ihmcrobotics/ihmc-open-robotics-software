@@ -3,8 +3,8 @@ package us.ihmc.rdx;
 import com.badlogic.gdx.graphics.Color;
 import imgui.ImGui;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.rdx.gdx.RDXLwjgl3ApplicationAdapter;
 import us.ihmc.rdx.mesh.RDXMutableMultiLineModel;
-import us.ihmc.rdx.ui.RDXBaseUI;
 
 import java.util.ArrayList;
 
@@ -17,7 +17,7 @@ public class RDXMutableMeshDemo
    public RDXMutableMeshDemo()
    {
       RDXBaseUI baseUI = new RDXBaseUI();
-      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
+      baseUI.launchRDXApplication(new RDXLwjgl3ApplicationAdapter()
       {
          @Override
          public void create()

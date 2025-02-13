@@ -9,7 +9,7 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.perception.steppableRegions.SteppableRegion;
 import us.ihmc.perception.steppableRegions.SteppableRegionMessageConverter;
 import us.ihmc.perception.steppableRegions.SteppableRegionsListCollection;
-import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
+import us.ihmc.rdx.graphics.RDXPlanarRegionsGraphic;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;

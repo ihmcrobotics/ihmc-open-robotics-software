@@ -9,17 +9,17 @@ import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.MeshDataBuilder;
 import us.ihmc.graphicsDescription.MeshDataHolder;
+import us.ihmc.rdx.gdx.RDXLwjgl3ApplicationAdapter;
 import us.ihmc.rdx.mesh.MeshDataBuilderMissingTools;
 import us.ihmc.rdx.mesh.RDXMeshDataInterpreter;
-import us.ihmc.rdx.tools.RDXModelBuilder;
-import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.model.RDXModelBuilder;
 
 public class RDXModelMeshModificationDemo
 {
    public RDXModelMeshModificationDemo()
    {
       RDXBaseUI baseUI = new RDXBaseUI();
-      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
+      baseUI.launchRDXApplication(new RDXLwjgl3ApplicationAdapter()
       {
          private static final double SIZE_MEDIAN = 0.2;
 

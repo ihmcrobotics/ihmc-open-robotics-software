@@ -7,9 +7,10 @@ import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.opencl.OpenCLPointCloudExtractor;
-import us.ihmc.rdx.AbstractRDXPointCloudRenderer.ColoringMethod;
-import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
+import us.ihmc.rdx.RDXBaseUI;
+import us.ihmc.rdx.graphics.AbstractRDXPointCloudRenderer.ColoringMethod;
+import us.ihmc.rdx.gdx.RDXLwjgl3ApplicationAdapter;
+import us.ihmc.rdx.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXRawImagePointCloudRenderer;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensors.deprecated.ZEDColorDepthImageRetriever;
@@ -36,7 +37,7 @@ public class RDXRawImagePointCloudRendererDemo
    private RDXRawImagePointCloudRendererDemo()
    {
       RDXBaseUI baseUI = new RDXBaseUI();
-      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
+      baseUI.launchRDXApplication(new RDXLwjgl3ApplicationAdapter()
       {
          @Override
          public void create()

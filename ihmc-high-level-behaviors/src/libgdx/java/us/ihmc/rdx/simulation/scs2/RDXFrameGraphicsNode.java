@@ -5,9 +5,9 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.rdx.tools.RDXModelBuilder;
-import us.ihmc.rdx.tools.LibGDXTools;
-import us.ihmc.rdx.ui.gizmo.RDXVisualModelInstance;
+import us.ihmc.rdx.model.RDXModelBuilder;
+import us.ihmc.rdx.gdx.LibGDXTools;
+import us.ihmc.rdx.model.RDXVisualModelInstance;
 
 import java.util.ArrayList;
 

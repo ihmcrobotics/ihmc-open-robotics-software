@@ -5,11 +5,11 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import net.mgsx.gltf.loaders.gltf.GLTFLoader;
 import net.mgsx.gltf.scene3d.scene.SceneAsset;
+import us.ihmc.rdx.gdx.RDXLwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.tools.BoxesDemoModel;
-import us.ihmc.rdx.tools.RDXModelInstance;
-import us.ihmc.rdx.tools.RDXModelLoader;
-import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.demo.BoxesDemoModel;
+import us.ihmc.rdx.model.RDXModelInstance;
+import us.ihmc.rdx.model.RDXModelLoader;
 
 public class RDXGLTFDemo
 {
@@ -18,7 +18,7 @@ public class RDXGLTFDemo
 
    public RDXGLTFDemo()
    {
-      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
+      baseUI.launchRDXApplication(new RDXLwjgl3ApplicationAdapter()
       {
          @Override
          public void create()

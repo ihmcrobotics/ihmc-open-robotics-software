@@ -4,7 +4,7 @@ import com.badlogic.gdx.graphics.g3d.Model;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.rdx.simulation.environment.object.RDXSCS2EnvironmentObject;
 import us.ihmc.rdx.simulation.environment.object.RDXSCS2EnvironmentObjectFactory;
-import us.ihmc.rdx.tools.RDXModelLoader;
+import us.ihmc.rdx.model.RDXModelLoader;
 
 public class RDXSCS2SmallCinderBlockRoughed extends RDXSCS2EnvironmentObject
 {

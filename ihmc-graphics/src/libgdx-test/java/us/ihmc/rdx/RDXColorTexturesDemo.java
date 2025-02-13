@@ -5,18 +5,18 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.rdx.tools.BoxesDemoModel;
-import us.ihmc.rdx.tools.RDXModelBuilder;
-import us.ihmc.rdx.tools.LibGDXTools;
+import us.ihmc.rdx.gdx.RDXLwjgl3ApplicationAdapter;
+import us.ihmc.rdx.demo.BoxesDemoModel;
+import us.ihmc.rdx.model.RDXModelBuilder;
+import us.ihmc.rdx.gdx.LibGDXTools;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.rdx.ui.RDXBaseUI;
 
 public class RDXColorTexturesDemo
 {
    public RDXColorTexturesDemo()
    {
       RDXBaseUI baseUI = new RDXBaseUI();
-      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
+      baseUI.launchRDXApplication(new RDXLwjgl3ApplicationAdapter()
       {
          @Override
          public void create()

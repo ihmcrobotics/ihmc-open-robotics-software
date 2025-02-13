@@ -1,7 +1,7 @@
 package us.ihmc.rdx.ui.tools;
 
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.RDXBaseUI;
 import us.ihmc.rdx.imgui.ImPlotDoublePlotLine;
 import us.ihmc.rdx.imgui.ImPlotPlot;
 import us.ihmc.rdx.imgui.ImPlotPlotPanel;

@@ -1,11 +1,11 @@
 package us.ihmc.rdx.simulation;
 
 import imgui.ImGui;
-import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
+import us.ihmc.rdx.gdx.RDXLwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.scene.RDXSceneLevel;
 import us.ihmc.rdx.simulation.scs2.RDXSCS2SimulationSession;
-import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.RDXBaseUI;
 import us.ihmc.scs2.examples.simulations.bullet.*;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletFlyingBallSimulationTest;
 
@@ -17,7 +17,7 @@ public class RDXSCS2BulletSimulationDemos
 
    public RDXSCS2BulletSimulationDemos()
    {
-      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
+      baseUI.launchRDXApplication(new RDXLwjgl3ApplicationAdapter()
       {
          @Override
          public void create()

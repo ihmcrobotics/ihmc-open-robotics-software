@@ -1,9 +1,9 @@
 package us.ihmc.rdx.simulation;
 
-import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.gdx.RDXLwjgl3ApplicationAdapter;
+import us.ihmc.rdx.scene.RDXSceneLevel;
 import us.ihmc.rdx.simulation.scs2.RDXSCS2SimulationSession;
-import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.RDXBaseUI;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletFlyingBallSimulationTest;
 
 public class RDXSCS2FlyingBallOrbitalEnergyTest
@@ -13,7 +13,7 @@ public class RDXSCS2FlyingBallOrbitalEnergyTest
 
    public RDXSCS2FlyingBallOrbitalEnergyTest()
    {
-      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
+      baseUI.launchRDXApplication(new RDXLwjgl3ApplicationAdapter()
       {
          @Override
          public void create()

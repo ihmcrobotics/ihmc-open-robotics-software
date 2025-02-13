@@ -14,9 +14,9 @@ import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.HumanoidPerceptionModule;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.rdx.imgui.RDXPanel;
-import us.ihmc.rdx.sceneManager.RDXRenderableProvider;
-import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.ui.RDXImagePanel;
+import us.ihmc.rdx.scene.RDXRenderableProvider;
+import us.ihmc.rdx.scene.RDXSceneLevel;
+import us.ihmc.rdx.RDXImagePanel;
 
 import java.util.Set;
 

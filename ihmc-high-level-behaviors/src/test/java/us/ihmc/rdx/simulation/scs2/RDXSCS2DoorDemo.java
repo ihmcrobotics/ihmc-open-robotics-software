@@ -4,10 +4,10 @@ import us.ihmc.behaviors.simulation.FlatGroundDefinition;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.behaviors.simulation.door.DoorDefinition;
-import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.gdx.RDXLwjgl3ApplicationAdapter;
+import us.ihmc.rdx.scene.RDXSceneLevel;
 import us.ihmc.rdx.simulation.scs2.robots.RDXDoorWidgets;
-import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.RDXBaseUI;
 import us.ihmc.scs2.session.SessionMode;
 import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
@@ -16,7 +16,7 @@ import us.ihmc.scs2.simulation.robot.Robot;
 /**
  * An SCS 2 simulation of a door hinged on a frame with a lever handle.
  */
-public class RDXSCS2DoorDemo extends Lwjgl3ApplicationAdapter
+public class RDXSCS2DoorDemo extends RDXLwjgl3ApplicationAdapter
 {
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private RDXSCS2RestartableSimulationSession rdxSimulationSession;
