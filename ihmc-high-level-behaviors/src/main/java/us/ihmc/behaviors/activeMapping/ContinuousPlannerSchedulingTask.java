@@ -4,6 +4,8 @@ import behavior_msgs.msg.dds.ContinuousHikingCommandMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingStateMachine.*;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.communication.ContinuousHikingAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
@@ -11,6 +13,8 @@ import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
@@ -19,6 +23,8 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -131,6 +137,15 @@ public class ContinuousPlannerSchedulingTask
       stateMachine = stateMachineFactory.build(ContinuousHikingState.DO_NOTHING);
       stateMachineFactory.addStateChangedListener((from, to) ->
                                                   {
+                                                     if (from == null)
+                                                     {
+                                                        // This means the state machine has just started up, for the visuals put them under the feet till we start walking
+                                                        SideDependentList<FramePose3D> robotFeet = new SideDependentList<>(new FramePose3D(), new FramePose3D());
+                                                        robotFeet.get(RobotSide.LEFT).set(referenceFrames.getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame());
+                                                        robotFeet.get(RobotSide.RIGHT).set(referenceFrames.getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame());
+                                                        debugger.publishStartAndGoalForVisualization(robotFeet, robotFeet);
+                                                     }
+
                                                      String message = "STATE CHANGED: (" + from + " -> " + to + ")";
                                                      LogTools.warn(message);
                                                      continuousHikingLogger.appendString(message);
