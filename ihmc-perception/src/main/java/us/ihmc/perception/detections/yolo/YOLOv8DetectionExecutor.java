@@ -295,7 +295,9 @@ public class YOLOv8DetectionExecutor
       System.out.println("Destroying " + getClass().getSimpleName());
       ros2Node.destroy();
 
-      taskExecutorThread.blockingKill();
+      taskExecutorThread.kill();
+      taskExecutorThread.interrupt();
+
       annotatedImagePublishedThread.kill();
       newestColorImage.set(null);
 
