@@ -1,4 +1,4 @@
-#define LAYERS 10  // Set a fixed size
+#define LAYERS 6  // Set a fixed size
 
 extern "C"
 __global__

@@ -24,7 +24,7 @@ public class FilteredRapidHeightMapExtractor
 
    private final cudaPitchedPtr pointerTo3DArray;
    private int currentIndex;
-   int layers = 10;
+   int layers = 6;
 
    private final CUstream_st stream;
    private final int rows;
