@@ -19,7 +19,7 @@ public class DoNothingState implements State
    private final TerrainPlanningDebugger debugger;
 
    private final ROS2Publisher<PauseWalkingMessage> pauseWalkingPublisher;
-   private SideDependentList<FramePose3D> robotFeet = new SideDependentList<>(new FramePose3D(), new FramePose3D());;
+   private final SideDependentList<FramePose3D> robotFeet = new SideDependentList<>(new FramePose3D(), new FramePose3D());
 
    /**
     * This state exists for when the state machine isn't doing anything, if we have gone back to this state after running the state machine, we reset a few
