@@ -257,18 +257,34 @@ public class QuicksterFootstepProvider implements Updatable
                                           FramePoint2DReadOnly pendulumBase,
                                           FramePoint2DReadOnly netPendulumBase,
                                           boolean isInDoubleSupport,
-                                          FixedFramePoint2DBasics touchdownPositionToPack)
+                                          FramePoint2DBasics touchdownPositionToPack)
    {
-      tempPendulumBase.setIncludingFrame(pendulumBase);
-      tempPendulumBase.changeFrameAndProjectToXYPlane(centerOfMassControlZUpFrame);
+//      tempPendulumBase.setIncludingFrame(pendulumBase);
+//      tempPendulumBase.changeFrameAndProjectToXYPlane(centerOfMassControlZUpFrame);
+//
+//      tempNetPendulumBase.setIncludingFrame(netPendulumBase);
+//      tempNetPendulumBase.changeFrameAndProjectToXYPlane(referenceFrames.getSoleZUpFrame(getTrailingSide()));
+//
+//      touchdownCalculator.computeDesiredTouchdownPosition(swingSide.getOppositeSide(), timeToReachGoal, tempPendulumBase, tempNetPendulumBase, isInDoubleSupport);
+//      tempTouchdownPosition.setIncludingFrame(touchdownCalculator.getDesiredTouchdownPosition2D());
+//      tempTouchdownPosition.changeFrameAndProjectToXYPlane(touchdownPositionToPack.getReferenceFrame());
+//      touchdownPositionToPack.set(tempTouchdownPosition);
 
-      tempNetPendulumBase.setIncludingFrame(netPendulumBase);
-      tempNetPendulumBase.changeFrameAndProjectToXYPlane(referenceFrames.getSoleZUpFrame(getTrailingSide()));
-
-      touchdownCalculator.computeDesiredTouchdownPosition(swingSide.getOppositeSide(), timeToReachGoal, tempPendulumBase, tempNetPendulumBase, isInDoubleSupport);
-      tempTouchdownPosition.setIncludingFrame(touchdownCalculator.getDesiredTouchdownPosition2D());
-      tempTouchdownPosition.changeFrameAndProjectToXYPlane(touchdownPositionToPack.getReferenceFrame());
-      touchdownPositionToPack.set(tempTouchdownPosition);
+      ALIPCalculatorTools.computeTouchdownPositionRegular(estimates.getCenterOfMassPosition(),
+                                                          estimates.getCenterOfMassVelocity(),
+                                                          estimates.getCenterOfMassAngularMomentum(),
+                                                          swingSide,
+                                                          desiredVelocity.getX(),
+                                                          desiredVelocity.getY(),
+                                                          parameters.getStanceWidth(swingSide).getDoubleValue(),
+                                                          timeToReachGoal,
+                                                          getStepDuration(swingSide),
+                                                          robotModel.getTotalMass(),
+                                                          parameters.getDesiredCoMHeight(swingSide).getDoubleValue(),
+                                                          touchdownPositionToPack,
+                                                          referenceFrames.getSoleZUpFrame(swingSide.getOppositeSide()),
+                                                          referenceFrames.getSoleZUpFrame(swingSide),
+                                                          centerOfMassControlZUpFrame);
    }
 
    private void calculateNetPendulumBase()
