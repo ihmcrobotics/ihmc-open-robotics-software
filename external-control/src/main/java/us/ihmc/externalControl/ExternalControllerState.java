@@ -1,27 +1,38 @@
 package us.ihmc.externalControl;
 
-import org.ejml.data.DMatrixRMaj;
+import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.JointControlBlender;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.PairList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.externalControl.library.ExternalControlNativeLibrary;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameWrench;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.sensors.FootSwitchInterface;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.HashMap;
+
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicPoint2D;
 
 public class ExternalControllerState extends HighLevelControllerState
 {
@@ -41,6 +52,12 @@ public class ExternalControllerState extends HighLevelControllerState
 
    private final YoEnum<DesiredMode> desiredMode = new YoEnum<>("DesiredExternalMode", registry, DesiredMode.class);
    private final YoEnum<DesiredBehavior> desiredBehavior = new YoEnum<>("DesiredExternalBehavior", registry, DesiredBehavior.class);
+
+   private final SideDependentList<YoFramePoint3D> measuredFootCoPs = new SideDependentList<>();
+   private final SideDependentList<YoFrameVector3D> measuredFootForces = new SideDependentList<>();
+
+   private final YoFramePoint3D capturePoint = new YoFramePoint3D("CapturePoint", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D centerOfMass = new YoFramePoint3D("CenterOfMass", ReferenceFrame.getWorldFrame(), registry);
 
    private final CommandInputManager commandInputManager;
 
@@ -93,6 +110,12 @@ public class ExternalControllerState extends HighLevelControllerState
          jointCommandBlenders.add(controlledJoint, jointControlBlender);
       }
 
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         measuredFootCoPs.put(robotSide, new YoFramePoint3D(robotSide.getShortLowerCaseName() + "_MeasuredFootCoP", ReferenceFrame.getWorldFrame(), registry));
+         measuredFootForces.put(robotSide, new YoFrameVector3D(robotSide.getShortLowerCaseName() + "_MeasuredFootForce", ReferenceFrame.getWorldFrame(), registry));
+      }
+
       for (String name : externalControl.debugDataNames) {
          debugData.put(name, new YoDouble("zmq_mpc_" + name, registry));
       }
@@ -121,7 +144,12 @@ public class ExternalControllerState extends HighLevelControllerState
    @Override
    public void doAction(double timeInState)
    {
+      updateContactState();
+
       controllerToolbox.update();
+
+      centerOfMass.set(controllerToolbox.getCenterOfMassPosition());
+      CapturePointTools.computeCapturePointPosition(controllerToolbox.getCenterOfMassPosition(), controllerToolbox.getCenterOfMassVelocity(), controllerToolbox.getOmega0(), capturePoint);
 
       externalControl.setFootStates(controllerToolbox.getReferenceFrames().getSoleFrames(),
                                     controllerToolbox.getFootSwitches().get(RobotSide.LEFT).hasFootHitGroundFiltered(),
@@ -181,6 +209,23 @@ public class ExternalControllerState extends HighLevelControllerState
 
    }
 
+   private void updateContactState()
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         FootSwitchInterface footSwitch = controllerToolbox.getFootSwitches().get(robotSide);
+         footSwitch.update();
+
+         if (footSwitch.hasFootHitGroundFiltered())
+            controllerToolbox.setFootContactStateFullyConstrained(robotSide);
+         else
+            controllerToolbox.setFootContactStateFree(robotSide);
+
+         measuredFootCoPs.get(robotSide).setMatchingFrame(footSwitch.getCenterOfPressure(), 0.0);
+         measuredFootForces.get(robotSide).setMatchingFrame(footSwitch.getMeasuredWrench().getLinearPart());
+      }
+   }
+
    @Override
    public void onExit(double timeInState)
    {
@@ -191,5 +236,37 @@ public class ExternalControllerState extends HighLevelControllerState
    public JointDesiredOutputListReadOnly getOutputForLowLevelController()
    {
       return lowLevelOneDoFJointDesiredDataHolder;
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D("Center of Mass Point",
+                                         centerOfMass,
+                                         0.02,
+                                         ColorDefinitions.Black().darker(),
+                                         YoGraphicDefinitionFactory.DefaultPoint2DGraphic.CIRCLE_CROSS));
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D("Capture Point",
+                                                                    capturePoint,
+                                                                    0.02,
+                                                                    ColorDefinitions.Blue().darker(),
+                                                                    YoGraphicDefinitionFactory.DefaultPoint2DGraphic.CIRCLE_CROSS));
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D(robotSide.getUpperCaseName() + " Measured CoP",
+                                                                       measuredFootCoPs.get(robotSide),
+                                                                       0.008,
+                                                                       ColorDefinitions.Black().darker(),
+                                                                       YoGraphicDefinitionFactory.DefaultPoint2DGraphic.DIAMOND_FILLED));
+         group.addChild(YoGraphicDefinitionFactory.newYoGraphicArrow3D(robotSide.getUpperCaseName() + " Measured Foot Force",
+                                                                       measuredFootCoPs.get(robotSide),
+                                                                       measuredFootForces.get(robotSide),
+                                                                       0.0015,
+                                                                       ColorDefinitions.Red().darker()));
+      }
+      if (group.isEmpty())
+         return null;
+      return group;
    }
 }
