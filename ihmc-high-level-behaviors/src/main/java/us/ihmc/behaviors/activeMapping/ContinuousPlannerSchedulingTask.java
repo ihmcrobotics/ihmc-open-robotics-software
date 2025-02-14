@@ -23,7 +23,6 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -80,7 +79,7 @@ public class ContinuousPlannerSchedulingTask
       stateMachineFactory.setRegistry(registry);
 
       // Create the different states
-      State notStartedState = new DoNothingState(ros2Helper, simpleRobotName, continuousPlanner, debugger);
+      State notStartedState = new DoNothingState(ros2Helper, referenceFrames, simpleRobotName, continuousPlanner, debugger);
       State readyToPlanState = new ReadyToPlanState(ros2Helper,
                                                     referenceFrames,
                                                     commandMessage,
