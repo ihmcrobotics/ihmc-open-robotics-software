@@ -12,6 +12,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
 import us.ihmc.perception.cuda.CUDAStreamManager;
+import us.ihmc.perception.cuda.CUDATimingTools;
 import us.ihmc.perception.cuda.CUDATools;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParameters;
@@ -25,6 +26,8 @@ import static us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractorCUDA.height
 
 public class SnappingHeightMapExtractor
 {
+   private static final boolean PRINT_TIMING_FOR_KERNELS = false;
+
    private final SteppableRegionCalculatorParameters steppableRegionParameters = new SteppableRegionCalculatorParameters();
 
    private final TerrainMapData terrainMapData;
@@ -33,6 +36,7 @@ public class SnappingHeightMapExtractor
 
    private final CUDAProgram snappingHeightMapProgram;
    private final CUDAKernel snappingKernel;
+   private final String computeSnappedValuesKernel;
    private dim3 snappingKernelGridDim;
    private dim3 blockSize;
 
@@ -60,7 +64,8 @@ public class SnappingHeightMapExtractor
          URL kernelPath = getClass().getResource("SnappingHeightMapExtractor.cu");
 
          snappingHeightMapProgram = new CUDAProgram(kernelPath, heightMapUtilsHeaderPath, mathUtilsHeaderPath);
-         snappingKernel = snappingHeightMapProgram.loadKernel("computeSnappedValuesKernel");
+         computeSnappedValuesKernel = "computeSnappedValuesKernel";
+         snappingKernel = snappingHeightMapProgram.loadKernel(computeSnappedValuesKernel);
 
          snappingParametersHostPointer = new FloatPointer(17);
          snappingParametersDevicePointer = new FloatPointer();
@@ -111,8 +116,20 @@ public class SnappingHeightMapExtractor
       snappingKernelGridDim = new dim3(snappedKernelGridSizeXY, snappedKernelGridSizeXY, 1);
       blockSize = new dim3(BLOCK_SIZE_XY, BLOCK_SIZE_XY, 1);
 
+      if (PRINT_TIMING_FOR_KERNELS)
+      {
+         CUDATimingTools.startKernelTimer();
+      }
+
       // Run the kernel and check for errors
       snappingKernel.run(stream, snappingKernelGridDim, blockSize, 0);
+
+      if (PRINT_TIMING_FOR_KERNELS)
+      {
+         CUDATimingTools.endKernelTimer(computeSnappedValuesKernel);
+         CUDATimingTools.printTimesForKernel(computeSnappedValuesKernel);
+      }
+
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
 
