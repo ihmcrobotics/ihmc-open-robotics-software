@@ -10,7 +10,7 @@ import us.ihmc.rdx.perception.sceneGraph.builder.RDXPredefinedRigidBodySceneNode
 
 public class RDXCustomSceneLoader
 {
-   public enum RDXDemoScenes
+   public enum RDXDemoScene
    {
       EXPLOSIVE_BREACHING,
       MANIPULATION_2X4,
@@ -24,7 +24,7 @@ public class RDXCustomSceneLoader
       this.sceneGraphUI = sceneGraphUI;
       this.predefinedRigidBodySceneNodeBuilder = new RDXPredefinedRigidBodySceneNodeBuilder(sceneGraphUI.getSceneGraph());
    }
-   public void loadCustomScene(RDXDemoScenes demoScene)
+   public void loadCustomScene(RDXDemoScene demoScene)
    {
       switch (demoScene)
       {
