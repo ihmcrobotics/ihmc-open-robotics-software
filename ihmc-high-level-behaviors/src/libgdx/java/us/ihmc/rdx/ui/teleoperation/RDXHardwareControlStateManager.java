@@ -10,35 +10,24 @@ import controller_msgs.msg.dds.MasterGainScaleControllerStatusMessage;
 import controller_msgs.msg.dds.StopAllTrajectoryMessage;
 import imgui.ImGui;
 import us.ihmc.behaviors.tools.CommunicationHelper;
-import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
-import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.tools.Timer;
 
-public class RDXRobotLowLevelMessenger
+public class RDXHardwareControlStateManager
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final RobotLowLevelMessenger robotLowLevelMessenger;
    private final CommunicationHelper communicationHelper;
    private final Timer hpuConnectedTimer = new Timer();
    private final Timer robotServoedConnectedTimer = new Timer();
    private boolean hpuEnabled = false;
    private boolean isRobotServoed = false;
    private HighLevelControllerName currentHighLevelState = null;
-   private HighLevelControllerName highLevelStateToRequest = HighLevelControllerName.DO_NOTHING_BEHAVIOR;
 
-   public RDXRobotLowLevelMessenger(CommunicationHelper communicationHelper)
+   public RDXHardwareControlStateManager(CommunicationHelper communicationHelper)
    {
       this.communicationHelper = communicationHelper;
-
-      robotLowLevelMessenger = communicationHelper.getOrCreateRobotLowLevelMessenger();
-      if (robotLowLevelMessenger == null)
-      {
-         String robotName = communicationHelper.getRobotModel().getSimpleRobotName();
-         throw new RuntimeException("Please add implementation of RobotLowLevelMessenger for " + robotName);
-      }
 
       communicationHelper.subscribeToControllerViaVolatileCallback(EnableHPUStatusMessage.class, message ->
       {
@@ -79,10 +68,6 @@ public class RDXRobotLowLevelMessenger
             }
          }
       }
-      else
-      {
-         ImGui.textColored(ImGuiTools.DARK_RED, "HPU variable not connected.");
-      }
 
       if (robotServoedConnectedTimer.isRunning(1.0))
       {
@@ -105,10 +90,6 @@ public class RDXRobotLowLevelMessenger
             }
          }
       }
-      else
-      {
-         ImGui.textColored(ImGuiTools.DARK_RED, "Robot servoed variable not connected.");
-      }
 
       ImGui.text("Current controller state: %s".formatted(currentHighLevelState == null ? "Unknown" : currentHighLevelState.name()));
       ImGui.text("Request:");
@@ -129,7 +110,7 @@ public class RDXRobotLowLevelMessenger
       if (ImGui.button(labels.get("Stand prep")))
       {
          RDXBaseUI.pushNotification("Commanding stand prep...");
-         sendStandRequest();
+         sendStandPrepRequest();
       }
 
       ImGui.text("Command:");
@@ -172,13 +153,17 @@ public class RDXRobotLowLevelMessenger
       }
    }
 
-   public void sendStandRequest()
+   public void sendStandPrepRequest()
    {
-      robotLowLevelMessenger.sendStandRequest();
+      HighLevelStateMessage highLevelStateMessage = new HighLevelStateMessage();
+      highLevelStateMessage.setHighLevelControllerName(HighLevelControllerName.STAND_PREP_STATE.toByte());
+      communicationHelper.publishToController(highLevelStateMessage);
    }
 
    public void sendFreezeRequest()
    {
-      robotLowLevelMessenger.sendFreezeRequest();
+      HighLevelStateMessage highLevelStateMessage = new HighLevelStateMessage();
+      highLevelStateMessage.setHighLevelControllerName(HighLevelControllerName.FREEZE_STATE.toByte());
+      communicationHelper.publishToController(highLevelStateMessage);
    }
 }
