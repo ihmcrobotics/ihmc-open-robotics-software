@@ -10,6 +10,8 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
@@ -21,9 +23,11 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.simulationTesting.NothingChangedVerifier;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
+import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
+import us.ihmc.simulationConstructionSetTools.util.environments.RampsEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.ControllerFailureException;
@@ -44,6 +48,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private BlockingSimulationRunner blockingSimulationRunner;
+   private SCS2AvatarTestingSimulation simulationTestHelper;
 
    @BeforeEach
    public void showMemoryUsageBeforeTest()
@@ -76,6 +81,20 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
    public void getRobotModelBeforeTests()
    {
       robotModel = getRobotModel();
+   }
+
+   // This one replace the original SCS1 test with the SCS2 test
+   @Test
+   public void testDRCOverShallowRampSCS2version() throws SimulationExceededMaximumTimeException, ControllerFailureException
+   {
+      CommonAvatarEnvironmentInterface rampEnvironment = createRampTerrain();
+      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(robotModel,
+                                                                                            rampEnvironment,
+                                                                                            simulationTestingParameters);
+
+      simulationTestHelper.simulateNow(0.5);
+
+
    }
 
    @Test
@@ -244,6 +263,16 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       assertTrue(success);
    }
 
+   private CommonAvatarEnvironmentInterface createRampTerrain()
+   {
+      double rampSlopeUp = 0.1;
+      double rampXLength0 = 6.0;
+      double landingLength = 1.0;
+
+      RampsEnvironment environment = new RampsEnvironment(rampSlopeUp, rampXLength0, landingLength);
+      return environment;
+   }
+
    private ImmutablePair<CombinedTerrainObject3D, Double> createRamp()
    {
       double rampSlopeUp = 0.1;
@@ -375,8 +404,11 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
 
    boolean setupForCheatingUsingGroundHeightAtForFootstepProvider = false;
 
-   private DRCFlatGroundWalkingTrack setupSimulationTrack(WalkingControllerParameters drcControlParameters, GroundProfile3D groundProfile,
-                                                          GroundProfile3D groundProfile3D, boolean drawGroundProfile, boolean useVelocityAndHeadingScript,
+   private DRCFlatGroundWalkingTrack setupSimulationTrack(WalkingControllerParameters drcControlParameters,
+                                                          GroundProfile3D groundProfile,
+                                                          GroundProfile3D groundProfile3D,
+                                                          boolean drawGroundProfile,
+                                                          boolean useVelocityAndHeadingScript,
                                                           boolean cheatWithGroundHeightAtForFootstep,
                                                           RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup)
    {

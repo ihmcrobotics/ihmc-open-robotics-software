@@ -25,14 +25,14 @@ public class AtlasBumpyAndShallowRampsWalkingTest extends DRCBumpyAndShallowRamp
    {
       return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ATLAS);
    }
-   
+
    @Test
    @Override
    public void testDRCBumpyGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       super.testDRCBumpyGroundWalking();
    }
-   
+
    // This has never worked. Would be nice if we can get it to work.")
    @Disabled
    @Test
@@ -41,11 +41,17 @@ public class AtlasBumpyAndShallowRampsWalkingTest extends DRCBumpyAndShallowRamp
    {
       super.testDRCOverRandomBlocks();
    }
-   
+
    @Test
    @Override
    public void testDRCOverShallowRamp() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       super.testDRCOverShallowRamp();
    }
+   @Test
+   @Override
+   public void testDRCOverShallowRampSCS2version() throws SimulationExceededMaximumTimeException, ControllerFailureException
+{
+   super.testDRCOverShallowRampSCS2version();
+}
 }
