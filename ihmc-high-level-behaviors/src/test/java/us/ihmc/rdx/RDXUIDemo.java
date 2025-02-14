@@ -6,7 +6,6 @@ import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import org.apache.logging.log4j.Level;
-import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.rdx.imgui.ImGuiMovingPlot;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -23,9 +22,6 @@ import us.ihmc.tools.string.StringTools;
 
 public class RDXUIDemo
 {
-   /** Currently relying on this hack to be removed when fixed. */
-   private static final Mat matToLoadBytedecoNatives = new Mat();
-
    private final RDXBaseUI baseUI = new RDXBaseUI("Demo");
    private final Stopwatch stopwatch = new Stopwatch().start();
    private final ImGuiMovingPlot renderPlot = new ImGuiMovingPlot("render count", 1000, 300, 30);
