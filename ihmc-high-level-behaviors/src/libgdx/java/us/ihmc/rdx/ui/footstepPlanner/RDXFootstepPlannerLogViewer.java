@@ -257,4 +257,9 @@ public class RDXFootstepPlannerLogViewer
          probeSphere.getRenderables(renderables, pool);
       }
    }
+
+   public void destroy()
+   {
+      footstepPlanGraphic.destroy();
+   }
 }

@@ -24,8 +24,6 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
                                   D extends LeafNodeDefinition>
       extends RDXBehaviorTreeNode<S, D>
 {
-   private final S state;
-   private final D definition;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiFlashingColors isExecutingFlashingColor = new ImGuiFlashingColors(0.1, ImGuiTools.PURPLE, ImGuiTools.DARK_PURPLE);
    private final ImGuiHollowArrowRenderer hollowArrowRenderer = new ImGuiHollowArrowRenderer();
@@ -36,9 +34,6 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
    public RDXLeafNode(S state)
    {
       super(state);
-
-      this.state = state;
-      definition = getDefinition();
    }
 
    @Override

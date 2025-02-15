@@ -1,5 +1,8 @@
 # Parent state fields
-behavior_msgs/BehaviorTreeNodeStateMessage state
+behavior_msgs/LeafNodeStateMessage state
 
 # Definition
 behavior_msgs/ConditionNodeDefinitionMessage definition
+
+# The current count of the counter
+uint32 count

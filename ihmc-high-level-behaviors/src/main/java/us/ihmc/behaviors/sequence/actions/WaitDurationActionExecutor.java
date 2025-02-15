@@ -9,15 +9,12 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class WaitDurationActionExecutor extends ActionNodeExecutor<WaitDurationActionState, WaitDurationActionDefinition>
 {
-   private final WaitDurationActionState state;
    private final ROS2SyncedRobotModel syncedRobot;
    private final NonWallTimer executionTimer = new NonWallTimer();
 
    public WaitDurationActionExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ROS2SyncedRobotModel syncedRobot)
    {
       super(new WaitDurationActionState(id, crdtInfo, saveFileDirectory));
-
-      state = getState();
 
       this.syncedRobot = syncedRobot;
    }
@@ -35,7 +32,7 @@ public class WaitDurationActionExecutor extends ActionNodeExecutor<WaitDurationA
    {
       super.triggerExecution();
 
-      state.getLogger().info("Waiting for %.2f s...".formatted(getDefinition().getWaitDuration()));
+      state.getLogger().info("Waiting for %.2f s...".formatted(definition.getWaitDuration()));
 
       executionTimer.reset();
    }
@@ -43,9 +40,9 @@ public class WaitDurationActionExecutor extends ActionNodeExecutor<WaitDurationA
    @Override
    public void updateCurrentlyExecuting()
    {
-      state.setIsExecuting(executionTimer.isRunning(getDefinition().getWaitDuration()));
+      state.setIsExecuting(executionTimer.isRunning(definition.getWaitDuration()));
 
-      state.setNominalExecutionDuration(getDefinition().getWaitDuration());
+      state.setNominalExecutionDuration(definition.getWaitDuration());
       state.setElapsedExecutionTime(executionTimer.getElapsedTime());
    }
 }

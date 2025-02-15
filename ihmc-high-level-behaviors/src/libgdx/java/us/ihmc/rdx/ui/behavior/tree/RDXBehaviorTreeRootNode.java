@@ -19,7 +19,6 @@ import java.util.List;
 public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRootNodeState, BehaviorTreeRootNodeDefinition>
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final BehaviorTreeRootNodeState state;
    private final ImBooleanWrapper automaticExecutionCheckbox;
    private final ImBooleanWrapper concurrencyEnabledCheckbox;
    private final TLongObjectHashMap<RDXBehaviorTreeNode<?, ?>> idToNodeMap = new TLongObjectHashMap<>();
@@ -32,8 +31,6 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
    public RDXBehaviorTreeRootNode(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(new BehaviorTreeRootNodeState(id, crdtInfo, saveFileDirectory));
-
-      state = getState();
 
       automaticExecutionCheckbox = new ImBooleanWrapper(state::getAutomaticExecution,
                                                         state::setAutomaticExecution,
@@ -96,19 +93,19 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
    {
       if (ImGui.button(labels.get("<")))
       {
-         getState().stepBackNextExecutionIndex();
+         state.stepBackNextExecutionIndex();
       }
       ImGuiTools.previousWidgetTooltip("Go to previous leaf");
       ImGui.sameLine();
-      ImGui.text("Index: " + String.format("%03d", getState().getExecutionNextIndex()));
+      ImGui.text("Index: " + String.format("%03d", state.getExecutionNextIndex()));
       ImGui.sameLine();
       if (ImGui.button(labels.get(">")))
       {
-         getState().stepForwardNextExecutionIndex();
+         state.stepForwardNextExecutionIndex();
       }
       ImGuiTools.previousWidgetTooltip("Go to next leaf");
 
-      boolean endOfSequence = getState().getExecutionNextIndex() >= getState().getOrderedLeaves().size();
+      boolean endOfSequence = state.getExecutionNextIndex() >= state.getOrderedLeaves().size();
       ImGui.beginDisabled(endOfSequence); // Use disabled so stuff doesn't glitch around
       {
          ImGui.sameLine();
@@ -117,20 +114,20 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
 
          automaticExecutionCheckbox.renderImGuiWidget();
          if (automaticExecutionCheckbox.changed())
-            getDefinition().modify();
+            definition.modify();
 
          ImGuiTools.previousWidgetTooltip("Enables autonomous execution. Will immediately start executing when checked.");
 
-         ImGui.beginDisabled(getState().getAutomaticExecution());
+         ImGui.beginDisabled(state.getAutomaticExecution());
          {
             ImGui.sameLine();
 
-            boolean disableManuallyExecuteButton = getState().getManualExecutionRequested();
+            boolean disableManuallyExecuteButton = state.getManualExecutionRequested();
             ImGui.beginDisabled(disableManuallyExecuteButton);
             {
                if (ImGui.button(labels.get("Manually")))
                {
-                  getState().setManualExecutionRequested();
+                  state.setManualExecutionRequested();
                }
             }
             ImGui.endDisabled();
@@ -180,7 +177,7 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
    @Override
    public void renderNodeSettingsWidgets()
    {
-      ImGui.text("Type: %s   ID: %d".formatted(getDefinition().getClass().getSimpleName(), getState().getID()));
+      ImGui.text("Type: %s   ID: %d".formatted(definition.getClass().getSimpleName(), state.getID()));
 
       super.renderNodeSettingsWidgets();
    }

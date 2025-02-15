@@ -74,6 +74,12 @@ public class BipedStepTransition
       return transitionTime;
    }
 
+   public void removeTransition(int transitionNumber)
+   {
+      transitionSides.remove(transitionNumber);
+      transitionTypes.remove(transitionNumber);
+   }
+
    public int getNumberOfFeetInTransition()
    {
       return transitionSides.size();

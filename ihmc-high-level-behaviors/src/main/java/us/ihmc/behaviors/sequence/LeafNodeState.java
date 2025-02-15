@@ -13,8 +13,6 @@ import java.util.List;
 
 public class LeafNodeState<D extends LeafNodeDefinition> extends BehaviorTreeNodeState<D>
 {
-   private final D definition;
-
    private final CRDTStatusBoolean isNextForExecution;
    private final CRDTStatusInteger concurrencyRank;
    private final CRDTStatusBoolean canExecute;
@@ -27,8 +25,6 @@ public class LeafNodeState<D extends LeafNodeDefinition> extends BehaviorTreeNod
    public LeafNodeState(long id, D definition, CRDTInfo crdtInfo)
    {
       super(id, definition, crdtInfo);
-
-      this.definition = definition;
 
       isNextForExecution = new CRDTStatusBoolean(ROS2ActorDesignation.ROBOT, crdtInfo, false);
       concurrencyRank = new CRDTStatusInteger(ROS2ActorDesignation.ROBOT, crdtInfo, 1);

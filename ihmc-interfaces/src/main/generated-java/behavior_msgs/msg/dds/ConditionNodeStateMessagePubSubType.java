@@ -15,7 +15,7 @@ public class ConditionNodeStateMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "fbd8cc5c3a36d57139fba35dfc741ee5f56e0ccaff9854204eae6660b20cceb4";
+   		return "eada9abbbc66f75c56364d1c11036bfd87ba0a5a4f11f48133240f371c74d026";
    }
    
    @Override
@@ -52,9 +52,11 @@ public class ConditionNodeStateMessagePubSubType implements us.ihmc.pubsub.Topic
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += behavior_msgs.msg.dds.BehaviorTreeNodeStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += behavior_msgs.msg.dds.LeafNodeStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += behavior_msgs.msg.dds.ConditionNodeDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
       return current_alignment - initial_alignment;
@@ -69,9 +71,12 @@ public class ConditionNodeStateMessagePubSubType implements us.ihmc.pubsub.Topic
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += behavior_msgs.msg.dds.BehaviorTreeNodeStateMessagePubSubType.getCdrSerializedSize(data.getState(), current_alignment);
+      current_alignment += behavior_msgs.msg.dds.LeafNodeStateMessagePubSubType.getCdrSerializedSize(data.getState(), current_alignment);
 
       current_alignment += behavior_msgs.msg.dds.ConditionNodeDefinitionMessagePubSubType.getCdrSerializedSize(data.getDefinition(), current_alignment);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
 
       return current_alignment - initial_alignment;
@@ -79,33 +84,39 @@ public class ConditionNodeStateMessagePubSubType implements us.ihmc.pubsub.Topic
 
    public static void write(behavior_msgs.msg.dds.ConditionNodeStateMessage data, us.ihmc.idl.CDR cdr)
    {
-      behavior_msgs.msg.dds.BehaviorTreeNodeStateMessagePubSubType.write(data.getState(), cdr);
+      behavior_msgs.msg.dds.LeafNodeStateMessagePubSubType.write(data.getState(), cdr);
       behavior_msgs.msg.dds.ConditionNodeDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
+      cdr.write_type_4(data.getCount());
+
    }
 
    public static void read(behavior_msgs.msg.dds.ConditionNodeStateMessage data, us.ihmc.idl.CDR cdr)
    {
-      behavior_msgs.msg.dds.BehaviorTreeNodeStateMessagePubSubType.read(data.getState(), cdr);	
+      behavior_msgs.msg.dds.LeafNodeStateMessagePubSubType.read(data.getState(), cdr);	
       behavior_msgs.msg.dds.ConditionNodeDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
+      data.setCount(cdr.read_type_4());
+      	
 
    }
 
    @Override
    public final void serialize(behavior_msgs.msg.dds.ConditionNodeStateMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_a("state", new behavior_msgs.msg.dds.BehaviorTreeNodeStateMessagePubSubType(), data.getState());
+      ser.write_type_a("state", new behavior_msgs.msg.dds.LeafNodeStateMessagePubSubType(), data.getState());
 
       ser.write_type_a("definition", new behavior_msgs.msg.dds.ConditionNodeDefinitionMessagePubSubType(), data.getDefinition());
 
+      ser.write_type_4("count", data.getCount());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.ConditionNodeStateMessage data)
    {
-      ser.read_type_a("state", new behavior_msgs.msg.dds.BehaviorTreeNodeStateMessagePubSubType(), data.getState());
+      ser.read_type_a("state", new behavior_msgs.msg.dds.LeafNodeStateMessagePubSubType(), data.getState());
 
       ser.read_type_a("definition", new behavior_msgs.msg.dds.ConditionNodeDefinitionMessagePubSubType(), data.getDefinition());
 
+      data.setCount(ser.read_type_4("count"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.ConditionNodeStateMessage src, behavior_msgs.msg.dds.ConditionNodeStateMessage dest)

@@ -37,8 +37,6 @@ import java.util.List;
 
 public class RDXPelvisHeightOrientationAction extends RDXActionNode<PelvisHeightOrientationActionState, PelvisHeightOrientationActionDefinition>
 {
-   private final PelvisHeightOrientationActionDefinition definition;
-   private final PelvisHeightOrientationActionState state;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImDoubleWrapper heightWidget;
    private final ImDoubleWrapper yawWidget;
@@ -68,9 +66,6 @@ public class RDXPelvisHeightOrientationAction extends RDXActionNode<PelvisHeight
    {
       super(new PelvisHeightOrientationActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
 
-      definition = getDefinition();
-      state = getState();
-
       this.syncedFullRobotModel = syncedFullRobotModel;
 
       poseGizmo = new RDXSelectablePose3DGizmo();
@@ -79,7 +74,7 @@ public class RDXPelvisHeightOrientationAction extends RDXActionNode<PelvisHeight
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
                                                                 referenceFrameLibrary,
                                                                 definition::getParentFrameName,
-                                                                getState().getPelvisFrame()::changeFrame);
+                                                                state.getPelvisFrame()::changeFrame);
       heightWidget = new ImDoubleWrapper(definition::getHeight,
                                          definition::setHeight,
                                          imDouble -> ImGuiTools.volatileInputDouble(labels.get("Height"), imDouble));

@@ -1,8 +1,8 @@
 #ifndef __behavior_msgs__msg__ConditionNodeStateMessage__idl__
 #define __behavior_msgs__msg__ConditionNodeStateMessage__idl__
 
-#include "behavior_msgs/msg/./BehaviorTreeNodeStateMessage_.idl"
 #include "behavior_msgs/msg/./ConditionNodeDefinitionMessage_.idl"
+#include "behavior_msgs/msg/./LeafNodeStateMessage_.idl"
 module behavior_msgs
 {
   module msg
@@ -16,11 +16,15 @@ module behavior_msgs
         /**
          * Parent state fields
          */
-        behavior_msgs::msg::dds::BehaviorTreeNodeStateMessage state;
+        behavior_msgs::msg::dds::LeafNodeStateMessage state;
         /**
          * Definition
          */
         behavior_msgs::msg::dds::ConditionNodeDefinitionMessage definition;
+        /**
+         * The current count of the counter
+         */
+        unsigned long count;
       };
     };
   };

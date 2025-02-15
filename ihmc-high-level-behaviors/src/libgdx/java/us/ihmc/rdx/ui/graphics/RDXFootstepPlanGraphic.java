@@ -25,7 +25,6 @@ import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.RDX3DSituatedText;
-import us.ihmc.rdx.mesh.RDXIDMappedColorFunction;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
@@ -38,24 +37,25 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
 
+/**
+ * A graphic representing one or more sequential footsteps.
+ * They are colored outlines of the maximum base of support, with a solid fill, and text number on each step.
+ * Optionally, more text can be added to give a name to the footstep plan.
+ *
+ * TODO: Make this class hold a list of RDXFootstepGraphic instead, moving the extra elements here to that class.
+ */
 public class RDXFootstepPlanGraphic implements RenderableProvider
 {
    private final ModelBuilder modelBuilder = new ModelBuilder();
-   RDXMultiColorMeshBuilder meshBuilder = new RDXMultiColorMeshBuilder();
-   // visualization options
-   private final Function<Integer, Color> colorFunction = new RDXIDMappedColorFunction();
+   private final RDXMultiColorMeshBuilder meshBuilder = new RDXMultiColorMeshBuilder();
    private final SideDependentList<Color> footstepColors = new SideDependentList<>();
-
    {
       footstepColors.set(RobotSide.LEFT, new Color(RDXFootstepGraphic.LEFT_FOOT_RED_COLOR));
       footstepColors.set(RobotSide.RIGHT, new Color(RDXFootstepGraphic.RIGHT_FOOT_GREEN_COLOR));
    }
-
    private final SideDependentList<ConvexPolygon2D> defaultContactPoints = new SideDependentList<>();
    private volatile Runnable buildMeshAndCreateModelInstance = null;
-
    private ModelInstance modelInstance;
    private Model lastModel;
 
