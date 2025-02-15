@@ -1,0 +1,25 @@
+# For use by external AI to modify the behavior tree and operate behaviors
+
+# Name of the action that has failed
+string action_name
+
+# Type of the action
+string action_type
+
+# Reference frame of the action
+string action_frame
+
+# Position tolerance for the action [m]
+float64 position_tolerance
+# Orientation tolerance for the action [deg]
+float64 orientation_tolerance
+
+# Error in position for the action
+geometry_msgs/Point position_error
+# Error in orientation for the action
+geometry_msgs/Quaternion orientation_error
+
+# Last commanded position (in action_frame) for the action
+geometry_msgs/Point desired_position
+# Last commanded orientation (in action_frame) for the action
+geometry_msgs/Quaternion desired_orientation

@@ -16,3 +16,4 @@ string completed_behavior
 
 # Name of the behavior that has failed (name of the checkpoint in the pre-loaded behavior collection)
 string failed_behavior
+behavior_msgs/AI2RActionFailureMessage failure

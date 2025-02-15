@@ -19,11 +19,16 @@ public class AI2RObjectMessage extends Packet<AI2RObjectMessage> implements Sett
             * Pose of the object in world frame
             */
    public us.ihmc.euclid.geometry.Pose3D object_pose_in_world_;
+   /**
+            * Pose of the object in robot frame (mid point between footsoles)
+            */
+   public us.ihmc.euclid.geometry.Pose3D object_pose_in_robot_frame_;
 
    public AI2RObjectMessage()
    {
       object_name_ = new java.lang.StringBuilder(255);
       object_pose_in_world_ = new us.ihmc.euclid.geometry.Pose3D();
+      object_pose_in_robot_frame_ = new us.ihmc.euclid.geometry.Pose3D();
    }
 
    public AI2RObjectMessage(AI2RObjectMessage other)
@@ -38,6 +43,7 @@ public class AI2RObjectMessage extends Packet<AI2RObjectMessage> implements Sett
       object_name_.append(other.object_name_);
 
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.object_pose_in_world_, object_pose_in_world_);
+      geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.object_pose_in_robot_frame_, object_pose_in_robot_frame_);
    }
 
    /**
@@ -74,6 +80,15 @@ public class AI2RObjectMessage extends Packet<AI2RObjectMessage> implements Sett
    }
 
 
+   /**
+            * Pose of the object in robot frame (mid point between footsoles)
+            */
+   public us.ihmc.euclid.geometry.Pose3D getObjectPoseInRobotFrame()
+   {
+      return object_pose_in_robot_frame_;
+   }
+
+
    public static Supplier<AI2RObjectMessagePubSubType> getPubSubType()
    {
       return AI2RObjectMessagePubSubType::new;
@@ -94,6 +109,7 @@ public class AI2RObjectMessage extends Packet<AI2RObjectMessage> implements Sett
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.object_name_, other.object_name_, epsilon)) return false;
 
       if (!this.object_pose_in_world_.epsilonEquals(other.object_pose_in_world_, epsilon)) return false;
+      if (!this.object_pose_in_robot_frame_.epsilonEquals(other.object_pose_in_robot_frame_, epsilon)) return false;
 
       return true;
    }
@@ -110,6 +126,7 @@ public class AI2RObjectMessage extends Packet<AI2RObjectMessage> implements Sett
       if (!us.ihmc.idl.IDLTools.equals(this.object_name_, otherMyClass.object_name_)) return false;
 
       if (!this.object_pose_in_world_.equals(otherMyClass.object_pose_in_world_)) return false;
+      if (!this.object_pose_in_robot_frame_.equals(otherMyClass.object_pose_in_robot_frame_)) return false;
 
       return true;
    }
@@ -123,7 +140,9 @@ public class AI2RObjectMessage extends Packet<AI2RObjectMessage> implements Sett
       builder.append("object_name=");
       builder.append(this.object_name_);      builder.append(", ");
       builder.append("object_pose_in_world=");
-      builder.append(this.object_pose_in_world_);
+      builder.append(this.object_pose_in_world_);      builder.append(", ");
+      builder.append("object_pose_in_robot_frame=");
+      builder.append(this.object_pose_in_robot_frame_);
       builder.append("}");
       return builder.toString();
    }
