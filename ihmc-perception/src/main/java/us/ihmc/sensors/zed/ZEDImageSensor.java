@@ -34,6 +34,8 @@ public class ZEDImageSensor extends ImageSensor
       ZEDJavaAPINativeLibrary.load();
    }
 
+   private static int nextStreamingPort = 30000;
+
    public static final int LEFT_COLOR_IMAGE_KEY = 0;
    public static final int RIGHT_COLOR_IMAGE_KEY = 1;
    public static final int DEPTH_IMAGE_KEY = 2;
@@ -46,6 +48,7 @@ public class ZEDImageSensor extends ImageSensor
    private final int cameraID;
    private final ZEDModelData zedModel;
    private final int slInputType;
+   private final int streamingPort = nextStreamingPort++;
 
    private final RawImage[] grabbedImages = new RawImage[OUTPUT_IMAGE_COUNT];
    private final Pointer[] slMatPointers = new Pointer[OUTPUT_IMAGE_COUNT];
@@ -109,6 +112,8 @@ public class ZEDImageSensor extends ImageSensor
             SL_PositionalTrackingParameters positionalTrackingParameters = sl_get_positional_tracking_parameters(cameraID);
             sl_enable_positional_tracking(cameraID, positionalTrackingParameters, "");
          }
+
+         sl_enable_streaming(cameraID, SL_STREAMING_CODEC_H264, 8000, (short) streamingPort, -1, 0, 16084, CAMERA_FPS);
 
          // Get camera intrinsics
          SL_CalibrationParameters sensorIntrinsics = sl_get_calibration_parameters(cameraID, false);
@@ -181,7 +186,8 @@ public class ZEDImageSensor extends ImageSensor
    @Override
    public boolean isSensorRunning()
    {
-      return sl_is_opened(cameraID) && !lastGrabFailed;
+      boolean recentlyGrabbed = lastGrabTime != null && lastGrabTime.isAfter(Instant.now().minusSeconds(1));
+      return sl_is_opened(cameraID) && !lastGrabFailed && recentlyGrabbed;
    }
 
    @Override
@@ -319,6 +325,11 @@ public class ZEDImageSensor extends ImageSensor
    public int getCameraID()
    {
       return cameraID;
+   }
+
+   public int getStreamingPort()
+   {
+      return streamingPort;
    }
 
    public void enablePositionalTracking(boolean enable)

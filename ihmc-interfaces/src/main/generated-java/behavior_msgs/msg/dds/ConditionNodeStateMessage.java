@@ -11,15 +11,19 @@ public class ConditionNodeStateMessage extends Packet<ConditionNodeStateMessage>
    /**
             * Parent state fields
             */
-   public behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage state_;
+   public behavior_msgs.msg.dds.LeafNodeStateMessage state_;
    /**
             * Definition
             */
    public behavior_msgs.msg.dds.ConditionNodeDefinitionMessage definition_;
+   /**
+            * The current count of the counter
+            */
+   public long count_;
 
    public ConditionNodeStateMessage()
    {
-      state_ = new behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage();
+      state_ = new behavior_msgs.msg.dds.LeafNodeStateMessage();
       definition_ = new behavior_msgs.msg.dds.ConditionNodeDefinitionMessage();
    }
 
@@ -31,15 +35,17 @@ public class ConditionNodeStateMessage extends Packet<ConditionNodeStateMessage>
 
    public void set(ConditionNodeStateMessage other)
    {
-      behavior_msgs.msg.dds.BehaviorTreeNodeStateMessagePubSubType.staticCopy(other.state_, state_);
+      behavior_msgs.msg.dds.LeafNodeStateMessagePubSubType.staticCopy(other.state_, state_);
       behavior_msgs.msg.dds.ConditionNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
+      count_ = other.count_;
+
    }
 
 
    /**
             * Parent state fields
             */
-   public behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage getState()
+   public behavior_msgs.msg.dds.LeafNodeStateMessage getState()
    {
       return state_;
    }
@@ -51,6 +57,21 @@ public class ConditionNodeStateMessage extends Packet<ConditionNodeStateMessage>
    public behavior_msgs.msg.dds.ConditionNodeDefinitionMessage getDefinition()
    {
       return definition_;
+   }
+
+   /**
+            * The current count of the counter
+            */
+   public void setCount(long count)
+   {
+      count_ = count;
+   }
+   /**
+            * The current count of the counter
+            */
+   public long getCount()
+   {
+      return count_;
    }
 
 
@@ -73,6 +94,8 @@ public class ConditionNodeStateMessage extends Packet<ConditionNodeStateMessage>
 
       if (!this.state_.epsilonEquals(other.state_, epsilon)) return false;
       if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.count_, other.count_, epsilon)) return false;
+
 
       return true;
    }
@@ -88,6 +111,8 @@ public class ConditionNodeStateMessage extends Packet<ConditionNodeStateMessage>
 
       if (!this.state_.equals(otherMyClass.state_)) return false;
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
+      if(this.count_ != otherMyClass.count_) return false;
+
 
       return true;
    }
@@ -101,7 +126,9 @@ public class ConditionNodeStateMessage extends Packet<ConditionNodeStateMessage>
       builder.append("state=");
       builder.append(this.state_);      builder.append(", ");
       builder.append("definition=");
-      builder.append(this.definition_);
+      builder.append(this.definition_);      builder.append(", ");
+      builder.append("count=");
+      builder.append(this.count_);
       builder.append("}");
       return builder.toString();
    }

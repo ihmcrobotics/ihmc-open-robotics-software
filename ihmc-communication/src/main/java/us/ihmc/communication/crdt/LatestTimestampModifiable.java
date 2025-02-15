@@ -57,7 +57,7 @@ public class LatestTimestampModifiable
    public void setModifierName(String ourName)
    {
       this.ourName = crdtInfo.getActorDesignation().name() + ": " + ourName;
-      latestModifierName = ourName;
+      latestModifierName = this.ourName;
    }
 
    /**

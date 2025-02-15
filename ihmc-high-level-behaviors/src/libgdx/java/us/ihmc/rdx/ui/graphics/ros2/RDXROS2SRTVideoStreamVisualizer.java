@@ -34,7 +34,7 @@ public class RDXROS2SRTVideoStreamVisualizer extends RDXROS2OpenCVVideoVisualize
       subscriber = new ROS2SRTVideoSubscriber(ros2, streamTopic, PixelFormat.RGBA8);
       subscriber.addNewFrameConsumer(this::updateImage);
 
-      setActivenessChangeCallback(isActive ->
+      addActivenessChangeCallback(isActive ->
       {
          if (isActive)
             subscriber.subscribe();
@@ -87,8 +87,8 @@ public class RDXROS2SRTVideoStreamVisualizer extends RDXROS2OpenCVVideoVisualize
    @Override
    public void destroy()
    {
-      subscriber.destroy();
       super.destroy();
+      subscriber.destroy();
       getOpenCVVideoVisualizer().destroy();
    }
 }

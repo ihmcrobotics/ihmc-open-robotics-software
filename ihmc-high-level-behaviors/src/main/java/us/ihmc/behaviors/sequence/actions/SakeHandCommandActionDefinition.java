@@ -85,11 +85,14 @@ public class SakeHandCommandActionDefinition extends ActionNodeDefinition
    {
       super.undoAllNontopologicalChanges();
 
-      side.setValue(onDiskSide);
-      handOpenAngle.setValue(onDiskHandOpenAngle);
-      initialSatisfactionHandAngleTolerance.setValue(onDiskInitialSatisfactionHandAngleTolerance);
-      completionHandAngleTolerance.setValue(onDiskCompletionHandAngleTolerance);
-      fingertipGripForceLimit.setValue(onDiskFingertipGripForceLimit);
+      if (isUndoAvailable())
+      {
+         side.setValue(onDiskSide);
+         handOpenAngle.setValue(onDiskHandOpenAngle);
+         initialSatisfactionHandAngleTolerance.setValue(onDiskInitialSatisfactionHandAngleTolerance);
+         completionHandAngleTolerance.setValue(onDiskCompletionHandAngleTolerance);
+         fingertipGripForceLimit.setValue(onDiskFingertipGripForceLimit);
+      }
    }
 
    @Override

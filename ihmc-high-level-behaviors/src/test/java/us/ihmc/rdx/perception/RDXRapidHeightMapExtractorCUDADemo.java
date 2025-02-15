@@ -115,7 +115,7 @@ public class RDXRapidHeightMapExtractorCUDADemo
 
                extractor.update(sensorPoseGizmo.getTransformToParent(), sensorToSensorZUp, sensorZUpToWorld);
 
-               heightMapData = RapidHeightMapExtractorCUDA.packHeightMapData(extractor);
+               heightMapData = extractor.getHeightMapData();
 
                Mat croppedHeightMapImage = extractor.getTerrainMapData().getHeightMap();
 

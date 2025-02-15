@@ -1,11 +1,11 @@
 package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.CheckPointNodeDefinitionMessage;
-import us.ihmc.behaviors.sequence.ActionNodeDefinition;
+import us.ihmc.behaviors.sequence.LeafNodeDefinition;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
-public class CheckPointNodeDefinition extends ActionNodeDefinition
+public class CheckPointNodeDefinition extends LeafNodeDefinition
 {
    public CheckPointNodeDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {

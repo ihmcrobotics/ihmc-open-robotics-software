@@ -46,7 +46,7 @@ public class ROS2StreamStatusMonitor
 
       throttler = new Throttler();
       messageTimer = new Timer();
-      messageMonitor = ThreadTools.startAsDaemon(this::monitorMessageFrequency, "StreamStatusMonitor");
+      messageMonitor = ThreadTools.startAsDaemon(this::monitorMessageFrequency, "StreamStatusMonitor-" + streamTopic.getName());
 
       messageSubscription = ros2.subscribe(streamTopic);
       messageSubscription.addCallback(this::receiveMessage);

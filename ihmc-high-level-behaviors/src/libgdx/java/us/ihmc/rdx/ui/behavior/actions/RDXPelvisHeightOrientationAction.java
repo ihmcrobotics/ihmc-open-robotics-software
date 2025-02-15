@@ -37,8 +37,6 @@ import java.util.List;
 
 public class RDXPelvisHeightOrientationAction extends RDXActionNode<PelvisHeightOrientationActionState, PelvisHeightOrientationActionDefinition>
 {
-   private final PelvisHeightOrientationActionDefinition definition;
-   private final PelvisHeightOrientationActionState state;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImDoubleWrapper heightWidget;
    private final ImDoubleWrapper yawWidget;
@@ -68,9 +66,6 @@ public class RDXPelvisHeightOrientationAction extends RDXActionNode<PelvisHeight
    {
       super(new PelvisHeightOrientationActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
 
-      definition = getDefinition();
-      state = getState();
-
       this.syncedFullRobotModel = syncedFullRobotModel;
 
       poseGizmo = new RDXSelectablePose3DGizmo();
@@ -79,7 +74,7 @@ public class RDXPelvisHeightOrientationAction extends RDXActionNode<PelvisHeight
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
                                                                 referenceFrameLibrary,
                                                                 definition::getParentFrameName,
-                                                                getState().getPelvisFrame()::changeFrame);
+                                                                state.getPelvisFrame()::changeFrame);
       heightWidget = new ImDoubleWrapper(definition::getHeight,
                                          definition::setHeight,
                                          imDouble -> ImGuiTools.volatileInputDouble(labels.get("Height"), imDouble));
@@ -172,7 +167,7 @@ public class RDXPelvisHeightOrientationAction extends RDXActionNode<PelvisHeight
    {
       if (isMouseHovering)
       {
-         tooltip.render("%s Action\nIndex: %d\nName: %s".formatted(getActionTypeTitle(), state.getActionIndex(), definition.getName()));
+         tooltip.render("%s Action\nIndex: %d\nName: %s".formatted(getLeafTypeTitle(), state.getLeafIndex(), definition.getName()));
       }
    }
 
@@ -230,7 +225,7 @@ public class RDXPelvisHeightOrientationAction extends RDXActionNode<PelvisHeight
    }
 
    @Override
-   public String getActionTypeTitle()
+   public String getLeafTypeTitle()
    {
       return "Pelvis Height and Orientation";
    }

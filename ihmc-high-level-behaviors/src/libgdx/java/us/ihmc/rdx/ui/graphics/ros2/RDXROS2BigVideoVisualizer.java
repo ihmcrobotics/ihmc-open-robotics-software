@@ -33,7 +33,7 @@ public class RDXROS2BigVideoVisualizer extends RDXROS2OpenCVVideoVisualizer<BigV
       titleBeforeAdditions = title;
       this.topic = topic;
 
-      setActivenessChangeCallback(isAlive ->
+      addActivenessChangeCallback(isAlive ->
       {
          if (isAlive && realtimeROS2Node == null)
          {
@@ -103,8 +103,8 @@ public class RDXROS2BigVideoVisualizer extends RDXROS2OpenCVVideoVisualizer<BigV
    @Override
    public void destroy()
    {
-      unsubscribe();
       super.destroy();
+      unsubscribe();
    }
 
    private void unsubscribe()

@@ -74,7 +74,7 @@ public class RDXROS2PointCloudVisualizer extends RDXROS2SingleTopicVisualizer
       this.ros2Node = ros2Node;
       this.topic = topic;
 
-      setActivenessChangeCallback(isActive ->
+      addActivenessChangeCallback(isActive ->
       {
          if (isActive && !subscribed)
          {
@@ -309,9 +309,9 @@ public class RDXROS2PointCloudVisualizer extends RDXROS2SingleTopicVisualizer
    @Override
    public void destroy()
    {
+      super.destroy();
       if (lidarActiveHeartbeat != null)
          lidarActiveHeartbeat.destroy();
-      super.destroy();
    }
 
    @Override

@@ -16,8 +16,6 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class FootPoseActionExecutor extends ActionNodeExecutor<FootPoseActionState, FootPoseActionDefinition>
 {
-   private final FootPoseActionState state;
-   private final FootPoseActionDefinition definition;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
    private final FramePose3D desiredFootPose = new FramePose3D();
@@ -32,9 +30,6 @@ public class FootPoseActionExecutor extends ActionNodeExecutor<FootPoseActionSta
                                  ROS2SyncedRobotModel syncedRobot)
    {
       super(new FootPoseActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
-
-      state = getState();
-      definition = getDefinition();
 
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
@@ -51,9 +46,9 @@ public class FootPoseActionExecutor extends ActionNodeExecutor<FootPoseActionSta
    }
 
    @Override
-   public void triggerActionExecution()
+   public void triggerExecution()
    {
-      super.triggerActionExecution();
+      super.triggerExecution();
 
       if (state.getFootFrame().isChildOfWorld())
       {
@@ -61,9 +56,9 @@ public class FootPoseActionExecutor extends ActionNodeExecutor<FootPoseActionSta
          desiredControlFramePose.changeFrame(ReferenceFrame.getWorldFrame());
 
          FootTrajectoryMessage message = new FootTrajectoryMessage();
-         message.setRobotSide(getDefinition().getSide().toByte());
+         message.setRobotSide(definition.getSide().toByte());
          message.getSe3Trajectory()
-                .set(HumanoidMessageTools.createSE3TrajectoryMessage(getDefinition().getTrajectoryDuration(),
+                .set(HumanoidMessageTools.createSE3TrajectoryMessage(definition.getTrajectoryDuration(),
                                                                      desiredControlFramePose,
                                                                      ReferenceFrame.getWorldFrame()));
          long frameId = MessageTools.toFrameId(ReferenceFrame.getWorldFrame());
@@ -74,11 +69,11 @@ public class FootPoseActionExecutor extends ActionNodeExecutor<FootPoseActionSta
 
          trackingCalculator.reset();
 
-         state.setNominalExecutionDuration(getDefinition().getTrajectoryDuration());
+         state.setNominalExecutionDuration(definition.getTrajectoryDuration());
 
          desiredFootPose.setFromReferenceFrame(state.getFootFrame().getReferenceFrame());
          syncedFootPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getChest().getBodyFixedFrame());
-         state.getCommandedTrajectory().setSingleSegmentTrajectory(syncedFootPose, desiredFootPose, getDefinition().getTrajectoryDuration());
+         state.getCommandedTrajectory().setSingleSegmentTrajectory(syncedFootPose, desiredFootPose, definition.getTrajectoryDuration());
       }
       else
       {

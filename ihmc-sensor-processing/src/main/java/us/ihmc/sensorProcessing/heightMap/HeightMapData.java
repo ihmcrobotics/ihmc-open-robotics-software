@@ -51,6 +51,7 @@ public class HeightMapData
       this.gridSizeXY = latestHeightMapData.getGridSizeXY();
       this.centerIndex = HeightMapTools.computeCenterIndex(latestHeightMapData.getGridSizeXY(), latestHeightMapData.getGridResolutionXY());
       this.cellsPerAxis = 2 * latestHeightMapData.getCenterIndex() + 1;
+      this.estimatedGroundHeight = latestHeightMapData.getEstimatedGroundHeight();
 
       this.heights = new double[latestHeightMapData.getCellsPerAxis() * latestHeightMapData.getCellsPerAxis()];
       this.normals = new Vector3D[latestHeightMapData.getCellsPerAxis() * latestHeightMapData.getCellsPerAxis()];

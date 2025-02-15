@@ -10,8 +10,11 @@ import us.ihmc.footstepPlanning.communication.ContinuousHikingAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.perception.StandAloneRealsenseProcess;
+import us.ihmc.perception.comms.PerceptionComms;
+import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractorCUDA;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 
 import java.util.concurrent.ScheduledExecutorService;
@@ -53,6 +56,9 @@ public class ContinuousHikingProcess
       // Add Swing Planner Parameters to be synced between the UI and this process
       SwingPlannerParametersBasics swingPlannerParameters = robotModel.getSwingPlannerParameters();
       ros2PropertySetGroup.registerStoredPropertySet(ContinuousHikingAPI.SWING_PLANNING_PARAMETERS, swingPlannerParameters);
+
+      HeightMapParameters heightMapParameters = RapidHeightMapExtractorCUDA.getHeightMapParameters();
+      ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.HEIGHT_MAP_PARAMETERS, heightMapParameters);
 
       ContinuousHikingLogger continuousHikingLogger = new ContinuousHikingLogger();
       ControllerFootstepQueueMonitor controllerFootstepQueueMonitor = new ControllerFootstepQueueMonitor(ros2Helper,

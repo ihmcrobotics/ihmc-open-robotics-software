@@ -25,8 +25,6 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
     */
    private static final double NOMINAL_TRAJECORY_DURATION = 1.0;
 
-   private final SakeHandCommandActionState state;
-   private final SakeHandCommandActionDefinition definition;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
    private final SideDependentList<ROS2SakeHandStatus> sakeHandStatus = new SideDependentList<>();
@@ -47,9 +45,6 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
                                         ROS2SyncedRobotModel syncedRobot)
    {
       super(new SakeHandCommandActionState(id, crdtInfo, saveFileDirectory));
-
-      state = getState();
-      definition = getDefinition();
 
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
@@ -97,9 +92,9 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
    }
 
    @Override
-   public void triggerActionExecution()
+   public void triggerExecution()
    {
-      super.triggerActionExecution();
+      super.triggerExecution();
 
       trackingCalculator.reset();
 
