@@ -18,6 +18,7 @@ mainDependencies {
       exclude(group = "org.lwjgl.lwjgl") // exclude lwjgl 2
    }
    api("us.ihmc:promp-java:1.0.1")
+   api("de.kherud:llama:3.4.1")
 }
 
 libgdxDependencies {
