@@ -35,7 +35,9 @@ public class Llama
       String modelFilePath = IHMCCommonPaths.DOT_IHMC_DIRECTORY.resolve("llama-models/Llama-3.2-1B-Instruct-Q8_0.gguf").toString();
       ModelParameters modelParams = new ModelParameters();
       modelParams.setModelFilePath(modelFilePath);
-      modelParams.setNGpuLayers(43);
+      modelParams.setNGpuLayers(33);
+      modelParams.setNThreads(8);
+      modelParams.setNCtx(4098);
 
       LlamaModel.setLogger(null, (level, message) -> {});
 
@@ -58,6 +60,9 @@ public class Llama
       inferParams.setTemperature(0.7f);
       inferParams.setMiroStat(MiroStat.V2);
       inferParams.setStopStrings("User:");
+      inferParams.setTopK(40);
+      inferParams.setTopP(0.25f);
+      inferParams.setRepeatPenalty(1.15f);
 
       String response = "";
       for (LlamaOutput output : model.generate(inferParams))
