@@ -165,7 +165,7 @@ public class CUDAKernel implements AutoCloseable
     * This class handles the kernel timings.
     * With options to compute the min/max, average, and variance of the dataset
     */
-   private static class CUDAKernelTimings
+   private class CUDAKernelTimings
    {
       private static final int MAX_ENTRIES = 250;
       private final LinkedList<Float> executionTimes = new LinkedList<>();
