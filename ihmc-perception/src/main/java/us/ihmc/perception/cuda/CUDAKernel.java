@@ -25,17 +25,17 @@ import static us.ihmc.perception.cuda.CUDATools.throwCUDAError;
 @SuppressWarnings("resource")
 public class CUDAKernel implements AutoCloseable
 {
+   private final String name;
    private final CUfunc_st kernelFunction = new CUfunc_st();
    private final List<Pointer> parameters = new ArrayList<>();
-   private final String name;
    private boolean retainParameters = false;
+   private boolean enableKernelTimings = false;
 
-   private CudaKernelTimings kernelTimings;
+   private CUDAKernelTimings kernelTimings;
    private final CUevent_st start = new CUevent_st();
    private final CUevent_st end = new CUevent_st();
 
    private int error;
-   private boolean enableKernelTimings = false;
 
    public CUDAKernel(String name, CUmod_st kernelModule) throws Exception
    {
@@ -51,7 +51,7 @@ public class CUDAKernel implements AutoCloseable
    public void enableKernelTimings(boolean enableKernelTimings)
    {
       this.enableKernelTimings = enableKernelTimings;
-      kernelTimings = new CudaKernelTimings(name);
+      kernelTimings = new CUDAKernelTimings(name);
    }
 
    public void retainParameters(boolean retainParameters)
@@ -165,14 +165,14 @@ public class CUDAKernel implements AutoCloseable
     * This class handles the kernel timings.
     * With options to compute the min/max, average, and variance of the dataset
     */
-   private static class CudaKernelTimings
+   private static class CUDAKernelTimings
    {
       private static final int MAX_ENTRIES = 250;
 
       private final LinkedList<Float> executionTimes = new LinkedList<>();
       private final String kernelName;
 
-      public CudaKernelTimings(String kernelName)
+      public CUDAKernelTimings(String kernelName)
       {
          this.kernelName = kernelName;
       }
