@@ -4,6 +4,7 @@ import de.kherud.llama.InferenceParameters;
 import de.kherud.llama.LlamaModel;
 import de.kherud.llama.ModelParameters;
 import de.kherud.llama.args.MiroStat;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.IHMCCommonPaths;
@@ -13,79 +14,66 @@ public class BehaviorTreeNextActionReasoning
    private static final String SYSTEM = """
          <|start_header_id|>system<|end_header_id|>
          You are a reasoning system that decides the next action to execute in a tree-based robotic system.
-         The current tree and state is given by:
-         {
-           "nodes": [
-              {"id": int, "type": string, "children": [ ]}
-           ],
-           "state": {
-             "currently_executing": int
-             "is_done": bool
-           }
-         }
-         There are two node types: Action and Sequence.
-         An Action node is the only type of node that can be executed.
-         A Sequence node can have children. When one child of an action sequence node is done, the next one in the list of children should be executed.
-         Please consider which node is best to execute next and output only the node ID number of that action.
+         The following is a schema for how the tree will be represented for a query.
+         There is a tree of nodes, where each node's type can be leaf or sequence.
+         A sequence node has 0 or more children nodes.
+         A leaf node does not have any children.
+         The leaves are depth-first ordered and their position in this ordering is given by the index field.
+         Each leaf node also has boolean fields for whether it is currently executing, has failed, and can execute.
+         The state portion of the scheme gives the global state of the tree.
+         The state has a field called execution next index, which is the index of the next node to execute.
+         nodes: [
+         { type: sequence, children: [
+         	{ type: leaf, index: int, is_executing: bool, failed: bool, can_execute: bool } }
+         ] } ],
+         state: { execution_next_index: int }
+         A sequence node defines the order of execution of the children as one after the other.
+         The next node to execute should be the one after the last one that is executing.
+         If no node's are executing, the next node to execute should remain unchanged.
+         Your task is to decide the next left to execute by providing its index.
          <|eot_id|>
          <|start_header_id|>user<|end_header_id|>
-         {
-           "nodes": [
-              {"id": 001, "type": "Sequence, "children": [
-                 {"id": 002, "type": "Action"},
-                 {"id": 005, "type": "Action"},
-                 {"id": 020, "type": "Action"},
-                 {"id": 004, "type": "Action"},
-                 {"id": 056, "type": "Action"}
-              ]}
-           ],
-           "state": {
-             "currently_executing": 002,
-             "is_done": true
-           }
-         }
+         nodes: [
+         { type: sequence, children: [
+         	{ type: leaf, index: 0, is_executing: false, failed: false, can_execute: true } }
+         	{ type: leaf, index: 1, is_executing: false, failed: false, can_execute: true } }
+         	{ type: leaf, index: 2, is_executing: false, failed: false, can_execute: true } }
+         	{ type: leaf, index: 3, is_executing: false, failed: false, can_execute: true } }
+         	{ type: leaf, index: 4, is_executing: false, failed: false, can_execute: true } }
+         ] } ],
+         state: { execution_next_index: 0 }
          <|eot_id|>
          <|start_header_id|>assistant<|end_header_id|>
-         005
+         0
          <|eot_id|>
          <|start_header_id|>user<|end_header_id|>
-         {
-           "nodes": [
-              {"id": 001, "type": "Sequence, "children": [
-                 {"id": 002, "type": "Action"},
-                 {"id": 005, "type": "Action"},
-                 {"id": 020, "type": "Action"},
-                 {"id": 004, "type": "Action"},
-                 {"id": 056, "type": "Action"}
-              ]}
-           ],
-           "state": {
-             "currently_executing": 005,
-             "is_done": true
-           }
-         }
+         nodes: [
+         { type: sequence, children: [
+         	{ type: leaf, index: 0, is_executing: true, failed: false, can_execute: true } }
+         	{ type: leaf, index: 1, is_executing: false, failed: false, can_execute: true } }
+         	{ type: leaf, index: 2, is_executing: false, failed: false, can_execute: true } }
+         	{ type: leaf, index: 3, is_executing: false, failed: false, can_execute: true } }
+         	{ type: leaf, index: 4, is_executing: false, failed: false, can_execute: true } }
+         ] } ],
+         state: { execution_next_index: 0 }
          <|eot_id|>
          <|start_header_id|>assistant<|end_header_id|>
-         020
+         1
          <|eot_id|>
          <|start_header_id|>user<|end_header_id|>
-         {
-           "nodes": [
-              {"id": 001, "type": "Sequence, "children": [
-                 {"id": 002, "type": "Action"},
-                 {"id": 005, "type": "Action"},
-                 {"id": 020, "type": "Action"},
-                 {"id": 004, "type": "Action"},
-                 {"id": 056, "type": "Action"}
-              ]}
-           ],
-           "state": {
-             "currently_executing": 020,
-             "is_done": true
-           }
-         }
+         nodes: [
+         { type: sequence, children: [
+         	{ type: leaf, index: 0, is_executing: false, failed: false, can_execute: true } }
+         	{ type: leaf, index: 1, is_executing: false, failed: false, can_execute: true } }
+         	{ type: leaf, index: 2, is_executing: true, failed: false, can_execute: true } }
+         	{ type: leaf, index: 3, is_executing: false, failed: false, can_execute: true } }
+         	{ type: leaf, index: 4, is_executing: false, failed: false, can_execute: true } }
+         ] } ],
+         state: { execution_next_index: 2 }
          <|eot_id|>
          <|start_header_id|>assistant<|end_header_id|>
+         3
+         <|eot_id|>
          """;
 
 
@@ -105,12 +93,21 @@ public class BehaviorTreeNextActionReasoning
       model = new LlamaModel(modelParams);
    }
 
-   public int queryNextLeafToExecuteIndex()
+   public int queryNextLeafToExecuteIndex(BehaviorTreeRootNodeState rootNode)
+   {
+      String treeEncoding = BehaviorTreeLLMEncoding.encode(rootNode);
+      return queryNextLeafToExecuteIndex(treeEncoding);
+   }
+
+   public int queryNextLeafToExecuteIndex(String treeEncoding)
    {
       String prompt = SYSTEM;
-//      prompt += """
-//            Hello!
-//            """;
+      prompt += """
+            <|start_header_id|>user<|end_header_id|>
+            %s
+            <|eot_id|>
+            <|start_header_id|>assistant<|end_header_id|>
+            """.formatted(treeEncoding);
 
       InferenceParameters inferParams = new InferenceParameters(prompt);
       inferParams.setPenalizeNl(true);
@@ -123,13 +120,12 @@ public class BehaviorTreeNextActionReasoning
 
       String reponse = model.complete(inferParams);
 
-//      LogTools.info(prompt + reponse);
-//
-//      LogTools.info("Response: {}", reponse);
+      LogTools.info(prompt + reponse);
 
       return Integer.parseInt(reponse.trim());
    }
 
+   // FIXME: Doesn't work yet
    public void destroy()
    {
       model.close();
@@ -142,7 +138,17 @@ public class BehaviorTreeNextActionReasoning
       for  (int i = 0; i < 10; i++)
       {
          Stopwatch stopwatch = new Stopwatch().start();
-         int leafIndex = reasoning.queryNextLeafToExecuteIndex();
+         int leafIndex = reasoning.queryNextLeafToExecuteIndex("""
+            nodes: [
+            { type: sequence, children: [
+            	{ type: leaf, index: 0, is_executing: false, failed: false, can_execute: true } }
+            	{ type: leaf, index: 1, is_executing: false, failed: false, can_execute: true } }
+            	{ type: leaf, index: 2, is_executing: false, failed: false, can_execute: true } }
+            	{ type: leaf, index: 3, is_executing: true, failed: false, can_execute: true } }
+            	{ type: leaf, index: 4, is_executing: false, failed: false, can_execute: true } }
+            ] } ],
+            state: { execution_next_index: 2 }
+            """);
          LogTools.info("Returned {} in {} seconds", leafIndex, stopwatch.totalElapsed());
       }
 
