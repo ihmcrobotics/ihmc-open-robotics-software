@@ -4,6 +4,7 @@ import de.kherud.llama.InferenceParameters;
 import de.kherud.llama.LlamaModel;
 import de.kherud.llama.ModelParameters;
 import de.kherud.llama.args.MiroStat;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.IHMCCommonPaths;
 
@@ -122,9 +123,11 @@ public class BehaviorTreeNextActionReasoning
 
       String reponse = model.complete(inferParams);
 
-      LogTools.info(prompt + reponse);
+//      LogTools.info(prompt + reponse);
+//
+//      LogTools.info("Response: {}", reponse);
 
-      return 0;
+      return Integer.parseInt(reponse.trim());
    }
 
    public void destroy()
@@ -135,7 +138,14 @@ public class BehaviorTreeNextActionReasoning
    public static void main(String[] args)
    {
       BehaviorTreeNextActionReasoning reasoning = new BehaviorTreeNextActionReasoning();
-      reasoning.queryNextLeafToExecuteIndex();
+
+      for  (int i = 0; i < 10; i++)
+      {
+         Stopwatch stopwatch = new Stopwatch().start();
+         int leafIndex = reasoning.queryNextLeafToExecuteIndex();
+         LogTools.info("Returned {} in {} seconds", leafIndex, stopwatch.totalElapsed());
+      }
+
       reasoning.destroy();
 
       System.exit(0); // FIXME: Not sure why it's not exiting automatically.
