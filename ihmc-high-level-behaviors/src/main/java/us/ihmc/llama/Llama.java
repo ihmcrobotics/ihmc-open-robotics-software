@@ -18,36 +18,100 @@ import java.nio.charset.StandardCharsets;
  */
 public class Llama
 {
+   private static final String SYSTEM = """
+         This is a conversation between User and Llama, a friendly chatbot.
+         Llama is helpful, kind, honest, good at writing, and never fails to answer any requests immediately and with precision.
+         
+         User: Hello, Llama.
+         Llama: Hello. How may I help you today?
+         
+         """;
+
+   private final LlamaModel model;
+   private String prompt = "";
+
+   public Llama()
+   {
+      String modelFilePath = IHMCCommonPaths.DOT_IHMC_DIRECTORY.resolve("llama-models/Llama-3.2-1B-Instruct-Q8_0.gguf").toString();
+      ModelParameters modelParams = new ModelParameters();
+      modelParams.setModelFilePath(modelFilePath);
+      modelParams.setNGpuLayers(43);
+
+      LlamaModel.setLogger(null, (level, message) -> {});
+
+      model = new LlamaModel(modelParams);
+
+      clearContext();
+   }
+
+   public void clearContext()
+   {
+      prompt = SYSTEM;
+   }
+
+   public String query(String input)
+   {
+      prompt += "User: %s%nLlama: ".formatted(input);
+
+      InferenceParameters inferParams = new InferenceParameters(prompt);
+      inferParams.setPenalizeNl(true);
+      inferParams.setTemperature(0.7f);
+      inferParams.setMiroStat(MiroStat.V2);
+      inferParams.setStopStrings("User:");
+
+      String response = "";
+      for (LlamaOutput output : model.generate(inferParams))
+      {
+         response += output;
+         prompt += output;
+      }
+
+      return response;
+   }
+
+   public String getPrompt()
+   {
+      return prompt;
+   }
+
+   public void destroy()
+   {
+      model.close();
+   }
+
    public static void main(String... args) throws IOException
    {
-      ModelParameters modelParams = new ModelParameters()
-            .setModelFilePath(IHMCCommonPaths.DOT_IHMC_DIRECTORY.resolve("llama-models/Llama-3.2-1B-Instruct-Q8_0.gguf").toString())
-            .setNGpuLayers(43);
+      Llama llama = new Llama();
 
-      String system = "This is a conversation between User and Llama, a friendly chatbot.\n" +
-                      "Llama is helpful, kind, honest, good at writing, and never fails to answer any " +
-                      "requests immediately and with precision.\n";
       BufferedReader reader = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
-      try (LlamaModel model = new LlamaModel(modelParams)) {
-         System.out.print(system);
-         String prompt = system;
-         while (true) {
-            prompt += "\nUser: ";
-            System.out.print("\nUser: ");
-            String input = reader.readLine();
-            prompt += input;
-            System.out.print("Llama: ");
-            prompt += "\nLlama: ";
-            InferenceParameters inferParams = new InferenceParameters(prompt)
-                  .setTemperature(0.7f)
-                  .setPenalizeNl(true)
-                  .setMiroStat(MiroStat.V2);
-//                  .setAntiPrompt("\n");
-            for (LlamaOutput output : model.generate(inferParams)) {
-               System.out.print(output);
-               prompt += output;
-            }
+      boolean running = true;
+      while (running)
+      {
+         System.out.print("> ");
+         String input = reader.readLine();
+
+         if (input.equalsIgnoreCase("exit"))
+         {
+            running = false;
+         }
+         else if (input.equalsIgnoreCase("clear"))
+         {
+            llama.clearContext();
+         }
+         else if (input.equalsIgnoreCase("prompt"))
+         {
+            System.out.print(llama.getPrompt());
+         }
+         else
+         {
+            String response = llama.query(input);
+            System.out.printf("%s", response);
          }
       }
+
+      llama.destroy();
+      reader.close();
+
+      System.exit(0);
    }
 }
