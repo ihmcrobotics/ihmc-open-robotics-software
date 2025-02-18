@@ -64,10 +64,7 @@ public class SnappingHeightMapExtractor
          snappingHeightMapProgram = new CUDAProgram(kernelPath, heightMapUtilsHeaderPath, mathUtilsHeaderPath);
          snappingKernel = snappingHeightMapProgram.loadKernel("computeSnappedValuesKernel");
 
-         if (PRINT_TIMING_FOR_KERNELS)
-         {
-            snappingKernel.enableKernelTimings(true);
-         }
+         snappingKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
 
          snappingParametersHostPointer = new FloatPointer(17);
          snappingParametersDevicePointer = new FloatPointer();

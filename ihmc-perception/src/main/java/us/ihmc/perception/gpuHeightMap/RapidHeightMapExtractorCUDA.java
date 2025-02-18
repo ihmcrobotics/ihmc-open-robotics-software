@@ -122,14 +122,11 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
          planOffsetKernel = heightMapCUDAProgram.loadKernel("planOffsetKernel");
          emptyRegisterKernel = heightMapCUDAProgram.loadKernel("heightMapRegistrationKernel");
 
-         if (PRINT_TIMING_FOR_KERNELS)
-         {
-            updateKernel.enableKernelTimings(true);
-            registerKernel.enableKernelTimings(true);
-            croppingKernel.enableKernelTimings(true);
-            planOffsetKernel.enableKernelTimings(true);
-            emptyRegisterKernel.enableKernelTimings(true);
-         }
+         updateKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
+         registerKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
+         croppingKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
+         planOffsetKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
+         emptyRegisterKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
 
          // Initialize matrices and images
          localHeightMapImage = new GpuMat(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_16UC1);
