@@ -13,8 +13,6 @@ import java.util.List;
  */
 public class FallbackNodeExecutor extends BehaviorTreeNodeExecutor<FallbackNodeState, FallbackNodeDefinition>
 {
-   private final FallbackNodeState state;
-   private final FallbackNodeDefinition definition;
    private final List<LeafNodeExecutor<?, ?>> leafChildren = new ArrayList<>();
 
    // TODO: Add these to state & add UI elements
@@ -24,9 +22,6 @@ public class FallbackNodeExecutor extends BehaviorTreeNodeExecutor<FallbackNodeS
    public FallbackNodeExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(new FallbackNodeState(id, crdtInfo, saveFileDirectory));
-
-      state = getState();
-      definition = getDefinition();
    }
 
    @Override

@@ -47,7 +47,7 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXROS2MultiTopicVisuali
 
       visualizer = new RDXRawImagePointCloudVisualizer(title);
 
-      setActivenessChangeCallback(isActive ->
+      addActivenessChangeCallback(isActive ->
       {
          if (isActive)
             subscribe();

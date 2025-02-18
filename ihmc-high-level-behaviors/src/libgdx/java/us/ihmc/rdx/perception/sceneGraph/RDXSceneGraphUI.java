@@ -139,11 +139,17 @@ public class RDXSceneGraphUI
                {
                   ImGui.tableNextRow();
                   ImGui.tableSetColumnIndex(0);
-                  if (ImGui.button(labels.get("Add 2x4")))
+                  if (ImGui.button(labels.get("Add PieceOfWood")))
                   {
-                     RDXPredefinedRigidBodySceneNode twoByFour = predefinedRigidBodySceneNodeBuilder.build("2X4");
+                     RDXPredefinedRigidBodySceneNode twoByFour = predefinedRigidBodySceneNodeBuilder.build("PieceOfWood");
                      modificationQueue.accept(new SceneGraphNodeAddition(twoByFour.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
                      addUISceneNode(twoByFour);
+                  }
+                  if (ImGui.button(labels.get("Add Barrier")))
+                  {
+                     RDXPredefinedRigidBodySceneNode barrier = predefinedRigidBodySceneNodeBuilder.build("Barrier");
+                     modificationQueue.accept(new SceneGraphNodeAddition(barrier.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
+                     addUISceneNode(barrier);
                   }
                   if (ImGui.button(labels.get("Add Bike")))
                   {
@@ -193,9 +199,9 @@ public class RDXSceneGraphUI
                      modificationQueue.accept(new SceneGraphNodeAddition(doorLever.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
                      addUISceneNode(doorLever);
                   }
-                  if (ImGui.button(labels.get("Add Door Panel (right)")))
+                  if (ImGui.button(labels.get("Add Door Panel")))
                   {
-                     RDXPredefinedRigidBodySceneNode rightDoorPanel = predefinedRigidBodySceneNodeBuilder.build("RightDoorPanel");
+                     RDXPredefinedRigidBodySceneNode rightDoorPanel = predefinedRigidBodySceneNodeBuilder.build("DoorPanel");
                      modificationQueue.accept(new SceneGraphNodeAddition(rightDoorPanel.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
                      addUISceneNode(rightDoorPanel);
                   }
@@ -217,11 +223,23 @@ public class RDXSceneGraphUI
                      modificationQueue.accept(new SceneGraphNodeAddition(mug.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
                      addUISceneNode(mug);
                   }
+                  if (ImGui.button(labels.get("Add Person")))
+                  {
+                     RDXPredefinedRigidBodySceneNode person = predefinedRigidBodySceneNodeBuilder.build("Person");
+                     modificationQueue.accept(new SceneGraphNodeAddition(person.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
+                     addUISceneNode(person);
+                  }
                   if (ImGui.button(labels.get("Add Shoe")))
                   {
                      RDXPredefinedRigidBodySceneNode shoe = predefinedRigidBodySceneNodeBuilder.build("Shoe");
                      modificationQueue.accept(new SceneGraphNodeAddition(shoe.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
                      addUISceneNode(shoe);
+                  }
+                  if (ImGui.button(labels.get("Add Table")))
+                  {
+                     RDXPredefinedRigidBodySceneNode table = predefinedRigidBodySceneNodeBuilder.build("Table");
+                     modificationQueue.accept(new SceneGraphNodeAddition(table.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
+                     addUISceneNode(table);
                   }
                   if (ImGui.button(labels.get("Add Trash Can")))
                   {

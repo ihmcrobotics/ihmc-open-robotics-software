@@ -33,7 +33,7 @@ public class RDXROS2BigDepthVideoVisualizer extends RDXROS2OpenCVVideoVisualizer
       titleBeforeAdditions = title;
       this.topic = topic;
 
-      setActivenessChangeCallback(isActive ->
+      addActivenessChangeCallback(isActive ->
       {
          if (isActive && realtimeROS2Node == null)
          {

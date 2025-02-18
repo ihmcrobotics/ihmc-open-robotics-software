@@ -456,7 +456,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(TrajectoryPoint1DMessagePubSubType.class);
       registerPacketField(IntrinsicParametersMessagePubSubType.class);
       registerPacketField(SE3TrajectoryMessagePubSubType.class);
-      registerPacketField(HandCollisionDetectedPacketPubSubType.class);
       registerPacketField(ParameterEventDescriptorsPubSubType.class);
       registerPacketField(TransformPubSubType.class);
       registerPacketField(AtlasWristSensorCalibrationRequestPacketPubSubType.class);
@@ -515,7 +514,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
 
       registerPacketField(FootstepPlanRequestType.class);
       registerPacketField(char[].class);
-      registerPacketClass(HandCollisionDetectedPacket.class);
 
       // Video data
       registerPacketClass(VideoPacket.class);

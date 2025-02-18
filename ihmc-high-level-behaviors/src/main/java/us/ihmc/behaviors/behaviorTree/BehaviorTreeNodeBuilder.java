@@ -4,9 +4,9 @@ import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 /**
- * @param <HLT> The generic type of this node: RDX or Executor
+ * @param <T> The generic type of this node: RDX or Executor
  */
-public interface BehaviorTreeNodeBuilder<HLT extends BehaviorTreeNode<HLT, ? ,?>>
+public interface BehaviorTreeNodeBuilder<T extends BehaviorTreeNode<T, ? ,?>>
 {
-   HLT createNode(Class<?> nodeType, long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory);
+   T createNode(Class<?> nodeType, long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory);
 }

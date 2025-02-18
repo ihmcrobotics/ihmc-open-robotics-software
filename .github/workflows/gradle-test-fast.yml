@@ -109,11 +109,6 @@ jobs:
     with:
       subproject: 'ihmc-high-level-behaviors'
       test-category: 'fast'
-  ihmc-humanoid-behaviors:
-    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
-    with:
-      subproject: 'ihmc-humanoid-behaviors'
-      test-category: 'fast'
   ihmc-interfaces:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
@@ -239,7 +234,6 @@ jobs:
       - ihmc-footstep-planning
       - ihmc-graphics
       - ihmc-high-level-behaviors
-      - ihmc-humanoid-behaviors
       - ihmc-interfaces
       - ihmc-java-toolkit
       - ihmc-manipulation-planning

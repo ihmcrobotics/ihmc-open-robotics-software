@@ -2,6 +2,7 @@ package us.ihmc.perception.detections.yolo;
 
 import org.bytedeco.cuda.cudart.CUstream_st;
 import org.bytedeco.cuda.cudart.dim3;
+import org.bytedeco.javacpp.BooleanPointer;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencv.global.opencv_core;
@@ -32,6 +33,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -50,7 +52,7 @@ public class YOLOv8Model
 
    // Meta data
    private final String modelName;
-   private final List<String> detectionClassNames = new ArrayList<>();
+   private final List<String> detectableObjects = new ArrayList<>();
 
    // OpenCV DNN stuff
    private final Net yoloNet;
@@ -74,6 +76,12 @@ public class YOLOv8Model
    private final FloatPointer prototypeMasks = new FloatPointer();
    private boolean firstAllocation = true;
 
+   // Parameters
+   private final BooleanPointer ignoredObjectClasses = new BooleanPointer();
+   private final FloatPointer confidenceThresholds = new FloatPointer();
+   private final float[] maskThresholds;
+   private float nmsThreshold;
+
    public YOLOv8Model(Path modelBaseDirectory)
    {
       // Ensure the passed in directory is a valid YOLO model directory
@@ -89,7 +97,7 @@ public class YOLOv8Model
          Yaml yaml = new Yaml();
          Map<String, List<Object>> classNamesData = yaml.load(inputStream);
          List<Object> names = classNamesData.get("names");
-         detectionClassNames.addAll(names.stream().map(Object::toString).toList());
+         detectableObjects.addAll(names.stream().map(Object::toString).toList());
 
          // Read the YOLO net
          Path onnxFile = YOLOv8Tools.getONNXFile(modelBaseDirectory);
@@ -121,6 +129,19 @@ public class YOLOv8Model
       }
 
       nms = new CUDANonMaximumSuppression();
+
+      // Initialize parameters
+      cudaMallocHost(ignoredObjectClasses, (long) ignoredObjectClasses.sizeof() * detectableObjects.size());
+      cudaMallocHost(confidenceThresholds, (long) confidenceThresholds.sizeof() * detectableObjects.size());
+      maskThresholds = new float[detectableObjects.size()];
+
+      // Set parameters to default values
+      boolean[] ignoredClasses = new boolean[detectableObjects.size()];
+      Arrays.fill(ignoredClasses, false); // Don't ignore any by default
+      setIgnoredClasses(ignoredClasses);
+      setConfidenceThresholds(0.7f);
+      setMaskThresholds(0.0f);
+      setNMSThreshold(0.2f);
    }
 
    public synchronized void destroy()
@@ -156,9 +177,88 @@ public class YOLOv8Model
    /**
     * @return A list of object classes this model can detect.
     */
-   public List<String> getDetectionClassNames()
+   public List<String> getDetectableObjects()
    {
-      return detectionClassNames;
+      return detectableObjects;
+   }
+
+   public int getDetectableObjectCount()
+   {
+      return detectableObjects.size();
+   }
+
+   /**
+    * Set whether to ignore detections of a certain object class
+    *
+    * @param objectClass Name of the object class
+    * @param ignore      If true, detections of the object class will be ignored.
+    */
+   public void ignore(String objectClass, boolean ignore)
+   {
+      ignoredObjectClasses.put(detectableObjects.indexOf(objectClass), ignore);
+   }
+
+   /**
+    * Set the object class detections to ignore.
+    *
+    * @param ignoredClasses An array of booleans, each determining whether the corresponding (by index) object class will be ignored.
+    */
+   public void setIgnoredClasses(boolean[] ignoredClasses)
+   {
+      ignoredObjectClasses.put(ignoredClasses);
+   }
+
+   /**
+    * Set the mask threshold for all object classes. A higher value will generally shrink the mask.
+    *
+    * @param maskThreshold Minimum value for a pixel to be part of the mask.
+    */
+   public void setMaskThresholds(float maskThreshold)
+   {
+      Arrays.fill(maskThresholds, maskThreshold);
+   }
+
+   /**
+    * Set the mask threshold for each object class. A higher value will generally shrink the mask.
+    *
+    * @param objectClassMaskThresholds Minimum values for a pixel to be part of the mask.
+    */
+   public void setMaskThresholds(float[] objectClassMaskThresholds)
+   {
+      System.arraycopy(objectClassMaskThresholds, 0, maskThresholds, 0, maskThresholds.length);
+   }
+
+   /**
+    * Set the confidence thresholds for all object classes
+    *
+    * @param confidenceThreshold Minimum confidence value detections must have to be considered valid [0.0, 1.0].
+    */
+   public void setConfidenceThresholds(float confidenceThreshold)
+   {
+      float[] confidenceArray = new float[detectableObjects.size()];
+      Arrays.fill(confidenceArray, confidenceThreshold);
+      setConfidenceThresholds(confidenceArray);
+   }
+
+   /**
+    * Set the confidence threshold for each object class
+    *
+    * @param objectClassConfidenceThresholds Array of minimum confidence values detections must have to be considered valid [0.0, 1.0].
+    */
+   public void setConfidenceThresholds(float[] objectClassConfidenceThresholds)
+   {
+      confidenceThresholds.put(objectClassConfidenceThresholds);
+   }
+
+   /**
+    * Set the non-maximum suppression threshold for determining whether boxes overlap.
+    * The smaller the value, the less overlap is required for a box to be removed.
+    *
+    * @param nmsThreshold Non-maximum suppression threshold [0.0, 1.0]
+    */
+   public void setNMSThreshold(float nmsThreshold)
+   {
+      this.nmsThreshold = nmsThreshold;
    }
 
    /**
@@ -166,13 +266,9 @@ public class YOLOv8Model
     *
     * @param image               Image to run YOLO on. If this image isn't in BGR format, it will be converted to BGR.
     *                            Pass in BGR images for optimal performance.
-    * @param confidenceThreshold Minimum confidence detections must have to be considered valid [0.0, 1.0].
-    * @param nmsThreshold        Non-maximum suppression threshold for determining whether bounding boxes overlap.
-    *                            The smaller the value, the less overlap is required for a box to be removed [0.0, 1.0].
-    * @param maskThreshold       Minimum value for a pixel to be part of the mask.
     * @return List of {@link YOLOv8Detection}s found in the image.
     */
-   public synchronized YOLOv8DetectionList run(RawImage image, float confidenceThreshold, float nmsThreshold, float maskThreshold)
+   public synchronized YOLOv8DetectionList run(RawImage image)
    {
       YOLOv8DetectionList result = new YOLOv8DetectionList();
 
@@ -269,9 +365,10 @@ public class YOLOv8Model
 
          // Run the filter kernel
          filterKernel.withPointer(unfilteredDetections)
-                     .withInt(detectionClassNames.size())
+                     .withInt(detectableObjects.size())
                      .withInt(unfilteredDetectionCount)
-                     .withFloat(confidenceThreshold)
+                     .withPointer(confidenceThresholds)
+                     .withPointer(ignoredObjectClasses)
                      .withInt(shiftWidth)
                      .withInt(shiftHeight)
                      .withPointer(filteredDetections)
@@ -318,9 +415,9 @@ public class YOLOv8Model
             Rect boundingBox = new Rect(Math.round(row.get(0)), Math.round(row.get(1)), Math.round(row.get(2)), Math.round(row.get(3)));
             float confidence = row.get(4);
             int classID = (int) row.get(5);
-            RawImage mask = computeDetectionMask(filteredDetections, prototypeMasks, index, maskThreshold, maskIntrinsics, bgrInputImage);
+            RawImage mask = computeDetectionMask(filteredDetections, prototypeMasks, index, maskThresholds[classID], maskIntrinsics, bgrInputImage);
 
-            YOLOv8Detection detection = new YOLOv8Detection(detectionClassNames.get(classID), confidence, boundingBox, mask);
+            YOLOv8Detection detection = new YOLOv8Detection(detectableObjects.get(classID), classID, confidence, boundingBox, mask);
             result.add(detection);
 
             boundingBox.close();
@@ -409,6 +506,8 @@ public class YOLOv8Model
       CUDATools.checkCUDAError(cudaFreeAsync(prototypeMasks, cudaStream));
       CUDATools.checkCUDAError(cudaFreeHost(filteredDetections));
       CUDATools.checkCUDAError(cudaFreeHost(filteredDetectionCountPointer));
+      CUDATools.checkCUDAError(cudaFreeHost(ignoredObjectClasses));
+      CUDATools.checkCUDAError(cudaFreeHost(confidenceThresholds));
    }
 
    private RawImage computeDetectionMask(FloatPointer filteredOutput,

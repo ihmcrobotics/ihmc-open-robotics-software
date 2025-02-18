@@ -3,17 +3,17 @@ package us.ihmc.behaviors.behaviorTree.topology;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNode;
 
 /**
- * @param <HLT> The generic type of this node: RDX or Executor
+ * @param <T> The generic type of this node: RDX or Executor
  */
-public class BehaviorTreeNodeInsertionDefinition<HLT extends BehaviorTreeNode<HLT, ?, ?>>
+public class BehaviorTreeNodeInsertionDefinition<T extends BehaviorTreeNode<T, ?, ?>>
 {
    private final BehaviorTreeNodeInsertionType insertionType;
-   private HLT nodeToInsert;
-   private HLT sibling;
-   private HLT parent;
+   private T nodeToInsert;
+   private T sibling;
+   private T parent;
    private int insertionIndex;
 
-   public BehaviorTreeNodeInsertionDefinition(BehaviorTreeNodeInsertionType insertionType, HLT nodeToInsert, HLT relativeNode)
+   public BehaviorTreeNodeInsertionDefinition(BehaviorTreeNodeInsertionType insertionType, T nodeToInsert, T relativeNode)
    {
       this.insertionType = insertionType;
 
@@ -49,9 +49,9 @@ public class BehaviorTreeNodeInsertionDefinition<HLT extends BehaviorTreeNode<HL
       }
    }
 
-   private HLT checkSiblingParent()
+   private T checkSiblingParent()
    {
-      HLT parent = sibling.getParent();
+      T parent = sibling.getParent();
       if (parent == null)
          throw new RuntimeException("Sibling's parent cannot be null.");
 
@@ -63,17 +63,17 @@ public class BehaviorTreeNodeInsertionDefinition<HLT extends BehaviorTreeNode<HL
       return insertionType;
    }
 
-   public HLT getNodeToInsert()
+   public T getNodeToInsert()
    {
       return nodeToInsert;
    }
 
-   public HLT getSibling()
+   public T getSibling()
    {
       return sibling;
    }
 
-   public HLT getParent()
+   public T getParent()
    {
       return parent;
    }

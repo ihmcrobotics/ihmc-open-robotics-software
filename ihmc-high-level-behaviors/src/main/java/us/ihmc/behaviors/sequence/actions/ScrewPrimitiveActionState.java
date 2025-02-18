@@ -17,7 +17,6 @@ public class ScrewPrimitiveActionState extends ActionNodeState<ScrewPrimitiveAct
    /** This limit is defined in the .msg file and limited to the size in the SE3TrajectoryMessage. */
    public static final int TRAJECTORY_SIZE_LIMIT = new ScrewPrimitiveActionStateMessage().getPreviewTrajectory().getCurrentCapacity();
 
-   private final ScrewPrimitiveActionDefinition definition;
    private final DetachableReferenceFrame screwFrame;
    private final CRDTStatusPoseList previewTrajectory;
    private final CRDTStatusVector3D force;
@@ -33,9 +32,7 @@ public class ScrewPrimitiveActionState extends ActionNodeState<ScrewPrimitiveAct
    {
       super(id, new ScrewPrimitiveActionDefinition(crdtInfo, saveFileDirectory), crdtInfo);
 
-      definition = getDefinition();
-
-      screwFrame = new DetachableReferenceFrame(referenceFrameLibrary, getDefinition().getScrewAxisPoseInObjectFrame().getValueReadOnly());
+      screwFrame = new DetachableReferenceFrame(referenceFrameLibrary, definition.getScrewAxisPoseInObjectFrame().getValueReadOnly());
       previewTrajectory = new CRDTStatusPoseList(ROS2ActorDesignation.ROBOT, crdtInfo);
       force = new CRDTStatusVector3D(ROS2ActorDesignation.ROBOT, crdtInfo);
       torque = new CRDTStatusVector3D(ROS2ActorDesignation.ROBOT, crdtInfo);
@@ -50,7 +47,7 @@ public class ScrewPrimitiveActionState extends ActionNodeState<ScrewPrimitiveAct
    @Override
    public void update()
    {
-      screwFrame.update(getDefinition().getObjectFrameName());
+      screwFrame.update(definition.getObjectFrameName());
    }
 
    @Override
@@ -71,7 +68,7 @@ public class ScrewPrimitiveActionState extends ActionNodeState<ScrewPrimitiveAct
 
    public void toMessage(ScrewPrimitiveActionStateMessage message)
    {
-      getDefinition().toMessage(message.getDefinition());
+      definition.toMessage(message.getDefinition());
 
       super.toMessage(message.getState());
 
@@ -91,7 +88,7 @@ public class ScrewPrimitiveActionState extends ActionNodeState<ScrewPrimitiveAct
 
    public void fromMessage(ScrewPrimitiveActionStateMessage message)
    {
-      getDefinition().fromMessage(message.getDefinition());
+      definition.fromMessage(message.getDefinition());
 
       super.fromMessage(message.getState());
 

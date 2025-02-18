@@ -10,13 +10,10 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 public class RDXCheckPointNode extends RDXLeafNode<CheckPointNodeState, CheckPointNodeDefinition>
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final CheckPointNodeState state;
 
    public RDXCheckPointNode(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(new CheckPointNodeState(id, crdtInfo, saveFileDirectory));
-
-      state = getState();
    }
 
    @Override

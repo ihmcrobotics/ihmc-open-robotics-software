@@ -13,14 +13,14 @@ import java.util.Queue;
  * We are intentionally not checking the types in this class, because it gets
  * to complicated to use and doesn't add much value.
  *
- * @param <HLT> The generic type of this node: RDX or Executor
+ * @param <T> The generic type of this node: RDX or Executor
  */
-public class BehaviorTreeTopologyOperationQueue<HLT extends BehaviorTreeNode<HLT, ?, ?>>
+public class BehaviorTreeTopologyOperationQueue<T extends BehaviorTreeNode<T, ?, ?>>
 {
-   private final BehaviorTree<HLT> behaviorTree;
+   private final BehaviorTree<T> behaviorTree;
    private final Queue<BehaviorTreeTopologyOperation> topologyOperationQueue = new LinkedList<>();
 
-   public BehaviorTreeTopologyOperationQueue(BehaviorTree<HLT> behaviorTree)
+   public BehaviorTreeTopologyOperationQueue(BehaviorTree<T> behaviorTree)
    {
       this.behaviorTree = behaviorTree;
    }
@@ -41,7 +41,7 @@ public class BehaviorTreeTopologyOperationQueue<HLT extends BehaviorTreeNode<HLT
       return atLeastOneOperationPerformed;
    }
 
-   public void queueInsertNodeModify(BehaviorTreeNodeInsertionDefinition<HLT> insertionDefinition)
+   public void queueInsertNodeModify(BehaviorTreeNodeInsertionDefinition<T> insertionDefinition)
    {
       if (insertionDefinition.getInsertionType() == BehaviorTreeNodeInsertionType.INSERT_ROOT)
       {
@@ -53,7 +53,7 @@ public class BehaviorTreeTopologyOperationQueue<HLT extends BehaviorTreeNode<HLT
       }
    }
 
-   public void queueSetRootNode(HLT rootNode)
+   public void queueSetRootNode(T rootNode)
    {
       topologyOperationQueue.add(() ->
       {
@@ -61,7 +61,7 @@ public class BehaviorTreeTopologyOperationQueue<HLT extends BehaviorTreeNode<HLT
       });
    }
 
-   public void queueSetRootNodeModify(HLT rootNode)
+   public void queueSetRootNodeModify(T rootNode)
    {
       topologyOperationQueue.add(() ->
       {
@@ -74,7 +74,7 @@ public class BehaviorTreeTopologyOperationQueue<HLT extends BehaviorTreeNode<HLT
    {
       topologyOperationQueue.add(() ->
       {
-         HLT rootNode = behaviorTree.getRootNode();
+         T rootNode = behaviorTree.getRootNode();
          behaviorTree.setRootNode(null);
          behaviorTree.getRootReferenceModification().modify();
          if (rootNode != null)
@@ -86,19 +86,19 @@ public class BehaviorTreeTopologyOperationQueue<HLT extends BehaviorTreeNode<HLT
    {
       topologyOperationQueue.add(() ->
       {
-         HLT rootNode = behaviorTree.getRootNode();
+         T rootNode = behaviorTree.getRootNode();
          behaviorTree.setRootNode(null);
          if (rootNode != null)
             BehaviorTreeTopologyOperations.destroySubtree(rootNode);
       });
    }
 
-   public void queueDestroySubtreeModify(HLT subtreeRoot)
+   public void queueDestroySubtreeModify(T subtreeRoot)
    {
       topologyOperationQueue.add(() -> BehaviorTreeTopologyOperations.destroySubtreeModify(subtreeRoot));
    }
 
-   public void queueInsertChildModify(HLT parent, HLT child, int insertionIndex)
+   public void queueInsertChildModify(T parent, T child, int insertionIndex)
    {
       topologyOperationQueue.add(() ->
       {
@@ -106,7 +106,7 @@ public class BehaviorTreeTopologyOperationQueue<HLT extends BehaviorTreeNode<HLT
       });
    }
 
-   public void queueMoveChildModify(HLT fromParent, HLT toParent, HLT child, HLT relativeNode, BehaviorTreeNodeInsertionType insertionType)
+   public void queueMoveChildModify(T fromParent, T toParent, T child, T relativeNode, BehaviorTreeNodeInsertionType insertionType)
    {
       topologyOperationQueue.add(() ->
       {
@@ -132,17 +132,17 @@ public class BehaviorTreeTopologyOperationQueue<HLT extends BehaviorTreeNode<HLT
       });
    }
 
-   public void queueAppendChildModify(HLT parent, HLT child)
+   public void queueAppendChildModify(T parent, T child)
    {
       topologyOperationQueue.add(() -> BehaviorTreeTopologyOperations.appendChildModify(parent, child));
    }
 
-   public void queueClearImmediateChildren(HLT node)
+   public void queueClearImmediateChildren(T node)
    {
       topologyOperationQueue.add(() -> BehaviorTreeTopologyOperations.clearImmediateChildren(node));
    }
 
-   public void queueAppendChild(HLT parent, HLT child)
+   public void queueAppendChild(T parent, T child)
    {
       topologyOperationQueue.add(() -> BehaviorTreeTopologyOperations.appendChild(parent, child));
    }
