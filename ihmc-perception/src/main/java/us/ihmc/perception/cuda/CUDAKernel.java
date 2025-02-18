@@ -51,7 +51,7 @@ public class CUDAKernel implements AutoCloseable
    public void enableKernelTimings(boolean enableKernelTimings)
    {
       this.enableKernelTimings = enableKernelTimings;
-      kernelTimings = new CUDAKernelTimings(name);
+      kernelTimings = new CUDAKernelTimings();
    }
 
    public void retainParameters(boolean retainParameters)
@@ -168,14 +168,7 @@ public class CUDAKernel implements AutoCloseable
    private static class CUDAKernelTimings
    {
       private static final int MAX_ENTRIES = 250;
-
       private final LinkedList<Float> executionTimes = new LinkedList<>();
-      private final String kernelName;
-
-      public CUDAKernelTimings(String kernelName)
-      {
-         this.kernelName = kernelName;
-      }
 
       private void addExecutionTime(CUevent_st start, CUevent_st end)
       {
@@ -243,15 +236,15 @@ public class CUDAKernel implements AutoCloseable
       {
          if (executionTimes.isEmpty())
          {
-            LogTools.info("No recorded times for " + kernelName);
+            LogTools.info("No recorded times for " + CUDAKernel.this.name);
          }
 
-         double average = getAverageTime(kernelName);
-         double variance = getStandardDeviation(kernelName);
-         double min = getMinTime(kernelName);
-         double max = getMaxTime(kernelName);
+         double average = getAverageTime(CUDAKernel.this.name);
+         double variance = getStandardDeviation(CUDAKernel.this.name);
+         double min = getMinTime(CUDAKernel.this.name);
+         double max = getMaxTime(CUDAKernel.this.name);
 
-         LogTools.info("Timings for kernel " + kernelName + " in milliseconds!");
+         LogTools.info("Timings for kernel " + CUDAKernel.this.name + " in milliseconds!");
          LogTools.info("|   Average time: " + average);
          LogTools.info("|   Variance time: " + variance);
          LogTools.info("|   Min time: " + min);
