@@ -173,7 +173,7 @@ public class PelvisICPBasedTranslationManager
          icpOffsetForReset.scale(alpha);
          pelvisPositionCumulatedError.setToZero();
          if (yoTime.getValue() - resetTime.getValue() > resetDuration.getValue())
-            disable();
+            clear();
          return;
       }
 
@@ -697,6 +697,11 @@ public class PelvisICPBasedTranslationManager
    public void disable()
    {
       isEnabled.set(false);
+      clear();
+   }
+
+   private void clear()
+   {
       isRunning.set(false);
       isResetting.set(false);
       isTrajectoryStopped.set(false);

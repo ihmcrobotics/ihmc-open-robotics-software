@@ -25,6 +25,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.*;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ComponentBasedFootstepDataMessageGeneratorFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HumanoidSteppingPluginFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.JoystickBasedSteppingPluginFactory;
+import us.ihmc.communication.PostureOptimizerState;
 import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler.TaskOverrunBehavior;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -82,6 +83,8 @@ import us.ihmc.tools.factories.RequiredFactoryField;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.RobotContactPointParameters.GroundContactModelParameters;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -845,7 +848,11 @@ public class SCS2AvatarSimulationFactory
 
       if (realtimeROS2Node.hasBeenSet())
       {
-         controllerFactory.createControllerNetworkSubscriber(robotModel.getSimpleRobotName(), realtimeROS2Node.get());
+         YoRegistry registry = controllerFactory.getRegistry();
+         YoDouble postureSensitivity = new YoDouble("postureSensitivity", registry);
+         YoDouble activationAlpha = new YoDouble("activationAlpha", registry);
+         YoEnum<PostureOptimizerState> stabilityState = new YoEnum<>("stabilityState", registry, PostureOptimizerState.class, true);
+         controllerFactory.createControllerNetworkSubscriber(robotModel.getSimpleRobotName(), realtimeROS2Node.get(), postureSensitivity::set, activationAlpha::set, stabilityState::set);
       }
 
       setHighLevelHumanoidControllerFactory(controllerFactory);

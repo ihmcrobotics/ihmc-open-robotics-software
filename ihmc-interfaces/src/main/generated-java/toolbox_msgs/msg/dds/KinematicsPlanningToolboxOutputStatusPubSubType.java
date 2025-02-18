@@ -15,7 +15,7 @@ public class KinematicsPlanningToolboxOutputStatusPubSubType implements us.ihmc.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "b90a1333b8ecfd4b7d1781eb80ab2337d331638dd4ce7bd34568aab14a7c8ddb";
+   		return "d3f22981dae8152201bf7ccd7189f7f9c6d3d5882eabfba505b9de391cf4c7a7";
    }
    
    @Override

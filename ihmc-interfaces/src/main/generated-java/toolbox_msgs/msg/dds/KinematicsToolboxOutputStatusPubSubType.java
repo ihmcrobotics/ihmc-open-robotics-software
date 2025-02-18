@@ -15,7 +15,7 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "24e1c048ab9f7fc5b8bb75a4b51d96efd5aad483599cdaba27efc225e88dbebd";
+   		return "d701031c76ffa9349c65a4019599e66ce3b4f0e567a088d7041760f089b4eb33";
    }
    
    @Override
@@ -75,6 +75,12 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
@@ -123,6 +129,15 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
@@ -156,6 +171,12 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
 
       cdr.write_type_6(data.getSupportRegionSensitivity());
 
+      cdr.write_type_9(data.getPostureOptimizerState());
+
+      cdr.write_type_6(data.getActivationAlpha());
+
+      cdr.write_type_6(data.getComStabilityPostureSensitivity());
+
       cdr.write_type_6(data.getSolutionQuality());
 
    }
@@ -176,6 +197,12 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getDesiredRootAngularVelocity(), cdr);	
       cdr.read_type_e(data.getSupportRegion());	
       data.setSupportRegionSensitivity(cdr.read_type_6());
+      	
+      data.setPostureOptimizerState(cdr.read_type_9());
+      	
+      data.setActivationAlpha(cdr.read_type_6());
+      	
+      data.setComStabilityPostureSensitivity(cdr.read_type_6());
       	
       data.setSolutionQuality(cdr.read_type_6());
       	
@@ -200,6 +227,9 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
 
       ser.write_type_e("support_region", data.getSupportRegion());
       ser.write_type_6("support_region_sensitivity", data.getSupportRegionSensitivity());
+      ser.write_type_9("posture_optimizer_state", data.getPostureOptimizerState());
+      ser.write_type_6("activation_alpha", data.getActivationAlpha());
+      ser.write_type_6("com_stability_posture_sensitivity", data.getComStabilityPostureSensitivity());
       ser.write_type_6("solution_quality", data.getSolutionQuality());
    }
 
@@ -221,6 +251,9 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
 
       ser.read_type_e("support_region", data.getSupportRegion());
       data.setSupportRegionSensitivity(ser.read_type_6("support_region_sensitivity"));
+      data.setPostureOptimizerState(ser.read_type_9("posture_optimizer_state"));
+      data.setActivationAlpha(ser.read_type_6("activation_alpha"));
+      data.setComStabilityPostureSensitivity(ser.read_type_6("com_stability_posture_sensitivity"));
       data.setSolutionQuality(ser.read_type_6("solution_quality"));
    }
 

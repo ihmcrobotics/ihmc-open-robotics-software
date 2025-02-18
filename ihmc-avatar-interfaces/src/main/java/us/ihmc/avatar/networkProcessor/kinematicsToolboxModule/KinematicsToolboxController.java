@@ -100,6 +100,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.function.Consumer;
 
 import static toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus.*;
 
@@ -117,6 +118,7 @@ public class KinematicsToolboxController extends ToolboxController
    private static final double GRAVITY = 9.81;
 
    private static final double GLOBAL_PROPORTIONAL_GAIN = 1200.0;
+   public static final boolean ALWAYS_SNAP_PRIV_CONFIG_TO_CURRENT = false;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -197,7 +199,7 @@ public class KinematicsToolboxController extends ToolboxController
     * configuration obtained from {@link #desiredOneDoFJoints} and also with the solution quality which can be
     * used to quickly see if the solution is viable. It is sent back to the caller only.
     */
-   private final KinematicsToolboxOutputStatus inverseKinematicsSolution;
+   protected final KinematicsToolboxOutputStatus inverseKinematicsSolution;
    /**
     * Variable to keep track of when the last solution was published.
     */
@@ -250,13 +252,13 @@ public class KinematicsToolboxController extends ToolboxController
     * configuration.
     */
    protected TObjectDoubleHashMap<OneDoFJointBasics> initialRobotConfigurationMap = null;
-   private boolean submitPrivilegedConfigurationCommand = true;
+   protected boolean submitPrivilegedConfigurationCommand = true;
    /**
     * This reference to {@link PrivilegedConfigurationCommand} is used internally only to figure out if
     * the current privileged configuration used in the controller core is to be updated or not. It is
     * usually updated once right after the initialization phase.
     */
-   private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
+   protected final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
    /**
     * The {@link #commandInputManager} is used as a 'thread-barrier'. When receiving a new user input,
     * this manager automatically copies the data in the corresponding command that can then be used
@@ -432,6 +434,9 @@ public class KinematicsToolboxController extends ToolboxController
    private final YoVector3D angularMomentumRateWeight = new YoVector3D("angularMomentumRateWeight", registry);
    private final YoVector3D linearMomentumRateWeight = new YoVector3D("linearMomentumRateWeight", registry);
    private final MomentumCommand momentumCommandForRateMinimization = new MomentumCommand();
+
+   protected Consumer<KinematicsToolboxRigidBodyCommand> rigidBodyCommandMutator = command -> {};
+   protected Consumer<KinematicsToolboxCenterOfMassCommand> centerOfMassCommandMutator = command -> {};
 
    /**
     * @param commandInputManager     the message/command barrier used by this controller. Submit
@@ -832,7 +837,7 @@ public class KinematicsToolboxController extends ToolboxController
 
    protected void initializePrivilegedConfiguration()
    {
-      if (initialRobotConfigurationMap != null)
+      if (!ALWAYS_SNAP_PRIV_CONFIG_TO_CURRENT && initialRobotConfigurationMap != null)
       {
          initialRobotConfigurationMap.forEachEntry((joint, q_priv) ->
                                                    {
@@ -1097,6 +1102,7 @@ public class KinematicsToolboxController extends ToolboxController
          noCommandReceived = false;
 
          KinematicsToolboxCenterOfMassCommand command = commandInputManager.pollNewestCommand(KinematicsToolboxCenterOfMassCommand.class);
+         centerOfMassCommandMutator.accept(command);
          KinematicsToolboxHelper.consumeCenterOfMassCommand(command, spatialGains.getPositionGains(), userFBCommands.addCenterOfMassFeedbackControlCommand());
          yoDesiredCenterOfMass.set(command.getDesiredPosition());
 
@@ -1121,6 +1127,7 @@ public class KinematicsToolboxController extends ToolboxController
          {
             noCommandReceived = false;
             KinematicsToolboxRigidBodyCommand command = commands.get(i);
+            rigidBodyCommandMutator.accept(command);
             RigidBodyBasics endEffector = command.getEndEffector();
             SpatialFeedbackControlCommand rigidBodyCommand = userFBCommands.addSpatialFeedbackControlCommand();
             KinematicsToolboxHelper.consumeRigidBodyCommand(command, rootBody, spatialGains, rigidBodyCommand);
@@ -1181,6 +1188,7 @@ public class KinematicsToolboxController extends ToolboxController
             noCommandReceived = false;
             KinematicsToolboxCenterOfMassCommand input = centerOfMassInputs.get(j);
             KinematicsToolboxHelper.consumeCenterOfMassCommand(input, spatialGains.getPositionGains(), userFBCommands.addCenterOfMassFeedbackControlCommand());
+            centerOfMassCommandMutator.accept(input);
 
             if (preserveUserCommandHistory.getValue())
             {
@@ -1198,6 +1206,7 @@ public class KinematicsToolboxController extends ToolboxController
          {
             noCommandReceived = false;
             KinematicsToolboxRigidBodyCommand input = rigidBodyInputs.get(j);
+            rigidBodyCommandMutator.accept(input);
             RigidBodyBasics endEffector = input.getEndEffector();
             SpatialFeedbackControlCommand rigidBodyCommand = userFBCommands.addSpatialFeedbackControlCommand();
             KinematicsToolboxHelper.consumeRigidBodyCommand(input, rootBody, spatialGains, rigidBodyCommand);

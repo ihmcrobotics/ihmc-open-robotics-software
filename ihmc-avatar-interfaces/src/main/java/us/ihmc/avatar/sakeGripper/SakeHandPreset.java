@@ -10,7 +10,7 @@ public enum SakeHandPreset
    /** Close almost all the way to achieve no torque when nothings being grabbed. */
    CLOSE(10.0, SakeHandParameters.FINGERTIP_GRIP_FORCE_SAFE),
    /** Close with specified torque */
-   GRIP(0.0, SakeHandParameters.FINGERTIP_GRIP_FORCE_SAFE),
+   GRIP(0.0, 19.0),
    /** Fully opens fingers */
    FULLY_OPEN(210.0, SakeHandParameters.FINGERTIP_GRIP_FORCE_SAFE),
    /** Close with maximum torque */

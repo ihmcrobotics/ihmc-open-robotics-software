@@ -15,6 +15,7 @@ import com.badlogic.gdx.utils.Pool;
 import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
 import org.lwjgl.opengl.GL41;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import us.ihmc.communication.PostureOptimizerState;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -31,11 +32,14 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class RDXMultiContactRegionGraphic implements RenderableProvider
 {
-   private static final Color NOMINAL_POLYGON_GRAPHIC_COLOR = Color.valueOf("DEE933");
-   private static final Color LOW_STABILITY_POLYGON_GRAPHIC_COLOR = Color.valueOf("EB3D40");
+   public static final Color NOMINAL_POLYGON_GRAPHIC_COLOR = Color.valueOf("DEE933");
+   public static final Color OPTIMIZER_POLYGON_GRAPHIC_COLOR = Color.valueOf("EB3D40");
+   public static final Color FREEZE_POLYGON_GRAPHIC_COLOR = Color.valueOf("3D46EB");
    private static final double STABILITY_GRAPHIC_HEIGHT = 2.0;
 
    private final ConvexPolygon2D supportRegion = new ConvexPolygon2D();
+   private PostureOptimizerState postureOptimizerState = PostureOptimizerState.NOMINAL;
+   private double activationAlpha = -1.0;
 
    private final FramePoint3D comCurrent = new FramePoint3D();
    private final FramePoint3D comDesired = new FramePoint3D();
@@ -137,14 +141,9 @@ public class RDXMultiContactRegionGraphic implements RenderableProvider
             meshBuilder.addLine(v0.getX(), v0.getY(), footZ, v1.getX(), v1.getY(), footZ, 0.01f, color);
          }
 
-         double postureSensitivityThreshold = 0.045;
-         double stabilityMarginThreshold = 0.12;
-
-         boolean isPostureHighlySensitive = kinematicsToolboxOutputStatus.getSupportRegionSensitivity() > postureSensitivityThreshold;
-         boolean hasLowStabilityMargin = minimumEdgeDistance < stabilityMarginThreshold;
-
-         Color polygonGraphicColor = (isPostureHighlySensitive && hasLowStabilityMargin) ? LOW_STABILITY_POLYGON_GRAPHIC_COLOR : NOMINAL_POLYGON_GRAPHIC_COLOR;
-         meshBuilder.addPolygon(transform, this.supportRegion, polygonGraphicColor);
+         postureOptimizerState = PostureOptimizerState.fromByte(kinematicsToolboxOutputStatus.getPostureOptimizerState());
+         activationAlpha = kinematicsToolboxOutputStatus.getActivationAlpha();
+         meshBuilder.addPolygon(transform, this.supportRegion, getPolygonColor());
       }
 
       modelBuilder.begin();
@@ -162,6 +161,11 @@ public class RDXMultiContactRegionGraphic implements RenderableProvider
 
       lastModel = modelBuilder.end();
       modelInstance = new ModelInstance(lastModel);
+   }
+
+   private Color getPolygonColor()
+   {
+      return activationAlpha > 0.1 ? OPTIMIZER_POLYGON_GRAPHIC_COLOR : NOMINAL_POLYGON_GRAPHIC_COLOR;
    }
 
    private void updateMinimumEdge()

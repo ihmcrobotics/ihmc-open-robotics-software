@@ -42,7 +42,7 @@ public class JointTorqueAgainstForceSensorVisualizer
          estimators.add(new JacobianBasedWrenchEstimator(foot, rootBody, feet.get(foot).getContactFrame(), footSwitches.get(foot), registry));
       }
 
-      parentRegistry.addChild(registry);
+//      parentRegistry.addChild(registry);
    }
 
    public void update()

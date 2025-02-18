@@ -130,8 +130,8 @@ public class TrajectoryRecordReplay
                                     boolean bButtonPressed,
                                     boolean triggerPressed,
                                     ReferenceFrame desiredControlFrame,
-                                    Vector3D angularVelocity,
-                                    Vector3D linearVelocity,
+                                    Tuple3DReadOnly angularVelocity,
+                                    Tuple3DReadOnly linearVelocity,
                                     ReferenceFrame recordFrame)
    {
       vrInputData.get(vrInputData.size() - 1).controllerData.get(robotSide)
@@ -146,8 +146,8 @@ public class TrajectoryRecordReplay
 
    public void recordTrackerData(VRTrackedSegmentType segmentType,
                                  ReferenceFrame desiredControlFrame,
-                                 Vector3D angularVelocity,
-                                 Vector3D linearVelocity,
+                                 Tuple3DReadOnly angularVelocity,
+                                 Tuple3DReadOnly linearVelocity,
                                  ReferenceFrame recordFrame)
    {
       vrInputData.get(vrInputData.size() - 1).trackerData.get(trackerIndex.get(segmentType)).set(desiredControlFrame, angularVelocity, linearVelocity, recordFrame);
@@ -315,7 +315,7 @@ public class TrajectoryRecordReplay
          return index;
       }
 
-      void set(ReferenceFrame trackerFrame, Vector3D angularVelocity, Vector3D linearVelocity, ReferenceFrame recordFrame)
+      void set(ReferenceFrame trackerFrame, Tuple3DReadOnly angularVelocity, Tuple3DReadOnly linearVelocity, ReferenceFrame recordFrame)
       {
          this.pose.setToZero(trackerFrame);
          this.pose.changeFrame(recordFrame);
@@ -349,7 +349,7 @@ public class TrajectoryRecordReplay
          return index;
       }
 
-      void set(boolean aButtonPressed, boolean bButtonPressed, boolean triggerPressed, ReferenceFrame trackerFrame, Vector3D angularVelocity, Vector3D linearVelocity, ReferenceFrame recordFrame)
+      void set(boolean aButtonPressed, boolean bButtonPressed, boolean triggerPressed, ReferenceFrame trackerFrame, Tuple3DReadOnly angularVelocity, Tuple3DReadOnly linearVelocity, ReferenceFrame recordFrame)
       {
          super.set(trackerFrame, angularVelocity, linearVelocity, recordFrame);
 

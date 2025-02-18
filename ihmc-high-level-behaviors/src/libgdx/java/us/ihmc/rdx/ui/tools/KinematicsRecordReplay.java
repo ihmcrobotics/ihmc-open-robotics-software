@@ -9,6 +9,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.motionRetargeting.VRTrackedSegmentType;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -127,7 +128,7 @@ public class KinematicsRecordReplay
       }
    }
 
-   public void recordInputData(RobotSide robotSide, boolean aButtonPressed, boolean bButtonPressed, boolean triggerPressed, Vector3D angularVelocity, Vector3D linearVelocity, ReferenceFrame recordFrame)
+   public void recordInputData(RobotSide robotSide, boolean aButtonPressed, boolean bButtonPressed, boolean triggerPressed, Tuple3DReadOnly angularVelocity, Tuple3DReadOnly linearVelocity, ReferenceFrame recordFrame)
    {
       if (!isRecording)
          return;
@@ -142,7 +143,7 @@ public class KinematicsRecordReplay
                                               recordFrame);
    }
 
-   public void recordTrackerData(VRTrackedSegmentType segmentType, ReferenceFrame desiredControlFrame, Vector3D angularVelocity, Vector3D linearVelocity, ReferenceFrame recordFrame)
+   public void recordTrackerData(VRTrackedSegmentType segmentType, ReferenceFrame desiredControlFrame, Tuple3DReadOnly angularVelocity, Tuple3DReadOnly linearVelocity, ReferenceFrame recordFrame)
    {
       if (!isRecording)
          return;

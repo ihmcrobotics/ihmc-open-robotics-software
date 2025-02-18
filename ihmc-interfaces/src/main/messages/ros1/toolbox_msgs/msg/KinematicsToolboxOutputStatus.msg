@@ -14,6 +14,15 @@ int8 CURRENT_TOOLBOX_STATE_INITIALIZE_FAILURE_MISSING_RCD=2
 # The toolbox has been initialized properly and is running.
 int8 CURRENT_TOOLBOX_STATE_RUNNING=3
 
+# Low margin, high sensitivity
+int8 POSTURE_OPTIMIZER_MODE_OPTIMIZER=0
+
+# Medium margin or low margin + low sensitivity
+int8 POSTURE_OPTIMIZER_MODE_FREEZE=1
+
+# High margin
+int8 POSTURE_OPTIMIZER_MODE_NOMINAL=2
+
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint64 sequence_id
 
@@ -46,6 +55,15 @@ geometry_msgs/Point[] support_region
 # Sensitivity of the support region with respect to the posture. Indicates postures where the StabilityMarginKinematicsCostCalculator is more effective.
 # Field default value -1.0
 float64 support_region_sensitivity
+
+# Field default value 2
+int8 posture_optimizer_state
+
+# Field default value -1.0
+float64 activation_alpha
+
+# Field default value -1.0
+float64 com_stability_posture_sensitivity
 
 # Field default value -1.0
 float64 solution_quality

@@ -72,6 +72,8 @@ public class SensitivityBasedStabilityGradientCalculator
    private final DMatrixRMaj stabilityBoundaryGradient = new DMatrixRMaj(0);
    /* The gradient of the com along the line stabilityMarginDirection */
    private final DMatrixRMaj comGradient = new DMatrixRMaj(0);
+   /* Normalized stability boundary gradient */
+   private final DMatrixRMaj normalizedStabilityBoundaryGradient = new DMatrixRMaj(0);
 
    /* The normalized vector from c to p, where c is the CoM and p is comMarginPoint */
    private final DMatrixRMaj stabilityMarginDirection = new DMatrixRMaj(XY_DIMENSIONS, 1);
@@ -179,6 +181,16 @@ public class SensitivityBasedStabilityGradientCalculator
       yoPostureSensitivity.set(Math.sqrt(optimalSensitivity));
 
       CommonOps_DDRM.mult(nullspaceCalculator.getNullspace(), computedSensitivity, stabilityBoundaryGradient);
+
+      normalizedStabilityBoundaryGradient.set(stabilityBoundaryGradient);
+      if (yoPostureSensitivity.getValue() > 1.0e-5)
+      {
+         CommonOps_DDRM.scale(1.0 / yoPostureSensitivity.getValue(), normalizedStabilityBoundaryGradient);
+      }
+      else
+      {
+         normalizedStabilityBoundaryGradient.zero();
+      }
 
       centroidalMomentumCalculator.reset();
       DMatrixRMaj centroidalMomentumMatrix = centroidalMomentumCalculator.getCentroidalMomentumMatrix();
@@ -290,7 +302,7 @@ public class SensitivityBasedStabilityGradientCalculator
 
    public DMatrixRMaj getNomalizedStabilityMarginGradient()
    {
-      throw new RuntimeException("Remove me");
+      return normalizedStabilityBoundaryGradient;
    }
 
    public ContactNullspaceCalculator getNullspaceCalculator()

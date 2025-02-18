@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.function.Consumer;
+import java.util.function.DoubleConsumer;
 
 import controller_msgs.msg.dds.WholeBodyStreamingMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
@@ -29,6 +31,7 @@ import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.SettableFootSwitch;
 import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.PostureOptimizerState;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -704,6 +707,11 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
 
    public void createControllerNetworkSubscriber(String robotName, RealtimeROS2Node realtimeROS2Node)
    {
+      createControllerNetworkSubscriber(robotName, realtimeROS2Node, null, null, null);
+   }
+
+   public void createControllerNetworkSubscriber(String robotName, RealtimeROS2Node realtimeROS2Node, DoubleConsumer postureConsumer, DoubleConsumer activationAlphaConsumer, Consumer<PostureOptimizerState> stabilityStateConsumer)
+   {
       ROS2Topic<?> inputTopic = HumanoidControllerAPI.getInputTopic(robotName);
       ROS2Topic<?> outputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
       ControllerNetworkSubscriber controllerNetworkSubscriber = new ControllerNetworkSubscriber(inputTopic,
@@ -717,7 +725,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                                        MessageUnpackingTools.createWholeBodyTrajectoryMessageUnpacker());
       controllerNetworkSubscriber.registerSubcriberWithMessageUnpacker(WholeBodyStreamingMessage.class,
                                                                        9,
-                                                                       MessageUnpackingTools.createWholeBodyStreamingMessageUnpacker());
+                                                                       MessageUnpackingTools.createWholeBodyStreamingMessageUnpacker(postureConsumer, activationAlphaConsumer, stabilityStateConsumer));
       controllerNetworkSubscriber.addMessageCollectors(ControllerAPIDefinition.createDefaultMessageIDExtractor(), 3);
       controllerNetworkSubscriber.addMessageValidator(ControllerAPIDefinition.createDefaultMessageValidation());
    }
@@ -745,4 +753,8 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
          isListeningToHighLevelStatePackets = isListening;
    }
 
+   public YoRegistry getRegistry()
+   {
+      return registry;
+   }
 }

@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.StabilityMarginRegionCalculator;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.communication.PostureOptimizerState;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.concurrent.ConcurrentCopier;
@@ -33,6 +34,8 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.HumanoidKinematicsToolboxConfigurationCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.idl.IDLSequence.Object;
@@ -63,8 +66,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_FAILURE_MISSING_RCD;
-import static toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL;
+import static toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus.*;
 import static us.ihmc.robotModels.FullRobotModelUtils.getAllJointsExcludingHands;
 
 public class HumanoidKinematicsToolboxController extends KinematicsToolboxController
@@ -72,6 +74,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final double FOOT_COEFFICIENT_OF_FRICTION = 0.8;
    private static final double HAND_COEFFICIENT_OF_FRICTION = 0.4;
+
+   public static RobotSide BRACING_HAND_SIDE = null;
 
    /**
     * This is the model of the robot that is constantly updated to represent the most recent solution
@@ -170,7 +174,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
    private final StabilityMarginRegionCalculator multiContactRegionCalculator;
    private final WholeBodyContactState wholeBodyContactState;
-   private final StabilityMarginKinematicsCostCalculator stabilityCostCalculator;
+   private final KinematicsToolboxMultiContactManager multiContactManager;
    private final FramePoint3D tempContactPoint = new FramePoint3D();
    private final FrameVector3D tempContactNormal = new FrameVector3D();
 
@@ -230,13 +234,13 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       multiContactRegionCalculator = StabilityMarginRegionCalculator.createForCoPStabilityMargin("", desiredFullRobotModel.getTotalMass(), desiredReferenceFrames.getCenterOfMassFrame(), desiredReferenceFrames.getMidFeetZUpFrame(), registry, yoGraphicsListRegistry);
       multiContactRegionCalculator.setupForStabilityMarginCalculation(() -> centerOfMass);
       wholeBodyContactState = new WholeBodyContactState(desiredOneDoFJoints, rootJoint);
-
-      stabilityCostCalculator = new StabilityMarginKinematicsCostCalculator(wholeBodyContactState,
-                                                                            multiContactRegionCalculator,
-                                                                            desiredFullRobotModel,
-                                                                            isUpperBodyLoadBearing,
-                                                                            getCenterOfMassSafeMargin(),
-                                                                            registry);
+      multiContactManager = new KinematicsToolboxMultiContactManager(wholeBodyContactState,
+                                                                     multiContactRegionCalculator,
+                                                                     desiredFullRobotModel,
+                                                                     desiredReferenceFrames.getCenterOfMassFrame(),
+                                                                     desiredReferenceFrames.getMidFeetZUpFrame(),
+                                                                     updateDT,
+                                                                     registry);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -265,6 +269,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       }
 
       populateDefaultJointLimitReductionFactors();
+      rigidBodyCommandMutator = this::mutateExternalRigidBodyWeights;
+      centerOfMassCommandMutator = this::mutateExternalCenterOfMassWeights;
    }
 
    /**
@@ -496,10 +502,9 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       {
          HumanoidKinematicsToolboxConfigurationCommand command = commandInputManager.pollNewestCommand(HumanoidKinematicsToolboxConfigurationCommand.class);
 
-         LogTools.info("holdCenterOfMassXYPosition: " + command.holdCurrentCenterOfMassXYPosition());
          holdCenterOfMassXYPosition.set(command.holdCurrentCenterOfMassXYPosition());
          enableJointLimitReduction.set(command.enableJointLimitReduction());
-         stabilityCostCalculator.setEnabled(command.enableStabilityObjective());
+         multiContactManager.setEnabled(command.enableStabilityObjective());
 
          if (command.hasCustomJointRestrictionLimits())
          {
@@ -522,6 +527,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       }
 
       super.updateInternal();
+
       if (!isUserProvidingSupportPolygon() && isUpperBodyLoadBearing.getValue())
       {
          // update actuation limits based on current configuration
@@ -539,6 +545,17 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
             }
             updateSupportPolygonConstraint(activeContactPointPositions);
          }
+
+         multiContactManager.update();
+         inverseKinematicsSolution.setPostureOptimizerState(multiContactManager.getCurrentState().toByte());
+         inverseKinematicsSolution.setSupportRegionSensitivity(multiContactManager.getPostureSensitivity());
+         inverseKinematicsSolution.setActivationAlpha(multiContactManager.getActivationAlpha());
+      }
+      else
+      {
+         inverseKinematicsSolution.setPostureOptimizerState(POSTURE_OPTIMIZER_MODE_NOMINAL);
+         inverseKinematicsSolution.setSupportRegionSensitivity(-1.0);
+         inverseKinematicsSolution.setActivationAlpha(0.0);
       }
 
       executionTimer.stopMeasurement();
@@ -765,6 +782,11 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       multiContactRegionCalculator.updateContactState(wholeBodyContactState, true);
    }
 
+   private void initializePostureAdjustment()
+   {
+      multiContactManager.initialize(privilegedConfigurationCommand);
+   }
+
    private void packFootContactPoints(RobotSide robotSide, List<Point3D> contactPoints)
    {
       for (int i = 0; i < contactPoints.size(); i++)
@@ -815,8 +837,10 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       addHoldSupportEndEffectorCommands(bufferToPack);
       addHoldCenterOfMassXYCommand(bufferToPack);
 
-      double supportRegionSensitivity = stabilityCostCalculator.addPostureFeedbackCommands(bufferToPack);
-      getSolution().setSupportRegionSensitivity(supportRegionSensitivity);
+      if (isUpperBodyLoadBearing.getValue())
+      {
+         multiContactManager.addPostureFeedbackCommands(bufferToPack);
+      }
    }
 
    @Override
@@ -838,5 +862,69 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    public CommonHumanoidReferenceFrames getDesiredReferenceFrames()
    {
       return desiredReferenceFrames;
+   }
+
+   private void mutateExternalRigidBodyWeights(KinematicsToolboxRigidBodyCommand command)
+   {
+      if (!isUpperBodyLoadBearing.getValue())
+         return;
+
+      if (multiContactManager.isEnabled() && command.getEndEffector() == desiredFullRobotModel.getHand(BRACING_HAND_SIDE))
+      {
+         double activationAlpha = multiContactManager.getActivationAlpha();
+         double orientationWeightRatio = 1.0 - activationAlpha;
+
+         if (orientationWeightRatio < 1.0e-6)
+         {
+            command.getSelectionMatrix().getAngularPart().setAxisSelection(false, false, false);
+         }
+         else
+         {
+            command.getWeightMatrix().getAngularPart().scale(orientationWeightRatio);
+         }
+      }
+   }
+
+   private void mutateExternalCenterOfMassWeights(KinematicsToolboxCenterOfMassCommand command)
+   {
+      if (!isUpperBodyLoadBearing.getValue())
+         return;
+
+      if (multiContactManager.isEnabled())
+      {
+         double activationAlpha = multiContactManager.getActivationAlpha();
+         double weightRatio = 1.0 - activationAlpha;
+
+         if (weightRatio < 1.0e-6)
+         {
+            command.getSelectionMatrix().selectZAxis(false);
+         }
+         else
+         {
+            double weightZ = command.getWeightMatrix().getZAxisWeight();
+            command.getWeightMatrix().setZAxisWeight(weightRatio * weightZ);
+         }
+      }
+   }
+
+
+   public PostureOptimizerState getMode()
+   {
+      return multiContactManager.getMode();
+   }
+
+   public double getPostureSensitivity()
+   {
+      return multiContactManager.getPostureSensitivity();
+   }
+
+   public double getActivationAlpha()
+   {
+      return multiContactManager.getActivationAlpha();
+   }
+
+   public boolean isPostureOptimizerEnabled()
+   {
+      return multiContactManager.isEnabled();
    }
 }

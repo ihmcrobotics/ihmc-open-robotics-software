@@ -37,8 +37,9 @@ public class StabilityMarginKinematicsCostCalculator
 
    private final YoBoolean isEnabled = new YoBoolean("isStabilityObjectiveEnabled", registry);
    private final YoDouble desiredStabilityMarginVelocity = new YoDouble("desiredStabilityMarginVelocity", registry);
-   private final YoDouble maxMarginToPenalize = new YoDouble("maxMarginToPenalize", registry);
    private final YoDouble stabilityMarginWeight = new YoDouble("stabilityMarginWeight", registry);
+   private final YoDouble stabilityMarginThreshold = new YoDouble("stabilityMarginThreshold", registry);
+   private final YoDouble stabilityMarginHysteresis = new YoDouble("stabilityMarginHysteresis", registry);
 
    private final FramePose3D pelvisControlFramePose = new FramePose3D();
    private final FramePose3D pelvisPose = new FramePose3D();
@@ -59,7 +60,8 @@ public class StabilityMarginKinematicsCostCalculator
       this.minStabilityMargin = minStabilityMargin;
 
       desiredStabilityMarginVelocity.set(0.15);
-      maxMarginToPenalize.set(0.12);
+      stabilityMarginThreshold.set(0.12);
+      stabilityMarginHysteresis.set(0.03);
       stabilityMarginWeight.set(0.5);
 
       MovingReferenceFrame afterRootJointFrame = fullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint();

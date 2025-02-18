@@ -401,11 +401,23 @@ public class KSTTools
    public void streamToController(KSTOutputDataReadOnly outputToPublish, boolean finalizeTrajectory)
    {
       if (finalizeTrajectory)
-         trajectoryMessagePublisher.publish(setupFinalizeTrajectoryMessage(outputToPublish));
+      {
+         WholeBodyTrajectoryMessage messageToPublish = setupFinalizeTrajectoryMessage(outputToPublish);
+         trajectoryMessagePublisher.publish(messageToPublish);
+      }
       else if (streamingMessagePublisher == null || !useStreamingPublisher.getValue())
-         trajectoryMessagePublisher.publish(setupTrajectoryMessage(outputToPublish));
+      {
+         WholeBodyTrajectoryMessage messageToPublish = setupTrajectoryMessage(outputToPublish);
+         trajectoryMessagePublisher.publish(messageToPublish);
+      }
       else
-         streamingMessagePublisher.publish(setupStreamingMessage(outputToPublish));
+      {
+         WholeBodyStreamingMessage messageToPublish = setupStreamingMessage(outputToPublish);
+         messageToPublish.setPostureSensitivity(ikController.getPostureSensitivity());
+         messageToPublish.setPostureOptimizerMode(ikController.getMode().toByte());
+         messageToPublish.setActivationAlpha(ikController.getActivationAlpha());
+         streamingMessagePublisher.publish(messageToPublish);
+      }
    }
 
    public WholeBodyStreamingMessage setupStreamingMessage(KSTOutputDataReadOnly solutionToConvert)
@@ -432,6 +444,8 @@ public class KSTTools
          streamingMessageFactory.computePelvisStreamingMessage(configurationCommand.getPelvisTrajectoryFrameId());
       if (isCenterOfMassOutputEnabled.getValue())
          streamingMessageFactory.computeCenterOfMassStreamingMessage();
+
+      streamingMessageFactory.getOutput().setHasCenterOfMassTrajectoryMessage(isCenterOfMassOutputEnabled.getValue());
 
       currentMessageId.increment();
       return streamingMessageFactory.getOutput();

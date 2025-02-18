@@ -143,8 +143,6 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
    private final BooleanProvider useCenterOfPressureCommandOnly = new BooleanParameter("useCenterOfPressureCommandOnly", registry, false);
    private final DoubleProvider capturePointVelocityBreakFrequency = new DoubleParameter("capturePointVelocityBreakFrequency", registry, 26.5);
 
-   private final CenterOfPressureCommand centerOfPressureCommand = new CenterOfPressureCommand();
-
    private boolean initializeOnStateChange;
    private FrameConvexPolygon2DReadOnly multiContactStabilityRegion;
 
@@ -350,7 +348,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
     */
    public CenterOfPressureCommand getCenterOfPressureCommand()
    {
-      return centerOfPressureCommand;
+      return centerOfPressureCommandCalculator.getCenterOfPressureCommand();
    }
 
    /**
@@ -480,6 +478,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
    private void computeICPController()
    {
       FrameConvexPolygon2DReadOnly supportPolygonInWorld = bipedSupportPolygons.getSupportPolygonInWorld();
+
       if (perfectCoP.containsNaN())
       {
          perfectCMPDelta.setToZero();

@@ -30,6 +30,18 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
           */
    public static final byte CURRENT_TOOLBOX_STATE_RUNNING = (byte) 3;
    /**
+          * Low margin, high sensitivity
+          */
+   public static final byte POSTURE_OPTIMIZER_MODE_OPTIMIZER = (byte) 0;
+   /**
+          * Medium margin or low margin + low sensitivity
+          */
+   public static final byte POSTURE_OPTIMIZER_MODE_FREEZE = (byte) 1;
+   /**
+          * High margin
+          */
+   public static final byte POSTURE_OPTIMIZER_MODE_NOMINAL = (byte) 2;
+   /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
@@ -70,6 +82,9 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
             * Sensitivity of the support region with respect to the posture. Indicates postures where the StabilityMarginKinematicsCostCalculator is more effective.
             */
    public double support_region_sensitivity_ = -1.0;
+   public byte posture_optimizer_state_ = (byte) 2;
+   public double activation_alpha_ = -1.0;
+   public double com_stability_posture_sensitivity_ = -1.0;
    public double solution_quality_ = -1.0;
 
    public KinematicsToolboxOutputStatus()
@@ -108,6 +123,12 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
       geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.desired_root_angular_velocity_, desired_root_angular_velocity_);
       support_region_.set(other.support_region_);
       support_region_sensitivity_ = other.support_region_sensitivity_;
+
+      posture_optimizer_state_ = other.posture_optimizer_state_;
+
+      activation_alpha_ = other.activation_alpha_;
+
+      com_stability_posture_sensitivity_ = other.com_stability_posture_sensitivity_;
 
       solution_quality_ = other.solution_quality_;
 
@@ -230,6 +251,33 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
       return support_region_sensitivity_;
    }
 
+   public void setPostureOptimizerState(byte posture_optimizer_state)
+   {
+      posture_optimizer_state_ = posture_optimizer_state;
+   }
+   public byte getPostureOptimizerState()
+   {
+      return posture_optimizer_state_;
+   }
+
+   public void setActivationAlpha(double activation_alpha)
+   {
+      activation_alpha_ = activation_alpha;
+   }
+   public double getActivationAlpha()
+   {
+      return activation_alpha_;
+   }
+
+   public void setComStabilityPostureSensitivity(double com_stability_posture_sensitivity)
+   {
+      com_stability_posture_sensitivity_ = com_stability_posture_sensitivity;
+   }
+   public double getComStabilityPostureSensitivity()
+   {
+      return com_stability_posture_sensitivity_;
+   }
+
    public void setSolutionQuality(double solution_quality)
    {
       solution_quality_ = solution_quality;
@@ -280,6 +328,12 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.support_region_sensitivity_, other.support_region_sensitivity_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.posture_optimizer_state_, other.posture_optimizer_state_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.activation_alpha_, other.activation_alpha_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.com_stability_posture_sensitivity_, other.com_stability_posture_sensitivity_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.solution_quality_, other.solution_quality_, epsilon)) return false;
 
 
@@ -309,6 +363,12 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
       if (!this.desired_root_angular_velocity_.equals(otherMyClass.desired_root_angular_velocity_)) return false;
       if (!this.support_region_.equals(otherMyClass.support_region_)) return false;
       if(this.support_region_sensitivity_ != otherMyClass.support_region_sensitivity_) return false;
+
+      if(this.posture_optimizer_state_ != otherMyClass.posture_optimizer_state_) return false;
+
+      if(this.activation_alpha_ != otherMyClass.activation_alpha_) return false;
+
+      if(this.com_stability_posture_sensitivity_ != otherMyClass.com_stability_posture_sensitivity_) return false;
 
       if(this.solution_quality_ != otherMyClass.solution_quality_) return false;
 
@@ -344,6 +404,12 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
       builder.append(this.support_region_);      builder.append(", ");
       builder.append("support_region_sensitivity=");
       builder.append(this.support_region_sensitivity_);      builder.append(", ");
+      builder.append("posture_optimizer_state=");
+      builder.append(this.posture_optimizer_state_);      builder.append(", ");
+      builder.append("activation_alpha=");
+      builder.append(this.activation_alpha_);      builder.append(", ");
+      builder.append("com_stability_posture_sensitivity=");
+      builder.append(this.com_stability_posture_sensitivity_);      builder.append(", ");
       builder.append("solution_quality=");
       builder.append(this.solution_quality_);
       builder.append("}");
