@@ -75,6 +75,12 @@ public class ROS2ControllerHelper extends ROS2Helper implements ROS2ControllerPu
    }
 
    @Override
+   public <T> void subscribeToControllerViaVolatileCallback(Class<T> messageClass, Consumer<T> callback)
+   {
+      subscribeViaVolatileCallback(HumanoidControllerAPI.getTopic(messageClass, simpleRobotName), callback);
+   }
+
+   @Override
    public Notification subscribeToWalkingCompletedViaNotification()
    {
       Notification notification = new Notification();
