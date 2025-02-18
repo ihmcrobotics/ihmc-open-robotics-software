@@ -93,7 +93,7 @@ public class RDXTeleoperationManager extends RDXPanel
    private final ImBoolean showGraphics = new ImBoolean(true);
    private final RDXTeleoperationParameters teleoperationParameters;
    private final RDXStoredPropertySetTuner teleoperationParametersTuner = new RDXStoredPropertySetTuner("Teleoperation Parameters");
-   private final RDXRobotLowLevelMessenger robotLowLevelMessenger;
+   private final RDXHardwareControlStateManager hardwareControlStateManager;
 
    private final RDXPelvisHeightSlider pelvisHeightSlider;
    private final RDXHumanoidDoFsWidgets dofsWidgets;
@@ -157,7 +157,7 @@ public class RDXTeleoperationManager extends RDXPanel
 
       syncedRobot = communicationHelper.newSyncedRobot(false);
 
-      robotLowLevelMessenger = new RDXRobotLowLevelMessenger(communicationHelper, teleoperationParameters);
+      hardwareControlStateManager = new RDXHardwareControlStateManager(communicationHelper);
 
       desiredRobot = new RDXDesiredRobot(robotModel);
       desiredRobot.setSceneLevels(RDXSceneLevel.VIRTUAL);
@@ -347,13 +347,13 @@ public class RDXTeleoperationManager extends RDXPanel
 
       RDX3DPanelToolbarButton standPrepButton = baseUI.getPrimary3DPanel().addToolbarButton();
       standPrepButton.loadAndSetIcon("icons/standPrep.png");
-      standPrepButton.setOnPressed(robotLowLevelMessenger::sendStandRequest);
+      standPrepButton.setOnPressed(hardwareControlStateManager::sendStandPrepRequest);
       standPrepButton.setTooltipText("Stand prep");
 
       RDX3DPanelToolbarButton freezeButton = baseUI.getPrimary3DPanel().addToolbarButton();
       freezeButton.loadAndSetIcon("icons/freeze.png");
       freezeButton.setTooltipText("Freeze");
-      freezeButton.setOnPressed(robotLowLevelMessenger::sendFreezeRequest);
+      freezeButton.setOnPressed(hardwareControlStateManager::sendFreezeRequest);
 
       RDX3DPanelToolbarButton abortToolbarButton = baseUI.getPrimary3DPanel().addToolbarButton();
       abortToolbarButton.loadAndSetIcon("icons/abort.png");
@@ -524,7 +524,7 @@ public class RDXTeleoperationManager extends RDXPanel
    {
       ImGuiTools.separatorText("Whole Body", ImGuiTools.getMediumFont());
 
-      robotLowLevelMessenger.renderImGuiWidgets();
+      hardwareControlStateManager.renderImGuiWidgets();
 
       pelvisHeightSlider.renderImGuiWidgets();
       dofsWidgets.renderImGuiWidgets();

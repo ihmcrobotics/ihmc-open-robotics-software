@@ -76,7 +76,7 @@ def add_predefined_rigid_node():
     root_node_number_of_children = updated_scene_graph.scene_nodes[root_node_index].number_of_children
     number_of_predefined_rigid_body_scene_nodes = len(updated_scene_graph.predefined_rigid_body_scene_nodes)
 
-    new_scene_node.name = "2x4_" + str(number_of_predefined_rigid_body_scene_nodes + 1)
+    new_scene_node.name = "PieceOfWood_" + str(number_of_predefined_rigid_body_scene_nodes + 1)
 
     new_predefined_rigid_body_scene_node = PredefinedRigidBodySceneNodeMessage()
     new_predefined_rigid_body_scene_node.scene_node = new_scene_node
@@ -134,7 +134,7 @@ def main(args=None):
     ros2["scene_graph_subscriber"] = scene_graph_subscriber
 
     scene_graph_publisher = node.create_publisher(SceneGraphMessage,
-                                    '/ihmc/scene_graph/command/scene_graph',
+                                    '/ihmc/scene_graph/status/scene_graph',
                                     qos_profile_best_effort)
     ros2["scene_graph_publisher"] = scene_graph_publisher
 
