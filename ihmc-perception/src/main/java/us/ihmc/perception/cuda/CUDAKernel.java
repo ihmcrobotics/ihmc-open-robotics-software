@@ -1,5 +1,6 @@
 package us.ihmc.perception.cuda;
 
+import org.bytedeco.cuda.cudart.CUevent_st;
 import org.bytedeco.cuda.cudart.CUfunc_st;
 import org.bytedeco.cuda.cudart.CUmod_st;
 import org.bytedeco.cuda.cudart.CUstream_st;
@@ -11,27 +12,46 @@ import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacpp.LongPointer;
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.javacpp.PointerPointer;
+import us.ihmc.log.LogTools;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
-import static org.bytedeco.cuda.global.cudart.cuLaunchKernel;
-import static org.bytedeco.cuda.global.cudart.cuModuleGetFunction;
+import static org.bytedeco.cuda.global.cudart.*;
 import static us.ihmc.perception.cuda.CUDATools.throwCUDAError;
 
 @SuppressWarnings("resource")
 public class CUDAKernel implements AutoCloseable
 {
+   private final String name;
    private final CUfunc_st kernelFunction = new CUfunc_st();
    private final List<Pointer> parameters = new ArrayList<>();
    private boolean retainParameters = false;
+   private boolean enableKernelTimings = false;
+
+   private CUDAKernelTimings kernelTimings;
+   private final CUevent_st start = new CUevent_st();
+   private final CUevent_st end = new CUevent_st();
 
    private int error;
 
    public CUDAKernel(String name, CUmod_st kernelModule) throws Exception
    {
+      this.name = name;
       error = cuModuleGetFunction(kernelFunction, kernelModule, name);
       throwCUDAError(error);
+   }
+
+   /**
+    * Setting this to true enables the ability to run timings on the specific kernel.
+    * The timing checks perform synchronization calls.
+    */
+   public void enableKernelTimings(boolean enableKernelTimings)
+   {
+      this.enableKernelTimings = enableKernelTimings;
+      kernelTimings = new CUDAKernelTimings();
    }
 
    public void retainParameters(boolean retainParameters)
@@ -53,6 +73,13 @@ public class CUDAKernel implements AutoCloseable
       for (int i = 0; i < parameters.size(); ++i)
          parametersPointer.put(i, parameters.get(i));
 
+      if (enableKernelTimings)
+      {
+         cudaEventCreate(start);
+         cudaEventCreate(end);
+         cudaEventRecord(start);
+      }
+
       error = cuLaunchKernel(kernelFunction,
                              gridSize.x(),
                              gridSize.y(),
@@ -64,6 +91,16 @@ public class CUDAKernel implements AutoCloseable
                              stream,
                              parametersPointer,
                              new PointerPointer<>());
+
+      if (enableKernelTimings)
+      {
+         cudaEventRecord(end);
+         cudaEventSynchronize(end);
+
+         kernelTimings.addExecutionTime(start, end);
+         kernelTimings.printTimesForKernel();
+      }
+
       CUDATools.checkCUDAError(error);
 
       if (!retainParameters)
@@ -122,5 +159,97 @@ public class CUDAKernel implements AutoCloseable
    {
       clearParameters();
       kernelFunction.close();
+   }
+
+   /**
+    * This class handles the kernel timings.
+    * With options to compute the min/max, average, and variance of the dataset
+    */
+   private class CUDAKernelTimings
+   {
+      private static final int MAX_ENTRIES = 250;
+      private final LinkedList<Float> executionTimes = new LinkedList<>();
+
+      private void addExecutionTime(CUevent_st start, CUevent_st end)
+      {
+         float[] milliseconds = new float[1];
+         milliseconds[0] = 0.0f;
+         cudaEventElapsedTime(milliseconds, start, end);
+         executionTimes.add(milliseconds[0]);
+
+         if (executionTimes.size() > MAX_ENTRIES)
+         {
+            executionTimes.pollFirst();
+         }
+      }
+
+      public double getAverageTime(String kernelName)
+      {
+         if (executionTimes.isEmpty())
+         {
+            LogTools.info("No recorded times for " + kernelName);
+            return Float.NaN;
+         }
+         else
+         {
+            return executionTimes.stream().mapToDouble(Float::doubleValue).average().orElse(0.0);
+         }
+      }
+
+      public Float getMinTime(String kernelName)
+      {
+         if (executionTimes.isEmpty())
+         {
+            LogTools.info("No recorded times for " + kernelName);
+            return Float.NaN;
+         }
+         Optional<Float> min = executionTimes.stream().min(Float::compareTo);
+         return min.orElse(null);
+      }
+
+      public  Float getMaxTime(String kernelName)
+      {
+         if (executionTimes.isEmpty())
+         {
+            LogTools.info("No recorded times for " + kernelName);
+            return Float.NaN;
+         }
+
+         Optional<Float> max = executionTimes.stream().max(Float::compareTo);
+         return max.orElse(null);
+      }
+
+      public double getStandardDeviation(String kernelName)
+      {
+         if (executionTimes.isEmpty())
+         {
+            LogTools.info("No recorded times for " + kernelName);
+            return Float.NaN;
+         }
+
+         double average = executionTimes.stream().mapToDouble(Float::doubleValue).average().orElse(0.0);
+         double variance = executionTimes.stream().mapToDouble(time -> Math.pow(time - average, 2)).average().orElse(0.0);
+         return Math.sqrt(variance);
+      }
+
+      public void printTimesForKernel()
+      {
+         if (executionTimes.isEmpty())
+         {
+            LogTools.info("No recorded times for " + CUDAKernel.this.name);
+         }
+
+         double average = getAverageTime(CUDAKernel.this.name);
+         double variance = getStandardDeviation(CUDAKernel.this.name);
+         double min = getMinTime(CUDAKernel.this.name);
+         double max = getMaxTime(CUDAKernel.this.name);
+
+         LogTools.info("Timings for kernel " + CUDAKernel.this.name + " in milliseconds!");
+         LogTools.info("|   Average time: " + average);
+         LogTools.info("|   Variance time: " + variance);
+         LogTools.info("|   Min time: " + min);
+         LogTools.info("|   Max time: " + max);
+         LogTools.warn("******************************************");
+      }
    }
 }
