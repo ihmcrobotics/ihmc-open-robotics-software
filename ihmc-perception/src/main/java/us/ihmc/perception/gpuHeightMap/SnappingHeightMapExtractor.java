@@ -120,7 +120,6 @@ public class SnappingHeightMapExtractor
 
       // Run the kernel and check for errors
       snappingKernel.run(stream, snappingKernelGridDim, blockSize, 0);
-
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
 

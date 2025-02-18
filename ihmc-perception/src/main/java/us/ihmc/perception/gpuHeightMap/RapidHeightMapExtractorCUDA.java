@@ -360,7 +360,6 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
       planOffsetKernel.withFloat(resetOffset);
 
       planOffsetKernel.run(stream, planOffsetKernelGridDim, blockSize, 0);
-
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
    }
