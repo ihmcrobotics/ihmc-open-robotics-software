@@ -16,7 +16,6 @@ import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
 import us.ihmc.perception.cuda.CUDAStreamManager;
-import us.ihmc.perception.cuda.CUDATimingTools;
 import us.ihmc.perception.cuda.CUDATools;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.tools.PerceptionMessageTools;
@@ -71,11 +70,6 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
    private final FloatPointer worldToGroundTransformDevicePointer;
    private final FloatPointer parametersHostPointer;
    private final FloatPointer parametersDevicePointer;
-   private final String planOffsetKernelName;
-   private final String emptyRegisterKernelName;
-   private final String croppingKernelName;
-   private final String heightMapRegistrationKernelName;
-   private final String heightMapUpdateKernelName;
 
    public int sequenceNumber = 0;
    private float gridOffsetX;
@@ -122,20 +116,20 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
       {
          heightMapCUDAProgram = new CUDAProgram(kernelPath, heightMapUtilsHeaderPath, mathUtilsHeaderPath);
 
-         heightMapUpdateKernelName = "heightMapUpdateKernel";
-         updateKernel = heightMapCUDAProgram.loadKernel(heightMapUpdateKernelName);
+         updateKernel = heightMapCUDAProgram.loadKernel("heightMapUpdateKernel");
+         registerKernel = heightMapCUDAProgram.loadKernel("heightMapRegistrationKernel");
+         croppingKernel = heightMapCUDAProgram.loadKernel("croppingKernel");
+         planOffsetKernel = heightMapCUDAProgram.loadKernel("planOffsetKernel");
+         emptyRegisterKernel = heightMapCUDAProgram.loadKernel("heightMapRegistrationKernel");
 
-         heightMapRegistrationKernelName = "heightMapRegistrationKernel";
-         registerKernel = heightMapCUDAProgram.loadKernel(heightMapRegistrationKernelName);
-
-         croppingKernelName = "croppingKernel";
-         croppingKernel = heightMapCUDAProgram.loadKernel(croppingKernelName);
-
-         planOffsetKernelName = "planOffsetKernel";
-         planOffsetKernel = heightMapCUDAProgram.loadKernel(planOffsetKernelName);
-
-         emptyRegisterKernelName = "heightMapRegistrationKernel";
-         emptyRegisterKernel = heightMapCUDAProgram.loadKernel(emptyRegisterKernelName);
+         if (PRINT_TIMING_FOR_KERNELS)
+         {
+            updateKernel.enableKernelTimings(true);
+            registerKernel.enableKernelTimings(true);
+            croppingKernel.enableKernelTimings(true);
+            planOffsetKernel.enableKernelTimings(true);
+            emptyRegisterKernel.enableKernelTimings(true);
+         }
 
          // Initialize matrices and images
          localHeightMapImage = new GpuMat(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_16UC1);
@@ -280,20 +274,9 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
       updateKernel.withPointer(groundToSensorTransformDevicePointer);
       updateKernel.withInt(localCellsPerAxis);
 
-      if (PRINT_TIMING_FOR_KERNELS)
-      {
-         CUDATimingTools.startKernelTimer();
-      }
-
       updateKernel.run(stream, updateKernelGridDim, blockSize, 0);
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
-
-      if (PRINT_TIMING_FOR_KERNELS)
-      {
-         CUDATimingTools.endKernelTimer(heightMapUpdateKernelName);
-         CUDATimingTools.printTimesForKernel(heightMapUpdateKernelName);
-      }
 
       // Run the registration kernel
       registerKernel.withPointer(localHeightMapImage.data()).withLong(localHeightMapImage.step());
@@ -301,20 +284,10 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
       registerKernel.withPointer(parametersDevicePointer);
       registerKernel.withPointer(worldToGroundTransformDevicePointer);
       registerKernel.withPointer(sensorToGroundTransformDevicePointer);
-      if (PRINT_TIMING_FOR_KERNELS)
-      {
-         CUDATimingTools.startKernelTimer();
-      }
 
       registerKernel.run(stream, registerKernelGridDim, blockSize, 0);
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
-
-      if (PRINT_TIMING_FOR_KERNELS)
-      {
-         CUDATimingTools.endKernelTimer(heightMapRegistrationKernelName);
-         CUDATimingTools.printTimesForKernel(heightMapRegistrationKernelName);
-      }
 
       // Run the cropping kernel
       croppingKernel.withPointer(globalHeightMapImage.data()).withLong(globalHeightMapImage.step());
@@ -324,20 +297,9 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
 
-      if (PRINT_TIMING_FOR_KERNELS)
-      {
-         CUDATimingTools.startKernelTimer();
-      }
-
       croppingKernel.run(stream, croppingKernelGridDim, blockSize, 0);
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
-
-      if (PRINT_TIMING_FOR_KERNELS)
-      {
-         CUDATimingTools.endKernelTimer(croppingKernelName);
-         CUDATimingTools.printTimesForKernel(croppingKernelName);
-      }
 
       snappedFootstepsExtractor.update(globalHeightMapImage, sensorOrigin, globalCenterIndex, cropCenterIndex);
 
@@ -387,20 +349,9 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
       emptyRegisterKernel.withPointer(worldToGroundTransformDevicePointer);
       emptyRegisterKernel.withPointer(sensorToGroundTransformDevicePointer);
 
-      if (PRINT_TIMING_FOR_KERNELS)
-      {
-         CUDATimingTools.startKernelTimer();
-      }
-
       emptyRegisterKernel.run(stream, registerKernelGridDim, blockSize, 0);
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
-
-      if (PRINT_TIMING_FOR_KERNELS)
-      {
-         CUDATimingTools.endKernelTimer(emptyRegisterKernelName);
-         CUDATimingTools.printTimesForKernel(emptyRegisterKernelName);
-      }
 
       // Run the plan offset kernel
       planOffsetKernel.withPointer(globalHeightMapImage.data()).withLong(globalHeightMapImage.step());
@@ -408,18 +359,7 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
       planOffsetKernel.withFloat(z).withInt(globalHeightMapImage.rows()).withInt(globalHeightMapImage.cols());
       planOffsetKernel.withFloat(resetOffset);
 
-      if (PRINT_TIMING_FOR_KERNELS)
-      {
-         CUDATimingTools.startKernelTimer();
-      }
-
       planOffsetKernel.run(stream, planOffsetKernelGridDim, blockSize, 0);
-
-      if (PRINT_TIMING_FOR_KERNELS)
-      {
-         CUDATimingTools.endKernelTimer(planOffsetKernelName);
-         CUDATimingTools.printTimesForKernel(planOffsetKernelName);
-      }
 
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
