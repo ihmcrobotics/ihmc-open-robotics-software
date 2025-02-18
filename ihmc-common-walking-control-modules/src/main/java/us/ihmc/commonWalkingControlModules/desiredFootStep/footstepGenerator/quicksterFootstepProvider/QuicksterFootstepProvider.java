@@ -270,7 +270,7 @@ public class QuicksterFootstepProvider implements Updatable
 //      tempTouchdownPosition.changeFrameAndProjectToXYPlane(touchdownPositionToPack.getReferenceFrame());
 //      touchdownPositionToPack.set(tempTouchdownPosition);
 
-      ALIPCalculatorTools.computeTouchdownPositionRegular(estimates.getCenterOfMassPosition(),
+      ALIPCalculatorTools.computeTouchdownPositionUsingRaibertHeuristicAndPolePlacement(estimates.getCenterOfMassPosition(),
                                                           estimates.getCenterOfMassVelocity(),
                                                           estimates.getCenterOfMassAngularMomentum(),
                                                           swingSide,
@@ -279,8 +279,10 @@ public class QuicksterFootstepProvider implements Updatable
                                                           parameters.getStanceWidth(swingSide).getDoubleValue(),
                                                           timeToReachGoal,
                                                           getStepDuration(swingSide),
+                                                          getTransferDuration(swingSide),
                                                           robotModel.getTotalMass(),
                                                           parameters.getDesiredCoMHeight(swingSide).getDoubleValue(),
+                                                          parameters.getPole(swingSide).getDoubleValue(),
                                                           touchdownPositionToPack,
                                                           referenceFrames.getSoleZUpFrame(swingSide.getOppositeSide()),
                                                           referenceFrames.getSoleZUpFrame(swingSide),

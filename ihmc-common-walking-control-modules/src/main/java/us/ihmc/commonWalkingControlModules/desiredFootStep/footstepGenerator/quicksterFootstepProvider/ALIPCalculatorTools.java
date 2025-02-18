@@ -4,10 +4,8 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class ALIPCalculatorTools
@@ -107,6 +105,75 @@ public class ALIPCalculatorTools
       touchdownPositionToPack.changeFrameAndProjectToXYPlane(originalFrame);
    }
 
+   public static void computeTouchdownPositionUsingRaibertHeuristicAndPolePlacement(FramePoint3DReadOnly currentPosition,
+                                                      FrameVector3DReadOnly currentVelocity,
+                                                      FrameVector3DReadOnly currentCentroidalAngularMomentum,
+                                                      RobotSide swingSide,
+                                                      double desiredVelocityX,
+                                                      double desiredVelocityY,
+                                                      double desiredStanceWidth,
+                                                      double timeRemainingInCurrentStep,
+                                                      double stepDuration,
+                                                      double doubleSupportDuration,
+                                                      double pendulumMass,
+                                                      double pendulumHeight,
+                                                      double pole,
+                                                      FramePoint2DBasics touchdownPositionToPack,
+                                                      ReferenceFrame stanceFootFrame,
+                                                      ReferenceFrame swingFootFrame,
+                                                      ReferenceFrame controlFrame)
+   {
+      double omega = calculateOmega(pendulumHeight);
+
+      //////
+      // Get CoM velocity and change frame to CoM control frame
+      tempVelocity.setIncludingFrame(currentVelocity);
+      tempVelocity.changeFrame(stanceFootFrame);
+
+      // Get CoM angular momentum and change frame to CoM control frame
+      tempCentroidalAngularMomentum.setIncludingFrame(currentCentroidalAngularMomentum);
+      tempCentroidalAngularMomentum.changeFrame(stanceFootFrame);
+      /////
+
+      tempAngularMomentum2.setToZero(stanceFootFrame);
+      tempAngularMomentum2.setY(pendulumMass * pendulumHeight * tempVelocity.getX() + tempCentroidalAngularMomentum.getY());
+      tempAngularMomentum2.setX(-pendulumMass * pendulumHeight * tempVelocity.getY() + tempCentroidalAngularMomentum.getX());
+      computeFutureStateUsingALIP(currentPosition, tempAngularMomentum2, tempPosition, tempAngularMomentum, timeRemainingInCurrentStep, pendulumMass, pendulumHeight, stanceFootFrame);
+
+      tempVelocity.setX(tempAngularMomentum.getY() / (pendulumMass * pendulumHeight));
+      tempVelocity.setY(-tempAngularMomentum.getX() / (pendulumMass * pendulumHeight));
+
+      computeTouchdownPositionUsingRaibertHeuristicAndPolePlacement(tempVelocity, touchdownPositionToPack, pole, stepDuration, omega, controlFrame);
+
+      double swingDuration = stepDuration - doubleSupportDuration;
+
+      ReferenceFrame originalFrame = touchdownPositionToPack.getReferenceFrame();
+      touchdownPositionToPack.changeFrameAndProjectToXYPlane(controlFrame);
+      touchdownPositionToPack.addX(computeForwardTouchdownOffsetForVelocity(swingDuration, doubleSupportDuration, omega, desiredVelocityX));
+      touchdownPositionToPack.addY(computeLateralTouchdownOffsetForVelocity(swingDuration, doubleSupportDuration, swingSide.getOppositeSide(), omega, desiredVelocityY));
+      touchdownPositionToPack.addY(computeDesiredTouchdownOffsetForStanceWidth(swingDuration, doubleSupportDuration, desiredStanceWidth, swingSide.getOppositeSide(), omega));
+      touchdownPositionToPack.changeFrameAndProjectToXYPlane(originalFrame);
+   }
+
+   public static void computeTouchdownPositionUsingRaibertHeuristicAndPolePlacement(FrameVector3DReadOnly velocity, FramePoint2DBasics touchdownPositionToPack, double pole, double stepDuration, double omega, ReferenceFrame controlFrame)
+   {
+      computeTouchdownPositionUsingRaibertHeuristic(calculateTimeConstantUsingPolePlacement(pole, stepDuration, omega), velocity, touchdownPositionToPack, controlFrame);
+   }
+
+   public static void computeTouchdownPositionUsingRaibertHeuristic(double timeConstant, FrameVector3DReadOnly velocity, FramePoint2DBasics touchdownPositionToPack, ReferenceFrame controlFrame)
+   {
+      ReferenceFrame originalFrame = touchdownPositionToPack.getReferenceFrame();
+      touchdownPositionToPack.changeFrameAndProjectToXYPlane(controlFrame);
+      touchdownPositionToPack.set(velocity.getX(), velocity.getY());
+      touchdownPositionToPack.scale(timeConstant);
+      touchdownPositionToPack.changeFrameAndProjectToXYPlane(originalFrame);
+   }
+
+   public static double calculateTimeConstantUsingPolePlacement(double pole, double stepDuration, double omega)
+   {
+      return (Math.cosh(omega * stepDuration) - pole) / (omega * Math.sinh(omega * stepDuration));
+   }
+
    public static double computeDesiredAngularMomentumForStanceWidth(RobotSide swingSide, double desiredStanceWidth, double pendulumMass, double pendulumHeight, double stepDuration)
    {
       double sideSignMultiplier = swingSide == RobotSide.LEFT ? 1.0  : -1.0;
@@ -114,20 +181,55 @@ public class ALIPCalculatorTools
       return sideSignMultiplier * 0.5 * pendulumMass * pendulumHeight * desiredStanceWidth * (omega * Math.sinh(omega * stepDuration)) / (1 + Math.cosh(omega * stepDuration));
    }
 
-   public static void computeTouchdownPositionUsingRaibertHeuristicAndPolePlacement(FrameVector3DReadOnly velocity, FramePoint3D touchdownPositionToPack, double pole, double deltaT, double omega)
+   private static double computeForwardTouchdownOffsetForVelocity(double swingDuration, double doubleSupportDuration, double omega, double desiredVelocity)
    {
-      computeTouchdownPositionUsingRaibertHeuristic(calculateTimeConstantUsingPolePlacement(pole, deltaT, omega), velocity, touchdownPositionToPack);
+      double stepDuration = doubleSupportDuration + swingDuration;
+      double exponential = Math.exp(omega * stepDuration);
+      double forwardMultiplier = 1.0;
+      if (doubleSupportDuration > 0.0)
+      {
+         forwardMultiplier += (Math.exp(omega * doubleSupportDuration) - 1.0) / (omega * doubleSupportDuration) - 1.0;
+      }
+
+      return -forwardMultiplier * desiredVelocity * stepDuration / (exponential - 1.0);
    }
 
-   public static void computeTouchdownPositionUsingRaibertHeuristic(double timeConstant, FrameVector3DReadOnly velocity, FramePoint3D touchdownPositionToPack)
+   private static double computeLateralTouchdownOffsetForVelocity(double swingDuration,
+                                                                  double doubleSupportDuration,
+                                                                  RobotSide supportSide,
+                                                                  double omega,
+                                                                  double desiredVelocity)
    {
-      velocity.checkReferenceFrameMatch(touchdownPositionToPack);
-      touchdownPositionToPack.setAndScale(timeConstant, velocity);
+      double stepDuration = doubleSupportDuration + swingDuration;
+      double exponential = Math.exp(omega * stepDuration);
+
+      double lateralOffset = 0.0;
+      if (desiredVelocity > 0.0 && supportSide == RobotSide.LEFT)
+      {
+         lateralOffset = -(desiredVelocity * 2.0 * swingDuration) / (exponential - 1.0);
+      }
+      else if (desiredVelocity < 0.0 && supportSide == RobotSide.RIGHT)
+      {
+         lateralOffset = -(desiredVelocity * 2.0 * swingDuration) / (exponential - 1.0);
+      }
+
+      return lateralOffset;
    }
 
-   public static double calculateTimeConstantUsingPolePlacement(double pole, double deltaT, double omega)
+   public static double computeDesiredTouchdownOffsetForStanceWidth(double swingDuration,
+                                                                    double doubleSupportDuration,
+                                                                    double stanceWidth,
+                                                                    RobotSide supportSide,
+                                                                    double omega)
    {
-      return (Math.cosh(omega * deltaT) - pole) / (omega * Math.sinh(omega * deltaT));
+      double widthMultiplier = 1.0;
+      if (doubleSupportDuration > 0.0)
+      {
+         widthMultiplier += (Math.exp(omega * doubleSupportDuration) - 1.0) / (omega * doubleSupportDuration) - 1.0;
+      }
+      // this is the desired offset distance to make the robot stably walk in place at our desired step width
+      double stepWidthOffset = widthMultiplier * stanceWidth / (1.0 + Math.exp(omega * (swingDuration + doubleSupportDuration)));
+      return supportSide.negateIfLeftSide(stepWidthOffset);
    }
 
    public static double calculateOmega(double height)
