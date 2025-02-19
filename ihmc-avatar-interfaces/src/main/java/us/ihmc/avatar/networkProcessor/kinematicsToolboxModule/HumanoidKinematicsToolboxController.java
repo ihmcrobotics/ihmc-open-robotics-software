@@ -270,7 +270,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
       populateDefaultJointLimitReductionFactors();
       rigidBodyCommandMutator = this::mutateExternalRigidBodyWeights;
-      centerOfMassCommandMutator = this::mutateExternalCenterOfMassWeights;
+//      centerOfMassCommandMutator = this::mutateExternalCenterOfMassWeights;
    }
 
    /**

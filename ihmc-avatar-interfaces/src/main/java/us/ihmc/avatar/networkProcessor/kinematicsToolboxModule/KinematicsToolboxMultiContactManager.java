@@ -39,6 +39,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 public class KinematicsToolboxMultiContactManager
 {
    public static final boolean DO_SMOOTH_STATE_TRANSITION = true;
+   public static boolean ENABLE_STABILITY_OBJECTIVE;
 
    private static final double JOINT_LIMIT_REDUCTION_PERCENTAGE = 0.05;
    private static final double JOINTSPACE_KP = 50.0;
@@ -65,7 +66,7 @@ public class KinematicsToolboxMultiContactManager
    private final ExecutionTimer postureOptimizationTimer = new ExecutionTimer("postureOptimizationTimer", registry);
    private final double updateDT;
 
-   private final YoBoolean isEnabled = new YoBoolean("isEnabled", registry);
+//   private final YoBoolean isEnabled = new YoBoolean("isEnabled", registry);
 
    /* Region managers and sensitivity calculator */
    private final TObjectIntHashMap<OneDoFJointBasics> jointIndexMap = new TObjectIntHashMap<>();
@@ -211,12 +212,13 @@ public class KinematicsToolboxMultiContactManager
 
    public void setEnabled(boolean enabled)
    {
-      this.isEnabled.set(enabled);
+//      this.isEnabled.set(enabled);
    }
 
    public boolean isEnabled()
    {
-      return isEnabled.getBooleanValue();
+      return ENABLE_STABILITY_OBJECTIVE;
+//      return isEnabled.getBooleanValue();
    }
 
    public void initialize(PrivilegedConfigurationCommand privilegedConfigurationCommand)
@@ -423,7 +425,7 @@ public class KinematicsToolboxMultiContactManager
 
    public void addPostureFeedbackCommands(FeedbackControlCommandBuffer bufferToPack)
    {
-      if (!isEnabled.getValue())
+      if (!isEnabled())
          return;
 
       boolean isActivated = activationAlpha.getValue() > 1.0e-5;
@@ -449,13 +451,13 @@ public class KinematicsToolboxMultiContactManager
          zeroPoint.setToZero(fullRobotModel.getPelvis().getBodyFixedFrame());
          tempPoint.setZ(optimizedPelvisHeight.getValue());
 
-         PointFeedbackControlCommand pelvisHeightCommand = bufferToPack.addPointFeedbackControlCommand();
-         pelvisHeightCommand.set(fullRobotModel.getRootBody(), fullRobotModel.getPelvis());
-         pelvisHeightCommand.setBodyFixedPointToControl(zeroPoint);
-         pelvisHeightCommand.setInverseKinematics(tempPoint, null);
-         pelvisHeightCommand.setWeightForSolver(postureOptimizationWeight.getValue() * activationAlpha.getValue());
-         pelvisHeightCommand.setSelectionMatrix(pelvisHeightSelection);
-         pelvisHeightCommand.setGains(pelvisHeightGains);
+//         PointFeedbackControlCommand pelvisHeightCommand = bufferToPack.addPointFeedbackControlCommand();
+//         pelvisHeightCommand.set(fullRobotModel.getRootBody(), fullRobotModel.getPelvis());
+//         pelvisHeightCommand.setBodyFixedPointToControl(zeroPoint);
+//         pelvisHeightCommand.setInverseKinematics(tempPoint, null);
+//         pelvisHeightCommand.setWeightForSolver(postureOptimizationWeight.getValue() * activationAlpha.getValue());
+//         pelvisHeightCommand.setSelectionMatrix(pelvisHeightSelection);
+//         pelvisHeightCommand.setGains(pelvisHeightGains);
 
          OrientationFeedbackControlCommand pelvisOrientationCommand = bufferToPack.addOrientationFeedbackControlCommand();
          pelvisOrientationCommand.set(fullRobotModel.getRootBody(), fullRobotModel.getPelvis());

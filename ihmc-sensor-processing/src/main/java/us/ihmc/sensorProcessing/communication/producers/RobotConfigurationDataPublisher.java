@@ -92,8 +92,8 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
    @Override
    public void write()
    {
-      if (lastPublishTime > 0 && timestampHolder.getMonotonicTime() - lastPublishTime < publishPeriod)
-         return;
+//      if (lastPublishTime > 0 && timestampHolder.getMonotonicTime() - lastPublishTime < publishPeriod)
+//         return;
 
       lastPublishTime = timestampHolder.getMonotonicTime();
 
@@ -169,10 +169,10 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
       robotConfigurationDataPublisher.publish(robotConfigurationData);
 
       // publish robot frame data
-      for (RobotFrameDataPublisher robotFrameDataPublisher : robotFrameDataPublishers)
-      {
-         robotFrameDataPublisher.publish();
-      }
+//      for (RobotFrameDataPublisher robotFrameDataPublisher : robotFrameDataPublishers)
+//      {
+//         robotFrameDataPublisher.publish();
+//      }
    }
 
    @Override

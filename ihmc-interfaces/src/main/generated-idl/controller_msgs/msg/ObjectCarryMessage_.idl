@@ -1,0 +1,22 @@
+#ifndef __controller_msgs__msg__ObjectCarryMessage__idl__
+#define __controller_msgs__msg__ObjectCarryMessage__idl__
+
+#include "geometry_msgs/msg/./Pose_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="controller_msgs::msg::dds_::ObjectCarryMessage_")
+      struct ObjectCarryMessage
+      {
+        geometry_msgs::msg::dds::Pose object_pose;
+        boolean object_is_carried;
+      };
+    };
+  };
+};
+
+#endif

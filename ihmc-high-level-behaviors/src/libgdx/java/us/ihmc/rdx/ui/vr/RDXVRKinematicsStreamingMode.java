@@ -19,12 +19,15 @@ import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxInitialConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
+import toolbox_msgs.msg.dds.ROS2BagMessage;
 import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.avatar.ros2bag.ROS2BagRecord;
+import us.ihmc.avatar.ros2bag.ROS2BagRequestedState;
 import us.ihmc.avatar.sakeGripper.SakeHandPreset;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.commons.UnitConversions;
@@ -76,6 +79,7 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Input;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
@@ -160,6 +164,7 @@ public class RDXVRKinematicsStreamingMode
 
    private final ImBoolean controlArmsOnly = new ImBoolean(false);
    private final ImBoolean enableStabilityObjective = new ImBoolean(false);
+   private final ImBoolean recordROS2Bag = new ImBoolean(false);
    private final ImBoolean armScaling = new ImBoolean(false);
    private final ImBoolean comTracking = new ImBoolean(false);
    private ReferenceFrame initialPelvisFrame;
@@ -250,6 +255,23 @@ public class RDXVRKinematicsStreamingMode
       capturabilityBasedStatus = ros2ControllerHelper.subscribeToController(CapturabilityBasedStatus.class);
 
       kinematicsRecorder = new KinematicsRecordReplay(enabled, handDesiredControlFrames);
+
+      ROS2Publisher<ROS2BagMessage> ros2BagMessagePublisher = ros2ControllerHelper.getROS2Node().createPublisher(ROS2BagRecord.getROS2BagTopic());
+      kinematicsRecorder.setReplayCallback(replayStarting ->
+                                           {
+                                              if (replayStarting && recordROS2Bag.get())
+                                              {
+                                                 ROS2BagMessage ros2BagMessage = new ROS2BagMessage();
+                                                 ros2BagMessage.setRequestedState(ROS2BagRequestedState.START.toByte());
+                                                 ros2BagMessagePublisher.publish(ros2BagMessage);
+                                              }
+                                              else if (!replayStarting)
+                                              {
+                                                 ROS2BagMessage ros2BagMessage = new ROS2BagMessage();
+                                                 ros2BagMessage.setRequestedState(ROS2BagRequestedState.FINISH.toByte());
+                                                 ros2BagMessagePublisher.publish(ros2BagMessage);
+                                              }
+                                           });
 
       if (syncedRobot.getRobotModel().getSimpleRobotName().contains("Nadia"))
       {
@@ -694,32 +716,32 @@ public class RDXVRKinematicsStreamingMode
    {
       PoseReferenceFrame trackerFrame = trackerReferenceFrames.get(segmentType);
       FramePoint3D trackerPosition = new FramePoint3D(trackerFrame);
-
-      if (snapTrackerControlFrames)
-      {
-         // Control frame here is used to store the nominal x_com in mid-feet zup frame
-         FramePoint3D comPosition = new FramePoint3D(syncedRobot.getReferenceFrames().getCenterOfMassFrame());
-         trackerPosition.changeFrame(ReferenceFrame.getWorldFrame());
-         comPosition.changeFrame(ReferenceFrame.getWorldFrame());
-         trackerToCoM.sub(comPosition, trackerPosition);
-      }
-
-      // Compute desired CoM position
       FramePoint3D desiredCenterOfMass = new FramePoint3D(trackerPosition);
       desiredCenterOfMass.changeFrame(ReferenceFrame.getWorldFrame());
-      desiredCenterOfMass.add(trackerToCoM);
-
-      if (snapTrackerControlFrames)
-      {
-         desiredCoMPositionFiltered.setIncludingFrame(desiredCenterOfMass);
-      }
-
-      desiredCenterOfMass.changeFrame(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
-      desiredCoMPositionFiltered.changeFrame(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
 
       // Filter and do a safety check on the desired CoM position in mid-feed z-up frame
       if (USE_TRACKER_FOR_COM)
       {
+         if (snapTrackerControlFrames)
+         {
+            // Control frame here is used to store the nominal x_com in mid-feet zup frame
+            FramePoint3D comPosition = new FramePoint3D(syncedRobot.getReferenceFrames().getCenterOfMassFrame());
+            trackerPosition.changeFrame(ReferenceFrame.getWorldFrame());
+            comPosition.changeFrame(ReferenceFrame.getWorldFrame());
+            trackerToCoM.sub(comPosition, trackerPosition);
+         }
+
+         // Compute desired CoM position
+         desiredCenterOfMass.add(trackerToCoM);
+
+         if (snapTrackerControlFrames)
+         {
+            desiredCoMPositionFiltered.setIncludingFrame(desiredCenterOfMass);
+         }
+
+         desiredCenterOfMass.changeFrame(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
+         desiredCoMPositionFiltered.changeFrame(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
+
          double interpolationAlphaXZ = 0.007;
          double interpolationAlphaY = 0.003;
 
@@ -747,23 +769,34 @@ public class RDXVRKinematicsStreamingMode
             desiredCoMPositionFiltered.setZ(0.88);
             desiredCoMPositionFiltered.changeFrame(ReferenceFrame.getWorldFrame());
          }
+
+         desiredCoMPositionFiltered.changeFrame(ReferenceFrame.getWorldFrame());
       }
       else
       {
-         desiredCoMPositionFiltered.set(desiredCenterOfMass);
+         if (snapTrackerControlFrames)
+         {
+            desiredCoMPositionFiltered.setIncludingFrame(desiredCenterOfMass);
+         }
+         else
+         {
+            double interpolationAlpha = 0.04;
+            desiredCoMPositionFiltered.interpolate(desiredCenterOfMass, interpolationAlpha);
+         }
       }
-
-      desiredCoMPositionFiltered.changeFrame(ReferenceFrame.getWorldFrame());
 
       // Create and pack IK toolbox message
       KinematicsToolboxCenterOfMassMessage comMessage = new KinematicsToolboxCenterOfMassMessage();
       comMessage.getDesiredPositionInWorld().set(desiredCoMPositionFiltered);
       comMessage.getDesiredLinearVelocityInWorld().setToZero();
 
-      if (snapTrackerControlFrames)
-      {
-         LogTools.info(desiredCoMPositionFiltered);
-      }
+//      if (snapTrackerControlFrames)
+//      {
+//         LogTools.info("Initial desired CoM");
+//         LogTools.info(desiredCoMPositionFiltered);
+//         LogTools.info("Tracker to CoM");
+//         LogTools.info(trackerToCoM);
+//      }
 
       comMessage.getSelectionMatrix().setSelectionFrameId(toFrameId(ReferenceFrame.getWorldFrame()));
       comMessage.getSelectionMatrix().setXSelected(true);
@@ -936,6 +969,7 @@ public class RDXVRKinematicsStreamingMode
       }
 
       ImGui.checkbox(labels.get("Enable stability objective"), enableStabilityObjective);
+      ImGui.checkbox(labels.get("Record ROS 2 Bag"), recordROS2Bag);
 
       if (ImGui.button(labels.get("Start record/replay")))
       {
@@ -999,6 +1033,9 @@ public class RDXVRKinematicsStreamingMode
             snapTrackerControlFrames.set(true);
             comPositionInitial.setToZero(syncedRobot.getReferenceFrames().getCenterOfMassFrame());
             comPositionInitial.changeFrame(ReferenceFrame.getWorldFrame());
+
+            LogTools.info("Com position initial: " + comPositionInitial);
+
             comTrackerOffset.setToZero();
             comTrackerOffsetRL.setToZero();
          }
@@ -1179,9 +1216,10 @@ public class RDXVRKinematicsStreamingMode
          handLoadBearingMessage.getContactPointInBodyFrame().set(contactPoint);
 
          // Currently hard-coded. Need to integrate with perception
-//         FrameVector3D contactNormal = new FrameVector3D(syncedRobot.getReferenceFrames().getMidFeetZUpFrame(), -1.0, 0.0, 0.0);
-         FrameVector3D contactNormal = new FrameVector3D(syncedRobot.getReferenceFrames().getMidFeetZUpFrame(), CONTACT_NORMAL);
-         contactNormal.changeFrame(ReferenceFrame.getWorldFrame());
+//         FrameVector3D contactNormal = new FrameVector3D(syncedRobot.getReferenceFrames().getMidFeetZUpFrame(), CONTACT_NORMAL);
+//         contactNormal.changeFrame(ReferenceFrame.getWorldFrame());
+
+         FrameVector3D contactNormal = new FrameVector3D(ReferenceFrame.getWorldFrame(), CONTACT_NORMAL);
          handLoadBearingMessage.getContactNormalInWorld().set(contactNormal);
 
          handsAreLoaded.put(robotSide, true);
