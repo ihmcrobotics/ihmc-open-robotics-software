@@ -38,10 +38,10 @@ public class ControllerFootstepQueueMonitor
       this.referenceFrames = referenceFrames;
       this.continuousHikingLogger = continuousHikingLogger;
 
-      ros2Node.createSubscription(HumanoidControllerAPI.getTopic(FootstepQueueStatusMessage.class, simpleRobotName), (s) -> footstepQueueStatusReceived(s.takeNextData()));
-      ros2Node.createSubscription(HumanoidControllerAPI.getTopic(FootstepStatusMessage.class, simpleRobotName), (s) -> footstepStatusReceived(s.takeNextData()));
-      ros2Node.createSubscription(getTopic(PlanOffsetStatus.class, simpleRobotName), (s) -> acceptPlanOffsetStatus(s.takeNextData()));
-      ros2Node.createSubscription(getTopic(WalkingStatusMessage.class, simpleRobotName), (s) -> acceptWalkingStatusMessage(s.takeNextData()));
+      ros2Node.createSubscription2(HumanoidControllerAPI.getTopic(FootstepQueueStatusMessage.class, simpleRobotName), this::footstepQueueStatusReceived);
+      ros2Node.createSubscription2(HumanoidControllerAPI.getTopic(FootstepStatusMessage.class, simpleRobotName), this::footstepStatusReceived);
+      ros2Node.createSubscription2(getTopic(PlanOffsetStatus.class, simpleRobotName), this::acceptPlanOffsetStatus);
+      ros2Node.createSubscription2(getTopic(WalkingStatusMessage.class, simpleRobotName), this::acceptWalkingStatusMessage);
    }
 
    private void footstepQueueStatusReceived(FootstepQueueStatusMessage footstepQueueStatusMessage)

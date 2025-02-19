@@ -38,7 +38,7 @@ public class ROS2HeartbeatMonitor
 
    public ROS2HeartbeatMonitor(ROS2Node ros2Node, ROS2Topic<Empty> heartbeatTopic)
    {
-      ros2Node.createSubscription(heartbeatTopic, (s) -> receivedHeartbeat(s.takeNextData()));
+      ros2Node.createSubscription2(heartbeatTopic, this::receivedHeartbeat);
       ThreadTools.startAsDaemon(() -> ExceptionTools.handle(this::monitorThread, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE),
                                 "HeartbeatMonitor");
    }

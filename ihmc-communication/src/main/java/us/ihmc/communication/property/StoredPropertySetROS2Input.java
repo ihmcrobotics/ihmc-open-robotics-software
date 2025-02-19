@@ -39,7 +39,7 @@ public class StoredPropertySetROS2Input
                                      StoredPropertySetBasics storedPropertySetToUpdate)
    {
       this.storedPropertySetToUpdate = storedPropertySetToUpdate;
-      ros2Node.createSubscription(inputTopic, (s) -> acceptMessage(s.takeNextData()));
+      ros2Node.createSubscription2(inputTopic, this::acceptMessage);
    }
 
    private void acceptMessage(PrimitiveDataVectorMessage message)

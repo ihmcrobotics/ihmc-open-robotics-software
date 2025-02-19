@@ -209,7 +209,7 @@ public class RDXSceneGraphDemo
 
                newPlanarRegions.set(planarRegionsInWorldFrame);
 
-               PerceptionMessageTools.publishFramePlanarRegionsList(framePlanarRegionsList, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, ros2Helper.getROS2Node());
+               PerceptionMessageTools.publishFramePlanarRegionsList(framePlanarRegionsList, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, ros2Node);
 
                zedDepthImage.release();
 

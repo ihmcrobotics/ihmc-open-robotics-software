@@ -50,9 +50,9 @@ public class OusterHeightMapUpdater
       realtimeROS2Node = new ROS2NodeBuilder().buildRealtime("ouster_height_map_publisher");
       heightMapPublisher = realtimeROS2Node.createPublisher(PerceptionAPI.HEIGHT_MAP_OUTPUT);
 
-      ros2Node.createSubscription(PerceptionAPI.HEIGHT_MAP_STATE_REQUEST, (s) -> consumeStateRequestMessage(s.takeNextData()));
-      ros2Node.createSubscription(HumanoidControllerAPI.getTopic(HighLevelStateChangeStatusMessage.class, simpleRobotName), (s) -> consumeStateChangedMessage(s.takeNextData()));
-      ros2Node.createSubscription(HumanoidControllerAPI.getTopic(WalkingStatusMessage.class, simpleRobotName), (s) -> consumeWalkingStatusMessage(s.takeNextData()));
+      ros2Node.createSubscription2(PerceptionAPI.HEIGHT_MAP_STATE_REQUEST, this::consumeStateRequestMessage);
+      ros2Node.createSubscription2(HumanoidControllerAPI.getTopic(HighLevelStateChangeStatusMessage.class, simpleRobotName), this::consumeStateChangedMessage);
+      ros2Node.createSubscription2(HumanoidControllerAPI.getTopic(WalkingStatusMessage.class, simpleRobotName), this::consumeWalkingStatusMessage);
 
       heightMapUpdater = new HeightMapUpdater();
       heightMapUpdater.attachHeightMapConsumer(heightMapPublisher::publish);
