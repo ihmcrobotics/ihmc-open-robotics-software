@@ -33,6 +33,7 @@ import us.ihmc.robotics.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.ros2.ROS2Node;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -66,14 +67,15 @@ public class RDXTerrainPlanningDebugger implements RenderableProvider
    private int leftIndex = 0;
    private int rightIndex = 0;
 
-   public RDXTerrainPlanningDebugger(ROS2Helper ros2Helper,
+   public RDXTerrainPlanningDebugger(ROS2Node ros2Node,
                                      MonteCarloFootstepPlannerParameters monteCarloFootstepPlannerParameters,
                                      SegmentDependentList<RobotSide, ArrayList<Point2D>> contactPoints)
    {
 
       this.monteCarloFootstepPlannerParameters = monteCarloFootstepPlannerParameters;
-      ros2Helper.subscribeViaCallback(ContinuousHikingAPI.MONTE_CARLO_TREE_NODES, this::onMonteCarloTreeNodesReceived);
-      ros2Helper.subscribeViaCallback(ContinuousHikingAPI.MONTE_CARLO_FOOTSTEP_PLAN, this::onMonteCarloPlanReceived);
+
+      ros2Node.createSubscription(ContinuousHikingAPI.MONTE_CARLO_TREE_NODES, (s) -> onMonteCarloTreeNodesReceived(s.takeNextData()));
+      ros2Node.createSubscription(ContinuousHikingAPI.MONTE_CARLO_FOOTSTEP_PLAN, (s) -> onMonteCarloPlanReceived(s.takeNextData()));
 
       goalFootstepGraphics = new SideDependentList<>(new RDXFootstepGraphic(contactPoints, RobotSide.LEFT),
                                                      new RDXFootstepGraphic(contactPoints, RobotSide.RIGHT));

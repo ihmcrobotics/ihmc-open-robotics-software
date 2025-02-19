@@ -24,7 +24,7 @@ public class ROS2DemandGraphNodeTest
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
       ROS2Topic<Empty> testTopic = ROS2Tools.IHMC_ROOT.withSuffix("demand_graph_test_is_demanded").withType(Empty.class);
 
-      ROS2DemandGraphNode testNode = new ROS2DemandGraphNode(ros2Helper, testTopic);
+      ROS2DemandGraphNode testNode = new ROS2DemandGraphNode(ros2Node, testTopic);
       ROS2Heartbeat testHeartbeat = new ROS2Heartbeat(ros2Node, testTopic);
 
       assertFalse(testNode.isDemanded());
@@ -51,9 +51,9 @@ public class ROS2DemandGraphNodeTest
       ROS2Topic<Empty> dependantTopic = testTopic.withPrefix("dependant");
 
       ROS2Heartbeat testHeartbeat = new ROS2Heartbeat(ros2Node, testTopic);
-      ROS2DemandGraphNode testNode = new ROS2DemandGraphNode(ros2Helper, testTopic);
+      ROS2DemandGraphNode testNode = new ROS2DemandGraphNode(ros2Node, testTopic);
       ROS2Heartbeat dependantHeartbeat = new ROS2Heartbeat(ros2Node, dependantTopic);
-      ROS2DemandGraphNode dependantNode = new ROS2DemandGraphNode(ros2Helper, dependantTopic);
+      ROS2DemandGraphNode dependantNode = new ROS2DemandGraphNode(ros2Node, dependantTopic);
       testNode.addDependents(dependantNode);
 
       // No heartbeat is on -> nothing should be demanded
@@ -95,9 +95,9 @@ public class ROS2DemandGraphNodeTest
       ROS2Topic<Empty> dependantTopic = testTopic.withPrefix("dependant");
 
       ROS2Heartbeat testHeartbeat = new ROS2Heartbeat(ros2Node, testTopic);
-      ROS2DemandGraphNode testNode = new ROS2DemandGraphNode(ros2Helper, testTopic);
+      ROS2DemandGraphNode testNode = new ROS2DemandGraphNode(ros2Node, testTopic);
       ROS2Heartbeat dependantHeartbeat = new ROS2Heartbeat(ros2Node, dependantTopic);
-      ROS2DemandGraphNode dependantNode = new ROS2DemandGraphNode(ros2Helper, dependantTopic);
+      ROS2DemandGraphNode dependantNode = new ROS2DemandGraphNode(ros2Node, dependantTopic);
       testNode.addDependents(dependantNode);
 
       TypedNotification<Boolean> callbackNotification = new TypedNotification<>();

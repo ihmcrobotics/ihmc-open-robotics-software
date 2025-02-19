@@ -130,7 +130,7 @@ public class StructuralPerceptionProcessWithDriver
          rapidRegionsExtractor = new RapidPlanarRegionsExtractor(openCLManager, openCLProgram, depthHeight, depthWidth);
          rapidRegionsExtractor.setPatchSizeChanged(false);
 
-         ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);
+         ros2PropertySetGroup = new ROS2StoredPropertySetGroup(realtimeROS2Node);
          ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.SPHERICAL_RAPID_REGION_PARAMETERS, rapidRegionsExtractor.getParameters());
          ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.SPHERICAL_POLYGONIZER_PARAMETERS,
                                                         rapidRegionsExtractor.getRapidPlanarRegionsCustomizer().getPolygonizerParameters());
@@ -176,7 +176,7 @@ public class StructuralPerceptionProcessWithDriver
 
       LogTools.info("Extracted {} planar regions", planarRegionsList.getNumberOfPlanarRegions());
 
-      PerceptionMessageTools.publishFramePlanarRegionsList(framePlanarRegionsList, frameRegionsTopic, ros2Helper);
+      PerceptionMessageTools.publishFramePlanarRegionsList(framePlanarRegionsList, frameRegionsTopic, ros2Helper.getROS2Node());
    }
 
    private void extractFramePlanarRegionsList(BytedecoImage depthImage, ReferenceFrame cameraFrame, FramePlanarRegionsList framePlanarRegionsList)

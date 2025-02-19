@@ -12,6 +12,7 @@ import us.ihmc.perception.steppableRegions.SteppableRegionsAPI;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParameters;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
@@ -38,7 +39,8 @@ public class OusterDriverAndDepthPublisher
    private volatile HumanoidReferenceFrames humanoidReferenceFrames;
    private final MutableReferenceFrame ousterSensorFrame = new MutableReferenceFrame(ReferenceFrame.getWorldFrame());
 
-   public OusterDriverAndDepthPublisher(ROS2ControllerPublishSubscribeAPI ros2,
+   public OusterDriverAndDepthPublisher(ROS2Node ros2,
+                                        String robotName,
                                         Supplier<HumanoidReferenceFrames> humanoidReferenceFramesSupplier,
                                         ROS2Topic<ImageMessage> imageMessageTopic,
                                         ROS2Topic<LidarScanMessage> lidarScanTopic)
@@ -53,7 +55,7 @@ public class OusterDriverAndDepthPublisher
       ouster.start();
 
       depthPublisher = new OusterDepthPublisher(imageMessageTopic, lidarScanTopic, publishLidarScanMonitor::isAlive);
-      heightMapUpdater = new OusterHeightMapUpdater(ros2);
+      heightMapUpdater = new OusterHeightMapUpdater(ros2, robotName);
 
       steppableRegionsUpdater = new RemoteSteppableRegionsUpdater(ros2, new SteppableRegionCalculatorParameters(), publishSteppableRegionsMonitor::isAlive);
       heightMapUpdater.attachHeightMapConsumer(steppableRegionsUpdater::submitLatestHeightMapMessage);

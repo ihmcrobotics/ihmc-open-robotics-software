@@ -14,6 +14,7 @@ import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensors.ImageSensor;
 
 import java.util.Collections;
@@ -24,7 +25,7 @@ public class RapidPlanarRegionsExtractionThread extends RepeatingTaskThread
 {
    private static final double UPDATE_FREQUENCY = 10.0;
 
-   private final ROS2PublishSubscribeAPI ros2;
+   private final ROS2Node ros2;
 
    private final OpenCLManager openCLManager;
 
@@ -37,7 +38,7 @@ public class RapidPlanarRegionsExtractionThread extends RepeatingTaskThread
    private final FramePlanarRegionsList framePlanarRegions = new FramePlanarRegionsList();
    private final Set<TypedNotification<FramePlanarRegionsList>> newPlanarRegionNotifications = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
-   public RapidPlanarRegionsExtractionThread(ROS2PublishSubscribeAPI ros2, OpenCLManager openCLManager, ImageSensor imageSensor, int depthImageKey)
+   public RapidPlanarRegionsExtractionThread(ROS2Node ros2, OpenCLManager openCLManager, ImageSensor imageSensor, int depthImageKey)
    {
       super(imageSensor.getSensorName() + RapidPlanarRegionsExtractionThread.class.getSimpleName());
       setFrequencyLimit(UPDATE_FREQUENCY);
