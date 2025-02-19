@@ -31,7 +31,7 @@ public class CUDAKernel implements AutoCloseable
    private boolean retainParameters = false;
    private boolean enableKernelTimings = false;
 
-   private CUDAKernelTimings kernelTimings;
+   private CUDAKernelTimings kernelTimings = null;
    private final CUevent_st start = new CUevent_st();
    private final CUevent_st end = new CUevent_st();
 
@@ -51,7 +51,12 @@ public class CUDAKernel implements AutoCloseable
    public void enableKernelTimings(boolean enableKernelTimings)
    {
       this.enableKernelTimings = enableKernelTimings;
-      kernelTimings = new CUDAKernelTimings();
+      if (enableKernelTimings && kernelTimings == null)
+      {
+         kernelTimings = new CUDAKernelTimings();
+         cudaEventCreate(start);
+         cudaEventCreate(end);
+      }
    }
 
    public void retainParameters(boolean retainParameters)
@@ -74,11 +79,7 @@ public class CUDAKernel implements AutoCloseable
          parametersPointer.put(i, parameters.get(i));
 
       if (enableKernelTimings)
-      {
-         cudaEventCreate(start);
-         cudaEventCreate(end);
-         cudaEventRecord(start);
-      }
+         cudaEventRecord(start, stream);
 
       error = cuLaunchKernel(kernelFunction,
                              gridSize.x(),
@@ -94,7 +95,7 @@ public class CUDAKernel implements AutoCloseable
 
       if (enableKernelTimings)
       {
-         cudaEventRecord(end);
+         cudaEventRecord(end, stream);
          cudaEventSynchronize(end);
 
          kernelTimings.addExecutionTime(start, end);
@@ -159,6 +160,12 @@ public class CUDAKernel implements AutoCloseable
    {
       clearParameters();
       kernelFunction.close();
+
+      if (kernelTimings != null)
+      {
+         cudaEventDestroy(start);
+         cudaEventDestroy(end);
+      }
    }
 
    /**
@@ -169,10 +176,10 @@ public class CUDAKernel implements AutoCloseable
    {
       private static final int MAX_ENTRIES = 250;
       private final LinkedList<Float> executionTimes = new LinkedList<>();
+      private final float[] milliseconds = new float[1];
 
       private void addExecutionTime(CUevent_st start, CUevent_st end)
       {
-         float[] milliseconds = new float[1];
          milliseconds[0] = 0.0f;
          cudaEventElapsedTime(milliseconds, start, end);
          executionTimes.add(milliseconds[0]);
