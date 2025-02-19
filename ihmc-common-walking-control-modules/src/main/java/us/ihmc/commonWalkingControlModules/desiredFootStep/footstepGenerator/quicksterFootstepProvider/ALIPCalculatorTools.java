@@ -29,13 +29,6 @@ public class ALIPCalculatorTools
                                                   double pendulumMass,
                                                   double pendulumHeight)
    {
-      // Use future position/angular momentum as placeholder variables to make sure current position/angular momentum are in correct frame
-//      futurePositionToPack.setMatchingFrame(currentCoMPosition);
-//      futurePositionToPack.distance(stanceFootPosition);
-//
-//      futureAngularMomentumToPack.setMatchingFrame(currentContactPointAngularMomentum);
-//      futureAngularMomentumToPack.(stanceFootFrame);
-
       tempCurrentCoMPosition.setMatchingFrame(currentCoMPosition);
       tempCurrentContactPointAngularMomentum.setMatchingFrame(currentContactPointAngularMomentum);
       tempCurrentStanceFootPosition.setMatchingFrame(currentStanceFootPosition);
@@ -60,8 +53,8 @@ public class ALIPCalculatorTools
       double yf = y0 * Math.cosh(omega * deltaT) - Lx0 * Math.sinh(omega * deltaT) / (pendulumMass * pendulumHeight * omega);
       double Lxf = -y0 * pendulumMass * pendulumHeight * omega * Math.sinh(omega * deltaT) + Lx0 * Math.cosh(omega * deltaT);
 
-      futurePositionToPack.setX(xf);
-      futurePositionToPack.setY(yf);
+      futurePositionToPack.setX(xf + tempCurrentStanceFootPosition.getX());
+      futurePositionToPack.setY(yf + tempCurrentStanceFootPosition.getY());
 
       futureAngularMomentumToPack.setX(Lxf);
       futureAngularMomentumToPack.setY(Lyf);
@@ -132,23 +125,6 @@ public class ALIPCalculatorTools
                                                                                     boolean useFutureCoM)
    {
       double omega = calculateOmega(pendulumHeight);
-
-//      //////
-//      // Get CoM velocity and change frame to CoM control frame
-//      tempVelocity.setIncludingFrame(currentVelocity);
-//      tempVelocity.changeFrame(stanceFootFrame);
-//
-//      // Get CoM angular momentum and change frame to CoM control frame
-//      tempCentroidalAngularMomentum.setIncludingFrame(currentCentroidalAngularMomentum);
-//      tempCentroidalAngularMomentum.changeFrame(stanceFootFrame);
-//      /////
-//
-//      tempAngularMomentum2.setToZero(stanceFootFrame);
-//      tempAngularMomentum2.setY(pendulumMass * pendulumHeight * tempVelocity.getX() + tempCentroidalAngularMomentum.getY());
-//      tempAngularMomentum2.setX(-pendulumMass * pendulumHeight * tempVelocity.getY() + tempCentroidalAngularMomentum.getX());
-//
-//      // Get CoM angular momentum and change frame to CoM control frame
-//      tempCurrentContactPointAngularMomentum.setMatchingFrame(currentContactPointAngularMomentum);
 
       computeFutureStateUsingALIP(currentCoMPosition,
                                   currentContactPointAngularMomentum,

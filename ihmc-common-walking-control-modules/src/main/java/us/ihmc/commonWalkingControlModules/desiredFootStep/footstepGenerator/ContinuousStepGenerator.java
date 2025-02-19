@@ -346,32 +346,16 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
          quicksterFootstepProvider.get().update(parameters.getNumberOfFootstepsToPlan());
       }
 
+      int perFootIndex = 0;
+
       for (int i = startingIndexToAdjust; i < parameters.getNumberOfFootstepsToPlan(); i++)
       {
          if (currentCSGMode.getEnumValue() == ContinuousStepGeneratorMode.QFP && quicksterFootstepProvider.hasValue())
          {
-            // FIXME we want all steps in plan to be QFP eventually
-//            quicksterFootstepProvider.get().getDesiredTouchdownPose(i, nextFootstepPose2D);
-            if (i == startingIndexToAdjust)
-            {
-               quicksterFootstepProvider.get().getDesiredTouchdownPose(swingSide, nextFootstepPose2D);
-            }
-            else
-            {
-               calculateNextFootstepPose2D(stepTime.getValue(),
-                                           desiredVelocityX,
-                                           desiredVelocityY,
-                                           desiredTurningVelocity.getDoubleValue(),
-                                           swingSide,
-                                           maxStepLength,
-                                           maxStepWidth,
-                                           defaultStepWidth,
-                                           minStepWidth,
-                                           turnMaxAngleInward,
-                                           turnMaxAngleOutward,
-                                           footstepPose2D,
-                                           nextFootstepPose2D);
-            }
+            if (i != 0 && i % 2 == 0)
+               perFootIndex++;
+
+            quicksterFootstepProvider.get().getDesiredTouchdownPose(perFootIndex, swingSide, nextFootstepPose2D);
          }
          else
          {
