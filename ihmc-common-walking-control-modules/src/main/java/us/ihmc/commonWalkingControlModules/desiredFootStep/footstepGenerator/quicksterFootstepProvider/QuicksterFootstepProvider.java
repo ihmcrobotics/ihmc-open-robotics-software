@@ -4,11 +4,9 @@ import controller_msgs.msg.dds.FootstepStatusMessage;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.*;
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePose2D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
@@ -35,7 +33,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-public class QuicksterFootstepProvider implements Updatable
+public class QuicksterFootstepProvider
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -58,6 +56,10 @@ public class QuicksterFootstepProvider implements Updatable
    private final SideDependentList<FramePoint2D> desiredTouchdownPositions = new SideDependentList<>();
    private final SideDependentList<FramePose2D> desiredTouchdownPoses = new SideDependentList<>();
    private final SideDependentList<YoFramePoint3D> desiredTouchdownPosition3DInWorld = new SideDependentList<>();
+
+   //
+   private final RecyclingArrayList<FramePoint2D> desiredTouchdownPositionsList = new RecyclingArrayList<>(FramePoint2D.class);
+   private final RecyclingArrayList<FramePose2D> desiredTouchdownPosesList = new RecyclingArrayList<>(FramePose2D.class);
 
    // Desired inputs
    private final YoDouble desiredTurningVelocity = new YoDouble("desiredTurningVelocity" + variableNameSuffix, registry);
@@ -209,11 +211,22 @@ public class QuicksterFootstepProvider implements Updatable
       firstTick = false;
    }
 
-   @Override
-   public void update(double time)
+   private double numberOfFootstepsToPlan;
+   public void update(int numberOfFootstepsToPlan)
    {
       if (firstTick)
          initialize();
+
+//      desiredTouchdownPositionsList.clear();
+//      desiredTouchdownPosesList.clear();
+//
+//      for (int i = 0;  i< numberOfFootstepsToPlan ; i++)
+//      {
+//         desiredTouchdownPositionsList.add();
+//         desiredTouchdownPosesList.add();
+//      }
+      this.numberOfFootstepsToPlan = numberOfFootstepsToPlan;
+
 
       updateEstimates();
 
@@ -248,12 +261,22 @@ public class QuicksterFootstepProvider implements Updatable
          desiredTouchdownPoses.get(robotSide).getOrientation().setFromReferenceFrame(centerOfMassControlZUpFrame);
       }
 
+      desiredTouchdownPosesList.clear();
+      for (int i = 0;  i< desiredTouchdownPositionsList.size() ; i++)
+      {
+         desiredTouchdownPosesList.getAndGrowIfNeeded(i).getPosition().set(desiredTouchdownPositionsList.get(i));
+         desiredTouchdownPosesList.getAndGrowIfNeeded(i).getOrientation().setFromReferenceFrame(centerOfMassControlZUpFrame);
+      }
+
       netPendulumBase3DInWorld.setMatchingFrame(netPendulumBase, 0.0);
    }
 
+   private final FramePoint3D tempPosition = new FramePoint3D();
+   private final FrameVector3D tempAngularMomentum = new FrameVector3D();
+
    public void calculateTouchdownPosition(QuicksterFootstepProviderTouchdownCalculator touchdownCalculator,
-                                          RobotSide swingSide,
-                                          double timeToReachGoal,
+                                          RobotSide startingSwingSide,
+                                          double timeRemainingInCurrentStep,
                                           FramePoint2DReadOnly pendulumBase,
                                           FramePoint2DReadOnly netPendulumBase,
                                           boolean isInDoubleSupport,
@@ -270,23 +293,66 @@ public class QuicksterFootstepProvider implements Updatable
 //      tempTouchdownPosition.changeFrameAndProjectToXYPlane(touchdownPositionToPack.getReferenceFrame());
 //      touchdownPositionToPack.set(tempTouchdownPosition);
 
-      ALIPCalculatorTools.computeTouchdownPositionUsingRaibertHeuristicAndPolePlacement(estimates.getCenterOfMassPosition(),
-                                                          estimates.getCenterOfMassVelocity(),
-                                                          estimates.getCenterOfMassAngularMomentum(),
-                                                          swingSide,
-                                                          desiredVelocity.getX(),
-                                                          desiredVelocity.getY(),
-                                                          parameters.getStanceWidth(swingSide).getDoubleValue(),
-                                                          timeToReachGoal,
-                                                          getStepDuration(swingSide),
-                                                          getTransferDuration(swingSide),
-                                                          robotModel.getTotalMass(),
-                                                          parameters.getDesiredCoMHeight(swingSide).getDoubleValue(),
-                                                          parameters.getPole(swingSide).getDoubleValue(),
-                                                          touchdownPositionToPack,
-                                                          referenceFrames.getSoleZUpFrame(swingSide.getOppositeSide()),
-                                                          referenceFrames.getSoleZUpFrame(swingSide),
-                                                          centerOfMassControlZUpFrame);
+      desiredTouchdownPositionsList.clear();
+      for (int i = 0;  i < numberOfFootstepsToPlan ; i++)
+      {
+         FramePoint2D desiredTouchdownPositionToPack = desiredTouchdownPositionsList.add();
+
+         FramePoint3DReadOnly currentCoMPosition;
+         FrameVector3DReadOnly currentAngularMomentum;
+         double timeToReachGoal;
+         RobotSide swingSide;
+
+         if (i == 0)
+         {
+            currentCoMPosition = estimates.getCenterOfMassPosition();
+            currentAngularMomentum = estimates.getContactPointAngularMomentum();
+            swingSide = startingSwingSide;
+            timeToReachGoal = timeRemainingInCurrentStep;
+         }
+         else if (i % 2 == 0)
+         {
+            currentCoMPosition = tempPosition;
+            currentAngularMomentum = tempAngularMomentum;
+            swingSide = startingSwingSide;
+            timeToReachGoal = getSwingDuration(swingSide);
+         }
+         else
+         {
+            currentCoMPosition = tempPosition;
+            currentAngularMomentum = tempAngularMomentum;
+            swingSide = startingSwingSide.getOppositeSide();
+            timeToReachGoal = getSwingDuration(swingSide);
+         }
+
+         ALIPCalculatorTools.computeTouchdownPositionUsingRaibertHeuristicAndPolePlacement(
+                 currentCoMPosition,
+                 currentAngularMomentum,
+                 swingSide,
+                 desiredVelocity.getX(),
+                 desiredVelocity.getY(),
+                 parameters.getStanceWidth(swingSide).getDoubleValue(),
+                 timeToReachGoal,
+                 getStepDuration(swingSide),
+                 getTransferDuration(swingSide),
+                 robotModel.getTotalMass(),
+                 parameters.getDesiredCoMHeight(swingSide).getDoubleValue(),
+                 parameters.getPole(swingSide).getDoubleValue(),
+                 desiredTouchdownPositionToPack,
+                 referenceFrames.getSoleZUpFrame(swingSide.getOppositeSide()),
+                 centerOfMassControlZUpFrame);
+
+         ALIPCalculatorTools.computeFutureStateUsingALIP(
+                 currentCoMPosition,
+                 currentAngularMomentum,
+                 tempPosition,
+                 tempAngularMomentum,
+                 timeToReachGoal,
+                 robotModel.getTotalMass(),
+                 parameters.getDesiredCoMHeight(swingSide).getDoubleValue(),
+                 referenceFrames.getSoleZUpFrame(swingSide.getOppositeSide()));
+
+      }
    }
 
    private void calculateNetPendulumBase()
@@ -425,7 +491,7 @@ public class QuicksterFootstepProvider implements Updatable
 
    /**
     * Sets a provider that is to be used to update the state of {@link #walk} internally on each call
-    * to {@link #update(double)}.
+    * to {@link #update(int)}.
     *
     * @param walkInputProvider the provider used to determine whether to walk or not walk.
     */
@@ -467,6 +533,12 @@ public class QuicksterFootstepProvider implements Updatable
    {
       // TODO 3D transform between two 2D poses?
       touchdownPoseToPack.setMatchingFrame(desiredTouchdownPoses.get(robotSide));
+   }
+
+   public void getDesiredTouchdownPose(int footstepIndex, FramePose2D touchdownPoseToPack)
+   {
+      // TODO 3D transform between two 2D poses?
+      touchdownPoseToPack.setMatchingFrame(desiredTouchdownPosesList.get(footstepIndex));
    }
 
    public double getSwingDuration(RobotSide swingSide)

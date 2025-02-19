@@ -343,7 +343,7 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
          if (currentCSGMode.getEnumValue() == ContinuousStepGeneratorMode.STANDARD)
             quicksterFootstepProvider.get().initialize();
 
-         quicksterFootstepProvider.get().update(time);
+         quicksterFootstepProvider.get().update(parameters.getNumberOfFootstepsToPlan());
       }
 
       for (int i = startingIndexToAdjust; i < parameters.getNumberOfFootstepsToPlan(); i++)
@@ -351,26 +351,27 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
          if (currentCSGMode.getEnumValue() == ContinuousStepGeneratorMode.QFP && quicksterFootstepProvider.hasValue())
          {
             // FIXME we want all steps in plan to be QFP eventually
-            if (i == startingIndexToAdjust)
-            {
-               quicksterFootstepProvider.get().getDesiredTouchdownPose(swingSide, nextFootstepPose2D);
-            }
-            else
-            {
-               calculateNextFootstepPose2D(stepTime.getValue(),
-                                           desiredVelocityX,
-                                           desiredVelocityY,
-                                           desiredTurningVelocity.getDoubleValue(),
-                                           swingSide,
-                                           maxStepLength,
-                                           maxStepWidth,
-                                           defaultStepWidth,
-                                           minStepWidth,
-                                           turnMaxAngleInward,
-                                           turnMaxAngleOutward,
-                                           footstepPose2D,
-                                           nextFootstepPose2D);
-            }
+            quicksterFootstepProvider.get().getDesiredTouchdownPose(i, nextFootstepPose2D);
+//            if (i == startingIndexToAdjust)
+//            {
+//               quicksterFootstepProvider.get().getDesiredTouchdownPose(swingSide, nextFootstepPose2D);
+//            }
+//            else
+//            {
+//               calculateNextFootstepPose2D(stepTime.getValue(),
+//                                           desiredVelocityX,
+//                                           desiredVelocityY,
+//                                           desiredTurningVelocity.getDoubleValue(),
+//                                           swingSide,
+//                                           maxStepLength,
+//                                           maxStepWidth,
+//                                           defaultStepWidth,
+//                                           minStepWidth,
+//                                           turnMaxAngleInward,
+//                                           turnMaxAngleOutward,
+//                                           footstepPose2D,
+//                                           nextFootstepPose2D);
+//            }
          }
          else
          {

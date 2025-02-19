@@ -27,6 +27,7 @@ public class QuicksterFootstepProviderEstimates
    private final YoFrameVector3D currentCoMVelocity;
    private final YoFrameVector3D currentCoMLinearMomentum;
    private final YoFrameVector3D currentCoMAngularMomentum;
+   private final YoFrameVector3D currentContactPointAngularMomentum;
 
    // CoM Frames
    private final MovingReferenceFrame centerOfMassFrame;
@@ -58,6 +59,7 @@ public class QuicksterFootstepProviderEstimates
       currentCoMVelocity = new YoFrameVector3D("currentCoMVelocity" + variableNameSuffix, ReferenceFrame.getWorldFrame(), registry);
       currentCoMLinearMomentum = new YoFrameVector3D("currentCoMLinearMomentum" + variableNameSuffix, ReferenceFrame.getWorldFrame(), registry);
       currentCoMAngularMomentum = new YoFrameVector3D("currentCoMAngularMomentum" + variableNameSuffix, ReferenceFrame.getWorldFrame(), registry);
+      currentContactPointAngularMomentum = new YoFrameVector3D("currentContactPointAngularMomentum" + variableNameSuffix, ReferenceFrame.getWorldFrame(), registry);
 
       centerOfMassFrame = (MovingReferenceFrame) referenceFrames.getCenterOfMassFrame();
 
@@ -109,6 +111,9 @@ public class QuicksterFootstepProviderEstimates
       angularExcursionCalculator.compute();
       currentCoMLinearMomentum.setMatchingFrame(angularExcursionCalculator.getLinearMomentum());
       currentCoMAngularMomentum.setMatchingFrame(angularExcursionCalculator.getAngularMomentum());
+      currentContactPointAngularMomentum.setMatchingFrame(angularExcursionCalculator.getAngularMomentum());
+      currentContactPointAngularMomentum.addX(-mass * parameters.getDesiredCoMHeight(swingSide).getDoubleValue() * currentCoMVelocity.getY());
+      currentContactPointAngularMomentum.addY(mass * parameters.getDesiredCoMHeight(swingSide).getDoubleValue() * currentCoMVelocity.getX());
 
       // Update CoM control frames
       centerOfMassControlFrame.update();
@@ -145,6 +150,11 @@ public class QuicksterFootstepProviderEstimates
    public FrameVector3DReadOnly getCenterOfMassAngularMomentum()
    {
       return currentCoMAngularMomentum;
+   }
+
+   public FrameVector3DReadOnly getContactPointAngularMomentum()
+   {
+      return currentContactPointAngularMomentum;
    }
 
    public MovingZUpFrame getCenterOfMassControlZUpFrame()

@@ -1,20 +1,18 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.quicksterFootstepProvider;
 
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
-import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class ALIPCalculatorTools
 {
    private final static double GRAVITY = -9.81;
 
-   private final static FramePoint3D tempPosition = new FramePoint3D();
-   private final static FrameVector3D tempAngularMomentum = new FrameVector3D();
-   private final static FrameVector3D tempAngularMomentum2 = new FrameVector3D();
+   private final static FramePoint3D tempFuturePosition = new FramePoint3D();
+   private final static FrameVector3D tempFutureContactPointAngularMomentum = new FrameVector3D();
+   private final static FrameVector3D tempCurrentContactPointAngularMomentum = new FrameVector3D();
    private final static FrameVector3D tempVelocity = new FrameVector3D();
    private final static FrameVector3D tempCentroidalAngularMomentum = new FrameVector3D();
 
@@ -88,13 +86,13 @@ public class ALIPCalculatorTools
       tempCentroidalAngularMomentum.changeFrame(stanceFootFrame);
       /////
 
-      tempAngularMomentum2.setToZero(stanceFootFrame);
-      tempAngularMomentum2.setY(pendulumMass * pendulumHeight * tempVelocity.getX() + tempCentroidalAngularMomentum.getY());
-      tempAngularMomentum2.setX(-pendulumMass * pendulumHeight * tempVelocity.getY() + tempCentroidalAngularMomentum.getX());
-      computeFutureStateUsingALIP(currentPosition, tempAngularMomentum2, tempPosition, tempAngularMomentum, timeRemainingInCurrentStep, pendulumMass, pendulumHeight, stanceFootFrame);
+      tempCurrentContactPointAngularMomentum.setToZero(stanceFootFrame);
+      tempCurrentContactPointAngularMomentum.setY(pendulumMass * pendulumHeight * tempVelocity.getX() + tempCentroidalAngularMomentum.getY());
+      tempCurrentContactPointAngularMomentum.setX(-pendulumMass * pendulumHeight * tempVelocity.getY() + tempCentroidalAngularMomentum.getX());
+      computeFutureStateUsingALIP(currentPosition, tempCurrentContactPointAngularMomentum, tempFuturePosition, tempFutureContactPointAngularMomentum, timeRemainingInCurrentStep, pendulumMass, pendulumHeight, stanceFootFrame);
 
-      double LyEndOfCurrentStep = tempAngularMomentum.getY();
-      double LxEndOfCurrentStep = tempAngularMomentum.getX();
+      double LyEndOfCurrentStep = tempFutureContactPointAngularMomentum.getY();
+      double LxEndOfCurrentStep = tempFutureContactPointAngularMomentum.getX();
 
       double desiredFootstepPositionX = (LyDesired - Math.cosh(omega * stepDuration) * LyEndOfCurrentStep) / (pendulumMass * pendulumHeight * omega * Math.sinh(omega * stepDuration));
       double desiredFootstepPositionY = (Math.cosh(omega * stepDuration) * LxEndOfCurrentStep - LxDesired) / (pendulumMass * pendulumHeight * omega * Math.sinh(omega * stepDuration));
@@ -106,8 +104,7 @@ public class ALIPCalculatorTools
    }
 
    public static void computeTouchdownPositionUsingRaibertHeuristicAndPolePlacement(FramePoint3DReadOnly currentPosition,
-                                                      FrameVector3DReadOnly currentVelocity,
-                                                      FrameVector3DReadOnly currentCentroidalAngularMomentum,
+                                                      FrameVector3DReadOnly currentContactPointAngularMomentum,
                                                       RobotSide swingSide,
                                                       double desiredVelocityX,
                                                       double desiredVelocityY,
@@ -120,28 +117,32 @@ public class ALIPCalculatorTools
                                                       double pole,
                                                       FramePoint2DBasics touchdownPositionToPack,
                                                       ReferenceFrame stanceFootFrame,
-                                                      ReferenceFrame swingFootFrame,
                                                       ReferenceFrame controlFrame)
    {
       double omega = calculateOmega(pendulumHeight);
 
-      //////
-      // Get CoM velocity and change frame to CoM control frame
-      tempVelocity.setIncludingFrame(currentVelocity);
-      tempVelocity.changeFrame(stanceFootFrame);
+//      //////
+//      // Get CoM velocity and change frame to CoM control frame
+//      tempVelocity.setIncludingFrame(currentVelocity);
+//      tempVelocity.changeFrame(stanceFootFrame);
+//
+//      // Get CoM angular momentum and change frame to CoM control frame
+//      tempCentroidalAngularMomentum.setIncludingFrame(currentCentroidalAngularMomentum);
+//      tempCentroidalAngularMomentum.changeFrame(stanceFootFrame);
+//      /////
+//
+//      tempAngularMomentum2.setToZero(stanceFootFrame);
+//      tempAngularMomentum2.setY(pendulumMass * pendulumHeight * tempVelocity.getX() + tempCentroidalAngularMomentum.getY());
+//      tempAngularMomentum2.setX(-pendulumMass * pendulumHeight * tempVelocity.getY() + tempCentroidalAngularMomentum.getX());
 
       // Get CoM angular momentum and change frame to CoM control frame
-      tempCentroidalAngularMomentum.setIncludingFrame(currentCentroidalAngularMomentum);
-      tempCentroidalAngularMomentum.changeFrame(stanceFootFrame);
-      /////
+      tempCurrentContactPointAngularMomentum.setIncludingFrame(currentContactPointAngularMomentum);
+      tempCurrentContactPointAngularMomentum.changeFrame(stanceFootFrame);
 
-      tempAngularMomentum2.setToZero(stanceFootFrame);
-      tempAngularMomentum2.setY(pendulumMass * pendulumHeight * tempVelocity.getX() + tempCentroidalAngularMomentum.getY());
-      tempAngularMomentum2.setX(-pendulumMass * pendulumHeight * tempVelocity.getY() + tempCentroidalAngularMomentum.getX());
-      computeFutureStateUsingALIP(currentPosition, tempAngularMomentum2, tempPosition, tempAngularMomentum, timeRemainingInCurrentStep, pendulumMass, pendulumHeight, stanceFootFrame);
+      computeFutureStateUsingALIP(currentPosition, tempCurrentContactPointAngularMomentum, tempFuturePosition, tempFutureContactPointAngularMomentum, timeRemainingInCurrentStep, pendulumMass, pendulumHeight, stanceFootFrame);
 
-      tempVelocity.setX(tempAngularMomentum.getY() / (pendulumMass * pendulumHeight));
-      tempVelocity.setY(-tempAngularMomentum.getX() / (pendulumMass * pendulumHeight));
+      tempVelocity.setX(tempFutureContactPointAngularMomentum.getY() / (pendulumMass * pendulumHeight));
+      tempVelocity.setY(-tempFutureContactPointAngularMomentum.getX() / (pendulumMass * pendulumHeight));
 
       computeTouchdownPositionUsingRaibertHeuristicAndPolePlacement(tempVelocity, touchdownPositionToPack, pole, stepDuration, omega, controlFrame);
 
