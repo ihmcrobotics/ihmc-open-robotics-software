@@ -271,8 +271,9 @@ public class QuicksterFootstepProvider
       netPendulumBase3DInWorld.setMatchingFrame(netPendulumBase, 0.0);
    }
 
-   private final FramePoint3D tempPosition = new FramePoint3D();
-   private final FrameVector3D tempAngularMomentum = new FrameVector3D();
+   private final FramePoint3D tempCurrentCoMPosition = new FramePoint3D();
+   private final FrameVector3D tempCurrentContactPointAngularMomentum = new FrameVector3D();
+   private final FramePoint3D tempCurrentStanceFootPosition = new FramePoint3D();
 
    public void calculateTouchdownPosition(QuicksterFootstepProviderTouchdownCalculator touchdownCalculator,
                                           RobotSide startingSwingSide,
@@ -293,66 +294,88 @@ public class QuicksterFootstepProvider
 //      tempTouchdownPosition.changeFrameAndProjectToXYPlane(touchdownPositionToPack.getReferenceFrame());
 //      touchdownPositionToPack.set(tempTouchdownPosition);
 
-      desiredTouchdownPositionsList.clear();
-      for (int i = 0;  i < numberOfFootstepsToPlan ; i++)
-      {
-         FramePoint2D desiredTouchdownPositionToPack = desiredTouchdownPositionsList.add();
 
-         FramePoint3DReadOnly currentCoMPosition;
-         FrameVector3DReadOnly currentAngularMomentum;
-         double timeToReachGoal;
-         RobotSide swingSide;
+//      desiredTouchdownPositionsList.clear();
+//      for (int i = 0;  i < numberOfFootstepsToPlan ; i++)
+//      {
+//         FramePoint2D desiredTouchdownPositionToPack = desiredTouchdownPositionsList.add();
+//
+//         FramePoint3DReadOnly currentCoMPosition;
+//         FrameVector3DReadOnly currentAngularMomentum;
+//         double timeToReachGoal;
+//         RobotSide swingSide;
+//
+//         if (i == 0)
+//         {
+//            currentCoMPosition = estimates.getCenterOfMassPosition();
+//            currentAngularMomentum = estimates.getContactPointAngularMomentum();
+//            swingSide = startingSwingSide;
+//            timeToReachGoal = timeRemainingInCurrentStep;
+//         }
+//         else if (i % 2 == 0)
+//         {
+//            currentCoMPosition = tempCurrentCoMPosition;
+//            currentAngularMomentum = tempCurrentContactPointAngularMomentum;
+//            swingSide = startingSwingSide;
+//            timeToReachGoal = getSwingDuration(swingSide);
+//         }
+//         else
+//         {
+//            currentCoMPosition = tempCurrentCoMPosition;
+//            currentAngularMomentum = tempCurrentContactPointAngularMomentum;
+//            swingSide = startingSwingSide.getOppositeSide();
+//            timeToReachGoal = getSwingDuration(swingSide);
+//         }
+//
+//         ALIPCalculatorTools.computeTouchdownPositionUsingRaibertHeuristicAndPolePlacement(
+//                 currentCoMPosition,
+//                 currentAngularMomentum,
+//                 swingSide,
+//                 desiredVelocity.getX(),
+//                 desiredVelocity.getY(),
+//                 parameters.getStanceWidth(swingSide).getDoubleValue(),
+//                 timeToReachGoal,
+//                 getStepDuration(swingSide),
+//                 getTransferDuration(swingSide),
+//                 robotModel.getTotalMass(),
+//                 parameters.getDesiredCoMHeight(swingSide).getDoubleValue(),
+//                 parameters.getPole(swingSide).getDoubleValue(),
+//                 desiredTouchdownPositionToPack,
+//                 referenceFrames.getSoleZUpFrame(swingSide.getOppositeSide()),
+//                 centerOfMassControlZUpFrame);
+//
+//         ALIPCalculatorTools.computeFutureStateUsingALIP(
+//                 currentCoMPosition,
+//                 currentAngularMomentum,
+//                 tempPosition,
+//                 tempAngularMomentum,
+//                 timeToReachGoal,
+//                 robotModel.getTotalMass(),
+//                 parameters.getDesiredCoMHeight(swingSide).getDoubleValue(),
+//                 referenceFrames.getSoleZUpFrame(swingSide.getOppositeSide()));
+//
+//      }
 
-         if (i == 0)
-         {
-            currentCoMPosition = estimates.getCenterOfMassPosition();
-            currentAngularMomentum = estimates.getContactPointAngularMomentum();
-            swingSide = startingSwingSide;
-            timeToReachGoal = timeRemainingInCurrentStep;
-         }
-         else if (i % 2 == 0)
-         {
-            currentCoMPosition = tempPosition;
-            currentAngularMomentum = tempAngularMomentum;
-            swingSide = startingSwingSide;
-            timeToReachGoal = getSwingDuration(swingSide);
-         }
-         else
-         {
-            currentCoMPosition = tempPosition;
-            currentAngularMomentum = tempAngularMomentum;
-            swingSide = startingSwingSide.getOppositeSide();
-            timeToReachGoal = getSwingDuration(swingSide);
-         }
+      tempCurrentCoMPosition.setMatchingFrame(estimates.getCenterOfMassPosition());
+      tempCurrentContactPointAngularMomentum.setMatchingFrame(estimates.getContactPointAngularMomentum());
+      tempCurrentStanceFootPosition.setFromReferenceFrame(referenceFrames.getSoleZUpFrame(startingSwingSide.getOppositeSide()));
 
-         ALIPCalculatorTools.computeTouchdownPositionUsingRaibertHeuristicAndPolePlacement(
-                 currentCoMPosition,
-                 currentAngularMomentum,
-                 swingSide,
-                 desiredVelocity.getX(),
-                 desiredVelocity.getY(),
-                 parameters.getStanceWidth(swingSide).getDoubleValue(),
-                 timeToReachGoal,
-                 getStepDuration(swingSide),
-                 getTransferDuration(swingSide),
-                 robotModel.getTotalMass(),
-                 parameters.getDesiredCoMHeight(swingSide).getDoubleValue(),
-                 parameters.getPole(swingSide).getDoubleValue(),
-                 desiredTouchdownPositionToPack,
-                 referenceFrames.getSoleZUpFrame(swingSide.getOppositeSide()),
-                 centerOfMassControlZUpFrame);
-
-         ALIPCalculatorTools.computeFutureStateUsingALIP(
-                 currentCoMPosition,
-                 currentAngularMomentum,
-                 tempPosition,
-                 tempAngularMomentum,
-                 timeToReachGoal,
-                 robotModel.getTotalMass(),
-                 parameters.getDesiredCoMHeight(swingSide).getDoubleValue(),
-                 referenceFrames.getSoleZUpFrame(swingSide.getOppositeSide()));
-
-      }
+      ALIPCalculatorTools.computeTouchdownPositionUsingRaibertHeuristicAndPolePlacement(
+            tempCurrentCoMPosition,
+            tempCurrentContactPointAngularMomentum,
+            tempCurrentStanceFootPosition,
+            touchdownPositionToPack,
+            startingSwingSide,
+            desiredVelocity.getX(),
+            desiredVelocity.getY(),
+            parameters.getStanceWidth(startingSwingSide).getDoubleValue(),
+            timeRemainingInCurrentStep,
+            getStepDuration(startingSwingSide),
+            getTransferDuration(startingSwingSide),
+            robotModel.getTotalMass(),
+            parameters.getDesiredCoMHeight(startingSwingSide).getDoubleValue(),
+            parameters.getPole(startingSwingSide).getDoubleValue(),
+            false);
    }
 
    private void calculateNetPendulumBase()
