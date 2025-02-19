@@ -103,6 +103,10 @@ public final class ControllerAPI
       inputMessageClasses.add(WholeBodyTrajectoryMessage.class);
       inputMessageClasses.add(WholeBodyStreamingMessage.class);
 
+      // Robot startup messages
+      inputMessageClasses.add(EnableHPUCommandMessage.class);
+      inputMessageClasses.add(MasterGainScaleControllerCommandMessage.class);
+
       // Statuses supported by bipedal walking controller {@link WalkingControllerState}
       outputMessageClasses.add(CapturabilityBasedStatus.class);
       outputMessageClasses.add(FootstepStatusMessage.class);
@@ -129,6 +133,10 @@ public final class ControllerAPI
       // Statuses supported by multi-contact controller, not in this repo
       outputMessageClasses.add(MultiContactBalanceStatus.class);
       outputMessageClasses.add(MultiContactTrajectoryStatus.class);
+
+      // Robot hardware status messages
+      outputMessageClasses.add(EnableHPUStatusMessage.class);
+      outputMessageClasses.add(MasterGainScaleControllerStatusMessage.class);
 
       // Setting the input messages with specific QoS
       inputMessageClassSpecificQoS.put(WholeBodyStreamingMessage.class, ROS2QosProfile.BEST_EFFORT());

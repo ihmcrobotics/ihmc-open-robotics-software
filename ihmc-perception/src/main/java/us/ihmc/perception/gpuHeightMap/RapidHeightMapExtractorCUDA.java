@@ -27,11 +27,11 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
 import java.net.URL;
 
-import static org.bytedeco.cuda.global.cudart.cudaFree;
-import static org.bytedeco.cuda.global.cudart.cudaStreamSynchronize;
+import static org.bytedeco.cuda.global.cudart.*;
 
 public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInterface
 {
+   private static final boolean PRINT_TIMING_FOR_KERNELS = false;
    static final int BLOCK_SIZE_XY = 32;
    static final HeightMapParameters heightMapParameters = new HeightMapParameters("GPU");
 
@@ -121,6 +121,12 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
          croppingKernel = heightMapCUDAProgram.loadKernel("croppingKernel");
          planOffsetKernel = heightMapCUDAProgram.loadKernel("planOffsetKernel");
          emptyRegisterKernel = heightMapCUDAProgram.loadKernel("heightMapRegistrationKernel");
+
+         updateKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
+         registerKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
+         croppingKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
+         planOffsetKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
+         emptyRegisterKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
 
          // Initialize matrices and images
          localHeightMapImage = new GpuMat(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_16UC1);

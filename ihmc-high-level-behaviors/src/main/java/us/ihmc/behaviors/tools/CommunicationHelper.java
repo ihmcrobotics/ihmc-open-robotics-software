@@ -211,9 +211,16 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
    }
 
    // TODO: Move to remote robot interface?
+   @Override
    public <T> void subscribeToControllerViaCallback(Class<T> messageClass, Consumer<T> callback)
    {
       subscribeViaCallback(HumanoidControllerAPI.getTopic(messageClass, robotModel.getSimpleRobotName()), callback);
+   }
+
+   @Override
+   public <T> void subscribeToControllerViaVolatileCallback(Class<T> messageClass, Consumer<T> callback)
+   {
+      subscribeViaVolatileCallback(HumanoidControllerAPI.getTopic(messageClass, robotModel.getSimpleRobotName()), callback);
    }
 
    @Override

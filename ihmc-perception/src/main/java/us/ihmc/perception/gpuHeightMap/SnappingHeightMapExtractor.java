@@ -25,6 +25,8 @@ import static us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractorCUDA.height
 
 public class SnappingHeightMapExtractor
 {
+   private static final boolean PRINT_TIMING_FOR_KERNELS = false;
+
    private final SteppableRegionCalculatorParameters steppableRegionParameters = new SteppableRegionCalculatorParameters();
 
    private final TerrainMapData terrainMapData;
@@ -61,6 +63,8 @@ public class SnappingHeightMapExtractor
 
          snappingHeightMapProgram = new CUDAProgram(kernelPath, heightMapUtilsHeaderPath, mathUtilsHeaderPath);
          snappingKernel = snappingHeightMapProgram.loadKernel("computeSnappedValuesKernel");
+
+         snappingKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
 
          snappingParametersHostPointer = new FloatPointer(17);
          snappingParametersDevicePointer = new FloatPointer();
