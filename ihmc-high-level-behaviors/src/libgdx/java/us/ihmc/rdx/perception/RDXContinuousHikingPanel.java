@@ -111,9 +111,9 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       this.robotModel = robotModel;
       this.syncedRobotModel = syncedRobotModel;
 
-      ros2Node.createSubscription(ContinuousHikingAPI.START_AND_GOAL_FOOTSTEPS, (s) -> onStartAndGoalPosesReceived(s.takeNextData()));
-      ros2Node.createSubscription(ContinuousHikingAPI.PLANNED_FOOTSTEPS, (s) -> onPlannedFootstepsReceived(s.takeNextData()));
-      ros2Node.createSubscription(ContinuousHikingAPI.MONTE_CARLO_FOOTSTEP_PLAN, (s) -> onMonteCarloPlanReceived(s.takeNextData()));
+      ros2Node.createSubscription2(ContinuousHikingAPI.START_AND_GOAL_FOOTSTEPS, this::onStartAndGoalPosesReceived);
+      ros2Node.createSubscription2(ContinuousHikingAPI.PLANNED_FOOTSTEPS, this::onPlannedFootstepsReceived);
+      ros2Node.createSubscription2(ContinuousHikingAPI.MONTE_CARLO_FOOTSTEP_PLAN, this::onMonteCarloPlanReceived);
 
       commandPublisher = ros2Node.createPublisher(ContinuousHikingAPI.CONTINUOUS_HIKING_COMMAND);
 
