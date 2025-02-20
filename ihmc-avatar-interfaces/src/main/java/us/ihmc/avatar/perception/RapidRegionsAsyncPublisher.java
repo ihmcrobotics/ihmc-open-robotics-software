@@ -59,7 +59,7 @@ public class RapidRegionsAsyncPublisher
          FramePlanarRegionsList frameRegions = new FramePlanarRegionsList();
          extractor.updateRobotConfigurationData(syncedRobot.getLatestRobotConfigurationData());
          extractor.update(bytedecoDepthImage, syncedRobot.getReferenceFrames().getSteppingCameraFrame(), frameRegions);
-         PerceptionMessageTools.publishFramePlanarRegionsList(frameRegions, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, ros2Helper);
+         PerceptionMessageTools.publishFramePlanarRegionsList(frameRegions, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, ros2Helper.getROS2Node());
          extractor.setProcessing(false);
       });
    }

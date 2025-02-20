@@ -95,7 +95,7 @@ public class RDXSceneGraphDemo
             ros2Node = new ROS2NodeBuilder().build("perception_scene_graph_demo");
             ros2Helper = new ROS2Helper(ros2Node);
 
-            detectionManager = new DetectionManager(ros2Helper);
+            detectionManager = new DetectionManager(ros2Node);
 
             // Add perception visualizers
             perceptionVisualizerPanel = new RDXPerceptionVisualizersPanel();
@@ -125,7 +125,7 @@ public class RDXSceneGraphDemo
             zed2ColoredPointCloudVisualizer.setActive(true);
             perceptionVisualizerPanel.addVisualizer(zed2ColoredPointCloudVisualizer);
 
-            perceptionVisualizerPanel.addVisualizer(new RDXDetectionManagerSettings("Detection Manager Settings", ros2Helper));
+            perceptionVisualizerPanel.addVisualizer(new RDXDetectionManagerSettings("Detection Manager Settings", ros2Node));
 
             RDXROS2YOLOv8Visualizer yoloSettingsVisualizer = new RDXROS2YOLOv8Visualizer("YOLOv8", ros2Node, PerceptionAPI.YOLO_ANNOTATED_IMAGE);
             yoloSettingsVisualizer.setActive(true);
@@ -161,7 +161,7 @@ public class RDXSceneGraphDemo
 
             // Add rapid region parameters panel
             ImGuiRemoteROS2StoredPropertySet rapidRegionsParameterPanel
-                  = new ImGuiRemoteROS2StoredPropertySet(ros2Helper,
+                  = new ImGuiRemoteROS2StoredPropertySet(ros2Node,
                                                          new RapidRegionsExtractorParameters(),
                                                          PerceptionComms.PERSPECTIVE_RAPID_REGION_PARAMETERS);
             baseUI.getImGuiPanelManager().addPanel(rapidRegionsParameterPanel.createPanel());
@@ -188,7 +188,7 @@ public class RDXSceneGraphDemo
                   planarRegionsExtractor = new RapidPlanarRegionsExtractor(planarRegionsOpenCLManager, imageHeight, imageWidth, fx, fy, cx, cy);
                   planarRegionsExtractor.getDebugger().setEnabled(false);
 
-                  planarRegionsExtractorParameterSync = new ROS2StoredPropertySet<>(ros2Helper,
+                  planarRegionsExtractorParameterSync = new ROS2StoredPropertySet<>(ros2Node,
                                                                                     PerceptionComms.PERSPECTIVE_RAPID_REGION_PARAMETERS,
                                                                                     planarRegionsExtractor.getParameters());
                }
@@ -209,7 +209,7 @@ public class RDXSceneGraphDemo
 
                newPlanarRegions.set(planarRegionsInWorldFrame);
 
-               PerceptionMessageTools.publishFramePlanarRegionsList(framePlanarRegionsList, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, ros2Helper);
+               PerceptionMessageTools.publishFramePlanarRegionsList(framePlanarRegionsList, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, ros2Node);
 
                zedDepthImage.release();
 
