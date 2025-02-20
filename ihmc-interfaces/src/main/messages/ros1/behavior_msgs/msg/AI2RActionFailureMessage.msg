@@ -21,10 +21,4 @@ geometry_msgs/Point position_error
 # Error in orientation for the action
 geometry_msgs/Quaternion orientation_error
 
-# Last commanded position (in action_frame) for the action
-geometry_msgs/Point desired_position
-
-# Last commanded orientation (in action_frame) for the action
-geometry_msgs/Quaternion desired_orientation
-
 

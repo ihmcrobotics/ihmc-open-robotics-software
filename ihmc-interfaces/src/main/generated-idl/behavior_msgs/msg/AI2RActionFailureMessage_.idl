@@ -44,14 +44,6 @@ module behavior_msgs
          * Error in orientation for the action
          */
         geometry_msgs::msg::dds::Quaternion orientation_error;
-        /**
-         * Last commanded position (in action_frame) for the action
-         */
-        geometry_msgs::msg::dds::Point desired_position;
-        /**
-         * Last commanded orientation (in action_frame) for the action
-         */
-        geometry_msgs::msg::dds::Quaternion desired_orientation;
       };
     };
   };

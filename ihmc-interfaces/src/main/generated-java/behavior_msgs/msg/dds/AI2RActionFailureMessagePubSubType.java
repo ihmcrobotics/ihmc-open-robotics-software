@@ -15,7 +15,7 @@ public class AI2RActionFailureMessagePubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "c646b6c31180a47c29f915c287239a0ab8cf713742e35605a4f896851203e37c";
+   		return "234e04af2f9471424e0423630a28ebaf6c4d5e6fdff47030ab98012fffe3e855";
    }
    
    @Override
@@ -63,10 +63,6 @@ public class AI2RActionFailureMessagePubSubType implements us.ihmc.pubsub.TopicD
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
-
-      current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
-
 
       return current_alignment - initial_alignment;
    }
@@ -96,10 +92,6 @@ public class AI2RActionFailureMessagePubSubType implements us.ihmc.pubsub.TopicD
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getOrientationError(), current_alignment);
 
-      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getDesiredPosition(), current_alignment);
-
-      current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getDesiredOrientation(), current_alignment);
-
 
       return current_alignment - initial_alignment;
    }
@@ -124,8 +116,6 @@ public class AI2RActionFailureMessagePubSubType implements us.ihmc.pubsub.TopicD
 
       geometry_msgs.msg.dds.PointPubSubType.write(data.getPositionError(), cdr);
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getOrientationError(), cdr);
-      geometry_msgs.msg.dds.PointPubSubType.write(data.getDesiredPosition(), cdr);
-      geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getDesiredOrientation(), cdr);
    }
 
    public static void read(behavior_msgs.msg.dds.AI2RActionFailureMessage data, us.ihmc.idl.CDR cdr)
@@ -139,8 +129,6 @@ public class AI2RActionFailureMessagePubSubType implements us.ihmc.pubsub.TopicD
       	
       geometry_msgs.msg.dds.PointPubSubType.read(data.getPositionError(), cdr);	
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getOrientationError(), cdr);	
-      geometry_msgs.msg.dds.PointPubSubType.read(data.getDesiredPosition(), cdr);	
-      geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getDesiredOrientation(), cdr);	
 
    }
 
@@ -156,10 +144,6 @@ public class AI2RActionFailureMessagePubSubType implements us.ihmc.pubsub.TopicD
 
       ser.write_type_a("orientation_error", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getOrientationError());
 
-      ser.write_type_a("desired_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getDesiredPosition());
-
-      ser.write_type_a("desired_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getDesiredOrientation());
-
    }
 
    @Override
@@ -173,10 +157,6 @@ public class AI2RActionFailureMessagePubSubType implements us.ihmc.pubsub.TopicD
       ser.read_type_a("position_error", new geometry_msgs.msg.dds.PointPubSubType(), data.getPositionError());
 
       ser.read_type_a("orientation_error", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getOrientationError());
-
-      ser.read_type_a("desired_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getDesiredPosition());
-
-      ser.read_type_a("desired_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getDesiredOrientation());
 
    }
 

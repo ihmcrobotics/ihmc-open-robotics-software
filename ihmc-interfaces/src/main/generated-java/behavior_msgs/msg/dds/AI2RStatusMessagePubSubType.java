@@ -15,7 +15,7 @@ public class AI2RStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "c52724e3260c0423bfbfb0c5587cd056fc7402d34d8a9fe2f0407c08519a283e";
+   		return "2d93242f809c340c15434aad6979f6ad226a7851a3883b02ac1399ba0593901d";
    }
    
    @Override

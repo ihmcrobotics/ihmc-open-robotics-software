@@ -39,14 +39,6 @@ public class AI2RActionFailureMessage extends Packet<AI2RActionFailureMessage> i
             * Error in orientation for the action
             */
    public us.ihmc.euclid.tuple4D.Quaternion orientation_error_;
-   /**
-            * Last commanded position (in action_frame) for the action
-            */
-   public us.ihmc.euclid.tuple3D.Point3D desired_position_;
-   /**
-            * Last commanded orientation (in action_frame) for the action
-            */
-   public us.ihmc.euclid.tuple4D.Quaternion desired_orientation_;
 
    public AI2RActionFailureMessage()
    {
@@ -55,8 +47,6 @@ public class AI2RActionFailureMessage extends Packet<AI2RActionFailureMessage> i
       action_frame_ = new java.lang.StringBuilder(255);
       position_error_ = new us.ihmc.euclid.tuple3D.Point3D();
       orientation_error_ = new us.ihmc.euclid.tuple4D.Quaternion();
-      desired_position_ = new us.ihmc.euclid.tuple3D.Point3D();
-      desired_orientation_ = new us.ihmc.euclid.tuple4D.Quaternion();
    }
 
    public AI2RActionFailureMessage(AI2RActionFailureMessage other)
@@ -82,8 +72,6 @@ public class AI2RActionFailureMessage extends Packet<AI2RActionFailureMessage> i
 
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.position_error_, position_error_);
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.orientation_error_, orientation_error_);
-      geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.desired_position_, desired_position_);
-      geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.desired_orientation_, desired_orientation_);
    }
 
    /**
@@ -207,24 +195,6 @@ public class AI2RActionFailureMessage extends Packet<AI2RActionFailureMessage> i
    }
 
 
-   /**
-            * Last commanded position (in action_frame) for the action
-            */
-   public us.ihmc.euclid.tuple3D.Point3D getDesiredPosition()
-   {
-      return desired_position_;
-   }
-
-
-   /**
-            * Last commanded orientation (in action_frame) for the action
-            */
-   public us.ihmc.euclid.tuple4D.Quaternion getDesiredOrientation()
-   {
-      return desired_orientation_;
-   }
-
-
    public static Supplier<AI2RActionFailureMessagePubSubType> getPubSubType()
    {
       return AI2RActionFailureMessagePubSubType::new;
@@ -254,8 +224,6 @@ public class AI2RActionFailureMessage extends Packet<AI2RActionFailureMessage> i
 
       if (!this.position_error_.epsilonEquals(other.position_error_, epsilon)) return false;
       if (!this.orientation_error_.epsilonEquals(other.orientation_error_, epsilon)) return false;
-      if (!this.desired_position_.epsilonEquals(other.desired_position_, epsilon)) return false;
-      if (!this.desired_orientation_.epsilonEquals(other.desired_orientation_, epsilon)) return false;
 
       return true;
    }
@@ -281,8 +249,6 @@ public class AI2RActionFailureMessage extends Packet<AI2RActionFailureMessage> i
 
       if (!this.position_error_.equals(otherMyClass.position_error_)) return false;
       if (!this.orientation_error_.equals(otherMyClass.orientation_error_)) return false;
-      if (!this.desired_position_.equals(otherMyClass.desired_position_)) return false;
-      if (!this.desired_orientation_.equals(otherMyClass.desired_orientation_)) return false;
 
       return true;
    }
@@ -306,11 +272,7 @@ public class AI2RActionFailureMessage extends Packet<AI2RActionFailureMessage> i
       builder.append("position_error=");
       builder.append(this.position_error_);      builder.append(", ");
       builder.append("orientation_error=");
-      builder.append(this.orientation_error_);      builder.append(", ");
-      builder.append("desired_position=");
-      builder.append(this.desired_position_);      builder.append(", ");
-      builder.append("desired_orientation=");
-      builder.append(this.desired_orientation_);
+      builder.append(this.orientation_error_);
       builder.append("}");
       return builder.toString();
    }

@@ -1,6 +1,8 @@
 package us.ihmc.behaviors.ai2r;
 
 import behavior_msgs.msg.dds.AI2RActionFailureMessage;
+import behavior_msgs.msg.dds.AI2RHandPoseAdaptationMessage;
+import behavior_msgs.msg.dds.AI2RNavigationMessage;
 import behavior_msgs.msg.dds.AI2RObjectMessage;
 import behavior_msgs.msg.dds.AI2RStatusMessage;
 import controller_msgs.msg.dds.AbortWalkingMessage;
@@ -19,6 +21,7 @@ import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTStatusFootstepList;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -63,37 +66,65 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
       {
          LogTools.info("Received command message: %s".formatted(message));
 
-         // Set goals for GoTo behavior
-         String referenceFrame = message.getGotoReferenceFrameName().toString();
-         Point3D goalStancePoint = message.getGotoGoalStancePoint();
-         Point3D goalFocalPoint = message.getGotoGoalFocalPoint();
-         for (var leaf : state.getActionSequence().getOrderedLeaves())
+         // Prepare commanded behavior
+         String behaviorToExecuteName = message.getBehaviorToExecuteAsString();
+         int commandedBehaviorIndex = -1;
+         for (int i = 0; i < state.getCheckPoints().size(); i++)
          {
-            if (leaf.getDefinition().getName().contains("Go to Action") && leaf instanceof FootstepPlanActionState gotoActionState)
+            if (state.getCheckPoints().get(i).getDefinition().getName().toLowerCase().equals(behaviorToExecuteName))
             {
-               gotoActionState.getDefinition().setParentFrameName(referenceFrame);
-               gotoActionState.getDefinition().getGoalStancePoint().getValue().set(goalStancePoint);
-               gotoActionState.getDefinition().getGoalFocalPoint().getValue().set(goalFocalPoint);
+               commandedBehaviorIndex = state.getCheckPoints().get(i).getLeafIndex();
                break;
             }
          }
 
-         // Trigger specified behavior
-         String checkPointName = message.getBehaviorToExecuteAsString();
-         for (int i = 0; i < state.getCheckPoints().size(); i++)
+         // GoTo behavior - Navigation
+         if (behaviorToExecuteName.toLowerCase().contains("go"))
          {
-            if (state.getCheckPoints().get(i).getDefinition().getName().equals(checkPointName))
+            AI2RNavigationMessage navigationMessage = message.getNavigation();
+            // Set goals for GoTo behavior
+            String referenceFrame = navigationMessage.getReferenceFrameName().toString();
+            Point3D goalStancePoint = navigationMessage.getGoalStancePoint();
+            Point3D goalFocalPoint = navigationMessage.getGoalFocalPoint();
+            for (var leaf : state.getActionSequence().getOrderedLeaves())
             {
-               // Reset state of failed leaves
-               for (int j = 0; j < failedLeaves.size(); j++)
+               if (leaf.getDefinition().getName().toLowerCase().contains("go to action") && leaf instanceof FootstepPlanActionState gotoActionState)
                {
-                  failedLeaves.get(j).setFailed(false);
+                  gotoActionState.getDefinition().setParentFrameName(referenceFrame);
+                  gotoActionState.getDefinition().getGoalStancePoint().getValue().set(goalStancePoint);
+                  gotoActionState.getDefinition().getGoalFocalPoint().getValue().set(goalFocalPoint);
+                  break;
                }
-               failedLeaves.clear();
-               state.getActionSequence().setExecutionNextIndex(state.getCheckPoints().get(i).getLeafIndex());
-               state.getActionSequence().setAutomaticExecution(true);
-               break;
             }
+         }
+         else  // Hand Pose Adaptation
+         {
+            AI2RHandPoseAdaptationMessage handMessage = message.getHandPoseAdaptation();
+            for (var leaf : state.getActionSequence().getOrderedLeaves())
+            {
+               if (leaf.getLeafIndex() > commandedBehaviorIndex &&
+                   leaf.getDefinition().getName().contains(handMessage.getActionName()) &&
+                   leaf instanceof HandPoseActionState handPoseActionState)
+               {
+                  handPoseActionState.getDefinition().setPalmParentFrameName(handMessage.getReferenceFrameNameAsString());
+                  RigidBodyTransform adaptedPose = new RigidBodyTransform(handMessage.getNewOrientation(), handMessage.getNewPosition());
+                  handPoseActionState.getDefinition().getPalmTransformToParent().setValue(adaptedPose ,1e-5);
+                  break;
+               }
+            }
+         }
+
+         //Trigger commanded behavior
+         if (commandedBehaviorIndex >= 0)
+         {
+            // Reset state of failed leaves
+            for (int j = 0; j < failedLeaves.size(); j++)
+            {
+               failedLeaves.get(j).setFailed(false);
+            }
+            failedLeaves.clear();
+            state.getActionSequence().setExecutionNextIndex(commandedBehaviorIndex);
+            state.getActionSequence().setAutomaticExecution(true);
          }
       });
    }
