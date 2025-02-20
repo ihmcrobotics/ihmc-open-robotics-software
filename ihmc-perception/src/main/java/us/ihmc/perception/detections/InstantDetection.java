@@ -30,17 +30,17 @@ public class InstantDetection
    private final Pose3DReadOnly pose;
    private final Instant detectionTime;
 
-   public InstantDetection(String detectedObjectClass, double confidence, Pose3DReadOnly currentPoseToCopy, Instant detectionTime)
+   public InstantDetection(String detectedObjectClass, double confidence, Pose3DReadOnly pose, Instant detectionTime)
    {
-      this(detectedObjectClass, detectedObjectClass, confidence, currentPoseToCopy, detectionTime);
+      this(detectedObjectClass, detectedObjectClass, confidence, pose, detectionTime);
    }
 
-   public InstantDetection(String detectedObjectClass, String detectedObjectName, double confidence, Pose3DReadOnly currentPoseToCopy, Instant detectionTime)
+   public InstantDetection(String detectedObjectClass, String detectedObjectName, double confidence, Pose3DReadOnly pose, Instant detectionTime)
    {
       this.detectedObjectClass = detectedObjectClass;
       this.detectedObjectName = detectedObjectName;
       this.confidence = confidence;
-      this.pose = new Pose3D(currentPoseToCopy);
+      this.pose = pose;
       this.detectionTime = detectionTime;
    }
 
