@@ -176,7 +176,7 @@ public class StructuralPerceptionProcessWithDriver
 
       LogTools.info("Extracted {} planar regions", planarRegionsList.getNumberOfPlanarRegions());
 
-      PerceptionMessageTools.publishFramePlanarRegionsList(framePlanarRegionsList, frameRegionsTopic, ros2Helper.getROS2Node());
+      PerceptionMessageTools.publishFramePlanarRegionsList(framePlanarRegionsList, frameRegionsTopic, ros2Helper);
    }
 
    private void extractFramePlanarRegionsList(BytedecoImage depthImage, ReferenceFrame cameraFrame, FramePlanarRegionsList framePlanarRegionsList)
