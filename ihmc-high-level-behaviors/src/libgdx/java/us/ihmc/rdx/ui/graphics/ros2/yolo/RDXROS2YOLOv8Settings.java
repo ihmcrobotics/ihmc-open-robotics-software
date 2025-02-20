@@ -68,8 +68,7 @@ public class RDXROS2YOLOv8Settings
          modelEnables.add(new ImBoolean(enableModelsOnInitialize));
       }
 
-      // TODO: Call this when the remove method is fixed
-      // availableModelsSubscriber.remove();
+      parametersChanged.set();
    }
 
    public void renderSettings()
