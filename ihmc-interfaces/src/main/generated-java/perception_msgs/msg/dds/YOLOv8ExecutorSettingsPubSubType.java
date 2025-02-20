@@ -15,7 +15,7 @@ public class YOLOv8ExecutorSettingsPubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "bcdeeeef907d2e79a9810120d1f448b9364d22e47fc145d914744f95ace83eb9";
+   		return "f503f5cde3531d91fde290b6513639a227ade21ba31a096ad53344b2d0720662";
    }
    
    @Override
@@ -52,11 +52,11 @@ public class YOLOv8ExecutorSettingsPubSubType implements us.ihmc.pubsub.TopicDat
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 8; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 16; ++i0)
       {
         current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       }
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 8; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 16; ++i0)
       {
           current_alignment += perception_msgs.msg.dds.YOLOv8ModelSettingsPubSubType.getMaxCdrSerializedSize(current_alignment);}
 
@@ -88,13 +88,13 @@ public class YOLOv8ExecutorSettingsPubSubType implements us.ihmc.pubsub.TopicDat
 
    public static void write(perception_msgs.msg.dds.YOLOv8ExecutorSettings data, us.ihmc.idl.CDR cdr)
    {
-      if(data.getModelsToRun().size() <= 8)
+      if(data.getModelsToRun().size() <= 16)
       cdr.write_type_e(data.getModelsToRun());else
-          throw new RuntimeException("models_to_run field exceeds the maximum length: %d > %d".formatted(data.getModelsToRun().size(), 8));
+          throw new RuntimeException("models_to_run field exceeds the maximum length: %d > %d".formatted(data.getModelsToRun().size(), 16));
 
-      if(data.getModelSettings().size() <= 8)
+      if(data.getModelSettings().size() <= 16)
       cdr.write_type_e(data.getModelSettings());else
-          throw new RuntimeException("model_settings field exceeds the maximum length: %d > %d".formatted(data.getModelSettings().size(), 8));
+          throw new RuntimeException("model_settings field exceeds the maximum length: %d > %d".formatted(data.getModelSettings().size(), 16));
 
    }
 

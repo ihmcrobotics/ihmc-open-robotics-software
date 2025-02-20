@@ -22,7 +22,7 @@ public class YOLOv8AvailableModels extends Packet<YOLOv8AvailableModels> impleme
 
    public YOLOv8AvailableModels()
    {
-      available_yolo_models_ = new us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.YOLOv8ModelInfo> (8, new perception_msgs.msg.dds.YOLOv8ModelInfoPubSubType());
+      available_yolo_models_ = new us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.YOLOv8ModelInfo> (16, new perception_msgs.msg.dds.YOLOv8ModelInfoPubSubType());
 
    }
 
