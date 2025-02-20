@@ -29,6 +29,7 @@ import us.ihmc.perception.imageMessage.PixelFormat;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -83,7 +84,8 @@ public class YOLOv8Model
    public YOLOv8Model(URL modelBaseDirectory)
    {
       // Get name & onnx file path
-      modelName = modelBaseDirectory.getFile();
+      Path path = Path.of(modelBaseDirectory.getPath());
+      modelName = path.getFileName().toString();
 
       URL classNamesFileURL = YOLOv8Tools.getClassNamesFile(modelBaseDirectory);
       URL onnxFileURL = YOLOv8Tools.getONNXFile(modelBaseDirectory);
