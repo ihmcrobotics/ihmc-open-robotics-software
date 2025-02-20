@@ -25,8 +25,6 @@ int8 CHECKPOINT_NODE=8
 
 int8 DOOR_TRAVERSAL=9
 
-int8 BUILDING_EXPLORATION=10
-
 int8 CHEST_ORIENTATION_ACTION=11
 
 int8 FOOTSTEP_PLAN_ACTION=12
@@ -84,8 +82,6 @@ behavior_msgs/GotoNodeStateMessage[] goto_nodes
 behavior_msgs/CheckPointNodeStateMessage[] checkpoint_nodes
 
 behavior_msgs/DoorTraversalStateMessage[] door_traversals
-
-behavior_msgs/BuildingExplorationStateMessage[] building_explorations
 
 behavior_msgs/ChestOrientationActionStateMessage[] chest_orientation_actions
 

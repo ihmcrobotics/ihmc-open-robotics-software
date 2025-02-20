@@ -1,17 +1,42 @@
 package us.ihmc.behaviors.behaviorTree.ros2;
 
-import behavior_msgs.msg.dds.*;
+import behavior_msgs.msg.dds.AI2RNodeStateMessage;
+import behavior_msgs.msg.dds.ActionSequenceStateMessage;
+import behavior_msgs.msg.dds.BasicNodeStateMessage;
+import behavior_msgs.msg.dds.BehaviorTreeRootNodeStateMessage;
+import behavior_msgs.msg.dds.BehaviorTreeStateMessage;
+import behavior_msgs.msg.dds.CheckPointNodeStateMessage;
+import behavior_msgs.msg.dds.ChestOrientationActionStateMessage;
+import behavior_msgs.msg.dds.ConditionNodeStateMessage;
+import behavior_msgs.msg.dds.DoorTraversalStateMessage;
+import behavior_msgs.msg.dds.FallbackNodeStateMessage;
+import behavior_msgs.msg.dds.FootPoseActionStateMessage;
+import behavior_msgs.msg.dds.FootstepPlanActionStateMessage;
+import behavior_msgs.msg.dds.GotoNodeStateMessage;
+import behavior_msgs.msg.dds.HandPoseActionStateMessage;
+import behavior_msgs.msg.dds.HandWrenchActionStateMessage;
+import behavior_msgs.msg.dds.PelvisHeightOrientationActionStateMessage;
+import behavior_msgs.msg.dds.SakeHandCommandActionStateMessage;
+import behavior_msgs.msg.dds.ScrewPrimitiveActionStateMessage;
+import behavior_msgs.msg.dds.WaitDurationActionStateMessage;
 import us.ihmc.behaviors.ai2r.AI2RNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
-import us.ihmc.behaviors.buildingExploration.BuildingExplorationState;
 import us.ihmc.behaviors.door.DoorTraversalState;
-import us.ihmc.behaviors.sequence.actions.CheckPointNodeState;
 import us.ihmc.behaviors.logic.ConditionNodeState;
 import us.ihmc.behaviors.logic.GotoNodeState;
 import us.ihmc.behaviors.sequence.ActionSequenceState;
 import us.ihmc.behaviors.sequence.FallbackNodeState;
-import us.ihmc.behaviors.sequence.actions.*;
+import us.ihmc.behaviors.sequence.actions.CheckPointNodeState;
+import us.ihmc.behaviors.sequence.actions.ChestOrientationActionState;
+import us.ihmc.behaviors.sequence.actions.FootPoseActionState;
+import us.ihmc.behaviors.sequence.actions.FootstepPlanActionState;
+import us.ihmc.behaviors.sequence.actions.HandPoseActionState;
+import us.ihmc.behaviors.sequence.actions.HandWrenchActionState;
+import us.ihmc.behaviors.sequence.actions.PelvisHeightOrientationActionState;
+import us.ihmc.behaviors.sequence.actions.SakeHandCommandActionState;
+import us.ihmc.behaviors.sequence.actions.ScrewPrimitiveActionState;
+import us.ihmc.behaviors.sequence.actions.WaitDurationActionState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.log.LogTools;
 
@@ -36,7 +61,6 @@ public class ROS2BehaviorTreeMessageTools
       treeStateMessage.getGotoNodes().clear();
       treeStateMessage.getCheckpointNodes().clear();
       treeStateMessage.getDoorTraversals().clear();
-      treeStateMessage.getBuildingExplorations().clear();
       treeStateMessage.getChestOrientationActions().clear();
       treeStateMessage.getFootstepPlanActions().clear();
       treeStateMessage.getHandPoseActions().clear();
@@ -109,12 +133,6 @@ public class ROS2BehaviorTreeMessageTools
             treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.DOOR_TRAVERSAL);
             treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getDoorTraversals().size());
             doorTraversalState.toMessage(treeStateMessage.getDoorTraversals().add());
-         }
-         else if (nodeState instanceof BuildingExplorationState buildingExplorationState)
-         {
-            treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.BUILDING_EXPLORATION);
-            treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getDoorTraversals().size());
-            buildingExplorationState.toMessage(treeStateMessage.getBuildingExplorations().add());
          }
          else if (nodeState instanceof ChestOrientationActionState chestOrientationActionState)
          {
@@ -222,10 +240,6 @@ public class ROS2BehaviorTreeMessageTools
       else if (nodeState instanceof DoorTraversalState doorTraversalState)
       {
          doorTraversalState.fromMessage(subscriptionNode.getDoorTraversalStateMessage());
-      }
-      else if (nodeState instanceof BuildingExplorationState buildingExplorationState)
-      {
-         buildingExplorationState.fromMessage(subscriptionNode.getBuildingExplorationStateMessage());
       }
       else if (nodeState instanceof ChestOrientationActionState chestOrientationActionState)
       {
@@ -344,13 +358,6 @@ public class ROS2BehaviorTreeMessageTools
             subscriptionNode.setDoorTraversalStateMessage(doorTraversalStateMessage);
             subscriptionNode.setBehaviorTreeNodeStateMessage(doorTraversalStateMessage.getState());
             subscriptionNode.setBehaviorTreeNodeDefinitionMessage(doorTraversalStateMessage.getDefinition().getDefinition());
-         }
-         case BehaviorTreeStateMessage.BUILDING_EXPLORATION ->
-         {
-            BuildingExplorationStateMessage buildingExplorationStateMessage = treeStateMessage.getBuildingExplorations().get(indexInTypesList);
-            subscriptionNode.setBuildingExplorationStateMessage(buildingExplorationStateMessage);
-            subscriptionNode.setBehaviorTreeNodeStateMessage(buildingExplorationStateMessage.getState());
-            subscriptionNode.setBehaviorTreeNodeDefinitionMessage(buildingExplorationStateMessage.getDefinition().getDefinition());
          }
          case BehaviorTreeStateMessage.CHEST_ORIENTATION_ACTION ->
          {

@@ -16,7 +16,6 @@ byte CONDITION_NODE = 6
 byte GOTO_NODE = 7
 byte CHECKPOINT_NODE = 8
 byte DOOR_TRAVERSAL = 9
-byte BUILDING_EXPLORATION = 10
 
 byte CHEST_ORIENTATION_ACTION = 11
 byte FOOTSTEP_PLAN_ACTION = 12
@@ -67,8 +66,6 @@ behavior_msgs/GotoNodeStateMessage[<=120] goto_nodes
 behavior_msgs/CheckPointNodeStateMessage[<=120] checkpoint_nodes
 
 behavior_msgs/DoorTraversalStateMessage[<=120] door_traversals
-
-behavior_msgs/BuildingExplorationStateMessage[<=120] building_explorations
 
 behavior_msgs/ChestOrientationActionStateMessage[<=120] chest_orientation_actions
 

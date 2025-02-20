@@ -15,7 +15,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "92bf4f6ca7e25a2d062a807fb6001e09139202cd4267e6933209614e5001e194";
+   		return "8aee092b5bac3553fae811ff2007300d3b5d6d21960c5258cbb9bfc484092e86";
    }
    
    @Override
@@ -94,9 +94,6 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 120; ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.DoorTraversalStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 120; ++i0)
-      {
-          current_alignment += behavior_msgs.msg.dds.BuildingExplorationStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 120; ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.ChestOrientationActionStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
@@ -206,11 +203,6 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
           current_alignment += behavior_msgs.msg.dds.DoorTraversalStateMessagePubSubType.getCdrSerializedSize(data.getDoorTraversals().get(i0), current_alignment);}
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for(int i0 = 0; i0 < data.getBuildingExplorations().size(); ++i0)
-      {
-          current_alignment += behavior_msgs.msg.dds.BuildingExplorationStateMessagePubSubType.getCdrSerializedSize(data.getBuildingExplorations().get(i0), current_alignment);}
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getChestOrientationActions().size(); ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.ChestOrientationActionStateMessagePubSubType.getCdrSerializedSize(data.getChestOrientationActions().get(i0), current_alignment);}
@@ -315,10 +307,6 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       cdr.write_type_e(data.getDoorTraversals());else
           throw new RuntimeException("door_traversals field exceeds the maximum length");
 
-      if(data.getBuildingExplorations().size() <= 120)
-      cdr.write_type_e(data.getBuildingExplorations());else
-          throw new RuntimeException("building_explorations field exceeds the maximum length");
-
       if(data.getChestOrientationActions().size() <= 120)
       cdr.write_type_e(data.getChestOrientationActions());else
           throw new RuntimeException("chest_orientation_actions field exceeds the maximum length");
@@ -377,7 +365,6 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       cdr.read_type_e(data.getGotoNodes());	
       cdr.read_type_e(data.getCheckpointNodes());	
       cdr.read_type_e(data.getDoorTraversals());	
-      cdr.read_type_e(data.getBuildingExplorations());	
       cdr.read_type_e(data.getChestOrientationActions());	
       cdr.read_type_e(data.getFootstepPlanActions());	
       cdr.read_type_e(data.getSakeHandCommandActions());	
@@ -411,7 +398,6 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       ser.write_type_e("goto_nodes", data.getGotoNodes());
       ser.write_type_e("checkpoint_nodes", data.getCheckpointNodes());
       ser.write_type_e("door_traversals", data.getDoorTraversals());
-      ser.write_type_e("building_explorations", data.getBuildingExplorations());
       ser.write_type_e("chest_orientation_actions", data.getChestOrientationActions());
       ser.write_type_e("footstep_plan_actions", data.getFootstepPlanActions());
       ser.write_type_e("sake_hand_command_actions", data.getSakeHandCommandActions());
@@ -444,7 +430,6 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       ser.read_type_e("goto_nodes", data.getGotoNodes());
       ser.read_type_e("checkpoint_nodes", data.getCheckpointNodes());
       ser.read_type_e("door_traversals", data.getDoorTraversals());
-      ser.read_type_e("building_explorations", data.getBuildingExplorations());
       ser.read_type_e("chest_orientation_actions", data.getChestOrientationActions());
       ser.read_type_e("footstep_plan_actions", data.getFootstepPlanActions());
       ser.read_type_e("sake_hand_command_actions", data.getSakeHandCommandActions());
