@@ -37,7 +37,7 @@ import us.ihmc.sensors.zed.ZEDSVOPlaybackSensor;
 import us.ihmc.tools.IHMCCommonPaths;
 
 import java.io.File;
-import java.nio.file.Path;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -100,7 +100,7 @@ public class RDXYOLOv8PipelineDemo
 
    private RDXYOLOv8PipelineDemo()
    {
-      for (Path yoloModelDirectory : YOLOv8Tools.getYOLOModelDirectories())
+      for (URL yoloModelDirectory : YOLOv8Tools.getYOLOModelDirectories())
       {
          YOLOv8Model model = new YOLOv8Model(yoloModelDirectory);
 

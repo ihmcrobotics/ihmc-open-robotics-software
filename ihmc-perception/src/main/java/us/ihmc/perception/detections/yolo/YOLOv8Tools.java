@@ -19,6 +19,7 @@ import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.tools.io.resources.ResourceTools;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -161,23 +162,27 @@ public class YOLOv8Tools
       }
    }
 
-   public static List<Path> getYOLOModelDirectories(URL baseModelsDirectory)
+   public static List<URL> getYOLOModelDirectories(URL baseModelsDirectory)
    {
       if (baseModelsDirectory == null)
          throw new NullPointerException("Base YOLO Model Directory is NULL");
 
-      List<Path> directories = new ArrayList<>();
+      List<URL> directories = new ArrayList<>();
       try
       {
          ResourceTools.processAsPath(baseModelsDirectory, modelsDirectoryPath ->
          {
             try (DirectoryStream<Path> stream = Files.newDirectoryStream(modelsDirectoryPath))
             {
-               stream.forEach(directory ->
+               for (Path directory : stream)
                {
                   if (isValidYOLOModelDirectory(directory))
-                     directories.add(directory);
-               });
+                     directories.add(new URL(baseModelsDirectory, directory.getFileName().toString()));
+               }
+            }
+            catch (MalformedURLException exception)
+            {
+               throw new RuntimeException(exception);
             }
          });
       }
@@ -189,9 +194,9 @@ public class YOLOv8Tools
       return directories;
    }
 
-   public static List<Path> getYOLOModelDirectories()
+   public static List<URL> getYOLOModelDirectories()
    {
-      return getYOLOModelDirectories(YOLOv8Tools.class.getResource("/yolo/models"));
+      return getYOLOModelDirectories(YOLOv8Tools.class.getResource("/yolo/models/"));
    }
 
    public static boolean isValidYOLOModelDirectory(Path yoloModelDirectory)
@@ -207,12 +212,12 @@ public class YOLOv8Tools
       }
    }
 
-   public static Path getONNXFile(URL yoloModelDirectory)
+   public static URL getONNXFile(URL yoloModelDirectory)
    {
       if (yoloModelDirectory == null)
          throw new NullPointerException("YOLO Model Directory is NULL");
 
-      MutableObject<Path> onnxFilePath = new MutableObject<>(null);
+      MutableObject<URL> onnxFileURL = new MutableObject<>(null);
       try
       {
          ResourceTools.processAsPath(yoloModelDirectory, directoryPath ->
@@ -220,7 +225,12 @@ public class YOLOv8Tools
             try (Stream<Path> directoryContents = Files.list(directoryPath))
             {
                Optional<Path> onnxFile = directoryContents.filter(path -> path.getFileName().toString().endsWith(".onnx")).findAny();
-               onnxFile.ifPresent(onnxFilePath::setValue);
+               if (onnxFile.isPresent())
+                  onnxFileURL.setValue(onnxFile.get().toUri().toURL());
+            }
+            catch (MalformedURLException exception)
+            {
+               throw new RuntimeException(exception);
             }
          });
       }
@@ -229,26 +239,31 @@ public class YOLOv8Tools
          throw new RuntimeException(ioException);
       }
 
-      if (onnxFilePath.getValue() == null)
+      if (onnxFileURL.getValue() == null)
          throw new IllegalArgumentException("Could not find an onnx file in %s".formatted(yoloModelDirectory.toString()));
 
-      return onnxFilePath.getValue();
+      return onnxFileURL.getValue();
    }
 
-   public static Path getClassNamesFile(URL yoloModelDirectory)
+   public static URL getClassNamesFile(URL yoloModelDirectory)
    {
       if (yoloModelDirectory == null)
          throw new NullPointerException("YOLO Model Directory is NULL");
 
-      MutableObject<Path> classNamesFile = new MutableObject<>(null);
+      MutableObject<URL> classNamesURL = new MutableObject<>(null);
       try
       {
          ResourceTools.processAsPath(yoloModelDirectory, directoryPath ->
          {
             try (Stream<Path> directoryContents = Files.list(directoryPath))
             {
-               Optional<Path> onnxFile = directoryContents.filter(path -> path.getFileName().toString().endsWith(CLASS_NAME_FILE_NAME)).findAny();
-               onnxFile.ifPresent(classNamesFile::setValue);
+               Optional<Path> classNamesFile = directoryContents.filter(path -> path.getFileName().toString().endsWith(CLASS_NAME_FILE_NAME)).findAny();
+               if (classNamesFile.isPresent())
+                  classNamesURL.setValue(classNamesFile.get().toUri().toURL());
+            }
+            catch (IOException ioException)
+            {
+               throw new RuntimeException(ioException);
             }
          });
       }
@@ -257,9 +272,9 @@ public class YOLOv8Tools
          throw new RuntimeException(ioException);
       }
 
-      if (classNamesFile.getValue() == null)
+      if (classNamesURL.getValue() == null)
          throw new IllegalArgumentException("Could not find an class names file in %s".formatted(yoloModelDirectory.toString()));
 
-      return classNamesFile.getValue();
+      return classNamesURL.getValue();
    }
 }

@@ -29,7 +29,6 @@ import us.ihmc.perception.imageMessage.PixelFormat;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -81,17 +80,16 @@ public class YOLOv8Model
    private final float[] maskThresholds;
    private float nmsThreshold;
 
-   public YOLOv8Model(Path modelBaseDirectoryPath)
+   public YOLOv8Model(URL modelBaseDirectory)
    {
       // Get name & onnx file path
-      modelName = modelBaseDirectoryPath.getFileName().toString();
+      modelName = modelBaseDirectory.getFile();
 
-      URL modelBaseDirectoryURL = getClass().getResource(modelBaseDirectoryPath.toString());
-      if (modelBaseDirectoryURL == null)
-         throw new RuntimeException("YOLO Model Directory Not Found");
+      URL classNamesFileURL = YOLOv8Tools.getClassNamesFile(modelBaseDirectory);
+      URL onnxFileURL = YOLOv8Tools.getONNXFile(modelBaseDirectory);
 
-      try (InputStream classNamesFile = getClass().getResourceAsStream(YOLOv8Tools.getClassNamesFile(modelBaseDirectoryURL).toString());
-           InputStream onnxFile = getClass().getResourceAsStream(YOLOv8Tools.getONNXFile(modelBaseDirectoryURL).toString()))
+      try (InputStream classNamesFile = classNamesFileURL.openStream();
+           InputStream onnxFile = onnxFileURL.openStream())
       {
          // Parse class_names.yaml
          Yaml yaml = new Yaml();
