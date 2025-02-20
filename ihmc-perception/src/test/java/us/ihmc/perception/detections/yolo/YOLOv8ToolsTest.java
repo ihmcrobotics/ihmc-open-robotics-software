@@ -7,6 +7,7 @@ import us.ihmc.tools.IHMCCommonPaths;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -65,22 +66,22 @@ public class YOLOv8ToolsTest
    @Test
    public void testGetYoloModelDirectories() throws MalformedURLException
    {
-      List<Path> yoloModelDirectories = YOLOv8Tools.getYOLOModelDirectories(testDirectoryPath.toUri().toURL());
+      List<URL> yoloModelDirectories = YOLOv8Tools.getYOLOModelDirectories(testDirectoryPath.toUri().toURL());
       assertEquals(1, yoloModelDirectories.size());
 
-      assertTrue(yoloModelDirectories.contains(goodYoloModelDirectory.toPath()));
-      assertFalse(yoloModelDirectories.contains(badYoloModelDirectory.toPath()));
+      assertTrue(yoloModelDirectories.contains(goodYoloModelDirectory.toURI().toURL()));
+      assertFalse(yoloModelDirectories.contains(badYoloModelDirectory.toURI().toURL()));
    }
 
    @Test
    public void testGetFiles() throws MalformedURLException
    {
       // Getting ONNX file
-      assertEquals(validONNXFile.toPath(), YOLOv8Tools.getONNXFile(goodYoloModelDirectory.toURI().toURL()));
+      assertEquals(validONNXFile.toURI().toURL(), YOLOv8Tools.getONNXFile(goodYoloModelDirectory.toURI().toURL()));
       assertThrows(IllegalArgumentException.class, () -> YOLOv8Tools.getONNXFile(badYoloModelDirectory.toURI().toURL()));
 
       // Getting class names file
-      assertEquals(validClassNameFile.toPath(), YOLOv8Tools.getClassNamesFile(goodYoloModelDirectory.toURI().toURL()));
+      assertEquals(validClassNameFile.toURI().toURL(), YOLOv8Tools.getClassNamesFile(goodYoloModelDirectory.toURI().toURL()));
       assertThrows(IllegalArgumentException.class, () -> YOLOv8Tools.getClassNamesFile(badYoloModelDirectory.toURI().toURL()));
    }
 }
