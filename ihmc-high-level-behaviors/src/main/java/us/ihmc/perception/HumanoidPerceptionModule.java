@@ -34,6 +34,7 @@ import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.globalHeightMap.GlobalHeightMap;
@@ -87,6 +88,8 @@ public class HumanoidPerceptionModule
    private boolean mappingEnabled = false;
    private boolean occupancyGridEnabled = false;
    public boolean heightMapDataBeingProcessed = false;
+   private ROS2Publisher<ImageMessage> heightMapPublisher;
+   private ROS2Publisher<ImageMessage> heightMapImagePublisher;
 
    public HumanoidPerceptionModule(OpenCLManager openCLManager)
    {
@@ -168,7 +171,7 @@ public class HumanoidPerceptionModule
 
                                    if (ros2Helper != null)
                                    {
-                                      publishHeightMapImage(ros2Helper,
+                                      publishHeightMapImage(ros2Helper.getROS2Node(),
                                                             croppedHeightMapImage,
                                                             compressedCroppedHeightMapPointer,
                                                             PerceptionAPI.HEIGHT_MAP_CROPPED,
@@ -181,18 +184,23 @@ public class HumanoidPerceptionModule
       }
    }
 
-   public void publishHeightMapImage(ROS2Helper ros2Helper,
+   public void publishHeightMapImage(ROS2Node ros2Node,
                                      Mat image,
                                      BytePointer pointer,
                                      ROS2Topic<ImageMessage> topic,
                                      ImageMessage message,
                                      Instant acquisitionTime)
    {
+      if (heightMapImagePublisher == null)
+      {
+         heightMapImagePublisher = ros2Node.createPublisher(topic);
+      }
+
       OpenCVTools.compressImagePNG(image, pointer);
       PerceptionMessageTools.publishCompressedDepthImage(pointer,
                                                          topic,
                                                          message,
-                                                         ros2Helper,
+                                                         heightMapImagePublisher,
                                                          cameraPose,
                                                          acquisitionTime,
                                                          rapidHeightMapExtractor.getSequenceNumber(),
@@ -222,8 +230,13 @@ public class HumanoidPerceptionModule
    }
 
 
-   public void publishExternalHeightMapImage(ROS2Helper ros2Helper)
+   public void publishExternalHeightMapImage(ROS2Node ros2Node)
    {
+      if (heightMapPublisher == null)
+      {
+         heightMapPublisher = ros2Node.createPublisher(PerceptionAPI.HEIGHT_MAP_CROPPED);
+      }
+
       executorService.clearTaskQueue();
       executorService.submit(() ->
         {
@@ -234,7 +247,7 @@ public class HumanoidPerceptionModule
            PerceptionMessageTools.publishCompressedDepthImage(compressedInternalHeightMapPointer,
                                                               PerceptionAPI.HEIGHT_MAP_CROPPED,
                                                               croppedHeightMapImageMessage,
-                                                              ros2Helper,
+                                                              heightMapPublisher,
                                                               new FramePose3D(ReferenceFrame.getWorldFrame(),
                                                                               rapidHeightMapExtractor.getSensorOrigin(),
                                                                               new Quaternion()),

@@ -14,6 +14,7 @@ import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import ihmc_common_msgs.msg.dds.PoseListMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
+import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingLogger;
@@ -72,7 +73,6 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    private static final int numberOfKnotPoints = 12;
    private static final int maxIterationsOptimization = 100;
    private final ROS2Node ros2Node;
-   private final ROS2Helper ros2Helper;
    private final DRCRobotModel robotModel;
    private final ROS2SyncedRobotModel syncedRobotModel;
    private final ROS2Publisher<ContinuousHikingCommandMessage> commandPublisher;
@@ -91,6 +91,9 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    private final ImBoolean useMonteCarloFootstepPlanner = new ImBoolean(false);
    private final ControllerFootstepQueueMonitor controllerFootstepQueueMonitor;
    private final ContinuousHikingLogger continuousHikingLogger;
+   private final ROS2Publisher<PlanOffsetStatus> planOffsetStatusPublisher;
+   private final ROS2Publisher<FootstepStatusMessage> footstepStatusMessagePublisher;
+   private final ROS2Publisher<Empty> clearGoalFootstepsPublisher;
    private SideDependentList<FramePose3D> startStancePose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
    private FootstepPlan latestFootstepPlan;
    private List<EnumMap<Axis3D, List<PolynomialReadOnly>>> swingTrajectories;
@@ -101,15 +104,18 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    private boolean publishAndSubscribe;
    private double simulatedDriftInMeters = -0.1;
 
-   public RDXContinuousHikingPanel(RDXBaseUI baseUI, ROS2Node ros2Node, ROS2Helper ros2Helper, DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobotModel)
+   public RDXContinuousHikingPanel(RDXBaseUI baseUI, ROS2Node ros2Node, DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobotModel)
    {
       super("Continuous Hiking");
-      this.ros2Helper = ros2Helper;
       setRenderMethod(this::renderImGuiWidgets);
 
       this.ros2Node = ros2Node;
       this.robotModel = robotModel;
       this.syncedRobotModel = syncedRobotModel;
+
+      footstepStatusMessagePublisher = ros2Node.createPublisher(getTopic(FootstepStatusMessage.class, robotModel.getSimpleRobotName()));
+      planOffsetStatusPublisher = ros2Node.createPublisher(getTopic(PlanOffsetStatus.class, robotModel.getSimpleRobotName()));
+      clearGoalFootstepsPublisher = ros2Node.createPublisher(ContinuousHikingAPI.CLEAR_GOAL_FOOTSTEPS);
 
       ros2Node.createSubscription2(ContinuousHikingAPI.START_AND_GOAL_FOOTSTEPS, this::onStartAndGoalPosesReceived);
       ros2Node.createSubscription2(ContinuousHikingAPI.PLANNED_FOOTSTEPS, this::onPlannedFootstepsReceived);
@@ -140,8 +146,8 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
                                                                monteCarloPlannerParameters,
                                                                robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
 
-      ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(WalkingControllerFailureStatusMessage.class, robotModel.getSimpleRobotName()),
-                                      message -> terrainPlanningDebugger.reset());
+      ros2Node.createSubscription(HumanoidControllerAPI.getTopic(WalkingControllerFailureStatusMessage.class, robotModel.getSimpleRobotName()),
+                                  (s) -> terrainPlanningDebugger.reset());
 
       hostStoredPropertySets = new ImGuiRemoteROS2StoredPropertySetGroup(ros2Node);
       ContinuousHikingParameters continuousHikingParameters = new ContinuousHikingParameters();
@@ -305,14 +311,14 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
          // Simulate that the controller started a step, this part triggers the drift offset kernel
          FootstepStatusMessage footstepStatusMessage = new FootstepStatusMessage();
          footstepStatusMessage.setFootstepStatus(FootstepStatusMessage.FOOTSTEP_STATUS_STARTED);
-         ros2Helper.publish(getTopic(FootstepStatusMessage.class, "Nadia"), footstepStatusMessage);
+         footstepStatusMessagePublisher.publish(footstepStatusMessage);
 
          // Simulate that the controller has drifted by some z value
          PlanOffsetStatus planOffsetStatus = new PlanOffsetStatus();
          Vector3D planOffset = new Vector3D(0, 0, simulatedDriftInMeters);
          planOffsetStatus.getOffsetVector().set(planOffset);
          LogTools.info("Plan Offset Status: " + planOffsetStatus.getOffsetVector());
-         ros2Helper.publish(getTopic(PlanOffsetStatus.class, "Nadia"), planOffsetStatus);
+         planOffsetStatusPublisher.publish(planOffsetStatus);
 
          // The amount of drift that we want to simulation and adjust for if we do this over and over
          if (simulatedDriftInMeters > -1.0)
@@ -372,7 +378,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
 
    public void clearPlannedFootsteps()
    {
-      ros2Helper.publish(ContinuousHikingAPI.CLEAR_GOAL_FOOTSTEPS);
+      clearGoalFootstepsPublisher.publish(new Empty());
    }
 
    /**

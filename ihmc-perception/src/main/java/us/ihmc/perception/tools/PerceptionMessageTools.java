@@ -15,7 +15,6 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -78,7 +77,7 @@ public class PerceptionMessageTools
    public static void publishCompressedDepthImage(BytePointer compressedDepthPointer,
                                                   ROS2Topic<ImageMessage> topic,
                                                   ImageMessage depthImageMessage,
-                                                  ROS2PublishSubscribeAPI helper,
+                                                  ROS2Publisher<ImageMessage> publisher,
                                                   Pose3DReadOnly cameraPose,
                                                   Instant acquisitionTime,
                                                   long sequenceNumber,
@@ -87,7 +86,7 @@ public class PerceptionMessageTools
                                                   float depthToMetersRatio)
    {
       packCompressedDepthImage(compressedDepthPointer, depthImageMessage, cameraPose, acquisitionTime, sequenceNumber, height, width, depthToMetersRatio);
-      helper.publish(topic, depthImageMessage);
+      publisher.publish(depthImageMessage);
    }
 
    public static void publishJPGCompressedColorImage(BytePointer compressedColorPointer,

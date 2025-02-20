@@ -26,6 +26,7 @@ import us.ihmc.perception.logging.PerceptionDataLogger;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.sensors.realsense.RealSenseConfiguration;
 import us.ihmc.sensors.realsense.RealSenseDevice;
 import us.ihmc.sensors.realsense.RealSenseDeviceManager;
@@ -82,6 +83,7 @@ public class RealsenseColorDepthPublisher
    private boolean loggerInitialized = false;
    private volatile boolean running = true;
    private final Notification destroyedNotification = new Notification();
+   private ROS2Publisher<ImageMessage> depthPublisher;
 
    public RealsenseColorDepthPublisher(RealSenseConfiguration realsenseConfiguration,
                                        ROS2Topic<ImageMessage> depthTopic,
@@ -174,10 +176,14 @@ public class RealsenseColorDepthPublisher
 
             PerceptionMessageTools.setDepthIntrinsicsFromRealsense(realsense, depthImageMessage);
             CameraModel.PINHOLE.packMessageFormat(depthImageMessage);
+            if (depthPublisher == null)
+            {
+               depthPublisher = ros2Node.createPublisher(depthTopic);
+            }
             PerceptionMessageTools.publishCompressedDepthImage(compressedDepthPointer,
                                                                depthTopic,
                                                                depthImageMessage,
-                                                               ros2Helper,
+                                                               depthPublisher,
                                                                depthPose,
                                                                acquisitionTime,
                                                                depthSequenceNumber++,

@@ -20,6 +20,7 @@ import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.sensors.realsense.RealSenseConfiguration;
 import us.ihmc.sensors.realsense.RealSenseDevice;
 import us.ihmc.sensors.realsense.RealSenseDeviceManager;
@@ -101,6 +102,7 @@ public class TerrainPerceptionProcessWithDriver
    private final int colorHeight;
    private long depthSequenceNumber = 0;
    private long colorSequenceNumber = 0;
+   private ROS2Publisher<ImageMessage> depthPublisher;
 
    public TerrainPerceptionProcessWithDriver(String robotName,
                                              CollisionBoxProvider collisionBoxProvider,
@@ -245,6 +247,12 @@ public class TerrainPerceptionProcessWithDriver
 
          if (parameters.getPublishDepth())
          {
+
+            if (depthPublisher == null)
+            {
+               depthPublisher = realtimeROS2Node.createPublisher(depthTopic);
+            }
+
             executorService.submit(() ->
                                    {
                                       OpenCVTools.compressImagePNG(depth16UC1Image, compressedDepthPointer);
@@ -252,8 +260,7 @@ public class TerrainPerceptionProcessWithDriver
                                       CameraModel.PINHOLE.packMessageFormat(depthImageMessage);
                                       PerceptionMessageTools.publishCompressedDepthImage(compressedDepthPointer,
                                                                                          depthTopic,
-                                                                                         depthImageMessage,
-                                                                                         ros2Helper,
+                                                                                         depthImageMessage, depthPublisher,
                                                                                          cameraPose,
                                                                                          acquisitionTime,
                                                                                          depthSequenceNumber++,

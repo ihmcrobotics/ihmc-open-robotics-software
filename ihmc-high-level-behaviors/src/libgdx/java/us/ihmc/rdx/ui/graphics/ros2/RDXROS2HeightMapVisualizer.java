@@ -45,9 +45,9 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
    private final RDXGlobalHeightMapGraphic globalHeightMapGraphic = new RDXGlobalHeightMapGraphic();
    private final ResettableExceptionHandlingExecutorService executorService;
 
-   private final ImBoolean enableHeightMapVisualizer = new ImBoolean(true);
+   private final ImBoolean enableHeightMapVisualizer = new ImBoolean(false);
    private final ImBoolean enableGlobalHeightMapVisualizer = new ImBoolean(false);
-   private final ImBoolean enableHeightMapRenderer = new ImBoolean(false);
+   private final ImBoolean enableHeightMapRenderer = new ImBoolean(true);
    private final ImBoolean displayGlobalHeightMapImage = new ImBoolean(false);
 
    private final RigidBodyTransform zUpToWorldTransform = new RigidBodyTransform();
@@ -251,7 +251,6 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       {
          if (heightMapImage.ptr(0) != null)
          {
-            //PerceptionDebugTools.printMat("Height Map Image", heightMapImage, 10);
             heightMapRenderer.update(zUpToWorldTransform,
                                      heightMapImage.ptr(0),
                                      (float) RapidHeightMapExtractor.getHeightMapParameters().getHeightOffset(),

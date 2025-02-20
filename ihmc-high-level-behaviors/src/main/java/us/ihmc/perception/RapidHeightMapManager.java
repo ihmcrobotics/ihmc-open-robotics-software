@@ -12,7 +12,6 @@ import us.ihmc.behaviors.activeMapping.ControllerFootstepQueueMonitor;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -25,6 +24,8 @@ import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 import java.time.Instant;
@@ -37,7 +38,7 @@ public class RapidHeightMapManager
    private final RapidHeightMapExtractorInterface rapidHeightMapExtractor;
    private final ImageMessage croppedHeightMapImageMessage = new ImageMessage();
    private final FramePose3D cameraPose = new FramePose3D();
-   private final ROS2PublishSubscribeAPI ros2;
+   private final ROS2Node ros2Node;
    private final boolean runWithCUDA;
    private final Mat hostDepthImage = new Mat();
    private final Notification resetHeightMapRequested = new Notification();
@@ -48,8 +49,9 @@ public class RapidHeightMapManager
 
    private GpuMat deviceDepthImage;
    private BytedecoImage heightMapBytedecoImage;
+   private ROS2Publisher<ImageMessage> heightMapPublisher;
 
-   public RapidHeightMapManager(ROS2PublishSubscribeAPI ros2,
+   public RapidHeightMapManager(ROS2Node ros2Node,
                                 DRCRobotModel robotModel,
                                 ReferenceFrame leftFootSoleFrame,
                                 ReferenceFrame rightFootSoleFrame,
@@ -57,7 +59,7 @@ public class RapidHeightMapManager
                                 CameraIntrinsics depthImageIntrinsics,
                                 boolean runWithCUDA) throws Exception
    {
-      this.ros2 = ros2;
+      this.ros2Node = ros2Node;
       this.runWithCUDA = runWithCUDA;
 
       if (runWithCUDA)
@@ -81,13 +83,15 @@ public class RapidHeightMapManager
       }
 
       // We use a notification in order to only call resetting the height map in one place
-      ros2.subscribeViaVolatileCallback(PerceptionAPI.RESET_HEIGHT_MAP, message -> resetHeightMapRequested.set());
-      if (robotModel != null) // Will be null on test bench
+      ros2Node.createSubscription2(PerceptionAPI.RESET_HEIGHT_MAP, message -> resetHeightMapRequested.set());
+      if (robotModel != null)
       {
-         ros2.subscribeViaVolatileCallback(HumanoidControllerAPI.getTopic(HighLevelStateChangeStatusMessage.class, robotModel.getSimpleRobotName()), message ->
-         { // Automatically reset the height map when the robot goes into the walking state
-            if (message.getEndHighLevelControllerName() == HighLevelStateChangeStatusMessage.WALKING)
+         ros2Node.createSubscription(HumanoidControllerAPI.getTopic(HighLevelStateChangeStatusMessage.class, robotModel.getSimpleRobotName()), message ->
+         {
+            if (message.takeNextData().getEndHighLevelControllerName() == HighLevelStateChangeStatusMessage.WALKING)
+            {
                resetHeightMapRequested.set();
+            }
          });
       }
    }
@@ -166,11 +170,16 @@ public class RapidHeightMapManager
          heightScaleFactor = (float) RapidHeightMapExtractor.getHeightMapParameters().getHeightScaleFactor();
       }
 
+      if (heightMapPublisher == null)
+      {
+         heightMapPublisher = ros2Node.createPublisher(PerceptionAPI.HEIGHT_MAP_CROPPED);
+      }
+
       OpenCVTools.compressImagePNG(croppedHeightMapImage, compressedCroppedHeightMapPointer);
       PerceptionMessageTools.publishCompressedDepthImage(compressedCroppedHeightMapPointer,
                                                          PerceptionAPI.HEIGHT_MAP_CROPPED,
                                                          croppedHeightMapImageMessage,
-                                                         ros2,
+                                                         heightMapPublisher,
                                                          cameraPose,
                                                          imageAcquisitionTime,
                                                          rapidHeightMapExtractor.getSequenceNumber(),
