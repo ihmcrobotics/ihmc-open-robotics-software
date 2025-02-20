@@ -22,7 +22,7 @@ public class ROS2SceneGraphUpdateThread extends RepeatingTaskThread
    private final DetectionManager detectionManager;
    private final Supplier<ReferenceFrame> robotPelvisFrameSupplier;
 
-   private TypedNotification<FramePlanarRegionsList> planarRegionsNotification;
+   private final TypedNotification<FramePlanarRegionsList> planarRegionsNotification = new TypedNotification<>();
    private OpenCVArUcoMarkerDetectionThread arUcoDetectionThread;
 
    public ROS2SceneGraphUpdateThread(ROS2SceneGraph sceneGraph,
@@ -36,9 +36,9 @@ public class ROS2SceneGraphUpdateThread extends RepeatingTaskThread
       this.robotPelvisFrameSupplier = robotPelvisFrameSupplier;
    }
 
-   public void setPlanarRegionsNotification(TypedNotification<FramePlanarRegionsList> planarRegionsNotification)
+   public void receivePlanarRegions(FramePlanarRegionsList newPlanarRegions)
    {
-      this.planarRegionsNotification = planarRegionsNotification;
+      planarRegionsNotification.set(newPlanarRegions);
    }
 
    public void setArUcoDetectionThread(OpenCVArUcoMarkerDetectionThread arUcoDetectionThread)
@@ -63,7 +63,7 @@ public class ROS2SceneGraphUpdateThread extends RepeatingTaskThread
       sceneGraph.updateDetections(detectionManager);
 
       // Update planar regions for door nodes
-      if (planarRegionsNotification != null && planarRegionsNotification.poll())
+      if (planarRegionsNotification.poll())
       {
          FramePlanarRegionsList framePlanarRegions = planarRegionsNotification.read();
          PlanarRegionsList planarRegionsInWorldFrame = framePlanarRegions.getPlanarRegionsList();

@@ -2,11 +2,9 @@ package us.ihmc.perception.rapidRegions;
 
 import org.bytedeco.opencl.global.OpenCL;
 import us.ihmc.commons.thread.RepeatingTaskThread;
-import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.property.ROS2StoredPropertySet;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.RawImage;
@@ -18,9 +16,9 @@ import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensors.ImageSensor;
 
-import java.util.Collections;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 
 public class RapidPlanarRegionsExtractionThread extends RepeatingTaskThread
 {
@@ -38,7 +36,8 @@ public class RapidPlanarRegionsExtractionThread extends RepeatingTaskThread
    private RapidPlanarRegionsExtractor extractor;
    private ROS2StoredPropertySet<RapidRegionsExtractorParameters> extractorParametersSync;
    private final FramePlanarRegionsList framePlanarRegions = new FramePlanarRegionsList();
-   private final Set<TypedNotification<FramePlanarRegionsList>> newPlanarRegionNotifications = Collections.newSetFromMap(new ConcurrentHashMap<>());
+
+   private final List<Consumer<FramePlanarRegionsList>> consumers = new ArrayList<>();
 
    public RapidPlanarRegionsExtractionThread(ROS2Node ros2Node, OpenCLManager openCLManager, ImageSensor imageSensor, int depthImageKey)
    {
@@ -53,6 +52,11 @@ public class RapidPlanarRegionsExtractionThread extends RepeatingTaskThread
       ros2Helper = new ROS2Helper(ros2Node);
 
       sensorFrame = new MutableReferenceFrame("PlanarRegionExtractionSensorFrame", ReferenceFrame.getWorldFrame());
+   }
+
+   public void addPlanarRegionsConsumer(Consumer<FramePlanarRegionsList> planarRegionsConsumer)
+   {
+      consumers.add(planarRegionsConsumer);
    }
 
    @Override
@@ -80,10 +84,9 @@ public class RapidPlanarRegionsExtractionThread extends RepeatingTaskThread
       extractor.setProcessing(false);
       bytedecoImage.destroy(openCLManager);
 
-      // Give a copy to notifications
-      FramePlanarRegionsList planarRegionsCopy = framePlanarRegions.copy();
-      for (TypedNotification<FramePlanarRegionsList> notification : newPlanarRegionNotifications)
-         notification.set(planarRegionsCopy);
+      // Give copies to consumers
+      for (Consumer<FramePlanarRegionsList> consumer : consumers)
+         consumer.accept(framePlanarRegions.copy());
 
       // Publish the frame planar regions
       PerceptionMessageTools.publishFramePlanarRegionsList(framePlanarRegions, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, ros2Helper);
@@ -97,13 +100,6 @@ public class RapidPlanarRegionsExtractionThread extends RepeatingTaskThread
       extractor.getDebugger().setEnabled(false);
 
       extractorParametersSync = new ROS2StoredPropertySet<>(ros2Node, PerceptionComms.PERSPECTIVE_RAPID_REGION_PARAMETERS, extractor.getParameters());
-   }
-
-   public TypedNotification<FramePlanarRegionsList> getNewPlanarRegionsNotification()
-   {
-      TypedNotification<FramePlanarRegionsList> notification = new TypedNotification<>();
-      newPlanarRegionNotifications.add(notification);
-      return notification;
    }
 
    @Override
