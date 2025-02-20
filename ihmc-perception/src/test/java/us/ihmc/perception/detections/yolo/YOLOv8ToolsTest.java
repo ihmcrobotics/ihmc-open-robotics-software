@@ -77,11 +77,11 @@ public class YOLOv8ToolsTest
    public void testGetFiles() throws MalformedURLException
    {
       // Getting ONNX file
-      assertEquals(validONNXFile.toPath(), YOLOv8Tools.getONNXFile(goodYoloModelDirectory.toURI().toURL()));
+      assertEquals(validONNXFile.toURI().toURL(), YOLOv8Tools.getONNXFile(goodYoloModelDirectory.toURI().toURL()));
       assertThrows(IllegalArgumentException.class, () -> YOLOv8Tools.getONNXFile(badYoloModelDirectory.toURI().toURL()));
 
       // Getting class names file
-      assertEquals(validClassNameFile.toPath(), YOLOv8Tools.getClassNamesFile(goodYoloModelDirectory.toURI().toURL()));
+      assertEquals(validClassNameFile.toURI().toURL(), YOLOv8Tools.getClassNamesFile(goodYoloModelDirectory.toURI().toURL()));
       assertThrows(IllegalArgumentException.class, () -> YOLOv8Tools.getClassNamesFile(badYoloModelDirectory.toURI().toURL()));
    }
 }

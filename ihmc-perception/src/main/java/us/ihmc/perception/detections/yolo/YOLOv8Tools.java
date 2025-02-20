@@ -177,7 +177,7 @@ public class YOLOv8Tools
                for (Path directory : stream)
                {
                   if (isValidYOLOModelDirectory(directory))
-                     directories.add(new URL(baseModelsDirectory, directory.getFileName().toString()));
+                     directories.add(new URL(baseModelsDirectory, directory.getFileName().toString() + "/"));
                }
             }
             catch (MalformedURLException exception)
