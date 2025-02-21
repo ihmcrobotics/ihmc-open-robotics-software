@@ -1,8 +1,6 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.quicksterFootstepProvider;
 
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -10,54 +8,85 @@ public class ALIPCalculatorTools
 {
    private final static double GRAVITY = -9.81;
 
-   private final static FramePoint3D tempFutureCoMPosition = new FramePoint3D();
+   private final static FramePose3D tempFutureCoMPose = new FramePose3D();
    private final static FrameVector3D tempFutureCoMVelocity = new FrameVector3D();
    private final static FrameVector3D tempFutureContactPointAngularMomentum = new FrameVector3D();
+   private final static PoseReferenceFrame tempFutureControlFrame = new PoseReferenceFrame("futureControlFrameALIPCalculator", ReferenceFrame.getWorldFrame());
 
-   private final static FramePoint3D tempCurrentCoMPosition = new FramePoint3D();
+   private final static FramePose3D tempCurrentCoMPose = new FramePose3D();
    private final static FrameVector3D tempCurrentContactPointAngularMomentum = new FrameVector3D();
    private final static FramePoint3D tempCurrentStanceFootPosition = new FramePoint3D();
 
-   private final static FrameVector3D tempCentroidalAngularMomentum = new FrameVector3D();
-
-   public static void computeFutureStateUsingALIP(FramePoint3DReadOnly currentCoMPosition,
+   public static void computeFutureStateUsingALIP(FramePose3DReadOnly currentCoMPose,
                                                   FrameVector3DReadOnly currentContactPointAngularMomentum,
                                                   FramePoint3DReadOnly currentStanceFootPosition,
-                                                  FramePoint3D futurePositionToPack,
-                                                  FrameVector3D futureAngularMomentumToPack,
-                                                  double deltaT,
+                                                  FramePose3D futureCoMPoseToPack,
+                                                  FrameVector3D futureContactPointAngularMomentumToPack,
+                                                  ReferenceFrame controlFrame,
+                                                  double horizonDuration,
                                                   double pendulumMass,
-                                                  double pendulumHeight)
+                                                  double pendulumHeight,
+                                                  double desiredTurningVelocity,
+                                                  double updateDt)
    {
-      tempCurrentCoMPosition.setMatchingFrame(currentCoMPosition);
+      tempCurrentCoMPose.setMatchingFrame(currentCoMPose);
       tempCurrentContactPointAngularMomentum.setMatchingFrame(currentContactPointAngularMomentum);
       tempCurrentStanceFootPosition.setMatchingFrame(currentStanceFootPosition);
 
-      tempCurrentCoMPosition.setX(tempCurrentCoMPosition.getX() - tempCurrentStanceFootPosition.getX());
-      tempCurrentCoMPosition.setY(tempCurrentCoMPosition.getY() - tempCurrentStanceFootPosition.getY());
-      tempCurrentCoMPosition.setZ(tempCurrentCoMPosition.getZ() - tempCurrentStanceFootPosition.getZ());
+      tempCurrentCoMPose.changeFrame(controlFrame);
+      tempCurrentContactPointAngularMomentum.changeFrame(controlFrame);
+      tempCurrentStanceFootPosition.changeFrame(controlFrame);
+
+      tempCurrentCoMPose.setX(-tempCurrentStanceFootPosition.getX());
+      tempCurrentCoMPose.setY(-tempCurrentStanceFootPosition.getY());
+      tempCurrentCoMPose.setZ(-tempCurrentStanceFootPosition.getZ());
 
       double omega = calculateOmega(pendulumHeight);
 
       // Current position and angular momentum
-      double x0 = tempCurrentCoMPosition.getX();
+      double x0 = tempCurrentCoMPose.getX();
       double Ly0 = tempCurrentContactPointAngularMomentum.getY();
 
-      double y0 = tempCurrentCoMPosition.getY();
+      double y0 = tempCurrentCoMPose.getY();
       double Lx0 = tempCurrentContactPointAngularMomentum.getX();
 
       // Final position and angular momentum
-      double xf = x0 * Math.cosh(omega * deltaT) + Ly0 * Math.sinh(omega * deltaT) / (pendulumMass * pendulumHeight * omega);
-      double Lyf = x0 * pendulumMass * pendulumHeight * omega * Math.sinh(omega * deltaT) + Ly0 * Math.cosh(omega * deltaT);
+      double xf = x0 * Math.cosh(omega * horizonDuration) + Ly0 * Math.sinh(omega * horizonDuration) / (pendulumMass * pendulumHeight * omega);
+      double Lyf = x0 * pendulumMass * pendulumHeight * omega * Math.sinh(omega * horizonDuration) + Ly0 * Math.cosh(omega * horizonDuration);
 
-      double yf = y0 * Math.cosh(omega * deltaT) - Lx0 * Math.sinh(omega * deltaT) / (pendulumMass * pendulumHeight * omega);
-      double Lxf = -y0 * pendulumMass * pendulumHeight * omega * Math.sinh(omega * deltaT) + Lx0 * Math.cosh(omega * deltaT);
+      double yf = y0 * Math.cosh(omega * horizonDuration) - Lx0 * Math.sinh(omega * horizonDuration) / (pendulumMass * pendulumHeight * omega);
+      double Lxf = -y0 * pendulumMass * pendulumHeight * omega * Math.sinh(omega * horizonDuration) + Lx0 * Math.cosh(omega * horizonDuration);
 
-      futurePositionToPack.setX(xf + tempCurrentStanceFootPosition.getX());
-      futurePositionToPack.setY(yf + tempCurrentStanceFootPosition.getY());
+      ReferenceFrame originalPositionFrame = futureCoMPoseToPack.getReferenceFrame();
+      ReferenceFrame originalMomentumFrame = futureContactPointAngularMomentumToPack.getReferenceFrame();
 
-      futureAngularMomentumToPack.setX(Lxf);
-      futureAngularMomentumToPack.setY(Lyf);
+      futureCoMPoseToPack.setIncludingFrame(tempCurrentCoMPose);
+      futureContactPointAngularMomentumToPack.changeFrame(controlFrame);
+
+
+      futureCoMPoseToPack.setX(tempCurrentStanceFootPosition.getX());
+      futureCoMPoseToPack.setY(tempCurrentStanceFootPosition.getY());
+      futureCoMPoseToPack.setZ(tempCurrentCoMPose.getZ());
+
+      int intervals = (int) Math.round(horizonDuration / updateDt);
+
+      for (double i = 0; i < intervals ; i ++)
+      {
+         futureCoMPoseToPack.appendYawRotation(desiredTurningVelocity * updateDt);
+         futureCoMPoseToPack.getPosition().addX(xf / intervals);
+         futureCoMPoseToPack.getPosition().addY(yf / intervals);
+
+
+      }
+
+      futureContactPointAngularMomentumToPack.setX(Lxf);
+      futureContactPointAngularMomentumToPack.setY(Lyf);
+
+
+      futureCoMPoseToPack.changeFrame(originalPositionFrame);
+      futureContactPointAngularMomentumToPack.changeFrame(originalMomentumFrame);
+
+
    }
 
 //   public static void computeTouchdownPositionRegular(FramePoint3DReadOnly currentPosition,
@@ -108,13 +137,15 @@ public class ALIPCalculatorTools
 //      touchdownPositionToPack.changeFrameAndProjectToXYPlane(originalFrame);
 //   }
 
-   public static void computeTouchdownPositionUsingRaibertHeuristicAndPolePlacement(FramePoint3DReadOnly currentCoMPosition,
+   public static void computeTouchdownPositionUsingRaibertHeuristicAndPolePlacement(FramePose3DReadOnly currentCoMPose,
                                                                                     FrameVector3DReadOnly currentContactPointAngularMomentum,
                                                                                     FramePoint3DReadOnly currentStanceFootPosition,
                                                                                     FramePoint2DBasics touchdownPositionToPack,
                                                                                     RobotSide swingSide,
+                                                                                    ReferenceFrame controlFrame,
                                                                                     double desiredVelocityX,
                                                                                     double desiredVelocityY,
+                                                                                    double desiredTurningVelocity,
                                                                                     double desiredStanceWidth,
                                                                                     double timeRemainingInCurrentStep,
                                                                                     double stepDuration,
@@ -122,50 +153,60 @@ public class ALIPCalculatorTools
                                                                                     double pendulumMass,
                                                                                     double pendulumHeight,
                                                                                     double pole,
-                                                                                    boolean useFutureCoM)
+                                                                                    boolean useFutureCoM,
+                                                                                    double updateDt)
    {
       double omega = calculateOmega(pendulumHeight);
 
-      computeFutureStateUsingALIP(currentCoMPosition,
+      computeFutureStateUsingALIP(currentCoMPose,
                                   currentContactPointAngularMomentum,
                                   currentStanceFootPosition,
-                                  tempFutureCoMPosition,
+                                  tempFutureCoMPose,
                                   tempFutureContactPointAngularMomentum,
+                                  controlFrame,
                                   timeRemainingInCurrentStep,
                                   pendulumMass,
-                                  pendulumHeight);
+                                  pendulumHeight,
+                                  desiredTurningVelocity,
+                                  updateDt);
 
-      tempCurrentCoMPosition.setMatchingFrame(currentCoMPosition);
+      tempFutureControlFrame.setPoseAndUpdate(tempFutureCoMPose);
+
+      tempFutureCoMVelocity.changeFrame(tempFutureContactPointAngularMomentum.getReferenceFrame());
       tempFutureCoMVelocity.setX(tempFutureContactPointAngularMomentum.getY() / (pendulumMass * pendulumHeight));
       tempFutureCoMVelocity.setY(-tempFutureContactPointAngularMomentum.getX() / (pendulumMass * pendulumHeight));
 
+      ReferenceFrame controlFrameToUse;
+
       if (useFutureCoM)
-         computeTouchdownPositionUsingRaibertHeuristicAndPolePlacement(tempFutureCoMVelocity, tempFutureCoMPosition, touchdownPositionToPack, pole, stepDuration, omega);
+         controlFrameToUse = tempFutureControlFrame;
       else
-         computeTouchdownPositionUsingRaibertHeuristicAndPolePlacement(tempFutureCoMVelocity, tempCurrentCoMPosition, touchdownPositionToPack, pole, stepDuration, omega);
+         controlFrameToUse = controlFrame;
+
+      tempFutureCoMVelocity.changeFrame(controlFrameToUse);
+      computeTouchdownPositionUsingRaibertHeuristicAndPolePlacement(tempFutureCoMVelocity, controlFrameToUse, touchdownPositionToPack, pole, stepDuration, omega);
 
       double swingDuration = stepDuration - doubleSupportDuration;
 
       ReferenceFrame originalFrame = touchdownPositionToPack.getReferenceFrame();
-      touchdownPositionToPack.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
+      touchdownPositionToPack.changeFrameAndProjectToXYPlane(controlFrameToUse);
       touchdownPositionToPack.addX(computeForwardTouchdownOffsetForVelocity(swingDuration, doubleSupportDuration, omega, desiredVelocityX));
       touchdownPositionToPack.addY(computeLateralTouchdownOffsetForVelocity(swingDuration, doubleSupportDuration, swingSide.getOppositeSide(), omega, desiredVelocityY));
       touchdownPositionToPack.addY(computeDesiredTouchdownOffsetForStanceWidth(swingDuration, doubleSupportDuration, desiredStanceWidth, swingSide.getOppositeSide(), omega));
       touchdownPositionToPack.changeFrameAndProjectToXYPlane(originalFrame);
    }
 
-   public static void computeTouchdownPositionUsingRaibertHeuristicAndPolePlacement(FrameVector3DReadOnly velocity, FramePoint3DReadOnly position, FramePoint2DBasics touchdownPositionToPack, double pole, double stepDuration, double omega)
+   public static void computeTouchdownPositionUsingRaibertHeuristicAndPolePlacement(FrameVector3DReadOnly velocity, ReferenceFrame controlFrame, FramePoint2DBasics touchdownPositionToPack, double pole, double stepDuration, double omega)
    {
-      computeTouchdownPositionUsingRaibertHeuristic(calculateTimeConstantUsingPolePlacement(pole, stepDuration, omega), velocity, position, touchdownPositionToPack);
+      computeTouchdownPositionUsingRaibertHeuristic(calculateTimeConstantUsingPolePlacement(pole, stepDuration, omega), velocity, controlFrame, touchdownPositionToPack);
    }
 
-   public static void computeTouchdownPositionUsingRaibertHeuristic(double timeConstant, FrameVector3DReadOnly velocity, FramePoint3DReadOnly position, FramePoint2DBasics touchdownPositionToPack)
+   public static void computeTouchdownPositionUsingRaibertHeuristic(double timeConstant, FrameVector3DReadOnly velocity, ReferenceFrame controlFrame, FramePoint2DBasics touchdownPositionToPack)
    {
       ReferenceFrame originalFrame = touchdownPositionToPack.getReferenceFrame();
-      touchdownPositionToPack.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
+      touchdownPositionToPack.setToZero(controlFrame);
       touchdownPositionToPack.set(velocity.getX(), velocity.getY());
       touchdownPositionToPack.scale(timeConstant);
-      touchdownPositionToPack.add(position.getX(), position.getY());
       touchdownPositionToPack.changeFrameAndProjectToXYPlane(originalFrame);
    }
 
