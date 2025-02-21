@@ -12,6 +12,7 @@ import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.ImageSensorPublishThread;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.comms.PerceptionComms;
+import us.ihmc.perception.cuda.CUDATools;
 import us.ihmc.perception.detections.DetectionManager;
 import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
 import us.ihmc.perception.opencl.OpenCLManager;
@@ -144,6 +145,8 @@ public class RDXSceneGraphDemo
             baseUI.getPrimaryScene().addRenderableProvider(sensorPoseGraphic, RDXSceneLevel.VIRTUAL);
 
             zedSVOPlayer = new ZEDSVOPlaybackSensor(ros2Helper, 0, ZEDModelData.ZED_2, SVO_FILE_NAME);
+            boolean disableNeuralMode = !CUDATools.hasCUDADeviceOfAtLeast(CUDATools.getFirstDeviceName(), "RTX 3080");
+            zedSVOPlayer.disableNeuralMode(disableNeuralMode);
             zedSVOPlayer.useTrackedPose(true);
             zedSVOPlayer.run(true);
 

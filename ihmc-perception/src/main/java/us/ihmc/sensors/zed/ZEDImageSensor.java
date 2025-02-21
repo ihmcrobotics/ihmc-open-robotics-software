@@ -73,6 +73,8 @@ public class ZEDImageSensor extends ImageSensor
    private final SL_Quaternion sensorRotation = new SL_Quaternion();
    private final SL_Vector3 sensorTranslation = new SL_Vector3();
 
+   private boolean disableNeuralMode;
+
    public ZEDImageSensor(int cameraID, ZEDModelData zedModel, int slInputType)
    {
       super(zedModel.name());
@@ -155,6 +157,11 @@ public class ZEDImageSensor extends ImageSensor
       return true;
    }
 
+   public void disableNeuralMode(boolean disableNeuralMode)
+   {
+      this.disableNeuralMode = disableNeuralMode;
+   }
+
    protected void setInitParameters(SL_InitParameters parametersToSet)
    {
       parametersToSet.camera_fps(CAMERA_FPS);
@@ -164,7 +171,9 @@ public class ZEDImageSensor extends ImageSensor
       parametersToSet.camera_image_flip(SL_FLIP_MODE_OFF);
       parametersToSet.camera_disable_self_calib(false);
       parametersToSet.enable_image_enhancement(true);
-      parametersToSet.depth_mode(SL_DEPTH_MODE_NEURAL);
+      if (!disableNeuralMode)
+         LogTools.info("ZED SDK will use neural depth mode. This uses significant GPU resources.");
+      parametersToSet.depth_mode(!disableNeuralMode ? SL_DEPTH_MODE_NEURAL : SL_DEPTH_MODE_PERFORMANCE);
       parametersToSet.depth_stabilization(1);
       parametersToSet.depth_maximum_distance(zedModel.getMaximumDepthDistance());
       parametersToSet.depth_minimum_distance(zedModel.getMinimumDepthDistance());
