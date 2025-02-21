@@ -111,11 +111,11 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       this.robotModel = robotModel;
       this.syncedRobotModel = syncedRobotModel;
 
-      ros2Helper.subscribeViaCallback(ContinuousHikingAPI.START_AND_GOAL_FOOTSTEPS, this::onStartAndGoalPosesReceived);
-      ros2Helper.subscribeViaCallback(ContinuousHikingAPI.PLANNED_FOOTSTEPS, this::onPlannedFootstepsReceived);
-      ros2Helper.subscribeViaCallback(ContinuousHikingAPI.MONTE_CARLO_FOOTSTEP_PLAN, this::onMonteCarloPlanReceived);
+      ros2Node.createSubscription2(ContinuousHikingAPI.START_AND_GOAL_FOOTSTEPS, this::onStartAndGoalPosesReceived);
+      ros2Node.createSubscription2(ContinuousHikingAPI.PLANNED_FOOTSTEPS, this::onPlannedFootstepsReceived);
+      ros2Node.createSubscription2(ContinuousHikingAPI.MONTE_CARLO_FOOTSTEP_PLAN, this::onMonteCarloPlanReceived);
 
-      commandPublisher = ros2Helper.getROS2Node().createPublisher(ContinuousHikingAPI.CONTINUOUS_HIKING_COMMAND);
+      commandPublisher = ros2Node.createPublisher(ContinuousHikingAPI.CONTINUOUS_HIKING_COMMAND);
 
       SegmentDependentList<RobotSide, ArrayList<Point2D>> groundContactPoints = robotModel.getContactPointParameters().getControllerFootGroundContactPoints();
       SideDependentList<ConvexPolygon2D> defaultContactPoints = new SideDependentList<>();
@@ -128,7 +128,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       }
 
       StancePoseCalculator stancePoseCalculator = new StancePoseCalculator(defaultContactPoints);
-      stancePoseSelectionPanel = new RDXStancePoseSelectionPanel(baseUI, ros2Helper, stancePoseCalculator);
+      stancePoseSelectionPanel = new RDXStancePoseSelectionPanel(baseUI, ros2Node, stancePoseCalculator);
       addChild(stancePoseSelectionPanel);
 
       MonteCarloFootstepPlannerParameters monteCarloPlannerParameters = new MonteCarloFootstepPlannerParameters();
@@ -136,14 +136,14 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       SwingPlannerParametersBasics swingPlannerParameters = robotModel.getSwingPlannerParameters();
       this.swingTrajectoryParameters = robotModel.getWalkingControllerParameters().getSwingTrajectoryParameters();
 
-      terrainPlanningDebugger = new RDXTerrainPlanningDebugger(ros2Helper,
+      terrainPlanningDebugger = new RDXTerrainPlanningDebugger(ros2Node,
                                                                monteCarloPlannerParameters,
                                                                robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
 
       ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(WalkingControllerFailureStatusMessage.class, robotModel.getSimpleRobotName()),
                                       message -> terrainPlanningDebugger.reset());
 
-      hostStoredPropertySets = new ImGuiRemoteROS2StoredPropertySetGroup(ros2Helper);
+      hostStoredPropertySets = new ImGuiRemoteROS2StoredPropertySetGroup(ros2Node);
       ContinuousHikingParameters continuousHikingParameters = new ContinuousHikingParameters();
       createParametersPanel(continuousHikingParameters,
                             continuousHikingParametersPanel,
@@ -173,7 +173,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
                             PerceptionComms.HEIGHT_MAP_PARAMETERS);
 
       continuousHikingLogger = new ContinuousHikingLogger();
-      controllerFootstepQueueMonitor = new ControllerFootstepQueueMonitor(ros2Helper,
+      controllerFootstepQueueMonitor = new ControllerFootstepQueueMonitor(ros2Node,
                                                                           robotModel.getSimpleRobotName(),
                                                                           syncedRobotModel.getReferenceFrames(),
                                                                           continuousHikingLogger);
@@ -202,7 +202,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       this.publishAndSubscribe = publishAndSubscribe;
       runSubscriberOnly = true;
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
-      clientStoredPropertySets = new ROS2StoredPropertySetGroup(ros2Helper);
+      clientStoredPropertySets = new ROS2StoredPropertySetGroup(ros2Node);
 
       // Add Continuous Hiking Parameters to be between the UI and this process
       ContinuousHikingParameters continuousHikingParameters = new ContinuousHikingParameters();

@@ -55,10 +55,10 @@ public class StandAloneRealsenseProcess
       this.syncedRobot = syncedRobot;
       this.controllerFootstepQueueMonitor = controllerFootstepQueueMonitor;
 
-      realsensePublishDemandNode = new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_REALSENSE_PUBLICATION);
-      heightMapDemandNode = new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_HEIGHT_MAP);
+      realsensePublishDemandNode = new ROS2DemandGraphNode(ros2Node, PerceptionAPI.REQUEST_REALSENSE_PUBLICATION);
+      heightMapDemandNode = new ROS2DemandGraphNode(ros2Node, PerceptionAPI.REQUEST_HEIGHT_MAP);
 
-      realsenseDemandNode = new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_REALSENSE);
+      realsenseDemandNode = new ROS2DemandGraphNode(ros2Node, PerceptionAPI.REQUEST_REALSENSE);
       realsenseDemandNode.addDependents(realsensePublishDemandNode, heightMapDemandNode);
 
       d455Sensor = new RealSenseImageSensor(RealSenseConfiguration.D455_COLOR_720P_DEPTH_720P_30HZ);

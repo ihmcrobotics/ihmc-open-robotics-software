@@ -50,7 +50,7 @@ public class BlackflyImagePublisher
 
       ros2Node = new ROS2NodeBuilder().build("blackfly_publisher");
       ros2DistoredImagePublisher = ros2Node.createPublisher(distortedImageTopic);
-      ousterFisheyeColoringIntrinsicsROS2 = new ROS2StoredPropertySet<>(new ROS2Helper(ros2Node),
+      ousterFisheyeColoringIntrinsicsROS2 = new ROS2StoredPropertySet<>(ros2Node,
                                                                         BlackflyComms.OUSTER_FISHEYE_COLORING_INTRINSICS,
                                                                         ousterFisheyeColoringIntrinsics);
 

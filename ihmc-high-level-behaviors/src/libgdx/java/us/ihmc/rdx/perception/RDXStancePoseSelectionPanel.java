@@ -12,7 +12,6 @@ import imgui.flag.ImGuiMouseButton;
 import imgui.type.ImBoolean;
 import us.ihmc.behaviors.activeMapping.StancePoseCalculator;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -35,6 +34,8 @@ import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 import java.util.ArrayList;
@@ -44,6 +45,7 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
 {
    private final RDXBaseUI baseUI;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final ROS2Publisher<PoseListMessage> publisher;
 
    private ModelInstance pickPointSphere;
 
@@ -61,9 +63,7 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
    private final ImBoolean calculateStancePose = new ImBoolean(false);
    private final RDXStoredPropertySetTuner stancePoseCalculatorParametersTuner = new RDXStoredPropertySetTuner("Stance Pose Parameters");
 
-   private final ROS2Helper ros2Helper;
-
-   public RDXStancePoseSelectionPanel(RDXBaseUI baseUI, ROS2Helper ros2Helper, StancePoseCalculator stancePoseCalculator)
+   public RDXStancePoseSelectionPanel(RDXBaseUI baseUI, ROS2Node ros2Node, StancePoseCalculator stancePoseCalculator)
    {
       super("Stance Pose Selection");
       this.baseUI = baseUI;
@@ -72,7 +72,7 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
 
       stancePoseCalculatorParametersTuner.create(stancePoseCalculator.getStancePoseParameters());
 
-      this.ros2Helper = ros2Helper;
+      publisher = ros2Node.createPublisher(ContinuousHikingAPI.PLACED_GOAL_FOOTSTEPS);
 
       SegmentDependentList<RobotSide, ArrayList<Point2D>> contactPoints = new SideDependentList<>();
       contactPoints.set(RobotSide.LEFT, PlannerTools.createFootContactPoints(0.2, 0.1, 0.08));
@@ -263,7 +263,7 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
       PoseListMessage poseListMessage = new PoseListMessage();
       MessageTools.packPoseListMessage(poses, poseListMessage);
 
-      ros2Helper.publish(ContinuousHikingAPI.PLACED_GOAL_FOOTSTEPS, poseListMessage);
+      publisher.publish(poseListMessage);
    }
 
    public boolean isSelectionActive()

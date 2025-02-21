@@ -48,7 +48,7 @@ public class RDXSteppableRegionsPanel
 
    public RDXSteppableRegionsPanel(ROS2Helper ros2Helper, SteppableRegionCalculatorParametersReadOnly defaultParameters)
    {
-      remotePropertySets = new ImGuiRemoteROS2StoredPropertySetGroup(ros2Helper);
+      remotePropertySets = new ImGuiRemoteROS2StoredPropertySetGroup(ros2Helper.getROS2Node());
       parameters = new SteppableRegionCalculatorParameters(defaultParameters);
       remotePropertySets.registerRemotePropertySet(parameters, SteppableRegionsAPI.PARAMETERS);
    }
