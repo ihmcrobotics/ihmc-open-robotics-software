@@ -36,7 +36,7 @@ public class ContinuousHikingProcess
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
       ROS2SyncedRobotModel syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
       syncedRobot.initializeToDefaultRobotInitialSetup(0.0, 0.0, 0.0, 0.0);
-      ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);
+      ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Node);
 
       RepeatingTaskThread robotUpdateThread = new RepeatingTaskThread("SyncedRobotUpdate", syncedRobot::update).setFrequencyLimit(30.0);
       robotUpdateThread.startRepeating();
@@ -61,7 +61,7 @@ public class ContinuousHikingProcess
       ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.HEIGHT_MAP_PARAMETERS, heightMapParameters);
 
       ContinuousHikingLogger continuousHikingLogger = new ContinuousHikingLogger();
-      ControllerFootstepQueueMonitor controllerFootstepQueueMonitor = new ControllerFootstepQueueMonitor(ros2Helper,
+      ControllerFootstepQueueMonitor controllerFootstepQueueMonitor = new ControllerFootstepQueueMonitor(ros2Node,
                                                                                                          robotModel.getSimpleRobotName(),
                                                                                                          syncedRobot.getReferenceFrames(),
                                                                                                          continuousHikingLogger);

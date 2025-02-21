@@ -2,7 +2,6 @@ package us.ihmc.rdx.imgui;
 
 import imgui.internal.ImGui;
 import imgui.type.ImInt;
-import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 
 import java.util.function.IntConsumer;
 import java.util.function.IntSupplier;

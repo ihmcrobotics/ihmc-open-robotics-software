@@ -130,7 +130,7 @@ public class StructuralPerceptionProcessWithDriver
          rapidRegionsExtractor = new RapidPlanarRegionsExtractor(openCLManager, openCLProgram, depthHeight, depthWidth);
          rapidRegionsExtractor.setPatchSizeChanged(false);
 
-         ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);
+         ros2PropertySetGroup = new ROS2StoredPropertySetGroup(realtimeROS2Node);
          ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.SPHERICAL_RAPID_REGION_PARAMETERS, rapidRegionsExtractor.getParameters());
          ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.SPHERICAL_POLYGONIZER_PARAMETERS,
                                                         rapidRegionsExtractor.getRapidPlanarRegionsCustomizer().getPolygonizerParameters());

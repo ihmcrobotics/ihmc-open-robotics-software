@@ -1,6 +1,7 @@
 package us.ihmc.rdx.ui;
 
 import com.badlogic.gdx.graphics.Color;
+import ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessage;
 import imgui.ImGui;
 import us.ihmc.communication.property.StoredPropertySetMessageTools;
 import us.ihmc.communication.property.StoredPropertySetROS2Input;
@@ -9,39 +10,29 @@ import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 
 public class ImGuiRemoteROS2StoredPropertySet
 {
-   private final ROS2PublishSubscribeAPI ros2PublishSubscribeAPI;
    private final StoredPropertySetBasics storedPropertySet;
-   private final StoredPropertySetROS2TopicPair topicPair;
    private final StoredPropertySetROS2Input storedPropertySetROS2Input;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final RDXStoredPropertySetTuner imGuiStoredPropertySetTuner;
    private boolean storedPropertySetChangedByImGuiUser = false;
    private static final Color DARK_RED = new Color(0x781d1dff);
    private static final Color YELLOW = new Color(0xa6b51bff);
+   private final ROS2Publisher<PrimitiveDataVectorMessage> publisher;
 
-   public ImGuiRemoteROS2StoredPropertySet(ROS2PublishSubscribeAPI ros2PublishSubscribeAPI,
-                                           StoredPropertySetBasics storedPropertySet,
-                                           String moduleTopicName)
-   {
-      this(ros2PublishSubscribeAPI,
-           storedPropertySet,
-           new StoredPropertySetROS2TopicPair(moduleTopicName, storedPropertySet));
-   }
-
-   public ImGuiRemoteROS2StoredPropertySet(ROS2PublishSubscribeAPI ros2PublishSubscribeAPI,
+   public ImGuiRemoteROS2StoredPropertySet(ROS2Node ros2Node,
                                            StoredPropertySetBasics storedPropertySet,
                                            StoredPropertySetROS2TopicPair topicPair)
    {
-      this.ros2PublishSubscribeAPI = ros2PublishSubscribeAPI;
       this.storedPropertySet = storedPropertySet;
-      this.topicPair = topicPair;
-      ros2PublishSubscribeAPI.createPublisher(topicPair.getCommandTopic());
+      publisher = ros2Node.createPublisher(topicPair.getCommandTopic());
 
-      storedPropertySetROS2Input = new StoredPropertySetROS2Input(ros2PublishSubscribeAPI, topicPair.getStatusTopic(), storedPropertySet);
+      storedPropertySetROS2Input = new StoredPropertySetROS2Input(ros2Node, topicPair.getStatusTopic(), storedPropertySet);
       imGuiStoredPropertySetTuner = new RDXStoredPropertySetTuner(storedPropertySet.getTitle());
       imGuiStoredPropertySetTuner.create(storedPropertySet, false, () -> storedPropertySetChangedByImGuiUser = true);
    }
@@ -95,7 +86,7 @@ public class ImGuiRemoteROS2StoredPropertySet
       if (storedPropertySetChangedByImGuiUser)
       {
          storedPropertySetChangedByImGuiUser = false;
-         ros2PublishSubscribeAPI.publish(topicPair.getCommandTopic(), StoredPropertySetMessageTools.newMessage(storedPropertySet));
+         publisher.publish(StoredPropertySetMessageTools.newMessage(storedPropertySet));
       }
    }
 

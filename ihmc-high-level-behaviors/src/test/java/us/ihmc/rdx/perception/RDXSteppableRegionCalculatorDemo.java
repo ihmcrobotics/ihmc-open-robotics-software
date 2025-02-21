@@ -49,7 +49,7 @@ public class RDXSteppableRegionCalculatorDemo
       heightMapUI = new RDXRemoteHeightMapPanel(ros2Helper);
 
       SteppableRegionCalculatorParametersReadOnly defaultSteppableParameters = new SteppableRegionCalculatorParameters();
-      steppableRegionsUpdater = new RemoteSteppableRegionsUpdater(ros2Helper, defaultSteppableParameters);
+      steppableRegionsUpdater = new RemoteSteppableRegionsUpdater(ros2Node, defaultSteppableParameters);
       steppableRegionsUpdater.start();
       steppableRegionsUI = new RDXSteppableRegionsPanel(ros2Helper, defaultSteppableParameters);
 

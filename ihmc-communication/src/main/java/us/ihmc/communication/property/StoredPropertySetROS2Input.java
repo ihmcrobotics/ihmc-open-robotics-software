@@ -6,6 +6,7 @@ import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.log.LogTools;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.property.StoredPropertyKey;
@@ -33,12 +34,12 @@ public class StoredPropertySetROS2Input
    private final Timer receptionTimer = new Timer();
    private long numberOfMessagesReceived = 0;
 
-   public StoredPropertySetROS2Input(ROS2PublishSubscribeAPI ros2PublishSubscribeAPI,
+   public StoredPropertySetROS2Input(ROS2Node ros2Node,
                                      ROS2Topic<PrimitiveDataVectorMessage> inputTopic,
                                      StoredPropertySetBasics storedPropertySetToUpdate)
    {
       this.storedPropertySetToUpdate = storedPropertySetToUpdate;
-      ros2PublishSubscribeAPI.subscribeViaCallback(inputTopic, this::acceptMessage);
+      ros2Node.createSubscription2(inputTopic, this::acceptMessage);
    }
 
    private void acceptMessage(PrimitiveDataVectorMessage message)

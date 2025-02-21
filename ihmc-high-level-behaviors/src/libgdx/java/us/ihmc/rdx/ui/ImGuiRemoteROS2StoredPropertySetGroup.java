@@ -4,6 +4,7 @@ import imgui.ImGui;
 import us.ihmc.communication.property.StoredPropertySetROS2TopicPair;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 
 import java.util.ArrayList;
@@ -11,17 +12,17 @@ import java.util.ArrayList;
 public class ImGuiRemoteROS2StoredPropertySetGroup
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ROS2PublishSubscribeAPI ros2PublishSubscribeAPI;
+   private final ROS2Node ros2Node;
    private final ArrayList<ImGuiRemoteROS2StoredPropertySet> remotePropertySets = new ArrayList<>();
 
-   public ImGuiRemoteROS2StoredPropertySetGroup(ROS2PublishSubscribeAPI ros2PublishSubscribeAPI)
+   public ImGuiRemoteROS2StoredPropertySetGroup(ROS2Node ros2Node)
    {
-      this.ros2PublishSubscribeAPI = ros2PublishSubscribeAPI;
+      this.ros2Node = ros2Node;
    }
 
    public void registerRemotePropertySet(StoredPropertySetBasics storedPropertySet, StoredPropertySetROS2TopicPair topicPair)
    {
-      remotePropertySets.add(new ImGuiRemoteROS2StoredPropertySet(ros2PublishSubscribeAPI, storedPropertySet, topicPair));
+      remotePropertySets.add(new ImGuiRemoteROS2StoredPropertySet(ros2Node, storedPropertySet, topicPair));
    }
 
    public void renderImGuiWidgets()

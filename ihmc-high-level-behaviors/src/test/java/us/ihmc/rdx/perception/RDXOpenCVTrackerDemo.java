@@ -65,8 +65,8 @@ public class RDXOpenCVTrackerDemo
 
       imageRetriever = new ZEDColorDepthImageRetriever(0,
                                                        ReferenceFrame::getWorldFrame,
-                                                       new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_ZED_PUBLICATION)::isDemanded,
-                                                       new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_ZED_PUBLICATION)::isDemanded);
+                                                       new ROS2DemandGraphNode(ros2Node, PerceptionAPI.REQUEST_ZED_PUBLICATION)::isDemanded,
+                                                       new ROS2DemandGraphNode(ros2Node, PerceptionAPI.REQUEST_ZED_PUBLICATION)::isDemanded);
       imageRetriever.start();
       imagePublisher = new ZEDColorDepthImagePublisher(PerceptionAPI.ZED2_COLOR_IMAGES, PerceptionAPI.ZED2_DEPTH, PerceptionAPI.ZED2_CUT_OUT_DEPTH);
 
