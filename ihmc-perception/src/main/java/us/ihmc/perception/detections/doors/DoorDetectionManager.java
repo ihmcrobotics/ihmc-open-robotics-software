@@ -1,13 +1,11 @@
 package us.ihmc.perception.detections.doors;
 
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.detections.InstantDetection;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -21,10 +19,10 @@ public class DoorDetectionManager
    static final String DOOR_STRING = "door";
    static final String PANEL_STRING = "door_panel";
 
+   // Detections
    private final List<DetectedDoor> detectedDoors = new LinkedList<>();
-   private final Map<Point3DReadOnly, DetectedDoor> openingMechanismPositions = new HashMap<>();
-   private final Map<Point3DReadOnly, DetectedDoor> panelPositions = new HashMap<>();
 
+   // Parameters
    private double maxDetectionJumpDistance = 0.5;
 
    public DoorDetectionManager()
@@ -32,7 +30,7 @@ public class DoorDetectionManager
 
    }
 
-   public void updateDetections(List<InstantDetection> newDetections)
+   public synchronized void updateDetections(List<InstantDetection> newDetections)
    {
       // Find opening hardware and panel detections
       List<InstantDetection> openingHardwareDetections = new ArrayList<>();
@@ -99,8 +97,9 @@ public class DoorDetectionManager
       }
    }
 
-   public void updatePlanarRegion(PlanarRegionsList newPlanarRegions)
+   public synchronized void updatePlanarRegion(PlanarRegionsList newPlanarRegions)
    {
-
+      for (DetectedDoor doorDetection : detectedDoors)
+         doorDetection.updatePlanarRegion(newPlanarRegions);
    }
 }
