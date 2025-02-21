@@ -14,6 +14,7 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
+import us.ihmc.ros2.ROS2Subscription;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +38,7 @@ public class RDXROS2YOLOv8Settings
       settingsPublisher = ros2Node.createPublisher(PerceptionAPI.YOLO_SETTINGS);
 
       // Subscribe to available models message
-      ros2Node.createSubscription2(PerceptionAPI.YOLO_AVAILABLE_MODELS, this::initialize);
+      ROS2Subscription<YOLOv8AvailableModels> availableModelsSubscription = ros2Node.createSubscription2(PerceptionAPI.YOLO_AVAILABLE_MODELS, this::initialize);
 
       // Start requesting available models
       ROS2Publisher<YOLOv8AvailableModels> availableModelsRequestPublisher = ros2Node.createPublisher(PerceptionAPI.YOLO_AVAILABLE_MODELS);
@@ -52,8 +53,8 @@ public class RDXROS2YOLOv8Settings
             availableModelsRequestPublisher.publish(requestMessage);
          }
 
-         // TODO: Call this when the remove method is fixed
-         // availableModelsRequestPublisher.remove();
+         availableModelsRequestPublisher.remove();
+         availableModelsSubscription.remove();
       }, "AvailableYOLOModelRequester");
    }
 
@@ -68,8 +69,7 @@ public class RDXROS2YOLOv8Settings
          modelEnables.add(new ImBoolean(enableModelsOnInitialize));
       }
 
-      // TODO: Call this when the remove method is fixed
-      // availableModelsSubscriber.remove();
+      parametersChanged.set();
    }
 
    public void renderSettings()
