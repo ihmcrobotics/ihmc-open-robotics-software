@@ -26,6 +26,7 @@ public class DetectedDoor
 
    // Panel
    private final Pose3D panelPose;
+   private final PlanarRegion panelPlanarRegion;
 
    // Detection stuff
    private Instant lastDetectionTime;
@@ -41,6 +42,8 @@ public class DetectedDoor
 
       panelPose = new Pose3D();
       panelPose.setToNaN();
+
+      panelPlanarRegion = new PlanarRegion();
    }
 
    public String getOpeningHardwareName()
@@ -53,9 +56,29 @@ public class DetectedDoor
       return openingHardwarePose;
    }
 
+   public boolean hasOpeningHardwarePose()
+   {
+      return !openingHardwarePose.containsNaN();
+   }
+
    public Pose3DReadOnly getPanelPose()
    {
       return panelPose;
+   }
+
+   public boolean hasPanelPose()
+   {
+      return !panelPose.containsNaN();
+   }
+
+   public PlanarRegion getPanelPlanarRegion()
+   {
+      return panelPlanarRegion;
+   }
+
+   public boolean hasPanelPlanarRegion()
+   {
+      return panelPlanarRegion.getArea() > 0.0;
    }
 
    public Instant getLastDetectedTime()
@@ -81,11 +104,15 @@ public class DetectedDoor
 
       if (detectedClass.contains(PANEL_STRING))
       {
+         if (panelPose.containsNaN())
+            panelPose.setToZero();
          panelPose.getPosition().set(newDetection.getPose().getPosition());
       }
       else if (detectedClass.startsWith(DOOR_STRING))
       {
          openingHardwareName = newDetection.getDetectedObjectClass();
+         if (openingHardwarePose.containsNaN())
+            openingHardwarePose.setToZero();
          openingHardwarePose.getPosition().set(newDetection.getPose().getPosition());
       }
       else
@@ -112,11 +139,12 @@ public class DetectedDoor
       if (bestFitRegion == null)
          return;
 
-      Point3DReadOnly regionCentroid = PlanarRegionTools.getCentroid3DInWorld(bestFitRegion);
+      panelPlanarRegion.set(bestFitRegion);
+      Point3DReadOnly regionCentroid = PlanarRegionTools.getCentroid3DInWorld(panelPlanarRegion);
       Line2D doorNormalLine = new Line2D(regionCentroid.getX(),
                                          regionCentroid.getY(),
-                                         bestFitRegion.getNormalX(),
-                                         bestFitRegion.getNormalY());
+                                         panelPlanarRegion.getNormalX(),
+                                         panelPlanarRegion.getNormalY());
 
       double planarRegionYaw = TupleTools.angle(Axis2D.X, doorNormalLine.getDirection());
 

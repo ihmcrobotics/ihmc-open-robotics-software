@@ -1,7 +1,7 @@
 package us.ihmc.perception.detections.doors;
 
 import us.ihmc.perception.detections.InstantDetection;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -28,6 +28,11 @@ public class DoorDetectionManager
    public DoorDetectionManager()
    {
 
+   }
+
+   public List<DetectedDoor> getDetectedDoors()
+   {
+      return detectedDoors;
    }
 
    public synchronized void updateDetections(List<InstantDetection> newDetections)
@@ -97,9 +102,9 @@ public class DoorDetectionManager
       }
    }
 
-   public synchronized void updatePlanarRegion(PlanarRegionsList newPlanarRegions)
+   public synchronized void updatePlanarRegions(FramePlanarRegionsList newPlanarRegions)
    {
       for (DetectedDoor doorDetection : detectedDoors)
-         doorDetection.updatePlanarRegion(newPlanarRegions);
+         doorDetection.updatePlanarRegion(newPlanarRegions.getPlanarRegionsList());
    }
 }
