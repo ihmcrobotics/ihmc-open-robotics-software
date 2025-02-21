@@ -21,7 +21,7 @@ public class RDXZEDSVORecorderPanel
    private final ROS2Helper ros2Helper;
    private ZEDSVOCurrentFileMessage latestMessage;
 
-   private final ImInt requestedPosition = new ImInt(0);
+   private final ImInt requestedPosition = new ImInt();
    private boolean holdingOnToTheSlider;
    private boolean paused;
 
