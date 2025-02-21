@@ -90,8 +90,8 @@ public final class ImpedancePointFeedbackControllerTest
       pointFeedbackControlCommand.set(baseBody, endEffector);
       pointFeedbackControlCommand.setGains(gains);
       pointFeedbackControlCommand.setInverseDynamics(desiredPosition, zero, zero);
+      pointFeedbackControlCommand.setImpedanceEnabled(true);
       pointFeedbackController.setEnabled(true);
-      pointFeedbackController.setImpedanceEnabled(true);
       pointFeedbackController.submitFeedbackControlCommand(pointFeedbackControlCommand);
 
       MotionQPInputCalculator motionQPInputCalculator = toolbox.getMotionQPInputCalculator();
@@ -173,8 +173,8 @@ public final class ImpedancePointFeedbackControllerTest
       pointFeedbackControlCommand.setGains(gains);
       pointFeedbackControlCommand.setBodyFixedPointToControl(bodyFixedPointToControl);
       pointFeedbackControlCommand.setInverseDynamics(desiredPosition, new FrameVector3D(worldFrame), new FrameVector3D(worldFrame));
+      pointFeedbackControlCommand.setImpedanceEnabled(true);
       pointFeedbackController.setEnabled(true);
-      pointFeedbackController.setImpedanceEnabled(true);
       pointFeedbackController.submitFeedbackControlCommand(pointFeedbackControlCommand);
 
       int numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(jointsToOptimizeFor);
@@ -262,8 +262,8 @@ public final class ImpedancePointFeedbackControllerTest
       pointFeedbackControlCommand.setGains(gains);
       pointFeedbackControlCommand.setBodyFixedPointToControl(bodyFixedPointToControl);
       pointFeedbackControlCommand.setInverseDynamics(desiredPosition, new FrameVector3D(worldFrame), new FrameVector3D(worldFrame));
+      pointFeedbackControlCommand.setImpedanceEnabled(true);
       pointFeedbackController.setEnabled(true);
-      pointFeedbackController.setImpedanceEnabled(true);
       pointFeedbackController.submitFeedbackControlCommand(pointFeedbackControlCommand);
 
       int numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(jointsToOptimizeFor);

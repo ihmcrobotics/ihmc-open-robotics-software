@@ -90,8 +90,8 @@ public class ImpedanceOrientationFeedbackControllerTest
       orientationFeedbackControlCommand.setGains(gains);
       orientationFeedbackControlCommand.setControlFrameFixedInEndEffector(bodyFixedOrientationToControl);
       orientationFeedbackControlCommand.setInverseDynamics(desiredOrientation, new FrameVector3D(worldFrame), new FrameVector3D(worldFrame));
+      orientationFeedbackControlCommand.setImpedanceEnabled(true);
       orientationFeedbackController.setEnabled(true);
-      orientationFeedbackController.setImpedanceEnabled(true);
       orientationFeedbackController.submitFeedbackControlCommand(orientationFeedbackControlCommand);
 
       int numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(jointsToOptimizeFor);
@@ -168,17 +168,17 @@ public class ImpedanceOrientationFeedbackControllerTest
                                                                                           new FeedbackControllerToolbox(new YoRegistry("Dummy")),
                                                                                           registry);
       orientationFeedbackController.setEnabled(true);
-      orientationFeedbackController.setImpedanceEnabled(true);
       spatialFeedbackController.setEnabled(true);
-      spatialFeedbackController.setImpedanceEnabled(true);
 
       OrientationFeedbackControlCommand orientationFeedbackControlCommand = new OrientationFeedbackControlCommand();
       orientationFeedbackControlCommand.set(elevator, endEffector);
+      orientationFeedbackControlCommand.setImpedanceEnabled(true);
       PID3DGains orientationGains = new DefaultPID3DGains();
 
       SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
       spatialFeedbackControlCommand.set(elevator, endEffector);
       spatialFeedbackControlCommand.getSpatialAccelerationCommand().setSelectionMatrixForAngularControl();
+      spatialFeedbackControlCommand.setImpedanceEnabled(true);
 
       MotionQPInputCalculator motionQPInputCalculator = toolbox.getMotionQPInputCalculator();
       NativeQPInputTypeA orientationMotionQPInput = new NativeQPInputTypeA(toolbox.getJointIndexHandler().getNumberOfDoFs());

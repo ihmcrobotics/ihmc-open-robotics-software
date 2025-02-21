@@ -186,6 +186,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
          isRootBody = false;
          rootBody = null;
       }
+
       jointIndexHandler = ccToolbox.getJointIndexHandler();
 
       rigidBodyTwistProvider = ccToolbox.getRigidBodyTwistCalculator();
@@ -327,9 +328,9 @@ public class PointFeedbackController implements FeedbackControllerInterface
       currentCommandId = command.getCommandId();
       base = command.getBase();
       controlBaseFrame = command.getControlBaseFrame();
-      setImpedanceEnabled(command.getIsImpedanceEnabled());
+      isImpedanceEnabled.set(command.getIsImpedanceEnabled());
 
-      if (isImpedanceEnabled())
+      if (isImpedanceEnabled.getValue())
       {
          MultiBodySystemTools.collectJointPath(base, endEffector, jointPath);
 
@@ -385,12 +386,6 @@ public class PointFeedbackController implements FeedbackControllerInterface
    }
 
    @Override
-   public void setImpedanceEnabled(boolean isEnabled)
-   {
-      this.isImpedanceEnabled.set(isEnabled);
-   }
-
-   @Override
    public void initialize()
    { // TODO: See SpatialFeedbackController.initialize()
       if (rateLimitedFeedbackLinearAcceleration != null)
@@ -415,7 +410,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
 
       ReferenceFrame trajectoryFrame = yoDesiredPosition.getReferenceFrame();
 
-      if (isImpedanceEnabled())
+      if (isImpedanceEnabled.getValue())
       {
          computeInverseInertiaMatrix();
       }
@@ -426,7 +421,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
       feedForwardLinearAcceleration.setIncludingFrame(yoFeedForwardLinearAcceleration);
       feedForwardLinearAcceleration.changeFrame(controlFrame);
 
-      if (isImpedanceEnabled())
+      if (isImpedanceEnabled.getValue())
       {
          inverseInertiaMatrix3D.set(inverseInertiaTempMatrix);
          inverseInertiaMatrix3D.transform(proportionalFeedback);
@@ -463,7 +458,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
       if (!isEnabled())
          return;
 
-      if (isImpedanceEnabled())
+      if (isImpedanceEnabled.getValue())
       {
          throw new FeedbackControllerException("Impedance control is not implemented in computeInverseKinematics.");
       }
@@ -507,7 +502,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
       if (!isEnabled())
          return;
 
-      if (isImpedanceEnabled())
+      if (isImpedanceEnabled.getValue())
       {
          throw new FeedbackControllerException("Impedance control is not implemented in computeVirtualModelControl.");
       }
@@ -668,7 +663,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
       feedbackTermToPack.changeFrame(linearGainsFrame != null ? linearGainsFrame : controlFrame);
 
       gains.getDerivativeGainMatrix(tempGainMatrix);
-      if (isImpedanceEnabled())
+      if (isImpedanceEnabled.getValue())
       {
          gains.getFullProportionalGainMatrix(tempMatrix, 3);
 
@@ -855,12 +850,6 @@ public class PointFeedbackController implements FeedbackControllerInterface
    public boolean isEnabled()
    {
       return isEnabled.getBooleanValue();
-   }
-
-   @Override
-   public boolean isImpedanceEnabled()
-   {
-      return isImpedanceEnabled.getBooleanValue();
    }
 
    @Override

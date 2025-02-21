@@ -334,9 +334,9 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       currentCommandId = command.getCommandId();
       base = command.getBase();
       controlBaseFrame = command.getControlBaseFrame();
-      setImpedanceEnabled(command.getIsImpedanceEnabled());
+      isImpedanceEnabled.set(command.getIsImpedanceEnabled());
 
-      if (isImpedanceEnabled())
+      if (isImpedanceEnabled.getValue())
       {
          MultiBodySystemTools.collectJointPath(base, endEffector, jointPath);
 
@@ -395,12 +395,6 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    }
 
    @Override
-   public void setImpedanceEnabled(boolean isImpedanceEnabled)
-   {
-      this.isImpedanceEnabled.set(isImpedanceEnabled);
-   }
-
-   @Override
    public void initialize()
    { // TODO See SpatialFeedbackController.initialize()
       if (rateLimitedFeedbackAngularAcceleration != null)
@@ -427,7 +421,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
          return;
 
       ReferenceFrame trajectoryFrame = yoDesiredOrientation.getReferenceFrame();
-      if (isImpedanceEnabled())
+      if (isImpedanceEnabled.getValue())
       {
          computeInverseInertiaMatrix();
       }
@@ -438,7 +432,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       feedForwardAngularAcceleration.setIncludingFrame(yoFeedForwardAngularAcceleration);
       feedForwardAngularAcceleration.changeFrame(controlFrame);
 
-      if (isImpedanceEnabled())
+      if (isImpedanceEnabled.getValue())
       {
          inverseInertiaMatrix3D.set(inverseInertiaTempMatrix);
          inverseInertiaMatrix3D.transform(proportionalFeedback);
@@ -474,7 +468,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       if (!isEnabled())
          return;
 
-      if (isImpedanceEnabled())
+      if (isImpedanceEnabled.getValue())
       {
          throw new FeedbackControllerException("Impedance control is not implemented in computeInverseKinematics.");
       }
@@ -513,7 +507,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       if (!isEnabled())
          return;
 
-      if (isImpedanceEnabled())
+      if (isImpedanceEnabled.getValue())
       {
          throw new FeedbackControllerException("Impedance control is not implemented in computeVirtualModelControl.");
       }
@@ -675,11 +669,12 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       feedbackTermToPack.changeFrame(angularGainsFrame != null ? angularGainsFrame : controlFrame);
 
       gains.getDerivativeGainMatrix(tempGainMatrix);
-      if (isImpedanceEnabled()){
+      if (isImpedanceEnabled.getValue())
+      {
          gains.getFullProportionalGainMatrix(tempMatrix, 3);
 
-         sqrtProportionalGainMatrix.reshape(6,6);
-         sqrtInertiaMatrix.reshape(6,6);
+         sqrtProportionalGainMatrix.reshape(6, 6);
+         sqrtInertiaMatrix.reshape(6, 6);
 
          MatrixMissingTools.sqrt(tempMatrix, sqrtProportionalGainMatrix, tempSqrtMatrix, U, W, Vt, svd);
          tempMatrix.set(inverseInertiaMatrix);
@@ -804,12 +799,6 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    public boolean isEnabled()
    {
       return isEnabled.getBooleanValue();
-   }
-
-   @Override
-   public boolean isImpedanceEnabled()
-   {
-      return isImpedanceEnabled.getBooleanValue();
    }
 
    @Override

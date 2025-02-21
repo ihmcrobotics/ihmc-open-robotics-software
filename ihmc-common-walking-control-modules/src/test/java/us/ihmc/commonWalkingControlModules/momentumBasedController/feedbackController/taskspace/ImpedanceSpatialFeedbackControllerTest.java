@@ -88,8 +88,8 @@ public final class ImpedanceSpatialFeedbackControllerTest
       spatialFeedbackControlCommand.set(baseBody, endEffector);
       spatialFeedbackControlCommand.setGains(gains);
       spatialFeedbackControlCommand.setInverseDynamics(desiredPose, zero, zero);
+      spatialFeedbackControlCommand.setImpedanceEnabled(true);
       spatialFeedbackController.setEnabled(true);
-      spatialFeedbackController.setImpedanceEnabled(true);
       spatialFeedbackController.submitFeedbackControlCommand(spatialFeedbackControlCommand);
 
       MotionQPInputCalculator motionQPInputCalculator = toolbox.getMotionQPInputCalculator();
@@ -175,8 +175,8 @@ public final class ImpedanceSpatialFeedbackControllerTest
                                                        new FrameVector3D(worldFrame),
                                                        new FrameVector3D(worldFrame),
                                                        new FrameVector3D(worldFrame));
+      spatialFeedbackControlCommand.setImpedanceEnabled(true);
       spatialFeedbackController.setEnabled(true);
-      spatialFeedbackController.setImpedanceEnabled(true);
       spatialFeedbackController.submitFeedbackControlCommand(spatialFeedbackControlCommand);
 
       int numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(jointsToOptimizeFor);
@@ -286,8 +286,8 @@ public final class ImpedanceSpatialFeedbackControllerTest
                                                        new FrameVector3D(worldFrame),
                                                        new FrameVector3D(worldFrame),
                                                        new FrameVector3D(worldFrame));
+      spatialFeedbackControlCommand.setImpedanceEnabled(true);
       spatialFeedbackController.setEnabled(true);
-      spatialFeedbackController.setImpedanceEnabled(true);
       spatialFeedbackController.submitFeedbackControlCommand(spatialFeedbackControlCommand);
 
       int numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(jointsToOptimizeFor);

@@ -399,7 +399,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       currentCommandId = command.getCommandId();
       base = command.getBase();
       controlBaseFrame = command.getControlBaseFrame();
-      setImpedanceEnabled(command.getIsImpedanceEnabled());
+      isImpedanceEnabled = command.getIsImpedanceEnabled();
       inverseDynamicsOutput.set(command.getSpatialAccelerationCommand());
       inverseKinematicsOutput.setProperties(command.getSpatialAccelerationCommand());
       virtualModelControlOutput.setProperties(command.getSpatialAccelerationCommand());
@@ -417,10 +417,10 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       angularGainsFrame = command.getAngularGainsFrame();
       linearGainsFrame = command.getLinearGainsFrame();
 
-      if (isImpedanceEnabled())
+      if (isImpedanceEnabled)
       {
          MultiBodySystemTools.collectJointPath(base.getChildrenJoints().get(0).getSuccessor(), endEffector, jointPath);
-         jointIndices.clear();
+         jointIndices.reset();
 
          for (int i = 0; i < jointPath.size(); i++)
          {
@@ -464,12 +464,6 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    public void setEnabled(boolean isEnabled)
    {
       this.isEnabled.set(isEnabled);
-   }
-
-   @Override
-   public void setImpedanceEnabled(boolean isImpedanceEnabled)
-   {
-      this.isImpedanceEnabled = isImpedanceEnabled;
    }
 
    @Override
@@ -525,7 +519,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
       ReferenceFrame trajectoryFrame = yoDesiredPose.getReferenceFrame();
 
-      if (isImpedanceEnabled())
+      if (isImpedanceEnabled)
       {
          computeInverseInertiaMatrix();
       }
@@ -537,7 +531,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
       updateFeedForward();
 
-      if (isImpedanceEnabled())
+      if (isImpedanceEnabled)
       {
          tempMatrix.reshape(6, 1);
 
@@ -617,7 +611,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       yoDesiredAcceleration.changeFrame(trajectoryFrame);
       yoDesiredAcceleration.setCommandId(currentCommandId);
 
-      if (!isImpedanceEnabled())
+      if (!isImpedanceEnabled)
       {
          addCoriolisAcceleration(desiredLinearAcceleration);
       }
@@ -631,7 +625,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       if (!isEnabled())
          return;
 
-      if (isImpedanceEnabled())
+      if (isImpedanceEnabled)
       {
          throw new FeedbackControllerException("Impedance control is not implemented in computeInverseKinematics.");
       }
@@ -679,7 +673,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       if (!isEnabled())
          return;
 
-      if (isImpedanceEnabled())
+      if (isImpedanceEnabled)
       {
          throw new FeedbackControllerException("Impedance control is not implemented in computeVirtualModelControl.");
       }
@@ -901,7 +895,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       positionGains.getDerivativeGainMatrix(tempGainMatrix);
       orientationGains.getDerivativeGainMatrix(tempMatrix3D);
 
-      if (isImpedanceEnabled())
+      if (isImpedanceEnabled)
       {
          positionGains.getFullProportionalGainMatrix(tempLinearMatrix, 3);
          orientationGains.getFullProportionalGainMatrix(tempAngularMatrix, 0);
@@ -1236,12 +1230,6 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    public boolean isEnabled()
    {
       return isEnabled.getBooleanValue();
-   }
-
-   @Override
-   public boolean isImpedanceEnabled()
-   {
-      return isImpedanceEnabled;
    }
 
    @Override
