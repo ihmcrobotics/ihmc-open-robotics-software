@@ -9,35 +9,35 @@ import us.ihmc.pubsub.TopicDataType;
 /**
        * this represents the 3d gains for a PID controller
        */
-public class PID3DGains extends Packet<PID3DGains> implements Settable<PID3DGains>, EpsilonComparable<PID3DGains>
+public class PID3DGainsMessage extends Packet<PID3DGainsMessage> implements Settable<PID3DGainsMessage>, EpsilonComparable<PID3DGainsMessage>
 {
-   public controller_msgs.msg.dds.PIDGains gains_x_;
-   public controller_msgs.msg.dds.PIDGains gains_y_;
-   public controller_msgs.msg.dds.PIDGains gains_z_;
+   public controller_msgs.msg.dds.PIDGainsMessage gains_x_;
+   public controller_msgs.msg.dds.PIDGainsMessage gains_y_;
+   public controller_msgs.msg.dds.PIDGainsMessage gains_z_;
    public double maximum_feedback_;
    public double maximum_feedback_rate_;
    public double maximum_integral_error_;
    public double maximum_derivative_error_;
    public double maximum_proportional_error_;
 
-   public PID3DGains()
+   public PID3DGainsMessage()
    {
-      gains_x_ = new controller_msgs.msg.dds.PIDGains();
-      gains_y_ = new controller_msgs.msg.dds.PIDGains();
-      gains_z_ = new controller_msgs.msg.dds.PIDGains();
+      gains_x_ = new controller_msgs.msg.dds.PIDGainsMessage();
+      gains_y_ = new controller_msgs.msg.dds.PIDGainsMessage();
+      gains_z_ = new controller_msgs.msg.dds.PIDGainsMessage();
    }
 
-   public PID3DGains(PID3DGains other)
+   public PID3DGainsMessage(PID3DGainsMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(PID3DGains other)
+   public void set(PID3DGainsMessage other)
    {
-      controller_msgs.msg.dds.PIDGainsPubSubType.staticCopy(other.gains_x_, gains_x_);
-      controller_msgs.msg.dds.PIDGainsPubSubType.staticCopy(other.gains_y_, gains_y_);
-      controller_msgs.msg.dds.PIDGainsPubSubType.staticCopy(other.gains_z_, gains_z_);
+      controller_msgs.msg.dds.PIDGainsMessagePubSubType.staticCopy(other.gains_x_, gains_x_);
+      controller_msgs.msg.dds.PIDGainsMessagePubSubType.staticCopy(other.gains_y_, gains_y_);
+      controller_msgs.msg.dds.PIDGainsMessagePubSubType.staticCopy(other.gains_z_, gains_z_);
       maximum_feedback_ = other.maximum_feedback_;
 
       maximum_feedback_rate_ = other.maximum_feedback_rate_;
@@ -51,19 +51,19 @@ public class PID3DGains extends Packet<PID3DGains> implements Settable<PID3DGain
    }
 
 
-   public controller_msgs.msg.dds.PIDGains getGainsX()
+   public controller_msgs.msg.dds.PIDGainsMessage getGainsX()
    {
       return gains_x_;
    }
 
 
-   public controller_msgs.msg.dds.PIDGains getGainsY()
+   public controller_msgs.msg.dds.PIDGainsMessage getGainsY()
    {
       return gains_y_;
    }
 
 
-   public controller_msgs.msg.dds.PIDGains getGainsZ()
+   public controller_msgs.msg.dds.PIDGainsMessage getGainsZ()
    {
       return gains_z_;
    }
@@ -114,19 +114,19 @@ public class PID3DGains extends Packet<PID3DGains> implements Settable<PID3DGain
    }
 
 
-   public static Supplier<PID3DGainsPubSubType> getPubSubType()
+   public static Supplier<PID3DGainsMessagePubSubType> getPubSubType()
    {
-      return PID3DGainsPubSubType::new;
+      return PID3DGainsMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return PID3DGainsPubSubType::new;
+      return PID3DGainsMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(PID3DGains other, double epsilon)
+   public boolean epsilonEquals(PID3DGainsMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -153,9 +153,9 @@ public class PID3DGains extends Packet<PID3DGains> implements Settable<PID3DGain
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof PID3DGains)) return false;
+      if(!(other instanceof PID3DGainsMessage)) return false;
 
-      PID3DGains otherMyClass = (PID3DGains) other;
+      PID3DGainsMessage otherMyClass = (PID3DGainsMessage) other;
 
       if (!this.gains_x_.equals(otherMyClass.gains_x_)) return false;
       if (!this.gains_y_.equals(otherMyClass.gains_y_)) return false;
@@ -179,7 +179,7 @@ public class PID3DGains extends Packet<PID3DGains> implements Settable<PID3DGain
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("PID3DGains {");
+      builder.append("PID3DGainsMessage {");
       builder.append("gains_x=");
       builder.append(this.gains_x_);      builder.append(", ");
       builder.append("gains_y=");

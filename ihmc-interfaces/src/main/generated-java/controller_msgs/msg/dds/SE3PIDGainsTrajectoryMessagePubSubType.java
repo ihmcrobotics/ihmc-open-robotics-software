@@ -15,7 +15,7 @@ public class SE3PIDGainsTrajectoryMessagePubSubType implements us.ihmc.pubsub.To
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "ef5185be8bbbef2d5c6eec4139f2b6a121b519f930299ffb7e01476c45b7428c";
+   		return "078bc93fce2932313cf4c04d35ab45fd3243dc24a3562a400bcc2e0436091aff";
    }
    
    @Override

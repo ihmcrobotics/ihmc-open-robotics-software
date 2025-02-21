@@ -2,16 +2,13 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import controller_msgs.msg.dds.SE3PIDGainsTrajectoryMessage;
 import controller_msgs.msg.dds.SE3PIDGainsTrajectoryPointMessage;
-import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
-import controller_msgs.msg.dds.PID3DGains;
+import controller_msgs.msg.dds.PID3DGainsMessage;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.OneDoFTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.SE3PIDGainsTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SE3PIDGainsTrajectoryPointBasics;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.TrajectoryPointListBasics;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.SE3PIDGainsTrajectoryPointList;
 
 import java.util.List;
 
@@ -35,7 +32,7 @@ public class SE3PIDGainsTrajectoryControllerCommand extends QueueableCommand<SE3
       trajectoryPoints.add().set(trajectoryPoint);
    }
 
-   public void addTrajectoryPoint(double time, PID3DGains angularGains, PID3DGains linearGains)
+   public void addTrajectoryPoint(double time, PID3DGainsMessage angularGains, PID3DGainsMessage linearGains)
    {
       us.ihmc.robotics.controllers.pidGains.PID3DGains newAngularGains = getNewPID3DGains(angularGains);
       us.ihmc.robotics.controllers.pidGains.PID3DGains newLinearGains = getNewPID3DGains(linearGains);
@@ -143,7 +140,7 @@ public class SE3PIDGainsTrajectoryControllerCommand extends QueueableCommand<SE3
       return sequenceId;
    }
 
-   public us.ihmc.robotics.controllers.pidGains.PID3DGains getNewPID3DGains(PID3DGains gains)
+   public us.ihmc.robotics.controllers.pidGains.PID3DGains getNewPID3DGains(PID3DGainsMessage gains)
    {
       us.ihmc.robotics.controllers.pidGains.PID3DGains newGains = new DefaultPID3DGains();
       newGains.setProportionalGains(gains.getGainsX().getKp(), gains.getGainsY().getKp(), gains.getGainsZ().getKp());

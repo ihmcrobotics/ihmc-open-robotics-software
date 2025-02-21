@@ -1,7 +1,7 @@
 #ifndef __controller_msgs__msg__SE3PIDGainsTrajectoryPointMessage__idl__
 #define __controller_msgs__msg__SE3PIDGainsTrajectoryPointMessage__idl__
 
-#include "controller_msgs/msg/./PID3DGains_.idl"
+#include "controller_msgs/msg/./PID3DGainsMessage_.idl"
 module controller_msgs
 {
   module msg
@@ -28,11 +28,11 @@ module controller_msgs
         /**
          * Define the desired linear PID gains for the trajectory point.
          */
-        controller_msgs::msg::dds::PID3DGains linear_gains;
+        controller_msgs::msg::dds::PID3DGainsMessage linear_gains;
         /**
          * Define the desired angular PID gains for the trajectory point.
          */
-        controller_msgs::msg::dds::PID3DGains angular_gains;
+        controller_msgs::msg::dds::PID3DGainsMessage angular_gains;
       };
     };
   };

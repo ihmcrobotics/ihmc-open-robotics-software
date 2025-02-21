@@ -15,7 +15,7 @@ public class SE3PIDGainsTrajectoryPointMessagePubSubType implements us.ihmc.pubs
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "e04cdc111cd7487d07550d375bb203fa8ebd0e8dd045e829d11c40569dbad462";
+   		return "bfe177ca0256a732214bccdd3bf958a595d8f08fae693c22f99c088deba6d825";
    }
    
    @Override
@@ -56,9 +56,9 @@ public class SE3PIDGainsTrajectoryPointMessagePubSubType implements us.ihmc.pubs
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += controller_msgs.msg.dds.PID3DGainsPubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += controller_msgs.msg.dds.PID3DGainsMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += controller_msgs.msg.dds.PID3DGainsPubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += controller_msgs.msg.dds.PID3DGainsMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -79,9 +79,9 @@ public class SE3PIDGainsTrajectoryPointMessagePubSubType implements us.ihmc.pubs
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
-      current_alignment += controller_msgs.msg.dds.PID3DGainsPubSubType.getCdrSerializedSize(data.getLinearGains(), current_alignment);
+      current_alignment += controller_msgs.msg.dds.PID3DGainsMessagePubSubType.getCdrSerializedSize(data.getLinearGains(), current_alignment);
 
-      current_alignment += controller_msgs.msg.dds.PID3DGainsPubSubType.getCdrSerializedSize(data.getAngularGains(), current_alignment);
+      current_alignment += controller_msgs.msg.dds.PID3DGainsMessagePubSubType.getCdrSerializedSize(data.getAngularGains(), current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -93,8 +93,8 @@ public class SE3PIDGainsTrajectoryPointMessagePubSubType implements us.ihmc.pubs
 
       cdr.write_type_6(data.getTime());
 
-      controller_msgs.msg.dds.PID3DGainsPubSubType.write(data.getLinearGains(), cdr);
-      controller_msgs.msg.dds.PID3DGainsPubSubType.write(data.getAngularGains(), cdr);
+      controller_msgs.msg.dds.PID3DGainsMessagePubSubType.write(data.getLinearGains(), cdr);
+      controller_msgs.msg.dds.PID3DGainsMessagePubSubType.write(data.getAngularGains(), cdr);
    }
 
    public static void read(controller_msgs.msg.dds.SE3PIDGainsTrajectoryPointMessage data, us.ihmc.idl.CDR cdr)
@@ -103,8 +103,8 @@ public class SE3PIDGainsTrajectoryPointMessagePubSubType implements us.ihmc.pubs
       	
       data.setTime(cdr.read_type_6());
       	
-      controller_msgs.msg.dds.PID3DGainsPubSubType.read(data.getLinearGains(), cdr);	
-      controller_msgs.msg.dds.PID3DGainsPubSubType.read(data.getAngularGains(), cdr);	
+      controller_msgs.msg.dds.PID3DGainsMessagePubSubType.read(data.getLinearGains(), cdr);	
+      controller_msgs.msg.dds.PID3DGainsMessagePubSubType.read(data.getAngularGains(), cdr);	
 
    }
 
@@ -113,9 +113,9 @@ public class SE3PIDGainsTrajectoryPointMessagePubSubType implements us.ihmc.pubs
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_6("time", data.getTime());
-      ser.write_type_a("linear_gains", new controller_msgs.msg.dds.PID3DGainsPubSubType(), data.getLinearGains());
+      ser.write_type_a("linear_gains", new controller_msgs.msg.dds.PID3DGainsMessagePubSubType(), data.getLinearGains());
 
-      ser.write_type_a("angular_gains", new controller_msgs.msg.dds.PID3DGainsPubSubType(), data.getAngularGains());
+      ser.write_type_a("angular_gains", new controller_msgs.msg.dds.PID3DGainsMessagePubSubType(), data.getAngularGains());
 
    }
 
@@ -124,9 +124,9 @@ public class SE3PIDGainsTrajectoryPointMessagePubSubType implements us.ihmc.pubs
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setTime(ser.read_type_6("time"));
-      ser.read_type_a("linear_gains", new controller_msgs.msg.dds.PID3DGainsPubSubType(), data.getLinearGains());
+      ser.read_type_a("linear_gains", new controller_msgs.msg.dds.PID3DGainsMessagePubSubType(), data.getLinearGains());
 
-      ser.read_type_a("angular_gains", new controller_msgs.msg.dds.PID3DGainsPubSubType(), data.getAngularGains());
+      ser.read_type_a("angular_gains", new controller_msgs.msg.dds.PID3DGainsMessagePubSubType(), data.getAngularGains());
 
    }
 

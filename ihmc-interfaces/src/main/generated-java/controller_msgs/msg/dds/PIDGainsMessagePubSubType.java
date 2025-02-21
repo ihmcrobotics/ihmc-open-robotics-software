@@ -2,20 +2,20 @@ package controller_msgs.msg.dds;
 
 /**
 * 
-* Topic data type of the struct "PIDGains" defined in "PIDGains_.idl". Use this class to provide the TopicDataType to a Participant. 
+* Topic data type of the struct "PIDGainsMessage" defined in "PIDGainsMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
 *
-* This file was automatically generated from PIDGains_.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit PIDGains_.idl instead.
+* This file was automatically generated from PIDGainsMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit PIDGainsMessage_.idl instead.
 *
 */
-public class PIDGainsPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.PIDGains>
+public class PIDGainsMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.PIDGainsMessage>
 {
-   public static final java.lang.String name = "controller_msgs::msg::dds_::PIDGains_";
+   public static final java.lang.String name = "controller_msgs::msg::dds_::PIDGainsMessage_";
    
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "6562b6de3dd8a12acd757a519470e6e60412ec757589c7df4c6f94afcccafc47";
+   		return "8970630ccb78c71075c429d35c53b60ff74f267b348b6af6d772829a805c2dea";
    }
    
    @Override
@@ -28,7 +28,7 @@ public class PIDGainsPubSubType implements us.ihmc.pubsub.TopicDataType<controll
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(controller_msgs.msg.dds.PIDGains data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
+   public void serialize(controller_msgs.msg.dds.PIDGainsMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -36,7 +36,7 @@ public class PIDGainsPubSubType implements us.ihmc.pubsub.TopicDataType<controll
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.PIDGains data) throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.PIDGainsMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -64,12 +64,12 @@ public class PIDGainsPubSubType implements us.ihmc.pubsub.TopicDataType<controll
       return current_alignment - initial_alignment;
    }
 
-   public final static int getCdrSerializedSize(controller_msgs.msg.dds.PIDGains data)
+   public final static int getCdrSerializedSize(controller_msgs.msg.dds.PIDGainsMessage data)
    {
       return getCdrSerializedSize(data, 0);
    }
 
-   public final static int getCdrSerializedSize(controller_msgs.msg.dds.PIDGains data, int current_alignment)
+   public final static int getCdrSerializedSize(controller_msgs.msg.dds.PIDGainsMessage data, int current_alignment)
    {
       int initial_alignment = current_alignment;
 
@@ -89,7 +89,7 @@ public class PIDGainsPubSubType implements us.ihmc.pubsub.TopicDataType<controll
       return current_alignment - initial_alignment;
    }
 
-   public static void write(controller_msgs.msg.dds.PIDGains data, us.ihmc.idl.CDR cdr)
+   public static void write(controller_msgs.msg.dds.PIDGainsMessage data, us.ihmc.idl.CDR cdr)
    {
       cdr.write_type_6(data.getKp());
 
@@ -101,7 +101,7 @@ public class PIDGainsPubSubType implements us.ihmc.pubsub.TopicDataType<controll
 
    }
 
-   public static void read(controller_msgs.msg.dds.PIDGains data, us.ihmc.idl.CDR cdr)
+   public static void read(controller_msgs.msg.dds.PIDGainsMessage data, us.ihmc.idl.CDR cdr)
    {
       data.setKp(cdr.read_type_6());
       	
@@ -115,7 +115,7 @@ public class PIDGainsPubSubType implements us.ihmc.pubsub.TopicDataType<controll
    }
 
    @Override
-   public final void serialize(controller_msgs.msg.dds.PIDGains data, us.ihmc.idl.InterchangeSerializer ser)
+   public final void serialize(controller_msgs.msg.dds.PIDGainsMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_6("kp", data.getKp());
       ser.write_type_6("kd", data.getKd());
@@ -124,7 +124,7 @@ public class PIDGainsPubSubType implements us.ihmc.pubsub.TopicDataType<controll
    }
 
    @Override
-   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.PIDGains data)
+   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.PIDGainsMessage data)
    {
       data.setKp(ser.read_type_6("kp"));
       data.setKd(ser.read_type_6("kd"));
@@ -132,15 +132,15 @@ public class PIDGainsPubSubType implements us.ihmc.pubsub.TopicDataType<controll
       data.setZeta(ser.read_type_6("zeta"));
    }
 
-   public static void staticCopy(controller_msgs.msg.dds.PIDGains src, controller_msgs.msg.dds.PIDGains dest)
+   public static void staticCopy(controller_msgs.msg.dds.PIDGainsMessage src, controller_msgs.msg.dds.PIDGainsMessage dest)
    {
       dest.set(src);
    }
 
    @Override
-   public controller_msgs.msg.dds.PIDGains createData()
+   public controller_msgs.msg.dds.PIDGainsMessage createData()
    {
-      return new controller_msgs.msg.dds.PIDGains();
+      return new controller_msgs.msg.dds.PIDGainsMessage();
    }
    @Override
    public int getTypeSize()
@@ -154,24 +154,24 @@ public class PIDGainsPubSubType implements us.ihmc.pubsub.TopicDataType<controll
       return name;
    }
    
-   public void serialize(controller_msgs.msg.dds.PIDGains data, us.ihmc.idl.CDR cdr)
+   public void serialize(controller_msgs.msg.dds.PIDGainsMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
    }
 
-   public void deserialize(controller_msgs.msg.dds.PIDGains data, us.ihmc.idl.CDR cdr)
+   public void deserialize(controller_msgs.msg.dds.PIDGainsMessage data, us.ihmc.idl.CDR cdr)
    {
       read(data, cdr);
    }
    
-   public void copy(controller_msgs.msg.dds.PIDGains src, controller_msgs.msg.dds.PIDGains dest)
+   public void copy(controller_msgs.msg.dds.PIDGainsMessage src, controller_msgs.msg.dds.PIDGainsMessage dest)
    {
       staticCopy(src, dest);
    }
 
    @Override
-   public PIDGainsPubSubType newInstance()
+   public PIDGainsMessagePubSubType newInstance()
    {
-      return new PIDGainsPubSubType();
+      return new PIDGainsMessagePubSubType();
    }
 }

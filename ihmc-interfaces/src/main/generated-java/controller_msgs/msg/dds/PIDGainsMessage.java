@@ -9,24 +9,24 @@ import us.ihmc.pubsub.TopicDataType;
 /**
        * this represents the gains for a PID controller
        */
-public class PIDGains extends Packet<PIDGains> implements Settable<PIDGains>, EpsilonComparable<PIDGains>
+public class PIDGainsMessage extends Packet<PIDGainsMessage> implements Settable<PIDGainsMessage>, EpsilonComparable<PIDGainsMessage>
 {
    public double kp_;
    public double kd_;
    public double ki_;
    public double zeta_;
 
-   public PIDGains()
+   public PIDGainsMessage()
    {
    }
 
-   public PIDGains(PIDGains other)
+   public PIDGainsMessage(PIDGainsMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(PIDGains other)
+   public void set(PIDGainsMessage other)
    {
       kp_ = other.kp_;
 
@@ -75,19 +75,19 @@ public class PIDGains extends Packet<PIDGains> implements Settable<PIDGains>, Ep
    }
 
 
-   public static Supplier<PIDGainsPubSubType> getPubSubType()
+   public static Supplier<PIDGainsMessagePubSubType> getPubSubType()
    {
-      return PIDGainsPubSubType::new;
+      return PIDGainsMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return PIDGainsPubSubType::new;
+      return PIDGainsMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(PIDGains other, double epsilon)
+   public boolean epsilonEquals(PIDGainsMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -109,9 +109,9 @@ public class PIDGains extends Packet<PIDGains> implements Settable<PIDGains>, Ep
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof PIDGains)) return false;
+      if(!(other instanceof PIDGainsMessage)) return false;
 
-      PIDGains otherMyClass = (PIDGains) other;
+      PIDGainsMessage otherMyClass = (PIDGainsMessage) other;
 
       if(this.kp_ != otherMyClass.kp_) return false;
 
@@ -130,7 +130,7 @@ public class PIDGains extends Packet<PIDGains> implements Settable<PIDGains>, Ep
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("PIDGains {");
+      builder.append("PIDGainsMessage {");
       builder.append("kp=");
       builder.append(this.kp_);      builder.append(", ");
       builder.append("kd=");

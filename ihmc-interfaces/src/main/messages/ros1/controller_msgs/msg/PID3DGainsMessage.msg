@@ -1,10 +1,10 @@
 # this represents the 3d gains for a PID controller
 
-controller_msgs/PIDGains gains_x
+controller_msgs/PIDGainsMessage gains_x
 
-controller_msgs/PIDGains gains_y
+controller_msgs/PIDGainsMessage gains_y
 
-controller_msgs/PIDGains gains_z
+controller_msgs/PIDGainsMessage gains_z
 
 float64 maximum_feedback
 

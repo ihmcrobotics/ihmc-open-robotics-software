@@ -1,8 +1,11 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace;
 
+import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.decomposition.lu.LUDecompositionAlt_DDRM;
 import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
+import org.ejml.dense.row.linsol.lu.LinearSolverLu_DDRM;
 import org.ejml.interfaces.decomposition.SingularValueDecomposition_F64;
 import us.ihmc.commonWalkingControlModules.controlModules.YoOrientationFrame;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerException;
@@ -132,6 +135,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    private final RigidBodyTwistProvider rigidBodyTwistProvider;
    private final RigidBodyAccelerationProvider rigidBodyAccelerationProvider;
    private final CompositeRigidBodyMassMatrixCalculator massMatrixCalculator;
+   private final LinearSolverLu_DDRM inverseSolver = new LinearSolverLu_DDRM(new LUDecompositionAlt_DDRM());
 
    private RigidBodyBasics base;
    private ReferenceFrame controlBaseFrame;
@@ -143,8 +147,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
 
    private final JointIndexHandler jointIndexHandler;
    private final List<JointBasics> jointPath = new ArrayList<>();
-   private final List<Integer> allJointIndices = new ArrayList<>();
-   private int[] jointIndices;
+   private final TIntArrayList jointPathIndices = new TIntArrayList();
 
    private final double dt;
    private final boolean isRootBody;
@@ -335,19 +338,16 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
 
       if (isImpedanceEnabled())
       {
-         MultiBodySystemTools.collectJointPath(base.getChildrenJoints().get(0).getSuccessor(), endEffector, jointPath);
-         allJointIndices.clear();
-         for (JointBasics joint : jointPath)
+         MultiBodySystemTools.collectJointPath(base, endEffector, jointPath);
+
+         jointPathIndices.reset();
+         for (int joint_idx = 0; joint_idx < jointPath.size(); joint_idx++)
          {
-            int[] indices = jointIndexHandler.getJointIndices(joint);
-            for (int index : indices)
+            int[] indices = jointIndexHandler.getJointIndices(jointPath.get(joint_idx));
+            for (int dof_idx = 0; dof_idx < indices.length; dof_idx++)
             {
-               allJointIndices.add(index);
+               jointPathIndices.add(indices[dof_idx]);
             }
-         }
-         jointIndices = new int[allJointIndices.size()];
-         for (int i = 0; i < allJointIndices.size(); i++) {
-            jointIndices[i] = allJointIndices.get(i);
          }
       }
 
@@ -438,7 +438,8 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       feedForwardAngularAcceleration.setIncludingFrame(yoFeedForwardAngularAcceleration);
       feedForwardAngularAcceleration.changeFrame(controlFrame);
 
-      if (isImpedanceEnabled()){
+      if (isImpedanceEnabled())
+      {
          inverseInertiaMatrix3D.set(inverseInertiaTempMatrix);
          inverseInertiaMatrix3D.transform(proportionalFeedback);
          inverseInertiaMatrix3D.transform(derivativeFeedback);
@@ -787,16 +788,16 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       massInverseMatrix.set(massMatrixCalculator.getMassMatrix());
       massMatrixCalculator.reset();
       massInverseMatrix.reshape(massInverseMatrix.getNumRows(), massInverseMatrix.getNumCols());
-      CommonOps_DDRM.invert(massInverseMatrix);
-      subMassInverseMatrix.set(new DMatrixRMaj(jointIndices.length, jointIndices.length));
-      CommonOps_DDRM.extract(massInverseMatrix, jointIndices, jointIndices.length, jointIndices, jointIndices.length, subMassInverseMatrix);
+      subMassInverseMatrix.set(new DMatrixRMaj(jointPath.size(), jointPath.size()));
+      MatrixMissingTools.extract(massInverseMatrix, jointPathIndices, jointPathIndices, subMassInverseMatrix);
+      MatrixMissingTools.invert(subMassInverseMatrix, inverseSolver);
 
-      inverseInertiaTempMatrix.reshape(jointIndices.length, jointIndices.length);
+      inverseInertiaTempMatrix.reshape(jointPathIndices.size(), jointPathIndices.size());
       CommonOps_DDRM.mult(jacobianMatrix, subMassInverseMatrix, inverseInertiaTempMatrix);
       CommonOps_DDRM.multTransB(inverseInertiaTempMatrix, jacobianMatrix, inverseInertiaMatrix);
       inverseInertiaTempMatrix.reshape(3,3);
       //      Point so extract the 3x3 matrix from the 6x6 matrix (Lower right 3x3 matrix)
-      CommonOps_DDRM.extract(inverseInertiaMatrix, 0, 3, 0, 3, inverseInertiaTempMatrix, 0, 0);
+      CommonOps_DDRM.extract(inverseInertiaMatrix, 3, 6, 3, 6, inverseInertiaTempMatrix, 0, 0);
    }
 
    @Override

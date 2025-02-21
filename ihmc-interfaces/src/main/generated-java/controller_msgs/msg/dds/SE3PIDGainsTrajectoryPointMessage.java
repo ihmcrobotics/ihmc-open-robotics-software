@@ -24,16 +24,16 @@ public class SE3PIDGainsTrajectoryPointMessage extends Packet<SE3PIDGainsTraject
    /**
             * Define the desired linear PID gains for the trajectory point.
             */
-   public controller_msgs.msg.dds.PID3DGains linear_gains_;
+   public controller_msgs.msg.dds.PID3DGainsMessage linear_gains_;
    /**
             * Define the desired angular PID gains for the trajectory point.
             */
-   public controller_msgs.msg.dds.PID3DGains angular_gains_;
+   public controller_msgs.msg.dds.PID3DGainsMessage angular_gains_;
 
    public SE3PIDGainsTrajectoryPointMessage()
    {
-      linear_gains_ = new controller_msgs.msg.dds.PID3DGains();
-      angular_gains_ = new controller_msgs.msg.dds.PID3DGains();
+      linear_gains_ = new controller_msgs.msg.dds.PID3DGainsMessage();
+      angular_gains_ = new controller_msgs.msg.dds.PID3DGainsMessage();
    }
 
    public SE3PIDGainsTrajectoryPointMessage(SE3PIDGainsTrajectoryPointMessage other)
@@ -48,8 +48,8 @@ public class SE3PIDGainsTrajectoryPointMessage extends Packet<SE3PIDGainsTraject
 
       time_ = other.time_;
 
-      controller_msgs.msg.dds.PID3DGainsPubSubType.staticCopy(other.linear_gains_, linear_gains_);
-      controller_msgs.msg.dds.PID3DGainsPubSubType.staticCopy(other.angular_gains_, angular_gains_);
+      controller_msgs.msg.dds.PID3DGainsMessagePubSubType.staticCopy(other.linear_gains_, linear_gains_);
+      controller_msgs.msg.dds.PID3DGainsMessagePubSubType.staticCopy(other.angular_gains_, angular_gains_);
    }
 
    /**
@@ -86,7 +86,7 @@ public class SE3PIDGainsTrajectoryPointMessage extends Packet<SE3PIDGainsTraject
    /**
             * Define the desired linear PID gains for the trajectory point.
             */
-   public controller_msgs.msg.dds.PID3DGains getLinearGains()
+   public controller_msgs.msg.dds.PID3DGainsMessage getLinearGains()
    {
       return linear_gains_;
    }
@@ -95,7 +95,7 @@ public class SE3PIDGainsTrajectoryPointMessage extends Packet<SE3PIDGainsTraject
    /**
             * Define the desired angular PID gains for the trajectory point.
             */
-   public controller_msgs.msg.dds.PID3DGains getAngularGains()
+   public controller_msgs.msg.dds.PID3DGainsMessage getAngularGains()
    {
       return angular_gains_;
    }

@@ -9,9 +9,9 @@ uint32 sequence_id
 float64 time
 
 # Define the desired linear PID gains for the trajectory point.
-controller_msgs/PID3DGains linear_gains
+controller_msgs/PID3DGainsMessage linear_gains
 
 # Define the desired angular PID gains for the trajectory point.
-controller_msgs/PID3DGains angular_gains
+controller_msgs/PID3DGainsMessage angular_gains
 
 
