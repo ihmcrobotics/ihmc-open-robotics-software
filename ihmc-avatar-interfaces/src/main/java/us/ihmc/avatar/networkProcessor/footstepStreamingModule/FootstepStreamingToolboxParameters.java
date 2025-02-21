@@ -99,7 +99,7 @@ public class FootstepStreamingToolboxParameters
       toolboxUpdatePeriod = 0.001;
       timeThresholdForSleeping = 3.0;
 
-      computeFromStance = false;
+      computeFromStance = true;
 
       // Step threshold of 5cm and lift of 2cm, seem to be too conservative. Step is identified after ~0.3s. Too long considering that a step lasts ~0.57s
       // Step threshold of 2cm and lift of 1cm seem to work great!
@@ -111,7 +111,7 @@ public class FootstepStreamingToolboxParameters
       stabilityIterations = 3;
 
       defaultStride = 0.20;
-      maxStride = 1.0;
+      maxStride = 0.6;
       kpDirection = 0.0;
       kpStride = 0.5;
 
@@ -121,7 +121,7 @@ public class FootstepStreamingToolboxParameters
       kpYaw = 0.3;
 
       minDistanceToStance = 0.15;
-      maxDistanceToStance = 1.0;
+      maxDistanceToStance = 0.6;
       minYawToStanceDegrees = 0.0;
       maxYawToStanceDegrees = 90.0;
    }

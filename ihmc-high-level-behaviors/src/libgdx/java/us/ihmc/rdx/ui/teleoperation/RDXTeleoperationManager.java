@@ -260,7 +260,7 @@ public class RDXTeleoperationManager extends RDXPanel
                      {
                       RDXBaseUI.pushNotification("Commanding pelvis trajectory...");
                       ros2Helper.publishToController(HumanoidMessageTools.createPelvisTrajectoryMessage(teleoperationParameters.getTrajectoryTime(),
-                                                                                                        interactablePelvis.getPose()));
+                                                                                                         interactablePelvis.getPose()));
                      }
                   });
                   allInteractableRobotLinks.add(interactablePelvis);

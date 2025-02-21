@@ -409,10 +409,10 @@ public class FSTStreamingState implements State
       robotPredictedFootXY.setX(predictedTrackerXY.getX());
       robotPredictedFootXY.setY(predictedTrackerXY.getY());
       // Clamp value of lateral distance according to limits relative to stance foot
-      if (side == RobotSide.RIGHT)
+      if (side == RobotSide.LEFT)
          robotPredictedFootXY.setY(Math.max(minDistanceToStance.getValue(), Math.min(maxDistanceToStance.getValue(), robotPredictedFootXY.getY())));
       else
-         robotPredictedFootXY.setY(Math.max(-maxDistanceToStance.getValue(), Math.min(minDistanceToStance.getValue(), robotPredictedFootXY.getY())));
+         robotPredictedFootXY.setY(Math.max(-maxDistanceToStance.getValue(), Math.min(-minDistanceToStance.getValue(), robotPredictedFootXY.getY())));
       robotPredictedFootXY.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
 
       // Compute predicted rotation relative to stance frame
