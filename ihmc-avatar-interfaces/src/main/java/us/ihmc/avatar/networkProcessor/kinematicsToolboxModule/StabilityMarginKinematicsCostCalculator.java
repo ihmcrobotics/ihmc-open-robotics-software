@@ -40,6 +40,7 @@ public class StabilityMarginKinematicsCostCalculator
    private final YoDouble stabilityMarginWeight = new YoDouble("stabilityMarginWeight", registry);
    private final YoDouble stabilityMarginThreshold = new YoDouble("stabilityMarginThreshold", registry);
    private final YoDouble stabilityMarginHysteresis = new YoDouble("stabilityMarginHysteresis", registry);
+   private final YoDouble alphaEnabled = new YoDouble("alphaEnabled", registry);
 
    private final FramePose3D pelvisControlFramePose = new FramePose3D();
    private final FramePose3D pelvisPose = new FramePose3D();
@@ -60,7 +61,7 @@ public class StabilityMarginKinematicsCostCalculator
       this.minStabilityMargin = minStabilityMargin;
 
       desiredStabilityMarginVelocity.set(0.15);
-      stabilityMarginThreshold.set(0.12);
+      stabilityMarginThreshold.set(0.16);
       stabilityMarginHysteresis.set(0.03);
       stabilityMarginWeight.set(0.5);
 
@@ -85,6 +86,11 @@ public class StabilityMarginKinematicsCostCalculator
       return isEnabled.getBooleanValue();
    }
 
+   public double getPostureSensitivity()
+   {
+      return stabilityGradientCalculator.getPostureSensitivity();
+   }
+
    /**
     * Computes and packs the feedback objective. Returns the postural sensitivity
     */
@@ -95,8 +101,8 @@ public class StabilityMarginKinematicsCostCalculator
 
       double stabilityMargin = multiContactRegionCalculator.getStabilityMargin();
       double deltaStabilityMargin = stabilityMargin - minStabilityMargin.getValue();
-      double alpha = EuclidCoreTools.clamp(deltaStabilityMargin / minStabilityMargin.getValue(), 0.0, 1.0);
-      double weight = alpha * stabilityMarginWeight.getValue();
+      alphaEnabled.set(EuclidCoreTools.clamp(1.0 - deltaStabilityMargin / (stabilityMarginThreshold.getValue() - minStabilityMargin.getValue()), 0.0, 1.0));
+      double weight = alphaEnabled.getDoubleValue() * stabilityMarginWeight.getValue();
 
       stabilityGradientCalculator.update();
       double posturalSensitivity = stabilityGradientCalculator.getPostureSensitivity();
@@ -104,7 +110,7 @@ public class StabilityMarginKinematicsCostCalculator
       if (!isEnabled.getValue() || posturalSensitivity < 1.0e-3)
          return posturalSensitivity;
 
-      DMatrixRMaj stabilityMarginGradient = stabilityGradientCalculator.getStabilityMarginGradient();
+      DMatrixRMaj stabilityMarginGradient = stabilityGradientCalculator.getStabilityBoundaryGradient();
       double gradientScalar = desiredStabilityMarginVelocity.getValue() / EuclidCoreTools.square(posturalSensitivity);
 
       // Feed-forward joint velocities

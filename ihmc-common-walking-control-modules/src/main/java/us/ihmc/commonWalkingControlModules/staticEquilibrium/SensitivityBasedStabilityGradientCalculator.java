@@ -45,6 +45,7 @@ public class SensitivityBasedStabilityGradientCalculator
 {
    private static final double integrationDT = 1.0e-3;
    private static final int XY_DIMENSIONS = 2;
+   private static final boolean INCLUDE_COM_IN_JACOBIAN = false;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -97,6 +98,9 @@ public class SensitivityBasedStabilityGradientCalculator
    /* To compute the CoM component of the margin objective */
    private final CentroidalMomentumCalculator centroidalMomentumCalculator;
 
+   /* Indexed controllable joints */
+   private final OneDoFJointBasics[] controllableOneDoFJoints;
+
    private int vertexIndexA;
    private int vertexIndexB;
    private double cosA;
@@ -125,7 +129,7 @@ public class SensitivityBasedStabilityGradientCalculator
       robotMass = fullRobotModel.getTotalMass();
 
       JointBasics[] controlledJoints = computeJointsToOptimizeFor(fullRobotModel);
-      OneDoFJointBasics[] controllableOneDoFJoints = MultiBodySystemTools.filterJoints(controlledJoints, OneDoFJointBasics.class);
+      controllableOneDoFJoints = MultiBodySystemTools.filterJoints(controlledJoints, OneDoFJointBasics.class);
       MultiBodySystemBasics multiBodySystemInput = MultiBodySystemBasics.toMultiBodySystemBasics(controlledJoints);
       centroidalMomentumCalculator = new CentroidalMomentumCalculator(multiBodySystemInput, ReferenceFrame.getWorldFrame());
 
@@ -241,7 +245,49 @@ public class SensitivityBasedStabilityGradientCalculator
       double sensitivityA = sensitivityMultiplier * cosA * computeSensitivity(solverConstraintVariation, primalSolutionA, dualSolutionA, tempSensitivityMatrix);
       double sensitivityB = sensitivityMultiplier * cosB * computeSensitivity(solverConstraintVariation, primalSolutionB, dualSolutionB, tempSensitivityMatrix);
       double sensitivity = sensitivityA * vertexAWeight + sensitivityB * vertexBWeight;
-      computedSensitivity.set(nullspaceIndex, 0, sensitivity);
+      double jointLimitAlpha = applyJointLimitFilter();
+
+      computedSensitivity.set(nullspaceIndex, 0, jointLimitAlpha * sensitivity);
+   }
+
+   private double applyJointLimitFilter()
+   {
+      int rootJointIndices = Twist.SIZE;
+      double jointLimitAlpha = 1.0;
+
+      for (int dof_idx = rootJointIndices; dof_idx < nullspaceVelocity.getNumRows(); dof_idx++)
+      {
+         int joint_idx = dof_idx - rootJointIndices;
+         OneDoFJointBasics joint = controllableOneDoFJoints[joint_idx];
+
+         double romFraction0 = 0.08;
+         double romFraction1 = 0.04;
+
+         double q = joint.getQ();
+         double qdNullspace = nullspaceVelocity.get(dof_idx);
+
+         double qUpper = joint.getJointLimitUpper();
+         double qLower = joint.getJointLimitLower();
+         double jointRoM = qUpper - qLower;
+
+         double qUpperCutoff0 = qUpper - jointRoM * romFraction0;
+         double qUpperCutoff1 = qUpper - jointRoM * romFraction1;
+
+         double qLowerCutoff0 = qLower + jointRoM * romFraction0;
+         double qLowerCutoff1 = qLower + jointRoM * romFraction1;
+
+         if (q > qUpperCutoff0 && qdNullspace > 0.0)
+         {
+            jointLimitAlpha = Math.min(jointLimitAlpha, EuclidCoreTools.clamp((qUpperCutoff1 - q) / (qUpperCutoff1 - qUpperCutoff0), 0.0, 1.0));
+//            jointLimitAlpha = Math.min(jointLimitAlpha, EuclidCoreTools.square());
+         }
+         else if (q < qLowerCutoff0 && qdNullspace < 0.0)
+         {
+            jointLimitAlpha = Math.min(jointLimitAlpha, EuclidCoreTools.clamp((qLowerCutoff1 - q) / (qLowerCutoff1 - qLowerCutoff0), 0.0, 1.0));
+         }
+      }
+
+      return jointLimitAlpha;
    }
 
    private boolean updateStabilityMarginData(int edgeIndex)
@@ -308,6 +354,11 @@ public class SensitivityBasedStabilityGradientCalculator
    public ContactNullspaceCalculator getNullspaceCalculator()
    {
       return nullspaceCalculator;
+   }
+
+   public DMatrixRMaj getStabilityBoundaryGradient()
+   {
+      return stabilityBoundaryGradient;
    }
 
    public FrameVector2DReadOnly getStabilityMarginDirection()

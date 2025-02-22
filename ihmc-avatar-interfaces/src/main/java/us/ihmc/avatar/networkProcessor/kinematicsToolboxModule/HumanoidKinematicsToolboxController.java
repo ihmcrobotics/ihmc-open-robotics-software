@@ -174,7 +174,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
    private final StabilityMarginRegionCalculator multiContactRegionCalculator;
    private final WholeBodyContactState wholeBodyContactState;
-   private final KinematicsToolboxMultiContactManager multiContactManager;
+   private final StabilityMarginKinematicsCostCalculator stabilityMarginCalculator;
    private final FramePoint3D tempContactPoint = new FramePoint3D();
    private final FrameVector3D tempContactNormal = new FrameVector3D();
 
@@ -231,16 +231,20 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       supportRigidBodyWeight.set(200.0);
       momentumWeight.set(0.001);
 
-      multiContactRegionCalculator = StabilityMarginRegionCalculator.createForCoPStabilityMargin("", desiredFullRobotModel.getTotalMass(), desiredReferenceFrames.getCenterOfMassFrame(), desiredReferenceFrames.getMidFeetZUpFrame(), registry, yoGraphicsListRegistry);
+      multiContactRegionCalculator = StabilityMarginRegionCalculator.createForCoPStabilityMargin("",
+                                                                                                 desiredFullRobotModel.getTotalMass(),
+                                                                                                 desiredReferenceFrames.getCenterOfMassFrame(),
+                                                                                                 desiredReferenceFrames.getMidFeetZUpFrame(),
+                                                                                                 registry,
+                                                                                                 yoGraphicsListRegistry);
       multiContactRegionCalculator.setupForStabilityMarginCalculation(() -> centerOfMass);
       wholeBodyContactState = new WholeBodyContactState(desiredOneDoFJoints, rootJoint);
-      multiContactManager = new KinematicsToolboxMultiContactManager(wholeBodyContactState,
-                                                                     multiContactRegionCalculator,
-                                                                     desiredFullRobotModel,
-                                                                     desiredReferenceFrames.getCenterOfMassFrame(),
-                                                                     desiredReferenceFrames.getMidFeetZUpFrame(),
-                                                                     updateDT,
-                                                                     registry);
+      stabilityMarginCalculator = new StabilityMarginKinematicsCostCalculator(wholeBodyContactState,
+                                                                              multiContactRegionCalculator,
+                                                                              desiredFullRobotModel,
+                                                                              isUpperBodyLoadBearing,
+                                                                              getCenterOfMassSafeMargin(),
+                                                                              registry);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -504,7 +508,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
          holdCenterOfMassXYPosition.set(command.holdCurrentCenterOfMassXYPosition());
          enableJointLimitReduction.set(command.enableJointLimitReduction());
-         multiContactManager.setEnabled(command.enableStabilityObjective());
+//         stabilityMarginCalculator.setEnabled(command.enableStabilityObjective());
 
          if (command.hasCustomJointRestrictionLimits())
          {
@@ -545,11 +549,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
             }
             updateSupportPolygonConstraint(activeContactPointPositions);
          }
-
-         multiContactManager.update();
-         inverseKinematicsSolution.setPostureOptimizerState(multiContactManager.getCurrentState().toByte());
-         inverseKinematicsSolution.setSupportRegionSensitivity(multiContactManager.getPostureSensitivity());
-         inverseKinematicsSolution.setActivationAlpha(multiContactManager.getActivationAlpha());
       }
       else
       {
@@ -782,11 +781,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       multiContactRegionCalculator.updateContactState(wholeBodyContactState, true);
    }
 
-   private void initializePostureAdjustment()
-   {
-      multiContactManager.initialize(privilegedConfigurationCommand);
-   }
-
    private void packFootContactPoints(RobotSide robotSide, List<Point3D> contactPoints)
    {
       for (int i = 0; i < contactPoints.size(); i++)
@@ -839,7 +833,9 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
       if (isUpperBodyLoadBearing.getValue())
       {
-         multiContactManager.addPostureFeedbackCommands(bufferToPack);
+         stabilityMarginCalculator.addPostureFeedbackCommands(bufferToPack);
+         inverseKinematicsSolution.setPostureOptimizerState(PostureOptimizerState.NOMINAL.toByte());
+         inverseKinematicsSolution.setSupportRegionSensitivity(stabilityMarginCalculator.getPostureSensitivity());
       }
    }
 
@@ -869,20 +865,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       if (!isUpperBodyLoadBearing.getValue())
          return;
 
-      if (multiContactManager.isEnabled() && command.getEndEffector() == desiredFullRobotModel.getHand(BRACING_HAND_SIDE))
-      {
-         double activationAlpha = multiContactManager.getActivationAlpha();
-         double orientationWeightRatio = 1.0 - activationAlpha;
-
-         if (orientationWeightRatio < 1.0e-6)
-         {
-            command.getSelectionMatrix().getAngularPart().setAxisSelection(false, false, false);
-         }
-         else
-         {
-            command.getWeightMatrix().getAngularPart().scale(orientationWeightRatio);
-         }
-      }
+      // TODO
    }
 
    private void mutateExternalCenterOfMassWeights(KinematicsToolboxCenterOfMassCommand command)
@@ -890,41 +873,27 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       if (!isUpperBodyLoadBearing.getValue())
          return;
 
-      if (multiContactManager.isEnabled())
-      {
-         double activationAlpha = multiContactManager.getActivationAlpha();
-         double weightRatio = 1.0 - activationAlpha;
-
-         if (weightRatio < 1.0e-6)
-         {
-            command.getSelectionMatrix().selectZAxis(false);
-         }
-         else
-         {
-            double weightZ = command.getWeightMatrix().getZAxisWeight();
-            command.getWeightMatrix().setZAxisWeight(weightRatio * weightZ);
-         }
-      }
+      // TODO
    }
 
 
    public PostureOptimizerState getMode()
    {
-      return multiContactManager.getMode();
+      return PostureOptimizerState.NOMINAL;
    }
 
    public double getPostureSensitivity()
    {
-      return multiContactManager.getPostureSensitivity();
+      return -1.0;
    }
 
    public double getActivationAlpha()
    {
-      return multiContactManager.getActivationAlpha();
+      return -1.0;
    }
 
    public boolean isPostureOptimizerEnabled()
    {
-      return multiContactManager.isEnabled();
+      return false;
    }
 }
