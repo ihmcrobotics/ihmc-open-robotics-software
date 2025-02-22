@@ -37,26 +37,21 @@ public class ExternalControlImplTest
          DMatrixRMaj state = new DMatrixRMaj(stateSize, 1);
          DMatrixRMaj control = new DMatrixRMaj(controlSize, 1);
          DMatrixRMaj feet = new DMatrixRMaj(6, 1);
-         success = externalControl.updateRobotState(24.0,
-                                                            state.data,
-                                                            state.numRows,
-                                                            control.data,
-                                                            control.numRows,
-                                                            true,
-                                                            true,
-                                                            feet.data,
-                                                            feet.numRows,
-                                                            0);
+         success = externalControl.updateRobotState(24.0, state.data, state.numRows, control.data, control.numRows, true, true, feet.data, feet.numRows, 0, 0);
          assertTrue(success, "Failed to successfully compute.");
 
          DMatrixRMaj returnedState = new DMatrixRMaj(stateSize, 1);
          DMatrixRMaj returnedControl = new DMatrixRMaj(controlSize, 1);
          DMatrixRMaj returnedStiffness = new DMatrixRMaj(controlSize, 1);
          DMatrixRMaj returnedDamping = new DMatrixRMaj(controlSize, 1);
-         success = externalControl.getSolution(returnedState.data, returnedState.numRows,
-                                               returnedControl.data, returnedControl.numRows,
-                                               returnedStiffness.data, returnedStiffness.numRows,
-                                               returnedDamping.data, returnedDamping.numRows);
+         success = externalControl.getSolution(returnedState.data,
+                                               returnedState.numRows,
+                                               returnedControl.data,
+                                               returnedControl.numRows,
+                                               returnedStiffness.data,
+                                               returnedStiffness.numRows,
+                                               returnedDamping.data,
+                                               returnedDamping.numRows);
          assertTrue(success, "Failed to get the solution");
 
          DMatrixRMaj expectedState = new DMatrixRMaj(stateSize, 1);
@@ -73,7 +68,5 @@ public class ExternalControlImplTest
          EjmlUnitTests.assertEquals(expectedStiffness, returnedStiffness, epsilon);
          EjmlUnitTests.assertEquals(expectedDamping, returnedDamping, epsilon);
       }
-
    }
-
 }
