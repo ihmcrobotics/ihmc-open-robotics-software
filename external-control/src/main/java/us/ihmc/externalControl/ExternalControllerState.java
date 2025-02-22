@@ -13,10 +13,10 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.externalControl.library.ExternalControlNativeLibrary;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameWrench;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
@@ -31,8 +31,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.HashMap;
-
-import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicPoint2D;
 
 public class ExternalControllerState extends HighLevelControllerState
 {
@@ -68,6 +66,7 @@ public class ExternalControllerState extends HighLevelControllerState
    private final ExternalControl externalControl;
 
    private final HashMap<String, YoDouble> debugData = new HashMap<>();
+   private final ExecutionTimer totalControllerTime = new ExecutionTimer("JavaSideControllerTotalTime", 1.0, registry);
 
    public ExternalControllerState(HighLevelControllerParameters highLevelControllerParameters,
                                   HighLevelHumanoidControllerToolbox controllerToolbox,
@@ -151,6 +150,7 @@ public class ExternalControllerState extends HighLevelControllerState
       centerOfMass.set(controllerToolbox.getCenterOfMassPosition());
       CapturePointTools.computeCapturePointPosition(controllerToolbox.getCenterOfMassPosition(), controllerToolbox.getCenterOfMassVelocity(), controllerToolbox.getOmega0(), capturePoint);
 
+      totalControllerTime.startMeasurement();
       externalControl.setFootStates(controllerToolbox.getReferenceFrames().getSoleFrames(),
                                     controllerToolbox.getFootSwitches().get(RobotSide.LEFT).hasFootHitGroundFiltered(),
                                     controllerToolbox.getFootSwitches().get(RobotSide.RIGHT).hasFootHitGroundFiltered());
@@ -200,6 +200,7 @@ public class ExternalControllerState extends HighLevelControllerState
 
       lowLevelOneDoFJointDesiredDataHolder.completeWith(getStateSpecificJointSettings());
 
+      totalControllerTime.stopMeasurement();
       externalControl.readDebugData();
 
       for (int i = 0; i < externalControl.solutionDebugData.numRows; i++)
