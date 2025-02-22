@@ -224,6 +224,8 @@ public class JustWaitState implements State
 
       FramePose3DReadOnly lastStepInQueue;
       PlannedFootstep squareUpStep = null;
+      ReferenceFrame leftFootFrame = syncedRobot.getReferenceFrames().getFootFrame(RobotSide.LEFT);
+      ReferenceFrame rightFootFrame = syncedRobot.getReferenceFrames().getFootFrame(RobotSide.RIGHT);
 
       if (controllerQueueMonitor.getNumberOfIncompleteFootsteps() > 0)
       {
@@ -235,6 +237,7 @@ public class JustWaitState implements State
          if (robotSide == RobotSide.LEFT)
          {
             tempFramePose.set(lastStepInQueue);
+            tempFramePose.changeFrame(leftFootFrame);
             tempFramePose.getTranslation().addY(-footstepPlannerParameters.getIdealFootstepWidth());
             tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
 
@@ -243,6 +246,7 @@ public class JustWaitState implements State
          else if (robotSide == RobotSide.RIGHT)
          {
             tempFramePose.set(lastStepInQueue);
+            tempFramePose.changeFrame(rightFootFrame);
             tempFramePose.getTranslation().addY(footstepPlannerParameters.getIdealFootstepWidth());
             tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
 
@@ -251,7 +255,6 @@ public class JustWaitState implements State
       }
       else
       {
-         ReferenceFrame leftFootFrame = syncedRobot.getReferenceFrames().getFootFrame(RobotSide.LEFT);
          FramePose3D rightFootPose = new FramePose3D(ReferenceFrame.getWorldFrame(),
                                                      syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame());
          rightFootPose.changeFrame(leftFootFrame);
