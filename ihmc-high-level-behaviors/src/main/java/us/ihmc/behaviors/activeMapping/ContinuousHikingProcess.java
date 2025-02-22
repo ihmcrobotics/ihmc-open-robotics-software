@@ -70,6 +70,7 @@ public class ContinuousHikingProcess
 
       continuousPlannerSchedulingTask = new ContinuousPlannerSchedulingTask(robotModel,
                                                                             ros2Node,
+                                                                            syncedRobot,
                                                                             syncedRobot.getReferenceFrames(),
                                                                             controllerFootstepQueueMonitor,
                                                                             continuousHikingLogger,

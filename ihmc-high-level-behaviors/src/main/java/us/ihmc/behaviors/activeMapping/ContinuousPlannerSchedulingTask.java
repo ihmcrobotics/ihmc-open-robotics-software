@@ -2,6 +2,7 @@ package us.ihmc.behaviors.activeMapping;
 
 import behavior_msgs.msg.dds.ContinuousHikingCommandMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingStateMachine.*;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -45,6 +46,7 @@ public class ContinuousPlannerSchedulingTask
 
    public ContinuousPlannerSchedulingTask(DRCRobotModel robotModel,
                                           ROS2Node ros2Node,
+                                          ROS2SyncedRobotModel syncedRobotModel,
                                           HumanoidReferenceFrames referenceFrames,
                                           ControllerFootstepQueueMonitor controllerFootstepQueueMonitor,
                                           ContinuousHikingLogger continuousHikingLogger,
@@ -94,7 +96,15 @@ public class ContinuousPlannerSchedulingTask
                                                         controllerFootstepQueueMonitor,
                                                         continuousHikingParameters,
                                                         continuousHikingLogger);
-      State justWaitState = new JustWaitState(controllerFootstepQueueMonitor);
+      State justWaitState = new JustWaitState(robotModel,
+                                              ros2Helper,
+                                              syncedRobotModel,
+                                              commandMessage,
+                                              controllerFootstepQueueMonitor,
+                                              footstepPlannerParameters,
+                                              swingPlannerParameters,
+                                              this::getHeightMapData,
+                                              this::getTerrainMap);
 
       // Adding the different states
       stateMachineFactory.addState(ContinuousHikingState.DO_NOTHING, notStartedState);
@@ -137,9 +147,12 @@ public class ContinuousPlannerSchedulingTask
                                                      if (from == null)
                                                      {
                                                         // This means the state machine has just started up, for the visuals put them under the feet till we start walking
-                                                        SideDependentList<FramePose3D> robotFeet = new SideDependentList<>(new FramePose3D(), new FramePose3D());
-                                                        robotFeet.get(RobotSide.LEFT).set(referenceFrames.getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame());
-                                                        robotFeet.get(RobotSide.RIGHT).set(referenceFrames.getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame());
+                                                        SideDependentList<FramePose3D> robotFeet = new SideDependentList<>(new FramePose3D(),
+                                                                                                                           new FramePose3D());
+                                                        robotFeet.get(RobotSide.LEFT)
+                                                                 .set(referenceFrames.getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame());
+                                                        robotFeet.get(RobotSide.RIGHT)
+                                                                 .set(referenceFrames.getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame());
                                                         debugger.publishStartAndGoalForVisualization(robotFeet, robotFeet);
                                                      }
 

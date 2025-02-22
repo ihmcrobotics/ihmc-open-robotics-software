@@ -6,6 +6,8 @@ import controller_msgs.msg.dds.PlanOffsetStatus;
 import controller_msgs.msg.dds.QueuedFootstepStatusMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
@@ -98,6 +100,42 @@ public class ControllerFootstepQueueMonitor
    public AtomicReference<FootstepStatusMessage> getFootstepStatusMessage()
    {
       return footstepStatusMessage;
+   }
+
+   public int getNumberOfIncompleteFootsteps()
+   {
+      return controllerQueueSize;
+   }
+
+   /**
+    * This method assumes the list is not empty; you need to check outside this method that the list has at least one in it
+    */
+   public FramePose3DReadOnly getLastFootstepInQueue()
+   {
+      FramePose3D previousFootstepPose = new FramePose3D();
+
+      previousFootstepPose.getPosition().set(controllerQueue.get(controllerQueueSize - 1).getLocation());
+      previousFootstepPose.getRotation().setToYawOrientation(controllerQueue.get(controllerQueueSize - 1).getOrientation().getYaw());
+
+      return previousFootstepPose;
+   }
+
+   /**
+    * This method assumes the list is not empty; you need to check outside this method that the list has at least one in it
+    */
+   public FramePose3DReadOnly getLastFootstepQueuedOnOppositeSide(RobotSide candidateFootstepSide)
+   {
+      FramePose3D previousFootstepPose = new FramePose3D();
+
+      int i = controllerQueue.size() - 1;
+      // Moved the index of the list to the last step on the other side
+      while (i >= 1 && controllerQueue.get(i).getRobotSide() == candidateFootstepSide.toByte())
+         --i;
+
+      previousFootstepPose.getPosition().set(controllerQueue.get(i).getLocation());
+      previousFootstepPose.getRotation().setToYawOrientation(controllerQueue.get(i).getOrientation().getYaw());
+
+      return previousFootstepPose;
    }
 
    // TODO Polling this in multiple threads may cause issues as the second time its pulled the value will be null.

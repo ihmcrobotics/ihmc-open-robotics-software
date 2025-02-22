@@ -76,6 +76,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    private final DRCRobotModel robotModel;
    private final ROS2SyncedRobotModel syncedRobotModel;
    private final ROS2Publisher<ContinuousHikingCommandMessage> commandPublisher;
+   private final ROS2Publisher<std_msgs.msg.dds.Empty> squareUpPublisher;
    private final ContinuousHikingCommandMessage commandMessage = new ContinuousHikingCommandMessage();
    private final RDXStancePoseSelectionPanel stancePoseSelectionPanel;
    private final PositionOptimizedTrajectoryGenerator positionTrajectoryGenerator = new PositionOptimizedTrajectoryGenerator(numberOfKnotPoints,
@@ -122,6 +123,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       ros2Node.createSubscription2(ContinuousHikingAPI.MONTE_CARLO_FOOTSTEP_PLAN, this::onMonteCarloPlanReceived);
 
       commandPublisher = ros2Node.createPublisher(ContinuousHikingAPI.CONTINUOUS_HIKING_COMMAND);
+      squareUpPublisher = ros2Node.createPublisher(ContinuousHikingAPI.SQUARE_UP_STEP);
 
       SegmentDependentList<RobotSide, ArrayList<Point2D>> groundContactPoints = robotModel.getContactPointParameters().getControllerFootGroundContactPoints();
       SideDependentList<ConvexPolygon2D> defaultContactPoints = new SideDependentList<>();
@@ -228,6 +230,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
 
       continuousPlannerSchedulingTask = new ContinuousPlannerSchedulingTask(robotModel,
                                                                             ros2Node,
+                                                                            syncedRobotModel,
                                                                             syncedRobotModel.getReferenceFrames(),
                                                                             controllerFootstepQueueMonitor,
                                                                             continuousHikingLogger,
@@ -294,6 +297,11 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       ImGui.separator();
       ImGui.text("Options for Continuous Hiking Message");
       ImGui.indent();
+      if (ImGui.button("Square Up"))
+      {
+         squareUpPublisher.publish(new Empty());
+      }
+
       ImGui.checkbox("Square Up To Goal", squareUpToGoal);
       if (ImGui.button("Clear Planned footsteps"))
       {
