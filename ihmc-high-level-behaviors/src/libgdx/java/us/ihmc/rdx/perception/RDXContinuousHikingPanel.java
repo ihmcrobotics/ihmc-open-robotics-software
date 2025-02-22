@@ -28,7 +28,6 @@ import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.property.StoredPropertySetROS2TopicPair;
-import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -87,6 +86,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    private final ImGuiRemoteROS2StoredPropertySetGroup hostStoredPropertySets;
    private final ImGuiSliderDouble stepsBeforeSafetyStop = new ImGuiSliderDouble("Steps Before Safety Stop", "%.2f");
    private final ImBoolean squareUpToGoal = new ImBoolean(false);
+   private final ImBoolean continuousHiking = new ImBoolean(false);
    private final ImBoolean useAStarFootstepPlanner = new ImBoolean(true);
    private final ImBoolean useMonteCarloReference = new ImBoolean(false);
    private final ImBoolean useMonteCarloFootstepPlanner = new ImBoolean(false);
@@ -95,6 +95,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    private final ROS2Publisher<PlanOffsetStatus> planOffsetStatusPublisher;
    private final ROS2Publisher<FootstepStatusMessage> footstepStatusMessagePublisher;
    private final ROS2Publisher<Empty> clearGoalFootstepsPublisher;
+   private final ContinuousHikingParameters continuousHikingParameters;
    private SideDependentList<FramePose3D> startStancePose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
    private FootstepPlan latestFootstepPlan;
    private List<EnumMap<Axis3D, List<PolynomialReadOnly>>> swingTrajectories;
@@ -152,7 +153,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
                                   (s) -> terrainPlanningDebugger.reset());
 
       hostStoredPropertySets = new ImGuiRemoteROS2StoredPropertySetGroup(ros2Node);
-      ContinuousHikingParameters continuousHikingParameters = new ContinuousHikingParameters();
+      continuousHikingParameters = new ContinuousHikingParameters();
       createParametersPanel(continuousHikingParameters,
                             continuousHikingParametersPanel,
                             hostStoredPropertySets,
@@ -209,7 +210,6 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    {
       this.publishAndSubscribe = publishAndSubscribe;
       runSubscriberOnly = true;
-      ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
       clientStoredPropertySets = new ROS2StoredPropertySetGroup(ros2Node);
 
       // Add Continuous Hiking Parameters to be between the UI and this process
@@ -288,11 +288,15 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
 
    public void renderImGuiWidgets()
    {
-      ImGui.text("The ContinuousHikingProcess must be running");
-      ImGui.text("And the enabled checkbox must be checked");
-      ImGui.text("By holding CTRL the robot will walk forward");
-      ImGui.separator();
-      continuousHikingParametersPanel.renderImGuiWidgets();
+      ImGui.checkbox("Enable Continuous Hiking", continuousHiking);
+      continuousHikingParameters.setStepPublisherEnabled(continuousHiking.get());
+
+      ImGui.checkbox("Square Up To Goal", squareUpToGoal);
+
+      if(ImGui.collapsingHeader("Continuous Hiking Parameters"))
+      {
+         continuousHikingParametersPanel.renderImGuiWidgets();
+      }
 
       ImGui.separator();
       ImGui.text("Options for Continuous Hiking Message");
@@ -301,8 +305,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       {
          squareUpPublisher.publish(new Empty());
       }
-
-      ImGui.checkbox("Square Up To Goal", squareUpToGoal);
+      ImGui.sameLine();
       if (ImGui.button("Clear Planned footsteps"))
       {
          clearPlannedFootsteps();
