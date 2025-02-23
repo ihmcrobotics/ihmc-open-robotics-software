@@ -163,17 +163,17 @@ public class StabilityMarginKinematicsCostCalculator
       for (int joint_idx = 0; joint_idx < wholeBodyContactState.getNumberOfJoints(); joint_idx++)
       {
          OneDoFJointBasics joint = oneDoFJoints[joint_idx];
-//         OneDoFJointFeedbackControlCommand jointFeedbackCommand = bufferToPack.addOneDoFJointFeedbackControlCommand();
-//         jointFeedbackCommand.setJoint(joint);
-//         jointFeedbackCommand.setWeightForSolver(weight);
-//
-//         int jointIndex = Twist.SIZE + joint_idx;
-//         double qd_ff = gradientScalar * stabilityMarginGradient.get(jointIndex);
-//         jointFeedbackCommand.setInverseKinematics(joint.getQ(), qd_ff);
-//
-//         // Clear gains - this is all feed-forward velocity
-//         jointFeedbackCommand.getGains().setKp(0.0);
-//         jointFeedbackCommand.getGains().setKd(0.0);
+         OneDoFJointFeedbackControlCommand jointFeedbackCommand = bufferToPack.addOneDoFJointFeedbackControlCommand();
+         jointFeedbackCommand.setJoint(joint);
+         jointFeedbackCommand.setWeightForSolver(weight);
+
+         int jointIndex = Twist.SIZE + joint_idx;
+         double qd_ff = gradientScalar * stabilityMarginGradient.get(jointIndex);
+         jointFeedbackCommand.setInverseKinematics(joint.getQ(), qd_ff);
+
+         // Clear gains - this is all feed-forward velocity
+         jointFeedbackCommand.getGains().setKp(0.0);
+         jointFeedbackCommand.getGains().setKd(0.0);
       }
 
       // Feed-forward pelvis velocity

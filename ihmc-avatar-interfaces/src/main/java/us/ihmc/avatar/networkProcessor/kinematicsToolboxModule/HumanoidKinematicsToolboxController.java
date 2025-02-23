@@ -176,8 +176,10 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    private final FramePoint3D tempContactPoint = new FramePoint3D();
    private final FrameVector3D tempContactNormal = new FrameVector3D();
 
-   private final SideDependentList<YoBoolean> computeContactPointSensitivity = new SideDependentList<>();
-   private final SideDependentList<FrameVector3D> contactPointNormal = new SideDependentList<>();
+   private static final RobotSide BRACING_SIDE = RobotSide.RIGHT;
+   private final YoBoolean requestPreviewSupportRegion = new YoBoolean("requestPreviewSupportRegion", registry);
+   private final YoBoolean isPreviewingSupportRegion = new YoBoolean("isPreviewingSupportRegion", registry);
+   private final FrameVector3D previewContactNormal = new FrameVector3D();
 
    public HumanoidKinematicsToolboxController(CommandInputManager commandInputManager,
                                               StatusMessageOutputManager statusOutputManager,
@@ -265,8 +267,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          initialFootPoses.put(robotSide, new YoFramePose3D(sidePrefix + "FootInitial", worldFrame, registry));
          isHandInSupport.put(robotSide, new YoBoolean("is" + side + "HandInSupport", registry));
          initialHandPositions.put(robotSide, new YoFramePoint3D(sidePrefix + "HandInitial", worldFrame, registry));
-         computeContactPointSensitivity.put(robotSide, new YoBoolean("compute" + side + "HandContactSensitivity", registry));
-         contactPointNormal.put(robotSide, new FrameVector3D());
       }
 
       for (RobotSide robotSide : RobotSide.values)
@@ -504,6 +504,10 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    public void updateInternal()
    {
       executionTimer.startMeasurement();
+      isPreviewingSupportRegion.set(false);
+
+      if (isPreviewingSupportRegion.getValue())
+         initialHandPositions.get(BRACING_HAND_SIDE).setMatchingFrame(handContactPointInBodyFrame.get(BRACING_HAND_SIDE));
 
       if (commandInputManager.isNewCommandAvailable(HumanoidKinematicsToolboxConfigurationCommand.class))
       {
@@ -544,7 +548,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          multiContactRegionCalculator.updateContactState(wholeBodyContactState);
          multiContactRegionCalculator.performUpdateForNextVertex();
 
-         if (multiContactRegionCalculator.hasSolvedWholeRegion())
+         if (!isPreviewingSupportRegion.getValue() && multiContactRegionCalculator.hasSolvedWholeRegion())
          {
             activeContactPointPositions.clear();
             for (int i = 0; i < multiContactRegionCalculator.getNumberOfVertices(); i++)
@@ -748,6 +752,14 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          isFootInSupport.get(robotside).set(HumanoidMessageTools.unpackIsSupportFoot(capturabilityBasedStatus, robotside));
          isHandInSupport.get(robotside).set(HumanoidMessageTools.unpackIsSupportHand(capturabilityBasedStatus, robotside, desiredFullRobotModel, handContactPointInBodyFrame.get(robotside)));
 
+         if (!isHandInSupport.get(robotside).getValue() && robotside == BRACING_SIDE && requestPreviewSupportRegion.getValue())
+         {
+            isPreviewingSupportRegion.set(true);
+            isHandInSupport.get(robotside).set(true);
+            handContactPointInBodyFrame.get(robotside).setToZero(desiredFullRobotModel.getHandControlFrame(robotside));
+            handContactPointInBodyFrame.get(robotside).changeFrame(desiredFullRobotModel.getHand(robotside).getBodyFixedFrame());
+         }
+
          if (isHandInSupport.get(robotside).getBooleanValue())
             initialHandPositions.get(robotside).setMatchingFrame(handContactPointInBodyFrame.get(robotside));
       }
@@ -911,13 +923,13 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       return false;
    }
 
-   public FrameVector3D getContactNormal(RobotSide robotSide)
+   public FrameVector3D getPreviewContactNormal()
    {
-      return contactPointNormal.get(robotSide);
+      return previewContactNormal;
    }
 
-   public void setComputeContactPointSensitivity(RobotSide robotSide, boolean enable)
+   public void setRequestPreviewSupportRegion(boolean doPreview)
    {
-      computeContactPointSensitivity.get(robotSide).set(enable);
+      requestPreviewSupportRegion.set(doPreview);
    }
 }
