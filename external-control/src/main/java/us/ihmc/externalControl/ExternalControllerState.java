@@ -37,7 +37,7 @@ public class ExternalControllerState extends HighLevelControllerState
    public static boolean REDUCE_YOVARIABLES = false;
 
    private enum DesiredMode {HOLD_POSITION, REXXXXXXX}
-   private enum DesiredBehavior {STAND, WALK_IN_PLACE}
+   private enum DesiredBehavior {STAND, WALK_IN_PLACE, SIDE_TO_SIDE, WALK_FORWARD}
 
    private final YoDouble blendRatioCurrentValue;
 
