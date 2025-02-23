@@ -347,6 +347,16 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
       return 2 * numberOfTorqueValidatedJoints;
    }
 
+   public int indexOf(RigidBodyBasics rigidBody)
+   {
+      for (int i = 0; i < contactPoints.size(); i++)
+      {
+         if (contactPoints.get(i).contactingBody == rigidBody)
+            return i;
+      }
+      return -1;
+   }
+
    private static class ContactPoint
    {
       private RigidBodyBasics contactingBody;

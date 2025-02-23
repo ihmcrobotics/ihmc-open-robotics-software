@@ -98,7 +98,7 @@ public abstract class StabilityMarginOptimizationModule implements SCS2YoGraphic
    final DMatrixRMaj Aeq = new DMatrixRMaj(0);
    final DMatrixRMaj beq = new DMatrixRMaj(0);
 
-   /* Transformation from x_solver = [rho_0, rho_1, ..., c_x+, c_y+, c_x-, c_y-] to x_nominal = [f_0x, f_0y, ..., c_x, c_y], with x_solver >= 0 */
+   /* Transform between x_solver = [rho_0, rho_1, ..., c_x+, c_y+, c_x-, c_y-] and x_nominal = [f_0x, f_0y, ..., c_x, c_y], with x_solver >= 0, when pre-multiplied is goes solver -> nominal. */
    private final DMatrixRMaj solverToNominalTransformation = new DMatrixRMaj(0);
 
    /* Inequality matrices for Ain x_nominal <= bin, where x_nominal = [f_0x, f_0y, ..., c_x, c_y] */

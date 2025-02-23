@@ -29,7 +29,7 @@ public class PostureConstraintMatrixVariationCalculator
 
    private final DMatrixRMaj actuationConstraintNominal = new DMatrixRMaj(0);
    private final DMatrixRMaj actuationConstraintVariation = new DMatrixRMaj(0);
-   private final DMatrixRMaj constraintMatrixVariation = new DMatrixRMaj(0);
+   private final DMatrixRMaj nominalConstraintMatrixVariation = new DMatrixRMaj(0);
    private final DMatrixRMaj solverConstraintVariation = new DMatrixRMaj(0);
 
    private final ExecutionTimer constraintVarCalculatorFramesTimer;
@@ -93,15 +93,16 @@ public class PostureConstraintMatrixVariationCalculator
       DMatrixRMaj solverToNominalTransformation = stabilityMarginOptimizationModule.getSolverToNominalTransformation();
       DMatrixRMaj nominalConstraintMatrix = stabilityMarginOptimizationModule.getNominalConstraintMatrix();
 
-      int numInequalityDynamicsConstraints = stabilityMarginOptimizationModule.getNumDynamicsConstraints();
-      int numEqualityDynamicsConstraints = 2 * numInequalityDynamicsConstraints;
+      int numEqualityDynamicsConstraints = stabilityMarginOptimizationModule.getNumDynamicsConstraints();
+      int numInequalityDynamicsConstraints = 2 * numEqualityDynamicsConstraints;
 
-      constraintMatrixVariation.reshape(nominalConstraintMatrix.getNumRows(), nominalConstraintMatrix.getNumCols());
-      MatrixTools.setMatrixBlock(constraintMatrixVariation, numEqualityDynamicsConstraints, 0, actuationConstraintVariation, 0, 0,
+      nominalConstraintMatrixVariation.reshape(nominalConstraintMatrix.getNumRows(), nominalConstraintMatrix.getNumCols());
+      nominalConstraintMatrixVariation.zero();
+      MatrixTools.setMatrixBlock(nominalConstraintMatrixVariation, numInequalityDynamicsConstraints, 0, actuationConstraintVariation, 0, 0,
                                  actuationConstraintVariation.getNumRows(), actuationConstraintVariation.getNumCols(), 1.0);
 
       /* Transform constraint matrix variation to rho-space */
-      CommonOps_DDRM.mult(constraintMatrixVariation, solverToNominalTransformation, solverConstraintVariation);
+      CommonOps_DDRM.mult(nominalConstraintMatrixVariation, solverToNominalTransformation, solverConstraintVariation);
 
       /* Soft reset to initial configuration (don't call update frames by default) */
       MultiBodySystemTools.insertJointsState(controlledJoints, JointStateType.CONFIGURATION, initialJointConfiguration);
@@ -130,12 +131,12 @@ public class PostureConstraintMatrixVariationCalculator
       int numInequalityDynamicsConstraints = stabilityMarginOptimizationModule.getNumDynamicsConstraints();
       int numEqualityDynamicsConstraints = 2 * numInequalityDynamicsConstraints;
 
-      constraintMatrixVariation.reshape(nominalConstraintMatrix.getNumRows(), nominalConstraintMatrix.getNumCols());
-      MatrixTools.setMatrixBlock(constraintMatrixVariation, numEqualityDynamicsConstraints, 0, actuationConstraintVariation, 0, 0,
+      nominalConstraintMatrixVariation.reshape(nominalConstraintMatrix.getNumRows(), nominalConstraintMatrix.getNumCols());
+      MatrixTools.setMatrixBlock(nominalConstraintMatrixVariation, numEqualityDynamicsConstraints, 0, actuationConstraintVariation, 0, 0,
                                  actuationConstraintVariation.getNumRows(), actuationConstraintVariation.getNumCols(), 1.0);
 
       /* Transform constraint matrix variation to rho-space */
-      CommonOps_DDRM.mult(constraintMatrixVariation, solverToNominalTransformation, solverConstraintVariation);
+      CommonOps_DDRM.mult(nominalConstraintMatrixVariation, solverToNominalTransformation, solverConstraintVariation);
 
       /* Reset joint configuration to initial */
       MultiBodySystemTools.insertJointsState(controlledJoints, JointStateType.CONFIGURATION, initialJointConfiguration);

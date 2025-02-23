@@ -9,13 +9,18 @@ import us.ihmc.commonWalkingControlModules.staticEquilibrium.SensitivityBasedSta
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.StabilityMarginRegionCalculator;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -46,6 +51,10 @@ public class StabilityMarginKinematicsCostCalculator
    private final FramePose3D pelvisPose = new FramePose3D();
    private final SpatialVector desiredPelvisSpatialVelocity = new SpatialVector();
 
+   private int rightHandIndex;
+   private final YoFrameVector3D rightHandAdjustment;
+   private final YoFrameVector3D integratedRightHandAdjustment;
+
    public StabilityMarginKinematicsCostCalculator(WholeBodyContactState wholeBodyContactState,
                                                   StabilityMarginRegionCalculator multiContactRegionCalculator,
                                                   FullHumanoidRobotModel fullRobotModel,
@@ -73,6 +82,10 @@ public class StabilityMarginKinematicsCostCalculator
                                                                                          wholeBodyContactState,
                                                                                          multiContactRegionCalculator,
                                                                                          registry);
+
+      rightHandAdjustment = new YoFrameVector3D("rightHandAdjustment", ReferenceFrame.getWorldFrame(), registry);
+      integratedRightHandAdjustment = new YoFrameVector3D("integratedRightHandAdjustment", ReferenceFrame.getWorldFrame(), registry);
+
       parentRegistry.addChild(registry);
    }
 
@@ -91,6 +104,39 @@ public class StabilityMarginKinematicsCostCalculator
       return stabilityGradientCalculator.getPostureSensitivity();
    }
 
+   public void update()
+   {
+      if (!multiContactRegionCalculator.hasSolvedWholeRegion())
+         return;
+
+      if (!isEnabled.getValue())
+         integratedRightHandAdjustment.setToZero();
+
+      RigidBodyBasics rightHand = fullRobotModel.getHand(RobotSide.RIGHT);
+      rightHandIndex = wholeBodyContactState.indexOf(rightHand);
+      stabilityGradientCalculator.clearContactPointsToComputeSensitivity();
+      stabilityGradientCalculator.addContactPointIndexToComputeSensitivity(rightHandIndex);
+
+      stabilityGradientCalculator.update();
+
+      rightHandAdjustment.set(stabilityGradientCalculator.getOptimalContactPointAdjustment(rightHandIndex));
+      if (rightHandAdjustment.normSquared() > 1.0e-5)
+      {
+         rightHandAdjustment.normalize();
+
+         double v = 0.02;
+         rightHandAdjustment.scale(v);
+
+         double dt = 1.0e-3;
+         integratedRightHandAdjustment.add(dt * rightHandAdjustment.getX(), dt * rightHandAdjustment.getY(), dt * rightHandAdjustment.getZ());
+      }
+   }
+
+   public FrameVector3DReadOnly getOptimalRightHandAdjustment()
+   {
+      return integratedRightHandAdjustment;
+   }
+
    /**
     * Computes and packs the feedback objective. Returns the postural sensitivity
     */
@@ -104,7 +150,6 @@ public class StabilityMarginKinematicsCostCalculator
       alphaEnabled.set(EuclidCoreTools.clamp(1.0 - deltaStabilityMargin / (stabilityMarginThreshold.getValue() - minStabilityMargin.getValue()), 0.0, 1.0));
       double weight = alphaEnabled.getDoubleValue() * stabilityMarginWeight.getValue();
 
-      stabilityGradientCalculator.update();
       double posturalSensitivity = stabilityGradientCalculator.getPostureSensitivity();
 
       if (!isEnabled.getValue() || posturalSensitivity < 1.0e-3)
@@ -118,17 +163,17 @@ public class StabilityMarginKinematicsCostCalculator
       for (int joint_idx = 0; joint_idx < wholeBodyContactState.getNumberOfJoints(); joint_idx++)
       {
          OneDoFJointBasics joint = oneDoFJoints[joint_idx];
-         OneDoFJointFeedbackControlCommand jointFeedbackCommand = bufferToPack.addOneDoFJointFeedbackControlCommand();
-         jointFeedbackCommand.setJoint(joint);
-         jointFeedbackCommand.setWeightForSolver(weight);
-
-         int jointIndex = Twist.SIZE + joint_idx;
-         double qd_ff = gradientScalar * stabilityMarginGradient.get(jointIndex);
-         jointFeedbackCommand.setInverseKinematics(joint.getQ(), qd_ff);
-
-         // Clear gains - this is all feed-forward velocity
-         jointFeedbackCommand.getGains().setKp(0.0);
-         jointFeedbackCommand.getGains().setKd(0.0);
+//         OneDoFJointFeedbackControlCommand jointFeedbackCommand = bufferToPack.addOneDoFJointFeedbackControlCommand();
+//         jointFeedbackCommand.setJoint(joint);
+//         jointFeedbackCommand.setWeightForSolver(weight);
+//
+//         int jointIndex = Twist.SIZE + joint_idx;
+//         double qd_ff = gradientScalar * stabilityMarginGradient.get(jointIndex);
+//         jointFeedbackCommand.setInverseKinematics(joint.getQ(), qd_ff);
+//
+//         // Clear gains - this is all feed-forward velocity
+//         jointFeedbackCommand.getGains().setKp(0.0);
+//         jointFeedbackCommand.getGains().setKd(0.0);
       }
 
       // Feed-forward pelvis velocity

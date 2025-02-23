@@ -13,47 +13,47 @@ import static us.ihmc.commonWalkingControlModules.staticEquilibrium.StabilityMar
 
 public class ContactPointConstraintMatrixVariation
 {
-   private final FullHumanoidRobotModel fullRobotModel;
-   private final WholeBodyContactState wholeBodyContactState;
    private final StabilityMarginOptimizationModule stabilityMarginOptimizationModule;
 
    private final DMatrixRMaj equalityConstraintVariation = new DMatrixRMaj(0);
    private final DMatrixRMaj inequalityConstraintVariation = new DMatrixRMaj(0);
    private final DMatrixRMaj solverConstraintVariation = new DMatrixRMaj(0);
 
-   public ContactPointConstraintMatrixVariation(FullHumanoidRobotModel fullRobotModel,
-                                                WholeBodyContactState wholeBodyContactState,
-                                                StabilityMarginOptimizationModule stabilityMarginOptimizationModule)
+   public ContactPointConstraintMatrixVariation(StabilityMarginOptimizationModule stabilityMarginOptimizationModule)
    {
-      this.fullRobotModel = fullRobotModel;
-      this.wholeBodyContactState = wholeBodyContactState;
       this.stabilityMarginOptimizationModule = stabilityMarginOptimizationModule;
    }
 
    public DMatrixRMaj compute(int contactPointIndex, Vector3DReadOnly contactPointAdjustment)
    {
-      int nominalDecisionVariables = LINEAR_DIMENSIONS * wholeBodyContactState.getNumberOfContactPoints() + CoM_DIMENSIONS;
+      int numEqualityDynamicsConstraints = stabilityMarginOptimizationModule.getNumDynamicsConstraints();
+      DMatrixRMaj solverToNominalTransformation = stabilityMarginOptimizationModule.getSolverToNominalTransformation();
+      DMatrixRMaj nominalConstraintMatrix = stabilityMarginOptimizationModule.getNominalConstraintMatrix();
 
-      equalityConstraintVariation.reshape(NUM_DYNAMICS_CONSTRAINTS, nominalDecisionVariables);
+      /* Always is point mass  */
+      int numAngularDynamicsConstraints = 3;
+      /* Is either XYZ or Z  */
+      int numLinearDynamicsConstraints = stabilityMarginOptimizationModule.getNumDynamicsConstraints() - numAngularDynamicsConstraints;
+
+      equalityConstraintVariation.reshape(numEqualityDynamicsConstraints, nominalConstraintMatrix.getNumCols());
       equalityConstraintVariation.zero();
 
       int colOffset = 3 * contactPointIndex;
 
-      equalityConstraintVariation.set(3, colOffset + Axis3D.Y.ordinal(), -contactPointAdjustment.getZ());
-      equalityConstraintVariation.set(3, colOffset + Axis3D.Z.ordinal(), contactPointAdjustment.getY());
-      equalityConstraintVariation.set(4, colOffset + Axis3D.X.ordinal(), contactPointAdjustment.getZ());
-      equalityConstraintVariation.set(4, colOffset + Axis3D.Z.ordinal(), -contactPointAdjustment.getX());
-      equalityConstraintVariation.set(5, colOffset + Axis3D.X.ordinal(), -contactPointAdjustment.getY());
-      equalityConstraintVariation.set(5, colOffset + Axis3D.Y.ordinal(), contactPointAdjustment.getX());
+      equalityConstraintVariation.set(numLinearDynamicsConstraints + Axis3D.X.ordinal(), colOffset + Axis3D.Y.ordinal(), -contactPointAdjustment.getZ());
+      equalityConstraintVariation.set(numLinearDynamicsConstraints + Axis3D.X.ordinal(), colOffset + Axis3D.Z.ordinal(), contactPointAdjustment.getY());
+      equalityConstraintVariation.set(numLinearDynamicsConstraints + Axis3D.Y.ordinal(), colOffset + Axis3D.X.ordinal(), contactPointAdjustment.getZ());
+      equalityConstraintVariation.set(numLinearDynamicsConstraints + Axis3D.Y.ordinal(), colOffset + Axis3D.Z.ordinal(), -contactPointAdjustment.getX());
+      equalityConstraintVariation.set(numLinearDynamicsConstraints + Axis3D.Z.ordinal(), colOffset + Axis3D.X.ordinal(), -contactPointAdjustment.getY());
+      equalityConstraintVariation.set(numLinearDynamicsConstraints + Axis3D.Z.ordinal(), colOffset + Axis3D.Y.ordinal(), contactPointAdjustment.getX());
 
-      inequalityConstraintVariation.reshape(2 * equalityConstraintVariation.getNumRows() + wholeBodyContactState.getActuationConstraintMatrix().getNumRows(), nominalDecisionVariables);
+      inequalityConstraintVariation.reshape(nominalConstraintMatrix.getNumRows(), nominalConstraintMatrix.getNumCols());
       inequalityConstraintVariation.zero();
 
       MatrixTools.setMatrixBlock(inequalityConstraintVariation, 0, 0, equalityConstraintVariation, 0, 0, equalityConstraintVariation.getNumRows(), equalityConstraintVariation.getNumCols(), 1.0);
       MatrixTools.setMatrixBlock(inequalityConstraintVariation, equalityConstraintVariation.getNumRows(), 0, equalityConstraintVariation, 0, 0, equalityConstraintVariation.getNumRows(), equalityConstraintVariation.getNumCols(), -1.0);
 
-      // TODO could optimize by only considering top 12 rows (ignoring joints)
-      CommonOps_DDRM.mult(inequalityConstraintVariation, stabilityMarginOptimizationModule.getSolverToNominalTransformation(), solverConstraintVariation);
+      CommonOps_DDRM.mult(inequalityConstraintVariation, solverToNominalTransformation, solverConstraintVariation);
       return solverConstraintVariation;
    }
 }
