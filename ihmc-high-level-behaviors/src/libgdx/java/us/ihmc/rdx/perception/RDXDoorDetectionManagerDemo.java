@@ -25,6 +25,7 @@ import us.ihmc.tools.IHMCCommonPaths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class RDXDoorDetectionManagerDemo
 {
@@ -49,6 +50,8 @@ public class RDXDoorDetectionManagerDemo
    private final RDXPlanarRegionsGraphic planarRegionsGraphic;
    private final RDXROS2YOLOv8Settings yoloSettings;
    private long lastSequenceNumber = -1L;
+
+   private final AtomicBoolean destroyed = new AtomicBoolean(false);
 
    private RDXDoorDetectionManagerDemo()
    {
@@ -125,6 +128,8 @@ public class RDXDoorDetectionManagerDemo
             pointCloudRenderer.dispose();
             yoloSettings.destroy();
             baseUI.dispose();
+
+            destroy();
          }
       });
    }
@@ -175,6 +180,9 @@ public class RDXDoorDetectionManagerDemo
 
    private void destroy()
    {
+      if (destroyed.getAndSet(true))
+         return;
+
       yoloThread.blockingKill();
       planarRegionThread.blockingKill();
       zed.close();
