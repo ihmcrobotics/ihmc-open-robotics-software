@@ -37,7 +37,7 @@ public class ExternalControlNativeLibrary implements NativeLibraryDescription
    public NativeLibraryWithDependencies getLibraryWithDependencies(OperatingSystem os, Architecture arch)
    {
       if (os == OperatingSystem.LINUX64 && arch == Architecture.x64)
-         return NativeLibraryWithDependencies.fromFilename("libjniExternalControlWrapper.so", "libexternal-control.so", "libzmq.so.5");
+         return NativeLibraryWithDependencies.fromFilename("libjniExternalControlWrapper.so", "libexternal-control.so");
 
       throw new RuntimeException("Unsupported platform: " + os.name() + "-" + arch.name());
    }

@@ -31,7 +31,8 @@ public class ExternalControl
    private final DMatrixRMaj solutionStiffnessVector;
    private final DMatrixRMaj solutionDampingVector;
    public final DMatrixRMaj solutionDebugData;
-   public final String[] debugDataNames = {"behavior", "primal_res", "dual_res", "qp_iters", "solve_time"}; // TODO: query the ext controller for this?
+   public final String[] debugDataNames = {"behavior", "primal_res", "dual_res", "qp_iters", "solve_time",
+                                           "L_x", "L_y", "L_z", "R_x", "R_y", "R_z"}; // TODO: query the ext controller for this?
    private final RigidBodyBasics baseBody;
    private final OneDoFJointReadOnly[] joints;
    private final FramePose3D basePose = new FramePose3D();

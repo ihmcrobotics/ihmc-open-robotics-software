@@ -38,7 +38,7 @@ namespace ihmc
 
     private:
         int number_of_joints_;
-        const int debug_data_size_ = 5;
+        const int debug_data_size_ = 1 + 4 + 6;
 
         Eigen::VectorXd home_configuration_;
         Eigen::VectorXd desired_joint_velocities_;
