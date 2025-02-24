@@ -145,7 +145,7 @@ public class RDXSceneGraphDemo
             baseUI.getPrimaryScene().addRenderableProvider(sensorPoseGraphic, RDXSceneLevel.VIRTUAL);
 
             zedSVOPlayer = new ZEDSVOPlaybackSensor(ros2Helper, 0, ZEDModelData.ZED_2, SVO_FILE_NAME);
-            boolean disableNeuralMode = !CUDATools.hasCUDADeviceOfAtLeast(CUDATools.getFirstDeviceName(), "RTX 3080");
+            boolean disableNeuralMode = !CUDATools.hasCUDADeviceOfAtLeast(CUDATools.getDeviceName(0), "RTX 3080");
             zedSVOPlayer.disableNeuralMode(disableNeuralMode);
             zedSVOPlayer.useTrackedPose(true);
             zedSVOPlayer.run(true);

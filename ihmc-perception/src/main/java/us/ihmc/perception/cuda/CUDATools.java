@@ -65,19 +65,24 @@ public class CUDATools
       return getCUDADeviceCount() > 0;
    }
 
-   public static String getFirstDeviceName()
+   /**
+    * Get the name of a CUDA device
+    * @param device the device number
+    * @return the name of the device
+    */
+   public static String getDeviceName(int device)
    {
-      try (IntPointer device = new IntPointer(1);
+      try (IntPointer devicePointer = new IntPointer(1);
            cudaDeviceProp deviceProperties = new cudaDeviceProp())
       {
-         cudaGetDevice(device);
-         cudaGetDeviceProperties(deviceProperties, device.get());
+         devicePointer.put(device);
+         cudaGetDeviceProperties(deviceProperties, devicePointer.get());
          return deviceProperties.name().getString();
       }
    }
 
    /**
-    * Attempts to score GPUs from a baseline device name (e.g. the minimum could be "RTX 2080 ti")
+    * Attempts to score GPUs from a baseline device name (e.g. the minimum could be "RTX 2080 Ti")
     *
     * @param deviceName        The device name to score
     * @param minimumDeviceName The device name to score against
