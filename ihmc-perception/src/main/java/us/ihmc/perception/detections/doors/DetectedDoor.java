@@ -6,6 +6,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tools.TupleTools;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.perception.detections.InstantDetection;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorModelParameters;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -20,9 +21,8 @@ import static us.ihmc.perception.detections.doors.DoorDetectionManager.PANEL_STR
 
 public class DetectedDoor
 {
-   // Opening Hardware
-   private String openingHardwareName;
-   private final Pose3D openingHardwarePose;
+   // Opening Mechanism
+   private final DoorOpeningMechanism openingMechanism;
 
    // Panel
    private final Pose3D panelPose;
@@ -32,13 +32,12 @@ public class DetectedDoor
    private Instant lastDetectionTime = Instant.MIN;
 
    // Parameters
-   private double maxPlanarRegionToOpeningHardwareDistance = 0.75;
+   private double maxPlanarRegionToOpeningMechanismDistance = 0.75;
    private double minPlanarRegionArea = 0.2 * (DoorModelParameters.DOOR_PANEL_WIDTH * DoorModelParameters.DOOR_PANEL_HEIGHT); // 1/5th of panel area
 
    public DetectedDoor()
    {
-      openingHardwarePose = new Pose3D();
-      openingHardwarePose.setToNaN();
+      openingMechanism = new DoorOpeningMechanism();
 
       panelPose = new Pose3D();
       panelPose.setToNaN();
@@ -46,19 +45,9 @@ public class DetectedDoor
       panelPlanarRegion = new PlanarRegion();
    }
 
-   public String getOpeningHardwareName()
+   public DoorOpeningMechanism getOpeningMechanism()
    {
-      return openingHardwareName;
-   }
-
-   public Pose3DReadOnly getOpeningHardwarePose()
-   {
-      return openingHardwarePose;
-   }
-
-   public boolean hasOpeningHardwarePose()
-   {
-      return !openingHardwarePose.containsNaN();
+      return openingMechanism;
    }
 
    public Pose3DReadOnly getPanelPose()
@@ -93,7 +82,7 @@ public class DetectedDoor
       if (detectedClass.contains(PANEL_STRING))
          return detection.getPose().getPosition().distanceSquared(getPanelPose().getPosition());
       else if (detectedClass.startsWith(DOOR_STRING))
-         return detection.getPose().getPosition().distanceSquared(getOpeningHardwarePose().getPosition());
+         return detection.getPose().getPosition().distanceSquared(openingMechanism.getPosition());
 
       return Double.POSITIVE_INFINITY;
    }
@@ -108,8 +97,8 @@ public class DetectedDoor
       }
       else if (detectedClass.startsWith(DOOR_STRING))
       {
-         openingHardwareName = newDetection.getDetectedObjectClass();
-         openingHardwarePose.getPosition().set(newDetection.getPose().getPosition());
+         openingMechanism.setName(detectedClass);
+         openingMechanism.setPosition(newDetection.getPose().getPosition());
       }
       else
       {
@@ -122,7 +111,7 @@ public class DetectedDoor
 
    /* package-private */ void updatePlanarRegion(PlanarRegionsList planarRegions)
    {
-      if (openingHardwarePose.getPosition().containsNaN() || planarRegions.isEmpty())
+      if (!openingMechanism.isPositionKnown() || planarRegions.isEmpty())
          return;
 
       PlanarRegion bestFitRegion = planarRegions.getPlanarRegionsAsList()                                   // Get planar regions as List<PlanarRegion>
@@ -144,15 +133,15 @@ public class DetectedDoor
 
       double planarRegionYaw = TupleTools.angle(Axis2D.X, doorNormalLine.getDirection());
 
-      openingHardwarePose.getRotation().setYawPitchRoll(planarRegionYaw, 0.0, 0.0);
+      openingMechanism.setOrientation(new Quaternion(planarRegionYaw, 0.0, 0.0));
       panelPose.getRotation().setYawPitchRoll(planarRegionYaw, 0.0, 0.0);
    }
 
    private boolean planarRegionDistanceToOpeningMechanismFilter(PlanarRegion planarRegion)
    {
       Point3DReadOnly planarRegionCentroid = PlanarRegionTools.getCentroid3DInWorld(planarRegion);
-      double distanceToOpeningHardware = planarRegionCentroid.distance(openingHardwarePose.getPosition());
-      return distanceToOpeningHardware < maxPlanarRegionToOpeningHardwareDistance;
+      double distanceToOpeningMechanism = planarRegionCentroid.distance(openingMechanism.getPosition());
+      return distanceToOpeningMechanism < maxPlanarRegionToOpeningMechanismDistance;
    }
 
    private boolean planarRegionAreaFilter(PlanarRegion planarRegion)

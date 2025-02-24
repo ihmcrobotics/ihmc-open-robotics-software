@@ -32,7 +32,7 @@ public class RDXDetectedDoor implements RDXRenderableProvider
 
    public void update()
    {
-      openingMechanismFrameGraphic.setPoseInWorldFrame(detectedDoor.getOpeningHardwarePose());
+      openingMechanismFrameGraphic.setPoseInWorldFrame(detectedDoor.getOpeningMechanism().getPose());
       panelFrameGraphic.setPoseInWorldFrame(detectedDoor.getPanelPose());
       planarRegionGraphic.generateMeshes(new PlanarRegionsList(detectedDoor.getPanelPlanarRegion()));
       planarRegionGraphic.update();
