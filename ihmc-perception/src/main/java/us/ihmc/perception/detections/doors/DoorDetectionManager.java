@@ -62,7 +62,7 @@ public class DoorDetectionManager
       if (publishThrottler.run())
       {
          detectedDoorsMessage.getDetectedDoors().clear();
-         for (int i = 0; i < detectedDoors.size() && i < detectedDoorsMessage.getDetectedDoors().size(); ++i)
+         for (int i = 0; i < detectedDoors.size() && i < detectedDoorsMessage.getDetectedDoors().getCurrentCapacity(); ++i)
          {
             DetectedDoor detectedDoor = detectedDoors.get(i);
             detectedDoor.toMessage(detectedDoorsMessage.getDetectedDoors().add());

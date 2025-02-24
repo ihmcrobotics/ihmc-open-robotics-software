@@ -18,12 +18,15 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 import java.time.Instant;
 import java.util.Comparator;
+import java.util.UUID;
 
 import static us.ihmc.perception.detections.doors.DoorDetectionManager.DOOR_STRING;
 import static us.ihmc.perception.detections.doors.DoorDetectionManager.PANEL_STRING;
 
 public class DetectedDoor
 {
+   private final UUID detectionUUID;
+
    // Opening Mechanism
    private final DoorOpeningMechanism openingMechanism;
 
@@ -40,6 +43,8 @@ public class DetectedDoor
 
    public DetectedDoor()
    {
+      detectionUUID = UUID.randomUUID();
+
       openingMechanism = new DoorOpeningMechanism();
 
       panelPose = new Pose3D();
@@ -154,6 +159,7 @@ public class DetectedDoor
 
    public void toMessage(DetectedDoorMessage messageToPack)
    {
+      MessageTools.toMessage(detectionUUID, messageToPack.getDetectionUuid());
       openingMechanism.toMessage(messageToPack.getOpeningMechanism());
       messageToPack.getPanelPose().set(panelPose);
       messageToPack.getPanelPlanarRegion().set(PlanarRegionMessageConverter.convertToPlanarRegionMessage(panelPlanarRegion));

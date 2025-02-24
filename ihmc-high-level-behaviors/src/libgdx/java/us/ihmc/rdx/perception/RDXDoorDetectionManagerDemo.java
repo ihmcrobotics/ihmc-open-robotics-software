@@ -2,14 +2,13 @@ package us.ihmc.rdx.perception;
 
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.detections.doors.DetectedDoor;
 import us.ihmc.perception.detections.doors.DoorDetectionManager;
 import us.ihmc.perception.detections.yolo.YOLOv8DetectionThread;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractionThread;
 import us.ihmc.rdx.AbstractRDXPointCloudRenderer.ColoringMethod;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.perception.doors.RDXDetectedDoor;
+import us.ihmc.rdx.perception.doors.RDXROS2DoorDetectionPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXRawImagePointCloudRenderer;
 import us.ihmc.rdx.ui.graphics.ros2.yolo.RDXROS2YOLOv8Settings;
@@ -22,9 +21,6 @@ import us.ihmc.sensors.zed.ZEDModelData;
 import us.ihmc.sensors.zed.ZEDSVOPlaybackSensor;
 import us.ihmc.tools.IHMCCommonPaths;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class RDXDoorDetectionManagerDemo
@@ -38,7 +34,6 @@ public class RDXDoorDetectionManagerDemo
    private final OpenCLManager openCLManager;
 
    private final DoorDetectionManager doorDetectionManager;
-   private final Map<DetectedDoor, RDXDetectedDoor> rdxDetectedDoors = new HashMap<>();
 
    private final ZEDSVOPlaybackSensor zed;
    private final YOLOv8DetectionThread yoloThread;
@@ -49,6 +44,7 @@ public class RDXDoorDetectionManagerDemo
    private final RDXRawImagePointCloudRenderer pointCloudRenderer;
    private final RDXPlanarRegionsGraphic planarRegionsGraphic;
    private final RDXROS2YOLOv8Settings yoloSettings;
+   private final RDXROS2DoorDetectionPanel doorDetectionPanel;
    private long lastSequenceNumber = -1L;
 
    private final AtomicBoolean destroyed = new AtomicBoolean(false);
@@ -85,6 +81,7 @@ public class RDXDoorDetectionManagerDemo
          planarRegionsGraphic.generateMeshes(planarRegionsList);
       });
       yoloSettings = new RDXROS2YOLOv8Settings(ros2Node);
+      doorDetectionPanel = new RDXROS2DoorDetectionPanel(ros2Node);
 
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
@@ -98,11 +95,7 @@ public class RDXDoorDetectionManagerDemo
             baseUI.getImGuiPanelManager().addPanel("YOLO Settings", yoloSettings::renderSettings);
             baseUI.getPrimaryScene().addRenderableProvider(pointCloudRenderer);
             baseUI.getPrimaryScene().addRenderableProvider(planarRegionsGraphic);
-            baseUI.getPrimaryScene().addRenderableProvider((renderables, pool, sceneLevels) ->
-            {
-               for (RDXDetectedDoor door : rdxDetectedDoors.values())
-                  door.getRenderables(renderables, pool, sceneLevels);
-            });
+            baseUI.getPrimaryScene().addRenderableProvider(doorDetectionPanel);
             baseUI.create();
 
             zed.run(true);
@@ -134,26 +127,6 @@ public class RDXDoorDetectionManagerDemo
       });
    }
 
-   private void updateDetections()
-   {
-      doorDetectionManager.update();
-
-      List<DetectedDoor> detectedDoors = doorDetectionManager.getDetectedDoors();
-      rdxDetectedDoors.keySet().removeIf(key -> !detectedDoors.contains(key));
-
-      for (DetectedDoor detectedDoor : detectedDoors)
-      {
-         RDXDetectedDoor rdxDetectedDoor = rdxDetectedDoors.get(detectedDoor);
-         if (rdxDetectedDoor == null)
-         {
-            rdxDetectedDoor = new RDXDetectedDoor(detectedDoor);
-            rdxDetectedDoors.put(detectedDoor, rdxDetectedDoor);
-         }
-
-         rdxDetectedDoor.update();
-      }
-   }
-
    private void updatePointCloud()
    {
       RawImage depthImage = zed.getImage(ZEDImageSensor.DEPTH_IMAGE_KEY);
@@ -171,7 +144,7 @@ public class RDXDoorDetectionManagerDemo
       {
          lastSequenceNumber = depthImage.getSequenceNumber();
          pointCloudRenderer.updateMesh(depthImage, colorImage);
-         updateDetections();
+         doorDetectionManager.update();
       }
 
       depthImage.release();

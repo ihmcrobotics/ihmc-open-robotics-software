@@ -15,7 +15,7 @@ public class DetectedDoorMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "94f9769870576d00cba1e10aabaa4eb89ffaf30e20c4039d3e97d9250df80803";
+   		return "0e347f3197bb05f1dce671b23500160878f7e468544dff6bb1aa81b758c6e254";
    }
    
    @Override
@@ -52,6 +52,8 @@ public class DetectedDoorMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += ihmc_common_msgs.msg.dds.UUIDMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
       current_alignment += perception_msgs.msg.dds.DetectedDoorOpeningMechanismMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
@@ -73,6 +75,8 @@ public class DetectedDoorMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += ihmc_common_msgs.msg.dds.UUIDMessagePubSubType.getCdrSerializedSize(data.getDetectionUuid(), current_alignment);
+
       current_alignment += perception_msgs.msg.dds.DetectedDoorOpeningMechanismMessagePubSubType.getCdrSerializedSize(data.getOpeningMechanism(), current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getPanelPose(), current_alignment);
@@ -87,6 +91,7 @@ public class DetectedDoorMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
    public static void write(perception_msgs.msg.dds.DetectedDoorMessage data, us.ihmc.idl.CDR cdr)
    {
+      ihmc_common_msgs.msg.dds.UUIDMessagePubSubType.write(data.getDetectionUuid(), cdr);
       perception_msgs.msg.dds.DetectedDoorOpeningMechanismMessagePubSubType.write(data.getOpeningMechanism(), cdr);
       geometry_msgs.msg.dds.PosePubSubType.write(data.getPanelPose(), cdr);
       perception_msgs.msg.dds.PlanarRegionMessagePubSubType.write(data.getPanelPlanarRegion(), cdr);
@@ -95,6 +100,7 @@ public class DetectedDoorMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
    public static void read(perception_msgs.msg.dds.DetectedDoorMessage data, us.ihmc.idl.CDR cdr)
    {
+      ihmc_common_msgs.msg.dds.UUIDMessagePubSubType.read(data.getDetectionUuid(), cdr);	
       perception_msgs.msg.dds.DetectedDoorOpeningMechanismMessagePubSubType.read(data.getOpeningMechanism(), cdr);	
       geometry_msgs.msg.dds.PosePubSubType.read(data.getPanelPose(), cdr);	
       perception_msgs.msg.dds.PlanarRegionMessagePubSubType.read(data.getPanelPlanarRegion(), cdr);	
@@ -105,6 +111,8 @@ public class DetectedDoorMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final void serialize(perception_msgs.msg.dds.DetectedDoorMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+      ser.write_type_a("detection_uuid", new ihmc_common_msgs.msg.dds.UUIDMessagePubSubType(), data.getDetectionUuid());
+
       ser.write_type_a("opening_mechanism", new perception_msgs.msg.dds.DetectedDoorOpeningMechanismMessagePubSubType(), data.getOpeningMechanism());
 
       ser.write_type_a("panel_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getPanelPose());
@@ -118,6 +126,8 @@ public class DetectedDoorMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.DetectedDoorMessage data)
    {
+      ser.read_type_a("detection_uuid", new ihmc_common_msgs.msg.dds.UUIDMessagePubSubType(), data.getDetectionUuid());
+
       ser.read_type_a("opening_mechanism", new perception_msgs.msg.dds.DetectedDoorOpeningMechanismMessagePubSubType(), data.getOpeningMechanism());
 
       ser.read_type_a("panel_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getPanelPose());

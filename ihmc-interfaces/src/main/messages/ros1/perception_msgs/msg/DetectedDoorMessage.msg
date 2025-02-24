@@ -1,5 +1,8 @@
 # Message representing a DetectedDoor
 
+# UUID of this detection
+ihmc_common_msgs/UUIDMessage detection_uuid
+
 # The opening mechanism
 perception_msgs/DetectedDoorOpeningMechanismMessage opening_mechanism
 

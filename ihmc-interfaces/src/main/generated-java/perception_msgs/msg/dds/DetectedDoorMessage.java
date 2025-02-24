@@ -12,6 +12,10 @@ import us.ihmc.pubsub.TopicDataType;
 public class DetectedDoorMessage extends Packet<DetectedDoorMessage> implements Settable<DetectedDoorMessage>, EpsilonComparable<DetectedDoorMessage>
 {
    /**
+            * UUID of this detection
+            */
+   public ihmc_common_msgs.msg.dds.UUIDMessage detection_uuid_;
+   /**
             * The opening mechanism
             */
    public perception_msgs.msg.dds.DetectedDoorOpeningMechanismMessage opening_mechanism_;
@@ -31,6 +35,7 @@ public class DetectedDoorMessage extends Packet<DetectedDoorMessage> implements 
 
    public DetectedDoorMessage()
    {
+      detection_uuid_ = new ihmc_common_msgs.msg.dds.UUIDMessage();
       opening_mechanism_ = new perception_msgs.msg.dds.DetectedDoorOpeningMechanismMessage();
       panel_pose_ = new us.ihmc.euclid.geometry.Pose3D();
       panel_planar_region_ = new perception_msgs.msg.dds.PlanarRegionMessage();
@@ -45,10 +50,20 @@ public class DetectedDoorMessage extends Packet<DetectedDoorMessage> implements 
 
    public void set(DetectedDoorMessage other)
    {
+      ihmc_common_msgs.msg.dds.UUIDMessagePubSubType.staticCopy(other.detection_uuid_, detection_uuid_);
       perception_msgs.msg.dds.DetectedDoorOpeningMechanismMessagePubSubType.staticCopy(other.opening_mechanism_, opening_mechanism_);
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.panel_pose_, panel_pose_);
       perception_msgs.msg.dds.PlanarRegionMessagePubSubType.staticCopy(other.panel_planar_region_, panel_planar_region_);
       ihmc_common_msgs.msg.dds.InstantMessagePubSubType.staticCopy(other.last_detection_time_, last_detection_time_);
+   }
+
+
+   /**
+            * UUID of this detection
+            */
+   public ihmc_common_msgs.msg.dds.UUIDMessage getDetectionUuid()
+   {
+      return detection_uuid_;
    }
 
 
@@ -106,6 +121,7 @@ public class DetectedDoorMessage extends Packet<DetectedDoorMessage> implements 
       if(other == null) return false;
       if(other == this) return true;
 
+      if (!this.detection_uuid_.epsilonEquals(other.detection_uuid_, epsilon)) return false;
       if (!this.opening_mechanism_.epsilonEquals(other.opening_mechanism_, epsilon)) return false;
       if (!this.panel_pose_.epsilonEquals(other.panel_pose_, epsilon)) return false;
       if (!this.panel_planar_region_.epsilonEquals(other.panel_planar_region_, epsilon)) return false;
@@ -123,6 +139,7 @@ public class DetectedDoorMessage extends Packet<DetectedDoorMessage> implements 
 
       DetectedDoorMessage otherMyClass = (DetectedDoorMessage) other;
 
+      if (!this.detection_uuid_.equals(otherMyClass.detection_uuid_)) return false;
       if (!this.opening_mechanism_.equals(otherMyClass.opening_mechanism_)) return false;
       if (!this.panel_pose_.equals(otherMyClass.panel_pose_)) return false;
       if (!this.panel_planar_region_.equals(otherMyClass.panel_planar_region_)) return false;
@@ -137,6 +154,8 @@ public class DetectedDoorMessage extends Packet<DetectedDoorMessage> implements 
       StringBuilder builder = new StringBuilder();
 
       builder.append("DetectedDoorMessage {");
+      builder.append("detection_uuid=");
+      builder.append(this.detection_uuid_);      builder.append(", ");
       builder.append("opening_mechanism=");
       builder.append(this.opening_mechanism_);      builder.append(", ");
       builder.append("panel_pose=");

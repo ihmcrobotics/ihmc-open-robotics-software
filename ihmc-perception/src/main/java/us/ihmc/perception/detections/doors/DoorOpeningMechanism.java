@@ -10,8 +10,8 @@ import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode.DoorSide;
 
 public class DoorOpeningMechanism
 {
-   private String name = null;
-   private DoorSide side = null;
+   private String name = "unknown";
+   private DoorSide side = DoorSide.UNKNOWN;
    private final Pose3D pose;
 
    public DoorOpeningMechanism()
@@ -28,9 +28,6 @@ public class DoorOpeningMechanism
 
    private void setDoorSideByName()
    {
-      if (name == null)
-         return;
-
       if (name.contains("pull_handle"))
          setDoorSide(DoorSide.PULL);
       else if (name.contains("push_bar"))

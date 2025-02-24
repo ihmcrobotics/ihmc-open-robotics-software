@@ -3,6 +3,7 @@
 
 #include "geometry_msgs/msg/./Pose_.idl"
 #include "ihmc_common_msgs/msg/./InstantMessage_.idl"
+#include "ihmc_common_msgs/msg/./UUIDMessage_.idl"
 #include "perception_msgs/msg/./DetectedDoorOpeningMechanismMessage_.idl"
 #include "perception_msgs/msg/./PlanarRegionMessage_.idl"
 module perception_msgs
@@ -18,6 +19,10 @@ module perception_msgs
       @TypeCode(type="perception_msgs::msg::dds_::DetectedDoorMessage_")
       struct DetectedDoorMessage
       {
+        /**
+         * UUID of this detection
+         */
+        ihmc_common_msgs::msg::dds::UUIDMessage detection_uuid;
         /**
          * The opening mechanism
          */
