@@ -31,7 +31,7 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2Publisher;
 
-import java.nio.file.Path;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -75,7 +75,7 @@ public class YOLOv8DetectionExecutor
       this.annotatedImageDemanded = annotatedImageDemanded;
 
       // Read available YOLO models
-      for (Path yoloModelDirectory : YOLOv8Tools.getYOLOModelDirectories())
+      for (URL yoloModelDirectory : YOLOv8Tools.getYOLOModelDirectories())
       {
          YOLOv8Model model = new YOLOv8Model(yoloModelDirectory);
 

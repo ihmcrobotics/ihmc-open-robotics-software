@@ -263,7 +263,7 @@ public class HumanoidPerceptionModule
       extractFramePlanarRegionsList(rapidPlanarRegionsExtractor, realsenseDepthImage, sensorFrameRegions, cameraFrame);
       filterFramePlanarRegionsList();
       perceptionStatistics.updateTimeToComputeRapidRegions((System.nanoTime() - begin) * 1e-6f);
-      PerceptionMessageTools.publishFramePlanarRegionsList(sensorFrameRegions, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, ros2Helper.getROS2Node());
+      PerceptionMessageTools.publishFramePlanarRegionsList(sensorFrameRegions, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, ros2Helper);
       perceptionStatistics.updateTimeToComputeRapidRegions((System.nanoTime() - begin) * 1e-6f);
    }
 
