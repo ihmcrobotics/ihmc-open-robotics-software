@@ -12,6 +12,8 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
+import us.ihmc.yoVariables.math.YoMatrix;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.HashMap;
 
@@ -23,6 +25,7 @@ public class ExternalControl
    private final DMatrixRMaj feetPositions;
    private boolean leftInContact;
    private boolean rightInContact;
+   private final YoMatrix yoSolutionRobotState;
    private final DMatrixRMaj solutionRobotState;
    private final DMatrixRMaj solutionTorqueVector;
    private final DMatrixRMaj solutionStiffnessVector;
@@ -37,7 +40,12 @@ public class ExternalControl
    private final FramePose3D solutionBasePose = new FramePose3D();
    private final HashMap<OneDoFJointReadOnly, SolutionJointData> solutionJointData = new HashMap<>();
 
-   public ExternalControl(RigidBodyBasics baseBody, WholeBodySetpointParameters homeConfiguration, OneDoFJointReadOnly[] joints, double defaultStiffness, double defaultDamping)
+   public ExternalControl(RigidBodyBasics baseBody,
+                          WholeBodySetpointParameters homeConfiguration,
+                          OneDoFJointReadOnly[] joints,
+                          double defaultStiffness,
+                          double defaultDamping,
+                          YoRegistry parentRegistry)
    {
       this.baseBody = baseBody;
       this.joints = joints;
@@ -52,12 +60,17 @@ public class ExternalControl
          solutionJointData.put(joint, new SolutionJointData());
       externalControlImpl = new ExternalControlWrapper.ExternalControlImpl(defaultStiffness, defaultDamping, joints.length);
 
+      YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+      yoSolutionRobotState = new YoMatrix("externalSolutionRobotState", 2 * joints.length + 13, 1, registry);
+
       DMatrixRMaj homeConfigurationVector = new DMatrixRMaj(joints.length, 1);
       for (int i = 0; i < joints.length; i++)
          homeConfigurationVector.set(i, 0, homeConfiguration.getSetpoint(joints[i].getName()));
       externalControlImpl.setHomeJointConfiguration(homeConfigurationVector.data, homeConfigurationVector.numRows);
 
       solutionDebugData = new DMatrixRMaj(externalControlImpl.getDebugDataSize(), 1);
+
+      parentRegistry.addChild(registry);
    }
 
    public void setFootStates(SideDependentList<? extends ReferenceFrame> soleFrames, boolean leftInContact, boolean rightInContact)
@@ -105,6 +118,7 @@ public class ExternalControl
       {
          throw new RuntimeException("Failed to retrieve solution data.");
       }
+      yoSolutionRobotState.set(solutionRobotState);
       solutionBasePose.getPosition().set(solutionRobotState);
       solutionBasePose.getOrientation().set(3, 0, solutionRobotState);
       int positionStart = 7;
@@ -118,7 +132,7 @@ public class ExternalControl
          data.stiffness = solutionStiffnessVector.get(i, 0);
          data.damping = solutionDampingVector.get(i, 0);
       }
-//      LogTools.info("returned stiffness" + solutionStiffnessVector);
+      //      LogTools.info("returned stiffness" + solutionStiffnessVector);
    }
 
    public void readDebugData()

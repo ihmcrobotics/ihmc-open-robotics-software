@@ -88,7 +88,7 @@ public class ExternalControllerState extends HighLevelControllerState
       desiredMode.set(DesiredMode.HOLD_POSITION);
       desiredBehavior.set(DesiredBehavior.STAND);
       externalControl = new ExternalControl(controllerToolbox.getFullRobotModel().getRootBody(), highLevelControllerParameters.getStandPrepParameters(),
-                                            controlledJoints, 1000.0, 5.0);
+                                            controlledJoints, 1000.0, 5.0, registry);
 
 
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledJoints);
