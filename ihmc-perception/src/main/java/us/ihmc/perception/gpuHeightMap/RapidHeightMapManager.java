@@ -50,7 +50,7 @@ public class RapidHeightMapManager
 
    private GpuMat deviceDepthImage;
    private BytedecoImage heightMapBytedecoImage;
-   private ROS2Publisher<ImageMessage> heightMapPublisher;
+   private final ROS2Publisher<ImageMessage> heightMapPublisher;
 
    public RapidHeightMapManager(ROS2Node ros2Node,
                                 FullHumanoidRobotModel robotModel,
@@ -89,6 +89,8 @@ public class RapidHeightMapManager
                                                                1,
                                                                heightMapParameters);
       }
+
+      heightMapPublisher = ros2Node.createPublisher(PerceptionAPI.HEIGHT_MAP_CROPPED);
 
       // We use a notification in order to only call resetting the height map in one place
       ros2Node.createSubscription2(PerceptionAPI.RESET_HEIGHT_MAP, message -> resetHeightMapRequested.set());
@@ -168,14 +170,8 @@ public class RapidHeightMapManager
          deviceCroppedHeightMapImage.close();
       }
 
-      if (heightMapPublisher == null)
-      {
-         heightMapPublisher = ros2Node.createPublisher(PerceptionAPI.HEIGHT_MAP_CROPPED);
-      }
-
       OpenCVTools.compressImagePNG(croppedHeightMapImage, compressedCroppedHeightMapPointer);
       PerceptionMessageTools.publishCompressedDepthImage(compressedCroppedHeightMapPointer,
-                                                         PerceptionAPI.HEIGHT_MAP_CROPPED,
                                                          croppedHeightMapImageMessage,
                                                          heightMapPublisher,
                                                          cameraPose,

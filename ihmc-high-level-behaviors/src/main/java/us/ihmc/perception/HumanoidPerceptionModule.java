@@ -195,7 +195,6 @@ public class HumanoidPerceptionModule
 
       OpenCVTools.compressImagePNG(image, pointer);
       PerceptionMessageTools.publishCompressedDepthImage(pointer,
-                                                         topic,
                                                          message,
                                                          heightMapImagePublisher,
                                                          cameraPose,
@@ -244,7 +243,6 @@ public class HumanoidPerceptionModule
                                 OpenCVTools.compressImagePNG(heightMapImage, compressedInternalHeightMapPointer);
                                 //PerceptionDebugTools.displayDepth("Published Global Height Map", heightMapImage, 1);
                                 PerceptionMessageTools.publishCompressedDepthImage(compressedInternalHeightMapPointer,
-                                                                                   PerceptionAPI.HEIGHT_MAP_CROPPED,
                                                                                    croppedHeightMapImageMessage,
                                                                                    heightMapPublisher,
                                                                                    new FramePose3D(ReferenceFrame.getWorldFrame(),

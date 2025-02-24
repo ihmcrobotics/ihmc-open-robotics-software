@@ -18,7 +18,6 @@ import us.ihmc.perception.cuda.CUDAProgram;
 import us.ihmc.perception.cuda.CUDAStreamManager;
 import us.ihmc.perception.cuda.CUDATools;
 import us.ihmc.perception.heightMap.TerrainMapData;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -116,7 +115,7 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
 
       recomputeDerivedParameters();
       // Need to initialize this after the parameters have been computed to get the right size
-      filteredRapidHeightMapExtractor = new FilteredRapidHeightMapExtractor(stream, globalCellsPerAxis, globalCellsPerAxis);
+      filteredRapidHeightMapExtractor = new FilteredRapidHeightMapExtractor(stream, globalCellsPerAxis, globalCellsPerAxis, 6);
 
       try
       {
@@ -289,7 +288,7 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
       CUDATools.checkCUDAError(error);
 
       if (heightMapParameters.getEnableAlphaFilter())
-         globalHeightMapImage = filteredRapidHeightMapExtractor.update(globalHeightMapImage, 0);
+         globalHeightMapImage = filteredRapidHeightMapExtractor.update(globalHeightMapImage);
 
       // Run the cropping kernel
       croppingKernel.withPointer(globalHeightMapImage.data()).withLong(globalHeightMapImage.step());
@@ -307,11 +306,6 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
 
       //Update the terrain map data with the new results
       terrainMapData.setSensorOrigin(groundToWorldTransform.getTranslationX(), groundToWorldTransform.getTranslationY());
-
-      Mat temp = new Mat();
-      sensorCroppedHeightMapImage.download(temp);
-//      PerceptionDebugTools.printMat("", temp, 10);
-
 
       Mat finalCroppedHeightMap = new Mat();  // Assuming the height map is 201x201
       sensorCroppedHeightMapImage.download(finalCroppedHeightMap);  // Download the image from the GPU to the Mat object

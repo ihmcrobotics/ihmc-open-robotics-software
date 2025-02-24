@@ -75,7 +75,6 @@ public class PerceptionMessageTools
    }
 
    public static void publishCompressedDepthImage(BytePointer compressedDepthPointer,
-                                                  ROS2Topic<ImageMessage> topic,
                                                   ImageMessage depthImageMessage,
                                                   ROS2Publisher<ImageMessage> publisher,
                                                   Pose3DReadOnly cameraPose,

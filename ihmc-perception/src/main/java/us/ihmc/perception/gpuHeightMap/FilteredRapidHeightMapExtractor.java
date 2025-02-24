@@ -4,15 +4,13 @@ import org.bytedeco.cuda.cudart.CUstream_st;
 import org.bytedeco.cuda.cudart.cudaExtent;
 import org.bytedeco.cuda.cudart.cudaPitchedPtr;
 import org.bytedeco.cuda.cudart.dim3;
+import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.opencv.opencv_core.Scalar;
-import org.jetbrains.annotations.NotNull;
 import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
 import us.ihmc.perception.cuda.CUDATools;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 
 import java.net.URL;
 
@@ -24,7 +22,7 @@ public class FilteredRapidHeightMapExtractor
 
    private final cudaPitchedPtr pointerTo3DArray;
    private int currentIndex;
-   int layers = 6;
+   int layers;
 
    private final CUstream_st stream;
    private final int rows;
@@ -32,13 +30,18 @@ public class FilteredRapidHeightMapExtractor
    private final CUDAKernel kernel;
    private final CUDAProgram program;
    private int loopTracker = 0;
-   private int defaultValue;
+   private final FloatPointer parametersHostPointer;
+   private final FloatPointer parametersDevicePointer;
 
-   public FilteredRapidHeightMapExtractor(CUstream_st stream, int rows, int cols)
+   public FilteredRapidHeightMapExtractor(CUstream_st stream, int rows, int cols, int layers)
    {
       this.stream = stream;
       this.rows = rows;
       this.cols = cols;
+      this.layers = layers;
+
+      parametersHostPointer = new FloatPointer(1);
+      parametersDevicePointer = new FloatPointer();
 
       // Load header and main file
       URL kernelPath = getClass().getResource("FilteredRapidHeightMapExtractor.cu");
@@ -60,20 +63,25 @@ public class FilteredRapidHeightMapExtractor
       currentIndex = 0;
    }
 
-   public GpuMat update(GpuMat latestGlobalHeightMap, int defaultValue)
+   public GpuMat update(GpuMat latestGlobalHeightMap)
    {
-      this.defaultValue = defaultValue;
+      int error;
 
-      return computerHeightMapHistoryAverage(latestGlobalHeightMap);
-   }
+      // Populate parameter buffers with the necessary values
+      float[] parametersArray = populateParametersArray(layers);
+      parametersHostPointer.put(parametersArray);
 
-   @NotNull
-   private GpuMat computerHeightMapHistoryAverage(GpuMat latestGlobalHeightMap)
-   {
       // Only want to compute the average if we have the past values to use
       if (loopTracker < layers)
       {
          loopTracker++;
+
+         CUDATools.mallocAsync(parametersDevicePointer, parametersArray.length, stream);
+
+         error = cudaStreamSynchronize(stream);
+         CUDATools.checkCUDAError(error);
+
+         CUDATools.memcpyAsync(parametersDevicePointer, parametersHostPointer, parametersArray.length, stream);
 
          cudaMemcpy2D(pointerTo3DArray.ptr().position(currentIndex * pointerTo3DArray.pitch() * pointerTo3DArray.ysize()),
                       pointerTo3DArray.pitch(),
@@ -87,18 +95,22 @@ public class FilteredRapidHeightMapExtractor
          return latestGlobalHeightMap;
       }
 
-      int error;
+      CUDATools.mallocAsync(parametersDevicePointer, parametersArray.length, stream);
+
+      error = cudaStreamSynchronize(stream);
+      CUDATools.checkCUDAError(error);
+
+      CUDATools.memcpyAsync(parametersDevicePointer, parametersHostPointer, parametersArray.length, stream);
 
       GpuMat result = new GpuMat(rows, cols, opencv_core.CV_16UC1);
 
       kernel.withPointer(pointerTo3DArray.ptr()).withLong(pointerTo3DArray.pitch());
       kernel.withPointer(result.data()).withLong(result.step());
       kernel.withPointer(latestGlobalHeightMap.data()).withLong(latestGlobalHeightMap.step());
+      kernel.withPointer(parametersDevicePointer);
       kernel.withLong(pointerTo3DArray.pitch() * rows);
       kernel.withInt(rows);
       kernel.withInt(cols);
-      kernel.withInt(layers);
-      kernel.withInt(defaultValue);
 
       //Execute the CUDA kernels with the provided stream
       //Each kernel performs a specific task related to the height map update, registration, and cropping
@@ -112,12 +124,10 @@ public class FilteredRapidHeightMapExtractor
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
 
-      // Print the result to make sure we get what we expect
-      // In this example we go through 2,4,6,8 so we expect the average to be 5
       Mat cpuResult = new Mat();
       result.download(cpuResult);
-//      PerceptionDebugTools.printMat("Result", cpuResult, 1);
 
+      // Upload the latest height map to the GPU for the next iteration
       cudaMemcpy2D(pointerTo3DArray.ptr().position(currentIndex * pointerTo3DArray.pitch() * pointerTo3DArray.ysize()),
                    pointerTo3DArray.pitch(),
                    latestGlobalHeightMap.data(),
@@ -131,6 +141,11 @@ public class FilteredRapidHeightMapExtractor
       return result;
    }
 
+   public float[] populateParametersArray(int layers)
+   {
+      return new float[] {(float) layers};
+   }
+
    public void reset()
    {
       loopTracker = 0;
@@ -140,5 +155,8 @@ public class FilteredRapidHeightMapExtractor
    {
       program.close();
       kernel.close();
+      parametersHostPointer.close();
+      parametersDevicePointer.close();
+      cudaFree(parametersDevicePointer);
    }
 }

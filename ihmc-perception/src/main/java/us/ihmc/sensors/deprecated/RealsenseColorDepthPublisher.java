@@ -58,7 +58,6 @@ public class RealsenseColorDepthPublisher
    private final ROS2StoredPropertySetGroup ros2PropertySetGroup;
    private final Supplier<ReferenceFrame> sensorFrameUpdater;
    private final ROS2Topic<ImageMessage> colorTopic;
-   private final ROS2Topic<ImageMessage> depthTopic;
    private final ROS2Node ros2Node;
    private final ROS2Helper ros2Helper;
    private final PerceptionConfigurationParameters parameters = new PerceptionConfigurationParameters();
@@ -83,7 +82,7 @@ public class RealsenseColorDepthPublisher
    private boolean loggerInitialized = false;
    private volatile boolean running = true;
    private final Notification destroyedNotification = new Notification();
-   private ROS2Publisher<ImageMessage> depthPublisher;
+   private final ROS2Publisher<ImageMessage> depthPublisher;
 
    public RealsenseColorDepthPublisher(RealSenseConfiguration realsenseConfiguration,
                                        ROS2Topic<ImageMessage> depthTopic,
@@ -91,7 +90,6 @@ public class RealsenseColorDepthPublisher
                                        Supplier<ReferenceFrame> sensorFrameUpdater)
    {
       this.colorTopic = colorTopic;
-      this.depthTopic = depthTopic;
       this.sensorFrameUpdater = sensorFrameUpdater;
 
       realsenseDeviceManager = new RealSenseDeviceManager();
@@ -106,6 +104,8 @@ public class RealsenseColorDepthPublisher
 
       ros2Node = new ROS2NodeBuilder().build("realsense_color_and_depth_publisher");
       ros2Helper = new ROS2Helper(ros2Node);
+
+      depthPublisher = ros2Node.createPublisher(depthTopic);
 
       LogTools.info("Setting up ROS2StoredPropertySetGroup");
       ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Node);
@@ -176,12 +176,7 @@ public class RealsenseColorDepthPublisher
 
             PerceptionMessageTools.setDepthIntrinsicsFromRealsense(realsense, depthImageMessage);
             CameraModel.PINHOLE.packMessageFormat(depthImageMessage);
-            if (depthPublisher == null)
-            {
-               depthPublisher = ros2Node.createPublisher(depthTopic);
-            }
             PerceptionMessageTools.publishCompressedDepthImage(compressedDepthPointer,
-                                                               depthTopic,
                                                                depthImageMessage,
                                                                depthPublisher,
                                                                depthPose,

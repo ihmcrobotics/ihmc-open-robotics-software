@@ -194,7 +194,6 @@ public abstract class CommunicationsSyncedRobotModel
       return fullRobotModel;
    }
 
-
    public SideDependentList<HandWrenchCalculator> getHandWrenchCalculators()
    {
       return handWrenchCalculators;

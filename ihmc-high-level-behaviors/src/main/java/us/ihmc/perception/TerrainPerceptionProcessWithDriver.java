@@ -102,7 +102,7 @@ public class TerrainPerceptionProcessWithDriver
    private final int colorHeight;
    private long depthSequenceNumber = 0;
    private long colorSequenceNumber = 0;
-   private ROS2Publisher<ImageMessage> depthPublisher;
+   private final ROS2Publisher<ImageMessage> depthPublisher;
 
    public TerrainPerceptionProcessWithDriver(String robotName,
                                              CollisionBoxProvider collisionBoxProvider,
@@ -130,6 +130,8 @@ public class TerrainPerceptionProcessWithDriver
       realtimeROS2Node = new ROS2NodeBuilder().buildRealtime("l515_videopub");
       realtimeROS2Node.spin();
       realsenseDeviceManager = new RealSenseDeviceManager();
+
+      depthPublisher = realtimeROS2Node.createPublisher(depthTopic);
 
       LogTools.info("Creating Bytedeco Realsense");
       realsense = realsenseDeviceManager.createBytedecoRealsenseDevice(realsenseConfiguration);
@@ -246,19 +248,12 @@ public class TerrainPerceptionProcessWithDriver
 
          if (parameters.getPublishDepth())
          {
-
-            if (depthPublisher == null)
-            {
-               depthPublisher = realtimeROS2Node.createPublisher(depthTopic);
-            }
-
             executorService.submit(() ->
                                    {
                                       OpenCVTools.compressImagePNG(depth16UC1Image, compressedDepthPointer);
                                       PerceptionMessageTools.setDepthIntrinsicsFromRealsense(realsense, depthImageMessage);
                                       CameraModel.PINHOLE.packMessageFormat(depthImageMessage);
                                       PerceptionMessageTools.publishCompressedDepthImage(compressedDepthPointer,
-                                                                                         depthTopic,
                                                                                          depthImageMessage,
                                                                                          depthPublisher,
                                                                                          cameraPose,

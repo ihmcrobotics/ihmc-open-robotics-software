@@ -4,7 +4,6 @@ import org.bytedeco.cuda.cudart.CUstream_st;
 import org.bytedeco.cuda.cudart.cudaExtent;
 import org.bytedeco.cuda.cudart.cudaPitchedPtr;
 import org.bytedeco.cuda.cudart.dim3;
-import org.bytedeco.javacpp.ShortPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -16,8 +15,6 @@ import us.ihmc.perception.cuda.CUDATools;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.bytedeco.cuda.global.cudart.*;
 

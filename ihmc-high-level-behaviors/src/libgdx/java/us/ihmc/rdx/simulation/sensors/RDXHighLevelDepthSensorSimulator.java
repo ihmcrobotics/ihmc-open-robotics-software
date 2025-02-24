@@ -579,7 +579,7 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
                depthImagePublisher = ros2Node.createPublisher(ros2DepthTopic);
             }
 
-            PerceptionMessageTools.publishCompressedDepthImage(compressedDepthPointer, ros2DepthTopic, depthImageMessage, depthImagePublisher, sensorPose, now, depthSequenceNumber++,
+            PerceptionMessageTools.publishCompressedDepthImage(compressedDepthPointer, depthImageMessage, depthImagePublisher, sensorPose, now, depthSequenceNumber++,
                                                                    depthSensorSimulator.getImageHeight(), depthSensorSimulator.getImageWidth(), 0.001f);
 
          });

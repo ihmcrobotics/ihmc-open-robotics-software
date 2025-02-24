@@ -128,14 +128,18 @@ public class RapidHeightMapExtractor implements RapidHeightMapExtractorInterface
                                   int mode,
                                   HeightMapParameters heightMapParameters)
    {
-      this(openCLManager, depthImage, depthCameraIntrinsics, mode);
-      this.heightMapParameters = heightMapParameters;
+      this(openCLManager, depthImage, depthCameraIntrinsics, mode, heightMapParameters);
       footSoleFrames.put(RobotSide.LEFT, leftFootSoleFrame);
       footSoleFrames.put(RobotSide.RIGHT, rightFootSoleFrame);
    }
 
-   public RapidHeightMapExtractor(OpenCLManager openCLManager, BytedecoImage depthImage, CameraIntrinsics depthCameraIntrinsics, int mode)
+   public RapidHeightMapExtractor(OpenCLManager openCLManager,
+                                  BytedecoImage depthImage,
+                                  CameraIntrinsics depthCameraIntrinsics,
+                                  int mode,
+                                  HeightMapParameters heightMapParameters)
    {
+      this.heightMapParameters = heightMapParameters;
       this.openCLManager = openCLManager;
       this.inputDepthImage = depthImage;
       this.depthCameraIntrinsics = depthCameraIntrinsics;
