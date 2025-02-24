@@ -29,7 +29,7 @@ public class DetectedDoor
    private final PlanarRegion panelPlanarRegion;
 
    // Detection stuff
-   private Instant lastDetectionTime;
+   private Instant lastDetectionTime = Instant.MIN;
 
    // Parameters
    private double maxPlanarRegionToOpeningHardwareDistance = 0.75;

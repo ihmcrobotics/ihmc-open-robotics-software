@@ -32,7 +32,7 @@ public class DoorDetectionManager
 
    public List<DetectedDoor> getDetectedDoors()
    {
-      return detectedDoors;
+      return new LinkedList<>(detectedDoors);
    }
 
    public synchronized void updateDetections(List<InstantDetection> newDetections)

@@ -41,7 +41,12 @@ public class RDXDetectedDoor implements RDXRenderableProvider
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      // TODO: Finish
+      if (sceneLevels.contains(RDXSceneLevel.VIRTUAL))
+      {
+         openingMechanismFrameGraphic.getRenderables(renderables, pool);
+         panelFrameGraphic.getRenderables(renderables, pool);
+         planarRegionGraphic.getRenderables(renderables, pool);
+      }
    }
 
    public void dispose()

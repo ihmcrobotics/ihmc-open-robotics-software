@@ -9,8 +9,10 @@ import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractionThread;
 import us.ihmc.rdx.AbstractRDXPointCloudRenderer.ColoringMethod;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
+import us.ihmc.rdx.perception.doors.RDXDetectedDoor;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXRawImagePointCloudRenderer;
+import us.ihmc.rdx.ui.graphics.ros2.yolo.RDXROS2YOLOv8Settings;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.sensors.zed.ZEDImageSensor;
@@ -18,7 +20,9 @@ import us.ihmc.sensors.zed.ZEDModelData;
 import us.ihmc.sensors.zed.ZEDSVOPlaybackSensor;
 import us.ihmc.tools.IHMCCommonPaths;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class RDXDoorDetectionManagerDemo
 {
@@ -31,13 +35,16 @@ public class RDXDoorDetectionManagerDemo
    private final OpenCLManager openCLManager;
 
    private final DoorDetectionManager doorDetectionManager;
+   private final Map<DetectedDoor, RDXDetectedDoor> rdxDetectedDoors = new HashMap<>();
 
    private final ZEDSVOPlaybackSensor zed;
    private final YOLOv8DetectionThread yoloThread;
    private final RapidPlanarRegionsExtractionThread planarRegionThread;
 
    private final RDXBaseUI baseUI;
+   private final RDXZEDSVORecorderPanel zedSVOPanel;
    private final RDXRawImagePointCloudRenderer pointCloudRenderer;
+   private final RDXROS2YOLOv8Settings yoloSetings;
    private long lastSequenceNumber = -1L;
 
    private RDXDoorDetectionManagerDemo()
@@ -59,7 +66,9 @@ public class RDXDoorDetectionManagerDemo
       planarRegionThread.addPlanarRegionsConsumer(doorDetectionManager::updatePlanarRegions);
 
       baseUI = new RDXBaseUI();
+      zedSVOPanel = new RDXZEDSVORecorderPanel(ros2Helper);
       pointCloudRenderer = new RDXRawImagePointCloudRenderer();
+      yoloSetings = new RDXROS2YOLOv8Settings(ros2Node);
 
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
@@ -69,7 +78,14 @@ public class RDXDoorDetectionManagerDemo
             pointCloudRenderer.create(1280 * 720);
             pointCloudRenderer.setColoringMethod(ColoringMethod.COLOR_IMAGE);
 
+            baseUI.getImGuiPanelManager().addPanel("ZED SVO", zedSVOPanel::render);
+            baseUI.getImGuiPanelManager().addPanel("YOLO Settings", yoloSetings::renderSettings);
             baseUI.getPrimaryScene().addRenderableProvider(pointCloudRenderer);
+            baseUI.getPrimaryScene().addRenderableProvider((renderables, pool, sceneLevels) ->
+            {
+               for (RDXDetectedDoor door : rdxDetectedDoors.values())
+                  door.getRenderables(renderables, pool, sceneLevels);
+            });
             baseUI.create();
 
             zed.run(true);
@@ -81,6 +97,9 @@ public class RDXDoorDetectionManagerDemo
          public void render()
          {
             updatePointCloud();
+            updateDetections();
+            zedSVOPanel.update();
+            yoloSetings.publishSettingsMessageIfChanged();
 
             baseUI.renderBeforeOnScreenUI();
 
@@ -93,6 +112,7 @@ public class RDXDoorDetectionManagerDemo
          public void dispose()
          {
             pointCloudRenderer.dispose();
+            yoloSetings.destroy();
             baseUI.dispose();
 
             destroy();
@@ -100,13 +120,22 @@ public class RDXDoorDetectionManagerDemo
       });
    }
 
-   private void renderDetections()
+   private void updateDetections()
    {
       List<DetectedDoor> detectedDoors = doorDetectionManager.getDetectedDoors();
 
+      rdxDetectedDoors.keySet().removeIf(key -> !detectedDoors.contains(key));
+
       for (DetectedDoor detectedDoor : detectedDoors)
       {
+         RDXDetectedDoor rdxDetectedDoor = rdxDetectedDoors.get(detectedDoor);
+         if (rdxDetectedDoor == null)
+         {
+            rdxDetectedDoor = new RDXDetectedDoor(detectedDoor);
+            rdxDetectedDoors.put(detectedDoor, rdxDetectedDoor);
+         }
 
+         rdxDetectedDoor.update();
       }
    }
 
