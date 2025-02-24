@@ -2,6 +2,7 @@ package us.ihmc.perception.detections.doors;
 
 import us.ihmc.perception.detections.InstantDetection;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -35,7 +36,13 @@ public class DoorDetectionManager
       return new LinkedList<>(detectedDoors);
    }
 
-   public synchronized void updateDetections(List<InstantDetection> newDetections)
+   public synchronized void update()
+   {
+      // Remove old detections
+      detectedDoors.removeIf(doorDetection -> doorDetection.getLastDetectedTime().plusSeconds(2).isBefore(Instant.now()));
+   }
+
+   public synchronized void registerNewDetections(List<InstantDetection> newDetections)
    {
       // Find opening hardware and panel detections
       List<InstantDetection> openingHardwareDetections = new ArrayList<>();
@@ -50,16 +57,13 @@ public class DoorDetectionManager
       }
 
       // Update opening hardware detections
-      updateDetectionsInternal(openingHardwareDetections);
+      registerNewDetectionsInternal(openingHardwareDetections);
 
       // Update panel detections
-      updateDetectionsInternal(panelDetections);
-
-      // Remove old detections
-      detectedDoors.removeIf(doorDetection -> doorDetection.getLastDetectedTime().plusSeconds(2).isBefore(Instant.now()));
+      registerNewDetectionsInternal(panelDetections);
    }
 
-   private void updateDetectionsInternal(List<InstantDetection> newDetections)
+   private void registerNewDetectionsInternal(List<InstantDetection> newDetections)
    {
       double maxDistanceSquared = maxDetectionJumpDistance * maxDetectionJumpDistance;
 
@@ -104,7 +108,10 @@ public class DoorDetectionManager
 
    public synchronized void updatePlanarRegions(FramePlanarRegionsList newPlanarRegions)
    {
+      PlanarRegionsList planarRegionsList = newPlanarRegions.getPlanarRegionsList();
+      planarRegionsList.applyTransform(newPlanarRegions.getSensorToWorldFrameTransform());
+
       for (DetectedDoor doorDetection : detectedDoors)
-         doorDetection.updatePlanarRegion(newPlanarRegions.getPlanarRegionsList());
+         doorDetection.updatePlanarRegion(planarRegionsList);
    }
 }

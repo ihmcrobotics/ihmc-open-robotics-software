@@ -104,15 +104,11 @@ public class DetectedDoor
 
       if (detectedClass.contains(PANEL_STRING))
       {
-         if (panelPose.containsNaN())
-            panelPose.setToZero();
          panelPose.getPosition().set(newDetection.getPose().getPosition());
       }
       else if (detectedClass.startsWith(DOOR_STRING))
       {
          openingHardwareName = newDetection.getDetectedObjectClass();
-         if (openingHardwarePose.containsNaN())
-            openingHardwarePose.setToZero();
          openingHardwarePose.getPosition().set(newDetection.getPose().getPosition());
       }
       else
@@ -126,7 +122,7 @@ public class DetectedDoor
 
    /* package-private */ void updatePlanarRegion(PlanarRegionsList planarRegions)
    {
-      if (openingHardwarePose.containsNaN() || planarRegions.isEmpty())
+      if (openingHardwarePose.getPosition().containsNaN() || planarRegions.isEmpty())
          return;
 
       PlanarRegion bestFitRegion = planarRegions.getPlanarRegionsAsList()                                   // Get planar regions as List<PlanarRegion>

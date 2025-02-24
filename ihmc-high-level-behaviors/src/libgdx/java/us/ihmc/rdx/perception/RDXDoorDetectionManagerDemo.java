@@ -13,6 +13,8 @@ import us.ihmc.rdx.perception.doors.RDXDetectedDoor;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXRawImagePointCloudRenderer;
 import us.ihmc.rdx.ui.graphics.ros2.yolo.RDXROS2YOLOv8Settings;
+import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.sensors.zed.ZEDImageSensor;
@@ -44,11 +46,14 @@ public class RDXDoorDetectionManagerDemo
    private final RDXBaseUI baseUI;
    private final RDXZEDSVORecorderPanel zedSVOPanel;
    private final RDXRawImagePointCloudRenderer pointCloudRenderer;
-   private final RDXROS2YOLOv8Settings yoloSetings;
+   private final RDXPlanarRegionsGraphic planarRegionsGraphic;
+   private final RDXROS2YOLOv8Settings yoloSettings;
    private long lastSequenceNumber = -1L;
 
    private RDXDoorDetectionManagerDemo()
    {
+      Runtime.getRuntime().addShutdownHook(new Thread(this::destroy));
+
       ros2Node = new ROS2NodeBuilder().build(getClass().getSimpleName());
       ros2Helper = new ROS2Helper(ros2Node);
       openCLManager = new OpenCLManager();
@@ -60,7 +65,7 @@ public class RDXDoorDetectionManagerDemo
 
       yoloThread = new YOLOv8DetectionThread(() -> true);
       yoloThread.setImageSensor(zed, ZEDImageSensor.LEFT_COLOR_IMAGE_KEY, ZEDImageSensor.DEPTH_IMAGE_KEY);
-      yoloThread.addDetectionConsumerCallback(doorDetectionManager::updateDetections);
+      yoloThread.addDetectionConsumerCallback(doorDetectionManager::registerNewDetections);
 
       planarRegionThread = new RapidPlanarRegionsExtractionThread(ros2Node, openCLManager, zed, ZEDImageSensor.DEPTH_IMAGE_KEY);
       planarRegionThread.addPlanarRegionsConsumer(doorDetectionManager::updatePlanarRegions);
@@ -68,7 +73,15 @@ public class RDXDoorDetectionManagerDemo
       baseUI = new RDXBaseUI();
       zedSVOPanel = new RDXZEDSVORecorderPanel(ros2Helper);
       pointCloudRenderer = new RDXRawImagePointCloudRenderer();
-      yoloSetings = new RDXROS2YOLOv8Settings(ros2Node);
+      planarRegionsGraphic = new RDXPlanarRegionsGraphic();
+      planarRegionsGraphic.setBlendOpacity(0.1f);
+      planarRegionThread.addPlanarRegionsConsumer(framePlanarRegions ->
+      {
+         PlanarRegionsList planarRegionsList = framePlanarRegions.getPlanarRegionsList();
+         planarRegionsList.applyTransform(framePlanarRegions.getSensorToWorldFrameTransform());
+         planarRegionsGraphic.generateMeshes(planarRegionsList);
+      });
+      yoloSettings = new RDXROS2YOLOv8Settings(ros2Node);
 
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
@@ -79,8 +92,9 @@ public class RDXDoorDetectionManagerDemo
             pointCloudRenderer.setColoringMethod(ColoringMethod.COLOR_IMAGE);
 
             baseUI.getImGuiPanelManager().addPanel("ZED SVO", zedSVOPanel::render);
-            baseUI.getImGuiPanelManager().addPanel("YOLO Settings", yoloSetings::renderSettings);
+            baseUI.getImGuiPanelManager().addPanel("YOLO Settings", yoloSettings::renderSettings);
             baseUI.getPrimaryScene().addRenderableProvider(pointCloudRenderer);
+            baseUI.getPrimaryScene().addRenderableProvider(planarRegionsGraphic);
             baseUI.getPrimaryScene().addRenderableProvider((renderables, pool, sceneLevels) ->
             {
                for (RDXDetectedDoor door : rdxDetectedDoors.values())
@@ -97,14 +111,11 @@ public class RDXDoorDetectionManagerDemo
          public void render()
          {
             updatePointCloud();
-            updateDetections();
             zedSVOPanel.update();
-            yoloSetings.publishSettingsMessageIfChanged();
+            planarRegionsGraphic.update();
+            yoloSettings.publishSettingsMessageIfChanged();
 
             baseUI.renderBeforeOnScreenUI();
-
-            // Render other stuff
-
             baseUI.renderEnd();
          }
 
@@ -112,18 +123,17 @@ public class RDXDoorDetectionManagerDemo
          public void dispose()
          {
             pointCloudRenderer.dispose();
-            yoloSetings.destroy();
+            yoloSettings.destroy();
             baseUI.dispose();
-
-            destroy();
          }
       });
    }
 
    private void updateDetections()
    {
-      List<DetectedDoor> detectedDoors = doorDetectionManager.getDetectedDoors();
+      doorDetectionManager.update();
 
+      List<DetectedDoor> detectedDoors = doorDetectionManager.getDetectedDoors();
       rdxDetectedDoors.keySet().removeIf(key -> !detectedDoors.contains(key));
 
       for (DetectedDoor detectedDoor : detectedDoors)
@@ -156,6 +166,7 @@ public class RDXDoorDetectionManagerDemo
       {
          lastSequenceNumber = depthImage.getSequenceNumber();
          pointCloudRenderer.updateMesh(depthImage, colorImage);
+         updateDetections();
       }
 
       depthImage.release();
@@ -164,12 +175,12 @@ public class RDXDoorDetectionManagerDemo
 
    private void destroy()
    {
+      yoloThread.blockingKill();
+      planarRegionThread.blockingKill();
+      zed.close();
+
       ros2Node.destroy();
       openCLManager.destroy();
-
-      zed.close();
-      yoloThread.kill();
-      planarRegionThread.kill();
    }
 
    public static void main(String[] args)
