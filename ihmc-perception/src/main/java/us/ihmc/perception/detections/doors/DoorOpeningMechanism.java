@@ -1,5 +1,6 @@
 package us.ihmc.perception.detections.doors;
 
+import perception_msgs.msg.dds.DetectedDoorOpeningMechanismMessage;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
@@ -89,5 +90,12 @@ public class DoorOpeningMechanism
    public Pose3DReadOnly getPose()
    {
       return pose;
+   }
+
+   public void toMessage(DetectedDoorOpeningMechanismMessage messageToPack)
+   {
+      messageToPack.setName(name);
+      messageToPack.setSide((byte) side.ordinal());
+      messageToPack.getPose().set(pose);
    }
 }

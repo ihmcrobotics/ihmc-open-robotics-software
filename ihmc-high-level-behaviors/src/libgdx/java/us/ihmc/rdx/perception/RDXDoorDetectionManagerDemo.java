@@ -61,7 +61,7 @@ public class RDXDoorDetectionManagerDemo
       ros2Helper = new ROS2Helper(ros2Node);
       openCLManager = new OpenCLManager();
 
-      doorDetectionManager = new DoorDetectionManager();
+      doorDetectionManager = new DoorDetectionManager(ros2Node);
 
       zed = new ZEDSVOPlaybackSensor(ros2Helper, 0, ZEDModelData.ZED_2, SVO_FILE);
       zed.useTrackedPose(true);

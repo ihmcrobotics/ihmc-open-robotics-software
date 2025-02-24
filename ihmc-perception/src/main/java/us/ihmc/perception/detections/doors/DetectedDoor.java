@@ -1,5 +1,8 @@
 package us.ihmc.perception.detections.doors;
 
+import perception_msgs.msg.dds.DetectedDoorMessage;
+import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.Axis2D;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -147,5 +150,13 @@ public class DetectedDoor
    private boolean planarRegionAreaFilter(PlanarRegion planarRegion)
    {
       return planarRegion.getArea() > minPlanarRegionArea;
+   }
+
+   public void toMessage(DetectedDoorMessage messageToPack)
+   {
+      openingMechanism.toMessage(messageToPack.getOpeningMechanism());
+      messageToPack.getPanelPose().set(panelPose);
+      messageToPack.getPanelPlanarRegion().set(PlanarRegionMessageConverter.convertToPlanarRegionMessage(panelPlanarRegion));
+      MessageTools.toMessage(lastDetectionTime, messageToPack.getLastDetectionTime());
    }
 }

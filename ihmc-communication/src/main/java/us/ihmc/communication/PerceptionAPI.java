@@ -295,6 +295,8 @@ public final class PerceptionAPI
       return BIPEDAL_SUPPORT_REGION_PARAMETERS.withRobot(robotName);
    }
 
+   public static final ROS2Topic<DetectedDoorListMessage> DETECTED_DOORS = IHMC_ROOT.withModule("door_detection").withType(DetectedDoorListMessage.class);
+
    /* VIDEO STREAMING STUFF */
    /**
     * SRT_RELAY_INSTANCE_ID is a randomly generated ID for SRT image relay topics. The idea is you want each instance of a process to have a unique ID
