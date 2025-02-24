@@ -14,7 +14,6 @@ void filterRapidHeightMap(unsigned short * matrixPointer, size_t pitchA,
         return;
 
     int sum = 0;
-    float* variance = (float*)malloc(params[LAYERS] * sizeof(float));
 
     // Compute the average height of the history in order to get the variance at each layer
     for (int layer = 0; layer < params[LAYERS]; layer++)
@@ -28,36 +27,6 @@ void filterRapidHeightMap(unsigned short * matrixPointer, size_t pitchA,
 
     unsigned short avg = sum / params[LAYERS];
 
-    // Compute the variance for each layer
-    for (int layer = 0; layer < params[LAYERS]; layer++)
-    {
-        unsigned short * currentLayer = (unsigned short*)((char*) matrixPointer + layer * layerSize);
-        unsigned short * matrixPointerRow = (unsigned short*)((char*) currentLayer + indexY * pitchA) + indexX;
-
-        float diff = (float)(*matrixPointerRow) - avg;
-        variance[layer] = abs(diff);
-    }
-
-    double heightSum = 0;
-    double varianceSum = 0;
-
-    // Compute the height and variance sum
-    for (int layer = 0; layer < params[LAYERS]; layer++)
-    {
-        unsigned short * currentLayer = (unsigned short*)((char*) matrixPointer + layer * layerSize);
-        unsigned short * matrixPointerRow = (unsigned short*)((char*) currentLayer + indexY * pitchA) + indexX;
-
-        if (variance[layer] > 0.0f)  // Prevent division by zero
-        {
-            heightSum += (double)(*matrixPointerRow) / (double)variance[layer];
-            varianceSum += 1.0 / (double)variance[layer];
-        }
-    }
-
-//     printf("Height sum: %f\n", heightSum);
-//     printf("Variance sum: %f\n", varianceSum);
-    unsigned short newHeight = heightSum / varianceSum;
-
     unsigned short * heightValue = (unsigned short*)((char*) newestHeightMap + indexY * pitchNewestHeightMap) + indexX;
 
     int heightValueInt = (int) *heightValue;
@@ -70,8 +39,4 @@ void filterRapidHeightMap(unsigned short * matrixPointer, size_t pitchA,
 
     unsigned short *outputPointer = (unsigned short *)((char*) resultPointer + indexY * pitchResult) + indexX;
     *outputPointer = (unsigned short) heightEstimate;
-
-    free(variance);
-//     printf("GPU Height Estimate: %f\n", heightEstimate);
 }
-

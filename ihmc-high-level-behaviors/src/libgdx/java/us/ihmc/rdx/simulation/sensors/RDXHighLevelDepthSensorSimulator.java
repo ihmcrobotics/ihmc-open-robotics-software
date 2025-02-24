@@ -234,6 +234,9 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
    {
       this.ros2Node = ros2Node;
       this.ros2Helper = new ROS2Helper(ros2Node);
+
+      depthImagePublisher = ros2Node.createPublisher(ros2DepthTopic);
+
       this.ros2DepthTopic = ros2DepthTopic;
       this.ros2ColorTopic = ros2ColorTopic;
 
@@ -245,9 +248,6 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
    {
       this.ros2Node = ros2Node;
       this.ros2PointCloudTopic = ros2PointCloudTopic;
-
-      depthImagePublisher = ros2Node.createPublisher(ros2DepthTopic);
-
       ros2PointsToPublish = new RecyclingArrayList<>(imageWidth * imageHeight, Point3D::new);
       pointCloudMessageType = ros2PointCloudTopic.getType();
       if (pointCloudMessageType.equals(StereoVisionPointCloudMessage.class))
