@@ -245,6 +245,9 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
    {
       this.ros2Node = ros2Node;
       this.ros2PointCloudTopic = ros2PointCloudTopic;
+
+      depthImagePublisher = ros2Node.createPublisher(ros2DepthTopic);
+
       ros2PointsToPublish = new RecyclingArrayList<>(imageWidth * imageHeight, Point3D::new);
       pointCloudMessageType = ros2PointCloudTopic.getType();
       if (pointCloudMessageType.equals(StereoVisionPointCloudMessage.class))
@@ -573,11 +576,6 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
             sensorPose.setToZero(sensorFrame);
             sensorPose.changeFrame(ReferenceFrame.getWorldFrame());
             OpenCVTools.compressImagePNG(depthImageMat, compressedDepthPointer);
-
-            if (depthImagePublisher == null)
-            {
-               depthImagePublisher = ros2Node.createPublisher(ros2DepthTopic);
-            }
 
             PerceptionMessageTools.publishCompressedDepthImage(compressedDepthPointer, depthImageMessage, depthImagePublisher, sensorPose, now, depthSequenceNumber++,
                                                                    depthSensorSimulator.getImageHeight(), depthSensorSimulator.getImageWidth(), 0.001f);
