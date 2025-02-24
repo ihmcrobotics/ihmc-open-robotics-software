@@ -49,6 +49,9 @@ import us.ihmc.tools.IHMCCommonPaths;
 
 import java.util.Map;
 
+import static us.ihmc.zed.global.zed.SL_DEPTH_MODE_NEURAL;
+import static us.ihmc.zed.global.zed.SL_DEPTH_MODE_PERFORMANCE;
+
 /**
  * A self contained demo and development environment for our scene graph functionality.
  * Requires everything installed from ihmc-perception/README.md
@@ -144,9 +147,8 @@ public class RDXSceneGraphDemo
             sensorPoseGraphic = RDXModelBuilder.createCoordinateFrameInstance(0.1);
             baseUI.getPrimaryScene().addRenderableProvider(sensorPoseGraphic, RDXSceneLevel.VIRTUAL);
 
-            zedSVOPlayer = new ZEDSVOPlaybackSensor(ros2Helper, 0, ZEDModelData.ZED_2, SVO_FILE_NAME);
-            boolean disableNeuralMode = !CUDATools.hasCUDADeviceOfAtLeast(CUDATools.getDeviceName(0), "RTX 3080");
-            zedSVOPlayer.disableNeuralMode(disableNeuralMode);
+            boolean enableNeuralMode = CUDATools.hasCUDADeviceOfAtLeast(CUDATools.getDeviceName(0), "RTX 3080");
+            zedSVOPlayer = new ZEDSVOPlaybackSensor(ros2Helper, 0, ZEDModelData.ZED_2, enableNeuralMode ? SL_DEPTH_MODE_NEURAL : SL_DEPTH_MODE_PERFORMANCE, SVO_FILE_NAME);
             zedSVOPlayer.useTrackedPose(true);
             zedSVOPlayer.run(true);
 

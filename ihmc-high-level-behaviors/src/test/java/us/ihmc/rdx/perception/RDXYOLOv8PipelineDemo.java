@@ -35,6 +35,7 @@ import us.ihmc.sensors.zed.ZEDImageSensor;
 import us.ihmc.sensors.zed.ZEDModelData;
 import us.ihmc.sensors.zed.ZEDSVOPlaybackSensor;
 import us.ihmc.tools.IHMCCommonPaths;
+import us.ihmc.zed.global.zed;
 
 import java.io.File;
 import java.net.URL;
@@ -56,7 +57,7 @@ public class RDXYOLOv8PipelineDemo
    private final ROS2Node ros2Node = new ROS2NodeBuilder().build(RDXYOLOv8PipelineDemo.class.getSimpleName());
    private final ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
-   private final ZEDSVOPlaybackSensor zed = new ZEDSVOPlaybackSensor(ros2Helper, 0, ZEDModelData.ZED_2, SVO_FILE);
+   private final ZEDSVOPlaybackSensor zedPlaybackSensor = new ZEDSVOPlaybackSensor(ros2Helper, 0, ZEDModelData.ZED_2, zed.SL_DEPTH_MODE_PERFORMANCE, SVO_FILE);
    private RawImage colorImage;
    private final RDXOpenCVVideoVisualizer colorImageVisualizer = new RDXOpenCVVideoVisualizer("ZED Color", "ZED Color", false);
    private RawImage depthImage;
@@ -111,13 +112,13 @@ public class RDXYOLOv8PipelineDemo
          availableModels.add(model.getName());
       }
 
-      zed.useTrackedPose(false);
-      zed.run(true);
+      zedPlaybackSensor.useTrackedPose(false);
+      zedPlaybackSensor.run(true);
       try
       {
-         zed.waitForGrab();
+         zedPlaybackSensor.waitForGrab();
       } catch (InterruptedException ignored) {}
-      zed.run(false);
+      zedPlaybackSensor.run(false);
 
       task = executor.submit(() -> grabFrame(frameToGrab.get()));
 
@@ -178,7 +179,7 @@ public class RDXYOLOv8PipelineDemo
          private void frameSettings()
          {
             ImGui.combo("YOLO Model", selectedDetector, availableModels.toArray(String[]::new));
-            if (ImGui.sliderInt("Frame", frameToGrab.getData(), 0, zed.getLength() - 1))
+            if (ImGui.sliderInt("Frame", frameToGrab.getData(), 0, zedPlaybackSensor.getLength() - 1))
             {
                task = executor.submit(() -> grabFrame(frameToGrab.get()));
                wasDone = false;
@@ -230,22 +231,22 @@ public class RDXYOLOv8PipelineDemo
 
    private void grabFrame(int frameToGrab)
    {
-      zed.setCurrentPosition(frameToGrab);
+      zedPlaybackSensor.setCurrentPosition(frameToGrab);
 
-      zed.run(true);
+      zedPlaybackSensor.run(true);
       try
       {
-         zed.waitForGrab();
+         zedPlaybackSensor.waitForGrab();
       } catch (InterruptedException ignored) {}
-      zed.run(false);
+      zedPlaybackSensor.run(false);
 
       if (colorImage != null)
          colorImage.release();
       if (depthImage != null)
          depthImage.release();
 
-      colorImage = zed.getImage(ZEDImageSensor.LEFT_COLOR_IMAGE_KEY);
-      depthImage = zed.getImage(ZEDImageSensor.DEPTH_IMAGE_KEY);
+      colorImage = zedPlaybackSensor.getImage(ZEDImageSensor.LEFT_COLOR_IMAGE_KEY);
+      depthImage = zedPlaybackSensor.getImage(ZEDImageSensor.DEPTH_IMAGE_KEY);
    }
 
    private void runYOLO()
@@ -472,7 +473,7 @@ public class RDXYOLOv8PipelineDemo
 
       depthImageSegmenter.destroy();
       pointCloudExtractor.close();
-      zed.close();
+      zedPlaybackSensor.close();
       ros2Node.destroy();
    }
 
