@@ -15,13 +15,14 @@ import us.ihmc.perception.cuda.CUDAStreamManager;
 import us.ihmc.perception.cuda.CUDATools;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParameters;
+import us.ihmc.perception.tools.PerceptionDebugTools;
+import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 
 import java.net.URL;
 
 import static org.bytedeco.cuda.global.cudart.cudaFree;
 import static org.bytedeco.cuda.global.cudart.cudaStreamSynchronize;
 import static us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractorCUDA.BLOCK_SIZE_XY;
-import static us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractorCUDA.heightMapParameters;
 
 public class SnappingHeightMapExtractor
 {
@@ -29,6 +30,7 @@ public class SnappingHeightMapExtractor
 
    private final SteppableRegionCalculatorParameters steppableRegionParameters = new SteppableRegionCalculatorParameters();
 
+   private final HeightMapParameters heightMapParameters;
    private final TerrainMapData terrainMapData;
 
    private final CUstream_st stream;
@@ -48,8 +50,9 @@ public class SnappingHeightMapExtractor
    private final GpuMat snapNormalZImage;
    private final GpuMat snappedAreaFractionImage;
 
-   public SnappingHeightMapExtractor(TerrainMapData terrainMapData)
+   public SnappingHeightMapExtractor(HeightMapParameters heightMapParameters, TerrainMapData terrainMapData)
    {
+      this.heightMapParameters = heightMapParameters;
       this.terrainMapData = terrainMapData;
 
       try
@@ -119,6 +122,11 @@ public class SnappingHeightMapExtractor
       snappingKernel.run(stream, snappingKernelGridDim, blockSize, 0);
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
+
+      Mat temp = new Mat();
+      steppabilityImage.download(temp);
+//      PerceptionDebugTools.printMat("", temp, 10);
+
 
       // Download all the data from the GPU and set the terrain data object
       {

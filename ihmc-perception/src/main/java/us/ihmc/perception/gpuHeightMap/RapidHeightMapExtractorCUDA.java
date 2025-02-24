@@ -18,6 +18,7 @@ import us.ihmc.perception.cuda.CUDAProgram;
 import us.ihmc.perception.cuda.CUDAStreamManager;
 import us.ihmc.perception.cuda.CUDATools;
 import us.ihmc.perception.heightMap.TerrainMapData;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -33,13 +34,13 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
 {
    private static final boolean PRINT_TIMING_FOR_KERNELS = false;
    static final int BLOCK_SIZE_XY = 32;
-   static final HeightMapParameters heightMapParameters = new HeightMapParameters("GPU");
 
    private final SideDependentList<ReferenceFrame> footSoleFrames = new SideDependentList<>();
    private final TerrainMapData terrainMapData;
    private final CameraIntrinsics cameraIntrinsics;
    private final Point3D sensorOrigin = new Point3D();
    private final int mode; // 0 -> Ouster, 1 -> Realsense
+   private final HeightMapParameters heightMapParameters;
 
    private final GpuMat inputDepthImage;
    private final GpuMat localHeightMapImage;
@@ -92,11 +93,13 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
                                       ReferenceFrame rightFootSoleFrame,
                                       GpuMat depthImage,
                                       CameraIntrinsics depthImageIntrinsics,
-                                      int mode)
+                                      int mode,
+                                      HeightMapParameters heightMapParameters)
    {
       inputDepthImage = depthImage;
       this.cameraIntrinsics = depthImageIntrinsics;
       this.mode = mode;
+      this.heightMapParameters = heightMapParameters;
 
       footSoleFrames.put(RobotSide.LEFT, leftFootSoleFrame);
       footSoleFrames.put(RobotSide.RIGHT, rightFootSoleFrame);
@@ -150,7 +153,7 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
          parametersHostPointer = new FloatPointer(37);
          parametersDevicePointer = new FloatPointer();
 
-         snappedFootstepsExtractor = new SnappingHeightMapExtractor(terrainMapData);
+         snappedFootstepsExtractor = new SnappingHeightMapExtractor(heightMapParameters, terrainMapData);
       }
       catch (Exception e)
       {
@@ -158,11 +161,6 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
       }
 
       reset();
-   }
-
-   public static HeightMapParameters getHeightMapParameters()
-   {
-      return heightMapParameters;
    }
 
    private void recomputeDerivedParameters()
@@ -302,6 +300,11 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
 
       //Update the terrain map data with the new results
       terrainMapData.setSensorOrigin(groundToWorldTransform.getTranslationX(), groundToWorldTransform.getTranslationY());
+
+      Mat temp = new Mat();
+      sensorCroppedHeightMapImage.download(temp);
+//      PerceptionDebugTools.printMat("", temp, 10);
+
 
       Mat finalCroppedHeightMap = new Mat();  // Assuming the height map is 201x201
       sensorCroppedHeightMapImage.download(finalCroppedHeightMap);  // Download the image from the GPU to the Mat object
@@ -460,8 +463,8 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
 
    public HeightMapData getHeightMapData()
    {
-      HeightMapData latestHeightMapData = new HeightMapData((float) getHeightMapParameters().getGlobalCellSizeInMeters(),
-                                                            (float) getHeightMapParameters().getGlobalWidthInMeters(),
+      HeightMapData latestHeightMapData = new HeightMapData((float) heightMapParameters.getGlobalCellSizeInMeters(),
+                                                            (float) heightMapParameters.getGlobalWidthInMeters(),
                                                             getSensorOrigin().getX(),
                                                             getSensorOrigin().getY());
 
@@ -469,8 +472,8 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
       PerceptionMessageTools.convertToHeightMapData(heightMapMat,
                                                     latestHeightMapData,
                                                     getSensorOrigin(),
-                                                    (float) getHeightMapParameters().getGlobalWidthInMeters(),
-                                                    (float) getHeightMapParameters().getGlobalCellSizeInMeters());
+                                                    (float) heightMapParameters.getGlobalWidthInMeters(),
+                                                    (float) heightMapParameters.getGlobalCellSizeInMeters());
 
       return latestHeightMapData;
    }

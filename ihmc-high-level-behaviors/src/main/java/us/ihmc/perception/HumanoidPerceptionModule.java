@@ -21,6 +21,7 @@ import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.perception.filters.CollidingScanRegionFilter;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
+import us.ihmc.perception.gpuHeightMap.RapidHeightMapManager;
 import us.ihmc.perception.heightMap.RemoteHeightMapUpdater;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVTools;
@@ -118,11 +119,7 @@ public class HumanoidPerceptionModule
       return heightMapDataBeingProcessed;
    }
 
-   public void updateTerrain(ROS2Helper ros2Helper,
-                             Mat incomingDepth,
-                             ReferenceFrame cameraFrame,
-                             ReferenceFrame cameraZUpFrame,
-                             boolean metricDepth)
+   public void updateTerrain(ROS2Helper ros2Helper, Mat incomingDepth, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame, boolean metricDepth)
    {
       if (localizationAndMappingTask != null)
          localizationAndMappingTask.setEnableLiveMode(mappingEnabled);
@@ -155,7 +152,7 @@ public class HumanoidPerceptionModule
                                 {
                                    if (!heightMapDataBeingProcessed)
                                    {
-                                      if (rapidHeightMapExtractor.getHeightMapParameters().getResetHeightMap())
+                                      if (RapidHeightMapManager.getHeightMapParameters().getResetHeightMap())
                                       {
                                          rapidHeightMapExtractor.reset();
                                       }
@@ -206,10 +203,13 @@ public class HumanoidPerceptionModule
                                                          rapidHeightMapExtractor.getSequenceNumber(),
                                                          image.rows(),
                                                          image.cols(),
-                                                         (float) RapidHeightMapExtractor.getHeightMapParameters().getHeightScaleFactor());
+                                                         (float) RapidHeightMapManager.getHeightMapParameters().getHeightScaleFactor());
    }
 
-   private static void publishGlobalHeightMapTile(ROS2Helper ros2Helper, GlobalHeightMap globalHeightMap, Instant acquisitionTime, ROS2Topic<GlobalMapTileMessage> topic)
+   private static void publishGlobalHeightMapTile(ROS2Helper ros2Helper,
+                                                  GlobalHeightMap globalHeightMap,
+                                                  Instant acquisitionTime,
+                                                  ROS2Topic<GlobalMapTileMessage> topic)
    {
       // Get tiles (made out of modified cells) from the global height map class and publish them in a for loop
       Collection<GlobalMapTile> modifiedCells = globalHeightMap.getModifiedMapTiles();
@@ -229,7 +229,6 @@ public class HumanoidPerceptionModule
       messageToPack.getHeightMap().set(HeightMapMessageTools.toMessage(tile));
    }
 
-
    public void publishExternalHeightMapImage(ROS2Node ros2Node)
    {
       if (heightMapPublisher == null)
@@ -239,24 +238,25 @@ public class HumanoidPerceptionModule
 
       executorService.clearTaskQueue();
       executorService.submit(() ->
-        {
-           Instant acquisitionTime = Instant.now();
-           Mat heightMapImage = rapidHeightMapExtractor.getInternalGlobalHeightMapImage().getBytedecoOpenCVMat();
-           OpenCVTools.compressImagePNG(heightMapImage, compressedInternalHeightMapPointer);
-           //PerceptionDebugTools.displayDepth("Published Global Height Map", heightMapImage, 1);
-           PerceptionMessageTools.publishCompressedDepthImage(compressedInternalHeightMapPointer,
-                                                              PerceptionAPI.HEIGHT_MAP_CROPPED,
-                                                              croppedHeightMapImageMessage,
-                                                              heightMapPublisher,
-                                                              new FramePose3D(ReferenceFrame.getWorldFrame(),
-                                                                              rapidHeightMapExtractor.getSensorOrigin(),
-                                                                              new Quaternion()),
-                                                              acquisitionTime,
-                                                              rapidHeightMapExtractor.getSequenceNumber(),
-                                                              heightMapImage.rows(),
-                                                              heightMapImage.cols(),
-                                                              (float) RapidHeightMapExtractor.getHeightMapParameters().getHeightScaleFactor());
-        });
+                             {
+                                Instant acquisitionTime = Instant.now();
+                                Mat heightMapImage = rapidHeightMapExtractor.getInternalGlobalHeightMapImage().getBytedecoOpenCVMat();
+                                OpenCVTools.compressImagePNG(heightMapImage, compressedInternalHeightMapPointer);
+                                //PerceptionDebugTools.displayDepth("Published Global Height Map", heightMapImage, 1);
+                                PerceptionMessageTools.publishCompressedDepthImage(compressedInternalHeightMapPointer,
+                                                                                   PerceptionAPI.HEIGHT_MAP_CROPPED,
+                                                                                   croppedHeightMapImageMessage,
+                                                                                   heightMapPublisher,
+                                                                                   new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                                                                                   rapidHeightMapExtractor.getSensorOrigin(),
+                                                                                                   new Quaternion()),
+                                                                                   acquisitionTime,
+                                                                                   rapidHeightMapExtractor.getSequenceNumber(),
+                                                                                   heightMapImage.rows(),
+                                                                                   heightMapImage.cols(),
+                                                                                   (float) RapidHeightMapManager.getHeightMapParameters()
+                                                                                                                .getHeightScaleFactor());
+                             });
    }
 
    private void updatePlanarRegions(ROS2Helper ros2Helper, ReferenceFrame cameraFrame)
@@ -329,7 +329,8 @@ public class HumanoidPerceptionModule
                                                             referenceFrames.getSoleFrame(RobotSide.RIGHT),
                                                             realsenseDepthImage,
                                                             cameraIntrinsics,
-                                                            1);
+                                                            1,
+                                                            RapidHeightMapManager.getHeightMapParameters());
 
       if (ros2Helper != null)
          ros2Helper.subscribeViaVolatileCallback(PerceptionAPI.RESET_HEIGHT_MAP, message -> resetHeightMapRequested.set());
@@ -456,16 +457,16 @@ public class HumanoidPerceptionModule
       Mat heightMapMat = heightMapImage.getBytedecoOpenCVMat().clone();
       if (latestHeightMapData == null)
       {
-         latestHeightMapData = new HeightMapData((float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalCellSizeInMeters(),
-                                                 (float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalWidthInMeters(),
+         latestHeightMapData = new HeightMapData((float) RapidHeightMapManager.getHeightMapParameters().getGlobalCellSizeInMeters(),
+                                                 (float) RapidHeightMapManager.getHeightMapParameters().getGlobalWidthInMeters(),
                                                  rapidHeightMapExtractor.getSensorOrigin().getX(),
                                                  rapidHeightMapExtractor.getSensorOrigin().getY());
       }
       PerceptionMessageTools.convertToHeightMapData(heightMapMat,
                                                     latestHeightMapData,
                                                     rapidHeightMapExtractor.getSensorOrigin(),
-                                                    (float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalWidthInMeters(),
-                                                    (float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalCellSizeInMeters());
+                                                    (float) RapidHeightMapManager.getHeightMapParameters().getGlobalWidthInMeters(),
+                                                    (float) RapidHeightMapManager.getHeightMapParameters().getGlobalCellSizeInMeters());
       return HeightMapMessageTools.toMessage(latestHeightMapData);
    }
 

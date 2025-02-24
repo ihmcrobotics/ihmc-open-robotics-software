@@ -1,4 +1,4 @@
-package us.ihmc.perception;
+package us.ihmc.perception.gpuHeightMap;
 
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import org.bytedeco.javacpp.BytePointer;
@@ -7,26 +7,25 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.behaviors.activeMapping.ControllerFootstepQueueMonitor;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
+import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.filters.CUDAFlyingPointsFilter;
-import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
-import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractorCUDA;
-import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractorInterface;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 
 import java.time.Instant;
 
@@ -35,6 +34,8 @@ import java.time.Instant;
  */
 public class RapidHeightMapManager
 {
+   static final HeightMapParameters heightMapParameters = new HeightMapParameters("GPU");
+
    private final RapidHeightMapExtractorInterface rapidHeightMapExtractor;
    private final ImageMessage croppedHeightMapImageMessage = new ImageMessage();
    private final FramePose3D cameraPose = new FramePose3D();
@@ -52,7 +53,8 @@ public class RapidHeightMapManager
    private ROS2Publisher<ImageMessage> heightMapPublisher;
 
    public RapidHeightMapManager(ROS2Node ros2Node,
-                                DRCRobotModel robotModel,
+                                FullHumanoidRobotModel robotModel,
+                                String robotName,
                                 ReferenceFrame leftFootSoleFrame,
                                 ReferenceFrame rightFootSoleFrame,
                                 ControllerFootstepQueueMonitor controllerFootstepQueueMonitor,
@@ -65,7 +67,12 @@ public class RapidHeightMapManager
       if (runWithCUDA)
       {
          deviceDepthImage = new GpuMat(depthImageIntrinsics.getHeight(), depthImageIntrinsics.getWidth(), opencv_core.CV_16UC1);
-         rapidHeightMapExtractor = new RapidHeightMapExtractorCUDA(leftFootSoleFrame, rightFootSoleFrame, deviceDepthImage, depthImageIntrinsics, 1);
+         rapidHeightMapExtractor = new RapidHeightMapExtractorCUDA(leftFootSoleFrame,
+                                                                   rightFootSoleFrame,
+                                                                   deviceDepthImage,
+                                                                   depthImageIntrinsics,
+                                                                   1,
+                                                                   heightMapParameters);
          rapidHeightMapDriftOffset = new RapidHeightMapDriftOffset(controllerFootstepQueueMonitor);
          flyingPointsFilter = new CUDAFlyingPointsFilter();
       }
@@ -79,14 +86,15 @@ public class RapidHeightMapManager
                                                                rightFootSoleFrame,
                                                                heightMapBytedecoImage,
                                                                depthImageIntrinsics,
-                                                               1);
+                                                               1,
+                                                               heightMapParameters);
       }
 
       // We use a notification in order to only call resetting the height map in one place
       ros2Node.createSubscription2(PerceptionAPI.RESET_HEIGHT_MAP, message -> resetHeightMapRequested.set());
       if (robotModel != null)
       {
-         ros2Node.createSubscription(HumanoidControllerAPI.getTopic(HighLevelStateChangeStatusMessage.class, robotModel.getSimpleRobotName()), message ->
+         ros2Node.createSubscription(HumanoidControllerAPI.getTopic(HighLevelStateChangeStatusMessage.class, robotName), message ->
          {
             if (message.takeNextData().getEndHighLevelControllerName() == HighLevelStateChangeStatusMessage.WALKING)
             {
@@ -150,7 +158,7 @@ public class RapidHeightMapManager
 
       Mat croppedHeightMapImage = rapidHeightMapExtractor.getTerrainMapData().getHeightMap();
 
-      if (runWithCUDA && RapidHeightMapExtractorCUDA.getHeightMapParameters().getFlyingPointsFilter())
+      if (runWithCUDA && getHeightMapParameters().getFlyingPointsFilter())
       {
          GpuMat deviceCroppedHeightMapImage = new GpuMat();
          deviceCroppedHeightMapImage.upload(croppedHeightMapImage);
@@ -158,16 +166,6 @@ public class RapidHeightMapManager
          filteredDeviceCroppedHeightMapImage.download(croppedHeightMapImage);
          filteredDeviceCroppedHeightMapImage.close();
          deviceCroppedHeightMapImage.close();
-      }
-
-      float heightScaleFactor;
-      if (runWithCUDA)
-      {
-         heightScaleFactor = (float) RapidHeightMapExtractorCUDA.getHeightMapParameters().getHeightScaleFactor();
-      }
-      else
-      {
-         heightScaleFactor = (float) RapidHeightMapExtractor.getHeightMapParameters().getHeightScaleFactor();
       }
 
       if (heightMapPublisher == null)
@@ -185,7 +183,7 @@ public class RapidHeightMapManager
                                                          rapidHeightMapExtractor.getSequenceNumber(),
                                                          croppedHeightMapImage.rows(),
                                                          croppedHeightMapImage.cols(),
-                                                         heightScaleFactor);
+                                                         (float) getHeightMapParameters().getHeightScaleFactor());
    }
 
    public HeightMapData getLatestHeightMapData()
@@ -196,6 +194,11 @@ public class RapidHeightMapManager
    public TerrainMapData getTerrainMapData()
    {
       return rapidHeightMapExtractor.getTerrainMapData();
+   }
+
+   public static HeightMapParameters getHeightMapParameters()
+   {
+      return heightMapParameters;
    }
 
    public void destroy()

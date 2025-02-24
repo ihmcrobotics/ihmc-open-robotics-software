@@ -20,7 +20,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
+import us.ihmc.perception.gpuHeightMap.RapidHeightMapManager;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.imageMessage.CompressionType;
 import us.ihmc.perception.imageMessage.PixelFormat;
@@ -276,8 +276,8 @@ public class PerceptionMessageTools
          for (int yIndex = 0; yIndex < cellsPerAxis; yIndex++)
          {
             int height = ((int) heightMapPointer.ptr(xIndex, yIndex).getShort() & 0xFFFF);
-            float cellHeight = (float) ((float) (height) / RapidHeightMapExtractor.getHeightMapParameters().getHeightScaleFactor())
-                               - (float) RapidHeightMapExtractor.getHeightMapParameters().getHeightOffset();
+            float cellHeight = (float) ((float) (height) / RapidHeightMapManager.getHeightMapParameters().getHeightScaleFactor())
+                               - (float) RapidHeightMapManager.getHeightMapParameters().getHeightOffset();
 
             int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
             heightMapDataToPack.setHeightAt(key, cellHeight);
@@ -301,8 +301,8 @@ public class PerceptionMessageTools
             double cellHeight = heightMapData.getHeightAt(key);
 
             // Reverse the height calculation to get the raw height value
-            int height = (int) ((cellHeight + (float) RapidHeightMapExtractor.getHeightMapParameters().getHeightOffset())
-                                * RapidHeightMapExtractor.getHeightMapParameters().getHeightScaleFactor());
+            int height = (int) ((cellHeight + (float) RapidHeightMapManager.getHeightMapParameters().getHeightOffset())
+                                * RapidHeightMapManager.getHeightMapParameters().getHeightScaleFactor());
 
             // Store the height value in the Mat object
             heightMapMat.ptr(xIndex, yIndex).putShort((short) height);

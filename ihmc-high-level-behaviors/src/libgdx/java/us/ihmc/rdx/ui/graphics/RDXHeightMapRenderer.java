@@ -126,8 +126,7 @@ public class RDXHeightMapRenderer implements RenderableProvider
             intermediateVertexBuffer[vertexIndex + 6] = color.a;
 
             // Size
-            // For visual improvements make the cells slightly bigger than they really are
-            intermediateVertexBuffer[vertexIndex + 7] = 0.025f;
+            intermediateVertexBuffer[vertexIndex + 7] = 0.02f;
          }
       }
 

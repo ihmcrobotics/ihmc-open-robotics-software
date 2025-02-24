@@ -18,6 +18,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
+import us.ihmc.perception.gpuHeightMap.RapidHeightMapManager;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -43,8 +44,8 @@ public class MonteCarloFootstepPlanningTest
 
       LogTools.info("Initializing");
 
-      RapidHeightMapExtractor.getHeightMapParameters().setInternalGlobalWidthInMeters(4.0);
-      RapidHeightMapExtractor.getHeightMapParameters().setInternalGlobalCellSizeInMeters(0.02);
+      RapidHeightMapManager.getHeightMapParameters().setInternalGlobalWidthInMeters(4.0);
+      RapidHeightMapManager.getHeightMapParameters().setInternalGlobalCellSizeInMeters(0.02);
       heightMapExtractor.initialize();
       heightMapExtractor.reset();
 
@@ -56,7 +57,7 @@ public class MonteCarloFootstepPlanningTest
       HeightMapTerrainGeneratorTools.fillWithSteppingStones(heightMap, 0.4f, 0.4f, 0.3f, 0.25f, 3);
 
       heightMapExtractor.getInternalGlobalHeightMapImage().writeOpenCLImage(openCLManager);
-      heightMapExtractor.populateParameterBuffers(RapidHeightMapExtractor.getHeightMapParameters(), cameraIntrinsics, new Point3D());
+      heightMapExtractor.populateParameterBuffers(RapidHeightMapManager.getHeightMapParameters(), cameraIntrinsics, new Point3D());
       heightMapExtractor.computeContactMap();
       heightMapExtractor.readContactMapImage();
 

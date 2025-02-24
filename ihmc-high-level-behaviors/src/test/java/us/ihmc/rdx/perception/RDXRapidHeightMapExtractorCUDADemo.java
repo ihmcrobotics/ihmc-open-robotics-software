@@ -14,6 +14,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractorCUDA;
+import us.ihmc.perception.gpuHeightMap.RapidHeightMapManager;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -94,7 +95,12 @@ public class RDXRapidHeightMapExtractorCUDADemo
 
             heightMapImage = new GpuMat(intrinsics.getWidth(), intrinsics.getHeight(), opencv_core.CV_16UC1);
 
-            extractor = new RapidHeightMapExtractorCUDA(leftFootSoleFrame, rightFootSoleFrame, heightMapImage, intrinsics, 1);
+            extractor = new RapidHeightMapExtractorCUDA(leftFootSoleFrame,
+                                                        rightFootSoleFrame,
+                                                        heightMapImage,
+                                                        intrinsics,
+                                                        1,
+                                                        RapidHeightMapManager.getHeightMapParameters());
 
             baseUI.getPrimaryScene().addRenderableProvider(heightMapGraphic, RDXSceneLevel.MODEL);
          }
@@ -144,8 +150,8 @@ public class RDXRapidHeightMapExtractorCUDADemo
                PerceptionMessageTools.convertToHeightMapData(sensorSimulator.getDepthImage().getCpuImageMat(),
                                                              heightMapData,
                                                              croppedHeightMapImageMessage.getPosition(),
-                                                             (float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalWidthInMeters(),
-                                                             (float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalCellSizeInMeters());
+                                                             (float) RapidHeightMapManager.getHeightMapParameters().getGlobalWidthInMeters(),
+                                                             (float) RapidHeightMapManager.getHeightMapParameters().getGlobalCellSizeInMeters());
                HeightMapMessageTools.toMessage(heightMapData, heightMapMessage);
 
                //               List<RDXMultiColorMeshBuilder> multiColorMeshBuilders = RDXHeightMapGraphicNew.generateHeightCells(heightsProvided,

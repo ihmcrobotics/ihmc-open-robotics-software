@@ -1,10 +1,11 @@
 package us.ihmc.perception;
 
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.activeMapping.ControllerFootstepQueueMonitor;
+import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.gpuHeightMap.RapidHeightMapManager;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
@@ -63,7 +64,8 @@ public class RapidHeightMapUpdateThread extends RepeatingTaskThread
          if (heightMapManager == null)
          {
             heightMapManager = new RapidHeightMapManager(ros2Node,
-                                                         syncedRobotModel.getRobotModel(),
+                                                         syncedRobotModel.getFullHumanoidRobotModel(),
+                                                         syncedRobotModel.getRobotModel().getSimpleRobotName(),
                                                          leftFootFrame,
                                                          rightFootFrame,
                                                          controllerFootstepQueueMonitor,

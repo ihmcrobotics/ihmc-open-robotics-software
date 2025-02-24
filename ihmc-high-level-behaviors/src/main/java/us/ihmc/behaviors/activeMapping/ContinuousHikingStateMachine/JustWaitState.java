@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
-import us.ihmc.behaviors.activeMapping.ControllerFootstepQueueMonitor;
+import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.packets.MessageTools;
@@ -104,7 +104,7 @@ public class JustWaitState implements State
    {
       ContinuousHikingCommandMessage continuousHikingCommandMessage = commandMessage.get();
 
-      if (continuousHikingCommandMessage.getSquareUpToGoal())
+      if (continuousHikingCommandMessage.getSquareUpToGoal() && !controllerQueueMonitor.getControllerFootstepQueue().isEmpty())
       {
          squareUpStep();
       }

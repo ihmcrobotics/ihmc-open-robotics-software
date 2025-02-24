@@ -17,6 +17,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.depthData.CollisionBoxProvider;
+import us.ihmc.perception.gpuHeightMap.RapidHeightMapManager;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
@@ -95,7 +96,6 @@ public class TerrainPerceptionProcessWithDriver
    private final double outputPeriod = UnitConversions.hertzToSeconds(30.0f);
    private volatile boolean running = true;
 
-
    private final int depthWidth;
    private final int depthHeight;
    private final int colorWidth;
@@ -173,8 +173,7 @@ public class TerrainPerceptionProcessWithDriver
       humanoidPerception.getRapidRegionsExtractor().setEnabled(true);
 
       ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS, parameters);
-      ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.HEIGHT_MAP_PARAMETERS,
-                                                     humanoidPerception.getRapidHeightMapExtractor().getHeightMapParameters());
+      ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.HEIGHT_MAP_PARAMETERS, RapidHeightMapManager.getHeightMapParameters());
       ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_RAPID_REGION_PARAMETERS,
                                                      humanoidPerception.getRapidRegionsExtractor().getParameters());
       ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_POLYGONIZER_PARAMETERS,
@@ -260,7 +259,8 @@ public class TerrainPerceptionProcessWithDriver
                                       CameraModel.PINHOLE.packMessageFormat(depthImageMessage);
                                       PerceptionMessageTools.publishCompressedDepthImage(compressedDepthPointer,
                                                                                          depthTopic,
-                                                                                         depthImageMessage, depthPublisher,
+                                                                                         depthImageMessage,
+                                                                                         depthPublisher,
                                                                                          cameraPose,
                                                                                          acquisitionTime,
                                                                                          depthSequenceNumber++,
