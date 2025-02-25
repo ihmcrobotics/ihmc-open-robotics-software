@@ -21,6 +21,7 @@ import us.ihmc.sensors.zed.ZEDImageSensor;
 import us.ihmc.sensors.zed.ZEDModelData;
 import us.ihmc.sensors.zed.ZEDSVOPlaybackSensor;
 import us.ihmc.tools.IHMCCommonPaths;
+import us.ihmc.zed.global.zed;
 
 public class RDXDepthStreamingDemo
 {
@@ -29,7 +30,7 @@ public class RDXDepthStreamingDemo
    private final ROS2Node ros2Node = new ROS2NodeBuilder().build(RDXDepthStreamingDemo.class.getSimpleName());
    private final ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
-   private final ZEDSVOPlaybackSensor zed = new ZEDSVOPlaybackSensor(ros2Helper, 0, ZEDModelData.ZED_2, SVO_FILE);
+   private final ZEDSVOPlaybackSensor zedPlaybackSensor = new ZEDSVOPlaybackSensor(ros2Helper, 0, ZEDModelData.ZED_2, zed.SL_DEPTH_MODE_PERFORMANCE, SVO_FILE);
 
    private final CUDADepthColorizer depthColorizer = new CUDADepthColorizer();
    private final ROS2SRTSensorStreamer sensorStreamer = new ROS2SRTSensorStreamer(ros2Node);
@@ -45,8 +46,8 @@ public class RDXDepthStreamingDemo
 
    public RDXDepthStreamingDemo() throws Exception
    {
-      zed.useTrackedPose(true);
-      zed.run(true);
+      zedPlaybackSensor.useTrackedPose(true);
+      zedPlaybackSensor.run(true);
       zedPublishThread.startRepeating();
 
       depthSubscriber.addNewFrameConsumer(this::receiveColorizedDepth);
@@ -96,9 +97,9 @@ public class RDXDepthStreamingDemo
    {
       try (Mat rgbMat = new Mat())
       {
-         zed.waitForGrab();
-         RawImage depthImage = zed.getImage(ZEDImageSensor.DEPTH_IMAGE_KEY);
-         RawImage colorImage = zed.getImage(ZEDImageSensor.LEFT_COLOR_IMAGE_KEY);
+         zedPlaybackSensor.waitForGrab();
+         RawImage depthImage = zedPlaybackSensor.getImage(ZEDImageSensor.DEPTH_IMAGE_KEY);
+         RawImage colorImage = zedPlaybackSensor.getImage(ZEDImageSensor.LEFT_COLOR_IMAGE_KEY);
 
          GpuMat colorizedDepth = depthColorizer.colorizeDepth(depthImage.getGpuImageMat());
          RawImage colorizedDepthImage = depthImage.replaceImage(colorizedDepth, PixelFormat.YUV444P);
@@ -141,7 +142,7 @@ public class RDXDepthStreamingDemo
    public void destroy()
    {
       zedPublishThread.blockingKill();
-      zed.close();
+      zedPlaybackSensor.close();
       depthColorizer.destroy();
       sensorStreamer.destroy();
       depthSubscriber.destroy();
