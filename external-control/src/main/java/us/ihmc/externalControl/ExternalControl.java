@@ -98,9 +98,9 @@ public class ExternalControl
       this.rightInContact = rightInContact;
    }
 
-   public void writeRobotState(double currentTime, int hardwareStatus, int behaviorStatus)
+   public void writeRobotState(double currentTime, int hardwareStatus, int behaviorStatus, double heightZOffset)
    {
-      setRobotState();
+      setRobotState(heightZOffset);
       setRobotControl();
       yoRobotState.set(robotState);
       if (!externalControlImpl.updateRobotState(currentTime,
@@ -161,10 +161,14 @@ public class ExternalControl
       return solutionJointData.get(joint);
    }
 
-   private void setRobotState()
+   private void setRobotState(double heightZOffset)
    {
       basePose.setToZero(baseBody.getBodyFixedFrame());
       basePose.changeFrame(ReferenceFrame.getWorldFrame());
+
+      // add a z offset to the base pose. This is meant to account for vertical drift
+      basePose.getPosition().addZ(heightZOffset);
+
       // set the configuration state for the robot
       basePose.getPosition().get(0, robotState);
       basePose.getOrientation().get(3, robotState);
