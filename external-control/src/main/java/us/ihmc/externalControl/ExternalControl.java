@@ -69,7 +69,8 @@ public class ExternalControl
       String[] stateNames = STATE_ORDER.keySet().toArray(new String[0]);
       yoSolutionRobotState = new YoMatrix("extSoln_", 2 * joints.length + 13, 1, stateNames, registry);
       yoRobotState = new YoMatrix("extRobotState_", 2 * joints.length + 13, 1, stateNames, registry);
-      yoSolutionTorque = new YoMatrix("extSolnTau_", joints.length, 1, registry);
+      String[] torqueNames = TORQUES_ORDER.keySet().toArray(new String[0]);
+      yoSolutionTorque = new YoMatrix("extSoln_", joints.length, 1, torqueNames, registry);
 
 
 
@@ -276,5 +277,31 @@ public class ExternalControl
       put("qd_RIGHT_SHOULDER_X",             56);
       put("qd_RIGHT_SHOULDER_Z",             57);
       put("qd_RIGHT_ELBOW_Y",                58);
+   }};
+
+   private static final Map<String, Integer> TORQUES_ORDER = new HashMap<>() {{
+      put("tau_LEFT_HIP_Z",       0);
+      put("tau_LEFT_HIP_X",       1);
+      put("tau_LEFT_HIP_Y",       2);
+      put("tau_LEFT_KNEE_Y",      3);
+      put("tau_LEFT_ANKLE_Y",     4);
+      put("tau_LEFT_ANKLE_X",     5);
+      put("tau_RIGHT_HIP_Z",      6);
+      put("tau_RIGHT_HIP_X",      7);
+      put("tau_RIGHT_HIP_Y",      8);
+      put("tau_RIGHT_KNEE_Y",     9);
+      put("tau_RIGHT_ANKLE_Y",    10);
+      put("tau_RIGHT_ANKLE_X",    11);
+      put("tau_SPINE_Z",          12);
+      put("tau_SPINE_X",          13);
+      put("tau_SPINE_Y",          14);
+      put("tau_LEFT_SHOULDER_Y",  15);
+      put("tau_LEFT_SHOULDER_X",  16);
+      put("tau_LEFT_SHOULDER_Z",  17);
+      put("tau_LEFT_ELBOW_Y",     18);
+      put("tau_RIGHT_SHOULDER_Y", 19);
+      put("tau_RIGHT_SHOULDER_X", 20);
+      put("tau_RIGHT_SHOULDER_Z", 21);
+      put("tau_RIGHT_ELBOW_Y",    22);
    }};
 }
