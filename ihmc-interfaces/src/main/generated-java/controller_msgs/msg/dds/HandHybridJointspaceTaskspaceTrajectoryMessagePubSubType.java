@@ -15,7 +15,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessagePubSubType implements
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "894fefc03f5a6b66dec5d6d7c2563f604f31ab4e97a062cf0bbfae4bc5361962";
+   		return "35394d69679bbfe3e5ce9863c4f9d21ef8a08f7b411e7d3c0f1f0fc0cefcfc45";
    }
    
    @Override

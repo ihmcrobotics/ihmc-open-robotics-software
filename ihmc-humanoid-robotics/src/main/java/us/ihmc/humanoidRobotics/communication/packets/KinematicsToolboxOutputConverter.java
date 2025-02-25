@@ -159,6 +159,11 @@ public class KinematicsToolboxOutputConverter
 
    public void computeHandTrajectoryMessage(RobotSide robotSide, long trajectoryFrameId)
    {
+      computeHandTrajectoryMessage(robotSide, trajectoryFrameId, false);
+   }
+
+   public void computeHandTrajectoryMessage(RobotSide robotSide, long trajectoryFrameId, boolean impedanceEnabled)
+   {
       checkIfDataHasBeenSet();
 
       // TODO Add the option to define the control frame in the API instead of hardcoding it here.
@@ -174,6 +179,7 @@ public class KinematicsToolboxOutputConverter
       packCustomControlFrame(fullRobotModel.getHand(robotSide).getBodyFixedFrame(), handControlFrame, se3TrajectoryMessage);
       se3TrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryFrameId);
       se3TrajectoryMessage.getFrameInformation().setDataReferenceFrameId(worldFrame.getFrameNameHashCode());
+      se3TrajectoryMessage.setUseImpedance(impedanceEnabled);
 
       Object<SE3TrajectoryPointMessage> taskspaceTrajectoryPoints = se3TrajectoryMessage.getTaskspaceTrajectoryPoints();
       taskspaceTrajectoryPoints.clear();

@@ -64,8 +64,8 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
    private final RigidBodyOrientationControlHelper orientationHelper;
 
    private final YoBoolean hybridModeActive;
-   private final YoBoolean isImpedanceEnabled;
    private final RigidBodyJointControlHelper jointControlHelper;
+   private final YoBoolean isImpedanceEnabled;
 
    private final TaskspaceTrajectoryStatusMessageHelper statusHelper;
 
@@ -77,7 +77,6 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
                                   YoDouble yoTime,
                                   RigidBodyJointControlHelper jointControlHelper,
                                   boolean enableFunctionGenerators,
-                                  YoBoolean enableImpedanceControl,
                                   YoGraphicsListRegistry graphicsListRegistry,
                                   YoRegistry parentRegistry)
    {
@@ -88,6 +87,7 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
       numberOfPointsInQueue = new YoInteger(prefix + "NumberOfPointsInQueue", registry);
       numberOfPointsInGenerator = new YoInteger(prefix + "NumberOfPointsInGenerator", registry);
       numberOfPoints = new YoInteger(prefix + "NumberOfPoints", registry);
+      isImpedanceEnabled = new YoBoolean(prefix + "-EnabledImpedanceControl", registry);
 
       usingWeightFromMessage = new YoBoolean(prefix + "UsingWeightFromMessage", registry);
       BooleanParameter useBaseFrameForControl = new BooleanParameter(prefix + "UseBaseFrameForControl", registry, false);
@@ -100,7 +100,7 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
                                                           useBaseFrameForControl,
                                                           usingWeightFromMessage,
                                                           enableFunctionGenerators,
-                                                          enableImpedanceControl,
+                                                          isImpedanceEnabled,
                                                           yoTime,
                                                           registry,
                                                           graphicsListRegistry);
@@ -113,7 +113,7 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
                                                                 useBaseFrameForControl,
                                                                 usingWeightFromMessage,
                                                                 enableFunctionGenerators,
-                                                                enableImpedanceControl,
+                                                                isImpedanceEnabled,
                                                                 yoTime,
                                                                 registry);
 
@@ -125,8 +125,6 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
       feedbackControlCommand.set(elevator, bodyToControl);
       feedbackControlCommand.setPrimaryBase(baseBody);
       feedbackControlCommand.setSelectionMatrixToIdentity();
-      feedbackControlCommand.setImpedanceEnabled(enableImpedanceControl.getBooleanValue());
-      isImpedanceEnabled = enableImpedanceControl;
    }
 
    public void setWeights(Vector3DReadOnly angularWeight, Vector3DReadOnly linearWeight)
@@ -579,5 +577,11 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
    public RigidBodyOrientationControlHelper getOrientationControlHelper()
    {
       return orientationHelper;
+   }
+
+   @Override
+   public void setImpedanceEnabled(boolean isImpedanceEnabled)
+   {
+      this.isImpedanceEnabled.set(isImpedanceEnabled);
    }
 }

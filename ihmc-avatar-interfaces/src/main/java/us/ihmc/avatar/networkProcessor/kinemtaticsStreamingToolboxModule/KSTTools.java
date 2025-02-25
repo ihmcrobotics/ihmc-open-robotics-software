@@ -102,6 +102,7 @@ public class KSTTools
    private final YoBoolean isCenterOfMassOutputEnabled;
    private final SideDependentList<YoBoolean> areHandTaskspaceOutputsEnabled = new SideDependentList<>();
    private final SideDependentList<YoBoolean> areArmJointspaceOutputsEnabled = new SideDependentList<>();
+   private final YoBoolean areArmImpedanceOutputsEnabled;
 
    private final YoBoolean invalidUserInput;
    private final YoLong latestInputTimestampSource;
@@ -220,6 +221,7 @@ public class KSTTools
          YoBoolean isArmJointspaceOutputEnabled = new YoBoolean("is" + robotSide.getPascalCaseName() + "ArmJointspaceOutputEnabled", registry);
          areArmJointspaceOutputsEnabled.put(robotSide, isArmJointspaceOutputEnabled);
       }
+      areArmImpedanceOutputsEnabled = new YoBoolean("areArmImpedanceOutputsEnabled", registry);
 
       invalidUserInput = new YoBoolean("invalidUserInput", registry);
       latestInputTimestampSource = new YoLong("latestInputTimestampSource", registry);
@@ -248,6 +250,7 @@ public class KSTTools
          areHandTaskspaceOutputsEnabled.get(robotSide).set(configurationCommand.isHandTaskspaceEnabled(robotSide));
          areArmJointspaceOutputsEnabled.get(robotSide).set(configurationCommand.isArmJointspaceEnabled(robotSide));
       }
+      areArmImpedanceOutputsEnabled.set(configurationCommand.isArmImpedanceEnabled());
 
       boolean wasRobotUpdated = robotStateUpdater.updateRobotConfiguration(currentRootJoint, currentOneDoFJoint);
 
@@ -403,7 +406,7 @@ public class KSTTools
       if (finalizeTrajectory)
          trajectoryMessagePublisher.publish(setupFinalizeTrajectoryMessage(outputToPublish));
       else if (streamingMessagePublisher == null || !useStreamingPublisher.getValue())
-         trajectoryMessagePublisher.publish(setupTrajectoryMessage(outputToPublish));
+         trajectoryMessagePublisher.publish(setupTrajectoryMessage(outputToPublish)); // not used for teleop
       else
          streamingMessagePublisher.publish(setupStreamingMessage(outputToPublish));
    }
@@ -448,7 +451,7 @@ public class KSTTools
       for (RobotSide robotSide : RobotSide.values)
       {
          if (areHandTaskspaceOutputsEnabled.get(robotSide).getValue())
-            trajectoryMessageFactory.computeHandTrajectoryMessage(robotSide, configurationCommand.getHandTrajectoryFrameId(robotSide));
+            trajectoryMessageFactory.computeHandTrajectoryMessage(robotSide, configurationCommand.getHandTrajectoryFrameId(robotSide), areArmImpedanceOutputsEnabled.getValue());
 
          if (areArmJointspaceOutputsEnabled.get(robotSide).getValue())
             trajectoryMessageFactory.computeArmTrajectoryMessage(robotSide);

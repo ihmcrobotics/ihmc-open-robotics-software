@@ -40,6 +40,8 @@ public abstract class RigidBodyTaskspaceControlState extends RigidBodyControlSta
       return null;
    }
 
+   public abstract void setImpedanceEnabled(boolean isImpedanceEnabled);
+
    public boolean handleTrajectoryCommand(EuclideanTrajectoryControllerCommand command)
    {
       LogTools.warn("Handling of " + command.getClass().getSimpleName() + " not implemented for " + getClass().getSimpleName() + ".");
@@ -73,28 +75,6 @@ public abstract class RigidBodyTaskspaceControlState extends RigidBodyControlSta
    }
 
    public boolean handleHybridTrajectoryCommand(SE3TrajectoryControllerCommand command, JointspaceTrajectoryCommand jointspaceCommand,
-                                                double[] initialJointPositions)
-   {
-      LogTools.warn("Handling of hybrid command " + command.getClass().getSimpleName() + " not implemented for " + getClass().getSimpleName() + ".");
-      return false;
-   }
-
-   public boolean handleHybridTrajectoryCommand(SE3TrajectoryControllerCommand command, JointspaceTrajectoryCommand jointspaceCommand,
-                                                WrenchTrajectoryControllerCommand feedForwardCommand, double[] initialJointPositions)
-   {
-      LogTools.warn("Handling of hybrid command " + command.getClass().getSimpleName() + " not implemented for " + getClass().getSimpleName() + ".");
-      return false;
-   }
-
-   public boolean handleHybridTrajectoryCommand(SE3TrajectoryControllerCommand command, JointspaceTrajectoryCommand jointspaceCommand,
-                                                SE3PIDGainsTrajectoryControllerCommand gainsCommand, double[] initialJointPositions)
-   {
-      LogTools.warn("Handling of hybrid command " + command.getClass().getSimpleName() + " not implemented for " + getClass().getSimpleName() + ".");
-      return false;
-   }
-
-   public boolean handleHybridTrajectoryCommand(SE3TrajectoryControllerCommand command, JointspaceTrajectoryCommand jointspaceCommand,
-                                                WrenchTrajectoryControllerCommand feedForwardCommand, SE3PIDGainsTrajectoryControllerCommand gainsCommand,
                                                 double[] initialJointPositions)
    {
       LogTools.warn("Handling of hybrid command " + command.getClass().getSimpleName() + " not implemented for " + getClass().getSimpleName() + ".");

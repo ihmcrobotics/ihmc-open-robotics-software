@@ -214,6 +214,7 @@ public class KSTStreamingMessageFactory
       packCustomControlFrame(handBodyFixedFrame, handControlFrame, handStreamingMessage);
       handStreamingMessage.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryFrameId);
       handStreamingMessage.getFrameInformation().setDataReferenceFrameId(worldFrame.getFrameNameHashCode());
+//      handStreamingMessage.setUseImpedance();
 
       packSE3TrajectoryPointMessage(desiredPose, desiredSpatialVelocity, desiredSpatialAcceleration, handStreamingMessage);
       yoHandStreamingMessages.get(robotSide).setFromMessage(handStreamingMessage);

@@ -15,7 +15,7 @@ public class FootTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "3d9b4d0b962c9e3a5d0a57d797da25c00a8d9bdd0375514944c1676ca0a51797";
+   		return "f405eede6779f1c8d6a50f668ae8ef5d6e93f165091c6d41c537142782fc64b3";
    }
    
    @Override

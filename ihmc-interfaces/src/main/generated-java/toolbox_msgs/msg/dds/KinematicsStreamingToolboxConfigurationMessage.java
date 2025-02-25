@@ -57,6 +57,12 @@ public class KinematicsStreamingToolboxConfigurationMessage extends Packet<Kinem
             */
    public boolean enable_right_hand_taskspace_ = true;
    /**
+            * Whether the arms should be controller in impedance mode.
+            * This is compatible with the arm task-space control.
+            * Default value is false.
+            */
+   public boolean enable_arm_impedance_;
+   /**
             * Whether the chest orientation should be controlled.
             * Default value is true.
             */
@@ -119,6 +125,8 @@ public class KinematicsStreamingToolboxConfigurationMessage extends Packet<Kinem
       enable_left_hand_taskspace_ = other.enable_left_hand_taskspace_;
 
       enable_right_hand_taskspace_ = other.enable_right_hand_taskspace_;
+
+      enable_arm_impedance_ = other.enable_arm_impedance_;
 
       enable_chest_taskspace_ = other.enable_chest_taskspace_;
 
@@ -281,6 +289,25 @@ public class KinematicsStreamingToolboxConfigurationMessage extends Packet<Kinem
    }
 
    /**
+            * Whether the arms should be controller in impedance mode.
+            * This is compatible with the arm task-space control.
+            * Default value is false.
+            */
+   public void setEnableArmImpedance(boolean enable_arm_impedance)
+   {
+      enable_arm_impedance_ = enable_arm_impedance;
+   }
+   /**
+            * Whether the arms should be controller in impedance mode.
+            * This is compatible with the arm task-space control.
+            * Default value is false.
+            */
+   public boolean getEnableArmImpedance()
+   {
+      return enable_arm_impedance_;
+   }
+
+   /**
             * Whether the chest orientation should be controlled.
             * Default value is true.
             */
@@ -433,6 +460,8 @@ public class KinematicsStreamingToolboxConfigurationMessage extends Packet<Kinem
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_right_hand_taskspace_, other.enable_right_hand_taskspace_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_arm_impedance_, other.enable_arm_impedance_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_chest_taskspace_, other.enable_chest_taskspace_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_pelvis_taskspace_, other.enable_pelvis_taskspace_, epsilon)) return false;
@@ -476,6 +505,8 @@ public class KinematicsStreamingToolboxConfigurationMessage extends Packet<Kinem
 
       if(this.enable_right_hand_taskspace_ != otherMyClass.enable_right_hand_taskspace_) return false;
 
+      if(this.enable_arm_impedance_ != otherMyClass.enable_arm_impedance_) return false;
+
       if(this.enable_chest_taskspace_ != otherMyClass.enable_chest_taskspace_) return false;
 
       if(this.enable_pelvis_taskspace_ != otherMyClass.enable_pelvis_taskspace_) return false;
@@ -516,6 +547,8 @@ public class KinematicsStreamingToolboxConfigurationMessage extends Packet<Kinem
       builder.append(this.enable_left_hand_taskspace_);      builder.append(", ");
       builder.append("enable_right_hand_taskspace=");
       builder.append(this.enable_right_hand_taskspace_);      builder.append(", ");
+      builder.append("enable_arm_impedance=");
+      builder.append(this.enable_arm_impedance_);      builder.append(", ");
       builder.append("enable_chest_taskspace=");
       builder.append(this.enable_chest_taskspace_);      builder.append(", ");
       builder.append("enable_pelvis_taskspace=");

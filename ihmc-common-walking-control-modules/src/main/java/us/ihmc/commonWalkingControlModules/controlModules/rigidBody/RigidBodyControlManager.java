@@ -57,7 +57,6 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
 
    private final String bodyName;
    private final RigidBodyBasics bodyToControl;
-   private final YoBoolean isImpedanceEnabled;
    private final YoRegistry registry;
    private final StateMachine<RigidBodyControlMode, RigidBodyControlState> stateMachine;
    private final YoEnum<RigidBodyControlMode> requestedState;
@@ -97,7 +96,6 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                   LoadBearingParameters loadBearingParameters,
                                   RigidBodyControlMode defaultControlMode,
                                   boolean enableFunctionGenerators,
-                                  YoBoolean isImpedanceEnabled,
                                   double nominalRhoWeight,
                                   WholeBodyPostureAdjustmentProvider postureAdjustmentProvider,
                                   YoDouble yoTime,
@@ -106,7 +104,6 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                   YoRegistry parentRegistry)
    {
       this.bodyToControl = bodyToControl;
-      this.isImpedanceEnabled = isImpedanceEnabled;
       bodyName = bodyToControl.getName();
       String namePrefix = bodyName + "Manager";
       registry = new YoRegistry(namePrefix);
@@ -133,7 +130,6 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                                                                                    yoTime,
                                                                                                    jointControlHelper,
                                                                                                    enableFunctionGenerators,
-                                                                                                   isImpedanceEnabled,
                                                                                                    parentRegistry);
          if (taskspaceOrientationGains == null)
          {
@@ -142,7 +138,6 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
          taskspaceControlState.setGains(taskspaceOrientationGains);
          taskspaceControlState.setWeights(taskspaceAngularWeight);
          this.taskspaceControlState = taskspaceControlState;
-         LogTools.info("Creating manager for " + bodyName + " with orientation controller. (Impedance enabled: " + isImpedanceEnabled.getValue() + ")");
       }
       else if (taskspaceAngularWeight == null && taskspaceLinearWeight != null)
       {
@@ -153,7 +148,6 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                                                                              baseFrame,
                                                                                              yoTime,
                                                                                              enableFunctionGenerators,
-                                                                                             isImpedanceEnabled,
                                                                                              parentRegistry,
                                                                                              graphicsListRegistry);
          if (taskspacePositionGains == null)
@@ -163,7 +157,6 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
          taskspaceControlState.setGains(taskspacePositionGains);
          taskspaceControlState.setWeights(taskspaceLinearWeight);
          this.taskspaceControlState = taskspaceControlState;
-         LogTools.info("Creating manager for " + bodyName + " with position controller. (Impedance enabled: " + isImpedanceEnabled.getValue() + ")");
       }
       else if (taskspaceAngularWeight != null && taskspaceLinearWeight != null)
       {
@@ -175,7 +168,6 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                                                                      yoTime,
                                                                                      jointControlHelper,
                                                                                      enableFunctionGenerators,
-                                                                                     isImpedanceEnabled,
                                                                                      graphicsListRegistry,
                                                                                      registry);
          if (taskspaceOrientationGains == null || taskspacePositionGains == null)
@@ -189,7 +181,6 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
          if (taskspaceOrientationImpedanceGains != null && taskspacePositionImpedanceGains != null)
             taskspaceControlState.setImpedanceGains(taskspaceOrientationImpedanceGains, taskspacePositionImpedanceGains);
          this.taskspaceControlState = taskspaceControlState;
-         LogTools.info("Creating manager for " + bodyName + " with pose controller. (Impedance enabled: " + isImpedanceEnabled.getValue() + ")");
       }
       else
       {
@@ -370,7 +361,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
       }
    }
 
-   public void handleHybridTrajectoryCommand(SE3TrajectoryControllerCommand taskspaceCommand, JointspaceTrajectoryCommand jointSpaceCommand)
+   public void handleHybridTrajectoryCommand(SE3TrajectoryControllerCommand taskspaceCommand, JointspaceTrajectoryCommand jointSpaceCommand, boolean isImpedanceEnabled)
    {
       computeDesiredJointPositions(initialJointPositions);
 
@@ -382,6 +373,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
       else if (taskspaceControlState.handleHybridTrajectoryCommand(taskspaceCommand, jointSpaceCommand, initialJointPositions))
       { // Otherwise execute in TASKSPACE mode
          requestState(taskspaceControlState.getControlMode());
+         taskspaceControlState.setImpedanceEnabled(isImpedanceEnabled);
       }
       else
       {
@@ -405,72 +397,72 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
       }
    }
 
-   public void handleHybridTrajectoryCommand(SE3TrajectoryControllerCommand taskspaceCommand,
-                                             JointspaceTrajectoryCommand jointSpaceCommand,
-                                             WrenchTrajectoryControllerCommand feedForwardCommand)
-   {
-      computeDesiredJointPositions(initialJointPositions);
+//   public void handleHybridTrajectoryCommand(SE3TrajectoryControllerCommand taskspaceCommand,
+//                                             JointspaceTrajectoryCommand jointSpaceCommand,
+//                                             WrenchTrajectoryControllerCommand feedForwardCommand)
+//   {
+//      computeDesiredJointPositions(initialJointPositions);
+//
+//      if (stateMachine.getCurrentStateKey() == RigidBodyControlMode.LOADBEARING)
+//      { // If in LOADBEARING mode, execute the trajectory in that state
+//         loadBearingControlState.handleAsOrientationTrajectoryCommand(taskspaceCommand);
+//         loadBearingControlState.handleJointTrajectoryCommand(jointSpaceCommand, initialJointPositions);
+//      }
+//      else if (taskspaceControlState.handleHybridTrajectoryCommand(taskspaceCommand, jointSpaceCommand, feedForwardCommand, initialJointPositions))
+//      { // Otherwise execute in TASKSPACE mode
+//         requestState(taskspaceControlState.getControlMode());
+//      }
+//      else
+//      {
+//         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " received invalid hybrid SE3 trajectory command.");
+//         hold();
+//      }
+//   }
+//
+//   public void handleHybridTrajectoryCommand(SE3TrajectoryControllerCommand taskspaceCommand,
+//                                             JointspaceTrajectoryCommand jointSpaceCommand,
+//                                             SE3PIDGainsTrajectoryControllerCommand gainsCommand)
+//   {
+//      computeDesiredJointPositions(initialJointPositions);
+//
+//      if (stateMachine.getCurrentStateKey() == RigidBodyControlMode.LOADBEARING)
+//      { // If in LOADBEARING mode, execute the trajectory in that state
+//         loadBearingControlState.handleAsOrientationTrajectoryCommand(taskspaceCommand);
+//         loadBearingControlState.handleJointTrajectoryCommand(jointSpaceCommand, initialJointPositions);
+//      }
+//      else if (taskspaceControlState.handleHybridTrajectoryCommand(taskspaceCommand, jointSpaceCommand, gainsCommand, initialJointPositions))
+//      { // Otherwise execute in TASKSPACE mode
+//         requestState(taskspaceControlState.getControlMode());
+//      }
+//      else
+//      {
+//         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " received invalid hybrid SE3 trajectory command.");
+//         hold();
+//      }
+//   }
 
-      if (stateMachine.getCurrentStateKey() == RigidBodyControlMode.LOADBEARING)
-      { // If in LOADBEARING mode, execute the trajectory in that state
-         loadBearingControlState.handleAsOrientationTrajectoryCommand(taskspaceCommand);
-         loadBearingControlState.handleJointTrajectoryCommand(jointSpaceCommand, initialJointPositions);
-      }
-      else if (taskspaceControlState.handleHybridTrajectoryCommand(taskspaceCommand, jointSpaceCommand, feedForwardCommand, initialJointPositions))
-      { // Otherwise execute in TASKSPACE mode
-         requestState(taskspaceControlState.getControlMode());
-      }
-      else
-      {
-         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " received invalid hybrid SE3 trajectory command.");
-         hold();
-      }
-   }
-
-   public void handleHybridTrajectoryCommand(SE3TrajectoryControllerCommand taskspaceCommand,
-                                             JointspaceTrajectoryCommand jointSpaceCommand,
-                                             SE3PIDGainsTrajectoryControllerCommand gainsCommand)
-   {
-      computeDesiredJointPositions(initialJointPositions);
-
-      if (stateMachine.getCurrentStateKey() == RigidBodyControlMode.LOADBEARING)
-      { // If in LOADBEARING mode, execute the trajectory in that state
-         loadBearingControlState.handleAsOrientationTrajectoryCommand(taskspaceCommand);
-         loadBearingControlState.handleJointTrajectoryCommand(jointSpaceCommand, initialJointPositions);
-      }
-      else if (taskspaceControlState.handleHybridTrajectoryCommand(taskspaceCommand, jointSpaceCommand, gainsCommand, initialJointPositions))
-      { // Otherwise execute in TASKSPACE mode
-         requestState(taskspaceControlState.getControlMode());
-      }
-      else
-      {
-         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " received invalid hybrid SE3 trajectory command.");
-         hold();
-      }
-   }
-
-   public void handleHybridTrajectoryCommand(SE3TrajectoryControllerCommand taskspaceCommand,
-                                             JointspaceTrajectoryCommand jointSpaceCommand,
-                                             WrenchTrajectoryControllerCommand feedForwardCommand,
-                                             SE3PIDGainsTrajectoryControllerCommand gainsCommand)
-   {
-      computeDesiredJointPositions(initialJointPositions);
-
-      if (stateMachine.getCurrentStateKey() == RigidBodyControlMode.LOADBEARING)
-      { // If in LOADBEARING mode, execute the trajectory in that state
-         loadBearingControlState.handleAsOrientationTrajectoryCommand(taskspaceCommand);
-         loadBearingControlState.handleJointTrajectoryCommand(jointSpaceCommand, initialJointPositions);
-      }
-      else if (taskspaceControlState.handleHybridTrajectoryCommand(taskspaceCommand, jointSpaceCommand, feedForwardCommand, gainsCommand, initialJointPositions))
-      { // Otherwise execute in TASKSPACE mode
-         requestState(taskspaceControlState.getControlMode());
-      }
-      else
-      {
-         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " received invalid hybrid SE3 trajectory command.");
-         hold();
-      }
-   }
+//   public void handleHybridTrajectoryCommand(SE3TrajectoryControllerCommand taskspaceCommand,
+//                                             JointspaceTrajectoryCommand jointSpaceCommand,
+//                                             WrenchTrajectoryControllerCommand feedForwardCommand,
+//                                             SE3PIDGainsTrajectoryControllerCommand gainsCommand)
+//   {
+//      computeDesiredJointPositions(initialJointPositions);
+//
+//      if (stateMachine.getCurrentStateKey() == RigidBodyControlMode.LOADBEARING)
+//      { // If in LOADBEARING mode, execute the trajectory in that state
+//         loadBearingControlState.handleAsOrientationTrajectoryCommand(taskspaceCommand);
+//         loadBearingControlState.handleJointTrajectoryCommand(jointSpaceCommand, initialJointPositions);
+//      }
+//      else if (taskspaceControlState.handleHybridTrajectoryCommand(taskspaceCommand, jointSpaceCommand, feedForwardCommand, gainsCommand, initialJointPositions))
+//      { // Otherwise execute in TASKSPACE mode
+//         requestState(taskspaceControlState.getControlMode());
+//      }
+//      else
+//      {
+//         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " received invalid hybrid SE3 trajectory command.");
+//         hold();
+//      }
+//   }
 
    public void handleDesiredAccelerationsCommand(DesiredAccelerationsCommand command)
    {
@@ -764,9 +756,9 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
       return ret;
    }
 
-   public YoBoolean getImpedanceEnabled()
+   public void setImpedanceEnabled(boolean isImpedanceEnabled)
    {
-      return isImpedanceEnabled;
+
    }
 
    public RigidBodyBasics getBodyToControl()

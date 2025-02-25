@@ -36,6 +36,11 @@ bool enable_left_hand_taskspace true
 # Default value is true.
 bool enable_right_hand_taskspace true
 
+# Whether the arms should be controller in impedance mode.
+# This is compatible with the arm task-space control.
+# Default value is false.
+bool enable_arm_impedance false
+
 # Whether the chest orientation should be controlled.
 # Default value is true.
 bool enable_chest_taskspace true

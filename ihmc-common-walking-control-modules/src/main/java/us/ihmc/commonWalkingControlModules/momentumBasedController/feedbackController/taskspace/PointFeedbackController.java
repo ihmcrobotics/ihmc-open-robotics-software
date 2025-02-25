@@ -29,6 +29,7 @@ import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.CompositeRigidBodyMassMatrixCalculator;
 import us.ihmc.mecano.algorithms.GeometricJacobianCalculator;
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyAccelerationProvider;
@@ -57,7 +58,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoBoolean isEnabled;
-   private final YoBoolean isImpedanceEnabled;
+   private boolean isImpedanceEnabled;
 
    private final FBPoint3D yoDesiredPosition;
    private final FBPoint3D yoCurrentPosition;
@@ -202,9 +203,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
 
       isEnabled = new YoBoolean(appendIndex(endEffectorName, controllerIndex) + "isPointFBControllerEnabled", fbToolbox.getRegistry());
       isEnabled.set(false);
-
-      isImpedanceEnabled = new YoBoolean(appendIndex(endEffectorName, controllerIndex) + "isPointFBControllerImpedanceEnabled", fbToolbox.getRegistry());
-      isImpedanceEnabled.set(false);
+      isImpedanceEnabled = false;
 
       yoDesiredPosition = fbToolbox.getOrCreatePositionData(endEffector, controllerIndex, DESIRED, isEnabled, true);
       yoCurrentPosition = fbToolbox.getOrCreatePositionData(endEffector, controllerIndex, CURRENT, isEnabled, true);
@@ -328,9 +327,9 @@ public class PointFeedbackController implements FeedbackControllerInterface
       currentCommandId = command.getCommandId();
       base = command.getBase();
       controlBaseFrame = command.getControlBaseFrame();
-      isImpedanceEnabled.set(command.getIsImpedanceEnabled());
+      isImpedanceEnabled = command.getIsImpedanceEnabled();
 
-      if (isImpedanceEnabled.getValue())
+      if (isImpedanceEnabled)
       {
          MultiBodySystemTools.collectJointPath(base, endEffector, jointPath);
 
@@ -410,7 +409,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
 
       ReferenceFrame trajectoryFrame = yoDesiredPosition.getReferenceFrame();
 
-      if (isImpedanceEnabled.getValue())
+      if (isImpedanceEnabled)
       {
          computeInverseInertiaMatrix();
       }
@@ -421,7 +420,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
       feedForwardLinearAcceleration.setIncludingFrame(yoFeedForwardLinearAcceleration);
       feedForwardLinearAcceleration.changeFrame(controlFrame);
 
-      if (isImpedanceEnabled.getValue())
+      if (isImpedanceEnabled)
       {
          inverseInertiaMatrix3D.set(inverseInertiaTempMatrix);
          inverseInertiaMatrix3D.transform(proportionalFeedback);
@@ -458,7 +457,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
       if (!isEnabled())
          return;
 
-      if (isImpedanceEnabled.getValue())
+      if (isImpedanceEnabled)
       {
          throw new FeedbackControllerException("Impedance control is not implemented in computeInverseKinematics.");
       }
@@ -502,7 +501,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
       if (!isEnabled())
          return;
 
-      if (isImpedanceEnabled.getValue())
+      if (isImpedanceEnabled)
       {
          throw new FeedbackControllerException("Impedance control is not implemented in computeVirtualModelControl.");
       }
@@ -663,7 +662,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
       feedbackTermToPack.changeFrame(linearGainsFrame != null ? linearGainsFrame : controlFrame);
 
       gains.getDerivativeGainMatrix(tempGainMatrix);
-      if (isImpedanceEnabled.getValue())
+      if (isImpedanceEnabled)
       {
          gains.getFullProportionalGainMatrix(tempMatrix, 3);
 

@@ -15,7 +15,7 @@ public class PelvisTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDa
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "1a7ddac9475169216f23dc1ab34b818ce799dfb4a0c8f357e3ef1bab49cb4876";
+   		return "ea719e1109cd469f401b6b3f063722fafa0746ff2f51a79bc17bbca35c5153a2";
    }
    
    @Override

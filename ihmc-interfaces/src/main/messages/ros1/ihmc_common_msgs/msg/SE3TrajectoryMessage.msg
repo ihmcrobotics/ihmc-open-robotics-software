@@ -31,6 +31,9 @@ bool use_custom_control_frame
 # This is the frame attached to the rigid body that the taskspace trajectory is defined for.
 geometry_msgs/Pose control_frame_pose
 
+# Flag that tells the controller whether the use an impedance feedback controller
+bool use_impedance
+
 # Properties for queueing trajectories.
 ihmc_common_msgs/QueueableMessage queueing_properties
 

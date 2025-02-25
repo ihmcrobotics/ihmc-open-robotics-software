@@ -15,7 +15,7 @@ public class SE3TrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "4564aeaed38ee4f9106b0b2f2a0bdb9f76661533f1e86423cf24a2de5403cf9b";
+   		return "a1ab63c0298ab7f49200c8a2096d04691b43b9eab0a1b874312be868588d5cf0";
    }
    
    @Override
@@ -71,6 +71,8 @@ public class SE3TrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataT
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
       current_alignment += ihmc_common_msgs.msg.dds.QueueableMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
 
@@ -109,6 +111,9 @@ public class SE3TrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataT
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getControlFramePose(), current_alignment);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
       current_alignment += ihmc_common_msgs.msg.dds.QueueableMessagePubSubType.getCdrSerializedSize(data.getQueueingProperties(), current_alignment);
 
 
@@ -131,6 +136,8 @@ public class SE3TrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataT
       cdr.write_type_7(data.getUseCustomControlFrame());
 
       geometry_msgs.msg.dds.PosePubSubType.write(data.getControlFramePose(), cdr);
+      cdr.write_type_7(data.getUseImpedance());
+
       ihmc_common_msgs.msg.dds.QueueableMessagePubSubType.write(data.getQueueingProperties(), cdr);
    }
 
@@ -147,6 +154,8 @@ public class SE3TrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataT
       data.setUseCustomControlFrame(cdr.read_type_7());
       	
       geometry_msgs.msg.dds.PosePubSubType.read(data.getControlFramePose(), cdr);	
+      data.setUseImpedance(cdr.read_type_7());
+      	
       ihmc_common_msgs.msg.dds.QueueableMessagePubSubType.read(data.getQueueingProperties(), cdr);	
 
    }
@@ -169,6 +178,7 @@ public class SE3TrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataT
       ser.write_type_7("use_custom_control_frame", data.getUseCustomControlFrame());
       ser.write_type_a("control_frame_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getControlFramePose());
 
+      ser.write_type_7("use_impedance", data.getUseImpedance());
       ser.write_type_a("queueing_properties", new ihmc_common_msgs.msg.dds.QueueableMessagePubSubType(), data.getQueueingProperties());
 
    }
@@ -191,6 +201,7 @@ public class SE3TrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataT
       data.setUseCustomControlFrame(ser.read_type_7("use_custom_control_frame"));
       ser.read_type_a("control_frame_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getControlFramePose());
 
+      data.setUseImpedance(ser.read_type_7("use_impedance"));
       ser.read_type_a("queueing_properties", new ihmc_common_msgs.msg.dds.QueueableMessagePubSubType(), data.getQueueingProperties());
 
    }

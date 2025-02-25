@@ -55,7 +55,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoBoolean isEnabled;
-   private final YoBoolean isImpedanceEnabled;
+   private boolean isImpedanceEnabled;
 
    private final FBQuaternion3D yoDesiredOrientation;
    private final FBQuaternion3D yoCurrentOrientation;
@@ -203,9 +203,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
 
       isEnabled = new YoBoolean(appendIndex(endEffectorName, controllerIndex) + "IsOrientationFBControllerEnabled", fbToolbox.getRegistry());
       isEnabled.set(false);
-
-      isImpedanceEnabled = new YoBoolean(appendIndex(endEffectorName, controllerIndex) + "isOrientationFBControllerImpedanceEnabled", fbToolbox.getRegistry());
-      isImpedanceEnabled.set(false);
+      isImpedanceEnabled = false;
 
       yoDesiredOrientation = fbToolbox.getOrCreateOrientationData(endEffector, controllerIndex, DESIRED, isEnabled, true);
       yoCurrentOrientation = fbToolbox.getOrCreateOrientationData(endEffector, controllerIndex, CURRENT, isEnabled, true);
@@ -334,9 +332,9 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       currentCommandId = command.getCommandId();
       base = command.getBase();
       controlBaseFrame = command.getControlBaseFrame();
-      isImpedanceEnabled.set(command.getIsImpedanceEnabled());
+      isImpedanceEnabled = command.getIsImpedanceEnabled();
 
-      if (isImpedanceEnabled.getValue())
+      if (isImpedanceEnabled)
       {
          MultiBodySystemTools.collectJointPath(base, endEffector, jointPath);
 
@@ -421,7 +419,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
          return;
 
       ReferenceFrame trajectoryFrame = yoDesiredOrientation.getReferenceFrame();
-      if (isImpedanceEnabled.getValue())
+      if (isImpedanceEnabled)
       {
          computeInverseInertiaMatrix();
       }
@@ -432,7 +430,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       feedForwardAngularAcceleration.setIncludingFrame(yoFeedForwardAngularAcceleration);
       feedForwardAngularAcceleration.changeFrame(controlFrame);
 
-      if (isImpedanceEnabled.getValue())
+      if (isImpedanceEnabled)
       {
          inverseInertiaMatrix3D.set(inverseInertiaTempMatrix);
          inverseInertiaMatrix3D.transform(proportionalFeedback);
@@ -468,7 +466,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       if (!isEnabled())
          return;
 
-      if (isImpedanceEnabled.getValue())
+      if (isImpedanceEnabled)
       {
          throw new FeedbackControllerException("Impedance control is not implemented in computeInverseKinematics.");
       }
@@ -507,7 +505,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       if (!isEnabled())
          return;
 
-      if (isImpedanceEnabled.getValue())
+      if (isImpedanceEnabled)
       {
          throw new FeedbackControllerException("Impedance control is not implemented in computeVirtualModelControl.");
       }
@@ -669,7 +667,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       feedbackTermToPack.changeFrame(angularGainsFrame != null ? angularGainsFrame : controlFrame);
 
       gains.getDerivativeGainMatrix(tempGainMatrix);
-      if (isImpedanceEnabled.getValue())
+      if (isImpedanceEnabled)
       {
          gains.getFullProportionalGainMatrix(tempMatrix, 3);
 

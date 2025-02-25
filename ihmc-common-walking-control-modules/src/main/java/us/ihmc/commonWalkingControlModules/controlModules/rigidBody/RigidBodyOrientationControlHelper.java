@@ -121,7 +121,7 @@ public class RigidBodyOrientationControlHelper
                                             BooleanProvider useBaseFrameForControl,
                                             BooleanProvider useWeightFromMessage,
                                             boolean enableFunctionGenerators,
-                                            YoBoolean enableImpedanceControl,
+                                            YoBoolean isImpedanceEnabled,
                                             DoubleProvider time,
                                             YoRegistry registry)
    {
@@ -130,6 +130,7 @@ public class RigidBodyOrientationControlHelper
       this.useWeightFromMessage = useWeightFromMessage;
       this.baseFrame = baseFrame;
       this.time = time;
+      this.isImpedanceEnabled = isImpedanceEnabled;
 
       String bodyName = bodyToControl.getName();
       String prefix = bodyName + "TaskspaceOrientation";
@@ -144,8 +145,6 @@ public class RigidBodyOrientationControlHelper
 
       feedbackControlCommand.set(elevator, bodyToControl);
       feedbackControlCommand.setPrimaryBase(baseBody);
-      feedbackControlCommand.setImpedanceEnabled(enableImpedanceControl.getBooleanValue());
-      isImpedanceEnabled = enableImpedanceControl;
       isFeedforwardEnabled = new YoBoolean(prefix + "FeedforwardEnabled", registry);
       isFeedforwardEnabled.set(true);
 

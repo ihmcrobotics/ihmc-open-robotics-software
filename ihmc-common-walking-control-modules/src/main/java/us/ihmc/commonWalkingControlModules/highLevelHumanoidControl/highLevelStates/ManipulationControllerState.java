@@ -244,7 +244,6 @@ public class ManipulationControllerState extends HighLevelControllerState
       ContactablePlaneBody contactableBody = null;
       RigidBodyControlMode defaultControlMode = walkingControllerParameters.getDefaultControlModesForRigidBodies().get(bodyName);
       boolean enableFunctionGenerators = walkingControllerParameters.enableFunctionGeneratorMode(bodyToControl.getName());
-      YoBoolean isImpedanceEnabled = new YoBoolean(bodyName + "-EnableImpedanceControl", registry);
 
       RigidBodyControlManager manager = new RigidBodyControlManager(bodyToControl,
                                                                     baseBody,
@@ -263,7 +262,6 @@ public class ManipulationControllerState extends HighLevelControllerState
                                                                     null,
                                                                     defaultControlMode,
                                                                     enableFunctionGenerators,
-                                                                    isImpedanceEnabled,
                                                                     momentumOptimizationSettings.getRhoWeight(),
                                                                     WholeBodyPostureAdjustmentProvider.createZeroPostureAdjustmentProvider(),
                                                                     yoTime,
@@ -514,12 +512,13 @@ public class ManipulationControllerState extends HighLevelControllerState
             jointspaceTrajectoryCommand.setSequenceId(command.getSequenceId());
             if (feedForwardCommand.getNumberOfTrajectoryPoints() != taskspaceTrajectoryCommand.getNumberOfTrajectoryPoints())
             {
-               handManager.handleHybridTrajectoryCommand(taskspaceTrajectoryCommand, jointspaceTrajectoryCommand);
+               handManager.handleHybridTrajectoryCommand(taskspaceTrajectoryCommand, jointspaceTrajectoryCommand, command.getImpedanceEnabled());
             }
             else
             {
-               feedForwardCommand.setSequenceId(command.getSequenceId());
-               handManager.handleHybridTrajectoryCommand(taskspaceTrajectoryCommand, jointspaceTrajectoryCommand, feedForwardCommand);
+               // TODO remove
+//               feedForwardCommand.setSequenceId(command.getSequenceId());
+//               handManager.handleHybridTrajectoryCommand(taskspaceTrajectoryCommand, jointspaceTrajectoryCommand, feedForwardCommand);
             }
          }
       }

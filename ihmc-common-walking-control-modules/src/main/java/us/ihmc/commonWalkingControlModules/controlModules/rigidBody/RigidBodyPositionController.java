@@ -44,6 +44,7 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
    private final RigidBodyPositionControlHelper positionHelper;
 
    private final TaskspaceTrajectoryStatusMessageHelper statusHelper;
+   private final YoBoolean isImpedanceEnabled;
 
    public RigidBodyPositionController(RigidBodyBasics bodyToControl,
                                       RigidBodyBasics baseBody,
@@ -52,7 +53,6 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
                                       ReferenceFrame baseFrame,
                                       YoDouble yoTime,
                                       boolean enableFunctionGenerators,
-                                      YoBoolean enableImpedanceControl,
                                       YoRegistry parentRegistry,
                                       YoGraphicsListRegistry graphicsListRegistry)
    {
@@ -64,6 +64,7 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
       numberOfPointsInQueue = new YoInteger(prefix + "NumberOfPointsInQueue", registry);
       numberOfPointsInGenerator = new YoInteger(prefix + "NumberOfPointsInGenerator", registry);
       numberOfPoints = new YoInteger(prefix + "NumberOfPoints", registry);
+      isImpedanceEnabled = new YoBoolean(prefix + "-EnabledImpedanceControl", registry);
 
       // This needs to be identity to allow for consistent conversions of the control frame point if a message with a control frame is recieved.
       bodyFrame = bodyToControl.getBodyFixedFrame();
@@ -83,7 +84,7 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
                                                           useBaseFrameForControl,
                                                           usingWeightFromMessage,
                                                           enableFunctionGenerators,
-                                                          enableImpedanceControl,
+                                                          isImpedanceEnabled,
                                                           yoTime,
                                                           registry,
                                                           graphicsListRegistry);
@@ -92,24 +93,6 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
       hideGraphics();
 
       statusHelper = new TaskspaceTrajectoryStatusMessageHelper(bodyToControl);
-   }
-
-   public RigidBodyPositionController(RigidBodyBasics bodyToControl,
-                                      RigidBodyBasics baseBody,
-                                      RigidBodyBasics elevator,
-                                      ReferenceFrame controlFrame,
-                                      ReferenceFrame baseFrame,
-                                      YoDouble yoTime,
-                                      boolean enableFunctionGenerators,
-                                      boolean enableImpedanceControl,
-                                      YoRegistry parentRegistry,
-                                      YoGraphicsListRegistry graphicsListRegistry)
-   {
-      this(bodyToControl, baseBody, elevator, controlFrame, baseFrame, yoTime, enableFunctionGenerators,
-           new YoBoolean(bodyToControl.getName() + "EnableImpedanceControlPosition", parentRegistry),
-           parentRegistry, graphicsListRegistry);
-      YoBoolean enableImpedanceControlYoBoolean = (YoBoolean) parentRegistry.getVariable(bodyToControl.getName() + "EnableImpedanceControlPosition");
-      enableImpedanceControlYoBoolean.set(enableImpedanceControl);
    }
 
    public void setGains(PID3DGainsReadOnly gains)
@@ -269,5 +252,11 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
       group.addChild(positionHelper.getSCS2YoGraphics());
       return group;
+   }
+
+   @Override
+   public void setImpedanceEnabled(boolean isImpedanceEnabled)
+   {
+      this.isImpedanceEnabled.set(isImpedanceEnabled);
    }
 }
