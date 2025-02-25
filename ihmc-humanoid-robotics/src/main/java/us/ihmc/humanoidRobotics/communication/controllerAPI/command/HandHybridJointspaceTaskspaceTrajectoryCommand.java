@@ -18,8 +18,6 @@ public class HandHybridJointspaceTaskspaceTrajectoryCommand
    private boolean impedanceEnabled = false;
    private final JointspaceTrajectoryCommand jointspaceTrajectoryCommand = new JointspaceTrajectoryCommand();
    private final SE3TrajectoryControllerCommand taskspaceTrajectoryCommand = new SE3TrajectoryControllerCommand();
-   private final WrenchTrajectoryControllerCommand feedForwardTrajectoryCommand = new WrenchTrajectoryControllerCommand();
-   private final SE3PIDGainsTrajectoryControllerCommand pidGainsTrajectoryCommand = new SE3PIDGainsTrajectoryControllerCommand();
 
    public HandHybridJointspaceTaskspaceTrajectoryCommand()
    {
@@ -44,41 +42,6 @@ public class HandHybridJointspaceTaskspaceTrajectoryCommand
       this.taskspaceTrajectoryCommand.set(taskspaceTrajectoryCommand);
    }
 
-   public HandHybridJointspaceTaskspaceTrajectoryCommand(RobotSide robotSide, boolean forceExecution, SE3TrajectoryControllerCommand taskspaceTrajectoryCommand,
-                                                         JointspaceTrajectoryCommand jointspaceTrajectoryCommand,
-                                                         SE3PIDGainsTrajectoryControllerCommand pidGainsTrajectoryCommand)
-   {
-      this.robotSide = robotSide;
-      this.setForceExecution(forceExecution);
-      this.jointspaceTrajectoryCommand.set(jointspaceTrajectoryCommand);
-      this.taskspaceTrajectoryCommand.set(taskspaceTrajectoryCommand);
-      this.pidGainsTrajectoryCommand.set(pidGainsTrajectoryCommand);
-   }
-
-   public HandHybridJointspaceTaskspaceTrajectoryCommand(RobotSide robotSide, boolean forceExecution, SE3TrajectoryControllerCommand taskspaceTrajectoryCommand,
-                                                         JointspaceTrajectoryCommand jointspaceTrajectoryCommand,
-                                                         WrenchTrajectoryControllerCommand feedForwardTrajectoryCommand)
-   {
-      this.robotSide = robotSide;
-      this.setForceExecution(forceExecution);
-      this.jointspaceTrajectoryCommand.set(jointspaceTrajectoryCommand);
-      this.taskspaceTrajectoryCommand.set(taskspaceTrajectoryCommand);
-      this.feedForwardTrajectoryCommand.set(feedForwardTrajectoryCommand);
-   }
-
-   public HandHybridJointspaceTaskspaceTrajectoryCommand(RobotSide robotSide, boolean forceExecution, SE3TrajectoryControllerCommand taskspaceTrajectoryCommand,
-                                                         JointspaceTrajectoryCommand jointspaceTrajectoryCommand,
-                                                         WrenchTrajectoryControllerCommand feedForwardTrajectoryCommand,
-                                                         SE3PIDGainsTrajectoryControllerCommand pidGainsTrajectoryCommand)
-   {
-      this.robotSide = robotSide;
-      this.setForceExecution(forceExecution);
-      this.jointspaceTrajectoryCommand.set(jointspaceTrajectoryCommand);
-      this.taskspaceTrajectoryCommand.set(taskspaceTrajectoryCommand);
-      this.feedForwardTrajectoryCommand.set(feedForwardTrajectoryCommand);
-      this.pidGainsTrajectoryCommand.set(pidGainsTrajectoryCommand);
-   }
-
    public HandHybridJointspaceTaskspaceTrajectoryCommand(Random random)
    {
       this(RobotSide.generateRandomRobotSide(random), random.nextBoolean(), new SE3TrajectoryControllerCommand(random),
@@ -99,8 +62,6 @@ public class HandHybridJointspaceTaskspaceTrajectoryCommand
       setForceExecution(false);
       setImpedanceEnabled(false);
       jointspaceTrajectoryCommand.clear();
-      feedForwardTrajectoryCommand.clear();
-      pidGainsTrajectoryCommand.clear();
    }
 
    @Override
@@ -118,15 +79,12 @@ public class HandHybridJointspaceTaskspaceTrajectoryCommand
       setImpedanceEnabled(message.getImpedanceEnabled());
       jointspaceTrajectoryCommand.setFromMessage(message.getJointspaceTrajectoryMessage());
       taskspaceTrajectoryCommand.set(resolver, message.getTaskspaceTrajectoryMessage());
-      feedForwardTrajectoryCommand.set(resolver, message.getFeedforwardTaskspaceTrajectoryMessage());
-      pidGainsTrajectoryCommand.setFromMessage(message.getTaskspacePidGainsTrajectoryMessage());
    }
 
    @Override
    public boolean isCommandValid()
    {
-      return robotSide != null && jointspaceTrajectoryCommand.isCommandValid() && taskspaceTrajectoryCommand.isCommandValid()
-             && feedForwardTrajectoryCommand.isCommandValid() && pidGainsTrajectoryCommand.isCommandValid();
+      return robotSide != null && jointspaceTrajectoryCommand.isCommandValid() && taskspaceTrajectoryCommand.isCommandValid();
    }
 
    @Override
@@ -138,8 +96,6 @@ public class HandHybridJointspaceTaskspaceTrajectoryCommand
       setImpedanceEnabled(other.getImpedanceEnabled());
       taskspaceTrajectoryCommand.set(other.getTaskspaceTrajectoryCommand());
       jointspaceTrajectoryCommand.set(other.getJointspaceTrajectoryCommand());
-      feedForwardTrajectoryCommand.set(other.getFeedForwardTrajectoryCommand());
-      pidGainsTrajectoryCommand.set(other.getPIDGainsTrajectoryCommand());
    }
 
    public RobotSide getRobotSide()
@@ -175,16 +131,6 @@ public class HandHybridJointspaceTaskspaceTrajectoryCommand
    public SE3TrajectoryControllerCommand getTaskspaceTrajectoryCommand()
    {
       return taskspaceTrajectoryCommand;
-   }
-
-   public WrenchTrajectoryControllerCommand getFeedForwardTrajectoryCommand()
-   {
-      return feedForwardTrajectoryCommand;
-   }
-
-   public SE3PIDGainsTrajectoryControllerCommand getPIDGainsTrajectoryCommand()
-   {
-      return pidGainsTrajectoryCommand;
    }
 
    @Override

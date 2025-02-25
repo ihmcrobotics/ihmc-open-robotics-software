@@ -420,39 +420,7 @@ public class WalkingCommandConsumer
             JointspaceTrajectoryCommand jointspaceTrajectoryCommand = command.getJointspaceTrajectoryCommand();
             taskspaceTrajectoryCommand.setSequenceId(command.getSequenceId());
             jointspaceTrajectoryCommand.setSequenceId(command.getSequenceId());
-            WrenchTrajectoryControllerCommand feedForwardCommand = command.getFeedForwardTrajectoryCommand();
-            SE3PIDGainsTrajectoryControllerCommand gainsCommand = command.getPIDGainsTrajectoryCommand();
-
-            if (feedForwardCommand.getNumberOfTrajectoryPoints() != taskspaceTrajectoryCommand.getNumberOfTrajectoryPoints())
-            {
-               if (gainsCommand.getNumberOfTrajectoryPoints() != taskspaceTrajectoryCommand.getNumberOfTrajectoryPoints())
-               {
-                  handManager.handleHybridTrajectoryCommand(taskspaceTrajectoryCommand, jointspaceTrajectoryCommand, command.getImpedanceEnabled());
-               }
-               else
-               {
-                  // TODO remove gains and PID3Gains.msg, etc
-//                  gainsCommand.setSequenceId(command.getSequenceId());
-//                  handManager.handleHybridTrajectoryCommand(taskspaceTrajectoryCommand, jointspaceTrajectoryCommand, gainsCommand);
-               }
-            }
-            // TODO remove gains and feedforward part
-//            else
-//            {
-//               LogTools.info("Hybrid message with feedForward activated");
-//               feedForwardCommand.setSequenceId(command.getSequenceId());
-//
-//               if (gainsCommand.getNumberOfTrajectoryPoints() != taskspaceTrajectoryCommand.getNumberOfTrajectoryPoints())
-//               {
-//                  handManager.handleHybridTrajectoryCommand(taskspaceTrajectoryCommand, jointspaceTrajectoryCommand, feedForwardCommand);
-//               }
-//               else
-//               {
-//                  LogTools.info("Hybrid message with feedForward and gains activated");
-//                  gainsCommand.setSequenceId(command.getSequenceId());
-//                  handManager.handleHybridTrajectoryCommand(taskspaceTrajectoryCommand, jointspaceTrajectoryCommand, feedForwardCommand, gainsCommand);
-//               }
-//            }
+            handManager.handleHybridTrajectoryCommand(taskspaceTrajectoryCommand, jointspaceTrajectoryCommand, command.getImpedanceEnabled());
          }
       }
 
