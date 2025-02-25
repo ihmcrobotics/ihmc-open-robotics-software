@@ -66,11 +66,9 @@ public class ExternalControl
       externalControlImpl = new ExternalControlWrapper.ExternalControlImpl(defaultStiffness, defaultDamping, joints.length);
 
       YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-      String[] stateNames = STATE_ORDER.keySet().toArray(new String[0]);
-      yoSolutionRobotState = new YoMatrix("extSoln_", 2 * joints.length + 13, 1, stateNames, registry);
-      yoRobotState = new YoMatrix("extRobotState_", 2 * joints.length + 13, 1, stateNames, registry);
-      String[] torqueNames = TORQUES_ORDER.keySet().toArray(new String[0]);
-      yoSolutionTorque = new YoMatrix("extSoln_", joints.length, 1, torqueNames, registry);
+      yoSolutionRobotState = new YoMatrix("extSoln_", 2 * joints.length + 13, 1, STATE_ORDER, registry);
+      yoRobotState = new YoMatrix("extRobotState_", 2 * joints.length + 13, 1, STATE_ORDER, registry);
+      yoSolutionTorque = new YoMatrix("extSoln_", joints.length, 1, TORQUES_ORDER, registry);
 
 
 
@@ -221,91 +219,89 @@ public class ExternalControl
       }
    }
 
-   public static final Map<String, Integer> STATE_ORDER = new HashMap<>()  {{
-      put("q_PELVIS_POSITION_X",   0);
-      put("q_PELVIS_POSITION_Y",   1);
-      put("q_PELVIS_POSITION_Z",   2);
-      put("q_PELVIS_QUATERNION_X", 3);
-      put("q_PELVIS_QUATERNION_Y", 4);
-      put("q_PELVIS_QUATERNION_Z", 5);
-      put("q_PELVIS_QUATERNION_W", 6);
-      put("q_LEFT_HIP_Z",          7);
-      put("q_LEFT_HIP_X",          8);
-      put("q_LEFT_HIP_Y",          9);
-      put("q_LEFT_KNEE_Y",         10);
-      put("q_LEFT_ANKLE_Y",        11);
-      put("q_LEFT_ANKLE_X",        12);
-      put("q_RIGHT_HIP_Z",         13);
-      put("q_RIGHT_HIP_X",         14);
-      put("q_RIGHT_HIP_Y",         15);
-      put("q_RIGHT_KNEE_Y",        16);
-      put("q_RIGHT_ANKLE_Y",       17);
-      put("q_RIGHT_ANKLE_X",       18);
-      put("q_SPINE_Z",             19);
-      put("q_SPINE_X",             20);
-      put("q_SPINE_Y",             21);
-      put("q_LEFT_SHOULDER_Y",     22);
-      put("q_LEFT_SHOULDER_X",     23);
-      put("q_LEFT_SHOULDER_Z",     24);
-      put("q_LEFT_ELBOW_Y",        25);
-      put("q_RIGHT_SHOULDER_Y",    26);
-      put("q_RIGHT_SHOULDER_X",    27);
-      put("q_RIGHT_SHOULDER_Z",    28);
-      put("q_RIGHT_ELBOW_Y",       29);
-      put("qd_PELVIS_LINEAR_VELOCITY_X",     30);
-      put("qd_PELVIS_LINEAR_VELOCITY_Y",     31);
-      put("qd_PELVIS_LINEAR_VELOCITY_Z",     32);
-      put("qd_PELVIS_ANGULAR_VELOCITY_X",    33);
-      put("qd_PELVIS_ANGULAR_VELOCITY_Y",    34);
-      put("qd_PELVIS_ANGULAR_VELOCITY_Z",    35);
-      put("qd_LEFT_HIP_Z",                   36);
-      put("qd_LEFT_HIP_X",                   37);
-      put("qd_LEFT_HIP_Y",                   38);
-      put("qd_LEFT_KNEE_Y",                  39);
-      put("qd_LEFT_ANKLE_Y",                 40);
-      put("qd_LEFT_ANKLE_X",                 41);
-      put("qd_RIGHT_HIP_Z",                  42);
-      put("qd_RIGHT_HIP_X",                  43);
-      put("qd_RIGHT_HIP_Y",                  44);
-      put("qd_RIGHT_KNEE_Y",                 45);
-      put("qd_RIGHT_ANKLE_Y",                46);
-      put("qd_RIGHT_ANKLE_X",                47);
-      put("qd_SPINE_Z",                      48);
-      put("qd_SPINE_X",                      49);
-      put("qd_SPINE_Y",                      50);
-      put("qd_LEFT_SHOULDER_Y",              51);
-      put("qd_LEFT_SHOULDER_X",              52);
-      put("qd_LEFT_SHOULDER_Z",              53);
-      put("qd_LEFT_ELBOW_Y",                 54);
-      put("qd_RIGHT_SHOULDER_Y",             55);
-      put("qd_RIGHT_SHOULDER_X",             56);
-      put("qd_RIGHT_SHOULDER_Z",             57);
-      put("qd_RIGHT_ELBOW_Y",                58);
-   }};
+   public static final String[] STATE_ORDER = new String[] {
+      "q_PELVIS_POSITION_X",
+      "q_PELVIS_POSITION_Y",
+      "q_PELVIS_POSITION_Z",
+      "q_PELVIS_QUATERNION_X",
+      "q_PELVIS_QUATERNION_Y",
+      "q_PELVIS_QUATERNION_Z",
+      "q_PELVIS_QUATERNION_W",
+      "q_LEFT_HIP_Z",
+      "q_LEFT_HIP_X",
+      "q_LEFT_HIP_Y",
+      "q_LEFT_KNEE_Y",
+      "q_LEFT_ANKLE_Y",
+      "q_LEFT_ANKLE_X",
+      "q_RIGHT_HIP_Z",
+      "q_RIGHT_HIP_X",
+      "q_RIGHT_HIP_Y",
+      "q_RIGHT_KNEE_Y",
+      "q_RIGHT_ANKLE_Y",
+      "q_RIGHT_ANKLE_X",
+      "q_SPINE_Z",
+      "q_SPINE_X",
+      "q_SPINE_Y",
+      "q_LEFT_SHOULDER_Y",
+      "q_LEFT_SHOULDER_X",
+      "q_LEFT_SHOULDER_Z",
+      "q_LEFT_ELBOW_Y",
+      "q_RIGHT_SHOULDER_Y",
+      "q_RIGHT_SHOULDER_X",
+      "q_RIGHT_SHOULDER_Z",
+      "q_RIGHT_ELBOW_Y",
+      "qd_PELVIS_LINEAR_VELOCITY_X",
+      "qd_PELVIS_LINEAR_VELOCITY_Y",
+      "qd_PELVIS_LINEAR_VELOCITY_Z",
+      "qd_PELVIS_ANGULAR_VELOCITY_X",
+      "qd_PELVIS_ANGULAR_VELOCITY_Y",
+      "qd_PELVIS_ANGULAR_VELOCITY_Z",
+      "qd_LEFT_HIP_Z",
+      "qd_LEFT_HIP_X",
+      "qd_LEFT_HIP_Y",
+      "qd_LEFT_KNEE_Y",
+      "qd_LEFT_ANKLE_Y",
+      "qd_LEFT_ANKLE_X",
+      "qd_RIGHT_HIP_Z",
+      "qd_RIGHT_HIP_X",
+      "qd_RIGHT_HIP_Y",
+      "qd_RIGHT_KNEE_Y",
+      "qd_RIGHT_ANKLE_Y",
+      "qd_RIGHT_ANKLE_X",
+      "qd_SPINE_Z",
+      "qd_SPINE_X",
+      "qd_SPINE_Y",
+      "qd_LEFT_SHOULDER_Y",
+      "qd_LEFT_SHOULDER_X",
+      "qd_LEFT_SHOULDER_Z",
+      "qd_LEFT_ELBOW_Y",
+      "qd_RIGHT_SHOULDER_Y",
+      "qd_RIGHT_SHOULDER_X",
+      "qd_RIGHT_SHOULDER_Z",
+      "qd_RIGHT_ELBOW_Y"};
 
-   private static final Map<String, Integer> TORQUES_ORDER = new HashMap<>() {{
-      put("tau_LEFT_HIP_Z",       0);
-      put("tau_LEFT_HIP_X",       1);
-      put("tau_LEFT_HIP_Y",       2);
-      put("tau_LEFT_KNEE_Y",      3);
-      put("tau_LEFT_ANKLE_Y",     4);
-      put("tau_LEFT_ANKLE_X",     5);
-      put("tau_RIGHT_HIP_Z",      6);
-      put("tau_RIGHT_HIP_X",      7);
-      put("tau_RIGHT_HIP_Y",      8);
-      put("tau_RIGHT_KNEE_Y",     9);
-      put("tau_RIGHT_ANKLE_Y",    10);
-      put("tau_RIGHT_ANKLE_X",    11);
-      put("tau_SPINE_Z",          12);
-      put("tau_SPINE_X",          13);
-      put("tau_SPINE_Y",          14);
-      put("tau_LEFT_SHOULDER_Y",  15);
-      put("tau_LEFT_SHOULDER_X",  16);
-      put("tau_LEFT_SHOULDER_Z",  17);
-      put("tau_LEFT_ELBOW_Y",     18);
-      put("tau_RIGHT_SHOULDER_Y", 19);
-      put("tau_RIGHT_SHOULDER_X", 20);
-      put("tau_RIGHT_SHOULDER_Z", 21);
-      put("tau_RIGHT_ELBOW_Y",    22);
-   }};
+   private static final String[] TORQUES_ORDER = new String[] {
+      "tau_LEFT_HIP_Z",
+      "tau_LEFT_HIP_X",
+      "tau_LEFT_HIP_Y",
+      "tau_LEFT_KNEE_Y",
+      "tau_LEFT_ANKLE_Y",
+      "tau_LEFT_ANKLE_X",
+      "tau_RIGHT_HIP_Z",
+      "tau_RIGHT_HIP_X",
+      "tau_RIGHT_HIP_Y",
+      "tau_RIGHT_KNEE_Y",
+      "tau_RIGHT_ANKLE_Y",
+      "tau_RIGHT_ANKLE_X",
+      "tau_SPINE_Z",
+      "tau_SPINE_X",
+      "tau_SPINE_Y",
+      "tau_LEFT_SHOULDER_Y",
+      "tau_LEFT_SHOULDER_X",
+      "tau_LEFT_SHOULDER_Z",
+      "tau_LEFT_ELBOW_Y",
+      "tau_RIGHT_SHOULDER_Y",
+      "tau_RIGHT_SHOULDER_X",
+      "tau_RIGHT_SHOULDER_Z",
+      "tau_RIGHT_ELBOW_Y"};
 }
