@@ -191,12 +191,10 @@ public class JustWaitState implements State
 
                                   FootstepPlannerOutput plannerOutput = footstepPlanner.handleRequest(footstepPlannerRequest);
 
-                                  FootstepPlan newestFootstepPlan = null;
+                                  if (plannerOutput == null)
+                                     return;
 
-                                  if (plannerOutput != null)
-                                  {
-                                     newestFootstepPlan = plannerOutput.getFootstepPlan();
-                                  }
+                                  FootstepPlan newestFootstepPlan = plannerOutput.getFootstepPlan();
 
                                   FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
                                   footstepDataListMessage.setDefaultSwingDuration(0.8);
@@ -205,7 +203,6 @@ public class JustWaitState implements State
 
                                   for (int i = 0; i < footstepPlanner.getOutput().getFootstepPlan().getNumberOfSteps(); i++)
                                   {
-                                     assert newestFootstepPlan != null;
                                      PlannedFootstep footstep = newestFootstepPlan.getFootstep(i);
                                      footstep.limitFootholdVertices();
                                      footstepDataListMessage.getFootstepDataList().add().set(footstep.getAsMessage());

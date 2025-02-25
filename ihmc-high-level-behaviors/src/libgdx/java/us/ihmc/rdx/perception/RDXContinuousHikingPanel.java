@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import com.studiohartman.jamepad.ControllerButton;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.PlanOffsetStatus;
@@ -108,6 +109,9 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    private double simulatedDriftInMeters = -0.1;
 
    private final ROS2Publisher<PoseListMessage> turningPublisher;
+   private boolean previousRightBumper;
+   private boolean previousLeftBumper;
+   private boolean previousYButton;
 
    public RDXContinuousHikingPanel(RDXBaseUI baseUI, ROS2Node ros2Node, DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobotModel)
    {
@@ -357,23 +361,22 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       // Here we check against null rather then .isConnected() because if the controller is unplugged, that method won't work
       boolean controllerConnected = joystickController != null;
 
+//      LogTools.info(ImGui.isKeyDown(ImGuiTools.getLeftArrowKey()));
+//      LogTools.info(ImGui.getIO().getKeyAlt());
+
       // The following logic determines how the Continuous Hiking State Machine will be started.
       // This can be with buttons pressed on the keyboard, or with an XBox One Controller
       if (ImGui.getIO().getKeyCtrl() && ImGui.getIO().getKeyShift())
       {
          publishContinuousHikingCommandWithEnabled();
       }
+      else if((ImGui.isKeyDown(ImGuiTools.getLeftArrowKey()) || ImGui.isKeyDown(ImGuiTools.getRightArrowKey())) && ImGui.getIO().getKeyShift())
+      {
+         publishContinuousHikingCommandSideStepEnabled(ImGui.isKeyDown(ImGuiTools.getLeftArrowKey()));
+      }
       else if (controllerConnected)
       {
-         if (joystickController.getButton(joystickController.getMapping().buttonA))
-         {
-            publishJoystickStatus(joystickController);
-         }
-
-         if (joystickController.getButton(joystickController.getMapping().buttonX))
-         {
-            publishStopContinuousHiking();
-         }
+         performJoystickControllerAction(joystickController);
       }
 
       // Pressing this key will stop Continuous Hiking
@@ -386,6 +389,42 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       {
          publishStopContinuousHiking();
       }
+   }
+
+   private void performJoystickControllerAction(Controller joystickController)
+   {
+      boolean currentYButtonPressed = joystickController.getButton(ControllerButton.Y.ordinal());
+      boolean currentLeftBumper = joystickController.getButton(ControllerButton.LEFTBUMPER.ordinal());
+      boolean currentRightBumper = joystickController.getButton(ControllerButton.RIGHTBUMPER.ordinal());
+
+      if (previousYButton && !currentYButtonPressed)
+      {
+         squareUpPublisher.publish(new Empty());
+      }
+
+      if (previousLeftBumper && !currentLeftBumper)
+      {
+         turnRobot(Math.PI / 2.0);
+      }
+
+      if (previousRightBumper && !currentRightBumper)
+      {
+         turnRobot(-Math.PI / 2.0);
+      }
+
+      if (joystickController.getButton(joystickController.getMapping().buttonA))
+      {
+         publishJoystickStatus(joystickController);
+      }
+
+      if (joystickController.getButton(joystickController.getMapping().buttonX))
+      {
+         publishStopContinuousHiking();
+      }
+
+      previousYButton = joystickController.getButton(ControllerButton.Y.ordinal());
+      previousLeftBumper = joystickController.getButton(ControllerButton.LEFTBUMPER.ordinal());
+      previousRightBumper = joystickController.getButton(ControllerButton.RIGHTBUMPER.ordinal());
    }
 
    public void processImGui3DViewInput(ImGui3DViewInput input)
@@ -529,6 +568,30 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       commandMessage.setEnableContinuousHiking(true);
       commandMessage.setStepsBeforeSafetyStop((int) stepsBeforeSafetyStop.getDoubleValue());
       commandMessage.setWalkForwards(true);
+      commandMessage.setSideStep(false);
+      commandMessage.setLeftDirection(false);
+      commandMessage.setSquareUpToGoal(squareUpToGoal.get());
+      commandMessage.setUseAstarFootstepPlanner(useAStarFootstepPlanner.get());
+      commandMessage.setUseMonteCarloFootstepPlanner(useMonteCarloFootstepPlanner.get());
+      commandMessage.setUseMonteCarloPlanAsReference(useMonteCarloReference.get());
+      commandMessage.setUsePreviousPlanAsReference(!useMonteCarloReference.get());
+
+      commandMessage.setUseJoystickController(false);
+      commandMessage.setForwardValue(0.0);
+      commandMessage.setWalkBackwards(false);
+      commandMessage.setLateralValue(0.0);
+      commandMessage.setTurningValue(0.0);
+
+      commandPublisher.publish(commandMessage);
+   }
+
+   private void publishContinuousHikingCommandSideStepEnabled(boolean leftDirection)
+   {
+      commandMessage.setEnableContinuousHiking(true);
+      commandMessage.setStepsBeforeSafetyStop((int) stepsBeforeSafetyStop.getDoubleValue());
+      commandMessage.setWalkForwards(true);
+      commandMessage.setSideStep(true);
+      commandMessage.setLeftDirection(leftDirection);
       commandMessage.setSquareUpToGoal(squareUpToGoal.get());
       commandMessage.setUseAstarFootstepPlanner(useAStarFootstepPlanner.get());
       commandMessage.setUseMonteCarloFootstepPlanner(useMonteCarloFootstepPlanner.get());

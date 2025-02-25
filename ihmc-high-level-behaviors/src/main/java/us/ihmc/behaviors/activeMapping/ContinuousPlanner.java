@@ -168,20 +168,24 @@ public class ContinuousPlanner
       request.setSnapGoalSteps(true);
       request.setAbortIfGoalStepSnappingFails(true);
 
-      // When walking backwards, we want to keep the body facing in the same direction, otherwise the robot will turn as it tries to step backwards
-      if (commandMessage.get().getWalkBackwards())
+      // When walking backwards or sideways, we want to keep the body facing in the same direction, otherwise the robot will turn as it tries to step
+      if (commandMessage.get().getWalkBackwards() || commandMessage.get().getSideStep())
       {
          FramePose3D bodyMidGoalPose = new FramePose3D();
          bodyMidGoalPose.interpolate(goalPoses.get(RobotSide.LEFT), goalPoses.get(RobotSide.RIGHT), 0.5);
          request.getBodyPathWaypoints().add(walkingStartMidPose);
          request.getBodyPathWaypoints().add(bodyMidGoalPose);
 
-         // To allow walking backwards, we need to change the minimum step length, but this affects other walking, so we only do it when going backwards
+         // To allow walking backwards or sideways, we need to change the max/min step length, but this affects other walking, so we only do it when going backwards
          footstepPlannerParameters.setMinStepLength(-0.3);
+         footstepPlannerParameters.setMaxStepReach(0.2);
+         footstepPlannerParameters.setMaxStepWidth(0.6);
       }
       else
       {
          footstepPlannerParameters.setMinStepLength(0.1);
+         footstepPlannerParameters.setMaxStepReach(0.5);
+         footstepPlannerParameters.setMaxStepWidth(0.45);
       }
 
       if (useMonteCarloPlanAsReference && monteCarloFootstepPlan.get() != null && monteCarloFootstepPlan.get().getNumberOfSteps() > 0)

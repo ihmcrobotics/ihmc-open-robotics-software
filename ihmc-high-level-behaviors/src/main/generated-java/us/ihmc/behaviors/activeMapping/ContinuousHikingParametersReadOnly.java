@@ -40,6 +40,11 @@ public interface ContinuousHikingParametersReadOnly extends StoredPropertySetRea
       return get(goalPoseBackwardDistance);
    }
 
+   default double getGoalPoseSidewaysDistance()
+   {
+      return get(goalPoseSidewaysDistance);
+   }
+
    default double getSwingTime()
    {
       return get(swingTime);

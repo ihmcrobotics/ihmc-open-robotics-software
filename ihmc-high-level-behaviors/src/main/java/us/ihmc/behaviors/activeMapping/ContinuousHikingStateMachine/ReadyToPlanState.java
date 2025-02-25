@@ -225,12 +225,28 @@ public class ReadyToPlanState implements State
       }
       else
       {
-         goalPoses = ContinuousPlannerTools.setStraightForwardGoalPoses(continuousPlanner.getWalkingStartMidPose(),
-                                                                        continuousPlanner.getStartStancePose(),
-                                                                        (float) continuousHikingParameters.getGoalPoseForwardDistance(),
-                                                                        (float) continuousHikingParameters.getGoalPoseUpDistance(),
-                                                                        X_RANDOM_MARGIN,
-                                                                        NOMINAL_STANCE_WIDTH);
+         if (commandMessage.get().getSideStep())
+         {
+            double sidewaysDistance = commandMessage.get().getLeftDirection() ?
+                  continuousHikingParameters.getGoalPoseSidewaysDistance() :
+                  -continuousHikingParameters.getGoalPoseSidewaysDistance();
+
+            goalPoses = ContinuousPlannerTools.setSidStepGoalPoses(continuousPlanner.getWalkingStartMidPose(),
+                                                                   continuousPlanner.getStartStancePose(),
+                                                                   (float) sidewaysDistance,
+                                                                   (float) continuousHikingParameters.getGoalPoseUpDistance(),
+                                                                   X_RANDOM_MARGIN,
+                                                                   NOMINAL_STANCE_WIDTH);
+         }
+         else
+         {
+            goalPoses = ContinuousPlannerTools.setStraightForwardGoalPoses(continuousPlanner.getWalkingStartMidPose(),
+                                                                           continuousPlanner.getStartStancePose(),
+                                                                           (float) continuousHikingParameters.getGoalPoseForwardDistance(),
+                                                                           (float) continuousHikingParameters.getGoalPoseUpDistance(),
+                                                                           X_RANDOM_MARGIN,
+                                                                           NOMINAL_STANCE_WIDTH);
+         }
       }
 
       return goalPoses;
