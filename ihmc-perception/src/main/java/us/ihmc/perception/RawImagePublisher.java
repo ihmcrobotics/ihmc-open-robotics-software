@@ -1,17 +1,21 @@
 package us.ihmc.perception;
 
+import builtin_interfaces.msg.dds.Time;
 import org.apache.commons.lang3.NotImplementedException;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_cudaimgproc;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import perception_msgs.msg.dds.ImageMessage;
+import perception_msgs.msg.dds.ROS2CompatImage;
 import perception_msgs.msg.dds.SRTStreamStatus;
+import std_msgs.msg.dds.Header;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.perception.cuda.CUDACompressionTools;
 import us.ihmc.perception.cuda.CUDAJPEGProcessor;
 import us.ihmc.perception.imageMessage.CompressionType;
+import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.streaming.ROS2SRTSensorStreamer;
 import us.ihmc.perception.tools.PerceptionMessageTools;
@@ -55,6 +59,10 @@ public class RawImagePublisher implements AutoCloseable
       else if (imageTopic.getType().equals(SRTStreamStatus.class))
       {  // Topic is an SRT stream topic -> stream video over SRT
          sensorStreamer.sendFrame((ROS2Topic<SRTStreamStatus>) imageTopic, imageToPublish);
+      }
+      else if (imageTopic.getType().equals(ROS2CompatImage.class))
+      {  // Topic is a ros2 common_interfaces sensor_msgs/Image https://github.com/ros2/common_interfaces/blob/rolling/sensor_msgs/msg/Image.msg
+         publishAsROS2CompatImage((ROS2Topic<ROS2CompatImage>) imageTopic, imageToPublish);
       }
    }
 
@@ -100,6 +108,32 @@ public class RawImagePublisher implements AutoCloseable
       // Pack the message and send it off
       PerceptionMessageTools.packImageMessage(imageToPublish, compressedImage, compressionType, imageMessage);
       ros2Helper.publish(imageTopic, imageMessage);
+   }
+
+   private void publishAsROS2CompatImage(ROS2Topic<ROS2CompatImage> imageTopic, RawImage imageToPublish)
+   {
+      ROS2CompatImage compatImage = new ROS2CompatImage();
+
+      compatImage.getHeader().getStamp().setSec((int) imageToPublish.getAcquisitionTime().getEpochSecond());
+      compatImage.getHeader().getStamp().setNanosec(imageToPublish.getAcquisitionTime().getNano());
+      compatImage.getHeader().setFrameId(Long.toString(imageToPublish.getSequenceNumber()));
+
+      compatImage.setHeight(compatImage.getHeight());
+      compatImage.setWidth(compatImage.getWidth());
+
+      PixelFormat pixelFormat = PixelFormat.fromImageMessage(imageMessage);
+      System.out.println("pixelFormat " + pixelFormat.name());
+      // TODO: set encoding
+
+      compatImage.setIsBigendian((byte) 0);
+//      compatImage.setStep(0);
+
+      // TODO: This is probably slow
+      byte[] imageData = new byte[compatImage.getData().capacity()];
+      imageToPublish.getCpuImageMat().data().put(imageData);
+      compatImage.getData().add(imageData);
+
+      ros2Helper.publish(imageTopic, compatImage);
    }
 
    @Override
