@@ -66,6 +66,8 @@ public class ExternalControllerState extends HighLevelControllerState
 
    private final YoFramePoint3D capturePoint = new YoFramePoint3D("CapturePoint", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint3D centerOfMass = new YoFramePoint3D("CenterOfMass", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D leftFootPosition = new YoFramePoint3D("leftFootPosition", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D rightFootPosition = new YoFramePoint3D("rightFootPosition", ReferenceFrame.getWorldFrame(), registry);
 
    private final CommandInputManager commandInputManager;
 
@@ -285,12 +287,13 @@ public class ExternalControllerState extends HighLevelControllerState
       return lowLevelOneDoFJointDesiredDataHolder;
    }
 
-   private final FramePoint3D leftFootPosition = new FramePoint3D();
-   private final FramePoint3D rightFootPosition = new FramePoint3D();
    private final FramePoint3D lowestFootPosition = new FramePoint3D();
 
    private void updateLowestFootSide()
    {
+      leftFootPosition.setFromReferenceFrame(controllerToolbox.getReferenceFrames().getSoleFrame(RobotSide.LEFT));
+      rightFootPosition.setFromReferenceFrame(controllerToolbox.getReferenceFrames().getSoleFrame(RobotSide.RIGHT));
+
       // This is true if we just switched sides. If that's the case, we should reset the switching filter to false.
       if (filteredShouldSwitchSupportSide.getBooleanValue())
          filteredShouldSwitchSupportSide.set(false);
@@ -300,12 +303,6 @@ public class ExternalControllerState extends HighLevelControllerState
       if (leftFootInContact && rightFootInContact)
       {
          // Both feet are in contact. Compute which foot is lower, based on the sole frame.
-         leftFootPosition.setToZero(controllerToolbox.getReferenceFrames().getSoleFrame(RobotSide.LEFT));
-         rightFootPosition.setToZero(controllerToolbox.getReferenceFrames().getSoleFrame(RobotSide.RIGHT));
-
-         leftFootPosition.changeFrame(ReferenceFrame.getWorldFrame());
-         rightFootPosition.changeFrame(ReferenceFrame.getWorldFrame());
-
          boolean leftFootIsLower = leftFootPosition.getZ() < rightFootPosition.getZ();
          RobotSide lowestSide = leftFootIsLower ? RobotSide.LEFT : RobotSide.RIGHT;
 
