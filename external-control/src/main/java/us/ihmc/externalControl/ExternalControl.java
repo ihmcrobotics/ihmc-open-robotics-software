@@ -14,6 +14,8 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.yoVariables.math.YoMatrix;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import java.util.HashMap;
+import java.util.Map;
 
 import java.util.HashMap;
 
@@ -26,6 +28,8 @@ public class ExternalControl
    private boolean leftInContact;
    private boolean rightInContact;
    private final YoMatrix yoSolutionRobotState;
+   private final YoMatrix yoRobotState;
+   private final YoMatrix yoSolutionTorque;
    private final DMatrixRMaj solutionRobotState;
    private final DMatrixRMaj solutionTorqueVector;
    private final DMatrixRMaj solutionStiffnessVector;
@@ -62,7 +66,12 @@ public class ExternalControl
       externalControlImpl = new ExternalControlWrapper.ExternalControlImpl(defaultStiffness, defaultDamping, joints.length);
 
       YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-      yoSolutionRobotState = new YoMatrix("externalSolutionRobotState", 2 * joints.length + 13, 1, registry);
+      String[] stateNames = STATE_ORDER.keySet().toArray(new String[0]);
+      yoSolutionRobotState = new YoMatrix("extSoln_", 2 * joints.length + 13, 1, stateNames, registry);
+      yoRobotState = new YoMatrix("extRobotState_", 2 * joints.length + 13, 1, stateNames, registry);
+      yoSolutionTorque = new YoMatrix("extSolnTau_", joints.length, 1, registry);
+
+
 
       DMatrixRMaj homeConfigurationVector = new DMatrixRMaj(joints.length, 1);
       for (int i = 0; i < joints.length; i++)
@@ -92,6 +101,7 @@ public class ExternalControl
    {
       setRobotState();
       setRobotControl();
+      yoRobotState.set(robotState);
       if (!externalControlImpl.updateRobotState(currentTime,
                                                 robotState.data,
                                                 robotState.getNumRows(),
@@ -120,6 +130,7 @@ public class ExternalControl
          throw new RuntimeException("Failed to retrieve solution data.");
       }
       yoSolutionRobotState.set(solutionRobotState);
+      yoSolutionTorque.set(solutionTorqueVector);
       solutionBasePose.getPosition().set(solutionRobotState);
       solutionBasePose.getOrientation().set(3, 0, solutionRobotState);
       int positionStart = 7;
@@ -204,4 +215,66 @@ public class ExternalControl
          jointDesiredOutputToPack.setDamping(damping);
       }
    }
+
+   public static final Map<String, Integer> STATE_ORDER = new HashMap<>()  {{
+      put("q_PELVIS_POSITION_X",   0);
+      put("q_PELVIS_POSITION_Y",   1);
+      put("q_PELVIS_POSITION_Z",   2);
+      put("q_PELVIS_QUATERNION_X", 3);
+      put("q_PELVIS_QUATERNION_Y", 4);
+      put("q_PELVIS_QUATERNION_Z", 5);
+      put("q_PELVIS_QUATERNION_W", 6);
+      put("q_LEFT_HIP_Z",          7);
+      put("q_LEFT_HIP_X",          8);
+      put("q_LEFT_HIP_Y",          9);
+      put("q_LEFT_KNEE_Y",         10);
+      put("q_LEFT_ANKLE_Y",        11);
+      put("q_LEFT_ANKLE_X",        12);
+      put("q_RIGHT_HIP_Z",         13);
+      put("q_RIGHT_HIP_X",         14);
+      put("q_RIGHT_HIP_Y",         15);
+      put("q_RIGHT_KNEE_Y",        16);
+      put("q_RIGHT_ANKLE_Y",       17);
+      put("q_RIGHT_ANKLE_X",       18);
+      put("q_SPINE_Z",             19);
+      put("q_SPINE_X",             20);
+      put("q_SPINE_Y",             21);
+      put("q_LEFT_SHOULDER_Y",     22);
+      put("q_LEFT_SHOULDER_X",     23);
+      put("q_LEFT_SHOULDER_Z",     24);
+      put("q_LEFT_ELBOW_Y",        25);
+      put("q_RIGHT_SHOULDER_Y",    26);
+      put("q_RIGHT_SHOULDER_X",    27);
+      put("q_RIGHT_SHOULDER_Z",    28);
+      put("q_RIGHT_ELBOW_Y",       29);
+      put("qd_PELVIS_LINEAR_VELOCITY_X",     30);
+      put("qd_PELVIS_LINEAR_VELOCITY_Y",     31);
+      put("qd_PELVIS_LINEAR_VELOCITY_Z",     32);
+      put("qd_PELVIS_ANGULAR_VELOCITY_X",    33);
+      put("qd_PELVIS_ANGULAR_VELOCITY_Y",    34);
+      put("qd_PELVIS_ANGULAR_VELOCITY_Z",    35);
+      put("qd_LEFT_HIP_Z",                   36);
+      put("qd_LEFT_HIP_X",                   37);
+      put("qd_LEFT_HIP_Y",                   38);
+      put("qd_LEFT_KNEE_Y",                  39);
+      put("qd_LEFT_ANKLE_Y",                 40);
+      put("qd_LEFT_ANKLE_X",                 41);
+      put("qd_RIGHT_HIP_Z",                  42);
+      put("qd_RIGHT_HIP_X",                  43);
+      put("qd_RIGHT_HIP_Y",                  44);
+      put("qd_RIGHT_KNEE_Y",                 45);
+      put("qd_RIGHT_ANKLE_Y",                46);
+      put("qd_RIGHT_ANKLE_X",                47);
+      put("qd_SPINE_Z",                      48);
+      put("qd_SPINE_X",                      49);
+      put("qd_SPINE_Y",                      50);
+      put("qd_LEFT_SHOULDER_Y",              51);
+      put("qd_LEFT_SHOULDER_X",              52);
+      put("qd_LEFT_SHOULDER_Z",              53);
+      put("qd_LEFT_ELBOW_Y",                 54);
+      put("qd_RIGHT_SHOULDER_Y",             55);
+      put("qd_RIGHT_SHOULDER_X",             56);
+      put("qd_RIGHT_SHOULDER_Z",             57);
+      put("qd_RIGHT_ELBOW_Y",                58);
+   }};
 }
