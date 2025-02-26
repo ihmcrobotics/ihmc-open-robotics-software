@@ -13,6 +13,10 @@ namespace ihmc
 
         virtual ~ZMQController() = default;
 
+        void startSocket();
+
+        void stopSocket();
+
         void resize(const double default_stiffness, const double default_damping, const int number_of_joints);
 
         bool setHomeJointConfiguration(const double* configuration_data, int rows);

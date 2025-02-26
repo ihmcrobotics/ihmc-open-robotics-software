@@ -40,6 +40,10 @@ namespace ihmc
 
         bool getDebugData(double* debug_data_to_pack);
 
+        void stopSocket() { zmq_controller_.stopSocket(); }
+
+        void startSocket() { zmq_controller_.startSocket(); }
+
     private:
         ConstantPositionController constant_position_controller_;
         ZMQController zmq_controller_;
