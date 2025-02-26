@@ -10,6 +10,7 @@ import imgui.type.ImBoolean;
 import org.apache.commons.lang.mutable.MutableBoolean;
 import org.lwjgl.openvr.InputDigitalActionData;
 import toolbox_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
+import toolbox_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
@@ -39,7 +40,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -131,6 +131,7 @@ public class RDXVRKinematicsStreamingMode
    private final KinematicsToolboxConfigurationMessage ikSolverConfigurationMessage = new KinematicsToolboxConfigurationMessage();
 
    private final ImBoolean controlArmsOnly = new ImBoolean(false);
+   private final ImBoolean enableArmImpedance = new ImBoolean(false);
    private final ImBoolean armScaling = new ImBoolean(false);
    private final ImBoolean comTracking = new ImBoolean(false);
    private ReferenceFrame initialPelvisFrame;
@@ -143,9 +144,6 @@ public class RDXVRKinematicsStreamingMode
    private boolean reintializingToolbox = false;
    private long pausedStreamingTime;
 
-   private final HandConfiguration[] handConfigurations = {HandConfiguration.HALF_CLOSE, HandConfiguration.CRUSH, HandConfiguration.CLOSE};
-   private int leftIndex = -1;
-   private int rightIndex = -1;
    private RDXMultiContactRegionGraphic multiContactStabilityGraphic;
    private final HumanoidKinematicsToolboxConfigurationMessage ikHumanoidSolverConfigurationMessage = new HumanoidKinematicsToolboxConfigurationMessage();
 
@@ -798,6 +796,13 @@ public class RDXVRKinematicsStreamingMode
       if (ImGui.checkbox(labels.get("Control only arms"), controlArmsOnly))
       {
          setEnabled(false);
+      }
+      if (ImGui.checkbox(labels.get("Enable arm impedance control"), enableArmImpedance))
+      {
+         KinematicsStreamingToolboxParameters parameters = KinematicsStreamingToolboxParameters.defaultParameters();
+         KinematicsStreamingToolboxConfigurationMessage impedanceConfiguration = parameters.getDefaultConfiguration();
+         impedanceConfiguration.setEnableArmImpedance(enableArmImpedance.get());
+         ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputStreamingConfigurationTopic(syncedRobot.getRobotModel().getSimpleRobotName()), impedanceConfiguration);
       }
 
       Set<String> connectedTrackers = vrContext.getAssignedTrackerRoles();
