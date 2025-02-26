@@ -16,4 +16,13 @@ perception_msgs/PlanarRegionMessage panel_planar_region
 # Last detection instant
 ihmc_common_msgs/InstantMessage last_detection_time
 
+# Internal statistics
+ihmc_common_msgs/InstantMessage opening_mechanism_first_detection_time
+
+int32 opening_mechanism_detection_count
+
+ihmc_common_msgs/InstantMessage panel_first_detection_time
+
+int32 panel_detection_count
+
 

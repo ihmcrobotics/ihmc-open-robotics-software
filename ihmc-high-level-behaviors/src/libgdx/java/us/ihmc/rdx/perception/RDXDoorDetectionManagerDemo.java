@@ -93,6 +93,7 @@ public class RDXDoorDetectionManagerDemo
 
             baseUI.getImGuiPanelManager().addPanel("ZED SVO", zedSVOPanel::render);
             baseUI.getImGuiPanelManager().addPanel("YOLO Settings", yoloSettings::renderSettings);
+            baseUI.getImGuiPanelManager().addPanel(doorDetectionPanel);
             baseUI.getPrimaryScene().addRenderableProvider(pointCloudRenderer);
             baseUI.getPrimaryScene().addRenderableProvider(planarRegionsGraphic);
             baseUI.getPrimaryScene().addRenderableProvider(doorDetectionPanel);

@@ -32,6 +32,13 @@ public class DetectedDoorMessage extends Packet<DetectedDoorMessage> implements 
             * Last detection instant
             */
    public ihmc_common_msgs.msg.dds.InstantMessage last_detection_time_;
+   /**
+            * Internal statistics
+            */
+   public ihmc_common_msgs.msg.dds.InstantMessage opening_mechanism_first_detection_time_;
+   public int opening_mechanism_detection_count_;
+   public ihmc_common_msgs.msg.dds.InstantMessage panel_first_detection_time_;
+   public int panel_detection_count_;
 
    public DetectedDoorMessage()
    {
@@ -40,6 +47,8 @@ public class DetectedDoorMessage extends Packet<DetectedDoorMessage> implements 
       panel_pose_ = new us.ihmc.euclid.geometry.Pose3D();
       panel_planar_region_ = new perception_msgs.msg.dds.PlanarRegionMessage();
       last_detection_time_ = new ihmc_common_msgs.msg.dds.InstantMessage();
+      opening_mechanism_first_detection_time_ = new ihmc_common_msgs.msg.dds.InstantMessage();
+      panel_first_detection_time_ = new ihmc_common_msgs.msg.dds.InstantMessage();
    }
 
    public DetectedDoorMessage(DetectedDoorMessage other)
@@ -55,6 +64,12 @@ public class DetectedDoorMessage extends Packet<DetectedDoorMessage> implements 
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.panel_pose_, panel_pose_);
       perception_msgs.msg.dds.PlanarRegionMessagePubSubType.staticCopy(other.panel_planar_region_, panel_planar_region_);
       ihmc_common_msgs.msg.dds.InstantMessagePubSubType.staticCopy(other.last_detection_time_, last_detection_time_);
+      ihmc_common_msgs.msg.dds.InstantMessagePubSubType.staticCopy(other.opening_mechanism_first_detection_time_, opening_mechanism_first_detection_time_);
+      opening_mechanism_detection_count_ = other.opening_mechanism_detection_count_;
+
+      ihmc_common_msgs.msg.dds.InstantMessagePubSubType.staticCopy(other.panel_first_detection_time_, panel_first_detection_time_);
+      panel_detection_count_ = other.panel_detection_count_;
+
    }
 
 
@@ -104,6 +119,39 @@ public class DetectedDoorMessage extends Packet<DetectedDoorMessage> implements 
    }
 
 
+   /**
+            * Internal statistics
+            */
+   public ihmc_common_msgs.msg.dds.InstantMessage getOpeningMechanismFirstDetectionTime()
+   {
+      return opening_mechanism_first_detection_time_;
+   }
+
+   public void setOpeningMechanismDetectionCount(int opening_mechanism_detection_count)
+   {
+      opening_mechanism_detection_count_ = opening_mechanism_detection_count;
+   }
+   public int getOpeningMechanismDetectionCount()
+   {
+      return opening_mechanism_detection_count_;
+   }
+
+
+   public ihmc_common_msgs.msg.dds.InstantMessage getPanelFirstDetectionTime()
+   {
+      return panel_first_detection_time_;
+   }
+
+   public void setPanelDetectionCount(int panel_detection_count)
+   {
+      panel_detection_count_ = panel_detection_count;
+   }
+   public int getPanelDetectionCount()
+   {
+      return panel_detection_count_;
+   }
+
+
    public static Supplier<DetectedDoorMessagePubSubType> getPubSubType()
    {
       return DetectedDoorMessagePubSubType::new;
@@ -126,6 +174,12 @@ public class DetectedDoorMessage extends Packet<DetectedDoorMessage> implements 
       if (!this.panel_pose_.epsilonEquals(other.panel_pose_, epsilon)) return false;
       if (!this.panel_planar_region_.epsilonEquals(other.panel_planar_region_, epsilon)) return false;
       if (!this.last_detection_time_.epsilonEquals(other.last_detection_time_, epsilon)) return false;
+      if (!this.opening_mechanism_first_detection_time_.epsilonEquals(other.opening_mechanism_first_detection_time_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.opening_mechanism_detection_count_, other.opening_mechanism_detection_count_, epsilon)) return false;
+
+      if (!this.panel_first_detection_time_.epsilonEquals(other.panel_first_detection_time_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.panel_detection_count_, other.panel_detection_count_, epsilon)) return false;
+
 
       return true;
    }
@@ -144,6 +198,12 @@ public class DetectedDoorMessage extends Packet<DetectedDoorMessage> implements 
       if (!this.panel_pose_.equals(otherMyClass.panel_pose_)) return false;
       if (!this.panel_planar_region_.equals(otherMyClass.panel_planar_region_)) return false;
       if (!this.last_detection_time_.equals(otherMyClass.last_detection_time_)) return false;
+      if (!this.opening_mechanism_first_detection_time_.equals(otherMyClass.opening_mechanism_first_detection_time_)) return false;
+      if(this.opening_mechanism_detection_count_ != otherMyClass.opening_mechanism_detection_count_) return false;
+
+      if (!this.panel_first_detection_time_.equals(otherMyClass.panel_first_detection_time_)) return false;
+      if(this.panel_detection_count_ != otherMyClass.panel_detection_count_) return false;
+
 
       return true;
    }
@@ -163,7 +223,15 @@ public class DetectedDoorMessage extends Packet<DetectedDoorMessage> implements 
       builder.append("panel_planar_region=");
       builder.append(this.panel_planar_region_);      builder.append(", ");
       builder.append("last_detection_time=");
-      builder.append(this.last_detection_time_);
+      builder.append(this.last_detection_time_);      builder.append(", ");
+      builder.append("opening_mechanism_first_detection_time=");
+      builder.append(this.opening_mechanism_first_detection_time_);      builder.append(", ");
+      builder.append("opening_mechanism_detection_count=");
+      builder.append(this.opening_mechanism_detection_count_);      builder.append(", ");
+      builder.append("panel_first_detection_time=");
+      builder.append(this.panel_first_detection_time_);      builder.append(", ");
+      builder.append("panel_detection_count=");
+      builder.append(this.panel_detection_count_);
       builder.append("}");
       return builder.toString();
    }

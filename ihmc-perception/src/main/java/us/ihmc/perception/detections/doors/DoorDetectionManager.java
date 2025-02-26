@@ -23,6 +23,10 @@ import java.util.Set;
 
 public class DoorDetectionManager
 {
+   // Parameters
+   private static final double MAX_DETECTION_JUMP_DISTANCE = 0.75;
+   static final double DETECTION_EXPIRATION_SECONDS = 2.0;
+
    static final String DOOR_STRING = "door";
    static final String PANEL_STRING = "door_panel";
 
@@ -35,10 +39,6 @@ public class DoorDetectionManager
 
    // Detections
    private final List<DetectedDoor> detectedDoors = new LinkedList<>();
-
-   // Parameters
-   private double maxDetectionJumpDistance = 0.5;
-   private double detectionExpirationSeconds = 2.0;
 
    public DoorDetectionManager(ROS2Node ros2Node)
    {
@@ -56,7 +56,7 @@ public class DoorDetectionManager
    {
       // Remove old detections
       detectedDoors.removeIf(doorDetection -> doorDetection.getLastDetectedTime()
-                                                           .plusNanos(Conversions.secondsToNanoseconds(detectionExpirationSeconds))
+                                                           .plusNanos(Conversions.secondsToNanoseconds(DETECTION_EXPIRATION_SECONDS))
                                                            .isBefore(Instant.now()));
       // Publish detected doors message
       if (publishThrottler.run())
@@ -94,7 +94,7 @@ public class DoorDetectionManager
 
    private void registerNewDetectionsInternal(List<InstantDetection> newDetections)
    {
-      double maxDistanceSquared = maxDetectionJumpDistance * maxDetectionJumpDistance;
+      double maxDistanceSquared = MAX_DETECTION_JUMP_DISTANCE * MAX_DETECTION_JUMP_DISTANCE;
 
       // Create a priority queue of potential matches
       PriorityQueue<Entry<DetectedDoor, InstantDetection>> potentialMatches = new PriorityQueue<>(Comparator.comparingDouble(entry -> entry.getKey()

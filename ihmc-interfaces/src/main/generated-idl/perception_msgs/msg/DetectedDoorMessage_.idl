@@ -40,6 +40,13 @@ module perception_msgs
          * Last detection instant
          */
         ihmc_common_msgs::msg::dds::InstantMessage last_detection_time;
+        /**
+         * Internal statistics
+         */
+        ihmc_common_msgs::msg::dds::InstantMessage opening_mechanism_first_detection_time;
+        long opening_mechanism_detection_count;
+        ihmc_common_msgs::msg::dds::InstantMessage panel_first_detection_time;
+        long panel_detection_count;
       };
     };
   };

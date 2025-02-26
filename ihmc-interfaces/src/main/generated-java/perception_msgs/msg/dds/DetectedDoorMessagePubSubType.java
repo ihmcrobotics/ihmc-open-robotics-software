@@ -15,7 +15,7 @@ public class DetectedDoorMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "0e347f3197bb05f1dce671b23500160878f7e468544dff6bb1aa81b758c6e254";
+   		return "1f28bf94e8ea9d2e71e803e690eacabed2392c8e7b9c7923e3067ff0c11ca2ea";
    }
    
    @Override
@@ -62,6 +62,14 @@ public class DetectedDoorMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
       current_alignment += ihmc_common_msgs.msg.dds.InstantMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += ihmc_common_msgs.msg.dds.InstantMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += ihmc_common_msgs.msg.dds.InstantMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       return current_alignment - initial_alignment;
    }
@@ -85,6 +93,16 @@ public class DetectedDoorMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
       current_alignment += ihmc_common_msgs.msg.dds.InstantMessagePubSubType.getCdrSerializedSize(data.getLastDetectionTime(), current_alignment);
 
+      current_alignment += ihmc_common_msgs.msg.dds.InstantMessagePubSubType.getCdrSerializedSize(data.getOpeningMechanismFirstDetectionTime(), current_alignment);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += ihmc_common_msgs.msg.dds.InstantMessagePubSubType.getCdrSerializedSize(data.getPanelFirstDetectionTime(), current_alignment);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -96,6 +114,12 @@ public class DetectedDoorMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
       geometry_msgs.msg.dds.PosePubSubType.write(data.getPanelPose(), cdr);
       perception_msgs.msg.dds.PlanarRegionMessagePubSubType.write(data.getPanelPlanarRegion(), cdr);
       ihmc_common_msgs.msg.dds.InstantMessagePubSubType.write(data.getLastDetectionTime(), cdr);
+      ihmc_common_msgs.msg.dds.InstantMessagePubSubType.write(data.getOpeningMechanismFirstDetectionTime(), cdr);
+      cdr.write_type_2(data.getOpeningMechanismDetectionCount());
+
+      ihmc_common_msgs.msg.dds.InstantMessagePubSubType.write(data.getPanelFirstDetectionTime(), cdr);
+      cdr.write_type_2(data.getPanelDetectionCount());
+
    }
 
    public static void read(perception_msgs.msg.dds.DetectedDoorMessage data, us.ihmc.idl.CDR cdr)
@@ -105,6 +129,12 @@ public class DetectedDoorMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
       geometry_msgs.msg.dds.PosePubSubType.read(data.getPanelPose(), cdr);	
       perception_msgs.msg.dds.PlanarRegionMessagePubSubType.read(data.getPanelPlanarRegion(), cdr);	
       ihmc_common_msgs.msg.dds.InstantMessagePubSubType.read(data.getLastDetectionTime(), cdr);	
+      ihmc_common_msgs.msg.dds.InstantMessagePubSubType.read(data.getOpeningMechanismFirstDetectionTime(), cdr);	
+      data.setOpeningMechanismDetectionCount(cdr.read_type_2());
+      	
+      ihmc_common_msgs.msg.dds.InstantMessagePubSubType.read(data.getPanelFirstDetectionTime(), cdr);	
+      data.setPanelDetectionCount(cdr.read_type_2());
+      	
 
    }
 
@@ -121,6 +151,12 @@ public class DetectedDoorMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
       ser.write_type_a("last_detection_time", new ihmc_common_msgs.msg.dds.InstantMessagePubSubType(), data.getLastDetectionTime());
 
+      ser.write_type_a("opening_mechanism_first_detection_time", new ihmc_common_msgs.msg.dds.InstantMessagePubSubType(), data.getOpeningMechanismFirstDetectionTime());
+
+      ser.write_type_2("opening_mechanism_detection_count", data.getOpeningMechanismDetectionCount());
+      ser.write_type_a("panel_first_detection_time", new ihmc_common_msgs.msg.dds.InstantMessagePubSubType(), data.getPanelFirstDetectionTime());
+
+      ser.write_type_2("panel_detection_count", data.getPanelDetectionCount());
    }
 
    @Override
@@ -136,6 +172,12 @@ public class DetectedDoorMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
       ser.read_type_a("last_detection_time", new ihmc_common_msgs.msg.dds.InstantMessagePubSubType(), data.getLastDetectionTime());
 
+      ser.read_type_a("opening_mechanism_first_detection_time", new ihmc_common_msgs.msg.dds.InstantMessagePubSubType(), data.getOpeningMechanismFirstDetectionTime());
+
+      data.setOpeningMechanismDetectionCount(ser.read_type_2("opening_mechanism_detection_count"));
+      ser.read_type_a("panel_first_detection_time", new ihmc_common_msgs.msg.dds.InstantMessagePubSubType(), data.getPanelFirstDetectionTime());
+
+      data.setPanelDetectionCount(ser.read_type_2("panel_detection_count"));
    }
 
    public static void staticCopy(perception_msgs.msg.dds.DetectedDoorMessage src, perception_msgs.msg.dds.DetectedDoorMessage dest)

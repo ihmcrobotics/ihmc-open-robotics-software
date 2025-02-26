@@ -1,6 +1,7 @@
 package us.ihmc.perception.detections.doors;
 
 import perception_msgs.msg.dds.DetectedDoorMessage;
+import us.ihmc.commons.Conversions;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.Axis2D;
@@ -10,6 +11,7 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tools.TupleTools;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.perception.detections.InstantDetection;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorModelParameters;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -17,14 +19,20 @@ import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
+import java.util.Objects;
 import java.util.UUID;
 
-import static us.ihmc.perception.detections.doors.DoorDetectionManager.DOOR_STRING;
-import static us.ihmc.perception.detections.doors.DoorDetectionManager.PANEL_STRING;
+import static us.ihmc.perception.detections.doors.DoorDetectionManager.*;
 
 public class DetectedDoor
 {
+   private static final double MAX_PLANAR_REGION_TO_OPENING_MECHANISM_DISTANCE = 0.75;
+   private static final double MIN_PLANAR_REGION_AREA = 0.2 * (DoorModelParameters.DOOR_PANEL_WIDTH * DoorModelParameters.DOOR_PANEL_HEIGHT); // 1/5th of panel area
+   private static final double STABLE_DETECTIONS_PER_SECOND = 5.0;
+   private static final double POSE_FILTER_ALPHA = 0.5;
+
    private final UUID detectionUUID;
 
    // Opening Mechanism
@@ -37,9 +45,11 @@ public class DetectedDoor
    // Detection stuff
    private Instant lastDetectionTime = Instant.MIN;
 
-   // Parameters
-   private double maxPlanarRegionToOpeningMechanismDistance = 0.75;
-   private double minPlanarRegionArea = 0.2 * (DoorModelParameters.DOOR_PANEL_WIDTH * DoorModelParameters.DOOR_PANEL_HEIGHT); // 1/5th of panel area
+   // Internal statistics
+   private Instant openingMechanismFirstDetectionTime = null;
+   private int openingMechanismDetectionCount = 0;
+   private Instant panelFirstDetectionTime = null;
+   private int panelDetectionCount = 0;
 
    public DetectedDoor()
    {
@@ -53,6 +63,30 @@ public class DetectedDoor
       panelPlanarRegion = new PlanarRegion();
    }
 
+   public DetectedDoor(DetectedDoorMessage message)
+   {
+      detectionUUID = MessageTools.toUUID(message.getDetectionUuid());
+      openingMechanism = new DoorOpeningMechanism(message.getOpeningMechanism());
+      panelPose = new Pose3D(message.getPanelPose());
+      panelPlanarRegion = PlanarRegionMessageConverter.convertToPlanarRegion(message.getPanelPlanarRegion());
+      lastDetectionTime = MessageTools.toInstant(message.getLastDetectionTime());
+
+      openingMechanismFirstDetectionTime = MessageTools.toInstant(message.getOpeningMechanismFirstDetectionTime());
+      if (openingMechanismFirstDetectionTime.equals(Instant.EPOCH))
+         openingMechanismFirstDetectionTime = null;
+      openingMechanismDetectionCount = message.getOpeningMechanismDetectionCount();
+
+      panelFirstDetectionTime = MessageTools.toInstant(message.getPanelFirstDetectionTime());
+      if (panelFirstDetectionTime.equals(Instant.EPOCH))
+         panelFirstDetectionTime = null;
+      panelDetectionCount = message.getPanelDetectionCount();
+   }
+
+   public UUID getDetectionUUID()
+   {
+      return detectionUUID;
+   }
+
    public DoorOpeningMechanism getOpeningMechanism()
    {
       return openingMechanism;
@@ -61,6 +95,16 @@ public class DetectedDoor
    public Pose3DReadOnly getPanelPose()
    {
       return panelPose;
+   }
+
+   public boolean hasPanelPosition()
+   {
+      return !panelPose.getPosition().containsNaN();
+   }
+
+   public boolean hasPanelOrientation()
+   {
+      return !panelPose.getOrientation().containsNaN();
    }
 
    public boolean hasPanelPose()
@@ -83,14 +127,53 @@ public class DetectedDoor
       return lastDetectionTime;
    }
 
+   public boolean isDetectionStable()
+   {
+      return isOpeningMechanismDetectionStable() || isPanelDetectionStable();
+   }
+
+   public boolean isOpeningMechanismDetectionStable()
+   {
+      if (openingMechanismFirstDetectionTime == null)
+         return false;
+
+      Instant now = Instant.now();
+      boolean isOldEnough = now.isAfter(openingMechanismFirstDetectionTime.plusSeconds((long) DETECTION_EXPIRATION_SECONDS));
+      double detectionsPerSecond =
+            openingMechanismDetectionCount / Conversions.millisecondsToSeconds((openingMechanismFirstDetectionTime.until(now, ChronoUnit.MILLIS)));
+      return isOldEnough && detectionsPerSecond > STABLE_DETECTIONS_PER_SECOND;
+   }
+
+   public boolean isPanelDetectionStable()
+   {
+      if (panelFirstDetectionTime == null)
+         return false;
+
+      Instant now = Instant.now();
+      boolean isOldEnough = now.isAfter(panelFirstDetectionTime.plusSeconds((long) DETECTION_EXPIRATION_SECONDS));
+      double detectionsPerSecond =
+            panelDetectionCount / Conversions.millisecondsToSeconds((panelFirstDetectionTime.until(now, ChronoUnit.MILLIS)));
+      return isOldEnough && detectionsPerSecond > STABLE_DETECTIONS_PER_SECOND;
+   }
+
    /* package-private */ double distanceSquared(InstantDetection detection)
    {
       String detectedClass = detection.getDetectedObjectClass().toLowerCase();
 
       if (detectedClass.contains(PANEL_STRING))
-         return detection.getPose().getPosition().distanceSquared(getPanelPose().getPosition());
+      {
+         if (hasPanelPosition())
+            return detection.getPose().getPosition().distanceSquared(getPanelPose().getPosition());
+         else if (openingMechanism.isPositionKnown())
+            return detection.getPose().getPosition().distanceSquared(openingMechanism.getPosition());
+      }
       else if (detectedClass.startsWith(DOOR_STRING))
-         return detection.getPose().getPosition().distanceSquared(openingMechanism.getPosition());
+      {
+         if (openingMechanism.isPositionKnown())
+            return detection.getPose().getPosition().distanceSquared(openingMechanism.getPosition());
+         else if (hasPanelPosition())
+            return detection.getPose().getPosition().distanceSquared(getPanelPose().getPosition());
+      }
 
       return Double.POSITIVE_INFINITY;
    }
@@ -101,12 +184,18 @@ public class DetectedDoor
 
       if (detectedClass.contains(PANEL_STRING))
       {
-         panelPose.getPosition().set(newDetection.getPose().getPosition());
+         if (panelFirstDetectionTime == null)
+            panelFirstDetectionTime = newDetection.getDetectionTime();
+         panelDetectionCount++;
+         updatePanelPosition(newDetection.getPose().getPosition());
       }
       else if (detectedClass.startsWith(DOOR_STRING))
       {
+         if (openingMechanismFirstDetectionTime == null)
+            openingMechanismFirstDetectionTime = newDetection.getDetectionTime();
+         openingMechanismDetectionCount++;
          openingMechanism.setName(detectedClass);
-         openingMechanism.setPosition(newDetection.getPose().getPosition());
+         openingMechanism.updatePosition(newDetection.getPose().getPosition(), POSE_FILTER_ALPHA);
       }
       else
       {
@@ -141,20 +230,37 @@ public class DetectedDoor
 
       double planarRegionYaw = TupleTools.angle(Axis2D.X, doorNormalLine.getDirection());
 
-      openingMechanism.setOrientation(new Quaternion(planarRegionYaw, 0.0, 0.0));
-      panelPose.getRotation().setYawPitchRoll(planarRegionYaw, 0.0, 0.0);
+      Quaternion orientation = new Quaternion(planarRegionYaw, 0.0, 0.0);
+      openingMechanism.updateOrientation(orientation, POSE_FILTER_ALPHA);
+      updatePanelOrientation(orientation);
    }
 
    private boolean planarRegionDistanceToOpeningMechanismFilter(PlanarRegion planarRegion)
    {
       Point3DReadOnly planarRegionCentroid = PlanarRegionTools.getCentroid3DInWorld(planarRegion);
       double distanceToOpeningMechanism = planarRegionCentroid.distance(openingMechanism.getPosition());
-      return distanceToOpeningMechanism < maxPlanarRegionToOpeningMechanismDistance;
+      return distanceToOpeningMechanism < MAX_PLANAR_REGION_TO_OPENING_MECHANISM_DISTANCE;
    }
 
    private boolean planarRegionAreaFilter(PlanarRegion planarRegion)
    {
-      return planarRegion.getArea() > minPlanarRegionArea;
+      return planarRegion.getArea() > MIN_PLANAR_REGION_AREA;
+   }
+
+   private void updatePanelPosition(Point3DReadOnly newPanelPosition)
+   {
+      if (hasPanelPosition())
+         panelPose.getPosition().interpolate(newPanelPosition, POSE_FILTER_ALPHA);
+      else
+         panelPose.getPosition().set(newPanelPosition);
+   }
+
+   private void updatePanelOrientation(QuaternionReadOnly newPanelOrientation)
+   {
+      if (hasPanelOrientation())
+         panelPose.getOrientation().interpolate(newPanelOrientation, POSE_FILTER_ALPHA);
+      else
+         panelPose.getOrientation().set(newPanelOrientation);
    }
 
    public void toMessage(DetectedDoorMessage messageToPack)
@@ -164,5 +270,9 @@ public class DetectedDoor
       messageToPack.getPanelPose().set(panelPose);
       messageToPack.getPanelPlanarRegion().set(PlanarRegionMessageConverter.convertToPlanarRegionMessage(panelPlanarRegion));
       MessageTools.toMessage(lastDetectionTime, messageToPack.getLastDetectionTime());
+      MessageTools.toMessage(Objects.requireNonNullElse(openingMechanismFirstDetectionTime, Instant.EPOCH), messageToPack.getOpeningMechanismFirstDetectionTime());
+      messageToPack.setOpeningMechanismDetectionCount(openingMechanismDetectionCount);
+      MessageTools.toMessage(Objects.requireNonNullElse(panelFirstDetectionTime, Instant.EPOCH), messageToPack.getPanelFirstDetectionTime());
+      messageToPack.setPanelDetectionCount(panelDetectionCount);
    }
 }

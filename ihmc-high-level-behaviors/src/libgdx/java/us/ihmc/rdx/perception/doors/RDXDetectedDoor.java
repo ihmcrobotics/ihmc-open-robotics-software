@@ -5,52 +5,49 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import perception_msgs.msg.dds.DetectedDoorMessage;
-import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.perception.detections.doors.DetectedDoor;
 import us.ihmc.rdx.sceneManager.RDXRenderableProvider;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
-import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 import java.util.Set;
 
 public class RDXDetectedDoor implements RDXRenderableProvider
 {
+   private DetectedDoor detection;
+
+   // TODO: Add opening mechanism models
    private final RDXReferenceFrameGraphic openingMechanismFrameGraphic;
    private final RDXReferenceFrameGraphic panelFrameGraphic;
    private final RDXPlanarRegionsGraphic planarRegionGraphic;
 
    public RDXDetectedDoor()
    {
-      openingMechanismFrameGraphic = new RDXReferenceFrameGraphic(0.2, Color.RED);
+      openingMechanismFrameGraphic = new RDXReferenceFrameGraphic(0.2);
       panelFrameGraphic = new RDXReferenceFrameGraphic(0.2, Color.BLUE);
       planarRegionGraphic = new RDXPlanarRegionsGraphic();
       planarRegionGraphic.setBlendOpacity(0.6f);
    }
 
-   public void update(DetectedDoor detectedDoor)
-   {
-      update(detectedDoor.getOpeningMechanism().getPose(),
-             detectedDoor.getPanelPose(),
-             detectedDoor.getPanelPlanarRegion());
-   }
-
    public void update(DetectedDoorMessage detectedDoorMessage)
    {
-      update(detectedDoorMessage.getOpeningMechanism().getPose(),
-             detectedDoorMessage.getPanelPose(),
-             PlanarRegionMessageConverter.convertToPlanarRegion(detectedDoorMessage.getPanelPlanarRegion()));
+      update(new DetectedDoor(detectedDoorMessage));
    }
 
-   public void update(Pose3DReadOnly openingMechanismPose, Pose3DReadOnly panelPose, PlanarRegion panelPlanarRegion)
+   public void update(DetectedDoor detectedDoor)
    {
-      openingMechanismFrameGraphic.setPoseInWorldFrame(openingMechanismPose);
-      panelFrameGraphic.setPoseInWorldFrame(panelPose);
-      planarRegionGraphic.generateMeshes(new PlanarRegionsList(panelPlanarRegion));
+      detection = detectedDoor;
+      openingMechanismFrameGraphic.setPoseInWorldFrame(detection.getOpeningMechanism().getPose());
+      panelFrameGraphic.setPoseInWorldFrame(detection.getPanelPose());
+      planarRegionGraphic.generateMeshes(new PlanarRegionsList(detection.getPanelPlanarRegion()));
       planarRegionGraphic.update();
+   }
+
+   public DetectedDoor getDetection()
+   {
+      return detection;
    }
 
    @Override
