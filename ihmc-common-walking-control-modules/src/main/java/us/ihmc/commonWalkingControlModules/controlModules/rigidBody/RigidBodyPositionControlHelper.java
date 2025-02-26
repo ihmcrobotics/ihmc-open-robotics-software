@@ -99,10 +99,6 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
    private final FrameVector3D desiredVelocity = new FrameVector3D();
    private final FrameVector3D feedForwardAcceleration = new FrameVector3D();
 
-   TDoubleArrayList feedForwardTrajectoryTimes = new TDoubleArrayList();
-   RecyclingArrayList<SpatialVector> feedForwardTrajectoryList = new RecyclingArrayList<>(200, SpatialVector.class);
-   RecyclingArrayList<SE3PIDGainsTrajectoryPoint> gainsTrajectoryPoints;
-
    private final BooleanProvider useBaseFrameForControl;
    private final YoBoolean isFeedforwardEnabled;
 
@@ -161,8 +157,6 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
       feedbackControlCommand.setPrimaryBase(baseBody);
       isFeedforwardEnabled = new YoBoolean(prefix + "FeedforwardEnabled", registry);
       isFeedforwardEnabled.set(true);
-
-      gainsTrajectoryPoints = new RecyclingArrayList<>(200, SE3PIDGainsTrajectoryPoint.class);
 
       defaultControlFrame = controlFrame;
       bodyFrame = bodyToControl.getBodyFixedFrame();
@@ -351,20 +345,7 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
       trajectoryGenerator.getLinearData(desiredPosition, desiredVelocity, feedForwardAcceleration);
       updateFunctionGenerators();
 
-      if (!feedForwardTrajectoryList.isEmpty())
-      {
-         feedForwardAcceleration.set(feedForwardTrajectoryList.get(Math.max(
-               feedForwardTrajectoryList.size() - pointQueue.size() - trajectoryGenerator.getCurrentNumberOfWaypoints()
-               + trajectoryGenerator.getCurrentWaypointIndex(), 0)).getLinearPart());
-      }
-
-      if (!gainsTrajectoryPoints.isEmpty())
-      {
-         gains = gainsTrajectoryPoints.get(Math.max(gainsTrajectoryPoints.size() - pointQueue.size() - trajectoryGenerator.getCurrentNumberOfWaypoints()
-                                                    + trajectoryGenerator.getCurrentWaypointIndex(), 0)).getAngular();
-         feedbackControlCommand.setGains(gains);
-      }
-      else if (!isImpedanceEnabled.getValue())
+      if (!isImpedanceEnabled.getValue())
       {
          feedbackControlCommand.setGains(gains);
       }
@@ -716,21 +697,6 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
       {
          return pointQueue.peekLast().getTime();
       }
-   }
-
-   public TDoubleArrayList getFeedForwardTrajectoryTimes()
-   {
-      return feedForwardTrajectoryTimes;
-   }
-
-   public RecyclingArrayList<SpatialVector> getFeedForwardTrajectoryList()
-   {
-      return feedForwardTrajectoryList;
-   }
-
-   public RecyclingArrayList<SE3PIDGainsTrajectoryPoint> getGainsTrajectoryPoints()
-   {
-      return gainsTrajectoryPoints;
    }
 
    public void clear()
