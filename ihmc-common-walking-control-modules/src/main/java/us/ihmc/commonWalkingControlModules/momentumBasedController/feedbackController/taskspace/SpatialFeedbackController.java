@@ -413,7 +413,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       dampingRatioMatrix.set(5, 5, gains.getPositionGains().getDampingRatios()[2]);
       command.getSpatialAccelerationCommand().getSelectionMatrix(selectionMatrix);
       // This one should be set from the orientation gains, put zero for x, y kind of this way
-      //      selectionMatrix.getAngularPart().setAxisSelection(false, false, true);
+      selectionMatrix.getAngularPart().setAxisSelection(false, false, true);
       angularGainsFrame = command.getAngularGainsFrame();
       linearGainsFrame = command.getLinearGainsFrame();
 
