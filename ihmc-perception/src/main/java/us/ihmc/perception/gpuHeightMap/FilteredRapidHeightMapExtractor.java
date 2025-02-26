@@ -17,7 +17,7 @@ import static org.bytedeco.cuda.global.cudart.*;
 public class FilteredRapidHeightMapExtractor
 {
    private static final int BLOCK_SIZE_XY = 32;
-   private static final double ALPHA = 0.2;
+   private static final float ALPHA = 0.2F;
 
    private final cudaPitchedPtr pointerTo3DArray;
    private int currentIndex;
@@ -74,6 +74,9 @@ public class FilteredRapidHeightMapExtractor
                       pointerTo3DArray.ysize(),
                       cudaMemcpyDefault);
 
+         error = cudaStreamSynchronize(stream);
+         CUDATools.checkCUDAError(error);
+
          currentIndex = (currentIndex + 1) % layers;
          return latestGlobalHeightMap;
       }
@@ -87,7 +90,7 @@ public class FilteredRapidHeightMapExtractor
       kernel.withLong(pointerTo3DArray.pitch() * rows);
       kernel.withInt(rows);
       kernel.withInt(cols);
-      kernel.withDouble(ALPHA);
+      kernel.withFloat(ALPHA);
 
       //Execute the CUDA kernels with the provided stream
       //Each kernel performs a specific task related to the height map update, registration, and cropping
@@ -109,6 +112,9 @@ public class FilteredRapidHeightMapExtractor
                    pointerTo3DArray.xsize(),
                    pointerTo3DArray.ysize(),
                    cudaMemcpyDefault);
+
+      error = cudaStreamSynchronize(stream);
+      CUDATools.checkCUDAError(error);
 
       currentIndex = (currentIndex + 1) % layers;
 
