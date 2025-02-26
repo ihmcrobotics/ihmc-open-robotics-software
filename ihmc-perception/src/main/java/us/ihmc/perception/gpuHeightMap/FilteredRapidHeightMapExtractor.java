@@ -66,15 +66,14 @@ public class FilteredRapidHeightMapExtractor
       {
          loopTracker++;
 
-         cudaMemcpy2D(pointerTo3DArray.ptr().position(currentIndex * pointerTo3DArray.pitch() * pointerTo3DArray.ysize()),
-                      pointerTo3DArray.pitch(),
-                      latestGlobalHeightMap.data(),
-                      latestGlobalHeightMap.step(),
-                      pointerTo3DArray.xsize(),
-                      pointerTo3DArray.ysize(),
-                      cudaMemcpyDefault);
+         error = cudaMemcpy2D(pointerTo3DArray.ptr().position(currentIndex * pointerTo3DArray.pitch() * pointerTo3DArray.ysize()),
+                              pointerTo3DArray.pitch(),
+                              latestGlobalHeightMap.data(),
+                              latestGlobalHeightMap.step(),
+                              pointerTo3DArray.xsize(),
+                              pointerTo3DArray.ysize(),
+                              cudaMemcpyDefault);
 
-         error = cudaStreamSynchronize(stream);
          CUDATools.checkCUDAError(error);
 
          currentIndex = (currentIndex + 1) % layers;
@@ -105,15 +104,14 @@ public class FilteredRapidHeightMapExtractor
       CUDATools.checkCUDAError(error);
 
       // Upload the latest height map to the GPU for the next iteration
-      cudaMemcpy2D(pointerTo3DArray.ptr().position(currentIndex * pointerTo3DArray.pitch() * pointerTo3DArray.ysize()),
-                   pointerTo3DArray.pitch(),
-                   latestGlobalHeightMap.data(),
-                   latestGlobalHeightMap.step(),
-                   pointerTo3DArray.xsize(),
-                   pointerTo3DArray.ysize(),
-                   cudaMemcpyDefault);
+      error = cudaMemcpy2D(pointerTo3DArray.ptr().position(currentIndex * pointerTo3DArray.pitch() * pointerTo3DArray.ysize()),
+                           pointerTo3DArray.pitch(),
+                           latestGlobalHeightMap.data(),
+                           latestGlobalHeightMap.step(),
+                           pointerTo3DArray.xsize(),
+                           pointerTo3DArray.ysize(),
+                           cudaMemcpyDefault);
 
-      error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
 
       currentIndex = (currentIndex + 1) % layers;
