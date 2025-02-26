@@ -114,7 +114,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
             }
          }
 
-         //Trigger commanded behavior
+         // Trigger commanded behavior
          if (commandedBehaviorIndex >= 0)
          {
             // Reset state of failed leaves
@@ -138,7 +138,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
       {
          statusMessage.getRobotMidFeetUnderPelvisPoseInWorld().set(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetUnderPelvisFrame));
 
-         // ------------ Scene --------------
+         // Scene
          statusMessage.getObjects().clear();
          boolean isRoot = true;
          for (String nodeName : sceneGraph.getNodeNameList())
@@ -155,7 +155,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
             objectMessage.getObjectPoseInRobotFrame().set(nodeFrame.getTransformToDesiredFrame(syncedRobot.getReferenceFrames().getMidFeetUnderPelvisFrame()));
          }
 
-         // ------------ Behaviors --------------
+         // Behaviors
          statusMessage.getAvailableBehaviors().resetQuick();
          for (int i = 0; i < state.getCheckPoints().size(); i++)
          {
@@ -164,7 +164,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
                statusMessage.getAvailableBehaviors().add(checkPointName);
          }
 
-         // ------------ Monitoring --------------
+         // Monitoring
          statusMessage.setFailedBehavior("");
          for (var leaf : state.getActionSequence().getOrderedLeaves())
          {
@@ -227,7 +227,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
          ros2.publish(AutonomyAPI.AI2R_STATUS, statusMessage);
       }
 
-      // ------------ Coordination --------------
+      // Coordination
       // Jump to end of sequence, once completed a behavior
       for (int i = 0; i < state.getCheckPoints().size(); i++)
       {
