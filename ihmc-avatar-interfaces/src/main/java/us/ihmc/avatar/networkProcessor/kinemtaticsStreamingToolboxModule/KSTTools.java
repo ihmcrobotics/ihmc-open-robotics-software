@@ -421,7 +421,7 @@ public class KSTTools
       for (RobotSide robotSide : RobotSide.values)
       {
          if (areHandTaskspaceOutputsEnabled.get(robotSide).getValue())
-            streamingMessageFactory.computeHandStreamingMessage(robotSide, configurationCommand.getHandTrajectoryFrameId(robotSide));
+            streamingMessageFactory.computeHandStreamingMessage(robotSide, configurationCommand.getHandTrajectoryFrameId(robotSide), areArmImpedanceOutputsEnabled.getValue());
 
          if (areArmJointspaceOutputsEnabled.get(robotSide).getValue())
             streamingMessageFactory.computeArmStreamingMessage(robotSide);
@@ -483,7 +483,7 @@ public class KSTTools
       for (RobotSide robotSide : RobotSide.values)
       {
          if (areHandTaskspaceOutputsEnabled.get(robotSide).getValue())
-            trajectoryMessageFactory.computeHandTrajectoryMessage(robotSide);
+            trajectoryMessageFactory.computeHandTrajectoryMessage(robotSide, areArmImpedanceOutputsEnabled.getValue());
 
          if (areArmJointspaceOutputsEnabled.get(robotSide).getValue())
             trajectoryMessageFactory.computeArmTrajectoryMessage(robotSide);

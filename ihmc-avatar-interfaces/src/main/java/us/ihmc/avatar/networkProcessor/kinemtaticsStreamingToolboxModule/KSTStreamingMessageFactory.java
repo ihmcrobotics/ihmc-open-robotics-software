@@ -181,15 +181,20 @@ public class KSTStreamingMessageFactory
 
    public void computeHandStreamingMessage(RobotSide robotSide)
    {
-      computeHandStreamingMessage(robotSide, worldFrame);
+      computeHandStreamingMessage(robotSide, worldFrame, false);
    }
 
-   public void computeHandStreamingMessage(RobotSide robotSide, ReferenceFrame trajectoryFrame)
+   public void computeHandStreamingMessage(RobotSide robotSide, boolean impedanceEnabled)
    {
-      computeHandStreamingMessage(robotSide, trajectoryFrame.getFrameNameHashCode());
+      computeHandStreamingMessage(robotSide, worldFrame, impedanceEnabled);
    }
 
-   public void computeHandStreamingMessage(RobotSide robotSide, long trajectoryFrameId)
+   public void computeHandStreamingMessage(RobotSide robotSide, ReferenceFrame trajectoryFrame, boolean impedanceEnabled)
+   {
+      computeHandStreamingMessage(robotSide, trajectoryFrame.getFrameNameHashCode(), impedanceEnabled);
+   }
+
+   public void computeHandStreamingMessage(RobotSide robotSide, long trajectoryFrameId, boolean impedanceEnabled)
    {
       checkIfDataHasBeenSet();
 
@@ -214,7 +219,7 @@ public class KSTStreamingMessageFactory
       packCustomControlFrame(handBodyFixedFrame, handControlFrame, handStreamingMessage);
       handStreamingMessage.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryFrameId);
       handStreamingMessage.getFrameInformation().setDataReferenceFrameId(worldFrame.getFrameNameHashCode());
-//      handStreamingMessage.setUseImpedance();
+      handStreamingMessage.setUseImpedance(impedanceEnabled);
 
       packSE3TrajectoryPointMessage(desiredPose, desiredSpatialVelocity, desiredSpatialAcceleration, handStreamingMessage);
       yoHandStreamingMessages.get(robotSide).setFromMessage(handStreamingMessage);

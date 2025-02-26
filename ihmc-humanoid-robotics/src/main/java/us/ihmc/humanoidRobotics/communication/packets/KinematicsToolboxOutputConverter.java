@@ -149,17 +149,17 @@ public class KinematicsToolboxOutputConverter
 
    public void computeHandTrajectoryMessage(RobotSide robotSide)
    {
-      computeHandTrajectoryMessage(robotSide, worldFrame);
+      computeHandTrajectoryMessage(robotSide, worldFrame, false);
    }
 
-   public void computeHandTrajectoryMessage(RobotSide robotSide, ReferenceFrame trajectoryFrame)
+   public void computeHandTrajectoryMessage(RobotSide robotSide, boolean impedanceEnabled)
    {
-      computeHandTrajectoryMessage(robotSide, trajectoryFrame.getFrameNameHashCode());
+      computeHandTrajectoryMessage(robotSide, worldFrame, impedanceEnabled);
    }
 
-   public void computeHandTrajectoryMessage(RobotSide robotSide, long trajectoryFrameId)
+   public void computeHandTrajectoryMessage(RobotSide robotSide, ReferenceFrame trajectoryFrame, boolean impedanceEnabled)
    {
-      computeHandTrajectoryMessage(robotSide, trajectoryFrameId, false);
+      computeHandTrajectoryMessage(robotSide, trajectoryFrame.getFrameNameHashCode(), impedanceEnabled);
    }
 
    public void computeHandTrajectoryMessage(RobotSide robotSide, long trajectoryFrameId, boolean impedanceEnabled)
