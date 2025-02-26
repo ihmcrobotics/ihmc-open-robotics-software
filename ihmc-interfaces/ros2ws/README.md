@@ -1,4 +1,4 @@
-# Nadia Examples
+# Behavior System Examples
 These examples should provide insight on how to communicate with the robot (hardware, or simulation) over IHMC's ROS2 interfaces.
 This directory can be treated as a colcon workspace. 
 
