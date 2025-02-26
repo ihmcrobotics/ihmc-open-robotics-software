@@ -9,15 +9,14 @@ import org.lwjgl.assimp.AIFileTellProcI;
 import org.lwjgl.assimp.AIFileWriteProcI;
 import org.lwjgl.assimp.Assimp;
 import org.lwjgl.system.MemoryUtil;
-import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.resources.ResourceTools;
 import us.ihmc.tools.string.StringTools;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.nio.ByteBuffer;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.Supplier;
@@ -27,22 +26,25 @@ public class AssimpOpenedFile
    private final long assimpFileStructAddress;
    private String fileName;
 
-   public AssimpOpenedFile(long assimpFileIOAddress, long fileNameAddress, long openModeAddress)
+   public AssimpOpenedFile(long assimpFileIOAddress, long fileNameAddress, long openModeAddress) throws IOException
    {
       fileName = MemoryUtil.memUTF8(fileNameAddress);
       String openMode = MemoryUtil.memUTF8(openModeAddress);
       LogTools.debug("{}: Opening in mode: {}", fileName, openMode);
 
       Path filePath = Paths.get(fileName);
-      URL url = ResourceTools.getResourceSystem(filePath);
-      if (url == null)
+
+      URL resourceUrl = ResourceTools.getResourceSystem(filePath);
+      if (resourceUrl == null)
       {
          Supplier<String> message = StringTools.format("Could not get resource: {}", filePath);
          LogTools.error(message);
          throw new RuntimeException(message.get());
       }
 
-      byte[] byteArray = ExceptionTools.handle(() -> Files.readAllBytes(filePath), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+      InputStream inputStream = resourceUrl.openStream();
+      byte[] byteArray = inputStream.readAllBytes();
+      inputStream.close();
 
       final MutableLong position = new MutableLong(0);
 

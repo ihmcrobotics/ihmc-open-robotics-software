@@ -4,13 +4,13 @@ import imgui.ImGui;
 import imgui.type.ImInt;
 import perception_msgs.msg.dds.ZEDSVOCurrentFileMessage;
 import std_msgs.msg.dds.Int64;
+import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.sensors.deprecated.ZEDColorDepthImageRetrieverSVO.RecordMode;
-import us.ihmc.commons.thread.Throttler;
 
 public class RDXZEDSVORecorderPanel
 {
@@ -58,7 +58,7 @@ public class RDXZEDSVORecorderPanel
          if (!holdingOnToTheSlider)
             requestedPosition.set((int) latestMessage.getCurrentPosition());
 
-         if (ImGuiTools.sliderInt(labels.get("Position"), requestedPosition, 0, (int) latestMessage.getLength()))
+         if (ImGuiTools.sliderInt(labels.get("Position"), requestedPosition, 0, Math.max((int) latestMessage.getLength(), 0)))
          {
             holdingOnToTheSlider = true;
 
