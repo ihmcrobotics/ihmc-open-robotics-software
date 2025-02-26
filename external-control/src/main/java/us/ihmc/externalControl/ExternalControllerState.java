@@ -14,6 +14,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.externalControl.library.ExternalControlNativeLibrary;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.robotics.math.filters.AlphaBasedOnBreakFrequencyProvider;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -90,8 +91,11 @@ public class ExternalControllerState extends HighLevelControllerState
                                                                                                        switchWindowSize);
 
    private final YoDouble rootHeightOffset = new YoDouble("rootHeightOffset", registry);
+   private final YoDouble rootHeightBias = new YoDouble("rootHeightBias", registry);
    private final YoDouble rootHeightOffsetBreakFrequency = new YoDouble("rootHeightOffsetBreakFrequency", registry);
    private final AlphaFilteredYoVariable filteredRootHeightOffset;
+
+   private final YoBoolean externalControlSocketIsOn = new YoBoolean("externalControlSocketIsOn", registry);
 
    public ExternalControllerState(HighLevelControllerParameters highLevelControllerParameters,
                                   HighLevelHumanoidControllerToolbox controllerToolbox,
@@ -111,10 +115,12 @@ public class ExternalControllerState extends HighLevelControllerState
       minimumHeightDifferenceForSwitchingSide.set(0.005);
       switchWindowSize.set(4);
 
+      rootHeightBias.set(-0.05);
       rootHeightOffsetBreakFrequency.set(10.0);
+      AlphaBasedOnBreakFrequencyProvider
       DoubleProvider alphaProvider = () -> AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(rootHeightOffsetBreakFrequency.getDoubleValue(),
                                                                                                     controllerToolbox.getControlDT());
-      filteredRootHeightOffset = new AlphaFilteredYoVariable("filteredRootHeightOffset", registry, alphaProvider, rootHeightOffset);
+      filteredRootHeightOffset = new AlphaFilteredYoVariable("filteredRootHeightOffset", registry, alphaProvider);
 
       ExternalControlNativeLibrary.load();
 
@@ -130,6 +136,15 @@ public class ExternalControllerState extends HighLevelControllerState
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledJoints);
       frozenJointDataHolder.registerJointsWithEmptyData(controlledJoints);
       externalJointDataHolder.registerJointsWithEmptyData(controlledJoints);
+
+      externalControlSocketIsOn.set(true);
+      externalControlSocketIsOn.addListener(v ->
+      {
+         if (externalControlSocketIsOn.getBooleanValue())
+            externalControl.startSocket();
+         else
+            externalControl.stopSocket();
+      });
 
       YoRegistry registryForBlenders = REDUCE_YOVARIABLES ? null : registry;
 
@@ -179,7 +194,7 @@ public class ExternalControllerState extends HighLevelControllerState
 
       lowestFootSide.set(null);
       filteredShouldSwitchSupportSide.set(false);
-      filteredRootHeightOffset.set(0.0);
+      filteredRootHeightOffset.set(rootHeightBias.getValue());
    }
 
    @Override
@@ -353,7 +368,7 @@ public class ExternalControllerState extends HighLevelControllerState
       // We want the height of the lowest foot post-offset to be zero. So the offset is the negative of the height.
       rootHeightOffset.set(-lowestFootPosition.getZ());
       // Apply a low-pass filter to the offset.
-      filteredRootHeightOffset.update();
+      filteredRootHeightOffset.update(rootHeightOffset.getDoubleValue() + rootHeightBias.getDoubleValue());
    }
 
    @Override

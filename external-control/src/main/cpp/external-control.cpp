@@ -78,12 +78,12 @@ namespace ihmc
             const Eigen::Vector3d base_angular_velocity = state.segment(10 + number_of_joints_, 3);
             const Eigen::VectorXd joint_velocities = state.tail(number_of_joints_);
 
+            zmq_controller_.compute(current_time, x_data, x_rows, u_data, u_rows, behavior_status);
+
             desired_state_data_.head(7) << base_position, base_orientation;
             desired_state_data_.segment(7, number_of_joints_) = zmq_controller_.get_desired_joint_positions();
             desired_state_data_.segment(7 + number_of_joints_, 6) << base_linear_velocity, base_angular_velocity;
             desired_state_data_.tail(number_of_joints_) = zmq_controller_.get_desired_joint_velocities();
-
-            zmq_controller_.compute(current_time, x_data, x_rows, u_data, u_rows, behavior_status);
 
             desired_control_data_ = zmq_controller_.get_desired_joint_torques();
             p_gains_ = zmq_controller_.get_desired_joint_stiffnesses();

@@ -154,6 +154,16 @@ public class ExternalControl
       }
    }
 
+   public void startSocket()
+   {
+      externalControlImpl.startSocket();
+   }
+
+   public void stopSocket()
+   {
+      externalControlImpl.stopSocket();
+   }
+
    public SolutionJointData getSolutionData(OneDoFJointReadOnly joint)
    {
       return solutionJointData.get(joint);

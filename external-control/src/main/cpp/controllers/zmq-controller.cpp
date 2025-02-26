@@ -25,6 +25,7 @@ namespace ihmc
         socket_cpp = zmq::socket_t(context, zmq::socket_type::req);
         int timeout = 500;
         socket_cpp.setsockopt(ZMQ_RCVTIMEO, &timeout, sizeof(timeout));
+        socket_cpp.setsockopt(ZMQ_SNDTIMEO, &timeout, sizeof(timeout));
 
         socket_cpp.bind("tcp://*:5555");
     }

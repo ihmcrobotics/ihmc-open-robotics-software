@@ -74,6 +74,10 @@ public class ExternalControlWrapper extends us.ihmc.externalControl.ExternalCont
         public native @Cast("bool") boolean getDebugData(DoublePointer debug_data_to_pack);
         public native @Cast("bool") boolean getDebugData(DoubleBuffer debug_data_to_pack);
         public native @Cast("bool") boolean getDebugData(double[] debug_data_to_pack);
+
+        public native void stopSocket();
+
+        public native void startSocket();
     }
 
 
