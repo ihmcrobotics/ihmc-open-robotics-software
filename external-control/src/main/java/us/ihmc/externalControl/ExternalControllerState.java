@@ -111,7 +111,7 @@ public class ExternalControllerState extends HighLevelControllerState
       minimumHeightDifferenceForSwitchingSide.set(0.005);
       switchWindowSize.set(4);
 
-      rootHeightOffsetBreakFrequency.set(50.0);
+      rootHeightOffsetBreakFrequency.set(10.0);
       DoubleProvider alphaProvider = () -> AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(rootHeightOffsetBreakFrequency.getDoubleValue(),
                                                                                                     controllerToolbox.getControlDT());
       filteredRootHeightOffset = new AlphaFilteredYoVariable("filteredRootHeightOffset", registry, alphaProvider, rootHeightOffset);
