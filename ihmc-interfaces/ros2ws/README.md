@@ -39,4 +39,4 @@ You can also test the scene graph only by running
 ```
 $ python3 scene_graph_example.py
 ```
-Observe that some scene nodes are added in the scen grpah and in the scene and removed.
+Observe that some scene nodes are added in the scene graph and in the scene and removed.
