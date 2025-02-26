@@ -34,12 +34,11 @@ import java.time.Instant;
  */
 public class RapidHeightMapManager
 {
-   static final HeightMapParameters heightMapParameters = new HeightMapParameters("GPU");
+   private static final HeightMapParameters heightMapParameters = new HeightMapParameters("GPU");
 
    private final RapidHeightMapExtractorInterface rapidHeightMapExtractor;
    private final ImageMessage croppedHeightMapImageMessage = new ImageMessage();
    private final FramePose3D cameraPose = new FramePose3D();
-   private final ROS2Node ros2Node;
    private final boolean runWithCUDA;
    private final Mat hostDepthImage = new Mat();
    private final Notification resetHeightMapRequested = new Notification();
@@ -61,7 +60,6 @@ public class RapidHeightMapManager
                                 CameraIntrinsics depthImageIntrinsics,
                                 boolean runWithCUDA) throws Exception
    {
-      this.ros2Node = ros2Node;
       this.runWithCUDA = runWithCUDA;
 
       if (runWithCUDA)

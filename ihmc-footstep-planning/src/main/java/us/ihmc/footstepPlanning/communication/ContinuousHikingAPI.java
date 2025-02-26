@@ -17,10 +17,10 @@ public class ContinuousHikingAPI
 
    // Commands supported for the Continuous Hiking Process
    public static final ROS2Topic<ContinuousHikingCommandMessage> CONTINUOUS_HIKING_COMMAND = IHMC_ROOT.withModule(moduleName).withType(ContinuousHikingCommandMessage.class).withSuffix("command");
-   public static final ROS2Topic<std_msgs.msg.dds.Empty> CLEAR_GOAL_FOOTSTEPS = IHMC_ROOT.withModule(moduleName).withType(std_msgs.msg.dds.Empty.class).withSuffix("clear_goal_footsteps");
+   public static final ROS2Topic<Empty> CLEAR_GOAL_FOOTSTEPS = IHMC_ROOT.withModule(moduleName).withType(Empty.class).withSuffix("clear_goal_footsteps");
    public static final ROS2Topic<PoseListMessage> PLACED_GOAL_FOOTSTEPS = IHMC_ROOT.withModule(moduleName).withType(PoseListMessage.class).withSuffix("placed_goal_footsteps");
    public static final ROS2Topic<PoseListMessage> ROTATE_GOAL_FOOTSTEPS = IHMC_ROOT.withModule(moduleName).withType(PoseListMessage.class).withSuffix("rotate_goal_footsteps");
-   public static final ROS2Topic<std_msgs.msg.dds.Empty> SQUARE_UP_STEP = IHMC_ROOT.withModule(moduleName).withType(std_msgs.msg.dds.Empty.class).withSuffix("rotate_goal_footsteps");
+   public static final ROS2Topic<Empty> SQUARE_UP_STEP = IHMC_ROOT.withModule(moduleName).withType(Empty.class).withSuffix("rotate_goal_footsteps");
 
    // Statuses supported from the Continuous Hiking Process
    public static final ROS2Topic<ContinuousWalkingStatusMessage> CONTINUOUS_WALKING_STATUS = IHMC_ROOT.withModule(moduleName).withType(ContinuousWalkingStatusMessage.class).withSuffix("status");

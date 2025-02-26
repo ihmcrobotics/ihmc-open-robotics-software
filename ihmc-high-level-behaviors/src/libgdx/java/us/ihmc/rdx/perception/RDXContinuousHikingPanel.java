@@ -292,7 +292,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
 
       if (ImGui.button("Turn Left 90°"))
       {
-         turnRobot(Math.PI / 2);
+         turnRobot(Math.PI / 2.0);
       }
       ImGui.sameLine();
 
