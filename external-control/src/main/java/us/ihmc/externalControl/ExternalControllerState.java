@@ -14,7 +14,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.externalControl.library.ExternalControlNativeLibrary;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.robotics.math.filters.AlphaBasedOnBreakFrequencyProvider;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -95,6 +94,15 @@ public class ExternalControllerState extends HighLevelControllerState
    private final YoDouble rootHeightOffsetBreakFrequency = new YoDouble("rootHeightOffsetBreakFrequency", registry);
    private final AlphaFilteredYoVariable filteredRootHeightOffset;
 
+   private final YoDouble leftHipZTauBreakFrequency = new YoDouble("leftHipZBreakFrequency", registry);
+   private final AlphaFilteredYoVariable filteredLeftHipZTau;
+   private final YoDouble rightHipZTauBreakFrequency = new YoDouble("rightHipZBreakFrequency", registry);
+   private final AlphaFilteredYoVariable filteredRightHipZTau;
+   private final YoDouble spineZTauBreakFrequency = new YoDouble("spineZBreakFrequency", registry);
+   private final AlphaFilteredYoVariable filteredSpineZTau;
+
+
+
    private final YoBoolean externalControlSocketIsOn = new YoBoolean("externalControlSocketIsOn", registry);
 
    public ExternalControllerState(HighLevelControllerParameters highLevelControllerParameters,
@@ -117,10 +125,24 @@ public class ExternalControllerState extends HighLevelControllerState
 
       rootHeightBias.set(-0.05);
       rootHeightOffsetBreakFrequency.set(10.0);
-      AlphaBasedOnBreakFrequencyProvider
       DoubleProvider alphaProvider = () -> AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(rootHeightOffsetBreakFrequency.getDoubleValue(),
                                                                                                     controllerToolbox.getControlDT());
       filteredRootHeightOffset = new AlphaFilteredYoVariable("filteredRootHeightOffset", registry, alphaProvider);
+
+      leftHipZTauBreakFrequency.set(10.0);
+      DoubleProvider leftHipZTauAlphaProvider = () -> AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(leftHipZTauBreakFrequency.getDoubleValue(),
+                                                                                                            controllerToolbox.getControlDT());
+      filteredLeftHipZTau = new AlphaFilteredYoVariable("filteredLeftHipZTau", registry, leftHipZTauAlphaProvider);
+
+      rightHipZTauBreakFrequency.set(10.0);
+      DoubleProvider rightHipZTauAlphaProvider = () -> AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(rightHipZTauBreakFrequency.getDoubleValue(),
+                                                                                                                controllerToolbox.getControlDT());
+      filteredRightHipZTau = new AlphaFilteredYoVariable("filteredRightHipZTau", registry, rightHipZTauAlphaProvider);
+
+      spineZTauBreakFrequency.set(10.0);
+      DoubleProvider spineZTauAlphaProvider = () -> AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(spineZTauBreakFrequency.getDoubleValue(),
+                                                                                                                controllerToolbox.getControlDT());
+      filteredSpineZTau = new AlphaFilteredYoVariable("filteredSpineZTau", registry, spineZTauAlphaProvider);
 
       ExternalControlNativeLibrary.load();
 
