@@ -128,6 +128,7 @@ public class FilteredRapidHeightMapExtractor
    {
       program.close();
       kernel.close();
-      cudaFree(pointerTo3DArray);
+      int error = cudaFree(pointerTo3DArray);
+      CUDATools.checkCUDAError(error);
    }
 }
