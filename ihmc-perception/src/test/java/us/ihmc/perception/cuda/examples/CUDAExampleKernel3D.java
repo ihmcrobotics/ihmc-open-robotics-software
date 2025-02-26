@@ -27,7 +27,7 @@ public class CUDAExampleKernel3D
     */
    public CUDAExampleKernel3D() throws Exception
    {
-      // Create a 2x2 with 5 layers
+      // Create a 2x2 with some amount of layers
       int rows = 2;
       int cols = 2;
       int layers = 4;

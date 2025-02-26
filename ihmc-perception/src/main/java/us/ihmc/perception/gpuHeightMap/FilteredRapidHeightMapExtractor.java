@@ -4,10 +4,8 @@ import org.bytedeco.cuda.cudart.CUstream_st;
 import org.bytedeco.cuda.cudart.cudaExtent;
 import org.bytedeco.cuda.cudart.cudaPitchedPtr;
 import org.bytedeco.cuda.cudart.dim3;
-import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
-import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
 import us.ihmc.perception.cuda.CUDATools;
@@ -18,11 +16,12 @@ import static org.bytedeco.cuda.global.cudart.*;
 
 public class FilteredRapidHeightMapExtractor
 {
-   static final int BLOCK_SIZE_XY = 32;
+   private static final int BLOCK_SIZE_XY = 32;
+   private static final double ALPHA = 0.2;
 
    private final cudaPitchedPtr pointerTo3DArray;
    private int currentIndex;
-   int layers;
+   private final int layers;
 
    private final CUstream_st stream;
    private final int rows;
@@ -30,8 +29,6 @@ public class FilteredRapidHeightMapExtractor
    private final CUDAKernel kernel;
    private final CUDAProgram program;
    private int loopTracker = 0;
-   private final FloatPointer parametersHostPointer;
-   private final FloatPointer parametersDevicePointer;
 
    public FilteredRapidHeightMapExtractor(CUstream_st stream, int rows, int cols, int layers)
    {
@@ -39,9 +36,6 @@ public class FilteredRapidHeightMapExtractor
       this.rows = rows;
       this.cols = cols;
       this.layers = layers;
-
-      parametersHostPointer = new FloatPointer(1);
-      parametersDevicePointer = new FloatPointer();
 
       // Load header and main file
       URL kernelPath = getClass().getResource("FilteredRapidHeightMapExtractor.cu");
@@ -67,21 +61,10 @@ public class FilteredRapidHeightMapExtractor
    {
       int error;
 
-      // Populate parameter buffers with the necessary values
-      float[] parametersArray = populateParametersArray(layers);
-      parametersHostPointer.put(parametersArray);
-
       // Only want to compute the average if we have the past values to use
       if (loopTracker < layers)
       {
          loopTracker++;
-
-         CUDATools.mallocAsync(parametersDevicePointer, parametersArray.length, stream);
-
-         error = cudaStreamSynchronize(stream);
-         CUDATools.checkCUDAError(error);
-
-         CUDATools.memcpyAsync(parametersDevicePointer, parametersHostPointer, parametersArray.length, stream);
 
          cudaMemcpy2D(pointerTo3DArray.ptr().position(currentIndex * pointerTo3DArray.pitch() * pointerTo3DArray.ysize()),
                       pointerTo3DArray.pitch(),
@@ -95,22 +78,16 @@ public class FilteredRapidHeightMapExtractor
          return latestGlobalHeightMap;
       }
 
-      CUDATools.mallocAsync(parametersDevicePointer, parametersArray.length, stream);
-
-      error = cudaStreamSynchronize(stream);
-      CUDATools.checkCUDAError(error);
-
-      CUDATools.memcpyAsync(parametersDevicePointer, parametersHostPointer, parametersArray.length, stream);
-
       GpuMat result = new GpuMat(rows, cols, opencv_core.CV_16UC1);
 
       kernel.withPointer(pointerTo3DArray.ptr()).withLong(pointerTo3DArray.pitch());
       kernel.withPointer(result.data()).withLong(result.step());
       kernel.withPointer(latestGlobalHeightMap.data()).withLong(latestGlobalHeightMap.step());
-      kernel.withPointer(parametersDevicePointer);
+      kernel.withInt(layers);
       kernel.withLong(pointerTo3DArray.pitch() * rows);
       kernel.withInt(rows);
       kernel.withInt(cols);
+      kernel.withDouble(ALPHA);
 
       //Execute the CUDA kernels with the provided stream
       //Each kernel performs a specific task related to the height map update, registration, and cropping
@@ -123,9 +100,6 @@ public class FilteredRapidHeightMapExtractor
 
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
-
-      Mat cpuResult = new Mat();
-      result.download(cpuResult);
 
       // Upload the latest height map to the GPU for the next iteration
       cudaMemcpy2D(pointerTo3DArray.ptr().position(currentIndex * pointerTo3DArray.pitch() * pointerTo3DArray.ysize()),
@@ -141,11 +115,6 @@ public class FilteredRapidHeightMapExtractor
       return result;
    }
 
-   public float[] populateParametersArray(int layers)
-   {
-      return new float[] {(float) layers};
-   }
-
    public void reset()
    {
       loopTracker = 0;
@@ -155,8 +124,6 @@ public class FilteredRapidHeightMapExtractor
    {
       program.close();
       kernel.close();
-      parametersHostPointer.close();
-      parametersDevicePointer.close();
-      cudaFree(parametersDevicePointer);
+      cudaFree(pointerTo3DArray);
    }
 }
