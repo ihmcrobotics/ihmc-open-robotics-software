@@ -12,6 +12,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
@@ -71,6 +72,7 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
    private final FloatPointer parametersHostPointer;
    private final FloatPointer parametersDevicePointer;
    private final FilteredRapidHeightMapExtractor filteredRapidHeightMapExtractor;
+   private final FilteredVerticalSurfacesExtractor verticalSurfacesExtractor;
 
    public int sequenceNumber = 0;
    private float gridOffsetX;
@@ -116,6 +118,9 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
       recomputeDerivedParameters();
       // Need to initialize this after the parameters have been computed to get the right size
       filteredRapidHeightMapExtractor = new FilteredRapidHeightMapExtractor(stream, globalCellsPerAxis, globalCellsPerAxis, 6);
+      verticalSurfacesExtractor = new FilteredVerticalSurfacesExtractor(stream,
+                                                                        heightMapParameters.getCropWindowSize(),
+                                                                        heightMapParameters.getCropWindowSize());
 
       try
       {
@@ -304,11 +309,21 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
 
       snappedFootstepsExtractor.update(globalHeightMapImage, sensorOrigin, globalCenterIndex, cropCenterIndex);
 
+
       //Update the terrain map data with the new results
       terrainMapData.setSensorOrigin(groundToWorldTransform.getTranslationX(), groundToWorldTransform.getTranslationY());
 
-      Mat finalCroppedHeightMap = new Mat();  // Assuming the height map is 201x201
-      sensorCroppedHeightMapImage.download(finalCroppedHeightMap);  // Download the image from the GPU to the Mat object
+      Mat finalCroppedHeightMap = new Mat();
+      if (heightMapParameters.getEnableVerticalFilter())
+      {
+         GpuMat verticalFilteredMap = verticalSurfacesExtractor.update(sensorCroppedHeightMapImage);
+         verticalFilteredMap.download(finalCroppedHeightMap);  // Download the image from the GPU to the Mat object
+      }
+      else
+      {
+         sensorCroppedHeightMapImage.download(finalCroppedHeightMap);
+      }
+
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
       terrainMapData.setHeightMap(finalCroppedHeightMap);
@@ -437,6 +452,7 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
 
       snappedFootstepsExtractor.destroy();
       filteredRapidHeightMapExtractor.destroy();
+      verticalSurfacesExtractor.destroy();
 
       // At the end we have to destroy the stream to release the memory
       CUDAStreamManager.releaseStream(stream);

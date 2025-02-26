@@ -3,6 +3,7 @@
   "Flying points filter" : true,
   "Reset Height Map" : false,
   "Enable alpha filter" : true,
+  "Enable vertical filter" : false,
   "Search window height": {
     "value": 20,
     "lowerBound": 10,

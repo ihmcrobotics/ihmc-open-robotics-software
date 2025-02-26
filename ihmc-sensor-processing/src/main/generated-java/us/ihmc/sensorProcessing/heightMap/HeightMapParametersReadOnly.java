@@ -25,6 +25,11 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
       return get(enableAlphaFilter);
    }
 
+   default boolean getEnableVerticalFilter()
+   {
+      return get(enableVerticalFilter);
+   }
+
    default int getSearchWindowHeight()
    {
       return get(searchWindowHeight);

@@ -23,6 +23,11 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
       set(HeightMapParameters.enableAlphaFilter, enableAlphaFilter);
    }
 
+   default void setEnableVerticalFilter(boolean enableVerticalFilter)
+   {
+      set(HeightMapParameters.enableVerticalFilter, enableVerticalFilter);
+   }
+
    default void setSearchWindowHeight(int searchWindowHeight)
    {
       set(HeightMapParameters.searchWindowHeight, searchWindowHeight);
