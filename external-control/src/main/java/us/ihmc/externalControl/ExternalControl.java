@@ -68,7 +68,7 @@ public class ExternalControl
       YoRegistry registry = new YoRegistry(getClass().getSimpleName());
       yoSolutionRobotState = new YoMatrix("extSoln_", 2 * joints.length + 13, 1, STATE_ORDER, registry);
       yoRobotState = new YoMatrix("extRobotState_", 2 * joints.length + 13, 1, STATE_ORDER, registry);
-      yoSolutionTorque = new YoMatrix("extSoln_", joints.length, 1, TORQUES_ORDER, registry);
+      yoSolutionTorque = new YoMatrix("extSolnTorque_", joints.length, 1, TORQUES_ORDER, registry);
 
 
 
