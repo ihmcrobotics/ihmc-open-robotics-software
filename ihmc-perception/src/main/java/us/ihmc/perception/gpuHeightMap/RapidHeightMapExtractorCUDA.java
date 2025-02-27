@@ -288,7 +288,11 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
       CUDATools.checkCUDAError(error);
 
       if (heightMapParameters.getEnableAlphaFilter())
-         globalHeightMapImage = filteredRapidHeightMapExtractor.update(globalHeightMapImage);
+      {
+         GpuMat filteredHeightMap = filteredRapidHeightMapExtractor.update(globalHeightMapImage);
+         globalHeightMapImage.close();
+         globalHeightMapImage = filteredHeightMap;
+      }
 
       // Run the cropping kernel
       croppingKernel.withPointer(globalHeightMapImage.data()).withLong(globalHeightMapImage.step());
