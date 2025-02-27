@@ -96,20 +96,20 @@ public class ExternalControl
 
       parentRegistry.addChild(registry);
 
-      leftHipZTauBreakFrequency = new YoDouble("leftHipZBreakFrequency", registry);
-      leftHipZTauBreakFrequency.set(10.0);
+      leftHipZTauBreakFrequency = new YoDouble("leftHipZTauBreakFrequency", registry);
+      leftHipZTauBreakFrequency.set(5.0);
       DoubleProvider leftHipZTauAlphaProvider = () -> AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(leftHipZTauBreakFrequency.getDoubleValue(),
                                                                                                                controllerToolbox.getControlDT());
       filteredLeftHipZTau = new AlphaFilteredYoVariable("filteredLeftHipZTau", registry, leftHipZTauAlphaProvider);
 
       rightHipZTauBreakFrequency = new YoDouble("rightHipZTauBreakFrequency", registry);
-      rightHipZTauBreakFrequency.set(10.0);
+      rightHipZTauBreakFrequency.set(5.0);
       DoubleProvider rightHipZTauAlphaProvider = () -> AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(rightHipZTauBreakFrequency.getDoubleValue(),
                                                                                                                 controllerToolbox.getControlDT());
       filteredRightHipZTau = new AlphaFilteredYoVariable("filteredRightHipZTau", registry, rightHipZTauAlphaProvider);
 
       spineZTauBreakFrequency = new YoDouble("spineZTauBreakFrequency", registry);
-      spineZTauBreakFrequency.set(10.0);
+      spineZTauBreakFrequency.set(5.0);
       DoubleProvider spineZTauAlphaProvider = () -> AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(spineZTauBreakFrequency.getDoubleValue(),
                                                                                                              controllerToolbox.getControlDT());
       filteredSpineZTau = new AlphaFilteredYoVariable("filteredSpineZTau", registry, spineZTauAlphaProvider);
