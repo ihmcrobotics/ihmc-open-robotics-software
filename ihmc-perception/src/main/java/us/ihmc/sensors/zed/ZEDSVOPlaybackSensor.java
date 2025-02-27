@@ -18,9 +18,9 @@ public class ZEDSVOPlaybackSensor extends ZEDImageSensor
    private final ZEDSVOCurrentFileMessage svoStatusMessage = new ZEDSVOCurrentFileMessage();
    private final RepeatingTaskThread publishInfoThread;
 
-   public ZEDSVOPlaybackSensor(ROS2PublishSubscribeAPI ros2, int cameraID, ZEDModelData zedModel, String svoFileName)
+   public ZEDSVOPlaybackSensor(ROS2PublishSubscribeAPI ros2, int cameraID, ZEDModelData zedModel, int slDepthMode, String svoFileName)
    {
-      super(cameraID, zedModel, SL_INPUT_TYPE_SVO);
+      super(cameraID, zedModel, SL_INPUT_TYPE_SVO, slDepthMode);
       this.cameraID = cameraID;
       this.svoFileName = svoFileName;
 

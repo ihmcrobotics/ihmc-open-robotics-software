@@ -15,7 +15,7 @@ public class AI2RObjectMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "ce195469ac061c6fe0438843f7f93ecc92651aba90fc32c3184e1676754b63b2";
+   		return "357e3eb089735543fe242e97c70f3a8348298ad3eed9ac42a070b1fd0ae4f32e";
    }
    
    @Override
@@ -55,6 +55,8 @@ public class AI2RObjectMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -72,6 +74,8 @@ public class AI2RObjectMessagePubSubType implements us.ihmc.pubsub.TopicDataType
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getObjectPoseInWorld(), current_alignment);
 
+      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getObjectPoseInRobotFrame(), current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -83,12 +87,14 @@ public class AI2RObjectMessagePubSubType implements us.ihmc.pubsub.TopicDataType
           throw new RuntimeException("object_name field exceeds the maximum length");
 
       geometry_msgs.msg.dds.PosePubSubType.write(data.getObjectPoseInWorld(), cdr);
+      geometry_msgs.msg.dds.PosePubSubType.write(data.getObjectPoseInRobotFrame(), cdr);
    }
 
    public static void read(behavior_msgs.msg.dds.AI2RObjectMessage data, us.ihmc.idl.CDR cdr)
    {
       cdr.read_type_d(data.getObjectName());	
       geometry_msgs.msg.dds.PosePubSubType.read(data.getObjectPoseInWorld(), cdr);	
+      geometry_msgs.msg.dds.PosePubSubType.read(data.getObjectPoseInRobotFrame(), cdr);	
 
    }
 
@@ -98,6 +104,8 @@ public class AI2RObjectMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       ser.write_type_d("object_name", data.getObjectName());
       ser.write_type_a("object_pose_in_world", new geometry_msgs.msg.dds.PosePubSubType(), data.getObjectPoseInWorld());
 
+      ser.write_type_a("object_pose_in_robot_frame", new geometry_msgs.msg.dds.PosePubSubType(), data.getObjectPoseInRobotFrame());
+
    }
 
    @Override
@@ -105,6 +113,8 @@ public class AI2RObjectMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    {
       ser.read_type_d("object_name", data.getObjectName());
       ser.read_type_a("object_pose_in_world", new geometry_msgs.msg.dds.PosePubSubType(), data.getObjectPoseInWorld());
+
+      ser.read_type_a("object_pose_in_robot_frame", new geometry_msgs.msg.dds.PosePubSubType(), data.getObjectPoseInRobotFrame());
 
    }
 
