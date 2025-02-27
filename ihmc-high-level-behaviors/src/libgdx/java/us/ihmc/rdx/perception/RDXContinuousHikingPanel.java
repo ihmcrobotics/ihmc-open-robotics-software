@@ -297,7 +297,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
 
       if (ImGui.button("Turn Left 90°"))
       {
-         turnRobot((float) (Math.PI / 2));
+         turnRobot((float) (Math.PI / 2.0));
       }
       ImGui.sameLine();
 
@@ -361,9 +361,6 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       Controller joystickController = Controllers.getCurrent();
       // Here we check against null rather then .isConnected() because if the controller is unplugged, that method won't work
       boolean controllerConnected = joystickController != null;
-
-      //      LogTools.info(ImGui.isKeyDown(ImGuiTools.getLeftArrowKey()));
-      //      LogTools.info(ImGui.getIO().getKeyAlt());
 
       // The following logic determines how the Continuous Hiking State Machine will be started.
       // This can be with buttons pressed on the keyboard, or with an XBox One Controller

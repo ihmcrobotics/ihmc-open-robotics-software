@@ -166,7 +166,6 @@ public class JustWaitState implements State
             tempMidFeetPose.appendTranslation(0, 0.12, 0);
          }
 
-//         tempMidFeetPose.changeFrame(midFeetZUpFrame);
          midFeetZUpPose.set(midFeetZUpFrame, tempMidFeetPose);
       }
 

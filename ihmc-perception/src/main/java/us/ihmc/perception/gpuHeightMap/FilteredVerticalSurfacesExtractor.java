@@ -17,8 +17,6 @@ public class FilteredVerticalSurfacesExtractor
 {
    static final int BLOCK_SIZE_XY = 32;
 
-   private int currentIndex;
-
    private final CUstream_st stream;
    private final int rows;
    private final int cols;
