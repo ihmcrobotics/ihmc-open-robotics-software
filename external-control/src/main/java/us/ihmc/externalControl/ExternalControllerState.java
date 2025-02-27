@@ -16,6 +16,7 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
+import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
@@ -253,8 +254,15 @@ public class ExternalControllerState extends HighLevelControllerState
          JointDesiredOutputBasics lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
          lowLevelJointData.clear();
 
+         double localGain = gainRatio;
+         if (joint == controllerToolbox.getFullRobotModel().getSpineJoint(SpineJointName.SPINE_ROLL) || joint == controllerToolbox.getFullRobotModel()
+                                                                                                                                  .getSpineJoint(SpineJointName.SPINE_PITCH))
+         {
+            localGain = 0.0;
+         }
+
          JointControlBlender jointControlBlender = jointCommandBlenders.get(jointIndex).getRight();
-         jointControlBlender.computeAndUpdateJointControl(lowLevelJointData, frozenJointData, externalJointData, gainRatio);
+         jointControlBlender.computeAndUpdateJointControl(lowLevelJointData, frozenJointData, externalJointData, localGain);
       }
 
       lowLevelOneDoFJointDesiredDataHolder.completeWith(getStateSpecificJointSettings());
