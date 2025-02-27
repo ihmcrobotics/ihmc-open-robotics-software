@@ -2,6 +2,7 @@ package us.ihmc.externalControl;
 
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -9,11 +10,17 @@ import us.ihmc.externalControl.global.ExternalControlWrapper;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
+import us.ihmc.yoVariables.filters.AlphaFilterTools;
 import us.ihmc.yoVariables.math.YoMatrix;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -45,12 +52,20 @@ public class ExternalControl
    private final FramePose3D solutionBasePose = new FramePose3D();
    private final HashMap<OneDoFJointReadOnly, SolutionJointData> solutionJointData = new HashMap<>();
 
+   private final YoDouble leftHipZTauBreakFrequency;
+   private final AlphaFilteredYoVariable filteredLeftHipZTau;
+   private final YoDouble rightHipZTauBreakFrequency;
+   private final AlphaFilteredYoVariable filteredRightHipZTau;
+   private final YoDouble spineZTauBreakFrequency;
+   private final AlphaFilteredYoVariable filteredSpineZTau;
+
    public ExternalControl(RigidBodyBasics baseBody,
                           WholeBodySetpointParameters homeConfiguration,
                           OneDoFJointReadOnly[] joints,
                           double defaultStiffness,
                           double defaultDamping,
-                          YoRegistry parentRegistry)
+                          YoRegistry parentRegistry,
+                          HighLevelHumanoidControllerToolbox controllerToolbox)
    {
       this.baseBody = baseBody;
       this.joints = joints;
@@ -80,6 +95,25 @@ public class ExternalControl
       solutionDebugData = new DMatrixRMaj(externalControlImpl.getDebugDataSize(), 1);
 
       parentRegistry.addChild(registry);
+
+      leftHipZTauBreakFrequency = new YoDouble("leftHipZBreakFrequency", registry);
+      leftHipZTauBreakFrequency.set(10.0);
+      DoubleProvider leftHipZTauAlphaProvider = () -> AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(leftHipZTauBreakFrequency.getDoubleValue(),
+                                                                                                               controllerToolbox.getControlDT());
+      filteredLeftHipZTau = new AlphaFilteredYoVariable("filteredLeftHipZTau", registry, leftHipZTauAlphaProvider);
+
+      rightHipZTauBreakFrequency = new YoDouble("rightHipZTauBreakFrequency", registry);
+      rightHipZTauBreakFrequency.set(10.0);
+      DoubleProvider rightHipZTauAlphaProvider = () -> AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(rightHipZTauBreakFrequency.getDoubleValue(),
+                                                                                                                controllerToolbox.getControlDT());
+      filteredRightHipZTau = new AlphaFilteredYoVariable("filteredRightHipZTau", registry, rightHipZTauAlphaProvider);
+
+      spineZTauBreakFrequency = new YoDouble("spineZTauBreakFrequency", registry);
+      spineZTauBreakFrequency.set(10.0);
+      DoubleProvider spineZTauAlphaProvider = () -> AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(spineZTauBreakFrequency.getDoubleValue(),
+                                                                                                             controllerToolbox.getControlDT());
+      filteredSpineZTau = new AlphaFilteredYoVariable("filteredSpineZTau", registry, spineZTauAlphaProvider);
+
    }
 
    public void setFootStates(SideDependentList<? extends ReferenceFrame> soleFrames, boolean leftInContact, boolean rightInContact)
@@ -128,6 +162,7 @@ public class ExternalControl
       {
          throw new RuntimeException("Failed to retrieve solution data.");
       }
+
       yoSolutionRobotState.set(solutionRobotState);
       yoSolutionTorque.set(solutionTorqueVector);
       solutionBasePose.getPosition().set(solutionRobotState);
@@ -142,7 +177,23 @@ public class ExternalControl
          data.torque = solutionTorqueVector.get(i, 0);
          data.stiffness = solutionStiffnessVector.get(i, 0);
          data.damping = solutionDampingVector.get(i, 0);
+
+         // Filter torque for certain joints
+         if (joints[i].getName().equals("LEFT_HIP_Z")) {
+            filteredLeftHipZTau.update(data.torque);
+            data.torque = filteredLeftHipZTau.getDoubleValue();
+         }
+         if (joints[i].getName().equals("RIGHT_HIP_Z")) {
+            filteredRightHipZTau.update(data.torque);
+            data.torque = filteredRightHipZTau.getDoubleValue();
+         }
+         if (joints[i].getName().equals("SPINE_Z")) {
+            filteredSpineZTau.update(data.torque);
+            data.torque = filteredSpineZTau.getDoubleValue();
+         }
       }
+
+      // Filter hip
       //      LogTools.info("returned stiffness" + solutionStiffnessVector);
    }
 
