@@ -16,6 +16,7 @@ import ihmc_common_msgs.msg.dds.PoseListMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import std_msgs.msg.dds.Empty;
+import std_msgs.msg.dds.Float32;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingLogger;
@@ -43,7 +44,6 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerPar
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.tools.SwingPlannerTools;
 import us.ihmc.log.LogTools;
-import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapManager;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.heightMap.TerrainMapData;
@@ -108,7 +108,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    private boolean publishAndSubscribe;
    private double simulatedDriftInMeters = -0.1;
 
-   private final ROS2Publisher<PoseListMessage> turningPublisher;
+   private final ROS2Publisher<Float32> turn90DegreesPublisher;
    private boolean previousRightBumper;
    private boolean previousLeftBumper;
    private boolean previousYButton;
@@ -143,7 +143,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
          defaultContactPoints.put(robotSide, defaultFoothold);
       }
 
-      turningPublisher = ros2Node.createPublisher(ContinuousHikingAPI.ROTATE_GOAL_FOOTSTEPS);
+      turn90DegreesPublisher = ros2Node.createPublisher(ContinuousHikingAPI.ROTATE_90_DEGREES);
 
       StancePoseCalculator stancePoseCalculator = new StancePoseCalculator(defaultContactPoints);
       stancePoseSelectionPanel = new RDXStancePoseSelectionPanel(baseUI, ros2Node, stancePoseCalculator);
@@ -296,13 +296,13 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
 
       if (ImGui.button("Turn Left 90°"))
       {
-         turnRobot(Math.PI / 2);
+         turnRobot((float) (Math.PI / 2));
       }
       ImGui.sameLine();
 
       if (ImGui.button("Turn Right 90°"))
       {
-         turnRobot(-Math.PI / 2.0);
+         turnRobot((float) (-Math.PI / 2.0));
       }
 
       if (ImGui.collapsingHeader("Continuous Hiking Parameters"))
@@ -361,8 +361,8 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       // Here we check against null rather then .isConnected() because if the controller is unplugged, that method won't work
       boolean controllerConnected = joystickController != null;
 
-//      LogTools.info(ImGui.isKeyDown(ImGuiTools.getLeftArrowKey()));
-//      LogTools.info(ImGui.getIO().getKeyAlt());
+      //      LogTools.info(ImGui.isKeyDown(ImGuiTools.getLeftArrowKey()));
+      //      LogTools.info(ImGui.getIO().getKeyAlt());
 
       // The following logic determines how the Continuous Hiking State Machine will be started.
       // This can be with buttons pressed on the keyboard, or with an XBox One Controller
@@ -370,7 +370,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       {
          publishContinuousHikingCommandWithEnabled();
       }
-      else if((ImGui.isKeyDown(ImGuiTools.getLeftArrowKey()) || ImGui.isKeyDown(ImGuiTools.getRightArrowKey())) && ImGui.getIO().getKeyShift())
+      else if ((ImGui.isKeyDown(ImGuiTools.getLeftArrowKey()) || ImGui.isKeyDown(ImGuiTools.getRightArrowKey())) && ImGui.getIO().getKeyShift())
       {
          publishContinuousHikingCommandSideStepEnabled(ImGui.isKeyDown(ImGuiTools.getLeftArrowKey()));
       }
@@ -404,12 +404,12 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
 
       if (previousLeftBumper && !currentLeftBumper)
       {
-         turnRobot(Math.PI / 2.0);
+         turnRobot((float) (Math.PI / 2.0));
       }
 
       if (previousRightBumper && !currentRightBumper)
       {
-         turnRobot(-Math.PI / 2.0);
+         turnRobot((float) (-Math.PI / 2.0));
       }
 
       if (joystickController.getButton(joystickController.getMapping().buttonA))
@@ -417,7 +417,11 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
          publishJoystickStatus(joystickController);
       }
 
-      if (joystickController.getButton(joystickController.getMapping().buttonX))
+      if (joystickController.getButton(joystickController.getMapping().buttonX) && joystickController.getButton(ControllerButton.DPAD_DOWN.ordinal()))
+      {
+         publishStopContinuousHikingGracefully();
+      }
+      else if (joystickController.getButton(joystickController.getMapping().buttonX))
       {
          publishStopContinuousHiking();
       }
@@ -444,30 +448,11 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       clearGoalFootstepsPublisher.publish(new Empty());
    }
 
-   public void turnRobot(double rotationRadians)
+   public void turnRobot(float rotationRadians)
    {
-      MovingReferenceFrame midFeetZUpFrame = syncedRobotModel.getReferenceFrames().getMidFeetZUpFrame();
-      FramePose3D midFeetZUpPose = new FramePose3D(midFeetZUpFrame, midFeetZUpFrame.getTransformToWorldFrame());
-      SideDependentList<FramePose3D> goalPoses = new SideDependentList<>(new FramePose3D(syncedRobotModel.getReferenceFrames().getMidFeetZUpFrame()),
-                                                                         new FramePose3D(syncedRobotModel.getReferenceFrames().getMidFeetZUpFrame()));
-
-      midFeetZUpPose.appendYawRotation(rotationRadians);
-      goalPoses.get(RobotSide.RIGHT).set(midFeetZUpPose);
-      goalPoses.get(RobotSide.RIGHT).changeFrame(syncedRobotModel.getReferenceFrames().getMidFeetZUpFrame());
-      goalPoses.get(RobotSide.RIGHT).appendTranslation(0, -0.15, 0);
-
-      goalPoses.get(RobotSide.LEFT).set(midFeetZUpPose);
-      goalPoses.get(RobotSide.LEFT).changeFrame(syncedRobotModel.getReferenceFrames().getMidFeetZUpFrame());
-      goalPoses.get(RobotSide.LEFT).appendTranslation(0, 0.15, 0);
-
-      List<Pose3D> poses = new ArrayList<>();
-      poses.add(new Pose3D(goalPoses.get(RobotSide.LEFT)));
-      poses.add(new Pose3D(goalPoses.get(RobotSide.RIGHT)));
-
-      PoseListMessage poseListMessage = new PoseListMessage();
-      MessageTools.packPoseListMessage(poses, poseListMessage);
-
-      turningPublisher.publish(poseListMessage);
+      std_msgs.msg.dds.Float32 rotationInRadians = new Float32();
+      rotationInRadians.setData(rotationRadians);
+      turn90DegreesPublisher.publish(rotationInRadians);
    }
 
    /**

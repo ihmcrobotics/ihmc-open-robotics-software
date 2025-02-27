@@ -4,7 +4,7 @@ import behavior_msgs.msg.dds.ContinuousHikingCommandMessage;
 import behavior_msgs.msg.dds.ContinuousWalkingStatusMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import ihmc_common_msgs.msg.dds.PoseListMessage;
-import std_msgs.msg.dds.Empty;
+import std_msgs.msg.dds.Float32;
 import us.ihmc.communication.property.StoredPropertySetROS2TopicPair;
 import us.ihmc.ros2.ROS2Topic;
 
@@ -20,6 +20,7 @@ public class ContinuousHikingAPI
    public static final ROS2Topic<std_msgs.msg.dds.Empty> CLEAR_GOAL_FOOTSTEPS = IHMC_ROOT.withModule(moduleName).withType(std_msgs.msg.dds.Empty.class).withSuffix("clear_goal_footsteps");
    public static final ROS2Topic<PoseListMessage> PLACED_GOAL_FOOTSTEPS = IHMC_ROOT.withModule(moduleName).withType(PoseListMessage.class).withSuffix("placed_goal_footsteps");
    public static final ROS2Topic<PoseListMessage> ROTATE_GOAL_FOOTSTEPS = IHMC_ROOT.withModule(moduleName).withType(PoseListMessage.class).withSuffix("rotate_goal_footsteps");
+   public static final ROS2Topic<Float32> ROTATE_90_DEGREES = IHMC_ROOT.withModule(moduleName).withType(Float32.class).withSuffix("rotate_90_degrees");
    public static final ROS2Topic<std_msgs.msg.dds.Empty> SQUARE_UP_STEP = IHMC_ROOT.withModule(moduleName).withType(std_msgs.msg.dds.Empty.class).withSuffix("rotate_goal_footsteps");
 
    // Statuses supported from the Continuous Hiking Process
