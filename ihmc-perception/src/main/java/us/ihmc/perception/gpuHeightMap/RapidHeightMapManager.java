@@ -14,6 +14,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
+import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.filters.CUDAFlyingPointsFilter;
 import us.ihmc.perception.heightMap.TerrainMapData;
@@ -38,7 +39,6 @@ public class RapidHeightMapManager
    private final RapidHeightMapExtractorInterface rapidHeightMapExtractor;
    private final ImageMessage croppedHeightMapImageMessage = new ImageMessage();
    private final FramePose3D cameraPose = new FramePose3D();
-   private final ROS2Node ros2Node;
    private final boolean runWithCUDA;
    private final Mat hostDepthImage = new Mat();
    private final Notification resetHeightMapRequested = new Notification();
@@ -60,7 +60,6 @@ public class RapidHeightMapManager
                                 CameraIntrinsics depthImageIntrinsics,
                                 boolean runWithCUDA) throws Exception
    {
-      this.ros2Node = ros2Node;
       this.runWithCUDA = runWithCUDA;
 
       if (runWithCUDA)
