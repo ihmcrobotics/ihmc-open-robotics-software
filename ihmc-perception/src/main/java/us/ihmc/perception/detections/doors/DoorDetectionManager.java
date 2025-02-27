@@ -4,6 +4,7 @@ import perception_msgs.msg.dds.DetectedDoorListMessage;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.detections.InstantDetection;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -50,6 +51,28 @@ public class DoorDetectionManager
    public List<DetectedDoor> getDetectedDoors()
    {
       return new LinkedList<>(detectedDoors);
+   }
+
+   public List<DetectedDoor> getDetectedDoorsInRange(Point3DReadOnly pointInWorld, double radius)
+   {
+      double radiusSquared = radius * radius;
+      List<DetectedDoor> doorsInRange = detectedDoors.stream().filter(detectedDoor ->
+      {
+         if (detectedDoor.getOpeningMechanism().isPositionKnown())
+            return detectedDoor.getOpeningMechanism().getPosition().distanceSquared(pointInWorld) < radiusSquared;
+
+         return false;
+      }).toList();
+
+      return new LinkedList<>(doorsInRange);
+   }
+
+   public DetectedDoor getClosestDoor(Point3DReadOnly pointInWorld)
+   {
+      return detectedDoors.stream()
+                          .filter(detectedDoor -> detectedDoor.getOpeningMechanism().isPositionKnown())
+                          .min(Comparator.comparingDouble(detectedDoor -> detectedDoor.getOpeningMechanism().getPosition().distanceSquared(pointInWorld)))
+                          .orElse(null);
    }
 
    public synchronized void update()
