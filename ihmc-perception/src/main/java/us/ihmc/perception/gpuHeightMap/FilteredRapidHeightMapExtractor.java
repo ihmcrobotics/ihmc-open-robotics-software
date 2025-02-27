@@ -77,7 +77,7 @@ public class FilteredRapidHeightMapExtractor
          CUDATools.checkCUDAError(error);
 
          currentIndex = (currentIndex + 1) % layers;
-         return latestGlobalHeightMap;
+         return latestGlobalHeightMap.clone();
       }
 
       GpuMat result = new GpuMat(rows, cols, opencv_core.CV_16UC1);
