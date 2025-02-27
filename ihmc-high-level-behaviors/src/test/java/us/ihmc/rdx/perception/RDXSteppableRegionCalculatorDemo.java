@@ -88,7 +88,7 @@ public class RDXSteppableRegionCalculatorDemo
 
             ros2Node.createSubscription2(PerceptionAPI.HEIGHT_MAP_OUTPUT, message ->
             {
-               heightMapVisualizer.acceptHeightMapMessage(message);
+               heightMapVisualizer.setupForImageMessage(ros2Helper);
                heightMapUI.acceptHeightMapMessage(message);
 
                steppableRegionsUpdater.submitLatestHeightMapMessage(message);

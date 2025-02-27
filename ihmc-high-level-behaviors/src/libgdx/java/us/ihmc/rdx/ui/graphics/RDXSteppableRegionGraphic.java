@@ -36,9 +36,6 @@ public class RDXSteppableRegionGraphic implements RenderableProvider
 
    public void clear()
    {
-      for (int i = 0; i < gridMapGraphics.size(); i++)
-         gridMapGraphics.get(i).clear();
-
       regionGraphics.clear();
       gridMapGraphics.clear();
    }

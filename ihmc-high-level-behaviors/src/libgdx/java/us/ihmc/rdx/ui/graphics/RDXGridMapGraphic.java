@@ -31,10 +31,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.IntFunction;
 import java.util.function.IntToDoubleFunction;
 
-/**
- * This class has been replaced with a newer implementation called {@link RDXHeightMapGraphicNew}, please use that going forward and use this one only for
- * reference
- */
 @Deprecated
 public class RDXGridMapGraphic implements RenderableProvider
 {
@@ -58,10 +54,6 @@ public class RDXGridMapGraphic implements RenderableProvider
    private final AtomicReference<ModelInstance> latestModel = new AtomicReference<>(null);
 
    private static final double zForInPainting = 0.95;
-
-   public void clear()
-   {
-   }
 
    public void update()
    {
