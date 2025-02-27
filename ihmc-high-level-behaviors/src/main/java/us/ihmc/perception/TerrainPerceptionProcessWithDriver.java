@@ -17,9 +17,11 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.depthData.CollisionBoxProvider;
+import us.ihmc.perception.gpuHeightMap.RapidHeightMapManager;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.sensors.realsense.RealSenseConfiguration;
 import us.ihmc.sensors.realsense.RealSenseDevice;
 import us.ihmc.sensors.realsense.RealSenseDeviceManager;
@@ -94,13 +96,13 @@ public class TerrainPerceptionProcessWithDriver
    private final double outputPeriod = UnitConversions.hertzToSeconds(30.0f);
    private volatile boolean running = true;
 
-
    private final int depthWidth;
    private final int depthHeight;
    private final int colorWidth;
    private final int colorHeight;
    private long depthSequenceNumber = 0;
    private long colorSequenceNumber = 0;
+   private final ROS2Publisher<ImageMessage> depthPublisher;
 
    public TerrainPerceptionProcessWithDriver(String robotName,
                                              CollisionBoxProvider collisionBoxProvider,
@@ -128,6 +130,8 @@ public class TerrainPerceptionProcessWithDriver
       realtimeROS2Node = new ROS2NodeBuilder().buildRealtime("l515_videopub");
       realtimeROS2Node.spin();
       realsenseDeviceManager = new RealSenseDeviceManager();
+
+      depthPublisher = realtimeROS2Node.createPublisher(depthTopic);
 
       LogTools.info("Creating Bytedeco Realsense");
       realsense = realsenseDeviceManager.createBytedecoRealsenseDevice(realsenseConfiguration);
@@ -171,8 +175,7 @@ public class TerrainPerceptionProcessWithDriver
       humanoidPerception.getRapidRegionsExtractor().setEnabled(true);
 
       ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS, parameters);
-      ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.HEIGHT_MAP_PARAMETERS,
-                                                     humanoidPerception.getRapidHeightMapExtractor().getHeightMapParameters());
+      ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.HEIGHT_MAP_PARAMETERS, RapidHeightMapManager.getHeightMapParameters());
       ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_RAPID_REGION_PARAMETERS,
                                                      humanoidPerception.getRapidRegionsExtractor().getParameters());
       ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_POLYGONIZER_PARAMETERS,
@@ -251,9 +254,8 @@ public class TerrainPerceptionProcessWithDriver
                                       PerceptionMessageTools.setDepthIntrinsicsFromRealsense(realsense, depthImageMessage);
                                       CameraModel.PINHOLE.packMessageFormat(depthImageMessage);
                                       PerceptionMessageTools.publishCompressedDepthImage(compressedDepthPointer,
-                                                                                         depthTopic,
                                                                                          depthImageMessage,
-                                                                                         ros2Helper,
+                                                                                         depthPublisher,
                                                                                          cameraPose,
                                                                                          acquisitionTime,
                                                                                          depthSequenceNumber++,

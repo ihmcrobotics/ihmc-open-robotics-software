@@ -161,6 +161,7 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
 
    private Thread publishImagesThread;
    private volatile boolean publishImagesRunning;
+   private ROS2Publisher<ImageMessage> depthImagePublisher;
 
    public RDXHighLevelDepthSensorSimulator(String sensorName,
                                            ReferenceFrame sensorFrame,
@@ -233,6 +234,9 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
    {
       this.ros2Node = ros2Node;
       this.ros2Helper = new ROS2Helper(ros2Node);
+
+      depthImagePublisher = ros2Node.createPublisher(ros2DepthTopic);
+
       this.ros2DepthTopic = ros2DepthTopic;
       this.ros2ColorTopic = ros2ColorTopic;
 
@@ -572,7 +576,8 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
             sensorPose.setToZero(sensorFrame);
             sensorPose.changeFrame(ReferenceFrame.getWorldFrame());
             OpenCVTools.compressImagePNG(depthImageMat, compressedDepthPointer);
-            PerceptionMessageTools.publishCompressedDepthImage(compressedDepthPointer, ros2DepthTopic, depthImageMessage, ros2Helper, sensorPose, now, depthSequenceNumber++,
+
+            PerceptionMessageTools.publishCompressedDepthImage(compressedDepthPointer, depthImageMessage, depthImagePublisher, sensorPose, now, depthSequenceNumber++,
                                                                    depthSensorSimulator.getImageHeight(), depthSensorSimulator.getImageWidth(), 0.001f);
 
          });

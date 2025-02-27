@@ -9,9 +9,10 @@ import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.communication.ContinuousHikingAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
+import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.perception.StandAloneRealsenseProcess;
 import us.ihmc.perception.comms.PerceptionComms;
-import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractorCUDA;
+import us.ihmc.perception.gpuHeightMap.RapidHeightMapManager;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
@@ -57,19 +58,17 @@ public class ContinuousHikingProcess
       SwingPlannerParametersBasics swingPlannerParameters = robotModel.getSwingPlannerParameters();
       ros2PropertySetGroup.registerStoredPropertySet(ContinuousHikingAPI.SWING_PLANNING_PARAMETERS, swingPlannerParameters);
 
-      HeightMapParameters heightMapParameters = RapidHeightMapExtractorCUDA.getHeightMapParameters();
+      HeightMapParameters heightMapParameters = RapidHeightMapManager.getHeightMapParameters();
       ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.HEIGHT_MAP_PARAMETERS, heightMapParameters);
 
       ContinuousHikingLogger continuousHikingLogger = new ContinuousHikingLogger();
-      ControllerFootstepQueueMonitor controllerFootstepQueueMonitor = new ControllerFootstepQueueMonitor(ros2Node,
-                                                                                                         robotModel.getSimpleRobotName(),
-                                                                                                         syncedRobot.getReferenceFrames(),
-                                                                                                         continuousHikingLogger);
+      ControllerFootstepQueueMonitor controllerFootstepQueueMonitor = new ControllerFootstepQueueMonitor(ros2Node, robotModel.getSimpleRobotName());
 
       standAloneRealsenseProcess = new StandAloneRealsenseProcess(ros2Node, ros2Helper, syncedRobot, controllerFootstepQueueMonitor);
 
       continuousPlannerSchedulingTask = new ContinuousPlannerSchedulingTask(robotModel,
                                                                             ros2Node,
+                                                                            syncedRobot,
                                                                             syncedRobot.getReferenceFrames(),
                                                                             controllerFootstepQueueMonitor,
                                                                             continuousHikingLogger,
