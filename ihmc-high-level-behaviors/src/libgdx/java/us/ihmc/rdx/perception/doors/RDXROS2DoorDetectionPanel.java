@@ -20,11 +20,13 @@ import us.ihmc.ros2.ROS2Node;
 
 import java.time.Instant;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class RDXROS2DoorDetectionPanel extends RDXPanel implements RDXRenderableProvider
 {
@@ -32,10 +34,12 @@ public class RDXROS2DoorDetectionPanel extends RDXPanel implements RDXRenderable
    private static final int DETECTED_DOORS_TABLE_COLUMNS = 7;
 
    private final Map<UUID, RDXDetectedDoor> rdxDetectedDoors = new LinkedHashMap<>();
-   private final Map<UUID, ImBoolean> renderIndividualDoors = new HashMap<>();
+   private final Set<RDXDetectedDoor> stableDetections = new LinkedHashSet<>();
+   private final Set<RDXDetectedDoor> unstableDetections = new LinkedHashSet<>();
+   private final Map<UUID, ImBoolean> detectionsToRender = new HashMap<>();
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImBoolean renderAllStableDetectedDoors = new ImBoolean(false);
+   private final ImBoolean renderStableDetections = new ImBoolean(false);
 
    public RDXROS2DoorDetectionPanel(ROS2Node ros2Node)
    {
@@ -44,69 +48,89 @@ public class RDXROS2DoorDetectionPanel extends RDXPanel implements RDXRenderable
 
       ros2Node.createSubscription2(PerceptionAPI.DETECTED_DOORS, detectedDoorListMessage ->
       {
-         rdxDetectedDoors.keySet()
-                         .removeIf(rdxUUID -> detectedDoorListMessage.getDetectedDoors()
-                                                                     .stream()
-                                                                     .map(detectionMessage -> MessageTools.toUUID(detectionMessage.getDetectionUuid()))
-                                                                     .noneMatch(uuid -> uuid.equals(rdxUUID)));
-         renderIndividualDoors.keySet()
-                              .removeIf(rdxUUID -> detectedDoorListMessage.getDetectedDoors()
-                                                                          .stream()
-                                                                          .map(detectionMessage -> MessageTools.toUUID(detectionMessage.getDetectionUuid()))
-                                                                          .noneMatch(uuid -> uuid.equals(rdxUUID)));
-
-         for (int i = 0; i < detectedDoorListMessage.getDetectedDoors().size(); ++i)
+         // Remove detections that disappeared
+         Set<UUID> currentlyDetectedDoorUUIDs = detectedDoorListMessage.getDetectedDoors()
+                                                                       .stream()
+                                                                       .map(detectedDoorMessage -> MessageTools.toUUID(detectedDoorMessage.getDetectionUuid()))
+                                                                       .collect(Collectors.toSet());
+         Iterator<UUID> uuidIterator = rdxDetectedDoors.keySet().iterator();
+         while (uuidIterator.hasNext())
          {
-            DetectedDoorMessage detectedDoorMessage = detectedDoorListMessage.getDetectedDoors().get(i);
-            UUID doorDetectionUUID = MessageTools.toUUID(detectedDoorMessage.getDetectionUuid());
-            RDXDetectedDoor rdxDetectedDoor = rdxDetectedDoors.get(doorDetectionUUID);
+            UUID uuid = uuidIterator.next();
+            if (!currentlyDetectedDoorUUIDs.contains(uuid))
+            {
+               RDXDetectedDoor detectedDoor = rdxDetectedDoors.get(uuid);
+               stableDetections.remove(detectedDoor);
+               unstableDetections.remove(detectedDoor);
+               detectionsToRender.remove(uuid);
+               detectedDoor.dispose();
+               uuidIterator.remove();
+            }
+         }
+
+         // Update existing detections
+         for (DetectedDoorMessage detectedDoorMessage : detectedDoorListMessage.getDetectedDoors())
+         {
+            UUID detectionUUID = MessageTools.toUUID(detectedDoorMessage.getDetectionUuid());
+            RDXDetectedDoor rdxDetectedDoor = rdxDetectedDoors.get(detectionUUID);
             if (rdxDetectedDoor == null)
             {
                rdxDetectedDoor = new RDXDetectedDoor();
-               rdxDetectedDoors.put(doorDetectionUUID, rdxDetectedDoor);
-               renderIndividualDoors.put(doorDetectionUUID, new ImBoolean(renderAllStableDetectedDoors.get()));
+               rdxDetectedDoors.put(detectionUUID, rdxDetectedDoor);
+               detectionsToRender.put(detectionUUID, new ImBoolean(false));
             }
             rdxDetectedDoor.update(detectedDoorMessage);
+
+            if (rdxDetectedDoor.getDetection().isDetectionStable())
+            {
+               if (!stableDetections.contains(rdxDetectedDoor))
+               {
+                  detectionsToRender.get(detectionUUID).set(renderStableDetections);
+                  stableDetections.add(rdxDetectedDoor);
+                  unstableDetections.remove(rdxDetectedDoor);
+               }
+            }
+            else
+            {
+               if (!unstableDetections.contains(rdxDetectedDoor))
+               {
+                  detectionsToRender.get(detectionUUID).set(false);
+                  unstableDetections.add(rdxDetectedDoor);
+                  stableDetections.remove(rdxDetectedDoor);
+               }
+            }
+
          }
       });
    }
 
    private void renderImGuiWidgets()
    {
-      if (ImGui.checkbox(labels.get("Render All Stable Detected Doors"), renderAllStableDetectedDoors))
-      {
-         renderIndividualDoors.forEach((detectionUUID, render) ->
-         {
-            if (rdxDetectedDoors.get(detectionUUID).getDetection().isDetectionStable())
-               render.set(renderAllStableDetectedDoors);
-         });
-      }
-
-      ImGui.separator();
-
-      // Stable detected doors
-      Set<RDXDetectedDoor> stableDetectedDoors = new LinkedHashSet<>(rdxDetectedDoors.values());
-      stableDetectedDoors.removeIf(detectedDoor -> !detectedDoor.getDetection().isDetectionStable());
-
-      // Unstable detected doors
-      Set<RDXDetectedDoor> unstableDetectedDoors = new LinkedHashSet<>(rdxDetectedDoors.values());
-      unstableDetectedDoors.removeIf(detectedDoor -> detectedDoor.getDetection().isDetectionStable());
-
       // Detected door counts
       ImGui.text("Detected Door Count: " + rdxDetectedDoors.size());
-      ImGui.text("Stable Detected Door Count: " + stableDetectedDoors.size());
-      ImGui.text("Unstable Detected Door Count: " + unstableDetectedDoors.size());
+      ImGui.text("Stable Detected Door Count: " + stableDetections.size());
+      ImGui.text("Unstable Detected Door Count: " + unstableDetections.size());
 
       // Tables of detected doors
-      renderDetectedDoorsTable("Stable Detected Doors", stableDetectedDoors);
-      renderDetectedDoorsTable("Unstable Detected Doors", unstableDetectedDoors);
+      ImGui.separator();
+      ImGui.text("Stable Detected Doors");
+      if (ImGui.checkbox(labels.get("Render Stable Detections"), renderStableDetections))
+      {
+         detectionsToRender.forEach((uuid, render) ->
+         {
+            if (stableDetections.contains(rdxDetectedDoors.get(uuid)))
+               render.set(renderStableDetections);
+         });
+      }
+      renderDetectedDoorsTable("Stable Detected Doors", stableDetections);
+
+      ImGui.separator();
+      ImGui.text("Unstable Detected Doors");
+      renderDetectedDoorsTable("Unstable Detected Doors", unstableDetections);
    }
 
    private void renderDetectedDoorsTable(String name, Set<RDXDetectedDoor> doorsToRender)
    {
-      ImGui.separator();
-      ImGui.text(name);
-
       int tableFlags = ImGuiTableFlags.ScrollY;
       tableFlags |= ImGuiTableFlags.Borders;
       tableFlags |= ImGuiTableFlags.NoKeepColumnsVisible;
@@ -129,7 +153,7 @@ public class RDXROS2DoorDetectionPanel extends RDXPanel implements RDXRenderable
          {
             DetectedDoor detection = detectedDoor.getDetection();
             UUID detectedDoorID = detection.getDetectionUUID();
-            ImBoolean render = renderIndividualDoors.get(detectedDoorID);
+            ImBoolean render = detectionsToRender.get(detectedDoorID);
 
             ImGui.tableNextRow();
 
@@ -187,7 +211,7 @@ public class RDXROS2DoorDetectionPanel extends RDXPanel implements RDXRenderable
 
       for (UUID detectedDoorID : rdxDetectedDoors.keySet())
       {
-         if (renderIndividualDoors.get(detectedDoorID).get())
+         if (detectionsToRender.get(detectedDoorID).get())
             rdxDetectedDoors.get(detectedDoorID).getRenderables(renderables, pool, sceneLevels);
       }
    }
