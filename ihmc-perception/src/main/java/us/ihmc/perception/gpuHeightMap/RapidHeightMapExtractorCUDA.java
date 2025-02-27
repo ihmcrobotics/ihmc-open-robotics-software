@@ -293,7 +293,11 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
       CUDATools.checkCUDAError(error);
 
       if (heightMapParameters.getEnableAlphaFilter())
-         globalHeightMapImage = filteredRapidHeightMapExtractor.update(globalHeightMapImage);
+      {
+         GpuMat filteredHeightMap = filteredRapidHeightMapExtractor.update(globalHeightMapImage);
+         globalHeightMapImage.close();
+         globalHeightMapImage = filteredHeightMap;
+      }
 
       // Run the cropping kernel
       croppingKernel.withPointer(globalHeightMapImage.data()).withLong(globalHeightMapImage.step());
@@ -308,7 +312,6 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
       CUDATools.checkCUDAError(error);
 
       snappedFootstepsExtractor.update(globalHeightMapImage, sensorOrigin, globalCenterIndex, cropCenterIndex);
-
 
       //Update the terrain map data with the new results
       terrainMapData.setSensorOrigin(groundToWorldTransform.getTranslationX(), groundToWorldTransform.getTranslationY());

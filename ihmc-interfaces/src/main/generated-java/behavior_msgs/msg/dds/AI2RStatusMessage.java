@@ -33,6 +33,7 @@ public class AI2RStatusMessage extends Packet<AI2RStatusMessage> implements Sett
             * Name of the behavior that has failed (name of the checkpoint in the pre-loaded behavior collection)
             */
    public java.lang.StringBuilder failed_behavior_;
+   public behavior_msgs.msg.dds.AI2RActionFailureMessage failure_;
 
    public AI2RStatusMessage()
    {
@@ -41,6 +42,7 @@ public class AI2RStatusMessage extends Packet<AI2RStatusMessage> implements Sett
       available_behaviors_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (200, "type_d");
       completed_behavior_ = new java.lang.StringBuilder(255);
       failed_behavior_ = new java.lang.StringBuilder(255);
+      failure_ = new behavior_msgs.msg.dds.AI2RActionFailureMessage();
 
    }
 
@@ -61,6 +63,7 @@ public class AI2RStatusMessage extends Packet<AI2RStatusMessage> implements Sett
       failed_behavior_.setLength(0);
       failed_behavior_.append(other.failed_behavior_);
 
+      behavior_msgs.msg.dds.AI2RActionFailureMessagePubSubType.staticCopy(other.failure_, failure_);
    }
 
 
@@ -141,6 +144,12 @@ public class AI2RStatusMessage extends Packet<AI2RStatusMessage> implements Sett
    }
 
 
+   public behavior_msgs.msg.dds.AI2RActionFailureMessage getFailure()
+   {
+      return failure_;
+   }
+
+
    public static Supplier<AI2RStatusMessagePubSubType> getPubSubType()
    {
       return AI2RStatusMessagePubSubType::new;
@@ -172,6 +181,7 @@ public class AI2RStatusMessage extends Packet<AI2RStatusMessage> implements Sett
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.failed_behavior_, other.failed_behavior_, epsilon)) return false;
 
+      if (!this.failure_.epsilonEquals(other.failure_, epsilon)) return false;
 
       return true;
    }
@@ -192,6 +202,7 @@ public class AI2RStatusMessage extends Packet<AI2RStatusMessage> implements Sett
 
       if (!us.ihmc.idl.IDLTools.equals(this.failed_behavior_, otherMyClass.failed_behavior_)) return false;
 
+      if (!this.failure_.equals(otherMyClass.failure_)) return false;
 
       return true;
    }
@@ -211,7 +222,9 @@ public class AI2RStatusMessage extends Packet<AI2RStatusMessage> implements Sett
       builder.append("completed_behavior=");
       builder.append(this.completed_behavior_);      builder.append(", ");
       builder.append("failed_behavior=");
-      builder.append(this.failed_behavior_);
+      builder.append(this.failed_behavior_);      builder.append(", ");
+      builder.append("failure=");
+      builder.append(this.failure_);
       builder.append("}");
       return builder.toString();
    }

@@ -76,12 +76,14 @@ def add_predefined_rigid_node():
     root_node_number_of_children = updated_scene_graph.scene_nodes[root_node_index].number_of_children
     number_of_predefined_rigid_body_scene_nodes = len(updated_scene_graph.predefined_rigid_body_scene_nodes)
 
+    # CHANGE THIS: Modify the object name as needed
     new_scene_node.name = "PieceOfWood_" + str(number_of_predefined_rigid_body_scene_nodes + 1)
 
     new_predefined_rigid_body_scene_node = PredefinedRigidBodySceneNodeMessage()
     new_predefined_rigid_body_scene_node.scene_node = new_scene_node
     new_predefined_rigid_body_scene_node.initial_parent_id = root_node_index
     new_predefined_rigid_body_scene_node.initial_transform_to_parent = RigidBodyTransformMessage(x=0.0, y=0.0, z=0.0, m00=1.0, m01=0.0, m02=0.0, m10=0.0, m11=1.0, m12=0.0, m20=0.0, m21=0.0, m22=1.0)
+    # CHANGE THIS: Modify the model file path to match your desired object
     new_predefined_rigid_body_scene_node.visual_model_file_path = "environmentObjects/debris/2x4.g3dj"
     new_predefined_rigid_body_scene_node.visual_transform_to_parent = RigidBodyTransformMessage(x=0.0, y=0.0, z=0.0, m00=1.0, m01=0.0, m02=0.0, m10=0.0, m11=1.0, m12=0.0, m20=0.0, m21=0.0, m22=1.0)
 

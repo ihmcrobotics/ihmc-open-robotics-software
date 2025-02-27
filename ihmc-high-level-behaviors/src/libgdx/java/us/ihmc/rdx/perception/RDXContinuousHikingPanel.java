@@ -30,6 +30,7 @@ import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.property.StoredPropertySetROS2TopicPair;
+import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;

@@ -14,7 +14,6 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
-import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.filters.CUDAFlyingPointsFilter;
 import us.ihmc.perception.heightMap.TerrainMapData;
@@ -34,7 +33,7 @@ import java.time.Instant;
  */
 public class RapidHeightMapManager
 {
-   static final HeightMapParameters heightMapParameters = new HeightMapParameters("GPU");
+   private static final HeightMapParameters heightMapParameters = new HeightMapParameters("GPU");
 
    private final RapidHeightMapExtractorInterface rapidHeightMapExtractor;
    private final ImageMessage croppedHeightMapImageMessage = new ImageMessage();
