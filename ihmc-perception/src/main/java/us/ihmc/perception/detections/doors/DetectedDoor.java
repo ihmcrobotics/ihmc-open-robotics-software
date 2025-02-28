@@ -28,6 +28,7 @@ import static us.ihmc.perception.detections.doors.DoorDetectionManager.*;
 
 public class DetectedDoor
 {
+   private static final double MAX_PLANAR_REGION_TO_PANEL_DISTANCE = 0.6 * DoorModelParameters.DOOR_PANEL_WIDTH;
    private static final double MAX_PLANAR_REGION_TO_OPENING_MECHANISM_DISTANCE = 0.75;
    private static final double MIN_PLANAR_REGION_AREA = 0.2 * (DoorModelParameters.DOOR_PANEL_WIDTH * DoorModelParameters.DOOR_PANEL_HEIGHT); // 1/5th of panel area
    private static final double STABLE_DETECTIONS_PER_SECOND = 5.0;
@@ -238,8 +239,18 @@ public class DetectedDoor
    private boolean planarRegionDistanceToOpeningMechanismFilter(PlanarRegion planarRegion)
    {
       Point3DReadOnly planarRegionCentroid = PlanarRegionTools.getCentroid3DInWorld(planarRegion);
-      double distanceToOpeningMechanism = planarRegionCentroid.distance(openingMechanism.getPosition());
-      return distanceToOpeningMechanism < MAX_PLANAR_REGION_TO_OPENING_MECHANISM_DISTANCE;
+      if (hasPanelPosition())
+      {
+         double distanceToPanel = planarRegionCentroid.distance(panelPose.getPosition());
+         return distanceToPanel < MAX_PLANAR_REGION_TO_PANEL_DISTANCE;
+      }
+      else if (openingMechanism.isPositionKnown())
+      {
+         double distanceToOpeningMechanism = planarRegionCentroid.distance(openingMechanism.getPosition());
+         return distanceToOpeningMechanism < MAX_PLANAR_REGION_TO_OPENING_MECHANISM_DISTANCE;
+      }
+
+      return false;
    }
 
    private boolean planarRegionAreaFilter(PlanarRegion planarRegion)
