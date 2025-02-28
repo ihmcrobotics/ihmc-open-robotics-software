@@ -48,12 +48,25 @@ public class DoorDetectionManager
       publishThrottler = new Throttler().setFrequency(PUBLISH_FREQUENCY);
    }
 
+   /**
+    * Get all currently detected doors
+    *
+    * @return A list of all currently detected doors (might be empty).
+    */
    public List<DetectedDoor> getDetectedDoors()
    {
       return new LinkedList<>(detectedDoors);
    }
 
-   public List<DetectedDoor> getDetectedDoorsInRange(Point3DReadOnly pointInWorld, double radius)
+   /**
+    * Get detected doors within some distance of a point.
+    * Distance is calculated from the point to the door's opening mechanism.
+    *
+    * @param pointInWorld The point (in world frame) around which to find doors
+    * @param radius       Radius (from the point) within which to find doors
+    * @return A list of currently detected doors which are within the radius of the passed in point (might be empty).
+    */
+   public synchronized List<DetectedDoor> getDetectedDoorsInRange(Point3DReadOnly pointInWorld, double radius)
    {
       double radiusSquared = radius * radius;
       List<DetectedDoor> doorsInRange = detectedDoors.stream().filter(detectedDoor ->
@@ -67,7 +80,13 @@ public class DoorDetectionManager
       return new LinkedList<>(doorsInRange);
    }
 
-   public DetectedDoor getClosestDoor(Point3DReadOnly pointInWorld)
+   /**
+    * Get the detected door that is closest to some point.
+    *
+    * @param pointInWorld The point (in world frame)
+    * @return The closest detected door to the point. Null if no door is found.
+    */
+   public synchronized DetectedDoor getClosestDoor(Point3DReadOnly pointInWorld)
    {
       return detectedDoors.stream()
                           .filter(detectedDoor -> detectedDoor.getOpeningMechanism().isPositionKnown())

@@ -2,6 +2,7 @@ package us.ihmc.rdx.perception;
 
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.perception.RawImage;
+import us.ihmc.perception.cuda.CUDATools;
 import us.ihmc.perception.detections.doors.DoorDetectionManager;
 import us.ihmc.perception.detections.yolo.YOLOv8DetectionThread;
 import us.ihmc.perception.opencl.OpenCLManager;
@@ -23,6 +24,9 @@ import us.ihmc.tools.IHMCCommonPaths;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static us.ihmc.zed.global.zed.SL_DEPTH_MODE_NEURAL;
+import static us.ihmc.zed.global.zed.SL_DEPTH_MODE_PERFORMANCE;
+
 public class RDXDoorDetectionManagerDemo
 {
    private static final String SVO_FILE = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20240715_103234_ZEDRecording_NewONRCourseWalk.svo2")
@@ -30,7 +34,6 @@ public class RDXDoorDetectionManagerDemo
                                                                                    .toString();
 
    private final ROS2Node ros2Node;
-   private final ROS2Helper ros2Helper;
    private final OpenCLManager openCLManager;
 
    private final DoorDetectionManager doorDetectionManager;
@@ -54,12 +57,13 @@ public class RDXDoorDetectionManagerDemo
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy));
 
       ros2Node = new ROS2NodeBuilder().build(getClass().getSimpleName());
-      ros2Helper = new ROS2Helper(ros2Node);
+      ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
       openCLManager = new OpenCLManager();
 
       doorDetectionManager = new DoorDetectionManager(ros2Node);
 
-      zed = new ZEDSVOPlaybackSensor(ros2Helper, 0, ZEDModelData.ZED_2, SVO_FILE);
+      boolean enableNeuralMode = CUDATools.hasCUDADeviceOfAtLeast(CUDATools.getDeviceName(0), "RTX 3080");
+      zed = new ZEDSVOPlaybackSensor(ros2Helper, 0, ZEDModelData.ZED_2, enableNeuralMode ? SL_DEPTH_MODE_NEURAL : SL_DEPTH_MODE_PERFORMANCE, SVO_FILE);
       zed.useTrackedPose(true);
 
       yoloThread = new YOLOv8DetectionThread(() -> true);

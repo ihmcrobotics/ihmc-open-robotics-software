@@ -73,14 +73,15 @@ public class RDXROS2DoorDetectionPanel extends RDXPanel implements RDXRenderable
          {
             UUID detectionUUID = MessageTools.toUUID(detectedDoorMessage.getDetectionUuid());
             RDXDetectedDoor rdxDetectedDoor = rdxDetectedDoors.get(detectionUUID);
-            if (rdxDetectedDoor == null)
+            if (rdxDetectedDoor == null) // Add new RDXDetectedDoors if new detections show up
             {
                rdxDetectedDoor = new RDXDetectedDoor();
                rdxDetectedDoors.put(detectionUUID, rdxDetectedDoor);
                detectionsToRender.put(detectionUUID, new ImBoolean(false));
             }
-            rdxDetectedDoor.update(detectedDoorMessage);
+            rdxDetectedDoor.update(detectedDoorMessage); // Update the RDXDetectedDoor
 
+            // Ensure each door is in the correct stable/unstable set
             if (rdxDetectedDoor.getDetection().isDetectionStable())
             {
                if (!stableDetections.contains(rdxDetectedDoor))
