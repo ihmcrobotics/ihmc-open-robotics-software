@@ -1,13 +1,14 @@
 package us.ihmc.behaviors.reasoning;
 
-import de.kherud.llama.InferenceParameters;
-import de.kherud.llama.LlamaModel;
-import de.kherud.llama.ModelParameters;
-import de.kherud.llama.args.MiroStat;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.llama.Llama;
+import us.ihmc.llamacpp.llama_context_params;
+import us.ihmc.llamacpp.llama_model_params;
+import us.ihmc.llamacpp.llama_sampler;
 import us.ihmc.log.LogTools;
-import us.ihmc.tools.IHMCCommonPaths;
+
+import static us.ihmc.llamacpp.global.llamacpp.*;
 
 public class BehaviorTreeNextActionReasoning
 {
@@ -76,21 +77,24 @@ public class BehaviorTreeNextActionReasoning
          <|eot_id|>
          """;
 
-
-   private final LlamaModel model;
+   private final Llama llama;
 
    public BehaviorTreeNextActionReasoning()
    {
-      String modelFilePath = IHMCCommonPaths.DOT_IHMC_DIRECTORY.resolve("llama-models/Llama-3.2-1B-Instruct-Q8_0.gguf").toString();
-      ModelParameters modelParams = new ModelParameters();
-      modelParams.setModelFilePath(modelFilePath);
-      modelParams.setNGpuLayers(33);
-      modelParams.setNThreads(8);
-      modelParams.setNCtx(4098);
+      llama_model_params model_params = llama_model_default_params();
+      model_params.n_gpu_layers(33);
 
-      LlamaModel.setLogger(null, (level, message) -> {});
+      llama_context_params ctx_params = llama_context_default_params();
+      ctx_params.n_ctx(2048);
+      ctx_params.n_batch(2048);
+      ctx_params.n_threads(8);
 
-      model = new LlamaModel(modelParams);
+      llama_sampler smpl = llama_sampler_chain_init(llama_sampler_chain_default_params());
+      llama_sampler_chain_add(smpl, llama_sampler_init_min_p(0.05f, 1));
+      llama_sampler_chain_add(smpl, llama_sampler_init_temp(0.8f));
+      llama_sampler_chain_add(smpl, llama_sampler_init_dist(LLAMA_DEFAULT_SEED));
+
+      llama = new Llama(model_params, ctx_params, smpl);
    }
 
    public int queryNextLeafToExecuteIndex(BehaviorTreeRootNodeState rootNode)
@@ -102,33 +106,24 @@ public class BehaviorTreeNextActionReasoning
    public int queryNextLeafToExecuteIndex(String treeEncoding)
    {
       String prompt = SYSTEM;
-      prompt += """
-            <|start_header_id|>user<|end_header_id|>
-            %s
-            <|eot_id|>
-            <|start_header_id|>assistant<|end_header_id|>
-            """.formatted(treeEncoding);
+//      prompt += """
+//            <|start_header_id|>user<|end_header_id|>
+//            %s
+//            <|eot_id|>
+//            <|start_header_id|>assistant<|end_header_id|>
+//            """.formatted(treeEncoding);
 
-      InferenceParameters inferParams = new InferenceParameters(prompt);
-      inferParams.setPenalizeNl(true);
-      inferParams.setTemperature(0.3f);
-      inferParams.setMiroStat(MiroStat.V2);
-      inferParams.setStopStrings("<|eot_id|>");
-      inferParams.setTopK(40);
-      inferParams.setTopP(0.25f);
-      inferParams.setRepeatPenalty(1.15f);
 
-      String reponse = model.complete(inferParams);
+      String reponse = llama.generate("Hello");
 
       LogTools.info(prompt + reponse);
 
       return Integer.parseInt(reponse.trim());
    }
 
-   // FIXME: Doesn't work yet
    public void destroy()
    {
-      model.close();
+      llama.destroy();
    }
 
    public static void main(String[] args)
