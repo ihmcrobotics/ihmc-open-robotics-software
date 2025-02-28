@@ -78,7 +78,6 @@ import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -171,7 +170,7 @@ public class RDXVRKinematicsStreamingMode
       this.handManager = handManager;
    }
 
-   public void create(boolean createToolbox)
+   public void create(boolean createToolbox, KinematicsStreamingToolboxParameters kstParameters)
    {
       RobotDefinition ghostRobotDefinition = new RobotDefinition(syncedRobot.getRobotModel().getRobotDefinition());
       MaterialDefinition material = new MaterialDefinition(ColorDefinitions.parse("0xDEE934").derive(0.0, 1.0, 1.0, 0.5));
@@ -222,56 +221,8 @@ public class RDXVRKinematicsStreamingMode
       }
       if (createToolbox)
       {
-         KinematicsStreamingToolboxParameters parameters = new KinematicsStreamingToolboxParameters();
-         parameters.setDefault();
-         parameters.setToolboxUpdatePeriod(0.003);
-         parameters.setPublishingPeriod(0.006); // Publishing period in seconds.
-         boolean usingRealtimePlugin = false;
-         parameters.setStreamIntegrationDuration(usingRealtimePlugin ? 2.0 * parameters.getPublishingPeriod() : 0.1);
-         parameters.setHoldChestAngularWeight(1.0, 1.0, 0.5);
-         parameters.setHoldPelvisLinearWeight(10.0, 10.0, 20.0);
-         parameters.setDefaultLinearRateLimit(10.0);
-         parameters.setDefaultAngularRateLimit(100.0);
-         parameters.setDefaultLinearWeight(10.0);
-         parameters.setDefaultAngularWeight(0.005); // TODO This is tuned for the 4-DoF arms. We want to relax the orientation tracking which we don't have good control over.
-         parameters.setInputPoseLPFBreakFrequency(15.0);
-         parameters.setInputPoseCorrectionDuration(0.05); // Need to send inputs at 30Hz.
-         parameters.setInputVelocityRawAlpha(0.65); // TODO This prob can be 1.0, afraid of overshoots.
-         parameters.setInputStateEstimatorType(KinematicsStreamingToolboxParameters.InputStateEstimatorType.FBC_STYLE);
-         parameters.setUseBBXInputFilter(true);
-         parameters.setInputBBXFilterSize(2.0, 2.8, 2.6);
-         parameters.setInputBBXFilterCenter(0.4, 0.0, 1.25);
-         parameters.setOutputLPFBreakFrequency(10.0);
-         parameters.setOutputJointVelocityScale(0.65);
-
-         parameters.setMinimizeAngularMomentum(true);
-         parameters.setMinimizeLinearMomentum(false);
-         parameters.setAngularMomentumWeight(0.20);
-         parameters.setLinearMomentumWeight(0.01);
-
-         parameters.setMinimizeAngularMomentumRate(true);
-         parameters.setMinimizeLinearMomentumRate(true);
-         parameters.setAngularMomentumRateWeight(1.0);
-         parameters.setLinearMomentumRateWeight(1.0);
-
-         parameters.getDefaultConfiguration().setEnableLeftHandTaskspace(false);
-         parameters.getDefaultConfiguration().setEnableRightHandTaskspace(false);
-         parameters.getDefaultConfiguration().setEnableNeckJointspace(false);
-         parameters.getDefaultSolverConfiguration().setJointVelocityWeight(0.05);
-         parameters.getDefaultSolverConfiguration().setJointAccelerationWeight(0.0); // As soon as we increase this guy, we inject springy behavior.
-
-         parameters.getDefaultSolverConfiguration().setEnableJointVelocityLimits(true);
-
-         if (robotModel != null)
-         {
-            reduceElbowJointLimits(parameters, robotModel);
-            parameters.setInitialConfigurationMap(createInitialConfiguration(robotModel));
-         }
-
-         parameters.setUseStreamingPublisher(Boolean.parseBoolean(System.getProperty("use.streaming.publisher", "true")));
-
          boolean startYoVariableServer = true;
-         toolbox = new KinematicsStreamingToolboxModule(robotModel, parameters, startYoVariableServer);
+         toolbox = new KinematicsStreamingToolboxModule(robotModel, kstParameters, startYoVariableServer);
       }
 
       if (vrContext.getVRModel() == RDXVRHardwareModel.FOCUS3)
@@ -285,47 +236,6 @@ public class RDXVRKinematicsStreamingMode
          RDXBaseUI.getInstance().getKeyBindings().register("Streaming - Control robot (toggle)", "Left A button");
       }
    }
-
-   private Map<String, Double> createInitialConfiguration(DRCRobotModel robotModel)
-   {
-      Map<String, Double> initialConfigurationMap = new HashMap<>();
-      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      for (OneDoFJointBasics joint : fullRobotModel.getOneDoFJoints())
-      {
-         String jointName = joint.getName();
-         double q = syncedRobot.getFullRobotModel().getOneDoFJointByName(jointName).getQ();
-         initialConfigurationMap.put(jointName, q);
-      }
-
-      return initialConfigurationMap;
-   }
-
-   private void reduceElbowJointLimits(KinematicsStreamingToolboxParameters parameters, DRCRobotModel robotModel)
-   {
-      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      // reduce limit for elbow to avoid singularity
-      Map<String, Double> jointUpperLimits = new LinkedHashMap<>();
-      Map<String, Double> jointLowerLimits = new LinkedHashMap<>();
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         OneDoFJointBasics elbowJoint = fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_PITCH);
-         double upperLimit = elbowJoint.getJointLimitUpper();
-         double lowerLimit = elbowJoint.getJointLimitLower();
-         double fullyExtendedLimit = Math.abs(upperLimit) < Math.abs(lowerLimit) ? upperLimit : lowerLimit;
-         if (fullyExtendedLimit > 0)
-         {
-            fullyExtendedLimit = -0.10;
-            jointUpperLimits.put(robotModel.getJointMap().getArmJointName(robotSide, ArmJointName.ELBOW_PITCH), fullyExtendedLimit);
-         }
-         else
-         {
-            fullyExtendedLimit = 0.10;
-            jointLowerLimits.put(robotModel.getJointMap().getArmJointName(robotSide, ArmJointName.ELBOW_PITCH), fullyExtendedLimit);
-         }
-      }
-      parameters.setJointCustomPositionUpperLimits(jointUpperLimits);
-      parameters.setJointCustomPositionLowerLimits(jointLowerLimits);
-}
 
    public void processVRInput()
    {
@@ -599,7 +509,11 @@ public class RDXVRKinematicsStreamingMode
             toolboxInputMessage.setStreamToController(streamToController.get());
          else
             toolboxInputMessage.setStreamToController(kinematicsRecorder.isReplaying());
-//         ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputToolboxConfigurationTopic(syncedRobot.getRobotModel().getSimpleRobotName()), ikSolverConfigurationMessage);
+         if (syncedRobot.getRobotModel().getSimpleRobotName().contains("Nadia"))
+         {
+            ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputToolboxConfigurationTopic(syncedRobot.getRobotModel().getSimpleRobotName()),
+                                         ikSolverConfigurationMessage);
+         }
          ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputCommandTopic(syncedRobot.getRobotModel().getSimpleRobotName()), toolboxInputMessage);
          outputFrequencyPlot.recordEvent();
       }
@@ -803,6 +717,7 @@ public class RDXVRKinematicsStreamingMode
          KinematicsStreamingToolboxConfigurationMessage impedanceConfiguration = parameters.getDefaultConfiguration();
          impedanceConfiguration.setEnableArmImpedance(enableArmImpedance.get());
          ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputStreamingConfigurationTopic(syncedRobot.getRobotModel().getSimpleRobotName()), impedanceConfiguration);
+         setEnabled(false);
       }
 
       Set<String> connectedTrackers = vrContext.getAssignedTrackerRoles();
