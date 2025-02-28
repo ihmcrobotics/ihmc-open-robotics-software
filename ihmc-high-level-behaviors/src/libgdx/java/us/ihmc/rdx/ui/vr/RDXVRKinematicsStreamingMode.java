@@ -127,6 +127,7 @@ public class RDXVRKinematicsStreamingMode
    private final SideDependentList<Float> gripButtonsValue = new SideDependentList<>();
    @Nullable
    private KinematicsStreamingToolboxModule toolbox;
+   private KinematicsStreamingToolboxParameters kstParameters;
    private final KinematicsToolboxConfigurationMessage ikSolverConfigurationMessage = new KinematicsToolboxConfigurationMessage();
 
    private final ImBoolean controlArmsOnly = new ImBoolean(false);
@@ -172,6 +173,7 @@ public class RDXVRKinematicsStreamingMode
 
    public void create(boolean createToolbox, KinematicsStreamingToolboxParameters kstParameters)
    {
+      this.kstParameters = kstParameters;
       RobotDefinition ghostRobotDefinition = new RobotDefinition(syncedRobot.getRobotModel().getRobotDefinition());
       MaterialDefinition material = new MaterialDefinition(ColorDefinitions.parse("0xDEE934").derive(0.0, 1.0, 1.0, 0.5));
       RobotDefinition.forEachRigidBodyDefinition(ghostRobotDefinition.getRootBodyDefinition(),
@@ -713,8 +715,7 @@ public class RDXVRKinematicsStreamingMode
       }
       if (ImGui.checkbox(labels.get("Enable arm impedance control"), enableArmImpedance))
       {
-         KinematicsStreamingToolboxParameters parameters = KinematicsStreamingToolboxParameters.defaultParameters();
-         KinematicsStreamingToolboxConfigurationMessage impedanceConfiguration = parameters.getDefaultConfiguration();
+         KinematicsStreamingToolboxConfigurationMessage impedanceConfiguration = kstParameters.getDefaultConfiguration();
          impedanceConfiguration.setEnableArmImpedance(enableArmImpedance.get());
          ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputStreamingConfigurationTopic(syncedRobot.getRobotModel().getSimpleRobotName()), impedanceConfiguration);
          setEnabled(false);
