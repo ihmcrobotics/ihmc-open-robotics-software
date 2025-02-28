@@ -30,7 +30,6 @@ import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.property.StoredPropertySetROS2TopicPair;
-import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -127,6 +126,14 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       planOffsetStatusPublisher = ros2Node.createPublisher(getTopic(PlanOffsetStatus.class, robotModel.getSimpleRobotName()));
       clearGoalFootstepsPublisher = ros2Node.createPublisher(ContinuousHikingAPI.CLEAR_GOAL_FOOTSTEPS);
 
+      MonteCarloFootstepPlannerParameters monteCarloPlannerParameters = new MonteCarloFootstepPlannerParameters();
+      terrainPlanningDebugger = new RDXTerrainPlanningDebugger(ros2Node,
+              monteCarloPlannerParameters,
+              robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
+
+      ros2Node.createSubscription(HumanoidControllerAPI.getTopic(WalkingControllerFailureStatusMessage.class, robotModel.getSimpleRobotName()),
+              (s) -> terrainPlanningDebugger.reset());
+
       ros2Node.createSubscription2(ContinuousHikingAPI.START_AND_GOAL_FOOTSTEPS, this::onStartAndGoalPosesReceived);
       ros2Node.createSubscription2(ContinuousHikingAPI.PLANNED_FOOTSTEPS, this::onPlannedFootstepsReceived);
       ros2Node.createSubscription2(ContinuousHikingAPI.MONTE_CARLO_FOOTSTEP_PLAN, this::onMonteCarloPlanReceived);
@@ -150,17 +157,9 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       stancePoseSelectionPanel = new RDXStancePoseSelectionPanel(baseUI, ros2Node, stancePoseCalculator);
       addChild(stancePoseSelectionPanel);
 
-      MonteCarloFootstepPlannerParameters monteCarloPlannerParameters = new MonteCarloFootstepPlannerParameters();
       DefaultFootstepPlannerParametersBasics footstepPlannerParameters = robotModel.getFootstepPlannerParameters("ForContinuousWalking");
       SwingPlannerParametersBasics swingPlannerParameters = robotModel.getSwingPlannerParameters();
       this.swingTrajectoryParameters = robotModel.getWalkingControllerParameters().getSwingTrajectoryParameters();
-
-      terrainPlanningDebugger = new RDXTerrainPlanningDebugger(ros2Node,
-                                                               monteCarloPlannerParameters,
-                                                               robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
-
-      ros2Node.createSubscription(HumanoidControllerAPI.getTopic(WalkingControllerFailureStatusMessage.class, robotModel.getSimpleRobotName()),
-                                  (s) -> terrainPlanningDebugger.reset());
 
       hostStoredPropertySets = new ImGuiRemoteROS2StoredPropertySetGroup(ros2Node);
       continuousHikingParameters = new ContinuousHikingParameters();
