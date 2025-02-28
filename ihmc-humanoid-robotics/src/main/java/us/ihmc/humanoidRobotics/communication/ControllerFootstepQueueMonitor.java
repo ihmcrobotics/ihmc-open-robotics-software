@@ -1,4 +1,4 @@
-package us.ihmc.behaviors.activeMapping;
+package us.ihmc.humanoidRobotics.communication;
 
 import controller_msgs.msg.dds.FootstepQueueStatusMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
@@ -6,8 +6,9 @@ import controller_msgs.msg.dds.PlanOffsetStatus;
 import controller_msgs.msg.dds.QueuedFootstepStatusMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
@@ -25,19 +26,11 @@ public class ControllerFootstepQueueMonitor
    private final AtomicReference<FootstepStatusMessage> footstepStatusMessage = new AtomicReference<>(new FootstepStatusMessage());
    private final AtomicReference<PlanOffsetStatus> planOffsetMessage = new AtomicReference<>(new PlanOffsetStatus());
 
-   private final HumanoidReferenceFrames referenceFrames;
-   private final ContinuousHikingLogger continuousHikingLogger;
    private boolean footstepStarted;
    private final AtomicBoolean isWalking = new AtomicBoolean(false);
 
-   public ControllerFootstepQueueMonitor(ROS2Node ros2Node,
-                                         String simpleRobotName,
-                                         HumanoidReferenceFrames referenceFrames,
-                                         ContinuousHikingLogger continuousHikingLogger)
+   public ControllerFootstepQueueMonitor(ROS2Node ros2Node, String simpleRobotName)
    {
-      this.referenceFrames = referenceFrames;
-      this.continuousHikingLogger = continuousHikingLogger;
-
       ros2Node.createSubscription2(HumanoidControllerAPI.getTopic(FootstepQueueStatusMessage.class, simpleRobotName), this::footstepQueueStatusReceived);
       ros2Node.createSubscription2(HumanoidControllerAPI.getTopic(FootstepStatusMessage.class, simpleRobotName), this::footstepStatusReceived);
       ros2Node.createSubscription2(getTopic(PlanOffsetStatus.class, simpleRobotName), this::acceptPlanOffsetStatus);
@@ -51,7 +44,6 @@ public class ControllerFootstepQueueMonitor
       {
          String message = String.format("Latest Controller Queue Footstep Size: " + footstepQueueStatusMessage.getQueuedFootstepList().size());
          LogTools.info(message);
-         continuousHikingLogger.appendString(message);
       }
 
       // For the statistics set the that controller queue size before getting the new one
@@ -60,14 +52,6 @@ public class ControllerFootstepQueueMonitor
 
    private void footstepStatusReceived(FootstepStatusMessage footstepStatusMessage)
    {
-      if (footstepStatusMessage.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED)
-      {
-         double distance = referenceFrames.getSoleFrame(RobotSide.LEFT)
-                                          .getTransformToDesiredFrame(referenceFrames.getSoleFrame(RobotSide.RIGHT))
-                                          .getTranslation()
-                                          .norm();
-      }
-
       footstepStarted = footstepStatusMessage.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_STARTED;
 
       this.footstepStatusMessage.set(footstepStatusMessage);
@@ -98,6 +82,42 @@ public class ControllerFootstepQueueMonitor
    public AtomicReference<FootstepStatusMessage> getFootstepStatusMessage()
    {
       return footstepStatusMessage;
+   }
+
+   public int getNumberOfIncompleteFootsteps()
+   {
+      return controllerQueueSize;
+   }
+
+   /**
+    * This method assumes the list is not empty; you need to check outside this method that the list has at least one in it
+    */
+   public FramePose3DReadOnly getLastFootstepInQueue()
+   {
+      FramePose3D previousFootstepPose = new FramePose3D();
+
+      previousFootstepPose.getPosition().set(controllerQueue.get(controllerQueueSize - 1).getLocation());
+      previousFootstepPose.getRotation().setToYawOrientation(controllerQueue.get(controllerQueueSize - 1).getOrientation().getYaw());
+
+      return previousFootstepPose;
+   }
+
+   /**
+    * This method assumes the list is not empty; you need to check outside this method that the list has at least one in it
+    */
+   public FramePose3DReadOnly getLastFootstepQueuedOnOppositeSide(RobotSide candidateFootstepSide)
+   {
+      FramePose3D previousFootstepPose = new FramePose3D();
+
+      int i = controllerQueue.size() - 1;
+      // Moved the index of the list to the last step on the other side
+      while (i >= 1 && controllerQueue.get(i).getRobotSide() == candidateFootstepSide.toByte())
+         --i;
+
+      previousFootstepPose.getPosition().set(controllerQueue.get(i).getLocation());
+      previousFootstepPose.getRotation().setToYawOrientation(controllerQueue.get(i).getOrientation().getYaw());
+
+      return previousFootstepPose;
    }
 
    // TODO Polling this in multiple threads may cause issues as the second time its pulled the value will be null.

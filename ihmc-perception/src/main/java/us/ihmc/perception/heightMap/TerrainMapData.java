@@ -8,6 +8,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
+import us.ihmc.perception.gpuHeightMap.RapidHeightMapManager;
 import us.ihmc.perception.steppableRegions.SnapResult;
 import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
@@ -25,7 +26,7 @@ public class TerrainMapData
 
    private final LeastSquaresZPlaneFitter planeFitter = new LeastSquaresZPlaneFitter();
 
-   private int localGridSize = 201;
+   private final int localGridSize;
    private int cellsPerMeter = 50;
 
    private Mat heightMap;
@@ -35,12 +36,12 @@ public class TerrainMapData
    private Mat steppableRegionAssignmentMat;
    private Mat steppableRegionRingMat;
    private Mat steppabilityImage;
+   private Mat steppabilityConnectionsImage;
    private Mat snapHeightImage;
    private Mat snappedAreaFractionImage;
    private Mat snapNormalXImage;
    private Mat snapNormalYImage;
    private Mat snapNormalZImage;
-   private Mat steppabilityConnectionsImage;
 
    public TerrainMapData(Mat heightMap, Mat contactMap)
    {
@@ -62,18 +63,13 @@ public class TerrainMapData
       setContactMap(contactMap);
       setTerrainCostMap(terrainCostMap);
       setSteppabilityImage(steppability);
+      setSnappedAreaFractionImage(snappedAreaFractionImage);
       setSnapNormalXImage(snapNormalXImage);
       setSnapNormalYImage(snapNormalYImage);
       setSnapNormalZImage(snapNormalZImage);
-      setSnappedAreaFractionImage(snappedAreaFractionImage);
 
       this.localGridSize = heightMap.rows();
       // TODO need to add cells per meter
-   }
-
-   public TerrainMapData(TerrainMapData other)
-   {
-      set(other);
    }
 
    public TerrainMapData(int height, int width)
@@ -84,27 +80,31 @@ public class TerrainMapData
       localGridSize = height;
    }
 
-   public void set(TerrainMapData other)
+   public TerrainMapData(TerrainMapData other)
    {
       this.localGridSize = other.localGridSize;
       this.cellsPerMeter = other.cellsPerMeter;
       heightMapCenter.set(other.heightMapCenter);
 
       setHeightMap(other.heightMap);
-      setSnapHeightImage(other.snapHeightImage);
       setContactMap(other.contactMap);
       setTerrainCostMap(other.terrainCostMap);
+
+      setSteppableRegionAssignmentMat(other.steppableRegionAssignmentMat);
+      setSteppableRegionRingMat(other.steppableRegionRingMat);
       setSteppabilityImage(other.steppabilityImage);
+      setSteppabilityConnectionsImage(other.steppabilityConnectionsImage);
+      setSnapHeightImage(other.snapHeightImage);
+      setSnappedAreaFractionImage(other.snappedAreaFractionImage);
       setSnapNormalXImage(other.snapNormalXImage);
       setSnapNormalYImage(other.snapNormalYImage);
       setSnapNormalZImage(other.snapNormalZImage);
-      setSnappedAreaFractionImage(other.snappedAreaFractionImage);
    }
 
    private int getLocalIndex(double coordinate, double center)
    {
       // TODO probably a height map tools method for this.
-      return (int) ((coordinate - center) * cellsPerMeter + localGridSize / 2);
+      return (int) ((coordinate - center) * cellsPerMeter + (double) localGridSize / 2);
    }
 
    public float getSnappedAreaFractionInWorld(double x, double y)
@@ -173,8 +173,8 @@ public class TerrainMapData
 
    private static float convertScaledAndOffsetValue(float value)
    {
-      return (float) (value / RapidHeightMapExtractor.getHeightMapParameters().getHeightScaleFactor())
-             - (float) RapidHeightMapExtractor.getHeightMapParameters().getHeightOffset();
+      return (float) (value / RapidHeightMapManager.getHeightMapParameters().getHeightScaleFactor()) - (float) RapidHeightMapManager.getHeightMapParameters()
+                                                                                                                                    .getHeightOffset();
    }
 
    private float getHeightLocal(int rIndex, int cIndex)
@@ -246,8 +246,8 @@ public class TerrainMapData
 
    public void setHeightLocal(float height, int rIndex, int cIndex)
    {
-      float offsetHeight = height + (float) RapidHeightMapExtractor.getHeightMapParameters().getHeightOffset();
-      int finalHeight = (int) (offsetHeight * RapidHeightMapExtractor.getHeightMapParameters().getHeightScaleFactor());
+      float offsetHeight = height + (float) RapidHeightMapManager.getHeightMapParameters().getHeightOffset();
+      int finalHeight = (int) (offsetHeight * RapidHeightMapManager.getHeightMapParameters().getHeightScaleFactor());
       heightMap.ptr(rIndex, cIndex).putShort((short) finalHeight);
    }
 

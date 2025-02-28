@@ -26,6 +26,7 @@ import us.ihmc.perception.logging.PerceptionDataLogger;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.sensors.realsense.RealSenseConfiguration;
 import us.ihmc.sensors.realsense.RealSenseDevice;
 import us.ihmc.sensors.realsense.RealSenseDeviceManager;
@@ -57,7 +58,6 @@ public class RealsenseColorDepthPublisher
    private final ROS2StoredPropertySetGroup ros2PropertySetGroup;
    private final Supplier<ReferenceFrame> sensorFrameUpdater;
    private final ROS2Topic<ImageMessage> colorTopic;
-   private final ROS2Topic<ImageMessage> depthTopic;
    private final ROS2Node ros2Node;
    private final ROS2Helper ros2Helper;
    private final PerceptionConfigurationParameters parameters = new PerceptionConfigurationParameters();
@@ -82,6 +82,7 @@ public class RealsenseColorDepthPublisher
    private boolean loggerInitialized = false;
    private volatile boolean running = true;
    private final Notification destroyedNotification = new Notification();
+   private final ROS2Publisher<ImageMessage> depthPublisher;
 
    public RealsenseColorDepthPublisher(RealSenseConfiguration realsenseConfiguration,
                                        ROS2Topic<ImageMessage> depthTopic,
@@ -89,7 +90,6 @@ public class RealsenseColorDepthPublisher
                                        Supplier<ReferenceFrame> sensorFrameUpdater)
    {
       this.colorTopic = colorTopic;
-      this.depthTopic = depthTopic;
       this.sensorFrameUpdater = sensorFrameUpdater;
 
       realsenseDeviceManager = new RealSenseDeviceManager();
@@ -104,6 +104,8 @@ public class RealsenseColorDepthPublisher
 
       ros2Node = new ROS2NodeBuilder().build("realsense_color_and_depth_publisher");
       ros2Helper = new ROS2Helper(ros2Node);
+
+      depthPublisher = ros2Node.createPublisher(depthTopic);
 
       LogTools.info("Setting up ROS2StoredPropertySetGroup");
       ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Node);
@@ -175,9 +177,8 @@ public class RealsenseColorDepthPublisher
             PerceptionMessageTools.setDepthIntrinsicsFromRealsense(realsense, depthImageMessage);
             CameraModel.PINHOLE.packMessageFormat(depthImageMessage);
             PerceptionMessageTools.publishCompressedDepthImage(compressedDepthPointer,
-                                                               depthTopic,
                                                                depthImageMessage,
-                                                               ros2Helper,
+                                                               depthPublisher,
                                                                depthPose,
                                                                acquisitionTime,
                                                                depthSequenceNumber++,

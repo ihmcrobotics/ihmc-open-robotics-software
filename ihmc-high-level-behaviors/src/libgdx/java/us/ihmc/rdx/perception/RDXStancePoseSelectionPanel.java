@@ -46,6 +46,7 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
    private final RDXBaseUI baseUI;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ROS2Publisher<PoseListMessage> publisher;
+   private final ROS2Publisher<PoseListMessage> turningPublisher;
 
    private ModelInstance pickPointSphere;
 
@@ -73,6 +74,7 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
       stancePoseCalculatorParametersTuner.create(stancePoseCalculator.getStancePoseParameters());
 
       publisher = ros2Node.createPublisher(ContinuousHikingAPI.PLACED_GOAL_FOOTSTEPS);
+      turningPublisher = ros2Node.createPublisher(ContinuousHikingAPI.ROTATE_GOAL_FOOTSTEPS);
 
       SegmentDependentList<RobotSide, ArrayList<Point2D>> contactPoints = new SideDependentList<>();
       contactPoints.set(RobotSide.LEFT, PlannerTools.createFootContactPoints(0.2, 0.1, 0.08));
@@ -210,6 +212,11 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
             latestPickPoint.getOrientation().setYawPitchRoll(latestFootstepYaw + deltaYaw, 0.0, 0.0);
          }
       }
+      if (input.isWindowHovered() && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Middle) && calculateStancePose.get() && selectionActive)
+      {
+         setRotateGoalFootsteps();
+         selectionActive = false;
+      }
 
       if (input.isWindowHovered() & input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left) && calculateStancePose.get() && selectionActive)
       {
@@ -252,6 +259,18 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
       pickPointSphere = null;
       leftSpheres.clear();
       rightSpheres.clear();
+   }
+
+   private void setRotateGoalFootsteps()
+   {
+      List<Pose3D> poses = new ArrayList<>();
+      poses.add(new Pose3D(stancePoses.get(RobotSide.LEFT)));
+      poses.add(new Pose3D(stancePoses.get(RobotSide.RIGHT)));
+
+      PoseListMessage poseListMessage = new PoseListMessage();
+      MessageTools.packPoseListMessage(poses, poseListMessage);
+
+      turningPublisher.publish(poseListMessage);
    }
 
    private void setGoalFootsteps()

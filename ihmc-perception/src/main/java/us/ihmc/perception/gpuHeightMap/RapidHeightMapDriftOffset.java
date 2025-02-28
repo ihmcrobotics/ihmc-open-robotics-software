@@ -1,8 +1,8 @@
-package us.ihmc.perception;
+package us.ihmc.perception.gpuHeightMap;
 
 import controller_msgs.msg.dds.PlanOffsetStatus;
-import us.ihmc.behaviors.activeMapping.ControllerFootstepQueueMonitor;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 
 /**
  * This class is meant to keep track of the drift in Z that is being calculated in the controller on the robot.

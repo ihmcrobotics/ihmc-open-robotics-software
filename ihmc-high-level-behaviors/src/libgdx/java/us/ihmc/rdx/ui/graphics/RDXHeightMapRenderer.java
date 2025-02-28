@@ -20,7 +20,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.rdx.shader.RDXShader;
 import us.ihmc.rdx.shader.RDXUniform;
 
-import java.nio.FloatBuffer;
 
 /**
  * Renders a height map as a point cloud. The height map is stored as a 16-bit grayscale image.
@@ -29,13 +28,6 @@ import java.nio.FloatBuffer;
  * 0 is the metric -3.2768f height, and 65536 is the 3.2768f height.
  * The height is scaled up by 10,000 for storage as 16-bit value (short)
  */
-
-/**
- * This has been updated to use {@link us.ihmc.rdx.ui.graphics.RDXHeightMapGraphicNew}, please use that going forward, this implementation has bugs with
- * interacting with collisions
- * from the mouse
- */
-@Deprecated
 public class RDXHeightMapRenderer implements RenderableProvider
 {
    private Renderable renderable;
@@ -140,11 +132,6 @@ public class RDXHeightMapRenderer implements RenderableProvider
 
       renderable.meshPart.size = totalCells;
       renderable.meshPart.mesh.setVertices(intermediateVertexBuffer, 0, totalCells * FLOATS_PER_CELL);
-   }
-
-   public FloatBuffer getVertexBuffer()
-   {
-      return renderable.meshPart.mesh.getVerticesBuffer();
    }
 
    @Override
