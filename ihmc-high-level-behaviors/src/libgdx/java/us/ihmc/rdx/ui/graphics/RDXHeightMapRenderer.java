@@ -16,7 +16,6 @@ import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.lwjgl.opengl.GL41;
-import us.ihmc.log.LogTools;
 import us.ihmc.rdx.shader.RDXShader;
 import us.ihmc.rdx.shader.RDXUniform;
 
@@ -28,12 +27,16 @@ import java.nio.FloatBuffer;
  * where the midway point 32,768 is the metric 0.0f height,
  * 0 is the metric -3.2768f height, and 65536 is the 3.2768f height.
  * The height is scaled up by 10,000 for storage as 16-bit value (short)
+ * <p>
+ * To learn about OpenGL and figure out what this code is doing,
+ * Tomasz recommends <a href="https://learnopengl.com/">LearnOpenGL.com</a>
  */
 public class RDXHeightMapRenderer implements RenderableProvider
 {
-   private Renderable renderable;
+   // The height map renderable
+   private final Renderable renderable = new Renderable();
 
-   public static final int FLOATS_PER_CELL = 8;
+   // Height map data sent to the GPU (as floats)
    private final VertexAttributes vertexAttributes = new VertexAttributes(new VertexAttribute(VertexAttributes.Usage.Generic, 1, "a_height"));
 
    // Uniforms
@@ -47,7 +50,7 @@ public class RDXHeightMapRenderer implements RenderableProvider
    {
       GL41.glEnable(GL41.GL_VERTEX_PROGRAM_POINT_SIZE);
 
-      renderable = new Renderable();
+      // Create the height map mesh (just a bunch of points)
       renderable.meshPart.primitiveType = GL41.GL_POINTS;
       renderable.meshPart.offset = 0;
       renderable.material = new Material(PBRColorAttribute.createBaseColorFactor(Color.WHITE));
@@ -58,15 +61,15 @@ public class RDXHeightMapRenderer implements RenderableProvider
       int maxIndices = 0;
       renderable.meshPart.mesh = new Mesh(isStatic, maxCells, maxIndices, vertexAttributes);
 
+      // Initialize the shader & assign it to the renderable
       RDXShader shader = new RDXShader(getClass());
       shader.create();
       registerUniforms(shader);
       shader.init(renderable);
       renderable.shader = shader.getBaseShader();
-
-      LogTools.info("Vertex Buffer Size: {}", maxCells * FLOATS_PER_CELL);
    }
 
+   // Registers a bunch of uniforms needed in the shader
    @SuppressWarnings("CodeBlock2Expr")
    private void registerUniforms(RDXShader rdxShader)
    {
@@ -125,6 +128,7 @@ public class RDXHeightMapRenderer implements RenderableProvider
       this.cellSize = cellSizeXYInMeters;
       this.heightScalingFactor = heightScalingFactor;
 
+      // Get the vertices buffer (contains the data sent to GPU for the vertex attribute)
       FloatBuffer verticesBuffer = renderable.meshPart.mesh.getVerticesBuffer(true);
 
       // Ensure correct length and initialize buffer
@@ -136,8 +140,17 @@ public class RDXHeightMapRenderer implements RenderableProvider
          verticesBuffer.limit(totalCells);
       }
 
+      /* NOTE:
+       * We need to copy the short values from the height map image (Mat) to the vertices buffer (FloatBuffer) as floats.
+       * In both objects, the data is in native memory. Copying native -> java -> native is slow,
+       * so we use the Mat#convertTo() method which performs the short to float conversion and memory copy natively.
+       */
+
+      // Wrap the vertices buffer into a pointer, then into a Mat
       FloatPointer verticesPointer = new FloatPointer(verticesBuffer);
       Mat verticesMat = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1, verticesPointer);
+
+      // Convert the height map data to float, and put it into the vertex buffer
       heightMapImage.convertTo(verticesMat, opencv_core.CV_32FC1);
 
       verticesMat.close();
@@ -147,8 +160,7 @@ public class RDXHeightMapRenderer implements RenderableProvider
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (renderable != null)
-         renderables.add(renderable);
+      renderables.add(renderable);
    }
 
    public void dispose()
