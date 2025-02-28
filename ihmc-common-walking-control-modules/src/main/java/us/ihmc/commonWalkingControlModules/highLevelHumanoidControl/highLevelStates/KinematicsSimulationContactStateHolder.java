@@ -28,9 +28,9 @@ public class KinematicsSimulationContactStateHolder
    private final MovingReferenceFrame currentPlaneFrame;
    private final ReferenceFrame desiredPlaneFrame;
 
-   private final double kp = 500.0;
+   private final double kp = 0.0;
    private final double zeta = 1.0;
-   private final double kd = GainCalculator.computeDerivativeGain(kp, zeta);
+   private final double kd = 200; //GainCalculator.computeDerivativeGain(kp, zeta);
    private final double weight = 50.0;
    private final MutableReferenceFrame controlFrame;
    private final RecyclingArrayList<SpatialAccelerationCommand> spatialAccelerationCommands
