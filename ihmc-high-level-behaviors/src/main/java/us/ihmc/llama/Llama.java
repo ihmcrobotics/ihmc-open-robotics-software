@@ -20,7 +20,6 @@ import us.ihmc.tools.IHMCCommonPaths;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.IntBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 
@@ -78,10 +77,12 @@ public class Llama
    public static final Path MODELS_DIRECTORY = IHMCCommonPaths.DOT_IHMC_DIRECTORY.resolve("llama-models");
    public static final Path MODEL_TO_USE = MODELS_DIRECTORY.resolve("Llama-3.2-1B-Instruct-Q8_0.gguf");
 
-   private final llama_model model;
-   private final llama_context ctx;
-   private final llama_vocab vocab;
+   private final llama_model_params model_params;
+   private final llama_context_params ctx_params;
    private final llama_sampler smpl;
+   private llama_model model;
+   private llama_context ctx;
+   private llama_vocab vocab;
    private BytePointer context_str;
    private int prev_len = 0;
    private final Stopwatch stopwatch = new Stopwatch();
@@ -91,6 +92,8 @@ public class Llama
 
    public Llama(llama_model_params model_params, llama_context_params ctx_params, llama_sampler smpl)
    {
+      this.model_params = model_params;
+      this.ctx_params = ctx_params;
       this.smpl = smpl;
 
       ggml_backend_load_all();
@@ -207,9 +210,17 @@ public class Llama
    public void clearContext()
    {
       context_str.close();
+      messages.close();
+      llama_sampler_free(smpl);
+      llama_free(ctx);
+      llama_model_free(model);
+
+      model = llama_model_load_from_file(MODEL_TO_USE.toString(), model_params);
+      vocab = llama_model_get_vocab(model);
+      ctx = llama_init_from_model(model, ctx_params);
+
       context_str = new BytePointer(llama_n_ctx(ctx));
       prev_len = 0;
-      messages.close();
       messages = new llama_chat_message(100);
       n_messages = 0;
    }
@@ -222,6 +233,7 @@ public class Llama
    public void destroy()
    {
       // free resources
+      context_str.close();
       messages.close();
       llama_sampler_free(smpl);
       llama_free(ctx);
