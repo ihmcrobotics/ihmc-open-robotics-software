@@ -277,8 +277,8 @@ public class PerceptionMessageTools
       for (int i = 0; i < totalCells; ++i)
       {
          int dataIndex = 2 * i;
-         int major = (data[dataIndex] << 8) & 0xFF00;
-         int minor = data[dataIndex + 1] & 0x00FF;
+         int major = (data[dataIndex + 1] << 8) & 0xFF00;
+         int minor = data[dataIndex] & 0x00FF;
          int height = major | minor;
          float cellHeight = (float) (((float) height / RapidHeightMapManager.getHeightMapParameters().getHeightScaleFactor())
                                      - RapidHeightMapManager.getHeightMapParameters().getHeightOffset());
