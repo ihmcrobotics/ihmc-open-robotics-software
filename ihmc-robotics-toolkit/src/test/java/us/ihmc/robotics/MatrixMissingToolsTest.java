@@ -489,7 +489,7 @@ public class MatrixMissingToolsTest
             DMatrixRMaj Asqrt_times_Asqrt = new DMatrixRMaj(matrixSize, matrixSize);
             CommonOps_DDRM.mult(A_sqrt, A_sqrt, Asqrt_times_Asqrt);
 
-            MatrixTestTools.assertMatrixEquals(A, Asqrt_times_Asqrt, 1.0e-7);
+            MatrixTestTools.assertMatrixEquals(A, Asqrt_times_Asqrt, 1.0e-10);
          }
       }
    }

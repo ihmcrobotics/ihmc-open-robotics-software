@@ -254,7 +254,7 @@ public class MultipleWaypointsPositionTrajectoryGenerator implements FramePositi
       }
 
       while (currentWaypointIndex.getIntegerValue() < numberOfWaypoints.getIntegerValue() - 2
-            && time >= waypoints.get(currentWaypointIndex.getIntegerValue() + 1).getTime())
+             && time >= waypoints.get(currentWaypointIndex.getIntegerValue() + 1).getTime())
       {
          currentWaypointIndex.increment();
       }
@@ -278,7 +278,6 @@ public class MultipleWaypointsPositionTrajectoryGenerator implements FramePositi
          return;
       }
 
-      double subTrajectoryTime = MathTools.clamp(time - start.getTime(), 0.0, end.getTime() - start.getTime());
       if (Precision.equals(start.getTime(), end.getTime()))
       {
          currentPosition.set(start.getPosition());
@@ -286,18 +285,11 @@ public class MultipleWaypointsPositionTrajectoryGenerator implements FramePositi
          currentAcceleration.setToZero();
          return;
       }
-      else if (Precision.equals(start.getTime(), end.getTime(), 0.05))
-      {
-         double alpha = (time - start.getTime()) / (end.getTime() - start.getTime());
-         currentPosition.interpolate(start.getPosition(), end.getPosition(), alpha);
-         currentVelocity.interpolate(start.getLinearVelocity(), end.getLinearVelocity(), alpha);
-         currentAcceleration.setToZero();
-         return;
-      }
 
       // Initialize the segment trajectory, in case the index or waypoints have changed
       subTrajectory.setCubicDirectly(end.getTime()
-            - start.getTime(), start.getPosition(), start.getLinearVelocity(), end.getPosition(), end.getLinearVelocity());
+                                     - start.getTime(), start.getPosition(), start.getLinearVelocity(), end.getPosition(), end.getLinearVelocity());
+      double subTrajectoryTime = MathTools.clamp(time - start.getTime(), 0.0, end.getTime() - start.getTime());
       subTrajectory.compute(subTrajectoryTime);
 
       currentPosition.set(subTrajectory.getPosition());
@@ -432,7 +424,7 @@ public class MultipleWaypointsPositionTrajectoryGenerator implements FramePositi
          return namePrefix + ": Has no waypoints.";
       else
          return namePrefix + ": number of waypoints = " + numberOfWaypoints.getIntegerValue() + ", current waypoint index = "
-               + currentWaypointIndex.getIntegerValue() + "\nFirst waypoint: " + waypoints.get(0) + ", last waypoint: "
-               + waypoints.get(numberOfWaypoints.getIntegerValue() - 1);
+                + currentWaypointIndex.getIntegerValue() + "\nFirst waypoint: " + waypoints.get(0) + ", last waypoint: "
+                + waypoints.get(numberOfWaypoints.getIntegerValue() - 1);
    }
 }

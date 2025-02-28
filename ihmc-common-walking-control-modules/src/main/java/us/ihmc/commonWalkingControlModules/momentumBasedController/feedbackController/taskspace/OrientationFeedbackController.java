@@ -669,7 +669,15 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       gains.getDerivativeGainMatrix(tempGainMatrix);
       if (isImpedanceEnabled)
       {
-         gains.getFullProportionalGainMatrix(tempMatrix, 3);
+         tempMatrix.reshape(6, 6);
+         CommonOps_DDRM.setIdentity(tempMatrix);
+
+         int rowOffset = 3;
+         double[] proportionalGains = gains.getProportionalGains();
+         for (int i = 0; i < 3; i++)
+         {
+            tempMatrix.set(i + rowOffset, i + rowOffset, proportionalGains[i]);
+         }
 
          sqrtProportionalGainMatrix.reshape(6, 6);
          sqrtInertiaMatrix.reshape(6, 6);

@@ -284,15 +284,6 @@ public abstract class WalkingControllerParameters
    }
 
    /**
-    * If true, the rigid body spatial control state for the given rigid body will be setup
-    * with impedance control
-    */
-   public boolean enableImpedanceControl(String rigidBodyName)
-   {
-      return false;
-   }
-
-   /**
     * The map returned contains the default rigid body poses in their respective base frame. For
     * example, if the base frame of the chest body is the pelvis z-up frame this should contain the
     * home pose of the chest in that frame. If the particular body does not support full pose control
@@ -900,5 +891,10 @@ public abstract class WalkingControllerParameters
    public List<String> getJointsToCheckTorqueFeasibilityInMultiContact()
    {
       return null;
+   }
+
+   public static String getImpedanceGainParameterName(String body)
+   {
+      return body + "_Impedance";
    }
 }

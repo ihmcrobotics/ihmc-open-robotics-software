@@ -106,11 +106,14 @@ public class MatrixMissingTools
       }
    }
 
-   public static void diagonal(DMatrixRMaj matrix, DMatrixRMaj diagMatrixToPack) {
-      if (matrix.getNumRows() != matrix.getNumCols()) {
+   public static void diagonal(DMatrixRMaj matrix, DMatrixRMaj diagMatrixToPack)
+   {
+      if (matrix.getNumRows() != matrix.getNumCols())
+      {
          throw new IllegalArgumentException("The input matrix must be square.");
       }
-      if (diagMatrixToPack.getNumRows() != matrix.getNumRows() || diagMatrixToPack.getNumCols() != matrix.getNumCols()) {
+      if (diagMatrixToPack.getNumRows() != matrix.getNumRows() || diagMatrixToPack.getNumCols() != matrix.getNumCols())
+      {
          throw new IllegalArgumentException("The diagonal matrix must have the same dimensions as the input matrix.");
       }
 
@@ -118,7 +121,8 @@ public class MatrixMissingTools
       CommonOps_DDRM.fill(diagMatrixToPack, 0.0);
 
       // Set the diagonal elements
-      for (int i = 0; i < matrix.getNumRows(); i++) {
+      for (int i = 0; i < matrix.getNumRows(); i++)
+      {
          diagMatrixToPack.set(i, i, matrix.get(i, i));
       }
    }
@@ -666,11 +670,10 @@ public class MatrixMissingTools
     * @param cols column indices to insert
     * @param dst destination matrix
     */
-   public static void insert( DMatrixRMaj src ,
-                              DMatrixRMaj dst ,
-                              TIntArrayList rows ,
-                              TIntArrayList cols ) {
-      if ( rows.size() == 0 || cols.size() == 0 ) return;
+   public static void insert(DMatrixRMaj src, DMatrixRMaj dst, TIntArrayList rows, TIntArrayList cols)
+   {
+      if (rows.isEmpty() || cols.isEmpty())
+         return;
 
       if (dst.getNumRows() < rows.get(rows.size() - 1) + 1)
          throw new IllegalArgumentException(
@@ -713,21 +716,32 @@ public class MatrixMissingTools
     * @param solver Invertion algorithm that is used.  Should be preconfigured.
     * @return true if it could invert the matrix false if it could not.
     */
-   public static boolean invert( DMatrixRMaj mat, LinearSolverLu_DDRM solver) {
-      if(mat.numCols <= UnrolledInverseFromMinor_DDRM.MAX ) {
-         if( mat.numCols != mat.numRows ) {
+   public static boolean invert(DMatrixRMaj mat, LinearSolverLu_DDRM solver)
+   {
+      if (mat.numCols <= UnrolledInverseFromMinor_DDRM.MAX)
+      {
+         if (mat.numCols != mat.numRows)
+         {
             throw new MatrixDimensionException("Must be a square matrix.");
          }
 
-         if( mat.numCols >= 2 ) {
-            UnrolledInverseFromMinor_DDRM.inv(mat,mat);
-         } else {
-            mat.set(0, 1.0/mat.get(0));
+         if (mat.numCols >= 2)
+         {
+            UnrolledInverseFromMinor_DDRM.inv(mat, mat);
          }
-      } else {
-         if( solver.setA(mat) ) {
+         else
+         {
+            mat.set(0, 1.0 / mat.get(0));
+         }
+      }
+      else
+      {
+         if (solver.setA(mat))
+         {
             solver.invert(mat);
-         } else {
+         }
+         else
+         {
             return false;
          }
       }

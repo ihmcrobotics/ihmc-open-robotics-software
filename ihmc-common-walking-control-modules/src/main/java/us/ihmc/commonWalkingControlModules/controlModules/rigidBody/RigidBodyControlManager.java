@@ -689,11 +689,6 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
       return ret;
    }
 
-   public void setImpedanceEnabled(boolean isImpedanceEnabled)
-   {
-
-   }
-
    public RigidBodyBasics getBodyToControl()
    {
       return bodyToControl;

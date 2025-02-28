@@ -242,8 +242,8 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
       // Weights
       Vector3DReadOnly taskspaceAngularWeight = taskspaceAngularWeightMap.get(bodyName);
       Vector3DReadOnly taskspaceLinearWeight = taskspaceLinearWeightMap.get(bodyName);
-      PID3DGainsReadOnly taskspaceOrientationImpedanceGains = taskspaceOrientationGainMap.get(bodyName + "_Impedance");
-      PID3DGainsReadOnly taskspacePositionImpedanceGains = taskspacePositionGainMap.get(bodyName + "_Impedance");
+      PID3DGainsReadOnly taskspaceOrientationImpedanceGains = taskspaceOrientationGainMap.get(WalkingControllerParameters.getImpedanceGainParameterName(bodyName));
+      PID3DGainsReadOnly taskspacePositionImpedanceGains = taskspacePositionGainMap.get(WalkingControllerParameters.getImpedanceGainParameterName(bodyName));
 
       TObjectDoubleHashMap<String> homeConfiguration = walkingControllerParameters.getOrCreateJointHomeConfiguration();
       Pose3D homePose = walkingControllerParameters.getOrCreateBodyHomeConfiguration().get(bodyName);

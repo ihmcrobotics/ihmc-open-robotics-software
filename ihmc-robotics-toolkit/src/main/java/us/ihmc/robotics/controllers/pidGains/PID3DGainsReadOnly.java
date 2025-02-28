@@ -101,31 +101,6 @@ public interface PID3DGainsReadOnly
    }
 
    /**
-    * Will pack the proportional stiffness matrix (6x6). The matrix will be a diagonal
-    * matrix with the diagonal elements set to the proportional stiffnesss.
-    *
-    * @param proportionalGainMatrixToPack the matrix in which the stiffnesss are stored. Modified.
-    */
-   public default void getFullProportionalGainMatrix(DMatrixRMaj proportionalGainMatrixToPack, int startIndex)
-   {
-      double[] proportionalGains = getProportionalGains();
-      proportionalGainMatrixToPack.reshape(6, 6);
-      proportionalGainMatrixToPack.zero();
-
-      for (int i = 0; i < 6; i++)
-      {
-         if (i >= startIndex && i < startIndex + proportionalGains.length)
-         {
-            proportionalGainMatrixToPack.set(i, i, proportionalGains[i - startIndex]);
-         }
-         else
-         {
-            proportionalGainMatrixToPack.set(i, i, 1.0);
-         }
-      }
-   }
-
-   /**
     * Will pack the integral gain matrix. The matrix will be a diagonal
     * matrix with the diagonal elements set to the integral gains.
     *

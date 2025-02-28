@@ -231,8 +231,8 @@ public class ManipulationControllerState extends HighLevelControllerState
       // Gains
       PID3DGainsReadOnly taskspaceOrientationGains = taskspaceOrientationGainMap.get(bodyName);
       PID3DGainsReadOnly taskspacePositionGains = taskspacePositionGainMap.get(bodyName);
-      PID3DGainsReadOnly taskspaceOrientationImpedanceGains = taskspaceOrientationGainMap.get(bodyName + "_Impedance");
-      PID3DGainsReadOnly taskspacePositionImpedanceGains = taskspacePositionGainMap.get(bodyName + "_Impedance");
+      PID3DGainsReadOnly taskspaceOrientationImpedanceGains = taskspaceOrientationGainMap.get(WalkingControllerParameters.getImpedanceGainParameterName(bodyName));
+      PID3DGainsReadOnly taskspacePositionImpedanceGains = taskspacePositionGainMap.get(WalkingControllerParameters.getImpedanceGainParameterName(bodyName));
 
       // Weights
       Vector3DReadOnly taskspaceAngularWeight = taskspaceAngularWeightMap.get(bodyName);

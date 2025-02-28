@@ -897,10 +897,19 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
       if (isImpedanceEnabled)
       {
-         positionGains.getFullProportionalGainMatrix(tempLinearMatrix, 3);
-         orientationGains.getFullProportionalGainMatrix(tempAngularMatrix, 0);
+         tempMatrix.reshape(6, 6);
+         tempMatrix.zero();
 
-         CommonOps_DDRM.mult(tempAngularMatrix, tempLinearMatrix, tempMatrix);
+         double[] kpOrientation = orientationGains.getProportionalGains();
+         double[] kpPosition = positionGains.getProportionalGains();
+         int angularOffset = 0;
+         int positionOffset = 3;
+
+         for (int i = 0; i < 3; i++)
+         {
+            tempMatrix.set(i + angularOffset, i + angularOffset, kpOrientation[i]);
+            tempMatrix.set(i + positionOffset, i + positionOffset, kpPosition[i]);
+         }
 
          sqrtProportionalGainMatrix.reshape(6, 6);
          sqrtInertiaMatrix.reshape(6, 6);
