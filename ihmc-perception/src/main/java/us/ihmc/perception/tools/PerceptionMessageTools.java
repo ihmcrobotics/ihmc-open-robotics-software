@@ -282,7 +282,9 @@ public class PerceptionMessageTools
          int height = major | minor;
          float cellHeight = (float) (((float) height / RapidHeightMapManager.getHeightMapParameters().getHeightScaleFactor())
                                      - RapidHeightMapManager.getHeightMapParameters().getHeightOffset());
-         heightMapDataToPack.setHeightAt(i, cellHeight);
+
+         int key = cellsPerAxis * (i % cellsPerAxis) + (i / cellsPerAxis);
+         heightMapDataToPack.setHeightAt(key, cellHeight);
       }
    }
 
