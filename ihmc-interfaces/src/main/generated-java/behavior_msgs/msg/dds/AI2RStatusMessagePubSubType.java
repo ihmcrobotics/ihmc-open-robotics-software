@@ -15,7 +15,7 @@ public class AI2RStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "99378d4b75adfff70cb0ff61433e1ad17c5e90808213bef857147f5e52f1fbb6";
+   		return "2d93242f809c340c15434aad6979f6ad226a7851a3883b02ac1399ba0593901d";
    }
    
    @Override
@@ -63,6 +63,8 @@ public class AI2RStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       }
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+      current_alignment += behavior_msgs.msg.dds.AI2RActionFailureMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -92,6 +94,8 @@ public class AI2RStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataType
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getFailedBehavior().length() + 1;
 
+      current_alignment += behavior_msgs.msg.dds.AI2RActionFailureMessagePubSubType.getCdrSerializedSize(data.getFailure(), current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -115,6 +119,7 @@ public class AI2RStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       cdr.write_type_d(data.getFailedBehavior());else
           throw new RuntimeException("failed_behavior field exceeds the maximum length");
 
+      behavior_msgs.msg.dds.AI2RActionFailureMessagePubSubType.write(data.getFailure(), cdr);
    }
 
    public static void read(behavior_msgs.msg.dds.AI2RStatusMessage data, us.ihmc.idl.CDR cdr)
@@ -124,6 +129,7 @@ public class AI2RStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       cdr.read_type_e(data.getAvailableBehaviors());	
       cdr.read_type_d(data.getCompletedBehavior());	
       cdr.read_type_d(data.getFailedBehavior());	
+      behavior_msgs.msg.dds.AI2RActionFailureMessagePubSubType.read(data.getFailure(), cdr);	
 
    }
 
@@ -136,6 +142,8 @@ public class AI2RStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       ser.write_type_e("available_behaviors", data.getAvailableBehaviors());
       ser.write_type_d("completed_behavior", data.getCompletedBehavior());
       ser.write_type_d("failed_behavior", data.getFailedBehavior());
+      ser.write_type_a("failure", new behavior_msgs.msg.dds.AI2RActionFailureMessagePubSubType(), data.getFailure());
+
    }
 
    @Override
@@ -147,6 +155,8 @@ public class AI2RStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       ser.read_type_e("available_behaviors", data.getAvailableBehaviors());
       ser.read_type_d("completed_behavior", data.getCompletedBehavior());
       ser.read_type_d("failed_behavior", data.getFailedBehavior());
+      ser.read_type_a("failure", new behavior_msgs.msg.dds.AI2RActionFailureMessagePubSubType(), data.getFailure());
+
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.AI2RStatusMessage src, behavior_msgs.msg.dds.AI2RStatusMessage dest)

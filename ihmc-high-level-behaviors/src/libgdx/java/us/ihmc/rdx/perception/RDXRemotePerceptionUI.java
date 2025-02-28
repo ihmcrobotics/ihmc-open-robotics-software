@@ -56,7 +56,7 @@ public class RDXRemotePerceptionUI
 
    public RDXRemotePerceptionUI(ROS2Helper ros2Helper)
    {
-      remotePropertySets = new ImGuiRemoteROS2StoredPropertySetGroup(ros2Helper);
+      remotePropertySets = new ImGuiRemoteROS2StoredPropertySetGroup(ros2Helper.getROS2Node());
 
       remotePropertySets.registerRemotePropertySet(perceptionConfigurationParameters, PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS);
       remotePropertySets.registerRemotePropertySet(continuousHikingParameters, ContinuousHikingAPI.CONTINUOUS_HIKING_PARAMETERS);

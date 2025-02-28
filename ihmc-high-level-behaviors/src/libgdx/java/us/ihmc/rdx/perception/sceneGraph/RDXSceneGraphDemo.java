@@ -12,6 +12,7 @@ import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.ImageSensorPublishThread;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.comms.PerceptionComms;
+import us.ihmc.perception.cuda.CUDATools;
 import us.ihmc.perception.detections.DetectionManager;
 import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
 import us.ihmc.perception.opencl.OpenCLManager;
@@ -47,6 +48,9 @@ import us.ihmc.sensors.zed.ZEDSVOPlaybackSensor;
 import us.ihmc.tools.IHMCCommonPaths;
 
 import java.util.Map;
+
+import static us.ihmc.zed.global.zed.SL_DEPTH_MODE_NEURAL;
+import static us.ihmc.zed.global.zed.SL_DEPTH_MODE_PERFORMANCE;
 
 /**
  * A self contained demo and development environment for our scene graph functionality.
@@ -95,7 +99,7 @@ public class RDXSceneGraphDemo
             ros2Node = new ROS2NodeBuilder().build("perception_scene_graph_demo");
             ros2Helper = new ROS2Helper(ros2Node);
 
-            detectionManager = new DetectionManager(ros2Helper);
+            detectionManager = new DetectionManager(ros2Node);
 
             // Add perception visualizers
             perceptionVisualizerPanel = new RDXPerceptionVisualizersPanel();
@@ -125,7 +129,7 @@ public class RDXSceneGraphDemo
             zed2ColoredPointCloudVisualizer.setActive(true);
             perceptionVisualizerPanel.addVisualizer(zed2ColoredPointCloudVisualizer);
 
-            perceptionVisualizerPanel.addVisualizer(new RDXDetectionManagerSettings("Detection Manager Settings", ros2Helper));
+            perceptionVisualizerPanel.addVisualizer(new RDXDetectionManagerSettings("Detection Manager Settings", ros2Node));
 
             RDXROS2YOLOv8Visualizer yoloSettingsVisualizer = new RDXROS2YOLOv8Visualizer("YOLOv8", ros2Node, PerceptionAPI.YOLO_ANNOTATED_IMAGE);
             yoloSettingsVisualizer.setActive(true);
@@ -143,7 +147,8 @@ public class RDXSceneGraphDemo
             sensorPoseGraphic = RDXModelBuilder.createCoordinateFrameInstance(0.1);
             baseUI.getPrimaryScene().addRenderableProvider(sensorPoseGraphic, RDXSceneLevel.VIRTUAL);
 
-            zedSVOPlayer = new ZEDSVOPlaybackSensor(ros2Helper, 0, ZEDModelData.ZED_2, SVO_FILE_NAME);
+            boolean enableNeuralMode = CUDATools.hasCUDADeviceOfAtLeast(CUDATools.getDeviceName(0), "RTX 3080");
+            zedSVOPlayer = new ZEDSVOPlaybackSensor(ros2Helper, 0, ZEDModelData.ZED_2, enableNeuralMode ? SL_DEPTH_MODE_NEURAL : SL_DEPTH_MODE_PERFORMANCE, SVO_FILE_NAME);
             zedSVOPlayer.useTrackedPose(true);
             zedSVOPlayer.run(true);
 
@@ -161,7 +166,7 @@ public class RDXSceneGraphDemo
 
             // Add rapid region parameters panel
             ImGuiRemoteROS2StoredPropertySet rapidRegionsParameterPanel
-                  = new ImGuiRemoteROS2StoredPropertySet(ros2Helper,
+                  = new ImGuiRemoteROS2StoredPropertySet(ros2Node,
                                                          new RapidRegionsExtractorParameters(),
                                                          PerceptionComms.PERSPECTIVE_RAPID_REGION_PARAMETERS);
             baseUI.getImGuiPanelManager().addPanel(rapidRegionsParameterPanel.createPanel());
@@ -188,7 +193,7 @@ public class RDXSceneGraphDemo
                   planarRegionsExtractor = new RapidPlanarRegionsExtractor(planarRegionsOpenCLManager, imageHeight, imageWidth, fx, fy, cx, cy);
                   planarRegionsExtractor.getDebugger().setEnabled(false);
 
-                  planarRegionsExtractorParameterSync = new ROS2StoredPropertySet<>(ros2Helper,
+                  planarRegionsExtractorParameterSync = new ROS2StoredPropertySet<>(ros2Node,
                                                                                     PerceptionComms.PERSPECTIVE_RAPID_REGION_PARAMETERS,
                                                                                     planarRegionsExtractor.getParameters());
                }

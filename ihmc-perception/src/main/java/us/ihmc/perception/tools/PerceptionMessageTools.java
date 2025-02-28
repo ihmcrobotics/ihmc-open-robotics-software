@@ -26,6 +26,8 @@ import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.imageMessage.CompressionType;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.opencv.OpenCVTools;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.sensors.realsense.RealSenseDevice;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;

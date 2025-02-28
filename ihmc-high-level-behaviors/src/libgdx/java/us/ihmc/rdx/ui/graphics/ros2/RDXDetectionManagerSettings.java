@@ -5,6 +5,7 @@ import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.perception.detections.DetectionManagerSettings;
 import us.ihmc.rdx.ui.ImGuiRemoteROS2StoredPropertySet;
 import us.ihmc.rdx.ui.graphics.RDXVisualizer;
+import us.ihmc.ros2.ROS2Node;
 
 /*
  *  FIXME: It doesn't make sense to have a visualizer for settings.
@@ -16,7 +17,7 @@ public class RDXDetectionManagerSettings extends RDXVisualizer
    private final DetectionManagerSettings settings = new DetectionManagerSettings();
    private final ImGuiRemoteROS2StoredPropertySet remoteStoredPropertySet;
 
-   public RDXDetectionManagerSettings(String title, ROS2PublishSubscribeAPI ros2)
+   public RDXDetectionManagerSettings(String title, ROS2Node ros2)
    {
       super(title);
 

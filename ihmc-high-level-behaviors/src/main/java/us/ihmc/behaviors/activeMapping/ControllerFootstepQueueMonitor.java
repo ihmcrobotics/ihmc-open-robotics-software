@@ -6,11 +6,11 @@ import controller_msgs.msg.dds.PlanOffsetStatus;
 import controller_msgs.msg.dds.QueuedFootstepStatusMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.ROS2Node;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -30,17 +30,18 @@ public class ControllerFootstepQueueMonitor
    private boolean footstepStarted;
    private final AtomicBoolean isWalking = new AtomicBoolean(false);
 
-   public ControllerFootstepQueueMonitor(ROS2Helper ros2Helper,
+   public ControllerFootstepQueueMonitor(ROS2Node ros2Node,
                                          String simpleRobotName,
                                          HumanoidReferenceFrames referenceFrames,
                                          ContinuousHikingLogger continuousHikingLogger)
    {
       this.referenceFrames = referenceFrames;
       this.continuousHikingLogger = continuousHikingLogger;
-      ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(FootstepQueueStatusMessage.class, simpleRobotName), this::footstepQueueStatusReceived);
-      ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(FootstepStatusMessage.class, simpleRobotName), this::footstepStatusReceived);
-      ros2Helper.subscribeViaCallback(getTopic(PlanOffsetStatus.class, simpleRobotName), this::acceptPlanOffsetStatus);
-      ros2Helper.subscribeViaCallback(getTopic(WalkingStatusMessage.class, simpleRobotName), this::acceptWalkingStatusMessage);
+
+      ros2Node.createSubscription2(HumanoidControllerAPI.getTopic(FootstepQueueStatusMessage.class, simpleRobotName), this::footstepQueueStatusReceived);
+      ros2Node.createSubscription2(HumanoidControllerAPI.getTopic(FootstepStatusMessage.class, simpleRobotName), this::footstepStatusReceived);
+      ros2Node.createSubscription2(getTopic(PlanOffsetStatus.class, simpleRobotName), this::acceptPlanOffsetStatus);
+      ros2Node.createSubscription2(getTopic(WalkingStatusMessage.class, simpleRobotName), this::acceptWalkingStatusMessage);
    }
 
    private void footstepQueueStatusReceived(FootstepQueueStatusMessage footstepQueueStatusMessage)

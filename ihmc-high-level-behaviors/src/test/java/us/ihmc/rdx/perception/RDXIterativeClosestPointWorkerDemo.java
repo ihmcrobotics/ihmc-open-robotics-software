@@ -101,8 +101,8 @@ public class RDXIterativeClosestPointWorkerDemo
    {
       zedImageRetriever = new ZEDColorDepthImageRetriever(0,
                                                           ReferenceFrame::getWorldFrame,
-                                                          new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_ZED_PUBLICATION)::isDemanded,
-                                                          new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_ZED_PUBLICATION)::isDemanded);
+                                                          new ROS2DemandGraphNode(node, PerceptionAPI.REQUEST_ZED_PUBLICATION)::isDemanded,
+                                                          new ROS2DemandGraphNode(node, PerceptionAPI.REQUEST_ZED_PUBLICATION)::isDemanded);
       zedImageRetriever.start();
       zedImagePublisher = new ZEDColorDepthImagePublisher(PerceptionAPI.ZED2_COLOR_IMAGES, PerceptionAPI.ZED2_DEPTH, PerceptionAPI.ZED2_CUT_OUT_DEPTH);
 

@@ -26,16 +26,15 @@ import us.ihmc.perception.cuda.CUDAStreamManager;
 import us.ihmc.perception.cuda.CUDATools;
 import us.ihmc.perception.imageMessage.PixelFormat;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static org.bytedeco.cuda.global.cudart.*;
 
@@ -82,26 +81,27 @@ public class YOLOv8Model
    private final float[] maskThresholds;
    private float nmsThreshold;
 
-   public YOLOv8Model(Path modelBaseDirectory)
+   public YOLOv8Model(URL modelBaseDirectory)
    {
-      // Ensure the passed in directory is a valid YOLO model directory
-      if (!YOLOv8Tools.isValidYOLOModelDirectory(modelBaseDirectory))
-         throw new IllegalArgumentException("Provided directory is not a YOLO model directory");
-
       // Get name & onnx file path
-      modelName = modelBaseDirectory.getFileName().toString();
+      Path path = Path.of(modelBaseDirectory.getPath());
+      modelName = path.getFileName().toString();
 
-      try (InputStream inputStream = new FileInputStream(YOLOv8Tools.getClassNamesFile(modelBaseDirectory).toFile()))
+      URL classNamesFileURL = YOLOv8Tools.getClassNamesFile(modelBaseDirectory);
+      URL onnxFileURL = YOLOv8Tools.getONNXFile(modelBaseDirectory);
+
+      try (InputStream classNamesFile = classNamesFileURL.openStream();
+           InputStream onnxFile = onnxFileURL.openStream())
       {
          // Parse class_names.yaml
          Yaml yaml = new Yaml();
-         Map<String, List<Object>> classNamesData = yaml.load(inputStream);
+         Map<String, List<Object>> classNamesData = yaml.load(classNamesFile);
          List<Object> names = classNamesData.get("names");
          detectableObjects.addAll(names.stream().map(Object::toString).toList());
 
          // Read the YOLO net
-         Path onnxFile = YOLOv8Tools.getONNXFile(modelBaseDirectory);
-         yoloNet = opencv_dnn.readNetFromONNX(Files.readAllBytes(onnxFile));
+         Objects.requireNonNull(onnxFile);
+         yoloNet = opencv_dnn.readNetFromONNX(onnxFile.readAllBytes());
       }
       catch (IOException e)
       {

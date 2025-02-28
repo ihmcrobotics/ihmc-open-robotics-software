@@ -30,7 +30,7 @@ public class AtlasOusterLidarOnRobotProcess
          ros2Node.destroy();
       }, getClass().getSimpleName() + "Shutdown"));
 
-      new OusterDriverAndDepthPublisher(controllerHelper, this::sensorFrameUpdater, PerceptionAPI.OUSTER_DEPTH_IMAGE, PerceptionAPI.OUSTER_LIDAR_SCAN);
+      new OusterDriverAndDepthPublisher(ros2Node, controllerHelper.getRobotName(), this::sensorFrameUpdater, PerceptionAPI.OUSTER_DEPTH_IMAGE, PerceptionAPI.OUSTER_LIDAR_SCAN);
    }
 
    private HumanoidReferenceFrames sensorFrameUpdater()

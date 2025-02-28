@@ -1,5 +1,6 @@
 package us.ihmc.communication.ros2;
 import std_msgs.msg.dds.Empty;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 
 import java.util.ArrayList;
@@ -16,7 +17,7 @@ public class ROS2DemandGraphNode
    private final Set<Consumer<Boolean>> demandChangedCallbacks = new HashSet<>();
    private final AtomicBoolean wasDemanded = new AtomicBoolean(false);
 
-   public ROS2DemandGraphNode(ROS2PublishSubscribeAPI ros2, ROS2Topic<Empty> heartbeatTopic)
+   public ROS2DemandGraphNode(ROS2Node ros2, ROS2Topic<Empty> heartbeatTopic)
    {
       nodeHeartbeatMonitor = new ROS2HeartbeatMonitor(ros2, heartbeatTopic);
       nodeHeartbeatMonitor.setAlivenessChangedCallback(this::checkIfDemandChanged);

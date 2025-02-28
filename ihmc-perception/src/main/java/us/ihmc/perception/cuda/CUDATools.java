@@ -12,6 +12,8 @@ import org.bytedeco.javacpp.Pointer;
 import us.ihmc.log.LogTools;
 
 import java.net.URL;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.bytedeco.cuda.global.cudart.*;
 import static org.bytedeco.cuda.global.nvjpeg.NVJPEG_STATUS_SUCCESS;
@@ -61,6 +63,66 @@ public class CUDATools
    public static boolean hasCUDADevice()
    {
       return getCUDADeviceCount() > 0;
+   }
+
+   /**
+    * Get the name of a CUDA device
+    * @param device the device number
+    * @return the name of the device
+    */
+   public static String getDeviceName(int device)
+   {
+      try (IntPointer devicePointer = new IntPointer(1);
+           cudaDeviceProp deviceProperties = new cudaDeviceProp())
+      {
+         devicePointer.put(device);
+         cudaGetDeviceProperties(deviceProperties, devicePointer.get());
+         return deviceProperties.name().getString();
+      }
+   }
+
+   /**
+    * Attempts to score GPUs from a baseline device name (e.g. the minimum could be "RTX 2080 Ti")
+    *
+    * @param deviceName        The device name to score
+    * @param minimumDeviceName The device name to score against
+    * @return true if deviceName is equal-to-or-better minimumDeviceName in terms of relative CUDA performance
+    */
+   public static boolean hasCUDADeviceOfAtLeast(String deviceName, String minimumDeviceName)
+   {
+      final double gpuSeriesExp = 0.8; // How much to weight the GPU series
+      final int tiWeight = 5; // If the GPU is a Ti edition
+      final int superWeight = 5; // If the GPU is a SUPER edition
+
+      double minimumDeviceScore = 0.0;
+
+      // Find the device number (e.g. 1080)
+      Pattern numberPattern = Pattern.compile("\\d+");
+      Matcher deviceMatcher = numberPattern.matcher(deviceName);
+      Matcher minumumDeviceMatcher = numberPattern.matcher(minimumDeviceName);
+
+      if (minumumDeviceMatcher.find())
+      {
+         String gpuModel = minumumDeviceMatcher.group();
+         int gpuSeries = gpuModel.length() == 3 ? Integer.parseInt(gpuModel.substring(0, 1)) : Integer.parseInt(gpuModel.substring(0, 2));
+         int gpuTier = gpuModel.length() == 3 ? Integer.parseInt(gpuModel.substring(1, 3)) : Integer.parseInt(gpuModel.substring(2, 4));
+         boolean tiEdition = deviceName.toLowerCase().contains("ti");
+         boolean superEdition = deviceName.toLowerCase().contains("super");
+         minimumDeviceScore = Math.pow(gpuSeries, gpuSeriesExp) + gpuTier + (tiEdition ? tiWeight : 0) + (superEdition ? superWeight : 0);
+      }
+
+      if (deviceMatcher.find() && minimumDeviceScore > 0.0)
+      {
+         String gpuModel = deviceMatcher.group();
+         int gpuSeries = gpuModel.length() == 3 ? Integer.parseInt(gpuModel.substring(0, 1)) : Integer.parseInt(gpuModel.substring(0, 2));
+         int gpuTier = gpuModel.length() == 3 ? Integer.parseInt(gpuModel.substring(1, 3)) : Integer.parseInt(gpuModel.substring(2, 4));
+         boolean tiEdition = deviceName.toLowerCase().contains("ti");
+         boolean superEdition = deviceName.toLowerCase().contains("super");
+         double score = Math.pow(gpuSeries, gpuSeriesExp) + gpuTier + (tiEdition ? tiWeight : 0) + (superEdition ? superWeight : 0);
+         return score >= minimumDeviceScore;
+      }
+
+      return false;
    }
 
    /**
