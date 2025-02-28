@@ -15,7 +15,7 @@ import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
-import us.ihmc.rdx.ui.graphics.RDXHeightMapGraphicNew;
+import us.ihmc.rdx.ui.graphics.RDXGridMapGraphic;
 import us.ihmc.rdx.visualizers.RDXFrustumGraphic;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
@@ -35,7 +35,7 @@ public class RDXHighLevelDepthSensorDemo
    private RDXFrustumGraphic frustumVisualizer;
    private RDXBytedecoImagePanel mainViewDepthPanel;
    private BytedecoImage image;
-   private RDXHeightMapGraphicNew heightMap;
+   private RDXGridMapGraphic heightMap;
 
    public RDXHighLevelDepthSensorDemo()
    {
@@ -123,7 +123,7 @@ public class RDXHighLevelDepthSensorDemo
             baseUI.getPrimaryScene().addRenderableProvider(box, RDXSceneLevel.MODEL);
             baseUI.getPrimaryScene().addRenderableProvider(box, RDXSceneLevel.GROUND_TRUTH);
 
-            heightMap = new RDXHeightMapGraphicNew();
+            heightMap = new RDXGridMapGraphic();
             HeightMapMessage heightMapMessage = new HeightMapMessage();
             heightMapMessage.setXyResolution(0.1);
             heightMapMessage.setGridSizeXy(2.0);
