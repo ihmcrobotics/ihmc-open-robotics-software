@@ -8,6 +8,7 @@ import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolbox
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxParameters.ClockType;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -251,6 +252,11 @@ public class KinematicsStreamingToolboxController extends ToolboxController
    public void setRobotStateUpdater(IKRobotStateUpdater robotStateUpdater)
    {
       tools.setRobotStateUpdater(robotStateUpdater);
+   }
+
+   public InverseKinematicsOptimizationSettingsCommand getActiveOptimizationSettings()
+   {
+      return tools.getIKController().getActiveOptimizationSettings();
    }
 
    public void updateCapturabilityBasedStatus(CapturabilityBasedStatus newStatus)
