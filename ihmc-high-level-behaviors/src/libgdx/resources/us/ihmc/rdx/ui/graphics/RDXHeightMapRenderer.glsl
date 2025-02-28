@@ -15,7 +15,7 @@ uniform float u_cellSize;
 uniform float u_heightScalingFactor;
 uniform float u_heightOffset;
 
-float indexToCoordinate(uint index, float gridCenter)
+float indexToCoordinate(int index, float gridCenter)
 {
     return (index - u_centerIndex) * u_cellSize + gridCenter;
 }
@@ -80,8 +80,8 @@ void main()
 {
     int cellsPerAxis = 2 * u_centerIndex + 1; // width and height of the height map
 
-    uint xIndex = gl_VertexID % cellsPerAxis;
-    uint yIndex = gl_VertexID / cellsPerAxis;
+    int xIndex = gl_VertexID / cellsPerAxis;
+    int yIndex = gl_VertexID % cellsPerAxis;
 
     float xPosition = indexToCoordinate(xIndex, u_gridCenter.x);
     float yPosition = indexToCoordinate(yIndex, u_gridCenter.y);
