@@ -276,13 +276,19 @@ public class PerceptionMessageTools
       // Put height values into HeightMapData object
       for (int i = 0; i < totalCells; ++i)
       {
-         int dataIndex = 2 * i;
+         // Get the start index of the bytes for a short
+         int dataIndex = Short.BYTES * i;
+
+         // Get the most and least significant bits, combine into integer
          int major = (data[dataIndex + 1] << 8) & 0xFF00;
          int minor = data[dataIndex] & 0x00FF;
          int height = major | minor;
+
+         // Calculate cell height
          float cellHeight = (float) (((float) height / RapidHeightMapManager.getHeightMapParameters().getHeightScaleFactor())
                                      - RapidHeightMapManager.getHeightMapParameters().getHeightOffset());
 
+         // Put it into the HeightMapData object
          int key = cellsPerAxis * (i % cellsPerAxis) + (i / cellsPerAxis);
          heightMapDataToPack.setHeightAt(key, cellHeight);
       }
