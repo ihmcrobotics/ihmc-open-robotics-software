@@ -195,8 +195,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       {
          if (heightMapImage.ptr(0) != null)
          {
-            heightMapRenderer.update(zUpToWorldTransform,
-                                     heightMapImage.ptr(0),
+            heightMapRenderer.update(heightMapImage,
                                      (float) RapidHeightMapManager.getHeightMapParameters().getHeightOffset(),
                                      zUpToWorldTransform.getTranslation().getX32(),
                                      zUpToWorldTransform.getTranslation().getY32(),
