@@ -332,6 +332,16 @@ public class MultipleWaypointsOrientationTrajectoryGenerator implements FrameOri
       return waypoints.get(index);
    }
 
+   public void removeFirstWaypoint()
+   {
+      numberOfWaypoints.decrement();
+      for (int i = 0; i < numberOfWaypoints.getIntegerValue(); i++)
+      {
+         waypoints.get(i).set(waypoints.get(i + 1));
+      }
+      waypoints.get(numberOfWaypoints.getIntegerValue()).setToNaN();
+   }
+
    public void removeLastWaypoint()
    {
       waypoints.get(numberOfWaypoints.getIntegerValue() - 1).setToNaN();

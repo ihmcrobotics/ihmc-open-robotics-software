@@ -367,6 +367,16 @@ public class MultipleWaypointsPositionTrajectoryGenerator implements FramePositi
       return waypoints.get(numberOfWaypoints.getIntegerValue() - 1).getTime();
    }
 
+   public void removeFirstWaypoint()
+   {
+      numberOfWaypoints.decrement();
+      for (int i = 0; i < numberOfWaypoints.getIntegerValue(); i++)
+      {
+         waypoints.get(i).set(waypoints.get(i + 1));
+      }
+      waypoints.get(numberOfWaypoints.getIntegerValue()).setToNaN();
+   }
+
    @Override
    public ReferenceFrame getReferenceFrame()
    {
