@@ -19,6 +19,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class RDXVRTeleporter
 {
+   private static final boolean DISABLE = true;
    private boolean preparingToTeleport = false;
 
    private ModelInstance ring;
@@ -67,7 +68,7 @@ public class RDXVRTeleporter
            controller.setBButtonText("Teleport");
            InputDigitalActionData joystickButton = controller.getJoystickPressActionData();
 
-           if (bButton.bChanged() && bButton.bState()) // Pressed B button
+           if (!DISABLE && bButton.bChanged() && bButton.bState()) // Pressed B button
            {
               preparingToTeleport = true;
            }
