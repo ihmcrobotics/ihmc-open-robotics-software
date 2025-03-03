@@ -372,6 +372,9 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
 
+      // We reset the filtered height map for the drift to take affect, otherwise it gets overridden.
+      filteredRapidHeightMapExtractor.reset();
+
       // Run the plan offset kernel
       planOffsetKernel.withPointer(globalHeightMapImage.data()).withLong(globalHeightMapImage.step());
       planOffsetKernel.withPointer(emptyGlobalHeightMapImage.data()).withLong(emptyGlobalHeightMapImage.step());
