@@ -15,7 +15,7 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "d5afe0beea9ef174908ccc1a76d2181e80ec8dba596fd5751ed7315a5aa1b891";
+   		return "d32a3d6b848fd9383b44e5f7c4bb24c755d0e43abf98d129c25ca76811c5ae0b";
    }
    
    @Override
@@ -54,8 +54,11 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
 
       current_alignment += behavior_msgs.msg.dds.LeafNodeDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
 
       return current_alignment - initial_alignment;
    }
@@ -71,8 +74,13 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
 
       current_alignment += behavior_msgs.msg.dds.LeafNodeDefinitionMessagePubSubType.getCdrSerializedSize(data.getDefinition(), current_alignment);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getPrompt().length() + 1;
 
 
       return current_alignment - initial_alignment;
@@ -81,15 +89,24 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
    public static void write(behavior_msgs.msg.dds.ConditionNodeDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.LeafNodeDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
+      cdr.write_type_9(data.getType());
+
       cdr.write_type_4(data.getCountTo());
+
+      if(data.getPrompt().length() <= 255)
+      cdr.write_type_d(data.getPrompt());else
+          throw new RuntimeException("prompt field exceeds the maximum length");
 
    }
 
    public static void read(behavior_msgs.msg.dds.ConditionNodeDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.LeafNodeDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
+      data.setType(cdr.read_type_9());
+      	
       data.setCountTo(cdr.read_type_4());
       	
+      cdr.read_type_d(data.getPrompt());	
 
    }
 
@@ -98,7 +115,9 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
    {
       ser.write_type_a("definition", new behavior_msgs.msg.dds.LeafNodeDefinitionMessagePubSubType(), data.getDefinition());
 
+      ser.write_type_9("type", data.getType());
       ser.write_type_4("count_to", data.getCountTo());
+      ser.write_type_d("prompt", data.getPrompt());
    }
 
    @Override
@@ -106,7 +125,9 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
    {
       ser.read_type_a("definition", new behavior_msgs.msg.dds.LeafNodeDefinitionMessagePubSubType(), data.getDefinition());
 
+      data.setType(ser.read_type_9("type"));
       data.setCountTo(ser.read_type_4("count_to"));
+      ser.read_type_d("prompt", data.getPrompt());
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.ConditionNodeDefinitionMessage src, behavior_msgs.msg.dds.ConditionNodeDefinitionMessage dest)

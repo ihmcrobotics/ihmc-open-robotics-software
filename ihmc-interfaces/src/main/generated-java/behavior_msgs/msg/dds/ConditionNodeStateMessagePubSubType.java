@@ -15,7 +15,7 @@ public class ConditionNodeStateMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "eada9abbbc66f75c56364d1c11036bfd87ba0a5a4f11f48133240f371c74d026";
+   		return "184aa1fd2fb3f27855595616a313e6321d12c0650f570eb19e65c5c62d3f1f65";
    }
    
    @Override

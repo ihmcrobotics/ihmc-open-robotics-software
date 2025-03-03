@@ -8,7 +8,17 @@ module behavior_msgs
   {
     module dds
     {
+      const octet COUNTER_TYPE =
+      0;
 
+      const octet LLM_TYPE =
+      1;
+
+
+      /**
+       * COUNTER TYPE
+       * LLM TYPE
+       */
       @TypeCode(type="behavior_msgs::msg::dds_::ConditionNodeDefinitionMessage_")
       struct ConditionNodeDefinitionMessage
       {
@@ -17,9 +27,17 @@ module behavior_msgs
          */
         behavior_msgs::msg::dds::LeafNodeDefinitionMessage definition;
         /**
+         * The type of condtion as defined above
+         */
+        octet type;
+        /**
          * The number of times to fail before passing
          */
         unsigned long count_to;
+        /**
+         * The prompt defining how to make the boolean decision
+         */
+        string prompt;
       };
     };
   };
