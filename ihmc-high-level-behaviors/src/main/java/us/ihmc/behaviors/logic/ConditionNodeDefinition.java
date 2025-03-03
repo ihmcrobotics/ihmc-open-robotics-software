@@ -3,8 +3,9 @@ package us.ihmc.behaviors.logic;
 import behavior_msgs.msg.dds.ConditionNodeDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import us.ihmc.behaviors.logic.condition.CounterConditionDefinition;
 import us.ihmc.behaviors.sequence.LeafNodeDefinition;
-import us.ihmc.communication.crdt.CRDTBidirectionalLong;
+import us.ihmc.communication.crdt.CRDTBidirectionalEnumField;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
@@ -16,15 +17,22 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
  */
 public class ConditionNodeDefinition extends LeafNodeDefinition
 {
-   private final CRDTBidirectionalLong countTo;
+   public enum Type
+   {
+      COUNTER,
+      LLM,
+   }
 
-   private long onDiskCountTo = 0;
+   private final CRDTBidirectionalEnumField<Type> type;
+   private CounterConditionDefinition counter;
+
+   private Type onDiskType;
 
    public ConditionNodeDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(crdtInfo, saveFileDirectory);
 
-      countTo = new CRDTBidirectionalLong(this, 0);
+      type = new CRDTBidirectionalEnumField<>(this, Type.COUNTER);
    }
 
    @Override
@@ -32,7 +40,12 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
    {
       super.saveToFile(jsonNode);
 
-      jsonNode.put("countTo", countTo.getValue());
+      jsonNode.put("type", type.getValue().name());
+
+      switch (type.getValue())
+      {
+         case COUNTER -> counter.saveToFile(jsonNode);
+      }
    }
 
    @Override
@@ -40,7 +53,12 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
    {
       super.loadFromFile(jsonNode);
 
-      countTo.setValue(jsonNode.get("countTo").longValue());
+      type.setValue(Type.valueOf(jsonNode.get("type").textValue()));
+
+      switch (type.getValue())
+      {
+         case COUNTER -> counter.loadFromFile(jsonNode);
+      }
    }
 
    @Override
@@ -48,7 +66,12 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
    {
       super.setOnDiskFields();
 
-      onDiskCountTo = countTo.getValue();
+      onDiskType = type.getValue();
+
+      switch (type.getValue())
+      {
+         case COUNTER -> counter.setOnDiskFields();
+      }
    }
 
    @Override
@@ -58,7 +81,12 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
 
       if (isUndoAvailable())
       {
-         countTo.setValue(onDiskCountTo);
+         type.setValue(onDiskType);
+
+         switch (type.getValue())
+         {
+            case COUNTER -> counter.undoAllNontopologicalChanges();
+         }
       }
    }
 
@@ -67,7 +95,12 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
    {
       boolean unchanged = !super.hasChanges();
 
-      unchanged &= countTo.getValue() == onDiskCountTo;
+      unchanged &= type.getValue() == onDiskType;
+
+      switch (type.getValue())
+      {
+         case COUNTER -> unchanged &= !counter.hasChanges();
+      }
 
       return !unchanged;
    }
@@ -76,18 +109,28 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
    {
       super.toMessage(message.getDefinition());
 
-      message.setCountTo(countTo.toMessage());
+      message.setType((byte) type.toMessage().ordinal());
+
+      switch (type.getValue())
+      {
+         case COUNTER -> counter.toMessage(message);
+      }
    }
 
    public void fromMessage(ConditionNodeDefinitionMessage message)
    {
       super.fromMessage(message.getDefinition());
 
-      countTo.fromMessage(message.getCountTo());
+      type.fromMessage(Type.values()[message.getType()]);
+
+      switch (type.getValue())
+      {
+         case COUNTER -> counter.fromMessage(message);
+      }
    }
 
-   public CRDTBidirectionalLong getCountTo()
+   public CRDTBidirectionalEnumField<Type> getType()
    {
-      return countTo;
+      return type;
    }
 }
