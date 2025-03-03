@@ -8,15 +8,19 @@ import us.ihmc.euclid.Axis2D;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.TupleTools;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.perception.detections.InstantDetection;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorModelParameters;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -40,7 +44,7 @@ public class DetectedDoor
    private final DoorOpeningMechanism openingMechanism;
 
    // Panel
-   private final Pose3D panelPose;
+   private final MutableReferenceFrame panelFrame;
    private final PlanarRegion panelPlanarRegion;
 
    // Detection stuff
@@ -58,8 +62,8 @@ public class DetectedDoor
 
       openingMechanism = new DoorOpeningMechanism();
 
-      panelPose = new Pose3D();
-      panelPose.setToNaN();
+      panelFrame = new MutableReferenceFrame();
+      panelFrame.update(RigidBodyTransformBasics::setToNaN);
 
       panelPlanarRegion = new PlanarRegion();
    }
@@ -68,7 +72,8 @@ public class DetectedDoor
    {
       detectionUUID = MessageTools.toUUID(message.getDetectionUuid());
       openingMechanism = new DoorOpeningMechanism(message.getOpeningMechanism());
-      panelPose = new Pose3D(message.getPanelPose());
+      panelFrame = new MutableReferenceFrame();
+      panelFrame.update(transformToWorld -> transformToWorld.set(message.getPanelPose()));
       panelPlanarRegion = PlanarRegionMessageConverter.convertToPlanarRegion(message.getPanelPlanarRegion());
       lastDetectionTime = MessageTools.toInstant(message.getLastDetectionTime());
 
@@ -95,22 +100,32 @@ public class DetectedDoor
 
    public Pose3DReadOnly getPanelPose()
    {
-      return panelPose;
+      return new Pose3D(panelFrame.getTransformToParent());
+   }
+
+   public ReferenceFrame getPanelFrame()
+   {
+      return panelFrame.getReferenceFrame();
+   }
+
+   public RigidBodyTransformReadOnly getPanelTransformToWorld()
+   {
+      return panelFrame.getTransformToParent();
    }
 
    public boolean hasPanelPosition()
    {
-      return !panelPose.getPosition().containsNaN();
+      return !getPanelTransformToWorld().getTranslation().containsNaN();
    }
 
    public boolean hasPanelOrientation()
    {
-      return !panelPose.getOrientation().containsNaN();
+      return !getPanelTransformToWorld().getRotation().containsNaN();
    }
 
    public boolean hasPanelPose()
    {
-      return !panelPose.containsNaN();
+      return !getPanelTransformToWorld().containsNaN();
    }
 
    public PlanarRegion getPanelPlanarRegion()
@@ -231,7 +246,7 @@ public class DetectedDoor
 
       double planarRegionYaw = TupleTools.angle(Axis2D.X, doorNormalLine.getDirection());
 
-      Quaternion orientation = new Quaternion(planarRegionYaw, 0.0, 0.0);
+      RotationMatrix orientation = new RotationMatrix(planarRegionYaw, 0.0, 0.0);
       openingMechanism.updateOrientation(orientation, POSE_FILTER_ALPHA);
       updatePanelOrientation(orientation);
    }
@@ -241,7 +256,7 @@ public class DetectedDoor
       Point3DReadOnly planarRegionCentroid = PlanarRegionTools.getCentroid3DInWorld(planarRegion);
       if (hasPanelPosition())
       {
-         double distanceToPanel = planarRegionCentroid.distance(panelPose.getPosition());
+         double distanceToPanel = planarRegionCentroid.distance(getPanelPose().getPosition());
          return distanceToPanel < MAX_PLANAR_REGION_TO_PANEL_DISTANCE;
       }
       else if (openingMechanism.isPositionKnown())
@@ -260,25 +275,31 @@ public class DetectedDoor
 
    private void updatePanelPosition(Point3DReadOnly newPanelPosition)
    {
-      if (hasPanelPosition())
-         panelPose.getPosition().interpolate(newPanelPosition, POSE_FILTER_ALPHA);
-      else
-         panelPose.getPosition().set(newPanelPosition);
+      panelFrame.update(transformToWorld ->
+      {
+         if (hasPanelPosition())
+            transformToWorld.getTranslation().interpolate(newPanelPosition, POSE_FILTER_ALPHA);
+         else
+            transformToWorld.getTranslation().set(newPanelPosition);
+      });
    }
 
-   private void updatePanelOrientation(QuaternionReadOnly newPanelOrientation)
+   private void updatePanelOrientation(RotationMatrixReadOnly newPanelOrientation)
    {
-      if (hasPanelOrientation())
-         panelPose.getOrientation().interpolate(newPanelOrientation, POSE_FILTER_ALPHA);
-      else
-         panelPose.getOrientation().set(newPanelOrientation);
+      panelFrame.update(transformToWorld ->
+      {
+         if (hasPanelOrientation())
+            transformToWorld.getRotation().interpolate(newPanelOrientation, POSE_FILTER_ALPHA);
+         else
+            transformToWorld.getRotation().set(newPanelOrientation);
+      });
    }
 
    public void toMessage(DetectedDoorMessage messageToPack)
    {
       MessageTools.toMessage(detectionUUID, messageToPack.getDetectionUuid());
       openingMechanism.toMessage(messageToPack.getOpeningMechanism());
-      messageToPack.getPanelPose().set(panelPose);
+      messageToPack.getPanelPose().set(getPanelPose());
       messageToPack.getPanelPlanarRegion().set(PlanarRegionMessageConverter.convertToPlanarRegionMessage(panelPlanarRegion));
       MessageTools.toMessage(lastDetectionTime, messageToPack.getLastDetectionTime());
       MessageTools.toMessage(Objects.requireNonNullElse(openingMechanismFirstDetectionTime, Instant.EPOCH), messageToPack.getOpeningMechanismFirstDetectionTime());

@@ -52,12 +52,12 @@ public class RDXDetectedDoor implements RDXRenderableProvider
       openingMechanismPositionSphere.transform.setTranslation(openingMechanismPosition.getX32(),
                                                               openingMechanismPosition.getY32(),
                                                               openingMechanismPosition.getZ32());
-      openingMechanismFrameGraphic.setPoseInWorldFrame(openingMechanismPose);
+      openingMechanismFrameGraphic.setToReferenceFrame(detection.getOpeningMechanism().getFrame());
 
       Pose3DReadOnly panelPose = detection.getPanelPose();
       Point3DReadOnly panelPosition = panelPose.getPosition();
       panelPositionSphere.transform.setTranslation(panelPosition.getX32(), panelPosition.getY32(), panelPosition.getZ32());
-      panelFrameGraphic.setPoseInWorldFrame(panelPose);
+      panelFrameGraphic.setToReferenceFrame(detection.getPanelFrame());
 
       planarRegionGraphic.generateMeshes(new PlanarRegionsList(detection.getPanelPlanarRegion()));
       planarRegionGraphic.update();

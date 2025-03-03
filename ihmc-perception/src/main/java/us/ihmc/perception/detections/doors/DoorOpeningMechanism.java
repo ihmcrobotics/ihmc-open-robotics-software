@@ -3,27 +3,33 @@ package us.ihmc.perception.detections.doors;
 import perception_msgs.msg.dds.DetectedDoorOpeningMechanismMessage;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode.DoorSide;
+import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 
 public class DoorOpeningMechanism
 {
    private String name = "unknown";
    private DoorSide side = DoorSide.UNKNOWN;
-   private final Pose3D pose;
+   private final MutableReferenceFrame frame;
 
    public DoorOpeningMechanism()
    {
-      pose = new Pose3D();
-      pose.setToNaN();
+      frame = new MutableReferenceFrame();
+      frame.update(RigidBodyTransformBasics::setToNaN);
    }
 
    /* package-private */ DoorOpeningMechanism(DetectedDoorOpeningMechanismMessage message)
    {
       name = message.getNameAsString();
       side = DoorSide.values()[message.getSide()];
-      pose = new Pose3D(message.getPose());
+      frame = new MutableReferenceFrame();
+      frame.update(transformToWorld -> transformToWorld.set(message.getPose()));
    }
 
    /* package-private */ void setName(String name)
@@ -42,18 +48,24 @@ public class DoorOpeningMechanism
 
    /* package-private */ void updatePosition(Point3DReadOnly newPosition, double alpha)
    {
-      if (isPositionKnown())
-         pose.getPosition().interpolate(newPosition, alpha);
-      else
-         pose.getPosition().set(newPosition);
+      frame.update(transformToWorld ->
+      {
+         if (isPositionKnown())
+            transformToWorld.getTranslation().interpolate(newPosition, alpha);
+         else
+            transformToWorld.getTranslation().set(newPosition);
+      });
    }
 
-   /* package-private */ void updateOrientation(QuaternionReadOnly orientation, double alpha)
+   /* package-private */ void updateOrientation(RotationMatrixReadOnly orientation, double alpha)
    {
-      if (isOrientationKnown())
-         pose.getRotation().interpolate(orientation, alpha);
-      else
-         pose.getRotation().set(orientation);
+      frame.update(transformToWorld ->
+      {
+         if (isOrientationKnown())
+            transformToWorld.getRotation().interpolate(orientation, alpha);
+         else
+            transformToWorld.getRotation().set(orientation);
+      });
    }
 
    /* package-private */ void setDoorSide(DoorSide side)
@@ -73,38 +85,48 @@ public class DoorOpeningMechanism
 
    public boolean isPositionKnown()
    {
-      return !pose.getPosition().containsNaN();
+      return !getTransformToWorld().getTranslation().containsNaN();
    }
 
    public boolean isOrientationKnown()
    {
-      return !pose.getRotation().containsNaN();
+      return !getTransformToWorld().getRotation().containsNaN();
    }
 
    public boolean isPoseKnown()
    {
-      return !pose.containsNaN();
+      return !getTransformToWorld().containsNaN();
    }
 
    public Point3DReadOnly getPosition()
    {
-      return pose.getPosition();
+      return getPose().getPosition();
    }
 
    public QuaternionReadOnly getOrientation()
    {
-      return pose.getOrientation();
+      return getPose().getOrientation();
    }
 
    public Pose3DReadOnly getPose()
    {
-      return pose;
+      return new Pose3D(getTransformToWorld());
+   }
+
+   public ReferenceFrame getFrame()
+   {
+      return frame.getReferenceFrame();
+   }
+
+   public RigidBodyTransformReadOnly getTransformToWorld()
+   {
+      return frame.getTransformToParent();
    }
 
    public void toMessage(DetectedDoorOpeningMechanismMessage messageToPack)
    {
       messageToPack.setName(name);
       messageToPack.setSide((byte) side.ordinal());
-      messageToPack.getPose().set(pose);
+      messageToPack.getPose().set(getPose());
    }
 }
