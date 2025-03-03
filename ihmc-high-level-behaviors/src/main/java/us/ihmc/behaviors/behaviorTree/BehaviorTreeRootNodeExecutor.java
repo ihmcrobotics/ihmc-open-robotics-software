@@ -2,7 +2,6 @@ package us.ihmc.behaviors.behaviorTree;
 
 import gnu.trove.map.hash.TLongObjectHashMap;
 import org.apache.logging.log4j.Level;
-import us.ihmc.behaviors.reasoning.BehaviorTreeNextActionReasoning;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.behaviors.sequence.FallbackNodeExecutor;
@@ -24,7 +23,6 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
    private final List<LeafNodeExecutor<?, ?>> failedLeaves = new ArrayList<>();
    private final List<LeafNodeExecutor<?, ?>> successfulLeaves = new ArrayList<>();
    private final List<LeafNodeExecutor<?, ?>> failedLeavesWithoutFallback = new ArrayList<>();
-   private final BehaviorTreeNextActionReasoning nextActionReasoning = new BehaviorTreeNextActionReasoning();
 
    public BehaviorTreeRootNodeExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
@@ -243,9 +241,7 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
       leafToExecute.update();
       leafToExecute.triggerExecution();
       currentlyExecutingLeaves.add(leafToExecute);
-      int nextExecutionIndex = nextActionReasoning.queryNextLeafToExecuteIndex(state);
-      state.setExecutionNextIndex(nextExecutionIndex);
-//      state.stepForwardNextExecutionIndex();
+      state.stepForwardNextExecutionIndex();
    }
 
    private boolean shouldExecuteNextLeaf()
@@ -303,15 +299,7 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
    {
       return state.getExecutionNextIndex() >= orderedLeaves.size();
    }
-
-   @Override
-   public void destroy()
-   {
-      super.destroy();
-
-      nextActionReasoning.destroy();
-   }
-
+   
    public TLongObjectHashMap<BehaviorTreeNodeExecutor<?, ?>> getIDToNodeMap()
    {
       return idToNodeMap;
