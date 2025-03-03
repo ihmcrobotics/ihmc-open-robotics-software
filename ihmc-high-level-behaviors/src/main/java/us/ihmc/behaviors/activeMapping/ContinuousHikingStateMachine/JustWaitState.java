@@ -5,7 +5,6 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.QueuedFootstepStatusMessage;
 import ihmc_common_msgs.msg.dds.PoseListMessage;
 import ihmc_common_msgs.msg.dds.QueueableMessage;
-import org.apache.regexp.RE;
 import org.jetbrains.annotations.NotNull;
 import std_msgs.msg.dds.Float32;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -228,7 +227,7 @@ public class JustWaitState implements State
                                   footstepPlannerRequest.setHeightMapData(heightMapData.get());
 
                                   footstepPlannerRequest.setSnapGoalSteps(true);
-                                  footstepPlannerRequest.setPlanBodyPath(true);
+                                  footstepPlannerRequest.setPlanBodyPath(false);
 
                                   FramePose3D goalFramePose = new FramePose3D();
                                   goalFramePose.interpolate(leftFootPose, rightFootPose, 0.5);
@@ -263,7 +262,14 @@ public class JustWaitState implements State
                                      footstepDataListMessage.getFootstepDataList().add().set(footstep.getAsMessage());
                                   }
 
-                                  ros2Helper.publish(controllerFootstepDataTopic, footstepDataListMessage);
+                                  if (!footstepDataListMessage.getFootstepDataList().isEmpty())
+                                  {
+                                      ros2Helper.publish(controllerFootstepDataTopic, footstepDataListMessage);
+                                  }
+                                  else
+                                  {
+                                      LogTools.warn("Didn't have any steps to publish, try again :( :(");
+                                  }
                                }, "PlanToGoalThread");
    }
 
