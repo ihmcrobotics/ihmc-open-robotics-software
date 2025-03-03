@@ -15,7 +15,7 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "2ee8531c108e60a6b56d08fc8ef8de994a5c08eb2418aa9602cec1f553c0c8b6";
+   		return "6f4a26cc9157dc2d541ec71a7be406b9e17575c0c93bc6e3db7fe1988055e4bc";
    }
    
    @Override
@@ -62,6 +62,10 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (20 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (20 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -94,6 +98,11 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getPreviewSurfaceNormal(), current_alignment);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getJointLimitReductionFactors().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -116,6 +125,9 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
 
       cdr.write_type_7(data.getEnableStabilityObjective());
 
+      cdr.write_type_7(data.getEnableRegionPreview());
+
+      geometry_msgs.msg.dds.Vector3PubSubType.write(data.getPreviewSurfaceNormal(), cdr);
       cdr.write_type_7(data.getEnableJointLimitReduction());
 
       if(data.getJointLimitReductionFactors().size() <= 20)
@@ -138,6 +150,9 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
       	
       data.setEnableStabilityObjective(cdr.read_type_7());
       	
+      data.setEnableRegionPreview(cdr.read_type_7());
+      	
+      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getPreviewSurfaceNormal(), cdr);	
       data.setEnableJointLimitReduction(cdr.read_type_7());
       	
       cdr.read_type_e(data.getJointLimitReductionFactors());	
@@ -152,6 +167,9 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
       ser.write_type_7("hold_current_center_of_mass_xy_position", data.getHoldCurrentCenterOfMassXyPosition());
       ser.write_type_7("enable_auto_support_polygon", data.getEnableAutoSupportPolygon());
       ser.write_type_7("enable_stability_objective", data.getEnableStabilityObjective());
+      ser.write_type_7("enable_region_preview", data.getEnableRegionPreview());
+      ser.write_type_a("preview_surface_normal", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getPreviewSurfaceNormal());
+
       ser.write_type_7("enable_joint_limit_reduction", data.getEnableJointLimitReduction());
       ser.write_type_e("joint_limit_reduction_factors", data.getJointLimitReductionFactors());
       ser.write_type_e("joint_limit_reduction_hash_codes", data.getJointLimitReductionHashCodes());
@@ -164,6 +182,9 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
       data.setHoldCurrentCenterOfMassXyPosition(ser.read_type_7("hold_current_center_of_mass_xy_position"));
       data.setEnableAutoSupportPolygon(ser.read_type_7("enable_auto_support_polygon"));
       data.setEnableStabilityObjective(ser.read_type_7("enable_stability_objective"));
+      data.setEnableRegionPreview(ser.read_type_7("enable_region_preview"));
+      ser.read_type_a("preview_surface_normal", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getPreviewSurfaceNormal());
+
       data.setEnableJointLimitReduction(ser.read_type_7("enable_joint_limit_reduction"));
       ser.read_type_e("joint_limit_reduction_factors", data.getJointLimitReductionFactors());
       ser.read_type_e("joint_limit_reduction_hash_codes", data.getJointLimitReductionHashCodes());

@@ -35,6 +35,14 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
             */
    public boolean enable_stability_objective_;
    /**
+            * If true, enables a preview of the feasible region and corresponding contact-point adjustment.
+            */
+   public boolean enable_region_preview_;
+   /**
+            * If enable_region_preview is true this is the surface normal for the upcoming bracing arm
+            */
+   public us.ihmc.euclid.tuple3D.Vector3D preview_surface_normal_;
+   /**
             * Whether restrictive joint limits are enabled, in order to have the IK avoid a solution at the joint limit.
             */
    public boolean enable_joint_limit_reduction_ = true;
@@ -51,6 +59,7 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
 
    public HumanoidKinematicsToolboxConfigurationMessage()
    {
+      preview_surface_normal_ = new us.ihmc.euclid.tuple3D.Vector3D();
       joint_limit_reduction_factors_ = new us.ihmc.idl.IDLSequence.Float (20, "type_5");
 
       joint_limit_reduction_hash_codes_ = new us.ihmc.idl.IDLSequence.Integer (20, "type_2");
@@ -73,6 +82,9 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
 
       enable_stability_objective_ = other.enable_stability_objective_;
 
+      enable_region_preview_ = other.enable_region_preview_;
+
+      geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.preview_surface_normal_, preview_surface_normal_);
       enable_joint_limit_reduction_ = other.enable_joint_limit_reduction_;
 
       joint_limit_reduction_factors_.set(other.joint_limit_reduction_factors_);
@@ -150,6 +162,30 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
    }
 
    /**
+            * If true, enables a preview of the feasible region and corresponding contact-point adjustment.
+            */
+   public void setEnableRegionPreview(boolean enable_region_preview)
+   {
+      enable_region_preview_ = enable_region_preview;
+   }
+   /**
+            * If true, enables a preview of the feasible region and corresponding contact-point adjustment.
+            */
+   public boolean getEnableRegionPreview()
+   {
+      return enable_region_preview_;
+   }
+
+
+   /**
+            * If enable_region_preview is true this is the surface normal for the upcoming bracing arm
+            */
+   public us.ihmc.euclid.tuple3D.Vector3D getPreviewSurfaceNormal()
+   {
+      return preview_surface_normal_;
+   }
+
+   /**
             * Whether restrictive joint limits are enabled, in order to have the IK avoid a solution at the joint limit.
             */
    public void setEnableJointLimitReduction(boolean enable_joint_limit_reduction)
@@ -210,6 +246,9 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_stability_objective_, other.enable_stability_objective_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_region_preview_, other.enable_region_preview_, epsilon)) return false;
+
+      if (!this.preview_surface_normal_.epsilonEquals(other.preview_surface_normal_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_joint_limit_reduction_, other.enable_joint_limit_reduction_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.joint_limit_reduction_factors_, other.joint_limit_reduction_factors_, epsilon)) return false;
@@ -237,6 +276,9 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
 
       if(this.enable_stability_objective_ != otherMyClass.enable_stability_objective_) return false;
 
+      if(this.enable_region_preview_ != otherMyClass.enable_region_preview_) return false;
+
+      if (!this.preview_surface_normal_.equals(otherMyClass.preview_surface_normal_)) return false;
       if(this.enable_joint_limit_reduction_ != otherMyClass.enable_joint_limit_reduction_) return false;
 
       if (!this.joint_limit_reduction_factors_.equals(otherMyClass.joint_limit_reduction_factors_)) return false;
@@ -259,6 +301,10 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
       builder.append(this.enable_auto_support_polygon_);      builder.append(", ");
       builder.append("enable_stability_objective=");
       builder.append(this.enable_stability_objective_);      builder.append(", ");
+      builder.append("enable_region_preview=");
+      builder.append(this.enable_region_preview_);      builder.append(", ");
+      builder.append("preview_surface_normal=");
+      builder.append(this.preview_surface_normal_);      builder.append(", ");
       builder.append("enable_joint_limit_reduction=");
       builder.append(this.enable_joint_limit_reduction_);      builder.append(", ");
       builder.append("joint_limit_reduction_factors=");

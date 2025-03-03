@@ -21,6 +21,12 @@ bool enable_auto_support_polygon
 # If true, enables an objective for improving the stability margin of the robot when the upper body is load-bearing.
 bool enable_stability_objective
 
+# If true, enables a preview of the feasible region and corresponding contact-point adjustment.
+bool enable_region_preview
+
+# If enable_region_preview is true this is the surface normal for the upcoming bracing arm
+geometry_msgs/Vector3 preview_surface_normal
+
 # Whether restrictive joint limits are enabled, in order to have the IK avoid a solution at the joint limit.
 # Field default value True
 bool enable_joint_limit_reduction

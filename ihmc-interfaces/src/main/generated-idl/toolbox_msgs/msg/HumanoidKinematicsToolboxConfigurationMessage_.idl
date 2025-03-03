@@ -1,6 +1,7 @@
 #ifndef __toolbox_msgs__msg__HumanoidKinematicsToolboxConfigurationMessage__idl__
 #define __toolbox_msgs__msg__HumanoidKinematicsToolboxConfigurationMessage__idl__
 
+#include "geometry_msgs/msg/./Vector3_.idl"
 module toolbox_msgs
 {
   module msg
@@ -39,6 +40,14 @@ module toolbox_msgs
          * If true, enables an objective for improving the stability margin of the robot when the upper body is load-bearing.
          */
         boolean enable_stability_objective;
+        /**
+         * If true, enables a preview of the feasible region and corresponding contact-point adjustment.
+         */
+        boolean enable_region_preview;
+        /**
+         * If enable_region_preview is true this is the surface normal for the upcoming bracing arm
+         */
+        geometry_msgs::msg::dds::Vector3 preview_surface_normal;
         /**
          * Whether restrictive joint limits are enabled, in order to have the IK avoid a solution at the joint limit.
          */
