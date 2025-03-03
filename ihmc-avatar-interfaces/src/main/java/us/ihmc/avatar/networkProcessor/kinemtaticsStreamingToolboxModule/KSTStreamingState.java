@@ -66,6 +66,7 @@ import java.util.stream.Stream;
  */
 public class KSTStreamingState implements State
 {
+   public static final boolean USE_DEFAULT_ORIENTATION_OBJECTIVES = false;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
@@ -389,7 +390,7 @@ public class KSTStreamingState implements State
          lockPelvisPose.setFromReferenceFrame(pelvis.getBodyFixedFrame());
          defaultPelvisMessage.getDesiredPositionInWorld().set(lockPelvisPose.getPosition());
          defaultPelvisMessage.getDesiredOrientationInWorld().setToYawOrientation(lockPelvisPose.getYaw());
-         defaultPelvisMessage.getLinearSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(false, false, true, worldFrame));
+         defaultPelvisMessage.getLinearSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(false, false, false, worldFrame));
          defaultPelvisMessage.getAngularSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(true, true, true, worldFrame));
          MessageTools.packWeightMatrix3DMessage(holdPelvisLinearWeight, defaultPelvisMessage.getLinearWeightMatrix());
          MessageTools.packWeightMatrix3DMessage(holdPelvisAngularWeight, defaultPelvisMessage.getAngularWeightMatrix());
@@ -623,12 +624,15 @@ public class KSTStreamingState implements State
             ikCommandInputManager.submitCommand(centerOfMassInput);
          }
 
-         if (!latestInput.hasInputFor(head))
-            ikCommandInputManager.submitMessages(defaultNeckJointMessages);
-         if (!latestInput.hasInputFor(pelvis) || lockPelvis.getValue())
-            ikCommandInputManager.submitMessage(defaultPelvisMessage);
-         if (!latestInput.hasInputFor(chest) || lockChest.getValue())
-            ikCommandInputManager.submitMessage(defaultChestMessage);
+         if (USE_DEFAULT_ORIENTATION_OBJECTIVES)
+         {
+            if (!latestInput.hasInputFor(head))
+               ikCommandInputManager.submitMessages(defaultNeckJointMessages);
+            if (!latestInput.hasInputFor(pelvis) || lockPelvis.getValue())
+               ikCommandInputManager.submitMessage(defaultPelvisMessage);
+            if (!latestInput.hasInputFor(chest) || lockChest.getValue())
+               ikCommandInputManager.submitMessage(defaultChestMessage);
+         }
 
          for (RobotSide robotSide : RobotSide.values)
          {

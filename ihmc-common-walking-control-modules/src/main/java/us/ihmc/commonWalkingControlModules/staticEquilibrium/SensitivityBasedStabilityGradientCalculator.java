@@ -20,6 +20,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
@@ -105,8 +106,10 @@ public class SensitivityBasedStabilityGradientCalculator
    /* YoVariable data of stability margin gradient */
    private final YoDouble[] yoStabilityMarginGradient;
 
-   /* To compute the CoM component of the margin objective */
-   private final CentroidalMomentumCalculator centroidalMomentumCalculator;
+   private final YoDouble gradientFilterAlpha = new YoDouble("gradientFilterAlpha", registry);
+   private final YoDouble yoPostureSensitivityFilt = new YoDouble("postureSensitivityFilt", registry);
+   /* Filtered data of stability margin gradient */
+   private final AlphaFilteredYoVariable[] yoStabilityMarginGradientFilt;
 
    /* Indexed controllable joints */
    private final OneDoFJointBasics[] controllableOneDoFJoints;
@@ -148,10 +151,12 @@ public class SensitivityBasedStabilityGradientCalculator
       JointBasics[] controlledJoints = computeJointsToOptimizeFor(fullRobotModel);
       controllableOneDoFJoints = MultiBodySystemTools.filterJoints(controlledJoints, OneDoFJointBasics.class);
       MultiBodySystemBasics multiBodySystemInput = MultiBodySystemBasics.toMultiBodySystemBasics(controlledJoints);
-      centroidalMomentumCalculator = new CentroidalMomentumCalculator(multiBodySystemInput, ReferenceFrame.getWorldFrame());
 
       yoStabilityMarginGradient = new YoDouble[Twist.SIZE + controllableOneDoFJoints.length];
-      String namePrefix = "stabilityMarginGrad_";
+      yoStabilityMarginGradientFilt = new AlphaFilteredYoVariable[Twist.SIZE + controllableOneDoFJoints.length];
+      String namePrefix = "stabilityGrad_";
+
+      gradientFilterAlpha.set(0.98);
 
       for (int i = 0; i < yoStabilityMarginGradient.length; i++)
       {
@@ -160,12 +165,16 @@ public class SensitivityBasedStabilityGradientCalculator
             int numAxes = Axis3D.values().length;
             Axis3D axis = Axis3D.values()[i % numAxes];
             String prefix = i < numAxes ? "w" : "v";
-            yoStabilityMarginGradient[i] = new YoDouble(namePrefix + prefix + axis, registry);
+            String name = namePrefix + prefix + axis;
+            yoStabilityMarginGradient[i] = new YoDouble(name, registry);
+            yoStabilityMarginGradientFilt[i] = new AlphaFilteredYoVariable(name + "Filt", registry, gradientFilterAlpha, yoStabilityMarginGradient[i]);
          }
          else
          {
             String jointName = controllableOneDoFJoints[i - Twist.SIZE].getName();
-            yoStabilityMarginGradient[i] = new YoDouble(namePrefix + jointName, registry);
+            String name = namePrefix + jointName;
+            yoStabilityMarginGradient[i] = new YoDouble(name, registry);
+            yoStabilityMarginGradientFilt[i] = new AlphaFilteredYoVariable(name + "Filt", registry, gradientFilterAlpha, yoStabilityMarginGradient[i]);
          }
       }
 
@@ -181,7 +190,7 @@ public class SensitivityBasedStabilityGradientCalculator
       parentRegistry.addChild(registry);
    }
 
-   public void update()
+   public void computePostureAdjustment()
    {
       updateNullspace();
 
@@ -219,8 +228,7 @@ public class SensitivityBasedStabilityGradientCalculator
          normalizedStabilityBoundaryGradient.zero();
       }
 
-      centroidalMomentumCalculator.reset();
-      DMatrixRMaj centroidalMomentumMatrix = centroidalMomentumCalculator.getCentroidalMomentumMatrix();
+      DMatrixRMaj centroidalMomentumMatrix = nullspaceCalculator.getCentroidalMomentumCalculator().getCentroidalMomentumMatrix();
       centroidalMomentumMatrixXY.reshape(XY_DIMENSIONS, centroidalMomentumMatrix.getNumCols());
       MatrixTools.setMatrixBlock(centroidalMomentumMatrixXY, 0, 0, centroidalMomentumMatrix, 3, 0, XY_DIMENSIONS, centroidalMomentumMatrix.getNumCols(), 1.0 / robotMass);
 
@@ -234,40 +242,68 @@ public class SensitivityBasedStabilityGradientCalculator
 
       for (int i = 0; i < stabilityMarginGradient.getNumRows(); i++)
       {
-         yoStabilityMarginGradient[i].set(stabilityMarginGradient.get(i));
+         yoStabilityMarginGradient[i].set(stabilityBoundaryGradient.get(i));
+         yoStabilityMarginGradientFilt[i].update();
       }
 
+      double sensitivityFilt = 0.0;
+      for (int i = 0; i < yoStabilityMarginGradientFilt.length; i++)
+      {
+         sensitivityFilt += EuclidCoreTools.square(yoStabilityMarginGradientFilt[i].getDoubleValue());
+      }
+      yoPostureSensitivityFilt.set(Math.sqrt(sensitivityFilt));
+   }
+
+   public void computeContactPointAdjustment()
+   {
       // Compute contact point sensitivity
       for (int i = 0; i < contactPointIndicesToCompute.size(); i++)
       {
+         // Constraint matrix variation
          int contact_idx = contactPointIndicesToCompute.get(i);
 
          tempFrameVectorX.setIncludingFrame(wholeBodyContactState.getContactFrame(contact_idx), Axis3D.X);
          tempFrameVectorX.changeFrame(ReferenceFrame.getWorldFrame());
          DMatrixRMaj dAX = contactPointConstraintMatrixVariation.compute(contact_idx, tempFrameVectorX);
 
-         double sensitivityAX = cosA * computeSensitivity(dAX, primalSolutionA, dualSolutionA, tempSensitivityMatrix);
-         double sensitivityBX = cosB * computeSensitivity(dAX, primalSolutionB, dualSolutionB, tempSensitivityMatrix);
-         double sensitivityX = sensitivityAX * vertexAWeight + sensitivityBX * vertexBWeight;
-
          tempFrameVectorY.setIncludingFrame(wholeBodyContactState.getContactFrame(contact_idx), Axis3D.Y);
          tempFrameVectorY.changeFrame(ReferenceFrame.getWorldFrame());
          DMatrixRMaj dAY = contactPointConstraintMatrixVariation.compute(contact_idx, tempFrameVectorY);
-         double sensitivityAY = cosA * computeSensitivity(dAY, primalSolutionA, dualSolutionA, tempSensitivityMatrix);
-         double sensitivityBY = cosB * computeSensitivity(dAY, primalSolutionB, dualSolutionB, tempSensitivityMatrix);
-         double sensitivityY = sensitivityAY * vertexAWeight + sensitivityBY * vertexBWeight;
+
+         FrameConvexPolygon2DReadOnly feasibleRegion = stabilityMarginRegionCalculator.getFeasibleRegion();
+
+         double dAreaX = 0.0;
+         double dAreaY = 0.0;
+
+         for (int edge_idx = 0; edge_idx < feasibleRegion.getNumberOfVertices(); edge_idx++)
+         {
+            updateStabilityMarginData(edge_idx);
+            FramePoint2DReadOnly vertexA = feasibleRegion.getVertex(edge_idx);
+            FramePoint2DReadOnly vertexB = feasibleRegion.getNextVertex(edge_idx);
+            double distance = vertexA.distance(vertexB);
+
+            double sensitivityAX = cosA * computeSensitivity(dAX, primalSolutionA, dualSolutionA, tempSensitivityMatrix);
+            double sensitivityBX = cosB * computeSensitivity(dAX, primalSolutionB, dualSolutionB, tempSensitivityMatrix);
+            double sensitivityX = sensitivityAX * vertexAWeight + sensitivityBX * vertexBWeight;
+            dAreaX += sensitivityX * distance;
+
+            double sensitivityAY = cosA * computeSensitivity(dAY, primalSolutionA, dualSolutionA, tempSensitivityMatrix);
+            double sensitivityBY = cosB * computeSensitivity(dAY, primalSolutionB, dualSolutionB, tempSensitivityMatrix);
+            double sensitivityY = sensitivityAY * vertexAWeight + sensitivityBY * vertexBWeight;
+            dAreaY += sensitivityY * distance;
+         }
 
          FrameVector3D contactPointOptimalAdjustment = contactPointOptimalAdjustments.get(i);
          contactPointOptimalAdjustment.setToZero(ReferenceFrame.getWorldFrame());
 
          // Scale by sensitivity
-         tempFrameVectorX.scale(sensitivityX);
-         tempFrameVectorY.scale(sensitivityY);
+         tempFrameVectorX.scale(dAreaX);
+         tempFrameVectorY.scale(dAreaY);
          contactPointOptimalAdjustment.add(tempFrameVectorX, tempFrameVectorY);
       }
    }
 
-   public void updateNullspace()
+   private void updateNullspace()
    {
       /* Update contact nullspace */
       nullspaceCalculationTimer.startMeasurement();
@@ -280,7 +316,12 @@ public class SensitivityBasedStabilityGradientCalculator
       nullspaceDimensionality.set(contactNullspace.getNumCols());
    }
 
-   public void updateSensitivity(int nullspaceIndex)
+   public CentroidalMomentumCalculator getCentroidalMomentumCalculator()
+   {
+      return nullspaceCalculator.getCentroidalMomentumCalculator();
+   }
+
+   private void updateSensitivity(int nullspaceIndex)
    {
       DMatrixRMaj nullspace = nullspaceCalculator.getNullspace();
 
@@ -298,12 +339,12 @@ public class SensitivityBasedStabilityGradientCalculator
       double sensitivityB = sensitivityMultiplier * cosB * computeSensitivity(solverConstraintVariation, primalSolutionB, dualSolutionB, tempSensitivityMatrix);
       double sensitivity = sensitivityA * vertexAWeight + sensitivityB * vertexBWeight;
 
-      double jointLimitAlpha = applyJointLimitFilter();
+      double jointLimitAlpha = 1.0; // computeJointLimitFilter();
 
       computedSensitivity.set(nullspaceIndex, 0, jointLimitAlpha * sensitivity);
    }
 
-   private double applyJointLimitFilter()
+   private double computeJointLimitFilter()
    {
       int rootJointIndices = Twist.SIZE;
       double jointLimitAlpha = 1.0;
@@ -321,6 +362,10 @@ public class SensitivityBasedStabilityGradientCalculator
 
          double qUpper = joint.getJointLimitUpper();
          double qLower = joint.getJointLimitLower();
+
+         if (Double.isInfinite(qUpper) || Double.isInfinite(qLower))
+            continue;
+
          double jointRoM = qUpper - qLower;
 
          double qUpperCutoff0 = qUpper - jointRoM * romFraction0;
@@ -332,7 +377,6 @@ public class SensitivityBasedStabilityGradientCalculator
          if (q > qUpperCutoff0 && qdNullspace > 0.0)
          {
             jointLimitAlpha = Math.min(jointLimitAlpha, EuclidCoreTools.clamp((qUpperCutoff1 - q) / (qUpperCutoff1 - qUpperCutoff0), 0.0, 1.0));
-//            jointLimitAlpha = Math.min(jointLimitAlpha, EuclidCoreTools.square());
          }
          else if (q < qLowerCutoff0 && qdNullspace < 0.0)
          {
@@ -411,7 +455,7 @@ public class SensitivityBasedStabilityGradientCalculator
 
    public double getPostureSensitivity()
    {
-      return yoPostureSensitivity.getValue();
+      return yoPostureSensitivityFilt.getValue();
    }
 
    public DMatrixRMaj getNomalizedStabilityMarginGradient()

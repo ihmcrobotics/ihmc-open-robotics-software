@@ -53,7 +53,6 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -92,7 +91,6 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -118,7 +116,7 @@ public class KinematicsToolboxController extends ToolboxController
    private static final double GRAVITY = 9.81;
 
    private static final double GLOBAL_PROPORTIONAL_GAIN = 1200.0;
-   public static final boolean ALWAYS_SNAP_PRIV_CONFIG_TO_CURRENT = false;
+   public static final boolean ALWAYS_SNAP_PRIV_CONFIG_TO_CURRENT = true;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -320,6 +318,7 @@ public class KinematicsToolboxController extends ToolboxController
    private final FrameConvexPolygon2D newSupportPolygon = new FrameConvexPolygon2D();
    protected final ConvexPolygon2D shrunkSupportPolygon = new ConvexPolygon2D();
    protected final FramePoint3D centerOfMass = new FramePoint3D();
+   protected final FramePoint3D tmpPoint = new FramePoint3D();
    /**
     * Distance to shrink the support polygon for safety purpose.
     */
@@ -435,8 +434,8 @@ public class KinematicsToolboxController extends ToolboxController
    private final YoVector3D linearMomentumRateWeight = new YoVector3D("linearMomentumRateWeight", registry);
    private final MomentumCommand momentumCommandForRateMinimization = new MomentumCommand();
 
-   protected Consumer<KinematicsToolboxRigidBodyCommand> rigidBodyCommandMutator = command -> {};
-   protected Consumer<KinematicsToolboxCenterOfMassCommand> centerOfMassCommandMutator = command -> {};
+   protected Consumer<KinematicsToolboxRigidBodyCommand> endEffectorRetargeting = command -> {};
+   protected Consumer<KinematicsToolboxCenterOfMassCommand> centerOfMassRetargeting = command -> {};
 
    /**
     * @param commandInputManager     the message/command barrier used by this controller. Submit
@@ -690,8 +689,8 @@ public class KinematicsToolboxController extends ToolboxController
 
       for (RigidBodyBasics rigidBody : rigidBodies)
       {
-         YoGraphicCoordinateSystem desiredCoodinateSystem = createCoodinateSystem(rigidBody, Type.DESIRED, desiredAppearance);
-         YoGraphicCoordinateSystem currentCoodinateSystem = createCoodinateSystem(rigidBody, Type.CURRENT, currentAppearance);
+         YoGraphicCoordinateSystem desiredCoodinateSystem = createCoordinateSystem(rigidBody, Type.DESIRED, desiredAppearance);
+         YoGraphicCoordinateSystem currentCoodinateSystem = createCoordinateSystem(rigidBody, Type.CURRENT, currentAppearance);
 
          rigidBodiesWithVisualization.add(rigidBody);
          desiredCoodinateSystems.put(rigidBody, desiredCoodinateSystem);
@@ -715,7 +714,7 @@ public class KinematicsToolboxController extends ToolboxController
     * @param appearanceDefinition the appearance of the coordinate system's arrows.
     * @return the graphic with a good name for the given end-effector.
     */
-   private YoGraphicCoordinateSystem createCoodinateSystem(RigidBodyBasics endEffector, Type type, AppearanceDefinition appearanceDefinition)
+   private YoGraphicCoordinateSystem createCoordinateSystem(RigidBodyBasics endEffector, Type type, AppearanceDefinition appearanceDefinition)
    {
       String namePrefix = endEffector.getName() + type.getName();
       return new YoGraphicCoordinateSystem(namePrefix, "", registry, false, 0.2, appearanceDefinition);
@@ -837,14 +836,14 @@ public class KinematicsToolboxController extends ToolboxController
 
    protected void initializePrivilegedConfiguration()
    {
-      if (!ALWAYS_SNAP_PRIV_CONFIG_TO_CURRENT && initialRobotConfigurationMap != null)
-      {
-         initialRobotConfigurationMap.forEachEntry((joint, q_priv) ->
-                                                   {
-                                                      joint.setQ(q_priv);
-                                                      return true;
-                                                   });
-      }
+//      if (!ALWAYS_SNAP_PRIV_CONFIG_TO_CURRENT && initialRobotConfigurationMap != null)
+//      {
+//         initialRobotConfigurationMap.forEachEntry((joint, q_priv) ->
+//                                                   {
+//                                                      joint.setQ(q_priv);
+//                                                      return true;
+//                                                   });
+//      }
 
       // Sets the privileged configuration to match the current robot configuration such that the solution will be as close as possible to the current robot configuration.
       snapPrivilegedConfigurationToCurrent();
@@ -1102,7 +1101,7 @@ public class KinematicsToolboxController extends ToolboxController
          noCommandReceived = false;
 
          KinematicsToolboxCenterOfMassCommand command = commandInputManager.pollNewestCommand(KinematicsToolboxCenterOfMassCommand.class);
-         centerOfMassCommandMutator.accept(command);
+         centerOfMassRetargeting.accept(command);
          KinematicsToolboxHelper.consumeCenterOfMassCommand(command, spatialGains.getPositionGains(), userFBCommands.addCenterOfMassFeedbackControlCommand());
          yoDesiredCenterOfMass.set(command.getDesiredPosition());
 
@@ -1127,7 +1126,7 @@ public class KinematicsToolboxController extends ToolboxController
          {
             noCommandReceived = false;
             KinematicsToolboxRigidBodyCommand command = commands.get(i);
-            rigidBodyCommandMutator.accept(command);
+            endEffectorRetargeting.accept(command);
             RigidBodyBasics endEffector = command.getEndEffector();
             SpatialFeedbackControlCommand rigidBodyCommand = userFBCommands.addSpatialFeedbackControlCommand();
             KinematicsToolboxHelper.consumeRigidBodyCommand(command, rootBody, spatialGains, rigidBodyCommand);
@@ -1188,7 +1187,7 @@ public class KinematicsToolboxController extends ToolboxController
             noCommandReceived = false;
             KinematicsToolboxCenterOfMassCommand input = centerOfMassInputs.get(j);
             KinematicsToolboxHelper.consumeCenterOfMassCommand(input, spatialGains.getPositionGains(), userFBCommands.addCenterOfMassFeedbackControlCommand());
-            centerOfMassCommandMutator.accept(input);
+            centerOfMassRetargeting.accept(input);
 
             if (preserveUserCommandHistory.getValue())
             {
@@ -1206,7 +1205,7 @@ public class KinematicsToolboxController extends ToolboxController
          {
             noCommandReceived = false;
             KinematicsToolboxRigidBodyCommand input = rigidBodyInputs.get(j);
-            rigidBodyCommandMutator.accept(input);
+            endEffectorRetargeting.accept(input);
             RigidBodyBasics endEffector = input.getEndEffector();
             SpatialFeedbackControlCommand rigidBodyCommand = userFBCommands.addSpatialFeedbackControlCommand();
             KinematicsToolboxHelper.consumeRigidBodyCommand(input, rootBody, spatialGains, rigidBodyCommand);
@@ -1561,9 +1560,20 @@ public class KinematicsToolboxController extends ToolboxController
 
          feedbackControllerDataHolder.getOrientationData(endEffector, rigidBodyOrientations, Type.DESIRED);
          if (rigidBodyOrientations.isEmpty())
+         {
             coordinateSystem.hide();
+         }
          else // TODO Handle the case there are more than 1 active controller.
+         {
             coordinateSystem.setOrientation(rigidBodyOrientations.get(0));
+
+            if (rigidBodyPositions.isEmpty())
+            {
+               tmpPoint.setToZero(endEffector.getBodyFixedFrame());
+               tmpPoint.changeFrame(ReferenceFrame.getWorldFrame());
+               coordinateSystem.setPosition(tmpPoint);
+            }
+         }
       }
 
       for (int i = 0; i < rigidBodiesWithVisualization.size(); i++)
@@ -1578,9 +1588,20 @@ public class KinematicsToolboxController extends ToolboxController
 
          feedbackControllerDataHolder.getOrientationData(endEffector, rigidBodyOrientations, Type.CURRENT);
          if (rigidBodyOrientations.isEmpty())
+         {
             coordinateSystem.hide();
+         }
          else // TODO Handle the case there are more than 1 active controller.
+         {
             coordinateSystem.setOrientation(rigidBodyOrientations.get(0));
+
+            if (rigidBodyPositions.isEmpty())
+            {
+               tmpPoint.setToZero(endEffector.getBodyFixedFrame());
+               tmpPoint.changeFrame(ReferenceFrame.getWorldFrame());
+               coordinateSystem.setPosition(tmpPoint);
+            }
+         }
       }
    }
 

@@ -35,12 +35,11 @@ import java.util.Map;
 import java.util.function.Predicate;
 
 import static us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStabilityMarginOptimizationModule.NUM_DYNAMICS_CONSTRAINTS;
-import static us.ihmc.commonWalkingControlModules.staticEquilibrium.StabilityMarginOptimizationModule.GRAVITY;
-import static us.ihmc.commonWalkingControlModules.staticEquilibrium.StabilityMarginOptimizationModule.LINEAR_DIMENSIONS;
+import static us.ihmc.commonWalkingControlModules.staticEquilibrium.StabilityMarginOptimizationModule.*;
 
 public class WholeBodyContactState implements WholeBodyContactStateInterface
 {
-   private static final boolean INCLUDE_GRAVITY_CORIOLIS_TORQUES = true;
+   private static final boolean INCLUDE_GRAVITY_CORIOLIS_TORQUES = false;
 
    private final RecyclingArrayList<ContactPoint> contactPoints = new RecyclingArrayList<>(20, SupplierBuilder.indexedSupplier(ContactPoint::new));
    private final Map<RigidBodyBasics, GeometricJacobian> contactJacobians = new HashMap<>();
@@ -241,7 +240,8 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
 
          if (torqueConstraintLowerBound > torqueConstraintUpperBound)
          {
-            LogTools.info("Infeasible torque constraint for " + oneDoFJoints[i].getName() + ". Likely due to high coriolis forces.");
+            if (DEBUG)
+               LogTools.info("Infeasible torque constraint for " + oneDoFJoints[i].getName() + ". Likely due to high coriolis forces.");
             clear();
             return;
          }

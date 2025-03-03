@@ -112,7 +112,7 @@ public class KinematicsStreamingToolboxInputCommand implements Command<Kinematic
       return inputs.get(index);
    }
 
-   public List<KinematicsToolboxRigidBodyCommand> getInputs()
+   public RecyclingArrayList<KinematicsToolboxRigidBodyCommand> getInputs()
    {
       return inputs;
    }

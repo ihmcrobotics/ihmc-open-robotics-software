@@ -41,6 +41,7 @@ public class KinematicsRecordReplay
 
    private final SideDependentList<MutableReferenceFrame> handDesiredControlFrames;
    private boolean requestRecordReplay;
+   private Consumer<Boolean> recordCallback = b -> {};
    private Consumer<Boolean> replayCallback = b -> {};
 
    public KinematicsRecordReplay(ImBoolean enabledKinematicsStreaming, SideDependentList<MutableReferenceFrame> handDesiredControlFrames)
@@ -78,6 +79,11 @@ public class KinematicsRecordReplay
       this.replayCallback = replayCallback;
    }
 
+   public void setRecordCallback(Consumer<Boolean> recordCallback)
+   {
+      this.recordCallback = recordCallback;
+   }
+
    public void onUpdateStart()
    {
       requestRecordReplay = false;
@@ -111,12 +117,14 @@ public class KinematicsRecordReplay
             isRecording = false;
             trajectoryRecorder.setPath(recordPath.get());
             trajectoryRecorder.onRecordEnd();
+            recordCallback.accept(false);
          }
          else
          {
             LogTools.info("Starting to record!");
             isRecording = true;
             trajectoryRecorder.onRecordStart();
+            recordCallback.accept(true);
          }
       }
 

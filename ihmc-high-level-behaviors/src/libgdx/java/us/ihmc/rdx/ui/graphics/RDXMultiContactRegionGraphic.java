@@ -40,6 +40,7 @@ public class RDXMultiContactRegionGraphic implements RenderableProvider
    private final ConvexPolygon2D supportRegion = new ConvexPolygon2D();
    private PostureOptimizerState postureOptimizerState = PostureOptimizerState.NOMINAL;
    private double activationAlpha = -1.0;
+   private double postureSensitivity = -1.0;
 
    private final FramePoint3D comCurrent = new FramePoint3D();
    private final FramePoint3D comDesired = new FramePoint3D();
@@ -47,7 +48,7 @@ public class RDXMultiContactRegionGraphic implements RenderableProvider
    private final FramePoint3D desiredCoMXYAtFootHeight = new FramePoint3D();
 
    private int minimumEdgeIndex;
-   private double minimumEdgeDistance;
+   private double stabilityMargin;
 
    private final ModelBuilder modelBuilder = new ModelBuilder();
    private final RDXMultiColorMeshBuilder meshBuilder = new RDXMultiColorMeshBuilder();
@@ -143,6 +144,7 @@ public class RDXMultiContactRegionGraphic implements RenderableProvider
 
          postureOptimizerState = PostureOptimizerState.fromByte(kinematicsToolboxOutputStatus.getPostureOptimizerState());
          activationAlpha = kinematicsToolboxOutputStatus.getActivationAlpha();
+         postureSensitivity = kinematicsToolboxOutputStatus.getSupportRegionSensitivity();
          meshBuilder.addPolygon(transform, this.supportRegion, getPolygonColor());
       }
 
@@ -165,12 +167,12 @@ public class RDXMultiContactRegionGraphic implements RenderableProvider
 
    private Color getPolygonColor()
    {
-      return activationAlpha > 0.1 ? OPTIMIZER_POLYGON_GRAPHIC_COLOR : NOMINAL_POLYGON_GRAPHIC_COLOR;
+      return (postureSensitivity > 0.035 && stabilityMargin < 0.1) ? OPTIMIZER_POLYGON_GRAPHIC_COLOR : NOMINAL_POLYGON_GRAPHIC_COLOR;
    }
 
    private void updateMinimumEdge()
    {
-      minimumEdgeDistance = Double.POSITIVE_INFINITY;
+      stabilityMargin = Double.POSITIVE_INFINITY;
 
       for (int i = 0; i < supportRegion.getNumberOfVertices(); i++)
       {
@@ -178,9 +180,9 @@ public class RDXMultiContactRegionGraphic implements RenderableProvider
          Point2DReadOnly v1 = supportRegion.getNextVertex(i);
 
          double margin = EuclidGeometryTools.distanceFromPoint2DToLine2D(comXYAtFootHeight.getX(), comXYAtFootHeight.getY(), v0, v1);
-         if (margin < minimumEdgeDistance)
+         if (margin < stabilityMargin)
          {
-            minimumEdgeDistance = margin;
+            stabilityMargin = margin;
             minimumEdgeIndex = i;
          }
       }

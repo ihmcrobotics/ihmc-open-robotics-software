@@ -96,6 +96,7 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
    private final YoFramePoint2D[] nearestConstraintVertexB = new YoFramePoint2D[DIRECTIONS_TO_OPTIMIZE];
    private final YoInteger lowestMarginEdgeIndex;
    private final YoDouble stabilityMargin;
+   private final YoDouble stabilityArea;
 
    /* Entry i corresponds to the distance of the CoM to the line segment connecting vertex (i) and (i+1) */
    private final YoDouble[] comEdgeMargin = new YoDouble[DIRECTIONS_TO_OPTIMIZE];
@@ -144,6 +145,8 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
       stabilityMargin = new YoDouble(namePrefix + "StabilityMargin", registry);
       lowestMarginEdgeIndex.set(NULL_INDEX);
       stabilityMargin.set(Double.POSITIVE_INFINITY);
+      stabilityArea = new YoDouble("stabilityArea", registry);
+      stabilityArea.set(Double.POSITIVE_INFINITY);
 
       yoCenterOfMass = new YoFramePoint2D("centerOfMass", ReferenceFrame.getWorldFrame(), registry);
       yoStabilityMarginPoint = new YoFramePoint2D("stabilityMarginPoint", ReferenceFrame.getWorldFrame(), registry);
@@ -345,6 +348,7 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
       }
 
       updateMinimumMarginEdge();
+      stabilityArea.set(feasibleRegion.getArea());
    }
 
    private static int findVertexIndex(Tuple2DReadOnly[] candidateVertices, Tuple2DReadOnly vertex)
