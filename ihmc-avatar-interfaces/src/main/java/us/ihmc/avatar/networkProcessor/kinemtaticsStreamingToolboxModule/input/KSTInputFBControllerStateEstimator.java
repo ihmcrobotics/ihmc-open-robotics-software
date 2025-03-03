@@ -836,7 +836,7 @@ public class KSTInputFBControllerStateEstimator implements KSTInputStateEstimato
             {
                double timeInterval = Conversions.nanosecondsToSeconds(inputTimestamp - lastInputTimestamp.getLongValue());
                KSTTools.computeLinearVelocity(timeInterval, rawInputPosition, position, debugInputVelocity);
-               rawInputVelocity.set(debugInputVelocity);
+               rawInputVelocity.setMatchingFrame(input.getDesiredVelocity());
             }
 
             if (rawInputVelocity.containsNaN())
