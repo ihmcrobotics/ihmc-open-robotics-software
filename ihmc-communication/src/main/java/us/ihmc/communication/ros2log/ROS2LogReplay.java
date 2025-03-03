@@ -33,6 +33,8 @@ public class ROS2LogReplay
       LogTools.info("Starting replay of " + logFile.getName());
       startReplay(topicManagers, timestampSupplier);
       LogTools.info("Finished replay");
+
+      System.exit(0);
    }
 
    private void startReplay(List<ReplayTopicManager<?>> topicManagers, LongSupplier timestampSupplier)
