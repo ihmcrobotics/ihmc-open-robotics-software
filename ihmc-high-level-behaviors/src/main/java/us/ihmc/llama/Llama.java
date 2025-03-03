@@ -3,6 +3,7 @@ package us.ihmc.llama;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacpp.Pointer;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.llamacpp.ggml_log_callback;
 import us.ihmc.llamacpp.library.LlamaCPPNativeLibrary;
@@ -123,6 +124,11 @@ public class Llama
          LogTools.error("Failed to apply the chat template");
       }
 
+      if (prev_len >= new_len)
+      {
+         LogTools.error("Prev_len >= new_len");
+      }
+
       String prompt = context_str.getString().substring(prev_len, new_len);
 
       StringBuilder response_builder = new StringBuilder();
@@ -192,6 +198,7 @@ public class Llama
       return response;
    }
 
+   @Disabled // FIXME: Not working yet
    public void addMessage(String role, String content)
    {
       String tmpl = llama_model_chat_template(model, (String) null);
@@ -227,6 +234,7 @@ public class Llama
       message.content(new BytePointer(content));
    }
 
+   @Deprecated // FIXME: Not working yet
    public void clearContext()
    {
       context_str.close();
