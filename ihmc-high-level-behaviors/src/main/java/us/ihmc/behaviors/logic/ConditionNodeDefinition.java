@@ -133,4 +133,9 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
    {
       return type;
    }
+
+   public CounterConditionDefinition getCounter()
+   {
+      return counter;
+   }
 }

@@ -1,11 +1,14 @@
 package us.ihmc.behaviors.logic;
 
+import us.ihmc.behaviors.logic.condition.CounterConditionExecutor;
 import us.ihmc.behaviors.sequence.LeafNodeExecutor;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class ConditionNodeExecutor extends LeafNodeExecutor<ConditionNodeState, ConditionNodeDefinition>
 {
+   private CounterConditionExecutor counter;
+
    public ConditionNodeExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(new ConditionNodeState(id, crdtInfo, saveFileDirectory));
@@ -14,12 +17,9 @@ public class ConditionNodeExecutor extends LeafNodeExecutor<ConditionNodeState, 
    @Override
    public void updateCurrentlyExecuting()
    {
-      if (state.getCount().getValue() < definition.getCountTo().getValue())
+      switch (definition.getType().getValue())
       {
-         state.getCount().setValue(state.getCount().getValue() + 1);
-         state.setFailed(true);
+         case COUNTER -> counter.updateCurrentlyExecuting();
       }
-
-      state.setIsExecuting(false); // Completes immediately
    }
 }

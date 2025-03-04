@@ -1,26 +1,18 @@
 package us.ihmc.behaviors.logic;
 
 import behavior_msgs.msg.dds.ConditionNodeStateMessage;
+import us.ihmc.behaviors.logic.condition.CounterConditionState;
 import us.ihmc.behaviors.sequence.LeafNodeState;
-import us.ihmc.communication.crdt.CRDTBidirectionalLong;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class ConditionNodeState extends LeafNodeState<ConditionNodeDefinition>
 {
-   private final CRDTBidirectionalLong count;
+   private CounterConditionState counter;
 
    public ConditionNodeState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(id, new ConditionNodeDefinition(crdtInfo, saveFileDirectory), crdtInfo);
-
-      count = new CRDTBidirectionalLong(definition, 0);
-   }
-
-   @Override
-   public void update()
-   {
-      super.update();
    }
 
    public void toMessage(ConditionNodeStateMessage message)
@@ -29,7 +21,10 @@ public class ConditionNodeState extends LeafNodeState<ConditionNodeDefinition>
 
       super.toMessage(message.getState());
 
-      message.setCount(count.toMessage());
+      switch (definition.getType().getValue())
+      {
+         case COUNTER -> counter.toMessage(message);
+      }
    }
 
    public void fromMessage(ConditionNodeStateMessage message)
@@ -37,12 +32,15 @@ public class ConditionNodeState extends LeafNodeState<ConditionNodeDefinition>
       definition.fromMessage(message.getDefinition());
 
       super.fromMessage(message.getState());
-      
-      count.fromMessage(message.getCount());
+
+      switch (definition.getType().getValue())
+      {
+         case COUNTER -> counter.fromMessage(message);
+      }
    }
 
-   public CRDTBidirectionalLong getCount()
+   public CounterConditionState getCounter()
    {
-      return count;
+      return counter;
    }
 }
