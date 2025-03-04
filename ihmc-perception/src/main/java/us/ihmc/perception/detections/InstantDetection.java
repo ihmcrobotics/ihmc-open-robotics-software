@@ -40,7 +40,7 @@ public class InstantDetection
       this.detectedObjectClass = detectedObjectClass;
       this.detectedObjectName = detectedObjectName;
       this.confidence = confidence;
-      this.pose = pose;
+      this.pose = new Pose3D(pose);
       this.detectionTime = detectionTime;
    }
 
