@@ -14,8 +14,12 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
 import org.lwjgl.opengl.GL41;
+import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.PostureOptimizerState;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -23,12 +27,21 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
+import us.ihmc.rdx.mesh.MeshDataGeneratorMissing;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.geometry.FramePlanarRegionsList;
+import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.ROS2Node;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 public class RDXMultiContactRegionGraphic implements RenderableProvider
 {
@@ -56,19 +69,27 @@ public class RDXMultiContactRegionGraphic implements RenderableProvider
    private final MidFrameZUpFrame midFeetZUpFrame;
    private final RigidBodyTransform transform = new RigidBodyTransform();
 
+   private final AtomicReference<FramePlanarRegionsListMessage> latestPlanarRegionsMessage = new AtomicReference<>();
+   private final Vector3D point = new Vector3D();
+   private final Vector3D normal = new Vector3D();
+   private final Quaternion orientation = new Quaternion();
+   private final MeshDataHolder arrowMesh = MeshDataGeneratorMissing.Arrow(0.3);
+
    private ModelInstance modelInstance;
    private Model lastModel;
 
-   public RDXMultiContactRegionGraphic(FullHumanoidRobotModel ghostFullRobotModel)
+   public RDXMultiContactRegionGraphic(FullHumanoidRobotModel ghostFullRobotModel, ROS2Node ros2Node)
    {
       this.centerOfMassFrame = new CenterOfMassReferenceFrame("ghostCoMFrame", ReferenceFrame.getWorldFrame(), ghostFullRobotModel.getRootBody());
-      this.midFeetZUpFrame = new MidFrameZUpFrame("midFeedZUpWhost",
+      this.midFeetZUpFrame = new MidFrameZUpFrame("midFeedZUpGhost",
                                                   ReferenceFrame.getWorldFrame(),
                                                   ghostFullRobotModel.getSoleFrame(RobotSide.LEFT),
                                                   ghostFullRobotModel.getSoleFrame(RobotSide.RIGHT));
+
+      ros2Node.createSubscription(PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, s -> latestPlanarRegionsMessage.set(s.takeNextData()));
    }
 
-   public void update(KinematicsToolboxOutputStatus kinematicsToolboxOutputStatus, FramePoint3D desiredCoMPosition)
+   public void updateMultiContactGraphics(KinematicsToolboxOutputStatus kinematicsToolboxOutputStatus, FramePoint3D desiredCoMPosition)
    {
       meshBuilder.clear();
 
@@ -148,6 +169,69 @@ public class RDXMultiContactRegionGraphic implements RenderableProvider
          meshBuilder.addPolygon(transform, this.supportRegion, getPolygonColor());
       }
 
+      if (normal.norm() > 0.01)
+      {
+         meshBuilder.addMesh(arrowMesh, point, orientation, Color.RED);
+      }
+
+      generateModel();
+   }
+
+   public void updateEnvironmentNormal()
+   {
+      // Check for new surface normal
+      FramePlanarRegionsListMessage planarRegionsMessage = latestPlanarRegionsMessage.getAndSet(null);
+      if (planarRegionsMessage != null)
+      {
+         FramePlanarRegionsList planarRegions = PlanarRegionMessageConverter.convertToFramePlanarRegionsList(planarRegionsMessage);
+         for (int i = 0; i < planarRegions.getPlanarRegionsList().getNumberOfPlanarRegions(); i++)
+         {
+            PlanarRegion region = planarRegions.getPlanarRegionsList().getPlanarRegion(i);
+
+            double area = region.getArea();
+            double areaThreshold = 0.15;
+
+            if (area < areaThreshold)
+               continue;
+
+            double normalZ = region.getNormal().getZ();
+            double pitch = Math.abs(Math.asin(normalZ));
+            double pitchThreshold = Math.toRadians(9.0);
+
+            if (pitch < pitchThreshold)
+               continue;
+
+            FramePoint3D position = new FramePoint3D(ReferenceFrame.getWorldFrame(), region.getPoint());
+            position.changeFrame(midFeetZUpFrame);
+
+            double xThresholdMin = 0.3;
+            double xThresholdMax = 2.0;
+            double yThreshold = 1.0;
+            double zThresholdMin = 0.4;
+
+            if (position.getX() < xThresholdMin || position.getX() > xThresholdMax || position.getY() < -yThreshold || position.getY() > yThreshold || position.getZ() < zThresholdMin)
+               continue;
+
+            position.changeFrame(ReferenceFrame.getWorldFrame());
+            point.set(position);
+
+            normal.set(region.getNormal());
+            EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(Axis3D.Z, normal, orientation);
+         }
+      }
+
+      meshBuilder.clear();
+
+      if (normal.norm() > 0.01)
+      {
+         meshBuilder.addMesh(arrowMesh, point, orientation, Color.RED);
+      }
+
+      generateModel();
+   }
+
+   private void generateModel()
+   {
       modelBuilder.begin();
       Mesh mesh = meshBuilder.generateMesh();
 
@@ -191,7 +275,7 @@ public class RDXMultiContactRegionGraphic implements RenderableProvider
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (supportRegion.isEmpty())
+      if (supportRegion.isEmpty() && normal.norm() < 0.01)
       {
          return;
       }

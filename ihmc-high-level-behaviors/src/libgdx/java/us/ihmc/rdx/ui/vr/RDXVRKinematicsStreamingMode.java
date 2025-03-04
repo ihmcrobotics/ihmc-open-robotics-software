@@ -43,12 +43,10 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -221,7 +219,7 @@ public class RDXVRKinematicsStreamingMode
       ghostRobotGraphic.setActive(true);
       ghostRobotGraphic.create();
 
-      multiContactStabilityGraphic = new RDXMultiContactRegionGraphic(ghostFullRobotModel);
+      multiContactStabilityGraphic = new RDXMultiContactRegionGraphic(ghostFullRobotModel, ros2ControllerHelper.getROS2Node());
 
       for (RobotSide side : RobotSide.values)
       {
@@ -932,7 +930,7 @@ public class RDXVRKinematicsStreamingMode
                      ghostOneDoFJointsExcludingHands[i].setQ(latestStatus.getDesiredJointAngles().get(i));
                   }
                   ghostFullRobotModel.getElevator().updateFramesRecursively();
-                  multiContactStabilityGraphic.update(latestStatus, desiredCoMPositionFiltered);
+                  multiContactStabilityGraphic.updateMultiContactGraphics(latestStatus, desiredCoMPositionFiltered);
                }
             }
             if (capturabilityBasedStatus.getMessageNotification().poll())
@@ -947,6 +945,10 @@ public class RDXVRKinematicsStreamingMode
             }
             if (ghostRobotGraphic.isActive())
                ghostRobotGraphic.update();
+         }
+         else
+         { // Only update normal when IK is disabled
+            multiContactStabilityGraphic.updateEnvironmentNormal();
          }
       }
    }
