@@ -55,6 +55,7 @@ public class FSTStreamingState implements State
    private final YoDouble liftThreshold = new YoDouble("liftThreshold", registry);
    private final YoDouble stabilityThreshold = new YoDouble("stabilityThreshold", registry);
    private final YoInteger stabilityIterations = new YoInteger("stabilityIterations", registry);
+   private final YoDouble footstepMarginTime = new YoDouble("footstepMarginTime", registry);
    private final YoDouble defaultStride = new YoDouble("defaultStride", registry);
    private final YoDouble maxStride = new YoDouble("maxStride", registry);
    private final YoDouble maxDistanceToStance = new YoDouble("maxDistanceToStance", registry);
@@ -84,6 +85,7 @@ public class FSTStreamingState implements State
       liftThreshold.set(parameters.getLiftThreshold());
       stabilityThreshold.set(parameters.getStabilityThreshold());
       stabilityIterations.set(parameters.getStabilityIterations());
+      footstepMarginTime.set(parameters.getFootstepMarginTime());
       defaultStride.set(parameters.getDefaultStride());
       maxStride.set(parameters.getMaxStride());
       maxDistanceToStance.set(parameters.getMaxDistanceToStance());
@@ -236,29 +238,19 @@ public class FSTStreamingState implements State
                            if (stableCount >= stabilityIterations.getIntegerValue())
                            {
                               reset(side, currentTrackerTransform);
-
-                              // Do not update direction any further.
-                              // Just keep the desired direction as is
-                              FootstepStreamingToolboxOutputStatus outputStatus = new FootstepStreamingToolboxOutputStatus();
-                              outputStatus.setRobotSide(side.toByte());
-                              outputStatus.setAdjustmentFootstep(true);
-                              outputStatus.setLastAdjustment(true);
-                              tools.getStatusOutputManager().reportStatusMessage(outputStatus);
-
                               LogTools.error("User completed stepping with {}", side);
                            }
                         }
                         else  // Still moving
                         {
                            stableIterationCounts.put(side, 0); // reset stability count
-                           // Only update direction if acceleration is not too small
                            if (!tools.hasPreviousInput())
                            {
                               LogTools.error("Cannot update footstep estimate because previous input is missing");
                            }
                            else // Send adjustment
                            {
-                              if(robotElapsedTimeCurrentStep < robotStepDuration)
+                              if(robotElapsedTimeCurrentStep < robotStepDuration - footstepMarginTime.getValue())
                               {
                                  FrameVector2D adjustedTranslationTrackerXY = new FrameVector2D(ReferenceFrame.getWorldFrame(), translationTracker.getX(), translationTracker.getY());
                                  double stride = defaultStride.getDoubleValue();
@@ -290,6 +282,16 @@ public class FSTStreamingState implements State
                                  outputStatus.getDesiredFootPosition().set(robotFootstepTransformInWorld.getTranslation());
                                  tools.getStatusOutputManager().reportStatusMessage(outputStatus);
                                  LogTools.warn("Sent footstep adjustment {}", side);
+                              }
+                              else
+                              {
+                                 // Do not update direction any further.
+                                 // Just keep the desired direction as is
+                                 FootstepStreamingToolboxOutputStatus outputStatus = new FootstepStreamingToolboxOutputStatus();
+                                 outputStatus.setRobotSide(side.toByte());
+                                 outputStatus.setAdjustmentFootstep(true);
+                                 outputStatus.setLastAdjustment(true);
+                                 tools.getStatusOutputManager().reportStatusMessage(outputStatus);
                               }
                            }
                         }

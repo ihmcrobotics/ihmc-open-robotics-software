@@ -41,6 +41,10 @@ public class FootstepStreamingToolboxParameters
     */
    private double liftThreshold;
    /**
+    * Default margin time before robot concludes step, when we want to stop sending update footsteps to the controller
+    */
+   private double footstepMarginTime;
+   /**
     * Default stride length to use as a starting guess
     */
    private double defaultStride;
@@ -100,6 +104,7 @@ public class FootstepStreamingToolboxParameters
       timeThresholdForSleeping = 3.0;
 
       computeFromStance = true;
+      footstepMarginTime = 0.025; // Equal to robot transfer time
 
       // Step threshold of 5cm and lift of 2cm, seem to be too conservative. Step is identified after ~0.3s. Too long considering that a step lasts ~0.57s
       // Step threshold of 2cm and lift of 1cm seem to work great!
@@ -224,5 +229,10 @@ public class FootstepStreamingToolboxParameters
    public double getStabilityThreshold()
    {
       return stabilityThreshold;
+   }
+
+   public double getFootstepMarginTime()
+   {
+      return footstepMarginTime;
    }
 }

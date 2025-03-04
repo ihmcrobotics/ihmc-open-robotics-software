@@ -732,6 +732,7 @@ public class RDXVRKinematicsStreamingMode
                   footstepStreaming.getReadyToStepNotification().clear();
                   LogTools.warn("Stepping from VR");
                   footstepStreaming.step(false);
+                  controllerStatusTracker.getFinishedWalkingNotification().clear();
                }
             }
             else
@@ -740,11 +741,10 @@ public class RDXVRKinematicsStreamingMode
                {
                   LogTools.warn("Consecutive stepping from VR");
                   footstepStreaming.step(false);
-                  // This prevents wrong logic. The controller might think we're done walking even if we've just sent a new footstep, that needs to propagate to the controller
+                  // This prevents wrong logic. The controller might think we're done walking even if we've just sent a new footstep that needs to propagate to the controller
                   controllerStatusTracker.getFinishedWalkingNotification().clear();
                }
             }
-
             // Resumes streaming once walking is done
             if (pausedForWalking && controllerStatusTracker.getFinishedWalkingNotification().poll())
             {
@@ -755,6 +755,7 @@ public class RDXVRKinematicsStreamingMode
                pausedForWalking = false;
                reinitializeToolboxRobotConfiguration();
                visualizeIKPreviewGraphic(true);
+               LogTools.warn("Finished walking. Re-enabling standard KST");
                if (streamingDisabled.poll())
                {
                   LogTools.warn("Finished walking. Resuming streaming");

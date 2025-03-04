@@ -140,6 +140,7 @@ public class RDXVRFootstepStreaming
             }
             else if (latestStatus.getLastAdjustment()) // Last estimate
             {
+               LogTools.error("Received last estimate footstep");
                footstepPlacer.reset();
                footstepError = false;
             }
