@@ -51,7 +51,7 @@ public class SensitivityBasedStabilityGradientCalculator
 {
    private static final double integrationDT = 1.0e-3;
    private static final int XY_DIMENSIONS = 2;
-   private static final boolean INCLUDE_COM_IN_JACOBIAN = false;
+   private static final boolean COMPUTE_EXPECTED_MARGIN_VELOCITY = true;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -106,6 +106,7 @@ public class SensitivityBasedStabilityGradientCalculator
    /* YoVariable data of stability margin gradient */
    private final YoDouble[] yoStabilityMarginGradient;
 
+   private final YoDouble expectedSensitivity = new YoDouble("expectedSensitivity", registry);
    private final YoDouble gradientFilterAlpha = new YoDouble("gradientFilterAlpha", registry);
    private final YoDouble yoPostureSensitivityFilt = new YoDouble("postureSensitivityFilt", registry);
    /* Filtered data of stability margin gradient */
@@ -205,6 +206,9 @@ public class SensitivityBasedStabilityGradientCalculator
       {
          updateSensitivity(nullspaceIndex);
       }
+
+      if (COMPUTE_EXPECTED_MARGIN_VELOCITY)
+         computeExpectedMarginVelocity();
 
       /* Set initial joint state and update frames */
       postureConstraintVariationCalculator.resetToInitialJointState();
@@ -314,6 +318,17 @@ public class SensitivityBasedStabilityGradientCalculator
       nullspaceVelocity.reshape(contactNullspace.getNumRows(), 1);
       computedSensitivity.reshape(contactNullspace.getNumCols(), 1);
       nullspaceDimensionality.set(contactNullspace.getNumCols());
+   }
+
+   public void computeExpectedMarginVelocity()
+   {
+      DMatrixRMaj currentWholeBodyVelocity = postureConstraintVariationCalculator.getCurrentWholeBodyVelocity();
+      DMatrixRMaj solverConstraintVariation = postureConstraintVariationCalculator.computeFiniteDifference(currentWholeBodyVelocity);
+      double sensitivityMultiplier = stabilityMarginRegionCalculator.getOptimizationModule().getStabilityPointGradientCoefficient();
+
+      double sensitivityA = sensitivityMultiplier * cosA * computeSensitivity(solverConstraintVariation, primalSolutionA, dualSolutionA, tempSensitivityMatrix);
+      double sensitivityB = sensitivityMultiplier * cosB * computeSensitivity(solverConstraintVariation, primalSolutionB, dualSolutionB, tempSensitivityMatrix);
+      expectedSensitivity.set(sensitivityA * vertexAWeight + sensitivityB * vertexBWeight);
    }
 
    public CentroidalMomentumCalculator getCentroidalMomentumCalculator()

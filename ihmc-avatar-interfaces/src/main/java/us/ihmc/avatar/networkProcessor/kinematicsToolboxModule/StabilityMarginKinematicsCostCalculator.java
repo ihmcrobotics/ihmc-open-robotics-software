@@ -91,7 +91,6 @@ public class StabilityMarginKinematicsCostCalculator
 
    private final double updateDT;
    private final YoDouble previousStabilityMargin = new YoDouble("previousStabilityMargin", registry);
-   private final YoDouble expectedStabilityMarginVelocity = new YoDouble("expectedStabilityMarginVelocity", registry);
    private final YoDouble actualStabilityMarginVelocity = new YoDouble("actualStabilityMarginVelocity", registry);
 
    private final DMatrixRMaj scaledStabilityGradient = new DMatrixRMaj(0);
@@ -268,8 +267,6 @@ public class StabilityMarginKinematicsCostCalculator
       {
          double deltaMargin = multiContactRegionCalculator.getStabilityMargin() - previousStabilityMargin.getValue();
          actualStabilityMarginVelocity.set(EuclidCoreTools.clamp(deltaMargin / updateDT, 0.6));
-         DMatrixRMaj stabilityMarginJacobian = stabilityGradientCalculator.getStabilityMarginGradient();
-         expectedStabilityMarginVelocity.set(CommonOps_DDRM.dot(currentWholeBodyVelocity, stabilityMarginJacobian));
       }
 
       boolean integrateRegargetedObjectives = isEnabled.getValue() && isUpperBodyLoadBearing.getValue() && updateAlphaEnabled() > 0.0;

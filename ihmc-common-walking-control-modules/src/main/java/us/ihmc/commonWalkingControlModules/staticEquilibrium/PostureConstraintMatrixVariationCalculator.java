@@ -24,8 +24,8 @@ public class PostureConstraintMatrixVariationCalculator
 
    private final RobotJointVelocityAccelerationIntegrator integrator;
    private final double integrationDT;
-   private final DMatrixRMaj initialJointConfiguration = new DMatrixRMaj(0);
-   private final DMatrixRMaj initialJointVelocity = new DMatrixRMaj(0);
+   private final DMatrixRMaj currentWholeBodyConfiguration = new DMatrixRMaj(0);
+   private final DMatrixRMaj currentWholeBodyVelocity = new DMatrixRMaj(0);
 
    private final DMatrixRMaj actuationConstraintNominal = new DMatrixRMaj(0);
    private final DMatrixRMaj actuationConstraintVariation = new DMatrixRMaj(0);
@@ -57,8 +57,8 @@ public class PostureConstraintMatrixVariationCalculator
       }
 
       int velocityDofs = MultiBodySystemTools.computeDegreesOfFreedom(controlledJoints);
-      initialJointConfiguration.reshape(velocityDofs + 1, 1); // Floating base is 6 dofs but backed by a quaternion so there is an extra dof
-      initialJointVelocity.reshape(velocityDofs, 1);
+      currentWholeBodyConfiguration.reshape(velocityDofs + 1, 1); // Floating base is 6 dofs but backed by a quaternion so there is an extra dof
+      currentWholeBodyVelocity.reshape(velocityDofs, 1);
 
       constraintVarCalculatorFramesTimer = new ExecutionTimer("constraintVarCalculatorFramesTimer", registry);
       constraintVarCalculatorContactUpdateTimer = new ExecutionTimer("constraintVarCalculatorContactUpdateTimer", registry);
@@ -68,7 +68,8 @@ public class PostureConstraintMatrixVariationCalculator
    public void initializeFiniteDifference()
    {
       actuationConstraintNominal.set(wholeBodyContactState.getActuationConstraintMatrix());
-      MultiBodySystemTools.extractJointsState(controlledJoints, JointStateType.CONFIGURATION, initialJointConfiguration);
+      MultiBodySystemTools.extractJointsState(controlledJoints, JointStateType.CONFIGURATION, currentWholeBodyConfiguration);
+      MultiBodySystemTools.extractJointsState(controlledJoints, JointStateType.VELOCITY, currentWholeBodyVelocity);
    }
 
    public DMatrixRMaj computeFiniteDifference(DMatrixRMaj qd)
@@ -105,7 +106,7 @@ public class PostureConstraintMatrixVariationCalculator
       CommonOps_DDRM.mult(nominalConstraintMatrixVariation, solverToNominalTransformation, solverConstraintVariation);
 
       /* Soft reset to initial configuration (don't call update frames by default) */
-      MultiBodySystemTools.insertJointsState(controlledJoints, JointStateType.CONFIGURATION, initialJointConfiguration);
+      MultiBodySystemTools.insertJointsState(controlledJoints, JointStateType.CONFIGURATION, currentWholeBodyConfiguration);
 
       constraintVarCalculatorSolverMathTimer.stopMeasurement();
       return solverConstraintVariation;
@@ -114,10 +115,15 @@ public class PostureConstraintMatrixVariationCalculator
    public void resetToInitialJointState()
    {
       /* Reset joint configuration to initial */
-      MultiBodySystemTools.insertJointsState(controlledJoints, JointStateType.CONFIGURATION, initialJointConfiguration);
+      MultiBodySystemTools.insertJointsState(controlledJoints, JointStateType.CONFIGURATION, currentWholeBodyConfiguration);
 
       fullRobotModel.updateFrames();
       wholeBodyContactState.getActuationConstraintMatrix().set(actuationConstraintNominal);
+   }
+
+   public DMatrixRMaj getCurrentWholeBodyVelocity()
+   {
+      return currentWholeBodyVelocity;
    }
 
    public DMatrixRMaj computeJacobianRate(DMatrixRMaj qd)
@@ -139,7 +145,7 @@ public class PostureConstraintMatrixVariationCalculator
       CommonOps_DDRM.mult(nominalConstraintMatrixVariation, solverToNominalTransformation, solverConstraintVariation);
 
       /* Reset joint configuration to initial */
-      MultiBodySystemTools.insertJointsState(controlledJoints, JointStateType.CONFIGURATION, initialJointConfiguration);
+      MultiBodySystemTools.insertJointsState(controlledJoints, JointStateType.CONFIGURATION, currentWholeBodyConfiguration);
       constraintVarCalculatorSolverMathTimer.stopMeasurement();
 
       return solverConstraintVariation;
@@ -150,9 +156,9 @@ public class PostureConstraintMatrixVariationCalculator
       return solverConstraintVariation;
    }
 
-   public DMatrixRMaj getInitialJointConfiguration()
+   public DMatrixRMaj getCurrentWholeBodyConfiguration()
    {
-      return initialJointConfiguration;
+      return currentWholeBodyConfiguration;
    }
 
    public DMatrixRMaj getActuationConstraintNominal()
