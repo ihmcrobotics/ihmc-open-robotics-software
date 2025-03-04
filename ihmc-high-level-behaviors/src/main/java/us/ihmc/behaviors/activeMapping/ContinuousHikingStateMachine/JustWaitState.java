@@ -171,11 +171,11 @@ public class JustWaitState implements State
       midFeetZUpPose.appendYawRotation(rotationRadians);
       goalPoses.get(RobotSide.RIGHT).set(midFeetZUpPose);
       goalPoses.get(RobotSide.RIGHT).changeFrame(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
-      goalPoses.get(RobotSide.RIGHT).appendTranslation(0, -0.15, 0);
+      goalPoses.get(RobotSide.RIGHT).appendTranslation(0, -0.13, 0);
 
       goalPoses.get(RobotSide.LEFT).set(midFeetZUpPose);
       goalPoses.get(RobotSide.LEFT).changeFrame(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
-      goalPoses.get(RobotSide.LEFT).appendTranslation(0, 0.15, 0);
+      goalPoses.get(RobotSide.LEFT).appendTranslation(0, 0.13, 0);
 
       List<Pose3D> poses = new ArrayList<>();
       poses.add(new Pose3D(goalPoses.get(RobotSide.LEFT)));
@@ -239,7 +239,6 @@ public class JustWaitState implements State
                                   startPose.setToZero(midFeetZUpFrame);
                                   startPose.changeFrame(ReferenceFrame.getWorldFrame());
                                   startPose.getOrientation().set(goalPose.getOrientation());
-                                  footstepPlannerRequest.getBodyPathWaypoints().add(midFeetZUpPose);
                                   footstepPlannerRequest.getBodyPathWaypoints().add(startPose);
                                   footstepPlannerRequest.getBodyPathWaypoints().add(goalPose);
 
