@@ -354,6 +354,7 @@ public class KinematicsStreamingToolboxParameters
       defaultConfiguration.setEnableRightHandTaskspace(false);
       defaultConfiguration.setEnableChestTaskspace(true);
       defaultConfiguration.setEnablePelvisTaskspace(true);
+      defaultConfiguration.setEnableCenterOfMassControl(false);
       defaultConfiguration.setLeftHandTrajectoryFrameId(ReferenceFrame.getWorldFrame().getFrameNameHashCode());
       defaultConfiguration.setRightHandTrajectoryFrameId(ReferenceFrame.getWorldFrame().getFrameNameHashCode());
       defaultConfiguration.setChestTrajectoryFrameId(ReferenceFrame.getWorldFrame().getFrameNameHashCode());

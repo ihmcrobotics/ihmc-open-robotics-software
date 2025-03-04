@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.GoHomeMessage;
 import controller_msgs.msg.dds.HandLoadBearingMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
@@ -141,7 +142,6 @@ public class RDXVRKinematicsStreamingMode
    private final ControllerStatusTracker controllerStatusTracker;
 
    private ROS2Input<CapturabilityBasedStatus> capturabilityBasedStatus;
-   private RDXMultiContactRegionGraphic multiContactStabilityGraphic;
    private final HumanoidKinematicsToolboxConfigurationMessage ikHumanoidSolverConfigurationMessage = new HumanoidKinematicsToolboxConfigurationMessage();
 
    private final RDXHandConfigurationManager handManager;
@@ -183,8 +183,6 @@ public class RDXVRKinematicsStreamingMode
       ghostRobotGraphic.loadRobotModelAndGraphics(ghostRobotDefinition, ghostFullRobotModel.getElevator());
       ghostRobotGraphic.setActive(true);
       ghostRobotGraphic.create();
-
-      multiContactStabilityGraphic = new RDXMultiContactRegionGraphic(ghostFullRobotModel);
 
       for (RobotSide side : RobotSide.values)
       {
@@ -256,6 +254,7 @@ public class RDXVRKinematicsStreamingMode
          parameters.getDefaultConfiguration().setEnableLeftHandTaskspace(false);
          parameters.getDefaultConfiguration().setEnableRightHandTaskspace(false);
          parameters.getDefaultConfiguration().setEnableNeckJointspace(false);
+         parameters.getDefaultConfiguration().setEnableCenterOfMassControl(false);
          parameters.getDefaultSolverConfiguration().setJointVelocityWeight(0.05);
          parameters.getDefaultSolverConfiguration().setJointAccelerationWeight(0.0); // As soon as we increase this guy, we inject springy behavior.
 
@@ -338,6 +337,23 @@ public class RDXVRKinematicsStreamingMode
                streamingDisabled.set();
          }
 
+         InputDigitalActionData bButton = controller.getBButtonActionData();
+         if (bButton.bChanged() && !bButton.bState())
+         {
+            double trajectoryTime = 1.5;
+            GoHomeMessage homePelvis = new GoHomeMessage();
+            homePelvis.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_PELVIS);
+            homePelvis.setTrajectoryTime(trajectoryTime);
+            ros2ControllerHelper.publishToController(homePelvis);
+
+            GoHomeMessage homeChest = new GoHomeMessage();
+            homeChest.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_CHEST);
+            homeChest.setTrajectoryTime(trajectoryTime);
+
+            RDXBaseUI.pushNotification("Commanding home pose...");
+            ros2ControllerHelper.publishToController(homeChest);
+         }
+
          // NOTE: Implement hand open close for controller trigger button.
          InputDigitalActionData clickTriggerButton = controller.getClickTriggerActionData();
          if (clickTriggerButton.bChanged() && !clickTriggerButton.bState())
@@ -376,23 +392,8 @@ public class RDXVRKinematicsStreamingMode
         // NOTE: Implement hand open close for controller trigger button.
         InputDigitalActionData clickTriggerButton = controller.getClickTriggerActionData();
         if (clickTriggerButton.bChanged() && !clickTriggerButton.bState())
-        { // do not want to close grippers while interacting with the panel
+        {
            performHandAction(RobotSide.RIGHT);
-
-           // TODO discuss and possibly remap to different button...
-
-           //           double trajectoryTime = 1.5;
-           //           GoHomeMessage homePelvis = new GoHomeMessage();
-           //           homePelvis.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_PELVIS);
-           //           homePelvis.setTrajectoryTime(trajectoryTime);
-           //           ros2ControllerHelper.publishToController(homePelvis);
-           //
-           //           GoHomeMessage homeChest = new GoHomeMessage();
-           //           homeChest.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_CHEST);
-           //           homeChest.setTrajectoryTime(trajectoryTime);
-           //
-           //           RDXBaseUI.pushNotification("Commanding home pose...");
-           //           ros2ControllerHelper.publishToController(homeChest);
         }
 
          gripButtonsValue.put(RobotSide.RIGHT, controller.getGripActionData().x());
@@ -546,6 +547,7 @@ public class RDXVRKinematicsStreamingMode
 
             toolboxInputMessage.setUseCenterOfMassInput(true);
             toolboxInputMessage.getCenterOfMassInput().set(comMessage);
+            LogTools.error("COM CONTROL");
          }
          // ---------- End  Motion retargeting -------------
 
@@ -713,7 +715,6 @@ public class RDXVRKinematicsStreamingMode
                      ghostOneDoFJointsExcludingHands[i].setQ(latestStatus.getDesiredJointAngles().get(i));
                   }
                   ghostFullRobotModel.getElevator().updateFramesRecursively();
-                  multiContactStabilityGraphic.update(latestStatus);
                }
             }
             if (capturabilityBasedStatus.getMessageNotification().poll())
@@ -934,8 +935,6 @@ public class RDXVRKinematicsStreamingMode
 
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      multiContactStabilityGraphic.getRenderables(renderables, pool);
-
       if (status.hasReceivedFirstMessage())
       {
          ghostRobotGraphic.getRenderables(renderables, pool, sceneLevels);

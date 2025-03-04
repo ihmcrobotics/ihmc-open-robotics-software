@@ -65,8 +65,8 @@ public class FSTStreamingState implements State
    private final YoDouble defaultTurnDegrees = new YoDouble("defaultTurn", registry);
    private final YoDouble maxYawRotationDegrees = new YoDouble("maxYawRotation", registry);
    private final YoDouble kpYaw = new YoDouble("kpYaw", registry);
-   private final YoDouble maxYawToStanceDegrees = new YoDouble("maxYawToStance", registry);
-   private final YoDouble minYawToStanceDegrees = new YoDouble("minYawToStance", registry);
+   private final YoDouble maxYawToStance = new YoDouble("maxYawToStance", registry);
+   private final YoDouble minYawToStance = new YoDouble("minYawToStance", registry);
 
    public FSTStreamingState(FSTTools tools)
    {
@@ -94,8 +94,8 @@ public class FSTStreamingState implements State
       defaultTurnDegrees.set(parameters.getTurnDegrees());
       maxYawRotationDegrees.set(parameters.getMaxYawRotationDegrees());
       kpYaw.set(parameters.getKpYaw());
-      maxYawToStanceDegrees.set(parameters.getMaxYawToStanceDegrees());
-      minYawToStanceDegrees.set(parameters.getMinYawToStanceDegrees());
+      maxYawToStance.set(Math.toRadians(parameters.getMaxYawToStanceDegrees()));
+      minYawToStance.set(Math.toRadians(parameters.getMinYawToStanceDegrees()));
       computeStepFromStance.set(parameters.getComputeFromStance());
    }
 
@@ -258,36 +258,39 @@ public class FSTStreamingState implements State
                            }
                            else // Send adjustment
                            {
-                              FrameVector2D adjustedTranslationTrackerXY = new FrameVector2D(ReferenceFrame.getWorldFrame(), translationTracker.getX(), translationTracker.getY());
-                              double stride = defaultStride.getDoubleValue();
-                              if (sideCommand.getHasCurrentVelocity())
+                              if(robotElapsedTimeCurrentStep < robotStepDuration)
                               {
-                                 stride = computeStrideEstimate(side,
-                                                                adjustedTranslationTrackerXY.norm(),
-                                                                translationTracker.getZ(),
-                                                                sideCommand.getCurrentVelocity().getLinearPart());
+                                 FrameVector2D adjustedTranslationTrackerXY = new FrameVector2D(ReferenceFrame.getWorldFrame(), translationTracker.getX(), translationTracker.getY());
+                                 double stride = defaultStride.getDoubleValue();
+                                 if (sideCommand.getHasCurrentVelocity())
+                                 {
+                                    stride = computeStrideEstimate(side,
+                                                                   adjustedTranslationTrackerXY.norm(),
+                                                                   translationTracker.getZ(),
+                                                                   sideCommand.getCurrentVelocity().getLinearPart());
+                                 }
+                                 adjustedTranslationTrackerXY.normalize();
+                                 adjustedTranslationTrackerXY.scale(stride);
+
+                                 double adjustedYawRotation = computeYawEstimate(side,
+                                                                                 rotationTracker,
+                                                                                 translationTracker.getZ(),
+                                                                                 sideCommand.getCurrentVelocity().getLinearPartZ(),
+                                                                                 sideCommand.getCurrentVelocity().getAngularPartZ());
+
+                                 RigidBodyTransformReadOnly robotFootstepTransformInWorld = computeStepFromStance.getValue() ?
+                                       computeTargetFootstepFromStance(latestInput, side, adjustedTranslationTrackerXY, adjustedYawRotation, initialTrackerTransform) :
+                                       computeTargetFootstepFromInitialSwing(side, adjustedTranslationTrackerXY, adjustedYawRotation, initialTrackerTransform);
+
+                                 FootstepStreamingToolboxOutputStatus outputStatus = new FootstepStreamingToolboxOutputStatus();
+                                 outputStatus.setRobotSide(side.toByte());
+                                 outputStatus.setAdjustmentFootstep(true);
+                                 outputStatus.setLastAdjustment(false);
+                                 outputStatus.getDesiredFootOrientation().set(robotFootstepTransformInWorld.getRotation());
+                                 outputStatus.getDesiredFootPosition().set(robotFootstepTransformInWorld.getTranslation());
+                                 tools.getStatusOutputManager().reportStatusMessage(outputStatus);
+                                 LogTools.warn("Sent footstep adjustment {}", side);
                               }
-                              adjustedTranslationTrackerXY.normalize();
-                              adjustedTranslationTrackerXY.scale(stride);
-
-                              double adjustedYawRotation = computeYawEstimate(side,
-                                                                              rotationTracker,
-                                                                              translationTracker.getZ(),
-                                                                              sideCommand.getCurrentVelocity().getLinearPartZ(),
-                                                                              sideCommand.getCurrentVelocity().getAngularPartZ());
-
-                              RigidBodyTransformReadOnly robotFootstepTransformInWorld = computeStepFromStance.getValue() ?
-                                    computeTargetFootstepFromStance(latestInput, side, adjustedTranslationTrackerXY, adjustedYawRotation, initialTrackerTransform) :
-                                    computeTargetFootstepFromInitialSwing(side, adjustedTranslationTrackerXY, adjustedYawRotation, initialTrackerTransform);
-
-                              FootstepStreamingToolboxOutputStatus outputStatus = new FootstepStreamingToolboxOutputStatus();
-                              outputStatus.setRobotSide(side.toByte());
-                              outputStatus.setAdjustmentFootstep(true);
-                              outputStatus.setLastAdjustment(false);
-                              outputStatus.getDesiredFootOrientation().set(robotFootstepTransformInWorld.getRotation());
-                              outputStatus.getDesiredFootPosition().set(robotFootstepTransformInWorld.getTranslation());
-                              tools.getStatusOutputManager().reportStatusMessage(outputStatus);
-                              LogTools.warn("Sent footstep adjustment {}", side);
                            }
                         }
 
@@ -418,11 +421,14 @@ public class FSTStreamingState implements State
       // Compute predicted rotation relative to stance frame
       double initialSwingTrackerYaw = initialTrackerTransform.getRotation().getYaw();
       double initialStanceTrackerYaw = initialTrackersTransform.get(side.getOppositeSide()).getRotation().getYaw();
+      LogTools.error(Math.toDegrees(yawRotationTracker));
       double newYawInStanceFrame = yawRotationTracker + (initialSwingTrackerYaw - initialStanceTrackerYaw);
+      LogTools.warn(Math.toDegrees(newYawInStanceFrame));
       // Clamp value of yaw according to limits relative to stance foot
       newYawInStanceFrame = side == RobotSide.LEFT ?
-            Math.toRadians(Math.max(minYawToStanceDegrees.getValue(), Math.min(maxYawToStanceDegrees.getValue(), newYawInStanceFrame))) :
-            Math.toRadians(Math.max(-maxYawToStanceDegrees.getValue(), Math.min(minYawToStanceDegrees.getValue(), newYawInStanceFrame)));
+            Math.max(minYawToStance.getValue(), Math.min(maxYawToStance.getValue(), newYawInStanceFrame)) :
+            Math.max(-maxYawToStance.getValue(), Math.min(minYawToStance.getValue(), newYawInStanceFrame));
+      LogTools.info(Math.toDegrees(newYawInStanceFrame));
 
       // Update yaw value based on prediction expressed in robot stance foot
       double newYaw = robotStanceFootTransformInWorld.getRotation().getYaw() + newYawInStanceFrame;
