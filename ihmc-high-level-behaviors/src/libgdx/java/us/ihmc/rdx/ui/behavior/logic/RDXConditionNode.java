@@ -7,6 +7,7 @@ import us.ihmc.behaviors.logic.ConditionNodeState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.behavior.logic.condition.RDXCounterCondition;
+import us.ihmc.rdx.ui.behavior.logic.condition.RDXLLMCondition;
 import us.ihmc.rdx.ui.behavior.sequence.RDXLeafNode;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
@@ -14,13 +15,15 @@ public class RDXConditionNode extends RDXLeafNode<ConditionNodeState, ConditionN
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
-   private RDXCounterCondition counter;
+   private final RDXCounterCondition counter;
+   private final RDXLLMCondition llm;
 
    public RDXConditionNode(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(new ConditionNodeState(id, crdtInfo, saveFileDirectory));
 
       counter = new RDXCounterCondition(state);
+      llm = new RDXLLMCondition(state);
    }
 
    @Override
@@ -44,6 +47,7 @@ public class RDXConditionNode extends RDXLeafNode<ConditionNodeState, ConditionN
       switch (currentType)
       {
          case COUNTER -> counter.renderImGuiWidgetsInternal();
+         case LLM -> llm.renderImGuiWidgetsInternal();
       }
    }
 

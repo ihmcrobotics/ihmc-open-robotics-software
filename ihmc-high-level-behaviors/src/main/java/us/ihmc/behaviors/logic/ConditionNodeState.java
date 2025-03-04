@@ -2,19 +2,22 @@ package us.ihmc.behaviors.logic;
 
 import behavior_msgs.msg.dds.ConditionNodeStateMessage;
 import us.ihmc.behaviors.logic.condition.CounterConditionState;
+import us.ihmc.behaviors.logic.condition.LLMConditionState;
 import us.ihmc.behaviors.sequence.LeafNodeState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class ConditionNodeState extends LeafNodeState<ConditionNodeDefinition>
 {
-   private CounterConditionState counter;
+   private final CounterConditionState counter;
+   private final LLMConditionState llm;
 
    public ConditionNodeState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(id, new ConditionNodeDefinition(crdtInfo, saveFileDirectory), crdtInfo);
 
       counter = new CounterConditionState(definition);
+      llm = new LLMConditionState(definition);
    }
 
    public void toMessage(ConditionNodeStateMessage message)
@@ -26,6 +29,7 @@ public class ConditionNodeState extends LeafNodeState<ConditionNodeDefinition>
       switch (definition.getType().getValue())
       {
          case COUNTER -> counter.toMessage(message);
+         case LLM -> llm.toMessage(message);
       }
    }
 
@@ -38,11 +42,17 @@ public class ConditionNodeState extends LeafNodeState<ConditionNodeDefinition>
       switch (definition.getType().getValue())
       {
          case COUNTER -> counter.fromMessage(message);
+         case LLM -> llm.fromMessage(message);
       }
    }
 
    public CounterConditionState getCounter()
    {
       return counter;
+   }
+
+   public LLMConditionState getLLM()
+   {
+      return llm;
    }
 }

@@ -4,6 +4,7 @@ import behavior_msgs.msg.dds.ConditionNodeDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.logic.condition.CounterConditionDefinition;
+import us.ihmc.behaviors.logic.condition.LLMConditionDefinition;
 import us.ihmc.behaviors.sequence.LeafNodeDefinition;
 import us.ihmc.communication.crdt.CRDTBidirectionalEnumField;
 import us.ihmc.communication.crdt.CRDTInfo;
@@ -28,6 +29,7 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
    private final CRDTBidirectionalEnumField<Type> type;
 
    private final CounterConditionDefinition counter;
+   private final LLMConditionDefinition llm;
 
    private Type onDiskType;
 
@@ -37,7 +39,9 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
 
       type = new CRDTBidirectionalEnumField<>(this, Type.COUNTER);
 
+      // TODO: Do we create them all or only as needed?
       counter = new CounterConditionDefinition(this);
+      llm = new LLMConditionDefinition(this);
    }
 
    @Override
@@ -50,6 +54,7 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
       switch (type.getValue())
       {
          case COUNTER -> counter.saveToFile(jsonNode);
+         case LLM -> llm.saveToFile(jsonNode);
       }
    }
 
@@ -63,6 +68,7 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
       switch (type.getValue())
       {
          case COUNTER -> counter.loadFromFile(jsonNode);
+         case LLM -> llm.loadFromFile(jsonNode);
       }
    }
 
@@ -76,6 +82,7 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
       switch (type.getValue())
       {
          case COUNTER -> counter.setOnDiskFields();
+         case LLM -> llm.setOnDiskFields();
       }
    }
 
@@ -91,6 +98,7 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
          switch (type.getValue())
          {
             case COUNTER -> counter.undoAllNontopologicalChanges();
+            case LLM -> llm.undoAllNontopologicalChanges();
          }
       }
    }
@@ -105,6 +113,7 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
       switch (type.getValue())
       {
          case COUNTER -> unchanged &= !counter.hasChanges();
+         case LLM -> unchanged &= !llm.hasChanges();
       }
 
       return !unchanged;
@@ -119,6 +128,7 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
       switch (type.getValue())
       {
          case COUNTER -> counter.toMessage(message);
+         case LLM -> llm.toMessage(message);
       }
    }
 
@@ -131,6 +141,7 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
       switch (type.getValue())
       {
          case COUNTER -> counter.fromMessage(message);
+         case LLM -> llm.fromMessage(message);
       }
    }
 
@@ -142,5 +153,10 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
    public CounterConditionDefinition getCounter()
    {
       return counter;
+   }
+
+   public LLMConditionDefinition getLLM()
+   {
+      return llm;
    }
 }
