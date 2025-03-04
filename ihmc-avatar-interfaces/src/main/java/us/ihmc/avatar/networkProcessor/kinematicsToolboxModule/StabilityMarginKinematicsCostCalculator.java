@@ -39,9 +39,9 @@ public class StabilityMarginKinematicsCostCalculator
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
-   private static final double MAX_ARM_ORIENTATION_OFFSET = Math.toRadians(35.0);
-   private static final double MAX_CHEST_ORIENTATION_OFFSET = Math.toRadians(35.0);
-   private static final double MAX_PELVIS_ORIENTATION_OFFSET = Math.toRadians(35.0);
+   private static final double MAX_ARM_ORIENTATION_OFFSET = Math.toRadians(180.0); // Math.toRadians(35.0);
+   private static final double MAX_CHEST_ORIENTATION_OFFSET = Math.toRadians(180.0); // Math.toRadians(35.0);
+   private static final double MAX_PELVIS_ORIENTATION_OFFSET = Math.toRadians(180.0); // Math.toRadians(35.0);
 
    private static final boolean OVERRIDE_MESSAGE = true;
    private static final boolean ENABLE_POSTURE_OBJECTIVE = false;
@@ -80,7 +80,7 @@ public class StabilityMarginKinematicsCostCalculator
    private final CoMHeightOffsetCalculator comHeightOffsetCalculator;
 
    private final JointBasics[] controlledJoints;
-   private final DMatrixRMaj initialJointVelocity = new DMatrixRMaj(0);
+   private final DMatrixRMaj currentWholeBodyVelocity = new DMatrixRMaj(0);
 
    private final YoDouble desiredStabilityMarginVelocity = new YoDouble("desiredStabilityMarginVelocity", registry);
    private final YoDouble stabilityMarginWeight = new YoDouble("stabilityMarginWeight", registry);
@@ -88,6 +88,11 @@ public class StabilityMarginKinematicsCostCalculator
    private final YoDouble stabilityMarginHysteresis = new YoDouble("stabilityMarginHysteresis", registry);
    private final YoDouble alphaEnabled = new YoDouble("alphaEnabled", registry);
    private final YoDouble gain = new YoDouble("stabilityGain", registry);
+
+   private final double updateDT;
+   private final YoDouble previousStabilityMargin = new YoDouble("previousStabilityMargin", registry);
+   private final YoDouble expectedStabilityMarginVelocity = new YoDouble("expectedStabilityMarginVelocity", registry);
+   private final YoDouble actualStabilityMarginVelocity = new YoDouble("actualStabilityMarginVelocity", registry);
 
    private final DMatrixRMaj scaledStabilityGradient = new DMatrixRMaj(0);
    private final OrientationCalculator chestOrientationCalculator;
@@ -112,8 +117,9 @@ public class StabilityMarginKinematicsCostCalculator
       this.multiContactRegionCalculator = multiContactRegionCalculator;
       this.fullRobotModel = fullRobotModel;
       this.controlledJoints = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(fullRobotModel);
+      this.updateDT = updateDT;
       int dofs = MultiBodySystemTools.computeDegreesOfFreedom(controlledJoints);
-      initialJointVelocity.reshape(dofs, 1);
+      currentWholeBodyVelocity.reshape(dofs, 1);
 
       this.isUpperBodyLoadBearing = isUpperBodyLoadBearing;
       this.minStabilityMargin = minStabilityMargin;
@@ -206,6 +212,8 @@ public class StabilityMarginKinematicsCostCalculator
 
       integratedContactPointAdjustment.setToZero();
       alphaEnabled.set(0.0);
+
+      previousStabilityMargin.setToNaN();
    }
 
    public void update()
@@ -252,10 +260,21 @@ public class StabilityMarginKinematicsCostCalculator
       // always compute, for debugging
       stabilityGradientCalculator.computePostureAdjustment();
 
-      if (isEnabled.getValue() && isUpperBodyLoadBearing.getValue() && updateAlphaEnabled() > 0.0)
+      // Save current whole-body velocity
+      MultiBodySystemTools.extractJointsState(controlledJoints, JointStateType.VELOCITY, currentWholeBodyVelocity);
+
+      // update gradient confidence
+      if (!previousStabilityMargin.isNaN())
       {
-         // Save initial velocities and set to gradient whole-body velocity
-         MultiBodySystemTools.extractJointsState(controlledJoints, JointStateType.VELOCITY, initialJointVelocity);
+         double deltaMargin = multiContactRegionCalculator.getStabilityMargin() - previousStabilityMargin.getValue();
+         actualStabilityMarginVelocity.set(EuclidCoreTools.clamp(deltaMargin / updateDT, 0.6));
+         DMatrixRMaj stabilityMarginJacobian = stabilityGradientCalculator.getStabilityMarginGradient();
+         expectedStabilityMarginVelocity.set(CommonOps_DDRM.dot(currentWholeBodyVelocity, stabilityMarginJacobian));
+      }
+
+      boolean integrateRegargetedObjectives = isEnabled.getValue() && isUpperBodyLoadBearing.getValue() && updateAlphaEnabled() > 0.0;
+      if (integrateRegargetedObjectives)
+      {
          scaledStabilityGradient.set(stabilityGradientCalculator.getStabilityBoundaryGradient());
          CommonOps_DDRM.scale(EuclidCoreTools.square(alphaEnabled.getValue()) * gain.getValue(), scaledStabilityGradient);
 
@@ -267,10 +286,6 @@ public class StabilityMarginKinematicsCostCalculator
          pelvisOrientationOffsetCalculator.integrate();
          bracingHandOrientationOffsetCalculator.integrate();
          comHeightOffsetCalculator.integrate(scaledStabilityGradient);
-
-         // Reset to initial velocities
-         MultiBodySystemTools.insertJointsState(controlledJoints, JointStateType.VELOCITY, initialJointVelocity);
-         fullRobotModel.updateFrames();
       }
       else
       {
@@ -282,6 +297,13 @@ public class StabilityMarginKinematicsCostCalculator
          bracingHandOrientationOffsetCalculator.clear(alphaLeak);
          comHeightOffsetCalculator.clear(alphaLeak);
       }
+
+      // Reset to initial velocities
+      MultiBodySystemTools.insertJointsState(controlledJoints, JointStateType.VELOCITY, currentWholeBodyVelocity);
+      previousStabilityMargin.set(multiContactRegionCalculator.getStabilityMargin());
+
+      if (integrateRegargetedObjectives)
+         fullRobotModel.updateFrames();
    }
 
    private static void configureSelectionMatrix(SelectionMatrix3D selectionMatrix, Tuple3DReadOnly weight)

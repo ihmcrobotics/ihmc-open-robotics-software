@@ -252,6 +252,17 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
       boolean success = performUpdateForVertex(vertexIndexToUpdate);
       if (success)
          queryCounter.set((queryCounter.getValue() + 1) % DIRECTIONS_TO_OPTIMIZE);
+
+      if (hasSolvedWholeRegion())
+      { // do fast update for minimum edge
+         int vertexA = fromEuclidIndex(lowestMarginEdgeIndex.getValue());
+         int vertexB = fromEuclidIndex(feasibleRegion.getNextVertexIndex(lowestMarginEdgeIndex.getValue()));
+         if (vertexA != vertexIndexToUpdate)
+            performFixedBasisUpdateForVertex(vertexA);
+         if (vertexB != vertexIndexToUpdate)
+            performFixedBasisUpdateForVertex(vertexB);
+      }
+
       updateFeasibleRegion();
       return success;
    }
