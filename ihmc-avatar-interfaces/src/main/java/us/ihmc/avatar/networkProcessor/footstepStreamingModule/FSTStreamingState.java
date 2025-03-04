@@ -63,7 +63,7 @@ public class FSTStreamingState implements State
    private final YoDouble kpStride = new YoDouble("kpStride", registry);
    private final YoDouble defaultTurningThresholdDegrees = new YoDouble("defaultTurningThreshold", registry);
    private final YoDouble defaultTurnDegrees = new YoDouble("defaultTurn", registry);
-   private final YoDouble maxYawRotationDegrees = new YoDouble("maxYawRotation", registry);
+   private final YoDouble maxYawRotation = new YoDouble("maxYawRotation", registry);
    private final YoDouble kpYaw = new YoDouble("kpYaw", registry);
    private final YoDouble maxYawToStance = new YoDouble("maxYawToStance", registry);
    private final YoDouble minYawToStance = new YoDouble("minYawToStance", registry);
@@ -92,7 +92,7 @@ public class FSTStreamingState implements State
       kpStride.set(parameters.getKpStride());
       defaultTurningThresholdDegrees.set(parameters.getTurningThresholdDegrees());
       defaultTurnDegrees.set(parameters.getTurnDegrees());
-      maxYawRotationDegrees.set(parameters.getMaxYawRotationDegrees());
+      maxYawRotation.set(Math.toRadians(parameters.getMaxYawRotationDegrees()));
       kpYaw.set(parameters.getKpYaw());
       maxYawToStance.set(Math.toRadians(parameters.getMaxYawToStanceDegrees()));
       minYawToStance.set(Math.toRadians(parameters.getMinYawToStanceDegrees()));
@@ -421,15 +421,12 @@ public class FSTStreamingState implements State
       // Compute predicted rotation relative to stance frame
       double initialSwingTrackerYaw = initialTrackerTransform.getRotation().getYaw();
       double initialStanceTrackerYaw = initialTrackersTransform.get(side.getOppositeSide()).getRotation().getYaw();
-      LogTools.error(Math.toDegrees(yawRotationTracker));
       double newYawInStanceFrame = yawRotationTracker + (initialSwingTrackerYaw - initialStanceTrackerYaw);
-      LogTools.warn(Math.toDegrees(newYawInStanceFrame));
+
       // Clamp value of yaw according to limits relative to stance foot
       newYawInStanceFrame = side == RobotSide.LEFT ?
             Math.max(minYawToStance.getValue(), Math.min(maxYawToStance.getValue(), newYawInStanceFrame)) :
             Math.max(-maxYawToStance.getValue(), Math.min(minYawToStance.getValue(), newYawInStanceFrame));
-      LogTools.info(Math.toDegrees(newYawInStanceFrame));
-
       // Update yaw value based on prediction expressed in robot stance foot
       double newYaw = robotStanceFootTransformInWorld.getRotation().getYaw() + newYawInStanceFrame;
 
@@ -539,14 +536,14 @@ public class FSTStreamingState implements State
                              + (1.0 - landingFactor) * measuredYawRotation;
 
       // 4) Clamp to [0, maxYawRotation] pre-P-control
-      double desiredYawRotation = Math.max(0.0, Math.min(blendedYawRotation, Math.toRadians(maxYawRotationDegrees.getValue())));
+      double desiredYawRotation = Math.max(-maxYawRotation.getValue(), Math.min(blendedYawRotation, maxYawRotation.getValue()));
 
       // 5) Apply P-control
       double error = desiredYawRotation - currentYawEstimate;
       double newYawEstimate = currentYawEstimate + kpYaw.getValue() * error;
 
       // 6) Final clamp
-      newYawEstimate = Math.max(0.0, Math.min(newYawEstimate, Math.toRadians(maxYawRotationDegrees.getValue())));
+      newYawEstimate = Math.max(-maxYawRotation.getValue(), Math.min(newYawEstimate, maxYawRotation.getValue()));
       currentYawEstimate = newYawEstimate;
 
       return currentYawEstimate;

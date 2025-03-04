@@ -3,7 +3,6 @@ package us.ihmc.rdx.ui.vr;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.GoHomeMessage;
 import controller_msgs.msg.dds.HandLoadBearingMessage;
 import imgui.ImGui;
@@ -38,7 +37,6 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -53,7 +51,6 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
-import us.ihmc.rdx.ui.graphics.RDXMultiContactRegionGraphic;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.teleoperation.RDXHandConfigurationManager;
 import us.ihmc.rdx.ui.tools.KinematicsRecordReplay;
@@ -140,8 +137,6 @@ public class RDXVRKinematicsStreamingMode
    private boolean pausedForWalking = false;
    private final RDXVRFootstepPlacement footstepPlacer;
    private final ControllerStatusTracker controllerStatusTracker;
-
-   private ROS2Input<CapturabilityBasedStatus> capturabilityBasedStatus;
    private final HumanoidKinematicsToolboxConfigurationMessage ikHumanoidSolverConfigurationMessage = new HumanoidKinematicsToolboxConfigurationMessage();
 
    private final RDXHandConfigurationManager handManager;
@@ -205,7 +200,6 @@ public class RDXVRKinematicsStreamingMode
       headsetReferenceFrame = new MutableReferenceFrame(vrContext.getHeadset().getXForwardZUpHeadsetFrame());
 
       status = ros2ControllerHelper.subscribe(KinematicsStreamingToolboxModule.getOutputStatusTopic(syncedRobot.getRobotModel().getSimpleRobotName()));
-      capturabilityBasedStatus = ros2ControllerHelper.subscribeToController(CapturabilityBasedStatus.class);
 
       kinematicsRecorder = new KinematicsRecordReplay(sceneGraph, enabled);
       motionRetargeting = new RDXVRMotionRetargeting(syncedRobot, handDesiredControlFrames, trackerReferenceFrames, headsetReferenceFrame, retargetingParameters);
@@ -547,7 +541,6 @@ public class RDXVRKinematicsStreamingMode
 
             toolboxInputMessage.setUseCenterOfMassInput(true);
             toolboxInputMessage.getCenterOfMassInput().set(comMessage);
-            LogTools.error("COM CONTROL");
          }
          // ---------- End  Motion retargeting -------------
 
@@ -717,14 +710,7 @@ public class RDXVRKinematicsStreamingMode
                   ghostFullRobotModel.getElevator().updateFramesRecursively();
                }
             }
-            if (capturabilityBasedStatus.getMessageNotification().poll())
-            {
-               CapturabilityBasedStatus capturabilityBasedStatus = this.capturabilityBasedStatus.getMessageNotification().read();
-               for (RobotSide robotSide : RobotSide.values)
-               {
-                  handsAreLoaded.put(robotSide, HumanoidMessageTools.isHandLoadBearing(robotSide, capturabilityBasedStatus));
-               }
-            }
+
             if (ghostRobotGraphic.isActive())
                ghostRobotGraphic.update();
 
