@@ -6,8 +6,6 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.Axis2D;
 import us.ihmc.euclid.geometry.Line2D;
-import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -73,7 +71,7 @@ public class DetectedDoor
       detectionUUID = MessageTools.toUUID(message.getDetectionUuid());
       openingMechanism = new DoorOpeningMechanism(message.getOpeningMechanism());
       panelFrame = new MutableReferenceFrame();
-      panelFrame.update(transformToWorld -> transformToWorld.set(message.getPanelPose()));
+      panelFrame.update(transformToWorld -> MessageTools.toEuclid(message.getPanelTransformToWorld(), transformToWorld));
       panelPlanarRegion = PlanarRegionMessageConverter.convertToPlanarRegion(message.getPanelPlanarRegion());
       lastDetectionTime = MessageTools.toInstant(message.getLastDetectionTime());
 
@@ -98,11 +96,6 @@ public class DetectedDoor
       return openingMechanism;
    }
 
-   public Pose3DReadOnly getPanelPose()
-   {
-      return new Pose3D(panelFrame.getTransformToParent());
-   }
-
    public ReferenceFrame getPanelFrame()
    {
       return panelFrame.getReferenceFrame();
@@ -113,17 +106,17 @@ public class DetectedDoor
       return panelFrame.getTransformToParent();
    }
 
-   public boolean hasPanelPosition()
+   public boolean isPanelTranslationKnown()
    {
       return !getPanelTransformToWorld().getTranslation().containsNaN();
    }
 
-   public boolean hasPanelOrientation()
+   public boolean isPanelRotationKnown()
    {
       return !getPanelTransformToWorld().getRotation().containsNaN();
    }
 
-   public boolean hasPanelPose()
+   public boolean isPanelTransformKnown()
    {
       return !getPanelTransformToWorld().containsNaN();
    }
@@ -178,17 +171,17 @@ public class DetectedDoor
 
       if (detectedClass.contains(PANEL_STRING))
       {
-         if (hasPanelPosition())
-            return detection.getPose().getPosition().distanceSquared(getPanelPose().getPosition());
-         else if (openingMechanism.isPositionKnown())
-            return detection.getPose().getPosition().distanceSquared(openingMechanism.getPosition());
+         if (isPanelTranslationKnown())
+            return detection.getPose().getPosition().differenceNormSquared(getPanelTransformToWorld().getTranslation());
+         else if (openingMechanism.isTranslationKnown())
+            return detection.getPose().getPosition().differenceNormSquared(openingMechanism.getTransformToWorld().getTranslation());
       }
       else if (detectedClass.startsWith(DOOR_STRING))
       {
-         if (openingMechanism.isPositionKnown())
-            return detection.getPose().getPosition().distanceSquared(openingMechanism.getPosition());
-         else if (hasPanelPosition())
-            return detection.getPose().getPosition().distanceSquared(getPanelPose().getPosition());
+         if (openingMechanism.isTranslationKnown())
+            return detection.getPose().getPosition().differenceNormSquared(openingMechanism.getTransformToWorld().getTranslation());
+         else if (isPanelTranslationKnown())
+            return detection.getPose().getPosition().differenceNormSquared(getPanelTransformToWorld().getTranslation());
       }
 
       return Double.POSITIVE_INFINITY;
@@ -224,7 +217,7 @@ public class DetectedDoor
 
    /* package-private */ void updatePlanarRegion(PlanarRegionsList planarRegions)
    {
-      if (!openingMechanism.isPositionKnown() || planarRegions.isEmpty())
+      if (!(isPanelTranslationKnown() && openingMechanism.isTranslationKnown()) || planarRegions.isEmpty())
          return;
 
       PlanarRegion bestFitRegion = planarRegions.getPlanarRegionsAsList()                                   // Get planar regions as List<PlanarRegion>
@@ -254,14 +247,14 @@ public class DetectedDoor
    private boolean planarRegionDistanceToOpeningMechanismFilter(PlanarRegion planarRegion)
    {
       Point3DReadOnly planarRegionCentroid = PlanarRegionTools.getCentroid3DInWorld(planarRegion);
-      if (hasPanelPosition())
+      if (isPanelTranslationKnown())
       {
-         double distanceToPanel = planarRegionCentroid.distance(getPanelPose().getPosition());
+         double distanceToPanel = planarRegionCentroid.differenceNorm(getPanelTransformToWorld().getTranslation());
          return distanceToPanel < MAX_PLANAR_REGION_TO_PANEL_DISTANCE;
       }
-      else if (openingMechanism.isPositionKnown())
+      else if (openingMechanism.isTranslationKnown())
       {
-         double distanceToOpeningMechanism = planarRegionCentroid.distance(openingMechanism.getPosition());
+         double distanceToOpeningMechanism = planarRegionCentroid.differenceNorm(openingMechanism.getTransformToWorld().getTranslation());
          return distanceToOpeningMechanism < MAX_PLANAR_REGION_TO_OPENING_MECHANISM_DISTANCE;
       }
 
@@ -277,7 +270,7 @@ public class DetectedDoor
    {
       panelFrame.update(transformToWorld ->
       {
-         if (hasPanelPosition())
+         if (isPanelTranslationKnown())
             transformToWorld.getTranslation().interpolate(newPanelPosition, POSE_FILTER_ALPHA);
          else
             transformToWorld.getTranslation().set(newPanelPosition);
@@ -288,7 +281,7 @@ public class DetectedDoor
    {
       panelFrame.update(transformToWorld ->
       {
-         if (hasPanelOrientation())
+         if (isPanelRotationKnown())
             transformToWorld.getRotation().interpolate(newPanelOrientation, POSE_FILTER_ALPHA);
          else
             transformToWorld.getRotation().set(newPanelOrientation);
@@ -299,7 +292,7 @@ public class DetectedDoor
    {
       MessageTools.toMessage(detectionUUID, messageToPack.getDetectionUuid());
       openingMechanism.toMessage(messageToPack.getOpeningMechanism());
-      messageToPack.getPanelPose().set(getPanelPose());
+      MessageTools.toMessage(panelFrame.getTransformToParent(), messageToPack.getPanelTransformToWorld());
       messageToPack.getPanelPlanarRegion().set(PlanarRegionMessageConverter.convertToPlanarRegionMessage(panelPlanarRegion));
       MessageTools.toMessage(lastDetectionTime, messageToPack.getLastDetectionTime());
       MessageTools.toMessage(Objects.requireNonNullElse(openingMechanismFirstDetectionTime, Instant.EPOCH), messageToPack.getOpeningMechanismFirstDetectionTime());

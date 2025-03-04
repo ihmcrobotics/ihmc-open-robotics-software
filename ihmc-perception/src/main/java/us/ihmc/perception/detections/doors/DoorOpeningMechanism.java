@@ -1,14 +1,12 @@
 package us.ihmc.perception.detections.doors;
 
 import perception_msgs.msg.dds.DetectedDoorOpeningMechanismMessage;
-import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode.DoorSide;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 
@@ -29,7 +27,7 @@ public class DoorOpeningMechanism
       name = message.getNameAsString();
       side = DoorSide.values()[message.getSide()];
       frame = new MutableReferenceFrame();
-      frame.update(transformToWorld -> transformToWorld.set(message.getPose()));
+      frame.update(transformToWorld -> MessageTools.toEuclid(message.getTransformToWorld(), transformToWorld));
    }
 
    /* package-private */ void setName(String name)
@@ -50,7 +48,7 @@ public class DoorOpeningMechanism
    {
       frame.update(transformToWorld ->
       {
-         if (isPositionKnown())
+         if (isTranslationKnown())
             transformToWorld.getTranslation().interpolate(newPosition, alpha);
          else
             transformToWorld.getTranslation().set(newPosition);
@@ -61,7 +59,7 @@ public class DoorOpeningMechanism
    {
       frame.update(transformToWorld ->
       {
-         if (isOrientationKnown())
+         if (isRotationKnown())
             transformToWorld.getRotation().interpolate(orientation, alpha);
          else
             transformToWorld.getRotation().set(orientation);
@@ -83,34 +81,19 @@ public class DoorOpeningMechanism
       return name;
    }
 
-   public boolean isPositionKnown()
+   public boolean isTranslationKnown()
    {
       return !getTransformToWorld().getTranslation().containsNaN();
    }
 
-   public boolean isOrientationKnown()
+   public boolean isRotationKnown()
    {
       return !getTransformToWorld().getRotation().containsNaN();
    }
 
-   public boolean isPoseKnown()
+   public boolean isTransformKnown()
    {
       return !getTransformToWorld().containsNaN();
-   }
-
-   public Point3DReadOnly getPosition()
-   {
-      return getPose().getPosition();
-   }
-
-   public QuaternionReadOnly getOrientation()
-   {
-      return getPose().getOrientation();
-   }
-
-   public Pose3DReadOnly getPose()
-   {
-      return new Pose3D(getTransformToWorld());
    }
 
    public ReferenceFrame getFrame()
@@ -127,6 +110,6 @@ public class DoorOpeningMechanism
    {
       messageToPack.setName(name);
       messageToPack.setSide((byte) side.ordinal());
-      messageToPack.getPose().set(getPose());
+      MessageTools.toMessage(frame.getTransformToParent(), messageToPack.getTransformToWorld());
    }
 }

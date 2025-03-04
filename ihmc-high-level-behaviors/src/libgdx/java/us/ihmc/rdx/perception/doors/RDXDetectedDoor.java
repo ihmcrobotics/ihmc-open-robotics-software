@@ -6,8 +6,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import perception_msgs.msg.dds.DetectedDoorMessage;
-import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.perception.detections.doors.DetectedDoor;
 import us.ihmc.rdx.sceneManager.RDXRenderableProvider;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -47,16 +46,14 @@ public class RDXDetectedDoor implements RDXRenderableProvider
    {
       detection = detectedDoor;
 
-      Pose3DReadOnly openingMechanismPose = detection.getOpeningMechanism().getPose();
-      Point3DReadOnly openingMechanismPosition = openingMechanismPose.getPosition();
-      openingMechanismPositionSphere.transform.setTranslation(openingMechanismPosition.getX32(),
-                                                              openingMechanismPosition.getY32(),
-                                                              openingMechanismPosition.getZ32());
+      Tuple3DReadOnly openingMechanismTranslation = detection.getOpeningMechanism().getTransformToWorld().getTranslation();
+      openingMechanismPositionSphere.transform.setTranslation(openingMechanismTranslation.getX32(),
+                                                              openingMechanismTranslation.getY32(),
+                                                              openingMechanismTranslation.getZ32());
       openingMechanismFrameGraphic.setToReferenceFrame(detection.getOpeningMechanism().getFrame());
 
-      Pose3DReadOnly panelPose = detection.getPanelPose();
-      Point3DReadOnly panelPosition = panelPose.getPosition();
-      panelPositionSphere.transform.setTranslation(panelPosition.getX32(), panelPosition.getY32(), panelPosition.getZ32());
+      Tuple3DReadOnly panelTranslation = detection.getPanelTransformToWorld().getTranslation();
+      panelPositionSphere.transform.setTranslation(panelTranslation.getX32(), panelTranslation.getY32(), panelTranslation.getZ32());
       panelFrameGraphic.setToReferenceFrame(detection.getPanelFrame());
 
       planarRegionGraphic.generateMeshes(new PlanarRegionsList(detection.getPanelPlanarRegion()));

@@ -15,7 +15,7 @@ public class DetectedDoorListMessagePubSubType implements us.ihmc.pubsub.TopicDa
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "44fe7a70437a03c6ed176308eee3c50559b0dc718eb5368969844a3320b4ef1e";
+   		return "7d3fd76bdf851fa5bd90093b988884930ef98d03ba2b9a6d04653de3c02de564";
    }
    
    @Override

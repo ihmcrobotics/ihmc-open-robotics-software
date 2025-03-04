@@ -15,7 +15,7 @@ public class DetectedDoorMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "1f28bf94e8ea9d2e71e803e690eacabed2392c8e7b9c7923e3067ff0c11ca2ea";
+   		return "ceb40f5da3771d873f7583793683d3af333c24c2e551488232ff215050dca16b";
    }
    
    @Override
@@ -56,7 +56,7 @@ public class DetectedDoorMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
       current_alignment += perception_msgs.msg.dds.DetectedDoorOpeningMechanismMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += perception_msgs.msg.dds.PlanarRegionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -87,7 +87,7 @@ public class DetectedDoorMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
       current_alignment += perception_msgs.msg.dds.DetectedDoorOpeningMechanismMessagePubSubType.getCdrSerializedSize(data.getOpeningMechanism(), current_alignment);
 
-      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getPanelPose(), current_alignment);
+      current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getCdrSerializedSize(data.getPanelTransformToWorld(), current_alignment);
 
       current_alignment += perception_msgs.msg.dds.PlanarRegionMessagePubSubType.getCdrSerializedSize(data.getPanelPlanarRegion(), current_alignment);
 
@@ -111,7 +111,7 @@ public class DetectedDoorMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       ihmc_common_msgs.msg.dds.UUIDMessagePubSubType.write(data.getDetectionUuid(), cdr);
       perception_msgs.msg.dds.DetectedDoorOpeningMechanismMessagePubSubType.write(data.getOpeningMechanism(), cdr);
-      geometry_msgs.msg.dds.PosePubSubType.write(data.getPanelPose(), cdr);
+      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getPanelTransformToWorld(), cdr);
       perception_msgs.msg.dds.PlanarRegionMessagePubSubType.write(data.getPanelPlanarRegion(), cdr);
       ihmc_common_msgs.msg.dds.InstantMessagePubSubType.write(data.getLastDetectionTime(), cdr);
       ihmc_common_msgs.msg.dds.InstantMessagePubSubType.write(data.getOpeningMechanismFirstDetectionTime(), cdr);
@@ -126,7 +126,7 @@ public class DetectedDoorMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       ihmc_common_msgs.msg.dds.UUIDMessagePubSubType.read(data.getDetectionUuid(), cdr);	
       perception_msgs.msg.dds.DetectedDoorOpeningMechanismMessagePubSubType.read(data.getOpeningMechanism(), cdr);	
-      geometry_msgs.msg.dds.PosePubSubType.read(data.getPanelPose(), cdr);	
+      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getPanelTransformToWorld(), cdr);	
       perception_msgs.msg.dds.PlanarRegionMessagePubSubType.read(data.getPanelPlanarRegion(), cdr);	
       ihmc_common_msgs.msg.dds.InstantMessagePubSubType.read(data.getLastDetectionTime(), cdr);	
       ihmc_common_msgs.msg.dds.InstantMessagePubSubType.read(data.getOpeningMechanismFirstDetectionTime(), cdr);	
@@ -145,7 +145,7 @@ public class DetectedDoorMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
       ser.write_type_a("opening_mechanism", new perception_msgs.msg.dds.DetectedDoorOpeningMechanismMessagePubSubType(), data.getOpeningMechanism());
 
-      ser.write_type_a("panel_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getPanelPose());
+      ser.write_type_a("panel_transform_to_world", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getPanelTransformToWorld());
 
       ser.write_type_a("panel_planar_region", new perception_msgs.msg.dds.PlanarRegionMessagePubSubType(), data.getPanelPlanarRegion());
 
@@ -166,7 +166,7 @@ public class DetectedDoorMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
       ser.read_type_a("opening_mechanism", new perception_msgs.msg.dds.DetectedDoorOpeningMechanismMessagePubSubType(), data.getOpeningMechanism());
 
-      ser.read_type_a("panel_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getPanelPose());
+      ser.read_type_a("panel_transform_to_world", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getPanelTransformToWorld());
 
       ser.read_type_a("panel_planar_region", new perception_msgs.msg.dds.PlanarRegionMessagePubSubType(), data.getPanelPlanarRegion());
 

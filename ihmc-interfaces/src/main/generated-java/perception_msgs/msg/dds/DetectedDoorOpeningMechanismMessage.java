@@ -20,12 +20,12 @@ public class DetectedDoorOpeningMechanismMessage extends Packet<DetectedDoorOpen
             * Pose of the opening mechanism.
             * May contain NaN in the position and/or orientation values if unknown.
             */
-   public us.ihmc.euclid.geometry.Pose3D pose_;
+   public controller_msgs.msg.dds.RigidBodyTransformMessage transform_to_world_;
 
    public DetectedDoorOpeningMechanismMessage()
    {
       name_ = new java.lang.StringBuilder(255);
-      pose_ = new us.ihmc.euclid.geometry.Pose3D();
+      transform_to_world_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
    }
 
    public DetectedDoorOpeningMechanismMessage(DetectedDoorOpeningMechanismMessage other)
@@ -41,7 +41,7 @@ public class DetectedDoorOpeningMechanismMessage extends Packet<DetectedDoorOpen
 
       side_ = other.side_;
 
-      geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.pose_, pose_);
+      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.transform_to_world_, transform_to_world_);
    }
 
    public void setName(java.lang.String name)
@@ -79,9 +79,9 @@ public class DetectedDoorOpeningMechanismMessage extends Packet<DetectedDoorOpen
             * Pose of the opening mechanism.
             * May contain NaN in the position and/or orientation values if unknown.
             */
-   public us.ihmc.euclid.geometry.Pose3D getPose()
+   public controller_msgs.msg.dds.RigidBodyTransformMessage getTransformToWorld()
    {
-      return pose_;
+      return transform_to_world_;
    }
 
 
@@ -106,7 +106,7 @@ public class DetectedDoorOpeningMechanismMessage extends Packet<DetectedDoorOpen
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.side_, other.side_, epsilon)) return false;
 
-      if (!this.pose_.epsilonEquals(other.pose_, epsilon)) return false;
+      if (!this.transform_to_world_.epsilonEquals(other.transform_to_world_, epsilon)) return false;
 
       return true;
    }
@@ -124,7 +124,7 @@ public class DetectedDoorOpeningMechanismMessage extends Packet<DetectedDoorOpen
 
       if(this.side_ != otherMyClass.side_) return false;
 
-      if (!this.pose_.equals(otherMyClass.pose_)) return false;
+      if (!this.transform_to_world_.equals(otherMyClass.transform_to_world_)) return false;
 
       return true;
    }
@@ -139,8 +139,8 @@ public class DetectedDoorOpeningMechanismMessage extends Packet<DetectedDoorOpen
       builder.append(this.name_);      builder.append(", ");
       builder.append("side=");
       builder.append(this.side_);      builder.append(", ");
-      builder.append("pose=");
-      builder.append(this.pose_);
+      builder.append("transform_to_world=");
+      builder.append(this.transform_to_world_);
       builder.append("}");
       return builder.toString();
    }

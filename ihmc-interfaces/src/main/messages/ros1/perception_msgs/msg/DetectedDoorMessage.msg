@@ -8,7 +8,7 @@ perception_msgs/DetectedDoorOpeningMechanismMessage opening_mechanism
 
 # Panel pose
 # May contain NaN in the position and/or orientation values if unknown.
-geometry_msgs/Pose panel_pose
+controller_msgs/RigidBodyTransformMessage panel_transform_to_world
 
 # Planar region of the panel
 perception_msgs/PlanarRegionMessage panel_planar_region

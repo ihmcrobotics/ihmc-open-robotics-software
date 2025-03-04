@@ -71,8 +71,8 @@ public class DoorDetectionManager
       double radiusSquared = radius * radius;
       List<DetectedDoor> doorsInRange = detectedDoors.stream().filter(detectedDoor ->
       {
-         if (detectedDoor.getOpeningMechanism().isPositionKnown())
-            return detectedDoor.getOpeningMechanism().getPosition().distanceSquared(pointInWorld) < radiusSquared;
+         if (detectedDoor.getOpeningMechanism().isTranslationKnown())
+            return detectedDoor.getOpeningMechanism().getTransformToWorld().getTranslation().differenceNormSquared(pointInWorld) < radiusSquared;
 
          return false;
       }).toList();
@@ -89,8 +89,11 @@ public class DoorDetectionManager
    public synchronized DetectedDoor getClosestDoor(Point3DReadOnly pointInWorld)
    {
       return detectedDoors.stream()
-                          .filter(detectedDoor -> detectedDoor.getOpeningMechanism().isPositionKnown())
-                          .min(Comparator.comparingDouble(detectedDoor -> detectedDoor.getOpeningMechanism().getPosition().distanceSquared(pointInWorld)))
+                          .filter(detectedDoor -> detectedDoor.getOpeningMechanism().isTranslationKnown())
+                          .min(Comparator.comparingDouble(detectedDoor -> detectedDoor.getOpeningMechanism()
+                                                                                      .getTransformToWorld()
+                                                                                      .getTranslation()
+                                                                                      .differenceNormSquared(pointInWorld)))
                           .orElse(null);
    }
 

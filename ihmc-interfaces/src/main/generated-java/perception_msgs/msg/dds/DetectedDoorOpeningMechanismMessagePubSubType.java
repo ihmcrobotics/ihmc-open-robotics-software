@@ -15,7 +15,7 @@ public class DetectedDoorOpeningMechanismMessagePubSubType implements us.ihmc.pu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "abfa3a5c881dd2fba756be584f429168ebce0e819d29d6ea53cd5f1a25273aa4";
+   		return "02ac3ec78c1568b97467918714db29b451b98e92d926f9df38d74383fde687d9";
    }
    
    @Override
@@ -55,7 +55,7 @@ public class DetectedDoorOpeningMechanismMessagePubSubType implements us.ihmc.pu
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -75,7 +75,7 @@ public class DetectedDoorOpeningMechanismMessagePubSubType implements us.ihmc.pu
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getPose(), current_alignment);
+      current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getCdrSerializedSize(data.getTransformToWorld(), current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -89,7 +89,7 @@ public class DetectedDoorOpeningMechanismMessagePubSubType implements us.ihmc.pu
 
       cdr.write_type_9(data.getSide());
 
-      geometry_msgs.msg.dds.PosePubSubType.write(data.getPose(), cdr);
+      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getTransformToWorld(), cdr);
    }
 
    public static void read(perception_msgs.msg.dds.DetectedDoorOpeningMechanismMessage data, us.ihmc.idl.CDR cdr)
@@ -97,7 +97,7 @@ public class DetectedDoorOpeningMechanismMessagePubSubType implements us.ihmc.pu
       cdr.read_type_d(data.getName());	
       data.setSide(cdr.read_type_9());
       	
-      geometry_msgs.msg.dds.PosePubSubType.read(data.getPose(), cdr);	
+      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getTransformToWorld(), cdr);	
 
    }
 
@@ -106,7 +106,7 @@ public class DetectedDoorOpeningMechanismMessagePubSubType implements us.ihmc.pu
    {
       ser.write_type_d("name", data.getName());
       ser.write_type_9("side", data.getSide());
-      ser.write_type_a("pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getPose());
+      ser.write_type_a("transform_to_world", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToWorld());
 
    }
 
@@ -115,7 +115,7 @@ public class DetectedDoorOpeningMechanismMessagePubSubType implements us.ihmc.pu
    {
       ser.read_type_d("name", data.getName());
       data.setSide(ser.read_type_9("side"));
-      ser.read_type_a("pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getPose());
+      ser.read_type_a("transform_to_world", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToWorld());
 
    }
 

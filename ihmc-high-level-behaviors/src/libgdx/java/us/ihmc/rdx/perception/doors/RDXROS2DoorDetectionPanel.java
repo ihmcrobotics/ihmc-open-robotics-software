@@ -180,7 +180,7 @@ public class RDXROS2DoorDetectionPanel extends RDXPanel implements RDXRenderable
 
             if (ImGui.tableNextColumn()) // Opening Mechanism Pose Known
             {
-               boolean isKnown = detection.getOpeningMechanism().isPoseKnown();
+               boolean isKnown = detection.getOpeningMechanism().isTransformKnown();
                String text = isKnown ? "Known" : "Unknown";
                int color = isKnown ? Color.GREEN.toIntBits() : Color.RED.toIntBits();
                ImGui.textColored(color, "Pose " + text);
@@ -188,7 +188,7 @@ public class RDXROS2DoorDetectionPanel extends RDXPanel implements RDXRenderable
 
             if (ImGui.tableNextColumn()) // Panel Pose Known
             {
-               boolean isKnown = detection.hasPanelPose();
+               boolean isKnown = detection.isPanelTransformKnown();
                String text = isKnown ? "Known" : "Unknown";
                int color = isKnown ? Color.GREEN.toIntBits() : Color.RED.toIntBits();
                ImGui.textColored(color, "Pose " + text);
