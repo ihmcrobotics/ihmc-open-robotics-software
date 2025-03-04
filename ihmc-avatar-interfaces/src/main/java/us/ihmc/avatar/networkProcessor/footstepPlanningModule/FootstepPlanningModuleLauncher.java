@@ -81,22 +81,7 @@ public class FootstepPlanningModuleLauncher
     */
    public static FootstepPlanningModule createModule(DRCRobotModel robotModel)
    {
-      String moduleName = robotModel.getSimpleRobotName();
-
-      DefaultFootstepPlannerParametersBasics footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
-      SwingPlannerParametersBasics swingPlannerParameters = robotModel.getSwingPlannerParameters();
-      StepReachabilityData stepReachabilityData = robotModel.getStepReachabilityData();
-
-      WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
-      SideDependentList<ConvexPolygon2D> footPolygons = createFootPolygons(robotModel);
-
-      return new FootstepPlanningModule(moduleName,
-                                        robotModel.getAStarBodyPathPlannerParameters(),
-                                        footstepPlannerParameters,
-                                        swingPlannerParameters,
-                                        walkingControllerParameters,
-                                        footPolygons,
-                                        stepReachabilityData);
+      return createModule(robotModel, null);
    }
 
    /**
@@ -105,8 +90,17 @@ public class FootstepPlanningModuleLauncher
    public static FootstepPlanningModule createModule(DRCRobotModel robotModel, String suffix)
    {
       String moduleName = robotModel.getSimpleRobotName();
+      DefaultFootstepPlannerParametersBasics footstepPlannerParameters;
 
-      DefaultFootstepPlannerParametersBasics footstepPlannerParameters = robotModel.getFootstepPlannerParameters(suffix);
+      if (suffix != null)
+      {
+          footstepPlannerParameters = robotModel.getFootstepPlannerParameters(suffix);
+      }
+      else
+      {
+         footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
+      }
+
       SwingPlannerParametersBasics swingPlannerParameters = robotModel.getSwingPlannerParameters();
       StepReachabilityData stepReachabilityData = robotModel.getStepReachabilityData();
 

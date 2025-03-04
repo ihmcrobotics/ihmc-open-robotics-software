@@ -6,6 +6,7 @@ import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.QueuedFootstepStatusMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -278,11 +279,14 @@ public class ContinuousPlanner
 
    public void logFootStePlan()
    {
-      // In case logging footstep plans becomes a problem, we have this feature where we can not log plans if we want too
-      if (continuousHikingParameters.getLogFootstepPlans())
-      {
-         logger.logSession();
-      }
+      ThreadTools.startAThread(() ->
+                               {
+                                  // In case logging footstep plans becomes a problem, we have this feature where we can not log plans if we want too
+                                  if (continuousHikingParameters.getLogFootstepPlans())
+                                  {
+                                     logger.logSession();
+                                  }
+                               }, "Footstep Logger Thead");
    }
 
    public FootstepPlan generateMonteCarloFootstepPlan(SideDependentList<FramePose3D> goalPoses, HeightMapData heightMapData, TerrainMapData terrainMapData)

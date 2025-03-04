@@ -281,26 +281,21 @@ public class CollisionFreeSwingCalculator
 
       // see TwoWaypointSwingGenerator.initialize() for trajectoryTypes DEFAULT and OBSTACLE_CLEARANCE
       double[] defaultWaypointProportions = new double[] {0.15, 0.85};
-      double defaultSwingHeightFromStanceFoot = walkingControllerParameters.getSwingTrajectoryParameters().getDefaultSwingHeight();
+      double defaultSwingHeightFromStanceFoot = walkingControllerParameters.getSwingTrajectoryParameters().getDefaultSwingHeight() + 0.05;
 
+      double maxStepZ = Math.max(startOfSwingPose.getZ(), endOfSwingPose.getZ());
       for (int i = 0; i < 2; i++)
       {
          FramePoint3D waypoint = new FramePoint3D();
          waypoint.interpolate(startOfSwingPose.getPosition(), endOfSwingPose.getPosition(), defaultWaypointProportions[i]);
-         waypoint.addZ(defaultSwingHeightFromStanceFoot);
+         waypoint.setZ(maxStepZ + defaultSwingHeightFromStanceFoot);
          defaultWaypoints.add(waypoint);
       }
 
-      double zDifference = Math.abs(startOfSwingPose.getZ() - endOfSwingPose.getZ());
-      boolean obstacleClearance = zDifference > walkingControllerParameters.getSwingTrajectoryParameters().getMinHeightDifferenceForStepUpOrDown();
-      if (obstacleClearance)
-      {
-         double maxStepZ = Math.max(startOfSwingPose.getZ(), endOfSwingPose.getZ());
-         for (int i = 0; i < 2; i++)
-         {
-            defaultWaypoints.get(i).setZ(maxStepZ + defaultSwingHeightFromStanceFoot);
-         }
-      }
+//      for (int i = 0; i < 2; i++)
+//      {
+//         defaultWaypoints.get(i).setZ(maxStepZ + defaultSwingHeightFromStanceFoot);
+//      }
 
       positionTrajectoryGenerator.setEndpointConditions(startOfSwingPose.getPosition(), zeroVector, endOfSwingPose.getPosition(), zeroVector);
       positionTrajectoryGenerator.setEndpointWeights(infiniteWeight, infiniteWeight, infiniteWeight, infiniteWeight);
