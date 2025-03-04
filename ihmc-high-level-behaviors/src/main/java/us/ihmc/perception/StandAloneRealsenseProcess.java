@@ -1,6 +1,7 @@
 package us.ihmc.perception;
 
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.communication.ros2.ROS2TunedRigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.PerceptionAPI;
@@ -9,7 +10,6 @@ import us.ihmc.communication.ros2.ROS2DemandGraphNode;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapManager;
 import us.ihmc.perception.heightMap.TerrainMapData;
-import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.sensors.realsense.RealSenseConfiguration;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
@@ -30,16 +30,14 @@ public class StandAloneRealsenseProcess
                                                                                                    PerceptionAPI.D455_DEPTH_IMAGE);
 
    private final ROS2DemandGraphNode realsenseDemandNode;
-   private final ControllerFootstepQueueMonitor controllerFootstepQueueMonitor;
    private final ROS2DemandGraphNode realsensePublishDemandNode;
    private final ROS2Helper ros2Helper;
    private final ROS2SyncedRobotModel syncedRobot;
 
    private final RealSenseImageSensor d455Sensor;
-   private ImageSensorPublishThread d455PublishThread;
+   private final ImageSensorPublishThread d455PublishThread;
 
    private final ROS2DemandGraphNode heightMapDemandNode;
-   private final OpenCLManager openCLManager = new OpenCLManager();
    private RapidHeightMapUpdateThread heightMapUpdateThread;
 
    public StandAloneRealsenseProcess(ROS2Node ros2Node, ROS2Helper ros2Helper, ROS2SyncedRobotModel syncedRobot)
@@ -54,7 +52,6 @@ public class StandAloneRealsenseProcess
    {
       this.ros2Helper = ros2Helper;
       this.syncedRobot = syncedRobot;
-      this.controllerFootstepQueueMonitor = controllerFootstepQueueMonitor;
 
       realsensePublishDemandNode = new ROS2DemandGraphNode(ros2Node, PerceptionAPI.REQUEST_REALSENSE_PUBLICATION);
       heightMapDemandNode = new ROS2DemandGraphNode(ros2Node, PerceptionAPI.REQUEST_HEIGHT_MAP);
@@ -64,16 +61,23 @@ public class StandAloneRealsenseProcess
 
       d455Sensor = new RealSenseImageSensor(RealSenseConfiguration.D455_COLOR_720P_DEPTH_720P_30HZ);
 
-      if (syncedRobot != null)
-      {
-         d455Sensor.setSensorFrameSupplier(syncedRobot.getReferenceFrames()::getSteppingCameraFrame);
-         loopOnDemand(d455Sensor.getGrabThread(), realsenseDemandNode);
+      ROS2TunedRigidBodyTransform realsenseTunableTransform = ROS2TunedRigidBodyTransform.toBeTuned(ros2Helper,
+                                                                                                    PerceptionAPI.STEPPING_CAMERA_TO_PARENT_TUNING,
+                                                                                                    syncedRobot.getRobotModel()
+                                                                                                               .getSensorInformation()
+                                                                                                               .getSteppingCameraTransform());
 
-         d455PublishThread = new ImageSensorPublishThread(ros2Node, d455Sensor, D455_IMAGE_TOPIC_MAP);
-         loopOnDemand(d455PublishThread, realsensePublishDemandNode);
+      RepeatingTaskThread realsenseUpdateThread = new RepeatingTaskThread("SyncedRobotUpdate", realsenseTunableTransform::update);
+      realsenseUpdateThread.setFrequencyLimit(30.0);
+      realsenseUpdateThread.startRepeating();
 
-         initializeHeightMap(controllerFootstepQueueMonitor);
-      }
+      d455Sensor.setSensorFrameSupplier(syncedRobot.getReferenceFrames()::getSteppingCameraFrame);
+      loopOnDemand(d455Sensor.getGrabThread(), realsenseDemandNode);
+
+      d455PublishThread = new ImageSensorPublishThread(ros2Node, d455Sensor, D455_IMAGE_TOPIC_MAP);
+      loopOnDemand(d455PublishThread, realsensePublishDemandNode);
+
+      initializeHeightMap(controllerFootstepQueueMonitor);
    }
 
    private void initializeHeightMap(ControllerFootstepQueueMonitor controllerFootstepQueueMonitor)
