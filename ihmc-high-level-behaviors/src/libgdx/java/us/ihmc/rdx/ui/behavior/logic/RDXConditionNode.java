@@ -1,6 +1,8 @@
 package us.ihmc.rdx.ui.behavior.logic;
 
+import imgui.ImGui;
 import us.ihmc.behaviors.logic.ConditionNodeDefinition;
+import us.ihmc.behaviors.logic.ConditionNodeDefinition.Type;
 import us.ihmc.behaviors.logic.ConditionNodeState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -18,13 +20,28 @@ public class RDXConditionNode extends RDXLeafNode<ConditionNodeState, ConditionN
    {
       super(new ConditionNodeState(id, crdtInfo, saveFileDirectory));
 
-
+      counter = new RDXCounterCondition(state);
    }
 
    @Override
    protected void renderImGuiWidgetsInternal()
    {
-      switch (definition.getType().getValue())
+      Type currentType = definition.getType().getValue();
+      if (ImGui.beginCombo(labels.get("Type"), currentType.name()))
+      {
+         for (Type value : Type.values)
+         {
+            if (ImGui.selectable(value.name(), value == currentType))
+            {
+               definition.getType().setValue(value);
+            }
+         }
+
+         ImGui.endCombo();
+      }
+
+
+      switch (currentType)
       {
          case COUNTER -> counter.renderImGuiWidgetsInternal();
       }

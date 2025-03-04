@@ -12,6 +12,8 @@ public class ConditionNodeExecutor extends LeafNodeExecutor<ConditionNodeState, 
    public ConditionNodeExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(new ConditionNodeState(id, crdtInfo, saveFileDirectory));
+
+      counter = new CounterConditionExecutor(state);
    }
 
    @Override

@@ -20,11 +20,14 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
    public enum Type
    {
       COUNTER,
-      LLM,
+      LLM;
+
+      public static final Type[] values = values();
    }
 
    private final CRDTBidirectionalEnumField<Type> type;
-   private CounterConditionDefinition counter;
+
+   private final CounterConditionDefinition counter;
 
    private Type onDiskType;
 
@@ -33,6 +36,8 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
       super(crdtInfo, saveFileDirectory);
 
       type = new CRDTBidirectionalEnumField<>(this, Type.COUNTER);
+
+      counter = new CounterConditionDefinition(this);
    }
 
    @Override
@@ -40,7 +45,7 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
    {
       super.saveToFile(jsonNode);
 
-      jsonNode.put("type", type.getValue().name());
+      jsonNode.put("conditionType", type.getValue().name());
 
       switch (type.getValue())
       {
@@ -53,7 +58,7 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
    {
       super.loadFromFile(jsonNode);
 
-      type.setValue(Type.valueOf(jsonNode.get("type").textValue()));
+      type.setValue(Type.valueOf(jsonNode.get("conditionType").textValue()));
 
       switch (type.getValue())
       {

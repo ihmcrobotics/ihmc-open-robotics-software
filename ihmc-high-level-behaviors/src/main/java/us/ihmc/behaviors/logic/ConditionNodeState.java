@@ -13,6 +13,8 @@ public class ConditionNodeState extends LeafNodeState<ConditionNodeDefinition>
    public ConditionNodeState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(id, new ConditionNodeDefinition(crdtInfo, saveFileDirectory), crdtInfo);
+
+      counter = new CounterConditionState(definition);
    }
 
    public void toMessage(ConditionNodeStateMessage message)
