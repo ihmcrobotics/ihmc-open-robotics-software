@@ -64,7 +64,6 @@ public class PersistentDetection
    public void addDetection(InstantDetection newDetection)
    {
       detectionHistory.add(newDetection);
-      newDetection.setPersistentDetectionID(id);
 
       filteredDetectionFrame.update(transformToWorld -> transformToWorld.interpolate(new RigidBodyTransform(getMostRecentPose()), filterAlpha));
    }

@@ -35,10 +35,12 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -53,7 +55,7 @@ public class YOLOv8DetectionExecutor
    private final OpenCLDepthImageSegmenter segmenter = new OpenCLDepthImageSegmenter();
 
    private final Map<String, YOLOv8Model> availableModels = new LinkedHashMap<>();
-   private final Map<String, YOLOv8Model> enabledModels = new LinkedHashMap<>();
+   private final Set<String> enabledModels = new HashSet<>();
    private final Map<YOLOv8Model, YOLOv8DetectionList> yoloDetectionResults = new ConcurrentHashMap<>();
    private Iterator<YOLOv8Model> modelIterator;
 
@@ -168,12 +170,12 @@ public class YOLOv8DetectionExecutor
 
    public void enableModel(String modelName)
    {
-      enabledModels.put(modelName, availableModels.get(modelName));
+      enabledModels.add(modelName);
    }
 
    public void enableAllModels()
    {
-      enabledModels.putAll(availableModels);
+      enabledModels.addAll(availableModels.keySet());
    }
 
    public void disableModel(String modelName)
@@ -195,7 +197,7 @@ public class YOLOv8DetectionExecutor
       {
          YOLOv8Model model = modelIterator.next();
 
-         if (enabledModels.containsKey(model.getName()))
+         if (enabledModels.contains(model.getName()))
          {
             runYOLODetection(model, colorImage, depthImage);
             return;
@@ -253,6 +255,7 @@ public class YOLOv8DetectionExecutor
                                                                          new Size(2 * erosionKernelRadius + 1, 2 * erosionKernelRadius + 1),
                                                                          new Point(erosionKernelRadius, erosionKernelRadius)));
                RawImage erodedObjectMask = objectMask.replaceImage(erodedMask);
+               objectMask.release();
 
                // Get the segmented depth image
                RawImage segmentedDepth = segmenter.removeBackground(depthImage, erodedObjectMask);
@@ -264,19 +267,24 @@ public class YOLOv8DetectionExecutor
                // Get the centroid of the point cloud
                Point3D32 centroid = YOLOv8Tools.computeCentroidOfPointCloud(pointCloud, 128);
                if (centroid.containsNaN())
-                  return;
+               {
+                  erodedObjectMask.release();
+                  segmentedDepth.release();
+                  continue;
+               }
 
                // Create an instant detection from data
                YOLOv8InstantDetection instantDetection = new YOLOv8InstantDetection(detection.objectClass(),
                                                                                     detection.confidence(),
                                                                                     new Pose3D(centroid, new RotationMatrix()),
-                                                                                    objectMask.getAcquisitionTime(),
+                                                                                    erodedObjectMask.getAcquisitionTime(),
                                                                                     bgrImage,
                                                                                     erodedObjectMask,
                                                                                     depthImage,
                                                                                     pointCloud);
                yoloInstantDetections.add(instantDetection);
-               erodedMask.release();
+               erodedObjectMask.release();
+               segmentedDepth.release();
             }
 
             // Process callbacks

@@ -1,14 +1,11 @@
 package us.ihmc.perception.detections.centerPose;
 
-import perception_msgs.msg.dds.InstantDetectionMessage;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.perception.detections.InstantDetection;
 
 import java.time.Instant;
-import java.util.Arrays;
 
 public class CenterPoseInstantDetection extends InstantDetection
 {
@@ -39,30 +36,5 @@ public class CenterPoseInstantDetection extends InstantDetection
    public Point2D[] getBoundingBoxVertices2D()
    {
       return boundingBoxVertices2D;
-   }
-
-   @Override
-   public void toMessage(InstantDetectionMessage message)
-   {
-      super.toMessage(message);
-      for (int i = 0; i < 8; ++i)
-      {
-         message.getCenterPoseBoundingBoxVertices()[i].set(boundingBoxVertices[i]);
-         message.getCenterPoseBoundingBox2dVertices()[i].set(boundingBoxVertices2D[i]);
-      }
-   }
-
-   public static CenterPoseInstantDetection fromMessage(InstantDetectionMessage message)
-   {
-      Point3D[] boundingBoxVertices = message.getCenterPoseBoundingBoxVertices();
-      Point2D[] boundingBoxVertices2D = Arrays.stream(message.getCenterPoseBoundingBox2dVertices()).map(Point2D::new).toArray(Point2D[]::new);
-
-      return new CenterPoseInstantDetection(message.getDetectedObjectClassAsString(),
-                                            message.getDetectedObjectNameAsString(),
-                                            message.getConfidence(),
-                                            message.getObjectPose(),
-                                            MessageTools.toInstant(message.getDetectionTime()),
-                                            boundingBoxVertices,
-                                            boundingBoxVertices2D);
    }
 }

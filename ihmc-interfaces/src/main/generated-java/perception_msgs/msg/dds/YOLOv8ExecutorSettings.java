@@ -22,8 +22,8 @@ public class YOLOv8ExecutorSettings extends Packet<YOLOv8ExecutorSettings> imple
 
    public YOLOv8ExecutorSettings()
    {
-      models_to_run_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (8, "type_d");
-      model_settings_ = new us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.YOLOv8ModelSettings> (8, new perception_msgs.msg.dds.YOLOv8ModelSettingsPubSubType());
+      models_to_run_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (16, "type_d");
+      model_settings_ = new us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.YOLOv8ModelSettings> (16, new perception_msgs.msg.dds.YOLOv8ModelSettingsPubSubType());
 
    }
 
