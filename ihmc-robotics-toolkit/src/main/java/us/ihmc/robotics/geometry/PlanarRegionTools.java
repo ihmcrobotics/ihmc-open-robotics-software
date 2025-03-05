@@ -747,7 +747,7 @@ public class PlanarRegionTools
       return centroid;
    }
 
-   public static Point3DReadOnly getCentroid3DInWorld(PlanarRegion planarRegion)
+   public static Point3D getCentroid3DInWorld(PlanarRegion planarRegion)
    {
       Point2DReadOnly centroidInLocal = getCentroid2DInLocal(planarRegion);
       Point3D point3D = new Point3D(centroidInLocal);

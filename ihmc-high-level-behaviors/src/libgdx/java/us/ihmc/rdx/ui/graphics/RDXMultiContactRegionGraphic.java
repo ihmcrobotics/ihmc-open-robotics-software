@@ -22,22 +22,32 @@ import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.idl.IDLSequence.Object;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.rdx.mesh.MeshDataGeneratorMissing;
+import us.ihmc.rdx.mesh.RDXMeshGraphicTools;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionTools;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 
@@ -73,7 +83,7 @@ public class RDXMultiContactRegionGraphic implements RenderableProvider
    private final Vector3D point = new Vector3D();
    private final Vector3D normal = new Vector3D();
    private final Quaternion orientation = new Quaternion();
-   private final MeshDataHolder arrowMesh = MeshDataGeneratorMissing.Arrow(0.3);
+   private final RotationMatrix rotation = new RotationMatrix();
 
    private ModelInstance modelInstance;
    private Model lastModel;
@@ -171,7 +181,18 @@ public class RDXMultiContactRegionGraphic implements RenderableProvider
 
       if (normal.norm() > 0.01)
       {
-         meshBuilder.addMesh(arrowMesh, point, orientation, Color.RED);
+         double length = 0.07;
+         double radius = 0.004;
+         double cylinderToConeLengthRatio = 0.8;
+         double coneDiameterMultiplier = 1.8;
+         RDXMeshGraphicTools.drawArrow(meshBuilder,
+                                       point,
+                                       rotation,
+                                       length,
+                                       radius,
+                                       cylinderToConeLengthRatio,
+                                       coneDiameterMultiplier,
+                                       Color.RED);
       }
 
       generateModel();
@@ -183,40 +204,71 @@ public class RDXMultiContactRegionGraphic implements RenderableProvider
       FramePlanarRegionsListMessage planarRegionsMessage = latestPlanarRegionsMessage.getAndSet(null);
       if (planarRegionsMessage != null)
       {
-         FramePlanarRegionsList planarRegions = PlanarRegionMessageConverter.convertToFramePlanarRegionsList(planarRegionsMessage);
-         for (int i = 0; i < planarRegions.getPlanarRegionsList().getNumberOfPlanarRegions(); i++)
+         PlanarRegionsList planarRegions = PlanarRegionMessageConverter.convertToPlanarRegionsListInWorld(planarRegionsMessage);
+         PlanarRegion maxAreaRegion = null;
+         double maxArea = 0.0;
+
+         for (int i = 0; i < planarRegions.getNumberOfPlanarRegions(); i++)
          {
-            PlanarRegion region = planarRegions.getPlanarRegionsList().getPlanarRegion(i);
+            PlanarRegion region = planarRegions.getPlanarRegion(i);
 
             double area = region.getArea();
-            double areaThreshold = 0.15;
+            if (area > maxArea)
+            {
+               maxArea = area;
+               maxAreaRegion = region;
+            }
 
-            if (area < areaThreshold)
-               continue;
+//            double areaThreshold = 0.15;
+//
+//            if (area < areaThreshold)
+//               continue;
+//
+//            Vector3D normal = new Vector3D(region.getNormal());
+//            normal.applyTransform(sensorToWorldTransform);
+//
+//            double normalZ = normal.getZ();
+//            double pitch = Math.abs(Math.asin(normalZ));
+//            double pitchThreshold = Math.toRadians(9.0);
+//
+//            if (pitch < pitchThreshold)
+//               continue;
+//
+//            Point3D centroid = PlanarRegionTools.getCentroid3DInWorld(region);
+//            centroid.applyTransform(transform);
+//
+//            FramePoint3D position = new FramePoint3D(ReferenceFrame.getWorldFrame(), centroid);
+//            position.changeFrame(midFeetZUpFrame);
+//
+////            double xThresholdMin = 0.3;
+////            double xThresholdMax = 2.0;
+////            double yThreshold = 1.0;
+////            double zThresholdMin = 0.4;
+////
+////            if (position.getX() < xThresholdMin || position.getX() > xThresholdMax || position.getY() < -yThreshold || position.getY() > yThreshold || position.getZ() < zThresholdMin)
+////               continue;
+//
+//            position.changeFrame(ReferenceFrame.getWorldFrame());
+//            point.set(position);
+//
+//            this.normal.set(normal);
+//            EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(Axis3D.Z, normal, orientation);
+//
+//            FrameVector3D normalInMidFeet = new FrameVector3D(ReferenceFrame.getWorldFrame(), normal);
+//            normalInMidFeet.changeFrame(midFeetZUpFrame);
+//
+//            FramePoint3D pointInMidFeet = new FramePoint3D(ReferenceFrame.getWorldFrame(), point);
+//            pointInMidFeet.changeFrame(midFeetZUpFrame);
+//
+//            LogTools.info("Point in mid feet:  " + pointInMidFeet);
+//            LogTools.info("Normal in mid feet: " + normalInMidFeet);
+         }
 
-            double normalZ = region.getNormal().getZ();
-            double pitch = Math.abs(Math.asin(normalZ));
-            double pitchThreshold = Math.toRadians(9.0);
-
-            if (pitch < pitchThreshold)
-               continue;
-
-            FramePoint3D position = new FramePoint3D(ReferenceFrame.getWorldFrame(), region.getPoint());
-            position.changeFrame(midFeetZUpFrame);
-
-            double xThresholdMin = 0.3;
-            double xThresholdMax = 2.0;
-            double yThreshold = 1.0;
-            double zThresholdMin = 0.4;
-
-            if (position.getX() < xThresholdMin || position.getX() > xThresholdMax || position.getY() < -yThreshold || position.getY() > yThreshold || position.getZ() < zThresholdMin)
-               continue;
-
-            position.changeFrame(ReferenceFrame.getWorldFrame());
-            point.set(position);
-
-            normal.set(region.getNormal());
-            EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(Axis3D.Z, normal, orientation);
+         if (maxAreaRegion != null)
+         {
+            point.set(PlanarRegionTools.getCentroid3DInWorld(maxAreaRegion));
+            normal.set(maxAreaRegion.getNormal());
+            rotation.set(maxAreaRegion.getTransformToWorldCopy().getRotation());
          }
       }
 
@@ -224,7 +276,18 @@ public class RDXMultiContactRegionGraphic implements RenderableProvider
 
       if (normal.norm() > 0.01)
       {
-         meshBuilder.addMesh(arrowMesh, point, orientation, Color.RED);
+         double length = 0.07;
+         double radius = 0.004;
+         double cylinderToConeLengthRatio = 0.8;
+         double coneDiameterMultiplier = 1.8;
+         RDXMeshGraphicTools.drawArrow(meshBuilder,
+                                       point,
+                                       rotation,
+                                       length,
+                                       radius,
+                                       cylinderToConeLengthRatio,
+                                       coneDiameterMultiplier,
+                                       Color.RED);
       }
 
       generateModel();
