@@ -120,7 +120,11 @@ public class ReadyToPlanState implements State
 
       // Plan to the goal and log the plan
       continuousPlanner.planToGoal(goalPoses, heightMapData, terrainMapData);
-      continuousPlanner.logFootStePlan();
+
+      if (continuousHikingParameters.getStepPublisherEnabled())
+      {
+         continuousPlanner.logFootStePlan();
+      }
 
       if (commandMessage.get().getUseMonteCarloFootstepPlanner() || commandMessage.get().getUseMonteCarloPlanAsReference())
       {
