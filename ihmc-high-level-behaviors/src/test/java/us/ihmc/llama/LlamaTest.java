@@ -58,7 +58,37 @@ public class LlamaTest
       response = llama.generate("List the fruit we just discussed.");
       LogTools.info(response);
 
+      LogTools.info(llama.getContext());
+
       llama.destroy();
+   }
+
+   @Test
+   public void testLlama10Times()
+   {
+         llama_model_params model_params = llama_model_default_params();
+         model_params.n_gpu_layers(99);
+
+         llama_context_params ctx_params = llama_context_default_params();
+         ctx_params.n_ctx(2048);
+         ctx_params.n_batch(2048);
+
+         // initialize the sampler
+         llama_sampler smpl = llama_sampler_chain_init(llama_sampler_chain_default_params());
+         llama_sampler_chain_add(smpl, llama_sampler_init_min_p(0.05f, 1));
+         llama_sampler_chain_add(smpl, llama_sampler_init_temp(0.0f)); // 0 temp important for tests
+         llama_sampler_chain_add(smpl, llama_sampler_init_dist(LLAMA_DEFAULT_SEED));
+
+         Llama llama = new Llama(model_params, ctx_params, smpl);
+      for (int i = 0; i < 100; i++)
+      {
+
+         String response;
+         response = llama.generate("What is 2 + 2?");
+         LogTools.info(response);
+
+      }
+         llama.destroy();
    }
 
    @Test
