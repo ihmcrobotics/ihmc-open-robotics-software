@@ -26,7 +26,7 @@ mainDependencies {
    api("us.ihmc:euclid-shape:0.22.3")
    api("us.ihmc:euclid-geometry:0.22.3")
    api("us.ihmc:ihmc-graphics-description:0.26.2")
-   api("us.ihmc:ihmc-native-library-loader:2.0.3")
+   api("us.ihmc:ihmc-native-library-loader:2.0.4")
 }
 
 testDependencies {
