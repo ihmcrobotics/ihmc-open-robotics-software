@@ -3,12 +3,10 @@ package us.ihmc.llama;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacpp.Pointer;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.llamacpp.ggml_log_callback;
 import us.ihmc.llamacpp.library.LlamaCPPNativeLibrary;
 import us.ihmc.llamacpp.llama_batch;
-import us.ihmc.llamacpp.llama_chat_message;
 import us.ihmc.llamacpp.llama_context;
 import us.ihmc.llamacpp.llama_context_params;
 import us.ihmc.llamacpp.llama_model;
@@ -84,210 +82,162 @@ public class Llama
 
    public static final Path MODELS_DIRECTORY = IHMCCommonPaths.DOT_IHMC_DIRECTORY.resolve("llama-models");
    public static final Path MODEL_TO_USE = MODELS_DIRECTORY.resolve("Llama-3.2-1B-Instruct-Q8_0.gguf");
+   public static final int MAX_CONTEXT_SIZE = 10000;
 
-   private final llama_model_params model_params;
-   private final llama_context_params ctx_params;
-   private final llama_sampler smpl;
-   private llama_model model;
-   private llama_context ctx;
-   private llama_vocab vocab;
-   private BytePointer context_str;
-   private int prev_len = 0;
+   private final llama_model model;
+   private final llama_context context;
+   private final llama_vocab vocab;
+   private final llama_sampler sampler;
+   private String system = Llama.CHAT_WITH_LLAMA;
+   private final StringBuilder contextStringBuilder = new StringBuilder();
+   private final StringBuilder responseStringBuilder = new StringBuilder();
    private final Stopwatch stopwatch = new Stopwatch();
+   private final IntPointer tokens = new IntPointer(MAX_CONTEXT_SIZE);
+   private final BytePointer piece = new BytePointer(256);
 
-   private llama_chat_message messages = new llama_chat_message(100);
-   private int n_messages = 0;
-
-   public Llama(llama_model_params model_params, llama_context_params ctx_params, llama_sampler smpl)
+   public Llama()
    {
-      this.model_params = model_params;
-      this.ctx_params = ctx_params;
-      this.smpl = smpl;
+      llama_model_params modelParameters = llama_model_default_params();
+      modelParameters.n_gpu_layers(99);
 
-      model = llama_model_load_from_file(MODEL_TO_USE.toString(), model_params);
+      llama_context_params contextParameters = llama_context_default_params();
+      contextParameters.n_ctx(MAX_CONTEXT_SIZE);
+      contextParameters.n_batch(MAX_CONTEXT_SIZE);
+
+      sampler = llama_sampler_chain_init(llama_sampler_chain_default_params());
+      llama_sampler_chain_add(sampler, llama_sampler_init_min_p(0.05f, 1));
+      llama_sampler_chain_add(sampler, llama_sampler_init_temp(0.0f)); // 0 temp important for tests
+      llama_sampler_chain_add(sampler, llama_sampler_init_dist(LLAMA_DEFAULT_SEED));
+
+      model = llama_model_load_from_file(Llama.MODEL_TO_USE.toString(), modelParameters);
       vocab = llama_model_get_vocab(model);
-      ctx = llama_init_from_model(model, ctx_params);
-      context_str = new BytePointer(llama_n_ctx(ctx));
+      context = llama_init_from_model(model, contextParameters);
+
+      resetContext();
+   }
+
+   public void resetContext()
+   {
+      resetContext(system);
+   }
+
+   public void resetContext(String system)
+   {
+      this.system = system;
+
+      contextStringBuilder.delete(0, contextStringBuilder.length());
+      contextStringBuilder.append("""
+                                  <|start_header_id|>system<|end_header_id|>
+                                  %s<|eot_id|>
+                                  """.formatted(system));
+      llama_kv_cache_clear(context);
    }
 
    public String generate(String request)
    {
+      return generate(request, false);
+   }
+
+   private String generate(String request, boolean isRetry)
+   {
       stopwatch.start();
 
-      String tmpl = llama_model_chat_template(model, (String) null);
+      contextStringBuilder.append("""
+                                  <|start_header_id|>user<|end_header_id|>
+                                  %s
+                                  <|eot_id|>
+                                  <|start_header_id|>assistant<|end_header_id|>
+                                  """.formatted(request));
 
-      // add the user input to the message list and format it
-      push_back_message("user", request);
-      int new_len = llama_chat_apply_template(tmpl, messages, n_messages, true, context_str, (int) context_str.capacity());
-      if (new_len > context_str.capacity())
-      {
-         context_str = new BytePointer(new_len);
-         new_len = llama_chat_apply_template(tmpl, messages, n_messages, true, context_str, (int) context_str.capacity());
-      }
-      if (new_len < 0)
-      {
-         LogTools.error("Failed to apply the chat template");
-      }
+      String text = contextStringBuilder.toString();
+      boolean isFirst = llama_get_kv_cache_used_cells(context) == 0;
+      int numberOfTokens = llama_tokenize(vocab, text, text.length(), tokens, MAX_CONTEXT_SIZE, isFirst, true);
+      llama_batch batch = llama_batch_get_one(tokens, numberOfTokens);
 
-      if (prev_len >= new_len)
-      {
-         LogTools.error("Prev_len >= new_len");
-      }
-
-      String prompt = context_str.getString().substring(prev_len, new_len);
-
-      StringBuilder response_builder = new StringBuilder();
-
-      boolean is_first = llama_get_kv_cache_used_cells(ctx) == 0;
-
-      int n_prompt_tokens = -llama_tokenize(vocab, prompt, prompt.length(), (IntPointer) null, 0, is_first, true);
-      IntPointer prompt_tokens = new IntPointer(n_prompt_tokens);
-      if (llama_tokenize(vocab, prompt, prompt.length(), prompt_tokens, n_prompt_tokens, is_first, true) < 0)
-         LogTools.error("Failed to tokenize the prompt");
-
-      // prepare a batch for the prompt
-      llama_batch batch = llama_batch_get_one(prompt_tokens, n_prompt_tokens);
-
-      int new_token_id;
+      int nextSampledToken;
+      responseStringBuilder.delete(0, responseStringBuilder.length());
+      boolean contextSizeExceeded = false;
       while (true)
       {
          // check if we have enough space in the context to evaluate this batch
-         int n_ctx = llama_n_ctx(ctx);
-         int n_ctx_used = llama_get_kv_cache_used_cells(ctx);
-         if (n_ctx_used + batch.n_tokens() > n_ctx)
+         int usedKVCells = llama_get_kv_cache_used_cells(context);
+         if (usedKVCells + numberOfTokens > MAX_CONTEXT_SIZE)
          {
-            LogTools.error("Context size exceeded");
+            LogTools.error("Context size exceeded. usedKVCells: %d + numberOfTokens: %d > MAX_CONTEXT_SIZE: %d"
+                                 .formatted(usedKVCells, numberOfTokens, MAX_CONTEXT_SIZE));
+            contextSizeExceeded = true;
             break;
          }
 
-         if (llama_decode(ctx, batch) != 0)
-            LogTools.error("Failed to decode");
+         int result = llama_decode(context, batch);
+         if (result > 0)
+         {
+            LogTools.warn("Could not find a KV slot for the batch (try reducing the size of the batch or increase the context)");
+         }
+         else if (result < 0)
+         {
+            LogTools.error("Error decoding: %d. The KV cache state is restored to the state before this call", result);
+         }
 
-         // sample the next token
-         new_token_id = llama_sampler_sample(smpl, ctx, -1);
+         nextSampledToken = llama_sampler_sample(sampler, context, -1);
 
          // is it an end of generation?
-         if (llama_vocab_is_eog(vocab, new_token_id))
+         if (llama_vocab_is_eog(vocab, nextSampledToken))
          {
             break;
          }
 
          // convert the token to a string, print it and add it to the response
-         byte[] buf = new byte[256];
-         int n = llama_token_to_piece(vocab, new_token_id, buf, buf.length, 0, true);
-         if (n < 0)
+         int pieceLength = llama_token_to_piece(vocab, nextSampledToken, piece, (int) piece.capacity(), 0, true);
+         if (pieceLength < 0)
          {
             LogTools.error("Failed to convert token to piece");
          }
-         String piece = new String(buf, 0, n);
-         response_builder.append(piece);
+         piece.limit(pieceLength);
+         responseStringBuilder.append(piece.getString());
 
          // prepare the next batch with the sampled token
-         batch.token().put(0, new_token_id);
+         batch.token().put(0, nextSampledToken);
          batch.n_tokens(1);
       }
 
-      String response = response_builder.toString();
+      String response = responseStringBuilder.toString();
 
-      // add the response to the messages
-      push_back_message("assistant", response);
-      prev_len = llama_chat_apply_template(tmpl, messages, n_messages, false, (BytePointer) null, 0);
-      if (prev_len < 0)
-      {
-         LogTools.error("Failed to apply the chat template");
-      }
+      contextStringBuilder.append("""
+                                  %s
+                                  <|eot_id|>
+                                  """.formatted(response));
 
       double duration = stopwatch.totalElapsed();
       LogTools.info("Response generation took: %.5f seconds".formatted(duration));
 
+      if (contextSizeExceeded && !isRetry)
+      {
+         LogTools.warn("Resetting the context and trying again.");
+         resetContext();
+         response = generate(request, true);
+      }
+
       return response;
-   }
-
-   @Disabled // FIXME: Not working yet
-   public void addMessage(String role, String content)
-   {
-      String tmpl = llama_model_chat_template(model, (String) null);
-
-      // add the user input to the message list and format it
-      push_back_message(role, content);
-      int new_len = llama_chat_apply_template(tmpl, messages, n_messages, false, context_str, (int) context_str.capacity());
-      if (new_len > context_str.capacity())
-      {
-         context_str = new BytePointer(new_len);
-         new_len = llama_chat_apply_template(tmpl, messages, n_messages, false, context_str, (int) context_str.capacity());
-      }
-      if (new_len < 0)
-      {
-         LogTools.error("Failed to apply the chat template");
-      }
-   }
-
-   private void push_back_message(String role, String content)
-   {
-      if (messages.capacity() == n_messages)
-      {
-         LogTools.info("Allocating new messages");
-         llama_chat_message messages_new = new llama_chat_message((long) n_messages * 2);
-         for (int i = 0; i < n_messages; i++)
-            Pointer.memcpy(messages_new, messages, n_messages);
-         messages.close();
-         messages = messages_new;
-      }
-
-      llama_chat_message message = messages.getPointer(n_messages++);
-      message.role(new BytePointer(role));
-      message.content(new BytePointer(content));
-   }
-
-   @Deprecated // FIXME: Not working yet
-   public void clearContext()
-   {
-      context_str.close();
-      messages.close();
-      llama_sampler_free(smpl);
-      llama_free(ctx);
-      llama_model_free(model);
-
-      model = llama_model_load_from_file(MODEL_TO_USE.toString(), model_params);
-      vocab = llama_model_get_vocab(model);
-      ctx = llama_init_from_model(model, ctx_params);
-
-      context_str = new BytePointer(llama_n_ctx(ctx));
-      prev_len = 0;
-      messages = new llama_chat_message(100);
-      n_messages = 0;
    }
 
    public String getContext()
    {
-      return context_str.getString();
+      return contextStringBuilder.toString();
    }
 
    public void destroy()
    {
-      // free resources
-      context_str.close();
-      messages.close();
-      llama_sampler_free(smpl);
-      llama_free(ctx);
+      tokens.close();
+      piece.close();
+      llama_sampler_free(sampler);
+      llama_free(context);
       llama_model_free(model);
    }
 
    public static void main(String... args) throws IOException
    {
-      llama_model_params model_params = llama_model_default_params();
-      model_params.n_gpu_layers(99);
-
-      llama_context_params ctx_params = llama_context_default_params();
-      ctx_params.n_ctx(2048);
-      ctx_params.n_batch(2048);
-
-      llama_sampler smpl = llama_sampler_chain_init(llama_sampler_chain_default_params());
-      llama_sampler_chain_add(smpl, llama_sampler_init_min_p(0.05f, 1));
-      llama_sampler_chain_add(smpl, llama_sampler_init_temp(0.8f));
-      llama_sampler_chain_add(smpl, llama_sampler_init_dist(LLAMA_DEFAULT_SEED));
-
-      Llama llama = new Llama(model_params, ctx_params, smpl);
+      Llama llama = new Llama();
 
       BufferedReader reader = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
       boolean running = true;
@@ -302,7 +252,7 @@ public class Llama
          }
          else if (input.equalsIgnoreCase("clear"))
          {
-            llama.clearContext();
+            llama.resetContext();
          }
          else if (input.equalsIgnoreCase("context"))
          {
