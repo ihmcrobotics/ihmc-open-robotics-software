@@ -28,7 +28,7 @@ geometry_msgs/Quaternion current_orientation_in_world
 
 # Whether the current linear velocity is defined.
 bool has_current_velocity
-# The current linear velocity of the control frame's origin.
+# The current linear velocity of the tracker frame's origin.
 geometry_msgs/Vector3 current_linear_velocity_in_world
-# The current angular velocity of the control frame.
+# The current angular velocity of the tracker frame.
 geometry_msgs/Vector3 current_angular_velocity_in_world

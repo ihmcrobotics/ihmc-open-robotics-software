@@ -9,5 +9,11 @@ float64 robot_step_duration
 # Time elapsed since the robot has initiated this last step
 float64 robot_step_elapsed_time
 
+# Current swing foot side of the robot
+byte robot_swing_side 255
+
+# If the robot swing foot is landing. Foot is descending below max swing height
+bool is_robot_swing_foot_landing
+
 # The list of sides used as input for the toolbox to estimate footsteps for the robot
 toolbox_msgs/FootstepStreamingToolboxSideMessage[<=2] side

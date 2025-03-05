@@ -46,7 +46,6 @@ public class RDXVRFootstepPlacement
    private int footstepIndex = 0;
    private LocomotionParameters locomotionParameters;
    private double stepStartTime = -1.0;
-   private boolean steppingEndedEarlier = false;
 
    public RDXVRFootstepPlacement(RDXVRContext vrContext,
                                  ROS2SyncedRobotModel syncedRobot,
@@ -250,21 +249,10 @@ public class RDXVRFootstepPlacement
 
    public double getTimeElapsedAfterStep()
    {
-      if (steppingEndedEarlier)
-      {
-         // TODO add flag for step not ended earlier in message to FST and remove this. send message from RDXVRKinematicsStreamingMode
-         steppingEndedEarlier = false;
-         return getStepDuration();
-      }
-      else if (stepStartTime < 0.0)
+      if (stepStartTime < 0.0)
          return 0.0;
       else
          return (System.nanoTime() - stepStartTime) * 1.0e-9;
-   }
-
-   public void setEndOfStep()
-   {
-      steppingEndedEarlier = true;
    }
 
    public void reset()
@@ -273,6 +261,5 @@ public class RDXVRFootstepPlacement
       footstepBeingExternallyPlaced = null;
       handPlacedFootsteps.clear();
       stepStartTime = -1.0;
-      steppingEndedEarlier = false;
    }
 }

@@ -50,11 +50,11 @@ public class FootstepStreamingToolboxSideMessage extends Packet<FootstepStreamin
             */
    public boolean has_current_velocity_;
    /**
-            * The current linear velocity of the control frame's origin.
+            * The current linear velocity of the tracker frame's origin.
             */
    public us.ihmc.euclid.tuple3D.Vector3D current_linear_velocity_in_world_;
    /**
-            * The current angular velocity of the control frame.
+            * The current angular velocity of the tracker frame.
             */
    public us.ihmc.euclid.tuple3D.Vector3D current_angular_velocity_in_world_;
 
@@ -194,7 +194,7 @@ public class FootstepStreamingToolboxSideMessage extends Packet<FootstepStreamin
 
 
    /**
-            * The current linear velocity of the control frame's origin.
+            * The current linear velocity of the tracker frame's origin.
             */
    public us.ihmc.euclid.tuple3D.Vector3D getCurrentLinearVelocityInWorld()
    {
@@ -203,7 +203,7 @@ public class FootstepStreamingToolboxSideMessage extends Packet<FootstepStreamin
 
 
    /**
-            * The current angular velocity of the control frame.
+            * The current angular velocity of the tracker frame.
             */
    public us.ihmc.euclid.tuple3D.Vector3D getCurrentAngularVelocityInWorld()
    {

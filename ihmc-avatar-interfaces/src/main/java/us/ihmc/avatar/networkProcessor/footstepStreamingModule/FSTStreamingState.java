@@ -38,6 +38,8 @@ public class FSTStreamingState implements State
    private final SideDependentList<Double> maxFeetHeight = new SideDependentList<>(0.0, 0.0);
    private double robotStepDuration = 0.0;
    private double robotElapsedTimeCurrentStep = 0.0;
+   private RobotSide robotSwingSide;
+   private boolean robotSwingFootIsLanding = false;
    private double currentStrideEstimate;
    private double currentYawEstimate;
    private double velocitySum = 0.0;
@@ -64,6 +66,7 @@ public class FSTStreamingState implements State
    private final YoDouble kpDirection = new YoDouble("kpDirection", registry);
    private final YoDouble kpStride = new YoDouble("kpStride", registry);
    private final YoDouble strideVelocityScalingFactor = new YoDouble("strideVelocityScalingFactor", registry);
+   private final YoDouble yawVelocityScalingFactor = new YoDouble("yawVelocityScalingFactor", registry);
    private final YoDouble defaultTurningThresholdDegrees = new YoDouble("defaultTurningThreshold", registry);
    private final YoDouble defaultTurnDegrees = new YoDouble("defaultTurn", registry);
    private final YoDouble maxYawRotation = new YoDouble("maxYawRotation", registry);
@@ -95,6 +98,7 @@ public class FSTStreamingState implements State
       kpDirection.set(parameters.getKpDirection());
       kpStride.set(parameters.getKpStride());
       strideVelocityScalingFactor.set(parameters.getStrideVelocityScalingFactor());
+      yawVelocityScalingFactor.set(parameters.getYawVelocityScalingFactor());
       defaultTurningThresholdDegrees.set(parameters.getTurningThresholdDegrees());
       defaultTurnDegrees.set(parameters.getTurnDegrees());
       maxYawRotation.set(Math.toRadians(parameters.getMaxYawRotationDegrees()));
@@ -149,10 +153,12 @@ public class FSTStreamingState implements State
          {
             robotStepDuration = latestInput.getRobotStepDuration();
             robotElapsedTimeCurrentStep = latestInput.getRobotElapsedTimeCurrentStep();
-            LogTools.info("Timing: stepDuration: {}, elapsed: {}", robotStepDuration, robotElapsedTimeCurrentStep);
+            robotSwingSide = latestInput.getRobotSwingSide();
+            robotSwingFootIsLanding = latestInput.isRobotSwingFootLanding();
+
             if (robotElapsedTimeCurrentStep > robotStepDuration)
                robotElapsedTimeCurrentStep = robotStepDuration;
-
+            LogTools.info("Timing: stepDuration: {}, elapsed: {}, margin {}", robotStepDuration, robotElapsedTimeCurrentStep, footstepMarginTime.getValue());
             for (RobotSide side : RobotSide.values)
             {
                FootstepStreamingToolboxSideCommand sideCommand = latestInput.getInputFor(side);
@@ -264,8 +270,14 @@ public class FSTStreamingState implements State
                            }
                            else // Send adjustment
                            {
-                              // TODO add flag for step not ended earlier here. add in message
-                              if((robotElapsedTimeCurrentStep < robotStepDuration - footstepMarginTime.getValue()) && !latestAdjustmentSent)
+                              LogTools.info("side: {}, landing: {}", robotSwingSide, robotSwingFootIsLanding);
+                              LogTools.info("latestAdjustment: {}", latestAdjustmentSent);
+                              LogTools.info("Adjustment Condition: {}", (robotElapsedTimeCurrentStep < robotStepDuration - footstepMarginTime.getValue())
+                                                              && !latestAdjustmentSent
+                                                              && (robotSwingSide == side && !robotSwingFootIsLanding));
+                              if((robotElapsedTimeCurrentStep < robotStepDuration - footstepMarginTime.getValue())
+                                 && !latestAdjustmentSent
+                                 && !robotSwingFootIsLanding)
                               {
                                  FrameVector2D adjustedTranslationTrackerXY = new FrameVector2D(ReferenceFrame.getWorldFrame(), translationTracker.getX(), translationTracker.getY());
                                  double stride = defaultStride.getDoubleValue();
@@ -538,7 +550,8 @@ public class FSTStreamingState implements State
                                     double angularVelocity)
    {
       // 1) Basic raw yaw rotation estimate
-      double rawYawRotation = measuredYawRotation + getAverageAngularVelocity(angularVelocity) * (robotStepDuration - robotElapsedTimeCurrentStep);
+      double rawYawRotation = measuredYawRotation + yawVelocityScalingFactor.getValue() *
+                                                    getAverageAngularVelocity(angularVelocity) * (robotStepDuration - robotElapsedTimeCurrentStep);
 
       // 2) "Landing factor" from vertical motion
       //    Interpolation factor landingFactor in [0,1], where 1 => no reduction,

@@ -25,6 +25,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.NewMessageListener;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.ros2.ROS2NodeBuilder.SpecialTransportMode;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.thread.CloseableAndDisposable;
@@ -108,7 +109,7 @@ public abstract class ToolboxModule implements CloseableAndDisposable
       // We're creating the ROS2 node here, so we need to manage it.
       manageROS2Node = ros2Node == null;
       if (ros2Node == null)
-         ros2Node = new ROS2NodeBuilder().build("ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name));
+         ros2Node = new ROS2NodeBuilder().specialTransportMode(SpecialTransportMode.UDPV4_ONLY).build("ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name));
       this.ros2Node = ros2Node;
       // Disable the comms to prevent message recival while creating the toolbox.
       commandInputManager = new CommandInputManager(name, createListOfSupportedCommands());

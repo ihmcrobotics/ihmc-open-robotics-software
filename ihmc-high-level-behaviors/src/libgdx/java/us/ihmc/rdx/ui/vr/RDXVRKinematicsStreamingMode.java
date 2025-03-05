@@ -24,6 +24,7 @@ import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.Kinemati
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.avatar.sakeGripper.SakeHandPreset;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
+import us.ihmc.behaviors.tools.walkingController.SwingFootTracker;
 import us.ihmc.commons.UnitConversions;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.Throttler;
@@ -137,6 +138,7 @@ public class RDXVRKinematicsStreamingMode
    private boolean pausedForWalking = false;
    private final RDXVRFootstepPlacement footstepPlacer;
    private final ControllerStatusTracker controllerStatusTracker;
+   private final SwingFootTracker swingFootTracker;
    private final HumanoidKinematicsToolboxConfigurationMessage ikHumanoidSolverConfigurationMessage = new HumanoidKinematicsToolboxConfigurationMessage();
 
    private final RDXHandConfigurationManager handManager;
@@ -163,6 +165,7 @@ public class RDXVRKinematicsStreamingMode
       this.controllerStatusTracker = controllerStatusTracker;
       this.footstepPlacer = footstepPlacer;
       this.handManager = handManager;
+      this.swingFootTracker = new SwingFootTracker(syncedRobot, controllerStatusTracker);
    }
 
    public void create(boolean createToolbox)
@@ -203,7 +206,7 @@ public class RDXVRKinematicsStreamingMode
 
       kinematicsRecorder = new KinematicsRecordReplay(sceneGraph, enabled);
       motionRetargeting = new RDXVRMotionRetargeting(syncedRobot, handDesiredControlFrames, trackerReferenceFrames, headsetReferenceFrame, retargetingParameters);
-      footstepStreaming = new RDXVRFootstepStreaming(syncedRobot, ros2ControllerHelper, footstepPlacer);
+      footstepStreaming = new RDXVRFootstepStreaming(syncedRobot, ros2ControllerHelper, footstepPlacer, swingFootTracker);
 
       if (syncedRobot.getRobotModel().getSimpleRobotName().contains("Nadia"))
       {
@@ -559,7 +562,7 @@ public class RDXVRKinematicsStreamingMode
          else
             toolboxInputMessage.setStreamToController(kinematicsRecorder.isReplaying());
 
-         if (toolboxInputStreamRateLimiter.run(streamPeriod))
+         if (toolboxInputStreamRateLimiter.run(streamPeriod) && !pausedForWalking)
          {
             ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputToolboxConfigurationTopic(syncedRobot.getRobotModel().getSimpleRobotName()), ikSolverConfigurationMessage);
             ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputCommandTopic(syncedRobot.getRobotModel().getSimpleRobotName()), toolboxInputMessage);
@@ -714,6 +717,7 @@ public class RDXVRKinematicsStreamingMode
             if (ghostRobotGraphic.isActive())
                ghostRobotGraphic.update();
 
+            swingFootTracker.update();
             footstepStreaming.processToolboxOutput();
             // Stepping with ankle trackers pauses streaming until walking is done
             if (!controllerStatusTracker.isWalking())
@@ -728,6 +732,7 @@ public class RDXVRKinematicsStreamingMode
                      streamToController.set(false);
                   }
                   pausedForWalking = true;
+                  sleepToolbox();
                   visualizeIKPreviewGraphic(false);
                   footstepStreaming.getReadyToStepNotification().clear();
                   LogTools.warn("Stepping from VR");
@@ -749,7 +754,6 @@ public class RDXVRKinematicsStreamingMode
             if (pausedForWalking && controllerStatusTracker.getFinishedWalkingNotification().poll())
             {
                reintializingToolbox = true;
-               footstepStreaming.setEndOfStep(); // communicat end of step as it might have ended earlier than expected
             }
             else if (pausedForWalking && reintializingToolbox)
             {

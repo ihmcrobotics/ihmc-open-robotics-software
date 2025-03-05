@@ -5,6 +5,7 @@ import toolbox_msgs.msg.dds.FootstepStreamingToolboxOutputStatus;
 import toolbox_msgs.msg.dds.FootstepStreamingToolboxSideMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepStreamingModule.FootstepStreamingToolboxModule;
+import us.ihmc.behaviors.tools.walkingController.SwingFootTracker;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -27,6 +28,7 @@ public class RDXVRFootstepStreaming
    private final ROS2Input<FootstepStreamingToolboxOutputStatus> status;
    private final ROS2SyncedRobotModel syncedRobot;
    private final RDXVRFootstepPlacement footstepPlacer;
+   private final SwingFootTracker swingFootTracker;
    private final SideDependentList<ReferenceFrame> ankleTrackerFrames = new SideDependentList<>();
    private final SideDependentList<SpatialVector> ankleTrackerVelocities = new SideDependentList<>();
    private final SideDependentList<Long> ankleTrackerTimestamps = new SideDependentList<>();
@@ -39,13 +41,17 @@ public class RDXVRFootstepStreaming
     * @param syncedRobot the synchronized robot model
     * @param footstepPlacer the footstep placer for manual footstep placement
     */
-   public RDXVRFootstepStreaming(ROS2SyncedRobotModel syncedRobot, ROS2Helper ros2Helper, RDXVRFootstepPlacement footstepPlacer)
+   public RDXVRFootstepStreaming(ROS2SyncedRobotModel syncedRobot,
+                                 ROS2Helper ros2Helper,
+                                 RDXVRFootstepPlacement footstepPlacer,
+                                 SwingFootTracker swingFootTracker)
    {
       this.syncedRobot = syncedRobot;
       this.footstepPlacer = footstepPlacer;
       this.ros2Helper = ros2Helper;
+      this.swingFootTracker = swingFootTracker;
 
-      footstepStreamingToolbox = new FootstepStreamingToolboxModule(syncedRobot.getRobotModel(), true);
+      footstepStreamingToolbox = new FootstepStreamingToolboxModule(syncedRobot.getRobotModel(), false);
       status = ros2Helper.subscribe(FootstepStreamingToolboxModule.getOutputStatusTopic(syncedRobot.getRobotModel().getSimpleRobotName()));
    }
 
@@ -61,6 +67,9 @@ public class RDXVRFootstepStreaming
          FootstepStreamingToolboxInputMessage toolboxInputMessage = new FootstepStreamingToolboxInputMessage();
          toolboxInputMessage.setRobotStepDuration(footstepPlacer.getStepDuration());
          toolboxInputMessage.setRobotStepElapsedTime(footstepPlacer.getTimeElapsedAfterStep());
+         toolboxInputMessage.setRobotSwingSide(swingFootTracker.getSide().toByte());
+         toolboxInputMessage.setIsRobotSwingFootLanding(swingFootTracker.isLanding());
+
          for (RobotSide side : RobotSide.values)
          {
             if (ankleTrackerFrames.get(side) != null)
@@ -147,11 +156,6 @@ public class RDXVRFootstepStreaming
    public void step(boolean activeAdjustment)
    {
       footstepPlacer.sendStep(activeAdjustment);
-   }
-
-   public void setEndOfStep()
-   {
-      footstepPlacer.setEndOfStep();
    }
 
    /**

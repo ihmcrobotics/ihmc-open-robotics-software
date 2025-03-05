@@ -36,7 +36,7 @@ public class RDXVRModeManager
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
-   private RDXVRMode mode = RDXVRMode.INPUTS_DISABLED;
+   private RDXVRMode mode = RDXVRMode.WHOLE_BODY_IK_STREAMING;
    private RDXVRFootstepPlacement footstepPlacer;
    @Nullable
    private RDXVRKinematicsStreamingMode kinematicsStreamingMode;

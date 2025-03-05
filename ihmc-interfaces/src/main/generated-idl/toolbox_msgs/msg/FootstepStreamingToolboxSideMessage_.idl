@@ -61,11 +61,11 @@ module toolbox_msgs
          */
         boolean has_current_velocity;
         /**
-         * The current linear velocity of the control frame's origin.
+         * The current linear velocity of the tracker frame's origin.
          */
         geometry_msgs::msg::dds::Vector3 current_linear_velocity_in_world;
         /**
-         * The current angular velocity of the control frame.
+         * The current angular velocity of the tracker frame.
          */
         geometry_msgs::msg::dds::Vector3 current_angular_velocity_in_world;
       };

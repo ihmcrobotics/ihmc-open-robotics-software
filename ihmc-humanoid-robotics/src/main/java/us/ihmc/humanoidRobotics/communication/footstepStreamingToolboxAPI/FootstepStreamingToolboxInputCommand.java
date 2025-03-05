@@ -5,6 +5,7 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.robotics.robotSide.RobotSide;
 
+import java.awt.*;
 import java.util.List;
 
 public class FootstepStreamingToolboxInputCommand implements Command<FootstepStreamingToolboxInputCommand, FootstepStreamingToolboxInputMessage>
@@ -12,6 +13,8 @@ public class FootstepStreamingToolboxInputCommand implements Command<FootstepStr
    private long sequenceId;
    private double robotStepDuration;
    private double robotElapsedTimeCurrentStep;
+   private RobotSide robotSwingSide;
+   private boolean isRobotSwingFootLanding;
    private final RecyclingArrayList<FootstepStreamingToolboxSideCommand> inputs = new RecyclingArrayList<>(FootstepStreamingToolboxSideCommand::new);
 
    @Override
@@ -21,6 +24,8 @@ public class FootstepStreamingToolboxInputCommand implements Command<FootstepStr
       inputs.clear();
       robotStepDuration = 0.0;
       robotElapsedTimeCurrentStep = 0.0;
+      robotSwingSide = RobotSide.LEFT;
+      isRobotSwingFootLanding = false;
    }
 
    @Override
@@ -32,6 +37,8 @@ public class FootstepStreamingToolboxInputCommand implements Command<FootstepStr
          inputs.add().set(other.inputs.get(i));
       robotStepDuration = other.robotStepDuration;
       robotElapsedTimeCurrentStep = other.robotElapsedTimeCurrentStep;
+      robotSwingSide = other.robotSwingSide;
+      isRobotSwingFootLanding = other.isRobotSwingFootLanding;
    }
 
    @Override
@@ -43,6 +50,8 @@ public class FootstepStreamingToolboxInputCommand implements Command<FootstepStr
          inputs.add().setFromMessage(message.getSide().get(i));
       robotStepDuration = message.getRobotStepDuration();
       robotElapsedTimeCurrentStep = message.getRobotStepElapsedTime();
+      robotSwingSide = RobotSide.fromByte(message.getRobotSwingSide());
+      isRobotSwingFootLanding = message.getIsRobotSwingFootLanding();
    }
 
    public void removeInput(int index)
@@ -93,6 +102,16 @@ public class FootstepStreamingToolboxInputCommand implements Command<FootstepStr
    public double getRobotElapsedTimeCurrentStep()
    {
       return robotElapsedTimeCurrentStep;
+   }
+
+   public RobotSide getRobotSwingSide()
+   {
+      return robotSwingSide;
+   }
+
+   public boolean isRobotSwingFootLanding()
+   {
+      return isRobotSwingFootLanding;
    }
 
    @Override
