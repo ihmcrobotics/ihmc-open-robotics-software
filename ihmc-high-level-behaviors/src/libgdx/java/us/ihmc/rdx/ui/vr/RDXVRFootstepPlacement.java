@@ -14,7 +14,6 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelLoader;

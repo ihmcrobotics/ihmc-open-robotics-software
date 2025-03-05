@@ -63,6 +63,7 @@ public class FSTStreamingState implements State
    private final YoDouble minDistanceToStance = new YoDouble("minDistanceToStance", registry);
    private final YoDouble kpDirection = new YoDouble("kpDirection", registry);
    private final YoDouble kpStride = new YoDouble("kpStride", registry);
+   private final YoDouble strideVelocityScalingFactor = new YoDouble("strideVelocityScalingFactor", registry);
    private final YoDouble defaultTurningThresholdDegrees = new YoDouble("defaultTurningThreshold", registry);
    private final YoDouble defaultTurnDegrees = new YoDouble("defaultTurn", registry);
    private final YoDouble maxYawRotation = new YoDouble("maxYawRotation", registry);
@@ -93,6 +94,7 @@ public class FSTStreamingState implements State
       minDistanceToStance.set(parameters.getMinDistanceToStance());
       kpDirection.set(parameters.getKpDirection());
       kpStride.set(parameters.getKpStride());
+      strideVelocityScalingFactor.set(parameters.getStrideVelocityScalingFactor());
       defaultTurningThresholdDegrees.set(parameters.getTurningThresholdDegrees());
       defaultTurnDegrees.set(parameters.getTurnDegrees());
       maxYawRotation.set(Math.toRadians(parameters.getMaxYawRotationDegrees()));
@@ -239,8 +241,17 @@ public class FSTStreamingState implements State
 
                            if (stableCount >= stabilityIterations.getIntegerValue())
                            {
-                              reset(side, currentTrackerTransform);
+                              if (!latestAdjustmentSent)
+                              {
+                                 FootstepStreamingToolboxOutputStatus outputStatus = new FootstepStreamingToolboxOutputStatus();
+                                 outputStatus.setRobotSide(side.toByte());
+                                 outputStatus.setAdjustmentFootstep(true);
+                                 outputStatus.setLastAdjustment(true);
+                                 tools.getStatusOutputManager().reportStatusMessage(outputStatus);
+                                 LogTools.warn("Sent last footstep adjustment {}", side);
+                              }
 
+                              reset(side, currentTrackerTransform);
                               LogTools.error("User completed stepping with {}", side);
                            }
                         }
@@ -287,7 +298,7 @@ public class FSTStreamingState implements State
                                  tools.getStatusOutputManager().reportStatusMessage(outputStatus);
                                  LogTools.warn("Sent footstep adjustment {}", side);
                               }
-                              else
+                              else if (!latestAdjustmentSent)
                               {
                                  // Do not update direction any further.
                                  // Just keep the desired direction as is
@@ -297,6 +308,7 @@ public class FSTStreamingState implements State
                                  outputStatus.setLastAdjustment(true);
                                  tools.getStatusOutputManager().reportStatusMessage(outputStatus);
                                  latestAdjustmentSent = true;
+                                 LogTools.warn("Sent last footstep adjustment {}", side);
                               }
                            }
                         }
@@ -477,8 +489,8 @@ public class FSTStreamingState implements State
    {
 
       // 1) Basic horizontal-based raw stride estimate
-      double rawStride = measuredHorizontalDistance + getAverageHorizontalVelocity(linearVelocity) * (robotStepDuration - robotElapsedTimeCurrentStep);
-
+      double rawStride = measuredHorizontalDistance + strideVelocityScalingFactor.getValue() *
+                                                      getAverageHorizontalVelocity(linearVelocity) * (robotStepDuration - robotElapsedTimeCurrentStep);
       // 2) "Landing factor" from vertical motion
       //    If the foot is descending (verticalVel < 0), we reduce the stride.
       //    One approach is an interpolation factor landingFactor in [0,1], where 1 => no reduction,

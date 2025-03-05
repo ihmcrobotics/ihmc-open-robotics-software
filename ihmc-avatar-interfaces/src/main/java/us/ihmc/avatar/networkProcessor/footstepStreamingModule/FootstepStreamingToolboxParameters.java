@@ -63,6 +63,11 @@ public class FootstepStreamingToolboxParameters
     */
    private double kpStride;
    /**
+    * Scaling factor for horizontal velocity of trackers used to estimate the final stride of the robot.
+    * Takes into account the different rapidity of motion between human and robot
+    */
+   private double strideVelocityScalingFactor;
+   /**
     * Proportional gain for yaw rotation control
     */
    private double kpYaw;
@@ -104,7 +109,7 @@ public class FootstepStreamingToolboxParameters
       timeThresholdForSleeping = 3.0;
 
       computeFromStance = true;
-      footstepMarginTime = 0.1;
+      footstepMarginTime = 0.3;
 
       // Step threshold of 5cm and lift of 2cm, seem to be too conservative. Step is identified after ~0.3s. Too long considering that a step lasts ~0.57s
       // Step threshold of 2cm and lift of 1cm seem to work great!
@@ -119,6 +124,7 @@ public class FootstepStreamingToolboxParameters
       maxStride = 0.6;
       kpDirection = 0.0;
       kpStride = 0.5;
+      strideVelocityScalingFactor = 0.8;
 
       turningThreshold = 12;
       turnDegrees = 33.3;
@@ -179,6 +185,11 @@ public class FootstepStreamingToolboxParameters
    public double getKpStride()
    {
       return kpStride;
+   }
+
+   public double getStrideVelocityScalingFactor()
+   {
+      return strideVelocityScalingFactor;
    }
 
    public double getKpYaw()
