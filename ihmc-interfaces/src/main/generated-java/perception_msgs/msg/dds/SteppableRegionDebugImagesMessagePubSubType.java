@@ -89,11 +89,11 @@ public class SteppableRegionDebugImagesMessagePubSubType implements us.ihmc.pubs
    {
       if(data.getSteppabilityImages().size() <= 10)
       cdr.write_type_e(data.getSteppabilityImages());else
-          throw new RuntimeException("steppability_images field exceeds the maximum length");
+          throw new RuntimeException("steppability_images field exceeds the maximum length: %d > %d".formatted(data.getSteppabilityImages().size(), 10));
 
       if(data.getRegionImages().size() <= 10)
       cdr.write_type_e(data.getRegionImages());else
-          throw new RuntimeException("region_images field exceeds the maximum length");
+          throw new RuntimeException("region_images field exceeds the maximum length: %d > %d".formatted(data.getRegionImages().size(), 10));
 
    }
 

@@ -141,7 +141,7 @@ public class FootstepDataListMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
       if(data.getFootstepDataList().size() <= 50)
       cdr.write_type_e(data.getFootstepDataList());else
-          throw new RuntimeException("footstep_data_list field exceeds the maximum length");
+          throw new RuntimeException("footstep_data_list field exceeds the maximum length: %d > %d".formatted(data.getFootstepDataList().size(), 50));
 
       cdr.write_type_9(data.getExecutionTiming());
 

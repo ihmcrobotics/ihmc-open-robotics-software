@@ -25,13 +25,13 @@ import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.imageMessage.CompressionType;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.opencv.OpenCVTools;
-import us.ihmc.ros2.ROS2Publisher;
-import us.ihmc.sensors.realsense.RealSenseDevice;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
+import us.ihmc.sensors.realsense.RealSenseDevice;
 
 import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
@@ -265,20 +265,32 @@ public class PerceptionMessageTools
    {
       int centerIndex = HeightMapTools.computeCenterIndex(widthInMeters, cellSizeInMeters);
       int cellsPerAxis = 2 * centerIndex + 1;
+      int totalCells = cellsPerAxis * cellsPerAxis;
 
       heightMapDataToPack.setGridCenter(gridCenter.getX(), gridCenter.getY());
 
-      for (int xIndex = 0; xIndex < cellsPerAxis; xIndex++)
-      {
-         for (int yIndex = 0; yIndex < cellsPerAxis; yIndex++)
-         {
-            int height = ((int) heightMapPointer.ptr(xIndex, yIndex).getShort() & 0xFFFF);
-            float cellHeight = (float) ((float) (height) / RapidHeightMapManager.getHeightMapParameters().getHeightScaleFactor())
-                               - (float) RapidHeightMapManager.getHeightMapParameters().getHeightOffset();
+      // Read data into byte[]
+      byte[] data = new byte[Short.BYTES * totalCells];
+      heightMapPointer.data().get(data);
 
-            int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
-            heightMapDataToPack.setHeightAt(key, cellHeight);
-         }
+      // Put height values into HeightMapData object
+      for (int i = 0; i < totalCells; ++i)
+      {
+         // Get the start index of the bytes for a short
+         int dataIndex = Short.BYTES * i;
+
+         // Get the most and least significant bits, combine into integer
+         int major = (data[dataIndex + 1] << 8) & 0xFF00;
+         int minor = data[dataIndex] & 0x00FF;
+         int height = major | minor;
+
+         // Calculate cell height
+         float cellHeight = (float) (((float) height / RapidHeightMapManager.getHeightMapParameters().getHeightScaleFactor())
+                                     - RapidHeightMapManager.getHeightMapParameters().getHeightOffset());
+
+         // Put it into the HeightMapData object
+         int key = cellsPerAxis * (i % cellsPerAxis) + (i / cellsPerAxis);
+         heightMapDataToPack.setHeightAt(key, cellHeight);
       }
    }
 

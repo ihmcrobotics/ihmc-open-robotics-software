@@ -122,7 +122,7 @@ public class VideoPacketPubSubType implements us.ihmc.pubsub.TopicDataType<perce
 
       if(data.getData().size() <= 2000000)
       cdr.write_type_e(data.getData());else
-          throw new RuntimeException("data field exceeds the maximum length");
+          throw new RuntimeException("data field exceeds the maximum length: %d > %d".formatted(data.getData().size(), 2000000));
 
       cdr.write_type_3(data.getImageWidth());
 

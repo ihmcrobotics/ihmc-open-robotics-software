@@ -84,7 +84,7 @@ public class AI2RCommandMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
    {
       if(data.getBehaviorToExecute().length() <= 255)
       cdr.write_type_d(data.getBehaviorToExecute());else
-          throw new RuntimeException("behavior_to_execute field exceeds the maximum length");
+          throw new RuntimeException("behavior_to_execute field exceeds the maximum length: %d > %d".formatted(data.getBehaviorToExecute().length(), 255));
 
       behavior_msgs.msg.dds.AI2RHandPoseAdaptationMessagePubSubType.write(data.getHandPoseAdaptation(), cdr);
       behavior_msgs.msg.dds.AI2RNavigationMessagePubSubType.write(data.getNavigation(), cdr);

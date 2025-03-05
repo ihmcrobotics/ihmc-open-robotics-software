@@ -97,11 +97,11 @@ public class DetectedFacesPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
 
       if(data.getIds().size() <= 100)
       cdr.write_type_e(data.getIds());else
-          throw new RuntimeException("ids field exceeds the maximum length");
+          throw new RuntimeException("ids field exceeds the maximum length: %d > %d".formatted(data.getIds().size(), 100));
 
       if(data.getPositions().size() <= 100)
       cdr.write_type_e(data.getPositions());else
-          throw new RuntimeException("positions field exceeds the maximum length");
+          throw new RuntimeException("positions field exceeds the maximum length: %d > %d".formatted(data.getPositions().size(), 100));
 
    }
 

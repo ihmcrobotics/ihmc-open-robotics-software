@@ -15,7 +15,7 @@ public class YOLOv8AvailableModelsPubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "b91d143b621093319bc35937a6d6374ca1283278d0c2754acf124d46e83a3f75";
+   		return "a899a00cab9d1a93ee6add734a6bc8370146d7eb1ca24cff88486d9cafcee79f";
    }
    
    @Override
@@ -54,7 +54,7 @@ public class YOLOv8AvailableModelsPubSubType implements us.ihmc.pubsub.TopicData
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 8; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 16; ++i0)
       {
           current_alignment += perception_msgs.msg.dds.YOLOv8ModelInfoPubSubType.getMaxCdrSerializedSize(current_alignment);}
 
@@ -86,9 +86,9 @@ public class YOLOv8AvailableModelsPubSubType implements us.ihmc.pubsub.TopicData
    {
       cdr.write_type_7(data.getRequest());
 
-      if(data.getAvailableYoloModels().size() <= 8)
+      if(data.getAvailableYoloModels().size() <= 16)
       cdr.write_type_e(data.getAvailableYoloModels());else
-          throw new RuntimeException("available_yolo_models field exceeds the maximum length");
+          throw new RuntimeException("available_yolo_models field exceeds the maximum length: %d > %d".formatted(data.getAvailableYoloModels().size(), 16));
 
    }
 

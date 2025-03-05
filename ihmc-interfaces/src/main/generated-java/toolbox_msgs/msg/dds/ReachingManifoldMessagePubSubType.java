@@ -115,15 +115,15 @@ public class ReachingManifoldMessagePubSubType implements us.ihmc.pubsub.TopicDa
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getManifoldOriginOrientation(), cdr);
       if(data.getManifoldConfigurationSpaceNames().size() <= 100)
       cdr.write_type_e(data.getManifoldConfigurationSpaceNames());else
-          throw new RuntimeException("manifold_configuration_space_names field exceeds the maximum length");
+          throw new RuntimeException("manifold_configuration_space_names field exceeds the maximum length: %d > %d".formatted(data.getManifoldConfigurationSpaceNames().size(), 100));
 
       if(data.getManifoldLowerLimits().size() <= 100)
       cdr.write_type_e(data.getManifoldLowerLimits());else
-          throw new RuntimeException("manifold_lower_limits field exceeds the maximum length");
+          throw new RuntimeException("manifold_lower_limits field exceeds the maximum length: %d > %d".formatted(data.getManifoldLowerLimits().size(), 100));
 
       if(data.getManifoldUpperLimits().size() <= 100)
       cdr.write_type_e(data.getManifoldUpperLimits());else
-          throw new RuntimeException("manifold_upper_limits field exceeds the maximum length");
+          throw new RuntimeException("manifold_upper_limits field exceeds the maximum length: %d > %d".formatted(data.getManifoldUpperLimits().size(), 100));
 
    }
 

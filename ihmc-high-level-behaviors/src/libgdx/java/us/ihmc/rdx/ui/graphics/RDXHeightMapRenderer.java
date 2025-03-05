@@ -8,18 +8,18 @@ import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
-import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
-import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.javacpp.FloatPointer;
+import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.opencv_core.Mat;
 import org.lwjgl.opengl.GL41;
-import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.log.LogTools;
 import us.ihmc.rdx.shader.RDXShader;
 import us.ihmc.rdx.shader.RDXUniform;
 
+import java.nio.FloatBuffer;
 
 /**
  * Renders a height map as a point cloud. The height map is stored as a 16-bit grayscale image.
@@ -27,67 +27,93 @@ import us.ihmc.rdx.shader.RDXUniform;
  * where the midway point 32,768 is the metric 0.0f height,
  * 0 is the metric -3.2768f height, and 65536 is the 3.2768f height.
  * The height is scaled up by 10,000 for storage as 16-bit value (short)
+ * <p>
+ * To learn about OpenGL and figure out what this code is doing,
+ * Tomasz recommends <a href="https://learnopengl.com/">LearnOpenGL.com</a>
  */
 public class RDXHeightMapRenderer implements RenderableProvider
 {
-   private Renderable renderable;
+   // The height map renderable
+   private final Renderable renderable = new Renderable();
 
-   public static final int FLOATS_PER_CELL = 8;
-   private final VertexAttributes vertexAttributes = new VertexAttributes(new VertexAttribute(VertexAttributes.Usage.Position,
-                                                                                              3,
-                                                                                              ShaderProgram.POSITION_ATTRIBUTE),
-                                                                          new VertexAttribute(VertexAttributes.Usage.ColorUnpacked,
-                                                                                              4,
-                                                                                              ShaderProgram.COLOR_ATTRIBUTE),
-                                                                          new VertexAttribute(VertexAttributes.Usage.Generic,
-                                                                                              1,
-                                                                                              GL41.GL_FLOAT,
-                                                                                              false,
-                                                                                              "a_size"));
-   private final RDXUniform screenWidthUniform = RDXUniform.createGlobalUniform("u_screenWidth",
-                                                                                (shader, inputID, renderable, combinedAttributes) -> shader.set(inputID,
-                                                                                                                                                shader.camera.viewportWidth));
-   private final RDXUniform multiColorUniform = RDXUniform.createGlobalUniform("u_multiColor", (shader, inputID, renderable, combinedAttributes) ->
-   {
-      int multiColor = 0;
-      shader.set(inputID, multiColor);
-   });
+   // Height map data sent to the GPU (as floats)
+   private final VertexAttributes vertexAttributes = new VertexAttributes(new VertexAttribute(VertexAttributes.Usage.Generic, 1, "a_height"));
 
-   private float[] intermediateVertexBuffer;
+   // Uniforms
+   private int centerIndex;
+   private final Vector2 gridCenter = new Vector2();
+   private float cellSize;
+   private float heightScalingFactor;
+   private float heightOffset;
 
-   private int totalCells;
-
-   public void create(int numberOfCells)
+   public void create(int maxCells)
    {
       GL41.glEnable(GL41.GL_VERTEX_PROGRAM_POINT_SIZE);
 
-      renderable = new Renderable();
+      // Create the height map mesh (just a bunch of points)
       renderable.meshPart.primitiveType = GL41.GL_POINTS;
       renderable.meshPart.offset = 0;
       renderable.material = new Material(PBRColorAttribute.createBaseColorFactor(Color.WHITE));
 
-      totalCells = numberOfCells;
       if (renderable.meshPart.mesh != null)
          renderable.meshPart.mesh.dispose();
       boolean isStatic = false;
       int maxIndices = 0;
-      renderable.meshPart.mesh = new Mesh(isStatic, totalCells, maxIndices, vertexAttributes);
+      renderable.meshPart.mesh = new Mesh(isStatic, maxCells, maxIndices, vertexAttributes);
 
+      // Initialize the shader & assign it to the renderable
       RDXShader shader = new RDXShader(getClass());
       shader.create();
-      shader.getBaseShader().register(DefaultShader.Inputs.viewTrans, DefaultShader.Setters.viewTrans);
-      shader.getBaseShader().register(DefaultShader.Inputs.projTrans, DefaultShader.Setters.projTrans);
-      shader.registerUniform(screenWidthUniform);
-      shader.registerUniform(multiColorUniform);
+      registerUniforms(shader);
       shader.init(renderable);
       renderable.shader = shader.getBaseShader();
-
-      LogTools.info("Vertex Buffer Size: {}", totalCells * FLOATS_PER_CELL);
-      intermediateVertexBuffer = new float[totalCells * FLOATS_PER_CELL];
    }
 
-   public void update(RigidBodyTransform zUpFrameToWorld,
-                      BytePointer heightMapPointer,
+   // Registers a bunch of uniforms needed in the shader
+   @SuppressWarnings("CodeBlock2Expr")
+   private void registerUniforms(RDXShader rdxShader)
+   {
+      rdxShader.getBaseShader().register(DefaultShader.Inputs.viewTrans, DefaultShader.Setters.viewTrans);
+      rdxShader.getBaseShader().register(DefaultShader.Inputs.projTrans, DefaultShader.Setters.projTrans);
+
+      RDXUniform screenWidthUniform = RDXUniform.createGlobalUniform("u_screenWidth", (shader, inputID, renderable, combinedAttributes) ->
+      {
+         shader.set(inputID, shader.camera.viewportWidth);
+      });
+      rdxShader.registerUniform(screenWidthUniform);
+
+      RDXUniform centerIndexUniform = RDXUniform.createGlobalUniform("u_centerIndex", (shader, inputID, renderable, combinedAttributes) ->
+      {
+         shader.set(inputID, centerIndex);
+      });
+      rdxShader.registerUniform(centerIndexUniform);
+
+      RDXUniform gridCenterUniform = RDXUniform.createGlobalUniform("u_gridCenter", (shader, inputID, renderable, combinedAttributes) ->
+      {
+         shader.set(inputID, gridCenter);
+      });
+      rdxShader.registerUniform(gridCenterUniform);
+
+      RDXUniform cellSizeUniform = RDXUniform.createGlobalUniform("u_cellSize", (shader, inputID, renderable, combinedAttributes) ->
+      {
+         shader.set(inputID, cellSize);
+      });
+      rdxShader.registerUniform(cellSizeUniform);
+
+      RDXUniform heightScalingFactorUniform = RDXUniform.createGlobalUniform("u_heightScalingFactor", (shader, inputID, renderable, combinedAttributes) ->
+      {
+         shader.set(inputID, heightScalingFactor);
+      });
+      rdxShader.registerUniform(heightScalingFactorUniform);
+
+      RDXUniform heightOffsetUniform = RDXUniform.createGlobalUniform("u_heightOffset", (shader, inputID, renderable, combinedAttributes) ->
+      {
+         shader.set(inputID, heightOffset);
+      });
+      rdxShader.registerUniform(heightOffsetUniform);
+   }
+
+   public void update(Mat heightMapImage,
                       float heightOffset,
                       float gridCenterX,
                       float gridCenterY,
@@ -95,43 +121,40 @@ public class RDXHeightMapRenderer implements RenderableProvider
                       float cellSizeXYInMeters,
                       float heightScalingFactor)
    {
-      zUpFrameToWorld.getTranslation().setZ(0);
+      // Update uniforms
+      this.heightOffset = heightOffset;
+      this.gridCenter.set(gridCenterX, gridCenterY);
+      this.centerIndex = centerIndex;
+      this.cellSize = cellSizeXYInMeters;
+      this.heightScalingFactor = heightScalingFactor;
 
+      // Get the vertices buffer (contains the data sent to GPU for the vertex attribute)
+      FloatBuffer verticesBuffer = renderable.meshPart.mesh.getVerticesBuffer(true);
+
+      // Ensure correct length and initialize buffer
       int cellsPerAxis = 2 * centerIndex + 1;
-
-      for (int xIndex = 0; xIndex < cellsPerAxis; xIndex++)
+      int totalCells = cellsPerAxis * cellsPerAxis;
+      if (renderable.meshPart.size != totalCells)
       {
-         for (int yIndex = 0; yIndex < cellsPerAxis; yIndex++)
-         {
-            double xPosition = HeightMapTools.indexToCoordinate(xIndex, gridCenterX, cellSizeXYInMeters, centerIndex);
-            double yPosition = HeightMapTools.indexToCoordinate(yIndex, gridCenterY, cellSizeXYInMeters, centerIndex);
-
-            /* look at the header docs for decoding the height map values as below */
-            int heightIndex = xIndex * cellsPerAxis + yIndex;
-            int vertexIndex = heightIndex * FLOATS_PER_CELL;
-            int height = heightMapPointer.getShort(heightIndex * 2L) & 0xFFFF;
-            float zPosition = ((float) height / heightScalingFactor);
-            zPosition -= heightOffset;
-
-            intermediateVertexBuffer[vertexIndex] = (float) xPosition;
-            intermediateVertexBuffer[vertexIndex + 1] = (float) yPosition;
-            intermediateVertexBuffer[vertexIndex + 2] = zPosition;
-
-            // Color (0.0 to 1.0)
-            double[] redGreenBlue = HeightMapTools.getRedGreenBlue(zPosition);
-            Color color = new Color((float) redGreenBlue[0], (float) redGreenBlue[1], (float) redGreenBlue[2], 1.0f);
-            intermediateVertexBuffer[vertexIndex + 3] = color.r;
-            intermediateVertexBuffer[vertexIndex + 4] = color.g;
-            intermediateVertexBuffer[vertexIndex + 5] = color.b;
-            intermediateVertexBuffer[vertexIndex + 6] = color.a;
-
-            // Size
-            intermediateVertexBuffer[vertexIndex + 7] = 0.02f;
-         }
+         renderable.meshPart.size = totalCells;
+         verticesBuffer.limit(totalCells);
       }
 
-      renderable.meshPart.size = totalCells;
-      renderable.meshPart.mesh.setVertices(intermediateVertexBuffer, 0, totalCells * FLOATS_PER_CELL);
+      /* NOTE:
+       * We need to copy the short values from the height map image (Mat) to the vertices buffer (FloatBuffer) as floats.
+       * In both objects, the data is in native memory. Copying native -> java -> native is slow,
+       * so we use the Mat#convertTo() method which performs the short to float conversion and memory copy natively.
+       */
+
+      // Wrap the vertices buffer into a pointer, then into a Mat
+      FloatPointer verticesPointer = new FloatPointer(verticesBuffer);
+      Mat verticesMat = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1, verticesPointer);
+
+      // Convert the height map data to float, and put it into the vertex buffer
+      heightMapImage.convertTo(verticesMat, opencv_core.CV_32FC1);
+
+      verticesMat.close();
+      verticesPointer.close();
    }
 
    @Override

@@ -110,11 +110,11 @@ public class KinematicsPlanningToolboxOutputStatusPubSubType implements us.ihmc.
 
       if(data.getKeyFrameTimes().size() <= 100)
       cdr.write_type_e(data.getKeyFrameTimes());else
-          throw new RuntimeException("key_frame_times field exceeds the maximum length");
+          throw new RuntimeException("key_frame_times field exceeds the maximum length: %d > %d".formatted(data.getKeyFrameTimes().size(), 100));
 
       if(data.getRobotConfigurations().size() <= 100)
       cdr.write_type_e(data.getRobotConfigurations());else
-          throw new RuntimeException("robot_configurations field exceeds the maximum length");
+          throw new RuntimeException("robot_configurations field exceeds the maximum length: %d > %d".formatted(data.getRobotConfigurations().size(), 100));
 
       cdr.write_type_6(data.getSolutionQuality());
 

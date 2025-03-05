@@ -149,23 +149,23 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
       if(data.getKeys().size() <= 45000)
       cdr.write_type_e(data.getKeys());else
-          throw new RuntimeException("keys field exceeds the maximum length");
+          throw new RuntimeException("keys field exceeds the maximum length: %d > %d".formatted(data.getKeys().size(), 45000));
 
       if(data.getHeights().size() <= 45000)
       cdr.write_type_e(data.getHeights());else
-          throw new RuntimeException("heights field exceeds the maximum length");
+          throw new RuntimeException("heights field exceeds the maximum length: %d > %d".formatted(data.getHeights().size(), 45000));
 
       if(data.getVariances().size() <= 45000)
       cdr.write_type_e(data.getVariances());else
-          throw new RuntimeException("variances field exceeds the maximum length");
+          throw new RuntimeException("variances field exceeds the maximum length: %d > %d".formatted(data.getVariances().size(), 45000));
 
       if(data.getCentroids().size() <= 45000)
       cdr.write_type_e(data.getCentroids());else
-          throw new RuntimeException("centroids field exceeds the maximum length");
+          throw new RuntimeException("centroids field exceeds the maximum length: %d > %d".formatted(data.getCentroids().size(), 45000));
 
       if(data.getNormals().size() <= 45000)
       cdr.write_type_e(data.getNormals());else
-          throw new RuntimeException("normals field exceeds the maximum length");
+          throw new RuntimeException("normals field exceeds the maximum length: %d > %d".formatted(data.getNormals().size(), 45000));
 
    }
 

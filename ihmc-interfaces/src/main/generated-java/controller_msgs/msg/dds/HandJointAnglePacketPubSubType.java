@@ -103,7 +103,7 @@ public class HandJointAnglePacketPubSubType implements us.ihmc.pubsub.TopicDataT
 
       if(data.getJointAngles().size() <= 100)
       cdr.write_type_e(data.getJointAngles());else
-          throw new RuntimeException("joint_angles field exceeds the maximum length");
+          throw new RuntimeException("joint_angles field exceeds the maximum length: %d > %d".formatted(data.getJointAngles().size(), 100));
 
       cdr.write_type_7(data.getConnected());
 

@@ -141,35 +141,35 @@ public class PlanarRegionsListMessagePubSubType implements us.ihmc.pubsub.TopicD
       ihmc_common_msgs.msg.dds.InstantMessagePubSubType.write(data.getLastUpdated(), cdr);
       if(data.getRegionId().size() <= 3000)
       cdr.write_type_e(data.getRegionId());else
-          throw new RuntimeException("region_id field exceeds the maximum length");
+          throw new RuntimeException("region_id field exceeds the maximum length: %d > %d".formatted(data.getRegionId().size(), 3000));
 
       if(data.getRegionOrigin().size() <= 3000)
       cdr.write_type_e(data.getRegionOrigin());else
-          throw new RuntimeException("region_origin field exceeds the maximum length");
+          throw new RuntimeException("region_origin field exceeds the maximum length: %d > %d".formatted(data.getRegionOrigin().size(), 3000));
 
       if(data.getRegionOrientation().size() <= 3000)
       cdr.write_type_e(data.getRegionOrientation());else
-          throw new RuntimeException("region_orientation field exceeds the maximum length");
+          throw new RuntimeException("region_orientation field exceeds the maximum length: %d > %d".formatted(data.getRegionOrientation().size(), 3000));
 
       if(data.getRegionNormal().size() <= 3000)
       cdr.write_type_e(data.getRegionNormal());else
-          throw new RuntimeException("region_normal field exceeds the maximum length");
+          throw new RuntimeException("region_normal field exceeds the maximum length: %d > %d".formatted(data.getRegionNormal().size(), 3000));
 
       if(data.getConcaveHullsSize().size() <= 3000)
       cdr.write_type_e(data.getConcaveHullsSize());else
-          throw new RuntimeException("concave_hulls_size field exceeds the maximum length");
+          throw new RuntimeException("concave_hulls_size field exceeds the maximum length: %d > %d".formatted(data.getConcaveHullsSize().size(), 3000));
 
       if(data.getNumberOfConvexPolygons().size() <= 3000)
       cdr.write_type_e(data.getNumberOfConvexPolygons());else
-          throw new RuntimeException("number_of_convex_polygons field exceeds the maximum length");
+          throw new RuntimeException("number_of_convex_polygons field exceeds the maximum length: %d > %d".formatted(data.getNumberOfConvexPolygons().size(), 3000));
 
       if(data.getConvexPolygonsSize().size() <= 3000)
       cdr.write_type_e(data.getConvexPolygonsSize());else
-          throw new RuntimeException("convex_polygons_size field exceeds the maximum length");
+          throw new RuntimeException("convex_polygons_size field exceeds the maximum length: %d > %d".formatted(data.getConvexPolygonsSize().size(), 3000));
 
       if(data.getVertexBuffer().size() <= 50000)
       cdr.write_type_e(data.getVertexBuffer());else
-          throw new RuntimeException("vertex_buffer field exceeds the maximum length");
+          throw new RuntimeException("vertex_buffer field exceeds the maximum length: %d > %d".formatted(data.getVertexBuffer().size(), 50000));
 
    }
 

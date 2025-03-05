@@ -93,7 +93,7 @@ public class OneDoFJointTrajectoryMessagePubSubType implements us.ihmc.pubsub.To
 
       if(data.getTrajectoryPoints().size() <= 50)
       cdr.write_type_e(data.getTrajectoryPoints());else
-          throw new RuntimeException("trajectory_points field exceeds the maximum length");
+          throw new RuntimeException("trajectory_points field exceeds the maximum length: %d > %d".formatted(data.getTrajectoryPoints().size(), 50));
 
       cdr.write_type_6(data.getWeight());
 

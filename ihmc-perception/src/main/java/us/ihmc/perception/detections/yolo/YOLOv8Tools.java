@@ -196,7 +196,7 @@ public class YOLOv8Tools
 
    public static List<URL> getYOLOModelDirectories()
    {
-      return getYOLOModelDirectories(YOLOv8Tools.class.getResource("/yolo/models/"));
+      return getYOLOModelDirectories(YOLOv8Tools.class.getResource("/yolo/"));
    }
 
    public static boolean isValidYOLOModelDirectory(Path yoloModelDirectory)

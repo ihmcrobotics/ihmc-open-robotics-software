@@ -103,7 +103,7 @@ public class DoorNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<p
       perception_msgs.msg.dds.DoorPanelMessagePubSubType.write(data.getDoorPanel(), cdr);
       if(data.getOpeningMechanisms().size() <= 100)
       cdr.write_type_e(data.getOpeningMechanisms());else
-          throw new RuntimeException("opening_mechanisms field exceeds the maximum length");
+          throw new RuntimeException("opening_mechanisms field exceeds the maximum length: %d > %d".formatted(data.getOpeningMechanisms().size(), 100));
 
    }
 

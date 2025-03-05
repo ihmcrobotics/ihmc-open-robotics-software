@@ -102,7 +102,7 @@ public class FootstepQueueStatusMessagePubSubType implements us.ihmc.pubsub.Topi
 
       if(data.getQueuedFootstepList().size() <= 50)
       cdr.write_type_e(data.getQueuedFootstepList());else
-          throw new RuntimeException("queued_footstep_list field exceeds the maximum length");
+          throw new RuntimeException("queued_footstep_list field exceeds the maximum length: %d > %d".formatted(data.getQueuedFootstepList().size(), 50));
 
    }
 

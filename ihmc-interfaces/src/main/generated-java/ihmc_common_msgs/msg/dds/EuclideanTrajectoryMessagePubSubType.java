@@ -113,7 +113,7 @@ public class EuclideanTrajectoryMessagePubSubType implements us.ihmc.pubsub.Topi
 
       if(data.getTaskspaceTrajectoryPoints().size() <= 50)
       cdr.write_type_e(data.getTaskspaceTrajectoryPoints());else
-          throw new RuntimeException("taskspace_trajectory_points field exceeds the maximum length");
+          throw new RuntimeException("taskspace_trajectory_points field exceeds the maximum length: %d > %d".formatted(data.getTaskspaceTrajectoryPoints().size(), 50));
 
       ihmc_common_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.write(data.getSelectionMatrix(), cdr);
       ihmc_common_msgs.msg.dds.FrameInformationPubSubType.write(data.getFrameInformation(), cdr);

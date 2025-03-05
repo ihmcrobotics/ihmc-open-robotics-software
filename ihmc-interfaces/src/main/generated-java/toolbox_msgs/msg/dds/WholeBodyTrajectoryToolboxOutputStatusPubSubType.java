@@ -101,11 +101,11 @@ public class WholeBodyTrajectoryToolboxOutputStatusPubSubType implements us.ihmc
 
       if(data.getTrajectoryTimes().size() <= 50)
       cdr.write_type_e(data.getTrajectoryTimes());else
-          throw new RuntimeException("trajectory_times field exceeds the maximum length");
+          throw new RuntimeException("trajectory_times field exceeds the maximum length: %d > %d".formatted(data.getTrajectoryTimes().size(), 50));
 
       if(data.getRobotConfigurations().size() <= 50)
       cdr.write_type_e(data.getRobotConfigurations());else
-          throw new RuntimeException("robot_configurations field exceeds the maximum length");
+          throw new RuntimeException("robot_configurations field exceeds the maximum length: %d > %d".formatted(data.getRobotConfigurations().size(), 50));
 
    }
 
