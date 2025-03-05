@@ -3,7 +3,6 @@ package us.ihmc.llama;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import us.ihmc.llamacpp.library.LlamaCPPNativeLibrary;
 import us.ihmc.llamacpp.llama_context_params;
 import us.ihmc.llamacpp.llama_model_params;
 import us.ihmc.llamacpp.llama_sampler;
@@ -18,7 +17,27 @@ public class LlamaTest
    @BeforeAll
    public static void beforeAll()
    {
-      LlamaCPPNativeLibrary.load();
+      Llama.initialize();
+   }
+
+   @Test
+   public void testSimpler()
+   {
+      LlamaSimpleChat llama = new LlamaSimpleChat();
+
+      for (int i = 0; i < 100; i++)
+      {
+         String response;
+         response = llama.generate("What is %d + %d?".formatted(i, i + 1));
+         LogTools.info(response);
+
+         if (i % 10 == 0)
+            llama.resetContext();
+      }
+
+      LogTools.info(llama.getContext());
+
+      llama.destroy();
    }
 
    @Test
@@ -80,14 +99,14 @@ public class LlamaTest
          llama_sampler_chain_add(smpl, llama_sampler_init_dist(LLAMA_DEFAULT_SEED));
 
          Llama llama = new Llama(model_params, ctx_params, smpl);
-      for (int i = 0; i < 100; i++)
-      {
 
-         String response;
-         response = llama.generate("What is 2 + 2?");
-         LogTools.info(response);
+         for (int i = 0; i < 100; i++)
+         {
+            String response;
+            response = llama.generate("What is 2 + 2?");
+            LogTools.info(response);
+         }
 
-      }
          llama.destroy();
    }
 
