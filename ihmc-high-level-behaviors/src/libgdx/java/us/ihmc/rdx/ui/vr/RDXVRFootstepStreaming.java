@@ -32,7 +32,6 @@ public class RDXVRFootstepStreaming
    private final SideDependentList<Long> ankleTrackerTimestamps = new SideDependentList<>();
    private final Notification readyToStep = new Notification();
    private boolean wasEnabled = false;
-   private boolean footstepError = false;
 
    /**
     * Constructor for the footstep streaming class.
@@ -110,39 +109,27 @@ public class RDXVRFootstepStreaming
                footstepPlacer.setFootstepPose(new FramePose3D(ReferenceFrame.getWorldFrame(),
                                                               latestStatus.getDesiredFootPosition(),
                                                               latestStatus.getDesiredFootOrientation()));
-               if (footstepPlacer.checkFootstepValidity())
-               {
-                  // We can't trigger stepping here. We have to notify the KST and stop streaming
-                  readyToStep.clear();
-                  readyToStep.set();
-               }
-               else
-               {
-                  footstepError = true;
-                  LogTools.error("Could not place step computed from the footstep streaming module. Unfeasible step");
-               }
+               // We can't trigger stepping here. We have to notify the KST and stop streaming
+               readyToStep.clear();
+               readyToStep.set();
             }
             else if (latestStatus.getAdjustmentFootstep() && !latestStatus.getLastAdjustment()) // Later values of updated estimate
             {
-               if (!footstepError)
+               if (footstepPlacer.setFootstepPose(new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                                                  latestStatus.getDesiredFootPosition(),
+                                                                  latestStatus.getDesiredFootOrientation())))
                {
-                  if (footstepPlacer.setFootstepPose(new FramePose3D(ReferenceFrame.getWorldFrame(),
-                                                                     latestStatus.getDesiredFootPosition(),
-                                                                     latestStatus.getDesiredFootOrientation())))
-                  {
-                     step(true);
-                  }
-                  else
-                  {
-                     LogTools.error("Could not place step. Please do not release grip on controllers when streaming footsteps");
-                  }
+                  step(true);
+               }
+               else
+               {
+                  LogTools.error("Could not place step. Please do not release grip on controllers when streaming footsteps");
                }
             }
             else if (latestStatus.getLastAdjustment()) // Last estimate
             {
                LogTools.error("Received last estimate footstep");
                footstepPlacer.reset();
-               footstepError = false;
             }
          }
          else
@@ -160,6 +147,11 @@ public class RDXVRFootstepStreaming
    public void step(boolean activeAdjustment)
    {
       footstepPlacer.sendStep(activeAdjustment);
+   }
+
+   public void setEndOfStep()
+   {
+      footstepPlacer.setEndOfStep();
    }
 
    /**
@@ -198,7 +190,6 @@ public class RDXVRFootstepStreaming
       wasEnabled = false;
       readyToStep.clear();
       footstepPlacer.reset();
-      footstepError = false;
    }
 
    public void destroy()

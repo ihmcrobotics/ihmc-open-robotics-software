@@ -749,6 +749,7 @@ public class RDXVRKinematicsStreamingMode
             if (pausedForWalking && controllerStatusTracker.getFinishedWalkingNotification().poll())
             {
                reintializingToolbox = true;
+               footstepStreaming.setEndOfStep(); // communicat end of step as it might have ended earlier than expected
             }
             else if (pausedForWalking && reintializingToolbox)
             {

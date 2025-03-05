@@ -14,7 +14,6 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.tools.LibGDXTools;
@@ -34,11 +33,9 @@ import java.util.UUID;
 public class RDXVRFootstepPlacement
 {
    private RDXVRHardwareModel controllerModel = RDXVRHardwareModel.UNKNOWN;
-   private static final double MAX_DISTANCE_MULTIPLIER = 3.0;
    private final RDXVRContext vrContext;
    private final ROS2SyncedRobotModel syncedRobot;
    private final ROS2ControllerHelper controllerHelper;
-   private DefaultFootstepPlannerParametersBasics footstepPlannerParameters;
 
    private final SideDependentList<ModelInstance> footstepModels = new SideDependentList<>();
    private final SideDependentList<ModelInstance> footstepsBeingHandPlaced = new SideDependentList<>();
@@ -50,6 +47,7 @@ public class RDXVRFootstepPlacement
    private int footstepIndex = 0;
    private LocomotionParameters locomotionParameters;
    private double stepStartTime = -1.0;
+   private boolean steppingEndedEarlier = false;
 
    public RDXVRFootstepPlacement(RDXVRContext vrContext,
                                  ROS2SyncedRobotModel syncedRobot,
@@ -82,11 +80,6 @@ public class RDXVRFootstepPlacement
    public void setLocomotionParameters(LocomotionParameters locomotionParameters)
    {
       this.locomotionParameters = locomotionParameters;
-   }
-
-   public void setFootstepPlannerParameters(DefaultFootstepPlannerParametersBasics footstepPlannerParameters)
-   {
-      this.footstepPlannerParameters = footstepPlannerParameters;
    }
 
    public void processVRInput()
@@ -223,25 +216,6 @@ public class RDXVRFootstepPlacement
       }
    }
 
-   public boolean checkFootstepValidity()
-   {
-      if (footstepPlannerParameters != null)
-      {
-         ReferenceFrame oppositeSideFootstepFrame = syncedRobot.getReferenceFrames().getSoleFrame(footstepBeingExternallyPlaced.getSide().getOppositeSide());
-         Point3D previousFootstepPosition = new Point3D(oppositeSideFootstepFrame.getTransformToWorldFrame().getTranslation());
-         boolean isReachable = footstepBeingExternallyPlaced.getPose().getPosition().distance(previousFootstepPosition) < MAX_DISTANCE_MULTIPLIER * footstepPlannerParameters.getMaxStepReach();
-         isReachable &= footstepBeingExternallyPlaced.getPose().getZ() - previousFootstepPosition.getZ() < MAX_DISTANCE_MULTIPLIER * footstepPlannerParameters.getMaxStepZ();
-         isReachable &= footstepBeingExternallyPlaced.getPose().getZ() - previousFootstepPosition.getZ() > -MAX_DISTANCE_MULTIPLIER * footstepPlannerParameters.getMaxStepZ();
-
-         return isReachable;
-      }
-      else
-      {
-         LogTools.error("Could not check validity of step. Footstep planning parameters are null");
-         return false;
-      }
-   }
-
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       for (RDXVRFootstep footstep : handPlacedFootsteps)
@@ -277,10 +251,21 @@ public class RDXVRFootstepPlacement
 
    public double getTimeElapsedAfterStep()
    {
-      if (stepStartTime < 0.0)
+      if (steppingEndedEarlier)
+      {
+         // TODO add flag for step not ended earlier in message to FST and remove this. send message from RDXVRKinematicsStreamingMode
+         steppingEndedEarlier = false;
+         return getStepDuration();
+      }
+      else if (stepStartTime < 0.0)
          return 0.0;
       else
          return (System.nanoTime() - stepStartTime) * 1.0e-9;
+   }
+
+   public void setEndOfStep()
+   {
+      steppingEndedEarlier = true;
    }
 
    public void reset()
@@ -289,5 +274,6 @@ public class RDXVRFootstepPlacement
       footstepBeingExternallyPlaced = null;
       handPlacedFootsteps.clear();
       stepStartTime = -1.0;
+      steppingEndedEarlier = false;
    }
 }

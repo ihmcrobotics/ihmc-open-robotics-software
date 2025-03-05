@@ -44,6 +44,7 @@ public class FSTStreamingState implements State
    private int velocityCount = 0;
    private double yawDotSum = 0.0;
    private int yawDotCount = 0;
+   private boolean latestAdjustmentSent = false;
 
    private final YoDouble timeOfLastInput = new YoDouble("timeOfLastInput", registry);
    private final YoDouble timeSinceLastInput = new YoDouble("timeSinceLastInput", registry);
@@ -146,6 +147,7 @@ public class FSTStreamingState implements State
          {
             robotStepDuration = latestInput.getRobotStepDuration();
             robotElapsedTimeCurrentStep = latestInput.getRobotElapsedTimeCurrentStep();
+            LogTools.info("Timing: stepDuration: {}, elapsed: {}", robotStepDuration, robotElapsedTimeCurrentStep);
             if (robotElapsedTimeCurrentStep > robotStepDuration)
                robotElapsedTimeCurrentStep = robotStepDuration;
 
@@ -238,6 +240,7 @@ public class FSTStreamingState implements State
                            if (stableCount >= stabilityIterations.getIntegerValue())
                            {
                               reset(side, currentTrackerTransform);
+
                               LogTools.error("User completed stepping with {}", side);
                            }
                         }
@@ -250,7 +253,8 @@ public class FSTStreamingState implements State
                            }
                            else // Send adjustment
                            {
-                              if(robotElapsedTimeCurrentStep < robotStepDuration - footstepMarginTime.getValue())
+                              // TODO add flag for step not ended earlier here. add in message
+                              if((robotElapsedTimeCurrentStep < robotStepDuration - footstepMarginTime.getValue()) && !latestAdjustmentSent)
                               {
                                  FrameVector2D adjustedTranslationTrackerXY = new FrameVector2D(ReferenceFrame.getWorldFrame(), translationTracker.getX(), translationTracker.getY());
                                  double stride = defaultStride.getDoubleValue();
@@ -292,6 +296,7 @@ public class FSTStreamingState implements State
                                  outputStatus.setAdjustmentFootstep(true);
                                  outputStatus.setLastAdjustment(true);
                                  tools.getStatusOutputManager().reportStatusMessage(outputStatus);
+                                 latestAdjustmentSent = true;
                               }
                            }
                         }
@@ -335,6 +340,7 @@ public class FSTStreamingState implements State
       velocityCount = 0;
       yawDotSum = 0.0;
       yawDotCount = 0;
+      latestAdjustmentSent = false;
    }
 
    private RigidBodyTransformReadOnly computeTargetFootstepFromInitialSwing(RobotSide side,
