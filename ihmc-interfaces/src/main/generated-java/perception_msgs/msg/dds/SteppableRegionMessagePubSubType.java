@@ -131,7 +131,7 @@ public class SteppableRegionMessagePubSubType implements us.ihmc.pubsub.TopicDat
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getRegionNormal(), cdr);
       if(data.getVertexBuffer().size() <= 1000)
       cdr.write_type_e(data.getVertexBuffer());else
-          throw new RuntimeException("vertex_buffer field exceeds the maximum length");
+          throw new RuntimeException("vertex_buffer field exceeds the maximum length: %d > %d".formatted(data.getVertexBuffer().size(), 1000));
 
       cdr.write_type_2(data.getConcaveHullSize());
 

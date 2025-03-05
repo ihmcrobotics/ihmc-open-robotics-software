@@ -104,11 +104,11 @@ public class PointCloudWorldPacketPubSubType implements us.ihmc.pubsub.TopicData
 
       if(data.getGroundQuadTreeSupport().size() <= 100)
       cdr.write_type_e(data.getGroundQuadTreeSupport());else
-          throw new RuntimeException("ground_quad_tree_support field exceeds the maximum length");
+          throw new RuntimeException("ground_quad_tree_support field exceeds the maximum length: %d > %d".formatted(data.getGroundQuadTreeSupport().size(), 100));
 
       if(data.getDecayingWorldScan().size() <= 100)
       cdr.write_type_e(data.getDecayingWorldScan());else
-          throw new RuntimeException("decaying_world_scan field exceeds the maximum length");
+          throw new RuntimeException("decaying_world_scan field exceeds the maximum length: %d > %d".formatted(data.getDecayingWorldScan().size(), 100));
 
       cdr.write_type_5(data.getDefaultGroundHeight());
 

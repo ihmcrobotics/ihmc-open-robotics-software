@@ -84,7 +84,7 @@ public class AI2RObjectMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    {
       if(data.getObjectName().length() <= 255)
       cdr.write_type_d(data.getObjectName());else
-          throw new RuntimeException("object_name field exceeds the maximum length");
+          throw new RuntimeException("object_name field exceeds the maximum length: %d > %d".formatted(data.getObjectName().length(), 255));
 
       geometry_msgs.msg.dds.PosePubSubType.write(data.getObjectPoseInWorld(), cdr);
       geometry_msgs.msg.dds.PosePubSubType.write(data.getObjectPoseInRobotFrame(), cdr);

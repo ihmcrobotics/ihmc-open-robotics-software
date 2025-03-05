@@ -98,7 +98,7 @@ public class LatestModificationMessagePubSubType implements us.ihmc.pubsub.Topic
 
       if(data.getLatestModifierName().length() <= 255)
       cdr.write_type_d(data.getLatestModifierName());else
-          throw new RuntimeException("latest_modifier_name field exceeds the maximum length");
+          throw new RuntimeException("latest_modifier_name field exceeds the maximum length: %d > %d".formatted(data.getLatestModifierName().length(), 255));
 
       cdr.write_type_7(data.getFullDataNeeded());
 

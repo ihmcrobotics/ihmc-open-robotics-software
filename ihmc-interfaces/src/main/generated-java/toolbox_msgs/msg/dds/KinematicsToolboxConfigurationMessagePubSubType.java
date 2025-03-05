@@ -162,11 +162,11 @@ public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.
 
       if(data.getJointsToDeactivate().size() <= 10)
       cdr.write_type_e(data.getJointsToDeactivate());else
-          throw new RuntimeException("joints_to_deactivate field exceeds the maximum length");
+          throw new RuntimeException("joints_to_deactivate field exceeds the maximum length: %d > %d".formatted(data.getJointsToDeactivate().size(), 10));
 
       if(data.getJointsToActivate().size() <= 10)
       cdr.write_type_e(data.getJointsToActivate());else
-          throw new RuntimeException("joints_to_activate field exceeds the maximum length");
+          throw new RuntimeException("joints_to_activate field exceeds the maximum length: %d > %d".formatted(data.getJointsToActivate().size(), 10));
 
    }
 

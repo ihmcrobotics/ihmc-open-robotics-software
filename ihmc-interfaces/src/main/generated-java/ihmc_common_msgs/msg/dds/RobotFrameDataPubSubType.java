@@ -95,7 +95,7 @@ public class RobotFrameDataPubSubType implements us.ihmc.pubsub.TopicDataType<ih
       geometry_msgs.msg.dds.PosePubSubType.write(data.getFramePoseInWorld(), cdr);
       if(data.getFrameName().length() <= 255)
       cdr.write_type_d(data.getFrameName());else
-          throw new RuntimeException("frame_name field exceeds the maximum length");
+          throw new RuntimeException("frame_name field exceeds the maximum length: %d > %d".formatted(data.getFrameName().length(), 255));
 
    }
 

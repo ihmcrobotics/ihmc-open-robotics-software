@@ -105,19 +105,19 @@ public class AI2RStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       geometry_msgs.msg.dds.PosePubSubType.write(data.getRobotMidFeetUnderPelvisPoseInWorld(), cdr);
       if(data.getObjects().size() <= 200)
       cdr.write_type_e(data.getObjects());else
-          throw new RuntimeException("objects field exceeds the maximum length");
+          throw new RuntimeException("objects field exceeds the maximum length: %d > %d".formatted(data.getObjects().size(), 200));
 
       if(data.getAvailableBehaviors().size() <= 200)
       cdr.write_type_e(data.getAvailableBehaviors());else
-          throw new RuntimeException("available_behaviors field exceeds the maximum length");
+          throw new RuntimeException("available_behaviors field exceeds the maximum length: %d > %d".formatted(data.getAvailableBehaviors().size(), 200));
 
       if(data.getCompletedBehavior().length() <= 255)
       cdr.write_type_d(data.getCompletedBehavior());else
-          throw new RuntimeException("completed_behavior field exceeds the maximum length");
+          throw new RuntimeException("completed_behavior field exceeds the maximum length: %d > %d".formatted(data.getCompletedBehavior().length(), 255));
 
       if(data.getFailedBehavior().length() <= 255)
       cdr.write_type_d(data.getFailedBehavior());else
-          throw new RuntimeException("failed_behavior field exceeds the maximum length");
+          throw new RuntimeException("failed_behavior field exceeds the maximum length: %d > %d".formatted(data.getFailedBehavior().length(), 255));
 
       behavior_msgs.msg.dds.AI2RActionFailureMessagePubSubType.write(data.getFailure(), cdr);
    }

@@ -85,11 +85,11 @@ public class CrocoddylStateMessagePubSubType implements us.ihmc.pubsub.TopicData
    {
       if(data.getX().size() <= 100)
       cdr.write_type_e(data.getX());else
-          throw new RuntimeException("x field exceeds the maximum length");
+          throw new RuntimeException("x field exceeds the maximum length: %d > %d".formatted(data.getX().size(), 100));
 
       if(data.getDx().size() <= 100)
       cdr.write_type_e(data.getDx());else
-          throw new RuntimeException("dx field exceeds the maximum length");
+          throw new RuntimeException("dx field exceeds the maximum length: %d > %d".formatted(data.getDx().size(), 100));
 
    }
 

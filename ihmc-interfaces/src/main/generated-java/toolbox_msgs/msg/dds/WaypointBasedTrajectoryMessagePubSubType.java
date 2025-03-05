@@ -122,11 +122,11 @@ public class WaypointBasedTrajectoryMessagePubSubType implements us.ihmc.pubsub.
 
       if(data.getWaypointTimes().size() <= 100)
       cdr.write_type_e(data.getWaypointTimes());else
-          throw new RuntimeException("waypoint_times field exceeds the maximum length");
+          throw new RuntimeException("waypoint_times field exceeds the maximum length: %d > %d".formatted(data.getWaypointTimes().size(), 100));
 
       if(data.getWaypoints().size() <= 100)
       cdr.write_type_e(data.getWaypoints());else
-          throw new RuntimeException("waypoints field exceeds the maximum length");
+          throw new RuntimeException("waypoints field exceeds the maximum length: %d > %d".formatted(data.getWaypoints().size(), 100));
 
       ihmc_common_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.write(data.getAngularSelectionMatrix(), cdr);
       ihmc_common_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.write(data.getLinearSelectionMatrix(), cdr);

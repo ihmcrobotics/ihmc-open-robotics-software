@@ -102,11 +102,11 @@ public class WholeBodyImpedanceTrajectoryMessagePubSubType implements us.ihmc.pu
 
       if(data.getJointHashCodes().size() <= 100)
       cdr.write_type_e(data.getJointHashCodes());else
-          throw new RuntimeException("joint_hash_codes field exceeds the maximum length");
+          throw new RuntimeException("joint_hash_codes field exceeds the maximum length: %d > %d".formatted(data.getJointHashCodes().size(), 100));
 
       if(data.getJointTrajectoryMessages().size() <= 100)
       cdr.write_type_e(data.getJointTrajectoryMessages());else
-          throw new RuntimeException("joint_trajectory_messages field exceeds the maximum length");
+          throw new RuntimeException("joint_trajectory_messages field exceeds the maximum length: %d > %d".formatted(data.getJointTrajectoryMessages().size(), 100));
 
       ihmc_common_msgs.msg.dds.QueueableMessagePubSubType.write(data.getQueueingProperties(), cdr);
       controller_msgs.msg.dds.MultiContactTimedContactSequenceMessagePubSubType.write(data.getContactSequenceMessage(), cdr);

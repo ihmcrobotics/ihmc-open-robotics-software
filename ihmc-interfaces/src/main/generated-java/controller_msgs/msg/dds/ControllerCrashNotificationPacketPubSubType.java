@@ -102,15 +102,15 @@ public class ControllerCrashNotificationPacketPubSubType implements us.ihmc.pubs
 
       if(data.getExceptionType().length() <= 255)
       cdr.write_type_d(data.getExceptionType());else
-          throw new RuntimeException("exception_type field exceeds the maximum length");
+          throw new RuntimeException("exception_type field exceeds the maximum length: %d > %d".formatted(data.getExceptionType().length(), 255));
 
       if(data.getErrorMessage().length() <= 255)
       cdr.write_type_d(data.getErrorMessage());else
-          throw new RuntimeException("error_message field exceeds the maximum length");
+          throw new RuntimeException("error_message field exceeds the maximum length: %d > %d".formatted(data.getErrorMessage().length(), 255));
 
       if(data.getStacktrace().size() <= 50)
       cdr.write_type_e(data.getStacktrace());else
-          throw new RuntimeException("stacktrace field exceeds the maximum length");
+          throw new RuntimeException("stacktrace field exceeds the maximum length: %d > %d".formatted(data.getStacktrace().size(), 50));
 
    }
 

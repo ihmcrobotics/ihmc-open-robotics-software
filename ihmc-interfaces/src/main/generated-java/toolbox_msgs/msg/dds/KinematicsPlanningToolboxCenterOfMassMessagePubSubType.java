@@ -102,11 +102,11 @@ public class KinematicsPlanningToolboxCenterOfMassMessagePubSubType implements u
 
       if(data.getWayPointTimes().size() <= 100)
       cdr.write_type_e(data.getWayPointTimes());else
-          throw new RuntimeException("way_point_times field exceeds the maximum length");
+          throw new RuntimeException("way_point_times field exceeds the maximum length: %d > %d".formatted(data.getWayPointTimes().size(), 100));
 
       if(data.getDesiredWayPointPositionsInWorld().size() <= 100)
       cdr.write_type_e(data.getDesiredWayPointPositionsInWorld());else
-          throw new RuntimeException("desired_way_point_positions_in_world field exceeds the maximum length");
+          throw new RuntimeException("desired_way_point_positions_in_world field exceeds the maximum length: %d > %d".formatted(data.getDesiredWayPointPositionsInWorld().size(), 100));
 
       ihmc_common_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.write(data.getSelectionMatrix(), cdr);
       ihmc_common_msgs.msg.dds.WeightMatrix3DMessagePubSubType.write(data.getWeights(), cdr);
