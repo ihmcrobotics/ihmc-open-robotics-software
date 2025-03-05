@@ -13,6 +13,10 @@ public class YOLOv8ExecutorSettings extends Packet<YOLOv8ExecutorSettings> imple
 {
    public ihmc_common_msgs.msg.dds.LatestModificationMessage latest_timestamp_modifiable_;
    /**
+            * List of the available models
+            */
+   public us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.YOLOv8ModelInfo>  available_yolo_models_;
+   /**
             * List of models to run
             */
    public us.ihmc.idl.IDLSequence.StringBuilderHolder  models_to_run_;
@@ -24,6 +28,7 @@ public class YOLOv8ExecutorSettings extends Packet<YOLOv8ExecutorSettings> imple
    public YOLOv8ExecutorSettings()
    {
       latest_timestamp_modifiable_ = new ihmc_common_msgs.msg.dds.LatestModificationMessage();
+      available_yolo_models_ = new us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.YOLOv8ModelInfo> (8, new perception_msgs.msg.dds.YOLOv8ModelInfoPubSubType());
       models_to_run_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (16, "type_d");
       model_settings_ = new us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.YOLOv8ModelSettings> (16, new perception_msgs.msg.dds.YOLOv8ModelSettingsPubSubType());
 
@@ -38,6 +43,7 @@ public class YOLOv8ExecutorSettings extends Packet<YOLOv8ExecutorSettings> imple
    public void set(YOLOv8ExecutorSettings other)
    {
       ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.staticCopy(other.latest_timestamp_modifiable_, latest_timestamp_modifiable_);
+      available_yolo_models_.set(other.available_yolo_models_);
       models_to_run_.set(other.models_to_run_);
       model_settings_.set(other.model_settings_);
    }
@@ -46,6 +52,15 @@ public class YOLOv8ExecutorSettings extends Packet<YOLOv8ExecutorSettings> imple
    public ihmc_common_msgs.msg.dds.LatestModificationMessage getLatestTimestampModifiable()
    {
       return latest_timestamp_modifiable_;
+   }
+
+
+   /**
+            * List of the available models
+            */
+   public us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.YOLOv8ModelInfo>  getAvailableYoloModels()
+   {
+      return available_yolo_models_;
    }
 
 
@@ -85,6 +100,13 @@ public class YOLOv8ExecutorSettings extends Packet<YOLOv8ExecutorSettings> imple
       if(other == this) return true;
 
       if (!this.latest_timestamp_modifiable_.epsilonEquals(other.latest_timestamp_modifiable_, epsilon)) return false;
+      if (this.available_yolo_models_.size() != other.available_yolo_models_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.available_yolo_models_.size(); i++)
+         {  if (!this.available_yolo_models_.get(i).epsilonEquals(other.available_yolo_models_.get(i), epsilon)) return false; }
+      }
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilderSequence(this.models_to_run_, other.models_to_run_, epsilon)) return false;
 
       if (this.model_settings_.size() != other.model_settings_.size()) { return false; }
@@ -108,6 +130,7 @@ public class YOLOv8ExecutorSettings extends Packet<YOLOv8ExecutorSettings> imple
       YOLOv8ExecutorSettings otherMyClass = (YOLOv8ExecutorSettings) other;
 
       if (!this.latest_timestamp_modifiable_.equals(otherMyClass.latest_timestamp_modifiable_)) return false;
+      if (!this.available_yolo_models_.equals(otherMyClass.available_yolo_models_)) return false;
       if (!this.models_to_run_.equals(otherMyClass.models_to_run_)) return false;
       if (!this.model_settings_.equals(otherMyClass.model_settings_)) return false;
 
@@ -122,6 +145,8 @@ public class YOLOv8ExecutorSettings extends Packet<YOLOv8ExecutorSettings> imple
       builder.append("YOLOv8ExecutorSettings {");
       builder.append("latest_timestamp_modifiable=");
       builder.append(this.latest_timestamp_modifiable_);      builder.append(", ");
+      builder.append("available_yolo_models=");
+      builder.append(this.available_yolo_models_);      builder.append(", ");
       builder.append("models_to_run=");
       builder.append(this.models_to_run_);      builder.append(", ");
       builder.append("model_settings=");

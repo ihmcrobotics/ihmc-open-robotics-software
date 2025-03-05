@@ -15,7 +15,7 @@ public class YOLOv8ExecutorSettingsPubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "954576a5f68507c503659530f8c20a4d603a4d222e491d31743fee78643ef243";
+   		return "19c6a869e24fa74429da39da3ec07d8b907cedabdc250bf876e02a4b0d9c0561";
    }
    
    @Override
@@ -54,6 +54,9 @@ public class YOLOv8ExecutorSettingsPubSubType implements us.ihmc.pubsub.TopicDat
 
       current_alignment += ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 8; ++i0)
+      {
+          current_alignment += perception_msgs.msg.dds.YOLOv8ModelInfoPubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 16; ++i0)
       {
         current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
@@ -77,6 +80,11 @@ public class YOLOv8ExecutorSettingsPubSubType implements us.ihmc.pubsub.TopicDat
       current_alignment += ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.getCdrSerializedSize(data.getLatestTimestampModifiable(), current_alignment);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getAvailableYoloModels().size(); ++i0)
+      {
+          current_alignment += perception_msgs.msg.dds.YOLOv8ModelInfoPubSubType.getCdrSerializedSize(data.getAvailableYoloModels().get(i0), current_alignment);}
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getModelsToRun().size(); ++i0)
       {
           current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getModelsToRun().get(i0).length() + 1;
@@ -93,6 +101,10 @@ public class YOLOv8ExecutorSettingsPubSubType implements us.ihmc.pubsub.TopicDat
    public static void write(perception_msgs.msg.dds.YOLOv8ExecutorSettings data, us.ihmc.idl.CDR cdr)
    {
       ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.write(data.getLatestTimestampModifiable(), cdr);
+      if(data.getAvailableYoloModels().size() <= 8)
+      cdr.write_type_e(data.getAvailableYoloModels());else
+          throw new RuntimeException("available_yolo_models field exceeds the maximum length: %d > %d".formatted(data.getAvailableYoloModels().size(), 8));
+
       if(data.getModelsToRun().size() <= 16)
       cdr.write_type_e(data.getModelsToRun());else
           throw new RuntimeException("models_to_run field exceeds the maximum length: %d > %d".formatted(data.getModelsToRun().size(), 16));
@@ -106,6 +118,7 @@ public class YOLOv8ExecutorSettingsPubSubType implements us.ihmc.pubsub.TopicDat
    public static void read(perception_msgs.msg.dds.YOLOv8ExecutorSettings data, us.ihmc.idl.CDR cdr)
    {
       ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.read(data.getLatestTimestampModifiable(), cdr);	
+      cdr.read_type_e(data.getAvailableYoloModels());	
       cdr.read_type_e(data.getModelsToRun());	
       cdr.read_type_e(data.getModelSettings());	
 
@@ -116,6 +129,7 @@ public class YOLOv8ExecutorSettingsPubSubType implements us.ihmc.pubsub.TopicDat
    {
       ser.write_type_a("latest_timestamp_modifiable", new ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType(), data.getLatestTimestampModifiable());
 
+      ser.write_type_e("available_yolo_models", data.getAvailableYoloModels());
       ser.write_type_e("models_to_run", data.getModelsToRun());
       ser.write_type_e("model_settings", data.getModelSettings());
    }
@@ -125,6 +139,7 @@ public class YOLOv8ExecutorSettingsPubSubType implements us.ihmc.pubsub.TopicDat
    {
       ser.read_type_a("latest_timestamp_modifiable", new ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType(), data.getLatestTimestampModifiable());
 
+      ser.read_type_e("available_yolo_models", data.getAvailableYoloModels());
       ser.read_type_e("models_to_run", data.getModelsToRun());
       ser.read_type_e("model_settings", data.getModelSettings());
    }

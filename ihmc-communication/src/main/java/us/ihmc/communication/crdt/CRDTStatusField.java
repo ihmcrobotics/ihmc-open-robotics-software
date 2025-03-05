@@ -26,15 +26,24 @@ public class CRDTStatusField
 
    protected void checkActorCanModifyAndMarkHasStatus()
    {
+      checkActorCanModify();
+      markHasStatus();
+   }
+
+   protected void checkActorCanModify()
+   {
       if (isModificationDisallowed())
          throw new RuntimeException("%s is not allowed to modify this value.".formatted(crdtInfo.getActorDesignation()));
-
-      hasStatus.set();
    }
 
    protected boolean isModificationDisallowed()
    {
       return sideThatCanModify != crdtInfo.getActorDesignation();
+   }
+
+   protected void markHasStatus()
+   {
+      hasStatus.set();
    }
 
    public boolean pollHasStatus()

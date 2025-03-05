@@ -33,7 +33,7 @@ public class CRDTBidirectionalMutableField<T>
    public T getValueAndModify()
    {
       // Mark and timestamp modification
-      latestTimestampModifiable.modify();
+      modify();
       return value;
    }
 
@@ -45,6 +45,11 @@ public class CRDTBidirectionalMutableField<T>
    public T getValue()
    {
       return value;
+   }
+
+   public void modify()
+   {
+      latestTimestampModifiable.modify();
    }
 
    protected T getValueInternal()

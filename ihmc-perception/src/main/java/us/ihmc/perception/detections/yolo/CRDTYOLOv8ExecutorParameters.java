@@ -2,48 +2,81 @@ package us.ihmc.perception.detections.yolo;
 
 import perception_msgs.msg.dds.YOLOv8ExecutorSettings;
 import perception_msgs.msg.dds.YOLOv8ModelInfo;
-import us.ihmc.communication.crdt.CRDTBidirectionalStringArray;
+import perception_msgs.msg.dds.YOLOv8ModelSettings;
+import us.ihmc.communication.crdt.CRDTBidirectionalSet;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTStatusSet;
 import us.ihmc.communication.crdt.LatestTimestampModifiable;
+import us.ihmc.communication.ros2.ROS2ActorDesignation;
 
-public class CRDTYOLOv8ExecutorParameters
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+public class CRDTYOLOv8ExecutorParameters extends LatestTimestampModifiable
 {
-   private final LatestTimestampModifiable latestTimestampModifiable;
+   private final CRDTStatusSet<YOLOv8ModelInfo> availableModels;
+   private final CRDTBidirectionalSet<String> modelsToRun;
+   private final Map<String, CRDTYOLOv8ModelParameters> modelSettings;
 
-   private final CRDTBidirectionalStringArray modelsToRun;
-   private final CRDTYOLOv8ModelParameters[] modelSettings;
-
-   public CRDTYOLOv8ExecutorParameters(CRDTInfo crdtInfo, YOLOv8ModelInfo[] models)
+   public CRDTYOLOv8ExecutorParameters(CRDTInfo crdtInfo)
    {
-      latestTimestampModifiable = new LatestTimestampModifiable(crdtInfo);
-      latestTimestampModifiable.setModifierName(getClass().getSimpleName());
+      super(crdtInfo);
+      setModifierName(getClass().getSimpleName());
 
-      modelsToRun = new CRDTBidirectionalStringArray(latestTimestampModifiable, models.length);
-      modelSettings = new CRDTYOLOv8ModelParameters[models.length];
-      for (int i = 0; i < models.length; ++i)
+      availableModels = new CRDTStatusSet<>(ROS2ActorDesignation.ROBOT, crdtInfo);
+      modelsToRun = new CRDTBidirectionalSet<>(this);
+      modelSettings = new HashMap<>();
+   }
+
+   public void setAvailableModels(Collection<YOLOv8Model> models)
+   {
+      availableModels.clear();
+      availableModels.addAll(models.stream().map(YOLOv8Tools::toMessage).collect(Collectors.toSet()));
+   }
+
+   public void update()
+   {
+      checkModified();
+
+      if (availableModels.pollHasStatus())
       {
-         modelSettings[i] = new CRDTYOLOv8ModelParameters(crdtInfo, models[i]);
+         modelSettings.clear();
+         availableModels.getCopy().forEach(model -> modelSettings.put(model.getModelNameAsString(), new CRDTYOLOv8ModelParameters(this, model)));
+         modelsToRun.retainAll(availableModels.getCopy().stream().map(YOLOv8ModelInfo::getModelNameAsString).collect(Collectors.toSet()));
       }
    }
 
-   public CRDTBidirectionalStringArray getModelsToRun()
+   public CRDTStatusSet<YOLOv8ModelInfo> getAvailableModels()
+   {
+      return availableModels;
+   }
+
+   public CRDTBidirectionalSet<String> getModelsToRun()
    {
       return modelsToRun;
    }
 
-   public CRDTYOLOv8ModelParameters[] getModelSettings()
+   public Map<String, CRDTYOLOv8ModelParameters> getModelSettings()
    {
       return modelSettings;
    }
 
    public void toMessage(YOLOv8ExecutorSettings messageToPack)
    {
-      latestTimestampModifiable.toMessage(messageToPack.getLatestTimestampModifiable());
+      toMessage(messageToPack.getLatestTimestampModifiable());
 
-      modelsToRun.toMessage(messageToPack.getModelsToRun());
+      messageToPack.getAvailableYoloModels().clear();
+      availableModels.getCopy().forEach(model -> messageToPack.getAvailableYoloModels().add().set(model));
 
       messageToPack.getModelsToRun().clear();
-      for (CRDTYOLOv8ModelParameters modelSetting : modelSettings)
+      modelsToRun.getValue().forEach(model -> messageToPack.getModelsToRun().add(model));
+
+      messageToPack.getModelSettings().clear();
+      for (CRDTYOLOv8ModelParameters modelSetting : modelSettings.values())
       {
          modelSetting.toMessage(messageToPack.getModelSettings().add());
       }
@@ -51,13 +84,23 @@ public class CRDTYOLOv8ExecutorParameters
 
    public void fromMessage(YOLOv8ExecutorSettings message)
    {
-      latestTimestampModifiable.fromMessage(message.getLatestTimestampModifiable());
+      fromMessage(message.getLatestTimestampModifiable());
 
-      modelsToRun.fromMessage(message.getModelsToRun());
-
-      for (int i = 0; i < message.getModelSettings().size() && i < modelSettings.length; ++i)
+      availableModels.fromMessage(models ->
       {
-         modelSettings[i].fromMessage(message.getModelSettings().get(i));
+         models.clear();
+         models.addAll(message.getAvailableYoloModels());
+      });
+
+      modelsToRun.fromMessage(models ->
+      {
+         models.clear();
+         models.addAll(message.getModelsToRun().stream().map(StringBuilder::toString).toList());
+      });
+
+      for (YOLOv8ModelSettings modelSettingsMessage : message.getModelSettings())
+      {
+         modelSettings.get(modelSettingsMessage.getModelNameAsString()).fromMessage(modelSettingsMessage);
       }
    }
 }

@@ -9,9 +9,9 @@ import imgui.flag.ImGuiTableRowFlags;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
-import perception_msgs.msg.dds.YOLOv8ModelSettings;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.perception.detections.yolo.CRDTYOLOv8ModelParameters;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 
@@ -19,6 +19,8 @@ public class RDXROS2YOLOv8ModelSettings
 {
    private static final int TABLE_COLUMN_COUNT = 6;
    private static final float MAX_TABLE_HEIGHT = 200.0f;
+
+   private final CRDTYOLOv8ModelParameters syncedParameters;
 
    private final String modelName;
    private final String[] detectableObjectClasses;
@@ -41,17 +43,14 @@ public class RDXROS2YOLOv8ModelSettings
    private final ImInt[] erosionKernelRadii;
    private final ImFloat[] outlierThresholds;
 
-   private final YOLOv8ModelSettings settingsMessage;
    private final Notification updateSettingsMessage = new Notification();
 
-   public RDXROS2YOLOv8ModelSettings(String modelName, String[] detectableObjectClasses)
+   public RDXROS2YOLOv8ModelSettings(CRDTYOLOv8ModelParameters syncedParameters)
    {
-      this.modelName = modelName;
-      this.detectableObjectClasses = detectableObjectClasses;
+      this.syncedParameters = syncedParameters;
+      this.modelName = syncedParameters.getModelName();
+      this.detectableObjectClasses = syncedParameters.getDetectableObjectClasses();
       detectableObjectClassCount = detectableObjectClasses.length;
-
-      settingsMessage = new YOLOv8ModelSettings();
-      settingsMessage.setModelName(modelName);
 
       // Initialize settings
       enables = new ImBoolean[detectableObjectClassCount];
@@ -67,12 +66,6 @@ public class RDXROS2YOLOv8ModelSettings
          maskThresholds[i] = new ImFloat(universalMaskThreshold);
          erosionKernelRadii[i] = new ImInt(universalErosionKernelRadius);
          outlierThresholds[i] = new ImFloat(universalOutlierThreshold);
-
-         settingsMessage.getIgnoredObjectClasses().add(!enables[i].get());
-         settingsMessage.getConfidenceThresholds().add(confidenceThresholds[i].get());
-         settingsMessage.getMaskThresholds().add(maskThresholds[i].get());
-         settingsMessage.getErosionKernelRadii().add(erosionKernelRadii[i].get());
-         settingsMessage.getOutlierThresholds().add(outlierThresholds[i].get());
       }
    }
 
@@ -81,15 +74,31 @@ public class RDXROS2YOLOv8ModelSettings
       return modelName;
    }
 
-   public YOLOv8ModelSettings getSettingsMessage()
+   public CRDTYOLOv8ModelParameters getModelParameters()
    {
       if (updateSettingsMessage.poll())
-         updateSettingsMessage();
+         updateSyncedParameters();
 
-      return settingsMessage;
+      return syncedParameters;
    }
 
-   public boolean renderSettings()
+   public void update()
+   {
+      if (syncedParameters.isModified())
+      {
+         nmsThreshold.set(syncedParameters.getNMSThreshold().getValue());
+         for (int i = 0; i < detectableObjectClassCount; ++i)
+         {
+            enables[i].set(!syncedParameters.getIgnoredObjectClasses().getValueReadOnly(i));
+            confidenceThresholds[i].set(syncedParameters.getConfidenceThresholds().getValueReadOnly(i));
+            maskThresholds[i].set(syncedParameters.getMaskThresholds().getValueReadOnly(i));
+            erosionKernelRadii[i].set(syncedParameters.getErosionKernelRadii().getValueReadOnly(i));
+            outlierThresholds[i].set(syncedParameters.getOutlierThresholds().getValueReadOnly(i));
+         }
+      }
+   }
+
+   public void renderSettings()
    {
       boolean changed = false;
 
@@ -114,8 +123,6 @@ public class RDXROS2YOLOv8ModelSettings
 
       if (changed)
          updateSettingsMessage.set();
-
-      return changed;
    }
 
    private boolean renderSettingsTable(ImGuiStyle style, int tableFlags, float height)
@@ -279,16 +286,16 @@ public class RDXROS2YOLOv8ModelSettings
       return changed;
    }
 
-   private void updateSettingsMessage()
+   private void updateSyncedParameters()
    {
+      syncedParameters.getNMSThreshold().setValue(nmsThreshold.get());
       for (int i = 0; i < detectableObjectClassCount; ++i)
       {
-         settingsMessage.getIgnoredObjectClasses().set(i, !enables[i].get());
-         settingsMessage.getConfidenceThresholds().set(i, confidenceThresholds[i].get());
-         settingsMessage.getMaskThresholds().set(i, maskThresholds[i].get());
-         settingsMessage.getErosionKernelRadii().set(i, erosionKernelRadii[i].get());
-         settingsMessage.getOutlierThresholds().set(i, outlierThresholds[i].get());
+         syncedParameters.getIgnoredObjectClasses().setValue(i, !enables[i].get());
+         syncedParameters.getConfidenceThresholds().setValue(i, confidenceThresholds[i].get());
+         syncedParameters.getMaskThresholds().setValue(i, maskThresholds[i].get());
+         syncedParameters.getErosionKernelRadii().setValue(i, erosionKernelRadii[i].get());
+         syncedParameters.getOutlierThresholds().setValue(i, outlierThresholds[i].get());
       }
-      settingsMessage.setNonMaximumSuppressionThreshold(nmsThreshold.get());
    }
 }
