@@ -97,7 +97,7 @@ public class TextToSpeechPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
 
       if(data.getTextToSpeak().length() <= 255)
       cdr.write_type_d(data.getTextToSpeak());else
-          throw new RuntimeException("text_to_speak field exceeds the maximum length");
+          throw new RuntimeException("text_to_speak field exceeds the maximum length: %d > %d".formatted(data.getTextToSpeak().length(), 255));
 
    }
 

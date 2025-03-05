@@ -98,7 +98,7 @@ public class SteppableRegionDebugImageMessagePubSubType implements us.ihmc.pubsu
 
       if(data.getData().size() <= 250000)
       cdr.write_type_e(data.getData());else
-          throw new RuntimeException("data field exceeds the maximum length");
+          throw new RuntimeException("data field exceeds the maximum length: %d > %d".formatted(data.getData().size(), 250000));
 
       cdr.write_type_3(data.getFormat());
 

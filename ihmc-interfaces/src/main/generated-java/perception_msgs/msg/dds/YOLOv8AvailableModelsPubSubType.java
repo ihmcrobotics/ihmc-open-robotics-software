@@ -88,7 +88,7 @@ public class YOLOv8AvailableModelsPubSubType implements us.ihmc.pubsub.TopicData
 
       if(data.getAvailableYoloModels().size() <= 8)
       cdr.write_type_e(data.getAvailableYoloModels());else
-          throw new RuntimeException("available_yolo_models field exceeds the maximum length");
+          throw new RuntimeException("available_yolo_models field exceeds the maximum length: %d > %d".formatted(data.getAvailableYoloModels().size(), 8));
 
    }
 

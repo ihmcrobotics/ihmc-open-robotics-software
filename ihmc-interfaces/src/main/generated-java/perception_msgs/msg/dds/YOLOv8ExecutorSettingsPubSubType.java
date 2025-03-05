@@ -90,11 +90,11 @@ public class YOLOv8ExecutorSettingsPubSubType implements us.ihmc.pubsub.TopicDat
    {
       if(data.getModelsToRun().size() <= 8)
       cdr.write_type_e(data.getModelsToRun());else
-          throw new RuntimeException("models_to_run field exceeds the maximum length");
+          throw new RuntimeException("models_to_run field exceeds the maximum length: %d > %d".formatted(data.getModelsToRun().size(), 8));
 
       if(data.getModelSettings().size() <= 8)
       cdr.write_type_e(data.getModelSettings());else
-          throw new RuntimeException("model_settings field exceeds the maximum length");
+          throw new RuntimeException("model_settings field exceeds the maximum length: %d > %d".formatted(data.getModelSettings().size(), 8));
 
    }
 

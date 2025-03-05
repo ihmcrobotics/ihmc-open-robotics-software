@@ -111,29 +111,29 @@ public class YOLOv8ModelSettingsPubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       if(data.getModelName().length() <= 255)
       cdr.write_type_d(data.getModelName());else
-          throw new RuntimeException("model_name field exceeds the maximum length");
+          throw new RuntimeException("model_name field exceeds the maximum length: %d > %d".formatted(data.getModelName().length(), 255));
 
       if(data.getIgnoredObjectClasses().size() <= 96)
       cdr.write_type_e(data.getIgnoredObjectClasses());else
-          throw new RuntimeException("ignored_object_classes field exceeds the maximum length");
+          throw new RuntimeException("ignored_object_classes field exceeds the maximum length: %d > %d".formatted(data.getIgnoredObjectClasses().size(), 96));
 
       if(data.getConfidenceThresholds().size() <= 96)
       cdr.write_type_e(data.getConfidenceThresholds());else
-          throw new RuntimeException("confidence_thresholds field exceeds the maximum length");
+          throw new RuntimeException("confidence_thresholds field exceeds the maximum length: %d > %d".formatted(data.getConfidenceThresholds().size(), 96));
 
       if(data.getMaskThresholds().size() <= 96)
       cdr.write_type_e(data.getMaskThresholds());else
-          throw new RuntimeException("mask_thresholds field exceeds the maximum length");
+          throw new RuntimeException("mask_thresholds field exceeds the maximum length: %d > %d".formatted(data.getMaskThresholds().size(), 96));
 
       cdr.write_type_5(data.getNonMaximumSuppressionThreshold());
 
       if(data.getErosionKernelRadii().size() <= 96)
       cdr.write_type_e(data.getErosionKernelRadii());else
-          throw new RuntimeException("erosion_kernel_radii field exceeds the maximum length");
+          throw new RuntimeException("erosion_kernel_radii field exceeds the maximum length: %d > %d".formatted(data.getErosionKernelRadii().size(), 96));
 
       if(data.getOutlierThresholds().size() <= 96)
       cdr.write_type_e(data.getOutlierThresholds());else
-          throw new RuntimeException("outlier_thresholds field exceeds the maximum length");
+          throw new RuntimeException("outlier_thresholds field exceeds the maximum length: %d > %d".formatted(data.getOutlierThresholds().size(), 96));
 
    }
 

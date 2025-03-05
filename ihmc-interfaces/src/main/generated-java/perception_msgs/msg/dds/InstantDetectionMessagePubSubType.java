@@ -130,11 +130,11 @@ public class InstantDetectionMessagePubSubType implements us.ihmc.pubsub.TopicDa
    {
       if(data.getDetectedObjectClass().length() <= 255)
       cdr.write_type_d(data.getDetectedObjectClass());else
-          throw new RuntimeException("detected_object_class field exceeds the maximum length");
+          throw new RuntimeException("detected_object_class field exceeds the maximum length: %d > %d".formatted(data.getDetectedObjectClass().length(), 255));
 
       if(data.getDetectedObjectName().length() <= 255)
       cdr.write_type_d(data.getDetectedObjectName());else
-          throw new RuntimeException("detected_object_name field exceeds the maximum length");
+          throw new RuntimeException("detected_object_name field exceeds the maximum length: %d > %d".formatted(data.getDetectedObjectName().length(), 255));
 
       cdr.write_type_6(data.getConfidence());
 
@@ -146,7 +146,7 @@ public class InstantDetectionMessagePubSubType implements us.ihmc.pubsub.TopicDa
       perception_msgs.msg.dds.ImageMessagePubSubType.write(data.getYoloObjectMask(), cdr);
       if(data.getYoloObjectPointCloud().size() <= 511)
       cdr.write_type_e(data.getYoloObjectPointCloud());else
-          throw new RuntimeException("yolo_object_point_cloud field exceeds the maximum length");
+          throw new RuntimeException("yolo_object_point_cloud field exceeds the maximum length: %d > %d".formatted(data.getYoloObjectPointCloud().size(), 511));
 
       for(int i0 = 0; i0 < data.getCenterPoseBoundingBox2dVertices().length; ++i0)
       {

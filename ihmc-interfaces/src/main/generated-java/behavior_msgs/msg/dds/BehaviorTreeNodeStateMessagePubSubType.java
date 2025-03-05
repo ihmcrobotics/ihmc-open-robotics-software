@@ -95,7 +95,7 @@ public class BehaviorTreeNodeStateMessagePubSubType implements us.ihmc.pubsub.To
 
       if(data.getRecentLogMessages().size() <= 50)
       cdr.write_type_e(data.getRecentLogMessages());else
-          throw new RuntimeException("recent_log_messages field exceeds the maximum length");
+          throw new RuntimeException("recent_log_messages field exceeds the maximum length: %d > %d".formatted(data.getRecentLogMessages().size(), 50));
 
    }
 

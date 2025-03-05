@@ -80,7 +80,7 @@ public class PolygonizerParametersStringMessagePubSubType implements us.ihmc.pub
    {
       if(data.getParameters().size() <= 2056)
       cdr.write_type_e(data.getParameters());else
-          throw new RuntimeException("parameters field exceeds the maximum length");
+          throw new RuntimeException("parameters field exceeds the maximum length: %d > %d".formatted(data.getParameters().size(), 2056));
 
    }
 

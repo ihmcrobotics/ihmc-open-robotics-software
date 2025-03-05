@@ -113,23 +113,23 @@ public class BoundingBoxesPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
 
       if(data.getBoundingBoxesXCoordinates().size() <= 100)
       cdr.write_type_e(data.getBoundingBoxesXCoordinates());else
-          throw new RuntimeException("bounding_boxes_x_coordinates field exceeds the maximum length");
+          throw new RuntimeException("bounding_boxes_x_coordinates field exceeds the maximum length: %d > %d".formatted(data.getBoundingBoxesXCoordinates().size(), 100));
 
       if(data.getBoundingBoxesYCoordinates().size() <= 100)
       cdr.write_type_e(data.getBoundingBoxesYCoordinates());else
-          throw new RuntimeException("bounding_boxes_y_coordinates field exceeds the maximum length");
+          throw new RuntimeException("bounding_boxes_y_coordinates field exceeds the maximum length: %d > %d".formatted(data.getBoundingBoxesYCoordinates().size(), 100));
 
       if(data.getBoundingBoxesWidths().size() <= 100)
       cdr.write_type_e(data.getBoundingBoxesWidths());else
-          throw new RuntimeException("bounding_boxes_widths field exceeds the maximum length");
+          throw new RuntimeException("bounding_boxes_widths field exceeds the maximum length: %d > %d".formatted(data.getBoundingBoxesWidths().size(), 100));
 
       if(data.getBoundingBoxesHeights().size() <= 100)
       cdr.write_type_e(data.getBoundingBoxesHeights());else
-          throw new RuntimeException("bounding_boxes_heights field exceeds the maximum length");
+          throw new RuntimeException("bounding_boxes_heights field exceeds the maximum length: %d > %d".formatted(data.getBoundingBoxesHeights().size(), 100));
 
       if(data.getLabels().size() <= 100)
       cdr.write_type_e(data.getLabels());else
-          throw new RuntimeException("labels field exceeds the maximum length");
+          throw new RuntimeException("labels field exceeds the maximum length: %d > %d".formatted(data.getLabels().size(), 100));
 
    }
 

@@ -102,7 +102,7 @@ public class MultiContactTrajectoryMessagePubSubType implements us.ihmc.pubsub.T
 
       if(data.getJointAngles().size() <= 50)
       cdr.write_type_e(data.getJointAngles());else
-          throw new RuntimeException("joint_angles field exceeds the maximum length");
+          throw new RuntimeException("joint_angles field exceeds the maximum length: %d > %d".formatted(data.getJointAngles().size(), 50));
 
       geometry_msgs.msg.dds.PosePubSubType.write(data.getRootJointPose(), cdr);
       cdr.write_type_2(data.getJointNameHash());

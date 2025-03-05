@@ -79,7 +79,7 @@ public class MinimalFootstepListMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       if(data.getMinimalFootsteps().size() <= 200)
       cdr.write_type_e(data.getMinimalFootsteps());else
-          throw new RuntimeException("minimal_footsteps field exceeds the maximum length");
+          throw new RuntimeException("minimal_footsteps field exceeds the maximum length: %d > %d".formatted(data.getMinimalFootsteps().size(), 200));
 
    }
 

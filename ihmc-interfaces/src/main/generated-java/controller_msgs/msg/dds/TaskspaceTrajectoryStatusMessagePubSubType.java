@@ -109,7 +109,7 @@ public class TaskspaceTrajectoryStatusMessagePubSubType implements us.ihmc.pubsu
 
       if(data.getEndEffectorName().length() <= 255)
       cdr.write_type_d(data.getEndEffectorName());else
-          throw new RuntimeException("end_effector_name field exceeds the maximum length");
+          throw new RuntimeException("end_effector_name field exceeds the maximum length: %d > %d".formatted(data.getEndEffectorName().length(), 255));
 
       cdr.write_type_9(data.getTrajectoryExecutionStatus());
 

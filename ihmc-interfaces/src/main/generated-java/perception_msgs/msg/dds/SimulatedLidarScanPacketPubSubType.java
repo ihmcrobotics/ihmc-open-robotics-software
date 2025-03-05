@@ -95,7 +95,7 @@ public class SimulatedLidarScanPacketPubSubType implements us.ihmc.pubsub.TopicD
 
       if(data.getRanges().size() <= 100)
       cdr.write_type_e(data.getRanges());else
-          throw new RuntimeException("ranges field exceeds the maximum length");
+          throw new RuntimeException("ranges field exceeds the maximum length: %d > %d".formatted(data.getRanges().size(), 100));
 
       cdr.write_type_2(data.getSensorId());
 

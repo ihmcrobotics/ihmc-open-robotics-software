@@ -91,7 +91,7 @@ public class ZEDSVOCurrentFileMessagePubSubType implements us.ihmc.pubsub.TopicD
    {
       if(data.getCurrentFileName().length() <= 255)
       cdr.write_type_d(data.getCurrentFileName());else
-          throw new RuntimeException("current_file_name field exceeds the maximum length");
+          throw new RuntimeException("current_file_name field exceeds the maximum length: %d > %d".formatted(data.getCurrentFileName().length(), 255));
 
       cdr.write_type_9(data.getRecordMode());
 

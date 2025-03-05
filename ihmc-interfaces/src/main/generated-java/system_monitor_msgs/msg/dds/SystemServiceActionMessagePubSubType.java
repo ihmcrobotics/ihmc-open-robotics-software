@@ -79,11 +79,11 @@ public class SystemServiceActionMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       if(data.getServiceName().length() <= 255)
       cdr.write_type_d(data.getServiceName());else
-          throw new RuntimeException("service_name field exceeds the maximum length");
+          throw new RuntimeException("service_name field exceeds the maximum length: %d > %d".formatted(data.getServiceName().length(), 255));
 
       if(data.getSystemdAction().length() <= 255)
       cdr.write_type_d(data.getSystemdAction());else
-          throw new RuntimeException("systemd_action field exceeds the maximum length");
+          throw new RuntimeException("systemd_action field exceeds the maximum length: %d > %d".formatted(data.getSystemdAction().length(), 255));
 
    }
 

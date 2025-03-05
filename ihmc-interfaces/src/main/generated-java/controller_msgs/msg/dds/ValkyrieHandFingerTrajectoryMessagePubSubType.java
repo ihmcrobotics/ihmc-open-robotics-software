@@ -97,7 +97,7 @@ public class ValkyrieHandFingerTrajectoryMessagePubSubType implements us.ihmc.pu
 
       if(data.getValkyrieFingerMotorNames().size() <= 6)
       cdr.write_type_e(data.getValkyrieFingerMotorNames());else
-          throw new RuntimeException("valkyrie_finger_motor_names field exceeds the maximum length");
+          throw new RuntimeException("valkyrie_finger_motor_names field exceeds the maximum length: %d > %d".formatted(data.getValkyrieFingerMotorNames().size(), 6));
 
       controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.write(data.getJointspaceTrajectory(), cdr);
    }

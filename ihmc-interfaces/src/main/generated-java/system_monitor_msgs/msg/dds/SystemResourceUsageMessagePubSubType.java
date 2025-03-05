@@ -167,7 +167,7 @@ public class SystemResourceUsageMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       if(data.getUptime().length() <= 255)
       cdr.write_type_d(data.getUptime());else
-          throw new RuntimeException("uptime field exceeds the maximum length");
+          throw new RuntimeException("uptime field exceeds the maximum length: %d > %d".formatted(data.getUptime().length(), 255));
 
       cdr.write_type_5(data.getMemoryUsed());
 
@@ -177,47 +177,47 @@ public class SystemResourceUsageMessagePubSubType implements us.ihmc.pubsub.Topi
 
       if(data.getCpuUsages().size() <= 100)
       cdr.write_type_e(data.getCpuUsages());else
-          throw new RuntimeException("cpu_usages field exceeds the maximum length");
+          throw new RuntimeException("cpu_usages field exceeds the maximum length: %d > %d".formatted(data.getCpuUsages().size(), 100));
 
       if(data.getCpuTemps().size() <= 100)
       cdr.write_type_e(data.getCpuTemps());else
-          throw new RuntimeException("cpu_temps field exceeds the maximum length");
+          throw new RuntimeException("cpu_temps field exceeds the maximum length: %d > %d".formatted(data.getCpuTemps().size(), 100));
 
       cdr.write_type_2(data.getIfaceCount());
 
       if(data.getIfaceNames().size() <= 100)
       cdr.write_type_e(data.getIfaceNames());else
-          throw new RuntimeException("iface_names field exceeds the maximum length");
+          throw new RuntimeException("iface_names field exceeds the maximum length: %d > %d".formatted(data.getIfaceNames().size(), 100));
 
       if(data.getIfaceRxKbps().size() <= 100)
       cdr.write_type_e(data.getIfaceRxKbps());else
-          throw new RuntimeException("iface_rx_kbps field exceeds the maximum length");
+          throw new RuntimeException("iface_rx_kbps field exceeds the maximum length: %d > %d".formatted(data.getIfaceRxKbps().size(), 100));
 
       if(data.getIfaceTxKbps().size() <= 100)
       cdr.write_type_e(data.getIfaceTxKbps());else
-          throw new RuntimeException("iface_tx_kbps field exceeds the maximum length");
+          throw new RuntimeException("iface_tx_kbps field exceeds the maximum length: %d > %d".formatted(data.getIfaceTxKbps().size(), 100));
 
       cdr.write_type_2(data.getNvidiaGpuCount());
 
       if(data.getNvidiaGpuModels().size() <= 100)
       cdr.write_type_e(data.getNvidiaGpuModels());else
-          throw new RuntimeException("nvidia_gpu_models field exceeds the maximum length");
+          throw new RuntimeException("nvidia_gpu_models field exceeds the maximum length: %d > %d".formatted(data.getNvidiaGpuModels().size(), 100));
 
       if(data.getNvidiaGpuMemoryUsed().size() <= 100)
       cdr.write_type_e(data.getNvidiaGpuMemoryUsed());else
-          throw new RuntimeException("nvidia_gpu_memory_used field exceeds the maximum length");
+          throw new RuntimeException("nvidia_gpu_memory_used field exceeds the maximum length: %d > %d".formatted(data.getNvidiaGpuMemoryUsed().size(), 100));
 
       if(data.getNvidiaGpuMemoryTotal().size() <= 100)
       cdr.write_type_e(data.getNvidiaGpuMemoryTotal());else
-          throw new RuntimeException("nvidia_gpu_memory_total field exceeds the maximum length");
+          throw new RuntimeException("nvidia_gpu_memory_total field exceeds the maximum length: %d > %d".formatted(data.getNvidiaGpuMemoryTotal().size(), 100));
 
       if(data.getNvidiaGpuUtilization().size() <= 100)
       cdr.write_type_e(data.getNvidiaGpuUtilization());else
-          throw new RuntimeException("nvidia_gpu_utilization field exceeds the maximum length");
+          throw new RuntimeException("nvidia_gpu_utilization field exceeds the maximum length: %d > %d".formatted(data.getNvidiaGpuUtilization().size(), 100));
 
       if(data.getNvidiaGpuTemps().size() <= 100)
       cdr.write_type_e(data.getNvidiaGpuTemps());else
-          throw new RuntimeException("nvidia_gpu_temps field exceeds the maximum length");
+          throw new RuntimeException("nvidia_gpu_temps field exceeds the maximum length: %d > %d".formatted(data.getNvidiaGpuTemps().size(), 100));
 
    }
 

@@ -97,7 +97,7 @@ public class CrocoddylControlMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
       if(data.getU().size() <= 100)
       cdr.write_type_e(data.getU());else
-          throw new RuntimeException("u field exceeds the maximum length");
+          throw new RuntimeException("u field exceeds the maximum length: %d > %d".formatted(data.getU().size(), 100));
 
       controller_msgs.msg.dds.CrocoddylFeedbackGainMessagePubSubType.write(data.getGain(), cdr);
    }
