@@ -11,6 +11,7 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class YOLOv8ExecutorSettings extends Packet<YOLOv8ExecutorSettings> implements Settable<YOLOv8ExecutorSettings>, EpsilonComparable<YOLOv8ExecutorSettings>
 {
+   public ihmc_common_msgs.msg.dds.LatestModificationMessage latest_timestamp_modifiable_;
    /**
             * List of models to run
             */
@@ -22,6 +23,7 @@ public class YOLOv8ExecutorSettings extends Packet<YOLOv8ExecutorSettings> imple
 
    public YOLOv8ExecutorSettings()
    {
+      latest_timestamp_modifiable_ = new ihmc_common_msgs.msg.dds.LatestModificationMessage();
       models_to_run_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (16, "type_d");
       model_settings_ = new us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.YOLOv8ModelSettings> (16, new perception_msgs.msg.dds.YOLOv8ModelSettingsPubSubType());
 
@@ -35,8 +37,15 @@ public class YOLOv8ExecutorSettings extends Packet<YOLOv8ExecutorSettings> imple
 
    public void set(YOLOv8ExecutorSettings other)
    {
+      ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.staticCopy(other.latest_timestamp_modifiable_, latest_timestamp_modifiable_);
       models_to_run_.set(other.models_to_run_);
       model_settings_.set(other.model_settings_);
+   }
+
+
+   public ihmc_common_msgs.msg.dds.LatestModificationMessage getLatestTimestampModifiable()
+   {
+      return latest_timestamp_modifiable_;
    }
 
 
@@ -75,6 +84,7 @@ public class YOLOv8ExecutorSettings extends Packet<YOLOv8ExecutorSettings> imple
       if(other == null) return false;
       if(other == this) return true;
 
+      if (!this.latest_timestamp_modifiable_.epsilonEquals(other.latest_timestamp_modifiable_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilderSequence(this.models_to_run_, other.models_to_run_, epsilon)) return false;
 
       if (this.model_settings_.size() != other.model_settings_.size()) { return false; }
@@ -97,6 +107,7 @@ public class YOLOv8ExecutorSettings extends Packet<YOLOv8ExecutorSettings> imple
 
       YOLOv8ExecutorSettings otherMyClass = (YOLOv8ExecutorSettings) other;
 
+      if (!this.latest_timestamp_modifiable_.equals(otherMyClass.latest_timestamp_modifiable_)) return false;
       if (!this.models_to_run_.equals(otherMyClass.models_to_run_)) return false;
       if (!this.model_settings_.equals(otherMyClass.model_settings_)) return false;
 
@@ -109,6 +120,8 @@ public class YOLOv8ExecutorSettings extends Packet<YOLOv8ExecutorSettings> imple
       StringBuilder builder = new StringBuilder();
 
       builder.append("YOLOv8ExecutorSettings {");
+      builder.append("latest_timestamp_modifiable=");
+      builder.append(this.latest_timestamp_modifiable_);      builder.append(", ");
       builder.append("models_to_run=");
       builder.append(this.models_to_run_);      builder.append(", ");
       builder.append("model_settings=");

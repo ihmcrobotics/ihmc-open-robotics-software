@@ -1,6 +1,7 @@
 #ifndef __perception_msgs__msg__YOLOv8ExecutorSettings__idl__
 #define __perception_msgs__msg__YOLOv8ExecutorSettings__idl__
 
+#include "ihmc_common_msgs/msg/./LatestModificationMessage_.idl"
 #include "perception_msgs/msg/./YOLOv8ModelSettings_.idl"
 module perception_msgs
 {
@@ -15,6 +16,7 @@ module perception_msgs
       @TypeCode(type="perception_msgs::msg::dds_::YOLOv8ExecutorSettings_")
       struct YOLOv8ExecutorSettings
       {
+        ihmc_common_msgs::msg::dds::LatestModificationMessage latest_timestamp_modifiable;
         /**
          * List of models to run
          */

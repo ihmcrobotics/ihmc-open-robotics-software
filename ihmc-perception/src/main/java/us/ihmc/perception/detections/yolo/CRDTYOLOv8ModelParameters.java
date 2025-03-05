@@ -28,7 +28,6 @@ public class CRDTYOLOv8ModelParameters
    public CRDTYOLOv8ModelParameters(CRDTInfo crdtInfo, YOLOv8ModelInfo modelInfo)
    {
       this.modelInfo = modelInfo;
-
       this.latestTimestampModifiable = new LatestTimestampModifiable(crdtInfo);
       latestTimestampModifiable.setModifierName(modelInfo.getModelNameAsString() + " Parameters");
 
@@ -51,6 +50,36 @@ public class CRDTYOLOv8ModelParameters
       model.setConfidenceThresholds(confidenceThresholds.getValue());
       model.setMaskThresholds(maskThresholds.getValue());
       model.setNMSThreshold(nmsThreshold.getValue());
+   }
+
+   public CRDTBidirectionalBooleanArray getIgnoredObjectClasses()
+   {
+      return ignoredObjectClasses;
+   }
+
+   public CRDTBidirectionalFloatArray getConfidenceThresholds()
+   {
+      return confidenceThresholds;
+   }
+
+   public CRDTBidirectionalFloatArray getMaskThresholds()
+   {
+      return maskThresholds;
+   }
+
+   public CRDTBidirectionalFloat getNMSThreshold()
+   {
+      return nmsThreshold;
+   }
+
+   public CRDTBidirectionalIntegerArray getErosionKernelRadii()
+   {
+      return erosionKernelRadii;
+   }
+
+   public CRDTBidirectionalFloatArray getOutlierThresholds()
+   {
+      return outlierThresholds;
    }
 
    public void toMessage(YOLOv8ModelSettings messageToPack)
