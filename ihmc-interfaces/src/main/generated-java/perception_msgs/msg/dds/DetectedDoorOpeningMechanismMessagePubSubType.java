@@ -85,7 +85,7 @@ public class DetectedDoorOpeningMechanismMessagePubSubType implements us.ihmc.pu
    {
       if(data.getName().length() <= 255)
       cdr.write_type_d(data.getName());else
-          throw new RuntimeException("name field exceeds the maximum length");
+          throw new RuntimeException("name field exceeds the maximum length: %d > %d".formatted(data.getName().length(), 255));
 
       cdr.write_type_9(data.getSide());
 

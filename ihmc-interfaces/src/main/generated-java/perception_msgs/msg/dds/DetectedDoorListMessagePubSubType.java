@@ -79,7 +79,7 @@ public class DetectedDoorListMessagePubSubType implements us.ihmc.pubsub.TopicDa
    {
       if(data.getDetectedDoors().size() <= 16)
       cdr.write_type_e(data.getDetectedDoors());else
-          throw new RuntimeException("detected_doors field exceeds the maximum length");
+          throw new RuntimeException("detected_doors field exceeds the maximum length: %d > %d".formatted(data.getDetectedDoors().size(), 16));
 
    }
 
