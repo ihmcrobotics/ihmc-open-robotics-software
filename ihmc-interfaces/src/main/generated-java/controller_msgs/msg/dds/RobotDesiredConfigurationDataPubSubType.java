@@ -134,7 +134,7 @@ public class RobotDesiredConfigurationDataPubSubType implements us.ihmc.pubsub.T
 
       if(data.getJointDesiredOutputList().size() <= 50)
       cdr.write_type_e(data.getJointDesiredOutputList());else
-          throw new RuntimeException("joint_desired_output_list field exceeds the maximum length");
+          throw new RuntimeException("joint_desired_output_list field exceeds the maximum length: %d > %d".formatted(data.getJointDesiredOutputList().size(), 50));
 
       cdr.write_type_7(data.getHasDesiredRootJointPositionData());
 

@@ -79,11 +79,11 @@ public class SystemAvailableMessagePubSubType implements us.ihmc.pubsub.TopicDat
    {
       if(data.getHostname().length() <= 255)
       cdr.write_type_d(data.getHostname());else
-          throw new RuntimeException("hostname field exceeds the maximum length");
+          throw new RuntimeException("hostname field exceeds the maximum length: %d > %d".formatted(data.getHostname().length(), 255));
 
       if(data.getInstanceId().length() <= 255)
       cdr.write_type_d(data.getInstanceId());else
-          throw new RuntimeException("instance_id field exceeds the maximum length");
+          throw new RuntimeException("instance_id field exceeds the maximum length: %d > %d".formatted(data.getInstanceId().length(), 255));
 
    }
 

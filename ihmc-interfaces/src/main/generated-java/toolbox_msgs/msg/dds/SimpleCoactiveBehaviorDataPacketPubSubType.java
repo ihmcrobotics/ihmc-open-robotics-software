@@ -88,7 +88,7 @@ public class SimpleCoactiveBehaviorDataPacketPubSubType implements us.ihmc.pubsu
 
       if(data.getKey().length() <= 255)
       cdr.write_type_d(data.getKey());else
-          throw new RuntimeException("key field exceeds the maximum length");
+          throw new RuntimeException("key field exceeds the maximum length: %d > %d".formatted(data.getKey().length(), 255));
 
       cdr.write_type_6(data.getValue());
 

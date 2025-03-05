@@ -90,7 +90,7 @@ public class DirectionalControlConfigurationMessagePubSubType implements us.ihmc
 
       if(data.getProfileName().length() <= 255)
       cdr.write_type_d(data.getProfileName());else
-          throw new RuntimeException("profile_name field exceeds the maximum length");
+          throw new RuntimeException("profile_name field exceeds the maximum length: %d > %d".formatted(data.getProfileName().length(), 255));
 
    }
 

@@ -109,15 +109,15 @@ public class WholeBodyTrajectoryToolboxMessagePubSubType implements us.ihmc.pubs
       toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessagePubSubType.write(data.getConfiguration(), cdr);
       if(data.getEndEffectorTrajectories().size() <= 10)
       cdr.write_type_e(data.getEndEffectorTrajectories());else
-          throw new RuntimeException("end_effector_trajectories field exceeds the maximum length");
+          throw new RuntimeException("end_effector_trajectories field exceeds the maximum length: %d > %d".formatted(data.getEndEffectorTrajectories().size(), 10));
 
       if(data.getExplorationConfigurations().size() <= 10)
       cdr.write_type_e(data.getExplorationConfigurations());else
-          throw new RuntimeException("exploration_configurations field exceeds the maximum length");
+          throw new RuntimeException("exploration_configurations field exceeds the maximum length: %d > %d".formatted(data.getExplorationConfigurations().size(), 10));
 
       if(data.getReachingManifolds().size() <= 10)
       cdr.write_type_e(data.getReachingManifolds());else
-          throw new RuntimeException("reaching_manifolds field exceeds the maximum length");
+          throw new RuntimeException("reaching_manifolds field exceeds the maximum length: %d > %d".formatted(data.getReachingManifolds().size(), 10));
 
    }
 

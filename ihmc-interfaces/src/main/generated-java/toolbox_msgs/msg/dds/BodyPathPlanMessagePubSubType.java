@@ -115,7 +115,7 @@ public class BodyPathPlanMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
       perception_msgs.msg.dds.PlanarRegionsListMessagePubSubType.write(data.getPlanarRegionsList(), cdr);
       if(data.getBodyPath().size() <= 100)
       cdr.write_type_e(data.getBodyPath());else
-          throw new RuntimeException("body_path field exceeds the maximum length");
+          throw new RuntimeException("body_path field exceeds the maximum length: %d > %d".formatted(data.getBodyPath().size(), 100));
 
       geometry_msgs.msg.dds.Pose2DPubSubType.write(data.getPathPlannerStartPose(), cdr);
       geometry_msgs.msg.dds.Pose2DPubSubType.write(data.getPathPlannerGoalPose(), cdr);

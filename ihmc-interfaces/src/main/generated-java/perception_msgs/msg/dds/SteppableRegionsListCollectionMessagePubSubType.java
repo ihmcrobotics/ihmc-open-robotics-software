@@ -149,39 +149,39 @@ public class SteppableRegionsListCollectionMessagePubSubType implements us.ihmc.
       ihmc_common_msgs.msg.dds.InstantMessagePubSubType.write(data.getLastUpdated(), cdr);
       if(data.getFootYaw().size() <= 100)
       cdr.write_type_e(data.getFootYaw());else
-          throw new RuntimeException("foot_yaw field exceeds the maximum length");
+          throw new RuntimeException("foot_yaw field exceeds the maximum length: %d > %d".formatted(data.getFootYaw().size(), 100));
 
       if(data.getRegionsPerYaw().size() <= 100)
       cdr.write_type_e(data.getRegionsPerYaw());else
-          throw new RuntimeException("regions_per_yaw field exceeds the maximum length");
+          throw new RuntimeException("regions_per_yaw field exceeds the maximum length: %d > %d".formatted(data.getRegionsPerYaw().size(), 100));
 
       if(data.getRegionId().size() <= 1000)
       cdr.write_type_e(data.getRegionId());else
-          throw new RuntimeException("region_id field exceeds the maximum length");
+          throw new RuntimeException("region_id field exceeds the maximum length: %d > %d".formatted(data.getRegionId().size(), 1000));
 
       if(data.getRegionOrigin().size() <= 1000)
       cdr.write_type_e(data.getRegionOrigin());else
-          throw new RuntimeException("region_origin field exceeds the maximum length");
+          throw new RuntimeException("region_origin field exceeds the maximum length: %d > %d".formatted(data.getRegionOrigin().size(), 1000));
 
       if(data.getRegionOrientation().size() <= 1000)
       cdr.write_type_e(data.getRegionOrientation());else
-          throw new RuntimeException("region_orientation field exceeds the maximum length");
+          throw new RuntimeException("region_orientation field exceeds the maximum length: %d > %d".formatted(data.getRegionOrientation().size(), 1000));
 
       if(data.getRegionNormal().size() <= 1000)
       cdr.write_type_e(data.getRegionNormal());else
-          throw new RuntimeException("region_normal field exceeds the maximum length");
+          throw new RuntimeException("region_normal field exceeds the maximum length: %d > %d".formatted(data.getRegionNormal().size(), 1000));
 
       if(data.getConcaveHullsSize().size() <= 100)
       cdr.write_type_e(data.getConcaveHullsSize());else
-          throw new RuntimeException("concave_hulls_size field exceeds the maximum length");
+          throw new RuntimeException("concave_hulls_size field exceeds the maximum length: %d > %d".formatted(data.getConcaveHullsSize().size(), 100));
 
       if(data.getVertexBuffer().size() <= 3000)
       cdr.write_type_e(data.getVertexBuffer());else
-          throw new RuntimeException("vertex_buffer field exceeds the maximum length");
+          throw new RuntimeException("vertex_buffer field exceeds the maximum length: %d > %d".formatted(data.getVertexBuffer().size(), 3000));
 
       if(data.getLocalHeightMap().size() <= 100)
       cdr.write_type_e(data.getLocalHeightMap());else
-          throw new RuntimeException("local_height_map field exceeds the maximum length");
+          throw new RuntimeException("local_height_map field exceeds the maximum length: %d > %d".formatted(data.getLocalHeightMap().size(), 100));
 
    }
 

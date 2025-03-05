@@ -92,7 +92,7 @@ public class JointspaceTrajectoryMessagePubSubType implements us.ihmc.pubsub.Top
 
       if(data.getJointTrajectoryMessages().size() <= 100)
       cdr.write_type_e(data.getJointTrajectoryMessages());else
-          throw new RuntimeException("joint_trajectory_messages field exceeds the maximum length");
+          throw new RuntimeException("joint_trajectory_messages field exceeds the maximum length: %d > %d".formatted(data.getJointTrajectoryMessages().size(), 100));
 
       ihmc_common_msgs.msg.dds.QueueableMessagePubSubType.write(data.getQueueingProperties(), cdr);
    }

@@ -85,11 +85,11 @@ public class YOLOv8ModelInfoPubSubType implements us.ihmc.pubsub.TopicDataType<p
    {
       if(data.getModelName().length() <= 255)
       cdr.write_type_d(data.getModelName());else
-          throw new RuntimeException("model_name field exceeds the maximum length");
+          throw new RuntimeException("model_name field exceeds the maximum length: %d > %d".formatted(data.getModelName().length(), 255));
 
       if(data.getDetectableObjectClasses().size() <= 96)
       cdr.write_type_e(data.getDetectableObjectClasses());else
-          throw new RuntimeException("detectable_object_classes field exceeds the maximum length");
+          throw new RuntimeException("detectable_object_classes field exceeds the maximum length: %d > %d".formatted(data.getDetectableObjectClasses().size(), 96));
 
    }
 

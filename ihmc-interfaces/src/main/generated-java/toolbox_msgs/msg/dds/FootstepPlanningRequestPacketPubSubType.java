@@ -215,7 +215,7 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
 
       if(data.getBodyPathWaypoints().size() <= 50)
       cdr.write_type_e(data.getBodyPathWaypoints());else
-          throw new RuntimeException("body_path_waypoints field exceeds the maximum length");
+          throw new RuntimeException("body_path_waypoints field exceeds the maximum length: %d > %d".formatted(data.getBodyPathWaypoints().size(), 50));
 
       cdr.write_type_6(data.getGoalDistanceProximity());
 

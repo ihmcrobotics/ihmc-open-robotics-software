@@ -126,7 +126,7 @@ public class PlanarRegionMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getRegionNormal(), cdr);
       if(data.getVertexBuffer().size() <= 1000)
       cdr.write_type_e(data.getVertexBuffer());else
-          throw new RuntimeException("vertex_buffer field exceeds the maximum length");
+          throw new RuntimeException("vertex_buffer field exceeds the maximum length: %d > %d".formatted(data.getVertexBuffer().size(), 1000));
 
       cdr.write_type_2(data.getConcaveHullSize());
 
@@ -134,7 +134,7 @@ public class PlanarRegionMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
       if(data.getConvexPolygonsSize().size() <= 20)
       cdr.write_type_e(data.getConvexPolygonsSize());else
-          throw new RuntimeException("convex_polygons_size field exceeds the maximum length");
+          throw new RuntimeException("convex_polygons_size field exceeds the maximum length: %d > %d".formatted(data.getConvexPolygonsSize().size(), 20));
 
    }
 

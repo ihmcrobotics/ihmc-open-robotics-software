@@ -154,11 +154,11 @@ public class StereoVisionPointCloudMessagePubSubType implements us.ihmc.pubsub.T
 
       if(data.getPointCloud().size() <= 20000000)
       cdr.write_type_e(data.getPointCloud());else
-          throw new RuntimeException("point_cloud field exceeds the maximum length");
+          throw new RuntimeException("point_cloud field exceeds the maximum length: %d > %d".formatted(data.getPointCloud().size(), 20000000));
 
       if(data.getColors().size() <= 7000000)
       cdr.write_type_e(data.getColors());else
-          throw new RuntimeException("colors field exceeds the maximum length");
+          throw new RuntimeException("colors field exceeds the maximum length: %d > %d".formatted(data.getColors().size(), 7000000));
 
       cdr.write_type_7(data.getLz4Compressed());
 

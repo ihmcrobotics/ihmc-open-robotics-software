@@ -112,15 +112,15 @@ public class MultiContactBalanceStatusPubSubType implements us.ihmc.pubsub.Topic
       geometry_msgs.msg.dds.PointPubSubType.write(data.getCenterOfMass3d(), cdr);
       if(data.getContactPointsInWorld().size() <= 16)
       cdr.write_type_e(data.getContactPointsInWorld());else
-          throw new RuntimeException("contact_points_in_world field exceeds the maximum length");
+          throw new RuntimeException("contact_points_in_world field exceeds the maximum length: %d > %d".formatted(data.getContactPointsInWorld().size(), 16));
 
       if(data.getSurfaceNormalsInWorld().size() <= 16)
       cdr.write_type_e(data.getSurfaceNormalsInWorld());else
-          throw new RuntimeException("surface_normals_in_world field exceeds the maximum length");
+          throw new RuntimeException("surface_normals_in_world field exceeds the maximum length: %d > %d".formatted(data.getSurfaceNormalsInWorld().size(), 16));
 
       if(data.getSupportRigidBodyIds().size() <= 16)
       cdr.write_type_e(data.getSupportRigidBodyIds());else
-          throw new RuntimeException("support_rigid_body_ids field exceeds the maximum length");
+          throw new RuntimeException("support_rigid_body_ids field exceeds the maximum length: %d > %d".formatted(data.getSupportRigidBodyIds().size(), 16));
 
    }
 
