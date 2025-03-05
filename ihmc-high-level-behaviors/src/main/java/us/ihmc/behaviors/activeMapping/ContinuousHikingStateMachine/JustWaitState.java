@@ -68,6 +68,7 @@ public class JustWaitState implements State
    private final MovingReferenceFrame midFeetZUpFrame;
    private final FramePose3D startPose = new FramePose3D();
    private final FootstepSnapAndWiggler footstepSnapAndWiggler;
+   private boolean prepareSquareUpStep;
 
    public JustWaitState(DRCRobotModel robotModel,
                         ROS2Helper ros2Helper,
@@ -110,7 +111,7 @@ public class JustWaitState implements State
 
       if (continuousHikingCommandMessage.getSquareUpToGoal() && !controllerQueueMonitor.getControllerFootstepQueue().isEmpty())
       {
-         squareUpStep();
+         prepareSquareUpStep = true;
       }
 
       isDone = false;
@@ -123,12 +124,18 @@ public class JustWaitState implements State
       {
          isDone = true;
       }
+
+      if (controllerQueueMonitor.getControllerFootstepQueue().size() < 2 && prepareSquareUpStep)
+      {
+         prepareSquareUpStep = false;
+         squareUpStep();
+      }
    }
 
    @Override
    public void onExit(double timeInState)
    {
-
+      prepareSquareUpStep = false;
    }
 
    @Override
@@ -328,11 +335,20 @@ public class JustWaitState implements State
       if (squareUpStep == null)
          return;
 
-      DiscreteFootstep footstep = new DiscreteFootstep(squareUpStep.getFootstepPose().getX(), squareUpStep.getFootstepPose().getY());
-      footstepSnapAndWiggler.snapFootstep(footstep);
+      //TODO, set the translation but don't worry about the orientation, it should be good enough to stand when stepping there.
+//      DiscreteFootstep footstep = new DiscreteFootstep(squareUpStep.getFootstepPose().getX(), squareUpStep.getFootstepPose().getY());
+//      footstepSnapAndWiggler.snapFootstep(footstep);
+//
+//      squareUpStep.getFootstepPose().setZ(0.0);
+//      squareUpStep.getFootstepPose().applyTransform(footstep.getSnapData().getSnapTransform());
 
-      squareUpStep.getFootstepPose().setZ(0.0);
-      squareUpStep.getFootstepPose().applyTransform(footstep.getSnapData().getSnapTransform());
+      // Set Pitch and Roll to Zero, not expecting some crazy orientation
+//      ReferenceFrame referenceFrame = squareUpStep.getFootstepPose().getReferenceFrame();
+//      squareUpStep.getFootstepPose().changeFrame(ReferenceFrame.getWorldFrame());
+//      squareUpStep.getFootstepPose().getOrientation().setToPitchOrientation(-0.6);
+//      squareUpStep.getFootstepPose().getOrientation().setToRollOrientation(0.3);
+//      squareUpStep.getFootstepPose().getOrientation().setToYawOrientation(0.43);
+//      squareUpStep.getFootstepPose().changeFrame(referenceFrame);
 
       FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
       footstepDataListMessage.setDefaultSwingDuration(0.8);
