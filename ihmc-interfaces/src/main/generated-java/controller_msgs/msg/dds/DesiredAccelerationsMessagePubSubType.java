@@ -90,7 +90,7 @@ public class DesiredAccelerationsMessagePubSubType implements us.ihmc.pubsub.Top
 
       if(data.getDesiredJointAccelerations().size() <= 100)
       cdr.write_type_e(data.getDesiredJointAccelerations());else
-          throw new RuntimeException("desired_joint_accelerations field exceeds the maximum length");
+          throw new RuntimeException("desired_joint_accelerations field exceeds the maximum length: %d > %d".formatted(data.getDesiredJointAccelerations().size(), 100));
 
       ihmc_common_msgs.msg.dds.QueueableMessagePubSubType.write(data.getQueueingProperties(), cdr);
    }

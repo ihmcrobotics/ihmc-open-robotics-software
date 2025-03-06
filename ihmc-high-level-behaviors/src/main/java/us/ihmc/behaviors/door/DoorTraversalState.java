@@ -26,8 +26,6 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
    public static final String POST_PULL_DOOR = "Post pull door evaluation";
    public static final String POST_GRASP_HANDLE = "Evaluate grasp";
 
-   private final DoorTraversalDefinition definition;
-
    @Nullable
    private DoorNode doorNode;
 
@@ -46,8 +44,6 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
    {
       super(id, new DoorTraversalDefinition(crdtInfo, saveFileDirectory), crdtInfo);
 
-      definition = getDefinition();
-
       doorHingeJointAngle = new CRDTStatusDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
       doorHandleDistanceFromStart = new CRDTStatusDouble(ROS2ActorDesignation.ROBOT, crdtInfo, 0.0);
    }
@@ -59,10 +55,10 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
 
       actionSequence = BehaviorTreeTools.findRootNode(this);
 
-      updateActionSubtree(this);
+      updateSubtree(this);
    }
 
-   public void updateActionSubtree(BehaviorTreeNodeState<?> node)
+   public void updateSubtree(BehaviorTreeNodeState<?> node)
    {
       setStaticForApproachActions.clear();
       setStaticForGraspActions.clear();
@@ -108,7 +104,7 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
          }
          else
          {
-            updateActionSubtree(child);
+            updateSubtree(child);
          }
       }
    }
@@ -124,7 +120,7 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
 
    public void toMessage(DoorTraversalStateMessage message)
    {
-      getDefinition().toMessage(message.getDefinition());
+      definition.toMessage(message.getDefinition());
 
       super.toMessage(message.getState());
 
@@ -134,7 +130,7 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
 
    public void fromMessage(DoorTraversalStateMessage message)
    {
-      getDefinition().fromMessage(message.getDefinition());
+      definition.fromMessage(message.getDefinition());
 
       super.fromMessage(message.getState());
 

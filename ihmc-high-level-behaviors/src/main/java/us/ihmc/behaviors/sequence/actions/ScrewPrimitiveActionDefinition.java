@@ -132,19 +132,22 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
    {
       super.undoAllNontopologicalChanges();
 
-      side.setValue(onDiskSide);
-      objectFrameName.setValue(onDiskObjectFrameName);
-      screwAxisPoseInObjectFrame.getValueAndModify().set(onDiskScrewAxisPoseInObjectFrame);
-      translation.setValue(onDiskTranslation);
-      rotation.setValue(onDiskRotation);
-      maxLinearVelocity.setValue(onDiskMaxLinearVelocity);
-      maxAngularVelocity.setValue(onDiskMaxAngularVelocity);
-      jointspaceOnly.setValue(onDiskJointspaceOnly);
-      linearPositionWeight.setValue(onDiskLinearPositionWeight);
-      angularPositionWeight.setValue(onDiskAngularPositionWeight);
-      jointspaceWeight.setValue(onDiskJointspaceWeight);
-      positionErrorTolerance.setValue(onDiskPositionErrorTolerance);
-      orientationErrorTolerance.setValue(onDiskOrientationErrorTolerance);
+      if (isUndoAvailable())
+      {
+         side.setValue(onDiskSide);
+         objectFrameName.setValue(onDiskObjectFrameName);
+         screwAxisPoseInObjectFrame.getValueAndModify().set(onDiskScrewAxisPoseInObjectFrame);
+         translation.setValue(onDiskTranslation);
+         rotation.setValue(onDiskRotation);
+         maxLinearVelocity.setValue(onDiskMaxLinearVelocity);
+         maxAngularVelocity.setValue(onDiskMaxAngularVelocity);
+         jointspaceOnly.setValue(onDiskJointspaceOnly);
+         linearPositionWeight.setValue(onDiskLinearPositionWeight);
+         angularPositionWeight.setValue(onDiskAngularPositionWeight);
+         jointspaceWeight.setValue(onDiskJointspaceWeight);
+         positionErrorTolerance.setValue(onDiskPositionErrorTolerance);
+         orientationErrorTolerance.setValue(onDiskOrientationErrorTolerance);
+      }
    }
 
    @Override

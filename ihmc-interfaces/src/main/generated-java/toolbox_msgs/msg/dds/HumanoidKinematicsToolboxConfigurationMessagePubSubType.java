@@ -120,11 +120,11 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
 
       if(data.getJointLimitReductionFactors().size() <= 20)
       cdr.write_type_e(data.getJointLimitReductionFactors());else
-          throw new RuntimeException("joint_limit_reduction_factors field exceeds the maximum length");
+          throw new RuntimeException("joint_limit_reduction_factors field exceeds the maximum length: %d > %d".formatted(data.getJointLimitReductionFactors().size(), 20));
 
       if(data.getJointLimitReductionHashCodes().size() <= 20)
       cdr.write_type_e(data.getJointLimitReductionHashCodes());else
-          throw new RuntimeException("joint_limit_reduction_hash_codes field exceeds the maximum length");
+          throw new RuntimeException("joint_limit_reduction_hash_codes field exceeds the maximum length: %d > %d".formatted(data.getJointLimitReductionHashCodes().size(), 20));
 
    }
 

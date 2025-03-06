@@ -15,7 +15,7 @@ public class FootPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "bee406f751941e0f869a803a20f920768c72c0468e0ac05d5b2e02ffc8669359";
+   		return "bf80d4eacf52d4e14f4563accbbc80836684b069cd0484cdaf7d960cbecd40db";
    }
    
    @Override
@@ -97,7 +97,7 @@ public class FootPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
 
       if(data.getParentFrameName().length() <= 255)
       cdr.write_type_d(data.getParentFrameName());else
-          throw new RuntimeException("parent_frame_name field exceeds the maximum length");
+          throw new RuntimeException("parent_frame_name field exceeds the maximum length: %d > %d".formatted(data.getParentFrameName().length(), 255));
 
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getTransformToParent(), cdr);
       cdr.write_type_6(data.getTrajectoryDuration());

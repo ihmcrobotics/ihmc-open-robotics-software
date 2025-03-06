@@ -13,13 +13,15 @@ import static us.ihmc.zed.global.zed.*;
 
 public class ZEDSVOPlaybackSensor extends ZEDImageSensor
 {
+   private final int cameraID;
    private final String svoFileName;
    private final ZEDSVOCurrentFileMessage svoStatusMessage = new ZEDSVOCurrentFileMessage();
    private final RepeatingTaskThread publishInfoThread;
 
-   public ZEDSVOPlaybackSensor(ROS2PublishSubscribeAPI ros2, int cameraID, ZEDModelData zedModel, String svoFileName)
+   public ZEDSVOPlaybackSensor(ROS2PublishSubscribeAPI ros2, int cameraID, ZEDModelData zedModel, int slDepthMode, String svoFileName)
    {
-      super(cameraID, zedModel, SL_INPUT_TYPE_SVO);
+      super(cameraID, zedModel, SL_INPUT_TYPE_SVO, slDepthMode);
+      this.cameraID = cameraID;
       this.svoFileName = svoFileName;
 
       if (!Files.exists(Path.of(svoFileName)))
@@ -69,6 +71,12 @@ public class ZEDSVOPlaybackSensor extends ZEDImageSensor
    protected int openCamera()
    {
       return sl_open_camera(getCameraID(), zedInitParameters, 0, svoFileName, "", 0, "", "", "");
+   }
+
+   @Override
+   public boolean isSensorRunning()
+   {
+      return sl_is_opened(cameraID);
    }
 
    @Override

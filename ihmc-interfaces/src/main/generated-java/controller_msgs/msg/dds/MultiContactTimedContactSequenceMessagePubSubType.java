@@ -112,19 +112,19 @@ public class MultiContactTimedContactSequenceMessagePubSubType implements us.ihm
 
       if(data.getLeftArmContactIntervals().size() <= 25)
       cdr.write_type_e(data.getLeftArmContactIntervals());else
-          throw new RuntimeException("left_arm_contact_intervals field exceeds the maximum length");
+          throw new RuntimeException("left_arm_contact_intervals field exceeds the maximum length: %d > %d".formatted(data.getLeftArmContactIntervals().size(), 25));
 
       if(data.getRightArmContactIntervals().size() <= 25)
       cdr.write_type_e(data.getRightArmContactIntervals());else
-          throw new RuntimeException("right_arm_contact_intervals field exceeds the maximum length");
+          throw new RuntimeException("right_arm_contact_intervals field exceeds the maximum length: %d > %d".formatted(data.getRightArmContactIntervals().size(), 25));
 
       if(data.getLeftLegContactIntervals().size() <= 25)
       cdr.write_type_e(data.getLeftLegContactIntervals());else
-          throw new RuntimeException("left_leg_contact_intervals field exceeds the maximum length");
+          throw new RuntimeException("left_leg_contact_intervals field exceeds the maximum length: %d > %d".formatted(data.getLeftLegContactIntervals().size(), 25));
 
       if(data.getRightLegContactIntervals().size() <= 25)
       cdr.write_type_e(data.getRightLegContactIntervals());else
-          throw new RuntimeException("right_leg_contact_intervals field exceeds the maximum length");
+          throw new RuntimeException("right_leg_contact_intervals field exceeds the maximum length: %d > %d".formatted(data.getRightLegContactIntervals().size(), 25));
 
    }
 

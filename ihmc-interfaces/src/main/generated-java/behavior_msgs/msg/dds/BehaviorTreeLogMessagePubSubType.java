@@ -91,7 +91,7 @@ public class BehaviorTreeLogMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
       if(data.getLogMessage().size() <= 2048)
       cdr.write_type_e(data.getLogMessage());else
-          throw new RuntimeException("log_message field exceeds the maximum length");
+          throw new RuntimeException("log_message field exceeds the maximum length: %d > %d".formatted(data.getLogMessage().size(), 2048));
 
    }
 

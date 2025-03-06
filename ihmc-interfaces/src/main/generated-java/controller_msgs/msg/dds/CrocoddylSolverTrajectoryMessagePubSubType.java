@@ -102,15 +102,15 @@ public class CrocoddylSolverTrajectoryMessagePubSubType implements us.ihmc.pubsu
       std_msgs.msg.dds.HeaderPubSubType.write(data.getHeader(), cdr);
       if(data.getIntervals().size() <= 100)
       cdr.write_type_e(data.getIntervals());else
-          throw new RuntimeException("intervals field exceeds the maximum length");
+          throw new RuntimeException("intervals field exceeds the maximum length: %d > %d".formatted(data.getIntervals().size(), 100));
 
       if(data.getStateTrajectory().size() <= 100)
       cdr.write_type_e(data.getStateTrajectory());else
-          throw new RuntimeException("state_trajectory field exceeds the maximum length");
+          throw new RuntimeException("state_trajectory field exceeds the maximum length: %d > %d".formatted(data.getStateTrajectory().size(), 100));
 
       if(data.getControlTrajectory().size() <= 100)
       cdr.write_type_e(data.getControlTrajectory());else
-          throw new RuntimeException("control_trajectory field exceeds the maximum length");
+          throw new RuntimeException("control_trajectory field exceeds the maximum length: %d > %d".formatted(data.getControlTrajectory().size(), 100));
 
    }
 

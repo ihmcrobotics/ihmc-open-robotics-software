@@ -1,6 +1,8 @@
 {
   "title" : "HeightMapParameters",
+  "Flying points filter" : true,
   "Reset Height Map" : false,
+  "Enable alpha filter" : true,
   "Search window height": {
     "value": 20,
     "lowerBound": 10,

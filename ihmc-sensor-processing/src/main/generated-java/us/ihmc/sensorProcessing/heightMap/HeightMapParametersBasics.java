@@ -8,9 +8,19 @@ import us.ihmc.tools.property.StoredPropertySetBasics;
  */
 public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, StoredPropertySetBasics
 {
+   default void setFlyingPointsFilter(boolean flyingPointsFilter)
+   {
+      set(HeightMapParameters.flyingPointsFilter, flyingPointsFilter);
+   }
+
    default void setResetHeightMap(boolean resetHeightMap)
    {
       set(HeightMapParameters.resetHeightMap, resetHeightMap);
+   }
+
+   default void setEnableAlphaFilter(boolean enableAlphaFilter)
+   {
+      set(HeightMapParameters.enableAlphaFilter, enableAlphaFilter);
    }
 
    default void setSearchWindowHeight(int searchWindowHeight)

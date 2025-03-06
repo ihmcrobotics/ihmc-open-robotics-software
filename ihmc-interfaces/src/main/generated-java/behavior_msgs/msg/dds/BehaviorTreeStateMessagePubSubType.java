@@ -15,7 +15,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "19d48ce59e82b6b09720c171536de46b851462670203fa84a2aa84c860bfd539";
+   		return "92bf4f6ca7e25a2d062a807fb6001e09139202cd4267e6933209614e5001e194";
    }
    
    @Override
@@ -269,91 +269,91 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.write(data.getLatestModificationToData(), cdr);
       if(data.getBehaviorTreeTypes().size() <= 1000)
       cdr.write_type_e(data.getBehaviorTreeTypes());else
-          throw new RuntimeException("behavior_tree_types field exceeds the maximum length");
+          throw new RuntimeException("behavior_tree_types field exceeds the maximum length: %d > %d".formatted(data.getBehaviorTreeTypes().size(), 1000));
 
       if(data.getBehaviorTreeIndices().size() <= 1000)
       cdr.write_type_e(data.getBehaviorTreeIndices());else
-          throw new RuntimeException("behavior_tree_indices field exceeds the maximum length");
+          throw new RuntimeException("behavior_tree_indices field exceeds the maximum length: %d > %d".formatted(data.getBehaviorTreeIndices().size(), 1000));
 
       if(data.getPartialDataNodes().size() <= 300)
       cdr.write_type_e(data.getPartialDataNodes());else
-          throw new RuntimeException("partial_data_nodes field exceeds the maximum length");
+          throw new RuntimeException("partial_data_nodes field exceeds the maximum length: %d > %d".formatted(data.getPartialDataNodes().size(), 300));
 
       if(data.getRootNodes().size() <= 1)
       cdr.write_type_e(data.getRootNodes());else
-          throw new RuntimeException("root_nodes field exceeds the maximum length");
+          throw new RuntimeException("root_nodes field exceeds the maximum length: %d > %d".formatted(data.getRootNodes().size(), 1));
 
       if(data.getBasicNodes().size() <= 120)
       cdr.write_type_e(data.getBasicNodes());else
-          throw new RuntimeException("basic_nodes field exceeds the maximum length");
+          throw new RuntimeException("basic_nodes field exceeds the maximum length: %d > %d".formatted(data.getBasicNodes().size(), 120));
 
       if(data.getAi2rNodes().size() <= 1)
       cdr.write_type_e(data.getAi2rNodes());else
-          throw new RuntimeException("ai2r_nodes field exceeds the maximum length");
+          throw new RuntimeException("ai2r_nodes field exceeds the maximum length: %d > %d".formatted(data.getAi2rNodes().size(), 1));
 
       if(data.getActionSequences().size() <= 120)
       cdr.write_type_e(data.getActionSequences());else
-          throw new RuntimeException("action_sequences field exceeds the maximum length");
+          throw new RuntimeException("action_sequences field exceeds the maximum length: %d > %d".formatted(data.getActionSequences().size(), 120));
 
       if(data.getFallbackNodes().size() <= 120)
       cdr.write_type_e(data.getFallbackNodes());else
-          throw new RuntimeException("fallback_nodes field exceeds the maximum length");
+          throw new RuntimeException("fallback_nodes field exceeds the maximum length: %d > %d".formatted(data.getFallbackNodes().size(), 120));
 
       if(data.getConditionNodes().size() <= 120)
       cdr.write_type_e(data.getConditionNodes());else
-          throw new RuntimeException("condition_nodes field exceeds the maximum length");
+          throw new RuntimeException("condition_nodes field exceeds the maximum length: %d > %d".formatted(data.getConditionNodes().size(), 120));
 
       if(data.getGotoNodes().size() <= 120)
       cdr.write_type_e(data.getGotoNodes());else
-          throw new RuntimeException("goto_nodes field exceeds the maximum length");
+          throw new RuntimeException("goto_nodes field exceeds the maximum length: %d > %d".formatted(data.getGotoNodes().size(), 120));
 
       if(data.getCheckpointNodes().size() <= 120)
       cdr.write_type_e(data.getCheckpointNodes());else
-          throw new RuntimeException("checkpoint_nodes field exceeds the maximum length");
+          throw new RuntimeException("checkpoint_nodes field exceeds the maximum length: %d > %d".formatted(data.getCheckpointNodes().size(), 120));
 
       if(data.getDoorTraversals().size() <= 120)
       cdr.write_type_e(data.getDoorTraversals());else
-          throw new RuntimeException("door_traversals field exceeds the maximum length");
+          throw new RuntimeException("door_traversals field exceeds the maximum length: %d > %d".formatted(data.getDoorTraversals().size(), 120));
 
       if(data.getBuildingExplorations().size() <= 120)
       cdr.write_type_e(data.getBuildingExplorations());else
-          throw new RuntimeException("building_explorations field exceeds the maximum length");
+          throw new RuntimeException("building_explorations field exceeds the maximum length: %d > %d".formatted(data.getBuildingExplorations().size(), 120));
 
       if(data.getChestOrientationActions().size() <= 120)
       cdr.write_type_e(data.getChestOrientationActions());else
-          throw new RuntimeException("chest_orientation_actions field exceeds the maximum length");
+          throw new RuntimeException("chest_orientation_actions field exceeds the maximum length: %d > %d".formatted(data.getChestOrientationActions().size(), 120));
 
       if(data.getFootstepPlanActions().size() <= 120)
       cdr.write_type_e(data.getFootstepPlanActions());else
-          throw new RuntimeException("footstep_plan_actions field exceeds the maximum length");
+          throw new RuntimeException("footstep_plan_actions field exceeds the maximum length: %d > %d".formatted(data.getFootstepPlanActions().size(), 120));
 
       if(data.getSakeHandCommandActions().size() <= 120)
       cdr.write_type_e(data.getSakeHandCommandActions());else
-          throw new RuntimeException("sake_hand_command_actions field exceeds the maximum length");
+          throw new RuntimeException("sake_hand_command_actions field exceeds the maximum length: %d > %d".formatted(data.getSakeHandCommandActions().size(), 120));
 
       if(data.getHandPoseActions().size() <= 120)
       cdr.write_type_e(data.getHandPoseActions());else
-          throw new RuntimeException("hand_pose_actions field exceeds the maximum length");
+          throw new RuntimeException("hand_pose_actions field exceeds the maximum length: %d > %d".formatted(data.getHandPoseActions().size(), 120));
 
       if(data.getHandWrenchActions().size() <= 120)
       cdr.write_type_e(data.getHandWrenchActions());else
-          throw new RuntimeException("hand_wrench_actions field exceeds the maximum length");
+          throw new RuntimeException("hand_wrench_actions field exceeds the maximum length: %d > %d".formatted(data.getHandWrenchActions().size(), 120));
 
       if(data.getScrewPrimitiveActions().size() <= 120)
       cdr.write_type_e(data.getScrewPrimitiveActions());else
-          throw new RuntimeException("screw_primitive_actions field exceeds the maximum length");
+          throw new RuntimeException("screw_primitive_actions field exceeds the maximum length: %d > %d".formatted(data.getScrewPrimitiveActions().size(), 120));
 
       if(data.getPelvisHeightActions().size() <= 120)
       cdr.write_type_e(data.getPelvisHeightActions());else
-          throw new RuntimeException("pelvis_height_actions field exceeds the maximum length");
+          throw new RuntimeException("pelvis_height_actions field exceeds the maximum length: %d > %d".formatted(data.getPelvisHeightActions().size(), 120));
 
       if(data.getWaitDurationActions().size() <= 120)
       cdr.write_type_e(data.getWaitDurationActions());else
-          throw new RuntimeException("wait_duration_actions field exceeds the maximum length");
+          throw new RuntimeException("wait_duration_actions field exceeds the maximum length: %d > %d".formatted(data.getWaitDurationActions().size(), 120));
 
       if(data.getFootPoseActions().size() <= 120)
       cdr.write_type_e(data.getFootPoseActions());else
-          throw new RuntimeException("foot_pose_actions field exceeds the maximum length");
+          throw new RuntimeException("foot_pose_actions field exceeds the maximum length: %d > %d".formatted(data.getFootPoseActions().size(), 120));
 
    }
 

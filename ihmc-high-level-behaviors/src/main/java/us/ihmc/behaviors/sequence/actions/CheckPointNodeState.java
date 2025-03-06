@@ -1,11 +1,11 @@
 package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.CheckPointNodeStateMessage;
-import us.ihmc.behaviors.sequence.ActionNodeState;
+import us.ihmc.behaviors.sequence.LeafNodeState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
-public class CheckPointNodeState extends ActionNodeState<CheckPointNodeDefinition>
+public class CheckPointNodeState extends LeafNodeState<CheckPointNodeDefinition>
 {
    public CheckPointNodeState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
@@ -20,7 +20,7 @@ public class CheckPointNodeState extends ActionNodeState<CheckPointNodeDefinitio
 
    public void toMessage(CheckPointNodeStateMessage message)
    {
-      getDefinition().toMessage(message.getDefinition());
+      definition.toMessage(message.getDefinition());
 
       super.toMessage(message.getState());
    }
@@ -29,6 +29,6 @@ public class CheckPointNodeState extends ActionNodeState<CheckPointNodeDefinitio
    {
       super.fromMessage(message.getState());
 
-      getDefinition().fromMessage(message.getDefinition());
+      definition.fromMessage(message.getDefinition());
    }
 }

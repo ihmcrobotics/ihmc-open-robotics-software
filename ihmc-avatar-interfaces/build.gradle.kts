@@ -17,10 +17,11 @@ mainDependencies {
    api("org.jfree:org.jfree.svg:5.0.6")
    api("com.github.sh0nk:matplotlib4j:0.5.0")
 
-   api("us.ihmc:mecano-graphviz:17-0.19.1")
-   api("us.ihmc:scs2-bullet-simulation:17-0.28.3")
+   api("us.ihmc:mecano-graphviz:17-0.19.2")
+   api("us.ihmc:scs2-bullet-simulation:17-0.28.7")
 
-   api("us.ihmc:ihmc-humanoid-behaviors:source")
+   api("us.ihmc:ihmc-footstep-planning:source")
+   api("us.ihmc:ihmc-manipulation-planning:source")
    api("us.ihmc:ihmc-graphics-jmonkeyengine:source")
    api("us.ihmc:ihmc-simulation-toolkit:source")
    api("us.ihmc:ihmc-robot-data-visualizer:source")

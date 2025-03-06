@@ -37,8 +37,6 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
    public static final double POSITION_TOLERANCE = 0.15;
    public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);
 
-   private final FootstepPlanActionState state;
-   private final FootstepPlanActionDefinition definition;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
    private final ControllerStatusTracker controllerStatusTracker;
@@ -66,9 +64,6 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
                                      WalkingControllerParameters walkingControllerParameters)
    {
       super(new FootstepPlanActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary, syncedRobot.getRobotModel()));
-
-      state = getState();
-      definition = getDefinition();
 
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
@@ -136,7 +131,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
          snappedGoalStancePose.getRotation().set(stanceOrientation);
          snappedGoalStancePose.changeFrame(state.getParentFrame());
 
-         state.getGoalToParentTransform().getValue().set(snappedGoalStancePose);
+         state.getGoalToParentTransform().setValue(snappedGoalStancePose, 1e-5);
          state.getGoalFrame().getReferenceFrame().update();
 
          for (RobotSide side : RobotSide.values)
@@ -181,9 +176,9 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
    }
 
    @Override
-   public void triggerActionExecution()
+   public void triggerExecution()
    {
-      super.triggerActionExecution();
+      super.triggerExecution();
 
       // Reset state
       state.setTotalNumberOfFootsteps(0);

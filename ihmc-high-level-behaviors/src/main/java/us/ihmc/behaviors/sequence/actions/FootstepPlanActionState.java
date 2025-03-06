@@ -24,7 +24,6 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionDefinition>
 {
-   private final FootstepPlanActionDefinition definition;
    private final ReferenceFrameLibrary referenceFrameLibrary;
    private int numberOfAllocatedFootsteps = 0;
    private final RecyclingArrayList<FootstepPlanActionFootstepState> manuallyPlacedFootsteps;
@@ -47,8 +46,6 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
                                   DRCRobotModel robotModel)
    {
       super(id, new FootstepPlanActionDefinition(crdtInfo, saveFileDirectory, robotModel.getFootstepPlannerParameters()), crdtInfo);
-
-      definition = getDefinition();
 
       this.referenceFrameLibrary = referenceFrameLibrary;
 

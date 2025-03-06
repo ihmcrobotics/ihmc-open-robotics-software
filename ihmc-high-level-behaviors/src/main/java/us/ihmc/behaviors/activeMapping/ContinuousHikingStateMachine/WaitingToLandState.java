@@ -5,7 +5,7 @@ import controller_msgs.msg.dds.FootstepStatusMessage;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingLogger;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
 import us.ihmc.behaviors.activeMapping.ContinuousPlanner;
-import us.ihmc.behaviors.activeMapping.ControllerFootstepQueueMonitor;
+import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.log.LogTools;
@@ -20,7 +20,7 @@ public class WaitingToLandState implements State
    private final ROS2Topic<FootstepDataListMessage> controllerFootstepDataTopic;
    private final ContinuousPlanner continuousPlanner;
    private final ControllerFootstepQueueMonitor controllerQueueMonitor;
-   private FootstepStatusMessage previousFootstepStatusMessage = null;
+   private FootstepStatusMessage previousFootstepStatusMessage = new FootstepStatusMessage();
    private final ContinuousHikingLogger continuousHikingLogger;
 
    /**
@@ -86,17 +86,11 @@ public class WaitingToLandState implements State
    @Override
    public boolean isDone(double timeInState)
    {
-      //TODO this is a bit messy, cleanup please
-      if (controllerQueueMonitor.getFootstepStatusMessage() != null)
-      {
-         FootstepStatusMessage footstepStatusMessage = controllerQueueMonitor.getFootstepStatusMessage().get();
-         if (previousFootstepStatusMessage != null && previousFootstepStatusMessage.getSequenceId() == footstepStatusMessage.getSequenceId())
-            return false;
+      FootstepStatusMessage footstepStatusMessage = controllerQueueMonitor.getFootstepStatusMessage().get();
+      if (previousFootstepStatusMessage.getSequenceId() == footstepStatusMessage.getSequenceId())
+         return false;
 
-         previousFootstepStatusMessage = footstepStatusMessage;
-         return footstepStatusMessage.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_STARTED;
-      }
-
-      return false;
+      previousFootstepStatusMessage = footstepStatusMessage;
+      return footstepStatusMessage.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_STARTED;
    }
 }

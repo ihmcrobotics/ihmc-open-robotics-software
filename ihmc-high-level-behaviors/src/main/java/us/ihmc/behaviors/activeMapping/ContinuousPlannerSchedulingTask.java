@@ -2,15 +2,20 @@ package us.ihmc.behaviors.activeMapping;
 
 import behavior_msgs.msg.dds.ContinuousHikingCommandMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingStateMachine.*;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.communication.ContinuousHikingAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
+import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
@@ -36,12 +41,13 @@ public class ContinuousPlannerSchedulingTask
    protected final ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(1,
                                                                                                           getClass(),
                                                                                                           ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
-   private final ContinuousPlanner continuousPlanner;
    public StateMachine<ContinuousHikingState, State> stateMachine;
    private TerrainMapData terrainMap;
+   private HeightMapData heightMapData;
 
    public ContinuousPlannerSchedulingTask(DRCRobotModel robotModel,
                                           ROS2Node ros2Node,
+                                          ROS2SyncedRobotModel syncedRobotModel,
                                           HumanoidReferenceFrames referenceFrames,
                                           ControllerFootstepQueueMonitor controllerFootstepQueueMonitor,
                                           ContinuousHikingLogger continuousHikingLogger,
@@ -57,15 +63,15 @@ public class ContinuousPlannerSchedulingTask
       ros2Helper.subscribeViaCallback(ContinuousHikingAPI.CONTINUOUS_HIKING_COMMAND, commandMessage::set);
 
       TerrainPlanningDebugger debugger = new TerrainPlanningDebugger(ros2Node, monteCarloFootstepPlannerParameters);
-      continuousPlanner = new ContinuousPlanner(robotModel,
-                                                referenceFrames,
-                                                commandMessage,
-                                                continuousHikingParameters,
-                                                monteCarloFootstepPlannerParameters,
-                                                footstepPlannerParameters,
-                                                swingPlannerParameters,
-                                                debugger,
-                                                continuousHikingLogger);
+      ContinuousPlanner continuousPlanner = new ContinuousPlanner(robotModel,
+                                                                  referenceFrames,
+                                                                  commandMessage,
+                                                                  continuousHikingParameters,
+                                                                  monteCarloFootstepPlannerParameters,
+                                                                  footstepPlannerParameters,
+                                                                  swingPlannerParameters,
+                                                                  debugger,
+                                                                  continuousHikingLogger);
 
       YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -74,14 +80,15 @@ public class ContinuousPlannerSchedulingTask
       stateMachineFactory.setRegistry(registry);
 
       // Create the different states
-      State notStartedState = new DoNothingState(ros2Helper, simpleRobotName, continuousPlanner, debugger);
+      State notStartedState = new DoNothingState(ros2Helper, referenceFrames, simpleRobotName, continuousPlanner, debugger);
       State readyToPlanState = new ReadyToPlanState(ros2Helper,
                                                     referenceFrames,
                                                     commandMessage,
                                                     continuousPlanner,
                                                     controllerFootstepQueueMonitor,
                                                     continuousHikingParameters,
-                                                    terrainMap,
+                                                    this::getHeightMapData,
+                                                    this::getTerrainMap,
                                                     debugger,
                                                     continuousHikingLogger);
       State waitingtoLandState = new WaitingToLandState(ros2Helper,
@@ -90,7 +97,15 @@ public class ContinuousPlannerSchedulingTask
                                                         controllerFootstepQueueMonitor,
                                                         continuousHikingParameters,
                                                         continuousHikingLogger);
-      State justWaitState = new JustWaitState(controllerFootstepQueueMonitor);
+      State justWaitState = new JustWaitState(robotModel,
+                                              ros2Helper,
+                                              syncedRobotModel,
+                                              commandMessage,
+                                              controllerFootstepQueueMonitor,
+                                              footstepPlannerParameters,
+                                              swingPlannerParameters,
+                                              this::getHeightMapData,
+                                              this::getTerrainMap);
 
       // Adding the different states
       stateMachineFactory.addState(ContinuousHikingState.DO_NOTHING, notStartedState);
@@ -130,6 +145,18 @@ public class ContinuousPlannerSchedulingTask
       stateMachine = stateMachineFactory.build(ContinuousHikingState.DO_NOTHING);
       stateMachineFactory.addStateChangedListener((from, to) ->
                                                   {
+                                                     if (from == null)
+                                                     {
+                                                        // This means the state machine has just started up, for the visuals put them under the feet till we start walking
+                                                        SideDependentList<FramePose3D> robotFeet = new SideDependentList<>(new FramePose3D(),
+                                                                                                                           new FramePose3D());
+                                                        robotFeet.get(RobotSide.LEFT)
+                                                                 .set(referenceFrames.getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame());
+                                                        robotFeet.get(RobotSide.RIGHT)
+                                                                 .set(referenceFrames.getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame());
+                                                        debugger.publishStartAndGoalForVisualization(robotFeet, robotFeet);
+                                                     }
+
                                                      String message = "STATE CHANGED: (" + from + " -> " + to + ")";
                                                      LogTools.warn(message);
                                                      continuousHikingLogger.appendString(message);
@@ -137,6 +164,16 @@ public class ContinuousPlannerSchedulingTask
       stateMachineFactory.addStateChangedListener((from, to) -> continuousHikingLogger.logToFile(true, false));
 
       executorService.scheduleWithFixedDelay(this::tickStateMachine, 1500, CONTINUOUS_PLANNING_DELAY_MS, TimeUnit.MILLISECONDS);
+   }
+
+   public TerrainMapData getTerrainMap()
+   {
+      return terrainMap;
+   }
+
+   public HeightMapData getHeightMapData()
+   {
+      return heightMapData;
    }
 
    /**
@@ -150,22 +187,16 @@ public class ContinuousPlannerSchedulingTask
 
    public void setLatestHeightMapData(HeightMapData heightMapData)
    {
-      this.continuousPlanner.setLatestHeightMapData(heightMapData);
+      this.heightMapData = heightMapData;
    }
 
    public void setTerrainMapData(TerrainMapData terrainMapData)
    {
-      this.terrainMap = new TerrainMapData(terrainMapData);
-      this.continuousPlanner.setLatestTerrainMapData(terrainMapData);
+      this.terrainMap = terrainMapData;
    }
 
    public void destroy()
    {
       executorService.shutdown();
-   }
-
-   public enum PlanningMode
-   {
-      FAST_HIKING, WALK_TO_GOAL
    }
 }

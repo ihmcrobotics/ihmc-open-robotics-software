@@ -36,22 +36,21 @@ public class BehaviorTreeSVGWriter
          {
             if (actionNode.getDefinition() instanceof ActionNodeDefinition actionNodeDefinition)
             {
-               if (actionNodeDefinition.getExecuteAfterPrevious().getValue())
+               if (actionNodeDefinition.getExecuteAfterPrevious())
                {
                   nodeToExecuteAfter = svgNodes.get(svgNodes.size() - 1);
                }
-               else if (actionNodeDefinition.getExecuteAfterBeginning().getValue())
+               else if (actionNodeDefinition.getExecuteAfterBeginning())
                {
                   nodeToExecuteAfter = actionSequenceSVGNode;
                }
                else
                {
-                  long afterID = actionNodeDefinition.getExecuteAfterNodeID().getValue();
                   for (BehaviorTreeSVGNode otherNode : svgNodes)
                   {
                      if (otherNode.getNode() instanceof ActionNodeState existingActionNode)
                      {
-                        if (existingActionNode.getID() == afterID)
+                        if (existingActionNode.getID() == actionNodeDefinition.getExecuteAfterNodeID())
                         {
                            nodeToExecuteAfter = otherNode;
                         }

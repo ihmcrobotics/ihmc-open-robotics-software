@@ -142,19 +142,19 @@ public class CapturabilityBasedStatusPubSubType implements us.ihmc.pubsub.TopicD
       geometry_msgs.msg.dds.PointPubSubType.write(data.getCenterOfMass3d(), cdr);
       if(data.getLeftFootSupportPolygon3d().size() <= 8)
       cdr.write_type_e(data.getLeftFootSupportPolygon3d());else
-          throw new RuntimeException("left_foot_support_polygon_3d field exceeds the maximum length");
+          throw new RuntimeException("left_foot_support_polygon_3d field exceeds the maximum length: %d > %d".formatted(data.getLeftFootSupportPolygon3d().size(), 8));
 
       if(data.getRightFootSupportPolygon3d().size() <= 8)
       cdr.write_type_e(data.getRightFootSupportPolygon3d());else
-          throw new RuntimeException("right_foot_support_polygon_3d field exceeds the maximum length");
+          throw new RuntimeException("right_foot_support_polygon_3d field exceeds the maximum length: %d > %d".formatted(data.getRightFootSupportPolygon3d().size(), 8));
 
       if(data.getLeftHandContactPoints().size() <= 1)
       cdr.write_type_e(data.getLeftHandContactPoints());else
-          throw new RuntimeException("left_hand_contact_points field exceeds the maximum length");
+          throw new RuntimeException("left_hand_contact_points field exceeds the maximum length: %d > %d".formatted(data.getLeftHandContactPoints().size(), 1));
 
       if(data.getRightHandContactPoints().size() <= 1)
       cdr.write_type_e(data.getRightHandContactPoints());else
-          throw new RuntimeException("right_hand_contact_points field exceeds the maximum length");
+          throw new RuntimeException("right_hand_contact_points field exceeds the maximum length: %d > %d".formatted(data.getRightHandContactPoints().size(), 1));
 
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getLeftHandContactNormal(), cdr);
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getRightHandContactNormal(), cdr);

@@ -17,7 +17,7 @@ mainDependencies {
       exclude(group = "org.jmonkeyengine")
       exclude(group = "org.lwjgl.lwjgl") // exclude lwjgl 2
    }
-   api("us.ihmc:promp-java:1.0.0")
+   api("us.ihmc:promp-java:1.0.1")
 }
 
 libgdxDependencies {
@@ -33,7 +33,7 @@ testDependencies {
    api(ihmc.sourceSetProject("libgdx"))
    api("us.ihmc:ihmc-graphics-libgdx-test:source")
    api("us.ihmc:ihmc-path-planning-test:source")
-   api("us.ihmc:scs2-examples:17-0.28.3")
-   api("us.ihmc:scs2-bullet-simulation-test:17-0.28.3")
+   api("us.ihmc:scs2-examples:17-0.28.7")
+   api("us.ihmc:scs2-bullet-simulation-test:17-0.28.7")
    api("us.ihmc:example-simulations:source")
 }

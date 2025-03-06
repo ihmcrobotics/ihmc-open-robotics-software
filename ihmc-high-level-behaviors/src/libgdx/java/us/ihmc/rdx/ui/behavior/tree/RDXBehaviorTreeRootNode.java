@@ -10,6 +10,7 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionProgressWidgetsManager;
+import us.ihmc.rdx.ui.behavior.sequence.RDXLeafNode;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.util.ArrayList;
@@ -18,20 +19,18 @@ import java.util.List;
 public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRootNodeState, BehaviorTreeRootNodeDefinition>
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final BehaviorTreeRootNodeState state;
    private final ImBooleanWrapper automaticExecutionCheckbox;
    private final ImBooleanWrapper concurrencyEnabledCheckbox;
    private final TLongObjectHashMap<RDXBehaviorTreeNode<?, ?>> idToNodeMap = new TLongObjectHashMap<>();
-   private final List<RDXActionNode<?, ?>> actionChildren = new ArrayList<>();
-   private final List<RDXActionNode<?, ?>> nextForExecutionActions = new ArrayList<>();
-   private final List<RDXActionNode<?, ?>> currentlyExecutingActions = new ArrayList<>();
+   private final List<RDXLeafNode<?, ?>> orderedLeaves = new ArrayList<>();
+   private final List<RDXActionNode<?, ?>> orderedActions = new ArrayList<>();
+   private final List<RDXLeafNode<?, ?>> nextForExecutionLeaves = new ArrayList<>();
+   private final List<RDXLeafNode<?, ?>> currentlyExecutingLeaves = new ArrayList<>();
    private final RDXActionProgressWidgetsManager progressWidgetsManager = new RDXActionProgressWidgetsManager();
 
    public RDXBehaviorTreeRootNode(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(new BehaviorTreeRootNodeState(id, crdtInfo, saveFileDirectory));
-
-      state = getState();
 
       automaticExecutionCheckbox = new ImBooleanWrapper(state::getAutomaticExecution,
                                                         state::setAutomaticExecution,
@@ -47,38 +46,37 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
       super.update();
 
       idToNodeMap.clear();
-      actionChildren.clear();
-      nextForExecutionActions.clear();
-      currentlyExecutingActions.clear();
-      updateActionSubtree(this);
+      orderedLeaves.clear();
+      orderedActions.clear();
+      nextForExecutionLeaves.clear();
+      currentlyExecutingLeaves.clear();
+      updateSubtree(this);
 
-      for (RDXActionNode<?, ?> actionChild : actionChildren)
+      for (RDXLeafNode<?, ?> leaf : orderedLeaves)
       {
-         actionChild.getState().updateAndValidateExecuteAfter(state.getActionChildren());
+         leaf.getState().validateFields(state.getOrderedLeaves());
       }
    }
 
-   public void updateActionSubtree(RDXBehaviorTreeNode<?, ?> node)
+   public void updateSubtree(RDXBehaviorTreeNode<?, ?> node)
    {
       idToNodeMap.put(node.getState().getID(), node);
 
       for (RDXBehaviorTreeNode<?, ?> child : node.getChildren())
       {
-         if (child instanceof RDXActionNode<?, ?> actionNode)
+         if (child instanceof RDXLeafNode<?, ?> leaf)
          {
-            actionChildren.add(actionNode);
+            orderedLeaves.add(leaf);
 
-            if (actionNode.getState().getIsNextForExecution())
-            {
-               nextForExecutionActions.add(actionNode);
-            }
-            if (actionNode.getState().getIsExecuting())
-            {
-               currentlyExecutingActions.add(actionNode);
-            }
+            if (leaf.getState().getIsNextForExecution())
+               nextForExecutionLeaves.add(leaf);
+            if (leaf.getState().getIsExecuting())
+               currentlyExecutingLeaves.add(leaf);
+            if (child instanceof RDXActionNode<?, ?> action)
+               orderedActions.add(action);
          }
 
-         updateActionSubtree(child);
+         updateSubtree(child);
       }
    }
 
@@ -95,20 +93,20 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
    {
       if (ImGui.button(labels.get("<")))
       {
-         getState().stepBackNextExecutionIndex();
+         state.stepBackNextExecutionIndex();
       }
-      ImGuiTools.previousWidgetTooltip("Go to previous action");
+      ImGuiTools.previousWidgetTooltip("Go to previous leaf");
       ImGui.sameLine();
-      ImGui.text("Index: " + String.format("%03d", getState().getExecutionNextIndex()));
+      ImGui.text("Index: " + String.format("%03d", state.getExecutionNextIndex()));
       ImGui.sameLine();
       if (ImGui.button(labels.get(">")))
       {
-         getState().stepForwardNextExecutionIndex();
+         state.stepForwardNextExecutionIndex();
       }
-      ImGuiTools.previousWidgetTooltip("Go to next action");
+      ImGuiTools.previousWidgetTooltip("Go to next leaf");
 
-      boolean endOfSequence = getState().getExecutionNextIndex() >= getState().getActionChildren().size();
-      if (!endOfSequence)
+      boolean endOfSequence = state.getExecutionNextIndex() >= state.getOrderedLeaves().size();
+      ImGui.beginDisabled(endOfSequence); // Use disabled so stuff doesn't glitch around
       {
          ImGui.sameLine();
          ImGui.text("Execute");
@@ -116,60 +114,62 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
 
          automaticExecutionCheckbox.renderImGuiWidget();
          if (automaticExecutionCheckbox.changed())
-            getDefinition().modify();
+            definition.modify();
 
          ImGuiTools.previousWidgetTooltip("Enables autonomous execution. Will immediately start executing when checked.");
-         if (!getState().getAutomaticExecution())
+
+         ImGui.beginDisabled(state.getAutomaticExecution());
          {
             ImGui.sameLine();
 
-            boolean disableManuallyExecuteButton = getState().getManualExecutionRequested();
-            if (disableManuallyExecuteButton)
-               ImGui.beginDisabled();
-            if (ImGui.button(labels.get("Manually")))
+            boolean disableManuallyExecuteButton = state.getManualExecutionRequested();
+            ImGui.beginDisabled(disableManuallyExecuteButton);
             {
-               getState().setManualExecutionRequested();
+               if (ImGui.button(labels.get("Manually")))
+               {
+                  state.setManualExecutionRequested();
+               }
             }
-            if (disableManuallyExecuteButton)
-               ImGui.endDisabled();
-            ImGuiTools.previousWidgetTooltip("Executes the next action.");
+            ImGui.endDisabled();
+            ImGuiTools.previousWidgetTooltip("Executes the next leaf.");
          }
-
-         if (endOfSequence)
-         {
-            ImGui.text("End of sequence.");
-         }
+         ImGui.endDisabled();
       }
+      ImGui.endDisabled();
 
       ImGui.sameLine();
       concurrencyEnabledCheckbox.renderImGuiWidget();
 
-      if (currentlyExecutingActions.isEmpty())
+      if (currentlyExecutingLeaves.isEmpty())
       {
          ImGui.text("Nothing executing.");
       }
       else
       {
          ImGui.text("Executing:");
-         for (RDXActionNode<?, ?> currentlyExecutingAction : currentlyExecutingActions)
+         for (RDXLeafNode<?, ?> currentlyExecutingLeaf : currentlyExecutingLeaves)
          {
             ImGui.sameLine();
-            ImGui.text("%s (%s)".formatted(currentlyExecutingAction.getDefinition().getName(),
-                                           currentlyExecutingAction.getActionTypeTitle()));
+            ImGui.text("%s (%s)".formatted(currentlyExecutingLeaf.getDefinition().getName(),
+                                           currentlyExecutingLeaf.getLeafTypeTitle()));
          }
       }
 
       progressWidgetsManager.getActionNodesToRender().clear();
       int lastIndex = 0;
-      for (RDXActionNode<?, ?> currentlyExecutingAction : currentlyExecutingActions)
+      for (RDXLeafNode<?, ?> currentlyExecutingLeaf : currentlyExecutingLeaves)
       {
-         progressWidgetsManager.getActionNodesToRender().add(currentlyExecutingAction);
-         lastIndex = Math.max(lastIndex, currentlyExecutingAction.getState().getActionIndex());
+         if (currentlyExecutingLeaf instanceof RDXActionNode<?, ?> currentlyExecutingAction)
+         {
+            progressWidgetsManager.getActionNodesToRender().add(currentlyExecutingAction);
+            lastIndex = Math.max(lastIndex, currentlyExecutingAction.getState().getLeafIndex());
+         }
       }
-      for (RDXActionNode<?, ?> nextForExecutionAction : nextForExecutionActions)
+      for (RDXLeafNode<?, ?> nextForExecutionLeaf : nextForExecutionLeaves)
       {
-         if (currentlyExecutingActions.isEmpty() || nextForExecutionAction.getState().getActionIndex() < lastIndex)
-            progressWidgetsManager.getActionNodesToRender().add(nextForExecutionAction);
+         if (nextForExecutionLeaf instanceof RDXActionNode<?, ?> nextForExecutionAction)
+            if (currentlyExecutingLeaves.isEmpty() || nextForExecutionAction.getState().getLeafIndex() < lastIndex)
+               progressWidgetsManager.getActionNodesToRender().add(nextForExecutionAction);
       }
       progressWidgetsManager.render();
    }
@@ -177,7 +177,7 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
    @Override
    public void renderNodeSettingsWidgets()
    {
-      ImGui.text("Type: %s   ID: %d".formatted(getDefinition().getClass().getSimpleName(), getState().getID()));
+      ImGui.text("Type: %s   ID: %d".formatted(definition.getClass().getSimpleName(), state.getID()));
 
       super.renderNodeSettingsWidgets();
    }

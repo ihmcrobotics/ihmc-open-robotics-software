@@ -35,9 +35,10 @@ import us.ihmc.sensors.zed.ZEDImageSensor;
 import us.ihmc.sensors.zed.ZEDModelData;
 import us.ihmc.sensors.zed.ZEDSVOPlaybackSensor;
 import us.ihmc.tools.IHMCCommonPaths;
+import us.ihmc.zed.global.zed;
 
 import java.io.File;
-import java.nio.file.Path;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -56,7 +57,7 @@ public class RDXYOLOv8PipelineDemo
    private final ROS2Node ros2Node = new ROS2NodeBuilder().build(RDXYOLOv8PipelineDemo.class.getSimpleName());
    private final ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
-   private final ZEDSVOPlaybackSensor zed = new ZEDSVOPlaybackSensor(ros2Helper, 0, ZEDModelData.ZED_2, SVO_FILE);
+   private final ZEDSVOPlaybackSensor zedPlaybackSensor = new ZEDSVOPlaybackSensor(ros2Helper, 0, ZEDModelData.ZED_2, zed.SL_DEPTH_MODE_PERFORMANCE, SVO_FILE);
    private RawImage colorImage;
    private final RDXOpenCVVideoVisualizer colorImageVisualizer = new RDXOpenCVVideoVisualizer("ZED Color", "ZED Color", false);
    private RawImage depthImage;
@@ -100,24 +101,24 @@ public class RDXYOLOv8PipelineDemo
 
    private RDXYOLOv8PipelineDemo()
    {
-      for (Path yoloModelDirectory : YOLOv8Tools.getYOLOModelDirectories())
+      for (URL yoloModelDirectory : YOLOv8Tools.getYOLOModelDirectories())
       {
          YOLOv8Model model = new YOLOv8Model(yoloModelDirectory);
 
-         LogTools.info("Loaded YOLOv8 model: " + YOLOv8Tools.getONNXFile(yoloModelDirectory));
-         LogTools.info("\t\t\tClasses: " + model.getDetectionClassNames().size());
+         LogTools.info("Loaded YOLOv8 model: " + model.getName());
+         LogTools.info("\t\t\tClasses: " + model.getDetectableObjectCount());
 
          yoloModels.add(model);
          availableModels.add(model.getName());
       }
 
-      zed.useTrackedPose(false);
-      zed.run(true);
+      zedPlaybackSensor.useTrackedPose(false);
+      zedPlaybackSensor.run(true);
       try
       {
-         zed.waitForGrab();
+         zedPlaybackSensor.waitForGrab();
       } catch (InterruptedException ignored) {}
-      zed.run(false);
+      zedPlaybackSensor.run(false);
 
       task = executor.submit(() -> grabFrame(frameToGrab.get()));
 
@@ -178,7 +179,7 @@ public class RDXYOLOv8PipelineDemo
          private void frameSettings()
          {
             ImGui.combo("YOLO Model", selectedDetector, availableModels.toArray(String[]::new));
-            if (ImGui.sliderInt("Frame", frameToGrab.getData(), 0, zed.getLength() - 1))
+            if (ImGui.sliderInt("Frame", frameToGrab.getData(), 0, zedPlaybackSensor.getLength() - 1))
             {
                task = executor.submit(() -> grabFrame(frameToGrab.get()));
                wasDone = false;
@@ -230,22 +231,22 @@ public class RDXYOLOv8PipelineDemo
 
    private void grabFrame(int frameToGrab)
    {
-      zed.setCurrentPosition(frameToGrab);
+      zedPlaybackSensor.setCurrentPosition(frameToGrab);
 
-      zed.run(true);
+      zedPlaybackSensor.run(true);
       try
       {
-         zed.waitForGrab();
+         zedPlaybackSensor.waitForGrab();
       } catch (InterruptedException ignored) {}
-      zed.run(false);
+      zedPlaybackSensor.run(false);
 
       if (colorImage != null)
          colorImage.release();
       if (depthImage != null)
          depthImage.release();
 
-      colorImage = zed.getImage(ZEDImageSensor.LEFT_COLOR_IMAGE_KEY);
-      depthImage = zed.getImage(ZEDImageSensor.DEPTH_IMAGE_KEY);
+      colorImage = zedPlaybackSensor.getImage(ZEDImageSensor.LEFT_COLOR_IMAGE_KEY);
+      depthImage = zedPlaybackSensor.getImage(ZEDImageSensor.DEPTH_IMAGE_KEY);
    }
 
    private void runYOLO()
@@ -253,11 +254,16 @@ public class RDXYOLOv8PipelineDemo
       // Get the model
       YOLOv8Model model = yoloModels.get(selectedDetector.get());
 
+      // Set parameters
+      model.setConfidenceThresholds(confidenceThreshold.get());
+      model.setMaskThresholds(maskThreshold.get());
+      model.setNMSThreshold(nmsThreshold.get());
+
       // Run YOLO on a BGR image
       Mat bgrMat = new Mat();
       opencv_imgproc.cvtColor(colorImage.getCpuImageMat(), bgrMat, opencv_imgproc.COLOR_BGRA2BGR);
       RawImage bgrImage = colorImage.replaceImage(bgrMat, PixelFormat.BGR8);
-      YOLOv8DetectionList results = model.run(bgrImage, confidenceThreshold.get(), nmsThreshold.get(), maskThreshold.get());
+      YOLOv8DetectionList results = model.run(bgrImage);
       if (results.isEmpty())
          return;
 
@@ -467,7 +473,7 @@ public class RDXYOLOv8PipelineDemo
 
       depthImageSegmenter.destroy();
       pointCloudExtractor.close();
-      zed.close();
+      zedPlaybackSensor.close();
       ros2Node.destroy();
    }
 

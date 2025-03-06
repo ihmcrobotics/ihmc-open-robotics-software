@@ -241,6 +241,16 @@ public class TerrainPlanningDebugger
       }
    }
 
+   public void resetVisualizationForUIPublisher()
+   {
+      PoseListMessage poseListMessage = new PoseListMessage();
+      FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
+
+      startAndGoalPublisherForUI.publish(poseListMessage);
+      monteCarloNodesPublisherForUI.publish(poseListMessage);
+      plannedFootstesPublisherForUI.publish(footstepDataListMessage);
+   }
+
    public void publishStartAndGoalForVisualization(SideDependentList<FramePose3D> startPoses, SideDependentList<FramePose3D> goalPoses)
    {
       List<Pose3D> poses = new ArrayList<>();
@@ -253,16 +263,6 @@ public class TerrainPlanningDebugger
       MessageTools.packPoseListMessage(poses, poseListMessage);
 
       startAndGoalPublisherForUI.publish(poseListMessage);
-   }
-
-   public void resetVisualizationForUIPublisher()
-   {
-      PoseListMessage poseListMessage = new PoseListMessage();
-      FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
-
-      startAndGoalPublisherForUI.publish(poseListMessage);
-      monteCarloNodesPublisherForUI.publish(poseListMessage);
-      plannedFootstesPublisherForUI.publish(footstepDataListMessage);
    }
 
    public void publishMonteCarloNodesForVisualization(MonteCarloTreeNode root, TerrainMapData terrainMap)

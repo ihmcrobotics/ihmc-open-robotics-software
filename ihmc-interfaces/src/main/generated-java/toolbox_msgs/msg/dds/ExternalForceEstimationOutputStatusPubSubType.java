@@ -101,7 +101,7 @@ public class ExternalForceEstimationOutputStatusPubSubType implements us.ihmc.pu
 
       if(data.getEstimatedExternalForces().size() <= 10)
       cdr.write_type_e(data.getEstimatedExternalForces());else
-          throw new RuntimeException("estimated_external_forces field exceeds the maximum length");
+          throw new RuntimeException("estimated_external_forces field exceeds the maximum length: %d > %d".formatted(data.getEstimatedExternalForces().size(), 10));
 
       geometry_msgs.msg.dds.WrenchPubSubType.write(data.getEstimatedRootJointWrench(), cdr);
       cdr.write_type_2(data.getRigidBodyHashCode());

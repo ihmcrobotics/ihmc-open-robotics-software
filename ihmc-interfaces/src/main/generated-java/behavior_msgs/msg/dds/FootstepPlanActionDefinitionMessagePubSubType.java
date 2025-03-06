@@ -15,7 +15,7 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "7f2408929c8dc26c0a7e54db531247e887ca1009994dabd9191f24bed2bf696b";
+   		return "a0dbc2d4e96bdf015777e266efbe9de7039cf800fb8292b437dac1d6495291d9";
    }
    
    @Override
@@ -166,7 +166,7 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
       behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
       if(data.getParentFrameName().length() <= 255)
       cdr.write_type_d(data.getParentFrameName());else
-          throw new RuntimeException("parent_frame_name field exceeds the maximum length");
+          throw new RuntimeException("parent_frame_name field exceeds the maximum length: %d > %d".formatted(data.getParentFrameName().length(), 255));
 
       cdr.write_type_6(data.getSwingDuration());
 
@@ -178,7 +178,7 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
 
       if(data.getFootsteps().size() <= 50)
       cdr.write_type_e(data.getFootsteps());else
-          throw new RuntimeException("footsteps field exceeds the maximum length");
+          throw new RuntimeException("footsteps field exceeds the maximum length: %d > %d".formatted(data.getFootsteps().size(), 50));
 
       geometry_msgs.msg.dds.PointPubSubType.write(data.getGoalStancePoint(), cdr);
       geometry_msgs.msg.dds.PointPubSubType.write(data.getGoalFocalPoint(), cdr);

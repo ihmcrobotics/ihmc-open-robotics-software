@@ -60,7 +60,6 @@ public class RapidHeightMapExtractor implements RapidHeightMapExtractorInterface
 
    private final SteppableRegionCalculatorParameters steppableRegionParameters = new SteppableRegionCalculatorParameters();
 
-   private static HeightMapParameters heightMapParameters = new HeightMapParameters("GPU");
    private final RigidBodyTransform currentSensorToWorldTransform = new RigidBodyTransform();
    private final RigidBodyTransform currentGroundToWorldTransform = new RigidBodyTransform();
    private final Point3D sensorOrigin = new Point3D();
@@ -119,21 +118,28 @@ public class RapidHeightMapExtractor implements RapidHeightMapExtractorInterface
    private TerrainMapData terrainMapData;
    private Mat denoisedHeightMapImage;
    private Rect cropWindowRectangle;
+   private HeightMapParameters heightMapParameters;
 
    public RapidHeightMapExtractor(OpenCLManager openCLManager,
                                   ReferenceFrame leftFootSoleFrame,
                                   ReferenceFrame rightFootSoleFrame,
                                   BytedecoImage depthImage,
                                   CameraIntrinsics depthCameraIntrinsics,
-                                  int mode)
+                                  int mode,
+                                  HeightMapParameters heightMapParameters)
    {
-      this(openCLManager, depthImage, depthCameraIntrinsics, mode);
+      this(openCLManager, depthImage, depthCameraIntrinsics, mode, heightMapParameters);
       footSoleFrames.put(RobotSide.LEFT, leftFootSoleFrame);
       footSoleFrames.put(RobotSide.RIGHT, rightFootSoleFrame);
    }
 
-   public RapidHeightMapExtractor(OpenCLManager openCLManager, BytedecoImage depthImage, CameraIntrinsics depthCameraIntrinsics, int mode)
+   public RapidHeightMapExtractor(OpenCLManager openCLManager,
+                                  BytedecoImage depthImage,
+                                  CameraIntrinsics depthCameraIntrinsics,
+                                  int mode,
+                                  HeightMapParameters heightMapParameters)
    {
+      this.heightMapParameters = heightMapParameters;
       this.openCLManager = openCLManager;
       this.inputDepthImage = depthImage;
       this.depthCameraIntrinsics = depthCameraIntrinsics;
@@ -787,14 +793,8 @@ public class RapidHeightMapExtractor implements RapidHeightMapExtractorInterface
 
    public Mat getCroppedImage(Point3DReadOnly origin, int globalCenterIndex, Mat imageToCrop)
    {
-      int xIndex = HeightMapTools.coordinateToIndex(origin.getX(),
-                                                    0,
-                                                    RapidHeightMapExtractor.getHeightMapParameters().getGlobalCellSizeInMeters(),
-                                                    globalCenterIndex);
-      int yIndex = HeightMapTools.coordinateToIndex(origin.getY(),
-                                                    0,
-                                                    RapidHeightMapExtractor.getHeightMapParameters().getGlobalCellSizeInMeters(),
-                                                    globalCenterIndex);
+      int xIndex = HeightMapTools.coordinateToIndex(origin.getX(), 0, heightMapParameters.getGlobalCellSizeInMeters(), globalCenterIndex);
+      int yIndex = HeightMapTools.coordinateToIndex(origin.getY(), 0, heightMapParameters.getGlobalCellSizeInMeters(), globalCenterIndex);
       cropWindowRectangle = new Rect((yIndex - heightMapParameters.getCropWindowSize() / 2),
                                      (xIndex - heightMapParameters.getCropWindowSize() / 2),
                                      heightMapParameters.getCropWindowSize(),
@@ -802,19 +802,19 @@ public class RapidHeightMapExtractor implements RapidHeightMapExtractorInterface
       return imageToCrop.apply(cropWindowRectangle);
    }
 
-   public static HeightMapData packHeightMapData(RapidHeightMapExtractorInterface heightMapExtractor)
+   public HeightMapData getHeightMapData()
    {
-      HeightMapData latestHeightMapData = new HeightMapData((float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalCellSizeInMeters(),
-                                                            (float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalWidthInMeters(),
-                                                            heightMapExtractor.getSensorOrigin().getX(),
-                                                            heightMapExtractor.getSensorOrigin().getY());
+      HeightMapData latestHeightMapData = new HeightMapData((float) heightMapParameters.getGlobalCellSizeInMeters(),
+                                                            (float) heightMapParameters.getGlobalWidthInMeters(),
+                                                            getSensorOrigin().getX(),
+                                                            getSensorOrigin().getY());
 
-      Mat heightMapMat = heightMapExtractor.getTerrainMapData().getHeightMap();
+      Mat heightMapMat = getTerrainMapData().getHeightMap();
       PerceptionMessageTools.convertToHeightMapData(heightMapMat,
                                                     latestHeightMapData,
-                                                    heightMapExtractor.getSensorOrigin(),
-                                                    (float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalWidthInMeters(),
-                                                    (float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalCellSizeInMeters());
+                                                    getSensorOrigin(),
+                                                    (float) heightMapParameters.getGlobalWidthInMeters(),
+                                                    (float) heightMapParameters.getGlobalCellSizeInMeters());
 
       return latestHeightMapData;
    }
@@ -862,11 +862,6 @@ public class RapidHeightMapExtractor implements RapidHeightMapExtractorInterface
    public boolean isHeightMapDataAvailable()
    {
       return heightMapDataAvailable;
-   }
-
-   public static HeightMapParameters getHeightMapParameters()
-   {
-      return heightMapParameters;
    }
 
    public boolean isInitialized()

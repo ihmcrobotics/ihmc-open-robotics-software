@@ -17,7 +17,8 @@ import java.util.List;
  */
 public class BehaviorTreeNodeState<D extends BehaviorTreeNodeDefinition> implements TreeNode<BehaviorTreeNodeState<?>>
 {
-   private final D definition;
+   /** Convenient accessor to the definition to keep the code clean, available to all inheriting classes. */
+   protected final D definition;
 
    /** The node's unique ID. */
    private final long id;
@@ -74,6 +75,7 @@ public class BehaviorTreeNodeState<D extends BehaviorTreeNodeDefinition> impleme
    public void update()
    {
       definition.checkModified();
+      definition.updateName();
    }
 
    public void drawToSVG()

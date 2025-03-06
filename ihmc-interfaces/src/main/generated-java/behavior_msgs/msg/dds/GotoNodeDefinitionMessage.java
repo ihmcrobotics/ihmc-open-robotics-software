@@ -9,13 +9,25 @@ import us.ihmc.pubsub.TopicDataType;
 public class GotoNodeDefinitionMessage extends Packet<GotoNodeDefinitionMessage> implements Settable<GotoNodeDefinitionMessage>, EpsilonComparable<GotoNodeDefinitionMessage>
 {
    /**
+          * Value of the node to goto ID when we have a name but still need to find the ID
+          */
+   public static final long INVALID = -1;
+   /**
+          * Value of the node to goto ID when the node is simply set to goto the next node (i.e. no-op)
+          */
+   public static final long GOTO_NEXT = -2;
+   /**
             * Parent definition fields
             */
-   public behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage definition_;
+   public behavior_msgs.msg.dds.LeafNodeDefinitionMessage definition_;
+   /**
+            * The ID of the node to goto or one of the invalid or next constants
+            */
+   public long node_to_goto_id_;
 
    public GotoNodeDefinitionMessage()
    {
-      definition_ = new behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage();
+      definition_ = new behavior_msgs.msg.dds.LeafNodeDefinitionMessage();
    }
 
    public GotoNodeDefinitionMessage(GotoNodeDefinitionMessage other)
@@ -26,15 +38,33 @@ public class GotoNodeDefinitionMessage extends Packet<GotoNodeDefinitionMessage>
 
    public void set(GotoNodeDefinitionMessage other)
    {
-      behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);   }
+      behavior_msgs.msg.dds.LeafNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
+      node_to_goto_id_ = other.node_to_goto_id_;
+
+   }
 
 
    /**
             * Parent definition fields
             */
-   public behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage getDefinition()
+   public behavior_msgs.msg.dds.LeafNodeDefinitionMessage getDefinition()
    {
       return definition_;
+   }
+
+   /**
+            * The ID of the node to goto or one of the invalid or next constants
+            */
+   public void setNodeToGotoId(long node_to_goto_id)
+   {
+      node_to_goto_id_ = node_to_goto_id;
+   }
+   /**
+            * The ID of the node to goto or one of the invalid or next constants
+            */
+   public long getNodeToGotoId()
+   {
+      return node_to_goto_id_;
    }
 
 
@@ -56,6 +86,8 @@ public class GotoNodeDefinitionMessage extends Packet<GotoNodeDefinitionMessage>
       if(other == this) return true;
 
       if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.node_to_goto_id_, other.node_to_goto_id_, epsilon)) return false;
+
 
       return true;
    }
@@ -70,6 +102,8 @@ public class GotoNodeDefinitionMessage extends Packet<GotoNodeDefinitionMessage>
       GotoNodeDefinitionMessage otherMyClass = (GotoNodeDefinitionMessage) other;
 
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
+      if(this.node_to_goto_id_ != otherMyClass.node_to_goto_id_) return false;
+
 
       return true;
    }
@@ -81,7 +115,9 @@ public class GotoNodeDefinitionMessage extends Packet<GotoNodeDefinitionMessage>
 
       builder.append("GotoNodeDefinitionMessage {");
       builder.append("definition=");
-      builder.append(this.definition_);
+      builder.append(this.definition_);      builder.append(", ");
+      builder.append("node_to_goto_id=");
+      builder.append(this.node_to_goto_id_);
       builder.append("}");
       return builder.toString();
    }

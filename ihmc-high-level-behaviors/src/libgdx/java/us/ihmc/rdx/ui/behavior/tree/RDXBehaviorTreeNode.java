@@ -37,8 +37,10 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
                                  D extends BehaviorTreeNodeDefinition>
       implements BehaviorTreeNode<RDXBehaviorTreeNode<?, ?>, S, D>
 {
-   private final S state;
-   private final D definition;
+   /** Convenient accessor to the state to keep the code clean, available to all inheriting classes. */
+   protected final S state;
+   /** Convenient accessor to the definition to keep the code clean, available to all inheriting classes. */
+   protected final D definition;
    private final List<RDXBehaviorTreeNode<?, ?>> children = new ArrayList<>();
    private transient RDXBehaviorTreeNode<?, ?> parent;
 

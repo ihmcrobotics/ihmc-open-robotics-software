@@ -90,17 +90,17 @@ public class SystemServiceStatusMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       if(data.getServiceName().length() <= 255)
       cdr.write_type_d(data.getServiceName());else
-          throw new RuntimeException("service_name field exceeds the maximum length");
+          throw new RuntimeException("service_name field exceeds the maximum length: %d > %d".formatted(data.getServiceName().length(), 255));
 
       if(data.getStatus().length() <= 255)
       cdr.write_type_d(data.getStatus());else
-          throw new RuntimeException("status field exceeds the maximum length");
+          throw new RuntimeException("status field exceeds the maximum length: %d > %d".formatted(data.getStatus().length(), 255));
 
       cdr.write_type_7(data.getRefresh());
 
       if(data.getLogData().size() <= 25000000)
       cdr.write_type_e(data.getLogData());else
-          throw new RuntimeException("log_data field exceeds the maximum length");
+          throw new RuntimeException("log_data field exceeds the maximum length: %d > %d".formatted(data.getLogData().size(), 25000000));
 
    }
 

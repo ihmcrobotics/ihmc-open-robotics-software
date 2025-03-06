@@ -22,16 +22,13 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
-import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.log.LogTools;
-import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 import us.ihmc.robotEnvironmentAwareness.updaters.LIDARBasedREAModule;
 import us.ihmc.robotEnvironmentAwareness.updaters.REANetworkProvider;
 import us.ihmc.robotEnvironmentAwareness.updaters.REAPlanarRegionPublicNetworkProvider;
 import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.tools.processManagement.JavaProcessSpawner;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 
@@ -76,10 +73,6 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
          humanoidNetworkProcessor.setupKinematicsStreamingToolboxModule(null, null, parameters.isUseKinematicsStreamingToolboxModule());
       if (parameters.isUseFootstepPlanningToolboxModule())
          humanoidNetworkProcessor.setupFootstepPlanningToolboxModule();
-      if (parameters.isUseBehaviorModule())
-         humanoidNetworkProcessor.setupBehaviorModule(parameters.isVisualizeBehaviorModule(),
-                                                      parameters.isUseAutomaticDiagnostic(),
-                                                      parameters.getAutomatedDiagnosticInitialDelay());
       if (parameters.isUseROSModule())
          humanoidNetworkProcessor.setupRosModule();
       if (parameters.isUseSensorModule())
@@ -272,47 +265,6 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
          modulesToClose.add(module);
 
          return module;
-      }
-      catch (Throwable e)
-      {
-         reportFailure(e);
-         return null;
-      }
-   }
-
-   public IHMCHumanoidBehaviorManager setupBehaviorModule(boolean enableYoVariableServer, boolean automaticDiagnostic, double diagnosticInitialDelay)
-   {
-      checkIfModuleCanBeCreated(IHMCHumanoidBehaviorManager.class);
-
-      try
-      {
-         HumanoidRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
-         LogModelProvider logModelProvider = robotModel.getLogModelProvider();
-         IHMCHumanoidBehaviorManager behaviorManager;
-
-         if (automaticDiagnostic)
-         {
-            behaviorManager = IHMCHumanoidBehaviorManager.createBehaviorModuleForAutomaticDiagnostic(robotModel.getSimpleRobotName(),
-                                                                                                     robotModel.getFootstepPlannerParameters(),
-                                                                                                     robotModel,
-                                                                                                     robotModel,
-                                                                                                     logModelProvider,
-                                                                                                     enableYoVariableServer,
-                                                                                                     sensorInformation,
-                                                                                                     diagnosticInitialDelay);
-         }
-         else
-         {
-            behaviorManager = new IHMCHumanoidBehaviorManager(robotModel.getSimpleRobotName(),
-                                                              robotModel.getFootstepPlannerParameters(),
-                                                              robotModel,
-                                                              robotModel,
-                                                              logModelProvider,
-                                                              enableYoVariableServer,
-                                                              sensorInformation);
-         }
-         modulesToClose.add(behaviorManager);
-         return behaviorManager;
       }
       catch (Throwable e)
       {

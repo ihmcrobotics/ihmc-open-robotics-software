@@ -14,16 +14,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
- * @param <HLT> The generic type of this node: RDX or Executor
+ * @param <T> The generic type of this node: RDX or Executor
  */
-public class BehaviorTreeFileLoader<HLT extends BehaviorTreeNode<HLT, ? ,?>>
+public class BehaviorTreeFileLoader<T extends BehaviorTreeNode<T, ? ,?>>
 {
-   private final BehaviorTree<HLT> behaviorTree;
-   private final BehaviorTreeNodeBuilder<HLT> nodeBuilder;
+   private final BehaviorTree<T> behaviorTree;
+   private final BehaviorTreeNodeBuilder<T> nodeBuilder;
    private final WorkspaceResourceDirectory treeFilesDirectory;
 
-   public BehaviorTreeFileLoader(BehaviorTree<HLT> behaviorTree,
-                                 BehaviorTreeNodeBuilder<HLT> nodeBuilder,
+   public BehaviorTreeFileLoader(BehaviorTree<T> behaviorTree,
+                                 BehaviorTreeNodeBuilder<T> nodeBuilder,
                                  WorkspaceResourceDirectory treeFilesDirectory)
    {
       this.behaviorTree = behaviorTree;
@@ -31,14 +31,14 @@ public class BehaviorTreeFileLoader<HLT extends BehaviorTreeNode<HLT, ? ,?>>
       this.treeFilesDirectory = treeFilesDirectory;
    }
 
-   public HLT loadFromFile(WorkspaceResourceFile file, BehaviorTreeTopologyOperationQueue<HLT> topologyOperationQueue)
+   public T loadFromFile(WorkspaceResourceFile file, BehaviorTreeTopologyOperationQueue<T> topologyOperationQueue)
    {
       return loadFromFile(file, null, null, topologyOperationQueue);
    }
 
-   private HLT loadFromFile(WorkspaceResourceFile file, JsonNode jsonNode, HLT parentNode, BehaviorTreeTopologyOperationQueue<HLT> topologyOperationQueue)
+   private T loadFromFile(WorkspaceResourceFile file, JsonNode jsonNode, T parentNode, BehaviorTreeTopologyOperationQueue<T> topologyOperationQueue)
    {
-      MutableObject<HLT> loadedNode = new MutableObject<>();
+      MutableObject<T> loadedNode = new MutableObject<>();
 
       if (jsonNode == null)
       {
@@ -76,7 +76,7 @@ public class BehaviorTreeFileLoader<HLT extends BehaviorTreeNode<HLT, ? ,?>>
       {
          String typeName = jsonNode.get("type").textValue();
 
-         HLT node = nodeBuilder.createNode(BehaviorTreeDefinitionRegistry.getClassFromTypeName(typeName),
+         T node = nodeBuilder.createNode(BehaviorTreeDefinitionRegistry.getClassFromTypeName(typeName),
                                            behaviorTree.getAndIncrementNextID(),
                                            behaviorTree.getCRDTInfo(),
                                            behaviorTree.getSaveFileDirectory());

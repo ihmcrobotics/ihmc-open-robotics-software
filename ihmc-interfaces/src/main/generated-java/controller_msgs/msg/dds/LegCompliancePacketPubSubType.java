@@ -91,7 +91,7 @@ public class LegCompliancePacketPubSubType implements us.ihmc.pubsub.TopicDataTy
 
       if(data.getMaxVelocityDeltas().size() <= 100)
       cdr.write_type_e(data.getMaxVelocityDeltas());else
-          throw new RuntimeException("max_velocity_deltas field exceeds the maximum length");
+          throw new RuntimeException("max_velocity_deltas field exceeds the maximum length: %d > %d".formatted(data.getMaxVelocityDeltas().size(), 100));
 
       cdr.write_type_9(data.getRobotSide());
 

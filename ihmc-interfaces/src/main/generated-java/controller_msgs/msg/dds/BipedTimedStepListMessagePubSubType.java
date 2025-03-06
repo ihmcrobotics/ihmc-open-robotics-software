@@ -88,7 +88,7 @@ public class BipedTimedStepListMessagePubSubType implements us.ihmc.pubsub.Topic
 
       if(data.getTimedStepList().size() <= 50)
       cdr.write_type_e(data.getTimedStepList());else
-          throw new RuntimeException("timed_step_list field exceeds the maximum length");
+          throw new RuntimeException("timed_step_list field exceeds the maximum length: %d > %d".formatted(data.getTimedStepList().size(), 50));
 
    }
 

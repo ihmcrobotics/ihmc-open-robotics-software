@@ -42,8 +42,6 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimitiveActionState, ScrewPrimitiveActionDefinition>
 {
-   private final ScrewPrimitiveActionState state;
-   private final ScrewPrimitiveActionDefinition definition;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
    private final FramePose3D desiredHandControlPose = new FramePose3D();
@@ -90,9 +88,6 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
 
-      state = getState();
-      definition = getDefinition();
-
       for (RobotSide side : RobotSide.values)
       {
          armIKSolvers.put(side, new ArmIKSolver(side, robotModel.getJointMap(), syncedRobot.getFullRobotModel()));
@@ -113,7 +108,7 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
          BehaviorTreeRootNodeState actionSequence = BehaviorTreeTools.findRootNode(state);
          if (actionSequence != null)
          {
-            if (actionSequence.getExecutionNextIndex() <= state.getActionIndex())
+            if (actionSequence.getExecutionNextIndex() <= state.getLeafIndex())
             {
                ReferenceFrame initialHandFrame = null;
 
@@ -123,9 +118,9 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
                }
                else
                {
-                  HandPoseActionState previousHandPose = actionSequence.findNextPreviousAction(HandPoseActionState.class,
-                                                                                               state.getActionIndex(),
-                                                                                               definition.getSide());
+                  HandPoseActionState previousHandPose = actionSequence.findNextPreviousLeaf(HandPoseActionState.class,
+                                                                                             state.getLeafIndex(),
+                                                                                             definition.getSide());
                   if (previousHandPose != null && previousHandPose.getPalmFrame().isChildOfWorld())
                   {
                      initialHandFrame = previousHandPose.getPalmFrame().getReferenceFrame();
@@ -299,9 +294,9 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
    }
 
    @Override
-   public void triggerActionExecution()
+   public void triggerExecution()
    {
-      super.triggerActionExecution();
+      super.triggerExecution();
 
       // Fail if invalid
       if (Double.isNaN(state.getPreviewTrajectoryLinearVelocity().getValue())

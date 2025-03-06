@@ -15,7 +15,7 @@ public class AI2RCommandMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "99233c6f23e4b4243e488c6c4f0f53065fedb240510e78b64dfcb1bbf314db3e";
+   		return "da043020cd0ef7adf1d8169427586ab419179c23716aeb2a07a11f991174a756";
    }
    
    @Override
@@ -53,10 +53,9 @@ public class AI2RCommandMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
       int initial_alignment = current_alignment;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
-      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += behavior_msgs.msg.dds.AI2RHandPoseAdaptationMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += behavior_msgs.msg.dds.AI2RNavigationMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -73,11 +72,9 @@ public class AI2RCommandMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getBehaviorToExecute().length() + 1;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getGotoReferenceFrameName().length() + 1;
+      current_alignment += behavior_msgs.msg.dds.AI2RHandPoseAdaptationMessagePubSubType.getCdrSerializedSize(data.getHandPoseAdaptation(), current_alignment);
 
-      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getGotoGoalStancePoint(), current_alignment);
-
-      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getGotoGoalFocalPoint(), current_alignment);
+      current_alignment += behavior_msgs.msg.dds.AI2RNavigationMessagePubSubType.getCdrSerializedSize(data.getNavigation(), current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -87,22 +84,17 @@ public class AI2RCommandMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
    {
       if(data.getBehaviorToExecute().length() <= 255)
       cdr.write_type_d(data.getBehaviorToExecute());else
-          throw new RuntimeException("behavior_to_execute field exceeds the maximum length");
+          throw new RuntimeException("behavior_to_execute field exceeds the maximum length: %d > %d".formatted(data.getBehaviorToExecute().length(), 255));
 
-      if(data.getGotoReferenceFrameName().length() <= 255)
-      cdr.write_type_d(data.getGotoReferenceFrameName());else
-          throw new RuntimeException("goto_reference_frame_name field exceeds the maximum length");
-
-      geometry_msgs.msg.dds.PointPubSubType.write(data.getGotoGoalStancePoint(), cdr);
-      geometry_msgs.msg.dds.PointPubSubType.write(data.getGotoGoalFocalPoint(), cdr);
+      behavior_msgs.msg.dds.AI2RHandPoseAdaptationMessagePubSubType.write(data.getHandPoseAdaptation(), cdr);
+      behavior_msgs.msg.dds.AI2RNavigationMessagePubSubType.write(data.getNavigation(), cdr);
    }
 
    public static void read(behavior_msgs.msg.dds.AI2RCommandMessage data, us.ihmc.idl.CDR cdr)
    {
       cdr.read_type_d(data.getBehaviorToExecute());	
-      cdr.read_type_d(data.getGotoReferenceFrameName());	
-      geometry_msgs.msg.dds.PointPubSubType.read(data.getGotoGoalStancePoint(), cdr);	
-      geometry_msgs.msg.dds.PointPubSubType.read(data.getGotoGoalFocalPoint(), cdr);	
+      behavior_msgs.msg.dds.AI2RHandPoseAdaptationMessagePubSubType.read(data.getHandPoseAdaptation(), cdr);	
+      behavior_msgs.msg.dds.AI2RNavigationMessagePubSubType.read(data.getNavigation(), cdr);	
 
    }
 
@@ -110,10 +102,9 @@ public class AI2RCommandMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
    public final void serialize(behavior_msgs.msg.dds.AI2RCommandMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_d("behavior_to_execute", data.getBehaviorToExecute());
-      ser.write_type_d("goto_reference_frame_name", data.getGotoReferenceFrameName());
-      ser.write_type_a("goto_goal_stance_point", new geometry_msgs.msg.dds.PointPubSubType(), data.getGotoGoalStancePoint());
+      ser.write_type_a("hand_pose_adaptation", new behavior_msgs.msg.dds.AI2RHandPoseAdaptationMessagePubSubType(), data.getHandPoseAdaptation());
 
-      ser.write_type_a("goto_goal_focal_point", new geometry_msgs.msg.dds.PointPubSubType(), data.getGotoGoalFocalPoint());
+      ser.write_type_a("navigation", new behavior_msgs.msg.dds.AI2RNavigationMessagePubSubType(), data.getNavigation());
 
    }
 
@@ -121,10 +112,9 @@ public class AI2RCommandMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.AI2RCommandMessage data)
    {
       ser.read_type_d("behavior_to_execute", data.getBehaviorToExecute());
-      ser.read_type_d("goto_reference_frame_name", data.getGotoReferenceFrameName());
-      ser.read_type_a("goto_goal_stance_point", new geometry_msgs.msg.dds.PointPubSubType(), data.getGotoGoalStancePoint());
+      ser.read_type_a("hand_pose_adaptation", new behavior_msgs.msg.dds.AI2RHandPoseAdaptationMessagePubSubType(), data.getHandPoseAdaptation());
 
-      ser.read_type_a("goto_goal_focal_point", new geometry_msgs.msg.dds.PointPubSubType(), data.getGotoGoalFocalPoint());
+      ser.read_type_a("navigation", new behavior_msgs.msg.dds.AI2RNavigationMessagePubSubType(), data.getNavigation());
 
    }
 

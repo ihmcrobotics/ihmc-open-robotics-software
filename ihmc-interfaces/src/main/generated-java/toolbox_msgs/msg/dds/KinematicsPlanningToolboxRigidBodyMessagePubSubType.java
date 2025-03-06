@@ -137,11 +137,11 @@ public class KinematicsPlanningToolboxRigidBodyMessagePubSubType implements us.i
 
       if(data.getKeyFrameTimes().size() <= 100)
       cdr.write_type_e(data.getKeyFrameTimes());else
-          throw new RuntimeException("key_frame_times field exceeds the maximum length");
+          throw new RuntimeException("key_frame_times field exceeds the maximum length: %d > %d".formatted(data.getKeyFrameTimes().size(), 100));
 
       if(data.getKeyFramePoses().size() <= 100)
       cdr.write_type_e(data.getKeyFramePoses());else
-          throw new RuntimeException("key_frame_poses field exceeds the maximum length");
+          throw new RuntimeException("key_frame_poses field exceeds the maximum length: %d > %d".formatted(data.getKeyFramePoses().size(), 100));
 
       ihmc_common_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.write(data.getAngularSelectionMatrix(), cdr);
       ihmc_common_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.write(data.getLinearSelectionMatrix(), cdr);
@@ -151,11 +151,11 @@ public class KinematicsPlanningToolboxRigidBodyMessagePubSubType implements us.i
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getControlFrameOrientationInEndEffector(), cdr);
       if(data.getAllowablePositionDisplacement().size() <= 100)
       cdr.write_type_e(data.getAllowablePositionDisplacement());else
-          throw new RuntimeException("allowable_position_displacement field exceeds the maximum length");
+          throw new RuntimeException("allowable_position_displacement field exceeds the maximum length: %d > %d".formatted(data.getAllowablePositionDisplacement().size(), 100));
 
       if(data.getAllowableOrientationDisplacement().size() <= 100)
       cdr.write_type_e(data.getAllowableOrientationDisplacement());else
-          throw new RuntimeException("allowable_orientation_displacement field exceeds the maximum length");
+          throw new RuntimeException("allowable_orientation_displacement field exceeds the maximum length: %d > %d".formatted(data.getAllowableOrientationDisplacement().size(), 100));
 
    }
 

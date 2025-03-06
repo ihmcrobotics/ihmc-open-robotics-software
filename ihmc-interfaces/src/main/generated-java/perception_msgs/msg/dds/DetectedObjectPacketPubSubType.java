@@ -137,7 +137,7 @@ public class DetectedObjectPacketPubSubType implements us.ihmc.pubsub.TopicDataT
 
       if(data.getObjectType().length() <= 255)
       cdr.write_type_d(data.getObjectType());else
-          throw new RuntimeException("object_type field exceeds the maximum length");
+          throw new RuntimeException("object_type field exceeds the maximum length: %d > %d".formatted(data.getObjectType().length(), 255));
 
       for(int i0 = 0; i0 < data.getBoundingBox2dVertices().length; ++i0)
       {
@@ -151,11 +151,11 @@ public class DetectedObjectPacketPubSubType implements us.ihmc.pubsub.TopicDataT
 
       if(data.getObjectPointCloud().size() <= 32768)
       cdr.write_type_e(data.getObjectPointCloud());else
-          throw new RuntimeException("object_point_cloud field exceeds the maximum length");
+          throw new RuntimeException("object_point_cloud field exceeds the maximum length: %d > %d".formatted(data.getObjectPointCloud().size(), 32768));
 
       if(data.getSegmentedPointCloud().size() <= 32768)
       cdr.write_type_e(data.getSegmentedPointCloud());else
-          throw new RuntimeException("segmented_point_cloud field exceeds the maximum length");
+          throw new RuntimeException("segmented_point_cloud field exceeds the maximum length: %d > %d".formatted(data.getSegmentedPointCloud().size(), 32768));
 
    }
 

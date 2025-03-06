@@ -36,7 +36,7 @@ public class RDXMessagerRobotVisualizer extends RDXMultiBodyGraphic
 
    public void destroy()
    {
-      scheduler.shutdownNow();
       super.destroy();
+      scheduler.shutdownNow();
    }
 }

@@ -84,8 +84,6 @@ public class RDXBaseUI
 {
    public static final int ANTI_ALIASING = 2;
 
-   private static boolean RECORD_VIDEO = Boolean.parseBoolean(System.getProperty("record.video"));
-   public static volatile Object ACTIVE_EDITOR; // a tool to assist editors in making sure there isn't more than one active
    private static final String VIEW_3D_WINDOW_NAME = "3D View";
 
    private static RDXBaseUI instance;
@@ -103,10 +101,9 @@ public class RDXBaseUI
    private final ArrayList<RDX3DPanel> additional3DPanels = new ArrayList<>();
    private final RDXVRManager vrManager = new RDXVRManager();
    private final RDXImGuiWindowAndDockSystem imGuiWindowAndDockSystem;
-//   private final RDXLinuxGUIRecorder guiRecorder;
    private final ArrayList<Runnable> onCloseRequestListeners = new ArrayList<>(); // TODO implement on windows closing
    private final String windowTitle;
-   private String configurationExtraPath;
+   private final String configurationExtraPath;
    private final HybridResourceDirectory configurationBaseDirectory;
    private final ImGuiFrequencyDisplay frameRateDisplay = new ImGuiFrequencyDisplay("frameRateDisplay");
    private final Stopwatch runTime = new Stopwatch().start();
@@ -127,13 +124,12 @@ public class RDXBaseUI
    private final RDXImGuiLayoutManager layoutManager;
    private final RDXKeyBindings keyBindings = new RDXKeyBindings();
    private long renderIndex = 0;
-   private double isoZoomOut = 0.7;
+   private final double isoZoomOut = 0.7;
    private enum Theme
    {
       LIGHT, DARK, CLASSIC
    }
    private Theme theme = Theme.LIGHT;
-   private final String shadePrefix = "shade=";
 
    public RDXBaseUI()
    {
@@ -200,16 +196,6 @@ public class RDXBaseUI
       });
       layoutManager.getSaveListeners().add(imGuiWindowAndDockSystem::saveConfiguration);
       layoutManager.applyLayoutDirectory();
-
-//      guiRecorder = new RDXLinuxGUIRecorder(24, 0.8f, getClass().getSimpleName());
-//      onCloseRequestListeners.add(guiRecorder::stop);
-//      Runtime.getRuntime().addShutdownHook(new Thread(guiRecorder::stop, "GUIRecorderStop"));
-
-      if (RECORD_VIDEO)
-      {
-         //         ThreadTools.scheduleSingleExecution("DelayRecordingStart", this::startRecording, 2.0);
-//         ThreadTools.scheduleSingleExecution("SafetyStop", guiRecorder::stop, 1200.0);
-      }
 
       primary3DPanel = new RDX3DPanel(VIEW_3D_WINDOW_NAME, ANTI_ALIASING, true);
       primary3DPanel.setBackgroundShade((float) view3DBackgroundShade.get());

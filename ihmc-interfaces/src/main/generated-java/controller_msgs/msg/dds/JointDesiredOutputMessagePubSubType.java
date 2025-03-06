@@ -228,7 +228,7 @@ public class JointDesiredOutputMessagePubSubType implements us.ihmc.pubsub.Topic
 
       if(data.getJointName().length() <= 255)
       cdr.write_type_d(data.getJointName());else
-          throw new RuntimeException("joint_name field exceeds the maximum length");
+          throw new RuntimeException("joint_name field exceeds the maximum length: %d > %d".formatted(data.getJointName().length(), 255));
 
       cdr.write_type_9(data.getControlMode());
 

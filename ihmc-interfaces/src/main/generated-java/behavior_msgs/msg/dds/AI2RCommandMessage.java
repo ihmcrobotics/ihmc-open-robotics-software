@@ -12,25 +12,14 @@ public class AI2RCommandMessage extends Packet<AI2RCommandMessage> implements Se
             * Behavior to execute (checkpoint to jump to in the pre-loaded behavior collection)
             */
    public java.lang.StringBuilder behavior_to_execute_;
-   /**
-            * Goto action - Reference frame for the action
-            */
-   public java.lang.StringBuilder goto_reference_frame_name_;
-   /**
-            * Goto action - The position to which the goal stance is aligned
-            */
-   public us.ihmc.euclid.tuple3D.Point3D goto_goal_stance_point_;
-   /**
-            * Goto action - The point that the robot should be facing in the goal stance
-            */
-   public us.ihmc.euclid.tuple3D.Point3D goto_goal_focal_point_;
+   public behavior_msgs.msg.dds.AI2RHandPoseAdaptationMessage hand_pose_adaptation_;
+   public behavior_msgs.msg.dds.AI2RNavigationMessage navigation_;
 
    public AI2RCommandMessage()
    {
       behavior_to_execute_ = new java.lang.StringBuilder(255);
-      goto_reference_frame_name_ = new java.lang.StringBuilder(255);
-      goto_goal_stance_point_ = new us.ihmc.euclid.tuple3D.Point3D();
-      goto_goal_focal_point_ = new us.ihmc.euclid.tuple3D.Point3D();
+      hand_pose_adaptation_ = new behavior_msgs.msg.dds.AI2RHandPoseAdaptationMessage();
+      navigation_ = new behavior_msgs.msg.dds.AI2RNavigationMessage();
    }
 
    public AI2RCommandMessage(AI2RCommandMessage other)
@@ -44,11 +33,8 @@ public class AI2RCommandMessage extends Packet<AI2RCommandMessage> implements Se
       behavior_to_execute_.setLength(0);
       behavior_to_execute_.append(other.behavior_to_execute_);
 
-      goto_reference_frame_name_.setLength(0);
-      goto_reference_frame_name_.append(other.goto_reference_frame_name_);
-
-      geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.goto_goal_stance_point_, goto_goal_stance_point_);
-      geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.goto_goal_focal_point_, goto_goal_focal_point_);
+      behavior_msgs.msg.dds.AI2RHandPoseAdaptationMessagePubSubType.staticCopy(other.hand_pose_adaptation_, hand_pose_adaptation_);
+      behavior_msgs.msg.dds.AI2RNavigationMessagePubSubType.staticCopy(other.navigation_, navigation_);
    }
 
    /**
@@ -75,46 +61,16 @@ public class AI2RCommandMessage extends Packet<AI2RCommandMessage> implements Se
       return behavior_to_execute_;
    }
 
-   /**
-            * Goto action - Reference frame for the action
-            */
-   public void setGotoReferenceFrameName(java.lang.String goto_reference_frame_name)
-   {
-      goto_reference_frame_name_.setLength(0);
-      goto_reference_frame_name_.append(goto_reference_frame_name);
-   }
 
-   /**
-            * Goto action - Reference frame for the action
-            */
-   public java.lang.String getGotoReferenceFrameNameAsString()
+   public behavior_msgs.msg.dds.AI2RHandPoseAdaptationMessage getHandPoseAdaptation()
    {
-      return getGotoReferenceFrameName().toString();
-   }
-   /**
-            * Goto action - Reference frame for the action
-            */
-   public java.lang.StringBuilder getGotoReferenceFrameName()
-   {
-      return goto_reference_frame_name_;
+      return hand_pose_adaptation_;
    }
 
 
-   /**
-            * Goto action - The position to which the goal stance is aligned
-            */
-   public us.ihmc.euclid.tuple3D.Point3D getGotoGoalStancePoint()
+   public behavior_msgs.msg.dds.AI2RNavigationMessage getNavigation()
    {
-      return goto_goal_stance_point_;
-   }
-
-
-   /**
-            * Goto action - The point that the robot should be facing in the goal stance
-            */
-   public us.ihmc.euclid.tuple3D.Point3D getGotoGoalFocalPoint()
-   {
-      return goto_goal_focal_point_;
+      return navigation_;
    }
 
 
@@ -137,10 +93,8 @@ public class AI2RCommandMessage extends Packet<AI2RCommandMessage> implements Se
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.behavior_to_execute_, other.behavior_to_execute_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.goto_reference_frame_name_, other.goto_reference_frame_name_, epsilon)) return false;
-
-      if (!this.goto_goal_stance_point_.epsilonEquals(other.goto_goal_stance_point_, epsilon)) return false;
-      if (!this.goto_goal_focal_point_.epsilonEquals(other.goto_goal_focal_point_, epsilon)) return false;
+      if (!this.hand_pose_adaptation_.epsilonEquals(other.hand_pose_adaptation_, epsilon)) return false;
+      if (!this.navigation_.epsilonEquals(other.navigation_, epsilon)) return false;
 
       return true;
    }
@@ -156,10 +110,8 @@ public class AI2RCommandMessage extends Packet<AI2RCommandMessage> implements Se
 
       if (!us.ihmc.idl.IDLTools.equals(this.behavior_to_execute_, otherMyClass.behavior_to_execute_)) return false;
 
-      if (!us.ihmc.idl.IDLTools.equals(this.goto_reference_frame_name_, otherMyClass.goto_reference_frame_name_)) return false;
-
-      if (!this.goto_goal_stance_point_.equals(otherMyClass.goto_goal_stance_point_)) return false;
-      if (!this.goto_goal_focal_point_.equals(otherMyClass.goto_goal_focal_point_)) return false;
+      if (!this.hand_pose_adaptation_.equals(otherMyClass.hand_pose_adaptation_)) return false;
+      if (!this.navigation_.equals(otherMyClass.navigation_)) return false;
 
       return true;
    }
@@ -172,12 +124,10 @@ public class AI2RCommandMessage extends Packet<AI2RCommandMessage> implements Se
       builder.append("AI2RCommandMessage {");
       builder.append("behavior_to_execute=");
       builder.append(this.behavior_to_execute_);      builder.append(", ");
-      builder.append("goto_reference_frame_name=");
-      builder.append(this.goto_reference_frame_name_);      builder.append(", ");
-      builder.append("goto_goal_stance_point=");
-      builder.append(this.goto_goal_stance_point_);      builder.append(", ");
-      builder.append("goto_goal_focal_point=");
-      builder.append(this.goto_goal_focal_point_);
+      builder.append("hand_pose_adaptation=");
+      builder.append(this.hand_pose_adaptation_);      builder.append(", ");
+      builder.append("navigation=");
+      builder.append(this.navigation_);
       builder.append("}");
       return builder.toString();
    }

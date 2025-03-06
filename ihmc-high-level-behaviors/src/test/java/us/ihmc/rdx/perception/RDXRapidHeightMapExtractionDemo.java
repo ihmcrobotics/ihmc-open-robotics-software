@@ -13,6 +13,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.HumanoidPerceptionModule;
+import us.ihmc.perception.gpuHeightMap.RapidHeightMapManager;
 import us.ihmc.perception.logging.PerceptionDataLoader;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.perception.opencl.OpenCLManager;
@@ -100,7 +101,7 @@ public class RDXRapidHeightMapExtractionDemo
             humanoidPerceptionUI = new RDXHumanoidPerceptionUI(humanoidPerception, ros2Helper);
             humanoidPerceptionUI.initializeHeightMapUI(ros2Helper);
 
-            HeightMapParameters heightMapParameters = humanoidPerception.getRapidHeightMapExtractor().getHeightMapParameters();
+            HeightMapParameters heightMapParameters = RapidHeightMapManager.getHeightMapParameters();
             LogTools.info("Height Map Parameters Save File " + heightMapParameters.findSaveFileDirectory().getFileName().toString());
             heightMapParametersTuner.create(heightMapParameters, false);
             humanoidPerceptionUI.addChild(heightMapParametersTuner);

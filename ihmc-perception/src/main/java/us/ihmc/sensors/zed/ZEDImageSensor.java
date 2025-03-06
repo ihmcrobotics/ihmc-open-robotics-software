@@ -34,6 +34,8 @@ public class ZEDImageSensor extends ImageSensor
       ZEDJavaAPINativeLibrary.load();
    }
 
+   private static int nextStreamingPort = 30000;
+
    public static final int LEFT_COLOR_IMAGE_KEY = 0;
    public static final int RIGHT_COLOR_IMAGE_KEY = 1;
    public static final int DEPTH_IMAGE_KEY = 2;
@@ -46,6 +48,8 @@ public class ZEDImageSensor extends ImageSensor
    private final int cameraID;
    private final ZEDModelData zedModel;
    private final int slInputType;
+   private final int slDepthMode;
+   private final int streamingPort = nextStreamingPort++;
 
    private final RawImage[] grabbedImages = new RawImage[OUTPUT_IMAGE_COUNT];
    private final Pointer[] slMatPointers = new Pointer[OUTPUT_IMAGE_COUNT];
@@ -70,13 +74,14 @@ public class ZEDImageSensor extends ImageSensor
    private final SL_Quaternion sensorRotation = new SL_Quaternion();
    private final SL_Vector3 sensorTranslation = new SL_Vector3();
 
-   public ZEDImageSensor(int cameraID, ZEDModelData zedModel, int slInputType)
+   public ZEDImageSensor(int cameraID, ZEDModelData zedModel, int slInputType, int slDepthMode)
    {
       super(zedModel.name());
 
       this.cameraID = cameraID;
       this.zedModel = zedModel;
       this.slInputType = slInputType;
+      this.slDepthMode = slDepthMode;
 
       // Set runtime parameters to default values
       zedRuntimeParameters.reference_frame(SL_REFERENCE_FRAME_CAMERA);
@@ -109,6 +114,8 @@ public class ZEDImageSensor extends ImageSensor
             SL_PositionalTrackingParameters positionalTrackingParameters = sl_get_positional_tracking_parameters(cameraID);
             sl_enable_positional_tracking(cameraID, positionalTrackingParameters, "");
          }
+
+         sl_enable_streaming(cameraID, SL_STREAMING_CODEC_H264, 8000, (short) streamingPort, -1, 0, 16084, CAMERA_FPS);
 
          // Get camera intrinsics
          SL_CalibrationParameters sensorIntrinsics = sl_get_calibration_parameters(cameraID, false);
@@ -159,7 +166,9 @@ public class ZEDImageSensor extends ImageSensor
       parametersToSet.camera_image_flip(SL_FLIP_MODE_OFF);
       parametersToSet.camera_disable_self_calib(false);
       parametersToSet.enable_image_enhancement(true);
-      parametersToSet.depth_mode(SL_DEPTH_MODE_NEURAL);
+      if (slDepthMode == SL_DEPTH_MODE_NEURAL || slDepthMode == SL_DEPTH_MODE_NEURAL_PLUS)
+         LogTools.info("ZED SDK will use neural depth mode. This uses significant GPU resources.");
+      parametersToSet.depth_mode(slDepthMode);
       parametersToSet.depth_stabilization(1);
       parametersToSet.depth_maximum_distance(zedModel.getMaximumDepthDistance());
       parametersToSet.depth_minimum_distance(zedModel.getMinimumDepthDistance());
@@ -181,7 +190,8 @@ public class ZEDImageSensor extends ImageSensor
    @Override
    public boolean isSensorRunning()
    {
-      return sl_is_opened(cameraID) && !lastGrabFailed;
+      boolean recentlyGrabbed = lastGrabTime != null && lastGrabTime.isAfter(Instant.now().minusSeconds(1));
+      return sl_is_opened(cameraID) && !lastGrabFailed && recentlyGrabbed;
    }
 
    @Override
@@ -319,6 +329,11 @@ public class ZEDImageSensor extends ImageSensor
    public int getCameraID()
    {
       return cameraID;
+   }
+
+   public int getStreamingPort()
+   {
+      return streamingPort;
    }
 
    public void enablePositionalTracking(boolean enable)

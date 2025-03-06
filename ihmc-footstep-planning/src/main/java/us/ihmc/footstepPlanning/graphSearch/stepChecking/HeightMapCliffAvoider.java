@@ -130,7 +130,7 @@ public class HeightMapCliffAvoider
          Point2DReadOnly polygonVertex = scaledFootPolygon.getVertex(pointIdx);
          double zBestFitPlane = bestFitPlane.getZOnPlane(polygonVertex.getX(), polygonVertex.getY());
          double zHeightMap = heightMapData.getHeightAt(polygonVertex.getX(), polygonVertex.getY());
-         double distanceFromBestFitPlane = zHeightMap - zBestFitPlane;
+         double distanceFromBestFitPlane = Math.abs(zHeightMap - zBestFitPlane);
          highestCliffHeight.set(Math.max(distanceFromBestFitPlane, highestCliffHeight.getValue()));
 
          if (distanceFromBestFitPlane > parameters.getCliffHeightThreshold())

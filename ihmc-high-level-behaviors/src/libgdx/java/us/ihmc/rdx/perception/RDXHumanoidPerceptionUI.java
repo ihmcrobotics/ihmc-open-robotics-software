@@ -9,8 +9,8 @@ import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.perception.gpuHeightMap.RapidHeightMapManager;
 import us.ihmc.perception.gpuHeightMap.HeatMapGenerator;
-import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.HumanoidPerceptionModule;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.rdx.imgui.RDXPanel;
@@ -219,16 +219,16 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
          //                                                   RDXImagePanel.DO_NOT_FLIP_Y);
 
          depthImagePanel = new RDXBytedecoImagePanel("Depth Image",
-                                                     RapidHeightMapExtractor.getHeightMapParameters().getCropWindowSize(),
-                                                     RapidHeightMapExtractor.getHeightMapParameters().getCropWindowSize(),
+                                                     RapidHeightMapManager.getHeightMapParameters().getCropWindowSize(),
+                                                     RapidHeightMapManager.getHeightMapParameters().getCropWindowSize(),
                                                      RDXImagePanel.DO_NOT_FLIP_Y);
          localHeightMapPanel = new RDXBytedecoImagePanel("Local Height Map",
-                                                         RapidHeightMapExtractor.getHeightMapParameters().getCropWindowSize(),
-                                                         RapidHeightMapExtractor.getHeightMapParameters().getCropWindowSize(),
+                                                         RapidHeightMapManager.getHeightMapParameters().getCropWindowSize(),
+                                                         RapidHeightMapManager.getHeightMapParameters().getCropWindowSize(),
                                                          RDXImagePanel.FLIP_Y);
          croppedHeightMapPanel = new RDXBytedecoImagePanel("Cropped Height Map",
-                                                           RapidHeightMapExtractor.getHeightMapParameters().getCropWindowSize(),
-                                                           RapidHeightMapExtractor.getHeightMapParameters().getCropWindowSize(),
+                                                           RapidHeightMapManager.getHeightMapParameters().getCropWindowSize(),
+                                                           RapidHeightMapManager.getHeightMapParameters().getCropWindowSize(),
                                                            RDXImagePanel.FLIP_Y);
          snapNormalZMapPanel = new RDXBytedecoImagePanel("Normal Z",
                                                                   humanoidPerception.getRapidHeightMapExtractor().getSnapNormalZImage().getBytedecoOpenCVMat().cols(),
@@ -251,12 +251,12 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
          //                                                        humanoidPerception.getRapidHeightMapExtractor().getSensorCroppedHeightMapImage().rows(),
          //                                                        RDXImagePanel.DO_NOT_FLIP_Y);
          terrainCostImagePanel = new RDXBytedecoImagePanel("Terrain Cost Image",
-                                                           RapidHeightMapExtractor.getHeightMapParameters().getCropWindowSize(),
-                                                           RapidHeightMapExtractor.getHeightMapParameters().getCropWindowSize(),
+                                                           RapidHeightMapManager.getHeightMapParameters().getCropWindowSize(),
+                                                           RapidHeightMapManager.getHeightMapParameters().getCropWindowSize(),
                                                            RDXImagePanel.FLIP_Y);
          contactMapImagePanel = new RDXBytedecoImagePanel("Contact Map Image",
-                                                          RapidHeightMapExtractor.getHeightMapParameters().getCropWindowSize(),
-                                                          RapidHeightMapExtractor.getHeightMapParameters().getCropWindowSize(),
+                                                          RapidHeightMapManager.getHeightMapParameters().getCropWindowSize(),
+                                                          RapidHeightMapManager.getHeightMapParameters().getCropWindowSize(),
                                                           RDXImagePanel.FLIP_Y);
 
          addChild(localHeightMapPanel.getImagePanel());

@@ -101,7 +101,7 @@ public class EvaBodyDimensionsMessagePubSubType implements us.ihmc.pubsub.TopicD
 
       if(data.getFileName().size() <= 2048)
       cdr.write_type_e(data.getFileName());else
-          throw new RuntimeException("file_name field exceeds the maximum length");
+          throw new RuntimeException("file_name field exceeds the maximum length: %d > %d".formatted(data.getFileName().size(), 2048));
 
       cdr.write_type_6(data.getThighLength());
 

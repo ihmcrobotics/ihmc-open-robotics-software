@@ -96,7 +96,7 @@ public class KinematicsPlanningToolboxInputMessagePubSubType implements us.ihmc.
 
       if(data.getRigidBodyMessages().size() <= 100)
       cdr.write_type_e(data.getRigidBodyMessages());else
-          throw new RuntimeException("rigid_body_messages field exceeds the maximum length");
+          throw new RuntimeException("rigid_body_messages field exceeds the maximum length: %d > %d".formatted(data.getRigidBodyMessages().size(), 100));
 
       toolbox_msgs.msg.dds.KinematicsPlanningToolboxCenterOfMassMessagePubSubType.write(data.getCenterOfMassMessage(), cdr);
       toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessagePubSubType.write(data.getKinematicsConfigurationMessage(), cdr);

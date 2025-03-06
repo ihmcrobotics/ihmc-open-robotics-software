@@ -1,21 +1,34 @@
 package us.ihmc.behaviors.ai2r;
 
+import behavior_msgs.msg.dds.AI2RActionFailureMessage;
+import behavior_msgs.msg.dds.AI2RHandPoseAdaptationMessage;
+import behavior_msgs.msg.dds.AI2RNavigationMessage;
 import behavior_msgs.msg.dds.AI2RObjectMessage;
 import behavior_msgs.msg.dds.AI2RStatusMessage;
 import controller_msgs.msg.dds.AbortWalkingMessage;
+import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
 import us.ihmc.behaviors.sequence.ActionNodeState;
+import us.ihmc.behaviors.sequence.LeafNodeState;
+import us.ihmc.behaviors.sequence.actions.ChestOrientationActionState;
 import us.ihmc.behaviors.sequence.actions.FootstepPlanActionState;
+import us.ihmc.behaviors.sequence.actions.HandPoseActionState;
+import us.ihmc.behaviors.sequence.actions.ScrewPrimitiveActionState;
 import us.ihmc.communication.AutonomyAPI;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTStatusFootstepList;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.SceneGraph;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SE3TrajectoryPointReadOnly;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.commons.thread.Throttler;
 
@@ -32,8 +45,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
    private final SceneGraph sceneGraph;
    private final Throttler statusThrottler = new Throttler().setFrequency(1.0);
    private final AI2RStatusMessage statusMessage = new AI2RStatusMessage();
-   private final AI2RNodeState state;
-   private final List<ActionNodeState<?>> failedActions = new ArrayList<>();
+   private final List<LeafNodeState<?>> failedLeaves = new ArrayList<>();
    private CRDTStatusFootstepList plannedSteps;
    private static final double DISTANCE_COLLISION_THRESHOLD = 0.3;
 
@@ -49,42 +61,70 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
       this.ros2 = ros2;
       this.syncedRobot = syncedRobot;
       this.sceneGraph = sceneGraph;
-      state = getState();
 
       ros2.subscribeViaCallback(AutonomyAPI.AI2R_COMMAND, message ->
       {
          LogTools.info("Received command message: %s".formatted(message));
 
-         // Set goals for GoTo behavior
-         String referenceFrame = message.getGotoReferenceFrameName().toString();
-         Point3D goalStancePoint = message.getGotoGoalStancePoint();
-         Point3D goalFocalPoint = message.getGotoGoalFocalPoint();
-         for (var actionChild : state.getActionSequence().getActionChildren())
+         // Prepare commanded behavior
+         String behaviorToExecuteName = message.getBehaviorToExecuteAsString();
+         int commandedBehaviorIndex = -1;
+         for (int i = 0; i < state.getCheckPoints().size(); i++)
          {
-            if (actionChild.getDefinition().getName().contains("Go to Action") && actionChild instanceof FootstepPlanActionState gotoActionState)
+            if (state.getCheckPoints().get(i).getDefinition().getName().toLowerCase().equals(behaviorToExecuteName))
             {
-               gotoActionState.getDefinition().setParentFrameName(referenceFrame);
-               gotoActionState.getDefinition().getGoalStancePoint().getValue().set(goalStancePoint);
-               gotoActionState.getDefinition().getGoalFocalPoint().getValue().set(goalFocalPoint);
+               commandedBehaviorIndex = state.getCheckPoints().get(i).getLeafIndex();
                break;
             }
          }
 
-         // Trigger specified behavior
-         String checkPointName = message.getBehaviorToExecuteAsString();
-         for (int i=0; i < state.getCheckPoints().size(); i++)
+         // GoTo behavior - Navigation
+         if (behaviorToExecuteName.toLowerCase().contains("go"))
          {
-            if (state.getCheckPoints().get(i).getDefinition().getName().equals(checkPointName))
+            AI2RNavigationMessage navigationMessage = message.getNavigation();
+            // Set goals for GoTo behavior
+            String referenceFrame = navigationMessage.getReferenceFrameName().toString();
+            Point3D goalStancePoint = navigationMessage.getGoalStancePoint();
+            Point3D goalFocalPoint = navigationMessage.getGoalFocalPoint();
+            for (var leaf : state.getActionSequence().getOrderedLeaves())
             {
-               for (int j=0; j < failedActions.size(); j++)
+               if (leaf.getDefinition().getName().toLowerCase().contains("go to action") && leaf instanceof FootstepPlanActionState gotoActionState)
                {
-                  failedActions.get(j).setFailed(false);
+                  gotoActionState.getDefinition().setParentFrameName(referenceFrame);
+                  gotoActionState.getDefinition().getGoalStancePoint().getValue().set(goalStancePoint);
+                  gotoActionState.getDefinition().getGoalFocalPoint().getValue().set(goalFocalPoint);
+                  break;
                }
-               failedActions.clear();
-               state.getActionSequence().setExecutionNextIndex(state.getCheckPoints().get(i).getActionIndex());
-               state.getActionSequence().setAutomaticExecution(true);
-               break;
             }
+         }
+         else  // Hand Pose Adaptation
+         {
+            AI2RHandPoseAdaptationMessage handMessage = message.getHandPoseAdaptation();
+            for (var leaf : state.getActionSequence().getOrderedLeaves())
+            {
+               if (leaf.getLeafIndex() > commandedBehaviorIndex &&
+                   leaf.getDefinition().getName().contains(handMessage.getActionName()) &&
+                   leaf instanceof HandPoseActionState handPoseActionState)
+               {
+                  handPoseActionState.getDefinition().setPalmParentFrameName(handMessage.getReferenceFrameNameAsString());
+                  RigidBodyTransform adaptedPose = new RigidBodyTransform(handMessage.getNewOrientation(), handMessage.getNewPosition());
+                  handPoseActionState.getDefinition().getPalmTransformToParent().setValue(adaptedPose ,1e-5);
+                  break;
+               }
+            }
+         }
+
+         // Trigger commanded behavior
+         if (commandedBehaviorIndex >= 0)
+         {
+            // Reset state of failed leaves
+            for (int j = 0; j < failedLeaves.size(); j++)
+            {
+               failedLeaves.get(j).setFailed(false);
+            }
+            failedLeaves.clear();
+            state.getActionSequence().setExecutionNextIndex(commandedBehaviorIndex);
+            state.getActionSequence().setAutomaticExecution(true);
          }
       });
    }
@@ -98,42 +138,87 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
       {
          statusMessage.getRobotMidFeetUnderPelvisPoseInWorld().set(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetUnderPelvisFrame));
 
+         // Scene
          statusMessage.getObjects().clear();
+         boolean isRoot = true;
          for (String nodeName : sceneGraph.getNodeNameList())
          {
+            if (isRoot)
+            {
+               isRoot = false;
+               continue;
+            }
             AI2RObjectMessage objectMessage = statusMessage.getObjects().add();
             objectMessage.setObjectName(nodeName);
-            objectMessage.getObjectPoseInWorld().set(sceneGraph.getNamesToNodesMap().get(nodeName).getNodeFrame().getTransformToWorldFrame());
+            ReferenceFrame nodeFrame = sceneGraph.getNamesToNodesMap().get(nodeName).getNodeFrame();
+            objectMessage.getObjectPoseInWorld().set(nodeFrame.getTransformToWorldFrame());
+            objectMessage.getObjectPoseInRobotFrame().set(nodeFrame.getTransformToDesiredFrame(syncedRobot.getReferenceFrames().getMidFeetUnderPelvisFrame()));
          }
 
+         // Behaviors
          statusMessage.getAvailableBehaviors().resetQuick();
-         for (int i =0; i< state.getCheckPoints().size(); i++)
+         for (int i = 0; i < state.getCheckPoints().size(); i++)
          {
             String checkPointName = state.getCheckPoints().get(i).getDefinition().getName();
             if (!checkPointName.contains("END"))
                statusMessage.getAvailableBehaviors().add(checkPointName);
          }
 
+         // Monitoring
          statusMessage.setFailedBehavior("");
-         for (var actionChild : state.getActionSequence().getActionChildren())
+         for (var leaf : state.getActionSequence().getOrderedLeaves())
          {
-            if (actionChild.getFailed() && !state.getActionSequence().getAutomaticExecution())
+            if (leaf.getFailed() && !state.getActionSequence().getAutomaticExecution())
             {
-               // Find the previous checkpoint action by iterating backwards through the checkpoints
-               for (int i = state.getCheckPoints().size() - 1; i >= 0; i--) {
+               // Find the previous checkpoint by iterating backwards through the checkpoints
+               for (int i = state.getCheckPoints().size() - 1; i >= 0; i--)
+               {
                   var checkpoint = state.getCheckPoints().get(i);
 
-                  // Check if the checkpoint is before the failed action
-                  if (checkpoint.getActionIndex() < actionChild.getActionIndex())
+                  // Check if the checkpoint is before the failed leaf
+                  if (checkpoint.getLeafIndex() < leaf.getLeafIndex())
                   {
                      // Retrieve the name of the closest previous checkpoint
-                     String checkpointActionName = checkpoint.getDefinition().getName();
+                     String checkpointName = checkpoint.getDefinition().getName();
 
-                     LogTools.info("Action failed at index: {}, closest previous checkpoint: {}",
-                                   actionChild.getActionIndex(), checkpointActionName);
+                     LogTools.info("Leaf failed at index: {}, closest previous checkpoint: {}", leaf.getLeafIndex(), checkpointName);
 
-                     statusMessage.setFailedBehavior(checkpointActionName);
-                     failedActions.add(actionChild);
+                     statusMessage.setFailedBehavior(checkpointName);
+                     if (leaf instanceof ActionNodeState<?> action)
+                     {
+                        AI2RActionFailureMessage failureMessage = statusMessage.getFailure();
+                        failureMessage.setActionName(action.getDefinition().getName());
+                        if (action instanceof FootstepPlanActionState walkAction)
+                        {
+                           failureMessage.setActionFrame(walkAction.getDefinition().getParentFrameName());
+                        }
+                        else
+                        {
+                           failureMessage.setOrientationTolerance(action.getOrientationDistanceToGoalTolerance());
+                           failureMessage.setPositionTolerance(action.getPositionDistanceToGoalTolerance());
+
+                           var desiredValue = action.getCommandedTrajectory().getLastValueReadOnly();
+                           var actualValue = action.getCurrentPose().getValueReadOnly();
+
+                           Quaternion errorOrientation = new Quaternion(actualValue.getOrientation());
+                           errorOrientation.multiply(desiredValue.getOrientation());
+                           failureMessage.getOrientationError().set(errorOrientation);
+
+                           Point3D errorPosition = new Point3D(desiredValue.getPosition());
+                           errorPosition.sub(actualValue.getPosition());
+                           failureMessage.getPositionError().set(errorPosition);
+                        }
+
+                        if (action instanceof HandPoseActionState handAction)
+                        {
+                           failureMessage.setActionFrame(handAction.getDefinition().getPalmParentFrameName());
+                        }
+                        if (action instanceof ChestOrientationActionState chestAction)
+                        {
+                           failureMessage.setActionFrame(chestAction.getDefinition().getParentFrameName());
+                        }
+                     }
+                     failedLeaves.add(leaf);
                      break;
                   }
                }
@@ -142,6 +227,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
          ros2.publish(AutonomyAPI.AI2R_STATUS, statusMessage);
       }
 
+      // Coordination
       // Jump to end of sequence, once completed a behavior
       for (int i = 0; i < state.getCheckPoints().size(); i++)
       {
@@ -153,7 +239,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
             statusMessage.setCompletedBehavior(state.getCheckPoints().get(i - 1).getDefinition().getName());
             LogTools.info("Completed behavior: {}", statusMessage.getCompletedBehavior());
             // Jump to end of sequence
-            state.getActionSequence().setExecutionNextIndex(state.getCheckPoints().get(state.getCheckPoints().size()-1).getActionIndex());
+            state.getActionSequence().setExecutionNextIndex(state.getCheckPoints().get(state.getCheckPoints().size() - 1).getLeafIndex());
          }
          else if (!state.getCheckPoints().get(i).getDefinition().getName().contains("END") && state.getCheckPoints().get(i).getIsExecuting())
          { // If we are executing another behavior checkpoint
@@ -163,9 +249,9 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
 
       // Check if Goto action is executing and if next steps are colliding with objects in the scene
       goToCollisionLoop:
-      for (var actionChild : state.getActionSequence().getActionChildren())
+      for (var leaf : state.getActionSequence().getOrderedLeaves())
       {
-         if (actionChild.getDefinition().getName().contains("Go to Action") && actionChild instanceof FootstepPlanActionState gotoActionState)
+         if (leaf.getDefinition().getName().contains("Go to Action") && leaf instanceof FootstepPlanActionState gotoActionState)
          {
             if (gotoActionState.getIsExecuting())
             {
@@ -181,18 +267,15 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
                      Point3DReadOnly positionNextStep = plannedSteps.getPoseReadOnly(plannedSteps.getSize() - stepsLeft).getTranslation();
                      for (var object : statusMessage.getObjects())
                      {
-                        if (!object.getObjectNameAsString().contains("SceneGraphRoot"))
+                        Point3DReadOnly objectPosition = object.getObjectPoseInWorld().getTranslation();
+                        if (positionNextStep.distanceXY(objectPosition) < DISTANCE_COLLISION_THRESHOLD)
                         {
-                           Point3DReadOnly objectPosition = object.getObjectPoseInWorld().getTranslation();
-                           if(positionNextStep.distanceXY(objectPosition) < DISTANCE_COLLISION_THRESHOLD)
-                           {
-                              gotoActionState.setFailed(true);
-                              // Have the executor abort
-                              ros2.publishToController(new AbortWalkingMessage());
+                           gotoActionState.setFailed(true);
+                           // Have the executor abort
+                           ros2.publishToController(new AbortWalkingMessage());
 
-                              plannedSteps = null;
-                              break goToCollisionLoop;
-                           }
+                           plannedSteps = null;
+                           break goToCollisionLoop;
                         }
                      }
                   }

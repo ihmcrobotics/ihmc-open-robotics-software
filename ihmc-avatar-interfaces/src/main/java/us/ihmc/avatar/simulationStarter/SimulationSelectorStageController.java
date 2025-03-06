@@ -92,7 +92,6 @@ public class SimulationSelectorStageController
          {
             boolean isNetworkProcessorSelected = moduleCheckBoxes.get(Modules.NETWORK_PROCESSOR).isSelected();
             boolean isNetworkProcessorDisabled = moduleCheckBoxes.get(Modules.NETWORK_PROCESSOR).isDisabled();
-            moduleCheckBoxes.get(Modules.BEHAVIOR_MODULE).setDisable(!isNetworkProcessorSelected || isNetworkProcessorDisabled);
             moduleCheckBoxes.get(Modules.SENSOR_MODULE).setDisable(!isNetworkProcessorSelected || isNetworkProcessorDisabled);
             moduleCheckBoxes.get(Modules.ZERO_POSE_PRODUCER).setDisable(!isNetworkProcessorSelected || isNetworkProcessorDisabled);
             moduleCheckBoxes.get(Modules.ROS_MODULE).setDisable(!isNetworkProcessorSelected || isNetworkProcessorDisabled);

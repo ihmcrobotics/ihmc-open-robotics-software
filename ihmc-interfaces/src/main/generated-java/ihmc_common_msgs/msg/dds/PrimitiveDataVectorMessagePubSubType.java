@@ -91,15 +91,15 @@ public class PrimitiveDataVectorMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       if(data.getDoubleValues().size() <= 200)
       cdr.write_type_e(data.getDoubleValues());else
-          throw new RuntimeException("double_values field exceeds the maximum length");
+          throw new RuntimeException("double_values field exceeds the maximum length: %d > %d".formatted(data.getDoubleValues().size(), 200));
 
       if(data.getIntegerValues().size() <= 200)
       cdr.write_type_e(data.getIntegerValues());else
-          throw new RuntimeException("integer_values field exceeds the maximum length");
+          throw new RuntimeException("integer_values field exceeds the maximum length: %d > %d".formatted(data.getIntegerValues().size(), 200));
 
       if(data.getBooleanValues().size() <= 200)
       cdr.write_type_e(data.getBooleanValues());else
-          throw new RuntimeException("boolean_values field exceeds the maximum length");
+          throw new RuntimeException("boolean_values field exceeds the maximum length: %d > %d".formatted(data.getBooleanValues().size(), 200));
 
    }
 

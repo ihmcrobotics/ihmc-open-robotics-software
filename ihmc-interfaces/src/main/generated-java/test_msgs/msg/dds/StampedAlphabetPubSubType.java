@@ -81,7 +81,7 @@ public class StampedAlphabetPubSubType implements us.ihmc.pubsub.TopicDataType<t
       ihmc_common_msgs.msg.dds.InstantMessagePubSubType.write(data.getLastModified(), cdr);
       if(data.getAlphabet().length() <= 255)
       cdr.write_type_d(data.getAlphabet());else
-          throw new RuntimeException("alphabet field exceeds the maximum length");
+          throw new RuntimeException("alphabet field exceeds the maximum length: %d > %d".formatted(data.getAlphabet().length(), 255));
 
    }
 

@@ -28,17 +28,8 @@ mainDependencies {
    api("us.ihmc:joctomap:1.12.5")
    api("us.ihmc:ihmc-graphics-javafx:source")
    api("us.ihmc:ihmc-messager-javafx:0.2.1")
-   api("us.ihmc:ihmc-robot-data-logger:0.30.2")
+   api("us.ihmc:ihmc-robot-data-logger:0.31.4")
    api("us.ihmc:ihmc-ros-tools:source")
-
-   val openblasVersion = "0.3.23-1.5.9"
-   api("org.bytedeco:openblas:$openblasVersion")
-   api("org.bytedeco:openblas:$openblasVersion:linux-x86_64")
-   api("org.bytedeco:openblas:$openblasVersion:windows-x86_64")
-   val opencvVersion = "4.7.0-1.5.9"
-   api("org.bytedeco:opencv:$opencvVersion")
-   api("org.bytedeco:opencv:$opencvVersion:linux-x86_64")
-   api("org.bytedeco:opencv:$opencvVersion:windows-x86_64")
 }
 
 applicationDependencies {

@@ -11,7 +11,6 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class RDXWaitDurationAction extends RDXActionNode<WaitDurationActionState, WaitDurationActionDefinition>
 {
-   private final WaitDurationActionState state;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImDoubleWrapper waitDurationWidget;
 
@@ -19,10 +18,8 @@ public class RDXWaitDurationAction extends RDXActionNode<WaitDurationActionState
    {
       super(new WaitDurationActionState(id, crdtInfo, saveFileDirectory));
 
-      state = getState();
-
-      waitDurationWidget = new ImDoubleWrapper(getDefinition()::getWaitDuration,
-                                               getDefinition()::setWaitDuration,
+      waitDurationWidget = new ImDoubleWrapper(definition::getWaitDuration,
+                                               definition::setWaitDuration,
                                                imDouble -> ImGui.inputDouble(labels.get("Wait duration"), imDouble));
    }
 
@@ -35,8 +32,8 @@ public class RDXWaitDurationAction extends RDXActionNode<WaitDurationActionState
    }
 
    @Override
-   public String getActionTypeTitle()
+   public String getLeafTypeTitle()
    {
-      return String.format("Wait %.1f s", getDefinition().getWaitDuration());
+      return String.format("Wait %.1f s", definition.getWaitDuration());
    }
 }
