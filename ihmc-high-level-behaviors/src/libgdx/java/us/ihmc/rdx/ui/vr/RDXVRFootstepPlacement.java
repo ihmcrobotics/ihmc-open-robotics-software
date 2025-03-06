@@ -25,12 +25,16 @@ import us.ihmc.rdx.vr.RDXVRHardwareModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.trajectories.TrajectoryType;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 import java.util.ArrayList;
 import java.util.UUID;
 
 public class RDXVRFootstepPlacement
 {
+   private final static boolean USE_HEIGHTMAP = true;
+   private HeightMapData latestHeightMapData;
+
    private RDXVRHardwareModel controllerModel = RDXVRHardwareModel.UNKNOWN;
    private final RDXVRContext vrContext;
    private final ROS2SyncedRobotModel syncedRobot;
@@ -168,7 +172,21 @@ public class RDXVRFootstepPlacement
    {
       if (footstepBeingExternallyPlaced != null)
       {
-         footstepBeingExternallyPlaced.setPose(pose);
+         if (USE_HEIGHTMAP && latestHeightMapData != null)
+         {
+            FramePose3D adaptedPose = new FramePose3D(pose);
+            adaptedPose.getPosition().set(pose.getTranslationX(),
+                                          pose.getTranslationY(),
+                                          latestHeightMapData.getHeightAt(pose.getTranslationX(), pose.getTranslationY()));
+            footstepBeingExternallyPlaced.setPose(adaptedPose);
+
+
+
+         }
+         else
+         {
+            footstepBeingExternallyPlaced.setPose(pose);
+         }
          return true;
       }
       else
@@ -212,6 +230,11 @@ public class RDXVRFootstepPlacement
       { // first step is not an adjustment
          stepStartTime = System.nanoTime();
       }
+   }
+
+   public void setHeightMapData(HeightMapData heightMapData)
+   {
+      latestHeightMapData = heightMapData;
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
@@ -259,6 +282,7 @@ public class RDXVRFootstepPlacement
    {
       footstepIndex = 0;
       footstepBeingExternallyPlaced = null;
+      latestHeightMapData = null;
       handPlacedFootsteps.clear();
       stepStartTime = -1.0;
    }

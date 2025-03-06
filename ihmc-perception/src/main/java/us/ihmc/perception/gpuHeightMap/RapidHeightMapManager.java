@@ -56,7 +56,6 @@ public class RapidHeightMapManager
                                 String robotName,
                                 ReferenceFrame leftFootSoleFrame,
                                 ReferenceFrame rightFootSoleFrame,
-                                ControllerFootstepQueueMonitor controllerFootstepQueueMonitor,
                                 CameraIntrinsics depthImageIntrinsics,
                                 boolean runWithCUDA) throws Exception
    {
@@ -71,7 +70,7 @@ public class RapidHeightMapManager
                                                                    depthImageIntrinsics,
                                                                    1,
                                                                    heightMapParameters);
-         rapidHeightMapDriftOffset = new RapidHeightMapDriftOffset(controllerFootstepQueueMonitor);
+         rapidHeightMapDriftOffset = new RapidHeightMapDriftOffset(ros2Node, robotName);
          flyingPointsFilter = new CUDAFlyingPointsFilter();
       }
       else

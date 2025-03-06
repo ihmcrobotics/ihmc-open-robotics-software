@@ -68,7 +68,6 @@ public class RapidHeightMapUpdateThread extends RepeatingTaskThread
                                                          syncedRobotModel.getRobotModel().getSimpleRobotName(),
                                                          leftFootFrame,
                                                          rightFootFrame,
-                                                         controllerFootstepQueueMonitor,
                                                          depthImage.getIntrinsicsCopy(),
                                                          runWithCUDA);
          }
