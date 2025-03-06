@@ -27,6 +27,22 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
             */
    public long count_to_;
    /**
+            * Whether to reset the context on each run
+            */
+   public boolean reset_context_each_run_;
+   /**
+            * Whether to generate behavior state information and add it to the prompt
+            */
+   public boolean inject_behavior_state_;
+   /**
+            * Whether to generate environment state information and add it to the prompt
+            */
+   public boolean inject_environment_state_;
+   /**
+            * The prompt given once at the very beginning
+            */
+   public java.lang.StringBuilder system_;
+   /**
             * The prompt defining how to make the boolean decision
             */
    public java.lang.StringBuilder prompt_;
@@ -34,6 +50,7 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
    public ConditionNodeDefinitionMessage()
    {
       definition_ = new behavior_msgs.msg.dds.LeafNodeDefinitionMessage();
+      system_ = new java.lang.StringBuilder(10000);
       prompt_ = new java.lang.StringBuilder(10000);
    }
 
@@ -49,6 +66,15 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
       type_ = other.type_;
 
       count_to_ = other.count_to_;
+
+      reset_context_each_run_ = other.reset_context_each_run_;
+
+      inject_behavior_state_ = other.inject_behavior_state_;
+
+      inject_environment_state_ = other.inject_environment_state_;
+
+      system_.setLength(0);
+      system_.append(other.system_);
 
       prompt_.setLength(0);
       prompt_.append(other.prompt_);
@@ -92,6 +118,75 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
    public long getCountTo()
    {
       return count_to_;
+   }
+
+   /**
+            * Whether to reset the context on each run
+            */
+   public void setResetContextEachRun(boolean reset_context_each_run)
+   {
+      reset_context_each_run_ = reset_context_each_run;
+   }
+   /**
+            * Whether to reset the context on each run
+            */
+   public boolean getResetContextEachRun()
+   {
+      return reset_context_each_run_;
+   }
+
+   /**
+            * Whether to generate behavior state information and add it to the prompt
+            */
+   public void setInjectBehaviorState(boolean inject_behavior_state)
+   {
+      inject_behavior_state_ = inject_behavior_state;
+   }
+   /**
+            * Whether to generate behavior state information and add it to the prompt
+            */
+   public boolean getInjectBehaviorState()
+   {
+      return inject_behavior_state_;
+   }
+
+   /**
+            * Whether to generate environment state information and add it to the prompt
+            */
+   public void setInjectEnvironmentState(boolean inject_environment_state)
+   {
+      inject_environment_state_ = inject_environment_state;
+   }
+   /**
+            * Whether to generate environment state information and add it to the prompt
+            */
+   public boolean getInjectEnvironmentState()
+   {
+      return inject_environment_state_;
+   }
+
+   /**
+            * The prompt given once at the very beginning
+            */
+   public void setSystem(java.lang.String system)
+   {
+      system_.setLength(0);
+      system_.append(system);
+   }
+
+   /**
+            * The prompt given once at the very beginning
+            */
+   public java.lang.String getSystemAsString()
+   {
+      return getSystem().toString();
+   }
+   /**
+            * The prompt given once at the very beginning
+            */
+   public java.lang.StringBuilder getSystem()
+   {
+      return system_;
    }
 
    /**
@@ -141,6 +236,14 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.count_to_, other.count_to_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.reset_context_each_run_, other.reset_context_each_run_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.inject_behavior_state_, other.inject_behavior_state_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.inject_environment_state_, other.inject_environment_state_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.system_, other.system_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.prompt_, other.prompt_, epsilon)) return false;
 
 
@@ -161,6 +264,14 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
 
       if(this.count_to_ != otherMyClass.count_to_) return false;
 
+      if(this.reset_context_each_run_ != otherMyClass.reset_context_each_run_) return false;
+
+      if(this.inject_behavior_state_ != otherMyClass.inject_behavior_state_) return false;
+
+      if(this.inject_environment_state_ != otherMyClass.inject_environment_state_) return false;
+
+      if (!us.ihmc.idl.IDLTools.equals(this.system_, otherMyClass.system_)) return false;
+
       if (!us.ihmc.idl.IDLTools.equals(this.prompt_, otherMyClass.prompt_)) return false;
 
 
@@ -179,6 +290,14 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
       builder.append(this.type_);      builder.append(", ");
       builder.append("count_to=");
       builder.append(this.count_to_);      builder.append(", ");
+      builder.append("reset_context_each_run=");
+      builder.append(this.reset_context_each_run_);      builder.append(", ");
+      builder.append("inject_behavior_state=");
+      builder.append(this.inject_behavior_state_);      builder.append(", ");
+      builder.append("inject_environment_state=");
+      builder.append(this.inject_environment_state_);      builder.append(", ");
+      builder.append("system=");
+      builder.append(this.system_);      builder.append(", ");
       builder.append("prompt=");
       builder.append(this.prompt_);
       builder.append("}");

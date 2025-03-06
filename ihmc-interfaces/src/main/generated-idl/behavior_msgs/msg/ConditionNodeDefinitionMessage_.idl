@@ -35,6 +35,22 @@ module behavior_msgs
          */
         unsigned long count_to;
         /**
+         * Whether to reset the context on each run
+         */
+        boolean reset_context_each_run;
+        /**
+         * Whether to generate behavior state information and add it to the prompt
+         */
+        boolean inject_behavior_state;
+        /**
+         * Whether to generate environment state information and add it to the prompt
+         */
+        boolean inject_environment_state;
+        /**
+         * The prompt given once at the very beginning
+         */
+        string<10000> system;
+        /**
          * The prompt defining how to make the boolean decision
          */
         string<10000> prompt;

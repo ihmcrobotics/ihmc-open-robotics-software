@@ -14,6 +14,18 @@ int8 type
 # The number of times to fail before passing
 uint32 count_to
 
+# Whether to reset the context on each run
+bool reset_context_each_run
+
+# Whether to generate behavior state information and add it to the prompt
+bool inject_behavior_state
+
+# Whether to generate environment state information and add it to the prompt
+bool inject_environment_state
+
+# The prompt given once at the very beginning
+string system
+
 # The prompt defining how to make the boolean decision
 string prompt
 

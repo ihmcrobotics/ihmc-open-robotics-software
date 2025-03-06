@@ -15,7 +15,7 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "ac6276434aa5480a53ca65c7501ff3d014eb9d9c4560c73b880373206dada309";
+   		return "6b4baa424299a8564f6cc1157784c15a47c0b181699afdb95cf3f8fa55221a96";
    }
    
    @Override
@@ -58,6 +58,13 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 10000 + 1;
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 10000 + 1;
 
       return current_alignment - initial_alignment;
@@ -80,6 +87,17 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getSystem().length() + 1;
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getPrompt().length() + 1;
 
 
@@ -93,9 +111,19 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
 
       cdr.write_type_4(data.getCountTo());
 
+      cdr.write_type_7(data.getResetContextEachRun());
+
+      cdr.write_type_7(data.getInjectBehaviorState());
+
+      cdr.write_type_7(data.getInjectEnvironmentState());
+
+      if(data.getSystem().length() <= 10000)
+      cdr.write_type_d(data.getSystem());else
+          throw new RuntimeException("system field exceeds the maximum length: %d > %d".formatted(data.getSystem().length(), 10000));
+
       if(data.getPrompt().length() <= 10000)
       cdr.write_type_d(data.getPrompt());else
-          throw new RuntimeException("prompt field exceeds the maximum length");
+          throw new RuntimeException("prompt field exceeds the maximum length: %d > %d".formatted(data.getPrompt().length(), 10000));
 
    }
 
@@ -106,6 +134,13 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
       	
       data.setCountTo(cdr.read_type_4());
       	
+      data.setResetContextEachRun(cdr.read_type_7());
+      	
+      data.setInjectBehaviorState(cdr.read_type_7());
+      	
+      data.setInjectEnvironmentState(cdr.read_type_7());
+      	
+      cdr.read_type_d(data.getSystem());	
       cdr.read_type_d(data.getPrompt());	
 
    }
@@ -117,6 +152,10 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
 
       ser.write_type_9("type", data.getType());
       ser.write_type_4("count_to", data.getCountTo());
+      ser.write_type_7("reset_context_each_run", data.getResetContextEachRun());
+      ser.write_type_7("inject_behavior_state", data.getInjectBehaviorState());
+      ser.write_type_7("inject_environment_state", data.getInjectEnvironmentState());
+      ser.write_type_d("system", data.getSystem());
       ser.write_type_d("prompt", data.getPrompt());
    }
 
@@ -127,6 +166,10 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
 
       data.setType(ser.read_type_9("type"));
       data.setCountTo(ser.read_type_4("count_to"));
+      data.setResetContextEachRun(ser.read_type_7("reset_context_each_run"));
+      data.setInjectBehaviorState(ser.read_type_7("inject_behavior_state"));
+      data.setInjectEnvironmentState(ser.read_type_7("inject_environment_state"));
+      ser.read_type_d("system", data.getSystem());
       ser.read_type_d("prompt", data.getPrompt());
    }
 

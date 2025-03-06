@@ -2,8 +2,13 @@ package us.ihmc.behaviors.logic.condition;
 
 import us.ihmc.behaviors.logic.ConditionNodeDefinition;
 import us.ihmc.behaviors.logic.ConditionNodeState;
+import us.ihmc.communication.crdt.CRDTBidirectionalBoolean;
+import us.ihmc.communication.crdt.CRDTBidirectionalString;
 import us.ihmc.llama.Llama;
 
+/**
+ * TODO: Extract context so each node holds it's own
+ */
 public class LLMConditionExecutor
 {
    private static final Object lock = new Object();
@@ -36,11 +41,23 @@ public class LLMConditionExecutor
    private final ConditionNodeState state;
    private final ConditionNodeDefinition definition;
 
+   private final CRDTBidirectionalBoolean resetContextEachRun;
+   private final CRDTBidirectionalBoolean injectBehaviorState;
+   private final CRDTBidirectionalBoolean injectEnvironmentState;
+   private final CRDTBidirectionalString system;
+   private final CRDTBidirectionalString prompt;
+
    public LLMConditionExecutor(ConditionNodeState state)
    {
       this.state = state;
 
       definition = state.getDefinition();
+
+      resetContextEachRun = definition.getLLM().getResetContextEachRun();
+      injectBehaviorState = definition.getLLM().getInjectBehaviorState();
+      injectEnvironmentState = definition.getLLM().getInjectEnvironmentState();
+      system = definition.getLLM().getSystem();
+      prompt = definition.getLLM().getPrompt();
 
       synchronized (lock)
       {
@@ -50,13 +67,37 @@ public class LLMConditionExecutor
 
    public void updateCurrentlyExecuting()
    {
-      String prompt = definition.getLLM().getPrompt().getValue();
-      state.getLogger().info(prompt);
+      if (!llama.getSystem().equals(system.getValue()))
+      {
+         state.getLogger().info("Resetting context");
+         llama.resetContext(system.getValue());
+      }
+
+      String promptText = prompt.getValue();
+      state.getLogger().info(promptText);
 
       String response;
       synchronized (lock)
       {
-         response = llama.generate(prompt);
+         if (resetContextEachRun.getValue())
+            llama.resetContext();
+
+         if (injectBehaviorState.getValue())
+         {
+            // TODO
+         }
+         if (injectEnvironmentState.getValue())
+         {
+            // TODO
+         }
+
+         response = llama.generate(promptText);
+
+         if (response.contains("success"))
+         {
+            state.getLogger().info("Success, resetting context");
+            llama.resetContext();
+         }
       }
 
       state.getLogger().info(response);

@@ -14,6 +14,7 @@ import us.ihmc.llamacpp.llama_model_params;
 import us.ihmc.llamacpp.llama_sampler;
 import us.ihmc.llamacpp.llama_vocab;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.cuda.CUDATools;
 import us.ihmc.tools.IHMCCommonPaths;
 
 import java.io.BufferedReader;
@@ -27,8 +28,11 @@ import static us.ihmc.llamacpp.global.llamacpp.ggml_log_level.GGML_LOG_LEVEL_CON
 import static us.ihmc.llamacpp.global.llamacpp.ggml_log_level.GGML_LOG_LEVEL_ERROR;
 
 /**
- * To use this, first download the following file to ~/.ihmc/llama-models
- * [Llama-3.2-1B-Instruct-Q8_0.gguf](https://drive.google.com/file/d/1zagSy28hsYwPnBg6mXSo502kHaMXGReH/view?usp=drive_link)
+ * To use this, first download a llama model to ~/.ihmc/llama-models
+ * [Llama Models of Google Drive](https://drive.google.com/drive/u/1/folders/1HzkuFZPkQp_b2X_kVK0adMluQVb1FDDE)
+ * Tested options:
+ * - Llama-3.2-1B-Instruct-Q8_0.gguf
+ * - Llama-3.2-3B-Instruct-Q8_0.gguf
  */
 public class Llama
 {
@@ -81,8 +85,10 @@ public class Llama
          """;
 
    public static final Path MODELS_DIRECTORY = IHMCCommonPaths.DOT_IHMC_DIRECTORY.resolve("llama-models");
-   public static final Path MODEL_TO_USE = MODELS_DIRECTORY.resolve("Llama-3.2-1B-Instruct-Q8_0.gguf");
-   public static final int MAX_CONTEXT_SIZE = 10000;
+   public static final Path MODEL_TO_USE = MODELS_DIRECTORY.resolve(CUDATools.hasCUDADeviceOfAtLeast(CUDATools.getDeviceName(0), "RTX 3080") ?
+                                                                          "Llama-3.2-3B-Instruct-Q8_0.gguf" :
+                                                                          "Llama-3.2-1B-Instruct-Q8_0.gguf");
+   public static final int MAX_CONTEXT_SIZE = 10000; // Approx. 3 GB of vRAM for 1B -- 6GB for 3B
 
    private final llama_model model;
    private final llama_context context;
@@ -99,7 +105,7 @@ public class Llama
    public Llama()
    {
       llama_model_params modelParameters = llama_model_default_params();
-      modelParameters.n_gpu_layers(99);
+      modelParameters.n_gpu_layers(28); // This is just the max. 1B will use 16, 3B will use 28
 
       llama_context_params contextParameters = llama_context_default_params();
       contextParameters.n_ctx(MAX_CONTEXT_SIZE);
@@ -107,7 +113,7 @@ public class Llama
 
       sampler = llama_sampler_chain_init(llama_sampler_chain_default_params());
       llama_sampler_chain_add(sampler, llama_sampler_init_min_p(0.05f, 1));
-      llama_sampler_chain_add(sampler, llama_sampler_init_temp(0.0f)); // 0 temp important for tests
+      llama_sampler_chain_add(sampler, llama_sampler_init_temp(0.6f));
       llama_sampler_chain_add(sampler, llama_sampler_init_dist(LLAMA_DEFAULT_SEED));
 
       model = llama_model_load_from_file(Llama.MODEL_TO_USE.toString(), modelParameters);
@@ -225,6 +231,11 @@ public class Llama
    public String getContext()
    {
       return contextStringBuilder.toString();
+   }
+
+   public String getSystem()
+   {
+      return system;
    }
 
    public void destroy()
