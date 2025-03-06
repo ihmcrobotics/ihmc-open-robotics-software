@@ -14,13 +14,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class CRDTYOLOv8ExecutorParameters extends LatestTimestampModifiable
+public class SyncedYOLOv8ExecutorParameters extends LatestTimestampModifiable
 {
    private final CRDTStatusSet<YOLOv8ModelInfo> availableModels;
    private final CRDTBidirectionalSet<String> modelsToRun;
-   private final Map<String, CRDTYOLOv8ModelParameters> modelSettings;
+   private final Map<String, SyncedYOLOv8ModelParameters> modelSettings;
 
-   public CRDTYOLOv8ExecutorParameters(CRDTInfo crdtInfo)
+   public SyncedYOLOv8ExecutorParameters(CRDTInfo crdtInfo)
    {
       super(crdtInfo);
       setModifierName(getClass().getSimpleName());
@@ -47,7 +47,7 @@ public class CRDTYOLOv8ExecutorParameters extends LatestTimestampModifiable
       return modelsToRun;
    }
 
-   public Map<String, CRDTYOLOv8ModelParameters> getModelSettings()
+   public Map<String, SyncedYOLOv8ModelParameters> getModelSettings()
    {
       return modelSettings;
    }
@@ -63,7 +63,7 @@ public class CRDTYOLOv8ExecutorParameters extends LatestTimestampModifiable
       modelsToRun.getValue().forEach(model -> messageToPack.getModelsToRun().add(model));
 
       messageToPack.getModelSettings().clear();
-      for (CRDTYOLOv8ModelParameters modelSetting : modelSettings.values())
+      for (SyncedYOLOv8ModelParameters modelSetting : modelSettings.values())
       {
          modelSetting.toMessage(messageToPack.getModelSettings().add());
       }
@@ -97,7 +97,7 @@ public class CRDTYOLOv8ExecutorParameters extends LatestTimestampModifiable
    private void updateModelSettings()
    {
       modelSettings.clear();
-      availableModels.getCopy().forEach(model -> modelSettings.put(model.getModelNameAsString(), new CRDTYOLOv8ModelParameters(this, model)));
+      availableModels.getCopy().forEach(model -> modelSettings.put(model.getModelNameAsString(), new SyncedYOLOv8ModelParameters(getCRDTInfo(), model)));
       modelsToRun.retainAll(availableModels.getCopy().stream().map(YOLOv8ModelInfo::getModelNameAsString).collect(Collectors.toSet()));
    }
 }

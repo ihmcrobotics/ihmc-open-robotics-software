@@ -6,14 +6,13 @@ import us.ihmc.communication.crdt.CRDTBidirectionalBooleanArray;
 import us.ihmc.communication.crdt.CRDTBidirectionalFloat;
 import us.ihmc.communication.crdt.CRDTBidirectionalFloatArray;
 import us.ihmc.communication.crdt.CRDTBidirectionalIntegerArray;
+import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.LatestTimestampModifiable;
 
 import java.util.Arrays;
 
-public class CRDTYOLOv8ModelParameters
+public class SyncedYOLOv8ModelParameters extends LatestTimestampModifiable
 {
-   private final LatestTimestampModifiable latestTimestampModifiable;
-
    private final YOLOv8ModelInfo modelInfo;
 
    // YOLO model parameters
@@ -26,27 +25,34 @@ public class CRDTYOLOv8ModelParameters
    private final CRDTBidirectionalIntegerArray erosionKernelRadii;
    private final CRDTBidirectionalFloatArray outlierThresholds;
 
-   public CRDTYOLOv8ModelParameters(LatestTimestampModifiable latestTimestampModifiable, YOLOv8ModelInfo modelInfo)
+   public SyncedYOLOv8ModelParameters(CRDTInfo crdtInfo, YOLOv8ModelInfo modelInfo)
    {
-      this.latestTimestampModifiable = latestTimestampModifiable;
+      super(crdtInfo);
+      setModifierName(modelInfo.getModelNameAsString() + " Parameters");
 
       this.modelInfo = modelInfo;
 
       int objectClassCount = modelInfo.getDetectableObjectClasses().size();
-      ignoredObjectClasses = new CRDTBidirectionalBooleanArray(latestTimestampModifiable, objectClassCount);
-      Arrays.fill(ignoredObjectClasses.getValueAndModify(), false);
-      confidenceThresholds = new CRDTBidirectionalFloatArray(latestTimestampModifiable, objectClassCount);
-      Arrays.fill(confidenceThresholds.getValueAndModify(), 0.7f);
-      maskThresholds = new CRDTBidirectionalFloatArray(latestTimestampModifiable, objectClassCount);
-      Arrays.fill(maskThresholds.getValueAndModify(), 0.0f);
-      nmsThreshold = new CRDTBidirectionalFloat(latestTimestampModifiable, 0.1f);
+      ignoredObjectClasses = new CRDTBidirectionalBooleanArray(this, objectClassCount);
+      Arrays.fill(ignoredObjectClasses.getValue(), false);
+      confidenceThresholds = new CRDTBidirectionalFloatArray(this, objectClassCount);
+      Arrays.fill(confidenceThresholds.getValue(), 0.7f);
+      maskThresholds = new CRDTBidirectionalFloatArray(this, objectClassCount);
+      Arrays.fill(maskThresholds.getValue(), 0.0f);
+      nmsThreshold = new CRDTBidirectionalFloat(this, 0.1f);
 
-      erosionKernelRadii = new CRDTBidirectionalIntegerArray(latestTimestampModifiable, objectClassCount);
-      Arrays.fill(erosionKernelRadii.getValueAndModify(), 1);
-      outlierThresholds = new CRDTBidirectionalFloatArray(latestTimestampModifiable, objectClassCount);
-      Arrays.fill(outlierThresholds.getValueAndModify(), 1.0f);
+      erosionKernelRadii = new CRDTBidirectionalIntegerArray(this, objectClassCount);
+      Arrays.fill(erosionKernelRadii.getValue(), 1);
+      outlierThresholds = new CRDTBidirectionalFloatArray(this, objectClassCount);
+      Arrays.fill(outlierThresholds.getValue(), 1.0f);
    }
 
+   /**
+    * Applies the current parameter values to the passed in model.
+    * The past in model must match the model info used to construct the parameters.
+    *
+    * @param model YOLO model to which parameters will be applied.
+    */
    public void applyToModel(YOLOv8Model model)
    {
       if (!model.getName().equals(getModelName()))
@@ -56,11 +62,6 @@ public class CRDTYOLOv8ModelParameters
       model.setConfidenceThresholds(confidenceThresholds.getValue());
       model.setMaskThresholds(maskThresholds.getValue());
       model.setNMSThreshold(nmsThreshold.getValue());
-   }
-
-   public boolean isModified()
-   {
-      return latestTimestampModifiable.isModified();
    }
 
    public String getModelName()
@@ -105,6 +106,8 @@ public class CRDTYOLOv8ModelParameters
 
    public void toMessage(YOLOv8ModelSettings messageToPack)
    {
+      toMessage(messageToPack.getLatestTimestampModifiable());
+
       messageToPack.setModelName(getModelName());
 
       ignoredObjectClasses.toMessage(messageToPack.getIgnoredObjectClasses());
@@ -118,6 +121,8 @@ public class CRDTYOLOv8ModelParameters
 
    public void fromMessage(YOLOv8ModelSettings message)
    {
+      fromMessage(message.getLatestTimestampModifiable());
+
       ignoredObjectClasses.fromMessage(message.getIgnoredObjectClasses());
       confidenceThresholds.fromMessage(message.getConfidenceThresholds());
       maskThresholds.fromMessage(message.getMaskThresholds());

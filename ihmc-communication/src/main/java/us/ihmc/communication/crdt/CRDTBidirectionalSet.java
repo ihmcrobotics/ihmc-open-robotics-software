@@ -63,7 +63,8 @@ public class CRDTBidirectionalSet<T> extends CRDTBidirectionalMutableField<Set<T
 
    public void clear()
    {
-      getValueAndModify().clear();
+      if (!getValueInternal().isEmpty())
+         getValueAndModify().clear();
    }
 
    public void fromMessage(Consumer<Set<T>> valueConsumer)

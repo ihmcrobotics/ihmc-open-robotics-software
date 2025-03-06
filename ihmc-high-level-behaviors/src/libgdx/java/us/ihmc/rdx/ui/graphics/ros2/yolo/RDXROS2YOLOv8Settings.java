@@ -6,9 +6,10 @@ import perception_msgs.msg.dds.YOLOv8ExecutorSettings;
 import perception_msgs.msg.dds.YOLOv8ModelInfo;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.LatestTimestampModifiable;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
-import us.ihmc.perception.detections.yolo.CRDTYOLOv8ExecutorParameters;
+import us.ihmc.perception.detections.yolo.SyncedYOLOv8ExecutorParameters;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.ros2.ROS2Node;
@@ -20,7 +21,8 @@ import java.util.stream.Collectors;
 
 public class RDXROS2YOLOv8Settings
 {
-   private final CRDTYOLOv8ExecutorParameters parameters;
+   private final SyncedYOLOv8ExecutorParameters parameters;
+   private boolean requestingFullData;
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final List<RDXROS2YOLOv8ModelSettings> modelSettings = new ArrayList<>();
@@ -31,10 +33,17 @@ public class RDXROS2YOLOv8Settings
    public RDXROS2YOLOv8Settings(ROS2Node ros2Node, ROS2PeerClockOffsetEstimator ros2ClockOffsetEstimator)
    {
       CRDTInfo crdtInfo = new CRDTInfo(ROS2ActorDesignation.OPERATOR, ros2ClockOffsetEstimator);
-      parameters = new CRDTYOLOv8ExecutorParameters(crdtInfo);
+      parameters = new SyncedYOLOv8ExecutorParameters(crdtInfo);
+      parameters.requestSendFullData();
+      requestingFullData = true;
 
       settingsPublisher = ros2Node.createPublisher(PerceptionAPI.YOLO_SETTINGS);
-      ros2Node.createSubscription2(PerceptionAPI.YOLO_SETTINGS, parameters::fromMessage);
+      ros2Node.createSubscription2(PerceptionAPI.YOLO_SETTINGS, message ->
+      {
+         parameters.fromMessage(message);
+         parameters.confirmReceivedFullData();
+         requestingFullData = false;
+      });
    }
 
    public void update()
@@ -48,7 +57,11 @@ public class RDXROS2YOLOv8Settings
 
       modelSettings.forEach(RDXROS2YOLOv8ModelSettings::update);
 
-      publishParameters();
+      if (requestingFullData || parameters.pollNeedSendFullData() || parameters.getModelSettings().values().stream().anyMatch(LatestTimestampModifiable::pollNeedSendFullData))
+      {
+         parameters.toMessage(settingsMessage);
+         settingsPublisher.publish(settingsMessage);
+      }
    }
 
    public void renderSettings()
@@ -87,15 +100,6 @@ public class RDXROS2YOLOv8Settings
       }
 
       ImGui.endDisabled();
-   }
-
-   private void publishParameters()
-   {
-      if (parameters.isModified())
-      {
-         parameters.toMessage(settingsMessage);
-         settingsPublisher.publish(settingsMessage);
-      }
    }
 
    public boolean anyModelEnabled()

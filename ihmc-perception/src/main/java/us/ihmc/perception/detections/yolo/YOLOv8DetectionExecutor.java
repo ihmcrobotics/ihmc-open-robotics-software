@@ -14,6 +14,7 @@ import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.LatestTimestampModifiable;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Point3D32;
@@ -52,7 +53,8 @@ public class YOLOv8DetectionExecutor
    private final Map<YOLOv8Model, YOLOv8DetectionList> yoloDetectionResults = new ConcurrentHashMap<>();
    private Iterator<YOLOv8Model> modelIterator;
 
-   private final CRDTYOLOv8ExecutorParameters parameters;
+   private final SyncedYOLOv8ExecutorParameters parameters;
+   private boolean requestingFullData;
    private final ROS2Publisher<YOLOv8ExecutorSettings> parametersPublisher;
    private final YOLOv8ExecutorSettings parametersMessage;
    private final RepeatingTaskThread updateThread;
@@ -86,11 +88,18 @@ public class YOLOv8DetectionExecutor
          LogTools.error("No YOLO models found. YOLO will not run.");
 
       // Create YOLO parameters
-      parameters = new CRDTYOLOv8ExecutorParameters(crdtInfo);
+      parameters = new SyncedYOLOv8ExecutorParameters(crdtInfo);
       parameters.setAvailableModels(availableModels.values());
+      parameters.requestSendFullData();
+      requestingFullData = true;
 
       // Subscribe to YOLO settings messages
-      ros2Node.createSubscription2(PerceptionAPI.YOLO_SETTINGS, parameters::fromMessage);
+      ros2Node.createSubscription2(PerceptionAPI.YOLO_SETTINGS, message ->
+      {
+         parameters.fromMessage(message);
+         parameters.confirmReceivedFullData();
+         requestingFullData = false;
+      });
 
       parametersPublisher = ros2Node.createPublisher(PerceptionAPI.YOLO_SETTINGS);
       parametersMessage = new YOLOv8ExecutorSettings();
@@ -135,18 +144,6 @@ public class YOLOv8DetectionExecutor
    public void disableAllModels()
    {
       parameters.getModelsToRun().clear();
-   }
-
-   public void update()
-   {
-      parameters.checkModified();
-      if (parameters.isModified())
-      {
-         parameters.getModelSettings().forEach((modelName, modelParameters) -> modelParameters.applyToModel(availableModels.get(modelName)));
-      }
-
-      parameters.toMessage(parametersMessage);
-      parametersPublisher.publish(parametersMessage);
    }
 
    public void runNextEnabledModel(RawImage colorImage, RawImage depthImage)
@@ -201,7 +198,7 @@ public class YOLOv8DetectionExecutor
                newestColorImage.read().release();
             newestColorImage.set(bgrImage.get());
 
-            CRDTYOLOv8ModelParameters modelParameters = parameters.getModelSettings().get(yoloModel.getName());
+            SyncedYOLOv8ModelParameters modelParameters = parameters.getModelSettings().get(yoloModel.getName());
 
             // Create list of instant detections from results
             List<InstantDetection> yoloInstantDetections = new ArrayList<>();
@@ -321,5 +318,22 @@ public class YOLOv8DetectionExecutor
 
       resultMat.close();
       colorImage.release();
+   }
+
+   private void update()
+   {
+      parameters.checkModified();
+      parameters.getModelSettings().forEach((modelName, modelParameters) ->
+      {
+         modelParameters.checkModified();
+         if (modelParameters.isModified())
+            modelParameters.applyToModel(availableModels.get(modelName));
+      });
+
+      if (requestingFullData || parameters.pollNeedSendFullData() || parameters.getModelSettings().values().stream().anyMatch(LatestTimestampModifiable::pollNeedSendFullData))
+      {
+         parameters.toMessage(parametersMessage);
+         parametersPublisher.publish(parametersMessage);
+      }
    }
 }
