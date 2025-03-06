@@ -21,7 +21,7 @@ module perception_msgs
         /**
          * List of the available models
          */
-        sequence<perception_msgs::msg::dds::YOLOv8ModelInfo, 8> available_yolo_models;
+        sequence<perception_msgs::msg::dds::YOLOv8ModelInfo, 16> available_yolo_models;
         /**
          * List of models to run
          */

@@ -2,7 +2,6 @@ package us.ihmc.rdx.ui.graphics.ros2.yolo;
 
 import imgui.ImGui;
 import imgui.ImGuiStyle;
-import imgui.type.ImBoolean;
 import perception_msgs.msg.dds.YOLOv8ExecutorSettings;
 import perception_msgs.msg.dds.YOLOv8ModelInfo;
 import us.ihmc.communication.PerceptionAPI;
@@ -40,9 +39,8 @@ public class RDXROS2YOLOv8Settings
 
    public void update()
    {
-      parameters.update();
-
-      if (parameters.getAvailableModels().pollHasStatus())
+      parameters.checkModified();
+      if (modelSettings.size() != parameters.getModelSettings().size())
       {
          modelSettings.clear();
          parameters.getModelSettings().values().forEach(modelParameters -> modelSettings.add(new RDXROS2YOLOv8ModelSettings(modelParameters)));

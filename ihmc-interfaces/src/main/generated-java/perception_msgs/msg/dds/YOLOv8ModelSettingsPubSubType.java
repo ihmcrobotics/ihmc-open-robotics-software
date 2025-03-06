@@ -15,7 +15,7 @@ public class YOLOv8ModelSettingsPubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "52c3cff4ed70509730e728fddd3d5187626fc4ac995e0e9a6d33b7b9231c2dd5";
+   		return "5af60eec8721bdcb06fad81269d0f77d71d1a9add4bebf7b250bcab24c311da6";
    }
    
    @Override
@@ -52,8 +52,6 @@ public class YOLOv8ModelSettingsPubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (96 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -79,8 +77,6 @@ public class YOLOv8ModelSettingsPubSubType implements us.ihmc.pubsub.TopicDataTy
    public final static int getCdrSerializedSize(perception_msgs.msg.dds.YOLOv8ModelSettings data, int current_alignment)
    {
       int initial_alignment = current_alignment;
-
-      current_alignment += ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.getCdrSerializedSize(data.getLatestTimestampModifiable(), current_alignment);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getModelName().length() + 1;
 
@@ -113,7 +109,6 @@ public class YOLOv8ModelSettingsPubSubType implements us.ihmc.pubsub.TopicDataTy
 
    public static void write(perception_msgs.msg.dds.YOLOv8ModelSettings data, us.ihmc.idl.CDR cdr)
    {
-      ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.write(data.getLatestTimestampModifiable(), cdr);
       if(data.getModelName().length() <= 255)
       cdr.write_type_d(data.getModelName());else
           throw new RuntimeException("model_name field exceeds the maximum length: %d > %d".formatted(data.getModelName().length(), 255));
@@ -144,7 +139,6 @@ public class YOLOv8ModelSettingsPubSubType implements us.ihmc.pubsub.TopicDataTy
 
    public static void read(perception_msgs.msg.dds.YOLOv8ModelSettings data, us.ihmc.idl.CDR cdr)
    {
-      ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.read(data.getLatestTimestampModifiable(), cdr);	
       cdr.read_type_d(data.getModelName());	
       cdr.read_type_e(data.getIgnoredObjectClasses());	
       cdr.read_type_e(data.getConfidenceThresholds());	
@@ -159,8 +153,6 @@ public class YOLOv8ModelSettingsPubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final void serialize(perception_msgs.msg.dds.YOLOv8ModelSettings data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_a("latest_timestamp_modifiable", new ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType(), data.getLatestTimestampModifiable());
-
       ser.write_type_d("model_name", data.getModelName());
       ser.write_type_e("ignored_object_classes", data.getIgnoredObjectClasses());
       ser.write_type_e("confidence_thresholds", data.getConfidenceThresholds());
@@ -173,8 +165,6 @@ public class YOLOv8ModelSettingsPubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.YOLOv8ModelSettings data)
    {
-      ser.read_type_a("latest_timestamp_modifiable", new ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType(), data.getLatestTimestampModifiable());
-
       ser.read_type_d("model_name", data.getModelName());
       ser.read_type_e("ignored_object_classes", data.getIgnoredObjectClasses());
       ser.read_type_e("confidence_thresholds", data.getConfidenceThresholds());

@@ -1,7 +1,5 @@
 # Settings for an individual YOLOv8 Model
 
-ihmc_common_msgs/LatestModificationMessage latest_timestamp_modifiable
-
 string model_name
 
 # A boolean for each object class, whether its detections should be ignored

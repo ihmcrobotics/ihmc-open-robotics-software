@@ -89,10 +89,7 @@ public class CRDTStatusSet<T> extends CRDTStatusMutableField<Set<T>>
    {
       if (isModificationDisallowed())
       {
-//         Set<T> before = getCopy();
          valueConsumer.accept(getValueInternal());
-//         if (!getValueInternal().containsAll(before) || !before.containsAll(getValueInternal()))
-//            markHasStatus();
       }
    }
 }

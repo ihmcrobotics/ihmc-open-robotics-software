@@ -1,7 +1,6 @@
 #ifndef __perception_msgs__msg__YOLOv8ModelSettings__idl__
 #define __perception_msgs__msg__YOLOv8ModelSettings__idl__
 
-#include "ihmc_common_msgs/msg/./LatestModificationMessage_.idl"
 module perception_msgs
 {
   module msg
@@ -17,7 +16,6 @@ module perception_msgs
       @TypeCode(type="perception_msgs::msg::dds_::YOLOv8ModelSettings_")
       struct YOLOv8ModelSettings
       {
-        ihmc_common_msgs::msg::dds::LatestModificationMessage latest_timestamp_modifiable;
         string model_name;
         /**
          * A boolean for each object class, whether its detections should be ignored

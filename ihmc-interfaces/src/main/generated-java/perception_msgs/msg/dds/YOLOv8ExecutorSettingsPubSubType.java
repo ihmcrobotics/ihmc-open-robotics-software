@@ -15,7 +15,7 @@ public class YOLOv8ExecutorSettingsPubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "19c6a869e24fa74429da39da3ec07d8b907cedabdc250bf876e02a4b0d9c0561";
+   		return "be23ca8420350b180b36e2b8438f39d3efe1741987fb37e13303bdb3b454fd94";
    }
    
    @Override
@@ -54,7 +54,7 @@ public class YOLOv8ExecutorSettingsPubSubType implements us.ihmc.pubsub.TopicDat
 
       current_alignment += ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 8; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 16; ++i0)
       {
           current_alignment += perception_msgs.msg.dds.YOLOv8ModelInfoPubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 16; ++i0)
@@ -101,9 +101,9 @@ public class YOLOv8ExecutorSettingsPubSubType implements us.ihmc.pubsub.TopicDat
    public static void write(perception_msgs.msg.dds.YOLOv8ExecutorSettings data, us.ihmc.idl.CDR cdr)
    {
       ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.write(data.getLatestTimestampModifiable(), cdr);
-      if(data.getAvailableYoloModels().size() <= 8)
+      if(data.getAvailableYoloModels().size() <= 16)
       cdr.write_type_e(data.getAvailableYoloModels());else
-          throw new RuntimeException("available_yolo_models field exceeds the maximum length: %d > %d".formatted(data.getAvailableYoloModels().size(), 8));
+          throw new RuntimeException("available_yolo_models field exceeds the maximum length: %d > %d".formatted(data.getAvailableYoloModels().size(), 16));
 
       if(data.getModelsToRun().size() <= 16)
       cdr.write_type_e(data.getModelsToRun());else

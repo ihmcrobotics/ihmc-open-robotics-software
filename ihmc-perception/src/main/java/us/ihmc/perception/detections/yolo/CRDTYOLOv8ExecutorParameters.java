@@ -10,10 +10,8 @@ import us.ihmc.communication.crdt.LatestTimestampModifiable;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class CRDTYOLOv8ExecutorParameters extends LatestTimestampModifiable
@@ -36,18 +34,7 @@ public class CRDTYOLOv8ExecutorParameters extends LatestTimestampModifiable
    {
       availableModels.clear();
       availableModels.addAll(models.stream().map(YOLOv8Tools::toMessage).collect(Collectors.toSet()));
-   }
-
-   public void update()
-   {
-      checkModified();
-
-      if (availableModels.pollHasStatus())
-      {
-         modelSettings.clear();
-         availableModels.getCopy().forEach(model -> modelSettings.put(model.getModelNameAsString(), new CRDTYOLOv8ModelParameters(this, model)));
-         modelsToRun.retainAll(availableModels.getCopy().stream().map(YOLOv8ModelInfo::getModelNameAsString).collect(Collectors.toSet()));
-      }
+      updateModelSettings();
    }
 
    public CRDTStatusSet<YOLOv8ModelInfo> getAvailableModels()
@@ -98,9 +85,19 @@ public class CRDTYOLOv8ExecutorParameters extends LatestTimestampModifiable
          models.addAll(message.getModelsToRun().stream().map(StringBuilder::toString).toList());
       });
 
+      if (availableModels.getSize() != modelSettings.size())
+         updateModelSettings();
+
       for (YOLOv8ModelSettings modelSettingsMessage : message.getModelSettings())
       {
          modelSettings.get(modelSettingsMessage.getModelNameAsString()).fromMessage(modelSettingsMessage);
       }
+   }
+
+   private void updateModelSettings()
+   {
+      modelSettings.clear();
+      availableModels.getCopy().forEach(model -> modelSettings.put(model.getModelNameAsString(), new CRDTYOLOv8ModelParameters(this, model)));
+      modelsToRun.retainAll(availableModels.getCopy().stream().map(YOLOv8ModelInfo::getModelNameAsString).collect(Collectors.toSet()));
    }
 }

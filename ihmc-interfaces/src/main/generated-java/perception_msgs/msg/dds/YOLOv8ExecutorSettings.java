@@ -28,7 +28,7 @@ public class YOLOv8ExecutorSettings extends Packet<YOLOv8ExecutorSettings> imple
    public YOLOv8ExecutorSettings()
    {
       latest_timestamp_modifiable_ = new ihmc_common_msgs.msg.dds.LatestModificationMessage();
-      available_yolo_models_ = new us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.YOLOv8ModelInfo> (8, new perception_msgs.msg.dds.YOLOv8ModelInfoPubSubType());
+      available_yolo_models_ = new us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.YOLOv8ModelInfo> (16, new perception_msgs.msg.dds.YOLOv8ModelInfoPubSubType());
       models_to_run_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (16, "type_d");
       model_settings_ = new us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.YOLOv8ModelSettings> (16, new perception_msgs.msg.dds.YOLOv8ModelSettingsPubSubType());
 

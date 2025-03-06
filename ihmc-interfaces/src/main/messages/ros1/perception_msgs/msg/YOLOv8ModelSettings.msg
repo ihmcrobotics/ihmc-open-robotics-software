@@ -2,8 +2,6 @@
 # Below are parameters not used directly by the YOLOv8Model class,
 # but related to the way we use the YOLO output.
 
-ihmc_common_msgs/LatestModificationMessage latest_timestamp_modifiable
-
 string model_name
 
 # A boolean for each object class, whether its detections should be ignored

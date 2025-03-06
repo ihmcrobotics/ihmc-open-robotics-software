@@ -13,7 +13,6 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class YOLOv8ModelSettings extends Packet<YOLOv8ModelSettings> implements Settable<YOLOv8ModelSettings>, EpsilonComparable<YOLOv8ModelSettings>
 {
-   public ihmc_common_msgs.msg.dds.LatestModificationMessage latest_timestamp_modifiable_;
    public java.lang.StringBuilder model_name_;
    /**
             * A boolean for each object class, whether its detections should be ignored
@@ -42,7 +41,6 @@ public class YOLOv8ModelSettings extends Packet<YOLOv8ModelSettings> implements 
 
    public YOLOv8ModelSettings()
    {
-      latest_timestamp_modifiable_ = new ihmc_common_msgs.msg.dds.LatestModificationMessage();
       model_name_ = new java.lang.StringBuilder(255);
       ignored_object_classes_ = new us.ihmc.idl.IDLSequence.Boolean (96, "type_7");
 
@@ -64,7 +62,6 @@ public class YOLOv8ModelSettings extends Packet<YOLOv8ModelSettings> implements 
 
    public void set(YOLOv8ModelSettings other)
    {
-      ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.staticCopy(other.latest_timestamp_modifiable_, latest_timestamp_modifiable_);
       model_name_.setLength(0);
       model_name_.append(other.model_name_);
 
@@ -75,12 +72,6 @@ public class YOLOv8ModelSettings extends Packet<YOLOv8ModelSettings> implements 
 
       erosion_kernel_radii_.set(other.erosion_kernel_radii_);
       outlier_thresholds_.set(other.outlier_thresholds_);
-   }
-
-
-   public ihmc_common_msgs.msg.dds.LatestModificationMessage getLatestTimestampModifiable()
-   {
-      return latest_timestamp_modifiable_;
    }
 
    public void setModelName(java.lang.String model_name)
@@ -176,7 +167,6 @@ public class YOLOv8ModelSettings extends Packet<YOLOv8ModelSettings> implements 
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!this.latest_timestamp_modifiable_.epsilonEquals(other.latest_timestamp_modifiable_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.model_name_, other.model_name_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBooleanSequence(this.ignored_object_classes_, other.ignored_object_classes_, epsilon)) return false;
@@ -204,7 +194,6 @@ public class YOLOv8ModelSettings extends Packet<YOLOv8ModelSettings> implements 
 
       YOLOv8ModelSettings otherMyClass = (YOLOv8ModelSettings) other;
 
-      if (!this.latest_timestamp_modifiable_.equals(otherMyClass.latest_timestamp_modifiable_)) return false;
       if (!us.ihmc.idl.IDLTools.equals(this.model_name_, otherMyClass.model_name_)) return false;
 
       if (!this.ignored_object_classes_.equals(otherMyClass.ignored_object_classes_)) return false;
@@ -224,8 +213,6 @@ public class YOLOv8ModelSettings extends Packet<YOLOv8ModelSettings> implements 
       StringBuilder builder = new StringBuilder();
 
       builder.append("YOLOv8ModelSettings {");
-      builder.append("latest_timestamp_modifiable=");
-      builder.append(this.latest_timestamp_modifiable_);      builder.append(", ");
       builder.append("model_name=");
       builder.append(this.model_name_);      builder.append(", ");
       builder.append("ignored_object_classes=");

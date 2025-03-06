@@ -15,6 +15,9 @@ import us.ihmc.perception.detections.yolo.CRDTYOLOv8ModelParameters;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 
+import java.util.Arrays;
+import java.util.function.Consumer;
+
 public class RDXROS2YOLOv8ModelSettings
 {
    private static final int TABLE_COLUMN_COUNT = 6;
@@ -43,8 +46,6 @@ public class RDXROS2YOLOv8ModelSettings
    private final ImInt[] erosionKernelRadii;
    private final ImFloat[] outlierThresholds;
 
-   private final Notification updateSettingsMessage = new Notification();
-
    public RDXROS2YOLOv8ModelSettings(CRDTYOLOv8ModelParameters syncedParameters)
    {
       this.syncedParameters = syncedParameters;
@@ -67,19 +68,13 @@ public class RDXROS2YOLOv8ModelSettings
          erosionKernelRadii[i] = new ImInt(universalErosionKernelRadius);
          outlierThresholds[i] = new ImFloat(universalOutlierThreshold);
       }
+
+      updateSyncedParameters();
    }
 
    public String getModelName()
    {
       return modelName;
-   }
-
-   public CRDTYOLOv8ModelParameters getModelParameters()
-   {
-      if (updateSettingsMessage.poll())
-         updateSyncedParameters();
-
-      return syncedParameters;
    }
 
    public void update()
@@ -122,7 +117,7 @@ public class RDXROS2YOLOv8ModelSettings
       changed |= renderSettingsTable(style, tableFlags, tableHeight);
 
       if (changed)
-         updateSettingsMessage.set();
+         updateSyncedParameters();
    }
 
    private boolean renderSettingsTable(ImGuiStyle style, int tableFlags, float height)

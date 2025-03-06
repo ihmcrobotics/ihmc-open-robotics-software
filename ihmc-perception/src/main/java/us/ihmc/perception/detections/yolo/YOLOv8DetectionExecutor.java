@@ -11,7 +11,6 @@ import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.YOLOv8ExecutorSettings;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.thread.RepeatingTaskThread;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.crdt.CRDTInfo;
@@ -89,7 +88,6 @@ public class YOLOv8DetectionExecutor
       // Create YOLO parameters
       parameters = new CRDTYOLOv8ExecutorParameters(crdtInfo);
       parameters.setAvailableModels(availableModels.values());
-      parameters.update();
 
       // Subscribe to YOLO settings messages
       ros2Node.createSubscription2(PerceptionAPI.YOLO_SETTINGS, parameters::fromMessage);
@@ -141,7 +139,7 @@ public class YOLOv8DetectionExecutor
 
    public void update()
    {
-      parameters.update();
+      parameters.checkModified();
       if (parameters.isModified())
       {
          parameters.getModelSettings().forEach((modelName, modelParameters) -> modelParameters.applyToModel(availableModels.get(modelName)));

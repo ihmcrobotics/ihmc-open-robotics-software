@@ -49,7 +49,6 @@ public class RDXROS2YOLOv8Visualizer extends RDXROS2ImageMessageVisualizer
    public void update()
    {
       super.update();
-      settings.update();
    }
 
    @Override
@@ -63,6 +62,8 @@ public class RDXROS2YOLOv8Visualizer extends RDXROS2ImageMessageVisualizer
    @Override
    public void renderImGuiWidgets()
    {
+      settings.update();
+
       ImGuiStyle style = new ImGuiStyle();
       float indent = ImGui.getFrameHeight() + style.getItemInnerSpacingX() + 1.0f;
       ImGui.indent(indent);
