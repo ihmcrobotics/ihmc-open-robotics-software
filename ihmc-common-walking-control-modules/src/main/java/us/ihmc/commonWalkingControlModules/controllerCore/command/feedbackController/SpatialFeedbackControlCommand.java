@@ -321,7 +321,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * This is a safety feature, the controller core will throw an exception in the case the control
     * mode mismatches the active mode of the controller core.
     * </p>
-    * 
+    *
     * @param controlMode the expected control mode.
     */
    public void setControlMode(WholeBodyControllerCoreMode controlMode)
@@ -332,7 +332,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    /**
     * Sets the impedance control mode to be used for this command.
     *
-    *    @param isImpedanceEnabled whether to enable impedance control
+    * @param isImpedanceEnabled whether to enable impedance control
     */
 
    public void setImpedanceEnabled(boolean isImpedanceEnabled)
@@ -585,7 +585,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * <p>
     * WARNING: The information provided has to be relevant to the {@code controlFrame} provided.
     * </p>
-    * 
+    *
     * @param desiredOrientation             the orientation the {@code controlFrame} should reach. Not
     *                                       modified.
     * @param desiredPosition                the position that the {@code controlFrame} should reach.
@@ -627,7 +627,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * <p>
     * WARNING: The information provided has to be relevant to the {@code controlFrame} provided.
     * </p>
-    * 
+    *
     * @param desiredPose             the pose that the {@code controlFrame} should reach. Not modified.
     * @param desiredVelocity         the desired angular & linear velocity of {@code controlFrame} with
     *                                respect to the {@code base}. Not modified. Can be {@code null}, in
@@ -864,7 +864,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     *
     * @param position the position of the {@code controlFrame}'s origin. Not modified.
     * @throws ReferenceFrameMismatchException if any of the {@code position} is not expressed in
-    *                                         {@code endEffector.getBodyFixedFrame()}.
+    *       {@code endEffector.getBodyFixedFrame()}.
     */
    public void setControlFrameFixedInEndEffector(FramePoint3DReadOnly position)
    {
@@ -886,7 +886,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * @param position    the position of the {@code controlFrame}'s origin. Not modified.
     * @param orientation the orientation of the {@code controlFrame}. Not modified.
     * @throws ReferenceFrameMismatchException if any of the two arguments is not expressed in
-    *                                         {@code endEffector.getBodyFixedFrame()}.
+    *       {@code endEffector.getBodyFixedFrame()}.
     */
    public void setControlFrameFixedInEndEffector(FramePoint3DReadOnly position, FrameOrientation3DReadOnly orientation)
    {
@@ -907,7 +907,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     *
     * @param pose the pose of the {@code controlFrame}. Not modified.
     * @throws ReferenceFrameMismatchException if the argument is not expressed in
-    *                                         {@code endEffector.getBodyFixedFrame()}.
+    *       {@code endEffector.getBodyFixedFrame()}.
     */
    public void setControlFrameFixedInEndEffector(FramePose3DReadOnly pose)
    {
@@ -959,7 +959,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * If the selection frame is not set, i.e. equal to {@code null}, it is assumed that the selection
     * frame is equal to the control frame.
     * </p>
-    * 
+    *
     * @param linearSelectionMatrix the selection matrix to apply to the linear part of this command.
     *                              Not modified.
     */
@@ -984,7 +984,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * If the selection frame is not set, i.e. equal to {@code null}, it is assumed that the selection
     * frame is equal to the control frame.
     * </p>
-    * 
+    *
     * @param angularSelectionMatrix the selection matrix to apply to the angular part of this command.
     *                               Not modified.
     */
@@ -1119,7 +1119,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
 
    /**
     * Gets the expected control mode to execute this command with.
-    * 
+    *
     * @return the expected active controller core control mode.
     */
    public WholeBodyControllerCoreMode getControlMode()
@@ -1132,7 +1132,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * <p>
     * The reference orientation typically represents the desired orientation.
     * </p>
-    * 
+    *
     * @return the reference orientation.
     */
    public FrameQuaternionBasics getReferenceOrientation()
@@ -1145,7 +1145,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * <p>
     * The reference position typically represents the desired position.
     * </p>
-    * 
+    *
     * @return the reference position.
     */
    public FramePoint3DBasics getReferencePosition()
@@ -1159,7 +1159,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * Depending on the active control mode, it can be used as a desired (ID & WMC) or a feed-forward
     * term (IK).
     * </p>
-    * 
+    *
     * @return the reference angular velocity.
     */
    public FrameVector3DBasics getReferenceAngularVelocity()
@@ -1173,7 +1173,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * Depending on the active control mode, it can be used as a desired (ID & WMC) or a feed-forward
     * term (IK).
     * </p>
-    * 
+    *
     * @return the reference linear velocity.
     */
    public FrameVector3DBasics getReferenceLinearVelocity()
@@ -1186,7 +1186,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * <p>
     * It is used in the inverse dynamics mode as a feed-forward term.
     * </p>
-    * 
+    *
     * @return the reference angular acceleration.
     */
    public FrameVector3DBasics getReferenceAngularAcceleration()
@@ -1199,7 +1199,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * <p>
     * It is used in the inverse dynamics mode as a feed-forward term.
     * </p>
-    * 
+    *
     * @return the reference linear acceleration.
     */
    public FrameVector3DBasics getReferenceLinearAcceleration()
@@ -1212,7 +1212,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * <p>
     * It is used in the virtual control mode as a feed-forward term.
     * </p>
-    * 
+    *
     * @return the reference torque.
     */
    public FrameVector3DBasics getReferenceTorque()
@@ -1225,7 +1225,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * <p>
     * It is used in the virtual control mode as a feed-forward term.
     * </p>
-    * 
+    *
     * @return the reference force.
     */
    public FrameVector3D getReferenceForce()
@@ -1334,6 +1334,8 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
          if (!spatialAccelerationCommand.equals(other.spatialAccelerationCommand))
             return false;
          if (controlBaseFrame != other.controlBaseFrame)
+            return false;
+         if (isImpedanceEnabled ^ other.isImpedanceEnabled)
             return false;
 
          return true;
