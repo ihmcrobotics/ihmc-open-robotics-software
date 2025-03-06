@@ -1,7 +1,7 @@
 package us.ihmc.perception.detections.yolo;
 
 import perception_msgs.msg.dds.YOLOv8ModelInfo;
-import perception_msgs.msg.dds.YOLOv8ModelSettings;
+import perception_msgs.msg.dds.YOLOv8ModelParameters;
 import us.ihmc.communication.crdt.CRDTBidirectionalBooleanArray;
 import us.ihmc.communication.crdt.CRDTBidirectionalFloat;
 import us.ihmc.communication.crdt.CRDTBidirectionalFloatArray;
@@ -104,7 +104,7 @@ public class SyncedYOLOv8ModelParameters extends LatestTimestampModifiable
       return outlierThresholds;
    }
 
-   public void toMessage(YOLOv8ModelSettings messageToPack)
+   public void toMessage(YOLOv8ModelParameters messageToPack)
    {
       toMessage(messageToPack.getLatestTimestampModifiable());
 
@@ -119,7 +119,7 @@ public class SyncedYOLOv8ModelParameters extends LatestTimestampModifiable
       outlierThresholds.toMessage(messageToPack.getOutlierThresholds());
    }
 
-   public void fromMessage(YOLOv8ModelSettings message)
+   public void fromMessage(YOLOv8ModelParameters message)
    {
       fromMessage(message.getLatestTimestampModifiable());
 

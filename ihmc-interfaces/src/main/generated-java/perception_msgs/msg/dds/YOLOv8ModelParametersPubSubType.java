@@ -2,20 +2,20 @@ package perception_msgs.msg.dds;
 
 /**
 * 
-* Topic data type of the struct "YOLOv8ModelSettings" defined in "YOLOv8ModelSettings_.idl". Use this class to provide the TopicDataType to a Participant. 
+* Topic data type of the struct "YOLOv8ModelParameters" defined in "YOLOv8ModelParameters_.idl". Use this class to provide the TopicDataType to a Participant. 
 *
-* This file was automatically generated from YOLOv8ModelSettings_.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit YOLOv8ModelSettings_.idl instead.
+* This file was automatically generated from YOLOv8ModelParameters_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit YOLOv8ModelParameters_.idl instead.
 *
 */
-public class YOLOv8ModelSettingsPubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.YOLOv8ModelSettings>
+public class YOLOv8ModelParametersPubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.YOLOv8ModelParameters>
 {
-   public static final java.lang.String name = "perception_msgs::msg::dds_::YOLOv8ModelSettings_";
+   public static final java.lang.String name = "perception_msgs::msg::dds_::YOLOv8ModelParameters_";
    
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "52c3cff4ed70509730e728fddd3d5187626fc4ac995e0e9a6d33b7b9231c2dd5";
+   		return "8b2e39292064cb9541915ce4b1c4506fa442921aec6c1ce007c92aae144b6554";
    }
    
    @Override
@@ -28,7 +28,7 @@ public class YOLOv8ModelSettingsPubSubType implements us.ihmc.pubsub.TopicDataTy
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(perception_msgs.msg.dds.YOLOv8ModelSettings data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
+   public void serialize(perception_msgs.msg.dds.YOLOv8ModelParameters data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -36,7 +36,7 @@ public class YOLOv8ModelSettingsPubSubType implements us.ihmc.pubsub.TopicDataTy
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, perception_msgs.msg.dds.YOLOv8ModelSettings data) throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, perception_msgs.msg.dds.YOLOv8ModelParameters data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -71,12 +71,12 @@ public class YOLOv8ModelSettingsPubSubType implements us.ihmc.pubsub.TopicDataTy
       return current_alignment - initial_alignment;
    }
 
-   public final static int getCdrSerializedSize(perception_msgs.msg.dds.YOLOv8ModelSettings data)
+   public final static int getCdrSerializedSize(perception_msgs.msg.dds.YOLOv8ModelParameters data)
    {
       return getCdrSerializedSize(data, 0);
    }
 
-   public final static int getCdrSerializedSize(perception_msgs.msg.dds.YOLOv8ModelSettings data, int current_alignment)
+   public final static int getCdrSerializedSize(perception_msgs.msg.dds.YOLOv8ModelParameters data, int current_alignment)
    {
       int initial_alignment = current_alignment;
 
@@ -111,7 +111,7 @@ public class YOLOv8ModelSettingsPubSubType implements us.ihmc.pubsub.TopicDataTy
       return current_alignment - initial_alignment;
    }
 
-   public static void write(perception_msgs.msg.dds.YOLOv8ModelSettings data, us.ihmc.idl.CDR cdr)
+   public static void write(perception_msgs.msg.dds.YOLOv8ModelParameters data, us.ihmc.idl.CDR cdr)
    {
       ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.write(data.getLatestTimestampModifiable(), cdr);
       if(data.getModelName().length() <= 255)
@@ -142,7 +142,7 @@ public class YOLOv8ModelSettingsPubSubType implements us.ihmc.pubsub.TopicDataTy
 
    }
 
-   public static void read(perception_msgs.msg.dds.YOLOv8ModelSettings data, us.ihmc.idl.CDR cdr)
+   public static void read(perception_msgs.msg.dds.YOLOv8ModelParameters data, us.ihmc.idl.CDR cdr)
    {
       ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.read(data.getLatestTimestampModifiable(), cdr);	
       cdr.read_type_d(data.getModelName());	
@@ -157,7 +157,7 @@ public class YOLOv8ModelSettingsPubSubType implements us.ihmc.pubsub.TopicDataTy
    }
 
    @Override
-   public final void serialize(perception_msgs.msg.dds.YOLOv8ModelSettings data, us.ihmc.idl.InterchangeSerializer ser)
+   public final void serialize(perception_msgs.msg.dds.YOLOv8ModelParameters data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_a("latest_timestamp_modifiable", new ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType(), data.getLatestTimestampModifiable());
 
@@ -171,7 +171,7 @@ public class YOLOv8ModelSettingsPubSubType implements us.ihmc.pubsub.TopicDataTy
    }
 
    @Override
-   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.YOLOv8ModelSettings data)
+   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.YOLOv8ModelParameters data)
    {
       ser.read_type_a("latest_timestamp_modifiable", new ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType(), data.getLatestTimestampModifiable());
 
@@ -184,15 +184,15 @@ public class YOLOv8ModelSettingsPubSubType implements us.ihmc.pubsub.TopicDataTy
       ser.read_type_e("outlier_thresholds", data.getOutlierThresholds());
    }
 
-   public static void staticCopy(perception_msgs.msg.dds.YOLOv8ModelSettings src, perception_msgs.msg.dds.YOLOv8ModelSettings dest)
+   public static void staticCopy(perception_msgs.msg.dds.YOLOv8ModelParameters src, perception_msgs.msg.dds.YOLOv8ModelParameters dest)
    {
       dest.set(src);
    }
 
    @Override
-   public perception_msgs.msg.dds.YOLOv8ModelSettings createData()
+   public perception_msgs.msg.dds.YOLOv8ModelParameters createData()
    {
-      return new perception_msgs.msg.dds.YOLOv8ModelSettings();
+      return new perception_msgs.msg.dds.YOLOv8ModelParameters();
    }
    @Override
    public int getTypeSize()
@@ -206,24 +206,24 @@ public class YOLOv8ModelSettingsPubSubType implements us.ihmc.pubsub.TopicDataTy
       return name;
    }
    
-   public void serialize(perception_msgs.msg.dds.YOLOv8ModelSettings data, us.ihmc.idl.CDR cdr)
+   public void serialize(perception_msgs.msg.dds.YOLOv8ModelParameters data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
    }
 
-   public void deserialize(perception_msgs.msg.dds.YOLOv8ModelSettings data, us.ihmc.idl.CDR cdr)
+   public void deserialize(perception_msgs.msg.dds.YOLOv8ModelParameters data, us.ihmc.idl.CDR cdr)
    {
       read(data, cdr);
    }
    
-   public void copy(perception_msgs.msg.dds.YOLOv8ModelSettings src, perception_msgs.msg.dds.YOLOv8ModelSettings dest)
+   public void copy(perception_msgs.msg.dds.YOLOv8ModelParameters src, perception_msgs.msg.dds.YOLOv8ModelParameters dest)
    {
       staticCopy(src, dest);
    }
 
    @Override
-   public YOLOv8ModelSettingsPubSubType newInstance()
+   public YOLOv8ModelParametersPubSubType newInstance()
    {
-      return new YOLOv8ModelSettingsPubSubType();
+      return new YOLOv8ModelParametersPubSubType();
    }
 }

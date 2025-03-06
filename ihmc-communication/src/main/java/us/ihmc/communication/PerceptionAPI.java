@@ -177,9 +177,9 @@ public final class PerceptionAPI
    public static final ROS2Topic<Empty> REQUEST_PLANAR_REGIONS = IHMC_ROOT.withModule("planar_regions")
                                                                           .withSuffix("request")
                                                                           .withType(Empty.class);
-   public static final ROS2Topic<YOLOv8ExecutorSettings> YOLO_SETTINGS = IHMC_ROOT.withModule("yolo")
-                                                                                  .withSuffix("settings")
-                                                                                  .withType(YOLOv8ExecutorSettings.class);
+   public static final ROS2Topic<YOLOv8ExecutorParameters> YOLO_PARAMETERS = IHMC_ROOT.withModule("yolo")
+                                                                                    .withSuffix("settings")
+                                                                                    .withType(YOLOv8ExecutorParameters.class);
    public static final ROS2Topic<YOLOv8AvailableModels> YOLO_AVAILABLE_MODELS = IHMC_ROOT.withModule("yolo")
                                                                                          .withSuffix("available_models")
                                                                                          .withType(YOLOv8AvailableModels.class);

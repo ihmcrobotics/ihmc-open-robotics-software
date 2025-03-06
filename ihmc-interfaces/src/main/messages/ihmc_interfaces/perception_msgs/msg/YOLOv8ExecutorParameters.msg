@@ -9,4 +9,4 @@ perception_msgs/YOLOv8ModelInfo[<=16] available_yolo_models
 string[<=16] models_to_run
 
 # Settings for each model
-perception_msgs/YOLOv8ModelSettings[<=16] model_settings
+perception_msgs/YOLOv8ModelParameters[<=16] model_settings

@@ -1,9 +1,9 @@
-#ifndef __perception_msgs__msg__YOLOv8ExecutorSettings__idl__
-#define __perception_msgs__msg__YOLOv8ExecutorSettings__idl__
+#ifndef __perception_msgs__msg__YOLOv8ExecutorParameters__idl__
+#define __perception_msgs__msg__YOLOv8ExecutorParameters__idl__
 
 #include "ihmc_common_msgs/msg/./LatestModificationMessage_.idl"
 #include "perception_msgs/msg/./YOLOv8ModelInfo_.idl"
-#include "perception_msgs/msg/./YOLOv8ModelSettings_.idl"
+#include "perception_msgs/msg/./YOLOv8ModelParameters_.idl"
 module perception_msgs
 {
   module msg
@@ -14,8 +14,8 @@ module perception_msgs
       /**
        * Settings for the YOLOv8DetectionExecutor class
        */
-      @TypeCode(type="perception_msgs::msg::dds_::YOLOv8ExecutorSettings_")
-      struct YOLOv8ExecutorSettings
+      @TypeCode(type="perception_msgs::msg::dds_::YOLOv8ExecutorParameters_")
+      struct YOLOv8ExecutorParameters
       {
         ihmc_common_msgs::msg::dds::LatestModificationMessage latest_timestamp_modifiable;
         /**
@@ -29,7 +29,7 @@ module perception_msgs
         /**
          * Settings for each model
          */
-        sequence<perception_msgs::msg::dds::YOLOv8ModelSettings, 16> model_settings;
+        sequence<perception_msgs::msg::dds::YOLOv8ModelParameters, 16> model_settings;
       };
     };
   };

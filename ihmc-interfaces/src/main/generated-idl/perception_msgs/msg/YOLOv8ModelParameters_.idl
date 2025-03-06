@@ -1,5 +1,5 @@
-#ifndef __perception_msgs__msg__YOLOv8ModelSettings__idl__
-#define __perception_msgs__msg__YOLOv8ModelSettings__idl__
+#ifndef __perception_msgs__msg__YOLOv8ModelParameters__idl__
+#define __perception_msgs__msg__YOLOv8ModelParameters__idl__
 
 #include "ihmc_common_msgs/msg/./LatestModificationMessage_.idl"
 module perception_msgs
@@ -14,8 +14,8 @@ module perception_msgs
        * Below are parameters not used directly by the YOLOv8Model class,
        * but related to the way we use the YOLO output.
        */
-      @TypeCode(type="perception_msgs::msg::dds_::YOLOv8ModelSettings_")
-      struct YOLOv8ModelSettings
+      @TypeCode(type="perception_msgs::msg::dds_::YOLOv8ModelParameters_")
+      struct YOLOv8ModelParameters
       {
         ihmc_common_msgs::msg::dds::LatestModificationMessage latest_timestamp_modifiable;
         string model_name;

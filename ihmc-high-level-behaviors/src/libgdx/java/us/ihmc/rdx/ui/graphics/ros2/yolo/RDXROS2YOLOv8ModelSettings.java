@@ -49,7 +49,7 @@ public class RDXROS2YOLOv8ModelSettings
       this.detectableObjectClasses = syncedParameters.getDetectableObjectClasses();
       detectableObjectClassCount = detectableObjectClasses.length;
 
-      // Initialize settings
+      // Initialize parameters
       enables = new ImBoolean[detectableObjectClassCount];
       confidenceThresholds = new ImFloat[detectableObjectClassCount];
       maskThresholds = new ImFloat[detectableObjectClassCount];

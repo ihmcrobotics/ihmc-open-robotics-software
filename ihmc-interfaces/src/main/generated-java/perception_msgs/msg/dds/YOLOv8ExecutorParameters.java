@@ -9,7 +9,7 @@ import us.ihmc.pubsub.TopicDataType;
 /**
        * Settings for the YOLOv8DetectionExecutor class
        */
-public class YOLOv8ExecutorSettings extends Packet<YOLOv8ExecutorSettings> implements Settable<YOLOv8ExecutorSettings>, EpsilonComparable<YOLOv8ExecutorSettings>
+public class YOLOv8ExecutorParameters extends Packet<YOLOv8ExecutorParameters> implements Settable<YOLOv8ExecutorParameters>, EpsilonComparable<YOLOv8ExecutorParameters>
 {
    public ihmc_common_msgs.msg.dds.LatestModificationMessage latest_timestamp_modifiable_;
    /**
@@ -23,24 +23,24 @@ public class YOLOv8ExecutorSettings extends Packet<YOLOv8ExecutorSettings> imple
    /**
             * Settings for each model
             */
-   public us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.YOLOv8ModelSettings>  model_settings_;
+   public us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.YOLOv8ModelParameters>  model_settings_;
 
-   public YOLOv8ExecutorSettings()
+   public YOLOv8ExecutorParameters()
    {
       latest_timestamp_modifiable_ = new ihmc_common_msgs.msg.dds.LatestModificationMessage();
       available_yolo_models_ = new us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.YOLOv8ModelInfo> (16, new perception_msgs.msg.dds.YOLOv8ModelInfoPubSubType());
       models_to_run_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (16, "type_d");
-      model_settings_ = new us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.YOLOv8ModelSettings> (16, new perception_msgs.msg.dds.YOLOv8ModelSettingsPubSubType());
+      model_settings_ = new us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.YOLOv8ModelParameters> (16, new perception_msgs.msg.dds.YOLOv8ModelParametersPubSubType());
 
    }
 
-   public YOLOv8ExecutorSettings(YOLOv8ExecutorSettings other)
+   public YOLOv8ExecutorParameters(YOLOv8ExecutorParameters other)
    {
       this();
       set(other);
    }
 
-   public void set(YOLOv8ExecutorSettings other)
+   public void set(YOLOv8ExecutorParameters other)
    {
       ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.staticCopy(other.latest_timestamp_modifiable_, latest_timestamp_modifiable_);
       available_yolo_models_.set(other.available_yolo_models_);
@@ -76,25 +76,25 @@ public class YOLOv8ExecutorSettings extends Packet<YOLOv8ExecutorSettings> imple
    /**
             * Settings for each model
             */
-   public us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.YOLOv8ModelSettings>  getModelSettings()
+   public us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.YOLOv8ModelParameters>  getModelSettings()
    {
       return model_settings_;
    }
 
 
-   public static Supplier<YOLOv8ExecutorSettingsPubSubType> getPubSubType()
+   public static Supplier<YOLOv8ExecutorParametersPubSubType> getPubSubType()
    {
-      return YOLOv8ExecutorSettingsPubSubType::new;
+      return YOLOv8ExecutorParametersPubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return YOLOv8ExecutorSettingsPubSubType::new;
+      return YOLOv8ExecutorParametersPubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(YOLOv8ExecutorSettings other, double epsilon)
+   public boolean epsilonEquals(YOLOv8ExecutorParameters other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -125,9 +125,9 @@ public class YOLOv8ExecutorSettings extends Packet<YOLOv8ExecutorSettings> imple
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof YOLOv8ExecutorSettings)) return false;
+      if(!(other instanceof YOLOv8ExecutorParameters)) return false;
 
-      YOLOv8ExecutorSettings otherMyClass = (YOLOv8ExecutorSettings) other;
+      YOLOv8ExecutorParameters otherMyClass = (YOLOv8ExecutorParameters) other;
 
       if (!this.latest_timestamp_modifiable_.equals(otherMyClass.latest_timestamp_modifiable_)) return false;
       if (!this.available_yolo_models_.equals(otherMyClass.available_yolo_models_)) return false;
@@ -142,7 +142,7 @@ public class YOLOv8ExecutorSettings extends Packet<YOLOv8ExecutorSettings> imple
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("YOLOv8ExecutorSettings {");
+      builder.append("YOLOv8ExecutorParameters {");
       builder.append("latest_timestamp_modifiable=");
       builder.append(this.latest_timestamp_modifiable_);      builder.append(", ");
       builder.append("available_yolo_models=");

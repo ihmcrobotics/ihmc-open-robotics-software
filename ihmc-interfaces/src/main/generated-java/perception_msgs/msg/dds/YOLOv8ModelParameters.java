@@ -11,7 +11,7 @@ import us.ihmc.pubsub.TopicDataType;
        * Below are parameters not used directly by the YOLOv8Model class,
        * but related to the way we use the YOLO output.
        */
-public class YOLOv8ModelSettings extends Packet<YOLOv8ModelSettings> implements Settable<YOLOv8ModelSettings>, EpsilonComparable<YOLOv8ModelSettings>
+public class YOLOv8ModelParameters extends Packet<YOLOv8ModelParameters> implements Settable<YOLOv8ModelParameters>, EpsilonComparable<YOLOv8ModelParameters>
 {
    public ihmc_common_msgs.msg.dds.LatestModificationMessage latest_timestamp_modifiable_;
    public java.lang.StringBuilder model_name_;
@@ -40,7 +40,7 @@ public class YOLOv8ModelSettings extends Packet<YOLOv8ModelSettings> implements 
             */
    public us.ihmc.idl.IDLSequence.Float  outlier_thresholds_;
 
-   public YOLOv8ModelSettings()
+   public YOLOv8ModelParameters()
    {
       latest_timestamp_modifiable_ = new ihmc_common_msgs.msg.dds.LatestModificationMessage();
       model_name_ = new java.lang.StringBuilder(255);
@@ -56,13 +56,13 @@ public class YOLOv8ModelSettings extends Packet<YOLOv8ModelSettings> implements 
 
    }
 
-   public YOLOv8ModelSettings(YOLOv8ModelSettings other)
+   public YOLOv8ModelParameters(YOLOv8ModelParameters other)
    {
       this();
       set(other);
    }
 
-   public void set(YOLOv8ModelSettings other)
+   public void set(YOLOv8ModelParameters other)
    {
       ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.staticCopy(other.latest_timestamp_modifiable_, latest_timestamp_modifiable_);
       model_name_.setLength(0);
@@ -159,19 +159,19 @@ public class YOLOv8ModelSettings extends Packet<YOLOv8ModelSettings> implements 
    }
 
 
-   public static Supplier<YOLOv8ModelSettingsPubSubType> getPubSubType()
+   public static Supplier<YOLOv8ModelParametersPubSubType> getPubSubType()
    {
-      return YOLOv8ModelSettingsPubSubType::new;
+      return YOLOv8ModelParametersPubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return YOLOv8ModelSettingsPubSubType::new;
+      return YOLOv8ModelParametersPubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(YOLOv8ModelSettings other, double epsilon)
+   public boolean epsilonEquals(YOLOv8ModelParameters other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -200,9 +200,9 @@ public class YOLOv8ModelSettings extends Packet<YOLOv8ModelSettings> implements 
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof YOLOv8ModelSettings)) return false;
+      if(!(other instanceof YOLOv8ModelParameters)) return false;
 
-      YOLOv8ModelSettings otherMyClass = (YOLOv8ModelSettings) other;
+      YOLOv8ModelParameters otherMyClass = (YOLOv8ModelParameters) other;
 
       if (!this.latest_timestamp_modifiable_.equals(otherMyClass.latest_timestamp_modifiable_)) return false;
       if (!us.ihmc.idl.IDLTools.equals(this.model_name_, otherMyClass.model_name_)) return false;
@@ -223,7 +223,7 @@ public class YOLOv8ModelSettings extends Packet<YOLOv8ModelSettings> implements 
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("YOLOv8ModelSettings {");
+      builder.append("YOLOv8ModelParameters {");
       builder.append("latest_timestamp_modifiable=");
       builder.append(this.latest_timestamp_modifiable_);      builder.append(", ");
       builder.append("model_name=");

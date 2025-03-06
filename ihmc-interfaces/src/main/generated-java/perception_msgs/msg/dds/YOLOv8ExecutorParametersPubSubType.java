@@ -2,20 +2,20 @@ package perception_msgs.msg.dds;
 
 /**
 * 
-* Topic data type of the struct "YOLOv8ExecutorSettings" defined in "YOLOv8ExecutorSettings_.idl". Use this class to provide the TopicDataType to a Participant. 
+* Topic data type of the struct "YOLOv8ExecutorParameters" defined in "YOLOv8ExecutorParameters_.idl". Use this class to provide the TopicDataType to a Participant. 
 *
-* This file was automatically generated from YOLOv8ExecutorSettings_.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit YOLOv8ExecutorSettings_.idl instead.
+* This file was automatically generated from YOLOv8ExecutorParameters_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit YOLOv8ExecutorParameters_.idl instead.
 *
 */
-public class YOLOv8ExecutorSettingsPubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.YOLOv8ExecutorSettings>
+public class YOLOv8ExecutorParametersPubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.YOLOv8ExecutorParameters>
 {
-   public static final java.lang.String name = "perception_msgs::msg::dds_::YOLOv8ExecutorSettings_";
+   public static final java.lang.String name = "perception_msgs::msg::dds_::YOLOv8ExecutorParameters_";
    
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "03e40887118ba9ab1a4ee8dcdb324f2df578c2e08648077c1a8ecdd89306aa26";
+   		return "ab05dddf8e29e69c4b552ccd84013a75437de0d09fac1e451a16453aa0658b0a";
    }
    
    @Override
@@ -28,7 +28,7 @@ public class YOLOv8ExecutorSettingsPubSubType implements us.ihmc.pubsub.TopicDat
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(perception_msgs.msg.dds.YOLOv8ExecutorSettings data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
+   public void serialize(perception_msgs.msg.dds.YOLOv8ExecutorParameters data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -36,7 +36,7 @@ public class YOLOv8ExecutorSettingsPubSubType implements us.ihmc.pubsub.TopicDat
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, perception_msgs.msg.dds.YOLOv8ExecutorSettings data) throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, perception_msgs.msg.dds.YOLOv8ExecutorParameters data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -63,17 +63,17 @@ public class YOLOv8ExecutorSettingsPubSubType implements us.ihmc.pubsub.TopicDat
       }
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 16; ++i0)
       {
-          current_alignment += perception_msgs.msg.dds.YOLOv8ModelSettingsPubSubType.getMaxCdrSerializedSize(current_alignment);}
+          current_alignment += perception_msgs.msg.dds.YOLOv8ModelParametersPubSubType.getMaxCdrSerializedSize(current_alignment);}
 
       return current_alignment - initial_alignment;
    }
 
-   public final static int getCdrSerializedSize(perception_msgs.msg.dds.YOLOv8ExecutorSettings data)
+   public final static int getCdrSerializedSize(perception_msgs.msg.dds.YOLOv8ExecutorParameters data)
    {
       return getCdrSerializedSize(data, 0);
    }
 
-   public final static int getCdrSerializedSize(perception_msgs.msg.dds.YOLOv8ExecutorSettings data, int current_alignment)
+   public final static int getCdrSerializedSize(perception_msgs.msg.dds.YOLOv8ExecutorParameters data, int current_alignment)
    {
       int initial_alignment = current_alignment;
 
@@ -92,13 +92,13 @@ public class YOLOv8ExecutorSettingsPubSubType implements us.ihmc.pubsub.TopicDat
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getModelSettings().size(); ++i0)
       {
-          current_alignment += perception_msgs.msg.dds.YOLOv8ModelSettingsPubSubType.getCdrSerializedSize(data.getModelSettings().get(i0), current_alignment);}
+          current_alignment += perception_msgs.msg.dds.YOLOv8ModelParametersPubSubType.getCdrSerializedSize(data.getModelSettings().get(i0), current_alignment);}
 
 
       return current_alignment - initial_alignment;
    }
 
-   public static void write(perception_msgs.msg.dds.YOLOv8ExecutorSettings data, us.ihmc.idl.CDR cdr)
+   public static void write(perception_msgs.msg.dds.YOLOv8ExecutorParameters data, us.ihmc.idl.CDR cdr)
    {
       ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.write(data.getLatestTimestampModifiable(), cdr);
       if(data.getAvailableYoloModels().size() <= 16)
@@ -115,7 +115,7 @@ public class YOLOv8ExecutorSettingsPubSubType implements us.ihmc.pubsub.TopicDat
 
    }
 
-   public static void read(perception_msgs.msg.dds.YOLOv8ExecutorSettings data, us.ihmc.idl.CDR cdr)
+   public static void read(perception_msgs.msg.dds.YOLOv8ExecutorParameters data, us.ihmc.idl.CDR cdr)
    {
       ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.read(data.getLatestTimestampModifiable(), cdr);	
       cdr.read_type_e(data.getAvailableYoloModels());	
@@ -125,7 +125,7 @@ public class YOLOv8ExecutorSettingsPubSubType implements us.ihmc.pubsub.TopicDat
    }
 
    @Override
-   public final void serialize(perception_msgs.msg.dds.YOLOv8ExecutorSettings data, us.ihmc.idl.InterchangeSerializer ser)
+   public final void serialize(perception_msgs.msg.dds.YOLOv8ExecutorParameters data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_a("latest_timestamp_modifiable", new ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType(), data.getLatestTimestampModifiable());
 
@@ -135,7 +135,7 @@ public class YOLOv8ExecutorSettingsPubSubType implements us.ihmc.pubsub.TopicDat
    }
 
    @Override
-   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.YOLOv8ExecutorSettings data)
+   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.YOLOv8ExecutorParameters data)
    {
       ser.read_type_a("latest_timestamp_modifiable", new ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType(), data.getLatestTimestampModifiable());
 
@@ -144,15 +144,15 @@ public class YOLOv8ExecutorSettingsPubSubType implements us.ihmc.pubsub.TopicDat
       ser.read_type_e("model_settings", data.getModelSettings());
    }
 
-   public static void staticCopy(perception_msgs.msg.dds.YOLOv8ExecutorSettings src, perception_msgs.msg.dds.YOLOv8ExecutorSettings dest)
+   public static void staticCopy(perception_msgs.msg.dds.YOLOv8ExecutorParameters src, perception_msgs.msg.dds.YOLOv8ExecutorParameters dest)
    {
       dest.set(src);
    }
 
    @Override
-   public perception_msgs.msg.dds.YOLOv8ExecutorSettings createData()
+   public perception_msgs.msg.dds.YOLOv8ExecutorParameters createData()
    {
-      return new perception_msgs.msg.dds.YOLOv8ExecutorSettings();
+      return new perception_msgs.msg.dds.YOLOv8ExecutorParameters();
    }
    @Override
    public int getTypeSize()
@@ -166,24 +166,24 @@ public class YOLOv8ExecutorSettingsPubSubType implements us.ihmc.pubsub.TopicDat
       return name;
    }
    
-   public void serialize(perception_msgs.msg.dds.YOLOv8ExecutorSettings data, us.ihmc.idl.CDR cdr)
+   public void serialize(perception_msgs.msg.dds.YOLOv8ExecutorParameters data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
    }
 
-   public void deserialize(perception_msgs.msg.dds.YOLOv8ExecutorSettings data, us.ihmc.idl.CDR cdr)
+   public void deserialize(perception_msgs.msg.dds.YOLOv8ExecutorParameters data, us.ihmc.idl.CDR cdr)
    {
       read(data, cdr);
    }
    
-   public void copy(perception_msgs.msg.dds.YOLOv8ExecutorSettings src, perception_msgs.msg.dds.YOLOv8ExecutorSettings dest)
+   public void copy(perception_msgs.msg.dds.YOLOv8ExecutorParameters src, perception_msgs.msg.dds.YOLOv8ExecutorParameters dest)
    {
       staticCopy(src, dest);
    }
 
    @Override
-   public YOLOv8ExecutorSettingsPubSubType newInstance()
+   public YOLOv8ExecutorParametersPubSubType newInstance()
    {
-      return new YOLOv8ExecutorSettingsPubSubType();
+      return new YOLOv8ExecutorParametersPubSubType();
    }
 }
