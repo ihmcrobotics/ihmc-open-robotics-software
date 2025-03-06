@@ -92,6 +92,7 @@ public class Llama
    private final StringBuilder contextStringBuilder = new StringBuilder();
    private final StringBuilder responseStringBuilder = new StringBuilder();
    private final Stopwatch stopwatch = new Stopwatch();
+   private final BytePointer textToTokenize = new BytePointer(MAX_CONTEXT_SIZE);
    private final IntPointer tokens = new IntPointer(MAX_CONTEXT_SIZE);
    private final BytePointer piece = new BytePointer(256);
 
@@ -149,9 +150,9 @@ public class Llama
                                   <|start_header_id|>assistant<|end_header_id|>
                                   """.formatted(request));
 
-      String text = contextStringBuilder.toString();
+      textToTokenize.putString(contextStringBuilder.toString());
       boolean isFirst = llama_get_kv_cache_used_cells(context) == 0;
-      int numberOfTokens = llama_tokenize(vocab, text, text.length(), tokens, MAX_CONTEXT_SIZE, isFirst, true);
+      int numberOfTokens = llama_tokenize(vocab, textToTokenize, contextStringBuilder.length(), tokens, MAX_CONTEXT_SIZE, isFirst, true);
       llama_batch batch = llama_batch_get_one(tokens, numberOfTokens);
 
       int nextSampledToken;

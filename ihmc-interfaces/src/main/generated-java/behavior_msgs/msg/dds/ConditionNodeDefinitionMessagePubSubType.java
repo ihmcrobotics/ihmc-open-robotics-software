@@ -15,7 +15,7 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "d32a3d6b848fd9383b44e5f7c4bb24c755d0e43abf98d129c25ca76811c5ae0b";
+   		return "ac6276434aa5480a53ca65c7501ff3d014eb9d9c4560c73b880373206dada309";
    }
    
    @Override
@@ -58,7 +58,7 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 10000 + 1;
 
       return current_alignment - initial_alignment;
    }
@@ -93,7 +93,7 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
 
       cdr.write_type_4(data.getCountTo());
 
-      if(data.getPrompt().length() <= 255)
+      if(data.getPrompt().length() <= 10000)
       cdr.write_type_d(data.getPrompt());else
           throw new RuntimeException("prompt field exceeds the maximum length");
 

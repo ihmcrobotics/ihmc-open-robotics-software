@@ -34,7 +34,7 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
    public ConditionNodeDefinitionMessage()
    {
       definition_ = new behavior_msgs.msg.dds.LeafNodeDefinitionMessage();
-      prompt_ = new java.lang.StringBuilder(255);
+      prompt_ = new java.lang.StringBuilder(10000);
    }
 
    public ConditionNodeDefinitionMessage(ConditionNodeDefinitionMessage other)

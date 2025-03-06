@@ -6,14 +6,35 @@ import us.ihmc.llama.Llama;
 
 public class LLMConditionExecutor
 {
-   static
+   private static final Object lock = new Object();
+   private static Llama llama;
+   private static boolean initialized = false;
+   private static boolean destroyed = false;
+
+   public static void initialize()
    {
-      Llama.initialize();
+      if (!initialized)
+      {
+         initialized = true;
+         Llama.initialize();
+         llama = new Llama();
+      }
+   }
+
+   public static void destroy()
+   {
+      synchronized (lock)
+      {
+         if (initialized && !destroyed)
+         {
+            destroyed = true;
+            llama.destroy();
+         }
+      }
    }
 
    private final ConditionNodeState state;
    private final ConditionNodeDefinition definition;
-   private final Llama llama;
 
    public LLMConditionExecutor(ConditionNodeState state)
    {
@@ -21,28 +42,26 @@ public class LLMConditionExecutor
 
       definition = state.getDefinition();
 
-      llama = new Llama();
+      synchronized (lock)
+      {
+         initialize();
+      }
    }
 
-   /**
-    * For now, we create and dispose everything on each run. This is not quick.
-    * FIXME: Allow reusing the model, resetting the context, etc.
-    */
    public void updateCurrentlyExecuting()
    {
       String prompt = definition.getLLM().getPrompt().getValue();
       state.getLogger().info(prompt);
 
-      String response = llama.generate(prompt);
+      String response;
+      synchronized (lock)
+      {
+         response = llama.generate(prompt);
+      }
 
       state.getLogger().info(response);
       state.setFailed(response.contains("failure"));
 
       state.setIsExecuting(false); // Completes immediately
-   }
-
-   public void destroy()
-   {
-      llama.destroy();
    }
 }

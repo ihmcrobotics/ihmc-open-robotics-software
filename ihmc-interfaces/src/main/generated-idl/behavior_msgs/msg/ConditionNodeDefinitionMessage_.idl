@@ -37,7 +37,7 @@ module behavior_msgs
         /**
          * The prompt defining how to make the boolean decision
          */
-        string prompt;
+        string<10000> prompt;
       };
     };
   };

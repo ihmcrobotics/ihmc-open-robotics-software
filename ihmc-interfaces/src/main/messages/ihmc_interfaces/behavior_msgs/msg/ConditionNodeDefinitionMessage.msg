@@ -15,4 +15,4 @@ uint32 count_to
 # LLM TYPE
 
 # The prompt defining how to make the boolean decision
-string prompt
+string<=10000 prompt
