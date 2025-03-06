@@ -1,15 +1,7 @@
 package us.ihmc.atlas;
 
-import java.io.File;
-import java.io.InputStream;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Objects;
-
-import org.apache.commons.io.FilenameUtils;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-
 import us.ihmc.atlas.parameters.AtlasCoPTrajectoryParameters;
 import us.ihmc.atlas.parameters.AtlasSwingTrajectoryParameters;
 import us.ihmc.atlas.parameters.AtlasToeOffParameters;
@@ -27,6 +19,11 @@ import us.ihmc.parameterTuner.guiElements.main.ParameterGuiInterface;
 import us.ihmc.parameterTuner.guiElements.main.ParameterTuningApplication;
 import us.ihmc.parameterTuner.offline.FileInputManager;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
+
+import java.io.File;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.Objects;
 
 public class AtlasFlatGroundQuickWalkingTest extends AvatarFlatGroundQuickWalkingTest
 {
@@ -160,9 +157,9 @@ public class AtlasFlatGroundQuickWalkingTest extends AvatarFlatGroundQuickWalkin
       protected ParameterGuiInterface createInputManager()
       {
          System.out.println(new File("."));
-         String relativeFilePath = FilenameUtils.separatorsToSystem(FAST_WALKING_PARAMETERS_XML);
-         Path filePath = Paths.get("resources", relativeFilePath);
-         return new FileInputManager(filePath.toFile());
+         URL resource = AtlasFlatGroundQuickWalkingTest.class.getResource(FAST_WALKING_PARAMETERS_XML);
+         String file = resource.getFile();
+         return new FileInputManager(new File(file));
       }
    }
 }
