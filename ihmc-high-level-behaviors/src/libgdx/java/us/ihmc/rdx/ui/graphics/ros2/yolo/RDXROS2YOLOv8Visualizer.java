@@ -57,13 +57,12 @@ public class RDXROS2YOLOv8Visualizer extends RDXROS2ImageMessageVisualizer
       super.updateHeartbeat();
       demandYOLOv8ZED.setAlive(isActive() && selectedSensor.get() == 0);
       demandYOLOv8D455.setAlive(isActive() && selectedSensor.get() == 1);
+      settings.update();
    }
 
    @Override
    public void renderImGuiWidgets()
    {
-      settings.update();
-
       ImGuiStyle style = new ImGuiStyle();
       float indent = ImGui.getFrameHeight() + style.getItemInnerSpacingX() + 1.0f;
       ImGui.indent(indent);
