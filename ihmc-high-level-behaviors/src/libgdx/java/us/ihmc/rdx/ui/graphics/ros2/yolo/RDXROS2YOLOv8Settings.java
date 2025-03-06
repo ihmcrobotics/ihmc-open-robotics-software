@@ -111,7 +111,7 @@ public class RDXROS2YOLOv8Settings
    {
       parameters.getModelsToRun()
                 .getValueAndModify()
-                .addAll(parameters.getAvailableModels().getCopy().stream().map(YOLOv8ModelInfo::getModelNameAsString).collect(Collectors.toSet()));
+                .addAll(parameters.getAvailableModels().getReadOnly().stream().map(YOLOv8ModelInfo::getModelNameAsString).collect(Collectors.toSet()));
    }
 
    public void disableAllModels()

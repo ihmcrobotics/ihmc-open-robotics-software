@@ -57,7 +57,7 @@ public class SyncedYOLOv8ExecutorParameters extends LatestTimestampModifiable
       toMessage(messageToPack.getLatestTimestampModifiable());
 
       messageToPack.getAvailableYoloModels().clear();
-      availableModels.getCopy().forEach(model -> messageToPack.getAvailableYoloModels().add().set(model));
+      availableModels.getReadOnly().forEach(model -> messageToPack.getAvailableYoloModels().add().set(model));
 
       messageToPack.getModelsToRun().clear();
       modelsToRun.getValue().forEach(model -> messageToPack.getModelsToRun().add(model));
@@ -97,7 +97,7 @@ public class SyncedYOLOv8ExecutorParameters extends LatestTimestampModifiable
    private void updateModelSettings()
    {
       modelParameters.clear();
-      availableModels.getCopy().forEach(model -> modelParameters.put(model.getModelNameAsString(), new SyncedYOLOv8ModelParameters(getCRDTInfo(), model)));
-      modelsToRun.retainAll(availableModels.getCopy().stream().map(YOLOv8ModelInfo::getModelNameAsString).collect(Collectors.toSet()));
+      availableModels.getReadOnly().forEach(model -> modelParameters.put(model.getModelNameAsString(), new SyncedYOLOv8ModelParameters(getCRDTInfo(), model)));
+      modelsToRun.retainAll(availableModels.getReadOnly().stream().map(YOLOv8ModelInfo::getModelNameAsString).collect(Collectors.toSet()));
    }
 }

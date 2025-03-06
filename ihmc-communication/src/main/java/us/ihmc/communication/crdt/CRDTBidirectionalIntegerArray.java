@@ -2,6 +2,14 @@ package us.ihmc.communication.crdt;
 
 import us.ihmc.idl.IDLSequence.Integer;
 
+/**
+ * Represents an integer array that can be modified by both the
+ * robot and the operator.
+ * <p>
+ * Warning: With this type, the data should not be continuously modified
+ * tick after tick, as that will mean the value is essentially never
+ * synced properly to the other side.
+ */
 public class CRDTBidirectionalIntegerArray extends CRDTBidirectionalMutableField<int[]>
 {
    public CRDTBidirectionalIntegerArray(LatestTimestampModifiable latestTimestampModifiable, int arraySize)

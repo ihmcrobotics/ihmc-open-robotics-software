@@ -3,14 +3,22 @@ package us.ihmc.communication.crdt;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+/**
+ * Represents a set that should only be modified by one actor type
+ * and read-only for the others. The internal writeable instance is kept protected
+ *  * from unchecked modifications.
+ * @param <T>
+ */
 public class CRDTStatusSet<T> extends CRDTStatusMutableField<Set<T>>
 {
    private final Supplier<Set<T>> newSetSupplier;
+   private final Set<T> readOnlySet;
 
    public CRDTStatusSet(ROS2ActorDesignation sideThatCanModify, CRDTInfo crdtInfo)
    {
@@ -21,6 +29,7 @@ public class CRDTStatusSet<T> extends CRDTStatusMutableField<Set<T>>
    {
       super(sideThatCanModify, crdtInfo, newSetSupplier);
       this.newSetSupplier = newSetSupplier;
+      readOnlySet = Collections.unmodifiableSet(getValueInternal());
    }
 
    public int getSize()
@@ -28,6 +37,19 @@ public class CRDTStatusSet<T> extends CRDTStatusMutableField<Set<T>>
       return getValueInternal().size();
    }
 
+   /**
+    * Get a read-only instance of the set.
+    * @return An unmodifiable instance of the set.
+    */
+   public Set<T> getReadOnly()
+   {
+      return readOnlySet;
+   }
+
+   /**
+    * Get a copy of the set.
+    * @return A modifiable copy of the set.
+    */
    public Set<T> getCopy()
    {
       Set<T> copy = newSetSupplier.get();

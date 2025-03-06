@@ -2,9 +2,16 @@ package us.ihmc.communication.crdt;
 
 import us.ihmc.idl.IDLSequence.StringBuilderHolder;
 
+/**
+ * Represents a String array that can be modified by both the
+ * robot and the operator.
+ * <p>
+ * Warning: With this type, the data should not be continuously modified
+ * tick after tick, as that will mean the value is essentially never
+ * synced properly to the other side.
+ */
 public class CRDTBidirectionalStringArray extends CRDTBidirectionalMutableField<String[]>
 {
-
    public CRDTBidirectionalStringArray(LatestTimestampModifiable latestTimestampModifiable, int arraySize)
    {
       super(latestTimestampModifiable, new String[arraySize]);

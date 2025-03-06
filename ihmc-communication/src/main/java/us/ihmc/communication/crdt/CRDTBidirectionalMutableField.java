@@ -38,7 +38,7 @@ public class CRDTBidirectionalMutableField<T>
    }
 
    /**
-    * Call this to update the data every tick, but it can get overritten immediately by
+    * Call this to update the data every tick, but it can get overwritten immediately by
     * incoming data. And example is to update a calculation on the robot side, but allow
     * the UI to also modify that using {@link #getValueAndModify}.
     */
@@ -47,9 +47,14 @@ public class CRDTBidirectionalMutableField<T>
       return value;
    }
 
+   /**
+    * Call this when making a change to the value.
+    * You may find {@link #getValueAndModify()} to be handy.
+    * Do not call this every tick.
+    */
    public void modify()
    {
-      latestTimestampModifiable.modify();
+      latestTimestampModifiable.modify(); // Mark and timestamp modification
    }
 
    protected T getValueInternal()
