@@ -178,12 +178,8 @@ public final class PerceptionAPI
                                                                           .withSuffix("request")
                                                                           .withType(Empty.class);
    public static final ROS2Topic<YOLOv8ExecutorParameters> YOLO_PARAMETERS = IHMC_ROOT.withModule("yolo")
-                                                                                    .withSuffix("settings")
-                                                                                    .withType(YOLOv8ExecutorParameters.class);
-   public static final ROS2Topic<YOLOv8AvailableModels> YOLO_AVAILABLE_MODELS = IHMC_ROOT.withModule("yolo")
-                                                                                         .withSuffix("available_models")
-                                                                                         .withType(YOLOv8AvailableModels.class);
-
+                                                                                      .withSuffix("settings")
+                                                                                      .withType(YOLOv8ExecutorParameters.class);
    public static final ROS2Topic<LidarScanMessage> MULTISENSE_LIDAR_SCAN = IHMC_ROOT.withTypeName(LidarScanMessage.class);
    public static final ROS2Topic<FusedSensorHeadPointCloudMessage> FUSED_SENSOR_HEAD_POINT_CLOUD = BEST_EFFORT.withTypeName(FusedSensorHeadPointCloudMessage.class);
    public static final ROS2Topic<FusedSensorHeadPointCloudMessage> D435_COLORED_POINT_CLOUD = BEST_EFFORT.withType(FusedSensorHeadPointCloudMessage.class)
