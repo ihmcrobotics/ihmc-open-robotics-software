@@ -3,17 +3,9 @@ package us.ihmc.atlas;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import us.ihmc.atlas.parameters.AtlasCoPTrajectoryParameters;
-import us.ihmc.atlas.parameters.AtlasSwingTrajectoryParameters;
-import us.ihmc.atlas.parameters.AtlasToeOffParameters;
-import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.AvatarFlatGroundQuickWalkingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
-import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.javaFXToolkit.ApplicationNoModule;
 import us.ihmc.parameterTuner.guiElements.main.ParameterGuiInterface;
 import us.ihmc.parameterTuner.guiElements.main.ParameterTuningApplication;
@@ -29,6 +21,9 @@ public class AtlasFlatGroundQuickWalkingTest extends AvatarFlatGroundQuickWalkin
 {
    private static final String FAST_WALKING_PARAMETERS_XML = "/us/ihmc/atlas/fast_walking_parameters.xml";
 
+   //   private final RobotTarget target = RobotTarget.SCS;
+
+   //   private final AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, target, false);
    @Override
    public DRCRobotModel getRobotModel()
    {
@@ -61,50 +56,51 @@ public class AtlasFlatGroundQuickWalkingTest extends AvatarFlatGroundQuickWalkin
             };
          }
 
-         @Override
-         public WalkingControllerParameters getWalkingControllerParameters()
-         {
-            return new AtlasWalkingControllerParameters(getTarget(), getJointMap(), getContactPointParameters())
-            {
-               @Override
-               public boolean controlHeightWithMomentum()
-               {
-                  return false;
-               }
-
-               @Override
-               public SwingTrajectoryParameters getSwingTrajectoryParameters()
-               {
-                  return new AtlasSwingTrajectoryParameters(getTarget(), getJointMap().getModelScale())
-                  {
-                     @Override
-                     public double getDesiredTouchdownHeightOffset()
-                     {
-                        return -0.005;
-                     }
-
-                     @Override
-                     public Tuple3DReadOnly getTouchdownVelocityWeight()
-                     {
-                        return new Vector3D(30.0, 30.0, 30.0);
-                     }
-                  };
-               }
-
-               @Override
-               public ToeOffParameters getToeOffParameters()
-               {
-                  return new AtlasToeOffParameters(getJointMap())
-                  {
-                     @Override
-                     public boolean doToeOffIfPossibleInSingleSupport()
-                     {
-                        return true;
-                     }
-                  };
-               }
-            };
-         }
+         //TODO fix this later. Beomyeong
+//         @Override
+//         public WalkingControllerParameters getWalkingControllerParameters()
+//         {
+//            return new AtlasWalkingControllerParameters(getTarget(), getJointMap(), getContactPointParameters())
+//            {
+//               @Override
+//               public boolean controlHeightWithMomentum()
+//               {
+//                  return false;
+//               }
+//
+//               @Override
+//               public SwingTrajectoryParameters getSwingTrajectoryParameters()
+//               {
+//                  return new AtlasSwingTrajectoryParameters(getTarget(), getJointMap().getModelScale())
+//                  {
+//                     @Override
+//                     public double getDesiredTouchdownHeightOffset()
+//                     {
+//                        return -0.005;
+//                     }
+//
+//                     @Override
+//                     public Tuple3DReadOnly getTouchdownVelocityWeight()
+//                     {
+//                        return new Vector3D(30.0, 30.0, 30.0);
+//                     }
+//                  };
+//               }
+//
+//               @Override
+//               public ToeOffParameters getToeOffParameters()
+//               {
+//                  return new AtlasToeOffParameters(getJointMap())
+//                  {
+//                     @Override
+//                     public boolean doToeOffIfPossibleInSingleSupport()
+//                     {
+//                        return true;
+//                     }
+//                  };
+//               }
+//            };
+//         }
 
          @Override
          public double getControllerDT()
