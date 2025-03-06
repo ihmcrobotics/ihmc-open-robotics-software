@@ -131,11 +131,11 @@ public class FootstepStreamingToolboxParameters
       kpStride = 0.5;
       strideVelocityScalingFactor = 0.8;
 
-      turningThreshold = 12;
+      turningThreshold = 20;
       turnDegrees = 33.3;
       maxYawRotationDegrees = 90.0;
-      kpYaw = 0.3;
-      yawVelocityScalingFactor = 0.7;
+      kpYaw = 0.5;
+      yawVelocityScalingFactor = 0.5;
 
       minDistanceToStance = 0.15;
       maxDistanceToStance = 0.6;

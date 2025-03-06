@@ -153,12 +153,15 @@ public class FSTStreamingState implements State
          {
             robotStepDuration = latestInput.getRobotStepDuration();
             robotElapsedTimeCurrentStep = latestInput.getRobotElapsedTimeCurrentStep();
+            if (robotElapsedTimeCurrentStep == 0.0)
+               latestAdjustmentSent = false;
+
             robotSwingSide = latestInput.getRobotSwingSide();
             robotSwingFootIsLanding = latestInput.isRobotSwingFootLanding();
 
             if (robotElapsedTimeCurrentStep > robotStepDuration)
                robotElapsedTimeCurrentStep = robotStepDuration;
-            LogTools.info("Timing: stepDuration: {}, elapsed: {}, margin {}", robotStepDuration, robotElapsedTimeCurrentStep, footstepMarginTime.getValue());
+
             for (RobotSide side : RobotSide.values)
             {
                FootstepStreamingToolboxSideCommand sideCommand = latestInput.getInputFor(side);
@@ -272,9 +275,7 @@ public class FSTStreamingState implements State
                            {
                               LogTools.info("side: {}, landing: {}", robotSwingSide, robotSwingFootIsLanding);
                               LogTools.info("latestAdjustment: {}", latestAdjustmentSent);
-                              LogTools.info("Adjustment Condition: {}", (robotElapsedTimeCurrentStep < robotStepDuration - footstepMarginTime.getValue())
-                                                              && !latestAdjustmentSent
-                                                              && (robotSwingSide == side && !robotSwingFootIsLanding));
+
                               if((robotElapsedTimeCurrentStep < robotStepDuration - footstepMarginTime.getValue())
                                  && !latestAdjustmentSent
                                  && !robotSwingFootIsLanding)
