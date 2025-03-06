@@ -46,12 +46,6 @@ public class RDXROS2YOLOv8Visualizer extends RDXROS2ImageMessageVisualizer
    }
 
    @Override
-   public void update()
-   {
-      super.update();
-   }
-
-   @Override
    public void updateHeartbeat()
    {
       super.updateHeartbeat();

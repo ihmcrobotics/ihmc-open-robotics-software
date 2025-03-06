@@ -37,7 +37,8 @@ public class ROS2BehaviorTreeUpdateThread extends RepeatingTaskThread
 
       executor = new ROS2BehaviorTreeExecutor(ros2ControllerHelper,
                                               robotModel,
-                                              syncedRobot, peerClockOffsetEstimator,
+                                              syncedRobot,
+                                              peerClockOffsetEstimator,
                                               referenceFrameLibrary,
                                               sceneGraph,
                                               detectionManager);
