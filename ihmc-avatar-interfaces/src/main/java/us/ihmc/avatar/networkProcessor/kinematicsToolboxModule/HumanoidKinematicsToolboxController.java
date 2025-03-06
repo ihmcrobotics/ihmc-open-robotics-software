@@ -25,7 +25,6 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tools.RotationMatrixTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -35,8 +34,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.HumanoidKinematicsToolboxConfigurationCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.idl.IDLSequence.Object;
@@ -521,7 +518,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
       stabilityMarginCostCalculator.update();
 
-      if (!isUserProvidingSupportPolygon() && (stabilityMarginCostCalculator.previewSupportRegion()) || isUpperBodyLoadBearing.getValue())
+      if (!isUserProvidingSupportPolygon() && (stabilityMarginCostCalculator.contactAdjustmentRequested()) || isUpperBodyLoadBearing.getValue())
       {
          // update actuation limits based on current configuration
          wholeBodyContactState.updateActuationConstraintVector();
@@ -560,10 +557,14 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          enableJointLimitReduction.set(command.enableJointLimitReduction());
 
          stabilityMarginCostCalculator.setEnabled(command.enableStabilityObjective());
-         if (command.enableRegionPreview())
-            stabilityMarginCostCalculator.enableSupportRegionPreview(command.getPreviewSurfaceNormal());
+         if (command.enableContactAdjustment())
+         {
+            stabilityMarginCostCalculator.enableContactAdjustment(command.getBracingRegionPoint(), command.getBracingRegionOrientation(), command.getBracingRegionPolygon(), command.getBracingRegionNormal());
+         }
          else
-            stabilityMarginCostCalculator.disableSupportRegionPreview();
+         {
+            stabilityMarginCostCalculator.disableContactAdjustment();
+         }
 
          if (command.hasCustomJointRestrictionLimits())
          {
@@ -764,24 +765,22 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       for (RobotSide robotside : RobotSide.values)
       {
          isFootInSupport.get(robotside).set(HumanoidMessageTools.unpackIsSupportFoot(capturabilityBasedStatus, robotside));
+         isHandInSupport.get(robotside).set(HumanoidMessageTools.unpackIsSupportHand(capturabilityBasedStatus, robotside, desiredFullRobotModel, handContactPointInBodyFrame.get(robotside)));
 
-         if (stabilityMarginCostCalculator.previewSupportRegion() && robotside == BRACING_HAND_SIDE)
-         {
-            isHandInSupport.get(robotside).set(true);
+         if (isHandInSupport.get(robotside).getBooleanValue())
+         { // Hand is load bearing
+            initialHandPositions.get(robotside).setMatchingFrame(handContactPointInBodyFrame.get(robotside));
+         }
+         else if (stabilityMarginCostCalculator.contactAdjustmentRequested() && robotside == BRACING_HAND_SIDE)
+         { // Hand isn't load bearing and contact adjustment is requested
             handContactPointInBodyFrame.get(robotside).setToZero(desiredFullRobotModel.getHandControlFrame(robotside));
             handContactPointInBodyFrame.get(robotside).changeFrame(desiredFullRobotModel.getHand(robotside).getBodyFixedFrame());
             initialHandPositions.get(robotside).setMatchingFrame(handContactPointInBodyFrame.get(robotside));
 
             if (BRACING_HAND_SIDE == RobotSide.LEFT)
-               capturabilityBasedStatusInternal.getLeftHandContactNormal().set(stabilityMarginCostCalculator.getPreviewContactNormal());
+               capturabilityBasedStatusInternal.getLeftHandContactNormal().set(stabilityMarginCostCalculator.getContactAdjustmentNormal());
             else
-               capturabilityBasedStatusInternal.getRightHandContactNormal().set(stabilityMarginCostCalculator.getPreviewContactNormal());
-         }
-         else
-         {
-            isHandInSupport.get(robotside).set(HumanoidMessageTools.unpackIsSupportHand(capturabilityBasedStatus, robotside, desiredFullRobotModel, handContactPointInBodyFrame.get(robotside)));
-            if (isHandInSupport.get(robotside).getBooleanValue())
-               initialHandPositions.get(robotside).setMatchingFrame(handContactPointInBodyFrame.get(robotside));
+               capturabilityBasedStatusInternal.getRightHandContactNormal().set(stabilityMarginCostCalculator.getContactAdjustmentNormal());
          }
       }
 
@@ -790,7 +789,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       if (isUserProvidingSupportPolygon())
          return;
 
-      if (isUpperBodyLoadBearing.getValue() || stabilityMarginCostCalculator.previewSupportRegion())
+      if (isUpperBodyLoadBearing.getValue() || stabilityMarginCostCalculator.contactAdjustmentRequested())
       { // CoM constraint polygon is computed through {@link CenterOfMassStabilityMarginRegionCalculator}
          initializeWholeBodyContactState();
       }
@@ -819,9 +818,9 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          packFootContactPoints(RobotSide.RIGHT, capturabilityBasedStatusInternal.getRightFootSupportPolygon3d());
 
       // add hand contact points
-      if (isHandInSupport.get(RobotSide.LEFT).getValue())
+      if (isHandInSupport.get(RobotSide.LEFT).getValue() || (stabilityMarginCostCalculator.contactAdjustmentRequested() && BRACING_HAND_SIDE == RobotSide.LEFT))
          packHandContactPoint(RobotSide.LEFT, capturabilityBasedStatusInternal.getLeftHandContactNormal());
-      if (isHandInSupport.get(RobotSide.RIGHT).getValue())
+      if (isHandInSupport.get(RobotSide.RIGHT).getValue() || (stabilityMarginCostCalculator.contactAdjustmentRequested() && BRACING_HAND_SIDE == RobotSide.RIGHT))
          packHandContactPoint(RobotSide.RIGHT, capturabilityBasedStatusInternal.getRightHandContactNormal());
 
       wholeBodyContactState.update();

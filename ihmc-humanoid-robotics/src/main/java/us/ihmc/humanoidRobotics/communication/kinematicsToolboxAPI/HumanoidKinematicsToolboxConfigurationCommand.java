@@ -4,7 +4,10 @@ import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
 import toolbox_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 
 public class HumanoidKinematicsToolboxConfigurationCommand
       implements Command<HumanoidKinematicsToolboxConfigurationCommand, HumanoidKinematicsToolboxConfigurationMessage>
@@ -18,8 +21,13 @@ public class HumanoidKinematicsToolboxConfigurationCommand
 
    // Configure stability assessment
    private boolean enableStabilityObjective = false; // if true, posture adjustment will run
-   private boolean enableRegionPreview = false; // if true, adjusts the hand contact to the region
-   private final Vector3D previewSurfaceNormal = new Vector3D(); // the surface normal of the region to preview // TODO replace with planar region if possible
+   private boolean enableContactAdjustment = false; // if true, adjusts the hand contact to the region
+
+   // Bracing region
+   private final Point3D bracingRegionPoint = new Point3D();
+   private final Quaternion bracingRegionOrientation = new Quaternion();
+   private final Vector3D bracingRegionNormal = new Vector3D();
+   private final ConvexPolygon2D bracingRegionPolygon = new ConvexPolygon2D();
 
    @Override
    public void clear()
@@ -32,8 +40,12 @@ public class HumanoidKinematicsToolboxConfigurationCommand
       jointLimitReductionHashCodes.reset();
 
       enableStabilityObjective = false;
-      enableRegionPreview = false;
-      previewSurfaceNormal.setToNaN();
+      enableContactAdjustment = false;
+
+      bracingRegionPoint.setToNaN();
+      bracingRegionOrientation.setToNaN();
+      bracingRegionNormal.setToNaN();
+      bracingRegionPolygon.setToNaN();
    }
 
    @Override
@@ -56,8 +68,12 @@ public class HumanoidKinematicsToolboxConfigurationCommand
          jointLimitReductionHashCodes.add(other.jointLimitReductionHashCodes.get(i));
       }
 
-      enableRegionPreview = other.enableRegionPreview;
-      previewSurfaceNormal.set(other.previewSurfaceNormal);
+      enableContactAdjustment = other.enableContactAdjustment;
+
+      bracingRegionPoint.set(other.bracingRegionPoint);
+      bracingRegionOrientation.set(other.bracingRegionOrientation);
+      bracingRegionNormal.set(other.bracingRegionNormal);
+      bracingRegionPolygon.set(other.bracingRegionPolygon);
    }
 
    @Override
@@ -80,8 +96,17 @@ public class HumanoidKinematicsToolboxConfigurationCommand
          jointLimitReductionHashCodes.add(message.getJointLimitReductionHashCodes().get(i));
       }
 
-      enableRegionPreview = message.getEnableRegionPreview();
-      previewSurfaceNormal.set(message.getPreviewSurfaceNormal());
+      enableContactAdjustment = message.getEnableContactAdjustment();
+      bracingRegionPoint.set(message.getRegionPoint());
+      bracingRegionOrientation.set(message.getRegionOrientation());
+      bracingRegionNormal.set(message.getRegionNormal());
+
+      bracingRegionPolygon.clear();
+      for (int i = 0; i < message.getRegionVertices().size(); i++)
+      {
+         bracingRegionPolygon.addVertex(message.getRegionVertices().get(i).getX(), message.getRegionVertices().get(i).getY());
+      }
+      bracingRegionPolygon.update();
    }
 
    public boolean holdCurrentCenterOfMassXYPosition()
@@ -124,14 +149,29 @@ public class HumanoidKinematicsToolboxConfigurationCommand
       return jointLimitReductionHashCodes.get(index);
    }
 
-   public boolean enableRegionPreview()
+   public boolean enableContactAdjustment()
    {
-      return enableRegionPreview;
+      return enableContactAdjustment;
    }
 
-   public Vector3D getPreviewSurfaceNormal()
+   public Point3D getBracingRegionPoint()
    {
-      return previewSurfaceNormal;
+      return bracingRegionPoint;
+   }
+
+   public Quaternion getBracingRegionOrientation()
+   {
+      return bracingRegionOrientation;
+   }
+
+   public Vector3D getBracingRegionNormal()
+   {
+      return bracingRegionNormal;
+   }
+
+   public ConvexPolygon2D getBracingRegionPolygon()
+   {
+      return bracingRegionPolygon;
    }
 
    @Override

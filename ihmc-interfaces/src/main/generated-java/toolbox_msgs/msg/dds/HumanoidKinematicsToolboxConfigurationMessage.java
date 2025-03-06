@@ -37,11 +37,23 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
    /**
             * If true, enables a preview of the feasible region and corresponding contact-point adjustment.
             */
-   public boolean enable_region_preview_;
+   public boolean enable_contact_adjustment_;
    /**
-            * If enable_region_preview is true this is the surface normal for the upcoming bracing arm
+            * If enable_contact_adjustment is true this the origin position of the frame describing the upcoming bracing region
             */
-   public us.ihmc.euclid.tuple3D.Vector3D preview_surface_normal_;
+   public us.ihmc.euclid.tuple3D.Point3D region_point_;
+   /**
+            * If enable_contact_adjustment is true this the origin orientation of the frame describing the upcoming bracing region. The normal is along z in the given plane
+            */
+   public us.ihmc.euclid.tuple4D.Quaternion region_orientation_;
+   /**
+            * Normal in world. This is over-specific but available to use if necessary
+            */
+   public us.ihmc.euclid.tuple3D.Vector3D region_normal_;
+   /**
+            * If enable_contact_adjustment is true this the convex hull of the upcoming bracing region
+            */
+   public us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.Point2DMessage>  region_vertices_;
    /**
             * Whether restrictive joint limits are enabled, in order to have the IK avoid a solution at the joint limit.
             */
@@ -59,10 +71,14 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
 
    public HumanoidKinematicsToolboxConfigurationMessage()
    {
-      preview_surface_normal_ = new us.ihmc.euclid.tuple3D.Vector3D();
+      region_point_ = new us.ihmc.euclid.tuple3D.Point3D();
+      region_orientation_ = new us.ihmc.euclid.tuple4D.Quaternion();
+      region_normal_ = new us.ihmc.euclid.tuple3D.Vector3D();
+      region_vertices_ = new us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.Point2DMessage> (200, new ihmc_common_msgs.msg.dds.Point2DMessagePubSubType());
       joint_limit_reduction_factors_ = new us.ihmc.idl.IDLSequence.Float (20, "type_5");
 
       joint_limit_reduction_hash_codes_ = new us.ihmc.idl.IDLSequence.Integer (20, "type_2");
+
 
    }
 
@@ -82,9 +98,12 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
 
       enable_stability_objective_ = other.enable_stability_objective_;
 
-      enable_region_preview_ = other.enable_region_preview_;
+      enable_contact_adjustment_ = other.enable_contact_adjustment_;
 
-      geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.preview_surface_normal_, preview_surface_normal_);
+      geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.region_point_, region_point_);
+      geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.region_orientation_, region_orientation_);
+      geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.region_normal_, region_normal_);
+      region_vertices_.set(other.region_vertices_);
       enable_joint_limit_reduction_ = other.enable_joint_limit_reduction_;
 
       joint_limit_reduction_factors_.set(other.joint_limit_reduction_factors_);
@@ -164,25 +183,52 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
    /**
             * If true, enables a preview of the feasible region and corresponding contact-point adjustment.
             */
-   public void setEnableRegionPreview(boolean enable_region_preview)
+   public void setEnableContactAdjustment(boolean enable_contact_adjustment)
    {
-      enable_region_preview_ = enable_region_preview;
+      enable_contact_adjustment_ = enable_contact_adjustment;
    }
    /**
             * If true, enables a preview of the feasible region and corresponding contact-point adjustment.
             */
-   public boolean getEnableRegionPreview()
+   public boolean getEnableContactAdjustment()
    {
-      return enable_region_preview_;
+      return enable_contact_adjustment_;
    }
 
 
    /**
-            * If enable_region_preview is true this is the surface normal for the upcoming bracing arm
+            * If enable_contact_adjustment is true this the origin position of the frame describing the upcoming bracing region
             */
-   public us.ihmc.euclid.tuple3D.Vector3D getPreviewSurfaceNormal()
+   public us.ihmc.euclid.tuple3D.Point3D getRegionPoint()
    {
-      return preview_surface_normal_;
+      return region_point_;
+   }
+
+
+   /**
+            * If enable_contact_adjustment is true this the origin orientation of the frame describing the upcoming bracing region. The normal is along z in the given plane
+            */
+   public us.ihmc.euclid.tuple4D.Quaternion getRegionOrientation()
+   {
+      return region_orientation_;
+   }
+
+
+   /**
+            * Normal in world. This is over-specific but available to use if necessary
+            */
+   public us.ihmc.euclid.tuple3D.Vector3D getRegionNormal()
+   {
+      return region_normal_;
+   }
+
+
+   /**
+            * If enable_contact_adjustment is true this the convex hull of the upcoming bracing region
+            */
+   public us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.Point2DMessage>  getRegionVertices()
+   {
+      return region_vertices_;
    }
 
    /**
@@ -246,9 +292,18 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_stability_objective_, other.enable_stability_objective_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_region_preview_, other.enable_region_preview_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_contact_adjustment_, other.enable_contact_adjustment_, epsilon)) return false;
 
-      if (!this.preview_surface_normal_.epsilonEquals(other.preview_surface_normal_, epsilon)) return false;
+      if (!this.region_point_.epsilonEquals(other.region_point_, epsilon)) return false;
+      if (!this.region_orientation_.epsilonEquals(other.region_orientation_, epsilon)) return false;
+      if (!this.region_normal_.epsilonEquals(other.region_normal_, epsilon)) return false;
+      if (this.region_vertices_.size() != other.region_vertices_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.region_vertices_.size(); i++)
+         {  if (!this.region_vertices_.get(i).epsilonEquals(other.region_vertices_.get(i), epsilon)) return false; }
+      }
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_joint_limit_reduction_, other.enable_joint_limit_reduction_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.joint_limit_reduction_factors_, other.joint_limit_reduction_factors_, epsilon)) return false;
@@ -276,9 +331,12 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
 
       if(this.enable_stability_objective_ != otherMyClass.enable_stability_objective_) return false;
 
-      if(this.enable_region_preview_ != otherMyClass.enable_region_preview_) return false;
+      if(this.enable_contact_adjustment_ != otherMyClass.enable_contact_adjustment_) return false;
 
-      if (!this.preview_surface_normal_.equals(otherMyClass.preview_surface_normal_)) return false;
+      if (!this.region_point_.equals(otherMyClass.region_point_)) return false;
+      if (!this.region_orientation_.equals(otherMyClass.region_orientation_)) return false;
+      if (!this.region_normal_.equals(otherMyClass.region_normal_)) return false;
+      if (!this.region_vertices_.equals(otherMyClass.region_vertices_)) return false;
       if(this.enable_joint_limit_reduction_ != otherMyClass.enable_joint_limit_reduction_) return false;
 
       if (!this.joint_limit_reduction_factors_.equals(otherMyClass.joint_limit_reduction_factors_)) return false;
@@ -301,10 +359,16 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
       builder.append(this.enable_auto_support_polygon_);      builder.append(", ");
       builder.append("enable_stability_objective=");
       builder.append(this.enable_stability_objective_);      builder.append(", ");
-      builder.append("enable_region_preview=");
-      builder.append(this.enable_region_preview_);      builder.append(", ");
-      builder.append("preview_surface_normal=");
-      builder.append(this.preview_surface_normal_);      builder.append(", ");
+      builder.append("enable_contact_adjustment=");
+      builder.append(this.enable_contact_adjustment_);      builder.append(", ");
+      builder.append("region_point=");
+      builder.append(this.region_point_);      builder.append(", ");
+      builder.append("region_orientation=");
+      builder.append(this.region_orientation_);      builder.append(", ");
+      builder.append("region_normal=");
+      builder.append(this.region_normal_);      builder.append(", ");
+      builder.append("region_vertices=");
+      builder.append(this.region_vertices_);      builder.append(", ");
       builder.append("enable_joint_limit_reduction=");
       builder.append(this.enable_joint_limit_reduction_);      builder.append(", ");
       builder.append("joint_limit_reduction_factors=");

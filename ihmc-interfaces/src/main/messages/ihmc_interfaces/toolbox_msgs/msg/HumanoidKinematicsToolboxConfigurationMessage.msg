@@ -17,9 +17,16 @@ bool enable_auto_support_polygon true
 # If true, enables an objective for improving the stability margin of the robot when the upper body is load-bearing.
 bool enable_stability_objective false
 # If true, enables a preview of the feasible region and corresponding contact-point adjustment.
-bool enable_region_preview false
-# If enable_region_preview is true this is the surface normal for the upcoming bracing arm
-geometry_msgs/Vector3 preview_surface_normal
+bool enable_contact_adjustment false
+
+# If enable_contact_adjustment is true this the origin position of the frame describing the upcoming bracing region
+geometry_msgs/Point region_point
+# If enable_contact_adjustment is true this the origin orientation of the frame describing the upcoming bracing region. The normal is along z in the given plane
+geometry_msgs/Quaternion region_orientation
+# Normal in world. This is over-specific but available to use if necessary
+geometry_msgs/Vector3 region_normal
+# If enable_contact_adjustment is true this the convex hull of the upcoming bracing region
+ihmc_common_msgs/Point2DMessage[<=200] region_vertices
 
 # Whether restrictive joint limits are enabled, in order to have the IK avoid a solution at the joint limit.
 bool enable_joint_limit_reduction true

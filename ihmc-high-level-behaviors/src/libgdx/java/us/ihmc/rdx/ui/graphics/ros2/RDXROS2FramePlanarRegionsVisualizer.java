@@ -21,6 +21,7 @@ import java.util.Set;
 
 public class RDXROS2FramePlanarRegionsVisualizer extends RDXROS2SingleTopicVisualizer<FramePlanarRegionsListMessage>
 {
+   private static final boolean VISUALIZE = false;
    private final ROS2Topic<FramePlanarRegionsListMessage> topic;
 
    private final RDXPlanarRegionsGraphic planarRegionsGraphic = new RDXPlanarRegionsGraphic();
@@ -41,7 +42,8 @@ public class RDXROS2FramePlanarRegionsVisualizer extends RDXROS2SingleTopicVisua
       int queueSize = 1;
       executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), daemon, queueSize);
 
-      ros2Node.createSubscription2(topic, this::acceptMessage);
+      if (VISUALIZE)
+         ros2Node.createSubscription2(topic, this::acceptMessage);
    }
 
    private void acceptMessage(FramePlanarRegionsListMessage framePlanarRegionsListMessage)

@@ -2,6 +2,7 @@ package us.ihmc.atlas;
 
 import java.io.File;
 import java.io.InputStream;
+import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
@@ -160,9 +161,9 @@ public class AtlasFlatGroundQuickWalkingTest extends AvatarFlatGroundQuickWalkin
       protected ParameterGuiInterface createInputManager()
       {
          System.out.println(new File("."));
-         String relativeFilePath = FilenameUtils.separatorsToSystem(FAST_WALKING_PARAMETERS_XML);
-         Path filePath = Paths.get("resources", relativeFilePath);
-         return new FileInputManager(filePath.toFile());
+         URL resource = AtlasFlatGroundQuickWalkingTest.class.getResource(FAST_WALKING_PARAMETERS_XML);
+         String file = resource.getFile();
+         return new FileInputManager(new File(file));
       }
    }
 }

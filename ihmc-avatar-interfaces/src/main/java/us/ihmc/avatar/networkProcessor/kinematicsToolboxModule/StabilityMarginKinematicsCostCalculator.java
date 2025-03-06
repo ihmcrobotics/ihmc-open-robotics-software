@@ -9,12 +9,18 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.SensitivityBasedStabilityGradientCalculator;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.StabilityMarginRegionCalculator;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
@@ -26,6 +32,7 @@ import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
+import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.yoVariables.euclid.YoVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
@@ -39,13 +46,19 @@ public class StabilityMarginKinematicsCostCalculator
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
-   private static final double MAX_ARM_ORIENTATION_OFFSET = Math.toRadians(180.0); // Math.toRadians(35.0);
-   private static final double MAX_CHEST_ORIENTATION_OFFSET = Math.toRadians(180.0); // Math.toRadians(35.0);
-   private static final double MAX_PELVIS_ORIENTATION_OFFSET = Math.toRadians(180.0); // Math.toRadians(35.0);
+   // Simulation
+//   private static final double MAX_ARM_ORIENTATION_OFFSET = Math.toRadians(180.0);
+//   private static final double MAX_CHEST_ORIENTATION_OFFSET = Math.toRadians(180.0);
+//   private static final double MAX_PELVIS_ORIENTATION_OFFSET = Math.toRadians(180.0);
 
-   private static final boolean OVERRIDE_MESSAGE = true;
-   private static final boolean ENABLE_POSTURE_OBJECTIVE = false;
-   private static final boolean ENABLE_CONTACT_OBJECTIVE = false;
+   // Hardware
+   private static final double MAX_ARM_ORIENTATION_OFFSET = Math.toRadians(30.0);
+   private static final double MAX_CHEST_ORIENTATION_OFFSET = Math.toRadians(30.0);
+   private static final double MAX_PELVIS_ORIENTATION_OFFSET = Math.toRadians(30.0);
+
+   public static final boolean OVERRIDE_MESSAGE = false;
+   public static final boolean ENABLE_POSTURE_OBJECTIVE = false;
+   public static final boolean ENABLE_CONTACT_OBJECTIVE = false;
 
    private final WholeBodyContactState wholeBodyContactState;
    private final StabilityMarginRegionCalculator multiContactRegionCalculator;
@@ -65,14 +78,21 @@ public class StabilityMarginKinematicsCostCalculator
 
    private final DefaultPID3DGains orientationGains = new DefaultPID3DGains();
 
-   /* When enabled, will compute and update region under two conditions: preview is requested or upper body is load-bearing */
+   /* When enabled, will compute and update region under two conditions: contact adjustment is requested or upper body is load-bearing */
    private final YoBoolean isEnabled = new YoBoolean("isStabilityObjectiveEnabled", registry);
    /* The upper body is actively load bearing */
    private final BooleanProvider isUpperBodyLoadBearing;
    /* Compute support region and preview it at the current configuration, even if upper body is not load-bearing */
-   private final YoBoolean requestSupportRegionPreview = new YoBoolean("requestSupportRegionPreview", registry);
+   private final YoBoolean requestContactAdjustment = new YoBoolean("requestContactAdjustment", registry);
    /* Contact normal for which support region is previewed */
-   private final FrameVector3D previewContactNormal = new FrameVector3D();
+   private final FrameVector3D regionNormal = new FrameVector3D();
+
+   /* Reference frame of the region */
+   private final PoseReferenceFrame regionFrame = new PoseReferenceFrame("regionFrame", ReferenceFrame.getWorldFrame());
+   /* Region polygon, expressed in local frame */
+   private final ConvexPolygon2D regionPolygon = new ConvexPolygon2D();
+   /* Polygon scaler, to add a safety factor to the perceived region */
+   private final ConvexPolygonScaler polygonScaler = new ConvexPolygonScaler();
 
    private final OrientationOffsetCalculator chestOrientationOffsetCalculator;
    private final OrientationOffsetCalculator pelvisOrientationOffsetCalculator;
@@ -87,7 +107,9 @@ public class StabilityMarginKinematicsCostCalculator
    private final YoDouble stabilityMarginThreshold = new YoDouble("stabilityMarginThreshold", registry);
    private final YoDouble stabilityMarginHysteresis = new YoDouble("stabilityMarginHysteresis", registry);
    private final YoDouble alphaEnabled = new YoDouble("alphaEnabled", registry);
-   private final YoDouble gain = new YoDouble("stabilityGain", registry);
+
+   private final YoDouble kpPosture = new YoDouble("kpPosture", registry);
+   private final YoDouble kpContact = new YoDouble("kpContact", registry);
 
    private final double updateDT;
    private final YoDouble previousStabilityMargin = new YoDouble("previousStabilityMargin", registry);
@@ -100,7 +122,11 @@ public class StabilityMarginKinematicsCostCalculator
    private int bracingPointIndex;
    private final YoFrameVector3D contactPointAdjustment;
    private final YoFrameVector3D integratedContactPointAdjustment;
-   private static final double MAX_CONTACT_POINT_ADJUSTMENT = 0.15;
+   private static final double MAX_CONTACT_POINT_ADJUSTMENT = 0.2;
+
+   private final FramePose3D tempPose = new FramePose3D();
+   private final FramePoint3D tempPoint = new FramePoint3D();
+   private final Point2D tempPoint2D = new Point2D();
 
    public StabilityMarginKinematicsCostCalculator(WholeBodyContactState wholeBodyContactState,
                                                   StabilityMarginRegionCalculator multiContactRegionCalculator,
@@ -135,7 +161,9 @@ public class StabilityMarginKinematicsCostCalculator
 
       this.chestOrientationCalculator = new OrientationCalculator(fullRobotModel.getChest(), midFeetZUpFrame, centerOfMassFrame, fullRobotModel, isUpperBodyLoadBearing);
       this.pelvisOrientationCalculator = new OrientationCalculator(fullRobotModel.getPelvis(), midFeetZUpFrame, centerOfMassFrame, fullRobotModel, isUpperBodyLoadBearing);
-      gain.set(30.0);
+
+      kpPosture.set(30.0);
+      kpContact.set(5.0e-4);
 
       double maxRate = Math.toRadians(15.0);
       chestOrientationOffsetCalculator = new OrientationOffsetCalculator("chest", updateDT, fullRobotModel.getChest().getBodyFixedFrame(), maxRate, MAX_CHEST_ORIENTATION_OFFSET, registry);
@@ -150,12 +178,12 @@ public class StabilityMarginKinematicsCostCalculator
          isEnabled.set(ENABLE_POSTURE_OBJECTIVE || ENABLE_CONTACT_OBJECTIVE);
 
       if (OVERRIDE_MESSAGE)
-         requestSupportRegionPreview.set(ENABLE_CONTACT_OBJECTIVE);
+         requestContactAdjustment.set(ENABLE_CONTACT_OBJECTIVE);
 
       chestWeight = new YoVector3D("chestWeight", registry);
       pelvisWeight = new YoVector3D("pelvisWeight", registry);
 
-      previewContactNormal.set(-0.342, 0.940,  0.000);
+      regionNormal.set(-0.342, 0.940, 0.000);
 
       // Detune the default KST values a bit
       chestDefaultWeight.set(0.0, 0.0, 0.5);
@@ -191,9 +219,9 @@ public class StabilityMarginKinematicsCostCalculator
       return stabilityGradientCalculator.getPostureSensitivity();
    }
 
-   public FrameVector3DReadOnly getPreviewContactNormal()
+   public FrameVector3DReadOnly getContactAdjustmentNormal()
    {
-      return previewContactNormal;
+      return regionNormal;
    }
 
    public void initialize()
@@ -223,31 +251,23 @@ public class StabilityMarginKinematicsCostCalculator
       if (!multiContactRegionCalculator.hasSolvedWholeRegion())
          return;
 
-      if (requestSupportRegionPreview.getValue())
+      if (requestContactAdjustment.getValue())
       {
          RigidBodyBasics bracingHand = fullRobotModel.getHand(HumanoidKinematicsToolboxController.BRACING_HAND_SIDE);
          bracingPointIndex = wholeBodyContactState.indexOf(bracingHand);
-         stabilityGradientCalculator.clearContactPointsToComputeSensitivity();
-         stabilityGradientCalculator.addContactPointIndexToComputeSensitivity(bracingPointIndex);
 
-         stabilityGradientCalculator.computeContactPointAdjustment();
-         contactPointAdjustment.set(stabilityGradientCalculator.getOptimalContactPointAdjustment(bracingPointIndex));
-         if (contactPointAdjustment.normSquared() > 1.0e-5)
+         if (bracingPointIndex != -1)
          {
-            contactPointAdjustment.normalize();
+            stabilityGradientCalculator.clearContactPointsToComputeSensitivity();
+            stabilityGradientCalculator.addContactPointIndexToComputeSensitivity(bracingPointIndex);
+            stabilityGradientCalculator.computeContactPointAdjustment();
+            contactPointAdjustment.set(stabilityGradientCalculator.getOptimalContactPointAdjustment(bracingPointIndex));
 
-            double v = 0.075;
-            contactPointAdjustment.scale(v);
-
-            double dt = 1.0e-3;
-            integratedContactPointAdjustment.add(dt * contactPointAdjustment.getX(), dt * contactPointAdjustment.getY(), dt * contactPointAdjustment.getZ());
-
-            double adjustmentSquared = integratedContactPointAdjustment.normSquared();
-            double maxAdjustmentSquared = EuclidCoreTools.square(MAX_CONTACT_POINT_ADJUSTMENT);
-
-            if (adjustmentSquared > maxAdjustmentSquared)
+            if (contactPointAdjustment.normSquared() > 1.0e-5)
             {
-               integratedContactPointAdjustment.scale(maxAdjustmentSquared / adjustmentSquared);
+               // double v = 0.075; // a good magnitude is ~0.07
+               contactPointAdjustment.scale(kpContact.getValue());
+               integratedContactPointAdjustment.add(updateDT * contactPointAdjustment.getX(), updateDT * contactPointAdjustment.getY(), updateDT * contactPointAdjustment.getZ());
             }
          }
       }
@@ -273,7 +293,7 @@ public class StabilityMarginKinematicsCostCalculator
       if (integrateRegargetedObjectives)
       {
          scaledStabilityGradient.set(stabilityGradientCalculator.getStabilityBoundaryGradient());
-         CommonOps_DDRM.scale(EuclidCoreTools.square(alphaEnabled.getValue()) * gain.getValue(), scaledStabilityGradient);
+         CommonOps_DDRM.scale(EuclidCoreTools.square(alphaEnabled.getValue()) * kpPosture.getValue(), scaledStabilityGradient);
 
          MultiBodySystemTools.insertJointsState(controlledJoints, JointStateType.VELOCITY, scaledStabilityGradient);
          fullRobotModel.updateFrames();
@@ -299,7 +319,7 @@ public class StabilityMarginKinematicsCostCalculator
       MultiBodySystemTools.insertJointsState(controlledJoints, JointStateType.VELOCITY, currentWholeBodyVelocity);
       previousStabilityMargin.set(multiContactRegionCalculator.getStabilityMargin());
 
-      if (integrateRegargetedObjectives)
+//      if (integrateRegargetedObjectives)
          fullRobotModel.updateFrames();
    }
 
@@ -316,25 +336,32 @@ public class StabilityMarginKinematicsCostCalculator
       return integratedContactPointAdjustment;
    }
 
-   public void disableSupportRegionPreview()
+   public void disableContactAdjustment()
    {
       if (!OVERRIDE_MESSAGE)
-         requestSupportRegionPreview.set(false);
+         requestContactAdjustment.set(false);
    }
 
-   public void enableSupportRegionPreview(Vector3D contactPointNormal)
+   public void enableContactAdjustment(Tuple3DReadOnly regionPoint, Orientation3DReadOnly regionOrientation, ConvexPolygon2DReadOnly regionPolygon, Tuple3DReadOnly regionNormal)
    {
-      LogTools.info("Enabling region preview");
+      LogTools.info("Enabling contact adjustment");
       if (!OVERRIDE_MESSAGE)
       {
-         requestSupportRegionPreview.set(true);
-         previewContactNormal.set(contactPointNormal);
+         requestContactAdjustment.set(true);
+         tempPose.set(regionPoint, regionOrientation);
+         regionFrame.setPoseAndUpdate(tempPose);
+
+         this.regionPolygon.set(regionPolygon);
+         this.regionNormal.set(regionNormal);
+
+         double safetyDistance = 0.07;
+         polygonScaler.scaleConvexPolygon(regionPolygon, safetyDistance, this.regionPolygon);
       }
    }
 
-   public boolean previewSupportRegion()
+   public boolean contactAdjustmentRequested()
    {
-      return requestSupportRegionPreview.getValue();
+      return requestContactAdjustment.getValue();
    }
 
    public void retargetRigidBody(KinematicsToolboxRigidBodyCommand command)
@@ -349,8 +376,34 @@ public class StabilityMarginKinematicsCostCalculator
          // Contact point adjustment
          if (!isUpperBodyLoadBearing.getValue())
          {
-            FixedFramePoint3DBasics desiredHandPosition = command.getDesiredPose().getPosition();
-            desiredHandPosition.add(integratedContactPointAdjustment);
+            // Position of the user
+            tempPoint.setIncludingFrame(command.getDesiredPose().getPosition());
+
+            // Retargeted position
+            tempPoint.add(integratedContactPointAdjustment);
+
+            if (!regionPolygon.isEmpty())
+            { // Snap to region
+               tempPoint.changeFrame(regionFrame);
+               tempPoint2D.set(tempPoint);
+               regionPolygon.orthogonalProjection(tempPoint2D);
+               tempPoint.set(tempPoint2D);
+               tempPoint.changeFrame(ReferenceFrame.getWorldFrame());
+
+               // Subtract off snapped difference
+               integratedContactPointAdjustment.sub(tempPoint, command.getDesiredPose().getPosition());
+            }
+
+            // Cap adjustment
+            double adjustmentSquared = integratedContactPointAdjustment.normSquared();
+            double maxAdjustmentSquared = EuclidCoreTools.square(MAX_CONTACT_POINT_ADJUSTMENT);
+            if (adjustmentSquared > maxAdjustmentSquared)
+            {
+               integratedContactPointAdjustment.scale(maxAdjustmentSquared / adjustmentSquared);
+            }
+
+            // Add it
+            command.getDesiredPose().getPosition().add(integratedContactPointAdjustment);
          }
       }
    }

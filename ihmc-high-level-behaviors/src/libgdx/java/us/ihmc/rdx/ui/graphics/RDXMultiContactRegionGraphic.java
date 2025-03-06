@@ -16,14 +16,12 @@ import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
 import org.lwjgl.opengl.GL41;
 import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxController;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.PostureOptimizerState;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -32,22 +30,18 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
-import us.ihmc.rdx.mesh.MeshDataGeneratorMissing;
 import us.ihmc.rdx.mesh.RDXMeshGraphicTools;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 
@@ -57,12 +51,9 @@ public class RDXMultiContactRegionGraphic implements RenderableProvider
 {
    public static final Color NOMINAL_POLYGON_GRAPHIC_COLOR = Color.valueOf("DEE933");
    public static final Color OPTIMIZER_POLYGON_GRAPHIC_COLOR = Color.valueOf("EB3D40");
-   public static final Color FREEZE_POLYGON_GRAPHIC_COLOR = Color.valueOf("3D46EB");
    private static final double STABILITY_GRAPHIC_HEIGHT = 2.0;
 
    private final ConvexPolygon2D supportRegion = new ConvexPolygon2D();
-   private PostureOptimizerState postureOptimizerState = PostureOptimizerState.NOMINAL;
-   private double activationAlpha = -1.0;
    private double postureSensitivity = -1.0;
 
    private final FramePoint3D comCurrent = new FramePoint3D();
@@ -73,6 +64,7 @@ public class RDXMultiContactRegionGraphic implements RenderableProvider
    private int minimumEdgeIndex;
    private double stabilityMargin;
 
+   private final FullHumanoidRobotModel ghostFullRobotModel;
    private final ModelBuilder modelBuilder = new ModelBuilder();
    private final RDXMultiColorMeshBuilder meshBuilder = new RDXMultiColorMeshBuilder();
    private final CenterOfMassReferenceFrame centerOfMassFrame;
@@ -80,26 +72,32 @@ public class RDXMultiContactRegionGraphic implements RenderableProvider
    private final RigidBodyTransform transform = new RigidBodyTransform();
 
    private final AtomicReference<FramePlanarRegionsListMessage> latestPlanarRegionsMessage = new AtomicReference<>();
-   private final Vector3D point = new Vector3D();
-   private final Vector3D normal = new Vector3D();
-   private final Quaternion orientation = new Quaternion();
-   private final RotationMatrix rotation = new RotationMatrix();
+   private final Vector3D bracingRegionPoint = new Vector3D();
+   private final Vector3D bracingRegionNormal = new Vector3D();
+   private final Quaternion bracingRegionOrientation = new Quaternion();
+   private final RotationMatrix bracingRegionRotation = new RotationMatrix();
+   private PlanarRegion bracingRegion = null;
 
    private ModelInstance modelInstance;
    private Model lastModel;
 
    public RDXMultiContactRegionGraphic(FullHumanoidRobotModel ghostFullRobotModel, ROS2Node ros2Node)
    {
+      this.ghostFullRobotModel = ghostFullRobotModel;
       this.centerOfMassFrame = new CenterOfMassReferenceFrame("ghostCoMFrame", ReferenceFrame.getWorldFrame(), ghostFullRobotModel.getRootBody());
-      this.midFeetZUpFrame = new MidFrameZUpFrame("midFeedZUpGhost",
+      this.midFeetZUpFrame = new MidFrameZUpFrame("midFeetZUpGhost",
                                                   ReferenceFrame.getWorldFrame(),
                                                   ghostFullRobotModel.getSoleFrame(RobotSide.LEFT),
                                                   ghostFullRobotModel.getSoleFrame(RobotSide.RIGHT));
 
-      ros2Node.createSubscription(PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, s -> latestPlanarRegionsMessage.set(s.takeNextData()));
+      ros2Node.createSubscription(PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, s ->
+      {
+//         LogTools.info("received regions!");
+         latestPlanarRegionsMessage.set(s.takeNextData());
+      });
    }
 
-   public void updateMultiContactGraphics(KinematicsToolboxOutputStatus kinematicsToolboxOutputStatus, FramePoint3D desiredCoMPosition)
+   public void updateSupportRegionAndGraphics(KinematicsToolboxOutputStatus kinematicsToolboxOutputStatus, FramePoint3D desiredCoMPosition)
    {
       meshBuilder.clear();
 
@@ -173,124 +171,117 @@ public class RDXMultiContactRegionGraphic implements RenderableProvider
             meshBuilder.addLine(v0.getX(), v0.getY(), footZ, v1.getX(), v1.getY(), footZ, 0.01f, color);
          }
 
-         postureOptimizerState = PostureOptimizerState.fromByte(kinematicsToolboxOutputStatus.getPostureOptimizerState());
-         activationAlpha = kinematicsToolboxOutputStatus.getActivationAlpha();
          postureSensitivity = kinematicsToolboxOutputStatus.getSupportRegionSensitivity();
          meshBuilder.addPolygon(transform, this.supportRegion, getPolygonColor());
       }
 
-      if (normal.norm() > 0.01)
-      {
-         double length = 0.07;
-         double radius = 0.004;
-         double cylinderToConeLengthRatio = 0.8;
-         double coneDiameterMultiplier = 1.8;
-         RDXMeshGraphicTools.drawArrow(meshBuilder,
-                                       point,
-                                       rotation,
-                                       length,
-                                       radius,
-                                       cylinderToConeLengthRatio,
-                                       coneDiameterMultiplier,
-                                       Color.RED);
-      }
-
+      addRegionGraphic();
       generateModel();
    }
 
-   public void updateEnvironmentNormal()
+   public void updateBracingRegionAndGraphics()
    {
+      midFeetZUpFrame.update();
+
       // Check for new surface normal
       FramePlanarRegionsListMessage planarRegionsMessage = latestPlanarRegionsMessage.getAndSet(null);
       if (planarRegionsMessage != null)
       {
+         LogTools.info("Received " + planarRegionsMessage.getPlanarRegions().getRegionNormal().size() + " regions.");
+
          PlanarRegionsList planarRegions = PlanarRegionMessageConverter.convertToPlanarRegionsListInWorld(planarRegionsMessage);
-         PlanarRegion maxAreaRegion = null;
-         double maxArea = 0.0;
+
+         PlanarRegion bracingRegion = null;
+         double minDistanceToHandXY = Double.MAX_VALUE;
 
          for (int i = 0; i < planarRegions.getNumberOfPlanarRegions(); i++)
          {
             PlanarRegion region = planarRegions.getPlanarRegion(i);
 
             double area = region.getArea();
-            if (area > maxArea)
-            {
-               maxArea = area;
-               maxAreaRegion = region;
-            }
+            double areaThreshold = 0.15;
 
-//            double areaThreshold = 0.15;
-//
-//            if (area < areaThreshold)
-//               continue;
-//
-//            Vector3D normal = new Vector3D(region.getNormal());
-//            normal.applyTransform(sensorToWorldTransform);
-//
-//            double normalZ = normal.getZ();
-//            double pitch = Math.abs(Math.asin(normalZ));
-//            double pitchThreshold = Math.toRadians(9.0);
-//
-//            if (pitch < pitchThreshold)
-//               continue;
-//
-//            Point3D centroid = PlanarRegionTools.getCentroid3DInWorld(region);
-//            centroid.applyTransform(transform);
-//
-//            FramePoint3D position = new FramePoint3D(ReferenceFrame.getWorldFrame(), centroid);
-//            position.changeFrame(midFeetZUpFrame);
-//
-////            double xThresholdMin = 0.3;
-////            double xThresholdMax = 2.0;
-////            double yThreshold = 1.0;
-////            double zThresholdMin = 0.4;
-////
-////            if (position.getX() < xThresholdMin || position.getX() > xThresholdMax || position.getY() < -yThreshold || position.getY() > yThreshold || position.getZ() < zThresholdMin)
-////               continue;
-//
-//            position.changeFrame(ReferenceFrame.getWorldFrame());
-//            point.set(position);
-//
-//            this.normal.set(normal);
-//            EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(Axis3D.Z, normal, orientation);
-//
-//            FrameVector3D normalInMidFeet = new FrameVector3D(ReferenceFrame.getWorldFrame(), normal);
-//            normalInMidFeet.changeFrame(midFeetZUpFrame);
-//
-//            FramePoint3D pointInMidFeet = new FramePoint3D(ReferenceFrame.getWorldFrame(), point);
-//            pointInMidFeet.changeFrame(midFeetZUpFrame);
-//
-//            LogTools.info("Point in mid feet:  " + pointInMidFeet);
-//            LogTools.info("Normal in mid feet: " + normalInMidFeet);
+            if (area < areaThreshold)
+               continue;
+
+            FrameVector3D normal = new FrameVector3D(ReferenceFrame.getWorldFrame(), region.getNormal());
+            normal.changeFrame(midFeetZUpFrame);
+            double normalZ = normal.getZ();
+            double pitch = Math.abs(Math.asin(normalZ));
+            double pitchThreshold = Math.toRadians(30.0); // Math.toRadians(9.0);
+
+            if (pitch > pitchThreshold)
+               continue;
+            if (normal.getX() > -0.2)
+               continue;
+
+            Point3D centroid = PlanarRegionTools.getCentroid3DInWorld(region);
+            FramePoint3D hand = new FramePoint3D(ghostFullRobotModel.getHandControlFrame(HumanoidKinematicsToolboxController.BRACING_HAND_SIDE));
+            hand.changeFrame(ReferenceFrame.getWorldFrame());
+
+            double distanceXY = centroid.distanceXY(hand);
+            if (distanceXY < minDistanceToHandXY)
+            {
+               minDistanceToHandXY = distanceXY;
+               bracingRegion = region;
+            }
          }
 
-         if (maxAreaRegion != null)
+         double distanceThresholdXY = 1.0;
+         if (minDistanceToHandXY < distanceThresholdXY)
          {
-            point.set(PlanarRegionTools.getCentroid3DInWorld(maxAreaRegion));
-            normal.set(maxAreaRegion.getNormal());
-            rotation.set(maxAreaRegion.getTransformToWorldCopy().getRotation());
+            bracingRegionPoint.set(PlanarRegionTools.getCentroid3DInWorld(bracingRegion));
+            bracingRegionNormal.set(bracingRegion.getNormal());
+            bracingRegionRotation.set(bracingRegion.getTransformToWorldCopy().getRotation());
+            this.bracingRegion = bracingRegion;
+            this.bracingRegion.updateConvexHull();
+
+            FramePose3D bracingRegionPose = new FramePose3D(ReferenceFrame.getWorldFrame(), bracingRegion.getTransformToWorld());
+            System.out.println(bracingRegionPose.getPosition());
+            System.out.println(bracingRegionPose.getOrientation());
+
+            UnitVector3DReadOnly normal = bracingRegion.getNormal();
+            System.out.println(normal.getX() + ", " + normal.getY() + ", " + normal.getZ());
+
+            ConvexPolygon2D convexHull = bracingRegion.getConvexHull();
+            System.out.println(convexHull);
          }
       }
 
       meshBuilder.clear();
+      addRegionGraphic();
 
-      if (normal.norm() > 0.01)
+      generateModel();
+   }
+
+   private void addRegionGraphic()
+   {
+      if (bracingRegion != null)
       {
+         Color color = Color.GREEN;
+         RigidBodyTransform transformToWorld = bracingRegion.getTransformToWorldCopy();
+         meshBuilder.addMultiLine(transformToWorld, bracingRegion.getConcaveHull(), 0.01, color, true);
+         for (ConvexPolygon2D convexPolygon : bracingRegion.getConvexPolygons())
+         {
+            meshBuilder.addPolygon(transformToWorld, convexPolygon, color);
+         }
+
          double length = 0.07;
          double radius = 0.004;
          double cylinderToConeLengthRatio = 0.8;
          double coneDiameterMultiplier = 1.8;
-         RDXMeshGraphicTools.drawArrow(meshBuilder,
-                                       point,
-                                       rotation,
-                                       length,
-                                       radius,
-                                       cylinderToConeLengthRatio,
-                                       coneDiameterMultiplier,
-                                       Color.RED);
+         RDXMeshGraphicTools.drawArrow(meshBuilder, bracingRegionPoint, bracingRegionRotation, length, radius, cylinderToConeLengthRatio, coneDiameterMultiplier, Color.RED);
       }
+   }
 
-      generateModel();
+   public boolean hasRegion()
+   {
+      return bracingRegion != null;
+   }
+
+   public PlanarRegion getBracingRegion()
+   {
+      return bracingRegion;
    }
 
    private void generateModel()
@@ -338,7 +329,7 @@ public class RDXMultiContactRegionGraphic implements RenderableProvider
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (supportRegion.isEmpty() && normal.norm() < 0.01)
+      if (supportRegion.isEmpty() && bracingRegionNormal.norm() < 0.01)
       {
          return;
       }
