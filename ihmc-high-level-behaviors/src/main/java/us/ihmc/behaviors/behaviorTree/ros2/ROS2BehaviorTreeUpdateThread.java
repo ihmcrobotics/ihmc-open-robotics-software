@@ -16,10 +16,10 @@ import java.util.Collections;
 public class ROS2BehaviorTreeUpdateThread extends RepeatingTaskThread
 {
    private final ROS2SyncedRobotModel syncedRobot;
-   private final ROS2PeerClockOffsetEstimator peerClockEstimator;
    private final ROS2BehaviorTreeExecutor executor;
 
    public ROS2BehaviorTreeUpdateThread(ROS2Node ros2Node,
+                                       ROS2PeerClockOffsetEstimator peerClockOffsetEstimator,
                                        DRCRobotModel robotModel,
                                        SceneGraph sceneGraph,
                                        DetectionManager detectionManager)
@@ -29,7 +29,6 @@ public class ROS2BehaviorTreeUpdateThread extends RepeatingTaskThread
 
       ROS2ControllerHelper ros2ControllerHelper = new ROS2ControllerHelper(ros2Node, robotModel);
       syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2ControllerHelper.getROS2Node());
-      peerClockEstimator = new ROS2PeerClockOffsetEstimator(ros2Node);
 
       ReferenceFrameLibrary referenceFrameLibrary = new ReferenceFrameLibrary();
       referenceFrameLibrary.addAll(Collections.singleton(ReferenceFrame.getWorldFrame()));
@@ -38,8 +37,7 @@ public class ROS2BehaviorTreeUpdateThread extends RepeatingTaskThread
 
       executor = new ROS2BehaviorTreeExecutor(ros2ControllerHelper,
                                               robotModel,
-                                              syncedRobot,
-                                              peerClockEstimator,
+                                              syncedRobot, peerClockOffsetEstimator,
                                               referenceFrameLibrary,
                                               sceneGraph,
                                               detectionManager);
@@ -58,7 +56,6 @@ public class ROS2BehaviorTreeUpdateThread extends RepeatingTaskThread
       super.kill();
 
       syncedRobot.destroy();
-      peerClockEstimator.destroy();
       executor.destroy();
    }
 }

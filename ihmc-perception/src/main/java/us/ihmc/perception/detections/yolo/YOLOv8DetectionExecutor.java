@@ -105,6 +105,7 @@ public class YOLOv8DetectionExecutor
       parametersMessage = new YOLOv8ExecutorParameters();
       updateThread = new RepeatingTaskThread(getClass().getSimpleName() + "Updater", this::update);
       updateThread.setFrequencyLimit(10.0);
+      updateThread.setDaemon(true);
       updateThread.startRepeating();
 
       taskQueue = new ArrayBlockingQueue<>(2 * availableModels.size());

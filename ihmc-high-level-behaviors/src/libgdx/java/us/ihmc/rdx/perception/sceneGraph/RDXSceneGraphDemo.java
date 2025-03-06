@@ -67,7 +67,8 @@ public class RDXSceneGraphDemo
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private ROS2Node ros2Node;
    private ROS2Helper ros2Helper;
-   private ROS2PeerClockOffsetEstimator ros2ClockOffsetEstimator;
+   private ROS2PeerClockOffsetEstimator robotClockOffsetEstimator;
+   private ROS2PeerClockOffsetEstimator uiClockOffsetEstimator;
    private ModelInstance sensorPoseGraphic;
    private RDXPerceptionVisualizersPanel perceptionVisualizerPanel;
    private DetectionManager detectionManager;
@@ -102,7 +103,8 @@ public class RDXSceneGraphDemo
 
             ros2Node = new ROS2NodeBuilder().build("perception_scene_graph_demo");
             ros2Helper = new ROS2Helper(ros2Node);
-            ros2ClockOffsetEstimator = new ROS2PeerClockOffsetEstimator(ros2Node);
+            robotClockOffsetEstimator = new ROS2PeerClockOffsetEstimator(ros2Node);
+            uiClockOffsetEstimator = new ROS2PeerClockOffsetEstimator(ros2Node);
 
             detectionManager = new DetectionManager(ros2Node);
 
@@ -138,7 +140,7 @@ public class RDXSceneGraphDemo
 
             RDXROS2YOLOv8Visualizer yoloSettingsVisualizer = new RDXROS2YOLOv8Visualizer("YOLOv8",
                                                                                          ros2Node,
-                                                                                         ros2ClockOffsetEstimator,
+                                                                                         uiClockOffsetEstimator,
                                                                                          PerceptionAPI.YOLO_ANNOTATED_IMAGE);
             yoloSettingsVisualizer.setActive(true);
             perceptionVisualizerPanel.addVisualizer(yoloSettingsVisualizer);
@@ -228,7 +230,7 @@ public class RDXSceneGraphDemo
 
                if (yolov8DetectionExecutor == null)
                {
-                  yolov8DetectionExecutor = new YOLOv8DetectionExecutor(new CRDTInfo(ROS2ActorDesignation.ROBOT, ros2ClockOffsetEstimator),
+                  yolov8DetectionExecutor = new YOLOv8DetectionExecutor(new CRDTInfo(ROS2ActorDesignation.ROBOT, robotClockOffsetEstimator),
                                                                         yoloSettingsVisualizer::isActive);
                   yolov8DetectionExecutor.addDetectionConsumerCallback(detectionManager::addDetections);
                }

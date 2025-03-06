@@ -110,7 +110,6 @@ public class RDXROS2YOLOv8Settings
    public void enableAllModels()
    {
       parameters.getModelsToRun()
-                .getValueAndModify()
                 .addAll(parameters.getAvailableModels().getReadOnly().stream().map(YOLOv8ModelInfo::getModelNameAsString).collect(Collectors.toSet()));
    }
 
