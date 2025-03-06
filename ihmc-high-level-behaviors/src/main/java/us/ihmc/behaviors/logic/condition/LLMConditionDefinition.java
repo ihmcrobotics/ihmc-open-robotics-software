@@ -17,22 +17,28 @@ public class LLMConditionDefinition
    private final CRDTBidirectionalBoolean resetContextEachRun;
    private final CRDTBidirectionalBoolean injectBehaviorState;
    private final CRDTBidirectionalBoolean injectEnvironmentState;
+   private final CRDTBidirectionalBoolean matchIsSuccess;
    private final CRDTBidirectionalString system;
    private final CRDTBidirectionalString prompt;
+   private final CRDTBidirectionalString responseMatcher;
 
    private boolean onDiskResetContextEachRun;
    private boolean onDiskInjectBehaviorState;
    private boolean onDiskInjectEnvironmentState;
+   private boolean onDiskMatchIsSuccess;
    private String onDiskSystem;
    private String onDiskPrompt;
+   private String onDiskResponseMatcher;
 
    public LLMConditionDefinition(LatestTimestampModifiable latestTimestampModifiable)
    {
       resetContextEachRun = new CRDTBidirectionalBoolean(latestTimestampModifiable, true);
       injectBehaviorState = new CRDTBidirectionalBoolean(latestTimestampModifiable, false);
       injectEnvironmentState = new CRDTBidirectionalBoolean(latestTimestampModifiable, false);
+      matchIsSuccess = new CRDTBidirectionalBoolean(latestTimestampModifiable, true);
       system = new CRDTBidirectionalString(latestTimestampModifiable, Llama.CHAT_WITH_LLAMA);
       prompt = new CRDTBidirectionalString(latestTimestampModifiable, DEFAULT_PROMPT);
+      responseMatcher = new CRDTBidirectionalString(latestTimestampModifiable, "failure");
    }
 
    public void saveToFile(ObjectNode jsonNode)
@@ -40,8 +46,10 @@ public class LLMConditionDefinition
       jsonNode.put("resetContextEachRun", resetContextEachRun.getValue());
       jsonNode.put("injectBehaviorState", injectBehaviorState.getValue());
       jsonNode.put("injectEnvironmentState", injectEnvironmentState.getValue());
+      jsonNode.put("matchIsSuccess", matchIsSuccess.getValue());
       jsonNode.put("system", system.getValue());
       jsonNode.put("prompt", prompt.getValue());
+      jsonNode.put("responseMatcher", responseMatcher.getValue());
    }
 
    public void loadFromFile(JsonNode jsonNode)
@@ -49,8 +57,10 @@ public class LLMConditionDefinition
       resetContextEachRun.setValue(jsonNode.get("resetContextEachRun").booleanValue());
       injectBehaviorState.setValue(jsonNode.get("injectBehaviorState").booleanValue());
       injectEnvironmentState.setValue(jsonNode.get("injectEnvironmentState").booleanValue());
+      matchIsSuccess.setValue(jsonNode.get("matchIsSuccess").booleanValue());
       system.setValue(jsonNode.get("system").textValue());
       prompt.setValue(jsonNode.get("prompt").textValue());
+      responseMatcher.setValue(jsonNode.get("responseMatcher").textValue());
    }
 
    public void setOnDiskFields()
@@ -58,8 +68,10 @@ public class LLMConditionDefinition
       onDiskResetContextEachRun = resetContextEachRun.getValue();
       onDiskInjectBehaviorState = injectBehaviorState.getValue();
       onDiskInjectEnvironmentState = injectEnvironmentState.getValue();
+      onDiskMatchIsSuccess = matchIsSuccess.getValue();
       onDiskSystem = system.getValue();
       onDiskPrompt = prompt.getValue();
+      onDiskResponseMatcher = responseMatcher.getValue();
    }
 
    public void undoAllNontopologicalChanges()
@@ -67,8 +79,10 @@ public class LLMConditionDefinition
       resetContextEachRun.setValue(onDiskResetContextEachRun);
       injectBehaviorState.setValue(onDiskInjectBehaviorState);
       injectEnvironmentState.setValue(onDiskInjectEnvironmentState);
+      matchIsSuccess.setValue(onDiskMatchIsSuccess);
       system.setValue(onDiskSystem);
       prompt.setValue(onDiskPrompt);
+      responseMatcher.setValue(onDiskResponseMatcher);
    }
 
    public boolean hasChanges()
@@ -78,8 +92,10 @@ public class LLMConditionDefinition
       unchanged &= resetContextEachRun.getValue() == (onDiskResetContextEachRun);
       unchanged &= injectBehaviorState.getValue() == (onDiskInjectBehaviorState);
       unchanged &= injectEnvironmentState.getValue() == (onDiskInjectEnvironmentState);
+      unchanged &= matchIsSuccess.getValue() == (onDiskMatchIsSuccess);
       unchanged &= system.getValue().equals(onDiskSystem);
       unchanged &= prompt.getValue().equals(onDiskPrompt);
+      unchanged &= responseMatcher.getValue().equals(onDiskResponseMatcher);
 
       return !unchanged;
    }
@@ -89,8 +105,10 @@ public class LLMConditionDefinition
       message.setResetContextEachRun(resetContextEachRun.toMessage());
       message.setInjectBehaviorState(injectBehaviorState.toMessage());
       message.setInjectEnvironmentState(injectEnvironmentState.toMessage());
+      message.setMatchIsSuccess(matchIsSuccess.toMessage());
       message.setSystem(system.toMessage());
       message.setPrompt(prompt.toMessage());
+      message.setResponseMatcher(responseMatcher.toMessage());
    }
 
    public void fromMessage(ConditionNodeDefinitionMessage message)
@@ -98,8 +116,10 @@ public class LLMConditionDefinition
       resetContextEachRun.fromMessage(message.getResetContextEachRun());
       injectBehaviorState.fromMessage(message.getInjectBehaviorState());
       injectEnvironmentState.fromMessage(message.getInjectEnvironmentState());
+      matchIsSuccess.fromMessage(message.getMatchIsSuccess());
       system.fromMessage(message.getSystemAsString());
       prompt.fromMessage(message.getPromptAsString());
+      responseMatcher.fromMessage(message.getResponseMatcherAsString());
    }
 
    public CRDTBidirectionalBoolean getResetContextEachRun()
@@ -117,6 +137,11 @@ public class LLMConditionDefinition
       return injectEnvironmentState;
    }
 
+   public CRDTBidirectionalBoolean getMatchIsSuccess()
+   {
+      return matchIsSuccess;
+   }
+
    public CRDTBidirectionalString getSystem()
    {
       return system;
@@ -125,5 +150,10 @@ public class LLMConditionDefinition
    public CRDTBidirectionalString getPrompt()
    {
       return prompt;
+   }
+
+   public CRDTBidirectionalString getResponseMatcher()
+   {
+      return responseMatcher;
    }
 }

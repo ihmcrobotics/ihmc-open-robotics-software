@@ -15,7 +15,7 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "6b4baa424299a8564f6cc1157784c15a47c0b181699afdb95cf3f8fa55221a96";
+   		return "242a3cc28174c1090456985661d7a33a0a422cc62434f334f1b719190c91ff4a";
    }
    
    @Override
@@ -64,6 +64,9 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 10000 + 1;
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 10000 + 1;
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 10000 + 1;
 
@@ -96,9 +99,14 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getSystem().length() + 1;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getPrompt().length() + 1;
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getResponseMatcher().length() + 1;
 
 
       return current_alignment - initial_alignment;
@@ -117,6 +125,8 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
 
       cdr.write_type_7(data.getInjectEnvironmentState());
 
+      cdr.write_type_7(data.getMatchIsSuccess());
+
       if(data.getSystem().length() <= 10000)
       cdr.write_type_d(data.getSystem());else
           throw new RuntimeException("system field exceeds the maximum length: %d > %d".formatted(data.getSystem().length(), 10000));
@@ -124,6 +134,10 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
       if(data.getPrompt().length() <= 10000)
       cdr.write_type_d(data.getPrompt());else
           throw new RuntimeException("prompt field exceeds the maximum length: %d > %d".formatted(data.getPrompt().length(), 10000));
+
+      if(data.getResponseMatcher().length() <= 10000)
+      cdr.write_type_d(data.getResponseMatcher());else
+          throw new RuntimeException("response_matcher field exceeds the maximum length: %d > %d".formatted(data.getResponseMatcher().length(), 10000));
 
    }
 
@@ -140,8 +154,11 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
       	
       data.setInjectEnvironmentState(cdr.read_type_7());
       	
+      data.setMatchIsSuccess(cdr.read_type_7());
+      	
       cdr.read_type_d(data.getSystem());	
       cdr.read_type_d(data.getPrompt());	
+      cdr.read_type_d(data.getResponseMatcher());	
 
    }
 
@@ -155,8 +172,10 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
       ser.write_type_7("reset_context_each_run", data.getResetContextEachRun());
       ser.write_type_7("inject_behavior_state", data.getInjectBehaviorState());
       ser.write_type_7("inject_environment_state", data.getInjectEnvironmentState());
+      ser.write_type_7("match_is_success", data.getMatchIsSuccess());
       ser.write_type_d("system", data.getSystem());
       ser.write_type_d("prompt", data.getPrompt());
+      ser.write_type_d("response_matcher", data.getResponseMatcher());
    }
 
    @Override
@@ -169,8 +188,10 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
       data.setResetContextEachRun(ser.read_type_7("reset_context_each_run"));
       data.setInjectBehaviorState(ser.read_type_7("inject_behavior_state"));
       data.setInjectEnvironmentState(ser.read_type_7("inject_environment_state"));
+      data.setMatchIsSuccess(ser.read_type_7("match_is_success"));
       ser.read_type_d("system", data.getSystem());
       ser.read_type_d("prompt", data.getPrompt());
+      ser.read_type_d("response_matcher", data.getResponseMatcher());
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.ConditionNodeDefinitionMessage src, behavior_msgs.msg.dds.ConditionNodeDefinitionMessage dest)

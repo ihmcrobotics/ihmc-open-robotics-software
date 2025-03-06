@@ -39,6 +39,10 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
             */
    public boolean inject_environment_state_;
    /**
+            * If a response match indicates success, else a match indicates failure
+            */
+   public boolean match_is_success_;
+   /**
             * The prompt given once at the very beginning
             */
    public java.lang.StringBuilder system_;
@@ -46,12 +50,17 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
             * The prompt defining how to make the boolean decision
             */
    public java.lang.StringBuilder prompt_;
+   /**
+            * A regular expression, where if it matches, the execution failed
+            */
+   public java.lang.StringBuilder response_matcher_;
 
    public ConditionNodeDefinitionMessage()
    {
       definition_ = new behavior_msgs.msg.dds.LeafNodeDefinitionMessage();
       system_ = new java.lang.StringBuilder(10000);
       prompt_ = new java.lang.StringBuilder(10000);
+      response_matcher_ = new java.lang.StringBuilder(10000);
    }
 
    public ConditionNodeDefinitionMessage(ConditionNodeDefinitionMessage other)
@@ -73,11 +82,16 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
 
       inject_environment_state_ = other.inject_environment_state_;
 
+      match_is_success_ = other.match_is_success_;
+
       system_.setLength(0);
       system_.append(other.system_);
 
       prompt_.setLength(0);
       prompt_.append(other.prompt_);
+
+      response_matcher_.setLength(0);
+      response_matcher_.append(other.response_matcher_);
 
    }
 
@@ -166,6 +180,21 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
    }
 
    /**
+            * If a response match indicates success, else a match indicates failure
+            */
+   public void setMatchIsSuccess(boolean match_is_success)
+   {
+      match_is_success_ = match_is_success;
+   }
+   /**
+            * If a response match indicates success, else a match indicates failure
+            */
+   public boolean getMatchIsSuccess()
+   {
+      return match_is_success_;
+   }
+
+   /**
             * The prompt given once at the very beginning
             */
    public void setSystem(java.lang.String system)
@@ -213,6 +242,30 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
       return prompt_;
    }
 
+   /**
+            * A regular expression, where if it matches, the execution failed
+            */
+   public void setResponseMatcher(java.lang.String response_matcher)
+   {
+      response_matcher_.setLength(0);
+      response_matcher_.append(response_matcher);
+   }
+
+   /**
+            * A regular expression, where if it matches, the execution failed
+            */
+   public java.lang.String getResponseMatcherAsString()
+   {
+      return getResponseMatcher().toString();
+   }
+   /**
+            * A regular expression, where if it matches, the execution failed
+            */
+   public java.lang.StringBuilder getResponseMatcher()
+   {
+      return response_matcher_;
+   }
+
 
    public static Supplier<ConditionNodeDefinitionMessagePubSubType> getPubSubType()
    {
@@ -242,9 +295,13 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.inject_environment_state_, other.inject_environment_state_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.match_is_success_, other.match_is_success_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.system_, other.system_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.prompt_, other.prompt_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.response_matcher_, other.response_matcher_, epsilon)) return false;
 
 
       return true;
@@ -270,9 +327,13 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
 
       if(this.inject_environment_state_ != otherMyClass.inject_environment_state_) return false;
 
+      if(this.match_is_success_ != otherMyClass.match_is_success_) return false;
+
       if (!us.ihmc.idl.IDLTools.equals(this.system_, otherMyClass.system_)) return false;
 
       if (!us.ihmc.idl.IDLTools.equals(this.prompt_, otherMyClass.prompt_)) return false;
+
+      if (!us.ihmc.idl.IDLTools.equals(this.response_matcher_, otherMyClass.response_matcher_)) return false;
 
 
       return true;
@@ -296,10 +357,14 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
       builder.append(this.inject_behavior_state_);      builder.append(", ");
       builder.append("inject_environment_state=");
       builder.append(this.inject_environment_state_);      builder.append(", ");
+      builder.append("match_is_success=");
+      builder.append(this.match_is_success_);      builder.append(", ");
       builder.append("system=");
       builder.append(this.system_);      builder.append(", ");
       builder.append("prompt=");
-      builder.append(this.prompt_);
+      builder.append(this.prompt_);      builder.append(", ");
+      builder.append("response_matcher=");
+      builder.append(this.response_matcher_);
       builder.append("}");
       return builder.toString();
    }

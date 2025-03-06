@@ -19,15 +19,19 @@ public class RDXLLMCondition
    private final CRDTBidirectionalBoolean resetContextEachRun;
    private final CRDTBidirectionalBoolean injectBehaviorState;
    private final CRDTBidirectionalBoolean injectEnvironmentState;
+   private final CRDTBidirectionalBoolean matchIsSuccess;
    private final CRDTBidirectionalString system;
    private final CRDTBidirectionalString prompt;
+   private final CRDTBidirectionalString responseMatcher;
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBooleanWrapper resetContextEachRunCheckbox;
    private final ImBooleanWrapper injectBehaviorStateCheckbox;
    private final ImBooleanWrapper injectEnvironmentStateCheckbox;
+   private final ImBooleanWrapper matchIsSuccessRadio;
    private transient final ImString imSystem = new ImString(Llama.MAX_CONTEXT_SIZE);
    private transient final ImString imPrompt = new ImString(Llama.MAX_CONTEXT_SIZE);
+   private transient final ImString imResponseMatcher = new ImString(Llama.MAX_CONTEXT_SIZE);
 
    public RDXLLMCondition(ConditionNodeState state)
    {
@@ -38,8 +42,10 @@ public class RDXLLMCondition
       resetContextEachRun = definition.getLLM().getResetContextEachRun();
       injectBehaviorState = definition.getLLM().getInjectBehaviorState();
       injectEnvironmentState = definition.getLLM().getInjectEnvironmentState();
+      matchIsSuccess = definition.getLLM().getMatchIsSuccess();
       system = definition.getLLM().getSystem();
       prompt = definition.getLLM().getPrompt();
+      responseMatcher = definition.getLLM().getResponseMatcher();
 
       resetContextEachRunCheckbox = new ImBooleanWrapper(resetContextEachRun::getValue,
                                                          resetContextEachRun::setValue,
@@ -50,17 +56,32 @@ public class RDXLLMCondition
       injectEnvironmentStateCheckbox = new ImBooleanWrapper(injectEnvironmentState::getValue,
                                                             injectEnvironmentState::setValue,
                                                             imBoolean -> ImGui.checkbox(labels.get("Inject environment state"), imBoolean));
+      matchIsSuccessRadio = new ImBooleanWrapper(matchIsSuccess::getValue,
+                                                 matchIsSuccess::setValue,
+                                                 imBoolean ->
+                                                 {
+                                                    ImGui.text("Match is:");
+                                                    ImGui.sameLine();
+                                                    if (ImGui.radioButton(labels.get("success"), imBoolean.get()))
+                                                       imBoolean.set(true);
+                                                    ImGui.sameLine();
+                                                    if (ImGui.radioButton(labels.get("failure"), !imBoolean.get()))
+                                                       imBoolean.set(false);
+                                                 });
    }
 
    public void renderImGuiWidgetsInternal()
    {
       resetContextEachRunCheckbox.renderImGuiWidget();
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Reset context")))
+         state.getLLM().setResetContextRequested();
       injectBehaviorStateCheckbox.renderImGuiWidget();
       injectEnvironmentStateCheckbox.renderImGuiWidget();
 
       ImGui.text("System:");
       String systemText = system.getValue();
-      String modifiedSystem = ImGuiTools.inputTextMultilineWrap(labels.getHidden("System"), systemText, imSystem);
+      String modifiedSystem = ImGuiTools.inputTextMultiline(labels.getHidden("System"), systemText, imSystem);
       if (modifiedSystem != null)
       {
          system.setValue(modifiedSystem);
@@ -68,10 +89,19 @@ public class RDXLLMCondition
 
       ImGui.text("Prompt:");
       String promptText = prompt.getValue();
-      String modifiedPrompt = ImGuiTools.inputTextMultilineWrap(labels.getHidden("Prompt"), promptText, imPrompt);
+      String modifiedPrompt = ImGuiTools.inputTextMultiline(labels.getHidden("Prompt"), promptText, imPrompt);
       if (modifiedPrompt != null)
       {
          prompt.setValue(modifiedPrompt);
+      }
+
+      ImGui.text("Response matcher:");
+      matchIsSuccessRadio.renderImGuiWidget();
+      String responseMatcherText = responseMatcher.getValue();
+      String modifiedResponseMatcher = ImGuiTools.inputTextMultiline(labels.getHidden("Response matcher"), responseMatcherText, imResponseMatcher);
+      if (modifiedResponseMatcher != null)
+      {
+         responseMatcher.setValue(modifiedResponseMatcher);
       }
    }
 }

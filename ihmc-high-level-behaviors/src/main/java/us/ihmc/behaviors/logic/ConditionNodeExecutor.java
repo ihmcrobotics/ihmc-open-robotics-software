@@ -20,6 +20,17 @@ public class ConditionNodeExecutor extends LeafNodeExecutor<ConditionNodeState, 
    }
 
    @Override
+   public void update()
+   {
+      super.update();
+
+      switch (definition.getType().getValue())
+      {
+         case LLM -> llm.update();
+      }
+   }
+
+   @Override
    public void updateCurrentlyExecuting()
    {
       switch (definition.getType().getValue())

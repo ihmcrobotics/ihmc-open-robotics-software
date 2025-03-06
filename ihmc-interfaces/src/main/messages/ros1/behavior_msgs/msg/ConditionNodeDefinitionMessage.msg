@@ -23,10 +23,16 @@ bool inject_behavior_state
 # Whether to generate environment state information and add it to the prompt
 bool inject_environment_state
 
+# If a response match indicates success, else a match indicates failure
+bool match_is_success
+
 # The prompt given once at the very beginning
 string system
 
 # The prompt defining how to make the boolean decision
 string prompt
+
+# A regular expression, where if it matches, the execution failed
+string response_matcher
 
 

@@ -65,6 +65,15 @@ public class LLMConditionExecutor
       }
    }
 
+   public void update()
+   {
+      if (state.getLLM().pollResetContextRequested())
+      {
+         state.getLogger().info("Resetting context");
+         llama.resetContext(system.getValue());
+      }
+   }
+
    public void updateCurrentlyExecuting()
    {
       if (!llama.getSystem().equals(system.getValue()))
@@ -92,16 +101,17 @@ public class LLMConditionExecutor
          }
 
          response = llama.generate(promptText);
-
-         if (response.contains("success"))
-         {
-            state.getLogger().info("Success, resetting context");
-            llama.resetContext();
-         }
       }
 
       state.getLogger().info(response);
-      state.setFailed(response.contains("failure"));
+
+      boolean failure = response.matches(definition.getLLM().getResponseMatcher().getValue());
+      boolean matchIsSuccess = definition.getLLM().getMatchIsSuccess().getValue();
+
+      if (matchIsSuccess)
+         failure = !failure;
+
+      state.setFailed(failure);
 
       state.setIsExecuting(false); // Completes immediately
    }

@@ -47,6 +47,10 @@ module behavior_msgs
          */
         boolean inject_environment_state;
         /**
+         * If a response match indicates success, else a match indicates failure
+         */
+        boolean match_is_success;
+        /**
          * The prompt given once at the very beginning
          */
         string<10000> system;
@@ -54,6 +58,10 @@ module behavior_msgs
          * The prompt defining how to make the boolean decision
          */
         string<10000> prompt;
+        /**
+         * A regular expression, where if it matches, the execution failed
+         */
+        string<10000> response_matcher;
       };
     };
   };
