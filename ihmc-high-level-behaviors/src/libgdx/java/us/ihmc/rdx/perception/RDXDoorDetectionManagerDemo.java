@@ -1,6 +1,7 @@
 package us.ihmc.rdx.perception;
 
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.cuda.CUDATools;
 import us.ihmc.perception.detections.doors.DoorDetectionManager;
@@ -34,6 +35,8 @@ public class RDXDoorDetectionManagerDemo
                                                                                    .toString();
 
    private final ROS2Node ros2Node;
+   private final ROS2PeerClockOffsetEstimator robotClockOffsetEstimator;
+   private final ROS2PeerClockOffsetEstimator uiClockOffsetEstimator;
    private final OpenCLManager openCLManager;
 
    private final DoorDetectionManager doorDetectionManager;
@@ -57,6 +60,8 @@ public class RDXDoorDetectionManagerDemo
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy));
 
       ros2Node = new ROS2NodeBuilder().build(getClass().getSimpleName());
+      robotClockOffsetEstimator = new ROS2PeerClockOffsetEstimator(ros2Node);
+      uiClockOffsetEstimator = new ROS2PeerClockOffsetEstimator(ros2Node);
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
       openCLManager = new OpenCLManager();
 
@@ -66,7 +71,7 @@ public class RDXDoorDetectionManagerDemo
       zed = new ZEDSVOPlaybackSensor(ros2Helper, 0, ZEDModelData.ZED_2, enableNeuralMode ? SL_DEPTH_MODE_NEURAL : SL_DEPTH_MODE_PERFORMANCE, SVO_FILE);
       zed.useTrackedPose(true);
 
-      yoloThread = new YOLOv8DetectionThread(() -> true);
+      yoloThread = new YOLOv8DetectionThread(robotClockOffsetEstimator, () -> true);
       yoloThread.setImageSensor(zed, ZEDImageSensor.LEFT_COLOR_IMAGE_KEY, ZEDImageSensor.DEPTH_IMAGE_KEY);
       yoloThread.addDetectionConsumerCallback(doorDetectionManager::registerNewDetections);
 
@@ -84,7 +89,7 @@ public class RDXDoorDetectionManagerDemo
          planarRegionsList.applyTransform(framePlanarRegions.getSensorToWorldFrameTransform());
          planarRegionsGraphic.generateMeshes(planarRegionsList);
       });
-      yoloSettings = new RDXROS2YOLOv8Settings(ros2Node);
+      yoloSettings = new RDXROS2YOLOv8Settings(ros2Node, uiClockOffsetEstimator);
       doorDetectionPanel = new RDXROS2DoorDetectionPanel(ros2Node);
 
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
@@ -114,7 +119,7 @@ public class RDXDoorDetectionManagerDemo
             updatePointCloud();
             zedSVOPanel.update();
             planarRegionsGraphic.update();
-            yoloSettings.publishSettingsMessageIfChanged();
+            yoloSettings.update();
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
@@ -165,6 +170,8 @@ public class RDXDoorDetectionManagerDemo
       planarRegionThread.blockingKill();
       zed.close();
 
+      robotClockOffsetEstimator.destroy();
+      uiClockOffsetEstimator.destroy();
       ros2Node.destroy();
       openCLManager.destroy();
    }
