@@ -11,7 +11,9 @@ import us.ihmc.commons.lists.SupplierBuilder;
 import us.ihmc.convexOptimization.linearProgram.LinearProgramSolver;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
@@ -359,9 +361,11 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
 
    private static class ContactPoint
    {
-      private RigidBodyBasics contactingBody;
       private final FramePose3D contactPose = new FramePose3D();
+      private final FramePoint3D contactPointInBodyFrame = new FramePoint3D();
       private final PoseReferenceFrame contactFrame;
+
+      private RigidBodyBasics contactingBody;
       private double coefficientOfFriction;
 
       ContactPoint(int index)
@@ -388,6 +392,10 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
 
          // Set position
          contactPose.getPosition().setMatchingFrame(contactPoint);
+
+         // Store relevant information for full update
+         contactPointInBodyFrame.setIncludingFrame(contactPoint);
+         contactPointInBodyFrame.changeFrame(contactingBody.getBodyFixedFrame());
       }
 
       void set(ContactPoint other)
@@ -398,7 +406,11 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
 
       void update()
       {
+         // Set position
+         contactPose.getPosition().setMatchingFrame(contactPointInBodyFrame);
          contactPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+         // Update frame
          contactFrame.setPoseAndUpdate(contactPose);
       }
    }
