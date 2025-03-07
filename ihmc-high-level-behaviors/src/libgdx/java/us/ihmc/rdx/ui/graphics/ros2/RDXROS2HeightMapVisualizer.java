@@ -131,15 +131,12 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
                                                     LogTools.warn("Creating Buffer of Size: {}", compressedBufferDefaultSize);
                                                  }
 
-                                                 if (latestHeightMapData == null)
-                                                 {
-                                                    latestHeightMapData = new HeightMapData(RapidHeightMapManager.getHeightMapParameters()
-                                                                                                                 .getGlobalCellSizeInMeters(),
-                                                                                            RapidHeightMapManager.getHeightMapParameters()
-                                                                                                                 .getGlobalWidthInMeters(),
-                                                                                            imageMessage.getPosition().getX(),
-                                                                                            imageMessage.getPosition().getY());
-                                                 }
+                                                 latestHeightMapData = new HeightMapData(RapidHeightMapManager.getHeightMapParameters()
+                                                                                                              .getGlobalCellSizeInMeters(),
+                                                                                         RapidHeightMapManager.getHeightMapParameters()
+                                                                                                              .getGlobalWidthInMeters(),
+                                                                                         imageMessage.getPosition().getX(),
+                                                                                         imageMessage.getPosition().getY());
 
                                                  PerceptionMessageTools.convertToHeightMapImage(imageMessage,
                                                                                                 heightMapImage,
