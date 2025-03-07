@@ -355,11 +355,31 @@ public class OpenCVTools
    }
 
    /**
+    * @return Bytes of memory used to store the data in the mat.
+    *       Not necessarily equal to {@link #dataSize(Mat)} as the
+    *       stored data may have padding at the end of each row.
+    */
+   public static long memorySize(Mat mat)
+   {
+      return mat.step() * mat.rows();
+   }
+
+   /**
     * @return Total size of data stored in the mat, in bytes.
     */
    public static long dataSize(GpuMat mat)
    {
       return mat.elemSize() * mat.rows() * mat.cols();
+   }
+
+   /**
+    * @return Bytes of memory used to store the data in the mat.
+    *       Not necessarily equal to {@link #dataSize(GpuMat)} as the
+    *       stored data may have padding at the end of each row.
+    */
+   public static long memorySize(GpuMat mat)
+   {
+      return mat.step() * mat.rows();
    }
 
    /**
