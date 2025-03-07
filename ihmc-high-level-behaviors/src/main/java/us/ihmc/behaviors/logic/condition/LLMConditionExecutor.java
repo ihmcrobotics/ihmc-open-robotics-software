@@ -1,10 +1,17 @@
 package us.ihmc.behaviors.logic.condition;
 
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.logic.ConditionNodeDefinition;
 import us.ihmc.behaviors.logic.ConditionNodeState;
+import us.ihmc.behaviors.reasoning.BehaviorTreeLLMEncoding;
 import us.ihmc.communication.crdt.CRDTBidirectionalBoolean;
 import us.ihmc.communication.crdt.CRDTBidirectionalString;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.llama.Llama;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
+import us.ihmc.tools.string.StringTools;
+
+import java.util.ArrayList;
 
 /**
  * TODO: Extract context so each node holds it's own
@@ -38,6 +45,7 @@ public class LLMConditionExecutor
       }
    }
 
+   private final ReferenceFrameLibrary referenceFrameLibrary;
    private final ConditionNodeState state;
    private final ConditionNodeDefinition definition;
 
@@ -47,9 +55,10 @@ public class LLMConditionExecutor
    private final CRDTBidirectionalString system;
    private final CRDTBidirectionalString prompt;
 
-   public LLMConditionExecutor(ConditionNodeState state)
+   public LLMConditionExecutor(ConditionNodeState state, ReferenceFrameLibrary referenceFrameLibrary)
    {
       this.state = state;
+      this.referenceFrameLibrary = referenceFrameLibrary;
 
       definition = state.getDefinition();
 
@@ -85,20 +94,37 @@ public class LLMConditionExecutor
       String promptText = prompt.getValue();
       state.getLogger().info(promptText);
 
+      StringBuilder injectedText = new StringBuilder();
+      if (injectBehaviorState.getValue())
+      {
+         injectedText.append("The following is a description of the current behavior state:\n");
+         injectedText.append(BehaviorTreeLLMEncoding.encode(BehaviorTreeTools.findRootNode(state)) + "\n");
+      }
+      if (injectEnvironmentState.getValue())
+      {
+         ArrayList<String> frameNames = new ArrayList<>();
+         referenceFrameLibrary.getAllFrameNames(frameNames::add);
+
+         if (frameNames.isEmpty())
+            injectedText.append("There are no currently detected objects in the environment.");
+         else
+            injectedText.append("The following is a list of poses of things in the environment:\n");
+
+         for (String frameName : frameNames)
+         {
+            ReferenceFrame frameByName = referenceFrameLibrary.findFrameByName(frameName);
+            injectedText.append(frameByName.getName() + StringTools.tupleString(frameByName.getTransformToWorldFrame().getTranslation())).append("\n");
+         }
+      }
+
+      promptText = injectedText + "\n" + promptText;
+      state.getLogger().info("Prompt: %s".formatted(promptText));
+
       String response;
       synchronized (lock)
       {
          if (resetContextEachRun.getValue())
             llama.resetContext();
-
-         if (injectBehaviorState.getValue())
-         {
-            // TODO
-         }
-         if (injectEnvironmentState.getValue())
-         {
-            // TODO
-         }
 
          response = llama.generate(promptText);
       }

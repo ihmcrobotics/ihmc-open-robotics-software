@@ -4,6 +4,7 @@ import us.ihmc.behaviors.logic.condition.CounterConditionExecutor;
 import us.ihmc.behaviors.logic.condition.LLMConditionExecutor;
 import us.ihmc.behaviors.sequence.LeafNodeExecutor;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class ConditionNodeExecutor extends LeafNodeExecutor<ConditionNodeState, ConditionNodeDefinition>
@@ -11,12 +12,12 @@ public class ConditionNodeExecutor extends LeafNodeExecutor<ConditionNodeState, 
    private final CounterConditionExecutor counter;
    private final LLMConditionExecutor llm;
 
-   public ConditionNodeExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public ConditionNodeExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ReferenceFrameLibrary referenceFrameLibrary)
    {
       super(new ConditionNodeState(id, crdtInfo, saveFileDirectory));
 
       counter = new CounterConditionExecutor(state);
-      llm = new LLMConditionExecutor(state);
+      llm = new LLMConditionExecutor(state, referenceFrameLibrary);
    }
 
    @Override
