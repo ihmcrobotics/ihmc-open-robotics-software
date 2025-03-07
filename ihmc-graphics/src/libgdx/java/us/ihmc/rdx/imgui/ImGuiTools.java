@@ -314,58 +314,6 @@ public class ImGuiTools
    }
 
    /**
-    * Renders a multiline widget that dynamically wraps the text so
-    * the user can see it.
-    *
-    * @return If user modified, the text with no newlines
-    *         If user did not modify, returns null
-    */
-   public static String inputTextMultilineWrap(String widgetName, String text, ImString imString)
-   {
-      float columnWidth = ImGui.getColumnWidth();
-      int wrapAt = (int) Math.floor(ImGui.getColumnWidth() / ImGuiTools.calcTextSizeX("a"));
-
-      StringBuilder wrappedTextBuilder = new StringBuilder();
-      int lineStart = 0;
-
-      while (lineStart < text.length())
-      {
-         int lineEnd = Math.min(lineStart + wrapAt, text.length());
-         // Check if we need to adjust the lineEnd to avoid cutting words
-         if (lineEnd < text.length() && !Character.isWhitespace(text.charAt(lineEnd)))
-         {
-            int lastSpace = text.lastIndexOf(' ', lineEnd);
-            if (lastSpace > lineStart)
-            {
-               lineEnd = lastSpace;
-            }
-         }
-
-         wrappedTextBuilder.append(text, lineStart, lineEnd).append("\n");
-         lineStart = lineEnd;
-         // Skip any whitespace after the line end
-         while (lineStart < text.length() && Character.isWhitespace(text.charAt(lineStart)))
-         {
-            lineStart++;
-         }
-      }
-
-      String wrappedText = wrappedTextBuilder.toString();
-
-      imString.set(wrappedText);
-
-      ImGui.setNextItemWidth(columnWidth);
-      if (ImGui.inputTextMultiline(widgetName, imString))
-      {
-         String returnText = imString.get();
-         returnText = returnText.replaceAll("\\r\\n|\\n|\\r", " ").trim();
-         return returnText;
-      }
-
-      return null;
-   }
-
-   /**
     * Renders a multiline widget that dynamically resizes to the necessary height
     * and the width of the available area.
     *
