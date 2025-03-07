@@ -100,15 +100,15 @@ public class AI2RActionFailureMessagePubSubType implements us.ihmc.pubsub.TopicD
    {
       if(data.getActionName().length() <= 255)
       cdr.write_type_d(data.getActionName());else
-          throw new RuntimeException("action_name field exceeds the maximum length");
+          throw new RuntimeException("action_name field exceeds the maximum length: %d > %d".formatted(data.getActionName().length(), 255));
 
       if(data.getActionType().length() <= 255)
       cdr.write_type_d(data.getActionType());else
-          throw new RuntimeException("action_type field exceeds the maximum length");
+          throw new RuntimeException("action_type field exceeds the maximum length: %d > %d".formatted(data.getActionType().length(), 255));
 
       if(data.getActionFrame().length() <= 255)
       cdr.write_type_d(data.getActionFrame());else
-          throw new RuntimeException("action_frame field exceeds the maximum length");
+          throw new RuntimeException("action_frame field exceeds the maximum length: %d > %d".formatted(data.getActionFrame().length(), 255));
 
       cdr.write_type_6(data.getPositionTolerance());
 

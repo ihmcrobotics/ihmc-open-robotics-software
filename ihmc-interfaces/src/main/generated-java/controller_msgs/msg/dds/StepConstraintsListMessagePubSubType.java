@@ -130,31 +130,31 @@ public class StepConstraintsListMessagePubSubType implements us.ihmc.pubsub.Topi
 
       if(data.getRegionOrigin().size() <= 20)
       cdr.write_type_e(data.getRegionOrigin());else
-          throw new RuntimeException("region_origin field exceeds the maximum length");
+          throw new RuntimeException("region_origin field exceeds the maximum length: %d > %d".formatted(data.getRegionOrigin().size(), 20));
 
       if(data.getRegionOrientation().size() <= 20)
       cdr.write_type_e(data.getRegionOrientation());else
-          throw new RuntimeException("region_orientation field exceeds the maximum length");
+          throw new RuntimeException("region_orientation field exceeds the maximum length: %d > %d".formatted(data.getRegionOrientation().size(), 20));
 
       if(data.getRegionNormal().size() <= 20)
       cdr.write_type_e(data.getRegionNormal());else
-          throw new RuntimeException("region_normal field exceeds the maximum length");
+          throw new RuntimeException("region_normal field exceeds the maximum length: %d > %d".formatted(data.getRegionNormal().size(), 20));
 
       if(data.getConcaveHullsSize().size() <= 100)
       cdr.write_type_e(data.getConcaveHullsSize());else
-          throw new RuntimeException("concave_hulls_size field exceeds the maximum length");
+          throw new RuntimeException("concave_hulls_size field exceeds the maximum length: %d > %d".formatted(data.getConcaveHullsSize().size(), 100));
 
       if(data.getNumberOfHolesInRegion().size() <= 100)
       cdr.write_type_e(data.getNumberOfHolesInRegion());else
-          throw new RuntimeException("number_of_holes_in_region field exceeds the maximum length");
+          throw new RuntimeException("number_of_holes_in_region field exceeds the maximum length: %d > %d".formatted(data.getNumberOfHolesInRegion().size(), 100));
 
       if(data.getHolePolygonsSize().size() <= 100)
       cdr.write_type_e(data.getHolePolygonsSize());else
-          throw new RuntimeException("hole_polygons_size field exceeds the maximum length");
+          throw new RuntimeException("hole_polygons_size field exceeds the maximum length: %d > %d".formatted(data.getHolePolygonsSize().size(), 100));
 
       if(data.getVertexBuffer().size() <= 50000)
       cdr.write_type_e(data.getVertexBuffer());else
-          throw new RuntimeException("vertex_buffer field exceeds the maximum length");
+          throw new RuntimeException("vertex_buffer field exceeds the maximum length: %d > %d".formatted(data.getVertexBuffer().size(), 50000));
 
    }
 

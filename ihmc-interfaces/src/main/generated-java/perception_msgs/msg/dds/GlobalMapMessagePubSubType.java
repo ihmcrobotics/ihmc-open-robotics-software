@@ -79,7 +79,7 @@ public class GlobalMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    {
       if(data.getGlobalMap().size() <= 100)
       cdr.write_type_e(data.getGlobalMap());else
-          throw new RuntimeException("global_map field exceeds the maximum length");
+          throw new RuntimeException("global_map field exceeds the maximum length: %d > %d".formatted(data.getGlobalMap().size(), 100));
 
    }
 

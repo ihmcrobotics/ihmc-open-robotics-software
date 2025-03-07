@@ -186,7 +186,7 @@ public class FootstepDataMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getOrientation(), cdr);
       if(data.getPredictedContactPoints2d().size() <= 10)
       cdr.write_type_e(data.getPredictedContactPoints2d());else
-          throw new RuntimeException("predicted_contact_points_2d field exceeds the maximum length");
+          throw new RuntimeException("predicted_contact_points_2d field exceeds the maximum length: %d > %d".formatted(data.getPredictedContactPoints2d().size(), 10));
 
       cdr.write_type_9(data.getTrajectoryType());
 
@@ -196,15 +196,15 @@ public class FootstepDataMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
       if(data.getCustomWaypointProportions().size() <= 2)
       cdr.write_type_e(data.getCustomWaypointProportions());else
-          throw new RuntimeException("custom_waypoint_proportions field exceeds the maximum length");
+          throw new RuntimeException("custom_waypoint_proportions field exceeds the maximum length: %d > %d".formatted(data.getCustomWaypointProportions().size(), 2));
 
       if(data.getCustomPositionWaypoints().size() <= 12)
       cdr.write_type_e(data.getCustomPositionWaypoints());else
-          throw new RuntimeException("custom_position_waypoints field exceeds the maximum length");
+          throw new RuntimeException("custom_position_waypoints field exceeds the maximum length: %d > %d".formatted(data.getCustomPositionWaypoints().size(), 12));
 
       if(data.getSwingTrajectory().size() <= 12)
       cdr.write_type_e(data.getSwingTrajectory());else
-          throw new RuntimeException("swing_trajectory field exceeds the maximum length");
+          throw new RuntimeException("swing_trajectory field exceeds the maximum length: %d > %d".formatted(data.getSwingTrajectory().size(), 12));
 
       cdr.write_type_6(data.getSwingTrajectoryBlendDuration());
 

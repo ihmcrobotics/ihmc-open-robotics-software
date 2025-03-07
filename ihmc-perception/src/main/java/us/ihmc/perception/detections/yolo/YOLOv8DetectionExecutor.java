@@ -1,7 +1,5 @@
 package us.ihmc.perception.detections.yolo;
 
-import gnu.trove.list.array.TFloatArrayList;
-import gnu.trove.list.array.TIntArrayList;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
@@ -10,12 +8,13 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Size;
 import perception_msgs.msg.dds.ImageMessage;
-import perception_msgs.msg.dds.YOLOv8AvailableModels;
-import perception_msgs.msg.dds.YOLOv8ModelInfo;
+import perception_msgs.msg.dds.YOLOv8ExecutorParameters;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.LatestTimestampModifiable;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Point3D32;
@@ -33,8 +32,6 @@ import us.ihmc.ros2.ROS2Publisher;
 
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -53,12 +50,14 @@ public class YOLOv8DetectionExecutor
    private final OpenCLDepthImageSegmenter segmenter = new OpenCLDepthImageSegmenter();
 
    private final Map<String, YOLOv8Model> availableModels = new LinkedHashMap<>();
-   private final Map<String, YOLOv8Model> enabledModels = new LinkedHashMap<>();
    private final Map<YOLOv8Model, YOLOv8DetectionList> yoloDetectionResults = new ConcurrentHashMap<>();
    private Iterator<YOLOv8Model> modelIterator;
 
-   private final Map<YOLOv8Model, TIntArrayList> erosionKernelRadiiMap = new HashMap<>();
-   private final Map<YOLOv8Model, TFloatArrayList> outlierThresholdsMap = new HashMap<>();
+   private final SyncedYOLOv8ExecutorParameters parameters;
+   private boolean requestingFullData;
+   private final ROS2Publisher<YOLOv8ExecutorParameters> parametersPublisher;
+   private final YOLOv8ExecutorParameters parametersMessage;
+   private final RepeatingTaskThread updateThread;
 
    private final List<Consumer<List<InstantDetection>>> detectionConsumerCallbacks = new ArrayList<>();
 
@@ -70,7 +69,7 @@ public class YOLOv8DetectionExecutor
    private final BlockingQueue<Runnable> taskQueue;
    private final RepeatingTaskThread taskExecutorThread = new RepeatingTaskThread("YOLOExecutor", this::executeTasks, DefaultExceptionHandler.RUNTIME_EXCEPTION);
 
-   public YOLOv8DetectionExecutor(BooleanSupplier annotatedImageDemanded)
+   public YOLOv8DetectionExecutor(CRDTInfo crdtInfo, BooleanSupplier annotatedImageDemanded)
    {
       this.annotatedImageDemanded = annotatedImageDemanded;
 
@@ -83,69 +82,31 @@ public class YOLOv8DetectionExecutor
          LogTools.info("\t\t\tClasses: " + model.getDetectableObjectCount());
 
          availableModels.put(model.getName(), model);
-
-         int[] defaultErosionKernelRadii = new int[model.getDetectableObjectCount()];
-         Arrays.fill(defaultErosionKernelRadii, 2);
-         erosionKernelRadiiMap.put(model, new TIntArrayList(defaultErosionKernelRadii));
-
-         float[] defaultOutlierThresholds = new float[model.getDetectableObjectCount()];
-         Arrays.fill(defaultOutlierThresholds, 1.0f);
-         outlierThresholdsMap.put(model, new TFloatArrayList(defaultOutlierThresholds));
       }
 
       if (availableModels.isEmpty())
          LogTools.error("No YOLO models found. YOLO will not run.");
 
-      // Create the available models message
-      YOLOv8AvailableModels availableModelsMessage = new YOLOv8AvailableModels();
-      availableModelsMessage.setRequest(false);
-      for (YOLOv8Model model : availableModels.values())
-      {
-         YOLOv8ModelInfo modelInfo = availableModelsMessage.getAvailableYoloModels().add();
-         modelInfo.setModelName(model.getName());
-         model.getDetectableObjects().forEach(objectClass -> modelInfo.getDetectableObjectClasses().add(objectClass));
-      }
+      // Create YOLO parameters
+      parameters = new SyncedYOLOv8ExecutorParameters(crdtInfo);
+      parameters.setAvailableModels(availableModels.values());
+      parameters.requestSendFullData();
+      requestingFullData = true;
 
-      // Create a publisher for the message, and publish whenever a request is received
-      ROS2Publisher<YOLOv8AvailableModels> availableModelsPublisher = ros2Node.createPublisher(PerceptionAPI.YOLO_AVAILABLE_MODELS);
-      ros2Node.createSubscription2(PerceptionAPI.YOLO_AVAILABLE_MODELS, message ->
+      // Subscribe to YOLO parameters messages
+      ros2Node.createSubscription2(PerceptionAPI.YOLO_PARAMETERS, message ->
       {
-         if (message.getRequest())
-            availableModelsPublisher.publish(availableModelsMessage);
+         parameters.fromMessage(message);
+         parameters.confirmReceivedFullData();
+         requestingFullData = false;
       });
 
-      // Subscribe to YOLO settings messages
-      ros2Node.createSubscription2(PerceptionAPI.YOLO_SETTINGS, settingsMessage ->
-      {
-         // Enable/disable models
-         List<String> modelsToRun = settingsMessage.getModelsToRun().stream().map(StringBuilder::toString).toList();
-         availableModels.keySet().forEach(model ->
-         {
-            if (modelsToRun.contains(model))
-               enableModel(model);
-            else
-               disableModel(model);
-         });
-
-         // Update each model's settings according to the message
-         settingsMessage.getModelSettings().forEach(modelSettings ->
-         {
-            YOLOv8Model model = availableModels.get(modelSettings.getModelNameAsString());
-            boolean[] ignoredClasses = new boolean[modelSettings.getIgnoredObjectClasses().size()];
-            for (int i = 0; i < modelSettings.getIgnoredObjectClasses().size(); ++i)
-               ignoredClasses[i] = modelSettings.getIgnoredObjectClasses().getBoolean(i);
-            model.setIgnoredClasses(ignoredClasses);
-            model.setConfidenceThresholds(modelSettings.getConfidenceThresholds().toArray());
-            model.setMaskThresholds(modelSettings.getMaskThresholds().toArray());
-            model.setNMSThreshold(modelSettings.getNonMaximumSuppressionThreshold());
-
-            TIntArrayList erosionKernelRadii = erosionKernelRadiiMap.get(model);
-            erosionKernelRadii.set(0, modelSettings.getErosionKernelRadii().toArray());
-
-            TFloatArrayList outlierThresholds = outlierThresholdsMap.get(model);
-            outlierThresholds.set(0, modelSettings.getOutlierThresholds().toArray());
-         });
-      });
+      parametersPublisher = ros2Node.createPublisher(PerceptionAPI.YOLO_PARAMETERS);
+      parametersMessage = new YOLOv8ExecutorParameters();
+      updateThread = new RepeatingTaskThread(getClass().getSimpleName() + "Updater", this::update);
+      updateThread.setFrequencyLimit(10.0);
+      updateThread.setDaemon(true);
+      updateThread.startRepeating();
 
       taskQueue = new ArrayBlockingQueue<>(2 * availableModels.size());
       taskExecutorThread.setDaemon(true);
@@ -168,22 +129,22 @@ public class YOLOv8DetectionExecutor
 
    public void enableModel(String modelName)
    {
-      enabledModels.put(modelName, availableModels.get(modelName));
+      parameters.getModelsToRun().add(modelName);
    }
 
    public void enableAllModels()
    {
-      enabledModels.putAll(availableModels);
+      parameters.getModelsToRun().addAll(availableModels.keySet());
    }
 
    public void disableModel(String modelName)
    {
-      enabledModels.remove(modelName);
+      parameters.getModelsToRun().remove(modelName);
    }
 
    public void disableAllModels()
    {
-      enabledModels.clear();
+      parameters.getModelsToRun().clear();
    }
 
    public void runNextEnabledModel(RawImage colorImage, RawImage depthImage)
@@ -195,7 +156,7 @@ public class YOLOv8DetectionExecutor
       {
          YOLOv8Model model = modelIterator.next();
 
-         if (enabledModels.containsKey(model.getName()))
+         if (parameters.getModelsToRun().getValue().contains(model.getName()))
          {
             runYOLODetection(model, colorImage, depthImage);
             return;
@@ -238,6 +199,8 @@ public class YOLOv8DetectionExecutor
                newestColorImage.read().release();
             newestColorImage.set(bgrImage.get());
 
+            SyncedYOLOv8ModelParameters modelParameters = parameters.getModelParameters().get(yoloModel.getName());
+
             // Create list of instant detections from results
             List<InstantDetection> yoloInstantDetections = new ArrayList<>();
             for (YOLOv8Detection detection : yoloResults)
@@ -245,7 +208,7 @@ public class YOLOv8DetectionExecutor
                RawImage objectMask = detection.mask();
 
                // Erode mask to get better segmentation
-               int erosionKernelRadius = erosionKernelRadiiMap.get(yoloModel).get(detection.objectClassID());
+               int erosionKernelRadius = modelParameters.getErosionKernelRadii().getValueReadOnly(detection.objectClassID());
                Mat erodedMask = new Mat(objectMask.getHeight(), objectMask.getWidth(), objectMask.getOpenCVType());
                opencv_imgproc.erode(objectMask.getCpuImageMat(),
                                     erodedMask,
@@ -253,30 +216,36 @@ public class YOLOv8DetectionExecutor
                                                                          new Size(2 * erosionKernelRadius + 1, 2 * erosionKernelRadius + 1),
                                                                          new Point(erosionKernelRadius, erosionKernelRadius)));
                RawImage erodedObjectMask = objectMask.replaceImage(erodedMask);
+               objectMask.release();
 
                // Get the segmented depth image
                RawImage segmentedDepth = segmenter.removeBackground(depthImage, erodedObjectMask);
                // Get the point cloud
                List<Point3D32> pointCloud = extractor.extractPointCloud(segmentedDepth);
                // Filter out outliers from the point cloud
-               float outlierThreshold = outlierThresholdsMap.get(yoloModel).get(detection.objectClassID());
+               float outlierThreshold = modelParameters.getOutlierThresholds().getValueReadOnly(detection.objectClassID());
                pointCloud = YOLOv8Tools.filterOutliers(pointCloud, outlierThreshold, 128);
                // Get the centroid of the point cloud
                Point3D32 centroid = YOLOv8Tools.computeCentroidOfPointCloud(pointCloud, 128);
                if (centroid.containsNaN())
-                  return;
+               {
+                  erodedObjectMask.release();
+                  segmentedDepth.release();
+                  continue;
+               }
 
                // Create an instant detection from data
                YOLOv8InstantDetection instantDetection = new YOLOv8InstantDetection(detection.objectClass(),
                                                                                     detection.confidence(),
                                                                                     new Pose3D(centroid, new RotationMatrix()),
-                                                                                    objectMask.getAcquisitionTime(),
+                                                                                    erodedObjectMask.getAcquisitionTime(),
                                                                                     bgrImage,
                                                                                     erodedObjectMask,
                                                                                     depthImage,
                                                                                     pointCloud);
                yoloInstantDetections.add(instantDetection);
-               erodedMask.release();
+               erodedObjectMask.release();
+               segmentedDepth.release();
             }
 
             // Process callbacks
@@ -293,6 +262,8 @@ public class YOLOv8DetectionExecutor
    public void destroy()
    {
       System.out.println("Destroying " + getClass().getSimpleName());
+      updateThread.blockingKill();
+
       ros2Node.destroy();
 
       taskExecutorThread.kill();
@@ -348,5 +319,22 @@ public class YOLOv8DetectionExecutor
 
       resultMat.close();
       colorImage.release();
+   }
+
+   private void update()
+   {
+      parameters.checkModified();
+      parameters.getModelParameters().forEach((modelName, modelParameters) ->
+      {
+         modelParameters.checkModified();
+         if (modelParameters.isModified())
+            modelParameters.applyToModel(availableModels.get(modelName));
+      });
+
+      if (requestingFullData || parameters.pollNeedSendFullData() || parameters.getModelParameters().values().stream().anyMatch(LatestTimestampModifiable::pollNeedSendFullData))
+      {
+         parameters.toMessage(parametersMessage);
+         parametersPublisher.publish(parametersMessage);
+      }
    }
 }

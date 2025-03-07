@@ -84,7 +84,7 @@ public class AI2RNavigationMessagePubSubType implements us.ihmc.pubsub.TopicData
    {
       if(data.getReferenceFrameName().length() <= 255)
       cdr.write_type_d(data.getReferenceFrameName());else
-          throw new RuntimeException("reference_frame_name field exceeds the maximum length");
+          throw new RuntimeException("reference_frame_name field exceeds the maximum length: %d > %d".formatted(data.getReferenceFrameName().length(), 255));
 
       geometry_msgs.msg.dds.PointPubSubType.write(data.getGoalStancePoint(), cdr);
       geometry_msgs.msg.dds.PointPubSubType.write(data.getGoalFocalPoint(), cdr);

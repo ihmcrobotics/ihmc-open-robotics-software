@@ -127,7 +127,7 @@ public class ScrewPrimitiveActionStateMessagePubSubType implements us.ihmc.pubsu
       behavior_msgs.msg.dds.ScrewPrimitiveActionDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
       if(data.getPreviewTrajectory().size() <= 50)
       cdr.write_type_e(data.getPreviewTrajectory());else
-          throw new RuntimeException("preview_trajectory field exceeds the maximum length");
+          throw new RuntimeException("preview_trajectory field exceeds the maximum length: %d > %d".formatted(data.getPreviewTrajectory().size(), 50));
 
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getForce(), cdr);
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getTorque(), cdr);

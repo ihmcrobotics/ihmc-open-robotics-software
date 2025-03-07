@@ -188,15 +188,15 @@ public class AtlasAuxiliaryRobotDataPubSubType implements us.ihmc.pubsub.TopicDa
 
       if(data.getElectricJointTemperatures().size() <= 6)
       cdr.write_type_e(data.getElectricJointTemperatures());else
-          throw new RuntimeException("electric_joint_temperatures field exceeds the maximum length");
+          throw new RuntimeException("electric_joint_temperatures field exceeds the maximum length: %d > %d".formatted(data.getElectricJointTemperatures().size(), 6));
 
       if(data.getElectricJointCurrents().size() <= 6)
       cdr.write_type_e(data.getElectricJointCurrents());else
-          throw new RuntimeException("electric_joint_currents field exceeds the maximum length");
+          throw new RuntimeException("electric_joint_currents field exceeds the maximum length: %d > %d".formatted(data.getElectricJointCurrents().size(), 6));
 
       if(data.getElectricJointEnabledArray().size() <= 6)
       cdr.write_type_e(data.getElectricJointEnabledArray());else
-          throw new RuntimeException("electric_joint_enabled_array field exceeds the maximum length");
+          throw new RuntimeException("electric_joint_enabled_array field exceeds the maximum length: %d > %d".formatted(data.getElectricJointEnabledArray().size(), 6));
 
       for(int i0 = 0; i0 < data.getRawImuTimestamps().length; ++i0)
       {

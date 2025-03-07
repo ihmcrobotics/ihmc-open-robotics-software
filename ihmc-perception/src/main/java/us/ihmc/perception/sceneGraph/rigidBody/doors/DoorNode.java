@@ -372,7 +372,7 @@ public class DoorNode extends DetectableSceneNode
 
    public enum DoorSide
    {
-      PUSH(true), PULL(false);
+      UNKNOWN(false), PUSH(true), PULL(false);
 
       private final boolean booleanValue;
 

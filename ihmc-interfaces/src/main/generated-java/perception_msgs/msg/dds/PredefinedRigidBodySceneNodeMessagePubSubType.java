@@ -97,7 +97,7 @@ public class PredefinedRigidBodySceneNodeMessagePubSubType implements us.ihmc.pu
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getInitialTransformToParent(), cdr);
       if(data.getVisualModelFilePath().length() <= 255)
       cdr.write_type_d(data.getVisualModelFilePath());else
-          throw new RuntimeException("visual_model_file_path field exceeds the maximum length");
+          throw new RuntimeException("visual_model_file_path field exceeds the maximum length: %d > %d".formatted(data.getVisualModelFilePath().length(), 255));
 
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getVisualTransformToParent(), cdr);
    }

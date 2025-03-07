@@ -74,7 +74,7 @@ public class SystemServiceLogRefreshMessagePubSubType implements us.ihmc.pubsub.
    {
       if(data.getServiceName().length() <= 255)
       cdr.write_type_d(data.getServiceName());else
-          throw new RuntimeException("service_name field exceeds the maximum length");
+          throw new RuntimeException("service_name field exceeds the maximum length: %d > %d".formatted(data.getServiceName().length(), 255));
 
    }
 

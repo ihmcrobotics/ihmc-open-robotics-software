@@ -101,11 +101,11 @@ public class KinematicsToolboxSupportRegionMessagePubSubType implements us.ihmc.
 
       if(data.getSupportRegionVertices().size() <= 100)
       cdr.write_type_e(data.getSupportRegionVertices());else
-          throw new RuntimeException("support_region_vertices field exceeds the maximum length");
+          throw new RuntimeException("support_region_vertices field exceeds the maximum length: %d > %d".formatted(data.getSupportRegionVertices().size(), 100));
 
       if(data.getSupportRegionVertexFrames().size() <= 100)
       cdr.write_type_e(data.getSupportRegionVertexFrames());else
-          throw new RuntimeException("support_region_vertex_frames field exceeds the maximum length");
+          throw new RuntimeException("support_region_vertex_frames field exceeds the maximum length: %d > %d".formatted(data.getSupportRegionVertexFrames().size(), 100));
 
    }
 

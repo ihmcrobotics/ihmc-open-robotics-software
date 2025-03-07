@@ -88,7 +88,7 @@ public class MultiContactTrajectorySequenceMessagePubSubType implements us.ihmc.
 
       if(data.getTrajectorySequence().size() <= 50)
       cdr.write_type_e(data.getTrajectorySequence());else
-          throw new RuntimeException("trajectory_sequence field exceeds the maximum length");
+          throw new RuntimeException("trajectory_sequence field exceeds the maximum length: %d > %d".formatted(data.getTrajectorySequence().size(), 50));
 
    }
 

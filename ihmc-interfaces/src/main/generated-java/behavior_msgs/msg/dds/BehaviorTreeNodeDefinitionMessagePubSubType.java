@@ -98,7 +98,7 @@ public class BehaviorTreeNodeDefinitionMessagePubSubType implements us.ihmc.pubs
       ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.write(data.getLatestModificationToChildren(), cdr);
       if(data.getName().length() <= 255)
       cdr.write_type_d(data.getName());else
-          throw new RuntimeException("name field exceeds the maximum length");
+          throw new RuntimeException("name field exceeds the maximum length: %d > %d".formatted(data.getName().length(), 255));
 
       cdr.write_type_3(data.getNumberOfChildren());
 

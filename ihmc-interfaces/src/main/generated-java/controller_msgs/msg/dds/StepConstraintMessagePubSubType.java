@@ -112,7 +112,7 @@ public class StepConstraintMessagePubSubType implements us.ihmc.pubsub.TopicData
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getRegionNormal(), cdr);
       if(data.getVertexBuffer().size() <= 1000)
       cdr.write_type_e(data.getVertexBuffer());else
-          throw new RuntimeException("vertex_buffer field exceeds the maximum length");
+          throw new RuntimeException("vertex_buffer field exceeds the maximum length: %d > %d".formatted(data.getVertexBuffer().size(), 1000));
 
       cdr.write_type_2(data.getConcaveHullSize());
 
@@ -120,7 +120,7 @@ public class StepConstraintMessagePubSubType implements us.ihmc.pubsub.TopicData
 
       if(data.getHolePolygonsSize().size() <= 20)
       cdr.write_type_e(data.getHolePolygonsSize());else
-          throw new RuntimeException("hole_polygons_size field exceeds the maximum length");
+          throw new RuntimeException("hole_polygons_size field exceeds the maximum length: %d > %d".formatted(data.getHolePolygonsSize().size(), 20));
 
    }
 

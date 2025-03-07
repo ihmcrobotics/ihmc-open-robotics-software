@@ -100,7 +100,7 @@ public class DetectedFiducialPacketPubSubType implements us.ihmc.pubsub.TopicDat
       geometry_msgs.msg.dds.PosePubSubType.write(data.getFiducialTransformToWorld(), cdr);
       if(data.getBounds().size() <= 100)
       cdr.write_type_e(data.getBounds());else
-          throw new RuntimeException("bounds field exceeds the maximum length");
+          throw new RuntimeException("bounds field exceeds the maximum length: %d > %d".formatted(data.getBounds().size(), 100));
 
    }
 
