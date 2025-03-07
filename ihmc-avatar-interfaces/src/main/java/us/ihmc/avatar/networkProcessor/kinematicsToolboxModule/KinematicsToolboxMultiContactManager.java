@@ -148,6 +148,7 @@ public class KinematicsToolboxMultiContactManager
       this.postureOptimizer = new SensitivityBasedStabilityGradientCalculator(fullRobotModel,
                                                                               wholeBodyContactState,
                                                                               multiContactRegionCalculator,
+                                                                              null,
                                                                               registry);
       this.midFeetZUpFrame = midFeetZUpFrame;
 

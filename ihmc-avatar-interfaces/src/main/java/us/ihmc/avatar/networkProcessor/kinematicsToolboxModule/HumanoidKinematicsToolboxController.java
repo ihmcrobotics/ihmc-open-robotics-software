@@ -244,6 +244,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
                                                                                   isUpperBodyLoadBearing,
                                                                                   getCenterOfMassSafeMargin(),
                                                                                   updateDT,
+                                                                                  yoGraphicsListRegistry,
                                                                                   registry);
 
       for (RobotSide robotSide : RobotSide.values)
@@ -516,25 +517,33 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       updateConfigurationCommand();
       super.updateInternal();
 
-      stabilityMarginCostCalculator.update();
-
-      if (!isUserProvidingSupportPolygon() && (stabilityMarginCostCalculator.contactAdjustmentRequested()) || isUpperBodyLoadBearing.getValue())
+      if (stabilityMarginCostCalculator.contactAdjustmentRequested() || isUpperBodyLoadBearing.getValue())
       {
-         // update actuation limits based on current configuration
-         wholeBodyContactState.updateActuationConstraintVector();
-         wholeBodyContactState.updateActuationConstraintMatrix();
+         { // update actuation limits based on current configuration
+//            wholeBodyContactState.updateActuationConstraintVector();
+//            wholeBodyContactState.updateActuationConstraintMatrix();
+         }
+
+         { // Full update
+            wholeBodyContactState.update(); // TODO don't commit
+         }
 
          multiContactRegionCalculator.updateContactState(wholeBodyContactState);
          multiContactRegionCalculator.performUpdateForNextVertex();
 
          if (multiContactRegionCalculator.hasSolvedWholeRegion())
          {
-            activeContactPointPositions.clear();
-            for (int i = 0; i < multiContactRegionCalculator.getNumberOfVertices(); i++)
+            stabilityMarginCostCalculator.update();
+
+            if (isUpperBodyLoadBearing.getValue())
             {
-               activeContactPointPositions.add().set(multiContactRegionCalculator.getOptimizedVertex(i));
+               activeContactPointPositions.clear();
+               for (int i = 0; i < multiContactRegionCalculator.getNumberOfVertices(); i++)
+               {
+                  activeContactPointPositions.add().set(multiContactRegionCalculator.getOptimizedVertex(i));
+               }
+               updateSupportPolygonConstraint(activeContactPointPositions);
             }
-            updateSupportPolygonConstraint(activeContactPointPositions);
          }
       }
       else

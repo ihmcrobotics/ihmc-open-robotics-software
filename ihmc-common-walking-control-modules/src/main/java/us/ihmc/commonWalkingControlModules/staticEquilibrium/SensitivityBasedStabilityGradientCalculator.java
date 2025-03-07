@@ -4,6 +4,7 @@ import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
@@ -12,6 +13,9 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.mecano.algorithms.CentroidalMomentumCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -28,7 +32,9 @@ import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.DefaultPoint2DGraphic;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -49,7 +55,9 @@ import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.percentageOfInte
  */
 public class SensitivityBasedStabilityGradientCalculator
 {
-   private static final double integrationDT = 1.0e-3;
+   private static final boolean APPLY_JOINT_LIMIT_FILTER = true;
+   private static final boolean USE_AREA_BASED_CONTACT_ADJUSTMENT = true;
+   private static final double INTEGRATION_DT = 1.0e-3;
    private static final int XY_DIMENSIONS = 2;
    private static final boolean COMPUTE_EXPECTED_MARGIN_VELOCITY = true;
 
@@ -118,6 +126,12 @@ public class SensitivityBasedStabilityGradientCalculator
    private final TIntArrayList contactPointIndicesToCompute = new TIntArrayList();
    private final List<FrameVector3D> contactPointOptimalAdjustments = new ArrayList<>();
 
+   private final List<YoFramePoint3D> yoContactPointOptimalAdjustmentsPoints = new ArrayList<>();
+   private final List<YoFrameVector3D> yoContactPointAreaAdjustments = new ArrayList<>();
+   private final List<YoFrameVector3D> yoContactPointMarginAdjustments = new ArrayList<>();
+   private final List<YoDouble> yoContactAdjustmentNorm = new ArrayList<>();
+
+   private final FrameVector3D tempNormal = new FrameVector3D();
    private final FrameVector3D tempFrameVectorX = new FrameVector3D();
    private final FrameVector3D tempFrameVectorY = new FrameVector3D();
    private int vertexIndexA;
@@ -136,6 +150,7 @@ public class SensitivityBasedStabilityGradientCalculator
    public SensitivityBasedStabilityGradientCalculator(FullHumanoidRobotModel fullRobotModel,
                                                       WholeBodyContactState wholeBodyContactState,
                                                       StabilityMarginRegionCalculator stabilityMarginRegionCalculator,
+                                                      YoGraphicsListRegistry graphicsListRegistry,
                                                       YoRegistry parentRegistry)
    {
       this.nullspaceCalculator = new ContactNullspaceCalculator(fullRobotModel, wholeBodyContactState, registry);
@@ -144,7 +159,7 @@ public class SensitivityBasedStabilityGradientCalculator
       this.postureConstraintVariationCalculator = new PostureConstraintMatrixVariationCalculator(fullRobotModel,
                                                                                                  wholeBodyContactState,
                                                                                                  stabilityMarginRegionCalculator.getOptimizationModule(),
-                                                                                                 integrationDT,
+                                                                                                 INTEGRATION_DT,
                                                                                                  registry);
       contactPointConstraintMatrixVariation = new ContactPointConstraintMatrixVariation(stabilityMarginRegionCalculator.getOptimizationModule());
       robotMass = fullRobotModel.getTotalMass();
@@ -183,6 +198,19 @@ public class SensitivityBasedStabilityGradientCalculator
       for (int i = 0; i < maxContactPointsToAdjust; i++)
       {
          contactPointOptimalAdjustments.add(new FrameVector3D());
+
+         yoContactPointOptimalAdjustmentsPoints.add(new YoFramePoint3D("contact" + i, ReferenceFrame.getWorldFrame(), registry));
+         yoContactPointAreaAdjustments.add(new YoFrameVector3D("contactAreaAdj" + i, ReferenceFrame.getWorldFrame(), registry));
+         yoContactPointMarginAdjustments.add(new YoFrameVector3D("contactMarginAdj" + i, ReferenceFrame.getWorldFrame(), registry));
+         yoContactAdjustmentNorm.add(new YoDouble("contactAdjustmentNorm" + i, registry));
+
+         if (graphicsListRegistry != null)
+         {
+            YoGraphicVector contactAreaAdjustmentGraphic = new YoGraphicVector("contactAreaAdj" + i, yoContactPointOptimalAdjustmentsPoints.get(i), yoContactPointAreaAdjustments.get(i), 0.003, YoAppearance.Red());
+            YoGraphicVector contactMarginAdjustmentGraphic = new YoGraphicVector("contactMarginAdj" + i, yoContactPointOptimalAdjustmentsPoints.get(i), yoContactPointMarginAdjustments.get(i), 0.1, YoAppearance.Green());
+            graphicsListRegistry.registerYoGraphic("Contact adjustment", contactAreaAdjustmentGraphic);
+            graphicsListRegistry.registerYoGraphic("Contact adjustment", contactMarginAdjustmentGraphic);
+         }
       }
 
       jointsToIgnore.addAll(multiBodySystemInput.getJointMatrixIndexProvider().getJointDoFIndices(fullRobotModel.getSpineJoint(SpineJointName.SPINE_ROLL)));
@@ -275,35 +303,76 @@ public class SensitivityBasedStabilityGradientCalculator
          DMatrixRMaj dAY = contactPointConstraintMatrixVariation.compute(contact_idx, tempFrameVectorY);
 
          FrameConvexPolygon2DReadOnly feasibleRegion = stabilityMarginRegionCalculator.getFeasibleRegion();
-
          double dAreaX = 0.0;
          double dAreaY = 0.0;
 
-         for (int edge_idx = 0; edge_idx < feasibleRegion.getNumberOfVertices(); edge_idx++)
          {
-            updateStabilityMarginData(edge_idx);
-            FramePoint2DReadOnly vertexA = feasibleRegion.getVertex(edge_idx);
-            FramePoint2DReadOnly vertexB = feasibleRegion.getNextVertex(edge_idx);
-            double distance = vertexA.distance(vertexB);
+//            for (int edge_idx = 0; edge_idx < feasibleRegion.getNumberOfVertices(); edge_idx++)
+            {
+               int edge_idx = stabilityMarginRegionCalculator.getLowestMarginEdgeIndex();
+               if (!updateStabilityMarginData(edge_idx))
+                  continue;
 
-            double sensitivityAX = cosA * computeSensitivity(dAX, primalSolutionA, dualSolutionA, tempSensitivityMatrix);
-            double sensitivityBX = cosB * computeSensitivity(dAX, primalSolutionB, dualSolutionB, tempSensitivityMatrix);
-            double sensitivityX = sensitivityAX * vertexAWeight + sensitivityBX * vertexBWeight;
-            dAreaX += sensitivityX * distance;
+               FramePoint2DReadOnly vertexA = feasibleRegion.getVertex(edge_idx);
+               FramePoint2DReadOnly vertexB = feasibleRegion.getNextVertex(edge_idx);
+               double distance = 1.0; // vertexA.distance(vertexB);
 
-            double sensitivityAY = cosA * computeSensitivity(dAY, primalSolutionA, dualSolutionA, tempSensitivityMatrix);
-            double sensitivityBY = cosB * computeSensitivity(dAY, primalSolutionB, dualSolutionB, tempSensitivityMatrix);
-            double sensitivityY = sensitivityAY * vertexAWeight + sensitivityBY * vertexBWeight;
-            dAreaY += sensitivityY * distance;
+               double sensitivityAX = cosA * computeSensitivity(dAX, primalSolutionA, dualSolutionA, tempSensitivityMatrix);
+               double sensitivityBX = cosB * computeSensitivity(dAX, primalSolutionB, dualSolutionB, tempSensitivityMatrix);
+               double sensitivityX = sensitivityAX * vertexAWeight + sensitivityBX * vertexBWeight;
+               dAreaX += sensitivityX * distance;
+
+               double sensitivityAY = cosA * computeSensitivity(dAY, primalSolutionA, dualSolutionA, tempSensitivityMatrix);
+               double sensitivityBY = cosB * computeSensitivity(dAY, primalSolutionB, dualSolutionB, tempSensitivityMatrix);
+               double sensitivityY = sensitivityAY * vertexAWeight + sensitivityBY * vertexBWeight;
+               dAreaY += sensitivityY * distance;
+            }
          }
 
-         FrameVector3D contactPointOptimalAdjustment = contactPointOptimalAdjustments.get(i);
-         contactPointOptimalAdjustment.setToZero(ReferenceFrame.getWorldFrame());
+         double dMarginX = 0.0;
+         double dMarginY = 0.0;
 
-         // Scale by sensitivity
+         { // Compute via farthest edge
+            // Find query direction parallel anti-parallel to normal
+            tempNormal.setIncludingFrame(wholeBodyContactState.getContactFrame(contact_idx), Axis3D.Z);
+            tempNormal.changeFrame(ReferenceFrame.getWorldFrame());
+            double minDot = Double.MAX_VALUE;
+            int leaningDirectionIndex = -1;
+
+            for (int j = 0; j < DIRECTIONS_TO_OPTIMIZE; j++)
+            {
+               double dot = tempNormal.getX() * queryDirectionX(j) + tempNormal.getY() * queryDirectionY(j);
+               if (dot < minDot)
+               {
+                  minDot = dot;
+                  leaningDirectionIndex = j;
+               }
+            }
+
+            DMatrixRMaj primalSolution = stabilityMarginRegionCalculator.getSolverPrimalSolution(leaningDirectionIndex);
+            DMatrixRMaj dualSolution = stabilityMarginRegionCalculator.getSolverDualSolution(leaningDirectionIndex);
+
+            dMarginX = computeSensitivity(dAX, primalSolution, dualSolution, tempSensitivityMatrix);
+            dMarginY = computeSensitivity(dAY, primalSolution, dualSolution, tempSensitivityMatrix);
+         }
+
+         // Update by area
          tempFrameVectorX.scale(dAreaX);
          tempFrameVectorY.scale(dAreaY);
-         contactPointOptimalAdjustment.add(tempFrameVectorX, tempFrameVectorY);
+         yoContactPointAreaAdjustments.get(i).add(tempFrameVectorX, tempFrameVectorY);
+
+         // Update by margin
+         tempFrameVectorX.scale(dMarginX);
+         tempFrameVectorY.scale(dMarginY);
+         yoContactPointMarginAdjustments.get(i).add(tempFrameVectorX, tempFrameVectorY);
+
+         // Scale by sensitivity
+         FrameVector3D contactPointOptimalAdjustment = contactPointOptimalAdjustments.get(i);
+         contactPointOptimalAdjustment.set(USE_AREA_BASED_CONTACT_ADJUSTMENT ? yoContactPointAreaAdjustments.get(i) : yoContactPointMarginAdjustments.get(i));
+         yoContactPointOptimalAdjustmentsPoints.get(i).setFromReferenceFrame(wholeBodyContactState.getContactFrame(contact_idx));
+
+         // Magnitude of the contact adjustment
+         yoContactAdjustmentNorm.get(i).set(contactPointOptimalAdjustment.norm());
       }
    }
 
@@ -354,7 +423,7 @@ public class SensitivityBasedStabilityGradientCalculator
       double sensitivityB = sensitivityMultiplier * cosB * computeSensitivity(solverConstraintVariation, primalSolutionB, dualSolutionB, tempSensitivityMatrix);
       double sensitivity = sensitivityA * vertexAWeight + sensitivityB * vertexBWeight;
 
-      double jointLimitAlpha = 1.0; // computeJointLimitFilter();
+      double jointLimitAlpha = APPLY_JOINT_LIMIT_FILTER ? computeJointLimitFilter() : 1.0;
 
       computedSensitivity.set(nullspaceIndex, 0, jointLimitAlpha * sensitivity);
    }

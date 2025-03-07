@@ -23,6 +23,7 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.log.LogTools;
@@ -52,13 +53,18 @@ public class StabilityMarginKinematicsCostCalculator
 //   private static final double MAX_PELVIS_ORIENTATION_OFFSET = Math.toRadians(180.0);
 
    // Hardware
-   private static final double MAX_ARM_ORIENTATION_OFFSET = Math.toRadians(30.0);
-   private static final double MAX_CHEST_ORIENTATION_OFFSET = Math.toRadians(30.0);
-   private static final double MAX_PELVIS_ORIENTATION_OFFSET = Math.toRadians(30.0);
+   private static final double MAX_ARM_ORIENTATION_OFFSET = Math.toRadians(35.0);
+   private static final double MAX_CHEST_ORIENTATION_OFFSET = Math.toRadians(35.0);
+   private static final double MAX_PELVIS_ORIENTATION_OFFSET = Math.toRadians(35.0);
 
    public static final boolean OVERRIDE_MESSAGE = false;
    public static final boolean ENABLE_POSTURE_OBJECTIVE = false;
    public static final boolean ENABLE_CONTACT_OBJECTIVE = false;
+
+   private static final double KP_ORIENTATION = 1200.0;
+   private static final double MAX_CONTACT_POINT_ADJUSTMENT = 0.5;
+   private static final double MAX_ORIENTATION_ERROR = Math.toRadians(4.0);
+//   private static final double MAX_COM_Z_ERROR = 0.01;
 
    private final WholeBodyContactState wholeBodyContactState;
    private final StabilityMarginRegionCalculator multiContactRegionCalculator;
@@ -84,6 +90,8 @@ public class StabilityMarginKinematicsCostCalculator
    private final BooleanProvider isUpperBodyLoadBearing;
    /* Compute support region and preview it at the current configuration, even if upper body is not load-bearing */
    private final YoBoolean requestContactAdjustment = new YoBoolean("requestContactAdjustment", registry);
+   /* Optimize posture */
+   private final YoBoolean requestPostureAdjustment = new YoBoolean("requestPostureAdjustment", registry);
    /* Contact normal for which support region is previewed */
    private final FrameVector3D regionNormal = new FrameVector3D();
 
@@ -108,6 +116,8 @@ public class StabilityMarginKinematicsCostCalculator
    private final YoDouble stabilityMarginHysteresis = new YoDouble("stabilityMarginHysteresis", registry);
    private final YoDouble alphaEnabled = new YoDouble("alphaEnabled", registry);
 
+   private final YoBoolean addContactAdjustment = new YoBoolean("addContactAdjustment", registry);
+
    private final YoDouble kpPosture = new YoDouble("kpPosture", registry);
    private final YoDouble kpContact = new YoDouble("kpContact", registry);
 
@@ -122,7 +132,6 @@ public class StabilityMarginKinematicsCostCalculator
    private int bracingPointIndex;
    private final YoFrameVector3D contactPointAdjustment;
    private final YoFrameVector3D integratedContactPointAdjustment;
-   private static final double MAX_CONTACT_POINT_ADJUSTMENT = 0.2;
 
    private final FramePose3D tempPose = new FramePose3D();
    private final FramePoint3D tempPoint = new FramePoint3D();
@@ -136,6 +145,7 @@ public class StabilityMarginKinematicsCostCalculator
                                                   BooleanProvider isUpperBodyLoadBearing,
                                                   DoubleProvider minStabilityMargin,
                                                   double updateDT,
+                                                  YoGraphicsListRegistry graphicsListRegistry,
                                                   YoRegistry parentRegistry)
    {
       this.wholeBodyContactState = wholeBodyContactState;
@@ -157,13 +167,15 @@ public class StabilityMarginKinematicsCostCalculator
       this.stabilityGradientCalculator = new SensitivityBasedStabilityGradientCalculator(fullRobotModel,
                                                                                          wholeBodyContactState,
                                                                                          multiContactRegionCalculator,
+                                                                                         graphicsListRegistry,
                                                                                          registry);
 
       this.chestOrientationCalculator = new OrientationCalculator(fullRobotModel.getChest(), midFeetZUpFrame, centerOfMassFrame, fullRobotModel, isUpperBodyLoadBearing);
       this.pelvisOrientationCalculator = new OrientationCalculator(fullRobotModel.getPelvis(), midFeetZUpFrame, centerOfMassFrame, fullRobotModel, isUpperBodyLoadBearing);
 
       kpPosture.set(30.0);
-      kpContact.set(5.0e-4);
+//      kpContact.set(5.0e-4);
+      kpContact.set(5.0e-5);
 
       double maxRate = Math.toRadians(15.0);
       chestOrientationOffsetCalculator = new OrientationOffsetCalculator("chest", updateDT, fullRobotModel.getChest().getBodyFixedFrame(), maxRate, MAX_CHEST_ORIENTATION_OFFSET, registry);
@@ -183,7 +195,7 @@ public class StabilityMarginKinematicsCostCalculator
       chestWeight = new YoVector3D("chestWeight", registry);
       pelvisWeight = new YoVector3D("pelvisWeight", registry);
 
-      regionNormal.set(-0.342, 0.940, 0.000);
+//      regionNormal.set(-0.342, 0.940, 0.000);
 
       // Detune the default KST values a bit
       chestDefaultWeight.set(0.0, 0.0, 0.5);
@@ -193,7 +205,8 @@ public class StabilityMarginKinematicsCostCalculator
       chestMultiContactWeight.set(0.0, 0.0, 0.1);
       pelvisMultiContactWeight.set(0.2, 0.2, 0.2);
 
-      orientationGains.setProportionalGains(1200.0);
+      orientationGains.setProportionalGains(KP_ORIENTATION);
+      orientationGains.setMaxProportionalError(MAX_ORIENTATION_ERROR);
 
       parentRegistry.addChild(registry);
    }
@@ -265,7 +278,6 @@ public class StabilityMarginKinematicsCostCalculator
 
             if (contactPointAdjustment.normSquared() > 1.0e-5)
             {
-               // double v = 0.075; // a good magnitude is ~0.07
                contactPointAdjustment.scale(kpContact.getValue());
                integratedContactPointAdjustment.add(updateDT * contactPointAdjustment.getX(), updateDT * contactPointAdjustment.getY(), updateDT * contactPointAdjustment.getZ());
             }
@@ -290,7 +302,7 @@ public class StabilityMarginKinematicsCostCalculator
       }
 
       boolean integrateRegargetedObjectives = isEnabled.getValue() && isUpperBodyLoadBearing.getValue() && updateAlphaEnabled() > 0.0;
-      if (integrateRegargetedObjectives)
+      if (integrateRegargetedObjectives && requestPostureAdjustment.getValue())
       {
          scaledStabilityGradient.set(stabilityGradientCalculator.getStabilityBoundaryGradient());
          CommonOps_DDRM.scale(EuclidCoreTools.square(alphaEnabled.getValue()) * kpPosture.getValue(), scaledStabilityGradient);
@@ -319,7 +331,7 @@ public class StabilityMarginKinematicsCostCalculator
       MultiBodySystemTools.insertJointsState(controlledJoints, JointStateType.VELOCITY, currentWholeBodyVelocity);
       previousStabilityMargin.set(multiContactRegionCalculator.getStabilityMargin());
 
-//      if (integrateRegargetedObjectives)
+      if (integrateRegargetedObjectives)
          fullRobotModel.updateFrames();
    }
 
@@ -382,6 +394,14 @@ public class StabilityMarginKinematicsCostCalculator
             // Retargeted position
             tempPoint.add(integratedContactPointAdjustment);
 
+            // Cap adjustment
+            double adjustmentSquared = integratedContactPointAdjustment.normSquared();
+            double maxAdjustmentSquared = EuclidCoreTools.square(MAX_CONTACT_POINT_ADJUSTMENT);
+            if (adjustmentSquared > maxAdjustmentSquared)
+            {
+               integratedContactPointAdjustment.scale(maxAdjustmentSquared / adjustmentSquared);
+            }
+
             if (!regionPolygon.isEmpty())
             { // Snap to region
                tempPoint.changeFrame(regionFrame);
@@ -394,16 +414,9 @@ public class StabilityMarginKinematicsCostCalculator
                integratedContactPointAdjustment.sub(tempPoint, command.getDesiredPose().getPosition());
             }
 
-            // Cap adjustment
-            double adjustmentSquared = integratedContactPointAdjustment.normSquared();
-            double maxAdjustmentSquared = EuclidCoreTools.square(MAX_CONTACT_POINT_ADJUSTMENT);
-            if (adjustmentSquared > maxAdjustmentSquared)
-            {
-               integratedContactPointAdjustment.scale(maxAdjustmentSquared / adjustmentSquared);
-            }
-
             // Add it
-            command.getDesiredPose().getPosition().add(integratedContactPointAdjustment);
+            if (addContactAdjustment.getValue())
+               command.getDesiredPose().getPosition().add(integratedContactPointAdjustment);
          }
       }
    }
@@ -428,18 +441,6 @@ public class StabilityMarginKinematicsCostCalculator
          chestOrientationCommand.setInverseKinematics(chestOrientationCalculator.getDesiredOrientation(), null);
          chestOrientationCommand.getReferenceOrientation().append(chestOrientationOffsetCalculator.getOrientationOffset());
       }
-
-//      OneDoFJointFeedbackControlCommand spineXCommand = bufferToPack.addOneDoFJointFeedbackControlCommand();
-//      spineXCommand.setJoint(fullRobotModel.getSpineJoint(SpineJointName.SPINE_ROLL));
-//      spineXCommand.getGains().setKp(1200.0);
-//      spineXCommand.setWeightForSolver(20.0);
-//      spineXCommand.setInverseKinematics(0.0, 0.0);
-//
-//      OneDoFJointFeedbackControlCommand spineYCommand = bufferToPack.addOneDoFJointFeedbackControlCommand();
-//      spineYCommand.setJoint(fullRobotModel.getSpineJoint(SpineJointName.SPINE_PITCH));
-//      spineYCommand.getGains().setKp(1200.0);
-//      spineYCommand.setWeightForSolver(20.0);
-//      spineYCommand.setInverseKinematics(0.0, 0.0);
    }
 
    public void retargetCenterOfMass(KinematicsToolboxCenterOfMassCommand command)

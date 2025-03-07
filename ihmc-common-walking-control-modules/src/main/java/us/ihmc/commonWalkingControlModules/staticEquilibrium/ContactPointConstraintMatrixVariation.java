@@ -38,7 +38,7 @@ public class ContactPointConstraintMatrixVariation
       equalityConstraintVariation.reshape(numEqualityDynamicsConstraints, nominalConstraintMatrix.getNumCols());
       equalityConstraintVariation.zero();
 
-      int colOffset = 3 * contactPointIndex;
+      int colOffset = LINEAR_DIMENSIONS * contactPointIndex;
 
       equalityConstraintVariation.set(numLinearDynamicsConstraints + Axis3D.X.ordinal(), colOffset + Axis3D.Y.ordinal(), -contactPointAdjustment.getZ());
       equalityConstraintVariation.set(numLinearDynamicsConstraints + Axis3D.X.ordinal(), colOffset + Axis3D.Z.ordinal(), contactPointAdjustment.getY());
