@@ -284,6 +284,8 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
       {
          try
          {
+            obstacleBetweenStepsChecker.setHeightMapData(environmentHandler.getHeightMap());
+
             if (!obstacleBetweenStepsChecker.isFootstepValid(candidateStep, stanceStep))
             {
                rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.OBSTACLE_BLOCKING_BODY);
@@ -319,6 +321,7 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
 
       double candidateStepHeight = DiscreteFootstepTools.getSnappedStepHeight(candidateStep, candidateStepSnapData.getSnapTransform());
       double stanceStepHeight = DiscreteFootstepTools.getSnappedStepHeight(stanceStep, stanceStepSnapData.getSnapTransform());
+      collisionDetector.setHeightMapData(environmentHandler.getHeightMap());
       boolean collisionDetected = collisionDetector.checkForCollision(candidateStep,
                                                                       stanceStep,
                                                                       candidateStepHeight,
@@ -341,12 +344,6 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
    public void setAssumeFlatGround(boolean assumeFlatGround)
    {
       this.assumeFlatGround = assumeFlatGround;
-   }
-
-   public void setHeightMapData(HeightMapData heightMapData)
-   {
-      collisionDetector.setHeightMapData(heightMapData);
-      obstacleBetweenStepsChecker.setHeightMapData(heightMapData);
    }
 
    private static void checkWiggleParameters(DefaultFootstepPlannerParametersReadOnly parameters)
