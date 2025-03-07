@@ -60,6 +60,6 @@ public class CoMHeightOffsetCalculator
 
    public double getOffset()
    {
-      return 0.0; // heightOffsetRL.getDoubleValue(); //
+      return heightOffsetRL.getDoubleValue(); //
    }
 }
