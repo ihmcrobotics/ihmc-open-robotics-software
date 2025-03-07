@@ -17,7 +17,6 @@ import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
@@ -73,18 +72,15 @@ public class ContinuousPlanner
    public ContinuousPlanner(DRCRobotModel robotModel,
                             HumanoidReferenceFrames referenceFrames,
                             AtomicReference<ContinuousHikingCommandMessage> commandMessage,
-                            ContinuousHikingParameters continuousHikingParameters,
-                            MonteCarloFootstepPlannerParameters monteCarloPlannerParameters,
-                            DefaultFootstepPlannerParametersBasics footstepPlannerParameters,
-                            SwingPlannerParametersBasics swingPlannerParameters,
+                            ActiveMappingParameterToolBox activeMappingParameterObject,
                             TerrainPlanningDebugger debugger,
                             ContinuousHikingLogger continuousHikingLogger)
    {
       this.referenceFrames = referenceFrames;
       this.commandMessage = commandMessage;
-      this.continuousHikingParameters = continuousHikingParameters;
-      this.footstepPlannerParameters = footstepPlannerParameters;
-      this.swingPlannerParameters = swingPlannerParameters;
+      this.continuousHikingParameters = activeMappingParameterObject.getContinuousHikingParameters();
+      this.footstepPlannerParameters = activeMappingParameterObject.getFootstepPlannerParameters();
+      this.swingPlannerParameters = activeMappingParameterObject.getSwingPlannerParameters();
       this.debugger = debugger;
       this.continuousHikingLogger = continuousHikingLogger;
 
@@ -92,7 +88,7 @@ public class ContinuousPlanner
       SideDependentList<ConvexPolygon2D> footPolygons = FootstepPlanningModuleLauncher.createFootPolygons(robotModel);
 
       logger = new FootstepPlannerLogger(footstepPlanner);
-      monteCarloFootstepPlanner = new MonteCarloFootstepPlanner(monteCarloPlannerParameters, footPolygons);
+      monteCarloFootstepPlanner = new MonteCarloFootstepPlanner(activeMappingParameterObject.getMonteCarloPlannerParameters(), footPolygons);
    }
 
    public void initialize()
