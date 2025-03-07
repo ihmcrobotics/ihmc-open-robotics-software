@@ -18,6 +18,9 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensors.realsense.RealSenseImageSensor;
 
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * This class handles publishing the color and depth of the realsense. Its meant to be a standalone class that only touches the realsense.
@@ -67,9 +70,8 @@ public class StandAloneRealsenseProcess
                                                                                                                .getSensorInformation()
                                                                                                                .getSteppingCameraTransform());
 
-      RepeatingTaskThread realsenseUpdateThread = new RepeatingTaskThread("SyncedRobotUpdate", realsenseTunableTransform::update);
-      realsenseUpdateThread.setFrequencyLimit(30.0);
-      realsenseUpdateThread.startRepeating();
+      ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+      scheduler.scheduleAtFixedRate(realsenseTunableTransform::update, 0, 33, TimeUnit.MILLISECONDS);
 
       d455Sensor.setSensorFrameSupplier(syncedRobot.getReferenceFrames()::getSteppingCameraFrame);
       loopOnDemand(d455Sensor.getGrabThread(), realsenseDemandNode);
