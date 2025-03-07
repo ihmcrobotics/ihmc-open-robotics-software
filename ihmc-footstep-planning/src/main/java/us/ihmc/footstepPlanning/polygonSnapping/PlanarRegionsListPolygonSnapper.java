@@ -69,7 +69,6 @@ public class PlanarRegionsListPolygonSnapper
 
          if (highestVertexInWorld.getZ() > maximumRegionHeightToConsider)
          {
-            continue;
          }
          else if (highestVertexInWorld.getZ() > highestZ + heightEpsilonToTakeFlatterRegion)
          {

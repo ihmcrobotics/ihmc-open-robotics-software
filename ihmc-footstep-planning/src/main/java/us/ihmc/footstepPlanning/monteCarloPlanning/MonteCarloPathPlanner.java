@@ -265,17 +265,7 @@ public class MonteCarloPathPlanner
 
    public void printLayerCounts()
    {
-      HashMap<Integer, Integer> layerCounts = new HashMap<>();
-      MonteCarloPlannerTools.getLayerCounts(root, layerCounts);
-
-      StringBuilder output = new StringBuilder("{");
-      for (Integer key : layerCounts.keySet())
-      {
-         output.append("(").append(key - root.getLevel()).append(":").append(layerCounts.get(key)).append(")");
-         output.append(", ");
-      }
-
-      LogTools.info("Layer Counts: {}", output.toString());
+      MonteCarloPlannerTools.printLayerCounts(root);
    }
 
    public MonteCarloWaypointAgent getAgent()

@@ -34,10 +34,7 @@ public class FootstepPlannerEdgeData
       copy.childNode = childNode;
       copy.endStepSnapData.set(endStepSnapData);
       copy.solutionEdge = solutionEdge;
-      for (int i = 0; i < dataBuffer.length; i++)
-      {
-         copy.dataBuffer[i] = dataBuffer[i];
-      }
+      System.arraycopy(dataBuffer, 0, copy.dataBuffer, 0, dataBuffer.length);
 
       return copy;
    }

@@ -58,7 +58,6 @@ public class GarbageFreePlanarRegionListPolygonSnapper
 
          if (highestVertexInWorld.getZ() > maximumRegionHeightToConsider)
          {
-            continue;
          }
          else if (highestVertexInWorld.getZ() > highestZ + heightEpsilonToTakeFlatterRegion)
          {

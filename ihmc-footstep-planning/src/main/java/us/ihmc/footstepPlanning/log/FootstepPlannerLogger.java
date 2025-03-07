@@ -84,9 +84,9 @@ public class FootstepPlannerLogger
       if (ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer())
       {
          // TODO GITHUB WORKFLOWS
-//         incomingLogsDirectory =
-//               System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "bamboo-logs" + File.separator + System.getenv("bamboo_planKey")
-//               + File.separator + System.getenv("bamboo_buildResultKey") + File.separator;
+         //         incomingLogsDirectory =
+         //               System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "bamboo-logs" + File.separator + System.getenv("bamboo_planKey")
+         //               + File.separator + System.getenv("bamboo_buildResultKey") + File.separator;
       }
       else
       {
@@ -362,13 +362,7 @@ public class FootstepPlannerLogger
                   writeSnapData(2, edgeData.getEndStepSnapData());
 
                   // write additional data as doubles
-                  fileWriter.write(tab + tab + "data:");
-                  long[] dataBuffer = edgeData.getDataBuffer();
-                  for (int k = 0; k < dataBuffer.length; k++)
-                  {
-                     fileWriter.write(dataBuffer[k] + (k == dataBuffer.length - 1 ? "" : ","));
-                  }
-                  fileWriter.write(newLine);
+                  writeAdditionalDataAsDoubles(edgeData.getDataBuffer());
                }
             }
          }
@@ -420,13 +414,7 @@ public class FootstepPlannerLogger
                writeLine(2, "height:" + edgeData.getChildSnapHeight());
 
                // write additional data as doubles
-               fileWriter.write(tab + tab + "data:");
-               long[] dataBuffer = edgeData.getDataBuffer();
-               for (int k = 0; k < dataBuffer.length; k++)
-               {
-                  fileWriter.write(dataBuffer[k] + (k == dataBuffer.length - 1 ? "" : ","));
-               }
-               fileWriter.write(newLine);
+               writeAdditionalDataAsDoubles(edgeData.getDataBuffer());
             }
          }
 
@@ -444,6 +432,16 @@ public class FootstepPlannerLogger
       }
 
       return true;
+   }
+
+   private void writeAdditionalDataAsDoubles(long[] dataBuffer) throws IOException
+   {
+      fileWriter.write(tab + tab + "data:");
+      for (int k = 0; k < dataBuffer.length; k++)
+      {
+         fileWriter.write(dataBuffer[k] + (k == dataBuffer.length - 1 ? "" : ","));
+      }
+      fileWriter.write(newLine);
    }
 
    private void logVariableDescriptors(YoRegistry registry) throws IOException

@@ -1,6 +1,5 @@
 package us.ihmc.footstepPlanning.tools;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.PositionOptimizedTrajectoryGenerator;
 import us.ihmc.euclid.Axis3D;
@@ -9,14 +8,9 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.PlannedFootstep;
-import us.ihmc.footstepPlanning.swing.SwingKnotPoint;
-import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.trajectories.core.Polynomial;
 import us.ihmc.robotics.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.trajectories.yoVariables.YoPolynomial;
@@ -29,8 +23,8 @@ import java.util.stream.Collectors;
 
 public class SwingPlannerTools
 {
-   private static Vector3D infiniteWeight = new Vector3D(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
-   private static FrameVector3D zeroVector = new FrameVector3D();
+   private static final Vector3D infiniteWeight = new Vector3D(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+   private static final FrameVector3D zeroVector = new FrameVector3D();
 
    public static List<EnumMap<Axis3D, List<PolynomialReadOnly>>> computeTrajectories(SwingTrajectoryParameters swingTrajectoryParameters,
                                                                                      PositionOptimizedTrajectoryGenerator positionTrajectoryGenerator,
@@ -71,8 +65,8 @@ public class SwingPlannerTools
       int totalNumberOfWaypoints = defaultTrajectoryUsed ? 2 : footstep.getCustomWaypointPositions().size();
 
       /*
-      * Compute default trajectories
-      * */
+       * Compute default trajectories
+       * */
       if (defaultTrajectoryUsed)
       {
          List<FramePoint3D> defaultWaypoints = new ArrayList<>();
@@ -112,26 +106,36 @@ public class SwingPlannerTools
       }
       else
       {
-         /* Compute the custom trajectories */
-         positionTrajectoryGenerator.reset();
-         positionTrajectoryGenerator.setEndpointConditions(startOfSwingPose.getPosition(), zeroVector, endOfSwingPose.getPosition(), zeroVector);
-         positionTrajectoryGenerator.setEndpointWeights(infiniteWeight, infiniteWeight, infiniteWeight, infiniteWeight);
-         positionTrajectoryGenerator.setWaypoints(footstep.getCustomWaypointPositions()
-                                                          .stream()
-                                                          .map(p -> new FramePoint3D(ReferenceFrame.getWorldFrame(), p))
-                                                          .collect(Collectors.toList()));
-         positionTrajectoryGenerator.initialize();
-         positionTrajectoryGenerator.setShouldVisualize(false);
-
-         for (int i = 0; i < 30; i++)
-         {
-            boolean isDone = positionTrajectoryGenerator.doOptimizationUpdate();
-            if (isDone)
-               break;
-         }
+         computeCustomTrajectory(positionTrajectoryGenerator, startOfSwingPose, endOfSwingPose, footstep);
       }
 
       return copySwingTrajectories(positionTrajectoryGenerator.getTrajectories(), totalNumberOfWaypoints + 1);
+   }
+
+   /**
+    * Compute the custom trajectories
+    */
+   public static void computeCustomTrajectory(PositionOptimizedTrajectoryGenerator positionTrajectoryGenerator,
+                                               FramePose3D startOfSwingPose,
+                                               FramePose3D endOfSwingPose,
+                                               PlannedFootstep footstep)
+   {
+      positionTrajectoryGenerator.reset();
+      positionTrajectoryGenerator.setEndpointConditions(startOfSwingPose.getPosition(), zeroVector, endOfSwingPose.getPosition(), zeroVector);
+      positionTrajectoryGenerator.setEndpointWeights(infiniteWeight, infiniteWeight, infiniteWeight, infiniteWeight);
+      positionTrajectoryGenerator.setWaypoints(footstep.getCustomWaypointPositions()
+                                                       .stream()
+                                                       .map(p -> new FramePoint3D(ReferenceFrame.getWorldFrame(), p))
+                                                       .collect(Collectors.toList()));
+      positionTrajectoryGenerator.initialize();
+      positionTrajectoryGenerator.setShouldVisualize(false);
+
+      for (int i = 0; i < 30; i++)
+      {
+         boolean isDone = positionTrajectoryGenerator.doOptimizationUpdate();
+         if (isDone)
+            break;
+      }
    }
 
    public static EnumMap<Axis3D, List<PolynomialReadOnly>> copySwingTrajectories(EnumMap<Axis3D, ArrayList<YoPolynomial>> trajectories, int trajectoriesToCopy)

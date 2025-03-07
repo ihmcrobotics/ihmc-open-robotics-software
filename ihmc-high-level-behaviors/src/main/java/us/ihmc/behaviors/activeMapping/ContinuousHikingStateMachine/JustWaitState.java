@@ -232,6 +232,7 @@ public class JustWaitState implements State
 
                                   footstepPlannerRequest.setRequestedInitialStanceSide(RobotSide.LEFT);
                                   footstepPlannerRequest.setHeightMapData(heightMapData.get());
+                                  footstepPlannerRequest.setTerrainMapData(terrainMapData.get());
 
                                   footstepPlannerRequest.setSnapGoalSteps(true);
                                   footstepPlannerRequest.setPlanBodyPath(false);

@@ -52,7 +52,7 @@ public class AStarFootstepPlanner
    private final FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
    private final FootstepSnapAndWiggler snapper;
    private final ParameterBasedStepExpansion nominalExpansion;
-   private final HeightMapFootstepChecker checker;
+   private final HeightMapFootstepChecker heightMapFootstepChecker;
    private final FootstepPlannerHeuristicCalculator distanceAndYawHeuristics;
    private final IdealStepCalculator idealStepCalculator;
    private final ReferenceBasedIdealStepCalculator referenceBasedIdealStepCalculator;
@@ -97,8 +97,8 @@ public class AStarFootstepPlanner
       this.statusCallbacks = statusCallbacks;
 
       this.snapper = new FootstepSnapAndWiggler(footPolygons, footstepPlannerParameters, environmentHandler);
-      this.checker = new HeightMapFootstepChecker(footstepPlannerParameters, footPolygons, environmentHandler, snapper, stepReachabilityData, registry);
-      this.idealStepCalculator = new IdealStepCalculator(footstepPlannerParameters, checker, bodyPathPlanHolder, environmentHandler, registry);
+      this.heightMapFootstepChecker = new HeightMapFootstepChecker(footstepPlannerParameters, footPolygons, environmentHandler, snapper, stepReachabilityData, registry);
+      this.idealStepCalculator = new IdealStepCalculator(footstepPlannerParameters, heightMapFootstepChecker, bodyPathPlanHolder, environmentHandler, registry);
       this.referenceBasedIdealStepCalculator = new ReferenceBasedIdealStepCalculator(footstepPlannerParameters, idealStepCalculator, registry);
 
       this.nominalExpansion = new ParameterBasedStepExpansion(footstepPlannerParameters, referenceBasedIdealStepCalculator, footPolygons);
@@ -110,7 +110,8 @@ public class AStarFootstepPlanner
                                                       distanceAndYawHeuristics::compute,
                                                       registry);
 
-      this.iterationConductor = new AStarFootstepPlannerIterationConductor(nominalExpansion, checker, stepCostCalculator, distanceAndYawHeuristics::compute);
+      this.iterationConductor = new AStarFootstepPlannerIterationConductor(nominalExpansion,
+                                                                           heightMapFootstepChecker, stepCostCalculator, distanceAndYawHeuristics::compute);
       this.completionChecker = new FootstepPlannerCompletionChecker(footstepPlannerParameters, iterationConductor, distanceAndYawHeuristics, snapper);
 
       referenceBasedIdealStepCalculator.setFootstepGraph(iterationConductor.getGraph());
@@ -505,7 +506,7 @@ public class AStarFootstepPlanner
 
    public HeightMapFootstepChecker getChecker()
    {
-      return checker;
+      return heightMapFootstepChecker;
    }
 
    public AStarFootstepPlannerIterationConductor getIterationConductor()

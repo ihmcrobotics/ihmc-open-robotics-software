@@ -14,7 +14,6 @@ import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepP
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.perception.steppableRegions.SnapResult;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -271,13 +270,12 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
       return true;
    }
 
-   private boolean isCollisionFree(DiscreteFootstep candidateStep, DiscreteFootstep stanceStep, DiscreteFootstep startOfSwing)
+   private void isCollisionFree(DiscreteFootstep candidateStep, DiscreteFootstep stanceStep, DiscreteFootstep startOfSwing)
    {
       if (stanceStep == null)
       {
-         return true;
+         return;
       }
-
 
       // Check for obstacle collisions (vertically extruded line between steps)
       if (parameters.getCheckForPathCollisions())
@@ -289,7 +287,7 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
             if (!obstacleBetweenStepsChecker.isFootstepValid(candidateStep, stanceStep))
             {
                rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.OBSTACLE_BLOCKING_BODY);
-               return false;
+               return;
             }
          }
          catch(Exception e)
@@ -304,11 +302,8 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
          if (boundingBoxCollisionDetected(candidateStep, stanceStep))
          {
             rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.OBSTACLE_HITTING_BODY);
-            return false;
          }
       }
-
-      return true;
    }
 
    private boolean boundingBoxCollisionDetected(DiscreteFootstep candidateStep, DiscreteFootstep stanceStep)
@@ -376,10 +371,5 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
    {
       // TODO
       return Double.POSITIVE_INFINITY;
-   }
-
-   public static void main(String[] args)
-   {
-
    }
 }

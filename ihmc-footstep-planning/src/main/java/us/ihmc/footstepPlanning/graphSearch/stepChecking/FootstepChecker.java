@@ -338,9 +338,4 @@ public class FootstepChecker implements FootstepCheckerInterface
    {
       customFootstepCheckers.add(customFootstepChecker);
    }
-
-   public static void main(String[] args)
-   {
-
-   }
 }
