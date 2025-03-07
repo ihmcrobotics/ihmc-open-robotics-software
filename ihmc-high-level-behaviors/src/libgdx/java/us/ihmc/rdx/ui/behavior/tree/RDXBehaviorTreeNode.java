@@ -253,11 +253,11 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       logArea.renderImGuiWidgets();
 
       ImGui.text("Notes:");
-      notesText.set(definition.getNotes());
-      ImGui.setNextItemWidth(ImGui.getColumnWidth());
-      if (ImGui.inputTextMultiline(labels.getHidden("Notes"), notesText))
+      String notes = definition.getNotes();
+      String modifiedNotes = ImGuiTools.inputTextMultiline(labels.getHidden("Notes"), notes, notesText);
+      if (modifiedNotes != null)
       {
-         definition.setNotes(notesText.get());
+         definition.setNotes(modifiedNotes);
       }
    }
 

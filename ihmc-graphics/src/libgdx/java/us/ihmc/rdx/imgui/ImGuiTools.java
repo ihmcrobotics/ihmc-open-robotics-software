@@ -324,7 +324,7 @@ public class ImGuiTools
    {
       imString.set(text);
 
-      float height = ImGuiTools.calcTextSizeY("A") * (text.lines().count() + 1);
+      float height = ImGuiTools.calcTextSizeY("A") * (Math.max(text.lines().count() + 1, 2));
 
       if (ImGui.inputTextMultiline(widgetName, imString, ImGui.getColumnWidth(), height))
       {
