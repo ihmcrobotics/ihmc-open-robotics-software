@@ -19,7 +19,7 @@ import us.ihmc.ros2.ROS2Input;
 
 /**
  * Class responsible for streaming footstep placements based on VR tracker data.
- * It monitors the ankle tracker positions to predict and place footsteps as the user walks.
+ * It monitors the ankle tracker positions to predict and place footsteps as the user steps.
  */
 public class RDXVRFootstepStreaming
 {

@@ -33,6 +33,7 @@ import java.util.UUID;
 public class RDXVRFootstepPlacement
 {
    private final static boolean USE_HEIGHTMAP = true;
+   private final static boolean USE_STEPPABLE_REGION_ADAPTATION = false;
    private HeightMapData latestHeightMapData;
 
    private RDXVRHardwareModel controllerModel = RDXVRHardwareModel.UNKNOWN;
@@ -175,13 +176,13 @@ public class RDXVRFootstepPlacement
          if (USE_HEIGHTMAP && latestHeightMapData != null)
          {
             FramePose3D adaptedPose = new FramePose3D(pose);
-            adaptedPose.getPosition().set(pose.getTranslationX(),
-                                          pose.getTranslationY(),
-                                          latestHeightMapData.getHeightAt(pose.getTranslationX(), pose.getTranslationY()));
+            if (!USE_STEPPABLE_REGION_ADAPTATION)
+            {
+               adaptedPose.getPosition().set(pose.getTranslationX(),
+                                             pose.getTranslationY(),
+                                             latestHeightMapData.getHeightAt(pose.getTranslationX(), pose.getTranslationY()));
+            }
             footstepBeingExternallyPlaced.setPose(adaptedPose);
-
-
-
          }
          else
          {
