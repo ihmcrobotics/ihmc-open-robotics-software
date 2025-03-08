@@ -429,16 +429,16 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
 
       //TODO temporalry fixed. After adding impedance control into pose, orientation and position FeedbackController, the steps could arrive to these steps. \
       // - Beomyeong
-//      addFootstepFromCBPose(footsteps, RobotSide.LEFT, cinderBlockPoses.get(4).get(1), 0.0, 0.08, zOffset, yawOffset);
-//      yawOffset = 0.85 * Math.PI;
-//      addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(3).get(1), 0.02, -0.08, zOffset, yawOffset);
-//      addFootstepFromCBPose(footsteps, RobotSide.LEFT, cinderBlockPoses.get(2).get(0), 0.0, 0.12, zOffset, yawOffset);
-//      addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(2).get(0), 0.0, -0.12, zOffset, yawOffset);
-//      yawOffset = Math.PI;
-//      addFootstepFromCBPose(footsteps, RobotSide.LEFT, cinderBlockPoses.get(1).get(1), 0.0, -0.08, zOffset, yawOffset);
-//      addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(1).get(0), 0.0, 0.08, zOffset, yawOffset);
-//      addFootstepFromCBPose(footsteps, RobotSide.LEFT, cinderBlockPoses.get(0).get(1), 0.0, -0.08, zOffset, yawOffset);
-//      addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(0).get(0), 0.0, 0.08, zOffset, yawOffset);
+      addFootstepFromCBPose(footsteps, RobotSide.LEFT, cinderBlockPoses.get(4).get(1), 0.0, 0.08, zOffset, yawOffset);
+      yawOffset = 0.85 * Math.PI;
+      addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(3).get(1), 0.02, -0.08, zOffset, yawOffset);
+      addFootstepFromCBPose(footsteps, RobotSide.LEFT, cinderBlockPoses.get(2).get(0), 0.0, 0.12, zOffset, yawOffset);
+      addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(2).get(0), 0.0, -0.12, zOffset, yawOffset);
+      yawOffset = Math.PI;
+      addFootstepFromCBPose(footsteps, RobotSide.LEFT, cinderBlockPoses.get(1).get(1), 0.0, -0.08, zOffset, yawOffset);
+      addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(1).get(0), 0.0, 0.08, zOffset, yawOffset);
+      addFootstepFromCBPose(footsteps, RobotSide.LEFT, cinderBlockPoses.get(0).get(1), 0.0, -0.08, zOffset, yawOffset);
+      addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(0).get(0), 0.0, 0.08, zOffset, yawOffset);
 
       return footsteps;
    }
