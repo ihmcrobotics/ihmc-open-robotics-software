@@ -2,26 +2,15 @@ package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.output.KSTFBOutputProcessor;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.commons.UnitConversions;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.partNames.ArmJointName;
-import us.ihmc.robotics.partNames.HumanoidJointNameMap;
-import us.ihmc.robotics.partNames.LegJointName;
-import us.ihmc.robotics.partNames.SpineJointName;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class KinematicsStreamingToolboxParameters
@@ -53,234 +42,236 @@ public class KinematicsStreamingToolboxParameters
       FIXED_DT;
    }
 
-   protected ClockType clockType;
+   private ClockType clockType;
    /**
     * Period at which the toolbox will update its internal state.
     * It's best to shoot for a multiple of the controller update period.
     */
-   protected double toolboxUpdatePeriod;
+   private double toolboxUpdatePeriod;
    /**
     * Duration after which the controller will go to sleep if no input is received.
     */
-   protected double timeThresholdForSleeping;
+   private double timeThresholdForSleeping;
 
    /**
     * Upon reception of a new streaming message from the IK, the controller will extrapolate the solution to the future to avoid discontinuities.
     */
-   protected double streamIntegrationDuration;
+   private double streamIntegrationDuration;
    /**
     * Safety margin to keep the center of mass within the support polygon.
     */
-   protected double centerOfMassSafeMargin;
+   private double centerOfMassSafeMargin;
    /**
     * Weight used to hold the center of mass in place.
     */
-   protected double centerOfMassHoldWeight;
+   private double centerOfMassHoldWeight;
    /**
     * Period at which the kinematics solution is published to the controller.
     * The faster, the better, but it also increases the communication load.
     */
-   protected double publishingSolutionPeriod;
+   private double publishingSolutionPeriod;
 
    /**
     * Default weight for holding the arms at the robot initial configuration when no arm message is received.
     */
-   protected double holdArmWeight;
+   private double holdArmWeight;
    /**
     * Default weight for holding the neck at the robot initial configuration when no neck message is received.
     */
-   protected double holdNeckWeight;
+   private double holdNeckWeight;
    /**
     * Default weight for holding the pelvis at the robot initial configuration when no pelvis message is received.
     */
-   protected final Vector3D holdPelvisLinearWeight = new Vector3D();
+   private final Vector3D holdPelvisLinearWeight = new Vector3D();
    /**
     * Default weight for holding the pelvis at the robot initial configuration when no pelvis message is received.
     */
-   protected final Vector3D holdPelvisAngularWeight = new Vector3D();
+   private final Vector3D holdPelvisAngularWeight = new Vector3D();
    /**
     * Default weight for holding the chest at the robot initial configuration when no chest message is received.
     */
-   protected final Vector3D holdChestAngularWeight = new Vector3D();
+   private final Vector3D holdChestAngularWeight = new Vector3D();
 
    /**
     * Default weight for locking the pelvis at the robot initial configuration when no pelvis message is received.
     */
-   protected double lockPelvisWeight;
+   private double lockPelvisWeight;
    /**
     * Default weight for locking the chest at the robot initial configuration when no chest message is received.
     */
-   protected double lockChestWeight;
+   private double lockChestWeight;
 
    /**
     * Default weight for input messages for which no weight is provided.
     */
-   protected Vector3D defaultLinearWeight = new Vector3D();
+   private Vector3D defaultLinearWeight = new Vector3D();
    /**
     * Default weight for input messages for which no weight is provided.
     */
-   protected Vector3D defaultAngularWeight = new Vector3D();
+   private Vector3D defaultAngularWeight = new Vector3D();
    /**
     * Default weight for pelvis input messages for which no weight is provided.
     */
-   protected Vector3D defaultPelvisLinearWeight = new Vector3D();
+   private Vector3D defaultPelvisLinearWeight = new Vector3D();
    /**
     * Default weight for pelvis input messages for which no weight is provided.
     */
-   protected Vector3D defaultPelvisAngularWeight = new Vector3D();
+   private Vector3D defaultPelvisAngularWeight = new Vector3D();
    /**
     * Default weight for chest input messages for which no weight is provided.
     */
-   protected Vector3D defaultChestLinearWeight = new Vector3D();
+   private Vector3D defaultChestLinearWeight = new Vector3D();
    /**
     * Default weight for chest input messages for which no weight is provided.
     */
-   protected Vector3D defaultChestAngularWeight = new Vector3D();
+   private Vector3D defaultChestAngularWeight = new Vector3D();
    /**
     * Default weight for hand input messages for which no weight is provided.
     */
-   protected Vector3D defaultHandLinearWeight = new Vector3D();
+   private Vector3D defaultHandLinearWeight = new Vector3D();
    /**
     * Default weight for hand input messages for which no weight is provided.
     */
-   protected Vector3D defaultHandAngularWeight = new Vector3D();
+   private Vector3D defaultHandAngularWeight = new Vector3D();
    /**
     * Default gain for the linear part of a taskspace objective.
     */
-   protected double defaultLinearGain;
+   private double defaultLinearGain;
    /**
     * Default gain for the angular part of a taskspace objective.
     */
-   protected double defaultAngularGain;
+   private double defaultAngularGain;
    /**
     * Default gain for a jointspace objective.
     */
-   protected double defaultSingleJointGain;
+   private double defaultSingleJointGain;
 
    /**
     * Default rate limit for input messages for which no rate limit is provided.
     */
-   protected double defaultLinearRateLimit;
+   private double defaultLinearRateLimit;
    /**
     * Default rate limit for input messages for which no rate limit is provided.
     */
-   protected double defaultAngularRateLimit;
+   private double defaultAngularRateLimit;
    /**
     * Scale factor used to downscale the joint velocity solution before sending it to the controller.
     */
-   protected double outputJointVelocityScale;
+   private double outputJointVelocityScale;
    /**
     * When using {@link KSTFBOutputProcessor}, this is the proportional gain used in the processor.
     */
-   protected double outputFeedbackGain;
+   private double outputFeedbackGain;
    /**
     * When using {@link KSTFBOutputProcessor}, this is the damping ratio used in the processor.
     */
-   protected double outputFeedbackDampingRatio;
+   private double outputFeedbackDampingRatio;
    /**
     * Break frequency used for the low-pass filter used to filter the output of the IK solver.
     */
-   protected double outputLPFBreakFrequency;
+   private double outputLPFBreakFrequency;
 
    /**
     * Whether to minimize the angular momentum in the kinematics solution.
     * Useful to reduce fast motions with the parts of the robot and instead privilege the motion of the extremities.
     */
-   protected boolean minimizeAngularMomentum;
+   private boolean minimizeAngularMomentum;
    /**
     * Whether to minimize the linear momentum in the kinematics solution.
     * Useful to reduce fast motions with the parts of the robot and instead privilege the motion of the extremities.
     */
-   protected boolean minimizeLinearMomentum;
+   private boolean minimizeLinearMomentum;
    /**
     * Weight used to minimize the angular momentum in the kinematics solution.
     */
-   protected Vector3D angularMomentumWeight;
+   private Vector3D angularMomentumWeight;
    /**
     * Weight used to minimize the linear momentum in the kinematics solution.
     */
-   protected Vector3D linearMomentumWeight;
+   private Vector3D linearMomentumWeight;
    /**
     * Whether to minimize the rate of change of the angular momentum in the kinematics solution.
     */
-   protected boolean minimizeAngularMomentumRate;
+   private boolean minimizeAngularMomentumRate;
    /**
     * Whether to minimize the rate of change of the linear momentum in the kinematics solution.
     */
-   protected boolean minimizeLinearMomentumRate;
+   private boolean minimizeLinearMomentumRate;
    /**
     * Weight used to minimize the rate of change of the angular momentum in the kinematics solution.
     */
-   protected Vector3D angularMomentumRateWeight;
+   private Vector3D angularMomentumRateWeight;
    /**
     * Weight used to minimize the rate of change of the linear momentum in the kinematics solution.
     */
-   protected Vector3D linearMomentumRateWeight;
+   private Vector3D linearMomentumRateWeight;
    /**
     * Duration used to smoothly initiate the streaming to the controller.
     */
-   protected double defaultStreamingBlendingDuration;
+   private double defaultStreamingBlendingDuration;
 
    /**
     * Break frequency used for the low-pass filter used to estimate the input pose.
     * Only used when {@link #inputStateEstimatorType} is set to {@link InputStateEstimatorType#FIRST_ORDER_LPF}.
     */
-   protected double inputPoseLPFBreakFrequency;
+   private double inputPoseLPFBreakFrequency;
    /**
     * Duration use to decay the estimated input weight.
     * When no input is received, the weight is decayed to zero, then the control for that end-effector is disabled.
     */
-   protected double inputWeightDecayDuration;
+   private double inputWeightDecayDuration;
    /**
     * Duration use to decay the estimated input velocity.
     * Safety used to limit the extrapolation in the future when inputs are not being received.
     */
-   protected double inputVelocityDecayDuration;
+   private double inputVelocityDecayDuration;
    /**
     * Duration used to correct the input pose in the state estimator.
     * Should be greater than the period at which inputs are received.
     * Only used when {@link #inputStateEstimatorType} is set to {@link InputStateEstimatorType#FBC_STYLE}.
     */
-   protected double inputVelocityRawAlpha;
+   private double inputVelocityRawAlpha;
    /**
     * Duration used to correct the input pose in the state estimator. Should be greater than the period at which inputs are received. Only used when
     * {@link #inputStateEstimatorType} is set to {@link InputStateEstimatorType#FBC_STYLE}.
     */
-   protected double inputPoseCorrectionDuration;
+   private double inputPoseCorrectionDuration;
    /**
     * When {@code true}, a bounding box filter is used to reject input poses that are too far from the current pose.
     * The bottom center of the bounding box is set to line up with the robot's mid-foot z-up frame.
     */
-   protected boolean useBBXInputFilter;
+   private boolean useBBXInputFilter;
    /**
     * Size of the bounding box filter used to reject input poses that are too far from the current pose.
     */
-   protected Vector3D inputFilterBBXSize;
+   private Vector3D inputFilterBBXSize;
    /**
     * Center of the bounding box with respect to the robot's mid-foot z-up frame.
     */
-   protected Point3D inputFilterBBXCenter;
-   protected double inputFilterMaxLinearDelta;
-   protected double inputFilterMaxAngularDelta;
-   protected double inputFilterMaxLinearVelocity;
-   protected double inputFilterMaxAngularVelocity;
+   private Point3D inputFilterBBXCenter;
+   private double inputFilterMaxLinearDelta;
+   private double inputFilterMaxAngularDelta;
+   private double inputFilterMaxLinearVelocity;
+   private double inputFilterMaxAngularVelocity;
 
-   protected boolean useStreamingPublisher;
-   protected double publishingPeriod;
+   private boolean useStreamingPublisher;
+   private double publishingPeriod;
 
-   protected InputStateEstimatorType inputStateEstimatorType;
+   private InputStateEstimatorType inputStateEstimatorType;
 
    /**
     * Map from joint name to initial 1-DoF joint position.
     */
-   protected Map<String, Double> initialConfigurationMap;
-   protected Map<String, Double> jointCustomPositionUpperLimits;
-   protected Map<String, Double> jointCustomPositionLowerLimits;
-   protected final KinematicsStreamingToolboxConfigurationMessage defaultConfiguration = new KinematicsStreamingToolboxConfigurationMessage();
-   protected final KinematicsToolboxConfigurationMessage defaultSolverConfiguration = new KinematicsToolboxConfigurationMessage();
-   protected double solverNullspaceAlpha;
-   protected double solverPrivilegedDefaultWeight;
-   protected double solverPrivilegedDefaultGain;
+   private Map<String, Double> initialConfigurationMap;
+   private Map<String, Double> jointCustomPositionUpperLimits;
+   private Map<String, Double> jointCustomPositionLowerLimits;
+   private final KinematicsStreamingToolboxConfigurationMessage defaultConfiguration = new KinematicsStreamingToolboxConfigurationMessage();
+   private final KinematicsToolboxConfigurationMessage defaultSolverConfiguration = new KinematicsToolboxConfigurationMessage();
+   private double solverNullspaceAlpha;
+   private double solverPrivilegedDefaultWeight;
+   private double solverPrivilegedDefaultGain;
+
+   private final List<String> inactiveJoints = new ArrayList<>();
 
    public static KinematicsStreamingToolboxParameters defaultParameters()
    {
@@ -358,7 +349,6 @@ public class KinematicsStreamingToolboxParameters
       defaultConfiguration.setEnableNeckJointspace(true);
       defaultConfiguration.setEnableLeftHandTaskspace(true);
       defaultConfiguration.setEnableRightHandTaskspace(true);
-      defaultConfiguration.setEnableArmImpedance(false);
       defaultConfiguration.setEnableChestTaskspace(true);
       defaultConfiguration.setEnablePelvisTaskspace(true);
       defaultConfiguration.setLeftHandTrajectoryFrameId(ReferenceFrame.getWorldFrame().getFrameNameHashCode());
@@ -378,67 +368,6 @@ public class KinematicsStreamingToolboxParameters
       inputFilterMaxAngularDelta = Double.POSITIVE_INFINITY;
       inputFilterMaxLinearVelocity = 6.0;
       inputFilterMaxAngularVelocity = Double.POSITIVE_INFINITY;
-   }
-
-   public void setDefault(boolean usingRealtimePlugin)
-   {
-      setDefault();
-   }
-
-   public static Map<String, Double> createInitialConfiguration(DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobot)
-   {
-      Map<String, Double> initialConfigurationMap = new HashMap<>();
-      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      for (OneDoFJointBasics joint : fullRobotModel.getOneDoFJoints())
-      {
-         String jointName = joint.getName();
-         double q = syncedRobot.getFullRobotModel().getOneDoFJointByName(jointName).getQ();
-         initialConfigurationMap.put(jointName, q);
-      }
-
-      return initialConfigurationMap;
-   }
-
-   public Map<String, Double> createInitialConfiguration(DRCRobotModel robotModel)
-   {
-      Map<String, Double> initialConfigurationMap = new HashMap<>();
-      RobotInitialSetup<HumanoidFloatingRootJointRobot> defaultRobotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, 0.0);
-      FullHumanoidRobotModel robot = robotModel.createFullRobotModel();
-      defaultRobotInitialSetup.initializeFullRobotModel(robot);
-
-      for (OneDoFJointBasics joint : robot.getOneDoFJoints())
-      {
-         initialConfigurationMap.put(joint.getName(), joint.getQ());
-      }
-
-      return initialConfigurationMap;
-   }
-
-   protected void reduceElbowJointLimits(DRCRobotModel robotModel)
-   {
-      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      // reduce limit for elbow to avoid singularity
-      Map<String, Double> jointUpperLimits = new LinkedHashMap<>();
-      Map<String, Double> jointLowerLimits = new LinkedHashMap<>();
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         OneDoFJointBasics elbowJoint = fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_PITCH);
-         double upperLimit = elbowJoint.getJointLimitUpper();
-         double lowerLimit = elbowJoint.getJointLimitLower();
-         double fullyExtendedLimit = Math.abs(upperLimit) < Math.abs(lowerLimit) ? upperLimit : lowerLimit;
-         if (fullyExtendedLimit > 0)
-         {
-            fullyExtendedLimit = -0.10;
-            jointUpperLimits.put(robotModel.getJointMap().getArmJointName(robotSide, ArmJointName.ELBOW_PITCH), fullyExtendedLimit);
-         }
-         else
-         {
-            fullyExtendedLimit = 0.10;
-            jointLowerLimits.put(robotModel.getJointMap().getArmJointName(robotSide, ArmJointName.ELBOW_PITCH), fullyExtendedLimit);
-         }
-      }
-      jointCustomPositionUpperLimits = jointUpperLimits;
-      jointCustomPositionLowerLimits = jointLowerLimits;
    }
 
    public ClockType getClockType()
@@ -1133,5 +1062,10 @@ public class KinematicsStreamingToolboxParameters
    public void setSolverPrivilegedDefaultGain(double solverPrivilegedDefaultGain)
    {
       this.solverPrivilegedDefaultGain = solverPrivilegedDefaultGain;
+   }
+
+   public List<String> getInactiveJoints()
+   {
+      return inactiveJoints;
    }
 }
