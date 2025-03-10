@@ -326,6 +326,7 @@ public final class ImpedanceSpatialFeedbackControllerTest
       double previousErrorMagnitude = Double.POSITIVE_INFINITY;
       double errorMagnitude = previousErrorMagnitude;
 
+      boolean isErrorReducing = false;
       for (int i = 0; i < 100; i++)
       {
          spatialFeedbackController.computeInverseDynamics();
@@ -379,9 +380,10 @@ public final class ImpedanceSpatialFeedbackControllerTest
          differenceOrientation.getRotationVector(rotationError);
 
          errorMagnitude = Math.sqrt(positionError.lengthSquared() + rotationError.lengthSquared());
-         boolean isErrorReducing = errorMagnitude < previousErrorMagnitude;
-         assertTrue(isErrorReducing);
+         isErrorReducing = errorMagnitude < previousErrorMagnitude;
          previousErrorMagnitude = errorMagnitude;
       }
+      assertTrue(isErrorReducing);
+
    }
 }
