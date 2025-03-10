@@ -56,10 +56,7 @@ public class GarbageFreePlanarRegionListPolygonSnapper
 
          polygonSnapper.snapPolygonToPlanarRegion(polygonToSnap, planarRegion, highestVertexInWorld, snapTransform);
 
-         if (highestVertexInWorld.getZ() > maximumRegionHeightToConsider)
-         {
-         }
-         else if (highestVertexInWorld.getZ() > highestZ + heightEpsilonToTakeFlatterRegion)
+         if (highestVertexInWorld.getZ() > highestZ + heightEpsilonToTakeFlatterRegion)
          {
             highestZ = highestVertexInWorld.getZ();
             highestTransform.set(snapTransform);

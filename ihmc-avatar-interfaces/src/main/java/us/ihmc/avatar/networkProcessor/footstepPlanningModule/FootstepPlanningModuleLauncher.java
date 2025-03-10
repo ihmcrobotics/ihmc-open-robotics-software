@@ -81,7 +81,7 @@ public class FootstepPlanningModuleLauncher
     */
    public static FootstepPlanningModule createModule(DRCRobotModel robotModel)
    {
-      return createModule(robotModel, null);
+      return createModule(robotModel, "");
    }
 
    /**
@@ -90,16 +90,7 @@ public class FootstepPlanningModuleLauncher
    public static FootstepPlanningModule createModule(DRCRobotModel robotModel, String suffix)
    {
       String moduleName = robotModel.getSimpleRobotName();
-      DefaultFootstepPlannerParametersBasics footstepPlannerParameters;
-
-      if (suffix != null)
-      {
-          footstepPlannerParameters = robotModel.getFootstepPlannerParameters(suffix);
-      }
-      else
-      {
-         footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
-      }
+      DefaultFootstepPlannerParametersBasics footstepPlannerParameters = robotModel.getFootstepPlannerParameters(suffix);
 
       SwingPlannerParametersBasics swingPlannerParameters = robotModel.getSwingPlannerParameters();
       StepReachabilityData stepReachabilityData = robotModel.getStepReachabilityData();

@@ -67,10 +67,7 @@ public class PlanarRegionsListPolygonSnapper
 
          RigidBodyTransform snapTransform = PlanarRegionPolygonSnapper.snapPolygonToPlanarRegion(polygonToSnap, planarRegion, highestVertexInWorld);
 
-         if (highestVertexInWorld.getZ() > maximumRegionHeightToConsider)
-         {
-         }
-         else if (highestVertexInWorld.getZ() > highestZ + heightEpsilonToTakeFlatterRegion)
+         if (highestVertexInWorld.getZ() > highestZ + heightEpsilonToTakeFlatterRegion)
          {
             highestZ = highestVertexInWorld.getZ();
             highestTransform = snapTransform;

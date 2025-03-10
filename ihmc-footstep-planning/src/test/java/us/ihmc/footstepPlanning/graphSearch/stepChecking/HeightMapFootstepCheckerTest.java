@@ -285,8 +285,6 @@ public class HeightMapFootstepCheckerTest
          {
             return 1.0e-10;
          }
-
-         ;
       };
 
       FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
