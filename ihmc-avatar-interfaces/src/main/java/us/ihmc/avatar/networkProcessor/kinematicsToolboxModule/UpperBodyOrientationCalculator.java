@@ -8,7 +8,10 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 
-public class OrientationCalculator
+/**
+ * Computes baseline orientation for chest/pelvis while leaning
+ */
+public class UpperBodyOrientationCalculator
 {
    private final RigidBodyBasics rigidBody;
    private final ReferenceFrame midFeetZUpFrame;
@@ -20,11 +23,11 @@ public class OrientationCalculator
    private final FramePose3D tempPose = new FramePose3D();
    private final FrameQuaternion desiredOrientation = new FrameQuaternion();
 
-   public OrientationCalculator(RigidBodyBasics rigidBody,
-                                ReferenceFrame midFeetZUpFrame,
-                                ReferenceFrame centerOfMassFrame,
-                                FullHumanoidRobotModel fullRobotModel,
-                                BooleanProvider isUpperBodyLoadBearing)
+   public UpperBodyOrientationCalculator(RigidBodyBasics rigidBody,
+                                         ReferenceFrame midFeetZUpFrame,
+                                         ReferenceFrame centerOfMassFrame,
+                                         FullHumanoidRobotModel fullRobotModel,
+                                         BooleanProvider isUpperBodyLoadBearing)
    {
       this.rigidBody = rigidBody;
       this.midFeetZUpFrame = midFeetZUpFrame;
