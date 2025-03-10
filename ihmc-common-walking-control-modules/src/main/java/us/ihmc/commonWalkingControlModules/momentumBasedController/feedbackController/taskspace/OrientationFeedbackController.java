@@ -777,20 +777,17 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    private void computeInverseInertiaMatrix()
    {
       jacobianCalculator.clear();
-      jacobianCalculator.setKinematicChain(base.getChildrenJoints().get(0).getSuccessor(), endEffector);
+      jacobianCalculator.setKinematicChain(base, endEffector);
       jacobianCalculator.setJacobianFrame(controlFrame);
       jacobianCalculator.reset();
 
       //      Jacobian is an M x N matrix, M is called the task size and
       //    * N is the overall number of degrees of freedom (DoFs) to be controlled.
       jacobianMatrix.set(jacobianCalculator.getJacobianMatrix());
-      jacobianMatrix.reshape(jacobianMatrix.getNumRows(), jacobianMatrix.getNumCols());
 
-      massInverseMatrix.set(massMatrixCalculator.getMassMatrix());
       massMatrixCalculator.reset();
-      massInverseMatrix.reshape(massInverseMatrix.getNumRows(), massInverseMatrix.getNumCols());
-      subMassInverseMatrix.set(new DMatrixRMaj(jointPath.size(), jointPath.size()));
-      MatrixMissingTools.extract(massInverseMatrix, jointPathIndices, jointPathIndices, subMassInverseMatrix);
+      subMassInverseMatrix.reshape(jointPathIndices.size(), jointPathIndices.size());
+      MatrixMissingTools.extract(massMatrixCalculator.getMassMatrix(), jointPathIndices, jointPathIndices, subMassInverseMatrix);
       MatrixMissingTools.invert(subMassInverseMatrix, inverseSolver);
 
       inverseInertiaTempMatrix.reshape(jointPathIndices.size(), jointPathIndices.size());

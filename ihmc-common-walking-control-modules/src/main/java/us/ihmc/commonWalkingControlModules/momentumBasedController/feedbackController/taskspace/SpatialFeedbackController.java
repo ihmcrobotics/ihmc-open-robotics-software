@@ -168,7 +168,6 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    private final SingularValueDecomposition_F64<DMatrixRMaj> svd = DecompositionFactory_DDRM.svd(true, true, true);
 
    protected final DMatrixRMaj jacobianMatrix = new DMatrixRMaj(0, 0);
-   protected final DMatrixRMaj subMassMatrix = new DMatrixRMaj(0, 0);
    protected final DMatrixRMaj subMassInverseMatrix = new DMatrixRMaj(0, 0);
    protected final DMatrixRMaj identityMatrix = CommonOps_DDRM.identity(6, 6);
    private final DMatrixRMaj tempInertiaMatrix = new DMatrixRMaj(0, 0);
@@ -419,7 +418,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
       if (isImpedanceEnabled)
       {
-         MultiBodySystemTools.collectJointPath(base.getChildrenJoints().get(0).getSuccessor(), endEffector, jointPath);
+         MultiBodySystemTools.collectJointPath(base, endEffector, jointPath);
          jointIndices.reset();
 
          for (int i = 0; i < jointPath.size(); i++)
@@ -1168,7 +1167,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    private void computeInverseInertiaMatrix()
    {
       jacobianCalculator.clear();
-      jacobianCalculator.setKinematicChain(base.getChildrenJoints().get(0).getSuccessor(), endEffector);
+      jacobianCalculator.setKinematicChain(base, endEffector);
       jacobianCalculator.setJacobianFrame(controlFrame);
       jacobianCalculator.reset();
 
@@ -1180,13 +1179,9 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       MatrixMissingTools.extractRows(jacobianMatrix, activeAxis, tempMatrix);
       jacobianMatrix.set(tempMatrix);
 
-      subMassMatrix.set(massMatrixCalculator.getMassMatrix());
       massMatrixCalculator.reset();
-      subMassMatrix.reshape(subMassMatrix.getNumRows(), subMassMatrix.getNumCols());
-
       subMassInverseMatrix.reshape(jointIndices.size(), jointIndices.size());
-      MatrixMissingTools.extract(subMassMatrix, jointIndices, jointIndices, subMassInverseMatrix);
-
+      MatrixMissingTools.extract(massMatrixCalculator.getMassMatrix(), jointIndices, jointIndices, subMassInverseMatrix);
       MatrixMissingTools.invert(subMassInverseMatrix, inverseSolver);
 
       inverseInertiaTempMatrix.reshape(jointIndices.size(), jointIndices.size());
