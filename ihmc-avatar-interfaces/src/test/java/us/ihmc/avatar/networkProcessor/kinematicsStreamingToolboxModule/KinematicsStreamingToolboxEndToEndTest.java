@@ -181,7 +181,7 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
       new ControllerNetworkSubscriber(toolboxInputTopic, commandInputManager, toolboxOutputTopic, statusOutputManager, toolboxROS2Node);
 
       KinematicsStreamingToolboxParameters parameters = new KinematicsStreamingToolboxParameters();
-      parameters.setDefault();
+      parameters.setDefault(false);
       parameters.setToolboxUpdatePeriod(toolboxControllerPeriod);
 
       toolboxController = new KinematicsStreamingToolboxController(commandInputManager,
