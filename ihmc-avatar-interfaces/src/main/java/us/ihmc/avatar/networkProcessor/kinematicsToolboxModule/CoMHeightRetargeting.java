@@ -60,6 +60,7 @@ public class CoMHeightRetargeting
       tempPoint.setToZero(centerOfMassFrame);
       tempPoint.changeFrame(ReferenceFrame.getWorldFrame());
       nominalHeight = tempPoint.getZ();
+      optimizedHeight = nominalHeight;
 
       // call once to avoid edge cases in rate limiting
       this.optimizedHeightRL.set(nominalHeight);
@@ -71,7 +72,6 @@ public class CoMHeightRetargeting
    public void updateNominalHeight(double nominalHeight)
    {
       this.nominalHeight = nominalHeight;
-      LogTools.info("updating nominal height at" + nominalHeight);
       nominalCoMZ.set(nominalHeight);
    }
 

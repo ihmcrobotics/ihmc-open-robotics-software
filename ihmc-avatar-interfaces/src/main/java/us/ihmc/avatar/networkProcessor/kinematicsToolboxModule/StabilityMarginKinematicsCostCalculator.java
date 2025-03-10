@@ -55,17 +55,17 @@ public class StabilityMarginKinematicsCostCalculator
 //   private static final double MAX_PELVIS_ORIENTATION_OFFSET = Math.toRadians(180.0);
 
    // Hardware
-   private static final double MAX_ARM_ORIENTATION_OFFSET = -1.0; // Math.toRadians(35.0);
-   private static final double MAX_CHEST_ORIENTATION_OFFSET = -1.0; // Math.toRadians(55.0);
-   private static final double MAX_PELVIS_ORIENTATION_OFFSET = -1.0; // Math.toRadians(55.0);
+   private static final double MAX_ARM_ORIENTATION_OFFSET = Math.toRadians(70.0);
+   private static final double MAX_CHEST_ORIENTATION_OFFSET = Math.toRadians(35.0);
+   private static final double MAX_PELVIS_ORIENTATION_OFFSET = Math.toRadians(35.0);
 
    public static final boolean OVERRIDE_MESSAGE = true;
    public static final boolean ENABLE_POSTURE_OBJECTIVE = true;
-   public static final boolean ENABLE_CONTACT_OBJECTIVE = false;
+   public static final boolean ENABLE_CONTACT_OBJECTIVE = true;
    public static final boolean INCLUDE_FF_VELOCITY = true;
 
    private static final double KP_ORIENTATION = 1200.0;
-   private static final double MAX_CONTACT_POINT_ADJUSTMENT = 0.12;
+   private static final double MAX_CONTACT_POINT_ADJUSTMENT = 0.07;
    private static final double MAX_ORIENTATION_ERROR = Math.toRadians(5.0);
 //   private static final double MAX_COM_Z_ERROR = 0.01;
 
@@ -107,9 +107,9 @@ public class StabilityMarginKinematicsCostCalculator
 
    private final YoEnum<PostureOptimizerState> postureOptimizerState = new YoEnum<>("postureOptimizerState", registry, PostureOptimizerState.class);
 
-   private final OrientationRetargetManager chestOrientationRetargeting;
-   private final OrientationRetargetManager pelvisOrientationRetargeting;
-   private final OrientationRetargetManager bracingHandOrientationRetargeting;
+   private final OrientationRetargeting chestOrientationRetargeting;
+   private final OrientationRetargeting pelvisOrientationRetargeting;
+   private final OrientationRetargeting bracingHandOrientationRetargeting;
    private final CoMHeightRetargeting comHeightRetargeting;
 
    private final JointBasics[] controlledJoints;
@@ -117,6 +117,7 @@ public class StabilityMarginKinematicsCostCalculator
 
    private final YoDouble stabilityMarginThreshold = new YoDouble("stabilityMarginThreshold", registry);
    private final YoDouble stabilityMarginHysteresis = new YoDouble("stabilityMarginHysteresis", registry);
+   private final YoDouble sensitivityThreshold = new YoDouble("sensitivityThreshold", registry);
    private final YoDouble alphaEnabled = new YoDouble("alphaEnabled", registry);
 
    private final YoBoolean addContactAdjustment = new YoBoolean("addContactAdjustment", registry);
@@ -169,16 +170,16 @@ public class StabilityMarginKinematicsCostCalculator
                                                                                          graphicsListRegistry,
                                                                                          registry);
 
-      kpPosture.set(12.0);
-      kpContact.set(0.25);
+      kpPosture.set(12.0); // 15.0);
+      kpContact.set(0.5);
 
       double maxRate = Math.toRadians(15.0);
-      chestOrientationRetargeting = new OrientationRetargetManager("chest", updateDT, fullRobotModel.getChest().getBodyFixedFrame(), maxRate, MAX_CHEST_ORIENTATION_OFFSET, graphicsListRegistry, registry);
-      pelvisOrientationRetargeting = new OrientationRetargetManager("pelvis", updateDT, fullRobotModel.getPelvis().getBodyFixedFrame(), maxRate, MAX_PELVIS_ORIENTATION_OFFSET, graphicsListRegistry, registry);
-      bracingHandOrientationRetargeting = new OrientationRetargetManager("bracingHand", updateDT, fullRobotModel.getHandControlFrame(HumanoidKinematicsToolboxController.BRACING_HAND_SIDE), maxRate, MAX_ARM_ORIENTATION_OFFSET, graphicsListRegistry, registry);
+      chestOrientationRetargeting = new OrientationRetargeting("chest",  fullRobotModel.getChest(), updateDT, maxRate, MAX_CHEST_ORIENTATION_OFFSET, graphicsListRegistry, registry);
+      pelvisOrientationRetargeting = new OrientationRetargeting("pelvis", fullRobotModel.getPelvis(), updateDT, maxRate, MAX_PELVIS_ORIENTATION_OFFSET, graphicsListRegistry, registry);
+      bracingHandOrientationRetargeting = new OrientationRetargeting("bracingHand", fullRobotModel.getHand(HumanoidKinematicsToolboxController.BRACING_HAND_SIDE), updateDT, maxRate, MAX_ARM_ORIENTATION_OFFSET, graphicsListRegistry, registry);
 
-      double minOffset = -0.2; // -0.07;
-      double maxOffset = 0.15; // 0.04;
+      double minOffset = -0.07;
+      double maxOffset = 0.04;
       comHeightRetargeting = new CoMHeightRetargeting(updateDT, 0.1, minOffset, maxOffset, fullRobotModel.getTotalMass(), centerOfMassFrame, stabilityGradientCalculator.getCentroidalMomentumCalculator(), registry);
 
       contactPointAdjustment = new YoFrameVector3D("contactPointAdjustment", ReferenceFrame.getWorldFrame(), registry);
@@ -206,6 +207,8 @@ public class StabilityMarginKinematicsCostCalculator
 
       orientationGains.setProportionalGains(KP_ORIENTATION);
       orientationGains.setMaxProportionalError(MAX_ORIENTATION_ERROR);
+
+      sensitivityThreshold.set(0.035);
 
 //      boolean useOldOrientation = false;
 //      if (useOldOrientation)
@@ -285,7 +288,7 @@ public class StabilityMarginKinematicsCostCalculator
             stabilityGradientCalculator.computeContactPointAdjustment();
             contactPointAdjustment.set(stabilityGradientCalculator.getOptimalContactPointAdjustment(bracingPointIndex));
 
-            if (contactPointAdjustment.normSquared() > 1.0e-5)
+            if (!isUpperBodyLoadBearing.getValue() && contactPointAdjustment.normSquared() > 1.0e-5)
             {
                contactPointAdjustment.scale(kpContact.getValue());
                integratedContactPointAdjustment.add(updateDT * contactPointAdjustment.getX(), updateDT * contactPointAdjustment.getY(), updateDT * contactPointAdjustment.getZ());
@@ -314,7 +317,7 @@ public class StabilityMarginKinematicsCostCalculator
       {
          postureOptimizerState.set(PostureOptimizerState.NOMINAL);
       }
-      else if (multiContactRegionCalculator.getStabilityMargin() > getLowerMarginThreshold())
+      else if (multiContactRegionCalculator.getStabilityMargin() > getLowerMarginThreshold() || stabilityGradientCalculator.getPostureSensitivity() < sensitivityThreshold.getValue())
       {
          postureOptimizerState.set(PostureOptimizerState.FREEZE);
       }
@@ -402,7 +405,7 @@ public class StabilityMarginKinematicsCostCalculator
       {
          // Posture adjustment
          FixedFrameQuaternionBasics desiredHandOrientation = command.getDesiredPose().getOrientation();
-         bracingHandOrientationRetargeting.updateNominalOrientation(desiredHandOrientation);
+         bracingHandOrientationRetargeting.updateNominalOrientation(desiredHandOrientation, command.getControlFramePose());
 
          desiredHandOrientation.set(bracingHandOrientationRetargeting.getDesiredOrientation());
          command.setHasDesiredVelocity(true);

@@ -56,7 +56,7 @@ import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.percentageOfInte
  */
 public class SensitivityBasedStabilityGradientCalculator
 {
-   private static final boolean APPLY_JOINT_LIMIT_FILTER = true;
+   private static final boolean APPLY_JOINT_LIMIT_FILTER = false;
    private static final boolean USE_AREA_BASED_CONTACT_ADJUSTMENT = false;
    private static final double INTEGRATION_DT = 1.0e-3;
    private static final int XY_DIMENSIONS = 2;
@@ -177,7 +177,7 @@ public class SensitivityBasedStabilityGradientCalculator
       yoStabilityMarginGradientFilt = new AlphaFilteredYoVariable[Twist.SIZE + controllableOneDoFJoints.length];
       String namePrefix = "stabilityGrad_";
 
-      gradientFilterAlpha.set(0.98);
+      gradientFilterAlpha.set(0.85);
 
       for (int i = 0; i < yoStabilityMarginGradient.length; i++)
       {
@@ -211,8 +211,8 @@ public class SensitivityBasedStabilityGradientCalculator
 
          if (graphicsListRegistry != null)
          {
-            YoGraphicVector contactAreaAdjustmentGraphic = new YoGraphicVector("contactAreaAdj" + i, yoContactPointOptimalAdjustmentsPoints.get(i), yoContactPointAreaAdjustments.get(i), 0.003, YoAppearance.Red());
-            YoGraphicVector contactMarginAdjustmentGraphic = new YoGraphicVector("contactMarginAdj" + i, yoContactPointOptimalAdjustmentsPoints.get(i), yoContactPointMarginAdjustments.get(i), 0.002, YoAppearance.Green());
+            YoGraphicVector contactAreaAdjustmentGraphic = new YoGraphicVector("contactAreaAdj" + i, yoContactPointOptimalAdjustmentsPoints.get(i), yoContactPointAreaAdjustments.get(i), 2.0, YoAppearance.Red());
+            YoGraphicVector contactMarginAdjustmentGraphic = new YoGraphicVector("contactMarginAdj" + i, yoContactPointOptimalAdjustmentsPoints.get(i), yoContactPointMarginAdjustments.get(i), 2.0, YoAppearance.Green());
             graphicsListRegistry.registerYoGraphic("Contact adjustment", contactAreaAdjustmentGraphic);
             graphicsListRegistry.registerYoGraphic("Contact adjustment", contactMarginAdjustmentGraphic);
          }

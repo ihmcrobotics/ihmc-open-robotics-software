@@ -3,18 +3,26 @@ package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 import us.ihmc.communication.PostureOptimizerState;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTools;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tools.QuaternionTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.yoVariables.euclid.filters.RateLimitedYoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
@@ -24,20 +32,24 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 /**
  * Retargets the pelvis/chest/arm orientation objectives during multi-contact
  */
-public class OrientationRetargetManager
+public class OrientationRetargeting
 {
+   private static final boolean VISUALIZE = true;
    private final RateLimitedYoFrameQuaternion desiredOrientationRateLimited;
 
    private final FrameQuaternion nominalOrientation = new FrameQuaternion();
    private final AxisAngle optimizedOrientation = new AxisAngle();
 
-//   private final YoFrameQuaternion yoNominalOrientation;
-//   private final YoFrameQuaternion yoOptimizedOrientation;
-//   private final YoFrameQuaternion yoActualOrientation;
+   private final YoFrameQuaternion yoNominalOrientation;
+   private final YoFrameQuaternion yoOptimizedOrientation;
+   private final YoFrameQuaternion yoActualOrientation;
+   private final YoFramePoint3D controlFrameOrigin;
 
+   private final FramePose3D controlFramePose = new FramePose3D();
    private final MovingReferenceFrame controlFrame;
    private final double integrationDT;
    private final double maxAngle;
+   private final RigidBodyBasics rigidBody;
 
    private final FrameVector3D angularVelocity = new FrameVector3D();
    private final Vector3D rotationVector = new Vector3D();
@@ -48,28 +60,51 @@ public class OrientationRetargetManager
 
    private final FrameVector3D filteredAngularVelocity = new FrameVector3D();
 
-//   private final YoFramePoint3D controlFrameOrigin;
-
-   public OrientationRetargetManager(String name, double integrationDT, MovingReferenceFrame controlFrame, double maxRate, double maxAngle, YoGraphicsListRegistry graphicsListRegistry, YoRegistry registry)
+   public OrientationRetargeting(String name, RigidBodyBasics rigidBody, double integrationDT, double maxRate, double maxAngle, YoGraphicsListRegistry graphicsListRegistry, YoRegistry registry)
    {
       desiredOrientationRateLimited = new RateLimitedYoFrameQuaternion(name, "DesiredOrientation", registry, maxRate, integrationDT, ReferenceFrame.getWorldFrame());
       this.integrationDT = integrationDT;
-      this.controlFrame = controlFrame;
       this.maxAngle = maxAngle;
+      this.controlFramePose.setToZero(rigidBody.getBodyFixedFrame());
+      this.rigidBody = rigidBody;
 
-//      yoNominalOrientation = new YoFrameQuaternion(name + "NominalOrientation", ReferenceFrame.getWorldFrame(), registry);
-//      yoOptimizedOrientation = new YoFrameQuaternion(name + "OptimizedOrientation", ReferenceFrame.getWorldFrame(), registry);
-//      yoActualOrientation = new YoFrameQuaternion(name + "ActualOrientation", ReferenceFrame.getWorldFrame(), registry);
-//
-//      controlFrameOrigin = new YoFramePoint3D(name + "ControlFrameOrigin", ReferenceFrame.getWorldFrame(), registry);
+      this.controlFrame = new MovingReferenceFrame(name + "ControlFrameRetarget", rigidBody.getBodyFixedFrame(), null, false, true)
+      {
+         @Override
+         protected void updateTwistRelativeToParent(Twist twistRelativeToParentToPack)
+         {
+         }
 
-//      YoGraphicCoordinateSystem nominalOrientation = new YoGraphicCoordinateSystem(name + "nominalOrientation", controlFrameOrigin, yoNominalOrientation, 0.35, YoAppearance.Green());
-//      YoGraphicCoordinateSystem optimizedOrientation = new YoGraphicCoordinateSystem(name + "optimizedOrientation", controlFrameOrigin, yoOptimizedOrientation, 0.35, YoAppearance.Red());
-//      YoGraphicCoordinateSystem actualOrientation = new YoGraphicCoordinateSystem(name + "actualOrientation", controlFrameOrigin, yoActualOrientation, 0.35, YoAppearance.Black());
-//
-//      graphicsListRegistry.registerYoGraphic("Coordinate Debug", nominalOrientation);
-//      graphicsListRegistry.registerYoGraphic("Coordinate Debug", optimizedOrientation);
-//      graphicsListRegistry.registerYoGraphic("Coordinate Debug", actualOrientation);
+         @Override
+         protected void updateTransformToParent(RigidBodyTransform transformToParent)
+         {
+            controlFramePose.checkReferenceFrameMatch(getParent());
+            controlFramePose.get(transformToParent);
+         }
+      };
+
+      if (VISUALIZE)
+      {
+         yoNominalOrientation = new YoFrameQuaternion(name + "NominalOrientation", ReferenceFrame.getWorldFrame(), registry);
+         yoOptimizedOrientation = new YoFrameQuaternion(name + "OptimizedOrientation", ReferenceFrame.getWorldFrame(), registry);
+         yoActualOrientation = new YoFrameQuaternion(name + "ActualOrientation", ReferenceFrame.getWorldFrame(), registry);
+
+         controlFrameOrigin = new YoFramePoint3D(name + "ControlFrameOrigin", ReferenceFrame.getWorldFrame(), registry);
+
+         YoGraphicCoordinateSystem nominalOrientation = new YoGraphicCoordinateSystem(name + "nominalOrientation", controlFrameOrigin, yoNominalOrientation, 0.35, YoAppearance.Green());
+         YoGraphicCoordinateSystem optimizedOrientation = new YoGraphicCoordinateSystem(name + "optimizedOrientation", controlFrameOrigin, yoOptimizedOrientation, 0.35, YoAppearance.Red());
+         YoGraphicCoordinateSystem actualOrientation = new YoGraphicCoordinateSystem(name + "actualOrientation", controlFrameOrigin, yoActualOrientation, 0.35, YoAppearance.Black());
+
+         graphicsListRegistry.registerYoGraphic("Coordinate Debug", nominalOrientation);
+         graphicsListRegistry.registerYoGraphic("Coordinate Debug", optimizedOrientation);
+         graphicsListRegistry.registerYoGraphic("Coordinate Debug", actualOrientation);
+      }
+      else
+      {
+         yoNominalOrientation = null;
+         yoOptimizedOrientation = null;
+         yoActualOrientation = null;
+      }
    }
 
    public void initialize()
@@ -83,18 +118,16 @@ public class OrientationRetargetManager
       optimizedOrientation.set(nominalOrientation);
    }
 
-   public void updateNominalOrientation(FrameOrientation3DReadOnly nominalOrientation)
+   public void updateNominalOrientation(FrameOrientation3DReadOnly nominalOrientation, FramePose3DReadOnly controlFrame)
    {
       this.nominalOrientation.setIncludingFrame(nominalOrientation);
+      this.controlFramePose.setIncludingFrame(controlFrame);
+      controlFramePose.changeFrame(rigidBody.getBodyFixedFrame());
    }
 
    public void update(PostureOptimizerState optimizerState)
    {
       controlFrame.update();
-//      controlFrameOrigin.setFromReferenceFrame(controlFrame);
-//      yoNominalOrientation.set(nominalOrientation);
-//      yoActualOrientation.setFromReferenceFrame(controlFrame);
-//      yoOptimizedOrientation.set(optimizedOrientation);
 
       if (optimizerState == PostureOptimizerState.NOMINAL)
       {
@@ -122,9 +155,13 @@ public class OrientationRetargetManager
          filteredAngularVelocity.setToZero();
       }
 
-//      yoNominalOrientation.set(nominalOrientation);
-//      yoOptimizedOrientation.set(optimizedOrientation);
-//      yoActualOrientation.setFromReferenceFrame(controlFrame);
+      if (VISUALIZE)
+      {
+         controlFrameOrigin.setFromReferenceFrame(controlFrame);
+         yoNominalOrientation.set(nominalOrientation);
+         yoOptimizedOrientation.set(optimizedOrientation);
+         yoActualOrientation.setFromReferenceFrame(controlFrame);
+      }
    }
 
    public FixedFrameQuaternionBasics getDesiredOrientation()
