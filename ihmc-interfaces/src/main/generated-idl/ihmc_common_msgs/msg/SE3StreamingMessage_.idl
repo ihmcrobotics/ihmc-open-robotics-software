@@ -31,6 +31,10 @@ module ihmc_common_msgs
          */
         geometry_msgs::msg::dds::Pose control_frame_pose;
         /**
+         * Flag that tells the controller whether the use an impedance feedback controller
+         */
+        boolean use_impedance;
+        /**
          * Define the desired 3D position to be reached.
          */
         geometry_msgs::msg::dds::Point position;

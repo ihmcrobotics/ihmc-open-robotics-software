@@ -15,7 +15,7 @@ public class SE3StreamingMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "237d991482ce22857cda4a655c19ed5d4fc3af95d13f9949134c3848a310f6d6";
+   		return "d1e66349be575de3daff20ee9bd0cafdc6db6c817d39c16694dd9edba78aa014";
    }
    
    @Override
@@ -58,6 +58,8 @@ public class SE3StreamingMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
@@ -90,6 +92,9 @@ public class SE3StreamingMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getControlFramePose(), current_alignment);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getPosition(), current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getOrientation(), current_alignment);
@@ -112,6 +117,8 @@ public class SE3StreamingMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
       cdr.write_type_7(data.getUseCustomControlFrame());
 
       geometry_msgs.msg.dds.PosePubSubType.write(data.getControlFramePose(), cdr);
+      cdr.write_type_7(data.getUseImpedance());
+
       geometry_msgs.msg.dds.PointPubSubType.write(data.getPosition(), cdr);
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getOrientation(), cdr);
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getLinearVelocity(), cdr);
@@ -126,6 +133,8 @@ public class SE3StreamingMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
       data.setUseCustomControlFrame(cdr.read_type_7());
       	
       geometry_msgs.msg.dds.PosePubSubType.read(data.getControlFramePose(), cdr);	
+      data.setUseImpedance(cdr.read_type_7());
+      	
       geometry_msgs.msg.dds.PointPubSubType.read(data.getPosition(), cdr);	
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getOrientation(), cdr);	
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getLinearVelocity(), cdr);	
@@ -143,6 +152,7 @@ public class SE3StreamingMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
       ser.write_type_7("use_custom_control_frame", data.getUseCustomControlFrame());
       ser.write_type_a("control_frame_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getControlFramePose());
 
+      ser.write_type_7("use_impedance", data.getUseImpedance());
       ser.write_type_a("position", new geometry_msgs.msg.dds.PointPubSubType(), data.getPosition());
 
       ser.write_type_a("orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getOrientation());
@@ -165,6 +175,7 @@ public class SE3StreamingMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
       data.setUseCustomControlFrame(ser.read_type_7("use_custom_control_frame"));
       ser.read_type_a("control_frame_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getControlFramePose());
 
+      data.setUseImpedance(ser.read_type_7("use_impedance"));
       ser.read_type_a("position", new geometry_msgs.msg.dds.PointPubSubType(), data.getPosition());
 
       ser.read_type_a("orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getOrientation());

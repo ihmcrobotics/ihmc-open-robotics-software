@@ -79,6 +79,12 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
    private ReferenceFrame controlBaseFrame = null;
 
    /**
+    * Whether to enable impedance control. If true, the controller will use impedance control
+    * to compute the desired acceleration.
+    */
+   private boolean isImpedanceEnabled = false;
+
+   /**
     * Creates an empty command.
     */
    public OrientationFeedbackControlCommand()
@@ -105,6 +111,7 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
       angularGainsFrame = other.angularGainsFrame;
       spatialAccelerationCommand.set(other.spatialAccelerationCommand);
       controlBaseFrame = other.controlBaseFrame;
+      isImpedanceEnabled = other.isImpedanceEnabled;
    }
 
    /**
@@ -209,12 +216,23 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
     * This is a safety feature, the controller core will throw an exception in the case the control
     * mode mismatches the active mode of the controller core.
     * </p>
-    * 
+    *
     * @param controlMode the expected control mode.
     */
    public void setControlMode(WholeBodyControllerCoreMode controlMode)
    {
       this.controlMode = controlMode;
+   }
+
+   /**
+    * Sets the impedance control mode to be used for this command.
+    *
+    * @param isImpedanceEnabled whether to enable impedance control
+    */
+
+   public void setImpedanceEnabled(boolean isImpedanceEnabled)
+   {
+      this.isImpedanceEnabled = isImpedanceEnabled;
    }
 
    /**
@@ -368,7 +386,7 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
     *
     * @param controlFrameOrientationInEndEffectorFrame the orientation of the {@code bodyFixedOrientation}. Not modified.
     * @throws ReferenceFrameMismatchException if any the argument is not expressed in
-    *                                         {@code endEffector.getBodyFixedFrame()}.
+    *       {@code endEffector.getBodyFixedFrame()}.
     */
    public void setControlFrameFixedInEndEffector(FrameOrientation3DReadOnly controlFrameOrientationInEndEffectorFrame)
    {
@@ -464,7 +482,7 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
 
    /**
     * Gets the expected control mode to execute this command with.
-    * 
+    *
     * @return the expected active controller core control mode.
     */
    public WholeBodyControllerCoreMode getControlMode()
@@ -477,7 +495,7 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
     * <p>
     * The reference orientation typically represents the desired orientation.
     * </p>
-    * 
+    *
     * @return the reference orientation.
     */
    public FrameQuaternionBasics getReferenceOrientation()
@@ -491,7 +509,7 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
     * Depending on the active control mode, it can be used as a desired (ID & WMC) or a feed-forward
     * term (IK).
     * </p>
-    * 
+    *
     * @return the reference angular velocity.
     */
    public FrameVector3DBasics getReferenceAngularVelocity()
@@ -504,7 +522,7 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
     * <p>
     * It is used in the inverse dynamics mode as a feed-forward term.
     * </p>
-    * 
+    *
     * @return the reference angular acceleration.
     */
    public FrameVector3DBasics getReferenceAngularAcceleration()
@@ -517,7 +535,7 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
     * <p>
     * It is used in the virtual control mode as a feed-forward term.
     * </p>
-    * 
+    *
     * @return the reference torque.
     */
    public FrameVector3DBasics getReferenceTorque()
@@ -546,6 +564,11 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
    public SpatialAccelerationCommand getSpatialAccelerationCommand()
    {
       return spatialAccelerationCommand;
+   }
+
+   public boolean getIsImpedanceEnabled()
+   {
+      return isImpedanceEnabled;
    }
 
    public PID3DGains getGains()
@@ -606,6 +629,8 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
          if (!spatialAccelerationCommand.equals(other.spatialAccelerationCommand))
             return false;
          if (controlBaseFrame != other.controlBaseFrame)
+            return false;
+         if (isImpedanceEnabled ^ other.isImpedanceEnabled)
             return false;
 
          return true;

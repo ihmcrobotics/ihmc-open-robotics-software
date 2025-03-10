@@ -149,15 +149,20 @@ public class KinematicsToolboxOutputConverter
 
    public void computeHandTrajectoryMessage(RobotSide robotSide)
    {
-      computeHandTrajectoryMessage(robotSide, worldFrame);
+      computeHandTrajectoryMessage(robotSide, worldFrame, false);
    }
 
-   public void computeHandTrajectoryMessage(RobotSide robotSide, ReferenceFrame trajectoryFrame)
+   public void computeHandTrajectoryMessage(RobotSide robotSide, boolean impedanceEnabled)
    {
-      computeHandTrajectoryMessage(robotSide, trajectoryFrame.getFrameNameHashCode());
+      computeHandTrajectoryMessage(robotSide, worldFrame, impedanceEnabled);
    }
 
-   public void computeHandTrajectoryMessage(RobotSide robotSide, long trajectoryFrameId)
+   public void computeHandTrajectoryMessage(RobotSide robotSide, ReferenceFrame trajectoryFrame, boolean impedanceEnabled)
+   {
+      computeHandTrajectoryMessage(robotSide, trajectoryFrame.getFrameNameHashCode(), impedanceEnabled);
+   }
+
+   public void computeHandTrajectoryMessage(RobotSide robotSide, long trajectoryFrameId, boolean impedanceEnabled)
    {
       checkIfDataHasBeenSet();
 
@@ -174,6 +179,7 @@ public class KinematicsToolboxOutputConverter
       packCustomControlFrame(fullRobotModel.getHand(robotSide).getBodyFixedFrame(), handControlFrame, se3TrajectoryMessage);
       se3TrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryFrameId);
       se3TrajectoryMessage.getFrameInformation().setDataReferenceFrameId(worldFrame.getFrameNameHashCode());
+      se3TrajectoryMessage.setUseImpedance(impedanceEnabled);
 
       Object<SE3TrajectoryPointMessage> taskspaceTrajectoryPoints = se3TrajectoryMessage.getTaskspaceTrajectoryPoints();
       taskspaceTrajectoryPoints.clear();

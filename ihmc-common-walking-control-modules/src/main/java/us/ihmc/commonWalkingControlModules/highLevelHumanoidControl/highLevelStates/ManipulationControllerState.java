@@ -44,6 +44,7 @@ import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.ArrayList;
@@ -230,6 +231,8 @@ public class ManipulationControllerState extends HighLevelControllerState
       // Gains
       PID3DGainsReadOnly taskspaceOrientationGains = taskspaceOrientationGainMap.get(bodyName);
       PID3DGainsReadOnly taskspacePositionGains = taskspacePositionGainMap.get(bodyName);
+      PID3DGainsReadOnly taskspaceOrientationImpedanceGains = taskspaceOrientationGainMap.get(WalkingControllerParameters.getImpedanceGainParameterName(bodyName));
+      PID3DGainsReadOnly taskspacePositionImpedanceGains = taskspacePositionGainMap.get(WalkingControllerParameters.getImpedanceGainParameterName(bodyName));
 
       // Weights
       Vector3DReadOnly taskspaceAngularWeight = taskspaceAngularWeightMap.get(bodyName);
@@ -253,6 +256,8 @@ public class ManipulationControllerState extends HighLevelControllerState
                                                                     taskspaceLinearWeight,
                                                                     taskspaceOrientationGains,
                                                                     taskspacePositionGains,
+                                                                    taskspaceOrientationImpedanceGains,
+                                                                    taskspacePositionImpedanceGains,
                                                                     contactableBody,
                                                                     null,
                                                                     defaultControlMode,
@@ -504,7 +509,7 @@ public class ManipulationControllerState extends HighLevelControllerState
             JointspaceTrajectoryCommand jointspaceTrajectoryCommand = command.getJointspaceTrajectoryCommand();
             taskspaceTrajectoryCommand.setSequenceId(command.getSequenceId());
             jointspaceTrajectoryCommand.setSequenceId(command.getSequenceId());
-            handManager.handleHybridTrajectoryCommand(taskspaceTrajectoryCommand, jointspaceTrajectoryCommand);
+            handManager.handleHybridTrajectoryCommand(taskspaceTrajectoryCommand, jointspaceTrajectoryCommand, command.getImpedanceEnabled());
          }
       }
 

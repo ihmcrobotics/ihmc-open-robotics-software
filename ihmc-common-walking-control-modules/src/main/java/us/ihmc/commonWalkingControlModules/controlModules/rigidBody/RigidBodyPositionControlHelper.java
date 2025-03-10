@@ -1,8 +1,10 @@
 package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
+import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.lists.RecyclingArrayDeque;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -22,6 +24,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.EuclideanTrajectoryControllerCommand;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorMode;
@@ -40,6 +43,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.ArrayList;
@@ -88,6 +92,7 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
 
    private Vector3DReadOnly defaultWeight;
    private PID3DGainsReadOnly gains;
+   private PID3DGainsReadOnly impedanceGains;
    private final List<YoFunctionGeneratorNew> functionGenerators = new ArrayList<>();
 
    private final FramePoint3D desiredPosition = new FramePoint3D();
@@ -95,6 +100,7 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
    private final FrameVector3D feedForwardAcceleration = new FrameVector3D();
 
    private final BooleanProvider useBaseFrameForControl;
+   private final YoBoolean isFeedforwardEnabled;
 
    private final RigidBodyTransform previousControlFramePose = new RigidBodyTransform();
    private final RigidBodyTransform controlFramePose = new RigidBodyTransform();
@@ -113,6 +119,7 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
    private final String warningPrefix;
 
    private final DoubleProvider time;
+   private final YoBoolean isImpedanceEnabled;
 
    public RigidBodyPositionControlHelper(String warningPrefix,
                                          RigidBodyBasics bodyToControl,
@@ -123,6 +130,7 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
                                          BooleanProvider useBaseFrameForControl,
                                          BooleanProvider useWeightFromMessage,
                                          boolean enableFunctionGenerators,
+                                         YoBoolean isImpedanceEnabled,
                                          DoubleProvider time,
                                          YoRegistry registry,
                                          YoGraphicsListRegistry graphicsListRegistry)
@@ -132,6 +140,7 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
       this.useWeightFromMessage = useWeightFromMessage;
       this.baseFrame = baseFrame;
       this.time = time;
+      this.isImpedanceEnabled = isImpedanceEnabled;
 
       String bodyName = bodyToControl.getName();
       String prefix = bodyName + "TaskspacePosition";
@@ -146,6 +155,8 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
 
       feedbackControlCommand.set(elevator, bodyToControl);
       feedbackControlCommand.setPrimaryBase(baseBody);
+      isFeedforwardEnabled = new YoBoolean(prefix + "FeedforwardEnabled", registry);
+      isFeedforwardEnabled.set(true);
 
       defaultControlFrame = controlFrame;
       bodyFrame = bodyToControl.getBodyFixedFrame();
@@ -185,6 +196,16 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
    public PID3DGainsReadOnly getGains()
    {
       return gains;
+   }
+
+   public void setImpedanceGains(PID3DGainsReadOnly impedanceGains)
+   {
+      this.impedanceGains = impedanceGains;
+   }
+
+   public PID3DGainsReadOnly getImpedanceGains()
+   {
+      return impedanceGains;
    }
 
    public void setWeights(Vector3DReadOnly weights)
@@ -324,12 +345,31 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
       trajectoryGenerator.getLinearData(desiredPosition, desiredVelocity, feedForwardAcceleration);
       updateFunctionGenerators();
 
+      if (!isImpedanceEnabled.getValue())
+      {
+         feedbackControlCommand.setGains(gains);
+      }
+      else
+      {
+         if (impedanceGains != null)
+         {
+            feedbackControlCommand.setGains(impedanceGains);
+         }
+         else
+         {
+            isImpedanceEnabled.set(false);
+            LogTools.warn(warningPrefix + "Impedance gains are not set, impedance control is disabled.");
+         }
+      }
+
       desiredPosition.changeFrame(ReferenceFrame.getWorldFrame());
       desiredVelocity.changeFrame(ReferenceFrame.getWorldFrame());
       feedForwardAcceleration.changeFrame(ReferenceFrame.getWorldFrame());
+      if (!isFeedforwardEnabled.getBooleanValue())
+         feedForwardAcceleration.set(0.0, 0.0, 0.0);
 
       feedbackControlCommand.setInverseDynamics(desiredPosition, desiredVelocity, feedForwardAcceleration);
-      feedbackControlCommand.setGains(gains);
+      feedbackControlCommand.setImpedanceEnabled(isImpedanceEnabled.getValue());
 
       // This will improve the tracking with respect to moving trajectory frames.
       if (useBaseFrameForControl.getValue())

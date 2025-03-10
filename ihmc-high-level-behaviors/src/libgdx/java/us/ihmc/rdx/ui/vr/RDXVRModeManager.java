@@ -8,6 +8,7 @@ import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -57,7 +58,8 @@ public class RDXVRModeManager
                       ROS2SyncedRobotModel syncedRobot,
                       RDXROS2RobotVisualizer robotVisualizer,
                       ROS2ControllerHelper controllerHelper,
-                      boolean createKinematicsStreamingToolboxModule)
+                      boolean createKinematicsStreamingToolboxModule,
+                      KinematicsStreamingToolboxParameters kstParameters)
    {
       create(baseUI,
              syncedRobot,
@@ -65,7 +67,8 @@ public class RDXVRModeManager
              controllerHelper,
              new DefaultRetargetingParameters(),
              new SceneGraph(),
-             createKinematicsStreamingToolboxModule);
+             createKinematicsStreamingToolboxModule,
+             kstParameters);
    }
 
    public void create(RDXBaseUI baseUI,
@@ -73,9 +76,10 @@ public class RDXVRModeManager
                       RDXROS2RobotVisualizer robotVisualizer,
                       ROS2ControllerHelper controllerHelper,
                       RetargetingParameters retargetingParameters,
-                      boolean createKinematicsStreamingToolboxModule)
+                      boolean createKinematicsStreamingToolboxModule,
+                      KinematicsStreamingToolboxParameters kstParameters)
    {
-      create(baseUI, syncedRobot, robotVisualizer, controllerHelper, retargetingParameters, new SceneGraph(), createKinematicsStreamingToolboxModule);
+      create(baseUI, syncedRobot, robotVisualizer, controllerHelper, retargetingParameters, new SceneGraph(), createKinematicsStreamingToolboxModule, kstParameters);
    }
 
    public void create(RDXBaseUI baseUI,
@@ -84,7 +88,8 @@ public class RDXVRModeManager
                       ROS2ControllerHelper controllerHelper,
                       RetargetingParameters retargetingParameters,
                       SceneGraph sceneGraph,
-                      boolean createKinematicsStreamingToolboxModule)
+                      boolean createKinematicsStreamingToolboxModule,
+                      KinematicsStreamingToolboxParameters kstParameters)
    {
       this.robotVisualizer = robotVisualizer;
 
@@ -114,7 +119,7 @@ public class RDXVRModeManager
                                                                     controllerStatusTracker,
                                                                     footstepPlacer,
                                                                     handManager);
-         kinematicsStreamingMode.create(createKinematicsStreamingToolboxModule);
+         kinematicsStreamingMode.create(createKinematicsStreamingToolboxModule, kstParameters);
       }
 
       joystickBasedStepping = new RDXJoystickBasedStepping(syncedRobot.getRobotModel());

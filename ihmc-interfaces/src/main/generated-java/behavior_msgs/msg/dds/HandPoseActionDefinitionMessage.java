@@ -45,6 +45,10 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
             */
    public double trajectory_duration_;
    /**
+            * Whether impedance control is active
+            */
+   public boolean impedance_control_;
+   /**
             * Whether maintaining the rigid body controlled in world after the action is complete
             */
    public boolean hold_pose_in_world_;
@@ -91,6 +95,8 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
       }
 
       trajectory_duration_ = other.trajectory_duration_;
+
+      impedance_control_ = other.impedance_control_;
 
       hold_pose_in_world_ = other.hold_pose_in_world_;
 
@@ -233,6 +239,21 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
    }
 
    /**
+            * Whether impedance control is active
+            */
+   public void setImpedanceControl(boolean impedance_control)
+   {
+      impedance_control_ = impedance_control;
+   }
+   /**
+            * Whether impedance control is active
+            */
+   public boolean getImpedanceControl()
+   {
+      return impedance_control_;
+   }
+
+   /**
             * Whether maintaining the rigid body controlled in world after the action is complete
             */
    public void setHoldPoseInWorld(boolean hold_pose_in_world)
@@ -329,6 +350,8 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.trajectory_duration_, other.trajectory_duration_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.impedance_control_, other.impedance_control_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.hold_pose_in_world_, other.hold_pose_in_world_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.linear_position_weight_, other.linear_position_weight_, epsilon)) return false;
@@ -373,6 +396,8 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
       }
       if(this.trajectory_duration_ != otherMyClass.trajectory_duration_) return false;
 
+      if(this.impedance_control_ != otherMyClass.impedance_control_) return false;
+
       if(this.hold_pose_in_world_ != otherMyClass.hold_pose_in_world_) return false;
 
       if(this.linear_position_weight_ != otherMyClass.linear_position_weight_) return false;
@@ -413,6 +438,8 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
       builder.append(java.util.Arrays.toString(this.joint_angles_));      builder.append(", ");
       builder.append("trajectory_duration=");
       builder.append(this.trajectory_duration_);      builder.append(", ");
+      builder.append("impedance_control=");
+      builder.append(this.impedance_control_);      builder.append(", ");
       builder.append("hold_pose_in_world=");
       builder.append(this.hold_pose_in_world_);      builder.append(", ");
       builder.append("linear_position_weight=");

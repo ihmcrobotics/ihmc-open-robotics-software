@@ -44,6 +44,7 @@ import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.ArrayList;
@@ -503,6 +504,8 @@ public class RigidBodyControlManagerTest
       Vector3D taskspaceAngularWeight = new Vector3D(1.0, 1.0, 1.0);
       Vector3D taskspaceLinearWeight = new Vector3D(1.0, 1.0, 1.0);
       double nominalRhoWeight = 1.0;
+      YoBoolean isImpedanceEnabled = new YoBoolean("isImpedanceEnabled", testRegistry);
+      isImpedanceEnabled.set(false);
 
       RigidBodyControlManager manager = new RigidBodyControlManager(bodyToControl,
                                                                     baseBody,
@@ -515,6 +518,8 @@ public class RigidBodyControlManagerTest
                                                                     taskspaceLinearWeight,
                                                                     taskspaceOrientationGains,
                                                                     taskspacePositionGains,
+                                                                    null,
+                                                                    null,
                                                                     contactableBody,
                                                                     null,
                                                                     null,

@@ -2,6 +2,7 @@ package us.ihmc.robotics.controllers.pidGains.implementations;
 
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.function.DoubleSupplier;
 
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.robotics.controllers.pidGains.GainCalculator;
@@ -9,6 +10,7 @@ import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.yoVariables.listener.YoParameterChangedListener;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -243,7 +245,7 @@ public class ParameterizedPID3DGains implements PID3DGainsReadOnly
    @Override
    public double[] getDerivativeGains()
    {
-      DefaultYoPID3DGains.fillFromMap(kdMap, tempDerivativeGains);
+      fillFromMap(kdMap, tempDerivativeGains);
       return tempDerivativeGains;
    }
 
@@ -263,7 +265,14 @@ public class ParameterizedPID3DGains implements PID3DGainsReadOnly
       return tempIntegralGains;
    }
 
-   private static void fillFromMap(Map<Axis3D, DoubleParameter> map, double[] arrayToFill)
+   @Override
+   public double[] getDampingRatios()
+   {
+      fillFromMap(zetaMap, tempProportionalGains);
+      return tempProportionalGains;
+   }
+
+   static void fillFromMap(Map<Axis3D, ? extends DoubleProvider> map, double[] arrayToFill)
    {
       arrayToFill[0] = map.get(Axis3D.X).getValue();
       arrayToFill[1] = map.get(Axis3D.Y).getValue();

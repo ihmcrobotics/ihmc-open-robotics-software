@@ -14,6 +14,8 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+import static us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPID3DGains.fillFromMap;
+
 /**
  * Provides a default implementation for Yo PID gains in three dimensions.
  * <p>
@@ -197,11 +199,11 @@ public class DefaultYoPID3DGains implements YoPID3DGains
       return tempIntegralGains;
    }
 
-   static void fillFromMap(Map<Axis3D, YoDouble> map, double[] arrayToFill)
+   @Override
+   public double[] getDampingRatios()
    {
-      arrayToFill[0] = map.get(Axis3D.X).getDoubleValue();
-      arrayToFill[1] = map.get(Axis3D.Y).getDoubleValue();
-      arrayToFill[2] = map.get(Axis3D.Z).getDoubleValue();
+      fillFromMap(zetaMap, tempIntegralGains);
+      return tempIntegralGains;
    }
 
    @Override

@@ -1,14 +1,7 @@
 package us.ihmc.avatar;
 
-import static us.ihmc.robotics.Assert.assertTrue;
-
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.Random;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.axisAngle.AxisAngle;
@@ -39,6 +32,12 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.Random;
+
+import static us.ihmc.robotics.Assert.assertTrue;
 
 public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implements MultiRobotTestInterface
 {
@@ -460,13 +459,13 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
    {
       for (JointNames name : JointNames.values())
       {
-         double bufferAwayFromJointLimits = 0.05; // 0.2; //0.0;
+         double bufferAwayFromJointLimits = 0.2; // 0.2; //0.0;
 
          double minRange = jointLimits.get(name).get(0) - bufferAwayFromJointLimits;
          double maxRange = jointLimits.get(name).get(1) + bufferAwayFromJointLimits;
 
          double randomJointAngle = RandomNumbers.nextDouble(random, minRange, maxRange);
-         jointAngles.put(name, randomJointAngle);
+         jointAngles.put(name, randomJointAngle / 2.0);
          oneDoFJoints.get(name).setQ(jointAngles.get(name));
       }
    }

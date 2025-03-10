@@ -81,6 +81,12 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
    private ReferenceFrame controlBaseFrame = null;
 
    /**
+    * Whether to enable impedance control. If true, the controller will use impedance control
+    * to compute the desired acceleration.
+    */
+   private boolean isImpedanceEnabled = false;
+
+   /**
     * Creates an empty command. It needs to be configured before being submitted to the controller
     * core.
     */
@@ -106,6 +112,7 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
       linearGainsFrame = other.linearGainsFrame;
       spatialAccelerationCommand.set(other.spatialAccelerationCommand);
       controlBaseFrame = other.controlBaseFrame;
+      isImpedanceEnabled = other.isImpedanceEnabled;
    }
 
    /**
@@ -210,12 +217,23 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
     * This is a safety feature, the controller core will throw an exception in the case the control
     * mode mismatches the active mode of the controller core.
     * </p>
-    * 
+    *
     * @param controlMode the expected control mode.
     */
    public void setControlMode(WholeBodyControllerCoreMode controlMode)
    {
       this.controlMode = controlMode;
+   }
+
+   /**
+    * Sets the impedance control mode to be used for this command.
+    *
+    * @param isImpedanceEnabled whether to enable impedance control
+    */
+
+   public void setImpedanceEnabled(boolean isImpedanceEnabled)
+   {
+      this.isImpedanceEnabled = isImpedanceEnabled;
    }
 
    /**
@@ -374,7 +392,7 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
     *
     * @param bodyFixedPointInEndEffectorFrame the position of the {@code bodyFixedPoint}. Not modified.
     * @throws ReferenceFrameMismatchException if any the argument is not expressed in
-    *                                         {@code endEffector.getBodyFixedFrame()}.
+    *       {@code endEffector.getBodyFixedFrame()}.
     */
    public void setBodyFixedPointToControl(FramePoint3DReadOnly bodyFixedPointInEndEffectorFrame)
    {
@@ -470,7 +488,7 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
 
    /**
     * Gets the expected control mode to execute this command with.
-    * 
+    *
     * @return the expected active controller core control mode.
     */
    public WholeBodyControllerCoreMode getControlMode()
@@ -483,7 +501,7 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
     * <p>
     * The reference position typically represents the desired position.
     * </p>
-    * 
+    *
     * @return the reference position.
     */
    public FramePoint3DBasics getReferencePosition()
@@ -497,7 +515,7 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
     * Depending on the active control mode, it can be used as a desired (ID & WMC) or a feed-forward
     * term (IK).
     * </p>
-    * 
+    *
     * @return the reference linear velocity.
     */
    public FrameVector3DBasics getReferenceLinearVelocity()
@@ -510,7 +528,7 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
     * <p>
     * It is used in the inverse dynamics mode as a feed-forward term.
     * </p>
-    * 
+    *
     * @return the reference linear acceleration.
     */
    public FrameVector3DBasics getReferenceLinearAcceleration()
@@ -523,7 +541,7 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
     * <p>
     * It is used in the virtual control mode as a feed-forward term.
     * </p>
-    * 
+    *
     * @return the reference force.
     */
    public FrameVector3D getReferenceForce()
@@ -552,6 +570,11 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
    public SpatialAccelerationCommand getSpatialAccelerationCommand()
    {
       return spatialAccelerationCommand;
+   }
+
+   public boolean getIsImpedanceEnabled()
+   {
+      return isImpedanceEnabled;
    }
 
    public PID3DGains getGains()
@@ -612,6 +635,8 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
          if (!spatialAccelerationCommand.equals(other.spatialAccelerationCommand))
             return false;
          if (controlBaseFrame != other.controlBaseFrame)
+            return false;
+         if (isImpedanceEnabled ^ other.isImpedanceEnabled)
             return false;
 
          return true;

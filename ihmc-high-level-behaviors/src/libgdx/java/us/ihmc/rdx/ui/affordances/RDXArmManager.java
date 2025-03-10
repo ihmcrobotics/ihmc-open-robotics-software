@@ -245,9 +245,9 @@ public class RDXArmManager
          armControlMode = RDXArmControlMode.TASKSPACE;
       }
       ImGui.sameLine();
-      if (ImGui.radioButton(labels.get("Hybrid"), armControlMode == RDXArmControlMode.HYBRID))
+      if (ImGui.radioButton(labels.get("Impedance"), armControlMode == RDXArmControlMode.IMPEDANCE))
       {
-         armControlMode = RDXArmControlMode.HYBRID;
+         armControlMode = RDXArmControlMode.IMPEDANCE;
       }
 
       ImGui.text("Taskspace trajectory frame:");
@@ -380,22 +380,15 @@ public class RDXArmManager
             RDXBaseUI.pushNotification("Commanding arm jointspace trajectory...");
             communicationHelper.publishToController(armTrajectoryMessage);
          }
-         case TASKSPACE ->
-         {
-            HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage();
-            handTrajectoryMessage.setRobotSide(robotSide.toByte());
-            handTrajectoryMessage.getSe3Trajectory().set(se3TrajectoryMessage);
-            RDXBaseUI.pushNotification("Commanding taskspace %s frame trajectory...".formatted(taskspaceTrajectoryFrame.getName()));
-            communicationHelper.publishToController(handTrajectoryMessage);
-         }
-         case HYBRID ->
+         case TASKSPACE, IMPEDANCE ->
          {
             HandHybridJointspaceTaskspaceTrajectoryMessage handHybridJointspaceTaskspaceTrajectoryMessage
                   = new HandHybridJointspaceTaskspaceTrajectoryMessage();
+            handHybridJointspaceTaskspaceTrajectoryMessage.setImpedanceEnabled(armControlMode == RDXArmControlMode.IMPEDANCE);
             handHybridJointspaceTaskspaceTrajectoryMessage.setRobotSide(robotSide.toByte());
             handHybridJointspaceTaskspaceTrajectoryMessage.getTaskspaceTrajectoryMessage().set(se3TrajectoryMessage);
             handHybridJointspaceTaskspaceTrajectoryMessage.getJointspaceTrajectoryMessage().set(jointspaceTrajectoryMessage);
-            RDXBaseUI.pushNotification("Commanding arm hybrid jointspace taskpace trajectory...");
+            RDXBaseUI.pushNotification("Commanding arm hybrid jointspace taskpace trajectory...".formatted(taskspaceTrajectoryFrame.getName()));
             communicationHelper.publishToController(handHybridJointspaceTaskspaceTrajectoryMessage);
          }
       }

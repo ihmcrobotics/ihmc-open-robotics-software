@@ -61,6 +61,10 @@ module ihmc_common_msgs
          */
         geometry_msgs::msg::dds::Pose control_frame_pose;
         /**
+         * Flag that tells the controller whether the use an impedance feedback controller
+         */
+        boolean use_impedance;
+        /**
          * Properties for queueing trajectories.
          */
         ihmc_common_msgs::msg::dds::QueueableMessage queueing_properties;

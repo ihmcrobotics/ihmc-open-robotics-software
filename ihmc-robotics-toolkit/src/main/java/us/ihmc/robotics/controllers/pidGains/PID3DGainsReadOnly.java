@@ -1,7 +1,7 @@
 package us.ihmc.robotics.controllers.pidGains;
 
 import java.util.Arrays;
-
+import org.ejml.data.DMatrixRMaj;
 import us.ihmc.euclid.matrix.Matrix3D;
 
 /**
@@ -32,6 +32,14 @@ public interface PID3DGainsReadOnly
     * @return the integral PID gains as double array.
     */
    public abstract double[] getIntegralGains();
+
+   /**
+    * Returns the derivative damping ratio for all three dimensions. The returned
+    * array is of length three.
+    *
+    * @return the derivative damping ratio as double array.
+    */
+   public abstract double[] getDampingRatios();
 
    /**
     * Returns the maximum integral error allowed by the PID controller

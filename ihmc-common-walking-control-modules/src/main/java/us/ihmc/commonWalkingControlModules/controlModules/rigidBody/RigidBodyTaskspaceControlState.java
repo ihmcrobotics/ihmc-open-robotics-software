@@ -38,6 +38,8 @@ public abstract class RigidBodyTaskspaceControlState extends RigidBodyControlSta
       return null;
    }
 
+   public abstract void setImpedanceEnabled(boolean isImpedanceEnabled);
+
    public boolean handleTrajectoryCommand(EuclideanTrajectoryControllerCommand command)
    {
       LogTools.warn("Handling of " + command.getClass().getSimpleName() + " not implemented for " + getClass().getSimpleName() + ".");

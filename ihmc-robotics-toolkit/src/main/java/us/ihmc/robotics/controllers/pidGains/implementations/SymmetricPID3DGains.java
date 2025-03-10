@@ -35,6 +35,12 @@ public class SymmetricPID3DGains implements PID3DGainsReadOnly
    }
 
    @Override
+   public double[] getDampingRatios()
+   {
+      return new double[] {1.0, 1.0, 1.0};
+   }
+
+   @Override
    public double getMaximumIntegralError()
    {
       return gains.getMaxIntegralError();

@@ -44,6 +44,7 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
    private final RigidBodyPositionControlHelper positionHelper;
 
    private final TaskspaceTrajectoryStatusMessageHelper statusHelper;
+   private final YoBoolean isImpedanceEnabled;
 
    public RigidBodyPositionController(RigidBodyBasics bodyToControl,
                                       RigidBodyBasics baseBody,
@@ -63,6 +64,7 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
       numberOfPointsInQueue = new YoInteger(prefix + "NumberOfPointsInQueue", registry);
       numberOfPointsInGenerator = new YoInteger(prefix + "NumberOfPointsInGenerator", registry);
       numberOfPoints = new YoInteger(prefix + "NumberOfPoints", registry);
+      isImpedanceEnabled = new YoBoolean(prefix + "-EnabledImpedanceControl", registry);
 
       // This needs to be identity to allow for consistent conversions of the control frame point if a message with a control frame is recieved.
       bodyFrame = bodyToControl.getBodyFixedFrame();
@@ -82,6 +84,7 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
                                                           useBaseFrameForControl,
                                                           usingWeightFromMessage,
                                                           enableFunctionGenerators,
+                                                          isImpedanceEnabled,
                                                           yoTime,
                                                           registry,
                                                           graphicsListRegistry);
@@ -249,5 +252,11 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
       group.addChild(positionHelper.getSCS2YoGraphics());
       return group;
+   }
+
+   @Override
+   public void setImpedanceEnabled(boolean isImpedanceEnabled)
+   {
+      this.isImpedanceEnabled.set(isImpedanceEnabled);
    }
 }

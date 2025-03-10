@@ -21,6 +21,7 @@ public class KinematicsStreamingToolboxConfigurationCommand
 
    private boolean enableLeftHandTaskspace = true;
    private boolean enableRightHandTaskspace = true;
+   private boolean enableArmImpedance = false;
    private boolean enableChestTaskspace = true;
    private boolean enablePelvisTaskspace = true;
    private boolean enableCenterOfMassTrajectory = false;
@@ -47,6 +48,7 @@ public class KinematicsStreamingToolboxConfigurationCommand
 
       enableLeftHandTaskspace = true;
       enableRightHandTaskspace = true;
+      enableArmImpedance = false;
       enableChestTaskspace = true;
       enablePelvisTaskspace = true;
       enableCenterOfMassTrajectory = false;
@@ -70,6 +72,7 @@ public class KinematicsStreamingToolboxConfigurationCommand
 
       enableLeftHandTaskspace = other.enableLeftHandTaskspace;
       enableRightHandTaskspace = other.enableRightHandTaskspace;
+      enableArmImpedance = other.enableArmImpedance;
       enableChestTaskspace = other.enableChestTaskspace;
       enablePelvisTaskspace = other.enablePelvisTaskspace;
       enableCenterOfMassTrajectory = other.enableCenterOfMassTrajectory;
@@ -96,6 +99,7 @@ public class KinematicsStreamingToolboxConfigurationCommand
 
       enableLeftHandTaskspace = message.getEnableLeftHandTaskspace();
       enableRightHandTaskspace = message.getEnableRightHandTaskspace();
+      enableArmImpedance = message.getEnableArmImpedance();
       enableChestTaskspace = message.getEnableChestTaskspace();
       enablePelvisTaskspace = message.getEnablePelvisTaskspace();
       enableCenterOfMassTrajectory = message.getEnableCenterOfMassControl();
@@ -155,6 +159,11 @@ public class KinematicsStreamingToolboxConfigurationCommand
    public boolean isRightHandTaskspaceEnabled()
    {
       return enableRightHandTaskspace;
+   }
+
+   public boolean isArmImpedanceEnabled()
+   {
+      return enableArmImpedance;
    }
 
    public boolean isChestTaskspaceEnabled()

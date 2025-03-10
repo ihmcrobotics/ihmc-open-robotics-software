@@ -18,6 +18,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OneDoFJointPrivilegedConfigurationParameters;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.PID3DConfiguration;
@@ -234,6 +235,16 @@ public abstract class WalkingControllerParameters
    public List<GroupParameter<PID3DConfiguration>> getTaskspacePositionControlGains()
    {
       return new ArrayList<>();
+   }
+
+   public PID3DGainsReadOnly getImpedanceHandPositionControlGains()
+   {
+      return null;
+   }
+
+   public PID3DGainsReadOnly getImpedanceHandOrientationControlGains()
+   {
+      return null;
    }
 
    /**
@@ -880,5 +891,10 @@ public abstract class WalkingControllerParameters
    public List<String> getJointsToCheckTorqueFeasibilityInMultiContact()
    {
       return null;
+   }
+
+   public static String getImpedanceGainParameterName(String body)
+   {
+      return body + "_Impedance";
    }
 }

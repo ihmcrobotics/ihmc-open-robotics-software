@@ -251,7 +251,7 @@ public class MultipleWaypointsOrientationTrajectoryGenerator implements FrameOri
       }
 
       while (currentWaypointIndex.getIntegerValue() < numberOfWaypoints.getIntegerValue() - 2
-            && time >= waypoints.get(currentWaypointIndex.getIntegerValue() + 1).getTime())
+             && time >= waypoints.get(currentWaypointIndex.getIntegerValue() + 1).getTime())
       {
          currentWaypointIndex.increment();
          changedSubTrajectory = true;
@@ -404,7 +404,7 @@ public class MultipleWaypointsOrientationTrajectoryGenerator implements FrameOri
          return namePrefix + ": Has no waypoints.";
       else
          return namePrefix + ": number of waypoints = " + numberOfWaypoints.getIntegerValue() + ", current waypoint index = "
-               + currentWaypointIndex.getIntegerValue() + "\nFirst waypoint: " + waypoints.get(0) + ", last waypoint: "
-               + waypoints.get(numberOfWaypoints.getIntegerValue() - 1);
+                + currentWaypointIndex.getIntegerValue() + "\nFirst waypoint: " + waypoints.get(0) + ", last waypoint: "
+                + waypoints.get(numberOfWaypoints.getIntegerValue() - 1);
    }
 }

@@ -52,6 +52,10 @@ public class SE3TrajectoryMessage extends Packet<SE3TrajectoryMessage> implement
             */
    public us.ihmc.euclid.geometry.Pose3D control_frame_pose_;
    /**
+            * Flag that tells the controller whether the use an impedance feedback controller
+            */
+   public boolean use_impedance_;
+   /**
             * Properties for queueing trajectories.
             */
    public ihmc_common_msgs.msg.dds.QueueableMessage queueing_properties_;
@@ -88,6 +92,8 @@ public class SE3TrajectoryMessage extends Packet<SE3TrajectoryMessage> implement
       use_custom_control_frame_ = other.use_custom_control_frame_;
 
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.control_frame_pose_, control_frame_pose_);
+      use_impedance_ = other.use_impedance_;
+
       ihmc_common_msgs.msg.dds.QueueableMessagePubSubType.staticCopy(other.queueing_properties_, queueing_properties_);
    }
 
@@ -185,6 +191,21 @@ public class SE3TrajectoryMessage extends Packet<SE3TrajectoryMessage> implement
       return control_frame_pose_;
    }
 
+   /**
+            * Flag that tells the controller whether the use an impedance feedback controller
+            */
+   public void setUseImpedance(boolean use_impedance)
+   {
+      use_impedance_ = use_impedance;
+   }
+   /**
+            * Flag that tells the controller whether the use an impedance feedback controller
+            */
+   public boolean getUseImpedance()
+   {
+      return use_impedance_;
+   }
+
 
    /**
             * Properties for queueing trajectories.
@@ -229,6 +250,8 @@ public class SE3TrajectoryMessage extends Packet<SE3TrajectoryMessage> implement
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.use_custom_control_frame_, other.use_custom_control_frame_, epsilon)) return false;
 
       if (!this.control_frame_pose_.epsilonEquals(other.control_frame_pose_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.use_impedance_, other.use_impedance_, epsilon)) return false;
+
       if (!this.queueing_properties_.epsilonEquals(other.queueing_properties_, epsilon)) return false;
 
       return true;
@@ -254,6 +277,8 @@ public class SE3TrajectoryMessage extends Packet<SE3TrajectoryMessage> implement
       if(this.use_custom_control_frame_ != otherMyClass.use_custom_control_frame_) return false;
 
       if (!this.control_frame_pose_.equals(otherMyClass.control_frame_pose_)) return false;
+      if(this.use_impedance_ != otherMyClass.use_impedance_) return false;
+
       if (!this.queueing_properties_.equals(otherMyClass.queueing_properties_)) return false;
 
       return true;
@@ -283,6 +308,8 @@ public class SE3TrajectoryMessage extends Packet<SE3TrajectoryMessage> implement
       builder.append(this.use_custom_control_frame_);      builder.append(", ");
       builder.append("control_frame_pose=");
       builder.append(this.control_frame_pose_);      builder.append(", ");
+      builder.append("use_impedance=");
+      builder.append(this.use_impedance_);      builder.append(", ");
       builder.append("queueing_properties=");
       builder.append(this.queueing_properties_);
       builder.append("}");

@@ -15,7 +15,7 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "89609430f53defe66e13d25a5760706eab37a1230124341d2b5a38f6f5362854";
+   		return "1cfdd0bfa262db510d5894cd4523509b1f1fd00a5e2ee64bf50edd9d664da7f6";
    }
    
    @Override
@@ -71,6 +71,8 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -119,6 +121,9 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
@@ -161,6 +166,8 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
 
       cdr.write_type_6(data.getTrajectoryDuration());
 
+      cdr.write_type_7(data.getImpedanceControl());
+
       cdr.write_type_7(data.getHoldPoseInWorld());
 
       cdr.write_type_6(data.getLinearPositionWeight());
@@ -196,6 +203,8 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
       	
       data.setTrajectoryDuration(cdr.read_type_6());
       	
+      data.setImpedanceControl(cdr.read_type_7());
+      	
       data.setHoldPoseInWorld(cdr.read_type_7());
       	
       data.setLinearPositionWeight(cdr.read_type_6());
@@ -225,6 +234,7 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
       ser.write_type_2("preset", data.getPreset());
       ser.write_type_f("joint_angles", data.getJointAngles());
       ser.write_type_6("trajectory_duration", data.getTrajectoryDuration());
+      ser.write_type_7("impedance_control", data.getImpedanceControl());
       ser.write_type_7("hold_pose_in_world", data.getHoldPoseInWorld());
       ser.write_type_6("linear_position_weight", data.getLinearPositionWeight());
       ser.write_type_6("angular_position_weight", data.getAngularPositionWeight());
@@ -247,6 +257,7 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
       data.setPreset(ser.read_type_2("preset"));
       ser.read_type_f("joint_angles", data.getJointAngles());
       data.setTrajectoryDuration(ser.read_type_6("trajectory_duration"));
+      data.setImpedanceControl(ser.read_type_7("impedance_control"));
       data.setHoldPoseInWorld(ser.read_type_7("hold_pose_in_world"));
       data.setLinearPositionWeight(ser.read_type_6("linear_position_weight"));
       data.setAngularPositionWeight(ser.read_type_6("angular_position_weight"));

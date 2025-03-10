@@ -48,6 +48,7 @@ public class RigidBodyOrientationController extends RigidBodyTaskspaceControlSta
    private final RigidBodyJointControlHelper jointControlHelper;
 
    private final TaskspaceTrajectoryStatusMessageHelper statusHelper;
+   private final YoBoolean isImpedanceEnabled;
 
    public RigidBodyOrientationController(RigidBodyBasics bodyToControl,
                                          RigidBodyBasics baseBody,
@@ -66,6 +67,7 @@ public class RigidBodyOrientationController extends RigidBodyTaskspaceControlSta
       numberOfPointsInQueue = new YoInteger(prefix + "NumberOfPointsInQueue", registry);
       numberOfPointsInGenerator = new YoInteger(prefix + "NumberOfPointsInGenerator", registry);
       numberOfPoints = new YoInteger(prefix + "NumberOfPoints", registry);
+      isImpedanceEnabled = new YoBoolean(prefix + "-EnabledImpedanceControl", registry);
 
       usingWeightFromMessage = new YoBoolean(prefix + "UsingWeightFromMessage", registry);
       BooleanParameter useBaseFrameForControl = new BooleanParameter(prefix + "UseBaseFrameForControl", registry, false);
@@ -80,6 +82,7 @@ public class RigidBodyOrientationController extends RigidBodyTaskspaceControlSta
                                                                 useBaseFrameForControl,
                                                                 usingWeightFromMessage,
                                                                 enableFunctionGenerators,
+                                                                isImpedanceEnabled,
                                                                 yoTime,
                                                                 registry);
 
@@ -308,5 +311,11 @@ public class RigidBodyOrientationController extends RigidBodyTaskspaceControlSta
    public RigidBodyOrientationControlHelper getOrientationControlHelper()
    {
       return orientationHelper;
+   }
+
+   @Override
+   public void setImpedanceEnabled(boolean isImpedanceEnabled)
+   {
+      this.isImpedanceEnabled.set(isImpedanceEnabled);
    }
 }

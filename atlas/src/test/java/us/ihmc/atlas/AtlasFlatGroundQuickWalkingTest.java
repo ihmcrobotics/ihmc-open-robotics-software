@@ -1,37 +1,29 @@
 package us.ihmc.atlas;
 
-import java.io.File;
-import java.io.InputStream;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Objects;
-
-import org.apache.commons.io.FilenameUtils;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-
 import us.ihmc.atlas.parameters.AtlasCoPTrajectoryParameters;
-import us.ihmc.atlas.parameters.AtlasSwingTrajectoryParameters;
-import us.ihmc.atlas.parameters.AtlasToeOffParameters;
-import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.AvatarFlatGroundQuickWalkingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
-import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.javaFXToolkit.ApplicationNoModule;
 import us.ihmc.parameterTuner.guiElements.main.ParameterGuiInterface;
 import us.ihmc.parameterTuner.guiElements.main.ParameterTuningApplication;
 import us.ihmc.parameterTuner.offline.FileInputManager;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 
+import java.io.File;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.Objects;
+
 public class AtlasFlatGroundQuickWalkingTest extends AvatarFlatGroundQuickWalkingTest
 {
    private static final String FAST_WALKING_PARAMETERS_XML = "/us/ihmc/atlas/fast_walking_parameters.xml";
 
+   //   private final RobotTarget target = RobotTarget.SCS;
+
+   //   private final AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, target, false);
    @Override
    public DRCRobotModel getRobotModel()
    {
@@ -64,50 +56,51 @@ public class AtlasFlatGroundQuickWalkingTest extends AvatarFlatGroundQuickWalkin
             };
          }
 
-         @Override
-         public WalkingControllerParameters getWalkingControllerParameters()
-         {
-            return new AtlasWalkingControllerParameters(getTarget(), getJointMap(), getContactPointParameters())
-            {
-               @Override
-               public boolean controlHeightWithMomentum()
-               {
-                  return false;
-               }
-
-               @Override
-               public SwingTrajectoryParameters getSwingTrajectoryParameters()
-               {
-                  return new AtlasSwingTrajectoryParameters(getTarget(), getJointMap().getModelScale())
-                  {
-                     @Override
-                     public double getDesiredTouchdownHeightOffset()
-                     {
-                        return -0.005;
-                     }
-
-                     @Override
-                     public Tuple3DReadOnly getTouchdownVelocityWeight()
-                     {
-                        return new Vector3D(30.0, 30.0, 30.0);
-                     }
-                  };
-               }
-
-               @Override
-               public ToeOffParameters getToeOffParameters()
-               {
-                  return new AtlasToeOffParameters(getJointMap())
-                  {
-                     @Override
-                     public boolean doToeOffIfPossibleInSingleSupport()
-                     {
-                        return true;
-                     }
-                  };
-               }
-            };
-         }
+         //TODO fix this later. Beomyeong
+//         @Override
+//         public WalkingControllerParameters getWalkingControllerParameters()
+//         {
+//            return new AtlasWalkingControllerParameters(getTarget(), getJointMap(), getContactPointParameters())
+//            {
+//               @Override
+//               public boolean controlHeightWithMomentum()
+//               {
+//                  return false;
+//               }
+//
+//               @Override
+//               public SwingTrajectoryParameters getSwingTrajectoryParameters()
+//               {
+//                  return new AtlasSwingTrajectoryParameters(getTarget(), getJointMap().getModelScale())
+//                  {
+//                     @Override
+//                     public double getDesiredTouchdownHeightOffset()
+//                     {
+//                        return -0.005;
+//                     }
+//
+//                     @Override
+//                     public Tuple3DReadOnly getTouchdownVelocityWeight()
+//                     {
+//                        return new Vector3D(30.0, 30.0, 30.0);
+//                     }
+//                  };
+//               }
+//
+//               @Override
+//               public ToeOffParameters getToeOffParameters()
+//               {
+//                  return new AtlasToeOffParameters(getJointMap())
+//                  {
+//                     @Override
+//                     public boolean doToeOffIfPossibleInSingleSupport()
+//                     {
+//                        return true;
+//                     }
+//                  };
+//               }
+//            };
+//         }
 
          @Override
          public double getControllerDT()
@@ -160,9 +153,9 @@ public class AtlasFlatGroundQuickWalkingTest extends AvatarFlatGroundQuickWalkin
       protected ParameterGuiInterface createInputManager()
       {
          System.out.println(new File("."));
-         String relativeFilePath = FilenameUtils.separatorsToSystem(FAST_WALKING_PARAMETERS_XML);
-         Path filePath = Paths.get("resources", relativeFilePath);
-         return new FileInputManager(filePath.toFile());
+         URL resource = AtlasFlatGroundQuickWalkingTest.class.getResource(FAST_WALKING_PARAMETERS_XML);
+         String file = resource.getFile();
+         return new FileInputManager(new File(file));
       }
    }
 }

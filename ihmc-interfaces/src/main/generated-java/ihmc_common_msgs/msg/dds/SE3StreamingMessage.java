@@ -23,6 +23,10 @@ public class SE3StreamingMessage extends Packet<SE3StreamingMessage> implements 
             */
    public us.ihmc.euclid.geometry.Pose3D control_frame_pose_;
    /**
+            * Flag that tells the controller whether the use an impedance feedback controller
+            */
+   public boolean use_impedance_;
+   /**
             * Define the desired 3D position to be reached.
             */
    public us.ihmc.euclid.tuple3D.Point3D position_;
@@ -71,6 +75,8 @@ public class SE3StreamingMessage extends Packet<SE3StreamingMessage> implements 
       use_custom_control_frame_ = other.use_custom_control_frame_;
 
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.control_frame_pose_, control_frame_pose_);
+      use_impedance_ = other.use_impedance_;
+
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.position_, position_);
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.orientation_, orientation_);
       geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.linear_velocity_, linear_velocity_);
@@ -108,6 +114,21 @@ public class SE3StreamingMessage extends Packet<SE3StreamingMessage> implements 
    public us.ihmc.euclid.geometry.Pose3D getControlFramePose()
    {
       return control_frame_pose_;
+   }
+
+   /**
+            * Flag that tells the controller whether the use an impedance feedback controller
+            */
+   public void setUseImpedance(boolean use_impedance)
+   {
+      use_impedance_ = use_impedance;
+   }
+   /**
+            * Flag that tells the controller whether the use an impedance feedback controller
+            */
+   public boolean getUseImpedance()
+   {
+      return use_impedance_;
    }
 
 
@@ -186,6 +207,8 @@ public class SE3StreamingMessage extends Packet<SE3StreamingMessage> implements 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.use_custom_control_frame_, other.use_custom_control_frame_, epsilon)) return false;
 
       if (!this.control_frame_pose_.epsilonEquals(other.control_frame_pose_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.use_impedance_, other.use_impedance_, epsilon)) return false;
+
       if (!this.position_.epsilonEquals(other.position_, epsilon)) return false;
       if (!this.orientation_.epsilonEquals(other.orientation_, epsilon)) return false;
       if (!this.linear_velocity_.epsilonEquals(other.linear_velocity_, epsilon)) return false;
@@ -209,6 +232,8 @@ public class SE3StreamingMessage extends Packet<SE3StreamingMessage> implements 
       if(this.use_custom_control_frame_ != otherMyClass.use_custom_control_frame_) return false;
 
       if (!this.control_frame_pose_.equals(otherMyClass.control_frame_pose_)) return false;
+      if(this.use_impedance_ != otherMyClass.use_impedance_) return false;
+
       if (!this.position_.equals(otherMyClass.position_)) return false;
       if (!this.orientation_.equals(otherMyClass.orientation_)) return false;
       if (!this.linear_velocity_.equals(otherMyClass.linear_velocity_)) return false;
@@ -231,6 +256,8 @@ public class SE3StreamingMessage extends Packet<SE3StreamingMessage> implements 
       builder.append(this.use_custom_control_frame_);      builder.append(", ");
       builder.append("control_frame_pose=");
       builder.append(this.control_frame_pose_);      builder.append(", ");
+      builder.append("use_impedance=");
+      builder.append(this.use_impedance_);      builder.append(", ");
       builder.append("position=");
       builder.append(this.position_);      builder.append(", ");
       builder.append("orientation=");
