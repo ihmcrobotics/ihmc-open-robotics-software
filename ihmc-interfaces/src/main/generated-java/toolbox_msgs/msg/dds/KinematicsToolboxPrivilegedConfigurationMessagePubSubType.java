@@ -131,11 +131,11 @@ public class KinematicsToolboxPrivilegedConfigurationMessagePubSubType implement
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getPrivilegedRootJointOrientation(), cdr);
       if(data.getPrivilegedJointHashCodes().size() <= 100)
       cdr.write_type_e(data.getPrivilegedJointHashCodes());else
-          throw new RuntimeException("privileged_joint_hash_codes field exceeds the maximum length");
+          throw new RuntimeException("privileged_joint_hash_codes field exceeds the maximum length: %d > %d".formatted(data.getPrivilegedJointHashCodes().size(), 100));
 
       if(data.getPrivilegedJointAngles().size() <= 100)
       cdr.write_type_e(data.getPrivilegedJointAngles());else
-          throw new RuntimeException("privileged_joint_angles field exceeds the maximum length");
+          throw new RuntimeException("privileged_joint_angles field exceeds the maximum length: %d > %d".formatted(data.getPrivilegedJointAngles().size(), 100));
 
       cdr.write_type_6(data.getNullspaceAlpha());
 

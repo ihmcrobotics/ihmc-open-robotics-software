@@ -116,7 +116,7 @@ public class HeightQuadTreeMessagePubSubType implements us.ihmc.pubsub.TopicData
 
       if(data.getLeaves().size() <= 5000)
       cdr.write_type_e(data.getLeaves());else
-          throw new RuntimeException("leaves field exceeds the maximum length");
+          throw new RuntimeException("leaves field exceeds the maximum length: %d > %d".formatted(data.getLeaves().size(), 5000));
 
    }
 

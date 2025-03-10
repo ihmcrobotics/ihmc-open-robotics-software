@@ -1,6 +1,5 @@
 package us.ihmc.perception.detections.yolo;
 
-import perception_msgs.msg.dds.InstantDetectionMessage;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.perception.RawImage;
@@ -23,27 +22,27 @@ public class YOLOv8InstantDetection extends InstantDetection
 
    public YOLOv8InstantDetection(String detectedObjectClass,
                                  double confidence,
-                                 Pose3DReadOnly currentPoseToCopy,
+                                 Pose3DReadOnly pose,
                                  Instant detectionTime,
                                  RawImage colorImage,
                                  RawImage objectMask,
                                  RawImage depthImage,
                                  List<Point3D32> objectPointCloud)
    {
-      this(detectedObjectClass, detectedObjectClass, confidence, currentPoseToCopy, detectionTime, colorImage, objectMask, depthImage, objectPointCloud);
+      this(detectedObjectClass, detectedObjectClass, confidence, pose, detectionTime, colorImage, objectMask, depthImage, objectPointCloud);
    }
 
    public YOLOv8InstantDetection(String detectedObjectClass,
                                  String detectedObjectName,
                                  double confidence,
-                                 Pose3DReadOnly currentPoseToCopy,
+                                 Pose3DReadOnly pose,
                                  Instant detectionTime,
                                  RawImage colorImage,
                                  RawImage objectMask,
                                  RawImage depthImage,
                                  List<Point3D32> objectPointCloud)
    {
-      super(detectedObjectClass, detectedObjectName, confidence, currentPoseToCopy, detectionTime);
+      super(detectedObjectClass, detectedObjectName, confidence, pose, detectionTime);
 
       this.colorImage = colorImage.get();
       this.depthImage = depthImage.get();
@@ -69,19 +68,6 @@ public class YOLOv8InstantDetection extends InstantDetection
    public RawImage getObjectMask()
    {
       return objectMask;
-   }
-
-   @Override
-   public void toMessage(InstantDetectionMessage message)
-   {
-      super.toMessage(message);
-      message.getYoloObjectPointCloud().clear();
-      for (int i = 0; i < message.getYoloObjectPointCloud().getCurrentCapacity() && i < objectPointCloud.size(); ++i)
-      {
-         Point3D32 point = message.getYoloObjectPointCloud().add();
-         point.set(objectPointCloud.get(i));
-      }
-      // TODO: Should pack images into message
    }
 
    @Override

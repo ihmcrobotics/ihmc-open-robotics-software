@@ -2,14 +2,14 @@ package us.ihmc.rdx.ui.graphics.ros2.yolo;
 
 import imgui.ImGui;
 import imgui.ImGuiStyle;
-import imgui.type.ImBoolean;
-import perception_msgs.msg.dds.YOLOv8AvailableModels;
-import perception_msgs.msg.dds.YOLOv8ExecutorSettings;
+import perception_msgs.msg.dds.YOLOv8ExecutorParameters;
 import perception_msgs.msg.dds.YOLOv8ModelInfo;
-import us.ihmc.commons.thread.Notification;
-import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.LatestTimestampModifiable;
+import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
+import us.ihmc.perception.detections.yolo.SyncedYOLOv8ExecutorParameters;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.ros2.ROS2Node;
@@ -17,87 +17,84 @@ import us.ihmc.ros2.ROS2Publisher;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 public class RDXROS2YOLOv8Settings
 {
+   private final SyncedYOLOv8ExecutorParameters parameters;
+   private boolean requestingFullData;
+
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final List<RDXROS2YOLOv8ModelSettings> modelSettings = new ArrayList<>();
-   private final List<ImBoolean> modelEnables = new ArrayList<>();
+   private final List<RDXROS2YOLOv8ModelSettings> rdxModelSettings = new ArrayList<>();
 
-   private final YOLOv8ExecutorSettings settingsMessage = new YOLOv8ExecutorSettings();
-   private final ROS2Publisher<YOLOv8ExecutorSettings> settingsPublisher;
-   private final Notification parametersChanged = new Notification();
+   private final YOLOv8ExecutorParameters parametersMessage = new YOLOv8ExecutorParameters();
+   private final ROS2Publisher<YOLOv8ExecutorParameters> parametersPublisher;
 
-   private final AtomicBoolean initialized = new AtomicBoolean(false);
-   private boolean enableModelsOnInitialize = false;
-
-   public RDXROS2YOLOv8Settings(ROS2Node ros2Node)
+   public RDXROS2YOLOv8Settings(ROS2Node ros2Node, ROS2PeerClockOffsetEstimator ros2ClockOffsetEstimator)
    {
-      settingsPublisher = ros2Node.createPublisher(PerceptionAPI.YOLO_SETTINGS);
+      CRDTInfo crdtInfo = new CRDTInfo(ROS2ActorDesignation.OPERATOR, ros2ClockOffsetEstimator);
+      parameters = new SyncedYOLOv8ExecutorParameters(crdtInfo);
+      parameters.requestSendFullData();
+      requestingFullData = true;
 
-      // Subscribe to available models message
-      ros2Node.createSubscription2(PerceptionAPI.YOLO_AVAILABLE_MODELS, this::initialize);
-
-      // Start requesting available models
-      ROS2Publisher<YOLOv8AvailableModels> availableModelsRequestPublisher = ros2Node.createPublisher(PerceptionAPI.YOLO_AVAILABLE_MODELS);
-      Throttler availableModelsRequestThrottler = new Throttler().setPeriod(1.0);
-      YOLOv8AvailableModels requestMessage = new YOLOv8AvailableModels();
-      requestMessage.setRequest(true);
-      ThreadTools.startAsDaemon(() ->
+      parametersPublisher = ros2Node.createPublisher(PerceptionAPI.YOLO_PARAMETERS);
+      ros2Node.createSubscription2(PerceptionAPI.YOLO_PARAMETERS, message ->
       {
-         while (!initialized.get())
-         {
-            availableModelsRequestThrottler.waitAndRun();
-            availableModelsRequestPublisher.publish(requestMessage);
-         }
-
-         // TODO: Call this when the remove method is fixed
-         // availableModelsRequestPublisher.remove();
-      }, "AvailableYOLOModelRequester");
+         parameters.fromMessage(message);
+         parameters.confirmReceivedFullData();
+         requestingFullData = false;
+      });
    }
 
-   private void initialize(YOLOv8AvailableModels availableModelsMessage)
+   public void update()
    {
-      if (availableModelsMessage.getRequest() || initialized.getAndSet(true))
-         return;
-
-      for (YOLOv8ModelInfo modelInfo : availableModelsMessage.getAvailableYoloModels())
+      parameters.checkModified();
+      if (rdxModelSettings.size() != parameters.getModelParameters().size())
       {
-         modelSettings.add(new RDXROS2YOLOv8ModelSettings(modelInfo.getModelNameAsString(), modelInfo.getDetectableObjectClasses().toStringArray()));
-         modelEnables.add(new ImBoolean(enableModelsOnInitialize));
+         rdxModelSettings.clear();
+         parameters.getModelParameters().values().forEach(modelParameters -> rdxModelSettings.add(new RDXROS2YOLOv8ModelSettings(modelParameters)));
       }
 
-      // TODO: Call this when the remove method is fixed
-      // availableModelsSubscriber.remove();
+      rdxModelSettings.forEach(RDXROS2YOLOv8ModelSettings::update);
+
+      if (requestingFullData || parameters.pollNeedSendFullData() || parameters.getModelParameters().values().stream().anyMatch(LatestTimestampModifiable::pollNeedSendFullData))
+      {
+         parameters.toMessage(parametersMessage);
+         parametersPublisher.publish(parametersMessage);
+      }
    }
 
    public void renderSettings()
    {
-      ImGui.beginDisabled(!initialized.get());
+      ImGui.beginDisabled(rdxModelSettings.isEmpty());
 
       ImGuiStyle style = new ImGuiStyle();
       float indent = ImGui.getFrameHeight() + style.getItemInnerSpacingX() + 1.0f;
 
       // Render each model's settings
-      for (int i = 0; i < modelSettings.size(); ++i)
+      for (int i = 0; i < rdxModelSettings.size(); ++i)
       {
-         RDXROS2YOLOv8ModelSettings settings = modelSettings.get(i);
-         ImBoolean enable = modelEnables.get(i);
+         RDXROS2YOLOv8ModelSettings settings = rdxModelSettings.get(i);
+         String modelName = settings.getModelName();
+         boolean enabled = parameters.getModelsToRun().getValue().contains(modelName);
 
          // Render checkbox for enabling/disabling the model
-         if (ImGui.checkbox(labels.getHidden("enable" + i), enable))
-            parametersChanged.set();
+         if (ImGui.checkbox(labels.getHidden("enable" + i), enabled))
+         {
+            if (enabled)
+               parameters.getModelsToRun().remove(modelName);
+            else
+               parameters.getModelsToRun().add(modelName);
+         }
 
          ImGuiTools.previousWidgetTooltip("Enable/Disable");
          ImGui.sameLine();
 
          // Render the model's settings
-         if (ImGui.collapsingHeader(settings.getModelName()))
+         if (ImGui.collapsingHeader(modelName))
          {
             ImGui.indent(indent);
-            if (settings.renderSettings())
-               parametersChanged.set();
+            settings.renderSettings();
             ImGui.unindent(indent);
          }
       }
@@ -105,50 +102,24 @@ public class RDXROS2YOLOv8Settings
       ImGui.endDisabled();
    }
 
-   public void publishSettingsMessageIfChanged()
-   {
-      // If the user adjusted parameters, publish the settings message
-      if (parametersChanged.poll())
-      {
-         settingsMessage.getModelsToRun().clear();
-         settingsMessage.getModelSettings().clear();
-         for (int i = 0; i < modelSettings.size(); ++i)
-         {
-            if (modelEnables.get(i).get())
-               settingsMessage.getModelsToRun().add(modelSettings.get(i).getModelName());
-
-            settingsMessage.getModelSettings().add().set(modelSettings.get(i).getSettingsMessage());
-         }
-
-         settingsPublisher.publish(settingsMessage);
-      }
-   }
-
    public boolean anyModelEnabled()
    {
-      return modelEnables.stream().anyMatch(ImBoolean::get);
+      return !parameters.getModelsToRun().getValue().isEmpty();
    }
 
    public void enableAllModels()
    {
-      enableModelsOnInitialize = true;
-      for (ImBoolean enabled : modelEnables)
-         enabled.set(true);
-
-      parametersChanged.set();
+      parameters.getModelsToRun()
+                .addAll(parameters.getAvailableModels().getReadOnly().stream().map(YOLOv8ModelInfo::getModelNameAsString).collect(Collectors.toSet()));
    }
 
    public void disableAllModels()
    {
-      enableModelsOnInitialize = false;
-      for (ImBoolean enabled : modelEnables)
-         enabled.set(false);
-
-      parametersChanged.set();
+      parameters.getModelsToRun().getValueAndModify().clear();
    }
 
    public void destroy()
    {
-      settingsPublisher.remove();
+      parametersPublisher.remove();
    }
 }

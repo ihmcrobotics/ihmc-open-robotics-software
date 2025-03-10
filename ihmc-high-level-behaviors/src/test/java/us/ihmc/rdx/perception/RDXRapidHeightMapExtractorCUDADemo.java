@@ -12,8 +12,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.camera.CameraIntrinsics;
-import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractorCUDA;
+import us.ihmc.perception.gpuHeightMap.RapidHeightMapManager;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -21,7 +21,7 @@ import us.ihmc.rdx.simulation.environment.RDXEnvironmentBuilder;
 import us.ihmc.rdx.simulation.sensors.RDXSensorSimulator;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
-import us.ihmc.rdx.ui.graphics.RDXHeightMapGraphicNew;
+import us.ihmc.rdx.ui.graphics.RDXGridMapGraphic;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
@@ -41,7 +41,7 @@ public class RDXRapidHeightMapExtractorCUDADemo
    private final RigidBodyTransform sensorToSensorZUp = new RigidBodyTransform();
    private final RigidBodyTransform sensorZUpToWorld = new RigidBodyTransform();
    private GpuMat heightMapImage;
-   private final RDXHeightMapGraphicNew heightMapGraphic = new RDXHeightMapGraphicNew();
+   private final RDXGridMapGraphic heightMapGraphic = new RDXGridMapGraphic();
    private final BytePointer compressedCroppedHeightMapPointer = new BytePointer();
    private final ImageMessage croppedHeightMapImageMessage = new ImageMessage();
    private final FramePose3D cameraPoseForHeightMap = new FramePose3D();
@@ -94,7 +94,12 @@ public class RDXRapidHeightMapExtractorCUDADemo
 
             heightMapImage = new GpuMat(intrinsics.getWidth(), intrinsics.getHeight(), opencv_core.CV_16UC1);
 
-            extractor = new RapidHeightMapExtractorCUDA(leftFootSoleFrame, rightFootSoleFrame, heightMapImage, intrinsics, 1);
+            extractor = new RapidHeightMapExtractorCUDA(leftFootSoleFrame,
+                                                        rightFootSoleFrame,
+                                                        heightMapImage,
+                                                        intrinsics,
+                                                        1,
+                                                        RapidHeightMapManager.getHeightMapParameters());
 
             baseUI.getPrimaryScene().addRenderableProvider(heightMapGraphic, RDXSceneLevel.MODEL);
          }
@@ -144,8 +149,8 @@ public class RDXRapidHeightMapExtractorCUDADemo
                PerceptionMessageTools.convertToHeightMapData(sensorSimulator.getDepthImage().getCpuImageMat(),
                                                              heightMapData,
                                                              croppedHeightMapImageMessage.getPosition(),
-                                                             (float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalWidthInMeters(),
-                                                             (float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalCellSizeInMeters());
+                                                             (float) RapidHeightMapManager.getHeightMapParameters().getGlobalWidthInMeters(),
+                                                             (float) RapidHeightMapManager.getHeightMapParameters().getGlobalCellSizeInMeters());
                HeightMapMessageTools.toMessage(heightMapData, heightMapMessage);
 
                //               List<RDXMultiColorMeshBuilder> multiColorMeshBuilders = RDXHeightMapGraphicNew.generateHeightCells(heightsProvided,

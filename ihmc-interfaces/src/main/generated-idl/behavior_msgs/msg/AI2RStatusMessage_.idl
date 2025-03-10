@@ -1,6 +1,7 @@
 #ifndef __behavior_msgs__msg__AI2RStatusMessage__idl__
 #define __behavior_msgs__msg__AI2RStatusMessage__idl__
 
+#include "behavior_msgs/msg/./AI2RActionFailureMessage_.idl"
 #include "behavior_msgs/msg/./AI2RObjectMessage_.idl"
 #include "geometry_msgs/msg/./Pose_.idl"
 module behavior_msgs
@@ -38,6 +39,7 @@ module behavior_msgs
          * Name of the behavior that has failed (name of the checkpoint in the pre-loaded behavior collection)
          */
         string failed_behavior;
+        behavior_msgs::msg::dds::AI2RActionFailureMessage failure;
       };
     };
   };

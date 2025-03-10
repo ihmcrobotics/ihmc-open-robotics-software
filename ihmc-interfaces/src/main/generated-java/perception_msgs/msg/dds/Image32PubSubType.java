@@ -100,7 +100,7 @@ public class Image32PubSubType implements us.ihmc.pubsub.TopicDataType<perceptio
 
       if(data.getRgbdata().size() <= 4000000)
       cdr.write_type_e(data.getRgbdata());else
-          throw new RuntimeException("rgbdata field exceeds the maximum length");
+          throw new RuntimeException("rgbdata field exceeds the maximum length: %d > %d".formatted(data.getRgbdata().size(), 4000000));
 
    }
 

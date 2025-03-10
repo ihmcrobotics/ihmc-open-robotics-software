@@ -105,15 +105,15 @@ public class RigidBodyExplorationConfigurationMessagePubSubType implements us.ih
 
       if(data.getConfigurationSpaceNamesToExplore().size() <= 100)
       cdr.write_type_e(data.getConfigurationSpaceNamesToExplore());else
-          throw new RuntimeException("configuration_space_names_to_explore field exceeds the maximum length");
+          throw new RuntimeException("configuration_space_names_to_explore field exceeds the maximum length: %d > %d".formatted(data.getConfigurationSpaceNamesToExplore().size(), 100));
 
       if(data.getExplorationRangeUpperLimits().size() <= 100)
       cdr.write_type_e(data.getExplorationRangeUpperLimits());else
-          throw new RuntimeException("exploration_range_upper_limits field exceeds the maximum length");
+          throw new RuntimeException("exploration_range_upper_limits field exceeds the maximum length: %d > %d".formatted(data.getExplorationRangeUpperLimits().size(), 100));
 
       if(data.getExplorationRangeLowerLimits().size() <= 100)
       cdr.write_type_e(data.getExplorationRangeLowerLimits());else
-          throw new RuntimeException("exploration_range_lower_limits field exceeds the maximum length");
+          throw new RuntimeException("exploration_range_lower_limits field exceeds the maximum length: %d > %d".formatted(data.getExplorationRangeLowerLimits().size(), 100));
 
    }
 

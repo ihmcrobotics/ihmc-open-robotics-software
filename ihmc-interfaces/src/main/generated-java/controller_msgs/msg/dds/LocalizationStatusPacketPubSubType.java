@@ -90,7 +90,7 @@ public class LocalizationStatusPacketPubSubType implements us.ihmc.pubsub.TopicD
 
       if(data.getStatus().length() <= 255)
       cdr.write_type_d(data.getStatus());else
-          throw new RuntimeException("status field exceeds the maximum length");
+          throw new RuntimeException("status field exceeds the maximum length: %d > %d".formatted(data.getStatus().length(), 255));
 
    }
 

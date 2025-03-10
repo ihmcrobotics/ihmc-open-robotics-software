@@ -120,11 +120,11 @@ public class ExternalForceEstimationConfigurationMessagePubSubType implements us
 
       if(data.getRigidBodyHashCodes().size() <= 10)
       cdr.write_type_e(data.getRigidBodyHashCodes());else
-          throw new RuntimeException("rigid_body_hash_codes field exceeds the maximum length");
+          throw new RuntimeException("rigid_body_hash_codes field exceeds the maximum length: %d > %d".formatted(data.getRigidBodyHashCodes().size(), 10));
 
       if(data.getContactPointPositions().size() <= 10)
       cdr.write_type_e(data.getContactPointPositions());else
-          throw new RuntimeException("contact_point_positions field exceeds the maximum length");
+          throw new RuntimeException("contact_point_positions field exceeds the maximum length: %d > %d".formatted(data.getContactPointPositions().size(), 10));
 
       cdr.write_type_7(data.getEstimateContactLocation());
 

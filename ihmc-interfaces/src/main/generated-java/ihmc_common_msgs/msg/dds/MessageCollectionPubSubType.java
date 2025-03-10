@@ -86,7 +86,7 @@ public class MessageCollectionPubSubType implements us.ihmc.pubsub.TopicDataType
 
       if(data.getSequences().size() <= 100)
       cdr.write_type_e(data.getSequences());else
-          throw new RuntimeException("sequences field exceeds the maximum length");
+          throw new RuntimeException("sequences field exceeds the maximum length: %d > %d".formatted(data.getSequences().size(), 100));
 
    }
 

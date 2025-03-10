@@ -111,7 +111,7 @@ public class JointspaceTrajectoryStatusMessagePubSubType implements us.ihmc.pubs
 
       if(data.getJointNames().size() <= 100)
       cdr.write_type_e(data.getJointNames());else
-          throw new RuntimeException("joint_names field exceeds the maximum length");
+          throw new RuntimeException("joint_names field exceeds the maximum length: %d > %d".formatted(data.getJointNames().size(), 100));
 
       cdr.write_type_9(data.getTrajectoryExecutionStatus());
 
@@ -119,11 +119,11 @@ public class JointspaceTrajectoryStatusMessagePubSubType implements us.ihmc.pubs
 
       if(data.getDesiredJointPositions().size() <= 100)
       cdr.write_type_e(data.getDesiredJointPositions());else
-          throw new RuntimeException("desired_joint_positions field exceeds the maximum length");
+          throw new RuntimeException("desired_joint_positions field exceeds the maximum length: %d > %d".formatted(data.getDesiredJointPositions().size(), 100));
 
       if(data.getActualJointPositions().size() <= 100)
       cdr.write_type_e(data.getActualJointPositions());else
-          throw new RuntimeException("actual_joint_positions field exceeds the maximum length");
+          throw new RuntimeException("actual_joint_positions field exceeds the maximum length: %d > %d".formatted(data.getActualJointPositions().size(), 100));
 
    }
 

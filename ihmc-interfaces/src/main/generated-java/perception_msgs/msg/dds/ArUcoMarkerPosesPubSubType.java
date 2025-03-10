@@ -95,15 +95,15 @@ public class ArUcoMarkerPosesPubSubType implements us.ihmc.pubsub.TopicDataType<
    {
       if(data.getMarkerId().size() <= 100)
       cdr.write_type_e(data.getMarkerId());else
-          throw new RuntimeException("marker_id field exceeds the maximum length");
+          throw new RuntimeException("marker_id field exceeds the maximum length: %d > %d".formatted(data.getMarkerId().size(), 100));
 
       if(data.getPosition().size() <= 100)
       cdr.write_type_e(data.getPosition());else
-          throw new RuntimeException("position field exceeds the maximum length");
+          throw new RuntimeException("position field exceeds the maximum length: %d > %d".formatted(data.getPosition().size(), 100));
 
       if(data.getOrientation().size() <= 100)
       cdr.write_type_e(data.getOrientation());else
-          throw new RuntimeException("orientation field exceeds the maximum length");
+          throw new RuntimeException("orientation field exceeds the maximum length: %d > %d".formatted(data.getOrientation().size(), 100));
 
    }
 

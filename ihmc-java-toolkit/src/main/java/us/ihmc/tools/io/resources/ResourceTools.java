@@ -2,6 +2,7 @@ package us.ihmc.tools.io.resources;
 
 import com.google.common.reflect.ClassPath;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.function.IOConsumer;
 import org.reflections.Reflections;
 import org.reflections.scanners.Scanners;
 import org.reflections.util.ConfigurationBuilder;
@@ -11,11 +12,17 @@ import us.ihmc.commons.nio.BasicPathVisitor;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystemNotFoundException;
+import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.BiConsumer;
@@ -240,5 +247,47 @@ public class ResourceTools
    public static void printClasspathSize(Class<?> clazz, String packagePrefix)
    {
       System.out.println("Number of classes in " + packagePrefix  + ".* " + getClassInfoRecursive(clazz, packagePrefix).size());
+   }
+
+   /**
+    * Used to process a resource using the {@link Path} API.
+    * <p>
+    * This method ensures the {@code Path} object is usable when running the code from either an IDE or a Jar file.
+    * When running from an IDE, the {@code Path} usually contains the computer's file system path, and can be used directly.
+    * When running from a Jar file, the {@code Path} must be used through a
+    * <a href="https://docs.oracle.com/en/java/javase/17/docs/api/jdk.zipfs/module-summary.html">ZipFileSystem</a>.
+    *
+    * @param resourceURL URL to the resource.
+    * @param processor Consumer that accepts the resource as a {@link Path} object.
+    * @throws IOException If the {@code resourceURL} is bad, or the {@code processor} throws an {@code IOException}.
+    */
+   public static void processAsPath(URL resourceURL, IOConsumer<Path> processor) throws IOException
+   {
+      // Get a URI from the resource URL
+      URI resourceURI;
+      try
+      {
+         resourceURI = resourceURL.toURI();
+      }
+      catch (URISyntaxException e)
+      {
+         throw new IOException("Invalid Resource URL", e);
+      }
+
+      try
+      {
+         // Try processing it as normal file system path
+         Path resourcePath = Path.of(resourceURI);
+         processor.accept(resourcePath);
+      }
+      catch (FileSystemNotFoundException fileSystemNotFoundException)
+      {
+         // If it's not a normal file system path, crate a new file system to process the path
+         try (FileSystem fileSystem = FileSystems.newFileSystem(resourceURI, Collections.emptyMap()))
+         {
+            Path resourcePath = fileSystem.provider().getPath(resourceURI);
+            processor.accept(resourcePath);
+         }
+      }
    }
 }

@@ -38,7 +38,7 @@ public class RDXRemoteHeightMapPanel
    public RDXRemoteHeightMapPanel(ROS2Helper ros2Helper)
    {
       this.ros2Helper = ros2Helper;
-      remotePropertySets = new ImGuiRemoteROS2StoredPropertySetGroup(ros2Helper);
+      remotePropertySets = new ImGuiRemoteROS2StoredPropertySetGroup(ros2Helper.getROS2Node());
       remotePropertySets.registerRemotePropertySet(heightMapParameters, HeightMapAPI.PARAMETERS);
       remotePropertySets.registerRemotePropertySet(heightMapFilterParameters, HeightMapAPI.FILTER_PARAMETERS);
 

@@ -15,23 +15,23 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
+import us.ihmc.perception.gpuHeightMap.RapidHeightMapManager;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.imageMessage.CompressionType;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.opencv.OpenCVTools;
-import us.ihmc.sensors.realsense.RealSenseDevice;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
+import us.ihmc.sensors.realsense.RealSenseDevice;
 
 import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
@@ -74,9 +74,8 @@ public class PerceptionMessageTools
    }
 
    public static void publishCompressedDepthImage(BytePointer compressedDepthPointer,
-                                                  ROS2Topic<ImageMessage> topic,
                                                   ImageMessage depthImageMessage,
-                                                  ROS2PublishSubscribeAPI helper,
+                                                  ROS2Publisher<ImageMessage> publisher,
                                                   Pose3DReadOnly cameraPose,
                                                   Instant acquisitionTime,
                                                   long sequenceNumber,
@@ -85,7 +84,7 @@ public class PerceptionMessageTools
                                                   float depthToMetersRatio)
    {
       packCompressedDepthImage(compressedDepthPointer, depthImageMessage, cameraPose, acquisitionTime, sequenceNumber, height, width, depthToMetersRatio);
-      helper.publish(topic, depthImageMessage);
+      publisher.publish(depthImageMessage);
    }
 
    public static void publishJPGCompressedColorImage(BytePointer compressedColorPointer,
@@ -105,7 +104,7 @@ public class PerceptionMessageTools
 
    public static void publishFramePlanarRegionsList(FramePlanarRegionsList framePlanarRegionsList,
                                                     ROS2Topic<FramePlanarRegionsListMessage> topic,
-                                                    ROS2PublishSubscribeAPI ros2)
+                                                    ROS2Helper ros2)
    {
       ros2.publish(topic, PlanarRegionMessageConverter.convertToFramePlanarRegionsListMessage(framePlanarRegionsList));
    }
@@ -266,20 +265,32 @@ public class PerceptionMessageTools
    {
       int centerIndex = HeightMapTools.computeCenterIndex(widthInMeters, cellSizeInMeters);
       int cellsPerAxis = 2 * centerIndex + 1;
+      int totalCells = cellsPerAxis * cellsPerAxis;
 
       heightMapDataToPack.setGridCenter(gridCenter.getX(), gridCenter.getY());
 
-      for (int xIndex = 0; xIndex < cellsPerAxis; xIndex++)
-      {
-         for (int yIndex = 0; yIndex < cellsPerAxis; yIndex++)
-         {
-            int height = ((int) heightMapPointer.ptr(xIndex, yIndex).getShort() & 0xFFFF);
-            float cellHeight = (float) ((float) (height) / RapidHeightMapExtractor.getHeightMapParameters().getHeightScaleFactor())
-                               - (float) RapidHeightMapExtractor.getHeightMapParameters().getHeightOffset();
+      // Read data into byte[]
+      byte[] data = new byte[Short.BYTES * totalCells];
+      heightMapPointer.data().get(data);
 
-            int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
-            heightMapDataToPack.setHeightAt(key, cellHeight);
-         }
+      // Put height values into HeightMapData object
+      for (int i = 0; i < totalCells; ++i)
+      {
+         // Get the start index of the bytes for a short
+         int dataIndex = Short.BYTES * i;
+
+         // Get the most and least significant bits, combine into integer
+         int major = (data[dataIndex + 1] << 8) & 0xFF00;
+         int minor = data[dataIndex] & 0x00FF;
+         int height = major | minor;
+
+         // Calculate cell height
+         float cellHeight = (float) (((float) height / RapidHeightMapManager.getHeightMapParameters().getHeightScaleFactor())
+                                     - RapidHeightMapManager.getHeightMapParameters().getHeightOffset());
+
+         // Put it into the HeightMapData object
+         int key = cellsPerAxis * (i % cellsPerAxis) + (i / cellsPerAxis);
+         heightMapDataToPack.setHeightAt(key, cellHeight);
       }
    }
 
@@ -299,8 +310,8 @@ public class PerceptionMessageTools
             double cellHeight = heightMapData.getHeightAt(key);
 
             // Reverse the height calculation to get the raw height value
-            int height = (int) ((cellHeight + (float) RapidHeightMapExtractor.getHeightMapParameters().getHeightOffset())
-                                * RapidHeightMapExtractor.getHeightMapParameters().getHeightScaleFactor());
+            int height = (int) ((cellHeight + (float) RapidHeightMapManager.getHeightMapParameters().getHeightOffset())
+                                * RapidHeightMapManager.getHeightMapParameters().getHeightScaleFactor());
 
             // Store the height value in the Mat object
             heightMapMat.ptr(xIndex, yIndex).putShort((short) height);

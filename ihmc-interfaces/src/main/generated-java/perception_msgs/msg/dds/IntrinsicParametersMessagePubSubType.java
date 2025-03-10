@@ -145,7 +145,7 @@ public class IntrinsicParametersMessagePubSubType implements us.ihmc.pubsub.Topi
 
       if(data.getRadial().size() <= 100)
       cdr.write_type_e(data.getRadial());else
-          throw new RuntimeException("radial field exceeds the maximum length");
+          throw new RuntimeException("radial field exceeds the maximum length: %d > %d".formatted(data.getRadial().size(), 100));
 
       cdr.write_type_6(data.getT1());
 

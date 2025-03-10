@@ -125,12 +125,12 @@ public class ActionNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
       if(data.getCommandedTrajectory().size() <= 500)
       cdr.write_type_e(data.getCommandedTrajectory());else
-          throw new RuntimeException("commanded_trajectory field exceeds the maximum length");
+          throw new RuntimeException("commanded_trajectory field exceeds the maximum length: %d > %d".formatted(data.getCommandedTrajectory().size(), 500));
 
       geometry_msgs.msg.dds.PosePubSubType.write(data.getCurrentPose(), cdr);
       if(data.getCommandedJointTrajectories().size() <= 7)
       cdr.write_type_e(data.getCommandedJointTrajectories());else
-          throw new RuntimeException("commanded_joint_trajectories field exceeds the maximum length");
+          throw new RuntimeException("commanded_joint_trajectories field exceeds the maximum length: %d > %d".formatted(data.getCommandedJointTrajectories().size(), 7));
 
       for(int i0 = 0; i0 < data.getCurrentJointAngles().length; ++i0)
       {

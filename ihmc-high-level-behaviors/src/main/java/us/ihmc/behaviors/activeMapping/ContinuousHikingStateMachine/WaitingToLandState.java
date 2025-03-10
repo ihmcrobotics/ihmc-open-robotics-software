@@ -5,7 +5,7 @@ import controller_msgs.msg.dds.FootstepStatusMessage;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingLogger;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
 import us.ihmc.behaviors.activeMapping.ContinuousPlanner;
-import us.ihmc.behaviors.activeMapping.ControllerFootstepQueueMonitor;
+import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.log.LogTools;

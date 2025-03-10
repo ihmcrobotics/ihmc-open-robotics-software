@@ -124,7 +124,7 @@ public class LidarScanMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
       if(data.getScan().size() <= 2000000)
       cdr.write_type_e(data.getScan());else
-          throw new RuntimeException("scan field exceeds the maximum length");
+          throw new RuntimeException("scan field exceeds the maximum length: %d > %d".formatted(data.getScan().size(), 2000000));
 
    }
 

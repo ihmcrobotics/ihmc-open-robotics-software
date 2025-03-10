@@ -105,7 +105,7 @@ public class YOLOv8NodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType
 
       if(data.getObjectPointCloud().size() <= 511)
       cdr.write_type_e(data.getObjectPointCloud());else
-          throw new RuntimeException("object_point_cloud field exceeds the maximum length");
+          throw new RuntimeException("object_point_cloud field exceeds the maximum length: %d > %d".formatted(data.getObjectPointCloud().size(), 511));
 
       geometry_msgs.msg.dds.TransformPubSubType.write(data.getCentroidToObjectTransform(), cdr);
       geometry_msgs.msg.dds.PosePubSubType.write(data.getObjectPose(), cdr);

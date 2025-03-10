@@ -49,7 +49,7 @@ public class RDXSteppableRegionCalculatorDemo
       heightMapUI = new RDXRemoteHeightMapPanel(ros2Helper);
 
       SteppableRegionCalculatorParametersReadOnly defaultSteppableParameters = new SteppableRegionCalculatorParameters();
-      steppableRegionsUpdater = new RemoteSteppableRegionsUpdater(ros2Helper, defaultSteppableParameters);
+      steppableRegionsUpdater = new RemoteSteppableRegionsUpdater(ros2Node, defaultSteppableParameters);
       steppableRegionsUpdater.start();
       steppableRegionsUI = new RDXSteppableRegionsPanel(ros2Helper, defaultSteppableParameters);
 
@@ -86,9 +86,9 @@ public class RDXSteppableRegionCalculatorDemo
 
             steppableRegionsUI.getEnabled().set(true);
 
+            heightMapVisualizer.setupForImageMessage(ros2Helper);
             ros2Node.createSubscription2(PerceptionAPI.HEIGHT_MAP_OUTPUT, message ->
             {
-               heightMapVisualizer.acceptHeightMapMessage(message);
                heightMapUI.acceptHeightMapMessage(message);
 
                steppableRegionsUpdater.submitLatestHeightMapMessage(message);

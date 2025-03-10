@@ -1,12 +1,13 @@
 package us.ihmc.perception;
 
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.activeMapping.ControllerFootstepQueueMonitor;
+import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros2.ROS2DemandGraphNode;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.perception.gpuHeightMap.RapidHeightMapManager;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.sensors.realsense.RealSenseConfiguration;
@@ -55,10 +56,10 @@ public class StandAloneRealsenseProcess
       this.syncedRobot = syncedRobot;
       this.controllerFootstepQueueMonitor = controllerFootstepQueueMonitor;
 
-      realsensePublishDemandNode = new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_REALSENSE_PUBLICATION);
-      heightMapDemandNode = new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_HEIGHT_MAP);
+      realsensePublishDemandNode = new ROS2DemandGraphNode(ros2Node, PerceptionAPI.REQUEST_REALSENSE_PUBLICATION);
+      heightMapDemandNode = new ROS2DemandGraphNode(ros2Node, PerceptionAPI.REQUEST_HEIGHT_MAP);
 
-      realsenseDemandNode = new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_REALSENSE);
+      realsenseDemandNode = new ROS2DemandGraphNode(ros2Node, PerceptionAPI.REQUEST_REALSENSE);
       realsenseDemandNode.addDependents(realsensePublishDemandNode, heightMapDemandNode);
 
       d455Sensor = new RealSenseImageSensor(RealSenseConfiguration.D455_COLOR_720P_DEPTH_720P_30HZ);
@@ -78,7 +79,7 @@ public class StandAloneRealsenseProcess
    private void initializeHeightMap(ControllerFootstepQueueMonitor controllerFootstepQueueMonitor)
    {
       boolean runWithCUDA = true;
-      heightMapUpdateThread = new RapidHeightMapUpdateThread(ros2Helper,
+      heightMapUpdateThread = new RapidHeightMapUpdateThread(ros2Helper.getROS2Node(),
                                                              syncedRobot,
                                                              syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.LEFT),
                                                              syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.RIGHT),
