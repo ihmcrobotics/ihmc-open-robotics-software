@@ -338,6 +338,8 @@ public class QuicksterFootstepProvider
             tempCurrentStanceFootPosition.add(tempCurrentCoMPose.getPosition());
          }
       }
+
+      desiredTouchdownPosition3DInWorld.get(currentSwingSide).setMatchingFrame(desiredTouchdownPositionsList.get(currentSwingSide).get(0), 0.0);
    }
 
    private void calculateNetPendulumBase()
