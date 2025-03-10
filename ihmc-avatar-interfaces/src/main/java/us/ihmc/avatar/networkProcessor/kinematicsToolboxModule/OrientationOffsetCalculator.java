@@ -1,8 +1,10 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameOrientation3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.rotationConversion.QuaternionConversion;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -23,7 +25,7 @@ public class OrientationOffsetCalculator
    private final double integrationDT;
    private final double maxAngle;
 
-   private final Vector3D angularVelocity = new Vector3D();
+   private final FrameVector3D angularVelocity = new FrameVector3D();
    private final Vector3D rotationVector = new Vector3D();
    private final AxisAngle axisAngle = new AxisAngle();
    private final AxisAngle axisAngleIntegrated = new AxisAngle();
@@ -49,7 +51,7 @@ public class OrientationOffsetCalculator
    {
       referenceFrame.getTwistRelativeToOther(ReferenceFrame.getWorldFrame(), tempTwist);
       tempTwist.changeFrame(referenceFrame);
-      angularVelocity.set(tempTwist.getAngularPart());
+      angularVelocity.set(ReferenceFrame.getWorldFrame(), tempTwist.getAngularPart());
       rotationVector.setAndScale(integrationDT, angularVelocity);
 
       axisAngle.setRotationVector(rotationVector);
@@ -74,5 +76,10 @@ public class OrientationOffsetCalculator
    public FixedFrameOrientation3DBasics getOrientationOffset()
    {
       return orientationOffset;
+   }
+
+   public FixedFrameVector3DBasics getAngularVelocity()
+   {
+      return angularVelocity;
    }
 }
