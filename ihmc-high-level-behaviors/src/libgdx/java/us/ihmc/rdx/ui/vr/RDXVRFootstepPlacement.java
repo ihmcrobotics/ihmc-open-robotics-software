@@ -9,6 +9,7 @@ import controller_msgs.msg.dds.FootstepDataMessage;
 import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.StepPositionLimiter;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -34,6 +35,17 @@ public class RDXVRFootstepPlacement
 {
    private final static boolean USE_HEIGHTMAP = true;
    private final static boolean USE_STEPPABLE_REGION_ADAPTATION = false;
+
+   // TODO move to parameter class
+   private final static double NOMINAL_STANCE_WIDTH = 0.25;
+   private final static double MAX_STEP_FORWARD = 0.5;
+   private final static double MIN_STANCE_WIDTH = 0.15;
+   private final static double MAX_STANCE_WIDTH = 0.5;
+   private final static double MIN_DISTANCE_FROM_STANCE_FOOT = 0.15;
+
+   private final StepPositionLimiter stepPositionLimiter = new StepPositionLimiter();
+   //
+
    private HeightMapData latestHeightMapData;
 
    private RDXVRHardwareModel controllerModel = RDXVRHardwareModel.UNKNOWN;
@@ -178,12 +190,28 @@ public class RDXVRFootstepPlacement
             double height = latestHeightMapData.getHeightAt(pose.getTranslationX(), pose.getTranslationY());
             if (!Double.isNaN(height))
             {
+               // FIXME creating a new adaptedPose creates garbage
                FramePose3D adaptedPose = new FramePose3D(pose);
                if (!USE_STEPPABLE_REGION_ADAPTATION)
                {
                   adaptedPose.getPosition().set(pose.getTranslationX(),
                                                 pose.getTranslationY(),
                                                 latestHeightMapData.getHeightAt(pose.getTranslationX(), pose.getTranslationY()));
+               }
+               else
+               {
+                  RobotSide swingSide = footstepBeingExternallyPlaced.getSide();
+                  stepPositionLimiter.enforceFootPositionConstraint(pose.getPosition(),
+                                                                    adaptedPose.getPosition(),
+                                                                    syncedRobot.getReferenceFrames().getCenterOfMassFrame(),
+                                                                    syncedRobot.getReferenceFrames().getSoleFrame(swingSide),
+                                                                    null,
+                                                                    NOMINAL_STANCE_WIDTH,
+                                                                    MAX_STEP_FORWARD,
+                                                                    MIN_STANCE_WIDTH,
+                                                                    MAX_STANCE_WIDTH,
+                                                                    MIN_DISTANCE_FROM_STANCE_FOOT,
+                                                                    swingSide);
                }
                footstepBeingExternallyPlaced.setPose(adaptedPose);
             }
