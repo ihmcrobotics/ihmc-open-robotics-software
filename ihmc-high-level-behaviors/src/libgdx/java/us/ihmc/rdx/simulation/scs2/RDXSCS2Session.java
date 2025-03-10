@@ -298,16 +298,28 @@ public class RDXSCS2Session
          session.submitIncrementBufferIndexRequest(1);
       }
       ImGui.sameLine();
-      if (ImGui.button(labels.get("Go to Out Point")))
+      ImGui.text("Go to:");
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("In Point")))
+      {
+         session.submitBufferIndexRequest(yoManager.getInPoint());
+      }
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Out Point")))
       {
          session.submitBufferIndexRequest(yoManager.getOutPoint());
       }
-      ImGui.sameLine();
-      ImGui.text("Out point: " + yoManager.getOutPoint());
       if (ImGui.button(labels.get("Crop to In Out")))
       {
          CropBufferRequest cropBufferRequest = new CropBufferRequest(yoManager.getInPoint(), yoManager.getOutPoint());
          session.submitCropBufferRequest(cropBufferRequest);
+      }
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Max In Out")))
+      {
+         session.submitBufferIndexRequest(0);
+         session.submitBufferInPointIndexRequest(0);
+         session.submitBufferOutPointIndexRequest(yoManager.getBufferSize() - 1);
       }
       ImGui.pushItemWidth(80.0f);
       if (ImGuiTools.volatileInputInt(labels.get("Buffer record tick period"), bufferRecordTickPeriod))
@@ -324,7 +336,13 @@ public class RDXSCS2Session
          changeBufferDuration(bufferDuration.get());
       }
       ImGui.popItemWidth();
-      if (ImGui.sliderInt(labels.get("Buffer"), bufferIndex.getData(), 0, yoManager.getBufferSize(), bufferSizeFormatString))
+      ImGui.text("Buffer:");
+      ImGui.sameLine();
+      float sliderWidth = ImGui.getColumnWidth();
+      ImGui.pushItemWidth(sliderWidth);
+      ImGuiTools.renderSliderOrProgressNotch(yoManager.getInPoint() / (float) yoManager.getBufferSize() * sliderWidth, ImGuiTools.DARK_GREEN);
+      ImGuiTools.renderSliderOrProgressNotch(yoManager.getOutPoint() / (float) yoManager.getBufferSize() * sliderWidth, ImGuiTools.DARK_RED);
+      if (ImGui.sliderInt(labels.getHidden("Buffer"), bufferIndex.getData(), 0, yoManager.getBufferSize(), bufferSizeFormatString))
       {
          session.submitBufferIndexRequest(bufferIndex.get());
       }
@@ -332,6 +350,7 @@ public class RDXSCS2Session
       {
          bufferIndex.set(yoManager.getCurrentIndex());
       }
+      ImGui.popItemWidth();
       ImGui.checkbox(labels.get("Pause and end of buffer"), pauseAtEndOfBuffer);
       if (ImGui.checkbox("Run at real-time rate", runAtRealtimeRate))
       {
