@@ -10,7 +10,10 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
@@ -19,8 +22,8 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class RDXVRTeleporter
 {
+   private static final Vector3D CHEST_TO_VR_HOME_OFFSET = new Vector3D(0.25, 0.0, 0.45);
    private boolean preparingToTeleport = false;
-
    private ModelInstance ring;
    private ModelInstance arrow;
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
@@ -30,6 +33,7 @@ public class RDXVRTeleporter
    private final Color color = Color.WHITE;
    private double lastTouchpadY = Double.NaN;
 
+   private HumanoidReferenceFrames robotReferenceFrames;
    // Reference frame of cameras to be set from syncedRobot (used for teleporting vr viewPoint to robot position)
    private final SideDependentList<ReferenceFrame> robotCameraReferenceFrames = new SideDependentList<>();
 
@@ -92,7 +96,7 @@ public class RDXVRTeleporter
            // Pressed right joystick button
            if (!robotCameraReferenceFrames.isEmpty() && controller.getJoystickIsCentered() && joystickButton.bChanged() && !joystickButton.bState())
            {
-              snapToCameraView(vrContext);
+              snapToVRHome(vrContext);
            }
            else if (preparingToTeleport) // Holding B button
            {
@@ -161,6 +165,31 @@ public class RDXVRTeleporter
        });
    }
 
+   public void snapToVRHome(RDXVRContext vrContext)
+   {
+      RigidBodyTransform chestToVRHomeTransform = new RigidBodyTransform(new Quaternion(), CHEST_TO_VR_HOME_OFFSET);
+      // Create robot camera frame as point in between cameras
+      ReferenceFrame robotVRHomeReferenceFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(robotReferenceFrames.getChestFrame(), chestToVRHomeTransform);
+
+      vrContext.teleport(teleportIHMCZUpToIHMCZUpWorld ->
+                         {
+                            xyYawHeadsetToTeleportTransform.setIdentity();
+                            vrContext.getHeadset().runIfConnected(headset -> // Teleport such that your headset ends up where the robot eyes/cameras are
+                                                                  {
+                                                                     headset.getXForwardZUpHeadsetFrame().getTransformToDesiredFrame(xyYawHeadsetToTeleportTransform, vrContext.getTeleportFrameIHMCZUp());
+                                                                     xyYawHeadsetToTeleportTransform.getRotation().setYawPitchRoll(xyYawHeadsetToTeleportTransform.getRotation().getYaw(), 0.0, 0.0);
+                                                                  });
+                            teleportIHMCZUpToIHMCZUpWorld.set(xyYawHeadsetToTeleportTransform);
+                            teleportIHMCZUpToIHMCZUpWorld.invert();
+
+                            RigidBodyTransform vrHomeFramePlanarTransformToWorld = new RigidBodyTransform(robotVRHomeReferenceFrame.getTransformToWorldFrame());
+                            vrHomeFramePlanarTransformToWorld.getRotation().setYawPitchRoll(vrHomeFramePlanarTransformToWorld.getRotation().getYaw(), 0.0, 0.0);
+                            // Transform teleportFrame based on camera frame
+                            tempTransform.set(vrHomeFramePlanarTransformToWorld);
+                            tempTransform.transform(teleportIHMCZUpToIHMCZUpWorld);
+                         });
+   }
+
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       if (preparingToTeleport)
@@ -168,6 +197,13 @@ public class RDXVRTeleporter
          ring.getRenderables(renderables, pool);
          arrow.getRenderables(renderables, pool);
       }
+   }
+
+   public void setRobotReferences(HumanoidReferenceFrames referenceFrames)
+   {
+      robotReferenceFrames = referenceFrames;
+      robotCameraReferenceFrames.put(RobotSide.LEFT, robotReferenceFrames.getStereoCameraFrame(RobotSide.LEFT));
+      robotCameraReferenceFrames.put(RobotSide.RIGHT, robotReferenceFrames.getStereoCameraFrame(RobotSide.RIGHT));
    }
 
    public void setRobotCameraReferenceFrames(ReferenceFrame leftCameraReferenceFrame, ReferenceFrame rightCameraReferenceFrame)

@@ -177,6 +177,15 @@ public class RDXVRModeManager
                   kinematicsStreamingMode.visualizeIKPreviewGraphic(true);
             }
          }
+
+         if (kinematicsStreamingMode.isEnabled() && !robotVisualizer.getHideChest().get())
+         {
+            robotVisualizer.getHideChest().set(true);
+         }
+         else if (!kinematicsStreamingMode.isEnabled() && robotVisualizer.getHideChest().get())
+         {
+            robotVisualizer.getHideChest().set(false);
+         }
       }
       if (vrModeControls.getRenderOnLeftHand().get())
          vrModeControls3DPanel.update();

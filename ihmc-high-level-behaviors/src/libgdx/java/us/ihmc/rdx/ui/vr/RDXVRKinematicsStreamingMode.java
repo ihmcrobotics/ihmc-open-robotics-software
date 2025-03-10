@@ -955,6 +955,11 @@ public class RDXVRKinematicsStreamingMode
       return streamToController.get();
    }
 
+   public boolean isEnabled()
+   {
+      return enabled.get();
+   }
+
    public Notification getStreamingDisabledNotification()
    {
       return streamingDisabled;

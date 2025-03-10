@@ -32,7 +32,7 @@ import java.util.UUID;
 
 public class RDXVRFootstepPlacement
 {
-   private final static boolean USE_HEIGHTMAP = true;
+   private final static boolean USE_HEIGHTMAP = false;
    private final static boolean USE_STEPPABLE_REGION_ADAPTATION = false;
    private HeightMapData latestHeightMapData;
 
