@@ -23,10 +23,8 @@ import java.util.ArrayList;
 public class RDXSCS2LogSession extends RDXSCS2Session
 {
    private LogSession logSession;
-   private LogVideoLoader logVideoLoader;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImInt logPosition = new ImInt();
-   private final ArrayList<RDXOpenCVVideoVisualizer> logVideoVisualizers = new ArrayList<>();
    private LogDataReader logDataReader;
    private LogPropertiesReader logProperties;
 
@@ -46,12 +44,6 @@ public class RDXSCS2LogSession extends RDXSCS2Session
       logDataReader = null;
       logProperties = null;
 
-      for (RDXOpenCVVideoVisualizer logVideoVisualizer : logVideoVisualizers)
-      {
-         perceptionVisualizersPanel.removeVisualizer(logVideoVisualizer);
-         logVideoVisualizer.destroy();
-      }
-      logVideoVisualizers.clear();
 
       try
       {

@@ -15,6 +15,11 @@ import java.util.Arrays;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
+/**
+ * Loads a Blackmagic .mp4 log video.
+ *
+ * @deprecated FIXME: Not currently working.
+ */
 public class LogVideoLoader
 {
    private final MP4VideoDemuxer demuxer;
