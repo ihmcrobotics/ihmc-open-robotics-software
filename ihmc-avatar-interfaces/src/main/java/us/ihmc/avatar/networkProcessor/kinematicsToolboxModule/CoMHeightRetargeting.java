@@ -6,9 +6,11 @@ import us.ihmc.communication.PostureOptimizerState;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.CentroidalMomentumCalculator;
 import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class CoMHeightRetargeting
 {
@@ -25,6 +27,10 @@ public class CoMHeightRetargeting
    private final ReferenceFrame centerOfMassFrame;
 
    private final FramePoint3D tempPoint = new FramePoint3D();
+   
+   private final YoDouble initialCoMZ;
+   private final YoDouble nominalCoMZ;
+   private final YoDouble centroidalZVelocity;
 
    public CoMHeightRetargeting(double integrationDT,
                                double maxRate,
@@ -43,6 +49,10 @@ public class CoMHeightRetargeting
       this.integrationDT = integrationDT;
 
       optimizedHeightRL = new RateLimitedYoVariable("optimizedCoMHeight", registry, maxRate, integrationDT);
+
+      initialCoMZ = new YoDouble("initialCoMZ", registry);
+      nominalCoMZ = new YoDouble("nominalCoMZ", registry);
+      centroidalZVelocity = new YoDouble("centroidalZVelocity", registry);
    }
 
    public void initialize()
@@ -54,11 +64,15 @@ public class CoMHeightRetargeting
       // call once to avoid edge cases in rate limiting
       this.optimizedHeightRL.set(nominalHeight);
       this.optimizedHeightRL.update(nominalHeight);
+
+      initialCoMZ.set(tempPoint.getZ());
    }
 
    public void updateNominalHeight(double nominalHeight)
    {
       this.nominalHeight = nominalHeight;
+      LogTools.info("updating nominal height at" + nominalHeight);
+      nominalCoMZ.set(nominalHeight);
    }
 
    public void update(PostureOptimizerState optimizerState, DMatrixRMaj qd)
@@ -90,6 +104,8 @@ public class CoMHeightRetargeting
       double momentumZOffsetVelocity = centroidalMomentum.get(centroidalLinearZIndex);
       double centroidalZVelocity = momentumZOffsetVelocity / robotMass;
       optimizedHeight += centroidalZVelocity * integrationDT;
+
+      this.centroidalZVelocity.set(centroidalZVelocity);
    }
 
    public double getHeight()

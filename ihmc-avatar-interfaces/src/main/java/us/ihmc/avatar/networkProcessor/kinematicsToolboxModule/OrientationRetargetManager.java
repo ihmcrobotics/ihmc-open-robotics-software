@@ -18,7 +18,6 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.yoVariables.euclid.filters.RateLimitedYoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -32,9 +31,9 @@ public class OrientationRetargetManager
    private final FrameQuaternion nominalOrientation = new FrameQuaternion();
    private final AxisAngle optimizedOrientation = new AxisAngle();
 
-   private final YoFrameQuaternion yoNominalOrientation;
-   private final YoFrameQuaternion yoOptimizedOrientation;
-   private final YoFrameQuaternion yoActualOrientation;
+//   private final YoFrameQuaternion yoNominalOrientation;
+//   private final YoFrameQuaternion yoOptimizedOrientation;
+//   private final YoFrameQuaternion yoActualOrientation;
 
    private final MovingReferenceFrame controlFrame;
    private final double integrationDT;
@@ -47,7 +46,9 @@ public class OrientationRetargetManager
    private final AxisAngle axisAngle = new AxisAngle();
    private final FrameQuaternion differenceToNominal = new FrameQuaternion();
 
-   private final YoFramePoint3D controlFrameOrigin;
+   private final FrameVector3D filteredAngularVelocity = new FrameVector3D();
+
+//   private final YoFramePoint3D controlFrameOrigin;
 
    public OrientationRetargetManager(String name, double integrationDT, MovingReferenceFrame controlFrame, double maxRate, double maxAngle, YoGraphicsListRegistry graphicsListRegistry, YoRegistry registry)
    {
@@ -56,19 +57,19 @@ public class OrientationRetargetManager
       this.controlFrame = controlFrame;
       this.maxAngle = maxAngle;
 
-      yoNominalOrientation = new YoFrameQuaternion(name + "NominalOrientation", ReferenceFrame.getWorldFrame(), registry);
-      yoOptimizedOrientation = new YoFrameQuaternion(name + "OptimizedOrientation", ReferenceFrame.getWorldFrame(), registry);
-      yoActualOrientation = new YoFrameQuaternion(name + "ActualOrientation", ReferenceFrame.getWorldFrame(), registry);
+//      yoNominalOrientation = new YoFrameQuaternion(name + "NominalOrientation", ReferenceFrame.getWorldFrame(), registry);
+//      yoOptimizedOrientation = new YoFrameQuaternion(name + "OptimizedOrientation", ReferenceFrame.getWorldFrame(), registry);
+//      yoActualOrientation = new YoFrameQuaternion(name + "ActualOrientation", ReferenceFrame.getWorldFrame(), registry);
+//
+//      controlFrameOrigin = new YoFramePoint3D(name + "ControlFrameOrigin", ReferenceFrame.getWorldFrame(), registry);
 
-      controlFrameOrigin = new YoFramePoint3D(name + "ControlFrameOrigin", ReferenceFrame.getWorldFrame(), registry);
-
-      YoGraphicCoordinateSystem nominalOrientation = new YoGraphicCoordinateSystem(name + "nominalOrientation", controlFrameOrigin, yoNominalOrientation, 0.35, YoAppearance.Green());
-      YoGraphicCoordinateSystem optimizedOrientation = new YoGraphicCoordinateSystem(name + "optimizedOrientation", controlFrameOrigin, yoOptimizedOrientation, 0.35, YoAppearance.Red());
-      YoGraphicCoordinateSystem actualOrientation = new YoGraphicCoordinateSystem(name + "actualOrientation", controlFrameOrigin, yoActualOrientation, 0.35, YoAppearance.Black());
-
-      graphicsListRegistry.registerYoGraphic("Coordinate Debug", nominalOrientation);
-      graphicsListRegistry.registerYoGraphic("Coordinate Debug", optimizedOrientation);
-      graphicsListRegistry.registerYoGraphic("Coordinate Debug", actualOrientation);
+//      YoGraphicCoordinateSystem nominalOrientation = new YoGraphicCoordinateSystem(name + "nominalOrientation", controlFrameOrigin, yoNominalOrientation, 0.35, YoAppearance.Green());
+//      YoGraphicCoordinateSystem optimizedOrientation = new YoGraphicCoordinateSystem(name + "optimizedOrientation", controlFrameOrigin, yoOptimizedOrientation, 0.35, YoAppearance.Red());
+//      YoGraphicCoordinateSystem actualOrientation = new YoGraphicCoordinateSystem(name + "actualOrientation", controlFrameOrigin, yoActualOrientation, 0.35, YoAppearance.Black());
+//
+//      graphicsListRegistry.registerYoGraphic("Coordinate Debug", nominalOrientation);
+//      graphicsListRegistry.registerYoGraphic("Coordinate Debug", optimizedOrientation);
+//      graphicsListRegistry.registerYoGraphic("Coordinate Debug", actualOrientation);
    }
 
    public void initialize()
@@ -84,16 +85,16 @@ public class OrientationRetargetManager
 
    public void updateNominalOrientation(FrameOrientation3DReadOnly nominalOrientation)
    {
-//      this.nominalOrientation.setIncludingFrame(nominalOrientation);
+      this.nominalOrientation.setIncludingFrame(nominalOrientation);
    }
 
    public void update(PostureOptimizerState optimizerState)
    {
       controlFrame.update();
-      controlFrameOrigin.setFromReferenceFrame(controlFrame);
-      yoNominalOrientation.set(nominalOrientation);
-      yoActualOrientation.setFromReferenceFrame(controlFrame);
-      yoOptimizedOrientation.set(optimizedOrientation);
+//      controlFrameOrigin.setFromReferenceFrame(controlFrame);
+//      yoNominalOrientation.set(nominalOrientation);
+//      yoActualOrientation.setFromReferenceFrame(controlFrame);
+//      yoOptimizedOrientation.set(optimizedOrientation);
 
       if (optimizerState == PostureOptimizerState.NOMINAL)
       {
@@ -102,23 +103,28 @@ public class OrientationRetargetManager
          // reset optimized to current control frame
          tempQuaternion.setFromReferenceFrame(controlFrame);
          optimizedOrientation.set(tempQuaternion);
+         filteredAngularVelocity.setToZero();
       }
       else if (optimizerState == PostureOptimizerState.OPTIMIZER)
       {
          integrate();
 
+         double filterAlpha = 0.25;
+         filteredAngularVelocity.interpolate(angularVelocity, filterAlpha);
+
          tempQuaternion.set(optimizedOrientation);
-         desiredOrientationRateLimited.update(tempQuaternion);
+         desiredOrientationRateLimited.set(tempQuaternion); // here the integrator acts as the filter
       }
       else
       {
          // freeze, no update (just call this to avoid edge cases in rate limiting)
          desiredOrientationRateLimited.update(desiredOrientationRateLimited);
+         filteredAngularVelocity.setToZero();
       }
 
-      yoNominalOrientation.set(nominalOrientation);
-      yoOptimizedOrientation.set(optimizedOrientation);
-      yoActualOrientation.setFromReferenceFrame(controlFrame);
+//      yoNominalOrientation.set(nominalOrientation);
+//      yoOptimizedOrientation.set(optimizedOrientation);
+//      yoActualOrientation.setFromReferenceFrame(controlFrame);
    }
 
    public FixedFrameQuaternionBasics getDesiredOrientation()
@@ -137,17 +143,31 @@ public class OrientationRetargetManager
       optimizedOrientation.multiply(axisAngle);
 
       // clamp angle relative to nominal, if enabled
-//      if (maxAngle > 0.0)
-//      {
-//         tempQuaternion.set(optimizedOrientation);
-//         differenceToNominal.difference(tempQuaternion, nominalOrientation);
-//         axisAngle.set(differenceToNominal);
-//         axisAngle.setAngle(EuclidCoreTools.clamp(axisAngle.getAngle(), maxAngle));
-//         differenceToNominal.set(axisAngle);
-//         QuaternionTools.multiplyConjugateRight(nominalOrientation, differenceToNominal, tempQuaternion);
-//      }
+      if (maxAngle > 0.0)
+      {
+         clampToAngle(tempQuaternion, optimizedOrientation, differenceToNominal, nominalOrientation, axisAngle, maxAngle);
+      }
+   }
 
-//      optimizedOrientation.set(tempQuaternion);
+   public FrameVector3D getAngularVelocity()
+   {
+      return filteredAngularVelocity;
+   }
+
+   private static void clampToAngle(FrameQuaternion tempQuaternion,
+                                    AxisAngle optimizedOrientation,
+                                    FrameQuaternion differenceToNominal,
+                                    FrameQuaternion nominalOrientation,
+                                    AxisAngle axisAngle,
+                                    double maxAngle)
+   {
+      tempQuaternion.set(optimizedOrientation);
+      differenceToNominal.difference(tempQuaternion, nominalOrientation);
+      axisAngle.set(differenceToNominal);
+      axisAngle.setAngle(EuclidCoreTools.clamp(axisAngle.getAngle(), maxAngle));
+      differenceToNominal.set(axisAngle);
+      QuaternionTools.multiplyConjugateRight(nominalOrientation, differenceToNominal, tempQuaternion);
+      optimizedOrientation.set(tempQuaternion);
    }
 
    public static void main(String[] args)
@@ -165,14 +185,7 @@ public class OrientationRetargetManager
       FrameQuaternion differenceToNominal = new FrameQuaternion();
 
       // clamp angle relative to nominal
-      tempQuaternion.set(optimizedOrientation);
-      differenceToNominal.difference(tempQuaternion, nominalOrientation);
-      axisAngle.set(differenceToNominal);
-      axisAngle.setAngle(EuclidCoreTools.clamp(axisAngle.getAngle(), maxAngle));
-      differenceToNominal.set(axisAngle);
-      QuaternionTools.multiplyConjugateRight(nominalOrientation, differenceToNominal, tempQuaternion);
-
-      optimizedOrientation.set(tempQuaternion);
+      clampToAngle(tempQuaternion, optimizedOrientation, differenceToNominal, nominalOrientation, axisAngle, maxAngle);
 
       System.out.println(optimizedOrientation.getAxis());
       System.out.println(optimizedOrientation.getAngle());
