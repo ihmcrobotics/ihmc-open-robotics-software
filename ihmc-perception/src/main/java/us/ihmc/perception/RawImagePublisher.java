@@ -22,8 +22,9 @@ import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.time.Instant;
-import java.util.Arrays;
 
 import static us.ihmc.perception.imageMessage.CompressionType.NVJPEG;
 import static us.ihmc.perception.imageMessage.CompressionType.ZSTD_NVJPEG_HYBRID;
@@ -121,7 +122,7 @@ public class RawImagePublisher implements AutoCloseable
       Instant imageAcquisitionTime = imageToPublish.getAcquisitionTime();
       ros2Image.getHeader().getStamp().setSec((int) imageAcquisitionTime.getEpochSecond());
       ros2Image.getHeader().getStamp().setNanosec(imageAcquisitionTime.getNano());
-      ros2Image.getHeader().setFrameId(""); // TODO: Figure out how to do frame ids with RawImage
+      ros2Image.getHeader().setFrameId("world"); // TODO: Figure out how to do frame ids with RawImage
 
       // Set dimensions
       ros2Image.setWidth(imageToPublish.getWidth());
@@ -137,16 +138,19 @@ public class RawImagePublisher implements AutoCloseable
       };
       ros2Image.setEncoding(encoding);
 
+      // Get the message's internal buffer
+      ByteBuffer dataBuffer = ros2Image.getData().getBuffer();
+
       // Set byte order
-      ros2Image.setIsBigendian((byte) 0);
+      ros2Image.setIsBigendian((byte) (dataBuffer.order().equals(ByteOrder.BIG_ENDIAN) ? 1 : 0));
 
       // Set step
       Mat cpuImage = imageToPublish.getCpuImageMat();
       ros2Image.setStep(cpuImage.step());
 
       // Set data
-      Arrays.fill(ros2Image.getData(), (byte) 0);
-      cpuImage.data().get(ros2Image.getData(), 0, (int) OpenCVTools.memorySize(cpuImage));
+      int memorySize = (int) OpenCVTools.memorySize(cpuImage);
+      dataBuffer.position(0).put(cpuImage.data().limit(memorySize).asByteBuffer());
 
       // Publish the image
       ros2Helper.publish(imageTopic, ros2Image);
@@ -154,6 +158,7 @@ public class RawImagePublisher implements AutoCloseable
 
    private String getOpenCVTypeString(int openCVType)
    {
+      // Reverse the opencv_core.CV_MAKETYPE method to get the type depth and number of channels
       int depth = openCVType & opencv_core.CV_MAT_DEPTH_MASK;
       int channels = ((openCVType - depth) >> opencv_core.CV_CN_SHIFT) + 1;
 
