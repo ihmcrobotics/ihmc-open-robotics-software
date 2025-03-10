@@ -48,7 +48,6 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
 
    private final OneDoFJointBasics[] oneDoFJoints;
    private final GravityCoriolisExternalWrenchMatrixCalculator gravityCoriolisExternalWrenchMatrixCalculator;
-   private final GeometricJacobianCalculator geometricJacobianCalculator = new GeometricJacobianCalculator();
 
    /* Jacobian-transpose actuation constraint corresponding to joint torque lower effort limits: - J^T f >= tau_lower - g */
    private final DMatrixRMaj constraintLowerBound;
@@ -522,6 +521,11 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
       {
          jointTorqueStaticMask[i] = jointsToCheckTorqueFeasibilityFilter.test(oneDoFJoints[i].getName());
       }
+   }
+
+   public RigidBodyBasics getContactingBody(int contactIndex)
+   {
+      return contactPoints.get(contactIndex).contactingBody;
    }
 
    public GeometricJacobian getJacobian(RigidBodyBasics rigidBody)

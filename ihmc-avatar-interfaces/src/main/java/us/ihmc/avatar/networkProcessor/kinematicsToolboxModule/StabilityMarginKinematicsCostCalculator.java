@@ -283,10 +283,7 @@ public class StabilityMarginKinematicsCostCalculator
 
          if (bracingPointIndex != -1)
          {
-            stabilityGradientCalculator.clearContactPointsToComputeSensitivity();
-            stabilityGradientCalculator.addContactPointIndexToComputeSensitivity(bracingPointIndex);
-            stabilityGradientCalculator.computeContactPointAdjustment();
-            contactPointAdjustment.set(stabilityGradientCalculator.getOptimalContactPointAdjustment(bracingPointIndex));
+            contactPointAdjustment.set(stabilityGradientCalculator.computeContactPointAdjustment(HumanoidKinematicsToolboxController.BRACING_HAND_SIDE));
 
             if (!isUpperBodyLoadBearing.getValue() && contactPointAdjustment.normSquared() > 1.0e-5)
             {
