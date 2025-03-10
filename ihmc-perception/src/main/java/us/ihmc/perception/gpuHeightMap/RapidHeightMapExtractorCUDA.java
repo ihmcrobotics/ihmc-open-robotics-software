@@ -18,7 +18,6 @@ import us.ihmc.perception.cuda.CUDAProgram;
 import us.ihmc.perception.cuda.CUDAStreamManager;
 import us.ihmc.perception.cuda.CUDATools;
 import us.ihmc.perception.heightMap.TerrainMapData;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -30,7 +29,7 @@ import java.net.URL;
 
 import static org.bytedeco.cuda.global.cudart.*;
 
-public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInterface
+public class RapidHeightMapExtractorCUDA
 {
    private static final boolean PRINT_TIMING_FOR_KERNELS = false;
    static final int BLOCK_SIZE_XY = 32;
@@ -345,7 +344,6 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
       terrainMapData.setHeightMap(finalCroppedHeightMap);
    }
 
-   @Override
    public void updateHeightOffset(float z)
    {
       int error;
