@@ -10,11 +10,13 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.GlobalMapMessage;
 import perception_msgs.msg.dds.GlobalMapTileMessage;
+import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapManager;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.tools.NativeMemoryTools;
@@ -26,6 +28,7 @@ import us.ihmc.rdx.ui.graphics.RDXGlobalHeightMapGraphic;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.sensorProcessing.globalHeightMap.GlobalLattice;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
@@ -50,6 +53,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
 
    private ROS2PublishSubscribeAPI ros2;
    private HeightMapData latestHeightMapData;
+   private HeightMapMessage latestHeightMapMessage = new HeightMapMessage();
    private Mat heightMapImage;
    private Mat compressedBytesMat;
    private ByteBuffer incomingCompressedImageBuffer;
@@ -118,32 +122,48 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       if (isActive())
       {
          executorService.clearQueueAndExecute(() ->
-                                              {
-                                                 pixelScalingFactor = imageMessage.getDepthDiscretization();
-                                                 zUpToWorldTransform.set(imageMessage.getOrientation(), imageMessage.getPosition());
+          {
+             pixelScalingFactor = imageMessage.getDepthDiscretization();
+             zUpToWorldTransform.set(imageMessage.getOrientation(), imageMessage.getPosition());
 
-                                                 if (heightMapImage == null)
-                                                 {
-                                                    heightMapImage = new Mat(imageMessage.getImageHeight(), imageMessage.getImageWidth(), opencv_core.CV_16UC1);
-                                                    compressedBytesMat = new Mat(1, 1, opencv_core.CV_8UC1);
-                                                    incomingCompressedImageBuffer = NativeMemoryTools.allocate(compressedBufferDefaultSize);
-                                                    incomingCompressedImageBytePointer = new BytePointer(incomingCompressedImageBuffer);
-                                                    LogTools.warn("Creating Buffer of Size: {}", compressedBufferDefaultSize);
-                                                 }
+             if (heightMapImage == null)
+             {
+                heightMapImage = new Mat(imageMessage.getImageHeight(), imageMessage.getImageWidth(), opencv_core.CV_16UC1);
+                compressedBytesMat = new Mat(1, 1, opencv_core.CV_8UC1);
+                incomingCompressedImageBuffer = NativeMemoryTools.allocate(compressedBufferDefaultSize);
+                incomingCompressedImageBytePointer = new BytePointer(incomingCompressedImageBuffer);
+                LogTools.warn("Creating Buffer of Size: {}", compressedBufferDefaultSize);
+             }
 
-                                                 latestHeightMapData = new HeightMapData(RapidHeightMapManager.getHeightMapParameters()
-                                                                                                              .getGlobalCellSizeInMeters(),
-                                                                                         RapidHeightMapManager.getHeightMapParameters()
-                                                                                                              .getGlobalWidthInMeters(),
-                                                                                         imageMessage.getPosition().getX(),
-                                                                                         imageMessage.getPosition().getY());
+             if (latestHeightMapData == null)
+             {
+                latestHeightMapData = new HeightMapData(RapidHeightMapManager.getHeightMapParameters()
+                                                                               .getGlobalCellSizeInMeters(),
+                                                        RapidHeightMapManager.getHeightMapParameters()
+                                                                               .getGlobalWidthInMeters(),
+                                                        imageMessage.getPosition().getX(),
+                                                        imageMessage.getPosition().getY());
+             }
 
-                                                 PerceptionMessageTools.convertToHeightMapImage(imageMessage,
-                                                                                                heightMapImage,
-                                                                                                incomingCompressedImageBuffer,
-                                                                                                incomingCompressedImageBytePointer,
-                                                                                                compressedBytesMat);
-                                              });
+             PerceptionMessageTools.convertToHeightMapImage(imageMessage,
+                                                            heightMapImage,
+                                                            incomingCompressedImageBuffer,
+                                                            incomingCompressedImageBytePointer,
+                                                            compressedBytesMat);
+
+             if (!heightMapMessageGenerated)
+             {
+                PerceptionMessageTools.convertToHeightMapData(heightMapImage,
+                                                              latestHeightMapData,
+                                                              imageMessage.getPosition(),
+                                                              (float) RapidHeightMapManager.getHeightMapParameters()
+                                                                                   .getGlobalWidthInMeters(),
+                                                              (float) RapidHeightMapManager.getHeightMapParameters()
+                                                                                   .getGlobalCellSizeInMeters());
+                latestHeightMapMessage = HeightMapMessageTools.toMessage(latestHeightMapData);
+                heightMapMessageGenerated = true;
+             }
+          });
       }
 
       getFrequency(PerceptionAPI.HEIGHT_MAP_CROPPED).ping();

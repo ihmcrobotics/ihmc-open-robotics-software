@@ -32,7 +32,7 @@ import java.util.UUID;
 
 public class RDXVRFootstepPlacement
 {
-   private final static boolean USE_HEIGHTMAP = false;
+   private final static boolean USE_HEIGHTMAP = true;
    private final static boolean USE_STEPPABLE_REGION_ADAPTATION = false;
    private HeightMapData latestHeightMapData;
 
@@ -175,14 +175,23 @@ public class RDXVRFootstepPlacement
       {
          if (USE_HEIGHTMAP && latestHeightMapData != null)
          {
-            FramePose3D adaptedPose = new FramePose3D(pose);
-            if (!USE_STEPPABLE_REGION_ADAPTATION)
+            double height = latestHeightMapData.getHeightAt(pose.getTranslationX(), pose.getTranslationY());
+            if (!Double.isNaN(height))
             {
-               adaptedPose.getPosition().set(pose.getTranslationX(),
-                                             pose.getTranslationY(),
-                                             latestHeightMapData.getHeightAt(pose.getTranslationX(), pose.getTranslationY()));
+               FramePose3D adaptedPose = new FramePose3D(pose);
+               if (!USE_STEPPABLE_REGION_ADAPTATION)
+               {
+                  adaptedPose.getPosition().set(pose.getTranslationX(),
+                                                pose.getTranslationY(),
+                                                latestHeightMapData.getHeightAt(pose.getTranslationX(), pose.getTranslationY()));
+               }
+               footstepBeingExternallyPlaced.setPose(adaptedPose);
             }
-            footstepBeingExternallyPlaced.setPose(adaptedPose);
+            else
+            {
+               LogTools.warn("Could not use heightMap for footstep adjustment, since height is NaN");
+            }
+
          }
          else
          {

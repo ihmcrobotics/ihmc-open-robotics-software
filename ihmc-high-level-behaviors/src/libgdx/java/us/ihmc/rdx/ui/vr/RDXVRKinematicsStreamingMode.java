@@ -37,6 +37,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
 import us.ihmc.log.LogTools;
@@ -57,6 +58,7 @@ import us.ihmc.rdx.ui.teleoperation.RDXHandConfigurationManager;
 import us.ihmc.rdx.ui.tools.KinematicsRecordReplay;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.rdx.vr.RDXVRHardwareModel;
+import us.ihmc.rdx.vr.RDXVRTeleporter;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.partNames.ArmJointName;
@@ -131,6 +133,7 @@ public class RDXVRKinematicsStreamingMode
    private RDXVRFootstepStreaming footstepStreaming;
    private boolean reintializingToolbox = false;
    private boolean pausedForWalking = false;
+   private boolean wasStepping = false;
    private final RDXVRFootstepPlacement footstepPlacer;
    private final ControllerStatusTracker controllerStatusTracker;
    private final SwingFootTracker swingFootTracker;
@@ -322,7 +325,13 @@ public class RDXVRKinematicsStreamingMode
             outputFrequencyPlot.recordEvent();
          }
 
-         footstepStreaming.processVRInput(gripButtonsValue.get(RobotSide.LEFT) > 0.2f && gripButtonsValue.get(RobotSide.RIGHT) > 0.2f);
+         boolean isStepping = gripButtonsValue.get(RobotSide.LEFT) > 0.2f && gripButtonsValue.get(RobotSide.RIGHT) > 0.2f;
+         footstepStreaming.processVRInput(isStepping);
+         if (wasStepping && !isStepping)
+         {
+            teleportToRobot();
+         }
+         wasStepping = isStepping;
       }
    }
 
@@ -633,6 +642,29 @@ public class RDXVRKinematicsStreamingMode
       }
    }
 
+   private void teleportToRobot()
+   {
+      ReferenceFrame robotVRHomeReferenceFrame = RDXVRTeleporter.getRobotVRHomeFrame();
+      RigidBodyTransform xyYawHeadsetToTeleportTransform = new RigidBodyTransform();
+      vrContext.teleport(teleportIHMCZUpToIHMCZUpWorld ->
+       {
+          xyYawHeadsetToTeleportTransform.setIdentity();
+          vrContext.getHeadset().runIfConnected(headset ->
+            {
+               headset.getXForwardZUpHeadsetFrame().getTransformToDesiredFrame(xyYawHeadsetToTeleportTransform, vrContext.getTeleportFrameIHMCZUp());
+               xyYawHeadsetToTeleportTransform.getRotation().setYawPitchRoll(xyYawHeadsetToTeleportTransform.getRotation().getYaw(), 0.0, 0.0);
+            });
+          teleportIHMCZUpToIHMCZUpWorld.set(xyYawHeadsetToTeleportTransform);
+          teleportIHMCZUpToIHMCZUpWorld.invert();
+
+          RigidBodyTransform vrHomeFramePlanarTransformToWorld = new RigidBodyTransform(robotVRHomeReferenceFrame.getTransformToWorldFrame());
+          vrHomeFramePlanarTransformToWorld.getRotation().setYawPitchRoll(vrHomeFramePlanarTransformToWorld.getRotation().getYaw(), 0.0, 0.0);
+          RigidBodyTransform tempTransform = new RigidBodyTransform();
+          tempTransform.set(vrHomeFramePlanarTransformToWorld);
+          tempTransform.transform(teleportIHMCZUpToIHMCZUpWorld);
+       });
+   }
+
    public void renderImGuiWidgets()
    {
       if (ImGui.checkbox(labels.get("Control/Stop Robot"), streamToController))
@@ -712,6 +744,7 @@ public class RDXVRKinematicsStreamingMode
          sleepToolbox();
          footstepStreaming.reset();
          pausedForWalking = false;
+         wasStepping = false;
          reintializingToolbox = false;
 
          visualizeIKPreviewGraphic(true);
