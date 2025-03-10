@@ -217,8 +217,11 @@ public abstract class TransferState extends WalkingState
 
    protected void initializeWalkingTrajectoryPath()
    {
-      if (isInitialTransfer())
-         walkingTrajectoryPath.reset();
+      // 2025/03/10: RJG leaving this commented in causes a discontinuity on the initial state of the pelvis yaw. That
+      // results in a big jump when the robot starts moving, potentially. If you leave it commented out, the path will
+      // start its yaw at the current yaw, and you get smooth motions.
+//      if (isInitialTransfer())
+//         walkingTrajectoryPath.reset();
       walkingTrajectoryPath.initializeDoubleSupport();
    }
 
