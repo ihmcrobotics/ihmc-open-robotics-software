@@ -98,6 +98,11 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
       set(HeightMapParameters.globalWidthInMeters, globalWidthInMeters);
    }
 
+   default void setTerrainWidthInMeters(double terrainWidthInMeters)
+   {
+      set(HeightMapParameters.terrainWidthInMeters, terrainWidthInMeters);
+   }
+
    default void setGlobalCellSizeInMeters(double globalCellSizeInMeters)
    {
       set(HeightMapParameters.globalCellSizeInMeters, globalCellSizeInMeters);
@@ -126,6 +131,11 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
    default void setCropWindowSize(int cropWindowSize)
    {
       set(HeightMapParameters.cropWindowSize, cropWindowSize);
+   }
+
+   default void setTerrainObjectSize(int terrainObjectSize)
+   {
+      set(HeightMapParameters.terrainObjectSize, terrainObjectSize);
    }
 
    default void setSteppingContactThreshold(int steppingContactThreshold)

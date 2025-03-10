@@ -70,9 +70,14 @@
     "upperBound" : 0.06
   },
   "Global width in meters" : {
-    "value" : 4.0,
+    "value" : 8.0,
     "lowerBound" : 2.0,
     "upperBound" : 10.0
+  },
+  "Terrain width in meters" : {
+    "value" : 4.0,
+    "lowerBound" : 2.0,
+    "upperBound" : 8.0
   },
   "Global cell size in meters" : {
     "value" : 0.02,
@@ -100,7 +105,12 @@
     "upperBound" : 20000.0
   },
   "Crop window size" : {
-    "value" : 201,
+    "value" : 401,
+    "lowerBound" : 300,
+    "upperBound" : 800
+  },
+  "Terrain object size" : {
+    "vale" : 201,
     "lowerBound" : 40,
     "upperBound" : 300
   },

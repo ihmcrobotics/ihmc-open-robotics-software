@@ -156,7 +156,7 @@ public class RapidHeightMapManager
 
       rapidHeightMapExtractor.update(sensorToWorld, sensorToGround, groundToWorld);
 
-      Mat croppedHeightMapImage = rapidHeightMapExtractor.getTerrainMapData().getHeightMap();
+      Mat croppedHeightMapImage = rapidHeightMapExtractor.getVisualizedHeightMap();
 
       if (runWithCUDA && getHeightMapParameters().getFlyingPointsFilter())
       {

@@ -74,6 +74,11 @@
     "lowerBound": 1.0,
     "upperBound": 5.5
   },
+  "Terrain width in meters" : {
+    "value" : 4.0,
+    "lowerBound" : 2.0,
+    "upperBound" : 8.0
+  },
   "Global cell size in meters": {
     "value": 0.02,
     "lowerBound": 0.01,
@@ -103,6 +108,11 @@
     "value": 201,
     "lowerBound": 40,
     "upperBound": 300
+  },
+  "Terrain object size" : {
+    "value" : 201,
+    "lowerBound" : 40,
+    "upperBound" : 300
   },
   "Stepping contact threshold" : {
     "value": 0,

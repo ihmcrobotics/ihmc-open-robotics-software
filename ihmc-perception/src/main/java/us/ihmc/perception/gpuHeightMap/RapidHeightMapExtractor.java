@@ -819,6 +819,12 @@ public class RapidHeightMapExtractor implements RapidHeightMapExtractorInterface
       return latestHeightMapData;
    }
 
+   @Override
+   public Mat getVisualizedHeightMap()
+   {
+      return null;
+   }
+
    public int getLocalCellsPerAxis()
    {
       return localCellsPerAxis;

@@ -100,6 +100,11 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
       return get(globalWidthInMeters);
    }
 
+   default double getTerrainWidthInMeters()
+   {
+      return get(terrainWidthInMeters);
+   }
+
    default double getGlobalCellSizeInMeters()
    {
       return get(globalCellSizeInMeters);
@@ -128,6 +133,11 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
    default int getCropWindowSize()
    {
       return get(cropWindowSize);
+   }
+
+   default int getTerrainObjectSize()
+   {
+      return get(terrainObjectSize);
    }
 
    default int getSteppingContactThreshold()

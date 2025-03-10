@@ -1,5 +1,6 @@
 package us.ihmc.perception.gpuHeightMap;
 
+import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.perception.heightMap.TerrainMapData;
@@ -24,4 +25,6 @@ public interface RapidHeightMapExtractorInterface
    void destroy();
 
    HeightMapData getHeightMapData();
+
+   Mat getVisualizedHeightMap();
 }
