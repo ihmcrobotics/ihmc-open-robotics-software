@@ -75,7 +75,7 @@ public class RDXSCS2LogSession extends RDXSCS2Session
 
    public void createLogVideoLoader(String logVideoFilePath, String logVideoTimestampFilePath) throws IOException
    {
-      logVideoLoader = new LogVideoLoader(logVideoFilePath, logVideoTimestampFilePath);
+//      logVideoLoader = new LogVideoLoader(logVideoFilePath, logVideoTimestampFilePath);
 
 //      log
    }
