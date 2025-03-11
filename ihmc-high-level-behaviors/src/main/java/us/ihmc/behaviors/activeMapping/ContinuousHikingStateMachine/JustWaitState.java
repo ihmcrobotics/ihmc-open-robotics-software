@@ -10,6 +10,8 @@ import std_msgs.msg.dds.Float32;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
+import us.ihmc.behaviors.activeMapping.ActiveMappingParameterToolBox;
+import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.HumanoidControllerAPI;
@@ -28,7 +30,6 @@ import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.communication.ContinuousHikingAPI;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
-import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
@@ -56,6 +57,7 @@ public class JustWaitState implements State
    private final AtomicReference<ContinuousHikingCommandMessage> commandMessage;
    private final ControllerFootstepQueueMonitor controllerQueueMonitor;
    private final FootstepPlannerEnvironmentHandler environmentHandler;
+   private final ContinuousHikingParameters continuousHikingParameters;
    private boolean isDone;
    private final FootstepPlanningModule footstepPlanner;
    private final DefaultFootstepPlannerParametersBasics footstepPlannerParameters;
@@ -75,8 +77,7 @@ public class JustWaitState implements State
                         ROS2SyncedRobotModel syncedRobot,
                         AtomicReference<ContinuousHikingCommandMessage> commandMessage,
                         ControllerFootstepQueueMonitor controllerQueueMonitor,
-                        DefaultFootstepPlannerParametersBasics footstepPlannerParameters,
-                        SwingPlannerParametersBasics swingPlannerParameters,
+                        ActiveMappingParameterToolBox activeMappingParameterToolBox,
                         Supplier<HeightMapData> heightMapData,
                         Supplier<TerrainMapData> terrainMapData)
    {
@@ -86,13 +87,15 @@ public class JustWaitState implements State
       this.controllerQueueMonitor = controllerQueueMonitor;
 
       footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel);
-      this.footstepPlannerParameters = footstepPlannerParameters;
-      this.swingPlannerParameters = swingPlannerParameters;
+
+      this.continuousHikingParameters = activeMappingParameterToolBox.getContinuousHikingParameters();
+      this.footstepPlannerParameters = activeMappingParameterToolBox.getFootstepPlannerParameters();
+      this.swingPlannerParameters = activeMappingParameterToolBox.getSwingPlannerParameters();
       this.heightMapData = heightMapData;
       this.terrainMapData = terrainMapData;
 
       environmentHandler = new FootstepPlannerEnvironmentHandler();
-      footstepSnapAndWiggler = new FootstepSnapAndWiggler(PlannerTools.createDefaultFootPolygons(), footstepPlannerParameters, environmentHandler);
+      footstepSnapAndWiggler = new FootstepSnapAndWiggler(PlannerTools.createDefaultFootPolygons(), this.footstepPlannerParameters, environmentHandler);
 
       midFeetZUpFrame = syncedRobot.getReferenceFrames().getMidFeetZUpFrame();
 
@@ -258,8 +261,8 @@ public class JustWaitState implements State
                                   FootstepPlan newestFootstepPlan = plannerOutput.getFootstepPlan();
 
                                   FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
-                                  footstepDataListMessage.setDefaultSwingDuration(0.8);
-                                  footstepDataListMessage.setDefaultTransferDuration(0.4);
+                                  footstepDataListMessage.setDefaultSwingDuration(continuousHikingParameters.getSwingTime());
+                                  footstepDataListMessage.setDefaultTransferDuration(continuousHikingParameters.getTransferTime());
                                   footstepDataListMessage.getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_QUEUE);
 
                                   for (int i = 0; i < footstepPlanner.getOutput().getFootstepPlan().getNumberOfSteps(); i++)
@@ -352,8 +355,8 @@ public class JustWaitState implements State
 //      squareUpStep.getFootstepPose().changeFrame(referenceFrame);
 
       FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
-      footstepDataListMessage.setDefaultSwingDuration(0.8);
-      footstepDataListMessage.setDefaultTransferDuration(0.4);
+      footstepDataListMessage.setDefaultSwingDuration(continuousHikingParameters.getSwingTime());
+      footstepDataListMessage.setDefaultTransferDuration(continuousHikingParameters.getTransferTime());
       footstepDataListMessage.getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_QUEUE);
       footstepDataListMessage.getFootstepDataList().add().set(squareUpStep.getAsMessage());
 

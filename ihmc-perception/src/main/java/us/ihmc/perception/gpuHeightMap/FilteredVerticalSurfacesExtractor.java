@@ -4,7 +4,6 @@ import org.bytedeco.cuda.cudart.CUstream_st;
 import org.bytedeco.cuda.cudart.dim3;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
-import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
 import us.ihmc.perception.cuda.CUDATools;

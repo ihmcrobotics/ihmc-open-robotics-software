@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.FootstepQueueStatusMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.PlanOffsetStatus;
 import controller_msgs.msg.dds.QueuedFootstepStatusMessage;
+import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -28,6 +29,7 @@ public class ControllerFootstepQueueMonitor
 
    private boolean footstepStarted;
    private final AtomicBoolean isWalking = new AtomicBoolean(false);
+   private final AtomicBoolean robotFalling = new AtomicBoolean(false);
 
    public ControllerFootstepQueueMonitor(ROS2Node ros2Node, String simpleRobotName)
    {
@@ -35,6 +37,7 @@ public class ControllerFootstepQueueMonitor
       ros2Node.createSubscription2(HumanoidControllerAPI.getTopic(FootstepStatusMessage.class, simpleRobotName), this::footstepStatusReceived);
       ros2Node.createSubscription2(getTopic(PlanOffsetStatus.class, simpleRobotName), this::acceptPlanOffsetStatus);
       ros2Node.createSubscription2(getTopic(WalkingStatusMessage.class, simpleRobotName), this::acceptWalkingStatusMessage);
+      ros2Node.createSubscription2(getTopic(WalkingControllerFailureStatusMessage.class, simpleRobotName), this::acceptWalkingControllerFailureStatusMessage);
    }
 
    private void footstepQueueStatusReceived(FootstepQueueStatusMessage footstepQueueStatusMessage)
@@ -118,6 +121,16 @@ public class ControllerFootstepQueueMonitor
       previousFootstepPose.getRotation().setToYawOrientation(controllerQueue.get(i).getOrientation().getYaw());
 
       return previousFootstepPose;
+   }
+
+   private void acceptWalkingControllerFailureStatusMessage(WalkingControllerFailureStatusMessage message)
+   {
+      robotFalling.set(true);
+   }
+
+   public boolean getRobotFalling()
+   {
+      return robotFalling.getAndSet(false);
    }
 
    // TODO Polling this in multiple threads may cause issues as the second time its pulled the value will be null.
