@@ -97,6 +97,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    private final ContinuousHikingLogger continuousHikingLogger;
    private final ROS2Publisher<PlanOffsetStatus> planOffsetStatusPublisher;
    private final ROS2Publisher<FootstepStatusMessage> footstepStatusMessagePublisher;
+   private final ROS2Publisher<WalkingControllerFailureStatusMessage> walkingControllerFailureStatusPublisher;
    private final ROS2Publisher<Empty> clearGoalFootstepsPublisher;
    private final ContinuousHikingParameters continuousHikingParameters;
    private SideDependentList<FramePose3D> startStancePose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
@@ -124,6 +125,8 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       this.syncedRobotModel = syncedRobotModel;
 
       footstepStatusMessagePublisher = ros2Node.createPublisher(getTopic(FootstepStatusMessage.class, robotModel.getSimpleRobotName()));
+      walkingControllerFailureStatusPublisher = ros2Node.createPublisher(getTopic(WalkingControllerFailureStatusMessage.class,
+                                                                                  robotModel.getSimpleRobotName()));
       planOffsetStatusPublisher = ros2Node.createPublisher(getTopic(PlanOffsetStatus.class, robotModel.getSimpleRobotName()));
       clearGoalFootstepsPublisher = ros2Node.createPublisher(ContinuousHikingAPI.CLEAR_GOAL_FOOTSTEPS);
 
@@ -354,6 +357,14 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
          {
             simulatedDriftInMeters += 0.1;
          }
+      }
+
+      ImGui.sameLine();
+
+      if (ImGui.button("Fake Robot Falling"))
+      {
+         WalkingControllerFailureStatusMessage walkingControllerFailureStatusMessage = new WalkingControllerFailureStatusMessage();
+         walkingControllerFailureStatusPublisher.publish(walkingControllerFailureStatusMessage);
       }
 
       terrainPlanningDebugger.renderImGuiWidgets();

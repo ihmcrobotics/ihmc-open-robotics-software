@@ -119,9 +119,7 @@ public class RapidHeightMapExtractorCUDA
       recomputeDerivedParameters();
       // Need to initialize this after the parameters have been computed to get the right size
       filteredRapidHeightMapExtractor = new FilteredRapidHeightMapExtractor(stream, globalCellsPerAxis, globalCellsPerAxis, 6);
-      verticalSurfacesExtractor = new FilteredVerticalSurfacesExtractor(stream,
-                                                                        heightMapParameters.getTerrainObjectSize(),
-                                                                        heightMapParameters.getTerrainObjectSize());
+      verticalSurfacesExtractor = new FilteredVerticalSurfacesExtractor(stream, globalCellsPerAxis, globalCellsPerAxis);
 
       try
       {
@@ -305,8 +303,15 @@ public class RapidHeightMapExtractorCUDA
          globalHeightMapImage = filteredHeightMap;
       }
 
+      //      Mat finalCroppedHeightMap = new Mat();
+      GpuMat verticalFilteredHeightMap = globalHeightMapImage.clone();
+      if (heightMapParameters.getEnableVerticalFilter())
+      {
+         verticalFilteredHeightMap = verticalSurfacesExtractor.update(globalHeightMapImage);
+      }
+
       // Run the cropping kernel
-      croppingKernel.withPointer(globalHeightMapImage.data()).withLong(globalHeightMapImage.step());
+      croppingKernel.withPointer(verticalFilteredHeightMap.data()).withLong(verticalFilteredHeightMap.step());
       croppingKernel.withPointer(sensorCroppedHeightMapImage.data()).withLong(sensorCroppedHeightMapImage.step());
       croppingKernel.withPointer(terrainHeightMapImage.data()).withLong(terrainHeightMapImage.step());
       croppingKernel.withPointer(parametersDevicePointer);
@@ -324,20 +329,12 @@ public class RapidHeightMapExtractorCUDA
       //Update the terrain map data with the new results
       terrainMapData.setSensorOrigin(groundToWorldTransform.getTranslationX(), groundToWorldTransform.getTranslationY());
 
-      Mat finalCroppedHeightMap = new Mat();
-      if (heightMapParameters.getEnableVerticalFilter())
-      {
-         GpuMat verticalFilteredMap = verticalSurfacesExtractor.update(terrainHeightMapImage);
-         verticalFilteredMap.download(finalCroppedHeightMap);  // Download the image from the GPU to the Mat object
-         verticalFilteredMap.close();
-      }
-      else
-      {
-         terrainHeightMapImage.download(finalCroppedHeightMap);
-      }
-
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
+      verticalFilteredHeightMap.close();
+
+      Mat finalCroppedHeightMap = new Mat();
+      terrainHeightMapImage.download(finalCroppedHeightMap);
       terrainMapData.setHeightMap(finalCroppedHeightMap);
    }
 

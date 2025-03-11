@@ -93,8 +93,7 @@ public class ContinuousPlannerSchedulingTask
                                               syncedRobotModel,
                                               commandMessage,
                                               controllerFootstepQueueMonitor,
-                                              activeMappingParameterObject.getFootstepPlannerParameters(),
-                                              activeMappingParameterObject.getSwingPlannerParameters(),
+                                              activeMappingParameterObject,
                                               this::getHeightMapData,
                                               this::getTerrainMap);
 
@@ -135,6 +134,17 @@ public class ContinuousPlannerSchedulingTask
 
       // Added a couple listeners to help when jumping between states
       stateMachine = stateMachineFactory.build(ContinuousHikingState.DO_NOTHING);
+
+      stateMachine.addPreTransitionCallback(() ->
+                                            {
+                                               if (controllerFootstepQueueMonitor.getRobotFalling())
+                                               {
+                                                  LogTools.info("---- Resetting State Machine for Continuous Hiking ----");
+                                                  stateMachine.resetToInitialState();
+                                                  commandMessage.get().setEnableContinuousHiking(false);
+                                               }
+                                            });
+
       stateMachineFactory.addStateChangedListener((from, to) ->
                                                   {
                                                      if (from == null)
