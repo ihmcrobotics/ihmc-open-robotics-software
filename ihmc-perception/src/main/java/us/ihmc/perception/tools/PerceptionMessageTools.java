@@ -130,6 +130,37 @@ public class PerceptionMessageTools
       imageMessage.getData().getBuffer().put(dataPointer.asByteBuffer());
    }
 
+   /**
+    * Packs the {@link ImageMessage} with the {@link RawImage} metadata,
+    * EXCEPT:
+    * <ul>
+    * <li> the compressed data, </li>
+    * <li> the {@link CompressionType}, </li>
+    * <li> the ouster beam altitude angles, and </li>
+    * <li> the ouster beam azimuth angles </li>
+    * </ul>
+    * To pack everything, use this instead:
+    * {@link us.ihmc.perception.tools.PerceptionMessageTools#packImageMessage(RawImage, BytePointer, CompressionType, ImageMessage)}
+    * @param messageToPack The message to pack
+    * @param image The image from which metadata is taken
+    */
+   public static void packImageMessageMetadata(ImageMessage messageToPack, RawImage image)
+   {
+      messageToPack.setPixelFormat(image.getPixelFormat().toByte());
+      messageToPack.setImageWidth(image.getWidth());
+      messageToPack.setImageHeight(image.getHeight());
+      messageToPack.setFocalLengthXPixels(image.getFocalLengthX());
+      messageToPack.setFocalLengthYPixels(image.getFocalLengthY());
+      messageToPack.setPrincipalPointXPixels(image.getPrincipalPointX());
+      messageToPack.setPrincipalPointYPixels(image.getPrincipalPointY());
+      messageToPack.setCameraModel(image.getCameraModel().toByte());
+      messageToPack.setDepthDiscretization(image.getDepthDiscretization());
+      messageToPack.setSequenceNumber(image.getSequenceNumber());
+      MessageTools.toMessage(image.getAcquisitionTime(), messageToPack.getAcquisitionTime());
+      messageToPack.getPosition().set(image.getPosition());
+      messageToPack.getOrientation().set(image.getOrientation());
+   }
+
    public static void packCompressedDepthImage(BytePointer compressedDepthPointer,
                                                ImageMessage depthImageMessage,
                                                Pose3DReadOnly cameraPose,
@@ -192,7 +223,7 @@ public class PerceptionMessageTools
                                        @Nullable ByteBuffer ousterBeamAzimuthAngles,
                                        ImageMessage imageMessageToPack)
    {
-      originalImage.packImageMessageMetaData(imageMessageToPack);
+      packImageMessageMetadata(imageMessageToPack, originalImage);
       packImageMessageData(imageMessageToPack, compressedData);
       imageMessageToPack.setCompressionType(compressionType.toByte());
       if (ousterBeamAltitudeAngles != null)
@@ -321,9 +352,6 @@ public class PerceptionMessageTools
 
       return heightMapMat;
    }
-
-
-
 
    public static void convertToHeightMapImage(ImageMessage imageMessage,
                                               Mat heightMapImageToPack,
