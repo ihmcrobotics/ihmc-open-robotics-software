@@ -160,6 +160,50 @@ public class ContinuousPlannerTools
       return goalPose;
    }
 
+   public static SideDependentList<FramePose3D> setSideStepGoalPoses(FramePose3D walkingStartPose,
+                                                                     SideDependentList<FramePose3D> stancePose,
+                                                                     float yDistance,
+                                                                     float zDistance,
+                                                                     float xRandomMargin,
+                                                                     float nominalStanceWidth)
+   {
+      float offsetX = (float) (Math.random() * xRandomMargin - xRandomMargin / 2.0f);
+
+      FramePose3D stanceMidPose = new FramePose3D();
+      stanceMidPose.interpolate(stancePose.get(RobotSide.LEFT), stancePose.get(RobotSide.RIGHT), 0.5);
+
+      SideDependentList<FramePose3D> goalPose = new SideDependentList<>();
+      for (RobotSide side : RobotSide.values)
+      {
+         goalPose.put(side, new FramePose3D());
+         RigidBodyTransform stanceToWalkingFrameTransform = new RigidBodyTransform();
+         RigidBodyTransform worldToWalkingFrameTransform = new RigidBodyTransform();
+
+         stanceToWalkingFrameTransform.set(stanceMidPose);
+         worldToWalkingFrameTransform.set(walkingStartPose);
+         worldToWalkingFrameTransform.invert();
+         stanceToWalkingFrameTransform.multiply(worldToWalkingFrameTransform);
+
+         double yWalkDistance = stanceToWalkingFrameTransform.getTranslation().norm();
+         goalPose.get(side).getPosition().set(walkingStartPose.getPosition());
+         goalPose.get(side).getOrientation().set(walkingStartPose.getOrientation());
+         if (yDistance > 0)
+         {
+            goalPose.get(side).appendTranslation(0, offsetX + yWalkDistance + yDistance, stanceMidPose.getZ() + zDistance - walkingStartPose.getZ());
+         }
+         else
+         {
+            goalPose.get(side).appendTranslation(0, -offsetX - yWalkDistance + yDistance, stanceMidPose.getZ() + zDistance - walkingStartPose.getZ());
+         }
+      }
+
+      // These are done after the for loop because of the ( - ) or ( + ) for the nominal stance
+      goalPose.get(RobotSide.LEFT).appendTranslation(0.0, 0.5f * nominalStanceWidth, 0.0);
+      goalPose.get(RobotSide.RIGHT).appendTranslation(0.0, -0.5f * nominalStanceWidth, 0.0);
+
+      return goalPose;
+   }
+
    public static void generateSensorZUpToStraightGoalFootPoses(HeightMapData latestHeightMapData,
                                                                RigidBodyTransform sensorZUpToWorldTransform,
                                                                SideDependentList<FramePose3D> startPoseToPack,

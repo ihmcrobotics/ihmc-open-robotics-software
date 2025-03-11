@@ -28,17 +28,18 @@ extern "C"
 #define SEARCH_WINDOW_HEIGHT 23
 #define SEARCH_WINDOW_WIDTH 24
 #define CROPPED_WINDOW_CENTER_INDEX 25
-#define MIN_CLAMP_HEIGHT 26
-#define MAX_CLAMP_HEIGHT 27
-#define HEIGHT_OFFSET 28
-#define STEPPING_COSINE_THRESHOLD 29
-#define STEPPING_CONTACT_THRESHOLD 30
-#define CONTACT_WINDOW_SIZE 31
-#define SPATIAL_ALPHA 32
-#define SEARCH_SKIP_SIZE 33
-#define VERTICAL_SEARCH_SIZE 34
-#define VERTICAL_SEARCH_RESOLUTION 35
-#define FAST_SEARCH_SIZE 36
+#define TERRAIN_WINDOW_CENTER_INDEX 26
+#define MIN_CLAMP_HEIGHT 27
+#define MAX_CLAMP_HEIGHT 28
+#define HEIGHT_OFFSET 29
+#define STEPPING_COSINE_THRESHOLD 30
+#define STEPPING_CONTACT_THRESHOLD 31
+#define CONTACT_WINDOW_SIZE 32
+#define SPATIAL_ALPHA 33
+#define SEARCH_SKIP_SIZE 34
+#define VERTICAL_SEARCH_SIZE 35
+#define VERTICAL_SEARCH_RESOLUTION 36
+#define FAST_SEARCH_SIZE 37
 
 #define VERTICAL_FOV 1.5707963267948966f
 #define HORIZONTAL_FOV 6.2831853f
@@ -425,7 +426,8 @@ extern "C" __global__ void heightMapRegistrationKernel(unsigned short *localMap,
 
 extern "C" __global__ void croppingKernel(unsigned short *inputMap, size_t pitchInput,
                                           unsigned short *croppedMap, size_t pitchCropped,
-                                          float *params, int croppedMapXY)
+                                          unsigned short *terrainObjectMap, size_t pitchTerrain,
+                                          float *params, int croppedMapXY, int terrainObjectMapXY)
 {
     int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
     int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
@@ -457,6 +459,32 @@ extern "C" __global__ void croppingKernel(unsigned short *inputMap, size_t pitch
     {
         unsigned short *croppedRow = (unsigned short *)((char *)croppedMap + xIndex * pitchCropped);
         croppedRow[yIndex] = 0; // Assign 0 for out-of-bounds cells
+    }
+
+    if (xIndex >= terrainObjectMapXY || yIndex >= terrainObjectMapXY)
+        return;
+
+    globalSensorIndex = coordinate_to_indices(
+        make_float2(params[HEIGHT_MAP_CENTER_X], params[HEIGHT_MAP_CENTER_Y]),
+        make_float2(0.0f, 0.0f),
+        params[GLOBAL_CELL_SIZE],
+        static_cast<int>(params[GLOBAL_CENTER_INDEX]));
+
+    globalCellIndexX = globalSensorIndex.x + xIndex - (params[TERRAIN_WINDOW_CENTER_INDEX]);
+    globalCellIndexY = globalSensorIndex.y + yIndex - (params[TERRAIN_WINDOW_CENTER_INDEX]);
+
+    // Check if global cell index is within bounds
+    if (globalCellIndexX >= 0 && globalCellIndexX < globalMapSizeX &&
+        globalCellIndexY >= 0 && globalCellIndexY < globalMapSizeY)
+    {
+        unsigned short *inputRow = (unsigned short *)((char *)inputMap + globalCellIndexX * pitchInput);
+        unsigned short *visualizedRow = (unsigned short *)((char *)terrainObjectMap + xIndex * pitchTerrain);
+        visualizedRow[yIndex] = inputRow[globalCellIndexY];
+    }
+    else
+    {
+        unsigned short *visualizedRow = (unsigned short *)((char *)terrainObjectMap + xIndex * pitchTerrain);
+        visualizedRow[yIndex] = 0; // Assign 0 for out-of-bounds cells
     }
 }
 

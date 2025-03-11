@@ -34,10 +34,7 @@ public class AStarBodyPathEdgeData
       copy.childSnapHeight = childSnapHeight;
       copy.solutionEdge = solutionEdge;
 
-      for (int i = 0; i < dataBuffer.length; i++)
-      {
-         copy.dataBuffer[i] = dataBuffer[i];
-      }
+      System.arraycopy(dataBuffer, 0, copy.dataBuffer, 0, dataBuffer.length);
 
       clear();
       return copy;

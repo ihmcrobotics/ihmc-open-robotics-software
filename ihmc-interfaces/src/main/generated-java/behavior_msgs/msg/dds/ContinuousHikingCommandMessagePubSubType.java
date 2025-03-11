@@ -15,7 +15,7 @@ public class ContinuousHikingCommandMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "16a67ca29bda8379d5278ae1f141a59cf18a01a63fe6d9d13557e347e9445765";
+   		return "14a907ec60824b89a2add005bd772000c269159875d8be7a43d69287ba29fd4b";
    }
    
    @Override
@@ -55,6 +55,10 @@ public class ContinuousHikingCommandMessagePubSubType implements us.ihmc.pubsub.
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -118,6 +122,12 @@ public class ContinuousHikingCommandMessagePubSubType implements us.ihmc.pubsub.
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
@@ -141,6 +151,10 @@ public class ContinuousHikingCommandMessagePubSubType implements us.ihmc.pubsub.
       cdr.write_type_4(data.getStepsBeforeSafetyStop());
 
       cdr.write_type_7(data.getWalkForwards());
+
+      cdr.write_type_7(data.getSideStep());
+
+      cdr.write_type_7(data.getLeftDirection());
 
       cdr.write_type_7(data.getSquareUpToGoal());
 
@@ -172,6 +186,10 @@ public class ContinuousHikingCommandMessagePubSubType implements us.ihmc.pubsub.
       	
       data.setWalkForwards(cdr.read_type_7());
       	
+      data.setSideStep(cdr.read_type_7());
+      	
+      data.setLeftDirection(cdr.read_type_7());
+      	
       data.setSquareUpToGoal(cdr.read_type_7());
       	
       data.setUseAstarFootstepPlanner(cdr.read_type_7());
@@ -201,6 +219,8 @@ public class ContinuousHikingCommandMessagePubSubType implements us.ihmc.pubsub.
       ser.write_type_7("enable_continuous_hiking", data.getEnableContinuousHiking());
       ser.write_type_4("steps_before_safety_stop", data.getStepsBeforeSafetyStop());
       ser.write_type_7("walk_forwards", data.getWalkForwards());
+      ser.write_type_7("side_step", data.getSideStep());
+      ser.write_type_7("left_direction", data.getLeftDirection());
       ser.write_type_7("square_up_to_goal", data.getSquareUpToGoal());
       ser.write_type_7("use_astar_footstep_planner", data.getUseAstarFootstepPlanner());
       ser.write_type_7("use_monte_carlo_footstep_planner", data.getUseMonteCarloFootstepPlanner());
@@ -219,6 +239,8 @@ public class ContinuousHikingCommandMessagePubSubType implements us.ihmc.pubsub.
       data.setEnableContinuousHiking(ser.read_type_7("enable_continuous_hiking"));
       data.setStepsBeforeSafetyStop(ser.read_type_4("steps_before_safety_stop"));
       data.setWalkForwards(ser.read_type_7("walk_forwards"));
+      data.setSideStep(ser.read_type_7("side_step"));
+      data.setLeftDirection(ser.read_type_7("left_direction"));
       data.setSquareUpToGoal(ser.read_type_7("square_up_to_goal"));
       data.setUseAstarFootstepPlanner(ser.read_type_7("use_astar_footstep_planner"));
       data.setUseMonteCarloFootstepPlanner(ser.read_type_7("use_monte_carlo_footstep_planner"));

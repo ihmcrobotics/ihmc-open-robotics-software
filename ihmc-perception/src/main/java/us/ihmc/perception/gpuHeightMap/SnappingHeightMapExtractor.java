@@ -77,12 +77,12 @@ public class SnappingHeightMapExtractor
       }
 
       // Initialize matrices and images
-      steppabilityImage = new GpuMat(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_8UC1);
-      snapHeightImage = new GpuMat(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_16UC1);
-      snapNormalXImage = new GpuMat(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_8UC1);
-      snapNormalYImage = new GpuMat(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_8UC1);
-      snapNormalZImage = new GpuMat(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_8UC1);
-      snappedAreaFractionImage = new GpuMat(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_8UC1);
+      steppabilityImage = new GpuMat(heightMapParameters.getTerrainObjectSize(), heightMapParameters.getTerrainObjectSize(), opencv_core.CV_8UC1);
+      snapHeightImage = new GpuMat(heightMapParameters.getTerrainObjectSize(), heightMapParameters.getTerrainObjectSize(), opencv_core.CV_16UC1);
+      snapNormalXImage = new GpuMat(heightMapParameters.getTerrainObjectSize(), heightMapParameters.getTerrainObjectSize(), opencv_core.CV_8UC1);
+      snapNormalYImage = new GpuMat(heightMapParameters.getTerrainObjectSize(), heightMapParameters.getTerrainObjectSize(), opencv_core.CV_8UC1);
+      snapNormalZImage = new GpuMat(heightMapParameters.getTerrainObjectSize(), heightMapParameters.getTerrainObjectSize(), opencv_core.CV_8UC1);
+      snappedAreaFractionImage = new GpuMat(heightMapParameters.getTerrainObjectSize(), heightMapParameters.getTerrainObjectSize(), opencv_core.CV_8UC1);
    }
 
    public void reset(int resetOffset)
@@ -110,10 +110,10 @@ public class SnappingHeightMapExtractor
       snappingKernel.withPointer(snapNormalYImage.data()).withLong(snapNormalYImage.step());
       snappingKernel.withPointer(snapNormalZImage.data()).withLong(snapNormalZImage.step());
       snappingKernel.withPointer(snappedAreaFractionImage.data()).withLong(snappedAreaFractionImage.step());
-      snappingKernel.withPointer(snappingParametersDevicePointer).withInt(heightMapParameters.getCropWindowSize());
+      snappingKernel.withPointer(snappingParametersDevicePointer).withInt(heightMapParameters.getTerrainObjectSize());
 
       // Compute the correct number of threads to run with the kernel
-      int snappedKernelGridSizeXY = (heightMapParameters.getCropWindowSize() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
+      int snappedKernelGridSizeXY = (heightMapParameters.getTerrainObjectSize() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
       snappingKernelGridDim = new dim3(snappedKernelGridSizeXY, snappedKernelGridSizeXY, 1);
       blockSize = new dim3(BLOCK_SIZE_XY, BLOCK_SIZE_XY, 1);
 

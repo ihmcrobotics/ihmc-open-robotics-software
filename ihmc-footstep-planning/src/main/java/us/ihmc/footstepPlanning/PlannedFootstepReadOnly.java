@@ -4,19 +4,16 @@ import controller_msgs.msg.dds.FootstepDataMessage;
 import gnu.trove.list.array.TDoubleArrayList;
 import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintListConverter;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintMessageConverter;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public interface PlannedFootstepReadOnly
@@ -93,7 +90,9 @@ public interface PlannedFootstepReadOnly
 
       if (getRegionSnappedTo() != null)
       {
-         footstepDataMessage.getStepConstraints().set(StepConstraintMessageConverter.convertToStepConstraintsListMessageFromPlanarRegions(Arrays.asList(getRegionSnappedTo())));
+         footstepDataMessage.getStepConstraints()
+                            .set(StepConstraintMessageConverter.convertToStepConstraintsListMessageFromPlanarRegions(Collections.singletonList(
+                                  getRegionSnappedTo())));
       }
 
       return footstepDataMessage;
