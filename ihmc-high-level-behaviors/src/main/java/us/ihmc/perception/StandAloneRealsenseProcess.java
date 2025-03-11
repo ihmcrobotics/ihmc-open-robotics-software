@@ -1,5 +1,6 @@
 package us.ihmc.perception;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.ros2.ROS2TunedRigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
@@ -20,6 +21,7 @@ import us.ihmc.sensors.realsense.RealSenseImageSensor;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -27,6 +29,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class StandAloneRealsenseProcess
 {
+   public static final String STAND_ALONE_REALSENSE_PROCESS = "StandAloneRealsenseProcess";
    private static final Map<Integer, ROS2Topic<? extends Packet<?>>> D455_IMAGE_TOPIC_MAP = Map.of(RealSenseImageSensor.COLOR_IMAGE_KEY,
                                                                                                    PerceptionAPI.SRT_REALSENSE_COLOR_STREAM_STATUS,
                                                                                                    RealSenseImageSensor.DEPTH_IMAGE_KEY,
@@ -70,7 +73,9 @@ public class StandAloneRealsenseProcess
                                                                                                                .getSensorInformation()
                                                                                                                .getSteppingCameraTransform());
 
-      ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+      // We create a ThreadFactory here so that when profiling the thread, there is a user-friendly name to identify it with
+      ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat(STAND_ALONE_REALSENSE_PROCESS).build();
+      ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1, threadFactory);
       scheduler.scheduleAtFixedRate(realsenseTunableTransform::update, 0, 33, TimeUnit.MILLISECONDS);
 
       d455Sensor.setSensorFrameSupplier(syncedRobot.getReferenceFrames()::getSteppingCameraFrame);

@@ -324,15 +324,12 @@ public class RapidHeightMapExtractorCUDA
       //Update the terrain map data with the new results
       terrainMapData.setSensorOrigin(groundToWorldTransform.getTranslationX(), groundToWorldTransform.getTranslationY());
 
-      Mat temp = new Mat();
-      terrainHeightMapImage.download(temp);
-//      PerceptionDebugTools.printMat("s", temp, 5);
-
       Mat finalCroppedHeightMap = new Mat();
       if (heightMapParameters.getEnableVerticalFilter())
       {
          GpuMat verticalFilteredMap = verticalSurfacesExtractor.update(terrainHeightMapImage);
          verticalFilteredMap.download(finalCroppedHeightMap);  // Download the image from the GPU to the Mat object
+         verticalFilteredMap.close();
       }
       else
       {

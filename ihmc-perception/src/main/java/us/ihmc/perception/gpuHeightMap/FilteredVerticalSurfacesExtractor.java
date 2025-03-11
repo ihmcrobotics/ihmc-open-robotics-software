@@ -69,9 +69,6 @@ public class FilteredVerticalSurfacesExtractor
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
 
-      Mat cpuResult = new Mat();
-      result.download(cpuResult);
-
       return result;
    }
 
