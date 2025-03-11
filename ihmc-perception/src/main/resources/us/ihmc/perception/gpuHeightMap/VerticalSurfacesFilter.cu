@@ -22,7 +22,8 @@ __global__ void removeCinderBlockWalls(unsigned short * matrixPointer, size_t pi
     unsigned short minNeighbor = currentHeight;
     unsigned short maxNeighbor = currentHeight;
 
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < 8; i++)
+    {
         int nx = x + dx[i];
         int ny = y + dy[i];
 
