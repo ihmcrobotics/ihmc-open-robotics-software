@@ -4,6 +4,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
+import us.ihmc.behaviors.logic.condition.LLMConditionExecutor;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.log.LogTools;
@@ -56,6 +57,7 @@ public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeNodeExecutor<
    public void destroy()
    {
       modifyTreeTopology(BehaviorTreeTopologyOperationQueue::queueDestroyEntireTree);
+      LLMConditionExecutor.destroy();
    }
 
    @Override

@@ -104,7 +104,7 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
       }
       if (nodeType == ConditionNodeDefinition.class)
       {
-         return new ConditionNodeExecutor(id, crdtInfo, saveFileDirectory);
+         return new ConditionNodeExecutor(id, crdtInfo, saveFileDirectory, referenceFrameLibrary);
       }
       if (nodeType == GotoNodeDefinition.class)
       {

@@ -15,7 +15,7 @@ public class ConditionNodeStateMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "eada9abbbc66f75c56364d1c11036bfd87ba0a5a4f11f48133240f371c74d026";
+   		return "52c0176456fddf7cfb4a2175dee30067034bf657c7df03570daa77073acc6d6d";
    }
    
    @Override
@@ -58,6 +58,8 @@ public class ConditionNodeStateMessagePubSubType implements us.ihmc.pubsub.Topic
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -78,6 +80,9 @@ public class ConditionNodeStateMessagePubSubType implements us.ihmc.pubsub.Topic
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -88,6 +93,8 @@ public class ConditionNodeStateMessagePubSubType implements us.ihmc.pubsub.Topic
       behavior_msgs.msg.dds.ConditionNodeDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
       cdr.write_type_4(data.getCount());
 
+      cdr.write_type_7(data.getRequestResetContext());
+
    }
 
    public static void read(behavior_msgs.msg.dds.ConditionNodeStateMessage data, us.ihmc.idl.CDR cdr)
@@ -95,6 +102,8 @@ public class ConditionNodeStateMessagePubSubType implements us.ihmc.pubsub.Topic
       behavior_msgs.msg.dds.LeafNodeStateMessagePubSubType.read(data.getState(), cdr);	
       behavior_msgs.msg.dds.ConditionNodeDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
       data.setCount(cdr.read_type_4());
+      	
+      data.setRequestResetContext(cdr.read_type_7());
       	
 
    }
@@ -107,6 +116,7 @@ public class ConditionNodeStateMessagePubSubType implements us.ihmc.pubsub.Topic
       ser.write_type_a("definition", new behavior_msgs.msg.dds.ConditionNodeDefinitionMessagePubSubType(), data.getDefinition());
 
       ser.write_type_4("count", data.getCount());
+      ser.write_type_7("request_reset_context", data.getRequestResetContext());
    }
 
    @Override
@@ -117,6 +127,7 @@ public class ConditionNodeStateMessagePubSubType implements us.ihmc.pubsub.Topic
       ser.read_type_a("definition", new behavior_msgs.msg.dds.ConditionNodeDefinitionMessagePubSubType(), data.getDefinition());
 
       data.setCount(ser.read_type_4("count"));
+      data.setRequestResetContext(ser.read_type_7("request_reset_context"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.ConditionNodeStateMessage src, behavior_msgs.msg.dds.ConditionNodeStateMessage dest)
