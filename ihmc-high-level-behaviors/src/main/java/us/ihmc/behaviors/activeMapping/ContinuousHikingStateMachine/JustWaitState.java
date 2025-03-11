@@ -165,11 +165,11 @@ public class JustWaitState implements State
 
          if (lastFootstepSide == RobotSide.LEFT)
          {
-            tempMidFeetPose.appendTranslation(0, -0.12, 0);
+            tempMidFeetPose.appendTranslation(0.0, -0.12, 0.0);
          }
          else
          {
-            tempMidFeetPose.appendTranslation(0, 0.12, 0);
+            tempMidFeetPose.appendTranslation(0.0, 0.12, 0.0);
          }
 
          midFeetZUpPose.set(midFeetZUpFrame, tempMidFeetPose);
@@ -178,11 +178,11 @@ public class JustWaitState implements State
       midFeetZUpPose.appendYawRotation(rotationRadians);
       goalPoses.get(RobotSide.RIGHT).set(midFeetZUpPose);
       goalPoses.get(RobotSide.RIGHT).changeFrame(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
-      goalPoses.get(RobotSide.RIGHT).appendTranslation(0, -0.13, 0);
+      goalPoses.get(RobotSide.RIGHT).appendTranslation(0.0, -0.13, 0.0);
 
       goalPoses.get(RobotSide.LEFT).set(midFeetZUpPose);
       goalPoses.get(RobotSide.LEFT).changeFrame(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
-      goalPoses.get(RobotSide.LEFT).appendTranslation(0, 0.13, 0);
+      goalPoses.get(RobotSide.LEFT).appendTranslation(0.0, 0.13, 0.0);
 
       List<Pose3D> poses = new ArrayList<>();
       poses.add(new Pose3D(goalPoses.get(RobotSide.LEFT)));

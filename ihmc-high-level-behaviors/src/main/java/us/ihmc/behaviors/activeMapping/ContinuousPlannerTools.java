@@ -160,12 +160,12 @@ public class ContinuousPlannerTools
       return goalPose;
    }
 
-   public static SideDependentList<FramePose3D> setSidStepGoalPoses(FramePose3D walkingStartPose,
-                                                                    SideDependentList<FramePose3D> stancePose,
-                                                                    float yDistance,
-                                                                    float zDistance,
-                                                                    float xRandomMargin,
-                                                                    float nominalStanceWidth)
+   public static SideDependentList<FramePose3D> setSideStepGoalPoses(FramePose3D walkingStartPose,
+                                                                     SideDependentList<FramePose3D> stancePose,
+                                                                     float yDistance,
+                                                                     float zDistance,
+                                                                     float xRandomMargin,
+                                                                     float nominalStanceWidth)
    {
       float offsetX = (float) (Math.random() * xRandomMargin - xRandomMargin / 2.0f);
 

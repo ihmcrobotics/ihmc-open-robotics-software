@@ -235,12 +235,12 @@ public class ReadyToPlanState implements State
                   continuousHikingParameters.getGoalPoseSidewaysDistance() :
                   -continuousHikingParameters.getGoalPoseSidewaysDistance();
 
-            goalPoses = ContinuousPlannerTools.setSidStepGoalPoses(continuousPlanner.getWalkingStartMidPose(),
-                                                                   continuousPlanner.getStartStancePose(),
-                                                                   (float) sidewaysDistance,
-                                                                   (float) continuousHikingParameters.getGoalPoseUpDistance(),
-                                                                   X_RANDOM_MARGIN,
-                                                                   NOMINAL_STANCE_WIDTH);
+            goalPoses = ContinuousPlannerTools.setSideStepGoalPoses(continuousPlanner.getWalkingStartMidPose(),
+                                                                    continuousPlanner.getStartStancePose(),
+                                                                    (float) sidewaysDistance,
+                                                                    (float) continuousHikingParameters.getGoalPoseUpDistance(),
+                                                                    X_RANDOM_MARGIN,
+                                                                    NOMINAL_STANCE_WIDTH);
          }
          else
          {
