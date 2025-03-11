@@ -313,6 +313,27 @@ public class ImGuiTools
       return ImGui.isItemFocused() && (ImGui.isKeyReleased(ImGuiTools.getEnterKey()) || ImGui.isKeyReleased(ImGuiTools.getKeyPadEnterKey()));
    }
 
+   /**
+    * Renders a multiline widget that dynamically resizes to the necessary height
+    * and the width of the available area.
+    *
+    * @return If user modified, the text
+    *         If user did not modify, returns null
+    */
+   public static String inputTextMultiline(String widgetName, String text, ImString imString)
+   {
+      imString.set(text);
+
+      float height = ImGuiTools.calcTextSizeY("A") * (Math.max(text.lines().count() + 1, 2));
+
+      if (ImGui.inputTextMultiline(widgetName, imString, ImGui.getColumnWidth(), height))
+      {
+         return imString.get();
+      }
+
+      return null;
+   }
+
    public static void textColored(Color color, String text)
    {
       ImGui.textColored(color.r, color.g, color.b, color.a, text);
