@@ -207,7 +207,7 @@ public class StepPositionLimiter
    {
       // This makes sure step is no less than a defined distance in y away from the stance foot.
       stanceFootPosition.setToZero(stanceFootZUpFrame);
-      stanceFootPosition.changeFrame(desiredConstraintFrame);
+      stanceFootPosition.changeFrameAndProjectToXYPlane(desiredConstraintFrame);
       desiredStepPositionToConstrain.changeFrame(desiredConstraintFrame);
 
       if (swingSide == RobotSide.LEFT)

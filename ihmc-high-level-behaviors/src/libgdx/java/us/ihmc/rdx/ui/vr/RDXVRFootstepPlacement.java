@@ -38,10 +38,10 @@ public class RDXVRFootstepPlacement
 
    // TODO move to parameter class
    private final static double NOMINAL_STANCE_WIDTH = 0.25;
-   private final static double MAX_STEP_FORWARD = 0.5;
+   private final static double MAX_STEP_FORWARD = 0.75;
    private final static double MIN_STANCE_WIDTH = 0.15;
-   private final static double MAX_STANCE_WIDTH = 0.5;
-   private final static double MIN_DISTANCE_FROM_STANCE_FOOT = 0.15;
+   private final static double MAX_STANCE_WIDTH = 0.75;
+   private final static double MIN_DISTANCE_FROM_STANCE_FOOT = 0.075;
 
    private final StepPositionLimiter stepPositionLimiter = new StepPositionLimiter();
    //
@@ -181,50 +181,44 @@ public class RDXVRFootstepPlacement
       footstepBeingExternallyPlaced = new RDXVRFootstep(side, footstepModels.get(side), footstepIndex++);
    }
 
+
+   private final FramePose3D tempAdaptedPose = new FramePose3D();
    public boolean setFootstepPose(FramePose3DReadOnly pose)
    {
       if (footstepBeingExternallyPlaced != null)
       {
+         tempAdaptedPose.setIncludingFrame(pose);
+
+         // Constrain footstep to reachable region
+         if (USE_STEPPABLE_REGION_ADAPTATION)
+         {
+            RobotSide swingSide = footstepBeingExternallyPlaced.getSide();
+            stepPositionLimiter.enforceFootPositionConstraint(pose.getPosition(),
+                                                              tempAdaptedPose.getPosition(),
+                                                              syncedRobot.getReferenceFrames().getCenterOfMassFrame(),
+                                                              syncedRobot.getReferenceFrames().getSoleFrame(swingSide.getOppositeSide()),
+                                                              null,
+                                                              NOMINAL_STANCE_WIDTH,
+                                                              MAX_STEP_FORWARD,
+                                                              MIN_STANCE_WIDTH,
+                                                              MAX_STANCE_WIDTH,
+                                                              MIN_DISTANCE_FROM_STANCE_FOOT,
+                                                              swingSide);
+         }
+
+         // Snap footstep to height map
          if (USE_HEIGHTMAP && latestHeightMapData != null)
          {
-            double height = latestHeightMapData.getHeightAt(pose.getTranslationX(), pose.getTranslationY());
-            if (!Double.isNaN(height))
-            {
-               // FIXME creating a new adaptedPose creates garbage
-               FramePose3D adaptedPose = new FramePose3D(pose);
-               if (!USE_STEPPABLE_REGION_ADAPTATION)
-               {
-                  adaptedPose.getPosition().set(pose.getTranslationX(),
-                                                pose.getTranslationY(),
-                                                latestHeightMapData.getHeightAt(pose.getTranslationX(), pose.getTranslationY()));
-               }
-               else
-               {
-                  RobotSide swingSide = footstepBeingExternallyPlaced.getSide();
-                  stepPositionLimiter.enforceFootPositionConstraint(pose.getPosition(),
-                                                                    adaptedPose.getPosition(),
-                                                                    syncedRobot.getReferenceFrames().getCenterOfMassFrame(),
-                                                                    syncedRobot.getReferenceFrames().getSoleFrame(swingSide),
-                                                                    null,
-                                                                    NOMINAL_STANCE_WIDTH,
-                                                                    MAX_STEP_FORWARD,
-                                                                    MIN_STANCE_WIDTH,
-                                                                    MAX_STANCE_WIDTH,
-                                                                    MIN_DISTANCE_FROM_STANCE_FOOT,
-                                                                    swingSide);
-               }
-               footstepBeingExternallyPlaced.setPose(adaptedPose);
-            }
-            else
-            {
-               LogTools.warn("Could not use heightMap for footstep adjustment, since height is NaN");
-            }
+            double height = latestHeightMapData.getHeightAt(tempAdaptedPose.getTranslationX(), tempAdaptedPose.getTranslationY());
 
+            if (!Double.isNaN(height))
+               tempAdaptedPose.getPosition().setZ(height);
+            else
+               LogTools.warn("Could not use heightMap for footstep adjustment, since height is NaN");
          }
-         else
-         {
-            footstepBeingExternallyPlaced.setPose(pose);
-         }
+
+         footstepBeingExternallyPlaced.setPose(tempAdaptedPose);
+
          return true;
       }
       else
