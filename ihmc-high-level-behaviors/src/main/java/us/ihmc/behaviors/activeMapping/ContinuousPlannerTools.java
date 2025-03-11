@@ -198,8 +198,8 @@ public class ContinuousPlannerTools
       }
 
       // These are done after the for loop because of the ( - ) or ( + ) for the nominal stance
-      goalPose.get(RobotSide.LEFT).appendTranslation(0.0, nominalStanceWidth / 2.0f, 0.0);
-      goalPose.get(RobotSide.RIGHT).appendTranslation(0.0, -nominalStanceWidth / 2.0f, 0.0);
+      goalPose.get(RobotSide.LEFT).appendTranslation(0.0, 0.5f * nominalStanceWidth, 0.0);
+      goalPose.get(RobotSide.RIGHT).appendTranslation(0.0, -0.5f * nominalStanceWidth, 0.0);
 
       return goalPose;
    }

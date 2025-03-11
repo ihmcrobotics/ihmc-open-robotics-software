@@ -91,8 +91,7 @@ public class StandAloneRealsenseProcess
                                                              syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.RIGHT),
                                                              controllerFootstepQueueMonitor,
                                                              d455Sensor,
-                                                             RealSenseImageSensor.DEPTH_IMAGE_KEY,
-                                                             runWithCUDA);
+                                                             RealSenseImageSensor.DEPTH_IMAGE_KEY);
       loopOnDemand(heightMapUpdateThread, heightMapDemandNode);
    }
 
