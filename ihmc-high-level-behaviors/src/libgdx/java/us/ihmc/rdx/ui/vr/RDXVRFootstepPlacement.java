@@ -186,14 +186,12 @@ public class RDXVRFootstepPlacement
                                                 latestHeightMapData.getHeightAt(pose.getTranslationX(), pose.getTranslationY()));
                }
                footstepBeingExternallyPlaced.setPose(adaptedPose);
-               return true;
             }
             else
             {
                LogTools.warn("Could not use heightMap for footstep adjustment, since height is NaN");
                return false;
             }
-
          }
          else
          {
