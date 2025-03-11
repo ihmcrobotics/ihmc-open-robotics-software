@@ -12,7 +12,6 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 
 public class ActiveMappingParameterToolBox
 {
-
    private final ContinuousHikingParameters continuousHikingParameters;
    private final MonteCarloFootstepPlannerParameters monteCarloPlannerParameters;
    private final DefaultFootstepPlannerParametersBasics footstepPlannerParameters;

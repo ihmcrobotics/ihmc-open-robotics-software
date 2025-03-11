@@ -1,5 +1,6 @@
 package us.ihmc.behaviors.activeMapping;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.commons.thread.RepeatingTaskThread;
@@ -12,10 +13,12 @@ import us.ihmc.ros2.ROS2NodeBuilder;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 public class ContinuousHikingProcess
 {
+   public static final String CONTINUOUS_HIKING_PROCESS = "ContinuousHikingProcess";
    private final ROS2StoredPropertySetGroup ros2PropertySetGroup;
    private final ContinuousPlannerSchedulingTask continuousPlannerSchedulingTask;
 
@@ -49,9 +52,10 @@ public class ContinuousHikingProcess
 
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "Shutdown"));
 
-      // Add initial delay to get things going in the right order
-      ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-      scheduler.scheduleWithFixedDelay(this::update, 8500, 100, TimeUnit.MILLISECONDS);
+      // We create a ThreadFactory here so that when profiling the thread, there is a user-friendly name to identify it with
+      ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat(CONTINUOUS_HIKING_PROCESS).build();
+      ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1, threadFactory);
+      scheduler.scheduleWithFixedDelay(this::update, 500, 100, TimeUnit.MILLISECONDS);
    }
 
    public void update()
