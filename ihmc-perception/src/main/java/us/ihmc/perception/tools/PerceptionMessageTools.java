@@ -100,19 +100,14 @@ public class PerceptionMessageTools
     * <li> the ouster beam azimuth angles </li>
     * </ul>
     * To pack everything, use this instead:
-    * {@link us.ihmc.perception.tools.PerceptionMessageTools#packImageMessage(RawImage, BytePointer, CompressionType, ImageMessage)}
+    * {@link #packImageMessage(RawImage, BytePointer, CompressionType, ImageMessage)}
     * @param messageToPack The message to pack
     * @param image The image from which metadata is taken
     */
    public static void packImageMessageMetadata(ImageMessage messageToPack, RawImage image)
    {
+      packCameraIntrinsics(image.getIntrinsicsCopy(), messageToPack);
       messageToPack.setPixelFormat(image.getPixelFormat().toByte());
-      messageToPack.setImageWidth(image.getWidth());
-      messageToPack.setImageHeight(image.getHeight());
-      messageToPack.setFocalLengthXPixels(image.getFocalLengthX());
-      messageToPack.setFocalLengthYPixels(image.getFocalLengthY());
-      messageToPack.setPrincipalPointXPixels(image.getPrincipalPointX());
-      messageToPack.setPrincipalPointYPixels(image.getPrincipalPointY());
       messageToPack.setCameraModel(image.getCameraModel().toByte());
       messageToPack.setDepthDiscretization(image.getDepthDiscretization());
       messageToPack.setSequenceNumber(image.getSequenceNumber());
