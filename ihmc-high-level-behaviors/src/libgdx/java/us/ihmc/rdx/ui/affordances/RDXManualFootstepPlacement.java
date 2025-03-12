@@ -11,13 +11,12 @@ import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.StepPositionLimiter;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -32,7 +31,7 @@ import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
-import java.util.ArrayList;
+import java.sql.Ref;
 
 /**
  * Manages and assists with the operator placement of footsteps.
@@ -44,7 +43,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
    // TODO move to parameter class
    private final static double NOMINAL_STANCE_WIDTH = 0.25;
    private final static double MAX_STEP_FORWARD = 0.75;
-   private final static double MIN_STANCE_WIDTH = 0.15;
+   private final static double MIN_STANCE_WIDTH = 0.075;
    private final static double MAX_STANCE_WIDTH = 0.75;
    private final static double MIN_DISTANCE_FROM_STANCE_FOOT = 0.075;
 
@@ -225,7 +224,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
          }
 
          // Constrain footstep to reachable region
-         setFootstepBeingPlacedPose(footstepBeingPlaced.getFootPose());
+         applyReachabilityConstraintToStep(footstepBeingPlaced.getFootPose());
 
          // Snap footstep to height map
          if (latestHeightMapData != null)
@@ -327,14 +326,45 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       footstepBeingPlaced.updatePose(tempFramePose);
    }
 
-   public void setFootstepBeingPlacedPose(FramePose3DReadOnly poseToSet)
+   private final PoseReferenceFrame stanceFootFrame = new PoseReferenceFrame("Latest Stance Foot Frame in Plan", ReferenceFrame.getWorldFrame());
+   private final PoseReferenceFrame controlFrame = new PoseReferenceFrame("Latest Control Frame in Plan", ReferenceFrame.getWorldFrame());
+   private final FramePose3D stanceFootPose = new FramePose3D();
+   private final FramePose3D controlFramePose = new FramePose3D();
+
+   private void applyReachabilityConstraintToStep(FramePose3DReadOnly poseToSet)
    {
       poseToSet.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      RobotSide swingSide = footstepBeingPlaced.getFootstepSide();
+
+      RobotSide swingSide;
+
+      if (footstepPlan.getLastFootstep() != null)
+      {
+         swingSide = footstepPlan.getLastFootstep().getFootstepSide().getOppositeSide();
+         stanceFootPose.setMatchingFrame(footstepPlan.getLastFootstep().getFootPose());
+         stanceFootFrame.setPoseAndUpdate(stanceFootPose);
+
+         controlFramePose.setToZero(stanceFootFrame);
+         double offset = swingSide == RobotSide.LEFT ? NOMINAL_STANCE_WIDTH/2.0 : -NOMINAL_STANCE_WIDTH/2.0;
+         controlFramePose.getPosition().addY(offset);
+      }
+      else
+      {
+         swingSide = footstepBeingPlaced.getFootstepSide();
+         stanceFootPose.setToZero(syncedRobot.getReferenceFrames().getSoleFrame(swingSide.getOppositeSide()));
+         controlFramePose.setToZero(syncedRobot.getReferenceFrames().getCenterOfMassFrame());
+      }
+
+      stanceFootPose.changeFrame(stanceFootFrame.getParent());
+      controlFramePose.changeFrame(controlFrame.getParent());
+
+      stanceFootFrame.setPoseAndUpdate(stanceFootPose);
+      controlFrame.setPoseAndUpdate(controlFramePose);
+
+      poseToSet.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       stepPositionLimiter.enforceFootPositionConstraint(poseToSet.getPosition(),
                                                         footstepBeingPlaced.getFootPose().getPosition(),
-                                                        syncedRobot.getReferenceFrames().getCenterOfMassFrame(),
-                                                        syncedRobot.getReferenceFrames().getSoleFrame(swingSide.getOppositeSide()),
+                                                        controlFrame,
+                                                        stanceFootFrame,
                                                         null,
                                                         NOMINAL_STANCE_WIDTH,
                                                         MAX_STEP_FORWARD,
@@ -342,6 +372,12 @@ public class RDXManualFootstepPlacement implements RenderableProvider
                                                         MAX_STANCE_WIDTH,
                                                         MIN_DISTANCE_FROM_STANCE_FOOT,
                                                         swingSide);
+   }
+
+   public void setFootstepBeingPlacedPose(FramePose3DReadOnly poseToSet)
+   {
+      poseToSet.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+      footstepBeingPlaced.updatePose(poseToSet);
    }
 
    public void squareUpFootstep()
