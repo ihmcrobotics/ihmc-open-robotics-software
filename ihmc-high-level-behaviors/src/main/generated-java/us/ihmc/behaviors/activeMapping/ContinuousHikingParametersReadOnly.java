@@ -65,9 +65,9 @@ public interface ContinuousHikingParametersReadOnly extends StoredPropertySetRea
       return get(planningWithoutReferenceTimeout);
    }
 
-   default double getPercentThroughSwingToPlanTo()
+   default double getPercentThroughSwingToStartPlanning()
    {
-      return get(percentThroughSwingToPlanTo);
+      return get(percentThroughSwingToStartPlanning);
    }
 
    default boolean getLogFootstepPlans()
