@@ -9,7 +9,7 @@ import controller_msgs.msg.dds.FootstepDataMessage;
 import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.StepPositionLimiter;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.EllipticalStepPositionLimiter;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
@@ -28,24 +28,14 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-
+import us.ihmc.tools.factories.OptionalFactoryField;
 import java.util.ArrayList;
 import java.util.UUID;
 
 public class RDXVRFootstepPlacement
 {
    private final static boolean USE_HEIGHTMAP = true;
-   private final static boolean APPLY_REACHABLE_REGION_CONSTRAINT = true;
-
-   // TODO move to parameter class
-   private final static double NOMINAL_STANCE_WIDTH = 0.25;
-   private final static double MAX_STEP_FORWARD = 0.6;
-   private final static double MIN_STANCE_WIDTH = 0.15;
-   private final static double MAX_STANCE_WIDTH = 0.3;
-   private final static double MIN_DISTANCE_FROM_STANCE_FOOT = 0.075;
-
-   private final StepPositionLimiter stepPositionLimiter = new StepPositionLimiter();
-   //
+   private final static boolean APPLY_REACHABLE_REGION_ELLIPTICAL_CONSTRAINT = true;
 
    private HeightMapData latestHeightMapData;
 
@@ -63,6 +53,7 @@ public class RDXVRFootstepPlacement
    private long sequenceId = (UUID.randomUUID().getLeastSignificantBits() % Integer.MAX_VALUE) + Integer.MAX_VALUE;
    private int footstepIndex = 0;
    private LocomotionParameters locomotionParameters;
+   private final OptionalFactoryField<EllipticalStepPositionLimiter> stepPositionLimiter = new OptionalFactoryField<>("VRFootstepPlacementLimiter");
    private double stepStartTime = -1.0;
 
    public RDXVRFootstepPlacement(RDXVRContext vrContext,
@@ -194,7 +185,7 @@ public class RDXVRFootstepPlacement
          adaptedFootstepPose.setIncludingFrame(footstepPose);
 
          // Constrain footstep to reachable region
-         if (APPLY_REACHABLE_REGION_CONSTRAINT)
+         if (APPLY_REACHABLE_REGION_ELLIPTICAL_CONSTRAINT)
          {
             constraintFramePose.setToZero(syncedRobot.getReferenceFrames().getCenterOfMassFrame());
             double yaw = syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame().getTransformToDesiredFrame(syncedRobot.getReferenceFrames().getCenterOfMassFrame()).getRotation().getYaw();
@@ -203,16 +194,11 @@ public class RDXVRFootstepPlacement
             constraintFrame.setPoseAndUpdate(constraintFramePose);
 
             RobotSide swingSide = footstepBeingExternallyPlaced.getSide();
-            stepPositionLimiter.enforceFootPositionConstraint(footstepPose.getPosition(),
-                                                              adaptedFootstepPose.getPosition(), constraintFrame,
-                                                              syncedRobot.getReferenceFrames().getSoleFrame(swingSide.getOppositeSide()),
-                                                              null,
-                                                              NOMINAL_STANCE_WIDTH,
-                                                              MAX_STEP_FORWARD,
-                                                              MIN_STANCE_WIDTH,
-                                                              MAX_STANCE_WIDTH,
-                                                              MIN_DISTANCE_FROM_STANCE_FOOT,
-                                                              swingSide);
+            if (stepPositionLimiter.hasValue())
+               stepPositionLimiter.get().enforceFootPositionConstraint(footstepPose.getPosition(),
+                                                                       adaptedFootstepPose.getPosition(), constraintFrame,
+                                                                       syncedRobot.getReferenceFrames().getSoleFrame(swingSide.getOppositeSide()),
+                                                                       swingSide);
          }
 
          // Snap footstep to height map
@@ -276,6 +262,11 @@ public class RDXVRFootstepPlacement
    public void setHeightMapData(HeightMapData heightMapData)
    {
       latestHeightMapData = heightMapData;
+   }
+
+   public void setStepPositionLimiter(EllipticalStepPositionLimiter stepPositionLimiter)
+   {
+      this.stepPositionLimiter.set(stepPositionLimiter);
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)

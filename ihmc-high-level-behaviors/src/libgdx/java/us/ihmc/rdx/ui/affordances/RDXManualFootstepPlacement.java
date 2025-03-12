@@ -9,7 +9,7 @@ import imgui.flag.ImGuiMouseButton;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.StepPositionLimiter;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.EllipticalStepPositionLimiter;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -30,25 +30,17 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.tools.factories.OptionalFactoryField;
 
 /**
  * Manages and assists with the operator placement of footsteps.
  */
 public class RDXManualFootstepPlacement implements RenderableProvider
 {
-   private static final double MAX_DISTANCE_MULTIPLIER = 3.0;
+   private final static boolean USE_HEIGHTMAP = true;
    private final static boolean APPLY_REACHABLE_REGION_ELLIPTICAL_CONSTRAINT = true;
 
-   // TODO move to parameter class
-   private final static double NOMINAL_STANCE_WIDTH = 0.25;
-   private final static double MAX_STEP_FORWARD = 0.75;
-   private final static double MIN_STANCE_WIDTH = 0.075;
-   private final static double MAX_STANCE_WIDTH = 0.4;
-   private final static double MIN_DISTANCE_FROM_STANCE_FOOT = 0.075;
-
-   private final StepPositionLimiter stepPositionLimiter = new StepPositionLimiter();
-   private HeightMapData latestHeightMapData;
-   //
+   private static final double MAX_DISTANCE_MULTIPLIER = 3.0;
 
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
    private RDXInteractableFootstep footstepBeingPlaced;
@@ -65,6 +57,8 @@ public class RDXManualFootstepPlacement implements RenderableProvider
    private final FramePose3D tempFramePose = new FramePose3D();
    private RDX3DPanelTooltip tooltip;
    private final ImBoolean activeAdjustmentEnabled = new ImBoolean(false);
+   private HeightMapData latestHeightMapData;
+   private final OptionalFactoryField<EllipticalStepPositionLimiter> stepPositionLimiter = new OptionalFactoryField<>("ManualFootstepPlacementLimiter");
 
    public void create(ROS2SyncedRobotModel syncedRobot,
                       RDXBaseUI baseUI,
@@ -227,7 +221,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
             applyReachabilityConstraintToStep(footstepBeingPlaced.getFootPose());
 
          // Snap footstep to height map
-         if (latestHeightMapData != null)
+         if (USE_HEIGHTMAP && latestHeightMapData != null)
          {
             double height = latestHeightMapData.getHeightAt(footstepBeingPlaced.getFootPose().getX(), footstepBeingPlaced.getFootPose().getY());
 
@@ -237,15 +231,20 @@ public class RDXManualFootstepPlacement implements RenderableProvider
                LogTools.warn("Could not use heightMap for footstep adjustment, since height is NaN");
          }
 
-         footstepBeingPlaced.setGizmoPose(footstepBeingPlaced.getFootPose().getX(),
-                                          footstepBeingPlaced.getFootPose().getY(),
-                                          footstepBeingPlaced.getFootPose().getZ(),
-                                          footstepBeingPlaced.getFootPose());
+         // Update gizmo if we used height map or constrained footstep position
+         if (USE_HEIGHTMAP || APPLY_REACHABLE_REGION_ELLIPTICAL_CONSTRAINT)
+            footstepBeingPlaced.setGizmoPose(footstepBeingPlaced.getFootPose().getX(),
+                                             footstepBeingPlaced.getFootPose().getY(),
+                                             footstepBeingPlaced.getFootPose().getZ(),
+                                             footstepBeingPlaced.getFootPose());
 
          // When left button clicked and released.
          if (input.isWindowHovered() & input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
          {
-            forcePlaceFootstep();
+            if (APPLY_REACHABLE_REGION_ELLIPTICAL_CONSTRAINT && stepPositionLimiter.hasValue())
+               forcePlaceFootstep();
+            else
+               placeFootstep();
          }
 
          if (input.isWindowHovered() && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Right))
@@ -345,7 +344,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
          stanceFootFrame.setPoseAndUpdate(stanceFootPose);
 
          constraintFramePose.setToZero(stanceFootFrame);
-         double offset = swingSide == RobotSide.LEFT ? NOMINAL_STANCE_WIDTH/2.0 : -NOMINAL_STANCE_WIDTH/2.0;
+         double offset = swingSide == RobotSide.LEFT ? EllipticalStepPositionLimiter.NOMINAL_STANCE_WIDTH_DEFAULT / 2.0 : -EllipticalStepPositionLimiter.NOMINAL_STANCE_WIDTH_DEFAULT / 2.0;
          constraintFramePose.getPosition().addY(offset);
       }
       else
@@ -366,16 +365,12 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       constraintFrame.setPoseAndUpdate(constraintFramePose);
 
       poseToSet.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      stepPositionLimiter.enforceFootPositionConstraint(poseToSet.getPosition(),
-                                                        footstepBeingPlaced.getFootPose().getPosition(), constraintFrame,
-                                                        stanceFootFrame,
-                                                        null,
-                                                        NOMINAL_STANCE_WIDTH,
-                                                        MAX_STEP_FORWARD,
-                                                        MIN_STANCE_WIDTH,
-                                                        MAX_STANCE_WIDTH,
-                                                        MIN_DISTANCE_FROM_STANCE_FOOT,
-                                                        swingSide);
+
+      if (stepPositionLimiter.hasValue())
+         stepPositionLimiter.get().enforceFootPositionConstraint(poseToSet.getPosition(),
+                                                                 footstepBeingPlaced.getFootPose().getPosition(), constraintFrame,
+                                                                 stanceFootFrame,
+                                                                 swingSide);
    }
 
    public void setFootstepBeingPlacedPose(FramePose3DReadOnly poseToSet)
@@ -448,6 +443,11 @@ public class RDXManualFootstepPlacement implements RenderableProvider
    public void clear()
    {
       footstepPlan.clear();
+   }
+
+   public void setStepPositionLimiter(EllipticalStepPositionLimiter stepPositionLimiter)
+   {
+      this.stepPositionLimiter.set(stepPositionLimiter);
    }
 
    public void setHeightMapData(HeightMapData heightMapMessage)

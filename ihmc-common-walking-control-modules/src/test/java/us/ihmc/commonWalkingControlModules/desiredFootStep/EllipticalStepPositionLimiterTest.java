@@ -11,7 +11,6 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.StepPositionLimiter;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -26,12 +25,12 @@ import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class StepPositionLimiterTest
+public class EllipticalStepPositionLimiterTest
 {
    @Test
    public void testMinWidths()
    {
-      StepPositionLimiter stepPositionLimiter = new StepPositionLimiter();
+      EllipticalStepPositionLimiter stepPositionLimiter = new EllipticalStepPositionLimiter();
 
       FramePoint3D stepPositionUnlimited = new FramePoint3D();
       FramePoint3D stepPositionLimited = new FramePoint3D();
@@ -150,12 +149,12 @@ public class StepPositionLimiterTest
             pointToConstrain.changeFrame(originalFrame);
             FramePoint3D originalPoint = new FramePoint3D(pointToConstrain);
 
-            boolean wasModified = StepPositionLimiter.enforceOuterEllipticalBoundInConstraintFrame(pointToConstrain,
-                                                                                                   constraintFrame,
-                                                                                                   nominalWidth,
-                                                                                                   maxForward,
-                                                                                                   maxWidth,
-                                                                                                   stepSide);
+            boolean wasModified = EllipticalStepPositionLimiter.enforceOuterEllipticalBoundInConstraintFrame(pointToConstrain,
+                                                                                                             constraintFrame,
+                                                                                                             nominalWidth,
+                                                                                                             maxForward,
+                                                                                                             maxWidth,
+                                                                                                             stepSide);
 
             // make sure the frames never changed
             assertEquals(originalFrame, pointToConstrain.getReferenceFrame());
@@ -217,7 +216,7 @@ public class StepPositionLimiterTest
    {
       SimulationConstructionSet2 scs = new SimulationConstructionSet2();
 
-      StepPositionLimiter stepPositionLimiter = new StepPositionLimiter();
+      EllipticalStepPositionLimiter stepPositionLimiter = new EllipticalStepPositionLimiter();
 
       PoseReferenceFrame stanceFootFrame = new PoseReferenceFrame("StanceFootFrame", ReferenceFrame.getWorldFrame());
 
@@ -229,7 +228,7 @@ public class StepPositionLimiterTest
 
       stanceFootFrame.setPositionAndUpdate(new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.0, -0.5 * nominalWidth, 0.0));
 
-      YoRegistry registry = new YoRegistry(StepPositionLimiter.class.getSimpleName());
+      YoRegistry registry = new YoRegistry(EllipticalStepPositionLimiter.class.getSimpleName());
       int index = 0;
       for (double x = -maxLength - 0.2; x <= maxLength + 0.2; x += 0.025)
       {

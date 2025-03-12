@@ -11,11 +11,35 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.robotics.geometry.GroundPlaneEstimator;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class StepPositionLimiter
+public class EllipticalStepPositionLimiter
 {
+   public final static double NOMINAL_STANCE_WIDTH_DEFAULT = 0.25;
+   public final static double MAX_STEP_FORWARD_DEFAULT = 0.75;
+   public final static double MIN_STANCE_WIDTH_DEFAULT = 0.075;
+   public final static double MAX_STANCE_WIDTH_DEFAULT = 0.4;
+   public final static double MIN_DISTANCE_FROM_STANCE_FOOT_DEFAULT = 0.075;
+
    private final FramePoint2D stanceFootPosition = new FramePoint2D();
    private final FramePoint2D constrainedTouchdownPosition2D = new FramePoint2D();
    private final FramePoint3DBasics constrainedSoleTouchdownPosition = new FramePoint3D();
+
+   public void enforceFootPositionConstraint(FramePoint3DReadOnly desiredSoleTouchdownPosition,
+                                                FixedFramePoint3DBasics constrainedSoleTouchdownPositionToPack,
+                                                ReferenceFrame desiredConstraintFrame,
+                                                ReferenceFrame stanceFootZUpFrame,
+                                                RobotSide swingSide)
+   {
+      enforceFootPositionConstraint(desiredSoleTouchdownPosition,
+                                    constrainedSoleTouchdownPositionToPack,
+                                    desiredConstraintFrame,
+                                    stanceFootZUpFrame,
+                                    NOMINAL_STANCE_WIDTH_DEFAULT,
+                                    MAX_STEP_FORWARD_DEFAULT,
+                                    MIN_STANCE_WIDTH_DEFAULT,
+                                    MAX_STANCE_WIDTH_DEFAULT,
+                                    MIN_DISTANCE_FROM_STANCE_FOOT_DEFAULT,
+                                    swingSide);
+   }
 
    /**
     * @param desiredSoleTouchdownPosition              The unconstrained position. Not Modified.
