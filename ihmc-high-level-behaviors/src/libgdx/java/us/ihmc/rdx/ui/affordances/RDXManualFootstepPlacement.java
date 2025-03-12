@@ -31,8 +31,6 @@ import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
-import java.sql.Ref;
-
 /**
  * Manages and assists with the operator placement of footsteps.
  */
@@ -326,10 +324,11 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       footstepBeingPlaced.updatePose(tempFramePose);
    }
 
-   private final PoseReferenceFrame stanceFootFrame = new PoseReferenceFrame("Latest Stance Foot Frame in Plan", ReferenceFrame.getWorldFrame());
-   private final PoseReferenceFrame controlFrame = new PoseReferenceFrame("Latest Control Frame in Plan", ReferenceFrame.getWorldFrame());
    private final FramePose3D stanceFootPose = new FramePose3D();
-   private final FramePose3D controlFramePose = new FramePose3D();
+   private final PoseReferenceFrame stanceFootFrame = new PoseReferenceFrame("Latest Stance Foot Frame in Plan", ReferenceFrame.getWorldFrame());
+
+   private final FramePose3D constraintFramePose = new FramePose3D();
+   private final PoseReferenceFrame constraintFrame = new PoseReferenceFrame("Latest Control Frame in Plan", ReferenceFrame.getWorldFrame());
 
    private void applyReachabilityConstraintToStep(FramePose3DReadOnly poseToSet)
    {
@@ -343,27 +342,26 @@ public class RDXManualFootstepPlacement implements RenderableProvider
          stanceFootPose.setMatchingFrame(footstepPlan.getLastFootstep().getFootPose());
          stanceFootFrame.setPoseAndUpdate(stanceFootPose);
 
-         controlFramePose.setToZero(stanceFootFrame);
+         constraintFramePose.setToZero(stanceFootFrame);
          double offset = swingSide == RobotSide.LEFT ? NOMINAL_STANCE_WIDTH/2.0 : -NOMINAL_STANCE_WIDTH/2.0;
-         controlFramePose.getPosition().addY(offset);
+         constraintFramePose.getPosition().addY(offset);
       }
       else
       {
          swingSide = footstepBeingPlaced.getFootstepSide();
          stanceFootPose.setToZero(syncedRobot.getReferenceFrames().getSoleFrame(swingSide.getOppositeSide()));
-         controlFramePose.setToZero(syncedRobot.getReferenceFrames().getCenterOfMassFrame());
+         constraintFramePose.setToZero(syncedRobot.getReferenceFrames().getCenterOfMassFrame());
       }
 
       stanceFootPose.changeFrame(stanceFootFrame.getParent());
-      controlFramePose.changeFrame(controlFrame.getParent());
+      constraintFramePose.changeFrame(constraintFrame.getParent());
 
       stanceFootFrame.setPoseAndUpdate(stanceFootPose);
-      controlFrame.setPoseAndUpdate(controlFramePose);
+      constraintFrame.setPoseAndUpdate(constraintFramePose);
 
       poseToSet.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       stepPositionLimiter.enforceFootPositionConstraint(poseToSet.getPosition(),
-                                                        footstepBeingPlaced.getFootPose().getPosition(),
-                                                        controlFrame,
+                                                        footstepBeingPlaced.getFootPose().getPosition(), constraintFrame,
                                                         stanceFootFrame,
                                                         null,
                                                         NOMINAL_STANCE_WIDTH,

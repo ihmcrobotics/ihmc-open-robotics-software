@@ -12,6 +12,7 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.StepPositionLimiter;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -38,9 +39,9 @@ public class RDXVRFootstepPlacement
 
    // TODO move to parameter class
    private final static double NOMINAL_STANCE_WIDTH = 0.25;
-   private final static double MAX_STEP_FORWARD = 0.75;
+   private final static double MAX_STEP_FORWARD = 0.6;
    private final static double MIN_STANCE_WIDTH = 0.15;
-   private final static double MAX_STANCE_WIDTH = 0.75;
+   private final static double MAX_STANCE_WIDTH = 0.3;
    private final static double MIN_DISTANCE_FROM_STANCE_FOOT = 0.075;
 
    private final StepPositionLimiter stepPositionLimiter = new StepPositionLimiter();
@@ -182,20 +183,28 @@ public class RDXVRFootstepPlacement
    }
 
 
-   private final FramePose3D tempAdaptedPose = new FramePose3D();
-   public boolean setFootstepPose(FramePose3DReadOnly pose)
+   private final FramePose3D adaptedFootstepPose = new FramePose3D();
+   private final FramePose3D constraintFramePose = new FramePose3D();
+   private final PoseReferenceFrame constraintFrame = new PoseReferenceFrame("Latest Control Frame in Plan", ReferenceFrame.getWorldFrame());
+
+   public boolean setFootstepPose(FramePose3DReadOnly footstepPose)
    {
       if (footstepBeingExternallyPlaced != null)
       {
-         tempAdaptedPose.setIncludingFrame(pose);
+         adaptedFootstepPose.setIncludingFrame(footstepPose);
 
          // Constrain footstep to reachable region
          if (USE_STEPPABLE_REGION_ADAPTATION)
          {
+            constraintFramePose.setToZero(syncedRobot.getReferenceFrames().getCenterOfMassFrame());
+            double yaw = syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame().getTransformToDesiredFrame(syncedRobot.getReferenceFrames().getCenterOfMassFrame()).getRotation().getYaw();
+            constraintFramePose.getOrientation().setToYawOrientation(yaw);
+            constraintFramePose.changeFrame(constraintFrame.getParent());
+            constraintFrame.setPoseAndUpdate(constraintFramePose);
+
             RobotSide swingSide = footstepBeingExternallyPlaced.getSide();
-            stepPositionLimiter.enforceFootPositionConstraint(pose.getPosition(),
-                                                              tempAdaptedPose.getPosition(),
-                                                              syncedRobot.getReferenceFrames().getCenterOfMassFrame(),
+            stepPositionLimiter.enforceFootPositionConstraint(footstepPose.getPosition(),
+                                                              adaptedFootstepPose.getPosition(), constraintFrame,
                                                               syncedRobot.getReferenceFrames().getSoleFrame(swingSide.getOppositeSide()),
                                                               null,
                                                               NOMINAL_STANCE_WIDTH,
@@ -209,15 +218,15 @@ public class RDXVRFootstepPlacement
          // Snap footstep to height map
          if (USE_HEIGHTMAP && latestHeightMapData != null)
          {
-            double height = latestHeightMapData.getHeightAt(tempAdaptedPose.getTranslationX(), tempAdaptedPose.getTranslationY());
+            double height = latestHeightMapData.getHeightAt(adaptedFootstepPose.getTranslationX(), adaptedFootstepPose.getTranslationY());
 
             if (!Double.isNaN(height))
-               tempAdaptedPose.getPosition().setZ(height);
+               adaptedFootstepPose.getPosition().setZ(height);
             else
                LogTools.warn("Could not use heightMap for footstep adjustment, since height is NaN");
          }
 
-         footstepBeingExternallyPlaced.setPose(tempAdaptedPose);
+         footstepBeingExternallyPlaced.setPose(adaptedFootstepPose);
 
          return true;
       }
