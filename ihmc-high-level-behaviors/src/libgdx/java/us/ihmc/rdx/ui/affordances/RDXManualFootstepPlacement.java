@@ -335,12 +335,25 @@ public class RDXManualFootstepPlacement implements RenderableProvider
    {
       poseToSet.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
 
-      RobotSide swingSide;
+      RobotSide swingSide = footstepBeingPlaced.getFootstepSide();
 
       if (footstepPlan.getLastFootstep() != null)
       {
-         swingSide = footstepPlan.getLastFootstep().getFootstepSide().getOppositeSide();
-         stanceFootPose.setMatchingFrame(footstepPlan.getLastFootstep().getFootPose());
+         boolean stanceFootPoseHasBeenSet = false;
+
+         // Make sure stance foot is set from latest footstep in plan that is opposite foot of swing foot
+         for (int i = 0 ; i < footstepPlan.getNumberOfFootsteps(); i++)
+            if (swingSide != footstepPlan.getFootsteps().get(i).getFootstepSide())
+            {
+               stanceFootPose.setMatchingFrame(footstepPlan.getFootsteps().get(i).getFootPose());
+               stanceFootPoseHasBeenSet = true;
+            }
+
+         // If all footsteps in plan are with the same foot, set stanceFootPose to robot's current stance foot
+         if (!stanceFootPoseHasBeenSet)
+            stanceFootPose.setToZero(syncedRobot.getReferenceFrames().getSoleFrame(swingSide.getOppositeSide()));
+
+         stanceFootPose.changeFrame(stanceFootFrame.getParent());
          stanceFootFrame.setPoseAndUpdate(stanceFootPose);
 
          constraintFramePose.setToZero(stanceFootFrame);
@@ -349,9 +362,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       }
       else
       {
-         swingSide = footstepBeingPlaced.getFootstepSide();
          stanceFootPose.setToZero(syncedRobot.getReferenceFrames().getSoleFrame(swingSide.getOppositeSide()));
-
 
          constraintFramePose.setToZero(syncedRobot.getReferenceFrames().getCenterOfMassFrame());
          double yaw = syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame().getTransformToDesiredFrame(syncedRobot.getReferenceFrames().getCenterOfMassFrame()).getRotation().getYaw();
@@ -368,7 +379,8 @@ public class RDXManualFootstepPlacement implements RenderableProvider
 
       if (stepPositionLimiter.hasValue())
          stepPositionLimiter.get().enforceFootPositionConstraint(poseToSet.getPosition(),
-                                                                 footstepBeingPlaced.getFootPose().getPosition(), constraintFrame,
+                                                                 footstepBeingPlaced.getFootPose().getPosition(),
+                                                                 constraintFrame,
                                                                  stanceFootFrame,
                                                                  swingSide);
    }

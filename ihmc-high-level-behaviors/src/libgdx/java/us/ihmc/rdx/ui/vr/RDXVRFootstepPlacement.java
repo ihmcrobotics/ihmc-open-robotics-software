@@ -196,7 +196,8 @@ public class RDXVRFootstepPlacement
             RobotSide swingSide = footstepBeingExternallyPlaced.getSide();
             if (stepPositionLimiter.hasValue())
                stepPositionLimiter.get().enforceFootPositionConstraint(footstepPose.getPosition(),
-                                                                       adaptedFootstepPose.getPosition(), constraintFrame,
+                                                                       adaptedFootstepPose.getPosition(),
+                                                                       constraintFrame,
                                                                        syncedRobot.getReferenceFrames().getSoleFrame(swingSide.getOppositeSide()),
                                                                        swingSide);
          }
