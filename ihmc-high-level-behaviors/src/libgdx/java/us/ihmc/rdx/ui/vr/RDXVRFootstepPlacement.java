@@ -35,7 +35,7 @@ import java.util.UUID;
 public class RDXVRFootstepPlacement
 {
    private final static boolean USE_HEIGHTMAP = true;
-   private final static boolean USE_STEPPABLE_REGION_ADAPTATION = false;
+   private final static boolean APPLY_REACHABLE_REGION_CONSTRAINT = true;
 
    // TODO move to parameter class
    private final static double NOMINAL_STANCE_WIDTH = 0.25;
@@ -194,7 +194,7 @@ public class RDXVRFootstepPlacement
          adaptedFootstepPose.setIncludingFrame(footstepPose);
 
          // Constrain footstep to reachable region
-         if (USE_STEPPABLE_REGION_ADAPTATION)
+         if (APPLY_REACHABLE_REGION_CONSTRAINT)
          {
             constraintFramePose.setToZero(syncedRobot.getReferenceFrames().getCenterOfMassFrame());
             double yaw = syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame().getTransformToDesiredFrame(syncedRobot.getReferenceFrames().getCenterOfMassFrame()).getRotation().getYaw();

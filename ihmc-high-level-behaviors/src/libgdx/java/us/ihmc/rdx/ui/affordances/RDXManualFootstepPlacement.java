@@ -37,12 +37,13 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 public class RDXManualFootstepPlacement implements RenderableProvider
 {
    private static final double MAX_DISTANCE_MULTIPLIER = 3.0;
+   private final static boolean APPLY_REACHABLE_REGION_ELLIPTICAL_CONSTRAINT = true;
 
    // TODO move to parameter class
    private final static double NOMINAL_STANCE_WIDTH = 0.25;
    private final static double MAX_STEP_FORWARD = 0.75;
    private final static double MIN_STANCE_WIDTH = 0.075;
-   private final static double MAX_STANCE_WIDTH = 0.75;
+   private final static double MAX_STANCE_WIDTH = 0.4;
    private final static double MIN_DISTANCE_FROM_STANCE_FOOT = 0.075;
 
    private final StepPositionLimiter stepPositionLimiter = new StepPositionLimiter();
@@ -222,7 +223,8 @@ public class RDXManualFootstepPlacement implements RenderableProvider
          }
 
          // Constrain footstep to reachable region
-         applyReachabilityConstraintToStep(footstepBeingPlaced.getFootPose());
+         if (APPLY_REACHABLE_REGION_ELLIPTICAL_CONSTRAINT)
+            applyReachabilityConstraintToStep(footstepBeingPlaced.getFootPose());
 
          // Snap footstep to height map
          if (latestHeightMapData != null)
@@ -350,7 +352,11 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       {
          swingSide = footstepBeingPlaced.getFootstepSide();
          stanceFootPose.setToZero(syncedRobot.getReferenceFrames().getSoleFrame(swingSide.getOppositeSide()));
+
+
          constraintFramePose.setToZero(syncedRobot.getReferenceFrames().getCenterOfMassFrame());
+         double yaw = syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame().getTransformToDesiredFrame(syncedRobot.getReferenceFrames().getCenterOfMassFrame()).getRotation().getYaw();
+         constraintFramePose.getOrientation().setToYawOrientation(yaw);
       }
 
       stanceFootPose.changeFrame(stanceFootFrame.getParent());
