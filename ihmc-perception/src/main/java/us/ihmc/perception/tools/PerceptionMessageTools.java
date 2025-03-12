@@ -25,6 +25,7 @@ import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
 import javax.annotation.Nullable;
@@ -210,9 +211,12 @@ public class PerceptionMessageTools
       floatPointer.put(startIndex + 3, (float) quaternion.getS());
    }
 
-   public static void convertToHeightMapData(Mat heightMapPointer, HeightMapData heightMapDataToPack, Point3D gridCenter, float widthInMeters, float cellSizeInMeters)
+   public static void convertToHeightMapData(Mat heightMapPointer,
+                                             HeightMapData heightMapDataToPack,
+                                             Point3D gridCenter,
+                                             HeightMapParameters heightMapParameters)
    {
-      int centerIndex = HeightMapTools.computeCenterIndex(widthInMeters, cellSizeInMeters);
+      int centerIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getTerrainWidthInMeters(), heightMapParameters.getGlobalCellSizeInMeters());
       int cellsPerAxis = 2 * centerIndex + 1;
       int totalCells = cellsPerAxis * cellsPerAxis;
 
@@ -234,8 +238,7 @@ public class PerceptionMessageTools
          int height = major | minor;
 
          // Calculate cell height
-         float cellHeight = (float) (((float) height / RapidHeightMapManager.getHeightMapParameters().getHeightScaleFactor())
-                                     - RapidHeightMapManager.getHeightMapParameters().getHeightOffset());
+         float cellHeight = (float) (((float) height / heightMapParameters.getHeightScaleFactor()) - heightMapParameters.getHeightOffset());
 
          // Put it into the HeightMapData object
          int key = cellsPerAxis * (i % cellsPerAxis) + (i / cellsPerAxis);
@@ -243,9 +246,9 @@ public class PerceptionMessageTools
       }
    }
 
-   public static Mat convertHeightMapDataToMat(HeightMapData heightMapData, float widthInMeters, float cellSizeInMeters)
+   public static Mat convertHeightMapDataToMat(HeightMapData heightMapData, HeightMapParameters heightMapParameters)
    {
-      int centerIndex = HeightMapTools.computeCenterIndex(widthInMeters, cellSizeInMeters);
+      int centerIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getTerrainWidthInMeters(), heightMapParameters.getGlobalCellSizeInMeters());
       int cellsPerAxis = 2 * centerIndex + 1;
 
       // Create a new Mat object to hold the height map data
@@ -259,12 +262,10 @@ public class PerceptionMessageTools
             double cellHeight = heightMapData.getHeightAt(key);
 
             // Reverse the height calculation to get the raw height value
-            int height = (int) ((cellHeight + (float) RapidHeightMapManager.getHeightMapParameters().getHeightOffset())
-                                * RapidHeightMapManager.getHeightMapParameters().getHeightScaleFactor());
+            int height = (int) ((cellHeight + (float) heightMapParameters.getHeightOffset()) * heightMapParameters.getHeightScaleFactor());
 
             // Store the height value in the Mat object
             heightMapMat.ptr(xIndex, yIndex).putShort((short) height);
-
          }
       }
 

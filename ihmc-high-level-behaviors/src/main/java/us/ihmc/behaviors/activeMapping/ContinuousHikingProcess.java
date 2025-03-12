@@ -40,7 +40,11 @@ public class ContinuousHikingProcess
       ContinuousHikingLogger continuousHikingLogger = new ContinuousHikingLogger();
       ControllerFootstepQueueMonitor controllerFootstepQueueMonitor = new ControllerFootstepQueueMonitor(ros2Node, robotModel.getSimpleRobotName());
 
-      standAloneRealsenseProcess = new StandAloneRealsenseProcess(ros2Node, ros2Helper, syncedRobot, controllerFootstepQueueMonitor);
+      standAloneRealsenseProcess = new StandAloneRealsenseProcess(ros2Node,
+                                                                  ros2Helper,
+                                                                  syncedRobot,
+                                                                  activeMappingParameterToolBox.getHeightMapParameters(),
+                                                                  controllerFootstepQueueMonitor);
 
       continuousPlannerSchedulingTask = new ContinuousPlannerSchedulingTask(robotModel,
                                                                             ros2Node,

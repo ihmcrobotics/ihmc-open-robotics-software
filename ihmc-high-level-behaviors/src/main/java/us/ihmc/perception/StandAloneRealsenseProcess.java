@@ -11,6 +11,7 @@ import us.ihmc.communication.ros2.ROS2DemandGraphNode;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapManager;
 import us.ihmc.perception.heightMap.TerrainMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 import us.ihmc.sensors.realsense.RealSenseConfiguration;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
@@ -36,6 +37,7 @@ public class StandAloneRealsenseProcess
                                                                                                    RealSenseImageSensor.DEPTH_IMAGE_KEY);
 
    private final ROS2DemandGraphNode realsenseDemandNode;
+   private final HeightMapParameters heightMapParameters;
    private final ROS2DemandGraphNode realsensePublishDemandNode;
    private final ROS2Helper ros2Helper;
    private final ROS2SyncedRobotModel syncedRobot;
@@ -48,12 +50,13 @@ public class StandAloneRealsenseProcess
 
    public StandAloneRealsenseProcess(ROS2Node ros2Node, ROS2Helper ros2Helper, ROS2SyncedRobotModel syncedRobot)
    {
-      this(ros2Node, ros2Helper, syncedRobot, null);
+      this(ros2Node, ros2Helper, syncedRobot, new HeightMapParameters("GPU"), null);
    }
 
    public StandAloneRealsenseProcess(ROS2Node ros2Node,
                                      ROS2Helper ros2Helper,
                                      ROS2SyncedRobotModel syncedRobot,
+                                     HeightMapParameters heightMapParameters,
                                      ControllerFootstepQueueMonitor controllerFootstepQueueMonitor)
    {
       this.ros2Helper = ros2Helper;
@@ -63,6 +66,7 @@ public class StandAloneRealsenseProcess
       heightMapDemandNode = new ROS2DemandGraphNode(ros2Node, PerceptionAPI.REQUEST_HEIGHT_MAP);
 
       realsenseDemandNode = new ROS2DemandGraphNode(ros2Node, PerceptionAPI.REQUEST_REALSENSE);
+      this.heightMapParameters = heightMapParameters;
       realsenseDemandNode.addDependents(realsensePublishDemandNode, heightMapDemandNode);
 
       d455Sensor = new RealSenseImageSensor(RealSenseConfiguration.D455_COLOR_720P_DEPTH_720P_30HZ);
@@ -95,7 +99,8 @@ public class StandAloneRealsenseProcess
                                                              syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.RIGHT),
                                                              controllerFootstepQueueMonitor,
                                                              d455Sensor,
-                                                             RealSenseImageSensor.DEPTH_IMAGE_KEY);
+                                                             RealSenseImageSensor.DEPTH_IMAGE_KEY,
+                                                             heightMapParameters);
       loopOnDemand(heightMapUpdateThread, heightMapDemandNode);
    }
 

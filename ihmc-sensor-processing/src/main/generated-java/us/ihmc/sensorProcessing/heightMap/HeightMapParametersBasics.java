@@ -13,11 +13,6 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
       set(HeightMapParameters.flyingPointsFilter, flyingPointsFilter);
    }
 
-   default void setResetHeightMap(boolean resetHeightMap)
-   {
-      set(HeightMapParameters.resetHeightMap, resetHeightMap);
-   }
-
    default void setEnableAlphaFilter(boolean enableAlphaFilter)
    {
       set(HeightMapParameters.enableAlphaFilter, enableAlphaFilter);

@@ -1,11 +1,10 @@
 {
   "title" : "GPU Height Map Parameters",
   "Flying points filter" : true,
-  "Reset Height Map" : false,
   "Enable alpha filter" : true,
   "Enable vertical filter" : true,
   "Search window height" : {
-    "value" : 350,
+    "value" : 400,
     "lowerBound" : 10,
     "upperBound" : 400
   },

@@ -114,7 +114,7 @@ public class RapidHeightMapExtractorCUDA
       URL mathUtilsHeaderPath = getClass().getResource("/us/ihmc/perception/cuda/MathUtils.cuh");
       URL kernelPath = getClass().getResource("RapidHeightMapExtractor.cu");
 
-      terrainMapData = new TerrainMapData(heightMapParameters.getTerrainObjectSize(), heightMapParameters.getTerrainObjectSize());
+      terrainMapData = new TerrainMapData(heightMapParameters.getTerrainObjectSize(), heightMapParameters.getTerrainObjectSize(), heightMapParameters);
 
       recomputeDerivedParameters();
       // Need to initialize this after the parameters have been computed to get the right size
@@ -500,11 +500,7 @@ public class RapidHeightMapExtractorCUDA
                                                             getSensorOrigin().getY());
 
       Mat heightMapMat = getTerrainMapData().getHeightMap();
-      PerceptionMessageTools.convertToHeightMapData(heightMapMat,
-                                                    latestHeightMapData,
-                                                    getSensorOrigin(),
-                                                    (float) heightMapParameters.getTerrainWidthInMeters(),
-                                                    (float) heightMapParameters.getGlobalCellSizeInMeters());
+      PerceptionMessageTools.convertToHeightMapData(heightMapMat, latestHeightMapData, getSensorOrigin(), heightMapParameters);
 
       return latestHeightMapData;
    }

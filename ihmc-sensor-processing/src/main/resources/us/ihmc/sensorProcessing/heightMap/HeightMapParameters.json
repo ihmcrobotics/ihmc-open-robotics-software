@@ -1,7 +1,6 @@
 {
   "title" : "HeightMapParameters",
   "Flying points filter" : true,
-  "Reset Height Map" : false,
   "Enable alpha filter" : true,
   "Enable vertical filter" : false,
   "Search window height": {
