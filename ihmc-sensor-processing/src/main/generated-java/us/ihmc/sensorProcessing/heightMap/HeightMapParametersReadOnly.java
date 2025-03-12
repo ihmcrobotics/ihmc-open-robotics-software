@@ -10,6 +10,11 @@ import static us.ihmc.sensorProcessing.heightMap.HeightMapParameters.*;
  */
 public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
 {
+   default boolean getDriftOffsetFilter()
+   {
+      return get(driftOffsetFilter);
+   }
+
    default boolean getFlyingPointsFilter()
    {
       return get(flyingPointsFilter);

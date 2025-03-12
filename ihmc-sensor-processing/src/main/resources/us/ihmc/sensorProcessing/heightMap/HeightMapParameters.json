@@ -1,5 +1,6 @@
 {
   "title" : "HeightMapParameters",
+  "Drift offset filter" : true,
   "Flying points filter" : true,
   "Reset Height Map" : false,
   "Enable alpha filter" : true,

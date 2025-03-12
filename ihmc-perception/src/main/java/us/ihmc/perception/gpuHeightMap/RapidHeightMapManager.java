@@ -96,7 +96,8 @@ public class RapidHeightMapManager
       if (resetHeightMapRequested.poll())
       {
          rapidHeightMapExtractor.reset();
-         rapidHeightMapDriftOffset.reset();
+         if (heightMapParameters.getDriftOffsetFilter())
+            rapidHeightMapDriftOffset.reset();
       }
 
       RigidBodyTransform sensorToWorld = cameraFrame.getTransformToWorldFrame();
@@ -106,12 +107,14 @@ public class RapidHeightMapManager
       cameraPose.setToZero(cameraFrame);
       cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      float driftOffsetInZ = rapidHeightMapDriftOffset.getUpdateDriftOffset();
-      if (!Float.isNaN(driftOffsetInZ))
+      if (heightMapParameters.getDriftOffsetFilter())
       {
-         rapidHeightMapExtractor.updateHeightOffset(driftOffsetInZ);
+         float driftOffsetInZ = rapidHeightMapDriftOffset.getUpdateDriftOffset();
+         if (!Float.isNaN(driftOffsetInZ))
+         {
+            rapidHeightMapExtractor.updateHeightOffset(driftOffsetInZ);
+         }
       }
-
       rapidHeightMapExtractor.update(sensorToWorld, sensorToGround, groundToWorld);
 
       Mat croppedHeightMapImage = rapidHeightMapExtractor.getVisualizedHeightMap();

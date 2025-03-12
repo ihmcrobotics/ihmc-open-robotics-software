@@ -8,6 +8,11 @@ import us.ihmc.tools.property.StoredPropertySetBasics;
  */
 public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, StoredPropertySetBasics
 {
+   default void setDriftOffsetFilter(boolean driftOffsetFilter)
+   {
+      set(HeightMapParameters.driftOffsetFilter, driftOffsetFilter);
+   }
+
    default void setFlyingPointsFilter(boolean flyingPointsFilter)
    {
       set(HeightMapParameters.flyingPointsFilter, flyingPointsFilter);

@@ -18,6 +18,7 @@ public class HeightMapParameters extends StoredPropertySet implements HeightMapP
 {
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
+   public static final BooleanStoredPropertyKey driftOffsetFilter = keys.addBooleanKey("Drift offset filter");
    public static final BooleanStoredPropertyKey flyingPointsFilter = keys.addBooleanKey("Flying points filter");
    public static final BooleanStoredPropertyKey resetHeightMap = keys.addBooleanKey("Reset Height Map");
    public static final BooleanStoredPropertyKey enableAlphaFilter = keys.addBooleanKey("Enable alpha filter");

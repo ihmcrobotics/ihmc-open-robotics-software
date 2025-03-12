@@ -300,7 +300,8 @@ public class RapidHeightMapExtractorCUDA
       {
          GpuMat filteredHeightMap = filteredRapidHeightMapExtractor.update(globalHeightMapImage);
          globalHeightMapImage.close();
-         globalHeightMapImage = filteredHeightMap;
+         globalHeightMapImage = filteredHeightMap.clone();
+         filteredHeightMap.close();
       }
 
       //      Mat finalCroppedHeightMap = new Mat();
