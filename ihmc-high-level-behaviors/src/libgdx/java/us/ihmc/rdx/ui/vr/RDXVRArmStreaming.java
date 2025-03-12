@@ -60,7 +60,7 @@ public class RDXVRArmStreaming
             desiredRobotArmJoints.put(side, FullRobotModelUtils.getArmJoints(syncedRobot.getFullRobotModel(), side, armJointNames));
             this.armJointNames.put(side, armJointNames);
             handControlFrameTransforms.put(side, new Pose3D(ikHandControlFramePoses.get(side)));
-            handControlFrameTransforms.get(side).setTranslationToZero(); // TODO not sure about this, check for nubs
+            handControlFrameTransforms.get(side).setTranslationToZero();
             handControlFrameTransforms.get(side).invert();
             handReferenceFrames.put(side, ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(controllerReferenceFrames.get(side).getReferenceFrame(), handControlFrameTransforms.get(side)));
          }
@@ -72,12 +72,12 @@ public class RDXVRArmStreaming
    {
       if (enabled)
       {
-         boolean desiredHandPoseChanged = false;
          for (RobotSide side : RobotSide.values)
          {
-            //         if (trackerReferenceFrames.get(CHEST.getSegmentName()) != null)
-            //         {
-            armIKSolvers.get(side).update(syncedRobot.getReferenceFrames().getChestFrame(), handReferenceFrames.get(side));
+            if (trackerReferenceFrames.get(CHEST.getSegmentName()) != null)
+            {
+               armIKSolvers.get(side).update(syncedRobot.getReferenceFrames().getChestFrame(), handReferenceFrames.get(side));
+            }
          }
 
          // The following puts the solver on a thread as to not slow down the UI
@@ -121,16 +121,19 @@ public class RDXVRArmStreaming
 
    private void updateGraphics()
    {
-      for (RobotSide side : armMultiBodyGraphics.keySet())
+      if (trackerReferenceFrames.get(CHEST.getSegmentName()) != null)
       {
-         RDXArmMultiBodyGraphic armMultiBodyGraphic = armMultiBodyGraphics.get(side);
-         armMultiBodyGraphic.getFloatingJoint().getJointPose().set(syncedRobot.getReferenceFrames().getChestFrame().getTransformToWorldFrame());
-         for (int i = 0; i < armMultiBodyGraphic.getJoints().length; i++)
+         for (RobotSide side : armMultiBodyGraphics.keySet())
          {
-            armMultiBodyGraphic.getJoints()[i].setQ(desiredRobotArmJoints.get(side)[i].getQ());
+            RDXArmMultiBodyGraphic armMultiBodyGraphic = armMultiBodyGraphics.get(side);
+            armMultiBodyGraphic.getFloatingJoint().getJointPose().set(trackerReferenceFrames.get(CHEST.getSegmentName()).getReferenceFrame().getTransformToWorldFrame());
+            for (int i = 0; i < armMultiBodyGraphic.getJoints().length; i++)
+            {
+               armMultiBodyGraphic.getJoints()[i].setQ(desiredRobotArmJoints.get(side)[i].getQ());
+            }
+            armMultiBodyGraphic.updateAfterModifyingConfiguration();
+            armMultiBodyGraphic.setColor(RDXIKSolverColors.GOOD_QUALITY_COLOR);
          }
-         armMultiBodyGraphic.updateAfterModifyingConfiguration();
-         armMultiBodyGraphic.setColor(RDXIKSolverColors.GOOD_QUALITY_COLOR);
       }
    }
 
