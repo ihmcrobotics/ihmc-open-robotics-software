@@ -16,8 +16,10 @@ import static org.bytedeco.cuda.global.cudart.*;
 
 public class FilteredRapidHeightMapExtractor
 {
+   private static final boolean PRINT_TIMING_FOR_KERNELS = false;
+
    private static final int BLOCK_SIZE_XY = 32;
-   private static final float ALPHA = 0.2F;
+   private static final float ALPHA = 0.75F;
 
    private final cudaPitchedPtr pointerTo3DArray;
    private int currentIndex;
@@ -39,6 +41,7 @@ public class FilteredRapidHeightMapExtractor
       {
          program = new CUDAProgram(kernelPath);
          kernel = program.loadKernel("filterRapidHeightMap");
+         kernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
       }
       catch (Exception e)
       {
