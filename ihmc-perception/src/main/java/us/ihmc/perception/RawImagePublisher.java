@@ -2,21 +2,29 @@ package us.ihmc.perception;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_cudaimgproc;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.GpuMat;
+import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.SRTStreamStatus;
+import sensor_msgs.msg.dds.Image;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.perception.cuda.CUDACompressionTools;
 import us.ihmc.perception.cuda.CUDAJPEGProcessor;
 import us.ihmc.perception.imageMessage.CompressionType;
+import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.streaming.ROS2SRTSensorStreamer;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
+
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.time.Instant;
 
 import static us.ihmc.perception.imageMessage.CompressionType.NVJPEG;
 import static us.ihmc.perception.imageMessage.CompressionType.ZSTD_NVJPEG_HYBRID;
@@ -29,6 +37,7 @@ public class RawImagePublisher implements AutoCloseable
 
    private final ROS2Helper ros2Helper;
    private final ImageMessage imageMessage;
+   private final Image ros2Image;
 
    private boolean destroyed = false;
 
@@ -40,6 +49,7 @@ public class RawImagePublisher implements AutoCloseable
 
       ros2Helper = new ROS2Helper(ros2Node);
       imageMessage = new ImageMessage();
+      ros2Image = new Image();
    }
 
    @SuppressWarnings("unchecked") // Trust me bro, I know what I'm doing
@@ -51,6 +61,10 @@ public class RawImagePublisher implements AutoCloseable
       if (imageTopic.getType().equals(ImageMessage.class))
       {  // Topic is an ImageMessage topic -> publish as image message
          publishAsImageMessage((ROS2Topic<ImageMessage>) imageTopic, imageToPublish);
+      }
+      else if (imageTopic.getType().equals(Image.class))
+      {  // Topic is a standard ROS2 Image topic -> publish as standard ROS2 Image message
+         publishAsROS2Image((ROS2Topic<Image>) imageTopic, imageToPublish);
       }
       else if (imageTopic.getType().equals(SRTStreamStatus.class))
       {  // Topic is an SRT stream topic -> stream video over SRT
@@ -100,6 +114,69 @@ public class RawImagePublisher implements AutoCloseable
       // Pack the message and send it off
       PerceptionMessageTools.packImageMessage(imageToPublish, compressedImage, compressionType, imageMessage);
       ros2Helper.publish(imageTopic, imageMessage);
+   }
+
+   private void publishAsROS2Image(ROS2Topic<Image> imageTopic, RawImage imageToPublish)
+   {
+      // Set the header
+      Instant imageAcquisitionTime = imageToPublish.getAcquisitionTime();
+      ros2Image.getHeader().getStamp().setSec((int) imageAcquisitionTime.getEpochSecond());
+      ros2Image.getHeader().getStamp().setNanosec(imageAcquisitionTime.getNano());
+      ros2Image.getHeader().setFrameId("world"); // TODO: Figure out how to do frame ids with RawImage
+
+      // Set dimensions
+      ros2Image.setWidth(imageToPublish.getWidth());
+      ros2Image.setHeight(imageToPublish.getHeight());
+
+      // Set encoding
+      PixelFormat pixelFormat = imageToPublish.getPixelFormat();
+      String encoding = switch (pixelFormat)
+      {
+         case BGR8, BGRA8, RGB8, RGBA8 -> pixelFormat.name().toLowerCase();
+         case GRAY8, GRAY16 -> pixelFormat.name().toLowerCase().replace("gray", "mono");
+         default -> getOpenCVTypeString(imageToPublish.getOpenCVType());
+      };
+      ros2Image.setEncoding(encoding);
+
+      // Get the message's internal buffer
+      ByteBuffer dataBuffer = ros2Image.getData().getBuffer();
+
+      // Set byte order
+      ros2Image.setIsBigendian((byte) (dataBuffer.order().equals(ByteOrder.BIG_ENDIAN) ? 1 : 0));
+
+      // Set step
+      Mat cpuImage = imageToPublish.getCpuImageMat();
+      ros2Image.setStep(cpuImage.step());
+
+      // Set data
+      int memorySize = (int) OpenCVTools.memorySize(cpuImage);
+      dataBuffer.position(0).put(cpuImage.data().limit(memorySize).asByteBuffer());
+
+      // Publish the image
+      ros2Helper.publish(imageTopic, ros2Image);
+   }
+
+   private String getOpenCVTypeString(int openCVType)
+   {
+      // Reverse the opencv_core.CV_MAKETYPE method to get the type depth and number of channels
+      int depth = openCVType & opencv_core.CV_MAT_DEPTH_MASK;
+      int channels = ((openCVType - depth) >> opencv_core.CV_CN_SHIFT) + 1;
+
+      StringBuilder typeString = new StringBuilder(5);
+      switch (depth)
+      {
+         case opencv_core.CV_8U -> typeString.append("8UC");
+         case opencv_core.CV_8S -> typeString.append("8SC");
+         case opencv_core.CV_16U -> typeString.append("16UC");
+         case opencv_core.CV_16S -> typeString.append("16SC");
+         case opencv_core.CV_32S -> typeString.append("32SC");
+         case opencv_core.CV_32F -> typeString.append("32FC");
+         case opencv_core.CV_64F -> typeString.append("64FC");
+      }
+
+      typeString.append(channels);
+
+      return typeString.toString();
    }
 
    @Override
