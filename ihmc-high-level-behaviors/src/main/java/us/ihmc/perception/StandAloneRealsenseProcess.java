@@ -30,10 +30,10 @@ import java.util.concurrent.TimeUnit;
 public class StandAloneRealsenseProcess
 {
    public static final String STAND_ALONE_REALSENSE_PROCESS = "StandAloneRealsenseProcess";
-   private static final Map<Integer, ROS2Topic<? extends Packet<?>>> D455_IMAGE_TOPIC_MAP = Map.of(RealSenseImageSensor.COLOR_IMAGE_KEY,
-                                                                                                   PerceptionAPI.SRT_REALSENSE_COLOR_STREAM_STATUS,
-                                                                                                   RealSenseImageSensor.DEPTH_IMAGE_KEY,
-                                                                                                   PerceptionAPI.D455_DEPTH_IMAGE);
+   private static final Map<ROS2Topic<? extends Packet<?>>, Integer> D455_IMAGE_TOPIC_MAP = Map.of(PerceptionAPI.SRT_REALSENSE_COLOR_STREAM_STATUS,
+                                                                                                   RealSenseImageSensor.COLOR_IMAGE_KEY,
+                                                                                                   PerceptionAPI.D455_DEPTH_IMAGE,
+                                                                                                   RealSenseImageSensor.DEPTH_IMAGE_KEY);
 
    private final ROS2DemandGraphNode realsenseDemandNode;
    private final ROS2DemandGraphNode realsensePublishDemandNode;
@@ -89,7 +89,6 @@ public class StandAloneRealsenseProcess
 
    private void initializeHeightMap(ControllerFootstepQueueMonitor controllerFootstepQueueMonitor)
    {
-      boolean runWithCUDA = true;
       heightMapUpdateThread = new RapidHeightMapUpdateThread(ros2Helper.getROS2Node(),
                                                              syncedRobot,
                                                              syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.LEFT),

@@ -26,7 +26,6 @@ import us.ihmc.ros2.ROS2Topic;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.time.Instant;
-import java.util.Arrays;
 
 import static us.ihmc.perception.imageMessage.CompressionType.NVJPEG;
 import static us.ihmc.perception.imageMessage.CompressionType.ZSTD_NVJPEG_HYBRID;
