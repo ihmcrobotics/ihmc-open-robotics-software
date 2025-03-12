@@ -99,6 +99,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    private final ROS2Publisher<FootstepStatusMessage> footstepStatusMessagePublisher;
    private final ROS2Publisher<WalkingControllerFailureStatusMessage> walkingControllerFailureStatusPublisher;
    private final ROS2Publisher<Empty> clearGoalFootstepsPublisher;
+   private final ROS2Publisher<Empty> resetStateMachinePublisher;
    private final ContinuousHikingParameters continuousHikingParameters;
    private SideDependentList<FramePose3D> startStancePose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
    private FootstepPlan latestFootstepPlan;
@@ -129,6 +130,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
                                                                                   robotModel.getSimpleRobotName()));
       planOffsetStatusPublisher = ros2Node.createPublisher(getTopic(PlanOffsetStatus.class, robotModel.getSimpleRobotName()));
       clearGoalFootstepsPublisher = ros2Node.createPublisher(ContinuousHikingAPI.CLEAR_GOAL_FOOTSTEPS);
+      resetStateMachinePublisher = ros2Node.createPublisher(ContinuousHikingAPI.RESET_STATE_MACHINE);
 
       MonteCarloFootstepPlannerParameters monteCarloPlannerParameters = new MonteCarloFootstepPlannerParameters();
       terrainPlanningDebugger = new RDXTerrainPlanningDebugger(ros2Node,
@@ -318,6 +320,11 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       ImGui.separator();
       ImGui.text("Options for Continuous Hiking Message");
       ImGui.indent();
+
+      if (ImGui.button("Reset State Machine"))
+      {
+         resetStateMachinePublisher.publish(new Empty());
+      }
       if (ImGui.button("Square Up"))
       {
          squareUpPublisher.publish(new Empty());
