@@ -153,6 +153,7 @@ public class FSTStreamingState implements State
          {
             robotStepDuration = latestInput.getRobotStepDuration();
             robotElapsedTimeCurrentStep = latestInput.getRobotElapsedTimeCurrentStep();
+            LogTools.info(robotElapsedTimeCurrentStep);
             if (robotElapsedTimeCurrentStep == 0.0)
                latestAdjustmentSent = false;
 
@@ -257,6 +258,7 @@ public class FSTStreamingState implements State
                                  outputStatus.setAdjustmentFootstep(true);
                                  outputStatus.setLastAdjustment(true);
                                  tools.getStatusOutputManager().reportStatusMessage(outputStatus);
+                                 latestAdjustmentSent = true;
                                  LogTools.warn("Sent last footstep adjustment {}", side);
                               }
 

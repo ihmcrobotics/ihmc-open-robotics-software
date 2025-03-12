@@ -194,6 +194,7 @@ public class RDXVRFootstepStreaming
       wasEnabled = false;
       readyToStep.clear();
       footstepPlacer.reset();
+      footstepPlacer.resetTimer();
    }
 
    public void destroy()

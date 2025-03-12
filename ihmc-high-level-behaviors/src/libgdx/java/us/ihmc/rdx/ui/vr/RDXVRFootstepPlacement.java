@@ -236,7 +236,7 @@ public class RDXVRFootstepPlacement
       controllerHelper.publishToController(messageList);
       footstepIndex--;
 
-      if (!activeAdjustment && stepStartTime < 0.0)
+      if (!activeAdjustment)
       { // first step is not an adjustment
          stepStartTime = System.nanoTime();
       }
@@ -294,6 +294,10 @@ public class RDXVRFootstepPlacement
       footstepBeingExternallyPlaced = null;
       latestHeightMapData = null;
       handPlacedFootsteps.clear();
+   }
+
+   public void resetTimer()
+   {
       stepStartTime = -1.0;
    }
 }
