@@ -54,6 +54,7 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
+import us.ihmc.rdx.ui.teleoperation.RDXDesiredRobot;
 import us.ihmc.rdx.ui.teleoperation.RDXHandConfigurationManager;
 import us.ihmc.rdx.ui.tools.KinematicsRecordReplay;
 import us.ihmc.rdx.vr.RDXVRContext;
@@ -137,6 +138,7 @@ public class RDXVRKinematicsStreamingMode
    private final RDXVRFootstepPlacement footstepPlacer;
    private final ControllerStatusTracker controllerStatusTracker;
    private final SwingFootTracker swingFootTracker;
+   private RDXVRArmStreaming armStreaming;
    private final HumanoidKinematicsToolboxConfigurationMessage ikHumanoidSolverConfigurationMessage = new HumanoidKinematicsToolboxConfigurationMessage();
 
    private final RDXHandConfigurationManager handManager;
@@ -170,7 +172,7 @@ public class RDXVRKinematicsStreamingMode
    {
       this.kstParameters = kstParameters;
 
-      RobotDefinition ghostRobotDefinition = new RobotDefinition(syncedRobot.getRobotModel().getRobotDefinition());
+      RobotDefinition ghostRobotDefinition = new RobotDefinition(robotModel.getRobotDefinition());
       MaterialDefinition material = new MaterialDefinition(ColorDefinitions.parse("0xDEE934").derive(0.0, 1.0, 1.0, 0.5));
       RobotDefinition.forEachRigidBodyDefinition(ghostRobotDefinition.getRootBodyDefinition(),
                                                  body -> body.getVisualDefinitions().forEach(visual -> visual.setMaterialDefinition(material)));
@@ -207,6 +209,7 @@ public class RDXVRKinematicsStreamingMode
       kinematicsRecorder = new KinematicsRecordReplay(sceneGraph, enabled);
       motionRetargeting = new RDXVRMotionRetargeting(syncedRobot, handDesiredControlFrames, trackerReferenceFrames, headsetReferenceFrame, retargetingParameters);
       footstepStreaming = new RDXVRFootstepStreaming(syncedRobot, ros2ControllerHelper, footstepPlacer, swingFootTracker);
+      armStreaming = new RDXVRArmStreaming(syncedRobot, handDesiredControlFrames, trackerReferenceFrames, ikControlFramePoses);
 
       if (syncedRobot.getRobotModel().getSimpleRobotName().contains("Nadia"))
       {
@@ -587,6 +590,8 @@ public class RDXVRKinematicsStreamingMode
             if (ghostRobotGraphic.isActive())
                ghostRobotGraphic.update();
 
+            armStreaming.update();
+
             swingFootTracker.update();
             footstepStreaming.processToolboxOutput();
             // Stepping with ankle trackers pauses streaming until walking is done
@@ -827,6 +832,7 @@ public class RDXVRKinematicsStreamingMode
       {
          ghostRobotGraphic.getRenderables(renderables, pool, sceneLevels);
       }
+      armStreaming.getRenderables(renderables, pool);
 
       if (showReferenceFrameGraphics.get())
       {
