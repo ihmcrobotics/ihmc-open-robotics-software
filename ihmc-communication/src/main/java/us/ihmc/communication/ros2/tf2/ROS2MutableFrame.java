@@ -1,5 +1,6 @@
 package us.ihmc.communication.ros2.tf2;
 
+import geometry_msgs.msg.dds.TransformStamped;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.ros2.ROS2Node;
@@ -137,5 +138,11 @@ public class ROS2MutableFrame extends ROS2Frame
    protected void updateTransformToParent(RigidBodyTransform transformToParent)
    {
       transformToParent.set(newestTransformToParent);
+   }
+
+   @Override
+   protected void onNewTransformReceived(TransformStamped newTransform)
+   {
+      updateTransform(newTransform.getTransform(), newTransform.getHeader().getStamp().getSec(), (int) newTransform.getHeader().getStamp().getNanosec());
    }
 }
