@@ -15,7 +15,7 @@ public class AI2RCommandMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "da043020cd0ef7adf1d8169427586ab419179c23716aeb2a07a11f991174a756";
+   		return "b9d13ab92c7aa7e569f07b172ca31e07b01ec4f8855d4cf84f542e1bb84ca3cf";
    }
    
    @Override
@@ -53,6 +53,8 @@ public class AI2RCommandMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
       int initial_alignment = current_alignment;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
       current_alignment += behavior_msgs.msg.dds.AI2RHandPoseAdaptationMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += behavior_msgs.msg.dds.AI2RNavigationMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
@@ -72,6 +74,9 @@ public class AI2RCommandMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getBehaviorToExecute().length() + 1;
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
       current_alignment += behavior_msgs.msg.dds.AI2RHandPoseAdaptationMessagePubSubType.getCdrSerializedSize(data.getHandPoseAdaptation(), current_alignment);
 
       current_alignment += behavior_msgs.msg.dds.AI2RNavigationMessagePubSubType.getCdrSerializedSize(data.getNavigation(), current_alignment);
@@ -86,6 +91,8 @@ public class AI2RCommandMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
       cdr.write_type_d(data.getBehaviorToExecute());else
           throw new RuntimeException("behavior_to_execute field exceeds the maximum length: %d > %d".formatted(data.getBehaviorToExecute().length(), 255));
 
+      cdr.write_type_7(data.getAdaptingBehavior());
+
       behavior_msgs.msg.dds.AI2RHandPoseAdaptationMessagePubSubType.write(data.getHandPoseAdaptation(), cdr);
       behavior_msgs.msg.dds.AI2RNavigationMessagePubSubType.write(data.getNavigation(), cdr);
    }
@@ -93,6 +100,8 @@ public class AI2RCommandMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
    public static void read(behavior_msgs.msg.dds.AI2RCommandMessage data, us.ihmc.idl.CDR cdr)
    {
       cdr.read_type_d(data.getBehaviorToExecute());	
+      data.setAdaptingBehavior(cdr.read_type_7());
+      	
       behavior_msgs.msg.dds.AI2RHandPoseAdaptationMessagePubSubType.read(data.getHandPoseAdaptation(), cdr);	
       behavior_msgs.msg.dds.AI2RNavigationMessagePubSubType.read(data.getNavigation(), cdr);	
 
@@ -102,6 +111,7 @@ public class AI2RCommandMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
    public final void serialize(behavior_msgs.msg.dds.AI2RCommandMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_d("behavior_to_execute", data.getBehaviorToExecute());
+      ser.write_type_7("adapting_behavior", data.getAdaptingBehavior());
       ser.write_type_a("hand_pose_adaptation", new behavior_msgs.msg.dds.AI2RHandPoseAdaptationMessagePubSubType(), data.getHandPoseAdaptation());
 
       ser.write_type_a("navigation", new behavior_msgs.msg.dds.AI2RNavigationMessagePubSubType(), data.getNavigation());
@@ -112,6 +122,7 @@ public class AI2RCommandMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.AI2RCommandMessage data)
    {
       ser.read_type_d("behavior_to_execute", data.getBehaviorToExecute());
+      data.setAdaptingBehavior(ser.read_type_7("adapting_behavior"));
       ser.read_type_a("hand_pose_adaptation", new behavior_msgs.msg.dds.AI2RHandPoseAdaptationMessagePubSubType(), data.getHandPoseAdaptation());
 
       ser.read_type_a("navigation", new behavior_msgs.msg.dds.AI2RNavigationMessagePubSubType(), data.getNavigation());

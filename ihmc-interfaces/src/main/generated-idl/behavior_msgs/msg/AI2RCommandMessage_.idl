@@ -17,6 +17,7 @@ module behavior_msgs
          * Behavior to execute (checkpoint to jump to in the pre-loaded behavior collection)
          */
         string behavior_to_execute;
+        boolean adapting_behavior;
         behavior_msgs::msg::dds::AI2RHandPoseAdaptationMessage hand_pose_adaptation;
         behavior_msgs::msg::dds::AI2RNavigationMessage navigation;
       };
