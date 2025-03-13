@@ -51,6 +51,7 @@ public class RDXVRFootstepPlacement
    private int footstepIndex = 0;
    private LocomotionParameters locomotionParameters;
    private double stepStartTime = -1.0;
+   private boolean useSwingCollisionAvoidance = false;
 
    public RDXVRFootstepPlacement(RDXVRContext vrContext,
                                  ROS2SyncedRobotModel syncedRobot,
@@ -186,6 +187,8 @@ public class RDXVRFootstepPlacement
                                                 latestHeightMapData.getHeightAt(pose.getTranslationX(), pose.getTranslationY()));
                }
                footstepBeingExternallyPlaced.setPose(adaptedPose);
+
+               useSwingCollisionAvoidance = true;
             }
             else
             {
@@ -230,7 +233,19 @@ public class RDXVRFootstepPlacement
       footstepDataMessage.setRobotSide(footstepBeingExternallyPlaced.getSide().toByte());
       footstepDataMessage.getLocation().set(footstepBeingExternallyPlaced.getPose().getPosition());
       footstepDataMessage.getOrientation().set(footstepBeingExternallyPlaced.getPose().getOrientation());
-      footstepDataMessage.setTrajectoryType(TrajectoryType.DEFAULT.toByte());
+      if (!useSwingCollisionAvoidance)
+      {
+         footstepDataMessage.setTrajectoryType(TrajectoryType.DEFAULT.toByte());
+      }
+      else
+      {
+         // This 0.02 is temporal value for the safety.
+         footstepDataMessage.setSwingHeight(footstepBeingExternallyPlaced.getPose().getZ() + 0.05);
+         // Not sure this is the correct way to set the waypoint proportions
+         footstepDataMessage.custom_waypoint_proportions_.set(0, 0.1);
+         footstepDataMessage.custom_waypoint_proportions_.set(1, 0.8);
+         footstepDataMessage.setTrajectoryType(FootstepDataMessage.TRAJECTORY_TYPE_OBSTACLE_CLEARANCE);
+      }
 
       RDXBaseUI.pushNotification("Commanding %d footsteps...".formatted(messageList.getFootstepDataList().size()));
       controllerHelper.publishToController(messageList);
