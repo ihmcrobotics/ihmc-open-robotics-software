@@ -3,13 +3,22 @@ package us.ihmc.rdx.ui.vr;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import controller_msgs.msg.dds.ArmTrajectoryMessage;
+import controller_msgs.msg.dds.JointspaceTrajectoryMessage;
+import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
+import ihmc_common_msgs.msg.dds.QueueableMessage;
+import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
+import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.rdx.ui.graphics.RDXArmMultiBodyGraphic;
 import us.ihmc.rdx.ui.teleoperation.RDXIKSolverColors;
@@ -25,12 +34,23 @@ import java.util.Map;
 
 import static us.ihmc.motionRetargeting.VRTrackedSegmentType.CHEST;
 
+/**
+ A class for streaming arm joint angles to a robot during walking, using footstep streaming.
+ It computes the joint angles based on VR controller positions and chest tracker data,
+ then sends these angles to the robot.
+ This class uses inverse kinematics (IK) to calculate arm joint angles that will position
+ the robot's hands to match the VR controller positions, relative to the chest tracker.
+ The IK solver runs in a separate thread to avoid slowing down the UI.
+ The class also provides visualization of the arm positions using {@link RDXArmMultiBodyGraphic}.
+ */
 public class RDXVRArmStreaming
 {
+   private static final double X_CHEST_IK_ROOT_OFFSET = 0.25;
    private final ROS2SyncedRobotModel syncedRobot;
+   private final ROS2ControllerHelper ros2ControllerHelper;
    private final SideDependentList<ReferenceFrame> handReferenceFrames = new SideDependentList<>();
    private final Map<String, MutableReferenceFrame> trackerReferenceFrames;
-
+   private ReferenceFrame rootFrame;
    private final SideDependentList<ArmIKSolver> armIKSolvers = new SideDependentList<>();
    private final SideDependentList<OneDoFJointBasics[]> desiredRobotArmJoints = new SideDependentList<>();
    private final SideDependentList<ArmJointName[]> armJointNames = new SideDependentList<>();
@@ -38,14 +58,25 @@ public class RDXVRArmStreaming
 
    private volatile boolean readyToSolve = true;
    private volatile boolean readyToCopySolution = false;
-   private boolean enabled = true;
+   private boolean enabled = false;
+   private boolean streaming = false;
 
+   /**
+    Constructs a new RDXVRArmStreaming instance.
+    @param syncedRobot The synchronized robot model
+    @param ros2ControllerHelper The ros2 controller interface
+    @param controllerReferenceFrames Reference frames for the controllers
+    @param trackerReferenceFrames Reference frames for the trackers
+    @param ikHandControlFramePoses Poses/transforms for the hand control frames
+    */
    public RDXVRArmStreaming(ROS2SyncedRobotModel syncedRobot,
+                            ROS2ControllerHelper ros2ControllerHelper,
                             SideDependentList<MutableReferenceFrame> controllerReferenceFrames,
                             Map<String, MutableReferenceFrame> trackerReferenceFrames,
                             SideDependentList<Pose3D> ikHandControlFramePoses)
    {
       this.syncedRobot = syncedRobot;
+      this.ros2ControllerHelper = ros2ControllerHelper;
       this.trackerReferenceFrames = trackerReferenceFrames;
 
       SideDependentList<Pose3D> handControlFrameTransforms = new SideDependentList<>();
@@ -62,59 +93,75 @@ public class RDXVRArmStreaming
             handControlFrameTransforms.put(side, new Pose3D(ikHandControlFramePoses.get(side)));
             handControlFrameTransforms.get(side).setTranslationToZero();
             handControlFrameTransforms.get(side).invert();
-            handReferenceFrames.put(side, ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(controllerReferenceFrames.get(side).getReferenceFrame(), handControlFrameTransforms.get(side)));
+            handReferenceFrames.put(side, ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(controllerReferenceFrames.get(side).getReferenceFrame(),
+                                                                                                                   handControlFrameTransforms.get(side)));
          }
       }
       updateGraphics();
    }
 
+   /**
+    Updates the arm positions based on the latest VR controller and chest tracker data.
+    This method should be called regularly to keep the arm positions up to date.
+    */
    public void update()
    {
       if (enabled)
       {
-         for (RobotSide side : RobotSide.values)
+         if (rootFrame == null && trackerReferenceFrames.get(CHEST.getSegmentName()) != null)
          {
-            if (trackerReferenceFrames.get(CHEST.getSegmentName()) != null)
-            {
-               armIKSolvers.get(side).update(syncedRobot.getReferenceFrames().getChestFrame(), handReferenceFrames.get(side));
-            }
+            rootFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformFromParent(trackerReferenceFrames.get(CHEST.getSegmentName()).getReferenceFrame(),
+                                                                                                   new RigidBodyTransform(new Quaternion(),
+                                                                                                                          new Point3D(X_CHEST_IK_ROOT_OFFSET, 0.0, 0.0)));
          }
 
-         // The following puts the solver on a thread as to not slow down the UI
-         if (readyToSolve)
+         if (rootFrame != null)
          {
-            readyToSolve = false;
             for (RobotSide side : RobotSide.values)
             {
-               armIKSolvers.get(side).copySourceToWork();
+               armIKSolvers.get(side).update(rootFrame, handReferenceFrames.get(side));
             }
 
-            ThreadTools.startAThread(() ->
-             {
-                try
+            // The following puts the solver on a thread as to not slow down the UI
+            if (readyToSolve)
+            {
+               readyToSolve = false;
+               for (RobotSide side : RobotSide.values)
+               {
+                  armIKSolvers.get(side).copySourceToWork();
+               }
+
+               ThreadTools.startAThread(() ->
                 {
-                   for (RobotSide side : RobotSide.values)
+                   try
                    {
-                      armIKSolvers.get(side).solve();
+                      for (RobotSide side : RobotSide.values)
+                      {
+                         armIKSolvers.get(side).solve();
+                      }
                    }
-                }
-                finally
-                {
-                   readyToCopySolution = true;
-                }
-             }, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, "IKSolver");
-         }
-
-         if (readyToCopySolution)
-         {
-            readyToCopySolution = false;
-            for (RobotSide side : RobotSide.values)
-            {
-               MultiBodySystemMissingTools.copyOneDoFJointsConfiguration(armIKSolvers.get(side).getSolutionOneDoFJoints(), desiredRobotArmJoints.get(side));
+                   finally
+                   {
+                      readyToCopySolution = true;
+                   }
+                }, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, "IKSolver");
             }
 
-            readyToSolve = true;
-            updateGraphics();
+            if (readyToCopySolution)
+            {
+               readyToCopySolution = false;
+               for (RobotSide side : RobotSide.values)
+               {
+                  MultiBodySystemMissingTools.copyOneDoFJointsConfiguration(armIKSolvers.get(side).getSolutionOneDoFJoints(), desiredRobotArmJoints.get(side));
+               }
+
+               readyToSolve = true;
+               updateGraphics();
+               if (streaming)
+               {
+                  publishSolutionToController();
+               }
+            }
          }
       }
    }
@@ -126,7 +173,7 @@ public class RDXVRArmStreaming
          for (RobotSide side : armMultiBodyGraphics.keySet())
          {
             RDXArmMultiBodyGraphic armMultiBodyGraphic = armMultiBodyGraphics.get(side);
-            armMultiBodyGraphic.getFloatingJoint().getJointPose().set(trackerReferenceFrames.get(CHEST.getSegmentName()).getReferenceFrame().getTransformToWorldFrame());
+            armMultiBodyGraphic.getFloatingJoint().getJointPose().set(syncedRobot.getReferenceFrames().getChestFrame().getTransformToWorldFrame());
             for (int i = 0; i < armMultiBodyGraphic.getJoints().length; i++)
             {
                armMultiBodyGraphic.getJoints()[i].setQ(desiredRobotArmJoints.get(side)[i].getQ());
@@ -137,9 +184,48 @@ public class RDXVRArmStreaming
       }
    }
 
+   private void publishSolutionToController()
+   {
+      for (RobotSide side : armMultiBodyGraphics.keySet())
+      {
+         JointspaceTrajectoryMessage jointspaceTrajectoryMessage = buildArmJointspaceTrajectoryMessage(side);
+         ArmTrajectoryMessage armTrajectoryMessage = new ArmTrajectoryMessage();
+         armTrajectoryMessage.setRobotSide(side.toByte());
+         armTrajectoryMessage.getJointspaceTrajectory().set(jointspaceTrajectoryMessage);
+         armTrajectoryMessage.setForceExecution(true); // Prevent the command being rejected because robot is walking
+         ros2ControllerHelper.publishToController(armTrajectoryMessage);
+      }
+   }
+
+   private JointspaceTrajectoryMessage buildArmJointspaceTrajectoryMessage(RobotSide side)
+   {
+      JointspaceTrajectoryMessage jointspaceTrajectoryMessage = new JointspaceTrajectoryMessage();
+      jointspaceTrajectoryMessage.getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_STREAM);
+
+      for (OneDoFJointBasics joint : desiredRobotArmJoints.get(side))
+      {
+         OneDoFJointTrajectoryMessage oneDoFJointTrajectoryMessage = jointspaceTrajectoryMessage.getJointTrajectoryMessages().add();
+         oneDoFJointTrajectoryMessage.setWeight(-1.0);
+
+         TrajectoryPoint1DMessage trajectoryPoint1DMessage = oneDoFJointTrajectoryMessage.getTrajectoryPoints().add();
+         trajectoryPoint1DMessage.setTime(0.0);
+         trajectoryPoint1DMessage.setPosition(joint.getQ());
+      }
+      return jointspaceTrajectoryMessage;
+   }
+
    public void enable(boolean enable)
    {
       enabled = enable;
+      if (!enable)
+      {
+         streaming = false;
+      }
+   }
+
+   public void enableStreaming(boolean enable)
+   {
+      streaming = enable;
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
