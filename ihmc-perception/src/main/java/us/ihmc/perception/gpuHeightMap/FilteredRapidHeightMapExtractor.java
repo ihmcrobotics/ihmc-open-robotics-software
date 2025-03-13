@@ -19,7 +19,7 @@ public class FilteredRapidHeightMapExtractor
    private static final boolean PRINT_TIMING_FOR_KERNELS = false;
 
    private static final int BLOCK_SIZE_XY = 32;
-   private static final float ALPHA = 0.75F;
+   private static final float ALPHA = 0.35F;
 
    private final cudaPitchedPtr pointerTo3DArray;
    private int currentIndex;
@@ -56,12 +56,12 @@ public class FilteredRapidHeightMapExtractor
       currentIndex = 0;
    }
 
-   public GpuMat update(GpuMat latestGlobalHeightMap)
+   public GpuMat update(GpuMat latestGlobalHeightMap, int resetOffset)
    {
       int error;
 
       // Only want to compute the average if we have the past values to use
-      if (loopTracker < layers)
+      if (loopTracker < layers + 1)
       {
          loopTracker++;
 
@@ -91,10 +91,12 @@ public class FilteredRapidHeightMapExtractor
       kernel.withPointer(result.data()).withLong(result.step());
       kernel.withPointer(latestGlobalHeightMap.data()).withLong(latestGlobalHeightMap.step());
       kernel.withInt(layers);
+      kernel.withInt(currentIndex);
       kernel.withLong(pointerTo3DArray.pitch() * latestGlobalHeightMap.rows());
       kernel.withInt(latestGlobalHeightMap.rows());
       kernel.withInt(latestGlobalHeightMap.cols());
       kernel.withFloat(ALPHA);
+      kernel.withInt(resetOffset);
 
       kernel.run(stream, registerKernelGridDim, blockSize, 0);
       error = cudaStreamSynchronize(stream);

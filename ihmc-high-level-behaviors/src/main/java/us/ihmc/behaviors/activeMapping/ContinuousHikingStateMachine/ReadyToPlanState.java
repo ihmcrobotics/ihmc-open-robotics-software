@@ -37,7 +37,7 @@ public class ReadyToPlanState implements State
    // These could be put into tunable parameters but for now they were left here
    private static final float X_RANDOM_MARGIN = 0.2f;
    private static final float NOMINAL_STANCE_WIDTH = 0.22f;
-   private static final double ALPHA = 0.2;
+   private static final double ALPHA = 0.1;
 
    private final HumanoidReferenceFrames referenceFrames;
    private final AtomicReference<ContinuousHikingCommandMessage> commandMessage;

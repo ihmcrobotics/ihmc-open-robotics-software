@@ -401,20 +401,10 @@ extern "C" __global__ void heightMapRegistrationKernel(unsigned short *localMap,
 
     float finalHeight = previousHeight;
 
-    // Filter the height
     if (!isColliding && (localHeight - sensorHeight) > params[MIN_HEIGHT_REGISTRATION] &&
         (localHeight - sensorHeight) < params[MAX_HEIGHT_REGISTRATION])
     {
-        float height_diff = fabsf(localHeight - previousHeight);
-        if (height_diff < params[MAX_HEIGHT_DIFFERENCE])
-        {
-            finalHeight = previousHeight * params[HEIGHT_FILTER_ALPHA] +
-                          localHeight * (1.0f - params[HEIGHT_FILTER_ALPHA]);
-        }
-        else
-        {
-            finalHeight = localHeight;
-        }
+        finalHeight = localHeight;
     }
 
     finalHeight += params[HEIGHT_OFFSET];

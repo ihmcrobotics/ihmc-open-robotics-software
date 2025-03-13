@@ -20,7 +20,7 @@
     "upperBound" : 5.0
   },
   "Max height registration" : {
-    "value" : 1.0,
+    "value" : 1.5,
     "lowerBound" : -5.0,
     "upperBound" : 5.0
   },

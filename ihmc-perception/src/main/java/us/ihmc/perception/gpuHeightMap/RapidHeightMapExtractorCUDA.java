@@ -298,7 +298,7 @@ public class RapidHeightMapExtractorCUDA
 
       if (heightMapParameters.getEnableAlphaFilter())
       {
-         GpuMat filteredHeightMap = filteredRapidHeightMapExtractor.update(globalHeightMapImage);
+         GpuMat filteredHeightMap = filteredRapidHeightMapExtractor.update(globalHeightMapImage, resetOffset);
          globalHeightMapImage.close();
          globalHeightMapImage = filteredHeightMap.clone();
          filteredHeightMap.close();
