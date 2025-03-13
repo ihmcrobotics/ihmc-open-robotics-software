@@ -71,15 +71,16 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
          int commandedBehaviorIndex = -1;
          for (int i = 0; i < state.getCheckPoints().size(); i++)
          {
-            if (state.getCheckPoints().get(i).getDefinition().getName().toLowerCase().equals(behaviorToExecuteName))
+            if (state.getCheckPoints().get(i).getDefinition().getName().equals(behaviorToExecuteName))
             {
                commandedBehaviorIndex = state.getCheckPoints().get(i).getLeafIndex();
                break;
             }
          }
 
+         // Generic adaptable skills
          // GoTo behavior - Navigation
-         if (behaviorToExecuteName.toLowerCase().contains("go"))
+         if (behaviorToExecuteName.contains("GOTO") && message.getAdaptingBehavior())
          {
             AI2RNavigationMessage navigationMessage = message.getNavigation();
             // Set goals for GoTo behavior
@@ -97,7 +98,8 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
                }
             }
          }
-         else  // Hand Pose Adaptation
+         // Object pick and place
+         else if (behaviorToExecuteName.contains("PICKUP") || behaviorToExecuteName.contains("PLACE") && message.getAdaptingBehavior())
          {
             AI2RHandPoseAdaptationMessage handMessage = message.getHandPoseAdaptation();
             for (var leaf : state.getActionSequence().getOrderedLeaves())
@@ -125,6 +127,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
             failedLeaves.clear();
             state.getActionSequence().setExecutionNextIndex(commandedBehaviorIndex);
             state.getActionSequence().setAutomaticExecution(true);
+            statusMessage.setCompletedBehavior("-");
          }
       });
    }
@@ -240,10 +243,6 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
             LogTools.info("Completed behavior: {}", statusMessage.getCompletedBehavior());
             // Jump to end of sequence
             state.getActionSequence().setExecutionNextIndex(state.getCheckPoints().get(state.getCheckPoints().size() - 1).getLeafIndex());
-         }
-         else if (!state.getCheckPoints().get(i).getDefinition().getName().contains("END") && state.getCheckPoints().get(i).getIsExecuting())
-         { // If we are executing another behavior checkpoint
-            statusMessage.setCompletedBehavior("");
          }
       }
 

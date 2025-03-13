@@ -12,6 +12,7 @@ public class AI2RCommandMessage extends Packet<AI2RCommandMessage> implements Se
             * Behavior to execute (checkpoint to jump to in the pre-loaded behavior collection)
             */
    public java.lang.StringBuilder behavior_to_execute_;
+   public boolean adapting_behavior_;
    public behavior_msgs.msg.dds.AI2RHandPoseAdaptationMessage hand_pose_adaptation_;
    public behavior_msgs.msg.dds.AI2RNavigationMessage navigation_;
 
@@ -32,6 +33,8 @@ public class AI2RCommandMessage extends Packet<AI2RCommandMessage> implements Se
    {
       behavior_to_execute_.setLength(0);
       behavior_to_execute_.append(other.behavior_to_execute_);
+
+      adapting_behavior_ = other.adapting_behavior_;
 
       behavior_msgs.msg.dds.AI2RHandPoseAdaptationMessagePubSubType.staticCopy(other.hand_pose_adaptation_, hand_pose_adaptation_);
       behavior_msgs.msg.dds.AI2RNavigationMessagePubSubType.staticCopy(other.navigation_, navigation_);
@@ -59,6 +62,15 @@ public class AI2RCommandMessage extends Packet<AI2RCommandMessage> implements Se
    public java.lang.StringBuilder getBehaviorToExecute()
    {
       return behavior_to_execute_;
+   }
+
+   public void setAdaptingBehavior(boolean adapting_behavior)
+   {
+      adapting_behavior_ = adapting_behavior;
+   }
+   public boolean getAdaptingBehavior()
+   {
+      return adapting_behavior_;
    }
 
 
@@ -93,6 +105,8 @@ public class AI2RCommandMessage extends Packet<AI2RCommandMessage> implements Se
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.behavior_to_execute_, other.behavior_to_execute_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.adapting_behavior_, other.adapting_behavior_, epsilon)) return false;
+
       if (!this.hand_pose_adaptation_.epsilonEquals(other.hand_pose_adaptation_, epsilon)) return false;
       if (!this.navigation_.epsilonEquals(other.navigation_, epsilon)) return false;
 
@@ -110,6 +124,8 @@ public class AI2RCommandMessage extends Packet<AI2RCommandMessage> implements Se
 
       if (!us.ihmc.idl.IDLTools.equals(this.behavior_to_execute_, otherMyClass.behavior_to_execute_)) return false;
 
+      if(this.adapting_behavior_ != otherMyClass.adapting_behavior_) return false;
+
       if (!this.hand_pose_adaptation_.equals(otherMyClass.hand_pose_adaptation_)) return false;
       if (!this.navigation_.equals(otherMyClass.navigation_)) return false;
 
@@ -124,6 +140,8 @@ public class AI2RCommandMessage extends Packet<AI2RCommandMessage> implements Se
       builder.append("AI2RCommandMessage {");
       builder.append("behavior_to_execute=");
       builder.append(this.behavior_to_execute_);      builder.append(", ");
+      builder.append("adapting_behavior=");
+      builder.append(this.adapting_behavior_);      builder.append(", ");
       builder.append("hand_pose_adaptation=");
       builder.append(this.hand_pose_adaptation_);      builder.append(", ");
       builder.append("navigation=");
