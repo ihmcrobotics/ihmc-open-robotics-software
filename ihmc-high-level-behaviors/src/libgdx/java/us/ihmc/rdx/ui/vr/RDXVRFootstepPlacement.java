@@ -14,6 +14,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelLoader;
@@ -29,6 +30,8 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 import java.util.ArrayList;
 import java.util.UUID;
+
+import static java.lang.Math.abs;
 
 public class RDXVRFootstepPlacement
 {
@@ -170,7 +173,7 @@ public class RDXVRFootstepPlacement
       footstepBeingExternallyPlaced = new RDXVRFootstep(side, footstepModels.get(side), footstepIndex++);
    }
 
-   public boolean setFootstepPose(FramePose3DReadOnly pose)
+   public boolean setFootstepPose(FramePose3DReadOnly pose, Vector3DReadOnly currentPose)
    {
       if (footstepBeingExternallyPlaced != null)
       {
@@ -188,7 +191,12 @@ public class RDXVRFootstepPlacement
                }
                footstepBeingExternallyPlaced.setPose(adaptedPose);
 
-               useSwingCollisionAvoidance = true;
+               LogTools.info("Current foot pose: " + currentPose + " new footstep pose : " + footstepBeingExternallyPlaced.getPose().getPosition());
+               if (abs(currentPose.getZ() - footstepBeingExternallyPlaced.getPose().getZ() ) > 0.1 )
+               {
+                  LogTools.info("useSwingCollisionAvoidance is turned on");
+                  useSwingCollisionAvoidance = true;
+               }
             }
             else
             {
@@ -242,8 +250,8 @@ public class RDXVRFootstepPlacement
          // This 0.02 is temporal value for the safety.
          footstepDataMessage.setSwingHeight(footstepBeingExternallyPlaced.getPose().getZ() + 0.05);
          // Not sure this is the correct way to set the waypoint proportions
-         footstepDataMessage.custom_waypoint_proportions_.set(0, 0.1);
-         footstepDataMessage.custom_waypoint_proportions_.set(1, 0.8);
+//         footstepDataMessage.custom_waypoint_proportions_.set(0, 0.1);
+//         footstepDataMessage.custom_waypoint_proportions_.set(1, 0.8);
          footstepDataMessage.setTrajectoryType(FootstepDataMessage.TRAJECTORY_TYPE_OBSTACLE_CLEARANCE);
       }
 

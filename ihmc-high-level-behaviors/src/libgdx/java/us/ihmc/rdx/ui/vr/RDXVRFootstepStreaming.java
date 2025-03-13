@@ -114,19 +114,25 @@ public class RDXVRFootstepStreaming
             if (!latestStatus.getAdjustmentFootstep()) // First value estimate for a footstep
             {
                // Place and send footstep
+               RigidBodyTransform currentRobotFootTransformInWorld = new RigidBodyTransform(syncedRobot.getReferenceFrames()
+                                                                                                       .getSoleFrame(side)
+                                                                                                       .getTransformToWorldFrame());
+
                footstepPlacer.createNewFootstep(side);
                footstepPlacer.setFootstepPose(new FramePose3D(ReferenceFrame.getWorldFrame(),
                                                               latestStatus.getDesiredFootPosition(),
-                                                              latestStatus.getDesiredFootOrientation()));
+                                                              latestStatus.getDesiredFootOrientation()), currentRobotFootTransformInWorld.getTranslation());
                // We can't trigger stepping here. We have to notify the KST and stop streaming
                readyToStep.clear();
                readyToStep.set();
             }
             else if (latestStatus.getAdjustmentFootstep() && !latestStatus.getLastAdjustment()) // Later values of updated estimate
             {
+               RigidBodyTransform currentRobotFootTransformInWorld = new RigidBodyTransform(syncedRobot.getReferenceFrames().getSoleFrame(side).getTransformToWorldFrame());
+
                if (footstepPlacer.setFootstepPose(new FramePose3D(ReferenceFrame.getWorldFrame(),
                                                                   latestStatus.getDesiredFootPosition(),
-                                                                  latestStatus.getDesiredFootOrientation())))
+                                                                  latestStatus.getDesiredFootOrientation()), currentRobotFootTransformInWorld.getTranslation()))
                {
                   step(true);
                }
