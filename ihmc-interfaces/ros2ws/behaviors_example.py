@@ -48,6 +48,7 @@ def behavior_message_callback(msg):
 
    # --------- Monitoring -----------
    completed_behavior = msg.completed_behavior
+   print("Completed Behavior: " + completed_behavior)
    failed_behavior = msg.failed_behavior
    if failed_behavior:
        print("[FAILURE] Failed behavior: " + failure_behavior)

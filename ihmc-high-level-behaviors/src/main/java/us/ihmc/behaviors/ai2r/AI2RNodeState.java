@@ -5,8 +5,10 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.sequence.ActionSequenceState;
+import us.ihmc.behaviors.sequence.LeafNodeState;
 import us.ihmc.behaviors.sequence.actions.CheckPointNodeState;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.util.ArrayList;
@@ -40,8 +42,8 @@ public class AI2RNodeState extends BehaviorTreeNodeState<AI2RNodeDefinition>
          {
             checkPoints.add(checkPoint);
          }
-         if (child instanceof ActionSequenceState sequence)
-            updateSubtree(sequence);
+         else
+            updateSubtree(child);
       }
    }
 
