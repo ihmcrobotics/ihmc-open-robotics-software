@@ -20,6 +20,7 @@ import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepP
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.vr.RDXVRContext;
@@ -268,7 +269,8 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       // TODO dangerous. However when manually placing footsteps, this is great.
       messageList.getQueueingProperties().setExecutionMode(activeAdjustment ? ExecutionMode.OVERRIDE.toByte() : ExecutionMode.QUEUE.toByte());
       messageList.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
-      messageList.setOffsetFootstepsHeightWithExecutionError(true);
+      messageList.setOffsetFootstepsHeightWithExecutionError(false);
+      messageList.setTrustHeightOfFootsteps(false);
       messageList.setDefaultSwingDuration(locomotionParameters.getSwingTime());
       messageList.setDefaultTransferDuration(locomotionParameters.getTransferTime());
       messageList.setAreFootstepsAdjustable(locomotionParameters.getAreFootstepsAdjustable());
