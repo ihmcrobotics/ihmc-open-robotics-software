@@ -163,9 +163,9 @@ public class RDXSceneGraphDemo
             zedSVOPlayer.run(true);
 
             zedPublishThread = new ImageSensorPublishThread(ros2Node, zedSVOPlayer,
-                                                            Map.of(ZEDImageSensor.LEFT_COLOR_IMAGE_KEY, PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT),
-                                                                   ZEDImageSensor.RIGHT_COLOR_IMAGE_KEY, PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.RIGHT),
-                                                                   ZEDImageSensor.DEPTH_IMAGE_KEY, PerceptionAPI.ZED2_DEPTH));
+                                                            Map.of(PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT), ZEDImageSensor.LEFT_COLOR_IMAGE_KEY,
+                                                                   PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.RIGHT), ZEDImageSensor.RIGHT_COLOR_IMAGE_KEY,
+                                                                   PerceptionAPI.ZED2_DEPTH, ZEDImageSensor.DEPTH_IMAGE_KEY));
             zedPublishThread.startRepeating();
 
             zedSVORecorderPanel = new RDXZEDSVORecorderPanel(ros2Helper);

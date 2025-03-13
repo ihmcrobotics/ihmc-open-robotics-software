@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import com.studiohartman.jamepad.ControllerButton;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.PlanOffsetStatus;
@@ -15,8 +16,10 @@ import ihmc_common_msgs.msg.dds.PoseListMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import std_msgs.msg.dds.Empty;
+import std_msgs.msg.dds.Float32;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.behaviors.activeMapping.ActiveMappingParameterToolBox;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingLogger;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
 import us.ihmc.behaviors.activeMapping.ContinuousPlannerSchedulingTask;
@@ -42,7 +45,6 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerPar
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.tools.SwingPlannerTools;
 import us.ihmc.log.LogTools;
-import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapManager;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.heightMap.TerrainMapData;
@@ -107,7 +109,10 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    private boolean publishAndSubscribe;
    private double simulatedDriftInMeters = -0.1;
 
-   private final ROS2Publisher<PoseListMessage> turningPublisher;
+   private final ROS2Publisher<Float32> turn90DegreesPublisher;
+   private boolean previousRightBumper;
+   private boolean previousLeftBumper;
+   private boolean previousYButton;
 
    public RDXContinuousHikingPanel(RDXBaseUI baseUI, ROS2Node ros2Node, DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobotModel)
    {
@@ -121,6 +126,14 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       footstepStatusMessagePublisher = ros2Node.createPublisher(getTopic(FootstepStatusMessage.class, robotModel.getSimpleRobotName()));
       planOffsetStatusPublisher = ros2Node.createPublisher(getTopic(PlanOffsetStatus.class, robotModel.getSimpleRobotName()));
       clearGoalFootstepsPublisher = ros2Node.createPublisher(ContinuousHikingAPI.CLEAR_GOAL_FOOTSTEPS);
+
+      MonteCarloFootstepPlannerParameters monteCarloPlannerParameters = new MonteCarloFootstepPlannerParameters();
+      terrainPlanningDebugger = new RDXTerrainPlanningDebugger(ros2Node,
+                                                               monteCarloPlannerParameters,
+                                                               robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
+
+      ros2Node.createSubscription(HumanoidControllerAPI.getTopic(WalkingControllerFailureStatusMessage.class, robotModel.getSimpleRobotName()),
+                                  (s) -> terrainPlanningDebugger.reset());
 
       ros2Node.createSubscription2(ContinuousHikingAPI.START_AND_GOAL_FOOTSTEPS, this::onStartAndGoalPosesReceived);
       ros2Node.createSubscription2(ContinuousHikingAPI.PLANNED_FOOTSTEPS, this::onPlannedFootstepsReceived);
@@ -139,23 +152,15 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
          defaultContactPoints.put(robotSide, defaultFoothold);
       }
 
-      turningPublisher = ros2Node.createPublisher(ContinuousHikingAPI.ROTATE_GOAL_FOOTSTEPS);
+      turn90DegreesPublisher = ros2Node.createPublisher(ContinuousHikingAPI.ROTATE_90_DEGREES);
 
       StancePoseCalculator stancePoseCalculator = new StancePoseCalculator(defaultContactPoints);
       stancePoseSelectionPanel = new RDXStancePoseSelectionPanel(baseUI, ros2Node, stancePoseCalculator);
       addChild(stancePoseSelectionPanel);
 
-      MonteCarloFootstepPlannerParameters monteCarloPlannerParameters = new MonteCarloFootstepPlannerParameters();
       DefaultFootstepPlannerParametersBasics footstepPlannerParameters = robotModel.getFootstepPlannerParameters("ForContinuousWalking");
       SwingPlannerParametersBasics swingPlannerParameters = robotModel.getSwingPlannerParameters();
       this.swingTrajectoryParameters = robotModel.getWalkingControllerParameters().getSwingTrajectoryParameters();
-
-      terrainPlanningDebugger = new RDXTerrainPlanningDebugger(ros2Node,
-                                                               monteCarloPlannerParameters,
-                                                               robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
-
-      ros2Node.createSubscription(HumanoidControllerAPI.getTopic(WalkingControllerFailureStatusMessage.class, robotModel.getSimpleRobotName()),
-                                  (s) -> terrainPlanningDebugger.reset());
 
       hostStoredPropertySets = new ImGuiRemoteROS2StoredPropertySetGroup(ros2Node);
       continuousHikingParameters = new ContinuousHikingParameters();
@@ -209,21 +214,25 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       runSubscriberOnly = true;
       clientStoredPropertySets = new ROS2StoredPropertySetGroup(ros2Node);
 
+      ActiveMappingParameterToolBox activeMappingParameterObject = new ActiveMappingParameterToolBox(clientStoredPropertySets,
+                                                                                                     robotModel,
+                                                                                                     "ForContinuousWalking");
+
       // Add Continuous Hiking Parameters to be between the UI and this process
-      ContinuousHikingParameters continuousHikingParameters = new ContinuousHikingParameters();
-      clientStoredPropertySets.registerStoredPropertySet(ContinuousHikingAPI.CONTINUOUS_HIKING_PARAMETERS, continuousHikingParameters);
+      clientStoredPropertySets.registerStoredPropertySet(ContinuousHikingAPI.CONTINUOUS_HIKING_PARAMETERS,
+                                                         activeMappingParameterObject.getContinuousHikingParameters());
 
       // Add Monte Carlo Footstep Planner Parameters to be between the UI and this process
-      MonteCarloFootstepPlannerParameters monteCarloPlannerParameters = new MonteCarloFootstepPlannerParameters();
-      clientStoredPropertySets.registerStoredPropertySet(ContinuousHikingAPI.MONTE_CARLO_PLANNER_PARAMETERS, monteCarloPlannerParameters);
+      clientStoredPropertySets.registerStoredPropertySet(ContinuousHikingAPI.MONTE_CARLO_PLANNER_PARAMETERS,
+                                                         activeMappingParameterObject.getMonteCarloPlannerParameters());
 
       // Add A* Footstep Planner Parameters to be between the UI and this process
-      DefaultFootstepPlannerParametersBasics footstepPlannerParameters = robotModel.getFootstepPlannerParameters("ForContinuousWalking");
-      clientStoredPropertySets.registerStoredPropertySet(ContinuousHikingAPI.FOOTSTEP_PLANNING_PARAMETERS, footstepPlannerParameters);
+      clientStoredPropertySets.registerStoredPropertySet(ContinuousHikingAPI.FOOTSTEP_PLANNING_PARAMETERS,
+                                                         activeMappingParameterObject.getFootstepPlannerParameters());
 
       // Add Swing Planner Parameters to be synced between the UI and this process
-      SwingPlannerParametersBasics swingPlannerParameters = robotModel.getSwingPlannerParameters();
-      clientStoredPropertySets.registerStoredPropertySet(ContinuousHikingAPI.SWING_PLANNING_PARAMETERS, swingPlannerParameters);
+      clientStoredPropertySets.registerStoredPropertySet(ContinuousHikingAPI.SWING_PLANNING_PARAMETERS,
+                                                         activeMappingParameterObject.getSwingPlannerParameters());
 
       continuousPlannerSchedulingTask = new ContinuousPlannerSchedulingTask(robotModel,
                                                                             ros2Node,
@@ -231,10 +240,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
                                                                             syncedRobotModel.getReferenceFrames(),
                                                                             controllerFootstepQueueMonitor,
                                                                             continuousHikingLogger,
-                                                                            continuousHikingParameters,
-                                                                            monteCarloPlannerParameters,
-                                                                            footstepPlannerParameters,
-                                                                            swingPlannerParameters);
+                                                                            activeMappingParameterObject);
    }
 
    public void update(TerrainMapData terrainMapData, HeightMapData heightMapData)
@@ -292,13 +298,13 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
 
       if (ImGui.button("Turn Left 90°"))
       {
-         turnRobot(Math.PI / 2.0);
+         turnRobot((float) (Math.PI / 2.0));
       }
       ImGui.sameLine();
 
       if (ImGui.button("Turn Right 90°"))
       {
-         turnRobot(-Math.PI / 2.0);
+         turnRobot((float) (-Math.PI / 2.0));
       }
 
       if (ImGui.collapsingHeader("Continuous Hiking Parameters"))
@@ -363,17 +369,13 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       {
          publishContinuousHikingCommandWithEnabled();
       }
+      else if ((ImGui.isKeyDown(ImGuiTools.getLeftArrowKey()) || ImGui.isKeyDown(ImGuiTools.getRightArrowKey())) && ImGui.getIO().getKeyShift())
+      {
+         publishContinuousHikingCommandSideStepEnabled(ImGui.isKeyDown(ImGuiTools.getLeftArrowKey()));
+      }
       else if (controllerConnected)
       {
-         if (joystickController.getButton(joystickController.getMapping().buttonA))
-         {
-            publishJoystickStatus(joystickController);
-         }
-
-         if (joystickController.getButton(joystickController.getMapping().buttonX))
-         {
-            publishStopContinuousHiking();
-         }
+         performJoystickControllerAction(joystickController);
       }
 
       // Pressing this key will stop Continuous Hiking
@@ -386,6 +388,46 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       {
          publishStopContinuousHiking();
       }
+   }
+
+   private void performJoystickControllerAction(Controller joystickController)
+   {
+      boolean currentYButtonPressed = joystickController.getButton(ControllerButton.Y.ordinal());
+      boolean currentLeftBumper = joystickController.getButton(ControllerButton.LEFTBUMPER.ordinal());
+      boolean currentRightBumper = joystickController.getButton(ControllerButton.RIGHTBUMPER.ordinal());
+
+      if (previousYButton && !currentYButtonPressed)
+      {
+         squareUpPublisher.publish(new Empty());
+      }
+
+      if (previousLeftBumper && !currentLeftBumper)
+      {
+         turnRobot((float) (Math.PI / 2.0));
+      }
+
+      if (previousRightBumper && !currentRightBumper)
+      {
+         turnRobot((float) (-Math.PI / 2.0));
+      }
+
+      if (joystickController.getButton(joystickController.getMapping().buttonA))
+      {
+         publishJoystickStatus(joystickController);
+      }
+
+      if (joystickController.getButton(joystickController.getMapping().buttonX) && joystickController.getButton(ControllerButton.DPAD_DOWN.ordinal()))
+      {
+         publishStopContinuousHikingGracefully();
+      }
+      else if (joystickController.getButton(joystickController.getMapping().buttonX))
+      {
+         publishStopContinuousHiking();
+      }
+
+      previousYButton = joystickController.getButton(ControllerButton.Y.ordinal());
+      previousLeftBumper = joystickController.getButton(ControllerButton.LEFTBUMPER.ordinal());
+      previousRightBumper = joystickController.getButton(ControllerButton.RIGHTBUMPER.ordinal());
    }
 
    public void processImGui3DViewInput(ImGui3DViewInput input)
@@ -405,30 +447,11 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       clearGoalFootstepsPublisher.publish(new Empty());
    }
 
-   public void turnRobot(double rotationRadians)
+   public void turnRobot(float rotationRadians)
    {
-      MovingReferenceFrame midFeetZUpFrame = syncedRobotModel.getReferenceFrames().getMidFeetZUpFrame();
-      FramePose3D midFeetZUpPose = new FramePose3D(midFeetZUpFrame, midFeetZUpFrame.getTransformToWorldFrame());
-      SideDependentList<FramePose3D> goalPoses = new SideDependentList<>(new FramePose3D(syncedRobotModel.getReferenceFrames().getMidFeetZUpFrame()),
-                                                                         new FramePose3D(syncedRobotModel.getReferenceFrames().getMidFeetZUpFrame()));
-
-      midFeetZUpPose.appendYawRotation(rotationRadians);
-      goalPoses.get(RobotSide.RIGHT).set(midFeetZUpPose);
-      goalPoses.get(RobotSide.RIGHT).changeFrame(syncedRobotModel.getReferenceFrames().getMidFeetZUpFrame());
-      goalPoses.get(RobotSide.RIGHT).appendTranslation(0, -0.15, 0);
-
-      goalPoses.get(RobotSide.LEFT).set(midFeetZUpPose);
-      goalPoses.get(RobotSide.LEFT).changeFrame(syncedRobotModel.getReferenceFrames().getMidFeetZUpFrame());
-      goalPoses.get(RobotSide.LEFT).appendTranslation(0, 0.15, 0);
-
-      List<Pose3D> poses = new ArrayList<>();
-      poses.add(new Pose3D(goalPoses.get(RobotSide.LEFT)));
-      poses.add(new Pose3D(goalPoses.get(RobotSide.RIGHT)));
-
-      PoseListMessage poseListMessage = new PoseListMessage();
-      MessageTools.packPoseListMessage(poses, poseListMessage);
-
-      turningPublisher.publish(poseListMessage);
+      std_msgs.msg.dds.Float32 rotationInRadians = new Float32();
+      rotationInRadians.setData(rotationRadians);
+      turn90DegreesPublisher.publish(rotationInRadians);
    }
 
    /**
@@ -529,6 +552,30 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       commandMessage.setEnableContinuousHiking(true);
       commandMessage.setStepsBeforeSafetyStop((int) stepsBeforeSafetyStop.getDoubleValue());
       commandMessage.setWalkForwards(true);
+      commandMessage.setSideStep(false);
+      commandMessage.setLeftDirection(false);
+      commandMessage.setSquareUpToGoal(squareUpToGoal.get());
+      commandMessage.setUseAstarFootstepPlanner(useAStarFootstepPlanner.get());
+      commandMessage.setUseMonteCarloFootstepPlanner(useMonteCarloFootstepPlanner.get());
+      commandMessage.setUseMonteCarloPlanAsReference(useMonteCarloReference.get());
+      commandMessage.setUsePreviousPlanAsReference(!useMonteCarloReference.get());
+
+      commandMessage.setUseJoystickController(false);
+      commandMessage.setForwardValue(0.0);
+      commandMessage.setWalkBackwards(false);
+      commandMessage.setLateralValue(0.0);
+      commandMessage.setTurningValue(0.0);
+
+      commandPublisher.publish(commandMessage);
+   }
+
+   private void publishContinuousHikingCommandSideStepEnabled(boolean leftDirection)
+   {
+      commandMessage.setEnableContinuousHiking(true);
+      commandMessage.setStepsBeforeSafetyStop((int) stepsBeforeSafetyStop.getDoubleValue());
+      commandMessage.setWalkForwards(true);
+      commandMessage.setSideStep(true);
+      commandMessage.setLeftDirection(leftDirection);
       commandMessage.setSquareUpToGoal(squareUpToGoal.get());
       commandMessage.setUseAstarFootstepPlanner(useAStarFootstepPlanner.get());
       commandMessage.setUseMonteCarloFootstepPlanner(useMonteCarloFootstepPlanner.get());

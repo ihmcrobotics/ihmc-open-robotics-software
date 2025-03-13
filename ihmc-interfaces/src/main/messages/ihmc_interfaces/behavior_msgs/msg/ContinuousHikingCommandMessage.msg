@@ -10,6 +10,12 @@ uint32 steps_before_safety_stop
 # Flag to walk straight forward with Continuous Hiking. This is generally a keyboard input, and is different then trying to walk with the Joystick
 bool walk_forwards
 
+# Flag to sidestep with Continuous Hiking.
+bool side_step
+
+# Flag for which direction to side step with Continuous Hiking.
+bool left_direction
+
 # Flag to square up to the goal when finishing walking. We may want the robot to end at an exact location.
 # Setting this to true tells the robot to step on the final goal positions.
 bool square_up_to_goal

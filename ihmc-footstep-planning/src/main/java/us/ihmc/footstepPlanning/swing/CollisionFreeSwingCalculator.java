@@ -49,7 +49,6 @@ import us.ihmc.yoVariables.variable.YoInteger;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class CollisionFreeSwingCalculator
 {
@@ -133,7 +132,12 @@ public class CollisionFreeSwingCalculator
       if (tickAndUpdatable != null)
          this.tickAndUpdatables.add(tickAndUpdatable);
       this.graphicsListRegistry = graphicsListRegistry;
-      this.positionTrajectoryGenerator = new PositionOptimizedTrajectoryGenerator("", registry, graphicsListRegistry, 100, numberOfKnotPoints, ReferenceFrame.getWorldFrame());
+      this.positionTrajectoryGenerator = new PositionOptimizedTrajectoryGenerator("",
+                                                                                  registry,
+                                                                                  graphicsListRegistry,
+                                                                                  100,
+                                                                                  numberOfKnotPoints,
+                                                                                  ReferenceFrame.getWorldFrame());
 
       for (int i = 0; i < numberOfKnotPoints; i++)
       {
@@ -176,7 +180,11 @@ public class CollisionFreeSwingCalculator
             YoFramePoint3D collisionLocationViz = new YoFramePoint3D("collisionLocationViz" + i, ReferenceFrame.getWorldFrame(), registry);
             YoFrameVector3D collisionGradientViz = new YoFrameVector3D("collisionGradientViz" + i, ReferenceFrame.getWorldFrame(), registry);
 
-            YoGraphicVector collisionGraphic = new YoGraphicVector("collisionDirection" + i, collisionLocationViz, collisionGradientViz, 2.0, YoAppearance.Red());
+            YoGraphicVector collisionGraphic = new YoGraphicVector("collisionDirection" + i,
+                                                                   collisionLocationViz,
+                                                                   collisionGradientViz,
+                                                                   2.0,
+                                                                   YoAppearance.Red());
             YoGraphicPosition collisionLocation = new YoGraphicPosition("collisionLocation" + i, collisionLocationViz, 0.03, YoAppearance.Red());
             YoGraphicPosition collisionPoint = new YoGraphicPosition("collision" + i, collisionPointViz, 0.02, YoAppearance.Yellow());
             graphicsList.add(collisionGraphic);
@@ -264,12 +272,6 @@ public class CollisionFreeSwingCalculator
          optimizeKnotPoints(planarRegionsList, heightMapData);
          //LogTools.info("Swing Knot Result: [{}]", swingKnotOptimizationResult.toString());
 
-         if (!collisionFound.getValue())
-         {
-            swingTrajectories.add(null);
-            continue;
-         }
-
          footstep.setTrajectoryType(TrajectoryType.CUSTOM);
          swingTrajectories.add(recomputeTrajectory(footstep));
       }
@@ -283,23 +285,13 @@ public class CollisionFreeSwingCalculator
       double[] defaultWaypointProportions = new double[] {0.15, 0.85};
       double defaultSwingHeightFromStanceFoot = walkingControllerParameters.getSwingTrajectoryParameters().getDefaultSwingHeight();
 
+      double maxStepZ = Math.max(startOfSwingPose.getZ(), endOfSwingPose.getZ());
       for (int i = 0; i < 2; i++)
       {
          FramePoint3D waypoint = new FramePoint3D();
          waypoint.interpolate(startOfSwingPose.getPosition(), endOfSwingPose.getPosition(), defaultWaypointProportions[i]);
-         waypoint.addZ(defaultSwingHeightFromStanceFoot);
+         waypoint.setZ(maxStepZ + defaultSwingHeightFromStanceFoot);
          defaultWaypoints.add(waypoint);
-      }
-
-      double zDifference = Math.abs(startOfSwingPose.getZ() - endOfSwingPose.getZ());
-      boolean obstacleClearance = zDifference > walkingControllerParameters.getSwingTrajectoryParameters().getMinHeightDifferenceForStepUpOrDown();
-      if (obstacleClearance)
-      {
-         double maxStepZ = Math.max(startOfSwingPose.getZ(), endOfSwingPose.getZ());
-         for (int i = 0; i < 2; i++)
-         {
-            defaultWaypoints.get(i).setZ(maxStepZ + defaultSwingHeightFromStanceFoot);
-         }
       }
 
       positionTrajectoryGenerator.setEndpointConditions(startOfSwingPose.getPosition(), zeroVector, endOfSwingPose.getPosition(), zeroVector);
@@ -347,7 +339,6 @@ public class CollisionFreeSwingCalculator
                tickAndUpdatable.tickAndUpdate();
          }
       }
-
    }
 
    private void optimizeKnotPoints(PlanarRegionsList planarRegionsList, HeightMapData heightMapData)
@@ -511,20 +502,7 @@ public class CollisionFreeSwingCalculator
       positionTrajectoryGenerator.compute(1 - downSamplePercentage);
       footstep.getCustomWaypointPositions().add(new Point3D(positionTrajectoryGenerator.getPosition()));
 
-      /* Recompute and visualize down-sampled trajectory */
-      positionTrajectoryGenerator.reset();
-      positionTrajectoryGenerator.setEndpointConditions(startOfSwingPose.getPosition(), zeroVector, endOfSwingPose.getPosition(), zeroVector);
-      positionTrajectoryGenerator.setEndpointWeights(infiniteWeight, infiniteWeight, infiniteWeight, infiniteWeight);
-      positionTrajectoryGenerator.setWaypoints(footstep.getCustomWaypointPositions().stream().map(p -> new FramePoint3D(ReferenceFrame.getWorldFrame(), p)).collect(Collectors.toList()));
-      positionTrajectoryGenerator.initialize();
-      positionTrajectoryGenerator.setShouldVisualize(visualize);
-
-      for (int i = 0; i < 30; i++)
-      {
-         boolean isDone = positionTrajectoryGenerator.doOptimizationUpdate();
-         if (isDone)
-            break;
-      }
+      SwingPlannerTools.computeCustomTrajectory(positionTrajectoryGenerator, startOfSwingPose, endOfSwingPose, footstep);
 
       if (visualize)
       {
@@ -624,7 +602,11 @@ public class CollisionFreeSwingCalculator
       {
          String namePrefix = robotSide.getLowerCaseName() + "Foot" + footGraphicIndices.get(robotSide).getAndIncrement();
          this.soleFramePose = new YoFramePoseUsingYawPitchRoll(namePrefix + "graphicPolygon", ReferenceFrame.getWorldFrame(), registry);
-         YoFrameConvexPolygon2D yoFootPolygon = new YoFrameConvexPolygon2D(namePrefix + "yoPolygon", "", ReferenceFrame.getWorldFrame(), footPolygon.getNumberOfVertices(), registry);
+         YoFrameConvexPolygon2D yoFootPolygon = new YoFrameConvexPolygon2D(namePrefix + "yoPolygon",
+                                                                           "",
+                                                                           ReferenceFrame.getWorldFrame(),
+                                                                           footPolygon.getNumberOfVertices(),
+                                                                           registry);
          yoFootPolygon.set(footPolygon);
          footPolygonViz = new YoGraphicPolygon(namePrefix + "graphicPolygon", yoFootPolygon, soleFramePose, 1.0, footPolygonAppearances.get(robotSide));
          yoGraphicsList.add(footPolygonViz);

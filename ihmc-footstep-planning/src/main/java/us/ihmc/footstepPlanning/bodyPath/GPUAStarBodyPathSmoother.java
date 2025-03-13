@@ -329,8 +329,7 @@ public class GPUAStarBodyPathSmoother
          populateWaypointStateBuffers();
          computeSmoothnessGradientsForAllWaypoints();
          getCurrentTraversibilityValues(heightMapParametersBuffer);
-         if (heightMapData != null)
-            computeWaypointMapGradients(heightMapParametersBuffer.getOpenCLBufferObject());
+         computeWaypointMapGradients(heightMapParametersBuffer.getOpenCLBufferObject());
 
          for (int waypointIndex = 1; waypointIndex < pathSize - 1; waypointIndex++)
          {
@@ -340,62 +339,56 @@ public class GPUAStarBodyPathSmoother
             gradients[waypointIndex].add(displacementGradient.getX(), displacementGradient.getY());
          }
 
-         if (heightMapData != null)
+         for (int waypointIndex = 1; waypointIndex < pathSize - 1; waypointIndex++)
          {
-            for (int waypointIndex = 1; waypointIndex < pathSize - 1; waypointIndex++)
+            waypoints[waypointIndex].computeCurrentTraversibilityFromGPU(waypointTravesibilityValues);
+         }
+
+         for (int waypointIndex = 2; waypointIndex < pathSize - 2; waypointIndex++)
+         {
+            /* Collision gradient */
+            gradients[waypointIndex].add(waypoints[waypointIndex].computeCollisionGradientFromGPU(waypointIndex, waypointMaxCollisions, waypointCollisionGradients));
+            maxCollision.set(Math.max(waypoints[waypointIndex].getMaxCollision(), maxCollision.getValue()));
+
+            /* Traversibility gradient */
+            Tuple3DReadOnly traversibilityGradient = waypoints[waypointIndex].computeTraversibilityGradientFromGPU(waypointTraversibilitySamples,
+                                                                                                                   waypointTraversibilityGradients);
+            gradients[waypointIndex].sub(traversibilityGradient.getX(), traversibilityGradient.getY());
+
+            if (waypoints[waypointIndex].isTurnPoint())
             {
-               waypoints[waypointIndex].computeCurrentTraversibilityFromGPU(waypointTravesibilityValues);
+               continue;
             }
 
-            for (int waypointIndex = 2; waypointIndex < pathSize - 2; waypointIndex++)
+            /* Ground plane gradient */
+            Tuple3DReadOnly groundPlaneGradient = waypoints[waypointIndex].computeGroundPlaneGradientFromGPU(waypointGroundPlaneCells,
+                                                                                                             waypointGroundPlaneGradients);
+            gradients[waypointIndex].sub(groundPlaneGradient.getX(), groundPlaneGradient.getY());
+
+            /* Roll-z gradient */
+            Vector2DReadOnly rollGradient = waypoints[waypointIndex].computeRollInclineGradient(leastSquaresNormalBuffer, leastSquaresSampledHeightBuffer);
+            gradients[waypointIndex - 1].sub(rollGradient);
+            gradients[waypointIndex + 1].add(rollGradient);
+
+            if (visualize)
             {
-               /* Collision gradient */
-               gradients[waypointIndex].add(waypoints[waypointIndex].computeCollisionGradientFromGPU(waypointIndex, waypointMaxCollisions, waypointCollisionGradients));
-               maxCollision.set(Math.max(waypoints[waypointIndex].getMaxCollision(), maxCollision.getValue()));
-
-               /* Traversibility gradient */
-               Tuple3DReadOnly traversibilityGradient = waypoints[waypointIndex].computeTraversibilityGradientFromGPU(waypointTraversibilitySamples,
-                                                                                                                      waypointTraversibilityGradients);
-               gradients[waypointIndex].sub(traversibilityGradient.getX(), traversibilityGradient.getY());
-
-               if (waypoints[waypointIndex].isTurnPoint())
+               waypoints[waypointIndex - 1].updateRollGraphics(-rollGradient.getX(), -rollGradient.getY());
+               if (waypointIndex + 1 != pathSize - 1)
                {
-                  continue;
-               }
-
-               /* Ground plane gradient */
-               Tuple3DReadOnly groundPlaneGradient = waypoints[waypointIndex].computeGroundPlaneGradientFromGPU(waypointGroundPlaneCells,
-                                                                                                                waypointGroundPlaneGradients);
-               gradients[waypointIndex].sub(groundPlaneGradient.getX(), groundPlaneGradient.getY());
-
-               /* Roll-z gradient */
-               Vector2DReadOnly rollGradient = waypoints[waypointIndex].computeRollInclineGradient(leastSquaresNormalBuffer, leastSquaresSampledHeightBuffer);
-               gradients[waypointIndex - 1].sub(rollGradient);
-               gradients[waypointIndex + 1].add(rollGradient);
-
-               if (visualize)
-               {
-                  if (waypointIndex - 1 != 0)
-                  {
-                     waypoints[waypointIndex - 1].updateRollGraphics(-rollGradient.getX(), -rollGradient.getY());
-                  }
-                  if (waypointIndex + 1 != pathSize - 1)
-                  {
-                     waypoints[waypointIndex + 1].updateRollGraphics(rollGradient.getX(), rollGradient.getY());
-                  }
+                  waypoints[waypointIndex + 1].updateRollGraphics(rollGradient.getX(), rollGradient.getY());
                }
             }
+         }
 
-            double gradientMagnitudeSq = 0.0;
-            for (int i = 0; i < gradients.length; i++)
-            {
-               gradientMagnitudeSq += EuclidCoreTools.normSquared(gradients[i].getX(), gradients[i].getY());
-            }
+         double gradientMagnitudeSq = 0.0;
+         for (int i = 0; i < gradients.length; i++)
+         {
+            gradientMagnitudeSq += EuclidCoreTools.normSquared(gradients[i].getX(), gradients[i].getY());
+         }
 
-            if (gradientMagnitudeSq < MathTools.square(plannerParameters.getSmootherGradientThresholdToTerminate()) && iteration.getValue() > minIterations)
-            {
-               break;
-            }
+         if (gradientMagnitudeSq < MathTools.square(plannerParameters.getSmootherGradientThresholdToTerminate()) && iteration.getValue() > minIterations)
+         {
+            break;
          }
 
          for (int j = 1; j < pathSize - 1; j++)
@@ -620,10 +613,10 @@ public class GPUAStarBodyPathSmoother
    {
       for (int i = 0; i < pathSize; i++)
       {
-         waypointXYZYawBuffer.getBytedecoFloatBufferPointer().put(4 * i, (float) waypoints[i].getPosition().getX());
-         waypointXYZYawBuffer.getBytedecoFloatBufferPointer().put(4 * i + 1, (float) waypoints[i].getPosition().getY());
-         waypointXYZYawBuffer.getBytedecoFloatBufferPointer().put(4 * i + 2, (float) waypoints[i].getPosition().getZ());
-         waypointXYZYawBuffer.getBytedecoFloatBufferPointer().put(4 * i + 3, (float) waypoints[i].getHeading());
+         waypointXYZYawBuffer.getBytedecoFloatBufferPointer().put((long) 4 * i, (float) waypoints[i].getPosition().getX());
+         waypointXYZYawBuffer.getBytedecoFloatBufferPointer().put((long) 4 * i + 1, (float) waypoints[i].getPosition().getY());
+         waypointXYZYawBuffer.getBytedecoFloatBufferPointer().put((long) 4 * i + 2, (float) waypoints[i].getPosition().getZ());
+         waypointXYZYawBuffer.getBytedecoFloatBufferPointer().put((long) 4 * i + 3, (float) waypoints[i].getHeading());
          waypointTurnPointsBuffer.getBytedecoIntBufferPointer().put(i, waypoints[i].isTurnPoint() ? 1 : 0);
       }
       waypointXYZYawBuffer.writeOpenCLBufferObject(openCLManager);

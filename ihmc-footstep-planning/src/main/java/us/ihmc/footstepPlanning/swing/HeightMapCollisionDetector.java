@@ -186,21 +186,7 @@ public class HeightMapCollisionDetector
    {
       Point3DReadOnly pointOnBox = getPointOnBoxWhenTheWholeBottomPenetrates(groundPoint, collisionBox);
 
-      Vector3D normalAtBox = new Vector3D();
-      normalAtBox.sub(pointOnBox, groundPoint);
-      normalAtBox.normalize();
-
-      collisionResult.setShapesAreColliding(true);
-
-      // set the collision information for the collision box (red point)
-      collisionResult.getPointOnA().set(pointOnBox);
-      collisionResult.getNormalOnA().set(normalAtBox);
-
-      // set the collision information for the ground (yellow point)
-      collisionResult.getPointOnB().set(groundPoint);
-
-      Vector3DReadOnly groundNormal = approximateSurfaceNormalAtPoint(groundPoint, heightMap);
-      collisionResult.getNormalOnB().set(groundNormal);
+      computeCollisionDataWhenPartialPenetration(groundPoint, pointOnBox, heightMap, collisionResult);
    }
 
    static Point3DReadOnly getPointOnBoxWhenTheWholeBottomPenetrates(Point3DReadOnly groundPoint, Box3DReadOnly collisionBox)

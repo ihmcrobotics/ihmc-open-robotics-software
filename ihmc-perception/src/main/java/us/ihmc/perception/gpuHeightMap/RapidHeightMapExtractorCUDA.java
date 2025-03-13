@@ -29,7 +29,7 @@ import java.net.URL;
 
 import static org.bytedeco.cuda.global.cudart.*;
 
-public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInterface
+public class RapidHeightMapExtractorCUDA
 {
    private static final boolean PRINT_TIMING_FOR_KERNELS = false;
    static final int BLOCK_SIZE_XY = 32;
@@ -47,6 +47,7 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
    private final GpuMat terrainCostImage;
    private final GpuMat contactMapImage;
    private final GpuMat sensorCroppedHeightMapImage;
+   private final GpuMat terrainHeightMapImage;
    private final GpuMat emptyGlobalHeightMapImage;
    private final CUDAProgram heightMapCUDAProgram;
 
@@ -71,6 +72,7 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
    private final FloatPointer parametersHostPointer;
    private final FloatPointer parametersDevicePointer;
    private final FilteredRapidHeightMapExtractor filteredRapidHeightMapExtractor;
+   private final FilteredVerticalSurfacesExtractor verticalSurfacesExtractor;
 
    public int sequenceNumber = 0;
    private float gridOffsetX;
@@ -78,6 +80,7 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
    private int localCellsPerAxis;
    private int globalCenterIndex;
    private int cropCenterIndex;
+   private int terrainCenterIndex;
    private int globalCellsPerAxis;
 
    private dim3 blockSize;
@@ -111,11 +114,14 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
       URL mathUtilsHeaderPath = getClass().getResource("/us/ihmc/perception/cuda/MathUtils.cuh");
       URL kernelPath = getClass().getResource("RapidHeightMapExtractor.cu");
 
-      terrainMapData = new TerrainMapData(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize());
+      terrainMapData = new TerrainMapData(heightMapParameters.getTerrainObjectSize(), heightMapParameters.getTerrainObjectSize());
 
       recomputeDerivedParameters();
       // Need to initialize this after the parameters have been computed to get the right size
       filteredRapidHeightMapExtractor = new FilteredRapidHeightMapExtractor(stream, globalCellsPerAxis, globalCellsPerAxis, 6);
+      verticalSurfacesExtractor = new FilteredVerticalSurfacesExtractor(stream,
+                                                                        heightMapParameters.getTerrainObjectSize(),
+                                                                        heightMapParameters.getTerrainObjectSize());
 
       try
       {
@@ -139,6 +145,7 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
          terrainCostImage = new GpuMat(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_8UC1);
          contactMapImage = new GpuMat(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_8UC1);
          sensorCroppedHeightMapImage = new GpuMat(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_16UC1);
+         terrainHeightMapImage = new GpuMat(heightMapParameters.getTerrainObjectSize(), heightMapParameters.getTerrainObjectSize(), opencv_core.CV_16UC1);
 
          emptyGlobalHeightMapImage = new GpuMat(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_16UC1);
 
@@ -175,9 +182,13 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
       globalCellsPerAxis = 2 * globalCenterIndex + 1;
 
       cropCenterIndex = (heightMapParameters.getCropWindowSize() - 1) / 2;
+      terrainCenterIndex = (heightMapParameters.getTerrainObjectSize() - 1) / 2;
 
       if (2 * cropCenterIndex + 1 != heightMapParameters.getCropWindowSize())
          throw new RuntimeException("The crop center index was computed incorrectly.");
+
+      if (2 * terrainCenterIndex + 1 != heightMapParameters.getTerrainObjectSize())
+         throw new RuntimeException("The terrain center index was computed incorrectly.");
    }
 
    public void reset()
@@ -297,8 +308,10 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
       // Run the cropping kernel
       croppingKernel.withPointer(globalHeightMapImage.data()).withLong(globalHeightMapImage.step());
       croppingKernel.withPointer(sensorCroppedHeightMapImage.data()).withLong(sensorCroppedHeightMapImage.step());
+      croppingKernel.withPointer(terrainHeightMapImage.data()).withLong(terrainHeightMapImage.step());
       croppingKernel.withPointer(parametersDevicePointer);
       croppingKernel.withInt(heightMapParameters.getCropWindowSize());
+      croppingKernel.withInt(terrainHeightMapImage.rows());
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
 
@@ -306,19 +319,28 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
 
-      snappedFootstepsExtractor.update(globalHeightMapImage, sensorOrigin, globalCenterIndex, cropCenterIndex);
+      snappedFootstepsExtractor.update(globalHeightMapImage, sensorOrigin, globalCenterIndex, terrainCenterIndex);
 
       //Update the terrain map data with the new results
       terrainMapData.setSensorOrigin(groundToWorldTransform.getTranslationX(), groundToWorldTransform.getTranslationY());
 
-      Mat finalCroppedHeightMap = new Mat();  // Assuming the height map is 201x201
-      sensorCroppedHeightMapImage.download(finalCroppedHeightMap);  // Download the image from the GPU to the Mat object
+      Mat finalCroppedHeightMap = new Mat();
+      if (heightMapParameters.getEnableVerticalFilter())
+      {
+         GpuMat verticalFilteredMap = verticalSurfacesExtractor.update(terrainHeightMapImage);
+         verticalFilteredMap.download(finalCroppedHeightMap);  // Download the image from the GPU to the Mat object
+         verticalFilteredMap.close();
+      }
+      else
+      {
+         terrainHeightMapImage.download(finalCroppedHeightMap);
+      }
+
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
       terrainMapData.setHeightMap(finalCroppedHeightMap);
    }
 
-   @Override
    public void updateHeightOffset(float z)
    {
       int error;
@@ -357,6 +379,9 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
       emptyRegisterKernel.run(stream, registerKernelGridDim, blockSize, 0);
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
+
+      // We reset the filtered height map for the drift to take affect, otherwise it gets overridden.
+      filteredRapidHeightMapExtractor.reset();
 
       // Run the plan offset kernel
       planOffsetKernel.withPointer(globalHeightMapImage.data()).withLong(globalHeightMapImage.step());
@@ -397,6 +422,7 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
                           (float) parameters.getSearchWindowHeight(),
                           (float) parameters.getSearchWindowWidth(),
                           (float) cropCenterIndex,
+                          (float) terrainCenterIndex,
                           (float) parameters.getMinClampHeight(),
                           (float) parameters.getMaxClampHeight(),
                           (float) parameters.getHeightOffset(),
@@ -438,9 +464,11 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
       terrainCostImage.close();
       contactMapImage.close();
       sensorCroppedHeightMapImage.close();
+      terrainHeightMapImage.close();
 
       snappedFootstepsExtractor.destroy();
       filteredRapidHeightMapExtractor.destroy();
+      verticalSurfacesExtractor.destroy();
 
       // At the end we have to destroy the stream to release the memory
       CUDAStreamManager.releaseStream(stream);
@@ -470,7 +498,7 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
    public HeightMapData getHeightMapData()
    {
       HeightMapData latestHeightMapData = new HeightMapData((float) heightMapParameters.getGlobalCellSizeInMeters(),
-                                                            (float) heightMapParameters.getGlobalWidthInMeters(),
+                                                            (float) heightMapParameters.getTerrainWidthInMeters(),
                                                             getSensorOrigin().getX(),
                                                             getSensorOrigin().getY());
 
@@ -478,10 +506,17 @@ public class RapidHeightMapExtractorCUDA implements RapidHeightMapExtractorInter
       PerceptionMessageTools.convertToHeightMapData(heightMapMat,
                                                     latestHeightMapData,
                                                     getSensorOrigin(),
-                                                    (float) heightMapParameters.getGlobalWidthInMeters(),
+                                                    (float) heightMapParameters.getTerrainWidthInMeters(),
                                                     (float) heightMapParameters.getGlobalCellSizeInMeters());
 
       return latestHeightMapData;
+   }
+
+   public Mat getVisualizedHeightMap()
+   {
+      Mat visualizedCroppedHeightMapImage = new Mat();
+      this.sensorCroppedHeightMapImage.download(visualizedCroppedHeightMapImage);
+      return visualizedCroppedHeightMapImage;
    }
 
    public TerrainMapData getTerrainMapData()

@@ -7,7 +7,6 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
-import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapManager;
 import us.ihmc.perception.steppableRegions.SnapResult;
 import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;

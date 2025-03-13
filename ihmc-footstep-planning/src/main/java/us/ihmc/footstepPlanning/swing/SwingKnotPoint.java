@@ -134,8 +134,8 @@ public class SwingKnotPoint
       // set default size
       double footForwardOffset = walkingControllerParameters.getSteppingParameters().getFootForwardOffset();
       double footBackwardOffset = walkingControllerParameters.getSteppingParameters().getFootBackwardOffset();
-      double boxSizeX = footForwardOffset + footBackwardOffset;
-      double boxSizeY = walkingControllerParameters.getSteppingParameters().getFootWidth();
+      double boxSizeX = walkingControllerParameters.getSteppingParameters().getActualFootLength();
+      double boxSizeY = walkingControllerParameters.getSteppingParameters().getActualFootWidth();
       double boxSizeZ = collisionBoxHeight;
       collisionBoxToPack.getSize().set(boxSizeX, boxSizeY, boxSizeZ);
 
