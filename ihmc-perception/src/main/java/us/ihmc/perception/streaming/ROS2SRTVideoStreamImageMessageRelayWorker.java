@@ -36,7 +36,6 @@ public class ROS2SRTVideoStreamImageMessageRelayWorker
    private CUDAJPEGProcessor cudajpegProcessor;
 
    private final ImageMessage imageMessage;
-   private long frameSequenceNumber = 0L;
 
    public ROS2SRTVideoStreamImageMessageRelayWorker(ROS2Node loopbackPublisherNode, ROS2Node subscriberNode, ROS2SRTStreamTopicPair streamTopicPair)
    {
@@ -95,10 +94,7 @@ public class ROS2SRTVideoStreamImageMessageRelayWorker
 
       switch (compressionType)
       {
-         case UNCOMPRESSED ->
-         {
-            PerceptionMessageTools.packImageMessageData(imageMessage, frameMat.data().limit(OpenCVTools.dataSize(frameMat)));
-         }
+         case UNCOMPRESSED -> PerceptionMessageTools.packImageMessageData(imageMessage, frameMat.data().limit(OpenCVTools.dataSize(frameMat)));
          case JPEG ->
          {
             BytePointer encodedData = new BytePointer(OpenCVTools.dataSize(frameMat));
@@ -123,8 +119,8 @@ public class ROS2SRTVideoStreamImageMessageRelayWorker
          }
       }
 
-      // Pack the image message meta data
-      frame.packImageMessageMetaData(imageMessage);
+      // Pack the image message metadata
+      PerceptionMessageTools.packImageMessageMetadata(imageMessage, frame);
 
       // Send the message
       publisher.publish(imageMessage);

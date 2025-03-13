@@ -5,12 +5,10 @@ import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
 import us.ihmc.perception.camera.CameraIntrinsics;
-import us.ihmc.perception.imageMessage.CompressionType;
 import us.ihmc.perception.imageMessage.PixelFormat;
 
 import javax.annotation.Nullable;
@@ -431,36 +429,6 @@ public class RawImage
    {
       if (numberOfReferences.decrementAndGet() <= 0)
          destroy();
-   }
-
-   /**
-    * Packs the {@link ImageMessage} with the {@link RawImage} metadata,
-    * EXCEPT:
-    * <ul>
-    * <li> the compressed data, </li>
-    * <li> the {@link CompressionType}, </li>
-    * <li> the ouster beam altitude angles, and </li>
-    * <li> the ouster beam azimuth angles </li>
-    * </ul>
-    * To pack everything, use this instead:
-    * {@link us.ihmc.perception.tools.PerceptionMessageTools#packImageMessage(RawImage, BytePointer, CompressionType, ImageMessage)}
-    * @param messageToPack The message to pack
-    */
-   public void packImageMessageMetaData(ImageMessage messageToPack)
-   {
-      messageToPack.setPixelFormat(getPixelFormat().toByte());
-      messageToPack.setImageWidth(getWidth());
-      messageToPack.setImageHeight(getHeight());
-      messageToPack.setFocalLengthXPixels(getFocalLengthX());
-      messageToPack.setFocalLengthYPixels(getFocalLengthY());
-      messageToPack.setPrincipalPointXPixels(getPrincipalPointX());
-      messageToPack.setPrincipalPointYPixels(getPrincipalPointY());
-      messageToPack.setCameraModel(getCameraModel().toByte());
-      messageToPack.setDepthDiscretization(getDepthDiscretization());
-      messageToPack.setSequenceNumber(getSequenceNumber());
-      MessageTools.toMessage(getAcquisitionTime(), messageToPack.getAcquisitionTime());
-      messageToPack.getPosition().set(getPosition());
-      messageToPack.getOrientation().set(getOrientation());
    }
 
    private void destroy()
