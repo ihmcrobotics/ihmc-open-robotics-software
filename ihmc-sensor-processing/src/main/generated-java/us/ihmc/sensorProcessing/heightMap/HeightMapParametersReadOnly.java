@@ -20,11 +20,6 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
       return get(flyingPointsFilter);
    }
 
-   default boolean getResetHeightMap()
-   {
-      return get(resetHeightMap);
-   }
-
    default boolean getEnableAlphaFilter()
    {
       return get(enableAlphaFilter);

@@ -29,7 +29,6 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
@@ -110,7 +109,7 @@ public class ReadyToPlanState implements State
       {
          while (stopWatch.getTime() < timeInSwingToWait)
          {
-            System.out.println(stopWatch.getTime(TimeUnit.MILLISECONDS));
+            // Wait till we are a percentage through the swing
          }
 
          LogTools.info("I've waited long enough");

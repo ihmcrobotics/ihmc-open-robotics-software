@@ -62,6 +62,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 
 import java.util.ArrayList;
@@ -169,6 +170,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
 
       hostStoredPropertySets = new ImGuiRemoteROS2StoredPropertySetGroup(ros2Node);
       continuousHikingParameters = new ContinuousHikingParameters();
+      HeightMapParameters heightMapParameters = new HeightMapParameters("GPU");
       createParametersPanel(continuousHikingParameters,
                             continuousHikingParametersPanel,
                             hostStoredPropertySets,
@@ -186,10 +188,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       RDXStoredPropertySetTuner swingPlannerParametersPanel = new RDXStoredPropertySetTuner("Swing Planner Parameters (CH)");
       createParametersPanel(swingPlannerParameters, swingPlannerParametersPanel, hostStoredPropertySets, ContinuousHikingAPI.SWING_PLANNING_PARAMETERS);
       RDXStoredPropertySetTuner heightMapParametersPanel = new RDXStoredPropertySetTuner("Height Map Parameters (CH)");
-      createParametersPanel(RapidHeightMapManager.getHeightMapParameters(),
-                            heightMapParametersPanel,
-                            hostStoredPropertySets,
-                            PerceptionComms.HEIGHT_MAP_PARAMETERS);
+      createParametersPanel(heightMapParameters, heightMapParametersPanel, hostStoredPropertySets, PerceptionComms.HEIGHT_MAP_PARAMETERS);
 
       continuousHikingLogger = new ContinuousHikingLogger();
       controllerFootstepQueueMonitor = new ControllerFootstepQueueMonitor(ros2Node, robotModel.getSimpleRobotName());
@@ -213,31 +212,13 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
     * This allows the {@link ContinuousPlannerSchedulingTask} to be started for when things are running in simulation, during the operation on the robot this
     * method should not be called as it will interfere with the remote process
     */
-   public void startContinuousPlannerSchedulingTask(boolean publishAndSubscribe)
+   public void startContinuousPlannerSchedulingTask(ActiveMappingParameterToolBox activeMappingParameterToolBox,
+                                                    ROS2StoredPropertySetGroup clientStoredPropertySets,
+                                                    boolean publishAndSubscribe)
    {
       this.publishAndSubscribe = publishAndSubscribe;
       runSubscriberOnly = true;
-      clientStoredPropertySets = new ROS2StoredPropertySetGroup(ros2Node);
-
-      ActiveMappingParameterToolBox activeMappingParameterObject = new ActiveMappingParameterToolBox(clientStoredPropertySets,
-                                                                                                     robotModel,
-                                                                                                     "ForContinuousWalking");
-
-      // Add Continuous Hiking Parameters to be between the UI and this process
-      clientStoredPropertySets.registerStoredPropertySet(ContinuousHikingAPI.CONTINUOUS_HIKING_PARAMETERS,
-                                                         activeMappingParameterObject.getContinuousHikingParameters());
-
-      // Add Monte Carlo Footstep Planner Parameters to be between the UI and this process
-      clientStoredPropertySets.registerStoredPropertySet(ContinuousHikingAPI.MONTE_CARLO_PLANNER_PARAMETERS,
-                                                         activeMappingParameterObject.getMonteCarloPlannerParameters());
-
-      // Add A* Footstep Planner Parameters to be between the UI and this process
-      clientStoredPropertySets.registerStoredPropertySet(ContinuousHikingAPI.FOOTSTEP_PLANNING_PARAMETERS,
-                                                         activeMappingParameterObject.getFootstepPlannerParameters());
-
-      // Add Swing Planner Parameters to be synced between the UI and this process
-      clientStoredPropertySets.registerStoredPropertySet(ContinuousHikingAPI.SWING_PLANNING_PARAMETERS,
-                                                         activeMappingParameterObject.getSwingPlannerParameters());
+      this.clientStoredPropertySets = clientStoredPropertySets;
 
       continuousPlannerSchedulingTask = new ContinuousPlannerSchedulingTask(robotModel,
                                                                             ros2Node,
@@ -245,7 +226,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
                                                                             syncedRobotModel.getReferenceFrames(),
                                                                             controllerFootstepQueueMonitor,
                                                                             continuousHikingLogger,
-                                                                            activeMappingParameterObject);
+                                                                            activeMappingParameterToolBox);
    }
 
    public void update(TerrainMapData terrainMapData, HeightMapData heightMapData)

@@ -31,8 +31,6 @@ import java.time.Instant;
  */
 public class RapidHeightMapManager
 {
-   private static final HeightMapParameters heightMapParameters = new HeightMapParameters("GPU");
-
    private final RapidHeightMapExtractorCUDA rapidHeightMapExtractor;
    private final ImageMessage croppedHeightMapImageMessage = new ImageMessage();
    private final FramePose3D cameraPose = new FramePose3D();
@@ -44,6 +42,7 @@ public class RapidHeightMapManager
    private final CUDAFlyingPointsFilter flyingPointsFilter;
 
    private final GpuMat deviceDepthImage;
+   private final HeightMapParameters heightMapParameters;
    private final ROS2Publisher<ImageMessage> heightMapPublisher;
 
    public RapidHeightMapManager(ROS2Node ros2Node,
@@ -52,8 +51,11 @@ public class RapidHeightMapManager
                                 ReferenceFrame leftFootSoleFrame,
                                 ReferenceFrame rightFootSoleFrame,
                                 ControllerFootstepQueueMonitor controllerFootstepQueueMonitor,
-                                CameraIntrinsics depthImageIntrinsics) throws Exception
+                                CameraIntrinsics depthImageIntrinsics,
+                                HeightMapParameters heightMapParameters) throws Exception
    {
+      this.heightMapParameters = heightMapParameters;
+
       deviceDepthImage = new GpuMat(depthImageIntrinsics.getHeight(), depthImageIntrinsics.getWidth(), opencv_core.CV_16UC1);
       rapidHeightMapExtractor = new RapidHeightMapExtractorCUDA(leftFootSoleFrame,
                                                                 rightFootSoleFrame,
@@ -119,7 +121,7 @@ public class RapidHeightMapManager
 
       Mat croppedHeightMapImage = rapidHeightMapExtractor.getVisualizedHeightMap();
 
-      if (getHeightMapParameters().getFlyingPointsFilter())
+      if (heightMapParameters.getFlyingPointsFilter())
       {
          GpuMat deviceCroppedHeightMapImage = new GpuMat();
          deviceCroppedHeightMapImage.upload(croppedHeightMapImage);
@@ -138,7 +140,7 @@ public class RapidHeightMapManager
                                                          rapidHeightMapExtractor.getSequenceNumber(),
                                                          croppedHeightMapImage.rows(),
                                                          croppedHeightMapImage.cols(),
-                                                         (float) getHeightMapParameters().getHeightScaleFactor());
+                                                         (float) heightMapParameters.getHeightScaleFactor());
    }
 
    public HeightMapData getLatestHeightMapData()
@@ -149,11 +151,6 @@ public class RapidHeightMapManager
    public TerrainMapData getTerrainMapData()
    {
       return rapidHeightMapExtractor.getTerrainMapData();
-   }
-
-   public static HeightMapParameters getHeightMapParameters()
-   {
-      return heightMapParameters;
    }
 
    public void destroy()

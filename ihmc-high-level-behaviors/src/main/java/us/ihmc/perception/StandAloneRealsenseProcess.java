@@ -3,14 +3,17 @@ package us.ihmc.perception;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.ros2.ROS2TunedRigidBodyTransform;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros2.ROS2DemandGraphNode;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapManager;
 import us.ihmc.perception.heightMap.TerrainMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 import us.ihmc.sensors.realsense.RealSenseConfiguration;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
@@ -29,6 +32,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class StandAloneRealsenseProcess
 {
+   private static final int DEPTH_IMAGE_KEY = RealSenseImageSensor.DEPTH_IMAGE_KEY;
    public static final String STAND_ALONE_REALSENSE_PROCESS = "StandAloneRealsenseProcess";
    private static final Map<Integer, ROS2Topic<? extends Packet<?>>> D455_IMAGE_TOPIC_MAP = Map.of(RealSenseImageSensor.COLOR_IMAGE_KEY,
                                                                                                    PerceptionAPI.SRT_REALSENSE_COLOR_STREAM_STATUS,
@@ -36,90 +40,130 @@ public class StandAloneRealsenseProcess
                                                                                                    PerceptionAPI.D455_DEPTH_IMAGE);
 
    private final ROS2DemandGraphNode realsenseDemandNode;
+   private final ControllerFootstepQueueMonitor controllerFootstepQueueMonitor;
    private final ROS2DemandGraphNode realsensePublishDemandNode;
-   private final ROS2Helper ros2Helper;
+   private final HeightMapParameters heightMapParameters;
+   private final ROS2Node ros2Node;
    private final ROS2SyncedRobotModel syncedRobot;
+   private final Object heightMapLock = new Object();
 
-   private final RealSenseImageSensor d455Sensor;
-   private final ImageSensorPublishThread d455PublishThread;
+   private final RealSenseImageSensor realsenseSensor;
+   private final ImageSensorPublishThread realsensePublishThread;
 
-   private final ROS2DemandGraphNode heightMapDemandNode;
-   private RapidHeightMapUpdateThread heightMapUpdateThread;
+   private final ReferenceFrame zUpSensorFrame;
+   private final ROS2TunedRigidBodyTransform realsenseTunableTransform;
+   private RapidHeightMapManager heightMapManager;
+   private final ReferenceFrame sensorFrame;
 
-   public StandAloneRealsenseProcess(ROS2Node ros2Node, ROS2Helper ros2Helper, ROS2SyncedRobotModel syncedRobot)
+   public StandAloneRealsenseProcess(ROS2Node ros2Node, ROS2Helper ros2Helper, ROS2SyncedRobotModel syncedRobot, HeightMapParameters heightMapParameters)
    {
-      this(ros2Node, ros2Helper, syncedRobot, null);
+      this(ros2Node, ros2Helper, syncedRobot, heightMapParameters, null);
    }
 
    public StandAloneRealsenseProcess(ROS2Node ros2Node,
                                      ROS2Helper ros2Helper,
                                      ROS2SyncedRobotModel syncedRobot,
+                                     HeightMapParameters heightMapParameters,
                                      ControllerFootstepQueueMonitor controllerFootstepQueueMonitor)
    {
-      this.ros2Helper = ros2Helper;
+      this.ros2Node = ros2Node;
       this.syncedRobot = syncedRobot;
 
       realsensePublishDemandNode = new ROS2DemandGraphNode(ros2Node, PerceptionAPI.REQUEST_REALSENSE_PUBLICATION);
-      heightMapDemandNode = new ROS2DemandGraphNode(ros2Node, PerceptionAPI.REQUEST_HEIGHT_MAP);
+      this.heightMapParameters = heightMapParameters;
+      ROS2DemandGraphNode heightMapDemandNode = new ROS2DemandGraphNode(ros2Node, PerceptionAPI.REQUEST_HEIGHT_MAP);
 
       realsenseDemandNode = new ROS2DemandGraphNode(ros2Node, PerceptionAPI.REQUEST_REALSENSE);
+      this.controllerFootstepQueueMonitor = controllerFootstepQueueMonitor;
       realsenseDemandNode.addDependents(realsensePublishDemandNode, heightMapDemandNode);
 
-      d455Sensor = new RealSenseImageSensor(RealSenseConfiguration.D455_COLOR_720P_DEPTH_720P_30HZ);
+      realsenseSensor = new RealSenseImageSensor(RealSenseConfiguration.D455_COLOR_720P_DEPTH_720P_30HZ);
 
-      ROS2TunedRigidBodyTransform realsenseTunableTransform = ROS2TunedRigidBodyTransform.toBeTuned(ros2Helper,
-                                                                                                    PerceptionAPI.STEPPING_CAMERA_TO_PARENT_TUNING,
-                                                                                                    syncedRobot.getRobotModel()
-                                                                                                               .getSensorInformation()
-                                                                                                               .getSteppingCameraTransform());
+      sensorFrame = syncedRobot.getReferenceFrames().getSteppingCameraFrame();
+      zUpSensorFrame = syncedRobot.getReferenceFrames().getSteppingCameraZUpFrame();
+
+      realsenseTunableTransform = ROS2TunedRigidBodyTransform.toBeTuned(ros2Helper,
+                                                                        PerceptionAPI.STEPPING_CAMERA_TO_PARENT_TUNING,
+                                                                        syncedRobot.getRobotModel().getSensorInformation().getSteppingCameraTransform());
 
       // We create a ThreadFactory here so that when profiling the thread, there is a user-friendly name to identify it with
       ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat(STAND_ALONE_REALSENSE_PROCESS).build();
       ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1, threadFactory);
-      scheduler.scheduleAtFixedRate(realsenseTunableTransform::update, 0, 33, TimeUnit.MILLISECONDS);
+      scheduler.scheduleAtFixedRate(this::updateEverythingRealSense, 0, 33, TimeUnit.MILLISECONDS);
 
-      d455Sensor.setSensorFrameSupplier(syncedRobot.getReferenceFrames()::getSteppingCameraFrame);
-      loopOnDemand(d455Sensor.getGrabThread(), realsenseDemandNode);
+      realsenseSensor.setSensorFrameSupplier(syncedRobot.getReferenceFrames()::getSteppingCameraFrame);
+      loopOnDemand(realsenseSensor.getGrabThread(), realsenseDemandNode);
 
-      d455PublishThread = new ImageSensorPublishThread(ros2Node, d455Sensor, D455_IMAGE_TOPIC_MAP);
-      loopOnDemand(d455PublishThread, realsensePublishDemandNode);
-
-      initializeHeightMap(controllerFootstepQueueMonitor);
+      realsensePublishThread = new ImageSensorPublishThread(ros2Node, realsenseSensor, D455_IMAGE_TOPIC_MAP);
+      loopOnDemand(realsensePublishThread, realsensePublishDemandNode);
    }
 
-   private void initializeHeightMap(ControllerFootstepQueueMonitor controllerFootstepQueueMonitor)
+   private void updateEverythingRealSense()
    {
-      heightMapUpdateThread = new RapidHeightMapUpdateThread(ros2Helper.getROS2Node(),
-                                                             syncedRobot,
-                                                             syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.LEFT),
-                                                             syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.RIGHT),
-                                                             controllerFootstepQueueMonitor,
-                                                             d455Sensor,
-                                                             RealSenseImageSensor.DEPTH_IMAGE_KEY);
-      loopOnDemand(heightMapUpdateThread, heightMapDemandNode);
+      try
+      {
+         realsenseSensor.waitForGrab();
+         RawImage depthImage = realsenseSensor.getImage(DEPTH_IMAGE_KEY);
+
+         // Initialize
+         if (heightMapManager == null)
+         {
+            heightMapManager = new RapidHeightMapManager(ros2Node,
+                                                         syncedRobot.getFullRobotModel(),
+                                                         syncedRobot.getRobotModel().getSimpleRobotName(),
+                                                         syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.LEFT),
+                                                         syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.RIGHT),
+                                                         controllerFootstepQueueMonitor,
+                                                         depthImage.getIntrinsicsCopy(),
+                                                         heightMapParameters);
+         }
+
+         // Update height map
+         synchronized (heightMapLock)
+         {
+            heightMapManager.update(depthImage.getCpuImageMat(), depthImage.getAcquisitionTime(), sensorFrame, zUpSensorFrame);
+         }
+
+         depthImage.release();
+      }
+      catch (InterruptedException ignored)
+      {
+      }
+      catch (Exception e)
+      {
+         LogTools.error(e);
+      }
+
+      realsenseTunableTransform.update();
    }
 
    public RapidHeightMapManager getHeightMapManager()
    {
-      return heightMapUpdateThread.getHeightMapManager();
+      return heightMapManager;
    }
 
    public HeightMapData getLatestHeightMapData()
    {
-      return heightMapUpdateThread.getLatestHeightMapData();
+      synchronized (heightMapLock)
+      {
+         return heightMapManager.getLatestHeightMapData();
+      }
    }
 
    public TerrainMapData getLatestTerrainMapData()
    {
-      return heightMapUpdateThread.getLatestTerrainMapData();
+      synchronized (heightMapLock)
+      {
+         return heightMapManager.getTerrainMapData();
+      }
    }
 
    public void destroy()
    {
       realsenseDemandNode.destroy();
       realsensePublishDemandNode.destroy();
-      d455Sensor.close();
-      d455PublishThread.blockingKill();
+      realsenseSensor.close();
+      realsensePublishThread.blockingKill();
    }
 
    private static void loopOnDemand(RepeatingTaskThread loopThread, ROS2DemandGraphNode demandNode)
