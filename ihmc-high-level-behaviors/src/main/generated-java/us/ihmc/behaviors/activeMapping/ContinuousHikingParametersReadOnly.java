@@ -55,11 +55,6 @@ public interface ContinuousHikingParametersReadOnly extends StoredPropertySetRea
       return get(transferTime);
    }
 
-   default double getPlanningTimeoutAsAFractionOfTheStepDuration()
-   {
-      return get(planningTimeoutAsAFractionOfTheStepDuration);
-   }
-
    default double getPlanningWithoutReferenceTimeout()
    {
       return get(planningWithoutReferenceTimeout);

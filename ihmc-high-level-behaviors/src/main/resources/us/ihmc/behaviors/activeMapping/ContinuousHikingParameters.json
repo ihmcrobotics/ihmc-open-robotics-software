@@ -9,9 +9,8 @@
   "Goal pose sideways distance" : 1.2,
   "Swing time" : 0.95,
   "Transfer time" : 0.6,
-  "Planning timeout as a fraction of the step duration" : 0.3,
   "Planning without reference timeout" : 1.3,
-  "Percent through swing to start planning" : 0.25,
+  "Percent through swing to start planning" : 0.15,
   "Log footstep plans" : true,
   "Next Waypoint Distance Margin" : 0.8
 }
