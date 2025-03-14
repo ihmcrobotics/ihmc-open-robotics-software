@@ -301,7 +301,7 @@ public class SwingKnotPoint
       }
       if (heightMapData != null && !heightMapData.isEmpty())
       {
-         EuclidShape3DCollisionResult collisionResult = HeightMapCollisionDetector.evaluateCollision(collisionBox, heightMapData);
+         EuclidShape3DCollisionResult collisionResult = HeightMapCollisionDetector.newEvaluateCollision(collisionBox, heightMapData);
 
          if (collisionResult.getSignedDistance() < this.collisionResult.getSignedDistance())
          {
