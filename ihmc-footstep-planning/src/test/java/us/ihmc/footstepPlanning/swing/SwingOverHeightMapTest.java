@@ -78,7 +78,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class SwingOverHeightMapTest
 {
-   private static boolean visualize = false;
+   private static boolean visualize = true;
    private static final double heightMapResolution = 0.03;
 
    private SimulationConstructionSet2 scs;
@@ -321,7 +321,7 @@ public class SwingOverHeightMapTest
       generator.addCubeReferencedAtCenter(cubeDepth, 0.4, cubeHeight);
 
       FramePose3D startFoot = new FramePose3D();
-      startFoot.getPosition().set(0.0, 0.0, 0.0);
+      startFoot.getPosition().set(-0.05, 0.0, 0.0);
 
       FramePose3D endFoot = new FramePose3D();
       endFoot.getPosition().set(1.0, 0.0, 0.0);
