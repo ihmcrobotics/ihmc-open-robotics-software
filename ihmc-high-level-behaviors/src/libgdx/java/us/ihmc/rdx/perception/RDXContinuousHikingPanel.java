@@ -165,7 +165,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       addChild(stancePoseSelectionPanel);
 
       DefaultFootstepPlannerParametersBasics footstepPlannerParameters = robotModel.getFootstepPlannerParameters("ForContinuousWalking");
-      SwingPlannerParametersBasics swingPlannerParameters = robotModel.getSwingPlannerParameters();
+      SwingPlannerParametersBasics swingPlannerParameters = robotModel.getSwingPlannerParameters("ForContinuousWalking");
       this.swingTrajectoryParameters = robotModel.getWalkingControllerParameters().getSwingTrajectoryParameters();
 
       hostStoredPropertySets = new ImGuiRemoteROS2StoredPropertySetGroup(ros2Node);
