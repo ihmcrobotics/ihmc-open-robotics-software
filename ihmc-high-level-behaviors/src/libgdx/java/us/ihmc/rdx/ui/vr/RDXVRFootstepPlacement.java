@@ -253,6 +253,7 @@ public class RDXVRFootstepPlacement
 //         footstepDataMessage.custom_waypoint_proportions_.set(0, 0.1);
 //         footstepDataMessage.custom_waypoint_proportions_.set(1, 0.8);
          footstepDataMessage.setTrajectoryType(FootstepDataMessage.TRAJECTORY_TYPE_OBSTACLE_CLEARANCE);
+         useSwingCollisionAvoidance = false;
       }
 
       RDXBaseUI.pushNotification("Commanding %d footsteps...".formatted(messageList.getFootstepDataList().size()));
