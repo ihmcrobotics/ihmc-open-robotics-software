@@ -59,11 +59,12 @@ public class CollisionFreeSwingCalculator implements SCS2YoGraphicHolder
    private static final double minCollisionAdjustment = 0.01;
    private static final double minCollisionAdjustmentSquared = minCollisionAdjustment * minCollisionAdjustment;
    private static final double collisionDistanceEpsilon = 1e-4;
-   private static final int numberOfKnotPoints = 12;
+   private static final int numberOfKnotPoints = 15;
    private static final double downSamplePercentage = 0.3;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoInteger iteration = new YoInteger("iteration", registry);
+   private final YoBoolean collisionFoundInIteration = new YoBoolean("collisionFoundInIteration", registry);
    private final YoInteger knotEvaluation = new YoInteger("knotEvaluation", registry);
    private final YoBoolean collisionFound = new YoBoolean("collisionFound", registry);
    private final YoDouble maxCollisionDistance = new YoDouble("maxCollisionDistance", registry);
@@ -353,8 +354,18 @@ public class CollisionFreeSwingCalculator implements SCS2YoGraphicHolder
       for (int i = 0; i < maxIterations; i++)
       {
          iteration.set(i);
-         maxCollisionDistance.set(0.0);
-         boolean intersectionFound = false;
+         maxCollisionDistance.set(Double.NEGATIVE_INFINITY);
+         collisionFoundInIteration.set(false);
+
+         if (visualize)
+         {
+            for (int j = 0; j < numberOfKnotPoints; j++)
+            {
+               collisionPointsViz.get(j).setToNaN();
+               collisionLocationsViz.get(j).setToNaN();
+               collisionGradientsViz.get(j).setToNaN();
+            }
+         }
 
          for (int j = 0; j < numberOfKnotPoints; j++)
          {
@@ -387,7 +398,7 @@ public class CollisionFreeSwingCalculator implements SCS2YoGraphicHolder
                // Project the calculated gradient onto the waypoint adjustment frame
                swingKnotPoints.get(j).projectOntoYZAdjustmentPlane(collisionGradients.get(j));
                maxCollisionDistance.set(Math.max(maxCollisionDistance.getDoubleValue(), collisionResult.getDistance()));
-               intersectionFound = true;
+               collisionFoundInIteration.set(true);
 
                if (swingKnotPoints.get(j).getCollisionResult().areShapesColliding())
                {
@@ -447,7 +458,7 @@ public class CollisionFreeSwingCalculator implements SCS2YoGraphicHolder
                tickAndUpdatable.tickAndUpdate();
          }
 
-         if (!intersectionFound || maxCollisionDistance.getDoubleValue() < collisionDistanceEpsilon)
+         if (!collisionFoundInIteration.getBooleanValue() || maxCollisionDistance.getDoubleValue() < collisionDistanceEpsilon)
          {
             break;
          }
