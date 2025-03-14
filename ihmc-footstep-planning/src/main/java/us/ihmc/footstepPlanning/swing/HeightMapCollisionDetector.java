@@ -87,6 +87,7 @@ public class HeightMapCollisionDetector
          return collisionResult;
 
       collisionResult.setShapesAreColliding(true);
+      collisionResult.setSignedDistance(maxPenetrationDepth);
 
       // set the collision information for the collision box (red point)
       collisionResult.getPointOnA().set(maximumPenetratingPointOnBox);
