@@ -45,7 +45,6 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerPar
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.tools.SwingPlannerTools;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.gpuHeightMap.RapidHeightMapManager;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.rdx.imgui.ImGuiSliderDouble;
