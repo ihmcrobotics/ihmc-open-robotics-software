@@ -137,10 +137,13 @@ public class RDXRapidHeightMapExtractorCUDADemo
                //                                                              incomingCompressedImageBytePointer,
                //                                                              compressedBytesMat);
 
+               HeightMapParameters heightMapParameters = new HeightMapParameters("GPU");
                PerceptionMessageTools.convertToHeightMapData(sensorSimulator.getDepthImage().getCpuImageMat(),
                                                              heightMapData,
                                                              croppedHeightMapImageMessage.getPosition(),
-                                                             new HeightMapParameters("GPU"));
+                                                             (float) heightMapParameters.getGlobalWidthInMeters(),
+                                                             (float) heightMapParameters.getGlobalCellSizeInMeters(),
+                                                             heightMapParameters);
                HeightMapMessageTools.toMessage(heightMapData, heightMapMessage);
 
                //               List<RDXMultiColorMeshBuilder> multiColorMeshBuilders = RDXHeightMapGraphicNew.generateHeightCells(heightsProvided,

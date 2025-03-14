@@ -261,9 +261,11 @@ public class PerceptionMessageTools
    public static void convertToHeightMapData(Mat heightMapPointer,
                                              HeightMapData heightMapDataToPack,
                                              Point3D gridCenter,
+                                             float widthInMeters,
+                                             float cellSizeInMeter,
                                              HeightMapParameters heightMapParameters)
    {
-      int centerIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getTerrainWidthInMeters(), heightMapParameters.getGlobalCellSizeInMeters());
+      int centerIndex = HeightMapTools.computeCenterIndex(widthInMeters, cellSizeInMeter);
       int cellsPerAxis = 2 * centerIndex + 1;
       int totalCells = cellsPerAxis * cellsPerAxis;
 

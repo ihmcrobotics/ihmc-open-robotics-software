@@ -126,7 +126,7 @@ public class HeightMapData
       }
 
       int key = HeightMapTools.coordinateToKey(x, y, gridCenter.getX(), gridCenter.getY(), gridResolutionXY, centerIndex);
-      return heights[key];
+      return Double.isNaN(heights[key]) ? estimatedGroundHeight : heights[key];
    }
 
    public void setHeightAt(int key, double height)

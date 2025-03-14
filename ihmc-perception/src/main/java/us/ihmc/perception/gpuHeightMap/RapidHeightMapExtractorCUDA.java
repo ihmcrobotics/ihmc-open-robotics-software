@@ -501,7 +501,12 @@ public class RapidHeightMapExtractorCUDA
                                                             getSensorOrigin().getY());
 
       Mat heightMapMat = getTerrainMapData().getHeightMap();
-      PerceptionMessageTools.convertToHeightMapData(heightMapMat, latestHeightMapData, getSensorOrigin(), heightMapParameters);
+      PerceptionMessageTools.convertToHeightMapData(heightMapMat,
+                                                    latestHeightMapData,
+                                                    getSensorOrigin(),
+                                                    (float) heightMapParameters.getTerrainWidthInMeters(),
+                                                    (float) heightMapParameters.getGlobalCellSizeInMeters(),
+                                                    heightMapParameters);
 
       return latestHeightMapData;
    }
