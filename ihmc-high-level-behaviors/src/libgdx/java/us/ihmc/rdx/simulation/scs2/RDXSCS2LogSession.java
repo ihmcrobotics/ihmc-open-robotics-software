@@ -7,13 +7,14 @@ import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.graphics.LogVideoLoader;
 import us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer;
 import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizersPanel;
+import us.ihmc.robotDataLogger.Camera;
 import us.ihmc.robotDataLogger.logger.LogPropertiesReader;
 import us.ihmc.scs2.session.SessionMode;
 import us.ihmc.scs2.session.log.LogDataReader;
 import us.ihmc.scs2.session.log.LogSession;
+import us.ihmc.scs2.session.log.ZEDSVOScrubber;
 import us.ihmc.tools.time.DurationFormatter;
 
 import java.io.File;
@@ -62,6 +63,17 @@ public class RDXSCS2LogSession extends RDXSCS2Session
       {
          startSession(logSession);
 
+         for (int i = 0; i < logSession.getLogProperties().getCameras().size(); i++)
+         {
+            Camera camera = logSession.getLogProperties().getCameras().get(i);
+            LogTools.info("Found camera: %s".formatted(camera.getName()));
+         }
+
+         for (File zedSensorDatFile : ZEDSVOScrubber.findZEDSensorDatFiles(logSession.getLogDirectory()))
+         {
+            LogTools.info("Found ZED sensor: %s".formatted(zedSensorDatFile.getName()));
+
+         }
 
 //         imagePanels.add(new RDXOpenCVVideoVisualizer("LoggerCameraView", "NadiaNorth", false));
 //         imagePanels.add(new RDXOpenCVVideoVisualizer("LoggerCameraView", "NadiaSouth", false));
