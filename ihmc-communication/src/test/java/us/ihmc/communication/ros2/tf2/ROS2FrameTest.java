@@ -2,6 +2,7 @@ package us.ihmc.communication.ros2.tf2;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
@@ -10,7 +11,7 @@ import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
 
-import java.time.Instant;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -20,35 +21,14 @@ public class ROS2FrameTest
    private static final double EPSILON = 1E-7;
 
    @Test
-   public void testWorldFrame()
-   {
-      ROS2StaticFrame worldFrame = ROS2FrameTools.getWorldFrame();
-
-      assertTrue(worldFrame.isWorldFrame());
-      assertTrue(worldFrame.isRootFrame());
-      assertTrue(worldFrame.isAStationaryFrame());
-      assertTrue(worldFrame.isZupFrame());
-      assertTrue(worldFrame.isFixedInParent());
-
-      assertDoesNotThrow(worldFrame::update);
-
-      assertNull(worldFrame.getParent());
-      assertEquals(worldFrame, worldFrame.getRootFrame());
-      assertEquals(ROS2FrameTools.WORLD_FRAME_ID, worldFrame.getFrameId());
-      EuclidCoreTestTools.assertEquals(ReferenceFrame.getWorldFrame().getTransformToWorldFrame(), worldFrame.getTransformToWorldFrame(), EPSILON);
-      EuclidCoreTestTools.assertEquals(ReferenceFrame.getWorldFrame().getTransformToRoot(), worldFrame.getTransformToRoot(), EPSILON);
-   }
-
-   @Test
    public void testConstructingStaticFrame()
    {
       ROS2Node node = new ROS2NodeBuilder().build("test_node");
 
       String id = "test_static_frame";
-      ROS2Frame parentFrame = ROS2FrameTools.getWorldFrame();
+      ReferenceFrame parentFrame = ReferenceFrameTools.getWorldFrame();
       RigidBodyTransformReadOnly transformToParent = new RigidBodyTransform(new YawPitchRoll(0.1, 0.2, 0.3), new Vector3D(0.4, 0.5, 0.6));
-      Instant timeAtConstruction = Instant.now();
-      ROS2Frame staticFrame = new ROS2StaticFrame(node, id, parentFrame, transformToParent, timeAtConstruction);
+      ROS2Frame staticFrame = new ROS2StaticFrame(node, id, parentFrame, transformToParent);
 
       assertFalse(staticFrame.isWorldFrame());
       assertFalse(staticFrame.isRootFrame());
@@ -58,7 +38,6 @@ public class ROS2FrameTest
 
       assertEquals(id, staticFrame.getFrameId());
       assertEquals(id, staticFrame.getName());
-      assertEquals(timeAtConstruction, staticFrame.getLastUpdateTimestamp());
       assertEquals(parentFrame, staticFrame.getParent());
       EuclidCoreTestTools.assertEquals(transformToParent, staticFrame.getTransformToParent(), EPSILON);
 
@@ -72,7 +51,7 @@ public class ROS2FrameTest
       ROS2Node node = new ROS2NodeBuilder().build("test_node");
 
       String id = "test_mutable_frame";
-      ROS2Frame parentFrame = ROS2FrameTools.getWorldFrame();
+      ReferenceFrame parentFrame = ReferenceFrameTools.getWorldFrame();
       ROS2MutableFrame mutableFrame = new ROS2MutableFrame(node, id, parentFrame);
 
       assertFalse(mutableFrame.isWorldFrame());
@@ -117,26 +96,27 @@ public class ROS2FrameTest
 
       // Construct a mutable frame
       String id = "test_mutable_frame";
-      ROS2Frame parentFrame = ROS2FrameTools.getWorldFrame();
+      ReferenceFrame parentFrame = ReferenceFrameTools.getWorldFrame();
       ROS2MutableFrame mutableFrame = new ROS2MutableFrame(node, id, parentFrame);
 
       // Run updates
       for (int i = 0; i < updatesToRun; ++i)
       {
-         // Update the frame
-         Instant updateTime = Instant.now();
-         mutableFrame.updateTransform(updatedTransformToParent, updateTime);
-
-         // Assert correct internal state
-         assertEquals(updateTime, mutableFrame.getLastUpdateTimestamp());
-         EuclidCoreTestTools.assertEquals(updatedTransformToParent, mutableFrame.getTransformToParent(), EPSILON);
+         updatedTransformToParent.appendTranslation(new Vector3D(0.1, 0.2, 0.3));
+         updatedTransformToParent.appendOrientation(new YawPitchRoll(0.1, 0.2, 0.3));
 
          synchronized (correctMessagesReceived)
          {
             try
             {
+               // Update the frame
+               mutableFrame.setNewTransformToParent(updatedTransformToParent);
+               mutableFrame.update();
+
+               // Assert correct internal state
+               EuclidCoreTestTools.assertEquals(updatedTransformToParent, mutableFrame.getTransformToParent(), EPSILON);
+
                // Publish a message and wait for it to be received
-               mutableFrame.publish();
                correctMessagesReceived.wait(1000);
 
                // Assert the message was correct
@@ -151,5 +131,118 @@ public class ROS2FrameTest
 
       mutableFrame.remove();
       node.destroy();
+   }
+
+   @Test
+   public void testPublishingMixedTree() throws InterruptedException
+   {
+      ROS2Node ros2Node = new ROS2NodeBuilder().build("test_node");
+
+      // Message counters to ensure correct messages
+      AtomicInteger messagesReceived = new AtomicInteger(0);
+
+      AtomicBoolean tfMessageReceived = new AtomicBoolean(false);
+      AtomicInteger transformsInTFMessage = new AtomicInteger(0);
+
+      AtomicBoolean tfStaticMessageReceived = new AtomicBoolean(false);
+      AtomicInteger transformsInTFStaticMessage = new AtomicInteger(0);
+
+      // Subscribe to /tf and /tf_static
+      ros2Node.createSubscription2(ROS2FrameTools.TF_TOPIC, tfMessage ->
+      {
+         synchronized (messagesReceived)
+         {
+            messagesReceived.getAndIncrement();
+            tfMessageReceived.set(true);
+            transformsInTFMessage.set(tfMessage.getTransforms().size());
+
+            messagesReceived.notify();
+         }
+      });
+
+      ros2Node.createSubscription2(ROS2FrameTools.TF_STATIC_TOPIC, tfMessage ->
+      {
+         synchronized (messagesReceived)
+         {
+            messagesReceived.getAndIncrement();
+            tfStaticMessageReceived.set(true);
+            transformsInTFStaticMessage.set(tfMessage.getTransforms().size());
+
+            messagesReceived.notify();
+         }
+      });
+
+      // Construct a reference frame tree (world <- map <- odom <- base_link <- wrist <- gripper)
+      ReferenceFrame worldFrame = ReferenceFrameTools.getWorldFrame();
+
+      RigidBodyTransform mapToWorldTransform = new RigidBodyTransform(new YawPitchRoll(0.1, 0.2, 0.3), new Vector3D(0.4, 0.5, 0.6));
+      ReferenceFrame mapFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("map", worldFrame, mapToWorldTransform);
+
+      RigidBodyTransform odomToMapTransform = new RigidBodyTransform(new YawPitchRoll(0.7, 0.8, 0.9), new Vector3D(1.0, 1.1, 1.2));
+      ReferenceFrame odomFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("odom", mapFrame, odomToMapTransform);
+
+      RigidBodyTransform baseLinkToOdomTransform = new RigidBodyTransform(new YawPitchRoll(1.3, 1.4, 1.5), new Vector3D(1.6, 1.7, 1.8));
+      ROS2MutableFrame ros2BaseLinkFrame = new ROS2MutableFrame(ros2Node, "base_link", odomFrame, baseLinkToOdomTransform);
+
+      RigidBodyTransform wristToBaseLinkTransform = new RigidBodyTransform(new YawPitchRoll(1.9, 2.0, 2.1), new Vector3D(2.2, 2.3, 2.4));
+      ReferenceFrame wristFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("wrist", ros2BaseLinkFrame, wristToBaseLinkTransform);
+
+      RigidBodyTransform wristToGripperTransform = new RigidBodyTransform(new YawPitchRoll(2.5, 2.6, 2.7), new Vector3D(2.8, 2.9, 3.0));
+      ROS2StaticFrame ros2GripperFrame = new ROS2StaticFrame(ros2Node, "gripper", wristFrame, wristToGripperTransform);
+
+      for (int i = 0; i < 10; ++i)
+      {
+         // Update transforms
+         odomToMapTransform.getTranslation().add(0.1, 0.1, 0.1);
+         baseLinkToOdomTransform.getTranslation().add(0.2, 0.2, 0.2);
+         ros2BaseLinkFrame.setNewTransformToParent(baseLinkToOdomTransform);
+         wristToBaseLinkTransform.getTranslation().add(0.3, 0.3, 0.3);
+
+         // Update reference frames
+         mapFrame.update();
+         odomFrame.update();
+
+         synchronized (messagesReceived)
+         {
+            messagesReceived.set(0);
+            tfMessageReceived.set(false);
+            transformsInTFMessage.set(0);
+            tfStaticMessageReceived.set(false);
+            transformsInTFStaticMessage.set(0);
+
+            ros2BaseLinkFrame.update();
+
+            while (messagesReceived.get() < 2)
+               messagesReceived.wait();
+
+            assertTrue(tfMessageReceived.get());
+            assertEquals(2, transformsInTFMessage.get());
+
+            assertTrue(tfStaticMessageReceived.get());
+            assertEquals(1, transformsInTFStaticMessage.get());
+         }
+
+         wristFrame.update();
+
+         synchronized (messagesReceived)
+         {
+            messagesReceived.set(0);
+            tfMessageReceived.set(false);
+            transformsInTFMessage.set(0);
+            tfStaticMessageReceived.set(false);
+            transformsInTFStaticMessage.set(0);
+
+            ros2GripperFrame.update();
+
+            while (messagesReceived.get() < 2)
+               messagesReceived.wait();
+
+            assertTrue(tfMessageReceived.get());
+            assertEquals(1, transformsInTFMessage.get());
+
+            assertTrue(tfStaticMessageReceived.get());
+            assertEquals(1, transformsInTFStaticMessage.get());
+         }
+      }
    }
 }

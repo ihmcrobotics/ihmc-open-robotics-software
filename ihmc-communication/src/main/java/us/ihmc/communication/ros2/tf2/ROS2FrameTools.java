@@ -1,19 +1,70 @@
 package us.ihmc.communication.ros2.tf2;
 
+import geometry_msgs.msg.dds.TransformStamped;
 import tf2_msgs.msg.dds.TFMessage;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 
 public class ROS2FrameTools
 {
-   public static final ROS2Topic<TFMessage> TF_TOPIC = new ROS2Topic<>().withModule("tf").withType(TFMessage.class);
-   public static final ROS2Topic<TFMessage> TF_STATIC_TOPIC = new ROS2Topic<>().withModule("tf_static").withType(TFMessage.class);
+   public static final ROS2Topic<TFMessage> TF_TOPIC = new ROS2Topic<>().withModule("tf").withQoS(ROS2QosProfile.RELIABLE()).withType(TFMessage.class);
+   public static final ROS2Topic<TFMessage> TF_STATIC_TOPIC = new ROS2Topic<>().withModule("tf_static")
+                                                                               .withQoS(ROS2QosProfile.KEEP_HISTORY(5))
+                                                                               .withType(TFMessage.class);
 
-   public static final String WORLD_FRAME_ID = "world";
-
-   private static final ROS2StaticFrame WORLD_FRAME = ROS2StaticFrame.constructARootFrame(WORLD_FRAME_ID);
-
-   public static synchronized ROS2StaticFrame getWorldFrame()
+   public static void packTransformMessage(ReferenceFrame frame, int timestampSeconds, int timestampNanos, TransformStamped messageToPack)
    {
-      return WORLD_FRAME;
+      if (frame.getParent() == null)
+         throw new IllegalArgumentException("Cannot pack the transform message for a root frame");
+
+      messageToPack.getHeader().getStamp().setSec(timestampSeconds);
+      messageToPack.getHeader().getStamp().setNanosec(timestampNanos);
+      messageToPack.getHeader().setFrameId(frame.getParent().getName());
+      messageToPack.getTransform().set(frame.getTransformToParent());
+      messageToPack.setChildFrameId(frame.getName());
+   }
+
+   public static void packTFMessages(ReferenceFrame frame, int timestampSeconds, int timestampNanos, TFMessage tfMessage, TFMessage tfStaticMessage)
+   {
+      // Once we have no parent (frame is root), we stop
+      if (frame.isRootFrame())
+         return;
+
+      // Get the message we want to pack into
+      TFMessage messageToPack = frame.isFixedInParent() ? tfStaticMessage : tfMessage;
+
+      // Add a transform message and pack it
+      ROS2FrameTools.packTransformMessage(frame, timestampSeconds, timestampNanos, messageToPack.getTransforms().add());
+
+      // If the parent isn't a ROS2Frame, pack the parent into the TFMessage to ensure full TF tree
+      if (!(frame.getParent() instanceof ROS2Frame))
+         packTFMessages(frame.getParent(), timestampSeconds, timestampNanos, tfMessage, tfStaticMessage);
+   }
+
+   public static ROS2Frame createFollowingFrame(ROS2Node ros2Node, String frameId, ReferenceFrame referenceFrameToFollow)
+   {
+      return new ROS2Frame(ros2Node,
+                           frameId,
+                           referenceFrameToFollow.getParent(),
+                           referenceFrameToFollow.getTransformToParent(),
+                           referenceFrameToFollow.isAStationaryFrame(),
+                           referenceFrameToFollow.isZupFrame(),
+                           referenceFrameToFollow.isFixedInParent())
+      {
+         @Override
+         protected void onNewTransformReceived(TransformStamped newTransform)
+         {
+            // Do nothing
+         }
+
+         @Override
+         protected void updateTransformToParent(RigidBodyTransform transformToParent)
+         {
+            transformToParent.set(referenceFrameToFollow.getTransformToParent());
+         }
+      };
    }
 }
