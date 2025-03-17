@@ -10,11 +10,13 @@ import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelLoader;
@@ -29,6 +31,7 @@ import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.UUID;
 
 import static java.lang.Math.abs;
@@ -185,9 +188,19 @@ public class RDXVRFootstepPlacement
                FramePose3D adaptedPose = new FramePose3D(pose);
                if (!USE_STEPPABLE_REGION_ADAPTATION)
                {
-                  adaptedPose.getPosition().set(pose.getTranslationX(),
-                                                pose.getTranslationY(),
-                                                latestHeightMapData.getHeightAt(pose.getTranslationX(), pose.getTranslationY()));
+                  adaptedPose.getPosition()
+                             .set(pose.getTranslationX(),
+                                  pose.getTranslationY(),
+                                  latestHeightMapData.getHeightAt(pose.getTranslationX(), pose.getTranslationY()));
+
+                  RotationMatrix rotationOfSurfaces = new RotationMatrix(latestHeightMapData.getOrientationAt(pose.getTranslationX(), pose.getTranslationY()));
+
+                  LogTools.info(
+                        "Euler Angle Orientation of the surface on the tracker: " + rotationOfSurfaces.getYaw() + ", " + rotationOfSurfaces.getPitch() + ", "
+                        + rotationOfSurfaces.getRoll());
+                  if (rotationOfSurfaces.containsNaN())
+                     rotationOfSurfaces.setIdentity();
+                  adaptedPose.getOrientation().set(rotationOfSurfaces);
                }
                footstepBeingExternallyPlaced.setPose(adaptedPose);
 
