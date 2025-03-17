@@ -422,7 +422,7 @@ public class AtlasWalkingTrajectoryPathFrameTest
       assertWalkingFrameMatchMidFeetZUpFrame();
       assertTrue(simulationTestHelper.simulateNow(2.0));
       assertCorrectControlMode();
-      Assertions.assertTrue(simulationTestHelper.simulateNow(simulationTime));
+      assertTrue(simulationTestHelper.simulateNow(simulationTime));
       assertTrue(pendulumAttachmentController.angleStandardDeviation.getValue() < pendulumAttachmentController.getMaxAngleStandardDeviation().getValue());
       assertWalkingFrameMatchMidFeetZUpFrame();
    }
