@@ -33,7 +33,7 @@ public class FilteredRapidHeightMapExtractorTest
          GpuMat latestDepthMat = new GpuMat();
          latestDepthMat.upload(cpuData);
 
-         GpuMat currentAverage = filteredRapidHeightMapExtractor.update(latestDepthMat);
+         GpuMat currentAverage = filteredRapidHeightMapExtractor.update(latestDepthMat, 0);
          Mat temp = new Mat();
          currentAverage.download(temp);
          PerceptionDebugTools.printMat("Current", temp, 1);
@@ -61,14 +61,14 @@ public class FilteredRapidHeightMapExtractorTest
          GpuMat latestDepthMat = new GpuMat();
          latestDepthMat.upload(cpuData);
 
-         filteredRapidHeightMapExtractor.update(latestDepthMat);
+         filteredRapidHeightMapExtractor.update(latestDepthMat, 0);
       }
 
       Mat cpuDataAdjusted = new Mat(rows, cols, opencv_core.CV_16UC1, new Scalar(1000));
       GpuMat latestDepthMat = new GpuMat();
       latestDepthMat.upload(cpuDataAdjusted);
 
-      GpuMat currentAverage = filteredRapidHeightMapExtractor.update(latestDepthMat);
+      GpuMat currentAverage = filteredRapidHeightMapExtractor.update(latestDepthMat, 0);
       Mat temp = new Mat();
       currentAverage.download(temp);
       PerceptionDebugTools.printMat("Current", temp, 1);
@@ -103,7 +103,7 @@ public class FilteredRapidHeightMapExtractorTest
          GpuMat latestDepthMat = new GpuMat();
          latestDepthMat.upload(cpuData);
 
-         filteredRapidHeightMapExtractor.update(latestDepthMat);
+         filteredRapidHeightMapExtractor.update(latestDepthMat, 0);
       }
 
       // 400 is about 20 centimeters? Ish depending on the parameters, this is hard coded could change it to be based on the parameters
@@ -111,7 +111,7 @@ public class FilteredRapidHeightMapExtractorTest
       GpuMat latestDepthMat = new GpuMat();
       latestDepthMat.upload(cpuData);
 
-      GpuMat currentAverage = filteredRapidHeightMapExtractor.update(latestDepthMat);
+      GpuMat currentAverage = filteredRapidHeightMapExtractor.update(latestDepthMat, 0);
       Mat temp = new Mat();
       currentAverage.download(temp);
       PerceptionDebugTools.printMat("Current", temp, 1);

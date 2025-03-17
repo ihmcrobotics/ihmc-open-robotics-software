@@ -3,7 +3,6 @@ package us.ihmc.behaviors.activeMapping;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
@@ -18,7 +17,9 @@ import java.util.concurrent.TimeUnit;
 
 public class ContinuousHikingProcess
 {
-   public static final String CONTINUOUS_HIKING_PROCESS = "ContinuousHikingProcess";
+   public static final String CONTINUOUS_HIKING_THREAD = "ContinuousHikingThread";
+   public static final String SYNCED_ROBOT_THREAD = "SyncedRobotThread";
+
    private final ROS2StoredPropertySetGroup ros2PropertySetGroup;
    private final ContinuousPlannerSchedulingTask continuousPlannerSchedulingTask;
 
@@ -31,8 +32,12 @@ public class ContinuousHikingProcess
 
       ROS2SyncedRobotModel syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
       syncedRobot.initializeToDefaultRobotInitialSetup(0.0, 0.0, 0.0, 0.0);
-      RepeatingTaskThread robotUpdateThread = new RepeatingTaskThread("SyncedRobotUpdate", syncedRobot::update).setFrequencyLimit(30.0);
-      robotUpdateThread.startRepeating();
+
+      // We create a ThreadFactory here so that when profiling the thread, there is a user-friendly name to identify it with
+      ThreadFactory threadFactorySyncedRobot = new ThreadFactoryBuilder().setNameFormat(SYNCED_ROBOT_THREAD).build();
+      ScheduledExecutorService schedulerSyncedRobot = Executors.newScheduledThreadPool(1, threadFactorySyncedRobot);
+      schedulerSyncedRobot.scheduleAtFixedRate(syncedRobot::update, 100, 10, TimeUnit.MILLISECONDS);
+
 
       ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Node);
       ActiveMappingParameterToolBox activeMappingParameterToolBox = new ActiveMappingParameterToolBox(ros2PropertySetGroup, robotModel, "ForContinuousWalking");
@@ -57,9 +62,9 @@ public class ContinuousHikingProcess
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "Shutdown"));
 
       // We create a ThreadFactory here so that when profiling the thread, there is a user-friendly name to identify it with
-      ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat(CONTINUOUS_HIKING_PROCESS).build();
-      ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1, threadFactory);
-      scheduler.scheduleWithFixedDelay(this::update, 500, 100, TimeUnit.MILLISECONDS);
+      ThreadFactory threadFactoryContinuousHiking = new ThreadFactoryBuilder().setNameFormat(CONTINUOUS_HIKING_THREAD).build();
+      ScheduledExecutorService schedulerContinuousHiking = Executors.newScheduledThreadPool(1, threadFactoryContinuousHiking);
+      schedulerContinuousHiking.scheduleWithFixedDelay(this::update, 500, 100, TimeUnit.MILLISECONDS);
    }
 
    public void update()
