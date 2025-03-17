@@ -84,6 +84,13 @@ public class RapidHeightMapManager
 
    public void update(Mat latestDepthImage, Instant imageAcquisitionTime, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame) throws Exception
    {
+      RigidBodyTransform sensorToWorld = cameraFrame.getTransformToWorldFrame();
+      RigidBodyTransform sensorToGround = cameraFrame.getTransformToDesiredFrame(cameraZUpFrame);
+      RigidBodyTransform groundToWorld = cameraZUpFrame.getTransformToWorldFrame();
+
+      cameraPose.setToZero(cameraFrame);
+      cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
+
       if (latestDepthImage.type() == opencv_core.CV_32FC1) // Support our simulated sensors
       {
          OpenCVTools.convertFloatToShort(latestDepthImage, hostDepthImage, 1000.0, 0.0);
@@ -99,15 +106,10 @@ public class RapidHeightMapManager
       {
          rapidHeightMapExtractor.reset();
          if (heightMapParameters.getDriftOffsetFilter())
+         {
             rapidHeightMapDriftOffset.reset();
+         }
       }
-
-      RigidBodyTransform sensorToWorld = cameraFrame.getTransformToWorldFrame();
-      RigidBodyTransform sensorToGround = cameraFrame.getTransformToDesiredFrame(cameraZUpFrame);
-      RigidBodyTransform groundToWorld = cameraZUpFrame.getTransformToWorldFrame();
-
-      cameraPose.setToZero(cameraFrame);
-      cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
 
       if (heightMapParameters.getDriftOffsetFilter())
       {
