@@ -129,6 +129,7 @@ public class RDXVRFootstepStreaming
                                                                   latestStatus.getDesiredFootOrientation())))
                {
                   step(true);
+                  footstepPlacer.resetOptimization();
                }
                else
                {

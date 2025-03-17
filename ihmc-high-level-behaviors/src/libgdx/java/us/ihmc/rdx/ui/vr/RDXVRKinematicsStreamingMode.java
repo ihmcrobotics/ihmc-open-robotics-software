@@ -264,11 +264,10 @@ public class RDXVRKinematicsStreamingMode
             ros2ControllerHelper.publishToController(homeChest);
          }
 
-         // NOTE: Implement hand open close for controller trigger button.
          InputDigitalActionData clickTriggerButton = controller.getClickTriggerActionData();
          if (clickTriggerButton.bChanged() && !clickTriggerButton.bState())
          {
-            performHandAction(RobotSide.LEFT);
+            teleportToRobot();
          }
 
          // Check if left joystick is pressed in order to trigger recording or replay of motion
@@ -299,11 +298,10 @@ public class RDXVRKinematicsStreamingMode
            setEnabled(!enabled.get());
         }
 
-        // NOTE: Implement hand open close for controller trigger button.
         InputDigitalActionData clickTriggerButton = controller.getClickTriggerActionData();
         if (clickTriggerButton.bChanged() && !clickTriggerButton.bState())
         {
-           performHandAction(RobotSide.RIGHT);
+           teleportToRobot();
         }
 
          gripButtonsValue.put(RobotSide.RIGHT, controller.getGripActionData().x());
@@ -607,7 +605,7 @@ public class RDXVRKinematicsStreamingMode
                   {
                      streamingDisabled.set();
                      streamToController.set(false);
-                     armStreaming.enableStreaming(true);
+//                     armStreaming.enableStreaming(true);
                   }
                   pausedForWalking = true;
                   sleepToolbox();
@@ -617,7 +615,7 @@ public class RDXVRKinematicsStreamingMode
                   footstepStreaming.step(false);
                   controllerStatusTracker.getFinishedWalkingNotification().clear();
                   //  start controlling only the arms of the robot during walking
-                  armStreaming.enable(true);
+//                  armStreaming.enable(true);
                }
             }
             else

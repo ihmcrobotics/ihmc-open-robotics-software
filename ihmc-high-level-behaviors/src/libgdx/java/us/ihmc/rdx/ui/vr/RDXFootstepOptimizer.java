@@ -20,14 +20,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class RDXFootstepOptimizer
 {
-   private final double ALPHA = 0.35;
-   private final double BETA = 0.45;
-   private final double GAMMA = 0.2;
-   private final double LEARNING_RATE = 0.1;
-   private final double EPSILON = 1e-3;
-   private final int MAX_ITERATIONS = 100;
-   private final double MAX_HEIGHT_VARIANCE = 0.05;
-   private final double MAX_SLOPE_ANGLE = Math.toRadians(50);
+   private static final double ALPHA = 0.35;
+   private static final double BETA = 0.45;
+   private static final double GAMMA = 0.2;
+   private static final double LEARNING_RATE = 0.1;
+   private static final double EPSILON = 1e-3;
+   private static final int MAX_ITERATIONS = 100;
+   private static final double MAX_HEIGHT_VARIANCE = 0.05;
+   private static final double MAX_SLOPE_ANGLE = Math.toRadians(50);
 
    private double footLength;
    private double footWidth;
@@ -39,6 +39,7 @@ public class RDXFootstepOptimizer
    private ExecutorService executor;
    private Future<?> currentFuture; // Store the future for the current computation
    private AtomicBoolean stopRequested = new AtomicBoolean(false);
+   private boolean hasConverged = false;
 
    /**
     * Constructor for the RDXFootstepOptimizer.
@@ -136,7 +137,14 @@ public class RDXFootstepOptimizer
          if (Math.sqrt(gradient[0] * gradient[0] + gradient[1] * gradient[1] + gradient[2] * gradient[2]) < EPSILON)
          {
             LogTools.warn("Convergence reached");
+            hasConverged = true;
             break; // Convergence reached
+         }
+
+         if (i == MAX_ITERATIONS - 1)
+         {
+            LogTools.warn("Max iterations reached");
+            hasConverged = true;
          }
       }
 
@@ -266,8 +274,8 @@ public class RDXFootstepOptimizer
    {
       return satisfiesPositionConstraint(q, initialPose)
              && satisfiesHeightConstraint(q)
-             && satisfiesSlopeConstraint(q)
-             && satisfiesYawConstraint(q, initialPose);
+             && satisfiesSlopeConstraint(q);
+//             && satisfiesYawConstraint(q, initialPose);
    }
 
    private boolean satisfiesPositionConstraint(double[] q, FramePose3DReadOnly initialPose)
@@ -324,12 +332,17 @@ public class RDXFootstepOptimizer
    {
       qCurrentMaxSlope = -1;
       qMaxHeightVariance = -1;
-      stopRequested.set(false);
       currentFuture = null;
+      hasConverged = false;
    }
 
    public FramePose3D getCurrentBestSolution()
    {
       return bestSolution; // Return the most recent best solution
+   }
+
+   public boolean hasConverged()
+   {
+      return hasConverged;
    }
 }

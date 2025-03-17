@@ -37,6 +37,7 @@ public class RDXVRFootstepPlacement
 {
    private final static boolean USE_HEIGHTMAP = true;
    private final static boolean USE_STEPPABLE_REGION_ADAPTATION = false;
+   private final static boolean RUN_ADAPTATION_ASYNC = false;
    private static final long TIMEOUT_STEPPABLE_REGION_ADAPTATION = 10;
    private HeightMapData latestHeightMapData;
 
@@ -192,7 +193,14 @@ public class RDXVRFootstepPlacement
                FramePose3D adaptedPose = new FramePose3D(pose);
                if (USE_STEPPABLE_REGION_ADAPTATION)
                {
-                  adaptedPose = optimizeFootstep(latestHeightMapData, pose, TIMEOUT_STEPPABLE_REGION_ADAPTATION);
+                  if (RUN_ADAPTATION_ASYNC)
+                  {
+                     adaptedPose = optimizeFootstep(latestHeightMapData, pose, TIMEOUT_STEPPABLE_REGION_ADAPTATION);
+                  }
+                  else
+                  {
+                     adaptedPose = footstepOptimizer.compute(latestHeightMapData, pose);
+                  }
                }
                else
                {
@@ -223,7 +231,15 @@ public class RDXVRFootstepPlacement
    {
       if (USE_STEPPABLE_REGION_ADAPTATION)
       {
-         footstepBeingExternallyPlaced.setPose(footstepOptimizer.getCurrentBestSolution());
+         if (footstepBeingExternallyPlaced != null)
+         {
+            footstepBeingExternallyPlaced.setPose(footstepOptimizer.getCurrentBestSolution());
+            sendStep(true);
+         }
+         if (footstepOptimizer.hasConverged())
+         {
+            footstepOptimizer.cancelCompute();
+         }
       }
    }
 
@@ -242,12 +258,16 @@ public class RDXVRFootstepPlacement
          LogTools.warn("Footstep optimization timed out or was interrupted.  Using best-so-far solution.");
          bestSoFar = footstepOptimizer.getCurrentBestSolution();
       }
-      finally // TODO move this to an external call and track status of optimization to have update() for this method called accordingly + reset() when sending other steps
+
+      return bestSoFar;
+   }
+
+   public void resetOptimization()
+   {
+      if (USE_STEPPABLE_REGION_ADAPTATION)
       {
          footstepOptimizer.cancelCompute();
       }
-
-      return bestSoFar;
    }
 
    public void sendStep(boolean activeAdjustment)
