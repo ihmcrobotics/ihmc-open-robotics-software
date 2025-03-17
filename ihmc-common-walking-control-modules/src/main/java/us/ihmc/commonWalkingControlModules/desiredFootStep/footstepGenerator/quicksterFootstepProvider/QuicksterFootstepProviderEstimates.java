@@ -112,8 +112,8 @@ public class QuicksterFootstepProviderEstimates
       currentCoMLinearMomentum.setMatchingFrame(angularExcursionCalculator.getLinearMomentum());
       currentCoMAngularMomentum.setMatchingFrame(angularExcursionCalculator.getAngularMomentum());
       currentContactPointAngularMomentum.setMatchingFrame(angularExcursionCalculator.getAngularMomentum());
-      currentContactPointAngularMomentum.addX(-mass * parameters.getDesiredCoMHeight(swingSide).getDoubleValue() * currentCoMVelocity.getY());
-      currentContactPointAngularMomentum.addY(mass * parameters.getDesiredCoMHeight(swingSide).getDoubleValue() * currentCoMVelocity.getX());
+      currentContactPointAngularMomentum.addX(-mass * currentCoMPosition.getZ() * currentCoMVelocity.getY());
+      currentContactPointAngularMomentum.addY(mass * currentCoMPosition.getZ() * currentCoMVelocity.getX());
 
       // Update CoM control frames
       centerOfMassControlFrame.update();

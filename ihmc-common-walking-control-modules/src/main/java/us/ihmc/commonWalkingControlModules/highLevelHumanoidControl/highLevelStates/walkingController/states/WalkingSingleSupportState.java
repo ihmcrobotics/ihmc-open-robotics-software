@@ -332,8 +332,6 @@ public class WalkingSingleSupportState extends SingleSupportState
          balanceManager.addFootstepToPlan(footsteps[i], footstepTimings[i]);
       }
 
-
-
       //
       updateHeightManager();
 
@@ -353,10 +351,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       //
       if (feetManager.adjustHeightIfNeeded(nextFootstep))
-      {
-         walkingMessageHandler.updateVisualizationAfterFootstepAdjustement(nextFootstep);
          feetManager.adjustSwingTrajectory(swingSide, nextFootstep, swingTime);
-      }
 
       //
       controllerToolbox.updateBipedSupportPolygons();
@@ -364,6 +359,8 @@ public class WalkingSingleSupportState extends SingleSupportState
       balanceManager.setSwingFootTrajectory(swingSide, feetManager.getSwingTrajectory(swingSide));
       balanceManager.adjustFootstepInCoPPlan(nextFootstep);
       balanceManager.computeICPPlan();
+
+      walkingMessageHandler.updateVisualizationAfterFootstepAdjustement(nextFootstep);
    }
 
    private boolean haveWeEntered = false;

@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.quicksterFootstepProvider;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -41,7 +42,7 @@ public class ALIPCalculatorTools
       tempCurrentCoMPose.setY(-tempCurrentStanceFootPosition.getY());
       tempCurrentCoMPose.setZ(-tempCurrentStanceFootPosition.getZ());
 
-      double omega = calculateOmega(pendulumHeight);
+      double omega = computeNaturalFrequency(pendulumHeight);
 
       // Current position and angular momentum
       double x0 = tempCurrentCoMPose.getX();
@@ -68,15 +69,15 @@ public class ALIPCalculatorTools
       futureCoMPoseToPack.setY(tempCurrentStanceFootPosition.getY());
       futureCoMPoseToPack.setZ(tempCurrentCoMPose.getZ());
 
+
       int intervals = (int) Math.round(horizonDuration / updateDt);
+      intervals = MathTools.clamp(intervals, 1, Integer.MAX_VALUE);
 
       for (double i = 0; i < intervals ; i ++)
       {
          futureCoMPoseToPack.appendYawRotation(desiredTurningVelocity * updateDt);
          futureCoMPoseToPack.getPosition().addX(xf / intervals);
          futureCoMPoseToPack.getPosition().addY(yf / intervals);
-
-
       }
 
       futureContactPointAngularMomentumToPack.setX(Lxf);
@@ -156,7 +157,7 @@ public class ALIPCalculatorTools
                                                                                     boolean useFutureCoM,
                                                                                     double updateDt)
    {
-      double omega = calculateOmega(pendulumHeight);
+      double omega = computeNaturalFrequency(pendulumHeight);
 
       computeFutureStateUsingALIP(currentCoMPose,
                                   currentContactPointAngularMomentum,
@@ -184,15 +185,16 @@ public class ALIPCalculatorTools
          controlFrameToUse = controlFrame;
 
       tempFutureCoMVelocity.changeFrame(controlFrameToUse);
-      computeTouchdownPositionUsingRaibertHeuristicAndPolePlacement(tempFutureCoMVelocity, controlFrameToUse, touchdownPositionToPack, pole, stepDuration, omega);
-
+      double timeConstant = calculateTimeConstantUsingPolePlacement(pole, stepDuration, omega);
       double swingDuration = stepDuration - doubleSupportDuration;
+
+      computeTouchdownPositionUsingRaibertHeuristic(timeConstant, tempFutureCoMVelocity, controlFrameToUse, touchdownPositionToPack);
 
       ReferenceFrame originalFrame = touchdownPositionToPack.getReferenceFrame();
       touchdownPositionToPack.changeFrameAndProjectToXYPlane(controlFrameToUse);
-      touchdownPositionToPack.addX(computeForwardTouchdownOffsetForVelocity(swingDuration, doubleSupportDuration, omega, desiredVelocityX));
-      touchdownPositionToPack.addY(computeLateralTouchdownOffsetForVelocity(swingDuration, doubleSupportDuration, swingSide.getOppositeSide(), omega, desiredVelocityY));
-      touchdownPositionToPack.addY(computeDesiredTouchdownOffsetForStanceWidth(swingDuration, doubleSupportDuration, desiredStanceWidth, swingSide.getOppositeSide(), omega));
+      touchdownPositionToPack.addX(computeForwardTouchdownOffsetForVelocity(swingDuration, doubleSupportDuration, 1/timeConstant, desiredVelocityX));
+      touchdownPositionToPack.addY(computeLateralTouchdownOffsetForVelocity(swingDuration, doubleSupportDuration, swingSide.getOppositeSide(), 1/timeConstant, desiredVelocityY));
+      touchdownPositionToPack.addY(computeDesiredTouchdownOffsetForStanceWidth(swingDuration, doubleSupportDuration, desiredStanceWidth, swingSide.getOppositeSide(), 1/timeConstant));
       touchdownPositionToPack.changeFrameAndProjectToXYPlane(originalFrame);
    }
 
@@ -218,7 +220,7 @@ public class ALIPCalculatorTools
    public static double computeDesiredAngularMomentumForStanceWidth(RobotSide swingSide, double desiredStanceWidth, double pendulumMass, double pendulumHeight, double stepDuration)
    {
       double sideSignMultiplier = swingSide == RobotSide.LEFT ? 1.0  : -1.0;
-      double omega = calculateOmega(pendulumHeight);
+      double omega = computeNaturalFrequency(pendulumHeight);
       return sideSignMultiplier * 0.5 * pendulumMass * pendulumHeight * desiredStanceWidth * (omega * Math.sinh(omega * stepDuration)) / (1 + Math.cosh(omega * stepDuration));
    }
 
@@ -273,8 +275,8 @@ public class ALIPCalculatorTools
       return supportSide.negateIfLeftSide(stepWidthOffset);
    }
 
-   public static double calculateOmega(double height)
+   public static double computeNaturalFrequency(double pendulumHeight)
    {
-      return Math.sqrt(Math.abs(GRAVITY / height));
+      return Math.sqrt(Math.abs(GRAVITY / pendulumHeight));
    }
 }

@@ -350,7 +350,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
     */
    public CenterOfPressureCommand getCenterOfPressureCommand()
    {
-      return centerOfPressureCommand;
+      return centerOfPressureCommandCalculator.getCenterOfPressureCommand();
    }
 
    /**
