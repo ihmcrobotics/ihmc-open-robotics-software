@@ -344,26 +344,13 @@ public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
 
       double currentTime = MathTools.clamp(time.getValue() - startTime.getValue(), 0.0, totalDuration.getValue());
 
-      if (footsteps.isEmpty())
-      {
-         WaypointData firstWaypoint = waypoints.getFirst();
-         currentPosition.set(firstWaypoint.position);
-         currentLinearVelocity.set(initialLinearVelocity);
-         currentLinearAcceleration.setToZero();
-         currentYaw.set(AngleTools.trimAngleMinusPiToPi(firstWaypoint.getYaw()));
-         currentYawRate.set(initialYawRate.getValue());
-         currentYawAcceleration.set(0.0);
-      }
-      else
-      {
-         trajectoryManager.initialize(initialLinearVelocity, initialYawRate.getValue(), waypoints, isLastWaypointOpen.getValue());
-         trajectoryManager.computePosition(currentTime, currentPosition);
-         trajectoryManager.computeLinearVelocity(currentTime, currentLinearVelocity);
-         trajectoryManager.computeLinearAcceleration(currentTime, currentLinearAcceleration);
-         currentYaw.set(AngleTools.trimAngleMinusPiToPi(trajectoryManager.computeYaw(currentTime)));
-         currentYawRate.set(trajectoryManager.computeYawRate(currentTime));
-         currentYawAcceleration.set(trajectoryManager.computeYawAcceleration(currentTime));
-      }
+      trajectoryManager.initialize(initialLinearVelocity, initialYawRate.getValue(), waypoints, isLastWaypointOpen.getValue());
+      trajectoryManager.computePosition(currentTime, currentPosition);
+      trajectoryManager.computeLinearVelocity(currentTime, currentLinearVelocity);
+      trajectoryManager.computeLinearAcceleration(currentTime, currentLinearAcceleration);
+      currentYaw.set(AngleTools.trimAngleMinusPiToPi(trajectoryManager.computeYaw(currentTime)));
+      currentYawRate.set(trajectoryManager.computeYawRate(currentTime));
+      currentYawAcceleration.set(trajectoryManager.computeYawAcceleration(currentTime));
 
       walkingTrajectoryPathFrame.update();
       walkingTrajectoryAcceleration.getLinearPart().setMatchingFrame(currentLinearAcceleration);
@@ -428,9 +415,15 @@ public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
       }
       else
       {
-         initialLinearVelocity.setToZero();
-         initialYawRate.set(0.0);
-         totalDuration.set(0.0);
+         // We don't have any footsteps, but we may have finished the last step early, so allow a bit of overrun to come to a stop.
+         WaypointData previousWaypoint = waypoints.getFirst();
+         WaypointData waypoint = waypoints.size() == 1 ? waypoints.add() : waypoints.get(1);
+         double yaw = computeAverage(supportFootPoses, waypoint.position);
+         waypoint.setYaw(previousWaypoint.getYaw() + AngleTools.computeAngleDifferenceMinusPiToPi(yaw, previousWaypoint.getYaw()));
+         waypoint.time.set(previousWaypoint.time.getValue() + 0.25); // come to a stop in 0.25 s
+         waypoint.updateViz();
+
+         totalDuration.set(waypoint.time.getValue());
       }
    }
 
