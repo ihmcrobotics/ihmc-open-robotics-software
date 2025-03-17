@@ -37,7 +37,7 @@ public class RDXVRTracker extends RDXVRTrackedDevice
          }
          default ->
          {
-            trackerYBackZLeftXRightToXForwardZUp = new RigidBodyTransform(new YawPitchRoll(Math.toRadians(-90.0), Math.toRadians(0.0), Math.toRadians(-90.0)),
+            trackerYBackZLeftXRightToXForwardZUp = new RigidBodyTransform(new YawPitchRoll(Math.toRadians(0.0), Math.toRadians(90.0), Math.toRadians(-90.0)),
                                                                           new Point3D());
          }
       }
