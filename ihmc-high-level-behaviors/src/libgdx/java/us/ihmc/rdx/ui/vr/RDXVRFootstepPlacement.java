@@ -9,6 +9,8 @@ import controller_msgs.msg.dds.FootstepDataMessage;
 import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -44,7 +46,9 @@ public class RDXVRFootstepPlacement
    private final SideDependentList<ModelInstance> footstepModels = new SideDependentList<>();
    private final SideDependentList<ModelInstance> footstepsBeingHandPlaced = new SideDependentList<>();
    private final ArrayList<RDXVRFootstep> handPlacedFootsteps = new ArrayList<>();
+
    private RDXVRFootstep footstepBeingExternallyPlaced;
+   private final RDXFootstepOptimizer footstepOptimizer;
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final FramePose3D poseForPlacement = new FramePose3D();
    private long sequenceId = (UUID.randomUUID().getLeastSignificantBits() % Integer.MAX_VALUE) + Integer.MAX_VALUE;
@@ -78,6 +82,11 @@ public class RDXVRFootstepPlacement
          RDXBaseUI.getInstance().getKeyBindings().register("Clear footsteps", "Left B button");
          RDXBaseUI.getInstance().getKeyBindings().register("Walk", "Right A button");
       }
+
+      WalkingControllerParameters walkingControllerParameters = syncedRobot.getRobotModel().getWalkingControllerParameters();
+      SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
+      footstepOptimizer = new RDXFootstepOptimizer(steppingParameters.getFootLength(),
+                                                   steppingParameters.getFootWidth());
    }
 
    public void setLocomotionParameters(LocomotionParameters locomotionParameters)
@@ -179,11 +188,13 @@ public class RDXVRFootstepPlacement
             if (!Double.isNaN(height))
             {
                FramePose3D adaptedPose = new FramePose3D(pose);
-               if (!USE_STEPPABLE_REGION_ADAPTATION)
+               if (USE_STEPPABLE_REGION_ADAPTATION)
                {
-                  adaptedPose.getPosition().set(pose.getTranslationX(),
-                                                pose.getTranslationY(),
-                                                latestHeightMapData.getHeightAt(pose.getTranslationX(), pose.getTranslationY()));
+                  adaptedPose = footstepOptimizer.compute(latestHeightMapData, pose);
+               }
+               else
+               {
+                  adaptedPose.getPosition().setZ(height);
                }
                footstepBeingExternallyPlaced.setPose(adaptedPose);
             }
@@ -294,6 +305,7 @@ public class RDXVRFootstepPlacement
       footstepBeingExternallyPlaced = null;
       latestHeightMapData = null;
       handPlacedFootsteps.clear();
+      footstepOptimizer.reset();
    }
 
    public void resetTimer()
