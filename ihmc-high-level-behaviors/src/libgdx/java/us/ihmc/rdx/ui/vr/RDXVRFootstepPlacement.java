@@ -31,11 +31,13 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 import java.util.ArrayList;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public class RDXVRFootstepPlacement
 {
    private final static boolean USE_HEIGHTMAP = true;
    private final static boolean USE_STEPPABLE_REGION_ADAPTATION = false;
+   private static final long TIMEOUT_STEPPABLE_REGION_ADAPTATION = 10;
    private HeightMapData latestHeightMapData;
 
    private RDXVRHardwareModel controllerModel = RDXVRHardwareModel.UNKNOWN;
@@ -190,7 +192,7 @@ public class RDXVRFootstepPlacement
                FramePose3D adaptedPose = new FramePose3D(pose);
                if (USE_STEPPABLE_REGION_ADAPTATION)
                {
-                  adaptedPose = footstepOptimizer.compute(latestHeightMapData, pose);
+                  adaptedPose = optimizeFootstep(latestHeightMapData, pose, TIMEOUT_STEPPABLE_REGION_ADAPTATION);
                }
                else
                {
@@ -215,6 +217,37 @@ public class RDXVRFootstepPlacement
          LogTools.error("Could not set pose because the footstep being placed is null");
          return false;
       }
+   }
+
+   public void update()
+   {
+      if (USE_STEPPABLE_REGION_ADAPTATION)
+      {
+         footstepBeingExternallyPlaced.setPose(footstepOptimizer.getCurrentBestSolution());
+      }
+   }
+
+   private FramePose3D optimizeFootstep(HeightMapData heightMapData, FramePose3DReadOnly initialPose, long timeoutMillis)
+   {
+      FramePose3D bestSoFar = new FramePose3D(initialPose); // Initialize with the initial pose
+      CompletableFuture<FramePose3D> futureResult = footstepOptimizer.computeAsync(heightMapData, initialPose);
+
+      try
+      {
+         bestSoFar = futureResult.get(timeoutMillis, java.util.concurrent.TimeUnit.MILLISECONDS);
+         LogTools.info("Footstep optimization completed successfully.");
+      }
+      catch (Exception e)
+      {
+         LogTools.warn("Footstep optimization timed out or was interrupted.  Using best-so-far solution.");
+         bestSoFar = footstepOptimizer.getCurrentBestSolution();
+      }
+      finally // TODO move this to an external call and track status of optimization to have update() for this method called accordingly + reset() when sending other steps
+      {
+         footstepOptimizer.cancelCompute();
+      }
+
+      return bestSoFar;
    }
 
    public void sendStep(boolean activeAdjustment)
@@ -305,11 +338,16 @@ public class RDXVRFootstepPlacement
       footstepBeingExternallyPlaced = null;
       latestHeightMapData = null;
       handPlacedFootsteps.clear();
-      footstepOptimizer.reset();
+      footstepOptimizer.cancelCompute();
    }
 
    public void resetTimer()
    {
       stepStartTime = -1.0;
+   }
+
+   public void destroy()
+   {
+      footstepOptimizer.shutdown();
    }
 }
