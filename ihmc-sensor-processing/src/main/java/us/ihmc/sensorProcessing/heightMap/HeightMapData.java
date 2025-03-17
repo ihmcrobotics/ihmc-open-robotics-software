@@ -2,11 +2,15 @@ package us.ihmc.sensorProcessing.heightMap;
 
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.log.LogTools;
 
 import java.util.Arrays;
+
+import static java.lang.Math.abs;
 
 public class HeightMapData
 {
@@ -260,5 +264,37 @@ public class HeightMapData
       maxX = gridCenter.getX() + halfWidth;
       minY = gridCenter.getY() - halfWidth;
       maxY = gridCenter.getY() + halfWidth;
+   }
+
+   public RotationMatrix getOrientationAt(double xIndex, double yIndex)
+   {
+      double dHeightAtX = getHeightAt(xIndex - 0.05, yIndex) - getHeightAt(xIndex + 0.05, yIndex);
+      double dHeightAtY = getHeightAt(xIndex, yIndex + 0.03) - getHeightAt(xIndex, yIndex - 0.03);
+
+      LogTools.info("Height at input point : " + getHeightAt(xIndex, yIndex) + " Height at x1 : " + getHeightAt(xIndex + 0.05, yIndex) + " Height at x2 : "
+                    + getHeightAt(xIndex - 0.05, yIndex) + " Height at y1 : " + getHeightAt(xIndex, yIndex + 0.03) + " Height at y2 : " + getHeightAt(xIndex,
+                                                                                                                                                      yIndex - 0.03));
+
+      RotationMatrix outputMatrix = new RotationMatrix();
+      outputMatrix.setIdentity();
+      if (abs(dHeightAtX) >= 0.01 || abs(dHeightAtY) >= 0.01)
+      {
+         double dx = dHeightAtX / 0.1;
+         double dy = dHeightAtY / 0.06;
+         Vector3D normal = new Vector3D(dx, dy, 1);
+         double length = normal.norm();
+         if (length > 1e-10)
+            normal.scale(1 / length);
+
+         double roll = Math.atan2(normal.getY(), normal.getZ());
+         double pitch = Math.atan2(normal.getX(), Math.sqrt(normal.getY() * normal.getY() + normal.getZ() * normal.getZ()));
+
+         // Let the Yaw always closes to Zero.
+
+         LogTools.info(
+               "roll : " + roll + " pitch : " + pitch + "dx : " + dx + " dy : " + dy + " normal length : " + length + " roll : " + roll + " pitch : " + pitch);
+         outputMatrix.setYawPitchRoll(0.0, pitch, roll);
+      }
+      return outputMatrix;
    }
 }
