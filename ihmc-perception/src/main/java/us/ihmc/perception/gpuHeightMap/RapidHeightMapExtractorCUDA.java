@@ -304,7 +304,6 @@ public class RapidHeightMapExtractorCUDA
          filteredHeightMap.close();
       }
 
-      //      Mat finalCroppedHeightMap = new Mat();
       GpuMat verticalFilteredHeightMap = globalHeightMapImage.clone();
       if (heightMapParameters.getEnableVerticalFilter())
       {
@@ -337,6 +336,7 @@ public class RapidHeightMapExtractorCUDA
       Mat finalCroppedHeightMap = new Mat();
       terrainHeightMapImage.download(finalCroppedHeightMap);
       terrainMapData.setHeightMap(finalCroppedHeightMap);
+      finalCroppedHeightMap.close();
    }
 
    public void updateHeightOffset(float z)

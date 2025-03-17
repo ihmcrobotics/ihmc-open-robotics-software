@@ -61,7 +61,7 @@ public class FilteredRapidHeightMapExtractor
       int error;
 
       // Only want to compute the average if we have the past values to use
-      if (loopTracker < layers + 1)
+      if (loopTracker < layers)
       {
          loopTracker++;
 
@@ -104,7 +104,6 @@ public class FilteredRapidHeightMapExtractor
 
       latestGlobalHeightMap.close();
       latestGlobalHeightMap = result.clone();
-      result.close();
 
       // Upload the latest height map to the GPU for the next iteration
       error = cudaMemcpy2D(pointerTo3DArray.ptr().position(currentIndex * pointerTo3DArray.pitch() * pointerTo3DArray.ysize()),
@@ -114,6 +113,10 @@ public class FilteredRapidHeightMapExtractor
                            pointerTo3DArray.xsize(),
                            pointerTo3DArray.ysize(),
                            cudaMemcpyDefault);
+
+      result.close();
+      blockSize.close();
+      registerKernelGridDim.close();
 
       CUDATools.checkCUDAError(error);
 
