@@ -537,9 +537,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       controllerToolbox.initialize();
       // This must be done before calling managerFactory.initializeManagers(), becuase the pelvis orientation manager relies on thew alking trajectory path.
-      controllerToolbox.getWalkingTrajectoryPath().reset();
-      controllerToolbox.getWalkingTrajectoryPath().initializeDoubleSupport();
-      controllerToolbox.getWalkingTrajectoryPath().updateTrajectory(FootControlModule.ConstraintType.FULL, FootControlModule.ConstraintType.FULL);
+      initializeWalkingTrajectoryPath();
 
       managerFactory.initializeManagers();
 
@@ -583,6 +581,14 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       commandConsumer.avoidManipulationAbortForDuration(RigidBodyControlManager.INITIAL_GO_HOME_TIME);
 
       firstTick = true;
+   }
+
+   private void initializeWalkingTrajectoryPath()
+   {
+      controllerToolbox.getWalkingTrajectoryPath().clearFootsteps();
+      controllerToolbox.getWalkingTrajectoryPath().reset();
+      controllerToolbox.getWalkingTrajectoryPath().initializeDoubleSupport();
+      controllerToolbox.getWalkingTrajectoryPath().updateTrajectory(FootControlModule.ConstraintType.FULL, FootControlModule.ConstraintType.FULL);
    }
 
    private void initializeManagers()
