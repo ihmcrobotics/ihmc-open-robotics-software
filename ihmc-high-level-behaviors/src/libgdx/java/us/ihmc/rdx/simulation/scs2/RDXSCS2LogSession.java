@@ -215,6 +215,14 @@ public class RDXSCS2LogSession extends RDXSCS2Session
       super.destroy(baseUI);
    }
 
+   public ZEDSVOScrubber getFirstZEDScrubber()
+   {
+      if (zedLogVideos.isEmpty())
+         return null;
+      else
+         return zedLogVideos.get(0).scrubber;
+   }
+
    @Override
    public LogSession getSession()
    {
