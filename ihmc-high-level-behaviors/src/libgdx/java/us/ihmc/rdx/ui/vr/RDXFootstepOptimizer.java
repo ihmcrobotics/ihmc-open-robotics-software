@@ -20,9 +20,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class RDXFootstepOptimizer
 {
-   private static final double ALPHA = 0.35;
-   private static final double BETA = 0.45;
-   private static final double GAMMA = 0.2;
+   private static final double POSITION_W = 0.35;
+   private static final double YAW_W = 0.45;
+   private static final double PLANARITY_W = 0.2;
    private static final double LEARNING_RATE = 0.1;
    private static final double EPSILON = 1e-5;
    private static final int MAX_ITERATIONS = 1000;
@@ -142,6 +142,7 @@ public class RDXFootstepOptimizer
                System.arraycopy(qBest, 0, q, 0, q.length);
             }
 
+            LogTools.info("Gradient: {}", Math.sqrt(gradient[0] * gradient[0] + gradient[1] * gradient[1] + gradient[2] * gradient[2]));
             if (Math.sqrt(gradient[0] * gradient[0] + gradient[1] * gradient[1] + gradient[2] * gradient[2]) < EPSILON)
             {
                LogTools.warn("Convergence reached");
@@ -175,9 +176,9 @@ public class RDXFootstepOptimizer
     */
    private double computeCost(double[] q, FramePose3DReadOnly targetPose)
    {
-      double positionCost = ALPHA * (Math.pow(q[0] - targetPose.getX(), 2) + Math.pow(q[1] - targetPose.getY(), 2));
-      double yawCost = BETA * Math.pow(q[2] - targetPose.getYaw(), 2);
-      double planarityCost = GAMMA * computePlanarityCost(q);
+      double positionCost = POSITION_W * (Math.pow(q[0] - targetPose.getX(), 2) + Math.pow(q[1] - targetPose.getY(), 2));
+      double yawCost = YAW_W * Math.pow(q[2] - targetPose.getYaw(), 2);
+      double planarityCost = PLANARITY_W * computePlanarityCost(q);
       return positionCost + yawCost + planarityCost;
    }
 
@@ -348,7 +349,7 @@ public class RDXFootstepOptimizer
    private double[] computeGradient(double[] q, FramePose3DReadOnly targetPose)
    {
       // Compute numerical gradient since analytical one is not available
-      double h = 1e-5; // Small value for finite difference
+      double h = currentHeightMap.getGridResolutionXY();
       double[] gradient = new double[3];
       for (int i = 0; i < 3; i++)
       {
