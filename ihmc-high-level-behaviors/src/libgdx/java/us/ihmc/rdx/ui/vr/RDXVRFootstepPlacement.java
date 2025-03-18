@@ -229,7 +229,7 @@ public class RDXVRFootstepPlacement
 
    public void update()
    {
-      if (USE_STEPPABLE_REGION_ADAPTATION)
+      if (USE_HEIGHTMAP && USE_STEPPABLE_REGION_ADAPTATION && RUN_ADAPTATION_ASYNC)
       {
          if (footstepBeingExternallyPlaced != null)
          {
@@ -264,7 +264,7 @@ public class RDXVRFootstepPlacement
 
    public void resetOptimization()
    {
-      if (USE_STEPPABLE_REGION_ADAPTATION)
+      if (USE_HEIGHTMAP && USE_STEPPABLE_REGION_ADAPTATION)
       {
          footstepOptimizer.cancelCompute();
       }
@@ -358,7 +358,10 @@ public class RDXVRFootstepPlacement
       footstepBeingExternallyPlaced = null;
       latestHeightMapData = null;
       handPlacedFootsteps.clear();
-      footstepOptimizer.cancelCompute();
+      if (USE_STEPPABLE_REGION_ADAPTATION && RUN_ADAPTATION_ASYNC)
+      {
+         footstepOptimizer.cancelCompute();
+      }
    }
 
    public void resetTimer()
@@ -368,6 +371,9 @@ public class RDXVRFootstepPlacement
 
    public void destroy()
    {
-      footstepOptimizer.shutdown();
+      if (USE_STEPPABLE_REGION_ADAPTATION && RUN_ADAPTATION_ASYNC)
+      {
+         footstepOptimizer.shutdown();
+      }
    }
 }
