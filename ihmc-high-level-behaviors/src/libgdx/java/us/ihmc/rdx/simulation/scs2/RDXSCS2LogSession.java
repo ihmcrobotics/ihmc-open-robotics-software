@@ -214,4 +214,10 @@ public class RDXSCS2LogSession extends RDXSCS2Session
 
       super.destroy(baseUI);
    }
+
+   @Override
+   public LogSession getSession()
+   {
+      return logSession;
+   }
 }
