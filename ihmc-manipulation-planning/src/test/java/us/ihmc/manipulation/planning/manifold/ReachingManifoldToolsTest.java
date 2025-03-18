@@ -1,26 +1,27 @@
 package us.ihmc.manipulation.planning.manifold;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import org.junit.jupiter.api.Test;
-
 import toolbox_msgs.msg.dds.ReachingManifoldMessage;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.shape.primitives.Cylinder3D;
 import us.ihmc.euclid.shape.primitives.Sphere3D;
+import us.ihmc.euclid.shape.primitives.interfaces.Cylinder3DReadOnly;
+import us.ihmc.euclid.shape.primitives.interfaces.Sphere3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.ReachingManifoldCommand;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 public class ReachingManifoldToolsTest
 {
-   private Random random = new Random();
+   private static final int iters = 10;
 
    private final static double positionWeight = 1.0;
    private final static double orientationWeight = 0.0;
@@ -29,11 +30,10 @@ public class ReachingManifoldToolsTest
    private final RobotSide robotSide = RobotSide.RIGHT;
    private final RigidBodyBasics dummyHand = new RigidBody("dummyHand", new RigidBodyTransform(), ReferenceFrame.getWorldFrame());
 
-   private final RigidBodyTransform shapeTransform = new RigidBodyTransform();
-   private final Sphere3D sphere = new Sphere3D(3.0, 3.0, 3.0, 1.0);
-   private final Cylinder3D cylinder = new Cylinder3D(1.0, 0.5);
+   private static final Sphere3DReadOnly sphere = new Sphere3D(3.0, 3.0, 3.0, 1.0);
+   private static final Cylinder3DReadOnly cylinder = new Cylinder3D(1.0, 0.5);
 
-   private void appendRandomTransform(RigidBodyTransform transform)
+   private void appendRandomTransform(RigidBodyTransform transform, Random random)
    {
       transform.appendTranslation(random.nextDouble(), random.nextDouble(), random.nextDouble());
       transform.appendRollRotation(random.nextDouble());
@@ -44,13 +44,6 @@ public class ReachingManifoldToolsTest
    @Test
    public void testFindingClosestPointOnSphere()
    {
-      RigidBodyTransform expectedClosestTransform = new RigidBodyTransform();
-      RigidBodyTransform from = new RigidBodyTransform();
-      appendRandomTransform(from);
-
-      shapeTransform.appendTranslation(1.0, 1.0, 1.0);
-      appendRandomTransform(shapeTransform);
-
       List<ReachingManifoldMessage> manifolds = ReachingManifoldTools.createSphereManifoldMessagesForValkyrie(robotSide, dummyHand, sphere);
       List<ReachingManifoldCommand> manifoldCommands = new ArrayList<>();
       for (int i = 0; i < manifolds.size(); i++)
@@ -60,29 +53,40 @@ public class ReachingManifoldToolsTest
          manifoldCommands.add(command);
       }
 
-      System.out.println("distance between manifold and transform = "
-            + ReachingManifoldTools.packClosestRigidBodyTransformOnManifold(manifoldCommands, from, expectedClosestTransform, positionWeight,
-                                                                            orientationWeight));
+      Random random = new Random(1738L);
 
-      RigidBodyTransform closestTransformToExpectedClosestTransform = new RigidBodyTransform();
-      double distance = ReachingManifoldTools.packClosestRigidBodyTransformOnManifold(manifoldCommands, expectedClosestTransform,
-                                                                                      closestTransformToExpectedClosestTransform, positionWeight,
-                                                                                      orientationWeight);
+      for (int i = 0; i < iters; i++)
+      {
+         RigidBodyTransform expectedClosestTransform = new RigidBodyTransform();
+         RigidBodyTransform from = new RigidBodyTransform();
+         appendRandomTransform(from, random);
 
-      System.out.println("distance " + distance);
+         RigidBodyTransform shapeTransform = new RigidBodyTransform();
+         shapeTransform.appendTranslation(1.0, 1.0, 1.0);
+         appendRandomTransform(shapeTransform, random);
 
-      assertTrue(distance < errorThreshold, "expected transform is on the manifolds ");
+         System.out.println("distance between manifold and transform = " + ReachingManifoldTools.packClosestRigidBodyTransformOnManifold(manifoldCommands,
+                                                                                                                                         from,
+                                                                                                                                         expectedClosestTransform,
+                                                                                                                                         positionWeight,
+                                                                                                                                         orientationWeight));
+
+         RigidBodyTransform closestTransformToExpectedClosestTransform = new RigidBodyTransform();
+         double distance = ReachingManifoldTools.packClosestRigidBodyTransformOnManifold(manifoldCommands,
+                                                                                         expectedClosestTransform,
+                                                                                         closestTransformToExpectedClosestTransform,
+                                                                                         positionWeight,
+                                                                                         orientationWeight);
+
+         assertTrue(distance < errorThreshold,
+                    "expected transform shoulds be on the manifolds, with a distance threshold of " + errorThreshold + ". The actual distance is " + distance);
+      }
    }
 
    @Test
    public void testFindingClosestPointOnCylinder()
    {
-      RigidBodyTransform expectedClosestTransform = new RigidBodyTransform();
-      RigidBodyTransform from = new RigidBodyTransform();
-      appendRandomTransform(from);
-
-      shapeTransform.appendTranslation(1.0, 1.0, 1.0);
-      appendRandomTransform(shapeTransform);
+      Random random = new Random(1738L);
 
       List<ReachingManifoldMessage> manifolds = ReachingManifoldTools.createCylinderManifoldMessagesForValkyrie(robotSide, dummyHand, cylinder);
       List<ReachingManifoldCommand> manifoldCommands = new ArrayList<>();
@@ -93,17 +97,32 @@ public class ReachingManifoldToolsTest
          manifoldCommands.add(command);
       }
 
-      System.out.println("distance between manifold and transform = "
-            + ReachingManifoldTools.packClosestRigidBodyTransformOnManifold(manifoldCommands, from, expectedClosestTransform, positionWeight,
-                                                                            orientationWeight));
+      for (int i = 0; i < iters; i++)
+      {
+         RigidBodyTransform expectedClosestTransform = new RigidBodyTransform();
+         RigidBodyTransform from = new RigidBodyTransform();
+         appendRandomTransform(from, random);
 
-      RigidBodyTransform closestTransformToExpectedClosestTransform = new RigidBodyTransform();
-      double distance = ReachingManifoldTools.packClosestRigidBodyTransformOnManifold(manifoldCommands, expectedClosestTransform,
-                                                                                      closestTransformToExpectedClosestTransform, positionWeight,
-                                                                                      orientationWeight);
+         RigidBodyTransform shapeTransform = new RigidBodyTransform();
+         shapeTransform.appendTranslation(1.0, 1.0, 1.0);
+         appendRandomTransform(shapeTransform, random);
 
-      System.out.println("distance " + distance);
+         double distanceBetweenManifoldAndTransform = ReachingManifoldTools.packClosestRigidBodyTransformOnManifold(manifoldCommands,
+                                                                                                                    from,
+                                                                                                                    expectedClosestTransform,
+                                                                                                                    positionWeight,
+                                                                                                                    orientationWeight);
+         System.out.println("distance between manifold and transform = " + distanceBetweenManifoldAndTransform);
 
-      assertTrue(distance < errorThreshold, "expected transform is on the manifolds ");
+         RigidBodyTransform closestTransformToExpectedClosestTransform = new RigidBodyTransform();
+         double distance = ReachingManifoldTools.packClosestRigidBodyTransformOnManifold(manifoldCommands,
+                                                                                         expectedClosestTransform,
+                                                                                         closestTransformToExpectedClosestTransform,
+                                                                                         positionWeight,
+                                                                                         orientationWeight);
+
+         assertTrue(distance < errorThreshold,
+                    "expected transform shoulds be on the manifolds, with a distance threshold of " + errorThreshold + ". The actual distance is " + distance);
+      }
    }
 }
