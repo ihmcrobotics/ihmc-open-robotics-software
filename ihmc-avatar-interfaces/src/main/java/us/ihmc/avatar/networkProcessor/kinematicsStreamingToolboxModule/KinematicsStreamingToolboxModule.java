@@ -81,6 +81,11 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
                                                             registry);
       controller.setRobotStateUpdater(robotStateUpdater);
       controller.setCollisionModel(robotModel.getHumanoidRobotKinematicsCollisionModel());
+      List<String> inactiveJoints = parameters.getInactiveJoints();
+      for (int i = 0; i < inactiveJoints.size(); i++)
+      {
+         controller.getActiveOptimizationSettings().deactivateJoint(controller.getDesiredFullRobotModel().getOneDoFJointByName(inactiveJoints.get(i)));
+      }
       Map<String, Double> initialConfiguration = fromStandPrep(robotModel);
       if (initialConfiguration != null)
          controller.setInitialRobotConfigurationNamedMap(initialConfiguration);

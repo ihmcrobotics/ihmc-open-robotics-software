@@ -224,6 +224,13 @@ public class IKStreamingRTPluginFactory
                                                                                               fullRobotModelFactory,
                                                                                               yoGraphicsListRegistry,
                                                                                               registry);
+
+         List<String> inactiveJoints = parameters.getInactiveJoints();
+         for (int i = 0; i < inactiveJoints.size(); i++)
+         {
+            kinematicsStreamingToolboxController.getActiveOptimizationSettings().deactivateJoint(desiredFullRobotModel.getOneDoFJointByName(inactiveJoints.get(i)));
+         }
+
          kinematicsStreamingToolboxController.setCollisionModel(collisionModel);
 
          MessageUnpacker<WholeBodyStreamingMessage> wholeBodyStreamingMessageUnpacker = MessageUnpackingTools.createWholeBodyStreamingMessageUnpacker();

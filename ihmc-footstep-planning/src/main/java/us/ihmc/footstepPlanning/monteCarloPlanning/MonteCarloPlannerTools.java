@@ -467,7 +467,7 @@ public class MonteCarloPlannerTools
          else if (isWithinGridBoundaries(new Point2D(position), gridColor.cols()) && node.getRobotSide() == RobotSide.RIGHT)
          {
             gridColor.ptr((int) position.getX32(), (int) position.getY32())
-                     .put(new byte[] {(byte) (score * 255), (byte) (score * 255), (byte) 255, (byte) 255});
+                     .put((byte) (score * 255), (byte) (score * 255), (byte) 255, (byte) 255);
          }
       }
    }

@@ -108,7 +108,7 @@ public class LatestTimestampModifiable
    }
 
    /** Call when we receive the full data to stop requesting it. */
-   public void confirmRecievedFullData()
+   public void confirmReceivedFullData()
    {
       if (requestSendFullData)
          LogTools.debug("{}: Update # {} Full data received", ourName, crdtInfo.getUpdateNumber());

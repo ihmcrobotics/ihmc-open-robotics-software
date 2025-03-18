@@ -40,7 +40,7 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
  * for distance away from boundaries and edges for each cell). For more information on Distance Transform visit:
  * https://en.wikipedia.org/wiki/Distance_transform
  */
-public class RapidHeightMapExtractor implements RapidHeightMapExtractorInterface
+public class RapidHeightMapExtractor
 {
    private int mode = 1; // 0 -> Ouster, 1 -> Realsense
    private float gridOffsetX;

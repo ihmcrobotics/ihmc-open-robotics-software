@@ -63,7 +63,7 @@ public class AStarFootstepPlannerIterationConductor
    }
 
   /**
-    * Performs iteration according to {@link #doPlanningIteration}.
+    * Performs iteration
     * The node expanded is the one with the {@code costFromStart + heuristicCostToGoal}
     *
     * @param nodeToExpand the node that will be expanded

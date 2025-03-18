@@ -17,9 +17,11 @@ import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
-
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class KinematicsStreamingToolboxParameters
@@ -280,6 +282,8 @@ public class KinematicsStreamingToolboxParameters
    protected double solverNullspaceAlpha;
    protected double solverPrivilegedDefaultWeight;
    protected double solverPrivilegedDefaultGain;
+
+   private final List<String> inactiveJoints = new ArrayList<>();
 
    public static KinematicsStreamingToolboxParameters defaultParameters()
    {
@@ -1098,30 +1102,30 @@ public class KinematicsStreamingToolboxParameters
       return initialConfigurationMap;
    }
 
-   public void reduceElbowJointLimits(DRCRobotModel robotModel)
-   {
+   public void reduceElbowJointLimits(DRCRobotModel robotModel) {
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       // reduce limit for elbow to avoid singularity
       Map<String, Double> jointUpperLimits = new LinkedHashMap<>();
       Map<String, Double> jointLowerLimits = new LinkedHashMap<>();
-      for (RobotSide robotSide : RobotSide.values)
-      {
+      for (RobotSide robotSide : RobotSide.values) {
          OneDoFJointBasics elbowJoint = fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_PITCH);
          double upperLimit = elbowJoint.getJointLimitUpper();
          double lowerLimit = elbowJoint.getJointLimitLower();
          double fullyExtendedLimit = Math.abs(upperLimit) < Math.abs(lowerLimit) ? upperLimit : lowerLimit;
-         if (fullyExtendedLimit > 0)
-         {
+         if (fullyExtendedLimit > 0) {
             fullyExtendedLimit = -0.10;
             jointUpperLimits.put(robotModel.getJointMap().getArmJointName(robotSide, ArmJointName.ELBOW_PITCH), fullyExtendedLimit);
-         }
-         else
-         {
+         } else {
             fullyExtendedLimit = 0.10;
             jointLowerLimits.put(robotModel.getJointMap().getArmJointName(robotSide, ArmJointName.ELBOW_PITCH), fullyExtendedLimit);
          }
       }
       jointCustomPositionUpperLimits = jointUpperLimits;
       jointCustomPositionLowerLimits = jointLowerLimits;
+   }
+
+   public List<String> getInactiveJoints()
+   {
+      return inactiveJoints;
    }
 }

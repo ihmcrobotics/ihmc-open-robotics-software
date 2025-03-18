@@ -595,7 +595,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    {
       if (manageROS2Node && ros2Node != null)
       {
-         ((ROS2Node) ros2Node).destroy();
+         ros2Node.destroy();
          ros2Node = null;
       }
    }
