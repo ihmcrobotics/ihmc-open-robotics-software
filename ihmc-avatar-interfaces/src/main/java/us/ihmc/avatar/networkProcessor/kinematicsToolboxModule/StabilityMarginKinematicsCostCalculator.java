@@ -196,8 +196,9 @@ public class StabilityMarginKinematicsCostCalculator
 
       // hard-coded for overriding
 //      regionNormal.set(-0.342, 0.940, 0.000);
-//      regionNormal.set(0.0, 0.0, 1.0);
-      regionNormal.set(-0.317,  0.871,  0.375);
+      regionNormal.set(0.0, 0.0, 1.0);
+//      regionNormal.set(-0.317,  0.871,  0.375);
+//      regionNormal.set(0.392,  0.840,  0.375);
 
       // Detune the default KST values a bit
       chestDefaultWeight.set(0.0, 0.0, 0.5);

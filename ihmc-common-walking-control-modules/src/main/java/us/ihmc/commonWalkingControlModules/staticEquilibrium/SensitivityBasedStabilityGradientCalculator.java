@@ -57,11 +57,11 @@ import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.percentageOfInte
 public class SensitivityBasedStabilityGradientCalculator
 {
    private static final boolean APPLY_JOINT_LIMIT_FILTER = false;
-   private static final boolean USE_AREA_BASED_CONTACT_ADJUSTMENT = true;
+   private static final boolean USE_AREA_BASED_CONTACT_ADJUSTMENT = false;
    private static final double INTEGRATION_DT = 1.0e-3;
    private static final int XY_DIMENSIONS = 2;
    private static final boolean COMPUTE_EXPECTED_MARGIN_VELOCITY = true;
-   private static final boolean INCLUDE_POSTURE_OBJ_IN_CONTACT_ADJUSTMENT = true;
+   private static final boolean INCLUDE_POSTURE_OBJ_IN_CONTACT_ADJUSTMENT = false;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -78,7 +78,7 @@ public class SensitivityBasedStabilityGradientCalculator
    private final StabilityMarginRegionCalculator stabilityMarginRegionCalculator;
    /* Compute dA/dt for a given q, qd, where A is the constraint matrix in the LP computed by StabilityMarginRegionCalculator */
    private final PostureConstraintMatrixVariationCalculator postureConstraintVariationCalculator;
-   /* Compute dA/dt for a given q, dr_i/dt, where r_i is contact point i and A is the constraint matrix in the LP computed by StabilityMarginRegionCalculator */
+   /* Compute dA/dt for a given dr_i/dt, where r_i is the position of contact point i and A is the constraint matrix in the LP computed by StabilityMarginRegionCalculator */
    private final ContactPointConstraintMatrixVariationCalculator contactPointConstraintMatrixVariation;
 
    /* Point p on the region boundary closest to the CoM. The margin m is defined as m = |c - p|, where c is the CoM */
@@ -115,8 +115,10 @@ public class SensitivityBasedStabilityGradientCalculator
    /* Temp field used to call LinearProgramSolver#computeSensitivity */
    private final DMatrixRMaj tempSensitivityMatrix = new DMatrixRMaj(0);
 
-   /* Postural sensitivity, given as |N grad m(q)|, where N is the nullspace projector */
+   /* Postural sensitivity, given as |N grad m(q)|, for configuration q, where N is the nullspace projector */
    private final YoDouble yoPostureSensitivity = new YoDouble("postureSensitivity", registry);
+   /* Contact sensitivity, given as |grad m(c)|, for contact point c */
+   private final YoDouble yoContactSensitivity = new YoDouble("contactSensitivity", registry);
    /* YoVariable data of stability margin gradient */
    private final YoDouble[] yoStabilityMarginGradient;
 
@@ -135,7 +137,7 @@ public class SensitivityBasedStabilityGradientCalculator
    private final SideDependentList<YoFrameVector3D> yoContactPointMarginAdjustments = new SideDependentList<>();
    private final SideDependentList<YoDouble> yoContactAdjustmentNorm = new SideDependentList<>();
 
-   private final FrameVector3D tempNormal = new FrameVector3D();
+   private final FrameVector3D tempFrameVector = new FrameVector3D();
    private final FrameVector3D tempFrameVectorX = new FrameVector3D();
    private final FrameVector3D tempFrameVectorY = new FrameVector3D();
    private final Vector2D tempVector2D = new Vector2D();
@@ -352,8 +354,8 @@ public class SensitivityBasedStabilityGradientCalculator
 
       { // Compute via farthest edge
          // Find query direction parallel anti-parallel to normal
-         tempNormal.setIncludingFrame(wholeBodyContactState.getContactFrame(contact_idx), Axis3D.Z);
-         tempNormal.changeFrame(ReferenceFrame.getWorldFrame());
+         tempFrameVector.setIncludingFrame(wholeBodyContactState.getContactFrame(contact_idx), Axis3D.Z);
+         tempFrameVector.changeFrame(ReferenceFrame.getWorldFrame());
 
 //         double maxDot = 0.0;
 //         int maxDotEdge = 0;
@@ -404,7 +406,15 @@ public class SensitivityBasedStabilityGradientCalculator
 
       // Scale by sensitivity
       contactPointOptimalAdjustment.set(USE_AREA_BASED_CONTACT_ADJUSTMENT ? yoContactPointAreaAdjustments.get(robotSide) : yoContactPointMarginAdjustments.get(robotSide));
-      yoContactAdjustmentNorm.get(robotSide).set(contactPointOptimalAdjustment.norm());
+
+      if (USE_AREA_BASED_CONTACT_ADJUSTMENT)
+      {
+         yoContactSensitivity.set(EuclidCoreTools.norm(dAreaX, dAreaY));
+      }
+      else
+      {
+         yoContactSensitivity.set(EuclidCoreTools.norm(dMarginX, dMarginY));
+      }
 
       if (INCLUDE_POSTURE_OBJ_IN_CONTACT_ADJUSTMENT)
          postureConstraintVariationCalculator.resetToInitialJointState();
