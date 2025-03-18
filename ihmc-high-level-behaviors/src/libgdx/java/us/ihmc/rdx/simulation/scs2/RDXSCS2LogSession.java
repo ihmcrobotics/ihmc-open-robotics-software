@@ -8,6 +8,7 @@ import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
+import us.ihmc.codecs.generated.YUVPicture;
 import us.ihmc.commons.MathTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -136,8 +137,22 @@ public class RDXSCS2LogSession extends RDXSCS2Session
             Frame frame = magewellLogVideo.scrubber.readVideoFrame(yoTimestamp.getValueAsLongBits());
             magewellLogVideo.visualizer.updateImageDimensions(frame.imageWidth, frame.imageHeight);
             magewellLogVideo.visualizer.setImage(magewellLogVideo.converter.convertToMat(frame), opencv_imgproc.COLOR_BGR2RGBA);
+            frame.close();
          }
-
+         for (BlackmagicLogVideo blackmagicLogVideo : blackmagicLogVideos)
+         {
+            try
+            {
+               YUVPicture yuvPicture = blackmagicLogVideo.scrubber.readVideoFrame(yoTimestamp.getValueAsLongBits());
+               blackmagicLogVideo.visualizer.updateImageDimensions(yuvPicture.getWidth(), yuvPicture.getHeight());
+               // TODO: Convert YUVPicture to Mat
+               yuvPicture.delete();
+            }
+            catch (Exception e)
+            {
+               LogTools.error(e.getMessage());
+            }
+         }
          for (ZEDLogVideo zedLogVideo : zedLogVideos)
          {
             zedLogVideo.scrubber.scrub(yoTimestamp.getValueAsLongBits());
@@ -147,9 +162,11 @@ public class RDXSCS2LogSession extends RDXSCS2Session
             zedLogVideo.visualizer.updateImageDimensions(imageWidth, imageHeight);
 
             Pointer leftColorImageSlMatPointer = zedLogVideo.scrubber.getLeftColorImageSlMatPointer();
-            zedLogVideo.visualizer.setImage(new Mat(imageHeight, imageWidth, opencv_core.CV_8UC4, // BGRA8
-                                                    sl_mat_get_ptr(leftColorImageSlMatPointer, SL_MEM_CPU),
-                                                    sl_mat_get_step_bytes(leftColorImageSlMatPointer, SL_MEM_CPU)));
+            Mat mat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC4, // BGRA8
+                              sl_mat_get_ptr(leftColorImageSlMatPointer, SL_MEM_CPU),
+                              sl_mat_get_step_bytes(leftColorImageSlMatPointer, SL_MEM_CPU));
+            zedLogVideo.visualizer.setImage(mat);
+            mat.close();
          }
       }
    }
@@ -181,6 +198,7 @@ public class RDXSCS2LogSession extends RDXSCS2Session
    {
       for (MagewellLogVideo magewellLogVideo : magewellLogVideos)
       {
+         magewellLogVideo.scrubber.getMagewellDemuxer().stop();
          magewellLogVideo.visualizer.destroy();
       }
       for (BlackmagicLogVideo blackmagicLogVideo : blackmagicLogVideos)
