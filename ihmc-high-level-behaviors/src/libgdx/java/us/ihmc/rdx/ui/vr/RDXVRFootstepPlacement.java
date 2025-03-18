@@ -35,7 +35,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class RDXVRFootstepPlacement
 {
-   private final static boolean USE_HEIGHTMAP = true;
+   private final static boolean USE_HEIGHTMAP = false;
    private final static boolean USE_STEPPABLE_REGION_ADAPTATION = false;
    private final static boolean RUN_ADAPTATION_ASYNC = false;
    private static final long TIMEOUT_STEPPABLE_REGION_ADAPTATION = 10;
