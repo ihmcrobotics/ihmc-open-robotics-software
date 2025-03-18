@@ -24,9 +24,10 @@ public class RDXFootstepOptimizer
    private static final double BETA = 0.45;
    private static final double GAMMA = 0.2;
    private static final double LEARNING_RATE = 0.1;
-   private static final double EPSILON = 1e-3;
-   private static final int MAX_ITERATIONS = 100;
+   private static final double EPSILON = 1e-5;
+   private static final int MAX_ITERATIONS = 1000;
    private static final double MAX_HEIGHT_VARIANCE = 0.05;
+   private static final double PLANARITY_TOLERANCE = 0.03;
    private static final double MAX_SLOPE_ANGLE = Math.toRadians(50);
 
    private double footLength;
@@ -95,65 +96,73 @@ public class RDXFootstepOptimizer
    public FramePose3D compute(HeightMapData heightMapData, FramePose3DReadOnly initialPose)
    {
       currentHeightMap = heightMapData;
-      double[] q = {initialPose.getX(), initialPose.getY(), initialPose.getYaw()};
-      double[] qBest = q.clone();
-      double costBest = Double.POSITIVE_INFINITY;
-
-      for (int i = 0; i < MAX_ITERATIONS; i++)
+      if (isInitialSolutionValid(initialPose))
       {
-         // Check if a stop has been requested
-         if (stopRequested.get()) {
-            LogTools.warn("Optimization interrupted");
-            return bestSolution;
-         }
-
-         double cost = computeCost(q, initialPose);
-         if (cost < costBest)
-         {
-            costBest = cost;
-            System.arraycopy(q, 0, qBest, 0, q.length);
-
-            // Update the best solution so far
-            FramePose3D currentBestSolution = new FramePose3D(initialPose);
-            currentBestSolution.setX(qBest[0]);
-            currentBestSolution.setY(qBest[1]);
-            currentBestSolution.getRotation().set(new YawPitchRoll(qBest[2], initialPose.getPitch(), initialPose.getRoll()));
-            currentBestSolution.setZ(heightMapData.getHeightAt(qBest[0], qBest[1]));
-            bestSolution = currentBestSolution; // Update volatile field
-         }
-
-         double[] gradient = computeGradient(q, initialPose);
-         for (int j = 0; j < q.length; j++)
-         {
-            q[j] -= LEARNING_RATE * gradient[j];
-         }
-
-         if (!satisfiesConstraints(q, initialPose))
-         {
-            // If constraints are violated, revert to previous valid state
-            System.arraycopy(qBest, 0, q, 0, q.length);
-         }
-
-         if (Math.sqrt(gradient[0] * gradient[0] + gradient[1] * gradient[1] + gradient[2] * gradient[2]) < EPSILON)
-         {
-            LogTools.warn("Convergence reached");
-            hasConverged = true;
-            break; // Convergence reached
-         }
-
-         if (i == MAX_ITERATIONS - 1)
-         {
-            LogTools.warn("Max iterations reached");
-            hasConverged = true;
-         }
+         LogTools.info("No need to run optimization");
+         return new FramePose3D(initialPose);
       }
+      else
+      {
+         double[] q = {initialPose.getX(), initialPose.getY(), initialPose.getYaw()};
+         double[] qBest = q.clone();
+         double costBest = Double.POSITIVE_INFINITY;
 
-      FramePose3D optimizedPose = new FramePose3D(initialPose);
-      optimizedPose.setX(qBest[0]);
-      optimizedPose.setY(qBest[1]);
-      optimizedPose.getRotation().set(new YawPitchRoll(qBest[2], initialPose.getPitch(), initialPose.getRoll()));
-      optimizedPose.setZ(heightMapData.getHeightAt(qBest[0], qBest[1]));
-      return optimizedPose;
+         for (int i = 0; i < MAX_ITERATIONS; i++)
+         {
+            // Check if a stop has been requested
+            if (stopRequested.get()) {
+               LogTools.warn("Optimization interrupted");
+               return bestSolution;
+            }
+
+            double cost = computeCost(q, initialPose);
+            if (cost < costBest)
+            {
+               costBest = cost;
+               System.arraycopy(q, 0, qBest, 0, q.length);
+
+               // Update the best solution so far
+               FramePose3D currentBestSolution = new FramePose3D(initialPose);
+               currentBestSolution.setX(qBest[0]);
+               currentBestSolution.setY(qBest[1]);
+               currentBestSolution.getRotation().set(new YawPitchRoll(qBest[2], initialPose.getPitch(), initialPose.getRoll()));
+               currentBestSolution.setZ(heightMapData.getHeightAt(qBest[0], qBest[1]));
+               bestSolution = currentBestSolution; // Update volatile field
+            }
+
+            double[] gradient = computeGradient(q, initialPose);
+            for (int j = 0; j < q.length; j++)
+            {
+               q[j] -= LEARNING_RATE * gradient[j];
+            }
+
+            if (!satisfiesConstraints(q, initialPose))
+            {
+               // If constraints are violated, revert to previous valid state
+               System.arraycopy(qBest, 0, q, 0, q.length);
+            }
+
+            if (Math.sqrt(gradient[0] * gradient[0] + gradient[1] * gradient[1] + gradient[2] * gradient[2]) < EPSILON)
+            {
+               LogTools.warn("Convergence reached");
+               hasConverged = true;
+               break; // Convergence reached
+            }
+
+            if (i == MAX_ITERATIONS - 1)
+            {
+               LogTools.warn("Max iterations reached");
+               hasConverged = true;
+            }
+         }
+
+         FramePose3D optimizedPose = new FramePose3D(initialPose);
+         optimizedPose.setX(qBest[0]);
+         optimizedPose.setY(qBest[1]);
+         optimizedPose.getRotation().set(new YawPitchRoll(qBest[2], initialPose.getPitch(), initialPose.getRoll()));
+         optimizedPose.setZ(heightMapData.getHeightAt(qBest[0], qBest[1]));
+         return optimizedPose;
+      }
    }
 
    /**
@@ -172,6 +181,36 @@ public class RDXFootstepOptimizer
       return positionCost + yawCost + planarityCost;
    }
 
+   private boolean isInitialSolutionValid(FramePose3DReadOnly initialPose)
+   {
+      double[] heights = new double[5];
+      double fx = footLength;
+      double fy = footWidth;
+      double[][] corners = {{-fx / 2, -fy / 2}, {fx / 2, -fy / 2}, {fx / 2, fy / 2}, {-fx / 2, fy / 2}, {0, 0}};
+      for (int i = 0; i < 5; i++)
+      {
+         double x = initialPose.getPosition().getX() + corners[i][0] * Math.cos(initialPose.getYaw()) - corners[i][1] * Math.sin(initialPose.getYaw());
+         double y = initialPose.getPosition().getY() + corners[i][0] * Math.sin(initialPose.getYaw()) + corners[i][1] * Math.cos(initialPose.getYaw());
+         heights[i] = currentHeightMap.getHeightAt(x, y);
+      }
+
+      // Fit a plane to the points
+      double[] planeCoeffs = fitPlane(corners, heights);
+
+      // Check if points lie on the same plane within tolerance
+      boolean onSamePlane = true;
+      for (int i = 0; i < 5; i++)
+      {
+         double distance = Math.abs(planeCoeffs[0] * corners[i][0] + planeCoeffs[1] * corners[i][1] + planeCoeffs[2] - heights[i]);
+         if (distance > PLANARITY_TOLERANCE)
+         {
+            onSamePlane = false;
+            break;
+         }
+      }
+      return onSamePlane;
+   }
+
    /**
     * Computes the planarity cost for a given foot position.
     *
@@ -188,16 +227,15 @@ public class RDXFootstepOptimizer
     */
    private double computePlanarityCost(double[] q)
    {
-      double[][] corners = {{q[0] - footLength / 2, q[1] - footWidth / 2},
-                            {q[0] + footLength / 2, q[1] - footWidth / 2},
-                            {q[0] + footLength / 2, q[1] + footWidth / 2},
-                            {q[0] - footLength / 2, q[1] + footWidth / 2},
-                            {q[0], q[1]}};  // Center point
-
       double[] heights = new double[5];
+      double fx = footLength;
+      double fy = footWidth;
+      double[][] corners = {{-fx / 2, -fy / 2}, {fx / 2, -fy / 2}, {fx / 2, fy / 2}, {-fx / 2, fy / 2}, {0, 0}};
       for (int i = 0; i < 5; i++)
       {
-         heights[i] = currentHeightMap.getHeightAt(corners[i][0], corners[i][1]);
+         double x = q[0] + corners[i][0] * Math.cos(q[2]) - corners[i][1] * Math.sin(q[2]);
+         double y = q[1] + corners[i][0] * Math.sin(q[2]) + corners[i][1] * Math.cos(q[2]);
+         heights[i] = currentHeightMap.getHeightAt(x, y);
       }
 
       // Fit a plane to the points
