@@ -1,11 +1,9 @@
 package us.ihmc.commonWalkingControlModules.staticEquilibrium;
 
 import gnu.trove.list.array.TIntArrayList;
-import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.euclid.Axis3D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
@@ -31,8 +29,6 @@ import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.GeometricJacobian;
-import us.ihmc.robotics.screwTheory.PointJacobian;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
@@ -45,9 +41,6 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor;
 import static us.ihmc.commonWalkingControlModules.staticEquilibrium.StabilityMarginRegionCalculator.queryDirectionX;
@@ -64,10 +57,11 @@ import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.percentageOfInte
 public class SensitivityBasedStabilityGradientCalculator
 {
    private static final boolean APPLY_JOINT_LIMIT_FILTER = false;
-   private static final boolean USE_AREA_BASED_CONTACT_ADJUSTMENT = false;
+   private static final boolean USE_AREA_BASED_CONTACT_ADJUSTMENT = true;
    private static final double INTEGRATION_DT = 1.0e-3;
    private static final int XY_DIMENSIONS = 2;
    private static final boolean COMPUTE_EXPECTED_MARGIN_VELOCITY = true;
+   private static final boolean INCLUDE_POSTURE_OBJ_IN_CONTACT_ADJUSTMENT = true;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -78,12 +72,14 @@ public class SensitivityBasedStabilityGradientCalculator
 
    /* The sensitivity analysis assumes a constant CoM xy position and contact points. This computes the nullspace of those constraints */
    private final ContactNullspaceCalculator nullspaceCalculator;
+   /* For computing contact point adjustment, this computes the whole-body velocity tangent to a given surface */
+   private final SideDependentList<ContactTangentCalculator> contactTangentCalculators = new SideDependentList<>();
    /* Stability margin calculator. The data on the closest edge is used to compute the margin gradient */
    private final StabilityMarginRegionCalculator stabilityMarginRegionCalculator;
    /* Compute dA/dt for a given q, qd, where A is the constraint matrix in the LP computed by StabilityMarginRegionCalculator */
    private final PostureConstraintMatrixVariationCalculator postureConstraintVariationCalculator;
    /* Compute dA/dt for a given q, dr_i/dt, where r_i is contact point i and A is the constraint matrix in the LP computed by StabilityMarginRegionCalculator */
-   private final ContactPointConstraintMatrixVariation contactPointConstraintMatrixVariation;
+   private final ContactPointConstraintMatrixVariationCalculator contactPointConstraintMatrixVariation;
 
    /* Point p on the region boundary closest to the CoM. The margin m is defined as m = |c - p|, where c is the CoM */
    private final YoFramePoint2D comMarginPoint = new YoFramePoint2D("comMarginPoint", ReferenceFrame.getWorldFrame(), registry);
@@ -130,12 +126,6 @@ public class SensitivityBasedStabilityGradientCalculator
    /* Filtered data of stability margin gradient */
    private final AlphaFilteredYoVariable[] yoStabilityMarginGradientFilt;
 
-   /* Point jacobian to compute joint motion during contact adjustment calc */
-   private final PointJacobian pointJacobian = new PointJacobian();
-   private final DMatrixRMaj pointJacobianReduced = new DMatrixRMaj(0);
-   private final DMatrixRMaj pointJacobianInverse = new DMatrixRMaj(0);
-   private final DMatrixRMaj qd;
-
    /* Indexed controllable joints */
    private final OneDoFJointBasics[] controllableOneDoFJoints;
 
@@ -146,7 +136,6 @@ public class SensitivityBasedStabilityGradientCalculator
    private final SideDependentList<YoDouble> yoContactAdjustmentNorm = new SideDependentList<>();
 
    private final FrameVector3D tempNormal = new FrameVector3D();
-   private final FramePoint3D tempPoint = new FramePoint3D();
    private final FrameVector3D tempFrameVectorX = new FrameVector3D();
    private final FrameVector3D tempFrameVectorY = new FrameVector3D();
    private final Vector2D tempVector2D = new Vector2D();
@@ -181,13 +170,13 @@ public class SensitivityBasedStabilityGradientCalculator
                                                                                                  stabilityMarginRegionCalculator.getOptimizationModule(),
                                                                                                  INTEGRATION_DT,
                                                                                                  registry);
-      contactPointConstraintMatrixVariation = new ContactPointConstraintMatrixVariation(stabilityMarginRegionCalculator.getOptimizationModule());
+      contactPointConstraintMatrixVariation = new ContactPointConstraintMatrixVariationCalculator(stabilityMarginRegionCalculator.getOptimizationModule());
       robotMass = fullRobotModel.getTotalMass();
 
       JointBasics[] controlledJoints = computeJointsToOptimizeFor(fullRobotModel);
       controllableOneDoFJoints = MultiBodySystemTools.filterJoints(controlledJoints, OneDoFJointBasics.class);
       MultiBodySystemBasics multiBodySystemInput = MultiBodySystemBasics.toMultiBodySystemBasics(controlledJoints);
-      qd = new DMatrixRMaj(6 + controllableOneDoFJoints.length, 1);
+//      qd = new DMatrixRMaj(6 + controllableOneDoFJoints.length, 1);
 
       yoStabilityMarginGradient = new YoDouble[Twist.SIZE + controllableOneDoFJoints.length];
       yoStabilityMarginGradientFilt = new AlphaFilteredYoVariable[Twist.SIZE + controllableOneDoFJoints.length];
@@ -224,6 +213,7 @@ public class SensitivityBasedStabilityGradientCalculator
          yoContactPointAreaAdjustments.put(robotSide, new YoFrameVector3D(prefix + "contactAreaAdj", ReferenceFrame.getWorldFrame(), registry));
          yoContactPointMarginAdjustments.put(robotSide, new YoFrameVector3D(prefix + "contactMarginAdj", ReferenceFrame.getWorldFrame(), registry));
          yoContactAdjustmentNorm.put(robotSide, new YoDouble(prefix + "contactAdjustmentNorm", registry));
+         contactTangentCalculators.put(robotSide, new ContactTangentCalculator(fullRobotModel, robotSide));
 
          if (graphicsListRegistry != null)
          {
@@ -310,45 +300,26 @@ public class SensitivityBasedStabilityGradientCalculator
    public FrameVector3DReadOnly computeContactPointAdjustment(RobotSide robotSide)
    {
       FrameVector3D contactPointOptimalAdjustment = contactPointOptimalAdjustments.get(robotSide);
+      postureConstraintVariationCalculator.initializeFiniteDifference();
 
-      // Compute contact point sensitivity
       RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
       int contact_idx = wholeBodyContactState.indexOf(hand);
 
-      // Compute hand jacobian
-      RigidBodyBasics contactingBody = wholeBodyContactState.getContactingBody(contact_idx);
-      GeometricJacobian jacobian = wholeBodyContactState.getJacobian(contactingBody);
-      jacobian.changeFrame(jacobian.getBaseFrame());
-      jacobian.compute();
-      tempPoint.setToZero(fullRobotModel.getHandControlFrame(robotSide));
-      pointJacobian.set(jacobian, tempPoint);
-      pointJacobian.compute();
-
-      DMatrixRMaj pointJacobianMatrix = pointJacobian.getJacobianMatrix();
-      pointJacobianReduced.reshape(pointJacobianMatrix.getNumRows(), pointJacobianMatrix.getNumCols() - 2);
-
-      // Hard-coded to remove spine x/y
-      int spineXIndex = 7;
-      int spineYIndex = 8;
-
-      // Extract to reduced jacobian
-      // Take inverse
-      // Multiply below and compute posture derivative
+      if (INCLUDE_POSTURE_OBJ_IN_CONTACT_ADJUSTMENT)
+         contactTangentCalculators.get(robotSide).computeJacobian();
 
       // Constraint matrix variation
       tempFrameVectorX.setIncludingFrame(wholeBodyContactState.getContactFrame(contact_idx), Axis3D.X);
       tempFrameVectorX.changeFrame(ReferenceFrame.getWorldFrame());
       dAX.set(contactPointConstraintMatrixVariation.compute(contact_idx, tempFrameVectorX));
+      if (INCLUDE_POSTURE_OBJ_IN_CONTACT_ADJUSTMENT)
+         CommonOps_DDRM.addEquals(dAX, postureConstraintVariationCalculator.computeFiniteDifference(contactTangentCalculators.get(robotSide).computeWholeBodyVelocity(tempFrameVectorX)));
 
       tempFrameVectorY.setIncludingFrame(wholeBodyContactState.getContactFrame(contact_idx), Axis3D.Y);
       tempFrameVectorY.changeFrame(ReferenceFrame.getWorldFrame());
       dAY.set(contactPointConstraintMatrixVariation.compute(contact_idx, tempFrameVectorY));
-
-      // TODO
-      // compute point Jacobian of the arm J
-      // compute system Jacobian via indexing in contact nullspace... or maybe just extract indices directly
-      // compute qd via qd = J^-1 v
-      // compute constraint matrix variation normally and add to dA{XY}
+      if (INCLUDE_POSTURE_OBJ_IN_CONTACT_ADJUSTMENT)
+         CommonOps_DDRM.addEquals(dAY, postureConstraintVariationCalculator.computeFiniteDifference(contactTangentCalculators.get(robotSide).computeWholeBodyVelocity(tempFrameVectorY)));
 
       FrameConvexPolygon2DReadOnly feasibleRegion = stabilityMarginRegionCalculator.getFeasibleRegion();
       double dAreaX = 0.0;
@@ -362,7 +333,7 @@ public class SensitivityBasedStabilityGradientCalculator
 
             FramePoint2DReadOnly vertexA = feasibleRegion.getVertex(edge_idx);
             FramePoint2DReadOnly vertexB = feasibleRegion.getNextVertex(edge_idx);
-            double distance = 1.0; // vertexA.distance(vertexB);
+            double distance = vertexA.distance(vertexB);
 
             double sensitivityAX = cosA * computeSensitivity(dAX, primalSolutionA, dualSolutionA, tempSensitivityMatrix);
             double sensitivityBX = cosB * computeSensitivity(dAX, primalSolutionB, dualSolutionB, tempSensitivityMatrix);
@@ -384,29 +355,31 @@ public class SensitivityBasedStabilityGradientCalculator
          tempNormal.setIncludingFrame(wholeBodyContactState.getContactFrame(contact_idx), Axis3D.Z);
          tempNormal.changeFrame(ReferenceFrame.getWorldFrame());
 
-         double maxDot = 0.0;
-         int maxDotEdge = 0;
+//         double maxDot = 0.0;
+//         int maxDotEdge = 0;
+//
+//         for (int j = 0; j < feasibleRegion.getNumberOfVertices(); j++)
+//         {
+//            FramePoint2DReadOnly v0 = feasibleRegion.getVertex(j);
+//            FramePoint2DReadOnly v1 = feasibleRegion.getNextVertex(j);
+//            tempVector2D.sub(v1, v0);
+//            tempVector2D.set(tempVector2D.getY(), -tempVector2D.getX());
+//            tempVector2D.normalize();
+//            double dot = tempVector2D.getX() * tempNormal.getX() + tempVector2D.getY() * tempNormal.getY();
+//            if (dot > maxDot)
+//            {
+//               maxDot = dot;
+//               maxDotEdge = j;
+//            }
+//         }
+//
+//         if (!updateStabilityMarginData(maxDotEdge))
+//         {
+//            contactPointOptimalAdjustment.setToZero();
+//            return contactPointOptimalAdjustment;
+//         }
 
-         for (int j = 0; j < feasibleRegion.getNumberOfVertices(); j++)
-         {
-            FramePoint2DReadOnly v0 = feasibleRegion.getVertex(j);
-            FramePoint2DReadOnly v1 = feasibleRegion.getNextVertex(j);
-            tempVector2D.sub(v1, v0);
-            tempVector2D.set(tempVector2D.getY(), -tempVector2D.getX());
-            tempVector2D.normalize();
-            double dot = tempVector2D.getX() * tempNormal.getX() + tempVector2D.getY() * tempNormal.getY();
-            if (dot > maxDot)
-            {
-               maxDot = dot;
-               maxDotEdge = j;
-            }
-         }
-
-         if (!updateStabilityMarginData(maxDotEdge))
-         {
-            contactPointOptimalAdjustment.setToZero();
-            return contactPointOptimalAdjustment;
-         }
+         updateStabilityMarginData(stabilityMarginRegionCalculator.getLowestMarginEdgeIndex());
 
          double sensitivityAX = cosA * computeSensitivity(dAX, primalSolutionA, dualSolutionA, tempSensitivityMatrix);
          double sensitivityBX = cosB * computeSensitivity(dAX, primalSolutionB, dualSolutionB, tempSensitivityMatrix);
@@ -432,6 +405,9 @@ public class SensitivityBasedStabilityGradientCalculator
       // Scale by sensitivity
       contactPointOptimalAdjustment.set(USE_AREA_BASED_CONTACT_ADJUSTMENT ? yoContactPointAreaAdjustments.get(robotSide) : yoContactPointMarginAdjustments.get(robotSide));
       yoContactAdjustmentNorm.get(robotSide).set(contactPointOptimalAdjustment.norm());
+
+      if (INCLUDE_POSTURE_OBJ_IN_CONTACT_ADJUSTMENT)
+         postureConstraintVariationCalculator.resetToInitialJointState();
 
       // For visualization
       yoContactPointOptimalAdjustmentsPoints.get(robotSide).setFromReferenceFrame(wholeBodyContactState.getContactFrame(contact_idx));

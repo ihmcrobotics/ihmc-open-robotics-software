@@ -62,10 +62,10 @@ public class StabilityMarginKinematicsCostCalculator
    public static final boolean OVERRIDE_MESSAGE = true;
    public static final boolean ENABLE_POSTURE_OBJECTIVE = true;
    public static final boolean ENABLE_CONTACT_OBJECTIVE = true;
-   public static final boolean INCLUDE_FF_VELOCITY = true;
+   public static final boolean INCLUDE_FF_VELOCITY = false;
 
    private static final double KP_ORIENTATION = 1200.0;
-   private static final double MAX_CONTACT_POINT_ADJUSTMENT = 0.07;
+   private static final double MAX_CONTACT_POINT_ADJUSTMENT = 0.4;
    private static final double MAX_ORIENTATION_ERROR = Math.toRadians(5.0);
 //   private static final double MAX_COM_Z_ERROR = 0.01;
 
@@ -171,7 +171,7 @@ public class StabilityMarginKinematicsCostCalculator
                                                                                          registry);
 
       kpPosture.set(12.0); // 15.0);
-      kpContact.set(0.5);
+      kpContact.set(0.8);
 
       double maxRate = Math.toRadians(15.0);
       chestOrientationRetargeting = new OrientationRetargeting("chest",  fullRobotModel.getChest(), updateDT, maxRate, MAX_CHEST_ORIENTATION_OFFSET, graphicsListRegistry, registry);
@@ -195,7 +195,9 @@ public class StabilityMarginKinematicsCostCalculator
       pelvisWeight = new YoVector3D("pelvisWeight", registry);
 
       // hard-coded for overriding
-      regionNormal.set(-0.342, 0.940, 0.000);
+//      regionNormal.set(-0.342, 0.940, 0.000);
+//      regionNormal.set(0.0, 0.0, 1.0);
+      regionNormal.set(-0.317,  0.871,  0.375);
 
       // Detune the default KST values a bit
       chestDefaultWeight.set(0.0, 0.0, 0.5);
