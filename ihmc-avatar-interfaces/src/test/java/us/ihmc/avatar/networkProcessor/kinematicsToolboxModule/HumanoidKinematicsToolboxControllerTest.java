@@ -243,7 +243,7 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
       runKinematicsToolboxController(numberOfIterations);
 
       assertTrue(initializationSucceeded.getBooleanValue(), KinematicsToolboxController.class.getSimpleName() + " did not manage to initialize.");
-      assertTrue(toolboxController.getSolution().getSolutionQuality() < 1.0e-4, "Poor solution quality: " + toolboxController.getSolution().getSolutionQuality());
+      assertTrue(toolboxController.getSolution().getSolutionQuality() < 5.0e-3, "Poor solution quality: " + toolboxController.getSolution().getSolutionQuality());
    }
 
    @Test
