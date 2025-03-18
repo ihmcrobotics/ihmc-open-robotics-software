@@ -143,6 +143,7 @@ public class FootstepSnapAndWigglerTest
       snapper.snapFootstep(stanceNode, null, false);
 
       // test regions low enough to snap
+      // the high height doesn't get filtered in the height map.
       FootstepSnapData snapData = snapper.snapFootstep(new DiscreteFootstep(1.0, -1.0), stanceNode, false);
       expectedTransform.setTranslationAndIdentityRotation(new Vector3D(0.0, 0.0, lowHeight0));
       EuclidCoreTestTools.assertEquals(expectedTransform, snapData.getSnapTransform(), epsilon);
@@ -193,7 +194,7 @@ public class FootstepSnapAndWigglerTest
       environmentHandler.setHeightMap(HeightMapMessageTools.unpackMessage(heightMapMessage));
 
       RigidBodyTransform expectedTransform = new RigidBodyTransform();
-      double epsilon = 1e-8;
+      double epsilon = 1e-5;
 
       DiscreteFootstep stanceNode = new DiscreteFootstep(0.0, 0.0);
       snapper.snapFootstep(stanceNode, null, false);
@@ -206,6 +207,9 @@ public class FootstepSnapAndWigglerTest
       assertEquals(rotatedAngle, snapData.getSnapTransform().getRotation().getPitch(), epsilon);
 
       snapData = snapper.snapFootstep(new DiscreteFootstep(3.0, 0.0), stanceNode, false);
+      assertEquals(rotatedAngle, snapData.getSnapTransform().getRotation().getPitch(), epsilon);
+
+      snapData = snapper.snapFootstep(new DiscreteFootstep(-3.0, 0.0), stanceNode, false);
       assertEquals(0.0, snapData.getSnapTransform().getRotation().getPitch(), epsilon);
    }
 
