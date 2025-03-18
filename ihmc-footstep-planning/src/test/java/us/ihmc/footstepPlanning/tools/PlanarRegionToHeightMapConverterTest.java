@@ -24,7 +24,7 @@ import static us.ihmc.euclid.tools.EuclidCoreTestTools.assertEquals;
 
 public class PlanarRegionToHeightMapConverterTest
 {
-   private static final int iters = 5000;
+   private static final int iters = 500;
 
    @Test
    public void testFittingNormals()

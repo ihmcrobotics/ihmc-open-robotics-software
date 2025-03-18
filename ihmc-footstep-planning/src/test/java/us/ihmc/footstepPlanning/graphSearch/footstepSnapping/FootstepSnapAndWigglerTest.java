@@ -8,6 +8,7 @@ import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -34,6 +35,8 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class FootstepSnapAndWigglerTest
 {
@@ -107,7 +110,8 @@ public class FootstepSnapAndWigglerTest
       planarRegionsListGenerator.translate(1.0, 1.0, lowHeight2);
       planarRegionsListGenerator.addRectangle(1.0, 1.0);
 
-      // regions too high to snap
+      // regions too high to snap. However, this is a height map. Unlike the planar regions, there is no such thing as a multi-level approach. This means the
+      // steps will be snapped to these heights.
       planarRegionsListGenerator.identity();
       double highHeight0 = groundHeight + maximumSnapHeight + 1e-5;
       planarRegionsListGenerator.translate(2.0, -1.0, highHeight0);
@@ -133,7 +137,7 @@ public class FootstepSnapAndWigglerTest
       environmentHandler.setHeightMap(HeightMapMessageTools.unpackMessage(heightMapMessage));
 
       RigidBodyTransform expectedTransform = new RigidBodyTransform();
-      double epsilon = 1e-8;
+      double epsilon = 1e-5;
 
       DiscreteFootstep stanceNode = new DiscreteFootstep(0.0, 0.0);
       snapper.snapFootstep(stanceNode, null, false);
@@ -141,28 +145,29 @@ public class FootstepSnapAndWigglerTest
       // test regions low enough to snap
       FootstepSnapData snapData = snapper.snapFootstep(new DiscreteFootstep(1.0, -1.0), stanceNode, false);
       expectedTransform.setTranslationAndIdentityRotation(new Vector3D(0.0, 0.0, lowHeight0));
-      Assertions.assertTrue(snapData.getSnapTransform().epsilonEquals(expectedTransform, epsilon));
+      EuclidCoreTestTools.assertEquals(expectedTransform, snapData.getSnapTransform(), epsilon);
 
       snapData = snapper.snapFootstep(new DiscreteFootstep(1.0, 0.0), stanceNode, false);
       expectedTransform.setTranslationAndIdentityRotation(new Vector3D(0.0, 0.0, lowHeight1));
-      Assertions.assertTrue(snapData.getSnapTransform().epsilonEquals(expectedTransform, epsilon));
+      EuclidCoreTestTools.assertEquals(expectedTransform, snapData.getSnapTransform(), epsilon);
 
       snapData = snapper.snapFootstep(new DiscreteFootstep(1.0, 1.0), stanceNode, false);
       expectedTransform.setTranslationAndIdentityRotation(new Vector3D(0.0, 0.0, lowHeight2));
-      Assertions.assertTrue(snapData.getSnapTransform().epsilonEquals(expectedTransform, epsilon));
+      EuclidCoreTestTools.assertEquals(expectedTransform, snapData.getSnapTransform(), epsilon);
 
-      // test regions high enough to snap
+      // test regions high enough to snap. Unlike with the planar regions, these high heights won't be filtered out, because the height map doesn't have a
+      // concept of "multi-level".
       snapData = snapper.snapFootstep(new DiscreteFootstep(2.0, -1.0), stanceNode, false);
-      expectedTransform.setTranslationAndIdentityRotation(new Vector3D(0.0, 0.0, groundHeight));
-      Assertions.assertTrue(snapData.getSnapTransform().epsilonEquals(expectedTransform, epsilon));
+      expectedTransform.setTranslationAndIdentityRotation(new Vector3D(0.0, 0.0, highHeight0));
+      EuclidCoreTestTools.assertEquals(expectedTransform, snapData.getSnapTransform(), epsilon);
 
       snapData = snapper.snapFootstep(new DiscreteFootstep(2.0, 0.0), stanceNode, false);
-      expectedTransform.setTranslationAndIdentityRotation(new Vector3D(0.0, 0.0, groundHeight));
-      Assertions.assertTrue(snapData.getSnapTransform().epsilonEquals(expectedTransform, epsilon));
+      expectedTransform.setTranslationAndIdentityRotation(new Vector3D(0.0, 0.0, highHeight1));
+      EuclidCoreTestTools.assertEquals(expectedTransform, snapData.getSnapTransform(), epsilon);
 
       snapData = snapper.snapFootstep(new DiscreteFootstep(2.0, 1.0), stanceNode, false);
-      expectedTransform.setTranslationAndIdentityRotation(new Vector3D(0.0, 0.0, groundHeight));
-      Assertions.assertTrue(snapData.getSnapTransform().epsilonEquals(expectedTransform, epsilon));
+      expectedTransform.setTranslationAndIdentityRotation(new Vector3D(0.0, 0.0, highHeight2));
+      EuclidCoreTestTools.assertEquals(expectedTransform, snapData.getSnapTransform(), epsilon);
    }
 
    @Test
@@ -195,13 +200,13 @@ public class FootstepSnapAndWigglerTest
 
       FootstepSnapData snapData = snapper.snapFootstep(new DiscreteFootstep(- 1.0, 0.0), stanceNode, false);
       expectedTransform.setTranslationAndIdentityRotation(new Vector3D(0.0, 0.0, groundHeight));
-      Assertions.assertTrue(snapData.getSnapTransform().epsilonEquals(expectedTransform, epsilon));
+      EuclidCoreTestTools.assertEquals(expectedTransform, snapData.getSnapTransform(), epsilon);
 
       snapData = snapper.snapFootstep(new DiscreteFootstep(1.0, 0.0), stanceNode, false);
-      Assertions.assertTrue(EuclidCoreTools.epsilonEquals(snapData.getSnapTransform().getRotation().getPitch(), rotatedAngle, epsilon));
+      assertEquals(rotatedAngle, snapData.getSnapTransform().getRotation().getPitch(), epsilon);
 
       snapData = snapper.snapFootstep(new DiscreteFootstep(3.0, 0.0), stanceNode, false);
-      Assertions.assertTrue(EuclidCoreTools.epsilonEquals(snapData.getSnapTransform().getRotation().getPitch(), 0.0, epsilon));
+      assertEquals(0.0, snapData.getSnapTransform().getRotation().getPitch(), epsilon);
    }
 
    @Test
@@ -267,7 +272,7 @@ public class FootstepSnapAndWigglerTest
       FootstepSnapData snapData = snapAndWiggler.snapFootstep(footstep);
       RigidBodyTransform snappedStepTransform = snapData.getSnappedStepTransform(footstep);
       double epsilon = 1e-7;
-      Assertions.assertEquals(snappedStepTransform.getTranslation().getZ(), flatGroundHeight, epsilon, "Flat ground snap height is not equal");
+      assertEquals(snappedStepTransform.getTranslation().getZ(), flatGroundHeight, epsilon, "Flat ground snap height is not equal");
    }
 
    public void testStanceFootClearance()

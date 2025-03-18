@@ -170,17 +170,20 @@ public class HeightMapPolygonSnapperTest
       polygonToSnap.addVertex(-footLength / 2.0, footWidth / 2.0);
       polygonToSnap.update();
 
+      double totalArea = footLength * footWidth;
+
       HeightMapPolygonSnapper snapper = new HeightMapPolygonSnapper();
       FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
       environmentHandler.setHeightMap(heightMapData);
       snapper.snapPolygonToHeightMap(polygonToSnap, environmentHandler, 0.05, Math.toRadians(45.0));
 
-      Assertions.assertTrue(snapper.getAreaFraction() >= polygonToSnap.getArea());
+      Assertions.assertTrue(snapper.getAreaFraction() * totalArea >= polygonToSnap.getArea());
 
       // make the foot overhang by a fair bit
       polygonToSnap.translate(-gridResolution, 0.0);
       snapper.snapPolygonToHeightMap(polygonToSnap, environmentHandler, 0.05, Math.toRadians(45.0));
-      Assertions.assertFalse(snapper.getAreaFraction() >= polygonToSnap.getArea());
-      Assertions.assertEquals(snapper.getAreaFraction(), (footLength - 0.05) * footWidth, 2e-3);
+      double expectedArea = (footLength - 0.05) * footWidth;
+      Assertions.assertFalse(snapper.getAreaFraction() > 1.0, "Expected area less than " + polygonToSnap.getArea() + ", got " + snapper.getAreaFraction());
+      Assertions.assertEquals(expectedArea, totalArea * snapper.getAreaFraction(), 2e-3);
    }
 }
