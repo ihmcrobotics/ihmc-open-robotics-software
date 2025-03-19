@@ -34,6 +34,7 @@ import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
+import us.ihmc.yoVariables.euclid.filters.FilteredFiniteDifferenceYoFrameVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.*;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -139,7 +140,7 @@ public class SphereControlToolbox
       setupFeetFrames(gravity, yoGraphicsListRegistry);
 
       capturePointVelocityAlpha.set(0.5);
-      icpVelocity = FilteredFiniteDifferenceYoFrameVector3D.createFilteredVelocityYoFrameVector("capturePointVelocity", "", capturePointVelocityAlpha, controlDT, registry, icp);
+      icpVelocity = new FilteredFiniteDifferenceYoFrameVector3D("capturePointVelocity", "", capturePointVelocityAlpha, controlDT, registry, icp);
 
       String graphicListName = getClass().getSimpleName();
 
