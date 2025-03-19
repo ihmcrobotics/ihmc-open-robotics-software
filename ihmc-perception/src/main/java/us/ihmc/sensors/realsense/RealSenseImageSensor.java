@@ -112,7 +112,7 @@ public class RealSenseImageSensor extends ImageSensor
 
          if (colorFrame != null)
             colorFrame.remove();
-         RigidBodyTransform colorToDepthTransform = new RigidBodyTransform(realsense.getDepthToColorRotation(), realsense.depthToColorTranslation);
+         RigidBodyTransform colorToDepthTransform = new RigidBodyTransform(realsense.getDepthToColorRotation(), realsense.getDepthToColorTranslation());
          colorToDepthTransform.invert();
          colorFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(getSensorName() + "_color", sensorFrame, colorToDepthTransform);
       }
@@ -124,7 +124,7 @@ public class RealSenseImageSensor extends ImageSensor
             grabbedImages[COLOR_IMAGE_KEY].release();
          grabbedImages[COLOR_IMAGE_KEY] = RawImage.createWithBGRImage(bgrImage,
                                                                       realsense.getColorCameraIntrinsics(),
-                                                                      new FramePose3D(colorFrame),
+                                                                      colorFrame.getTransformToRoot(),
                                                                       grabTime,
                                                                       grabSequenceNumber);
 
@@ -132,7 +132,7 @@ public class RealSenseImageSensor extends ImageSensor
             grabbedImages[DEPTH_IMAGE_KEY].release();
          grabbedImages[DEPTH_IMAGE_KEY] = RawImage.createWith16BitDepth(depthImage,
                                                                         realsense.getDepthCameraIntrinsics(),
-                                                                        new FramePose3D(depthFrame),
+                                                                        depthFrame.getTransformToRoot(),
                                                                         grabTime,
                                                                         grabSequenceNumber,
                                                                         (float) realsense.getDepthDiscretization());

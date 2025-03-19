@@ -2,11 +2,11 @@ package us.ihmc.sensors.zed;
 
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.opencv.opencv_core.GpuMat;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
@@ -276,22 +276,25 @@ public class ZEDImageSensor extends ImageSensor
          returnCode = sl_retrieve_image(cameraID, rightColorImagePointer, SL_VIEW_RIGHT, SL_MEM_GPU, imageWidth, imageHeight);
          throwOnError(returnCode);
 
-         FramePose3D leftSensorPose = new FramePose3D(leftSensorFrame);
-         FramePose3D rightSensorPose = new FramePose3D(rightSensorFrame);
-
          synchronized (grabbedImages)
          {  // Create RawImages from the grabbed retrieved slMats
             if (grabbedImages[LEFT_COLOR_IMAGE_KEY] != null)
                grabbedImages[LEFT_COLOR_IMAGE_KEY].release();
-            grabbedImages[LEFT_COLOR_IMAGE_KEY] = slMatToRawImage(leftColorImagePointer, PixelFormat.BGRA8, leftSensorIntrinsics, leftSensorPose);
+            grabbedImages[LEFT_COLOR_IMAGE_KEY] = slMatToRawImage(leftColorImagePointer,
+                                                                  PixelFormat.BGRA8,
+                                                                  leftSensorIntrinsics,
+                                                                  leftSensorFrame.getTransformToRoot());
 
             if (grabbedImages[RIGHT_COLOR_IMAGE_KEY] != null)
                grabbedImages[RIGHT_COLOR_IMAGE_KEY].release();
-            grabbedImages[RIGHT_COLOR_IMAGE_KEY] = slMatToRawImage(rightColorImagePointer, PixelFormat.BGRA8, rightSensorIntrinsics, rightSensorPose);
+            grabbedImages[RIGHT_COLOR_IMAGE_KEY] = slMatToRawImage(rightColorImagePointer,
+                                                                   PixelFormat.BGRA8,
+                                                                   rightSensorIntrinsics,
+                                                                   rightSensorFrame.getTransformToRoot());
 
             if (grabbedImages[DEPTH_IMAGE_KEY] != null)
                grabbedImages[DEPTH_IMAGE_KEY].release();
-            grabbedImages[DEPTH_IMAGE_KEY] = slMatToRawImage(depthImagePointer, PixelFormat.GRAY16, leftSensorIntrinsics, leftSensorPose);
+            grabbedImages[DEPTH_IMAGE_KEY] = slMatToRawImage(depthImagePointer, PixelFormat.GRAY16, leftSensorIntrinsics, leftSensorFrame.getTransformToRoot());
          }
       }
       catch (ZEDException exception)
@@ -305,7 +308,10 @@ public class ZEDImageSensor extends ImageSensor
       return true;
    }
 
-   private RawImage slMatToRawImage(Pointer slMatPointer, PixelFormat imagePixelFormat, CameraIntrinsics cameraIntrinsics, FramePose3D sensorPose)
+   private RawImage slMatToRawImage(Pointer slMatPointer,
+                                    PixelFormat imagePixelFormat,
+                                    CameraIntrinsics cameraIntrinsics,
+                                    RigidBodyTransformReadOnly sensorTransform)
    {
       GpuMat imageGpuMat = new GpuMat(imageHeight,
                                       imageWidth,
@@ -317,7 +323,7 @@ public class ZEDImageSensor extends ImageSensor
                           imagePixelFormat,
                           cameraIntrinsics,
                           CameraModel.PINHOLE,
-                          new FramePose3D(sensorPose),
+                          sensorTransform,
                           lastGrabTime,
                           grabSequenceNumber,
                           MILLIMETER_TO_METERS);

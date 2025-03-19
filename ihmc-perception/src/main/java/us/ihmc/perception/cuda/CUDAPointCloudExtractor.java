@@ -92,7 +92,7 @@ public class CUDAPointCloudExtractor implements AutoCloseable
       }
 
       // Get a float[] of the transformation matrix, and copy it into CUDA page-locked memory
-      depthToWorldTransform.set(depthImage.getPose());
+      depthToWorldTransform.set(depthImage.getTransformToWorld());
       depthToWorldTransform.get(transformArray);
       transformPointer.put(transformArray);
 
