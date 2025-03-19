@@ -23,11 +23,11 @@ import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.rdx.vr.RDXVRPickResult;
 import us.ihmc.robotics.interaction.MouseCollidable;
 import us.ihmc.robotics.interaction.PointCollidable;
-import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.simulation.collision.Collidable;
 
 /**
  * A robot collidable is a part of the robot that the user can click on.
@@ -61,15 +61,6 @@ public class RDXRobotCollidable implements RenderableProvider
    private boolean ranVRProcessInput = false;
    private boolean ranMouseCalculateInput = false;
    private boolean ranMouseProcessInput = false;
-
-   public RDXRobotCollidable(us.ihmc.scs2.simulation.collision.Collidable collidable, int collidableIndex, Color color)
-   {
-      this(collidable.getShape(),
-           collidable.getRigidBody().getParentJoint().getFrameAfterJoint(),
-           collidable.getRigidBody().getName(),
-           collidableIndex,
-           color);
-   }
 
    public RDXRobotCollidable(Collidable collidable, int collidableIndex, Color color)
    {
