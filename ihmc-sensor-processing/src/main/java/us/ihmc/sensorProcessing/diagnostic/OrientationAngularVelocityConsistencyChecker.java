@@ -1,14 +1,14 @@
 package us.ihmc.sensorProcessing.diagnostic;
 
-import static us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoFrameVector.createSimpleMovingAverageFilteredYoFrameVector;
+import static us.ihmc.yoVariables.euclid.filters.SimpleMovingAverageFilteredYoFrameVector3D.createSimpleMovingAverageFilteredYoFrameVector;
 
 import java.util.EnumMap;
 
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.math.filters.FiniteDifferenceAngularVelocityYoFrameVector;
-import us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoFrameVector;
+import us.ihmc.yoVariables.euclid.filters.FiniteDifferenceAngularVelocityYoFrameVector3D;
+import us.ihmc.yoVariables.euclid.filters.SimpleMovingAverageFilteredYoFrameVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -17,11 +17,11 @@ public class OrientationAngularVelocityConsistencyChecker implements DiagnosticU
 {
    private final YoRegistry registry;
 
-   private final FiniteDifferenceAngularVelocityYoFrameVector localVelocityFromFD;
+   private final FiniteDifferenceAngularVelocityYoFrameVector3D localVelocityFromFD;
    private final YoFrameVector3D angularVelocityToCheck;
 
-   private final SimpleMovingAverageFilteredYoFrameVector localVelocityFiltered;
-   private final SimpleMovingAverageFilteredYoFrameVector filteredVelocityToCheck;
+   private final SimpleMovingAverageFilteredYoFrameVector3D localVelocityFiltered;
+   private final SimpleMovingAverageFilteredYoFrameVector3D filteredVelocityToCheck;
 
    private final EnumMap<Axis3D, DelayEstimatorBetweenTwoSignals> delayEstimators = new EnumMap<>(Axis3D.class);
 
@@ -40,7 +40,7 @@ public class OrientationAngularVelocityConsistencyChecker implements DiagnosticU
       registry = new YoRegistry(namePrefix + "OrientationVelocityCheck");
       this.referenceFrameUsedForComparison = referenceFrameUsedForComparison;
 
-      localVelocityFromFD = new FiniteDifferenceAngularVelocityYoFrameVector(namePrefix + "referenceFD", orientation, updateDT, registry);
+      localVelocityFromFD = new FiniteDifferenceAngularVelocityYoFrameVector3D(namePrefix + "referenceFD", orientation, updateDT, registry);
       this.angularVelocityToCheck = angularVelocityToCheck;
 
       int windowSize = 10;

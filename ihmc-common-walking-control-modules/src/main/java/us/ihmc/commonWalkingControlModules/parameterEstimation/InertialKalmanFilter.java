@@ -10,7 +10,7 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.parameterEstimation.ExtendedKalmanFilter;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.yoVariables.filters.AlphaFilteredYoMatrix;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
+import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;

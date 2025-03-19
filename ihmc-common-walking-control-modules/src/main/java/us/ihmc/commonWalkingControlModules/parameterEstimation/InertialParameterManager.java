@@ -20,7 +20,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelWrapper;
 import us.ihmc.robotics.MatrixMissingTools;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
-import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
+import us.ihmc.yoVariables.filters.FilteredFiniteDifferenceYoVariable;
 import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoVariables.math.YoMatrix;
 import us.ihmc.yoVariables.filters.AlphaFilteredYoMatrix;
@@ -66,7 +66,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final DMatrixRMaj wholeSystemTorques;
 
    private final DMatrixRMaj jointVelocitiesContainer;
-   private final FilteredVelocityYoVariable[] jointAccelerations;
+   private final FilteredFiniteDifferenceYoVariable[] jointAccelerations;
 
    private final Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>[] basisSets;
    private final RigidBodyBasics[] regressorModelBodiesToProcess;
@@ -185,9 +185,9 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       accelerationCalculationAlpha = new YoDouble("accelerationCalculationAlpha", registry);
       accelerationCalculationAlpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(inertialEstimationParameters.getBreakFrequencyForAccelerationCalculation(), dt));
       jointVelocitiesContainer = new DMatrixRMaj(nDoFs, 1);
-      jointAccelerations = new FilteredVelocityYoVariable[nDoFs];
+      jointAccelerations = new FilteredFiniteDifferenceYoVariable[nDoFs];
       for (int i = 0; i < measurementNames.length; i++)
-         jointAccelerations[i] = new FilteredVelocityYoVariable("jointAcceleration_" + measurementNames[i], "", defaultAccelerationCalculationAlpha, dt, registry);
+         jointAccelerations[i] = new FilteredFiniteDifferenceYoVariable("jointAcceleration_" + measurementNames[i], "", defaultAccelerationCalculationAlpha, dt, registry);
 
       String[] estimateNames = inertialEstimationParameters.getEstimateNames();
       estimate = new YoMatrix("", nParameters, 1, estimateNames, null, registry);
@@ -304,7 +304,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
    private void updateAccelerationCalculationFilterAlphas()
    {
-      for (FilteredVelocityYoVariable jointAcceleration : jointAccelerations)
+      for (FilteredFiniteDifferenceYoVariable jointAcceleration : jointAccelerations)
          jointAcceleration.setAlpha(accelerationCalculationAlpha.getValue());
    }
 

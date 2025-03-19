@@ -9,7 +9,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
-import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector;
+import us.ihmc.yoVariables.euclid.filters.FilteredFiniteDifferenceYoFrameVector3D;
 import us.ihmc.simulationConstructionSetTools.robotController.SimpleRobotController;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -41,8 +41,8 @@ public class ActualCMPComputer extends SimpleRobotController
    private final YoDouble alpha = new YoDouble("simMomentumRateAlpha", registry);
    private final YoFrameVector3D yoLinearMomentum = new YoFrameVector3D("simLinearMomentum", worldFrame, registry);
    private final YoFrameVector3D yoAngularMomentum = new YoFrameVector3D("simAngularMomentum", worldFrame, registry);
-   private final FilteredVelocityYoFrameVector linearMomentumRateOfChange;
-   private final FilteredVelocityYoFrameVector angularMomentumRateOfChange;
+   private final FilteredFiniteDifferenceYoFrameVector3D linearMomentumRateOfChange;
+   private final FilteredFiniteDifferenceYoFrameVector3D angularMomentumRateOfChange;
 
    private final YoFrameVector2D yoCmp = new YoFrameVector2D("simActualCMP", worldFrame, registry);
 
@@ -52,8 +52,8 @@ public class ActualCMPComputer extends SimpleRobotController
       simulateDT = scs.getDT();
       gravity = simulatedRobot.getGravityZ();
 
-      linearMomentumRateOfChange = new FilteredVelocityYoFrameVector("SimRateOfChangeLinearMomentum", "", alpha, simulateDT, registry, yoLinearMomentum);
-      angularMomentumRateOfChange = new FilteredVelocityYoFrameVector("SimRateOfChangeAngularMomentum", "", alpha, simulateDT, registry, yoAngularMomentum);
+      linearMomentumRateOfChange = new FilteredFiniteDifferenceYoFrameVector3D("SimRateOfChangeLinearMomentum", "", alpha, simulateDT, registry, yoLinearMomentum);
+      angularMomentumRateOfChange = new FilteredFiniteDifferenceYoFrameVector3D("SimRateOfChangeAngularMomentum", "", alpha, simulateDT, registry, yoAngularMomentum);
 
       if (createViz)
       {

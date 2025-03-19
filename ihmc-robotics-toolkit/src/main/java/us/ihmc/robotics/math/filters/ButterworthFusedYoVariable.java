@@ -1,6 +1,8 @@
 package us.ihmc.robotics.math.filters;
 
-import us.ihmc.robotics.math.filters.ButterworthFilteredYoVariable.ButterworthFilterType;
+import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
+import us.ihmc.yoVariables.filters.ButterworthFilteredYoVariable;
+import us.ihmc.yoVariables.filters.ButterworthFilteredYoVariable.ButterworthFilterType;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;

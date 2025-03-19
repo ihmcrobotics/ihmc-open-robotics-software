@@ -1,11 +1,9 @@
 package us.ihmc.robotics.filters;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.robotics.math.filters.SecondOrderFilterType;
-import us.ihmc.robotics.math.filters.SecondOrderFilteredYoVariable;
+import us.ihmc.yoVariables.filters.SecondOrderFilterType;
+import us.ihmc.yoVariables.filters.SecondOrderFilteredYoVariable;
 import us.ihmc.robotics.testing.JUnitTools;
 
 public class SecondOrderFilteredYoVariableTest

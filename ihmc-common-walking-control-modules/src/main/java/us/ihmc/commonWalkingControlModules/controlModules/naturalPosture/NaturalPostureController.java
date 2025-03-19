@@ -12,8 +12,8 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
+import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
+import us.ihmc.yoVariables.filters.FilteredFiniteDifferenceYoVariable;
 import us.ihmc.robotics.referenceFrames.OrientationFrame;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
@@ -44,7 +44,7 @@ public class NaturalPostureController
    private final YoDouble velocityAlpha = new YoDouble("naturalPostureVelocityAlpha", registry);
    private final YoDouble velocityBreakFrequency = new YoDouble("naturalPostureVelocityBreakFrequency", registry);
 
-   private final FilteredVelocityYoVariable comAngularVelocityYaw, comAngularVelocityPitch, comAngularVelocityRoll;
+   private final FilteredFiniteDifferenceYoVariable comAngularVelocityYaw, comAngularVelocityPitch, comAngularVelocityRoll;
 
    private final YoFrameYawPitchRoll comAngle = new YoFrameYawPitchRoll("naturalPostureCenterOfMassAngle", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameYawPitchRoll kpComAngle = new YoFrameYawPitchRoll("naturalPostureCenterOfMassAngleKpGains", ReferenceFrame.getWorldFrame(), registry);
@@ -109,9 +109,9 @@ public class NaturalPostureController
 
       //TODO This is likely not equivalent to filtering the 3D angular velocity and should probably be corrected.
       // We should filter the angular velocity and then compute yaw pitch roll rates from it.
-      comAngularVelocityYaw = new FilteredVelocityYoVariable("npYawVelocity", "", velocityAlpha, comAngle.getYoYaw(), controlDT, registry);
-      comAngularVelocityPitch = new FilteredVelocityYoVariable("npPitchVelocity", "", velocityAlpha, comAngle.getYoPitch(), controlDT, registry);
-      comAngularVelocityRoll = new FilteredVelocityYoVariable("npRollVelocity", "", velocityAlpha, comAngle.getYoRoll(), controlDT, registry);
+      comAngularVelocityYaw = new FilteredFiniteDifferenceYoVariable("npYawVelocity", "", velocityAlpha, comAngle.getYoYaw(), controlDT, registry);
+      comAngularVelocityPitch = new FilteredFiniteDifferenceYoVariable("npPitchVelocity", "", velocityAlpha, comAngle.getYoPitch(), controlDT, registry);
+      comAngularVelocityRoll = new FilteredFiniteDifferenceYoVariable("npRollVelocity", "", velocityAlpha, comAngle.getYoRoll(), controlDT, registry);
 
       fullRobotModel = controllerToolbox.getFullRobotModel();
 
