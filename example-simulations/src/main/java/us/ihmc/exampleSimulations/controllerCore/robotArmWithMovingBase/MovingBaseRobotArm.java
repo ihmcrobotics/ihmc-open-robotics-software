@@ -1,7 +1,5 @@
 package us.ihmc.exampleSimulations.controllerCore.robotArmWithMovingBase;
 
-import static us.ihmc.yoVariables.euclid.filters.FilteredFiniteDifferenceYoFrameVector3D.createFilteredVelocityYoFrameVector;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -149,9 +147,9 @@ public class MovingBaseRobotArm extends Robot
 
       handControlFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("handControlFrame", hand.getBodyFixedFrame(), controlFrameTransform);
 
-      controlFrameLinearAcceleration = createFilteredVelocityYoFrameVector("controlFrameLinearAcceleration", "", dummyAlpha, dt, yoRegistry,
+      controlFrameLinearAcceleration = new FilteredFiniteDifferenceYoFrameVector3D("controlFrameLinearAcceleration", "", dummyAlpha, dt, yoRegistry,
                                                                            controlFrameTracker.getYoVelocity());
-      controlFrameAngularAcceleration = createFilteredVelocityYoFrameVector("controlFrameAngularAcceleration", "", dummyAlpha, dt, yoRegistry,
+      controlFrameAngularAcceleration = new FilteredFiniteDifferenceYoFrameVector3D("controlFrameAngularAcceleration", "", dummyAlpha, dt, yoRegistry,
                                                                             controlFrameTracker.getYoAngularVelocity());
 
       setJointLimits();

@@ -48,8 +48,7 @@ public class ToeSlippingDetector
 
       alpha = new YoDouble(namePrefix + "AlphaFilter", registry);
       toeForceFiltered = new AlphaFilteredYoVariable(namePrefix + "ToeForceFiltered", "", registry, alpha);
-      toeLinearVelocityFiltered = AlphaFilteredYoFrameVector3D.createAlphaFilteredYoFrameVector(namePrefix + "ToeLinearVelocityFiltered", "", registry, alpha,
-                                                                                                worldFrame);
+      toeLinearVelocityFiltered = new AlphaFilteredYoFrameVector3D(namePrefix + "ToeLinearVelocityFiltered", "", registry, alpha, worldFrame);
 
       initialToePosition = new YoFramePoint3D(namePrefix + "ToeInitial", worldFrame, registry);
       toeSlippageDistance = new YoDouble(namePrefix + "ToeSlippageDistance", registry);

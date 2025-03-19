@@ -30,8 +30,8 @@ import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFramePoint2D;
 import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFrameVector3D;
-import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoVariables.euclid.filters.BacklashCompensatingVelocityYoFrameVector3D;
+import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
@@ -140,7 +140,7 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
        */
       alphaLinearVelocityDebug.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(16.0, estimatorDT));
       slopTimeLinearVelocityDebug.set(0.03);
-      rootJointLinearVelocityFDDebug = BacklashCompensatingVelocityYoFrameVector3D.createBacklashCompensatingVelocityYoFrameVector("estimatedRootJointLinearVelocityBacklashKin",
+      rootJointLinearVelocityFDDebug = new BacklashCompensatingVelocityYoFrameVector3D("estimatedRootJointLinearVelocityBacklashKin",
                                                                                                                                    "",
                                                                                                                                    alphaLinearVelocityDebug,
                                                                                                                                    estimatorDT,

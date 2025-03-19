@@ -88,7 +88,7 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
       footRotating = new YoBoolean(namePrefix + "RotatingGeometry", registry);
 
       YoDouble copAlpha = explorationParameters.getGeometricDetectionPlanePointAlpha();
-      measuredCoPFiltered = AlphaFilteredYoFramePoint3D.createAlphaFilteredYoFramePoint(namePrefix + "CoPFiltered", "", registry, copAlpha, worldFrame);
+      measuredCoPFiltered = new AlphaFilteredYoFramePoint3D(namePrefix + "CoPFiltered", "", registry, copAlpha, worldFrame);
 
       groundPlaneNormal = new YoFrameVector3D(namePrefix + "PlaneNormal", worldFrame, registry);
       lineSegmentOfRotation = new YoFrameLineSegment2D(namePrefix + "LineOfRotationGeometric", "", worldFrame, registry);

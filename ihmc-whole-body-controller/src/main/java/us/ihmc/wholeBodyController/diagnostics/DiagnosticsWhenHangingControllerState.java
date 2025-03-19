@@ -201,11 +201,11 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
          YoFrameVector3D footTorqueRaw = new YoFrameVector3D(sidePrefix + "DiagFootTorqueRaw", footSensorFrame, registry);
          footTorquesRaw.put(robotSide, footTorqueRaw);
 
-         AlphaFilteredYoFrameVector3D footForceRawFiltered = AlphaFilteredYoFrameVector3D.createAlphaFilteredYoFrameVector(sidePrefix + "DiagFootForceRawFilt", "",
+         AlphaFilteredYoFrameVector3D footForceRawFiltered = new AlphaFilteredYoFrameVector3D(sidePrefix + "DiagFootForceRawFilt", "",
                                                                                                                            registry, alphaFootForce, footForceRaw);
          footForcesRawFiltered.put(robotSide, footForceRawFiltered);
 
-         AlphaFilteredYoFrameVector3D footTorqueRawFiltered = AlphaFilteredYoFrameVector3D.createAlphaFilteredYoFrameVector(sidePrefix + "DiagFootTorqueRawFilt",
+         AlphaFilteredYoFrameVector3D footTorqueRawFiltered = new AlphaFilteredYoFrameVector3D(sidePrefix + "DiagFootTorqueRawFilt",
                                                                                                                             "", registry, alphaFootForce,
                                                                                                                             footTorqueRaw);
          footTorquesRawFiltered.put(robotSide, footTorqueRawFiltered);

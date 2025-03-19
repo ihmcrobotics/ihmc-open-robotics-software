@@ -102,8 +102,7 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
       cruiseVelocity.set(parameters.getCruiseVelocity());
       sidestepVelocity.set(parameters.getSideStepVelocity());
 
-      desiredVelocityRateLimited = RateLimitedYoFrameVector2D.createRateLimitedYoFrameVector2d("scriptDesiredVelocityRateLimited", "", registry, acceleration,
-                                                                                               controlDT, desiredVelocity);
+      desiredVelocityRateLimited = new RateLimitedYoFrameVector2D("scriptDesiredVelocityRateLimited", "", registry, acceleration, controlDT, desiredVelocity);
       desiredTurningVelocityRateLimited = new RateLimitedYoVariable("scriptDesiredTurningVelocityRateLimited", registry, turningAcceleration,
                                                                     desiredTurningVelocity, controlDT);
 

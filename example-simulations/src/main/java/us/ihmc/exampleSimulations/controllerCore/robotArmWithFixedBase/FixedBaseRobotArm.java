@@ -29,8 +29,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 
-import static us.ihmc.yoVariables.euclid.filters.FilteredFiniteDifferenceYoFrameVector3D.createFilteredVelocityYoFrameVector;
-
 public class FixedBaseRobotArm extends Robot
 {
    private static final double SMALL_MASS = 0.2;
@@ -122,9 +120,9 @@ public class FixedBaseRobotArm extends Robot
 
       handControlFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("handControlFrame", hand.getBodyFixedFrame(), controlFrameTransform);
 
-      controlFrameLinearAcceleration = createFilteredVelocityYoFrameVector("controlFrameLinearAcceleration", "", dummyAlpha, dt, yoRegistry,
+      controlFrameLinearAcceleration = new FilteredFiniteDifferenceYoFrameVector3D("controlFrameLinearAcceleration", "", dummyAlpha, dt, yoRegistry,
                                                                            controlFrameTracker.getYoVelocity());
-      controlFrameAngularAcceleration = createFilteredVelocityYoFrameVector("controlFrameAngularAcceleration", "", dummyAlpha, dt, yoRegistry,
+      controlFrameAngularAcceleration = new FilteredFiniteDifferenceYoFrameVector3D("controlFrameAngularAcceleration", "", dummyAlpha, dt, yoRegistry,
                                                                             controlFrameTracker.getYoAngularVelocity());
 
       setJointLimits();
