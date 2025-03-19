@@ -5,7 +5,6 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
-import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.jetbrains.annotations.NotNull;
@@ -14,15 +13,12 @@ import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
-import us.ihmc.perception.tools.NativeMemoryTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
-import us.ihmc.rdx.ui.graphics.RDXHeightMapRenderer;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXGlobalHeightMapGraphic;
+import us.ihmc.rdx.ui.graphics.RDXHeightMapRenderer;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.sensorProcessing.globalHeightMap.GlobalLattice;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
@@ -30,7 +26,6 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
-import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Set;
 
@@ -52,12 +47,8 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
 
    private ROS2PublishSubscribeAPI ros2;
    private Mat heightMapImage;
-   private Mat compressedBytesMat;
-   private ByteBuffer incomingCompressedImageBuffer;
-   private BytePointer incomingCompressedImageBytePointer;
 
    private float pixelScalingFactor = 10000.0f;
-   private Point3D sensorPosition;
    private HeightMapData latestHeightMapData;
 
    public RDXROS2HeightMapVisualizer(String title, @NotNull HeightMapParameters heightMapParameters)
@@ -116,20 +107,9 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
                                               zUpToWorldTransform.set(imageMessage.getOrientation(), imageMessage.getPosition());
 
                                               if (heightMapImage == null)
-                                              {
                                                  heightMapImage = new Mat(imageMessage.getImageHeight(), imageMessage.getImageWidth(), opencv_core.CV_16UC1);
-                                                 compressedBytesMat = new Mat(1, 1, opencv_core.CV_8UC1);
-                                                 int compressedBufferDefaultSize = 1000000;
-                                                 incomingCompressedImageBuffer = NativeMemoryTools.allocate(compressedBufferDefaultSize);
-                                                 incomingCompressedImageBytePointer = new BytePointer(incomingCompressedImageBuffer);
-                                                 LogTools.warn("Creating Buffer of Size: {}", compressedBufferDefaultSize);
-                                              }
 
-                                              PerceptionMessageTools.convertToHeightMapImage(imageMessage,
-                                                                                             heightMapImage,
-                                                                                             incomingCompressedImageBuffer,
-                                                                                             incomingCompressedImageBytePointer,
-                                                                                             compressedBytesMat);
+                                              PerceptionMessageTools.convertToHeightMapImage(imageMessage, heightMapImage);
 
                                               if (latestHeightMapData == null)
                                               {
