@@ -75,7 +75,7 @@ public class RapidPlanarRegionsExtractionThread extends RepeatingTaskThread
       extractorParametersSync.updateAndPublishThrottledStatus();
 
       // Update the sensor frame using the depth image pose
-      sensorFrame.update(transformToWorld -> transformToWorld.set(depthImage.getOrientation(), depthImage.getPosition()));
+      sensorFrame.update(transformToWorld -> transformToWorld.set(depthImage.getTransformToWorld()));
 
       // Extract the planar regions
       BytedecoImage bytedecoImage = new BytedecoImage(depthImage.getCpuImageMat().clone());

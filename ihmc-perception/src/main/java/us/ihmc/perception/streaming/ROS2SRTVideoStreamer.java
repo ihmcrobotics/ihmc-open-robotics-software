@@ -5,7 +5,6 @@ import perception_msgs.msg.dds.SRTStreamStatus;
 import perception_msgs.msg.dds.VideoFrameExtraData;
 import us.ihmc.commons.time.FrequencyCalculator;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
 import us.ihmc.ros2.ROS2Node;
@@ -141,7 +140,7 @@ public class ROS2SRTVideoStreamer
 
       frameExtraData.setSequenceNumber(frame.getSequenceNumber());
       MessageTools.toMessage(frame.getAcquisitionTime(), frameExtraData.getAcquisitionTime());
-      frameExtraData.getSensorPose().set(new Pose3D(frame.getPosition(), frame.getOrientation()));
+      frameExtraData.getSensorPose().set(frame.getTransformToWorld());
 
       if (isStreamingDepth)
       {

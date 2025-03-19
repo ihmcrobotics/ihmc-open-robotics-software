@@ -112,8 +112,8 @@ public class PerceptionMessageTools
       messageToPack.setDepthDiscretization(image.getDepthDiscretization());
       messageToPack.setSequenceNumber(image.getSequenceNumber());
       MessageTools.toMessage(image.getAcquisitionTime(), messageToPack.getAcquisitionTime());
-      messageToPack.getPosition().set(image.getPosition());
-      messageToPack.getOrientation().set(image.getOrientation());
+      messageToPack.getPosition().set(image.getTranslation());
+      messageToPack.getOrientation().set(image.getRotation());
    }
 
    public static void packCompressedDepthImage(BytePointer compressedDepthPointer,
