@@ -20,8 +20,6 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelWrapper;
 import us.ihmc.robotics.MatrixMissingTools;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
-import us.ihmc.yoVariables.filters.FilteredFiniteDifferenceYoVariable;
-import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoVariables.math.YoMatrix;
 import us.ihmc.yoVariables.filters.AlphaFilteredYoMatrix;
 import us.ihmc.robotics.robotSide.RobotSide;

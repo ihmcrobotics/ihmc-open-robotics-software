@@ -6,7 +6,6 @@ import java.util.HashMap;
 import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 import us.ihmc.simulationToolkit.parameters.SimulatedElasticityParameters;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;

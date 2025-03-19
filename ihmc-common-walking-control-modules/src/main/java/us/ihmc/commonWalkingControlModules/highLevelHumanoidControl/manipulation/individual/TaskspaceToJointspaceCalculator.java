@@ -27,7 +27,6 @@ import us.ihmc.robotics.math.YoSolvePseudoInverseSVDWithDampedLeastSquaresNearSi
 import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFramePoint3D;
 import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFrameVector3D;
-import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;

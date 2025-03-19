@@ -30,8 +30,7 @@ public class PositionVelocity3DConsistencyChecker implements DiagnosticUpdatable
    {
       registry = new YoRegistry(namePrefix + "PositionVelocity3DCheck");
       dummyAlpha = new YoDouble("dummyAlpha", registry);
-      localVelocityFromFD = FilteredFiniteDifferenceYoFrameVector3D.createFilteredVelocityYoFrameVector(namePrefix, "referenceFD", dummyAlpha, updateDT, registry,
-                                                                                                        position);
+      localVelocityFromFD = new FilteredFiniteDifferenceYoFrameVector3D(namePrefix, "referenceFD", dummyAlpha, updateDT, registry, position);
       int windowSize = 10;
       localVelocityFiltered = createSimpleMovingAverageFilteredYoFrameVector(namePrefix, "_referenceFiltered", windowSize, localVelocityFromFD, registry);
       filteredVelocityToCheck = createSimpleMovingAverageFilteredYoFrameVector(namePrefix, "_filtered", windowSize, angularVelocityToCheck, registry);

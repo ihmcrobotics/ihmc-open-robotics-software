@@ -3,11 +3,11 @@ package us.ihmc.sensorProcessing.diagnostic;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 import org.ejml.data.DMatrixRMaj;
 
+import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 
 /**
  * This class aims to estimate the delay (lag or lead) between two given signals.
