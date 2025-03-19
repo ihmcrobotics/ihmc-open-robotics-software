@@ -12,12 +12,12 @@ public class ROS2FrameTools
 {
    public static final ROS2Topic<TFMessage> TF_TOPIC = new ROS2Topic<>().withModule("tf").withQoS(ROS2QosProfile.RELIABLE()).withType(TFMessage.class);
    public static final ROS2Topic<TFMessage> TF_STATIC_TOPIC = new ROS2Topic<>().withModule("tf_static")
-                                                                               .withQoS(ROS2QosProfile.KEEP_HISTORY(5))
+                                                                               .withQoS(ROS2QosProfile.KEEP_HISTORY(1))
                                                                                .withType(TFMessage.class);
 
    public static void packTransformMessage(ReferenceFrame frame, int timestampSeconds, int timestampNanos, TransformStamped messageToPack)
    {
-      if (frame.getParent() == null)
+      if (frame.isRootFrame())
          throw new IllegalArgumentException("Cannot pack the transform message for a root frame");
 
       messageToPack.getHeader().getStamp().setSec(timestampSeconds);
