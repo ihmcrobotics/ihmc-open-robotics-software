@@ -9,6 +9,7 @@ import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.SRTStreamStatus;
+import sensor_msgs.msg.dds.CameraInfo;
 import sensor_msgs.msg.dds.Image;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros2.ROS2Helper;
@@ -65,6 +66,10 @@ public class RawImagePublisher implements AutoCloseable
       else if (imageTopic.getType().equals(Image.class))
       {  // Topic is a standard ROS2 Image topic -> publish as standard ROS2 Image message
          publishAsROS2Image((ROS2Topic<Image>) imageTopic, imageToPublish);
+      }
+      else if (imageTopic.getType().equals(CameraInfo.class))
+      {  // Topic is a camera info topic -> publish the image's camera info
+         publishCameraInfo((ROS2Topic<CameraInfo>) imageTopic, imageToPublish);
       }
       else if (imageTopic.getType().equals(SRTStreamStatus.class))
       {  // Topic is an SRT stream topic -> stream video over SRT
@@ -177,6 +182,91 @@ public class RawImagePublisher implements AutoCloseable
       typeString.append(channels);
 
       return typeString.toString();
+   }
+
+   // TODO: Support non-rectified images and stereo images
+   private void publishCameraInfo(ROS2Topic<CameraInfo> cameraInfoTopic, RawImage image)
+   {
+      CameraInfo cameraInfo = new CameraInfo();
+
+      // Set the header
+      Instant imageAcquisitionTime = image.getAcquisitionTime();
+      cameraInfo.getHeader().getStamp().setSec((int) imageAcquisitionTime.getEpochSecond());
+      cameraInfo.getHeader().getStamp().setNanosec(imageAcquisitionTime.getNano());
+      cameraInfo.getHeader().setFrameId("world"); // TODO: should be camera frame
+
+      // Set the calibration parameters
+      // Image dimensions
+      cameraInfo.setHeight(image.getHeight());
+      cameraInfo.setWidth(image.getWidth());
+
+      // Distortion model
+      cameraInfo.setDistortionModel("plumb_bob");
+      cameraInfo.getD().clear(5);
+      cameraInfo.getD().add(new double[]{0.0, 0.0, 0.0, 0.0, 0.0}); // We (mostly) work with rectified images, so assume no distortion
+
+      /*
+       * Set the intrinsics matrix
+       *      [fx  0 cx]
+       *  K = [ 0 fy cy]
+       *      [ 0  0  1]
+       */
+      cameraInfo.getK()[0] = image.getFocalLengthX();
+      cameraInfo.getK()[1] = 0.0;
+      cameraInfo.getK()[2] = image.getPrincipalPointX();
+      cameraInfo.getK()[3] = 0.0;
+      cameraInfo.getK()[4] = image.getFocalLengthY();
+      cameraInfo.getK()[5] = image.getPrincipalPointY();
+      cameraInfo.getK()[6] = 0.0;
+      cameraInfo.getK()[7] = 0.0;
+      cameraInfo.getK()[8] = 1.0;
+
+      // Set the rotation matrix (only used for stereo images, so we assume identity)
+      cameraInfo.getR()[0] = 1.0;
+      cameraInfo.getR()[1] = 0.0;
+      cameraInfo.getR()[2] = 0.0;
+      cameraInfo.getR()[3] = 0.0;
+      cameraInfo.getR()[4] = 1.0;
+      cameraInfo.getR()[5] = 0.0;
+      cameraInfo.getR()[6] = 0.0;
+      cameraInfo.getR()[7] = 0.0;
+      cameraInfo.getR()[8] = 1.0;
+
+      /*
+       * Set the projection matrix
+       *     [fx'  0  cx' Tx]
+       * P = [ 0  fy' cy' Ty]
+       *     [ 0   0   1   0]
+       * Since we're not using stereo images, Tx = Ty = 0
+       * We also assume fx` = fx, cx` = cx, etc.
+       */
+      cameraInfo.getP()[0] = image.getFocalLengthX();
+      cameraInfo.getP()[1] = 0.0;
+      cameraInfo.getP()[2] = image.getPrincipalPointX();
+      cameraInfo.getP()[3] = 0.0;
+      cameraInfo.getP()[4] = 0.0;
+      cameraInfo.getP()[5] = image.getFocalLengthY();
+      cameraInfo.getP()[6] = image.getPrincipalPointY();
+      cameraInfo.getP()[7] = 0.0;
+      cameraInfo.getP()[8] = 0.0;
+      cameraInfo.getP()[9] = 0.0;
+      cameraInfo.getP()[10] = 1.0;
+      cameraInfo.getP()[11] = 0.0;
+
+      // Set "Operational Parameters"
+      // Assume no binning
+      cameraInfo.setBinningX(0);
+      cameraInfo.setBinningY(0);
+
+      // Set the ROI to the full image
+      cameraInfo.getRoi().setXOffset(0);
+      cameraInfo.getRoi().setYOffset(0);
+      cameraInfo.getRoi().setHeight(0);
+      cameraInfo.getRoi().setWidth(0);
+      cameraInfo.getRoi().setDoRectify(false);
+
+      // Publish the message
+      ros2Helper.publish(cameraInfoTopic, cameraInfo);
    }
 
    @Override

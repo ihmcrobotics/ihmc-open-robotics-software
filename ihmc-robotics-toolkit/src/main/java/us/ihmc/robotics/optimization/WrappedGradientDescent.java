@@ -4,7 +4,8 @@ import gnu.trove.list.array.TDoubleArrayList;
 import org.ejml.data.DMatrixD1;
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.robotics.numericalMethods.GradientDescentModule;
-import us.ihmc.robotics.numericalMethods.SingleQueryFunction;
+
+import java.util.function.ToDoubleFunction;
 
 /**
  * Gradient descent with finite difference
@@ -30,12 +31,12 @@ public class WrappedGradientDescent implements Optimizer
       this.costFunction = costFunction;
    }
 
-   private SingleQueryFunction createUnwrappedCostFunction(CostFunction costFunction)
+   private ToDoubleFunction<TDoubleArrayList> createUnwrappedCostFunction(CostFunction costFunction)
    {
-      return new SingleQueryFunction()
+      return new ToDoubleFunction<>()
       {
          @Override
-         public double getQuery(TDoubleArrayList values)
+         public double applyAsDouble(TDoubleArrayList values)
          {
             // convert TDoubleArrayList to DMatrixRMaj
             convertArrayToMatrix(vectorInputToCostFunction, values);
@@ -82,8 +83,8 @@ public class WrappedGradientDescent implements Optimizer
       TDoubleArrayList initialArray = new TDoubleArrayList();
       convertMatrixToArray(initial, initialArray);
       gradientDescentModule = new GradientDescentModule(createUnwrappedCostFunction(costFunction), initialArray);
-      gradientDescentModule.setStepSize(stepSize);
-      gradientDescentModule.setReducingStepSizeRatio(1.0/learningRate);
+      gradientDescentModule.setLearningRate(stepSize);
+      gradientDescentModule.setReducingLearningRateRatio(1.0 / learningRate);
 
       gradientDescentModule.run();
       return getOptimalParameters();

@@ -2,36 +2,31 @@ package us.ihmc.perception.tools;
 
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.FloatPointer;
-import org.bytedeco.javacpp.LongPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.ImageMessage;
-import perception_msgs.msg.dds.PlanarRegionsListMessage;
-import perception_msgs.msg.dds.VideoPacket;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.perception.RawImage;
+import us.ihmc.perception.camera.CameraIntrinsics;
+import us.ihmc.perception.gpuHeightMap.RapidHeightMapManager;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.imageMessage.CompressionType;
 import us.ihmc.perception.imageMessage.PixelFormat;
-import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
-import us.ihmc.sensors.realsense.RealSenseDevice;
 
 import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
@@ -39,38 +34,14 @@ import java.time.Instant;
 
 public class PerceptionMessageTools
 {
-   public static void setDepthIntrinsicsFromRealsense(RealSenseDevice sensor, ImageMessage imageMessageToPack)
+   public static void packCameraIntrinsics(CameraIntrinsics cameraIntrinsics, ImageMessage imageMessageToPack)
    {
-      imageMessageToPack.setFocalLengthXPixels((float) sensor.getDepthFocalLengthPixelsX());
-      imageMessageToPack.setFocalLengthYPixels((float) sensor.getDepthFocalLengthPixelsY());
-      imageMessageToPack.setPrincipalPointXPixels((float) sensor.getDepthPrincipalOffsetXPixels());
-      imageMessageToPack.setPrincipalPointYPixels((float) sensor.getDepthPrincipalOffsetYPixels());
-   }
-
-   public static void setColorIntrinsicsFromRealsense(RealSenseDevice sensor, ImageMessage imageMessageToPack)
-   {
-      imageMessageToPack.setFocalLengthXPixels((float) sensor.getColorFocalLengthPixelsX());
-      imageMessageToPack.setFocalLengthYPixels((float) sensor.getColorFocalLengthPixelsY());
-      imageMessageToPack.setPrincipalPointXPixels((float) sensor.getColorPrincipalOffsetXPixels());
-      imageMessageToPack.setPrincipalPointYPixels((float) sensor.getColorPrincipalOffsetYPixels());
-   }
-
-   @Deprecated
-   public static void copyToMessage(Object cameraPinhole, ImageMessage imageMessageToPack)
-   {
-      //      imageMessageToPack.setFocalLengthXPixels((float) cameraPinhole.getFx());
-      //      imageMessageToPack.setFocalLengthYPixels((float) cameraPinhole.getFy());
-      //      imageMessageToPack.setPrincipalPointXPixels((float) cameraPinhole.getCx());
-      //      imageMessageToPack.setPrincipalPointYPixels((float) cameraPinhole.getCy());
-   }
-
-   @Deprecated
-   public static void toBoofCV(ImageMessage imageMessage, Object cameraPinholeToPack)
-   {
-      //      cameraPinholeToPack.setFx(imageMessage.getFocalLengthXPixels());
-      //      cameraPinholeToPack.setFy(imageMessage.getFocalLengthYPixels());
-      //      cameraPinholeToPack.setCx(imageMessage.getPrincipalPointXPixels());
-      //      cameraPinholeToPack.setCy(imageMessage.getPrincipalPointYPixels());
+      imageMessageToPack.setFocalLengthXPixels((float) cameraIntrinsics.getFx());
+      imageMessageToPack.setFocalLengthYPixels((float) cameraIntrinsics.getFy());
+      imageMessageToPack.setPrincipalPointXPixels((float) cameraIntrinsics.getCx());
+      imageMessageToPack.setPrincipalPointYPixels((float) cameraIntrinsics.getCy());
+      imageMessageToPack.setImageWidth(cameraIntrinsics.getWidth());
+      imageMessageToPack.setImageHeight(cameraIntrinsics.getHeight());
    }
 
    public static void publishCompressedDepthImage(BytePointer compressedDepthPointer,
@@ -109,37 +80,53 @@ public class PerceptionMessageTools
       ros2.publish(topic, PlanarRegionMessageConverter.convertToFramePlanarRegionsListMessage(framePlanarRegionsList));
    }
 
-   public static void publishPlanarRegionsList(PlanarRegionsList planarRegionsList, ROS2Topic<PlanarRegionsListMessage> topic, ROS2Helper ros2Helper)
+   public static void packImageMessageData(ImageMessage imageMessage, ByteBuffer dataBuffer)
    {
-      ros2Helper.publish(topic, PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList));
-   }
-
-   public static void extractImageMessageData(ImageMessage imageMessage, ByteBuffer dataByteBuffer)
-   {
-      MessageTools.extractIDLSequence(imageMessage.getData(), dataByteBuffer);
-   }
-
-   public static void packImageMessageData(ByteBuffer dataByteBuffer, ImageMessage imageMessage)
-   {
-      MessageTools.packIDLSequence(dataByteBuffer, imageMessage.getData());
+      imageMessage.getData().resetQuick();
+      imageMessage.getData().getBuffer().put(dataBuffer);
    }
 
    public static void packImageMessageData(ImageMessage imageMessage, BytePointer dataPointer)
    {
-      imageMessage.getData().resetQuick();
-      imageMessage.getData().getBuffer().put(dataPointer.asByteBuffer());
+      packImageMessageData(imageMessage, dataPointer.asBuffer());
+   }
+
+   /**
+    * Packs the {@link ImageMessage} with the {@link RawImage} metadata,
+    * EXCEPT:
+    * <ul>
+    * <li> the compressed data, </li>
+    * <li> the {@link CompressionType}, </li>
+    * <li> the ouster beam altitude angles, and </li>
+    * <li> the ouster beam azimuth angles </li>
+    * </ul>
+    * To pack everything, use this instead:
+    * {@link #packImageMessage(RawImage, BytePointer, CompressionType, ImageMessage)}
+    * @param messageToPack The message to pack
+    * @param image The image from which metadata is taken
+    */
+   public static void packImageMessageMetadata(ImageMessage messageToPack, RawImage image)
+   {
+      packCameraIntrinsics(image.getIntrinsicsCopy(), messageToPack);
+      messageToPack.setPixelFormat(image.getPixelFormat().toByte());
+      messageToPack.setCameraModel(image.getCameraModel().toByte());
+      messageToPack.setDepthDiscretization(image.getDepthDiscretization());
+      messageToPack.setSequenceNumber(image.getSequenceNumber());
+      MessageTools.toMessage(image.getAcquisitionTime(), messageToPack.getAcquisitionTime());
+      messageToPack.getPosition().set(image.getPosition());
+      messageToPack.getOrientation().set(image.getOrientation());
    }
 
    public static void packCompressedDepthImage(BytePointer compressedDepthPointer,
                                                ImageMessage depthImageMessage,
                                                Pose3DReadOnly cameraPose,
-                                               Instant aquisitionTime,
+                                               Instant acquisitionTime,
                                                long sequenceNumber,
                                                int height,
                                                int width,
                                                float depthToMetersRatio)
    {
-      packImageMessage(depthImageMessage, compressedDepthPointer, cameraPose, aquisitionTime, sequenceNumber, height, width, depthToMetersRatio);
+      packImageMessage(depthImageMessage, compressedDepthPointer, cameraPose, acquisitionTime, sequenceNumber, height, width, depthToMetersRatio);
       depthImageMessage.setPixelFormat(PixelFormat.GRAY16.toByte());
       depthImageMessage.setCompressionType(CompressionType.PNG.toByte());
    }
@@ -147,13 +134,13 @@ public class PerceptionMessageTools
    public static void packJPGCompressedColorImage(BytePointer compressedColorPointer,
                                                   ImageMessage colorImageMessage,
                                                   Pose3DReadOnly cameraPose,
-                                                  Instant aquisitionTime,
+                                                  Instant acquisitionTime,
                                                   long sequenceNumber,
                                                   int height,
                                                   int width,
                                                   float depthToMetersRatio)
    {
-      packImageMessage(colorImageMessage, compressedColorPointer, cameraPose, aquisitionTime, sequenceNumber, height, width, depthToMetersRatio);
+      packImageMessage(colorImageMessage, compressedColorPointer, cameraPose, acquisitionTime, sequenceNumber, height, width, depthToMetersRatio);
       colorImageMessage.setPixelFormat(PixelFormat.YUV_I420.toByte());
       colorImageMessage.setCompressionType(CompressionType.JPEG.toByte());
    }
@@ -161,7 +148,7 @@ public class PerceptionMessageTools
    public static void packImageMessage(ImageMessage imageMessage,
                                        BytePointer dataBytePointer,
                                        Pose3DReadOnly cameraPose,
-                                       Instant aquisitionTime,
+                                       Instant acquisitionTime,
                                        long sequenceNumber,
                                        int height,
                                        int width,
@@ -173,7 +160,7 @@ public class PerceptionMessageTools
       imageMessage.getPosition().set(cameraPose.getPosition());
       imageMessage.getOrientation().set(cameraPose.getOrientation());
       imageMessage.setSequenceNumber(sequenceNumber);
-      MessageTools.toMessage(aquisitionTime, imageMessage.getAcquisitionTime());
+      MessageTools.toMessage(acquisitionTime, imageMessage.getAcquisitionTime());
       imageMessage.setDepthDiscretization(depthToMetersRatio);
    }
 
@@ -189,7 +176,7 @@ public class PerceptionMessageTools
                                        @Nullable ByteBuffer ousterBeamAzimuthAngles,
                                        ImageMessage imageMessageToPack)
    {
-      originalImage.packImageMessageMetaData(imageMessageToPack);
+      packImageMessageMetadata(imageMessageToPack, originalImage);
       packImageMessageData(imageMessageToPack, compressedData);
       imageMessageToPack.setCompressionType(compressionType.toByte());
       if (ousterBeamAltitudeAngles != null)
@@ -198,48 +185,11 @@ public class PerceptionMessageTools
          MessageTools.packIDLSequence(ousterBeamAzimuthAngles, imageMessageToPack.getOusterBeamAzimuthAngles());
    }
 
-   public static void packVideoPacket(BytePointer compressedBytes, byte[] heapArray, VideoPacket packet, int height, int width, long nanoTime)
-   {
-      compressedBytes.asBuffer().get(heapArray, 0, compressedBytes.asBuffer().remaining());
-      packet.setTimestamp(nanoTime);
-      packet.getData().resetQuick();
-      packet.getData().add(heapArray);
-      packet.setImageHeight(height);
-      packet.setImageWidth(width);
-      packet.setVideoSource(VideoSource.MULTISENSE_LEFT_EYE.toByte());
-   }
-
-   public static void displayVideoPacketColor(VideoPacket videoPacket)
-   {
-      Mat colorImage = new Mat(videoPacket.getImageHeight(), videoPacket.getImageWidth(), opencv_core.CV_8UC3);
-      byte[] compressedByteArray = videoPacket.getData().copyArray();
-      OpenCVTools.decompressJPG(compressedByteArray, colorImage);
-      PerceptionDebugTools.display("Color Image", colorImage, 1);
-   }
-
-   public static void copyToBytePointer(IDLSequence.Byte sourceIDLSequence, BytePointer pointerToPack)
-   {
-      pointerToPack.position(0);
-      pointerToPack.limit(sourceIDLSequence.size());
-      for (int i = 0; i < sourceIDLSequence.size(); i++)
-      {
-         pointerToPack.put(i, sourceIDLSequence.get(i));
-      }
-   }
-
    public static void copyToFloatPointer(IDLSequence.Float sourceIDLSequence, FloatPointer floatPointerToPack, int startIndex)
    {
       for (int i = 0; i < sourceIDLSequence.size(); i++)
       {
          floatPointerToPack.put(i + startIndex, sourceIDLSequence.get(i));
-      }
-   }
-
-   public static void copyToLongPointer(IDLSequence.Long sourceIDLSequence, LongPointer longPointerToPack, int startIndex)
-   {
-      for (int i = 0; i < sourceIDLSequence.size(); i++)
-      {
-         longPointerToPack.put(i + startIndex, sourceIDLSequence.get(i));
       }
    }
 
@@ -262,10 +212,10 @@ public class PerceptionMessageTools
                                              HeightMapData heightMapDataToPack,
                                              Point3D gridCenter,
                                              float widthInMeters,
-                                             float cellSizeInMeter,
+                                             float cellSizeInMeters,
                                              HeightMapParameters heightMapParameters)
    {
-      int centerIndex = HeightMapTools.computeCenterIndex(widthInMeters, cellSizeInMeter);
+      int centerIndex = HeightMapTools.computeCenterIndex(widthInMeters, cellSizeInMeters);
       int cellsPerAxis = 2 * centerIndex + 1;
       int totalCells = cellsPerAxis * cellsPerAxis;
 

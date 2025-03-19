@@ -401,7 +401,7 @@ public class PlanarRegionsListExamples
       {
          generator.identity();
 
-         Vector3D translationVector = EuclidCoreRandomTools.nextVector3D(random, -maxX, -maxY, 0.0, maxX, maxY, maxZ);
+         Vector3D translationVector = EuclidCoreRandomTools.nextVector3D(random, -maxX, -maxY, 0.0, maxX, -maxZ, maxZ);
          generator.translate(translationVector);
 
          Quaternion rotation = EuclidCoreRandomTools.nextQuaternion(random);

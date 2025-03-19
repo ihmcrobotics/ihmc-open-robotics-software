@@ -249,7 +249,7 @@ public class TerrainPerceptionProcessWithDriver
             executorService.submit(() ->
                                    {
                                       OpenCVTools.compressImagePNG(depth16UC1Image, compressedDepthPointer);
-                                      PerceptionMessageTools.setDepthIntrinsicsFromRealsense(realsense, depthImageMessage);
+                                      PerceptionMessageTools.packCameraIntrinsics(realsense.getDepthCameraIntrinsics(), depthImageMessage);
                                       CameraModel.PINHOLE.packMessageFormat(depthImageMessage);
                                       PerceptionMessageTools.publishCompressedDepthImage(compressedDepthPointer,
                                                                                          depthImageMessage,
@@ -280,7 +280,7 @@ public class TerrainPerceptionProcessWithDriver
                                    {
                                       OpenCVTools.compressRGBImageJPG(color8UC3Image, yuvColorImage, compressedColorPointer);
 
-                                      PerceptionMessageTools.setColorIntrinsicsFromRealsense(realsense, colorImageMessage);
+                                      PerceptionMessageTools.packCameraIntrinsics(realsense.getColorCameraIntrinsics(), colorImageMessage);
                                       CameraModel.PINHOLE.packMessageFormat(colorImageMessage);
                                       PerceptionMessageTools.publishJPGCompressedColorImage(compressedColorPointer,
                                                                                             colorTopic,
