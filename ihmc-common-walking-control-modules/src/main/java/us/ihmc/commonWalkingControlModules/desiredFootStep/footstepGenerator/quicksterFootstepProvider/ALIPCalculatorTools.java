@@ -9,16 +9,40 @@ public class ALIPCalculatorTools
 {
    private final static double GRAVITY = -9.81;
 
-   private final static FramePose3D tempFutureCoMPose = new FramePose3D();
-   private final static FrameVector3D tempFutureCoMVelocity = new FrameVector3D();
-   private final static FrameVector3D tempFutureContactPointAngularMomentum = new FrameVector3D();
-   private final static PoseReferenceFrame tempFutureControlFrame = new PoseReferenceFrame("futureControlFrameALIPCalculator", ReferenceFrame.getWorldFrame());
+   private final FramePose3D tempFutureCoMPose = new FramePose3D();
+   private final FrameVector3D tempFutureCoMVelocity = new FrameVector3D();
+   private final FrameVector3D tempFutureContactPointAngularMomentum = new FrameVector3D();
+   private final PoseReferenceFrame tempFutureControlFrame = new PoseReferenceFrame("futureControlFrameALIPCalculator", ReferenceFrame.getWorldFrame());
 
-   private final static FramePose3D tempCurrentCoMPose = new FramePose3D();
-   private final static FrameVector3D tempCurrentContactPointAngularMomentum = new FrameVector3D();
-   private final static FramePoint3D tempCurrentStanceFootPosition = new FramePoint3D();
+   private final FramePose3D tempCurrentCoMPose = new FramePose3D();
+   private final FrameVector3D tempCurrentContactPointAngularMomentum = new FrameVector3D();
+   private final FramePoint3D tempCurrentStanceFootPosition = new FramePoint3D();
 
-   public static void computeFutureStateUsingALIP(FramePose3DReadOnly currentCoMPose,
+   public void computeFutureStateUsingALIP(FramePose3DReadOnly currentCoMPose,
+                                                  FrameVector3DReadOnly currentContactPointAngularMomentum,
+                                                  FramePoint3DReadOnly currentStanceFootPosition,
+                                                  FramePose3D futureCoMPoseToPack,
+                                                  FrameVector3D futureContactPointAngularMomentumToPack,
+                                                  ReferenceFrame controlFrame,
+                                                  double horizonDuration,
+                                                  double pendulumMass,
+                                                  double pendulumHeight,
+                                                  double updateDt)
+   {
+      computeFutureStateUsingALIP(currentCoMPose,
+                                  currentContactPointAngularMomentum,
+                                  currentStanceFootPosition,
+                                  futureCoMPoseToPack,
+                                  futureContactPointAngularMomentumToPack,
+                                  controlFrame,
+                                  horizonDuration,
+                                  pendulumMass,
+                                  pendulumHeight,
+                                  0.0,
+                                  updateDt);
+   }
+
+   public void computeFutureStateUsingALIP(FramePose3DReadOnly currentCoMPose,
                                                   FrameVector3DReadOnly currentContactPointAngularMomentum,
                                                   FramePoint3DReadOnly currentStanceFootPosition,
                                                   FramePose3D futureCoMPoseToPack,
@@ -72,12 +96,13 @@ public class ALIPCalculatorTools
 
       int intervals = (int) Math.round(horizonDuration / updateDt);
       intervals = MathTools.clamp(intervals, 1, Integer.MAX_VALUE);
+      horizonDuration = MathTools.clamp(horizonDuration, updateDt, Double.POSITIVE_INFINITY);
 
-      for (double i = 0; i < intervals ; i ++)
+      for (int i = 0; i < intervals ; i ++)
       {
          futureCoMPoseToPack.appendYawRotation(desiredTurningVelocity * updateDt);
-         futureCoMPoseToPack.getPosition().addX(xf / intervals);
-         futureCoMPoseToPack.getPosition().addY(yf / intervals);
+         futureCoMPoseToPack.getPosition().addX(xf * updateDt / horizonDuration);
+         futureCoMPoseToPack.getPosition().addY(yf * updateDt / horizonDuration);
       }
 
       futureContactPointAngularMomentumToPack.setX(Lxf);
@@ -86,8 +111,6 @@ public class ALIPCalculatorTools
 
       futureCoMPoseToPack.changeFrame(originalPositionFrame);
       futureContactPointAngularMomentumToPack.changeFrame(originalMomentumFrame);
-
-
    }
 
 //   public static void computeTouchdownPositionRegular(FramePoint3DReadOnly currentPosition,
@@ -138,7 +161,7 @@ public class ALIPCalculatorTools
 //      touchdownPositionToPack.changeFrameAndProjectToXYPlane(originalFrame);
 //   }
 
-   public static void computeTouchdownPositionUsingRaibertHeuristicAndPolePlacement(FramePose3DReadOnly currentCoMPose,
+   public void computeTouchdownPositionUsingRaibertHeuristicAndPolePlacement(FramePose3DReadOnly currentCoMPose,
                                                                                     FrameVector3DReadOnly currentContactPointAngularMomentum,
                                                                                     FramePoint3DReadOnly currentStanceFootPosition,
                                                                                     FramePoint2DBasics touchdownPositionToPack,
@@ -171,6 +194,7 @@ public class ALIPCalculatorTools
                                   desiredTurningVelocity,
                                   updateDt);
 
+      tempFutureCoMPose.changeFrame(tempFutureControlFrame.getParent());
       tempFutureControlFrame.setPoseAndUpdate(tempFutureCoMPose);
 
       tempFutureCoMVelocity.changeFrame(tempFutureContactPointAngularMomentum.getReferenceFrame());

@@ -15,6 +15,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -65,7 +66,9 @@ public class QuicksterFootstepProvider
    private final FrameQuaternion chestOrientation = new FrameQuaternion();
 
    // Foot state information
-   public enum FootState {SUPPORT, SWING}
+   public enum FootState
+   {SUPPORT, SWING}
+
    private final SideDependentList<YoEnum<FootState>> footStates = new SideDependentList<>();
    private final SideDependentList<StateMachine<FootState, State>> footStateMachines = new SideDependentList<>();
    private final YoEnum<RobotSide> newestSupportSide = new YoEnum<>("newestSupportSide" + variableNameSuffix, registry, RobotSide.class);
@@ -76,7 +79,9 @@ public class QuicksterFootstepProvider
    private final SideDependentList<FramePoint2D> pendulumBase = new SideDependentList<>();
    private final FramePoint2D netPendulumBase = new FramePoint2D();
    private final SideDependentList<YoFramePoint3D> pendulumBase3DInWorld = new SideDependentList<>();
-   private final YoFramePoint3D netPendulumBase3DInWorld = new YoFramePoint3D("netPendulumBase3DInWorld" + variableNameSuffix, ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D netPendulumBase3DInWorld = new YoFramePoint3D("netPendulumBase3DInWorld" + variableNameSuffix,
+                                                                              ReferenceFrame.getWorldFrame(),
+                                                                              registry);
 
    // Temp variables for changing frames and stuff
    private final FramePoint2DBasics tempPendulumBase = new FramePoint2D();
@@ -89,7 +94,15 @@ public class QuicksterFootstepProvider
    private DesiredVelocityProvider desiredVelocityProvider = () -> zero2D;
    private DesiredTurningVelocityProvider desiredTurningVelocityProvider = () -> 0.0;
 
-   public QuicksterFootstepProvider(FullHumanoidRobotModel robotModel, CommonHumanoidReferenceFrames referenceFrames, double updateDT, YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, DoubleProvider yoTime)
+   //
+   private final ALIPCalculatorTools alipCalculatorTools = new ALIPCalculatorTools();
+
+   public QuicksterFootstepProvider(FullHumanoidRobotModel robotModel,
+                                    CommonHumanoidReferenceFrames referenceFrames,
+                                    double updateDT,
+                                    YoRegistry parentRegistry,
+                                    YoGraphicsListRegistry yoGraphicsListRegistry,
+                                    DoubleProvider yoTime)
    {
       this.robotModel = robotModel;
       this.referenceFrames = referenceFrames;
@@ -99,7 +112,6 @@ public class QuicksterFootstepProvider
 
       // Parameters
       parameters = new QuicksterFootstepProviderParameters(gravity, registry);
-
 
       // Estimates
       estimates = new QuicksterFootstepProviderEstimates(robotModel,
@@ -113,8 +125,6 @@ public class QuicksterFootstepProvider
 
       centerOfMassControlZUpFrame = estimates.getCenterOfMassControlZUpFrame();
 
-
-
       // Side-dependant stuff, most of the desired-related things
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -122,28 +132,29 @@ public class QuicksterFootstepProvider
 
          pendulumBase.put(robotSide, new FramePoint2D(centerOfMassControlZUpFrame));
 
-         pendulumBase3DInWorld.put(robotSide, new YoFramePoint3D(robotSide.getLowerCaseName() + "PendulumBase3DInWorld" + variableNameSuffix,
-                                                                 ReferenceFrame.getWorldFrame(),
-                                                                 registry));
+         pendulumBase3DInWorld.put(robotSide,
+                                   new YoFramePoint3D(robotSide.getLowerCaseName() + "PendulumBase3DInWorld" + variableNameSuffix,
+                                                      ReferenceFrame.getWorldFrame(),
+                                                      registry));
 
-         touchdownCalculator.put(robotSide, new QuicksterFootstepProviderTouchdownCalculator(robotSide,
-                                                                                             centerOfMassControlZUpFrame,
-                                                                                             estimates.getCenterOfMassVelocity(),
-                                                                                             estimates.getCenterOfMassAngularMomentum(),
-                                                                                             robotModel,
-                                                                                             parameters,
-                                                                                             gravity,
-                                                                                             desiredVelocity,
-                                                                                             registry));
+         touchdownCalculator.put(robotSide,
+                                 new QuicksterFootstepProviderTouchdownCalculator(robotSide,
+                                                                                  centerOfMassControlZUpFrame,
+                                                                                  estimates.getCenterOfMassVelocity(),
+                                                                                  estimates.getCenterOfMassAngularMomentum(),
+                                                                                  robotModel,
+                                                                                  parameters,
+                                                                                  gravity,
+                                                                                  desiredVelocity,
+                                                                                  registry));
 
          desiredTouchdownPositionsList.put(robotSide, new RecyclingArrayList<>(FramePoint2D.class));
          desiredTouchdownPosesList.put(robotSide, new RecyclingArrayList<>(FramePose2D.class));
 
-         desiredTouchdownPosition3DInWorld.put(robotSide, new YoFramePoint3D(robotSide.getLowerCaseName() + "DesiredTouchdownPosition3DInWorld" + variableNameSuffix,
-                                                                             ReferenceFrame.getWorldFrame(),
-                                                                             registry));
-
-
+         desiredTouchdownPosition3DInWorld.put(robotSide,
+                                               new YoFramePoint3D(robotSide.getLowerCaseName() + "DesiredTouchdownPosition3DInWorld" + variableNameSuffix,
+                                                                  ReferenceFrame.getWorldFrame(),
+                                                                  registry));
 
          StateMachineFactory<FootState, State> stateMachineFactory = new StateMachineFactory<>(FootState.class);
          stateMachineFactory.setRegistry(registry).setNamePrefix(robotSide.getLowerCaseName() + variableNameSuffix).buildYoClock(yoTime);
@@ -179,7 +190,6 @@ public class QuicksterFootstepProvider
          }
       }
 
-
       if (yoGraphicsListRegistry != null)
       {
          YoGraphicPosition netPendulumBaseViz = new YoGraphicPosition("netPendulumBase" + variableNameSuffix,
@@ -208,6 +218,7 @@ public class QuicksterFootstepProvider
    }
 
    private double numberOfFootstepsToPlan;
+
    public void update(int numberOfFootstepsToPlan)
    {
       if (firstTick)
@@ -250,17 +261,17 @@ public class QuicksterFootstepProvider
    private final FrameVector3D tempCurrentContactPointAngularMomentum = new FrameVector3D();
    private final FramePoint3D tempCurrentStanceFootPosition = new FramePoint3D();
    private final PoseReferenceFrame tempControlFrame = new PoseReferenceFrame("tempControlFrameQFP", ReferenceFrame.getWorldFrame());
+   private boolean haveWeMadeIt = false;
 
-   public void calculateTouchdownPosition(RobotSide currentSwingSide,
-                                          double timeRemainingInCurrentStep)
+   public void calculateTouchdownPosition(RobotSide currentSwingSide, double timeRemainingInCurrentStep)
    {
       desiredTouchdownPositionsList.get(currentSwingSide).clear();
       desiredTouchdownPositionsList.get(currentSwingSide.getOppositeSide()).clear();
       desiredTouchdownPosesList.get(currentSwingSide).clear();
       desiredTouchdownPosesList.get(currentSwingSide.getOppositeSide()).clear();
+      haveWeMadeIt = false;
 
-
-      for (int i = 0;  i < numberOfFootstepsToPlan ; i++)
+      for (int i = 0; i < numberOfFootstepsToPlan; i++)
       {
          double timeToReachGoal;
          RobotSide swingSide;
@@ -292,39 +303,39 @@ public class QuicksterFootstepProvider
 
          FramePoint2D desiredTouchdownPositionToPack = desiredTouchdownPositionsList.get(swingSide).add();
          FramePose2D desiredTouchdownPose = desiredTouchdownPosesList.get(swingSide).add();
+         if (swingSide == currentSwingSide)
+            haveWeMadeIt = true;
 
-         ALIPCalculatorTools.computeTouchdownPositionUsingRaibertHeuristicAndPolePlacement(
-               tempCurrentCoMPose,
-               tempCurrentContactPointAngularMomentum,
-               tempCurrentStanceFootPosition,
-               desiredTouchdownPositionToPack,
-               swingSide,
-               tempControlFrame,
-               desiredVelocity.getX(),
-               desiredVelocity.getY(),
-               desiredTurningVelocity.getDoubleValue(),
-               parameters.getStanceWidth(swingSide).getDoubleValue(),
-               timeToReachGoal,
-               getStepDuration(swingSide),
-               getTransferDuration(swingSide),
-               robotModel.getTotalMass(),
-               parameters.getDesiredCoMHeight(swingSide).getDoubleValue(),
-               parameters.getPole(swingSide).getDoubleValue(),
-               useFutureCoM,
-               updateDT);
+         alipCalculatorTools.computeTouchdownPositionUsingRaibertHeuristicAndPolePlacement(tempCurrentCoMPose,
+                                                                                           tempCurrentContactPointAngularMomentum,
+                                                                                           tempCurrentStanceFootPosition,
+                                                                                           desiredTouchdownPositionToPack,
+                                                                                           swingSide,
+                                                                                           tempControlFrame,
+                                                                                           desiredVelocity.getX(),
+                                                                                           desiredVelocity.getY(),
+                                                                                           desiredTurningVelocity.getDoubleValue(),
+                                                                                           parameters.getStanceWidth(swingSide).getDoubleValue(),
+                                                                                           timeToReachGoal,
+                                                                                           getStepDuration(swingSide),
+                                                                                           getTransferDuration(swingSide),
+                                                                                           robotModel.getTotalMass(),
+                                                                                           parameters.getDesiredCoMHeight(swingSide).getDoubleValue(),
+                                                                                           parameters.getPole(swingSide).getDoubleValue(),
+                                                                                           useFutureCoM,
+                                                                                           updateDT);
 
-         ALIPCalculatorTools.computeFutureStateUsingALIP(
-               tempCurrentCoMPose,
-               tempCurrentContactPointAngularMomentum,
-               tempCurrentStanceFootPosition,
-               tempCurrentCoMPose,
-               tempCurrentContactPointAngularMomentum,
-               tempControlFrame,
-               timeToReachGoal,
-               robotModel.getTotalMass(),
-               parameters.getDesiredCoMHeight(swingSide).getDoubleValue(),
-               desiredTurningVelocity.getDoubleValue(),
-               updateDT);
+         alipCalculatorTools.computeFutureStateUsingALIP(tempCurrentCoMPose,
+                                                         tempCurrentContactPointAngularMomentum,
+                                                         tempCurrentStanceFootPosition,
+                                                         tempCurrentCoMPose,
+                                                         tempCurrentContactPointAngularMomentum,
+                                                         tempControlFrame,
+                                                         timeToReachGoal,
+                                                         robotModel.getTotalMass(),
+                                                         parameters.getDesiredCoMHeight(swingSide).getDoubleValue(),
+                                                         desiredTurningVelocity.getDoubleValue(),
+                                                         updateDT);
 
          desiredTouchdownPose.getPosition().set(desiredTouchdownPositionToPack);
          desiredTouchdownPose.getOrientation().setFromReferenceFrame(tempControlFrame);
@@ -339,6 +350,8 @@ public class QuicksterFootstepProvider
          }
       }
 
+//      if (!haveWeMadeIt)
+//         LogTools.error("FUCK FUCK FUCK FUCK SOMETHING IS WRONG FUCKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK");
       desiredTouchdownPosition3DInWorld.get(currentSwingSide).setMatchingFrame(desiredTouchdownPositionsList.get(currentSwingSide).get(0), 0.0);
    }
 

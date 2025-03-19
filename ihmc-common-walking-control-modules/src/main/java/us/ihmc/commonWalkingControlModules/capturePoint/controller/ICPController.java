@@ -15,6 +15,8 @@ import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.ParameterizedICPControlGains;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commons.InterpolationTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -108,6 +110,7 @@ public class ICPController implements ICPControllerInterface
    private final YoBoolean hasNotConvergedInPast = new YoBoolean(yoNamePrefix + "HasNotConvergedInPast", registry);
    private final YoBoolean previousTickFailed = new YoBoolean(yoNamePrefix + "PreviousTickFailed", registry);
    private final YoInteger hasNotConvergedCounts = new YoInteger(yoNamePrefix + "HasNotConvergedCounts", registry);
+   private final YoInteger ticksToInterpolateAlpha = new YoInteger("ticksToInterpolateAlpha", registry);
 
    private final IntegerProvider maxNumberOfIterations = new IntegerParameter(yoNamePrefix + "MaxNumberOfIterations", registry, 100);
 
@@ -211,6 +214,8 @@ public class ICPController implements ICPControllerInterface
       parameters.createFeedForwardAlphaCalculator(registry, yoGraphicsListRegistry);
       parameters.createFeedbackAlphaCalculator(registry, null);
       parameters.createFeedbackProjectionOperator(registry, null);
+
+      ticksToInterpolateAlpha.set(150);
 
       if (yoGraphicsListRegistry != null)
          setupVisualizers(yoGraphicsListRegistry);
@@ -452,14 +457,31 @@ public class ICPController implements ICPControllerInterface
       integrator.update(desiredICPVelocity, currentCoMVelocity, icpError);
    }
 
+   private int alphaInterpolationTicks = 0;
    private void computeFeedForwardAndFeedBackAlphas()
    {
       if (disableCoPFeedback.getValue() || !useCoPFeedbackByDefault.getValue())
-         feedbackAlpha.set(1.0);
+      {
+         double maxNumberOfAlphaInterpolationTicks = MathTools.clamp(ticksToInterpolateAlpha.getIntegerValue(), 1, Integer.MAX_VALUE);
+         double interpolationFactor = (double) alphaInterpolationTicks / maxNumberOfAlphaInterpolationTicks;
+         interpolationFactor = MathTools.clamp(interpolationFactor, 0.0, 1.0);
+         double startValue = 0.0; //parameters.getFeedbackAlphaCalculator() != null ? parameters.getFeedbackAlphaCalculator().computeAlpha(currentICP, copConstraintHandler.getCoPConstraint()) : 0.0;
+         double endValue = 1.0;
+         double valueToUse = InterpolationTools.linearInterpolate(startValue, endValue, interpolationFactor);
+         feedbackAlpha.set(valueToUse);
+         if (alphaInterpolationTicks < ticksToInterpolateAlpha.getValue())
+            alphaInterpolationTicks++;
+      }
       else if (parameters.getFeedbackAlphaCalculator() != null)
+      {
          feedbackAlpha.set(parameters.getFeedbackAlphaCalculator().computeAlpha(currentICP, copConstraintHandler.getCoPConstraint()));
+         alphaInterpolationTicks = 0;
+      }
       else
+      {
          feedbackAlpha.set(0.0);
+         alphaInterpolationTicks = 0;
+      }
 
       if (parameters.getFeedForwardAlphaCalculator() != null)
          feedForwardAlpha.set(parameters.getFeedForwardAlphaCalculator()
