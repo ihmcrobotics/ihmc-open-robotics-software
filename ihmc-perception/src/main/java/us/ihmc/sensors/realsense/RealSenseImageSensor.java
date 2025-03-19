@@ -4,7 +4,6 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.Throttler;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -152,6 +151,23 @@ public class RealSenseImageSensor extends ImageSensor
 
          return grabbedImages[imageKey].get();
       }
+   }
+
+   @Override
+   public ReferenceFrame getImageFrame(int imageKey)
+   {
+      return switch (imageKey)
+      {
+         case COLOR_IMAGE_KEY -> colorFrame;
+         case DEPTH_IMAGE_KEY -> depthFrame;
+         default -> null;
+      };
+   }
+
+   @Override
+   public ReferenceFrame[] getImageFrames()
+   {
+      return new ReferenceFrame[] {colorFrame, depthFrame};
    }
 
    @Override
