@@ -514,7 +514,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       updateConfigurationCommand();
       super.updateInternal();
 
-      if (stabilityMarginCostCalculator.contactAdjustmentRequested() || isUpperBodyLoadBearing.getValue())
+//      if (stabilityMarginCostCalculator.contactAdjustmentRequested() || isUpperBodyLoadBearing.getValue())
+      if (isUpperBodyLoadBearing.getValue())
       {
          { // update actuation limits based on current configuration
 //            wholeBodyContactState.updateActuationConstraintVector();
@@ -541,6 +542,20 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
                }
                updateSupportPolygonConstraint(activeContactPointPositions);
             }
+         }
+      }
+      else if (stabilityMarginCostCalculator.contactAdjustmentRequested())
+      {
+         { // Full update
+            wholeBodyContactState.update(); // TODO don't commit
+         }
+
+         multiContactRegionCalculator.updateContactState(wholeBodyContactState);
+         multiContactRegionCalculator.performUpdateForNextVertex();
+
+         if (multiContactRegionCalculator.hasSolvedWholeRegion())
+         {
+            stabilityMarginCostCalculator.update2();
          }
       }
       else

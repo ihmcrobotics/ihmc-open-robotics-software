@@ -222,7 +222,7 @@ public class StabilityBasedKinematicRetargetingCalculator
 //      }
 
       requestPostureAdjustment.set(ENABLE_POSTURE_OBJECTIVE);
-      addContactAdjustment.set(true);
+      addContactAdjustment.set(false);
 
       parentRegistry.addChild(registry);
    }
@@ -342,6 +342,77 @@ public class StabilityBasedKinematicRetargetingCalculator
 
       if (postureOptimizerState.getValue() == PostureOptimizerState.OPTIMIZER)
          fullRobotModel.updateFrames();
+   }
+
+   public void update2()
+   {
+      if (!multiContactRegionCalculator.hasSolvedWholeRegion())
+         return;
+
+      if (requestContactAdjustment.getValue())
+      {
+         RigidBodyBasics bracingHand = fullRobotModel.getHand(HumanoidKinematicsToolboxController.BRACING_HAND_SIDE);
+         bracingPointIndex = wholeBodyContactState.indexOf(bracingHand);
+
+         if (bracingPointIndex != -1)
+         {
+            contactPointAdjustment.set(stabilityGradientCalculator.computeContactPointAdjustment(HumanoidKinematicsToolboxController.BRACING_HAND_SIDE));
+
+            if (!isUpperBodyLoadBearing.getValue() && contactPointAdjustment.normSquared() > 1.0e-5)
+            {
+               contactPointAdjustment.scale(kpContact.getValue());
+               integratedContactPointAdjustment.add(updateDT * contactPointAdjustment.getX(), updateDT * contactPointAdjustment.getY(), updateDT * contactPointAdjustment.getZ());
+            }
+         }
+      }
+      else
+      {
+         integratedContactPointAdjustment.setToZero();
+      }
+
+      // always compute, for debugging
+//      stabilityGradientCalculator.computePostureAdjustment();
+
+      // Save current whole-body velocity
+//      MultiBodySystemTools.extractJointsState(controlledJoints, JointStateType.VELOCITY, currentWholeBodyVelocity);
+
+      // update gradient confidence
+//      if (!previousStabilityMargin.isNaN())
+//      {
+//         double deltaMargin = multiContactRegionCalculator.getStabilityMargin() - previousStabilityMargin.getValue();
+//         actualStabilityMarginVelocity.set(EuclidCoreTools.clamp(deltaMargin / updateDT, 0.6));
+//      }
+
+      if (!isEnabled.getValue() || !isUpperBodyLoadBearing.getValue()  || !requestPostureAdjustment.getValue() || multiContactRegionCalculator.getStabilityMargin() > getUpperMarginThreshold())
+      {
+         postureOptimizerState.set(PostureOptimizerState.NOMINAL);
+      }
+      else if (multiContactRegionCalculator.getStabilityMargin() > getLowerMarginThreshold() || stabilityGradientCalculator.getPostureSensitivity() < sensitivityThreshold.getValue())
+      {
+         postureOptimizerState.set(PostureOptimizerState.FREEZE);
+      }
+      else
+      {
+         postureOptimizerState.set(PostureOptimizerState.OPTIMIZER);
+
+//         scaledStabilityGradient.set(stabilityGradientCalculator.getStabilityBoundaryGradient());
+//         CommonOps_DDRM.scale(kpPosture.getValue(), scaledStabilityGradient);
+//         MultiBodySystemTools.insertJointsState(controlledJoints, JointStateType.VELOCITY, scaledStabilityGradient);
+//         fullRobotModel.updateFrames();
+      }
+
+      // problem is here, likely with the bracing hand?? vv
+      chestOrientationRetargeting.update(postureOptimizerState.getValue());
+      pelvisOrientationRetargeting.update(postureOptimizerState.getValue());
+      bracingHandOrientationRetargeting.update(postureOptimizerState.getValue());
+      comHeightRetargeting.update(postureOptimizerState.getValue(), scaledStabilityGradient);
+
+      // Reset to initial velocities
+//      MultiBodySystemTools.insertJointsState(controlledJoints, JointStateType.VELOCITY, currentWholeBodyVelocity);
+//      previousStabilityMargin.set(multiContactRegionCalculator.getStabilityMargin());
+
+//      if (postureOptimizerState.getValue() == PostureOptimizerState.OPTIMIZER)
+//         fullRobotModel.updateFrames();
    }
 
    private double getUpperMarginThreshold()
