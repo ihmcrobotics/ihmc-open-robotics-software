@@ -22,7 +22,7 @@ void filterRapidHeightMap(unsigned short * matrixPointer, size_t pitchA,
         unsigned short * matrixCell = (unsigned short*)((char*) currentLayer + indexY * pitchA) + indexX;
 
         // This is less then or equal to due to a round error that can give +- 1 offsets
-        if ((int) *matrixCell - resetOffset <= 2)
+        if (abs((int) *matrixCell - resetOffset) <= 2)
         {
             dontUseAlphaYet = true;
         }

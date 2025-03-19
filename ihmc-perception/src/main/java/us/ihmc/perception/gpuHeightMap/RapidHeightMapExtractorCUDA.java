@@ -43,7 +43,7 @@ public class RapidHeightMapExtractorCUDA
 
    private final GpuMat inputDepthImage;
    private final GpuMat localHeightMapImage;
-   private GpuMat globalHeightMapImage;
+   private final GpuMat globalHeightMapImage;
    private final GpuMat terrainCostImage;
    private final GpuMat contactMapImage;
    private final GpuMat sensorCroppedHeightMapImage;
@@ -298,10 +298,7 @@ public class RapidHeightMapExtractorCUDA
 
       if (heightMapParameters.getEnableAlphaFilter())
       {
-         GpuMat filteredHeightMap = filteredRapidHeightMapExtractor.update(globalHeightMapImage, resetOffset);
-         globalHeightMapImage.close();
-         globalHeightMapImage = filteredHeightMap.clone();
-         filteredHeightMap.close();
+         filteredRapidHeightMapExtractor.update(globalHeightMapImage, resetOffset);
       }
 
       GpuMat verticalFilteredHeightMap = globalHeightMapImage.clone();
