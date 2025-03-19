@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.SensitivityBasedStabilityGradientCalculator;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.StabilityMarginRegionCalculator;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState;
+import us.ihmc.communication.PostureOptimizerState;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
@@ -42,8 +43,9 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 
-public class StabilityMarginKinematicsCostCalculator
+public class StabilityBasedKinematicRetargetingCalculator
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -53,17 +55,18 @@ public class StabilityMarginKinematicsCostCalculator
 //   private static final double MAX_PELVIS_ORIENTATION_OFFSET = Math.toRadians(180.0);
 
    // Hardware
-   private static final double MAX_ARM_ORIENTATION_OFFSET = Math.toRadians(35.0);
+   private static final double MAX_ARM_ORIENTATION_OFFSET = Math.toRadians(70.0);
    private static final double MAX_CHEST_ORIENTATION_OFFSET = Math.toRadians(35.0);
    private static final double MAX_PELVIS_ORIENTATION_OFFSET = Math.toRadians(35.0);
 
-   public static final boolean OVERRIDE_MESSAGE = false;
-   public static final boolean ENABLE_POSTURE_OBJECTIVE = false;
-   public static final boolean ENABLE_CONTACT_OBJECTIVE = false;
+   public static final boolean OVERRIDE_MESSAGE = true;
+   public static final boolean ENABLE_POSTURE_OBJECTIVE = true;
+   public static final boolean ENABLE_CONTACT_OBJECTIVE = true;
+   public static final boolean INCLUDE_FF_VELOCITY = false;
 
    private static final double KP_ORIENTATION = 1200.0;
-   private static final double MAX_CONTACT_POINT_ADJUSTMENT = 0.5;
-   private static final double MAX_ORIENTATION_ERROR = Math.toRadians(4.0);
+   private static final double MAX_CONTACT_POINT_ADJUSTMENT = 0.4;
+   private static final double MAX_ORIENTATION_ERROR = Math.toRadians(5.0);
 //   private static final double MAX_COM_Z_ERROR = 0.01;
 
    private final WholeBodyContactState wholeBodyContactState;
@@ -102,18 +105,19 @@ public class StabilityMarginKinematicsCostCalculator
    /* Polygon scaler, to add a safety factor to the perceived region */
    private final ConvexPolygonScaler polygonScaler = new ConvexPolygonScaler();
 
-   private final OrientationOffsetCalculator chestOrientationOffsetCalculator;
-   private final OrientationOffsetCalculator pelvisOrientationOffsetCalculator;
-   private final OrientationOffsetCalculator bracingHandOrientationOffsetCalculator;
-   private final CoMHeightOffsetCalculator comHeightOffsetCalculator;
+   private final YoEnum<PostureOptimizerState> postureOptimizerState = new YoEnum<>("postureOptimizerState", registry, PostureOptimizerState.class);
+
+   private final OrientationRetargeting chestOrientationRetargeting;
+   private final OrientationRetargeting pelvisOrientationRetargeting;
+   private final OrientationRetargeting bracingHandOrientationRetargeting;
+   private final CoMHeightRetargeting comHeightRetargeting;
 
    private final JointBasics[] controlledJoints;
    private final DMatrixRMaj currentWholeBodyVelocity = new DMatrixRMaj(0);
 
-   private final YoDouble desiredStabilityMarginVelocity = new YoDouble("desiredStabilityMarginVelocity", registry);
-   private final YoDouble stabilityMarginWeight = new YoDouble("stabilityMarginWeight", registry);
    private final YoDouble stabilityMarginThreshold = new YoDouble("stabilityMarginThreshold", registry);
    private final YoDouble stabilityMarginHysteresis = new YoDouble("stabilityMarginHysteresis", registry);
+   private final YoDouble sensitivityThreshold = new YoDouble("sensitivityThreshold", registry);
    private final YoDouble alphaEnabled = new YoDouble("alphaEnabled", registry);
 
    private final YoBoolean addContactAdjustment = new YoBoolean("addContactAdjustment", registry);
@@ -126,8 +130,6 @@ public class StabilityMarginKinematicsCostCalculator
    private final YoDouble actualStabilityMarginVelocity = new YoDouble("actualStabilityMarginVelocity", registry);
 
    private final DMatrixRMaj scaledStabilityGradient = new DMatrixRMaj(0);
-   private final OrientationCalculator chestOrientationCalculator;
-   private final OrientationCalculator pelvisOrientationCalculator;
 
    private int bracingPointIndex;
    private final YoFrameVector3D contactPointAdjustment;
@@ -137,16 +139,16 @@ public class StabilityMarginKinematicsCostCalculator
    private final FramePoint3D tempPoint = new FramePoint3D();
    private final Point2D tempPoint2D = new Point2D();
 
-   public StabilityMarginKinematicsCostCalculator(WholeBodyContactState wholeBodyContactState,
-                                                  StabilityMarginRegionCalculator multiContactRegionCalculator,
-                                                  FullHumanoidRobotModel fullRobotModel,
-                                                  ReferenceFrame midFeetZUpFrame,
-                                                  ReferenceFrame centerOfMassFrame,
-                                                  BooleanProvider isUpperBodyLoadBearing,
-                                                  DoubleProvider minStabilityMargin,
-                                                  double updateDT,
-                                                  YoGraphicsListRegistry graphicsListRegistry,
-                                                  YoRegistry parentRegistry)
+   public StabilityBasedKinematicRetargetingCalculator(WholeBodyContactState wholeBodyContactState,
+                                                       StabilityMarginRegionCalculator multiContactRegionCalculator,
+                                                       FullHumanoidRobotModel fullRobotModel,
+                                                       ReferenceFrame midFeetZUpFrame,
+                                                       ReferenceFrame centerOfMassFrame,
+                                                       BooleanProvider isUpperBodyLoadBearing,
+                                                       DoubleProvider minStabilityMargin,
+                                                       double updateDT,
+                                                       YoGraphicsListRegistry graphicsListRegistry,
+                                                       YoRegistry parentRegistry)
    {
       this.wholeBodyContactState = wholeBodyContactState;
       this.multiContactRegionCalculator = multiContactRegionCalculator;
@@ -159,10 +161,8 @@ public class StabilityMarginKinematicsCostCalculator
       this.isUpperBodyLoadBearing = isUpperBodyLoadBearing;
       this.minStabilityMargin = minStabilityMargin;
 
-      desiredStabilityMarginVelocity.set(0.15);
-      stabilityMarginThreshold.set(0.16);
-      stabilityMarginHysteresis.set(0.03);
-      stabilityMarginWeight.set(0.5);
+      stabilityMarginThreshold.set(0.15);
+      stabilityMarginHysteresis.set(0.015);
 
       this.stabilityGradientCalculator = new SensitivityBasedStabilityGradientCalculator(fullRobotModel,
                                                                                          wholeBodyContactState,
@@ -170,18 +170,17 @@ public class StabilityMarginKinematicsCostCalculator
                                                                                          graphicsListRegistry,
                                                                                          registry);
 
-      this.chestOrientationCalculator = new OrientationCalculator(fullRobotModel.getChest(), midFeetZUpFrame, centerOfMassFrame, fullRobotModel, isUpperBodyLoadBearing);
-      this.pelvisOrientationCalculator = new OrientationCalculator(fullRobotModel.getPelvis(), midFeetZUpFrame, centerOfMassFrame, fullRobotModel, isUpperBodyLoadBearing);
-
-      kpPosture.set(30.0);
-//      kpContact.set(5.0e-4);
-      kpContact.set(5.0e-5);
+      kpPosture.set(12.0); // 15.0);
+      kpContact.set(0.8);
 
       double maxRate = Math.toRadians(15.0);
-      chestOrientationOffsetCalculator = new OrientationOffsetCalculator("chest", updateDT, fullRobotModel.getChest().getBodyFixedFrame(), maxRate, MAX_CHEST_ORIENTATION_OFFSET, registry);
-      pelvisOrientationOffsetCalculator = new OrientationOffsetCalculator("pelvis", updateDT, fullRobotModel.getPelvis().getBodyFixedFrame(), maxRate, MAX_PELVIS_ORIENTATION_OFFSET, registry);
-      bracingHandOrientationOffsetCalculator = new OrientationOffsetCalculator("bracingHand", updateDT, fullRobotModel.getHandControlFrame(HumanoidKinematicsToolboxController.BRACING_HAND_SIDE), maxRate, MAX_ARM_ORIENTATION_OFFSET, registry);
-      comHeightOffsetCalculator = new CoMHeightOffsetCalculator(updateDT, 0.05, -0.07, 0.04, fullRobotModel.getTotalMass(), stabilityGradientCalculator.getCentroidalMomentumCalculator(), registry);
+      chestOrientationRetargeting = new OrientationRetargeting("chest",  fullRobotModel.getChest(), updateDT, maxRate, MAX_CHEST_ORIENTATION_OFFSET, graphicsListRegistry, registry);
+      pelvisOrientationRetargeting = new OrientationRetargeting("pelvis", fullRobotModel.getPelvis(), updateDT, maxRate, MAX_PELVIS_ORIENTATION_OFFSET, graphicsListRegistry, registry);
+      bracingHandOrientationRetargeting = new OrientationRetargeting("bracingHand", fullRobotModel.getHand(HumanoidKinematicsToolboxController.BRACING_HAND_SIDE), updateDT, maxRate, MAX_ARM_ORIENTATION_OFFSET, graphicsListRegistry, registry);
+
+      double minOffset = -0.07;
+      double maxOffset = 0.04;
+      comHeightRetargeting = new CoMHeightRetargeting(updateDT, 0.1, minOffset, maxOffset, fullRobotModel.getTotalMass(), centerOfMassFrame, stabilityGradientCalculator.getCentroidalMomentumCalculator(), registry);
 
       contactPointAdjustment = new YoFrameVector3D("contactPointAdjustment", ReferenceFrame.getWorldFrame(), registry);
       integratedContactPointAdjustment = new YoFrameVector3D("integratedContactPointAdjustment", ReferenceFrame.getWorldFrame(), registry);
@@ -195,7 +194,11 @@ public class StabilityMarginKinematicsCostCalculator
       chestWeight = new YoVector3D("chestWeight", registry);
       pelvisWeight = new YoVector3D("pelvisWeight", registry);
 
-//      regionNormal.set(-0.342, 0.940, 0.000);
+      // hard-coded for overriding
+      regionNormal.set(-0.342, 0.940, 0.000);
+//      regionNormal.set(0.0, 0.0, 1.0);
+//      regionNormal.set(-0.317,  0.871,  0.375);
+//      regionNormal.set(0.392,  0.840,  0.375);
 
       // Detune the default KST values a bit
       chestDefaultWeight.set(0.0, 0.0, 0.5);
@@ -207,6 +210,19 @@ public class StabilityMarginKinematicsCostCalculator
 
       orientationGains.setProportionalGains(KP_ORIENTATION);
       orientationGains.setMaxProportionalError(MAX_ORIENTATION_ERROR);
+
+      sensitivityThreshold.set(0.035);
+
+//      boolean useOldOrientation = false;
+//      if (useOldOrientation)
+//      {
+//         orientationGains.setMaxProportionalError(100.0);
+//         chestMultiContactWeight.set(chestDefaultWeight);
+//         pelvisMultiContactWeight.set(pelvisDefaultWeight);
+//      }
+
+      requestPostureAdjustment.set(ENABLE_POSTURE_OBJECTIVE);
+      addContactAdjustment.set(true);
 
       parentRegistry.addChild(registry);
    }
@@ -239,8 +255,10 @@ public class StabilityMarginKinematicsCostCalculator
 
    public void initialize()
    {
-      chestOrientationCalculator.initialize();
-      pelvisOrientationCalculator.initialize();
+      chestOrientationRetargeting.initialize();
+      pelvisOrientationRetargeting.initialize();
+      bracingHandOrientationRetargeting.initialize();
+      comHeightRetargeting.initialize();
 
       // update chest orientation
       chestWeight.set(isUpperBodyLoadBearing.getValue() ? chestMultiContactWeight : chestDefaultWeight);
@@ -258,9 +276,6 @@ public class StabilityMarginKinematicsCostCalculator
 
    public void update()
    {
-      chestOrientationCalculator.update();
-      pelvisOrientationCalculator.update();
-
       if (!multiContactRegionCalculator.hasSolvedWholeRegion())
          return;
 
@@ -271,12 +286,9 @@ public class StabilityMarginKinematicsCostCalculator
 
          if (bracingPointIndex != -1)
          {
-            stabilityGradientCalculator.clearContactPointsToComputeSensitivity();
-            stabilityGradientCalculator.addContactPointIndexToComputeSensitivity(bracingPointIndex);
-            stabilityGradientCalculator.computeContactPointAdjustment();
-            contactPointAdjustment.set(stabilityGradientCalculator.getOptimalContactPointAdjustment(bracingPointIndex));
+            contactPointAdjustment.set(stabilityGradientCalculator.computeContactPointAdjustment(HumanoidKinematicsToolboxController.BRACING_HAND_SIDE));
 
-            if (contactPointAdjustment.normSquared() > 1.0e-5)
+            if (!isUpperBodyLoadBearing.getValue() && contactPointAdjustment.normSquared() > 1.0e-5)
             {
                contactPointAdjustment.scale(kpContact.getValue());
                integratedContactPointAdjustment.add(updateDT * contactPointAdjustment.getX(), updateDT * contactPointAdjustment.getY(), updateDT * contactPointAdjustment.getZ());
@@ -301,38 +313,45 @@ public class StabilityMarginKinematicsCostCalculator
          actualStabilityMarginVelocity.set(EuclidCoreTools.clamp(deltaMargin / updateDT, 0.6));
       }
 
-      boolean integrateRegargetedObjectives = isEnabled.getValue() && isUpperBodyLoadBearing.getValue() && updateAlphaEnabled() > 0.0;
-      if (integrateRegargetedObjectives && requestPostureAdjustment.getValue())
+      if (!isEnabled.getValue() || !isUpperBodyLoadBearing.getValue()  || !requestPostureAdjustment.getValue() || multiContactRegionCalculator.getStabilityMargin() > getUpperMarginThreshold())
       {
-         scaledStabilityGradient.set(stabilityGradientCalculator.getStabilityBoundaryGradient());
-         CommonOps_DDRM.scale(EuclidCoreTools.square(alphaEnabled.getValue()) * kpPosture.getValue(), scaledStabilityGradient);
-
-         MultiBodySystemTools.insertJointsState(controlledJoints, JointStateType.VELOCITY, scaledStabilityGradient);
-         fullRobotModel.updateFrames();
-
-         // Update orientation offsets
-         chestOrientationOffsetCalculator.integrate();
-         pelvisOrientationOffsetCalculator.integrate();
-         bracingHandOrientationOffsetCalculator.integrate();
-         comHeightOffsetCalculator.integrate(scaledStabilityGradient);
+         postureOptimizerState.set(PostureOptimizerState.NOMINAL);
+      }
+      else if (multiContactRegionCalculator.getStabilityMargin() > getLowerMarginThreshold() || stabilityGradientCalculator.getPostureSensitivity() < sensitivityThreshold.getValue())
+      {
+         postureOptimizerState.set(PostureOptimizerState.FREEZE);
       }
       else
       {
-         alphaEnabled.set(0.0);
+         postureOptimizerState.set(PostureOptimizerState.OPTIMIZER);
 
-         double alphaLeak = 0.995;
-         chestOrientationOffsetCalculator.clear(alphaLeak);
-         pelvisOrientationOffsetCalculator.clear(alphaLeak);
-         bracingHandOrientationOffsetCalculator.clear(alphaLeak);
-         comHeightOffsetCalculator.clear(alphaLeak);
+         scaledStabilityGradient.set(stabilityGradientCalculator.getStabilityBoundaryGradient());
+         CommonOps_DDRM.scale(kpPosture.getValue(), scaledStabilityGradient);
+         MultiBodySystemTools.insertJointsState(controlledJoints, JointStateType.VELOCITY, scaledStabilityGradient);
+         fullRobotModel.updateFrames();
       }
+
+      chestOrientationRetargeting.update(postureOptimizerState.getValue());
+      pelvisOrientationRetargeting.update(postureOptimizerState.getValue());
+      bracingHandOrientationRetargeting.update(postureOptimizerState.getValue());
+      comHeightRetargeting.update(postureOptimizerState.getValue(), scaledStabilityGradient);
 
       // Reset to initial velocities
       MultiBodySystemTools.insertJointsState(controlledJoints, JointStateType.VELOCITY, currentWholeBodyVelocity);
       previousStabilityMargin.set(multiContactRegionCalculator.getStabilityMargin());
 
-      if (integrateRegargetedObjectives)
+      if (postureOptimizerState.getValue() == PostureOptimizerState.OPTIMIZER)
          fullRobotModel.updateFrames();
+   }
+
+   private double getUpperMarginThreshold()
+   {
+      return stabilityMarginThreshold.getValue() + stabilityMarginHysteresis.getValue();
+   }
+
+   private double getLowerMarginThreshold()
+   {
+      return stabilityMarginThreshold.getValue() - stabilityMarginHysteresis.getValue();
    }
 
    private static void configureSelectionMatrix(SelectionMatrix3D selectionMatrix, Tuple3DReadOnly weight)
@@ -366,8 +385,11 @@ public class StabilityMarginKinematicsCostCalculator
          this.regionPolygon.set(regionPolygon);
          this.regionNormal.set(regionNormal);
 
-         double safetyDistance = 0.07;
-         polygonScaler.scaleConvexPolygon(regionPolygon, safetyDistance, this.regionPolygon);
+         if (!regionPolygon.isEmpty())
+         {
+            double safetyDistance = 0.07;
+            polygonScaler.scaleConvexPolygon(regionPolygon, safetyDistance, this.regionPolygon);
+         }
       }
    }
 
@@ -383,7 +405,13 @@ public class StabilityMarginKinematicsCostCalculator
       {
          // Posture adjustment
          FixedFrameQuaternionBasics desiredHandOrientation = command.getDesiredPose().getOrientation();
-         desiredHandOrientation.append(bracingHandOrientationOffsetCalculator.getOrientationOffset());
+         bracingHandOrientationRetargeting.updateNominalOrientation(desiredHandOrientation, command.getControlFramePose());
+
+         desiredHandOrientation.set(bracingHandOrientationRetargeting.getDesiredOrientation());
+         command.setHasDesiredVelocity(true);
+         command.getDesiredVelocity().getLinearPart().setToZero();
+         if (INCLUDE_FF_VELOCITY)
+            command.getDesiredVelocity().getAngularPart().add(bracingHandOrientationRetargeting.getAngularVelocity());
 
          // Contact point adjustment
          if (!isUpperBodyLoadBearing.getValue())
@@ -430,22 +458,25 @@ public class StabilityMarginKinematicsCostCalculator
          pelvisOrientationCommand.setWeightsForSolver(pelvisWeight);
          pelvisOrientationCommand.setSelectionMatrix(pelvisSelectionMatrix);
          pelvisOrientationCommand.setGains(orientationGains);
-         pelvisOrientationCommand.setInverseKinematics(pelvisOrientationCalculator.getDesiredOrientation(), null);
-         pelvisOrientationCommand.getReferenceOrientation().append(pelvisOrientationOffsetCalculator.getOrientationOffset());
+         pelvisOrientationCommand.setInverseKinematics(pelvisOrientationRetargeting.getDesiredOrientation(), null);
+         if (INCLUDE_FF_VELOCITY)
+            pelvisOrientationCommand.getReferenceAngularVelocity().set(pelvisOrientationRetargeting.getAngularVelocity());
 
          OrientationFeedbackControlCommand chestOrientationCommand = bufferToPack.addOrientationFeedbackControlCommand();
          chestOrientationCommand.set(fullRobotModel.getRootBody(), fullRobotModel.getChest());
          chestOrientationCommand.setWeightsForSolver(chestWeight);
          chestOrientationCommand.setSelectionMatrix(chestSelectionMatrix);
          chestOrientationCommand.setGains(orientationGains);
-         chestOrientationCommand.setInverseKinematics(chestOrientationCalculator.getDesiredOrientation(), null);
-         chestOrientationCommand.getReferenceOrientation().append(chestOrientationOffsetCalculator.getOrientationOffset());
+         chestOrientationCommand.setInverseKinematics(chestOrientationRetargeting.getDesiredOrientation(), null);
+         if (INCLUDE_FF_VELOCITY)
+            chestOrientationCommand.getReferenceAngularVelocity().set(chestOrientationRetargeting.getAngularVelocity());
       }
    }
 
    public void retargetCenterOfMass(KinematicsToolboxCenterOfMassCommand command)
    {
-      command.getDesiredPosition().addZ(comHeightOffsetCalculator.getOffset());
+      comHeightRetargeting.updateNominalHeight(command.getDesiredPosition().getZ());
+      command.getDesiredPosition().setZ(comHeightRetargeting.getHeight());
    }
 
    private double updateAlphaEnabled()

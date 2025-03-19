@@ -215,7 +215,7 @@ public class ContactNullspaceCalculator
       return rowOffset + numRows;
    }
 
-   private int getSystemJacobianColumn(OneDoFJointBasics joint)
+   public int getSystemJacobianColumn(OneDoFJointBasics joint)
    {
       return SPATIAL_DIMENSIONS + jointToIndexMap.get(joint);
    }

@@ -5,13 +5,10 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.matrixlib.MatrixTools;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 
-import static us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStabilityMarginOptimizationModule.CoM_DIMENSIONS;
-import static us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStabilityMarginOptimizationModule.NUM_DYNAMICS_CONSTRAINTS;
 import static us.ihmc.commonWalkingControlModules.staticEquilibrium.StabilityMarginOptimizationModule.*;
 
-public class ContactPointConstraintMatrixVariation
+public class ContactPointConstraintMatrixVariationCalculator
 {
    private final StabilityMarginOptimizationModule stabilityMarginOptimizationModule;
 
@@ -19,7 +16,7 @@ public class ContactPointConstraintMatrixVariation
    private final DMatrixRMaj inequalityConstraintVariation = new DMatrixRMaj(0);
    private final DMatrixRMaj solverConstraintVariation = new DMatrixRMaj(0);
 
-   public ContactPointConstraintMatrixVariation(StabilityMarginOptimizationModule stabilityMarginOptimizationModule)
+   public ContactPointConstraintMatrixVariationCalculator(StabilityMarginOptimizationModule stabilityMarginOptimizationModule)
    {
       this.stabilityMarginOptimizationModule = stabilityMarginOptimizationModule;
    }

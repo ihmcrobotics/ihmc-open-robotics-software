@@ -22,7 +22,6 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
@@ -37,7 +36,6 @@ import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.HumanoidKinem
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.idl.IDLSequence.Object;
-import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -172,7 +170,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
    private final StabilityMarginRegionCalculator multiContactRegionCalculator;
    private final WholeBodyContactState wholeBodyContactState;
-   private final StabilityMarginKinematicsCostCalculator stabilityMarginCostCalculator;
+   private final StabilityBasedKinematicRetargetingCalculator stabilityMarginCostCalculator;
    private final FramePoint3D tempContactPoint = new FramePoint3D();
    private final FrameVector3D tempContactNormal = new FrameVector3D();
 
@@ -228,24 +226,31 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
       supportRigidBodyWeight.set(200.0);
       momentumWeight.set(0.001);
-      multiContactRegionCalculator = StabilityMarginRegionCalculator.createForCoPStabilityMargin("",
+
+      multiContactRegionCalculator = StabilityMarginRegionCalculator.createForCoMStabilityMargin("",
                                                                                                  desiredFullRobotModel.getTotalMass(),
-                                                                                                 desiredReferenceFrames.getCenterOfMassFrame(),
-                                                                                                 desiredReferenceFrames.getMidFeetZUpFrame(),
                                                                                                  registry,
                                                                                                  yoGraphicsListRegistry);
+
+//      multiContactRegionCalculator = StabilityMarginRegionCalculator.createForCoPStabilityMargin("",
+//                                                                                                 desiredFullRobotModel.getTotalMass(),
+//                                                                                                 desiredReferenceFrames.getCenterOfMassFrame(),
+//                                                                                                 desiredReferenceFrames.getMidFeetZUpFrame(),
+//                                                                                                 registry,
+//                                                                                                 yoGraphicsListRegistry);
+
       multiContactRegionCalculator.setupForStabilityMarginCalculation(() -> centerOfMass);
       wholeBodyContactState = new WholeBodyContactState(desiredOneDoFJoints, rootJoint);
-      stabilityMarginCostCalculator = new StabilityMarginKinematicsCostCalculator(wholeBodyContactState,
-                                                                                  multiContactRegionCalculator,
-                                                                                  desiredFullRobotModel,
-                                                                                  desiredReferenceFrames.getMidFeetZUpFrame(),
-                                                                                  desiredReferenceFrames.getCenterOfMassFrame(),
-                                                                                  isUpperBodyLoadBearing,
-                                                                                  getCenterOfMassSafeMargin(),
-                                                                                  updateDT,
-                                                                                  yoGraphicsListRegistry,
-                                                                                  registry);
+      stabilityMarginCostCalculator = new StabilityBasedKinematicRetargetingCalculator(wholeBodyContactState,
+                                                                                       multiContactRegionCalculator,
+                                                                                       desiredFullRobotModel,
+                                                                                       desiredReferenceFrames.getMidFeetZUpFrame(),
+                                                                                       desiredReferenceFrames.getCenterOfMassFrame(),
+                                                                                       isUpperBodyLoadBearing,
+                                                                                       getCenterOfMassSafeMargin(),
+                                                                                       updateDT,
+                                                                                       yoGraphicsListRegistry,
+                                                                                       registry);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -384,7 +389,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       }
 
       updateConfigurationCommand();
-
       updateContactInfo();
 
 //      if (!ALWAYS_SNAP_PRIV_CONFIG_TO_CURRENT && initialRobotConfigurationMap != null)
@@ -423,13 +427,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       //   Initialize the CoM position to be in between the feet and keep updating it so it moves with the feet.
       //   Add an offset to control the stability of the CoM.
       updateCoMPositionToHold();
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         FramePose3D footPose = new FramePose3D();
-         footPose.setFromReferenceFrame(desiredFullRobotModel.getFoot(robotSide).getBodyFixedFrame());
-         LogTools.info(robotSide.getLowerCaseName() + " foot pose : " + footPose);
-      }
 
       status.setCurrentToolboxState(CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL);
       reportMessage(status);
