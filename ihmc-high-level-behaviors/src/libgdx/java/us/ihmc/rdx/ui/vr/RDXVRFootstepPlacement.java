@@ -196,11 +196,11 @@ public class RDXVRFootstepPlacement
                {
                   if (RUN_ADAPTATION_ASYNC)
                   {
-                     adaptedPose = optimizeFootstep(latestHeightMapData, pose, TIMEOUT_STEPPABLE_REGION_ADAPTATION);
+                     adaptedPose = optimizeFootstep(latestHeightMapData, adaptedPose, TIMEOUT_STEPPABLE_REGION_ADAPTATION);
                   }
                   else
                   {
-                     adaptedPose = footstepOptimizer.compute(latestHeightMapData, pose);
+                     adaptedPose = footstepOptimizer.compute(latestHeightMapData, adaptedPose);
                   }
                }
                footstepBeingExternallyPlaced.setPose(adaptedPose);

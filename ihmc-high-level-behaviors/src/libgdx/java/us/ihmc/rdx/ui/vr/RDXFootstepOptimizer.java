@@ -12,28 +12,32 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static com.badlogic.gdx.math.MathUtils.random;
+
 /**
  * This class implements a footstep optimizer for virtual reality (VR) applications.
- * It uses a gradient descent approach to find the best footstep placement based on
- * position, yaw, and planarity costs, while also satisfying constraints on height,
- * slope, and yaw.
+ * It uses a simulated annealing approach to find the best footstep placement
+ * based on position, yaw, and planarity costs in a neighbour region,
+ * while also satisfying constraints on height, slope of terrain and kinematic steppability.
  */
 public class RDXFootstepOptimizer
 {
-   private static final double POSITION_W = 0.35;
-   private static final double YAW_W = 0.45;
-   private static final double PLANARITY_W = 0.2;
+   private static final double POSITION_W = 0.2;
+   private static final double YAW_W = 0.5;
+   private static final double PLANARITY_W = 0.3;
 
-   private static final double LEARNING_RATE = 0.1;
-   private static final double EPSILON = 1e-5;
+   private static final double POSITION_STD_DEV = 0.05;  // probability density of 0.7 is achieved at roughly std_dev/2, hence 70% of times we get half as a step
+   private static final double YAW_STD_DEV = Math.toRadians(0);
+   private static final double INITIAL_TEMPERATURE = 100.0;
+   private static final double COOLING_RATE = 0.95;
    private static final int MAX_ITERATIONS = 100;
 
    private static final double MAX_HEIGHT_VARIANCE = 0.05;
    private static final double PLANARITY_TOLERANCE = 0.03;
    private static final double MAX_SLOPE_ANGLE = Math.toRadians(50);
-   private static final double  POSITION_CONSTRAINT_PENALTY = 10000;
-   private static final double  HEIGHT_CONSTRAINT_PENALTY = 500;
-   private static final double  SLOPE_CONSTRAINT_PENALTY = 1000;
+
+   private static final double HEIGHT_CONSTRAINT_PENALTY = 5.0;
+   private static final double SLOPE_CONSTRAINT_PENALTY = 10.0;
 
    private double footLength;
    private double footWidth;
@@ -73,10 +77,10 @@ public class RDXFootstepOptimizer
       // Store the future in a field so it can be cancelled later.
       stopRequested.set(false);
       currentFuture = CompletableFuture.supplyAsync(() ->
-       {
-          bestSolution = new FramePose3D(initialPose); // Initialize with initial pose
-          return compute(heightMapData, initialPose);
-       }, executor);
+                                                    {
+                                                       bestSolution = new FramePose3D(initialPose); // Initialize with initial pose
+                                                       return compute(heightMapData, initialPose);
+                                                    }, executor);
 
       return (CompletableFuture<FramePose3D>) currentFuture; // Store and return
    }
@@ -107,67 +111,75 @@ public class RDXFootstepOptimizer
       currentHeightMap = heightMapData;
       if (isInitialSolutionValid(initialPose))
       {
-         LogTools.info("No need to run optimization");
+         LogTools.info("Initial solution is valid, no optimization needed.");
          return new FramePose3D(initialPose);
       }
-      else
+
+      double[] q = {initialPose.getX(), initialPose.getY(), initialPose.getYaw()}; // q as initial pose.
+      double[] qBest = q.clone(); // keep the best solution here
+
+      double bestCost = computeCost(q, initialPose);
+
+      double temperature = INITIAL_TEMPERATURE;
+
+      for (int i = 0; i < MAX_ITERATIONS; i++)
       {
-         double[] q = {initialPose.getX(), initialPose.getY(), initialPose.getYaw()};
-         double[] qBest = q.clone();
-         double costBest = Double.POSITIVE_INFINITY;
-
-         for (int i = 0; i < MAX_ITERATIONS; i++)
+         if (stopRequested.get())
          {
-            // Check if a stop has been requested
-            if (stopRequested.get())
-            {
-               LogTools.warn("Optimization interrupted");
-               return bestSolution;
-            }
+            LogTools.warn("Optimization interrupted.");
+            break;
+         }
 
-            double cost = computeCost(q, initialPose);
-            if (cost < costBest)
-            {
-               costBest = cost;
-               System.arraycopy(q, 0, qBest, 0, q.length);
+         // Generate a neighbor solution by randomly perturbing the current pose
+         double[] qNew = generateNeighbor(q, initialPose);
 
-               // Update the best solution so far
-               FramePose3D currentBestSolution = new FramePose3D(initialPose);
-               currentBestSolution.setX(qBest[0]);
-               currentBestSolution.setY(qBest[1]);
-               currentBestSolution.getRotation().set(new YawPitchRoll(qBest[2], initialPose.getPitch(), initialPose.getRoll()));
-               currentBestSolution.setZ(heightMapData.getHeightAt(qBest[0], qBest[1]));
-               bestSolution = currentBestSolution; // Update volatile field
-            }
+         double newCost = computeCost(qNew, initialPose);
+         double costDelta = newCost - bestCost;
 
-            double[] gradient = computeGradient(q, initialPose);
-            for (int j = 0; j < q.length; j++)
+         // Metropolis acceptance criterion
+         if (costDelta < 0 || random.nextDouble() < Math.exp(-costDelta / temperature))
+         {
+            System.arraycopy(qNew, 0, q, 0, q.length);  // Update q (current solution)
+            if (newCost < bestCost)
             {
-               q[j] -= LEARNING_RATE * gradient[j];
-            }
-
-            LogTools.info("Gradient: {}", Math.sqrt(gradient[0] * gradient[0] + gradient[1] * gradient[1] + gradient[2] * gradient[2]));
-            if (Math.sqrt(gradient[0] * gradient[0] + gradient[1] * gradient[1] + gradient[2] * gradient[2]) < EPSILON)
-            {
-               LogTools.warn("Convergence reached");
-               hasConverged = true;
-               break; // Convergence reached
-            }
-
-            if (i == MAX_ITERATIONS - 1)
-            {
-               LogTools.warn("Max iterations reached");
-               hasConverged = true;
+               bestCost = newCost;
+               System.arraycopy(qNew, 0, qBest, 0, q.length);   // Update qBest (best solution)
+               LogTools.info("New best cost: " + bestCost);
             }
          }
 
-         FramePose3D optimizedPose = new FramePose3D(initialPose);
-         optimizedPose.setX(qBest[0]);
-         optimizedPose.setY(qBest[1]);
-         optimizedPose.getRotation().set(new YawPitchRoll(qBest[2], initialPose.getPitch(), initialPose.getRoll()));
-         optimizedPose.setZ(heightMapData.getHeightAt(qBest[0], qBest[1]));
-         return optimizedPose;
+         // Cool down the temperature
+         temperature *= COOLING_RATE;
+
+         LogTools.info("Iteration: " + i + ", Temperature: " + temperature + ", Best Cost: " + bestCost);
       }
+
+      LogTools.info("Simulated Annealing finished. Best cost: " + bestCost);
+      hasConverged = true;
+
+      // Create and return the best solution, using qBest
+      FramePose3D optimizedPose = new FramePose3D(initialPose);
+      optimizedPose.setX(qBest[0]);
+      optimizedPose.setY(qBest[1]);
+      optimizedPose.getRotation().set(new YawPitchRoll(qBest[2], initialPose.getPitch(), initialPose.getRoll()));
+      optimizedPose.setZ(currentHeightMap.getHeightAt(qBest[0], qBest[1]));
+      bestSolution = optimizedPose;  // Ensure bestSolution is correctly set
+      return bestSolution;
+   }
+
+   private double[] generateNeighbor(double[] q, FramePose3DReadOnly initialPose)
+   {
+      double x = q[0] + random.nextGaussian() * POSITION_STD_DEV;
+      double y = q[1] + random.nextGaussian() * POSITION_STD_DEV;
+      double yaw = q[2] + random.nextGaussian() * YAW_STD_DEV;
+
+      double[] newQ = new double[] {x, y, yaw};
+      if (!satisfiesPositionConstraint(q, initialPose))
+      {
+         LogTools.warn("Out of bound neighbor. Getting new one");
+         generateNeighbor(q, initialPose);
+      }
+      return newQ;
    }
 
    /**
@@ -185,17 +197,15 @@ public class RDXFootstepOptimizer
       double planarityCost = PLANARITY_W * computePlanarityCost(q);
       // Add constraint penalties
       double constraintCost = 0;
-      if (!satisfiesPositionConstraint(q, targetPose))
-      {
-         constraintCost += POSITION_CONSTRAINT_PENALTY;
-      }
       if (!satisfiesHeightConstraint(q))
       {
          constraintCost += HEIGHT_CONSTRAINT_PENALTY;
+         LogTools.warn("HEIGHT constraint violated");
       }
       if (!satisfiesSlopeConstraint(q))
       {
          constraintCost += SLOPE_CONSTRAINT_PENALTY;
+         LogTools.warn("SLOPE constraint violated");
       }
       return positionCost + yawCost + planarityCost + constraintCost;
    }
@@ -218,22 +228,6 @@ public class RDXFootstepOptimizer
    {
       CornerSamplingResults samplingResults = sampleFootCorners(q);
 
-      // Ensure the height of the removed point is not too different from the other points
-      double maxHeightDifference = 0;
-      for (int j = 0; j < 5; j++)
-      {
-         if (j != samplingResults.maxDiffIndex)
-         {
-            double diff = Math.abs(samplingResults.heights[j] - samplingResults.heights[samplingResults.maxDiffIndex]);
-            maxHeightDifference = Math.max(maxHeightDifference, diff);
-         }
-      }
-
-      if (maxHeightDifference > MAX_HEIGHT_VARIANCE)
-      { // If the diff is higher than 5cm, we avoid it.
-         return HEIGHT_CONSTRAINT_PENALTY;
-      }
-
       // Fit a plane to the remaining points
       double[] planeCoeffs = fitPlane(samplingResults.cornersXYSubset, samplingResults.heightsSubset);
 
@@ -242,7 +236,9 @@ public class RDXFootstepOptimizer
       double maxVariance = 0;
       for (int i = 0; i < samplingResults.cornersXYSubset.length; i++)
       {
-         double distance = Math.abs(planeCoeffs[0] * samplingResults.cornersXYSubset[i][0] + planeCoeffs[1] * samplingResults.cornersXYSubset[i][1] + planeCoeffs[2] -  samplingResults.heightsSubset[i]);
+         double distance = Math.abs(
+               planeCoeffs[0] * samplingResults.cornersXYSubset[i][0] + planeCoeffs[1] * samplingResults.cornersXYSubset[i][1] + planeCoeffs[2]
+               - samplingResults.heightsSubset[i]);
          sumSquaredDistances += distance * distance;
          maxVariance = Math.max(maxVariance, distance);
       }
@@ -292,7 +288,6 @@ public class RDXFootstepOptimizer
          double x = q[0] + corners[i][0] * Math.cos(q[2]) - corners[i][1] * Math.sin(q[2]);
          double y = q[1] + corners[i][0] * Math.sin(q[2]) + corners[i][1] * Math.cos(q[2]);
          results.heights[i] = currentHeightMap.getHeightAt(x, y);
-         LogTools.info(results.heights[i]);
          results.cornersXY[i] = new double[] {x, y};
       }
 
@@ -386,7 +381,6 @@ public class RDXFootstepOptimizer
       {
          double distance = Math.abs(planeCoeffs[0] * samplingResults.cornersXYSubset[i][0] + planeCoeffs[1] * samplingResults.cornersXYSubset[i][1]
                                     - samplingResults.heightsSubset[i] + planeCoeffs[3]) / normalizer;
-         LogTools.info("{} Distance to plane: {}", i, distance);
          if (distance > PLANARITY_TOLERANCE)
          {
             onSamePlane = false;
