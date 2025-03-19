@@ -24,13 +24,7 @@ public abstract class ImageSensor implements AutoCloseable
    }
 
    /**
-    * Initializes and starts the sensor.
-    * @return Whether the sensor was successfully initialized and started.
-    */
-   protected abstract boolean startSensor();
-
-   /**
-    * Set the sensor frame supplier.
+    * Set the sensor frame.
     * @param sensorFrame The sensor's reference frame.
     */
    public void setSensorFrame(ReferenceFrame sensorFrame)
@@ -46,6 +40,17 @@ public abstract class ImageSensor implements AutoCloseable
    {
       // To be optionally implemented by subclasses
    }
+
+   public ReferenceFrame getSensorFrame()
+   {
+      return sensorFrame;
+   }
+
+   /**
+    * Initializes and starts the sensor.
+    * @return Whether the sensor was successfully initialized and started.
+    */
+   protected abstract boolean startSensor();
 
    /**
     * @return Whether the sensor is running. Not necessarily the same as whether the grab thread is running.
@@ -72,6 +77,23 @@ public abstract class ImageSensor implements AutoCloseable
     * The caller must call {@link RawImage#release()}.
     */
    public abstract RawImage getImage(int imageKey);
+
+   /**
+    * Get the {@link ReferenceFrame} associated with an image, specified by the image key.
+    *
+    * @param imageKey Key of the image associated with the reference frame.
+    * @return The {@link ReferenceFrame} of the image. {@code null} if an invalid key is provided.
+    */
+   public abstract ReferenceFrame getImageFrame(int imageKey);
+
+   /**
+    * Get all image reference frames provided by the sensor.
+    *
+    * @return An array of all image reference frames provided by the sensor.
+    * @apiNote The number of reference might not equal the number of images as some images may share a frame.
+    *       Image keys do not work on the returned array.
+    */
+   public abstract ReferenceFrame[] getImageFrames();
 
    public String getSensorName()
    {

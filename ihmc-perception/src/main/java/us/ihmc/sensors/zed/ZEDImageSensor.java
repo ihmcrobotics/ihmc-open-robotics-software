@@ -341,6 +341,23 @@ public class ZEDImageSensor extends ImageSensor
       }
    }
 
+   @Override
+   public ReferenceFrame getImageFrame(int imageKey)
+   {
+      return switch (imageKey)
+      {
+         case LEFT_COLOR_IMAGE_KEY, DEPTH_IMAGE_KEY -> leftSensorFrame;
+         case RIGHT_COLOR_IMAGE_KEY -> rightSensorFrame;
+         default -> null;
+      };
+   }
+
+   @Override
+   public ReferenceFrame[] getImageFrames()
+   {
+      return new ReferenceFrame[] {leftSensorFrame, rightSensorFrame};
+   }
+
    public ReferenceFrame getTrackedSensorFrame()
    {
       return trackedSensorFrame.getReferenceFrame();
