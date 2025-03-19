@@ -6,15 +6,13 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.RawImage;
 
-import java.util.function.Supplier;
-
 public abstract class ImageSensor implements AutoCloseable
 {
    private static final double SECONDS_BETWEEN_RETRIES = 1.0;  // Wait 1 second between retries for starting sensors
 
    private final String sensorName;
-   /** Sensor will be in world frame by default, unless a sensor frame supplier is specified through {@link #setSensorFrameSupplier(Supplier)}. */
-   protected volatile Supplier<ReferenceFrame> sensorFrameSupplier = ReferenceFrame::getWorldFrame;
+   /** Sensor will be in world frame by default, unless a sensor frame is specified through {@link #setSensorFrame(ReferenceFrame)}. */
+   protected ReferenceFrame sensorFrame = ReferenceFrame.getWorldFrame();
 
    private final RepeatingTaskThread grabThread;
    private final Object grabNotification = new Object();
@@ -33,11 +31,20 @@ public abstract class ImageSensor implements AutoCloseable
 
    /**
     * Set the sensor frame supplier.
-    * @param sensorFrameSupplier Supplier of the sensor's reference frame.
+    * @param sensorFrame The sensor's reference frame.
     */
-   public void setSensorFrameSupplier(Supplier<ReferenceFrame> sensorFrameSupplier)
+   public void setSensorFrame(ReferenceFrame sensorFrame)
    {
-      this.sensorFrameSupplier = sensorFrameSupplier;
+      if (this.sensorFrame != sensorFrame)
+      {
+         this.sensorFrame = sensorFrame;
+         onSensorFrameChanged();
+      }
+   }
+
+   protected void onSensorFrameChanged()
+   {
+      // To be optionally implemented by subclasses
    }
 
    /**
