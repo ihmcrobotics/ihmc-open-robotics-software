@@ -5,9 +5,11 @@ import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.imageMessage.PixelFormat;
 
@@ -57,7 +59,7 @@ public class RawImage
    private final float depthDiscretization;
    private final long sequenceNumber;
    private final Instant acquisitionTime;
-   private final FixedFramePose3DBasics sensorPose;
+   private final FramePose3D sensorPose; // Should always be in world frame
 
    private final AtomicInteger numberOfReferences = new AtomicInteger(1);
 
@@ -66,7 +68,7 @@ public class RawImage
                    PixelFormat pixelFormat,
                    CameraIntrinsics cameraIntrinsics,
                    CameraModel cameraModel,
-                   FixedFramePose3DBasics sensorPose,
+                   FramePose3DReadOnly sensorPose,
                    Instant acquisitionTime,
                    long sequenceNumber,
                    float depthDiscretization)
@@ -77,9 +79,10 @@ public class RawImage
       this.cpuImageMat = cpuImageMat;
       this.gpuImageMat = gpuImageMat;
       this.pixelFormat = pixelFormat;
-      this.cameraIntrinsics = cameraIntrinsics;
+      this.cameraIntrinsics = new CameraIntrinsics(cameraIntrinsics);
       this.cameraModel = cameraModel;
-      this.sensorPose = sensorPose;
+      this.sensorPose = new FramePose3D(sensorPose);
+      this.sensorPose.changeFrame(sensorPose.getReferenceFrame().getRootFrame());
       this.acquisitionTime = acquisitionTime;
       this.sequenceNumber = sequenceNumber;
       this.depthDiscretization = depthDiscretization;
@@ -382,7 +385,7 @@ public class RawImage
       return (float) cameraIntrinsics.getCy();
    }
 
-   public FixedFramePose3DBasics getPose()
+   public FramePose3DReadOnly getPose()
    {
       return sensorPose;
    }
