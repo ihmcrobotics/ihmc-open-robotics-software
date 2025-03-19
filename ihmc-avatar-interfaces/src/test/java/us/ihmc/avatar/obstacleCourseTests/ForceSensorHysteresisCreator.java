@@ -5,6 +5,7 @@ import org.ejml.data.DMatrixRMaj;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.robotController.ModularRobotController;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
+import us.ihmc.yoVariables.filters.GlitchFilteredYoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
