@@ -110,7 +110,6 @@ public class RDXSCS2LogSession extends RDXSCS2Session
             LogTools.info("Found ZED sensor: %s".formatted(zedSensorDatFile.getName()));
             ZEDSVOScrubber zedSVOScrubber = new ZEDSVOScrubber(zedSensorDatFile);
             RDXOpenCVVideoVisualizer visualizer = new RDXOpenCVVideoVisualizer(zedSVOScrubber.getName(), zedSVOScrubber.getName(), false);
-            visualizer.setActive(true);
             perceptionVisualizersPanel.addVisualizer(visualizer);
             ZEDLogVideo zedLogVideo = new ZEDLogVideo(zedSVOScrubber, visualizer);
             zedLogVideos.add(zedLogVideo);
