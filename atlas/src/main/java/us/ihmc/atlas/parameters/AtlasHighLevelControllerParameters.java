@@ -24,6 +24,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.outputData.JointDesiredBehavior;
 import us.ihmc.sensorProcessing.outputData.JointDesiredBehaviorReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
+import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 
 public class AtlasHighLevelControllerParameters implements HighLevelControllerParameters
 {
