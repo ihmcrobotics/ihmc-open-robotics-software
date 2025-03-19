@@ -17,7 +17,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
-import us.ihmc.perception.gpuHeightMap.RapidHeightMapManager;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.imageMessage.CompressionType;
 import us.ihmc.perception.imageMessage.PixelFormat;
@@ -271,26 +270,23 @@ public class PerceptionMessageTools
       return heightMapMat;
    }
 
-   public static void convertToHeightMapImage(ImageMessage imageMessage,
-                                              Mat heightMapImageToPack,
-                                              ByteBuffer compressedByteBuffer,
-                                              BytePointer byteBufferAccessPointer,
-                                              Mat compressedBytesMat)
+   public static void convertToHeightMapImage(ImageMessage imageMessage, Mat heightMapImageToPack)
    {
       int numberOfBytes = imageMessage.getData().size();
-      compressedByteBuffer.rewind();
-      compressedByteBuffer.limit(numberOfBytes);
-      for (int i = 0; i < numberOfBytes; i++)
-      {
-         compressedByteBuffer.put(imageMessage.getData().get(i));
-      }
-      compressedByteBuffer.flip();
 
-      compressedBytesMat.cols(numberOfBytes);
-      compressedBytesMat.data(byteBufferAccessPointer);
+      // Create a pointer to the compressed data
+      BytePointer compressedDataPointer = new BytePointer(imageMessage.getData().getBuffer().position(0));
+      compressedDataPointer.limit(numberOfBytes);
+
+      // Wrap the pointer in a Mat (for the imdecode function)
+      Mat compressedDataMat = new Mat(1, numberOfBytes, opencv_core.CV_8UC1, compressedDataPointer);
 
       // Decompress the height map image
-      opencv_imgcodecs.imdecode(compressedBytesMat, opencv_imgcodecs.IMREAD_UNCHANGED, heightMapImageToPack);
+      opencv_imgcodecs.imdecode(compressedDataMat, opencv_imgcodecs.IMREAD_UNCHANGED, heightMapImageToPack);
+
+      // Close pointers
+      compressedDataMat.close();
+      compressedDataPointer.close();
    }
 
    public static void unpackMessage(HeightMapMessage heightMapMessage, TerrainMapData terrainMapData)
