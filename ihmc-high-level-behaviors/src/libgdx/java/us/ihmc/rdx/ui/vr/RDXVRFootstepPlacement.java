@@ -35,8 +35,8 @@ import java.util.concurrent.CompletableFuture;
 
 public class RDXVRFootstepPlacement
 {
-   private final static boolean USE_HEIGHTMAP = false;
-   private final static boolean USE_STEPPABLE_REGION_ADAPTATION = false;
+   private final static boolean USE_HEIGHTMAP = true;
+   private final static boolean USE_STEPPABLE_REGION_ADAPTATION = true;
    private final static boolean RUN_ADAPTATION_ASYNC = false;
    private static final long TIMEOUT_STEPPABLE_REGION_ADAPTATION = 10;
    private HeightMapData latestHeightMapData;
@@ -191,6 +191,7 @@ public class RDXVRFootstepPlacement
             if (!Double.isNaN(height))
             {
                FramePose3D adaptedPose = new FramePose3D(pose);
+               adaptedPose.getPosition().setZ(height);
                if (USE_STEPPABLE_REGION_ADAPTATION)
                {
                   if (RUN_ADAPTATION_ASYNC)
@@ -201,10 +202,6 @@ public class RDXVRFootstepPlacement
                   {
                      adaptedPose = footstepOptimizer.compute(latestHeightMapData, pose);
                   }
-               }
-               else
-               {
-                  adaptedPose.getPosition().setZ(height);
                }
                footstepBeingExternallyPlaced.setPose(adaptedPose);
             }
@@ -264,7 +261,7 @@ public class RDXVRFootstepPlacement
 
    public void resetOptimization()
    {
-      if (USE_HEIGHTMAP && USE_STEPPABLE_REGION_ADAPTATION)
+      if (USE_HEIGHTMAP && USE_STEPPABLE_REGION_ADAPTATION && RUN_ADAPTATION_ASYNC)
       {
          footstepOptimizer.cancelCompute();
       }

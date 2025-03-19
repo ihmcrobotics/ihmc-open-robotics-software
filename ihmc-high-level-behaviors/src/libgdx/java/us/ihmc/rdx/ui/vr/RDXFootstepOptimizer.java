@@ -23,12 +23,17 @@ public class RDXFootstepOptimizer
    private static final double POSITION_W = 0.35;
    private static final double YAW_W = 0.45;
    private static final double PLANARITY_W = 0.2;
+
    private static final double LEARNING_RATE = 0.1;
    private static final double EPSILON = 1e-5;
-   private static final int MAX_ITERATIONS = 1000;
+   private static final int MAX_ITERATIONS = 100;
+
    private static final double MAX_HEIGHT_VARIANCE = 0.05;
    private static final double PLANARITY_TOLERANCE = 0.03;
    private static final double MAX_SLOPE_ANGLE = Math.toRadians(50);
+   private static final double  POSITION_CONSTRAINT_PENALTY = 10000;
+   private static final double  HEIGHT_CONSTRAINT_PENALTY = 500;
+   private static final double  SLOPE_CONSTRAINT_PENALTY = 1000;
 
    private double footLength;
    private double footWidth;
@@ -63,13 +68,15 @@ public class RDXFootstepOptimizer
     * @param initialPose   The initial pose of the footstep.
     * @return A CompletableFuture containing the optimized FramePose3D.
     */
-   public CompletableFuture<FramePose3D> computeAsync(HeightMapData heightMapData, FramePose3DReadOnly initialPose) {
+   public CompletableFuture<FramePose3D> computeAsync(HeightMapData heightMapData, FramePose3DReadOnly initialPose)
+   {
       // Store the future in a field so it can be cancelled later.
       stopRequested.set(false);
-      currentFuture = CompletableFuture.supplyAsync(() -> {
-         bestSolution = new FramePose3D(initialPose); // Initialize with initial pose
-         return compute(heightMapData, initialPose);
-      }, executor);
+      currentFuture = CompletableFuture.supplyAsync(() ->
+       {
+          bestSolution = new FramePose3D(initialPose); // Initialize with initial pose
+          return compute(heightMapData, initialPose);
+       }, executor);
 
       return (CompletableFuture<FramePose3D>) currentFuture; // Store and return
    }
@@ -77,9 +84,11 @@ public class RDXFootstepOptimizer
    /**
     * Attempts to cancel the current running computation, if any.
     */
-   public void cancelCompute() {
+   public void cancelCompute()
+   {
       stopRequested.set(true);
-      if (currentFuture != null) {
+      if (currentFuture != null)
+      {
          currentFuture.cancel(true); // Interrupt the thread
          currentFuture = null;
       }
@@ -110,7 +119,8 @@ public class RDXFootstepOptimizer
          for (int i = 0; i < MAX_ITERATIONS; i++)
          {
             // Check if a stop has been requested
-            if (stopRequested.get()) {
+            if (stopRequested.get())
+            {
                LogTools.warn("Optimization interrupted");
                return bestSolution;
             }
@@ -134,12 +144,6 @@ public class RDXFootstepOptimizer
             for (int j = 0; j < q.length; j++)
             {
                q[j] -= LEARNING_RATE * gradient[j];
-            }
-
-            if (!satisfiesConstraints(q, initialPose))
-            {
-               // If constraints are violated, revert to previous valid state
-               System.arraycopy(qBest, 0, q, 0, q.length);
             }
 
             LogTools.info("Gradient: {}", Math.sqrt(gradient[0] * gradient[0] + gradient[1] * gradient[1] + gradient[2] * gradient[2]));
@@ -170,8 +174,8 @@ public class RDXFootstepOptimizer
     * Computes the cost associated with a given footstep pose.
     * The cost is a combination of position cost, yaw cost, and planarity cost.
     *
-    * @param q           The current footstep pose (x, y, yaw).
-    * @param targetPose  The target footstep pose.
+    * @param q          The current footstep pose (x, y, yaw).
+    * @param targetPose The target footstep pose.
     * @return The total cost.
     */
    private double computeCost(double[] q, FramePose3DReadOnly targetPose)
@@ -179,37 +183,21 @@ public class RDXFootstepOptimizer
       double positionCost = POSITION_W * (Math.pow(q[0] - targetPose.getX(), 2) + Math.pow(q[1] - targetPose.getY(), 2));
       double yawCost = YAW_W * Math.pow(q[2] - targetPose.getYaw(), 2);
       double planarityCost = PLANARITY_W * computePlanarityCost(q);
-      return positionCost + yawCost + planarityCost;
-   }
-
-   private boolean isInitialSolutionValid(FramePose3DReadOnly initialPose)
-   {
-      double[] heights = new double[5];
-      double fx = footLength;
-      double fy = footWidth;
-      double[][] corners = {{-fx / 2, -fy / 2}, {fx / 2, -fy / 2}, {fx / 2, fy / 2}, {-fx / 2, fy / 2}, {0, 0}};
-      for (int i = 0; i < 5; i++)
+      // Add constraint penalties
+      double constraintCost = 0;
+      if (!satisfiesPositionConstraint(q, targetPose))
       {
-         double x = initialPose.getPosition().getX() + corners[i][0] * Math.cos(initialPose.getYaw()) - corners[i][1] * Math.sin(initialPose.getYaw());
-         double y = initialPose.getPosition().getY() + corners[i][0] * Math.sin(initialPose.getYaw()) + corners[i][1] * Math.cos(initialPose.getYaw());
-         heights[i] = currentHeightMap.getHeightAt(x, y);
+         constraintCost += POSITION_CONSTRAINT_PENALTY;
       }
-
-      // Fit a plane to the points
-      double[] planeCoeffs = fitPlane(corners, heights);
-
-      // Check if points lie on the same plane within tolerance
-      boolean onSamePlane = true;
-      for (int i = 0; i < 5; i++)
+      if (!satisfiesHeightConstraint(q))
       {
-         double distance = Math.abs(planeCoeffs[0] * corners[i][0] + planeCoeffs[1] * corners[i][1] + planeCoeffs[2] - heights[i]);
-         if (distance > PLANARITY_TOLERANCE)
-         {
-            onSamePlane = false;
-            break;
-         }
+         constraintCost += HEIGHT_CONSTRAINT_PENALTY;
       }
-      return onSamePlane;
+      if (!satisfiesSlopeConstraint(q))
+      {
+         constraintCost += SLOPE_CONSTRAINT_PENALTY;
+      }
+      return positionCost + yawCost + planarityCost + constraintCost;
    }
 
    /**
@@ -228,38 +216,120 @@ public class RDXFootstepOptimizer
     */
    private double computePlanarityCost(double[] q)
    {
-      double[] heights = new double[5];
-      double fx = footLength;
-      double fy = footWidth;
-      double[][] corners = {{-fx / 2, -fy / 2}, {fx / 2, -fy / 2}, {fx / 2, fy / 2}, {-fx / 2, fy / 2}, {0, 0}};
-      for (int i = 0; i < 5; i++)
+      CornerSamplingResults samplingResults = sampleFootCorners(q);
+
+      // Ensure the height of the removed point is not too different from the other points
+      double maxHeightDifference = 0;
+      for (int j = 0; j < 5; j++)
       {
-         double x = q[0] + corners[i][0] * Math.cos(q[2]) - corners[i][1] * Math.sin(q[2]);
-         double y = q[1] + corners[i][0] * Math.sin(q[2]) + corners[i][1] * Math.cos(q[2]);
-         heights[i] = currentHeightMap.getHeightAt(x, y);
+         if (j != samplingResults.maxDiffIndex)
+         {
+            double diff = Math.abs(samplingResults.heights[j] - samplingResults.heights[samplingResults.maxDiffIndex]);
+            maxHeightDifference = Math.max(maxHeightDifference, diff);
+         }
       }
 
-      // Fit a plane to the points
-      double[] planeCoeffs = fitPlane(corners, heights);
+      if (maxHeightDifference > MAX_HEIGHT_VARIANCE)
+      { // If the diff is higher than 5cm, we avoid it.
+         return HEIGHT_CONSTRAINT_PENALTY;
+      }
+
+      // Fit a plane to the remaining points
+      double[] planeCoeffs = fitPlane(samplingResults.cornersXYSubset, samplingResults.heightsSubset);
 
       // Calculate the sum of squared distances from each point to the fitted plane
       double sumSquaredDistances = 0;
       double maxVariance = 0;
-      for (int i = 0; i < 5; i++)
+      for (int i = 0; i < samplingResults.cornersXYSubset.length; i++)
       {
-         double distance = Math.abs(planeCoeffs[0] * corners[i][0] + planeCoeffs[1] * corners[i][1] + planeCoeffs[2] - heights[i]);
+         double distance = Math.abs(planeCoeffs[0] * samplingResults.cornersXYSubset[i][0] + planeCoeffs[1] * samplingResults.cornersXYSubset[i][1] + planeCoeffs[2] -  samplingResults.heightsSubset[i]);
          sumSquaredDistances += distance * distance;
          maxVariance = Math.max(maxVariance, distance);
       }
       qMaxHeightVariance = maxVariance;
 
-      double rmse = Math.sqrt(sumSquaredDistances / 5);  // Root mean square error
+      double rmse = Math.sqrt(sumSquaredDistances / samplingResults.cornersXYSubset.length);  // Root mean square error
 
       // Calculate the maximum slope of the fitted plane
       double maxSlope = Math.sqrt(planeCoeffs[0] * planeCoeffs[0] + planeCoeffs[1] * planeCoeffs[1]);
       qCurrentMaxSlope = maxSlope;
 
       return rmse + maxSlope;
+   }
+
+   /**
+    * Helper class to hold the results of sampling the foot corners and identifying the worst one.
+    */
+   private class CornerSamplingResults
+   {
+      public double[][] cornersXY;
+      public double[][] cornersXYSubset;
+      public double[] heights;
+      public double[] heightsSubset;
+      public int maxDiffIndex;
+   }
+
+   /**
+    * Samples the foot corners, calculates the corresponding world coordinates and heights,
+    * and identifies the corner with the largest height difference to the mean.
+    *
+    * @param q The footstep pose (x, y, yaw).
+    * @return A CornerSamplingResults object containing the sampling results.
+    */
+   private CornerSamplingResults sampleFootCorners(double[] q)
+   {
+      CornerSamplingResults results = new CornerSamplingResults();
+
+      double fx = footLength;
+      double fy = footWidth;
+      double[][] corners = {{-fx / 2, -fy / 2}, {fx / 2, -fy / 2}, {fx / 2, fy / 2}, {-fx / 2, fy / 2}, {0, 0}};
+
+      results.cornersXY = new double[5][2];
+      results.heights = new double[5];
+
+      for (int i = 0; i < 5; i++)
+      {
+         double x = q[0] + corners[i][0] * Math.cos(q[2]) - corners[i][1] * Math.sin(q[2]);
+         double y = q[1] + corners[i][0] * Math.sin(q[2]) + corners[i][1] * Math.cos(q[2]);
+         results.heights[i] = currentHeightMap.getHeightAt(x, y);
+         LogTools.info(results.heights[i]);
+         results.cornersXY[i] = new double[] {x, y};
+      }
+
+      // Find the corner with the largest height difference to the mean
+      results.maxDiffIndex = 0;
+      double meanHeight = 0;
+      for (double height : results.heights)
+      {
+         meanHeight += height;
+      }
+      meanHeight /= 5;
+
+      double maxDiff = Math.abs(results.heights[0] - meanHeight);
+      for (int j = 1; j < 5; j++)
+      {
+         double diff = Math.abs(results.heights[j] - meanHeight);
+         if (diff > maxDiff)
+         {
+            maxDiff = diff;
+            results.maxDiffIndex = j;
+         }
+      }
+
+      // Remove the worst corner
+      results.cornersXYSubset = new double[4][2];
+      results.heightsSubset = new double[4];
+      int cornerIndex = 0;
+      for (int j = 0; j < 5; j++)
+      {
+         if (j != results.maxDiffIndex)
+         {
+            results.cornersXYSubset[cornerIndex] = results.cornersXY[j];
+            results.heightsSubset[cornerIndex] = results.heights[j];
+            cornerIndex++;
+         }
+      }
+      return results;
    }
 
    /**
@@ -299,22 +369,41 @@ public class RDXFootstepOptimizer
 
       double c = (sumZ - a * sumX - b * sumY) / n;
 
-      return new double[] {a, b, -1, c};  // Ax + By - z + C = 0
+      return new double[] {a, b, -1, c};  // Ax + By - z + C = 0 -> z = Ax + By + C
    }
 
-   /**
-    * Checks if the given footstep pose satisfies all constraints.
-    *
-    * @param q           The current footstep pose (x, y, yaw).
-    * @param initialPose The initial footstep pose.
-    * @return True if all constraints are satisfied, false otherwise.
-    */
-   private boolean satisfiesConstraints(double[] q, FramePose3DReadOnly initialPose)
+   private boolean isInitialSolutionValid(FramePose3DReadOnly initialPose)
    {
-      return satisfiesPositionConstraint(q, initialPose)
-             && satisfiesHeightConstraint(q)
-             && satisfiesSlopeConstraint(q);
-//             && satisfiesYawConstraint(q, initialPose);
+      CornerSamplingResults samplingResults = sampleFootCorners(new double[] {initialPose.getX(), initialPose.getY(), initialPose.getYaw()});
+
+      // Fit a plane to the remaining points
+      double[] planeCoeffs = fitPlane(samplingResults.cornersXYSubset, samplingResults.heightsSubset);
+
+      // Check if points lie on the same plane within tolerance
+      boolean onSamePlane = true;
+      double normalizer = Math.sqrt(planeCoeffs[0] * planeCoeffs[0] + planeCoeffs[1] * planeCoeffs[1] + 1); // Since C = -1
+      for (int i = 0; i < 4; i++)
+      {
+         double distance = Math.abs(planeCoeffs[0] * samplingResults.cornersXYSubset[i][0] + planeCoeffs[1] * samplingResults.cornersXYSubset[i][1]
+                                    - samplingResults.heightsSubset[i] + planeCoeffs[3]) / normalizer;
+         LogTools.info("{} Distance to plane: {}", i, distance);
+         if (distance > PLANARITY_TOLERANCE)
+         {
+            onSamePlane = false;
+            break;
+         }
+      }
+
+      // check if the other excluded point is too distant
+      double distance = Math.abs(planeCoeffs[0] * samplingResults.cornersXY[samplingResults.maxDiffIndex][0]
+                                 + planeCoeffs[1] * samplingResults.cornersXY[samplingResults.maxDiffIndex][1]
+                                 - samplingResults.heights[samplingResults.maxDiffIndex] + planeCoeffs[3]) / normalizer;
+      if (distance > MAX_HEIGHT_VARIANCE)
+      {
+         onSamePlane = false;
+      }
+
+      return onSamePlane;
    }
 
    private boolean satisfiesPositionConstraint(double[] q, FramePose3DReadOnly initialPose)
@@ -325,7 +414,7 @@ public class RDXFootstepOptimizer
 
    private boolean satisfiesHeightConstraint(double[] q)
    {
-      return  qMaxHeightVariance <= MAX_HEIGHT_VARIANCE;
+      return qMaxHeightVariance <= MAX_HEIGHT_VARIANCE;
    }
 
    private boolean satisfiesSlopeConstraint(double[] q)
@@ -342,8 +431,8 @@ public class RDXFootstepOptimizer
    /**
     * Computes the numerical gradient of the cost function with respect to the footstep pose.
     *
-    * @param q           The current footstep pose (x, y, yaw).
-    * @param targetPose  The target footstep pose.
+    * @param q          The current footstep pose (x, y, yaw).
+    * @param targetPose The target footstep pose.
     * @return The gradient of the cost function.
     */
    private double[] computeGradient(double[] q, FramePose3DReadOnly targetPose)
@@ -351,7 +440,7 @@ public class RDXFootstepOptimizer
       // Compute numerical gradient since analytical one is not available
       double h = currentHeightMap.getGridResolutionXY();
       double[] gradient = new double[3];
-      for (int i = 0; i < 3; i++)
+      for (int i = 0; i < 2; i++)
       {
          double[] qPlus = q.clone();
          double[] qMinus = q.clone();
