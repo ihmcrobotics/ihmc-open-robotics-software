@@ -16,6 +16,7 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.math.filters.*;
+import us.ihmc.yoVariables.euclid.filters.BacklashProcessingYoFrameVector3D;
 import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
@@ -31,7 +32,6 @@ import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
 import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFrameVector3D;
-import us.ihmc.yoVariables.euclid.filters.BacklashProcessingYoFrameVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.filters.*;
@@ -1876,12 +1876,12 @@ public class SensorProcessing implements SensorOutputMapReadOnly
          int newProcessorID = processors.size();
          processorIDs.put(imuName, newProcessorID);
          String suffix = IMU_ANGULAR_VELOCITY.getProcessorNameSuffix(imuName, newProcessorID);
-         BacklashProcessingYoFrameVector3D filteredAngularVelocity = BacklashProcessingYoFrameVector3D.createBacklashProcessingYoFrameVector(prefix,
-                                                                                                                                             suffix,
-                                                                                                                                             updateDT,
-                                                                                                                                             slopTime,
-                                                                                                                                             registry,
-                                                                                                                                             intermediateAngularVelocity);
+         BacklashProcessingYoFrameVector3D filteredAngularVelocity = new BacklashProcessingYoFrameVector3D(prefix,
+                                                                                                           suffix,
+                                                                                                           updateDT,
+                                                                                                           slopTime,
+                                                                                                           registry,
+                                                                                                           intermediateAngularVelocity);
          processors.add(filteredAngularVelocity);
 
          if (!forVizOnly)

@@ -3,7 +3,6 @@ package us.ihmc.avatar;
 import java.util.ArrayList;
 
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
-import us.ihmc.yoVariables.filters.DelayedYoDouble;
 import us.ihmc.robotics.robotController.RawOutputWriter;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
@@ -11,6 +10,7 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.wholeBodyController.DRCOutputProcessor;
+import us.ihmc.yoVariables.filters.DelayedYoDouble;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
