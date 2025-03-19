@@ -2,7 +2,6 @@ package us.ihmc.perception.gpuHeightMap;
 
 import org.bytedeco.cuda.cudart.CUstream_st;
 import org.bytedeco.cuda.cudart.dim3;
-import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
@@ -41,17 +40,16 @@ public class FilteredVerticalSurfacesExtractor
       }
    }
 
-   public GpuMat update(GpuMat croppedHeightMap)
+   public void update(GpuMat croppedHeightMap)
    {
       int error;
+      GpuMat result = croppedHeightMap.clone();
 
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
 
-      GpuMat result = new GpuMat(rows, cols, opencv_core.CV_16UC1);
-
-      kernel.withPointer(croppedHeightMap.data()).withLong(croppedHeightMap.step());
       kernel.withPointer(result.data()).withLong(result.step());
+      kernel.withPointer(croppedHeightMap.data()).withLong(croppedHeightMap.step());
       kernel.withInt(rows);
       kernel.withInt(cols);
       kernel.withInt(100);
@@ -68,7 +66,8 @@ public class FilteredVerticalSurfacesExtractor
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
 
-      return result;
+      cudaFree(result);
+      result.close();
    }
 
    public void destroy()

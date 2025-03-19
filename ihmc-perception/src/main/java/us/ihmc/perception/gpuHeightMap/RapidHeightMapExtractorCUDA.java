@@ -301,14 +301,13 @@ public class RapidHeightMapExtractorCUDA
          filteredRapidHeightMapExtractor.update(globalHeightMapImage, resetOffset);
       }
 
-      GpuMat verticalFilteredHeightMap = globalHeightMapImage.clone();
       if (heightMapParameters.getEnableVerticalFilter())
       {
-         verticalFilteredHeightMap = verticalSurfacesExtractor.update(globalHeightMapImage);
+         verticalSurfacesExtractor.update(globalHeightMapImage);
       }
 
       // Run the cropping kernel
-      croppingKernel.withPointer(verticalFilteredHeightMap.data()).withLong(verticalFilteredHeightMap.step());
+      croppingKernel.withPointer(globalHeightMapImage.data()).withLong(globalHeightMapImage.step());
       croppingKernel.withPointer(sensorCroppedHeightMapImage.data()).withLong(sensorCroppedHeightMapImage.step());
       croppingKernel.withPointer(terrainHeightMapImage.data()).withLong(terrainHeightMapImage.step());
       croppingKernel.withPointer(parametersDevicePointer);
@@ -328,7 +327,6 @@ public class RapidHeightMapExtractorCUDA
 
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
-      verticalFilteredHeightMap.close();
 
       Mat finalCroppedHeightMap = new Mat();
       terrainHeightMapImage.download(finalCroppedHeightMap);
