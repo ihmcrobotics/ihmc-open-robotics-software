@@ -91,7 +91,7 @@ public class ReadyToPlanState implements State
    {
       stopWatch.reset();
       continuousPlanner.setPlanAvailable(false);
-      timeInSwingToStopPlanningAndWaitTillNextAttempt = continuousHikingParameters.getSwingTime() - (1 - ALPHA);
+      timeInSwingToStopPlanningAndWaitTillNextAttempt = continuousHikingParameters.getSwingTime() * (1 - ALPHA);
       stopWatch.start();
    }
 

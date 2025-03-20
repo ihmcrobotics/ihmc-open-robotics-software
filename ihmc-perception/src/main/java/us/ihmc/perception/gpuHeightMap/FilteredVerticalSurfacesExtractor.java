@@ -40,16 +40,16 @@ public class FilteredVerticalSurfacesExtractor
       }
    }
 
-   public void update(GpuMat croppedHeightMap)
+   public void update(GpuMat croppedHeightMapToBePacked)
    {
       int error;
-      GpuMat result = croppedHeightMap.clone();
+      GpuMat croppedHeightMapCopy = croppedHeightMapToBePacked.clone();
 
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
 
-      kernel.withPointer(result.data()).withLong(result.step());
-      kernel.withPointer(croppedHeightMap.data()).withLong(croppedHeightMap.step());
+      kernel.withPointer(croppedHeightMapCopy.data()).withLong(croppedHeightMapCopy.step());
+      kernel.withPointer(croppedHeightMapToBePacked.data()).withLong(croppedHeightMapToBePacked.step());
       kernel.withInt(rows);
       kernel.withInt(cols);
       kernel.withInt(100);
@@ -66,8 +66,7 @@ public class FilteredVerticalSurfacesExtractor
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
 
-      cudaFree(result);
-      result.close();
+      croppedHeightMapCopy.close();
    }
 
    public void destroy()

@@ -1,13 +1,10 @@
 package us.ihmc.perception.gpuHeightMap;
 
-import org.bytedeco.cuda.cudart.CUstream_st;
 import org.bytedeco.javacpp.SizeTPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.perception.tools.PerceptionDebugTools;
@@ -21,21 +18,6 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 public class FilteredRapidHeightMapExtractorTest
 {
-
-   private CUstream_st stream;
-
-   @BeforeEach
-   public void getStream()
-   {
-      stream = new CUstream_st();
-   }
-
-   @AfterEach
-   public void destroyStream()
-   {
-      stream.close();
-   }
-
    @Test
    public void testGettingAverage()
    {
@@ -43,7 +25,7 @@ public class FilteredRapidHeightMapExtractorTest
       int cols = 10;
       int layers = 2;
 
-      FilteredRapidHeightMapExtractor filteredRapidHeightMapExtractor = new FilteredRapidHeightMapExtractor(stream, rows, cols, layers);
+      FilteredRapidHeightMapExtractor filteredRapidHeightMapExtractor = new FilteredRapidHeightMapExtractor(null, rows, cols, layers);
 
       for (int i = 0; i < layers; i++)
       {
@@ -67,7 +49,7 @@ public class FilteredRapidHeightMapExtractorTest
       int cols = 2;
       int layers = 2;
 
-      FilteredRapidHeightMapExtractor filteredRapidHeightMapExtractor = new FilteredRapidHeightMapExtractor(stream, rows, cols, layers);
+      FilteredRapidHeightMapExtractor filteredRapidHeightMapExtractor = new FilteredRapidHeightMapExtractor(null, rows, cols, layers);
 
       // This example fills the history with the same value, all 8's
       // Lets see how this behaves when we later than introduce a change (noise)
@@ -109,7 +91,7 @@ public class FilteredRapidHeightMapExtractorTest
       int cols = 2;
       int layers = 2;
 
-      FilteredRapidHeightMapExtractor filteredRapidHeightMapExtractor = new FilteredRapidHeightMapExtractor(stream, rows, cols, layers);
+      FilteredRapidHeightMapExtractor filteredRapidHeightMapExtractor = new FilteredRapidHeightMapExtractor(null, rows, cols, layers);
 
       // This example fills the history with the same value, all 8's
       // Lets see how this behaves when we later than introduce a change (noise)
@@ -160,7 +142,7 @@ public class FilteredRapidHeightMapExtractorTest
       int cols = 1000;
       int layers = 5;
 
-      FilteredRapidHeightMapExtractor filteredRapidHeightMapExtractor = new FilteredRapidHeightMapExtractor(stream, rows, cols, layers);
+      FilteredRapidHeightMapExtractor filteredRapidHeightMapExtractor = new FilteredRapidHeightMapExtractor(null, rows, cols, layers);
 
       // The value here doesn't matter just needs to fill it with something in order to run the update method.
       for (int i = 0; i < layers; i++)

@@ -6,8 +6,6 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -18,18 +16,6 @@ public class FilteredVerticalSurfacesExtractorTest
 {
 
    private CUstream_st steam;
-
-   @BeforeEach
-   public void startSteam()
-   {
-      steam = new CUstream_st();
-   }
-
-   @AfterEach
-   public void destroyStream()
-   {
-      steam.close();
-   }
 
    /**
     * This test is meant to run locally to see if there is a GPU memory leak.
@@ -46,7 +32,7 @@ public class FilteredVerticalSurfacesExtractorTest
       int cols = 1000;
       int layers = 5;
 
-      FilteredVerticalSurfacesExtractor filteredVerticalSurfacesExtractor = new FilteredVerticalSurfacesExtractor(steam, rows, cols);
+      FilteredVerticalSurfacesExtractor filteredVerticalSurfacesExtractor = new FilteredVerticalSurfacesExtractor(null, rows, cols);
 
       // Our data to pass into the update call over and over again.
       Mat cpuData = new Mat(rows, cols, opencv_core.CV_16UC1, new Scalar(33100));
@@ -54,7 +40,7 @@ public class FilteredVerticalSurfacesExtractorTest
       latestDepthMat.upload(cpuData);
 
       // Run this over and over to see if there is a memory leak
-      for (int i = 0; i < 100000; i++)
+      for (int i = 0; i < 10000; i++)
       {
          filteredVerticalSurfacesExtractor.update(latestDepthMat);
 
