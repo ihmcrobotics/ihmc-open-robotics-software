@@ -199,6 +199,7 @@ public class AlexanderHighLevelControllerParameters implements HighLevelControll
 
          configureBehavior(behaviors, jointMap, SpineJointName.SPINE_YAW, EFFORT, 101.0, 0.0, maxPosError, maxVelError, velScale);
          configureBehavior(behaviors, jointMap, SpineJointName.SPINE_PITCH, EFFORT, 1000.0, 3.0, maxPosError, maxVelError, velScale);
+
          configureNeckBehavior(behaviors, jointMap, NeckJointName.DISTAL_NECK_YAW, EFFORT, 1000.0, 3.0);
          configureNeckBehavior(behaviors, jointMap, NeckJointName.DISTAL_NECK_PITCH, EFFORT, 1000.0, 3.0);
 
@@ -383,7 +384,7 @@ public class AlexanderHighLevelControllerParameters implements HighLevelControll
          ret.add(new GroupParameter<>("PelvisYaws", parameters, jointNames));
       }
 
-      { // Leg hydraulic joints
+      { // Leg joints
          JointAccelerationIntegrationParameters parameters = new JointAccelerationIntegrationParameters();
          parameters.setVelocityBreakFrequency(1.0);
          parameters.setPositionBreakFrequency(Double.POSITIVE_INFINITY);
@@ -404,7 +405,7 @@ public class AlexanderHighLevelControllerParameters implements HighLevelControll
          ret.add(new GroupParameter<>("LegJoints", parameters, jointNames));
       }
 
-      { // Spine pitch and roll joints
+      { // Spine pitch and neck joints
          JointAccelerationIntegrationParameters parameters = new JointAccelerationIntegrationParameters();
          parameters.setVelocityBreakFrequency(1.00);
          parameters.setPositionBreakFrequency(0.05);

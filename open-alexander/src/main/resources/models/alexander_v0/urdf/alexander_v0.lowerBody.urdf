@@ -398,7 +398,7 @@
     <!-- END TORSO IMU -->
 
     <!-- NECK & HEAD LINKS -->
-    <joint name="NECK_Z" type="fixed">
+    <joint name="NECK_Z" type="revolute">
         <origin rpy="0 0 0" xyz="0 0 0.307953"/> <!-- placeholder for the joint location -->
         <axis xyz="0 0 1"/>
         <parent link="TORSO_LINK"/>
@@ -406,7 +406,7 @@
         <limit effort="20" lower="-1.5708" upper="1.5708" velocity="20"/>
         <dynamics damping="0.05" friction="0.0"/>
     </joint>
-    <joint name="NECK_Y" type="fixed">
+    <joint name="NECK_Y" type="revolute">
         <origin rpy="0 0 0" xyz="0.025 0.01 0.207252"/>
         <axis xyz="0 1 0"/>
         <parent link="NECK_Z_LINK"/>

@@ -725,12 +725,6 @@ public class OpenAlexanderWalkingControllerParameters extends WalkingControllerP
    }
 
    @Override
-   public double getDefaultFinalTransferTime()
-   {
-      return 1.0;
-   }
-
-   @Override
    public String[] getJointsToIgnoreInController()
    {
       return new String[0];

@@ -30,6 +30,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -563,12 +564,27 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
       {
          t = (trajectoryPointIndex + 1) * timePerWaypoint;
-         double pitch = amp * Math.sin(t * w);
-         double pitchDot = w * amp * Math.cos(t * w);
+         double angle = amp * Math.sin(t * w);
+         double angleDot = w * amp * Math.cos(t * w);
          desiredChestOrientations[trajectoryPointIndex] = new FrameQuaternion();
-         desiredChestOrientations[trajectoryPointIndex].setYawPitchRoll(0.0, pitch, 0.0);
          desiredChestAngularVelocities[trajectoryPointIndex] = new FrameVector3D();
-         desiredChestAngularVelocities[trajectoryPointIndex].set(0.0, pitchDot, 0.0);
+
+         if (getAxisToMoveForQueuedMessages() == Axis3D.X)
+         {
+            desiredChestOrientations[trajectoryPointIndex].setYawPitchRoll(0.0, 0.0, angle);
+            desiredChestAngularVelocities[trajectoryPointIndex].set(angleDot, 0.0, 0.0);
+         }
+         else if (getAxisToMoveForQueuedMessages() == Axis3D.Y)
+         {
+            desiredChestOrientations[trajectoryPointIndex].setYawPitchRoll(0.0, angle, 0.0);
+            desiredChestAngularVelocities[trajectoryPointIndex].set(0.0, angleDot, 0.0);
+         }
+         else if (getAxisToMoveForQueuedMessages() == Axis3D.Z)
+         {
+            desiredChestOrientations[trajectoryPointIndex].setYawPitchRoll(angle, 0.0, 0.0);
+            desiredChestAngularVelocities[trajectoryPointIndex].set(0.0, 0.0, angleDot);
+         }
+
          if (trajectoryPointIndex == numberOfTrajectoryPoints - 1)
             desiredChestAngularVelocities[trajectoryPointIndex].setToZero();
 
@@ -674,16 +690,30 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
       {
          t = (trajectoryPointIndex + 1) * timePerWaypoint + RigidBodyTaskspaceControlState.timeEpsilonForInitialPoint;
-         double roll = amp * Math.sin(t * w);
-         double rollDot = w * amp * Math.cos(t * w);
+         double angle = amp * Math.sin(t * w);
+         double angleDot = w * amp * Math.cos(t * w);
          desiredChestOrientations[trajectoryPointIndex] = new FrameQuaternion();
-         desiredChestOrientations[trajectoryPointIndex].setYawPitchRoll(0.0, 0.0, roll);
          desiredChestAngularVelocities[trajectoryPointIndex] = new FrameVector3D();
 
+         if (getAxisToMoveForALotOfMessages() == Axis3D.X)
+         {
+            desiredChestOrientations[trajectoryPointIndex].setYawPitchRoll(0.0, 0.0, angle);
+            desiredChestAngularVelocities[trajectoryPointIndex].set(angleDot, 0.0, 0.0);
+         }
+         else if (getAxisToMoveForALotOfMessages() == Axis3D.Y)
+         {
+            desiredChestOrientations[trajectoryPointIndex].setYawPitchRoll(0.0, angle, 0.0);
+            desiredChestAngularVelocities[trajectoryPointIndex].set(0.0, angleDot, 0.0);
+         }
+         else if (getAxisToMoveForALotOfMessages() == Axis3D.Z)
+         {
+            desiredChestOrientations[trajectoryPointIndex].setYawPitchRoll(angle, 0.0, 0.0);
+            desiredChestAngularVelocities[trajectoryPointIndex].set(0.0, 0.0, angleDot);
+         }
+
+
          if (trajectoryPointIndex == 0 || trajectoryPointIndex == numberOfTrajectoryPoints - 1)
-            desiredChestAngularVelocities[trajectoryPointIndex].set(0.0, 0.0, 0.0);
-         else
-            desiredChestAngularVelocities[trajectoryPointIndex].set(rollDot, 0.0, 0.0);
+            desiredChestAngularVelocities[trajectoryPointIndex].setToZero();
 
          SO3TrajectoryPointMessage trajectoryPoint = so3Trajectory.getTaskspaceTrajectoryPoints().add();
          trajectoryPoint.setTime(t);
@@ -747,6 +777,13 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       assertControlErrorIsLow(simulationTestHelper, chest, 1.0e-2);
    }
 
+
+   public Axis3D getAxisToMoveForALotOfMessages()
+   {
+      // move pitch axis by default
+      return Axis3D.X;
+   }
+
    public void testMessageWithALotOfTrajectoryPointsExpressedInPelvisZUp() throws Exception
    {
       CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -782,17 +819,31 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
       {
          t = (trajectoryPointIndex + 1) * timePerWaypoint + RigidBodyTaskspaceControlState.timeEpsilonForInitialPoint;
-         double roll = amp * Math.sin(t * w);
-         double rollDot = w * amp * Math.cos(t * w);
+         double angle = amp * Math.sin(t * w);
+         double angleDot = w * amp * Math.cos(t * w);
          desiredChestOrientations[trajectoryPointIndex] = new FrameQuaternion();
-         desiredChestOrientations[trajectoryPointIndex].setYawPitchRoll(0.0, 0.0, roll);
-         desiredChestOrientations[trajectoryPointIndex].changeFrame(pelvisZUpFrame);
          desiredChestAngularVelocities[trajectoryPointIndex] = new FrameVector3D();
 
+         if (getAxisToMoveForALotOfMessages() == Axis3D.X)
+         {
+            desiredChestOrientations[trajectoryPointIndex].setYawPitchRoll(0.0, 0.0, angle);
+            desiredChestAngularVelocities[trajectoryPointIndex].set(angleDot, 0.0, 0.0);
+         }
+         else if (getAxisToMoveForALotOfMessages() == Axis3D.Y)
+         {
+            desiredChestOrientations[trajectoryPointIndex].setYawPitchRoll(0.0, angle, 0.0);
+            desiredChestAngularVelocities[trajectoryPointIndex].set(0.0, angleDot, 0.0);
+         }
+         else if (getAxisToMoveForALotOfMessages() == Axis3D.Z)
+         {
+            desiredChestOrientations[trajectoryPointIndex].setYawPitchRoll(angle, 0.0, 0.0);
+            desiredChestAngularVelocities[trajectoryPointIndex].set(0.0, 0.0, angleDot);
+         }
+
          if (trajectoryPointIndex == 0 || trajectoryPointIndex == numberOfTrajectoryPoints - 1)
-            desiredChestAngularVelocities[trajectoryPointIndex].set(0.0, 0.0, 0.0);
-         else
-            desiredChestAngularVelocities[trajectoryPointIndex].set(rollDot, 0.0, 0.0);
+            desiredChestAngularVelocities[trajectoryPointIndex].setToZero();
+
+         desiredChestOrientations[trajectoryPointIndex].changeFrame(pelvisZUpFrame);
          desiredChestAngularVelocities[trajectoryPointIndex].changeFrame(pelvisZUpFrame);
 
          SO3TrajectoryPointMessage trajectoryPoint = so3Trajectory.getTaskspaceTrajectoryPoints().add();
@@ -855,6 +906,12 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       success = simulationTestHelper.simulateNow(timePerWaypoint * numberOfTrajectoryPoints + 0.5);
       assertTrue(success);
       assertControlErrorIsLow(simulationTestHelper, chest, 1.0e-2);
+   }
+
+   public Axis3D getAxisToMoveForQueuedMessages()
+   {
+      // move pitch axis by default
+      return Axis3D.Y;
    }
 
    public void testQueuedMessages() throws Exception
@@ -920,13 +977,26 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
          {
             double tOffset = messageIndex * numberOfTrajectoryPoints * timePerWaypoint;
             t = (trajectoryPointIndex + 1) * timePerWaypoint + RigidBodyTaskspaceControlState.timeEpsilonForInitialPoint;
-            double pitch = amp * Math.sin((t + tOffset) * w);
-            double pitchDot = w * amp * Math.cos((t + tOffset) * w);
+            double angle = amp * Math.sin((t + tOffset) * w);
+            double angleDot = w * amp * Math.cos((t + tOffset) * w);
             desiredChestOrientations[trajectoryPointIndex] = new FrameQuaternion(humanoidReferenceFrames.getPelvisZUpFrame());
-            desiredChestOrientations[trajectoryPointIndex].setYawPitchRoll(0.0, pitch, 0.0);
-            desiredChestOrientations[trajectoryPointIndex].changeFrame(ReferenceFrame.getWorldFrame());
             desiredChestAngularVelocities[trajectoryPointIndex] = new FrameVector3D(humanoidReferenceFrames.getPelvisZUpFrame());
-            desiredChestAngularVelocities[trajectoryPointIndex].set(0.0, pitchDot, 0.0);
+            if (getAxisToMoveForQueuedMessages() == Axis3D.X)
+            {
+               desiredChestOrientations[trajectoryPointIndex].setYawPitchRoll(0.0, 0.0, angle);
+               desiredChestAngularVelocities[trajectoryPointIndex].set(angleDot, 0.0, 0.0);
+            }
+            else if (getAxisToMoveForQueuedMessages() == Axis3D.Y)
+            {
+               desiredChestOrientations[trajectoryPointIndex].setYawPitchRoll(0.0, angle, 0.0);
+               desiredChestAngularVelocities[trajectoryPointIndex].set(0.0, angleDot, 0.0);
+            }
+            else if (getAxisToMoveForQueuedMessages() == Axis3D.Z)
+            {
+               desiredChestOrientations[trajectoryPointIndex].setYawPitchRoll(angle, 0.0, 0.0);
+               desiredChestAngularVelocities[trajectoryPointIndex].set(0.0, 0.0, angleDot);
+            }
+            desiredChestOrientations[trajectoryPointIndex].changeFrame(ReferenceFrame.getWorldFrame());
             desiredChestAngularVelocities[trajectoryPointIndex].changeFrame(ReferenceFrame.getWorldFrame());
 
             if (messageIndex == numberOfMessages - 1 && trajectoryPointIndex == numberOfTrajectoryPoints - 1)
@@ -1079,12 +1149,25 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
          {
             double tOffset = messageIndex * numberOfTrajectoryPoints * timePerWaypoint;
             t = (trajectoryPointIndex + 1) * timePerWaypoint;
-            double pitch = amp * Math.sin((t + tOffset) * w);
-            double pitchDot = w * amp * Math.cos((t + tOffset) * w);
+            double angle = amp * Math.sin((t + tOffset) * w);
+            double angleDot = w * amp * Math.cos((t + tOffset) * w);
             desiredChestOrientations[trajectoryPointIndex] = new FrameQuaternion();
-            desiredChestOrientations[trajectoryPointIndex].setYawPitchRoll(0.0, pitch, 0.0);
             desiredChestAngularVelocities[trajectoryPointIndex] = new FrameVector3D();
-            desiredChestAngularVelocities[trajectoryPointIndex].set(0.0, pitchDot, 0.0);
+            if (getAxisToMoveForQueuedMessages() == Axis3D.X)
+            {
+               desiredChestOrientations[trajectoryPointIndex].setYawPitchRoll(0.0, 0.0, angle);
+               desiredChestAngularVelocities[trajectoryPointIndex].set(angleDot, 0.0, 0.0);
+            }
+            else if (getAxisToMoveForQueuedMessages() == Axis3D.Y)
+            {
+               desiredChestOrientations[trajectoryPointIndex].setYawPitchRoll(0.0, angle, 0.0);
+               desiredChestAngularVelocities[trajectoryPointIndex].set(0.0, angleDot, 0.0);
+            }
+            else if (getAxisToMoveForQueuedMessages() == Axis3D.Z)
+            {
+               desiredChestOrientations[trajectoryPointIndex].setYawPitchRoll(angle, 0.0, 0.0);
+               desiredChestAngularVelocities[trajectoryPointIndex].set(0.0, 0.0, angleDot);
+            }
 
             SO3TrajectoryPointMessage trajectoryPoint = so3Trajectory.getTaskspaceTrajectoryPoints().add();
             trajectoryPoint.setTime(t);
@@ -1338,12 +1421,25 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
          {
             double tOffset = messageIndex * numberOfTrajectoryPoints * timePerWaypoint;
             t = (trajectoryPointIndex + 1) * timePerWaypoint;
-            double pitch = amp * Math.sin((t + tOffset) * w);
-            double pitchDot = w * amp * Math.cos((t + tOffset) * w);
+            double angle = amp * Math.sin((t + tOffset) * w);
+            double angleDot = w * amp * Math.cos((t + tOffset) * w);
             desiredChestOrientations[trajectoryPointIndex] = new FrameQuaternion();
-            desiredChestOrientations[trajectoryPointIndex].setYawPitchRoll(0.0, pitch, 0.0);
             desiredChestAngularVelocities[trajectoryPointIndex] = new FrameVector3D();
-            desiredChestAngularVelocities[trajectoryPointIndex].set(0.0, pitchDot, 0.0);
+            if (getAxisToMoveForQueuedMessages() == Axis3D.X)
+            {
+               desiredChestOrientations[trajectoryPointIndex].setYawPitchRoll(0.0, 0.0, angle);
+               desiredChestAngularVelocities[trajectoryPointIndex].set(angleDot, 0.0, 0.0);
+            }
+            else if (getAxisToMoveForQueuedMessages() == Axis3D.Y)
+            {
+               desiredChestOrientations[trajectoryPointIndex].setYawPitchRoll(0.0, angle, 0.0);
+               desiredChestAngularVelocities[trajectoryPointIndex].set(0.0, angleDot, 0.0);
+            }
+            else if (getAxisToMoveForQueuedMessages() == Axis3D.Z)
+            {
+               desiredChestOrientations[trajectoryPointIndex].setYawPitchRoll(angle, 0.0, 0.0);
+               desiredChestAngularVelocities[trajectoryPointIndex].set(0.0, 0.0, angleDot);
+            }
 
             SO3TrajectoryPointMessage trajectoryPoint = so3Trajectory.getTaskspaceTrajectoryPoints().add();
             trajectoryPoint.setTime(t);

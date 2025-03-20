@@ -79,12 +79,12 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
    private double perceptionDT = DEFAULT_PERCEPTION_DT;
    private double stepGeneratorDT = 10 * controllerDT;
 
-   private final AlexanderPhysicalProperties physicalProperties;
+   protected final AlexanderPhysicalProperties physicalProperties;
    private final WalkingControllerParameters walkingControllerParameters;
    private final HighLevelControllerParameters highLevelControllerParameters;
    private final AlexanderSensorInformation sensorInformation;
-   private final AlexanderJointMap jointMap;
-   private final AlexanderContactPointParameters contactPointParameters;
+   protected final AlexanderJointMap jointMap;
+   protected final AlexanderContactPointParameters contactPointParameters;
    private final CoPTrajectoryParameters copTrajectoryParameters = new CoPTrajectoryParameters();
    private final AlexanderDiagnosticParameters diagnosticParameters;
    private final StateEstimatorParameters stateEstimatorParameters;

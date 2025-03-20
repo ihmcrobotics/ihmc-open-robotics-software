@@ -31,7 +31,7 @@ public class AlexanderJointMap implements HumanoidJointNameMap
    private final LegJointName[] legJoints = {LegJointName.HIP_YAW, LegJointName.HIP_ROLL, LegJointName.HIP_PITCH, LegJointName.KNEE_PITCH,
                                              LegJointName.ANKLE_PITCH, LegJointName.ANKLE_ROLL};
    private final SpineJointName[] spineJoints = new SpineJointName[] {SpineJointName.SPINE_YAW};//, SpineJointName.SPINE_PITCH};
-   private final NeckJointName[] neckJoints = new NeckJointName[] {}; // NeckJointName.DISTAL_NECK_YAW, NeckJointName.DISTAL_NECK_PITCH
+   private final NeckJointName[] neckJoints = new NeckJointName[] {NeckJointName.DISTAL_NECK_YAW, NeckJointName.DISTAL_NECK_PITCH};
    private final SideDependentList<ArmJointName[]> armJoints = new SideDependentList<>();
 
    private final SideDependentList<RigidBodyTransform> handControlFrameToWristTransforms = new SideDependentList<>();

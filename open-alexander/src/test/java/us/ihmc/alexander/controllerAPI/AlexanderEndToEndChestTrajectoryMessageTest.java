@@ -1,19 +1,21 @@
-package us.ihmc.atlas.controllerAPI;
+package us.ihmc.alexander.controllerAPI;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-
-import us.ihmc.atlas.AtlasRobotModel;
-import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.alexander.AlexanderVersion;
+import us.ihmc.alexander.OpenAlexanderRobotModel;
 import us.ihmc.avatar.controllerAPI.EndToEndChestTrajectoryMessageTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools.SimpleRobotNameKeys;
 
-public class AtlasEndToEndChestTrajectoryMessageTest extends EndToEndChestTrajectoryMessageTest
+public class AlexanderEndToEndChestTrajectoryMessageTest extends EndToEndChestTrajectoryMessageTest
 {
 
-   private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
+   private final DRCRobotModel robotModel = new OpenAlexanderRobotModel(AlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS);
 
    @Override
    public DRCRobotModel getRobotModel()
@@ -24,7 +26,19 @@ public class AtlasEndToEndChestTrajectoryMessageTest extends EndToEndChestTrajec
    @Override
    public String getSimpleRobotName()
    {
-      return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ATLAS);
+      return CITools.getSimpleRobotNameFor(SimpleRobotNameKeys.ALEXANDER);
+   }
+
+   @Override
+   public Axis3D getAxisToMoveForQueuedMessages()
+   {
+      return Axis3D.Z;
+   }
+
+   @Override
+   public Axis3D getAxisToMoveForALotOfMessages()
+   {
+      return Axis3D.Z;
    }
 
    @Tag("controller-api-slow")
@@ -99,7 +113,9 @@ public class AtlasEndToEndChestTrajectoryMessageTest extends EndToEndChestTrajec
       super.testQueueWithWrongPreviousId();
    }
 
+   // This doesn't work for Alexander, since we only have a yaw joint.
    @Tag("controller-api-slow")
+   @Disabled
    @Override
    @Test
    public void testSelectionMatrixDisableRandomAxisWithSingleTrajectoryPoint() throws Exception
@@ -149,6 +165,7 @@ public class AtlasEndToEndChestTrajectoryMessageTest extends EndToEndChestTrajec
 
    @Tag("controller-api-slow")
    @Override
+   @Test
    public void testStopAllTrajectoryRepeatedly() throws Exception
    {
       super.testStopAllTrajectoryRepeatedly();

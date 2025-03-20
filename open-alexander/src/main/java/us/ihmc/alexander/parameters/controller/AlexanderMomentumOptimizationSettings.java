@@ -30,7 +30,7 @@ public class AlexanderMomentumOptimizationSettings extends MomentumOptimizationS
    private final Vector3D highLinearFootWeight = new Vector3D(50.0, 50.0, 50.0);
 
    // TODO The z-component is really low, need to double-check that it is not causing problems.
-   private final Vector3D pelvisAngularWeight = new Vector3D(50.0, 50.0, 1.0);
+   private final Vector3D pelvisAngularWeight = new Vector3D(25.0, 25.0, 1.0);
    // TODO Needs tune up.
    private final Vector3D pelvisLinearWeight = new Vector3D(5.0, 5.0, 30.0);
 
@@ -72,7 +72,7 @@ public class AlexanderMomentumOptimizationSettings extends MomentumOptimizationS
    // TODO Needs tune up.
    private final Vector3D headAngularWeight = new Vector3D(500.0, 500.0, 500.0);
    // TODO Needs tune up.
-   private final Vector3D chestAngularWeight;
+   private final Vector3D chestAngularWeight = new Vector3D(15.0, 15.0, 5.0);
 
    private final Vector3D handAngularWeight;
 
@@ -99,11 +99,6 @@ public class AlexanderMomentumOptimizationSettings extends MomentumOptimizationS
       allUserModeJoints.addAll(spineNames);
       allUserModeJoints.addAll(armNames);
       allUserModeJoints.addAll(legNames);
-
-      if (target == RobotTarget.REAL_ROBOT)
-         chestAngularWeight = new Vector3D(0.0, 0.0, 5.0);
-      else
-         chestAngularWeight = new Vector3D(5.0, 5.0, 5.0);
 
       if (jointMap.getArmJointNames().length == 4)
       { // For 4-dof arm, only control Z orientation of hand and place at higher weight
