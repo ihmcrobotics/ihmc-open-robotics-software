@@ -38,13 +38,13 @@ public class RDXZEDFirstPersonView
          firstPersonBackgroundRenderer = () ->
          {
             Mat rgbMat = new Mat(bgrMat.rows(), bgrMat.cols(), opencv_core.CV_8UC4);
-            opencv_imgproc.cvtColor(bgrMat, rgbMat, opencv_imgproc.COLOR_RGB2RGBA);
+            opencv_imgproc.cvtColor(bgrMat, rgbMat, opencv_imgproc.COLOR_BGRA2RGBA);
             opencv_core.flip(rgbMat, rgbMat, OpenCVTools.FLIP_Y);
 
             int viewportWidth = (int) Math.floor(firstPerson3DPanel.getViewportSizeX()) * firstPerson3DPanel.getAntiAliasing();
             int viewportHeight = (int) Math.floor(firstPerson3DPanel.getViewportSizeY()) * firstPerson3DPanel.getAntiAliasing();
 
-            float cameraAspect = (float) bgrMat.cols() / bgrMat.rows();
+            float cameraAspect = (float) rgbMat.cols() / rgbMat.rows();
             float viewportAspect = (float) viewportWidth / viewportHeight;
 
             int cameraRenderWidth = Math.round(viewportHeight * cameraAspect);
