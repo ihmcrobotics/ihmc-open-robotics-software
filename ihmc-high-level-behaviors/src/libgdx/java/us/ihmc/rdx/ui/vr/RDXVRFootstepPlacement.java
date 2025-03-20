@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import com.vividsolutions.jts.geom.util.PointExtracter;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import org.lwjgl.openvr.InputDigitalActionData;
@@ -15,6 +16,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.log.LogTools;
@@ -201,6 +203,11 @@ public class RDXVRFootstepPlacement
                   if (rotationOfSurfaces.containsNaN())
                      rotationOfSurfaces.setIdentity();
                   adaptedPose.getOrientation().set(rotationOfSurfaces);
+
+                  adjustmentUnstableSteppingPoint(pose.getTranslationX(),
+                                                  pose.getTranslationY(),
+                                                  latestHeightMapData.getHeightAt(pose.getTranslationX(), pose.getTranslationY()),
+                                                  adaptedPose);
                }
                footstepBeingExternallyPlaced.setPose(adaptedPose);
 
@@ -336,5 +343,196 @@ public class RDXVRFootstepPlacement
    public void resetTimer()
    {
       stepStartTime = -1.0;
+   }
+
+   private void adjustmentUnstableSteppingPoint(double xIndex, double yIndex, double zIndex, FramePose3D centerPose)
+   {
+      double lengthToToe = 0.2;
+      double lengthToHeel = 0.03;
+      double footWidth = 0.1;
+
+      Point3D centerOfFoot = new Point3D(xIndex, yIndex, zIndex);
+      Point3D leftToeCornerFoot = new Point3D(xIndex + lengthToToe,
+                                              yIndex + footWidth / 2.0,
+                                              latestHeightMapData.getHeightAt(xIndex + lengthToToe, yIndex + footWidth / 2.0));
+      Point3D rightToeCornerFoot = new Point3D(xIndex + lengthToToe,
+                                               yIndex - footWidth / 2.0,
+                                               latestHeightMapData.getHeightAt(xIndex + lengthToToe, yIndex - footWidth / 2.0));
+      Point3D leftHeelCornerFoot = new Point3D(xIndex - lengthToHeel,
+                                               yIndex + footWidth / 2.0,
+                                               latestHeightMapData.getHeightAt(xIndex - lengthToHeel, yIndex + footWidth / 2.0));
+      Point3D rightHeelCornerFoot = new Point3D(xIndex - lengthToHeel,
+                                                yIndex - footWidth / 2.0,
+                                                latestHeightMapData.getHeightAt(xIndex - lengthToHeel, yIndex - footWidth / 2.0));
+
+      boolean leftToeIn = true;
+      boolean rightToeIn = true;
+      boolean leftHeelIn = true;
+      boolean rightHeelIn = true;
+      if (centerOfFoot.getZ() - leftToeCornerFoot.getZ() > 0.05)
+         leftToeIn = false;
+      if (centerOfFoot.getZ() - rightToeCornerFoot.getZ() > 0.05)
+         rightToeIn = false;
+      if (centerOfFoot.getZ() - leftHeelCornerFoot.getZ() > 0.05)
+         leftHeelIn = false;
+      if (centerOfFoot.getZ() - rightHeelCornerFoot.getZ() > 0.05)
+         rightHeelIn = false;
+
+      // checking how many corners are out
+      int bitMask = (leftToeIn ? 1 : 0) + (rightToeIn ? 1 : 0) + (leftHeelIn ? 1 : 0) + (rightHeelIn ? 1 : 0);
+      if (bitMask == 1) // only one corner is out
+      {
+         if (!leftToeIn)
+         {
+            double displacementX = 0.0;
+            while (true)
+            {
+               if ((centerOfFoot.getZ() - latestHeightMapData.getHeightAt(leftToeCornerFoot.getX() + displacementX, leftToeCornerFoot.getY())) <= 0.02)
+                  break;
+               else
+                  displacementX -= 0.02;
+            }
+
+            double displacementY = 0.0;
+            while (true)
+            {
+               if ((centerOfFoot.getZ() - latestHeightMapData.getHeightAt(leftToeCornerFoot.getX(), leftToeCornerFoot.getY() + displacementY)) <= 0.02)
+                  break;
+               else
+                  displacementY -= 0.02;
+            }
+
+            centerPose.getPosition().addX(displacementX);
+
+            centerPose.getPosition().addY(displacementY);
+         }
+         else if (!rightToeIn)
+         {
+            double displacementX = 0.0;
+            while (true)
+            {
+               if ((centerOfFoot.getZ() - latestHeightMapData.getHeightAt(leftToeCornerFoot.getX() + displacementX, leftToeCornerFoot.getY())) <= 0.02)
+                  break;
+               else
+                  displacementX -= 0.02;
+            }
+
+            double displacementY = 0.0;
+            while (true)
+            {
+               if ((centerOfFoot.getZ() - latestHeightMapData.getHeightAt(leftToeCornerFoot.getX(), leftToeCornerFoot.getY() + displacementY)) <= 0.02)
+                  break;
+               else
+                  displacementY += 0.02;
+            }
+
+            centerPose.getPosition().addX(displacementX);
+            centerPose.getPosition().addY(displacementY);
+         }
+         else if (!leftHeelIn)
+         {
+            double displacementX = 0.0;
+            while (true)
+            {
+               if ((centerOfFoot.getZ() - latestHeightMapData.getHeightAt(leftToeCornerFoot.getX() + displacementX, leftToeCornerFoot.getY())) <= 0.02)
+                  break;
+               else
+                  displacementX += 0.02;
+            }
+
+            double displacementY = 0.0;
+            while (true)
+            {
+               if ((centerOfFoot.getZ() - latestHeightMapData.getHeightAt(leftToeCornerFoot.getX(), leftToeCornerFoot.getY() + displacementY)) <= 0.02)
+                  break;
+               else
+                  displacementY -= 0.02;
+            }
+
+            centerPose.getPosition().addX(displacementX);
+            centerPose.getPosition().addY(displacementY);
+         }
+         else if (!rightHeelIn)
+         {
+            double displacementX = 0.0;
+            while (true)
+            {
+               if ((centerOfFoot.getZ() - latestHeightMapData.getHeightAt(leftToeCornerFoot.getX() + displacementX, leftToeCornerFoot.getY())) <= 0.02)
+                  break;
+               else
+                  displacementX += 0.02;
+            }
+
+            double displacementY = 0.0;
+            while (true)
+            {
+               if ((centerOfFoot.getZ() - latestHeightMapData.getHeightAt(leftToeCornerFoot.getX(), leftToeCornerFoot.getY() + displacementY)) <= 0.02)
+                  break;
+               else
+                  displacementY += 0.02;
+            }
+
+            centerPose.getPosition().addX(displacementX);
+            centerPose.getPosition().addY(displacementY);
+         }
+      }
+      if (bitMask == 2)
+      {
+         // check the center of the two vertices
+         if (!leftHeelIn && !rightHeelIn)
+         {
+            double displacement = 0.0;
+            while (true)
+            {
+               if ((centerOfFoot.getZ() - latestHeightMapData.getHeightAt((leftHeelCornerFoot.getX() + rightHeelCornerFoot.getX()) / 2.0 + displacement,
+                                                                          (leftHeelCornerFoot.getY() + rightHeelCornerFoot.getY()) / 2.0)) <= 0.02)
+                  break;
+               else
+                  displacement += 0.02;
+            }
+            centerPose.getPosition().addX(displacement);
+         }
+         else if (!leftHeelIn && !leftToeIn)
+         {
+            double displacement = 0.0;
+            while (true)
+            {
+               if ((centerOfFoot.getZ() - latestHeightMapData.getHeightAt((leftHeelCornerFoot.getX() + rightHeelCornerFoot.getX()) / 2.0,
+                                                                          (leftHeelCornerFoot.getY() + rightHeelCornerFoot.getY()) / 2.0) + displacement)
+                   <= 0.02)
+                  break;
+               else
+                  displacement -= 0.02;
+            }
+            centerPose.getPosition().addY(displacement);
+         }
+         else if (!leftToeIn && !rightToeIn)
+         {
+            double displacement = 0.0;
+            while (true)
+            {
+               if ((centerOfFoot.getZ() - latestHeightMapData.getHeightAt((leftHeelCornerFoot.getX() + rightHeelCornerFoot.getX()) / 2.0 + displacement,
+                                                                          (leftHeelCornerFoot.getY() + rightHeelCornerFoot.getY()) / 2.0)) <= 0.02)
+                  break;
+               else
+                  displacement -= 0.02;
+            }
+            centerPose.getPosition().addX(displacement);
+         }
+         else if (!rightToeIn && !rightHeelIn)
+         {
+            double displacement = 0.0;
+            while (true)
+            {
+               if ((centerOfFoot.getZ() - latestHeightMapData.getHeightAt((leftHeelCornerFoot.getX() + rightHeelCornerFoot.getX()) / 2.0,
+                                                                          (leftHeelCornerFoot.getY() + rightHeelCornerFoot.getY()) / 2.0) + displacement)
+                   <= 0.02)
+                  break;
+               else
+                  displacement += 0.02;
+            }
+            centerPose.getPosition().addY(displacement);
+         }
+      }
    }
 }
