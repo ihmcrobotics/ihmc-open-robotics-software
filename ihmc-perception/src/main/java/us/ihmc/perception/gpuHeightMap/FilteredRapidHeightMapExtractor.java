@@ -59,9 +59,6 @@ public class FilteredRapidHeightMapExtractor
    {
       int error;
 
-      // Create new GpuMat to store the result, by default fill it with the latest and expect it to be overwritten
-      GpuMat latestGlobalHeightMap = globalHeightMapToPack.clone();
-
       // Only want to compute the average if we have the past values to use
       if (loopTracker < layers)
       {
@@ -78,7 +75,11 @@ public class FilteredRapidHeightMapExtractor
          CUDATools.checkCUDAError(error);
 
          currentIndex = (currentIndex + 1) % layers;
+         return;
       }
+
+      // Create new GpuMat to store the result, by default fill it with the latest and expect it to be overwritten
+      GpuMat latestGlobalHeightMap = globalHeightMapToPack.clone();
 
       // Allocate the correct amount of threads to process the entire mat
       int registerKernelGridSizeXY = (globalHeightMapToPack.rows() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;

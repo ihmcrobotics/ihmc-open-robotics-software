@@ -128,7 +128,7 @@ public class ControllerFootstepQueueMonitor
       robotFalling.set(true);
    }
 
-   public boolean getRobotFalling()
+   public boolean pollRobotFalling()
    {
       return robotFalling.getAndSet(false);
    }

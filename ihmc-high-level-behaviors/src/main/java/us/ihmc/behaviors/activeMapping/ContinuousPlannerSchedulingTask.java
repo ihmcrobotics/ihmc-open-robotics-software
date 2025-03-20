@@ -143,7 +143,7 @@ public class ContinuousPlannerSchedulingTask
 
       stateMachine.addPreTransitionCallback(() ->
                                             {
-                                               if (controllerFootstepQueueMonitor.getRobotFalling() || resetStateMachine.get())
+                                               if (controllerFootstepQueueMonitor.pollRobotFalling() || resetStateMachine.get())
                                                {
                                                   LogTools.info("---- Resetting State Machine for Continuous Hiking ----");
                                                   stateMachine.resetToInitialState();
