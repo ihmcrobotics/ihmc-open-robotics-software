@@ -1,20 +1,18 @@
-package us.ihmc.atlas.angularMomentumTest;
+package us.ihmc.alexander.angularMomentum;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import us.ihmc.atlas.AtlasRobotModel;
-import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.alexander.AlexanderVersion;
+import us.ihmc.alexander.OpenAlexanderRobotModel;
 import us.ihmc.avatar.angularMomentumTest.AvatarAngularExcursionTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 @Tag("humanoid-flat-ground-slow-2")
-public class AtlasAngularExcursionTest extends AvatarAngularExcursionTest
+public class AlexanderAngularExcursionTest extends AvatarAngularExcursionTest
 {
-   private final AtlasRobotVersion version = AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS;
-   private final RobotTarget target = RobotTarget.SCS;
+   private final DRCRobotModel robotModel = new OpenAlexanderRobotModel(AlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS);
 
    @Override
    protected double getStepLength()
@@ -39,12 +37,12 @@ public class AtlasAngularExcursionTest extends AvatarAngularExcursionTest
    @Override
    public DRCRobotModel getRobotModel()
    {
-      return new AtlasRobotModel(version, target, false);
+      return robotModel;
    }
 
    @Override
    public String getSimpleRobotName()
    {
-      return "atlas";
+      return "alexander";
    }
 }

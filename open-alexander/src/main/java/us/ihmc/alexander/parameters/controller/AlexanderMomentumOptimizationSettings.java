@@ -79,7 +79,7 @@ public class AlexanderMomentumOptimizationSettings extends MomentumOptimizationS
    private final List<GroupParameter<Vector3DReadOnly>> taskspaceAngularWeights = new ArrayList<>();
 
    // TODO Needs tune up.
-   private final Vector3D handLinearWeight = new Vector3D(1.0, 1.0, 1.0);
+   private final Vector3D handLinearWeight = new Vector3D(5.0, 5.0, 5.0);
    private final List<GroupParameter<Vector3DReadOnly>> taskspaceLinearWeights = new ArrayList<>();
 
    public AlexanderMomentumOptimizationSettings(RobotTarget target, HumanoidJointNameMap jointMap)
@@ -106,7 +106,7 @@ public class AlexanderMomentumOptimizationSettings extends MomentumOptimizationS
       }
       else
       { // Full 7dof arm mode
-         handAngularWeight = new Vector3D(0.5, 0.5, 0.5);
+         handAngularWeight = new Vector3D(1.0, 1.0, 1.0);
       }
 
       userModeWeights.add(new GroupParameter<Double>("allJoints", jointUserModeWeight, allUserModeJoints));

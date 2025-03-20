@@ -13,6 +13,7 @@ import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.robot.WrenchSensorDefinition;
 import us.ihmc.scs2.definition.robot.urdf.URDFTools;
 import us.ihmc.scs2.definition.robot.urdf.items.URDFModel;
+import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 import java.util.Arrays;
 import java.util.function.Consumer;
@@ -22,7 +23,7 @@ public class AlexanderModelFactory
 {
    private final String[] resourceModelsToBeLogged = {"models/alexander_v0"};
    private final AlexanderURDFParameters urdfParameters;
-   private final AlexanderContactPointParameters contactPointParameters;
+   private final RobotContactPointParameters<RobotSide> contactPointParameters;
    private RobotDefinition simulationRobotDefinition;
    private final AlexanderVersion alexanderVersion;
    private RobotDefinition controllerRobotDefinition;
@@ -31,7 +32,7 @@ public class AlexanderModelFactory
 
    public AlexanderModelFactory(AlexanderVersion alexanderVersion,
                                AlexanderJointMap jointMap,
-                               AlexanderContactPointParameters contactPointParameters,
+                               RobotContactPointParameters<RobotSide> contactPointParameters,
                                Consumer<RobotDefinition> robotDefinitionMutator)
    {
       this.alexanderVersion = alexanderVersion;

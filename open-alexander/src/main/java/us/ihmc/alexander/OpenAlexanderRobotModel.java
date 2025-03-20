@@ -84,7 +84,7 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
    private final HighLevelControllerParameters highLevelControllerParameters;
    private final AlexanderSensorInformation sensorInformation;
    protected final AlexanderJointMap jointMap;
-   protected final AlexanderContactPointParameters contactPointParameters;
+   protected final RobotContactPointParameters<RobotSide> contactPointParameters;
    private final CoPTrajectoryParameters copTrajectoryParameters = new CoPTrajectoryParameters();
    private final AlexanderDiagnosticParameters diagnosticParameters;
    private final StateEstimatorParameters stateEstimatorParameters;
@@ -107,7 +107,12 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
 
    public OpenAlexanderRobotModel(AlexanderVersion robotVersion, RobotTarget robotTarget)
    {
-      this(robotVersion, robotTarget, null);
+      this(robotVersion, robotTarget, null, false);
+   }
+
+   public OpenAlexanderRobotModel(AlexanderVersion robotVersion, RobotTarget robotTarget, RobotContactPointParameters<RobotSide> contactPointParameters)
+   {
+      this(robotVersion, robotTarget, null, contactPointParameters);
    }
 
    public OpenAlexanderRobotModel(AlexanderVersion robotVersion, RobotTarget robotTarget, MaterialDefinition robotMaterial)
@@ -117,14 +122,21 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
 
    public OpenAlexanderRobotModel(AlexanderVersion robotVersion, RobotTarget robotTarget, MaterialDefinition robotMaterial, boolean createHandContactPoints)
    {
+      this(robotVersion, robotTarget, robotMaterial, new AlexanderContactPointParameters(robotVersion.getJointMap(),
+                                                                                         robotVersion.getPhysicalProperties(),
+                                                                                         createHandContactPoints));
+   }
+
+   public OpenAlexanderRobotModel(AlexanderVersion robotVersion, RobotTarget robotTarget, MaterialDefinition robotMaterial, RobotContactPointParameters<RobotSide> contactPointParameters)
+   {
       this.robotVersion = robotVersion;
       this.robotTarget = robotTarget;
+      this.contactPointParameters = contactPointParameters;
 
       jointMap = robotVersion.getJointMap();
       sensorInformation = robotVersion.getSensorInformation();
       physicalProperties = robotVersion.getPhysicalProperties();
 
-      contactPointParameters = new AlexanderContactPointParameters(jointMap, physicalProperties, createHandContactPoints);
       walkingControllerParameters = new OpenAlexanderWalkingControllerParameters(robotVersion, robotTarget, jointMap, physicalProperties, contactPointParameters);
       highLevelControllerParameters = new AlexanderHighLevelControllerParameters(robotVersion, jointMap, robotTarget);
       diagnosticParameters = new AlexanderDiagnosticParameters(robotTarget, jointMap, sensorInformation, highLevelControllerParameters);

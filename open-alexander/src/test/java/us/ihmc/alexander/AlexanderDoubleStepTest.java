@@ -1,17 +1,16 @@
-package us.ihmc.atlas;
+package us.ihmc.alexander;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-
 import us.ihmc.avatar.AvatarDoubleStepTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 
-public class AtlasDoubleStepTest extends AvatarDoubleStepTest
+public class AlexanderDoubleStepTest extends AvatarDoubleStepTest
 {
    private final RobotTarget target = RobotTarget.SCS;
 
-   private final AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, target, false);
+   private final OpenAlexanderRobotModel robotModel = new OpenAlexanderRobotModel(AlexanderVersion.V0_FULL_ROBOT, target);
 
    @Tag("humanoid-flat-ground-slow-2")
    @Test

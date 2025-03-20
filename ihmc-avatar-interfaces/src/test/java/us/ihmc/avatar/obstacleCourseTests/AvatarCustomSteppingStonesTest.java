@@ -1,7 +1,5 @@
 package us.ihmc.avatar.obstacleCourseTests;
 
-import static us.ihmc.robotics.Assert.assertTrue;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
@@ -21,6 +19,8 @@ import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class AvatarCustomSteppingStonesTest implements MultiRobotTestInterface
 {
@@ -118,7 +118,7 @@ public abstract class AvatarCustomSteppingStonesTest implements MultiRobotTestIn
       setupTest(testInfo, steps);
 
       walkForward(getStepLength(), numberOfSteps, stepHeight, initialStepYoffset);
-      assertTrue(simulationTestHelper.simulateNow(3.0));
+      assertTrue(simulationTestHelper.simulateNow(1.5));
    }
 
    private void setupTest(TestInfo testInfo, CommonAvatarEnvironmentInterface environment)
@@ -132,7 +132,7 @@ public abstract class AvatarCustomSteppingStonesTest implements MultiRobotTestIn
       simulationTestHelper.start();
       simulationTestHelper.setCamera(new Point3D(0.6, 0.0, 0.6), new Point3D(10.0, 3.0, 3.0));
 
-      assertTrue(simulationTestHelper.simulateNow(1.0));
+      assertTrue(simulationTestHelper.simulateNow(0.5));
    }
 
    private void createStepsEnvironment(StepsEnvironment stepsEnvironment,
@@ -201,7 +201,7 @@ public abstract class AvatarCustomSteppingStonesTest implements MultiRobotTestIn
       footsteps.getFootstepDataList().add().set(footstepData);
 
       simulationTestHelper.publishToController(footsteps);
-      assertTrue(simulationTestHelper.simulateNow(numberOfSteps * 1.5));
+      assertTrue(simulationTestHelper.simulateNow(numberOfSteps * 1.1));
    }
 
    private static class StepsEnvironment implements CommonAvatarEnvironmentInterface

@@ -32,6 +32,8 @@ import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
+import us.ihmc.wholeBodyController.RobotContactPointParameters;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -90,7 +92,7 @@ public class OpenAlexanderWalkingControllerParameters extends WalkingControllerP
                                                    RobotTarget target,
                                                    AlexanderJointMap jointMap,
                                                    AlexanderPhysicalProperties physicalProperties,
-                                                   AlexanderContactPointParameters contactPointParameters)
+                                                   RobotContactPointParameters<RobotSide> contactPointParameters)
    {
       this.version = version;
       this.target = target;
@@ -98,7 +100,7 @@ public class OpenAlexanderWalkingControllerParameters extends WalkingControllerP
       this.physicalProperties = physicalProperties;
 
       toeOffParameters = new AlexanderToeOffParameters(physicalProperties);
-      momentumOptimizationSettings = new AlexanderMomentumOptimizationSettings(target, jointMap, contactPointParameters.getNumberOfContactableBodies());
+      momentumOptimizationSettings = new AlexanderMomentumOptimizationSettings(target, jointMap, 2 + contactPointParameters.getAdditionalContactNames().size());
       swingTrajectoryParameters = new AlexanderSwingTrajectoryParameters();
       steppingParameters = new AlexanderSteppingParameters(physicalProperties);
       icpControllerParameters = new OpenAlexanderICPControllerParameters();

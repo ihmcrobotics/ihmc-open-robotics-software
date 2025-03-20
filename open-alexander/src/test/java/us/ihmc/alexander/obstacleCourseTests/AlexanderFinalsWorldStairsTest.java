@@ -1,15 +1,11 @@
-package us.ihmc.atlas.obstacleCourseTests;
-
-import static us.ihmc.robotics.Assert.assertTrue;
-
-import java.util.ArrayList;
-
-import org.junit.jupiter.api.*;
+package us.ihmc.alexander.obstacleCourseTests;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
-import us.ihmc.atlas.AtlasRobotModel;
-import us.ihmc.atlas.AtlasRobotVersion;
+import org.junit.jupiter.api.*;
+import us.ihmc.alexander.AlexanderVersion;
+import us.ihmc.alexander.OpenAlexanderRobotModel;
+import us.ihmc.alexander.parameters.controller.AlexanderContactPointParameters;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.environments.DRCFinalsEnvironment;
@@ -29,13 +25,16 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
 import us.ihmc.wholeBodyController.FootContactPoints;
 
-public class AtlasFinalsWorldStairsTest
+import java.util.ArrayList;
+
+import static us.ihmc.robotics.Assert.assertTrue;
+
+public class AlexanderFinalsWorldStairsTest
 {
    protected SimulationTestingParameters simulationTestingParameters;
    protected SCS2AvatarTestingSimulation simulationTestHelper;
@@ -63,15 +62,18 @@ public class AtlasFinalsWorldStairsTest
    @Tag("humanoid-rough-terrain")
    @Test
    @Disabled
-   public void testWalkingUpStairs() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
+   public void testWalkingUpStairs()
    {
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
       CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCStartingLocation selectedLocation = DRCSCStartingLocations.STAIRS_START;
 
-      FootContactPoints<RobotSide> simulationContactPoints = new AdditionalSimulationContactPoints<>(RobotSide.values, 10, 2, true, true);
-      AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false, simulationContactPoints);
+      AlexanderVersion version = AlexanderVersion.V0_FULL_ROBOT;
+      FootContactPoints<RobotSide> simulationContactPoints = new AdditionalSimulationContactPoints<>(RobotSide.values, 8, 3, true, true);
+      AlexanderContactPointParameters contactPointParameters = new AlexanderContactPointParameters(version.getJointMap(), version.getPhysicalProperties(), simulationContactPoints, false);
+      OpenAlexanderRobotModel robotModel = new OpenAlexanderRobotModel(version, RobotTarget.SCS, contactPointParameters);
+
       DRCFinalsEnvironment environment = new DRCFinalsEnvironment(false, false, false, false, true);
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(robotModel,
                                                                                                                                              environment,
@@ -87,7 +89,7 @@ public class AtlasFinalsWorldStairsTest
       ReferenceFrame rootFrame = simulationTestHelper.getControllerFullRobotModel().getRootJoint().getFrameAfterJoint();
       FramePoint3D pelvisPosition = new FramePoint3D(rootFrame);
       pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
-      PelvisHeightTrajectoryMessage message = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, pelvisPosition.getZ() + 0.025);
+      PelvisHeightTrajectoryMessage message = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, pelvisPosition.getZ());
       simulationTestHelper.publishToController(message);
 
       success = simulationTestHelper.simulateNow(0.5);
@@ -110,17 +112,18 @@ public class AtlasFinalsWorldStairsTest
       CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @Disabled
+   @Tag("humanoid-rough-terrain")
    @Test
-   public void testFastWalkingUpStairs() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
+   public void testFastWalkingUpStairs()
    {
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
       CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCStartingLocation selectedLocation = DRCSCStartingLocations.STAIRS_START;
-
+      AlexanderVersion version = AlexanderVersion.V0_FULL_ROBOT;
       FootContactPoints<RobotSide> simulationContactPoints = new AdditionalSimulationContactPoints<>(RobotSide.values, 8, 3, true, true);
-      AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false, simulationContactPoints);
+      AlexanderContactPointParameters contactPointParameters = new AlexanderContactPointParameters(version.getJointMap(), version.getPhysicalProperties(), simulationContactPoints, false);
+      OpenAlexanderRobotModel robotModel = new OpenAlexanderRobotModel(version, RobotTarget.SCS, contactPointParameters);
       DRCFinalsEnvironment environment = new DRCFinalsEnvironment(false, false, false, false, true);
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(robotModel,
                                                                                                                                              environment,
@@ -136,7 +139,7 @@ public class AtlasFinalsWorldStairsTest
       ReferenceFrame rootFrame = simulationTestHelper.getControllerFullRobotModel().getRootJoint().getFrameAfterJoint();
       FramePoint3D pelvisPosition = new FramePoint3D(rootFrame);
       pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
-      PelvisHeightTrajectoryMessage message = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, pelvisPosition.getZ() + 0.07);
+      PelvisHeightTrajectoryMessage message = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, pelvisPosition.getZ());
       simulationTestHelper.publishToController(message);
 
       success = simulationTestHelper.simulateNow(0.5);

@@ -1,12 +1,10 @@
-package us.ihmc.atlas;
-
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+package us.ihmc.alexander;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import us.ihmc.atlas.parameters.AtlasICPControllerParameters;
-import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
-import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+import us.ihmc.alexander.parameters.controller.OpenAlexanderICPControllerParameters;
+import us.ihmc.alexander.parameters.controller.OpenAlexanderWalkingControllerParameters;
 import us.ihmc.avatar.AvatarFlatGroundForwardWalkingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
@@ -16,22 +14,21 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 
 @Tag("humanoid-flat-ground-slow-2")
-public class AtlasFlatGroundForwardWalkingTest extends AvatarFlatGroundForwardWalkingTest
+public class AlexanderFlatGroundForwardWalkingTest extends AvatarFlatGroundForwardWalkingTest
 {
-   private final AtlasRobotVersion version = AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS;
-   private final AtlasJointMap jointMap = new AtlasJointMap(version, new AtlasPhysicalProperties());
+   private final AlexanderVersion version = AlexanderVersion.V0_FULL_ROBOT;
    private final RobotTarget target = RobotTarget.SCS;
-   private final AtlasRobotModel robotModel = new AtlasRobotModel(version, target, false)
+   private final OpenAlexanderRobotModel robotModel = new OpenAlexanderRobotModel(version, target)
    {
       @Override
       public WalkingControllerParameters getWalkingControllerParameters()
       {
-         return new AtlasWalkingControllerParameters(target, jointMap, getContactPointParameters())
+         return new OpenAlexanderWalkingControllerParameters(version, target, jointMap, physicalProperties)
          {
             @Override
             public ICPControllerParameters getICPControllerParameters()
             {
-               return new AtlasICPControllerParameters(false)
+               return new OpenAlexanderICPControllerParameters()
                {
                   @Override
                   public boolean useAngularMomentum()
@@ -54,13 +51,13 @@ public class AtlasFlatGroundForwardWalkingTest extends AvatarFlatGroundForwardWa
    private final double transferTime = 0.2;
    private final double finalTransferTime = 1.0;
 
-   private final double forcePercentageOfWeight1 = 0.02;
-   private final double forceDuration1 = 1;
+   private final double forcePercentageOfWeight1 = 0.015;
+   private final double forceDuration1 = 0.25;
    private final double forceDelay1 = 0.1 * swingTime;
    private final Vector3D forceDirection1 = new Vector3D(0.0, -1.0, 0.0);
 
-   private final double forcePercentageOfWeight2 = 0.025;
-   private final double forceDuration2 = 1;
+   private final double forcePercentageOfWeight2 = 0.02;
+   private final double forceDuration2 = 0.25;
    private final double forceDelay2 = 0.5 * swingTime;
    private final Vector3D forceDirection2 = new Vector3D(1.0, 0.0, 0.0);
 

@@ -1,14 +1,13 @@
-package us.ihmc.atlas.icpPlannerTests;
+package us.ihmc.alexander.icpPlannerTests;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-
-import us.ihmc.atlas.AtlasJointMap;
-import us.ihmc.atlas.AtlasRobotModel;
-import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.atlas.parameters.AtlasContactPointParameters;
-import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
+import us.ihmc.alexander.AlexanderJointMap;
+import us.ihmc.alexander.AlexanderVersion;
+import us.ihmc.alexander.OpenAlexanderRobotModel;
+import us.ihmc.alexander.parameters.controller.OpenAlexanderWalkingControllerParameters;
+import us.ihmc.alexander.parameters.model.AlexanderPhysicalProperties;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.icpPlannerTests.AvatarICPPlannerFlatGroundTest;
@@ -16,9 +15,9 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
 
 @Tag("humanoid-flat-ground")
-public class AtlasICPPlannerFlatGroundTest extends AvatarICPPlannerFlatGroundTest
+public class AlexanderICPPlannerFlatGroundTest extends AvatarICPPlannerFlatGroundTest
 {
-   private final DRCRobotModel robotModel = new TestModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
+   private final DRCRobotModel robotModel = new TestModel(AlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS);
 
    @Override
    @Disabled
@@ -65,14 +64,14 @@ public class AtlasICPPlannerFlatGroundTest extends AvatarICPPlannerFlatGroundTes
       return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ATLAS);
    }
 
-   private class TestModel extends AtlasRobotModel
+   private static class TestModel extends OpenAlexanderRobotModel
    {
       private final TestWalkingParameters walkingParameters;
 
-      public TestModel(AtlasRobotVersion atlasVersion, RobotTarget target, boolean headless)
+      public TestModel(AlexanderVersion version, RobotTarget target)
       {
-         super(atlasVersion, target, headless);
-         walkingParameters = new TestWalkingParameters(target, getJointMap(), getContactPointParameters());
+         super(version, target);
+         walkingParameters = new TestWalkingParameters(version, target, getJointMap(), getPhysicalProperties());
       }
 
       @Override
@@ -83,11 +82,11 @@ public class AtlasICPPlannerFlatGroundTest extends AvatarICPPlannerFlatGroundTes
 
    }
 
-   private class TestWalkingParameters extends AtlasWalkingControllerParameters
+   private static class TestWalkingParameters extends OpenAlexanderWalkingControllerParameters
    {
-      public TestWalkingParameters(RobotTarget target, AtlasJointMap jointMap, AtlasContactPointParameters contactPointParameters)
+      public TestWalkingParameters(AlexanderVersion version, RobotTarget target, AlexanderJointMap jointMap, AlexanderPhysicalProperties physicalProperties)
       {
-         super(target, jointMap, contactPointParameters);
+         super(version, target, jointMap,physicalProperties);
       }
 
       @Override

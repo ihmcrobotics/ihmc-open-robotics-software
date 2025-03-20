@@ -1,4 +1,4 @@
-package us.ihmc.atlas;
+package us.ihmc.alexander;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
@@ -6,7 +6,6 @@ import controller_msgs.msg.dds.HandWrenchTrajectoryMessage;
 import controller_msgs.msg.dds.PrepareForLocomotionMessage;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -77,8 +76,9 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class AtlasWalkingTrajectoryPathFrameTest
+public class AlexanderWalkingTrajectoryPathFrameTest
 {
+   private static final boolean KEEP_SCS_UP = false;
    private static final boolean ADD_PENDULUM = true;
    private static final RobotSide HAND_SIDE = RobotSide.LEFT;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -92,7 +92,7 @@ public class AtlasWalkingTrajectoryPathFrameTest
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
-      simulationTestingParameters.setKeepSCSUp(!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
+      simulationTestingParameters.setKeepSCSUp(KEEP_SCS_UP && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
    }
 
    @AfterEach
@@ -115,7 +115,7 @@ public class AtlasWalkingTrajectoryPathFrameTest
    {
       if (robotModel == null)
       {
-         robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS);
+         robotModel = new OpenAlexanderRobotModel(AlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS);
       }
       return robotModel;
    }
@@ -132,7 +132,7 @@ public class AtlasWalkingTrajectoryPathFrameTest
 
    public Pose3DReadOnly getHandDesiredPoseInChestFrame()
    {
-      return new Pose3D(new Point3D(0.55, 0.35, -0.25), new Quaternion());
+      return new Pose3D(new Point3D(0.4, 0.25, -0.25), new Quaternion());
    }
 
    @Tag("controller-api-2")

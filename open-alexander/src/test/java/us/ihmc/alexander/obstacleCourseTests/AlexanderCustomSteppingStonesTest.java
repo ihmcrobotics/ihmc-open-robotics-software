@@ -1,17 +1,16 @@
-package us.ihmc.atlas.obstacleCourseTests;
+package us.ihmc.alexander.obstacleCourseTests;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
-
-import us.ihmc.atlas.AtlasRobotModel;
-import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.alexander.AlexanderVersion;
+import us.ihmc.alexander.OpenAlexanderRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.AvatarCustomSteppingStonesTest;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
 
-public class AtlasCustomSteppingStonesTest extends AvatarCustomSteppingStonesTest
+public class AlexanderCustomSteppingStonesTest extends AvatarCustomSteppingStonesTest
 {
    @Tag("humanoid-obstacle-2")
    @Test
@@ -21,7 +20,7 @@ public class AtlasCustomSteppingStonesTest extends AvatarCustomSteppingStonesTes
        * TODO remove as it assimilates
        * {@link us.ihmc.atlas.roughTerrainWalking.AtlasEndToEndStairsTest#testUpStairs(TestInfo)}
        */
-      changeWalkingParameters(0.3, 1.05);
+      changeWalkingParameters(0.3, 0.8);
       setNumberOfSteps(4);
       super.testTakingStep(testInfo, 0.24);
    }
@@ -31,14 +30,14 @@ public class AtlasCustomSteppingStonesTest extends AvatarCustomSteppingStonesTes
    public void testTakingBigStepUpAndStopping(TestInfo testInfo)
    { // NOTE this passes but violates knee joint limits
       setTakeSquareUpStep(false);
-      super.testTakingStep(testInfo, 0.4);
+      super.testTakingStep(testInfo, 0.35);
    }
 
    @Tag("humanoid-obstacle-2")
    @Test
    public void testTakingBigStepUpAndStoppingThenSquaringUp(TestInfo testInfo)
    { // NOTE this passes but violates knee joint limits
-      changeWalkingParameters(0.3, 0.95);
+      changeWalkingParameters(0.3, 0.8);
       setNumberOfSteps(4);
       super.testTakingStepOneFootAtATime(testInfo, 0.22);
    }
@@ -54,7 +53,7 @@ public class AtlasCustomSteppingStonesTest extends AvatarCustomSteppingStonesTes
    @Test
    public void testToeOffTakingBigSideStepUp(TestInfo testInfo)
    {
-      changeWalkingParameters(0.25, 0.8);
+      changeWalkingParameters(0.35, 0.75);
       super.testTakingStep(testInfo, 0.35, -0.25);
    }
 
@@ -67,8 +66,7 @@ public class AtlasCustomSteppingStonesTest extends AvatarCustomSteppingStonesTes
    @Override
    public DRCRobotModel getRobotModel()
    {
-      AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
-      return robotModel;
+      return new OpenAlexanderRobotModel(AlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS);
    }
 
    @Override

@@ -14,11 +14,27 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 public class AlexanderContactPointParameters extends RobotContactPointParameters<RobotSide>
 {
    private final boolean createHandContactPoints;
+
+   public AlexanderContactPointParameters(HumanoidJointNameMap jointMap, AlexanderPhysicalProperties physicalProperties,
+                                      FootContactPoints<RobotSide> footContactPoints, boolean createHandContactPoints)
+   {
+      super(jointMap,
+            physicalProperties.getToeWidthForControl(),
+            physicalProperties.getFootWidthForControl(),
+            physicalProperties.getFootLengthForControl(),
+            physicalProperties.getSoleToAnkleFrameTransforms());
+
+      createFootContactPoints(footContactPoints);
+
+      this.createHandContactPoints = createHandContactPoints;
+   }
+
 
    public AlexanderContactPointParameters(HumanoidJointNameMap jointMap, AlexanderPhysicalProperties physicalProperties, boolean createHandContactPoints)
    {

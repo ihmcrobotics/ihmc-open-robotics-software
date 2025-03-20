@@ -1,12 +1,11 @@
-package us.ihmc.atlas.obstacleCourseTests;
+package us.ihmc.alexander.obstacleCourseTests;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
-
 import org.junit.jupiter.api.Test;
-import us.ihmc.atlas.AtlasRobotModel;
-import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
+import us.ihmc.alexander.AlexanderVersion;
+import us.ihmc.alexander.OpenAlexanderRobotModel;
+import us.ihmc.alexander.parameters.controller.OpenAlexanderWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.obstacleCourseTests.AvatarBigStepDownTest;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -16,18 +15,18 @@ import us.ihmc.simulationConstructionSetTools.tools.CITools;
  * Tests in this class have been replaced with Nadia tests so they are all disabled
  */
 @Tag("humanoid-obstacle")
-public class AtlasBigStepDownTest extends AvatarBigStepDownTest
+public class AlexanderBigStepDownTest extends AvatarBigStepDownTest
 {
 
    @Override
    public DRCRobotModel getRobotModel()
    {
-      DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS)
+      DRCRobotModel robotModel = new OpenAlexanderRobotModel(AlexanderVersion.V0_FULL_ROBOT)
       {
          @Override
          public WalkingControllerParameters getWalkingControllerParameters()
          {
-            return new AtlasWalkingControllerParameters(getTarget(), getJointMap(), getContactPointParameters())
+            return new OpenAlexanderWalkingControllerParameters(getRobotVersion(), getTarget(), getJointMap(), getPhysicalProperties())
             {
                @Override
                public double nominalHeightAboveAnkle()
@@ -47,6 +46,7 @@ public class AtlasBigStepDownTest extends AvatarBigStepDownTest
       return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ATLAS);
    }
 
+   @Tag("humanoid-obstacle")
    @Disabled
    @Test
    public void testSplitFractionInBigStepDown()
@@ -54,6 +54,7 @@ public class AtlasBigStepDownTest extends AvatarBigStepDownTest
       super.testSplitFractionInBigStepDown();
    }
 
+   @Tag("humanoid-obstacle")
    @Disabled
    @Test
    public void testWalkingOffOfLargePlatform()
