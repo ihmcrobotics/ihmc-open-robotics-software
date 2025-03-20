@@ -16,6 +16,13 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapDataReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelLoader;
@@ -52,6 +59,7 @@ public class RDXVRFootstepPlacement
 
    private RDXVRFootstep footstepBeingExternallyPlaced;
    private final RDXFootstepOptimizer footstepOptimizer;
+   private final FootstepSnapAndWiggler snapper;
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final FramePose3D poseForPlacement = new FramePose3D();
    private long sequenceId = (UUID.randomUUID().getLeastSignificantBits() % Integer.MAX_VALUE) + Integer.MAX_VALUE;
@@ -66,6 +74,9 @@ public class RDXVRFootstepPlacement
       this.vrContext = vrContext;
       this.syncedRobot = syncedRobot;
       this.controllerHelper = controllerHelper;
+      FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
+      this.snapper = new FootstepSnapAndWiggler(PlannerTools.createDefaultFootPolygons(), new DefaultFootstepPlannerParameters(), environmentHandler);
+      snapper.initialize();
 
       for (RobotSide side : RobotSide.values)
       {
@@ -181,7 +192,7 @@ public class RDXVRFootstepPlacement
       footstepBeingExternallyPlaced = new RDXVRFootstep(side, footstepModels.get(side), footstepIndex++);
    }
 
-   public boolean setFootstepPose(FramePose3DReadOnly pose)
+   public boolean setFootstepPose(FramePose3DReadOnly pose, boolean lastAdjustment)
    {
       if (footstepBeingExternallyPlaced != null)
       {
@@ -192,7 +203,7 @@ public class RDXVRFootstepPlacement
             {
                FramePose3D adaptedPose = new FramePose3D(pose);
                adaptedPose.getPosition().setZ(height);
-               if (USE_STEPPABLE_REGION_ADAPTATION)
+               if (USE_STEPPABLE_REGION_ADAPTATION && lastAdjustment)
                {
                   if (RUN_ADAPTATION_ASYNC)
                   {
