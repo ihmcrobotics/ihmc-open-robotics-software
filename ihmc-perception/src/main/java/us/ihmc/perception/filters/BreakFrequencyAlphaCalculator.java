@@ -1,7 +1,7 @@
 package us.ihmc.perception.filters;
 
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.tools.time.MovingAverageDurationCalculator;
+import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 
 public class BreakFrequencyAlphaCalculator
 {

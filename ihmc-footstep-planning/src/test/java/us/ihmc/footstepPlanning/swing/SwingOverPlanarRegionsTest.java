@@ -503,7 +503,7 @@ public class SwingOverPlanarRegionsTest
                hittingEndGoal |= endFootPolygon.getMinX() < desiredPosition.getX();
                hittingStartGoal |= desiredPosition.getX() < startFootPolygon.getMaxX();
 
-               double distanceToCollision = foot.distance(collision);
+               double distanceToCollision = foot.signedDistance(collision);
                if ((!hittingEndGoal && !hittingStartGoal && ignoreGroundSegments) && distanceToCollision < closestDistance)
                {
                   closestDistance = distanceToCollision;

@@ -126,12 +126,14 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
       heuristicPoseChecker.setApproximateStepDimensions(candidateStep, stanceStep);
       achievedDeltaInside.set(snapData.getAchievedInsideDelta());
 
-      BipedalFootstepPlannerNodeRejectionReason poseRejectionReason;
+      // Check the quality of the snap data.
+      if (!doValidityCheckForSnap(candidateStep))
+         return;
 
       if (environmentHandler.hasTerrainMapData())
       {
          // Check height map rejection reasons
-         poseRejectionReason = doValidityCheckForTerrainMap(candidateStep);
+         BipedalFootstepPlannerNodeRejectionReason poseRejectionReason = doValidityCheckForTerrainMap(candidateStep);
 
          if (poseRejectionReason != null)
          {
@@ -139,16 +141,12 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
             return;
          }
 
-         // Check height map rejection reasons
-         if (!doValidityCheckForHeightMap(candidateStep))
-            return;
-
          // Check height map cliff avoidance
          heightMapCliffAvoider.setHeightMapData(environmentHandler.getHeightMap());
          if (!heightMapCliffAvoider.isStepValid(candidateStep, stanceStep))
          {
-            poseRejectionReason =  BipedalFootstepPlannerNodeRejectionReason.STEP_ON_CLIFF_EDGE;
-            rejectionReason.set(poseRejectionReason);
+            rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.STEP_ON_CLIFF_EDGE);
+            return;
          }
       }
 
@@ -158,6 +156,7 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
          return;
       }
 
+      BipedalFootstepPlannerNodeRejectionReason poseRejectionReason;
       // Check snapped footstep placement
       if (parameters.getUseReachabilityMap())
       {
@@ -189,13 +188,6 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
 
    private BipedalFootstepPlannerNodeRejectionReason doValidityCheckForTerrainMap(DiscreteFootstep candidateStep)
    {
-      double areaFraction = candidateStepSnapData.getSnapAreaFraction();
-      if (Double.isFinite(areaFraction))
-         footAreaPercentage.set(areaFraction);
-      else
-         footAreaPercentage.set(1.0);
-      rmsError.set(candidateStepSnapData.getSnapRMSError());
-
       SnapResult snapResult = environmentHandler.getTerrainMapData().getSnapResultInWorld(candidateStep.getX(), candidateStep.getY());
       return switch (snapResult)
             {
@@ -208,11 +200,8 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
    }
 
 
-   private boolean doValidityCheckForHeightMap(DiscreteFootstep candidateStep)
+   private boolean doValidityCheckForSnap(DiscreteFootstep candidateStep)
    {
-      if (environmentHandler.hasHeightMap())
-         return true;
-
       // Area
       double areaFraction = candidateStepSnapData.getSnapAreaFraction();
       if (Double.isFinite(areaFraction))

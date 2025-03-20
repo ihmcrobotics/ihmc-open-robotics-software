@@ -5,6 +5,8 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.commons.MathTools;
 import us.ihmc.log.LogTools;
 
+import java.util.function.ToDoubleFunction;
+
 /**
  * The primary role of this solver is to calculate out closest manifold by searching configuration
  * spaces of the manifold.
@@ -14,26 +16,28 @@ public class GradientDescentModule
    private static final boolean DEBUG = false;
 
    // internal
-   private SingleQueryFunction function;
+   private ToDoubleFunction<TDoubleArrayList> function;
    private final int dimension;
    private final TDoubleArrayList initialInput;
 
    // result
    private boolean solved;
-   private TDoubleArrayList optimalInput;
+   private final TDoubleArrayList optimalInput;
    private double optimalQuery;
    private double computationTime;
 
    // params
-   private TDoubleArrayList inputUpperLimit;
-   private TDoubleArrayList inputLowerLimit;
+   private final TDoubleArrayList inputUpperLimit;
+   private final TDoubleArrayList inputLowerLimit;
    private double deltaThreshold = 10E-10;
    private int maximumIterations = 1000;
-   private double alpha = -10;
+   private double learningRate = -1.0;
+   private double minLearningRate = -1e-6;
+   private double learningRateToUse = learningRate;
    private double perturb = 0.001;
-   private double reducingStepSizeRatio = 1.1;
+   private double reducingLearningRateRatio = 1.1;
 
-   public GradientDescentModule(SingleQueryFunction function, TDoubleArrayList initial)
+   public GradientDescentModule(ToDoubleFunction<TDoubleArrayList> function, TDoubleArrayList initial)
    {
       this.function = function;
       this.dimension = initial.size();
@@ -50,14 +54,14 @@ public class GradientDescentModule
       }
    }
 
-   public void redefineModule(SingleQueryFunction function)
+   public void redefineModule(ToDoubleFunction<TDoubleArrayList> function)
    {
       this.function = function;
    }
 
-   private void reduceStepSize()
+   private void reduceLearningRate()
    {
-      alpha = alpha / reducingStepSizeRatio;
+      learningRateToUse = Math.min(learningRateToUse / reducingLearningRateRatio, minLearningRate);
    }
 
    /**
@@ -91,30 +95,34 @@ public class GradientDescentModule
    }
 
    /**
-    * default value is 1.
+    * This is the learning rate applied to the gradient during the update. The default value is -1.0.
     */
-   public void setStepSize(double value)
+   public void setLearningRate(double value)
    {
-      if (value > 0)
-         alpha = -value;
-      else
-         alpha = value;
+      learningRate = -Math.abs(value);
    }
 
    /**
+    * Sets the minimum learning rate that can be applied after the learning rate reduction. The learning rate is iteratively reduced on each iteration by
+    * {@link #reducingLearningRateRatio}. This bounds how much it can be reduced by..
+    */
+   public void setMinimumLearningRate(double value)
+   {
+      minLearningRate = -Math.abs(value);
+   }
+
+   /**
+    * This is the perturbation size used to numerically compute the gradient.
     * default value is 0.001.
     */
    public void setPerturbationSize(double value)
    {
-      if (value > 0)
-         perturb = value;
-      else
-         perturb = -value;
+      perturb = Math.abs(value);
    }
 
-   public void setReducingStepSizeRatio(double value)
+   public void setReducingLearningRateRatio(double value)
    {
-      reducingStepSizeRatio = value;
+      reducingLearningRateRatio = value;
    }
 
    public int run()
@@ -127,7 +135,9 @@ public class GradientDescentModule
       for (int i = 0; i < dimension; i++)
          pastInput.add(initialInput.get(i));
 
-      optimalQuery = function.getQuery(pastInput);
+      optimalQuery = function.applyAsDouble(pastInput);
+      // reinitialize the learning rate to its original value, in case it was changed using the reducing learning rate
+      learningRateToUse = learningRate;
 
       double pastQuery = 0;
       double newQuery = 0;
@@ -158,7 +168,7 @@ public class GradientDescentModule
 
             perturbedInput.replace(j, MathTools.clamp(tempInput, inputLowerLimit.get(j), inputUpperLimit.get(j)));
 
-            double perturbedQuery = function.getQuery(perturbedInput);
+            double perturbedQuery = function.applyAsDouble(perturbedInput);
 
             gradient.add((perturbedQuery - pastQuery) / (perturb * tempSignForPerturb));
          }
@@ -178,22 +188,22 @@ public class GradientDescentModule
          optimalInput.clear();
          for (int j = 0; j < dimension; j++)
          {
-            double input = pastInput.get(j) + gradient.get(j) * alpha;
+            double input = pastInput.get(j) + gradient.get(j) * learningRateToUse;
             optimalInput.add(MathTools.clamp(input, inputLowerLimit.get(j), inputUpperLimit.get(j)));
          }
 
-         newQuery = function.getQuery(optimalInput);
+         newQuery = function.applyAsDouble(optimalInput);
          if (DEBUG)
             LogTools.debug("cur Query " + pastQuery + " new Query " + newQuery);
 
-         reduceStepSize();
+         reduceLearningRate();
          optimalQuery = newQuery;
          double delta = Math.abs((pastQuery - optimalQuery) / optimalQuery);
 
          if (DEBUG)
          {
             double iterationComputationTime = Conversions.nanosecondsToSeconds(System.nanoTime() - curTime);
-            LogTools.debug("iterations is " + i + " " + optimalQuery + " " + alpha + " " + delta + " " + iterationComputationTime);
+            LogTools.debug("iterations is " + i + " " + optimalQuery + " " + learningRateToUse + " " + delta + " " + iterationComputationTime);
          }
 
          if (delta < deltaThreshold)

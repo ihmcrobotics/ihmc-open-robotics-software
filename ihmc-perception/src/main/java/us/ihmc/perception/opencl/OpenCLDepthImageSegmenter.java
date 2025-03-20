@@ -26,8 +26,8 @@ public class OpenCLDepthImageSegmenter
       depthImage.get();
       imageMask.get();
 
-      depthFrame.update(transformToWorld -> transformToWorld.set(depthImage.getOrientation(), depthImage.getPosition()));
-      maskFrame.update(transformToWorld -> transformToWorld.set(imageMask.getOrientation(), imageMask.getPosition()));
+      depthFrame.update(transformToWorld -> transformToWorld.set(depthImage.getRotation(), depthImage.getTranslation()));
+      maskFrame.update(transformToWorld -> transformToWorld.set(imageMask.getRotation(), imageMask.getTranslation()));
       depthFrame.getReferenceFrame().getTransformToDesiredFrame(depthToMaskTransform, maskFrame.getReferenceFrame());
       depthToMaskTransformParameter.setParameter(depthToMaskTransform);
       depthToMaskTransformParameter.writeOpenCLBufferObject(openCLManager);

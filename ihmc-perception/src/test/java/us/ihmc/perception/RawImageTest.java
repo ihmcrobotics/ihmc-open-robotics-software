@@ -9,6 +9,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.imageMessage.PixelFormat;
 
@@ -128,7 +132,6 @@ public class RawImageTest
    @Test
    public void testReplaceImageDifferentType()
    {
-
       // CPU to CPU, different type
       assertDoesNotThrow(() ->
       {
@@ -152,6 +155,38 @@ public class RawImageTest
          originalImage.release();
          replacedImage.release();
       });
+   }
+
+   @Test
+   public void testImmutability()
+   {
+      CameraIntrinsics cameraIntrinsics = new CameraIntrinsics(mat8UC1.rows(), mat8UC1.cols(), 10.0f, 10.0f, mat8UC1.cols() / 2.0f, mat8UC1.rows() / 2.0f);
+      CameraIntrinsics cameraIntrinsicsOriginal = new CameraIntrinsics(cameraIntrinsics);
+
+      RigidBodyTransform sensorTransform = new RigidBodyTransform(new YawPitchRoll(0.1, 0.2, 0.3), new Vector3D(0.4, 0.5, 0.6));
+      RigidBodyTransform sensorTransformOriginal = new RigidBodyTransform(sensorTransform);
+
+      RawImage image = new RawImage(mat8UC1, null, GRAY8, cameraIntrinsics, CameraModel.PINHOLE, sensorTransform, Instant.now(), 0L, 0.001f);
+
+      // Try modifying the passed in camera intrinsics object
+      cameraIntrinsics.setWidth(0);
+      cameraIntrinsics.setHeight(999);
+      assertEquals(cameraIntrinsicsOriginal.toString(), image.getIntrinsicsCopy().toString()); // comparing toString since we get two separate objects
+      assertNotEquals(cameraIntrinsics.toString(), image.getIntrinsicsCopy().toString());
+
+      // Try modifying the camera intrinsics received from the RawImage
+      image.getIntrinsicsCopy().setWidth(999);
+      image.getIntrinsicsCopy().setHeight(0);
+      assertEquals(cameraIntrinsicsOriginal.toString(), image.getIntrinsicsCopy().toString()); // comparing toString since we get two separate objects
+      assertNotEquals(cameraIntrinsics.toString(), image.getIntrinsicsCopy().toString());
+
+      // Try modifying the passed in pose
+      sensorTransform.getTranslation().add(0.5, 0.5, 0.5);
+      sensorTransform.getRotation().appendYawRotation(0.3);
+      EuclidCoreTestTools.assertGeometricallyEquals(sensorTransformOriginal, image.getTransformToWorld(), 1E-7);
+      assertFalse(sensorTransform.geometricallyEquals(image.getTransformToWorld(), 1E-7));
+
+      image.release();
    }
 
    private boolean dataEquals(BytePointer dataA, BytePointer dataB)

@@ -9,6 +9,7 @@ import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -201,28 +202,28 @@ public class PlanarRegionFootstepSnapAndWigglerTest
       // test regions low enough to snap
       FootstepSnapData snapData = snapper.snapFootstep(new DiscreteFootstep(1.0, -1.0), stanceNode, false);
       expectedTransform.setTranslationAndIdentityRotation(new Vector3D(0.0, 0.0, lowHeight0));
-      Assertions.assertTrue(snapData.getSnapTransform().epsilonEquals(expectedTransform, epsilon));
+      EuclidCoreTestTools.assertEquals(expectedTransform, snapData.getSnapTransform(), epsilon);
 
       snapData = snapper.snapFootstep(new DiscreteFootstep(1.0, 0.0), stanceNode, false);
       expectedTransform.setTranslationAndIdentityRotation(new Vector3D(0.0, 0.0, lowHeight1));
-      Assertions.assertTrue(snapData.getSnapTransform().epsilonEquals(expectedTransform, epsilon));
+      EuclidCoreTestTools.assertEquals(expectedTransform, snapData.getSnapTransform(), epsilon);
 
       snapData = snapper.snapFootstep(new DiscreteFootstep(1.0, 1.0), stanceNode, false);
       expectedTransform.setTranslationAndIdentityRotation(new Vector3D(0.0, 0.0, lowHeight2));
-      Assertions.assertTrue(snapData.getSnapTransform().epsilonEquals(expectedTransform, epsilon));
+      EuclidCoreTestTools.assertEquals(expectedTransform, snapData.getSnapTransform(), epsilon);
 
       // test regions high enough to snap
       snapData = snapper.snapFootstep(new DiscreteFootstep(2.0, -1.0), stanceNode, false);
       expectedTransform.setTranslationAndIdentityRotation(new Vector3D(0.0, 0.0, groundHeight));
-      Assertions.assertTrue(snapData.getSnapTransform().epsilonEquals(expectedTransform, epsilon));
+      EuclidCoreTestTools.assertEquals(expectedTransform, snapData.getSnapTransform(), epsilon);
 
       snapData = snapper.snapFootstep(new DiscreteFootstep(2.0, 0.0), stanceNode, false);
       expectedTransform.setTranslationAndIdentityRotation(new Vector3D(0.0, 0.0, groundHeight));
-      Assertions.assertTrue(snapData.getSnapTransform().epsilonEquals(expectedTransform, epsilon));
+      EuclidCoreTestTools.assertEquals(expectedTransform, snapData.getSnapTransform(), epsilon);
 
       snapData = snapper.snapFootstep(new DiscreteFootstep(2.0, 1.0), stanceNode, false);
       expectedTransform.setTranslationAndIdentityRotation(new Vector3D(0.0, 0.0, groundHeight));
-      Assertions.assertTrue(snapData.getSnapTransform().epsilonEquals(expectedTransform, epsilon));
+      EuclidCoreTestTools.assertEquals(expectedTransform, snapData.getSnapTransform(), epsilon);
    }
 
    @Test

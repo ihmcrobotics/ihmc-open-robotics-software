@@ -2,9 +2,11 @@ package us.ihmc.sensors.zed;
 
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.opencv.opencv_core.GpuMat;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
@@ -15,7 +17,6 @@ import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.sensors.ImageSensor;
 import us.ihmc.zed.SL_CalibrationParameters;
-import us.ihmc.zed.SL_CameraInformation;
 import us.ihmc.zed.SL_InitParameters;
 import us.ihmc.zed.SL_PositionalTrackingParameters;
 import us.ihmc.zed.SL_Quaternion;
@@ -58,9 +59,9 @@ public class ZEDImageSensor extends ImageSensor
    private int imageWidth;
    private int imageHeight;
 
-   private float sensorCenterToCameraDistanceY = 0.0f;
-   private final FramePose3D leftSensorPose = new FramePose3D();
-   private final FramePose3D rightSensorPose = new FramePose3D();
+   private float sensorCenterToCameraDistanceY;
+   private ReferenceFrame leftSensorFrame = null;
+   private ReferenceFrame rightSensorFrame = null;
 
    private long grabSequenceNumber = 0L;
    private Instant lastGrabTime;
@@ -83,6 +84,9 @@ public class ZEDImageSensor extends ImageSensor
       this.slInputType = slInputType;
       this.slDepthMode = slDepthMode;
 
+      sensorCenterToCameraDistanceY = (float) zedModel.getCenterToCameraDistance();
+      updateReferenceFrames();
+
       // Set runtime parameters to default values
       zedRuntimeParameters.reference_frame(SL_REFERENCE_FRAME_CAMERA);
       zedRuntimeParameters.enable_depth(true);
@@ -90,6 +94,25 @@ public class ZEDImageSensor extends ImageSensor
       zedRuntimeParameters.texture_confidence_threshold(100);
       zedRuntimeParameters.remove_saturated_areas(true);
       zedRuntimeParameters.enable_fill_mode(false);
+   }
+
+   private void updateReferenceFrames()
+   {
+      if (leftSensorFrame != null)
+         leftSensorFrame.remove();
+      RigidBodyTransform leftSensorTransform = new RigidBodyTransform(new Quaternion(), new Vector3D(0.0, sensorCenterToCameraDistanceY, 0.0));
+      leftSensorFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(getSensorName() + "_left", sensorFrame, leftSensorTransform);
+
+      if (rightSensorFrame != null)
+         rightSensorFrame.remove();
+      RigidBodyTransform rightSensorTransform = new RigidBodyTransform(new Quaternion(), new Vector3D(0.0, -sensorCenterToCameraDistanceY, 0.0));
+      rightSensorFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(getSensorName() + "_right", sensorFrame, rightSensorTransform);
+   }
+
+   @Override
+   protected void onSensorFrameChanged()
+   {
+      updateReferenceFrames();
    }
 
    @Override
@@ -135,12 +158,11 @@ public class ZEDImageSensor extends ImageSensor
          rightSensorIntrinsics.setFy(sensorIntrinsics.right_cam().fy());
          rightSensorIntrinsics.setCx(sensorIntrinsics.right_cam().cx());
          rightSensorIntrinsics.setCy(sensorIntrinsics.right_cam().cy());
+
+         sensorCenterToCameraDistanceY = -0.5f * sensorIntrinsics.translation().y();
          sensorIntrinsics.close();
 
-         // Get center to camera distance
-         SL_CameraInformation cameraInformation = sl_get_camera_information(cameraID, 0, 0);
-         sensorCenterToCameraDistanceY = 0.5f * cameraInformation.camera_configuration().calibration_parameters().translation().y();
-         cameraInformation.close();
+         updateReferenceFrames();
 
          // Create image retrieval pointers
          slMatPointers[LEFT_COLOR_IMAGE_KEY] = sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_U8_C4, SL_MEM_GPU);
@@ -197,17 +219,6 @@ public class ZEDImageSensor extends ImageSensor
    @Override
    protected boolean grab()
    {
-      // Update the sensor pose
-      ReferenceFrame sensorFrame = sensorFrameSupplier.get();
-
-      leftSensorPose.setToZero(sensorFrame);
-      leftSensorPose.getPosition().subY(sensorCenterToCameraDistanceY);
-      leftSensorPose.changeFrame(ReferenceFrame.getWorldFrame());
-
-      rightSensorPose.setToZero(sensorFrame);
-      rightSensorPose.getPosition().addY(sensorCenterToCameraDistanceY);
-      rightSensorPose.changeFrame(ReferenceFrame.getWorldFrame());
-
       int returnCode;
       try
       {
@@ -269,15 +280,21 @@ public class ZEDImageSensor extends ImageSensor
          {  // Create RawImages from the grabbed retrieved slMats
             if (grabbedImages[LEFT_COLOR_IMAGE_KEY] != null)
                grabbedImages[LEFT_COLOR_IMAGE_KEY].release();
-            grabbedImages[LEFT_COLOR_IMAGE_KEY] = slMatToRawImage(leftColorImagePointer, PixelFormat.BGRA8, leftSensorIntrinsics, leftSensorPose);
+            grabbedImages[LEFT_COLOR_IMAGE_KEY] = slMatToRawImage(leftColorImagePointer,
+                                                                  PixelFormat.BGRA8,
+                                                                  leftSensorIntrinsics,
+                                                                  leftSensorFrame.getTransformToRoot());
 
             if (grabbedImages[RIGHT_COLOR_IMAGE_KEY] != null)
                grabbedImages[RIGHT_COLOR_IMAGE_KEY].release();
-            grabbedImages[RIGHT_COLOR_IMAGE_KEY] = slMatToRawImage(rightColorImagePointer, PixelFormat.BGRA8, rightSensorIntrinsics, rightSensorPose);
+            grabbedImages[RIGHT_COLOR_IMAGE_KEY] = slMatToRawImage(rightColorImagePointer,
+                                                                   PixelFormat.BGRA8,
+                                                                   rightSensorIntrinsics,
+                                                                   rightSensorFrame.getTransformToRoot());
 
             if (grabbedImages[DEPTH_IMAGE_KEY] != null)
                grabbedImages[DEPTH_IMAGE_KEY].release();
-            grabbedImages[DEPTH_IMAGE_KEY] = slMatToRawImage(depthImagePointer, PixelFormat.GRAY16, leftSensorIntrinsics, leftSensorPose);
+            grabbedImages[DEPTH_IMAGE_KEY] = slMatToRawImage(depthImagePointer, PixelFormat.GRAY16, leftSensorIntrinsics, leftSensorFrame.getTransformToRoot());
          }
       }
       catch (ZEDException exception)
@@ -291,7 +308,10 @@ public class ZEDImageSensor extends ImageSensor
       return true;
    }
 
-   private RawImage slMatToRawImage(Pointer slMatPointer, PixelFormat imagePixelFormat, CameraIntrinsics cameraIntrinsics, FramePose3D sensorPose)
+   private RawImage slMatToRawImage(Pointer slMatPointer,
+                                    PixelFormat imagePixelFormat,
+                                    CameraIntrinsics cameraIntrinsics,
+                                    RigidBodyTransformReadOnly sensorTransform)
    {
       GpuMat imageGpuMat = new GpuMat(imageHeight,
                                       imageWidth,
@@ -303,7 +323,7 @@ public class ZEDImageSensor extends ImageSensor
                           imagePixelFormat,
                           cameraIntrinsics,
                           CameraModel.PINHOLE,
-                          new FramePose3D(sensorPose),
+                          sensorTransform,
                           lastGrabTime,
                           grabSequenceNumber,
                           MILLIMETER_TO_METERS);
@@ -319,6 +339,23 @@ public class ZEDImageSensor extends ImageSensor
 
          return grabbedImages[imageKey].get();
       }
+   }
+
+   @Override
+   public ReferenceFrame getImageFrame(int imageKey)
+   {
+      return switch (imageKey)
+      {
+         case LEFT_COLOR_IMAGE_KEY, DEPTH_IMAGE_KEY -> leftSensorFrame;
+         case RIGHT_COLOR_IMAGE_KEY -> rightSensorFrame;
+         default -> null;
+      };
+   }
+
+   @Override
+   public ReferenceFrame[] getImageFrames()
+   {
+      return new ReferenceFrame[] {leftSensorFrame, rightSensorFrame};
    }
 
    public ReferenceFrame getTrackedSensorFrame()

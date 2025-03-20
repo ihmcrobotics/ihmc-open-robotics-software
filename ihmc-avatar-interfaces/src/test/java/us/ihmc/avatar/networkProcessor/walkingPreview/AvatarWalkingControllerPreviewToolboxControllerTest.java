@@ -543,7 +543,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
                                             orientationMean,
                                             linearVelocityMean,
                                             angularVelocityMean);
-      assertTrue(positionMean < positionTreshold, errorMessage);
+      assertTrue(positionMean < positionTreshold, errorMessage + "\n Position mean was " + positionMean + ", should have been less than " + positionTreshold);
       assertTrue(orientationMean < orientationTreshold, errorMessage);
       assertTrue(linearVelocityMean < linearVelocityTreshold, errorMessage);
       assertTrue(angularVelocityMean < angularVelocityTreshold, errorMessage);

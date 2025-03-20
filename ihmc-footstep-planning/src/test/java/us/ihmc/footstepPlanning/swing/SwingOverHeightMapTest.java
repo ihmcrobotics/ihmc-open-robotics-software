@@ -78,7 +78,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class SwingOverHeightMapTest
 {
-   private static boolean visualize = false;
+   private static boolean visualize = true;
    private static final double heightMapResolution = 0.03;
 
    private SimulationConstructionSet2 scs;
@@ -321,7 +321,7 @@ public class SwingOverHeightMapTest
       generator.addCubeReferencedAtCenter(cubeDepth, 0.4, cubeHeight);
 
       FramePose3D startFoot = new FramePose3D();
-      startFoot.getPosition().set(0.0, 0.0, 0.0);
+      startFoot.getPosition().set(-0.05, 0.0, 0.0);
 
       FramePose3D endFoot = new FramePose3D();
       endFoot.getPosition().set(1.0, 0.0, 0.0);
@@ -423,8 +423,8 @@ public class SwingOverHeightMapTest
                                                                                walkingControllerParameters,
                                                                                footPolygons,
                                                                                null,
-                                                                               yoGraphicsListRegistry,
-                                                                               registry);
+                                                                               visualize ? yoGraphicsListRegistry : null,
+                                                                               visualize ? registry : null);
 
       Graphics3DObject startGraphics = new Graphics3DObject();
       Graphics3DObject endGraphics = new Graphics3DObject();
@@ -510,6 +510,7 @@ public class SwingOverHeightMapTest
          scs.setDT(1.0);
          scs.addRegistry(registry);
          scs.addYoGraphic(sylviasBox);
+         scs.addYoGraphic(expander.getSCS2YoGraphics());
          scs.addYoGraphics(YoGraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry));
 //         scs.setGroundVisible(false);
 //         Conver();
@@ -555,10 +556,9 @@ public class SwingOverHeightMapTest
 
       List<Point3D> waypoints = footstepPlan.getFootstep(0).getCustomWaypointPositions();
       RecyclingArrayList<FramePoint3D> waypointListCopy = new RecyclingArrayList<>(FramePoint3D.class);
-      if (waypoints.size() > 0)
+      for (Point3D waypoint : waypoints)
       {
-         waypointListCopy.add().set(waypoints.get(0));
-         waypointListCopy.add().set(waypoints.get(1));
+         waypointListCopy.add().set(waypoint);
       }
 
       twoWaypointSwingGenerator.setStanceFootPosition(stanceFootPosition);
@@ -639,7 +639,7 @@ public class SwingOverHeightMapTest
          collisionBox.getPose().set(boxCenterPose);
 
 
-         double closestDistance = Double.MAX_VALUE;
+         double closestDistance = 0.0;
          Point3DReadOnly closestCollision = null;
 
          for (PlanarRegion planarRegion : planarRegionsList.getPlanarRegionsAsList())
@@ -650,7 +650,7 @@ public class SwingOverHeightMapTest
             collisionRelativeToEndFoot.changeFrame(endFootPoseFrame);
             collisionRelativeToStartFoot.changeFrame(startFootPoseFrame);
 
-            double distanceToCollision = collisionBox.distance(collision);
+            double distanceToCollision = collisionBox.signedDistance(collision);
             if (distanceToCollision < closestDistance)
             {
                closestDistance = distanceToCollision;
@@ -658,14 +658,14 @@ public class SwingOverHeightMapTest
             }
          }
 
-         EuclidShape3DCollisionResult collisionResult = HeightMapCollisionDetector.evaluateCollision(collisionBox, heightMapData);
+         EuclidShape3DCollisionResult collisionResult = HeightMapCollisionDetector.newEvaluateCollision(collisionBox, heightMapData);
          if (collisionResult.getSignedDistance() < closestDistance)
          {
             closestDistance = collisionResult.getSignedDistance();
             closestCollision = new Point3D(collisionResult.getPointOnB());
          }
 
-         boolean colliding = (closestDistance + 1.5e-2) < 0.0;
+         boolean colliding = (closestDistance + 1e-3) <= 0.0;
          if (colliding)
          {
             collisionPosition.set(closestCollision);
@@ -692,6 +692,8 @@ public class SwingOverHeightMapTest
       SwingPlannerParametersBasics parameters = new DefaultSwingPlannerParameters();
 //      parameters.setDoInitialFastApproximation(true);
       parameters.setMinimumSwingFootClearance(0.05);
+      parameters.setMaxDisplacementLow(0.5);
+      parameters.setMaxDisplacementHigh(0.5);
       return parameters;
    }
 
