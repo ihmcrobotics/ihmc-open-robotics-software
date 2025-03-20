@@ -1,6 +1,6 @@
 {
   "title" : "GPU Height Map Parameters",
-  "Flying points filter" : true,
+  "Flying points filter" : false,
   "Reset Height Map" : false,
   "Enable alpha filter" : true,
   "Enable vertical filter" : true,
@@ -35,12 +35,12 @@
     "upperBound" : 0.4
   },
   "Height filter alpha" : {
-    "value" : 0.5,
+    "value" : 0.85,
     "lowerBound" : 0.2,
     "upperBound" : 0.85
   },
   "Spatial alpha" : {
-    "value" : 0.5,
+    "value" : 0.7,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },
