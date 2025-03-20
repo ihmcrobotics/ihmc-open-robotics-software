@@ -1,0 +1,103 @@
+<?xml version = "1.0" ?>
+<robot name="Alexander">
+
+    <!-- Left Arm -->
+    <joint name="LEFT_SHOULDER_Y" type="revolute">
+        <origin xyz="-0.025 0.1 0.214" rpy="0.698132 0.0 0.0"   />
+        <axis xyz="0.0 1.0 0.0" />
+        <parent link="TORSO_LINK" />
+        <child link="LEFT_SHOULDER_Y_LINK" />
+        <limit effort="150.0" lower="-3.141592" upper="1.22173" velocity = "9.0" />
+        <dynamics damping="0.05" friction="0.0"/>
+    </joint>
+
+    <link name="LEFT_SHOULDER_Y_LINK">
+        <inertial>
+            <mass value="2.99"/>
+            <origin rpy="0 0 0" xyz="-0.00264 0.12135 -0.006824"/>
+            <inertia ixx="0.0111046" ixy="0.0002882" ixz="-0.000054" iyy="0.0051699" iyz="0.0009318" izz="0.01176" />
+        </inertial>
+        <visual>
+            <geometry>
+                <mesh filename="package://alexander_v0/meshes/cycloidal_arm/LeftShoulderPitchLink.obj"/>
+            </geometry>
+            <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+        </visual>
+    </link>
+
+    <joint name="LEFT_SHOULDER_X" type="revolute">
+        <origin rpy="-0.698132 0.0 0.0" xyz="0.0 0.15676000 -0.01300000" />
+        <axis xyz="1 0 0" />
+        <parent link="LEFT_SHOULDER_Y_LINK" />
+        <child link="LEFT_SHOULDER_X_LINK" />
+        <limit effort="150.0" lower="-0.349066" upper="2.79253" velocity = "9.0" />
+        <dynamics damping="0.05" friction="0.0"/>
+    </joint>
+
+    <link name="LEFT_SHOULDER_X_LINK">
+        <inertial>
+            <mass value="0.972"/>
+            <origin rpy="0 0 0" xyz="0.01251711 0.0188309 -0.03849849"/>
+            <inertia ixx="0.0029485" ixy="0.0001386" ixz="-0.0003345" iyy="0.0023587" iyz="0.0005255" izz="0.0014366" />
+        </inertial>
+        <visual>
+            <geometry>
+                <mesh filename="package://alexander_v0/meshes/cycloidal_arm/LeftShoulderRollLink_shortBicep.obj"/>
+            </geometry>
+            <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+        </visual>
+    </link>
+
+    <joint name="LEFT_SHOULDER_Z" type="revolute">
+        <origin rpy="0.0 0.0 0.0" xyz="0.0 0.035 0.0" />
+        <axis xyz="0.0 0.0 1.0" />
+        <parent link="LEFT_SHOULDER_X_LINK" />
+        <child link="LEFT_SHOULDER_Z_LINK" />
+        <limit effort="80.0" lower="-1.91986" upper="1.22173" velocity = "11.5" />
+        <dynamics damping="0.05" friction="0.0"/>
+    </joint>
+
+    <link name="LEFT_SHOULDER_Z_LINK">
+        <inertial>
+            <mass value="2.91"/>
+            <origin rpy="0 0 0" xyz="0.00510403 0.00314332 -0.21695413"/>
+            <inertia ixx="0.0267829" ixy="-0.000011" ixz="0.0015998" iyy="0.0265514" iyz="0.0004426" izz="0.003052" />
+        </inertial>
+        <visual>
+            <geometry>
+                <mesh filename="package://alexander_v0/meshes/cycloidal_arm/LeftShoulderYawLink.obj"/>
+            </geometry>
+            <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0867"/>
+        </visual>
+    </link>
+
+    <joint name="LEFT_ELBOW_Y" type="revolute">
+        <origin rpy="0.0 0.0 0.0" xyz="0.015 0.0 -0.3127" />
+        <axis xyz="0.0 1.0 0.0" />
+        <parent link="LEFT_SHOULDER_Z_LINK" />
+        <child link="LEFT_ELBOW_PITCH_LINK" />
+        <limit effort="80.0" lower="-2.35619" upper="0.174532925" velocity = "11.5" />
+        <dynamics damping="0.05" friction="0.0"/>
+    </joint>
+
+    <link name="LEFT_ELBOW_PITCH_LINK">
+        <inertial>
+            <!-- Normal forearm nub -->
+            <mass value="0.616"/>
+            <origin rpy="0 0 0" xyz="-0.01090935 -0.01147189 -0.10388715"/>
+            <inertia ixx="0.00760733" ixy="2.242e-5" ixz="-2.583e-4" iyy="0.00767556" iyz="0.00061995" izz="4.554e-4" />
+
+            <!-- 12lbs dumbbell -->
+            <!--<mass value="5.9"/>-->
+            <!--<origin rpy="0 0 0" xyz="0.05 0.0 -0.225"/>-->
+            <!--<inertia ixx="0.05" ixy="2.242e-5" ixz="-2.583e-4" iyy="0.015" iyz="0.00061995" izz="0.05" />-->
+        </inertial>
+        <visual>
+            <geometry>
+                <mesh filename="package://alexander_v0/meshes/cycloidal_arm/LEFT_ELBOW_PITCH_LINK_413mm_LENGTH.obj"/>
+            </geometry>
+            <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+        </visual>
+    </link>
+
+</robot>
