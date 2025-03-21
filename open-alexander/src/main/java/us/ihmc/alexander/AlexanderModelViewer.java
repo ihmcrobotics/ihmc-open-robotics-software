@@ -6,7 +6,6 @@ import us.ihmc.commonWalkingControlModules.parameterEstimation.InertiaVisualizat
 import us.ihmc.commonWalkingControlModules.parameterEstimation.YoInertiaEllipsoid;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
-import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.scs2.definition.SCS2DefinitionTools;
@@ -24,6 +23,7 @@ import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizer;
 import us.ihmc.scs2.simulation.SimulationSession;
+import us.ihmc.scs2.simulation.collision.CollidableHelper;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.simulationToolkit.RobotDefinitionTools;
 

@@ -9,7 +9,7 @@ public class AlexanderPhysicalPropertiesV0 implements AlexanderPhysicalPropertie
 {
    private final double ANKLE_HEIGHT = 0.0665;
 
-   private final double FOOT_WIDTH_REDUCTION = 0.03;
+   private final double FOOT_WIDTH_REDUCTION = 0.015;
    private final double FOOT_LENGTH_REDUCTION = 0.03;
 
    private final double ACTUAL_FOOT_LENGTH = 0.2;

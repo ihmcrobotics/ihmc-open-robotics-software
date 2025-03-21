@@ -69,7 +69,7 @@ public class OpenAlexanderWalkingControllerParameters extends WalkingControllerP
     * When {@code true}, the chest and hand will be reset to a default pose right when starting to walk, cancelling any ongoing trajectory and not allowing to
     * hold a pose in world frame for instance.
     */
-   private boolean doPrepareManipulationForLocomotion = false;
+   private boolean doPrepareManipulationForLocomotion = true;
    /**
     * When {@code true}, the pelvis will be reset to a default pose right when starting to walk, cancelling any ongoing trajectory and not allowing to hold a
     * pose in world frame for instance.
@@ -238,7 +238,7 @@ public class OpenAlexanderWalkingControllerParameters extends WalkingControllerP
    @Override
    public double getMaximumLegLengthForSingularityAvoidance()
    {
-      return 0.848;
+      return 0.78;
    }
 
    @Override

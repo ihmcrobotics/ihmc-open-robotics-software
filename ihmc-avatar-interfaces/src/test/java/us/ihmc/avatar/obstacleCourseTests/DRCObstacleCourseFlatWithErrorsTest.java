@@ -1,7 +1,5 @@
 package us.ihmc.avatar.obstacleCourseTests;
 
-import static us.ihmc.robotics.Assert.assertTrue;
-
 import java.io.InputStream;
 
 import org.junit.jupiter.api.AfterEach;
@@ -30,6 +28,8 @@ import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.PelvisKin
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class DRCObstacleCourseFlatWithErrorsTest implements MultiRobotTestInterface
 {

@@ -1,16 +1,15 @@
-package us.ihmc.atlas.obstacleCourseTests;
+package us.ihmc.alexander.obstacleCourseTests;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-
-import us.ihmc.atlas.AtlasRobotModel;
-import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.alexander.AlexanderVersion;
+import us.ihmc.alexander.OpenAlexanderRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.DRCObstacleCourseDoNothingTest;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
 
-public class AtlasObstacleCourseDoNothingTest extends DRCObstacleCourseDoNothingTest
+public class AlexanderObstacleCourseDoNothingTest extends DRCObstacleCourseDoNothingTest
 {
    private DRCRobotModel robotModel;
 
@@ -30,7 +29,7 @@ public class AtlasObstacleCourseDoNothingTest extends DRCObstacleCourseDoNothing
    @Test
    public void testDoNothing()
    {
-      robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
+      robotModel = new OpenAlexanderRobotModel(AlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS);
       super.testDoNothing1();
    }
 }
