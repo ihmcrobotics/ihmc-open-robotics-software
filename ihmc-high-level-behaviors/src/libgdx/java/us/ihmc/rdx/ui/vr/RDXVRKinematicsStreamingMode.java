@@ -332,6 +332,7 @@ public class RDXVRKinematicsStreamingMode
    {
       if (!recordROS2Log.get())
          return;
+      openGrippers();
       ROS2LogMessage message = new ROS2LogMessage();
       message.setRequestedState((isStarting ? ROS2LoggerRequestedState.START : ROS2LoggerRequestedState.FINISH).toByte());
       ros2LogMessagePublisher.publish(message);
@@ -693,6 +694,18 @@ public class RDXVRKinematicsStreamingMode
             wakeUpToolbox();
             reinitializeToolbox();
             wakeUpToolbox();
+         }
+      }
+   }
+
+   private void openGrippers()
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         if (handControlModes.get(robotSide) == RDXHandControlMode.GRIPPER)
+         {
+            handsAreOpen.get(robotSide).setValue(true);
+            handManager.publishHandCommand(robotSide, SakeHandPreset.FULLY_OPEN, false, false);
          }
       }
    }
