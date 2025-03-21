@@ -24,7 +24,7 @@ public class AlexanderObstacleCourseFlatWithErrorsTest extends DRCObstacleCourse
    @Override
    public String getSimpleRobotName()
    {
-      return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ATLAS);
+      return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ALEXANDER);
    }
 
    @Tag("humanoid-flat-ground-slow-3")

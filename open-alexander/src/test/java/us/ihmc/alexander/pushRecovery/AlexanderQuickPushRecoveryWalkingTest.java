@@ -20,7 +20,7 @@ public class AlexanderQuickPushRecoveryWalkingTest extends AvatarQuickPushRecove
    @Override
    public String getSimpleRobotName()
    {
-      return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ATLAS);
+      return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ALEXANDER);
    }
 
    @Tag("humanoid-push-recovery")

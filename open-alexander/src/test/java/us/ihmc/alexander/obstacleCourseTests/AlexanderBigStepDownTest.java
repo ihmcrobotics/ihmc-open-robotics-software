@@ -43,7 +43,7 @@ public class AlexanderBigStepDownTest extends AvatarBigStepDownTest
    @Override
    public String getSimpleRobotName()
    {
-      return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ATLAS);
+      return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ALEXANDER);
    }
 
    @Tag("humanoid-obstacle")

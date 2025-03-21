@@ -20,7 +20,7 @@ public class AlexanderPushRecoveryWithCrossOverWalkingTest extends AvatarPushRec
    @Override
    public String getSimpleRobotName()
    {
-      return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ATLAS);
+      return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ALEXANDER);
    }
 
    @Override

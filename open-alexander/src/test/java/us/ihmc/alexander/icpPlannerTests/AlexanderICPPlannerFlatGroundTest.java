@@ -61,7 +61,7 @@ public class AlexanderICPPlannerFlatGroundTest extends AvatarICPPlannerFlatGroun
    @Override
    public String getSimpleRobotName()
    {
-      return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ATLAS);
+      return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ALEXANDER);
    }
 
    private static class TestModel extends OpenAlexanderRobotModel

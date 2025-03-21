@@ -34,7 +34,7 @@ public class AlexanderEndToEndCinderBlockFieldTest extends EndToEndCinderBlockFi
    @Override
    public String getSimpleRobotName()
    {
-      return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ATLAS);
+      return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ALEXANDER);
    }
 
    @Override

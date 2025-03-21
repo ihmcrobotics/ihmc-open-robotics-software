@@ -310,7 +310,7 @@ public class AlexanderFinalsWorldStairsTest
 
    public String getSimpleRobotName()
    {
-      return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ATLAS);
+      return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ALEXANDER);
    }
 
    private void setupCameraForWalkingUpStairs()

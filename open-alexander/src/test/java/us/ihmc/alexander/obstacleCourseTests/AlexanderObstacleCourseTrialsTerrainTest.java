@@ -36,7 +36,7 @@ public class AlexanderObstacleCourseTrialsTerrainTest extends DRCObstacleCourseT
    @Override
    public String getSimpleRobotName()
    {
-      return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ATLAS);
+      return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ALEXANDER);
    }
 
    @Test

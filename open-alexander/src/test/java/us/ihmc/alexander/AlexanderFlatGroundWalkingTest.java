@@ -72,7 +72,7 @@ public class AlexanderFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
       }
       catch (TestAbortedException e)
       {
-         System.out.println("Not Nightly Build, skipping AtlasFlatGroundWalkingTest.testFlatGroundWalkingRunsSameWayTwice");
+         System.out.println("Not Nightly Build, skipping AlexanderlatGroundWalkingTest.testFlatGroundWalkingRunsSameWayTwice");
       }
    }
 
@@ -85,6 +85,6 @@ public class AlexanderFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
    @Override
    public String getSimpleRobotName()
    {
-      return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ATLAS);
+      return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ALEXANDER);
    }
 }

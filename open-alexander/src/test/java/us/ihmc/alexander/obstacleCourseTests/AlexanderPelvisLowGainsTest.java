@@ -36,7 +36,7 @@ public class AlexanderPelvisLowGainsTest extends DRCPelvisLowGainsTest
    @Override
    public String getSimpleRobotName()
    {
-      return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ATLAS);
+      return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ALEXANDER);
    }
 
    @Tag("humanoid-flat-ground-slow-4")
