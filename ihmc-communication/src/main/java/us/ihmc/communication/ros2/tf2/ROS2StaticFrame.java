@@ -11,7 +11,7 @@ import us.ihmc.ros2.ROS2Node;
  */
 public class ROS2StaticFrame extends ROS2Frame
 {
-   private final RigidBodyTransform previousTransformToRoot;
+   private final boolean publishMessage;
 
    /**
     * Constructs a non-root frame.
@@ -48,9 +48,7 @@ public class ROS2StaticFrame extends ROS2Frame
    {
       super(ros2Node, id, parentFrame, transformToParent, isAStationaryFrame, isZUpFrame, true);
 
-      previousTransformToRoot = new RigidBodyTransform(getTransformToRoot());
-
-      publishTFMessages();
+      publishMessage = shouldPublishMessage(parentFrame);
    }
 
    private ROS2StaticFrame(String id)
@@ -67,6 +65,17 @@ public class ROS2StaticFrame extends ROS2Frame
    public static ROS2StaticFrame constructARootFrame(String id)
    {
       return new ROS2StaticFrame(id);
+   }
+
+   private boolean shouldPublishMessage(ReferenceFrame parentFrame)
+   {
+      if (parentFrame instanceof ROS2Frame || parentFrame.isRootFrame())
+         return false;
+
+      if (!parentFrame.isFixedInParent())
+         return true;
+
+      return shouldPublishMessage(parentFrame.getParent());
    }
 
    @Override
@@ -90,9 +99,12 @@ public class ROS2StaticFrame extends ROS2Frame
    {
       super.update();
 
-      if (!previousTransformToRoot.geometricallyEquals(getTransformToRoot(), 1E-6))
+      if (publishMessage)
          publishTFMessages();
+   }
 
-      previousTransformToRoot.set(getTransformToRoot());
+   public boolean publishesMessageOnUpdate()
+   {
+      return publishMessage;
    }
 }

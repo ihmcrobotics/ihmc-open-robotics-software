@@ -25,10 +25,11 @@ public class ROS2FrameTest
    {
       ROS2Node node = new ROS2NodeBuilder().build("test_node");
 
-      String id = "test_static_frame";
-      ReferenceFrame parentFrame = ReferenceFrameTools.getWorldFrame();
+      // Test basic static frame
+      String id = "test_static_frame_0";
+      ReferenceFrame worldFrame = ReferenceFrameTools.getWorldFrame();
       RigidBodyTransformReadOnly transformToParent = new RigidBodyTransform(new YawPitchRoll(0.1, 0.2, 0.3), new Vector3D(0.4, 0.5, 0.6));
-      ROS2Frame staticFrame = new ROS2StaticFrame(node, id, parentFrame, transformToParent);
+      ROS2StaticFrame staticFrame = new ROS2StaticFrame(node, id, worldFrame, transformToParent);
 
       assertFalse(staticFrame.isWorldFrame());
       assertFalse(staticFrame.isRootFrame());
@@ -38,10 +39,21 @@ public class ROS2FrameTest
 
       assertEquals(id, staticFrame.getFrameId());
       assertEquals(id, staticFrame.getName());
-      assertEquals(parentFrame, staticFrame.getParent());
+      assertEquals(worldFrame, staticFrame.getParent());
       EuclidCoreTestTools.assertEquals(transformToParent, staticFrame.getTransformToParent(), EPSILON);
 
+      assertFalse(staticFrame.publishesMessageOnUpdate());
+
+      // Test static frame that should publish its tf message every update
+      ReferenceFrame grandParentFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("grandparent_frame", worldFrame, new RigidBodyTransform());
+      ReferenceFrame parentFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformFromParent("parent_frame", grandParentFrame, new RigidBodyTransform());
+      String id2 = "test_static_frame_1";
+      ROS2StaticFrame staticFrame1 = new ROS2StaticFrame(node, id2, parentFrame, new RigidBodyTransform());
+
+      assertTrue(staticFrame1.publishesMessageOnUpdate());
+
       staticFrame.remove();
+      staticFrame1.remove();
       node.destroy();
    }
 

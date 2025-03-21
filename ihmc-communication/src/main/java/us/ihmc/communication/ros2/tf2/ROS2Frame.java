@@ -59,6 +59,8 @@ public abstract class ROS2Frame extends ReferenceFrame
          tfSubscription = null;
          tfMessageToReceive = null;
       }
+
+      publishTFMessages();
    }
 
    private void receiveTFMessage(@SuppressWarnings("deprecation") Subscriber<TFMessage> subscriber)

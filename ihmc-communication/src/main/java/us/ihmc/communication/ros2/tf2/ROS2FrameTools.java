@@ -3,8 +3,6 @@ package us.ihmc.communication.ros2.tf2;
 import geometry_msgs.msg.dds.TransformStamped;
 import tf2_msgs.msg.dds.TFMessage;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 
@@ -42,29 +40,5 @@ public class ROS2FrameTools
       // If the parent isn't a ROS2Frame, pack the parent into the TFMessage to ensure full TF tree
       if (!(frame.getParent() instanceof ROS2Frame))
          packTFMessages(frame.getParent(), timestampSeconds, timestampNanos, tfMessage, tfStaticMessage);
-   }
-
-   public static ROS2Frame createFollowingFrame(ROS2Node ros2Node, String frameId, ReferenceFrame referenceFrameToFollow)
-   {
-      return new ROS2Frame(ros2Node,
-                           frameId,
-                           referenceFrameToFollow.getParent(),
-                           referenceFrameToFollow.getTransformToParent(),
-                           referenceFrameToFollow.isAStationaryFrame(),
-                           referenceFrameToFollow.isZupFrame(),
-                           referenceFrameToFollow.isFixedInParent())
-      {
-         @Override
-         protected void onNewTransformReceived(TransformStamped newTransform)
-         {
-            // Do nothing
-         }
-
-         @Override
-         protected void updateTransformToParent(RigidBodyTransform transformToParent)
-         {
-            transformToParent.set(referenceFrameToFollow.getTransformToParent());
-         }
-      };
    }
 }

@@ -7,6 +7,7 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.ros2.ROS2Node;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 /**
  * A ROS 2 frame with a changing transform to parent.
@@ -63,8 +64,6 @@ public class ROS2MutableFrame extends ROS2Frame
 
       newestTransformToParent = new RigidBodyTransform();
       getTransformToParent(newestTransformToParent);
-
-      publishTFMessages();
    }
 
    /**
@@ -76,6 +75,18 @@ public class ROS2MutableFrame extends ROS2Frame
    public void setNewTransformToParent(RigidBodyTransformReadOnly newTransformToParent)
    {
       newestTransformToParent.set(newTransformToParent);
+      hasNewTransform.set(true);
+   }
+
+   /**
+    * Set this frame's transform to parent.
+    * Will be applied on the next call to {@link #update()}.
+    *
+    * @param transformUpdater Method applied to this frame's transform to parent.
+    */
+   public void setNewTransformToParent(Consumer<RigidBodyTransform> transformUpdater)
+   {
+      transformUpdater.accept(newestTransformToParent);
       hasNewTransform.set(true);
    }
 
