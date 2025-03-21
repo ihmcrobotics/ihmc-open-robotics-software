@@ -7,14 +7,14 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class AlexanderPhysicalPropertiesV0 implements AlexanderPhysicalProperties
 {
-   private final double ANKLE_HEIGHT = 0.0665;
+   private final double ANKLE_HEIGHT = 0.06;
 
    private final double FOOT_WIDTH_REDUCTION = 0.015;
-   private final double FOOT_LENGTH_REDUCTION = 0.03;
+   private final double FOOT_LENGTH_REDUCTION = 0.01;
 
-   private final double ACTUAL_FOOT_LENGTH = 0.2;
+   private final double ACTUAL_FOOT_LENGTH = 0.197;
    private final double ACTUAL_FOOT_WIDTH = 0.09;
-   private final double FOOT_BACK = 0.073 - FOOT_LENGTH_REDUCTION / 2.0;
+   private final double FOOT_BACK = 0.052 - FOOT_LENGTH_REDUCTION / 2.0;
    private final double THIGH_LENGTH = 0.431;
    private final double SHIN_LENGTH = 0.406;
 
@@ -83,6 +83,7 @@ public class AlexanderPhysicalPropertiesV0 implements AlexanderPhysicalPropertie
       return modelMassScalePower;
    }
 
+   @Override
    public double getAnkleHeight()
    {
       return ankleHeight;
@@ -106,6 +107,11 @@ public class AlexanderPhysicalPropertiesV0 implements AlexanderPhysicalPropertie
    public double getActualFootWidth()
    {
       return footWidth;
+   }
+
+   public double getActualFootBack()
+   {
+      return footBack;
    }
 
    public double getFootLengthForControl()

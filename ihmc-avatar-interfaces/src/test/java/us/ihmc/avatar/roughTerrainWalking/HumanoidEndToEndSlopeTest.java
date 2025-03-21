@@ -109,7 +109,7 @@ public abstract class HumanoidEndToEndSlopeTest implements MultiRobotTestInterfa
       if (useExperimentalPhysicsEngine)
       {
          ContactParameters contactParameters = ContactParameters.defaultIneslasticContactParameters(true);
-         contactParameters.setCoefficientOfFriction(0.9);
+         contactParameters.setCoefficientOfFriction(1.1);
          contactParameters.setCoulombMomentFrictionRatio(0.8);
          simulationTestHelperFactory.setImpulseBasedPhysicsEngineContactParameters(contactParameters);
       }

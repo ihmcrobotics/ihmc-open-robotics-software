@@ -1,8 +1,5 @@
 package us.ihmc.avatar;
 
-import static us.ihmc.robotics.Assert.assertEquals;
-import static us.ihmc.robotics.Assert.assertTrue;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,6 +25,8 @@ import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
 {
@@ -81,7 +80,7 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
    {
       setupTest();
       walkPaused.set(false);
-      assertTrue(simulationTestHelper.simulateNow(1.0));
+      assertTrue(simulationTestHelper.simulateNow(0.5));
       sendFootstepCommand(0.0, getNumberOfFootsteps());
       assertTrue(simulationTestHelper.simulateNow(getTimeForPausing()));
       PauseWalkingMessage pauseWalkingMessage = HumanoidMessageTools.createPauseWalkingMessage(true);
@@ -283,7 +282,6 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
       simulationTestHelper.start();
       YoRegistry registry = simulationTestHelper.getRootRegistry();
       walkPaused = new YoBoolean("isWalkPaused", registry);
-      ThreadTools.sleep(1000);
       setupCameraSideView();
    }
 

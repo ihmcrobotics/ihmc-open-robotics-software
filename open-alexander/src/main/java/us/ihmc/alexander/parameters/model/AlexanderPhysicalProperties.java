@@ -9,7 +9,11 @@ public interface AlexanderPhysicalProperties
 
    double getActualFootWidth();
 
+   double getActualFootBack();
+
    double getFootWidthForControl();
+
+   double getAnkleHeight();
 
    default double getToeWidthForControl()
    {

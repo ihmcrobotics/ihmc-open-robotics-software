@@ -148,7 +148,7 @@
                   <parameter name="kpXYSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="150.0" />
                   <parameter name="kpZSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="200.0" />
                   <parameter name="zetaXYSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.7" />
-                  <parameter name="zetaZSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.7" />
+                  <parameter name="zetaZSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.9" />
                   <parameter name="maxDerivativeErrorSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
                   <parameter name="maxProportionalErrorSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
                   <parameter name="maximumFeedbackSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />

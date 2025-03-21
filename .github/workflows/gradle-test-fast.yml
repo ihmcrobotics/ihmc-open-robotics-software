@@ -12,66 +12,66 @@ permissions:
   contents: read
 
 jobs:
-  atlas:
+  alexander:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
-      subproject: 'atlas'
+      subproject: 'alexander'
       test-category: 'fast'
-  atlas-video:
+  alexander-video:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
-      subproject: 'atlas'
+      subproject: 'alexander'
       test-category: 'video'
-  atlas-controller-api:
+  alexander-controller-api:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
-      subproject: 'atlas'
+      subproject: 'alexander'
       test-category: 'controller-api'
-  atlas-controller-api-2:
+  alexander-controller-api-2:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
-      subproject: 'atlas'
+      subproject: 'alexander'
       test-category: 'controller-api-2'
-  atlas-humanoid-behaviors:
+  alexander-humanoid-behaviors:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
-      subproject: 'atlas'
+      subproject: 'alexander'
       test-category: 'humanoid-behaviors'
-  atlas-humanoid-flat-ground:
+  alexander-humanoid-flat-ground:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
-      subproject: 'atlas'
+      subproject: 'alexander'
       test-category: 'humanoid-flat-ground'
-  atlas-humanoid-flat-ground-bullet:
+  alexander-humanoid-flat-ground-bullet:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
-      subproject: 'atlas'
+      subproject: 'alexander'
       test-category: 'humanoid-flat-ground-bullet'
-  atlas-humanoid-obstacle:
+  alexander-humanoid-obstacle:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
-      subproject: 'atlas'
+      subproject: 'alexander'
       test-category: 'humanoid-obstacle'
-  atlas-humanoid-obstacle-2:
+  alexander-humanoid-obstacle-2:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
-      subproject: 'atlas'
+      subproject: 'alexander'
       test-category: 'humanoid-obstacle-2'
       requires-self-hosted: true
-  atlas-humanoid-push-recovery:
+  alexander-humanoid-push-recovery:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
-      subproject: 'atlas'
+      subproject: 'alexander'
       test-category: 'humanoid-push-recovery'
-  atlas-humanoid-rough-terrain:
+  alexander-humanoid-rough-terrain:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
-      subproject: 'atlas'
+      subproject: 'alexander'
       test-category: 'humanoid-rough-terrain'
-  atlas-humanoid-toolbox:
+  alexander-humanoid-toolbox:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
-      subproject: 'atlas'
+      subproject: 'alexander'
       test-category: 'humanoid-toolbox'
   example-simulations:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
@@ -215,18 +215,18 @@ jobs:
     name: Force update on evergreen
     runs-on: ubuntu-latest
     needs: 
-      - atlas
-      - atlas-video
-      - atlas-controller-api
-      - atlas-controller-api-2
-      - atlas-humanoid-behaviors
-      - atlas-humanoid-flat-ground
-      - atlas-humanoid-flat-ground-bullet
-      - atlas-humanoid-obstacle
-      - atlas-humanoid-obstacle-2
-      - atlas-humanoid-push-recovery
-      - atlas-humanoid-rough-terrain
-      - atlas-humanoid-toolbox
+      - alexander
+      - alexander-video
+      - alexander-controller-api
+      - alexander-controller-api-2
+      - alexander-humanoid-behaviors
+      - alexander-humanoid-flat-ground
+      - alexander-humanoid-flat-ground-bullet
+      - alexander-humanoid-obstacle
+      - alexander-humanoid-obstacle-2
+      - alexander-humanoid-push-recovery
+      - alexander-humanoid-rough-terrain
+      - alexander-humanoid-toolbox
       - example-simulations
       - ihmc-avatar-interfaces
       - ihmc-common-walking-control-modules

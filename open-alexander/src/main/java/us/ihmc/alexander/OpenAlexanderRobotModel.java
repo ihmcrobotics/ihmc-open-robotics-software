@@ -371,7 +371,7 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
    @Override
    public RobotCollisionModel getSimulationRobotCollisionModel(CollidableHelper helper, String robotCollisionMask, String... environmentCollisionMasks)
    {
-      AlexanderSimulationCollisionModel collisionModel = new AlexanderSimulationCollisionModel(jointMap);
+      AlexanderSimulationCollisionModel collisionModel = new AlexanderSimulationCollisionModel(jointMap, physicalProperties);
       collisionModel.setCollidableHelper(helper, robotCollisionMask, environmentCollisionMasks);
       return collisionModel;
    }

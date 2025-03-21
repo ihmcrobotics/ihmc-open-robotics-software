@@ -396,7 +396,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
          handTrackingWatchers.put(robotSide, handTrackingWatcher);
       }
 
-      boolean success = simulationTestHelper.simulateNow(1.0);
+      boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
       RigidBodyBasics chest = controllerFullRobotModel.getChest();

@@ -138,7 +138,7 @@ public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterf
       }
    }
 
-   private void publishHeightOffset(double heightOffset) throws Exception
+   private void publishHeightOffset(double heightOffset)
    {
       if (!Double.isFinite(heightOffset) || EuclidCoreTools.epsilonEquals(0.0, heightOffset, 1.0e-3))
          return;
@@ -148,7 +148,7 @@ public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterf
       assertTrue(simulationTestHelper.simulateNow(0.5));
    }
 
-   private void publishFootstepsAndSimulate(DRCRobotModel robotModel, FootstepDataListMessage footsteps) throws Exception
+   private void publishFootstepsAndSimulate(DRCRobotModel robotModel, FootstepDataListMessage footsteps)
    {
       double walkingDuration = EndToEndTestTools.computeWalkingDuration(footsteps, robotModel.getWalkingControllerParameters());
       simulationTestHelper.publishToController(footsteps);
