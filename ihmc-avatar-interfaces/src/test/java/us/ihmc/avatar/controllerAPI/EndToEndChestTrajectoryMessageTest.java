@@ -121,7 +121,6 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT_BUT_ALMOST_PI;
       simulationTestHelper = createSimulationTestHelper(selectedLocation);
       simulationTestHelper.start();
-      ThreadTools.sleep(1000);
       assertTrue(simulationTestHelper.simulateNow(0.5));
 
       CommonHumanoidReferenceFrames humanoidReferenceFrames = simulationTestHelper.getControllerReferenceFrames();
@@ -191,7 +190,6 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       simulationTestHelper.createSubscriberFromController(TaskspaceTrajectoryStatusMessage.class, statusMessages::add);
       double controllerDT = getRobotModel().getControllerDT();
 
-      ThreadTools.sleep(1000);
       boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
@@ -534,7 +532,6 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       simulationTestHelper.createSubscriberFromController(TaskspaceTrajectoryStatusMessage.class, statusMessages::add);
       double controllerDT = getRobotModel().getControllerDT();
 
-      ThreadTools.sleep(1000);
       boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
@@ -661,7 +658,6 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       simulationTestHelper = createSimulationTestHelper();
       simulationTestHelper.start();
 
-      ThreadTools.sleep(1000);
       boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
@@ -791,7 +787,6 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       simulationTestHelper = createSimulationTestHelper();
       simulationTestHelper.start();
 
-      ThreadTools.sleep(1000);
       boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
@@ -929,7 +924,6 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       simulationTestHelper.createSubscriberFromController(TaskspaceTrajectoryStatusMessage.class, statusMessages::add);
       double controllerDT = getRobotModel().getControllerDT();
 
-      ThreadTools.sleep(1000);
       boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
@@ -1100,7 +1094,6 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       simulationTestHelper = createSimulationTestHelper();
       simulationTestHelper.start();
 
-      ThreadTools.sleep(1000);
       boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
@@ -1208,7 +1201,6 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT_BUT_ALMOST_PI;
       simulationTestHelper = createSimulationTestHelper(selectedLocation);
       simulationTestHelper.start();
-      ThreadTools.sleep(1000);
       assertTrue(simulationTestHelper.simulateNow(0.5));
 
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
@@ -1312,7 +1304,6 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT_BUT_ALMOST_PI;
       simulationTestHelper = createSimulationTestHelper(selectedLocation);
       simulationTestHelper.start();
-      ThreadTools.sleep(1000);
       assertTrue(simulationTestHelper.simulateNow(0.5));
 
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
@@ -1375,7 +1366,6 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       simulationTestHelper = createSimulationTestHelper();
       simulationTestHelper.start();
 
-      ThreadTools.sleep(1000);
       boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
@@ -1511,7 +1501,6 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       simulationTestHelper = createSimulationTestHelper();
       simulationTestHelper.start();
 
-      ThreadTools.sleep(1000);
       boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
@@ -1581,7 +1570,6 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       simulationTestHelper.start();
       simulationTestHelper.setCameraFocusPosition(0.4, 0.0, 1.0);
       simulationTestHelper.setCameraPosition(0.4, 8.0, 1.0);
-      ThreadTools.sleep(1000);
       assertTrue(simulationTestHelper.simulateNow(0.1));
 
       // Apply a push to the robot so we get some tracking error going
@@ -1640,8 +1628,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       simulationTestHelper.start();
       simulationTestHelper.getControllerRegistry().addChild(testRegistry);
 
-      ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateNow(1.5);
+      boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
@@ -1769,7 +1756,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
    {
       Vector3D error = findControlErrorRotationVector(scs, chest);
       boolean isErrorLow = error.norm() <= errorTolerance;
-      assertTrue(isErrorLow, "Error: " + error.norm());
+      assertTrue(isErrorLow, "Error: " + error.norm() + ", wanted less than " + errorTolerance);
    }
 
    public static void assertSingleWaypointExecuted(FrameQuaternion desiredOrientation, YoVariableHolder scs, RigidBodyBasics body, String prefix)

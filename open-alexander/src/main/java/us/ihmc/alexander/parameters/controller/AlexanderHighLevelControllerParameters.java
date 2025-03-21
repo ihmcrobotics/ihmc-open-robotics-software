@@ -405,7 +405,7 @@ public class AlexanderHighLevelControllerParameters implements HighLevelControll
          ret.add(new GroupParameter<>("LegJoints", parameters, jointNames));
       }
 
-      { // Spine pitch and neck joints
+      { // Neck joints
          JointAccelerationIntegrationParameters parameters = new JointAccelerationIntegrationParameters();
          parameters.setVelocityBreakFrequency(1.00);
          parameters.setPositionBreakFrequency(0.05);
@@ -413,12 +413,10 @@ public class AlexanderHighLevelControllerParameters implements HighLevelControll
          parameters.setVelocityReferenceAlpha(1.0);
          List<String> jointNames = new ArrayList<>();
 
-         jointNames.add(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH));
-
          jointNames.add(jointMap.getNeckJointName(NeckJointName.DISTAL_NECK_PITCH));
          jointNames.add(jointMap.getNeckJointName(NeckJointName.DISTAL_NECK_YAW));
 
-         ret.add(new GroupParameter<>("SpinePitchRoll", parameters, jointNames));
+         ret.add(new GroupParameter<>("Neck", parameters, jointNames));
       }
 
       { // Upper arm joints
@@ -510,11 +508,10 @@ public class AlexanderHighLevelControllerParameters implements HighLevelControll
          parameters.setVelocityReferenceAlpha(1.0);
          List<String> jointNames = new ArrayList<>();
 
-         jointNames.add(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH));
          jointNames.add(jointMap.getNeckJointName(NeckJointName.DISTAL_NECK_PITCH));
          jointNames.add(jointMap.getNeckJointName(NeckJointName.DISTAL_NECK_YAW));
 
-         ret.add(new GroupParameter<>("SpinePitchRoll", parameters, jointNames));
+         ret.add(new GroupParameter<>("Neck", parameters, jointNames));
       }
 
       { // Upper arm joints

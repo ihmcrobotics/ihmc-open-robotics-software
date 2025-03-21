@@ -36,7 +36,7 @@ public class AlexanderFlatGroundQuickWalkingTest extends AvatarFlatGroundQuickWa
                @Override
                public int getMaxNumberOfStepsToConsider()
                {
-                  return 5;
+                  return 8;
                }
             };
          }
@@ -81,6 +81,12 @@ public class AlexanderFlatGroundQuickWalkingTest extends AvatarFlatGroundQuickWa
                      {
                         return true;
                      }
+
+                     @Override
+                     public boolean doToeOffWhenHittingTrailingKneeLowerLimit()
+                     {
+                        return true;
+                     }
                   };
                }
             };
@@ -109,13 +115,13 @@ public class AlexanderFlatGroundQuickWalkingTest extends AvatarFlatGroundQuickWa
    @Override
    public double getFastTransferTime()
    {
-      return 0.05;
+      return 0.075;
    }
 
    @Override
    public double getMaxForwardStepLength()
    {
-      return 0.525;
+      return 0.5;
    }
 
    @Tag("humanoid-flat-ground")

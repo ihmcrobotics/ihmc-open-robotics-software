@@ -544,7 +544,7 @@ public class OpenAlexanderWalkingControllerParameters extends WalkingControllerP
    public Map<String, RigidBodyControlMode> getDefaultControlModesForRigidBodies()
    {
       Map<String, RigidBodyControlMode> defaultControlModes = new HashMap<>();
-      defaultControlModes.put(jointMap.getChestName(), RigidBodyControlMode.TASKSPACE);
+      defaultControlModes.put(jointMap.getChestName(), RigidBodyControlMode.JOINTSPACE);
       return defaultControlModes;
    }
 

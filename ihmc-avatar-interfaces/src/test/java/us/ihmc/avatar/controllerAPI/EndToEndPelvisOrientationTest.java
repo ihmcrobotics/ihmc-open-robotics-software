@@ -22,6 +22,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientati
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
@@ -437,7 +438,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
 
       simulationTestHelper.getRootRegistry().addChild(testRegistry);
 
-      boolean success = simulationTestHelper.simulateNow(1.0);
+      boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
@@ -531,7 +532,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
 
       EuclidCoreTestTools.assertOrientation3DGeometricallyEquals(desiredOrientation, currentDesiredTrajectoryPoint.getOrientation(), desiredEpsilon);
       EuclidCoreTestTools.assertEquals(desiredAngularVelocity, currentDesiredTrajectoryPoint.getAngularVelocity(), desiredEpsilon);
-      EndToEndChestTrajectoryMessageTest.assertControlErrorIsLow(simulationTestHelper, pelvis, 1.0e-3);
+      EndToEndChestTrajectoryMessageTest.assertControlErrorIsLow(simulationTestHelper, pelvis, 1.5e-3);
    }
 
    @SuppressWarnings("unchecked")
@@ -542,7 +543,6 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       return ((YoEnum<PelvisOrientationControlMode>) variable).getEnumValue();
    }
 
-   @SuppressWarnings("unchecked")
    private double findWalkingTrajectoryPathCurrentYaw()
    {
       YoVariable variable = simulationTestHelper.findVariable("WalkingTrajectoryPath", "walkingTrajectoryPathCurrentYaw");

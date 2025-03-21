@@ -1,7 +1,5 @@
 package us.ihmc.alexander.controllerAPI;
 
-import controller_msgs.msg.dds.HandTrajectoryMessage;
-import ihmc_common_msgs.msg.dds.SE3TrajectoryMessage;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -11,25 +9,10 @@ import us.ihmc.alexander.parameters.model.AlexanderPhysicalPropertiesV0;
 import us.ihmc.avatar.controllerAPI.EndToEndHandTrajectoryMessageTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.testTools.EndToEndTestTools;
-import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
-import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
-import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.tools.CITools.SimpleRobotNameKeys;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-
-import static org.junit.jupiter.api.Assertions.*;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class AlexanderEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajectoryMessageTest
 {

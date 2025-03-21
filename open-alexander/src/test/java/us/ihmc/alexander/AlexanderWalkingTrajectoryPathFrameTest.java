@@ -1,9 +1,6 @@
 package us.ihmc.alexander;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.HandTrajectoryMessage;
-import controller_msgs.msg.dds.HandWrenchTrajectoryMessage;
-import controller_msgs.msg.dds.PrepareForLocomotionMessage;
+import controller_msgs.msg.dds.*;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -132,7 +129,9 @@ public class AlexanderWalkingTrajectoryPathFrameTest
 
    public Pose3DReadOnly getHandDesiredPoseInChestFrame()
    {
-      return new Pose3D(new Point3D(0.4, 0.25, -0.25), new Quaternion());
+      Quaternion rotation = new Quaternion();
+      rotation.appendPitchRotation(-Math.toRadians(90));
+      return new Pose3D(new Point3D(0.4, 0.2, -0.2), rotation);
    }
 
    @Tag("controller-api-2")
@@ -404,6 +403,7 @@ public class AlexanderWalkingTrajectoryPathFrameTest
                                                                                                                          cinderBlockFieldEnvironment,
                                                                                                                          simulationTestingParameters);
       simulationTestHelper = factory.createAvatarTestingSimulation();
+      simulationTestHelper.setKeepSCSUp(true);
 
       FreeFloatingPendulumRobotDefinition pendulumRobotDefinition = setupPendulum();
 
@@ -420,7 +420,7 @@ public class AlexanderWalkingTrajectoryPathFrameTest
       pendulumAttachmentController.rootJoint.getJointTwist().setToZero();
 
       assertWalkingFrameMatchMidFeetZUpFrame();
-      assertTrue(simulationTestHelper.simulateNow(2.0));
+      assertTrue(simulationTestHelper.simulateNow(3.0));
       assertCorrectControlMode();
       assertTrue(simulationTestHelper.simulateNow(simulationTime));
       assertTrue(pendulumAttachmentController.angleStandardDeviation.getValue() < pendulumAttachmentController.getMaxAngleStandardDeviation().getValue());
@@ -475,7 +475,9 @@ public class AlexanderWalkingTrajectoryPathFrameTest
       Pose3D footstepPose = new Pose3D(cinderBlockPose);
       footstepPose.appendYawRotation(yawOffset);
       footstepPose.appendTranslation(xOffset, yOffset, zOffset);
-      footsteps.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(stepSide, footstepPose));
+      FootstepDataMessage footstep = footsteps.getFootstepDataList().add();
+      footstep.set(HumanoidMessageTools.createFootstepDataMessage(stepSide, footstepPose));
+      footstep.setSwingHeight(0.15);
    }
 
    public static List<List<CinderBlockStackDescription>> steppingStonesB(RigidBodyTransformReadOnly startPose)
