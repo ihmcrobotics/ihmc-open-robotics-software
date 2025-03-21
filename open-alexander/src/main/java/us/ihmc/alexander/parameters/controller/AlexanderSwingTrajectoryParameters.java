@@ -15,7 +15,7 @@ public class AlexanderSwingTrajectoryParameters extends SwingTrajectoryParameter
    @Override
    public double getFinalCoMAccelerationInjectionRatio()
    {
-      return 0.5;
+      return 0.0;
    }
 
    @Override

@@ -1,10 +1,9 @@
-package us.ihmc.atlas.obstacleCourseTests;
+package us.ihmc.alexander.obstacleCourseTests;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-
-import us.ihmc.atlas.AtlasRobotModel;
-import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.alexander.AlexanderVersion;
+import us.ihmc.alexander.OpenAlexanderRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.DRCPelvisLowGainsTest;
@@ -14,9 +13,9 @@ import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobo
 import us.ihmc.yoVariables.registry.YoVariableHolder;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class AtlasPelvisLowGainsTest extends DRCPelvisLowGainsTest
+public class AlexanderPelvisLowGainsTest extends DRCPelvisLowGainsTest
 {
-   private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false)
+   private final DRCRobotModel robotModel = new OpenAlexanderRobotModel(AlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS)
    {
       // Disable joint damping to make sure that damping isn't causing the problem.
       private static final boolean enableJointDamping = false;
@@ -52,6 +51,6 @@ public class AtlasPelvisLowGainsTest extends DRCPelvisLowGainsTest
    protected YoDouble getPelvisOrientationErrorVariableName(YoVariableHolder yoVariableHolder)
    {
 
-      return (YoDouble) yoVariableHolder.findVariable(FeedbackControllerToolbox.class.getSimpleName(), "pelvisErrorRotationVectorZ");
+      return (YoDouble) yoVariableHolder.findVariable(FeedbackControllerToolbox.class.getSimpleName(), "PELVIS_LINKErrorRotationVectorZ");
    }
 }

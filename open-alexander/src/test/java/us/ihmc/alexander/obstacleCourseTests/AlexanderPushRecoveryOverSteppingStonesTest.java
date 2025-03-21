@@ -1,15 +1,10 @@
-package us.ihmc.atlas.obstacleCourseTests;
+package us.ihmc.alexander.obstacleCourseTests;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-
-import us.ihmc.atlas.AtlasRobotModel;
-import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.atlas.parameters.AtlasICPControllerParameters;
-import us.ihmc.atlas.parameters.AtlasStepAdjustmentParameters;
-import us.ihmc.atlas.parameters.AtlasSteppingParameters;
-import us.ihmc.atlas.parameters.AtlasToeOffParameters;
-import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
+import us.ihmc.alexander.AlexanderVersion;
+import us.ihmc.alexander.OpenAlexanderRobotModel;
+import us.ihmc.alexander.parameters.controller.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.AvatarPushRecoveryOverSteppingStonesTest;
@@ -21,22 +16,22 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
 
 @Tag("humanoid-obstacle-slow-3")
-public class AtlasPushRecoveryOverSteppingStonesTest extends AvatarPushRecoveryOverSteppingStonesTest
+public class AlexanderPushRecoveryOverSteppingStonesTest extends AvatarPushRecoveryOverSteppingStonesTest
 {
    @Override
    public DRCRobotModel getRobotModel()
    {
-      AtlasRobotModel atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false)
+      OpenAlexanderRobotModel robotModel = new OpenAlexanderRobotModel(AlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS)
       {
          @Override
          public WalkingControllerParameters getWalkingControllerParameters()
          {
-            return new AtlasWalkingControllerParameters(RobotTarget.SCS, getJointMap(), getContactPointParameters())
+            return new OpenAlexanderWalkingControllerParameters(getRobotVersion(), RobotTarget.SCS, getJointMap(), getPhysicalProperties(), getContactPointParameters())
             {
                @Override
                public ICPControllerParameters getICPControllerParameters()
                {
-                  return new AtlasICPControllerParameters(false)
+                  return new OpenAlexanderICPControllerParameters()
                   {
                      @Override
                      public boolean useAngularMomentum()
@@ -49,7 +44,7 @@ public class AtlasPushRecoveryOverSteppingStonesTest extends AvatarPushRecoveryO
                @Override
                public StepAdjustmentParameters getStepAdjustmentParameters()
                {
-                  return new AtlasStepAdjustmentParameters()
+                  return new AlexanderStepAdjustmentParameters()
                   {
                      @Override
                      public boolean allowStepAdjustment()
@@ -62,7 +57,7 @@ public class AtlasPushRecoveryOverSteppingStonesTest extends AvatarPushRecoveryO
                @Override
                public SteppingParameters getSteppingParameters()
                {
-                  return new AtlasSteppingParameters(getJointMap())
+                  return new AlexanderSteppingParameters(getPhysicalProperties())
                   {
                      @Override
                      public double getMaxStepLength()
@@ -81,7 +76,7 @@ public class AtlasPushRecoveryOverSteppingStonesTest extends AvatarPushRecoveryO
                @Override
                public ToeOffParameters getToeOffParameters()
                {
-                  return new AtlasToeOffParameters(getJointMap())
+                  return new AlexanderToeOffParameters(getPhysicalProperties())
                   {
                      @Override
                      public double getAnkleLowerLimitToTriggerToeOff()
@@ -95,13 +90,13 @@ public class AtlasPushRecoveryOverSteppingStonesTest extends AvatarPushRecoveryO
          }
       };
 
-      return atlasRobotModel;
+      return robotModel;
    }
 
    @Override
    public String getSimpleRobotName()
    {
-      return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ATLAS);
+      return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ALEXANDER);
    }
 
    @Override

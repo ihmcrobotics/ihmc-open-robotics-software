@@ -1,21 +1,22 @@
-package us.ihmc.atlas.roughTerrainWalking;
-
-import java.io.InputStream;
+package us.ihmc.alexander.roughTerrainWalking;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-
-import us.ihmc.atlas.AtlasRobotModel;
-import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.alexander.AlexanderVersion;
+import us.ihmc.alexander.OpenAlexanderRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.roughTerrainWalking.AvatarAbsoluteStepTimingsTest;
-import us.ihmc.robotics.Assert;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
 
+import java.io.InputStream;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 @Tag("humanoid-rough-terrain")
-public class AtlasAbsoluteStepTimingsTest extends AvatarAbsoluteStepTimingsTest
+public class AlexanderAbsoluteStepTimingsTest extends AvatarAbsoluteStepTimingsTest
 {
+   @Tag("humanoid-rough-terrain")
    @Override
    @Test
    public void testTakingStepsWithAbsoluteTimings()
@@ -23,6 +24,7 @@ public class AtlasAbsoluteStepTimingsTest extends AvatarAbsoluteStepTimingsTest
       super.testTakingStepsWithAbsoluteTimings();
    }
 
+   @Tag("humanoid-rough-terrain")
    @Override
    @Test
    public void testMinimumTransferTimeIsRespected()
@@ -30,6 +32,7 @@ public class AtlasAbsoluteStepTimingsTest extends AvatarAbsoluteStepTimingsTest
       super.testMinimumTransferTimeIsRespected();
    }
 
+   @Tag("humanoid-rough-terrain")
    @Override
    @Test
    public void testPausingWalkDuringLongTransfers()
@@ -40,13 +43,13 @@ public class AtlasAbsoluteStepTimingsTest extends AvatarAbsoluteStepTimingsTest
    @Override
    public DRCRobotModel getRobotModel()
    {
-      return new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false)
+      return new OpenAlexanderRobotModel(AlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS)
       {
          @Override
          public InputStream getParameterOverwrites()
          {
             InputStream overwrites = AvatarAbsoluteStepTimingsTest.class.getResourceAsStream("/absolute_step_timing_test.xml");
-            Assert.assertNotNull(overwrites);
+            assertNotNull(overwrites);
             return overwrites;
          }
       };

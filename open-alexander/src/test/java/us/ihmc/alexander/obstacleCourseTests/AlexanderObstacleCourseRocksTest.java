@@ -1,23 +1,22 @@
-package us.ihmc.atlas.obstacleCourseTests;
+package us.ihmc.alexander.obstacleCourseTests;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-
-import us.ihmc.atlas.AtlasRobotModel;
-import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.alexander.AlexanderVersion;
+import us.ihmc.alexander.OpenAlexanderRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.DRCObstacleCourseRocksTest;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
 
-public class AtlasObstacleCourseRocksTest extends DRCObstacleCourseRocksTest
+public class AlexanderObstacleCourseRocksTest extends DRCObstacleCourseRocksTest
 {
 
    @Override
    public DRCRobotModel getRobotModel()
    {
-      return new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
+      return new OpenAlexanderRobotModel(AlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS);
    }
 
    @Override
@@ -27,7 +26,6 @@ public class AtlasObstacleCourseRocksTest extends DRCObstacleCourseRocksTest
    }
 
    @Tag("humanoid-obstacle")
-   @Disabled
    @Test
    public void testWalkingOntoRocks()
    {

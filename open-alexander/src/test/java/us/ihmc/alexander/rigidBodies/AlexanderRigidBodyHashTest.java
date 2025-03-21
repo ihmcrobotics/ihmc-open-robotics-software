@@ -1,12 +1,12 @@
-package us.ihmc.atlas.rigidbodies;
+package us.ihmc.alexander.rigidBodies;
 
-import us.ihmc.atlas.AtlasRobotModel;
-import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.alexander.AlexanderVersion;
+import us.ihmc.alexander.OpenAlexanderRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.rigidbodies.RigidBodyHashTest;
+import us.ihmc.avatar.rigidBodies.RigidBodyHashTest;
 
-public class AtlasRigidBodyHashTest extends RigidBodyHashTest
+public class AlexanderRigidBodyHashTest extends RigidBodyHashTest
 {
    @Override
    public void testSignificantRigidBodiesHashCode()
@@ -23,6 +23,6 @@ public class AtlasRigidBodyHashTest extends RigidBodyHashTest
    @Override
    public DRCRobotModel getRobotModel()
    {
-      return new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, true);
+      return new OpenAlexanderRobotModel(AlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS);
    }
 }

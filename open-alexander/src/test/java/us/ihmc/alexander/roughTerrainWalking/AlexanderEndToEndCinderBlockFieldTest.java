@@ -1,18 +1,17 @@
-package us.ihmc.atlas.roughTerrainWalking;
+package us.ihmc.alexander.roughTerrainWalking;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-
-import us.ihmc.atlas.AtlasRobotModel;
-import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.alexander.AlexanderVersion;
+import us.ihmc.alexander.OpenAlexanderRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.roughTerrainWalking.EndToEndCinderBlockFieldTest;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
 
-public class AtlasEndToEndCinderBlockFieldTest extends EndToEndCinderBlockFieldTest
+public class AlexanderEndToEndCinderBlockFieldTest extends EndToEndCinderBlockFieldTest
 {
-   private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
+   private final DRCRobotModel robotModel = new OpenAlexanderRobotModel(AlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS);
 
    @Override
    public DRCRobotModel getRobotModel()

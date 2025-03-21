@@ -1,8 +1,5 @@
 package us.ihmc.avatar.roughTerrainWalking;
 
-import static us.ihmc.robotics.Assert.assertEquals;
-import static us.ihmc.robotics.Assert.assertTrue;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -49,6 +46,8 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInterface
 {
    protected final static SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -63,10 +62,9 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
       DRCRobotModel robotModel = getRobotModel();
       simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(robotModel, environment, simulationTestingParameters);
       simulationTestHelper.start();
-      ThreadTools.sleep(1000);
       simulationTestHelper.setCameraPosition(8.0, -8.0, 5.0);
       simulationTestHelper.setCameraFocusPosition(1.5, 0.0, 0.8);
-      assertTrue(simulationTestHelper.simulateNow(0.5));
+      assertTrue(simulationTestHelper.simulateNow(0.25));
       Random random = new Random(59249625689L);
 
       double swingStartInterval = 1.125;
@@ -164,7 +162,7 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
       }
    }
 
-   private class TimingChecker implements YoVariableChangedListener
+   private static class TimingChecker implements YoVariableChangedListener
    {
       private static final String failMessage = "Swing did not start at expected time.";
 
@@ -220,7 +218,7 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
                LogTools.error(stepCount + " expected: " + expectedStartTimeOfNextStep + " but was: " + time);
             }
 
-            assertEquals(failMessage, expectedStartTimeOfNextStep, time, swingStartTimeEpsilon);
+            assertEquals(expectedStartTimeOfNextStep, time, swingStartTimeEpsilon, failMessage);
 
             if (stepCount > footstepMessage1.getFootstepDataList().size() + footstepMessage2.getFootstepDataList().size() - 2)
             {
@@ -272,10 +270,9 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
       DRCRobotModel robotModel = getRobotModel();
       simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(robotModel, environment, simulationTestingParameters);
       simulationTestHelper.start();
-      ThreadTools.sleep(1000);
       simulationTestHelper.setCameraPosition(8.0, -8.0, 5.0);
       simulationTestHelper.setCameraFocusPosition(1.5, 0.0, 0.8);
-      assertTrue(simulationTestHelper.simulateNow(0.5));
+      assertTrue(simulationTestHelper.simulateNow(0.25));
 
       FootstepDataListMessage footsteps = HumanoidMessageTools.createFootstepDataListMessage(0.6, 0.3, 0.1);
       footsteps.setExecutionTiming(ExecutionTiming.CONTROL_ABSOLUTE_TIMINGS.toByte());
@@ -305,7 +302,7 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
                                                                                             new FlatGroundEnvironment(),
                                                                                             simulationTestingParameters);
       simulationTestHelper.start();
-      Assert.assertTrue(simulationTestHelper.simulateNow(0.25));
+      assertTrue(simulationTestHelper.simulateNow(0.25));
 
       double finalTransferDuration = 0.5;
       double swingDuration = 0.6;
@@ -345,24 +342,24 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
       }
 
       simulationTestHelper.publishToController(message);
-      Assert.assertTrue(simulationTestHelper.simulateNow(0.1));
+      assertTrue(simulationTestHelper.simulateNow(0.1));
       YoEnum<WalkingStateEnum> walkingState = (YoEnum<WalkingStateEnum>) simulationTestHelper.findVariable("WalkingCurrentState");
       for (int i = 0; i < steps; i++)
       {
-         Assert.assertTrue(simulationTestHelper.simulateNow(stepTime.get(i)));
+         assertTrue(simulationTestHelper.simulateNow(stepTime.get(i)));
          if (i + 1 < steps)
          {
             boolean isPaused = WalkingStateEnum.TO_STANDING == walkingState.getEnumValue();
-            Assert.assertEquals(expectPause.get(i + 1), isPaused);
+            assertEquals(expectPause.get(i + 1), isPaused);
          }
       }
-      Assert.assertTrue(simulationTestHelper.simulateNow(finalTransferDuration));
+      assertTrue(simulationTestHelper.simulateNow(finalTransferDuration));
    }
 
    private void checkTransferTimes(YoVariableHolder yoVariableHolder, double minimumTransferTime)
    {
       YoDouble firstTransferTime = getDoubleYoVariable(yoVariableHolder, "transferTime0", BalanceManager.class.getSimpleName());
-      assertTrue("Executing transfer that is faster then allowed.", firstTransferTime.getDoubleValue() >= minimumTransferTime);
+      assertTrue(firstTransferTime.getDoubleValue() >= minimumTransferTime, "Executing transfer that is faster then allowed.");
    }
 
    private static YoDouble getDoubleYoVariable(YoVariableHolder yoVariableHolder, String name, String namespace)
