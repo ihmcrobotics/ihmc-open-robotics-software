@@ -111,19 +111,19 @@ public class ROS2HumanoidFrames
        */
       if (frameToCopy.equals(fullRobotModel.getRootJoint().getFrameAfterJoint()))
       {  // base link == frame before root joint
-         baseLinkFrame = new ROS2FollowingFrame(ros2Node, "base_link", odomFrame, frameToCopy);
+         baseLinkFrame = createFrameCopy(frameToCopy, "base_link", odomFrame);
          ros2FrameCopy = baseLinkFrame;
       }
       else if (frameToCopy.equals(humanoidFrames.getChestFrame()))
       {  // torso == chest
          ROS2Frame parentFrame = ros2FrameCopyMap.getOrDefault(frameToCopy.getParent(), baseLinkFrame);
-         torsoFrame = new ROS2FollowingFrame(ros2Node, "torso", parentFrame, frameToCopy);
+         torsoFrame = createFrameCopy(frameToCopy, "torso", parentFrame);
          ros2FrameCopy = torsoFrame;
       }
       else if (frameToCopy.equals(humanoidFrames.getHeadFrame()))
       {  // gaze == head
          ROS2Frame parentFrame = ros2FrameCopyMap.getOrDefault(frameToCopy.getParent(), torsoFrame);
-         gazeFrame = new ROS2FollowingFrame(ros2Node, "gaze", parentFrame, frameToCopy);
+         gazeFrame = createFrameCopy(frameToCopy, "gaze", parentFrame);
          ros2FrameCopy = gazeFrame;
       }
       else
@@ -138,28 +138,28 @@ public class ROS2HumanoidFrames
             if (frameToCopy.equals(fullRobotModel.getHand(side).getParentJoint().getFrameAfterJoint()))
             {  // wrist == parent joint frame of hand
                ROS2Frame parentFrame = ros2FrameCopyMap.getOrDefault(frameToCopy.getParent(), torsoFrame);
-               ROS2Frame wristFrame = new ROS2FollowingFrame(ros2Node, sidePrefix + "wrist", parentFrame, frameToCopy);
+               ROS2Frame wristFrame = createFrameCopy(frameToCopy, sidePrefix + "wrist", parentFrame);
                wristFrames.put(side, wristFrame);
                ros2FrameCopy = wristFrame;
             }
             else if (frameToCopy.equals(fullRobotModel.getHandControlFrame(side)))
             {  // gripper == hand control frame
                ROS2Frame parentFrame = ros2FrameCopyMap.getOrDefault(frameToCopy.getParent(), wristFrames.get(side));
-               ROS2Frame gripperFrame = new ROS2FollowingFrame(ros2Node, sidePrefix + "gripper", parentFrame, frameToCopy);
+               ROS2Frame gripperFrame = createFrameCopy(frameToCopy, sidePrefix + "gripper", parentFrame);
                gripperFrames.put(side, gripperFrame);
                ros2FrameCopy = gripperFrame;
             }
             else if (frameToCopy.equals(humanoidFrames.getFootFrame(side)))
             {  // ankle == foot frame
                ROS2Frame parentFrame = ros2FrameCopyMap.getOrDefault(frameToCopy.getParent(), baseLinkFrame);
-               ROS2Frame ankleFrame = new ROS2FollowingFrame(ros2Node, sidePrefix + "ankle", parentFrame, frameToCopy);
+               ROS2Frame ankleFrame = createFrameCopy(frameToCopy, sidePrefix + "ankle", parentFrame);
                ankleFrames.put(side, ankleFrame);
                ros2FrameCopy = ankleFrame;
             }
             else if (frameToCopy.equals(humanoidFrames.getSoleFrame(side)))
             {  // sole == sole 👍
                ROS2Frame parentFrame = ros2FrameCopyMap.getOrDefault(frameToCopy.getParent(), ankleFrames.get(side));
-               ROS2Frame soleFrame = new ROS2FollowingFrame(ros2Node, sidePrefix + "sole", parentFrame, frameToCopy);
+               ROS2Frame soleFrame = createFrameCopy(frameToCopy, sidePrefix + "sole", parentFrame);
                soleFrames.put(side, soleFrame);
                ros2FrameCopy = soleFrame;
             }
@@ -170,11 +170,19 @@ public class ROS2HumanoidFrames
       if (ros2FrameCopy == null)
       {
          ROS2Frame parentFrame = ros2FrameCopyMap.getOrDefault(frameToCopy.getParent(), baseLinkFrame);
-         ros2FrameCopy = new ROS2FollowingFrame(ros2Node, "ros2_" + frameToCopy.getName(), parentFrame, frameToCopy);
+         ros2FrameCopy = createFrameCopy(frameToCopy, "ros2_" + frameToCopy.getName(), parentFrame);
       }
 
       ros2FrameCopyMap.put(frameToCopy, ros2FrameCopy);
       allROS2Frames.add(ros2FrameCopy);
+   }
+
+   private ROS2Frame createFrameCopy(ReferenceFrame frameToCopy, String id, ROS2Frame parentFrame)
+   {
+      if (frameToCopy.isFixedInParent() && parentFrame.equals(ros2FrameCopyMap.get(frameToCopy.getParent())))
+         return new ROS2StaticFrame(ros2Node, id, parentFrame, frameToCopy.getTransformToParent());
+      else
+         return new ROS2FollowingFrame(ros2Node, id, parentFrame, frameToCopy);
    }
 
    private RigidBodyTransform computeBaseFootprintToBaseLinkTransform(RigidBodyTransform transformToPack)

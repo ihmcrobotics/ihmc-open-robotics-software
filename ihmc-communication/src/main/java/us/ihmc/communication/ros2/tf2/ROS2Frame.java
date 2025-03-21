@@ -27,6 +27,8 @@ public abstract class ROS2Frame extends ReferenceFrame
    private int lastPublishTimestampSeconds;
    private int lastPublishTimestampNanos;
 
+   private int skipData = 0;
+
    protected ROS2Frame(ROS2Node ros2Node,
                        String id,
                        ReferenceFrame parentFrame,
@@ -65,6 +67,14 @@ public abstract class ROS2Frame extends ReferenceFrame
 
    private void receiveTFMessage(@SuppressWarnings("deprecation") Subscriber<TFMessage> subscriber)
    {
+      // Skip the first 50 messages to avoid a race condition that causes createSubscription to hang on KEEP_HISTORY QoS
+      // TODO: Remove once race condition is fixed
+      if (skipData < 50)
+      {
+         ++skipData;
+         return;
+      }
+
       // Read the new message
       subscriber.takeNextData(tfMessageToReceive, null);
 
