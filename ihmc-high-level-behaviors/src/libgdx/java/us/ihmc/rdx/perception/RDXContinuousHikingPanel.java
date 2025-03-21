@@ -88,7 +88,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    private final RDXStoredPropertySetTuner continuousHikingParametersPanel = new RDXStoredPropertySetTuner("Continuous Hiking Parameters (CH)");
    private final ImGuiRemoteROS2StoredPropertySetGroup hostStoredPropertySets;
    private final ImGuiSliderDouble stepsBeforeSafetyStop = new ImGuiSliderDouble("Steps Before Safety Stop", "%.2f");
-   private final ImBoolean squareUpToGoal = new ImBoolean(false);
+   private final ImBoolean squareUpToGoal = new ImBoolean(true);
    private final ImBoolean continuousHiking = new ImBoolean(false);
    private final ImBoolean useAStarFootstepPlanner = new ImBoolean(true);
    private final ImBoolean useMonteCarloReference = new ImBoolean(false);
@@ -276,6 +276,24 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
 
    public void renderImGuiWidgets()
    {
+      if (ImGui.button("Start Walking"))
+      {
+         publishStartContinuousHiking();
+      }
+      ImGuiTools.previousWidgetTooltip("CTRL + SHIFT");
+      ImGui.sameLine();
+      if (ImGui.button("Stop Walking"))
+      {
+         publishStopContinuousHikingGracefully();
+      }
+      ImGuiTools.previousWidgetTooltip("ALT");
+      ImGui.sameLine();
+      if (ImGui.button("Abort Walking"))
+      {
+         publishStopContinuousHiking();
+      }
+      ImGuiTools.previousWidgetTooltip("ESC");
+
       ImGui.checkbox("Enable Continuous Hiking", continuousHiking);
       continuousHikingParameters.setStepPublisherEnabled(continuousHiking.get());
 
@@ -365,7 +383,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       // This can be with buttons pressed on the keyboard, or with an XBox One Controller
       if (ImGui.getIO().getKeyCtrl() && ImGui.getIO().getKeyShift())
       {
-         publishContinuousHikingCommandWithEnabled();
+         publishStartContinuousHiking();
       }
       else if ((ImGui.isKeyDown(ImGuiTools.getLeftArrowKey()) || ImGui.isKeyDown(ImGuiTools.getRightArrowKey())) && ImGui.getIO().getKeyShift())
       {
@@ -506,13 +524,14 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    private void publishStopContinuousHiking()
    {
       commandMessage.setEnableContinuousHiking(false);
+      commandMessage.setSquareUpToGoal(false);
       commandPublisher.publish(commandMessage);
    }
 
    private void publishStopContinuousHikingGracefully()
    {
       commandMessage.setEnableContinuousHiking(false);
-      commandMessage.setSquareUpToGoal(true);
+      commandMessage.setSquareUpToGoal(squareUpToGoal.get());
       commandPublisher.publish(commandMessage);
    }
 
@@ -545,7 +564,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    /**
     * This publishes and tells the state machine that we want to start walking. Setting the enable Continuous Hiking to true
     */
-   private void publishContinuousHikingCommandWithEnabled()
+   private void publishStartContinuousHiking()
    {
       commandMessage.setEnableContinuousHiking(true);
       commandMessage.setStepsBeforeSafetyStop((int) stepsBeforeSafetyStop.getDoubleValue());
