@@ -92,7 +92,6 @@ public class RDXMultiContactRegionGraphic implements RenderableProvider
 
       ros2Node.createSubscription(PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, s ->
       {
-//         LogTools.info("received regions!");
          latestPlanarRegionsMessage.set(s.takeNextData());
       });
    }
@@ -236,15 +235,9 @@ public class RDXMultiContactRegionGraphic implements RenderableProvider
             this.bracingRegion = bracingRegion;
             this.bracingRegion.updateConvexHull();
 
-            FramePose3D bracingRegionPose = new FramePose3D(ReferenceFrame.getWorldFrame(), bracingRegion.getTransformToWorld());
-            System.out.println(bracingRegionPose.getPosition());
-            System.out.println(bracingRegionPose.getOrientation());
-
-            UnitVector3DReadOnly normal = bracingRegion.getNormal();
-            System.out.println(normal.getX() + ", " + normal.getY() + ", " + normal.getZ());
-
-            ConvexPolygon2D convexHull = bracingRegion.getConvexHull();
-            System.out.println(convexHull);
+//            FramePose3D bracingRegionPose = new FramePose3D(ReferenceFrame.getWorldFrame(), bracingRegion.getTransformToWorld());
+//            UnitVector3DReadOnly normal = bracingRegion.getNormal();
+//            ConvexPolygon2D convexHull = bracingRegion.getConvexHull();
          }
       }
 
@@ -305,7 +298,7 @@ public class RDXMultiContactRegionGraphic implements RenderableProvider
 
    private Color getPolygonColor()
    {
-      return (postureSensitivity > 0.035 && stabilityMargin < 0.1) ? OPTIMIZER_POLYGON_GRAPHIC_COLOR : NOMINAL_POLYGON_GRAPHIC_COLOR;
+      return (postureSensitivity > 0.035 && stabilityMargin < 0.08) ? OPTIMIZER_POLYGON_GRAPHIC_COLOR : NOMINAL_POLYGON_GRAPHIC_COLOR;
    }
 
    private void updateMinimumEdge()

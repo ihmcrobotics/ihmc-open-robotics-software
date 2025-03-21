@@ -109,6 +109,7 @@ public class OrientationRetargeting
 
    public void initialize()
    {
+      controlFrame.update();
       nominalOrientation.setFromReferenceFrame(controlFrame);
 
       // call once to avoid edge cases in rate limiting

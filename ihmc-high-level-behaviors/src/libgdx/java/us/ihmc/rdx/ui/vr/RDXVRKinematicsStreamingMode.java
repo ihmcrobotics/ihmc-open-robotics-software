@@ -704,6 +704,11 @@ public class RDXVRKinematicsStreamingMode
                PlanarRegion bracingRegion = multiContactStabilityGraphic.getBracingRegion();
                ikHumanoidSolverConfigurationMessage.getRegionNormal().set(bracingRegion.getNormal());
             }
+            else
+            {
+               LogTools.info("No region found, not loading the hand");
+               return;
+            }
 
             // Configure region if doing contact adjustment
             boolean enableContactAdjustmentRequested = enableContactAdjustment.get();

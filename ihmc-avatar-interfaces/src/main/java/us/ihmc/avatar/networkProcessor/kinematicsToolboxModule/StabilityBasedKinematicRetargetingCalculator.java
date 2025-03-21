@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.staticEquilibrium.SensitivityBasedSta
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.StabilityMarginRegionCalculator;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState;
 import us.ihmc.communication.PostureOptimizerState;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
@@ -27,7 +28,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
-import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.JointStateType;
@@ -59,13 +59,14 @@ public class StabilityBasedKinematicRetargetingCalculator
    private static final double MAX_CHEST_ORIENTATION_OFFSET = Math.toRadians(35.0);
    private static final double MAX_PELVIS_ORIENTATION_OFFSET = Math.toRadians(35.0);
 
-   public static final boolean OVERRIDE_MESSAGE = true;
-   public static final boolean ENABLE_POSTURE_OBJECTIVE = true;
-   public static final boolean ENABLE_CONTACT_OBJECTIVE = true;
+   public static boolean OVERRIDE_MESSAGE = false;
+   public static final boolean ENABLE_POSTURE_OBJECTIVE = false;
+   public static final boolean ENABLE_CONTACT_OBJECTIVE = false;
    public static final boolean INCLUDE_FF_VELOCITY = false;
+   public static final Vector3D OVERRIDE_NORMAL = new Vector3D(Axis3D.Z);
 
    private static final double KP_ORIENTATION = 1200.0;
-   private static final double MAX_CONTACT_POINT_ADJUSTMENT = 0.4;
+   private static final double MAX_CONTACT_POINT_ADJUSTMENT = 0.15;
    private static final double MAX_ORIENTATION_ERROR = Math.toRadians(5.0);
 //   private static final double MAX_COM_Z_ERROR = 0.01;
 
@@ -171,7 +172,7 @@ public class StabilityBasedKinematicRetargetingCalculator
                                                                                          registry);
 
       kpPosture.set(12.0); // 15.0);
-      kpContact.set(0.8);
+      kpContact.set(0.25);
 
       double maxRate = Math.toRadians(15.0);
       chestOrientationRetargeting = new OrientationRetargeting("chest",  fullRobotModel.getChest(), updateDT, maxRate, MAX_CHEST_ORIENTATION_OFFSET, graphicsListRegistry, registry);
@@ -195,10 +196,10 @@ public class StabilityBasedKinematicRetargetingCalculator
       pelvisWeight = new YoVector3D("pelvisWeight", registry);
 
       // hard-coded for overriding
-      regionNormal.set(-0.342, 0.940, 0.000);
-//      regionNormal.set(0.0, 0.0, 1.0);
-//      regionNormal.set(-0.317,  0.871,  0.375);
-//      regionNormal.set(0.392,  0.840,  0.375);
+      if (OVERRIDE_MESSAGE)
+      {
+         regionNormal.set(OVERRIDE_NORMAL);
+      }
 
       // Detune the default KST values a bit
       chestDefaultWeight.set(0.0, 0.0, 0.5);
@@ -222,7 +223,7 @@ public class StabilityBasedKinematicRetargetingCalculator
 //      }
 
       requestPostureAdjustment.set(ENABLE_POSTURE_OBJECTIVE);
-      addContactAdjustment.set(false);
+      addContactAdjustment.set(true);
 
       parentRegistry.addChild(registry);
    }
@@ -272,63 +273,64 @@ public class StabilityBasedKinematicRetargetingCalculator
       alphaEnabled.set(0.0);
 
       previousStabilityMargin.setToNaN();
+      postureOptimizerState.set(PostureOptimizerState.NOMINAL);
    }
 
    public void update()
    {
-      if (!multiContactRegionCalculator.hasSolvedWholeRegion())
-         return;
-
-      if (requestContactAdjustment.getValue())
+      if (multiContactRegionCalculator.hasSolvedWholeRegion())
       {
-         RigidBodyBasics bracingHand = fullRobotModel.getHand(HumanoidKinematicsToolboxController.BRACING_HAND_SIDE);
-         bracingPointIndex = wholeBodyContactState.indexOf(bracingHand);
-
-         if (bracingPointIndex != -1)
+         if (requestContactAdjustment.getValue())
          {
-            contactPointAdjustment.set(stabilityGradientCalculator.computeContactPointAdjustment(HumanoidKinematicsToolboxController.BRACING_HAND_SIDE));
+            RigidBodyBasics bracingHand = fullRobotModel.getHand(HumanoidKinematicsToolboxController.BRACING_HAND_SIDE);
+            bracingPointIndex = wholeBodyContactState.indexOf(bracingHand);
 
-            if (!isUpperBodyLoadBearing.getValue() && contactPointAdjustment.normSquared() > 1.0e-5)
+            if (bracingPointIndex != -1)
             {
-               contactPointAdjustment.scale(kpContact.getValue());
-               integratedContactPointAdjustment.add(updateDT * contactPointAdjustment.getX(), updateDT * contactPointAdjustment.getY(), updateDT * contactPointAdjustment.getZ());
+               contactPointAdjustment.set(stabilityGradientCalculator.computeContactPointAdjustment(HumanoidKinematicsToolboxController.BRACING_HAND_SIDE));
+
+               if (!isUpperBodyLoadBearing.getValue() && contactPointAdjustment.normSquared() > 1.0e-5)
+               {
+                  contactPointAdjustment.scale(kpContact.getValue());
+                  integratedContactPointAdjustment.add(updateDT * contactPointAdjustment.getX(), updateDT * contactPointAdjustment.getY(), updateDT * contactPointAdjustment.getZ());
+               }
             }
          }
-      }
-      else
-      {
-         integratedContactPointAdjustment.setToZero();
-      }
+         else
+         {
+            integratedContactPointAdjustment.setToZero();
+         }
 
-      // always compute, for debugging
-      stabilityGradientCalculator.computePostureAdjustment();
+         // always compute, for debugging
+         stabilityGradientCalculator.computePostureAdjustment();
 
-      // Save current whole-body velocity
-      MultiBodySystemTools.extractJointsState(controlledJoints, JointStateType.VELOCITY, currentWholeBodyVelocity);
+         // Save current whole-body velocity
+         MultiBodySystemTools.extractJointsState(controlledJoints, JointStateType.VELOCITY, currentWholeBodyVelocity);
 
-      // update gradient confidence
-      if (!previousStabilityMargin.isNaN())
-      {
-         double deltaMargin = multiContactRegionCalculator.getStabilityMargin() - previousStabilityMargin.getValue();
-         actualStabilityMarginVelocity.set(EuclidCoreTools.clamp(deltaMargin / updateDT, 0.6));
-      }
+         // update gradient confidence
+         if (!previousStabilityMargin.isNaN())
+         {
+            double deltaMargin = multiContactRegionCalculator.getStabilityMargin() - previousStabilityMargin.getValue();
+            actualStabilityMarginVelocity.set(EuclidCoreTools.clamp(deltaMargin / updateDT, 0.6));
+         }
 
-      if (!isEnabled.getValue() || !isUpperBodyLoadBearing.getValue()  || !requestPostureAdjustment.getValue() || multiContactRegionCalculator.getStabilityMargin() > getUpperMarginThreshold())
-      {
-         postureOptimizerState.set(PostureOptimizerState.NOMINAL);
-      }
-      else if (multiContactRegionCalculator.getStabilityMargin() > getLowerMarginThreshold() || stabilityGradientCalculator.getPostureSensitivity() < sensitivityThreshold.getValue())
-      {
-         postureOptimizerState.set(PostureOptimizerState.FREEZE);
-      }
-      else
-      {
-         postureOptimizerState.set(PostureOptimizerState.OPTIMIZER);
+         if (!isEnabled.getValue() || !isUpperBodyLoadBearing.getValue() || !requestPostureAdjustment.getValue() || multiContactRegionCalculator.getStabilityMargin() > getUpperMarginThreshold())
+         {
+            postureOptimizerState.set(PostureOptimizerState.NOMINAL);
+         }
+         else if (multiContactRegionCalculator.getStabilityMargin() > getLowerMarginThreshold() || stabilityGradientCalculator.getPostureSensitivity() < sensitivityThreshold.getValue())
+         {
+            postureOptimizerState.set(PostureOptimizerState.FREEZE);
+         }
+         else
+         {
+            postureOptimizerState.set(PostureOptimizerState.OPTIMIZER);
 
-         scaledStabilityGradient.set(stabilityGradientCalculator.getStabilityBoundaryGradient());
-         CommonOps_DDRM.scale(kpPosture.getValue(), scaledStabilityGradient);
-         MultiBodySystemTools.insertJointsState(controlledJoints, JointStateType.VELOCITY, scaledStabilityGradient);
-         fullRobotModel.updateFrames();
+            scaledStabilityGradient.set(stabilityGradientCalculator.getStabilityBoundaryGradient());
+            CommonOps_DDRM.scale(kpPosture.getValue(), scaledStabilityGradient);
+            MultiBodySystemTools.insertJointsState(controlledJoints, JointStateType.VELOCITY, scaledStabilityGradient);
+            fullRobotModel.updateFrames();
+         }
       }
 
       chestOrientationRetargeting.update(postureOptimizerState.getValue());
@@ -336,83 +338,15 @@ public class StabilityBasedKinematicRetargetingCalculator
       bracingHandOrientationRetargeting.update(postureOptimizerState.getValue());
       comHeightRetargeting.update(postureOptimizerState.getValue(), scaledStabilityGradient);
 
-      // Reset to initial velocities
-      MultiBodySystemTools.insertJointsState(controlledJoints, JointStateType.VELOCITY, currentWholeBodyVelocity);
-      previousStabilityMargin.set(multiContactRegionCalculator.getStabilityMargin());
-
-      if (postureOptimizerState.getValue() == PostureOptimizerState.OPTIMIZER)
-         fullRobotModel.updateFrames();
-   }
-
-   public void update2()
-   {
-      if (!multiContactRegionCalculator.hasSolvedWholeRegion())
-         return;
-
-      if (requestContactAdjustment.getValue())
+      if (multiContactRegionCalculator.hasSolvedWholeRegion())
       {
-         RigidBodyBasics bracingHand = fullRobotModel.getHand(HumanoidKinematicsToolboxController.BRACING_HAND_SIDE);
-         bracingPointIndex = wholeBodyContactState.indexOf(bracingHand);
+         // Reset to initial velocities
+         MultiBodySystemTools.insertJointsState(controlledJoints, JointStateType.VELOCITY, currentWholeBodyVelocity);
+         previousStabilityMargin.set(multiContactRegionCalculator.getStabilityMargin());
 
-         if (bracingPointIndex != -1)
-         {
-            contactPointAdjustment.set(stabilityGradientCalculator.computeContactPointAdjustment(HumanoidKinematicsToolboxController.BRACING_HAND_SIDE));
-
-            if (!isUpperBodyLoadBearing.getValue() && contactPointAdjustment.normSquared() > 1.0e-5)
-            {
-               contactPointAdjustment.scale(kpContact.getValue());
-               integratedContactPointAdjustment.add(updateDT * contactPointAdjustment.getX(), updateDT * contactPointAdjustment.getY(), updateDT * contactPointAdjustment.getZ());
-            }
-         }
+         if (postureOptimizerState.getValue() == PostureOptimizerState.OPTIMIZER)
+            fullRobotModel.updateFrames();
       }
-      else
-      {
-         integratedContactPointAdjustment.setToZero();
-      }
-
-      // always compute, for debugging
-//      stabilityGradientCalculator.computePostureAdjustment();
-
-      // Save current whole-body velocity
-//      MultiBodySystemTools.extractJointsState(controlledJoints, JointStateType.VELOCITY, currentWholeBodyVelocity);
-
-      // update gradient confidence
-//      if (!previousStabilityMargin.isNaN())
-//      {
-//         double deltaMargin = multiContactRegionCalculator.getStabilityMargin() - previousStabilityMargin.getValue();
-//         actualStabilityMarginVelocity.set(EuclidCoreTools.clamp(deltaMargin / updateDT, 0.6));
-//      }
-
-      if (!isEnabled.getValue() || !isUpperBodyLoadBearing.getValue()  || !requestPostureAdjustment.getValue() || multiContactRegionCalculator.getStabilityMargin() > getUpperMarginThreshold())
-      {
-         postureOptimizerState.set(PostureOptimizerState.NOMINAL);
-      }
-      else if (multiContactRegionCalculator.getStabilityMargin() > getLowerMarginThreshold() || stabilityGradientCalculator.getPostureSensitivity() < sensitivityThreshold.getValue())
-      {
-         postureOptimizerState.set(PostureOptimizerState.FREEZE);
-      }
-      else
-      {
-         postureOptimizerState.set(PostureOptimizerState.OPTIMIZER);
-
-//         scaledStabilityGradient.set(stabilityGradientCalculator.getStabilityBoundaryGradient());
-//         CommonOps_DDRM.scale(kpPosture.getValue(), scaledStabilityGradient);
-//         MultiBodySystemTools.insertJointsState(controlledJoints, JointStateType.VELOCITY, scaledStabilityGradient);
-//         fullRobotModel.updateFrames();
-      }
-
-      // problem is here, likely with the bracing hand?? vv
-      chestOrientationRetargeting.update(postureOptimizerState.getValue());
-      pelvisOrientationRetargeting.update(postureOptimizerState.getValue());
-      bracingHandOrientationRetargeting.update(postureOptimizerState.getValue());
-      comHeightRetargeting.update(postureOptimizerState.getValue(), scaledStabilityGradient);
-
-      // Reset to initial velocities
-//      MultiBodySystemTools.insertJointsState(controlledJoints, JointStateType.VELOCITY, currentWholeBodyVelocity);
-//      previousStabilityMargin.set(multiContactRegionCalculator.getStabilityMargin());
-
-//      if (postureOptimizerState.getValue() == PostureOptimizerState.OPTIMIZER)
-//         fullRobotModel.updateFrames();
    }
 
    private double getUpperMarginThreshold()
@@ -446,7 +380,8 @@ public class StabilityBasedKinematicRetargetingCalculator
 
    public void enableContactAdjustment(Tuple3DReadOnly regionPoint, Orientation3DReadOnly regionOrientation, ConvexPolygon2DReadOnly regionPolygon, Tuple3DReadOnly regionNormal)
    {
-      LogTools.info("Enabling contact adjustment");
+//      LogTools.info("Enabling contact adjustment");
+
       if (!OVERRIDE_MESSAGE)
       {
          requestContactAdjustment.set(true);

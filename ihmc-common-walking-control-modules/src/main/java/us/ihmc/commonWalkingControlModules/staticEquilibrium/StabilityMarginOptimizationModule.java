@@ -197,7 +197,7 @@ public abstract class StabilityMarginOptimizationModule implements SCS2YoGraphic
       }
 
       equalityConstraintEpsilon = new YoDouble("equalityConstraintEpilson", registry);
-      equalityConstraintEpsilon.set(0.0);
+      equalityConstraintEpsilon.set(0.01);
 
       if (parentRegistry != null)
          parentRegistry.addChild(registry);

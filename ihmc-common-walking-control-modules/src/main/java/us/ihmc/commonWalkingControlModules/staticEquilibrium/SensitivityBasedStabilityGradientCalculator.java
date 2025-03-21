@@ -57,8 +57,8 @@ import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.percentageOfInte
 public class SensitivityBasedStabilityGradientCalculator
 {
    private static final boolean APPLY_JOINT_LIMIT_FILTER = false;
-   private static final boolean USE_AREA_BASED_CONTACT_ADJUSTMENT = false;
-   private static final boolean USE_HEURISTIC_MARGIN = false;
+   private static final boolean USE_AREA_BASED_CONTACT_ADJUSTMENT = true;
+   private static final boolean USE_HEURISTIC_MARGIN = true;
    private static final double INTEGRATION_DT = 1.0e-3;
    private static final int XY_DIMENSIONS = 2;
    private static final boolean COMPUTE_EXPECTED_MARGIN_VELOCITY = true;
@@ -329,24 +329,22 @@ public class SensitivityBasedStabilityGradientCalculator
       double dAreaY = 0.0;
 
       {
-         for (int edge_idx = 0; edge_idx < feasibleRegion.getNumberOfVertices(); edge_idx++)
+         for (int vertex_idx = 0; vertex_idx < feasibleRegion.getNumberOfVertices(); vertex_idx++)
          {
-            if (!updateStabilityMarginData(edge_idx))
-               continue;
+            FramePoint2DReadOnly vertex = feasibleRegion.getVertex(vertex_idx);
+            FramePoint2DReadOnly vertexPrev = feasibleRegion.getPreviousVertex(vertex_idx);
+            FramePoint2DReadOnly vertexNext = feasibleRegion.getNextVertex(vertex_idx);
+            double distance = 0.5 * (vertex.distance(vertexPrev) + vertex.distance(vertexNext));
 
-            FramePoint2DReadOnly vertexA = feasibleRegion.getVertex(edge_idx);
-            FramePoint2DReadOnly vertexB = feasibleRegion.getNextVertex(edge_idx);
-            double distance = vertexA.distance(vertexB);
+            int vertexIndex = stabilityMarginRegionCalculator.fromEuclidIndex(vertex_idx);
+            DMatrixRMaj primalSolution = stabilityMarginRegionCalculator.getSolverPrimalSolution(vertexIndex);
+            DMatrixRMaj dualSolution = stabilityMarginRegionCalculator.getSolverDualSolution(vertexIndex);
 
-            double sensitivityAX = cosA * computeSensitivity(dAX, primalSolutionA, dualSolutionA, tempSensitivityMatrix);
-            double sensitivityBX = cosB * computeSensitivity(dAX, primalSolutionB, dualSolutionB, tempSensitivityMatrix);
-            double sensitivityX = sensitivityAX * vertexAWeight + sensitivityBX * vertexBWeight;
-            dAreaX += sensitivityX * distance;
+            double sensitivityX = computeSensitivity(dAX, primalSolution, dualSolution, tempSensitivityMatrix);
+            dAreaX += distance * sensitivityX;
 
-            double sensitivityAY = cosA * computeSensitivity(dAY, primalSolutionA, dualSolutionA, tempSensitivityMatrix);
-            double sensitivityBY = cosB * computeSensitivity(dAY, primalSolutionB, dualSolutionB, tempSensitivityMatrix);
-            double sensitivityY = sensitivityAY * vertexAWeight + sensitivityBY * vertexBWeight;
-            dAreaY += sensitivityY * distance;
+            double sensitivityY = computeSensitivity(dAY, primalSolution, dualSolution, tempSensitivityMatrix);
+            dAreaY += distance * sensitivityY;
          }
       }
 
