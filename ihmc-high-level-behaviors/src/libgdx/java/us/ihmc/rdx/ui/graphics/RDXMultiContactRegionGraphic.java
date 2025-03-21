@@ -90,10 +90,7 @@ public class RDXMultiContactRegionGraphic implements RenderableProvider
                                                   ghostFullRobotModel.getSoleFrame(RobotSide.LEFT),
                                                   ghostFullRobotModel.getSoleFrame(RobotSide.RIGHT));
 
-      ros2Node.createSubscription(PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, s ->
-      {
-         latestPlanarRegionsMessage.set(s.takeNextData());
-      });
+      ros2Node.createSubscription(PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, s -> latestPlanarRegionsMessage.set(s.takeNextData()));
    }
 
    public void updateSupportRegionAndGraphics(KinematicsToolboxOutputStatus kinematicsToolboxOutputStatus, FramePoint3D desiredCoMPosition)
@@ -236,8 +233,14 @@ public class RDXMultiContactRegionGraphic implements RenderableProvider
             this.bracingRegion.updateConvexHull();
 
 //            FramePose3D bracingRegionPose = new FramePose3D(ReferenceFrame.getWorldFrame(), bracingRegion.getTransformToWorld());
+//            System.out.println(bracingRegionPose.getPosition());
+//            System.out.println(bracingRegionPose.getOrientation());
+//
 //            UnitVector3DReadOnly normal = bracingRegion.getNormal();
+//            System.out.println(normal.getX() + ", " + normal.getY() + ", " + normal.getZ());
+//
 //            ConvexPolygon2D convexHull = bracingRegion.getConvexHull();
+//            System.out.println(convexHull);
          }
       }
 
