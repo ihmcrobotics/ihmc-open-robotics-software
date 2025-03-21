@@ -374,6 +374,7 @@ public class RDXVRKinematicsStreamingMode
             jointLowerLimits.put(robotModel.getJointMap().getArmJointName(robotSide, ArmJointName.ELBOW_PITCH), fullyExtendedLimit);
          }
       }
+
       parameters.setJointCustomPositionUpperLimits(jointUpperLimits);
       parameters.setJointCustomPositionLowerLimits(jointLowerLimits);
    }
@@ -384,6 +385,15 @@ public class RDXVRKinematicsStreamingMode
          return;
 
       kinematicsRecorder.onUpdateStart();
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         OneDoFJointBasics fingerJoint = syncedRobot.getFullRobotModel().getOneDoFJointByName(robotSide.getUpperCaseName() + "_GRIPPER_X1");
+         if (fingerJoint != null)
+         {
+            handsAreOpen.get(robotSide).setValue(fingerJoint.getQ() > 0.9);
+         }
+      }
 
       // Handle left joystick input
       if (kinematicsRecorder.isReplaying())
