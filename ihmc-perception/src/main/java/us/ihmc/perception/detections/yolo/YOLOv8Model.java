@@ -544,7 +544,7 @@ public class YOLOv8Model
                           PixelFormat.GRAY8,
                           new CameraIntrinsics(maskIntrinsics),
                           CameraModel.PINHOLE,
-                          bgrInputImage.getPose(),
+                          bgrInputImage.getTransformToWorld(),
                           bgrInputImage.getAcquisitionTime(),
                           bgrInputImage.getSequenceNumber(),
                           bgrInputImage.getDepthDiscretization());

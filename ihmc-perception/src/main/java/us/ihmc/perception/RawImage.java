@@ -5,9 +5,10 @@ import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.imageMessage.PixelFormat;
 
@@ -57,7 +58,7 @@ public class RawImage
    private final float depthDiscretization;
    private final long sequenceNumber;
    private final Instant acquisitionTime;
-   private final FixedFramePose3DBasics sensorPose;
+   private final RigidBodyTransformReadOnly sensorToWorldTransform;
 
    private final AtomicInteger numberOfReferences = new AtomicInteger(1);
 
@@ -66,7 +67,7 @@ public class RawImage
                    PixelFormat pixelFormat,
                    CameraIntrinsics cameraIntrinsics,
                    CameraModel cameraModel,
-                   FixedFramePose3DBasics sensorPose,
+                   RigidBodyTransformReadOnly sensorToWorldTransform,
                    Instant acquisitionTime,
                    long sequenceNumber,
                    float depthDiscretization)
@@ -77,9 +78,9 @@ public class RawImage
       this.cpuImageMat = cpuImageMat;
       this.gpuImageMat = gpuImageMat;
       this.pixelFormat = pixelFormat;
-      this.cameraIntrinsics = cameraIntrinsics;
+      this.cameraIntrinsics = new CameraIntrinsics(cameraIntrinsics);
       this.cameraModel = cameraModel;
-      this.sensorPose = sensorPose;
+      this.sensorToWorldTransform = new RigidBodyTransform(sensorToWorldTransform);
       this.acquisitionTime = acquisitionTime;
       this.sequenceNumber = sequenceNumber;
       this.depthDiscretization = depthDiscretization;
@@ -94,7 +95,7 @@ public class RawImage
       this.pixelFormat = other.pixelFormat;
       this.cameraIntrinsics = other.cameraIntrinsics;
       this.cameraModel = other.cameraModel;
-      this.sensorPose = other.sensorPose;
+      this.sensorToWorldTransform = other.sensorToWorldTransform;
       this.acquisitionTime = other.acquisitionTime;
       this.sequenceNumber = other.sequenceNumber;
       this.depthDiscretization = other.depthDiscretization;
@@ -102,42 +103,48 @@ public class RawImage
 
    public static RawImage createWithBGRImage(Pointer matPointer,
                                              CameraIntrinsics cameraIntrinsics,
-                                             FixedFramePose3DBasics sensorPose,
+                                             RigidBodyTransformReadOnly sensorTransformToWorld,
                                              Instant acquisitionTime,
                                              long sequenceNumber)
    {
-      return createWithBGRImage(matPointer, cameraIntrinsics, CameraModel.PINHOLE, sensorPose, acquisitionTime, sequenceNumber);
+      return createWithBGRImage(matPointer, cameraIntrinsics, CameraModel.PINHOLE, sensorTransformToWorld, acquisitionTime, sequenceNumber);
    }
 
    public static RawImage createWithBGRImage(Pointer matPointer,
                                              CameraIntrinsics cameraIntrinsics,
                                              CameraModel cameraModel,
-                                             FixedFramePose3DBasics sensorPose,
+                                             RigidBodyTransformReadOnly sensorTransformToWorld,
                                              Instant acquisitionTime,
                                              long sequenceNumber)
    {
       if (matPointer instanceof Mat cpuImage)
-         return new RawImage(cpuImage, null, PixelFormat.BGR8, cameraIntrinsics, cameraModel, sensorPose, acquisitionTime, sequenceNumber, -1.0f);
+         return new RawImage(cpuImage, null, PixelFormat.BGR8, cameraIntrinsics, cameraModel, sensorTransformToWorld, acquisitionTime, sequenceNumber, -1.0f);
       else if (matPointer instanceof GpuMat gpuImage)
-         return new RawImage(null, gpuImage, PixelFormat.BGR8, cameraIntrinsics, cameraModel, sensorPose, acquisitionTime, sequenceNumber, -1.0f);
+         return new RawImage(null, gpuImage, PixelFormat.BGR8, cameraIntrinsics, cameraModel, sensorTransformToWorld, acquisitionTime, sequenceNumber, -1.0f);
 
       throw new IllegalArgumentException("The pointer passed in was neither a Mat nor GpuMat");
    }
 
    public static RawImage createWith16BitDepth(Pointer matPointer,
                                                CameraIntrinsics cameraIntrinsics,
-                                               FixedFramePose3DBasics sensorPose,
+                                               RigidBodyTransformReadOnly sensorTransformToWorld,
                                                Instant acquisitionTime,
                                                long sequenceNumber,
                                                float depthDiscretization)
    {
-      return createWith16BitDepth(matPointer, cameraIntrinsics, CameraModel.PINHOLE, sensorPose, acquisitionTime, sequenceNumber, depthDiscretization);
+      return createWith16BitDepth(matPointer,
+                                  cameraIntrinsics,
+                                  CameraModel.PINHOLE,
+                                  sensorTransformToWorld,
+                                  acquisitionTime,
+                                  sequenceNumber,
+                                  depthDiscretization);
    }
 
    public static RawImage createWith16BitDepth(Pointer matPointer,
                                                CameraIntrinsics cameraIntrinsics,
                                                CameraModel cameraModel,
-                                               FixedFramePose3DBasics sensorPose,
+                                               RigidBodyTransformReadOnly sensorTransformToWorld,
                                                Instant acquisitionTime,
                                                long sequenceNumber,
                                                float depthDiscretization)
@@ -148,7 +155,7 @@ public class RawImage
                              PixelFormat.GRAY16,
                              cameraIntrinsics,
                              cameraModel,
-                             sensorPose,
+                             sensorTransformToWorld,
                              acquisitionTime,
                              sequenceNumber,
                              depthDiscretization);
@@ -158,7 +165,7 @@ public class RawImage
                              PixelFormat.GRAY16,
                              cameraIntrinsics,
                              cameraModel,
-                             sensorPose,
+                             sensorTransformToWorld,
                              acquisitionTime,
                              sequenceNumber,
                              depthDiscretization);
@@ -169,6 +176,7 @@ public class RawImage
    /**
     * Provides a new {@link RawImage} with the same pixel format, intrinsics, and metadata as this one, but with a different image.
     * Useful when applying changes to Mats and wishing to keep the same intrinsics & metadata in the {@link RawImage}.
+    *
     * @param newCpuImageMat new CPU image mat to replace the current image. Must have the same dimensions.
     * @return A new {@link RawImage} with the same intrinsics & metadata, but with a different image.
     */
@@ -180,6 +188,7 @@ public class RawImage
    /**
     * Provides a new {@link RawImage} with the same intrinsics and metadata as this one, but with a different image.
     * Useful when applying changes to Mats and wishing to keep the same intrinsics & metadata in the {@link RawImage}.
+    *
     * @param newCpuImageMat new CPU image mat to replace the current image. Must have the same dimensions.
     * @param newPixelFormat the PixelFormat of the new image.
     * @return A new {@link RawImage} with the same intrinsics & metadata, but with a different image.
@@ -194,7 +203,7 @@ public class RawImage
                           newPixelFormat,
                           this.cameraIntrinsics,
                           this.cameraModel,
-                          this.sensorPose,
+                          this.sensorToWorldTransform,
                           this.acquisitionTime,
                           this.sequenceNumber,
                           this.depthDiscretization);
@@ -203,6 +212,7 @@ public class RawImage
    /**
     * Provides a new {@link RawImage} with the same pixel format, intrinsics, and metadata as this one, but with a different image.
     * Useful when applying changes to Mats and wishing to keep the same intrinsics & metadata in the {@link RawImage}.
+    *
     * @param newGpuImageMat new GPU image mat to replace the current image. Must have the same dimensions.
     * @return A new {@link RawImage} with the same intrinsics & metadata, but with a different image.
     */
@@ -214,6 +224,7 @@ public class RawImage
    /**
     * Provides a new {@link RawImage} with the same intrinsics and metadata as this one, but with a different image.
     * Useful when applying changes to Mats and wishing to keep the same intrinsics & metadata in the {@link RawImage}.
+    *
     * @param newGpuImageMat new GPU image mat to replace the current image. Must have the same dimensions.
     * @param newPixelFormat the PixelFormat of the new image.
     * @return A new {@link RawImage} with the same intrinsics & metadata, but with a different image.
@@ -228,7 +239,7 @@ public class RawImage
                           newPixelFormat,
                           this.cameraIntrinsics,
                           this.cameraModel,
-                          this.sensorPose,
+                          this.sensorToWorldTransform,
                           this.acquisitionTime,
                           this.sequenceNumber,
                           this.depthDiscretization);
@@ -267,6 +278,7 @@ public class RawImage
     * If this image only has a {@link GpuMat}, a new {@link Mat} will be created
     * and the image data will be downloaded from the device (GPU).
     * </p>
+    *
     * @return The {@link Mat} containing the image data.
     */
    public Mat getCpuImageMat()
@@ -291,6 +303,7 @@ public class RawImage
     * If this image only has a {@link Mat}, a new {@link GpuMat} will be created
     * and the image data will be uploaded to the device (GPU).
     * </p>
+    *
     * @return The {@link GpuMat} containing the image data.
     */
    public GpuMat getGpuImageMat()
@@ -315,6 +328,7 @@ public class RawImage
     * Same as calling {@code getCpuImageMat().data()}. As such, if this image does not have a {@link Mat},
     * a new {@link Mat} will be created and the image data will be downloaded from the device (GPU).
     * </p>
+    *
     * @return The pointer to the image data.
     */
    public BytePointer getDataPointer()
@@ -330,6 +344,7 @@ public class RawImage
     * Same as calling {@code getGpuImageMat().data()}. As such, if this image does not have a {@link GpuMat},
     * a new {@link GpuMat} will be created and the image data will be uploaded to the device (GPU).
     * </p>
+    *
     * @return The CUDA pointer to the image data.
     */
    public BytePointer getCUDADataPointer()
@@ -382,19 +397,19 @@ public class RawImage
       return (float) cameraIntrinsics.getCy();
    }
 
-   public FixedFramePose3DBasics getPose()
+   public RigidBodyTransformReadOnly getTransformToWorld()
    {
-      return sensorPose;
+      return sensorToWorldTransform;
    }
 
-   public FixedFramePoint3DBasics getPosition()
+   public Tuple3DReadOnly getTranslation()
    {
-      return sensorPose.getPosition();
+      return sensorToWorldTransform.getTranslation();
    }
 
-   public FixedFrameQuaternionBasics getOrientation()
+   public Orientation3DReadOnly getRotation()
    {
-      return sensorPose.getOrientation();
+      return sensorToWorldTransform.getRotation();
    }
 
    public boolean hasCpuImage()

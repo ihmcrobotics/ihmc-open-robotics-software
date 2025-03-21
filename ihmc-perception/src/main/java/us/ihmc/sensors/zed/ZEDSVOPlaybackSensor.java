@@ -57,7 +57,7 @@ public class ZEDSVOPlaybackSensor extends ZEDImageSensor
    {
       enablePositionalTracking(useTrackedPose);
       if (useTrackedPose)
-         setSensorFrameSupplier(this::getTrackedSensorFrame);
+         setSensorFrame(getTrackedSensorFrame());
    }
 
    @Override

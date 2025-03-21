@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.inverseKinematics;
 import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.QuaternionCalculus;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
@@ -10,7 +11,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotics.math.QuaternionCalculus;
 
 public class RobotJointVelocityAccelerationIntegrator
 {

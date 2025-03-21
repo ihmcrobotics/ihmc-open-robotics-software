@@ -82,7 +82,7 @@ public class StandAloneRealsenseProcess
       ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1, threadFactory);
       scheduler.scheduleAtFixedRate(realsenseTunableTransform::update, 0, 33, TimeUnit.MILLISECONDS);
 
-      d455Sensor.setSensorFrameSupplier(syncedRobot.getReferenceFrames()::getSteppingCameraFrame);
+      d455Sensor.setSensorFrame(syncedRobot.getReferenceFrames().getSteppingCameraFrame());
       loopOnDemand(d455Sensor.getGrabThread(), realsenseDemandNode);
 
       d455PublishThread = new ImageSensorPublishThread(ros2Node, d455Sensor, D455_IMAGE_TOPIC_MAP);
