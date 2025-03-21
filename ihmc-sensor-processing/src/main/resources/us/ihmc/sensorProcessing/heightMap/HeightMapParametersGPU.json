@@ -1,11 +1,11 @@
 {
   "title" : "GPU Height Map Parameters",
+  "Drift offset filter" : false,
   "Flying points filter" : true,
-  "Reset Height Map" : false,
   "Enable alpha filter" : true,
   "Enable vertical filter" : true,
   "Search window height" : {
-    "value" : 350,
+    "value" : 400,
     "lowerBound" : 10,
     "upperBound" : 400
   },
@@ -20,7 +20,7 @@
     "upperBound" : 5.0
   },
   "Max height registration" : {
-    "value" : 1.0,
+    "value" : 1.5,
     "lowerBound" : -5.0,
     "upperBound" : 5.0
   },
@@ -50,12 +50,12 @@
     "upperBound" : 10.0
   },
   "Min Clamp Height" : {
-    "value" : -3.2768,
+    "value" : -6.5536,
     "lowerBound" : -8.0,
     "upperBound" : 8.0
   },
   "Max Clamp Height" : {
-    "value" : 3.2768,
+    "value" : 6.5536,
     "lowerBound" : -8.0,
     "upperBound" : 8.0
   },

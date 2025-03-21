@@ -17,7 +17,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
-import us.ihmc.perception.gpuHeightMap.RapidHeightMapManager;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.imageMessage.CompressionType;
 import us.ihmc.perception.imageMessage.PixelFormat;
@@ -25,6 +24,7 @@ import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
 import javax.annotation.Nullable;
@@ -163,10 +163,7 @@ public class PerceptionMessageTools
       imageMessage.setDepthDiscretization(depthToMetersRatio);
    }
 
-   public static void packImageMessage(RawImage originalImage,
-                                       BytePointer compressedData,
-                                       CompressionType compressionType,
-                                       ImageMessage imageMessageToPack)
+   public static void packImageMessage(RawImage originalImage, BytePointer compressedData, CompressionType compressionType, ImageMessage imageMessageToPack)
    {
       packImageMessage(originalImage, compressedData, compressionType, null, null, imageMessageToPack);
    }
@@ -210,7 +207,12 @@ public class PerceptionMessageTools
       floatPointer.put(startIndex + 3, (float) quaternion.getS());
    }
 
-   public static void convertToHeightMapData(Mat heightMapPointer, HeightMapData heightMapDataToPack, Point3D gridCenter, float widthInMeters, float cellSizeInMeters)
+   public static void convertToHeightMapData(Mat heightMapPointer,
+                                             HeightMapData heightMapDataToPack,
+                                             Point3D gridCenter,
+                                             float widthInMeters,
+                                             float cellSizeInMeters,
+                                             HeightMapParameters heightMapParameters)
    {
       int centerIndex = HeightMapTools.computeCenterIndex(widthInMeters, cellSizeInMeters);
       int cellsPerAxis = 2 * centerIndex + 1;
@@ -234,8 +236,7 @@ public class PerceptionMessageTools
          int height = major | minor;
 
          // Calculate cell height
-         float cellHeight = (float) (((float) height / RapidHeightMapManager.getHeightMapParameters().getHeightScaleFactor())
-                                     - RapidHeightMapManager.getHeightMapParameters().getHeightOffset());
+         float cellHeight = (float) (((float) height / heightMapParameters.getHeightScaleFactor()) - heightMapParameters.getHeightOffset());
 
          // Put it into the HeightMapData object
          int key = cellsPerAxis * (i % cellsPerAxis) + (i / cellsPerAxis);
@@ -243,9 +244,9 @@ public class PerceptionMessageTools
       }
    }
 
-   public static Mat convertHeightMapDataToMat(HeightMapData heightMapData, float widthInMeters, float cellSizeInMeters)
+   public static Mat convertHeightMapDataToMat(HeightMapData heightMapData, HeightMapParameters heightMapParameters)
    {
-      int centerIndex = HeightMapTools.computeCenterIndex(widthInMeters, cellSizeInMeters);
+      int centerIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getTerrainWidthInMeters(), heightMapParameters.getGlobalCellSizeInMeters());
       int cellsPerAxis = 2 * centerIndex + 1;
 
       // Create a new Mat object to hold the height map data
@@ -259,38 +260,33 @@ public class PerceptionMessageTools
             double cellHeight = heightMapData.getHeightAt(key);
 
             // Reverse the height calculation to get the raw height value
-            int height = (int) ((cellHeight + (float) RapidHeightMapManager.getHeightMapParameters().getHeightOffset())
-                                * RapidHeightMapManager.getHeightMapParameters().getHeightScaleFactor());
+            int height = (int) ((cellHeight + (float) heightMapParameters.getHeightOffset()) * heightMapParameters.getHeightScaleFactor());
 
             // Store the height value in the Mat object
             heightMapMat.ptr(xIndex, yIndex).putShort((short) height);
-
          }
       }
 
       return heightMapMat;
    }
 
-   public static void convertToHeightMapImage(ImageMessage imageMessage,
-                                              Mat heightMapImageToPack,
-                                              ByteBuffer compressedByteBuffer,
-                                              BytePointer byteBufferAccessPointer,
-                                              Mat compressedBytesMat)
+   public static void convertToHeightMapImage(ImageMessage imageMessage, Mat heightMapImageToPack)
    {
       int numberOfBytes = imageMessage.getData().size();
-      compressedByteBuffer.rewind();
-      compressedByteBuffer.limit(numberOfBytes);
-      for (int i = 0; i < numberOfBytes; i++)
-      {
-         compressedByteBuffer.put(imageMessage.getData().get(i));
-      }
-      compressedByteBuffer.flip();
 
-      compressedBytesMat.cols(numberOfBytes);
-      compressedBytesMat.data(byteBufferAccessPointer);
+      // Create a pointer to the compressed data
+      BytePointer compressedDataPointer = new BytePointer(imageMessage.getData().getBuffer().position(0));
+      compressedDataPointer.limit(numberOfBytes);
+
+      // Wrap the pointer in a Mat (for the imdecode function)
+      Mat compressedDataMat = new Mat(1, numberOfBytes, opencv_core.CV_8UC1, compressedDataPointer);
 
       // Decompress the height map image
-      opencv_imgcodecs.imdecode(compressedBytesMat, opencv_imgcodecs.IMREAD_UNCHANGED, heightMapImageToPack);
+      opencv_imgcodecs.imdecode(compressedDataMat, opencv_imgcodecs.IMREAD_UNCHANGED, heightMapImageToPack);
+
+      // Close pointers
+      compressedDataMat.close();
+      compressedDataPointer.close();
    }
 
    public static void unpackMessage(HeightMapMessage heightMapMessage, TerrainMapData terrainMapData)

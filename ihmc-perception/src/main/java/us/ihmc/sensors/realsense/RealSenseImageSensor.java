@@ -19,7 +19,7 @@ public class RealSenseImageSensor extends ImageSensor
    public static final int DEPTH_IMAGE_KEY = 1;
    public static final int OUTPUT_IMAGE_COUNT = 2;
 
-   private static final double OUTPUT_FREQUENCY = 20.0;
+   private static final double OUTPUT_FREQUENCY = 30.0;
 
    private final RealSenseConfiguration realsenseConfiguration;
    private final RealSenseDeviceManager realsenseManager = new RealSenseDeviceManager();

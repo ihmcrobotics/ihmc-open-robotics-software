@@ -8,6 +8,8 @@ import us.ihmc.behaviors.activeMapping.ContinuousHikingLogger;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
 import us.ihmc.behaviors.activeMapping.ContinuousPlanner;
 import us.ihmc.behaviors.activeMapping.ContinuousPlannerTools;
+import us.ihmc.commons.Conversions;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2Helper;
@@ -36,6 +38,7 @@ public class ReadyToPlanState implements State
    // These could be put into tunable parameters but for now they were left here
    private static final float X_RANDOM_MARGIN = 0.2f;
    private static final float NOMINAL_STANCE_WIDTH = 0.22f;
+   private static final double ALPHA = 0.1;
 
    private final HumanoidReferenceFrames referenceFrames;
    private final AtomicReference<ContinuousHikingCommandMessage> commandMessage;
@@ -88,7 +91,7 @@ public class ReadyToPlanState implements State
    {
       stopWatch.reset();
       continuousPlanner.setPlanAvailable(false);
-      timeInSwingToStopPlanningAndWaitTillNextAttempt = continuousHikingParameters.getSwingTime() * continuousHikingParameters.getPercentThroughSwingToPlanTo();
+      timeInSwingToStopPlanningAndWaitTillNextAttempt = continuousHikingParameters.getSwingTime() * (1 - ALPHA);
       stopWatch.start();
    }
 
@@ -100,6 +103,16 @@ public class ReadyToPlanState implements State
       {
          continuousPlanner.setLatestFootstepStatusMessage(controllerFootstepQueueMonitor.getFootstepStatusMessage());
          continuousPlanner.setLatestControllerQueue(controllerFootstepQueueMonitor.getControllerFootstepQueue());
+      }
+
+      double timeInSwingToWait = Conversions.secondsToMilliseconds(continuousHikingParameters.getSwingTime() * continuousHikingParameters.getPercentThroughSwingToStartPlanning());
+      if (continuousHikingParameters.getStepPublisherEnabled() && !controllerFootstepQueueMonitor.getControllerFootstepQueue().isEmpty())
+      {
+         // We attempt to wait based on the parameters. Wait a little less because its better to go a little early then a little late
+         LogTools.info("Waiting for " + timeInSwingToWait + " ms!");
+         long timeToWait = (long) ((long) (timeInSwingToWait - stopWatch.getTime()) * (1 - ALPHA));
+         ThreadTools.sleep(timeToWait);
+         LogTools.info("I've waited long enough");
       }
 
       // Set up the imminent stance and goal poses in which to plan from

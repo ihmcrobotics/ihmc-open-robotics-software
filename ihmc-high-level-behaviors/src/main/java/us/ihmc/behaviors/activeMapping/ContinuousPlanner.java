@@ -223,11 +223,10 @@ public class ContinuousPlanner
 
             // The timeout when given a reference plan is a percentage of the step duration
             double stepDuration = continuousHikingParameters.getSwingTime() + continuousHikingParameters.getTransferTime();
-            double referencePlanTimeout = stepDuration * continuousHikingParameters.getPlanningTimeoutAsAFractionOfTheStepDuration();
 
-            continuousHikingLogger.appendString("Using Reference Plan: " + this.previousFootstepPlan.getNumberOfSteps() + "Timeout: " + referencePlanTimeout);
+            continuousHikingLogger.appendString("Using Reference Plan: " + this.previousFootstepPlan.getNumberOfSteps() + "Timeout: " + stepDuration);
             continuousHikingLogger.appendString("Previous Footstep Plan: " + previousFootstepPlan);
-            request.setTimeout(referencePlanTimeout);
+            request.setTimeout(stepDuration);
          }
       }
       else

@@ -3,12 +3,12 @@ package us.ihmc.perception.gpuHeightMap;
 import org.junit.jupiter.api.Test;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
-import us.ihmc.perception.tools.PerceptionDebugTools;
+import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 
 public class TerrainMapDataTest
 {
    int size = 100; // 2 m x 2 m
-   private TerrainMapData terrainMapData = new TerrainMapData(size, size);
+   private final TerrainMapData terrainMapData = new TerrainMapData(size, size, new HeightMapParameters("GPU"));
 
    @Test
    public void testTerrainMapSurfaceNormals()

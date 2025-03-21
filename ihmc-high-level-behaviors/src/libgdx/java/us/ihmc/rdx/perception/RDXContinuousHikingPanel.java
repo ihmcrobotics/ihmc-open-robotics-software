@@ -45,7 +45,6 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerPar
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.tools.SwingPlannerTools;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.gpuHeightMap.RapidHeightMapManager;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.rdx.imgui.ImGuiSliderDouble;
@@ -62,6 +61,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 
 import java.util.ArrayList;
@@ -97,7 +97,9 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    private final ContinuousHikingLogger continuousHikingLogger;
    private final ROS2Publisher<PlanOffsetStatus> planOffsetStatusPublisher;
    private final ROS2Publisher<FootstepStatusMessage> footstepStatusMessagePublisher;
+   private final ROS2Publisher<WalkingControllerFailureStatusMessage> walkingControllerFailureStatusPublisher;
    private final ROS2Publisher<Empty> clearGoalFootstepsPublisher;
+   private final ROS2Publisher<Empty> resetStateMachinePublisher;
    private final ContinuousHikingParameters continuousHikingParameters;
    private SideDependentList<FramePose3D> startStancePose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
    private FootstepPlan latestFootstepPlan;
@@ -124,8 +126,11 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       this.syncedRobotModel = syncedRobotModel;
 
       footstepStatusMessagePublisher = ros2Node.createPublisher(getTopic(FootstepStatusMessage.class, robotModel.getSimpleRobotName()));
+      walkingControllerFailureStatusPublisher = ros2Node.createPublisher(getTopic(WalkingControllerFailureStatusMessage.class,
+                                                                                  robotModel.getSimpleRobotName()));
       planOffsetStatusPublisher = ros2Node.createPublisher(getTopic(PlanOffsetStatus.class, robotModel.getSimpleRobotName()));
       clearGoalFootstepsPublisher = ros2Node.createPublisher(ContinuousHikingAPI.CLEAR_GOAL_FOOTSTEPS);
+      resetStateMachinePublisher = ros2Node.createPublisher(ContinuousHikingAPI.RESET_STATE_MACHINE);
 
       MonteCarloFootstepPlannerParameters monteCarloPlannerParameters = new MonteCarloFootstepPlannerParameters();
       terrainPlanningDebugger = new RDXTerrainPlanningDebugger(ros2Node,
@@ -159,11 +164,12 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       addChild(stancePoseSelectionPanel);
 
       DefaultFootstepPlannerParametersBasics footstepPlannerParameters = robotModel.getFootstepPlannerParameters("ForContinuousWalking");
-      SwingPlannerParametersBasics swingPlannerParameters = robotModel.getSwingPlannerParameters();
+      SwingPlannerParametersBasics swingPlannerParameters = robotModel.getSwingPlannerParameters("ForContinuousWalking");
       this.swingTrajectoryParameters = robotModel.getWalkingControllerParameters().getSwingTrajectoryParameters();
 
       hostStoredPropertySets = new ImGuiRemoteROS2StoredPropertySetGroup(ros2Node);
       continuousHikingParameters = new ContinuousHikingParameters();
+      HeightMapParameters heightMapParameters = new HeightMapParameters("GPU");
       createParametersPanel(continuousHikingParameters,
                             continuousHikingParametersPanel,
                             hostStoredPropertySets,
@@ -181,10 +187,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       RDXStoredPropertySetTuner swingPlannerParametersPanel = new RDXStoredPropertySetTuner("Swing Planner Parameters (CH)");
       createParametersPanel(swingPlannerParameters, swingPlannerParametersPanel, hostStoredPropertySets, ContinuousHikingAPI.SWING_PLANNING_PARAMETERS);
       RDXStoredPropertySetTuner heightMapParametersPanel = new RDXStoredPropertySetTuner("Height Map Parameters (CH)");
-      createParametersPanel(RapidHeightMapManager.getHeightMapParameters(),
-                            heightMapParametersPanel,
-                            hostStoredPropertySets,
-                            PerceptionComms.HEIGHT_MAP_PARAMETERS);
+      createParametersPanel(heightMapParameters, heightMapParametersPanel, hostStoredPropertySets, PerceptionComms.HEIGHT_MAP_PARAMETERS);
 
       continuousHikingLogger = new ContinuousHikingLogger();
       controllerFootstepQueueMonitor = new ControllerFootstepQueueMonitor(ros2Node, robotModel.getSimpleRobotName());
@@ -208,31 +211,13 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
     * This allows the {@link ContinuousPlannerSchedulingTask} to be started for when things are running in simulation, during the operation on the robot this
     * method should not be called as it will interfere with the remote process
     */
-   public void startContinuousPlannerSchedulingTask(boolean publishAndSubscribe)
+   public void startContinuousPlannerSchedulingTask(ActiveMappingParameterToolBox activeMappingParameterToolBox,
+                                                    ROS2StoredPropertySetGroup clientStoredPropertySets,
+                                                    boolean publishAndSubscribe)
    {
       this.publishAndSubscribe = publishAndSubscribe;
       runSubscriberOnly = true;
-      clientStoredPropertySets = new ROS2StoredPropertySetGroup(ros2Node);
-
-      ActiveMappingParameterToolBox activeMappingParameterObject = new ActiveMappingParameterToolBox(clientStoredPropertySets,
-                                                                                                     robotModel,
-                                                                                                     "ForContinuousWalking");
-
-      // Add Continuous Hiking Parameters to be between the UI and this process
-      clientStoredPropertySets.registerStoredPropertySet(ContinuousHikingAPI.CONTINUOUS_HIKING_PARAMETERS,
-                                                         activeMappingParameterObject.getContinuousHikingParameters());
-
-      // Add Monte Carlo Footstep Planner Parameters to be between the UI and this process
-      clientStoredPropertySets.registerStoredPropertySet(ContinuousHikingAPI.MONTE_CARLO_PLANNER_PARAMETERS,
-                                                         activeMappingParameterObject.getMonteCarloPlannerParameters());
-
-      // Add A* Footstep Planner Parameters to be between the UI and this process
-      clientStoredPropertySets.registerStoredPropertySet(ContinuousHikingAPI.FOOTSTEP_PLANNING_PARAMETERS,
-                                                         activeMappingParameterObject.getFootstepPlannerParameters());
-
-      // Add Swing Planner Parameters to be synced between the UI and this process
-      clientStoredPropertySets.registerStoredPropertySet(ContinuousHikingAPI.SWING_PLANNING_PARAMETERS,
-                                                         activeMappingParameterObject.getSwingPlannerParameters());
+      this.clientStoredPropertySets = clientStoredPropertySets;
 
       continuousPlannerSchedulingTask = new ContinuousPlannerSchedulingTask(robotModel,
                                                                             ros2Node,
@@ -240,7 +225,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
                                                                             syncedRobotModel.getReferenceFrames(),
                                                                             controllerFootstepQueueMonitor,
                                                                             continuousHikingLogger,
-                                                                            activeMappingParameterObject);
+                                                                            activeMappingParameterToolBox);
    }
 
    public void update(TerrainMapData terrainMapData, HeightMapData heightMapData)
@@ -315,6 +300,11 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       ImGui.separator();
       ImGui.text("Options for Continuous Hiking Message");
       ImGui.indent();
+
+      if (ImGui.button("Reset State Machine"))
+      {
+         resetStateMachinePublisher.publish(new Empty());
+      }
       if (ImGui.button("Square Up"))
       {
          squareUpPublisher.publish(new Empty());
@@ -354,6 +344,14 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
          {
             simulatedDriftInMeters += 0.1;
          }
+      }
+
+      ImGui.sameLine();
+
+      if (ImGui.button("Fake Robot Falling"))
+      {
+         WalkingControllerFailureStatusMessage walkingControllerFailureStatusMessage = new WalkingControllerFailureStatusMessage();
+         walkingControllerFailureStatusPublisher.publish(walkingControllerFailureStatusMessage);
       }
 
       terrainPlanningDebugger.renderImGuiWidgets();

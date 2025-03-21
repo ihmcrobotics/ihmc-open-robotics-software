@@ -7,7 +7,6 @@ import us.ihmc.footstepPlanning.communication.ContinuousHikingAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.perception.comms.PerceptionComms;
-import us.ihmc.perception.gpuHeightMap.RapidHeightMapManager;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 
 public class ActiveMappingParameterToolBox
@@ -24,7 +23,7 @@ public class ActiveMappingParameterToolBox
       monteCarloPlannerParameters = new MonteCarloFootstepPlannerParameters();
       footstepPlannerParameters = robotModel.getFootstepPlannerParameters(taskPurpose);
       swingPlannerParameters = robotModel.getSwingPlannerParameters(taskPurpose);
-      heightMapParameters = RapidHeightMapManager.getHeightMapParameters();
+      heightMapParameters = new HeightMapParameters("GPU");
 
       // Add Parameters to be synced between the UI and this process
       ros2PropertySetGroup.registerStoredPropertySet(ContinuousHikingAPI.CONTINUOUS_HIKING_PARAMETERS, continuousHikingParameters);
