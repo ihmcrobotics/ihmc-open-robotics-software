@@ -1,15 +1,9 @@
-package us.ihmc.atlas.packets;
-
-import static us.ihmc.robotics.Assert.assertTrue;
-
-import java.io.ByteArrayOutputStream;
-
-import org.junit.jupiter.api.Test;
+package us.ihmc.alexander.packets;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Output;
-
 import controller_msgs.msg.dds.RobotConfigurationData;
+import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -23,7 +17,11 @@ import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 
-public class AtlasRobotConfigurationDataTest
+import java.io.ByteArrayOutputStream;
+
+import static us.ihmc.robotics.Assert.assertTrue;
+
+public class AlexanderRobotConfigurationDataTest
 {
 
    /**

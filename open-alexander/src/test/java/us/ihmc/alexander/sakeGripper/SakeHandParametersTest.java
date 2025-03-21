@@ -1,4 +1,4 @@
-package us.ihmc.avatar.sakeGripper;
+package us.ihmc.alexander.sakeGripper;
 
 import org.junit.jupiter.api.Test;
 

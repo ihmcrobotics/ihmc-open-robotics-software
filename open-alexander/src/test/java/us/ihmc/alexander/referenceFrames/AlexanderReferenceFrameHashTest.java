@@ -1,19 +1,19 @@
-package us.ihmc.atlas.referenceFrames;
-
-import java.lang.reflect.InvocationTargetException;
+package us.ihmc.alexander.referenceFrames;
 
 import org.junit.jupiter.api.Test;
-
-import us.ihmc.atlas.AtlasRobotModel;
-import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.alexander.AlexanderVersion;
+import us.ihmc.alexander.OpenAlexanderRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.referenceFrames.ReferenceFrameHashTest;
-public class AtlasReferenceFrameHashTest extends ReferenceFrameHashTest
+
+import java.lang.reflect.InvocationTargetException;
+
+public class AlexanderReferenceFrameHashTest extends ReferenceFrameHashTest
 {
    public DRCRobotModel getRobotModel()
    {
-      return new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, true);
+      return new OpenAlexanderRobotModel(AlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS);
    }
    
    @Override
