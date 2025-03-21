@@ -26,8 +26,7 @@ public class RDXZEDFirstPersonView
       scene3D.addDefaultLighting();
 
       firstPerson3DPanel = new RDX3DPanel("ZED 1st Person View", false);
-//      baseUI.add3DPanel(firstPerson3DPanel, scene3D); TODO
-      baseUI.add3DPanel(firstPerson3DPanel);
+      baseUI.add3DPanel(firstPerson3DPanel, scene3D);
       firstPerson3DPanel.getCamera3D().setInputEnabled(false);
    }
 
@@ -92,4 +91,14 @@ public class RDXZEDFirstPersonView
       firstPerson3DPanel.getCamera3D().setPose(zedLeftEyeFrame.getTransformToWorldFrame());
    }
 
+   public RDX3DScene getScene3D()
+   {
+      return scene3D;
+   }
+
+   public void destroy()
+   {
+      scene3D.dispose();
+      firstPerson3DPanel.dispose();
+   }
 }
