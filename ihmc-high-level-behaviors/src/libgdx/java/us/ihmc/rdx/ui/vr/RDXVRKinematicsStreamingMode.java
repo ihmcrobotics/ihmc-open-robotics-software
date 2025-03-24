@@ -332,6 +332,7 @@ public class RDXVRKinematicsStreamingMode
    {
       if (!recordROS2Log.get())
          return;
+      openGrippers();
       ROS2LogMessage message = new ROS2LogMessage();
       message.setRequestedState((isStarting ? ROS2LoggerRequestedState.START : ROS2LoggerRequestedState.FINISH).toByte());
       ros2LogMessagePublisher.publish(message);
@@ -374,6 +375,7 @@ public class RDXVRKinematicsStreamingMode
             jointLowerLimits.put(robotModel.getJointMap().getArmJointName(robotSide, ArmJointName.ELBOW_PITCH), fullyExtendedLimit);
          }
       }
+
       parameters.setJointCustomPositionUpperLimits(jointUpperLimits);
       parameters.setJointCustomPositionLowerLimits(jointLowerLimits);
    }
@@ -384,6 +386,15 @@ public class RDXVRKinematicsStreamingMode
          return;
 
       kinematicsRecorder.onUpdateStart();
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         OneDoFJointBasics fingerJoint = syncedRobot.getFullRobotModel().getOneDoFJointByName(robotSide.getUpperCaseName() + "_GRIPPER_X1");
+         if (fingerJoint != null)
+         {
+            handsAreOpen.get(robotSide).setValue(fingerJoint.getQ() > 0.9);
+         }
+      }
 
       // Handle left joystick input
       if (kinematicsRecorder.isReplaying())
@@ -683,6 +694,18 @@ public class RDXVRKinematicsStreamingMode
             wakeUpToolbox();
             reinitializeToolbox();
             wakeUpToolbox();
+         }
+      }
+   }
+
+   private void openGrippers()
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         if (handControlModes.get(robotSide) == RDXHandControlMode.GRIPPER)
+         {
+            handsAreOpen.get(robotSide).setValue(true);
+            handManager.publishHandCommand(robotSide, SakeHandPreset.FULLY_OPEN, false, false);
          }
       }
    }

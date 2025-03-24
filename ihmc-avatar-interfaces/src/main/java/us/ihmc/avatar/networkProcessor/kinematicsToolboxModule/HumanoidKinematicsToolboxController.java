@@ -532,7 +532,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          }
 
          multiContactRegionCalculator.updateContactState(wholeBodyContactState);
-         multiContactRegionCalculator.performUpdateForNextVertex();
+         multiContactRegionCalculator.performUpdateForNextVertex(true);
 
          if (multiContactRegionCalculator.hasSolvedWholeRegion() && isUpperBodyLoadBearing.getValue())
          {
