@@ -24,6 +24,7 @@ import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.gpuHeightMap.CUDALocalFootstepOptimizer;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -44,8 +45,6 @@ public class RDXVRFootstepPlacement
 {
    private final static boolean USE_HEIGHTMAP = true;
    private final static boolean USE_STEPPABLE_REGION_ADAPTATION = true;
-   private final static boolean RUN_ADAPTATION_ASYNC = false;
-   private static final long TIMEOUT_STEPPABLE_REGION_ADAPTATION = 10;
    private HeightMapData latestHeightMapData;
 
    private RDXVRHardwareModel controllerModel = RDXVRHardwareModel.UNKNOWN;
@@ -57,8 +56,8 @@ public class RDXVRFootstepPlacement
    private final SideDependentList<ModelInstance> footstepsBeingHandPlaced = new SideDependentList<>();
    private final ArrayList<RDXVRFootstep> handPlacedFootsteps = new ArrayList<>();
 
+   private final CUDALocalFootstepOptimizer footstepOptimizer;
    private RDXVRFootstep footstepBeingExternallyPlaced;
-   private final RDXFootstepOptimizer footstepOptimizer;
    private final FootstepSnapAndWiggler snapper;
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final FramePose3D poseForPlacement = new FramePose3D();
@@ -99,8 +98,8 @@ public class RDXVRFootstepPlacement
 
       WalkingControllerParameters walkingControllerParameters = syncedRobot.getRobotModel().getWalkingControllerParameters();
       SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
-      footstepOptimizer = new RDXFootstepOptimizer(steppingParameters.getFootLength(),
-                                                   steppingParameters.getFootWidth());
+      footstepOptimizer = new CUDALocalFootstepOptimizer((float) steppingParameters.getFootLength(),
+                                                         (float) steppingParameters.getFootWidth());
    }
 
    public void setLocomotionParameters(LocomotionParameters locomotionParameters)
@@ -205,14 +204,7 @@ public class RDXVRFootstepPlacement
                adaptedPose.getPosition().setZ(height);
                if (USE_STEPPABLE_REGION_ADAPTATION && lastAdjustment)
                {
-                  if (RUN_ADAPTATION_ASYNC)
-                  {
-                     adaptedPose = optimizeFootstep(latestHeightMapData, adaptedPose, TIMEOUT_STEPPABLE_REGION_ADAPTATION);
-                  }
-                  else
-                  {
-                     adaptedPose = footstepOptimizer.compute(latestHeightMapData, adaptedPose);
-                  }
+                  adaptedPose = footstepOptimizer.compute(latestHeightMapData, adaptedPose);
                }
                footstepBeingExternallyPlaced.setPose(adaptedPose);
             }
@@ -232,49 +224,6 @@ public class RDXVRFootstepPlacement
       {
          LogTools.error("Could not set pose because the footstep being placed is null");
          return false;
-      }
-   }
-
-   public void update()
-   {
-      if (USE_HEIGHTMAP && USE_STEPPABLE_REGION_ADAPTATION && RUN_ADAPTATION_ASYNC)
-      {
-         if (footstepBeingExternallyPlaced != null)
-         {
-            footstepBeingExternallyPlaced.setPose(footstepOptimizer.getCurrentBestSolution());
-            sendStep(true);
-         }
-         if (footstepOptimizer.hasConverged())
-         {
-            footstepOptimizer.cancelCompute();
-         }
-      }
-   }
-
-   private FramePose3D optimizeFootstep(HeightMapData heightMapData, FramePose3DReadOnly initialPose, long timeoutMillis)
-   {
-      FramePose3D bestSoFar = new FramePose3D(initialPose); // Initialize with the initial pose
-      CompletableFuture<FramePose3D> futureResult = footstepOptimizer.computeAsync(heightMapData, initialPose);
-
-      try
-      {
-         bestSoFar = futureResult.get(timeoutMillis, java.util.concurrent.TimeUnit.MILLISECONDS);
-         LogTools.info("Footstep optimization completed successfully.");
-      }
-      catch (Exception e)
-      {
-         LogTools.warn("Footstep optimization timed out or was interrupted.  Using best-so-far solution.");
-         bestSoFar = footstepOptimizer.getCurrentBestSolution();
-      }
-
-      return bestSoFar;
-   }
-
-   public void resetOptimization()
-   {
-      if (USE_HEIGHTMAP && USE_STEPPABLE_REGION_ADAPTATION && RUN_ADAPTATION_ASYNC)
-      {
-         footstepOptimizer.cancelCompute();
       }
    }
 
@@ -366,10 +315,6 @@ public class RDXVRFootstepPlacement
       footstepBeingExternallyPlaced = null;
       latestHeightMapData = null;
       handPlacedFootsteps.clear();
-      if (USE_STEPPABLE_REGION_ADAPTATION && RUN_ADAPTATION_ASYNC)
-      {
-         footstepOptimizer.cancelCompute();
-      }
    }
 
    public void resetTimer()
@@ -379,9 +324,6 @@ public class RDXVRFootstepPlacement
 
    public void destroy()
    {
-      if (USE_STEPPABLE_REGION_ADAPTATION && RUN_ADAPTATION_ASYNC)
-      {
-         footstepOptimizer.shutdown();
-      }
+      footstepOptimizer.close();
    }
 }

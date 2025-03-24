@@ -73,11 +73,8 @@ public class CUDALocalFootstepOptimizer implements AutoCloseable
 
       searchRadius = footLength;
       stepsXY = (int) (2 * searchRadius / SEARCH_SPACE_RESOLUTION_XY) + 1;
-      stepsYaw = (int) (Math.PI/4 / SEARCH_SPACE_RESOLUTION_YAW);
-
+      stepsYaw = (int) (Math.PI / 4 / SEARCH_SPACE_RESOLUTION_YAW);
       searchSpaceDim = stepsXY * stepsXY * stepsYaw;
-      blockSize = new dim3(512, 1, 1); // Older gpus have a limit of 512, newer ones of 1024
-      gridSize = new dim3(searchSpaceDim / blockSize.x(), 1, 1);
 
       cpuCosts = new FloatPointer(searchSpaceDim);
       gpuCosts = new FloatPointer();
@@ -105,6 +102,9 @@ public class CUDALocalFootstepOptimizer implements AutoCloseable
     */
    public FramePose3D compute(HeightMapData heightMapData, FramePose3DReadOnly initialPose)
    {
+      blockSize = new dim3(512, 1, 1); // Older gpus have a limit of 512, newer ones of 1024
+      gridSize = new dim3(searchSpaceDim / blockSize.x(), 1, 1);
+
       FloatPointer cpuInitialPose = new FloatPointer((float) initialPose.getX(), (float) initialPose.getY(), (float) initialPose.getYaw());
       FloatPointer gpuInitialPose = new FloatPointer();
       CUDATools.mallocAsync(gpuInitialPose, 3, cudaStream);
@@ -152,7 +152,7 @@ public class CUDALocalFootstepOptimizer implements AutoCloseable
       gridSize.close();
 
       // Now run another kernel to retrieve the best solution among those in cpuSolutions
-      blockSize = new dim3(256, 1, 1); // Older gpus have a limit of 512, newer ones of 1024
+      blockSize = new dim3(256, 1, 1);
       gridSize = new dim3((searchSpaceDim + blockSize.x() -1) / blockSize.x(), 1, 1);
       int sharedMemSize = 2 * 256 * Float.BYTES; // Account for both sharedCosts
 

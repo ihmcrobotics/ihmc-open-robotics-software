@@ -131,7 +131,6 @@ public class RDXVRFootstepStreaming
                                                                   latestStatus.getDesiredFootOrientation()), false))
                {
                   step(true);
-                  footstepPlacer.resetOptimization();
                   previousAdjustment.put(side, new RigidBodyTransform(latestStatus.getDesiredFootOrientation(), latestStatus.getDesiredFootPosition()));
                }
                else
