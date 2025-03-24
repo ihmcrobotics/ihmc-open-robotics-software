@@ -91,7 +91,7 @@ public class ReadyToPlanState implements State
    @Override
    public void onEntry()
    {
-      if (controllerFootstepQueueMonitor.getControllerFootstepQueue().isEmpty())
+      if (controllerFootstepQueueMonitor.getControllerFootstepQueue().isEmpty() && continuousHikingParameters.getStepPublisherEnabled())
       {
          previousLateralValue = 0;
       }

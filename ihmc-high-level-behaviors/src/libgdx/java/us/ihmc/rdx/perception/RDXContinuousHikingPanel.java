@@ -115,6 +115,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    private boolean previousRightBumper;
    private boolean previousLeftBumper;
    private boolean previousYButton;
+   private boolean previousStartButton;
 
    public RDXContinuousHikingPanel(RDXBaseUI baseUI, ROS2Node ros2Node, DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobotModel)
    {
@@ -411,6 +412,13 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       boolean currentYButtonPressed = joystickController.getButton(ControllerButton.Y.ordinal());
       boolean currentLeftBumper = joystickController.getButton(ControllerButton.LEFTBUMPER.ordinal());
       boolean currentRightBumper = joystickController.getButton(ControllerButton.RIGHTBUMPER.ordinal());
+      boolean currentStartButton = joystickController.getButton(ControllerButton.START.ordinal());
+
+      if (previousStartButton && !currentStartButton)
+      {
+         // This sets the value to the opposite value
+         continuousHiking.set(!continuousHiking.get());
+      }
 
       if (previousYButton && !currentYButtonPressed)
       {
@@ -441,6 +449,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
          publishStopContinuousHiking();
       }
 
+      previousStartButton = joystickController.getButton(ControllerButton.START.ordinal());
       previousYButton = joystickController.getButton(ControllerButton.Y.ordinal());
       previousLeftBumper = joystickController.getButton(ControllerButton.LEFTBUMPER.ordinal());
       previousRightBumper = joystickController.getButton(ControllerButton.RIGHTBUMPER.ordinal());
