@@ -129,7 +129,8 @@ public class ROS2FrameTest
                EuclidCoreTestTools.assertEquals(updatedTransformToParent, mutableFrame.getTransformToParent(), EPSILON);
 
                // Publish a message and wait for it to be received
-               correctMessagesReceived.wait(1000);
+               if (correctMessagesReceived.get() != i + 1)
+                  correctMessagesReceived.wait(1000);
 
                // Assert the message was correct
                assertEquals(i + 1, correctMessagesReceived.get());
