@@ -230,8 +230,7 @@ public class StabilityBasedKinematicRetargetingCalculator
 //         chestMultiContactWeight.set(chestDefaultWeight);
 //         pelvisMultiContactWeight.set(pelvisDefaultWeight);
 //      }
-
-      requestPostureAdjustment.set(ENABLE_POSTURE_OBJECTIVE);
+      
       addContactAdjustment.set(true);
 
       parentRegistry.addChild(registry);
