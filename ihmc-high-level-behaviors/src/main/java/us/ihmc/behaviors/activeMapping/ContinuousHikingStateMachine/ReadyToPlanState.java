@@ -39,7 +39,7 @@ public class ReadyToPlanState implements State
    private static final float X_RANDOM_MARGIN = 0.2f;
    private static final float NOMINAL_STANCE_WIDTH = 0.22f;
    private static final double ALPHA = 0.1;
-   public static final double JOYSTICK_ALPHA = 0.1;
+   public static final double JOYSTICK_ALPHA = 0.25;
 
    private final HumanoidReferenceFrames referenceFrames;
    private final AtomicReference<ContinuousHikingCommandMessage> commandMessage;
@@ -91,6 +91,11 @@ public class ReadyToPlanState implements State
    @Override
    public void onEntry()
    {
+      if (controllerFootstepQueueMonitor.getControllerFootstepQueue().isEmpty())
+      {
+         previousLateralValue = 0;
+      }
+
       stopWatch.reset();
       continuousPlanner.setPlanAvailable(false);
       timeInSwingToStopPlanningAndWaitTillNextAttempt = continuousHikingParameters.getSwingTime() * (1 - ALPHA);
