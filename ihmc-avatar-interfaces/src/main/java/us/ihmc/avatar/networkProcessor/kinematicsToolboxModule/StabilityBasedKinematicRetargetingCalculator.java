@@ -119,7 +119,8 @@ public class StabilityBasedKinematicRetargetingCalculator
 
    private final YoDouble stabilityMarginThreshold = new YoDouble("stabilityMarginThreshold", registry);
    private final YoDouble stabilityMarginHysteresis = new YoDouble("stabilityMarginHysteresis", registry);
-   private final YoDouble sensitivityThreshold = new YoDouble("sensitivityThreshold", registry);
+   private final YoDouble sensitivityThresholdUpper = new YoDouble("sensitivityThresholdUpper", registry);
+   private final YoDouble sensitivityThresholdLower = new YoDouble("sensitivityThresholdLower", registry);
    private final YoDouble alphaEnabled = new YoDouble("alphaEnabled", registry);
 
    private final YoBoolean addContactAdjustment = new YoBoolean("addContactAdjustment", registry);
@@ -166,6 +167,8 @@ public class StabilityBasedKinematicRetargetingCalculator
 
       stabilityMarginThreshold.set(0.15);
       stabilityMarginHysteresis.set(0.015);
+      sensitivityThresholdLower.set(3.0e-4);
+      sensitivityThresholdUpper.set(0.035);
 
       this.stabilityGradientCalculator = new SensitivityBasedStabilityGradientCalculator(fullRobotModel,
                                                                                          wholeBodyContactState,
@@ -195,6 +198,11 @@ public class StabilityBasedKinematicRetargetingCalculator
       if (OVERRIDE_MESSAGE)
          requestContactAdjustment.set(ENABLE_CONTACT_OBJECTIVE);
 
+      if (OVERRIDE_MESSAGE)
+         requestPostureAdjustment.set(ENABLE_POSTURE_OBJECTIVE);
+      else
+         requestPostureAdjustment.set(true);
+
       chestWeight = new YoVector3D("chestWeight", registry);
       pelvisWeight = new YoVector3D("pelvisWeight", registry);
 
@@ -214,8 +222,6 @@ public class StabilityBasedKinematicRetargetingCalculator
 
       orientationGains.setProportionalGains(KP_ORIENTATION);
       orientationGains.setMaxProportionalError(MAX_ORIENTATION_ERROR);
-
-      sensitivityThreshold.set(0.035);
 
 //      boolean useOldOrientation = false;
 //      if (useOldOrientation)
@@ -277,6 +283,8 @@ public class StabilityBasedKinematicRetargetingCalculator
 
       previousStabilityMargin.setToNaN();
       postureOptimizerState.set(PostureOptimizerState.NOMINAL);
+
+      stabilityGradientCalculator.initialize();
    }
 
    public void update()
@@ -317,11 +325,11 @@ public class StabilityBasedKinematicRetargetingCalculator
             actualStabilityMarginVelocity.set(EuclidCoreTools.clamp(deltaMargin / updateDT, 0.6));
          }
 
-         if (!isEnabled.getValue() || !isUpperBodyLoadBearing.getValue() || !requestPostureAdjustment.getValue() || multiContactRegionCalculator.getStabilityMargin() > getUpperMarginThreshold())
+         if (!isEnabled.getValue() || !isUpperBodyLoadBearing.getValue() || !requestPostureAdjustment.getValue() || multiContactRegionCalculator.getStabilityMargin() > getUpperMarginThreshold() || getPostureSensitivity() < sensitivityThresholdLower.getValue())
          {
             postureOptimizerState.set(PostureOptimizerState.NOMINAL);
          }
-         else if (multiContactRegionCalculator.getStabilityMargin() > getLowerMarginThreshold() || stabilityGradientCalculator.getPostureSensitivity() < sensitivityThreshold.getValue())
+         else if (multiContactRegionCalculator.getStabilityMargin() > getLowerMarginThreshold() || stabilityGradientCalculator.getPostureSensitivity() < sensitivityThresholdUpper.getValue())
          {
             postureOptimizerState.set(PostureOptimizerState.FREEZE);
          }
