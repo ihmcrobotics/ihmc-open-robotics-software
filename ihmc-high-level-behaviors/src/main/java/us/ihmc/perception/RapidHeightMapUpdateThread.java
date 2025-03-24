@@ -65,6 +65,7 @@ public class RapidHeightMapUpdateThread extends RepeatingTaskThread
          if (heightMapManager == null)
          {
             heightMapManager = new RapidHeightMapManager(ros2Node,
+                                                         null,
                                                          syncedRobotModel.getFullRobotModel(),
                                                          syncedRobotModel.getRobotModel().getSimpleRobotName(),
                                                          leftFootFrame,

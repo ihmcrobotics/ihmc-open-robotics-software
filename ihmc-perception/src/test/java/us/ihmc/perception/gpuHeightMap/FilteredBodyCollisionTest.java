@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class FilteredBodyCollisionTest
 {
-   BodyCollisionFilteredHeightMap bodyCollisionFilteredHeightMap = new BodyCollisionFilteredHeightMap();
+   BodyCollisionFilteredHeightMap bodyCollisionFilteredHeightMap = new BodyCollisionFilteredHeightMap(null);
 
    @Test
    public void testInSphere()

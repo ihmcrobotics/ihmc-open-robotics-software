@@ -19,12 +19,15 @@ import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
+import us.ihmc.scs2.simulation.collision.Collidable;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 
 import java.time.Instant;
+import java.util.List;
 
 /**
  * This class takes care of managing the {@link RapidHeightMapExtractorCUDA}. This class can be used on remote process's or locally as well.
@@ -46,6 +49,7 @@ public class RapidHeightMapManager
    private final ROS2Publisher<ImageMessage> heightMapPublisher;
 
    public RapidHeightMapManager(ROS2Node ros2Node,
+                                RobotCollisionModel robotCollisionModel,
                                 FullHumanoidRobotModel robotModel,
                                 String robotName,
                                 ReferenceFrame leftFootSoleFrame,
@@ -55,6 +59,10 @@ public class RapidHeightMapManager
                                 HeightMapParameters heightMapParameters) throws Exception
    {
       this.heightMapParameters = heightMapParameters;
+
+      List<Collidable> robotCollidables = robotCollisionModel.getRobotCollidables(robotModel.getRootBody());
+
+      BodyCollisionFilteredHeightMap bodyCollisionFilteredHeightMap = new BodyCollisionFilteredHeightMap(robotCollidables);
 
       deviceDepthImage = new GpuMat(depthImageIntrinsics.getHeight(), depthImageIntrinsics.getWidth(), opencv_core.CV_16UC1);
       rapidHeightMapExtractor = new RapidHeightMapExtractorCUDA(leftFootSoleFrame,

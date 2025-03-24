@@ -2,9 +2,26 @@ package us.ihmc.perception.gpuHeightMap;
 
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.scs2.simulation.collision.Collidable;
+
+import java.util.List;
 
 public class BodyCollisionFilteredHeightMap
 {
+   private final List<Collidable> robotCollidables;
+
+   public BodyCollisionFilteredHeightMap(List<Collidable> robotCollidables)
+   {
+      this.robotCollidables = robotCollidables;
+
+      for(Collidable collidable : robotCollidables)
+      {
+
+
+//         FramePoint3DReadOnly centroid = collidable.;
+//         isPointInSphere((Point3D) centroid, 0.2, new Point3D(0.0, 0.0, 0.0));
+      }
+   }
    //   public static void getRobotBodyShapes(FullHumanoidRobotModel fullRobotModel)
    //   {
    //      for (RobotSide robotSide : RobotSide.values)
