@@ -83,7 +83,7 @@ public class MultipleWaypointsOrientationTrajectoryGenerator implements FrameOri
 
       clear(referenceFrame);
 
-      parentRegistry.addChild(registry);
+//      parentRegistry.addChild(registry);
    }
 
    public void clear()

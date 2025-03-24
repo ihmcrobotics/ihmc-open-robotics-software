@@ -181,7 +181,7 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
       this.maxNumberOfSwingWaypoints = maxNumberOfSwingWaypoints;
 
       registry = new YoRegistry(namePrefix + getClass().getSimpleName());
-      parentRegistry.addChild(registry);
+//      parentRegistry.addChild(registry);
 
       this.trajectoryFrame = trajectoryFrame;
       waypointPositions = new RecyclingArrayList<>(maxNumberOfSwingWaypoints, this::createNewWaypoint);
