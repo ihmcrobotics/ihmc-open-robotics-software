@@ -100,7 +100,7 @@ public class RDXFootstepOptimizer
    }
 
    /**
-    * Computes the optimized footstep pose. This method is private and called from computeAsync.
+    * Computes the optimized footstep pose.
     *
     * @param heightMapData The height map data of the environment.
     * @param initialPose   The initial pose of the footstep.
@@ -121,15 +121,12 @@ public class RDXFootstepOptimizer
       double searchRadius = footLength;
       int stepsXY = (int) (2 * searchRadius / GRID_RESOLUTION_XY) + 1;
       int stepsYaw = (int) (Math.PI/4 / GRID_RESOLUTION_YAW);
-      int n =0;
       for (int i = 0; i < stepsXY; i++)
       {
          for (int j = 0; j < stepsXY; j++)
          {
             for (int k = 0; k < stepsYaw; k++)
             {
-               n++;
-               LogTools.info(n);
                if (stopRequested.get())
                {
                   LogTools.warn("Grid search interrupted.");
@@ -284,7 +281,7 @@ public class RDXFootstepOptimizer
    {
       CornerSamplingResults results = new CornerSamplingResults();
 
-      double fx = footLength - 0.02;
+      double fx = footLength;
       double fy = footWidth - 0.02;
       double[][] corners = {{-fx / 2, -fy / 2}, {fx / 2, -fy / 2}, {fx / 2, fy / 2}, {-fx / 2, fy / 2}, {0, 0}};
 
@@ -426,7 +423,7 @@ public class RDXFootstepOptimizer
 
    private boolean satisfiesSlopeConstraint(double[] q)
    {
-      return qCurrentMaxSlope <= Math.tan(MAX_SLOPE_ANGLE);
+      return qCurrentMaxSlope <= MAX_SLOPE_ANGLE;
    }
 
    private boolean satisfiesYawConstraint(double[] q, FramePose3DReadOnly initialPose)
