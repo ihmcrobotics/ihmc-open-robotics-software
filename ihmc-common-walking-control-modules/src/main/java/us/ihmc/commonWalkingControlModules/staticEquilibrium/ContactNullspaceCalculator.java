@@ -81,8 +81,6 @@ public class ContactNullspaceCalculator
          this.computeCentroidalMomentumMatrix = false;
       }
 
-      debugCentroidalMomentumCalculator = new CentroidalMomentumCalculator(multiBodySystemInput, ReferenceFrame.getWorldFrame());
-
       for (int jointIdx = 0; jointIdx < controlledOneDoFJoints.length; jointIdx++)
       {
          OneDoFJointBasics joint = controlledOneDoFJoints[jointIdx];
