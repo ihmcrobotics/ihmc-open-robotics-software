@@ -183,7 +183,7 @@ public class RDXMultiContactRegionGraphic implements RenderableProvider
       FramePlanarRegionsListMessage planarRegionsMessage = latestPlanarRegionsMessage.getAndSet(null);
       if (planarRegionsMessage != null)
       {
-         LogTools.info("Received " + planarRegionsMessage.getPlanarRegions().getRegionNormal().size() + " regions.");
+//         LogTools.info("Received " + planarRegionsMessage.getPlanarRegions().getRegionNormal().size() + " regions.");
 
          PlanarRegionsList planarRegions = PlanarRegionMessageConverter.convertToPlanarRegionsListInWorld(planarRegionsMessage);
 
