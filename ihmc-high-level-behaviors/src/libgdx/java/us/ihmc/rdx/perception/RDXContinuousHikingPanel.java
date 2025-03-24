@@ -115,6 +115,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    private boolean previousRightBumper;
    private boolean previousLeftBumper;
    private boolean previousYButton;
+   private boolean previousStartButton;
 
    public RDXContinuousHikingPanel(RDXBaseUI baseUI, ROS2Node ros2Node, DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobotModel)
    {
@@ -411,6 +412,13 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       boolean currentYButtonPressed = joystickController.getButton(ControllerButton.Y.ordinal());
       boolean currentLeftBumper = joystickController.getButton(ControllerButton.LEFTBUMPER.ordinal());
       boolean currentRightBumper = joystickController.getButton(ControllerButton.RIGHTBUMPER.ordinal());
+      boolean currentStartButton = joystickController.getButton(ControllerButton.START.ordinal());
+
+      if (previousStartButton && !currentStartButton)
+      {
+         // This sets the value to the opposite value
+         continuousHiking.set(!continuousHiking.get());
+      }
 
       if (previousYButton && !currentYButtonPressed)
       {
@@ -432,15 +440,16 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
          publishJoystickStatus(joystickController);
       }
 
-      if (joystickController.getButton(joystickController.getMapping().buttonX) && joystickController.getButton(ControllerButton.DPAD_DOWN.ordinal()))
+      if (joystickController.getButton(joystickController.getMapping().buttonB) && joystickController.getButton(ControllerButton.DPAD_DOWN.ordinal()))
       {
          publishStopContinuousHikingGracefully();
       }
-      else if (joystickController.getButton(joystickController.getMapping().buttonX))
+      else if (joystickController.getButton(joystickController.getMapping().buttonB))
       {
          publishStopContinuousHiking();
       }
 
+      previousStartButton = joystickController.getButton(ControllerButton.START.ordinal());
       previousYButton = joystickController.getButton(ControllerButton.Y.ordinal());
       previousLeftBumper = joystickController.getButton(ControllerButton.LEFTBUMPER.ordinal());
       previousRightBumper = joystickController.getButton(ControllerButton.RIGHTBUMPER.ordinal());
@@ -546,7 +555,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       double lateralJoystickValue;
       double turningJoystickValue;
 
-      walkBackwards = joystickController.getButton(joystickController.getMapping().buttonB);
+      walkBackwards = joystickController.getButton(joystickController.getMapping().buttonX);
       forwardJoystickValue = -joystickController.getAxis(joystickController.getMapping().axisLeftY);
       lateralJoystickValue = -joystickController.getAxis(joystickController.getMapping().axisLeftX);
       turningJoystickValue = -joystickController.getAxis(joystickController.getMapping().axisRightX);
