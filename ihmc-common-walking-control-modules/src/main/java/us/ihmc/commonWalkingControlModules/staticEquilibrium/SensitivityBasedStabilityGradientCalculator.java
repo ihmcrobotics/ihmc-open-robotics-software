@@ -99,8 +99,6 @@ public class SensitivityBasedStabilityGradientCalculator
    private final DMatrixRMaj stabilityBoundaryGradient = new DMatrixRMaj(0);
    /* The gradient of the com along the line stabilityMarginDirection */
    private final DMatrixRMaj comGradient = new DMatrixRMaj(0);
-   /* Normalized stability boundary gradient */
-   private final DMatrixRMaj normalizedStabilityBoundaryGradient = new DMatrixRMaj(0);
 
    /* The normalized vector from c to p, where c is the CoM and p is comMarginPoint */
    private final DMatrixRMaj stabilityMarginDirection = new DMatrixRMaj(XY_DIMENSIONS, 1);
@@ -117,7 +115,7 @@ public class SensitivityBasedStabilityGradientCalculator
    private final DMatrixRMaj tempSensitivityMatrix = new DMatrixRMaj(0);
 
    /* Postural sensitivity, given as |N grad m(q)|, for configuration q, where N is the nullspace projector */
-   private final YoDouble yoPostureSensitivity = new YoDouble("postureSensitivity", registry);
+   private final AlphaFilteredYoVariable yoPostureSensitivity;
    /* Contact sensitivity, given as |grad m(c)|, for contact point c */
    private final YoDouble yoContactSensitivity = new YoDouble("contactSensitivity", registry);
    /* YoVariable data of stability margin gradient */
@@ -125,9 +123,6 @@ public class SensitivityBasedStabilityGradientCalculator
 
    private final YoDouble expectedSensitivity = new YoDouble("expectedSensitivity", registry);
    private final YoDouble gradientFilterAlpha = new YoDouble("gradientFilterAlpha", registry);
-   private final YoDouble yoPostureSensitivityFilt = new YoDouble("postureSensitivityFilt", registry);
-   /* Filtered data of stability margin gradient */
-   private final AlphaFilteredYoVariable[] yoStabilityMarginGradientFilt;
 
    /* Indexed controllable joints */
    private final OneDoFJointBasics[] controllableOneDoFJoints;
@@ -183,10 +178,10 @@ public class SensitivityBasedStabilityGradientCalculator
 //      qd = new DMatrixRMaj(6 + controllableOneDoFJoints.length, 1);
 
       yoStabilityMarginGradient = new YoDouble[Twist.SIZE + controllableOneDoFJoints.length];
-      yoStabilityMarginGradientFilt = new AlphaFilteredYoVariable[Twist.SIZE + controllableOneDoFJoints.length];
       String namePrefix = "stabilityGrad_";
 
-      gradientFilterAlpha.set(0.85);
+      gradientFilterAlpha.set(0.97);
+      yoPostureSensitivity = new AlphaFilteredYoVariable("postureSensitivity", registry, gradientFilterAlpha);
 
       for (int i = 0; i < yoStabilityMarginGradient.length; i++)
       {
@@ -197,14 +192,12 @@ public class SensitivityBasedStabilityGradientCalculator
             String prefix = i < numAxes ? "w" : "v";
             String name = namePrefix + prefix + axis;
             yoStabilityMarginGradient[i] = new YoDouble(name, registry);
-            yoStabilityMarginGradientFilt[i] = new AlphaFilteredYoVariable(name + "Filt", registry, gradientFilterAlpha, yoStabilityMarginGradient[i]);
          }
          else
          {
             String jointName = controllableOneDoFJoints[i - Twist.SIZE].getName();
             String name = namePrefix + jointName;
             yoStabilityMarginGradient[i] = new YoDouble(name, registry);
-            yoStabilityMarginGradientFilt[i] = new AlphaFilteredYoVariable(name + "Filt", registry, gradientFilterAlpha, yoStabilityMarginGradient[i]);
          }
       }
 
@@ -234,6 +227,11 @@ public class SensitivityBasedStabilityGradientCalculator
       parentRegistry.addChild(registry);
    }
 
+   public void initialize()
+   {
+      yoPostureSensitivity.set(0.0);
+   }
+
    public void computePostureAdjustment()
    {
       updateNullspace();
@@ -261,19 +259,9 @@ public class SensitivityBasedStabilityGradientCalculator
       {
          optimalSensitivity += EuclidCoreTools.square(computedSensitivity.get(i));
       }
-      yoPostureSensitivity.set(Math.sqrt(optimalSensitivity));
+      yoPostureSensitivity.update(Math.sqrt(optimalSensitivity));
 
       CommonOps_DDRM.mult(nullspaceCalculator.getNullspace(), computedSensitivity, stabilityBoundaryGradient);
-
-      normalizedStabilityBoundaryGradient.set(stabilityBoundaryGradient);
-      if (yoPostureSensitivity.getValue() > 1.0e-5)
-      {
-         CommonOps_DDRM.scale(1.0 / yoPostureSensitivity.getValue(), normalizedStabilityBoundaryGradient);
-      }
-      else
-      {
-         normalizedStabilityBoundaryGradient.zero();
-      }
 
       DMatrixRMaj centroidalMomentumMatrix = nullspaceCalculator.getCentroidalMomentumCalculator().getCentroidalMomentumMatrix();
       centroidalMomentumMatrixXY.reshape(XY_DIMENSIONS, centroidalMomentumMatrix.getNumCols());
@@ -290,15 +278,7 @@ public class SensitivityBasedStabilityGradientCalculator
       for (int i = 0; i < stabilityMarginGradient.getNumRows(); i++)
       {
          yoStabilityMarginGradient[i].set(stabilityBoundaryGradient.get(i));
-         yoStabilityMarginGradientFilt[i].update();
       }
-
-      double sensitivityFilt = 0.0;
-      for (int i = 0; i < yoStabilityMarginGradientFilt.length; i++)
-      {
-         sensitivityFilt += EuclidCoreTools.square(yoStabilityMarginGradientFilt[i].getDoubleValue());
-      }
-      yoPostureSensitivityFilt.set(Math.sqrt(sensitivityFilt));
    }
 
    public FrameVector3DReadOnly computeContactPointAdjustment(RobotSide robotSide)
@@ -582,12 +562,12 @@ public class SensitivityBasedStabilityGradientCalculator
 
    public double getPostureSensitivity()
    {
-      return yoPostureSensitivityFilt.getValue();
+      return yoPostureSensitivity.getValue();
    }
 
    public DMatrixRMaj getNomalizedStabilityMarginGradient()
    {
-      return normalizedStabilityBoundaryGradient;
+      return new DMatrixRMaj(0);
    }
 
    public ContactNullspaceCalculator getNullspaceCalculator()
