@@ -18,6 +18,8 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 import java.net.URL;
 
+import static org.bytedeco.cuda.global.cudart.cudaFreeAsync;
+
 public class CUDALocalFootstepOptimizer implements AutoCloseable
 {
    private static final double SEARCH_SPACE_RESOLUTION_XY = 0.02;
@@ -27,7 +29,7 @@ public class CUDALocalFootstepOptimizer implements AutoCloseable
    private final CUDAProgram program;
    private final CUDAKernel computeKernel;
    private final CUDAKernel resultKernel;
-   private final CUstream_st cudaStream;
+   private CUstream_st cudaStream;
    private dim3 blockSize;
    private dim3 gridSize;
 
@@ -39,14 +41,14 @@ public class CUDALocalFootstepOptimizer implements AutoCloseable
    private final float footWidth;
 
    // Pointers to CUDA memory
-   private final FloatPointer cpuCosts;
-   private final FloatPointer cpuSolutions;
-   private final FloatPointer gpuCosts;
-   private final FloatPointer gpuSolutions;
-   private final FloatPointer cpuBestCost;
-   private final FloatPointer cpuBestSolution;
-   private final FloatPointer gpuBestCost;
-   private final FloatPointer gpuBestSolution;
+   private FloatPointer cpuCosts;
+   private FloatPointer cpuSolutions;
+   private FloatPointer gpuCosts;
+   private FloatPointer gpuSolutions;
+   private FloatPointer cpuBestCost;
+   private FloatPointer cpuBestSolution;
+   private FloatPointer gpuBestCost;
+   private FloatPointer gpuBestSolution;
 
    public CUDALocalFootstepOptimizer(float footLength, float footWidth)
    {
@@ -68,13 +70,16 @@ public class CUDALocalFootstepOptimizer implements AutoCloseable
          throw new RuntimeException(e);
       }
 
-      // Get a stream
-      cudaStream = CUDAStreamManager.getStream();
-
       searchRadius = footLength;
       stepsXY = (int) (2 * searchRadius / SEARCH_SPACE_RESOLUTION_XY) + 1;
       stepsYaw = (int) (Math.PI / 4 / SEARCH_SPACE_RESOLUTION_YAW);
       searchSpaceDim = stepsXY * stepsXY * stepsYaw;
+   }
+
+   private void initialize()
+   {
+      // Get a stream
+      cudaStream = CUDAStreamManager.getStream();
 
       cpuCosts = new FloatPointer(searchSpaceDim);
       gpuCosts = new FloatPointer();
@@ -102,6 +107,8 @@ public class CUDALocalFootstepOptimizer implements AutoCloseable
     */
    public FramePose3D compute(HeightMapData heightMapData, FramePose3DReadOnly initialPose)
    {
+      initialize();
+
       blockSize = new dim3(512, 1, 1); // Older gpus have a limit of 512, newer ones of 1024
       gridSize = new dim3(searchSpaceDim / blockSize.x(), 1, 1);
 
@@ -139,25 +146,17 @@ public class CUDALocalFootstepOptimizer implements AutoCloseable
                    .withPointer(gpuSolutions)
                    .run(cudaStream, gridSize, blockSize, 0);
 
-      // Synchronize the stream
-      // This call waits until all asynchronous functions being executed on this stream finish.
-      // We have to call this to ensure that the kernel finished, and the result is ready to be downloaded onto the CPU
-      cudart.cudaStreamSynchronize(cudaStream);
-
-      // This is where we are pulling the result from the gpu. The download packs the variable being passed in
-      CUDATools.memcpyAsync(cpuCosts, gpuCosts, searchSpaceDim, cudaStream);
-      CUDATools.memcpyAsync(cpuSolutions, gpuSolutions, searchSpaceDim, cudaStream);
-
       blockSize.close();
       gridSize.close();
+      cudaFreeAsync(gpuInitialPose, cudaStream);
+      cudaFreeAsync(gpuHeights, cudaStream);
+      cudaFreeAsync(gpuGridCenter, cudaStream);
 
       // Now run another kernel to retrieve the best solution among those in cpuSolutions
       blockSize = new dim3(256, 1, 1);
       gridSize = new dim3((searchSpaceDim + blockSize.x() -1) / blockSize.x(), 1, 1);
       int sharedMemSize = 2 * 256 * Float.BYTES; // Account for both sharedCosts
 
-      CUDATools.memcpyAsync(gpuCosts, cpuCosts, searchSpaceDim, cudaStream);
-      CUDATools.memcpyAsync(gpuSolutions, cpuSolutions, searchSpaceDim, cudaStream);
       CUDATools.memcpyAsync(gpuBestCost, cpuBestCost, 1, cudaStream);
       CUDATools.memcpyAsync(gpuBestSolution, cpuBestSolution, 3, cudaStream);
       // Run the kernel
@@ -168,6 +167,9 @@ public class CUDALocalFootstepOptimizer implements AutoCloseable
                   .withPointer(gpuBestSolution)
                   .run(cudaStream, gridSize, blockSize, sharedMemSize);
 
+      // Synchronize the stream
+      // This call waits until all asynchronous functions being executed on this stream finish.
+      // We have to call this to ensure that the kernel finished, and the result is ready to be downloaded onto the CPU
       cudart.cudaStreamSynchronize(cudaStream);
 
       CUDATools.memcpyAsync(cpuBestSolution, gpuBestSolution, 3, cudaStream);
@@ -179,6 +181,11 @@ public class CUDALocalFootstepOptimizer implements AutoCloseable
       // Release stuff
       blockSize.close();
       gridSize.close();
+      cudaFreeAsync(gpuCosts, cudaStream);
+      cudaFreeAsync(gpuSolutions, cudaStream);
+      cudaFreeAsync(gpuBestCost, cudaStream);
+      cudaFreeAsync(gpuBestSolution, cudaStream);
+      CUDAStreamManager.releaseStream(cudaStream);
 
       return optimalFootstepPose;
    }
