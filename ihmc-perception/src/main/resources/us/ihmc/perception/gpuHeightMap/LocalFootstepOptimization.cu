@@ -1,7 +1,6 @@
 #include <cuda_runtime.h>
 #include <math.h>
 
-#define GRID_RESOLUTION_XY 0.02f
 #define GRID_RESOLUTION_YAW 0.0872664626f // 5 degrees in radians
 #define POSITION_W 10.0f
 #define YAW_W 50.0f
@@ -15,11 +14,13 @@
 #define SLOPE_CONSTRAINT_PENALTY 10.0f
 
 extern "C" __global__ void optimizeFootstep(
-    float* heightMapData,
-    int width,
-    int height,
-    float resolution,
-    float* initialPose,
+    double* heightMapData,
+    double2 heightMapCenter,
+    int heightMapCenterIdx,
+    double heightMapResolution,
+    float3 initialPose,
+    float footLength,
+    float footWidth,
     float searchRadius,
     int stepsXY,
     int stepsYaw,
@@ -41,11 +42,11 @@ extern "C" __global__ void optimizeFootstep(
         // Use the modulo operator to find the remainder when divided by stepsYaw
         int k = idx % stepsYaw;
 
-        float x = initialPose[0] - searchRadius + i * GRID_RESOLUTION_XY;
-        float y = initialPose[1] - searchRadius + j * GRID_RESOLUTION_XY;
-        float yaw = initialPose[2] + k * GRID_RESOLUTION_YAW;
+        float x = initialPose.x - searchRadius + i * heightMapResolution;
+        float y = initialPose.y - searchRadius + j * heightMapResolution;
+        float yaw = initialPose.z + k * GRID_RESOLUTION_YAW;
 
-        float cost = computeCost(x, y, yaw, initialPose, heightMapData, width, height, resolution);
+        float cost = computeCost(x, y, yaw, initialPose, footLength, footWidth, heightMapData, heightMapCenter, heightMapCenterIdx, heightMapResolution);
 
         // Write the computed cost to the global memory array
         costs[idx] = cost;
@@ -56,78 +57,114 @@ extern "C" __global__ void optimizeFootstep(
     }
 }
 
-__global__ void findBestSolution(float* costs, float* solutions, int totalThreads, float* bestCost, float* bestSolution)
+__global__ void findBestSolution(float* costs, float* solutions, int totalThreads,
+                                float* globalBestCost, float3* globalBestSolution)
 {
-    __shared__ float sharedCosts[256];
+    __shared__ float sharedCosts[256];  // Assumes blockDim.x == 256
     __shared__ int sharedIndices[256];
+    __shared__ bool needsUpdate;  // For coordinated solution update
 
     int tid = threadIdx.x;
-    int gid = blockIdx.x * blockDim.x + threadIdx.x;
+    int gid = blockIdx.x * blockDim.x + tid;
 
-    // Load data into shared memory
+    // Initialize shared memory
     if (gid < totalThreads)
     {
         sharedCosts[tid] = costs[gid];
         sharedIndices[tid] = gid;
-    }
-    else
+    } else
     {
         sharedCosts[tid] = FLT_MAX;
         sharedIndices[tid] = -1;
     }
     __syncthreads();
 
-    // Perform reduction in shared memory
-    for (int stride = blockDim.x / 2; stride > 0; stride >>= 1)
+    // Parallel reduction to find block minimum
+    for(int stride = blockDim.x/2; stride > 0; stride >>= 1)
     {
-        if (tid < stride && sharedCosts[tid + stride] < sharedCosts[tid])
+        if(tid < stride)
         {
-            sharedCosts[tid] = sharedCosts[tid + stride];
-            sharedIndices[tid] = sharedIndices[tid + stride];
+            if(sharedCosts[tid + stride] < sharedCosts[tid])
+            {
+                sharedCosts[tid] = sharedCosts[tid + stride];
+                sharedIndices[tid] = sharedIndices[tid + stride];
+            }
         }
         __syncthreads();
     }
 
-    // Write result for this block to global memory
-    if (tid == 0)
+    // Block 0 thread 0 handles atomic update
+    if(tid == 0)
     {
-        atomicMin((int*)bestCost, __float_as_int(sharedCosts[0]));
-        if (*bestCost == sharedCosts[0])
+        float blockMin = sharedCosts[0];
+        int blockMinIndex = sharedIndices[0];
+        needsUpdate = false;
+
+        // Atomic float minimum using CAS
+        int* target = reinterpret_cast<int*>(globalBestCost);
+        int old = *target;
+        while(blockMin < __int_as_float(old))
         {
-            int index = sharedIndices[0];
-            bestSolution[0] = solutions[index * 3];
-            bestSolution[1] = solutions[index * 3 + 1];
-            bestSolution[2] = solutions[index * 3 + 2];
+            int assumed = old;
+            int desired = __float_as_int(blockMin);
+            old = atomicCAS(target, assumed, desired);
+
+            if(old == assumed)
+            {
+                needsUpdate = true;  // Mark that we updated the cost
+                break;
+            }
+        }
+        __threadfence();  // Ensure memory consistency
+
+        // Update solution atomically if we updated the cost
+        if(needsUpdate)
+        {
+            globalBestSolution->x = solutions[blockMinIndex * 3];
+            globalBestSolution->y = solutions[blockMinIndex * 3 + 1];
+            globalBestSolution->z = solutions[blockMinIndex * 3 + 2];
         }
     }
 }
 
+
 // -------------------------------------------------------------------------
 // Returns the height at world coordinates (x,y) given a height map that is
-// stored as a contiguous float array. (The host must prepare the heightMap array
-// and also provide the map dimensions, resolution, and origin.)
-__device__ float getHeightAt(float x, float y,
-const float* heightMap,
-int mapWidth, int mapHeight,
-float mapResolution, float mapOriginX, float mapOriginY)
+// stored as a contiguous double array
+__device__ float getHeightAt(float x, float y, const double* heightMapData, double2 heightMapCenter, int heightMapCenterIdx, double heightMapResolution)
 {
-int col = (int)((x - mapOriginX) / mapResolution);
-int row = (int)((y - mapOriginY) / mapResolution);
-// Clamp indices to valid bounds.
-if(col < 0) col = 0;
-if(col >= mapWidth) col = mapWidth - 1;
-if(row < 0) row = 0;
-if(row >= mapHeight) row = mapHeight - 1;
-return heightMap[row * mapWidth + col];
+    int key = coordinateToKey(x, y, heightMapCenter.x, heightMapCenter.y, heightMapResolution, heightMapCenterIdx);
+    return (float)heightMapData[key];
 }
 
-__device__ float computeCost(float x, float y, float yaw, float* initialPose, float* heightMapData, int width, int height, float resolution)
+__device__ int coordinateToKey(float x, float y, double xCenter, double yCenter,
+                              double resolution, int centerIndex)
+{
+    int xIndex = coordinateToIndex((double) x, xCenter, resolution, centerIndex);
+    int yIndex = coordinateToIndex((double) y, yCenter, resolution, centerIndex);
+    return indicesToKey(xIndex, yIndex, centerIndex);
+}
+
+__device__ int coordinateToIndex(double coordinate, double gridCenter,
+                                double resolution, int centerIndex)
+{
+    double offset = (coordinate - gridCenter) / resolution;
+    return static_cast<int>(round(offset)) + centerIndex;
+}
+
+__device__ int indicesToKey(int xIndex, int yIndex, int centerIndex)
+{
+    int rowLength = 2 * centerIndex + 1;
+    return yIndex * rowLength + xIndex;
+}
+
+__device__ float computeCost(float x, float y, float yaw, float* initialPose, float footLength, float footWidth, double* heightMapData, float2 heightMapCenter, int heightMapCenterIdx, double heightMapResolution)
 {
     float positionCost = POSITION_W * (fabsf(x - initialPose[0]) + fabsf(y - initialPose[1]));
     float yawCost = YAW_W * fabsf(yaw - initialPose[2]);
-    float planarityCost = PLANARITY_W * computePlanarityCost(x, y, yaw, heightMapData, width, height, resolution);
+    float planarityCost = PLANARITY_W * computePlanarityCost(x, y, yaw, heightMapData, heightMapCenter, heightMapCenterIdx, heightMapResolution, footLength, footWidth);
 
-    float z = getHeightAt(x, y, heightMapData, width, height, resolution);
+    float z = getHeightAt(x, y, heightMapData, heightMapCenter, heightMapCenterIdx, heightMapResolution);
     float zDistancePenalty = HEIGHT_W * fabsf(z - initialPose[3]);
 
     return positionCost + yawCost + planarityCost + zDistancePenalty;
@@ -139,10 +176,10 @@ __device__ float computeCost(float x, float y, float yaw, float* initialPose, fl
 // surface appears discontinuous we return a heavy penalty; otherwise, we discard
 // the worst (most deviant) sample, fit a plane to remaining points and compute rmse
 // height deviation and inclination
-__device__ float computePlanarityCost(float x, float y, float yaw, float* heightMapData, int width, int height, float resolution)
+__device__ float computePlanarityCost(float x, float y, float yaw, double* heightMapData, float2 heightMapCenter, int heightMapCenterIdx, double heightMapResolution, float footLength, float footWidth)
 {
-    float fx = FOOT_LENGTH + 0.02f;
-    float fy = FOOT_WIDTH + 0.02f;
+    float fx = footLength + 0.02f;
+    float fy = footWidth + 0.02f;
     float fullSamples[13][2] = {{-fx/2, -fy/2}, {fx/2, -fy/2}, {fx/2, fy/2}, {-fx/2, fy/2}, {0, 0},
                                     {-fx/4, -fy/2}, {-fx/4, 0}, {-fx/4, fy/2}, {0, -fy/2}, {0, fy/2},
                                     {fx/4, -fy/2}, {fx/4, 0}, {fx/4, fy/2}};
@@ -162,7 +199,7 @@ __device__ float computePlanarityCost(float x, float y, float yaw, float* height
             cornersXY[i][0] = sampleX;
             cornersXY[i][1] = sampleY;
         }
-        fullHeights[i] = getHeightAt(sampleX, sampleY, heightMapData, width, height, resolution);
+        heights[i] = getHeightAt(sampleX, sampleY, heightMapData, heightMapCenter, heightMapCenterIdx, heightMapResolution);
     }
 
 

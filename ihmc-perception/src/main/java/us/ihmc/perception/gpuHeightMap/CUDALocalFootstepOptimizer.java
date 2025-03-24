@@ -3,10 +3,13 @@ package us.ihmc.perception.gpuHeightMap;
 import org.bytedeco.cuda.cudart.CUstream_st;
 import org.bytedeco.cuda.cudart.dim3;
 import org.bytedeco.cuda.global.cudart;
+import org.bytedeco.javacpp.DoublePointer;
 import org.bytedeco.javacpp.FloatPointer;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
 import us.ihmc.perception.cuda.CUDAStreamManager;
@@ -14,10 +17,6 @@ import us.ihmc.perception.cuda.CUDATools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 import java.net.URL;
-import java.util.Arrays;
-import java.util.stream.IntStream;
-
-import static org.bytedeco.cuda.global.cudart.*;
 
 public class CUDALocalFootstepOptimizer implements AutoCloseable
 {
@@ -28,22 +27,32 @@ public class CUDALocalFootstepOptimizer implements AutoCloseable
    private final CUDAProgram program;
    private final CUDAKernel computeKernel;
    private final CUDAKernel resultKernel;
-   private final CUstream_st stream;
-   private final dim3 blockSize;
-   private final dim3 gridSize;
+   private final CUstream_st cudaStream;
+   private dim3 blockSize;
+   private dim3 gridSize;
 
    private final float searchRadius;
    private final int stepsXY;
    private final int stepsYaw;
+   private final int searchSpaceDim;
+   private final float footLength;
+   private final float footWidth;
 
    // Pointers to CUDA memory
-   private final FloatPointer costs = new FloatPointer();
-   private final FloatPointer solutions = new FloatPointer();
-   private final FloatPointer bestCost = new FloatPointer();
-   private final FloatPointer bestSolution = new FloatPointer();
+   private final FloatPointer cpuCosts;
+   private final FloatPointer cpuSolutions;
+   private final FloatPointer gpuCosts;
+   private final FloatPointer gpuSolutions;
+   private final FloatPointer cpuBestCost;
+   private final FloatPointer cpuBestSolution;
+   private final FloatPointer gpuBestCost;
+   private final FloatPointer gpuBestSolution;
 
    public CUDALocalFootstepOptimizer(float footLength, float footWidth)
    {
+      this.footLength = footLength;
+      this.footWidth = footWidth;
+
       // Get URLs to the CUDA files
       URL optimizerExtractionURL = getClass().getResource("LocalFootstepOptimization.cu");
 
@@ -60,15 +69,31 @@ public class CUDALocalFootstepOptimizer implements AutoCloseable
       }
 
       // Get a stream
-      stream = CUDAStreamManager.getStream();
+      cudaStream = CUDAStreamManager.getStream();
 
       searchRadius = footLength;
       stepsXY = (int) (2 * searchRadius / SEARCH_SPACE_RESOLUTION_XY) + 1;
       stepsYaw = (int) (Math.PI/4 / SEARCH_SPACE_RESOLUTION_YAW);
 
-      int totalNumberOfThreads = stepsXY * stepsXY * stepsYaw;
+      searchSpaceDim = stepsXY * stepsXY * stepsYaw;
       blockSize = new dim3(512, 1, 1); // Older gpus have a limit of 512, newer ones of 1024
-      gridSize = new dim3(totalNumberOfThreads / blockSize.x(), 1, 1);
+      gridSize = new dim3(searchSpaceDim / blockSize.x(), 1, 1);
+
+      cpuCosts = new FloatPointer(searchSpaceDim);
+      gpuCosts = new FloatPointer();
+      CUDATools.mallocAsync(gpuCosts, searchSpaceDim, cudaStream);
+
+      cpuSolutions = new FloatPointer(searchSpaceDim);
+      gpuSolutions = new FloatPointer();
+      CUDATools.mallocAsync(gpuSolutions, searchSpaceDim, cudaStream);
+
+      cpuBestCost = new FloatPointer(1);
+      gpuBestCost = new FloatPointer();
+      CUDATools.mallocAsync(gpuBestCost, 1, cudaStream);
+
+      cpuBestSolution = new FloatPointer(3);
+      gpuBestSolution = new FloatPointer();
+      CUDATools.mallocAsync(gpuBestSolution, 3, cudaStream);
    }
 
    /**
@@ -80,90 +105,82 @@ public class CUDALocalFootstepOptimizer implements AutoCloseable
     */
    public FramePose3D compute(HeightMapData heightMapData, FramePose3DReadOnly initialPose)
    {
+      FloatPointer cpuInitialPose = new FloatPointer((float) initialPose.getX(), (float) initialPose.getY(), (float) initialPose.getYaw());
+      FloatPointer gpuInitialPose = new FloatPointer();
+      CUDATools.mallocAsync(gpuInitialPose, 3, cudaStream);
+
+      DoublePointer cpuHeights = new DoublePointer(heightMapData.getHeights());
+      DoublePointer gpuHeights = new DoublePointer();
+      CUDATools.mallocAsync(gpuHeights, heightMapData.getHeights().length, cudaStream);
+
+      DoublePointer cpuGridCenter = new DoublePointer(heightMapData.getGridCenter().getX(), (float) heightMapData.getGridCenter().getY());
+      DoublePointer gpuGridCenter = new DoublePointer();
+      CUDATools.mallocAsync(gpuGridCenter, 2, cudaStream);
+
+      // Copying data from CPU to GPU
+      CUDATools.memcpyAsync(gpuCosts, cpuCosts, searchSpaceDim, cudaStream);
+      CUDATools.memcpyAsync(gpuSolutions, cpuSolutions, searchSpaceDim, cudaStream);
+      CUDATools.memcpyAsync(gpuInitialPose, cpuInitialPose, 3, cudaStream);
+      CUDATools.memcpyAsync(gpuHeights, cpuHeights, heightMapData.getHeights().length, cudaStream);
+      CUDATools.memcpyAsync(gpuGridCenter, cpuGridCenter, 2, cudaStream);
+
       // Runs the kernel with the desired grid and block sizes
-      computeKernel.withPointer(heightmap)
-                   .withPointer(initialPose)
+      computeKernel.withPointer(gpuHeights)
+                   .withPointer(gpuGridCenter)
+                   .withInt(heightMapData.getCenterIndex())
+                   .withDouble(heightMapData.getGridResolutionXY())
+                   .withPointer(gpuInitialPose)
+                   .withFloat(footLength)
+                   .withFloat(footWidth)
                    .withFloat(searchRadius)
                    .withInt(stepsXY)
                    .withInt(stepsYaw)
-                   .withPointer(costs)
-                   .withPointer(solutions)
-                   .run(stream, gridSize, blockSize, 0);
+                   .withPointer(gpuCosts)
+                   .withPointer(gpuSolutions)
+                   .run(cudaStream, gridSize, blockSize, 0);
 
       // Synchronize the stream
       // This call waits until all asynchronous functions being executed on this stream finish.
       // We have to call this to ensure that the kernel finished, and the result is ready to be downloaded onto the CPU
-      cudart.cudaStreamSynchronize(stream);
+      cudart.cudaStreamSynchronize(cudaStream);
 
       // This is where we are pulling the result from the gpu. The download packs the variable being passed in
-      gpuResult.download(cpuResult);
+      CUDATools.memcpyAsync(cpuCosts, gpuCosts, searchSpaceDim, cudaStream);
+      CUDATools.memcpyAsync(cpuSolutions, gpuSolutions, searchSpaceDim, cudaStream);
 
-      printResult(cpuResult);
+      blockSize.close();
+      gridSize.close();
 
-      // Remember to close these!
-      gridDim.close();
-      blockDim.close();
-
-      // We need to worry about closing these variables
-      dim3 gridDim = new dim3(); // The same thing as ( new dim3(1, 1, 1); )
-      dim3 blockDim = new dim3(width, height, 1);
-
-      // Runs the kernel with the desired grid and block sizes
-      cudaKernel.run(stream, gridDim, blockDim, 0);
-
-
-
-
-      dim3 blockSize(256, 1, 1);
-      dim3 gridSize((totalThreads + blockSize.x - 1) / blockSize.x, 1, 1);
+      // Now run another kernel to retrieve the best solution among those in cpuSolutions
+      blockSize = new dim3(256, 1, 1); // Older gpus have a limit of 512, newer ones of 1024
+      gridSize = new dim3((searchSpaceDim + blockSize.x() -1) / blockSize.x(), 1, 1);
       int sharedMemSize = 2 * 256 * Float.BYTES; // Account for both sharedCosts
 
+      CUDATools.memcpyAsync(gpuCosts, cpuCosts, searchSpaceDim, cudaStream);
+      CUDATools.memcpyAsync(gpuSolutions, cpuSolutions, searchSpaceDim, cudaStream);
+      CUDATools.memcpyAsync(gpuBestCost, cpuBestCost, 1, cudaStream);
+      CUDATools.memcpyAsync(gpuBestSolution, cpuBestSolution, 3, cudaStream);
       // Run the kernel
-      kernel.withPointer(depthImage.getCUDADataPointer())
-            .withLong(depthImage.getGpuImageMat().step())
-            .withInt(depthImage.getWidth())
-            .withInt(depthImage.getHeight())
-            .withFloat(depthImage.getFocalLengthX())
-            .withFloat(depthImage.getFocalLengthY())
-            .withFloat(depthImage.getPrincipalPointX())
-            .withFloat(depthImage.getPrincipalPointY())
-            .withFloat(depthImage.getDepthDiscretization())
-            .withPointer(transformPointer)
-            .withPointer(gpuPointCloudPointer)
-            .withPointer(pointCloudSize)
-            .run(stream, gridSize, blockSize, sharedMemSize);
+      resultKernel.withPointer(gpuCosts)
+                  .withPointer(gpuSolutions)
+                  .withInt(searchSpaceDim)
+                  .withPointer(gpuBestCost)
+                  .withPointer(gpuBestSolution)
+                  .run(cudaStream, gridSize, blockSize, sharedMemSize);
 
-      // Synchronize the stream to ensure we can read the point cloud size
-      error = cudaStreamSynchronize(stream);
-      CUDATools.checkCUDAError(error);
-      int numberOfPoints = pointCloudSize.get();
-      long numberOfFloats = 3L * numberOfPoints;
+      cudart.cudaStreamSynchronize(cudaStream);
 
-      // Copy the point cloud data from GPU to CPU, then to a Java float[]
-      FloatPointer cpuPointCloudPointer = new FloatPointer(numberOfFloats);
-      float[] pointsArray = new float[(int) numberOfFloats];
-      CUDATools.memcpyAsync(cpuPointCloudPointer, gpuPointCloudPointer, numberOfFloats, stream);
-      error = cudaStreamSynchronize(stream);
-      CUDATools.checkCUDAError(error);
-      cpuPointCloudPointer.get(pointsArray);
+      CUDATools.memcpyAsync(cpuBestSolution, gpuBestSolution, 3, cudaStream);
 
-      // Create a list of points from the float[]
-      Point3D32[] result = new Point3D32[numberOfPoints];
-      IntStream.range(0, numberOfPoints).parallel().forEach(i ->
-                                                            {
-                                                               float x = pointsArray[3 * i];
-                                                               float y = pointsArray[3 * i + 1];
-                                                               float z = pointsArray[3 * i + 2];
-                                                               result[i] = new Point3D32(x, y, z);
-                                                            });
+      FramePose3D optimalFootstepPose = new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                                        new Point3D(cpuBestSolution.get(0), cpuBestSolution.get(1), initialPose.getZ()),
+                                                        new YawPitchRoll(cpuBestSolution.get(2), initialPose.getPitch(), initialPose.getRoll()));
 
       // Release stuff
       blockSize.close();
       gridSize.close();
-      cpuPointCloudPointer.close();
-      depthImage.release();
 
-      return Arrays.asList(result);
+      return optimalFootstepPose;
    }
 
    @Override
@@ -172,6 +189,6 @@ public class CUDALocalFootstepOptimizer implements AutoCloseable
       computeKernel.close();
       resultKernel.close();
       program.close();
-      CUDAStreamManager.releaseStream(stream);
+      CUDAStreamManager.releaseStream(cudaStream);
    }
 }
