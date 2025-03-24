@@ -432,11 +432,11 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
          publishJoystickStatus(joystickController);
       }
 
-      if (joystickController.getButton(joystickController.getMapping().buttonX) && joystickController.getButton(ControllerButton.DPAD_DOWN.ordinal()))
+      if (joystickController.getButton(joystickController.getMapping().buttonB) && joystickController.getButton(ControllerButton.DPAD_DOWN.ordinal()))
       {
          publishStopContinuousHikingGracefully();
       }
-      else if (joystickController.getButton(joystickController.getMapping().buttonX))
+      else if (joystickController.getButton(joystickController.getMapping().buttonB))
       {
          publishStopContinuousHiking();
       }
@@ -546,7 +546,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       double lateralJoystickValue;
       double turningJoystickValue;
 
-      walkBackwards = joystickController.getButton(joystickController.getMapping().buttonB);
+      walkBackwards = joystickController.getButton(joystickController.getMapping().buttonX);
       forwardJoystickValue = -joystickController.getAxis(joystickController.getMapping().axisLeftY);
       lateralJoystickValue = -joystickController.getAxis(joystickController.getMapping().axisLeftX);
       turningJoystickValue = -joystickController.getAxis(joystickController.getMapping().axisRightX);

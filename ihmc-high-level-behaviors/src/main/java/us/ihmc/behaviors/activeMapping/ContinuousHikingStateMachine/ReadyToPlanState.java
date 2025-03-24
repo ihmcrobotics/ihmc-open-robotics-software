@@ -39,6 +39,7 @@ public class ReadyToPlanState implements State
    private static final float X_RANDOM_MARGIN = 0.2f;
    private static final float NOMINAL_STANCE_WIDTH = 0.22f;
    private static final double ALPHA = 0.1;
+   public static final double JOYSTICK_ALPHA = 0.1;
 
    private final HumanoidReferenceFrames referenceFrames;
    private final AtomicReference<ContinuousHikingCommandMessage> commandMessage;
@@ -53,6 +54,7 @@ public class ReadyToPlanState implements State
    private final Point3D robotLocation = new Point3D();
    private final StopWatch stopWatch = new StopWatch();
    double timeInSwingToStopPlanningAndWaitTillNextAttempt = 0;
+   private double previousLateralValue;
 
    /**
     * This state exists to plan footsteps based on the conditions of the {@link ContinuousHikingParameters}. This state publishes visuals the UI but doesn't
@@ -213,8 +215,11 @@ public class ReadyToPlanState implements State
                                                                             NOMINAL_STANCE_WIDTH);
          }
          // Here we assume the joystick isn't being turned at all, so we give a direction of straight forward
-         else if (Math.abs(commandMessage.get().getLateralValue()) < 0.1)
+         // The number here it to account for drift in the controller where that value is never actually zero.
+         // Cause the Joystick is drifting constantly
+         else if (Math.abs(commandMessage.get().getLateralValue()) < 0.05)
          {
+            previousLateralValue = 0;
             goalPoses = ContinuousPlannerTools.setStraightForwardGoalPoses(continuousPlanner.getWalkingStartMidPose(),
                                                                            continuousPlanner.getStartStancePose(),
                                                                            (float) continuousHikingParameters.getGoalPoseForwardDistance(),
@@ -224,12 +229,19 @@ public class ReadyToPlanState implements State
          }
          else
          {
+            // Apply an alpha filter to the joystick value so we can't jump around so quickly.
+            // Helps with the controller to perform better
+            double lateralValue = commandMessage.get().getLateralValue();
+            double filteredLateralValue = lateralValue * JOYSTICK_ALPHA + previousLateralValue *(1 - JOYSTICK_ALPHA);
+
             goalPoses = ContinuousPlannerTools.setGoalPoseBasedOnLateralJoystickValue(referenceFrames.getPelvisZUpFrame(),
                                                                                       referenceFrames.getMidFeetZUpFrame(),
-                                                                                      commandMessage.get().getLateralValue(),
+                                                                                      filteredLateralValue,
                                                                                       (float) continuousHikingParameters.getGoalPoseForwardDistance(),
                                                                                       (float) continuousHikingParameters.getGoalPoseUpDistance(),
                                                                                       NOMINAL_STANCE_WIDTH);
+
+            previousLateralValue = filteredLateralValue;
 
             // We update this pose because when we start walking straight forward again, it's from the point where we are currently at
             // And not the point from which we were at before we started turning
