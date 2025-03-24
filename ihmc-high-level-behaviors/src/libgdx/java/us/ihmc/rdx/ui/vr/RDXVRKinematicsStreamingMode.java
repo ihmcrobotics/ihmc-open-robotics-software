@@ -330,9 +330,11 @@ public class RDXVRKinematicsStreamingMode
 
    private void onPlaybackChanged(boolean isStarting)
    {
+      if (isStarting)
+         openGrippers();
+
       if (!recordROS2Log.get())
          return;
-      openGrippers();
       ROS2LogMessage message = new ROS2LogMessage();
       message.setRequestedState((isStarting ? ROS2LoggerRequestedState.START : ROS2LoggerRequestedState.FINISH).toByte());
       ros2LogMessagePublisher.publish(message);
