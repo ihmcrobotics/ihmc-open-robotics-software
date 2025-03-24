@@ -161,11 +161,12 @@ public class SensitivityBasedStabilityGradientCalculator
    public SensitivityBasedStabilityGradientCalculator(FullHumanoidRobotModel fullRobotModel,
                                                       WholeBodyContactState wholeBodyContactState,
                                                       StabilityMarginRegionCalculator stabilityMarginRegionCalculator,
+                                                      CentroidalMomentumCalculator centroidalMomentumCalculator,
                                                       YoGraphicsListRegistry graphicsListRegistry,
                                                       YoRegistry parentRegistry)
    {
       this.fullRobotModel = fullRobotModel;
-      this.nullspaceCalculator = new ContactNullspaceCalculator(fullRobotModel, wholeBodyContactState, registry);
+      this.nullspaceCalculator = new ContactNullspaceCalculator(fullRobotModel, wholeBodyContactState, centroidalMomentumCalculator, registry);
       this.stabilityMarginRegionCalculator = stabilityMarginRegionCalculator;
       this.wholeBodyContactState = wholeBodyContactState;
       this.postureConstraintVariationCalculator = new PostureConstraintMatrixVariationCalculator(fullRobotModel,

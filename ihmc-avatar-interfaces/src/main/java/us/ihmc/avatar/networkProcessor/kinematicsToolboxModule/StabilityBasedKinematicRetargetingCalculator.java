@@ -28,6 +28,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
+import us.ihmc.mecano.algorithms.CentroidalMomentumCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.JointStateType;
@@ -143,6 +144,7 @@ public class StabilityBasedKinematicRetargetingCalculator
    public StabilityBasedKinematicRetargetingCalculator(WholeBodyContactState wholeBodyContactState,
                                                        StabilityMarginRegionCalculator multiContactRegionCalculator,
                                                        FullHumanoidRobotModel fullRobotModel,
+                                                       CentroidalMomentumCalculator centroidalMomentumCalculator,
                                                        ReferenceFrame midFeetZUpFrame,
                                                        ReferenceFrame centerOfMassFrame,
                                                        BooleanProvider isUpperBodyLoadBearing,
@@ -168,6 +170,7 @@ public class StabilityBasedKinematicRetargetingCalculator
       this.stabilityGradientCalculator = new SensitivityBasedStabilityGradientCalculator(fullRobotModel,
                                                                                          wholeBodyContactState,
                                                                                          multiContactRegionCalculator,
+                                                                                         centroidalMomentumCalculator,
                                                                                          graphicsListRegistry,
                                                                                          registry);
 

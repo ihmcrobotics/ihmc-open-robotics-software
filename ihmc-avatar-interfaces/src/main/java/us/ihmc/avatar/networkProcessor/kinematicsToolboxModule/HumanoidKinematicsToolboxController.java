@@ -36,6 +36,7 @@ import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.HumanoidKinem
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.idl.IDLSequence.Object;
+import us.ihmc.mecano.algorithms.CentroidalMomentumCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -241,9 +242,12 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
       multiContactRegionCalculator.setupForStabilityMarginCalculation(() -> centerOfMass);
       wholeBodyContactState = new WholeBodyContactState(desiredOneDoFJoints, rootJoint);
+
+      CentroidalMomentumCalculator centroidalMomentumCalculator = controllerCore.getToolbox().getCentroidalMomentumCalculator();
       retargetingCalculator = new StabilityBasedKinematicRetargetingCalculator(wholeBodyContactState,
                                                                                multiContactRegionCalculator,
                                                                                desiredFullRobotModel,
+                                                                               centroidalMomentumCalculator,
                                                                                desiredReferenceFrames.getMidFeetZUpFrame(),
                                                                                desiredReferenceFrames.getCenterOfMassFrame(),
                                                                                isUpperBodyLoadBearing,

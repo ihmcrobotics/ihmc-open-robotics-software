@@ -149,6 +149,7 @@ public class KinematicsToolboxMultiContactManager
                                                                               wholeBodyContactState,
                                                                               multiContactRegionCalculator,
                                                                               null,
+                                                                              null,
                                                                               registry);
       this.midFeetZUpFrame = midFeetZUpFrame;
 

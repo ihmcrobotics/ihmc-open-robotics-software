@@ -507,6 +507,11 @@ public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
       return centroidalMomentumRateCalculator;
    }
 
+   public CentroidalMomentumCalculator getCentroidalMomentumCalculator()
+   {
+      return centroidalMomentumCalculator;
+   }
+
    public CompositeRigidBodyMassMatrixCalculator getMassMatrixCalculator()
    {
       if (massMatrixCalculator == null)

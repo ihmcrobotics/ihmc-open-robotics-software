@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.staticEquilibrium;
 
 import gnu.trove.map.hash.TObjectIntHashMap;
 import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -38,6 +39,7 @@ public class ContactNullspaceCalculator
    private static final int SPATIAL_DIMENSIONS = 6;
 
    private final OneDoFJointBasics[] controlledOneDoFJoints;
+   private final boolean computeCentroidalMomentumMatrix;
 
    private final DMatrixRMaj stackedContactJacobian = new DMatrixRMaj(0);
    private final CentroidalMomentumCalculator centroidalMomentumCalculator;
@@ -59,6 +61,7 @@ public class ContactNullspaceCalculator
 
    public ContactNullspaceCalculator(FullHumanoidRobotModel fullRobotModel,
                                      WholeBodyContactState wholeBodyContactState,
+                                     CentroidalMomentumCalculator centroidalMomentumCalculator,
                                      YoRegistry registry)
    {
       JointBasics[] controlledJoints = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(fullRobotModel);
@@ -66,7 +69,19 @@ public class ContactNullspaceCalculator
       this.wholeBodyContactState = wholeBodyContactState;
 
       MultiBodySystemBasics multiBodySystemInput = MultiBodySystemBasics.toMultiBodySystemBasics(controlledJoints);
-      centroidalMomentumCalculator = new CentroidalMomentumCalculator(multiBodySystemInput, ReferenceFrame.getWorldFrame());
+
+      if (centroidalMomentumCalculator == null)
+      {
+         this.centroidalMomentumCalculator = new CentroidalMomentumCalculator(multiBodySystemInput, ReferenceFrame.getWorldFrame());
+         this.computeCentroidalMomentumMatrix = true;
+      }
+      else
+      {
+         this.centroidalMomentumCalculator = centroidalMomentumCalculator;
+         this.computeCentroidalMomentumMatrix = false;
+      }
+
+      debugCentroidalMomentumCalculator = new CentroidalMomentumCalculator(multiBodySystemInput, ReferenceFrame.getWorldFrame());
 
       for (int jointIdx = 0; jointIdx < controlledOneDoFJoints.length; jointIdx++)
       {
@@ -118,9 +133,10 @@ public class ContactNullspaceCalculator
       int rowOffset = 0;
 
       /* Compute and set centroidal mass momentum matrix */
-      centroidalMomentumCalculator.reset();
+      if (computeCentroidalMomentumMatrix)
+         centroidalMomentumCalculator.reset();
       DMatrixRMaj centroidalMomentumMatrix = centroidalMomentumCalculator.getCentroidalMomentumMatrix();
-
+      
       int centroidalMomentumRowOffset = 3;
       int centroidalMomentumNumRows = 2;
 
