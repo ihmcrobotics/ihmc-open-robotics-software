@@ -322,7 +322,9 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
 
       if (ImGui.button("Reset State Machine"))
       {
+         continuousHiking.set(false);
          resetStateMachinePublisher.publish(new Empty());
+         publishStopContinuousHiking();
       }
       if (ImGui.button("Square Up"))
       {
