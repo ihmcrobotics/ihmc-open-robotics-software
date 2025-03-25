@@ -25,7 +25,6 @@ public class RapidHeightMapUpdateThread extends RepeatingTaskThread
    private final ImageSensor imageSensor;
    private final ReferenceFrame sensorFrame;
    private final ReferenceFrame zUpSensorFrame;
-   private final boolean runWithCUDA;
    private final int depthImageKey;
 
    public RapidHeightMapUpdateThread(ROS2Node ros2Node,
@@ -34,8 +33,7 @@ public class RapidHeightMapUpdateThread extends RepeatingTaskThread
                                      ReferenceFrame rightFootFrame,
                                      ControllerFootstepQueueMonitor controllerFootstepQueueMonitor,
                                      ImageSensor imageSensor,
-                                     int depthImageKey,
-                                     boolean runWithCUDA)
+                                     int depthImageKey)
    {
       super(imageSensor.getSensorName() + RapidHeightMapUpdateThread.class.getSimpleName());
 
@@ -49,7 +47,6 @@ public class RapidHeightMapUpdateThread extends RepeatingTaskThread
 
       sensorFrame = syncedRobotModel.getReferenceFrames().getSteppingCameraFrame();
       zUpSensorFrame = syncedRobotModel.getReferenceFrames().getSteppingCameraZUpFrame();
-      this.runWithCUDA = runWithCUDA;
    }
 
    @Override
@@ -68,8 +65,8 @@ public class RapidHeightMapUpdateThread extends RepeatingTaskThread
                                                          syncedRobotModel.getRobotModel().getSimpleRobotName(),
                                                          leftFootFrame,
                                                          rightFootFrame,
-                                                         depthImage.getIntrinsicsCopy(),
-                                                         runWithCUDA);
+                                                         controllerFootstepQueueMonitor,
+                                                         depthImage.getIntrinsicsCopy());
          }
 
          // Update height map

@@ -21,6 +21,7 @@ public class HeightMapParameters extends StoredPropertySet implements HeightMapP
    public static final BooleanStoredPropertyKey flyingPointsFilter = keys.addBooleanKey("Flying points filter");
    public static final BooleanStoredPropertyKey resetHeightMap = keys.addBooleanKey("Reset Height Map");
    public static final BooleanStoredPropertyKey enableAlphaFilter = keys.addBooleanKey("Enable alpha filter");
+   public static final BooleanStoredPropertyKey enableVerticalFilter = keys.addBooleanKey("Enable vertical filter");
    public static final IntegerStoredPropertyKey searchWindowHeight = keys.addIntegerKey("Search window height");
    public static final IntegerStoredPropertyKey searchWindowWidth = keys.addIntegerKey("Search window width");
    public static final DoubleStoredPropertyKey minHeightRegistration = keys.addDoubleKey("Min height registration");
@@ -35,12 +36,14 @@ public class HeightMapParameters extends StoredPropertySet implements HeightMapP
    public static final DoubleStoredPropertyKey localWidthInMeters = keys.addDoubleKey("Local width in meters");
    public static final DoubleStoredPropertyKey localCellSizeInMeters = keys.addDoubleKey("Local cell size in meters");
    public static final DoubleStoredPropertyKey globalWidthInMeters = keys.addDoubleKey("Global width in meters");
+   public static final DoubleStoredPropertyKey terrainWidthInMeters = keys.addDoubleKey("Terrain width in meters");
    public static final DoubleStoredPropertyKey globalCellSizeInMeters = keys.addDoubleKey("Global cell size in meters");
    public static final DoubleStoredPropertyKey robotCollisionCylinderRadius = keys.addDoubleKey("Robot collision cylinder radius");
    public static final DoubleStoredPropertyKey internalGlobalWidthInMeters = keys.addDoubleKey("Internal global width in meters");
    public static final DoubleStoredPropertyKey internalGlobalCellSizeInMeters = keys.addDoubleKey("Internal global cell size in meters");
    public static final DoubleStoredPropertyKey heightScaleFactor = keys.addDoubleKey("Height scale factor");
    public static final IntegerStoredPropertyKey cropWindowSize = keys.addIntegerKey("Crop window size");
+   public static final IntegerStoredPropertyKey terrainObjectSize = keys.addIntegerKey("Terrain object size");
    public static final IntegerStoredPropertyKey steppingContactThreshold = keys.addIntegerKey("Stepping contact threshold");
    public static final IntegerStoredPropertyKey contactWindowSize = keys.addIntegerKey("Contact window size");
    public static final DoubleStoredPropertyKey steppingCosineThreshold = keys.addDoubleKey("Stepping cosine threshold");

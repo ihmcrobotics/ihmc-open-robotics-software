@@ -25,6 +25,14 @@ public class ContinuousHikingCommandMessage extends Packet<ContinuousHikingComma
             */
    public boolean walk_forwards_;
    /**
+            * Flag to sidestep with Continuous Hiking.
+            */
+   public boolean side_step_;
+   /**
+            * Flag for which direction to side step with Continuous Hiking.
+            */
+   public boolean left_direction_;
+   /**
             * Flag to square up to the goal when finishing walking. We may want the robot to end at an exact location.
             * Setting this to true tells the robot to step on the final goal positions.
             */
@@ -83,6 +91,10 @@ public class ContinuousHikingCommandMessage extends Packet<ContinuousHikingComma
       steps_before_safety_stop_ = other.steps_before_safety_stop_;
 
       walk_forwards_ = other.walk_forwards_;
+
+      side_step_ = other.side_step_;
+
+      left_direction_ = other.left_direction_;
 
       square_up_to_goal_ = other.square_up_to_goal_;
 
@@ -149,6 +161,36 @@ public class ContinuousHikingCommandMessage extends Packet<ContinuousHikingComma
    public boolean getWalkForwards()
    {
       return walk_forwards_;
+   }
+
+   /**
+            * Flag to sidestep with Continuous Hiking.
+            */
+   public void setSideStep(boolean side_step)
+   {
+      side_step_ = side_step;
+   }
+   /**
+            * Flag to sidestep with Continuous Hiking.
+            */
+   public boolean getSideStep()
+   {
+      return side_step_;
+   }
+
+   /**
+            * Flag for which direction to side step with Continuous Hiking.
+            */
+   public void setLeftDirection(boolean left_direction)
+   {
+      left_direction_ = left_direction;
+   }
+   /**
+            * Flag for which direction to side step with Continuous Hiking.
+            */
+   public boolean getLeftDirection()
+   {
+      return left_direction_;
    }
 
    /**
@@ -327,6 +369,10 @@ public class ContinuousHikingCommandMessage extends Packet<ContinuousHikingComma
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.walk_forwards_, other.walk_forwards_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.side_step_, other.side_step_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.left_direction_, other.left_direction_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.square_up_to_goal_, other.square_up_to_goal_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.use_astar_footstep_planner_, other.use_astar_footstep_planner_, epsilon)) return false;
@@ -366,6 +412,10 @@ public class ContinuousHikingCommandMessage extends Packet<ContinuousHikingComma
 
       if(this.walk_forwards_ != otherMyClass.walk_forwards_) return false;
 
+      if(this.side_step_ != otherMyClass.side_step_) return false;
+
+      if(this.left_direction_ != otherMyClass.left_direction_) return false;
+
       if(this.square_up_to_goal_ != otherMyClass.square_up_to_goal_) return false;
 
       if(this.use_astar_footstep_planner_ != otherMyClass.use_astar_footstep_planner_) return false;
@@ -402,6 +452,10 @@ public class ContinuousHikingCommandMessage extends Packet<ContinuousHikingComma
       builder.append(this.steps_before_safety_stop_);      builder.append(", ");
       builder.append("walk_forwards=");
       builder.append(this.walk_forwards_);      builder.append(", ");
+      builder.append("side_step=");
+      builder.append(this.side_step_);      builder.append(", ");
+      builder.append("left_direction=");
+      builder.append(this.left_direction_);      builder.append(", ");
       builder.append("square_up_to_goal=");
       builder.append(this.square_up_to_goal_);      builder.append(", ");
       builder.append("use_astar_footstep_planner=");

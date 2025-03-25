@@ -17,9 +17,9 @@ public class RapidHeightMapDriftOffset
    private final Vector3D previousPlanOffsetProcessed = new Vector3D();
    private final Vector3D incrementalOffset = new Vector3D();
 
-   public RapidHeightMapDriftOffset(ROS2Node ros2Node, String robotName)
+   public RapidHeightMapDriftOffset(ControllerFootstepQueueMonitor controllerFootstepQueueMonitor)
    {
-      controllerFootstepQueueMonitor = new ControllerFootstepQueueMonitor(ros2Node, robotName);
+      this.controllerFootstepQueueMonitor = controllerFootstepQueueMonitor;
    }
 
    public void reset()

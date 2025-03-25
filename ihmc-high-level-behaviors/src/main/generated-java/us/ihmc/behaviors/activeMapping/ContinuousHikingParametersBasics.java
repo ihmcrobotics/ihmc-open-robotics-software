@@ -38,6 +38,11 @@ public interface ContinuousHikingParametersBasics extends ContinuousHikingParame
       set(ContinuousHikingParameters.goalPoseBackwardDistance, goalPoseBackwardDistance);
    }
 
+   default void setGoalPoseSidewaysDistance(double goalPoseSidewaysDistance)
+   {
+      set(ContinuousHikingParameters.goalPoseSidewaysDistance, goalPoseSidewaysDistance);
+   }
+
    default void setSwingTime(double swingTime)
    {
       set(ContinuousHikingParameters.swingTime, swingTime);

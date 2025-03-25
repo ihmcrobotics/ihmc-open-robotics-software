@@ -6,10 +6,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingStateMachine.*;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.communication.ContinuousHikingAPI;
-import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
@@ -51,10 +48,7 @@ public class ContinuousPlannerSchedulingTask
                                           HumanoidReferenceFrames referenceFrames,
                                           ControllerFootstepQueueMonitor controllerFootstepQueueMonitor,
                                           ContinuousHikingLogger continuousHikingLogger,
-                                          ContinuousHikingParameters continuousHikingParameters,
-                                          MonteCarloFootstepPlannerParameters monteCarloFootstepPlannerParameters,
-                                          DefaultFootstepPlannerParametersBasics footstepPlannerParameters,
-                                          SwingPlannerParametersBasics swingPlannerParameters)
+                                          ActiveMappingParameterToolBox activeMappingParameterObject)
    {
       String simpleRobotName = robotModel.getSimpleRobotName();
 
@@ -62,14 +56,11 @@ public class ContinuousPlannerSchedulingTask
       AtomicReference<ContinuousHikingCommandMessage> commandMessage = new AtomicReference<>(new ContinuousHikingCommandMessage());
       ros2Helper.subscribeViaCallback(ContinuousHikingAPI.CONTINUOUS_HIKING_COMMAND, commandMessage::set);
 
-      TerrainPlanningDebugger debugger = new TerrainPlanningDebugger(ros2Node, monteCarloFootstepPlannerParameters);
+      TerrainPlanningDebugger debugger = new TerrainPlanningDebugger(ros2Node, activeMappingParameterObject.getMonteCarloPlannerParameters());
       ContinuousPlanner continuousPlanner = new ContinuousPlanner(robotModel,
                                                                   referenceFrames,
                                                                   commandMessage,
-                                                                  continuousHikingParameters,
-                                                                  monteCarloFootstepPlannerParameters,
-                                                                  footstepPlannerParameters,
-                                                                  swingPlannerParameters,
+                                                                  activeMappingParameterObject,
                                                                   debugger,
                                                                   continuousHikingLogger);
 
@@ -86,7 +77,7 @@ public class ContinuousPlannerSchedulingTask
                                                     commandMessage,
                                                     continuousPlanner,
                                                     controllerFootstepQueueMonitor,
-                                                    continuousHikingParameters,
+                                                    activeMappingParameterObject.getContinuousHikingParameters(),
                                                     this::getHeightMapData,
                                                     this::getTerrainMap,
                                                     debugger,
@@ -95,15 +86,15 @@ public class ContinuousPlannerSchedulingTask
                                                         simpleRobotName,
                                                         continuousPlanner,
                                                         controllerFootstepQueueMonitor,
-                                                        continuousHikingParameters,
+                                                        activeMappingParameterObject.getContinuousHikingParameters(),
                                                         continuousHikingLogger);
       State justWaitState = new JustWaitState(robotModel,
                                               ros2Helper,
                                               syncedRobotModel,
                                               commandMessage,
                                               controllerFootstepQueueMonitor,
-                                              footstepPlannerParameters,
-                                              swingPlannerParameters,
+                                              activeMappingParameterObject.getFootstepPlannerParameters(),
+                                              activeMappingParameterObject.getSwingPlannerParameters(),
                                               this::getHeightMapData,
                                               this::getTerrainMap);
 
@@ -116,7 +107,8 @@ public class ContinuousPlannerSchedulingTask
       // Create different conditions
       StartContinuousHikingTransitionCondition startContinuousHikingTransitionCondition = new StartContinuousHikingTransitionCondition(commandMessage);
       StopContinuousHikingTransitionCondition stopContinuousHikingTransitionCondition = new StopContinuousHikingTransitionCondition(commandMessage);
-      PlanAgainTransitionCondition planAgainTransitionCondition = new PlanAgainTransitionCondition(continuousPlanner, continuousHikingParameters);
+      PlanAgainTransitionCondition planAgainTransitionCondition = new PlanAgainTransitionCondition(continuousPlanner,
+                                                                                                   activeMappingParameterObject.getContinuousHikingParameters());
       SquareUpTransitionCondition squareUpTransitionCondition = new SquareUpTransitionCondition(commandMessage);
 
       //NOTE: The transitions for the state machine are checked in the order they are added.

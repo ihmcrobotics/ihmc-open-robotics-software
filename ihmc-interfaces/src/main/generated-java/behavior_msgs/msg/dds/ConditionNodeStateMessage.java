@@ -6,6 +6,10 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
+/**
+       * COUNTER TYPE
+       * LLM TYPE
+       */
 public class ConditionNodeStateMessage extends Packet<ConditionNodeStateMessage> implements Settable<ConditionNodeStateMessage>, EpsilonComparable<ConditionNodeStateMessage>
 {
    /**
@@ -20,6 +24,10 @@ public class ConditionNodeStateMessage extends Packet<ConditionNodeStateMessage>
             * The current count of the counter
             */
    public long count_;
+   /**
+            * A request to reset the LLM's context now
+            */
+   public boolean request_reset_context_;
 
    public ConditionNodeStateMessage()
    {
@@ -38,6 +46,8 @@ public class ConditionNodeStateMessage extends Packet<ConditionNodeStateMessage>
       behavior_msgs.msg.dds.LeafNodeStateMessagePubSubType.staticCopy(other.state_, state_);
       behavior_msgs.msg.dds.ConditionNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
       count_ = other.count_;
+
+      request_reset_context_ = other.request_reset_context_;
 
    }
 
@@ -74,6 +84,21 @@ public class ConditionNodeStateMessage extends Packet<ConditionNodeStateMessage>
       return count_;
    }
 
+   /**
+            * A request to reset the LLM's context now
+            */
+   public void setRequestResetContext(boolean request_reset_context)
+   {
+      request_reset_context_ = request_reset_context;
+   }
+   /**
+            * A request to reset the LLM's context now
+            */
+   public boolean getRequestResetContext()
+   {
+      return request_reset_context_;
+   }
+
 
    public static Supplier<ConditionNodeStateMessagePubSubType> getPubSubType()
    {
@@ -96,6 +121,8 @@ public class ConditionNodeStateMessage extends Packet<ConditionNodeStateMessage>
       if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.count_, other.count_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.request_reset_context_, other.request_reset_context_, epsilon)) return false;
+
 
       return true;
    }
@@ -113,6 +140,8 @@ public class ConditionNodeStateMessage extends Packet<ConditionNodeStateMessage>
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
       if(this.count_ != otherMyClass.count_) return false;
 
+      if(this.request_reset_context_ != otherMyClass.request_reset_context_) return false;
+
 
       return true;
    }
@@ -128,7 +157,9 @@ public class ConditionNodeStateMessage extends Packet<ConditionNodeStateMessage>
       builder.append("definition=");
       builder.append(this.definition_);      builder.append(", ");
       builder.append("count=");
-      builder.append(this.count_);
+      builder.append(this.count_);      builder.append(", ");
+      builder.append("request_reset_context=");
+      builder.append(this.request_reset_context_);
       builder.append("}");
       return builder.toString();
    }

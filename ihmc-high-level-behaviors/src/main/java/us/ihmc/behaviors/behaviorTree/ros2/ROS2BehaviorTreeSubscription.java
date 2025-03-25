@@ -154,7 +154,7 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNode<T, ? ,?>>
          }
          else
          {
-            localNode.getDefinition().confirmRecievedFullData();
+            localNode.getDefinition().confirmReceivedFullData();
             ROS2BehaviorTreeMessageTools.fromMessage(subscriptionNode, localNode.getState());
          }
       }

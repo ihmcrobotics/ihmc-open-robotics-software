@@ -10,13 +10,20 @@ import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.EllipticalStepPositionLimiter;
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.gpuHeightMap.CUDALocalFootstepOptimizer;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -36,6 +43,7 @@ public class RDXVRFootstepPlacement
 {
    private final static boolean USE_HEIGHTMAP = true;
    private final static boolean APPLY_REACHABLE_REGION_ELLIPTICAL_CONSTRAINT = true;
+   private final static boolean USE_STEPPABLE_REGION_ADAPTATION = true;
 
    private HeightMapData latestHeightMapData;
 
@@ -47,7 +55,14 @@ public class RDXVRFootstepPlacement
    private final SideDependentList<ModelInstance> footstepModels = new SideDependentList<>();
    private final SideDependentList<ModelInstance> footstepsBeingHandPlaced = new SideDependentList<>();
    private final ArrayList<RDXVRFootstep> handPlacedFootsteps = new ArrayList<>();
+
+   private final FramePose3D adaptedFootstepPose = new FramePose3D();
+   private final FramePose3D constraintFramePose = new FramePose3D();
+   private final PoseReferenceFrame constraintFrame = new PoseReferenceFrame("Latest Control Frame in Plan", ReferenceFrame.getWorldFrame());
+
+   private final CUDALocalFootstepOptimizer footstepOptimizer;
    private RDXVRFootstep footstepBeingExternallyPlaced;
+   private final FootstepSnapAndWiggler snapper;
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final FramePose3D poseForPlacement = new FramePose3D();
    private long sequenceId = (UUID.randomUUID().getLeastSignificantBits() % Integer.MAX_VALUE) + Integer.MAX_VALUE;
@@ -63,6 +78,9 @@ public class RDXVRFootstepPlacement
       this.vrContext = vrContext;
       this.syncedRobot = syncedRobot;
       this.controllerHelper = controllerHelper;
+      FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
+      this.snapper = new FootstepSnapAndWiggler(PlannerTools.createDefaultFootPolygons(), new DefaultFootstepPlannerParameters(), environmentHandler);
+      snapper.initialize();
 
       for (RobotSide side : RobotSide.values)
       {
@@ -82,6 +100,11 @@ public class RDXVRFootstepPlacement
          RDXBaseUI.getInstance().getKeyBindings().register("Clear footsteps", "Left B button");
          RDXBaseUI.getInstance().getKeyBindings().register("Walk", "Right A button");
       }
+
+      WalkingControllerParameters walkingControllerParameters = syncedRobot.getRobotModel().getWalkingControllerParameters();
+      SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
+      footstepOptimizer = new CUDALocalFootstepOptimizer((float) steppingParameters.getFootLength(),
+                                                         (float) steppingParameters.getFootWidth());
    }
 
    public void setLocomotionParameters(LocomotionParameters locomotionParameters)
@@ -173,12 +196,7 @@ public class RDXVRFootstepPlacement
       footstepBeingExternallyPlaced = new RDXVRFootstep(side, footstepModels.get(side), footstepIndex++);
    }
 
-
-   private final FramePose3D adaptedFootstepPose = new FramePose3D();
-   private final FramePose3D constraintFramePose = new FramePose3D();
-   private final PoseReferenceFrame constraintFrame = new PoseReferenceFrame("Latest Control Frame in Plan", ReferenceFrame.getWorldFrame());
-
-   public boolean setFootstepPose(FramePose3DReadOnly footstepPose)
+   public boolean setFootstepPose(FramePose3DReadOnly footstepPose, boolean lastAdjustment)
    {
       if (footstepBeingExternallyPlaced != null)
       {
@@ -208,7 +226,12 @@ public class RDXVRFootstepPlacement
             double height = latestHeightMapData.getHeightAt(adaptedFootstepPose.getTranslationX(), adaptedFootstepPose.getTranslationY());
 
             if (!Double.isNaN(height))
+            {
                adaptedFootstepPose.getPosition().setZ(height);
+
+               if (USE_STEPPABLE_REGION_ADAPTATION && lastAdjustment)
+                  adaptedFootstepPose.set(footstepOptimizer.compute(latestHeightMapData, adaptedFootstepPose));
+            }
             else
                LogTools.warn("Could not use heightMap for footstep adjustment, since height is NaN");
          }
@@ -254,7 +277,7 @@ public class RDXVRFootstepPlacement
       controllerHelper.publishToController(messageList);
       footstepIndex--;
 
-      if (!activeAdjustment && stepStartTime < 0.0)
+      if (!activeAdjustment)
       { // first step is not an adjustment
          stepStartTime = System.nanoTime();
       }
@@ -317,6 +340,15 @@ public class RDXVRFootstepPlacement
       footstepBeingExternallyPlaced = null;
       latestHeightMapData = null;
       handPlacedFootsteps.clear();
+   }
+
+   public void resetTimer()
+   {
       stepStartTime = -1.0;
+   }
+
+   public void destroy()
+   {
+      footstepOptimizer.close();
    }
 }

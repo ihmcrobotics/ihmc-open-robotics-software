@@ -276,6 +276,7 @@ public class RDXVRModeManager
          kinematicsStreamingMode.destroy();
       joystickBasedStepping.destroy();
       stereoVision.getDualBlackflySphericalProjection().shutdown();
+      footstepPlacer.destroy();
    }
 
    public RDXVRMode getMode()

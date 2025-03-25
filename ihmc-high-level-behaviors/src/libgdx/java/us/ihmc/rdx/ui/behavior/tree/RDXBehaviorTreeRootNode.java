@@ -4,7 +4,9 @@ import gnu.trove.map.hash.TLongObjectHashMap;
 import imgui.ImGui;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
+import us.ihmc.behaviors.reasoning.BehaviorTreeLLMEncoding;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -84,6 +86,9 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
    public void renderContextMenuItems()
    {
       super.renderContextMenuItems();
+
+      if (ImGui.menuItem(labels.get("Print LLM Encoding")))
+         LogTools.info("LLM Encoding:%n%s".formatted(BehaviorTreeLLMEncoding.encode(state)));
 
       if (ImGui.menuItem(labels.get("Render Progress Using Plots"), null, progressWidgetsManager.getRenderAsPlots()))
          progressWidgetsManager.setRenderAsPlots(!progressWidgetsManager.getRenderAsPlots());

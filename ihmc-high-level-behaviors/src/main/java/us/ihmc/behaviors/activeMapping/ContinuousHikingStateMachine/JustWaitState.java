@@ -6,6 +6,7 @@ import controller_msgs.msg.dds.QueuedFootstepStatusMessage;
 import ihmc_common_msgs.msg.dds.PoseListMessage;
 import ihmc_common_msgs.msg.dds.QueueableMessage;
 import org.jetbrains.annotations.NotNull;
+import std_msgs.msg.dds.Float32;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
@@ -36,10 +37,12 @@ import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
@@ -65,6 +68,7 @@ public class JustWaitState implements State
    private final MovingReferenceFrame midFeetZUpFrame;
    private final FramePose3D startPose = new FramePose3D();
    private final FootstepSnapAndWiggler footstepSnapAndWiggler;
+   private boolean prepareSquareUpStep;
 
    public JustWaitState(DRCRobotModel robotModel,
                         ROS2Helper ros2Helper,
@@ -95,6 +99,7 @@ public class JustWaitState implements State
       controllerFootstepDataTopic = HumanoidControllerAPI.getTopic(FootstepDataListMessage.class, "Nadia");
       ros2Helper.createPublisher(controllerFootstepDataTopic);
 
+      ros2Helper.subscribeViaCallback(ContinuousHikingAPI.ROTATE_90_DEGREES, this::rotate90Degrees);
       ros2Helper.subscribeViaCallback(ContinuousHikingAPI.ROTATE_GOAL_FOOTSTEPS, this::planToGoal);
       ros2Helper.subscribeViaCallback(ContinuousHikingAPI.SQUARE_UP_STEP, this::squareUpStep);
    }
@@ -106,7 +111,7 @@ public class JustWaitState implements State
 
       if (continuousHikingCommandMessage.getSquareUpToGoal() && !controllerQueueMonitor.getControllerFootstepQueue().isEmpty())
       {
-         squareUpStep();
+         prepareSquareUpStep = true;
       }
 
       isDone = false;
@@ -119,18 +124,74 @@ public class JustWaitState implements State
       {
          isDone = true;
       }
+
+      if (controllerQueueMonitor.getControllerFootstepQueue().size() < 2 && prepareSquareUpStep)
+      {
+         prepareSquareUpStep = false;
+         squareUpStep();
+      }
    }
 
    @Override
    public void onExit(double timeInState)
    {
-
+      prepareSquareUpStep = false;
    }
 
    @Override
    public boolean isDone(double timeInState)
    {
       return isDone;
+   }
+
+   public void rotate90Degrees(Float32 float32Message)
+   {
+      float rotationRadians = float32Message.getData();
+
+      MovingReferenceFrame midFeetZUpFrame = syncedRobot.getReferenceFrames().getMidFeetZUpFrame();
+      FramePose3D midFeetZUpPose = new FramePose3D(midFeetZUpFrame, midFeetZUpFrame.getTransformToWorldFrame());
+      SideDependentList<FramePose3D> goalPoses = new SideDependentList<>(new FramePose3D(syncedRobot.getReferenceFrames().getMidFeetZUpFrame()),
+                                                                         new FramePose3D(syncedRobot.getReferenceFrames().getMidFeetZUpFrame()));
+
+      if (!controllerQueueMonitor.getControllerFootstepQueue().isEmpty())
+      {
+         FramePose3DReadOnly lastFootstepInQueue = controllerQueueMonitor.getLastFootstepInQueue();
+         RobotSide lastFootstepSide = RobotSide.fromByte(controllerQueueMonitor.getControllerFootstepQueue()
+                                                                               .get(controllerQueueMonitor.getControllerFootstepQueue().size() - 1)
+                                                                               .getRobotSide());
+
+         FramePose3D tempMidFeetPose = new FramePose3D();
+         tempMidFeetPose.set(lastFootstepInQueue);
+
+         if (lastFootstepSide == RobotSide.LEFT)
+         {
+            tempMidFeetPose.appendTranslation(0.0, -0.12, 0.0);
+         }
+         else
+         {
+            tempMidFeetPose.appendTranslation(0.0, 0.12, 0.0);
+         }
+
+         midFeetZUpPose.set(midFeetZUpFrame, tempMidFeetPose);
+      }
+
+      midFeetZUpPose.appendYawRotation(rotationRadians);
+      goalPoses.get(RobotSide.RIGHT).set(midFeetZUpPose);
+      goalPoses.get(RobotSide.RIGHT).changeFrame(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
+      goalPoses.get(RobotSide.RIGHT).appendTranslation(0.0, -0.13, 0.0);
+
+      goalPoses.get(RobotSide.LEFT).set(midFeetZUpPose);
+      goalPoses.get(RobotSide.LEFT).changeFrame(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
+      goalPoses.get(RobotSide.LEFT).appendTranslation(0.0, 0.13, 0.0);
+
+      List<Pose3D> poses = new ArrayList<>();
+      poses.add(new Pose3D(goalPoses.get(RobotSide.LEFT)));
+      poses.add(new Pose3D(goalPoses.get(RobotSide.RIGHT)));
+
+      PoseListMessage poseListMessage = new PoseListMessage();
+      MessageTools.packPoseListMessage(poses, poseListMessage);
+
+      planToGoal(poseListMessage);
    }
 
    public void planToGoal(PoseListMessage poseListMessage)
@@ -171,9 +232,10 @@ public class JustWaitState implements State
 
                                   footstepPlannerRequest.setRequestedInitialStanceSide(RobotSide.LEFT);
                                   footstepPlannerRequest.setHeightMapData(heightMapData.get());
+                                  footstepPlannerRequest.setTerrainMapData(terrainMapData.get());
 
                                   footstepPlannerRequest.setSnapGoalSteps(true);
-                                  footstepPlannerRequest.setPlanBodyPath(true);
+                                  footstepPlannerRequest.setPlanBodyPath(false);
 
                                   FramePose3D goalFramePose = new FramePose3D();
                                   goalFramePose.interpolate(leftFootPose, rightFootPose, 0.5);
@@ -185,18 +247,15 @@ public class JustWaitState implements State
                                   startPose.setToZero(midFeetZUpFrame);
                                   startPose.changeFrame(ReferenceFrame.getWorldFrame());
                                   startPose.getOrientation().set(goalPose.getOrientation());
-                                  footstepPlannerRequest.getBodyPathWaypoints().add(midFeetZUpPose);
                                   footstepPlannerRequest.getBodyPathWaypoints().add(startPose);
                                   footstepPlannerRequest.getBodyPathWaypoints().add(goalPose);
 
                                   FootstepPlannerOutput plannerOutput = footstepPlanner.handleRequest(footstepPlannerRequest);
 
-                                  FootstepPlan newestFootstepPlan = null;
+                                  if (plannerOutput == null)
+                                     return;
 
-                                  if (plannerOutput != null)
-                                  {
-                                     newestFootstepPlan = plannerOutput.getFootstepPlan();
-                                  }
+                                  FootstepPlan newestFootstepPlan = plannerOutput.getFootstepPlan();
 
                                   FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
                                   footstepDataListMessage.setDefaultSwingDuration(0.8);
@@ -205,13 +264,19 @@ public class JustWaitState implements State
 
                                   for (int i = 0; i < footstepPlanner.getOutput().getFootstepPlan().getNumberOfSteps(); i++)
                                   {
-                                     assert newestFootstepPlan != null;
                                      PlannedFootstep footstep = newestFootstepPlan.getFootstep(i);
                                      footstep.limitFootholdVertices();
                                      footstepDataListMessage.getFootstepDataList().add().set(footstep.getAsMessage());
                                   }
 
-                                  ros2Helper.publish(controllerFootstepDataTopic, footstepDataListMessage);
+                                  if (!footstepDataListMessage.getFootstepDataList().isEmpty())
+                                  {
+                                      ros2Helper.publish(controllerFootstepDataTopic, footstepDataListMessage);
+                                  }
+                                  else
+                                  {
+                                      LogTools.warn("Didn't have any steps to publish, try again :( :(");
+                                  }
                                }, "PlanToGoalThread");
    }
 
@@ -271,11 +336,20 @@ public class JustWaitState implements State
       if (squareUpStep == null)
          return;
 
-      DiscreteFootstep footstep = new DiscreteFootstep(squareUpStep.getFootstepPose().getX(), squareUpStep.getFootstepPose().getY());
-      footstepSnapAndWiggler.snapFootstep(footstep);
+      //TODO, set the translation but don't worry about the orientation, it should be good enough to stand when stepping there.
+//      DiscreteFootstep footstep = new DiscreteFootstep(squareUpStep.getFootstepPose().getX(), squareUpStep.getFootstepPose().getY());
+//      footstepSnapAndWiggler.snapFootstep(footstep);
+//
+//      squareUpStep.getFootstepPose().setZ(0.0);
+//      squareUpStep.getFootstepPose().applyTransform(footstep.getSnapData().getSnapTransform());
 
-      squareUpStep.getFootstepPose().setZ(0.0);
-      squareUpStep.getFootstepPose().applyTransform(footstep.getSnapData().getSnapTransform());
+      // Set Pitch and Roll to Zero, not expecting some crazy orientation
+//      ReferenceFrame referenceFrame = squareUpStep.getFootstepPose().getReferenceFrame();
+//      squareUpStep.getFootstepPose().changeFrame(ReferenceFrame.getWorldFrame());
+//      squareUpStep.getFootstepPose().getOrientation().setToPitchOrientation(-0.6);
+//      squareUpStep.getFootstepPose().getOrientation().setToRollOrientation(0.3);
+//      squareUpStep.getFootstepPose().getOrientation().setToYawOrientation(0.43);
+//      squareUpStep.getFootstepPose().changeFrame(referenceFrame);
 
       FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
       footstepDataListMessage.setDefaultSwingDuration(0.8);

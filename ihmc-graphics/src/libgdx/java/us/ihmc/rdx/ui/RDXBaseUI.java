@@ -223,6 +223,7 @@ public class RDXBaseUI
       setForegroundFPSLimit(settings.getForegroundFPSLimit());
       libGDXLogLevel.set(settings.getLibGDXLogLevel());
       imguiFontSize.set(settings.getFontSize());
+      ImGuiTools.CURRENT_FONT_SIZE = imguiFontSize.get();
       try
       {
          setTheme(Theme.valueOf(settings.getThemeName()));

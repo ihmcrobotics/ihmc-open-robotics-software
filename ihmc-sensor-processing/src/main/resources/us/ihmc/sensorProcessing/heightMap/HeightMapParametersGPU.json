@@ -1,15 +1,16 @@
 {
   "title" : "GPU Height Map Parameters",
-  "Flying points filter" : true,
+  "Flying points filter" : false,
   "Reset Height Map" : false,
   "Enable alpha filter" : true,
+  "Enable vertical filter" : true,
   "Search window height" : {
     "value" : 350,
     "lowerBound" : 10,
     "upperBound" : 400
   },
   "Search window width" : {
-    "value" : 200,
+    "value" : 300,
     "lowerBound" : 10,
     "upperBound" : 400
   },
@@ -69,9 +70,14 @@
     "upperBound" : 0.06
   },
   "Global width in meters" : {
+    "value" : 8.0,
+    "lowerBound" : 2.0,
+    "upperBound" : 10.0
+  },
+  "Terrain width in meters" : {
     "value" : 4.0,
-    "lowerBound" : 1.0,
-    "upperBound" : 5.5
+    "lowerBound" : 2.0,
+    "upperBound" : 8.0
   },
   "Global cell size in meters" : {
     "value" : 0.02,
@@ -79,7 +85,7 @@
     "upperBound" : 0.06
   },
   "Robot collision cylinder radius" : {
-    "value" : 0.4,
+    "value" : 0.5,
     "lowerBound" : 0.1,
     "upperBound" : 0.8
   },
@@ -99,7 +105,12 @@
     "upperBound" : 20000.0
   },
   "Crop window size" : {
-    "value" : 201,
+    "value" : 401,
+    "lowerBound" : 300,
+    "upperBound" : 800
+  },
+  "Terrain object size" : {
+    "vale" : 201,
     "lowerBound" : 40,
     "upperBound" : 300
   },

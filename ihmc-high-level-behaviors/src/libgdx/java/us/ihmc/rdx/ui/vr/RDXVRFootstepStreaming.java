@@ -1,5 +1,6 @@
 package us.ihmc.rdx.ui.vr;
 
+import org.apache.commons.math3.geometry.partitioning.Side;
 import toolbox_msgs.msg.dds.FootstepStreamingToolboxInputMessage;
 import toolbox_msgs.msg.dds.FootstepStreamingToolboxOutputStatus;
 import toolbox_msgs.msg.dds.FootstepStreamingToolboxSideMessage;
@@ -32,6 +33,7 @@ public class RDXVRFootstepStreaming
    private final SideDependentList<ReferenceFrame> ankleTrackerFrames = new SideDependentList<>();
    private final SideDependentList<SpatialVector> ankleTrackerVelocities = new SideDependentList<>();
    private final SideDependentList<Long> ankleTrackerTimestamps = new SideDependentList<>();
+   private final SideDependentList<RigidBodyTransform> previousAdjustment = new SideDependentList<>();
    private final Notification readyToStep = new Notification();
    private boolean wasEnabled = false;
 
@@ -117,7 +119,7 @@ public class RDXVRFootstepStreaming
                footstepPlacer.createNewFootstep(side);
                footstepPlacer.setFootstepPose(new FramePose3D(ReferenceFrame.getWorldFrame(),
                                                               latestStatus.getDesiredFootPosition(),
-                                                              latestStatus.getDesiredFootOrientation()));
+                                                              latestStatus.getDesiredFootOrientation()), false);
                // We can't trigger stepping here. We have to notify the KST and stop streaming
                readyToStep.clear();
                readyToStep.set();
@@ -126,9 +128,10 @@ public class RDXVRFootstepStreaming
             {
                if (footstepPlacer.setFootstepPose(new FramePose3D(ReferenceFrame.getWorldFrame(),
                                                                   latestStatus.getDesiredFootPosition(),
-                                                                  latestStatus.getDesiredFootOrientation())))
+                                                                  latestStatus.getDesiredFootOrientation()), false))
                {
                   step(true);
+                  previousAdjustment.put(side, new RigidBodyTransform(latestStatus.getDesiredFootOrientation(), latestStatus.getDesiredFootPosition()));
                }
                else
                {
@@ -137,8 +140,14 @@ public class RDXVRFootstepStreaming
             }
             else if (latestStatus.getLastAdjustment()) // Last estimate
             {
+               if (footstepPlacer.setFootstepPose(new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                                                  previousAdjustment.get(side).getTranslation(),
+                                                                  previousAdjustment.get(side).getRotation()), true))
+               {
+//                  step(true);
+               }
                LogTools.error("Received last estimate footstep");
-               footstepPlacer.reset();
+//               footstepPlacer.reset();
             }
          }
          else
@@ -194,6 +203,7 @@ public class RDXVRFootstepStreaming
       wasEnabled = false;
       readyToStep.clear();
       footstepPlacer.reset();
+      footstepPlacer.resetTimer();
    }
 
    public void destroy()

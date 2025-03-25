@@ -2,6 +2,9 @@ package us.ihmc.perception.detections.yolo;
 
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import us.ihmc.commons.thread.RepeatingTaskThread;
+import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.detections.InstantDetection;
 import us.ihmc.perception.imageMessage.PixelFormat;
@@ -19,11 +22,12 @@ public class YOLOv8DetectionThread extends RepeatingTaskThread
    private int colorImageKey;
    private int depthImageKey;
 
-   public YOLOv8DetectionThread(BooleanSupplier annotatedImageDemandSupplier)
+   public YOLOv8DetectionThread(ROS2PeerClockOffsetEstimator clockOffsetEstimator, BooleanSupplier annotatedImageDemandSupplier)
    {
       super(YOLOv8DetectionThread.class.getSimpleName());
 
-      yoloExecutor = new YOLOv8DetectionExecutor(annotatedImageDemandSupplier);
+      CRDTInfo crdtInfo = new CRDTInfo(ROS2ActorDesignation.ROBOT, clockOffsetEstimator);
+      yoloExecutor = new YOLOv8DetectionExecutor(crdtInfo, annotatedImageDemandSupplier);
    }
 
    public void addDetectionConsumerCallback(Consumer<List<InstantDetection>> consumer)
