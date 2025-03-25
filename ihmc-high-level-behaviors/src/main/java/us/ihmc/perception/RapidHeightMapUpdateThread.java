@@ -9,6 +9,7 @@ import us.ihmc.perception.gpuHeightMap.RapidHeightMapManager;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 import us.ihmc.sensors.ImageSensor;
 
 public class RapidHeightMapUpdateThread extends RepeatingTaskThread
@@ -25,6 +26,7 @@ public class RapidHeightMapUpdateThread extends RepeatingTaskThread
    private final ImageSensor imageSensor;
    private final ReferenceFrame sensorFrame;
    private final ReferenceFrame zUpSensorFrame;
+   private final HeightMapParameters heightMapParameters;
    private final int depthImageKey;
 
    public RapidHeightMapUpdateThread(ROS2Node ros2Node,
@@ -33,7 +35,8 @@ public class RapidHeightMapUpdateThread extends RepeatingTaskThread
                                      ReferenceFrame rightFootFrame,
                                      ControllerFootstepQueueMonitor controllerFootstepQueueMonitor,
                                      ImageSensor imageSensor,
-                                     int depthImageKey)
+                                     int depthImageKey,
+                                     HeightMapParameters heightMapParameters)
    {
       super(imageSensor.getSensorName() + RapidHeightMapUpdateThread.class.getSimpleName());
 
@@ -44,6 +47,7 @@ public class RapidHeightMapUpdateThread extends RepeatingTaskThread
       this.controllerFootstepQueueMonitor = controllerFootstepQueueMonitor;
       this.imageSensor = imageSensor;
       this.depthImageKey = depthImageKey;
+      this.heightMapParameters = heightMapParameters;
 
       sensorFrame = syncedRobotModel.getReferenceFrames().getSteppingCameraFrame();
       zUpSensorFrame = syncedRobotModel.getReferenceFrames().getSteppingCameraZUpFrame();
@@ -66,7 +70,8 @@ public class RapidHeightMapUpdateThread extends RepeatingTaskThread
                                                          leftFootFrame,
                                                          rightFootFrame,
                                                          controllerFootstepQueueMonitor,
-                                                         depthImage.getIntrinsicsCopy());
+                                                         depthImage.getIntrinsicsCopy(),
+                                                         heightMapParameters);
          }
 
          // Update height map

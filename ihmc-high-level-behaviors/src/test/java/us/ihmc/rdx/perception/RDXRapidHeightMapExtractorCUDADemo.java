@@ -25,6 +25,7 @@ import us.ihmc.rdx.ui.graphics.RDXGridMapGraphic;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
+import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 
 public class RDXRapidHeightMapExtractorCUDADemo
 {
@@ -99,7 +100,7 @@ public class RDXRapidHeightMapExtractorCUDADemo
                                                         heightMapImage,
                                                         intrinsics,
                                                         1,
-                                                        RapidHeightMapManager.getHeightMapParameters());
+                                                        new HeightMapParameters("GPU"));
 
             baseUI.getPrimaryScene().addRenderableProvider(heightMapGraphic, RDXSceneLevel.MODEL);
          }
@@ -127,16 +128,6 @@ public class RDXRapidHeightMapExtractorCUDADemo
                cameraPoseForHeightMap.setToZero(sensorPoseGizmo.getGizmoFrame());
                cameraPoseForHeightMap.changeFrame(ReferenceFrame.getWorldFrame());
 
-               //               OpenCVTools.compressImagePNG(croppedHeightMapImage, compressedCroppedHeightMapPointer);
-               //               PerceptionMessageTools.packCompressedDepthImage(compressedCroppedHeightMapPointer,
-               //                                                               croppedHeightMapImageMessage,
-               //                                                               cameraPoseForHeightMap,
-               //                                                               sensorSimulator.getDepthImage().getAcquisitionTime(),
-               //                                                               sensorSimulator.getDepthImage().getSequenceNumber(),
-               //                                                               croppedHeightMapImage.rows(),
-               //                                                               croppedHeightMapImage.cols(),
-               //                                                               (float) RapidHeightMapExtractor.getHeightMapParameters().getHeightScaleFactor());
-
                pixelScalingFactor = croppedHeightMapImageMessage.getDepthDiscretization();
                zUpToWorldTransform.set(croppedHeightMapImageMessage.getOrientation(), croppedHeightMapImageMessage.getPosition());
 
@@ -146,11 +137,13 @@ public class RDXRapidHeightMapExtractorCUDADemo
                //                                                              incomingCompressedImageBytePointer,
                //                                                              compressedBytesMat);
 
+               HeightMapParameters heightMapParameters = new HeightMapParameters("GPU");
                PerceptionMessageTools.convertToHeightMapData(sensorSimulator.getDepthImage().getCpuImageMat(),
                                                              heightMapData,
                                                              croppedHeightMapImageMessage.getPosition(),
-                                                             (float) RapidHeightMapManager.getHeightMapParameters().getGlobalWidthInMeters(),
-                                                             (float) RapidHeightMapManager.getHeightMapParameters().getGlobalCellSizeInMeters());
+                                                             (float) heightMapParameters.getGlobalWidthInMeters(),
+                                                             (float) heightMapParameters.getGlobalCellSizeInMeters(),
+                                                             heightMapParameters);
                HeightMapMessageTools.toMessage(heightMapData, heightMapMessage);
 
                //               List<RDXMultiColorMeshBuilder> multiColorMeshBuilders = RDXHeightMapGraphicNew.generateHeightCells(heightsProvided,
