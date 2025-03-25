@@ -70,8 +70,8 @@ public class DepthImageOverlapRemover
          if (highQualityImage == null || highQualityImage.isEmpty())
             return lowQualityImage;
 
-         zedFrame.update(transformToWorld -> transformToWorld.set(lowQualityImage.getOrientation(), lowQualityImage.getPosition()));
-         realsenseFrame.update(transformToWorld -> transformToWorld.set(highQualityImage.getOrientation(), highQualityImage.getPosition()));
+         zedFrame.update(transformToWorld -> transformToWorld.set(lowQualityImage.getRotation(), lowQualityImage.getTranslation()));
+         realsenseFrame.update(transformToWorld -> transformToWorld.set(highQualityImage.getRotation(), highQualityImage.getTranslation()));
          zedFrame.getReferenceFrame().getTransformToDesiredFrame(zedToRealsenseTransform, realsenseFrame.getReferenceFrame());
          zedToRealsenseTransformParameter.setParameter(zedToRealsenseTransform);
          zedToRealsenseTransformParameter.writeOpenCLBufferObject(openCLManager);

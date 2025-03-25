@@ -1,9 +1,9 @@
 package us.ihmc.atlas;
 
-import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.scs2.definition.collision.CollisionShapeDefinition;
 import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
+import us.ihmc.scs2.simulation.collision.CollidableHelper;
 
 public class AtlasSCS2BulletSimulationTools
 {

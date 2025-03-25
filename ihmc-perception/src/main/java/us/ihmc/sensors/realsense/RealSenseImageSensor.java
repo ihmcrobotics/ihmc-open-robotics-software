@@ -2,9 +2,11 @@ package us.ihmc.sensors.realsense;
 
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.Throttler;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
 import us.ihmc.sensors.ImageSensor;
@@ -17,7 +19,7 @@ public class RealSenseImageSensor extends ImageSensor
    public static final int DEPTH_IMAGE_KEY = 1;
    public static final int OUTPUT_IMAGE_COUNT = 2;
 
-   private static final double OUTPUT_FREQUENCY = 20.0;
+   private static final double OUTPUT_FREQUENCY = 30.0;
 
    private final RealSenseConfiguration realsenseConfiguration;
    private final RealSenseDeviceManager realsenseManager = new RealSenseDeviceManager();
@@ -27,8 +29,10 @@ public class RealSenseImageSensor extends ImageSensor
    private long grabSequenceNumber = 0L;
    private int grabFailureCount = 0;
 
-   private final FramePose3D depthPose = new FramePose3D();
-   private final FramePose3D colorPose = new FramePose3D();
+   private ReferenceFrame depthFrame;
+   private ReferenceFrame colorFrame;
+   private final Notification resetFrames = new Notification();
+
    private final Throttler grabThrottler = new Throttler().setFrequency(OUTPUT_FREQUENCY);
 
    public RealSenseImageSensor(RealSenseConfiguration realsenseConfiguration)
@@ -36,6 +40,13 @@ public class RealSenseImageSensor extends ImageSensor
       super(realsenseConfiguration.name().split("_")[0]);
 
       this.realsenseConfiguration = realsenseConfiguration;
+      resetFrames.set();
+   }
+
+   @Override
+   protected void onSensorFrameChanged()
+   {
+      resetFrames.set();
    }
 
    @Override
@@ -77,15 +88,6 @@ public class RealSenseImageSensor extends ImageSensor
    {
       grabThrottler.waitAndRun();
 
-      // Update the sensor poses
-      ReferenceFrame sensorFrame = sensorFrameSupplier.get();
-      depthPose.setToZero(sensorFrame);
-      depthPose.changeFrame(ReferenceFrame.getWorldFrame());
-
-      colorPose.setIncludingFrame(sensorFrame, realsense.getDepthToColorTranslation(), realsense.getDepthToColorRotation());
-      colorPose.invert();
-      colorPose.changeFrame(ReferenceFrame.getWorldFrame());
-
       // Read grabbed images
       if (!realsense.readFrameData())
       {
@@ -100,6 +102,20 @@ public class RealSenseImageSensor extends ImageSensor
       Mat bgrImage = new Mat(realsense.getColorHeight(), realsense.getColorWidth(), opencv_core.CV_8UC3, realsense.getColorFrameData());
       Mat depthImage = new Mat(realsense.getDepthHeight(), realsense.getDepthWidth(), opencv_core.CV_16UC1, realsense.getDepthFrameData());
 
+      // Update sensor frames
+      if (resetFrames.poll())
+      {
+         if (depthFrame != null)
+            depthFrame.remove();
+         depthFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(getSensorName() + "_depth", sensorFrame, new RigidBodyTransform());
+
+         if (colorFrame != null)
+            colorFrame.remove();
+         RigidBodyTransform colorToDepthTransform = new RigidBodyTransform(realsense.getDepthToColorRotation(), realsense.getDepthToColorTranslation());
+         colorToDepthTransform.invert();
+         colorFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(getSensorName() + "_color", sensorFrame, colorToDepthTransform);
+      }
+
       // Update grabbed images
       synchronized (grabbedImages)
       {
@@ -107,7 +123,7 @@ public class RealSenseImageSensor extends ImageSensor
             grabbedImages[COLOR_IMAGE_KEY].release();
          grabbedImages[COLOR_IMAGE_KEY] = RawImage.createWithBGRImage(bgrImage,
                                                                       realsense.getColorCameraIntrinsics(),
-                                                                      new FramePose3D(colorPose),
+                                                                      colorFrame.getTransformToRoot(),
                                                                       grabTime,
                                                                       grabSequenceNumber);
 
@@ -115,7 +131,7 @@ public class RealSenseImageSensor extends ImageSensor
             grabbedImages[DEPTH_IMAGE_KEY].release();
          grabbedImages[DEPTH_IMAGE_KEY] = RawImage.createWith16BitDepth(depthImage,
                                                                         realsense.getDepthCameraIntrinsics(),
-                                                                        new FramePose3D(depthPose),
+                                                                        depthFrame.getTransformToRoot(),
                                                                         grabTime,
                                                                         grabSequenceNumber,
                                                                         (float) realsense.getDepthDiscretization());
@@ -135,6 +151,23 @@ public class RealSenseImageSensor extends ImageSensor
 
          return grabbedImages[imageKey].get();
       }
+   }
+
+   @Override
+   public ReferenceFrame getImageFrame(int imageKey)
+   {
+      return switch (imageKey)
+      {
+         case COLOR_IMAGE_KEY -> colorFrame;
+         case DEPTH_IMAGE_KEY -> depthFrame;
+         default -> null;
+      };
+   }
+
+   @Override
+   public ReferenceFrame[] getImageFrames()
+   {
+      return new ReferenceFrame[] {colorFrame, depthFrame};
    }
 
    @Override

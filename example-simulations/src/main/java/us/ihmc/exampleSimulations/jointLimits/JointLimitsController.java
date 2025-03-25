@@ -1,8 +1,8 @@
 package us.ihmc.exampleSimulations.jointLimits;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.simulationConstructionSetTools.robotController.SimpleRobotController;
 
 public class JointLimitsController extends SimpleRobotController

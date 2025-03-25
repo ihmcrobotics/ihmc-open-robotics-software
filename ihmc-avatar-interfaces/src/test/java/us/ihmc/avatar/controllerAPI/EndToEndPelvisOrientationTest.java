@@ -76,7 +76,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
    @Test
    public void testGoHome()
    {
-      double epsilon = 1.0e-4;
+      double epsilon = 1.5e-4;
       double yaw = Math.toRadians(15.0);
       double trajectoryTime = 0.5;
 

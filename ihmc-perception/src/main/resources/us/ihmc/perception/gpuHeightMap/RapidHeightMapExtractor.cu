@@ -331,10 +331,11 @@ extern "C" __global__ void heightMapUpdateKernel(unsigned short *in, size_t pitc
     *(outRow + yIndex) = (unsigned short)(heightValue);
 }
 
-extern "C" __global__ void heightMapRegistrationKernel(unsigned short *localMap, size_t pitchLocal,
-                                                       unsigned short *globalMap, size_t pitchGlobal,
-                                                       float *params, float *worldToZUpFrameTf,
-                                                       float *sensorToGroundTf)
+extern "C"
+__global__ void heightMapRegistrationKernel(unsigned short *localMap, size_t pitchLocal,
+                                            unsigned short *globalMap, size_t pitchGlobal,
+                                            float *params, float *worldToZUpFrameTf,
+                                            float *sensorToGroundTf)
 {
     int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
     int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
@@ -401,20 +402,10 @@ extern "C" __global__ void heightMapRegistrationKernel(unsigned short *localMap,
 
     float finalHeight = previousHeight;
 
-    // Filter the height
     if (!isColliding && (localHeight - sensorHeight) > params[MIN_HEIGHT_REGISTRATION] &&
         (localHeight - sensorHeight) < params[MAX_HEIGHT_REGISTRATION])
     {
-        float height_diff = fabsf(localHeight - previousHeight);
-        if (height_diff < params[MAX_HEIGHT_DIFFERENCE])
-        {
-            finalHeight = previousHeight * params[HEIGHT_FILTER_ALPHA] +
-                          localHeight * (1.0f - params[HEIGHT_FILTER_ALPHA]);
-        }
-        else
-        {
-            finalHeight = localHeight;
-        }
+        finalHeight = localHeight;
     }
 
     finalHeight += params[HEIGHT_OFFSET];
@@ -501,7 +492,9 @@ __global__ void planOffsetKernel(unsigned short * matrixToModify, size_t pitchMa
         return;
 
     unsigned short *skipRow = (unsigned short *)((char *)matrixValuesToSkip + indexY * pitchMatrixValuesToSkip);
-    if (skipRow[indexX] != resetOffset)
+    // This is less then or equal to due to a round error that can give +- 1 offsets
+    // This skips the cells that have real data in them coming from the values to skip
+    if (abs( (int) skipRow[indexX] - resetOffset) >= 2)
         return;
 
     unsigned short *matrixRow = (unsigned short *)((char *)matrixToModify + indexY * pitchMatrixToModify);

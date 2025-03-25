@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateContro
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.naturalPosture.NaturalPostureManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
@@ -535,6 +536,9 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       }
 
       controllerToolbox.initialize();
+      // This must be done before calling managerFactory.initializeManagers(), becuase the pelvis orientation manager relies on thew alking trajectory path.
+      initializeWalkingTrajectoryPath();
+
       managerFactory.initializeManagers();
 
       commandInputManager.clearAllCommands();
@@ -579,12 +583,17 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       firstTick = true;
    }
 
+   private void initializeWalkingTrajectoryPath()
+   {
+      controllerToolbox.getWalkingTrajectoryPath().clearFootsteps();
+      controllerToolbox.getWalkingTrajectoryPath().reset();
+      controllerToolbox.getWalkingTrajectoryPath().initializeDoubleSupport();
+      controllerToolbox.getWalkingTrajectoryPath().updateTrajectory(FootControlModule.ConstraintType.FULL, FootControlModule.ConstraintType.FULL);
+   }
+
    private void initializeManagers()
    {
       balanceManager.disablePelvisXYControl();
-
-      double stepTime = walkingMessageHandler.getDefaultStepTime();
-      pelvisOrientationManager.setTrajectoryTime(stepTime);
 
       for (int managerIdx = 0; managerIdx < bodyManagers.size(); managerIdx++)
       {

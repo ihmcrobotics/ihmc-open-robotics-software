@@ -7,7 +7,7 @@ import us.ihmc.euclid.shape.primitives.interfaces.*;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.physics.Collidable;
+import us.ihmc.scs2.simulation.collision.Collidable;
 
 /**
  * Tool for colliding a collision shape with a mouse pick ray.

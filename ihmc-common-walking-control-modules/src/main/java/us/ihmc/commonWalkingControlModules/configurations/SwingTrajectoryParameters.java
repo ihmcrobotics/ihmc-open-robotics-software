@@ -63,7 +63,7 @@ public abstract class SwingTrajectoryParameters
     */
    public double getCustomWaypointAngleThreshold()
    {
-      return Math.toRadians(50.0);
+      return Math.toRadians(80.0);
    }
 
    /**

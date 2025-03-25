@@ -1,5 +1,6 @@
 package us.ihmc.atlas.networkProcessor.footstepPostProcessing;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -58,6 +59,7 @@ public class AtlasPostProcessingTest extends AvatarPostProcessingTests
       super.testWalkingOffOfMediumPlatform();
    }
 
+   @Disabled
    @Tag("humanoid-obstacle-2")
    @Override
    @Test

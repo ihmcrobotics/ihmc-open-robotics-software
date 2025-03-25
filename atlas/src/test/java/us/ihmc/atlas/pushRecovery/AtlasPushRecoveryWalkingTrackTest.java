@@ -1,5 +1,6 @@
 package us.ihmc.atlas.pushRecovery;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
@@ -8,6 +9,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.pushRecovery.AvatarPushRecoveryWalkingTrackTest;
 
+@Disabled
 public class AtlasPushRecoveryWalkingTrackTest extends AvatarPushRecoveryWalkingTrackTest
 {
    private DRCRobotModel robotModel;

@@ -7,7 +7,6 @@ import org.bytedeco.opencv.opencv_core.Size;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.property.ROS2StoredPropertySet;
-import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.cuda.CUDAJPEGProcessor;
@@ -116,8 +115,8 @@ public class BlackflyImagePublisher
          distortedImageMessage.setPrincipalPointYPixels(imageToPublish.getPrincipalPointY() * publishedImageScaleFactor);
          distortedImageMessage.setImageWidth(scaledWidth);
          distortedImageMessage.setImageHeight(scaledHeight);
-         distortedImageMessage.getPosition().set(imageToPublish.getPosition());
-         distortedImageMessage.getOrientation().set(imageToPublish.getOrientation());
+         distortedImageMessage.getPosition().set(imageToPublish.getTranslation());
+         distortedImageMessage.getOrientation().set(imageToPublish.getRotation());
          distortedImageMessage.setSequenceNumber(imageToPublish.getSequenceNumber());
          distortedImageMessage.setCameraModel(CameraModel.EQUIDISTANT_FISHEYE.toByte());
          distortedImageMessage.setPixelFormat(PixelFormat.BGR8.toByte());
