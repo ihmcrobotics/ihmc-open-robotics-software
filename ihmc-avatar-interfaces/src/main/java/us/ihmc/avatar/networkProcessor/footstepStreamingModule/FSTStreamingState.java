@@ -11,10 +11,11 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.footstepStreamingToolboxAPI.FootstepStreamingToolboxInputCommand;
 import us.ihmc.humanoidRobotics.communication.footstepStreamingToolboxAPI.FootstepStreamingToolboxSideCommand;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.State;
+import us.ihmc.yoVariables.filters.AlphaFilterTools;
+import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -83,7 +84,7 @@ public class FSTStreamingState implements State
       tools.getRegistry().addChild(registry);
 
       YoDouble inputFrequencyAlpha = new YoDouble("inputFrequencyFilter", registry);
-      inputFrequencyAlpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(2.0, toolboxControllerPeriod));
+      inputFrequencyAlpha.set(AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(2.0, toolboxControllerPeriod));
       inputFrequency = new AlphaFilteredYoVariable("inputFrequency", registry, inputFrequencyAlpha, rawInputFrequency);
 
       stepThreshold.set(parameters.getStepThreshold());

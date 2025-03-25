@@ -26,6 +26,8 @@ public class CUDALocalFootstepOptimizer implements AutoCloseable
    private static final double SEARCH_SPACE_RESOLUTION_XY = 0.02;
    private static final double SEARCH_SPACE_RESOLUTION_YAW = Math.toRadians(5);
 
+   private final PlanarityChecker planarityChecker;
+
    // CUDA stuff
    private final CUDAProgram program;
    private final CUDAKernel computeKernel;
@@ -75,7 +77,8 @@ public class CUDALocalFootstepOptimizer implements AutoCloseable
       searchRadius = footLength;
       stepsXY = (int) (2 * searchRadius / SEARCH_SPACE_RESOLUTION_XY) + 1;
       stepsYaw = (int) (Math.PI / 4 / SEARCH_SPACE_RESOLUTION_YAW);
-      searchSpaceDim = stepsXY * stepsXY * stepsYaw;
+
+      planarityChecker = new PlanarityChecker(footLength, footWidth);
    }
 
    /**
@@ -87,8 +90,14 @@ public class CUDALocalFootstepOptimizer implements AutoCloseable
     */
    public FramePose3D compute(HeightMapData heightMapData, FramePose3DReadOnly initialPose)
    {
+      if (planarityChecker.isOnPlane(heightMapData, initialPose))
+      {
+         LogTools.info("Initial solution is valid, no optimization needed.");
+         return new FramePose3D(initialPose);
+      }
       // Get a stream
       cudaStream = CUDAStreamManager.getStream();
+      searchSpaceDim = stepsXY * stepsXY * stepsYaw;
 
       cpuCosts = new FloatPointer(searchSpaceDim);
       gpuCosts = new FloatPointer();
@@ -108,7 +117,6 @@ public class CUDALocalFootstepOptimizer implements AutoCloseable
       DoublePointer cpuHeights = new DoublePointer(heightMapData.getHeights());
       DoublePointer gpuHeights = new DoublePointer();
       CUDATools.mallocAsync(gpuHeights, heightMapData.getHeights().length, cudaStream);
-      LogTools.error(heightMapData.getHeights().length);
 
       DoublePointer cpuGridCenter = new DoublePointer(heightMapData.getGridCenter().getX(), (float) heightMapData.getGridCenter().getY());
       DoublePointer gpuGridCenter = new DoublePointer();
@@ -136,7 +144,12 @@ public class CUDALocalFootstepOptimizer implements AutoCloseable
                    .withPointer(gpuCosts)
                    .withPointer(gpuSolutions)
                    .run(cudaStream, gridSize, blockSize, 0);
+
       LogTools.warn("Done kernel compute");
+      // Synchronize the stream
+      // This call waits until all asynchronous functions being executed on this stream finish.
+      // We have to call this to ensure that the kernel finished, and the result is ready to be downloaded onto the CPU
+      cudart.cudaStreamSynchronize(cudaStream);
 
       CUDATools.memcpyAsync(cpuSolutions, gpuSolutions, 3L * searchSpaceDim, cudaStream);
 
@@ -188,7 +201,6 @@ public class CUDALocalFootstepOptimizer implements AutoCloseable
             CUDATools.mallocAsync(gpuCosts, resultSize, cudaStream);
             cpuCosts.put(cpuBestCosts);
             CUDATools.memcpyAsync(gpuCosts, cpuCosts, resultSize, cudaStream);
-
          }
          searchSpaceDim = resultSize;
       }
@@ -259,8 +271,6 @@ public class CUDALocalFootstepOptimizer implements AutoCloseable
          cudart.cudaStreamSynchronize(cudaStream);
 
          CUDATools.memcpyAsync(cpuBestCosts, gpuBestCosts, resultSize, cudaStream);
-         for (int i=0; i< resultSize; i++)
-            LogTools.info(cpuBestCosts.get(i));
 
          if (resultSize != 1)
          {

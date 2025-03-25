@@ -57,8 +57,7 @@ extern "C" __global__ void findMinimumCosts(float* array, int size, float* block
 
 __device__ int indicesToKey(int xIndex, int yIndex, int centerIndex)
 {
-    int rowLength = 2 * centerIndex + 1;
-    return yIndex * rowLength + xIndex;
+    return  xIndex + yIndex * (2 * centerIndex + 1);
 }
 
 __device__ int coordinateToIndex(double coordinate, double gridCenter,
@@ -85,8 +84,10 @@ __device__ float getHeightAt(float x, float y, const double* heightMapData, doub
     return (float)heightMapData[key];
 }
 
-__device__ void fitPlane(float2* points, float* heights, float* planeCoeffs)
+__device__ float* fitPlane(float2* points, float* heights)
 {
+    // Allocate memory for plane coefficients
+    static float planeCoeffs[4];
     // Simple least squares plane fitting
     float sumX = 0, sumY = 0, sumZ = 0, sumX2 = 0, sumY2 = 0, sumXY = 0, sumXZ = 0, sumYZ = 0;
     for (int i = 0; i < 13; i++)
@@ -104,22 +105,24 @@ __device__ void fitPlane(float2* points, float* heights, float* planeCoeffs)
         sumYZ += y * z;
     }
 
-    float det = sizeof(points) * (sumX2 * sumY2 - sumXY * sumXY) +
+    float det = 13 * (sumX2 * sumY2 - sumXY * sumXY) +
                 sumX * (sumXY * sumY - sumX * sumY2) +
                 sumY * (sumX * sumXY - sumX2 * sumY);
-    float a = (sizeof(points) * (sumXZ * sumY2 - sumYZ * sumXY) +
+    float a = (13 * (sumXZ * sumY2 - sumYZ * sumXY) +
                sumY * (sumYZ * sumX - sumXZ * sumY) +
                sumZ * (sumXY * sumY - sumX * sumY2)) / det;
-    float b = (sizeof(points) * (sumX2 * sumYZ - sumXZ * sumXY) +
+    float b = (13 * (sumX2 * sumYZ - sumXZ * sumXY) +
                sumX * (sumXZ * sumY - sumYZ * sumX) +
                sumZ * (sumX * sumXY - sumX2 * sumY)) / det;
-    float c = (sumZ - a * sumX - b * sumY) / sizeof(points);
+    float c = (sumZ - a * sumX - b * sumY) / 13;
 
     // Convert to four-coefficient representation
     planeCoeffs[0] = a;
     planeCoeffs[1] = b;
     planeCoeffs[2] = -1.0f;
     planeCoeffs[3] = c;
+
+    return planeCoeffs;
 }
 
 // -------------------------------------------------------------------------
@@ -130,8 +133,8 @@ __device__ void fitPlane(float2* points, float* heights, float* planeCoeffs)
 // height deviation and inclination
 __device__ float computePlanarityCost(float x, float y, float yaw, double* heightMapData, double* heightMapCenter, int heightMapCenterIdx, double heightMapResolution, float footLength, float footWidth)
 {
-    float fx = footLength + 0.02f;
-    float fy = footWidth + 0.02f;
+    float fx = footLength;
+    float fy = footWidth;
     float2 fullSamples[13] = {{-fx/2, -fy/2}, {fx/2, -fy/2}, {fx/2, fy/2}, {-fx/2, fy/2}, {0, 0},
                                     {-fx/4, -fy/2}, {-fx/4, 0}, {-fx/4, fy/2}, {0, -fy/2}, {0, fy/2},
                                     {fx/4, -fy/2}, {fx/4, 0}, {fx/4, fy/2}};
@@ -162,8 +165,7 @@ __device__ float computePlanarityCost(float x, float y, float yaw, double* heigh
     }
 
     // Fit plane and calculate planarity cost
-    float planeCoeffs[4];
-    fitPlane(fullSamplesXY, heights, planeCoeffs);
+    float* planeCoeffs = fitPlane(fullSamplesXY, heights);
 
     float sumSquaredDistances = 0.0f;
     float maxVariance = 0.0f;
@@ -183,7 +185,7 @@ __device__ float computePlanarityCost(float x, float y, float yaw, double* heigh
         penalties += HEIGHT_CONSTRAINT_PENALTY;
     }
 
-    float rmse = sqrtf(sumSquaredDistances / 5.0f);
+    float rmse = sqrtf(sumSquaredDistances / 13.0f);
     float maxSlope = sqrtf(planeCoeffs[0] * planeCoeffs[0] + planeCoeffs[1] * planeCoeffs[1]);
     if (maxSlope > MAX_SLOPE_ANGLE)
     {
@@ -233,7 +235,7 @@ extern "C" __global__ void optimizeFootstep(double* heightMapData,
 
         float x = initialPose[0] - searchRadius + i * heightMapResolution;
         float y = initialPose[1] - searchRadius + j * heightMapResolution;
-        float yaw = initialPose[2] + k * GRID_RESOLUTION_YAW;
+        float yaw = initialPose[3] + k * GRID_RESOLUTION_YAW;
 
         float cost = computeCost(x, y, yaw, initialPose, footLength, footWidth, heightMapData, heightMapCenter, heightMapCenterIdx, heightMapResolution);
 
