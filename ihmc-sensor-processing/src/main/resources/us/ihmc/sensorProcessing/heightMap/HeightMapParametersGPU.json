@@ -1,6 +1,6 @@
 {
   "title" : "GPU Height Map Parameters",
-  "Drift offset filter" : false,
+  "Drift offset filter" : true,
   "Flying points filter" : true,
   "Enable alpha filter" : true,
   "Enable vertical filter" : true,

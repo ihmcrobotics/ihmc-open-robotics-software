@@ -264,6 +264,7 @@ public class JustWaitState implements State
                                   footstepDataListMessage.setDefaultSwingDuration(continuousHikingParameters.getSwingTime());
                                   footstepDataListMessage.setDefaultTransferDuration(continuousHikingParameters.getTransferTime());
                                   footstepDataListMessage.getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_QUEUE);
+                                  footstepDataListMessage.setOffsetFootstepsHeightWithExecutionError(true);
 
                                   for (int i = 0; i < footstepPlanner.getOutput().getFootstepPlan().getNumberOfSteps(); i++)
                                   {
@@ -358,6 +359,7 @@ public class JustWaitState implements State
       footstepDataListMessage.setDefaultSwingDuration(continuousHikingParameters.getSwingTime());
       footstepDataListMessage.setDefaultTransferDuration(continuousHikingParameters.getTransferTime());
       footstepDataListMessage.getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_QUEUE);
+      footstepDataListMessage.setOffsetFootstepsHeightWithExecutionError(true);
       footstepDataListMessage.getFootstepDataList().add().set(squareUpStep.getAsMessage());
 
       ros2Helper.publish(controllerFootstepDataTopic, footstepDataListMessage);
