@@ -529,6 +529,7 @@ public class RDXLocomotionManager
    {
       footstepPlanning.setHeightMapData(heightMapData);
       interactableFootstepPlan.setHeightMapMessage(heightMapData);
+      manualFootstepPlacement.setHeightMapData(heightMapData);
    }
 
    public LocomotionParameters getLocomotionParameters()
