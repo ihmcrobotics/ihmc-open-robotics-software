@@ -122,7 +122,7 @@ public class RapidHeightMapManager
       }
 
       deviceDepthImage.upload(hostDepthImage);
-      bodyCollisionFilteredHeightMap.update(robotCollidables, cameraZUpFrame, depthImageIntrinsics);
+      bodyCollisionFilteredHeightMap.update(robotCollidables, cameraFrame, depthImageIntrinsics);
       if (resetHeightMapRequested.poll())
       {
          rapidHeightMapExtractor.reset();
