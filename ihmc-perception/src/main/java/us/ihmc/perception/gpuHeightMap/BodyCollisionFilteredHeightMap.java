@@ -46,12 +46,9 @@ public class BodyCollisionFilteredHeightMap
 
 //      for (Collidable collidable : robotCollidables)
 //      {
-         if (collidable.getShape() instanceof FrameCapsule3D)
+         if (collidable.getShape() instanceof FrameCapsule3D capsule)
          {
-            FrameCapsule3D bodypart =  new FrameCapsule3D();
-            bodypart.changeFrame(collidable.getShape().getReferenceFrame());
-            bodypart.set((FrameCapsule3D) collidable.getShape());
-            System.out.println("Original Body Part: " + bodypart);
+            FrameCapsule3D bodypart =  new FrameCapsule3D(capsule);
             bodypart.changeFrame(cameraFrame);
             System.out.println("Body Part in Camera Frame: " + bodypart);
 
@@ -66,8 +63,8 @@ public class BodyCollisionFilteredHeightMap
                if (point.getX() > 0) // Assuming X-axis is forward in the camera frame
                {
                   System.out.println("Point: " + point + " is in front of the camera (X > 0), maybe in view.");
-                  double u = fx * (point.getY() / point.getX()) + cx;
-                  double v = fy * (point.getZ() / point.getX()) + cy;
+                  double u = cx - (point.getY() / point.getX() * fx);
+                  double v = cy - (point.getZ() / point.getX() * fy);
 
                   System.out.println("Projected u: " + u);
                   System.out.println("Projected v: " + v);
