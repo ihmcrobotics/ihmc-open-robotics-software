@@ -193,7 +193,7 @@ public class TerrainMapData
       if (isOutOfBounds(rIndex, cIndex))
          return 0.0f;
 
-      return ((float) ((int) snappedAreaFractionImage.ptr(rIndex, cIndex).getShort() & 0xFF * 255)) + 1.0f;
+      return ((float) ((snappedAreaFractionImage.ptr(rIndex, cIndex).get() & 0xFF))) / 255;
    }
 
    private float getSnappedHeightLocal(int rIndex, int cIndex)

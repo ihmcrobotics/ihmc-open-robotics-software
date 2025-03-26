@@ -8,6 +8,7 @@ import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
@@ -90,7 +91,7 @@ public class SnappingHeightMapExtractor
       snapHeightImage.setTo(new Scalar(resetOffset));
    }
 
-   public void update(GpuMat globalHeightMapImage, Point3D sensorOrigin, int globalCenterIndex, int cropCenterIndex)
+   public void update(GpuMat globalHeightMapImage, Point3DReadOnly sensorOrigin, int globalCenterIndex, int cropCenterIndex)
    {
       int error;
 
