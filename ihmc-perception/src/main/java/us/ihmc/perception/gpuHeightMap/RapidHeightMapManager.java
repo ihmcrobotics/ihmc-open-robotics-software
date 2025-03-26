@@ -25,12 +25,14 @@ import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.scs2.simulation.collision.Collidable;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
+import us.ihmc.sensors.realsense.RealSenseDevice;
 
 import java.time.Instant;
 import java.util.List;
 
 /**
- * This class takes care of managing the {@link RapidHeightMapExtractorCUDA}. This class can be used on remote process's or locally as well.
+ * This class takes care of managing the {@link RapidHeightMapExtractorCUDA}. This class can be used on remote process's
+ * or locally as well.
  */
 public class RapidHeightMapManager
 {
@@ -47,6 +49,9 @@ public class RapidHeightMapManager
    private final GpuMat deviceDepthImage;
    private final HeightMapParameters heightMapParameters;
    private final ROS2Publisher<ImageMessage> heightMapPublisher;
+   private List<Collidable> robotCollidables;
+   private BodyCollisionFilteredHeightMap bodyCollisionFilteredHeightMap;
+   private CameraIntrinsics depthImageIntrinsics;
 
    public RapidHeightMapManager(ROS2Node ros2Node,
                                 RobotCollisionModel robotCollisionModel,
@@ -56,15 +61,18 @@ public class RapidHeightMapManager
                                 ReferenceFrame rightFootSoleFrame,
                                 ControllerFootstepQueueMonitor controllerFootstepQueueMonitor,
                                 CameraIntrinsics depthImageIntrinsics,
-                                HeightMapParameters heightMapParameters) throws Exception
+                                HeightMapParameters heightMapParameters,
+                                ReferenceFrame cameraFrame) throws Exception
    {
       this.heightMapParameters = heightMapParameters;
+      this.depthImageIntrinsics = depthImageIntrinsics;
 
-      List<Collidable> robotCollidables = robotCollisionModel.getRobotCollidables(robotModel.getRootBody());
+      robotCollidables = robotCollisionModel.getRobotCollidables(robotModel.getRootBody());
+      bodyCollisionFilteredHeightMap = new BodyCollisionFilteredHeightMap();
 
-      BodyCollisionFilteredHeightMap bodyCollisionFilteredHeightMap = new BodyCollisionFilteredHeightMap(robotCollidables);
-
-      deviceDepthImage = new GpuMat(depthImageIntrinsics.getHeight(), depthImageIntrinsics.getWidth(), opencv_core.CV_16UC1);
+      deviceDepthImage = new GpuMat(depthImageIntrinsics.getHeight(),
+                                    depthImageIntrinsics.getWidth(),
+                                    opencv_core.CV_16UC1);
       rapidHeightMapExtractor = new RapidHeightMapExtractorCUDA(leftFootSoleFrame,
                                                                 rightFootSoleFrame,
                                                                 deviceDepthImage,
@@ -80,17 +88,22 @@ public class RapidHeightMapManager
       ros2Node.createSubscription2(PerceptionAPI.RESET_HEIGHT_MAP, message -> resetHeightMapRequested.set());
       if (robotModel != null)
       {
-         ros2Node.createSubscription(HumanoidControllerAPI.getTopic(HighLevelStateChangeStatusMessage.class, robotName), message ->
-         {
-            if (message.takeNextData().getEndHighLevelControllerName() == HighLevelStateChangeStatusMessage.WALKING)
-            {
-               resetHeightMapRequested.set();
-            }
-         });
+         ros2Node.createSubscription(HumanoidControllerAPI.getTopic(HighLevelStateChangeStatusMessage.class, robotName),
+                                     message ->
+                                     {
+                                        if (message.takeNextData().getEndHighLevelControllerName()
+                                            == HighLevelStateChangeStatusMessage.WALKING)
+                                        {
+                                           resetHeightMapRequested.set();
+                                        }
+                                     });
       }
    }
 
-   public void update(Mat latestDepthImage, Instant imageAcquisitionTime, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame) throws Exception
+   public void update(Mat latestDepthImage,
+                      Instant imageAcquisitionTime,
+                      ReferenceFrame cameraFrame,
+                      ReferenceFrame cameraZUpFrame) throws Exception
    {
       RigidBodyTransform sensorToWorld = cameraFrame.getTransformToWorldFrame();
       RigidBodyTransform sensorToGround = cameraFrame.getTransformToDesiredFrame(cameraZUpFrame);
@@ -109,7 +122,7 @@ public class RapidHeightMapManager
       }
 
       deviceDepthImage.upload(hostDepthImage);
-
+      bodyCollisionFilteredHeightMap.update(robotCollidables, cameraZUpFrame, depthImageIntrinsics);
       if (resetHeightMapRequested.poll())
       {
          rapidHeightMapExtractor.reset();

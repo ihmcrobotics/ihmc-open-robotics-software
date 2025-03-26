@@ -72,7 +72,9 @@ public class RapidHeightMapUpdateThread extends RepeatingTaskThread
                                                          rightFootFrame,
                                                          controllerFootstepQueueMonitor,
                                                          depthImage.getIntrinsicsCopy(),
-                                                         heightMapParameters);
+                                                         heightMapParameters,sensorFrame);
+
+
          }
 
          // Update height map
