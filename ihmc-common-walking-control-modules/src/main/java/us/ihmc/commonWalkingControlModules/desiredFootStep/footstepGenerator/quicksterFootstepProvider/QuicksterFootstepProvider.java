@@ -38,8 +38,6 @@ public class QuicksterFootstepProvider
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
-   private final QuicksterFootstepProviderParameters parameters;
-
    private final String variableNameSuffix = "QFP";
 
    private final FullHumanoidRobotModel robotModel;
@@ -47,6 +45,11 @@ public class QuicksterFootstepProvider
 
    private final double updateDT;
    private final double gravity = 9.81;
+
+   // Parameters
+   private final QuicksterFootstepProviderParameters parameters;
+   private boolean useAlternateTransferDuration = false;
+   private double alternateTransferDuration = 0.01;
 
    // Estimates
    private final QuicksterFootstepProviderEstimates estimates;
@@ -233,7 +236,8 @@ public class QuicksterFootstepProvider
 
    private void updateEstimates()
    {
-      desiredPelvisOrientation.appendYawRotation(desiredTurningVelocity.getDoubleValue() * updateDT);
+      initialize();
+      desiredPelvisOrientation.appendYawRotation(desiredTurningVelocity.getDoubleValue() * 10 * updateDT);
 
       inDoubleSupport.set(footStates.get(RobotSide.LEFT).getEnumValue() == FootState.SUPPORT &&
                           footStates.get(RobotSide.RIGHT).getEnumValue() == FootState.SUPPORT);
@@ -337,10 +341,11 @@ public class QuicksterFootstepProvider
                                                          desiredTurningVelocity.getDoubleValue(),
                                                          updateDT);
 
+         tempCurrentCoMPose.changeFrame(tempControlFrame.getParent());
+         tempControlFrame.setPoseAndUpdate(tempCurrentCoMPose);
+
          desiredTouchdownPose.getPosition().set(desiredTouchdownPositionToPack);
          desiredTouchdownPose.getOrientation().setFromReferenceFrame(tempControlFrame);
-
-         tempControlFrame.setPoseAndUpdate(tempCurrentCoMPose);
 
          tempCurrentStanceFootPosition.setMatchingFrame(desiredTouchdownPositionToPack, 0.0);
          if (!useFutureCoM)
@@ -350,8 +355,8 @@ public class QuicksterFootstepProvider
          }
       }
 
-//      if (!haveWeMadeIt)
-//         LogTools.error("FUCK FUCK FUCK FUCK SOMETHING IS WRONG FUCKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK");
+      if (!haveWeMadeIt)
+         LogTools.error("FUCK FUCK FUCK FUCK SOMETHING IS WRONG FUCKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK");
       desiredTouchdownPosition3DInWorld.get(currentSwingSide).setMatchingFrame(desiredTouchdownPositionsList.get(currentSwingSide).get(0), 0.0);
    }
 
@@ -535,7 +540,20 @@ public class QuicksterFootstepProvider
 
    public double getTransferDuration(RobotSide swingSide)
    {
-      return parameters.getSwingDuration(swingSide).getDoubleValue() * parameters.getDoubleSupportFraction(swingSide).getDoubleValue();
+      if (useAlternateTransferDuration)
+         return alternateTransferDuration;
+      else
+         return parameters.getSwingDuration(swingSide).getDoubleValue() * parameters.getDoubleSupportFraction(swingSide).getDoubleValue();
+   }
+
+   public void setAlternateTransferDuration(double alternateTransferDuration)
+   {
+      this.alternateTransferDuration = alternateTransferDuration;
+   }
+
+   public void setUseAlternateTransferDuration(boolean useAlternateTransferDuration)
+   {
+      this.useAlternateTransferDuration = useAlternateTransferDuration;
    }
 
    public double getStepDuration(RobotSide swingSide)

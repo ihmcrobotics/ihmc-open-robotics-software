@@ -163,6 +163,7 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
    private final YoEnum<ContinuousStepGeneratorMode> currentCSGMode = new YoEnum<>("currentCSGMode", registry, ContinuousStepGeneratorMode.class);
    private final YoEnum<ContinuousStepGeneratorMode> requestedCSGMode = new YoEnum<>("requestedCSGMode", registry, ContinuousStepGeneratorMode.class);
    private final OptionalFactoryField<QuicksterFootstepProvider> quicksterFootstepProvider = new OptionalFactoryField<>("QuicksterFootstepProviderField");
+   private boolean useQFPParameters = false;
 
    /**
     * Creates a new step generator, its {@code YoVariable}s will not be attached to any registry.
@@ -290,9 +291,21 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
       // Set footstep parameters
       if (currentCSGMode.getEnumValue() == ContinuousStepGeneratorMode.QFP && quicksterFootstepProvider.hasValue())
       {
+         if (useQFPParameters)
+         {
+            quicksterFootstepProvider.get().setUseAlternateTransferDuration(false);
+            footstepDataListMessage.setDefaultTransferDuration(quicksterFootstepProvider.get().getTransferDuration(swingSide));
+            footstepDataListMessage.setFinalTransferDuration(quicksterFootstepProvider.get().getTransferDuration(swingSide));
+         }
+         else
+         {
+            quicksterFootstepProvider.get().setUseAlternateTransferDuration(true);
+            quicksterFootstepProvider.get().setAlternateTransferDuration(parameters.getTransferDuration());
+            footstepDataListMessage.setDefaultTransferDuration(parameters.getTransferDuration());
+            footstepDataListMessage.setFinalTransferDuration(parameters.getTransferDuration());
+         }
+
          footstepDataListMessage.setDefaultSwingDuration(quicksterFootstepProvider.get().getSwingDuration(swingSide));
-         footstepDataListMessage.setDefaultTransferDuration(quicksterFootstepProvider.get().getTransferDuration(swingSide));
-         footstepDataListMessage.setFinalTransferDuration(quicksterFootstepProvider.get().getTransferDuration(swingSide));
          footstepDataListMessage.setAreFootstepsAdjustable(false);
          footstepDataListMessage.setOffsetFootstepsWithExecutionError(false);
       }
@@ -674,6 +687,8 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
    {
       latestStatusReceived.setValue(FootstepStatus.STARTED);
       currentSupportSide.set(robotSide.getOppositeSide());
+
+      useQFPParameters = currentCSGMode.getEnumValue().equals(ContinuousStepGeneratorMode.QFP);
    }
 
    /**
