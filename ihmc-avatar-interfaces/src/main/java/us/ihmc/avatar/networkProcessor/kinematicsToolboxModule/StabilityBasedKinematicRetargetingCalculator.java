@@ -60,6 +60,7 @@ public class StabilityBasedKinematicRetargetingCalculator
    private static final double MAX_CHEST_ORIENTATION_OFFSET = Math.toRadians(35.0);
    private static final double MAX_PELVIS_ORIENTATION_OFFSET = Math.toRadians(35.0);
 
+   private static final boolean SNAP_TO_REGION = false;
    public static boolean OVERRIDE_MESSAGE = false;
    public static final boolean ENABLE_POSTURE_OBJECTIVE = false;
    public static final boolean ENABLE_CONTACT_OBJECTIVE = false;
@@ -446,7 +447,7 @@ public class StabilityBasedKinematicRetargetingCalculator
                integratedContactPointAdjustment.scale(maxAdjustmentSquared / adjustmentSquared);
             }
 
-            if (!regionPolygon.isEmpty())
+            if (SNAP_TO_REGION && !regionPolygon.isEmpty())
             { // Snap to region
                tempPoint.changeFrame(regionFrame);
                tempPoint2D.set(tempPoint);
