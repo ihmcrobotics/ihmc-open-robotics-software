@@ -58,9 +58,7 @@ public class RDXVRFootstepPlacement
    private final ArrayList<RDXVRFootstep> handPlacedFootsteps = new ArrayList<>();
 
    private final CUDALocalFootstepOptimizer footstepOptimizer;
-   private final RDXFootstepOptimizer cpuOptimizer;
    private RDXVRFootstep footstepBeingExternallyPlaced;
-   private RDXVRFootstep gpuFootstepBeingExternallyPlaced;
    private final FootstepSnapAndWiggler snapper;
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final FramePose3D poseForPlacement = new FramePose3D();
@@ -103,8 +101,6 @@ public class RDXVRFootstepPlacement
       SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
       footstepOptimizer = new CUDALocalFootstepOptimizer((float) steppingParameters.getFootLength(),
                                                          (float) steppingParameters.getFootWidth());
-      cpuOptimizer = new RDXFootstepOptimizer(steppingParameters.getFootLength(),
-                                              steppingParameters.getFootWidth());
    }
 
    public void setLocomotionParameters(LocomotionParameters locomotionParameters)
@@ -194,7 +190,6 @@ public class RDXVRFootstepPlacement
    public void createNewFootstep(RobotSide side)
    {
       footstepBeingExternallyPlaced = new RDXVRFootstep(side, footstepModels.get(side), footstepIndex++);
-      gpuFootstepBeingExternallyPlaced = new RDXVRFootstep(side.getOppositeSide(), footstepModels.get(side.getOppositeSide()), footstepIndex);
    }
 
    public boolean setFootstepPose(FramePose3DReadOnly pose, boolean lastAdjustment)
@@ -213,16 +208,9 @@ public class RDXVRFootstepPlacement
                gpuAdaptedPose.getPosition().setZ(height);
                if (USE_STEPPABLE_REGION_ADAPTATION && lastAdjustment)
                {
-                  double timeStart = System.nanoTime();
-                  adaptedPose = cpuOptimizer.compute(latestHeightMapData, adaptedPose);
-                  LogTools.error("CPU {}", (System.nanoTime()-timeStart)/1e9);
-                  timeStart = System.nanoTime();
-                  gpuAdaptedPose = footstepOptimizer.compute(latestHeightMapData, gpuAdaptedPose);
-                  LogTools.error("GPU {}", (System.nanoTime()-timeStart)/1e9);
+                  adaptedPose = footstepOptimizer.compute(latestHeightMapData, adaptedPose);
                }
                footstepBeingExternallyPlaced.setPose(adaptedPose);
-               gpuAdaptedPose.setX(gpuAdaptedPose.getTranslationX() + 0.02);
-               gpuFootstepBeingExternallyPlaced.setPose(gpuAdaptedPose);
             }
             else
             {
@@ -301,7 +289,6 @@ public class RDXVRFootstepPlacement
       if (footstepBeingExternallyPlaced != null)
       {
          footstepBeingExternallyPlaced.getModelInstance().getRenderables(renderables, pool);
-         gpuFootstepBeingExternallyPlaced.getModelInstance().getRenderables(renderables, pool);
       }
    }
 
@@ -330,7 +317,6 @@ public class RDXVRFootstepPlacement
    {
       footstepIndex = 0;
       footstepBeingExternallyPlaced = null;
-      gpuFootstepBeingExternallyPlaced = null;
       latestHeightMapData = null;
       handPlacedFootsteps.clear();
    }
