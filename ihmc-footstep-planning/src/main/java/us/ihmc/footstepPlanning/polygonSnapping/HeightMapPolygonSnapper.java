@@ -23,8 +23,6 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import java.util.ArrayList;
 import java.util.List;
 
-import static us.ihmc.footstepPlanning.polygonSnapping.PolygonSnapperTools.setTranslationSettingZAndPreservingXAndY;
-
 public class HeightMapPolygonSnapper
 {
    private final List<Point3D> footPointsInEnvironment = new ArrayList<>();
@@ -174,7 +172,7 @@ public class HeightMapPolygonSnapper
          double height = terrainMapData.getSnappedHeightLocal(rIndex, cIndex);
          UnitVector3DReadOnly normal = terrainMapData.getNormalLocal(rIndex, cIndex);
 
-         // The surface normal must point up.
+         // The surface normal must point up. If it does not, recreate it so that it does.
          if (normal.getZ() < 0.0)
          {
             UnitVector3D tempNormal = new UnitVector3D(normal);
@@ -182,8 +180,9 @@ public class HeightMapPolygonSnapper
             normal = tempNormal;
          }
 
-         transformToReturn = PolygonSnapperTools.createTransformToMatchSurfaceNormalPreserveX(normal);
-         PolygonSnapperTools.setTranslationSettingZAndPreservingXAndY(new Point3D(centroid.getX(), centroid.getY(), height), transformToReturn);
+         transformToReturn = new RigidBodyTransform();
+         PolygonSnapperTools.constructRotationToMatchSurfaceNormal(normal, transformToReturn.getRotation());
+         PolygonSnapperTools.setTranslationToAchieveZAndPreserveXAndY(centroid, 0.0, height, transformToReturn.getRotation(), transformToReturn.getTranslation());
 
          // TODO need to compute the snapped polygon
          snappedPolygon.set(polygonToSnap);
@@ -281,8 +280,9 @@ public class HeightMapPolygonSnapper
          double height = bestFitPlane.getZOnPlane(centroid.getX(), centroid.getY());
 
          // compute the actual snap transform.
-         transformToReturn = PolygonSnapperTools.createTransformToMatchSurfaceNormalPreserveX(bestFitPlane.getNormal());
-         setTranslationSettingZAndPreservingXAndY(new Point3D(centroid.getX(), centroid.getY(), height), transformToReturn);
+         transformToReturn = new RigidBodyTransform();
+         PolygonSnapperTools.constructRotationToMatchSurfaceNormal(bestFitPlane.getNormal(), transformToReturn.getRotation());
+         PolygonSnapperTools.setTranslationToAchieveZAndPreserveXAndY(centroid, 0.0, height, transformToReturn.getRotation(), transformToReturn.getTranslation());
       }
 
       return transformToReturn;

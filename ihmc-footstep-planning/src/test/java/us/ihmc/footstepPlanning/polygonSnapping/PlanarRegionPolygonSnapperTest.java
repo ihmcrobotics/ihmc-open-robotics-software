@@ -2,12 +2,14 @@ package us.ihmc.footstepPlanning.polygonSnapping;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.MutationTestFacilitator;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -96,10 +98,42 @@ public class PlanarRegionPolygonSnapperTest
          snappedFootPose.getTranslation().setZ(0.0);
          snappedFootPose.applyTransform(transformToModify);
 
-         assertEquals(highestVertex.getZ(), snappedFootPose.getZ(), 1e-5);
-         assertEquals(highestVertex.getX(), snappedFootPose.getX(), 1e-5);
-         assertEquals(highestVertex.getY(), snappedFootPose.getY(), 1e-5);
+         EuclidCoreTestTools.assertEquals(highestVertex, snappedFootPose.getTranslation(), 1e-5);
+      }
+   }
 
+   @Test
+   public void testSetTranslationToAchieveZAndPreserveXAndY()
+   {
+      Random random = new Random(1738L);
+      for (int i = 0; i < iters; i++)
+      {
+         Point3D originalVertex = EuclidCoreRandomTools.nextPoint3D(random);
+         Point3D highestVertex = new Point3D(originalVertex);
+         highestVertex.setZ(RandomNumbers.nextDouble(random, 1.0));
+
+         // Initialize this to a random value to ensure things get set correctly.
+         RigidBodyTransform transformToModify = EuclidCoreRandomTools.nextRigidBodyTransform(random);
+
+         // Compute what the expected transform is.
+         RigidBodyTransform transformExpected = new RigidBodyTransform(transformToModify);
+
+         Vector3D newTranslation = new Vector3D(originalVertex);
+         transformExpected.transform(newTranslation);
+         newTranslation.scale(-1.0);
+         newTranslation.add(highestVertex);
+
+         transformExpected.getTranslation().set(newTranslation);
+
+         PolygonSnapperTools.setTranslationToAchieveZAndPreserveXAndY(new Point2D(originalVertex), originalVertex.getZ(), highestVertex.getZ(), transformToModify.getRotation(), transformToModify.getTranslation());
+
+         EuclidCoreTestTools.assertEquals(transformExpected, transformToModify, 1e-5);
+
+         // If X and Y are preserved, it should be at the original value.
+         Pose3D snappedFootPose = new Pose3D(originalVertex, new Quaternion());
+         snappedFootPose.applyTransform(transformToModify);
+
+         EuclidCoreTestTools.assertEquals(highestVertex, snappedFootPose.getTranslation(), 1e-5);
       }
    }
 

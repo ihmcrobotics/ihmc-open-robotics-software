@@ -1,11 +1,11 @@
 package us.ihmc.footstepPlanning.polygonSnapping;
 
-import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -23,11 +23,11 @@ public class PolygonSnapperTools
    /**
     * This computes the equivalent rotation matrix to match the provided surface normal. That is, a plane with the orientation of the rotation
     * {@param rotationTransformToPack} will have the same normal as {@param surfaceNormal}.
-    *
+    * <p>
     * The provided surface normal does not necessarily have to be a unit vector.
     *
-    * @param surfaceNormal
-    * @param rotationTransformToPack
+    * @param surfaceNormal           desired surface normal to achieve. Not modified.
+    * @param rotationTransformToPack Rotation matrix to store the result. Modified.
     */
    public static void constructRotationToMatchSurfaceNormal(Vector3DReadOnly surfaceNormal, RotationMatrixBasics rotationTransformToPack)
    {
@@ -41,7 +41,7 @@ public class PolygonSnapperTools
       double surfaceNormalY = surfaceNormal.getY() * scale;
       double surfaceNormalZ = surfaceNormal.getZ() * scale;
 
-      // xAxis = yAxis cross SurfaceNormal
+      // xAxis = yAxisInWorld cross SurfaceNormal. yAxisInWorld = (0, 1, 0)
       double xAxisX = surfaceNormalZ;
       double xAxisY = 0.0;
       double xAxisZ = -surfaceNormalX;
@@ -70,7 +70,35 @@ public class PolygonSnapperTools
       setTranslationSettingZAndPreservingXAndY(highestVertex, transformToReturn.getRotation(), transformToReturn.getTranslation());
    }
 
+   /**
+    * Computes the translation transform that will transform a point from (X, Y, 0) to the desired point at {@param highestVertex}, where (X, Y) are the same,
+    * after also applying the provided rotation transform {@param rotationTransform}.
+    */
    private static void setTranslationSettingZAndPreservingXAndY(Point3DReadOnly highestVertex,
+                                                                Orientation3DReadOnly rotationTransform,
+                                                                Tuple3DBasics translationTransformToPack)
+   {
+      setTranslationToAchieveZAndPreserveXAndY(highestVertex.getX(), highestVertex.getY(), 0.0, highestVertex.getZ(), rotationTransform, translationTransformToPack);
+   }
+
+   public static void setTranslationToAchieveZAndPreserveXAndY(Point2DReadOnly vertex,
+                                                               double unsnappedHeight,
+                                                               double desiredSnappedHeight,
+                                                               Orientation3DReadOnly rotationTransform,
+                                                               Tuple3DBasics translationTransformToPack)
+   {
+      setTranslationToAchieveZAndPreserveXAndY(vertex.getX(),
+                                               vertex.getY(),
+                                               unsnappedHeight,
+                                               desiredSnappedHeight,
+                                               rotationTransform,
+                                               translationTransformToPack);
+   }
+
+   public static void setTranslationToAchieveZAndPreserveXAndY(double vertexX,
+                                                               double vertexY,
+                                                               double unsnappedHeight,
+                                                               double desiredSnappedHeight,
                                                                Orientation3DReadOnly rotationTransform,
                                                                Tuple3DBasics translationTransformToPack)
    {
@@ -78,10 +106,10 @@ public class PolygonSnapperTools
       // before the rotation is applied to achieve the desired height. Since we have the location of the point that we want to achieve at the end,
 
       // The initial height of the point being snapped will always start at zero height. So first, apply the rotation to that initial translation such
-      translationTransformToPack.set(-highestVertex.getX(), -highestVertex.getY(), 0.0);
+      translationTransformToPack.set(-vertexX, -vertexY, -unsnappedHeight);
       rotationTransform.transform(translationTransformToPack);
 
       // Now add the desired vertex, such that the translation is achieved. This is the same as appending
-      translationTransformToPack.add(highestVertex);
+      translationTransformToPack.add(vertexX, vertexY, desiredSnappedHeight);
    }
 }
