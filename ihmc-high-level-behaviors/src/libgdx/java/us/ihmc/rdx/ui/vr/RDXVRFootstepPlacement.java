@@ -18,13 +18,10 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapDataReadOnly;
-import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.gpuHeightMap.CUDALocalFootstepOptimizer;
+import us.ihmc.perception.gpuHeightMap.CUDAFootstepOptimizer;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -38,9 +35,7 @@ import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 import java.util.ArrayList;
-import java.util.Objects;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 public class RDXVRFootstepPlacement
 {
@@ -57,7 +52,7 @@ public class RDXVRFootstepPlacement
    private final SideDependentList<ModelInstance> footstepsBeingHandPlaced = new SideDependentList<>();
    private final ArrayList<RDXVRFootstep> handPlacedFootsteps = new ArrayList<>();
 
-   private final CUDALocalFootstepOptimizer footstepOptimizer;
+   private final CUDAFootstepOptimizer footstepOptimizer;
    private RDXVRFootstep footstepBeingExternallyPlaced;
    private final FootstepSnapAndWiggler snapper;
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
@@ -99,8 +94,8 @@ public class RDXVRFootstepPlacement
 
       WalkingControllerParameters walkingControllerParameters = syncedRobot.getRobotModel().getWalkingControllerParameters();
       SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
-      footstepOptimizer = new CUDALocalFootstepOptimizer((float) steppingParameters.getFootLength(),
-                                                         (float) steppingParameters.getFootWidth());
+      footstepOptimizer = new CUDAFootstepOptimizer((float) steppingParameters.getFootLength(),
+                                                    (float) steppingParameters.getFootWidth());
    }
 
    public void setLocomotionParameters(LocomotionParameters locomotionParameters)

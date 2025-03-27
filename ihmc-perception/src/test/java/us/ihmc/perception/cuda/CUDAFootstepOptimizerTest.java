@@ -2,18 +2,17 @@ package us.ihmc.perception.cuda;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.log.LogTools;
-import us.ihmc.perception.gpuHeightMap.CUDALocalFootstepOptimizer;
+import us.ihmc.perception.gpuHeightMap.CUDAFootstepOptimizer;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class CUDALocalFootstepOptimizerTest
+public class CUDAFootstepOptimizerTest
 {
    @Test
-   public void findMinimumCost() throws Exception
+   public void findMinimumCost()
    {
-      CUDALocalFootstepOptimizer footstepOptimizer = new CUDALocalFootstepOptimizer(0.5f,0.25f);
+      CUDAFootstepOptimizer footstepOptimizer = new CUDAFootstepOptimizer(0.5f, 0.25f);
 
       float[] costs = new float[10000];
       float[] solutions = new float[30000];
@@ -75,10 +74,9 @@ public class CUDALocalFootstepOptimizerTest
    }
 
    @Test
-   public void computeCosts() throws Exception
+   public void computeCosts()
    {
-      CUDALocalFootstepOptimizer footstepOptimizer = new CUDALocalFootstepOptimizer(0.5f,0.25f);
+      CUDAFootstepOptimizer footstepOptimizer = new CUDAFootstepOptimizer(0.5f,0.25f);
       footstepOptimizer.compute(new HeightMapData(0.03, 5.0, 0.0, 0.0), new FramePose3D());
-
    }
 }
