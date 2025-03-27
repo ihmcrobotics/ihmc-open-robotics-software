@@ -312,7 +312,7 @@ public class PerceptionMessageTools
 
    public static void unpackMessage(HeightMapMessage heightMapMessage, TerrainMapData terrainMapData)
    {
-      terrainMapData.getTerrainMapCenter().set(heightMapMessage.getGridCenterX(), heightMapMessage.getGridCenterY());
+      terrainMapData.setSensorOrigin(heightMapMessage.getGridCenterX(), heightMapMessage.getGridCenterY());
       int centerIndex = HeightMapTools.computeCenterIndex(heightMapMessage.getGridSizeXy(), heightMapMessage.getXyResolution());
 
       for (int i = 0; i < heightMapMessage.getHeights().size(); i++)
