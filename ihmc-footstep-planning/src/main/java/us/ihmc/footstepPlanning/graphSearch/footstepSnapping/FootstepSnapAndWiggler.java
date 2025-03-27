@@ -3,7 +3,9 @@ package us.ihmc.footstepPlanning.graphSearch.footstepSnapping;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.StepConstraintPolygonTools;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.WiggleParameters;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
@@ -15,8 +17,10 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
 public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
 {
@@ -91,6 +95,7 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
          else if (snapData.getWiggleTransformInWorld().containsNaN() && computeWiggleTransform)
          {
             computeWiggleTransform(footstep, stanceStep, snapData);
+            updateTheCroppedFoothold(footstep);
          }
 
          return snapData;
@@ -173,6 +178,48 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
          }
       }
    }
+
+   protected void updateTheCroppedFoothold(DiscreteFootstep footstepToCrop)
+   {
+      List<Point3DBasics> footPointsInEnvironment = new ArrayList<>();
+      FootstepSnapData snapData = footstepToCrop.getSnapData();
+
+
+      ConvexPolygon2D convexPolygon2D = new ConvexPolygon2D(snapData.getCroppedFoothold());
+      if (convexPolygon2D.getNumberOfVertices() != 4)
+      {
+         convexPolygon2D.set(footPolygonsInSoleFrame.get(footstepToCrop.getRobotSide()));
+      }
+
+      RigidBodyTransform totalTransform = new RigidBodyTransform();
+      RigidBodyTransform snapAndWiggleTransform = new RigidBodyTransform();
+
+      DiscreteFootstepTools.getStepTransform(footstepToCrop, totalTransform);
+      snapData.packSnapAndWiggleTransform(snapAndWiggleTransform);
+      // FIXME this may need to be a multiply, not a pre-multiply.
+      totalTransform.preMultiply(snapAndWiggleTransform);
+
+      // Transform the foot polygon to its position in the world after the snap.
+      convexPolygon2D.applyTransform(totalTransform);
+
+      heightMapSnapper.computeFootPointsInTheEnvironment(convexPolygon2D,
+                                                         environmentHandler.getHeightMap(),
+                                                         environmentHandler.getTerrainMapData(),
+                                                         parameters.getHeightMapSnapThreshold(),
+                                                         parameters.getMinSurfaceIncline(),
+                                                         -Double.MAX_VALUE,
+                                                         footPointsInEnvironment);
+
+      ConvexPolygon2D croppedFoothold = snapData.getCroppedFoothold();
+      croppedFoothold.set(Vertex3DSupplier.asVertex3DSupplier(footPointsInEnvironment));
+      croppedFoothold.applyInverseTransform(totalTransform);
+
+      if (croppedFoothold.getNumberOfVertices() > 4)
+      {
+         throw new RuntimeException("We're not set up to handle this, we need to down-sample the polygon");
+      }
+   }
+
 
    private final RigidBodyTransform transform1 = new RigidBodyTransform();
    private final RigidBodyTransform transform2 = new RigidBodyTransform();

@@ -34,6 +34,7 @@ public class DiscreteFootstepTools
       getStepTransform(step.getX(), step.getY(), step.getYaw(), stepToWorldTransformToPack);
    }
 
+
    /**
     * Computes a step-to-world RigidBodyTransform from the step's x, y and yaw. This transform
     * will always have no z translation, pitch and roll.

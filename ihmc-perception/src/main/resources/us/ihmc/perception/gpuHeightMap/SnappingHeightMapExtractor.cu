@@ -204,7 +204,11 @@ __global__ void computeSnappedValuesKernel(unsigned short *globalMap, size_t pit
     normal = normalize(normal);
     // If the normal points down, we need to flip it.
     if (normal.z < 0.0)
-        normal = -normal;
+    {
+        normal.x = -normal.x;
+        normal.y = -normal.y;
+        normal.z = -normal.z;
+    }
 
     // TODO include this?
     // snap_height = getZOnPlane(foot_position, (float3) (x_solution, y_solution, z_solution), normal);

@@ -283,6 +283,11 @@ public class AStarFootstepPlanner
                                                                                       0.8 * request.getStatusPublishPeriod());
    }
 
+   /**
+    * This method does two things. It both publishes the current status of the planner, and also performs the wiggle step when computing the snap again.
+    * @param request
+    * @param outputToPack
+    */
    private void reportStatus(FootstepPlannerRequest request, FootstepPlannerOutput outputToPack)
    {
       outputToPack.setFootstepPlanningResult(result);
