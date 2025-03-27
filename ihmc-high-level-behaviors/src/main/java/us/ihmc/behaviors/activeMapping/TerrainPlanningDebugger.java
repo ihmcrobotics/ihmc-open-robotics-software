@@ -85,8 +85,8 @@ public class TerrainPlanningDebugger
          return;
 
       this.request = request;
-      this.offsetX = (int) (request.getTerrainMapData().getHeightMapCenter().getX() * parameters.getNodesPerMeter());
-      this.offsetY = (int) (request.getTerrainMapData().getHeightMapCenter().getY() * parameters.getNodesPerMeter());
+      this.offsetX = (int) (request.getTerrainMapData().getTerrainMapCenter().getX() * parameters.getNodesPerMeter());
+      this.offsetY = (int) (request.getTerrainMapData().getTerrainMapCenter().getY() * parameters.getNodesPerMeter());
       refresh(request.getTerrainMapData());
    }
 
@@ -95,8 +95,8 @@ public class TerrainPlanningDebugger
       if (!enabled)
          return;
 
-      this.offsetX = (int) (terrainMapData.getHeightMapCenter().getX() * parameters.getNodesPerMeter());
-      this.offsetY = (int) (terrainMapData.getHeightMapCenter().getY() * parameters.getNodesPerMeter());
+      this.offsetX = (int) (terrainMapData.getTerrainMapCenter().getX() * parameters.getNodesPerMeter());
+      this.offsetY = (int) (terrainMapData.getTerrainMapCenter().getY() * parameters.getNodesPerMeter());
 
       PerceptionDebugTools.convertDepthCopyToColor(terrainMapData.getHeightMap().clone(), heightMapColorImage);
       opencv_imgproc.resize(heightMapColorImage, heightMapColorImage, new Size(scaledWidth, scaledHeight));

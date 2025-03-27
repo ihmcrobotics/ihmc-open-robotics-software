@@ -81,8 +81,29 @@ public class PerceptionMessageTools
 
    public static void packImageMessageData(ImageMessage imageMessage, ByteBuffer dataBuffer)
    {
-      imageMessage.getData().resetQuick();
-      imageMessage.getData().getBuffer().put(dataBuffer);
+      packDataArray(imageMessage.getData(), dataBuffer);
+   }
+
+   public static void packDataArray(IDLSequence.Byte dataToPack, ByteBuffer dataBuffer)
+   {
+      dataToPack.resetQuick();
+      dataToPack.getBuffer().put(dataBuffer);
+   }
+
+   public static void packDataArray(IDLSequence.Byte dataToPack, BytePointer dataPointer)
+   {
+      packDataArray(dataToPack, dataPointer.asBuffer());
+   }
+
+   public static void packImageMessageData(ImageMessage imageMessage, Mat mat)
+   {
+      packDataArray(imageMessage.getData(), mat);
+   }
+
+   public static void packDataArray(IDLSequence.Byte dataToPack, Mat mat)
+   {
+      long size = mat.step() * mat.rows();
+      packDataArray(dataToPack, mat.data().limit(size).asBuffer());
    }
 
    public static void packImageMessageData(ImageMessage imageMessage, BytePointer dataPointer)
@@ -291,7 +312,7 @@ public class PerceptionMessageTools
 
    public static void unpackMessage(HeightMapMessage heightMapMessage, TerrainMapData terrainMapData)
    {
-      terrainMapData.getHeightMapCenter().set(heightMapMessage.getGridCenterX(), heightMapMessage.getGridCenterY());
+      terrainMapData.getTerrainMapCenter().set(heightMapMessage.getGridCenterX(), heightMapMessage.getGridCenterY());
       int centerIndex = HeightMapTools.computeCenterIndex(heightMapMessage.getGridSizeXy(), heightMapMessage.getXyResolution());
 
       for (int i = 0; i < heightMapMessage.getHeights().size(); i++)
