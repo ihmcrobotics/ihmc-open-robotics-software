@@ -56,7 +56,10 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       super(title);
 
       this.heightMapParameters = heightMapParameters;
-      terrainMapData = new TerrainMapData(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), heightMapParameters);
+      terrainMapData = new TerrainMapData(heightMapParameters.getCropWindowSize(),
+                                          heightMapParameters.getCropWindowSize(),
+                                          heightMapParameters.getHeightScaleFactor(),
+                                          heightMapParameters.getHeightOffset());
       executorService = MissingThreadTools.newSingleThreadExecutor("Height Map Visualizer Subscription", true, 1);
    }
 

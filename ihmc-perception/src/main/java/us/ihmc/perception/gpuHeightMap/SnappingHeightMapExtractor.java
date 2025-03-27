@@ -126,15 +126,15 @@ public class SnappingHeightMapExtractor
       {
          Mat cpuSteppabilityMap = new Mat();
          steppabilityImage.download(cpuSteppabilityMap);
-         terrainMapData.setSteppabilityImage(cpuSteppabilityMap);
+         terrainMapData.setSteppabilityMat(cpuSteppabilityMap);
 
          Mat cpuSnapHeightMap = new Mat();
          snapHeightImage.download(cpuSnapHeightMap);
-         terrainMapData.setSnapHeightImage(cpuSnapHeightMap);
+         terrainMapData.setSnapHeightMat(cpuSnapHeightMap);
 
          Mat cpuSnapNormalXMap = new Mat();
          snapNormalXImage.download(cpuSnapNormalXMap);
-         terrainMapData.setSnapNormalXImage(cpuSnapNormalXMap);
+         terrainMapData.setSnapNormalXMat(cpuSnapNormalXMap);
 
          Mat cpuSnapNormalYMap = new Mat();
          snapNormalYImage.download(cpuSnapNormalYMap);
@@ -142,11 +142,11 @@ public class SnappingHeightMapExtractor
 
          Mat cpuSnapNormalZMap = new Mat();
          snapNormalZImage.download(cpuSnapNormalZMap);
-         terrainMapData.setSnapNormalZImage(cpuSnapNormalZMap);
+         terrainMapData.setSnapNormalZMat(cpuSnapNormalZMap);
 
          Mat cpuSnappedAreaFractionMap = new Mat();
          snappedAreaFractionImage.download(cpuSnappedAreaFractionMap);
-         terrainMapData.setSnappedAreaFractionImage(cpuSnappedAreaFractionMap);
+         terrainMapData.setSnappedAreaFractionMat(cpuSnappedAreaFractionMap);
       }
    }
 

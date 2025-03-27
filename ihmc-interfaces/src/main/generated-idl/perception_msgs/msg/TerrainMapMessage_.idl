@@ -41,6 +41,11 @@ module perception_msgs
          */
         double height_scale_factor;
         double height_scale_offset;
+        boolean has_height_map_data;
+        boolean has_snapped_height_data;
+        boolean has_snapped_normal_data;
+        boolean has_snapped_area_data;
+        boolean has_steppability_data;
         /**
          * The raw data for the raw heights, which are stored as shorts.
          */
@@ -65,6 +70,10 @@ module perception_msgs
          * The raw data for the snapped support area, which are stored as chars.
          */
         sequence<octet, 250000> snapped_area_data;
+        /**
+         * The raw data for the snapped support area, which are stored as chars.
+         */
+        sequence<octet, 250000> steppability_data;
       };
     };
   };

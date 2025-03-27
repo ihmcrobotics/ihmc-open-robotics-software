@@ -22,6 +22,12 @@ float64 map_center_y
 float64 height_scale_factor
 float64 height_scale_offset
 
+bool has_height_map_data false
+bool has_snapped_height_data false
+bool has_snapped_normal_data false
+bool has_snapped_area_data false
+bool has_steppability_data false
+
 # The raw data for the raw heights, which are stored as shorts.
 byte[<=500000] height_map_data
 # The raw data for the snapped heights, which are stored as shorts.
@@ -34,3 +40,5 @@ byte[<=250000] snapped_normal_y_data
 byte[<=250000] snapped_normal_z_data
 # The raw data for the snapped support area, which are stored as chars.
 byte[<=250000] snapped_area_data
+# The raw data for the snapped support area, which are stored as chars.
+byte[<=250000] steppability_data

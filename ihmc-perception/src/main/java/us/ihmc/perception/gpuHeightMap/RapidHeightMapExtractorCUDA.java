@@ -114,7 +114,10 @@ public class RapidHeightMapExtractorCUDA
       URL mathUtilsHeaderPath = getClass().getResource("/us/ihmc/perception/cuda/MathUtils.cuh");
       URL kernelPath = getClass().getResource("RapidHeightMapExtractor.cu");
 
-      terrainMapData = new TerrainMapData(heightMapParameters.getTerrainObjectSize(), heightMapParameters.getTerrainObjectSize(), heightMapParameters);
+      terrainMapData = new TerrainMapData(heightMapParameters.getTerrainObjectSize(),
+                                          heightMapParameters.getTerrainObjectSize(),
+                                          heightMapParameters.getHeightScaleFactor(),
+                                          heightMapParameters.getHeightOffset());
 
       recomputeDerivedParameters();
       // Need to initialize this after the parameters have been computed to get the right size

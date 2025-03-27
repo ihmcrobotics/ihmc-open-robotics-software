@@ -11,10 +11,6 @@ import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.perception.steppableRegions.SnapResult;
-import us.ihmc.perception.tools.PerceptionMessageTools;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
-import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
 public class TerrainMapData
 {
@@ -25,6 +21,9 @@ public class TerrainMapData
 
    private int localGridSize;
    private int cellsPerMeter = 50;
+
+   private double heightScaleFactor;
+   private double heightScaleOffset;
 
    private Mat heightMap;
    // TODO the contact map and terrain map are assumed to be null. I'm keeping them in to avoid breaking the code.
@@ -37,21 +36,27 @@ public class TerrainMapData
    private Mat snapNormalYImage;
    private Mat snapNormalZImage;
 
-   private double heightScaleFactor;
-   private double heightScaleOffset;
-
-   public TerrainMapData(int height, int width, HeightMapParameters heightMapParameters)
+   public TerrainMapData(int height, int width, double heightScaleFactor, double heightScaleOffset)
    {
-      setHeightScaleParameters(heightMapParameters.getHeightScaleFactor(), heightMapParameters.getHeightOffset());
+      setHeightScaleParameters(heightScaleFactor, heightScaleOffset);
 
       heightMap = new Mat(height, width, opencv_core.CV_16UC1);
 
-//      contactMap = new Mat(height, width, opencv_core.CV_8UC1);
+      //      contactMap = new Mat(height, width, opencv_core.CV_8UC1);
       localGridSize = height;
    }
 
-   // FIXME this copy constructor probably has a number of problems with it.
    public TerrainMapData(TerrainMapData other)
+   {
+      set(other);
+   }
+
+   public TerrainMapData(TerrainMapMessage other)
+   {
+      setFromPacket(other);
+   }
+
+   public void set(TerrainMapData other)
    {
       this.localGridSize = other.localGridSize;
       this.cellsPerMeter = other.cellsPerMeter;
@@ -61,14 +66,24 @@ public class TerrainMapData
       terrainMapCenter.set(other.terrainMapCenter);
 
       setHeightMap(other.heightMap);
-
-      setSteppabilityImage(other.steppabilityImage);
-      setSnapHeightImage(other.snapHeightImage);
-      setSnappedAreaFractionImage(other.snappedAreaFractionImage);
-      setSnapNormalXImage(other.snapNormalXImage);
+      setContactMap(other.contactMap);
+      setSteppabilityMat(other.steppabilityImage);
+      setSnapHeightMat(other.snapHeightImage);
+      setSnappedAreaFractionMat(other.snappedAreaFractionImage);
+      setSnapNormalXMat(other.snapNormalXImage);
       setSnapNormalYMat(other.snapNormalYImage);
-      setSnapNormalZImage(other.snapNormalZImage);
+      setSnapNormalZMat(other.snapNormalZImage);
    }
+
+   public boolean isEmpty()
+   {
+      if (hasHeightMap())
+         return false;
+      if (hasSnapHeight())
+         return false;
+      return !hasSteppability();
+   }
+
 
    public boolean hasHeightMap()
    {
@@ -83,6 +98,16 @@ public class TerrainMapData
    public boolean hasSnapNormal()
    {
       return snapNormalXImage != null && snapNormalYImage != null && snapNormalZImage != null;
+   }
+
+   public boolean hasSteppability()
+   {
+      return steppabilityImage != null;
+   }
+
+   public boolean hasSnappedArea()
+   {
+      return snappedAreaFractionImage != null;
    }
 
    public int getLocalXIndex(double coordinate)
@@ -276,6 +301,16 @@ public class TerrainMapData
       this.heightScaleFactor = heightScaleFactor;
    }
 
+   public double getHeightScaleOffset()
+   {
+      return heightScaleOffset;
+   }
+
+   public double getHeightScaleFactor()
+   {
+      return heightScaleFactor;
+   }
+
    public void setHeightMap(Mat heightMap)
    {
       this.heightMap = heightMap == null ? null : heightMap.clone();
@@ -286,17 +321,17 @@ public class TerrainMapData
       this.contactMap = contactMap == null ? null : contactMap.clone();
    }
 
-   public void setSteppabilityImage(Mat steppabilityImage)
+   public void setSteppabilityMat(Mat steppabilityImage)
    {
       this.steppabilityImage = steppabilityImage == null ? null : steppabilityImage.clone();
    }
 
-   public void setSnapHeightImage(Mat snapHeightImage)
+   public void setSnapHeightMat(Mat snapHeightImage)
    {
       this.snapHeightImage = snapHeightImage == null ? null : snapHeightImage.clone();
    }
 
-   public void setSnapNormalXImage(Mat snapNormalXImage)
+   public void setSnapNormalXMat(Mat snapNormalXImage)
    {
       this.snapNormalXImage = snapNormalXImage == null ? null : snapNormalXImage.clone();
    }
@@ -306,42 +341,42 @@ public class TerrainMapData
       this.snapNormalYImage = snapNormalYImage == null ? null : snapNormalYImage.clone();
    }
 
-   public void setSnapNormalZImage(Mat snapNormalZImage)
+   public void setSnapNormalZMat(Mat snapNormalZImage)
    {
       this.snapNormalZImage = snapNormalZImage == null ? null : snapNormalZImage.clone();
    }
 
-   public void setSnappedAreaFractionImage(Mat snappedAreaFractionImage)
+   public void setSnappedAreaFractionMat(Mat snappedAreaFractionImage)
    {
       this.snappedAreaFractionImage = snappedAreaFractionImage == null ? null : snappedAreaFractionImage.clone();
    }
 
-   public Mat getSteppabilityImage()
+   public Mat getSteppabilityMat()
    {
       return steppabilityImage;
    }
 
-   public Mat getSnapHeightImage()
+   public Mat getSnapHeightMat()
    {
       return snapHeightImage;
    }
 
-   public Mat getSnappedAreaFractionImage()
+   public Mat getSnappedAreaFractionMat()
    {
       return snappedAreaFractionImage;
    }
 
-   public Mat getSnapNormalXImage()
+   public Mat getSnapNormalXMat()
    {
       return snapNormalXImage;
    }
 
-   public Mat getSnapNormalYImage()
+   public Mat getSnapNormalYMat()
    {
       return snapNormalYImage;
    }
 
-   public Mat getSnapNormalZImage()
+   public Mat getSnapNormalZMat()
    {
       return snapNormalZImage;
    }
@@ -356,45 +391,65 @@ public class TerrainMapData
       heightScaleOffset = message.getHeightScaleOffset();
       heightScaleFactor = message.getHeightScaleFactor();
 
-      if (heightMap == null)
-         heightMap = new Mat(localGridSize, localGridSize, opencv_core.CV_16UC1);
-      heightMap.data(new BytePointer(message.getHeightMapData().getBuffer()));
-      if (snapHeightImage == null)
-         snapHeightImage = new Mat(localGridSize, localGridSize, opencv_core.CV_16UC1);
-      snapHeightImage.data(new BytePointer(message.getSnappedHeightData().getBuffer()));
-      if (snapNormalXImage == null)
-         snapNormalXImage = new Mat(localGridSize, localGridSize, opencv_core.CV_8UC1);
-      snapNormalXImage.data(new BytePointer(message.getSnappedNormalXData().getBuffer()));
-      if (snapNormalYImage == null)
-         snapNormalYImage = new Mat(localGridSize, localGridSize, opencv_core.CV_8UC1);
-      snapNormalYImage.data(new BytePointer(message.getSnappedNormalYData().getBuffer()));
-      if (snapNormalZImage == null)
-         snapNormalZImage = new Mat(localGridSize, localGridSize, opencv_core.CV_8UC1);
-      snapNormalZImage.data(new BytePointer(message.getSnappedNormalZData().getBuffer()));
-      if (snappedAreaFractionImage == null)
-         snappedAreaFractionImage = new Mat(localGridSize, localGridSize, opencv_core.CV_8UC1);
-      snappedAreaFractionImage.data(new BytePointer(message.getSnappedAreaData().getBuffer()));
+      if (message.getHasHeightMapData())
+      {
+         if (heightMap == null)
+            heightMap = new Mat(localGridSize, localGridSize, opencv_core.CV_16UC1);
+         heightMap.data(new BytePointer(message.getHeightMapData().getBuffer()));
+      }
+      else
+      {
+         heightMap = null;
+      }
+      if (message.getHasSnappedHeightData())
+      {
+         if (snapHeightImage == null)
+            snapHeightImage = new Mat(localGridSize, localGridSize, opencv_core.CV_16UC1);
+         snapHeightImage.data(new BytePointer(message.getSnappedHeightData().getBuffer()));
+      }
+      else
+      {
+         snapHeightImage = null;
+      }
+      if (message.getHasSnappedNormalData())
+      {
+         if (snapNormalXImage == null)
+            snapNormalXImage = new Mat(localGridSize, localGridSize, opencv_core.CV_8UC1);
+         snapNormalXImage.data(new BytePointer(message.getSnappedNormalXData().getBuffer()));
+         if (snapNormalYImage == null)
+            snapNormalYImage = new Mat(localGridSize, localGridSize, opencv_core.CV_8UC1);
+         snapNormalYImage.data(new BytePointer(message.getSnappedNormalYData().getBuffer()));
+         if (snapNormalZImage == null)
+            snapNormalZImage = new Mat(localGridSize, localGridSize, opencv_core.CV_8UC1);
+         snapNormalZImage.data(new BytePointer(message.getSnappedNormalZData().getBuffer()));
+      }
+      else
+      {
+         snapNormalXImage = null;
+         snapNormalYImage = null;
+         snapNormalZImage = null;
+      }
+      if (message.getHasSteppabilityData())
+      {
+         if (steppabilityImage == null)
+            steppabilityImage = new Mat(localGridSize, localGridSize, opencv_core.CV_8UC1);
+         steppabilityImage.data(new BytePointer(message.getSteppabilityData().getBuffer()));
+      }
+      else
+      {
+         steppabilityImage = null;
+      }
+      if (message.getHasSnappedAreaData())
+      {
+         if (snappedAreaFractionImage == null)
+            snappedAreaFractionImage = new Mat(localGridSize, localGridSize, opencv_core.CV_8UC1);
+         snappedAreaFractionImage.data(new BytePointer(message.getSnappedAreaData().getBuffer()));
+      }
+      else
+      {
+         snappedAreaFractionImage = null;
+      }
    }
 
-   public TerrainMapMessage getAsPacket()
-   {
-      TerrainMapMessage message = new TerrainMapMessage();
 
-      message.setLocalGridSize(localGridSize);
-      message.setCellsPerMeter((byte) cellsPerMeter);
-
-      message.setMapCenterX(terrainMapCenter.getX());
-      message.setMapCenterY(terrainMapCenter.getY());
-
-      message.setHeightScaleFactor(heightScaleFactor);
-      message.setHeightScaleOffset(heightScaleOffset);
-
-      PerceptionMessageTools.packDataArray(message.getHeightMapData(), heightMap);
-      PerceptionMessageTools.packDataArray(message.getSnappedHeightData(), snapHeightImage);
-      PerceptionMessageTools.packDataArray(message.getSnappedNormalXData(), snapNormalXImage);
-      PerceptionMessageTools.packDataArray(message.getSnappedNormalYData(), snapNormalYImage);
-      PerceptionMessageTools.packDataArray(message.getSnappedAreaData(), snappedAreaFractionImage);
-
-      return message;
-   }
 }

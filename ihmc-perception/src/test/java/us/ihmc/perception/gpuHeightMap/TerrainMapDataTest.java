@@ -9,7 +9,8 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 public class TerrainMapDataTest
 {
    int size = 100; // 2 m x 2 m
-   private final TerrainMapData terrainMapData = new TerrainMapData(size, size, new HeightMapParameters("GPU"));
+   private final HeightMapParameters parameters = new HeightMapParameters("GPU");
+   private final TerrainMapData terrainMapData = new TerrainMapData(size, size, parameters.getHeightScaleFactor(), parameters.getHeightOffset());
 
    @Test
    public void testTerrainMapSurfaceNormals()

@@ -22,6 +22,16 @@ float64 height_scale_factor
 
 float64 height_scale_offset
 
+bool has_height_map_data
+
+bool has_snapped_height_data
+
+bool has_snapped_normal_data
+
+bool has_snapped_area_data
+
+bool has_steppability_data
+
 # The raw data for the raw heights, which are stored as shorts.
 int8[] height_map_data
 
@@ -39,5 +49,8 @@ int8[] snapped_normal_z_data
 
 # The raw data for the snapped support area, which are stored as chars.
 int8[] snapped_area_data
+
+# The raw data for the snapped support area, which are stored as chars.
+int8[] steppability_data
 
 

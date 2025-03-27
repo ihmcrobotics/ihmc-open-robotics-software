@@ -1,8 +1,10 @@
 package us.ihmc.perception.heightMap;
 
+import perception_msgs.msg.dds.TerrainMapMessage;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
+import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
 
 import java.util.ArrayList;
@@ -82,5 +84,58 @@ public class TerrainMapTools
          planeFitter.fitPlaneToPoints(points, bestFitPlane);
          return bestFitPlane.getNormal();
       }
+   }
+
+   public static TerrainMapMessage toMessage(TerrainMapData terrainMapData)
+   {
+      TerrainMapMessage message = new TerrainMapMessage();
+
+      message.setLocalGridSize(terrainMapData.getLocalGridSize());
+      message.setCellsPerMeter((byte) terrainMapData.getCellsPerMeter());
+
+      message.setMapCenterX(terrainMapData.getTerrainMapCenter().getX());
+      message.setMapCenterY(terrainMapData.getTerrainMapCenter().getY());
+
+      message.setHeightScaleFactor(terrainMapData.getHeightScaleFactor());
+      message.setHeightScaleOffset(terrainMapData.getHeightScaleOffset());
+
+      if (terrainMapData.hasHeightMap())
+      {
+         message.setHasHeightMapData(true);
+         PerceptionMessageTools.packDataArray(message.getHeightMapData(), terrainMapData.getHeightMap());
+      }
+      if (terrainMapData.hasSteppability())
+      {
+         message.setHasSteppabilityData(true);
+         PerceptionMessageTools.packDataArray(message.getSteppabilityData(), terrainMapData.getSteppabilityMat());
+      }
+      if (terrainMapData.hasSnapHeight())
+      {
+         message.setHasSnappedHeightData(true);
+         PerceptionMessageTools.packDataArray(message.getSnappedHeightData(), terrainMapData.getSnapHeightMat());
+      }
+      if (terrainMapData.hasSnapNormal())
+      {
+         message.setHasSnappedNormalData(true);
+         PerceptionMessageTools.packDataArray(message.getSnappedNormalXData(), terrainMapData.getSnapNormalXMat());
+         PerceptionMessageTools.packDataArray(message.getSnappedNormalYData(), terrainMapData.getSnapNormalYMat());
+         PerceptionMessageTools.packDataArray(message.getSnappedNormalZData(), terrainMapData.getSnapNormalZMat());
+      }
+      if (terrainMapData.hasSnappedArea())
+      {
+         message.setHasSnappedAreaData(true);
+         PerceptionMessageTools.packDataArray(message.getSnappedAreaData(), terrainMapData.getSnappedAreaFractionMat());
+      }
+
+      return message;
+   }
+
+   public static boolean isEmpty(TerrainMapMessage message)
+   {
+      if (message.getHasHeightMapData())
+         return false;
+      if (message.getHasSnappedHeightData())
+         return false;
+      return !message.getHasSteppabilityData();
    }
 }
