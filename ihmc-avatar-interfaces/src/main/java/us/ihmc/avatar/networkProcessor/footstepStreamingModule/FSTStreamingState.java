@@ -154,7 +154,7 @@ public class FSTStreamingState implements State
          {
             robotStepDuration = latestInput.getRobotStepDuration();
             robotElapsedTimeCurrentStep = latestInput.getRobotElapsedTimeCurrentStep();
-            LogTools.info(robotElapsedTimeCurrentStep);
+
             if (robotElapsedTimeCurrentStep == 0.0)
                latestAdjustmentSent = false;
 

@@ -5,6 +5,7 @@ import org.bytedeco.cuda.cudart.dim3;
 import org.bytedeco.cuda.global.cudart;
 import org.bytedeco.javacpp.DoublePointer;
 import org.bytedeco.javacpp.FloatPointer;
+import org.bytedeco.javacpp.IntPointer;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -31,7 +32,9 @@ public class CUDALocalFootstepOptimizer implements AutoCloseable
    // CUDA stuff
    private final CUDAProgram program;
    private final CUDAKernel computeKernel;
-   private final CUDAKernel resultKernel;
+   private final CUDAKernel blockResultKernel;
+   private final CUDAKernel globalResultKernel;
+
    private CUstream_st cudaStream;
    private dim3 blockSize;
    private dim3 gridSize;
@@ -45,13 +48,15 @@ public class CUDALocalFootstepOptimizer implements AutoCloseable
 
    // Pointers to CUDA memory
    private FloatPointer cpuCosts;
-   private FloatPointer cpuSolutions;
    private FloatPointer gpuCosts;
-   private FloatPointer gpuSolutions;
    private FloatPointer cpuBestCosts;
-   private FloatPointer cpuBestIndices;
    private FloatPointer gpuBestCosts;
-   private FloatPointer gpuBestIndices;
+   private IntPointer cpuBestIndices;
+   private IntPointer gpuBestIndices;
+   private IntPointer cpuGlobalBestIndex;
+   private IntPointer gpuGlobalBestIndex;
+   private FloatPointer cpuGlobalBestCost;
+   private FloatPointer gpuGlobalBestCost;
    private final float[] bestSolution = new float[3];
 
    public CUDALocalFootstepOptimizer(float footLength, float footWidth)
@@ -67,7 +72,8 @@ public class CUDALocalFootstepOptimizer implements AutoCloseable
       {
          program = new CUDAProgram(optimizerExtractionURL);
          computeKernel = program.loadKernel("optimizeFootstep");
-         resultKernel = program.loadKernel("findMinimumCosts");
+         blockResultKernel = program.loadKernel("findBlockMinima");
+         globalResultKernel = program.loadKernel("findGlobalMinimum");
       }
       catch (Exception e)
       {
@@ -103,8 +109,8 @@ public class CUDALocalFootstepOptimizer implements AutoCloseable
       gpuCosts = new FloatPointer();
       CUDATools.mallocAsync(gpuCosts, searchSpaceDim, cudaStream);
 
-      cpuSolutions = new FloatPointer(3L * searchSpaceDim);
-      gpuSolutions = new FloatPointer();
+      FloatPointer cpuSolutions = new FloatPointer(3L * searchSpaceDim);
+      FloatPointer gpuSolutions = new FloatPointer();
       CUDATools.mallocAsync(gpuSolutions, 3L * searchSpaceDim, cudaStream);
 
       blockSize = new dim3(512, 1, 1); // Older gpus have a limit of 512, newer ones of 1024
@@ -118,8 +124,8 @@ public class CUDALocalFootstepOptimizer implements AutoCloseable
       DoublePointer gpuHeights = new DoublePointer();
       CUDATools.mallocAsync(gpuHeights, heightMapData.getHeights().length, cudaStream);
 
-      DoublePointer cpuGridCenter = new DoublePointer(heightMapData.getGridCenter().getX(), (float) heightMapData.getGridCenter().getY());
-      DoublePointer gpuGridCenter = new DoublePointer();
+      FloatPointer cpuGridCenter = new FloatPointer((float) heightMapData.getGridCenter().getX(), (float) heightMapData.getGridCenter().getY());
+      FloatPointer gpuGridCenter = new FloatPointer();
       CUDATools.mallocAsync(gpuGridCenter, 2, cudaStream);
 
       // Copying data from CPU to GPU
@@ -129,12 +135,12 @@ public class CUDALocalFootstepOptimizer implements AutoCloseable
       CUDATools.memcpyAsync(gpuHeights, cpuHeights, heightMapData.getHeights().length, cudaStream);
       CUDATools.memcpyAsync(gpuGridCenter, cpuGridCenter, 2, cudaStream);
 
-      LogTools.warn("Running kernel compute");
+      LogTools.info("Running kernel compute");
       // Runs the kernel with the desired grid and block sizes
       computeKernel.withPointer(gpuHeights)
                    .withPointer(gpuGridCenter)
                    .withInt(heightMapData.getCenterIndex())
-                   .withDouble(heightMapData.getGridResolutionXY())
+                   .withFloat((float) heightMapData.getGridResolutionXY())
                    .withPointer(gpuInitialPose)
                    .withFloat(footLength)
                    .withFloat(footWidth)
@@ -145,7 +151,6 @@ public class CUDALocalFootstepOptimizer implements AutoCloseable
                    .withPointer(gpuSolutions)
                    .run(cudaStream, gridSize, blockSize, 0);
 
-      LogTools.warn("Done kernel compute");
       // Synchronize the stream
       // This call waits until all asynchronous functions being executed on this stream finish.
       // We have to call this to ensure that the kernel finished, and the result is ready to be downloaded onto the CPU
@@ -160,65 +165,76 @@ public class CUDALocalFootstepOptimizer implements AutoCloseable
       cudaFreeAsync(gpuGridCenter, cudaStream);
 
       // Now run another kernel to retrieve the best solution among those in cpuSolutions
-      int resultSize = searchSpaceDim;
-      while (resultSize > 1)
-      {
-         blockSize = new dim3(Math.min(searchSpaceDim, 512), 1, 1);
-         gridSize = new dim3(searchSpaceDim / blockSize.x(), 1, 1);
+      blockSize = new dim3(Math.min(searchSpaceDim, 512), 1, 1);
+      gridSize = new dim3(searchSpaceDim / blockSize.x(), 1, 1);
 
-         resultSize = searchSpaceDim / blockSize.x();
+      int resultSize = searchSpaceDim / blockSize.x();
 
-         cpuBestCosts = new FloatPointer(resultSize);
-         gpuBestCosts = new FloatPointer();
-         CUDATools.mallocAsync(gpuBestCosts, resultSize, cudaStream);
+      cpuBestCosts = new FloatPointer(resultSize);
+      gpuBestCosts = new FloatPointer();
+      CUDATools.mallocAsync(gpuBestCosts, resultSize, cudaStream);
 
-         cpuBestIndices = new FloatPointer(resultSize);
-         gpuBestIndices = new FloatPointer();
-         CUDATools.mallocAsync(gpuBestIndices, resultSize, cudaStream);
+      cpuBestIndices = new IntPointer(resultSize);
+      gpuBestIndices = new IntPointer();
+      CUDATools.mallocAsync(gpuBestIndices, resultSize, cudaStream);
 
-         CUDATools.memcpyAsync(gpuBestCosts, cpuBestCosts, resultSize, cudaStream);
-         CUDATools.memcpyAsync(gpuBestIndices, cpuBestIndices, resultSize, cudaStream);
-         LogTools.warn("Running kernel result");
-         // Run the kernel
-         resultKernel.withPointer(gpuCosts)
-                     .withInt(searchSpaceDim)
-                     .withPointer(gpuBestCosts)
-                     .withPointer(gpuBestIndices)
-                     .run(cudaStream, gridSize, blockSize, 0);
+      CUDATools.memcpyAsync(gpuBestCosts, cpuBestCosts, resultSize, cudaStream);
+      CUDATools.memcpyAsync(gpuBestIndices, cpuBestIndices, resultSize, cudaStream);
+      LogTools.info("Running block kernel result");
+      // Run the kernel
+      blockResultKernel.withPointer(gpuCosts)
+                       .withInt(searchSpaceDim)
+                       .withPointer(gpuBestCosts)
+                       .withPointer(gpuBestIndices)
+                       .run(cudaStream, gridSize, blockSize, 0);
 
-         LogTools.warn("Done kernel result");
-         // Synchronize the stream
-         // This call waits until all asynchronous functions being executed on this stream finish.
-         // We have to call this to ensure that the kernel finished, and the result is ready to be downloaded onto the CPU
-         cudart.cudaStreamSynchronize(cudaStream);
+      // Synchronize the stream
+      // This call waits until all asynchronous functions being executed on this stream finish.
+      // We have to call this to ensure that the kernel finished, and the result is ready to be downloaded onto the CPU
+      cudart.cudaStreamSynchronize(cudaStream);
 
-         CUDATools.memcpyAsync(cpuBestCosts, gpuBestCosts, resultSize, cudaStream);
+      searchSpaceDim = resultSize;
+      cpuGlobalBestIndex = new IntPointer(1);
+      gpuGlobalBestIndex = new IntPointer();
+      CUDATools.mallocAsync(gpuGlobalBestIndex, 1, cudaStream);
 
-         if (resultSize != 1)
-         {
-            cpuCosts = new FloatPointer(resultSize);
-            gpuCosts = new FloatPointer();
-            CUDATools.mallocAsync(gpuCosts, resultSize, cudaStream);
-            cpuCosts.put(cpuBestCosts);
-            CUDATools.memcpyAsync(gpuCosts, cpuCosts, resultSize, cudaStream);
-         }
-         searchSpaceDim = resultSize;
-      }
+      cpuGlobalBestCost = new FloatPointer(1);
+      gpuGlobalBestCost = new FloatPointer();
+      CUDATools.mallocAsync(gpuGlobalBestCost, 1, cudaStream);
 
-      CUDATools.memcpyAsync(cpuBestIndices, gpuBestIndices, 1, cudaStream);
-      int startIndex = (int) cpuBestIndices.get(0);
+      LogTools.info("Running global kernel result");
+      // Run the kernel
+      globalResultKernel.withPointer(gpuBestCosts)
+                        .withPointer(gpuBestIndices)
+                        .withInt(searchSpaceDim)
+                        .withPointer(gpuGlobalBestCost)
+                        .withPointer(gpuGlobalBestIndex)
+                        .run(cudaStream, gridSize, blockSize, 0);
+
+      // Synchronize the stream
+      // This call waits until all asynchronous functions being executed on this stream finish.
+      // We have to call this to ensure that the kernel finished, and the result is ready to be downloaded onto the CPU
+      cudart.cudaStreamSynchronize(cudaStream);
+
+      CUDATools.memcpyAsync(cpuGlobalBestCost, gpuGlobalBestCost, 1, cudaStream);
+      CUDATools.memcpyAsync(cpuGlobalBestIndex, gpuGlobalBestIndex, 1, cudaStream);
+
+      LogTools.info("Grid search completed");
+      int startIndex = cpuGlobalBestIndex.get(0);
       bestSolution[0] = cpuSolutions.get(startIndex);
       bestSolution[1] = cpuSolutions.get(startIndex + 1);
       bestSolution[2] = cpuSolutions.get(startIndex + 2);
 
       FramePose3D optimalFootstepPose = new FramePose3D(ReferenceFrame.getWorldFrame(),
-                                                        new Point3D(bestSolution[0], bestSolution[1], initialPose.getZ()),
+                                                        new Point3D(bestSolution[0], bestSolution[1], heightMapData.getHeightAt(bestSolution[0], bestSolution[1])),
                                                         new YawPitchRoll(bestSolution[2], initialPose.getPitch(), initialPose.getRoll()));
 
       // Release stuff
       blockSize.close();
       gridSize.close();
       cudaFreeAsync(gpuCosts, cudaStream);
+      cudaFreeAsync(gpuGlobalBestCost, cudaStream);
+      cudaFreeAsync(gpuGlobalBestIndex, cudaStream);
       cudaFreeAsync(gpuSolutions, cudaStream);
       cudaFreeAsync(gpuBestCosts, cudaStream);
       cudaFreeAsync(gpuBestIndices, cudaStream);
@@ -231,7 +247,8 @@ public class CUDALocalFootstepOptimizer implements AutoCloseable
    public void close()
    {
       computeKernel.close();
-      resultKernel.close();
+      blockResultKernel.close();
+      globalResultKernel.close();
       program.close();
    }
 
@@ -239,58 +256,74 @@ public class CUDALocalFootstepOptimizer implements AutoCloseable
    {
       cudaStream = CUDAStreamManager.getStream();
 
-      int resultSize = searchSpaceDim;
-      while (resultSize > 1)
-      {
-         blockSize = new dim3(Math.min(searchSpaceDim, 512), 1, 1);
-         gridSize = new dim3(searchSpaceDim / blockSize.x(), 1, 1);
+      blockSize = new dim3(Math.min(searchSpaceDim, 512), 1, 1);
+      gridSize = new dim3(searchSpaceDim / blockSize.x(), 1, 1);
 
-         resultSize = searchSpaceDim / blockSize.x();
-         LogTools.info(resultSize);
+      int resultSize = searchSpaceDim / blockSize.x();
 
-         cpuBestCosts = new FloatPointer(resultSize);
-         gpuBestCosts = new FloatPointer();
-         CUDATools.mallocAsync(gpuBestCosts, resultSize, cudaStream);
+      cpuBestCosts = new FloatPointer(resultSize);
+      gpuBestCosts = new FloatPointer();
+      CUDATools.mallocAsync(gpuBestCosts, resultSize, cudaStream);
 
-         cpuBestIndices = new FloatPointer(resultSize);
-         gpuBestIndices = new FloatPointer();
-         CUDATools.mallocAsync(gpuBestIndices, resultSize, cudaStream);
+      cpuBestIndices = new IntPointer(resultSize);
+      gpuBestIndices = new IntPointer();
+      CUDATools.mallocAsync(gpuBestIndices, resultSize, cudaStream);
 
-         CUDATools.memcpyAsync(gpuBestCosts, cpuBestCosts, resultSize, cudaStream);
-         CUDATools.memcpyAsync(gpuBestIndices, cpuBestIndices, resultSize, cudaStream);
-         // Run the kernel
-         resultKernel.withPointer(gpuCosts)
-                     .withInt(searchSpaceDim)
-                     .withPointer(gpuBestCosts)
-                     .withPointer(gpuBestIndices)
-                     .run(cudaStream, gridSize, blockSize, 0);
+      CUDATools.memcpyAsync(gpuBestCosts, cpuBestCosts, resultSize, cudaStream);
+      CUDATools.memcpyAsync(gpuBestIndices, cpuBestIndices, resultSize, cudaStream);
+      LogTools.warn("Running block kernel result");
+      // Run the kernel
+      blockResultKernel.withPointer(gpuCosts)
+                       .withInt(searchSpaceDim)
+                       .withPointer(gpuBestCosts)
+                       .withPointer(gpuBestIndices)
+                       .run(cudaStream, gridSize, blockSize, 0);
 
-         // Synchronize the stream
-         // This call waits until all asynchronous functions being executed on this stream finish.
-         // We have to call this to ensure that the kernel finished, and the result is ready to be downloaded onto the CPU
-         cudart.cudaStreamSynchronize(cudaStream);
+      // Synchronize the stream
+      // This call waits until all asynchronous functions being executed on this stream finish.
+      // We have to call this to ensure that the kernel finished, and the result is ready to be downloaded onto the CPU
+      cudart.cudaStreamSynchronize(cudaStream);
 
-         CUDATools.memcpyAsync(cpuBestCosts, gpuBestCosts, resultSize, cudaStream);
+      CUDATools.memcpyAsync(cpuBestCosts, gpuBestCosts, resultSize, cudaStream);
+      CUDATools.memcpyAsync(cpuBestIndices, gpuBestIndices, resultSize, cudaStream);
 
-         if (resultSize != 1)
-         {
-            cpuCosts = new FloatPointer(resultSize);
-            gpuCosts = new FloatPointer();
-            CUDATools.mallocAsync(gpuCosts, resultSize, cudaStream);
-            cpuCosts.put(cpuBestCosts);
-            CUDATools.memcpyAsync(gpuCosts, cpuCosts, resultSize, cudaStream);
+      for (int i=0; i<resultSize; i++)
+         LogTools.info("Best Block Costs: {}, Indices: {}", cpuBestCosts.get(i), cpuBestIndices.get(i));
 
-         }
-         searchSpaceDim = resultSize;
-      }
+      searchSpaceDim = resultSize;
+      cpuGlobalBestIndex = new IntPointer(1);
+      gpuGlobalBestIndex = new IntPointer();
+      CUDATools.mallocAsync(gpuGlobalBestIndex, 1, cudaStream);
 
-      CUDATools.memcpyAsync(cpuBestIndices, gpuBestIndices, 1, cudaStream);
-      CUDATools.memcpyAsync(cpuBestCosts, gpuBestCosts, 1, cudaStream);
+      cpuGlobalBestCost = new FloatPointer(1);
+      gpuGlobalBestCost = new FloatPointer();
+      CUDATools.mallocAsync(gpuGlobalBestCost, 1, cudaStream);
+
+      LogTools.warn("Running global kernel result");
+      // Run the kernel
+      globalResultKernel.withPointer(gpuBestCosts)
+                        .withPointer(gpuBestIndices)
+                        .withInt(searchSpaceDim)
+                        .withPointer(gpuGlobalBestCost)
+                        .withPointer(gpuGlobalBestIndex)
+                        .run(cudaStream, gridSize, blockSize, 0);
+
+      // Synchronize the stream
+      // This call waits until all asynchronous functions being executed on this stream finish.
+      // We have to call this to ensure that the kernel finished, and the result is ready to be downloaded onto the CPU
+      cudart.cudaStreamSynchronize(cudaStream);
+
+      CUDATools.memcpyAsync(cpuGlobalBestCost, gpuGlobalBestCost, 1, cudaStream);
+      CUDATools.memcpyAsync(cpuGlobalBestIndex, gpuGlobalBestIndex, 1, cudaStream);
+
+      LogTools.info("Best Cost: {}, Idx: {}", cpuGlobalBestCost.get(0), cpuGlobalBestIndex.get(0));
 
       // Release stuff
       blockSize.close();
       gridSize.close();
       cudaFreeAsync(gpuCosts, cudaStream);
+      cudaFreeAsync(cpuGlobalBestCost, cudaStream);
+      cudaFreeAsync(gpuGlobalBestIndex, cudaStream);
       cudaFreeAsync(gpuBestCosts, cudaStream);
       cudaFreeAsync(gpuBestIndices, cudaStream);
       CUDAStreamManager.releaseStream(cudaStream);
@@ -308,11 +341,11 @@ public class CUDALocalFootstepOptimizer implements AutoCloseable
 
    public float getBestCost()
    {
-      return cpuBestCosts.get(0);
+      return cpuGlobalBestCost.get(0);
    }
 
    public float getBestIndex()
    {
-      return cpuBestIndices.get(0);
+      return cpuGlobalBestIndex.get(0);
    }
 }
