@@ -169,6 +169,7 @@ public class HeightMapPolygonSnapper
          Point2DReadOnly centroid = polygonToSnap.getCentroid();
          int rIndex = terrainMapData.getLocalXIndex(centroid.getX());
          int cIndex = terrainMapData.getLocalYIndex(centroid.getY());
+
          double height = terrainMapData.getSnappedHeightLocal(rIndex, cIndex);
          UnitVector3DReadOnly normal = terrainMapData.getNormalLocal(rIndex, cIndex);
 

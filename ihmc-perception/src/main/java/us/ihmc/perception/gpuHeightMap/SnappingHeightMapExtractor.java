@@ -7,7 +7,6 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.perception.cuda.CUDAKernel;
@@ -139,7 +138,7 @@ public class SnappingHeightMapExtractor
 
          Mat cpuSnapNormalYMap = new Mat();
          snapNormalYImage.download(cpuSnapNormalYMap);
-         terrainMapData.setSnapNormalYImage(cpuSnapNormalYMap);
+         terrainMapData.setSnapNormalYMat(cpuSnapNormalYMap);
 
          Mat cpuSnapNormalZMap = new Mat();
          snapNormalZImage.download(cpuSnapNormalZMap);

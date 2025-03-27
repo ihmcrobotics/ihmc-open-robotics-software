@@ -127,8 +127,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
                                                                                             heightMapParameters);
 
                                               terrainMapData.setHeightMap(heightMapImage);
-                                              terrainMapData.setSensorOrigin(zUpToWorldTransform.getTranslation().getX(),
-                                                                             zUpToWorldTransform.getTranslation().getY());
+                                              terrainMapData.setSensorOrigin(zUpToWorldTransform.getTranslation());
                                            });
 
       getFrequency(PerceptionAPI.HEIGHT_MAP_CROPPED).ping();

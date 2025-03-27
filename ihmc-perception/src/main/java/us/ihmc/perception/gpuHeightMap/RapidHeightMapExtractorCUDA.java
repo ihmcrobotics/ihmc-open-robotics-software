@@ -323,7 +323,7 @@ public class RapidHeightMapExtractorCUDA
       snappedFootstepsExtractor.update(globalHeightMapImage, sensorOrigin, globalCenterIndex, terrainCenterIndex);
 
       //Update the terrain map data with the new results
-      terrainMapData.setSensorOrigin(groundToWorldTransform.getTranslationX(), groundToWorldTransform.getTranslationY());
+      terrainMapData.setSensorOrigin(groundToWorldTransform.getTranslation());
 
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);

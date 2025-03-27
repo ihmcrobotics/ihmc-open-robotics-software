@@ -159,10 +159,10 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
       }
 
       TerrainMapData terrainMapData = environmentHandler.getTerrainMapData();
-      if (ImGui.button("Print Contact Map"))
-      {
-         PerceptionDebugTools.printMat("Contact Map", terrainMapData.getContactMap(), 4);
-      }
+//      if (ImGui.button("Print Contact Map"))
+//      {
+//         PerceptionDebugTools.printMat("Contact Map", terrainMapData.getContactMap(), 4);
+//      }
       ImGui.sameLine();
       if (ImGui.button("Print Height Map"))
       {
