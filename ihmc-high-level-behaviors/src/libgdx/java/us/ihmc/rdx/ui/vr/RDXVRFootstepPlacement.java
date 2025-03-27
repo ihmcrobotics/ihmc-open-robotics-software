@@ -213,8 +213,12 @@ public class RDXVRFootstepPlacement
                gpuAdaptedPose.getPosition().setZ(height);
                if (USE_STEPPABLE_REGION_ADAPTATION && lastAdjustment)
                {
+                  double timeStart = System.nanoTime();
                   adaptedPose = cpuOptimizer.compute(latestHeightMapData, adaptedPose);
+                  LogTools.error("CPU {}", (System.nanoTime()-timeStart)/1e9);
+                  timeStart = System.nanoTime();
                   gpuAdaptedPose = footstepOptimizer.compute(latestHeightMapData, gpuAdaptedPose);
+                  LogTools.error("GPU {}", (System.nanoTime()-timeStart)/1e9);
                }
                footstepBeingExternallyPlaced.setPose(adaptedPose);
                gpuAdaptedPose.setX(gpuAdaptedPose.getTranslationX() + 0.02);

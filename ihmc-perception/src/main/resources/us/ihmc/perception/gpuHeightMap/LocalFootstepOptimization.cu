@@ -319,7 +319,7 @@ __device__ float computePlanarityCost(
     }
 }
 
-__device__ float computeCost(int idx, float x, float y, float yaw, float* initialPose, float footLength, float footWidth, double* heightMapData, float* heightMapCenter, int heightMapCenterIdx, float heightMapResolution)
+__device__ float computeCost(float x, float y, float yaw, float* initialPose, float footLength, float footWidth, double* heightMapData, float* heightMapCenter, int heightMapCenterIdx, float heightMapResolution)
 {
     float positionCost = POSITION_W * (fabsf(x - initialPose[0]) + fabsf(y - initialPose[1]));
     float yawCost = YAW_W * fabsf(yaw - initialPose[3]);
@@ -327,8 +327,6 @@ __device__ float computeCost(int idx, float x, float y, float yaw, float* initia
 
     float z = getHeightAt(x, y, heightMapData, heightMapCenter, heightMapCenterIdx, heightMapResolution);
     float zDistancePenalty = HEIGHT_W * fabsf(z - initialPose[2]);
-
-    //printf("IDX: %d planarity: %f\n", idx, planarityCost);
 
     return positionCost + yawCost + planarityCost + zDistancePenalty;
 }
@@ -363,8 +361,7 @@ extern "C" __global__ void optimizeFootstep(double* heightMapData,
         float y = initialPose[1] - searchRadius + j * heightMapResolution;
         float yaw = initialPose[3] + k * GRID_RESOLUTION_YAW;
 
-        float cost = computeCost(idx, x, y, yaw, initialPose, footLength, footWidth, heightMapData, heightMapCenter, heightMapCenterIdx, heightMapResolution);
-        printf("IDX: %d cost: %f\n", idx, cost);
+        float cost = computeCost(x, y, yaw, initialPose, footLength, footWidth, heightMapData, heightMapCenter, heightMapCenterIdx, heightMapResolution);
         // Write the computed cost to the global memory array
         costs[idx] = cost;
 

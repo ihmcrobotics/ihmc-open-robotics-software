@@ -138,8 +138,7 @@ public class RDXFootstepOptimizer
                float yaw = (float) initialPose.getYaw() + k * GRID_RESOLUTION_YAW;
 
                float[] q = {x, y, yaw};
-               float cost = computeCost(n, q, initialPose);
-               LogTools.error("idx: {}, cost: {}", n, cost);
+               float cost = computeCost(q, initialPose);
 
                if (cost < bestCost)
                {
@@ -176,7 +175,7 @@ public class RDXFootstepOptimizer
     * @param targetPose The target footstep pose.
     * @return The total cost.
     */
-   private float computeCost(int idx, float[] q, FramePose3DReadOnly targetPose)
+   private float computeCost(float[] q, FramePose3DReadOnly targetPose)
    {
       float positionCost = POSITION_W * (Math.abs(q[0] - (float) targetPose.getX()) + Math.abs(q[1] - (float) targetPose.getY()));
       float yawCost = YAW_W * Math.abs(q[2] - (float) targetPose.getYaw());
@@ -186,8 +185,6 @@ public class RDXFootstepOptimizer
       float z = (float) currentHeightMap.getHeightAt(q[0], q[1]); // Z of the point to be placed.
       float initialZ = (float) targetPose.getZ(); // Z of the initial Point
       float zDistancePenalty = HEIGHT_W * Math.abs(z - initialZ);
-
-//      LogTools.error("idx: {}, planarity: {}", idx, planarityCost);
 
       return positionCost + yawCost + planarityCost + zDistancePenalty;
    }
@@ -246,12 +243,10 @@ public class RDXFootstepOptimizer
          if (maxVariance > MAX_HEIGHT_VARIANCE)
          {
             penalties += HEIGHT_CONSTRAINT_PENALTY;
-            LogTools.warn("HEIGHT constraint violated");
          }
          if (maxSlope > MAX_SLOPE_ANGLE)
          {
             penalties += SLOPE_CONSTRAINT_PENALTY;
-            LogTools.warn("SLOPE constraint violated");
          }
 
          return meanError + penalties;
