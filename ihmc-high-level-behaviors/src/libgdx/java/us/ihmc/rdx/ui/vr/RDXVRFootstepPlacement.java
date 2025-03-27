@@ -187,7 +187,7 @@ public class RDXVRFootstepPlacement
       footstepBeingExternallyPlaced = new RDXVRFootstep(side, footstepModels.get(side), footstepIndex++);
    }
 
-   public boolean setFootstepPose(FramePose3DReadOnly pose, boolean lastAdjustment)
+   public boolean setFootstepPose(FramePose3DReadOnly pose)
    {
       if (footstepBeingExternallyPlaced != null)
       {
@@ -201,7 +201,7 @@ public class RDXVRFootstepPlacement
 
                FramePose3D gpuAdaptedPose = new FramePose3D(pose);
                gpuAdaptedPose.getPosition().setZ(height);
-               if (USE_STEPPABLE_REGION_ADAPTATION && lastAdjustment)
+               if (USE_STEPPABLE_REGION_ADAPTATION)
                {
                   adaptedPose = footstepOptimizer.compute(latestHeightMapData, adaptedPose);
                }

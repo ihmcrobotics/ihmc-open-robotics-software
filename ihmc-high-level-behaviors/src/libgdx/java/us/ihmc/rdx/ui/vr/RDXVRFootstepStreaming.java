@@ -119,7 +119,7 @@ public class RDXVRFootstepStreaming
                footstepPlacer.createNewFootstep(side);
                footstepPlacer.setFootstepPose(new FramePose3D(ReferenceFrame.getWorldFrame(),
                                                               latestStatus.getDesiredFootPosition(),
-                                                              latestStatus.getDesiredFootOrientation()), false);
+                                                              latestStatus.getDesiredFootOrientation()));
                // We can't trigger stepping here. We have to notify the KST and stop streaming
                readyToStep.clear();
                readyToStep.set();
@@ -128,7 +128,7 @@ public class RDXVRFootstepStreaming
             {
                if (footstepPlacer.setFootstepPose(new FramePose3D(ReferenceFrame.getWorldFrame(),
                                                                   latestStatus.getDesiredFootPosition(),
-                                                                  latestStatus.getDesiredFootOrientation()), false))
+                                                                  latestStatus.getDesiredFootOrientation())))
                {
                   step(true);
                   previousAdjustment.put(side, new RigidBodyTransform(latestStatus.getDesiredFootOrientation(), latestStatus.getDesiredFootPosition()));
@@ -140,14 +140,8 @@ public class RDXVRFootstepStreaming
             }
             else if (latestStatus.getLastAdjustment()) // Last estimate
             {
-               if (footstepPlacer.setFootstepPose(new FramePose3D(ReferenceFrame.getWorldFrame(),
-                                                                  previousAdjustment.get(side).getTranslation(),
-                                                                  previousAdjustment.get(side).getRotation()), true))
-               {
-//                  step(true);
-               }
                LogTools.error("Received last estimate footstep");
-//               footstepPlacer.reset();
+               footstepPlacer.reset();
             }
          }
          else
