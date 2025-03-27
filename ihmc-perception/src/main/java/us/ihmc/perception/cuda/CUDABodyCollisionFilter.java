@@ -53,8 +53,8 @@ public class CUDABodyCollisionFilter {
       stream = CUDAStreamManager.getStream();
    }
 
-   public void process(RawImage depthImage, CameraIntrinsics cameraIntrinsics, List<Collidable> robotCollidables, ReferenceFrame cameraFrame) {
-      this.latestDepthImage = depthImage.get();
+   public void process(Mat depthImage, CameraIntrinsics cameraIntrinsics, List<Collidable> robotCollidables, ReferenceFrame cameraFrame) {
+      this.latestDepthImage = depthImage;
       this.cameraIntrinsics = cameraIntrinsics;
       this.robotCollidables = robotCollidables;
       this.cameraFrame = cameraFrame;
@@ -154,7 +154,6 @@ public class CUDABodyCollisionFilter {
       if (collisionResults != null) {
          CUDATools.checkCUDAError(cudaFreeAsync(collisionResults, stream));
       }
-
       kernel.close();
       program.close();
       CUDAStreamManager.releaseStream(stream);

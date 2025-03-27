@@ -14,6 +14,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.perception.camera.CameraIntrinsics;
+import us.ihmc.perception.cuda.CUDABodyCollisionFilter;
 import us.ihmc.perception.filters.CUDAFlyingPointsFilter;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.opencv.OpenCVTools;
@@ -50,7 +51,7 @@ public class RapidHeightMapManager
    private final HeightMapParameters heightMapParameters;
    private final ROS2Publisher<ImageMessage> heightMapPublisher;
    private List<Collidable> robotCollidables;
-   private BodyCollisionFilteredHeightMap bodyCollisionFilteredHeightMap;
+   private CUDABodyCollisionFilter bodyCollisionFilter;
    private CameraIntrinsics depthImageIntrinsics;
 
    public RapidHeightMapManager(ROS2Node ros2Node,
@@ -68,7 +69,7 @@ public class RapidHeightMapManager
       this.depthImageIntrinsics = depthImageIntrinsics;
 
       robotCollidables = robotCollisionModel.getRobotCollidables(robotModel.getRootBody());
-      bodyCollisionFilteredHeightMap = new BodyCollisionFilteredHeightMap();
+      bodyCollisionFilter = new CUDABodyCollisionFilter();
 
       deviceDepthImage = new GpuMat(depthImageIntrinsics.getHeight(),
                                     depthImageIntrinsics.getWidth(),
@@ -122,7 +123,7 @@ public class RapidHeightMapManager
       }
 
       deviceDepthImage.upload(hostDepthImage);
-      bodyCollisionFilteredHeightMap.update(robotCollidables, cameraFrame, depthImageIntrinsics);
+      bodyCollisionFilter.process(latestDepthImage,depthImageIntrinsics,robotCollidables, cameraFrame);
       if (resetHeightMapRequested.poll())
       {
          rapidHeightMapExtractor.reset();
