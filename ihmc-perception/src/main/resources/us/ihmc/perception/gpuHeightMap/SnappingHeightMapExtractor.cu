@@ -89,6 +89,7 @@ __global__ void computeSnappedValuesKernel(unsigned short *globalMap, size_t pit
     int foot_search_min_y = max(map_key.y - foot_offset_indices, 0);
     int foot_search_max_y = min(map_key.y + foot_offset_indices + 1, map_cells_per_side_for_checking);
 
+    // Get the maximum height of any cell when snapping the foot down. This gives us our highest point on the threshold. Assume the foot is a circle.
     for (int x_query = foot_search_min_x; x_query < foot_search_max_x; ++x_query)
     {
         for (int y_query = foot_search_min_y; y_query < foot_search_max_y; ++y_query)
@@ -96,6 +97,7 @@ __global__ void computeSnappedValuesKernel(unsigned short *globalMap, size_t pit
             float2 vector_to_point_from_foot = make_float2(static_cast<float>(x_query - map_key.x) * map_resolution,
                                                            static_cast<float>(y_query - map_key.y) * map_resolution);
 
+            // If the magnitude of the vector is greater than the search radius, then the point is outside the foot.
             if (dot2D(vector_to_point_from_foot, vector_to_point_from_foot) > foot_search_radius_squared)
                 continue;
 
@@ -106,9 +108,10 @@ __global__ void computeSnappedValuesKernel(unsigned short *globalMap, size_t pit
         }
     }
 
+    // convert that maximum height from an int representation to an actual height in the world in meters
     float max_height_under_foot = static_cast<float>(max_height_int) / params[SNAP_HEIGHT_SCALING_FACTOR] - params[SNAP_HEIGHT_OFFSET];
 
-    // Setup values
+    // Setup values to perform a least squares fit of the foot to the height map, but omitting any points that are too far below the foot.
     float n = 0.0f;
     float x = 0.0f;
     float y = 0.0f;
@@ -129,7 +132,7 @@ __global__ void computeSnappedValuesKernel(unsigned short *globalMap, size_t pit
     {
         for (int y_value_idx = -samples; y_value_idx <= samples; y_value_idx++)
         {
-            // Calculate offset and check distance
+            // Calculate offset and check distanc
             float2 offset = make_float2((float)x_value_idx * resolution, (float)y_value_idx * resolution);
             float offset_distance_squared = dot2D(offset, offset);
 
@@ -199,6 +202,9 @@ __global__ void computeSnappedValuesKernel(unsigned short *globalMap, size_t pit
 
     float3 normal = make_float3(coefficients[0], coefficients[1], 1.0);
     normal = normalize(normal);
+    // If the normal points down, we need to flip it.
+    if (normal.z < 0.0)
+        normal = -normal;
 
     // TODO include this?
     // snap_height = getZOnPlane(foot_position, (float3) (x_solution, y_solution, z_solution), normal);
@@ -213,6 +219,7 @@ __global__ void computeSnappedValuesKernel(unsigned short *globalMap, size_t pit
         failed = true;
     }
 
+    // FIXME this isn't a good way to program a GPU. We should consider running through these conditions regardles, so each thread takes the same amount of time
     //////////// Check to make sure we're not stepping too near a cliff base or top
     if (!failed)
     {
@@ -290,6 +297,7 @@ __global__ void computeSnappedValuesKernel(unsigned short *globalMap, size_t pit
     int area_fraction = static_cast<int>(255 * n / max_points_possible_under_support);
     // note these are switched to align with world
 
+    // Technically speaking, the z value of the normal doesn't need to be returned, since we know the magnitude of the vector is unitary.
     int normal_x_int = static_cast<int>(255 * (normal.y + 1.0f) / 2.0f);
     int normal_y_int = static_cast<int>(255 * (normal.x + 1.0f) / 2.0f);
     int normal_z_int = static_cast<int>(255 * (normal.z + 1.0f) / 2.0f);

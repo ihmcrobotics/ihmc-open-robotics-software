@@ -7,13 +7,8 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
-
-import java.util.List;
 
 public class GarbageFreePlanarRegionPolygonSnapper
 {
@@ -61,8 +56,8 @@ public class GarbageFreePlanarRegionPolygonSnapper
       if (noIntersection)
          return false;
 
-      PolygonSnapperTools.constructTransformToMatchSurfaceNormalPreserveX(planarRegionToSnapTo.getNormal(), snapTransformToPack);
-      PlanarRegionPolygonSnapper.setTranslationSettingZAndPreservingXAndY(highestVertexInWorld, snapTransformToPack);
+      PolygonSnapperTools.constructRotationToMatchSurfaceNormal(planarRegionToSnapTo.getNormal(), snapTransformToPack.getRotation());
+      PolygonSnapperTools.setTranslationSettingZAndPreservingXAndY(highestVertexInWorld, snapTransformToPack);
 
       return true;
    }

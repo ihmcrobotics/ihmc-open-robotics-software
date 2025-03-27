@@ -1,21 +1,11 @@
 package us.ihmc.footstepPlanning.polygonSnapping;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
-import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
-import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 
@@ -75,16 +65,9 @@ public class PlanarRegionPolygonSnapper
       if (noIntersection)
          return false;
 
-      PolygonSnapperTools.constructTransformToMatchSurfaceNormalPreserveX(planarRegionToSnapTo.getNormal(), snapTransformToPack);
-      setTranslationSettingZAndPreservingXAndY(highestVertexInWorld, snapTransformToPack);
+      PolygonSnapperTools.constructRotationToMatchSurfaceNormal(planarRegionToSnapTo.getNormal(), snapTransformToPack.getRotation());
+      PolygonSnapperTools.setTranslationSettingZAndPreservingXAndY(highestVertexInWorld, snapTransformToPack);
 
       return true;
-   }
-
-   static void setTranslationSettingZAndPreservingXAndY(Point3DReadOnly highestVertex, RigidBodyTransform transformToReturn)
-   {
-      EuclidCoreMissingTools.transform(transformToReturn.getRotation(), highestVertex.getX(), highestVertex.getY(), 0.0, transformToReturn.getTranslation());
-      transformToReturn.getTranslation().scale(-1.0);
-      transformToReturn.getTranslation().add(highestVertex);
    }
 }

@@ -104,6 +104,16 @@ public class TerrainMapData
       setSnapNormalZImage(other.snapNormalZImage);
    }
 
+   public int getLocalXIndex(double coordinate)
+   {
+      return getLocalIndex(coordinate, heightMapCenter.getX());
+   }
+
+   public int getLocalYIndex(double coordinate)
+   {
+      return getLocalIndex(coordinate, heightMapCenter.getY());
+   }
+
    private int getLocalIndex(double coordinate, double center)
    {
       // TODO probably a height map tools method for this.
@@ -112,15 +122,15 @@ public class TerrainMapData
 
    public float getSnappedAreaFractionInWorld(double x, double y)
    {
-      int rIndex = getLocalIndex(x, heightMapCenter.getX());
-      int cIndex = getLocalIndex(y, heightMapCenter.getY());
+      int rIndex = getLocalXIndex(x);
+      int cIndex = getLocalYIndex(y);
       return getSnappedAreaLocal(rIndex, cIndex);
    }
 
    public float getHeightInWorld(double x, double y)
    {
-      int rIndex = getLocalIndex(x, heightMapCenter.getX());
-      int cIndex = getLocalIndex(y, heightMapCenter.getY());
+      int rIndex = getLocalXIndex(x);
+      int cIndex = getLocalYIndex(y);
       return getHeightLocal(rIndex, cIndex);
    }
 
@@ -188,7 +198,7 @@ public class TerrainMapData
       return convertScaledAndOffsetValue((float) height);
    }
 
-   private float getSnappedAreaLocal(int rIndex, int cIndex)
+   public float getSnappedAreaLocal(int rIndex, int cIndex)
    {
       if (isOutOfBounds(rIndex, cIndex))
          return 0.0f;
@@ -196,7 +206,7 @@ public class TerrainMapData
       return ((float) ((snappedAreaFractionImage.ptr(rIndex, cIndex).get() & 0xFF))) / 255;
    }
 
-   private float getSnappedHeightLocal(int rIndex, int cIndex)
+   public float getSnappedHeightLocal(int rIndex, int cIndex)
    {
       if (snapHeightImage == null)
          return getHeightLocal(rIndex, cIndex);
@@ -208,7 +218,7 @@ public class TerrainMapData
       return convertScaledAndOffsetValue((float) height);
    }
 
-   private UnitVector3DReadOnly getNormalLocal(int rIndex, int cIndex)
+   public UnitVector3DReadOnly getNormalLocal(int rIndex, int cIndex)
    {
       if (isOutOfBounds(rIndex, cIndex))
       {

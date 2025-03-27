@@ -9,6 +9,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
@@ -22,7 +23,7 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import java.util.ArrayList;
 import java.util.List;
 
-import static us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionPolygonSnapper.setTranslationSettingZAndPreservingXAndY;
+import static us.ihmc.footstepPlanning.polygonSnapping.PolygonSnapperTools.setTranslationSettingZAndPreservingXAndY;
 
 public class HeightMapPolygonSnapper
 {
@@ -122,10 +123,12 @@ public class HeightMapPolygonSnapper
       {
          FootstepSnapData snapData = new FootstepSnapData(snapTransform);
 
+         // FIXME if using the terrain map, this will not have value.
          snapData.setRMSErrorHeightMap(rootMeanSquaredError / maxPossibleRMSError);
          snapData.setSnapAreaFraction(areaFraction);
 
          // get the cropped polygon back in sole frame.
+         // FIXME if using the terrain map, this will not have value.
          snapData.getCroppedFoothold().set(snappedPolygon);
          snapData.getCroppedFoothold().applyInverseTransform(footstepTransform);
 
@@ -166,17 +169,27 @@ public class HeightMapPolygonSnapper
       if (environmentHandler.hasTerrainMapData() && terrainMapData.hasSnapHeight() && terrainMapData.hasSnapNormal())
       {
          Point2DReadOnly centroid = polygonToSnap.getCentroid();
-         double height = terrainMapData.getSnappedHeightInWorld(centroid.getX(), centroid.getY());
-         UnitVector3DReadOnly normal = terrainMapData.getNormalInWorld(centroid.getX(), centroid.getY());
+         int rIndex = terrainMapData.getLocalXIndex(centroid.getX());
+         int cIndex = terrainMapData.getLocalYIndex(centroid.getY());
+         double height = terrainMapData.getSnappedHeightLocal(rIndex, cIndex);
+         UnitVector3DReadOnly normal = terrainMapData.getNormalLocal(rIndex, cIndex);
+
+         // The surface normal must point up.
+         if (normal.getZ() < 0.0)
+         {
+            UnitVector3D tempNormal = new UnitVector3D(normal);
+            tempNormal.negate();
+            normal = tempNormal;
+         }
 
          transformToReturn = PolygonSnapperTools.createTransformToMatchSurfaceNormalPreserveX(normal);
-         setTranslationSettingZAndPreservingXAndY(new Point3D(centroid.getX(), centroid.getY(), height), transformToReturn);
+         PolygonSnapperTools.setTranslationSettingZAndPreservingXAndY(new Point3D(centroid.getX(), centroid.getY(), height), transformToReturn);
 
          // TODO need to compute the snapped polygon
          snappedPolygon.set(polygonToSnap);
          // TODO need to compute the RMS error on the GPU.
          rootMeanSquaredError = Double.NaN;
-         areaFraction = terrainMapData.getSnappedAreaFractionInWorld(centroid.getX(), centroid.getY());;
+         areaFraction = terrainMapData.getSnappedAreaLocal(rIndex, cIndex);;
       }
       else
       {
