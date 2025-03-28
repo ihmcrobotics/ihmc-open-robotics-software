@@ -241,7 +241,7 @@ public class SwingState extends AbstractFootControlState
       currentTime = new YoDouble(namePrefix + "CurrentTime", registry);
       currentTimeWithSwingSpeedUp = new YoDouble(namePrefix + "CurrentTimeWithSpeedUp", registry);
       isSwingSpeedUpEnabled = new YoBoolean(namePrefix + "IsSpeedUpEnabled", registry);
-      isSwingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
+      isSwingSpeedUpEnabled.set(false);//walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
 
       controllerToolbox.getWalkingMessageHandler().getUsingQFP().addListener(change ->
       {
@@ -252,7 +252,7 @@ public class SwingState extends AbstractFootControlState
          }
          else
          {
-            isSwingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
+            isSwingSpeedUpEnabled.set(false);//walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
             swingTrajectorySmoother.setTrackingZeta(swingTrajectorySmoother.getDefaultTrackingZeta());
          }
       });
