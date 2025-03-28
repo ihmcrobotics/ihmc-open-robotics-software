@@ -49,8 +49,8 @@ public class KinematicsRecordReplay
       this.enabledKinematicsStreaming = enabledKinematicsStreaming;
       this.handDesiredControlFrames = handDesiredControlFrames;
 
-//      loadLatestReplayFile();
-      replayPath.set(Paths.get(System.getProperty("user.home"), ".ihmc/logs/250207_wall0_good.csv").toString());
+      loadLatestReplayFile();
+//      replayPath.set(Paths.get(System.getProperty("user.home"), ".ihmc/logs/250207_wall0_good.csv").toString());
    }
 
    public void loadLatestReplayFile()

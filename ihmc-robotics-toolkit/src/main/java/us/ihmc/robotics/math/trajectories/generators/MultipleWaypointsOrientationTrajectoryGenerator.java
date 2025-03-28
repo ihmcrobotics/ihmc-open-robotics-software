@@ -36,6 +36,7 @@ import us.ihmc.yoVariables.variable.YoLong;
  */
 public class MultipleWaypointsOrientationTrajectoryGenerator implements FrameOrientationTrajectoryGenerator, YoMutableFrameObject
 {
+   public static boolean EXCLUDE_REGISTRY = false;
    private final String namePrefix;
 
    private final int maximumNumberOfWaypoints;
@@ -83,7 +84,8 @@ public class MultipleWaypointsOrientationTrajectoryGenerator implements FrameOri
 
       clear(referenceFrame);
 
-//      parentRegistry.addChild(registry);
+      if (!EXCLUDE_REGISTRY)
+         parentRegistry.addChild(registry);
    }
 
    public void clear()

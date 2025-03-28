@@ -617,9 +617,9 @@ public class RDXVRKinematicsStreamingMode
          else
             toolboxInputMessage.setStreamToController(kinematicsRecorder.isReplaying());
 
-         if (controllerLastPollTimeNanos > previousControllerLastPollTimeNanos)
+//         if (controllerLastPollTimeNanos > previousControllerLastPollTimeNanos)
          {
-            toolboxInputMessage.setTimestamp(controllerLastPollTimeNanos);
+            toolboxInputMessage.setTimestamp(System.nanoTime());
             //         ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputToolboxConfigurationTopic(syncedRobot.getRobotModel().getSimpleRobotName()), ikSolverConfigurationMessage);
             ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputCommandTopic(syncedRobot.getRobotModel().getSimpleRobotName()), toolboxInputMessage);
 

@@ -22,6 +22,7 @@ import java.util.List;
 
 public class HandWrenchCalculator
 {
+   public static boolean EXCLUDE_REGISTRY = false;
    public static final double BREAK_FREQUENCY = 20.0;
 
    private final YoRegistry registry;
@@ -70,8 +71,8 @@ public class HandWrenchCalculator
                                                           () -> alpha,
                                                           unfilteredWrench.getAngularPart(),
                                                           unfilteredWrench.getLinearPart());
-//      if (parentRegistry != null)
-//         parentRegistry.addChild(registry);
+      if (parentRegistry != null && !EXCLUDE_REGISTRY)
+         parentRegistry.addChild(registry);
    }
 
    public void compute()

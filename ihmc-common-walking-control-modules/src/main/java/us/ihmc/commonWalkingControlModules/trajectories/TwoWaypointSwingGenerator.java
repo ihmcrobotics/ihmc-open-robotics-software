@@ -41,6 +41,8 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class TwoWaypointSwingGenerator implements SwingGenerator
 {
+   public static boolean EXCLUDE_REGISTRY = false;
+
    private static final int maxTimeIterations = -1; // setting this negative activates continuous updating
    private static final int defaultNumberOfWaypoints = 2;
    private static final double[] defaultWaypointProportions = new double[] {0.15, 0.85};
@@ -181,7 +183,9 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
       this.maxNumberOfSwingWaypoints = maxNumberOfSwingWaypoints;
 
       registry = new YoRegistry(namePrefix + getClass().getSimpleName());
-//      parentRegistry.addChild(registry);
+
+      if (!EXCLUDE_REGISTRY)
+         parentRegistry.addChild(registry);
 
       this.trajectoryFrame = trajectoryFrame;
       waypointPositions = new RecyclingArrayList<>(maxNumberOfSwingWaypoints, this::createNewWaypoint);
