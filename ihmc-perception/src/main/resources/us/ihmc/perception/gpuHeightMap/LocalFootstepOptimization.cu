@@ -140,8 +140,8 @@ __device__ void sampleFootCorners(
     bool* isSurfaceDiscontinuous)
 {
     // Define foot corners
-    float fx = footLength;
-    float fy = footWidth;
+    float fx = footLength + 0.1; // keep some room for not bumping into edges
+    float fy = footWidth + 0.1;
     float2 corners[5] = {
         {-fx / 2, -fy / 2},
         {fx / 2, -fy / 2},
@@ -339,6 +339,7 @@ extern "C" __global__ void optimizeFootstep(double* heightMapData,
                                             float footLength,
                                             float footWidth,
                                             float searchRadius,
+                                            float searchYawLimit,
                                             int stepsXY,
                                             int stepsYaw,
                                             float* costs,
@@ -359,7 +360,7 @@ extern "C" __global__ void optimizeFootstep(double* heightMapData,
 
         float x = initialPose[0] - searchRadius + i * heightMapResolution;
         float y = initialPose[1] - searchRadius + j * heightMapResolution;
-        float yaw = initialPose[3] + k * GRID_RESOLUTION_YAW;
+        float yaw = initialPose[3] - searchYawLimit + k * GRID_RESOLUTION_YAW;
 
         float cost = computeCost(x, y, yaw, initialPose, footLength, footWidth, heightMapData, heightMapCenter, heightMapCenterIdx, heightMapResolution);
         // Write the computed cost to the global memory array

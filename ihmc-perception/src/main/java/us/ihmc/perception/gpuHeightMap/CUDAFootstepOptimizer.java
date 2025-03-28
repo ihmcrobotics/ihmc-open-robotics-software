@@ -38,6 +38,7 @@ public class CUDAFootstepOptimizer implements AutoCloseable
    private final dim3 gridSize;
 
    private final float searchRadius;
+   private final float searchYawLimit;
    private final int stepsXY;
    private final int stepsYaw;
    private int searchSpaceDim;
@@ -71,9 +72,10 @@ public class CUDAFootstepOptimizer implements AutoCloseable
          throw new RuntimeException(e);
       }
 
-      searchRadius = footLength;
+      searchRadius = 1.5f * footLength;
+      searchYawLimit = (float) Math.PI/4 / 2;
       stepsXY = (int) (2 * searchRadius / SEARCH_SPACE_RESOLUTION_XY) + 1;
-      stepsYaw = (int) (Math.PI / 4 / SEARCH_SPACE_RESOLUTION_YAW);
+      stepsYaw = (int) (2 * searchYawLimit / SEARCH_SPACE_RESOLUTION_YAW);
       searchSpaceDim = stepsXY * stepsXY * stepsYaw;
       // Get a stream
       cudaStream = CUDAStreamManager.getStream();
@@ -136,6 +138,7 @@ public class CUDAFootstepOptimizer implements AutoCloseable
                    .withFloat(footLength)
                    .withFloat(footWidth)
                    .withFloat(searchRadius)
+                   .withFloat(searchYawLimit)
                    .withInt(stepsXY)
                    .withInt(stepsYaw)
                    .withPointer(gpuCosts)
