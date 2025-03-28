@@ -126,9 +126,9 @@ public class FootstepStreamingToolboxParameters
       stabilityIterations = 3;
 
       defaultStride = 0.20;
-      maxStride = 0.6;
+      maxStride = 0.5;
       kpDirection = 0.0;
-      kpStride = 0.5;
+      kpStride = 0.8;
       strideVelocityScalingFactor = 0.8;
 
       turningThreshold = 20;

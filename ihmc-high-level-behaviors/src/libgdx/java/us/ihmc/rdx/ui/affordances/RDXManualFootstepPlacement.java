@@ -241,10 +241,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
          // When left button clicked and released.
          if (input.isWindowHovered() & input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
          {
-            if (APPLY_REACHABLE_REGION_ELLIPTICAL_CONSTRAINT && stepPositionLimiter.hasValue())
-               forcePlaceFootstep();
-            else
-               placeFootstep();
+            forcePlaceFootstep();
          }
 
          if (input.isWindowHovered() && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Right))
@@ -256,20 +253,12 @@ public class RDXManualFootstepPlacement implements RenderableProvider
 
    public void placeFootstep()
    {
-      if (footstepBeingPlacedIsReachable)
-      {
-         // If safe to place footstep
-         RDXInteractableFootstep addedStep = footstepPlan.getNextFootstep();
-         addedStep.copyFrom(footstepBeingPlaced);
-         // Switch sides
-         currentFootStepSide = currentFootStepSide.getOppositeSide();
-         createNewFootstep(currentFootStepSide);
-      }
-      else
-      {
-         // If not safe print message and abort footstep placement
-         LogTools.info("Footstep Rejected, too far from previous foot... not placing footstep");
-      }
+      // If safe to place footstep
+      RDXInteractableFootstep addedStep = footstepPlan.getNextFootstep();
+      addedStep.copyFrom(footstepBeingPlaced);
+      // Switch sides
+      currentFootStepSide = currentFootStepSide.getOppositeSide();
+      createNewFootstep(currentFootStepSide);
    }
 
    public void forcePlaceFootstep()
