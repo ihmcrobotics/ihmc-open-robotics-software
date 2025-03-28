@@ -2,9 +2,12 @@ package us.ihmc.footstepPlanning.graphSearch.footstepSnapping;
 
 import us.ihmc.commonWalkingControlModules.polygonWiggling.StepConstraintPolygonTools;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.WiggleParameters;
+import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
@@ -13,6 +16,7 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerPar
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapSnapWiggler;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -184,25 +188,25 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
       List<Point3DBasics> footPointsInEnvironment = new ArrayList<>();
       FootstepSnapData snapData = footstepToCrop.getSnapData();
 
-
-      ConvexPolygon2D convexPolygon2D = new ConvexPolygon2D(snapData.getCroppedFoothold());
-      if (convexPolygon2D.getNumberOfVertices() != 4)
+      ConvexPolygon2D footPolygonInFootFrame = new ConvexPolygon2D(snapData.getCroppedFoothold());
+      if (footPolygonInFootFrame.getNumberOfVertices() != 4)
       {
-         convexPolygon2D.set(footPolygonsInSoleFrame.get(footstepToCrop.getRobotSide()));
+         footPolygonInFootFrame.set(footPolygonsInSoleFrame.get(footstepToCrop.getRobotSide()));
       }
 
-      RigidBodyTransform totalTransform = new RigidBodyTransform();
+      // Get the transform from the sole frame to the desired foot pose.
+      RigidBodyTransform transformToFootPose = new RigidBodyTransform();
       RigidBodyTransform snapAndWiggleTransform = new RigidBodyTransform();
 
-      DiscreteFootstepTools.getStepTransform(footstepToCrop, totalTransform);
+      DiscreteFootstepTools.getStepTransform(footstepToCrop, transformToFootPose);
       snapData.packSnapAndWiggleTransform(snapAndWiggleTransform);
-      // FIXME this may need to be a multiply, not a pre-multiply.
-      totalTransform.preMultiply(snapAndWiggleTransform);
+      transformToFootPose.preMultiply(snapAndWiggleTransform);
 
       // Transform the foot polygon to its position in the world after the snap.
-      convexPolygon2D.applyTransform(totalTransform);
+      ConvexPolygon2D snappedFootPolygonInWorld = new ConvexPolygon2D(footPolygonInFootFrame);
+      snappedFootPolygonInWorld.applyTransform(transformToFootPose, false);
 
-      heightMapSnapper.computeFootPointsInTheEnvironment(convexPolygon2D,
+      heightMapSnapper.computeFootPointsInTheEnvironment(snappedFootPolygonInWorld,
                                                          environmentHandler.getHeightMap(),
                                                          environmentHandler.getTerrainMapData(),
                                                          parameters.getHeightMapSnapThreshold(),
@@ -210,14 +214,18 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
                                                          -Double.MAX_VALUE,
                                                          footPointsInEnvironment);
 
-      ConvexPolygon2D croppedFoothold = snapData.getCroppedFoothold();
-      croppedFoothold.set(Vertex3DSupplier.asVertex3DSupplier(footPointsInEnvironment));
-      croppedFoothold.applyInverseTransform(totalTransform);
+      ConvexPolygon2D croppedFoothold = new ConvexPolygon2D(Vertex3DSupplier.asVertex3DSupplier(footPointsInEnvironment));
+      croppedFoothold.applyInverseTransform(transformToFootPose, false);
 
+      // Reduce the foothold down to 4 vertices.
       if (croppedFoothold.getNumberOfVertices() > 4)
-      {
-         throw new RuntimeException("We're not set up to handle this, we need to down-sample the polygon");
-      }
+         ConvexPolygonTools.limitVerticesConservative(croppedFoothold, 4);
+
+      // If this cropped foothold is almost the same as the original, don't bother storing it, and clear the stored one.
+      if (footPolygonsInSoleFrame.get(footstepToCrop.getRobotSide()).getArea() - croppedFoothold.getArea() > 1e-3)
+         snapData.getCroppedFoothold().set(croppedFoothold);
+      else
+         snapData.getCroppedFoothold().clear();
    }
 
 
@@ -267,5 +275,54 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
    public void reset()
    {
       clearSnapData();
+   }
+
+   public static void main(String[] args)
+   {
+      List<Point2D> points = new ArrayList<>();
+      points.add(new Point2D(1.763, -0.008));
+      points.add(new Point2D(1.776, 0.028));
+      points.add(new Point2D(1.846, -0.031));
+      points.add(new Point2D(1.888, -0.042));
+      points.add(new Point2D(1.929, -0.053));
+      points.add(new Point2D(1.971, -0.065));
+      points.add(new Point2D(1.769, 0.010));
+      points.add(new Point2D(1.810, -0.003));
+      points.add(new Point2D(1.851, -0.015));
+      points.add(new Point2D(1.893, -0.028));
+      points.add(new Point2D(1.934, -0.041));
+      points.add(new Point2D(1.975, -0.054));
+      points.add(new Point2D(1.804, -0.019));
+      points.add(new Point2D(1.816, -0.014));
+      points.add(new Point2D(1.857, -0.000));
+      points.add(new Point2D(1.898, -0.014));
+      points.add(new Point2D(1.938, -0.028));
+      points.add(new Point2D(1.979, -0.042));
+      points.add(new Point2D(1.782, 0.046));
+      points.add(new Point2D(1.822, 0.030));
+      points.add(new Point2D(1.863, 0.015));
+      points.add(new Point2D(1.903, 0.000));
+      points.add(new Point2D(1.943, -0.031));
+      points.add(new Point2D(1.789, 0.064));
+      points.add(new Point2D(1.828, 0.047));
+      points.add(new Point2D(1.868, 0.030));
+      points.add(new Point2D(1.908, 0.014));
+      points.add(new Point2D(1.947, -0.003));
+      points.add(new Point2D(1.987, -0.020));
+      points.add(new Point2D(1.795, 0.081));
+      points.add(new Point2D(1.834, 0.063));
+      points.add(new Point2D(1.874, 0.045));
+      points.add(new Point2D(1.913, 0.027));
+      points.add(new Point2D(1.952, 0.009));
+      points.add(new Point2D(1.991, -0.009));
+
+      ConvexPolygon2D polygon = new ConvexPolygon2D();
+      points.forEach(polygon::addVertex);
+      polygon.update();
+
+      for (Point2D point : points)
+      {
+         assert(polygon.isPointInside(point));
+      }
    }
 }
