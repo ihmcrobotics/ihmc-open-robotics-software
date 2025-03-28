@@ -42,17 +42,13 @@ public class ALIPCalculatorTools
       tempCurrentContactPointAngularMomentum.changeFrame(controlFrame);
       tempCurrentStanceFootPosition.changeFrame(controlFrame);
 
-      tempCurrentCoMPose.setX(-tempCurrentStanceFootPosition.getX());
-      tempCurrentCoMPose.setY(-tempCurrentStanceFootPosition.getY());
-      tempCurrentCoMPose.setZ(-tempCurrentStanceFootPosition.getZ());
-
       double omega = computeNaturalFrequency(pendulumHeight);
 
       // Current position and angular momentum
-      double x0 = tempCurrentCoMPose.getX();
+      double x0 = tempCurrentCoMPose.getX() - tempCurrentStanceFootPosition.getX();
       double Ly0 = tempCurrentContactPointAngularMomentum.getY();
 
-      double y0 = tempCurrentCoMPose.getY();
+      double y0 = tempCurrentCoMPose.getY() - tempCurrentStanceFootPosition.getY();
       double Lx0 = tempCurrentContactPointAngularMomentum.getX();
 
       // Final position and angular momentum
@@ -66,11 +62,10 @@ public class ALIPCalculatorTools
       ReferenceFrame originalMomentumFrame = futureContactPointAngularMomentumToPack.getReferenceFrame();
 
       futureCoMPoseToPack.setIncludingFrame(tempCurrentCoMPose);
-      futureContactPointAngularMomentumToPack.changeFrame(controlFrame);
-
       futureCoMPoseToPack.setX(tempCurrentStanceFootPosition.getX());
       futureCoMPoseToPack.setY(tempCurrentStanceFootPosition.getY());
-      futureCoMPoseToPack.setZ(tempCurrentCoMPose.getZ());
+
+      futureContactPointAngularMomentumToPack.changeFrame(controlFrame);
 
       int intervals = (int) Math.round(horizonDuration / updateDt);
       intervals = MathTools.clamp(intervals, 1, Integer.MAX_VALUE);

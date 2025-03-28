@@ -187,6 +187,12 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
       numberOfTicksBeforeSubmittingFootsteps.set(0);
       currentFootstepDataListCommandID.set(new Random().nextLong(0, Long.MAX_VALUE / 2)); // To make this command ID unique
 
+      requestedCSGMode.addListener(change ->
+                                   {
+//                                      if (requestedCSGMode.getEnumValue().equals(ContinuousStepGeneratorMode.STANDARD))
+//                                         useQFPParameters = false;
+                                   });
+
       currentCSGMode.addListener(change ->
                           {
                              if (currentCSGMode.getEnumValue() == ContinuousStepGeneratorMode.QFP)
@@ -288,23 +294,32 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
          previousFootstepPose.set(previousFootstep.getLocation(), previousFootstep.getOrientation());
       }
 
-      // Set footstep parameters
-      if (currentCSGMode.getEnumValue() == ContinuousStepGeneratorMode.QFP && quicksterFootstepProvider.hasValue())
+      if (quicksterFootstepProvider.hasValue())
       {
+         if (currentCSGMode.getEnumValue().equals(ContinuousStepGeneratorMode.QFP))
+            swingSide = quicksterFootstepProvider.get().getCurrentSwingSide();
+
          if (useQFPParameters)
-         {
             quicksterFootstepProvider.get().setUseAlternateTransferDuration(false);
-            footstepDataListMessage.setDefaultTransferDuration(quicksterFootstepProvider.get().getTransferDuration(swingSide));
-            footstepDataListMessage.setFinalTransferDuration(quicksterFootstepProvider.get().getTransferDuration(swingSide));
-         }
          else
          {
             quicksterFootstepProvider.get().setUseAlternateTransferDuration(true);
             quicksterFootstepProvider.get().setAlternateTransferDuration(parameters.getTransferDuration());
-            footstepDataListMessage.setDefaultTransferDuration(parameters.getTransferDuration());
-            footstepDataListMessage.setFinalTransferDuration(parameters.getTransferDuration());
          }
 
+         // If in standard mode, keep initializing QFP so its control frame matches pelvis yaw
+         if (currentCSGMode.getEnumValue() == ContinuousStepGeneratorMode.STANDARD)
+            quicksterFootstepProvider.get().initialize();
+
+         // Continuously update QFP for data visualization purposes
+         quicksterFootstepProvider.get().update(parameters.getNumberOfFootstepsToPlan());
+      }
+
+      // Set footstep parameters
+      if (currentCSGMode.getEnumValue() == ContinuousStepGeneratorMode.QFP && quicksterFootstepProvider.hasValue())
+      {
+         footstepDataListMessage.setDefaultTransferDuration(quicksterFootstepProvider.get().getTransferDuration(swingSide));
+         footstepDataListMessage.setFinalTransferDuration(quicksterFootstepProvider.get().getTransferDuration(swingSide));
          footstepDataListMessage.setDefaultSwingDuration(quicksterFootstepProvider.get().getSwingDuration(swingSide));
          footstepDataListMessage.setAreFootstepsAdjustable(false);
          footstepDataListMessage.setOffsetFootstepsWithExecutionError(false);
@@ -348,17 +363,6 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
       this.desiredTurningVelocity.set(turningVelocity);
 
       int startingIndexToAdjust = footsteps.size();
-
-      // Continuously update QFP for data visualization purposes
-      if (quicksterFootstepProvider.hasValue())
-      {
-         // If in standard mode, keep initializing QFP so its control frame matches pelvis yaw
-         if (currentCSGMode.getEnumValue() == ContinuousStepGeneratorMode.STANDARD)
-            quicksterFootstepProvider.get().initialize();
-
-         quicksterFootstepProvider.get().update(parameters.getNumberOfFootstepsToPlan());
-      }
-
       int perFootIndex = 0;
 
       for (int i = startingIndexToAdjust; i < parameters.getNumberOfFootstepsToPlan(); i++)
@@ -405,7 +409,7 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
 
          if (swingHeightInputProvider == null && currentCSGMode.getEnumValue() == ContinuousStepGeneratorMode.STANDARD)
             footstep.setSwingHeight(parameters.getSwingHeight());
-         else if (swingHeightInputProvider == null && currentCSGMode.getEnumValue() == ContinuousStepGeneratorMode.QFP)
+         else if (swingHeightInputProvider == null && currentCSGMode.getEnumValue() == ContinuousStepGeneratorMode.QFP && quicksterFootstepProvider.hasValue())
             footstep.setSwingHeight(quicksterFootstepProvider.get().getSwingHeight(swingSide));
          else
             footstep.setSwingHeight(swingHeightInputProvider.getValue());
@@ -436,30 +440,30 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
       }
 
       // run through and make sure these adjusted steps are valid.
-      for (int i = startingIndexToAdjust; i < footstepDataListMessage.getFootstepDataList().size(); i++)
-      {
-         FootstepDataMessage footstepData = footstepDataListMessage.getFootstepDataList().get(i);
-         nextFootstepPose2D.getPosition().set(footstepData.getLocation());
-         nextFootstepPose2D.getOrientation().set(footstepData.getOrientation());
-         nextFootstepPose3D.getPosition().set(footstepData.getLocation());
-         nextFootstepPose3D.getOrientation().set(footstepData.getOrientation());
-         swingSide = RobotSide.fromByte(footstepData.getRobotSide());
-
-         if (!isStepValid(nextFootstepPose3D, previousFootstepPose, swingSide))
-         {
-            alternateStepChooser.computeStep(footstepPose2D, nextFootstepPose2D, swingSide, footstepData);
-
-            // remove all the other steps after the invalid one.
-            while (footstepDataListMessage.getFootstepDataList().size() > i + 1)
-            {
-               footstepDataListMessage.getFootstepDataList().remove(i + 1);
-            }
-         }
-
-         previousFootstepPose.getPosition().set(footstepData.getLocation());
-         previousFootstepPose.getOrientation().set(footstepData.getOrientation());
-         footstepPose2D.set(previousFootstepPose);
-      }
+//      for (int i = startingIndexToAdjust; i < footstepDataListMessage.getFootstepDataList().size(); i++)
+//      {
+//         FootstepDataMessage footstepData = footstepDataListMessage.getFootstepDataList().get(i);
+//         nextFootstepPose2D.getPosition().set(footstepData.getLocation());
+//         nextFootstepPose2D.getOrientation().set(footstepData.getOrientation());
+//         nextFootstepPose3D.getPosition().set(footstepData.getLocation());
+//         nextFootstepPose3D.getOrientation().set(footstepData.getOrientation());
+//         swingSide = RobotSide.fromByte(footstepData.getRobotSide());
+//
+//         if (!isStepValid(nextFootstepPose3D, previousFootstepPose, swingSide))
+//         {
+//            alternateStepChooser.computeStep(footstepPose2D, nextFootstepPose2D, swingSide, footstepData);
+//
+//            // remove all the other steps after the invalid one.
+//            while (footstepDataListMessage.getFootstepDataList().size() > i + 1)
+//            {
+//               footstepDataListMessage.getFootstepDataList().remove(i + 1);
+//            }
+//         }
+//
+//         previousFootstepPose.getPosition().set(footstepData.getLocation());
+//         previousFootstepPose.getOrientation().set(footstepData.getOrientation());
+//         footstepPose2D.set(previousFootstepPose);
+//      }
 
       // Update the visualizers
       for (int i = startingIndexToAdjust; i < footstepDataListMessage.getFootstepDataList().size(); i++)
