@@ -123,7 +123,7 @@ public class RapidHeightMapManager
       }
 
       deviceDepthImage.upload(hostDepthImage);
-      bodyCollisionFilter.process(latestDepthImage,depthImageIntrinsics,robotCollidables, cameraFrame);
+      bodyCollisionFilter.process(deviceDepthImage,depthImageIntrinsics,robotCollidables, cameraFrame);
       if (resetHeightMapRequested.poll())
       {
          rapidHeightMapExtractor.reset();
