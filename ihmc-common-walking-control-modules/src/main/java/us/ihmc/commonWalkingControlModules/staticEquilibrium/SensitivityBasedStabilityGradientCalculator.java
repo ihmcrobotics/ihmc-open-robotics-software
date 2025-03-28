@@ -56,7 +56,7 @@ import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.percentageOfInte
  */
 public class SensitivityBasedStabilityGradientCalculator
 {
-   private static final boolean APPLY_JOINT_LIMIT_FILTER = false;
+   private static final boolean APPLY_JOINT_LIMIT_FILTER = true;
    private static final boolean USE_AREA_BASED_CONTACT_ADJUSTMENT = true;
    private static final boolean USE_HEURISTIC_MARGIN = true;
    private static final double INTEGRATION_DT = 1.0e-3;
