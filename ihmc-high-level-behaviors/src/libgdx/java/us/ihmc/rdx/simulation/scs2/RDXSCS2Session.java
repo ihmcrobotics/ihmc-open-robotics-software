@@ -309,6 +309,16 @@ public class RDXSCS2Session
       {
          session.submitBufferIndexRequest(yoManager.getOutPoint());
       }
+      if (ImGui.button(labels.get("Set In")))
+      {
+         session.submitBufferInPointIndexRequest(yoManager.getCurrentIndex());
+      }
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Set Out")))
+      {
+         session.submitBufferOutPointIndexRequest(yoManager.getCurrentIndex());
+      }
+      ImGui.sameLine();
       if (ImGui.button(labels.get("Crop to In Out")))
       {
          CropBufferRequest cropBufferRequest = new CropBufferRequest(yoManager.getInPoint(), yoManager.getOutPoint());
