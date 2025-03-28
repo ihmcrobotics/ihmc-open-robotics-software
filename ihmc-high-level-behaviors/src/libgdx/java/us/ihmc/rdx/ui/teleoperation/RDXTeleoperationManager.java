@@ -734,9 +734,4 @@ public class RDXTeleoperationManager extends RDXPanel
    {
       return armManager;
    }
-
-   public ControllerStatusTracker getControllerStatusTracker()
-   {
-      return controllerStatusTracker;
-   }
 }

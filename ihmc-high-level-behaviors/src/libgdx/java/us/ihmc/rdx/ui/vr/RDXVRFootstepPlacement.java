@@ -53,6 +53,7 @@ public class RDXVRFootstepPlacement
    private final ArrayList<RDXVRFootstep> handPlacedFootsteps = new ArrayList<>();
 
    private final CUDAFootstepOptimizer footstepOptimizer;
+   private double previousAdaptedStepHeight = Double.NaN;
    private RDXVRFootstep footstepBeingExternallyPlaced;
    private final FootstepSnapAndWiggler snapper;
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
@@ -198,14 +199,17 @@ public class RDXVRFootstepPlacement
             {
                FramePose3D adaptedPose = new FramePose3D(pose);
                adaptedPose.getPosition().setZ(height);
-
-               FramePose3D gpuAdaptedPose = new FramePose3D(pose);
-               gpuAdaptedPose.getPosition().setZ(height);
                if (USE_STEPPABLE_REGION_ADAPTATION)
                {
                   adaptedPose = footstepOptimizer.compute(latestHeightMapData, adaptedPose);
                }
-               footstepBeingExternallyPlaced.setPose(adaptedPose);
+               if (Double.isNaN(previousAdaptedStepHeight) ||
+                   getTimeElapsedAfterStep() < getStepDuration() / 2 ||
+                   getTimeElapsedAfterStep() > getStepDuration() / 2 && Math.abs(adaptedPose.getZ() - previousAdaptedStepHeight) < 0.05)
+               {
+                  footstepBeingExternallyPlaced.setPose(adaptedPose);
+                  previousAdaptedStepHeight = adaptedPose.getZ();
+               }
             }
             else
             {
@@ -312,6 +316,7 @@ public class RDXVRFootstepPlacement
    {
       footstepIndex = 0;
       footstepBeingExternallyPlaced = null;
+      previousAdaptedStepHeight = Double.NaN;
       latestHeightMapData = null;
       handPlacedFootsteps.clear();
    }

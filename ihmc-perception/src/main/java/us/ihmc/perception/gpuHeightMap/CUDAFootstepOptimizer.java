@@ -127,7 +127,6 @@ public class CUDAFootstepOptimizer implements AutoCloseable
       CUDATools.memcpyAsync(gpuHeights, cpuHeights, currentHeightMapData.getHeights().length, cudaStream);
       CUDATools.memcpyAsync(gpuGridCenter, cpuGridCenter, 2, cudaStream);
 
-      LogTools.warn("Running compute kernel");
       // Runs the kernel with the desired grid and block sizes
       computeKernel.withPointer(gpuHeights)
                    .withPointer(gpuGridCenter)
@@ -152,7 +151,6 @@ public class CUDAFootstepOptimizer implements AutoCloseable
       CUDATools.mallocAsync(gpuBestCosts, resultSize, cudaStream);
       CUDATools.mallocAsync(gpuBestIndices, resultSize, cudaStream);
 
-      LogTools.warn("Running block result kernel");
       // Run the kernel
       blockResultKernel.withPointer(gpuCosts)
                        .withInt(searchSpaceDim)
@@ -165,7 +163,6 @@ public class CUDAFootstepOptimizer implements AutoCloseable
       CUDATools.mallocAsync(gpuGlobalBestIndex, 1, cudaStream);
       CUDATools.mallocAsync(gpuGlobalBestCost, 1, cudaStream);
 
-      LogTools.warn("Running global result kernel");
       // Run the kernel
       globalResultKernel.withPointer(gpuBestCosts)
                         .withPointer(gpuBestIndices)
@@ -173,12 +170,10 @@ public class CUDAFootstepOptimizer implements AutoCloseable
                         .withPointer(gpuGlobalBestCost)
                         .withPointer(gpuGlobalBestIndex)
                         .run(cudaStream, gridSize, blockSize, 0);
-      LogTools.warn("Done global result kernel");
       IntPointer cpuGlobalBestIndex = new IntPointer(1);
       FloatPointer cpuGlobalBestCost = new FloatPointer(1);
       CUDATools.memcpyAsync(cpuGlobalBestIndex, gpuGlobalBestIndex, 1, cudaStream);
       CUDATools.memcpyAsync(cpuGlobalBestCost, gpuGlobalBestCost, 1, cudaStream);
-
       cudart.cudaStreamSynchronize(cudaStream);
 
       int startIndex = cpuGlobalBestIndex.get(0);

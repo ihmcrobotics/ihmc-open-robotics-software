@@ -10,6 +10,7 @@ import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.behaviors.tools.interfaces.LogToolsLogger;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -48,7 +49,8 @@ public class RDXVRModeManager
    private RDX3DSituatedImGuiPanel vrModeControls3DPanel;
    private final FramePose3D vrModeControls3DPanelPose = new FramePose3D();
    private RDXROS2RobotVisualizer robotVisualizer;
-   private ImBoolean interactablesEnabled;
+   private ImBoolean interactablesEnabled = new ImBoolean(false);
+   private final LogToolsLogger logToolsLogger = new LogToolsLogger();
    private ControllerStatusTracker controllerStatusTracker;
    private RDXHandConfigurationManager handManager;
 
@@ -92,12 +94,12 @@ public class RDXVRModeManager
       this.robotVisualizer = robotVisualizer;
 
       Collection<RDXPanel> baseUIPanels =  RDXBaseUI.getInstance().getImGuiPanelManager().getPanels();
+      controllerStatusTracker = new ControllerStatusTracker(logToolsLogger, controllerHelper.getROS2Node(), syncedRobot.getRobotModel().getSimpleRobotName());
       for (RDXPanel panel : baseUIPanels)
       {
          if (panel instanceof RDXTeleoperationManager teleoperationPanel)
          {
             interactablesEnabled = teleoperationPanel.getInteractablesEnabled();
-            controllerStatusTracker = teleoperationPanel.getControllerStatusTracker();
             handManager = teleoperationPanel.getArmManager().getHandManager();
             break;
          }
