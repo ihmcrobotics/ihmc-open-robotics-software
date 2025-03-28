@@ -299,8 +299,14 @@ public class AStarFootstepPlanner
       {
          FootstepGraphNode footstepNode = path.get(i);
          FootstepSnapData snapData = snapper.snapFootstep(footstepNode.getSecondStep(), footstepNode.getFirstStep(), true);
+
          PlannedFootstep footstep = new PlannedFootstep(footstepNode.getSecondStepSide());
          footstep.getFootstepPose().set(snapData.getSnappedStepTransform(footstepNode.getSecondStep()));
+         if (!snapData.getCroppedFoothold().isEmpty())
+         {
+            footstep.getFoothold().set(snapData.getCroppedFoothold());
+            footstep.limitFootholdVertices();
+         }
 
          if (!footstepPlannerParameters.getWiggleWhilePlanning())
          {

@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.polygonWiggling.StepConstraintPolygon
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -11,6 +12,7 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -29,7 +31,7 @@ public class DiscreteFootstepTools
     * @param step
     * @param stepToWorldTransformToPack
     */
-   public static void getStepTransform(DiscreteFootstep step, RigidBodyTransform stepToWorldTransformToPack)
+   public static void getStepTransform(DiscreteFootstep step, RigidBodyTransformBasics stepToWorldTransformToPack)
    {
       getStepTransform(step.getX(), step.getY(), step.getYaw(), stepToWorldTransformToPack);
    }
@@ -40,7 +42,7 @@ public class DiscreteFootstepTools
     * will always have no z translation, pitch and roll.
     * @param stepToWorldTransformToPack
     */
-   public static void getStepTransform(double x, double y, double yaw, RigidBodyTransform stepToWorldTransformToPack)
+   public static void getStepTransform(double x, double y, double yaw, RigidBodyTransformBasics stepToWorldTransformToPack)
    {
       stepToWorldTransformToPack.setRotationYawAndZeroTranslation(yaw);
       stepToWorldTransformToPack.getTranslation().set(x, y, 0.0);
@@ -54,13 +56,13 @@ public class DiscreteFootstepTools
     * @param snapTransform pre-snap to post-snap transform
     * @param transformToPack
     */
-   public static void getSnappedStepTransform(DiscreteFootstep step, RigidBodyTransformReadOnly snapTransform, RigidBodyTransform transformToPack)
+   public static void getSnappedStepTransform(DiscreteFootstep step, RigidBodyTransformReadOnly snapTransform, RigidBodyTransformBasics transformToPack)
    {
       getStepTransform(step, transformToPack);
       snapTransform.transform(transformToPack);
    }
 
-   public static Point3DReadOnly getStepPositionInWorld(DiscreteFootstep step, RigidBodyTransform snapTransform)
+   public static Point3DReadOnly getStepPositionInWorld(DiscreteFootstep step, RigidBodyTransformBasics snapTransform)
    {
       Point3D nodeInWorld = new Point3D();
       getStepPositionInWorld(step, nodeInWorld, snapTransform);
@@ -68,7 +70,7 @@ public class DiscreteFootstepTools
       return nodeInWorld;
    }
 
-   public static void getStepPositionInWorld(DiscreteFootstep step, Point3DBasics stepPositionToSet, RigidBodyTransform snapTransform)
+   public static void getStepPositionInWorld(DiscreteFootstep step, Point3DBasics stepPositionToSet, RigidBodyTransformReadOnly snapTransform)
    {
       stepPositionToSet.set(step.getX(), step.getY(), 0.0);
       snapTransform.transform(stepPositionToSet);
@@ -82,7 +84,7 @@ public class DiscreteFootstepTools
       return stepPoseInWorld;
    }
 
-   public static void getStepPoseInWorld(DiscreteFootstep step, Pose3DBasics stepPoseToSet, RigidBodyTransform snapTransform)
+   public static void getStepPoseInWorld(DiscreteFootstep step, Pose3DBasics stepPoseToSet, RigidBodyTransformReadOnly snapTransform)
    {
       RigidBodyTransform snappedTransform = new RigidBodyTransform();
       getSnappedStepTransform(step, snapTransform, snappedTransform);
@@ -96,7 +98,7 @@ public class DiscreteFootstepTools
     * @param footPolygonInSoleFrame
     * @param footPolygonToPack
     */
-   public static void getFootPolygon(DiscreteFootstep step, ConvexPolygon2DReadOnly footPolygonInSoleFrame, ConvexPolygon2D footPolygonToPack)
+   public static void getFootPolygon(DiscreteFootstep step, ConvexPolygon2DReadOnly footPolygonInSoleFrame, ConvexPolygon2DBasics footPolygonToPack)
    {
       getFootPolygon(step.getX(), step.getY(), step.getYaw(), footPolygonInSoleFrame, footPolygonToPack);
    }
@@ -107,7 +109,7 @@ public class DiscreteFootstepTools
     * @param footPolygonInSoleFrame
     * @param footPolygonToPack
     */
-   public static void getFootPolygon(double stepX, double stepY, double stepYaw, ConvexPolygon2DReadOnly footPolygonInSoleFrame, ConvexPolygon2D footPolygonToPack)
+   public static void getFootPolygon(double stepX, double stepY, double stepYaw, ConvexPolygon2DReadOnly footPolygonInSoleFrame, ConvexPolygon2DBasics footPolygonToPack)
    {
       footPolygonToPack.set(footPolygonInSoleFrame);
 

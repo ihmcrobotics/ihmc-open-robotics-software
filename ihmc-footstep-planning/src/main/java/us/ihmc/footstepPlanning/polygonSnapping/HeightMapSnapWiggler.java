@@ -59,7 +59,7 @@ public class HeightMapSnapWiggler
       RobotSide robotSide = footstepToWiggle.getRobotSide();
 
       Point2D currentPosition = new Point2D(footstepToWiggle.getX(), footstepToWiggle.getY());
-      Point2D originalPosition = new Point2D(footstepToWiggle.getX(), footstepToWiggle.getY());
+      Point2D originalPosition = new Point2D(currentPosition);
 
       computeWiggleOffsets(footstepToWiggle.getYaw());
 
