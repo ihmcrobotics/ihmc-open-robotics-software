@@ -56,9 +56,9 @@ public class StabilityBasedKinematicRetargetingCalculator
 //   private static final double MAX_PELVIS_ORIENTATION_OFFSET = Math.toRadians(180.0);
 
    // Hardware
-   private static final double MAX_ARM_ORIENTATION_OFFSET = Math.toRadians(70.0);
-   private static final double MAX_CHEST_ORIENTATION_OFFSET = Math.toRadians(35.0);
-   private static final double MAX_PELVIS_ORIENTATION_OFFSET = Math.toRadians(35.0);
+   private static final double MAX_ARM_ORIENTATION_OFFSET = Math.toRadians(55.0);
+   private static final double MAX_CHEST_ORIENTATION_OFFSET = Math.toRadians(30.0);
+   private static final double MAX_PELVIS_ORIENTATION_OFFSET = Math.toRadians(25.0);
 
    private static final boolean SNAP_TO_REGION = false;
    public static boolean OVERRIDE_MESSAGE = false;
@@ -68,7 +68,7 @@ public class StabilityBasedKinematicRetargetingCalculator
    public static final Vector3D OVERRIDE_NORMAL = new Vector3D(Axis3D.Z);
 
    private static final double KP_ORIENTATION = 1200.0;
-   private static final double MAX_CONTACT_POINT_ADJUSTMENT = 0.15;
+   private static final double MAX_CONTACT_POINT_ADJUSTMENT = 0.18;
    private static final double MAX_ORIENTATION_ERROR = Math.toRadians(5.0);
 //   private static final double MAX_COM_Z_ERROR = 0.01;
 
@@ -100,6 +100,7 @@ public class StabilityBasedKinematicRetargetingCalculator
    private final YoBoolean requestPostureAdjustment = new YoBoolean("requestPostureAdjustment", registry);
    /* Contact normal for which support region is previewed */
    private final FrameVector3D regionNormal = new FrameVector3D();
+   private final YoDouble maxContactAdjustment = new YoDouble("maxContactAdjustment", registry);
 
    /* Reference frame of the region */
    private final PoseReferenceFrame regionFrame = new PoseReferenceFrame("regionFrame", ReferenceFrame.getWorldFrame());
@@ -170,6 +171,7 @@ public class StabilityBasedKinematicRetargetingCalculator
       stabilityMarginHysteresis.set(0.015);
       sensitivityThresholdLower.set(3.0e-4);
       sensitivityThresholdUpper.set(0.035);
+      maxContactAdjustment.set(MAX_CONTACT_POINT_ADJUSTMENT);
 
       this.stabilityGradientCalculator = new SensitivityBasedStabilityGradientCalculator(fullRobotModel,
                                                                                          wholeBodyContactState,
@@ -441,7 +443,7 @@ public class StabilityBasedKinematicRetargetingCalculator
 
             // Cap adjustment
             double adjustmentSquared = integratedContactPointAdjustment.normSquared();
-            double maxAdjustmentSquared = EuclidCoreTools.square(MAX_CONTACT_POINT_ADJUSTMENT);
+            double maxAdjustmentSquared = EuclidCoreTools.square(maxContactAdjustment.getValue());
             if (adjustmentSquared > maxAdjustmentSquared)
             {
                integratedContactPointAdjustment.scale(maxAdjustmentSquared / adjustmentSquared);
