@@ -43,7 +43,7 @@ public class BipedContactSequenceTools
          }
       }
    }
-   
+
    public static void computeStepTransitionsFromStepSequence(RecyclingArrayList<BipedStepTransition> stepTransitionsToPack, double firstSwingStartTime,
                                                              double currentTime, List<Footstep> footstepList, List<FootstepTiming> footstepTimingList, 
                                                              int stepsToConsider)
@@ -72,17 +72,25 @@ public class BipedContactSequenceTools
       }
 
       // sort step transitions in ascending order as a function of time
-      stepTransitionsToPack.sort(Comparator.comparingDouble(BipedStepTransition::getTransitionTime));
+      stepTransitionsToPack.sort(stepTransitionTimeComparator);
 
       // collapse the transitions that occur at the same time
       BipedContactSequenceTools.collapseTransitionEvents(stepTransitionsToPack);
 
       // remove any transitions that already happened
-      stepTransitionsToPack.removeIf(transition -> transition.getTransitionTime() <= currentTime);
+      int transitionNumber = 0;
+      while (transitionNumber < stepTransitionsToPack.size())
+      {
+         BipedStepTransition transition = stepTransitionsToPack.get(transitionNumber);
+         if (transition.getTransitionTime() <= currentTime)
+            stepTransitionsToPack.remove(transitionNumber);
+         else
+            transitionNumber++;
+      }
    }
 
    private static final Comparator<BipedStepTransition> stepTransitionTimeComparator = Comparator.comparingDouble(BipedStepTransition::getTransitionTime);
-   
+
    public static void computeStepTransitionsFromStepSequence(RecyclingArrayList<BipedStepTransition> stepTransitionsToPack, double currentTime,
                                                              List<? extends BipedTimedStep> stepSequence, int stepsToConsider)
    {
@@ -123,7 +131,7 @@ public class BipedContactSequenceTools
       while (transitionNumber < stepTransitionsToPack.size())
       {
          BipedStepTransition transition = stepTransitionsToPack.get(transitionNumber);
-         if (transition.getTransitionTime() < currentTime)
+         if (transition.getTransitionTime() <= currentTime)
             stepTransitionsToPack.remove(transitionNumber);
          else
             transitionNumber++;
@@ -141,7 +149,7 @@ public class BipedContactSequenceTools
 
       if (contactSequenceToPack.isEmpty())
       { // if there aren't any past sequences, add the current one in.
-         addCurrentStateAsAContactPhase(contactSequenceToPack, currentFeetInContact, currentSolePoses, currentTime);
+         addCurrentStateAsAContactPhase(0, contactSequenceToPack, currentFeetInContact, currentSolePoses, currentTime);
       }
       else
       { // there are some contact phases that are currently in progress
@@ -155,18 +163,27 @@ public class BipedContactSequenceTools
                contactPhase.setStartFootPoses(currentSolePoses);
             }
             else
-            { // end the previous contact phase and add a new one for the current state
+            {
+               // end the previous contact phase and add a new one for the current state. Note that while this
                contactSequenceToPack.remove(i);
-               addCurrentStateAsAContactPhase(contactSequenceToPack, currentFeetInContact, currentSolePoses, currentTime);
+               addCurrentStateAsAContactPhase(i, contactSequenceToPack, currentFeetInContact, currentSolePoses, currentTime);
             }
          }
       }
    }
 
-   public static void addCurrentStateAsAContactPhase(RecyclingArrayList<SimpleBipedContactPhase> contactSequenceToPack, List<RobotSide> currentFeetInContact,
-                                                     SideDependentList<? extends FramePose3DReadOnly> solePoses, double currentTime)
+   public static void addCurrentStateAsAContactPhase(int location,
+                                                     RecyclingArrayList<SimpleBipedContactPhase> contactSequenceToPack,
+                                                     List<RobotSide> currentFeetInContact,
+                                                     SideDependentList<? extends FramePose3DReadOnly> solePoses,
+                                                     double currentTime)
    {
-      SimpleBipedContactPhase contactPhase = contactSequenceToPack.add();
+      SimpleBipedContactPhase contactPhase;
+      if (location == 0)
+         contactPhase = contactSequenceToPack.add();
+      else
+         contactPhase = contactSequenceToPack.insertAtIndex(location);
+
       contactPhase.reset();
       contactPhase.setFeetInContact(currentFeetInContact);
       for (int i = 0; i < currentFeetInContact.size(); i++)
