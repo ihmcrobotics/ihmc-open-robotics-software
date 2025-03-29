@@ -1,8 +1,12 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
+import us.ihmc.commons.ArrayTools;
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.lists.ArraySorter;
+import us.ihmc.commons.lists.ListSorter;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.commons.lists.RecyclingArrayListTools;
 import us.ihmc.commons.time.TimeIntervalProvider;
 import us.ihmc.commons.time.TimeIntervalTools;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -76,12 +80,9 @@ public class BipedContactSequenceTools
       // remove any transitions that already happened
       stepTransitionsToPack.removeIf(transition -> transition.getTransitionTime() <= currentTime);
    }
+
+   private static final Comparator<BipedStepTransition> stepTransitionTimeComparator = Comparator.comparingDouble(BipedStepTransition::getTransitionTime);
    
-   /**
-    * <p>
-    * WARNING: This method generates garbage.
-    * </p>
-    */
    public static void computeStepTransitionsFromStepSequence(RecyclingArrayList<BipedStepTransition> stepTransitionsToPack, double currentTime,
                                                              List<? extends BipedTimedStep> stepSequence, int stepsToConsider)
    {
@@ -111,13 +112,22 @@ public class BipedContactSequenceTools
       }
 
       // sort step transitions in ascending order as a function of time
-      stepTransitionsToPack.sort(Comparator.comparingDouble(BipedStepTransition::getTransitionTime));
+      // If this array is too long, this will allocate a sorter behind the scenes.
+      stepTransitionsToPack.sort(stepTransitionTimeComparator);
 
       // collapse the transitions that occur at the same time
       BipedContactSequenceTools.collapseTransitionEvents(stepTransitionsToPack);
 
       // remove any transitions that already happened
-      stepTransitionsToPack.removeIf(transition -> transition.getTransitionTime() < currentTime);
+      int transitionNumber = 0;
+      while (transitionNumber < stepTransitionsToPack.size())
+      {
+         BipedStepTransition transition = stepTransitionsToPack.get(transitionNumber);
+         if (transition.getTransitionTime() < currentTime)
+            stepTransitionsToPack.remove(transitionNumber);
+         else
+            transitionNumber++;
+      }
    }
 
    public static void trimPastContactSequences(RecyclingArrayList<SimpleBipedContactPhase> contactSequenceToPack, double currentTime,
