@@ -145,6 +145,12 @@ public class LeRobotDataset
          splits.put("train", "0:%d".formatted(episodes.size()));
          rootNode.put("data_path", "data/chunk-{episode_chunk:03d}/episode_{episode_index:06d}.parquet");
          rootNode.put("video_path", "videos/chunk-{episode_chunk:03d}/{video_key}/episode_{episode_index:06d}.mp4");
+
+         ObjectNode features = rootNode.putObject("features");
+         for (RobotSide side : RobotSide.values)
+         {
+
+         }
       });
    }
 
