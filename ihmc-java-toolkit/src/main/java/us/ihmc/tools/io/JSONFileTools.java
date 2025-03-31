@@ -2,9 +2,6 @@ package us.ihmc.tools.io;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.PrettyPrinter;
-import com.fasterxml.jackson.core.util.DefaultIndenter;
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -252,17 +249,7 @@ public class JSONFileTools
       rootConsumer.accept(root);
       try
       {
-         DefaultPrettyPrinter prettyPrinter = new DefaultPrettyPrinter()
-         {
-            @Override
-            public DefaultPrettyPrinter createInstance()
-            {
-               return new JSONLinePrettyPrinter();
-            }
-         };
-         prettyPrinter.indentArraysWith(new DefaultIndenter(" ", ""));
-         prettyPrinter.indentObjectsWith(new DefaultIndenter(" ", ""));
-         return objectMapper.writer(prettyPrinter).writeValueAsString(root);
+         return objectMapper.writeValueAsString(root);
       }
       catch (JsonProcessingException e)
       {
