@@ -53,9 +53,9 @@ public class RDXLeRobotDatasetCreator
             ImGui.text("Datasets:");
             for (Path datasetPath : datasets)
             {
-               if (ImGui.radioButton(labels.get(datasetPath.getFileName().toString()), dataset.getDirectory().equals(datasetPath)))
+               if (ImGui.radioButton(labels.get(datasetPath.getFileName().toString()), dataset != null && dataset.getDirectory().equals(datasetPath)))
                {
-                  if (!dataset.getDirectory().equals(datasetPath))
+                  if (dataset == null || !dataset.getDirectory().equals(datasetPath))
                      dataset = new LeRobotDataset(datasetPath);
                }
             }
@@ -69,6 +69,7 @@ public class RDXLeRobotDatasetCreator
                File logDirectory = logSession.getSession().getLogDirectory();
                dataset = new LeRobotDataset(logDirectory.toPath().resolve(datasetName.get().trim()));
                dataset.mkdirs();
+               datasetName.clear();
                refresh();
             }
             ImGui.endMenu();
@@ -90,6 +91,13 @@ public class RDXLeRobotDatasetCreator
       {
          ImGui.text("Task name:");
          ImGuiTools.inputTextMultiline(labels.getHidden("taskName"), imTaskName);
+
+
+         ImGui.text("Episodes are created for the current SCS 2 in/out points.");
+         if (ImGui.button(labels.get("Add Episode")))
+         {
+            dataset.addEpisode(imTaskName.get().trim());
+         }
 
       }
    }
