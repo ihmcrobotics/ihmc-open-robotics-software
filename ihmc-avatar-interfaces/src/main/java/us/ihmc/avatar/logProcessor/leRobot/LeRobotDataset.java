@@ -17,58 +17,74 @@ public class LeRobotDataset
 {
    private final String name;
    private final Path directory;
-   private final Path data;
-   private final Path meta;
-   private final Path videos;
-   private final Path dataChunk0;
+   private final Path dataPath;
+   private final Path metaPath;
+   private final Path videosPath;
+   private final Path dataChunk0Path;
    private final SideDependentList<Path> zedVideoDirs = new SideDependentList<>();
-   private final Path episodes;
-   private final Path episodeStats;
-   private final Path info;
-   private final Path tasks;
+   private final Path episodesJsonlPath;
+   private final Path episodeStatsJsonlPath;
+   private final Path infoJsonPath;
+   private final Path tasksJsonlPath;
 
    private final List<String> taskNames = new ArrayList<>();
+   private final List<LeRobotDatasetEpisode> episodes = new ArrayList<>();
 
    public LeRobotDataset(Path directory)
    {
       this.directory = directory;
 
       name = directory.getFileName().toString();
-      data = directory.resolve("data");
-      meta = directory.resolve("meta");
-      videos = directory.resolve("videos");
-      dataChunk0 = data.resolve("chunk-000");
+      dataPath = directory.resolve("data");
+      metaPath = directory.resolve("meta");
+      videosPath = directory.resolve("videos");
+      dataChunk0Path = dataPath.resolve("chunk-000");
       for (RobotSide side : RobotSide.values)
-         zedVideoDirs.put(side, videos.resolve("chunk-000/observations.images.cam_zed_" + side.getLowerCaseName()));
+         zedVideoDirs.put(side, videosPath.resolve("chunk-000/observations.images.cam_zed_" + side.getLowerCaseName()));
 
-      episodes = meta.resolve("episodes.jsonl");
-      episodeStats = meta.resolve("episode_stats.jsonl");
-      info = meta.resolve("info.json");
-      tasks = meta.resolve("tasks.jsonl");
+      episodesJsonlPath = metaPath.resolve("episodes.jsonl");
+      episodeStatsJsonlPath = metaPath.resolve("episode_stats.jsonl");
+      infoJsonPath = metaPath.resolve("info.json");
+      tasksJsonlPath = metaPath.resolve("tasks.jsonl");
    }
 
    public void mkdirs()
    {
       FileTools.ensureDirectoryExists(directory, DefaultExceptionHandler.PRINT_MESSAGE);
-      FileTools.ensureDirectoryExists(data, DefaultExceptionHandler.PRINT_MESSAGE);
-      FileTools.ensureDirectoryExists(meta, DefaultExceptionHandler.PRINT_MESSAGE);
-      FileTools.ensureDirectoryExists(videos, DefaultExceptionHandler.PRINT_MESSAGE);
-      FileTools.ensureDirectoryExists(dataChunk0, DefaultExceptionHandler.PRINT_MESSAGE);
+      FileTools.ensureDirectoryExists(dataPath, DefaultExceptionHandler.PRINT_MESSAGE);
+      FileTools.ensureDirectoryExists(metaPath, DefaultExceptionHandler.PRINT_MESSAGE);
+      FileTools.ensureDirectoryExists(videosPath, DefaultExceptionHandler.PRINT_MESSAGE);
+      FileTools.ensureDirectoryExists(dataChunk0Path, DefaultExceptionHandler.PRINT_MESSAGE);
       for (RobotSide side : RobotSide.values)
          FileTools.ensureDirectoryExists(zedVideoDirs.get(side), DefaultExceptionHandler.PRINT_MESSAGE);
 
-      FileTools.ensureFileExists(episodes, DefaultExceptionHandler.PRINT_MESSAGE);
-      FileTools.ensureFileExists(episodeStats, DefaultExceptionHandler.PRINT_MESSAGE);
-      FileTools.ensureFileExists(info, DefaultExceptionHandler.PRINT_MESSAGE);
-      FileTools.ensureFileExists(tasks, DefaultExceptionHandler.PRINT_MESSAGE);
+      FileTools.ensureFileExists(episodesJsonlPath, DefaultExceptionHandler.PRINT_MESSAGE);
+      FileTools.ensureFileExists(episodeStatsJsonlPath, DefaultExceptionHandler.PRINT_MESSAGE);
+      FileTools.ensureFileExists(infoJsonPath, DefaultExceptionHandler.PRINT_MESSAGE);
+      FileTools.ensureFileExists(tasksJsonlPath, DefaultExceptionHandler.PRINT_MESSAGE);
    }
 
    public void loadData()
    {
       taskNames.clear();
-      JSONFileTools.loadLines(tasks, lineRoot ->
+      JSONFileTools.loadLines(tasksJsonlPath, lineRoot ->
       {
          taskNames.add(lineRoot.get("task").textValue());
+      });
+      episodes.clear();
+      JSONFileTools.loadLines(episodesJsonlPath, lineRoot ->
+      {
+         int episodeIndex = episodes.size();
+         String episodeName = "episode_%6d".formatted(episodeIndex);
+         String taskName = lineRoot.get("tasks").get(0).textValue();
+         LeRobotDatasetEpisode episode = new LeRobotDatasetEpisode(episodeIndex,
+                                                                   episodeName,
+                                                                   taskName,
+                                                                   episodesJsonlPath,
+                                                                   episodeStatsJsonlPath,
+                                                                   dataChunk0Path,
+                                                                   zedVideoDirs);
+         episodes.add(episode);
       });
    }
 
@@ -78,7 +94,7 @@ public class LeRobotDataset
       {
          taskNames.add(taskName);
 
-         appendLine(tasks, JSONFileTools.getAsSingleLine(node ->
+         LeRobotDatasetTools.appendLine(tasksJsonlPath, JSONFileTools.getAsSingleLine(node ->
          {
             node.put("task_index", taskNames.size() - 1);
             node.put("task", taskName);
@@ -86,16 +102,24 @@ public class LeRobotDataset
       }
 
       // add episode to episodes.jsonl
+
+      int episodeIndex = episodes.size();
+      String episodeName = "episode_%6d".formatted(episodeIndex);
+      LeRobotDatasetEpisode episode = new LeRobotDatasetEpisode(episodeIndex,
+                                                                episodeName,
+                                                                taskName,
+                                                                episodesJsonlPath,
+                                                                episodeStatsJsonlPath,
+                                                                dataChunk0Path,
+                                                                zedVideoDirs);
+      episode.writeToFilesystem();
+      episodes.add(episode);
+
       // add episode stats entry
       // update info.json
 
       // add episode parquet file
       // add mp4 for each camera
-   }
-
-   private void appendLine(Path path, String line)
-   {
-      ExceptionTools.handle(() -> Files.writeString(path, line, StandardOpenOption.APPEND), DefaultExceptionHandler.PRINT_MESSAGE);
    }
 
    public String getName()
@@ -108,24 +132,24 @@ public class LeRobotDataset
       return directory;
    }
 
-   public Path getData()
+   public Path getDataPath()
    {
-      return data;
+      return dataPath;
    }
 
-   public Path getMeta()
+   public Path getMetaPath()
    {
-      return meta;
+      return metaPath;
    }
 
-   public Path getVideos()
+   public Path getVideosPath()
    {
-      return videos;
+      return videosPath;
    }
 
-   public Path getDataChunk0()
+   public Path getDataChunk0Path()
    {
-      return dataChunk0;
+      return dataChunk0Path;
    }
 
    public SideDependentList<Path> getZedVideoDirs()
@@ -136,5 +160,10 @@ public class LeRobotDataset
    public List<String> getTaskNames()
    {
       return taskNames;
+   }
+
+   public List<LeRobotDatasetEpisode> getEpisodes()
+   {
+      return episodes;
    }
 }

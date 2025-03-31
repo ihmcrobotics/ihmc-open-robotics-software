@@ -1,8 +1,12 @@
 package us.ihmc.avatar.logProcessor.leRobot;
 
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.List;
 
 public class LeRobotDatasetTools
@@ -17,5 +21,10 @@ public class LeRobotDatasetTools
       {
          throw new RuntimeException("Error searching for dataset directories with meta/info.json", e);
       }
+   }
+
+   public static void appendLine(Path path, String line)
+   {
+      ExceptionTools.handle(() -> Files.writeString(path, line, StandardOpenOption.APPEND), DefaultExceptionHandler.PRINT_MESSAGE);
    }
 }
