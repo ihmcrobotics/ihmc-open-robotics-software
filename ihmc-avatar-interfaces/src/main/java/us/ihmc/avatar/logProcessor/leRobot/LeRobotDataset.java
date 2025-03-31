@@ -1,15 +1,13 @@
 package us.ihmc.avatar.logProcessor.leRobot;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.JSONFileTools;
 
 import java.nio.file.Path;
-import java.nio.file.Files;
-import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,6 +25,7 @@ public class LeRobotDataset
    private final Path infoJsonPath;
    private final Path tasksJsonlPath;
 
+   private double fps = 15.0; // ZED FPS
    private final List<String> taskNames = new ArrayList<>();
    private final List<LeRobotDatasetEpisode> episodes = new ArrayList<>();
 
@@ -120,6 +119,33 @@ public class LeRobotDataset
 
       // add episode parquet file
       // add mp4 for each camera
+   }
+
+   public void writeMetadataToFilesystem()
+   {
+      JSONFileTools.save(infoJsonPath, rootNode ->
+      {
+         int totalFrames = 0;
+         for (LeRobotDatasetEpisode episode : episodes)
+         {
+            totalFrames += episode.getLength();
+         }
+
+
+         rootNode.put("codebase_version", "v2.1");
+         rootNode.put("robot_type", "nadia");
+         rootNode.put("total_episodes", episodes.size());
+         rootNode.put("total_frames", totalFrames);
+         rootNode.put("total_tasks", taskNames.size());
+         rootNode.put("total_videos", 2 * episodes.size());
+         rootNode.put("total_chunks", 1);
+         rootNode.put("chunk_size", 1000);
+         rootNode.put("fps", fps);
+         ObjectNode splits = rootNode.putObject("splits");
+         splits.put("train", "0:%d".formatted(episodes.size()));
+         rootNode.put("data_path", "data/chunk-{episode_chunk:03d}/episode_{episode_index:06d}.parquet");
+         rootNode.put("video_path", "videos/chunk-{episode_chunk:03d}/{video_key}/episode_{episode_index:06d}.mp4");
+      });
    }
 
    public String getName()
