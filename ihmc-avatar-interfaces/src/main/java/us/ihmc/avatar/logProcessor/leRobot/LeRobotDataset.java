@@ -15,6 +15,7 @@ import java.util.List;
 
 public class LeRobotDataset
 {
+   private final String name;
    private final Path directory;
    private final Path data;
    private final Path meta;
@@ -31,6 +32,8 @@ public class LeRobotDataset
    public LeRobotDataset(Path directory)
    {
       this.directory = directory;
+
+      name = directory.getFileName().toString();
       data = directory.resolve("data");
       meta = directory.resolve("meta");
       videos = directory.resolve("videos");
@@ -62,9 +65,10 @@ public class LeRobotDataset
 
    public void loadData()
    {
+      taskNames.clear();
       JSONFileTools.loadLines(tasks, lineRoot ->
       {
-
+         taskNames.add(lineRoot.get("task").textValue());
       });
    }
 
@@ -92,6 +96,11 @@ public class LeRobotDataset
    private void appendLine(Path path, String line)
    {
       ExceptionTools.handle(() -> Files.writeString(path, line, StandardOpenOption.APPEND), DefaultExceptionHandler.PRINT_MESSAGE);
+   }
+
+   public String getName()
+   {
+      return name;
    }
 
    public Path getDirectory()
@@ -122,5 +131,10 @@ public class LeRobotDataset
    public SideDependentList<Path> getZedVideoDirs()
    {
       return zedVideoDirs;
+   }
+
+   public List<String> getTaskNames()
+   {
+      return taskNames;
    }
 }

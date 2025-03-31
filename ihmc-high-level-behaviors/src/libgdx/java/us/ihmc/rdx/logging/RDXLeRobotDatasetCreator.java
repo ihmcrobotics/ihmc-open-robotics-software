@@ -56,7 +56,10 @@ public class RDXLeRobotDatasetCreator
                if (ImGui.radioButton(labels.get(datasetPath.getFileName().toString()), dataset != null && dataset.getDirectory().equals(datasetPath)))
                {
                   if (dataset == null || !dataset.getDirectory().equals(datasetPath))
+                  {
                      dataset = new LeRobotDataset(datasetPath);
+                     dataset.loadData();
+                  }
                }
             }
             ImGui.separator();
@@ -86,9 +89,20 @@ public class RDXLeRobotDatasetCreator
 
       ImGui.text("Log directory: %s".formatted(logSession.getSession().getLogDataReader().getLogDirectory().getName()));
 
-
       if (dataset != null)
       {
+         ImGuiTools.separatorText("Selected dataset");
+
+         ImGui.text("Dataset name: %s".formatted(dataset.getName()));
+
+         ImGui.text("Tasks:");
+         for (int i = 0; i < dataset.getTaskNames().size(); i++)
+         {
+            ImGui.text("%d. %s".formatted(i, dataset.getTaskNames().get(i)));
+         }
+
+         ImGuiTools.separatorText("New episode");
+
          ImGui.text("Task name:");
          ImGuiTools.inputTextMultiline(labels.getHidden("taskName"), imTaskName);
 
@@ -99,6 +113,10 @@ public class RDXLeRobotDatasetCreator
             dataset.addEpisode(imTaskName.get().trim());
          }
 
+      }
+      else
+      {
+         ImGui.text("Select or create a dataset using the Dataset menu..");
       }
    }
 
