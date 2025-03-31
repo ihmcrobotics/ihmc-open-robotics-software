@@ -64,4 +64,9 @@ public class LeRobotDatasetEpisode
    {
       return zedVideoDirs;
    }
+
+   public int getLength()
+   {
+      return length;
+   }
 }

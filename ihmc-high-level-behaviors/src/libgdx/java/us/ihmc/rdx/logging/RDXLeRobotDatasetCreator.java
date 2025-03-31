@@ -105,9 +105,8 @@ public class RDXLeRobotDatasetCreator
 
          ImGuiTools.separatorText("New episode");
 
-         ImGui.text("Task name:");
+         ImGui.text("Current task name:");
          ImGuiTools.inputTextMultiline(labels.getHidden("taskName"), imTaskName);
-
 
          ImGui.text("Episodes are created for the current SCS 2 in/out points.");
          if (ImGui.button(labels.get("Add Episode")))
@@ -115,6 +114,10 @@ public class RDXLeRobotDatasetCreator
             dataset.addEpisode(imTaskName.get().trim());
          }
 
+         if (ImGui.button(labels.get("Regenerate Metadata")))
+         {
+            dataset.writeMetadataToFilesystem();
+         }
       }
       else
       {
