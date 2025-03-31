@@ -101,6 +101,8 @@ public class RDXLeRobotDatasetCreator
             ImGui.text("%d. %s".formatted(i, dataset.getTaskNames().get(i)));
          }
 
+         ImGui.text("Episodes: %d".formatted(dataset.getEpisodes().size()));
+
          ImGuiTools.separatorText("New episode");
 
          ImGui.text("Task name:");
