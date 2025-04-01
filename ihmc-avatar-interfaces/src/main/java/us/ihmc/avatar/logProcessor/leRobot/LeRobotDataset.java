@@ -112,7 +112,7 @@ public class LeRobotDataset
                                                                 episodeStatsJsonlPath,
                                                                 dataChunk0Path,
                                                                 zedVideoDirs);
-      episode.writeToFilesystem();
+      episode.writeToFilesystem(session);
       episodes.add(episode);
 
       // add episode stats entry
