@@ -58,7 +58,7 @@ public class AlexanderSwingTrajectoryParameters extends SwingTrajectoryParameter
    @Override
    public double getDesiredTouchdownHeightOffset()
    {
-      return -0.005; // TODO Tune me up!
+      return 0.0; // TODO Tune me up!
    }
 
    @Override
@@ -102,13 +102,13 @@ public class AlexanderSwingTrajectoryParameters extends SwingTrajectoryParameter
    @Override
    public double[] getSwingStepUpWaypointProportions()
    {
-      return new double[] {0.05, 0.70};
+      return new double[] {0.05, 0.80};
    }
 
    @Override
    public double[] getSwingStepDownWaypointProportions()
    {
-      return new double[] {0.30, 0.95};
+      return new double[] {0.20, 0.95};
    }
 
    @Override

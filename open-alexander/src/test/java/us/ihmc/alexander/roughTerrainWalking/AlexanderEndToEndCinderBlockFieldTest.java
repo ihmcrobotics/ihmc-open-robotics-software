@@ -22,7 +22,7 @@ public class AlexanderEndToEndCinderBlockFieldTest extends EndToEndCinderBlockFi
    @Override
    public double getPelvisOffsetHeight()
    {
-      return -0.05;
+      return -0.0;
    }
 
    @Override
