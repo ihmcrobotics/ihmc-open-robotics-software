@@ -1,7 +1,9 @@
 package us.ihmc.avatar.logProcessor.leRobot;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import us.ihmc.avatar.scs2.SCS2LogSessionWithVideo;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.scs2.session.log.ZEDSVOScrubber;
 import us.ihmc.tools.io.JSONFileTools;
 
 import java.nio.file.Path;
@@ -29,7 +31,7 @@ public class LeRobotDatasetEpisode
       this.zedVideoDirs = zedVideoDirs;
    }
 
-   public void writeToFilesystem()
+   public void writeToFilesystem(SCS2LogSessionWithVideo session)
    {
       LeRobotDatasetTools.appendLine(episodesJsonlPath, JSONFileTools.getAsSingleLine(node ->
       {
@@ -38,6 +40,16 @@ public class LeRobotDatasetEpisode
          tasksArray.add(taskName);
          node.put("length", length);
       }));
+
+//      session.getLogDataReader().
+
+      ZEDSVOScrubber zedSVOScrubber = session.getZedSVOScrubbers().get(0);
+      int inPoint = session.getBufferProperties().getInPoint();
+      int outPoint = session.getBufferProperties().getOutPoint();
+
+      // TODO: How to get timestamps for in/out points?
+
+      //      LeRobotDatasetTools.extractMP4FromZED(zedSVOScrubber);
    }
 
    public String getEpisodeName()

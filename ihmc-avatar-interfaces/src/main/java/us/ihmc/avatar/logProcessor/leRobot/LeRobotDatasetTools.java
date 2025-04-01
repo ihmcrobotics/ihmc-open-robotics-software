@@ -5,6 +5,7 @@ import org.bytedeco.opencv.opencv_core.Size;
 import org.bytedeco.opencv.opencv_videoio.VideoWriter;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.scs2.session.log.ZEDSVOScrubber;
 
 import java.io.IOException;
@@ -66,8 +67,23 @@ public class LeRobotDatasetTools
       boolean isColor = true;
       double fps = 50.0;
       videoWriter.open(mp4Path.toString(), fourcc, fps, frameSize, isColor);
-
-
       frameSize.close();
+
+
+      if (videoWriter.isOpened())
+      {
+
+         for (long i = startTimestamp; i <= endTimestamp; i++)
+         {
+
+         }
+
+
+      }
+      else
+      {
+         LogTools.error("Could not open video writer for {}", mp4Path);
+      }
+
    }
 }
