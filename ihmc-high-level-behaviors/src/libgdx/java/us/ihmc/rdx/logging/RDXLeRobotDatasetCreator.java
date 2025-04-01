@@ -111,7 +111,7 @@ public class RDXLeRobotDatasetCreator
          ImGui.text("Episodes are created for the current SCS 2 in/out points.");
          if (ImGui.button(labels.get("Add Episode")))
          {
-            dataset.addEpisode(imTaskName.get().trim());
+            dataset.addEpisode(imTaskName.get().trim(), logSession.getSession());
          }
 
          if (ImGui.button(labels.get("Regenerate Metadata")))
