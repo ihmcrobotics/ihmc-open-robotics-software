@@ -1,6 +1,7 @@
 package us.ihmc.avatar.logProcessor.leRobot;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import us.ihmc.avatar.scs2.SCS2LogSessionWithVideo;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -87,7 +88,7 @@ public class LeRobotDataset
       });
    }
 
-   public void addEpisode(String taskName)
+   public void addEpisode(String taskName, SCS2LogSessionWithVideo session)
    {
       if (!taskNames.contains(taskName))
       {

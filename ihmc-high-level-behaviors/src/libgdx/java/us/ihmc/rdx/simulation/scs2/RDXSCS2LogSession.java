@@ -8,6 +8,7 @@ import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
+import us.ihmc.avatar.scs2.SCS2LogSessionWithVideo;
 import us.ihmc.codecs.generated.YUVPicture;
 import us.ihmc.commons.MathTools;
 import us.ihmc.log.LogTools;
@@ -16,8 +17,6 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer;
 import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizersPanel;
 import us.ihmc.robotDataLogger.Camera;
-import us.ihmc.robotDataLogger.CameraType;
-import us.ihmc.robotDataLogger.logger.LogPropertiesReader;
 import us.ihmc.scs2.session.log.*;
 import us.ihmc.tools.time.DurationFormatter;
 import us.ihmc.yoVariables.variable.YoLong;
@@ -36,10 +35,9 @@ public class RDXSCS2LogSession extends RDXSCS2Session
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImInt logPosition = new ImInt();
    private int lastUpdatedLogPosition = -1;
-   private LogSession logSession;
+   private SCS2LogSessionWithVideo logSession;
    private YoLong yoTimestamp;
    private LogDataReader logDataReader;
-   private LogPropertiesReader logProperties;
 
    private record ZEDLogVideo(ZEDSVOScrubber scrubber, RDXOpenCVVideoVisualizer visualizer) { }
    private final List<ZEDLogVideo> zedLogVideos = new ArrayList<>();
@@ -61,9 +59,8 @@ public class RDXSCS2LogSession extends RDXSCS2Session
          LogTools.info("Loading log: {}", file.toPath().getParent().normalize().toAbsolutePath());
          if (!Files.exists(file.toPath().getParent()))
             throw new RuntimeException("Log folder not found.");
-         logSession = new LogSession(file.getParentFile(), null);
+         logSession = new SCS2LogSessionWithVideo(file.getParentFile(), null);
          logDataReader = logSession.getLogDataReader();
-         logProperties = logSession.getLogProperties();
       }
       catch (IOException e)
       {
@@ -76,39 +73,22 @@ public class RDXSCS2LogSession extends RDXSCS2Session
 
          yoTimestamp = logDataReader.getTimestamp();
 
-         for (int i = 0; i < logProperties.getCameras().size(); i++)
+         for (MagewellScrubber magewellScrubber : logSession.getMagewellScrubbers())
          {
-            Camera camera = logProperties.getCameras().get(i);
-            LogTools.info("Found camera: %s".formatted(camera.getName()));
-            try
-            {
-               RDXOpenCVVideoVisualizer visualizer = new RDXOpenCVVideoVisualizer(camera.getNameAsString(), camera.getNameAsString(), false);
-               if (camera.getTypeAsString().equals(CameraType.CAPTURE_CARD_MAGEWELL.toString()))
-               {
-                  MagewellScrubber magewellScrubber = new MagewellScrubber(camera, logSession.getLogDirectory(), logProperties.getVideo().getHasTimebase());
-                  MagewellLogVideo magewellLogVideo = new MagewellLogVideo(magewellScrubber, new OpenCVFrameConverter.ToMat(), visualizer);
-                  magewellLogVideos.add(magewellLogVideo);
-               }
-               else
-               {
-                  BlackMagicScrubber blackMagicScrubber = new BlackMagicScrubber(camera,
-                                                                                 logSession.getLogDirectory(),
-                                                                                 logProperties.getVideo().getHasTimebase());
-                  BlackmagicLogVideo blackmagicLogVideo = new BlackmagicLogVideo(blackMagicScrubber, visualizer);
-                  blackmagicLogVideos.add(blackmagicLogVideo);
-               }
-               perceptionVisualizersPanel.addVisualizer(visualizer);
-            }
-            catch (IOException e)
-            {
-               LogTools.error(e.getMessage());
-            }
+            Camera camera = magewellScrubber.getCamera();
+            RDXOpenCVVideoVisualizer visualizer = new RDXOpenCVVideoVisualizer(camera.getNameAsString(), camera.getNameAsString(), false);
+            MagewellLogVideo magewellLogVideo = new MagewellLogVideo(magewellScrubber, new OpenCVFrameConverter.ToMat(), visualizer);
+            magewellLogVideos.add(magewellLogVideo);
          }
-
-         for (File zedSensorDatFile : ZEDSVOScrubber.findZEDSensorDatFiles(logSession.getLogDirectory()))
+         for (BlackMagicScrubber blackMagicScrubber : logSession.getBlackMagicScrubbers())
          {
-            LogTools.info("Found ZED sensor: %s".formatted(zedSensorDatFile.getName()));
-            ZEDSVOScrubber zedSVOScrubber = new ZEDSVOScrubber(zedSensorDatFile);
+            Camera camera = blackMagicScrubber.getCamera();
+            RDXOpenCVVideoVisualizer visualizer = new RDXOpenCVVideoVisualizer(camera.getNameAsString(), camera.getNameAsString(), false);
+            BlackmagicLogVideo blackmagicLogVideo = new BlackmagicLogVideo(blackMagicScrubber, visualizer);
+            blackmagicLogVideos.add(blackmagicLogVideo);
+         }
+         for (ZEDSVOScrubber zedSVOScrubber : logSession.getZedSVOScrubbers())
+         {
             RDXOpenCVVideoVisualizer visualizer = new RDXOpenCVVideoVisualizer(zedSVOScrubber.getName(), zedSVOScrubber.getName(), false);
             perceptionVisualizersPanel.addVisualizer(visualizer);
             ZEDLogVideo zedLogVideo = new ZEDLogVideo(zedSVOScrubber, visualizer);
@@ -196,20 +176,13 @@ public class RDXSCS2LogSession extends RDXSCS2Session
    public void destroy(RDXBaseUI baseUI)
    {
       for (MagewellLogVideo magewellLogVideo : magewellLogVideos)
-      {
-         magewellLogVideo.scrubber.getMagewellDemuxer().stop();
          magewellLogVideo.visualizer.destroy();
-      }
       for (BlackmagicLogVideo blackmagicLogVideo : blackmagicLogVideos)
-      {
-         blackmagicLogVideo.scrubber.getDemuxer().delete();
          blackmagicLogVideo.visualizer.destroy();
-      }
       for (ZEDLogVideo zedLogVideo : zedLogVideos)
-      {
-         zedLogVideo.scrubber.close();
          zedLogVideo.visualizer.destroy();
-      }
+
+      session.shutdownSession();
 
       super.destroy(baseUI);
    }
@@ -223,7 +196,7 @@ public class RDXSCS2LogSession extends RDXSCS2Session
    }
 
    @Override
-   public LogSession getSession()
+   public SCS2LogSessionWithVideo getSession()
    {
       return logSession;
    }
