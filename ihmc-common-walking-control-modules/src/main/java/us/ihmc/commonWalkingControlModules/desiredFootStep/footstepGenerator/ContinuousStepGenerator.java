@@ -13,6 +13,7 @@ import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.EllipticalStepPositionLimiter;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepVisualizer;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.quicksterFootstepProvider.QuicksterFootstepProvider;
 import us.ihmc.commons.MathTools;
@@ -20,6 +21,7 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -31,6 +33,7 @@ import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ContinuousStepGeneratorMode;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactableBody;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -38,6 +41,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
+import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.yoVariables.euclid.YoVector2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
@@ -164,6 +168,8 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
    private final YoEnum<ContinuousStepGeneratorMode> requestedCSGMode = new YoEnum<>("requestedCSGMode", registry, ContinuousStepGeneratorMode.class);
    private final OptionalFactoryField<QuicksterFootstepProvider> quicksterFootstepProvider = new OptionalFactoryField<>("QuicksterFootstepProviderField");
    private boolean useQFPParameters = false;
+
+   private final OptionalFactoryField<CommonHumanoidReferenceFrames> referenceFrames = new OptionalFactoryField<>("referenceFramesCSG");
 
    /**
     * Creates a new step generator, its {@code YoVariable}s will not be attached to any registry.
@@ -439,31 +445,11 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
          }
       }
 
-      // run through and make sure these adjusted steps are valid.
-//      for (int i = startingIndexToAdjust; i < footstepDataListMessage.getFootstepDataList().size(); i++)
-//      {
-//         FootstepDataMessage footstepData = footstepDataListMessage.getFootstepDataList().get(i);
-//         nextFootstepPose2D.getPosition().set(footstepData.getLocation());
-//         nextFootstepPose2D.getOrientation().set(footstepData.getOrientation());
-//         nextFootstepPose3D.getPosition().set(footstepData.getLocation());
-//         nextFootstepPose3D.getOrientation().set(footstepData.getOrientation());
-//         swingSide = RobotSide.fromByte(footstepData.getRobotSide());
-//
-//         if (!isStepValid(nextFootstepPose3D, previousFootstepPose, swingSide))
-//         {
-//            alternateStepChooser.computeStep(footstepPose2D, nextFootstepPose2D, swingSide, footstepData);
-//
-//            // remove all the other steps after the invalid one.
-//            while (footstepDataListMessage.getFootstepDataList().size() > i + 1)
-//            {
-//               footstepDataListMessage.getFootstepDataList().remove(i + 1);
-//            }
-//         }
-//
-//         previousFootstepPose.getPosition().set(footstepData.getLocation());
-//         previousFootstepPose.getOrientation().set(footstepData.getOrientation());
-//         footstepPose2D.set(previousFootstepPose);
-//      }
+      // Apply reachability constraint
+      if (currentCSGMode.getEnumValue().equals(ContinuousStepGeneratorMode.STANDARD))
+         applyReachabilityConstraintToStep(footsteps.get(0));
+      else
+         applyReachabilityConstraintToStep(footsteps);
 
       // Update the visualizers
       for (int i = startingIndexToAdjust; i < footstepDataListMessage.getFootstepDataList().size(); i++)
@@ -504,6 +490,112 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
 
       walkPreviousValue.set(walk.getValue());
       stepGeneratorTimer.stopMeasurement();
+   }
+
+   private final FramePose3D stanceFootPose = new FramePose3D();
+   private final PoseReferenceFrame stanceFootFrame = new PoseReferenceFrame("Latest Stance Foot Frame in Plan", ReferenceFrame.getWorldFrame());
+
+   private final FramePose3D constraintFramePose = new FramePose3D();
+   private final PoseReferenceFrame constraintFrame = new PoseReferenceFrame("Latest Control Frame in Plan", ReferenceFrame.getWorldFrame());
+
+   private final FramePose3D unConstrainedFootstepPose = new FramePose3D();
+   private final FramePose3D constrainedFootstepPose = new FramePose3D();
+
+   EllipticalStepPositionLimiter stepPositionLimiter = new EllipticalStepPositionLimiter();
+
+   private void applyReachabilityConstraintToStep(FootstepDataMessage footstep)
+   {
+      unConstrainedFootstepPose.setMatchingFrame(ReferenceFrame.getWorldFrame(), footstep.getLocation(), footstep.getOrientation());
+
+      RobotSide swingSide = RobotSide.fromByte(footstep.getRobotSide());
+
+      stanceFootPose.setFromReferenceFrame(referenceFrames.get().getSoleZUpFrame(swingSide.getOppositeSide()));
+      constraintFramePose.setFromReferenceFrame(referenceFrames.get().getPelvisZUpFrame());
+
+      stanceFootPose.changeFrame(stanceFootFrame.getParent());
+      constraintFramePose.changeFrame(constraintFrame.getParent());
+
+      stanceFootFrame.setPoseAndUpdate(stanceFootPose);
+      constraintFrame.setPoseAndUpdate(constraintFramePose);
+
+      stepPositionLimiter.enforceFootPositionConstraint(unConstrainedFootstepPose.getPosition(),
+                                                        constrainedFootstepPose.getPosition(),
+                                                        constraintFrame,
+                                                        stanceFootFrame,
+                                                        swingSide);
+
+      footstep.getLocation().set(constrainedFootstepPose.getPosition());
+   }
+
+   private void applyReachabilityConstraintToStep(List<FootstepDataMessage> footsteps)
+   {
+      for (int i = 0; i < footsteps.size(); i++)
+      {
+         FootstepDataMessage footstepDataMessage = footsteps.get(i);
+
+         unConstrainedFootstepPose.setMatchingFrame(ReferenceFrame.getWorldFrame(), footstepDataMessage.getLocation(), footstepDataMessage.getOrientation());
+
+         RobotSide swingSide = RobotSide.fromByte(footstepDataMessage.getRobotSide());
+
+         double offset = swingSide == RobotSide.LEFT ? EllipticalStepPositionLimiter.NOMINAL_STANCE_WIDTH_DEFAULT / 2.0 : -EllipticalStepPositionLimiter.NOMINAL_STANCE_WIDTH_DEFAULT / 2.0;
+
+         if (i == 0)
+         {
+            stanceFootPose.setFromReferenceFrame(referenceFrames.get().getSoleZUpFrame(swingSide.getOppositeSide()));
+
+            if (referenceFrames.hasValue())
+               constraintFramePose.setFromReferenceFrame(referenceFrames.get().getPelvisZUpFrame());
+            else
+            {
+               stanceFootFrame.setPoseAndUpdate(stanceFootPose);
+
+               constraintFramePose.setFromReferenceFrame(stanceFootFrame);
+               constraintFramePose.getPosition().addY(offset);
+            }
+         }
+         else
+         {
+            constraintFramePose.changeFrame(stanceFootFrame);
+
+            double x = constraintFramePose.getX();
+            double y = constraintFramePose.getY();
+            double z = constraintFramePose.getZ();
+
+            boolean stanceFootPoseHasBeenSet = false;
+
+            // Make sure stance foot is set from latest footstep in plan that is opposite foot of swing foot
+            for (int k = 0 ; k < i; k++)
+               if (swingSide != RobotSide.fromByte(footsteps.get(k).getRobotSide()))
+               {
+                  stanceFootPose.setMatchingFrame(ReferenceFrame.getWorldFrame(), footsteps.get(k).getLocation(), footsteps.get(k).getOrientation());
+                  stanceFootPoseHasBeenSet = true;
+               }
+
+            // If all footsteps in plan are with the same foot, set stanceFootPose to robot's current stance foot
+            if (!stanceFootPoseHasBeenSet)
+               stanceFootPose.setFromReferenceFrame(referenceFrames.get().getSoleZUpFrame(swingSide.getOppositeSide()));
+
+            stanceFootPose.changeFrame(stanceFootFrame.getParent());
+            stanceFootFrame.setPoseAndUpdate(stanceFootPose);
+
+            constraintFramePose.setFromReferenceFrame(stanceFootFrame);
+            constraintFramePose.getPosition().set(x, -y, z);
+         }
+
+         stanceFootPose.changeFrame(stanceFootFrame.getParent());
+         constraintFramePose.changeFrame(constraintFrame.getParent());
+
+         stanceFootFrame.setPoseAndUpdate(stanceFootPose);
+         constraintFrame.setPoseAndUpdate(constraintFramePose);
+
+         stepPositionLimiter.enforceFootPositionConstraint(unConstrainedFootstepPose.getPosition(),
+                                                           constrainedFootstepPose.getPosition(),
+                                                           constraintFrame,
+                                                           stanceFootFrame,
+                                                           swingSide);
+
+         footstepDataMessage.getLocation().set(constrainedFootstepPose.getPosition());
+      }
    }
 
    private static void calculateNextFootstepPose2D(double stepTime, double desiredVelocityX, double desiredVelocityY, double desiredTurningVelocity,
@@ -868,6 +960,11 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
    public void setQuicksterFootstepProvider(QuicksterFootstepProvider quicksterFootstepProvider)
    {
       this.quicksterFootstepProvider.set(quicksterFootstepProvider);
+   }
+
+   public void setReferenceFrames(CommonHumanoidReferenceFrames referenceFrames)
+   {
+      this.referenceFrames.set(referenceFrames);
    }
 
    /**

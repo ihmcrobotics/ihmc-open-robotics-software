@@ -139,6 +139,7 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
       FactoryTools.checkAllFactoryFieldsAreSet(this);
 
       ContinuousStepGenerator continuousStepGenerator = new ContinuousStepGenerator(registryField.get());
+      continuousStepGenerator.setReferenceFrames(referenceFrames);
       continuousStepGenerator.setQuicksterFootstepProvider(new QuicksterFootstepProvider(robotModel,
                                                                                          referenceFrames,
                                                                                          updateDT,
