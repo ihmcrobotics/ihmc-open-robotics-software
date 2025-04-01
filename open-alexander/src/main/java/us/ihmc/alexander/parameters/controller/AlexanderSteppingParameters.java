@@ -48,7 +48,7 @@ public class AlexanderSteppingParameters implements SteppingParameters
    public double getMaxStepWidth()
    {
       // TODO Needs tune up.
-      return 0.7;
+      return 0.8;
    }
 
    @Override

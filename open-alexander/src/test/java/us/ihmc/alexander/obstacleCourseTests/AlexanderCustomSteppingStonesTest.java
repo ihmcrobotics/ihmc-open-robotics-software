@@ -53,8 +53,8 @@ public class AlexanderCustomSteppingStonesTest extends AvatarCustomSteppingStone
    @Test
    public void testToeOffTakingBigSideStepUp(TestInfo testInfo)
    {
-      changeWalkingParameters(0.35, 0.75);
-      super.testTakingStep(testInfo, 0.35, -0.25);
+      changeWalkingParameters(0.65, 0.75);
+      super.testTakingStep(testInfo, 0.35, -0.25, -0.05);
    }
 
    @Override

@@ -279,19 +279,6 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
    }
 
    @Override
-   public SimulationLowLevelControllerFactory getSimulationLowLevelControllerFactory()
-   {
-      return null;
-   }
-
-   @Override
-   public JointDesiredOutputWriter getCustomSimulationOutputWriter(HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot,
-                                                                   HumanoidRobotContextData contextData)
-   {
-      return null;
-   }
-
-   @Override
    public double getSimulateDT()
    {
       return simulateDT;

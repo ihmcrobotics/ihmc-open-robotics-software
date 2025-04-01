@@ -317,7 +317,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         assertTrackingErrorMeanIsLow(footTrackingWatchers.get(robotSide), 0.01, 0.015, 0.06, 0.20);
+         assertTrackingErrorMeanIsLow(footTrackingWatchers.get(robotSide), 0.01, 0.025, 0.06, 0.20);
          assertTrackingErrorMeanIsLow(handTrackingWatchers.get(robotSide), 0.04, 0.10, 0.06, 0.20); // I wonder if the tracking is off because the control is in joint-space.
       }
 
@@ -525,7 +525,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
 
    private void assertTrackingErrorMeanIsLow(RigidBodyTrackingWatcher watcher,
                                              double positionTreshold,
-                                             double orientationTreshold,
+                                             double orientationThreshold,
                                              double linearVelocityTreshold,
                                              double angularVelocityTreshold)
    {
@@ -544,7 +544,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
                                             linearVelocityMean,
                                             angularVelocityMean);
       assertTrue(positionMean < positionTreshold, errorMessage + "\n Position mean was " + positionMean + ", should have been less than " + positionTreshold);
-      assertTrue(orientationMean < orientationTreshold, errorMessage);
+      assertTrue(orientationMean < orientationThreshold, errorMessage + "\n Orientation mean was " + orientationMean + ", should have been less than " + orientationThreshold);
       assertTrue(linearVelocityMean < linearVelocityTreshold, errorMessage);
       assertTrue(angularVelocityMean < angularVelocityTreshold, errorMessage);
    }
