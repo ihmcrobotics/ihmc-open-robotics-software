@@ -28,6 +28,7 @@ public abstract class ROS2Frame extends ReferenceFrame
    private int lastPublishTimestampNanos;
 
    private volatile boolean readyToTakeData = false;
+   private volatile boolean hasBeenRemoved = false;
 
    protected ROS2Frame(ROS2Node ros2Node,
                        String id,
@@ -74,6 +75,9 @@ public abstract class ROS2Frame extends ReferenceFrame
       if (!readyToTakeData)
          return;
 
+      if (hasBeenRemoved)
+         return;
+
       // Read the new message
       subscriber.takeNextData(tfMessageToReceive, null);
 
@@ -113,6 +117,9 @@ public abstract class ROS2Frame extends ReferenceFrame
 
    protected void publishTFMessages()
    {
+      if (hasBeenRemoved)
+         return;
+
       long currentTimeMillis = System.currentTimeMillis();
       lastPublishTimestampSeconds = (int) (currentTimeMillis / 1000);
       lastPublishTimestampNanos = (int) (currentTimeMillis % 1000) * 1000000;
@@ -143,6 +150,10 @@ public abstract class ROS2Frame extends ReferenceFrame
    @Override
    public void remove()
    {
+      if (hasBeenRemoved)
+         return;
+      hasBeenRemoved = true;
+
       super.remove();
       if (tfPublisher != null)
          tfPublisher.remove();
