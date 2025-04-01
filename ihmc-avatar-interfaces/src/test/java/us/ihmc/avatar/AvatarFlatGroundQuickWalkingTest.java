@@ -20,6 +20,7 @@ import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public abstract class AvatarFlatGroundQuickWalkingTest implements MultiRobotTestInterface
@@ -119,5 +120,7 @@ public abstract class AvatarFlatGroundQuickWalkingTest implements MultiRobotTest
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
 
       simulationTestHelper.start();
+      ((YoBoolean) simulationTestHelper.findVariable("controllerAllowCrossOverSteps")).set(true);
+      ((YoDouble) simulationTestHelper.findVariable("icpDistanceOutsideSupportForStep")).set(0.2);
    }
 }

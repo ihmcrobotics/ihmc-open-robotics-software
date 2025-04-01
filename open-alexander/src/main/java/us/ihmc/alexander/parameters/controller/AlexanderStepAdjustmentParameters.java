@@ -17,7 +17,7 @@ public class AlexanderStepAdjustmentParameters extends StepAdjustmentParameters
    @Override
    public double getAdjustmentDeadband()
    {
-      return 0.02;
+      return 0.005;
    }
 
    @Override

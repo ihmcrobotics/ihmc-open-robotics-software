@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.referenceFrames.WalkingTrajectoryPath;
 import us.ihmc.commons.ContinuousIntegrationTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -131,7 +132,7 @@ public class AlexanderWalkingTrajectoryPathFrameTest
    {
       Quaternion rotation = new Quaternion();
       rotation.appendPitchRotation(-Math.toRadians(90));
-      return new Pose3D(new Point3D(0.4, 0.2, -0.2), rotation);
+      return new Pose3D(new Point3D(0.35, 0.3, -0.25), rotation);
    }
 
    @Tag("controller-api-2")
@@ -403,7 +404,6 @@ public class AlexanderWalkingTrajectoryPathFrameTest
                                                                                                                          cinderBlockFieldEnvironment,
                                                                                                                          simulationTestingParameters);
       simulationTestHelper = factory.createAvatarTestingSimulation();
-      simulationTestHelper.setKeepSCSUp(true);
 
       FreeFloatingPendulumRobotDefinition pendulumRobotDefinition = setupPendulum();
 
@@ -422,8 +422,11 @@ public class AlexanderWalkingTrajectoryPathFrameTest
       assertWalkingFrameMatchMidFeetZUpFrame();
       assertTrue(simulationTestHelper.simulateNow(3.0));
       assertCorrectControlMode();
+
       assertTrue(simulationTestHelper.simulateNow(simulationTime));
-      assertTrue(pendulumAttachmentController.angleStandardDeviation.getValue() < pendulumAttachmentController.getMaxAngleStandardDeviation().getValue());
+      assertTrue(pendulumAttachmentController.angleStandardDeviation.getValue() < pendulumAttachmentController.getMaxAngleStandardDeviation().getValue(),
+                 "Pendulum standard deviation " + pendulumAttachmentController.angleStandardDeviation.getDoubleValue() + " exceeded the max threshold " +
+                 pendulumAttachmentController.getMaxAngleStandardDeviation().getDoubleValue());
       assertWalkingFrameMatchMidFeetZUpFrame();
    }
 
@@ -444,7 +447,7 @@ public class AlexanderWalkingTrajectoryPathFrameTest
       addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(7).get(4), 0.0, 0.08, zOffset, yawOffset);
       addFootstepFromCBPose(footsteps, RobotSide.LEFT, cinderBlockPoses.get(6).get(3), 0.0, -0.08, zOffset, yawOffset);
       addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(7).get(2), 0.0, 0.08, zOffset, yawOffset);
-      yawOffset = 0.95 * Math.PI;
+      yawOffset = 0.75 * Math.PI;
       addFootstepFromCBPose(footsteps, RobotSide.LEFT, cinderBlockPoses.get(6).get(1), 0.0, 0.04, zOffset, yawOffset);
       yawOffset = Math.PI;
       addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(5).get(0), 0.0, 0.08, zOffset, yawOffset);

@@ -94,6 +94,12 @@ public class AlexanderSwingTrajectoryParameters extends SwingTrajectoryParameter
    }
 
    @Override
+   public double getMinHeightDifferenceForStepUpOrDown()
+   {
+      return 0.1;
+   }
+
+   @Override
    public double[] getSwingStepUpWaypointProportions()
    {
       return new double[] {0.05, 0.70};
@@ -102,7 +108,7 @@ public class AlexanderSwingTrajectoryParameters extends SwingTrajectoryParameter
    @Override
    public double[] getSwingStepDownWaypointProportions()
    {
-      return new double[] {0.30, 1.0};
+      return new double[] {0.30, 0.95};
    }
 
    @Override
