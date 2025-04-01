@@ -197,6 +197,16 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
       return defaultWeight;
    }
 
+   public YoFramePoint3D getYoCurrentPosition()
+   {
+      return yoCurrentPosition;
+   }
+
+   public YoFramePoint3D getYoDesiredPosition()
+   {
+      return yoDesiredPosition;
+   }
+
    private void setupViz(YoGraphicsListRegistry graphicsListRegistry, String bodyName)
    {
       String listName = getClass().getSimpleName();

@@ -1,6 +1,7 @@
 package us.ihmc.alexander.parameters.model;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 public interface AlexanderPhysicalProperties
@@ -31,4 +32,6 @@ public interface AlexanderPhysicalProperties
    double getShinLength();
 
    SideDependentList<RigidBodyTransform> getSoleToAnkleFrameTransforms();
+
+   RigidBodyTransform getHandControlFrameToWristTransform(RobotSide side);
 }

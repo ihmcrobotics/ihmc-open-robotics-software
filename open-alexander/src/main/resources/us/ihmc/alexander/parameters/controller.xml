@@ -20,9 +20,9 @@
                      <parameter name="captureIntegralLeakRatio" type="DoubleParameter" min="0.0" max="1.0" value="0.97" />
                   </registry>
                   <parameter name="allowMomentumRecoveryWeight" type="BooleanParameter" value="true" />
-                  <parameter name="LinearMomentumRateWeightX" type="DoubleParameter" min="0.0" max="1.0" value="0.05" />
-                  <parameter name="LinearMomentumRateWeightY" type="DoubleParameter" min="0.0" max="1.0" value="0.05" />
-                  <parameter name="LinearMomentumRateWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="0.01" />
+                  <parameter name="LinearMomentumRateWeightX" type="DoubleParameter" min="0.0" max="1.0" value="0.075" />
+                  <parameter name="LinearMomentumRateWeightY" type="DoubleParameter" min="0.0" max="1.0" value="0.075" />
+                  <parameter name="LinearMomentumRateWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="0.02" />
                   <parameter name="RecoveryLinearMomentumRateWeightX" type="DoubleParameter" min="0.0" max="1.0" value="0.5" />
                   <parameter name="RecoveryLinearMomentumRateWeightY" type="DoubleParameter" min="0.0" max="1.0" value="0.5" />
                   <parameter name="RecoveryLinearMomentumRateWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="0.01" />
@@ -61,9 +61,9 @@
                   <parameter name="PelvisLinearWeightX" type="DoubleParameter" min="0.0" max="1.0" value="5.0" />
                   <parameter name="PelvisLinearWeightY" type="DoubleParameter" min="0.0" max="1.0" value="5.0" />
                   <parameter name="PelvisLinearWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="50.0" />
-                  <parameter name="HandLinearWeightX" type="DoubleParameter" min="0.0" max="1.0" value="5.0" />
-                  <parameter name="HandLinearWeightY" type="DoubleParameter" min="0.0" max="1.0" value="5.0" />
-                  <parameter name="HandLinearWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="5.0" />
+                  <parameter name="HandLinearWeightX" type="DoubleParameter" min="0.0" max="1.0" value="30.0" />
+                  <parameter name="HandLinearWeightY" type="DoubleParameter" min="0.0" max="1.0" value="30.0" />
+                  <parameter name="HandLinearWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="30.0" />
                   <parameter name="FootLinearWeightX" type="DoubleParameter" min="0.0" max="1.0" value="30.0" />
                   <parameter name="FootLinearWeightY" type="DoubleParameter" min="0.0" max="1.0" value="30.0" />
                   <parameter name="FootLinearWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="30.0" />
@@ -123,7 +123,7 @@
                   <parameter name="maxProportionalErrorHeadOrientation" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
                   <parameter name="maximumFeedbackHeadOrientation" type="DoubleParameter" min="0.0" max="1.0" value="36.0" />
                   <parameter name="maximumFeedbackRateHeadOrientation" type="DoubleParameter" min="0.0" max="1.0" value="540.0" />
-                  <parameter name="kpXYZHandOrientation" type="DoubleParameter" min="0.0" max="1.0" value="100.0" />
+                  <parameter name="kpXYZHandOrientation" type="DoubleParameter" min="0.0" max="1.0" value="150.0" />
                   <parameter name="zetaXYZHandOrientation" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
                   <parameter name="maxDerivativeErrorHandOrientation" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
                   <parameter name="maxProportionalErrorHandOrientation" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
@@ -137,7 +137,7 @@
                   <parameter name="maxProportionalErrorPelvisOrientation" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
                   <parameter name="maximumFeedbackPelvisOrientation" type="DoubleParameter" min="0.0" max="1.0" value="36.0" />
                   <parameter name="maximumFeedbackRatePelvisOrientation" type="DoubleParameter" min="0.0" max="1.0" value="540.0" />
-                  <parameter name="kpXYZHandPosition" type="DoubleParameter" min="0.0" max="1.0" value="100.0" />
+                  <parameter name="kpXYZHandPosition" type="DoubleParameter" min="0.0" max="1.0" value="150.0" />
                   <parameter name="zetaXYZHandPosition" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
                   <parameter name="maxDerivativeErrorHandPosition" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
                   <parameter name="maxProportionalErrorHandPosition" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />

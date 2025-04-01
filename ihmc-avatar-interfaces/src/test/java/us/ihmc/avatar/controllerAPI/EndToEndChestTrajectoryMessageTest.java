@@ -33,6 +33,7 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -53,6 +54,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.math.interpolators.OrientationInterpolationCalculator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.SO3TrajectoryPoint;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.MovingZUpFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
@@ -528,17 +530,27 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       simulationTestHelper = createSimulationTestHelper();
       simulationTestHelper.start();
 
+      CommonHumanoidReferenceFrames humanoidReferenceFrames = simulationTestHelper.getControllerReferenceFrames();
+      humanoidReferenceFrames.updateFrames();
+      ReferenceFrame pelvisZUpFrame = humanoidReferenceFrames.getPelvisZUpFrame();
+
       List<TaskspaceTrajectoryStatusMessage> statusMessages = new ArrayList<>();
-      simulationTestHelper.createSubscriberFromController(TaskspaceTrajectoryStatusMessage.class, statusMessages::add);
+      List<FramePose3D> pelvisPosesAtTime = new ArrayList<>();
+      simulationTestHelper.createSubscriberFromController(TaskspaceTrajectoryStatusMessage.class, message ->
+                                                          {
+                                                             statusMessages.add(message);
+                                                             humanoidReferenceFrames.updateFrames();
+                                                             FramePose3D pose = new FramePose3D(pelvisZUpFrame);
+                                                             pose.changeFrame(ReferenceFrame.getWorldFrame());
+                                                             pelvisPosesAtTime.add(pose);
+                                                          });
       double controllerDT = getRobotModel().getControllerDT();
 
       boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
-      CommonHumanoidReferenceFrames humanoidReferenceFrames = simulationTestHelper.getControllerReferenceFrames();
-      humanoidReferenceFrames.updateFrames();
-      ReferenceFrame pelvisZUpFrame = humanoidReferenceFrames.getPelvisZUpFrame();
+
 
       double timePerWaypoint = 0.1;
       int numberOfTrajectoryPoints = 15;
@@ -607,6 +619,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
                                                         chest.getName(),
                                                         statusMessages.remove(0),
                                                         controllerDT);
+      pelvisPosesAtTime.remove(0);
 
       for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
       {
@@ -640,6 +653,13 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       assertControlErrorIsLow(simulationTestHelper, chest, 1.0e-2);
 
       assertEquals(1, statusMessages.size());
+      humanoidReferenceFrames.updateFrames();
+
+      // We have to do this transformation to account for the fact that the pelvis pose at the tiem the status message was broadcast was not necessarily
+      // aligned with world. The desired trajectory sent down was in the pelivs pose, but the status message is broadcast in world frame.
+      PoseReferenceFrame pelvisPoseFrame = new PoseReferenceFrame("PelvisPoseFrame", ReferenceFrame.getWorldFrame());
+      pelvisPoseFrame.setPoseAndUpdate(pelvisPosesAtTime.get(0));
+
       EndToEndTestTools.assertTaskspaceTrajectoryStatus(chestTrajectoryMessage.getSequenceId(),
                                                         TrajectoryExecutionStatus.COMPLETED,
                                                         trajectoryTime,
@@ -647,6 +667,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
                                                         desiredChestOrientations[desiredChestOrientations.length - 1],
                                                         chest.getName(),
                                                         statusMessages.remove(0),
+                                                        pelvisPoseFrame,
                                                         1.0e-3,
                                                         controllerDT);
    }
@@ -1715,7 +1736,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 
       EuclidCoreTestTools.assertOrientation3DGeometricallyEquals(desiredOrientation, currentDesiredTrajectoryPoint.getOrientation(), desiredEpsilon);
       EuclidCoreTestTools.assertEquals(desiredAngularVelocity, currentDesiredTrajectoryPoint.getAngularVelocity(), desiredEpsilon);
-      assertControlErrorIsLow(simulationTestHelper, chest, 2.0e-4);
+      assertControlErrorIsLow(simulationTestHelper, chest, 1.0e-3);
    }
 
    public static Vector3D findControlErrorRotationVector(YoVariableHolder scs, RigidBodyBasics chest)

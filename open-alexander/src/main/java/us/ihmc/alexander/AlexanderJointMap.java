@@ -108,7 +108,7 @@ public class AlexanderJointMap implements HumanoidJointNameMap
 
             lastSimulatedJoint = robotSide == RobotSide.LEFT ? Joints.LEFT_GRIPPER_Z : Joints.RIGHT_GRIPPER_Z;
 
-            handControlFrameToWristTransforms.put(robotSide, new RigidBodyTransform(new AxisAngle(), new Vector3D(0.0, 0.0, -0.11)));
+            handControlFrameToWristTransforms.put(robotSide, alexanderPhysicalProperties.getHandControlFrameToWristTransform(robotSide));
 
             Joints jointBeforeHand = robotSide == RobotSide.LEFT ? Joints.LEFT_GRIPPER_Z : Joints.RIGHT_GRIPPER_Z;
             nameOfJointsBeforeHands.put(robotSide, jointBeforeHand.name);
@@ -316,6 +316,11 @@ public class AlexanderJointMap implements HumanoidJointNameMap
 
       jointNamesBeforeFeet[0] = getJointBeforeFootName(RobotSide.LEFT);
       jointNamesBeforeFeet[1] = getJointBeforeFootName(RobotSide.RIGHT);
+   }
+
+   public AlexanderArmConfiguration getArmConfiguration(RobotSide robotSide)
+   {
+      return armConfigurations.get(robotSide);
    }
 
    @Override

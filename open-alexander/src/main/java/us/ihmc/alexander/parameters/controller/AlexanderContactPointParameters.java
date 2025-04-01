@@ -1,14 +1,14 @@
 package us.ihmc.alexander.parameters.controller;
 
-import us.ihmc.alexander.AlexanderNubHandModel;
-import us.ihmc.alexander.AlexanderVersion;
-import us.ihmc.alexander.OpenAlexanderRobotModel;
+import us.ihmc.alexander.*;
 import us.ihmc.alexander.parameters.model.AlexanderPhysicalProperties;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.ArmJointName;
@@ -33,6 +33,11 @@ public class AlexanderContactPointParameters extends RobotContactPointParameters
       createFootContactPoints(footContactPoints);
 
       this.createHandContactPoints = createHandContactPoints;
+
+      if (createHandContactPoints)
+      {
+         createHandContactPointsForNubs(physicalProperties);
+      }
    }
 
 
@@ -47,6 +52,11 @@ public class AlexanderContactPointParameters extends RobotContactPointParameters
       createDefaultFootContactPoints();
 
       this.createHandContactPoints = createHandContactPoints;
+
+      if (createHandContactPoints)
+      {
+         createHandContactPointsForNubs(physicalProperties);
+      }
    }
 
    public void createGroundContactModelParameters(double simDT)
@@ -88,7 +98,44 @@ public class AlexanderContactPointParameters extends RobotContactPointParameters
       additionalContactTransforms.add(transformToContactFrame);
    }
 
-   public static FramePoint3DReadOnly computeKnubPoseInBodyFrame(RobotSide robotSide)
+   private int createHandContactPointsForNubs(AlexanderPhysicalProperties physicalProperties)
+   {
+      int numberOfHandContactPoints = 0;
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         /////////////// NUB MODE ////////////////////////////
+
+         if (((AlexanderJointMap) jointMap).getArmConfiguration(robotSide) == AlexanderArmConfiguration.NUB)
+         {
+            String handName = ((HumanoidJointNameMap) jointMap).getHandName(robotSide);
+            String elbowJointName = ((HumanoidJointNameMap) jointMap).getArmJointName(robotSide, ArmJointName.ELBOW_PITCH);
+            Vector3D contactPointPositionInParentJointFrame = new Vector3D(AlexanderNubHandModel.getElbowToControlFrame());
+
+            addSimulationContactPoint(elbowJointName, contactPointPositionInParentJointFrame);
+
+            RigidBodyTransform transformToContactFrame = new RigidBodyTransform(new Quaternion(), contactPointPositionInParentJointFrame);
+            addControllerContactPoint(handName, handName + "Contact", transformToContactFrame);
+            numberOfHandContactPoints++;
+         }
+         else if (((AlexanderJointMap) jointMap).getArmConfiguration(robotSide) == AlexanderArmConfiguration.FOREARM)
+         {
+            String handName = ((HumanoidJointNameMap) jointMap).getHandName(robotSide);
+            String wristJointName = ((HumanoidJointNameMap) jointMap).getArmJointName(robotSide, ArmJointName.WRIST_YAW);
+            Vector3D contactPointPositionInParentJointFrame = new Vector3D(physicalProperties.getHandControlFrameToWristTransform(robotSide).getTranslation());
+
+            addSimulationContactPoint(wristJointName, contactPointPositionInParentJointFrame);
+
+            RigidBodyTransform transformToContactFrame = new RigidBodyTransform(new Quaternion(), contactPointPositionInParentJointFrame);
+            addControllerContactPoint(handName, handName + "Contact", transformToContactFrame);
+            numberOfHandContactPoints++;
+         }
+      }
+
+      return numberOfHandContactPoints;
+   }
+
+   public static FramePoint3DReadOnly computeNubPoseInBodyFrame(RobotSide robotSide)
    {
       DRCRobotModel robotModel = new OpenAlexanderRobotModel(AlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS);
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
@@ -116,7 +163,7 @@ public class AlexanderContactPointParameters extends RobotContactPointParameters
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         System.out.println(robotSide + " " + computeKnubPoseInBodyFrame(robotSide));
+         System.out.println(robotSide + " " + computeNubPoseInBodyFrame(robotSide));
       }
    }
 }

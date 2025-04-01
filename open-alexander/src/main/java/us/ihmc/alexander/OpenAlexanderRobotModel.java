@@ -107,7 +107,7 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
 
    public OpenAlexanderRobotModel(AlexanderVersion robotVersion, RobotTarget robotTarget)
    {
-      this(robotVersion, robotTarget, null, false);
+      this(robotVersion, robotTarget, null, true);
    }
 
    public OpenAlexanderRobotModel(AlexanderVersion robotVersion, RobotTarget robotTarget, RobotContactPointParameters<RobotSide> contactPointParameters)
@@ -117,7 +117,7 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
 
    public OpenAlexanderRobotModel(AlexanderVersion robotVersion, RobotTarget robotTarget, MaterialDefinition robotMaterial)
    {
-      this(robotVersion, robotTarget, robotMaterial, false);
+      this(robotVersion, robotTarget, robotMaterial, true);
    }
 
    public OpenAlexanderRobotModel(AlexanderVersion robotVersion, RobotTarget robotTarget, MaterialDefinition robotMaterial, boolean createHandContactPoints)

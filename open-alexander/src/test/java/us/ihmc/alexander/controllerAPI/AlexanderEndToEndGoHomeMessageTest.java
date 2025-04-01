@@ -1,5 +1,6 @@
 package us.ihmc.alexander.controllerAPI;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import us.ihmc.alexander.AlexanderVersion;
@@ -23,6 +24,8 @@ public class AlexanderEndToEndGoHomeMessageTest extends EndToEndGoHomeMessageTes
       super.testGoHomeArms();
    }
 
+   // This test is disabled becuase it assumes tha tthe chest is controlled in taskspace by default. Alexander is controlled in jointspace.
+   @Disabled
    @Tag("controller-api")
    @Override
    @Test

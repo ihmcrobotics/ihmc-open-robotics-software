@@ -66,9 +66,8 @@ public class AlexanderPhysicalPropertiesV0 implements AlexanderPhysicalPropertie
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBodyTransform controlFrameToWristTransform = new RigidBodyTransform();
-         controlFrameToWristTransform.getTranslation().set(0.0, robotSide.negateIfLeftSide(0.02), -0.08);
+         controlFrameToWristTransform.getTranslation().set(0.0, 0.0, -0.11);
          controlFrameToWristTransform.getTranslation().scale(modelSizeScale);
-         controlFrameToWristTransform.appendYawRotation(robotSide.negateIfLeftSide(Math.PI * 0.5));
          handControlFrameToWristTransforms.put(robotSide, controlFrameToWristTransform);
       }
    }

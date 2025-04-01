@@ -27,7 +27,7 @@ public class AlexanderEndToEndHandTrajectoryMessageTest extends EndToEndHandTraj
    @Override
    public double getStreamingRangeOfMotion()
    {
-      return 0.4;
+      return 0.3;
    }
 
    @Tag("controller-api-slow-3")

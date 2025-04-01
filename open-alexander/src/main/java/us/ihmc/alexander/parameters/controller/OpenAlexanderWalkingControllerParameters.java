@@ -85,7 +85,7 @@ public class OpenAlexanderWalkingControllerParameters extends WalkingControllerP
 
    public OpenAlexanderWalkingControllerParameters(AlexanderVersion version, RobotTarget target, AlexanderJointMap jointMap, AlexanderPhysicalProperties physicalProperties)
    {
-      this(version, target, jointMap, physicalProperties, new AlexanderContactPointParameters(jointMap, physicalProperties, false));
+      this(version, target, jointMap, physicalProperties, new AlexanderContactPointParameters(jointMap, physicalProperties, true));
    }
 
    public OpenAlexanderWalkingControllerParameters(AlexanderVersion version,
