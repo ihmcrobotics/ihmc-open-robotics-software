@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import controller_msgs.msg.dds.AbortWalkingMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import org.lwjgl.openvr.InputDigitalActionData;
@@ -36,6 +37,7 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 import java.util.ArrayList;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class RDXVRFootstepPlacement
 {
@@ -111,46 +113,46 @@ public class RDXVRFootstepPlacement
       for (RobotSide side : RobotSide.values)
       {
          vrContext.getController(side).runIfConnected(controller ->
-         {
-            InputDigitalActionData triggerClick = controller.getClickTriggerActionData();
+                                                      {
+                                                         InputDigitalActionData triggerClick = controller.getClickTriggerActionData();
 
-            if (triggerClick.bChanged() && triggerClick.bState())
-            {
-               footstepsBeingHandPlaced.put(side, footstepModels.get(side));
-               LibGDXTools.setOpacity(footstepsBeingHandPlaced.get(side), 0.5f);
-            }
+                                                         if (triggerClick.bChanged() && triggerClick.bState())
+                                                         {
+                                                            footstepsBeingHandPlaced.put(side, footstepModels.get(side));
+                                                            LibGDXTools.setOpacity(footstepsBeingHandPlaced.get(side), 0.5f);
+                                                         }
 
-            if (triggerClick.bChanged() && !triggerClick.bState())
-            {
-               ModelInstance footBeingPlaced = new ModelInstance(footstepsBeingHandPlaced.get(side));
-               footstepsBeingHandPlaced.put(side, null);
-               handPlacedFootsteps.add(new RDXVRFootstep(side, footBeingPlaced, footstepIndex++));
-            }
+                                                         if (triggerClick.bChanged() && !triggerClick.bState())
+                                                         {
+                                                            ModelInstance footBeingPlaced = new ModelInstance(footstepsBeingHandPlaced.get(side));
+                                                            footstepsBeingHandPlaced.put(side, null);
+                                                            handPlacedFootsteps.add(new RDXVRFootstep(side, footBeingPlaced, footstepIndex++));
+                                                         }
 
-            ModelInstance footBeingPlaced = footstepsBeingHandPlaced.get(side);
-            if (footBeingPlaced != null)
-            {
-               poseForPlacement.setToZero(controller.getXForwardZUpControllerFrame());
-               poseForPlacement.getPosition().add(0.05, 0.0, 0.0);
-               poseForPlacement.getOrientation().appendPitchRotation(Math.toRadians(-90.0));
-               poseForPlacement.changeFrame(ReferenceFrame.getWorldFrame());
-               poseForPlacement.get(tempTransform);
+                                                         ModelInstance footBeingPlaced = footstepsBeingHandPlaced.get(side);
+                                                         if (footBeingPlaced != null)
+                                                         {
+                                                            poseForPlacement.setToZero(controller.getXForwardZUpControllerFrame());
+                                                            poseForPlacement.getPosition().add(0.05, 0.0, 0.0);
+                                                            poseForPlacement.getOrientation().appendPitchRotation(Math.toRadians(-90.0));
+                                                            poseForPlacement.changeFrame(ReferenceFrame.getWorldFrame());
+                                                            poseForPlacement.get(tempTransform);
 
-               LibGDXTools.toLibGDX(tempTransform, footBeingPlaced.transform);
-            }
+                                                            LibGDXTools.toLibGDX(tempTransform, footBeingPlaced.transform);
+                                                         }
 
-            InputDigitalActionData aButton = controller.getAButtonActionData();
-            if (side == RobotSide.RIGHT && aButton.bChanged() && !aButton.bState())
-            {
-               sendPlacedFootsteps(locomotionParameters);
-            }
+                                                         InputDigitalActionData aButton = controller.getAButtonActionData();
+                                                         if (side == RobotSide.RIGHT && aButton.bChanged() && !aButton.bState())
+                                                         {
+                                                            sendPlacedFootsteps(locomotionParameters);
+                                                         }
 
-            InputDigitalActionData bButton = controller.getBButtonActionData();
-            if (side == RobotSide.LEFT && bButton.bChanged() && !bButton.bState())
-            {
-               reset();
-            }
-         });
+                                                         InputDigitalActionData bButton = controller.getBButtonActionData();
+                                                         if (side == RobotSide.LEFT && bButton.bChanged() && !bButton.bState())
+                                                         {
+                                                            reset();
+                                                         }
+                                                      });
       }
    }
 
@@ -230,17 +232,22 @@ public class RDXVRFootstepPlacement
       }
    }
 
+   private final FootstepDataListMessage messageList = new FootstepDataListMessage();
+   private final FramePose3D secondFootstepPose = new FramePose3D();
+   private AtomicBoolean consecutiveStepping = new AtomicBoolean(false);
+
    public void sendStep(boolean activeAdjustment)
    {
       // send the placed footsteps
-      FootstepDataListMessage messageList = new FootstepDataListMessage();
-      messageList.getQueueingProperties().setExecutionMode(activeAdjustment ? ExecutionMode.OVERRIDE.toByte() : ExecutionMode.QUEUE.toByte());
+      messageList.getFootstepDataList().clear();
+      messageList.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
       messageList.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
       messageList.setOffsetFootstepsHeightWithExecutionError(true);
       if (locomotionParameters != null)
       {
          messageList.setDefaultSwingDuration(locomotionParameters.getSwingTime());
          messageList.setDefaultTransferDuration(locomotionParameters.getTransferTime());
+         messageList.setFinalTransferDuration(locomotionParameters.getFinalTransferTime());
          messageList.setAreFootstepsAdjustable(locomotionParameters.getAreFootstepsAdjustable());
       }
       else
@@ -249,12 +256,29 @@ public class RDXVRFootstepPlacement
          messageList.setDefaultTransferDuration(syncedRobot.getRobotModel().getWalkingControllerParameters().getDefaultTransferTime());
       }
 
-      FootstepDataMessage footstepDataMessage = messageList.getFootstepDataList().add();
-      footstepDataMessage.setSequenceId(sequenceId++);
-      footstepDataMessage.setRobotSide(footstepBeingExternallyPlaced.getSide().toByte());
-      footstepDataMessage.getLocation().set(footstepBeingExternallyPlaced.getPose().getPosition());
-      footstepDataMessage.getOrientation().set(footstepBeingExternallyPlaced.getPose().getOrientation());
-      footstepDataMessage.setTrajectoryType(TrajectoryType.DEFAULT.toByte());
+      // Add first footstep
+      FootstepDataMessage footstepDataMessage1 = messageList.getFootstepDataList().add();
+      footstepDataMessage1.setSequenceId(sequenceId++);
+      footstepDataMessage1.setRobotSide(footstepBeingExternallyPlaced.getSide().toByte());
+      footstepDataMessage1.getLocation().set(footstepBeingExternallyPlaced.getPose().getPosition());
+      footstepDataMessage1.getOrientation().set(footstepBeingExternallyPlaced.getPose().getOrientation());
+      footstepDataMessage1.setTrajectoryType(TrajectoryType.DEFAULT.toByte());
+
+      if (consecutiveStepping.get())
+      {
+         // Add second footstep
+         RobotSide footstep2Side = footstepBeingExternallyPlaced.getSide().getOppositeSide();
+         secondFootstepPose.changeFrame(syncedRobot.getFullRobotModel().getSoleFrame(footstep2Side));
+         secondFootstepPose.setToZero();
+         secondFootstepPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+         FootstepDataMessage footstepDataMessage2 = messageList.getFootstepDataList().add();
+         footstepDataMessage2.setSequenceId(sequenceId++);
+         footstepDataMessage2.setRobotSide(footstep2Side.toByte());
+         footstepDataMessage2.getLocation().set(secondFootstepPose.getPosition());
+         footstepDataMessage2.getOrientation().set(secondFootstepPose.getOrientation());
+         footstepDataMessage2.setTrajectoryType(TrajectoryType.DEFAULT.toByte());
+      }
 
       RDXBaseUI.pushNotification("Commanding %d footsteps...".formatted(messageList.getFootstepDataList().size()));
       controllerHelper.publishToController(messageList);
@@ -264,6 +288,22 @@ public class RDXVRFootstepPlacement
       { // first step is not an adjustment
          stepStartTime = System.nanoTime();
       }
+   }
+
+   public void abortLastStep()
+   {
+      LogTools.info("Aborting last step in place");
+      controllerHelper.publishToController(new AbortWalkingMessage());
+   }
+
+   public void setConsecutiveStepping(boolean enable)
+   {
+      consecutiveStepping.set(enable);
+   }
+
+   public boolean getConsecutiveStepping()
+   {
+      return consecutiveStepping.get();
    }
 
    public void setHeightMapData(HeightMapData heightMapData)
@@ -299,8 +339,8 @@ public class RDXVRFootstepPlacement
       }
       else
       {
-        return syncedRobot.getRobotModel().getWalkingControllerParameters().getDefaultSwingTime()
-               + syncedRobot.getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
+         return syncedRobot.getRobotModel().getWalkingControllerParameters().getDefaultSwingTime()
+                + syncedRobot.getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
       }
    }
 
@@ -319,6 +359,7 @@ public class RDXVRFootstepPlacement
       previousAdaptedStepHeight = Double.NaN;
       latestHeightMapData = null;
       handPlacedFootsteps.clear();
+      consecutiveStepping.set(false);
    }
 
    public void resetTimer()

@@ -156,6 +156,11 @@ public class RDXVRFootstepStreaming
       return readyToStep;
    }
 
+   public void setConsecutiveStepping(boolean enable)
+   {
+      footstepPlacer.setConsecutiveStepping(enable);
+   }
+
    public void step(boolean activeAdjustment)
    {
       footstepPlacer.sendStep(activeAdjustment);
@@ -198,6 +203,11 @@ public class RDXVRFootstepStreaming
       readyToStep.clear();
       footstepPlacer.reset();
       footstepPlacer.resetTimer();
+      if (footstepPlacer.getConsecutiveStepping())
+      {
+         footstepPlacer.abortLastStep();
+         setConsecutiveStepping(false);
+      }
    }
 
    public void destroy()
