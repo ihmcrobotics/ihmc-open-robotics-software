@@ -256,7 +256,7 @@ public class QuicksterFootstepProvider
    private void updateEstimates()
    {
       initialize();
-      desiredPelvisOrientation.appendYawRotation(desiredTurningVelocity.getDoubleValue() * 10 * updateDT);
+      desiredPelvisOrientation.appendYawRotation(desiredTurningVelocity.getDoubleValue() * 1 * updateDT);
 
       inDoubleSupport.set(footStates.get(RobotSide.LEFT).getEnumValue() == FootState.SUPPORT &&
                           footStates.get(RobotSide.RIGHT).getEnumValue() == FootState.SUPPORT);
@@ -292,11 +292,7 @@ public class QuicksterFootstepProvider
       desiredTouchdownPosesList.get(currentSwingSide).clear();
       desiredTouchdownPosesList.get(currentSwingSide.getOppositeSide()).clear();
 
-      int numberOfSteps = numberOfFootstepsToPlan;
-      if (inDoubleSupport)
-         numberOfSteps++;
-
-      for (int i = 0; i < numberOfSteps; i++)
+      for (int i = 0; i < numberOfFootstepsToPlan; i++)
       {
          double timeToReachGoal;
          double stepDuration;
@@ -308,7 +304,7 @@ public class QuicksterFootstepProvider
          {
             tempCurrentCoMPose.setFromReferenceFrame(centerOfMassControlZUpFrame);
             tempCurrentContactPointAngularMomentum.setMatchingFrame(estimates.getContactPointAngularMomentum());
-            tempCurrentStanceFootPosition.setFromReferenceFrame(referenceFrames.getSoleZUpFrame(currentSwingSide.getOppositeSide()));//setMatchingFrame(netPendulumBase3DInWorld);//
+            tempCurrentStanceFootPosition.setMatchingFrame(netPendulumBase3DInWorld);//setFromReferenceFrame(referenceFrames.getSoleZUpFrame(currentSwingSide.getOppositeSide()));//
             tempControlFrame.setTransformAndUpdate(centerOfMassControlZUpFrame.getTransformToDesiredFrame(tempControlFrame.getParent()));
 
             swingSide = currentSwingSide;
@@ -337,28 +333,24 @@ public class QuicksterFootstepProvider
          FramePoint2D desiredTouchdownPositionToPack = desiredTouchdownPositionsList.get(swingSide).add();
          FramePose2D desiredTouchdownPose = desiredTouchdownPosesList.get(swingSide).add();
 
-         if (inDoubleSupport && i == 0)
-            desiredTouchdownPositionToPack.setFromReferenceFrame(referenceFrames.getSoleZUpFrame(currentSwingSide));
-         else
-            alipCalculatorTools.computeTouchdownPositionUsingRaibertHeuristicAndPolePlacement(tempCurrentCoMPose,
-                                                                                              tempCurrentContactPointAngularMomentum,
-                                                                                              tempCurrentStanceFootPosition,
-                                                                                              desiredTouchdownPositionToPack,
-                                                                                              swingSide,
-                                                                                              tempControlFrame,
-                                                                                              desiredVelocity.getX(),
-                                                                                              desiredVelocity.getY(),
-                                                                                              desiredTurningVelocity.getDoubleValue(),
-                                                                                              parameters.getStanceWidth(swingSide).getDoubleValue(),
-                                                                                              timeToReachGoal,
-                                                                                              stepDuration,
-                                                                                              transferDuration,
-                                                                                              robotModel.getTotalMass(),
-                                                                                              parameters.getDesiredCoMHeight(swingSide).getDoubleValue(),
-                                                                                              parameters.getPole(swingSide).getDoubleValue(),
-                                                                                              useFutureCoM,
-                                                                                              updateDT);
-
+         alipCalculatorTools.computeTouchdownPositionUsingRaibertHeuristicAndPolePlacement(tempCurrentCoMPose,
+                                                                                           tempCurrentContactPointAngularMomentum,
+                                                                                           tempCurrentStanceFootPosition,
+                                                                                           desiredTouchdownPositionToPack,
+                                                                                           swingSide,
+                                                                                           tempControlFrame,
+                                                                                           desiredVelocity.getX(),
+                                                                                           desiredVelocity.getY(),
+                                                                                           desiredTurningVelocity.getDoubleValue(),
+                                                                                           parameters.getStanceWidth(swingSide).getDoubleValue(),
+                                                                                           timeToReachGoal,
+                                                                                           stepDuration,
+                                                                                           transferDuration,
+                                                                                           robotModel.getTotalMass(),
+                                                                                           parameters.getDesiredCoMHeight(swingSide).getDoubleValue(),
+                                                                                           parameters.getPole(swingSide).getDoubleValue(),
+                                                                                           useFutureCoM,
+                                                                                           updateDT);
          alipCalculatorTools.computeFutureStateUsingALIP(tempCurrentCoMPose,
                                                          tempCurrentContactPointAngularMomentum,
                                                          tempCurrentStanceFootPosition,
@@ -381,22 +373,14 @@ public class QuicksterFootstepProvider
 
          if (i == 0 && !useFutureCoM)
          {
-            if (inDoubleSupport)
-            {
-               desiredTouchdownPositionsList.get(swingSide).remove(0);
-               desiredTouchdownPosesList.get(swingSide).remove(0);
-            }
-            else
-            {
-               tempCurrentStanceFootPosition.changeFrame(centerOfMassControlZUpFrame);
-               double stanceFootX = tempCurrentStanceFootPosition.getX();
-               double stanceFootY = tempCurrentStanceFootPosition.getY();
-               double stanceFootZ = tempCurrentStanceFootPosition.getZ();
+            tempCurrentStanceFootPosition.changeFrame(centerOfMassControlZUpFrame);
+            double stanceFootX = tempCurrentStanceFootPosition.getX();
+            double stanceFootY = tempCurrentStanceFootPosition.getY();
+            double stanceFootZ = tempCurrentStanceFootPosition.getZ();
 
-               tempCurrentStanceFootPosition.changeFrame(tempControlFrame);
-               tempCurrentStanceFootPosition.set(stanceFootX, stanceFootY, stanceFootZ);
-               tempCurrentStanceFootPosition.changeFrame(tempControlFrame.getParent());
-            }
+            tempCurrentStanceFootPosition.changeFrame(tempControlFrame);
+            tempCurrentStanceFootPosition.set(stanceFootX, stanceFootY, stanceFootZ);
+            tempCurrentStanceFootPosition.changeFrame(tempControlFrame.getParent());
 
             nextStanceFootPosition.setMatchingFrame(tempCurrentStanceFootPosition);
             nextCoMPosition.setMatchingFrame(tempCurrentCoMPose.getPosition());
@@ -645,22 +629,22 @@ public class QuicksterFootstepProvider
          pendulumBase.get(robotSide).setToZero(referenceFrames.getSoleZUpFrame(robotSide));
          pendulumBase.get(robotSide).changeFrameAndProjectToXYPlane(centerOfMassControlZUpFrame);
 
-         double transferDuration = useAlternateTransferDuration ? getAlternateTransferDuration() : getTransferDuration(robotSide);
-         if (robotSide == newestSupportSide.getEnumValue() && inDoubleSupport.getValue())
-            calculateTouchdownPosition(robotSide, transferDuration, true);
+         double stepDuration = useAlternateTransferDuration ? getSwingDuration(robotSide) + getAlternateTransferDuration() : getStepDuration(robotSide);
+         if (robotSide != newestSupportSide.getEnumValue() && inDoubleSupport.getValue())
+            calculateTouchdownPosition(robotSide, stepDuration, true);
       }
 
       @Override
       public void doAction(double timeInState)
       {
-         double transferDuration = useAlternateTransferDuration ? getAlternateTransferDuration() : getTransferDuration(robotSide);
-         double timeToReachGoal = transferDuration - timeInState;
-         timeToReachGoal = MathTools.clamp(timeToReachGoal, 0.0, transferDuration);
+         double stepDuration = useAlternateTransferDuration ? getSwingDuration(robotSide) + getAlternateTransferDuration() : getStepDuration(robotSide);
+         double timeToReachGoal = stepDuration - footStateMachines.get(robotSide.getOppositeSide()).getTimeInCurrentState();
+         timeToReachGoal = MathTools.clamp(timeToReachGoal, 0.0, stepDuration);
 
          pendulumBase.get(robotSide).setToZero(referenceFrames.getSoleZUpFrame(robotSide));
          pendulumBase.get(robotSide).changeFrameAndProjectToXYPlane(centerOfMassControlZUpFrame);
 
-         if (robotSide == newestSupportSide.getEnumValue() && inDoubleSupport.getValue())
+         if (robotSide != newestSupportSide.getEnumValue() && footStateMachines.get(robotSide.getOppositeSide()).getCurrentStateKey().equals(FootState.SUPPORT) && inDoubleSupport.getValue())
             calculateTouchdownPosition(robotSide, timeToReachGoal, true);
       }
 
@@ -697,8 +681,7 @@ public class QuicksterFootstepProvider
       {
          footStates.get(robotSide).set(FootState.SWING);
 
-         double stepDuration = useAlternateTransferDuration ? getSwingDuration(robotSide) + getAlternateTransferDuration() : getStepDuration(robotSide);
-         calculateTouchdownPosition(robotSide, stepDuration, false);
+         calculateTouchdownPosition(robotSide, getSwingDuration(robotSide), false);
 
          parameters.setParametersForUpcomingSwing(robotSide);
       }
@@ -706,9 +689,8 @@ public class QuicksterFootstepProvider
       @Override
       public void doAction(double timeInState)
       {
-         double stepDuration = useAlternateTransferDuration ? getSwingDuration(robotSide) + getAlternateTransferDuration() : getStepDuration(robotSide);
-         double timeToReachGoal = stepDuration - timeInState;
-         timeToReachGoal = MathTools.clamp(timeToReachGoal, 0.0, stepDuration);
+         double timeToReachGoal = getSwingDuration(robotSide) - timeInState;
+         timeToReachGoal = MathTools.clamp(timeToReachGoal, 0.0, getSwingDuration(robotSide));
          this.timeToReachGoal.set(timeToReachGoal);
 
          calculateTouchdownPosition(robotSide, timeToReachGoal, false);
