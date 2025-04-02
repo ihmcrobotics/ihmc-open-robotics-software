@@ -298,7 +298,11 @@ public class RDXVRFootstepPlacement
       CapturabilityBasedStatus status = controllerStatusTracker.getLatestCapturabilityBasedStatus();
       Point3D icpDes = status.getDesiredCapturePoint2d();
       Point3D icpCur = status.getCapturePoint2d();
-      LogTools.error(icpDes.distance(icpCur));
+      if (Math.abs(icpDes.getY() - icpCur.getY()) > 0.2)
+      {
+         messageList.setDefaultTransferDuration(locomotionParameters.getTransferTime() + 0.1);
+         controllerHelper.publishToController(messageList);
+      }
    }
 
    public void abortLastStep()
