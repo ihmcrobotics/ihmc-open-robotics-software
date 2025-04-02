@@ -50,6 +50,11 @@ public abstract class EndToEndUpperBodyTrajectoriesWhileWalkingTest implements M
 
    private SCS2AvatarTestingSimulation simulationTestHelper;
 
+   protected double getArmJointRangeOfMotionLimit()
+   {
+      return 1.0;
+   }
+
    @Test
    public void testWalkingWithRandomArmTrajectoryMovements() throws Exception
    {
@@ -185,7 +190,8 @@ public abstract class EndToEndUpperBodyTrajectoriesWhileWalkingTest implements M
 
                for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
                {
-                  double desiredJointPosition = RandomNumbers.nextDouble(random, joint.getJointLimitLower(), joint.getJointLimitUpper());
+                  double desiredJointPosition =
+                        getArmJointRangeOfMotionLimit() * RandomNumbers.nextDouble(random, joint.getJointLimitLower(), joint.getJointLimitUpper());
                   trajectoryPoint1DCalculator.appendTrajectoryPoint(desiredJointPosition);
                }
 

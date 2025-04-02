@@ -1,7 +1,5 @@
 package us.ihmc.avatar.obstacleCourseTests;
 
-import static us.ihmc.robotics.Assert.assertTrue;
-
 import java.io.InputStream;
 import java.util.List;
 
@@ -36,6 +34,8 @@ import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTestInterface
 {
@@ -84,7 +84,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       simulationTestHelper.start();
       InputStream scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
-      simulationTestHelper.simulateNow(0.01);
+      simulationTestHelper.simulateNow(0.25);
       simulationTestHelper.loadScriptFile(scriptInputStream, fullRobotModel.getSoleFrame(RobotSide.LEFT));
       if (offsetHeight != 0.0)
       {
@@ -94,7 +94,6 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       }
 
       setupCameraForWalkingOntoSlopes();
-      ThreadTools.sleep(1000);
       boolean success = simulationTestHelper.simulateNow(21.0);
       // TODO GITHUB WORKFLOWS
 //      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
@@ -123,7 +122,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       simulationTestHelper.start();
       InputStream scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
-      simulationTestHelper.simulateNow(0.5);
+      simulationTestHelper.simulateNow(0.25);
       simulationTestHelper.loadScriptFile(scriptInputStream, fullRobotModel.getSoleFrame(RobotSide.LEFT));
       setupCameraForWalkingOntoSlopes();
       Robot robot = simulationTestHelper.getRobot();
@@ -172,7 +171,6 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       simulationTestHelper.simulateNow(0.01);
       simulationTestHelper.loadScriptFile(scriptInputStream, fullRobotModel.getSoleFrame(RobotSide.LEFT));
       setupCameraForWalkingOverHurdles();
-      ThreadTools.sleep(1000);
       boolean success = simulationTestHelper.simulateNow(8.0);
       // TODO GITHUB WORKFLOWS
 //      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
@@ -209,7 +207,6 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       slipRandomOnEachStepPerturber.setSlipPercentSlipPerTickRange(0.01, 0.03);
       slipRandomOnEachStepPerturber.setProbabilityOfSlip(0.0);
       robot.addThrottledController(slipRandomOnEachStepPerturber, 10 * simulationTestHelper.getSimulationDT());
-      ThreadTools.sleep(1000);
       boolean success = simulationTestHelper.simulateNow(1.0);
       slipRandomOnEachStepPerturber.setProbabilityOfSlip(1.0);
       success = success && simulationTestHelper.simulateNow(6.5);
@@ -234,8 +231,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
       simulationTestHelper.start();
       setupCameraForWalkingOntoSlopes();
-      ThreadTools.sleep(1000);
-      Assert.assertTrue(simulationTestHelper.simulateNow(0.5));
+      assertTrue(simulationTestHelper.simulateNow(0.5));
       FootstepDataListMessage footstepDataList = createFootstepsForWalkingToTheSlopesSideways();
       List<FootstepDataMessage> dataList = createFootstepsForSteppingOverTheSlopesEdgeSideways().getFootstepDataList();
       for (int i = 0; i < dataList.size(); i++)
@@ -244,9 +240,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
          footstepDataList.getFootstepDataList().add().set(step);
       }
       simulationTestHelper.publishToController(footstepDataList);
-      WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
-      double stepTime = walkingControllerParameters.getDefaultSwingTime() + walkingControllerParameters.getDefaultTransferTime();
-      boolean success = simulationTestHelper.simulateNow(footstepDataList.getFootstepDataList().size() * stepTime + 2.0);
+      boolean success = simulationTestHelper.simulateNow(getDefaultMoveTime(footstepDataList));
       assertTrue(success);
 
       // TODO GITHUB WORKFLOWS
@@ -341,4 +335,15 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
 
       return EndToEndTestTools.generateFootstepsFromPose3Ds(RobotSide.RIGHT, footstepPoses);
    }
+
+
+   private double getDefaultMoveTime(FootstepDataListMessage footsteps)
+   {
+      DRCRobotModel robotModel = getRobotModel();
+      double moveTime = footsteps.getFootstepDataList().size() * (robotModel.getWalkingControllerParameters().getDefaultSwingTime()
+                                                                  + robotModel.getWalkingControllerParameters().getDefaultTransferTime());
+      moveTime += robotModel.getWalkingControllerParameters().getDefaultInitialTransferTime() + robotModel.getWalkingControllerParameters().getDefaultFinalTransferTime();
+      return moveTime;
+   }
+
 }

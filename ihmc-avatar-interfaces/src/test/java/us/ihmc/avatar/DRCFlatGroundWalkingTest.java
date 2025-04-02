@@ -15,7 +15,6 @@ import us.ihmc.avatar.testTools.scs2.SCS2RunsSameWayTwiceVerifier;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.robotDataLogger.RobotVisualizer;
-import us.ihmc.robotics.Assert;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.environments.MeshTerrainEnvironment;
@@ -100,7 +99,6 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       boolean doPelvisWarmup = doPelvisWarmup();
       CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       simulationTestingParameters.setUsePefectSensors(getUsePerfectSensors());
-      simulationTestingParameters.setKeepSCSUp(true);
 
       MeshTerrainEnvironment meshTerrainEnvironment = new MeshTerrainEnvironment(MeshTerrainObjectFactory.createWorkPlatformObject(), MeshTerrainObjectFactory.createFlatGround());
       DRCRobotModel robotModel = getRobotModel();
@@ -148,6 +146,8 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       }
       physicsEngineName = useBulletPhysicsEngine ? "Bullet Physics Engine: " : "SCS2 Physics Engine: ";
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
+      simulationTestHelper.setKeepSCSUp(true);
+
       simulationTestHelper.start();
 
       if (CHECK_ICP_CONTINUITY)
@@ -179,7 +179,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       ((YoBoolean) simulationTestHelper.findVariable("walkCSG")).set(true);
       for (int i = 0; i < 10; i++)
       {
-         Assert.assertTrue(simulationTestHelper.simulateNow(1.0));
+         assertTrue(simulationTestHelper.simulateNow(1.0));
          simulationTestHelper.resetRobot(false);
       }
    }
