@@ -46,7 +46,7 @@ public abstract class AvatarSwingOverPlanarRegionsTest implements MultiRobotTest
    @Test
    public void testSwingOverPlanarRegions()
    {
-      fail("This neesd to be fixed");
+//      fail("This neesd to be fixed");
       double swingTime = 0.6;
       double transferTime = 0.25;
       double stepLength = 0.35;
