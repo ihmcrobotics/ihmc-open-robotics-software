@@ -9,19 +9,17 @@ import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import org.lwjgl.openvr.InputDigitalActionData;
-import org.opencv.core.Point3;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.packets.ExecutionMode;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
@@ -46,8 +44,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class RDXVRFootstepPlacement
 {
-   private final static boolean USE_HEIGHTMAP = true;
-   private final static boolean USE_STEPPABLE_REGION_ADAPTATION = true;
+   private final static boolean USE_HEIGHTMAP = false;
+   private final static boolean USE_STEPPABLE_REGION_ADAPTATION = false;
    private HeightMapData latestHeightMapData;
 
    private RDXVRHardwareModel controllerModel = RDXVRHardwareModel.UNKNOWN;
@@ -267,13 +265,14 @@ public class RDXVRFootstepPlacement
       footstepDataMessage1.getOrientation().set(footstepBeingExternallyPlaced.getPose().getOrientation());
       footstepDataMessage1.setTrajectoryType(TrajectoryType.DEFAULT.toByte());
 
-      if (consecutiveStepping.get())
+      if (consecutiveStepping.get() && !USE_STEPPABLE_REGION_ADAPTATION)
       {
          // Add second footstep
          RobotSide footstep2Side = footstepBeingExternallyPlaced.getSide().getOppositeSide();
-         secondFootstepPose.changeFrame(syncedRobot.getFullRobotModel().getSoleFrame(footstep2Side));
-         secondFootstepPose.setToZero();
-         secondFootstepPose.changeFrame(ReferenceFrame.getWorldFrame());
+         secondFootstepPose.set(footstepBeingExternallyPlaced.getPose());
+         Vector3DBasics positionOtherFoot = syncedRobot.getReferenceFrames().getSoleFrame(footstep2Side).getTransformToWorldFrame().getTranslation();
+         secondFootstepPose.getPosition().setX(positionOtherFoot.getX());
+         secondFootstepPose.getPosition().setY(positionOtherFoot.getY());
 
          FootstepDataMessage footstepDataMessage2 = messageList.getFootstepDataList().add();
          footstepDataMessage2.setSequenceId(sequenceId++);
@@ -296,11 +295,11 @@ public class RDXVRFootstepPlacement
    public void checkCapturabilityStatus()
    {
       CapturabilityBasedStatus status = controllerStatusTracker.getLatestCapturabilityBasedStatus();
-      Point3D icpDes = status.getDesiredCapturePoint2d();
-      Point3D icpCur = status.getCapturePoint2d();
-      if (Math.abs(icpDes.getY() - icpCur.getY()) > 0.2)
+      double yIcpDistance = Math.abs(status.getDesiredCapturePoint2d().getY() - status.getCapturePoint2d().getY());
+      if (yIcpDistance > 0.1)
       {
-         messageList.setDefaultTransferDuration(locomotionParameters.getTransferTime() + 0.1);
+         double extraTransferTime = Math.ceil((yIcpDistance - 0.1) / 0.05) * 0.05;
+         messageList.setDefaultTransferDuration(locomotionParameters.getTransferTime() + extraTransferTime);
          controllerHelper.publishToController(messageList);
       }
    }

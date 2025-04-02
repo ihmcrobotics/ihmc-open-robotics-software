@@ -603,6 +603,7 @@ public class RDXVRKinematicsStreamingMode
 //                     armStreaming.enableStreaming(true);
                   }
                   pausedForWalking = true;
+                  reintializingToolbox = false;
                   sleepToolbox();
                   visualizeIKPreviewGraphic(false);
                   footstepStreaming.getReadyToStepNotification().clear();
@@ -618,6 +619,7 @@ public class RDXVRKinematicsStreamingMode
                if (footstepStreaming.getReadyToStepNotification().poll())
                {
                   LogTools.warn("Consecutive stepping from VR");
+                  reintializingToolbox = false;
                   footstepStreaming.setConsecutiveStepping(true);
                   footstepStreaming.step(false);
                   // This prevents wrong logic. The controller might think we're done walking even if we've just sent a new footstep that needs to propagate to the controller
@@ -629,12 +631,13 @@ public class RDXVRKinematicsStreamingMode
             {
                footstepStreaming.setConsecutiveStepping(false);
                reintializingToolbox = true;
+               timeNotificationIsDoneWalking = System.nanoTime() / 1e9;
+            }
+            else if (pausedForWalking && reintializingToolbox && (System.nanoTime() / 1e9 - timeNotificationIsDoneWalking) > 0.3
+            )
+            {
                // disable arm streaming
                armStreaming.enable(false);
-               timeNotificationIsDoneWalking = System.nanoTime() / 10e9;
-            }
-            else if (pausedForWalking && reintializingToolbox && (System.nanoTime() / 10e9 - timeNotificationIsDoneWalking) > 0.1)
-            {
                pausedForWalking = false;
                reinitializeToolboxRobotConfiguration();
                visualizeIKPreviewGraphic(true);

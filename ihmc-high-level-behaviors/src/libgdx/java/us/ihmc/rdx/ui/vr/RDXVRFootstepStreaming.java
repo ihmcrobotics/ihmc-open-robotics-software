@@ -107,7 +107,6 @@ public class RDXVRFootstepStreaming
 
    public void processToolboxOutput()
    {
-      footstepPlacer.checkCapturabilityStatus();
       if (status.getMessageNotification().poll())
       {
          FootstepStreamingToolboxOutputStatus latestStatus = status.getMessageNotification().read();
@@ -150,6 +149,7 @@ public class RDXVRFootstepStreaming
             LogTools.error("Received null footstep streaming output status");
          }
       }
+      footstepPlacer.checkCapturabilityStatus();
    }
 
    public Notification getReadyToStepNotification()
@@ -204,11 +204,7 @@ public class RDXVRFootstepStreaming
       readyToStep.clear();
       footstepPlacer.reset();
       footstepPlacer.resetTimer();
-      if (footstepPlacer.getConsecutiveStepping())
-      {
-         footstepPlacer.abortLastStep();
-         setConsecutiveStepping(false);
-      }
+      footstepPlacer.abortLastStep();
    }
 
    public void destroy()
