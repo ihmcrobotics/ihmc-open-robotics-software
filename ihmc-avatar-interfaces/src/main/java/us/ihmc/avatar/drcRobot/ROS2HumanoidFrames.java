@@ -98,7 +98,11 @@ public class ROS2HumanoidFrames
       // Repeat for all its child frames
       int childrenCount = start.getNumberOfChildren();
       for (int i = 0; i < childrenCount; ++i)
-         fillTree(start.getChild(i));
+      {
+         ReferenceFrame childFrame = start.getChild(i);
+         if (childFrame != null)
+            fillTree(childFrame);
+      }
    }
 
    private void createFrameCopy(ReferenceFrame frameToCopy)

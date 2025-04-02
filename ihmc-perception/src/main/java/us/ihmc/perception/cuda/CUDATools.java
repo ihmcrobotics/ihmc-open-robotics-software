@@ -6,6 +6,7 @@ import org.bytedeco.cuda.global.cudart;
 import org.bytedeco.cuda.global.nvcomp;
 import org.bytedeco.cuda.global.nvjpeg;
 import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacpp.Loader;
 import org.bytedeco.javacpp.Pointer;
