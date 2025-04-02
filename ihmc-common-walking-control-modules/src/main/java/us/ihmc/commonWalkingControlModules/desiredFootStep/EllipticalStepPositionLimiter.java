@@ -15,9 +15,9 @@ public class EllipticalStepPositionLimiter
 {
    public final static double NOMINAL_STANCE_WIDTH_DEFAULT = 0.25;
    public final static double MAX_STEP_FORWARD_DEFAULT = 0.85;
-   public final static double MIN_STANCE_WIDTH_DEFAULT = 0.075;
+   public final static double MIN_STANCE_WIDTH_DEFAULT = 0.1;
    public final static double MAX_STANCE_WIDTH_DEFAULT = 0.75;
-   public final static double MIN_DISTANCE_FROM_STANCE_FOOT_DEFAULT = 0.075;
+   public final static double MIN_DISTANCE_FROM_STANCE_FOOT_DEFAULT = 0.1;
 
    private final FramePoint2D stanceFootPosition = new FramePoint2D();
    private final FramePoint2D constrainedTouchdownPosition2D = new FramePoint2D();

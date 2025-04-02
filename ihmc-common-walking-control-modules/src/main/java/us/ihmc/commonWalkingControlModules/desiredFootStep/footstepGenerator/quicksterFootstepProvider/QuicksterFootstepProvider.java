@@ -256,7 +256,7 @@ public class QuicksterFootstepProvider
    private void updateEstimates()
    {
       initialize();
-      desiredPelvisOrientation.appendYawRotation(desiredTurningVelocity.getDoubleValue() * 1 * updateDT);
+      desiredPelvisOrientation.appendYawRotation(desiredTurningVelocity.getDoubleValue() * 10 * updateDT);
 
       inDoubleSupport.set(footStates.get(RobotSide.LEFT).getEnumValue() == FootState.SUPPORT &&
                           footStates.get(RobotSide.RIGHT).getEnumValue() == FootState.SUPPORT);
