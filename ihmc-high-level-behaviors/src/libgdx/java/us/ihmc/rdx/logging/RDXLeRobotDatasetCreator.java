@@ -34,11 +34,6 @@ public class RDXLeRobotDatasetCreator
       refresh();
    }
 
-   public void update()
-   {
-
-   }
-
    private void renderImGuiWidgets()
    {
       if (ImGui.beginMenuBar())
@@ -59,6 +54,8 @@ public class RDXLeRobotDatasetCreator
                   {
                      dataset = new LeRobotDataset(datasetPath);
                      dataset.loadData();
+                     if (!dataset.getTaskNames().isEmpty())
+                        imTaskName.set(dataset.getTaskNames().get(dataset.getTaskNames().size() - 1));
                   }
                }
             }
