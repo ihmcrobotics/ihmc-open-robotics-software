@@ -51,7 +51,7 @@ public class OpenAlexanderWalkingControllerParameters extends WalkingControllerP
    private AlexanderSteppingParameters steppingParameters;
    private final OpenAlexanderICPControllerParameters icpControllerParameters;
    private final AlexanderStepAdjustmentParameters stepAdjustmentParameters;
-   private JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters = new JointPrivilegedConfigurationParameters();
+   private JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters = new AlexanderJointPrivilegedConfigurationParameters();
    private final OneDoFJointPrivilegedConfigurationParameters kneePrivilegedConfigurationParameters;
    private final JointLimitParameters kneeJointLimitParameters;
 

@@ -8,7 +8,7 @@
         <parent link="TORSO_LINK" />
         <child link="LEFT_SHOULDER_Y_LINK" />
         <limit effort="150.0" lower="-3.141592" upper="1.22173" velocity = "9.0" />
-        <dynamics damping="0.05" friction="0.0"/>
+        <dynamics damping="0.02" friction="0.0"/>
     </joint>
 
     <link name="LEFT_SHOULDER_Y_LINK">
@@ -31,7 +31,7 @@
         <parent link="LEFT_SHOULDER_Y_LINK" />
         <child link="LEFT_SHOULDER_X_LINK" />
         <limit effort="150.0" lower="-0.349066" upper="2.79253" velocity = "9.0" />
-        <dynamics damping="0.05" friction="0.0"/>
+        <dynamics damping="0.02" friction="0.0"/>
     </joint>
 
     <link name="LEFT_SHOULDER_X_LINK">
@@ -54,7 +54,7 @@
         <parent link="LEFT_SHOULDER_X_LINK" />
         <child link="LEFT_SHOULDER_Z_LINK" />
         <limit effort="80.0" lower="-1.91986" upper="1.22173" velocity = "11.5" />
-        <dynamics damping="0.05" friction="0.0"/>
+        <dynamics damping="0.02" friction="0.0"/>
     </joint>
 
     <link name="LEFT_SHOULDER_Z_LINK">
@@ -77,7 +77,7 @@
         <parent link="LEFT_SHOULDER_Z_LINK" />
         <child link="LEFT_ELBOW_Y_LINK" />
         <limit effort="80.0" lower="-2.35619" upper="0.174532925" velocity = "11.5" />
-        <dynamics damping="0.05" friction="0.0"/>
+        <dynamics damping="0.02" friction="0.0"/>
     </joint>
 
     <link name="LEFT_ELBOW_Y_LINK">
@@ -100,7 +100,7 @@
         <parent link="LEFT_ELBOW_Y_LINK" />
         <child link="LEFT_WRIST_Z_LINK" />
         <limit effort="20.0" lower="-2.61799" upper="2.61799" velocity = "25.0" />
-        <dynamics damping="0.05" friction="0.0"/>
+        <dynamics damping="0.02" friction="0.0"/>
     </joint>
 
     <link name="LEFT_WRIST_Z_LINK">
@@ -123,7 +123,7 @@
         <parent link="LEFT_WRIST_Z_LINK" />
         <child link="LEFT_WRIST_X_LINK" />
         <limit effort="20.0" lower="-1.8326" upper="0.610865" velocity = "25.0" />
-        <dynamics damping="0.05" friction="0.0"/>
+        <dynamics damping="0.02" friction="0.0"/>
     </joint>
 
     <link name="LEFT_WRIST_X_LINK">
@@ -146,7 +146,7 @@
         <parent link="LEFT_WRIST_X_LINK" />
         <child link="LEFT_GRIPPER_Z_LINK" />
         <limit effort="20.0" lower="-2.61799" upper="2.61799" velocity = "25.0" />
-        <dynamics damping="0.05" friction="0.0"/>
+        <dynamics damping="0.02" friction="0.0"/>
     </joint>
 
     <link name="LEFT_GRIPPER_Z_LINK">

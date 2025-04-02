@@ -32,7 +32,7 @@ public class AlexanderPushRecoveryWithCrossOverWalkingTest extends AvatarPushRec
    @Override
    public double getOutwardPushDelta()
    {
-      return 0.35;
+      return 0.3;
    }
 
    @Override

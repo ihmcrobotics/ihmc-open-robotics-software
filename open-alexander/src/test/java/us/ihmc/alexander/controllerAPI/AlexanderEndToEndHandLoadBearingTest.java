@@ -20,7 +20,6 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@Disabled
 public class AlexanderEndToEndHandLoadBearingTest extends EndToEndHandLoadBearingTest
 {
    private final DRCRobotModel robotModel = new OpenAlexanderRobotModel(AlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS);

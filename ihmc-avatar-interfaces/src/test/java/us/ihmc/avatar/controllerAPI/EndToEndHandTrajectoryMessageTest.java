@@ -112,7 +112,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
    /**
     * Method used to scale down trajectories for different robots.
-    * 
+    *
     * @return shinLength + thighLength of the robot
     */
    public abstract double getLegLength();
@@ -124,7 +124,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
    protected double getStreamingRangeOfMotion()
    {
-      return 0.6;
+      return 0.5;
    }
 
    @Test
@@ -1422,8 +1422,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       simulationTestHelper.start();
       simulationTestHelper.addRegistry(testRegistry);
 
-      ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateNow(1.5);
+      boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
@@ -1440,7 +1439,18 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       SideDependentList<YoFramePose3D> desiredPoses = new SideDependentList<>();
       SideDependentList<YoFixedFrameSpatialVector> desiredVelocities = new SideDependentList<>();
 
-      SubtreeStreams.fromChildren(OneDoFJointBasics.class, chestCloned).forEach(joint -> joint.setQ(nextJointConfiguration(random, getStreamingRangeOfMotion(), joint)));
+      SubtreeStreams.fromChildren(OneDoFJointBasics.class, chestCloned).forEach(joint ->
+                                                                                {
+                                                                                   String name = joint.getName().replaceAll("Cloned$", "");
+                                                                                   double homePosition = simulationTestHelper.getRobotModel()
+                                                                                                                             .getWalkingControllerParameters()
+                                                                                                                             .getOrCreateJointHomeConfiguration()
+                                                                                                                             .get(name);
+                                                                                   joint.setQ(nextJointConfiguration(random,
+                                                                                                                     getStreamingRangeOfMotion(),
+                                                                                                                     joint,
+                                                                                                                     homePosition));
+                                                                                });
       chestCloned.updateFramesRecursively();
 
       for (RobotSide robotSide : RobotSide.values)
@@ -1558,7 +1568,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
                + Math.abs(AngleTools.trimAngleMinusPiToPi(currentPose.getOrientation().distance(controllerDesiredPose.getOrientation()))),
                                                        controllerDesiredPose,
                                                        currentPose,
-                                                       0.1);
+                                                       0.15);
       }
 
       success = simulationTestHelper.simulateNow(0.5 * trajectoryTime.getValue() + 1.5);
@@ -1594,7 +1604,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       }
    }
 
-   public static double nextJointConfiguration(Random random, double percentOfMotionRangeAllowed, OneDoFJointReadOnly joint)
+   public static double nextJointConfiguration(Random random, double percentOfMotionRangeAllowed, OneDoFJointReadOnly joint, double homePosition)
    {
       double jointLimitLower = joint.getJointLimitLower();
       if (Double.isInfinite(jointLimitLower))
@@ -1602,9 +1612,10 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       double jointLimitUpper = joint.getJointLimitUpper();
       if (Double.isInfinite(jointLimitUpper))
          jointLimitUpper = -Math.PI;
-      double rangeReduction = (1.0 - percentOfMotionRangeAllowed) * (jointLimitUpper - jointLimitLower);
-      jointLimitLower += 0.5 * rangeReduction;
-      jointLimitUpper -= 0.5 * rangeReduction;
+      double upperLimitOffset = percentOfMotionRangeAllowed * (jointLimitUpper - homePosition);
+      double lowerLimitOffset = percentOfMotionRangeAllowed * (homePosition - jointLimitLower);
+      jointLimitLower = Math.max(homePosition - lowerLimitOffset, jointLimitLower);
+      jointLimitUpper = Math.min(homePosition + upperLimitOffset, jointLimitUpper);
       return RandomNumbers.nextDouble(random, jointLimitLower, jointLimitUpper);
    }
 

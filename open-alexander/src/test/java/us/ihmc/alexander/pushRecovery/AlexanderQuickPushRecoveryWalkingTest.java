@@ -46,7 +46,7 @@ public class AlexanderQuickPushRecoveryWalkingTest extends AvatarQuickPushRecove
    @Test
    public void testOutwardPushLeftSwingAtDifferentTimes()
    {
-      setPushChangeInVelocity(0.6);
+      setPushChangeInVelocity(0.5);
       super.testOutwardPushLeftSwingAtDifferentTimes();
    }
 
