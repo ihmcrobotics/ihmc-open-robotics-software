@@ -1,8 +1,5 @@
 package us.ihmc.avatar.controllerAPI;
 
-import static us.ihmc.robotics.Assert.assertEquals;
-import static us.ihmc.robotics.Assert.assertTrue;
-
 import java.util.Random;
 
 import org.junit.jupiter.api.AfterEach;
@@ -37,6 +34,9 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.registry.YoVariableHolder;
 import us.ihmc.yoVariables.variable.YoInteger;
+
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTestInterface
 {

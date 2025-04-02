@@ -1,8 +1,5 @@
 package us.ihmc.avatar;
 
-import static us.ihmc.robotics.Assert.assertEquals;
-import static us.ihmc.robotics.Assert.assertTrue;
-
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -28,6 +25,8 @@ import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnviro
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class AvatarFootstepQueueingTest implements MultiRobotTestInterface
 {
@@ -121,7 +120,7 @@ public abstract class AvatarFootstepQueueingTest implements MultiRobotTestInterf
    }
 
    @Test
-   public void testQueuedStepsSequentialWithMessageTools() throws SimulationExceededMaximumTimeException
+   public void testQueuedStepsSequentialWithMessageTools()
    {
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
 
