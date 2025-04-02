@@ -223,7 +223,6 @@ public class JustWaitState implements State
                                                                                         FramePose3DReadOnly soleFramePose;
                                                                                         if (controllerQueueMonitor.getNumberOfIncompleteFootsteps() > 0)
                                                                                         {
-                                                                                           LogTools.info("Yes this queue is not empty");
                                                                                            // We pass in the opposite side because the method returns the footstep on the opposite side
                                                                                            soleFramePose = controllerQueueMonitor.getLastFootstepQueuedOnOppositeSide(
                                                                                                  side.getOppositeSide());
