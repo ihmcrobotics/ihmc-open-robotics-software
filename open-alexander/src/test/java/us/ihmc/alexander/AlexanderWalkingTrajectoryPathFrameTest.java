@@ -132,7 +132,7 @@ public class AlexanderWalkingTrajectoryPathFrameTest
    {
       Quaternion rotation = new Quaternion();
       rotation.appendPitchRotation(-Math.toRadians(90));
-      return new Pose3D(new Point3D(0.35, 0.3, -0.25), rotation);
+      return new Pose3D(new Point3D(0.3, 0.3, -0.25), rotation);
    }
 
    @Tag("controller-api-2")
@@ -408,6 +408,7 @@ public class AlexanderWalkingTrajectoryPathFrameTest
                                                                                                                                                         0.8,
                                                                                                                                                         0.0))));
       FootstepDataListMessage footsteps = generateFootstepsForSteppingStonesB(cinderBlockPoses, 0.0);
+      footsteps.setFinalTransferDuration(getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime());
 
       DRCRobotModel robotModel = getRobotModel();
       SCS2AvatarTestingSimulationFactory factory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(robotModel,
@@ -467,6 +468,7 @@ public class AlexanderWalkingTrajectoryPathFrameTest
       addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(3).get(1), 0.02, -0.08, zOffset, yawOffset);
       yawOffset = Math.PI;
       addFootstepFromCBPose(footsteps, RobotSide.LEFT, cinderBlockPoses.get(2).get(0), 0.0, 0.11, zOffset, yawOffset);
+
 //      addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(2).get(0), 0.0, -0.12, zOffset, yawOffset);
 //      yawOffset = Math.PI;
 //      addFootstepFromCBPose(footsteps, RobotSide.LEFT, cinderBlockPoses.get(1).get(1), 0.0, -0.08, zOffset, yawOffset);

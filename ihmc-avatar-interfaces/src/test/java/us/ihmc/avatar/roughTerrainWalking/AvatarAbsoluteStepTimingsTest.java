@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import gnu.trove.list.array.TDoubleArrayList;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,6 +26,7 @@ import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.ExecutionTiming;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -58,7 +60,7 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
    @Test
    public void testTakingStepsWithAbsoluteTimings()
    {
-      CommonAvatarEnvironmentInterface environment = new TestingEnvironment();
+      TestingEnvironment environment = new TestingEnvironment();
       DRCRobotModel robotModel = getRobotModel();
       simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(robotModel, environment, simulationTestingParameters);
       simulationTestHelper.start();
@@ -74,6 +76,7 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
       double stepWidth = (walkingControllerParameters.getSteppingParameters().getMinStepWidth()
             + walkingControllerParameters.getSteppingParameters().getMaxStepWidth()) / 2.0;
       double stepLength = walkingControllerParameters.getSteppingParameters().getDefaultStepLength() / 2.0;
+      stepLength = Math.max(walkingControllerParameters.getSteppingParameters().getActualFootLength() * 1.2, stepLength);
       double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
       double defaultTransferTime = walkingControllerParameters.getDefaultTransferTime();
 
@@ -95,10 +98,12 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
       {
          RobotSide side = stepIndex % 2 == 0 ? RobotSide.LEFT : RobotSide.RIGHT;
          double y = side == RobotSide.LEFT ? stepWidth / 2.0 : -stepWidth / 2.0;
-         Point3D location = new Point3D(stepIndex * stepLength, y, 0.0);
+         Point3D location = new Point3D(stepIndex * stepLength, y, environment.getHeight(stepIndex * stepLength));
          Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
          FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(side, location, orientation);
-         footstepData.setSwingHeight(0.04);
+         footstepData.setSwingHeight(0.12);
+         footstepData.getCustomWaypointProportions().add(0.05);
+         footstepData.getCustomWaypointProportions().add(0.95);
          double transferTime = defaultTransferTime + random.nextDouble() * 0.5;
          double swingTime = defaultSwingTime + random.nextDouble() * 0.5 - 0.2;
          double touchdownTime = transferTime * random.nextDouble() * 0.3;
@@ -390,14 +395,22 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
       private final CombinedTerrainObject3D terrain;
       private final Random random = new Random(19389481L);
 
+      private final TDoubleArrayList xStarts = new TDoubleArrayList();
+      private final TDoubleArrayList xEnds = new TDoubleArrayList();
+      private final TDoubleArrayList heights = new TDoubleArrayList();
+
       public TestingEnvironment()
       {
          SteppingParameters steppingParameters = getRobotModel().getWalkingControllerParameters().getSteppingParameters();
          double flatArea = steppingParameters.getDefaultStepLength() * 0.5;
+         flatArea = Math.max(steppingParameters.getActualFootLength() * 1.2, flatArea);
          double maxElevation = getRobotModel().getWalkingControllerParameters().getSwingTrajectoryParameters().getDefaultSwingHeight() * 0.25;
 
          terrain = new CombinedTerrainObject3D(getClass().getSimpleName());
          terrain.addBox(-0.5 - flatArea / 2.0, -1.0, flatArea / 2.0, 1.0, -0.01, 0.0);
+         xStarts.add(-0.5 - flatArea / 2.0);
+         xEnds.add(flatArea / 2.0);
+         heights.add(0.0);
 
          for (int i = 0; i < 50; i++)
          {
@@ -405,7 +418,22 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
             double height = maxElevation * 2.0 * (random.nextDouble() - 0.5);
             double length = flatArea;
             terrain.addBox(xStart, -1.0, xStart + length, 1.0, height - 0.01, height);
+
+            xStarts.add(xStart);
+            xEnds.add(xStart + length);
+            heights.add(height);
          }
+      }
+
+      public double getHeight(double x)
+      {
+         for (int i = 0; i < xStarts.size(); i++)
+         {
+            if (x >= xStarts.get(i) && x < xEnds.get(i))
+               return heights.get(i);
+         }
+
+         return 0.0;
       }
 
       @Override

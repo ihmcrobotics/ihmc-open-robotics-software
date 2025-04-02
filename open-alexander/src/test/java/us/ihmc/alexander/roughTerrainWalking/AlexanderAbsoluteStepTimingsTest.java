@@ -4,9 +4,12 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import us.ihmc.alexander.AlexanderVersion;
 import us.ihmc.alexander.OpenAlexanderRobotModel;
+import us.ihmc.alexander.parameters.simulation.AlexanderInitialSetup;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.avatar.initialSetup.HumanoidRobotInitialSetup;
 import us.ihmc.avatar.roughTerrainWalking.AvatarAbsoluteStepTimingsTest;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
 
 import java.io.InputStream;
@@ -52,6 +55,15 @@ public class AlexanderAbsoluteStepTimingsTest extends AvatarAbsoluteStepTimingsT
             assertNotNull(overwrites);
             return overwrites;
          }
+
+         @Override
+         public HumanoidRobotInitialSetup getDefaultRobotInitialSetup()
+         {
+            AlexanderInitialSetup initialSetup = new AlexanderInitialSetup(getRobotDefinition(), getJointMap());
+            initialSetup.setOffset(new Vector3D(-0.05, 0.0, 0.0));
+            return initialSetup;
+         }
+
       };
    }
 

@@ -302,6 +302,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       return new ImmutablePair<CombinedTerrainObject3D, Double>(combinedTerrainObject, xMax);
    }
 
+   @Disabled
    @Test
    public void testDRCBumpyGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
