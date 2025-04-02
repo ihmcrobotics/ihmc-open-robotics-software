@@ -1,7 +1,5 @@
 package us.ihmc.avatar.posePlayback;
 
-import static us.ihmc.robotics.Assert.*;
-
 import java.io.ByteArrayOutputStream;
 import java.io.StringReader;
 import java.util.Random;
@@ -12,6 +10,8 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class PlaybackPoseSequenceDRCTest implements MultiRobotTestInterface
 {

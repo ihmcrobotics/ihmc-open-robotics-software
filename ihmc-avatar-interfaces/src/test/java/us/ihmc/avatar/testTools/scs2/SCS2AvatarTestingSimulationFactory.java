@@ -74,6 +74,7 @@ public class SCS2AvatarTestingSimulationFactory extends SCS2AvatarSimulationFact
    {
       setRobotModel(robotModel);
       setCommonAvatarEnvrionmentInterface(environment);
+      setRobotInitialSetup(robotModel.getDefaultRobotInitialSetup());
 
       setRealtimeROS2Node(new ROS2NodeBuilder().buildRealtime("ihmc_simulation"));
 

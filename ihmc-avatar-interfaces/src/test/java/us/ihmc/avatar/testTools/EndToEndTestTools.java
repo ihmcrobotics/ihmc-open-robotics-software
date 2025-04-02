@@ -291,6 +291,29 @@ public class EndToEndTestTools
                                                       double epsilon,
                                                       double controllerDT)
    {
+      assertTaskspaceTrajectoryStatus(expectedSequenceID,
+                                      expectedStatus,
+                                      expectedTimestamp,
+                                      expectedDesiredPosition,
+                                      expectedDesiredOrientation,
+                                      endEffectorName,
+                                      statusMessage,
+                                      ReferenceFrame.getWorldFrame(),
+                                      epsilon,
+                                      controllerDT);
+   }
+
+   public static void assertTaskspaceTrajectoryStatus(long expectedSequenceID,
+                                                      TrajectoryExecutionStatus expectedStatus,
+                                                      double expectedTimestamp,
+                                                      Point3DReadOnly expectedDesiredPosition,
+                                                      Orientation3DReadOnly expectedDesiredOrientation,
+                                                      String endEffectorName,
+                                                      TaskspaceTrajectoryStatusMessage statusMessage,
+                                                      ReferenceFrame desiredFrame,
+                                                      double epsilon,
+                                                      double controllerDT)
+   {
       if (expectedDesiredPosition != null)
       {
          if (!expectedDesiredPosition.containsNaN())
@@ -352,7 +375,12 @@ public class EndToEndTestTools
 
       if (expectedDesiredOrientation != null)
       {
-         EuclidCoreTestTools.assertEquals(expectedDesiredOrientation, statusMessage.getDesiredEndEffectorOrientation(), epsilon);
+         FrameQuaternion desiredOrientation = new FrameQuaternion(ReferenceFrame.getWorldFrame(), statusMessage.getDesiredEndEffectorOrientation());
+         desiredOrientation.changeFrame(desiredFrame);
+         EuclidCoreTestTools.assertEquals("The expected desired orientation does not match the value returned by the status message.",
+                                          expectedDesiredOrientation,
+                                          desiredOrientation,
+                                          epsilon);
          assertFalse(statusMessage.getActualEndEffectorOrientation().containsNaN());
       }
       else

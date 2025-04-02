@@ -1,0 +1,166 @@
+<?xml version = "1.0" ?>
+<robot name="Alexander">
+
+    <!-- Right Arm -->
+    <joint name="RIGHT_SHOULDER_Y" type="revolute">
+        <origin xyz="-0.025 -0.1 0.214" rpy="-0.698132 0.0 0.0" />
+        <axis xyz="0.0 1.0 0.0" />
+        <parent link="TORSO_LINK" />
+        <child link="RIGHT_SHOULDER_Y_LINK" />
+        <limit effort="1000" lower="-3.141592" upper="1.22173" velocity = "100" />
+        <dynamics damping="0.02" friction="0.0"/>
+    </joint>
+
+    <link name="RIGHT_SHOULDER_Y_LINK">
+        <inertial>
+            <mass value="2.99"/>
+            <origin rpy="0 0 0" xyz="-0.00264 -0.12135 -0.006824"/>
+            <inertia ixx="0.0110394" ixy="-0.0003041" ixz="-0.0000594" iyy="0.0051097" iyz="-0.0009183" izz="0.0116925" />
+        </inertial>
+        <visual>
+            <geometry>
+                <mesh filename="package://alexander_v0/meshes/cycloidal_arm/RightShoulderPitchLink.obj"/>
+            </geometry>
+            <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+        </visual>
+    </link>
+
+    <joint name="RIGHT_SHOULDER_X" type="revolute">
+          <origin rpy="0.698132 0.0 0.0" xyz="0.0 -0.15676000 -0.01300000" />
+        <axis xyz="1 0 0" />
+        <parent link="RIGHT_SHOULDER_Y_LINK" />
+        <child link="RIGHT_SHOULDER_X_LINK" />
+        <limit effort="1000" lower="-2.79253" upper="0.349066" velocity = "100" />
+        <dynamics damping="0.02" friction="0.0"/>
+    </joint>
+
+    <link name="RIGHT_SHOULDER_X_LINK">
+        <inertial>
+            <mass value="0.972"/>
+            <origin rpy="0 0 0" xyz="0.012489 -0.01882 -0.0385"/>
+            <inertia ixx="0.002949" ixy="-0.000135" ixz="-0.0003358" iyy="0.0023603" iyz="-0.0005249" izz="0.0014377" />
+        </inertial>
+        <visual>
+            <geometry>
+                <mesh filename="package://alexander_v0/meshes/cycloidal_arm/RightShoulderRollLink_shortBicep.obj"/>
+            </geometry>
+            <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+        </visual>
+    </link>
+
+    <joint name="RIGHT_SHOULDER_Z" type="revolute">
+        <origin rpy="0.0 0.0 0.0" xyz="0.0 -0.035 0.0" />
+        <axis xyz="0.0 0.0 1.0" />
+        <parent link="RIGHT_SHOULDER_X_LINK" />
+        <child link="RIGHT_SHOULDER_Z_LINK" />
+         <limit effort="1000" lower="-1.22173" upper="1.91986" velocity = "100" />
+        <dynamics damping="0.02" friction="0.0"/>
+    </joint>
+
+    <link name="RIGHT_SHOULDER_Z_LINK">
+        <inertial>
+            <mass value="2.91"/>
+            <origin rpy="0 0 0" xyz="0.00524 -0.00274 -0.21745"/>
+            <inertia ixx="0.0248699" ixy="0.0000211" ixz="0.0000211" iyy="0.0245973" iyz="-0.0004444" izz="0.0029883" />
+        </inertial>
+        <visual>
+            <geometry>
+                <mesh filename="package://alexander_v0/meshes/cycloidal_arm/RightShoulderYawLink.obj"/>
+            </geometry>
+            <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0867"/>
+        </visual>
+    </link>
+
+    <joint name="RIGHT_ELBOW_Y" type="revolute">
+        <origin rpy="0.0 0.0 0.0" xyz="0.015 0.0 -0.3127" />
+        <axis xyz="0.0 1.0 0.0" />
+        <parent link="RIGHT_SHOULDER_Z_LINK" />
+        <child link="RIGHT_ELBOW_Y_LINK" />
+         <limit effort="1000" lower="-2.35619" upper="0.174532925" velocity = "100" />
+        <dynamics damping="0.02" friction="0.0"/>
+    </joint>
+
+    <link name="RIGHT_ELBOW_Y_LINK">
+        <inertial>
+            <mass value="0.45"/>
+            <origin xyz="-0.0127 0.006913 -0.048421" rpy="0 0 0"/>
+            <inertia ixx="0.0006446" ixy="-0.0000073" ixz="-0.0000345" iyy="0.000625" iyz="-0.0001257" izz="0.0003922" />
+        </inertial>
+        <visual>
+            <geometry>
+                <mesh filename="package://alexander_v0/meshes/cycloidal_arm/RightElbowPitchLink.obj"/>
+            </geometry>
+            <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+        </visual>
+    </link>
+
+    <joint name="RIGHT_WRIST_Z" type="revolute">
+        <origin xyz="-0.015 0.0 0.0" rpy="0.0 0.0 0.0"   />
+        <axis xyz="0.0 0.0 1.0" />
+        <parent link="RIGHT_ELBOW_Y_LINK" />
+        <child link="RIGHT_WRIST_Z_LINK" />
+        <limit effort="20.0" lower="-2.61799" upper="2.61799" velocity = "25.0" />
+        <dynamics damping="0.02" friction="0.0"/>
+    </joint>
+
+    <link name="RIGHT_WRIST_Z_LINK">
+        <inertial>
+            <mass value="1.547"/> <!-- This is a measured value. Refer to https://docs.google.com/spreadsheets/d/1VXWFJk3VJUsfkHrDaytB2INq94un1KytIOzcKJD0p44/edit?gid=0#gid=0  -->
+            <origin xyz="-0.002616 0.000462 -0.13019" rpy="0 0 0"/>
+            <inertia ixx="0.0037805" ixy="-0.0000177" ixz="-0.000025" iyy="0.0040639" iyz="0.00009" izz="0.0015151" />
+        </inertial>
+        <visual>
+            <geometry>
+                <mesh filename="package://alexander_v0/meshes/cycloidal_arm/RightWristYawLink.obj"/>
+            </geometry>
+            <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+        </visual>
+    </link>
+
+    <joint name="RIGHT_WRIST_X" type="revolute">
+        <origin xyz="0.0 0.013 -0.25" rpy="0.0 0.0 0.0"/>
+        <axis xyz="1 0 0" />
+        <parent link="RIGHT_WRIST_Z_LINK" />
+        <child link="RIGHT_WRIST_X_LINK" />
+          <limit effort="20.0" lower="-0.610865" upper="1.8326" velocity = "25.0" />
+        <dynamics damping="0.02" friction="0.0"/>
+    </joint>
+
+    <link name="RIGHT_WRIST_X_LINK">
+        <inertial>
+            <mass value="0.909"/> <!-- This is a measured value. Refer to https://docs.google.com/spreadsheets/d/1VXWFJk3VJUsfkHrDaytB2INq94un1KytIOzcKJD0p44/edit?gid=0#gid=0  -->
+            <origin xyz="-0.0000481 -0.012143 0.000196" rpy="0 0 0"/>
+            <inertia ixx="0.0005535" ixy="0.0000081" ixz="-0.0000231" iyy="0.0005559" iyz="0.0000012" izz="0.0005893" />
+        </inertial>
+        <visual>
+            <geometry>
+                <mesh filename="package://alexander_v0/meshes/cycloidal_arm/RightWristRollLink.obj"/>
+            </geometry>
+            <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+        </visual>
+    </link>
+
+    <joint name="RIGHT_GRIPPER_Z" type="revolute">
+            <origin xyz="0.0 -0.013 -0.031" rpy="0.0 0.0 0.0" />
+        <axis xyz="0.0 0.0 1.0" />
+        <parent link="RIGHT_WRIST_X_LINK" />
+        <child link="RIGHT_GRIPPER_Z_LINK" />
+        <limit effort="20.0" lower="-2.61799" upper="2.61799" velocity = "25.0" />
+        <dynamics damping="0.02" friction="0.0"/>
+    </joint>
+
+    <link name="RIGHT_GRIPPER_Z_LINK">
+        <inertial>
+            <mass value="0.251"/>
+            <origin rpy="0 0 0" xyz="-0.000217 -0.000349 0.009761"/>
+            <inertia ixx="0.0000722" ixy="-0.0000016" ixz="-0.0000037" iyy="0.0000747" iyz="0.0000004" izz="0.0000324" />
+        </inertial>
+        <visual>
+            <geometry>
+                <mesh filename="package://alexander_v0/meshes/cycloidal_arm/nub.obj"/>
+            </geometry>
+            <origin rpy="0.0 1.57 0.0" xyz="0.0 0.0 0.0"/>
+        </visual>
+    </link>
+
+</robot>

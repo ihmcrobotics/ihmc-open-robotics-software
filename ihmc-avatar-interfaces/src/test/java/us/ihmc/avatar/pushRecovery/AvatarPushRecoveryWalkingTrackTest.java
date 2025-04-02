@@ -38,7 +38,6 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-@Disabled
 @Tag("video")
 public abstract class AvatarPushRecoveryWalkingTrackTest implements MultiRobotTestInterface
 {
