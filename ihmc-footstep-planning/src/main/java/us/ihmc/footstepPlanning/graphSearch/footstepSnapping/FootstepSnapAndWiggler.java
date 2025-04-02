@@ -9,6 +9,7 @@ import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
@@ -235,9 +236,9 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
       else
       {
          // Check that all points are inside the polygon. If not, gift wrapping failed, and we need to fall back to the original polygon.
-         for (Point3DBasics footPointInEnvironment : footPointsInEnvironment)
+         for (Point2DBasics footPoint : footPointsInFoot)
          {
-            if (!croppedFoothold.isPointInside(new Point2D(footPointInEnvironment), 1e-3))
+            if (!croppedFoothold.isPointInside(footPoint, 1e-3))
             {
                croppedFoothold.set(footPolygonInFootFrame);
                break;
