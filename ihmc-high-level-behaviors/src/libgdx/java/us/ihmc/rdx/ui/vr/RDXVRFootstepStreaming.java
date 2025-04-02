@@ -149,7 +149,6 @@ public class RDXVRFootstepStreaming
             LogTools.error("Received null footstep streaming output status");
          }
       }
-      footstepPlacer.checkCapturabilityStatus();
    }
 
    public Notification getReadyToStepNotification()

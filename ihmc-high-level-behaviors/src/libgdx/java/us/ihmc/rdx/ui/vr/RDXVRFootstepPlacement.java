@@ -25,6 +25,7 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWigg
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.perception.gpuHeightMap.CUDAFootstepOptimizer;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelLoader;
@@ -246,8 +247,29 @@ public class RDXVRFootstepPlacement
       messageList.setOffsetFootstepsHeightWithExecutionError(true);
       if (locomotionParameters != null)
       {
-         messageList.setDefaultSwingDuration(locomotionParameters.getSwingTime());
-         messageList.setDefaultTransferDuration(locomotionParameters.getTransferTime());
+         MovingReferenceFrame pelvisFrame = syncedRobot.getReferenceFrames().getPelvisFrame();
+         FramePose3D goalFootstepFramePose = new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                                             syncedRobot.getReferenceFrames().getSoleFrame(footstepBeingExternallyPlaced.getSide()).getTransformToWorldFrame());
+         goalFootstepFramePose.changeFrame(pelvisFrame);
+         FramePose3D stanceFootstepFramePose = new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                                             syncedRobot.getReferenceFrames().getSoleFrame(footstepBeingExternallyPlaced.getSide().getOppositeSide()).getTransformToWorldFrame());
+         stanceFootstepFramePose.changeFrame(pelvisFrame);
+         double yFootstepDistance = Math.abs(stanceFootstepFramePose.getY() - goalFootstepFramePose.getY());
+         if (yFootstepDistance > 0.4)
+         {
+            // Normalize yFootstepDistance to a value between 0 and 1
+            double normalizedDistance = Math.min(1.0, Math.max(0.0, (yFootstepDistance - 0.4) / (0.7 - 0.4)));
+            // Scale normalized value to the desired range for extraTransferTime
+            double extraTransferTime = normalizedDistance * 0.3; // Maximum extra time is 0.3
+            messageList.setDefaultTransferDuration(locomotionParameters.getTransferTime() + extraTransferTime);
+            messageList.setDefaultSwingDuration(locomotionParameters.getSwingTime() + extraTransferTime);
+            LogTools.warn("DistanceY: {}, Swing: {}, Transfer: {}", yFootstepDistance, locomotionParameters.getSwingTime() + extraTransferTime, locomotionParameters.getTransferTime() + extraTransferTime);
+         }
+         else
+         {
+            messageList.setDefaultTransferDuration(locomotionParameters.getTransferTime());
+            messageList.setDefaultSwingDuration(locomotionParameters.getSwingTime());
+         }
          messageList.setFinalTransferDuration(locomotionParameters.getFinalTransferTime());
          messageList.setAreFootstepsAdjustable(locomotionParameters.getAreFootstepsAdjustable());
       }
