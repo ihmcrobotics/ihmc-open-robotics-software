@@ -47,9 +47,13 @@ __device__ bool isPointInCapsule(float3 point,
     dist.x = point.x - closestPointOnAxis.x;
     dist.y = point.y - closestPointOnAxis.y;
     dist.z = point.z - closestPointOnAxis.z;
-    float distSq = dot(dist, dist);
 
+    float distSq = dot(dist, dist);
+ printf("here: (%f, %f, %f)\n", distSq, radius, radius*radius);
     return distSq <= radius * radius;
+    //         printf("radius: %f\n", radius);
+    //             printf("topCenter: (%f, %f, %f)\n", topCenter.x, topCenter.y, topCenter.z);
+
 }
 
 extern "C" __global__ void checkBodyCollision(unsigned short* depthImage,
@@ -62,7 +66,7 @@ extern "C" __global__ void checkBodyCollision(unsigned short* depthImage,
                                             float cy,
                                             unsigned short* collisionMask,
                                             size_t collisionMaskPitch,
-                                            float* collidableGeometry,
+                                            float* collidableGeometryPointer,
                                             int numCollidables) {
     int x = Utils::getThreadCoordX();
     int y = Utils::getThreadCoordY();
@@ -71,30 +75,41 @@ extern "C" __global__ void checkBodyCollision(unsigned short* depthImage,
         return;
 
     unsigned short depthValue = *row(col(depthImage, x), depthImagePitch, y);
-//     *row(col(collisionMask, x), collisionMaskPitch, y) = depthValue;
     if (depthValue == 0) {
         *row(col(collisionMask, x), collisionMaskPitch, y) = 0; // Set to 0 (integer)
         return;
     }
 
-    float depthInMeters = 1000.0f * depthValue;
+    float depthInMeters = depthValue/1000.0f;
     float3 depthFramePoint = make_float3(depthInMeters,
                                          -(x - cx) / fx * depthInMeters,
                                          -(y - cy) / fy * depthInMeters);
 
-    *row(col(collisionMask, x), collisionMaskPitch, y) = 0; // Initialize to 0 (integer)
+
+
+
+    *row(col(collisionMask, x), collisionMaskPitch, y) = 255;
 
     for (int i = 0; i < numCollidables; ++i) {
-        float3 topCenter = make_float3(collidableGeometry[i * 7 + 0],
-                                         collidableGeometry[i * 7 + 1],
-                                         collidableGeometry[i * 7 + 2]);
-        float3 bottomCenter = make_float3(collidableGeometry[i * 7 + 3],
-                                            collidableGeometry[i * 7 + 4],
-                                            collidableGeometry[i * 7 + 5]);
-        float radius = collidableGeometry[i * 7 + 6];
+        int index = i * 7;
+
+        float3 topCenter = make_float3(collidableGeometryPointer[index],
+                                       collidableGeometryPointer[index + 1],
+                                       collidableGeometryPointer[index + 2]);
+
+
+
+        float3 bottomCenter = make_float3(collidableGeometryPointer[index + 3],
+                                          collidableGeometryPointer[index + 4],
+                                          collidableGeometryPointer[index + 5]);
+
+        float radius = collidableGeometryPointer[index + 6];
+
+
+
 
         if (isPointInCapsule(depthFramePoint, topCenter, bottomCenter, radius)) {
-            *row(col(collisionMask, x), collisionMaskPitch, y) = 255; // Set to 255 (integer)
+            *row(col(collisionMask, x), collisionMaskPitch, y) = 0; // Set to 255 (integer)
             return; // No need to check other capsules if a collision is found
         }
     }
