@@ -75,10 +75,8 @@ public class LeRobotDataset
       JSONFileTools.loadLines(episodesJsonlPath, lineRoot ->
       {
          int episodeIndex = episodes.size();
-         String episodeName = "episode_%6d".formatted(episodeIndex);
          String taskName = lineRoot.get("tasks").get(0).textValue();
          LeRobotDatasetEpisode episode = new LeRobotDatasetEpisode(episodeIndex,
-                                                                   episodeName,
                                                                    taskName,
                                                                    episodesJsonlPath,
                                                                    episodeStatsJsonlPath,
@@ -104,15 +102,13 @@ public class LeRobotDataset
       // add episode to episodes.jsonl
 
       int episodeIndex = episodes.size();
-      String episodeName = "episode_%6d".formatted(episodeIndex);
       LeRobotDatasetEpisode episode = new LeRobotDatasetEpisode(episodeIndex,
-                                                                episodeName,
                                                                 taskName,
                                                                 episodesJsonlPath,
                                                                 episodeStatsJsonlPath,
                                                                 dataChunk0Path,
                                                                 zedVideoDirs);
-      episode.writeToFilesystem(session);
+      episode.startGeneratingEpisode(session);
       episodes.add(episode);
 
       // add episode stats entry
