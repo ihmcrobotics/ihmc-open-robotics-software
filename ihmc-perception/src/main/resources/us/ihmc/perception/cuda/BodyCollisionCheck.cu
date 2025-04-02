@@ -79,15 +79,13 @@ extern "C" __global__ void checkBodyCollision(unsigned short* depthImage,
 
     float depthInMeters = depthValue/1000.0f;
     float3 depthFramePoint = make_float3(depthInMeters,
-                                         -(x - cx) / fx * depthInMeters,
+                                          -(x - cx) / fx * depthInMeters,
                                          -(y - cy) / fy * depthInMeters);
-
-
-
 
     *row(col(collisionMask, x), collisionMaskPitch, y) = 0;
 
-    for (int i = 0; i < numCollidables; ++i) {
+    for (int i = 0; i < numCollidables; ++i)
+    {
         int index = i * 7;
 
         float3 topCenter = make_float3(collidableGeometryPointer[index],
@@ -102,9 +100,10 @@ extern "C" __global__ void checkBodyCollision(unsigned short* depthImage,
 
         float radius = collidableGeometryPointer[index + 6];
 
-        if (isPointInCapsule(depthFramePoint, topCenter, bottomCenter, radius)) {
+        if (isPointInCapsule(depthFramePoint, topCenter, bottomCenter, radius))
+        {
             *row(col(collisionMask, x), collisionMaskPitch, y) = 255; // Set to 255 (integer)
-            return; // No need to check other capsules if a collision is found
+//             return; // No need to check other capsules if a collision is found
         }
     }
 }
