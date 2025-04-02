@@ -26,7 +26,7 @@ public class CUDABodyCollisionFilter
    private final CUDAKernel kernel;
    private final CUstream_st stream;
 
-   private GpuMat collisionResults; // Results from the kernel
+   private GpuMat collisionResults;
    private int error;
    private int numCollidables;
 
@@ -95,7 +95,7 @@ public class CUDABodyCollisionFilter
             .withFloat((float) cameraIntrinsics.getFy())
             .withFloat((float) cameraIntrinsics.getCx())
             .withFloat((float) cameraIntrinsics.getCy())
-            .withPointer(collisionResults.data()) // changed to collisionResults.data()
+            .withPointer(collisionResults.data())
             .withLong(collisionResults.step())
             .withPointer(deviceCollidableGeometryPointer)
             .withInt(numCollidables)
@@ -142,17 +142,21 @@ public class CUDABodyCollisionFilter
       int index = 0;
       for (Collidable collidable : robotCollidables)
       {
-         if (collidable.getShape() instanceof FrameCapsule3D capsule)
+         String rigidBodyName = collidable.getRigidBody().getName();
+         if (!rigidBodyName.equals("PELVIS_LINK") && !rigidBodyName.equals("TORSO_LINK"))
          {
-            FrameCapsule3D bodypart = new FrameCapsule3D(capsule);
-            bodypart.changeFrame(cameraFrame);
-            geometryPointer.put(index++, (float) bodypart.getTopCenter().getX());
-            geometryPointer.put(index++, (float) bodypart.getTopCenter().getY());
-            geometryPointer.put(index++, (float) bodypart.getTopCenter().getZ());
-            geometryPointer.put(index++, (float) bodypart.getBottomCenter().getX());
-            geometryPointer.put(index++, (float) bodypart.getBottomCenter().getY());
-            geometryPointer.put(index++, (float) bodypart.getBottomCenter().getZ());
-            geometryPointer.put(index++, (float) bodypart.getRadius());
+            if (collidable.getShape() instanceof FrameCapsule3D capsule)
+            {
+               FrameCapsule3D bodypart = new FrameCapsule3D(capsule);
+               bodypart.changeFrame(cameraFrame);
+               geometryPointer.put(index++, (float) bodypart.getTopCenter().getX());
+               geometryPointer.put(index++, (float) bodypart.getTopCenter().getY());
+               geometryPointer.put(index++, (float) bodypart.getTopCenter().getZ());
+               geometryPointer.put(index++, (float) bodypart.getBottomCenter().getX());
+               geometryPointer.put(index++, (float) bodypart.getBottomCenter().getY());
+               geometryPointer.put(index++, (float) bodypart.getBottomCenter().getZ());
+               geometryPointer.put(index++, (float) bodypart.getRadius());
+            }
          }
       }
       return geometryPointer;

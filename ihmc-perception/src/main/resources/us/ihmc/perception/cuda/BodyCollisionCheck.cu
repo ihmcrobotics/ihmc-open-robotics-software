@@ -49,10 +49,7 @@ __device__ bool isPointInCapsule(float3 point,
     dist.z = point.z - closestPointOnAxis.z;
 
     float distSq = dot(dist, dist);
- printf("here: (%f, %f, %f)\n", distSq, radius, radius*radius);
     return distSq <= radius * radius;
-    //         printf("radius: %f\n", radius);
-    //             printf("topCenter: (%f, %f, %f)\n", topCenter.x, topCenter.y, topCenter.z);
 
 }
 
@@ -88,7 +85,7 @@ extern "C" __global__ void checkBodyCollision(unsigned short* depthImage,
 
 
 
-    *row(col(collisionMask, x), collisionMaskPitch, y) = 255;
+    *row(col(collisionMask, x), collisionMaskPitch, y) = 0;
 
     for (int i = 0; i < numCollidables; ++i) {
         int index = i * 7;
@@ -105,11 +102,8 @@ extern "C" __global__ void checkBodyCollision(unsigned short* depthImage,
 
         float radius = collidableGeometryPointer[index + 6];
 
-
-
-
         if (isPointInCapsule(depthFramePoint, topCenter, bottomCenter, radius)) {
-            *row(col(collisionMask, x), collisionMaskPitch, y) = 0; // Set to 255 (integer)
+            *row(col(collisionMask, x), collisionMaskPitch, y) = 255; // Set to 255 (integer)
             return; // No need to check other capsules if a collision is found
         }
     }
