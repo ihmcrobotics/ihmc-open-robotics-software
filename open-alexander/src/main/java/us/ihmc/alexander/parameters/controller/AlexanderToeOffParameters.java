@@ -36,6 +36,13 @@ public class AlexanderToeOffParameters extends ToeOffParameters
       return true;
    }
 
+   @Override
+   public boolean doToeOffWhenHittingTrailingKneeLowerLimit()
+   {
+      return true;
+   }
+
+
    // TODO we should investigate turning this on on hardware
    //   @Override
    //   public boolean doToeOffWhenHittingTrailingKneeLowerLimit()

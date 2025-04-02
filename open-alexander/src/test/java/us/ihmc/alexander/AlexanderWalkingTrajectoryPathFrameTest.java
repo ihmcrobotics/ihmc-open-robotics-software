@@ -354,6 +354,16 @@ public class AlexanderWalkingTrajectoryPathFrameTest
 
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
+
+      FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
+      FramePoint3D pelvisPosition = new FramePoint3D(fullRobotModel.getPelvis().getBodyFixedFrame());
+      pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
+      pelvisPosition.add(0.0, 0.0, -0.03);
+      double desiredHeight = pelvisPosition.getZ();
+      simulationTestHelper.publishToController(HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, desiredHeight));
+
+
+
       FramePose3D startPose = new FramePose3D(simulationTestHelper.getControllerReferenceFrames().getMidFootZUpGroundFrame());
       startPose.changeFrame(worldFrame);
       startPose.appendTranslation(0.45, 0.0, 0.0);
