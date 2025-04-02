@@ -215,7 +215,7 @@ public class ICPController implements ICPControllerInterface
       parameters.createFeedbackAlphaCalculator(registry, null);
       parameters.createFeedbackProjectionOperator(registry, null);
 
-      ticksToInterpolateAlpha.set(75);
+      ticksToInterpolateAlpha.set(100);
 
       if (yoGraphicsListRegistry != null)
          setupVisualizers(yoGraphicsListRegistry);
@@ -469,7 +469,7 @@ public class ICPController implements ICPControllerInterface
          double endValue = 1.0;
          double valueToUse = InterpolationTools.linearInterpolate(startValue, endValue, interpolationFactor);
          feedbackAlpha.set(valueToUse);
-         if (alphaInterpolationTicks < ticksToInterpolateAlpha.getValue())
+         if (alphaInterpolationTicks < maxNumberOfAlphaInterpolationTicks)
             alphaInterpolationTicks++;
       }
       else if (parameters.getFeedbackAlphaCalculator() != null)

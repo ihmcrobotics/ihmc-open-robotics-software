@@ -324,8 +324,17 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
       // Set footstep parameters
       if (currentCSGMode.getEnumValue() == ContinuousStepGeneratorMode.QFP && quicksterFootstepProvider.hasValue())
       {
-         footstepDataListMessage.setDefaultTransferDuration(quicksterFootstepProvider.get().getTransferDuration(swingSide));
-         footstepDataListMessage.setFinalTransferDuration(quicksterFootstepProvider.get().getTransferDuration(swingSide));
+         if (useQFPParameters)
+         {
+            footstepDataListMessage.setDefaultTransferDuration(quicksterFootstepProvider.get().getTransferDuration(swingSide));
+            footstepDataListMessage.setFinalTransferDuration(quicksterFootstepProvider.get().getTransferDuration(swingSide));
+         }
+         else
+         {
+            footstepDataListMessage.setDefaultTransferDuration(quicksterFootstepProvider.get().getAlternateTransferDuration());
+            footstepDataListMessage.setFinalTransferDuration(quicksterFootstepProvider.get().getAlternateTransferDuration());
+         }
+
          footstepDataListMessage.setDefaultSwingDuration(quicksterFootstepProvider.get().getSwingDuration(swingSide));
          footstepDataListMessage.setAreFootstepsAdjustable(false);
          footstepDataListMessage.setOffsetFootstepsWithExecutionError(false);
@@ -446,10 +455,7 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
       }
 
       // Apply reachability constraint
-      if (currentCSGMode.getEnumValue().equals(ContinuousStepGeneratorMode.STANDARD))
-         applyReachabilityConstraintToStep(footsteps.get(0));
-      else
-         applyReachabilityConstraintToStep(footsteps);
+      applyReachabilityConstraintToStep(footsteps.get(0));
 
       // Update the visualizers
       for (int i = startingIndexToAdjust; i < footstepDataListMessage.getFootstepDataList().size(); i++)

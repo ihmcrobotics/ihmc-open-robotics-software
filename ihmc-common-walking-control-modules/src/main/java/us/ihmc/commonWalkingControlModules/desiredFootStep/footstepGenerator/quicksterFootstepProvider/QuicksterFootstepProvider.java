@@ -239,7 +239,7 @@ public class QuicksterFootstepProvider
       firstTick = false;
    }
 
-   private double numberOfFootstepsToPlan;
+   private int numberOfFootstepsToPlan;
 
    public void update(int numberOfFootstepsToPlan)
    {
@@ -292,9 +292,15 @@ public class QuicksterFootstepProvider
       desiredTouchdownPosesList.get(currentSwingSide).clear();
       desiredTouchdownPosesList.get(currentSwingSide.getOppositeSide()).clear();
 
-      for (int i = 0; i < numberOfFootstepsToPlan; i++)
+      int numberOfSteps = numberOfFootstepsToPlan;
+      if (inDoubleSupport)
+         numberOfSteps++;
+
+      for (int i = 0; i < numberOfSteps; i++)
       {
          double timeToReachGoal;
+         double stepDuration;
+         double transferDuration;
          RobotSide swingSide;
          boolean useFutureCoM;
 
@@ -302,23 +308,29 @@ public class QuicksterFootstepProvider
          {
             tempCurrentCoMPose.setFromReferenceFrame(centerOfMassControlZUpFrame);
             tempCurrentContactPointAngularMomentum.setMatchingFrame(estimates.getContactPointAngularMomentum());
-            tempCurrentStanceFootPosition.setFromReferenceFrame(referenceFrames.getSoleZUpFrame(currentSwingSide.getOppositeSide()));
+            tempCurrentStanceFootPosition.setFromReferenceFrame(referenceFrames.getSoleZUpFrame(currentSwingSide.getOppositeSide()));//setMatchingFrame(netPendulumBase3DInWorld);//
             tempControlFrame.setTransformAndUpdate(centerOfMassControlZUpFrame.getTransformToDesiredFrame(tempControlFrame.getParent()));
 
             swingSide = currentSwingSide;
             timeToReachGoal = timeRemainingInCurrentStep;
+            stepDuration = useAlternateTransferDuration ? getSwingDuration(swingSide) + getAlternateTransferDuration() : getStepDuration(swingSide);
+            transferDuration = useAlternateTransferDuration ? getAlternateTransferDuration() : getTransferDuration(swingSide);
             useFutureCoM = false;
          }
          else if (i % 2 == 0)
          {
             swingSide = currentSwingSide;
             timeToReachGoal = getStepDuration(swingSide);
+            stepDuration = getStepDuration(swingSide);
+            transferDuration = getTransferDuration(swingSide);
             useFutureCoM = true;
          }
          else
          {
             swingSide = currentSwingSide.getOppositeSide();
             timeToReachGoal = getStepDuration(swingSide);
+            stepDuration = getStepDuration(swingSide);
+            transferDuration = getTransferDuration(swingSide);
             useFutureCoM = true;
          }
 
@@ -339,8 +351,8 @@ public class QuicksterFootstepProvider
                                                                                               desiredTurningVelocity.getDoubleValue(),
                                                                                               parameters.getStanceWidth(swingSide).getDoubleValue(),
                                                                                               timeToReachGoal,
-                                                                                              getStepDuration(swingSide),
-                                                                                              getTransferDuration(swingSide),
+                                                                                              stepDuration,
+                                                                                              transferDuration,
                                                                                               robotModel.getTotalMass(),
                                                                                               parameters.getDesiredCoMHeight(swingSide).getDoubleValue(),
                                                                                               parameters.getPole(swingSide).getDoubleValue(),
@@ -369,14 +381,22 @@ public class QuicksterFootstepProvider
 
          if (i == 0 && !useFutureCoM)
          {
-            tempCurrentStanceFootPosition.changeFrame(centerOfMassControlZUpFrame);
-            double stanceFootX = tempCurrentStanceFootPosition.getX();
-            double stanceFootY = tempCurrentStanceFootPosition.getY();
-            double stanceFootZ = tempCurrentStanceFootPosition.getZ();
+            if (inDoubleSupport)
+            {
+               desiredTouchdownPositionsList.get(swingSide).remove(0);
+               desiredTouchdownPosesList.get(swingSide).remove(0);
+            }
+            else
+            {
+               tempCurrentStanceFootPosition.changeFrame(centerOfMassControlZUpFrame);
+               double stanceFootX = tempCurrentStanceFootPosition.getX();
+               double stanceFootY = tempCurrentStanceFootPosition.getY();
+               double stanceFootZ = tempCurrentStanceFootPosition.getZ();
 
-            tempCurrentStanceFootPosition.changeFrame(tempControlFrame);
-            tempCurrentStanceFootPosition.set(stanceFootX, stanceFootY, stanceFootZ);
-            tempCurrentStanceFootPosition.changeFrame(tempControlFrame.getParent());
+               tempCurrentStanceFootPosition.changeFrame(tempControlFrame);
+               tempCurrentStanceFootPosition.set(stanceFootX, stanceFootY, stanceFootZ);
+               tempCurrentStanceFootPosition.changeFrame(tempControlFrame.getParent());
+            }
 
             nextStanceFootPosition.setMatchingFrame(tempCurrentStanceFootPosition);
             nextCoMPosition.setMatchingFrame(tempCurrentCoMPose.getPosition());
@@ -420,7 +440,7 @@ public class QuicksterFootstepProvider
       setTrailingSide(trailingSide);
 
       // compute the double support duration
-      double doubleSupportDuration = getTransferDuration(trailingSide.getOppositeSide());
+      double doubleSupportDuration = useAlternateTransferDuration ? getAlternateTransferDuration() : getTransferDuration(trailingSide.getOppositeSide());
 
       // compute the fraction through the double support state that we are at the current time
       double alpha = 1.0;
@@ -562,6 +582,11 @@ public class QuicksterFootstepProvider
          touchdownPoseToPack.setMatchingFrame(desiredTouchdownPosesList.get(robotSide).getLast());
    }
 
+   public double getStepDuration(RobotSide swingSide)
+   {
+      return getSwingDuration(swingSide) + getTransferDuration(swingSide);
+   }
+
    public double getSwingDuration(RobotSide swingSide)
    {
       return parameters.getSwingDuration(swingSide).getDoubleValue();
@@ -569,10 +594,12 @@ public class QuicksterFootstepProvider
 
    public double getTransferDuration(RobotSide swingSide)
    {
-      if (useAlternateTransferDuration)
-         return alternateTransferDuration;
-      else
-         return parameters.getSwingDuration(swingSide).getDoubleValue() * parameters.getDoubleSupportFraction(swingSide).getDoubleValue();
+      return parameters.getSwingDuration(swingSide).getDoubleValue() * parameters.getDoubleSupportFraction(swingSide).getDoubleValue();
+   }
+
+   public double getAlternateTransferDuration()
+   {
+      return alternateTransferDuration;
    }
 
    public void setAlternateTransferDuration(double alternateTransferDuration)
@@ -583,11 +610,6 @@ public class QuicksterFootstepProvider
    public void setUseAlternateTransferDuration(boolean useAlternateTransferDuration)
    {
       this.useAlternateTransferDuration = useAlternateTransferDuration;
-   }
-
-   public double getStepDuration(RobotSide swingSide)
-   {
-      return getSwingDuration(swingSide) + getTransferDuration(swingSide);
    }
 
    public double getSwingHeight(RobotSide swingSide)
@@ -623,15 +645,17 @@ public class QuicksterFootstepProvider
          pendulumBase.get(robotSide).setToZero(referenceFrames.getSoleZUpFrame(robotSide));
          pendulumBase.get(robotSide).changeFrameAndProjectToXYPlane(centerOfMassControlZUpFrame);
 
+         double transferDuration = useAlternateTransferDuration ? getAlternateTransferDuration() : getTransferDuration(robotSide);
          if (robotSide == newestSupportSide.getEnumValue() && inDoubleSupport.getValue())
-            calculateTouchdownPosition(robotSide, getTransferDuration(robotSide), true);
+            calculateTouchdownPosition(robotSide, transferDuration, true);
       }
 
       @Override
       public void doAction(double timeInState)
       {
-         double timeToReachGoal = getStepDuration(robotSide) - timeInState;
-         timeToReachGoal = MathTools.clamp(timeToReachGoal, 0.0, getTransferDuration(robotSide));
+         double transferDuration = useAlternateTransferDuration ? getAlternateTransferDuration() : getTransferDuration(robotSide);
+         double timeToReachGoal = transferDuration - timeInState;
+         timeToReachGoal = MathTools.clamp(timeToReachGoal, 0.0, transferDuration);
 
          pendulumBase.get(robotSide).setToZero(referenceFrames.getSoleZUpFrame(robotSide));
          pendulumBase.get(robotSide).changeFrameAndProjectToXYPlane(centerOfMassControlZUpFrame);
@@ -649,7 +673,11 @@ public class QuicksterFootstepProvider
       @Override
       public boolean isDone(double timeInState)
       {
-         return inDoubleSupport.getValue() && (timeInState - getSwingDuration(robotSide)) > getTransferDuration(robotSide) && !robotSide.equals(newestSupportSide.getEnumValue());
+         double transferDuration = useAlternateTransferDuration ? getAlternateTransferDuration() : getTransferDuration(robotSide.getOppositeSide());
+
+         return inDoubleSupport.getValue()
+                && robotSide.getOppositeSide().equals(newestSupportSide.getEnumValue())
+                && footStateMachines.get(robotSide.getOppositeSide()).getTimeInCurrentState() > transferDuration;
       }
    }
 
@@ -669,7 +697,8 @@ public class QuicksterFootstepProvider
       {
          footStates.get(robotSide).set(FootState.SWING);
 
-         calculateTouchdownPosition(robotSide, getStepDuration(robotSide), false);
+         double stepDuration = useAlternateTransferDuration ? getSwingDuration(robotSide) + getAlternateTransferDuration() : getStepDuration(robotSide);
+         calculateTouchdownPosition(robotSide, stepDuration, false);
 
          parameters.setParametersForUpcomingSwing(robotSide);
       }
@@ -677,8 +706,9 @@ public class QuicksterFootstepProvider
       @Override
       public void doAction(double timeInState)
       {
-         double timeToReachGoal = getStepDuration(robotSide) - timeInState;
-         timeToReachGoal = MathTools.clamp(timeToReachGoal, 0.0, getStepDuration(robotSide));
+         double stepDuration = useAlternateTransferDuration ? getSwingDuration(robotSide) + getAlternateTransferDuration() : getStepDuration(robotSide);
+         double timeToReachGoal = stepDuration - timeInState;
+         timeToReachGoal = MathTools.clamp(timeToReachGoal, 0.0, stepDuration);
          this.timeToReachGoal.set(timeToReachGoal);
 
          calculateTouchdownPosition(robotSide, timeToReachGoal, false);

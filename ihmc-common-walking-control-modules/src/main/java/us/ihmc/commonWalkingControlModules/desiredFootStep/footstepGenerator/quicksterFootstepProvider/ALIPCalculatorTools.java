@@ -65,6 +65,7 @@ public class ALIPCalculatorTools
       futureCoMPoseToPack.setX(tempCurrentStanceFootPosition.getX());
       futureCoMPoseToPack.setY(tempCurrentStanceFootPosition.getY());
 
+      futureContactPointAngularMomentumToPack.setIncludingFrame(tempCurrentContactPointAngularMomentum);
       futureContactPointAngularMomentumToPack.changeFrame(controlFrame);
 
       int intervals = (int) Math.round(horizonDuration / updateDt);
@@ -187,7 +188,7 @@ public class ALIPCalculatorTools
       tempFutureCoMPose.changeFrame(tempFutureControlFrame.getParent());
       tempFutureControlFrame.setPoseAndUpdate(tempFutureCoMPose);
 
-      tempFutureCoMVelocity.changeFrame(tempFutureContactPointAngularMomentum.getReferenceFrame());
+      tempFutureCoMVelocity.setToZero(tempFutureContactPointAngularMomentum.getReferenceFrame());
       tempFutureCoMVelocity.setX(tempFutureContactPointAngularMomentum.getY() / (pendulumMass * pendulumHeight));
       tempFutureCoMVelocity.setY(-tempFutureContactPointAngularMomentum.getX() / (pendulumMass * pendulumHeight));
 
