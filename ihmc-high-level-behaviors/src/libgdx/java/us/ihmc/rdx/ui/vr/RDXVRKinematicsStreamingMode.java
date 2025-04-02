@@ -134,7 +134,7 @@ public class RDXVRKinematicsStreamingMode
    private RDXVRFootstepStreaming footstepStreaming;
    private boolean reintializingToolbox = false;
    private boolean pausedForWalking = false;
-   private boolean wasStepping = false;
+   private double timeNotificationIsDoneWalking = 0.0;
    private final RDXVRFootstepPlacement footstepPlacer;
    private final ControllerStatusTracker controllerStatusTracker;
    private final SwingFootTracker swingFootTracker;
@@ -321,18 +321,13 @@ public class RDXVRKinematicsStreamingMode
 
          if (toolboxInputStreamRateLimiter.run(streamPeriod) && !pausedForWalking)
          {
-//            ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputToolboxConfigurationTopic(syncedRobot.getRobotModel().getSimpleRobotName()), ikSolverConfigurationMessage);
+            ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputToolboxConfigurationTopic(syncedRobot.getRobotModel().getSimpleRobotName()), ikSolverConfigurationMessage);
             ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputCommandTopic(syncedRobot.getRobotModel().getSimpleRobotName()), toolboxInputMessage);
             outputFrequencyPlot.recordEvent();
          }
 
          boolean isStepping = gripButtonsValue.get(RobotSide.LEFT) > 0.2f && gripButtonsValue.get(RobotSide.RIGHT) > 0.2f;
          footstepStreaming.processVRInput(isStepping);
-         if (wasStepping && !isStepping)
-         {
-//            teleportToRobot();
-         }
-         wasStepping = isStepping;
       }
    }
 
@@ -636,8 +631,9 @@ public class RDXVRKinematicsStreamingMode
                reintializingToolbox = true;
                // disable arm streaming
                armStreaming.enable(false);
+               timeNotificationIsDoneWalking = System.nanoTime() / 10e9;
             }
-            else if (pausedForWalking && reintializingToolbox)
+            else if (pausedForWalking && reintializingToolbox && (System.nanoTime() / 10e9 - timeNotificationIsDoneWalking) > 0.1)
             {
                pausedForWalking = false;
                reinitializeToolboxRobotConfiguration();
@@ -756,7 +752,6 @@ public class RDXVRKinematicsStreamingMode
          sleepToolbox();
          footstepStreaming.reset();
          pausedForWalking = false;
-         wasStepping = false;
          reintializingToolbox = false;
 
          visualizeIKPreviewGraphic(true);

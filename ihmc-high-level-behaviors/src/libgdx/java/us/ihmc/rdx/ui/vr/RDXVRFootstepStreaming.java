@@ -107,6 +107,7 @@ public class RDXVRFootstepStreaming
 
    public void processToolboxOutput()
    {
+      footstepPlacer.checkCapturabilityStatus();
       if (status.getMessageNotification().poll())
       {
          FootstepStreamingToolboxOutputStatus latestStatus = status.getMessageNotification().read();

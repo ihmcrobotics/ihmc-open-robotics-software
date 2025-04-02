@@ -5,18 +5,23 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.AbortWalkingMessage;
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import org.lwjgl.openvr.InputDigitalActionData;
+import org.opencv.core.Point3;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
@@ -49,6 +54,7 @@ public class RDXVRFootstepPlacement
    private final RDXVRContext vrContext;
    private final ROS2SyncedRobotModel syncedRobot;
    private final ROS2ControllerHelper controllerHelper;
+   private final ControllerStatusTracker controllerStatusTracker;
 
    private final SideDependentList<ModelInstance> footstepModels = new SideDependentList<>();
    private final SideDependentList<ModelInstance> footstepsBeingHandPlaced = new SideDependentList<>();
@@ -65,13 +71,19 @@ public class RDXVRFootstepPlacement
    private LocomotionParameters locomotionParameters;
    private double stepStartTime = -1.0;
 
+   private final FootstepDataListMessage messageList = new FootstepDataListMessage();
+   private final FramePose3D secondFootstepPose = new FramePose3D();
+   private final AtomicBoolean consecutiveStepping = new AtomicBoolean(false);
+
    public RDXVRFootstepPlacement(RDXVRContext vrContext,
                                  ROS2SyncedRobotModel syncedRobot,
-                                 ROS2ControllerHelper controllerHelper)
+                                 ROS2ControllerHelper controllerHelper,
+                                 ControllerStatusTracker controllerStatusTracker)
    {
       this.vrContext = vrContext;
       this.syncedRobot = syncedRobot;
       this.controllerHelper = controllerHelper;
+      this.controllerStatusTracker = controllerStatusTracker;
       FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
       this.snapper = new FootstepSnapAndWiggler(PlannerTools.createDefaultFootPolygons(), new DefaultFootstepPlannerParameters(), environmentHandler);
       snapper.initialize();
@@ -99,11 +111,6 @@ public class RDXVRFootstepPlacement
       SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
       footstepOptimizer = new CUDAFootstepOptimizer((float) steppingParameters.getFootLength(),
                                                     (float) steppingParameters.getFootWidth());
-   }
-
-   public void setLocomotionParameters(LocomotionParameters locomotionParameters)
-   {
-      this.locomotionParameters = locomotionParameters;
    }
 
    public void processVRInput()
@@ -232,10 +239,6 @@ public class RDXVRFootstepPlacement
       }
    }
 
-   private final FootstepDataListMessage messageList = new FootstepDataListMessage();
-   private final FramePose3D secondFootstepPose = new FramePose3D();
-   private AtomicBoolean consecutiveStepping = new AtomicBoolean(false);
-
    public void sendStep(boolean activeAdjustment)
    {
       // send the placed footsteps
@@ -290,25 +293,18 @@ public class RDXVRFootstepPlacement
       }
    }
 
+   public void checkCapturabilityStatus()
+   {
+      CapturabilityBasedStatus status = controllerStatusTracker.getLatestCapturabilityBasedStatus();
+      Point3D icpDes = status.getDesiredCapturePoint2d();
+      Point3D icpCur = status.getCapturePoint2d();
+      LogTools.error(icpDes.distance(icpCur));
+   }
+
    public void abortLastStep()
    {
       LogTools.info("Aborting last step in place");
       controllerHelper.publishToController(new AbortWalkingMessage());
-   }
-
-   public void setConsecutiveStepping(boolean enable)
-   {
-      consecutiveStepping.set(enable);
-   }
-
-   public boolean getConsecutiveStepping()
-   {
-      return consecutiveStepping.get();
-   }
-
-   public void setHeightMapData(HeightMapData heightMapData)
-   {
-      latestHeightMapData = heightMapData;
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
@@ -329,6 +325,26 @@ public class RDXVRFootstepPlacement
       {
          footstepBeingExternallyPlaced.getModelInstance().getRenderables(renderables, pool);
       }
+   }
+
+   public void setConsecutiveStepping(boolean enable)
+   {
+      consecutiveStepping.set(enable);
+   }
+
+   public boolean getConsecutiveStepping()
+   {
+      return consecutiveStepping.get();
+   }
+
+   public void setHeightMapData(HeightMapData heightMapData)
+   {
+      latestHeightMapData = heightMapData;
+   }
+
+   public void setLocomotionParameters(LocomotionParameters locomotionParameters)
+   {
+      this.locomotionParameters = locomotionParameters;
    }
 
    public double getStepDuration()
