@@ -17,6 +17,7 @@ public class ContinuousHikingAPI
    private static final String ACTIVE_MODULE_NAME = "active_perception";
 
    // Commands supported for the Continuous Hiking Process
+   public static final ROS2Topic<Empty> RESET_STATE_MACHINE = IHMC_ROOT.withModule(moduleName).withTypeName(Empty.class).withSuffix("reset_state_machine");
    public static final ROS2Topic<ContinuousHikingCommandMessage> CONTINUOUS_HIKING_COMMAND = IHMC_ROOT.withModule(moduleName).withType(ContinuousHikingCommandMessage.class).withSuffix("command");
    public static final ROS2Topic<Empty> CLEAR_GOAL_FOOTSTEPS = IHMC_ROOT.withModule(moduleName).withType(Empty.class).withSuffix("clear_goal_footsteps");
    public static final ROS2Topic<PoseListMessage> PLACED_GOAL_FOOTSTEPS = IHMC_ROOT.withModule(moduleName).withType(PoseListMessage.class).withSuffix("placed_goal_footsteps");

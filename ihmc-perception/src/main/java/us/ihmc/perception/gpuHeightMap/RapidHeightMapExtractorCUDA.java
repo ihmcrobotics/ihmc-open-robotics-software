@@ -43,7 +43,7 @@ public class RapidHeightMapExtractorCUDA
 
    private final GpuMat inputDepthImage;
    private final GpuMat localHeightMapImage;
-   private GpuMat globalHeightMapImage;
+   private final GpuMat globalHeightMapImage;
    private final GpuMat terrainCostImage;
    private final GpuMat contactMapImage;
    private final GpuMat sensorCroppedHeightMapImage;
@@ -114,14 +114,12 @@ public class RapidHeightMapExtractorCUDA
       URL mathUtilsHeaderPath = getClass().getResource("/us/ihmc/perception/cuda/MathUtils.cuh");
       URL kernelPath = getClass().getResource("RapidHeightMapExtractor.cu");
 
-      terrainMapData = new TerrainMapData(heightMapParameters.getTerrainObjectSize(), heightMapParameters.getTerrainObjectSize());
+      terrainMapData = new TerrainMapData(heightMapParameters.getTerrainObjectSize(), heightMapParameters.getTerrainObjectSize(), heightMapParameters);
 
       recomputeDerivedParameters();
       // Need to initialize this after the parameters have been computed to get the right size
       filteredRapidHeightMapExtractor = new FilteredRapidHeightMapExtractor(stream, globalCellsPerAxis, globalCellsPerAxis, 6);
-      verticalSurfacesExtractor = new FilteredVerticalSurfacesExtractor(stream,
-                                                                        heightMapParameters.getTerrainObjectSize(),
-                                                                        heightMapParameters.getTerrainObjectSize());
+      verticalSurfacesExtractor = new FilteredVerticalSurfacesExtractor(stream, globalCellsPerAxis, globalCellsPerAxis);
 
       try
       {
@@ -300,9 +298,12 @@ public class RapidHeightMapExtractorCUDA
 
       if (heightMapParameters.getEnableAlphaFilter())
       {
-         GpuMat filteredHeightMap = filteredRapidHeightMapExtractor.update(globalHeightMapImage);
-         globalHeightMapImage.close();
-         globalHeightMapImage = filteredHeightMap;
+         filteredRapidHeightMapExtractor.update(globalHeightMapImage, resetOffset);
+      }
+
+      if (heightMapParameters.getEnableVerticalFilter())
+      {
+         verticalSurfacesExtractor.update(globalHeightMapImage);
       }
 
       // Run the cropping kernel
@@ -324,21 +325,13 @@ public class RapidHeightMapExtractorCUDA
       //Update the terrain map data with the new results
       terrainMapData.setSensorOrigin(groundToWorldTransform.getTranslationX(), groundToWorldTransform.getTranslationY());
 
-      Mat finalCroppedHeightMap = new Mat();
-      if (heightMapParameters.getEnableVerticalFilter())
-      {
-         GpuMat verticalFilteredMap = verticalSurfacesExtractor.update(terrainHeightMapImage);
-         verticalFilteredMap.download(finalCroppedHeightMap);  // Download the image from the GPU to the Mat object
-         verticalFilteredMap.close();
-      }
-      else
-      {
-         terrainHeightMapImage.download(finalCroppedHeightMap);
-      }
-
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
+
+      Mat finalCroppedHeightMap = new Mat();
+      terrainHeightMapImage.download(finalCroppedHeightMap);
       terrainMapData.setHeightMap(finalCroppedHeightMap);
+      finalCroppedHeightMap.close();
    }
 
    public void updateHeightOffset(float z)
@@ -507,7 +500,8 @@ public class RapidHeightMapExtractorCUDA
                                                     latestHeightMapData,
                                                     getSensorOrigin(),
                                                     (float) heightMapParameters.getTerrainWidthInMeters(),
-                                                    (float) heightMapParameters.getGlobalCellSizeInMeters());
+                                                    (float) heightMapParameters.getGlobalCellSizeInMeters(),
+                                                    heightMapParameters);
 
       return latestHeightMapData;
    }

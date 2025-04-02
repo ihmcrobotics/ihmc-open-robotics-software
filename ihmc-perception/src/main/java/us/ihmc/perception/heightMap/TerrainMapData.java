@@ -7,10 +7,10 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
-import us.ihmc.perception.gpuHeightMap.RapidHeightMapManager;
 import us.ihmc.perception.steppableRegions.SnapResult;
 import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
 import java.util.ArrayList;
@@ -41,10 +41,11 @@ public class TerrainMapData
    private Mat snapNormalXImage;
    private Mat snapNormalYImage;
    private Mat snapNormalZImage;
+   private HeightMapParameters heightMapParameters;
 
-   public TerrainMapData(Mat heightMap, Mat contactMap)
+   public TerrainMapData(Mat heightMap, Mat contactMap, HeightMapParameters heightMapParameters)
    {
-      this(heightMap, null, contactMap, null, null, null, null, null, null);
+      this(heightMap, null, contactMap, null, null, null, null, null, null, heightMapParameters);
    }
 
    public TerrainMapData(Mat heightMap,
@@ -55,8 +56,10 @@ public class TerrainMapData
                          Mat snapNormalXImage,
                          Mat snapNormalYImage,
                          Mat snapNormalZImage,
-                         Mat snappedAreaFractionImage)
+                         Mat snappedAreaFractionImage,
+                         HeightMapParameters heightMapParameters)
    {
+      this.heightMapParameters = heightMapParameters;
       setHeightMap(heightMap);
       setSnapHeightImage(snapHeightImage);
       setContactMap(contactMap);
@@ -71,8 +74,9 @@ public class TerrainMapData
       // TODO need to add cells per meter
    }
 
-   public TerrainMapData(int height, int width)
+   public TerrainMapData(int height, int width, HeightMapParameters heightMapParameters)
    {
+      this.heightMapParameters = heightMapParameters;
       heightMap = new Mat(height, width, opencv_core.CV_16UC1);
       terrainCostMap = new Mat(height, width, opencv_core.CV_8UC1);
       contactMap = new Mat(height, width, opencv_core.CV_8UC1);
@@ -170,10 +174,9 @@ public class TerrainMapData
       return rIndex < 0 || rIndex >= localGridSize || cIndex < 0 || cIndex >= localGridSize;
    }
 
-   private static float convertScaledAndOffsetValue(float value)
+   private float convertScaledAndOffsetValue(float value)
    {
-      return (float) (value / RapidHeightMapManager.getHeightMapParameters().getHeightScaleFactor()) - (float) RapidHeightMapManager.getHeightMapParameters()
-                                                                                                                                    .getHeightOffset();
+      return (float) (value / heightMapParameters.getHeightScaleFactor()) - (float) heightMapParameters.getHeightOffset();
    }
 
    private float getHeightLocal(int rIndex, int cIndex)
@@ -245,8 +248,8 @@ public class TerrainMapData
 
    public void setHeightLocal(float height, int rIndex, int cIndex)
    {
-      float offsetHeight = height + (float) RapidHeightMapManager.getHeightMapParameters().getHeightOffset();
-      int finalHeight = (int) (offsetHeight * RapidHeightMapManager.getHeightMapParameters().getHeightScaleFactor());
+      float offsetHeight = height + (float) heightMapParameters.getHeightOffset();
+      int finalHeight = (int) (offsetHeight * heightMapParameters.getHeightScaleFactor());
       heightMap.ptr(rIndex, cIndex).putShort((short) finalHeight);
    }
 
