@@ -71,6 +71,7 @@ extern "C" __global__ void checkBodyCollision(unsigned short* depthImage,
         return;
 
     unsigned short depthValue = *row(col(depthImage, x), depthImagePitch, y);
+//     *row(col(collisionMask, x), collisionMaskPitch, y) = depthValue;
     if (depthValue == 0) {
         *row(col(collisionMask, x), collisionMaskPitch, y) = 0; // Set to 0 (integer)
         return;
