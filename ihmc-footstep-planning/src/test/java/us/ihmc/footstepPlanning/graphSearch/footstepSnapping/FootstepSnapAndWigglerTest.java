@@ -5,16 +5,24 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.commons.ContinuousIntegrationTools;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
+import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
+import us.ihmc.footstepPlanning.graphSearch.graph.LatticePoint;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.tools.PlanarRegionToHeightMapConverter;
@@ -35,6 +43,10 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -83,6 +95,180 @@ public class FootstepSnapAndWigglerTest
       }
    }
 
+   @Test
+   public void testTerriblePoint()
+   {
+      Random random = new Random(1738L);
+      ConvexPolygon2D basePolygon = new ConvexPolygon2D();
+      basePolygon.addVertex(-0.108, 0.048);
+      basePolygon.addVertex(0.108, 0.030);
+      basePolygon.addVertex(-0.108, -0.030);
+      basePolygon.addVertex(-0.108, -0.048);
+      basePolygon.update();
+
+      double snapAreaResolution = 0.2;
+      int iters = 1;
+      for (int iter = 0; iter < iters; iter++)
+      {
+         // get a polygon transformed to a random location.
+         RigidBodyTransform transform = new RigidBodyTransform();
+         int gridXIndex = -50;
+         int gridYIndex = -31;
+         int yawIndex = 19;
+         transform.getTranslation().set(LatticePoint.gridSizeXY * gridXIndex, LatticePoint.gridSizeXY * gridYIndex, 0.0);
+         transform.getRotation().appendYawRotation(yawIndex * LatticePoint.gridSizeYaw);
+
+         ConvexPolygon2D transformedPolygon = new ConvexPolygon2D(basePolygon);
+         transformedPolygon.applyTransform(transform);
+
+         // Here we want to collect all the points  under the foothold similar to what is done during snapping, but slightly different by assuming they're all
+         // valid
+         List<Point3D> footPointsInEnvironment = new ArrayList<>();
+         Point2DReadOnly corner0 = transformedPolygon.getVertex(0);
+         Point2DReadOnly corner1 = transformedPolygon.getVertex(1);
+         Point2DReadOnly corner2 = transformedPolygon.getVertex(2);
+         Point2DReadOnly corner3 = transformedPolygon.getVertex(3);
+
+         Point2D pointOnEdge1 = new Point2D();
+         Point2D pointOnEdge2 = new Point2D();
+         Point2D footPointToSnap = new Point2D();
+
+         double height = RandomNumbers.nextDouble(random, 1.0);
+
+         for (double edgeAlpha = 0.0; edgeAlpha <= 1.0; edgeAlpha += snapAreaResolution)
+         {
+            pointOnEdge1.interpolate(corner0, corner1, edgeAlpha);
+            pointOnEdge2.interpolate(corner3, corner2, edgeAlpha);
+
+            for (double interiorAlpha = 0.0; interiorAlpha <= 1.0; interiorAlpha += snapAreaResolution)
+            {
+               footPointToSnap.interpolate(pointOnEdge1, pointOnEdge2, interiorAlpha);
+
+               Point3D point = new Point3D(footPointToSnap.getX(), footPointToSnap.getY(), height);
+               footPointsInEnvironment.add(point);
+            }
+         }
+
+
+         // Now get the wrapped hull of this both before and after transform, and assert all the points are inside.
+         ConvexPolygon2D croppedFoothold = new ConvexPolygon2D(Vertex3DSupplier.asVertex3DSupplier(footPointsInEnvironment));
+         assertPointsInside(croppedFoothold, footPointsInEnvironment);
+
+         List<Point2D> footPointsInFoot = footPointsInEnvironment.stream().map(point ->
+                                                                               {
+                                                                                  Point3D transformedPoint = new Point3D(point);
+                                                                                  transformedPoint.applyInverseTransform(transform);
+                                                                                  return new Point2D(transformedPoint);
+                                                                               }).toList();
+
+
+         // Transform crop, and make sure all the transformed points are inside
+//         croppedFoothold.applyInverseTransform(transform, false);
+//         assertPoint2DsInside(croppedFoothold, footPointsInFoot);
+
+
+         // Create a polygon around all the transformed points, and make sure they're inside
+         ConvexPolygon2D polygon2D = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(footPointsInFoot));
+         assertPoint2DsInside(polygon2D, footPointsInFoot);
+      }
+   }
+
+
+   @Test
+   public void testTerriblePoints()
+   {
+      Random random = new Random(1738L);
+      ConvexPolygon2D basePolygon = new ConvexPolygon2D();
+      basePolygon.addVertex(-0.108, 0.048);
+      basePolygon.addVertex(0.108, 0.030);
+      basePolygon.addVertex(-0.108, -0.030);
+      basePolygon.addVertex(-0.108, -0.048);
+      basePolygon.update();
+
+      double snapAreaResolution = 0.2;
+      int iters = 100000;
+      for (int iter = 0; iter < iters; iter++)
+      {
+         // get a polygon transformed to a random location.
+         RigidBodyTransform transform = new RigidBodyTransform();
+         int gridXIndex = RandomNumbers.nextInt(random, -100, 100);
+         int gridYIndex = RandomNumbers.nextInt(random, -100, 100);
+         int yawIndex = RandomNumbers.nextInt(random, 0, LatticePoint.yawDivisions);
+         transform.getTranslation().set(LatticePoint.gridSizeXY * gridXIndex, LatticePoint.gridSizeXY * gridYIndex, 0.0);
+         transform.getRotation().appendYawRotation(yawIndex * LatticePoint.gridSizeYaw);
+
+         ConvexPolygon2D transformedPolygon = new ConvexPolygon2D(basePolygon);
+         transformedPolygon.applyTransform(transform);
+
+         // Here we want to collect all the points  under the foothold similar to what is done during snapping, but slightly different by assuming they're all
+         // valid
+         List<Point3D> footPointsInEnvironment = new ArrayList<>();
+         Point2DReadOnly corner0 = transformedPolygon.getVertex(0);
+         Point2DReadOnly corner1 = transformedPolygon.getVertex(1);
+         Point2DReadOnly corner2 = transformedPolygon.getVertex(2);
+         Point2DReadOnly corner3 = transformedPolygon.getVertex(3);
+
+         Point2D pointOnEdge1 = new Point2D();
+         Point2D pointOnEdge2 = new Point2D();
+         Point2D footPointToSnap = new Point2D();
+
+         double height = RandomNumbers.nextDouble(random, 1.0);
+
+         for (double edgeAlpha = 0.0; edgeAlpha <= 1.0; edgeAlpha += snapAreaResolution)
+         {
+            pointOnEdge1.interpolate(corner0, corner1, edgeAlpha);
+            pointOnEdge2.interpolate(corner3, corner2, edgeAlpha);
+
+            for (double interiorAlpha = 0.0; interiorAlpha <= 1.0; interiorAlpha += snapAreaResolution)
+            {
+               footPointToSnap.interpolate(pointOnEdge1, pointOnEdge2, interiorAlpha);
+
+               Point3D point = new Point3D(footPointToSnap.getX(), footPointToSnap.getY(), height);
+               footPointsInEnvironment.add(point);
+            }
+         }
+
+         List<Point2D> footPointsInFoot = footPointsInEnvironment.stream().map(point ->
+                                                                               {
+                                                                                  Point3D transformedPoint = new Point3D(point);
+                                                                                  transformedPoint.applyInverseTransform(transform);
+                                                                                  return new Point2D(transformedPoint);
+                                                                               }).toList();
+
+         // Now get the wrapped hull of this both before and after transform, and assert all the points are inside.
+//         ConvexPolygon2D croppedFoothold = new ConvexPolygon2D(Vertex3DSupplier.asVertex3DSupplier(footPointsInEnvironment));
+//         assertPointsInside(croppedFoothold, footPointsInEnvironment);
+
+         // Transform crop, and make sure all the transformed points are inside
+//         croppedFoothold.applyInverseTransform(transform, false);
+//         assertPoint2DsInside(croppedFoothold, footPointsInFoot);
+
+
+         // Create a polygon around all teh transformed points, and make sure they're inside
+         ConvexPolygon2D polygon2D = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(footPointsInFoot));
+         assertPoint2DsInside(polygon2D, footPointsInFoot);
+      }
+   }
+
+   private static void assertPointsInside(ConvexPolygon2DReadOnly polygonToCheck, List<Point3D> points)
+   {
+      for (Point3D point : points)
+      {
+         double distance = polygonToCheck.signedDistance(new Point2D(point));
+         assertTrue(polygonToCheck.isPointInside(new Point2D(point)), "Point " + point + " is not inside the polygon. Distance was " + distance);
+         assertTrue(distance < 1e-3, "Point " + point + " is not inside the polygon. Distance was " + distance);
+      }
+   }
+
+   private static void assertPoint2DsInside(ConvexPolygon2DReadOnly polygonToCheck, List<Point2D> points)
+   {
+      for (Point2D point : points)
+      {
+         double distance = polygonToCheck.signedDistance(point);
+         assertTrue(polygonToCheck.isPointInside(point, 1e-3), "Point " + point + " is not inside the polygon. Distance was " + distance);
+         assertTrue(distance < 1e-3, "Point " + point + " is not inside the polygon. Distance was " + distance);
+      }
+   }
 
    @Test
    public void testMaximumSnapHeightOnFlatRegions()
