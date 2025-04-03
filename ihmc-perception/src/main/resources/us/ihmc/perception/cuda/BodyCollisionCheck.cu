@@ -103,7 +103,7 @@ extern "C" __global__ void checkBodyCollision(unsigned short* depthImage,
         if (isPointInCapsule(depthFramePoint, topCenter, bottomCenter, radius))
         {
             *row(col(collisionMask, x), collisionMaskPitch, y) = 255; // Set to 255 (integer)
-//             return; // No need to check other capsules if a collision is found
+            return; // No need to check other capsules if a collision is found
         }
     }
 }
