@@ -203,6 +203,7 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
                clearFlamingoCommands();
                break;
             case QUEUE:
+               // Check for inconsistencies between the previous command options and the current command options
                if (isWalking.getBooleanValue())
                {
                   if (offsettingXYPlanWithFootstepError.getValue() != command.isOffsetFootstepsWithExecutionError())
