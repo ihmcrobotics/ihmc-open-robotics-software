@@ -3,6 +3,7 @@ package us.ihmc.perception.gpuHeightMap;
 import controller_msgs.msg.dds.PlanOffsetStatus;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
+import us.ihmc.log.LogTools;
 
 /**
  * This class is meant to keep track of the drift in Z that is being calculated in the controller on the robot.
@@ -33,8 +34,9 @@ public class RapidHeightMapDriftOffset
    {
       incrementalOffset.setToNaN();
 
-      if (controllerFootstepQueueMonitor.pollIsWalking() || controllerFootstepQueueMonitor.getReceivedNewFootstepPlan())
+      if (controllerFootstepQueueMonitor.pollIsWalking() || controllerFootstepQueueMonitor.getReceivedNewFootstepPlanWithOverride())
       {
+         LogTools.info("Accounting for drift.......................................................");
          // We reset this because the controller resets the drift on its end. So we need to reset ours as well.
          // The existing drift is already captured in the height map by the previous offsets
          previousPlanOffsetProcessed.setToZero();

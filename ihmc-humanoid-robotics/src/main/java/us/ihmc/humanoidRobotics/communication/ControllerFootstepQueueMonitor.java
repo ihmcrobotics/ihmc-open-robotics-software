@@ -7,6 +7,7 @@ import controller_msgs.msg.dds.PlanOffsetStatus;
 import controller_msgs.msg.dds.QueuedFootstepStatusMessage;
 import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
+import ihmc_common_msgs.msg.dds.QueueableMessage;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -31,7 +32,7 @@ public class ControllerFootstepQueueMonitor
    private boolean footstepStarted;
    private final AtomicBoolean isWalking = new AtomicBoolean(false);
    private final AtomicBoolean robotFalling = new AtomicBoolean(false);
-   private AtomicBoolean receivedNewFootstepPlan;
+   private final AtomicBoolean receivedNewFootstepPlanWithOverride = new AtomicBoolean(false);
 
    public ControllerFootstepQueueMonitor(ROS2Node ros2Node, String simpleRobotName)
    {
@@ -47,7 +48,10 @@ public class ControllerFootstepQueueMonitor
    {
       if (footstepDataListMessage.getOffsetFootstepsHeightWithExecutionError())
       {
-         receivedNewFootstepPlan.set(true);
+         if (footstepDataListMessage.getQueueingProperties().getExecutionMode() == QueueableMessage.EXECUTION_MODE_OVERRIDE)
+         {
+            receivedNewFootstepPlanWithOverride.set(true);
+         }
       }
    }
 
@@ -134,9 +138,9 @@ public class ControllerFootstepQueueMonitor
       return previousFootstepPose;
    }
 
-   public boolean getReceivedNewFootstepPlan()
+   public boolean getReceivedNewFootstepPlanWithOverride()
    {
-      return receivedNewFootstepPlan.getAndSet(false);
+      return receivedNewFootstepPlanWithOverride.getAndSet(false);
    }
 
    private void acceptWalkingControllerFailureStatusMessage(WalkingControllerFailureStatusMessage message)
