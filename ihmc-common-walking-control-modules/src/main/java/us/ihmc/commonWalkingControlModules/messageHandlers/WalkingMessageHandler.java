@@ -203,9 +203,7 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
                clearFlamingoCommands();
                break;
             case QUEUE:
-               // TODO review the use of this. 
-               boolean checkForInconsistencies = !upcomingFootsteps.isEmpty() || currentNumberOfFootsteps.getIntegerValue() > 0;
-               if (checkForInconsistencies)
+               if (isWalking.getBooleanValue())
                {
                   if (offsettingXYPlanWithFootstepError.getValue() != command.isOffsetFootstepsWithExecutionError())
                   {
@@ -243,7 +241,7 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
                }
                else
                {
-                  // We don't have any steps in the queue, so it's effectively the same thing as overriding.
+                  // We aren't walking, we are in stance, so it's effectively the same thing as overriding.
                   offsettingXYPlanWithFootstepError.set(command.isOffsetFootstepsWithExecutionError());
                   offsettingHeightPlanWithFootstepError.set(command.isOffsetFootstepsHeightWithExecutionError());
                   planOffsetInWorld.setToZero();
