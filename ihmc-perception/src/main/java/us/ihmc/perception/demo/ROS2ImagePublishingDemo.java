@@ -3,8 +3,8 @@ package us.ihmc.perception.demo;
 import sensor_msgs.msg.dds.CameraInfo;
 import sensor_msgs.msg.dds.Image;
 import us.ihmc.commons.thread.RepeatingTaskThread;
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.ImageSensorPublishThread;
 import us.ihmc.perception.RawImage;
@@ -17,8 +17,6 @@ import us.ihmc.sensors.zed.ZEDImageSensor;
 import us.ihmc.sensors.zed.ZEDModelData;
 import us.ihmc.sensors.zed.ZEDSVOPlaybackSensor;
 import us.ihmc.tools.IHMCCommonPaths;
-
-import java.util.Map;
 
 import static us.ihmc.zed.global.zed.SL_DEPTH_MODE_PERFORMANCE;
 
@@ -42,14 +40,14 @@ import static us.ihmc.zed.global.zed.SL_DEPTH_MODE_PERFORMANCE;
  * {@code
  * source /opt/ros/humble/setup.bash
  * export ROS_DOMAIN_ID=[your-domain-id] # insert your domain ID
- * ros2 run rviz2 rviz2
+ * rviz2
  * }
  * </pre>
  * In RViz2, add two Image display by clicking the Add button,
  * and in the By topic options selecting the Image displays under
  * the /zed/color/image_raw topic, and again under the /zed/depth/image_raw topic.
  * <p>
- * To show a point cloud, set the Fixed Frame (under Global Options) to "world".
+ * To show a point cloud, set the Fixed Frame (under Global Options) to "World".
  * Then, click Add, select DepthCloud, and click Ok.
  * Under the DepthCloud options, set the options as such:
  * <ul>
@@ -58,8 +56,6 @@ import static us.ihmc.zed.global.zed.SL_DEPTH_MODE_PERFORMANCE;
  *    <li>Color Image Topic = /zed/color/image_raw</li>
  * </ul>
  * <p>
- * You may notice the orientation of the point cloud is incorrect
- * as this demo does not publish a tf tree.
  */
 class ROS2ImagePublishingDemo
 {
@@ -104,6 +100,7 @@ class ROS2ImagePublishingDemo
 
       // Create a ZED sensor (in this case we use an SVO playback)
       zed = new ZEDSVOPlaybackSensor(new ROS2Helper(ros2Node), 0, ZEDModelData.ZED_2, SL_DEPTH_MODE_PERFORMANCE, SVO_FILE);
+      zed.useTrackedPose(true);
 
       // Add shutdown hook to properly close/destroy everything
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, getClass().getSimpleName() + "Shutdown"));
@@ -123,15 +120,19 @@ class ROS2ImagePublishingDemo
 
    private void startPredefinedPublishThread()
    {
-      // Define a topic to image key map
-      Map<ROS2Topic<? extends Packet<?>>, Integer> zedTopicMap =
-            Map.of(colorImageTopic, ZEDImageSensor.LEFT_COLOR_IMAGE_KEY,       // Color image topic requires ZED's left color image
-                   colorCameraInfoTopic, ZEDImageSensor.LEFT_COLOR_IMAGE_KEY,  // Color camera info topic requires ZED's left color image
-                   depthImageTopic, ZEDImageSensor.DEPTH_IMAGE_KEY,            // Depth image topic requires ZED's depth image
-                   depthCameraInfoTopic, ZEDImageSensor.DEPTH_IMAGE_KEY);      // Depth camera info topic requires ZED's depth image
+      // Create the predefined publish thread
+      imageSensorPublishThread = new ImageSensorPublishThread(ros2Node, zed);
 
-      // Create the predefined publish thread and set its parameters
-      imageSensorPublishThread = new ImageSensorPublishThread(ros2Node, zed, zedTopicMap);
+      // Give it the topics it should publish on
+      imageSensorPublishThread.addTopic(colorImageTopic, ZEDImageSensor.LEFT_COLOR_IMAGE_KEY);        // Color image topic requires ZED's left color image
+      imageSensorPublishThread.addTopic(colorCameraInfoTopic, ZEDImageSensor.LEFT_COLOR_IMAGE_KEY);   // Color camera info topic requires ZED's left color image
+      imageSensorPublishThread.addTopic(depthImageTopic, ZEDImageSensor.DEPTH_IMAGE_KEY);             // Depth image topic requires ZED's depth image
+      imageSensorPublishThread.addTopic(depthCameraInfoTopic, ZEDImageSensor.DEPTH_IMAGE_KEY);        // Depth camera info topic requires ZED's depth image
+
+      // Enable ROS 2 frames in the publish thread.
+      imageSensorPublishThread.enableROS2Frames(true);
+
+      // We don't need to publish CameraInfo every time, so we set a skip count
       imageSensorPublishThread.setCameraInfoPublishGrabSkipCount(CAMERA_INFO_PUBLISH_SKIP);
 
       // Start the thread
@@ -165,15 +166,15 @@ class ROS2ImagePublishingDemo
 
          // Publish the images
          LogTools.info("Publishing images {}", color.getSequenceNumber());
-         rawImagePublisher.publishImage(colorImageTopic, color);
-         rawImagePublisher.publishImage(depthImageTopic, depth);
+         rawImagePublisher.publishImage(colorImageTopic, color, ReferenceFrame.getWorldFrame());
+         rawImagePublisher.publishImage(depthImageTopic, depth, ReferenceFrame.getWorldFrame());
 
          // Publish the camera info
          if (color.getSequenceNumber() % (CAMERA_INFO_PUBLISH_SKIP + 1) == 0)
          {
             LogTools.info("Publishing camera info");
-            rawImagePublisher.publishImage(colorCameraInfoTopic, color);
-            rawImagePublisher.publishImage(depthCameraInfoTopic, depth);
+            rawImagePublisher.publishImage(colorCameraInfoTopic, color, ReferenceFrame.getWorldFrame());
+            rawImagePublisher.publishImage(depthCameraInfoTopic, depth, ReferenceFrame.getWorldFrame());
          }
 
          // Release the images

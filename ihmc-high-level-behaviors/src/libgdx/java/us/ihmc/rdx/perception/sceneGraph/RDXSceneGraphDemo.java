@@ -50,8 +50,6 @@ import us.ihmc.sensors.zed.ZEDModelData;
 import us.ihmc.sensors.zed.ZEDSVOPlaybackSensor;
 import us.ihmc.tools.IHMCCommonPaths;
 
-import java.util.Map;
-
 import static us.ihmc.zed.global.zed.SL_DEPTH_MODE_NEURAL;
 import static us.ihmc.zed.global.zed.SL_DEPTH_MODE_PERFORMANCE;
 
@@ -162,10 +160,10 @@ public class RDXSceneGraphDemo
             zedSVOPlayer.useTrackedPose(true);
             zedSVOPlayer.run(true);
 
-            zedPublishThread = new ImageSensorPublishThread(ros2Node, zedSVOPlayer,
-                                                            Map.of(PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT), ZEDImageSensor.LEFT_COLOR_IMAGE_KEY,
-                                                                   PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.RIGHT), ZEDImageSensor.RIGHT_COLOR_IMAGE_KEY,
-                                                                   PerceptionAPI.ZED2_DEPTH, ZEDImageSensor.DEPTH_IMAGE_KEY));
+            zedPublishThread = new ImageSensorPublishThread(ros2Node, zedSVOPlayer);
+            zedPublishThread.addTopic(PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT), ZEDImageSensor.LEFT_COLOR_IMAGE_KEY);
+            zedPublishThread.addTopic(PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.RIGHT), ZEDImageSensor.RIGHT_COLOR_IMAGE_KEY);
+            zedPublishThread.addTopic(PerceptionAPI.ZED2_DEPTH, ZEDImageSensor.DEPTH_IMAGE_KEY);
             zedPublishThread.startRepeating();
 
             zedSVORecorderPanel = new RDXZEDSVORecorderPanel(ros2Helper);

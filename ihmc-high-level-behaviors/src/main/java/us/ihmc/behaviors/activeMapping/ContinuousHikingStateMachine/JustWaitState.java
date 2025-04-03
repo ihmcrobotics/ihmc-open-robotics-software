@@ -12,6 +12,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.behaviors.activeMapping.ActiveMappingParameterToolBox;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
+import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.HumanoidControllerAPI;
@@ -58,6 +59,7 @@ public class JustWaitState implements State
    private final ControllerFootstepQueueMonitor controllerQueueMonitor;
    private final FootstepPlannerEnvironmentHandler environmentHandler;
    private final ContinuousHikingParameters continuousHikingParameters;
+   private final FootstepPlannerLogger logger;
    private boolean isDone;
    private final FootstepPlanningModule footstepPlanner;
    private final DefaultFootstepPlannerParametersBasics footstepPlannerParameters;
@@ -87,6 +89,7 @@ public class JustWaitState implements State
       this.controllerQueueMonitor = controllerQueueMonitor;
 
       footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel);
+      logger = new FootstepPlannerLogger(footstepPlanner);
 
       this.continuousHikingParameters = activeMappingParameterToolBox.getContinuousHikingParameters();
       this.footstepPlannerParameters = activeMappingParameterToolBox.getFootstepPlannerParameters();
@@ -264,6 +267,7 @@ public class JustWaitState implements State
                                   footstepDataListMessage.setDefaultSwingDuration(continuousHikingParameters.getSwingTime());
                                   footstepDataListMessage.setDefaultTransferDuration(continuousHikingParameters.getTransferTime());
                                   footstepDataListMessage.getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_QUEUE);
+                                  footstepDataListMessage.setOffsetFootstepsHeightWithExecutionError(true);
 
                                   for (int i = 0; i < footstepPlanner.getOutput().getFootstepPlan().getNumberOfSteps(); i++)
                                   {
@@ -274,11 +278,12 @@ public class JustWaitState implements State
 
                                   if (!footstepDataListMessage.getFootstepDataList().isEmpty())
                                   {
-                                      ros2Helper.publish(controllerFootstepDataTopic, footstepDataListMessage);
+                                     logFootStePlan();
+                                     ros2Helper.publish(controllerFootstepDataTopic, footstepDataListMessage);
                                   }
                                   else
                                   {
-                                      LogTools.warn("Didn't have any steps to publish, try again :( :(");
+                                     LogTools.warn("Didn't have any steps to publish, try again :( :(");
                                   }
                                }, "PlanToGoalThread");
    }
@@ -358,8 +363,23 @@ public class JustWaitState implements State
       footstepDataListMessage.setDefaultSwingDuration(continuousHikingParameters.getSwingTime());
       footstepDataListMessage.setDefaultTransferDuration(continuousHikingParameters.getTransferTime());
       footstepDataListMessage.getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_QUEUE);
+      footstepDataListMessage.setOffsetFootstepsHeightWithExecutionError(true);
       footstepDataListMessage.getFootstepDataList().add().set(squareUpStep.getAsMessage());
 
+      logFootStePlan();
+
       ros2Helper.publish(controllerFootstepDataTopic, footstepDataListMessage);
+   }
+
+   public void logFootStePlan()
+   {
+      ThreadTools.startAThread(() ->
+                               {
+                                  // In case logging footstep plans becomes a problem, we have this feature where we can not log plans if we want too
+                                  if (continuousHikingParameters.getLogFootstepPlans())
+                                  {
+                                     logger.logSession();
+                                  }
+                               }, "Footstep Logger Thead");
    }
 }

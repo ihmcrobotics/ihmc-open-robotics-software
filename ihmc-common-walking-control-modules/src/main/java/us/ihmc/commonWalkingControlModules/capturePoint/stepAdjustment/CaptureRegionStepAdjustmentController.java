@@ -251,7 +251,7 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
       computeLimitedAreaForCoP();
 
       captureRegionCalculator.calculateCaptureRegion(upcomingFootstepSide.getEnumValue(),
-                                                     timeRemainingInState.getDoubleValue(),
+                                                     Math.max(timeRemainingInState.getDoubleValue(), 0.05),
                                                      currentICP,
                                                      omega0,
                                                      allowableAreaForCoP);

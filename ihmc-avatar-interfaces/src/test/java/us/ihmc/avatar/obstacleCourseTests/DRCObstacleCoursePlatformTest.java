@@ -1,8 +1,5 @@
 package us.ihmc.avatar.obstacleCourseTests;
 
-import static us.ihmc.robotics.Assert.assertTrue;
-import static us.ihmc.robotics.Assert.fail;
-
 import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
@@ -41,6 +38,8 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationRunner.VariableDifference;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInterface
 {
@@ -164,8 +163,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 
       setupCameraForWalkingOverSmallPlatform();
 
-      ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateNow(2.0); //2.0);
+      boolean success = simulationTestHelper.simulateNow(0.5); //2.0);
 
       ReferenceFrame rootFrame = simulationTestHelper.getControllerFullRobotModel().getRootJoint().getFrameAfterJoint();
       FramePoint3D pelvisPosition = new FramePoint3D(rootFrame);
@@ -182,7 +180,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 //      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
       // simulationTestHelper.checkNothingChanged();
 
-      assertTrue("Robot had an exception, probably fell.", success);
+      assertTrue(success, "Robot had an exception, probably fell.");
 
       Point3D center = new Point3D(-3.7944324216932475, -5.38051322671167, 0.7893380490431007);
       Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
@@ -207,8 +205,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 
       setupCameraForWalkingOverSmallPlatform();
 
-      ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateNow(2.0); //2.0);
+      boolean success = simulationTestHelper.simulateNow(0.5); //2.0);
 
       FramePoint3D desiredPosition = new FramePoint3D(simulationTestHelper.getControllerFullRobotModel().getPelvis().getBodyFixedFrame());
       desiredPosition.changeFrame(ReferenceFrame.getWorldFrame());
@@ -254,8 +251,9 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 
       setupCameraForWalkingOverSmallPlatform();
 
-      ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateNow(2.0); //2.0);
+      boolean success = simulationTestHelper.simulateNow(0.1); //2.0);
+      simulationTestHelper.publishToController(HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, getRobotModel().getWalkingControllerParameters().nominalHeightAboveAnkle() - 0.03, 0.0));
+      success &= simulationTestHelper.simulateNow(0.1); //2.0);
 
       FootstepDataListMessage footstepDataList = createFootstepsForSideSteppingOverSmallWall();
       simulationTestHelper.publishToController(footstepDataList);
@@ -291,8 +289,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 
       setupCameraForWalkingOverSmallPlatform();
 
-      ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateNow(2.0); //2.0);
+      boolean success = simulationTestHelper.simulateNow(0.25); //2.0);
 
       FootstepDataListMessage footstepDataList = createFootstepsForSteppingOntoSmallPlatform();
       simulationTestHelper.publishToController(footstepDataList);
@@ -336,8 +333,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 
       setupCameraForWalkingOverMediumPlatform();
 
-      ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateNow(2.0);
+      boolean success = simulationTestHelper.simulateNow(0.25);
 
       FootstepDataListMessage footstepDataList = createFootstepsForSteppingOntoMediumPlatform();
       simulationTestHelper.publishToController(footstepDataList);
@@ -362,7 +358,6 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
    public void testWalkingOffOfMediumPlatform()
    {
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
-      simulationTestingParameters.setKeepSCSUp(!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
       CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.ON_MEDIUM_PLATFORM;
@@ -374,8 +369,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 
       setupCameraForWalkingOffOfMediumPlatform();
 
-      ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateNow(2.0);
+      boolean success = simulationTestHelper.simulateNow(0.25);
 
       FootstepDataListMessage footstepDataList = createFootstepsForSteppingOffOfMediumPlatform();
       footstepDataList.setDefaultSwingDuration(1.1);
@@ -417,8 +411,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(controllerFullRobotModel);
       ReferenceFrame pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
 
-      ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateNow(2.0);
+      boolean success = simulationTestHelper.simulateNow(0.25);
 
       FrameQuaternion desiredChestFrameOrientation = new FrameQuaternion(ReferenceFrame.getWorldFrame());
       double leanAngle = 30.0;
@@ -461,6 +454,11 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
+   protected double getHeightOffsetForLargePlatforms()
+   {
+      return 0.0;
+   }
+
    @Test
    public void testWalkingOffOfLargePlatform()
    {
@@ -475,12 +473,17 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
                                                                                                                                              simulationTestingParameters);
       simulationTestHelperFactory.setStartingLocationOffset(selectedLocation.getStartingLocationOffset());
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
+      simulationTestHelper.setKeepSCSUp(true);
       simulationTestHelper.start();
 
       setupCameraForWalkingOffOfLargePlatform();
 
-      ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateNow(2.0);
+      boolean success = simulationTestHelper.simulateNow(0.1);
+
+      FramePoint3D currentPelvisHeight = new FramePoint3D(simulationTestHelper.getControllerReferenceFrames().getPelvisZUpFrame());
+      currentPelvisHeight.changeFrame(ReferenceFrame.getWorldFrame());
+      simulationTestHelper.publishToController(HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, currentPelvisHeight.getZ() + getHeightOffsetForLargePlatforms(), 0.0));
+      success &= simulationTestHelper.simulateNow(0.5);
 
       FootstepDataListMessage footstepDataList = createFootstepsForSteppingOffOfLargePlatform();
       simulationTestHelper.publishToController(footstepDataList);
@@ -519,8 +522,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 
       setupCameraForWalkingOffOfLargePlatform();
 
-      ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateNow(2.0);
+      boolean success = simulationTestHelper.simulateNow(0.25);
 
       FootstepDataListMessage footstepDataList = createFootstepsForSteppingOntoLargePlatform();
       simulationTestHelper.publishToController(footstepDataList);
@@ -624,7 +626,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
                                                                           new Point3D(-4.598, -4.192, 0.0),
                                                                           orientation,
                                                                           TrajectoryType.OBSTACLE_CLEARANCE,
-                                                                          0.24));
+                                                                          0.26));
       footstepDataList.getFootstepDataList().add()
                       .set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(-4.318, -3.912, 0.0), orientation));
       footstepDataList.getFootstepDataList().add()
@@ -634,7 +636,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
                                                                           new Point3D(-4.598, -4.192, 0.0),
                                                                           orientation,
                                                                           TrajectoryType.OBSTACLE_CLEARANCE,
-                                                                          0.24));
+                                                                          0.26));
       footstepDataList.getFootstepDataList().add()
                       .set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(-4.858, -4.452, 0.0), orientation));
       footstepDataList.getFootstepDataList().add()

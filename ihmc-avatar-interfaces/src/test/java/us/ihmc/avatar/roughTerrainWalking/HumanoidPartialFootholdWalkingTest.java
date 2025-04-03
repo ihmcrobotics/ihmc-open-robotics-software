@@ -1,7 +1,5 @@
 package us.ihmc.avatar.roughTerrainWalking;
 
-import static us.ihmc.robotics.Assert.assertTrue;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,6 +20,8 @@ import us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvi
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class HumanoidPartialFootholdWalkingTest implements MultiRobotTestInterface
 {
@@ -54,6 +54,13 @@ public abstract class HumanoidPartialFootholdWalkingTest implements MultiRobotTe
       assertTrue(success);
    }
 
+   protected abstract String getLeftAnkleXName();
+
+   protected abstract String getLeftAnkleYName();
+
+   protected abstract String getRightAnkleXName();
+
+   protected abstract String getRightAnkleYName();
 
    @Test
    public void testSteppingOntoWithInsideOfFoot()
@@ -220,10 +227,10 @@ public abstract class HumanoidPartialFootholdWalkingTest implements MultiRobotTe
       simulationTestHelper.start();
 
       // increase ankle damping to match the real robot better
-      YoDouble damping_l_akx = (YoDouble) simulationTestHelper.findVariable("damping_l_leg_akx");
-      YoDouble damping_l_aky = (YoDouble) simulationTestHelper.findVariable("damping_l_leg_aky");
-      YoDouble damping_r_akx = (YoDouble) simulationTestHelper.findVariable("damping_r_leg_akx");
-      YoDouble damping_r_aky = (YoDouble) simulationTestHelper.findVariable("damping_r_leg_aky");
+      YoDouble damping_l_akx = (YoDouble) simulationTestHelper.findVariable("damping_" + getLeftAnkleXName());
+      YoDouble damping_l_aky = (YoDouble) simulationTestHelper.findVariable("damping_" + getLeftAnkleYName());
+      YoDouble damping_r_akx = (YoDouble) simulationTestHelper.findVariable("damping_" + getRightAnkleXName());
+      YoDouble damping_r_aky = (YoDouble) simulationTestHelper.findVariable("damping_" + getRightAnkleYName());
       damping_l_akx.set(1.0);
       damping_l_aky.set(1.0);
       damping_r_akx.set(1.0);
@@ -233,7 +240,7 @@ public abstract class HumanoidPartialFootholdWalkingTest implements MultiRobotTe
    }
 
 
-   public class SimpleBlockEnvironment extends PlanarRegionEnvironmentInterface
+   public static class SimpleBlockEnvironment extends PlanarRegionEnvironmentInterface
    {
       public SimpleBlockEnvironment(double blockPosition, double blockDepth, double blockWidth, double blockHeight)
       {
@@ -260,7 +267,7 @@ public abstract class HumanoidPartialFootholdWalkingTest implements MultiRobotTe
       }
    }
 
-   public class PartialFootholdField extends PlanarRegionEnvironmentInterface
+   public static class PartialFootholdField extends PlanarRegionEnvironmentInterface
    {
       private final FootstepDataListMessage steps = new FootstepDataListMessage();
 

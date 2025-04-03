@@ -331,6 +331,7 @@ public class ContinuousPlanner
       FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
       footstepDataListMessage.setDefaultSwingDuration(continuousHIkingParameters.getSwingTime());
       footstepDataListMessage.setDefaultTransferDuration(continuousHIkingParameters.getTransferTime());
+      footstepDataListMessage.setOffsetFootstepsHeightWithExecutionError(true);
 
       // We expect the plannerOutput to contain this number of steps we ask for
       int index = 0;
@@ -356,6 +357,7 @@ public class ContinuousPlanner
    public FootstepDataListMessage getMonteCarloFootstepDataListMessage()
    {
       FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
+      footstepDataListMessage.setOffsetFootstepsHeightWithExecutionError(true);
 
       if (monteCarloReferencePlan != null)
       {
