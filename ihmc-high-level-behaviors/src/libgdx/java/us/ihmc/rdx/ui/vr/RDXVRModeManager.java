@@ -52,7 +52,6 @@ public class RDXVRModeManager
    private ImBoolean interactablesEnabled = new ImBoolean(false);
    private final LogToolsLogger logToolsLogger = new LogToolsLogger();
    private ControllerStatusTracker controllerStatusTracker;
-   private RDXHandConfigurationManager handManager;
 
    public void create(RDXBaseUI baseUI,
                       ROS2SyncedRobotModel syncedRobot,
@@ -100,7 +99,6 @@ public class RDXVRModeManager
          if (panel instanceof RDXTeleoperationManager teleoperationPanel)
          {
             interactablesEnabled = teleoperationPanel.getInteractablesEnabled();
-            handManager = teleoperationPanel.getArmManager().getHandManager();
             break;
          }
       }
@@ -115,8 +113,7 @@ public class RDXVRModeManager
                                                                     retargetingParameters,
                                                                     sceneGraph,
                                                                     controllerStatusTracker,
-                                                                    footstepPlacer,
-                                                                    handManager);
+                                                                    footstepPlacer);
          kinematicsStreamingMode.create(createKinematicsStreamingToolboxModule, kstParameters);
       }
 
