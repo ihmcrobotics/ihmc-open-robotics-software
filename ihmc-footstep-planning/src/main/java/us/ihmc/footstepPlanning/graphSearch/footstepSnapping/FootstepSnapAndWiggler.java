@@ -2,11 +2,8 @@ package us.ihmc.footstepPlanning.graphSearch.footstepSnapping;
 
 import us.ihmc.commonWalkingControlModules.polygonWiggling.StepConstraintPolygonTools;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.WiggleParameters;
-import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
-import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
@@ -19,7 +16,6 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerPar
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapSnapWiggler;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
@@ -29,7 +25,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
 {
@@ -245,9 +240,6 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
             }
          }
       }
-
-
-
 
       // Reduce the foothold down to 4 vertices.
       if (croppedFoothold.getNumberOfVertices() > 4)
