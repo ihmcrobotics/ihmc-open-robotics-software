@@ -132,7 +132,7 @@ __global__ void computeSnappedValuesKernel(unsigned short *globalMap, size_t pit
     {
         for (int y_value_idx = -samples; y_value_idx <= samples; y_value_idx++)
         {
-            // Calculate offset and check distanc
+            // Calculate offset and check distance
             float2 offset = make_float2((float)x_value_idx * resolution, (float)y_value_idx * resolution);
             float offset_distance_squared = dot2D(offset, offset);
 
