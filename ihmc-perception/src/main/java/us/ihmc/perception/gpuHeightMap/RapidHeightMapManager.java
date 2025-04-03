@@ -50,9 +50,9 @@ public class RapidHeightMapManager
    private final GpuMat deviceDepthImage;
    private final HeightMapParameters heightMapParameters;
    private final ROS2Publisher<ImageMessage> heightMapPublisher;
-   private List<Collidable> robotCollidables;
-   private CUDABodyCollisionFilter bodyCollisionFilter;
-   private CameraIntrinsics depthImageIntrinsics;
+   private final List<Collidable> robotCollidables;
+   private final CUDABodyCollisionFilter bodyCollisionFilter;
+   private final CameraIntrinsics depthImageIntrinsics;
 
    public RapidHeightMapManager(ROS2Node ros2Node,
                                 RobotCollisionModel robotCollisionModel,
@@ -123,7 +123,7 @@ public class RapidHeightMapManager
       }
 
       deviceDepthImage.upload(hostDepthImage);
-      bodyCollisionFilter.process(deviceDepthImage,depthImageIntrinsics,robotCollidables, cameraFrame);
+      bodyCollisionFilter.process(deviceDepthImage, depthImageIntrinsics, robotCollidables, cameraFrame);
       if (resetHeightMapRequested.poll())
       {
          rapidHeightMapExtractor.reset();

@@ -42,7 +42,7 @@ public class StandAloneRealsenseProcess
 
    private final ROS2DemandGraphNode heightMapDemandNode;
    private RapidHeightMapUpdateThread heightMapUpdateThread;
-   private RobotCollisionModel robotCollisionModel;
+   private final RobotCollisionModel robotCollisionModel;
 
    public StandAloneRealsenseProcess(ROS2Node ros2Node,
                                      ROS2Helper ros2Helper,
@@ -62,6 +62,7 @@ public class StandAloneRealsenseProcess
    {
       this.ros2Helper = ros2Helper;
       this.syncedRobot = syncedRobot;
+      this.robotCollisionModel = robotCollisionModel;
 
       realsensePublishDemandNode = new ROS2DemandGraphNode(ros2Node, PerceptionAPI.REQUEST_REALSENSE_PUBLICATION);
       heightMapDemandNode = new ROS2DemandGraphNode(ros2Node, PerceptionAPI.REQUEST_HEIGHT_MAP);
