@@ -27,8 +27,8 @@ public class CUDABodyCollisionFilter
    private final CUstream_st stream;
 
    private GpuMat collisionResults;
-   private int error;
-   private int numCollidables;
+   private int numberOfCollidables;
+   private int numberOfAttributes = 7;
 
    public CUDABodyCollisionFilter()
    {
@@ -54,10 +54,7 @@ public class CUDABodyCollisionFilter
       }
    }
 
-   public void process(GpuMat latestDepthImage,
-                       CameraIntrinsics cameraIntrinsics,
-                       List<Collidable> robotCollidables,
-                       ReferenceFrame cameraFrame)
+   public void process(GpuMat latestDepthImage, CameraIntrinsics cameraIntrinsics, List<Collidable> robotCollidables, ReferenceFrame cameraFrame)
    {
       if (collisionResults != null)
       {
@@ -65,16 +62,16 @@ public class CUDABodyCollisionFilter
          collisionResults = null;
       }
 
-      numCollidables = countCapsules(robotCollidables);
+      numberOfCollidables = countCapsules(robotCollidables);
 
-      if (numCollidables == 0)
+      if (numberOfCollidables == 0)
       {
          return;
       }
 
       FloatPointer collidableGeometryPointer = getCollidablesPointer(robotCollidables, cameraFrame);
 
-      int dataSize = numCollidables * 7 * Float.BYTES;
+      int dataSize = numberOfCollidables * numberOfAttributes * Float.BYTES;
 
       FloatPointer deviceCollidableGeometryPointer = new FloatPointer();
       CUDATools.mallocAsync(deviceCollidableGeometryPointer, dataSize, stream);
@@ -88,21 +85,22 @@ public class CUDABodyCollisionFilter
       int gridSizeY = (latestDepthImage.rows() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
       dim3 gridSize = new dim3(gridSizeX, gridSizeY, 1);
 
-      kernel.withPointer(latestDepthImage.data())
-            .withLong(latestDepthImage.step())
-            .withInt(latestDepthImage.cols())
-            .withInt(latestDepthImage.rows())
-            .withFloat((float) cameraIntrinsics.getFx())
-            .withFloat((float) cameraIntrinsics.getFy())
-            .withFloat((float) cameraIntrinsics.getCx())
-            .withFloat((float) cameraIntrinsics.getCy())
-            .withPointer(collisionResults.data())
-            .withLong(collisionResults.step())
-            .withPointer(deviceCollidableGeometryPointer)
-            .withInt(numCollidables)
-            .run(stream, gridSize, blockSize, 0);
+      kernel.withPointer(latestDepthImage.data());
+      kernel.withLong(latestDepthImage.step());
+      kernel.withInt(latestDepthImage.cols());
+      kernel.withInt(latestDepthImage.rows());
+      kernel.withFloat((float) cameraIntrinsics.getFx());
+      kernel.withFloat((float) cameraIntrinsics.getFy());
+      kernel.withFloat((float) cameraIntrinsics.getCx());
+      kernel.withFloat((float) cameraIntrinsics.getCy());
+      kernel.withPointer(collisionResults.data());
+      kernel.withLong(collisionResults.step());
+      kernel.withPointer(deviceCollidableGeometryPointer);
+      kernel.withInt(numberOfCollidables);
+      kernel.withInt(numberOfAttributes);
 
-      error = cudaStreamSynchronize(stream);
+      kernel.run(stream, gridSize, blockSize, 0);
+      int error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
 
       Mat hostResults = new Mat();
@@ -127,9 +125,7 @@ public class CUDABodyCollisionFilter
       int count = 0;
       for (Collidable collidable : robotCollidables)
       {
-         if (collidable.getShape() instanceof FrameCapsule3D && !collidable.getRigidBody()
-                                                                           .getName()
-                                                                           .matches("TORSO_LINK|PELVIS_LINK"))
+         if (collidable.getShape() instanceof FrameCapsule3D && !collidable.getRigidBody().getName().matches("TORSO_LINK|PELVIS_LINK"))
          {
             count++;
          }
@@ -139,17 +135,15 @@ public class CUDABodyCollisionFilter
 
    public FloatPointer getCollidablesPointer(List<Collidable> robotCollidables, ReferenceFrame cameraFrame)
    {
-      if (numCollidables == 0)
+      if (numberOfCollidables == 0)
          return new FloatPointer(0);
 
-      FloatPointer geometryPointer = new FloatPointer(numCollidables * 7);
+      FloatPointer geometryPointer = new FloatPointer(numberOfCollidables * numberOfAttributes);
       int index = 0;
 
       for (Collidable collidable : robotCollidables)
       {
-         if (collidable.getShape() instanceof FrameCapsule3D capsule && !collidable.getRigidBody()
-                                                                                   .getName()
-                                                                                   .matches("TORSO_LINK|PELVIS_LINK"))
+         if (collidable.getShape() instanceof FrameCapsule3D capsule && !collidable.getRigidBody().getName().matches("TORSO_LINK|PELVIS_LINK"))
          {
 
             FrameCapsule3D bodypart = new FrameCapsule3D(capsule);

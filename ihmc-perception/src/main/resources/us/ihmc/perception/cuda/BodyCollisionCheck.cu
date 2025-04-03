@@ -7,7 +7,8 @@ using namespace PerceptionUtils;
 __device__ bool isPointInCapsule(float3 point,
                                  float3 topCenter,
                                  float3 bottomCenter,
-                                 float radius) {
+                                 float radius)
+{
     float3 capsuleAxis;
     capsuleAxis.x = bottomCenter.x - topCenter.x;
     capsuleAxis.y = bottomCenter.y - topCenter.y;
@@ -16,7 +17,8 @@ __device__ bool isPointInCapsule(float3 point,
     float capsuleLengthSq = dot(capsuleAxis, capsuleAxis);
     float capsuleLength = sqrtf(capsuleLengthSq);
 
-    if (capsuleLength < 1e-6f) {
+    if (capsuleLength < 1e-6f)
+    {
         float3 diff;
         diff.x = point.x - topCenter.x;
         diff.y = point.y - topCenter.y;
@@ -50,7 +52,6 @@ __device__ bool isPointInCapsule(float3 point,
 
     float distSq = dot(dist, dist);
     return distSq <= radius * radius;
-
 }
 
 extern "C" __global__ void checkBodyCollision(unsigned short* depthImage,
@@ -64,7 +65,9 @@ extern "C" __global__ void checkBodyCollision(unsigned short* depthImage,
                                             unsigned short* collisionMask,
                                             size_t collisionMaskPitch,
                                             float* collidableGeometryPointer,
-                                            int numCollidables) {
+                                            int numCollidables,
+                                            int numberOfAttributes)
+{
     int x = Utils::getThreadCoordX();
     int y = Utils::getThreadCoordY();
 
@@ -72,7 +75,8 @@ extern "C" __global__ void checkBodyCollision(unsigned short* depthImage,
         return;
 
     unsigned short depthValue = *row(col(depthImage, x), depthImagePitch, y);
-    if (depthValue == 0) {
+    if (depthValue == 0)
+    {
         *row(col(collisionMask, x), collisionMaskPitch, y) = 0; // Set to 0 (integer)
         return;
     }
@@ -86,7 +90,7 @@ extern "C" __global__ void checkBodyCollision(unsigned short* depthImage,
 
     for (int i = 0; i < numCollidables; ++i)
     {
-        int index = i * 7;
+        int index = i * numberOfAttributes;
 
         float3 topCenter = make_float3(collidableGeometryPointer[index],
                                        collidableGeometryPointer[index + 1],
