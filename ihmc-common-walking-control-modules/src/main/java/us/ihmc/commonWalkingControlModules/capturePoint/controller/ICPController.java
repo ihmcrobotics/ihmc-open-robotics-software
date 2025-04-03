@@ -215,7 +215,7 @@ public class ICPController implements ICPControllerInterface
       parameters.createFeedbackAlphaCalculator(registry, null);
       parameters.createFeedbackProjectionOperator(registry, null);
 
-      ticksToInterpolateAlpha.set(100);
+      ticksToInterpolateAlpha.set(75);
 
       if (yoGraphicsListRegistry != null)
          setupVisualizers(yoGraphicsListRegistry);
