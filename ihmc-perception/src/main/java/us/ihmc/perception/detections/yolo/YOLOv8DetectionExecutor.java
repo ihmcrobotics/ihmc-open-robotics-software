@@ -295,12 +295,15 @@ public class YOLOv8DetectionExecutor
 
    private void annotateAndPublishImage()
    {
-      if (!annotatedImageDemanded.getAsBoolean())
-         return;
-
       RawImage colorImage = newestColorImage.blockingPoll();
       if (colorImage == null)
          return;
+
+      if (!annotatedImageDemanded.getAsBoolean())
+      {
+         colorImage.release();
+         return;
+      }
 
       Mat resultMat = new Mat();
       synchronized (yoloDetectionResults)

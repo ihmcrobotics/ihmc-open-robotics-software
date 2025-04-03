@@ -1,7 +1,5 @@
 package us.ihmc.sensorProcessing.communication.producers;
 
-import static us.ihmc.robotics.Assert.*;
-
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -15,6 +13,8 @@ import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class RobotConfigurationDataBufferTest
 {

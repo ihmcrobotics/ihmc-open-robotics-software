@@ -3,11 +3,9 @@ package us.ihmc.avatar.obstacleCourseTests;
 import static us.ihmc.robotics.Assert.assertEquals;
 import static us.ihmc.robotics.Assert.assertTrue;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
@@ -34,6 +32,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
+@Tag("humanoid-obstacle")
 public abstract class AvatarBigStepDownTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -146,7 +145,7 @@ public abstract class AvatarBigStepDownTest implements MultiRobotTestInterface
       simulationTestHelper.setCamera(cameraFix, cameraPosition);
 
       ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateNow(2.0);
+      boolean success = simulationTestHelper.simulateNow(0.5);
 
       @SuppressWarnings("unchecked")
       YoEnum<FootControlModule.ConstraintType> rightFootState = ((YoEnum<FootControlModule.ConstraintType>) simulationTestHelper.findVariable("rightFootCurrentState"));
@@ -182,7 +181,9 @@ public abstract class AvatarBigStepDownTest implements MultiRobotTestInterface
                                                                                       new Point3D(-5.8 - 0.15, -7.471 + 0.15, 0.0),
                                                                                       footRotation);
 
-      simulationTestHelper.publishToController(HumanoidMessageTools.createFootstepDataListMessage(firstStep));
+      FootstepDataListMessage steps = HumanoidMessageTools.createFootstepDataListMessage(firstStep);
+      steps.setAreFootstepsAdjustable(true);
+      simulationTestHelper.publishToController(steps);
 
       success = success && simulationTestHelper.simulateNow(4.0);
 

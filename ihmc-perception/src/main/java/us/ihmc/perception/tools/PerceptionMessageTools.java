@@ -8,6 +8,8 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.ImageMessage;
+import sensor_msgs.msg.dds.CameraInfo;
+import sensor_msgs.msg.dds.Image;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.ros2.ROS2Helper;
@@ -20,6 +22,7 @@ import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.imageMessage.CompressionType;
 import us.ihmc.perception.imageMessage.PixelFormat;
+import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
@@ -29,6 +32,7 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
 import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.time.Instant;
 
 public class PerceptionMessageTools
@@ -182,6 +186,146 @@ public class PerceptionMessageTools
          MessageTools.packIDLSequence(ousterBeamAltitudeAngles, imageMessageToPack.getOusterBeamAltitudeAngles());
       if (ousterBeamAzimuthAngles != null)
          MessageTools.packIDLSequence(ousterBeamAzimuthAngles, imageMessageToPack.getOusterBeamAzimuthAngles());
+   }
+
+   public static void packImageMessage(RawImage image, String cameraFrameId, Image messageToPack)
+   {
+      // Set the header
+      Instant imageAcquisitionTime = image.getAcquisitionTime();
+      messageToPack.getHeader().getStamp().setSec((int) imageAcquisitionTime.getEpochSecond());
+      messageToPack.getHeader().getStamp().setNanosec(imageAcquisitionTime.getNano());
+      messageToPack.getHeader().setFrameId(cameraFrameId);
+
+      // Set dimensions
+      messageToPack.setWidth(image.getWidth());
+      messageToPack.setHeight(image.getHeight());
+
+      // Set encoding
+      PixelFormat pixelFormat = image.getPixelFormat();
+      String encoding = switch (pixelFormat)
+      {
+         case BGR8, BGRA8, RGB8, RGBA8 -> pixelFormat.name().toLowerCase();
+         case GRAY8, GRAY16 -> pixelFormat.name().toLowerCase().replace("gray", "mono");
+         default -> getOpenCVTypeString(image.getOpenCVType());
+      };
+      messageToPack.setEncoding(encoding);
+
+      // Get the message's internal buffer
+      ByteBuffer dataBuffer = messageToPack.getData().getBuffer();
+
+      // Set byte order
+      messageToPack.setIsBigendian((byte) (dataBuffer.order().equals(ByteOrder.BIG_ENDIAN) ? 1 : 0));
+
+      // Set step
+      Mat cpuImage = image.getCpuImageMat();
+      messageToPack.setStep(cpuImage.step());
+
+      // Set data
+      int memorySize = (int) OpenCVTools.memorySize(cpuImage);
+      dataBuffer.position(0).put(cpuImage.data().limit(memorySize).asByteBuffer());
+   }
+
+   private static String getOpenCVTypeString(int openCVType)
+   {
+      // Reverse the opencv_core.CV_MAKETYPE method to get the type depth and number of channels
+      int depth = openCVType & opencv_core.CV_MAT_DEPTH_MASK;
+      int channels = ((openCVType - depth) >> opencv_core.CV_CN_SHIFT) + 1;
+
+      StringBuilder typeString = new StringBuilder(5);
+      switch (depth)
+      {
+         case opencv_core.CV_8U -> typeString.append("8UC");
+         case opencv_core.CV_8S -> typeString.append("8SC");
+         case opencv_core.CV_16U -> typeString.append("16UC");
+         case opencv_core.CV_16S -> typeString.append("16SC");
+         case opencv_core.CV_32S -> typeString.append("32SC");
+         case opencv_core.CV_32F -> typeString.append("32FC");
+         case opencv_core.CV_64F -> typeString.append("64FC");
+      }
+
+      typeString.append(channels);
+
+      return typeString.toString();
+   }
+
+   // TODO: Support non-rectified images and stereo images
+   public static void packCameraInfo(RawImage image, String cameraFrameId, CameraInfo cameraInfoToPack)
+   {
+      // Set the header
+      Instant imageAcquisitionTime = image.getAcquisitionTime();
+      cameraInfoToPack.getHeader().getStamp().setSec((int) imageAcquisitionTime.getEpochSecond());
+      cameraInfoToPack.getHeader().getStamp().setNanosec(imageAcquisitionTime.getNano());
+      cameraInfoToPack.getHeader().setFrameId(cameraFrameId);
+
+      // Set the calibration parameters
+      // Image dimensions
+      cameraInfoToPack.setHeight(image.getHeight());
+      cameraInfoToPack.setWidth(image.getWidth());
+
+      // Distortion model
+      cameraInfoToPack.setDistortionModel("plumb_bob");
+      cameraInfoToPack.getD().clear(5);
+      cameraInfoToPack.getD().add(new double[]{0.0, 0.0, 0.0, 0.0, 0.0}); // We (mostly) work with rectified images, so assume no distortion
+
+      /*
+       * Set the intrinsics matrix
+       *      [fx  0 cx]
+       *  K = [ 0 fy cy]
+       *      [ 0  0  1]
+       */
+      cameraInfoToPack.getK()[0] = image.getFocalLengthX();
+      cameraInfoToPack.getK()[1] = 0.0;
+      cameraInfoToPack.getK()[2] = image.getPrincipalPointX();
+      cameraInfoToPack.getK()[3] = 0.0;
+      cameraInfoToPack.getK()[4] = image.getFocalLengthY();
+      cameraInfoToPack.getK()[5] = image.getPrincipalPointY();
+      cameraInfoToPack.getK()[6] = 0.0;
+      cameraInfoToPack.getK()[7] = 0.0;
+      cameraInfoToPack.getK()[8] = 1.0;
+
+      // Set the rotation matrix (only used for stereo images, so we assume identity)
+      cameraInfoToPack.getR()[0] = 1.0;
+      cameraInfoToPack.getR()[1] = 0.0;
+      cameraInfoToPack.getR()[2] = 0.0;
+      cameraInfoToPack.getR()[3] = 0.0;
+      cameraInfoToPack.getR()[4] = 1.0;
+      cameraInfoToPack.getR()[5] = 0.0;
+      cameraInfoToPack.getR()[6] = 0.0;
+      cameraInfoToPack.getR()[7] = 0.0;
+      cameraInfoToPack.getR()[8] = 1.0;
+
+      /*
+       * Set the projection matrix
+       *     [fx'  0  cx' Tx]
+       * P = [ 0  fy' cy' Ty]
+       *     [ 0   0   1   0]
+       * Since we're not using stereo images, Tx = Ty = 0
+       * We also assume fx` = fx, cx` = cx, etc.
+       */
+      cameraInfoToPack.getP()[0] = image.getFocalLengthX();
+      cameraInfoToPack.getP()[1] = 0.0;
+      cameraInfoToPack.getP()[2] = image.getPrincipalPointX();
+      cameraInfoToPack.getP()[3] = 0.0;
+      cameraInfoToPack.getP()[4] = 0.0;
+      cameraInfoToPack.getP()[5] = image.getFocalLengthY();
+      cameraInfoToPack.getP()[6] = image.getPrincipalPointY();
+      cameraInfoToPack.getP()[7] = 0.0;
+      cameraInfoToPack.getP()[8] = 0.0;
+      cameraInfoToPack.getP()[9] = 0.0;
+      cameraInfoToPack.getP()[10] = 1.0;
+      cameraInfoToPack.getP()[11] = 0.0;
+
+      // Set "Operational Parameters"
+      // Assume no binning
+      cameraInfoToPack.setBinningX(0);
+      cameraInfoToPack.setBinningY(0);
+
+      // Set the ROI to the full image
+      cameraInfoToPack.getRoi().setXOffset(0);
+      cameraInfoToPack.getRoi().setYOffset(0);
+      cameraInfoToPack.getRoi().setHeight(0);
+      cameraInfoToPack.getRoi().setWidth(0);
+      cameraInfoToPack.getRoi().setDoRectify(false);
    }
 
    public static void copyToFloatPointer(IDLSequence.Float sourceIDLSequence, FloatPointer floatPointerToPack, int startIndex)

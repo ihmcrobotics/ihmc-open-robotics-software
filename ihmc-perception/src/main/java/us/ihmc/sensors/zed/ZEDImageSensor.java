@@ -71,7 +71,7 @@ public class ZEDImageSensor extends ImageSensor
    protected final SL_RuntimeParameters zedRuntimeParameters = new SL_RuntimeParameters();
 
    private boolean positionalTrackingEnabled = false;
-   private final MutableReferenceFrame trackedSensorFrame = new MutableReferenceFrame();
+   private final MutableReferenceFrame trackedSensorFrame;
    private final SL_Quaternion sensorRotation = new SL_Quaternion();
    private final SL_Vector3 sensorTranslation = new SL_Vector3();
 
@@ -83,6 +83,8 @@ public class ZEDImageSensor extends ImageSensor
       this.zedModel = zedModel;
       this.slInputType = slInputType;
       this.slDepthMode = slDepthMode;
+
+      trackedSensorFrame = new MutableReferenceFrame(getSensorName() + "_tracked", ReferenceFrameTools.getWorldFrame());
 
       sensorCenterToCameraDistanceY = (float) zedModel.getCenterToCameraDistance();
       updateReferenceFrames();

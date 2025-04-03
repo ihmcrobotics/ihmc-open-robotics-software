@@ -2,11 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
 import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.controlModules.TaskspaceTrajectoryStatusMessageHelper;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.*;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -22,7 +18,9 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3Trajector
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.CommandConversionTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
@@ -203,8 +201,7 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
                                                 orientationCommand.getReferenceAngularAcceleration());
 
       // Copy from the position command since the orientation does not have a control frame.
-      feedbackControlCommand.setControlFrameFixedInEndEffector(positionCommand.getBodyFixedPointToControl(),
-                                                               orientationCommand.getControlFrameOrientation());
+      feedbackControlCommand.setControlFrameFixedInEndEffector(positionCommand.getBodyFixedPointToControl(), orientationCommand.getControlFrameOrientation());
 
       feedbackControlCommand.setControlBaseFrame(positionCommand.getControlBaseFrame());
    }
@@ -431,6 +428,24 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
       group.addChild(positionHelper.getSCS2YoGraphics());
+
+      if (positionHelper.getYoCurrentPosition() != null && orientationHelper.getYoCurrentOrientation() != null)
+      {
+         group.addChild(YoGraphicDefinitionFactory.newYoGraphicCoordinateSystem3D(positionHelper.getYoCurrentPosition().getNamePrefix(),
+                                                                                  positionHelper.getYoCurrentPosition(),
+                                                                                  orientationHelper.getYoCurrentOrientation(),
+                                                                                  0.1,
+                                                                                  ColorDefinitions.Red()));
+      }
+      if (positionHelper.getYoDesiredPosition() != null && orientationHelper.getYoDesiredOrientation() != null)
+      {
+         group.addChild(YoGraphicDefinitionFactory.newYoGraphicCoordinateSystem3D(positionHelper.getYoDesiredPosition().getNamePrefix(),
+                                                                                  positionHelper.getYoDesiredPosition(),
+                                                                                  orientationHelper.getYoDesiredOrientation(),
+                                                                                  0.1,
+                                                                                  ColorDefinitions.Blue()));
+      }
+
       return group;
    }
 

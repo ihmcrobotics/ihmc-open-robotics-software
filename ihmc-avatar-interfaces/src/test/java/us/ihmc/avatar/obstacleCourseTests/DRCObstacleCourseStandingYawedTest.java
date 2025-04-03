@@ -1,7 +1,5 @@
 package us.ihmc.avatar.obstacleCourseTests;
 
-import static us.ihmc.robotics.Assert.assertTrue;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,6 +14,8 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class DRCObstacleCourseStandingYawedTest implements MultiRobotTestInterface
 {

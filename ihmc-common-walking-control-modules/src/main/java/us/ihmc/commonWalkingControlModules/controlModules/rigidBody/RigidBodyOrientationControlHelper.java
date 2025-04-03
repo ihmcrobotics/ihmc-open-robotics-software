@@ -6,9 +6,7 @@ import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
@@ -27,6 +25,8 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSO3TrajectoryPoi
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameSO3TrajectoryPointList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -89,12 +89,17 @@ public class RigidBodyOrientationControlHelper
    private final FixedFrameQuaternionBasics previousControlFrameOrientation;
    private final FixedFrameQuaternionBasics controlFrameOrientation;
    private final ReferenceFrame defaultControlFrame;
+   private final FramePose3D controlFramePose = new FramePose3D();
 
    private final Quaternion integratedOrientation = new Quaternion();
    private final Vector3D integratedRotationVector = new Vector3D();
 
    private final ReferenceFrame baseFrame;
    private final ReferenceFrame bodyFrame;
+
+   private final FrameQuaternion currentOrientation = new FrameQuaternion();
+   private final YoFrameQuaternion yoCurrentOrientation;
+   private final YoFrameQuaternion yoDesiredOrientation;
 
    private final String warningPrefix;
 
@@ -143,6 +148,9 @@ public class RigidBodyOrientationControlHelper
       streamTimestampSource = new YoDouble(prefix + "StreamTimestampSource", registry);
       streamTimestampSource.setToNaN();
 
+      yoCurrentOrientation = new YoFrameQuaternion(prefix + "Current", ReferenceFrame.getWorldFrame(), registry);
+      yoDesiredOrientation = new YoFrameQuaternion(prefix + "Desired", ReferenceFrame.getWorldFrame(), registry);
+
       if (enableFunctionGenerators)
       {
          functionGenerator = new YoFunctionGeneratorNew(prefix + "_FG", time, registry);
@@ -175,14 +183,27 @@ public class RigidBodyOrientationControlHelper
       return defaultWeight;
    }
 
+   public YoFrameQuaternion getYoCurrentOrientation()
+   {
+      return yoCurrentOrientation;
+   }
+
+   public YoFrameQuaternion getYoDesiredOrientation()
+   {
+      return yoDesiredOrientation;
+   }
+
    private void setDefaultControlFrame()
    {
+      defaultControlFrame.getTransformToDesiredFrame(controlFramePose, bodyFrame);
       controlFrameOrientation.setFromReferenceFrame(defaultControlFrame);
       feedbackControlCommand.setControlFrameFixedInEndEffector(controlFrameOrientation);
    }
 
    private void setControlFrameOrientation(Orientation3DReadOnly controlFrameOrientationInBodyFrame)
    {
+      controlFramePose.setToZero(bodyFrame);
+      controlFramePose.getOrientation().set(controlFrameOrientationInBodyFrame);
       controlFrameOrientation.set(controlFrameOrientationInBodyFrame);
       feedbackControlCommand.setControlFrameFixedInEndEffector(controlFrameOrientation);
    }
@@ -293,6 +314,10 @@ public class RigidBodyOrientationControlHelper
 
       feedbackControlCommand.setWeightMatrix(weightMatrix);
       feedbackControlCommand.setSelectionMatrix(selectionMatrix);
+
+      currentOrientation.setIncludingFrame(bodyFrame, controlFramePose.getRotation());
+      yoCurrentOrientation.setMatchingFrame(currentOrientation);
+      yoDesiredOrientation.setMatchingFrame(desiredOrientation);
 
       return done;
    }
