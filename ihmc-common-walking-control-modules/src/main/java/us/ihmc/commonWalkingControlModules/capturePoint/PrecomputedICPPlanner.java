@@ -299,6 +299,11 @@ public class PrecomputedICPPlanner implements SCS2YoGraphicHolder
       yoDesiredCMPPosition.setToNaN();
    }
 
+   public void clear()
+   {
+      centerOfMassTrajectoryHandler.clear();
+   }
+
    @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {
