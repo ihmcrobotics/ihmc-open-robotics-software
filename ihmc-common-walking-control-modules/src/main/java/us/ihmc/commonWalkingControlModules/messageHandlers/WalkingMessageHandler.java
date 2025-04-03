@@ -130,6 +130,8 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
    private final YoBoolean usingQFP = new YoBoolean("usingQFP", registry);
    private final YoBoolean isWalkingInPlace = new YoBoolean("isWalkingInPlace", registry);
 
+   private final YoDouble yoTransferDuration = new YoDouble("TransferDuration", registry);
+
    public WalkingMessageHandler(double defaultTransferTime,
                                 double defaultSwingTime,
                                 double defaultInitialTransferTime,
@@ -956,11 +958,12 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
          // There are no upcoming steps, we are not walking, and this is an overwrite message:
          if (stepsInQueue == 0 && !isWalking.getBooleanValue())
 //            transferDuration = defaultInitialTransferTime.getDoubleValue();
-            transferDuration = defaultTransferTime.getDoubleValue();
+            transferDuration =  defaultTransferTime.getDoubleValue();
          else
             transferDuration = defaultTransferTime.getDoubleValue();
       }
 
+      yoTransferDuration.set(transferDuration);
       timingToSet.setTimings(swingDuration, transferDuration);
       timingToSet.setTouchdownDuration(footstep.getTouchdownDuration());
       timingToSet.setLiftoffDuration(footstep.getLiftoffDuration());
