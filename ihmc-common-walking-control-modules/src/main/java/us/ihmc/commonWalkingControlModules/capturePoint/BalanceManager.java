@@ -811,6 +811,10 @@ public class BalanceManager implements SCS2YoGraphicHolder
    public void disablePelvisXYControl()
    {
       pelvisICPBasedTranslationManager.disable();
+      if (precomputedICPPlanner != null)
+         precomputedICPPlanner.clear();
+      if (momentumTrajectoryHandler != null)
+         momentumTrajectoryHandler.clear();
    }
 
    public void enablePelvisXYControl()
