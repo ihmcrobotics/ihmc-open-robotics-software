@@ -6,6 +6,7 @@ import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.euclid.referenceFrame.FrameCapsule3D;
+import us.ihmc.euclid.referenceFrame.FrameSphere3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.tools.PerceptionDebugTools;
@@ -100,12 +101,12 @@ public class CUDABodyCollisionFilter
       CUDATools.checkCUDAError(error);
 
 //      Mat hostResults = new Mat();
-//      latestDepthImage.download(hostResults);
-//      PerceptionDebugTools.displayDepth("mask", hostResults, 1);
-//
-//      Mat hostDepth = new Mat();
-//      originalDepthImage.download(hostDepth);
-//      PerceptionDebugTools.displayDepth("depth", hostDepth, 1);
+      //      latestDepthImage.download(hostResults);
+      //      PerceptionDebugTools.displayDepth("mask", hostResults, 1);
+      //
+      //      Mat hostDepth = new Mat();
+      //      originalDepthImage.download(hostDepth);
+      //      PerceptionDebugTools.displayDepth("depth", hostDepth, 1);
 
       blockSize.close();
       gridSize.close();
@@ -121,8 +122,11 @@ public class CUDABodyCollisionFilter
 
       int count = 0;
       for (Collidable collidable : robotCollidables)
+
       {
-         if (collidable.getShape() instanceof FrameCapsule3D && !collidable.getRigidBody().getName().matches("TORSO_LINK|PELVIS_LINK"))
+         if ((collidable.getShape() instanceof FrameCapsule3D || collidable.getShape() instanceof FrameSphere3D) && !collidable.getRigidBody()
+                                                                                                                               .getName()
+                                                                                                                               .matches("TORSO_LINK|PELVIS_LINK"))
          {
             count++;
          }
@@ -135,22 +139,33 @@ public class CUDABodyCollisionFilter
       if (numberOfCollidables == 0)
          return new FloatPointer(0);
 
-      FloatPointer geometryPointer = new FloatPointer(numberOfCollidables * numberOfAttributes);
+      FloatPointer geometryPointer = new FloatPointer((long) numberOfCollidables * numberOfAttributes);
       int index = 0;
 
       for (Collidable collidable : robotCollidables)
       {
+         if (collidable.getShape() instanceof FrameSphere3D sphere)
+         {
+            FrameSphere3D bodypart = new FrameSphere3D(sphere);
+            bodypart.changeFrame(cameraFrame);
+            geometryPointer.put(index++, bodypart.getPosition().getX32());
+            geometryPointer.put(index++, bodypart.getPosition().getY32());
+            geometryPointer.put(index++, bodypart.getPosition().getZ32());
+            geometryPointer.put(index++, bodypart.getPosition().getX32());
+            geometryPointer.put(index++, bodypart.getPosition().getY32());
+            geometryPointer.put(index++, bodypart.getPosition().getZ32());
+            geometryPointer.put(index++, (float) bodypart.getRadius());
+         }
          if (collidable.getShape() instanceof FrameCapsule3D capsule && !collidable.getRigidBody().getName().matches("TORSO_LINK|PELVIS_LINK"))
          {
-
             FrameCapsule3D bodypart = new FrameCapsule3D(capsule);
             bodypart.changeFrame(cameraFrame);
-            geometryPointer.put(index++, (float) bodypart.getTopCenter().getX());
-            geometryPointer.put(index++, (float) bodypart.getTopCenter().getY());
-            geometryPointer.put(index++, (float) bodypart.getTopCenter().getZ());
-            geometryPointer.put(index++, (float) bodypart.getBottomCenter().getX());
-            geometryPointer.put(index++, (float) bodypart.getBottomCenter().getY());
-            geometryPointer.put(index++, (float) bodypart.getBottomCenter().getZ());
+            geometryPointer.put(index++, bodypart.getTopCenter().getX32());
+            geometryPointer.put(index++, bodypart.getTopCenter().getY32());
+            geometryPointer.put(index++, bodypart.getTopCenter().getZ32());
+            geometryPointer.put(index++, bodypart.getBottomCenter().getX32());
+            geometryPointer.put(index++, bodypart.getBottomCenter().getY32());
+            geometryPointer.put(index++, bodypart.getBottomCenter().getZ32());
             geometryPointer.put(index++, (float) bodypart.getRadius());
          }
       }

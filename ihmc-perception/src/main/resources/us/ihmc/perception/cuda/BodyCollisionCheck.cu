@@ -9,6 +9,7 @@ __device__ bool isPointInCapsule(float3 point,
                                  float3 bottomCenter,
                                  float radius)
 {
+    float tolerance = 0.1;
     float3 capsuleAxis;
     capsuleAxis.x = bottomCenter.x - topCenter.x;
     capsuleAxis.y = bottomCenter.y - topCenter.y;
@@ -24,7 +25,8 @@ __device__ bool isPointInCapsule(float3 point,
         diff.y = point.y - topCenter.y;
         diff.z = point.z - topCenter.z;
         float distSq = dot(diff, diff);
-        return distSq <= radius * radius;
+        return distSq <=  (radius + tolerance) * (radius + tolerance);
+
     }
 
     float3 normalizedAxis;
@@ -51,7 +53,7 @@ __device__ bool isPointInCapsule(float3 point,
     dist.z = point.z - closestPointOnAxis.z;
 
     float distSq = dot(dist, dist);
-    return distSq <= (radius + 0.1) * (radius + 0.1);
+    return distSq <= (radius + tolerance) * (radius + tolerance);
 }
 
 extern "C" __global__ void checkBodyCollision(unsigned short* depthImage,
