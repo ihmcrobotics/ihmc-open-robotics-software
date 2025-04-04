@@ -272,6 +272,15 @@ public class ReadyToPlanState implements State
                                                                     X_RANDOM_MARGIN,
                                                                     NOMINAL_STANCE_WIDTH);
          }
+         else if (commandMessage.get().getWalkBackwards())
+         {
+            goalPoses = ContinuousPlannerTools.setStraightBackwardGoalPoses(continuousPlanner.getWalkingStartMidPose(),
+                                                                            continuousPlanner.getStartStancePose(),
+                                                                            (float) continuousHikingParameters.getGoalPoseBackwardDistance(),
+                                                                            (float) continuousHikingParameters.getGoalPoseUpDistance(),
+                                                                            X_RANDOM_MARGIN,
+                                                                            NOMINAL_STANCE_WIDTH);
+         }
          else
          {
             goalPoses = ContinuousPlannerTools.setStraightForwardGoalPoses(continuousPlanner.getWalkingStartMidPose(),

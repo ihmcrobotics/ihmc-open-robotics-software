@@ -89,7 +89,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    private final ImGuiRemoteROS2StoredPropertySetGroup hostStoredPropertySets;
    private final ImGuiSliderDouble stepsBeforeSafetyStop = new ImGuiSliderDouble("Steps Before Safety Stop", "%.2f");
    private final ImBoolean squareUpToGoal = new ImBoolean(true);
-   private final ImBoolean continuousHiking = new ImBoolean(false);
+   private final ImBoolean enableContinuousHiking = new ImBoolean(false);
    private final ImBoolean useAStarFootstepPlanner = new ImBoolean(true);
    private final ImBoolean useMonteCarloReference = new ImBoolean(false);
    private final ImBoolean useMonteCarloFootstepPlanner = new ImBoolean(false);
@@ -277,14 +277,15 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
 
    public void renderImGuiWidgets()
    {
-      if (ImGui.button("Start Walking"))
+      if (ImGui.button("Go Froward"))
       {
-         publishStartContinuousHiking();
+         publishStartContinuousHiking(true, false);
       }
       ImGuiTools.previousWidgetTooltip("CTRL + SHIFT");
       ImGui.sameLine();
       if (ImGui.button("Stop Walking"))
       {
+         enableContinuousHiking.set(false);
          publishStopContinuousHikingGracefully();
       }
       ImGuiTools.previousWidgetTooltip("ALT");
@@ -295,18 +296,29 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       }
       ImGuiTools.previousWidgetTooltip("ESC");
 
-      ImGui.checkbox("Enable Continuous Hiking", continuousHiking);
-      continuousHikingParameters.setStepPublisherEnabled(continuousHiking.get());
+      if (ImGui.button("Go Backwards"))
+      {
+         publishStartContinuousHiking(false, true);
+      }
+
+      if (ImGui.checkbox("Enable Continuous Hiking", enableContinuousHiking))
+      {
+         if (!enableContinuousHiking.get())
+         {
+            publishStopContinuousHiking();
+         }
+      }
+      continuousHikingParameters.setStepPublisherEnabled(enableContinuousHiking.get());
 
       ImGui.checkbox("Square Up To Goal", squareUpToGoal);
 
-      if (ImGui.button("Turn Left 90°"))
+      if (ImGui.button("Turn Left 90°") && enableContinuousHiking.get())
       {
          turnRobot((float) (Math.PI / 2.0));
       }
       ImGui.sameLine();
 
-      if (ImGui.button("Turn Right 90°"))
+      if (ImGui.button("Turn Right 90°") && enableContinuousHiking.get())
       {
          turnRobot((float) (-Math.PI / 2.0));
       }
@@ -322,7 +334,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
 
       if (ImGui.button("Reset State Machine"))
       {
-         continuousHiking.set(false);
+         enableContinuousHiking.set(false);
          resetStateMachinePublisher.publish(new Empty());
          publishStopContinuousHiking();
       }
@@ -386,7 +398,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       // This can be with buttons pressed on the keyboard, or with an XBox One Controller
       if (ImGui.getIO().getKeyCtrl() && ImGui.getIO().getKeyShift())
       {
-         publishStartContinuousHiking();
+         publishStartContinuousHiking(true, false);
       }
       else if ((ImGui.isKeyDown(ImGuiTools.getLeftArrowKey()) || ImGui.isKeyDown(ImGuiTools.getRightArrowKey())) && ImGui.getIO().getKeyShift())
       {
@@ -419,7 +431,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       if (previousStartButton && !currentStartButton)
       {
          // This sets the value to the opposite value
-         continuousHiking.set(!continuousHiking.get());
+         enableContinuousHiking.set(!enableContinuousHiking.get());
       }
 
       if (previousYButton && !currentYButtonPressed)
@@ -575,11 +587,11 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    /**
     * This publishes and tells the state machine that we want to start walking. Setting the enable Continuous Hiking to true
     */
-   private void publishStartContinuousHiking()
+   private void publishStartContinuousHiking(boolean walkForward, boolean walkBackwards)
    {
       commandMessage.setEnableContinuousHiking(true);
       commandMessage.setStepsBeforeSafetyStop((int) stepsBeforeSafetyStop.getDoubleValue());
-      commandMessage.setWalkForwards(true);
+      commandMessage.setWalkForwards(walkForward);
       commandMessage.setSideStep(false);
       commandMessage.setLeftDirection(false);
       commandMessage.setSquareUpToGoal(squareUpToGoal.get());
@@ -590,7 +602,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
 
       commandMessage.setUseJoystickController(false);
       commandMessage.setForwardValue(0.0);
-      commandMessage.setWalkBackwards(false);
+      commandMessage.setWalkBackwards(walkBackwards);
       commandMessage.setLateralValue(0.0);
       commandMessage.setTurningValue(0.0);
 
