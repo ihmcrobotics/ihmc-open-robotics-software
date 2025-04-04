@@ -4,8 +4,6 @@ import imgui.ImGui;
 import imgui.type.ImString;
 import us.ihmc.avatar.logProcessor.leRobot.LeRobotDataset;
 import us.ihmc.avatar.logProcessor.leRobot.LeRobotDatasetTools;
-import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.commons.nio.FileTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
@@ -122,13 +120,6 @@ public class RDXLeRobotDatasetCreator
       }
    }
 
-   private Path mkdir(Path path, String name)
-   {
-      Path newPath = path.resolve(name);
-      FileTools.ensureDirectoryExists(newPath, DefaultExceptionHandler.PRINT_MESSAGE);
-      return newPath;
-   }
-   
    private void refresh()
    {
       datasets = LeRobotDatasetTools.findLeRobotDatasetSubdirectories(logSession.getSession().getLogDataReader().getLogDirectory().toPath());
