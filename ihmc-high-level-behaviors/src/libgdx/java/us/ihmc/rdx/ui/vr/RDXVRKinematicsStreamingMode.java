@@ -260,7 +260,6 @@ public class RDXVRKinematicsStreamingMode
          InputDigitalActionData clickTriggerButton = controller.getClickTriggerActionData();
          if (clickTriggerButton.bChanged() && !clickTriggerButton.bState())
          {
-            footstepPlacer.shiftCoM(RobotSide.LEFT, syncedRobot.getReferenceFrames());
          }
 
          // Check if left joystick is pressed in order to trigger recording or replay of motion
@@ -294,7 +293,6 @@ public class RDXVRKinematicsStreamingMode
         InputDigitalActionData clickTriggerButton = controller.getClickTriggerActionData();
         if (clickTriggerButton.bChanged() && !clickTriggerButton.bState())
         {
-           footstepPlacer.shiftCoM(RobotSide.RIGHT, syncedRobot.getReferenceFrames());
         }
 
          gripButtonsValue.put(RobotSide.RIGHT, controller.getGripActionData().x());
