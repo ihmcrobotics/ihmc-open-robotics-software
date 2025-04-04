@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.graphSearch.footstepSnapping;
 
 import org.junit.jupiter.api.Test;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -12,6 +13,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticePoint;
@@ -43,6 +45,21 @@ public class ConvexPolygon2DTest
    static final double EPSILON = 1.0e-7;
 
    @Test
+   public void testSimpleGiftWrappingError()
+   {
+      List<Point2D> points = new ArrayList<>();
+      points.add(new Point2D(0.0, 0.0));
+      points.add(new Point2D(0.1, 0.05));
+      points.add(new Point2D(0.2, 0.1));
+      points.add(new Point2D(0.1, 0.1));
+      points.add(new Point2D(0.2, 0.2));
+
+      int numberOfPoints = inPlaceGiftWrapConvexHull2D(points, points.size());
+      assertEquals(points.size(), numberOfPoints);
+      ThreadTools.sleepForever();
+   }
+
+   @Test
    public void testTerriblePoint()
    {
       Random random = new Random(1738L);
@@ -54,14 +71,12 @@ public class ConvexPolygon2DTest
       basePolygon.update();
 
       double snapAreaResolution = 0.2;
-      int iters = 1;
-      for (int iter = 0; iter < iters; iter++)
-      {
+
          // get a polygon transformed to a random location.
          RigidBodyTransform transform = new RigidBodyTransform();
-         int gridXIndex = -50;
-         int gridYIndex = -31;
-         int yawIndex = 19;
+         int gridXIndex = -76; //-6;
+         int gridYIndex = -76;// -59;
+         int yawIndex = 22;// 33;
          transform.getTranslation().set(LatticePoint.gridSizeXY * gridXIndex, LatticePoint.gridSizeXY * gridYIndex, 0.0);
          transform.getRotation().appendYawRotation(yawIndex * LatticePoint.gridSizeYaw);
 
@@ -96,16 +111,14 @@ public class ConvexPolygon2DTest
             }
          }
 
-
          // Now get the wrapped hull of this both before and after transform, and assert all the points are inside.
          ConvexPolygon2D croppedFootholdOf3D = new ConvexPolygon2D(Vertex3DSupplier.asVertex3DSupplier(footPointsInEnvironment));
          List<Point2D> sortedPoints = footPointsInEnvironment.stream().map(Point2D::new).collect(Collectors.toList());
          ConvexPolygon2D croppedFootholdOf2D = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(sortedPoints));
-         int numberOfPoints = inPlaceGiftWrapConvexHull2D(sortedPoints, sortedPoints.size());
-         ThreadTools.sleepForever();
+      int numberOfPoints = inPlaceGiftWrapConvexHull2D(sortedPoints, sortedPoints.size());
+      ThreadTools.sleepForever();
          assertEquals(croppedFootholdOf2D.getNumberOfVertices(), croppedFootholdOf3D.getNumberOfVertices());
-         assertEquals(numberOfPoints, croppedFootholdOf2D.getNumberOfVertices());
-         assertPointsInside(croppedFootholdOf3D, footPointsInEnvironment);
+         assertPointsInside(croppedFootholdOf3D, footPointsInEnvironment, 1e-7);
 
          List<Point2D> footPointsInFoot = footPointsInEnvironment.stream().map(point ->
                                                                                {
@@ -114,18 +127,14 @@ public class ConvexPolygon2DTest
                                                                                   return new Point2D(transformedPoint);
                                                                                }).toList();
 
-
          // Transform crop, and make sure all the transformed points are inside
          //         croppedFoothold.applyInverseTransform(transform, false);
          //         assertPoint2DsInside(croppedFoothold, footPointsInFoot);
 
-
          // Create a polygon around all the transformed points, and make sure they're inside
          ConvexPolygon2D polygon2D = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(footPointsInFoot));
-         assertPoint2DsInside(polygon2D, footPointsInFoot);
-      }
+         assertPoint2DsInside(polygon2D, footPointsInFoot, 1e-7);
 
-      ThreadTools.sleepForever();
    }
 
    public static int inPlaceGiftWrapConvexHull2D(List<? extends Point2DReadOnly> vertices, int numberOfVertices)
@@ -146,13 +155,6 @@ public class ConvexPolygon2DTest
        */
       Collections.swap(vertices, findMinXMaxYVertexIndex(vertices, numberOfVertices), 0);
       Point2DReadOnly firstVertex = vertices.get(0);
-
-      // Idiot check to verify that it is indeed the lowest x-coordinate.
-      for (int i = 1; i < vertices.size(); i++)
-      {
-         if (firstVertex.getX() > vertices.get(i).getX())
-            throw new RuntimeException("Crap");
-      }
 
       // This is the last index that belongs to the convex polygon that has been found so far.
       int lastHullVertexIndex = 0;
@@ -180,14 +182,13 @@ public class ConvexPolygon2DTest
             }
          }
 
-         visualizer.setPerimeter(vertices, lastHullVertexIndex);
+         visualizer.setPerimeter(vertices, lastHullVertexIndex + 1);
          visualizer.setCandidate(lastHullVertex, candidateVertex, candidateIndex);
          visualizer.updateViz(AlgorithmPhase.UPDATING_PERIMETER);
 
-
          // Loop through all the other vertices. Create a line segment starting at the last hull vertex, and ending at the candidate vertex.  If all the other
          // points are to the
-         for (int vertexIndex = lastHullVertexIndex + 2; vertexIndex <= numberOfVertices;)
+         for (int vertexIndex = lastHullVertexIndex + 2; vertexIndex <= numberOfVertices; )
          {
             int wrappedIndex = EuclidCoreTools.wrap(vertexIndex, numberOfVertices);
             Point2DReadOnly vertex = vertices.get(wrappedIndex);
@@ -207,11 +208,20 @@ public class ConvexPolygon2DTest
 
             if (isPoint2DOnLeftSideOfLine2D(vertex, lastHullVertex, candidateVertex))
             { // vertex is located outside => candidateVertex is not the next polygon vertex, vertex might be though.
-               candidateIndex = wrappedIndex;
-               candidateVertex = vertex;
 
-               visualizer.setCandidate(lastHullVertex, candidateVertex, candidateIndex);
-               visualizer.updateViz(AlgorithmPhase.UDPATING_CANDIDATE);
+               // Check that we're not trying to finish the loop. If we are trying to finish the loop, make sure we're not doubling back, as this is a failure
+               // case.
+               if (lastHullVertexIndex < 1 || !isCandidatePointCollinearInOppositeDirectionWithTheFirstPoint(lastHullVertex,
+                                                                                                            vertices.get(lastHullVertexIndex - 1),
+                                                                                                            vertex,
+                                                                                                            EPSILON))
+               {
+                  candidateIndex = wrappedIndex;
+                  candidateVertex = vertex;
+
+                  visualizer.setCandidate(lastHullVertex, candidateVertex, candidateIndex);
+                  visualizer.updateViz(AlgorithmPhase.UDPATING_CANDIDATE);
+               }
             }
 
             vertexIndex++;
@@ -237,28 +247,42 @@ public class ConvexPolygon2DTest
             Collections.swap(vertices, lastHullVertexIndex, candidateIndex);
 
             visualizer.setLastHullVertexIndex(lastHullVertexIndex);
-            visualizer.setPerimeter(vertices, lastHullVertexIndex);
+            visualizer.setPerimeter(vertices, lastHullVertexIndex + 1);
             visualizer.updateViz(AlgorithmPhase.UPDATING_PERIMETER);
-
-            // doing an idiot check
-            int otherIndex = EuclidCoreTools.wrap(lastHullVertexIndex + 1, numberOfVertices);
-            while (otherIndex != lastHullVertexIndex - 1)
-            {
-               if (isPoint2DOnLeftSideOfLine2D(vertices.get(otherIndex), vertices.get(lastHullVertexIndex - 1), vertices.get(lastHullVertexIndex)))
-               { // vertex is located outside => candidateVertex is not the next polygon vertex, vertex might be though.
-                  LogTools.info("This isn't good, there's a point on the other side of the polygon.");
-               }
-
-               otherIndex = EuclidCoreTools.wrap(otherIndex + 1, numberOfVertices);
-            }
          }
       }
-
 
       visualizer.setPerimeter(vertices, numberOfVertices);
       visualizer.updateViz(AlgorithmPhase.RAN_THROUGH_ALL);
 
       return numberOfVertices;
+   }
+
+   private static boolean isCandidatePointCollinearInOppositeDirectionWithTheFirstPoint(Point2DReadOnly lastHullVertex,
+                                                                                        Point2DReadOnly previousHullVertex,
+                                                                                        Point2DReadOnly candidateVertex,
+                                                                                        double epsilon)
+   {
+      // get the normalized direction of the previous edge.
+      double candidateDeltaX = lastHullVertex.getX() - previousHullVertex.getX();
+      double candidateDeltaY = lastHullVertex.getY() - previousHullVertex.getY();
+      double candidateNorm = EuclidCoreTools.norm(candidateDeltaX, candidateDeltaY);
+      double candidateDirectionX = candidateDeltaX / candidateNorm;
+      double candidateDirectionY = candidateDeltaY / candidateNorm;
+
+      // Check if this new candidate point is collinear and in the opposite direction
+      double vertexDeltaX = candidateVertex.getX() - lastHullVertex.getX();
+      double vertexDeltaY = candidateVertex.getY() - lastHullVertex.getY();
+      double vertexDeltaNorm = EuclidCoreTools.norm(vertexDeltaX, vertexDeltaY);
+
+      double dotProduct = dot(vertexDeltaX, vertexDeltaY, candidateDirectionX, candidateDirectionY);
+
+      return MathTools.epsilonEquals(dotProduct, -vertexDeltaNorm, epsilon);
+   }
+
+   private static double dot(double deltaX1, double deltaY1, double deltaX2, double deltaY2)
+   {
+      return deltaX1 * deltaX2 + deltaY1 * deltaY2;
    }
 
    public static int findMinXMaxYVertexIndex(List<? extends Point2DReadOnly> vertices, int numberOfVertices)
@@ -306,7 +330,7 @@ public class ConvexPolygon2DTest
       basePolygon.update();
 
       double snapAreaResolution = 0.2;
-      int iters = 100000;
+      int iters = 1000000;
       for (int iter = 0; iter < iters; iter++)
       {
          // get a polygon transformed to a random location.
@@ -356,43 +380,44 @@ public class ConvexPolygon2DTest
                                                                                }).toList();
 
          // Now get the wrapped hull of this both before and after transform, and assert all the points are inside.
-         //         ConvexPolygon2D croppedFoothold = new ConvexPolygon2D(Vertex3DSupplier.asVertex3DSupplier(footPointsInEnvironment));
-         //         assertPointsInside(croppedFoothold, footPointsInEnvironment);
+         ConvexPolygon2D croppedFoothold = new ConvexPolygon2D(Vertex3DSupplier.asVertex3DSupplier(footPointsInEnvironment));
+         assertPointsInside(croppedFoothold, footPointsInEnvironment, 1e-7);
 
          // Transform crop, and make sure all the transformed points are inside
-         //         croppedFoothold.applyInverseTransform(transform, false);
-         //         assertPoint2DsInside(croppedFoothold, footPointsInFoot);
-
+//         croppedFoothold.applyInverseTransform(transform, false);
+//         assertPoint2DsInside(croppedFoothold, footPointsInFoot, 1e-7);
 
          // Create a polygon around all teh transformed points, and make sure they're inside
          ConvexPolygon2D polygon2D = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(footPointsInFoot));
-         assertPoint2DsInside(polygon2D, footPointsInFoot);
+         assertPoint2DsInside(polygon2D, footPointsInFoot, 1e-7);
       }
    }
 
-
-   private static void assertPointsInside(ConvexPolygon2DReadOnly polygonToCheck, List<Point3D> points)
+   private static void assertPointsInside(ConvexPolygon2DReadOnly polygonToCheck, List<Point3D> points, double epsilon)
    {
       for (Point3D point : points)
       {
          double distance = polygonToCheck.signedDistance(new Point2D(point));
-         assertTrue(distance < 1e-3, "Point " + point + " is not inside the polygon. Distance was " + distance);
-         assertTrue(polygonToCheck.isPointInside(new Point2D(point)), "Point " + point + " is not inside the polygon. Distance was " + distance);
+         assertTrue(distance < epsilon, "Point " + point + " is not inside the polygon. Distance was " + distance);
+         assertTrue(polygonToCheck.isPointInside(new Point2D(point), epsilon), "Point " + point + " is not inside the polygon. Distance was " + distance);
       }
    }
 
-   private static void assertPoint2DsInside(ConvexPolygon2DReadOnly polygonToCheck, List<Point2D> points)
+   private static void assertPoint2DsInside(ConvexPolygon2DReadOnly polygonToCheck, List<Point2D> points, double epsilon)
    {
       for (Point2D point : points)
       {
          double distance = polygonToCheck.signedDistance(point);
-         assertTrue(polygonToCheck.isPointInside(point, 1e-3), "Point " + point + " is not inside the polygon. Distance was " + distance);
-         assertTrue(distance < 1e-3, "Point " + point + " is not inside the polygon. Distance was " + distance);
+         if (!polygonToCheck.isPointInside(point, epsilon))
+            LogTools.info("crap");
+         assertTrue(polygonToCheck.isPointInside(point, epsilon), "Point " + point + " is not inside the polygon. Distance was " + distance);
+         assertTrue(distance < epsilon, "Point " + point + " is not inside the polygon. Distance was " + distance);
       }
    }
 
    private enum AlgorithmPhase
    {CHECKING_ALL_POINTS, UDPATING_CANDIDATE, UDPATING_QUERY, FINISHED_LOOP, REMOVED_ALL, RAN_THROUGH_ALL, UPDATING_PERIMETER}
+
    private static class GiftWrappingVisualizer implements SCS2YoGraphicHolder
    {
       private final SimulationConstructionSet2 scs2;
@@ -468,26 +493,20 @@ public class ConvexPolygon2DTest
       {
          this.algorithmPhase.set(algorithmPhase);
          scs2.simulateNow(1);
-         ThreadTools.sleep(100);
+         ThreadTools.sleep(10);
       }
 
       public void setPerimeter(List<? extends Point2DReadOnly> points, int pointsOnPerimeter)
       {
          perimeterSegments.forEach(LineSegment2DBasics::setToNaN);
+         perimeterPoints.forEach(Point2DBasics::setToNaN);
 
-         for (int i = 0; i < perimeterPoints.size(); i++)
+         for (int i = 0; i < Math.min(perimeterPoints.size(), pointsOnPerimeter); i++)
          {
-            if (i < pointsOnPerimeter)
+            perimeterPoints.get(i).set(points.get(i));
+            if (i > 0)
             {
-               perimeterPoints.get(i).set(points.get(i));
-               if (i > 0)
-               {
-                  perimeterSegments.get(i - 1).set(perimeterPoints.get(i - 1), perimeterPoints.get(i));
-               }
-            }
-            else
-            {
-               perimeterPoints.get(i).setToNaN();
+               perimeterSegments.get(i - 1).set(perimeterPoints.get(i - 1), perimeterPoints.get(i));
             }
          }
       }
@@ -506,7 +525,6 @@ public class ConvexPolygon2DTest
          this.queryIndex.set(queryIndex);
       }
 
-
       @Override
       public YoGraphicDefinition getSCS2YoGraphics()
       {
@@ -520,14 +538,13 @@ public class ConvexPolygon2DTest
                                                                            YoGraphicDefinitionFactory.DefaultPoint2DGraphic.CIRCLE);
 
             YoGraphicPoint2DDefinition perimeterPointViz = newYoGraphicPoint2D("perimeterPointViz " + i,
-                                                                           perimeterPoints.get(i),
-                                                                           0.004,
-                                                                           ColorDefinitions.DarkViolet(),
-                                                                           YoGraphicDefinitionFactory.DefaultPoint2DGraphic.CIRCLE_FILLED);
+                                                                               perimeterPoints.get(i),
+                                                                               0.004,
+                                                                               ColorDefinitions.DarkViolet(),
+                                                                               YoGraphicDefinitionFactory.DefaultPoint2DGraphic.CIRCLE_FILLED);
 
             group.addChild(pointCloudVid);
             group.addChild(perimeterPointViz);
-
          }
 
          for (int i = 0; i < perimeterSegments.size(); i++)
@@ -538,26 +555,23 @@ public class ConvexPolygon2DTest
             group.addChild(segmentViz);
          }
 
-
          YoGraphicPoint2DDefinition candidatePointViz = newYoGraphicPoint2D("CandidatePoint",
-                                                                        candidatePoint,
-                                                                        0.006,
-                                                                        ColorDefinitions.Green(),
-                                                                        YoGraphicDefinitionFactory.DefaultPoint2DGraphic.CIRCLE_CROSS);
-         YoGraphicLine2DDefinition candidateSegmentViz = newYoGraphicLineSegment2DDefinition("CandidateSegment",
-                                                                            candidateSegment,
-                                                                            ColorDefinitions.Green());
+                                                                            candidatePoint,
+                                                                            0.006,
+                                                                            ColorDefinitions.Green(),
+                                                                            YoGraphicDefinitionFactory.DefaultPoint2DGraphic.CIRCLE_CROSS);
+         YoGraphicLine2DDefinition candidateSegmentViz = newYoGraphicLineSegment2DDefinition("CandidateSegment", candidateSegment, ColorDefinitions.Green());
          YoGraphicPoint2DDefinition lastHullPointViz = newYoGraphicPoint2D("lastHullPoint",
-                                                                        lastHullPoint,
-                                                                        0.006,
-                                                                        ColorDefinitions.DarkViolet(),
-                                                                        YoGraphicDefinitionFactory.DefaultPoint2DGraphic.CIRCLE_FILLED);
+                                                                           lastHullPoint,
+                                                                           0.006,
+                                                                           ColorDefinitions.DarkViolet(),
+                                                                           YoGraphicDefinitionFactory.DefaultPoint2DGraphic.CIRCLE_FILLED);
 
          YoGraphicPoint2DDefinition queryPointViz = newYoGraphicPoint2D("queryPoint",
-                                                                            queryPoint,
-                                                                            0.006,
-                                                                            ColorDefinitions.Blue(),
-                                                                            YoGraphicDefinitionFactory.DefaultPoint2DGraphic.CIRCLE_CROSS);
+                                                                        queryPoint,
+                                                                        0.006,
+                                                                        ColorDefinitions.Blue(),
+                                                                        YoGraphicDefinitionFactory.DefaultPoint2DGraphic.CIRCLE_CROSS);
          group.addChild(candidatePointViz);
          group.addChild(candidateSegmentViz);
          group.addChild(lastHullPointViz);
@@ -566,5 +580,4 @@ public class ConvexPolygon2DTest
          return group;
       }
    }
-
 }
