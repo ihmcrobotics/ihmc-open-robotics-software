@@ -12,6 +12,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -20,6 +21,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.rdx.ui.graphics.RDXArmMultiBodyGraphic;
 import us.ihmc.rdx.ui.teleoperation.RDXIKSolverColors;
 import us.ihmc.robotModels.FullRobotModelUtils;
@@ -201,17 +203,31 @@ public class RDXVRArmStreaming
    {
       JointspaceTrajectoryMessage jointspaceTrajectoryMessage = new JointspaceTrajectoryMessage();
       jointspaceTrajectoryMessage.getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_STREAM);
+      jointspaceTrajectoryMessage.getJointTrajectoryMessages().clear();
 
       for (OneDoFJointBasics joint : desiredRobotArmJoints.get(side))
       {
-         OneDoFJointTrajectoryMessage oneDoFJointTrajectoryMessage = jointspaceTrajectoryMessage.getJointTrajectoryMessages().add();
-         oneDoFJointTrajectoryMessage.setWeight(-1.0);
-
-         TrajectoryPoint1DMessage trajectoryPoint1DMessage = oneDoFJointTrajectoryMessage.getTrajectoryPoints().add();
-         trajectoryPoint1DMessage.setTime(0.0);
-         trajectoryPoint1DMessage.setPosition(joint.getQ());
+         OneDoFJointTrajectoryMessage jointTrajectoryMessage = jointspaceTrajectoryMessage.getJointTrajectoryMessages().add();
+         jointTrajectoryMessage.getTrajectoryPoints().clear();
+         jointTrajectoryMessage.setWeight(50.0);
+         packTrajectoryPoint1DMessage(0.0,
+                                      getJointPosition(joint),
+                                      joint.getQd(),
+                                      jointTrajectoryMessage.getTrajectoryPoints().add());
       }
       return jointspaceTrajectoryMessage;
+   }
+
+   private double getJointPosition(OneDoFJointReadOnly joint)
+   {
+      return MathTools.clamp(joint.getQ(), joint.getJointLimitLower(), joint.getJointLimitUpper());
+   }
+
+   private void packTrajectoryPoint1DMessage(double time, double position, double velocity, TrajectoryPoint1DMessage messageToPack)
+   {
+      messageToPack.setTime(time);
+      messageToPack.setPosition(position);
+      messageToPack.setVelocity(velocity);
    }
 
    public void enable(boolean enable)

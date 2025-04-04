@@ -137,7 +137,7 @@ public class FootstepStreamingToolboxParameters
       kpYaw = 0.5;
       yawVelocityScalingFactor = 0.5;
 
-      minDistanceToStance = 0.15;
+      minDistanceToStance = 0.18;
       maxDistanceToStance = 0.6;
       minYawToStanceDegrees = 0.0;
       maxYawToStanceDegrees = 90.0;
