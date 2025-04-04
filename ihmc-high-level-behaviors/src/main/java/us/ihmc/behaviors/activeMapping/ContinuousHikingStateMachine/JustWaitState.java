@@ -12,6 +12,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.behaviors.activeMapping.ActiveMappingParameterToolBox;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
+import us.ihmc.behaviors.activeMapping.TerrainPlanningDebugger;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.commons.thread.ThreadTools;
@@ -62,6 +63,7 @@ public class JustWaitState implements State
    private final FootstepPlannerLogger logger;
    private boolean isDone;
    private final FootstepPlanningModule footstepPlanner;
+   private final TerrainPlanningDebugger terrainPlanningDebugger;
    private final DefaultFootstepPlannerParametersBasics footstepPlannerParameters;
    private final SwingPlannerParametersBasics swingPlannerParameters;
    private final Supplier<HeightMapData> heightMapData;
@@ -72,13 +74,13 @@ public class JustWaitState implements State
    private final MovingReferenceFrame midFeetZUpFrame;
    private final FramePose3D startPose = new FramePose3D();
    private final FootstepSnapAndWiggler footstepSnapAndWiggler;
-   private boolean prepareSquareUpStep;
 
    public JustWaitState(DRCRobotModel robotModel,
                         ROS2Helper ros2Helper,
                         ROS2SyncedRobotModel syncedRobot,
                         AtomicReference<ContinuousHikingCommandMessage> commandMessage,
                         ControllerFootstepQueueMonitor controllerQueueMonitor,
+                        TerrainPlanningDebugger terrainPlanningDebugger,
                         ActiveMappingParameterToolBox activeMappingParameterToolBox,
                         Supplier<HeightMapData> heightMapData,
                         Supplier<TerrainMapData> terrainMapData)
@@ -89,6 +91,7 @@ public class JustWaitState implements State
       this.controllerQueueMonitor = controllerQueueMonitor;
 
       footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel);
+      this.terrainPlanningDebugger = terrainPlanningDebugger;
       logger = new FootstepPlannerLogger(footstepPlanner);
 
       this.continuousHikingParameters = activeMappingParameterToolBox.getContinuousHikingParameters();
@@ -117,7 +120,8 @@ public class JustWaitState implements State
 
       if (continuousHikingCommandMessage.getSquareUpToGoal() && !controllerQueueMonitor.getControllerFootstepQueue().isEmpty())
       {
-         prepareSquareUpStep = true;
+         squareUpStep();
+         terrainPlanningDebugger.resetVisualizationForUIPublisher();
       }
 
       isDone = false;
@@ -130,18 +134,11 @@ public class JustWaitState implements State
       {
          isDone = true;
       }
-
-      if (controllerQueueMonitor.getControllerFootstepQueue().size() < 2 && prepareSquareUpStep)
-      {
-         prepareSquareUpStep = false;
-         squareUpStep();
-      }
    }
 
    @Override
    public void onExit(double timeInState)
    {
-      prepareSquareUpStep = false;
    }
 
    @Override
@@ -295,21 +292,21 @@ public class JustWaitState implements State
       environmentHandler.setHeightMap(heightMapData.get());
       environmentHandler.setTerrainMapData(terrainMapData.get());
 
-      FramePose3DReadOnly lastStepInQueue;
+      FramePose3DReadOnly firstStepInQueue;
       PlannedFootstep squareUpStep = null;
       ReferenceFrame leftFootFrame = syncedRobot.getReferenceFrames().getFootFrame(RobotSide.LEFT);
       ReferenceFrame rightFootFrame = syncedRobot.getReferenceFrames().getFootFrame(RobotSide.RIGHT);
 
       if (controllerQueueMonitor.getNumberOfIncompleteFootsteps() > 0)
       {
-         lastStepInQueue = controllerQueueMonitor.getLastFootstepInQueue();
+         firstStepInQueue = controllerQueueMonitor.getFirstFootstepInQueue();
          List<QueuedFootstepStatusMessage> controllerFootstepQueue = controllerQueueMonitor.getControllerFootstepQueue();
 
          RobotSide robotSide = RobotSide.fromByte(controllerFootstepQueue.get(controllerFootstepQueue.size() - 1).getRobotSide());
 
          if (robotSide == RobotSide.LEFT)
          {
-            tempFramePose.set(lastStepInQueue);
+            tempFramePose.set(firstStepInQueue);
             tempFramePose.changeFrame(leftFootFrame);
             tempFramePose.getTranslation().addY(-footstepPlannerParameters.getIdealFootstepWidth());
             tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
@@ -318,7 +315,7 @@ public class JustWaitState implements State
          }
          else if (robotSide == RobotSide.RIGHT)
          {
-            tempFramePose.set(lastStepInQueue);
+            tempFramePose.set(firstStepInQueue);
             tempFramePose.changeFrame(rightFootFrame);
             tempFramePose.getTranslation().addY(footstepPlannerParameters.getIdealFootstepWidth());
             tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
@@ -345,24 +342,24 @@ public class JustWaitState implements State
          return;
 
       //TODO, set the translation but don't worry about the orientation, it should be good enough to stand when stepping there.
-//      DiscreteFootstep footstep = new DiscreteFootstep(squareUpStep.getFootstepPose().getX(), squareUpStep.getFootstepPose().getY());
-//      footstepSnapAndWiggler.snapFootstep(footstep);
-//
-//      squareUpStep.getFootstepPose().setZ(0.0);
-//      squareUpStep.getFootstepPose().applyTransform(footstep.getSnapData().getSnapTransform());
+      //      DiscreteFootstep footstep = new DiscreteFootstep(squareUpStep.getFootstepPose().getX(), squareUpStep.getFootstepPose().getY());
+      //      footstepSnapAndWiggler.snapFootstep(footstep);
+      //
+      //      squareUpStep.getFootstepPose().setZ(0.0);
+      //      squareUpStep.getFootstepPose().applyTransform(footstep.getSnapData().getSnapTransform());
 
       // Set Pitch and Roll to Zero, not expecting some crazy orientation
-//      ReferenceFrame referenceFrame = squareUpStep.getFootstepPose().getReferenceFrame();
-//      squareUpStep.getFootstepPose().changeFrame(ReferenceFrame.getWorldFrame());
-//      squareUpStep.getFootstepPose().getOrientation().setToPitchOrientation(-0.6);
-//      squareUpStep.getFootstepPose().getOrientation().setToRollOrientation(0.3);
-//      squareUpStep.getFootstepPose().getOrientation().setToYawOrientation(0.43);
-//      squareUpStep.getFootstepPose().changeFrame(referenceFrame);
+      //      ReferenceFrame referenceFrame = squareUpStep.getFootstepPose().getReferenceFrame();
+      //      squareUpStep.getFootstepPose().changeFrame(ReferenceFrame.getWorldFrame());
+      //      squareUpStep.getFootstepPose().getOrientation().setToPitchOrientation(-0.6);
+      //      squareUpStep.getFootstepPose().getOrientation().setToRollOrientation(0.3);
+      //      squareUpStep.getFootstepPose().getOrientation().setToYawOrientation(0.43);
+      //      squareUpStep.getFootstepPose().changeFrame(referenceFrame);
 
       FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
       footstepDataListMessage.setDefaultSwingDuration(continuousHikingParameters.getSwingTime());
       footstepDataListMessage.setDefaultTransferDuration(continuousHikingParameters.getTransferTime());
-      footstepDataListMessage.getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_QUEUE);
+      footstepDataListMessage.getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_OVERRIDE);
       footstepDataListMessage.setOffsetFootstepsHeightWithExecutionError(true);
       footstepDataListMessage.getFootstepDataList().add().set(squareUpStep.getAsMessage());
 
