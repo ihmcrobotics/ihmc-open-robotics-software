@@ -5,11 +5,8 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.AbortWalkingMessage;
-import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.CenterOfMassTrajectoryMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
-import ihmc_common_msgs.msg.dds.EuclideanTrajectoryPointMessage;
 import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
@@ -17,17 +14,14 @@ import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.packets.ExecutionMode;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.perception.gpuHeightMap.CUDAFootstepOptimizer;
@@ -75,8 +69,6 @@ public class RDXVRFootstepPlacement
    private LocomotionParameters locomotionParameters;
    private double stepStartTime = -1.0;
 
-//   private final FootstepDataListMessage messageList = new FootstepDataListMessage();
-//   private final FramePose3D secondFootstepPose = new FramePose3D();
    private final AtomicBoolean consecutiveStepping = new AtomicBoolean(false);
    private final SteppingParameters steppingParameters;
 
@@ -244,29 +236,6 @@ public class RDXVRFootstepPlacement
       }
    }
 
-   public void prepareStep(RobotSide side)
-   {
-      FootstepDataListMessage messageList = new FootstepDataListMessage();
-      FramePose3D leftSole = new FramePose3D(syncedRobot.getReferenceFrames().getSoleFrame(side));
-      leftSole.changeFrame(ReferenceFrame.getWorldFrame());
-      messageList.getFootstepDataList().clear();
-      messageList.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
-      messageList.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
-      messageList.setOffsetFootstepsHeightWithExecutionError(true);
-      messageList.setDefaultTransferDuration(2.0);
-      messageList.setDefaultSwingDuration(0.8);
-      messageList.setFinalTransferDuration(locomotionParameters.getFinalTransferTime());
-      messageList.setAreFootstepsAdjustable(locomotionParameters.getAreFootstepsAdjustable());
-      // Add first footstep
-      FootstepDataMessage footstepDataMessage = messageList.getFootstepDataList().add();
-      footstepDataMessage.setSequenceId(sequenceId++);
-      footstepDataMessage.setRobotSide(side.toByte());
-      footstepDataMessage.getLocation().set(leftSole.getPosition());
-      footstepDataMessage.getOrientation().set(leftSole.getOrientation());
-      footstepDataMessage.setTrajectoryType(TrajectoryType.DEFAULT.toByte());
-      controllerHelper.publishToController(messageList);
-   }
-
    public void sendStep(boolean activeAdjustment)
    {
       FootstepDataListMessage messageList = new FootstepDataListMessage();
@@ -317,30 +286,12 @@ public class RDXVRFootstepPlacement
          messageList.setDefaultTransferDuration(syncedRobot.getRobotModel().getWalkingControllerParameters().getDefaultTransferTime());
       }
 
-      // Add first footstep
-      FootstepDataMessage footstepDataMessage1 = messageList.getFootstepDataList().add();
-      footstepDataMessage1.setSequenceId(sequenceId++);
-      footstepDataMessage1.setRobotSide(footstepBeingExternallyPlaced.getSide().toByte());
-      footstepDataMessage1.getLocation().set(footstepBeingExternallyPlaced.getPose().getPosition());
-      footstepDataMessage1.getOrientation().set(footstepBeingExternallyPlaced.getPose().getOrientation());
-      footstepDataMessage1.setTrajectoryType(TrajectoryType.DEFAULT.toByte());
-
-//      if (consecutiveStepping.get() && !USE_STEPPABLE_REGION_ADAPTATION)
-//      {
-//         // Add second footstep
-//         RobotSide footstep2Side = footstepBeingExternallyPlaced.getSide().getOppositeSide();
-//         secondFootstepPose.set(footstepBeingExternallyPlaced.getPose());
-//         Vector3DBasics positionOtherFoot = syncedRobot.getReferenceFrames().getSoleFrame(footstep2Side).getTransformToWorldFrame().getTranslation();
-//         secondFootstepPose.getPosition().setX(positionOtherFoot.getX());
-//         secondFootstepPose.getPosition().setY(positionOtherFoot.getY());
-//
-//         FootstepDataMessage footstepDataMessage2 = messageList.getFootstepDataList().add();
-//         footstepDataMessage2.setSequenceId(sequenceId++);
-//         footstepDataMessage2.setRobotSide(footstep2Side.toByte());
-//         footstepDataMessage2.getLocation().set(secondFootstepPose.getPosition());
-//         footstepDataMessage2.getOrientation().set(secondFootstepPose.getOrientation());
-//         footstepDataMessage2.setTrajectoryType(TrajectoryType.DEFAULT.toByte());
-//      }
+      FootstepDataMessage footstepDataMessage = messageList.getFootstepDataList().add();
+      footstepDataMessage.setSequenceId(sequenceId++);
+      footstepDataMessage.setRobotSide(footstepBeingExternallyPlaced.getSide().toByte());
+      footstepDataMessage.getLocation().set(footstepBeingExternallyPlaced.getPose().getPosition());
+      footstepDataMessage.getOrientation().set(footstepBeingExternallyPlaced.getPose().getOrientation());
+      footstepDataMessage.setTrajectoryType(TrajectoryType.DEFAULT.toByte());
 
       RDXBaseUI.pushNotification("Commanding %d footsteps...".formatted(messageList.getFootstepDataList().size()));
       controllerHelper.publishToController(messageList);
@@ -437,40 +388,5 @@ public class RDXVRFootstepPlacement
    public void destroy()
    {
       footstepOptimizer.close();
-   }
-
-   public void shiftCoM(RobotSide slideDirection, HumanoidReferenceFrames referenceFrames)
-   {
-      referenceFrames.updateFrames();
-
-      FramePose3D currentCoM = new FramePose3D(referenceFrames.getCenterOfMassFrame());
-      currentCoM.changeFrame(ReferenceFrame.getWorldFrame());
-
-      FramePose3D desiredCoM = new FramePose3D(referenceFrames.getSoleFrame(slideDirection));
-      desiredCoM.setY(slideDirection.negateIfLeftSide(steppingParameters.getFootWidth()));
-      desiredCoM.changeFrame(ReferenceFrame.getWorldFrame());
-
-      CenterOfMassTrajectoryMessage centerOfMassTrajectoryMessage = new CenterOfMassTrajectoryMessage();
-      EuclideanTrajectoryPointMessage c0 = centerOfMassTrajectoryMessage.getEuclideanTrajectory().getTaskspaceTrajectoryPoints().add();
-      EuclideanTrajectoryPointMessage c1 = centerOfMassTrajectoryMessage.getEuclideanTrajectory().getTaskspaceTrajectoryPoints().add();
-      EuclideanTrajectoryPointMessage c2 = centerOfMassTrajectoryMessage.getEuclideanTrajectory().getTaskspaceTrajectoryPoints().add();
-
-      c0.getPosition().set(currentCoM.getPosition());
-      c1.getPosition().set(desiredCoM.getPosition());
-      c2.getPosition().set(desiredCoM.getPosition());
-
-      c0.setTime(0.0);
-      c1.setTime(0.1);
-      c2.setTime(20.0);
-
-      long frameId = MessageTools.toFrameId(ReferenceFrame.getWorldFrame());
-      centerOfMassTrajectoryMessage.getEuclideanTrajectory().getFrameInformation().setDataReferenceFrameId(frameId);
-      centerOfMassTrajectoryMessage.getEuclideanTrajectory().getFrameInformation().setTrajectoryReferenceFrameId(frameId);
-      centerOfMassTrajectoryMessage.getEuclideanTrajectory().getSelectionMatrix().setXSelected(true);
-      centerOfMassTrajectoryMessage.getEuclideanTrajectory().getSelectionMatrix().setYSelected(true);
-      centerOfMassTrajectoryMessage.getEuclideanTrajectory().getSelectionMatrix().setZSelected(false);
-
-      LogTools.info("Publishing CoM message. Approaching {} foot", slideDirection.toString());
-      controllerHelper.publishToController(centerOfMassTrajectoryMessage);
    }
 }
