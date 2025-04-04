@@ -390,35 +390,15 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       // Here we check against null rather then .isConnected() because if the controller is unplugged, that method won't work
       boolean controllerConnected = joystickController != null;
 
-      // The following logic determines how the Continuous Hiking State Machine will be started.
-      // This can be with buttons pressed on the keyboard, or with an XBox One Controller
-      if (ImGui.getIO().getKeyCtrl() && ImGui.getIO().getKeyShift())
-      {
-         publishStartContinuousHiking(true, false);
-      }
-      else if ((ImGui.isKeyDown(ImGuiTools.getLeftArrowKey()) || ImGui.isKeyDown(ImGuiTools.getRightArrowKey())) && ImGui.getIO().getKeyShift())
-      {
-         publishContinuousHikingCommandSideStepEnabled(ImGui.isKeyDown(ImGuiTools.getLeftArrowKey()));
-      }
-      else if (controllerConnected)
+      if (controllerConnected)
       {
          performJoystickControllerAction(joystickController);
       }
 
-      // Pressing this key will stop Continuous Hiking
-      // We allow for options for both stopping on the next step, and stopping when the queue expires, so a few more steps
-      if (ImGui.getIO().getKeyAlt())
-      {
-         publishStopContinuousHiking(squareUpToGoal.get());
-      }
-      else if (ImGui.isKeyPressed(ImGuiTools.getEscapeKey()))
-      {
-         publishStopContinuousHiking(false);
-      }
-
-      if (controllerFootstepQueueMonitorUI.pollRobotFalling())
+      if (controllerFootstepQueueMonitorUI.pollRobotFalling() || controllerFootstepQueueMonitorUI.pollIsWalkingPaused())
       {
          enableContinuousHiking.set(false);
+         publishStopContinuousHiking(false);
       }
    }
 
