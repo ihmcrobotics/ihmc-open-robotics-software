@@ -26,7 +26,6 @@ import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.scs2.simulation.collision.Collidable;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
-import us.ihmc.sensors.realsense.RealSenseDevice;
 
 import java.time.Instant;
 import java.util.List;
@@ -71,9 +70,7 @@ public class RapidHeightMapManager
       robotCollidables = robotCollisionModel.getRobotCollidables(robotModel.getRootBody());
       bodyCollisionFilter = new CUDABodyCollisionFilter();
 
-      deviceDepthImage = new GpuMat(depthImageIntrinsics.getHeight(),
-                                    depthImageIntrinsics.getWidth(),
-                                    opencv_core.CV_16UC1);
+      deviceDepthImage = new GpuMat(depthImageIntrinsics.getHeight(), depthImageIntrinsics.getWidth(), opencv_core.CV_16UC1);
       rapidHeightMapExtractor = new RapidHeightMapExtractorCUDA(leftFootSoleFrame,
                                                                 rightFootSoleFrame,
                                                                 deviceDepthImage,
@@ -89,22 +86,17 @@ public class RapidHeightMapManager
       ros2Node.createSubscription2(PerceptionAPI.RESET_HEIGHT_MAP, message -> resetHeightMapRequested.set());
       if (robotModel != null)
       {
-         ros2Node.createSubscription(HumanoidControllerAPI.getTopic(HighLevelStateChangeStatusMessage.class, robotName),
-                                     message ->
-                                     {
-                                        if (message.takeNextData().getEndHighLevelControllerName()
-                                            == HighLevelStateChangeStatusMessage.WALKING)
-                                        {
-                                           resetHeightMapRequested.set();
-                                        }
-                                     });
+         ros2Node.createSubscription(HumanoidControllerAPI.getTopic(HighLevelStateChangeStatusMessage.class, robotName), message ->
+         {
+            if (message.takeNextData().getEndHighLevelControllerName() == HighLevelStateChangeStatusMessage.WALKING)
+            {
+               resetHeightMapRequested.set();
+            }
+         });
       }
    }
 
-   public void update(Mat latestDepthImage,
-                      Instant imageAcquisitionTime,
-                      ReferenceFrame cameraFrame,
-                      ReferenceFrame cameraZUpFrame) throws Exception
+   public void update(Mat latestDepthImage, Instant imageAcquisitionTime, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame) throws Exception
    {
       RigidBodyTransform sensorToWorld = cameraFrame.getTransformToWorldFrame();
       RigidBodyTransform sensorToGround = cameraFrame.getTransformToDesiredFrame(cameraZUpFrame);
@@ -122,8 +114,7 @@ public class RapidHeightMapManager
          latestDepthImage.convertTo(hostDepthImage, opencv_core.CV_16UC1);
       }
 
-      deviceDepthImage.upload(hostDepthImage);
-      bodyCollisionFilter.process(deviceDepthImage, depthImageIntrinsics, robotCollidables, cameraFrame);
+      bodyCollisionFilter.process(hostDepthImage, deviceDepthImage, depthImageIntrinsics, robotCollidables, cameraFrame);
       if (resetHeightMapRequested.poll())
       {
          rapidHeightMapExtractor.reset();

@@ -14,9 +14,7 @@ import us.ihmc.scs2.simulation.collision.Collidable;
 import java.net.URL;
 import java.util.List;
 
-import static org.bytedeco.cuda.global.cudart.cudaFreeAsync;
 import static org.bytedeco.cuda.global.cudart.cudaStreamSynchronize;
-import static org.bytedeco.opencv.global.opencv_core.CV_16UC1;
 
 public class CUDABodyCollisionFilter
 {
@@ -26,7 +24,6 @@ public class CUDABodyCollisionFilter
    private final CUDAKernel kernel;
    private final CUstream_st stream;
 
-   private GpuMat collisionResults;
    private int numberOfCollidables;
    private int numberOfAttributes = 7;
 
@@ -54,13 +51,14 @@ public class CUDABodyCollisionFilter
       }
    }
 
-   public void process(GpuMat latestDepthImage, CameraIntrinsics cameraIntrinsics, List<Collidable> robotCollidables, ReferenceFrame cameraFrame)
+   public void process(Mat hostDepthImage,
+                       GpuMat latestDepthImage,
+                       CameraIntrinsics cameraIntrinsics,
+                       List<Collidable> robotCollidables,
+                       ReferenceFrame cameraFrame)
    {
-      if (collisionResults != null)
-      {
-         collisionResults.release();
-         collisionResults = null;
-      }
+      GpuMat originalDepthImage = new GpuMat();
+      originalDepthImage.upload(hostDepthImage);
 
       numberOfCollidables = countCapsules(robotCollidables);
 
@@ -77,24 +75,22 @@ public class CUDABodyCollisionFilter
       CUDATools.mallocAsync(deviceCollidableGeometryPointer, dataSize, stream);
       CUDATools.memcpyAsync(deviceCollidableGeometryPointer, collidableGeometryPointer, dataSize, stream);
 
-      collisionResults = new GpuMat(latestDepthImage.rows(), latestDepthImage.cols(), CV_16UC1);
-
       dim3 blockSize = new dim3(BLOCK_SIZE_XY, BLOCK_SIZE_XY, 1);
 
-      int gridSizeX = (latestDepthImage.cols() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
-      int gridSizeY = (latestDepthImage.rows() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
+      int gridSizeX = (originalDepthImage.cols() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
+      int gridSizeY = (originalDepthImage.rows() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
       dim3 gridSize = new dim3(gridSizeX, gridSizeY, 1);
 
-      kernel.withPointer(latestDepthImage.data());
-      kernel.withLong(latestDepthImage.step());
-      kernel.withInt(latestDepthImage.cols());
-      kernel.withInt(latestDepthImage.rows());
+      kernel.withPointer(originalDepthImage.data());
+      kernel.withLong(originalDepthImage.step());
+      kernel.withInt(originalDepthImage.cols());
+      kernel.withInt(originalDepthImage.rows());
       kernel.withFloat((float) cameraIntrinsics.getFx());
       kernel.withFloat((float) cameraIntrinsics.getFy());
       kernel.withFloat((float) cameraIntrinsics.getCx());
       kernel.withFloat((float) cameraIntrinsics.getCy());
-      kernel.withPointer(collisionResults.data());
-      kernel.withLong(collisionResults.step());
+      kernel.withPointer(latestDepthImage.data());
+      kernel.withLong(latestDepthImage.step());
       kernel.withPointer(deviceCollidableGeometryPointer);
       kernel.withInt(numberOfCollidables);
       kernel.withInt(numberOfAttributes);
@@ -104,17 +100,18 @@ public class CUDABodyCollisionFilter
       CUDATools.checkCUDAError(error);
 
       Mat hostResults = new Mat();
-      collisionResults.download(hostResults);
+      latestDepthImage.download(hostResults);
       PerceptionDebugTools.displayDepth("mask", hostResults, 1);
 
       Mat hostDepth = new Mat();
-      latestDepthImage.download(hostDepth);
+      originalDepthImage.download(hostDepth);
       PerceptionDebugTools.displayDepth("depth", hostDepth, 1);
 
       blockSize.close();
       gridSize.close();
       collidableGeometryPointer.close();
       deviceCollidableGeometryPointer.close();
+      originalDepthImage.close();
    }
 
    private int countCapsules(List<Collidable> robotCollidables)
@@ -162,11 +159,6 @@ public class CUDABodyCollisionFilter
 
    public void close()
    {
-      if (collisionResults != null)
-      {
-         CUDATools.checkCUDAError(cudaFreeAsync(collisionResults.data(), stream));
-         collisionResults.release();
-      }
       kernel.close();
       program.close();
       CUDAStreamManager.releaseStream(stream);

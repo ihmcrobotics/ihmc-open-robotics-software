@@ -51,7 +51,7 @@ __device__ bool isPointInCapsule(float3 point,
     dist.z = point.z - closestPointOnAxis.z;
 
     float distSq = dot(dist, dist);
-    return distSq <= radius * radius;
+    return distSq <= (radius + 0.1) * (radius + 0.1);
 }
 
 extern "C" __global__ void checkBodyCollision(unsigned short* depthImage,
@@ -77,7 +77,7 @@ extern "C" __global__ void checkBodyCollision(unsigned short* depthImage,
     unsigned short depthValue = *row(col(depthImage, x), depthImagePitch, y);
     if (depthValue == 0)
     {
-        *row(col(collisionMask, x), collisionMaskPitch, y) = 0; // Set to 0 (integer)
+        *row(col(collisionMask, x), collisionMaskPitch, y) = 0;
         return;
     }
 
@@ -86,7 +86,7 @@ extern "C" __global__ void checkBodyCollision(unsigned short* depthImage,
                                           -(x - cx) / fx * depthInMeters,
                                          -(y - cy) / fy * depthInMeters);
 
-    *row(col(collisionMask, x), collisionMaskPitch, y) = 0;
+    *row(col(collisionMask, x), collisionMaskPitch, y) = depthValue;
 
     for (int i = 0; i < numCollidables; ++i)
     {
@@ -106,7 +106,7 @@ extern "C" __global__ void checkBodyCollision(unsigned short* depthImage,
 
         if (isPointInCapsule(depthFramePoint, topCenter, bottomCenter, radius))
         {
-            *row(col(collisionMask, x), collisionMaskPitch, y) = 255; // Set to 255 (integer)
+            *row(col(collisionMask, x), collisionMaskPitch, y) = 0;
             return; // No need to check other capsules if a collision is found
         }
     }
