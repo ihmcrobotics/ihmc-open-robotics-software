@@ -99,13 +99,13 @@ public class CUDABodyCollisionFilter
       int error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
 
-      Mat hostResults = new Mat();
-      latestDepthImage.download(hostResults);
-      PerceptionDebugTools.displayDepth("mask", hostResults, 1);
-
-      Mat hostDepth = new Mat();
-      originalDepthImage.download(hostDepth);
-      PerceptionDebugTools.displayDepth("depth", hostDepth, 1);
+//      Mat hostResults = new Mat();
+//      latestDepthImage.download(hostResults);
+//      PerceptionDebugTools.displayDepth("mask", hostResults, 1);
+//
+//      Mat hostDepth = new Mat();
+//      originalDepthImage.download(hostDepth);
+//      PerceptionDebugTools.displayDepth("depth", hostDepth, 1);
 
       blockSize.close();
       gridSize.close();
