@@ -110,6 +110,19 @@ public class ControllerFootstepQueueMonitor
    /**
     * This method assumes the list is not empty; you need to check outside this method that the list has at least one in it
     */
+   public FramePose3DReadOnly getFirstFootstepInQueue()
+   {
+      FramePose3D previousFootstepPose = new FramePose3D();
+
+      previousFootstepPose.getPosition().set(controllerQueue.get(0).getLocation());
+      previousFootstepPose.getRotation().setToYawOrientation(controllerQueue.get(0).getOrientation().getYaw());
+
+      return previousFootstepPose;
+   }
+
+   /**
+    * This method assumes the list is not empty; you need to check outside this method that the list has at least one in it
+    */
    public FramePose3DReadOnly getLastFootstepInQueue()
    {
       FramePose3D previousFootstepPose = new FramePose3D();
