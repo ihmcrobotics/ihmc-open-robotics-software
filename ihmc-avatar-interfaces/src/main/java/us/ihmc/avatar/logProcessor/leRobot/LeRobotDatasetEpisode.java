@@ -9,6 +9,7 @@ import org.bytedeco.opencv.opencv_core.Size;
 import org.bytedeco.opencv.opencv_videoio.VideoWriter;
 import us.ihmc.avatar.scs2.SCS2LogSessionWithVideo;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.session.log.ZEDSVOScrubber;
@@ -47,7 +48,7 @@ public class LeRobotDatasetEpisode
       this.dataChunk0Path = dataChunk0Path;
       this.zedVideoDirs = zedVideoDirs;
 
-      episodeName = "episode_%6d".formatted(episodeIndex);
+      episodeName = "episode_%06d".formatted(episodeIndex);
    }
 
    public void startGeneratingEpisode(SCS2LogSessionWithVideo session)
@@ -67,6 +68,8 @@ public class LeRobotDatasetEpisode
 
       int inPoint = session.getBufferProperties().getInPoint();
       int outPoint = session.getBufferProperties().getOutPoint();
+      double sessionDTSeconds = session.getSessionDTSeconds();
+      LogTools.info("dt: {}", sessionDTSeconds);
 
       // TODO: merely start the mp4 export
       //      LeRobotDatasetTools.extractMP4FromZED(zedSVOScrubber);
@@ -99,54 +102,67 @@ public class LeRobotDatasetEpisode
 
             VideoWriter videoWriter = new VideoWriter();
 
-            int fourcc = VideoWriter.fourcc((byte) 'A', (byte) 'V', (byte) '0', (byte) '1');
+//            int fourcc = VideoWriter.fourcc((byte) 'A', (byte) 'V', (byte) '0', (byte) '1');
+            int fourcc = VideoWriter.fourcc((byte) 'M', (byte) 'J', (byte) 'P', (byte) 'G');
 
             //      opencv_imgproc.cvtColor(bgrFrame, yuvFrame, cv::COLOR_BGR2YUV_I420);
 
             Size frameSize = new Size(imageWidth, imageHeight);
             boolean isColor = true;
             double fps = 50.0;
-            videoWriter.open(mp4Path.toString(), fourcc, fps, frameSize, isColor);
+            boolean success = videoWriter.open(mp4Path.toString(), fourcc, fps, frameSize, isColor);
+            if (!success)
+               LogTools.error("Failed to open video writer for: {}", mp4Path.toString());
+            else
+               LogTools.info("Opened video writer for: {}", mp4Path.toString());
+
             frameSize.close();
 
             videoWriters.put(side, videoWriter);
          }
 
-         int numberOfFrames = outPoint - inPoint; // TODO: Reduce to FPS - data rate
+         int numberOfFrames = outPoint - inPoint;
          for (int i = 0; i < numberOfFrames; i++)
          {
             session.playbackTick();
 
-            long timestamp = yoTimestamp.getLongValue();
-            zedSVOScrubber.scrub(timestamp);
-
-            for (RobotSide side : RobotSide.values)
+            if (i % 100 == 0) // TODO: Reduce to FPS - data rate
             {
-               Pointer zedColorImageSLMatPointer = side == RobotSide.LEFT ? zedSVOScrubber.getLeftColorImageSlMatPointer()
-                                                                          : zedSVOScrubber.getRightColorImageSlMatPointer();
-               Mat bgra8Mat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC4, // BGRA8
-                                      sl_mat_get_ptr(zedColorImageSLMatPointer, SL_MEM_CPU),
-                                      sl_mat_get_step_bytes(zedColorImageSLMatPointer, SL_MEM_CPU));
+               long timestamp = yoTimestamp.getLongValue();
+               zedSVOScrubber.scrub(timestamp);
 
-               // Resize smaller for better transformer training
-               Size size = new Size(853, 480);
-               Mat resized = new Mat(size.height(), size.width(), opencv_core.CV_8UC4);
-               opencv_imgproc.resize(bgra8Mat, resized, size);
-               size.close();
-
-               // TODO: Crop the sides off to 640x480?
-
-               VideoWriter videoWriter = videoWriters.get(side);
-
-               if (videoWriter.isOpened())
+               for (RobotSide side : RobotSide.values)
                {
-                  videoWriter.write(resized);
+                  Pointer zedColorImageSLMatPointer =
+                        side == RobotSide.LEFT ? zedSVOScrubber.getLeftColorImageSlMatPointer() : zedSVOScrubber.getRightColorImageSlMatPointer();
+                  Mat bgra8Mat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC4, // BGRA8
+                                         sl_mat_get_ptr(zedColorImageSLMatPointer, SL_MEM_CPU), sl_mat_get_step_bytes(zedColorImageSLMatPointer, SL_MEM_CPU));
+
+                  // Resize smaller for better transformer training
+                  Size size = new Size(853, 480);
+                  Mat resized = new Mat(size.height(), size.width(), opencv_core.CV_8UC4);
+                  opencv_imgproc.resize(bgra8Mat, resized, size);
+                  size.close();
+
+                  // TODO: Crop the sides off to 640x480?
+
+                  VideoWriter videoWriter = videoWriters.get(side);
+
+                  if (videoWriter.isOpened())
+                  {
+                     videoWriter.write(resized);
+                  }
+
+                  resized.close();
                }
-
             }
-
-
          }
+
+         for (RobotSide side : RobotSide.values)
+         {
+            videoWriters.get(side).release();
+         }
+
       }, getClass().getSimpleName());
    }
 
