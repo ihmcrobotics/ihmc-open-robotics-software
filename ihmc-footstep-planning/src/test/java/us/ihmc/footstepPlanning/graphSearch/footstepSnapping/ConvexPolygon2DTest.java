@@ -11,8 +11,10 @@ import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tools.TupleTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -42,7 +44,7 @@ import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.*;
 
 public class ConvexPolygon2DTest
 {
-
+   private static final boolean visualize = false;
    static final double EPSILON = 1.0e-7;
 
    @Test
@@ -55,10 +57,9 @@ public class ConvexPolygon2DTest
       points.add(new Point2D(0.1, 0.1));
       points.add(new Point2D(0.2, 0.2));
 
-      GiftWrappingVisualizer visualizer = new GiftWrappingVisualizer(points.size());
+      GiftWrappingVisualizer visualizer = visualize ? new GiftWrappingVisualizer(points.size()) : null;
       int numberOfPoints = inPlaceGiftWrapConvexHull2D(visualizer, points, points.size());
       assertEquals(points.size(), numberOfPoints);
-      ThreadTools.sleepForever();
    }
 
    @Test
@@ -125,17 +126,16 @@ public class ConvexPolygon2DTest
                                                                                return new Point2D(transformedPoint);
                                                                             }).collect(Collectors.toList());
 
-      GiftWrappingVisualizer visualizer = new GiftWrappingVisualizer(footPointsInFoot.size());
+      GiftWrappingVisualizer visualizer = visualize ? new GiftWrappingVisualizer(footPointsInFoot.size()) : null;
       ConvexPolygon2D polygon2D = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(footPointsInFoot));
       inPlaceGiftWrapConvexHull2D(visualizer, footPointsInFoot, footPointsInFoot.size());
       assertPoint2DsInside(visualizer, polygon2D, footPointsInFoot, 1e-7);
-
-      ThreadTools.sleepForever();
    }
 
    public static int inPlaceGiftWrapConvexHull2D(GiftWrappingVisualizer visualizer, List<? extends Point2DReadOnly> vertices, int numberOfVertices)
    {
-      visualizer.setPointCloud(vertices, numberOfVertices);
+      if (visualizer != null)
+         visualizer.setPointCloud(vertices, numberOfVertices);
 
       if (numberOfVertices == 0)
          return 0;
@@ -148,7 +148,8 @@ public class ConvexPolygon2DTest
        * candidates is chosen.
        */
       Collections.swap(vertices, findMinXMaxYVertexIndex(vertices, numberOfVertices), 0);
-      visualizer.setPointCloud(vertices, numberOfVertices);
+      if (visualizer != null)
+         visualizer.setPointCloud(vertices, numberOfVertices);
 
       Point2DReadOnly firstVertex = vertices.get(0);
 
@@ -158,53 +159,95 @@ public class ConvexPolygon2DTest
       while (lastHullVertexIndex < numberOfVertices - 1)
       {
          Point2DReadOnly lastHullVertex = vertices.get(lastHullVertexIndex);
-         visualizer.setLastHullVertexIndex(lastHullVertexIndex);
+         if (visualizer != null)
+            visualizer.setLastHullVertexIndex(lastHullVertexIndex);
 
          // Index to keep track of the potential next vertex of the polygon.
          int candidateIndex = lastHullVertexIndex + 1;
          Point2DReadOnly candidateVertex = vertices.get(candidateIndex);
 
+         if (visualizer != null)
+         {
+            visualizer.setCandidate(lastHullVertex, candidateVertex, candidateIndex);
+            visualizer.updateViz(AlgorithmPhase.CHECKING_FOR_TOO_CLOSE_START);
+         }
+
          while (candidateVertex.epsilonEquals(lastHullVertex, EPSILON))
-         { // Remove any duplicate vertices between here and the end of the list. We do this by swapping this vertex to the last of the list.
+         { // Remove any duplicate vertices between here and the end of the list. We do this by swapping this vertex to the last of the list, and hten making
+            // the working list shorter
             Collections.swap(vertices, candidateIndex, --numberOfVertices);
-            visualizer.setPointCloud(vertices, numberOfVertices);
+            if (visualizer != null)
+               visualizer.setPointCloud(vertices, numberOfVertices);
             candidateVertex = vertices.get(candidateIndex);
+
+            if (visualizer != null)
+            {
+               visualizer.setCandidate(lastHullVertex, candidateVertex, candidateIndex);
+               visualizer.setQueryRejection(QueryRejection.TOO_CLOSE);
+               visualizer.updateViz(AlgorithmPhase.REJECTING_CANDIDATE);
+            }
 
             if (numberOfVertices == 1)
             {
-               visualizer.setPerimeter(vertices, numberOfVertices);
-               visualizer.updateViz(AlgorithmPhase.REMOVED_ALL);
+               if (visualizer != null)
+               {
+                  visualizer.setPerimeter(vertices, numberOfVertices);
+                  visualizer.updateViz(AlgorithmPhase.REMOVED_ALL);
+               }
 
                return numberOfVertices;
             }
          }
-//         while ((lastHullVertexIndex >= 1 && isCandidatePointCollinearInOppositeDirectionWithTheFirstPoint(lastHullVertex,
-//                                                                                                           vertices.get(lastHullVertexIndex - 1),
-//                                                                                                           candidateVertex,
-//                                                                                                           EPSILON)))
-//         { // The next candidate vertex isn't valid.
-//            candidateIndex++;
-//            candidateVertex = vertices.get(candidateIndex);
-//         }
+         if (visualizer != null)
+         {
+            visualizer.setCandidate(lastHullVertex, candidateVertex, candidateIndex);
+            visualizer.updateViz(AlgorithmPhase.CHECKING_FOR_NONCOLLINEAR_START);
+         }
 
-         visualizer.setPerimeter(vertices, lastHullVertexIndex + 1);
-         visualizer.setCandidate(lastHullVertex, candidateVertex, candidateIndex);
-         visualizer.updateViz(AlgorithmPhase.UPDATING_PERIMETER);
+         while ((lastHullVertexIndex >= 1 && isCandidatePointCollinearInOppositeDirectionWithTheFirstPoint(lastHullVertex,
+                                                                                                           vertices.get(lastHullVertexIndex - 1),
+                                                                                                           candidateVertex,
+                                                                                                           EPSILON)))
+         { // The next candidate vertex isn't valid because it's collinear, but may be valid for a future point, so we want to keep it in scope.
+            candidateIndex++;
+            candidateVertex = vertices.get(candidateIndex);
+
+            if (visualizer != null)
+            {
+               visualizer.setCandidate(lastHullVertex, candidateVertex, candidateIndex);
+               visualizer.setQueryRejection(QueryRejection.COLLINEAR);
+               visualizer.updateViz(AlgorithmPhase.REJECTING_CANDIDATE);
+            }
+         }
+
+         if (visualizer != null)
+         {
+            visualizer.setPerimeter(vertices, lastHullVertexIndex + 1);
+            visualizer.updateViz(AlgorithmPhase.UPDATING_PERIMETER);
+            visualizer.setCandidate(lastHullVertex, candidateVertex, candidateIndex);
+            visualizer.updateViz(AlgorithmPhase.UPDATING_CANDIDATE);
+         }
+
 
          // Loop through all the other vertices. Create a line segment starting at the last hull vertex, and ending at the candidate vertex.  If all the other
          // points are to the
-         for (int vertexIndex = lastHullVertexIndex + 2; vertexIndex <= numberOfVertices; )
+         for (int vertexIndex = candidateIndex + 1; vertexIndex <= numberOfVertices; )
          {
             int wrappedIndex = EuclidCoreTools.wrap(vertexIndex, numberOfVertices);
             Point2DReadOnly vertex = vertices.get(wrappedIndex);
 
-            visualizer.setQueryPoint(vertex, wrappedIndex);
-            visualizer.updateViz(AlgorithmPhase.UDPATING_QUERY);
+            if (visualizer != null)
+            {
+               visualizer.setQueryPoint(vertex, wrappedIndex);
+               visualizer.updateViz(AlgorithmPhase.UPDATING_QUERY);
+            }
 
             if (vertex.epsilonEquals(candidateVertex, EPSILON) || wrappedIndex != 0 && vertex.epsilonEquals(firstVertex, EPSILON))
             { // Remove duplicate vertices
                Collections.swap(vertices, wrappedIndex, --numberOfVertices);
-               visualizer.setPointCloud(vertices, numberOfVertices);
+               if (visualizer != null)
+                  visualizer.setPointCloud(vertices, numberOfVertices);
+
                /*
                 * Restart iteration without incrementing the vertexIndex, so the wrappedIndex can be updated
                 * properly as the numberOfVertices just changed.
@@ -225,9 +268,23 @@ public class ConvexPolygon2DTest
                   candidateIndex = wrappedIndex;
                   candidateVertex = vertex;
 
-                  visualizer.setCandidate(lastHullVertex, candidateVertex, candidateIndex);
-                  visualizer.updateViz(AlgorithmPhase.UDPATING_CANDIDATE);
+
+                  if (visualizer != null)
+                  {
+                     visualizer.setCandidate(lastHullVertex, candidateVertex, candidateIndex);
+                     visualizer.updateViz(AlgorithmPhase.UPDATING_CANDIDATE);
+                  }
                }
+               else if (visualizer != null)
+               {
+                  visualizer.setQueryRejection(QueryRejection.COLLINEAR);
+                  visualizer.updateViz(AlgorithmPhase.REJECTING_QUERY);
+               }
+            }
+            else if (visualizer != null)
+            {
+               visualizer.setQueryRejection(QueryRejection.TO_THE_RIGHT);
+               visualizer.updateViz(AlgorithmPhase.REJECTING_QUERY);
             }
 
             vertexIndex++;
@@ -239,8 +296,11 @@ public class ConvexPolygon2DTest
              * Got back to the first vertex of the polygon: we're done and the size of the polygon is defined by
              * the index of the last vertex found.
              */
-            visualizer.setPerimeter(vertices, lastHullVertexIndex + 1);
-            visualizer.updateViz(AlgorithmPhase.FINISHED_LOOP);
+            if (visualizer != null)
+            {
+               visualizer.setPerimeter(vertices, lastHullVertexIndex + 1);
+               visualizer.updateViz(AlgorithmPhase.FINISHED_LOOP);
+            }
 
             return lastHullVertexIndex + 1;
          }
@@ -252,15 +312,22 @@ public class ConvexPolygon2DTest
             lastHullVertexIndex++;
             Collections.swap(vertices, lastHullVertexIndex, candidateIndex);
 
-            visualizer.setPointCloud(vertices, numberOfVertices);
-            visualizer.setLastHullVertexIndex(lastHullVertexIndex);
-            visualizer.setPerimeter(vertices, lastHullVertexIndex + 1);
-            visualizer.updateViz(AlgorithmPhase.UPDATING_PERIMETER);
+            if (visualizer != null)
+            {
+
+               visualizer.setPointCloud(vertices, numberOfVertices);
+               visualizer.setLastHullVertexIndex(lastHullVertexIndex);
+               visualizer.setPerimeter(vertices, lastHullVertexIndex + 1);
+               visualizer.updateViz(AlgorithmPhase.UPDATING_PERIMETER);
+            }
          }
       }
 
-      visualizer.setPerimeter(vertices, numberOfVertices);
-      visualizer.updateViz(AlgorithmPhase.RAN_THROUGH_ALL);
+      if (visualizer != null)
+      {
+         visualizer.setPerimeter(vertices, numberOfVertices);
+         visualizer.updateViz(AlgorithmPhase.RAN_THROUGH_ALL);
+      }
 
       return numberOfVertices;
    }
@@ -282,9 +349,32 @@ public class ConvexPolygon2DTest
       double vertexDeltaY = candidateVertex.getY() - lastHullVertex.getY();
       double vertexDeltaNorm = EuclidCoreTools.norm(vertexDeltaX, vertexDeltaY);
 
+      Vector2D incomingEdge = new Vector2D();
+      incomingEdge.sub(previousHullVertex, lastHullVertex);
+      Vector2D outgoingEdge = new Vector2D();
+      outgoingEdge.sub(candidateVertex, lastHullVertex);
+
+      double x1 = previousHullVertex.getX() - lastHullVertex.getX();
+      double y1 = previousHullVertex.getY() - lastHullVertex.getY();
+      double x2 = candidateVertex.getX() - lastHullVertex.getX();
+      double y2 = candidateVertex.getY() - lastHullVertex.getY();
+      double angle = TupleTools.angle(x1,  y1, x2, y2);
+
       double dotProduct = dot(vertexDeltaX, vertexDeltaY, candidateDirectionX, candidateDirectionY);
 
-      return MathTools.epsilonEquals(dotProduct, -vertexDeltaNorm, epsilon);
+      boolean badfromAngle = MathTools.epsilonEquals(angle, 0.0, epsilon);
+      boolean badFromDotProduct = MathTools.epsilonEquals(dotProduct, -vertexDeltaNorm, epsilon);
+
+      double sinTheta = x1 * y2 - y1 * x2;
+      double cosTheta = x1 * x2 + y1 * y2;
+
+      boolean badFromSin = MathTools.epsilonEquals(sinTheta, 0.0, epsilon) && cosTheta > -epsilon;
+
+      if (badfromAngle != badFromDotProduct || badfromAngle != badFromSin)
+         throw new RuntimeException("All three methods should be equivalent.");
+
+
+      return badFromDotProduct || badFromSin || badfromAngle;
    }
 
    private static double dot(double deltaX1, double deltaY1, double deltaX2, double deltaY2)
@@ -292,80 +382,7 @@ public class ConvexPolygon2DTest
       return deltaX1 * deltaX2 + deltaY1 * deltaY2;
    }
 
-   @Test
-   public void testTerriblePoints()
-   {
-      Random random = new Random(1738L);
-      ConvexPolygon2D basePolygon = new ConvexPolygon2D();
-      basePolygon.addVertex(-0.108, 0.048);
-      basePolygon.addVertex(0.108, 0.030);
-      basePolygon.addVertex(-0.108, -0.030);
-      basePolygon.addVertex(-0.108, -0.048);
-      basePolygon.update();
 
-      double snapAreaResolution = 0.2;
-      int iters = 1000000;
-      for (int iter = 0; iter < iters; iter++)
-      {
-         // get a polygon transformed to a random location.
-         RigidBodyTransform transform = new RigidBodyTransform();
-         int gridXIndex = RandomNumbers.nextInt(random, -100, 100);
-         int gridYIndex = RandomNumbers.nextInt(random, -100, 100);
-         int yawIndex = RandomNumbers.nextInt(random, 0, LatticePoint.yawDivisions);
-         transform.getTranslation().set(LatticePoint.gridSizeXY * gridXIndex, LatticePoint.gridSizeXY * gridYIndex, 0.0);
-         transform.getRotation().appendYawRotation(yawIndex * LatticePoint.gridSizeYaw);
-
-         ConvexPolygon2D transformedPolygon = new ConvexPolygon2D(basePolygon);
-         transformedPolygon.applyTransform(transform);
-
-         // Here we want to collect all the points  under the foothold similar to what is done during snapping, but slightly different by assuming they're all
-         // valid
-         List<Point3D> footPointsInEnvironment = new ArrayList<>();
-         Point2DReadOnly corner0 = transformedPolygon.getVertex(0);
-         Point2DReadOnly corner1 = transformedPolygon.getVertex(1);
-         Point2DReadOnly corner2 = transformedPolygon.getVertex(2);
-         Point2DReadOnly corner3 = transformedPolygon.getVertex(3);
-
-         Point2D pointOnEdge1 = new Point2D();
-         Point2D pointOnEdge2 = new Point2D();
-         Point2D footPointToSnap = new Point2D();
-
-         double height = RandomNumbers.nextDouble(random, 1.0);
-
-         for (double edgeAlpha = 0.0; edgeAlpha <= 1.0; edgeAlpha += snapAreaResolution)
-         {
-            pointOnEdge1.interpolate(corner0, corner1, edgeAlpha);
-            pointOnEdge2.interpolate(corner3, corner2, edgeAlpha);
-
-            for (double interiorAlpha = 0.0; interiorAlpha <= 1.0; interiorAlpha += snapAreaResolution)
-            {
-               footPointToSnap.interpolate(pointOnEdge1, pointOnEdge2, interiorAlpha);
-
-               Point3D point = new Point3D(footPointToSnap.getX(), footPointToSnap.getY(), height);
-               footPointsInEnvironment.add(point);
-            }
-         }
-
-         List<Point2D> footPointsInFoot = footPointsInEnvironment.stream().map(point ->
-                                                                               {
-                                                                                  Point3D transformedPoint = new Point3D(point);
-                                                                                  transformedPoint.applyInverseTransform(transform);
-                                                                                  return new Point2D(transformedPoint);
-                                                                               }).toList();
-
-         // Now get the wrapped hull of this both before and after transform, and assert all the points are inside.
-         ConvexPolygon2D croppedFoothold = new ConvexPolygon2D(Vertex3DSupplier.asVertex3DSupplier(footPointsInEnvironment));
-         assertPointsInside(croppedFoothold, footPointsInEnvironment, 1e-7);
-
-         // Transform crop, and make sure all the transformed points are inside
-         //         croppedFoothold.applyInverseTransform(transform, false);
-         //         assertPoint2DsInside(croppedFoothold, footPointsInFoot, 1e-7);
-
-         // Create a polygon around all teh transformed points, and make sure they're inside
-         ConvexPolygon2D polygon2D = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(footPointsInFoot));
-         assertPoint2DsInside(polygon2D, footPointsInFoot, 1e-7);
-      }
-   }
 
    public static int findMinXMaxYVertexIndex(List<? extends Point2DReadOnly> vertices, int numberOfVertices)
    {
@@ -435,8 +452,6 @@ public class ConvexPolygon2DTest
       {
          double distance = polygonToCheck.signedDistance(new Point2D(point));
 
-         if (!polygonToCheck.isPointInside(point, epsilon))
-            LogTools.info("crap");
          assertTrue(polygonToCheck.isPointInside(point, epsilon), "Point " + point + " is not inside the polygon. Distance was " + distance);
          assertTrue(distance < epsilon, "Point " + point + " is not inside the polygon. Distance was " + distance);
       }
@@ -444,6 +459,9 @@ public class ConvexPolygon2DTest
 
    private static void assertPoint2DsInside(GiftWrappingVisualizer visualizer, ConvexPolygon2DReadOnly polygonToCheck, List<Point2D> points, double epsilon)
    {
+      if (visualizer == null)
+         return;
+
       for (Point2D point : points)
       {
          double distanece = polygonToCheck.signedDistance(new Point2D(point));
@@ -461,7 +479,11 @@ public class ConvexPolygon2DTest
    }
 
    private enum AlgorithmPhase
-   {CHECKING_ALL_POINTS, UDPATING_CANDIDATE, UDPATING_QUERY, FINISHED_LOOP, REMOVED_ALL, RAN_THROUGH_ALL, UPDATING_PERIMETER, CHECKING_INTERIOR}
+   {CHECKING_ALL_POINTS, UPDATING_CANDIDATE, UPDATING_QUERY, REJECTING_QUERY, REJECTING_CANDIDATE, FINISHED_LOOP, REMOVED_ALL, RAN_THROUGH_ALL, UPDATING_PERIMETER, CHECKING_INTERIOR, CHECKING_FOR_TOO_CLOSE_START, CHECKING_FOR_NONCOLLINEAR_START}
+
+   private enum QueryRejection
+   {TO_THE_RIGHT, TOO_CLOSE, COLLINEAR}
+
 
    private static class GiftWrappingVisualizer implements SCS2YoGraphicHolder
    {
@@ -469,6 +491,7 @@ public class ConvexPolygon2DTest
       private final YoRegistry registry = new YoRegistry("GiftWrappingVisualizer");
 
       private final YoEnum<AlgorithmPhase> algorithmPhase = new YoEnum<>("algorithmPhase", registry, AlgorithmPhase.class);
+      private final YoEnum<QueryRejection> queryRejection = new YoEnum<>("QueryRejection", registry, QueryRejection.class, true);
 
       private final List<YoFramePoint2D> pointCloud = new ArrayList<>();
       private final List<YoFramePoint2D> perimeterPoints = new ArrayList<>();
@@ -528,6 +551,11 @@ public class ConvexPolygon2DTest
          this.lastHullVertexIndex.set(lastHullVertexIndex);
       }
 
+      public void setQueryRejection(QueryRejection queryRejection)
+      {
+         this.queryRejection.set(queryRejection);
+      }
+
       public void setPointCloud(List<? extends Point2DReadOnly> points, int numberOfIndices)
       {
          this.numberOfVertices.set(numberOfIndices);
@@ -572,6 +600,7 @@ public class ConvexPolygon2DTest
 
       public void setCandidate(Point2DReadOnly lastPointOnHull, Point2DReadOnly candidate, int candidateIndex)
       {
+         queryRejection.set(null);
          lastHullPoint.set(lastPointOnHull);
          candidatePoint.set(candidate);
          candidateSegment.set(candidate, lastPointOnHull);
