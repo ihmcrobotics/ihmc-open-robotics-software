@@ -92,7 +92,6 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    private final ImBoolean useAStarFootstepPlanner = new ImBoolean(true);
    private final ImBoolean useMonteCarloReference = new ImBoolean(false);
    private final ImBoolean useMonteCarloFootstepPlanner = new ImBoolean(false);
-   private final ControllerFootstepQueueMonitor controllerFootstepQueueMonitorUI;
    private final ControllerFootstepQueueMonitor controllerFootstepQueueMonitorRemote;
    private final ContinuousHikingLogger continuousHikingLogger;
    private final ROS2Publisher<PlanOffsetStatus> planOffsetStatusPublisher;
@@ -191,7 +190,6 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       createParametersPanel(heightMapParameters, heightMapParametersPanel, hostStoredPropertySets, PerceptionComms.HEIGHT_MAP_PARAMETERS);
 
       continuousHikingLogger = new ContinuousHikingLogger();
-      controllerFootstepQueueMonitorUI = new ControllerFootstepQueueMonitor(ros2Node, robotModel.getSimpleRobotName());
       controllerFootstepQueueMonitorRemote = new ControllerFootstepQueueMonitor(ros2Node, robotModel.getSimpleRobotName());
    }
 
@@ -393,12 +391,6 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       if (controllerConnected)
       {
          performJoystickControllerAction(joystickController);
-      }
-
-      if (controllerFootstepQueueMonitorUI.pollRobotFalling() || controllerFootstepQueueMonitorUI.pollIsWalkingPaused())
-      {
-         enableContinuousHiking.set(false);
-         publishStopContinuousHiking(false);
       }
    }
 
