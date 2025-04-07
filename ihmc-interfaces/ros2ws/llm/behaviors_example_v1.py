@@ -15,13 +15,38 @@ from behavior_msgs.msg import AI2RHandPoseAdaptationMessage
 
 import cv2
 import numpy as np
-from llm_interface import LLMInterface
 
-# Example usage:
-print(" Calling the LLM")
-llm = LLMInterface(config_file="config.json")
+# LLM API imports
+from together import Together
+import os
+import requests
+import json
 
+# Get a free API key from https://api.together.xyz/settings/api-keys
+os.environ["TOGETHER_API_KEY"] = "1c7f74e3619d28067c154d33480d4063a8dff40b2cf3278312c905e38a796361"
 
+def llama32(messages, model_size=3):
+  model = f"meta-llama/Llama-3.2-{model_size}B-Instruct-Turbo"
+  url = "https://api.together.xyz/v1/chat/completions"
+  payload = {
+    "model": model,
+    "max_tokens": 4096,
+    "temperature": 0.0,
+    "stop": ["<|eot_id|>","<|eom_id|>"],
+    "messages": messages
+  }
+
+  headers = {
+    "Accept": "application/json",
+    "Content-Type": "application/json",
+    "Authorization": "Bearer " + os.environ["TOGETHER_API_KEY"]
+  }
+  res = json.loads(requests.request("POST", url, headers=headers, data=json.dumps(payload)).content)
+
+  if 'error' in res:
+    raise Exception(res['error'])
+
+  return res['choices'][0]['message']['content']
 
 
 ros2 = {}
@@ -54,19 +79,18 @@ def behavior_message_callback(msg):
    # --------- Reasoning -----------
    # CAN DO SOME REASONING HERE based on objects in the scene and available behaviors
    behaviors_str = str(behaviors)
-#    messages = [
-#    {
-#        "role": "assistant",
-#        "content": behaviors_str
-#    },
-#    {
-#        "role": "user",
-#        "content": "Summarize all the behaviors in one paragraph"
-#    }
-#    ]
-#    answer = llama32(messages)
-   response = llm.call_model(behaviors_str)
-   print("Summarized behaviors: ",response)
+   messages = [
+   {
+       "role": "assistant",
+       "content": behaviors_str
+   },
+   {
+       "role": "user",
+       "content": "Summarize all the behaviors in one paragraph"
+   }
+   ]
+   answer = llama32(messages)
+   print("Summarized behaviors: ",answer)
 
    # --------- Monitoring -----------
    completed_behavior = msg.completed_behavior
