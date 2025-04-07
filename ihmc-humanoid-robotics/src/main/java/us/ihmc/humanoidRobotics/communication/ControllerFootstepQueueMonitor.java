@@ -31,6 +31,7 @@ public class ControllerFootstepQueueMonitor
 
    private boolean footstepStarted;
    private final AtomicBoolean isWalking = new AtomicBoolean(false);
+   private final AtomicBoolean isWalkingPaused = new AtomicBoolean(false);
    private final AtomicBoolean robotFalling = new AtomicBoolean(false);
    private final AtomicBoolean receivedNewFootstepPlanWithOverride = new AtomicBoolean(false);
 
@@ -81,9 +82,18 @@ public class ControllerFootstepQueueMonitor
       isWalking.set(false);
       WalkingStatus walkingStatus = WalkingStatus.fromByte(message.getWalkingStatus());
 
-      if (walkingStatus == WalkingStatus.STARTED || walkingStatus == WalkingStatus.RESUMED)
+      if (walkingStatus == WalkingStatus.STARTED)
       {
          isWalking.set(true);
+         isWalkingPaused.set(false);
+      }
+      else if (walkingStatus == WalkingStatus.PAUSED)
+      {
+         isWalkingPaused.set(true);
+      }
+      else if (walkingStatus == WalkingStatus.RESUMED)
+      {
+         isWalkingPaused.set(false);
       }
    }
 
@@ -183,5 +193,10 @@ public class ControllerFootstepQueueMonitor
    public boolean pollIsWalking()
    {
       return isWalking.getAndSet(false);
+   }
+
+   public boolean pollIsWalkingPaused()
+   {
+      return isWalkingPaused.get();
    }
 }
