@@ -291,7 +291,7 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
       }
       else
       {
-         return !currentlyExecutingLeaves.isEmpty();
+         return currentlyExecutingLeaves.isEmpty();
       }
    }
 
