@@ -1,0 +1,9 @@
+{
+    "model": "meta-llama/Llama-3.2-3B-Instruct-Turbo",
+    "temperature": 0.0,
+    "token_limit": 2048,
+    "top_k": "N/A",
+    "top_p": 1.0,
+    "goal": "Assist with selecting next behavior",
+    "prompt": "Task: Deliver the charge to the door, You should return only the name of the next behavior to execute based on the task, scene objects, and available behaviors. If the task is already completed or no valid action exists, return NO_ACTION."
+}
