@@ -108,9 +108,8 @@ public class LeRobotDatasetEpisode
             //      opencv_imgproc.cvtColor(bgrFrame, yuvFrame, cv::COLOR_BGR2YUV_I420);
 
             Size frameSize = new Size(imageWidth, imageHeight);
-            boolean isColor = true;
             double fps = 50.0;
-            boolean success = videoWriter.open(mp4Path.toString(), fourcc, fps, frameSize, isColor);
+            boolean success = videoWriter.open(mp4Path.toString(), fourcc, fps, frameSize);
             if (!success)
                LogTools.error("Failed to open video writer for: {}", mp4Path.toString());
             else
