@@ -53,17 +53,17 @@ public class FootstepPlanActionPlanningThread
       }
 
       Thread thread = new Thread(() ->
-      {
-         try
-         {
-            plan(started);
-         }
-         catch (Throwable throwable)
-         {
-            LogTools.error(throwable.getMessage());
-            throwable.printStackTrace();
-         }
-      }, getClass().getSimpleName() + started);
+                                 {
+                                    try
+                                    {
+                                       plan(started);
+                                    }
+                                    catch (Throwable throwable)
+                                    {
+                                       LogTools.error(throwable.getMessage());
+                                       throwable.printStackTrace();
+                                    }
+                                 }, getClass().getSimpleName() + started);
       thread.start();
    }
 
@@ -159,8 +159,10 @@ public class FootstepPlanActionPlanningThread
             double rejectionPercentage = rejectionReasonReport.getRejectionReasonPercentage(reason);
             state.getLogger().info("Rejection {}%: {}", FormattingTools.getFormattedToSignificantFigures(rejectionPercentage, 3), reason);
          }
-         state.getLogger().info("Footstep planning failed with {}, {} step(s)", footstepPlannerOutput.getFootstepPlanningResult(),
-                                                                                footstepPlannerOutput.getFootstepPlan().getNumberOfSteps());
+         state.getLogger()
+              .info("Footstep planning failed with {}, {} step(s)",
+                    footstepPlannerOutput.getFootstepPlanningResult(),
+                    footstepPlannerOutput.getFootstepPlan().getNumberOfSteps());
       }
 
       // Copy of the output to be safe & use clean empty plan when no solution found
