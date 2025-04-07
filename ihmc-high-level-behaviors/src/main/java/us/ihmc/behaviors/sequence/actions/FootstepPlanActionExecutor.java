@@ -280,6 +280,8 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
       footstepDataListMessage.setFinalTransferDuration(finalTransferDuration);
       footstepDataListMessage.getQueueingProperties().setExecutionMode(definition.getExecutionMode().getValue().toByte());
       footstepDataListMessage.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
+      footstepDataListMessage.setOffsetFootstepsHeightWithExecutionError(false);
+      footstepDataListMessage.setTrustHeightOfFootsteps(false);
       state.getLogger().info("Commanding {} footsteps", footstepDataListMessage.getFootstepDataList().size());
       ros2ControllerHelper.publishToController(footstepDataListMessage);
       for (RobotSide side : RobotSide.values)
