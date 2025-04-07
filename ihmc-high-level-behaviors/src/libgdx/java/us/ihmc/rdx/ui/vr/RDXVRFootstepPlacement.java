@@ -43,8 +43,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class RDXVRFootstepPlacement
 {
-   private final static boolean USE_HEIGHTMAP = false;
-   private final static boolean USE_STEPPABLE_REGION_ADAPTATION = false;
+   private final static boolean USE_HEIGHTMAP = true;
+   private final static boolean USE_STEPPABLE_REGION_ADAPTATION = true;
    private final static boolean ADAPTABLE_STEP_DURATION = false;
    private HeightMapData latestHeightMapData;
 
@@ -61,6 +61,7 @@ public class RDXVRFootstepPlacement
    private final CUDAFootstepOptimizer footstepOptimizer;
    private double previousAdaptedStepHeight = Double.NaN;
    private RDXVRFootstep footstepBeingExternallyPlaced;
+   private RDXVRFootstep footstepPreview;
    private final FootstepSnapAndWiggler snapper;
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final FramePose3D poseForPlacement = new FramePose3D();
@@ -192,6 +193,7 @@ public class RDXVRFootstepPlacement
    public void createNewFootstep(RobotSide side)
    {
       footstepBeingExternallyPlaced = new RDXVRFootstep(side, footstepModels.get(side), footstepIndex++);
+      footstepPreview = new RDXVRFootstep(side, footstepModels.get(side.getOppositeSide()), footstepIndex);
    }
 
    public boolean setFootstepPose(FramePose3DReadOnly pose)
@@ -210,10 +212,13 @@ public class RDXVRFootstepPlacement
                   adaptedPose = footstepOptimizer.compute(latestHeightMapData, adaptedPose);
                }
                if (Double.isNaN(previousAdaptedStepHeight) ||
-                   getTimeElapsedAfterStep() < getStepDuration() / 2 ||
-                   getTimeElapsedAfterStep() > getStepDuration() / 2 && Math.abs(adaptedPose.getZ() - previousAdaptedStepHeight) < 0.05)
+                   getTimeElapsedAfterStep() < getStepDuration() / 3)
                {
                   footstepBeingExternallyPlaced.setPose(adaptedPose);
+                  footstepPreview.setPose(adaptedPose);
+                  FramePose3D previewPose = new FramePose3D(adaptedPose);
+                  previewPose.getPosition().setZ(adaptedPose.getZ()+0.05);
+                  footstepPreview.setPose(previewPose);
                   previousAdaptedStepHeight = adaptedPose.getZ();
                }
             }
@@ -326,6 +331,7 @@ public class RDXVRFootstepPlacement
       if (footstepBeingExternallyPlaced != null)
       {
          footstepBeingExternallyPlaced.getModelInstance().getRenderables(renderables, pool);
+         footstepPreview.getModelInstance().getRenderables(renderables, pool);
       }
    }
 
@@ -374,6 +380,7 @@ public class RDXVRFootstepPlacement
    {
       footstepIndex = 0;
       footstepBeingExternallyPlaced = null;
+      footstepPreview = null;
       previousAdaptedStepHeight = Double.NaN;
       latestHeightMapData = null;
       handPlacedFootsteps.clear();

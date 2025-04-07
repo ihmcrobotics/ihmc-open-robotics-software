@@ -230,8 +230,8 @@ public class RDXVRKinematicsStreamingMode
             streamToController.set(!streamToController.get());
             if (!streamToController.get())
                streamingDisabled.set();
-            armStreaming.enable(streamToController.get());
-            armStreaming.enableStreaming(streamToController.get());
+//            armStreaming.enable(streamToController.get());
+//            armStreaming.enableStreaming(streamToController.get());
          }
 
          InputDigitalActionData bButton = controller.getBButtonActionData();
@@ -585,7 +585,7 @@ public class RDXVRKinematicsStreamingMode
                   {
                      streamingDisabled.set();
                      streamToController.set(false);
-                     armStreaming.enableStreaming(true);
+//                     armStreaming.enableStreaming(true);
                   }
                   pausedForWalking = true;
                   reintializingToolbox = false;
@@ -596,7 +596,7 @@ public class RDXVRKinematicsStreamingMode
                   footstepStreaming.step(false);
                   controllerStatusTracker.getFinishedWalkingNotification().clear();
                   //  start controlling only the arms of the robot during walking
-                  armStreaming.enable(true);
+//                  armStreaming.enable(true);
                }
             }
             else
