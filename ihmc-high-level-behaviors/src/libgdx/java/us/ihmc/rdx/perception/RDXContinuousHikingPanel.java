@@ -394,12 +394,6 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       {
          performJoystickControllerAction(joystickController);
       }
-
-      if (controllerFootstepQueueMonitorUI.pollRobotFalling() || controllerFootstepQueueMonitorUI.pollIsWalkingPaused())
-      {
-         enableContinuousHiking.set(false);
-         publishStopContinuousHiking(false);
-      }
    }
 
    private void performJoystickControllerAction(Controller joystickController)
