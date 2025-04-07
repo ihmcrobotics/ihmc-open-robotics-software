@@ -1,13 +1,18 @@
 package us.ihmc.avatar.logProcessor.leRobot;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import org.bytedeco.ffmpeg.global.avcodec;
+import org.bytedeco.ffmpeg.global.avutil;
 import org.bytedeco.javacpp.Pointer;
+import org.bytedeco.javacv.FFmpegFrameRecorder;
+import org.bytedeco.javacv.Frame;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Size;
-import org.bytedeco.opencv.opencv_videoio.VideoWriter;
 import us.ihmc.avatar.scs2.SCS2LogSessionWithVideo;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -32,7 +37,7 @@ public class LeRobotDatasetEpisode
    private final SideDependentList<Path> zedVideoDirs;
 
    private int length = 0; // TODO
-   private final SideDependentList<VideoWriter> videoWriters = new SideDependentList<>();
+   private final SideDependentList<FFmpegFrameRecorder> ffmpegRecorders = new SideDependentList<>();
 
    public LeRobotDatasetEpisode(int episodeIndex,
                                 String taskName,
@@ -100,24 +105,17 @@ public class LeRobotDatasetEpisode
             //      encoder         : Lavc61.8.100 libsvtav1
             //[libdav1d @ 0x652476360640] libdav1d 1.2.1
 
-            VideoWriter videoWriter = new VideoWriter();
+            FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(mp4Path.toString(), imageWidth, imageHeight);
 
-//            int fourcc = VideoWriter.fourcc((byte) 'A', (byte) 'V', (byte) '0', (byte) '1');
-            int fourcc = VideoWriter.fourcc((byte) 'M', (byte) 'J', (byte) 'P', (byte) 'G');
-
-            //      opencv_imgproc.cvtColor(bgrFrame, yuvFrame, cv::COLOR_BGR2YUV_I420);
-
-            Size frameSize = new Size(imageWidth, imageHeight);
+            recorder.setFormat("mp4");
+            recorder.setVideoCodec(avcodec.AV_CODEC_ID_AV1);
+            recorder.setPixelFormat(avutil.AV_PIX_FMT_YUV420P);
             double fps = 50.0;
-            boolean success = videoWriter.open(mp4Path.toString(), fourcc, fps, frameSize);
-            if (!success)
-               LogTools.error("Failed to open video writer for: {}", mp4Path.toString());
-            else
-               LogTools.info("Opened video writer for: {}", mp4Path.toString());
+            recorder.setFrameRate(fps);
 
-            frameSize.close();
+            ExceptionTools.handle(() -> recorder.start(), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
 
-            videoWriters.put(side, videoWriter);
+            ffmpegRecorders.put(side, recorder);
          }
 
          int numberOfFrames = outPoint - inPoint;
@@ -145,12 +143,10 @@ public class LeRobotDatasetEpisode
 
                   // TODO: Crop the sides off to 640x480?
 
-                  VideoWriter videoWriter = videoWriters.get(side);
+                  FFmpegFrameRecorder recorder = ffmpegRecorders.get(side);
 
-                  if (videoWriter.isOpened())
-                  {
-                     videoWriter.write(resized);
-                  }
+                  Frame frame = new Frame();
+                  ExceptionTools.handle(() -> recorder.record(frame), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
 
                   resized.close();
                }
@@ -159,7 +155,7 @@ public class LeRobotDatasetEpisode
 
          for (RobotSide side : RobotSide.values)
          {
-            videoWriters.get(side).release();
+            ExceptionTools.handle(() -> ffmpegRecorders.get(side).stop(), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
          }
 
       }, getClass().getSimpleName());
