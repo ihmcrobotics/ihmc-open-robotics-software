@@ -53,7 +53,7 @@ public class RDXVRFootstepStreaming
       this.ros2Helper = ros2Helper;
       this.swingFootTracker = swingFootTracker;
 
-      footstepStreamingToolbox = new FootstepStreamingToolboxModule(syncedRobot.getRobotModel(), false);
+      footstepStreamingToolbox = new FootstepStreamingToolboxModule(syncedRobot.getRobotModel(), true);
       status = ros2Helper.subscribe(FootstepStreamingToolboxModule.getOutputStatusTopic(syncedRobot.getRobotModel().getSimpleRobotName()));
    }
 

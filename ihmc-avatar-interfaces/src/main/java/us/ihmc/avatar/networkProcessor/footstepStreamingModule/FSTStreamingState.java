@@ -14,6 +14,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.State;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.filters.AlphaFilterTools;
 import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -75,6 +76,32 @@ public class FSTStreamingState implements State
    private final YoDouble maxYawToStance = new YoDouble("maxYawToStance", registry);
    private final YoDouble minYawToStance = new YoDouble("minYawToStance", registry);
 
+   private final YoDouble yoRobotStepDuration = new YoDouble("robotStepDuration", registry);
+   private final YoDouble yoRobotElapsedTimeCurrentStep = new YoDouble("robotElapsedTimeCurrentStep", registry);
+   private final YoInteger yoRobotSwingSide = new YoInteger("robotSwingSide", registry);
+   private final YoBoolean yoRobotSwingFootIsLanding =  new YoBoolean("robotSwingFootIsLanding", registry);
+   private final YoFramePoint3D yoInitialRobotSwingFootPosition = new YoFramePoint3D("robotInitialSwingPosition", ReferenceFrame.getWorldFrame(), registry);
+   private final YoDouble yoInitialRobotSwingFootYaw = new YoDouble("robotInitialSwingYaw", registry);
+   private final YoFramePoint3D yoRobotSwingFootPosition = new YoFramePoint3D("robotSwingPosition", ReferenceFrame.getWorldFrame(), registry);
+   private final YoDouble yoRobotSwingFootYaw = new YoDouble("robotSwingYaw", registry);
+
+   private final SideDependentList<YoFramePoint3D> yoInitialTrackersPosition =  new SideDependentList<>();
+   private final SideDependentList<YoDouble> yoInitialTrackersYaw = new SideDependentList<>();
+   private final SideDependentList<YoFramePoint3D> yoTrackersPosition =  new SideDependentList<>();
+   private final SideDependentList<YoDouble> yoTrackersYaw =  new SideDependentList<>();
+   private final SideDependentList<YoFramePoint3D> yoTrackersTranslation =  new SideDependentList<>();
+   private final SideDependentList<YoDouble> yoTrackersYawVariation =  new SideDependentList<>();
+
+   private final SideDependentList<YoBoolean> yoIsUserStepping =  new SideDependentList<>();
+   private final SideDependentList<YoFramePoint3D> yoDesiredFootPosition =  new SideDependentList<>();
+   private final SideDependentList<YoDouble> yoDesiredFootYaw =  new SideDependentList<>();
+
+   private final YoDouble yoLandingFactorStride = new YoDouble("landingFactorStride", registry);
+   private final YoDouble yoRawStride = new YoDouble("rawStride", registry);
+   private final YoDouble yoMeasuredStride = new YoDouble("measuredStride", registry);
+   private final YoDouble yoDesiredStride = new YoDouble("desiredStride", registry);
+   private final YoDouble yoControlledStride = new YoDouble("controlledStride", registry);
+
    public FSTStreamingState(FSTTools tools)
    {
       FootstepStreamingToolboxParameters parameters = tools.getParameters();
@@ -107,6 +134,20 @@ public class FSTStreamingState implements State
       maxYawToStance.set(Math.toRadians(parameters.getMaxYawToStanceDegrees()));
       minYawToStance.set(Math.toRadians(parameters.getMinYawToStanceDegrees()));
       computeStepFromStance.set(parameters.getComputeFromStance());
+
+      for (RobotSide side : RobotSide.values)
+      {
+         yoInitialTrackersPosition.put(side, new YoFramePoint3D(side + "_initialTrackerPosition", ReferenceFrame.getWorldFrame(), registry));
+         yoInitialTrackersYaw.put(side, new YoDouble(side + "_initialTrackerYaw", registry));
+         yoTrackersPosition.put(side, new YoFramePoint3D(side + "_trackerPosition", ReferenceFrame.getWorldFrame(), registry));
+         yoTrackersYaw.put(side, new YoDouble(side + "_trackerYaw", registry));
+         yoTrackersTranslation.put(side, new YoFramePoint3D(side + "_trackerTranslation", ReferenceFrame.getWorldFrame(), registry));
+         yoTrackersYawVariation.put(side, new YoDouble(side + "_trackerYawVariation", registry));
+
+         yoIsUserStepping.put(side, new YoBoolean(side + "_isUserStepping", registry));
+         yoDesiredFootPosition.put(side, new YoFramePoint3D(side + "_desiredFootPosition", ReferenceFrame.getWorldFrame(), registry));
+         yoDesiredFootYaw.put(side, new YoDouble(side + "_desiredFootYaw", registry));
+      }
    }
 
    @Override
@@ -116,6 +157,7 @@ public class FSTStreamingState implements State
       for (RobotSide side : RobotSide.values())
       {
          isUserStepping.put(side, false);
+         yoIsUserStepping.get(side).set(false);
          stableIterationCounts.put(side, 0);
          previousTrackersTransform.put(side, new RigidBodyTransform());
          // Initialize controlled direction
@@ -155,11 +197,17 @@ public class FSTStreamingState implements State
             robotStepDuration = latestInput.getRobotStepDuration();
             robotElapsedTimeCurrentStep = latestInput.getRobotElapsedTimeCurrentStep();
 
+            yoRobotStepDuration.set(robotStepDuration);
+            yoRobotElapsedTimeCurrentStep.set(robotElapsedTimeCurrentStep);
+
             if (robotElapsedTimeCurrentStep == 0.0)
                latestAdjustmentSent = false;
 
             robotSwingSide = latestInput.getRobotSwingSide();
             robotSwingFootIsLanding = latestInput.isRobotSwingFootLanding();
+
+            yoRobotSwingSide.set(robotSwingSide.toByte());
+            yoRobotSwingFootIsLanding.set(robotSwingFootIsLanding);
 
             if (robotElapsedTimeCurrentStep > robotStepDuration)
                robotElapsedTimeCurrentStep = robotStepDuration;
@@ -173,11 +221,27 @@ public class FSTStreamingState implements State
                   RigidBodyTransform initialTrackerTransform = initialTrackersTransform.get(side);
                   RigidBodyTransform currentRobotFootTransformInWorld = new RigidBodyTransform(sideCommand.getRobotFootPose());
 
+                  yoTrackersPosition.get(side).set(currentTrackerTransform.getTranslation());
+                  yoTrackersYaw.get(side).set(currentTrackerTransform.getRotation().getYaw());
+                  if (side.equals(robotSwingSide))
+                  {
+                     yoRobotSwingFootPosition.set(currentRobotFootTransformInWorld.getTranslation());
+                     yoRobotSwingFootYaw.set(currentRobotFootTransformInWorld.getRotation().getYaw());
+                  }
+
                   if (initialTrackerTransform == null)
                   {
                      initialTrackersTransform.put(side, new RigidBodyTransform(currentTrackerTransform));
                      previousTrackersTransform.put(side, new RigidBodyTransform(currentTrackerTransform));
                      initialRobotSwingFootTransformsInWorld.put(side, new RigidBodyTransform(currentRobotFootTransformInWorld));
+
+                     yoInitialTrackersPosition.get(side).set(initialTrackersTransform.get(side).getTranslation());
+                     yoInitialTrackersYaw.get(side).set(initialTrackersTransform.get(side).getRotation().getYaw());
+                     if (side.equals(robotSwingSide))
+                     {
+                        yoInitialRobotSwingFootPosition.set(initialRobotSwingFootTransformsInWorld.get(side).getTranslation());
+                        yoInitialRobotSwingFootYaw.set(initialRobotSwingFootTransformsInWorld.get(side).getRotation().getYaw());
+                     }
                   }
 
                   // Get translation of current tracker position wrt to initial one
@@ -186,12 +250,16 @@ public class FSTStreamingState implements State
                   FrameVector2D translationTrackerXY = new FrameVector2D(ReferenceFrame.getWorldFrame(),
                                                                          translationTracker.getX(),
                                                                          translationTracker.getY());
+
                   if (translationTracker.getZ() > maxFeetHeight.get(side))
                   {
                      maxFeetHeight.put(side, translationTracker.getZ());
                   }
 
                   double rotationTracker = currentTrackerTransform.getRotation().getYaw() - initialTrackersTransform.get(side).getRotation().getYaw();
+
+                  yoTrackersTranslation.get(side).set(translationTracker);
+                  yoTrackersYawVariation.get(side).set(rotationTracker);
 
                   if (!isUserStepping.get(side)) // Tracker is not moving by a lot yet
                   {
@@ -223,6 +291,9 @@ public class FSTStreamingState implements State
                         isUserStepping.put(side, true);
                         // Avoid false stepping detection when already in swing with one side
                         isUserStepping.put(side.getOppositeSide(), false);
+
+                        yoIsUserStepping.get(side).set(true);
+                        yoIsUserStepping.get(side.getOppositeSide()).set(false);
                      }
                      else
                      {
@@ -236,6 +307,7 @@ public class FSTStreamingState implements State
                   {
                      // Avoid false stepping detection when already in swing with one side
                      isUserStepping.put(side.getOppositeSide(), false);
+                     yoIsUserStepping.get(side.getOppositeSide()).set(false);
                      if (initialTrackerTransform != null)
                      {
                         // Check if tracker is not moving much anymore
@@ -260,11 +332,11 @@ public class FSTStreamingState implements State
                                  outputStatus.setLastAdjustment(true);
                                  tools.getStatusOutputManager().reportStatusMessage(outputStatus);
                                  latestAdjustmentSent = true;
-                                 LogTools.warn("Sent last footstep adjustment {}", side);
+                                 LogTools.debug("Sent last footstep adjustment {}", side);
                               }
 
                               reset(side, currentTrackerTransform);
-                              LogTools.error("User completed stepping with {}", side);
+                              LogTools.info("User completed stepping with {}", side);
                            }
                         }
                         else  // Still moving
@@ -276,8 +348,8 @@ public class FSTStreamingState implements State
                            }
                            else // Send adjustment
                            {
-                              LogTools.info("side: {}, landing: {}", robotSwingSide, robotSwingFootIsLanding);
-                              LogTools.info("latestAdjustment: {}", latestAdjustmentSent);
+                              LogTools.debug("side: {}, landing: {}", robotSwingSide, robotSwingFootIsLanding);
+                              LogTools.debug("latestAdjustment: {}", latestAdjustmentSent);
 
                               if((robotElapsedTimeCurrentStep < robotStepDuration - footstepMarginTime.getValue())
                                  && !latestAdjustmentSent
@@ -312,7 +384,10 @@ public class FSTStreamingState implements State
                                  outputStatus.getDesiredFootOrientation().set(robotFootstepTransformInWorld.getRotation());
                                  outputStatus.getDesiredFootPosition().set(robotFootstepTransformInWorld.getTranslation());
                                  tools.getStatusOutputManager().reportStatusMessage(outputStatus);
-                                 LogTools.warn("Sent footstep adjustment {}", side);
+                                 LogTools.debug("Sent footstep adjustment {}", side);
+
+                                 yoDesiredFootPosition.get(side).set(robotFootstepTransformInWorld.getTranslation());
+                                 yoDesiredFootYaw.get(side).set(robotFootstepTransformInWorld.getRotation().getYaw());
                               }
                               else if (!latestAdjustmentSent)
                               {
@@ -324,7 +399,7 @@ public class FSTStreamingState implements State
                                  outputStatus.setLastAdjustment(true);
                                  tools.getStatusOutputManager().reportStatusMessage(outputStatus);
                                  latestAdjustmentSent = true;
-                                 LogTools.warn("Sent last footstep adjustment {}", side);
+                                 LogTools.debug("Sent last footstep adjustment {}", side);
                               }
                            }
                         }
@@ -360,6 +435,8 @@ public class FSTStreamingState implements State
    private void reset(RobotSide side, RigidBodyTransform currentTrackerTransform)
    {
       isUserStepping.put(side, false);
+      yoIsUserStepping.get(side).set(false);
+
       directionTrackersCtrl.put(side, new FrameVector2D());
       initialTrackersTransform.put(side, new RigidBodyTransform(currentTrackerTransform));
       stableIterationCounts.put(side, 0);
@@ -518,13 +595,17 @@ public class FSTStreamingState implements State
          landingFactor = verticalPosition / maxFeetHeight.get(side);
          landingFactor = Math.max(0.0, Math.min(1.0, landingFactor));
       }
+      yoLandingFactorStride.set(landingFactor);
 
       // 3) The stride is pulled toward the measuredDistance if foot is descending
       double blendedStride = landingFactor * rawStride
                              + (1.0 - landingFactor) * measuredHorizontalDistance;
+      yoRawStride.set(rawStride);
+      yoMeasuredStride.set(measuredHorizontalDistance);
 
       // 4) Clamp to [0, maxStride] pre-P-control
       double desiredStride = Math.max(0.0, Math.min(blendedStride, maxStride.getValue()));
+      yoDesiredStride.set(desiredStride);
 
       // 5) Apply P-control
       double error = desiredStride - currentStrideEstimate;
@@ -533,6 +614,7 @@ public class FSTStreamingState implements State
       // 6) Final clamp
       newStrideEstimate = Math.max(0.0, Math.min(newStrideEstimate, maxStride.getValue()));
       currentStrideEstimate = newStrideEstimate;
+      yoControlledStride.set(currentStrideEstimate);
 
       return currentStrideEstimate;
    }
@@ -596,7 +678,7 @@ public class FSTStreamingState implements State
    @Override
    public void onExit(double timeInState)
    {
-      LogTools.error("RESET. Footstep Streaming disabled");
+      LogTools.info("Footstep Streaming disabled");
       tools.flushInputCommands();
    }
 }

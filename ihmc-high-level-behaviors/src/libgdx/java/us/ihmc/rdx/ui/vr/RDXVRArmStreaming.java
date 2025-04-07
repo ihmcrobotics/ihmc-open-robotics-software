@@ -190,10 +190,9 @@ public class RDXVRArmStreaming
    {
       for (RobotSide side : armMultiBodyGraphics.keySet())
       {
-         JointspaceTrajectoryMessage jointspaceTrajectoryMessage = buildArmJointspaceTrajectoryMessage(side);
          ArmTrajectoryMessage armTrajectoryMessage = new ArmTrajectoryMessage();
          armTrajectoryMessage.setRobotSide(side.toByte());
-         armTrajectoryMessage.getJointspaceTrajectory().set(jointspaceTrajectoryMessage);
+         armTrajectoryMessage.getJointspaceTrajectory().set(buildArmJointspaceTrajectoryMessage(side));
          armTrajectoryMessage.setForceExecution(true); // Prevent the command being rejected because robot is walking
          ros2ControllerHelper.publishToController(armTrajectoryMessage);
       }
@@ -203,6 +202,7 @@ public class RDXVRArmStreaming
    {
       JointspaceTrajectoryMessage jointspaceTrajectoryMessage = new JointspaceTrajectoryMessage();
       jointspaceTrajectoryMessage.getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_STREAM);
+      jointspaceTrajectoryMessage.getQueueingProperties().setStreamIntegrationDuration(0.01);
       jointspaceTrajectoryMessage.getJointTrajectoryMessages().clear();
 
       for (OneDoFJointBasics joint : desiredRobotArmJoints.get(side))
