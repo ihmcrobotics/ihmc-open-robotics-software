@@ -14,6 +14,8 @@ import java.util.List;
 
 public class LeRobotDataset
 {
+   public static final double ZED_FPS = 15.0;
+
    private final String name;
    private final Path directory;
    private final Path dataPath;
@@ -26,7 +28,6 @@ public class LeRobotDataset
    private final Path infoJsonPath;
    private final Path tasksJsonlPath;
 
-   private double fps = 15.0; // ZED FPS
    private final List<String> taskNames = new ArrayList<>();
    private final List<LeRobotDatasetEpisode> episodes = new ArrayList<>();
 
@@ -137,7 +138,7 @@ public class LeRobotDataset
          rootNode.put("total_videos", 2 * episodes.size());
          rootNode.put("total_chunks", 1);
          rootNode.put("chunk_size", 1000);
-         rootNode.put("fps", fps);
+         rootNode.put("fps", ZED_FPS);
          ObjectNode splits = rootNode.putObject("splits");
          splits.put("train", "0:%d".formatted(episodes.size()));
          rootNode.put("data_path", "data/chunk-{episode_chunk:03d}/episode_{episode_index:06d}.parquet");
