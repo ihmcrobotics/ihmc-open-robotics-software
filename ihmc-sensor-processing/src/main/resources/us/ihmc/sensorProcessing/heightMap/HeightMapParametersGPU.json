@@ -85,7 +85,7 @@
     "upperBound" : 0.06
   },
   "Robot collision cylinder radius" : {
-    "value" : 0.0,
+    "value" : 0.05,
     "lowerBound" : 0.0,
     "upperBound" : 0.8
   },
