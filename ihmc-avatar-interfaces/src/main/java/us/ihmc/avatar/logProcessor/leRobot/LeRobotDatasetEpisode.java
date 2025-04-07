@@ -6,6 +6,7 @@ import org.bytedeco.ffmpeg.global.avutil;
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.javacv.FFmpegFrameRecorder;
 import org.bytedeco.javacv.Frame;
+import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -24,7 +25,6 @@ import us.ihmc.yoVariables.variable.YoLong;
 import java.nio.file.Path;
 
 import static us.ihmc.zed.global.zed.*;
-import static us.ihmc.zed.global.zed.SL_MEM_CPU;
 
 public class LeRobotDatasetEpisode
 {
@@ -87,6 +87,8 @@ public class LeRobotDatasetEpisode
          int imageHeight = zedSVOScrubber.getImageHeight();
          int imageWidth = zedSVOScrubber.getImageWidth();
 
+         OpenCVFrameConverter.ToMat frameConverter = new OpenCVFrameConverter.ToMat();
+
          for (RobotSide side : RobotSide.values)
          {
             Path mp4Path = zedVideoDirs.get(side).resolve(episodeName + ".mp4");
@@ -105,35 +107,63 @@ public class LeRobotDatasetEpisode
             //      encoder         : Lavc61.8.100 libsvtav1
             //[libdav1d @ 0x652476360640] libdav1d 1.2.1
 
-            FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(mp4Path.toString(), imageWidth, imageHeight);
+            FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(mp4Path.toString(), 853, 480);
 
-            recorder.setFormat("mp4");
-            recorder.setVideoCodec(avcodec.AV_CODEC_ID_AV1);
+
+            recorder.setVideoOption("tune", "zerolatency"); // https://trac.ffmpeg.org/wiki/StreamingGuide
+            recorder.setFormat("mov");
+
+            // For information about these settings visit https://trac.ffmpeg.org/wiki/Encode/H.264
+            recorder.setVideoOption("preset", "ultrafast");
+            recorder.setVideoOption("crf", "27");
+            recorder.setVideoBitrate(60000000); // 6000 kb/s
+
+            // This video codec is deprecated, so in order to use it without errors we have to set the pixel format and strictly allow FFMPEG to use it
+            recorder.setVideoCodec(avcodec.AV_CODEC_ID_MJPEG);
             recorder.setPixelFormat(avutil.AV_PIX_FMT_YUV420P);
-            double fps = 50.0;
-            recorder.setFrameRate(fps);
+            recorder.setVideoOption("strict", "-2");
+            // Frame rate of video recordings
+            recorder.setFrameRate(15);
+
+//            recorder.setFormat("mp4");
+//            recorder.setVideoCodec(avcodec.AV_CODEC_ID_AV1);
+//            recorder.setPixelFormat(avutil.AV_PIX_FMT_YUV420P);
+////            float frameRate = sl_get_current_fps(zedSVOScrubber.getCameraID());
+////            LogTools.info("Recording at {} FPS", frameRate);
+//            recorder.setFrameRate(LeRobotDataset.ZED_FPS);
 
             ExceptionTools.handle(() -> recorder.start(), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
 
             ffmpegRecorders.put(side, recorder);
          }
 
+         long lastVideoTimestamp = -1;
          int numberOfFrames = outPoint - inPoint;
+         long startVideoTimestamp = -1;
          for (int i = 0; i < numberOfFrames; i++)
          {
-            session.playbackTick();
+            session.playbackTick(); // TODO: Is this skipping the first tick?
 
-            if (i % 100 == 0) // TODO: Reduce to FPS - data rate
+            long timestamp = yoTimestamp.getLongValue();
+            zedSVOScrubber.scrub(timestamp);
+            long currentVideoTimestamp = zedSVOScrubber.getCurrentTimestamp();
+            if (startVideoTimestamp < 0)
+               startVideoTimestamp = currentVideoTimestamp;
+
+            if (currentVideoTimestamp > lastVideoTimestamp) // Write only when a new frame is available
             {
-               long timestamp = yoTimestamp.getLongValue();
-               zedSVOScrubber.scrub(timestamp);
+               lastVideoTimestamp = currentVideoTimestamp;
 
                for (RobotSide side : RobotSide.values)
                {
                   Pointer zedColorImageSLMatPointer =
                         side == RobotSide.LEFT ? zedSVOScrubber.getLeftColorImageSlMatPointer() : zedSVOScrubber.getRightColorImageSlMatPointer();
-                  Mat bgra8Mat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC4, // BGRA8
-                                         sl_mat_get_ptr(zedColorImageSLMatPointer, SL_MEM_CPU), sl_mat_get_step_bytes(zedColorImageSLMatPointer, SL_MEM_CPU));
+                  Mat bgra8Mat = new Mat(imageHeight,
+                                         imageWidth,
+                                         opencv_core.CV_8UC4,
+                                         // BGRA8
+                                         sl_mat_get_ptr(zedColorImageSLMatPointer, SL_MEM_CPU),
+                                         sl_mat_get_step_bytes(zedColorImageSLMatPointer, SL_MEM_CPU));
 
                   // Resize smaller for better transformer training
                   Size size = new Size(853, 480);
@@ -145,10 +175,14 @@ public class LeRobotDatasetEpisode
 
                   FFmpegFrameRecorder recorder = ffmpegRecorders.get(side);
 
-                  Frame frame = new Frame();
-                  ExceptionTools.handle(() -> recorder.record(frame), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
-
+                  Frame frame = frameConverter.convert(resized);
                   resized.close();
+
+                  long videoTimestampMs = Math.round((currentVideoTimestamp - startVideoTimestamp) / 1000.0);
+                  LogTools.info("Writing frame {}", videoTimestampMs);
+                  recorder.setTimestamp(videoTimestampMs);
+                  ExceptionTools.handle(() -> recorder.record(frame), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+                  frame.close();
                }
             }
          }
