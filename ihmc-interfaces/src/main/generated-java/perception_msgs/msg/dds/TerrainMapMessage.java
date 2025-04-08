@@ -44,11 +44,11 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
    public boolean has_snapped_area_data_;
    public boolean has_steppability_data_;
    /**
-            * The raw data for the raw heights, which are stored as shorts.
+            * The raw data for the raw heights, which are stored as two bytes to form one short.
             */
    public us.ihmc.idl.IDLSequence.Byte  height_map_data_;
    /**
-            * The raw data for the snapped heights, which are stored as shorts.
+            * The raw data for the snapped heights, which are stored as two bytes to form one short.
             */
    public us.ihmc.idl.IDLSequence.Byte  snapped_height_data_;
    /**
@@ -281,7 +281,7 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
 
 
    /**
-            * The raw data for the raw heights, which are stored as shorts.
+            * The raw data for the raw heights, which are stored as two bytes to form one short.
             */
    public us.ihmc.idl.IDLSequence.Byte  getHeightMapData()
    {
@@ -290,7 +290,7 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
 
 
    /**
-            * The raw data for the snapped heights, which are stored as shorts.
+            * The raw data for the snapped heights, which are stored as two bytes to form one short.
             */
    public us.ihmc.idl.IDLSequence.Byte  getSnappedHeightData()
    {

@@ -32,10 +32,10 @@ bool has_snapped_area_data
 
 bool has_steppability_data
 
-# The raw data for the raw heights, which are stored as shorts.
+# The raw data for the raw heights, which are stored as two bytes to form one short.
 int8[] height_map_data
 
-# The raw data for the snapped heights, which are stored as shorts.
+# The raw data for the snapped heights, which are stored as two bytes to form one short.
 int8[] snapped_height_data
 
 # The raw data for the snap normal x value, which are stored as chars.

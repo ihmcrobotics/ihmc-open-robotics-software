@@ -33,6 +33,7 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.ShortBuffer;
 import java.time.Instant;
 
 public class PerceptionMessageTools
@@ -108,6 +109,31 @@ public class PerceptionMessageTools
    {
       long size = mat.step() * mat.rows();
       packDataArray(dataToPack, mat.data().limit(size).asBuffer());
+   }
+
+   public static void packShortDataArray(IDLSequence.Byte dataToPack, Mat mat)
+   {
+      if (mat.type() != opencv_core.CV_16UC1)
+         throw new IllegalArgumentException("Expected CV_16UC1 Mat");
+
+      // Note: Due to how the backing native memory layout is, ensure we get the total Buffer
+      // mat.asByteBuffer() doesn't always return the entire buffer, also the data may be wrong
+      int totalBytes = mat.rows() * mat.cols() * 2; // 2 bytes per short
+      ByteBuffer matBuffer = mat.data().limit(totalBytes).asByteBuffer();
+      ShortBuffer shortBuffer = matBuffer.asShortBuffer();
+
+      PerceptionDebugTools.printMat("s", mat, 1);
+
+      while (shortBuffer.hasRemaining())
+      {
+         int ushort = shortBuffer.get() & 0xFFFF; // Mask to make sure it's unsigned
+         byte low = (byte) (ushort & 0xFF);      // Lower 8 bits
+         byte high = (byte) ((ushort >> 8) & 0xFF); // Upper 8 bits
+
+         // Pack in little-endian format (low byte first)
+         dataToPack.add(low);
+         dataToPack.add(high);
+      }
    }
 
    public static void packImageMessageData(ImageMessage imageMessage, BytePointer dataPointer)

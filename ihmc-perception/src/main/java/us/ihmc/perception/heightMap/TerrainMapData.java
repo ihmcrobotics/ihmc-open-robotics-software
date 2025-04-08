@@ -12,6 +12,9 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.perception.steppableRegions.SnapResult;
 
+import java.nio.ByteBuffer;
+import java.nio.ShortBuffer;
+
 public class TerrainMapData
 {
    /**
@@ -395,7 +398,32 @@ public class TerrainMapData
       {
          if (heightMap == null)
             heightMap = new Mat(localGridSize, localGridSize, opencv_core.CV_16UC1);
-         heightMap.data(new BytePointer(message.getHeightMapData().getBuffer()));
+
+         ByteBuffer buffer = message.getHeightMapData().getBuffer();
+         // Need to back this guy up, all the way to the beginning
+         buffer.rewind();
+
+         int expectedShorts = heightMap.rows() * heightMap.cols();
+         int availableShorts = buffer.remaining() / 2;
+
+         if (availableShorts < expectedShorts)
+            throw new RuntimeException("Not enough data to fill height map: have " + availableShorts + " shorts, need " + expectedShorts);
+
+         // Note: Due to how the backing native memory layout is, ensure we get the total Buffer
+         // mat.asByteBuffer() doesn't always return the entire buffer, also the data may be wrong
+         int totalBytes = heightMap.rows() * heightMap.cols() * 2; // 2 bytes per short
+         ByteBuffer matBuffer = heightMap.data().limit(totalBytes).asByteBuffer();
+         ShortBuffer shortBuffer = matBuffer.asShortBuffer();
+
+         for (int i = 0; i < expectedShorts; i++)
+         {
+            // Little-endian
+            byte low  = buffer.get();
+            byte high = buffer.get();
+
+            int ushort = ((high & 0xFF) << 8) | (low & 0xFF);
+            shortBuffer.put((short) ushort);
+         }
       }
       else
       {
@@ -405,7 +433,33 @@ public class TerrainMapData
       {
          if (snapHeightImage == null)
             snapHeightImage = new Mat(localGridSize, localGridSize, opencv_core.CV_16UC1);
-         snapHeightImage.data(new BytePointer(message.getSnappedHeightData().getBuffer()));
+
+         ByteBuffer buffer = message.getSnappedHeightData().getBuffer();
+         // Need to back this guy up, all the way to the beginning
+         buffer.rewind();
+
+         int expectedShorts = snapHeightImage.rows() * snapHeightImage.cols();
+         int availableShorts = buffer.remaining() / 2;
+
+         if (availableShorts < expectedShorts)
+            throw new RuntimeException("Not enough data to fill height map: have " + availableShorts + " shorts, need " + expectedShorts);
+
+         // Note: Due to how the backing native memory layout is, ensure we get the total Buffer
+         // mat.asByteBuffer() doesn't always return the entire buffer, also the data may be wrong
+         int totalBytes = snapHeightImage.rows() * snapHeightImage.cols() * 2; // 2 bytes per short
+         ByteBuffer matBuffer = snapHeightImage.data().limit(totalBytes).asByteBuffer();
+         ShortBuffer shortBuffer = matBuffer.asShortBuffer();
+
+         for (int i = 0; i < expectedShorts; i++)
+         {
+            // Little-endian
+            byte low  = buffer.get();
+            byte high = buffer.get();
+
+            int ushort = ((high & 0xFF) << 8) | (low & 0xFF);
+            shortBuffer.put((short) ushort);
+         }
+
       }
       else
       {

@@ -14,10 +14,11 @@ public class TerrainMapTools
    /**
     * Computes and returns the index along the desired axis of the grid that matches this point. It is assumed that the coordinate and center values are
     * expressed in the same dimension of the same frame.
+    *
     * @param cellsPerMeter this is the number of cells found in one meter of the grid, which maps to the resolution.
-    * @param cellsPerSide this is the cells per side of the grid.
-    * @param coordinate the coordinate in question.
-    * @param center the center of the grid along the defined axis.
+    * @param cellsPerSide  this is the cells per side of the grid.
+    * @param coordinate    the coordinate in question.
+    * @param center        the center of the grid along the defined axis.
     * @return index that contains the cell along the axis in question.
     */
    public static int getLocalIndex(int cellsPerMeter, int cellsPerSide, double coordinate, double center)
@@ -102,7 +103,7 @@ public class TerrainMapTools
       if (terrainMapData.hasHeightMap())
       {
          message.setHasHeightMapData(true);
-         PerceptionMessageTools.packDataArray(message.getHeightMapData(), terrainMapData.getHeightMap());
+         PerceptionMessageTools.packShortDataArray(message.getHeightMapData(), terrainMapData.getHeightMap());
       }
       if (terrainMapData.hasSteppability())
       {
@@ -112,7 +113,7 @@ public class TerrainMapTools
       if (terrainMapData.hasSnapHeight())
       {
          message.setHasSnappedHeightData(true);
-         PerceptionMessageTools.packDataArray(message.getSnappedHeightData(), terrainMapData.getSnapHeightMat());
+         PerceptionMessageTools.packShortDataArray(message.getSnappedHeightData(), terrainMapData.getSnapHeightMat());
       }
       if (terrainMapData.hasSnapNormal())
       {

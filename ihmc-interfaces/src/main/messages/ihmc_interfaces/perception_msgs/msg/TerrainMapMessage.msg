@@ -28,9 +28,9 @@ bool has_snapped_normal_data false
 bool has_snapped_area_data false
 bool has_steppability_data false
 
-# The raw data for the raw heights, which are stored as shorts.
+# The raw data for the raw heights, which are stored as two bytes to form one short.
 byte[<=500000] height_map_data
-# The raw data for the snapped heights, which are stored as shorts.
+# The raw data for the snapped heights, which are stored as two bytes to form one short.
 byte[<=500000] snapped_height_data
 # The raw data for the snap normal x value, which are stored as chars.
 byte[<=250000] snapped_normal_x_data
