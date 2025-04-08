@@ -47,6 +47,7 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
@@ -74,6 +75,8 @@ public class JustWaitState implements State
    private final MovingReferenceFrame midFeetZUpFrame;
    private final FramePose3D startPose = new FramePose3D();
    private final FootstepSnapAndWiggler footstepSnapAndWiggler;
+   private boolean prepareSquareUpStep;
+   private AtomicBoolean useEnvironmentData = new AtomicBoolean(false);
 
    public JustWaitState(DRCRobotModel robotModel,
                         ROS2Helper ros2Helper,
@@ -194,6 +197,9 @@ public class JustWaitState implements State
       PoseListMessage poseListMessage = new PoseListMessage();
       MessageTools.packPoseListMessage(poses, poseListMessage);
 
+      // We assume the 90 degree turn is happening on flat ground, makes it easier
+      // TODO snap footsteps under the robot, this is difficult cause of the noise in the height map causing inaccurate steps
+      useEnvironmentData.set(false);
       planToGoal(poseListMessage);
    }
 
@@ -234,10 +240,14 @@ public class JustWaitState implements State
                                                                                      });
 
                                   footstepPlannerRequest.setRequestedInitialStanceSide(RobotSide.LEFT);
-                                  footstepPlannerRequest.setHeightMapData(heightMapData.get());
-                                  footstepPlannerRequest.setTerrainMapData(terrainMapData.get());
 
-                                  footstepPlannerRequest.setSnapGoalSteps(true);
+                                  if (useEnvironmentData.get())
+                                  {
+                                     footstepPlannerRequest.setHeightMapData(heightMapData.get());
+                                     footstepPlannerRequest.setTerrainMapData(terrainMapData.get());
+                                     footstepPlannerRequest.setSnapGoalSteps(useEnvironmentData.get());
+                                  }
+
                                   footstepPlannerRequest.setPlanBodyPath(false);
 
                                   FramePose3D goalFramePose = new FramePose3D();
@@ -275,6 +285,7 @@ public class JustWaitState implements State
 
                                   if (!footstepDataListMessage.getFootstepDataList().isEmpty())
                                   {
+                                     useEnvironmentData.set(true);
                                      logFootStePlan();
                                      ros2Helper.publish(controllerFootstepDataTopic, footstepDataListMessage);
                                   }
@@ -302,11 +313,12 @@ public class JustWaitState implements State
          firstStepInQueue = controllerQueueMonitor.getFirstFootstepInQueue();
          List<QueuedFootstepStatusMessage> controllerFootstepQueue = controllerQueueMonitor.getControllerFootstepQueue();
 
-         RobotSide robotSide = RobotSide.fromByte(controllerFootstepQueue.get(controllerFootstepQueue.size() - 1).getRobotSide());
+         RobotSide robotSide = RobotSide.fromByte(controllerFootstepQueue.get(0).getRobotSide());
+
+         tempFramePose.set(firstStepInQueue);
 
          if (robotSide == RobotSide.LEFT)
          {
-            tempFramePose.set(firstStepInQueue);
             tempFramePose.changeFrame(leftFootFrame);
             tempFramePose.getTranslation().addY(-footstepPlannerParameters.getIdealFootstepWidth());
             tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
@@ -315,7 +327,6 @@ public class JustWaitState implements State
          }
          else if (robotSide == RobotSide.RIGHT)
          {
-            tempFramePose.set(firstStepInQueue);
             tempFramePose.changeFrame(rightFootFrame);
             tempFramePose.getTranslation().addY(footstepPlannerParameters.getIdealFootstepWidth());
             tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());

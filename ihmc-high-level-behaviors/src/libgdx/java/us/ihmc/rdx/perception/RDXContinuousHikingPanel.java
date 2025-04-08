@@ -27,7 +27,6 @@ import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.behaviors.activeMapping.StancePoseCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.PositionOptimizedTrajectoryGenerator;
-import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.property.StoredPropertySetROS2TopicPair;
@@ -78,7 +77,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    private final DRCRobotModel robotModel;
    private final ROS2SyncedRobotModel syncedRobotModel;
    private final ROS2Publisher<ContinuousHikingCommandMessage> commandPublisher;
-   private final ROS2Publisher<std_msgs.msg.dds.Empty> squareUpPublisher;
+   private final ROS2Publisher<Empty> squareUpPublisher;
    private final ContinuousHikingCommandMessage commandMessage = new ContinuousHikingCommandMessage();
    private final RDXStancePoseSelectionPanel stancePoseSelectionPanel;
    private final PositionOptimizedTrajectoryGenerator positionTrajectoryGenerator = new PositionOptimizedTrajectoryGenerator(numberOfKnotPoints,
@@ -93,6 +92,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    private final ImBoolean useMonteCarloReference = new ImBoolean(false);
    private final ImBoolean useMonteCarloFootstepPlanner = new ImBoolean(false);
    private final ControllerFootstepQueueMonitor controllerFootstepQueueMonitorRemote;
+   private final ControllerFootstepQueueMonitor controllerFootstepQueueMonitorUI;
    private final ContinuousHikingLogger continuousHikingLogger;
    private final ROS2Publisher<PlanOffsetStatus> planOffsetStatusPublisher;
    private final ROS2Publisher<FootstepStatusMessage> footstepStatusMessagePublisher;
@@ -137,7 +137,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
                                                                monteCarloPlannerParameters,
                                                                robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
 
-      ros2Node.createSubscription(HumanoidControllerAPI.getTopic(WalkingControllerFailureStatusMessage.class, robotModel.getSimpleRobotName()),
+      ros2Node.createSubscription(getTopic(WalkingControllerFailureStatusMessage.class, robotModel.getSimpleRobotName()),
                                   (s) -> terrainPlanningDebugger.reset());
 
       ros2Node.createSubscription2(ContinuousHikingAPI.START_AND_GOAL_FOOTSTEPS, this::onStartAndGoalPosesReceived);
@@ -191,6 +191,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
 
       continuousHikingLogger = new ContinuousHikingLogger();
       controllerFootstepQueueMonitorRemote = new ControllerFootstepQueueMonitor(ros2Node, robotModel.getSimpleRobotName());
+      controllerFootstepQueueMonitorUI = new ControllerFootstepQueueMonitor(ros2Node, robotModel.getSimpleRobotName());
    }
 
    /**
@@ -307,7 +308,8 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       ImGui.sameLine();
       if (ImGui.button("Square Up"))
       {
-         squareUpPublisher.publish(new Empty());
+         if (controllerFootstepQueueMonitorUI.getControllerFootstepQueue().isEmpty())
+            squareUpPublisher.publish(new Empty());
       }
       ImGui.separator();
 
