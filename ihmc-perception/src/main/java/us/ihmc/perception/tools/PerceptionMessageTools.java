@@ -122,8 +122,6 @@ public class PerceptionMessageTools
       ByteBuffer matBuffer = mat.data().limit(totalBytes).asByteBuffer();
       ShortBuffer shortBuffer = matBuffer.asShortBuffer();
 
-      PerceptionDebugTools.printMat("s", mat, 1);
-
       while (shortBuffer.hasRemaining())
       {
          int ushort = shortBuffer.get() & 0xFFFF; // Mask to make sure it's unsigned
