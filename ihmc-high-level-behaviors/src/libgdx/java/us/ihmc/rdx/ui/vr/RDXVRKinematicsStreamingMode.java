@@ -300,7 +300,7 @@ public class RDXVRKinematicsStreamingMode
          retargetMotion(toolboxInputMessage);
 
          if (enabled.get())
-            toolboxInputMessage.setStreamToController(false);
+            toolboxInputMessage.setStreamToController(streamToController.get());
          else
             toolboxInputMessage.setStreamToController(kinematicsRecorder.isReplaying());
 

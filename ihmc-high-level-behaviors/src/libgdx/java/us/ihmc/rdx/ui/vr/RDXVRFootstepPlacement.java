@@ -43,8 +43,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class RDXVRFootstepPlacement
 {
-   private final static boolean USE_HEIGHTMAP = true;
-   private final static boolean USE_STEPPABLE_REGION_ADAPTATION = true;
+   private final static boolean USE_HEIGHTMAP = false;
+   private final static boolean USE_STEPPABLE_REGION_ADAPTATION = false;
    private final static boolean ADAPTABLE_STEP_DURATION = false;
    private HeightMapData latestHeightMapData;
 
