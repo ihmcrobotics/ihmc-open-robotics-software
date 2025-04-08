@@ -193,7 +193,7 @@ public class RDXVRFootstepPlacement
    public void createNewFootstep(RobotSide side)
    {
       footstepBeingExternallyPlaced = new RDXVRFootstep(side, footstepModels.get(side), footstepIndex++);
-      footstepPreview = new RDXVRFootstep(side, footstepModels.get(side.getOppositeSide()), footstepIndex);
+      footstepPreview = new RDXVRFootstep(side, footstepModels.get(side), footstepIndex);
    }
 
    public boolean setFootstepPose(FramePose3DReadOnly pose)
@@ -211,16 +211,12 @@ public class RDXVRFootstepPlacement
                {
                   adaptedPose = footstepOptimizer.compute(latestHeightMapData, adaptedPose);
                }
-               if (Double.isNaN(previousAdaptedStepHeight) ||
-                   getTimeElapsedAfterStep() < getStepDuration() / 3)
-               {
-                  footstepBeingExternallyPlaced.setPose(adaptedPose);
-                  footstepPreview.setPose(adaptedPose);
-                  FramePose3D previewPose = new FramePose3D(adaptedPose);
-                  previewPose.getPosition().setZ(adaptedPose.getZ()+0.05);
-                  footstepPreview.setPose(previewPose);
-                  previousAdaptedStepHeight = adaptedPose.getZ();
-               }
+               footstepBeingExternallyPlaced.setPose(adaptedPose);
+               footstepPreview.setPose(adaptedPose);
+               FramePose3D previewPose = new FramePose3D(adaptedPose);
+               previewPose.getPosition().setZ(adaptedPose.getZ()+0.05);
+               footstepPreview.setPose(previewPose);
+//               previousAdaptedStepHeight = adaptedPose.getZ();
             }
             else
             {

@@ -140,8 +140,8 @@ __device__ void sampleFootCorners(
     bool* isSurfaceDiscontinuous)
 {
     // Define foot corners
-    float fx = footLength + 0.1; // keep some room for not bumping into edges
-    float fy = footWidth + 0.1;
+    float fx = footLength + 0.10; // keep some room for not bumping into edges
+    float fy = footWidth + 0.10;
     float2 corners[5] = {
         {-fx / 2, -fy / 2},
         {fx / 2, -fy / 2},

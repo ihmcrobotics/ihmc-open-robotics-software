@@ -72,7 +72,7 @@ public class CUDAFootstepOptimizer implements AutoCloseable
          throw new RuntimeException(e);
       }
 
-      searchRadius = 1.5f * footLength;
+      searchRadius = 1.0f * footLength;
       searchYawLimit = (float) Math.PI/4 / 2;
       stepsXY = (int) (2 * searchRadius / SEARCH_SPACE_RESOLUTION_XY) + 1;
       stepsYaw = (int) (2 * searchYawLimit / SEARCH_SPACE_RESOLUTION_YAW);
