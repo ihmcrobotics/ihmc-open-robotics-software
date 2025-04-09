@@ -12,6 +12,7 @@ import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Size;
 import us.ihmc.avatar.scs2.SCS2LogSessionWithVideo;
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -91,7 +92,8 @@ public class LeRobotDatasetEpisode
 
          for (RobotSide side : RobotSide.values)
          {
-            Path mp4Path = zedVideoDirs.get(side).resolve(episodeName + ".mp4");
+//            Path mp4Path = zedVideoDirs.get(side).resolve(episodeName + ".mp4");
+            Path mp4Path = zedVideoDirs.get(side).resolve(episodeName + ".mov");
 
             // Input #0, mov,mp4,m4a,3gp,3g2,mj2, from 'episode_000000.mp4':
             //  Metadata:
@@ -138,20 +140,24 @@ public class LeRobotDatasetEpisode
          }
 
          long lastVideoTimestamp = -1;
-         int numberOfFrames = outPoint - inPoint;
+         int scsInOutLength = outPoint - inPoint;
          long startVideoTimestamp = -1;
-         for (int i = 0; i < numberOfFrames; i++)
+         for (int i = 0; i < scsInOutLength; i++)
          {
             session.playbackTick(); // TODO: Is this skipping the first tick?
 
             long timestamp = yoTimestamp.getLongValue();
             zedSVOScrubber.scrub(timestamp);
-            long currentVideoTimestamp = zedSVOScrubber.getCurrentTimestamp();
+            long currentVideoTimestamp = zedSVOScrubber.getTimestampScrubber().getCurrentVideoTimestamp();
             if (startVideoTimestamp < 0)
                startVideoTimestamp = currentVideoTimestamp;
 
             if (currentVideoTimestamp > lastVideoTimestamp) // Write only when a new frame is available
             {
+               double period = 0.0;
+               if (lastVideoTimestamp >= 0)
+                  period = Conversions.nanosecondsToSeconds(currentVideoTimestamp - lastVideoTimestamp);
+
                lastVideoTimestamp = currentVideoTimestamp;
 
                for (RobotSide side : RobotSide.values)
@@ -179,7 +185,7 @@ public class LeRobotDatasetEpisode
                   resized.close();
 
                   long videoTimestampMs = Math.round((currentVideoTimestamp - startVideoTimestamp) / 1000.0);
-                  LogTools.info("Writing frame {}", videoTimestampMs);
+                  LogTools.info("Current timestamp: %d  Writing frame %.3f Frequency %.3f".formatted(currentVideoTimestamp, videoTimestampMs / 1000.0, Conversions.secondsToHertz(period)));
                   recorder.setTimestamp(videoTimestampMs);
                   ExceptionTools.handle(() -> recorder.record(frame), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
                   frame.close();
@@ -187,6 +193,7 @@ public class LeRobotDatasetEpisode
             }
          }
 
+         LogTools.info("Stopping writing episode.");
          for (RobotSide side : RobotSide.values)
          {
             ExceptionTools.handle(() -> ffmpegRecorders.get(side).stop(), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
