@@ -485,7 +485,7 @@ public class AvatarSimulationFactory
       {
          scs.attachSimulationRewoundListener(() -> visualizer.updateGraphics());
          scs.attachPlayCycleListener(tick -> visualizer.updateGraphics());
-//         scs.addYoGraphicsListRegistry(visualizer.getGraphicsListRegistry(), false);
+         scs.addYoGraphicsListRegistry(visualizer.getGraphicsListRegistry(), false);
       }
    }
 
