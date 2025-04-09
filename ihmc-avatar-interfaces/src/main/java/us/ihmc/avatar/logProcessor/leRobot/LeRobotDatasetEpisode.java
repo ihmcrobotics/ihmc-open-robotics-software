@@ -106,9 +106,9 @@ public class LeRobotDatasetEpisode
             recorder.setFormat("mp4");
 //            recorder.setVideoCodecName("av1_nvenc");
 //            recorder.setVideoOption("preset", "p7");
-            recorder.setVideoCodecName("libaom-av1");
-            recorder.setVideoOption("preset", "10");
-            recorder.setVideoOption("threads", String.valueOf(Runtime.getRuntime().availableProcessors()));
+//            recorder.setVideoCodecName("libaom-av1");
+//            recorder.setVideoOption("preset", "10");
+//            recorder.setVideoOption("threads", String.valueOf(Runtime.getRuntime().availableProcessors()));
             recorder.setPixelFormat(avutil.AV_PIX_FMT_YUV420P);
             recorder.setFrameRate(LeRobotDataset.ZED_FPS);
             recorder.setVideoBitrate(1352000);
