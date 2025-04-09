@@ -16,8 +16,6 @@ import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.avatar.testTools.scs2.SCS2RewindabilityVerifier;
 import us.ihmc.avatar.testTools.scs2.SCS2RewindabilityVerifierWithStackTracing;
-import us.ihmc.commons.ContinuousIntegrationTools;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -41,7 +39,7 @@ import us.ihmc.tools.MemoryTools;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInterface
+public abstract class AvatarObstacleCoursePlatformTest implements MultiRobotTestInterface
 {
    protected SimulationTestingParameters simulationTestingParameters;
    protected SCS2AvatarTestingSimulation simulationTestHelper;

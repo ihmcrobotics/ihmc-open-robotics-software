@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -40,6 +41,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -54,6 +56,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.math.interpolators.OrientationInterpolationCalculator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.SO3TrajectoryPoint;
+import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.MovingZUpFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
@@ -239,7 +242,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       humanoidReferenceFrames.updateFrames();
       desiredRandomChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
 
-      assertControlErrorIsLow(simulationTestHelper, chest, 1.0e-2);
+      assertControlErrorIsLow(simulationTestHelper, chest, 1.0e-2, getRobotModel().getJointMap().getSpineJointNames());
       assertSingleWaypointExecuted(desiredRandomChestOrientation, simulationTestHelper, chest, prefix);
 
       assertEquals(1, statusMessages.size());
@@ -650,7 +653,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 
       success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
-      assertControlErrorIsLow(simulationTestHelper, chest, 1.0e-2);
+      assertControlErrorIsLow(simulationTestHelper, chest, 1.0e-2, getRobotModel().getJointMap().getSpineJointNames());
 
       assertEquals(1, statusMessages.size());
       humanoidReferenceFrames.updateFrames();
@@ -791,7 +794,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 
       success = simulationTestHelper.simulateNow(timePerWaypoint * numberOfTrajectoryPoints + 0.5);
       assertTrue(success);
-      assertControlErrorIsLow(simulationTestHelper, chest, 1.0e-2);
+      assertControlErrorIsLow(simulationTestHelper, chest, 1.0e-2, getRobotModel().getJointMap().getSpineJointNames());
    }
 
 
@@ -921,7 +924,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 
       success = simulationTestHelper.simulateNow(timePerWaypoint * numberOfTrajectoryPoints + 0.5);
       assertTrue(success);
-      assertControlErrorIsLow(simulationTestHelper, chest, 1.0e-2);
+      assertControlErrorIsLow(simulationTestHelper, chest, 1.0e-2, getRobotModel().getJointMap().getSpineJointNames());
    }
 
    public Axis3D getAxisToMoveForQueuedMessages()
@@ -1074,7 +1077,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       pointsInLastTrajectory++;
 
       EndToEndTestTools.assertTotalNumberOfWaypointsInTaskspaceManager(chest.getName(), prefix, pointsInLastTrajectory, simulationTestHelper);
-      assertControlErrorIsLow(simulationTestHelper, chest, 1.0e-2);
+      assertControlErrorIsLow(simulationTestHelper, chest, 1.0e-2, getRobotModel().getJointMap().getSpineJointNames());
 
       assertEquals(2 * messageList.size(), statusMessages.size());
 
@@ -1510,7 +1513,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 
       success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
-      assertControlErrorIsLow(simulationTestHelper, chest, 1.0e-2);
+      assertControlErrorIsLow(simulationTestHelper, chest, 1.0e-2, getRobotModel().getJointMap().getSpineJointNames());
    }
 
    public void testStopAllTrajectory() throws Exception
@@ -1576,7 +1579,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       EndToEndTestTools.assertTotalNumberOfWaypointsInTaskspaceManager(chest.getName(), prefix, 1, simulationTestHelper);
 
       EuclidCoreTestTools.assertEquals(desiredOrientationBeforeStop, desiredOrientationAfterStop, 1.0e-3);
-      assertControlErrorIsLow(simulationTestHelper, chest, 1.0e-2);
+      assertControlErrorIsLow(simulationTestHelper, chest, 1.0e-2, getRobotModel().getJointMap().getSpineJointNames());
    }
 
    /**
@@ -1726,7 +1729,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 
       EuclidCoreTestTools.assertOrientation3DGeometricallyEquals(desiredOrientation, currentDesiredTrajectoryPoint.getOrientation(), desiredEpsilon);
       EuclidCoreTestTools.assertEquals(desiredAngularVelocity, currentDesiredTrajectoryPoint.getAngularVelocity(), desiredEpsilon);
-      assertControlErrorIsLow(simulationTestHelper, chest, 1.0e-2);
+      assertControlErrorIsLow(simulationTestHelper, chest, 1.0e-2, getRobotModel().getJointMap().getSpineJointNames());
 
       success = simulationTestHelper.simulateNow(0.5 * trajectoryTime.getValue() + 1.5);
       assertTrue(success);
@@ -1736,7 +1739,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 
       EuclidCoreTestTools.assertOrientation3DGeometricallyEquals(desiredOrientation, currentDesiredTrajectoryPoint.getOrientation(), desiredEpsilon);
       EuclidCoreTestTools.assertEquals(desiredAngularVelocity, currentDesiredTrajectoryPoint.getAngularVelocity(), desiredEpsilon);
-      assertControlErrorIsLow(simulationTestHelper, chest, 1.0e-3);
+      assertControlErrorIsLow(simulationTestHelper, chest, 1.0e-3, getRobotModel().getJointMap().getSpineJointNames());
    }
 
    public static Vector3D findControlErrorRotationVector(YoVariableHolder scs, RigidBodyBasics chest)
@@ -1775,10 +1778,30 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 
    public static void assertControlErrorIsLow(YoVariableHolder scs, RigidBodyBasics chest, double errorTolerance)
    {
+      assertControlErrorIsLow(scs, chest, errorTolerance, null);
+   }
+
+   public static void assertControlErrorIsLow(YoVariableHolder scs, RigidBodyBasics chest, double errorTolerance, SpineJointName[] spineJointNames)
+   {
       Vector3D error = findControlErrorRotationVector(scs, chest);
+      if (spineJointNames != null)
+         error = maskVectorWithActuation(error, spineJointNames);
       boolean isErrorLow = error.norm() <= errorTolerance;
       assertTrue(isErrorLow, "Error: " + error.norm() + ", wanted less than " + errorTolerance);
    }
+
+   public static Vector3D maskVectorWithActuation(Vector3DReadOnly vector, SpineJointName[] spineJointNames)
+   {
+      Vector3D maskedVector = new Vector3D(vector);
+      if (!Arrays.asList(spineJointNames).contains(SpineJointName.SPINE_ROLL))
+         maskedVector.setX(0.0);
+      if (!Arrays.asList(spineJointNames).contains(SpineJointName.SPINE_PITCH))
+         maskedVector.setY(0.0);
+      if (!Arrays.asList(spineJointNames).contains(SpineJointName.SPINE_YAW))
+         maskedVector.setZ(0.0);
+      return maskedVector;
+   }
+
 
    public static void assertSingleWaypointExecuted(FrameQuaternion desiredOrientation, YoVariableHolder scs, RigidBodyBasics body, String prefix)
    {

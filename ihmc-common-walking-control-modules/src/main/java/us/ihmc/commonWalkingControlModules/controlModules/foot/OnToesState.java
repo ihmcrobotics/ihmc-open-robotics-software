@@ -45,7 +45,6 @@ public class OnToesState extends AbstractFootControlState
    private final DoubleParameter maxContactPointRate;
 
    private final YoBoolean usePointContact;
-   private final YoDouble toeOffDesiredPitchAngle, toeOffDesiredPitchVelocity, toeOffDesiredPitchAcceleration;
    private final YoDouble toeOffCurrentPitchAngle, toeOffCurrentPitchVelocity;
 
    private final FramePoint2D toeOffContactPoint2d = new FramePoint2D();
@@ -74,10 +73,6 @@ public class OnToesState extends AbstractFootControlState
 
       usePointContact = new YoBoolean(namePrefix + "UsePointContact", registry);
 
-      toeOffDesiredPitchAngle = new YoDouble(namePrefix + "ToeOffDesiredPitchAngle", registry);
-      toeOffDesiredPitchVelocity = new YoDouble(namePrefix + "ToeOffDesiredPitchVelocity", registry);
-      toeOffDesiredPitchAcceleration = new YoDouble(namePrefix + "ToeOffDesiredPitchAcceleration", registry);
-
       toeOffCurrentPitchAngle = new YoDouble(namePrefix + "ToeOffCurrentPitchAngle", registry);
       toeOffCurrentPitchVelocity = new YoDouble(namePrefix + "ToeOffCurrentPitchVelocity", registry);
 
@@ -91,10 +86,6 @@ public class OnToesState extends AbstractFootControlState
                                                                  controllerToolbox.getControlDT(),
                                                                  contactPoint.getReferenceFrame()));
       }
-
-      toeOffDesiredPitchAngle.set(Double.NaN);
-      toeOffDesiredPitchVelocity.set(Double.NaN);
-      toeOffDesiredPitchAcceleration.set(Double.NaN);
 
       toeOffCurrentPitchAngle.set(Double.NaN);
       toeOffCurrentPitchVelocity.set(Double.NaN);
@@ -295,10 +286,6 @@ public class OnToesState extends AbstractFootControlState
    public void onExit(double timeInState)
    {
       super.onExit(timeInState);
-
-      toeOffDesiredPitchAngle.set(Double.NaN);
-      toeOffDesiredPitchVelocity.set(Double.NaN);
-      toeOffDesiredPitchAcceleration.set(Double.NaN);
 
       toeOffCurrentPitchAngle.set(Double.NaN);
       toeOffCurrentPitchVelocity.set(Double.NaN);
