@@ -1,7 +1,6 @@
 package us.ihmc.avatar.logProcessor.leRobot;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import org.bytedeco.ffmpeg.global.avcodec;
 import org.bytedeco.ffmpeg.global.avutil;
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.javacv.FFmpegFrameRecorder;
@@ -69,16 +68,10 @@ public class LeRobotDatasetEpisode
          node.put("length", length);
       }));
 
-      //      session.getLogDataReader().
-      //      session.get
-
       int inPoint = session.getBufferProperties().getInPoint();
       int outPoint = session.getBufferProperties().getOutPoint();
       double sessionDTSeconds = session.getSessionDTSeconds();
       LogTools.info("dt: {}", sessionDTSeconds);
-
-      // TODO: merely start the mp4 export
-      //      LeRobotDatasetTools.extractMP4FromZED(zedSVOScrubber);
 
       ThreadTools.startAsDaemon(() ->
       {
@@ -92,8 +85,7 @@ public class LeRobotDatasetEpisode
 
          for (RobotSide side : RobotSide.values)
          {
-//            Path mp4Path = zedVideoDirs.get(side).resolve(episodeName + ".mp4");
-            Path mp4Path = zedVideoDirs.get(side).resolve(episodeName + ".mov");
+            Path mp4Path = zedVideoDirs.get(side).resolve(episodeName + ".mp4");
 
             // Input #0, mov,mp4,m4a,3gp,3g2,mj2, from 'episode_000000.mp4':
             //  Metadata:
@@ -110,29 +102,11 @@ public class LeRobotDatasetEpisode
             //[libdav1d @ 0x652476360640] libdav1d 1.2.1
 
             FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(mp4Path.toString(), 853, 480);
-
-
-            recorder.setVideoOption("tune", "zerolatency"); // https://trac.ffmpeg.org/wiki/StreamingGuide
-            recorder.setFormat("mov");
-
-            // For information about these settings visit https://trac.ffmpeg.org/wiki/Encode/H.264
-            recorder.setVideoOption("preset", "ultrafast");
-            recorder.setVideoOption("crf", "27");
-            recorder.setVideoBitrate(60000000); // 6000 kb/s
-
-            // This video codec is deprecated, so in order to use it without errors we have to set the pixel format and strictly allow FFMPEG to use it
-            recorder.setVideoCodec(avcodec.AV_CODEC_ID_MJPEG);
+            recorder.setFormat("mp4");
+            recorder.setVideoOption("preset", "p7");
             recorder.setPixelFormat(avutil.AV_PIX_FMT_YUV420P);
-            recorder.setVideoOption("strict", "-2");
-            // Frame rate of video recordings
-            recorder.setFrameRate(15);
-
-//            recorder.setFormat("mp4");
-//            recorder.setVideoCodec(avcodec.AV_CODEC_ID_AV1);
-//            recorder.setPixelFormat(avutil.AV_PIX_FMT_YUV420P);
-////            float frameRate = sl_get_current_fps(zedSVOScrubber.getCameraID());
-////            LogTools.info("Recording at {} FPS", frameRate);
-//            recorder.setFrameRate(LeRobotDataset.ZED_FPS);
+            recorder.setFrameRate(LeRobotDataset.ZED_FPS);
+            recorder.setVideoBitrate(1352000);
 
             ExceptionTools.handle(() -> recorder.start(), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
 
