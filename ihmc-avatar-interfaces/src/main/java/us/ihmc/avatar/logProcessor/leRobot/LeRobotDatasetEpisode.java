@@ -9,6 +9,7 @@ import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Size;
 import us.ihmc.avatar.scs2.SCS2LogSessionWithVideo;
 import us.ihmc.commons.Conversions;
@@ -101,7 +102,7 @@ public class LeRobotDatasetEpisode
             //      encoder         : Lavc61.8.100 libsvtav1
             //[libdav1d @ 0x652476360640] libdav1d 1.2.1
 
-            FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(mp4Path.toString(), 853, 480);
+            FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(mp4Path.toString(), 640, 480);
             recorder.setFormat("mp4");
             recorder.setVideoOption("preset", "p7");
             recorder.setPixelFormat(avutil.AV_PIX_FMT_YUV420P);
@@ -151,12 +152,18 @@ public class LeRobotDatasetEpisode
                   opencv_imgproc.resize(bgra8Mat, resized, size);
                   size.close();
 
-                  // TODO: Crop the sides off to 640x480?
+                  int cropWidth = 640;
+                  int cropHeight = 480;
+                  int x = (resized.cols() - cropWidth) / 2;  // Center crop horizontally
+                  int y = (resized.rows() - cropHeight) / 2; // Center crop vertically
+                  Rect roi = new Rect(x, y, cropWidth, cropHeight);
+                  Mat cropped = new Mat(resized, roi);
+                  resized.close();
 
                   FFmpegFrameRecorder recorder = ffmpegRecorders.get(side);
 
-                  Frame frame = frameConverter.convert(resized);
-                  resized.close();
+                  Frame frame = frameConverter.convert(cropped);
+                  cropped.close();
 
                   long videoTimestampMs = Math.round((currentVideoTimestamp - startVideoTimestamp) / 1000.0);
                   LogTools.info("Current timestamp: %d  Writing frame %.3f Frequency %.3f".formatted(currentVideoTimestamp, videoTimestampMs / 1000.0, Conversions.secondsToHertz(period)));
