@@ -72,4 +72,14 @@ public interface ContinuousHikingParametersBasics extends ContinuousHikingParame
    {
       set(ContinuousHikingParameters.nextWaypointDistanceMargin, nextWaypointDistanceMargin);
    }
+
+   default void setNinetyDegreeTurnSwingTime(double ninetyDegreeTurnSwingTime)
+   {
+      set(ContinuousHikingParameters.ninetyDegreeTurnSwingTime, ninetyDegreeTurnSwingTime);
+   }
+
+   default void setNinetyDegreeTurnTransferTime(double ninetyDegreeTurnTransferTime)
+   {
+      set(ContinuousHikingParameters.ninetyDegreeTurnTransferTime, ninetyDegreeTurnTransferTime);
+   }
 }

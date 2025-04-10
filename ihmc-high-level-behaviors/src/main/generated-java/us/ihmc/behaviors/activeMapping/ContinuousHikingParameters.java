@@ -31,6 +31,8 @@ public class ContinuousHikingParameters extends StoredPropertySet implements Con
    public static final DoubleStoredPropertyKey percentThroughSwingToStartPlanning = keys.addDoubleKey("Percent through swing to start planning");
    public static final BooleanStoredPropertyKey logFootstepPlans = keys.addBooleanKey("Log footstep plans");
    public static final DoubleStoredPropertyKey nextWaypointDistanceMargin = keys.addDoubleKey("Next Waypoint Distance Margin");
+   public static final DoubleStoredPropertyKey ninetyDegreeTurnSwingTime = keys.addDoubleKey("Ninety Degree Turn Swing Time");
+   public static final DoubleStoredPropertyKey ninetyDegreeTurnTransferTime = keys.addDoubleKey("Ninety Degree Turn Transfer Time");
 
    /**
     * Loads this property set.

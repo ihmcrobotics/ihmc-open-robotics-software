@@ -271,8 +271,8 @@ public class JustWaitState implements State
                                   FootstepPlan newestFootstepPlan = plannerOutput.getFootstepPlan();
 
                                   FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
-                                  footstepDataListMessage.setDefaultSwingDuration(continuousHikingParameters.getSwingTime());
-                                  footstepDataListMessage.setDefaultTransferDuration(continuousHikingParameters.getTransferTime());
+                                  footstepDataListMessage.setDefaultSwingDuration(continuousHikingParameters.getNinetyDegreeTurnSwingTime());
+                                  footstepDataListMessage.setDefaultTransferDuration(continuousHikingParameters.getNinetyDegreeTurnTransferTime());
                                   footstepDataListMessage.getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_QUEUE);
                                   footstepDataListMessage.setOffsetFootstepsHeightWithExecutionError(true);
 

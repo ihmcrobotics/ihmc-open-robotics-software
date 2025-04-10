@@ -12,5 +12,7 @@
   "Planning without reference timeout" : 1.3,
   "Percent through swing to start planning" : 0.15,
   "Log footstep plans" : true,
-  "Next Waypoint Distance Margin" : 0.8
+  "Next Waypoint Distance Margin" : 0.8,
+  "Ninety Degree Turn Swing Time" : 0.8,
+  "Ninety Degree Turn Transfer Time": 0.4
 }

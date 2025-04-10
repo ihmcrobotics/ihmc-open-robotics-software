@@ -74,4 +74,14 @@ public interface ContinuousHikingParametersReadOnly extends StoredPropertySetRea
    {
       return get(nextWaypointDistanceMargin);
    }
+
+   default double getNinetyDegreeTurnSwingTime()
+   {
+      return get(ninetyDegreeTurnSwingTime);
+   }
+
+   default double getNinetyDegreeTurnTransferTime()
+   {
+      return get(ninetyDegreeTurnTransferTime);
+   }
 }
