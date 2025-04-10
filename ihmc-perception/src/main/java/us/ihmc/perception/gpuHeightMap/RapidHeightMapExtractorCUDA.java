@@ -189,6 +189,29 @@ public class RapidHeightMapExtractorCUDA
          throw new RuntimeException("The terrain center index was computed incorrectly.");
    }
 
+   public void lowerBackDrop()
+   {
+      double thicknessOfTheFoot = 0.02;
+      double height = 0.0;
+
+      if (footSoleFrames.sides().length == 2)
+      {
+         height = Math.min(footSoleFrames.get(RobotSide.LEFT).getTransformToWorldFrame().getTranslationZ(),
+                           footSoleFrames.get(RobotSide.RIGHT).getTransformToWorldFrame().getTranslationZ()) - thicknessOfTheFoot;
+      }
+      int lowerBackDropAmount = (int) ((height + heightMapParameters.getHeightOffset()) * heightMapParameters.getHeightScaleFactor());
+      lowerBackDropAmount -= 10000;
+
+      localHeightMapImage.setTo(new Scalar(lowerBackDropAmount));
+      globalHeightMapImage.setTo(new Scalar(lowerBackDropAmount));
+      emptyGlobalHeightMapImage.setTo(new Scalar(lowerBackDropAmount));
+
+      filteredRapidHeightMapExtractor.reset();
+      snappedFootstepsExtractor.reset(lowerBackDropAmount);
+
+      sequenceNumber = 0;
+   }
+
    public void reset()
    {
       double thicknessOfTheFoot = 0.02;

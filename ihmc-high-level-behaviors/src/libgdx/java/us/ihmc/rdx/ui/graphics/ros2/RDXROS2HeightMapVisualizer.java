@@ -151,6 +151,9 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       if (ros2 != null && ImGui.button(labels.get("Reset Ground to Feet")))
          ros2.publish(PerceptionAPI.RESET_HEIGHT_MAP);
 
+      if (ros2 != null && ImGui.button(labels.get("Lower Height Map Backdrop")))
+         ros2.publish(PerceptionAPI.LOWER_HEIGHT_MAP_BACKDROP);
+
       if (ImGui.collapsingHeader(labels.get("Visualization Options")))
       {
          ImGui.checkbox(labels.get("Enable Height Map Renderer"), enableHeightMapRenderer);
