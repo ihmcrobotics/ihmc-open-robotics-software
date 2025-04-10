@@ -1,6 +1,7 @@
 package us.ihmc.rdx.simulation.scs2;
 
 import imgui.ImGui;
+import imgui.flag.ImGuiMouseButton;
 import imgui.type.ImInt;
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.javacv.Frame;
@@ -11,7 +12,10 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.avatar.scs2.SCS2LogSessionWithVideo;
 import us.ihmc.codecs.generated.YUVPicture;
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.log.LogTools;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer;
@@ -21,6 +25,7 @@ import us.ihmc.scs2.session.log.*;
 import us.ihmc.tools.time.DurationFormatter;
 import us.ihmc.yoVariables.variable.YoLong;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -155,6 +160,12 @@ public class RDXSCS2LogSession extends RDXSCS2Session
    {
       if (isSessionThreadRunning())
       {
+         File logDirectory = logDataReader.getLogDirectory();
+         if (ImGuiTools.textWithUnderlineOnHover("Log directory: %s".formatted(logDirectory.getName())) && ImGui.isMouseClicked(ImGuiMouseButton.Left))
+         {
+            ExceptionTools.handle(() -> Desktop.getDesktop().open(logDirectory), DefaultExceptionHandler.PRINT_MESSAGE);
+         }
+
          int timeQueryTimestamp = MathTools.clamp(logPosition.get(), 0, logDataReader.getNumberOfEntries() - 1);
          String format = "%d/%d %s".formatted(logPosition.get(),
                                               logDataReader.getNumberOfEntries(),

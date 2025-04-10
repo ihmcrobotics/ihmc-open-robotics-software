@@ -1,14 +1,18 @@
 package us.ihmc.rdx.logging;
 
 import imgui.ImGui;
+import imgui.flag.ImGuiMouseButton;
 import imgui.type.ImString;
 import us.ihmc.avatar.logProcessor.leRobot.LeRobotDataset;
 import us.ihmc.avatar.logProcessor.leRobot.LeRobotDatasetTools;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.simulation.scs2.RDXSCS2LogSession;
 
+import java.awt.*;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
@@ -82,13 +86,12 @@ public class RDXLeRobotDatasetCreator
          return;
       }
 
-      ImGui.text("Log directory: %s".formatted(logSession.getSession().getLogDataReader().getLogDirectory().getName()));
-
       if (dataset != null)
       {
          ImGuiTools.separatorText("Selected dataset");
 
-         ImGui.text("Dataset name: %s".formatted(dataset.getName()));
+         if (ImGuiTools.textWithUnderlineOnHover("Dataset name: %s".formatted(dataset.getName())) && ImGui.isMouseClicked(ImGuiMouseButton.Left))
+            ExceptionTools.handle(() -> Desktop.getDesktop().open(dataset.getDirectory().toFile()), DefaultExceptionHandler.PRINT_MESSAGE);
 
          ImGui.text("Tasks:");
          for (int i = 0; i < dataset.getTaskNames().size(); i++)
