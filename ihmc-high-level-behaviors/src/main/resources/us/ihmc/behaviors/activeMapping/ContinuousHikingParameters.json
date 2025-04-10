@@ -7,7 +7,7 @@
   "Goal pose up distance" : 0.5,
   "Goal pose backward distance" : 0.8,
   "Goal pose sideways distance" : 1.2,
-  "Swing time" : 0.95,
+  "Swing time" : 1.0,
   "Transfer time" : 0.6,
   "Planning without reference timeout" : 1.3,
   "Percent through swing to start planning" : 0.15,
