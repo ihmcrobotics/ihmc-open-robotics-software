@@ -31,7 +31,7 @@ public class SakeHandParameters
    public static final double ERROR_TEMPERATURE_CELSIUS = 50.0;
 
    /** Once the hand has reset, the temperature that must be achieved before allowing torque again. */
-   public static final double RESET_TEMPERATURE_CELSIUS = 50.0;
+   public static final double RESET_TEMPERATURE_CELSIUS = 65.0;
    /** The max temperature before the hand resets. */
    public static final double TEMPERATURE_LIMIT_CELSIUS = 75.0;
 
