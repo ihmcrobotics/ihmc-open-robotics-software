@@ -63,7 +63,7 @@ public class StabilityBasedKinematicRetargetingCalculator
    private static final boolean SNAP_TO_REGION = false;
    public static boolean OVERRIDE_MESSAGE = false;
    public static final boolean ENABLE_POSTURE_OBJECTIVE = false;
-   public static final boolean ENABLE_CONTACT_OBJECTIVE = false;
+   public static final boolean ENABLE_CONTACT_OBJECTIVE = true;
    public static final boolean INCLUDE_FF_VELOCITY = false;
    public static final Vector3D OVERRIDE_NORMAL = new Vector3D(Axis3D.Z);
 

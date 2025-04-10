@@ -74,29 +74,29 @@ class LPSupportingVertexForcePolytopeSolver implements ForcePolytopeSolver
       MatrixTools.setMatrixBlock(lpInequalityB, rows, 0, tauLowerLimit, 0, 0, dofs, 1, -1.0);
 
       Tuple3DReadOnly[] directionsToOptimize;
-      if (singularValues.size() == 3)
-      {
+//      if (singularValues.size() == 3)
+//      {
          directionsToOptimize = ForcePolytopeSolver.directionsToOptimize;
-      }
-      else if (singularValues.size() == 2)
-      {
-         int numberOfPointsToGenerate = 50;
-         directionsToOptimize = new Point3D[numberOfPointsToGenerate];
-         for (int i = 0; i < numberOfPointsToGenerate; i++)
-         {
-            Point3D directionToOptimize = new Point3D();
-            double theta = i * 2.0 * Math.PI / numberOfPointsToGenerate;
-            alpha.set(0, 0, Math.cos(theta));
-            alpha.set(1, 0, Math.sin(theta));
-            CommonOps_DDRM.mult(V, alpha, tempDirectionToOptimize);
-            directionToOptimize.set(tempDirectionToOptimize);
-            directionsToOptimize[i] = directionToOptimize;
-         }
-      }
-      else
-      {
-         return;
-      }
+//      }
+//      else if (singularValues.size() == 2)
+//      {
+//         int numberOfPointsToGenerate = 50;
+//         directionsToOptimize = new Point3D[numberOfPointsToGenerate];
+//         for (int i = 0; i < numberOfPointsToGenerate; i++)
+//         {
+//            Point3D directionToOptimize = new Point3D();
+//            double theta = i * 2.0 * Math.PI / numberOfPointsToGenerate;
+//            alpha.set(0, 0, Math.cos(theta));
+//            alpha.set(1, 0, Math.sin(theta));
+//            CommonOps_DDRM.mult(V, alpha, tempDirectionToOptimize);
+//            directionToOptimize.set(tempDirectionToOptimize);
+//            directionsToOptimize[i] = directionToOptimize;
+//         }
+//      }
+//      else
+//      {
+//         return;
+//      }
 
       for (int i = 0; i < directionsToOptimize.length; i++)
       {

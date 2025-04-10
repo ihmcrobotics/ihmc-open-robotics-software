@@ -306,6 +306,8 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
             }
          }
 
+         LogTools.info("contact jacobian: " + contactJacobian);
+
          CommonOps_DDRM.transpose(contactJacobian, contactJacobianTranspose);
          MatrixTools.setMatrixBlock(graspMatrixJacobianTranspose, 0, LINEAR_DIMENSIONS * contactPointIndex, contactJacobianTranspose, 0, 0, contactJacobianTranspose.getNumRows(), contactJacobianTranspose.getNumCols(), 1.0);
       }

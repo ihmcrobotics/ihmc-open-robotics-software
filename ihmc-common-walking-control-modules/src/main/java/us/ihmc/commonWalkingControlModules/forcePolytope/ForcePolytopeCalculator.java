@@ -8,6 +8,7 @@ import us.ihmc.euclid.shape.convexPolytope.ConvexPolytope3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -21,7 +22,7 @@ public class ForcePolytopeCalculator
    private static final boolean debug = true;
    private static final double gravity = -9.81;
 
-   private enum SolveMethod
+   public enum SolveMethod
    {
       LP_INTERIOR_POINT,
       QP_INTERIOR_POINT,
@@ -109,7 +110,18 @@ public class ForcePolytopeCalculator
       pointJacobian.set(jacobian, tempPoint);
       pointJacobian.compute();
       DMatrixRMaj jacobianMatrix = pointJacobian.getJacobianMatrix();
-      CommonOps_DDRM.transpose(jacobianMatrix, jacobianTranspose);
+      LogTools.info("jacobianMatrix: " + jacobianMatrix);
+//      CommonOps_DDRM.transpose(jacobianMatrix, jacobianTranspose);
+
+      DMatrixRMaj reducedJacobian = new DMatrixRMaj(jacobianMatrix.getNumRows(), jacobianMatrix.getNumCols() - 6);
+
+      for (int row_i = 0; row_i < jacobianMatrix.getNumRows(); row_i++)
+      {
+         for (int col_i = 6; col_i < jacobianMatrix.getNumCols(); col_i++)
+         {
+            reducedJacobian.set(row_i, col_i - 6, jacobianMatrix.get(row_i, col_i));
+         }
+      }
 
       /* Compute point jacobian */
       calculator.compute();
@@ -121,25 +133,25 @@ public class ForcePolytopeCalculator
 
       for (int i = 0; i < joints.length; i++)
       {
-         tauLowerLimit.set(i, -gravityCompensationTorques.get(i) + joints[i].getEffortLimitLower());
-         tauUpperLimit.set(i, -gravityCompensationTorques.get(i) + joints[i].getEffortLimitUpper());
+         tauLowerLimit.set(i, joints[i].getEffortLimitLower());
+         tauUpperLimit.set(i, joints[i].getEffortLimitUpper());
       }
 
       if (solveMethod == SolveMethod.LP_INTERIOR_POINT)
       {
-         lpSolver.solve(jacobianMatrix, tauLowerLimit, tauUpperLimit, forcePolytope);
+         lpSolver.solve(reducedJacobian, tauLowerLimit, tauUpperLimit, forcePolytope);
       }
       else if (solveMethod == SolveMethod.QP_INTERIOR_POINT)
       {
-         qpSolver.solve(jacobianMatrix, tauLowerLimit, tauUpperLimit, forcePolytope);
+         qpSolver.solve(reducedJacobian, tauLowerLimit, tauUpperLimit, forcePolytope);
       }
       else if (solveMethod == SolveMethod.SVD_ITERATIVE)
       {
-         svdIterativeSolver.solve(jacobianMatrix, tauLowerLimit, tauUpperLimit, forcePolytope);
+         svdIterativeSolver.solve(reducedJacobian, tauLowerLimit, tauUpperLimit, forcePolytope);
       }
       else if (solveMethod == SolveMethod.SVD_PROJECTION)
       {
-         svdProjectionSolver.solve(jacobianMatrix, tauLowerLimit, tauUpperLimit, forcePolytope);
+         svdProjectionSolver.solve(reducedJacobian, tauLowerLimit, tauUpperLimit, forcePolytope);
       }
    }
 
