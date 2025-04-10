@@ -39,7 +39,7 @@ module controller_msgs
          */
         boolean enable_automatic_cooldown;
         /**
-         * Set to false to disable automatic cooldown
+         * Set to true to disable automatic cooldown
          */
         boolean disable_automatic_cooldown;
         /**

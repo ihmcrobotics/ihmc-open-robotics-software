@@ -31,7 +31,7 @@ public class SakeHandDesiredCommandMessage extends Packet<SakeHandDesiredCommand
             */
    public boolean enable_automatic_cooldown_;
    /**
-            * Set to false to disable automatic cooldown
+            * Set to true to disable automatic cooldown
             */
    public boolean disable_automatic_cooldown_;
    /**
@@ -147,14 +147,14 @@ public class SakeHandDesiredCommandMessage extends Packet<SakeHandDesiredCommand
    }
 
    /**
-            * Set to false to disable automatic cooldown
+            * Set to true to disable automatic cooldown
             */
    public void setDisableAutomaticCooldown(boolean disable_automatic_cooldown)
    {
       disable_automatic_cooldown_ = disable_automatic_cooldown;
    }
    /**
-            * Set to false to disable automatic cooldown
+            * Set to true to disable automatic cooldown
             */
    public boolean getDisableAutomaticCooldown()
    {

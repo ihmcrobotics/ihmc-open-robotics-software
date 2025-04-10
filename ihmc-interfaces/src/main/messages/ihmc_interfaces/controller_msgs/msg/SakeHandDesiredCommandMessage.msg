@@ -16,7 +16,7 @@ bool request_reset_errors
 # Set to true to enable automatic cooldown
 bool enable_automatic_cooldown
 
-# Set to false to disable automatic cooldown
+# Set to true to disable automatic cooldown
 bool disable_automatic_cooldown
 
 # Set to true to override the cooldown
