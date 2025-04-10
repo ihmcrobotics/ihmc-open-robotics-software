@@ -24,15 +24,19 @@ public class SakeHandParameters
    /** Rough guess how much knuckle torque corresponding to our limit above. */
    public static final double KNUCKLE_TORQUE_AT_LIMIT = 2.0;
    /** Normal hand temperature. */
-   public static final double NORMAL_TEMPERATURE_CELCIUS = 30.0;
+   public static final double NORMAL_TEMPERATURE_CELSIUS = 30.0;
    /** Warning hand temperature. */
-   public static final double WARNING_TEMPERATURE_CELCIUS = 40.0;
+   public static final double WARNING_TEMPERATURE_CELSIUS = 40.0;
    /** Red colored hand temperature. */
-   public static final double ERROR_TEMPERATURE_CELCIUS = 50.0;
+   public static final double ERROR_TEMPERATURE_CELSIUS = 50.0;
+
+   /** Once the hand has reset, the temperature that must be achieved before allowing torque again. */
+   public static final double RESET_TEMPERATURE_CELSIUS = 65.0;
    /** The max temperature before the hand resets. */
-   public static final double TEMPERATURE_LIMIT_CELCIUS = 60.0;
+   public static final double TEMPERATURE_LIMIT_CELSIUS = 75.0;
+
    /** The temperature at which the Dynamixel will break. */
-   public static final int DYNAMIXEL_FAILURE_TEMPERATURE_CELCIUS = 80;
+   public static final int DYNAMIXEL_FAILURE_TEMPERATURE_CELSIUS = 80;
    /** Sake encoder resolution is 4096. Convert that to rad */
    public static final double RAW_SAKE_POSITION_TO_RAD = (2.0 * Math.PI) / 4096.0;
    /**
@@ -41,6 +45,9 @@ public class SakeHandParameters
     */
    public static final double RAW_SAKE_VELOCITY_TO_RAD_PER_SEC = 0.11 * ((2.0 * Math.PI) / 60);
    public static final double RAW_SAKE_TORQUE_TO_GRIP_FORCE = FINGERTIP_GRIP_FORCE_HARDWARE_LIMIT / 1023.0;
+
+   public static final int RAW_SAKE_HAND_RANGE = 2500;
+   public static final int RAW_POSITION_MIN_VALUE = -28672;
 
    /**
     * @param normalizedHandOpenAngle 1.0 (open) to 0.0 (closed)
@@ -120,7 +127,8 @@ public class SakeHandParameters
       return handOpenAngleToKnuckleJointAngle(handPositionToOpenAngle(handPosition, positionLowerLimit, positionUpperLimit));
    }
 
-   public static int gripForceToRawTorque(double gripForce) {
+   public static int gripForceToRawTorque(double gripForce)
+   {
       return (int) (gripForce / RAW_SAKE_TORQUE_TO_GRIP_FORCE);
    }
 
@@ -141,5 +149,20 @@ public class SakeHandParameters
       sakeHandDesiredCommandMessage.setRequestCalibration(false);
       sakeHandDesiredCommandMessage.setRequestResetErrors(false);
       sakeHandDesiredCommandMessage.setTorqueOn(true);
+   }
+
+   public static int convertAngleToRawPosition(double radians)
+   {
+      return (int) (radians / RAW_SAKE_POSITION_TO_RAD);
+   }
+
+   public static double convertRawPositionToRadians(int rawPosition)
+   {
+      return rawPosition * RAW_SAKE_POSITION_TO_RAD;
+   }
+
+   public static double convertRawVelocityToRadiansPerSecond(int rawVelocity)
+   {
+      return rawVelocity * RAW_SAKE_VELOCITY_TO_RAD_PER_SEC;
    }
 }
