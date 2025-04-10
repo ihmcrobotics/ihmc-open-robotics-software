@@ -19,13 +19,13 @@ import us.ihmc.perception.cuda.CUDAStreamManager;
 import us.ihmc.perception.cuda.CUDATools;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.tools.PerceptionMessageTools;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.bytedeco.cuda.global.cudart.*;
 
@@ -34,7 +34,7 @@ public class RapidHeightMapExtractorCUDA
    private static final boolean PRINT_TIMING_FOR_KERNELS = false;
    static final int BLOCK_SIZE_XY = 32;
 
-   private final SideDependentList<ReferenceFrame> footSoleFrames = new SideDependentList<>();
+   private final List<ReferenceFrame> footSoleFrames = new ArrayList<>();
    private final TerrainMapData terrainMapData;
    private final CameraIntrinsics cameraIntrinsics;
    private final Point3D sensorOrigin = new Point3D();
@@ -104,8 +104,8 @@ public class RapidHeightMapExtractorCUDA
       this.mode = mode;
       this.heightMapParameters = heightMapParameters;
 
-      footSoleFrames.put(RobotSide.LEFT, leftFootSoleFrame);
-      footSoleFrames.put(RobotSide.RIGHT, rightFootSoleFrame);
+      footSoleFrames.add(leftFootSoleFrame);
+      footSoleFrames.add(rightFootSoleFrame);
 
       stream = CUDAStreamManager.getStream();
 
@@ -194,10 +194,11 @@ public class RapidHeightMapExtractorCUDA
       double thicknessOfTheFoot = 0.02;
       double height = 0.0;
 
-      if (footSoleFrames.sides().length == 2)
+      if (footSoleFrames.size() == 2)
       {
-         height = Math.min(footSoleFrames.get(RobotSide.LEFT).getTransformToWorldFrame().getTranslationZ(),
-                           footSoleFrames.get(RobotSide.RIGHT).getTransformToWorldFrame().getTranslationZ()) - thicknessOfTheFoot;
+
+         height = Math.min(footSoleFrames.get(0).getTransformToWorldFrame().getTranslationZ(),
+                           footSoleFrames.get(1).getTransformToWorldFrame().getTranslationZ()) - thicknessOfTheFoot;
       }
       int lowerBackDropAmount = (int) ((height + heightMapParameters.getHeightOffset()) * heightMapParameters.getHeightScaleFactor());
       lowerBackDropAmount -= 10000;
@@ -214,15 +215,9 @@ public class RapidHeightMapExtractorCUDA
 
    public void reset()
    {
-      double thicknessOfTheFoot = 0.02;
-      double height = 0.0;
+      double footHeight = computeFootHeight();
 
-      if (footSoleFrames.sides().length == 2)
-      {
-         height = Math.min(footSoleFrames.get(RobotSide.LEFT).getTransformToWorldFrame().getTranslationZ(),
-                           footSoleFrames.get(RobotSide.RIGHT).getTransformToWorldFrame().getTranslationZ()) - thicknessOfTheFoot;
-      }
-      resetOffset = (int) ((height + heightMapParameters.getHeightOffset()) * heightMapParameters.getHeightScaleFactor());
+      resetOffset = (int) ((footHeight + heightMapParameters.getHeightOffset()) * heightMapParameters.getHeightScaleFactor());
 
       localHeightMapImage.setTo(new Scalar(resetOffset));
       globalHeightMapImage.setTo(new Scalar(resetOffset));
@@ -232,6 +227,23 @@ public class RapidHeightMapExtractorCUDA
       snappedFootstepsExtractor.reset(resetOffset);
 
       sequenceNumber = 0;
+   }
+
+   private double computeFootHeight()
+   {
+      double thicknessOfTheFoot = 0.02;
+      double height = Double.POSITIVE_INFINITY;
+
+      for (int i = 0; i < footSoleFrames.size(); i++)
+      {
+         height = Math.min(footSoleFrames.get(i).getTransformToWorldFrame().getTranslationZ(), height);
+      }
+      if (Double.isInfinite(height))
+         height = 0.0;
+
+      height -= thicknessOfTheFoot;
+
+      return height;
    }
 
    public void update(RigidBodyTransform sensorToWorldTransform, RigidBodyTransform sensorToGroundTransform, RigidBodyTransform groundToWorldTransform)
@@ -251,7 +263,7 @@ public class RapidHeightMapExtractorCUDA
       sensorOrigin.set(sensorToWorldTransform.getTranslation());
 
       // Populate parameter buffers with the necessary values
-      float[] parametersArray = populateParameterArray(heightMapParameters, cameraIntrinsics, sensorOrigin);
+      float[] parametersArray = populateParameterArray(heightMapParameters, cameraIntrinsics, sensorOrigin, computeFootHeight());
       parametersHostPointer.put(parametersArray);
 
       //Extract the transform arrays for memory transfer
@@ -362,7 +374,7 @@ public class RapidHeightMapExtractorCUDA
       int error;
 
       // Populate parameter buffers with the necessary values
-      float[] parametersArray = populateParameterArray(heightMapParameters, cameraIntrinsics, sensorOrigin);
+      float[] parametersArray = populateParameterArray(heightMapParameters, cameraIntrinsics, sensorOrigin, computeFootHeight());
       parametersHostPointer.put(parametersArray);
 
       CUDATools.mallocAsync(worldToGroundTransformDevicePointer, worldToGroundTransformArray.length, stream);
@@ -410,7 +422,7 @@ public class RapidHeightMapExtractorCUDA
       CUDATools.checkCUDAError(error);
    }
 
-   public float[] populateParameterArray(HeightMapParameters parameters, CameraIntrinsics cameraIntrinsics, Tuple3DReadOnly gridCenter)
+   public float[] populateParameterArray(HeightMapParameters parameters, CameraIntrinsics cameraIntrinsics, Tuple3DReadOnly gridCenter, double groundHeightGuess)
    {
       return new float[] {(float) parameters.getLocalCellSizeInMeters(),
                           (float) centerIndex,
@@ -449,7 +461,8 @@ public class RapidHeightMapExtractorCUDA
                           (float) parameters.getSearchSkipSize(),
                           (float) parameters.getVerticalSearchSize(),
                           (float) parameters.getVerticalSearchResolution(),
-                          (float) parameters.getFastSearchSize()};
+                          (float) parameters.getFastSearchSize(),
+                          (float) groundHeightGuess};
    }
 
    public void destroy()
