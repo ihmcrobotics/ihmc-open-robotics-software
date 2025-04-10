@@ -19,8 +19,6 @@ import us.ihmc.perception.cuda.CUDAStreamManager;
 import us.ihmc.perception.cuda.CUDATools;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.tools.PerceptionMessageTools;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
@@ -196,10 +194,11 @@ public class RapidHeightMapExtractorCUDA
       double thicknessOfTheFoot = 0.02;
       double height = 0.0;
 
-      if (footSoleFrames.sides().length == 2)
+      if (footSoleFrames.size() == 2)
       {
-         height = Math.min(footSoleFrames.get(RobotSide.LEFT).getTransformToWorldFrame().getTranslationZ(),
-                           footSoleFrames.get(RobotSide.RIGHT).getTransformToWorldFrame().getTranslationZ()) - thicknessOfTheFoot;
+
+         height = Math.min(footSoleFrames.get(0).getTransformToWorldFrame().getTranslationZ(),
+                           footSoleFrames.get(1).getTransformToWorldFrame().getTranslationZ()) - thicknessOfTheFoot;
       }
       int lowerBackDropAmount = (int) ((height + heightMapParameters.getHeightOffset()) * heightMapParameters.getHeightScaleFactor());
       lowerBackDropAmount -= 10000;
