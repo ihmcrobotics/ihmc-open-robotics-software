@@ -38,6 +38,11 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
       set(HeightMapParameters.searchWindowWidth, searchWindowWidth);
    }
 
+   default void setSearchSkipSize(int searchSkipSize)
+   {
+      set(HeightMapParameters.searchSkipSize, searchSkipSize);
+   }
+
    default void setMinHeightRegistration(double minHeightRegistration)
    {
       set(HeightMapParameters.minHeightRegistration, minHeightRegistration);
@@ -151,11 +156,6 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
    default void setSteppingCosineThreshold(double steppingCosineThreshold)
    {
       set(HeightMapParameters.steppingCosineThreshold, steppingCosineThreshold);
-   }
-
-   default void setSearchSkipSize(int searchSkipSize)
-   {
-      set(HeightMapParameters.searchSkipSize, searchSkipSize);
    }
 
    default void setFastSearchSize(int fastSearchSize)

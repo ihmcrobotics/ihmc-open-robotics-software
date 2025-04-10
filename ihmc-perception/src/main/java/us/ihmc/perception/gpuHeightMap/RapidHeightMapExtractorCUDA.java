@@ -31,7 +31,7 @@ import static org.bytedeco.cuda.global.cudart.*;
 
 public class RapidHeightMapExtractorCUDA
 {
-   private static final boolean PRINT_TIMING_FOR_KERNELS = false;
+   private static final boolean PRINT_TIMING_FOR_KERNELS = true;
    static final int BLOCK_SIZE_XY = 32;
 
    private final List<ReferenceFrame> footSoleFrames = new ArrayList<>();
