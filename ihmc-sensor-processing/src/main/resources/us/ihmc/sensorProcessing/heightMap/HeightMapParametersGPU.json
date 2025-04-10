@@ -5,14 +5,14 @@
   "Enable alpha filter" : true,
   "Enable vertical filter" : true,
   "Search window height" : {
-    "value" : 800,
-    "lowerBound" : 200,
-    "upperBound" : 4000
+    "value" : 500,
+    "lowerBound" : 100,
+    "upperBound" : 800
   },
   "Search window width" : {
-    "value" : 500,
-    "lowerBound" : 200,
-    "upperBound" : 4000
+    "value" : 400,
+    "lowerBound" : 100,
+    "upperBound" : 800
   },
   "Search skip size" : {
     "value" : 4,
@@ -20,7 +20,7 @@
     "upperBound" : 16
   },
   "Min height registration" : {
-    "value" : -3.0,
+    "value" : -1.5,
     "lowerBound" : -10.0,
     "upperBound" : 1.0
   },
