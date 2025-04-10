@@ -75,6 +75,9 @@ module controller_msgs
         long realtime_tick;
         boolean is_calibrated;
         boolean needs_reset;
+        boolean is_calibrating;
+        boolean is_cooling_down;
+        boolean automatic_cooldown_enabled;
       };
     };
   };

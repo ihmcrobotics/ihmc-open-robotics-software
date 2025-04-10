@@ -10,6 +10,9 @@ public class ROS2SakeHandStatus
 {
    private volatile boolean isCalibrated = false;
    private volatile boolean needsReset;
+   private volatile boolean isCalibrating;
+   private volatile boolean isCoolingDown;
+   private volatile boolean automaticCooldownEnabled;
 
    // Hand fully closed
    private volatile double positionUpperLimit;
@@ -32,15 +35,16 @@ public class ROS2SakeHandStatus
       {
          isCalibrated = sakeHandStatusMessage.getIsCalibrated();
          needsReset = sakeHandStatusMessage.getNeedsReset();
+         isCalibrating = sakeHandStatusMessage.getIsCalibrating();
+         isCoolingDown = sakeHandStatusMessage.getIsCoolingDown();
+         automaticCooldownEnabled = sakeHandStatusMessage.getAutomaticCooldownEnabled();
 
          positionUpperLimit = sakeHandStatusMessage.getPositionUpperLimit();
          positionLowerLimit = sakeHandStatusMessage.getPositionLowerLimit();
 
          isTorqueOn = sakeHandStatusMessage.getTorqueOnStatus();
          currentTemperature = sakeHandStatusMessage.getTemperature();
-         currentHandOpenAngle = SakeHandParameters.handPositionToOpenAngle(sakeHandStatusMessage.getCurrentPosition(),
-                                                                           positionLowerLimit,
-                                                                           positionUpperLimit);
+         currentHandOpenAngle = SakeHandParameters.handPositionToOpenAngle(sakeHandStatusMessage.getCurrentPosition(), positionLowerLimit, positionUpperLimit);
          commandedHandOpenAngle = SakeHandParameters.handPositionToOpenAngle(sakeHandStatusMessage.getDesiredPositionStatus(),
                                                                              positionLowerLimit,
                                                                              positionUpperLimit);
@@ -61,6 +65,21 @@ public class ROS2SakeHandStatus
    public boolean getNeedsReset()
    {
       return needsReset;
+   }
+
+   public boolean getIsCalibrating()
+   {
+      return isCalibrating;
+   }
+
+   public boolean getIsCoolingDown()
+   {
+      return isCoolingDown;
+   }
+
+   public boolean getAutomaticCooldownEnabled()
+   {
+      return automaticCooldownEnabled;
    }
 
    public double getPositionUpperLimit()

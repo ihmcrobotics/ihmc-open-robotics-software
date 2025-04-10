@@ -15,6 +15,15 @@ bool request_calibration
 # Request to reset the gripper error state after overheating
 bool request_reset_errors
 
+# Set to true to enable automatic cooldown
+bool enable_automatic_cooldown
+
+# Set to false to disable automatic cooldown
+bool disable_automatic_cooldown
+
+# Set to true to override the cooldown
+bool override_cooldown
+
 # The desired dynamixel position, in radians
 float64 gripper_desired_position
 
