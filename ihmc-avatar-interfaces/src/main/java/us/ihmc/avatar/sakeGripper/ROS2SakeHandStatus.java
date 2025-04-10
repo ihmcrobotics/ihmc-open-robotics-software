@@ -44,7 +44,9 @@ public class ROS2SakeHandStatus
 
          isTorqueOn = sakeHandStatusMessage.getTorqueOnStatus();
          currentTemperature = sakeHandStatusMessage.getTemperature();
-         currentHandOpenAngle = SakeHandParameters.handPositionToOpenAngle(sakeHandStatusMessage.getCurrentPosition(), positionLowerLimit, positionUpperLimit);
+         currentHandOpenAngle = SakeHandParameters.handPositionToOpenAngle(sakeHandStatusMessage.getCurrentPosition(),
+                                                                           positionLowerLimit,
+                                                                           positionUpperLimit);
          commandedHandOpenAngle = SakeHandParameters.handPositionToOpenAngle(sakeHandStatusMessage.getDesiredPositionStatus(),
                                                                              positionLowerLimit,
                                                                              positionUpperLimit);
