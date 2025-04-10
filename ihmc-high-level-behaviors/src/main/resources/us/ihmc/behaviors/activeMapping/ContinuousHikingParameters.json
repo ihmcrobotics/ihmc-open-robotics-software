@@ -2,7 +2,7 @@
   "title" : "ContinuousHikingParameters",
   "Step publisher enabled" : false,
   "Override entire queue each step" : true,
-  "Number of steps to send" : 3,
+  "Number of steps to send" : 2,
   "Goal pose forward distance" : 1.4,
   "Goal pose up distance" : 0.5,
   "Goal pose backward distance" : 0.8,
