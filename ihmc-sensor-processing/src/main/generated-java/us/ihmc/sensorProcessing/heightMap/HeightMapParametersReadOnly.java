@@ -40,6 +40,11 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
       return get(searchWindowWidth);
    }
 
+   default int getSearchSkipSize()
+   {
+      return get(searchSkipSize);
+   }
+
    default double getMinHeightRegistration()
    {
       return get(minHeightRegistration);
@@ -153,11 +158,6 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
    default double getSteppingCosineThreshold()
    {
       return get(steppingCosineThreshold);
-   }
-
-   default int getSearchSkipSize()
-   {
-      return get(searchSkipSize);
    }
 
    default int getFastSearchSize()
