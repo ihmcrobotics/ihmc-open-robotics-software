@@ -19,6 +19,12 @@ public class AlexanderSwingTrajectoryParameters extends SwingTrajectoryParameter
    }
 
    @Override
+   public boolean addOrientationMidpointForObstacleClearance()
+   {
+      return true;
+   }
+
+   @Override
    public Tuple3DReadOnly getTouchdownVelocityWeight()
    {
       return new Vector3D(30.0, 30.0, Double.POSITIVE_INFINITY);
@@ -40,7 +46,7 @@ public class AlexanderSwingTrajectoryParameters extends SwingTrajectoryParameter
    public double getMaxSwingHeight()
    {
       // TODO Needs tune up.
-      return 0.30;
+      return 0.35;
    }
 
    @Override
@@ -65,7 +71,7 @@ public class AlexanderSwingTrajectoryParameters extends SwingTrajectoryParameter
    public double getDesiredTouchdownVelocity()
    {
       // TODO Needs tune up
-      return -0.3;
+      return -0.15;
    }
 
    @Override

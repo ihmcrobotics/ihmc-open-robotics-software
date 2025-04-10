@@ -294,13 +294,16 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
       boolean areFootstepsAdjustable = command.areFootstepsAdjustable();
       boolean shouldCheckPlanForReachability = command.getShouldCheckForReachability();
 
-      usingQFP.set(command.getFootstep(0).getCsgMode() == ContinuousStepGeneratorMode.QFP);
-      isWalkingInPlace.set(command.getFootstep(0).walkingInPlace);
+      if (command.getNumberOfFootsteps() > 0)
+      {
+         usingQFP.set(command.getFootstep(0).getCsgMode() == ContinuousStepGeneratorMode.QFP);
+         isWalkingInPlace.set(command.getFootstep(0).walkingInPlace);
 
-      if (usingQFP.getBooleanValue() &&
-          footstepStatus.getRobotSide() == command.getFootstep(0).getRobotSide().toByte() &&
-          footstepStatus.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED)
-         command.removeFootstep(0);
+         if (usingQFP.getBooleanValue() &&
+             footstepStatus.getRobotSide() == command.getFootstep(0).getRobotSide().toByte() &&
+             footstepStatus.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED)
+            command.removeFootstep(0);
+      }
 
       for (int i = 0; i < command.getNumberOfFootsteps(); i++)
       {

@@ -220,15 +220,15 @@ public class RDXSakeHandWidgets
 
       ImGui.endDisabled();
 
-      if (sakeHandStatus.getCurrentTemperature() >= SakeHandParameters.ERROR_TEMPERATURE_CELCIUS)
+      if (sakeHandStatus.getCurrentTemperature() >= SakeHandParameters.ERROR_TEMPERATURE_CELSIUS)
          ImGui.pushStyleColor(ImGuiCol.PlotHistogram, ImGuiTools.RED);
-      else if (sakeHandStatus.getCurrentTemperature() >= SakeHandParameters.WARNING_TEMPERATURE_CELCIUS)
+      else if (sakeHandStatus.getCurrentTemperature() >= SakeHandParameters.WARNING_TEMPERATURE_CELSIUS)
          ImGui.pushStyleColor(ImGuiCol.PlotHistogram, ImGuiTools.YELLOW);
       else
          ImGui.pushStyleColor(ImGuiCol.PlotHistogram, ImGuiTools.LIGHT_GRAY);
 
       widgetAligner.text("Temperature");
-      ImGui.progressBar((float) (sakeHandStatus.getCurrentTemperature() / SakeHandParameters.DYNAMIXEL_FAILURE_TEMPERATURE_CELCIUS),
+      ImGui.progressBar((float) (sakeHandStatus.getCurrentTemperature() / SakeHandParameters.DYNAMIXEL_FAILURE_TEMPERATURE_CELSIUS),
                         ImGui.getColumnWidth(),
                         ImGui.getFrameHeight(),
                         "%.1f %sC".formatted(sakeHandStatus.getCurrentTemperature(), EuclidCoreMissingTools.DEGREE_SYMBOL));
