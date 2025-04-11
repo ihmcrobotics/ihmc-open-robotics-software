@@ -99,6 +99,7 @@ public class ContinuousPlannerSchedulingTask
                                               syncedRobotModel,
                                               commandMessage,
                                               controllerFootstepQueueMonitor,
+                                              debugger,
                                               activeMappingParameterObject,
                                               this::getHeightMapData,
                                               this::getTerrainMap);

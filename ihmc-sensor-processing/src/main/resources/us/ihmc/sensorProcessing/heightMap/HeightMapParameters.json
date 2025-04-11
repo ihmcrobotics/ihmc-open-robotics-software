@@ -14,6 +14,11 @@
     "lowerBound": 10,
     "upperBound": 400
   },
+  "Search skip size" : {
+    "value": 4,
+    "lowerBound": 0,
+    "upperBound": 16
+  },
   "Min height registration": {
     "value": -1.0,
     "lowerBound": -5.0,
@@ -128,11 +133,6 @@
     "value": 0.8,
     "lowerBound": 0.0,
     "upperBound": 1.0
-  },
-  "Search skip size" : {
-    "value": 4,
-    "lowerBound": 0,
-    "upperBound": 16
   },
   "Fast search size" : {
     "value": 20,

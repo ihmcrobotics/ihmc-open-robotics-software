@@ -171,6 +171,11 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
       }
    }
 
+   public HumanoidSteppingPlugin getContinuousStepGeneratorPlugin()
+   {
+      return continuousStepGeneratorPlugin;
+   }
+
    @Override
    public YoRegistry getYoVariableRegistry()
    {

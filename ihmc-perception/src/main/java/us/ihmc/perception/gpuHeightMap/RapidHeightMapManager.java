@@ -41,6 +41,7 @@ public class RapidHeightMapManager
    private final FramePose3D cameraPose = new FramePose3D();
    private final Mat hostDepthImage = new Mat();
    private final Notification resetHeightMapRequested = new Notification();
+   private final Notification lowerHeightMapBackdropRequested = new Notification();
    private final BytePointer compressedCroppedHeightMapPointer = new BytePointer();
 
    private final RapidHeightMapDriftOffset rapidHeightMapDriftOffset;
@@ -84,6 +85,7 @@ public class RapidHeightMapManager
 
       // We use a notification in order to only call resetting the height map in one place
       ros2Node.createSubscription2(PerceptionAPI.RESET_HEIGHT_MAP, message -> resetHeightMapRequested.set());
+      ros2Node.createSubscription2(PerceptionAPI.LOWER_HEIGHT_MAP_BACKDROP, message -> lowerHeightMapBackdropRequested.set());
       if (robotModel != null)
       {
          ros2Node.createSubscription(HumanoidControllerAPI.getTopic(HighLevelStateChangeStatusMessage.class, robotName), message ->
@@ -115,6 +117,16 @@ public class RapidHeightMapManager
       }
 
       bodyCollisionFilter.process(hostDepthImage, deviceDepthImage, depthImageIntrinsics, robotCollidables, cameraFrame);
+
+      if (lowerHeightMapBackdropRequested.poll())
+      {
+         rapidHeightMapExtractor.lowerBackDrop();
+         if (heightMapParameters.getDriftOffsetFilter())
+         {
+            rapidHeightMapDriftOffset.reset();
+         }
+      }
+
       if (resetHeightMapRequested.poll())
       {
          rapidHeightMapExtractor.reset();
