@@ -149,6 +149,9 @@ public class SakeHandParameters
       sakeHandDesiredCommandMessage.setRequestCalibration(false);
       sakeHandDesiredCommandMessage.setRequestResetErrors(false);
       sakeHandDesiredCommandMessage.setTorqueOn(true);
+      sakeHandDesiredCommandMessage.setEnableAutomaticCooldown(false);
+      sakeHandDesiredCommandMessage.setDisableAutomaticCooldown(false);
+      sakeHandDesiredCommandMessage.setOverrideCooldown(false);
    }
 
    public static int convertAngleToRawPosition(double radians)

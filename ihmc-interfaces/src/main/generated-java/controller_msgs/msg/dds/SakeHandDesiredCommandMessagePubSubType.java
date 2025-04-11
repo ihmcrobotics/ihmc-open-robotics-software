@@ -15,7 +15,7 @@ public class SakeHandDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "41518aa27c33ad5448af9d04ac9dfc7d5434fed4300bdd46c66c797cdaa686b5";
+   		return "3a56e9d87db38866ad11cf3e7efd7f1265813a7684b6f47b4200ccc325791b03";
    }
    
    @Override
@@ -58,6 +58,12 @@ public class SakeHandDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -76,6 +82,15 @@ public class SakeHandDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
    public final static int getCdrSerializedSize(controller_msgs.msg.dds.SakeHandDesiredCommandMessage data, int current_alignment)
    {
       int initial_alignment = current_alignment;
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -107,6 +122,12 @@ public class SakeHandDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
 
       cdr.write_type_7(data.getRequestResetErrors());
 
+      cdr.write_type_7(data.getEnableAutomaticCooldown());
+
+      cdr.write_type_7(data.getDisableAutomaticCooldown());
+
+      cdr.write_type_7(data.getOverrideCooldown());
+
       cdr.write_type_6(data.getGripperDesiredPosition());
 
       cdr.write_type_2(data.getRawGripperTorqueLimit());
@@ -123,6 +144,12 @@ public class SakeHandDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
       	
       data.setRequestResetErrors(cdr.read_type_7());
       	
+      data.setEnableAutomaticCooldown(cdr.read_type_7());
+      	
+      data.setDisableAutomaticCooldown(cdr.read_type_7());
+      	
+      data.setOverrideCooldown(cdr.read_type_7());
+      	
       data.setGripperDesiredPosition(cdr.read_type_6());
       	
       data.setRawGripperTorqueLimit(cdr.read_type_2());
@@ -138,6 +165,9 @@ public class SakeHandDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
       ser.write_type_9("robot_side", data.getRobotSide());
       ser.write_type_7("request_calibration", data.getRequestCalibration());
       ser.write_type_7("request_reset_errors", data.getRequestResetErrors());
+      ser.write_type_7("enable_automatic_cooldown", data.getEnableAutomaticCooldown());
+      ser.write_type_7("disable_automatic_cooldown", data.getDisableAutomaticCooldown());
+      ser.write_type_7("override_cooldown", data.getOverrideCooldown());
       ser.write_type_6("gripper_desired_position", data.getGripperDesiredPosition());
       ser.write_type_2("raw_gripper_torque_limit", data.getRawGripperTorqueLimit());
       ser.write_type_7("torque_on", data.getTorqueOn());
@@ -149,6 +179,9 @@ public class SakeHandDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
       data.setRobotSide(ser.read_type_9("robot_side"));
       data.setRequestCalibration(ser.read_type_7("request_calibration"));
       data.setRequestResetErrors(ser.read_type_7("request_reset_errors"));
+      data.setEnableAutomaticCooldown(ser.read_type_7("enable_automatic_cooldown"));
+      data.setDisableAutomaticCooldown(ser.read_type_7("disable_automatic_cooldown"));
+      data.setOverrideCooldown(ser.read_type_7("override_cooldown"));
       data.setGripperDesiredPosition(ser.read_type_6("gripper_desired_position"));
       data.setRawGripperTorqueLimit(ser.read_type_2("raw_gripper_torque_limit"));
       data.setTorqueOn(ser.read_type_7("torque_on"));

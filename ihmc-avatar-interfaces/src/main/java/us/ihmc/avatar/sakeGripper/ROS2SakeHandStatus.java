@@ -10,6 +10,9 @@ public class ROS2SakeHandStatus
 {
    private volatile boolean isCalibrated = false;
    private volatile boolean needsReset;
+   private volatile boolean isCalibrating;
+   private volatile boolean isCoolingDown;
+   private volatile boolean automaticCooldownEnabled;
 
    // Hand fully closed
    private volatile double positionUpperLimit;
@@ -32,6 +35,9 @@ public class ROS2SakeHandStatus
       {
          isCalibrated = sakeHandStatusMessage.getIsCalibrated();
          needsReset = sakeHandStatusMessage.getNeedsReset();
+         isCalibrating = sakeHandStatusMessage.getIsCalibrating();
+         isCoolingDown = sakeHandStatusMessage.getIsCoolingDown();
+         automaticCooldownEnabled = sakeHandStatusMessage.getAutomaticCooldownEnabled();
 
          positionUpperLimit = sakeHandStatusMessage.getPositionUpperLimit();
          positionLowerLimit = sakeHandStatusMessage.getPositionLowerLimit();
@@ -61,6 +67,21 @@ public class ROS2SakeHandStatus
    public boolean getNeedsReset()
    {
       return needsReset;
+   }
+
+   public boolean getIsCalibrating()
+   {
+      return isCalibrating;
+   }
+
+   public boolean getIsCoolingDown()
+   {
+      return isCoolingDown;
+   }
+
+   public boolean getAutomaticCooldownEnabled()
+   {
+      return automaticCooldownEnabled;
    }
 
    public double getPositionUpperLimit()
