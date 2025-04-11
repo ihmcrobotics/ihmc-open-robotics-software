@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.avatar.scs2.SCS2LogSessionWithVideo;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
+import us.ihmc.commons.nio.WriteOption;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.JSONFileTools;
@@ -77,8 +78,10 @@ public class LeRobotDataset
       {
          int episodeIndex = episodes.size();
          String taskName = lineRoot.get("tasks").get(0).textValue();
+         int length = lineRoot.get("length").intValue();
          LeRobotDatasetEpisode episode = new LeRobotDatasetEpisode(episodeIndex,
                                                                    taskName,
+                                                                   length,
                                                                    episodesJsonlPath,
                                                                    episodeStatsJsonlPath,
                                                                    dataChunk0Path,
@@ -105,11 +108,12 @@ public class LeRobotDataset
       int episodeIndex = episodes.size();
       LeRobotDatasetEpisode episode = new LeRobotDatasetEpisode(episodeIndex,
                                                                 taskName,
+                                                                0,
                                                                 episodesJsonlPath,
                                                                 episodeStatsJsonlPath,
                                                                 dataChunk0Path,
                                                                 zedVideoDirs);
-      episode.startGeneratingEpisode(session);
+      episode.startGeneratingEpisode(session, this::writeMetadataToFilesystem);
       episodes.add(episode);
 
       // add episode stats entry
@@ -128,7 +132,6 @@ public class LeRobotDataset
          {
             totalFrames += episode.getLength();
          }
-
 
          rootNode.put("codebase_version", "v2.1");
          rootNode.put("robot_type", "nadia");
@@ -150,6 +153,13 @@ public class LeRobotDataset
 
          }
       });
+
+      FileTools.write(episodesJsonlPath, new byte[0], WriteOption.TRUNCATE, DefaultExceptionHandler.PRINT_MESSAGE);
+      FileTools.write(episodeStatsJsonlPath, new byte[0], WriteOption.TRUNCATE, DefaultExceptionHandler.PRINT_MESSAGE);
+      for (LeRobotDatasetEpisode episode : episodes)
+      {
+         episode.appendJsonFileLine();
+      }
    }
 
    public String getName()

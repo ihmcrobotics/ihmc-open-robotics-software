@@ -25,6 +25,6 @@ public class LeRobotDatasetTools
 
    public static void appendLine(Path path, String line)
    {
-      ExceptionTools.handle(() -> Files.writeString(path, line, StandardOpenOption.APPEND), DefaultExceptionHandler.PRINT_MESSAGE);
+      ExceptionTools.handle(() -> Files.writeString(path, "%s%n".formatted(line.trim()), StandardOpenOption.APPEND), DefaultExceptionHandler.PRINT_MESSAGE);
    }
 }
