@@ -18,6 +18,11 @@ public interface ContinuousHikingParametersBasics extends ContinuousHikingParame
       set(ContinuousHikingParameters.overrideEntireQueueEachStep, overrideEntireQueueEachStep);
    }
 
+   default void setEnableSwingCollisionAvoidance(boolean enableSwingCollisionAvoidance)
+   {
+      set(ContinuousHikingParameters.enableSwingCollisionAvoidance, enableSwingCollisionAvoidance);
+   }
+
    default void setNumberOfStepsToSend(int numberOfStepsToSend)
    {
       set(ContinuousHikingParameters.numberOfStepsToSend, numberOfStepsToSend);

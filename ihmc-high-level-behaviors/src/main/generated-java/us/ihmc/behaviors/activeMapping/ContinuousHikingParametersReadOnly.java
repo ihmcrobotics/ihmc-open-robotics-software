@@ -20,6 +20,11 @@ public interface ContinuousHikingParametersReadOnly extends StoredPropertySetRea
       return get(overrideEntireQueueEachStep);
    }
 
+   default boolean getEnableSwingCollisionAvoidance()
+   {
+      return get(enableSwingCollisionAvoidance);
+   }
+
    default int getNumberOfStepsToSend()
    {
       return get(numberOfStepsToSend);

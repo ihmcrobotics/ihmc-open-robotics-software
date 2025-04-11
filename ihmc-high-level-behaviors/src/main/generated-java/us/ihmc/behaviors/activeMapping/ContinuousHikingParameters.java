@@ -20,6 +20,7 @@ public class ContinuousHikingParameters extends StoredPropertySet implements Con
 
    public static final BooleanStoredPropertyKey stepPublisherEnabled = keys.addBooleanKey("Step publisher enabled");
    public static final BooleanStoredPropertyKey overrideEntireQueueEachStep = keys.addBooleanKey("Override entire queue each step");
+   public static final BooleanStoredPropertyKey enableSwingCollisionAvoidance = keys.addBooleanKey("Enable Swing Collision Avoidance");
    public static final IntegerStoredPropertyKey numberOfStepsToSend = keys.addIntegerKey("Number of steps to send");
    public static final DoubleStoredPropertyKey goalPoseForwardDistance = keys.addDoubleKey("Goal pose forward distance");
    public static final DoubleStoredPropertyKey goalPoseUpDistance = keys.addDoubleKey("Goal pose up distance");

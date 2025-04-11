@@ -155,7 +155,11 @@ public class ContinuousPlanner
       FootstepPlannerRequest request = new FootstepPlannerRequest();
       request.setStartFootPoses(startStancePose.get(RobotSide.LEFT), startStancePose.get(RobotSide.RIGHT));
       request.setGoalFootPoses(goalPoses.get(RobotSide.LEFT), goalPoses.get(RobotSide.RIGHT));
-      request.setSwingPlannerType(SwingPlannerType.MULTI_WAYPOINT_POSITION);
+
+      if (continuousHikingParameters.getEnableSwingCollisionAvoidance())
+      {
+         request.setSwingPlannerType(SwingPlannerType.MULTI_WAYPOINT_POSITION);
+      }
       request.setPerformAStarSearch(true);
       request.setAssumeFlatGround(false);
       request.setPlanBodyPath(false);
