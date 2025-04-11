@@ -4,6 +4,7 @@ import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
 import imgui.type.ImString;
 import us.ihmc.avatar.logProcessor.leRobot.LeRobotDataset;
+import us.ihmc.avatar.logProcessor.leRobot.LeRobotDatasetEpisode;
 import us.ihmc.avatar.logProcessor.leRobot.LeRobotDatasetTools;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
@@ -71,6 +72,7 @@ public class RDXLeRobotDatasetCreator
                File logDirectory = logSession.getSession().getLogDirectory();
                dataset = new LeRobotDataset(logDirectory.toPath().resolve(datasetName.get().trim()));
                dataset.mkdirs();
+               dataset.writeMetadataToFilesystem();
                datasetName.clear();
                refresh();
             }
@@ -93,13 +95,19 @@ public class RDXLeRobotDatasetCreator
          if (ImGuiTools.textWithUnderlineOnHover("Dataset name: %s".formatted(dataset.getName())) && ImGui.isMouseClicked(ImGuiMouseButton.Left))
             ExceptionTools.handle(() -> Desktop.getDesktop().open(dataset.getDirectory().toFile()), DefaultExceptionHandler.PRINT_MESSAGE);
 
+         ImGui.separator();
          ImGui.text("Tasks:");
          for (int i = 0; i < dataset.getTaskNames().size(); i++)
          {
             ImGui.text("%d. %s".formatted(i, dataset.getTaskNames().get(i)));
          }
 
-         ImGui.text("Episodes: %d".formatted(dataset.getEpisodes().size()));
+         ImGui.separator();
+         ImGui.text("Episodes:");
+         for (LeRobotDatasetEpisode episode : dataset.getEpisodes())
+         {
+            ImGui.text("%s length: %d".formatted(episode.getEpisodeName(), episode.getLength()));
+         }
 
          ImGuiTools.separatorText("New episode");
 
