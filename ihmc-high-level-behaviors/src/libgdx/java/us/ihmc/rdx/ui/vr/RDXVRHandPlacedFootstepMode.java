@@ -86,7 +86,10 @@ public class RDXVRHandPlacedFootstepMode
          {
             InputDigitalActionData triggerClick = controller.getClickTriggerActionData();
 
-            if (triggerClick.bChanged() && triggerClick.bState())
+            // Prevents placing and sending steps when interacting with menu
+            boolean nothingElseSelected = controller.getSelectedPick() == null;
+
+            if (nothingElseSelected && triggerClick.bChanged() && triggerClick.bState())
             {
                feetBeingPlaced.put(side, footModels.get(side));
                LibGDXTools.setOpacity(feetBeingPlaced.get(side), 0.5f);
@@ -112,13 +115,13 @@ public class RDXVRHandPlacedFootstepMode
             }
 
             InputDigitalActionData aButton = controller.getAButtonActionData();
-            if (side == RobotSide.RIGHT && aButton.bChanged() && !aButton.bState())
+            if (nothingElseSelected && side == RobotSide.RIGHT && aButton.bChanged() && !aButton.bState())
             {
                sendPlacedFootsteps(locomotionParameters);
             }
 
             InputDigitalActionData bButton = controller.getBButtonActionData();
-            if (side == RobotSide.LEFT && bButton.bChanged() && !bButton.bState())
+            if (nothingElseSelected && side == RobotSide.LEFT && bButton.bChanged() && !bButton.bState())
             {
                resetFootsteps();
             }
