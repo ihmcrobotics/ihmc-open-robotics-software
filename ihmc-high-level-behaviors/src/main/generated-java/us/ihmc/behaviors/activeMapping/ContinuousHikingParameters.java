@@ -20,6 +20,7 @@ public class ContinuousHikingParameters extends StoredPropertySet implements Con
 
    public static final BooleanStoredPropertyKey stepPublisherEnabled = keys.addBooleanKey("Step publisher enabled");
    public static final BooleanStoredPropertyKey overrideEntireQueueEachStep = keys.addBooleanKey("Override entire queue each step");
+   public static final BooleanStoredPropertyKey enableSwingCollisionAvoidance = keys.addBooleanKey("Enable Swing Collision Avoidance");
    public static final IntegerStoredPropertyKey numberOfStepsToSend = keys.addIntegerKey("Number of steps to send");
    public static final DoubleStoredPropertyKey goalPoseForwardDistance = keys.addDoubleKey("Goal pose forward distance");
    public static final DoubleStoredPropertyKey goalPoseUpDistance = keys.addDoubleKey("Goal pose up distance");
@@ -31,6 +32,8 @@ public class ContinuousHikingParameters extends StoredPropertySet implements Con
    public static final DoubleStoredPropertyKey percentThroughSwingToStartPlanning = keys.addDoubleKey("Percent through swing to start planning");
    public static final BooleanStoredPropertyKey logFootstepPlans = keys.addBooleanKey("Log footstep plans");
    public static final DoubleStoredPropertyKey nextWaypointDistanceMargin = keys.addDoubleKey("Next Waypoint Distance Margin");
+   public static final DoubleStoredPropertyKey ninetyDegreeTurnSwingTime = keys.addDoubleKey("Ninety Degree Turn Swing Time");
+   public static final DoubleStoredPropertyKey ninetyDegreeTurnTransferTime = keys.addDoubleKey("Ninety Degree Turn Transfer Time");
 
    /**
     * Loads this property set.
