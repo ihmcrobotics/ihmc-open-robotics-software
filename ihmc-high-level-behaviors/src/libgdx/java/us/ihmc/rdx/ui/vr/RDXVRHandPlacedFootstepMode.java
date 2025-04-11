@@ -95,16 +95,15 @@ public class RDXVRHandPlacedFootstepMode
                LibGDXTools.setOpacity(feetBeingPlaced.get(side), 0.5f);
             }
 
-            if (triggerClick.bChanged() && !triggerClick.bState())
-            {
-               ModelInstance footBeingPlaced = feetBeingPlaced.get(side);
-               feetBeingPlaced.put(side, null);
-               placedFootsteps.add(new RDXVRHandPlacedFootstep(side, footBeingPlaced, footstepIndex++, new RigidBodyTransform()));
-            }
-
             ModelInstance footBeingPlaced = feetBeingPlaced.get(side);
             if (footBeingPlaced != null)
             {
+               if (triggerClick.bChanged() && !triggerClick.bState())
+               {
+                  feetBeingPlaced.put(side, null);
+                  placedFootsteps.add(new RDXVRHandPlacedFootstep(side, footBeingPlaced, footstepIndex++, new RigidBodyTransform()));
+               }
+
                poseForPlacement.setToZero(controller.getXForwardZUpControllerFrame());
                poseForPlacement.getPosition().add(0.05, 0.0, 0.0);
                poseForPlacement.getOrientation().appendPitchRotation(Math.toRadians(-90.0));
