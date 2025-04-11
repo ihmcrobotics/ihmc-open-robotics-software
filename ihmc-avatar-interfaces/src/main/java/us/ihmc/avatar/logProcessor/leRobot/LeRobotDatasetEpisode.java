@@ -59,8 +59,6 @@ public class LeRobotDatasetEpisode
          session.submitBufferIndexRequestAndWait(inPoint);
 
          ZEDSVOScrubber zedSVOScrubber = session.getZedSVOScrubbers().get(0);
-         int imageHeight = zedSVOScrubber.getImageHeight();
-         int imageWidth = zedSVOScrubber.getImageWidth();
 
          for (RobotSide side : RobotSide.values)
          {
@@ -68,10 +66,9 @@ public class LeRobotDatasetEpisode
          }
 
          length = 0;
-         long lastVideoTimestamp = -1;
-         int scsInOutLength = outPoint - inPoint;
          long startVideoTimestamp = -1;
-         for (int i = 0; i < scsInOutLength; i++)
+         long lastVideoTimestamp = -1;
+         for (int i = 0; i < outPoint - inPoint; i++)
          {
             session.playbackTick(); // TODO: Is this skipping the first tick?
 
