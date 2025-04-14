@@ -19,7 +19,6 @@ mainDependencies {
    }
    api("us.ihmc:promp-java:1.0.1")
    api("us.ihmc:llamacpp-javacpp:b4829")
-   api("com.jerolba:carpet-record:0.3.0")
 }
 
 libgdxDependencies {
