@@ -93,7 +93,6 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    private final ImBoolean useMonteCarloFootstepPlanner = new ImBoolean(false);
    private final ControllerFootstepQueueMonitor controllerFootstepQueueMonitorRemote;
    private final ControllerFootstepQueueMonitor controllerFootstepQueueMonitorUI;
-   private final ContinuousHikingLogger continuousHikingLogger;
    private final ROS2Publisher<PlanOffsetStatus> planOffsetStatusPublisher;
    private final ROS2Publisher<FootstepStatusMessage> footstepStatusMessagePublisher;
    private final ROS2Publisher<WalkingControllerFailureStatusMessage> walkingControllerFailureStatusPublisher;
@@ -189,7 +188,6 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       RDXStoredPropertySetTuner heightMapParametersPanel = new RDXStoredPropertySetTuner("Height Map Parameters (CH)");
       createParametersPanel(heightMapParameters, heightMapParametersPanel, hostStoredPropertySets, PerceptionComms.HEIGHT_MAP_PARAMETERS);
 
-      continuousHikingLogger = new ContinuousHikingLogger();
       controllerFootstepQueueMonitorRemote = new ControllerFootstepQueueMonitor(ros2Node, robotModel.getSimpleRobotName());
       controllerFootstepQueueMonitorUI = new ControllerFootstepQueueMonitor(ros2Node, robotModel.getSimpleRobotName());
    }
@@ -220,6 +218,8 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       runSubscriberOnly = true;
       this.clientStoredPropertySets = clientStoredPropertySets;
 
+      // We only want to start the logger if we create the subscriber for Continuous Hiking
+      ContinuousHikingLogger continuousHikingLogger = new ContinuousHikingLogger();
       continuousPlannerSchedulingTask = new ContinuousPlannerSchedulingTask(robotModel,
                                                                             ros2Node,
                                                                             syncedRobotModel,
