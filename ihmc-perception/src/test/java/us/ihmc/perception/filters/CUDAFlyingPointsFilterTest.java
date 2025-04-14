@@ -1,7 +1,6 @@
 package us.ihmc.perception.filters;
 
 import org.bytedeco.opencv.global.opencv_core;
-import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.junit.jupiter.api.Test;
 import us.ihmc.perception.tools.PerceptionDebugTools;
@@ -16,7 +15,7 @@ public class CUDAFlyingPointsFilterTest
    public void testSimpleMatrix() throws Exception
    {
       CUDAFlyingPointsFilter flyingPointsFilter;
-      GpuMat filterGpuMat = new GpuMat();
+      Mat filterGpuMat;
       Mat outputMat = new Mat();
       flyingPointsFilter = new CUDAFlyingPointsFilter();
 
@@ -33,9 +32,8 @@ public class CUDAFlyingPointsFilterTest
 
       PerceptionDebugTools.printMat("input_matrix", inputMat, 1);
 
-      filterGpuMat.upload(inputMat);
-      filterGpuMat = flyingPointsFilter.applyFilter(filterGpuMat);
-      filterGpuMat.download(outputMat);
+      filterGpuMat = flyingPointsFilter.applyFilter(inputMat);
+      filterGpuMat.copyTo(outputMat);
 
       PerceptionDebugTools.printMat("output_matrix", outputMat, 1);
 
