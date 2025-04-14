@@ -119,18 +119,24 @@ public class RDXSCS2LogSession extends RDXSCS2Session
          for (MagewellLogVideo magewellLogVideo : magewellLogVideos)
          {
             Frame frame = magewellLogVideo.scrubber.readVideoFrame(yoTimestamp.getValueAsLongBits());
-            magewellLogVideo.visualizer.updateImageDimensions(frame.imageWidth, frame.imageHeight);
-            magewellLogVideo.visualizer.setImage(magewellLogVideo.converter.convertToMat(frame), opencv_imgproc.COLOR_BGR2RGBA);
-            frame.close();
+            if (frame != null)
+            {
+               magewellLogVideo.visualizer.updateImageDimensions(frame.imageWidth, frame.imageHeight);
+               magewellLogVideo.visualizer.setImage(magewellLogVideo.converter.convertToMat(frame), opencv_imgproc.COLOR_BGR2RGBA);
+               frame.close();
+            }
          }
          for (BlackmagicLogVideo blackmagicLogVideo : blackmagicLogVideos)
          {
             try
             {
                YUVPicture yuvPicture = blackmagicLogVideo.scrubber.readVideoFrame(yoTimestamp.getValueAsLongBits());
-               blackmagicLogVideo.visualizer.updateImageDimensions(yuvPicture.getWidth(), yuvPicture.getHeight());
-               // TODO: Convert YUVPicture to Mat
-               yuvPicture.delete();
+               if (yuvPicture != null)
+               {
+                  blackmagicLogVideo.visualizer.updateImageDimensions(yuvPicture.getWidth(), yuvPicture.getHeight());
+                  // TODO: Convert YUVPicture to Mat
+                  yuvPicture.delete();
+               }
             }
             catch (Exception e)
             {
