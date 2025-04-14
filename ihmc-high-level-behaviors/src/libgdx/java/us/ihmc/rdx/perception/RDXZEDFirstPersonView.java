@@ -30,20 +30,20 @@ public class RDXZEDFirstPersonView
       firstPerson3DPanel.getCamera3D().setInputEnabled(false);
    }
 
-   public void update(Mat bgrMat, float vFov, ReferenceFrame zedLeftEyeFrame)
+   public void update(Mat bgraMat, float vFov, ReferenceFrame zedLeftEyeFrame)
    {
       if (firstPersonBackgroundRenderer == null)
       {
          firstPersonBackgroundRenderer = () ->
          {
-            Mat rgbMat = new Mat(bgrMat.rows(), bgrMat.cols(), opencv_core.CV_8UC4);
-            opencv_imgproc.cvtColor(bgrMat, rgbMat, opencv_imgproc.COLOR_BGRA2RGBA);
-            opencv_core.flip(rgbMat, rgbMat, OpenCVTools.FLIP_Y);
+            Mat rgbaMat = new Mat(bgraMat.rows(), bgraMat.cols(), opencv_core.CV_8UC4);
+            opencv_imgproc.cvtColor(bgraMat, rgbaMat, opencv_imgproc.COLOR_BGRA2RGBA);
+            opencv_core.flip(rgbaMat, rgbaMat, OpenCVTools.FLIP_Y);
 
             int viewportWidth = (int) Math.floor(firstPerson3DPanel.getViewportSizeX()) * firstPerson3DPanel.getAntiAliasing();
             int viewportHeight = (int) Math.floor(firstPerson3DPanel.getViewportSizeY()) * firstPerson3DPanel.getAntiAliasing();
 
-            float cameraAspect = (float) rgbMat.cols() / rgbMat.rows();
+            float cameraAspect = (float) rgbaMat.cols() / rgbaMat.rows();
             float viewportAspect = (float) viewportWidth / viewportHeight;
 
             int cameraRenderWidth = Math.round(viewportHeight * cameraAspect);
@@ -59,19 +59,19 @@ public class RDXZEDFirstPersonView
             }
 
             Size size = new Size(cameraRenderWidth, viewportHeight);
-            Mat scaledRgbMat = new Mat(viewportHeight, cameraRenderWidth, opencv_core.CV_8UC4);
-            opencv_imgproc.resize(rgbMat, scaledRgbMat, size);
+            Mat scaledRgbaMat = new Mat(size, opencv_core.CV_8UC4);
+            opencv_imgproc.resize(rgbaMat, scaledRgbaMat, size);
             size.close();
-            rgbMat.close();
+            rgbaMat.close();
 
-            Mat renderMat = scaledRgbMat;
-            Mat shiftedRgbMat = null;
+            Mat renderMat = scaledRgbaMat;
+            Mat shiftedRgbaMat = null;
             if (shiftAmountX > 0) // We need to shift the image to the left in the case the camera extends beyond the side edges
             {
-               shiftedRgbMat = new Mat(scaledRgbMat.size(), scaledRgbMat.type());
-               Mat rangeToShift = scaledRgbMat.colRange(shiftAmountX, scaledRgbMat.cols());
-               rangeToShift.copyTo(shiftedRgbMat);
-               renderMat = shiftedRgbMat;
+               shiftedRgbaMat = new Mat(scaledRgbaMat.size(), scaledRgbaMat.type());
+               Mat rangeToShift = scaledRgbaMat.colRange(shiftAmountX, scaledRgbaMat.cols());
+               rangeToShift.copyTo(shiftedRgbaMat);
+               renderMat = shiftedRgbaMat;
                rangeToShift.close();
             }
 
@@ -80,9 +80,9 @@ public class RDXZEDFirstPersonView
             Gdx.gl.glTexSubImage2D(glTarget, 0, offsetX, 0, renderMat.cols(), renderMat.rows(),
                                    GL20.GL_RGBA, GL20.GL_UNSIGNED_BYTE, renderMat.data().asBuffer());
 
-            if (shiftedRgbMat != null)
-               shiftedRgbMat.close();
-            scaledRgbMat.close();
+            if (shiftedRgbaMat != null)
+               shiftedRgbaMat.close();
+            scaledRgbaMat.close();
          };
 
          firstPerson3DPanel.getCamera3D().setVerticalFieldOfView(vFov);

@@ -65,16 +65,13 @@ public class LeRobotDatasetVideoWriter
 
       Pointer zedColorImageSLMatPointer =
             side == RobotSide.LEFT ? zedSVOScrubber.getLeftColorImageSlMatPointer() : zedSVOScrubber.getRightColorImageSlMatPointer();
-      Mat bgra8Mat = new Mat(imageHeight,
-                             imageWidth,
-                             opencv_core.CV_8UC4,
-                             // BGRA8
+      Mat bgra8Mat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC4, // BGRA8
                              sl_mat_get_ptr(zedColorImageSLMatPointer, SL_MEM_CPU),
                              sl_mat_get_step_bytes(zedColorImageSLMatPointer, SL_MEM_CPU));
 
       // Resize smaller for better transformer training
       Size size = new Size(853, 480);
-      Mat resized = new Mat(size.height(), size.width(), opencv_core.CV_8UC4);
+      Mat resized = new Mat(size, opencv_core.CV_8UC4);
       opencv_imgproc.resize(bgra8Mat, resized, size);
       size.close();
 
@@ -86,6 +83,9 @@ public class LeRobotDatasetVideoWriter
       Rect roi = new Rect(x, y, cropWidth, cropHeight);
       Mat cropped = new Mat(resized, roi);
       resized.close();
+
+      // ZED outputs bgra but frame recorder wants rgba
+      opencv_imgproc.cvtColor(cropped, cropped, opencv_imgproc.COLOR_BGR2RGBA);
 
       Frame frame = frameConverter.convert(cropped);
       cropped.close();

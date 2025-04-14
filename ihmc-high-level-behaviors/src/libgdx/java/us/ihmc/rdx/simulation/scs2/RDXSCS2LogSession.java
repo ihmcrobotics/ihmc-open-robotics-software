@@ -155,7 +155,7 @@ public class RDXSCS2LogSession extends RDXSCS2Session
             Mat mat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC4, // BGRA8
                               sl_mat_get_ptr(leftColorImageSlMatPointer, SL_MEM_CPU),
                               sl_mat_get_step_bytes(leftColorImageSlMatPointer, SL_MEM_CPU));
-            zedLogVideo.visualizer.setImage(mat);
+            zedLogVideo.visualizer.setImage(mat, opencv_imgproc.COLOR_BGR2RGBA);
             mat.close();
          }
       }
