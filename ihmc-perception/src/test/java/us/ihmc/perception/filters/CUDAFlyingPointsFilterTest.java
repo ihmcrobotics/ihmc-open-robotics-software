@@ -89,5 +89,8 @@ public class CUDAFlyingPointsFilterTest
          cudaFree(freePointer);
          cudaFree(usedPointer);
       }
+
+      cpuData.close();
+      flyingPointsFilter.destroy();
    }
 }
