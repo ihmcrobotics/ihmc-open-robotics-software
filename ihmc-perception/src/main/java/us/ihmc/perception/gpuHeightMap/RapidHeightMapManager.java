@@ -113,7 +113,7 @@ public class RapidHeightMapManager
       Mat latestDepthImage = depthImage.getCpuImageMat();
       CameraIntrinsics depthIntrinsicsCopy = depthImage.getIntrinsicsCopy();
       // This takes the latest depth image and converts it to the expected type
-      Mat hostDepthImage = depthImage.getCpuImageMat();
+      Mat hostDepthImage = new Mat();
       latestDepthImage.convertTo(hostDepthImage, opencv_core.CV_16UC1);
 
       // We expect that depthImage to contain depths for parts of the robot that are in the camera frame, we remove that here
