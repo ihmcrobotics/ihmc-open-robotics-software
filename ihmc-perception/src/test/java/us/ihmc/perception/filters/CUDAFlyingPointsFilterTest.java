@@ -2,12 +2,10 @@ package us.ihmc.perception.filters;
 
 import org.bytedeco.javacpp.SizeTPointer;
 import org.bytedeco.opencv.global.opencv_core;
-import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import us.ihmc.perception.gpuHeightMap.FilteredVerticalSurfacesExtractor;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 
 import static org.bytedeco.cuda.global.cudart.cudaFree;
