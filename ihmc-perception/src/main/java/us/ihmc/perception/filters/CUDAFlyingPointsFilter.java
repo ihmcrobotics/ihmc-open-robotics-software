@@ -29,13 +29,6 @@ public class CUDAFlyingPointsFilter
       flyingPointFilterKernel = flyingPointFilterCUDAProgram.loadKernel(filterKernelName);
    }
 
-   public void destroy()
-   {
-      flyingPointFilterCUDAProgram.close();
-      flyingPointFilterKernel.close();
-      CUDAStreamManager.releaseStream(stream);
-   }
-
    public Mat applyFilter(Mat deviceInputImage)
    {
       GpuMat deviceOutputImage = new GpuMat(deviceInputImage.size(), deviceInputImage.type());
@@ -59,6 +52,13 @@ public class CUDAFlyingPointsFilter
       Mat filteredDepthImageHost = new Mat();
       deviceOutputImage.download(filteredDepthImageHost);
       return filteredDepthImageHost;
+   }
+
+   public void destroy()
+   {
+      flyingPointFilterCUDAProgram.close();
+      flyingPointFilterKernel.close();
+      CUDAStreamManager.releaseStream(stream);
    }
 }
 
