@@ -29,8 +29,10 @@ public class CUDAFlyingPointsFilter
       flyingPointFilterKernel = flyingPointFilterCUDAProgram.loadKernel(filterKernelName);
    }
 
-   public Mat applyFilter(Mat deviceInputImage)
+   public Mat applyFilter(Mat inputImage)
    {
+      GpuMat deviceInputImage = new GpuMat();
+      deviceInputImage.upload(inputImage);
       GpuMat deviceOutputImage = new GpuMat(deviceInputImage.size(), deviceInputImage.type());
 
       int gridSizeX = (deviceInputImage.cols() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
@@ -51,6 +53,7 @@ public class CUDAFlyingPointsFilter
 
       blockSize.close();
       gridSize.close();
+      deviceInputImage.close();
       deviceOutputImage.close();
 
       return filteredDepthImageHost;
