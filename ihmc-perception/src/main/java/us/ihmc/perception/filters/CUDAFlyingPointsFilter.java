@@ -46,11 +46,13 @@ public class CUDAFlyingPointsFilter
 
       CUDATools.checkCUDAError(cudart.cudaStreamSynchronize(stream));
 
-      blockSize.close();
-      gridSize.close();
-
       Mat filteredDepthImageHost = new Mat();
       deviceOutputImage.download(filteredDepthImageHost);
+
+      blockSize.close();
+      gridSize.close();
+      deviceOutputImage.close();
+
       return filteredDepthImageHost;
    }
 
