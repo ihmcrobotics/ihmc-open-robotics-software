@@ -67,7 +67,7 @@ public class LeRobotDatasetEpisode
          }
 
          Path parquetPath = dataChunk0Path.resolve(episodeName + ".parquet");
-         dataWriter = new LeRobotDatasetDataWriter(parquetPath);
+         dataWriter = new LeRobotDatasetDataWriter(parquetPath, session.getRootRegistry());
 
          length = 0;
          long startVideoTimestamp = -1;
