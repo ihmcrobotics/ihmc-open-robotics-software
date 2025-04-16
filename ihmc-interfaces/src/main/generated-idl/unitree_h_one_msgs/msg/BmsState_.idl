@@ -1,0 +1,32 @@
+#ifndef __unitree_h_one_msgs__msg__BmsState__idl__
+#define __unitree_h_one_msgs__msg__BmsState__idl__
+
+module unitree_h_one_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="unitree_h_one_msgs::msg::dds_::BmsState_")
+      struct BmsState
+      {
+        octet version_high;
+        octet version_low;
+        octet fn;
+        unsigned_short cell_vol[40];
+        unsigned_long bmsvoltage[3];
+        long current;
+        octet soc;
+        octet soh;
+        short temperature[12];
+        unsigned short cycle;
+        unsigned short manufacturer_date;
+        unsigned_long bmsstate[5];
+        unsigned_long reserve[3];
+      };
+    };
+  };
+};
+
+#endif

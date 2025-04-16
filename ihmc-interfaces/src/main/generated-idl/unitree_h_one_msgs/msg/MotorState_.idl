@@ -1,0 +1,29 @@
+#ifndef __unitree_h_one_msgs__msg__MotorState__idl__
+#define __unitree_h_one_msgs__msg__MotorState__idl__
+
+module unitree_h_one_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="unitree_h_one_msgs::msg::dds_::MotorState_")
+      struct MotorState
+      {
+        octet mode;
+        float q;
+        float dq;
+        float ddq;
+        float tau_est;
+        short temperature[2];
+        float vol;
+        unsigned_long sensor[2];
+        unsigned long motorstate;
+        unsigned_long reserve[4];
+      };
+    };
+  };
+};
+
+#endif

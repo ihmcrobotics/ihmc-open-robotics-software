@@ -1,0 +1,25 @@
+#ifndef __unitree_h_one_msgs__msg__LowCmd__idl__
+#define __unitree_h_one_msgs__msg__LowCmd__idl__
+
+#include "unitree_h_one_msgs/msg/./MotorCmd_.idl"
+module unitree_h_one_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="unitree_h_one_msgs::msg::dds_::LowCmd_")
+      struct LowCmd
+      {
+        octet mode_pr;
+        octet mode_machine;
+        unitree_h_one_msgs::msg::dds::MotorCmd motor_cmd[35];
+        unsigned_long reserve[4];
+        unsigned long crc;
+      };
+    };
+  };
+};
+
+#endif

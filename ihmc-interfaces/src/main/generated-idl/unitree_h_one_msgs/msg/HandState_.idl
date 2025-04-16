@@ -1,0 +1,28 @@
+#ifndef __unitree_h_one_msgs__msg__HandState__idl__
+#define __unitree_h_one_msgs__msg__HandState__idl__
+
+#include "unitree_h_one_msgs/msg/./IMUState_.idl"
+#include "unitree_h_one_msgs/msg/./MotorState_.idl"
+#include "unitree_h_one_msgs/msg/./PressSensorState_.idl"
+module unitree_h_one_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="unitree_h_one_msgs::msg::dds_::HandState_")
+      struct HandState
+      {
+        sequence<unitree_h_one_msgs::msg::dds::MotorState> motor_state;
+        unitree_h_one_msgs::msg::dds::IMUState imu_state;
+        sequence<unitree_h_one_msgs::msg::dds::PressSensorState> press_sensor_state;
+        float power_v;
+        float power_a;
+        unsigned_long reserve[2];
+      };
+    };
+  };
+};
+
+#endif

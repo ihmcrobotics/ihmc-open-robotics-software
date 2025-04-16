@@ -1,0 +1,21 @@
+#ifndef __unitree_h_one_msgs__msg__HandCmd__idl__
+#define __unitree_h_one_msgs__msg__HandCmd__idl__
+
+#include "unitree_h_one_msgs/msg/./MotorCmd_.idl"
+module unitree_h_one_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="unitree_h_one_msgs::msg::dds_::HandCmd_")
+      struct HandCmd
+      {
+        sequence<unitree_h_one_msgs::msg::dds::MotorCmd> motor_cmd;
+      };
+    };
+  };
+};
+
+#endif

@@ -1,0 +1,23 @@
+#ifndef __unitree_h_one_msgs__msg__MainBoardState__idl__
+#define __unitree_h_one_msgs__msg__MainBoardState__idl__
+
+module unitree_h_one_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="unitree_h_one_msgs::msg::dds_::MainBoardState_")
+      struct MainBoardState
+      {
+        unsigned_short fan_state[6];
+        short temperature[6];
+        float value[6];
+        unsigned_long state[6];
+      };
+    };
+  };
+};
+
+#endif

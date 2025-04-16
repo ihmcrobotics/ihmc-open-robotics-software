@@ -1,0 +1,24 @@
+#ifndef __unitree_h_one_msgs__msg__IMUState__idl__
+#define __unitree_h_one_msgs__msg__IMUState__idl__
+
+module unitree_h_one_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="unitree_h_one_msgs::msg::dds_::IMUState_")
+      struct IMUState
+      {
+        float quaternion[4];
+        float gyroscope[3];
+        float accelerometer[3];
+        float rpy[3];
+        short temperature;
+      };
+    };
+  };
+};
+
+#endif

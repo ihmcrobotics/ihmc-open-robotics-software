@@ -1,0 +1,30 @@
+#ifndef __unitree_h_one_msgs__msg__LowState__idl__
+#define __unitree_h_one_msgs__msg__LowState__idl__
+
+#include "unitree_h_one_msgs/msg/./IMUState_.idl"
+#include "unitree_h_one_msgs/msg/./MotorState_.idl"
+module unitree_h_one_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="unitree_h_one_msgs::msg::dds_::LowState_")
+      struct LowState
+      {
+        unsigned_long version[2];
+        octet mode_pr;
+        octet mode_machine;
+        unsigned long tick;
+        unitree_h_one_msgs::msg::dds::IMUState imu_state;
+        unitree_h_one_msgs::msg::dds::MotorState motor_state[35];
+        octet wireless_remote[40];
+        unsigned_long reserve[4];
+        unsigned long crc;
+      };
+    };
+  };
+};
+
+#endif
