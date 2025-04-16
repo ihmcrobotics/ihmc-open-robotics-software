@@ -5,12 +5,12 @@
   "Enable alpha filter": true,
   "Enable vertical filter": true,
   "Search window height": {
-    "value": 500,
+    "value": 400,
     "lowerBound": 100,
     "upperBound": 800
   },
   "Search window width": {
-    "value": 400,
+    "value": 480,
     "lowerBound": 100,
     "upperBound": 800
   },
@@ -75,34 +75,29 @@
     "upperBound": 4.5
   },
   "Terrain width in meters": {
-    "value": 2.0,
+    "value": 4.0,
     "lowerBound": 2.0,
     "upperBound": 8.0
   },
-  "Robot collision cylinder radius": {
-    "value": 0.05,
-    "lowerBound": 0.0,
-    "upperBound": 0.8
+  "Cropped width in meters": {
+    "value": 6.0,
+    "lowerBound": 2.0,
+    "upperBound": 8.0
   },
   "Internal global width in meters": {
     "value": 30.0,
     "lowerBound": 20.0,
     "upperBound": 40.0
   },
+  "Robot collision cylinder radius": {
+    "value": 0.05,
+    "lowerBound": 0.0,
+    "upperBound": 0.8
+  },
   "Height scale factor": {
     "value": 10000.0,
     "lowerBound": 1000.0,
     "upperBound": 20000.0
-  },
-  "Crop window size": {
-    "value": 201,
-    "lowerBound": 300,
-    "upperBound": 800
-  },
-  "Terrain object size": {
-    "vale": 201,
-    "lowerBound": 40,
-    "upperBound": 300
   },
   "Stepping contact threshold": {
     "value": 0,

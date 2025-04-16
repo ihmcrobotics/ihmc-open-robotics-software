@@ -37,11 +37,10 @@ public class HeightMapParameters extends StoredPropertySet implements HeightMapP
    public static final DoubleStoredPropertyKey cellSizeInMeters = keys.addDoubleKey("Cell size in meters");
    public static final DoubleStoredPropertyKey localWidthInMeters = keys.addDoubleKey("Local width in meters");
    public static final DoubleStoredPropertyKey terrainWidthInMeters = keys.addDoubleKey("Terrain width in meters");
-   public static final DoubleStoredPropertyKey robotCollisionCylinderRadius = keys.addDoubleKey("Robot collision cylinder radius");
+   public static final DoubleStoredPropertyKey croppedWidthInMeters = keys.addDoubleKey("Cropped width in meters");
    public static final DoubleStoredPropertyKey internalGlobalWidthInMeters = keys.addDoubleKey("Internal global width in meters");
+   public static final DoubleStoredPropertyKey robotCollisionCylinderRadius = keys.addDoubleKey("Robot collision cylinder radius");
    public static final DoubleStoredPropertyKey heightScaleFactor = keys.addDoubleKey("Height scale factor");
-   public static final IntegerStoredPropertyKey cropWindowSize = keys.addIntegerKey("Crop window size");
-   public static final IntegerStoredPropertyKey terrainObjectSize = keys.addIntegerKey("Terrain object size");
    public static final IntegerStoredPropertyKey steppingContactThreshold = keys.addIntegerKey("Stepping contact threshold");
    public static final IntegerStoredPropertyKey contactWindowSize = keys.addIntegerKey("Contact window size");
    public static final DoubleStoredPropertyKey steppingCosineThreshold = keys.addDoubleKey("Stepping cosine threshold");

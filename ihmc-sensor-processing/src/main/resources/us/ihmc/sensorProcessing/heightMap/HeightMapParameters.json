@@ -79,30 +79,25 @@
     "lowerBound": 2.0,
     "upperBound": 8.0
   },
-  "Robot collision cylinder radius": {
-    "value": 0.5,
-    "lowerBound": 0.1,
-    "upperBound": 0.8
+  "Cropped width in meters": {
+    "value": 6.0,
+    "lowerBound": 2.0,
+    "upperBound": 8.0
   },
   "Internal global width in meters": {
     "value": 30.0,
     "lowerBound": 20.0,
     "upperBound": 40.0
   },
+  "Robot collision cylinder radius": {
+    "value": 0.5,
+    "lowerBound": 0.1,
+    "upperBound": 0.8
+  },
   "Height scale factor": {
     "value": 10000.0,
     "lowerBound": 1000.0,
     "upperBound": 20000.0
-  },
-  "Crop window size": {
-    "value": 201,
-    "lowerBound": 40,
-    "upperBound": 300
-  },
-  "Terrain object size": {
-    "value": 201,
-    "lowerBound": 40,
-    "upperBound": 300
   },
   "Stepping contact threshold": {
     "value": 0,
