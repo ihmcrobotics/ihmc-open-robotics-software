@@ -1,0 +1,28 @@
+#ifndef __unitree_go_msgs__msg__BmsState__idl__
+#define __unitree_go_msgs__msg__BmsState__idl__
+
+module unitree_go_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="unitree_go_msgs::msg::dds_::BmsState_")
+      struct BmsState
+      {
+        octet version_high;
+        octet version_low;
+        octet status;
+        octet soc;
+        long current;
+        unsigned short cycle;
+        octet bq_ntc[2];
+        octet mcu_ntc[2];
+        unsigned_short cell_vol[15];
+      };
+    };
+  };
+};
+
+#endif

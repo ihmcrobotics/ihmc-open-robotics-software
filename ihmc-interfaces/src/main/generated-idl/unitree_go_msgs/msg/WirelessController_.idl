@@ -1,0 +1,24 @@
+#ifndef __unitree_go_msgs__msg__WirelessController__idl__
+#define __unitree_go_msgs__msg__WirelessController__idl__
+
+module unitree_go_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="unitree_go_msgs::msg::dds_::WirelessController_")
+      struct WirelessController
+      {
+        float lx;
+        float ly;
+        float rx;
+        float ry;
+        unsigned short keys;
+      };
+    };
+  };
+};
+
+#endif

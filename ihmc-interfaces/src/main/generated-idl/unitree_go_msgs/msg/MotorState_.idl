@@ -1,0 +1,30 @@
+#ifndef __unitree_go_msgs__msg__MotorState__idl__
+#define __unitree_go_msgs__msg__MotorState__idl__
+
+module unitree_go_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="unitree_go_msgs::msg::dds_::MotorState_")
+      struct MotorState
+      {
+        octet mode;
+        float q;
+        float dq;
+        float ddq;
+        float tau_est;
+        float q_raw;
+        float dq_raw;
+        float ddq_raw;
+        octet temperature;
+        unsigned long lost;
+        unsigned_long reserve[2];
+      };
+    };
+  };
+};
+
+#endif

@@ -1,0 +1,32 @@
+#ifndef __unitree_go_msgs__msg__SportModeCmd__idl__
+#define __unitree_go_msgs__msg__SportModeCmd__idl__
+
+#include "unitree_go_msgs/msg/./BmsCmd_.idl"
+#include "unitree_go_msgs/msg/./PathPoint_.idl"
+module unitree_go_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="unitree_go_msgs::msg::dds_::SportModeCmd_")
+      struct SportModeCmd
+      {
+        octet mode;
+        octet gait_type;
+        octet speed_level;
+        float foot_raise_height;
+        float body_height;
+        float position[2];
+        float euler[3];
+        float velocity[2];
+        float yaw_speed;
+        unitree_go_msgs::msg::dds::BmsCmd bms_cmd;
+        unitree_go_msgs::msg::dds::PathPoint path_point[30];
+      };
+    };
+  };
+};
+
+#endif

@@ -1,0 +1,36 @@
+#ifndef __unitree_go_msgs__msg__LidarState__idl__
+#define __unitree_go_msgs__msg__LidarState__idl__
+
+module unitree_go_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="unitree_go_msgs::msg::dds_::LidarState_")
+      struct LidarState
+      {
+        double stamp;
+        string firmware_version;
+        string software_version;
+        string sdk_version;
+        float sys_rotation_speed;
+        float com_rotation_speed;
+        octet error_state;
+        float cloud_frequency;
+        float cloud_packet_loss_rate;
+        unsigned long cloud_size;
+        unsigned long cloud_scan_num;
+        float imu_frequency;
+        float imu_packet_loss_rate;
+        float imu_rpy[3];
+        double serial_recv_stamp;
+        unsigned long serial_buffer_size;
+        unsigned long serial_buffer_read;
+      };
+    };
+  };
+};
+
+#endif

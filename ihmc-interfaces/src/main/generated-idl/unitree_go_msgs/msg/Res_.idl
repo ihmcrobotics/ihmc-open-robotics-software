@@ -1,0 +1,22 @@
+#ifndef __unitree_go_msgs__msg__Res__idl__
+#define __unitree_go_msgs__msg__Res__idl__
+
+module unitree_go_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="unitree_go_msgs::msg::dds_::Res_")
+      struct Res
+      {
+        string uuid;
+        sequence<octet> data;
+        string body;
+      };
+    };
+  };
+};
+
+#endif

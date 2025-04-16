@@ -1,0 +1,26 @@
+#ifndef __unitree_go_msgs__msg__MotorCmd__idl__
+#define __unitree_go_msgs__msg__MotorCmd__idl__
+
+module unitree_go_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="unitree_go_msgs::msg::dds_::MotorCmd_")
+      struct MotorCmd
+      {
+        octet mode;
+        float q;
+        float dq;
+        float tau;
+        float kp;
+        float kd;
+        unsigned_long reserve[3];
+      };
+    };
+  };
+};
+
+#endif

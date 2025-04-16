@@ -1,0 +1,20 @@
+#ifndef __unitree_go_msgs__msg__UwbSwitch__idl__
+#define __unitree_go_msgs__msg__UwbSwitch__idl__
+
+module unitree_go_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="unitree_go_msgs::msg::dds_::UwbSwitch_")
+      struct UwbSwitch
+      {
+        octet enabled;
+      };
+    };
+  };
+};
+
+#endif

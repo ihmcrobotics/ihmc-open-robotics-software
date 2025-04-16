@@ -1,0 +1,21 @@
+#ifndef __unitree_go_msgs__msg__MotorCmds__idl__
+#define __unitree_go_msgs__msg__MotorCmds__idl__
+
+#include "unitree_go_msgs/msg/./MotorCmd_.idl"
+module unitree_go_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="unitree_go_msgs::msg::dds_::MotorCmds_")
+      struct MotorCmds
+      {
+        sequence<unitree_go_msgs::msg::dds::MotorCmd> cmds;
+      };
+    };
+  };
+};
+
+#endif

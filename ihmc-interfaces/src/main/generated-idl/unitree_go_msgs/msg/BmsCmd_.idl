@@ -1,0 +1,21 @@
+#ifndef __unitree_go_msgs__msg__BmsCmd__idl__
+#define __unitree_go_msgs__msg__BmsCmd__idl__
+
+module unitree_go_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="unitree_go_msgs::msg::dds_::BmsCmd_")
+      struct BmsCmd
+      {
+        octet off;
+        octet reserve[3];
+      };
+    };
+  };
+};
+
+#endif
