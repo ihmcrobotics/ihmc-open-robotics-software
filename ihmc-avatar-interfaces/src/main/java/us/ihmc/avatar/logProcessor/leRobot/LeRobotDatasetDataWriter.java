@@ -3,7 +3,6 @@ package us.ihmc.avatar.logProcessor.leRobot;
 import com.jerolba.carpet.CarpetWriter;
 import com.jerolba.carpet.ColumnNamingStrategy;
 import com.jerolba.carpet.annotation.Alias;
-import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -18,9 +17,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
-
-import static us.ihmc.commons.exception.DefaultExceptionHandler.*;
 
 public class LeRobotDatasetDataWriter
 {
@@ -29,37 +25,32 @@ public class LeRobotDatasetDataWriter
                         long episodeIndex, // index of the episode for this sample
                         long frameIndex, // index of the frame for this sample in the episode; starts at 0 for each episode
                         float timestamp, // in the episode
-                        @Alias("next.done") boolean nextDone,
+                        @Alias("next.done") boolean nextDone, // true for the last frame of an episode
                         long index, // general index in the whole dataset
-                        long taskIndex
+                        long taskIndex // probably 0 mostly, since we only train one task at a time
    ) { }
 
-   private final OutputStream outputStream;
-   private final CarpetWriter<EpisodeRecord> carpetWriter;
-   private Random random = new Random();
+   private final List<EpisodeRecord> records = new ArrayList<>();
 
    private final YoRegistry yoRegistry;
    private final String feedbackController;
    record EndEffectorVariables(YoPose3D current,YoPose3D desired) { }
    private final SideDependentList<EndEffectorVariables> endEffectorVariables = new SideDependentList<>();
+   private final long episodeIndex;
+   private final long datasetLengthSoFar;
 
-   public LeRobotDatasetDataWriter(Path parquetPath, YoRegistry yoRegistry)
+   public LeRobotDatasetDataWriter(long episodeIndex, long datasetLengthSoFar, YoRegistry yoRegistry)
    {
+      this.episodeIndex = episodeIndex;
+      this.datasetLengthSoFar = datasetLengthSoFar;
       this.yoRegistry = yoRegistry;
-
-      outputStream = ExceptionTools.handle(() -> Files.newOutputStream(parquetPath), MESSAGE_AND_STACKTRACE);
-      carpetWriter = ExceptionTools.handle(() ->
-         new CarpetWriter.Builder<>(outputStream, EpisodeRecord.class).withColumnNamingStrategy(ColumnNamingStrategy.SNAKE_CASE).build()
-      , MESSAGE_AND_STACKTRACE);
 
       String highLevelController = "root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.";
       String wbcc = highLevelController + "HighLevelHumanoidControllerFactory.WholeBodyControllerCoreFactory.WholeBodyControllerCore.";
       feedbackController = wbcc + "WholeBodyFeedbackController.FeedbackControllerToolbox.";
 
       for (RobotSide side : RobotSide.values)
-      {
          endEffectorVariables.put(side, new EndEffectorVariables(findYoPose(side, "Current"), findYoPose(side, "Desired")));
-      }
    }
 
    private YoPose3D findYoPose(RobotSide side, String qualifier)
@@ -79,19 +70,19 @@ public class LeRobotDatasetDataWriter
       }
    }
 
-   public void write()
+   public void addFrame(long timestampMicros, long frameIndex)
    {
-      List<Float> observationState = new ArrayList<>();
+      List<Float> state = new ArrayList<>();
       List<Float> action = new ArrayList<>();
       for (RobotSide side : RobotSide.values)
       {
-         observationState.add(endEffectorVariables.get(side).current().getPosition().getX32());
-         observationState.add(endEffectorVariables.get(side).current().getPosition().getY32());
-         observationState.add(endEffectorVariables.get(side).current().getPosition().getZ32());
-         observationState.add(endEffectorVariables.get(side).current().getOrientation().getX32());
-         observationState.add(endEffectorVariables.get(side).current().getOrientation().getY32());
-         observationState.add(endEffectorVariables.get(side).current().getOrientation().getZ32());
-         observationState.add(endEffectorVariables.get(side).current().getOrientation().getS32());
+         state.add(endEffectorVariables.get(side).current().getPosition().getX32());
+         state.add(endEffectorVariables.get(side).current().getPosition().getY32());
+         state.add(endEffectorVariables.get(side).current().getPosition().getZ32());
+         state.add(endEffectorVariables.get(side).current().getOrientation().getX32());
+         state.add(endEffectorVariables.get(side).current().getOrientation().getY32());
+         state.add(endEffectorVariables.get(side).current().getOrientation().getZ32());
+         state.add(endEffectorVariables.get(side).current().getOrientation().getS32());
          action.add(endEffectorVariables.get(side).desired().getPosition().getX32());
          action.add(endEffectorVariables.get(side).desired().getPosition().getY32());
          action.add(endEffectorVariables.get(side).desired().getPosition().getZ32());
@@ -101,23 +92,45 @@ public class LeRobotDatasetDataWriter
          action.add(endEffectorVariables.get(side).desired().getOrientation().getS32());
       }
 
-      EpisodeRecord value = new EpisodeRecord(observationState,
-                                              action,
-                                              random.nextLong(),
-                                              random.nextLong(),
-                                              random.nextFloat(),
-                                              random.nextBoolean(),
-                                              random.nextLong(),
-                                              random.nextLong());
-
-      ExceptionTools.handle(() -> carpetWriter.write(value), MESSAGE_AND_STACKTRACE);
+      float timestamp = timestampMicros / 1e6f; // in seconds, beginning of episode is 0.0 s
+      int taskIndex = 0; // We're only training one task at a time for now
+      boolean isLastFrame = false;
+      records.add(new EpisodeRecord(state,
+                                    action,
+                                    episodeIndex,
+                                    frameIndex,
+                                    timestamp, isLastFrame,
+                                    datasetLengthSoFar + frameIndex, taskIndex));
    }
 
-   public void close()
+   public void writeFile(Path parquetPath)
    {
-      if (carpetWriter != null)
-         ExceptionTools.handle(carpetWriter::close, MESSAGE_AND_STACKTRACE);
-      if (outputStream != null)
-         ExceptionTools.handle(outputStream::close, MESSAGE_AND_STACKTRACE);
+      // Mark the last frame
+      EpisodeRecord last = records.get(records.size() - 1);
+      records.set(records.size() - 1, new EpisodeRecord(last.state,
+                                                        last.action,
+                                                        last.episodeIndex,
+                                                        last.frameIndex,
+                                                        last.timestamp,
+                                                        true, // <-- Main thing we're doing here
+                                                        last.index,
+                                                        last.taskIndex));
+      try
+      {
+         OutputStream outputStream = Files.newOutputStream(parquetPath);
+         CarpetWriter<EpisodeRecord> writer = new CarpetWriter.Builder<>(outputStream, EpisodeRecord.class)
+               .withColumnNamingStrategy(ColumnNamingStrategy.SNAKE_CASE).build();
+
+         for (EpisodeRecord record : records)
+            writer.write(record);
+
+         writer.close();
+         outputStream.close();
+      }
+      catch (Exception e)
+      {
+         LogTools.error(e.getMessage());
+         e.printStackTrace();
+      }
    }
 }

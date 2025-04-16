@@ -31,6 +31,7 @@ public class LeRobotDataset
 
    private final List<String> taskNames = new ArrayList<>();
    private final List<LeRobotDatasetEpisode> episodes = new ArrayList<>();
+   long totalFrames = 0L;
 
    public LeRobotDataset(Path directory)
    {
@@ -82,11 +83,14 @@ public class LeRobotDataset
          LeRobotDatasetEpisode episode = new LeRobotDatasetEpisode(episodeIndex,
                                                                    taskName,
                                                                    length,
+                                                                   totalFrames,
                                                                    episodesJsonlPath,
                                                                    episodeStatsJsonlPath,
                                                                    dataChunk0Path,
                                                                    zedVideoDirs);
          episodes.add(episode);
+
+         totalFrames += length;
       });
    }
 
@@ -109,6 +113,7 @@ public class LeRobotDataset
       LeRobotDatasetEpisode episode = new LeRobotDatasetEpisode(episodeIndex,
                                                                 taskName,
                                                                 0,
+                                                                totalFrames,
                                                                 episodesJsonlPath,
                                                                 episodeStatsJsonlPath,
                                                                 dataChunk0Path,
@@ -127,7 +132,7 @@ public class LeRobotDataset
    {
       JSONFileTools.save(infoJsonPath, rootNode ->
       {
-         int totalFrames = 0;
+         totalFrames = 0;
          for (LeRobotDatasetEpisode episode : episodes)
          {
             totalFrames += episode.getLength();
@@ -205,5 +210,10 @@ public class LeRobotDataset
    public List<LeRobotDatasetEpisode> getEpisodes()
    {
       return episodes;
+   }
+
+   public long getTotalFrames()
+   {
+      return totalFrames;
    }
 }
