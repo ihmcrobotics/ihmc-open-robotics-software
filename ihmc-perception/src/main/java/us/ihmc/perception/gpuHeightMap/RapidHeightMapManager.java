@@ -122,7 +122,15 @@ public class RapidHeightMapManager
       // -------- Update the Height Map with the latest depth image from the sensor --------------
       // This takes the latest depth image and converts it to the expected type
       Mat hostDepthImage = new Mat();
-      latestDepthImage.convertTo(hostDepthImage, opencv_core.CV_16UC1);
+
+      if (latestDepthImage.type() == opencv_core.CV_32FC1) // Support our simulated sensors
+      {
+         OpenCVTools.convertFloatToShort(latestDepthImage, hostDepthImage, 1000.0, 0.0);
+      }
+      else
+      {
+         latestDepthImage.convertTo(hostDepthImage, opencv_core.CV_16UC1);
+      }
 
       // We expect that depthImage to contain depths for parts of the robot that are in the camera frame, we remove that here
       GpuMat depthImageWithoutRobot = bodyCollisionFilter.process(hostDepthImage, depthIntrinsicsCopy, cameraFrame);
