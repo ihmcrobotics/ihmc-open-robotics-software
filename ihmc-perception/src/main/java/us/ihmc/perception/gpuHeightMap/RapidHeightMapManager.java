@@ -88,6 +88,17 @@ public class RapidHeightMapManager
 
    public void update(RawImage depthImage, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame) throws Exception
    {
+      // -------- Update the Height Map with the latest depth image from the sensor --------------
+      Mat latestDepthImage = depthImage.getCpuImageMat();
+      Instant acquisitionTime = depthImage.getAcquisitionTime();
+      CameraIntrinsics depthIntrinsicsCopy = depthImage.getIntrinsicsCopy();
+
+      update(latestDepthImage, acquisitionTime, depthIntrinsicsCopy, cameraFrame, cameraZUpFrame);
+   }
+
+
+   public void update(Mat latestDepthImage, Instant acquisitionTime, CameraIntrinsics depthIntrinsicsCopy, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame) throws Exception
+   {
       // Option that gets triggered from a message sent from the user
       if (lowerHeightMapBackdropRequested.poll())
       {
@@ -109,9 +120,6 @@ public class RapidHeightMapManager
       }
 
       // -------- Update the Height Map with the latest depth image from the sensor --------------
-      Instant acquisitionTime = depthImage.getAcquisitionTime();
-      Mat latestDepthImage = depthImage.getCpuImageMat();
-      CameraIntrinsics depthIntrinsicsCopy = depthImage.getIntrinsicsCopy();
       // This takes the latest depth image and converts it to the expected type
       Mat hostDepthImage = new Mat();
       latestDepthImage.convertTo(hostDepthImage, opencv_core.CV_16UC1);
