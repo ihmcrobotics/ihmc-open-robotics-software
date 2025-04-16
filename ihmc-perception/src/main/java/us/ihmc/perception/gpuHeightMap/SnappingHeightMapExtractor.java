@@ -162,7 +162,7 @@ public class SnappingHeightMapExtractor
    {
       return new float[] {(float) gridCenter.getX(),
                           (float) gridCenter.getY(),
-                          (float) heightMapParameters.getGlobalCellSizeInMeters(),
+                          (float) heightMapParameters.getCellSizeInMeters(),
                           globalCenterIndex,
                           cropCenterIndex,
                           (float) heightMapParameters.getHeightScaleFactor(),

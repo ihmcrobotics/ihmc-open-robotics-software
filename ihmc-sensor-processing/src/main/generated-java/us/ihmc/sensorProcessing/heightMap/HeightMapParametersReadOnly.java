@@ -90,29 +90,19 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
       return get(maxClampHeight);
    }
 
+   default double getCellSizeInMeters()
+   {
+      return get(cellSizeInMeters);
+   }
+
    default double getLocalWidthInMeters()
    {
       return get(localWidthInMeters);
    }
 
-   default double getLocalCellSizeInMeters()
-   {
-      return get(localCellSizeInMeters);
-   }
-
-   default double getGlobalWidthInMeters()
-   {
-      return get(globalWidthInMeters);
-   }
-
    default double getTerrainWidthInMeters()
    {
       return get(terrainWidthInMeters);
-   }
-
-   default double getGlobalCellSizeInMeters()
-   {
-      return get(globalCellSizeInMeters);
    }
 
    default double getRobotCollisionCylinderRadius()
@@ -123,11 +113,6 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
    default double getInternalGlobalWidthInMeters()
    {
       return get(internalGlobalWidthInMeters);
-   }
-
-   default double getInternalGlobalCellSizeInMeters()
-   {
-      return get(internalGlobalCellSizeInMeters);
    }
 
    default double getHeightScaleFactor()

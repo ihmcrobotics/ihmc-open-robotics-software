@@ -113,8 +113,8 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
 
                                               if (latestHeightMapData == null)
                                               {
-                                                 latestHeightMapData = new HeightMapData(heightMapParameters.getGlobalCellSizeInMeters(),
-                                                                                         heightMapParameters.getGlobalWidthInMeters(),
+                                                 latestHeightMapData = new HeightMapData(heightMapParameters.getCellSizeInMeters(),
+                                                                                         heightMapParameters.getLocalWidthInMeters(),
                                                                                          imageMessage.getPosition().getX(),
                                                                                          imageMessage.getPosition().getY());
                                               }
@@ -122,8 +122,8 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
                                               PerceptionMessageTools.convertToHeightMapData(heightMapImage,
                                                                                             latestHeightMapData,
                                                                                             imageMessage.getPosition(),
-                                                                                            (float) heightMapParameters.getGlobalWidthInMeters(),
-                                                                                            (float) heightMapParameters.getGlobalCellSizeInMeters(),
+                                                                                            (float) heightMapParameters.getLocalWidthInMeters(),
+                                                                                            (float) heightMapParameters.getCellSizeInMeters(),
                                                                                             heightMapParameters);
 
                                               terrainMapData.setHeightMap(heightMapImage);
@@ -185,7 +185,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
                                      zUpToWorldTransform.getTranslation().getX32(),
                                      zUpToWorldTransform.getTranslation().getY32(),
                                      heightMapImage.rows() / 2,
-                                     (float) heightMapParameters.getGlobalCellSizeInMeters(),
+                                     (float) heightMapParameters.getCellSizeInMeters(),
                                      pixelScalingFactor);
          }
       }

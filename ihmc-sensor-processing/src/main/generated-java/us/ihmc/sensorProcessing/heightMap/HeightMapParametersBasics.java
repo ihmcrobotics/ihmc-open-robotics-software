@@ -88,29 +88,19 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
       set(HeightMapParameters.maxClampHeight, maxClampHeight);
    }
 
+   default void setCellSizeInMeters(double cellSizeInMeters)
+   {
+      set(HeightMapParameters.cellSizeInMeters, cellSizeInMeters);
+   }
+
    default void setLocalWidthInMeters(double localWidthInMeters)
    {
       set(HeightMapParameters.localWidthInMeters, localWidthInMeters);
    }
 
-   default void setLocalCellSizeInMeters(double localCellSizeInMeters)
-   {
-      set(HeightMapParameters.localCellSizeInMeters, localCellSizeInMeters);
-   }
-
-   default void setGlobalWidthInMeters(double globalWidthInMeters)
-   {
-      set(HeightMapParameters.globalWidthInMeters, globalWidthInMeters);
-   }
-
    default void setTerrainWidthInMeters(double terrainWidthInMeters)
    {
       set(HeightMapParameters.terrainWidthInMeters, terrainWidthInMeters);
-   }
-
-   default void setGlobalCellSizeInMeters(double globalCellSizeInMeters)
-   {
-      set(HeightMapParameters.globalCellSizeInMeters, globalCellSizeInMeters);
    }
 
    default void setRobotCollisionCylinderRadius(double robotCollisionCylinderRadius)
@@ -121,11 +111,6 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
    default void setInternalGlobalWidthInMeters(double internalGlobalWidthInMeters)
    {
       set(HeightMapParameters.internalGlobalWidthInMeters, internalGlobalWidthInMeters);
-   }
-
-   default void setInternalGlobalCellSizeInMeters(double internalGlobalCellSizeInMeters)
-   {
-      set(HeightMapParameters.internalGlobalCellSizeInMeters, internalGlobalCellSizeInMeters);
    }
 
    default void setHeightScaleFactor(double heightScaleFactor)
