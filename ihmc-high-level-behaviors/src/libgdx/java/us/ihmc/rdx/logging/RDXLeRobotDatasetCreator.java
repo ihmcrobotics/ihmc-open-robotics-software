@@ -95,6 +95,8 @@ public class RDXLeRobotDatasetCreator
          if (ImGuiTools.textWithUnderlineOnHover("Dataset name: %s".formatted(dataset.getName())) && ImGui.isMouseClicked(ImGuiMouseButton.Left))
             ExceptionTools.handle(() -> Desktop.getDesktop().open(dataset.getDirectory().toFile()), DefaultExceptionHandler.PRINT_MESSAGE);
 
+         ImGui.text("Total frames: %d".formatted(dataset.getTotalFrames()));
+
          ImGui.separator();
          ImGui.text("Tasks:");
          for (int i = 0; i < dataset.getTaskNames().size(); i++)

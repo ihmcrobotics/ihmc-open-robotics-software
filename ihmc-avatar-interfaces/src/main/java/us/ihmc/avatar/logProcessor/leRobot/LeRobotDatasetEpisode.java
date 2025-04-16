@@ -18,18 +18,20 @@ public class LeRobotDatasetEpisode
    private final int episodeIndex;
    private final String episodeName;
    private final String taskName;
+   private final long datasetLengthSoFar;
    private final Path episodesJsonlPath;
    private final Path episodeStatsJsonlPath;
    private final Path dataChunk0Path;
    private final SideDependentList<Path> zedVideoDirs;
 
-   private int length = 0; // TODO
+   private long length = 0L;
    private final SideDependentList<LeRobotDatasetVideoWriter> ffmpegRecorders = new SideDependentList<>();
    private LeRobotDatasetDataWriter dataWriter;
 
    public LeRobotDatasetEpisode(int episodeIndex,
                                 String taskName,
-                                int length,
+                                long length,
+                                long datasetLengthSoFar,
                                 Path episodesJsonlPath,
                                 Path episodeStatsJsonlPath,
                                 Path dataChunk0Path,
@@ -38,6 +40,7 @@ public class LeRobotDatasetEpisode
       this.episodeIndex = episodeIndex;
       this.taskName = taskName;
       this.length = length;
+      this.datasetLengthSoFar = datasetLengthSoFar;
       this.episodesJsonlPath = episodesJsonlPath;
       this.episodeStatsJsonlPath = episodeStatsJsonlPath;
       this.dataChunk0Path = dataChunk0Path;
@@ -66,10 +69,9 @@ public class LeRobotDatasetEpisode
             ffmpegRecorders.put(side, new LeRobotDatasetVideoWriter(side, zedVideoDirs.get(side).resolve(episodeName + ".mp4")));
          }
 
-         Path parquetPath = dataChunk0Path.resolve(episodeName + ".parquet");
-         dataWriter = new LeRobotDatasetDataWriter(parquetPath, session.getRootRegistry());
+         dataWriter = new LeRobotDatasetDataWriter(episodeIndex, datasetLengthSoFar, session.getRootRegistry());
 
-         length = 0;
+         length = 0L;
          long startVideoTimestamp = -1;
          long lastVideoTimestamp = -1;
          for (int i = 0; i < outPoint - inPoint; i++)
@@ -90,16 +92,16 @@ public class LeRobotDatasetEpisode
 
                lastVideoTimestamp = currentVideoTimestamp;
 
-               long videoTimestampMs = Math.round((currentVideoTimestamp - startVideoTimestamp) / 1000.0);
+               long videoTimestampMicros = Math.round((currentVideoTimestamp - startVideoTimestamp) / 1000.0);
                LogTools.info("Current timestamp: %d  Writing frame %.3f Frequency %.3f".formatted(currentVideoTimestamp,
-                                                                                                  videoTimestampMs / 1000.0,
+                                                                                                  videoTimestampMicros / 1000.0,
                                                                                                   Conversions.secondsToHertz(period)));
                for (RobotSide side : RobotSide.values)
                {
-                  ffmpegRecorders.get(side).writeFrame(zedSVOScrubber, videoTimestampMs);
+                  ffmpegRecorders.get(side).writeFrame(zedSVOScrubber, videoTimestampMicros);
                }
 
-               dataWriter.write();
+               dataWriter.addFrame(videoTimestampMicros, length);
 
                ++length;
             }
@@ -111,7 +113,8 @@ public class LeRobotDatasetEpisode
             ffmpegRecorders.get(side).close();
          }
 
-         dataWriter.close();
+         Path parquetPath = dataChunk0Path.resolve(episodeName + ".parquet");
+         dataWriter.writeFile(parquetPath);
 
          writeMetadataToFilesystem.run();
 
@@ -156,6 +159,6 @@ public class LeRobotDatasetEpisode
 
    public int getLength()
    {
-      return length;
+      return (int) length;
    }
 }
