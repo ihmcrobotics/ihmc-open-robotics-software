@@ -99,9 +99,7 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
          else if (snapData.getWiggleTransformInWorld().containsNaN() && computeWiggleTransform)
          {
             computeWiggleTransform(footstep, stanceStep, snapData);
-            // To debug the larger footstep, disabled this
-            // TODO uncomment me once bug is fixed (having this enalbed makes it harder to see the bug)
-//            updateTheCroppedFoothold(footstep);
+            updateTheCroppedFoothold(footstep);
          }
 
          return snapData;
