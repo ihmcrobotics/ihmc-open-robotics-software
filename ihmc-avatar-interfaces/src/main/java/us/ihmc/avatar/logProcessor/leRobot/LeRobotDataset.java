@@ -1,5 +1,6 @@
 package us.ihmc.avatar.logProcessor.leRobot;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.avatar.scs2.SCS2LogSessionWithVideo;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
@@ -155,8 +156,25 @@ public class LeRobotDataset
          ObjectNode features = rootNode.putObject("features");
          for (RobotSide side : RobotSide.values)
          {
-
+            ObjectNode cam = features.putObject("observations.images.cam_zed_%s".formatted(side.getLowerCaseName()));
+            cam.put("dtype", "video");
+            cam.putArray("shape").add(480).add(640).add(3);
+            cam.putArray("names").add("height").add("width").add("channel");
+            cam.putObject("video_info").put("video.fps", ZED_FPS)
+                                       .put("video.codec", "mpeg4")
+                                       .put("video.pix_fmt", "yuv420p")
+                                       .put("video.is_depth_map", false)
+                                       .put("has_audio", false);
          }
+
+         ObjectNode state = features.putObject("observation.state");
+         state.put("dtype", "float32");
+         state.putArray("shape").add(14);
+         ArrayNode motors = state.putObject("names").putArray("motors");
+         motors.add("left_gripper_x").add("left_gripper_y").add("left_gripper_z");
+         motors.add("left_gripper_qx").add("left_gripper_qy").add("left_gripper_qz").add("left_gripper_qs");
+         motors.add("right_gripper_x").add("right_gripper_y").add("right_gripper_z");
+         motors.add("right_gripper_qx").add("right_gripper_qy").add("right_gripper_qz").add("right_gripper_qs");
       });
 
       FileTools.write(episodesJsonlPath, new byte[0], WriteOption.TRUNCATE, DefaultExceptionHandler.PRINT_MESSAGE);
