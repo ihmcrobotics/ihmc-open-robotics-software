@@ -19,6 +19,7 @@ public class RDXSensorSimulatorDemo
    private static final float FOV = 70.0f;
    private static final float MIN_RANGE = 0.2f;
    private static final float MAX_RANGE = 20.0f;
+   private static final int NOISE = 20;
 
    private final Throttler throttler = new Throttler().setFrequency(30.0);
    private final RDXSensorSimulator sensorSimulator;
@@ -30,7 +31,7 @@ public class RDXSensorSimulatorDemo
 
    public RDXSensorSimulatorDemo()
    {
-      sensorSimulator = new RDXSensorSimulator(WIDTH, HEIGHT, FOV, MIN_RANGE, MAX_RANGE);
+      sensorSimulator = new RDXSensorSimulator(WIDTH, HEIGHT, FOV, MIN_RANGE, MAX_RANGE, NOISE);
 
       RDXBaseUI baseUI = new RDXBaseUI();
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()

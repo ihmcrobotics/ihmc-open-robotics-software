@@ -370,8 +370,11 @@ public class HeightMapFootstepCheckerTest
       badFoothold.addVertex(-side / 2.0, -side / 2.0);
       badFoothold.update();
 
+      FootstepSnapData snapData = new FootstepSnapData(snapTransform0, badFoothold);
+      snapData.setSnapAreaFraction(footholdArea / footArea);
+
       // too small foothold
-      snapper.addSnapData(step2, new FootstepSnapData(snapTransform0, badFoothold));
+      snapper.addSnapData(step2, snapData);
       assertFalse(checker.isStepValid(step2, step1, step0));
    }
 

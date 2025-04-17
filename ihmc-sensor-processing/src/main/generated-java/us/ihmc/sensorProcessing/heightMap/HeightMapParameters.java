@@ -18,12 +18,13 @@ public class HeightMapParameters extends StoredPropertySet implements HeightMapP
 {
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
+   public static final BooleanStoredPropertyKey driftOffsetFilter = keys.addBooleanKey("Drift offset filter");
    public static final BooleanStoredPropertyKey flyingPointsFilter = keys.addBooleanKey("Flying points filter");
-   public static final BooleanStoredPropertyKey resetHeightMap = keys.addBooleanKey("Reset Height Map");
    public static final BooleanStoredPropertyKey enableAlphaFilter = keys.addBooleanKey("Enable alpha filter");
    public static final BooleanStoredPropertyKey enableVerticalFilter = keys.addBooleanKey("Enable vertical filter");
    public static final IntegerStoredPropertyKey searchWindowHeight = keys.addIntegerKey("Search window height");
    public static final IntegerStoredPropertyKey searchWindowWidth = keys.addIntegerKey("Search window width");
+   public static final IntegerStoredPropertyKey searchSkipSize = keys.addIntegerKey("Search skip size");
    public static final DoubleStoredPropertyKey minHeightRegistration = keys.addDoubleKey("Min height registration");
    public static final DoubleStoredPropertyKey maxHeightRegistration = keys.addDoubleKey("Max height registration");
    public static final DoubleStoredPropertyKey minHeightDifference = keys.addDoubleKey("Min height difference");
@@ -47,7 +48,6 @@ public class HeightMapParameters extends StoredPropertySet implements HeightMapP
    public static final IntegerStoredPropertyKey steppingContactThreshold = keys.addIntegerKey("Stepping contact threshold");
    public static final IntegerStoredPropertyKey contactWindowSize = keys.addIntegerKey("Contact window size");
    public static final DoubleStoredPropertyKey steppingCosineThreshold = keys.addDoubleKey("Stepping cosine threshold");
-   public static final IntegerStoredPropertyKey searchSkipSize = keys.addIntegerKey("Search skip size");
    public static final IntegerStoredPropertyKey fastSearchSize = keys.addIntegerKey("Fast search size");
    public static final IntegerStoredPropertyKey verticalSearchSize = keys.addIntegerKey("Vertical search size");
    public static final DoubleStoredPropertyKey verticalSearchResolution = keys.addDoubleKey("Vertical search resolution");

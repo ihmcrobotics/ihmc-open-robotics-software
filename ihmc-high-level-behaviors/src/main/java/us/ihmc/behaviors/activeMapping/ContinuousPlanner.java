@@ -155,7 +155,11 @@ public class ContinuousPlanner
       FootstepPlannerRequest request = new FootstepPlannerRequest();
       request.setStartFootPoses(startStancePose.get(RobotSide.LEFT), startStancePose.get(RobotSide.RIGHT));
       request.setGoalFootPoses(goalPoses.get(RobotSide.LEFT), goalPoses.get(RobotSide.RIGHT));
-      request.setSwingPlannerType(SwingPlannerType.MULTI_WAYPOINT_POSITION);
+
+      if (continuousHikingParameters.getEnableSwingCollisionAvoidance())
+      {
+         request.setSwingPlannerType(SwingPlannerType.MULTI_WAYPOINT_POSITION);
+      }
       request.setPerformAStarSearch(true);
       request.setAssumeFlatGround(false);
       request.setPlanBodyPath(false);
@@ -223,11 +227,10 @@ public class ContinuousPlanner
 
             // The timeout when given a reference plan is a percentage of the step duration
             double stepDuration = continuousHikingParameters.getSwingTime() + continuousHikingParameters.getTransferTime();
-            double referencePlanTimeout = stepDuration * continuousHikingParameters.getPlanningTimeoutAsAFractionOfTheStepDuration();
 
-            continuousHikingLogger.appendString("Using Reference Plan: " + this.previousFootstepPlan.getNumberOfSteps() + "Timeout: " + referencePlanTimeout);
+            continuousHikingLogger.appendString("Using Reference Plan: " + this.previousFootstepPlan.getNumberOfSteps() + "Timeout: " + stepDuration);
             continuousHikingLogger.appendString("Previous Footstep Plan: " + previousFootstepPlan);
-            request.setTimeout(referencePlanTimeout);
+            request.setTimeout(stepDuration);
          }
       }
       else
@@ -332,6 +335,7 @@ public class ContinuousPlanner
       FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
       footstepDataListMessage.setDefaultSwingDuration(continuousHIkingParameters.getSwingTime());
       footstepDataListMessage.setDefaultTransferDuration(continuousHIkingParameters.getTransferTime());
+      footstepDataListMessage.setOffsetFootstepsHeightWithExecutionError(true);
 
       // We expect the plannerOutput to contain this number of steps we ask for
       int index = 0;
@@ -357,6 +361,7 @@ public class ContinuousPlanner
    public FootstepDataListMessage getMonteCarloFootstepDataListMessage()
    {
       FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
+      footstepDataListMessage.setOffsetFootstepsHeightWithExecutionError(true);
 
       if (monteCarloReferencePlan != null)
       {

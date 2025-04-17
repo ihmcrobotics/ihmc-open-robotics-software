@@ -7,6 +7,8 @@ import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
 import perception_msgs.msg.dds.*;
+import sensor_msgs.msg.dds.CameraInfo;
+import sensor_msgs.msg.dds.Image;
 import std_msgs.msg.dds.Empty;
 import std_msgs.msg.dds.Float64;
 import std_msgs.msg.dds.Int64;
@@ -252,6 +254,7 @@ public final class PerceptionAPI
    public static final ROS2Topic<Empty> REQUEST_LIDAR_SCAN = PERCEPTION_MODULE.withSuffix("request_lidar_scan").withType(Empty.class);
    public static final ROS2Topic<Empty> REQUEST_HEIGHT_MAP = PERCEPTION_MODULE.withSuffix("request_height_map").withType(Empty.class);
    public static final ROS2Topic<Empty> RESET_HEIGHT_MAP = PERCEPTION_MODULE.withSuffix("reset_height_map").withType(Empty.class);
+   public static final ROS2Topic<Empty> LOWER_HEIGHT_MAP_BACKDROP = PERCEPTION_MODULE.withSuffix("lower_height_map_backdrop").withType(Empty.class);
 
    public static final ROS2Topic<ArUcoMarkerPoses> ARUCO_MARKER_POSES = PERCEPTION_MODULE.withType(ArUcoMarkerPoses.class).withSuffix("aruco_marker_poses");
    public static final ROS2Topic<Empty> REQUEST_ARUCO = PERCEPTION_MODULE.withSuffix("request_aruco").withType(Empty.class);
@@ -292,6 +295,30 @@ public final class PerceptionAPI
    }
 
    public static final ROS2Topic<DetectedDoorListMessage> DETECTED_DOORS = IHMC_ROOT.withModule("door_detection").withType(DetectedDoorListMessage.class);
+
+   /* STANDARD ROS 2 PERCEPTION MESSAGE TOPICS */
+   // ZED topics
+   private static final ROS2Topic<?> ROS2_ZED = new ROS2Topic<>().withPrefix("zed").withQoS(ROS2QosProfile.RELIABLE());
+
+   private static final ROS2Topic<?> ROS2_ZED_COLOR = ROS2_ZED.withModule("color");
+   public static final ROS2Topic<Image> ROS2_ZED_COLOR_IMAGE = ROS2_ZED_COLOR.withSuffix("image").withType(Image.class);
+   public static final ROS2Topic<CameraInfo> ROS2_ZED_COLOR_CAMERA_INFO = ROS2_ZED_COLOR.withSuffix("camera_info").withType(CameraInfo.class);
+
+   private static final ROS2Topic<?> ROS2_ZED_DEPTH = ROS2_ZED.withModule("depth");
+   public static final ROS2Topic<Image> ROS2_ZED_DEPTH_IMAGE = ROS2_ZED_DEPTH.withSuffix("image").withType(Image.class);
+   public static final ROS2Topic<CameraInfo> ROS2_ZED_DEPTH_CAMERA_INFO = ROS2_ZED_DEPTH.withSuffix("camera_info").withType(CameraInfo.class);
+
+   // D455 topics
+   private static final ROS2Topic<?> ROS2_D455 = new ROS2Topic<>().withPrefix("d455").withQoS(ROS2QosProfile.RELIABLE());
+
+   private static final ROS2Topic<?> ROS2_D455_COLOR = ROS2_D455.withModule("color");
+   public static final ROS2Topic<Image> ROS2_D455_COLOR_IMAGE = ROS2_D455_COLOR.withSuffix("image").withType(Image.class);
+   public static final ROS2Topic<CameraInfo> ROS2_D455_COLOR_CAMERA_INFO = ROS2_D455_COLOR.withSuffix("camera_info").withType(CameraInfo.class);
+
+   private static final ROS2Topic<?> ROS2_D455_DEPTH = ROS2_D455.withModule("depth");
+   public static final ROS2Topic<Image> ROS2_D455_DEPTH_IMAGE = ROS2_D455_DEPTH.withSuffix("image").withType(Image.class);
+   public static final ROS2Topic<CameraInfo> ROS2_D455_DEPTH_CAMERA_INFO = ROS2_D455_DEPTH.withSuffix("camera_info").withType(CameraInfo.class);
+
 
    /* VIDEO STREAMING STUFF */
    /**

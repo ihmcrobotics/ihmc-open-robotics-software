@@ -8,14 +8,14 @@ import us.ihmc.tools.property.StoredPropertySetBasics;
  */
 public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, StoredPropertySetBasics
 {
+   default void setDriftOffsetFilter(boolean driftOffsetFilter)
+   {
+      set(HeightMapParameters.driftOffsetFilter, driftOffsetFilter);
+   }
+
    default void setFlyingPointsFilter(boolean flyingPointsFilter)
    {
       set(HeightMapParameters.flyingPointsFilter, flyingPointsFilter);
-   }
-
-   default void setResetHeightMap(boolean resetHeightMap)
-   {
-      set(HeightMapParameters.resetHeightMap, resetHeightMap);
    }
 
    default void setEnableAlphaFilter(boolean enableAlphaFilter)
@@ -36,6 +36,11 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
    default void setSearchWindowWidth(int searchWindowWidth)
    {
       set(HeightMapParameters.searchWindowWidth, searchWindowWidth);
+   }
+
+   default void setSearchSkipSize(int searchSkipSize)
+   {
+      set(HeightMapParameters.searchSkipSize, searchSkipSize);
    }
 
    default void setMinHeightRegistration(double minHeightRegistration)
@@ -151,11 +156,6 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
    default void setSteppingCosineThreshold(double steppingCosineThreshold)
    {
       set(HeightMapParameters.steppingCosineThreshold, steppingCosineThreshold);
-   }
-
-   default void setSearchSkipSize(int searchSkipSize)
-   {
-      set(HeightMapParameters.searchSkipSize, searchSkipSize);
    }
 
    default void setFastSearchSize(int fastSearchSize)

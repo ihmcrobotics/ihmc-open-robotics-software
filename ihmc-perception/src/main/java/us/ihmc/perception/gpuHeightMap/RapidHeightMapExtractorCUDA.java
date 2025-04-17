@@ -19,13 +19,13 @@ import us.ihmc.perception.cuda.CUDAStreamManager;
 import us.ihmc.perception.cuda.CUDATools;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.tools.PerceptionMessageTools;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.bytedeco.cuda.global.cudart.*;
 
@@ -34,7 +34,7 @@ public class RapidHeightMapExtractorCUDA
    private static final boolean PRINT_TIMING_FOR_KERNELS = false;
    static final int BLOCK_SIZE_XY = 32;
 
-   private final SideDependentList<ReferenceFrame> footSoleFrames = new SideDependentList<>();
+   private final List<ReferenceFrame> footSoleFrames = new ArrayList<>();
    private final TerrainMapData terrainMapData;
    private final CameraIntrinsics cameraIntrinsics;
    private final Point3D sensorOrigin = new Point3D();
@@ -43,7 +43,7 @@ public class RapidHeightMapExtractorCUDA
 
    private final GpuMat inputDepthImage;
    private final GpuMat localHeightMapImage;
-   private GpuMat globalHeightMapImage;
+   private final GpuMat globalHeightMapImage;
    private final GpuMat terrainCostImage;
    private final GpuMat contactMapImage;
    private final GpuMat sensorCroppedHeightMapImage;
@@ -104,8 +104,8 @@ public class RapidHeightMapExtractorCUDA
       this.mode = mode;
       this.heightMapParameters = heightMapParameters;
 
-      footSoleFrames.put(RobotSide.LEFT, leftFootSoleFrame);
-      footSoleFrames.put(RobotSide.RIGHT, rightFootSoleFrame);
+      footSoleFrames.add(leftFootSoleFrame);
+      footSoleFrames.add(rightFootSoleFrame);
 
       stream = CUDAStreamManager.getStream();
 
@@ -114,14 +114,12 @@ public class RapidHeightMapExtractorCUDA
       URL mathUtilsHeaderPath = getClass().getResource("/us/ihmc/perception/cuda/MathUtils.cuh");
       URL kernelPath = getClass().getResource("RapidHeightMapExtractor.cu");
 
-      terrainMapData = new TerrainMapData(heightMapParameters.getTerrainObjectSize(), heightMapParameters.getTerrainObjectSize());
+      terrainMapData = new TerrainMapData(heightMapParameters.getTerrainObjectSize(), heightMapParameters.getTerrainObjectSize(), heightMapParameters);
 
       recomputeDerivedParameters();
       // Need to initialize this after the parameters have been computed to get the right size
       filteredRapidHeightMapExtractor = new FilteredRapidHeightMapExtractor(stream, globalCellsPerAxis, globalCellsPerAxis, 6);
-      verticalSurfacesExtractor = new FilteredVerticalSurfacesExtractor(stream,
-                                                                        heightMapParameters.getTerrainObjectSize(),
-                                                                        heightMapParameters.getTerrainObjectSize());
+      verticalSurfacesExtractor = new FilteredVerticalSurfacesExtractor(stream, globalCellsPerAxis, globalCellsPerAxis);
 
       try
       {
@@ -191,17 +189,35 @@ public class RapidHeightMapExtractorCUDA
          throw new RuntimeException("The terrain center index was computed incorrectly.");
    }
 
-   public void reset()
+   public void lowerBackDrop()
    {
       double thicknessOfTheFoot = 0.02;
       double height = 0.0;
 
-      if (footSoleFrames.sides().length == 2)
+      if (footSoleFrames.size() == 2)
       {
-         height = Math.min(footSoleFrames.get(RobotSide.LEFT).getTransformToWorldFrame().getTranslationZ(),
-                           footSoleFrames.get(RobotSide.RIGHT).getTransformToWorldFrame().getTranslationZ()) - thicknessOfTheFoot;
+
+         height = Math.min(footSoleFrames.get(0).getTransformToWorldFrame().getTranslationZ(),
+                           footSoleFrames.get(1).getTransformToWorldFrame().getTranslationZ()) - thicknessOfTheFoot;
       }
-      resetOffset = (int) ((height + heightMapParameters.getHeightOffset()) * heightMapParameters.getHeightScaleFactor());
+      int lowerBackDropAmount = (int) ((height + heightMapParameters.getHeightOffset()) * heightMapParameters.getHeightScaleFactor());
+      lowerBackDropAmount -= 10000;
+
+      localHeightMapImage.setTo(new Scalar(lowerBackDropAmount));
+      globalHeightMapImage.setTo(new Scalar(lowerBackDropAmount));
+      emptyGlobalHeightMapImage.setTo(new Scalar(lowerBackDropAmount));
+
+      filteredRapidHeightMapExtractor.reset();
+      snappedFootstepsExtractor.reset(lowerBackDropAmount);
+
+      sequenceNumber = 0;
+   }
+
+   public void reset()
+   {
+      double footHeight = computeFootHeight();
+
+      resetOffset = (int) ((footHeight + heightMapParameters.getHeightOffset()) * heightMapParameters.getHeightScaleFactor());
 
       localHeightMapImage.setTo(new Scalar(resetOffset));
       globalHeightMapImage.setTo(new Scalar(resetOffset));
@@ -211,6 +227,23 @@ public class RapidHeightMapExtractorCUDA
       snappedFootstepsExtractor.reset(resetOffset);
 
       sequenceNumber = 0;
+   }
+
+   private double computeFootHeight()
+   {
+      double thicknessOfTheFoot = 0.02;
+      double height = Double.POSITIVE_INFINITY;
+
+      for (int i = 0; i < footSoleFrames.size(); i++)
+      {
+         height = Math.min(footSoleFrames.get(i).getTransformToWorldFrame().getTranslationZ(), height);
+      }
+      if (Double.isInfinite(height))
+         height = 0.0;
+
+      height -= thicknessOfTheFoot;
+
+      return height;
    }
 
    public void update(RigidBodyTransform sensorToWorldTransform, RigidBodyTransform sensorToGroundTransform, RigidBodyTransform groundToWorldTransform)
@@ -230,7 +263,7 @@ public class RapidHeightMapExtractorCUDA
       sensorOrigin.set(sensorToWorldTransform.getTranslation());
 
       // Populate parameter buffers with the necessary values
-      float[] parametersArray = populateParameterArray(heightMapParameters, cameraIntrinsics, sensorOrigin);
+      float[] parametersArray = populateParameterArray(heightMapParameters, cameraIntrinsics, sensorOrigin, computeFootHeight());
       parametersHostPointer.put(parametersArray);
 
       //Extract the transform arrays for memory transfer
@@ -300,9 +333,12 @@ public class RapidHeightMapExtractorCUDA
 
       if (heightMapParameters.getEnableAlphaFilter())
       {
-         GpuMat filteredHeightMap = filteredRapidHeightMapExtractor.update(globalHeightMapImage);
-         globalHeightMapImage.close();
-         globalHeightMapImage = filteredHeightMap;
+         filteredRapidHeightMapExtractor.update(globalHeightMapImage, resetOffset);
+      }
+
+      if (heightMapParameters.getEnableVerticalFilter())
+      {
+         verticalSurfacesExtractor.update(globalHeightMapImage);
       }
 
       // Run the cropping kernel
@@ -324,21 +360,13 @@ public class RapidHeightMapExtractorCUDA
       //Update the terrain map data with the new results
       terrainMapData.setSensorOrigin(groundToWorldTransform.getTranslationX(), groundToWorldTransform.getTranslationY());
 
-      Mat finalCroppedHeightMap = new Mat();
-      if (heightMapParameters.getEnableVerticalFilter())
-      {
-         GpuMat verticalFilteredMap = verticalSurfacesExtractor.update(terrainHeightMapImage);
-         verticalFilteredMap.download(finalCroppedHeightMap);  // Download the image from the GPU to the Mat object
-         verticalFilteredMap.close();
-      }
-      else
-      {
-         terrainHeightMapImage.download(finalCroppedHeightMap);
-      }
-
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
+
+      Mat finalCroppedHeightMap = new Mat();
+      terrainHeightMapImage.download(finalCroppedHeightMap);
       terrainMapData.setHeightMap(finalCroppedHeightMap);
+      finalCroppedHeightMap.close();
    }
 
    public void updateHeightOffset(float z)
@@ -346,7 +374,7 @@ public class RapidHeightMapExtractorCUDA
       int error;
 
       // Populate parameter buffers with the necessary values
-      float[] parametersArray = populateParameterArray(heightMapParameters, cameraIntrinsics, sensorOrigin);
+      float[] parametersArray = populateParameterArray(heightMapParameters, cameraIntrinsics, sensorOrigin, computeFootHeight());
       parametersHostPointer.put(parametersArray);
 
       CUDATools.mallocAsync(worldToGroundTransformDevicePointer, worldToGroundTransformArray.length, stream);
@@ -394,7 +422,7 @@ public class RapidHeightMapExtractorCUDA
       CUDATools.checkCUDAError(error);
    }
 
-   public float[] populateParameterArray(HeightMapParameters parameters, CameraIntrinsics cameraIntrinsics, Tuple3DReadOnly gridCenter)
+   public float[] populateParameterArray(HeightMapParameters parameters, CameraIntrinsics cameraIntrinsics, Tuple3DReadOnly gridCenter, double groundHeightGuess)
    {
       return new float[] {(float) parameters.getLocalCellSizeInMeters(),
                           (float) centerIndex,
@@ -433,7 +461,8 @@ public class RapidHeightMapExtractorCUDA
                           (float) parameters.getSearchSkipSize(),
                           (float) parameters.getVerticalSearchSize(),
                           (float) parameters.getVerticalSearchResolution(),
-                          (float) parameters.getFastSearchSize()};
+                          (float) parameters.getFastSearchSize(),
+                          (float) groundHeightGuess};
    }
 
    public void destroy()
@@ -507,7 +536,8 @@ public class RapidHeightMapExtractorCUDA
                                                     latestHeightMapData,
                                                     getSensorOrigin(),
                                                     (float) heightMapParameters.getTerrainWidthInMeters(),
-                                                    (float) heightMapParameters.getGlobalCellSizeInMeters());
+                                                    (float) heightMapParameters.getGlobalCellSizeInMeters(),
+                                                    heightMapParameters);
 
       return latestHeightMapData;
    }

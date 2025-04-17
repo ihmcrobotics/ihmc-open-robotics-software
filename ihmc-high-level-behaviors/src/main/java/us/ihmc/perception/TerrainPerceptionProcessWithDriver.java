@@ -171,11 +171,9 @@ public class TerrainPerceptionProcessWithDriver
       humanoidPerception.initializeBodyCollisionFilter(fullRobotModel, collisionBoxProvider);
       humanoidPerception.initializeRealsenseDepthImage(realsense.getDepthHeight(), realsense.getDepthWidth());
       humanoidPerception.initializePerspectiveRapidRegionsExtractor(realsense.getDepthCameraIntrinsics());
-      humanoidPerception.initializeHeightMapExtractor(ros2Helper, referenceFrames, realsense.getDepthCameraIntrinsics());
       humanoidPerception.getRapidRegionsExtractor().setEnabled(true);
 
       ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS, parameters);
-      ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.HEIGHT_MAP_PARAMETERS, RapidHeightMapManager.getHeightMapParameters());
       ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_RAPID_REGION_PARAMETERS,
                                                      humanoidPerception.getRapidRegionsExtractor().getParameters());
       ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_POLYGONIZER_PARAMETERS,

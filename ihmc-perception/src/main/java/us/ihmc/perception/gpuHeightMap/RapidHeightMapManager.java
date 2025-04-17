@@ -14,46 +14,63 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.perception.camera.CameraIntrinsics;
+import us.ihmc.perception.cuda.CUDABodyCollisionFilter;
 import us.ihmc.perception.filters.CUDAFlyingPointsFilter;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
+import us.ihmc.scs2.simulation.collision.Collidable;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 
 import java.time.Instant;
+import java.util.List;
 
 /**
- * This class takes care of managing the {@link RapidHeightMapExtractorCUDA}. This class can be used on remote process's or locally as well.
+ * This class takes care of managing the {@link RapidHeightMapExtractorCUDA}. This class can be used on remote process's
+ * or locally as well.
  */
 public class RapidHeightMapManager
 {
-   private static final HeightMapParameters heightMapParameters = new HeightMapParameters("GPU");
-
    private final RapidHeightMapExtractorCUDA rapidHeightMapExtractor;
    private final ImageMessage croppedHeightMapImageMessage = new ImageMessage();
    private final FramePose3D cameraPose = new FramePose3D();
    private final Mat hostDepthImage = new Mat();
    private final Notification resetHeightMapRequested = new Notification();
+   private final Notification lowerHeightMapBackdropRequested = new Notification();
    private final BytePointer compressedCroppedHeightMapPointer = new BytePointer();
 
    private final RapidHeightMapDriftOffset rapidHeightMapDriftOffset;
    private final CUDAFlyingPointsFilter flyingPointsFilter;
 
    private final GpuMat deviceDepthImage;
+   private final HeightMapParameters heightMapParameters;
    private final ROS2Publisher<ImageMessage> heightMapPublisher;
+   private final List<Collidable> robotCollidables;
+   private final CUDABodyCollisionFilter bodyCollisionFilter;
+   private final CameraIntrinsics depthImageIntrinsics;
 
    public RapidHeightMapManager(ROS2Node ros2Node,
+                                RobotCollisionModel robotCollisionModel,
                                 FullHumanoidRobotModel robotModel,
                                 String robotName,
                                 ReferenceFrame leftFootSoleFrame,
                                 ReferenceFrame rightFootSoleFrame,
                                 ControllerFootstepQueueMonitor controllerFootstepQueueMonitor,
-                                CameraIntrinsics depthImageIntrinsics) throws Exception
+                                CameraIntrinsics depthImageIntrinsics,
+                                HeightMapParameters heightMapParameters,
+                                ReferenceFrame cameraFrame) throws Exception
    {
+      this.heightMapParameters = heightMapParameters;
+      this.depthImageIntrinsics = depthImageIntrinsics;
+
+      robotCollidables = robotCollisionModel.getRobotCollidables(robotModel.getRootBody());
+      bodyCollisionFilter = new CUDABodyCollisionFilter();
+
       deviceDepthImage = new GpuMat(depthImageIntrinsics.getHeight(), depthImageIntrinsics.getWidth(), opencv_core.CV_16UC1);
       rapidHeightMapExtractor = new RapidHeightMapExtractorCUDA(leftFootSoleFrame,
                                                                 rightFootSoleFrame,
@@ -68,6 +85,7 @@ public class RapidHeightMapManager
 
       // We use a notification in order to only call resetting the height map in one place
       ros2Node.createSubscription2(PerceptionAPI.RESET_HEIGHT_MAP, message -> resetHeightMapRequested.set());
+      ros2Node.createSubscription2(PerceptionAPI.LOWER_HEIGHT_MAP_BACKDROP, message -> lowerHeightMapBackdropRequested.set());
       if (robotModel != null)
       {
          ros2Node.createSubscription(HumanoidControllerAPI.getTopic(HighLevelStateChangeStatusMessage.class, robotName), message ->
@@ -82,6 +100,13 @@ public class RapidHeightMapManager
 
    public void update(Mat latestDepthImage, Instant imageAcquisitionTime, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame) throws Exception
    {
+      RigidBodyTransform sensorToWorld = cameraFrame.getTransformToWorldFrame();
+      RigidBodyTransform sensorToGround = cameraFrame.getTransformToDesiredFrame(cameraZUpFrame);
+      RigidBodyTransform groundToWorld = cameraZUpFrame.getTransformToWorldFrame();
+
+      cameraPose.setToZero(cameraFrame);
+      cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
+
       if (latestDepthImage.type() == opencv_core.CV_32FC1) // Support our simulated sensors
       {
          OpenCVTools.convertFloatToShort(latestDepthImage, hostDepthImage, 1000.0, 0.0);
@@ -91,32 +116,40 @@ public class RapidHeightMapManager
          latestDepthImage.convertTo(hostDepthImage, opencv_core.CV_16UC1);
       }
 
-      deviceDepthImage.upload(hostDepthImage);
+      bodyCollisionFilter.process(hostDepthImage, deviceDepthImage, depthImageIntrinsics, robotCollidables, cameraFrame);
+
+      if (lowerHeightMapBackdropRequested.poll())
+      {
+         rapidHeightMapExtractor.lowerBackDrop();
+         if (heightMapParameters.getDriftOffsetFilter())
+         {
+            rapidHeightMapDriftOffset.reset();
+         }
+      }
+
 
       if (resetHeightMapRequested.poll())
       {
          rapidHeightMapExtractor.reset();
-         rapidHeightMapDriftOffset.reset();
+         if (heightMapParameters.getDriftOffsetFilter())
+         {
+            rapidHeightMapDriftOffset.reset();
+         }
       }
 
-      RigidBodyTransform sensorToWorld = cameraFrame.getTransformToWorldFrame();
-      RigidBodyTransform sensorToGround = cameraFrame.getTransformToDesiredFrame(cameraZUpFrame);
-      RigidBodyTransform groundToWorld = cameraZUpFrame.getTransformToWorldFrame();
-
-      cameraPose.setToZero(cameraFrame);
-      cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
-
-      float driftOffsetInZ = rapidHeightMapDriftOffset.getUpdateDriftOffset();
-      if (!Float.isNaN(driftOffsetInZ))
+      if (heightMapParameters.getDriftOffsetFilter())
       {
-         rapidHeightMapExtractor.updateHeightOffset(driftOffsetInZ);
+         float driftOffsetInZ = rapidHeightMapDriftOffset.getUpdateDriftOffset();
+         if (!Float.isNaN(driftOffsetInZ))
+         {
+            rapidHeightMapExtractor.updateHeightOffset(driftOffsetInZ);
+         }
       }
-
       rapidHeightMapExtractor.update(sensorToWorld, sensorToGround, groundToWorld);
 
       Mat croppedHeightMapImage = rapidHeightMapExtractor.getVisualizedHeightMap();
 
-      if (getHeightMapParameters().getFlyingPointsFilter())
+      if (heightMapParameters.getFlyingPointsFilter())
       {
          GpuMat deviceCroppedHeightMapImage = new GpuMat();
          deviceCroppedHeightMapImage.upload(croppedHeightMapImage);
@@ -135,7 +168,7 @@ public class RapidHeightMapManager
                                                          rapidHeightMapExtractor.getSequenceNumber(),
                                                          croppedHeightMapImage.rows(),
                                                          croppedHeightMapImage.cols(),
-                                                         (float) getHeightMapParameters().getHeightScaleFactor());
+                                                         (float) heightMapParameters.getHeightScaleFactor());
    }
 
    public HeightMapData getLatestHeightMapData()
@@ -146,11 +179,6 @@ public class RapidHeightMapManager
    public TerrainMapData getTerrainMapData()
    {
       return rapidHeightMapExtractor.getTerrainMapData();
-   }
-
-   public static HeightMapParameters getHeightMapParameters()
-   {
-      return heightMapParameters;
    }
 
    public void destroy()

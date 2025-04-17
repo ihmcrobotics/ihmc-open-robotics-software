@@ -86,22 +86,24 @@ public class RDXVRHandPlacedFootstepMode
          {
             InputDigitalActionData triggerClick = controller.getClickTriggerActionData();
 
-            if (triggerClick.bChanged() && triggerClick.bState())
+            // Prevents placing and sending steps when interacting with menu
+            boolean nothingElseSelected = controller.getSelectedPick() == null;
+
+            if (nothingElseSelected && triggerClick.bChanged() && triggerClick.bState())
             {
                feetBeingPlaced.put(side, footModels.get(side));
                LibGDXTools.setOpacity(feetBeingPlaced.get(side), 0.5f);
             }
 
-            if (triggerClick.bChanged() && !triggerClick.bState())
-            {
-               ModelInstance footBeingPlaced = feetBeingPlaced.get(side);
-               feetBeingPlaced.put(side, null);
-               placedFootsteps.add(new RDXVRHandPlacedFootstep(side, footBeingPlaced, footstepIndex++, new RigidBodyTransform()));
-            }
-
             ModelInstance footBeingPlaced = feetBeingPlaced.get(side);
             if (footBeingPlaced != null)
             {
+               if (triggerClick.bChanged() && !triggerClick.bState())
+               {
+                  feetBeingPlaced.put(side, null);
+                  placedFootsteps.add(new RDXVRHandPlacedFootstep(side, footBeingPlaced, footstepIndex++, new RigidBodyTransform()));
+               }
+
                poseForPlacement.setToZero(controller.getXForwardZUpControllerFrame());
                poseForPlacement.getPosition().add(0.05, 0.0, 0.0);
                poseForPlacement.getOrientation().appendPitchRotation(Math.toRadians(-90.0));
@@ -112,13 +114,13 @@ public class RDXVRHandPlacedFootstepMode
             }
 
             InputDigitalActionData aButton = controller.getAButtonActionData();
-            if (side == RobotSide.RIGHT && aButton.bChanged() && !aButton.bState())
+            if (nothingElseSelected && side == RobotSide.RIGHT && aButton.bChanged() && !aButton.bState())
             {
                sendPlacedFootsteps(locomotionParameters);
             }
 
             InputDigitalActionData bButton = controller.getBButtonActionData();
-            if (side == RobotSide.LEFT && bButton.bChanged() && !bButton.bState())
+            if (nothingElseSelected && side == RobotSide.LEFT && bButton.bChanged() && !bButton.bState())
             {
                resetFootsteps();
             }

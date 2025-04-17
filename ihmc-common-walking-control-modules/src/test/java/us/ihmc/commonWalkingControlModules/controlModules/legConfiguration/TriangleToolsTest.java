@@ -8,8 +8,7 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 
 import java.util.Random;
 
-import static us.ihmc.robotics.Assert.assertEquals;
-import static us.ihmc.robotics.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class TriangleToolsTest
 {
@@ -27,21 +26,28 @@ public class TriangleToolsTest
          double interiorAngle = RandomNumbers.nextDouble(random, 0.0 + 1e-2, Math.PI - 1e-2);
 
          double farSideLength = TriangleTools.computeSideLength(sideALength, sideBLength, interiorAngle);
-         assertEquals("Iteration " + iter + " length failed.", interiorAngle, TriangleTools.computeInteriorAngle(sideALength, sideBLength, farSideLength),
-                      epsilon);
+         assertEquals(interiorAngle,
+                      TriangleTools.computeInteriorAngle(sideALength, sideBLength, farSideLength),
+                      epsilon,
+                      "Iteration " + iter + " length failed.");
 
          double interiorAngleVelocity = RandomNumbers.nextDouble(random, -10.0, 10.0);
          double farSideVelocity = TriangleTools.computeSideLengthVelocity(sideALength, sideBLength, interiorAngle, interiorAngleVelocity);
-         assertEquals("Iteration " + iter + " velocity failed.", interiorAngleVelocity,
-                      TriangleTools.computeInteriorAngleVelocity(sideALength, sideBLength, farSideLength, farSideVelocity), epsilon);
+         assertEquals(interiorAngleVelocity,
+                      TriangleTools.computeInteriorAngleVelocity(sideALength, sideBLength, farSideLength, farSideVelocity),
+                      epsilon,
+                      "Iteration " + iter + " velocity failed.");
 
          double interiorAngleAcceleration = RandomNumbers.nextDouble(random, -100.0, 100.0);
          double farSideAcceleration = TriangleTools
                .computeSideLengthAcceleration(sideALength, sideBLength, interiorAngle, interiorAngleVelocity, interiorAngleAcceleration);
-         assertEquals("Iteration " + iter + " acceleration failed.", interiorAngleAcceleration,
-                      TriangleTools.computeInteriorAngleAcceleration(sideALength, sideBLength, farSideLength, farSideVelocity, farSideAcceleration), epsilon);
+         assertEquals(interiorAngleAcceleration,
+                      TriangleTools.computeInteriorAngleAcceleration(sideALength, sideBLength, farSideLength, farSideVelocity, farSideAcceleration),
+                      epsilon,
+                      "Iteration " + iter + " acceleration failed.");
       }
    }
+
 
    @Test
    public void testFindInteriorAngle()
@@ -193,9 +199,10 @@ public class TriangleToolsTest
 
          double numericalAcceleration = (accelerationPlus + accelerationMinus + accelerationPlusMinus) / 3.0;
 
-         assertEquals("Iteration " + iter + " failed.", numericalAcceleration,
+         assertEquals(numericalAcceleration,
                       TriangleTools.computeInteriorAngleAcceleration(sideALength, sideBLength, farSideLength, farSideLengthVelocity, farSideLengthAcceleration),
-                      1e-1);
+                      1e-1,
+                      "Iteration " + iter + " failed.");
       }
    }
 
@@ -350,9 +357,10 @@ public class TriangleToolsTest
 
          double numericalAcceleration = (accelerationPlus + accelerationMinus + accelerationPlusMinus) / 3.0;
 
-         assertEquals("iteration " + iter + " failed.", numericalAcceleration,
+         assertEquals(numericalAcceleration,
                       TriangleTools.computeSideLengthAcceleration(sideALength, sideBLength, interiorAngle, interiorAngleVelocity, interiorAngleAcceleration),
-                      1e-2);
+                      1e-2,
+                      "iteration " + iter + " failed.");
       }
    }
 
@@ -398,10 +406,10 @@ public class TriangleToolsTest
 
          double positiveInteriorVel = TriangleTools.computeInteriorAngleVelocity(sideALength, sideBLength, farSideLength, farSideLengthVelocityPositive);
          double negativeInteriorVel = TriangleTools.computeInteriorAngleVelocity(sideALength, sideBLength, farSideLength, farSideLengthVelocityNegative);
-         assertTrue("Iteration " + iter + " positive failed. Actuator velocity " + farSideLengthVelocityPositive + " resulted in joint velocity "
-                          + positiveInteriorVel + ", length = " + farSideLength, positiveInteriorVel > epsilon);
-         assertTrue("Iteration " + iter + " negative failed. Actuator velocity " + farSideLengthVelocityNegative + " resulted in joint velocity "
-                          + negativeInteriorVel, negativeInteriorVel < epsilon);
+         assertTrue(positiveInteriorVel > epsilon, "Iteration " + iter + " positive failed. Actuator velocity " + farSideLengthVelocityPositive + " resulted in joint velocity "
+                                                   + positiveInteriorVel + ", length = " + farSideLength);
+         assertTrue(negativeInteriorVel < epsilon, "Iteration " + iter + " negative failed. Actuator velocity " + farSideLengthVelocityNegative + " resulted in joint velocity "
+                                                   + negativeInteriorVel);
       }
    }
 
@@ -429,8 +437,8 @@ public class TriangleToolsTest
                .computeInteriorAngleAcceleration(sideALength, sideBLength, farSideLength, 0.0, farSideLengthAccelerationPositive);
          double negativeInteriorAccel = TriangleTools
                .computeInteriorAngleAcceleration(sideALength, sideBLength, farSideLength, 0.0, farSideLengthAccelerationNegative);
-         assertTrue("Iteration " + iter + " positive failed.", positiveInteriorAccel > epsilon);
-         assertTrue("Iteration " + iter + " negative failed.", negativeInteriorAccel < epsilon);
+         assertTrue(positiveInteriorAccel > epsilon, "Iteration " + iter + " positive failed.");
+         assertTrue(negativeInteriorAccel < epsilon,"Iteration " + iter + " negative failed.");
       }
    }
 
@@ -450,7 +458,7 @@ public class TriangleToolsTest
       angleB = 0.8;
       result = 2.014053;
       isAngleAObtuse = false;
-      assertEquals("Case 1 failed.", result, TriangleTools.computeSideLengthFromSideSideAngle(sideALength, sideBLength, angleB, isAngleAObtuse), epsilon);
+      assertEquals(result, TriangleTools.computeSideLengthFromSideSideAngle(sideALength, sideBLength, angleB, isAngleAObtuse), epsilon, "Case 1 failed.");
 
       // Case 2: Known angle < Pi/2 and adjacent side = opposite side
       sideALength = 1.0;
@@ -458,14 +466,14 @@ public class TriangleToolsTest
       angleB = 0.8;
       result = 1.393413;
       isAngleAObtuse = false;
-      assertEquals("Case 2 failed.", result, TriangleTools.computeSideLengthFromSideSideAngle(sideALength, sideBLength, angleB, isAngleAObtuse), epsilon);
+      assertEquals(result, TriangleTools.computeSideLengthFromSideSideAngle(sideALength, sideBLength, angleB, isAngleAObtuse), epsilon, "Case 2 failed.");
 
       // Case 3: Known angle < Pi/2 and adjacent side > opposite side and opposite side < height
       sideALength = 1.5;
       sideBLength = 1.0;
       angleB = 0.8;
       isAngleAObtuse = false;
-      assertTrue("Case 3 failed.", new Double(TriangleTools.computeSideLengthFromSideSideAngle(sideALength, sideBLength, angleB, isAngleAObtuse)).isNaN());
+      assertTrue(Double.isNaN(TriangleTools.computeSideLengthFromSideSideAngle(sideALength, sideBLength, angleB, isAngleAObtuse)));
 
       // Case 4: Known angle < Pi/2 and adjacent side > opposite side and opposite side > height and angleA is acute
       sideALength = 1.5;
@@ -473,7 +481,7 @@ public class TriangleToolsTest
       angleB = 0.6;
       result = 1.769654;
       isAngleAObtuse = false;
-      assertEquals("Case 4 failed.", result, TriangleTools.computeSideLengthFromSideSideAngle(sideALength, sideBLength, angleB, isAngleAObtuse), epsilon);
+      assertEquals(result, TriangleTools.computeSideLengthFromSideSideAngle(sideALength, sideBLength, angleB, isAngleAObtuse), epsilon);
 
       // Case 5: Known angle < Pi/2 and adjacent side > opposite side and opposite side > height and angleA is obtuse
       sideALength = 1.5;
@@ -481,7 +489,7 @@ public class TriangleToolsTest
       angleB = 0.6;
       result = 0.706353;
       isAngleAObtuse = true;
-      assertEquals("Case 5 failed.", result, TriangleTools.computeSideLengthFromSideSideAngle(sideALength, sideBLength, angleB, isAngleAObtuse), epsilon);
+      assertEquals(result, TriangleTools.computeSideLengthFromSideSideAngle(sideALength, sideBLength, angleB, isAngleAObtuse), epsilon);
 
       // Case 6: Known angle > Pi/2 and adjacent side < opposite side
       sideALength = 0.5;
@@ -489,21 +497,21 @@ public class TriangleToolsTest
       angleB = 1.75;
       result = 0.781476;
       isAngleAObtuse = false;
-      assertEquals("Case 6 failed.", result, TriangleTools.computeSideLengthFromSideSideAngle(sideALength, sideBLength, angleB, isAngleAObtuse), epsilon);
+      assertEquals(result, TriangleTools.computeSideLengthFromSideSideAngle(sideALength, sideBLength, angleB, isAngleAObtuse), epsilon);
 
       // Case 7: Known angle > Pi/2 and adjacent side = opposite side
       sideALength = 1.0;
       sideBLength = 1.0;
       angleB = 1.75;
       isAngleAObtuse = false;
-      assertTrue("Case 7 failed.", new Double(TriangleTools.computeSideLengthFromSideSideAngle(sideALength, sideBLength, angleB, isAngleAObtuse)).isNaN());
+      assertTrue(Double.isNaN(TriangleTools.computeSideLengthFromSideSideAngle(sideALength, sideBLength, angleB, isAngleAObtuse)));
 
       // Case 8: Known angle > Pi/2 and adjacent side > opposite side
       sideALength = 1.5;
       sideBLength = 1.0;
       angleB = 1.75;
       isAngleAObtuse = false;
-      assertTrue("Case 8 failed.", new Double(TriangleTools.computeSideLengthFromSideSideAngle(sideALength, sideBLength, angleB, isAngleAObtuse)).isNaN());
+      assertTrue(Double.isNaN(TriangleTools.computeSideLengthFromSideSideAngle(sideALength, sideBLength, angleB, isAngleAObtuse)));
 
       // Random Testing
       Random random = new Random(34534L);

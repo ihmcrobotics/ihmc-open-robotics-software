@@ -14,11 +14,11 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
-import us.ihmc.robotics.math.filters.RateLimitedYoFramePoint2D;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.yoVariables.euclid.filters.RateLimitedYoFramePoint2D;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -45,7 +45,6 @@ public class OnToesState extends AbstractFootControlState
    private final DoubleParameter maxContactPointRate;
 
    private final YoBoolean usePointContact;
-   private final YoDouble toeOffDesiredPitchAngle, toeOffDesiredPitchVelocity, toeOffDesiredPitchAcceleration;
    private final YoDouble toeOffCurrentPitchAngle, toeOffCurrentPitchVelocity;
 
    private final FramePoint2D toeOffContactPoint2d = new FramePoint2D();
@@ -74,10 +73,6 @@ public class OnToesState extends AbstractFootControlState
 
       usePointContact = new YoBoolean(namePrefix + "UsePointContact", registry);
 
-      toeOffDesiredPitchAngle = new YoDouble(namePrefix + "ToeOffDesiredPitchAngle", registry);
-      toeOffDesiredPitchVelocity = new YoDouble(namePrefix + "ToeOffDesiredPitchVelocity", registry);
-      toeOffDesiredPitchAcceleration = new YoDouble(namePrefix + "ToeOffDesiredPitchAcceleration", registry);
-
       toeOffCurrentPitchAngle = new YoDouble(namePrefix + "ToeOffCurrentPitchAngle", registry);
       toeOffCurrentPitchVelocity = new YoDouble(namePrefix + "ToeOffCurrentPitchVelocity", registry);
 
@@ -91,10 +86,6 @@ public class OnToesState extends AbstractFootControlState
                                                                  controllerToolbox.getControlDT(),
                                                                  contactPoint.getReferenceFrame()));
       }
-
-      toeOffDesiredPitchAngle.set(Double.NaN);
-      toeOffDesiredPitchVelocity.set(Double.NaN);
-      toeOffDesiredPitchAcceleration.set(Double.NaN);
 
       toeOffCurrentPitchAngle.set(Double.NaN);
       toeOffCurrentPitchVelocity.set(Double.NaN);
@@ -295,10 +286,6 @@ public class OnToesState extends AbstractFootControlState
    public void onExit(double timeInState)
    {
       super.onExit(timeInState);
-
-      toeOffDesiredPitchAngle.set(Double.NaN);
-      toeOffDesiredPitchVelocity.set(Double.NaN);
-      toeOffDesiredPitchAcceleration.set(Double.NaN);
 
       toeOffCurrentPitchAngle.set(Double.NaN);
       toeOffCurrentPitchVelocity.set(Double.NaN);

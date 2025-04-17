@@ -1,0 +1,168 @@
+package us.ihmc.alexander;
+
+import us.ihmc.alexander.parameters.model.AlexanderPhysicalProperties;
+import us.ihmc.alexander.parameters.model.AlexanderPhysicalPropertiesV0;
+import us.ihmc.alexander.parameters.model.AlexanderURDFParameters;
+import us.ihmc.avatar.drcRobot.RobotVersion;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
+
+import java.util.Arrays;
+import java.util.Collection;
+
+public enum AlexanderVersion implements RobotVersion
+{
+   V0_FULL_ROBOT(Arrays.asList(AlexanderURDFParameters.URDF_LOWER_BODY, AlexanderURDFParameters.URDF_LEFT_ARM, AlexanderURDFParameters.URDF_RIGHT_ARM), null),
+   V0_NUB_FOREARMS(Arrays.asList(AlexanderURDFParameters.URDF_LOWER_BODY, AlexanderURDFParameters.URDF_LEFT_ARM_NUB_FOREARM, AlexanderURDFParameters.URDF_RIGHT_ARM_NUB_FOREARM), null);
+
+   private static String[] resourceDirectories;
+   private final SideDependentList<RigidBodyTransform> offsetHandFromAttachmentPlate = new SideDependentList<RigidBodyTransform>();
+   private final Collection<String> hardwareMapResources;
+
+   public static final boolean SHORT_NUBS = false;
+
+   private final Collection<String> urdfModelPath;
+
+   private AlexanderJointMap jointMap;
+   private AlexanderPhysicalProperties physicalProperties;
+   private AlexanderSensorInformation sensorInformation;
+
+   AlexanderVersion(Collection<String> urdfModelPath, Collection<String> hardwareMapResources)
+   {
+      this.urdfModelPath = urdfModelPath;
+      this.hardwareMapResources = hardwareMapResources;
+   }
+
+   public Collection<String> getModelPath()
+   {
+      return urdfModelPath;
+   }
+
+   public Collection<String> getHardwareMapResources()
+   {
+      return hardwareMapResources;
+   }
+
+   public boolean hasArms(RobotSide side)
+   {
+      switch (this)
+      {
+         case V0_FULL_ROBOT, V0_NUB_FOREARMS:
+            return true;
+         default:
+            return false;
+      }
+   }
+
+   public boolean hasCycloidForearms()
+   {
+      switch (this)
+      {
+         case V0_FULL_ROBOT:
+            return true;
+         default:
+            return false;
+      }
+   }
+
+   public boolean armsNeedCalibration()
+   {
+      return false;
+   }
+
+   public AlexanderJointMap getJointMap()
+   {
+      if (jointMap != null)
+      {
+         return jointMap;
+      }
+      switch (this)
+      {
+         case V0_FULL_ROBOT:
+            jointMap = new AlexanderJointMap(getPhysicalProperties(),
+                                             new SideDependentList<>(AlexanderArmConfiguration.FOREARM, AlexanderArmConfiguration.FOREARM));
+            break;
+         case V0_NUB_FOREARMS:
+            jointMap = new AlexanderJointMap(getPhysicalProperties(),
+                                             new SideDependentList<>(AlexanderArmConfiguration.NUB, AlexanderArmConfiguration.NUB));
+            break;
+      }
+      return jointMap;
+   }
+
+   @Override
+   public boolean hasArm(RobotSide robotSide)
+   {
+      return switch (this)
+      {
+         case V0_FULL_ROBOT -> true;
+         case V0_NUB_FOREARMS -> true;
+         default -> false;
+      };
+   }
+
+   @Override
+   public boolean hasSakeGripperJoints(RobotSide side)
+   {
+      switch (this)
+      {
+         case V0_FULL_ROBOT ->
+         {
+            return true;
+         }
+         default ->
+         {
+            return false;
+         }
+      }
+   }
+
+   public boolean hasNubHands(RobotSide side)
+   {
+      switch (this)
+      {
+         case V0_FULL_ROBOT, V0_NUB_FOREARMS:
+            return true;
+         default:
+            return false;
+      }
+   }
+
+   public AlexanderSensorInformation getSensorInformation()
+   {
+      if (sensorInformation != null)
+      {
+         return sensorInformation;
+      }
+
+      switch (this)
+      {
+         case V0_FULL_ROBOT, V0_NUB_FOREARMS:
+            sensorInformation = new AlexanderSensorInformation(this);
+            break;
+         default:
+            break;
+      }
+      // If this point is reached it means that sensorInformation is null
+      return sensorInformation;
+   }
+
+   public AlexanderPhysicalProperties getPhysicalProperties()
+   {
+      if (physicalProperties != null)
+      {
+         return physicalProperties;
+      }
+
+      switch (this)
+      {
+         case V0_FULL_ROBOT, V0_NUB_FOREARMS:
+            physicalProperties = new AlexanderPhysicalPropertiesV0();
+            break;
+         default:
+            break;
+      }
+      return physicalProperties;
+   }
+}

@@ -2,6 +2,7 @@ package us.ihmc.robotics.math.trajectories.generators;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.ToDoubleFunction;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commons.MathTools;
@@ -15,7 +16,6 @@ import us.ihmc.robotics.math.trajectories.SimpleHermiteCurvedBasedOrientationTra
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSO3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameSO3TrajectoryPointList;
 import us.ihmc.robotics.numericalMethods.GradientDescentModule;
-import us.ihmc.robotics.numericalMethods.SingleQueryFunction;
 
 public class SO3TrajectoryPointCalculator
 {
@@ -85,8 +85,8 @@ public class SO3TrajectoryPointCalculator
          for (int j = 0; j < 3; j++)
             defaultInitialAngularVelocitiesInDoubleArray.add(angularVelocities.get(i).getElement(j));
 
-      SingleQueryFunction function = new SO3TrajectoryPointOptimizerCostFunction();
-      double defaultQuery = function.getQuery(defaultInitialAngularVelocitiesInDoubleArray);
+      ToDoubleFunction<TDoubleArrayList> function = new SO3TrajectoryPointOptimizerCostFunction();
+      double defaultQuery = function.applyAsDouble(defaultInitialAngularVelocitiesInDoubleArray);
 
       for (int i = 1; i < times.size() - 1; i++)
       {
@@ -113,7 +113,7 @@ public class SO3TrajectoryPointCalculator
          for (int j = 0; j < 3; j++)
             initialAngularVelocitiesInDoubleArray.add(angularVelocities.get(i).getElement(j));
 
-      double modifiedQuery = function.getQuery(initialAngularVelocitiesInDoubleArray);
+      double modifiedQuery = function.applyAsDouble(initialAngularVelocitiesInDoubleArray);
 
       if (debug)
       {
@@ -156,11 +156,11 @@ public class SO3TrajectoryPointCalculator
          for (int j = 0; j < 3; j++)
             initialAngularVelocitiesInDoubleArray.add(angularVelocities.get(i).getElement(j));
 
-      SingleQueryFunction function = new SO3TrajectoryPointOptimizerCostFunction();
+      ToDoubleFunction<TDoubleArrayList> function = new SO3TrajectoryPointOptimizerCostFunction();
       GradientDescentModule optimizer = new GradientDescentModule(function, initialAngularVelocitiesInDoubleArray);
       optimizer.setMaximumIterations(maxIterations);
       optimizer.setConvergenceThreshold(convergenceThreshold);
-      optimizer.setStepSize(optimizerStepSize);
+      optimizer.setLearningRate(optimizerStepSize);
       optimizer.setPerturbationSize(optimizerPerturbationSize);
 
       List<Vector3DBasics> initialAngularVelocities = new ArrayList<>();
@@ -171,7 +171,7 @@ public class SO3TrajectoryPointCalculator
 
       if (debug)
       {
-         System.out.println("# initial query " + function.getQuery(initialAngularVelocitiesInDoubleArray));
+         System.out.println("# initial query " + function.applyAsDouble(initialAngularVelocitiesInDoubleArray));
          System.out.println("# iteration is " + numberOfIterationToSolve);
          System.out.println("# final query is " + optimizer.getOptimalQuery());
          System.out.println("# computation time is " + optimizer.getComputationTime());
@@ -196,10 +196,10 @@ public class SO3TrajectoryPointCalculator
       return trajectoryPoints.getTrajectoryPoint(i);
    }
 
-   private class SO3TrajectoryPointOptimizerCostFunction implements SingleQueryFunction
+   private class SO3TrajectoryPointOptimizerCostFunction implements ToDoubleFunction<TDoubleArrayList>
    {
       @Override
-      public double getQuery(TDoubleArrayList values)
+      public double applyAsDouble(TDoubleArrayList values)
       {
          int numberOfPoints = times.size();
          int optimalSolutionIndex = 0;

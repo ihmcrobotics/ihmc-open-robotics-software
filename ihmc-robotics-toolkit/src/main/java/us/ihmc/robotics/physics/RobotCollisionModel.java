@@ -7,6 +7,7 @@ import java.util.function.Function;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.scs2.simulation.collision.Collidable;
 
 /**
  * Defines a factory for creating the collision shapes of a humanoid robot.

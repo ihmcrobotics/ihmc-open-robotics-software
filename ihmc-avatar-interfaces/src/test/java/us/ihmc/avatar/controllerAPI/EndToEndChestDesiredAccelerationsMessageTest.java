@@ -75,7 +75,7 @@ public abstract class EndToEndChestDesiredAccelerationsMessageTest implements Mu
       assertTrue(success);
 
       assertEquals(RigidBodyControlMode.USER, EndToEndTestTools.findRigidBodyControlManagerState(chest.getName(), simulationTestHelper));
-      double[] controllerDesiredJointAccelerations = findControllerDesiredJointAccelerations(spineJoints, simulationTestHelper);
+      double[] controllerDesiredJointAccelerations = findControllerDesiredJointAccelerations(chest.getName(), spineJoints, simulationTestHelper);
       assertArrayEquals(chestDesiredJointAccelerations, controllerDesiredJointAccelerations, 1.0e-10);
       double[] qpOutputJointAccelerations = findQPOutputJointAccelerations(spineJoints, simulationTestHelper);
       assertArrayEquals(chestDesiredJointAccelerations, qpOutputJointAccelerations, 1.0e-3);
@@ -96,10 +96,10 @@ public abstract class EndToEndChestDesiredAccelerationsMessageTest implements Mu
       return qdd_ds;
    }
 
-   public double[] findControllerDesiredJointAccelerations(OneDoFJointBasics[] joints, YoVariableHolder scs)
+   public double[] findControllerDesiredJointAccelerations(String torsoName, OneDoFJointBasics[] joints, YoVariableHolder scs)
    {
       double[] qdd_ds = new double[joints.length];
-      String prefix = "utorsoUserMode";
+      String prefix = torsoName + "UserMode";
       for (int i = 0; i < joints.length; i++)
       {
          String name = prefix + "_" + joints[i].getName() + "_qdd_d";

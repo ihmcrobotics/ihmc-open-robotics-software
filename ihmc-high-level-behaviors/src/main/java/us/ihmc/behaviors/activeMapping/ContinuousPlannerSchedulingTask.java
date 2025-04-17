@@ -23,6 +23,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -42,6 +43,8 @@ public class ContinuousPlannerSchedulingTask
    private TerrainMapData terrainMap;
    private HeightMapData heightMapData;
 
+   private final AtomicBoolean resetStateMachine = new AtomicBoolean(false);
+
    public ContinuousPlannerSchedulingTask(DRCRobotModel robotModel,
                                           ROS2Node ros2Node,
                                           ROS2SyncedRobotModel syncedRobotModel,
@@ -53,6 +56,9 @@ public class ContinuousPlannerSchedulingTask
       String simpleRobotName = robotModel.getSimpleRobotName();
 
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
+
+      ros2Helper.subscribeViaCallback(ContinuousHikingAPI.RESET_STATE_MACHINE, this::resetStateMachine);
+
       AtomicReference<ContinuousHikingCommandMessage> commandMessage = new AtomicReference<>(new ContinuousHikingCommandMessage());
       ros2Helper.subscribeViaCallback(ContinuousHikingAPI.CONTINUOUS_HIKING_COMMAND, commandMessage::set);
 
@@ -93,8 +99,8 @@ public class ContinuousPlannerSchedulingTask
                                               syncedRobotModel,
                                               commandMessage,
                                               controllerFootstepQueueMonitor,
-                                              activeMappingParameterObject.getFootstepPlannerParameters(),
-                                              activeMappingParameterObject.getSwingPlannerParameters(),
+                                              debugger,
+                                              activeMappingParameterObject,
                                               this::getHeightMapData,
                                               this::getTerrainMap);
 
@@ -135,6 +141,18 @@ public class ContinuousPlannerSchedulingTask
 
       // Added a couple listeners to help when jumping between states
       stateMachine = stateMachineFactory.build(ContinuousHikingState.DO_NOTHING);
+
+      stateMachine.addPreTransitionCallback(() ->
+                                            {
+                                               if (controllerFootstepQueueMonitor.pollRobotFalling() || resetStateMachine.get())
+                                               {
+                                                  LogTools.info("---- Resetting State Machine for Continuous Hiking ----");
+                                                  stateMachine.resetToInitialState();
+                                                  resetStateMachine.set(false);
+                                                  commandMessage.get().setEnableContinuousHiking(false);
+                                               }
+                                            });
+
       stateMachineFactory.addStateChangedListener((from, to) ->
                                                   {
                                                      if (from == null)
@@ -156,6 +174,11 @@ public class ContinuousPlannerSchedulingTask
       stateMachineFactory.addStateChangedListener((from, to) -> continuousHikingLogger.logToFile(true, false));
 
       executorService.scheduleWithFixedDelay(this::tickStateMachine, 1500, CONTINUOUS_PLANNING_DELAY_MS, TimeUnit.MILLISECONDS);
+   }
+
+   private void resetStateMachine()
+   {
+      resetStateMachine.set(true);
    }
 
    public TerrainMapData getTerrainMap()

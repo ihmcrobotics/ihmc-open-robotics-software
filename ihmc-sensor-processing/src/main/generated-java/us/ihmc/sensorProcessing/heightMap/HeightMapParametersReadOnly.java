@@ -10,14 +10,14 @@ import static us.ihmc.sensorProcessing.heightMap.HeightMapParameters.*;
  */
 public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
 {
+   default boolean getDriftOffsetFilter()
+   {
+      return get(driftOffsetFilter);
+   }
+
    default boolean getFlyingPointsFilter()
    {
       return get(flyingPointsFilter);
-   }
-
-   default boolean getResetHeightMap()
-   {
-      return get(resetHeightMap);
    }
 
    default boolean getEnableAlphaFilter()
@@ -38,6 +38,11 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
    default int getSearchWindowWidth()
    {
       return get(searchWindowWidth);
+   }
+
+   default int getSearchSkipSize()
+   {
+      return get(searchSkipSize);
    }
 
    default double getMinHeightRegistration()
@@ -153,11 +158,6 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
    default double getSteppingCosineThreshold()
    {
       return get(steppingCosineThreshold);
-   }
-
-   default int getSearchSkipSize()
-   {
-      return get(searchSkipSize);
    }
 
    default int getFastSearchSize()

@@ -1,7 +1,5 @@
 package us.ihmc.avatar;
 
-import static us.ihmc.robotics.Assert.assertTrue;
-
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -32,6 +30,8 @@ import us.ihmc.simulationToolkit.controllers.PushRobotControllerSCS2;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoEnum;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class AvatarFlatGroundSideSteppingTest implements MultiRobotTestInterface
 {
@@ -160,7 +160,7 @@ public abstract class AvatarFlatGroundSideSteppingTest implements MultiRobotTest
       }
 
       controllerSpy.setFootStepCheckPoints(rootLocations, getStepLength(), getStepWidth());
-      simulationTestHelper.simulateNow(1.0);
+      simulationTestHelper.simulateNow(0.5);
       simulationTestHelper.publishToController(footMessage);
       double simulationTime = 1 * footMessage.getFootstepDataList().size() + 1.0;
 
@@ -199,7 +199,7 @@ public abstract class AvatarFlatGroundSideSteppingTest implements MultiRobotTest
       }
 
       controllerSpy.setFootStepCheckPoints(rootLocations, getStepLength(), getStepWidth());
-      simulationTestHelper.simulateNow(1.0);
+      simulationTestHelper.simulateNow(0.5);
       simulationTestHelper.publishToController(footMessage);
       double simulationTime = 1 * footMessage.getFootstepDataList().size() + 1.0;
 
@@ -325,8 +325,6 @@ public abstract class AvatarFlatGroundSideSteppingTest implements MultiRobotTest
          singleSupportStartConditions.put(robotSide, new SingleSupportStartCondition(footConstraintType));
          doubleSupportStartConditions.put(robotSide, new DoubleSupportStartCondition(walkingState, robotSide));
       }
-
-      ThreadTools.sleep(1000);
    }
 
    protected double getForcePointOffsetZInChestFrame()

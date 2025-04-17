@@ -12,10 +12,10 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.RawImageTest;
 import us.ihmc.perception.camera.CameraIntrinsics;
@@ -277,10 +277,10 @@ public class SRTStreamerSubscriberTest
                                                                400.0,
                                                                sampleImage.cols() / 2.0,
                                                                sampleImage.rows() / 2.0);
-      FramePose3D testPose = new FramePose3D(ReferenceFrame.getWorldFrame(), new Pose3D(0.3, 0.4, 0.5, 0.5, 0.4, 0.3));
+      RigidBodyTransform testTransform = new RigidBodyTransform(new YawPitchRoll(0.3, 0.4, 0.5), new Vector3D(0.5, 0.4, 0.3));
 
       // Create an example raw image
-      RawImage rawImage = RawImage.createWithBGRImage(sampleImage, cameraIntrinsics, testPose, Instant.now(), 0L);
+      RawImage rawImage = RawImage.createWithBGRImage(sampleImage, cameraIntrinsics, testTransform, Instant.now(), 0L);
 
       // Create and initialize the streamer
       ROS2SRTVideoStreamer streamer = new ROS2SRTVideoStreamer(ROS2_NODE, requestTopic, localAddress);
@@ -304,7 +304,7 @@ public class SRTStreamerSubscriberTest
          assertEquals(cameraIntrinsics.getFy(), receivedImage.getFocalLengthY());
          assertEquals(cameraIntrinsics.getCx(), receivedImage.getPrincipalPointX());
          assertEquals(cameraIntrinsics.getCy(), receivedImage.getPrincipalPointY());
-         EuclidCoreTestTools.assertEquals(testPose, receivedImage.getPose(), 1E-5);
+         EuclidCoreTestTools.assertGeometricallyEquals(testTransform, receivedImage.getTransformToWorld(), 1E-5);
       });
 
       // No communication at this time

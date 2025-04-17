@@ -3,9 +3,11 @@ package us.ihmc.manipulation.planning.gradientDescent;
 import gnu.trove.list.array.TDoubleArrayList;
 import org.junit.jupiter.api.Test;
 import us.ihmc.robotics.numericalMethods.GradientDescentModule;
-import us.ihmc.robotics.numericalMethods.SingleQueryFunction;
 
-import static us.ihmc.robotics.Assert.assertTrue;
+import java.util.function.ToDoubleFunction;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 public class GradientDescentTest
 {
    @Test
@@ -19,18 +21,18 @@ public class GradientDescentTest
 
       TDoubleArrayList initial = new TDoubleArrayList();
       initial.add(initialInput);
-      SingleQueryFunction function = new SingleQueryFunction()
+      ToDoubleFunction<TDoubleArrayList> function = new ToDoubleFunction<>()
       {
          @Override
-         public double getQuery(TDoubleArrayList values)
+         public double applyAsDouble(TDoubleArrayList values)
          {
             // power function.
             return Math.pow((values.get(0) - expectedOptimalInput) * 10, 2.0) + desiredQuery;
          }
       };
       GradientDescentModule solver = new GradientDescentModule(function, initial);
-      solver.setStepSize(20.0);
-      solver.setReducingStepSizeRatio(1.5);
+      solver.setLearningRate(20.0);
+      solver.setReducingLearningRateRatio(1.5);
 
       TDoubleArrayList upperLimit = new TDoubleArrayList();
       upperLimit.add(35.0);
@@ -46,8 +48,8 @@ public class GradientDescentTest
       double error = Math.abs(solver.getOptimalQuery() - desiredQuery);
       double expectedInputError = Math.abs(optimalSolution.get(0) - expectedOptimalInput);
 
-      assertTrue("query arrived on desired value", error < 10E-5);
-      assertTrue("input arrived on expected value", expectedInputError < 10E-4);
+      assertTrue(error < 10E-5, "query arrived on desired value");
+      assertTrue(expectedInputError < 10E-4, "input arrived on expected value");
 
       System.out.println("Good Bye Test");
    }

@@ -13,8 +13,6 @@ import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.jetbrains.annotations.Nullable;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
@@ -35,7 +33,7 @@ public class RDXRawImagePointCloudRenderer extends AbstractRDXPointCloudRenderer
    // DEPTH IMAGE UNIFORM DATA
    private CameraIntrinsics depthIntrinsics = new CameraIntrinsics();
    private float depthDiscretization = 0.0f;
-   private final FixedFramePose3DBasics depthPose = new FramePose3D();
+   private final RigidBodyTransform depthTransform = new RigidBodyTransform();
    private final Matrix4 libGDXDepthTransform = new Matrix4();
    private final RigidBodyTransform tempDepthTransform = new RigidBodyTransform();
 
@@ -82,8 +80,8 @@ public class RDXRawImagePointCloudRenderer extends AbstractRDXPointCloudRenderer
       // Update depth image uniforms
       depthIntrinsics = depthImage.getIntrinsicsCopy();
       depthDiscretization = depthImage.getDepthDiscretization();
-      depthPose.set(depthImage.getPose());
-      LibGDXTools.toLibGDX(depthPose, tempDepthTransform, libGDXDepthTransform);
+      depthTransform.set(depthImage.getTransformToWorld());
+      LibGDXTools.toLibGDX(depthTransform, tempDepthTransform, libGDXDepthTransform);
 
       int width = depthImage.getWidth();
       int height = depthImage.getHeight();
@@ -133,8 +131,8 @@ public class RDXRawImagePointCloudRenderer extends AbstractRDXPointCloudRenderer
 
       // Update color image uniforms
       colorIntrinsics = colorImage.getIntrinsicsCopy();
-      depthToColorTransform.setAndInvert(colorImage.getPose());
-      depthToColorTransform.multiply(depthPose);
+      depthToColorTransform.setAndInvert(colorImage.getTransformToWorld());
+      depthToColorTransform.multiply(depthTransform);
       LibGDXTools.toLibGDX(depthToColorTransform, tempColorTransform, libGDXColorTransform);
 
       // Reallocate pixmap and data pointer if image size changed

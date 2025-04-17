@@ -92,7 +92,7 @@ public class BallDetectionManager
             double z = -(ballCenter.y() - colorImage.getPrincipalPointY()) / colorImage.getFocalLengthY() * depth;
 
             // get ball's position with respect to world
-            RigidBodyTransform newBallPosition = new RigidBodyTransform(colorImage.getOrientation(), colorImage.getPosition());
+            RigidBodyTransform newBallPosition = new RigidBodyTransform(colorImage.getTransformToWorld());
             newBallPosition.appendTranslation(depth, y, z);
             ballPosition.update(newBallPosition);
 

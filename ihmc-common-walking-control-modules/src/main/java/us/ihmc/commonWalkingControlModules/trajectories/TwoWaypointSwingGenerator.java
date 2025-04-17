@@ -192,7 +192,7 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
       isDone = new YoBoolean(namePrefix + "IsDone", registry);
       isSteppingDown = new YoBoolean(namePrefix + "IsSteppingDown", registry);
       swingHeight = new YoDouble(namePrefix + "SwingHeight", registry);
-      swingHeight.set(minSwingHeight);
+      swingHeight.set(defaultSwingHeight);
 
       this.maxSwingHeight = new YoDouble(namePrefix + "MaxSwingHeight", registry);
       this.maxSwingHeight.set(maxSwingHeight);
@@ -475,7 +475,13 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
             break;
          }
          case CUSTOM:
+         {
+            if (initialGroundZ >= finalGroundZ)
+            { // Stepping down
+               isSteppingDown.set(true);
+            }
             break;
+         }
          default:
             throw new RuntimeException("Trajectory type not implemented");
       }

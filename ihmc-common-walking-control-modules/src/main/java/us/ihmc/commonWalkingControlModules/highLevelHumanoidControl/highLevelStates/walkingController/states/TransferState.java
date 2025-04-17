@@ -4,7 +4,6 @@ import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManage
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
-import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
@@ -30,7 +29,6 @@ public abstract class TransferState extends WalkingState
    protected final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
    protected final CenterOfMassHeightManager comHeightManager;
-   protected final PelvisOrientationManager pelvisOrientationManager;
    protected final FeetManager feetManager;
 
    private final FramePoint2D capturePoint2d = new FramePoint2D();
@@ -64,7 +62,6 @@ public abstract class TransferState extends WalkingState
 
       walkingTrajectoryPath = controllerToolbox.getWalkingTrajectoryPath();
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
-      pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       feetManager = managerFactory.getOrCreateFeetManager();
 
       if (unloadFraction != null)
@@ -220,8 +217,11 @@ public abstract class TransferState extends WalkingState
 
    protected void initializeWalkingTrajectoryPath()
    {
-      walkingTrajectoryPath.clearFootsteps();
-      walkingTrajectoryPath.addFootsteps(walkingMessageHandler);
+      // 2025/03/10: RJG leaving this commented in causes a discontinuity on the initial state of the pelvis yaw. That
+      // results in a big jump when the robot starts moving, potentially. If you leave it commented out, the path will
+      // start its yaw at the current yaw, and you get smooth motions.
+//      if (isInitialTransfer())
+//         walkingTrajectoryPath.reset();
       walkingTrajectoryPath.initializeDoubleSupport();
    }
 
@@ -240,9 +240,6 @@ public abstract class TransferState extends WalkingState
       {
          failureDetectionControlModule.setNextFootstep(null);
       }
-
-      double transferTime = walkingMessageHandler.getNextTransferTime();
-      pelvisOrientationManager.setTrajectoryTime(transferTime);
    }
 
    public boolean isInitialTransfer()

@@ -5,7 +5,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameShape3DReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.robotics.physics.Collidable;
+import us.ihmc.scs2.simulation.collision.Collidable;
 
 import java.util.ArrayList;
 import java.util.HashMap;

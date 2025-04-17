@@ -116,7 +116,7 @@ public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterf
 
       assertTrue(simulationTestHelper.simulateNow(0.5));
 
-      FootstepDataListMessage footsteps = createStairsFootsteps(squareUpSteps, goingUp, stepHeight, stepLength, 0.25, numberOfSteps);
+      FootstepDataListMessage footsteps = EndToEndTestTools.generateStairsFootsteps(squareUpSteps, goingUp, stepHeight, stepLength, 0.25, numberOfSteps);
       if (goingUp)
          translate(footsteps, new Vector3D(0.6 - 0.045 - actualFootLength / 2.0, 0.0, 0.0));
       else
@@ -138,7 +138,7 @@ public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterf
       }
    }
 
-   private void publishHeightOffset(double heightOffset) throws Exception
+   private void publishHeightOffset(double heightOffset)
    {
       if (!Double.isFinite(heightOffset) || EuclidCoreTools.epsilonEquals(0.0, heightOffset, 1.0e-3))
          return;
@@ -148,7 +148,7 @@ public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterf
       assertTrue(simulationTestHelper.simulateNow(0.5));
    }
 
-   private void publishFootstepsAndSimulate(DRCRobotModel robotModel, FootstepDataListMessage footsteps) throws Exception
+   private void publishFootstepsAndSimulate(DRCRobotModel robotModel, FootstepDataListMessage footsteps)
    {
       double walkingDuration = EndToEndTestTools.computeWalkingDuration(footsteps, robotModel.getWalkingControllerParameters());
       simulationTestHelper.publishToController(footsteps);
@@ -163,65 +163,6 @@ public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterf
       }
 
       return message;
-   }
-
-   private static FootstepDataListMessage createStairsFootsteps(boolean slow,
-                                                                boolean up,
-                                                                double stepHeight,
-                                                                double stepLength,
-                                                                double stanceWidth,
-                                                                int numberOfSteps)
-   {
-      FootstepDataListMessage footsteps = new FootstepDataListMessage();
-
-      double x = 0.0;
-      double z = 0.0;
-
-      if (slow)
-      {
-         for (int i = 0; i < numberOfSteps + 1; i++)
-         {
-            for (RobotSide robotSide : RobotSide.values)
-            {
-               FootstepDataMessage footstep = footsteps.getFootstepDataList().add();
-               footstep.setRobotSide(robotSide.toByte());
-               footstep.getLocation().set(x, 0.5 * robotSide.negateIfRightSide(stanceWidth), z);
-            }
-
-            x += stepLength;
-            z += up ? stepHeight : -stepHeight;
-         }
-      }
-      else
-      {
-         RobotSide stepSide = RobotSide.LEFT;
-
-         FootstepDataMessage footstep = footsteps.getFootstepDataList().add();
-         footstep.setRobotSide(stepSide.toByte());
-         footstep.getLocation().set(x, 0.5 * stepSide.negateIfRightSide(stanceWidth), z);
-         stepSide = stepSide.getOppositeSide();
-
-         for (int i = 0; i < numberOfSteps + 1; i++)
-         {
-            footstep = footsteps.getFootstepDataList().add();
-            footstep.setRobotSide(stepSide.toByte());
-            footstep.getLocation().set(x, 0.5 * stepSide.negateIfRightSide(stanceWidth), z);
-
-            stepSide = stepSide.getOppositeSide();
-
-            if (i < numberOfSteps)
-            {
-               x += stepLength;
-               z += up ? stepHeight : -stepHeight;
-            }
-         }
-
-         footstep = footsteps.getFootstepDataList().add();
-         footstep.setRobotSide(stepSide.toByte());
-         footstep.getLocation().set(x, 0.5 * stepSide.negateIfRightSide(stanceWidth), z);
-      }
-
-      return footsteps;
    }
 
    public static Consumer<FootstepDataListMessage> createFootstepCorruptor(Random random,
