@@ -61,11 +61,10 @@ public class StabilityBasedKinematicRetargetingCalculator
    private static final double MAX_PELVIS_ORIENTATION_OFFSET = Math.toRadians(25.0);
 
    private static final boolean SNAP_TO_REGION = false;
-   public static boolean OVERRIDE_MESSAGE = false;
+   public static boolean OVERRIDE_MESSAGE = true;
    public static final boolean ENABLE_POSTURE_OBJECTIVE = false;
    public static final boolean ENABLE_CONTACT_OBJECTIVE = true;
    public static final boolean INCLUDE_FF_VELOCITY = false;
-   public static final Vector3D OVERRIDE_NORMAL = new Vector3D(Axis3D.Z);
 
    private static final double KP_ORIENTATION = 1200.0;
    private static final double MAX_CONTACT_POINT_ADJUSTMENT = 0.18;
@@ -99,7 +98,7 @@ public class StabilityBasedKinematicRetargetingCalculator
    /* Optimize posture */
    private final YoBoolean requestPostureAdjustment = new YoBoolean("requestPostureAdjustment", registry);
    /* Contact normal for which support region is previewed */
-   private final FrameVector3D regionNormal = new FrameVector3D();
+   private final YoFrameVector3D regionNormal = new YoFrameVector3D("regionNormal", ReferenceFrame.getWorldFrame(), registry);
    private final YoDouble maxContactAdjustment = new YoDouble("maxContactAdjustment", registry);
 
    /* Reference frame of the region */
@@ -139,6 +138,7 @@ public class StabilityBasedKinematicRetargetingCalculator
    private int bracingPointIndex;
    private final YoFrameVector3D contactPointAdjustment;
    private final YoFrameVector3D integratedContactPointAdjustment;
+   private final YoDouble contactPointAdjustmentNorm;
 
    private final FramePose3D tempPose = new FramePose3D();
    private final FramePoint3D tempPoint = new FramePoint3D();
@@ -169,7 +169,7 @@ public class StabilityBasedKinematicRetargetingCalculator
 
       stabilityMarginThreshold.set(0.15);
       stabilityMarginHysteresis.set(0.015);
-      sensitivityThresholdLower.set(3.0e-4);
+      sensitivityThresholdLower.set(1.0e-7);
       sensitivityThresholdUpper.set(0.035);
       maxContactAdjustment.set(MAX_CONTACT_POINT_ADJUSTMENT);
 
@@ -180,8 +180,8 @@ public class StabilityBasedKinematicRetargetingCalculator
                                                                                          graphicsListRegistry,
                                                                                          registry);
 
-      kpPosture.set(12.0); // 15.0);
-      kpContact.set(0.25);
+      kpPosture.set(15.0); // 15.0);
+      kpContact.set(0.35);
 
       double maxRate = Math.toRadians(15.0);
       chestOrientationRetargeting = new OrientationRetargeting("chest",  fullRobotModel.getChest(), updateDT, maxRate, MAX_CHEST_ORIENTATION_OFFSET, graphicsListRegistry, registry);
@@ -194,9 +194,10 @@ public class StabilityBasedKinematicRetargetingCalculator
 
       contactPointAdjustment = new YoFrameVector3D("contactPointAdjustment", ReferenceFrame.getWorldFrame(), registry);
       integratedContactPointAdjustment = new YoFrameVector3D("integratedContactPointAdjustment", ReferenceFrame.getWorldFrame(), registry);
+      contactPointAdjustmentNorm = new YoDouble("contactPointAdjustmentNorm", registry);
 
       if (OVERRIDE_MESSAGE)
-         isEnabled.set(ENABLE_POSTURE_OBJECTIVE || ENABLE_CONTACT_OBJECTIVE);
+         isEnabled.set(true);
 
       if (OVERRIDE_MESSAGE)
          requestContactAdjustment.set(ENABLE_CONTACT_OBJECTIVE);
@@ -209,12 +210,6 @@ public class StabilityBasedKinematicRetargetingCalculator
       chestWeight = new YoVector3D("chestWeight", registry);
       pelvisWeight = new YoVector3D("pelvisWeight", registry);
 
-      // hard-coded for overriding
-      if (OVERRIDE_MESSAGE)
-      {
-         regionNormal.set(OVERRIDE_NORMAL);
-      }
-
       // Detune the default KST values a bit
       chestDefaultWeight.set(0.0, 0.0, 0.5);
       pelvisDefaultWeight.set(1.0, 1.0, 1.0);
@@ -225,14 +220,6 @@ public class StabilityBasedKinematicRetargetingCalculator
 
       orientationGains.setProportionalGains(KP_ORIENTATION);
       orientationGains.setMaxProportionalError(MAX_ORIENTATION_ERROR);
-
-//      boolean useOldOrientation = false;
-//      if (useOldOrientation)
-//      {
-//         orientationGains.setMaxProportionalError(100.0);
-//         chestMultiContactWeight.set(chestDefaultWeight);
-//         pelvisMultiContactWeight.set(pelvisDefaultWeight);
-//      }
       
       addContactAdjustment.set(true);
 
@@ -287,6 +274,7 @@ public class StabilityBasedKinematicRetargetingCalculator
       postureOptimizerState.set(PostureOptimizerState.NOMINAL);
 
       stabilityGradientCalculator.initialize();
+      contactPointAdjustmentNorm.set(0.0);
    }
 
    public void update()
@@ -313,6 +301,8 @@ public class StabilityBasedKinematicRetargetingCalculator
          {
             integratedContactPointAdjustment.setToZero();
          }
+
+         contactPointAdjustmentNorm.set(integratedContactPointAdjustment.norm());
 
          // always compute, for debugging
          stabilityGradientCalculator.computePostureAdjustment();
@@ -398,17 +388,18 @@ public class StabilityBasedKinematicRetargetingCalculator
       if (!OVERRIDE_MESSAGE)
       {
          requestContactAdjustment.set(true);
-         tempPose.set(regionPoint, regionOrientation);
-         regionFrame.setPoseAndUpdate(tempPose);
+      }
 
-         this.regionPolygon.set(regionPolygon);
-         this.regionNormal.set(regionNormal);
+      tempPose.set(regionPoint, regionOrientation);
+      regionFrame.setPoseAndUpdate(tempPose);
 
-         if (!regionPolygon.isEmpty())
-         {
-            double safetyDistance = 0.07;
-            polygonScaler.scaleConvexPolygon(regionPolygon, safetyDistance, this.regionPolygon);
-         }
+      this.regionPolygon.set(regionPolygon);
+      this.regionNormal.set(regionNormal);
+
+      if (!regionPolygon.isEmpty())
+      {
+         double safetyDistance = 0.07;
+         polygonScaler.scaleConvexPolygon(regionPolygon, safetyDistance, this.regionPolygon);
       }
    }
 

@@ -249,6 +249,14 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
          constraintLowerBound.set(jointTorqueIndexMap.get(oneDoFJoints[i]), torqueConstraintLowerBound);
          constraintUpperBound.set(jointTorqueIndexMap.get(oneDoFJoints[i]), torqueConstraintUpperBound);
       }
+
+      stackedConstraintVector.reshape(getNumberOfActuationConstraints(), 1);
+      int rowOffsetLowerBound = 0;
+      int rowOffsetUpperBound = numberOfTorqueValidatedJoints;
+      /* Lower torque bound constraint: J^T f <= - tau_lower + g */
+      MatrixTools.setMatrixBlock(stackedConstraintVector, rowOffsetLowerBound, 0, constraintLowerBound, 0, 0, constraintLowerBound.getNumRows(), constraintLowerBound.getNumCols(), -1.0);
+      /* Upper torque bound constraint: -J^T f <= tau_upper - g */
+      MatrixTools.setMatrixBlock(stackedConstraintVector, rowOffsetUpperBound, 0, constraintUpperBound, 0, 0, constraintUpperBound.getNumRows(), constraintUpperBound.getNumCols(), 1.0);
    }
 
    public void updateActuationConstraintMatrix()
@@ -305,25 +313,21 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
             }
          }
 
-         LogTools.info("contact jacobian: " + contactJacobian);
+//         LogTools.info("contact jacobian: " + contactJacobian);
 
          CommonOps_DDRM.transpose(contactJacobian, contactJacobianTranspose);
          MatrixTools.setMatrixBlock(graspMatrixJacobianTranspose, 0, LINEAR_DIMENSIONS * contactPointIndex, contactJacobianTranspose, 0, 0, contactJacobianTranspose.getNumRows(), contactJacobianTranspose.getNumCols(), 1.0);
       }
 
       stackedConstraintMatrix.reshape(getNumberOfActuationConstraints(), nContactForceVariables);
-      stackedConstraintVector.reshape(getNumberOfActuationConstraints(), 1);
-
       int rowOffsetLowerBound = 0;
       int rowOffsetUpperBound = numberOfTorqueValidatedJoints;
 
       /* Lower torque bound constraint: J^T f <= - tau_lower + g */
       MatrixTools.setMatrixBlock(stackedConstraintMatrix, rowOffsetLowerBound, 0, graspMatrixJacobianTranspose, 0, 0, graspMatrixJacobianTranspose.getNumRows(), graspMatrixJacobianTranspose.getNumCols(), 1.0);
-      MatrixTools.setMatrixBlock(stackedConstraintVector, rowOffsetLowerBound, 0, constraintLowerBound, 0, 0, constraintLowerBound.getNumRows(), constraintLowerBound.getNumCols(), -1.0);
-
       /* Upper torque bound constraint: -J^T f <= tau_upper - g */
       MatrixTools.setMatrixBlock(stackedConstraintMatrix, rowOffsetUpperBound, 0, graspMatrixJacobianTranspose, 0, 0, graspMatrixJacobianTranspose.getNumRows(), graspMatrixJacobianTranspose.getNumCols(), -1.0);
-      MatrixTools.setMatrixBlock(stackedConstraintVector, rowOffsetUpperBound, 0, constraintUpperBound, 0, 0, constraintUpperBound.getNumRows(), constraintUpperBound.getNumCols(), 1.0);
+
    }
 
    private boolean containsTorqueValidatedJoint(JointBasics[] jacobianJoints)

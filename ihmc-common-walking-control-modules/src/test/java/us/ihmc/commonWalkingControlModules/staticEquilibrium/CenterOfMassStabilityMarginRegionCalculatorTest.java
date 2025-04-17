@@ -10,7 +10,7 @@ public class CenterOfMassStabilityMarginRegionCalculatorTest
    @Test
    public void testIndexing()
    {
-      for (int index = 0; index < DIRECTIONS_TO_OPTIMIZE; index++)
+      for (int index = 0; index < DEFAULT_DIRECTIONS_TO_OPTIMIZE; index++)
       {
          String errorMessage = "Invalid index correspondence";
 
@@ -27,8 +27,8 @@ public class CenterOfMassStabilityMarginRegionCalculatorTest
 
          if (index == 0)
          {
-            Assertions.assertTrue(previousVertex == DIRECTIONS_TO_OPTIMIZE - 1, errorMessage);
-            Assertions.assertTrue(previousEdge == DIRECTIONS_TO_OPTIMIZE - 1, errorMessage);
+            Assertions.assertTrue(previousVertex == DEFAULT_DIRECTIONS_TO_OPTIMIZE - 1, errorMessage);
+            Assertions.assertTrue(previousEdge == DEFAULT_DIRECTIONS_TO_OPTIMIZE - 1, errorMessage);
          }
          else
          {
@@ -36,7 +36,7 @@ public class CenterOfMassStabilityMarginRegionCalculatorTest
             Assertions.assertTrue(previousEdge == index - 1, errorMessage);
          }
 
-         if (index == DIRECTIONS_TO_OPTIMIZE - 1)
+         if (index == DEFAULT_DIRECTIONS_TO_OPTIMIZE - 1)
          {
             Assertions.assertTrue(nextVertex == 0, errorMessage);
             Assertions.assertTrue(nextEdge == 0, errorMessage);

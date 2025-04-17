@@ -114,13 +114,19 @@ public class ContactNullspaceCalculator
       numConstraints += 2; // xy centroidal motion
       numConstraints += jointsToIgnore.size(); // hard-coded spine joints
 
+      RobotSide graspingHand = null;
+
       for (RobotSide robotSide : RobotSide.values)
       {
          handInContact.get(robotSide).set(wholeBodyContactState.isBodyInContact(hands.get(robotSide)));
          footInContact.get(robotSide).set(wholeBodyContactState.isBodyInContact(feet.get(robotSide)));
 
          if (handInContact.get(robotSide).getValue())
+         {
             numConstraints += 3;
+            graspingHand = robotSide.getOppositeSide();
+            numConstraints += 6;
+         }
          if (footInContact.get(robotSide).getValue())
             numConstraints += 6;
       }
@@ -163,6 +169,10 @@ public class ContactNullspaceCalculator
             pointJacobian.set(handJacobian, handControlPoints.get(robotSide));
             pointJacobian.compute();
             rowOffset = stackJacobian(rowOffset, pointJacobian.getJacobianMatrix(), handJacobian.getJointsInOrder());
+
+            /* Compute and set grasping hand jacobian */
+            GeometricJacobian graspingHandJacobian = wholeBodyContactState.getJacobian(hands.get(robotSide.getOppositeSide()));
+            rowOffset = stackJacobian(rowOffset, graspingHandJacobian.getJacobianMatrix(), graspingHandJacobian.getJointsInOrder());
          }
       }
 

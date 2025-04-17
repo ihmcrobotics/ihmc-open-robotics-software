@@ -44,8 +44,8 @@ public class ROS2LogIOTools
    public static final String logDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator + "ros2" + File.separator;
 
    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
-   private static final String timestampKey = "timestamps";
-   private static final String messageKey = "messages";
+   public static final String timestampKey = "timestamps";
+   public static final String messageKey = "messages";
 
    static String writeLogFile(List<RecordTopicManager<?>> topicManagers, ROS2LogSerialization serialization)
    {

@@ -6,7 +6,6 @@ import us.ihmc.communication.PostureOptimizerState;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.CentroidalMomentumCalculator;
 import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -32,6 +31,8 @@ public class CoMHeightRetargeting
    private final YoDouble nominalCoMZ;
    private final YoDouble centroidalZVelocity;
 
+   private final YoDouble comRetargetDelta;
+
    public CoMHeightRetargeting(double integrationDT,
                                double maxRate,
                                double minOffset,
@@ -53,6 +54,8 @@ public class CoMHeightRetargeting
       initialCoMZ = new YoDouble("initialCoMZ", registry);
       nominalCoMZ = new YoDouble("nominalCoMZ", registry);
       centroidalZVelocity = new YoDouble("centroidalZVelocity", registry);
+
+      comRetargetDelta = new YoDouble("comRetargetDelta", registry);
    }
 
    public void initialize()
@@ -67,6 +70,7 @@ public class CoMHeightRetargeting
       this.optimizedHeightRL.update(nominalHeight);
 
       initialCoMZ.set(tempPoint.getZ());
+      comRetargetDelta.set(0.0);
    }
 
    public void updateNominalHeight(double nominalHeight)
@@ -95,6 +99,8 @@ public class CoMHeightRetargeting
          // freeze, no update (just call this to avoid edge cases in rate limiting)
          optimizedHeightRL.update(optimizedHeightRL.getValue());
       }
+
+      comRetargetDelta.set(Math.abs(optimizedHeightRL.getValue() - nominalHeight));
    }
 
    public void integrate(DMatrixRMaj qd)

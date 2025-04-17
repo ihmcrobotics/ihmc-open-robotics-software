@@ -43,8 +43,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 import static us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor;
-import static us.ihmc.commonWalkingControlModules.staticEquilibrium.StabilityMarginRegionCalculator.queryDirectionX;
-import static us.ihmc.commonWalkingControlModules.staticEquilibrium.StabilityMarginRegionCalculator.queryDirectionY;
 import static us.ihmc.convexOptimization.linearProgram.LinearProgramSolver.computeSensitivity;
 import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.ONE_TEN_MILLIONTH;
 import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.percentageOfIntersectionBetweenTwoLine2Ds;
@@ -57,8 +55,8 @@ import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.percentageOfInte
 public class SensitivityBasedStabilityGradientCalculator
 {
    private static final boolean APPLY_JOINT_LIMIT_FILTER = true;
-   private static final boolean USE_AREA_BASED_CONTACT_ADJUSTMENT = true;
-   private static final boolean USE_HEURISTIC_MARGIN = true;
+   private static final boolean USE_AREA_BASED_CONTACT_ADJUSTMENT = false;
+   private static final boolean USE_HEURISTIC_MARGIN = false;
    private static final double INTEGRATION_DT = 1.0e-3;
    private static final int XY_DIMENSIONS = 2;
    private static final boolean COMPUTE_EXPECTED_MARGIN_VELOCITY = true;
@@ -548,8 +546,8 @@ public class SensitivityBasedStabilityGradientCalculator
       vertexAWeight = 1.0 - percentage;
       vertexBWeight = percentage;
 
-      cosA = yoStabilityMarginDirection.getX() * queryDirectionX(vertexIndexA) + yoStabilityMarginDirection.getY() * queryDirectionY(vertexIndexA);
-      cosB = yoStabilityMarginDirection.getX() * queryDirectionX(vertexIndexB) + yoStabilityMarginDirection.getY() * queryDirectionY(vertexIndexB);
+      cosA = yoStabilityMarginDirection.getX() * stabilityMarginRegionCalculator.queryDirectionX(vertexIndexA) + yoStabilityMarginDirection.getY() * stabilityMarginRegionCalculator.queryDirectionY(vertexIndexA);
+      cosB = yoStabilityMarginDirection.getX() * stabilityMarginRegionCalculator.queryDirectionX(vertexIndexB) + yoStabilityMarginDirection.getY() * stabilityMarginRegionCalculator.queryDirectionY(vertexIndexB);
 
       primalSolutionA = stabilityMarginRegionCalculator.getSolverPrimalSolution(vertexIndexA);
       dualSolutionA = stabilityMarginRegionCalculator.getSolverDualSolution(vertexIndexA);

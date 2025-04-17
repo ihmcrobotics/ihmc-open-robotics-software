@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonHumanoidReferenceFramesVisualizer;
 import us.ihmc.commonWalkingControlModules.referenceFrames.WalkingTrajectoryPath;
+import us.ihmc.commonWalkingControlModules.staticEquilibrium.StabilityCalculatorComparer;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.StabilityMarginRegionCalculator;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState;
 import us.ihmc.commons.MathTools;
@@ -169,6 +170,10 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    private WalkingTrajectoryPath walkingTrajectoryPath;
 
    private final StabilityMarginRegionCalculator multiContactStabilityRegionCalculator;
+   private final StabilityMarginRegionCalculator baselineRegionCalculator;
+   private final StabilityMarginRegionCalculator fixedQueryRegionCalculator;
+   private final StabilityCalculatorComparer incrementalRegionComparer;
+   private final StabilityCalculatorComparer fixedQueryRegionComparer;
 
    private final YoBoolean wholeBodyContactsChanged = new YoBoolean("wholeBodyContactsChanged", registry);
    private final WholeBodyContactState wholeBodyContactState;
@@ -351,11 +356,24 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
 //         multiContactStabilityRegionCalculator = StabilityMarginRegionCalculator.createForCoPStabilityMargin("cop_", totalMass.getValue(), centerOfMassFrame, referenceFrames.getMidFeetZUpFrame(), registry, yoGraphicsListRegistry);
          multiContactStabilityRegionCalculator = StabilityMarginRegionCalculator.createForCoMStabilityMargin("cop_", totalMass.getValue(), registry, yoGraphicsListRegistry);
          multiContactStabilityRegionCalculator.setupForStabilityMarginCalculation(centerOfMassStateProvider::getCenterOfMassPosition);
+
+         baselineRegionCalculator = StabilityMarginRegionCalculator.createForCoMStabilityMargin("cop_bl_", 40, totalMass.getValue(), registry, yoGraphicsListRegistry);
+         fixedQueryRegionCalculator = StabilityMarginRegionCalculator.createForCoMStabilityMargin("cop_fixed_", totalMass.getValue(), registry, yoGraphicsListRegistry);
+
+         baselineRegionCalculator.setupForStabilityMarginCalculation(centerOfMassStateProvider::getCenterOfMassPosition);
+         fixedQueryRegionCalculator.setupForStabilityMarginCalculation(centerOfMassStateProvider::getCenterOfMassPosition);
+
+         fixedQueryRegionComparer = new StabilityCalculatorComparer("fixed", fixedQueryRegionCalculator, multiContactStabilityRegionCalculator, registry);
+         incrementalRegionComparer = new StabilityCalculatorComparer("inc", baselineRegionCalculator, multiContactStabilityRegionCalculator, registry);
       }
       else
       {
          multiContactStabilityRegionCalculator = null;
+         baselineRegionCalculator = null;
+         fixedQueryRegionCalculator = null;
          wholeBodyContactState = null;
+         incrementalRegionComparer = null;
+         fixedQueryRegionComparer = null;
       }
 
       String graphicListName = getClass().getSimpleName();
@@ -1077,6 +1095,8 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
          return;
       wholeBodyContactsChanged.set(true);
       multiContactStabilityRegionCalculator.clear();
+      fixedQueryRegionCalculator.clear();
+      baselineRegionCalculator.clear();
    }
 
    public WholeBodyContactState getWholeBodyContactState()
@@ -1105,18 +1125,25 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       // Update LP solver constraints based on contact state
       multiContactRegionLPUpdateTimer.startMeasurement();
       multiContactStabilityRegionCalculator.updateContactState(wholeBodyContactState, wholeBodyContactsChanged.getValue());
+      fixedQueryRegionCalculator.updateContactState(wholeBodyContactState, wholeBodyContactsChanged.getValue());
+      baselineRegionCalculator.updateContactState(wholeBodyContactState, wholeBodyContactsChanged.getValue());
       wholeBodyContactsChanged.set(false);
       multiContactRegionLPUpdateTimer.stopMeasurement();
 
       multiContactRegionLPSolveTimer.startMeasurement();
 
       // Query new direction until initial region has been constructed
-            multiContactStabilityRegionCalculator.performUpdateForNextVertex(false);
-//      multiContactStabilityRegionCalculator.performFullRegionUpdate();
+      multiContactStabilityRegionCalculator.performUpdateForNextVertex(true);
+
+      fixedQueryRegionCalculator.performFullRegionUpdate();
+      baselineRegionCalculator.performFullRegionUpdate();
 
       multiContactRegionLPSolveTimer.stopMeasurement();
 
       multiContactStabilityTimer.stopMeasurement();
+
+      incrementalRegionComparer.update();
+      fixedQueryRegionComparer.update();
    }
 
    /**

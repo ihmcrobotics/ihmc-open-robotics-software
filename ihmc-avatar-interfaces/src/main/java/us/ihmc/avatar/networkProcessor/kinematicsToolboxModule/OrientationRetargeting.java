@@ -3,17 +3,13 @@ package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 import us.ihmc.communication.PostureOptimizerState;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
-import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTools;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tools.QuaternionTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -28,6 +24,7 @@ import us.ihmc.yoVariables.euclid.filters.RateLimitedYoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * Retargets the pelvis/chest/arm orientation objectives during multi-contact
@@ -39,6 +36,7 @@ public class OrientationRetargeting
 
    private final FrameQuaternion nominalOrientation = new FrameQuaternion();
    private final AxisAngle optimizedOrientation = new AxisAngle();
+   private final FrameQuaternion orientationDifference = new FrameQuaternion();
 
    private final YoFrameQuaternion yoNominalOrientation;
    private final YoFrameQuaternion yoOptimizedOrientation;
@@ -60,6 +58,8 @@ public class OrientationRetargeting
 
    private final FrameVector3D filteredAngularVelocity = new FrameVector3D();
 
+   private final YoDouble retargetDelta;
+
    public OrientationRetargeting(String name, RigidBodyBasics rigidBody, double integrationDT, double maxRate, double maxAngle, YoGraphicsListRegistry graphicsListRegistry, YoRegistry registry)
    {
       desiredOrientationRateLimited = new RateLimitedYoFrameQuaternion(name, "DesiredOrientation", registry, maxRate, integrationDT, ReferenceFrame.getWorldFrame());
@@ -67,6 +67,7 @@ public class OrientationRetargeting
       this.maxAngle = maxAngle;
       this.controlFramePose.setToZero(rigidBody.getBodyFixedFrame());
       this.rigidBody = rigidBody;
+      this.retargetDelta = new YoDouble(name + "RetargetDelta", registry);
 
       this.controlFrame = new MovingReferenceFrame(name + "ControlFrameRetarget", rigidBody.getBodyFixedFrame(), null, false, true)
       {
@@ -117,6 +118,7 @@ public class OrientationRetargeting
       this.desiredOrientationRateLimited.update(nominalOrientation);
 
       optimizedOrientation.set(nominalOrientation);
+      retargetDelta.set(0.0);
    }
 
    public void updateNominalOrientation(FrameOrientation3DReadOnly nominalOrientation, FramePose3DReadOnly controlFrame)
@@ -163,6 +165,9 @@ public class OrientationRetargeting
          yoOptimizedOrientation.set(optimizedOrientation);
          yoActualOrientation.setFromReferenceFrame(controlFrame);
       }
+
+      orientationDifference.difference(nominalOrientation, desiredOrientationRateLimited);
+      retargetDelta.set(orientationDifference.angle());
    }
 
    public FixedFrameQuaternionBasics getDesiredOrientation()

@@ -204,12 +204,29 @@ public class RDXMultiContactRegionGraphic implements RenderableProvider
             normal.changeFrame(midFeetZUpFrame);
             double normalZ = normal.getZ();
             double pitch = Math.abs(Math.asin(normalZ));
-            double pitchThreshold = Math.toRadians(30.0); // Math.toRadians(9.0);
+            double pitchThreshold = Math.toRadians(10.0); // Math.toRadians(9.0);
 
-            if (pitch > pitchThreshold)
+            // hardware
+//            if (pitch > pitchThreshold)
+//               continue;
+//            if (normal.getX() > -0.2)
+//               continue;
+
+            // back wall
+//            if (pitch > pitchThreshold)
+//               continue;
+//            if (normal.getX() > 0.0)
+//               continue;
+
+            // top wall
+            if (normal.getZ() > -0.5)
                continue;
-            if (normal.getX() > -0.2)
-               continue;
+
+            // pitched wall
+//            if (Math.abs(normal.getZ()) > 0.5)
+//               continue;
+//            if (normal.getX() > -0.3)
+//               continue;
 
             Point3D centroid = PlanarRegionTools.getCentroid3DInWorld(region);
             FramePoint3D hand = new FramePoint3D(ghostFullRobotModel.getHandControlFrame(HumanoidKinematicsToolboxController.BRACING_HAND_SIDE));
@@ -223,7 +240,7 @@ public class RDXMultiContactRegionGraphic implements RenderableProvider
             }
          }
 
-         double distanceThresholdXY = 1.0;
+         double distanceThresholdXY = 1.5;
          if (minDistanceToHandXY < distanceThresholdXY)
          {
             bracingRegionPoint.set(PlanarRegionTools.getCentroid3DInWorld(bracingRegion));
@@ -232,7 +249,9 @@ public class RDXMultiContactRegionGraphic implements RenderableProvider
             this.bracingRegion = bracingRegion;
             this.bracingRegion.updateConvexHull();
 
-//            FramePose3D bracingRegionPose = new FramePose3D(ReferenceFrame.getWorldFrame(), bracingRegion.getTransformToWorld());
+            System.out.println(bracingRegionNormal);
+
+            //            FramePose3D bracingRegionPose = new FramePose3D(ReferenceFrame.getWorldFrame(), bracingRegion.getTransformToWorld());
 //            System.out.println(bracingRegionPose.getPosition());
 //            System.out.println(bracingRegionPose.getOrientation());
 //

@@ -70,7 +70,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final double FOOT_COEFFICIENT_OF_FRICTION = 0.8;
-   private static final double HAND_COEFFICIENT_OF_FRICTION = 0.4;
+   private static final double HAND_COEFFICIENT_OF_FRICTION = 1.0; // 0.4; //
 
    public static RobotSide BRACING_HAND_SIDE = null;
 
@@ -526,13 +526,14 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
             wholeBodyContactState.updateActuationConstraintMatrix();
          }
 
-         if (retargetingCalculator.contactAdjustmentRequested())
+         else if (retargetingCalculator.contactAdjustmentRequested())
          { // Full update
             wholeBodyContactState.update();
          }
 
          multiContactRegionCalculator.updateContactState(wholeBodyContactState);
-         multiContactRegionCalculator.performUpdateForNextVertex(true);
+//         multiContactRegionCalculator.performUpdateForNextVertex(true);
+         multiContactRegionCalculator.performFullRegionUpdate();
 
          if (multiContactRegionCalculator.hasSolvedWholeRegion() && isUpperBodyLoadBearing.getValue())
          {
@@ -566,7 +567,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          enableJointLimitReduction.set(command.enableJointLimitReduction());
 
          retargetingCalculator.setEnabled(command.enableStabilityObjective());
-         if (command.enableContactAdjustment())
+         if (command.enableContactAdjustment() || (StabilityBasedKinematicRetargetingCalculator.OVERRIDE_MESSAGE && StabilityBasedKinematicRetargetingCalculator.ENABLE_CONTACT_OBJECTIVE))
          {
             retargetingCalculator.enableContactAdjustment(command.getBracingRegionPoint(), command.getBracingRegionOrientation(), command.getBracingRegionPolygon(), command.getBracingRegionNormal());
          }

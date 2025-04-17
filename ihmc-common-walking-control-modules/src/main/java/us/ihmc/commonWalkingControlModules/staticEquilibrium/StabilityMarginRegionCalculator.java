@@ -4,14 +4,11 @@ import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.convexOptimization.linearProgram.LinearProgramSolver;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
@@ -49,20 +46,11 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
 {
    private static final int NULL_INDEX = -1;
    private static final double VERTEX_EPS = 1.0e-4;
+   public static final int DEFAULT_DIRECTIONS_TO_OPTIMIZE = 18;
 
-   public static final int DIRECTIONS_TO_OPTIMIZE = 18;
-   private final static double DELTA_ANGLE = 2.0 * Math.PI / DIRECTIONS_TO_OPTIMIZE;
-   private static final double[] QUERY_X = new double[DIRECTIONS_TO_OPTIMIZE];
-   private static final double[] QUERY_Y = new double[DIRECTIONS_TO_OPTIMIZE];
-
-   static
-   {
-      for (int i = 0; i < DIRECTIONS_TO_OPTIMIZE; i++)
-      {
-         QUERY_X[i] = Math.cos(i * DELTA_ANGLE);
-         QUERY_Y[i] = -Math.sin(i * DELTA_ANGLE);
-      }
-   }
+   private final int directionsToOptimize;
+   private final double[] queryX;
+   private final double[] queryY;
 
    private final String namePrefix;
    private ColorDefinition polygonGraphicColor;
@@ -74,32 +62,32 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
    private final StabilityMarginOptimizationModule optimizationModule;
 
    /* Solver solution data */
-   private final DMatrixRMaj[] primalSolutions = new DMatrixRMaj[DIRECTIONS_TO_OPTIMIZE];
-   private final DMatrixRMaj[] dualSolutions = new DMatrixRMaj[DIRECTIONS_TO_OPTIMIZE];
+   private final DMatrixRMaj[] primalSolutions;
+   private final DMatrixRMaj[] dualSolutions;
 
    /* CoM stability region */
-   private final YoFramePoint2D[] optimizedVertices = new YoFramePoint2D[DIRECTIONS_TO_OPTIMIZE];
+   private final YoFramePoint2D[] optimizedVertices;
    private final YoFrameConvexPolygon2D feasibleRegion;
    //   private final int[] toEuclidPolygonIndexMap = new int[DIRECTIONS_TO_OPTIMIZE];
-   private final int[] fromEuclidPolygonIndexMap = new int[DIRECTIONS_TO_OPTIMIZE];
+   private final int[] fromEuclidPolygonIndexMap;
 
    /* YoVariablized CoM for margin visualization */
    private final YoFramePoint2D yoCenterOfMass;
    private final YoFramePoint2D yoStabilityMarginPoint;
 
    /* Fields to monitor the nearest constraint edge */
-   private final DMatrixRMaj[] resolvedForces = new DMatrixRMaj[DIRECTIONS_TO_OPTIMIZE];
-   private final TIntArrayList[] saturatedConstraintIndices = new TIntArrayList[DIRECTIONS_TO_OPTIMIZE];
-   private final TIntArrayList[] solutionBasisIndices = new TIntArrayList[DIRECTIONS_TO_OPTIMIZE];
-   private final YoDouble[] minDictionaryRHSColumnEntries = new YoDouble[DIRECTIONS_TO_OPTIMIZE];
-   private final YoFramePoint2D[] nearestConstraintVertexA = new YoFramePoint2D[DIRECTIONS_TO_OPTIMIZE];
-   private final YoFramePoint2D[] nearestConstraintVertexB = new YoFramePoint2D[DIRECTIONS_TO_OPTIMIZE];
+   private final DMatrixRMaj[] resolvedForces;
+   private final TIntArrayList[] saturatedConstraintIndices;
+   private final TIntArrayList[] solutionBasisIndices;
+   private final YoDouble[] minDictionaryRHSColumnEntries;
+   private final YoFramePoint2D[] nearestConstraintVertexA;
+   private final YoFramePoint2D[] nearestConstraintVertexB;
    private final YoInteger lowestMarginEdgeIndex;
    private final YoDouble stabilityMargin;
    private final YoDouble stabilityArea;
 
    /* Entry i corresponds to the distance of the CoM to the line segment connecting vertex (i) and (i+1) */
-   private final YoDouble[] comEdgeMargin = new YoDouble[DIRECTIONS_TO_OPTIMIZE];
+   private final YoDouble[] comEdgeMargin;
 
    private Supplier<FramePoint3DReadOnly> centerOfMassSupplier = null;
    private boolean showNearestSupportEdgeGraphic = true;
@@ -111,15 +99,43 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
 
    public StabilityMarginRegionCalculator(String namePrefix, StabilityMarginOptimizationModule optimizationModule, YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
+      this(namePrefix, optimizationModule, DEFAULT_DIRECTIONS_TO_OPTIMIZE, parentRegistry, graphicsListRegistry);
+   }
+
+   public StabilityMarginRegionCalculator(String namePrefix, StabilityMarginOptimizationModule optimizationModule, int directionsToOptimize, YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
+   {
       this.namePrefix = namePrefix;
       YoRegistry registry = new YoRegistry(namePrefix + getClass().getSimpleName());
+
+      this.directionsToOptimize = directionsToOptimize;
+      queryX = new double[directionsToOptimize];
+      queryY = new double[directionsToOptimize];
+      double deltaAngle = 2.0 * Math.PI / directionsToOptimize;
+      for (int i = 0; i < directionsToOptimize; i++)
+      {
+         queryX[i] = Math.cos(i * deltaAngle);
+         queryY[i] = -Math.sin(i * deltaAngle);
+      }
+
+      primalSolutions = new DMatrixRMaj[directionsToOptimize];
+      dualSolutions = new DMatrixRMaj[directionsToOptimize];
+
+      optimizedVertices = new YoFramePoint2D[directionsToOptimize];
+      fromEuclidPolygonIndexMap = new int[directionsToOptimize];
+      resolvedForces = new DMatrixRMaj[directionsToOptimize];
+      saturatedConstraintIndices = new TIntArrayList[directionsToOptimize];
+      solutionBasisIndices = new TIntArrayList[directionsToOptimize];
+      minDictionaryRHSColumnEntries = new YoDouble[directionsToOptimize];
+      nearestConstraintVertexA = new YoFramePoint2D[directionsToOptimize];
+      nearestConstraintVertexB = new YoFramePoint2D[directionsToOptimize];
+      comEdgeMargin = new YoDouble[directionsToOptimize];
 
       queryCounter = new YoInteger("queryIndex", registry);
       hasSolvedWholeRegion = new YoBoolean("hasSolvedWholeRegion", registry);
       this.optimizationModule = optimizationModule;
       polygonGraphicColor = optimizationModule.getRegionGraphicColor();
 
-      for (int vertex_idx = 0; vertex_idx < DIRECTIONS_TO_OPTIMIZE; vertex_idx++)
+      for (int vertex_idx = 0; vertex_idx < directionsToOptimize; vertex_idx++)
       {
          optimizedVertices[vertex_idx] = new YoFramePoint2D("comStabilityMarginVertex" + vertex_idx, ReferenceFrame.getWorldFrame(), registry);
          resolvedForces[vertex_idx] = new DMatrixRMaj(0);
@@ -139,7 +155,8 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
          dualSolutions[vertex_idx] = new DMatrixRMaj(0);
       }
 
-      feasibleRegion = new YoFrameConvexPolygon2D(namePrefix + "StabilityMarginPolygon", ReferenceFrame.getWorldFrame(), DIRECTIONS_TO_OPTIMIZE, registry);
+      feasibleRegion = new YoFrameConvexPolygon2D(namePrefix + "StabilityMarginPolygon", ReferenceFrame.getWorldFrame(),
+                                                  directionsToOptimize, registry);
 
       lowestMarginEdgeIndex = new YoInteger("lowestMarginEdgeIndex", registry);
       stabilityMargin = new YoDouble(namePrefix + "StabilityMargin", registry);
@@ -162,7 +179,7 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
          YoArtifactPosition com = new YoArtifactPosition(namePrefix + "CenterOfMass", yoCenterOfMass, GraphicType.BALL_WITH_CROSS, Color.BLACK, 0.01);
          graphicsListRegistry.registerArtifact(getClass().getSimpleName(), com);
 
-         for (int vertex_idx = 0; vertex_idx < DIRECTIONS_TO_OPTIMIZE; vertex_idx++)
+         for (int vertex_idx = 0; vertex_idx < directionsToOptimize; vertex_idx++)
          {
             YoArtifactLineSegment2d nearestSegment = new YoArtifactLineSegment2d(namePrefix + "nearestConstraintViz" + vertex_idx, nearestConstraintVertexA[vertex_idx], nearestConstraintVertexB[vertex_idx], Color.RED);
             graphicsListRegistry.registerArtifact(getClass().getSimpleName(), nearestSegment);
@@ -175,11 +192,16 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
 
    public static StabilityMarginRegionCalculator createForCoMStabilityMargin(String prefix, double robotMass, YoRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
    {
+      return createForCoMStabilityMargin(prefix, DEFAULT_DIRECTIONS_TO_OPTIMIZE, robotMass, registry, graphicsListRegistry);
+   }
+
+   public static StabilityMarginRegionCalculator createForCoMStabilityMargin(String prefix, int directionsToOptimize, double robotMass, YoRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
+   {
       CenterOfMassStabilityMarginOptimizationModule stabilityMarginOptimizationModule = new CenterOfMassStabilityMarginOptimizationModule(prefix,
                                                                                                                                           robotMass,
                                                                                                                                           registry,
                                                                                                                                           graphicsListRegistry);
-      return new StabilityMarginRegionCalculator(prefix, stabilityMarginOptimizationModule, registry, graphicsListRegistry);
+      return new StabilityMarginRegionCalculator(prefix, stabilityMarginOptimizationModule, directionsToOptimize, registry, graphicsListRegistry);
    }
 
    public static StabilityMarginRegionCalculator createForCoPStabilityMargin(String prefix,
@@ -200,7 +222,7 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
 
    public void clear()
    {
-      for (int vertex_idx = 0; vertex_idx < DIRECTIONS_TO_OPTIMIZE; vertex_idx++)
+      for (int vertex_idx = 0; vertex_idx < directionsToOptimize; vertex_idx++)
       {
          optimizedVertices[vertex_idx].setToNaN();
          resolvedForces[vertex_idx].zero();
@@ -234,7 +256,7 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
 
    public boolean performFullRegionUpdate()
    {
-      for (int i = 0; i < DIRECTIONS_TO_OPTIMIZE; i++)
+      for (int i = 0; i < directionsToOptimize; i++)
       {
          if (!performUpdateForVertex(i))
             return false;
@@ -251,7 +273,7 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
       int vertexIndexToUpdate = queryCounter.getValue();
       boolean success = performUpdateForVertex(vertexIndexToUpdate);
       if (success)
-         queryCounter.set((queryCounter.getValue() + 1) % DIRECTIONS_TO_OPTIMIZE);
+         queryCounter.set((queryCounter.getValue() + 1) % directionsToOptimize);
 
       if (doFastUpdateForMinimumEdge && hasSolvedWholeRegion())
       { // do fast update for minimum edge
@@ -331,7 +353,7 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
 
       feasibleRegion.clear();
       boolean hasNaNVertex = false;
-      for (int vertex_idx = 0; vertex_idx < DIRECTIONS_TO_OPTIMIZE; vertex_idx++)
+      for (int vertex_idx = 0; vertex_idx < directionsToOptimize; vertex_idx++)
       {
          if (optimizedVertices[vertex_idx].containsNaN())
             hasNaNVertex = true;
@@ -427,7 +449,7 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
       FramePoint2DReadOnly v2 = feasibleRegion.getNextVertex(lowestMarginEdgeIndex.getValue());
       EuclidGeometryTools.orthogonalProjectionOnLineSegment2D(comX, comY, v1.getX(), v1.getY(), v2.getX(), v2.getY(), yoStabilityMarginPoint);
 
-      for (int vertex_idx = 0; vertex_idx < DIRECTIONS_TO_OPTIMIZE; vertex_idx++)
+      for (int vertex_idx = 0; vertex_idx < directionsToOptimize; vertex_idx++)
       {
          nearestConstraintVertexA[vertex_idx].setToNaN();
          nearestConstraintVertexB[vertex_idx].setToNaN();
@@ -442,14 +464,14 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
       optimizedVertices[vertexIndex].set(optimizationModule.solveForFixedBasis(solutionBasisIndices[vertexIndex]));
    }
 
-   public static double queryDirectionX(int index)
+   public double queryDirectionX(int index)
    {
-      return QUERY_X[index];
+      return queryX[index];
    }
 
-   public static double queryDirectionY(int index)
+   public double queryDirectionY(int index)
    {
-      return QUERY_Y[index];
+      return queryY[index];
    }
 
    // TODO should make package private later?
@@ -492,12 +514,12 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
 
    private static int getPreviousIndex(int index)
    {
-      return index > 0 ? index - 1 : DIRECTIONS_TO_OPTIMIZE - 1;
+      return index > 0 ? index - 1 : DEFAULT_DIRECTIONS_TO_OPTIMIZE - 1;
    }
 
    private static int getNextIndex(int index)
    {
-      return (index + 1) % DIRECTIONS_TO_OPTIMIZE;
+      return (index + 1) % DEFAULT_DIRECTIONS_TO_OPTIMIZE;
    }
 
    public DMatrixRMaj getResolvedForce(int vertex_idx)
@@ -507,7 +529,7 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
 
    public int getNumberOfVertices()
    {
-      return DIRECTIONS_TO_OPTIMIZE;
+      return directionsToOptimize;
    }
 
    public boolean hasSolvedWholeRegion()
@@ -590,7 +612,7 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
 
       int numberOfLowMarginEdges = 0;
 
-      for (int edgeIndex = 0; edgeIndex < DIRECTIONS_TO_OPTIMIZE; edgeIndex++)
+      for (int edgeIndex = 0; edgeIndex < directionsToOptimize; edgeIndex++)
       {
          int indexA = getVertexAOfEdge(edgeIndex);
          int indexB = getVertexBOfEdge(edgeIndex);
@@ -633,7 +655,7 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
 
       if (showNearestSupportEdgeGraphic)
       {
-         for (int vertex_idx = 0; vertex_idx < DIRECTIONS_TO_OPTIMIZE; vertex_idx++)
+         for (int vertex_idx = 0; vertex_idx < directionsToOptimize; vertex_idx++)
          {
             YoGraphicLine2DDefinition nearestSegmentGraphic = YoGraphicDefinitionFactory.newYoGraphicLineSegment2DDefinition(namePrefix + "nearestConstraintViz" + vertex_idx,
                                                                                                                              nearestConstraintVertexA[vertex_idx],
