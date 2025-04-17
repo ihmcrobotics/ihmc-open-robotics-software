@@ -5,24 +5,29 @@
   "Enable alpha filter" : true,
   "Enable vertical filter" : true,
   "Search window height" : {
-    "value" : 400,
-    "lowerBound" : 10,
-    "upperBound" : 400
+    "value" : 500,
+    "lowerBound" : 100,
+    "upperBound" : 800
   },
   "Search window width" : {
-    "value" : 300,
-    "lowerBound" : 10,
-    "upperBound" : 400
+    "value" : 400,
+    "lowerBound" : 100,
+    "upperBound" : 800
+  },
+  "Search skip size" : {
+    "value" : 4,
+    "lowerBound" : 1,
+    "upperBound" : 16
   },
   "Min height registration" : {
-    "value" : -0.5,
-    "lowerBound" : -5.0,
-    "upperBound" : 5.0
+    "value" : -1.5,
+    "lowerBound" : -10.0,
+    "upperBound" : 1.0
   },
   "Max height registration" : {
-    "value" : 1.5,
-    "lowerBound" : -5.0,
-    "upperBound" : 5.0
+    "value" : 5.0,
+    "lowerBound" : -1.0,
+    "upperBound" : 10.0
   },
   "Min height difference" : {
     "value" : -0.05,
@@ -85,8 +90,8 @@
     "upperBound" : 0.06
   },
   "Robot collision cylinder radius" : {
-    "value" : 0.4,
-    "lowerBound" : 0.1,
+    "value" : 0.05,
+    "lowerBound" : 0.0,
     "upperBound" : 0.8
   },
   "Internal global width in meters" : {
@@ -128,11 +133,6 @@
     "value" : 0.99,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
-  },
-  "Search skip size" : {
-    "value" : 4,
-    "lowerBound" : 0,
-    "upperBound" : 16
   },
   "Fast search size" : {
     "value" : 20,

@@ -7,6 +7,7 @@ import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.perception.StandAloneRealsenseProcess;
+import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
 
@@ -25,7 +26,7 @@ public class ContinuousHikingProcess
 
    private final StandAloneRealsenseProcess standAloneRealsenseProcess;
 
-   public ContinuousHikingProcess(DRCRobotModel robotModel)
+   public ContinuousHikingProcess(DRCRobotModel robotModel, RobotCollisionModel robotCollisionModel)
    {
       ROS2Node ros2Node = new ROS2NodeBuilder().build("nadia_terrain_perception_node");
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
@@ -38,7 +39,6 @@ public class ContinuousHikingProcess
       ScheduledExecutorService schedulerSyncedRobot = Executors.newScheduledThreadPool(1, threadFactorySyncedRobot);
       schedulerSyncedRobot.scheduleAtFixedRate(syncedRobot::update, 100, 10, TimeUnit.MILLISECONDS);
 
-
       ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Node);
       ActiveMappingParameterToolBox activeMappingParameterToolBox = new ActiveMappingParameterToolBox(ros2PropertySetGroup, robotModel, "ForContinuousWalking");
 
@@ -48,6 +48,7 @@ public class ContinuousHikingProcess
       standAloneRealsenseProcess = new StandAloneRealsenseProcess(ros2Node,
                                                                   ros2Helper,
                                                                   syncedRobot,
+                                                                  robotCollisionModel,
                                                                   activeMappingParameterToolBox.getHeightMapParameters(),
                                                                   controllerFootstepQueueMonitor);
 

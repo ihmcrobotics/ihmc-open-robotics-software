@@ -75,7 +75,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       goalFootstepToGoalYs = new SideDependentList<>(() -> new CRDTBidirectionalDouble(this, 0.0));
       goalFootstepToGoalYaws = new SideDependentList<>(() -> new CRDTBidirectionalDouble(this, 0.0));
       plannerInitialStanceSide = new CRDTBidirectionalImmutableField<>(this, InitialStanceSide.AUTO);
-      plannerPerformAStarSearch = new CRDTBidirectionalBoolean(this, true);
+      plannerPerformAStarSearch = new CRDTBidirectionalBoolean(this, false);
       plannerWalkWithGoalOrientation = new CRDTBidirectionalBoolean(this, true);
       plannerParameters = new BehaviorStoredPropertySetDefinition(this, "plannerParameters", initialPlannerParameters);
    }

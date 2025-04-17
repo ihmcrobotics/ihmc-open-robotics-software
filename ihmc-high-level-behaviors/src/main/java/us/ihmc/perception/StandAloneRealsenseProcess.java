@@ -10,6 +10,7 @@ import us.ihmc.communication.ros2.ROS2TunedRigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapManager;
 import us.ihmc.perception.heightMap.TerrainMapData;
+import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
@@ -23,7 +24,8 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 /**
- * This class handles publishing the color and depth of the realsense. Its meant to be a standalone class that only touches the realsense.
+ * This class handles publishing the color and depth of the realsense. Its meant to be a standalone class that only
+ * touches the realsense.
  */
 public class StandAloneRealsenseProcess
 {
@@ -40,20 +42,27 @@ public class StandAloneRealsenseProcess
 
    private final ROS2DemandGraphNode heightMapDemandNode;
    private RapidHeightMapUpdateThread heightMapUpdateThread;
+   private final RobotCollisionModel robotCollisionModel;
 
-   public StandAloneRealsenseProcess(ROS2Node ros2Node, ROS2Helper ros2Helper, ROS2SyncedRobotModel syncedRobot, HeightMapParameters heightMapParameters)
+   public StandAloneRealsenseProcess(ROS2Node ros2Node,
+                                     ROS2Helper ros2Helper,
+                                     ROS2SyncedRobotModel syncedRobot,
+                                     RobotCollisionModel robotCollisionModel,
+                                     HeightMapParameters heightMapParameters)
    {
-      this(ros2Node, ros2Helper, syncedRobot, heightMapParameters, null);
+      this(ros2Node, ros2Helper, syncedRobot, robotCollisionModel, heightMapParameters, null);
    }
 
    public StandAloneRealsenseProcess(ROS2Node ros2Node,
                                      ROS2Helper ros2Helper,
                                      ROS2SyncedRobotModel syncedRobot,
+                                     RobotCollisionModel robotCollisionModel,
                                      HeightMapParameters heightMapParameters,
                                      ControllerFootstepQueueMonitor controllerFootstepQueueMonitor)
    {
       this.ros2Helper = ros2Helper;
       this.syncedRobot = syncedRobot;
+      this.robotCollisionModel = robotCollisionModel;
 
       realsensePublishDemandNode = new ROS2DemandGraphNode(ros2Node, PerceptionAPI.REQUEST_REALSENSE_PUBLICATION);
       heightMapDemandNode = new ROS2DemandGraphNode(ros2Node, PerceptionAPI.REQUEST_HEIGHT_MAP);
@@ -90,6 +99,7 @@ public class StandAloneRealsenseProcess
    {
       heightMapUpdateThread = new RapidHeightMapUpdateThread(ros2Helper.getROS2Node(),
                                                              syncedRobot,
+                                                             robotCollisionModel,
                                                              syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.LEFT),
                                                              syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.RIGHT),
                                                              controllerFootstepQueueMonitor,
