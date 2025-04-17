@@ -535,11 +535,9 @@ public class RapidHeightMapExtractorCUDA
       return latestHeightMapData;
    }
 
-   public Mat getVisualizedHeightMap()
+   public GpuMat getVisualizedHeightMap()
    {
-      Mat visualizedCroppedHeightMapImage = new Mat();
-      this.sensorCroppedHeightMapImage.download(visualizedCroppedHeightMapImage);
-      return visualizedCroppedHeightMapImage;
+      return sensorCroppedHeightMapImage.clone(); // clone to ensure external code cannot modify this image
    }
 
    public TerrainMapData getTerrainMapData()

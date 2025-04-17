@@ -5,7 +5,6 @@ import org.bytedeco.cuda.cudart.dim3;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
-import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.euclid.referenceFrame.FrameCapsule3D;
 import us.ihmc.euclid.referenceFrame.FrameSphere3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -54,21 +53,18 @@ public class CUDABodyCollisionFilter
       }
    }
 
-   public GpuMat process(Mat hostDepthImage,
+   public GpuMat process(GpuMat depthImage,
                          CameraIntrinsics cameraIntrinsics,
                          ReferenceFrame cameraFrame)
    {
-      GpuMat originalDepthImage = new GpuMat();
-      originalDepthImage.upload(hostDepthImage);
-
-      GpuMat depthImageWithoutRobot = new GpuMat(hostDepthImage.size(), opencv_core.CV_16UC1);
-
       numberOfCollidables = countCapsules(robotCollidables);
 
       if (numberOfCollidables == 0)
       {
-         return originalDepthImage;
+         return depthImage.clone();
       }
+
+      GpuMat depthImageWithoutRobot = new GpuMat(depthImage.size(), opencv_core.CV_16UC1);
 
       FloatPointer collidableGeometryPointer = getCollidablesPointer(robotCollidables, cameraFrame);
 
@@ -80,14 +76,14 @@ public class CUDABodyCollisionFilter
 
       dim3 blockSize = new dim3(BLOCK_SIZE_XY, BLOCK_SIZE_XY, 1);
 
-      int gridSizeX = (originalDepthImage.cols() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
-      int gridSizeY = (originalDepthImage.rows() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
+      int gridSizeX = (depthImage.cols() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
+      int gridSizeY = (depthImage.rows() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
       dim3 gridSize = new dim3(gridSizeX, gridSizeY, 1);
 
-      kernel.withPointer(originalDepthImage.data());
-      kernel.withLong(originalDepthImage.step());
-      kernel.withInt(originalDepthImage.cols());
-      kernel.withInt(originalDepthImage.rows());
+      kernel.withPointer(depthImage.data());
+      kernel.withLong(depthImage.step());
+      kernel.withInt(depthImage.cols());
+      kernel.withInt(depthImage.rows());
       kernel.withFloat((float) cameraIntrinsics.getFx());
       kernel.withFloat((float) cameraIntrinsics.getFy());
       kernel.withFloat((float) cameraIntrinsics.getCx());
@@ -106,7 +102,6 @@ public class CUDABodyCollisionFilter
       gridSize.close();
       collidableGeometryPointer.close();
       deviceCollidableGeometryPointer.close();
-      originalDepthImage.close();
 
       return depthImageWithoutRobot;
    }

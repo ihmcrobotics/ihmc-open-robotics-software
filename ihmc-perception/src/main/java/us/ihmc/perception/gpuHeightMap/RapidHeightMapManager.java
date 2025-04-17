@@ -88,16 +88,21 @@ public class RapidHeightMapManager
 
    public void update(RawImage depthImage, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame) throws Exception
    {
+      if (depthImage.get() == null)
+         return;
+
       // -------- Update the Height Map with the latest depth image from the sensor --------------
-      Mat latestDepthImage = depthImage.getCpuImageMat();
+      GpuMat latestDepthImage = depthImage.getGpuImageMat();
       Instant acquisitionTime = depthImage.getAcquisitionTime();
       CameraIntrinsics depthIntrinsicsCopy = depthImage.getIntrinsicsCopy();
 
       update(latestDepthImage, acquisitionTime, depthIntrinsicsCopy, cameraFrame, cameraZUpFrame);
+
+      depthImage.release();
    }
 
 
-   public void update(Mat latestDepthImage, Instant acquisitionTime, CameraIntrinsics depthIntrinsicsCopy, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame) throws Exception
+   public void update(GpuMat latestDepthImage, Instant acquisitionTime, CameraIntrinsics depthIntrinsicsCopy, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame) throws Exception
    {
       // Option that gets triggered from a message sent from the user
       if (lowerHeightMapBackdropRequested.poll())
@@ -121,21 +126,21 @@ public class RapidHeightMapManager
 
       // -------- Update the Height Map with the latest depth image from the sensor --------------
       // This takes the latest depth image and converts it to the expected type
-      Mat hostDepthImage = new Mat();
+      GpuMat shortDepthImage = new GpuMat();
 
       if (latestDepthImage.type() == opencv_core.CV_32FC1) // Support our simulated sensors
       {
-         OpenCVTools.convertFloatToShort(latestDepthImage, hostDepthImage, 1000.0, 0.0);
+         latestDepthImage.convertTo(shortDepthImage, opencv_core.CV_16UC1, 1000.0, 0.0);
       }
       else
       {
-         latestDepthImage.convertTo(hostDepthImage, opencv_core.CV_16UC1);
+         latestDepthImage.convertTo(shortDepthImage, opencv_core.CV_16UC1);
       }
 
       // We expect that depthImage to contain depths for parts of the robot that are in the camera frame, we remove that here
-      GpuMat depthImageWithoutRobot = bodyCollisionFilter.process(hostDepthImage, depthIntrinsicsCopy, cameraFrame);
+      GpuMat depthImageWithoutRobot = bodyCollisionFilter.process(shortDepthImage, depthIntrinsicsCopy, cameraFrame);
       // Now we are finished with the host depth image because we have a new image without the robot, so close it
-      hostDepthImage.close();
+      shortDepthImage.close();
 
       // The controller can publish a status letting anyone listening know that the controller is aware of some amount of drift in the Z direction
       // If we have that parameter set to true, we update the heights of the height map to account for that drift
@@ -157,17 +162,21 @@ public class RapidHeightMapManager
 
       // Perform update, this actually creates the height map
       rapidHeightMapExtractor.update(depthImageWithoutRobot, depthIntrinsicsCopy, sensorToWorld, sensorToGround, groundToWorld);
-      Mat croppedHeightMap = rapidHeightMapExtractor.getVisualizedHeightMap();
+      GpuMat deviceCroppedHeightMap = rapidHeightMapExtractor.getVisualizedHeightMap();
       // We have used the depth image without the robot, close this to avoid creating a memory leak
       depthImageWithoutRobot.close();
 
       // Perform a flying points filter as a post-processing step on the height map
       if (heightMapParameters.getFlyingPointsFilter())
       {
-         Mat filteredCroppedHeightMapOnDevice = flyingPointsFilter.applyFilter(croppedHeightMap);
-         filteredCroppedHeightMapOnDevice.copyTo(croppedHeightMap);
+         GpuMat filteredCroppedHeightMapOnDevice = flyingPointsFilter.applyFilter(deviceCroppedHeightMap);
+         filteredCroppedHeightMapOnDevice.copyTo(deviceCroppedHeightMap);
          filteredCroppedHeightMapOnDevice.close();
       }
+
+      Mat croppedHeightMap = new Mat();
+      deviceCroppedHeightMap.download(croppedHeightMap);
+      deviceCroppedHeightMap.close();
 
       // Publish the height map to anyone who is subscribing
       OpenCVTools.compressImagePNG(croppedHeightMap, compressedCroppedHeightMapPointer);
@@ -180,6 +189,7 @@ public class RapidHeightMapManager
                                                          croppedHeightMap.rows(),
                                                          croppedHeightMap.cols(),
                                                          (float) heightMapParameters.getHeightScaleFactor());
+      croppedHeightMap.close();
    }
 
    public HeightMapData getLatestHeightMapData()
