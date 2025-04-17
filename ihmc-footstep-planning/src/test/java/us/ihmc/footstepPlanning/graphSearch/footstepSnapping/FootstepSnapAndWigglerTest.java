@@ -5,25 +5,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.commons.ContinuousIntegrationTools;
-import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
-import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
-import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
-import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
-import us.ihmc.footstepPlanning.graphSearch.graph.LatticePoint;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.tools.PlanarRegionToHeightMapConverter;
@@ -31,7 +21,6 @@ import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
@@ -46,19 +35,11 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
-import java.util.stream.Collectors;
-
 import static org.junit.jupiter.api.Assertions.*;
-import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.isPoint2DOnLeftSideOfLine2D;
 
 public class FootstepSnapAndWigglerTest
 {
    private static boolean visualize = false;
-
 
    // For visualizable tests at the bottom
    private static final SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
@@ -87,7 +68,9 @@ public class FootstepSnapAndWigglerTest
          graphicsListRegistry.addArtifactListsToPlotter(scs.createSimulationOverheadPlotterFactory().createOverheadPlotter().getPlotter());
 
          Graphics3DObject graphics3DObject = new Graphics3DObject();
-         Graphics3DObjectTools.addPlanarRegionsList(graphics3DObject, DataSetIOTools.loadDataSet(DataSetName._20210419_111333_GPUCinders1).getPlanarRegionsList(), YoAppearance.DarkGray());
+         Graphics3DObjectTools.addPlanarRegionsList(graphics3DObject,
+                                                    DataSetIOTools.loadDataSet(DataSetName._20210419_111333_GPUCinders1).getPlanarRegionsList(),
+                                                    YoAppearance.DarkGray());
          scs.addStaticLinkGraphics(graphics3DObject);
 
          scs.addYoGraphicsListRegistry(graphicsListRegistry);
@@ -100,8 +83,6 @@ public class FootstepSnapAndWigglerTest
          snapAndWiggler = new FootstepSnapAndWiggler(footPolygons, parameters, environmentHandler);
       }
    }
-
-
 
    @Test
    public void testMaximumSnapHeightOnFlatRegions()
@@ -150,7 +131,7 @@ public class FootstepSnapAndWigglerTest
       DefaultFootstepPlannerParameters footstepPlannerParameters = new DefaultFootstepPlannerParameters();
       footstepPlannerParameters.setMaximumSnapHeight(maximumSnapHeight);
       FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
-      FootstepSnapAndWiggler snapper  = new FootstepSnapAndWiggler(PlannerTools.createDefaultFootPolygons(), footstepPlannerParameters, environmentHandler);
+      FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(PlannerTools.createDefaultFootPolygons(), footstepPlannerParameters, environmentHandler);
 
       HeightMapMessage heightMapMessage = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList);
       environmentHandler.setHeightMap(HeightMapMessageTools.unpackMessage(heightMapMessage));
@@ -195,7 +176,7 @@ public class FootstepSnapAndWigglerTest
    {
       double groundHeight = -0.2;
       double maximumSnapHeight = 2.7;
-      double rotatedAngle = Math.toRadians(- 45.0);
+      double rotatedAngle = Math.toRadians(-45.0);
 
       PlanarRegionsListGenerator planarRegionsListGenerator = new PlanarRegionsListGenerator();
       planarRegionsListGenerator.translate(0.0, 0.0, groundHeight);
@@ -207,7 +188,7 @@ public class FootstepSnapAndWigglerTest
       DefaultFootstepPlannerParameters footstepPlannerParameters = new DefaultFootstepPlannerParameters();
       footstepPlannerParameters.setMaximumSnapHeight(maximumSnapHeight);
       FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
-      FootstepSnapAndWiggler snapper  = new FootstepSnapAndWiggler(PlannerTools.createDefaultFootPolygons(), footstepPlannerParameters, environmentHandler);
+      FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(PlannerTools.createDefaultFootPolygons(), footstepPlannerParameters, environmentHandler);
 
       HeightMapMessage heightMapMessage = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList);
       environmentHandler.setHeightMap(HeightMapMessageTools.unpackMessage(heightMapMessage));
@@ -218,7 +199,7 @@ public class FootstepSnapAndWigglerTest
       DiscreteFootstep stanceNode = new DiscreteFootstep(0.0, 0.0);
       snapper.snapFootstep(stanceNode, null, false);
 
-      FootstepSnapData snapData = snapper.snapFootstep(new DiscreteFootstep(- 1.0, 0.0), stanceNode, false);
+      FootstepSnapData snapData = snapper.snapFootstep(new DiscreteFootstep(-1.0, 0.0), stanceNode, false);
       expectedTransform.setTranslationAndIdentityRotation(new Vector3D(0.0, 0.0, groundHeight));
       EuclidCoreTestTools.assertEquals(expectedTransform, snapData.getSnapTransform(), epsilon);
 
@@ -283,7 +264,6 @@ public class FootstepSnapAndWigglerTest
       Assertions.assertFalse(overlap);
    }
 
-
    @Test
    public void testSnappingToFlatGroundHeight()
    {
@@ -317,7 +297,8 @@ public class FootstepSnapAndWigglerTest
       DiscreteFootstep stanceStep = new DiscreteFootstep(105, 82, 3, RobotSide.LEFT);
       DiscreteFootstep candidateStep = new DiscreteFootstep(109, 80, 2, RobotSide.RIGHT);
 
-      RigidBodyTransform stanceSnapTransform = new RigidBodyTransform(new Quaternion(-0.00521871,0.01066136,-0.00008137,0.99992954), new Vector3D(-0.00110121,0.00147726,0.88437723));
+      RigidBodyTransform stanceSnapTransform = new RigidBodyTransform(new Quaternion(-0.00521871, 0.01066136, -0.00008137, 0.99992954),
+                                                                      new Vector3D(-0.00110121, 0.00147726, 0.88437723));
       FootstepSnapData stanceSnapData = new FootstepSnapData(stanceSnapTransform);
       stanceSnapData.setRegionIndex(2);
       snapAndWiggler.addSnapData(stanceStep, stanceSnapData);

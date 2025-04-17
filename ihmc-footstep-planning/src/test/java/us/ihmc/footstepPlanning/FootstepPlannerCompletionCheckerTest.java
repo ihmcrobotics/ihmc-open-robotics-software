@@ -3,15 +3,8 @@ package us.ihmc.footstepPlanning;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import toolbox_msgs.msg.dds.FootstepPlannerParametersPacket;
-import us.ihmc.commons.MathTools;
-import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.footstepPlanning.bodyPath.GPUAStarBodyPathPlanner;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
@@ -20,20 +13,12 @@ import us.ihmc.footstepPlanning.graphSearch.graph.LatticePoint;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLog;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader;
-import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
-import us.ihmc.log.LogTools;
-import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.io.File;
-import java.math.RoundingMode;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
 
 public class FootstepPlannerCompletionCheckerTest
 {
@@ -44,6 +29,7 @@ public class FootstepPlannerCompletionCheckerTest
     */
    @Test
    @Disabled
+   // TODO fix this test, it needs a log, the log previously used in the test disappeared
    public void testGoalReachedAndSnappedCorrectly()
    {
       // Load the log from resources
