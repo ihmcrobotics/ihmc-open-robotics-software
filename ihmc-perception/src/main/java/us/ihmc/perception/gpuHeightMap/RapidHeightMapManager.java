@@ -97,8 +97,11 @@ public class RapidHeightMapManager
       update(latestDepthImage, acquisitionTime, depthIntrinsicsCopy, cameraFrame, cameraZUpFrame);
    }
 
-
-   public void update(Mat latestDepthImage, Instant acquisitionTime, CameraIntrinsics depthIntrinsicsCopy, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame) throws Exception
+   public void update(Mat latestDepthImage,
+                      Instant acquisitionTime,
+                      CameraIntrinsics depthIntrinsicsCopy,
+                      ReferenceFrame cameraFrame,
+                      ReferenceFrame cameraZUpFrame) throws Exception
    {
       // Option that gets triggered from a message sent from the user
       if (lowerHeightMapBackdropRequested.poll())
