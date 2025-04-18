@@ -68,7 +68,7 @@ public class StabilityBasedKinematicRetargetingCalculator
    public static final boolean INCLUDE_FF_VELOCITY = false;
 
    private static final double KP_ORIENTATION = 1200.0;
-   private static final double MAX_CONTACT_POINT_ADJUSTMENT = 0.13; // 0.18;
+   private static final double MAX_CONTACT_POINT_ADJUSTMENT = 0.09;
    private static final double MAX_ORIENTATION_ERROR = Math.toRadians(5.0);
 //   private static final double MAX_COM_Z_ERROR = 0.01;
 
@@ -182,7 +182,7 @@ public class StabilityBasedKinematicRetargetingCalculator
                                                                                          registry);
 
       kpPosture.set(15.0); // 15.0);
-      kpContact.set(0.9); // 0.35);
+      kpContact.set(0.25); // 0.35);
 
       double maxRate = Math.toRadians(15.0);
       chestOrientationRetargeting = new OrientationRetargeting("chest",  fullRobotModel.getChest(), updateDT, maxRate, MAX_CHEST_ORIENTATION_OFFSET, graphicsListRegistry, registry);
@@ -318,8 +318,10 @@ public class StabilityBasedKinematicRetargetingCalculator
             actualStabilityMarginVelocity.set(EuclidCoreTools.clamp(deltaMargin / updateDT, 0.6));
          }
 
-         if (!isEnabled.getValue() || !isUpperBodyLoadBearing.getValue() || !requestPostureAdjustment.getValue()
-             || multiContactRegionCalculator.getStabilityMargin() > getUpperMarginThreshold() || getPostureSensitivity() < sensitivityThresholdLower.getValue())
+         boolean disallowNominal = postureOptimizerState.getValue() != PostureOptimizerState.NOMINAL && isUpperBodyLoadBearing.getValue();
+
+         if ((!isEnabled.getValue() || !isUpperBodyLoadBearing.getValue() || !requestPostureAdjustment.getValue()
+             || multiContactRegionCalculator.getStabilityMargin() > getUpperMarginThreshold() || getPostureSensitivity() < sensitivityThresholdLower.getValue()) && !disallowNominal)
          {
             postureOptimizerState.set(PostureOptimizerState.NOMINAL);
          }

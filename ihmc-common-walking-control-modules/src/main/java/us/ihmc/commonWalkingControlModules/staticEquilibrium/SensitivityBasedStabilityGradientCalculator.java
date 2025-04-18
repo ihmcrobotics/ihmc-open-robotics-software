@@ -56,7 +56,7 @@ public class SensitivityBasedStabilityGradientCalculator
 {
    private static final boolean APPLY_JOINT_LIMIT_FILTER = true;
    private static final boolean USE_AREA_BASED_CONTACT_ADJUSTMENT = true;
-   private static final boolean USE_HEURISTIC_MARGIN = false;
+   private static final boolean USE_HEURISTIC_MARGIN = true;
    private static final double INTEGRATION_DT = 1.0e-3;
    private static final int XY_DIMENSIONS = 2;
    private static final boolean COMPUTE_EXPECTED_MARGIN_VELOCITY = true;
