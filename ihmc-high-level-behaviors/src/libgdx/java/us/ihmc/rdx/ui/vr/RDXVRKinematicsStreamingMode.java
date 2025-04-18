@@ -94,6 +94,7 @@ public class RDXVRKinematicsStreamingMode
    private final RetargetingParameters retargetingParameters;
    private final DRCRobotModel robotModel;
    private RDXMultiBodyGraphic ghostRobotGraphic;
+   private final ImBoolean ghostPreviewEnabled = new ImBoolean(true);
    private FullHumanoidRobotModel ghostFullRobotModel;
    private OneDoFJointBasics[] ghostOneDoFJointsExcludingHands;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -798,6 +799,10 @@ public class RDXVRKinematicsStreamingMode
       if (ImGui.checkbox(labels.get("Control only arms"), controlArmsOnly))
       {
          setEnabled(false);
+      }
+      if (ImGui.checkbox(labels.get("Ghost preview"), ghostPreviewEnabled))
+      {
+         visualizeIKPreviewGraphic(ghostPreviewEnabled.get());
       }
 
       Set<String> connectedTrackers = vrContext.getAssignedTrackerRoles();
