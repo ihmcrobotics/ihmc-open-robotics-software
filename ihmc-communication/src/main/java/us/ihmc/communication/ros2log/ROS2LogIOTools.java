@@ -121,6 +121,7 @@ public class ROS2LogIOTools
          List<ReplayTopicManager<?>> topicManagers = new ArrayList<>();
 
          ObjectNode rootNode = (ObjectNode) objectMapper.readTree(inputStream);
+         long firstTimestamp = Long.MAX_VALUE;
 
          for (int topic_idx = 0; topic_idx < loggedTopics.size(); topic_idx++)
          {
@@ -153,7 +154,19 @@ public class ROS2LogIOTools
                topicManager.getMessages().add(message);
             }
 
+            if (!timestamps.isEmpty())
+               firstTimestamp = Math.min(timestamps.get(0).longValue(), firstTimestamp);
+
             topicManagers.add(topicManager);
+         }
+
+         for (int topic_idx = 0; topic_idx < topicManagers.size(); topic_idx++)
+         {
+            TLongArrayList timestamps = topicManagers.get(topic_idx).getTimestamps();
+            for (int message_idx = 0; message_idx < timestamps.size(); message_idx++)
+            {
+               timestamps.set(message_idx, timestamps.get(message_idx) - firstTimestamp);
+            }
          }
 
          return topicManagers;

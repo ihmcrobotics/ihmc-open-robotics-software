@@ -136,9 +136,8 @@ public class OrientationRetargeting
       {
          desiredOrientationRateLimited.update(nominalOrientation);
 
-         // reset optimized to current control frame
-         tempQuaternion.setFromReferenceFrame(controlFrame);
-         optimizedOrientation.set(tempQuaternion);
+         // reset optimized to current desired
+         optimizedOrientation.set(desiredOrientationRateLimited);
          filteredAngularVelocity.setToZero();
       }
       else if (optimizerState == PostureOptimizerState.OPTIMIZER)

@@ -1,5 +1,6 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
+import org.apache.commons.math3.util.Precision;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KSTStreamingState;
@@ -62,12 +63,12 @@ public class StabilityBasedKinematicRetargetingCalculator
 
    private static final boolean SNAP_TO_REGION = false;
    public static boolean OVERRIDE_MESSAGE = true;
-   public static final boolean ENABLE_POSTURE_OBJECTIVE = false;
+   public static final boolean ENABLE_POSTURE_OBJECTIVE = true;
    public static final boolean ENABLE_CONTACT_OBJECTIVE = true;
    public static final boolean INCLUDE_FF_VELOCITY = false;
 
    private static final double KP_ORIENTATION = 1200.0;
-   private static final double MAX_CONTACT_POINT_ADJUSTMENT = 0.18;
+   private static final double MAX_CONTACT_POINT_ADJUSTMENT = 0.13; // 0.18;
    private static final double MAX_ORIENTATION_ERROR = Math.toRadians(5.0);
 //   private static final double MAX_COM_Z_ERROR = 0.01;
 
@@ -167,9 +168,9 @@ public class StabilityBasedKinematicRetargetingCalculator
       this.isUpperBodyLoadBearing = isUpperBodyLoadBearing;
       this.minStabilityMargin = minStabilityMargin;
 
-      stabilityMarginThreshold.set(0.15);
+      stabilityMarginThreshold.set(0.16);
       stabilityMarginHysteresis.set(0.015);
-      sensitivityThresholdLower.set(1.0e-7);
+      sensitivityThresholdLower.set(1.0e-12);
       sensitivityThresholdUpper.set(0.035);
       maxContactAdjustment.set(MAX_CONTACT_POINT_ADJUSTMENT);
 
@@ -181,7 +182,7 @@ public class StabilityBasedKinematicRetargetingCalculator
                                                                                          registry);
 
       kpPosture.set(15.0); // 15.0);
-      kpContact.set(0.35);
+      kpContact.set(0.9); // 0.35);
 
       double maxRate = Math.toRadians(15.0);
       chestOrientationRetargeting = new OrientationRetargeting("chest",  fullRobotModel.getChest(), updateDT, maxRate, MAX_CHEST_ORIENTATION_OFFSET, graphicsListRegistry, registry);
@@ -317,7 +318,8 @@ public class StabilityBasedKinematicRetargetingCalculator
             actualStabilityMarginVelocity.set(EuclidCoreTools.clamp(deltaMargin / updateDT, 0.6));
          }
 
-         if (!isEnabled.getValue() || !isUpperBodyLoadBearing.getValue() || !requestPostureAdjustment.getValue() || multiContactRegionCalculator.getStabilityMargin() > getUpperMarginThreshold() || getPostureSensitivity() < sensitivityThresholdLower.getValue())
+         if (!isEnabled.getValue() || !isUpperBodyLoadBearing.getValue() || !requestPostureAdjustment.getValue()
+             || multiContactRegionCalculator.getStabilityMargin() > getUpperMarginThreshold() || getPostureSensitivity() < sensitivityThresholdLower.getValue())
          {
             postureOptimizerState.set(PostureOptimizerState.NOMINAL);
          }

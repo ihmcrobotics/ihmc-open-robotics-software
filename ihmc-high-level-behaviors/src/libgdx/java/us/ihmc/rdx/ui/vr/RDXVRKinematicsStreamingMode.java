@@ -99,6 +99,7 @@ import us.ihmc.yoVariables.euclid.filters.RateLimitedYoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import javax.annotation.Nullable;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -1273,5 +1274,25 @@ public class RDXVRKinematicsStreamingMode
 
       // centers in Y, this direction should be intuitive for the user to line up
 //      controlFrameToPack.setY(0.0);
+   }
+
+   public static void main(String[] args) throws IOException
+   {
+      HumanoidKinematicsToolboxConfigurationMessage packet = new HumanoidKinematicsToolboxConfigurationMessage();
+      HumanoidKinematicsToolboxConfigurationMessagePubSubType topicDataType = new HumanoidKinematicsToolboxConfigurationMessagePubSubType();
+
+      ObjectMapper objectMapper = new ObjectMapper(new JsonFactory());
+      ObjectNode rootNode = objectMapper.createObjectNode();
+      AbstractSerializer serializer = new JSONSerializer<>(topicDataType);
+
+      ObjectNode topicObject = rootNode.putObject(packet.getClass().getName());
+      ArrayNode timestamps = topicObject.putArray(timestampKey);
+      ArrayNode messages = topicObject.putArray(messageKey);
+
+      timestamps.add(0);
+      messages.add(serializer.serializeToString(packet));
+
+      objectMapper.writerWithDefaultPrettyPrinter().writeValue(System.out, rootNode);
+
    }
 }
