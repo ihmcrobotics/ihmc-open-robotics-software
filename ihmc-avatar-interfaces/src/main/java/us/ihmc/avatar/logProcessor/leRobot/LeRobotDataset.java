@@ -167,7 +167,7 @@ public class LeRobotDataset
                                        .put("has_audio", false);
          }
 
-         ObjectNode state = features.putObject("observation.state");
+         ObjectNode state = features.putObject("state");
          state.put("dtype", "float32");
          state.putArray("shape").add(14);
          ArrayNode motors = state.putObject("names").putArray("motors");
@@ -175,6 +175,39 @@ public class LeRobotDataset
          motors.add("left_gripper_qx").add("left_gripper_qy").add("left_gripper_qz").add("left_gripper_qs");
          motors.add("right_gripper_x").add("right_gripper_y").add("right_gripper_z");
          motors.add("right_gripper_qx").add("right_gripper_qy").add("right_gripper_qz").add("right_gripper_qs");
+         ObjectNode action = features.putObject("action");
+         action.put("dtype", "float32");
+         action.putArray("shape").add(14);
+         motors = action.putObject("names").putArray("motors");
+         motors.add("left_gripper_x").add("left_gripper_y").add("left_gripper_z");
+         motors.add("left_gripper_qx").add("left_gripper_qy").add("left_gripper_qz").add("left_gripper_qs");
+         motors.add("right_gripper_x").add("right_gripper_y").add("right_gripper_z");
+         motors.add("right_gripper_qx").add("right_gripper_qy").add("right_gripper_qz").add("right_gripper_qs");
+
+         ObjectNode episodeIndex = features.putObject("episode_index");
+         episodeIndex.put("dtype", "int64");
+         episodeIndex.putArray("shape").add(1);
+         episodeIndex.put("names", (byte[]) null);
+         ObjectNode frameIndex = features.putObject("frame_index");
+         frameIndex.put("dtype", "int64");
+         frameIndex.putArray("shape").add(1);
+         frameIndex.put("names", (byte[]) null);
+         ObjectNode timestamp = features.putObject("timestamp");
+         timestamp.put("dtype", "float32");
+         timestamp.putArray("shape").add(1);
+         timestamp.put("names", (byte[]) null);
+         ObjectNode nextDone = features.putObject("next.done");
+         nextDone.put("dtype", "bool");
+         nextDone.putArray("shape").add(1);
+         nextDone.put("names", (byte[]) null);
+         ObjectNode index = features.putObject("index");
+         index.put("dtype", "int64");
+         index.putArray("shape").add(1);
+         index.put("names", (byte[]) null);
+         ObjectNode taskIndex = features.putObject("task_index");
+         taskIndex.put("dtype", "int64");
+         taskIndex.putArray("shape").add(1);
+         taskIndex.put("names", (byte[]) null);
       });
 
       FileTools.write(episodesJsonlPath, new byte[0], WriteOption.TRUNCATE, DefaultExceptionHandler.PRINT_MESSAGE);
