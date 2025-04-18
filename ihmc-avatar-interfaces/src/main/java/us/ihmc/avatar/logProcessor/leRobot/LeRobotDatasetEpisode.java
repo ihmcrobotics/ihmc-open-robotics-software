@@ -1,6 +1,7 @@
 package us.ihmc.avatar.logProcessor.leRobot;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.avatar.scs2.SCS2LogSessionWithVideo;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
@@ -129,6 +130,34 @@ public class LeRobotDatasetEpisode
          ArrayNode tasksArray = node.putArray("tasks");
          tasksArray.add(taskName);
          node.put("length", length);
+      }));
+      LeRobotDatasetTools.appendLine(episodeStatsJsonlPath, JSONFileTools.getAsSingleLine(node ->
+      {
+         node.put("episode_index", episodeIndex);
+         ObjectNode stats = node.putObject("stats");
+         for (RobotSide side : RobotSide.values)
+         {
+            ObjectNode video = stats.putObject(zedVideoDirs.get(side).getFileName().toString());
+            ArrayNode min = video.putArray("min");
+            min.addArray().addArray().add(0.0f);
+            min.addArray().addArray().add(0.0f);
+            min.addArray().addArray().add(0.0f);
+            ArrayNode max = video.putArray("max");
+            max.addArray().addArray().add(1.0f);
+            min.addArray().addArray().add(0.0f);
+            min.addArray().addArray().add(0.0f);
+            ArrayNode mean = video.putArray("mean");
+            mean.addArray().addArray().add(0.5f);
+            min.addArray().addArray().add(0.0f);
+            min.addArray().addArray().add(0.0f);
+            ArrayNode std = video.putArray("std");
+            std.addArray().addArray().add(0.5f);
+            min.addArray().addArray().add(0.0f);
+            min.addArray().addArray().add(0.0f);
+            video.putArray("count").add(length);
+         }
+
+         stats.putObject("state");
       }));
    }
 
