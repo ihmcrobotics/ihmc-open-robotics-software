@@ -47,7 +47,7 @@ public class LeRobotDataset
          zedVideoDirs.put(side, videosPath.resolve("chunk-000/observations.images.cam_zed_" + side.getLowerCaseName()));
 
       episodesJsonlPath = metaPath.resolve("episodes.jsonl");
-      episodeStatsJsonlPath = metaPath.resolve("episode_stats.jsonl");
+      episodeStatsJsonlPath = metaPath.resolve("episodes_stats.jsonl");
       infoJsonPath = metaPath.resolve("info.json");
       tasksJsonlPath = metaPath.resolve("tasks.jsonl");
    }
