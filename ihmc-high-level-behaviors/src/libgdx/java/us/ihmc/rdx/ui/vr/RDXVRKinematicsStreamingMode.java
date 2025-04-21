@@ -39,7 +39,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -122,11 +121,7 @@ public class RDXVRKinematicsStreamingMode
    private KinematicsRecordReplay kinematicsRecorder;
    private final SceneGraph sceneGraph;
    private final RDXVRContext vrContext;
-   private final ControllerStatusTracker controllerStatusTracker;
-   private final RDXManualFootstepPlacement footstepPlacer;
    private final RDXHandConfigurationManager handManager;
-   private boolean pausedForWalking = false;
-   private final SideDependentList<Float> gripButtonsValue = new SideDependentList<>();
    @Nullable
    private KinematicsStreamingToolboxModule toolbox;
    private final KinematicsToolboxConfigurationMessage ikSolverConfigurationMessage = new KinematicsToolboxConfigurationMessage();
@@ -139,14 +134,7 @@ public class RDXVRKinematicsStreamingMode
    private ReferenceFrame initialChestFrame;
    private final RigidBodyTransform initialChestTransformToWorld = new RigidBodyTransform();
    private RDXVRMotionRetargeting motionRetargeting;
-   private RDXVRPrescientFootstepStreaming prescientFootstepStreaming;
-   private long lastStepCompletionTime;
-   private boolean reintializingToolbox = false;
-   private long pausedStreamingTime;
 
-   private final HandConfiguration[] handConfigurations = {HandConfiguration.HALF_CLOSE, HandConfiguration.CRUSH, HandConfiguration.CLOSE};
-   private int leftIndex = -1;
-   private int rightIndex = -1;
    private RDXMultiContactRegionGraphic multiContactStabilityGraphic;
    private final HumanoidKinematicsToolboxConfigurationMessage ikHumanoidSolverConfigurationMessage = new HumanoidKinematicsToolboxConfigurationMessage();
 
@@ -169,8 +157,6 @@ public class RDXVRKinematicsStreamingMode
       this.retargetingParameters = retargetingParameters;
       this.sceneGraph = sceneGraph;
       this.vrContext = vrContext;
-      this.controllerStatusTracker = controllerStatusTracker;
-      this.footstepPlacer = footstepPlacer;
       this.handManager = handManager;
    }
 
@@ -215,7 +201,6 @@ public class RDXVRKinematicsStreamingMode
 
       kinematicsRecorder = new KinematicsRecordReplay(sceneGraph, enabled);
       motionRetargeting = new RDXVRMotionRetargeting(syncedRobot, handDesiredControlFrames, trackerReferenceFrames, headsetReferenceFrame, retargetingParameters);
-      prescientFootstepStreaming = new RDXVRPrescientFootstepStreaming(syncedRobot, footstepPlacer);
 
       if (syncedRobot.getRobotModel().getSimpleRobotName().contains("Nadia"))
       {
@@ -342,6 +327,12 @@ public class RDXVRKinematicsStreamingMode
                streamingDisabled.set();
          }
 
+         InputDigitalActionData bButton = controller.getBButtonActionData();
+         if (bButton.bChanged() && !bButton.bState())
+         {
+            ghostPreviewEnabled.set(!ghostPreviewEnabled.get());
+         }
+
          // NOTE: Implement hand open close for controller trigger button.
          InputDigitalActionData clickTriggerButton = controller.getClickTriggerActionData();
          if (clickTriggerButton.bChanged() && !clickTriggerButton.bState())
@@ -351,8 +342,6 @@ public class RDXVRKinematicsStreamingMode
 
          // Check if left joystick is pressed in order to trigger recording or replay of motion
          InputDigitalActionData leftJoystickButton = controller.getJoystickPressActionData();
-         gripButtonsValue.put(RobotSide.LEFT, controller.getGripActionData().x());
-
          kinematicsRecorder.processRecordReplayInput(leftJoystickButton);
          if (kinematicsRecorder.isReplayingEnabled().get())
             wakeUpToolbox();
@@ -382,8 +371,6 @@ public class RDXVRKinematicsStreamingMode
         { // do not want to close grippers while interacting with the panel
            performHandAction(RobotSide.RIGHT);
 
-           // TODO discuss and possibly remap to different button...
-
            //           double trajectoryTime = 1.5;
            //           GoHomeMessage homePelvis = new GoHomeMessage();
            //           homePelvis.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_PELVIS);
@@ -401,8 +388,6 @@ public class RDXVRKinematicsStreamingMode
            //           pausedForWalking = false;
            //           reintializingToolbox = false;
         }
-
-         gripButtonsValue.put(RobotSide.RIGHT, controller.getGripActionData().x());
       });
 
       if ((enabled.get() || kinematicsRecorder.isReplaying()) && toolboxInputStreamRateLimiter.run(streamPeriod))
@@ -453,10 +438,6 @@ public class RDXVRKinematicsStreamingMode
                      }
                   }
                });
-               if (segmentType.isFootRelated())
-               {
-                  prescientFootstepStreaming.setTrackerReference(segmentType.getSegmentSide(), trackerReferenceFrames.get(segmentType.getSegmentName()).getReferenceFrame());
-               }
             }
          }
          // ---------- end VR Trackers ------------
@@ -558,51 +539,11 @@ public class RDXVRKinematicsStreamingMode
             lockPelvis(toolboxInputMessage);
          }
 
-         // Stepping with ankle trackers
-         if (gripButtonsValue.get(RobotSide.LEFT) > 0.5f && gripButtonsValue.get(RobotSide.RIGHT) > 0.5f)
-         {
-            prescientFootstepStreaming.streamFootsteps();
-
-            // Stepping with ankle trackers pauses Streaming until walking is done
-            if (!controllerStatusTracker.isWalking())
-            {
-               if (pausedForWalking)
-               {
-                  if (System.currentTimeMillis() - pausedStreamingTime > RDXVRPrescientFootstepStreaming.WAIT_TIME_BEFORE_STEP)
-                  {
-                     LogTools.info("Stepping");
-                     prescientFootstepStreaming.step();
-                  }
-               }
-               if (prescientFootstepStreaming.getReadyToStepNotification().poll())
-               {
-                  streamToController.set(false);
-                  pausedStreamingTime = System.currentTimeMillis();
-                  pausedForWalking = true;
-                  LogTools.info("Starting to walk. Paused streaming");
-                  visualizeIKPreviewGraphic(false);
-               }
-            }
-            else
-            {
-               sleepToolbox();
-               if (prescientFootstepStreaming.getReadyToStepNotification().poll())
-               {
-                  LogTools.info("Stepping");
-                  prescientFootstepStreaming.step();
-               }
-            }
-         }
-         else
-         {
-            prescientFootstepStreaming.reset();
-         }
-
          if (enabled.get())
             toolboxInputMessage.setStreamToController(streamToController.get());
          else
             toolboxInputMessage.setStreamToController(kinematicsRecorder.isReplaying());
-//         ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputToolboxConfigurationTopic(syncedRobot.getRobotModel().getSimpleRobotName()), ikSolverConfigurationMessage);
+         ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputToolboxConfigurationTopic(syncedRobot.getRobotModel().getSimpleRobotName()), ikSolverConfigurationMessage);
          ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputCommandTopic(syncedRobot.getRobotModel().getSimpleRobotName()), toolboxInputMessage);
          outputFrequencyPlot.recordEvent();
       }
@@ -760,27 +701,6 @@ public class RDXVRKinematicsStreamingMode
             if (ghostRobotGraphic.isActive())
                ghostRobotGraphic.update();
          }
-
-         // Resumes streaming once walking is done
-         if (pausedForWalking && controllerStatusTracker.getFinishedWalkingNotification().poll())
-         {
-            LogTools.info("Finished walking. Resuming streaming");
-            // Restart KST
-            lastStepCompletionTime = System.currentTimeMillis();
-            reintializingToolbox = true;
-         }
-         else if (pausedForWalking && reintializingToolbox)
-         {
-            // Wait a bit for robot to stabilize on last footsteps
-            if (System.currentTimeMillis() - lastStepCompletionTime > RDXVRPrescientFootstepStreaming.WAIT_TIME_AFTER_STEP)
-            {
-               pausedForWalking = false;
-               setEnabled(true);
-               visualizeIKPreviewGraphic(true);
-               streamToController.set(true);
-               reintializingToolbox = false;
-            }
-         }
       }
    }
 
@@ -863,8 +783,6 @@ public class RDXVRKinematicsStreamingMode
          initialPelvisFrame = null;
          initialChestFrame = null;
          trackerReferenceFrames.clear();
-         if (!pausedForWalking)
-            prescientFootstepStreaming.reset();
          motionRetargeting.reset();
          motionRetargeting.setControlArmsOnly(controlArmsOnly.get());
          motionRetargeting.setArmScaling(armScaling.get());
@@ -874,10 +792,6 @@ public class RDXVRKinematicsStreamingMode
       {
          streamingDisabled.poll();
          sleepToolbox();
-         prescientFootstepStreaming.reset();
-         pausedForWalking = false;
-         reintializingToolbox = false;
-
          visualizeIKPreviewGraphic(true);
          streamToController.set(false);
       }
