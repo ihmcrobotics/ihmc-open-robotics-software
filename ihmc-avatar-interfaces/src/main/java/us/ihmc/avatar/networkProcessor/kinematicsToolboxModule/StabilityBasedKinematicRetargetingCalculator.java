@@ -52,14 +52,14 @@ public class StabilityBasedKinematicRetargetingCalculator
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    // Simulation
-//   private static final double MAX_ARM_ORIENTATION_OFFSET = Math.toRadians(180.0);
-//   private static final double MAX_CHEST_ORIENTATION_OFFSET = Math.toRadians(180.0);
-//   private static final double MAX_PELVIS_ORIENTATION_OFFSET = Math.toRadians(180.0);
+   private static final double MAX_ARM_ORIENTATION_OFFSET = Math.toRadians(180.0);
+   private static final double MAX_CHEST_ORIENTATION_OFFSET = Math.toRadians(180.0);
+   private static final double MAX_PELVIS_ORIENTATION_OFFSET = Math.toRadians(180.0);
 
    // Hardware
-   private static final double MAX_ARM_ORIENTATION_OFFSET = Math.toRadians(55.0);
-   private static final double MAX_CHEST_ORIENTATION_OFFSET = Math.toRadians(30.0);
-   private static final double MAX_PELVIS_ORIENTATION_OFFSET = Math.toRadians(25.0);
+//   private static final double MAX_ARM_ORIENTATION_OFFSET = Math.toRadians(55.0);
+//   private static final double MAX_CHEST_ORIENTATION_OFFSET = Math.toRadians(30.0);
+//   private static final double MAX_PELVIS_ORIENTATION_OFFSET = Math.toRadians(25.0);
 
    private static final boolean SNAP_TO_REGION = false;
    public static boolean OVERRIDE_MESSAGE = true;
@@ -119,8 +119,6 @@ public class StabilityBasedKinematicRetargetingCalculator
    private final JointBasics[] controlledJoints;
    private final DMatrixRMaj currentWholeBodyVelocity = new DMatrixRMaj(0);
 
-   private final YoDouble stabilityMarginThreshold = new YoDouble("stabilityMarginThreshold", registry);
-   private final YoDouble stabilityMarginHysteresis = new YoDouble("stabilityMarginHysteresis", registry);
    private final YoDouble sensitivityThresholdUpper = new YoDouble("sensitivityThresholdUpper", registry);
    private final YoDouble sensitivityThresholdLower = new YoDouble("sensitivityThresholdLower", registry);
    private final YoDouble alphaEnabled = new YoDouble("alphaEnabled", registry);
@@ -164,14 +162,12 @@ public class StabilityBasedKinematicRetargetingCalculator
       this.updateDT = updateDT;
       int dofs = MultiBodySystemTools.computeDegreesOfFreedom(controlledJoints);
       currentWholeBodyVelocity.reshape(dofs, 1);
-
+      
       this.isUpperBodyLoadBearing = isUpperBodyLoadBearing;
       this.minStabilityMargin = minStabilityMargin;
 
-      stabilityMarginThreshold.set(0.16);
-      stabilityMarginHysteresis.set(0.015);
-      sensitivityThresholdLower.set(1.0e-12);
-      sensitivityThresholdUpper.set(0.035);
+      sensitivityThresholdLower.set(1.0e-13);
+      sensitivityThresholdUpper.set(0.01);
       maxContactAdjustment.set(MAX_CONTACT_POINT_ADJUSTMENT);
 
       this.stabilityGradientCalculator = new SensitivityBasedStabilityGradientCalculator(fullRobotModel,
@@ -318,14 +314,11 @@ public class StabilityBasedKinematicRetargetingCalculator
             actualStabilityMarginVelocity.set(EuclidCoreTools.clamp(deltaMargin / updateDT, 0.6));
          }
 
-         boolean disallowNominal = postureOptimizerState.getValue() != PostureOptimizerState.NOMINAL && isUpperBodyLoadBearing.getValue();
-
-         if ((!isEnabled.getValue() || !isUpperBodyLoadBearing.getValue() || !requestPostureAdjustment.getValue()
-             || multiContactRegionCalculator.getStabilityMargin() > getUpperMarginThreshold() || getPostureSensitivity() < sensitivityThresholdLower.getValue()) && !disallowNominal)
+         if (!isEnabled.getValue() || !isUpperBodyLoadBearing.getValue() || !requestPostureAdjustment.getValue() || getPostureSensitivity() < sensitivityThresholdLower.getValue())
          {
             postureOptimizerState.set(PostureOptimizerState.NOMINAL);
          }
-         else if (multiContactRegionCalculator.getStabilityMargin() > getLowerMarginThreshold() || stabilityGradientCalculator.getPostureSensitivity() < sensitivityThresholdUpper.getValue())
+         else if (stabilityGradientCalculator.getPostureSensitivity() < sensitivityThresholdUpper.getValue())
          {
             postureOptimizerState.set(PostureOptimizerState.FREEZE);
          }
@@ -354,16 +347,6 @@ public class StabilityBasedKinematicRetargetingCalculator
          if (postureOptimizerState.getValue() == PostureOptimizerState.OPTIMIZER)
             fullRobotModel.updateFrames();
       }
-   }
-
-   private double getUpperMarginThreshold()
-   {
-      return stabilityMarginThreshold.getValue() + stabilityMarginHysteresis.getValue();
-   }
-
-   private double getLowerMarginThreshold()
-   {
-      return stabilityMarginThreshold.getValue() - stabilityMarginHysteresis.getValue();
    }
 
    private static void configureSelectionMatrix(SelectionMatrix3D selectionMatrix, Tuple3DReadOnly weight)
@@ -491,14 +474,5 @@ public class StabilityBasedKinematicRetargetingCalculator
    {
       comHeightRetargeting.updateNominalHeight(command.getDesiredPosition().getZ());
       command.getDesiredPosition().setZ(comHeightRetargeting.getHeight());
-   }
-
-   private double updateAlphaEnabled()
-   {
-      double stabilityMargin = multiContactRegionCalculator.getStabilityMargin();
-      double deltaStabilityMargin = stabilityMargin - minStabilityMargin.getValue();
-      double enabledFraction = EuclidCoreTools.clamp(1.0 - deltaStabilityMargin / (stabilityMarginThreshold.getValue() - minStabilityMargin.getValue()), 0.0, 1.0);
-      alphaEnabled.set(enabledFraction);
-      return alphaEnabled.getValue();
    }
 }
