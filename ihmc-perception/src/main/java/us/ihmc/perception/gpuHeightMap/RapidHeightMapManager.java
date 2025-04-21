@@ -95,6 +95,7 @@ public class RapidHeightMapManager
       CameraIntrinsics depthIntrinsicsCopy = depthImageCopy.getIntrinsicsCopy();
 
       update(latestDepthImage, acquisitionTime, depthIntrinsicsCopy, cameraFrame, cameraZUpFrame);
+      depthImageCopy.release();
    }
 
    public void update(Mat latestDepthImage,
