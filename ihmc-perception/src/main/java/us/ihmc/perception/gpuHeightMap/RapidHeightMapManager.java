@@ -29,6 +29,7 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -50,6 +51,8 @@ public class RapidHeightMapManager
    private final ROS2Publisher<ImageMessage> heightMapPublisher;
    private final CUDABodyCollisionFilter bodyCollisionFilter;
 
+   private final List<ReferenceFrame> footSoleFrames = new ArrayList<>();
+
    public RapidHeightMapManager(ROS2Node ros2Node,
                                 RobotCollisionModel robotCollisionModel,
                                 FullHumanoidRobotModel robotModel,
@@ -61,16 +64,18 @@ public class RapidHeightMapManager
    {
       this.heightMapParameters = heightMapParameters;
 
+      footSoleFrames.add(leftFootSoleFrame);
+      footSoleFrames.add(rightFootSoleFrame);
+
       List<Collidable> robotCollidables = robotCollisionModel.getRobotCollidables(robotModel.getRootBody());
       bodyCollisionFilter = new CUDABodyCollisionFilter(robotCollidables);
-
-      rapidHeightMapExtractor = new RapidHeightMapExtractorCUDA(leftFootSoleFrame, rightFootSoleFrame, 1, heightMapParameters);
       rapidHeightMapDriftOffset = new RapidHeightMapDriftOffset(controllerFootstepQueueMonitor);
       flyingPointsFilter = new CUDAFlyingPointsFilter();
 
-      heightMapPublisher = ros2Node.createPublisher(PerceptionAPI.HEIGHT_MAP_CROPPED);
+      rapidHeightMapExtractor = new RapidHeightMapExtractorCUDA(1, heightMapParameters);
 
       // We use a notification to only call resetting the height map in one place
+      heightMapPublisher = ros2Node.createPublisher(PerceptionAPI.HEIGHT_MAP_CROPPED);
       ros2Node.createSubscription2(PerceptionAPI.RESET_HEIGHT_MAP, message -> resetHeightMapRequested.set());
       ros2Node.createSubscription2(PerceptionAPI.LOWER_HEIGHT_MAP_BACKDROP, message -> lowerHeightMapBackdropRequested.set());
 
@@ -108,7 +113,9 @@ public class RapidHeightMapManager
       // Option that gets triggered from a message sent from the user
       if (lowerHeightMapBackdropRequested.poll())
       {
-         rapidHeightMapExtractor.lowerBackDrop();
+         double footHeight = computeFootHeight();
+         int loweredFootHeight = -10000;
+         rapidHeightMapExtractor.reset(footHeight, loweredFootHeight);
          if (heightMapParameters.getDriftOffsetFilter())
          {
             rapidHeightMapDriftOffset.reset();
@@ -118,7 +125,8 @@ public class RapidHeightMapManager
       // Option that gets triggered from a message sent from the user
       if (resetHeightMapRequested.poll())
       {
-         rapidHeightMapExtractor.reset();
+         double footHeight = computeFootHeight();
+         rapidHeightMapExtractor.reset(footHeight);
          if (heightMapParameters.getDriftOffsetFilter())
          {
             rapidHeightMapDriftOffset.reset();
@@ -150,7 +158,7 @@ public class RapidHeightMapManager
          float driftOffsetInZ = rapidHeightMapDriftOffset.getUpdateDriftOffset();
          if (!Float.isNaN(driftOffsetInZ))
          {
-            rapidHeightMapExtractor.updateHeightOffset(driftOffsetInZ, depthIntrinsicsCopy);
+            rapidHeightMapExtractor.updateHeightOffset(driftOffsetInZ, depthIntrinsicsCopy, computeFootHeight());
          }
       }
 
@@ -162,7 +170,7 @@ public class RapidHeightMapManager
       cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
 
       // Perform update, this actually creates the height map
-      rapidHeightMapExtractor.update(depthImageWithoutRobot, depthIntrinsicsCopy, sensorToWorld, sensorToGround, groundToWorld);
+      rapidHeightMapExtractor.update(depthImageWithoutRobot, depthIntrinsicsCopy, sensorToWorld, sensorToGround, groundToWorld, computeFootHeight());
       Mat croppedHeightMap = rapidHeightMapExtractor.getVisualizedHeightMap();
       // We have used the depth image without the robot, close this to avoid creating a memory leak
       depthImageWithoutRobot.close();
@@ -196,6 +204,24 @@ public class RapidHeightMapManager
    public TerrainMapData getTerrainMapData()
    {
       return rapidHeightMapExtractor.getTerrainMapData();
+   }
+
+
+   private double computeFootHeight()
+   {
+      double thicknessOfTheFoot = 0.02;
+      double height = Double.POSITIVE_INFINITY;
+
+      for (int i = 0; i < footSoleFrames.size(); i++)
+      {
+         height = Math.min(footSoleFrames.get(i).getTransformToWorldFrame().getTranslationZ(), height);
+      }
+      if (Double.isInfinite(height))
+         height = 0.0;
+
+      height -= thicknessOfTheFoot;
+
+      return height;
    }
 
    public void destroy()

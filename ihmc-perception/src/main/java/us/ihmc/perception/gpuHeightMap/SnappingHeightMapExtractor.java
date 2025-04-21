@@ -49,7 +49,6 @@ public class SnappingHeightMapExtractor
    private final GpuMat snapNormalYImage;
    private final GpuMat snapNormalZImage;
    private final GpuMat snappedAreaFractionImage;
-   private int terrainCenterIndex;
    private int cellsPerAxisTerrain;
 
    public SnappingHeightMapExtractor(HeightMapParameters heightMapParameters)
@@ -92,24 +91,23 @@ public class SnappingHeightMapExtractor
 
    private void recomputeDerivedParameters()
    {
-      terrainCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getTerrainWidthInMeters(), heightMapParameters.getCellSizeInMeters());
+      int terrainCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getTerrainWidthInMeters(), heightMapParameters.getCellSizeInMeters());
       cellsPerAxisTerrain = 2 * terrainCenterIndex + 1;
    }
-
 
    public void reset(int resetOffset)
    {
       snapHeightImage.setTo(new Scalar(resetOffset));
    }
 
-   public void update(GpuMat globalHeightMapImage, Point3D sensorOrigin, int centerIndex, GpuMat terrainHeightMap)
+   public void update(GpuMat globalHeightMapImage, Point3D sensorOrigin, GpuMat terrainHeightMap)
    {
       int error;
 
       recomputeDerivedParameters();
 
       // Populate parameters buffer for the snapping kernel
-      float[] snappingParametersArray = populateSnappingParametersArray(sensorOrigin, centerIndex, terrainCenterIndex);
+      float[] snappingParametersArray = populateSnappingParametersArray(sensorOrigin);
       snappingParametersHostPointer.put(snappingParametersArray);
 
       // Handle memory allocation and copy values to the GPU
@@ -174,18 +172,16 @@ public class SnappingHeightMapExtractor
    /**
     * Populate the parameter's array for the snapping kernels.
     *
-    * @param gridCenter        is the location of the sensor origin, that will be the center of our map
-    * @param globalCenterIndex is the center index of the global map
-    * @param cropCenterIndex   is the center index of the cropped map
+    * @param gridCenter is the location of the sensor origin, that will be the center of our map
     * @return a float array with the parameters for the snapping kernels. The order matters as it needs to match the order things are defined by in the kernel
     */
-   public float[] populateSnappingParametersArray(Tuple3DReadOnly gridCenter, int globalCenterIndex, int cropCenterIndex)
+   public float[] populateSnappingParametersArray(Tuple3DReadOnly gridCenter)
    {
       return new float[] {(float) gridCenter.getX(),
                           (float) gridCenter.getY(),
                           (float) heightMapParameters.getCellSizeInMeters(),
-                          globalCenterIndex,
-                          cropCenterIndex,
+                          (float) heightMapParameters.getInternalGlobalWidthInMeters(),
+                          (float) heightMapParameters.getTerrainWidthInMeters(),
                           (float) heightMapParameters.getHeightScaleFactor(),
                           (float) heightMapParameters.getHeightOffset(),
                           (float) steppableRegionParameters.getFootLength(),

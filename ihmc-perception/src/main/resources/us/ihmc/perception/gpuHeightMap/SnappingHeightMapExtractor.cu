@@ -6,8 +6,8 @@ extern "C"
 #define SNAP_HEIGHT_MAP_CENTER_X 0
 #define SNAP_HEIGHT_MAP_CENTER_Y 1
 #define SNAP_GLOBAL_CELL_SIZE 2
-#define SNAP_GLOBAL_CENTER_INDEX 3
-#define SNAP_CROPPED_WINDOW_CENTER_INDEX 4
+#define SNAP_GLOBAL_WIDTH_IN_METERS 3
+#define SNAP_CROPPED_WIDTH_IN_METERS 4
 #define SNAP_HEIGHT_SCALING_FACTOR 5
 #define SNAP_HEIGHT_OFFSET 6
 #define SNAP_FOOT_LENGTH 7
@@ -59,8 +59,9 @@ __global__ void computeSnappedValuesKernel(unsigned short *globalMap, size_t pit
 
     float map_resolution = params[SNAP_GLOBAL_CELL_SIZE];
     float max_dimension = fmaxf(params[SNAP_FOOT_WIDTH], params[SNAP_FOOT_LENGTH]);
-    int map_center_index = static_cast<int>(params[SNAP_GLOBAL_CENTER_INDEX]);
-    int cropped_center_index = static_cast<int>(params[SNAP_CROPPED_WINDOW_CENTER_INDEX]);
+
+    int map_center_index = compute_center_index(params[SNAP_GLOBAL_WIDTH_IN_METERS], map_resolution);
+    int cropped_center_index = compute_center_index(params[SNAP_CROPPED_WIDTH_IN_METERS], map_resolution);
     float2 center = make_float2(params[SNAP_HEIGHT_MAP_CENTER_Y], params[SNAP_HEIGHT_MAP_CENTER_X]);
     float2 map_center = make_float2(0.0f, 0.0f);
 
@@ -322,7 +323,7 @@ __global__ void computeSteppabilityConnectionsKernel(float* params,
     int idx_x = blockIdx.x * blockDim.x + threadIdx.x;
     int idx_y = blockIdx.y * blockDim.y + threadIdx.y;
 
-    int cells_per_side = 2 * static_cast<int>(params[SNAP_CROPPED_WINDOW_CENTER_INDEX]) + 1;
+    int cells_per_side = 2 * compute_center_index(params[SNAP_CROPPED_WIDTH_IN_METERS], params[SNAP_GLOBAL_CELL_SIZE]) + 1;
 
     int2 key = make_int2(idx_x, idx_y);
 
