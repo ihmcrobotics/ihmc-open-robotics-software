@@ -146,7 +146,7 @@ public class LeRobotDataset
          rootNode.put("total_tasks", taskNames.size());
          rootNode.put("total_videos", 2 * episodes.size());
          rootNode.put("total_chunks", 1);
-         rootNode.put("chunk_size", 1000);
+         rootNode.put("chunks_size", 1000);
          rootNode.put("fps", ZED_FPS);
          ObjectNode splits = rootNode.putObject("splits");
          splits.put("train", "0:%d".formatted(episodes.size()));
