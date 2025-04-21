@@ -61,8 +61,6 @@ public class CUDABodyCollisionFilter
       GpuMat originalDepthImage = new GpuMat();
       originalDepthImage.upload(hostDepthImage);
 
-      GpuMat depthImageWithoutRobot = new GpuMat(hostDepthImage.size(), opencv_core.CV_16UC1);
-
       numberOfCollidables = countCapsules(robotCollidables);
 
       if (numberOfCollidables == 0)
@@ -70,11 +68,12 @@ public class CUDABodyCollisionFilter
          return originalDepthImage;
       }
 
-      FloatPointer collidableGeometryPointer = getCollidablesPointer(robotCollidables, cameraFrame);
+      GpuMat depthImageWithoutRobot = new GpuMat(hostDepthImage.size(), opencv_core.CV_16UC1);
 
       int dataSize = numberOfCollidables * NUMBER_OF_ATTRIBUTES * Float.BYTES;
-
       FloatPointer deviceCollidableGeometryPointer = new FloatPointer();
+      FloatPointer collidableGeometryPointer = getCollidablesPointer(robotCollidables, cameraFrame);
+
       CUDATools.mallocAsync(deviceCollidableGeometryPointer, dataSize, stream);
       CUDATools.memcpyAsync(deviceCollidableGeometryPointer, collidableGeometryPointer, dataSize, stream);
 

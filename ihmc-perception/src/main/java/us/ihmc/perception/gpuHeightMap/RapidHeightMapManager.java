@@ -89,15 +89,21 @@ public class RapidHeightMapManager
    public void update(RawImage depthImage, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame) throws Exception
    {
       // -------- Update the Height Map with the latest depth image from the sensor --------------
-      Mat latestDepthImage = depthImage.getCpuImageMat();
-      Instant acquisitionTime = depthImage.getAcquisitionTime();
-      CameraIntrinsics depthIntrinsicsCopy = depthImage.getIntrinsicsCopy();
+      RawImage depthImageCopy = depthImage.get();
+      Mat latestDepthImage = depthImageCopy.getCpuImageMat();
+      Instant acquisitionTime = depthImageCopy.getAcquisitionTime();
+      CameraIntrinsics depthIntrinsicsCopy = depthImageCopy.getIntrinsicsCopy();
 
       update(latestDepthImage, acquisitionTime, depthIntrinsicsCopy, cameraFrame, cameraZUpFrame);
+      depthImageCopy.release();
    }
 
 
-   public void update(Mat latestDepthImage, Instant acquisitionTime, CameraIntrinsics depthIntrinsicsCopy, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame) throws Exception
+   public void update(Mat latestDepthImage,
+                      Instant acquisitionTime,
+                      CameraIntrinsics depthIntrinsicsCopy,
+                      ReferenceFrame cameraFrame,
+                      ReferenceFrame cameraZUpFrame) throws Exception
    {
       // Option that gets triggered from a message sent from the user
       if (lowerHeightMapBackdropRequested.poll())

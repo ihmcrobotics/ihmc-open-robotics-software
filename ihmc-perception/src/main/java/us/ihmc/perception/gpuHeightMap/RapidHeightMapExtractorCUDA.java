@@ -31,8 +31,9 @@ import static org.bytedeco.cuda.global.cudart.*;
 
 public class RapidHeightMapExtractorCUDA
 {
-   static final int BLOCK_SIZE_XY = 32;
    private static final boolean PRINT_TIMING_FOR_KERNELS = false;
+   static final int BLOCK_SIZE_XY = 32;
+
    private final List<ReferenceFrame> footSoleFrames = new ArrayList<>();
    private final Point3D sensorOrigin = new Point3D();
    private final int mode; // 0 -> Ouster, 1 -> Realsense
@@ -87,7 +88,10 @@ public class RapidHeightMapExtractorCUDA
    private dim3 planOffsetKernelGridDim;
    private int resetOffset;
 
-   public RapidHeightMapExtractorCUDA(ReferenceFrame leftFootSoleFrame, ReferenceFrame rightFootSoleFrame, int mode, HeightMapParameters heightMapParameters)
+   public RapidHeightMapExtractorCUDA(ReferenceFrame leftFootSoleFrame,
+                                      ReferenceFrame rightFootSoleFrame,
+                                      int mode,
+                                      HeightMapParameters heightMapParameters)
    {
       this.mode = mode;
       this.heightMapParameters = heightMapParameters;
