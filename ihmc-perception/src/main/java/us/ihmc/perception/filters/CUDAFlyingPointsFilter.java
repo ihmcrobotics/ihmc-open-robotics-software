@@ -3,8 +3,8 @@ package us.ihmc.perception.filters;
 import org.bytedeco.cuda.cudart.CUstream_st;
 import org.bytedeco.cuda.cudart.dim3;
 import org.bytedeco.cuda.global.cudart;
-import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
+import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
 
@@ -29,21 +29,11 @@ public class CUDAFlyingPointsFilter
       flyingPointFilterKernel = flyingPointFilterCUDAProgram.loadKernel(filterKernelName);
    }
 
-   public void destroy()
+   public Mat applyFilter(Mat inputImage)
    {
-      flyingPointFilterCUDAProgram.close();
-      flyingPointFilterKernel.close();
-      CUDAStreamManager.releaseStream(stream);
-   }
-
-   public GpuMat applyFilter(GpuMat deviceInputImage)
-   {
-      return applyFilterAsync(deviceInputImage, stream);
-   }
-
-   public GpuMat applyFilterAsync(GpuMat deviceInputImage, CUstream_st stream)
-   {
-      GpuMat deviceOutputImage = new GpuMat(deviceInputImage.rows(), deviceInputImage.cols(), opencv_core.CV_16UC1);
+      GpuMat deviceInputImage = new GpuMat();
+      deviceInputImage.upload(inputImage);
+      GpuMat deviceOutputImage = new GpuMat(deviceInputImage.size(), deviceInputImage.type());
 
       int gridSizeX = (deviceInputImage.cols() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
       int gridSizeY = (deviceInputImage.rows() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
@@ -58,10 +48,22 @@ public class CUDAFlyingPointsFilter
 
       CUDATools.checkCUDAError(cudart.cudaStreamSynchronize(stream));
 
+      Mat filteredDepthImageHost = new Mat();
+      deviceOutputImage.download(filteredDepthImageHost);
+
       blockSize.close();
       gridSize.close();
+      deviceInputImage.close();
+      deviceOutputImage.close();
 
-      return deviceOutputImage;
+      return filteredDepthImageHost;
+   }
+
+   public void destroy()
+   {
+      flyingPointFilterCUDAProgram.close();
+      flyingPointFilterKernel.close();
+      CUDAStreamManager.releaseStream(stream);
    }
 }
 

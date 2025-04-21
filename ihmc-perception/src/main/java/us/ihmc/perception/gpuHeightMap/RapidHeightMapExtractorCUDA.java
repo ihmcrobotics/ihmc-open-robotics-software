@@ -36,12 +36,10 @@ public class RapidHeightMapExtractorCUDA
 
    private final List<ReferenceFrame> footSoleFrames = new ArrayList<>();
    private final TerrainMapData terrainMapData;
-   private final CameraIntrinsics cameraIntrinsics;
    private final Point3D sensorOrigin = new Point3D();
    private final int mode; // 0 -> Ouster, 1 -> Realsense
    private final HeightMapParameters heightMapParameters;
 
-   private final GpuMat inputDepthImage;
    private final GpuMat localHeightMapImage;
    private final GpuMat globalHeightMapImage;
    private final GpuMat terrainCostImage;
@@ -94,13 +92,9 @@ public class RapidHeightMapExtractorCUDA
 
    public RapidHeightMapExtractorCUDA(ReferenceFrame leftFootSoleFrame,
                                       ReferenceFrame rightFootSoleFrame,
-                                      GpuMat depthImage,
-                                      CameraIntrinsics depthImageIntrinsics,
                                       int mode,
                                       HeightMapParameters heightMapParameters)
    {
-      inputDepthImage = depthImage;
-      this.cameraIntrinsics = depthImageIntrinsics;
       this.mode = mode;
       this.heightMapParameters = heightMapParameters;
 
@@ -246,7 +240,7 @@ public class RapidHeightMapExtractorCUDA
       return height;
    }
 
-   public void update(RigidBodyTransform sensorToWorldTransform, RigidBodyTransform sensorToGroundTransform, RigidBodyTransform groundToWorldTransform)
+   public void update(GpuMat latestDepthImageGPU, CameraIntrinsics cameraIntrinsics, RigidBodyTransform sensorToWorldTransform, RigidBodyTransform sensorToGroundTransform, RigidBodyTransform groundToWorldTransform)
    {
       int error;
 
@@ -309,7 +303,7 @@ public class RapidHeightMapExtractorCUDA
       croppingKernelGridDim = new dim3(croppingKernelGridSizeXY, croppingKernelGridSizeXY, 1);
 
       // Run the update kernel
-      updateKernel.withPointer(inputDepthImage.data()).withLong(inputDepthImage.step());
+      updateKernel.withPointer(latestDepthImageGPU.data()).withLong(latestDepthImageGPU.step());
       updateKernel.withPointer(localHeightMapImage.data()).withLong(localHeightMapImage.step());
       updateKernel.withPointer(parametersDevicePointer);
       updateKernel.withPointer(sensorToGroundTransformDevicePointer);
@@ -369,7 +363,7 @@ public class RapidHeightMapExtractorCUDA
       finalCroppedHeightMap.close();
    }
 
-   public void updateHeightOffset(float z)
+   public void updateHeightOffset(float z, CameraIntrinsics cameraIntrinsics)
    {
       int error;
 
@@ -487,7 +481,6 @@ public class RapidHeightMapExtractorCUDA
       registerKernelGridDim.close();
       croppingKernelGridDim.close();
 
-      inputDepthImage.close();
       localHeightMapImage.close();
       globalHeightMapImage.close();
       terrainCostImage.close();

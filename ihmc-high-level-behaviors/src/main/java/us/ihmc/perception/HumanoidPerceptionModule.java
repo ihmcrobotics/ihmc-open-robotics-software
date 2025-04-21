@@ -19,10 +19,8 @@ import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.perception.filters.CollidingScanRegionFilter;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractorCUDA;
-import us.ihmc.perception.gpuHeightMap.RapidHeightMapManager;
 import us.ihmc.perception.heightMap.RemoteHeightMapUpdater;
 import us.ihmc.perception.opencl.OpenCLManager;
-import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.timing.PerceptionStatistics;
@@ -180,23 +178,6 @@ public class HumanoidPerceptionModule
       perceptionStatistics.updateTimeToComputeRapidRegions((System.nanoTime() - begin) * 1e-6f);
    }
 
-   private void updateRapidHeightMap(ROS2Helper ros2Helper, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame)
-   {
-      if (resetHeightMapRequested.poll())
-         rapidHeightMapExtractor.reset();
-
-      RigidBodyTransform sensorToWorld = cameraFrame.getTransformToWorldFrame();
-      RigidBodyTransform sensorToGround = cameraFrame.getTransformToDesiredFrame(cameraZUpFrame);
-      RigidBodyTransform groundToWorld = cameraZUpFrame.getTransformToWorldFrame();
-
-      cameraPose.setToZero(cameraFrame);
-      cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
-
-      long begin = System.nanoTime();
-      rapidHeightMapExtractor.update(sensorToWorld, sensorToGround, groundToWorld);
-      perceptionStatistics.updateTimeToComputeHeightMap((System.nanoTime() - begin) * 1e-6f);
-   }
-
    public void updateStructural(ROS2Helper ros2Helper, List<Point3D> pointCloud, ReferenceFrame sensorFrame, Mat occupancy, float thresholdHeight)
    {
       lidarPose.setToZero(sensorFrame);
@@ -341,7 +322,8 @@ public class HumanoidPerceptionModule
 
    public RapidHeightMapExtractorCUDA getRapidHeightMapExtractor()
    {
-      return rapidHeightMapExtractor;
+      // TODO fix me
+      return null;
    }
 
    public void setPerceptionConfigurationParameters(PerceptionConfigurationParameters perceptionConfigurationParameters)

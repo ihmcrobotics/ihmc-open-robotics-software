@@ -15,21 +15,14 @@ import us.ihmc.sensors.ImageSensor;
 
 public class RapidHeightMapUpdateThread extends RepeatingTaskThread
 {
-   private final ROS2Node ros2Node;
-   private final ROS2SyncedRobotModel syncedRobotModel;
-   private final ReferenceFrame leftFootFrame;
-   private final ReferenceFrame rightFootFrame;
 
-   private RapidHeightMapManager heightMapManager;
+   private final RapidHeightMapManager heightMapManager;
    private final Object heightMapLock = new Object();
 
-   private final ControllerFootstepQueueMonitor controllerFootstepQueueMonitor;
    private final ImageSensor imageSensor;
    private final ReferenceFrame sensorFrame;
    private final ReferenceFrame zUpSensorFrame;
-   private final HeightMapParameters heightMapParameters;
    private final int depthImageKey;
-   private final RobotCollisionModel robotCollisionModel;
 
    public RapidHeightMapUpdateThread(ROS2Node ros2Node,
                                      ROS2SyncedRobotModel syncedRobotModel,
@@ -43,18 +36,27 @@ public class RapidHeightMapUpdateThread extends RepeatingTaskThread
    {
       super(imageSensor.getSensorName() + RapidHeightMapUpdateThread.class.getSimpleName());
 
-      this.ros2Node = ros2Node;
-      this.syncedRobotModel = syncedRobotModel;
-      this.robotCollisionModel = robotCollisionModel;
-      this.leftFootFrame = leftFootFrame;
-      this.rightFootFrame = rightFootFrame;
-      this.controllerFootstepQueueMonitor = controllerFootstepQueueMonitor;
       this.imageSensor = imageSensor;
       this.depthImageKey = depthImageKey;
-      this.heightMapParameters = heightMapParameters;
 
       sensorFrame = syncedRobotModel.getReferenceFrames().getSteppingCameraFrame();
       zUpSensorFrame = syncedRobotModel.getReferenceFrames().getSteppingCameraZUpFrame();
+
+      try
+      {
+         heightMapManager = new RapidHeightMapManager(ros2Node,
+                                                      robotCollisionModel,
+                                                      syncedRobotModel.getFullRobotModel(),
+                                                      syncedRobotModel.getRobotModel().getSimpleRobotName(),
+                                                      leftFootFrame,
+                                                      rightFootFrame,
+                                                      controllerFootstepQueueMonitor,
+                                                      heightMapParameters);
+      }
+      catch (Exception e)
+      {
+         throw new RuntimeException(e);
+      }
    }
 
    @Override
@@ -65,25 +67,10 @@ public class RapidHeightMapUpdateThread extends RepeatingTaskThread
          imageSensor.waitForGrab();
          RawImage depthImage = imageSensor.getImage(depthImageKey);
 
-         // Initialize
-         if (heightMapManager == null)
-         {
-            heightMapManager = new RapidHeightMapManager(ros2Node,
-                                                         robotCollisionModel,
-                                                         syncedRobotModel.getFullRobotModel(),
-                                                         syncedRobotModel.getRobotModel().getSimpleRobotName(),
-                                                         leftFootFrame,
-                                                         rightFootFrame,
-                                                         controllerFootstepQueueMonitor,
-                                                         depthImage.getIntrinsicsCopy(),
-                                                         heightMapParameters,
-                                                         sensorFrame);
-         }
-
          // Update height map
          synchronized (heightMapLock)
          {
-            heightMapManager.update(depthImage.getCpuImageMat(), depthImage.getAcquisitionTime(), sensorFrame, zUpSensorFrame);
+            heightMapManager.update(depthImage, sensorFrame, zUpSensorFrame);
          }
 
          depthImage.release();
