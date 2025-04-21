@@ -24,6 +24,7 @@ import us.ihmc.zed.SL_RuntimeParameters;
 import us.ihmc.zed.SL_Vector3;
 import us.ihmc.zed.library.ZEDJavaAPINativeLibrary;
 
+import javax.annotation.Nullable;
 import java.time.Instant;
 
 import static us.ihmc.zed.global.zed.*;
@@ -50,6 +51,10 @@ public class ZEDImageSensor extends ImageSensor
    private final ZEDModelData zedModel;
    private final int slInputType;
    private final int slDepthMode;
+   @Nullable
+   private String remoteAddress;
+   @Nullable
+   private int remotePort;
    private final int streamingPort = nextStreamingPort++;
 
    private final RawImage[] grabbedImages = new RawImage[OUTPUT_IMAGE_COUNT];
@@ -83,6 +88,8 @@ public class ZEDImageSensor extends ImageSensor
       this.zedModel = zedModel;
       this.slInputType = slInputType;
       this.slDepthMode = slDepthMode;
+      this.remoteAddress = null;
+      this.remotePort = -1;
 
       trackedSensorFrame = new MutableReferenceFrame(getSensorName() + "_tracked", ReferenceFrameTools.getWorldFrame());
 
@@ -96,6 +103,14 @@ public class ZEDImageSensor extends ImageSensor
       zedRuntimeParameters.texture_confidence_threshold(100);
       zedRuntimeParameters.remove_saturated_areas(true);
       zedRuntimeParameters.enable_fill_mode(false);
+   }
+
+   public ZEDImageSensor(int cameraID, ZEDModelData zedModel, int slInputType, int slDepthMode, String remoteAddress, int remotePort)
+   {
+      this(cameraID, zedModel, slInputType, slDepthMode);
+
+      this.remoteAddress = remoteAddress;
+      this.remotePort = remotePort;
    }
 
    private void updateReferenceFrames()
@@ -140,7 +155,8 @@ public class ZEDImageSensor extends ImageSensor
             sl_enable_positional_tracking(cameraID, positionalTrackingParameters, "");
          }
 
-         sl_enable_streaming(cameraID, SL_STREAMING_CODEC_H264, 8000, (short) streamingPort, -1, 0, 16084, CAMERA_FPS);
+         if (slInputType != SL_INPUT_TYPE_STREAM)
+            sl_enable_streaming(cameraID, SL_STREAMING_CODEC_H264, 8000, (short) streamingPort, -1, 0, 16084, CAMERA_FPS);
 
          // Get camera intrinsics
          SL_CalibrationParameters sensorIntrinsics = sl_get_calibration_parameters(cameraID, false);
@@ -208,7 +224,10 @@ public class ZEDImageSensor extends ImageSensor
 
    protected int openCamera()
    {
-      return sl_open_camera(cameraID, zedInitParameters, 0, "", "", 0, "", "", "");
+      if (slInputType == SL_INPUT_TYPE_STREAM)
+         return sl_open_camera(cameraID, zedInitParameters, 0, "", remoteAddress, remotePort, "", "", "");
+      else
+         return sl_open_camera(cameraID, zedInitParameters, 0, "", "", 0, "", "", "");
    }
 
    @Override
