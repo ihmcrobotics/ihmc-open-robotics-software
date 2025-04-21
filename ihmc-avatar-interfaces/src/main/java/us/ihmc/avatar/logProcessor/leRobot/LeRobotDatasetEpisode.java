@@ -119,10 +119,12 @@ public class LeRobotDatasetEpisode
 
          writeMetadataToFilesystem.run();
 
+         appendJsonStatsLine();
+
       }, getClass().getSimpleName());
    }
 
-   public void appendJsonFileLine()
+   public void appendJsonBasicEntryLine()
    {
       LeRobotDatasetTools.appendLine(episodesJsonlPath, JSONFileTools.getAsSingleLine(node ->
       {
@@ -131,6 +133,10 @@ public class LeRobotDatasetEpisode
          tasksArray.add(taskName);
          node.put("length", length);
       }));
+   }
+
+   public void appendJsonStatsLine()
+   {
       LeRobotDatasetTools.appendLine(episodeStatsJsonlPath, JSONFileTools.getAsSingleLine(node ->
       {
          node.put("episode_index", episodeIndex);
@@ -157,7 +163,8 @@ public class LeRobotDatasetEpisode
             video.putArray("count").add(length);
          }
 
-         stats.putObject("state");
+         ObjectNode state = stats.putObject("state");
+         ArrayNode min = state.putArray("min");
       }));
    }
 

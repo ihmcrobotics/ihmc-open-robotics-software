@@ -211,10 +211,9 @@ public class LeRobotDataset
       });
 
       FileTools.write(episodesJsonlPath, new byte[0], WriteOption.TRUNCATE, DefaultExceptionHandler.PRINT_MESSAGE);
-      FileTools.write(episodeStatsJsonlPath, new byte[0], WriteOption.TRUNCATE, DefaultExceptionHandler.PRINT_MESSAGE);
       for (LeRobotDatasetEpisode episode : episodes)
       {
-         episode.appendJsonFileLine();
+         episode.appendJsonBasicEntryLine();
       }
    }
 
