@@ -52,8 +52,6 @@ __global__ void computeSnappedValuesKernel(unsigned short *globalMap, size_t pit
 
     bool should_print = false;//idx_x == 20 && idx_y == 20;
 
-    int2 key = make_int2(idx_x, idx_y);
-
     float foot_width = params[SNAP_FOOT_WIDTH];
     float foot_length = params[SNAP_FOOT_LENGTH];
 
