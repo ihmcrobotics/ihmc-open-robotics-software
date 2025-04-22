@@ -15,7 +15,7 @@ public class ErrorPubSubType implements us.ihmc.pubsub.TopicDataType<unitree_go_
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "dff9c6f148f46bcf8edab3e1c5f06c6f7139e02721e57d149b92833031e6b4be";
+   		return "c7106a36f20cca02a31b2d438da6070bdeac9693cf565e49215bef3f14afc796";
    }
    
    @Override
@@ -81,17 +81,17 @@ public class ErrorPubSubType implements us.ihmc.pubsub.TopicDataType<unitree_go_
 
    public static void write(unitree_go_msgs.msg.dds.Error data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSource());
+      cdr.write_type_4(data.getErrorSource());
 
-      cdr.write_type_4(data.getState());
+      cdr.write_type_4(data.getErrorState());
 
    }
 
    public static void read(unitree_go_msgs.msg.dds.Error data, us.ihmc.idl.CDR cdr)
    {
-      data.setSource(cdr.read_type_4());
+      data.setErrorSource(cdr.read_type_4());
       	
-      data.setState(cdr.read_type_4());
+      data.setErrorState(cdr.read_type_4());
       	
 
    }
@@ -99,15 +99,15 @@ public class ErrorPubSubType implements us.ihmc.pubsub.TopicDataType<unitree_go_
    @Override
    public final void serialize(unitree_go_msgs.msg.dds.Error data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("source", data.getSource());
-      ser.write_type_4("state", data.getState());
+      ser.write_type_4("error_source", data.getErrorSource());
+      ser.write_type_4("error_state", data.getErrorState());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, unitree_go_msgs.msg.dds.Error data)
    {
-      data.setSource(ser.read_type_4("source"));
-      data.setState(ser.read_type_4("state"));
+      data.setErrorSource(ser.read_type_4("error_source"));
+      data.setErrorState(ser.read_type_4("error_state"));
    }
 
    public static void staticCopy(unitree_go_msgs.msg.dds.Error src, unitree_go_msgs.msg.dds.Error dest)

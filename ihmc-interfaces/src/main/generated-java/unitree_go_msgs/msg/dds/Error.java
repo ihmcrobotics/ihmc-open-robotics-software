@@ -8,8 +8,8 @@ import us.ihmc.pubsub.TopicDataType;
 
 public class Error extends Packet<Error> implements Settable<Error>, EpsilonComparable<Error>
 {
-   public long source_;
-   public long state_;
+   public long error_source_;
+   public long error_state_;
 
    public Error()
    {
@@ -23,28 +23,28 @@ public class Error extends Packet<Error> implements Settable<Error>, EpsilonComp
 
    public void set(Error other)
    {
-      source_ = other.source_;
+      error_source_ = other.error_source_;
 
-      state_ = other.state_;
+      error_state_ = other.error_state_;
 
    }
 
-   public void setSource(long source)
+   public void setErrorSource(long error_source)
    {
-      source_ = source;
+      error_source_ = error_source;
    }
-   public long getSource()
+   public long getErrorSource()
    {
-      return source_;
+      return error_source_;
    }
 
-   public void setState(long state)
+   public void setErrorState(long error_state)
    {
-      state_ = state;
+      error_state_ = error_state;
    }
-   public long getState()
+   public long getErrorState()
    {
-      return state_;
+      return error_state_;
    }
 
 
@@ -65,9 +65,9 @@ public class Error extends Packet<Error> implements Settable<Error>, EpsilonComp
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.source_, other.source_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.error_source_, other.error_source_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.state_, other.state_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.error_state_, other.error_state_, epsilon)) return false;
 
 
       return true;
@@ -82,9 +82,9 @@ public class Error extends Packet<Error> implements Settable<Error>, EpsilonComp
 
       Error otherMyClass = (Error) other;
 
-      if(this.source_ != otherMyClass.source_) return false;
+      if(this.error_source_ != otherMyClass.error_source_) return false;
 
-      if(this.state_ != otherMyClass.state_) return false;
+      if(this.error_state_ != otherMyClass.error_state_) return false;
 
 
       return true;
@@ -96,10 +96,10 @@ public class Error extends Packet<Error> implements Settable<Error>, EpsilonComp
       StringBuilder builder = new StringBuilder();
 
       builder.append("Error {");
-      builder.append("source=");
-      builder.append(this.source_);      builder.append(", ");
-      builder.append("state=");
-      builder.append(this.state_);
+      builder.append("error_source=");
+      builder.append(this.error_source_);      builder.append(", ");
+      builder.append("error_state=");
+      builder.append(this.error_state_);
       builder.append("}");
       return builder.toString();
    }

@@ -1,2 +1,2 @@
-uint32 source
-uint32 state
+uint32 error_source
+uint32 error_state

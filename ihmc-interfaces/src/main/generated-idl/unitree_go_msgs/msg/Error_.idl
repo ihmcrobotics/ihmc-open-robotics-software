@@ -11,8 +11,8 @@ module unitree_go_msgs
       @TypeCode(type="unitree_go_msgs::msg::dds_::Error_")
       struct Error
       {
-        unsigned long source;
-        unsigned long state;
+        unsigned long error_source;
+        unsigned long error_state;
       };
     };
   };
