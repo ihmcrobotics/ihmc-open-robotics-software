@@ -62,7 +62,6 @@ public class RapidHeightMapExtractorCUDA
    private final FloatPointer parametersDevicePointer;
    private final FilteredRapidHeightMapExtractor filteredRapidHeightMapExtractor;
    private final FilteredVerticalSurfacesExtractor verticalSurfacesExtractor;
-   private final SnappingHeightMapExtractor snappedFootstepsExtractor;
    public int sequenceNumber = 0;
    private float gridOffsetX;
    private int centerIndex;
@@ -136,8 +135,6 @@ public class RapidHeightMapExtractorCUDA
 
          parametersHostPointer = new FloatPointer(37);
          parametersDevicePointer = new FloatPointer();
-
-         snappedFootstepsExtractor = new SnappingHeightMapExtractor(heightMapParameters);
       }
       catch (Exception e)
       {
@@ -420,7 +417,6 @@ public class RapidHeightMapExtractorCUDA
       sensorCroppedHeightMapImage.close();
       terrainHeightMapImage.close();
 
-      snappedFootstepsExtractor.destroy();
       filteredRapidHeightMapExtractor.destroy();
       verticalSurfacesExtractor.destroy();
 
