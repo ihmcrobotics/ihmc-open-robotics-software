@@ -299,7 +299,7 @@ public class RapidHeightMapExtractorCUDA
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
 
-      snappedFootstepsExtractor.update(globalHeightMapImage, sensorOrigin, terrainHeightMapImage);
+      snappedFootstepsExtractor.update(terrainHeightMapImage, sensorOrigin);
    }
 
    public void updateHeightOffset(float z, CameraIntrinsics cameraIntrinsics, double footHeight)

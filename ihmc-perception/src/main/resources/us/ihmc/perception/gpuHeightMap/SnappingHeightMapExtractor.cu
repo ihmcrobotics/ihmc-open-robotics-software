@@ -6,20 +6,19 @@ extern "C"
 #define SNAP_HEIGHT_MAP_CENTER_X 0
 #define SNAP_HEIGHT_MAP_CENTER_Y 1
 #define SNAP_GLOBAL_CELL_SIZE 2
-#define SNAP_GLOBAL_WIDTH_IN_METERS 3
-#define SNAP_CROPPED_WIDTH_IN_METERS 4
-#define SNAP_HEIGHT_SCALING_FACTOR 5
-#define SNAP_HEIGHT_OFFSET 6
-#define SNAP_FOOT_LENGTH 7
-#define SNAP_FOOT_WIDTH 8
-#define MIN_DISTANCE_FROM_CLIFF_TOPS 9
-#define MIN_DISTANCE_FROM_CLIFF_BOTTOMS 10
-#define CLIFF_START_HEIGHT_TO_AVOID 11
-#define CLIFF_END_HEIGHT_TO_AVOID 12
-#define MIN_SUPPORT_AREA_FRACTION 13
-#define MIN_SNAP_HEIGHT_THRESHOLD 14
-#define SNAP_HEIGHT_THRESHOLD_AT_SEARCH_EDGE 15
-#define INEQUALITY_ACTIVATION_SLOPE 16
+#define SNAP_WIDTH_IN_METERS 3
+#define SNAP_HEIGHT_SCALING_FACTOR 4
+#define SNAP_HEIGHT_OFFSET 5
+#define SNAP_FOOT_LENGTH 6
+#define SNAP_FOOT_WIDTH 7
+#define MIN_DISTANCE_FROM_CLIFF_TOPS 8
+#define MIN_DISTANCE_FROM_CLIFF_BOTTOMS 9
+#define CLIFF_START_HEIGHT_TO_AVOID 10
+#define CLIFF_END_HEIGHT_TO_AVOID 11
+#define MIN_SUPPORT_AREA_FRACTION 12
+#define MIN_SNAP_HEIGHT_THRESHOLD 13
+#define SNAP_HEIGHT_THRESHOLD_AT_SEARCH_EDGE 14
+#define INEQUALITY_ACTIVATION_SLOPE 15
 
 #define SNAP_FAILED 0
 #define CLIFF_TOP 1
@@ -50,7 +49,7 @@ __global__ void computeSnappedValuesKernel(unsigned short *globalMap, size_t pit
     if (idx_x >= croppedMapXY || idx_y >= croppedMapXY)
         return;
 
-    bool should_print = false;//idx_x == 20 && idx_y == 20;
+    bool should_print = false;
 
     float foot_width = params[SNAP_FOOT_WIDTH];
     float foot_length = params[SNAP_FOOT_LENGTH];
@@ -58,12 +57,10 @@ __global__ void computeSnappedValuesKernel(unsigned short *globalMap, size_t pit
     float map_resolution = params[SNAP_GLOBAL_CELL_SIZE];
     float max_dimension = fmaxf(params[SNAP_FOOT_WIDTH], params[SNAP_FOOT_LENGTH]);
 
-    int map_center_index = compute_center_index(params[SNAP_GLOBAL_WIDTH_IN_METERS], map_resolution);
-    int cropped_center_index = compute_center_index(params[SNAP_CROPPED_WIDTH_IN_METERS], map_resolution);
+    int cropped_center_index = compute_center_index(params[SNAP_WIDTH_IN_METERS], map_resolution);
     float2 center = make_float2(params[SNAP_HEIGHT_MAP_CENTER_Y], params[SNAP_HEIGHT_MAP_CENTER_X]);
-    float2 map_center = make_float2(0.0f, 0.0f);
 
-    int map_cells_per_side = 2 * map_center_index + 1;
+    int map_cells_per_side = 2 * cropped_center_index + 1;
     int map_cells_per_side_for_checking = map_cells_per_side - 1;
 
     int crop_idx_x = idx_x;
@@ -71,9 +68,6 @@ __global__ void computeSnappedValuesKernel(unsigned short *globalMap, size_t pit
     int2 crop_key = make_int2(crop_idx_x, crop_idx_y);
 
     float2 foot_position = indices_to_coordinate(crop_key, center, map_resolution, cropped_center_index);
-
-    // Convert from the world coordinate to the map index.
-    int2 map_key = coordinate_to_indices(foot_position, map_center, map_resolution, map_center_index);
 
     float half_length = foot_length / 2.0f;
     float half_width = foot_width / 2.0f;
@@ -83,17 +77,17 @@ __global__ void computeSnappedValuesKernel(unsigned short *globalMap, size_t pit
     int foot_offset_indices = static_cast<int>(ceilf(foot_search_radius / map_resolution));
 
     int max_height_int = -100;
-    int foot_search_min_x = max(map_key.x - foot_offset_indices, 0);
-    int foot_search_max_x = min(map_key.x + foot_offset_indices + 1, map_cells_per_side_for_checking);
-    int foot_search_min_y = max(map_key.y - foot_offset_indices, 0);
-    int foot_search_max_y = min(map_key.y + foot_offset_indices + 1, map_cells_per_side_for_checking);
+    int foot_search_min_x = max(crop_key.x - foot_offset_indices, 0);
+    int foot_search_max_x = min(crop_key.x + foot_offset_indices + 1, map_cells_per_side_for_checking);
+    int foot_search_min_y = max(crop_key.y - foot_offset_indices, 0);
+    int foot_search_max_y = min(crop_key.y + foot_offset_indices + 1, map_cells_per_side_for_checking);
 
     for (int x_query = foot_search_min_x; x_query < foot_search_max_x; ++x_query)
     {
         for (int y_query = foot_search_min_y; y_query < foot_search_max_y; ++y_query)
         {
-            float2 vector_to_point_from_foot = make_float2(static_cast<float>(x_query - map_key.x) * map_resolution,
-                                                           static_cast<float>(y_query - map_key.y) * map_resolution);
+            float2 vector_to_point_from_foot = make_float2(static_cast<float>(x_query - crop_key.x) * map_resolution,
+                                                           static_cast<float>(y_query - crop_key.y) * map_resolution);
 
             if (dot2D(vector_to_point_from_foot, vector_to_point_from_foot) > foot_search_radius_squared)
                 continue;
@@ -138,7 +132,8 @@ __global__ void computeSnappedValuesKernel(unsigned short *globalMap, size_t pit
             float offset_distance = sqrt(offset_distance_squared);
             float2 point_query = make_float2(offset.x + foot_position.x, offset.y + foot_position.y);
 
-            int2 query_key = coordinate_to_indices(point_query, map_center, map_resolution, map_center_index);
+            float2 localXY = make_float2(point_query.x, point_query.y);
+            int2 query_key  = coordinate_to_indices(localXY, center, resolution, cropped_center_index);
 
             if (query_key.x < 0 || query_key.x > map_cells_per_side_for_checking || query_key.y < 0 || query_key.y > map_cells_per_side_for_checking)
                 continue;
@@ -223,17 +218,17 @@ __global__ void computeSnappedValuesKernel(unsigned short *globalMap, size_t pit
         int cliff_offset_indices = (int)ceil(cliff_search_offset / map_resolution);
         float min_distance_from_tops_squared = params[MIN_DISTANCE_FROM_CLIFF_TOPS] * params[MIN_DISTANCE_FROM_CLIFF_TOPS];
 
-        int min_x = max(map_key.x - cliff_offset_indices,0);
-        int max_x = min(map_key.x + cliff_offset_indices + 1, map_cells_per_side_for_checking);
-        int min_y = max(map_key.y - cliff_offset_indices, 0);
-        int max_y = min(map_key.y + cliff_offset_indices + 1, map_cells_per_side_for_checking);
+        int min_x = max(crop_key.x - cliff_offset_indices,0);
+        int max_x = min(crop_key.x + cliff_offset_indices + 1, map_cells_per_side_for_checking);
+        int min_y = max(crop_key.y - cliff_offset_indices, 0);
+        int max_y = min(crop_key.y + cliff_offset_indices + 1, map_cells_per_side_for_checking);
 
         // search for a cliff base that's too close
         for (int x_query = min_x; x_query < max_x; x_query++)
         {
             for (int y_query = min_y; y_query < max_y; y_query++)
             {
-                float2 vector_to_point_from_foot = make_float2((float)(x_query - map_key.x) * map_resolution, (float)(y_query - map_key.y) * map_resolution);
+                float2 vector_to_point_from_foot = make_float2((float)(x_query - crop_key.x) * map_resolution, (float)(y_query - crop_key.y) * map_resolution);
                 float distance_to_point_squared = dot2D(vector_to_point_from_foot, vector_to_point_from_foot);
 
                 // skip this cell if it's too far away from the foot // , but also skip it if it's within the foot.
@@ -321,7 +316,7 @@ __global__ void computeSteppabilityConnectionsKernel(float* params,
     int idx_x = blockIdx.x * blockDim.x + threadIdx.x;
     int idx_y = blockIdx.y * blockDim.y + threadIdx.y;
 
-    int cells_per_side = 2 * compute_center_index(params[SNAP_CROPPED_WIDTH_IN_METERS], params[SNAP_GLOBAL_CELL_SIZE]) + 1;
+    int cells_per_side = 2 * compute_center_index(params[SNAP_WIDTH_IN_METERS], params[SNAP_GLOBAL_CELL_SIZE]) + 1;
 
     int2 key = make_int2(idx_x, idx_y);
 

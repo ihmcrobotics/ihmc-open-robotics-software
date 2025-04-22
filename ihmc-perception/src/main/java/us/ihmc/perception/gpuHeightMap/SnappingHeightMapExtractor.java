@@ -68,7 +68,7 @@ public class SnappingHeightMapExtractor
          snappingKernel = snappingHeightMapProgram.loadKernel("computeSnappedValuesKernel");
          snappingKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
 
-         snappingParametersHostPointer = new FloatPointer(17);
+         snappingParametersHostPointer = new FloatPointer(16);
          snappingParametersDevicePointer = new FloatPointer();
       }
       catch (Exception e)
@@ -100,7 +100,7 @@ public class SnappingHeightMapExtractor
       snapHeightImage.setTo(new Scalar(resetOffset));
    }
 
-   public void update(GpuMat globalHeightMapImage, Point3D sensorOrigin, GpuMat terrainHeightMap)
+   public void update(GpuMat terrainHeightMap, Point3D sensorOrigin)
    {
       int error;
 
@@ -115,7 +115,7 @@ public class SnappingHeightMapExtractor
       CUDATools.memcpyAsync(snappingParametersDevicePointer, snappingParametersHostPointer, snappingParametersArray.length, stream);
 
       // Pass all the parameters to the kernel so that its setup to run correctly
-      snappingKernel.withPointer(globalHeightMapImage.data()).withLong(globalHeightMapImage.step());
+      snappingKernel.withPointer(terrainHeightMap.data()).withLong(terrainHeightMap.step());
       snappingKernel.withPointer(steppabilityImage.data()).withLong(steppabilityImage.step());
       snappingKernel.withPointer(snapHeightImage.data()).withLong(snapHeightImage.step());
       snappingKernel.withPointer(snapNormalXImage.data()).withLong(snapNormalXImage.step());
@@ -180,7 +180,6 @@ public class SnappingHeightMapExtractor
       return new float[] {(float) gridCenter.getX(),
                           (float) gridCenter.getY(),
                           (float) heightMapParameters.getCellSizeInMeters(),
-                          (float) heightMapParameters.getInternalGlobalWidthInMeters(),
                           (float) heightMapParameters.getTerrainWidthInMeters(),
                           (float) heightMapParameters.getHeightScaleFactor(),
                           (float) heightMapParameters.getHeightOffset(),
