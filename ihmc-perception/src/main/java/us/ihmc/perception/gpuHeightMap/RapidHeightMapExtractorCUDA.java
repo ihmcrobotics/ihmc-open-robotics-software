@@ -181,8 +181,6 @@ public class RapidHeightMapExtractorCUDA
       emptyGlobalHeightMapImage.setTo(new Scalar(resetOffset));
 
       filteredRapidHeightMapExtractor.reset();
-      snappedFootstepsExtractor.reset(resetOffset);
-
       sequenceNumber = 0;
    }
 

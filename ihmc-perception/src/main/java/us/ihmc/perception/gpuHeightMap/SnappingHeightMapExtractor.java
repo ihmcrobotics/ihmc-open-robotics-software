@@ -6,7 +6,6 @@ import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.opencv.opencv_core.Scalar;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.perception.cuda.CUDAKernel;
@@ -93,11 +92,6 @@ public class SnappingHeightMapExtractor
    {
       int terrainCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getTerrainWidthInMeters(), heightMapParameters.getCellSizeInMeters());
       cellsPerAxisTerrain = 2 * terrainCenterIndex + 1;
-   }
-
-   public void reset(int resetOffset)
-   {
-      snapHeightImage.setTo(new Scalar(resetOffset));
    }
 
    public void update(GpuMat terrainHeightMap, Point3D sensorOrigin)

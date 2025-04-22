@@ -114,7 +114,7 @@ public class RapidHeightMapManager
       if (lowerHeightMapBackdropRequested.poll())
       {
          double footHeight = computeFootHeight();
-         int loweredFootHeight = -10000;
+         int loweredFootHeight = 10000;
          rapidHeightMapExtractor.reset(footHeight, loweredFootHeight);
          if (heightMapParameters.getDriftOffsetFilter())
          {
