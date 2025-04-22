@@ -44,7 +44,7 @@ public class ZEDImageSensor extends ImageSensor
 
    public static final int OUTPUT_IMAGE_COUNT = 3;
 
-   protected static final int CAMERA_FPS = 15;
+   protected static final int CAMERA_FPS = 60;
    private static final float MILLIMETER_TO_METERS = 0.001f;
 
    private final int cameraID;
@@ -200,7 +200,7 @@ public class ZEDImageSensor extends ImageSensor
    protected void setInitParameters(SL_InitParameters parametersToSet)
    {
       parametersToSet.camera_fps(CAMERA_FPS);
-      parametersToSet.resolution(SL_RESOLUTION_VGA);
+      parametersToSet.resolution(SL_RESOLUTION_HD720);
       parametersToSet.input_type(slInputType);
       parametersToSet.camera_device_id(cameraID);
       parametersToSet.camera_image_flip(SL_FLIP_MODE_OFF);
