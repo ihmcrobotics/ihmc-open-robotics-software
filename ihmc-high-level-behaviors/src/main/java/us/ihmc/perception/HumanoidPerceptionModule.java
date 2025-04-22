@@ -50,13 +50,8 @@ import java.util.function.Supplier;
 public class HumanoidPerceptionModule
 {
    private final ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 16);
-   private final FramePose3D cameraPose = new FramePose3D();
    private final FramePose3D lidarPose = new FramePose3D();
    private final OpenCLManager openCLManager;
-
-   private final ImageMessage croppedHeightMapImageMessage = new ImageMessage();
-
-   private final BytePointer compressedCroppedHeightMapPointer = new BytePointer();
 
    private RemoteHeightMapUpdater heightMap;
    private PerceptionConfigurationParameters perceptionConfigurationParameters;
@@ -69,7 +64,6 @@ public class HumanoidPerceptionModule
    private PlanarRegionsList regionsInWorldFrame;
    private CollisionBoxProvider collisionBoxProvider;
    private FramePlanarRegionsList sensorFrameRegions;
-   private HeightMapData latestHeightMapData;
    private BytedecoImage realsenseDepthImage;
    private GpuMat deviceDepthImage;
 
@@ -82,9 +76,6 @@ public class HumanoidPerceptionModule
    private boolean heightMapEnabled = false;
    private boolean mappingEnabled = false;
    private boolean occupancyGridEnabled = false;
-   public boolean heightMapDataBeingProcessed = false;
-   private ROS2Publisher<ImageMessage> heightMapPublisher;
-   private ROS2Publisher<ImageMessage> heightMapImagePublisher;
 
    public HumanoidPerceptionModule(OpenCLManager openCLManager)
    {
@@ -94,22 +85,6 @@ public class HumanoidPerceptionModule
    public void initializeRealsenseDepthImage(int height, int width)
    {
       deviceDepthImage = new GpuMat(height, width, opencv_core.CV_16UC1);
-   }
-
-   public void initializeHeightMapUpdater(String robotName, Supplier<ReferenceFrame> frameSupplier, RealtimeROS2Node realtimeRos2Node)
-   {
-      heightMap = new RemoteHeightMapUpdater(robotName, frameSupplier, realtimeRos2Node);
-      heightMap.start();
-   }
-
-   public void setIsHeightMapDataBeingProcessed(boolean dataBeingProcessed)
-   {
-      heightMapDataBeingProcessed = dataBeingProcessed;
-   }
-
-   public boolean isHeightMapDataBeingProcessed()
-   {
-      return heightMapDataBeingProcessed;
    }
 
    public void updateTerrain(ROS2Helper ros2Helper, Mat incomingDepth, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame, boolean metricDepth)
@@ -318,12 +293,6 @@ public class HumanoidPerceptionModule
 
       if (localizationAndMappingTask != null)
          localizationAndMappingTask.destroy();
-   }
-
-   public RapidHeightMapExtractorCUDA getRapidHeightMapExtractor()
-   {
-      // TODO fix me
-      return null;
    }
 
    public void setPerceptionConfigurationParameters(PerceptionConfigurationParameters perceptionConfigurationParameters)
