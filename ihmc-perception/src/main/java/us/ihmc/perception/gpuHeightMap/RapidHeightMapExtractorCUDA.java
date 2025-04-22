@@ -10,16 +10,13 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
-import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
 import us.ihmc.perception.cuda.CUDAStreamManager;
 import us.ihmc.perception.cuda.CUDATools;
-import us.ihmc.perception.heightMap.TerrainMapData;
-import us.ihmc.perception.tools.PerceptionMessageTools;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
@@ -32,7 +29,6 @@ public class RapidHeightMapExtractorCUDA
    private static final boolean PRINT_TIMING_FOR_KERNELS = false;
    static final int BLOCK_SIZE_XY = 32;
 
-   private final Point3D sensorOrigin = new Point3D();
    private final int mode; // 0 -> Ouster, 1 -> Realsense
    private final HeightMapParameters heightMapParameters;
 
@@ -189,6 +185,7 @@ public class RapidHeightMapExtractorCUDA
                       RigidBodyTransformReadOnly sensorToWorldTransform,
                       RigidBodyTransform sensorToGroundTransform,
                       RigidBodyTransformReadOnly groundToWorldTransform,
+                      Point3DReadOnly sensorOrigin,
                       double footHeight)
    {
       int error;
@@ -201,9 +198,6 @@ public class RapidHeightMapExtractorCUDA
       groundToSensorTransform.invert();
       RigidBodyTransform worldToGroundTransform = new RigidBodyTransform(groundToWorldTransform);
       worldToGroundTransform.invert();
-
-      //Store the sensor's origin for later use in parameter population
-      sensorOrigin.set(sensorToWorldTransform.getTranslation());
 
       // Populate parameter buffers with the necessary values
       float[] parametersArray = populateParameterArray(heightMapParameters, cameraIntrinsics, sensorOrigin, footHeight);
@@ -296,11 +290,9 @@ public class RapidHeightMapExtractorCUDA
       croppingKernel.run(stream, croppingKernelGridDim, blockSize, 0);
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
-
-      snappedFootstepsExtractor.update(terrainHeightMapImage, sensorOrigin);
    }
 
-   public void updateHeightOffset(float z, CameraIntrinsics cameraIntrinsics, double footHeight)
+   public void updateHeightOffset(float z, CameraIntrinsics cameraIntrinsics, Point3DReadOnly sensorOrigin, double footHeight)
    {
       int error;
 
@@ -457,22 +449,9 @@ public class RapidHeightMapExtractorCUDA
       return sequenceNumber;
    }
 
-   public HeightMapData getHeightMapData()
+   public GpuMat getTerrainHeightMapImage()
    {
-      HeightMapData latestHeightMapData = new HeightMapData((float) heightMapParameters.getCellSizeInMeters(),
-                                                            (float) heightMapParameters.getTerrainWidthInMeters(),
-                                                            getSensorOrigin().getX(),
-                                                            getSensorOrigin().getY());
-
-      Mat heightMapMat = getTerrainMapData().getHeightMap();
-      PerceptionMessageTools.convertToHeightMapData(heightMapMat,
-                                                    latestHeightMapData,
-                                                    getSensorOrigin(),
-                                                    (float) heightMapParameters.getTerrainWidthInMeters(),
-                                                    (float) heightMapParameters.getCellSizeInMeters(),
-                                                    heightMapParameters);
-
-      return latestHeightMapData;
+      return terrainHeightMapImage;
    }
 
    public Mat getVisualizedHeightMap()
@@ -480,16 +459,6 @@ public class RapidHeightMapExtractorCUDA
       Mat visualizedCroppedHeightMapImage = new Mat();
       this.sensorCroppedHeightMapImage.download(visualizedCroppedHeightMapImage);
       return visualizedCroppedHeightMapImage;
-   }
-
-   public TerrainMapData getTerrainMapData()
-   {
-      return snappedFootstepsExtractor.getTerrainMapData();
-   }
-
-   public Point3D getSensorOrigin()
-   {
-      return sensorOrigin;
    }
 
    public int getCenterIndex()

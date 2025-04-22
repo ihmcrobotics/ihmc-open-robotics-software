@@ -331,12 +331,6 @@ public class HumanoidPerceptionModule
       this.perceptionConfigurationParameters = perceptionConfigurationParameters;
    }
 
-   public HeightMapData getLatestHeightMapData()
-   {
-      latestHeightMapData = rapidHeightMapExtractor.getHeightMapData();
-      return latestHeightMapData;
-   }
-
    public void setRapidRegionsEnabled(boolean rapidRegionsEnabled)
    {
       this.rapidRegionsEnabled = rapidRegionsEnabled;
