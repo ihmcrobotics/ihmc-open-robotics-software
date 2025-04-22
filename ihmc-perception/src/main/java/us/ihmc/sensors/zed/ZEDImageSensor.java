@@ -200,7 +200,7 @@ public class ZEDImageSensor extends ImageSensor
    protected void setInitParameters(SL_InitParameters parametersToSet)
    {
       parametersToSet.camera_fps(CAMERA_FPS);
-      parametersToSet.resolution(SL_RESOLUTION_HD720);
+      parametersToSet.resolution(SL_RESOLUTION_VGA);
       parametersToSet.input_type(slInputType);
       parametersToSet.camera_device_id(cameraID);
       parametersToSet.camera_image_flip(SL_FLIP_MODE_OFF);
