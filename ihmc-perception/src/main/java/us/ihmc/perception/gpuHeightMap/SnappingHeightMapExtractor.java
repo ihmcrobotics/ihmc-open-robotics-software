@@ -21,10 +21,10 @@ import java.net.URL;
 
 import static org.bytedeco.cuda.global.cudart.cudaFree;
 import static org.bytedeco.cuda.global.cudart.cudaStreamSynchronize;
-import static us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractorCUDA.BLOCK_SIZE_XY;
 
 public class SnappingHeightMapExtractor
 {
+   private static final int BLOCK_SIZE_XY = 32;
    private static final boolean PRINT_TIMING_FOR_KERNELS = false;
 
    private final SteppableRegionCalculatorParameters steppableRegionParameters = new SteppableRegionCalculatorParameters();

@@ -13,6 +13,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
+import us.ihmc.perception.RawImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.cuda.CUDABodyCollisionFilter;
 import us.ihmc.perception.filters.CUDAFlyingPointsFilter;
@@ -31,15 +32,13 @@ import java.time.Instant;
 import java.util.List;
 
 /**
- * This class takes care of managing the {@link RapidHeightMapExtractorCUDA}. This class can be used on remote process's
- * or locally as well.
+ * This class takes care of managing the {@link RapidHeightMapExtractorCUDA}. This class can be used in a remote process, or locally as well.
  */
 public class RapidHeightMapManager
 {
    private final RapidHeightMapExtractorCUDA rapidHeightMapExtractor;
    private final ImageMessage croppedHeightMapImageMessage = new ImageMessage();
    private final FramePose3D cameraPose = new FramePose3D();
-   private final Mat hostDepthImage = new Mat();
    private final Notification resetHeightMapRequested = new Notification();
    private final Notification lowerHeightMapBackdropRequested = new Notification();
    private final BytePointer compressedCroppedHeightMapPointer = new BytePointer();
@@ -47,12 +46,9 @@ public class RapidHeightMapManager
    private final RapidHeightMapDriftOffset rapidHeightMapDriftOffset;
    private final CUDAFlyingPointsFilter flyingPointsFilter;
 
-   private final GpuMat deviceDepthImage;
    private final HeightMapParameters heightMapParameters;
    private final ROS2Publisher<ImageMessage> heightMapPublisher;
-   private final List<Collidable> robotCollidables;
    private final CUDABodyCollisionFilter bodyCollisionFilter;
-   private final CameraIntrinsics depthImageIntrinsics;
 
    public RapidHeightMapManager(ROS2Node ros2Node,
                                 RobotCollisionModel robotCollisionModel,
@@ -61,31 +57,23 @@ public class RapidHeightMapManager
                                 ReferenceFrame leftFootSoleFrame,
                                 ReferenceFrame rightFootSoleFrame,
                                 ControllerFootstepQueueMonitor controllerFootstepQueueMonitor,
-                                CameraIntrinsics depthImageIntrinsics,
-                                HeightMapParameters heightMapParameters,
-                                ReferenceFrame cameraFrame) throws Exception
+                                HeightMapParameters heightMapParameters) throws Exception
    {
       this.heightMapParameters = heightMapParameters;
-      this.depthImageIntrinsics = depthImageIntrinsics;
 
-      robotCollidables = robotCollisionModel.getRobotCollidables(robotModel.getRootBody());
-      bodyCollisionFilter = new CUDABodyCollisionFilter();
+      List<Collidable> robotCollidables = robotCollisionModel.getRobotCollidables(robotModel.getRootBody());
+      bodyCollisionFilter = new CUDABodyCollisionFilter(robotCollidables);
 
-      deviceDepthImage = new GpuMat(depthImageIntrinsics.getHeight(), depthImageIntrinsics.getWidth(), opencv_core.CV_16UC1);
-      rapidHeightMapExtractor = new RapidHeightMapExtractorCUDA(leftFootSoleFrame,
-                                                                rightFootSoleFrame,
-                                                                deviceDepthImage,
-                                                                depthImageIntrinsics,
-                                                                1,
-                                                                heightMapParameters);
+      rapidHeightMapExtractor = new RapidHeightMapExtractorCUDA(leftFootSoleFrame, rightFootSoleFrame, 1, heightMapParameters);
       rapidHeightMapDriftOffset = new RapidHeightMapDriftOffset(controllerFootstepQueueMonitor);
       flyingPointsFilter = new CUDAFlyingPointsFilter();
 
       heightMapPublisher = ros2Node.createPublisher(PerceptionAPI.HEIGHT_MAP_CROPPED);
 
-      // We use a notification in order to only call resetting the height map in one place
+      // We use a notification to only call resetting the height map in one place
       ros2Node.createSubscription2(PerceptionAPI.RESET_HEIGHT_MAP, message -> resetHeightMapRequested.set());
       ros2Node.createSubscription2(PerceptionAPI.LOWER_HEIGHT_MAP_BACKDROP, message -> lowerHeightMapBackdropRequested.set());
+
       if (robotModel != null)
       {
          ros2Node.createSubscription(HumanoidControllerAPI.getTopic(HighLevelStateChangeStatusMessage.class, robotName), message ->
@@ -98,14 +86,47 @@ public class RapidHeightMapManager
       }
    }
 
-   public void update(Mat latestDepthImage, Instant imageAcquisitionTime, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame) throws Exception
+   public void update(RawImage depthImage, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame) throws Exception
    {
-      RigidBodyTransform sensorToWorld = cameraFrame.getTransformToWorldFrame();
-      RigidBodyTransform sensorToGround = cameraFrame.getTransformToDesiredFrame(cameraZUpFrame);
-      RigidBodyTransform groundToWorld = cameraZUpFrame.getTransformToWorldFrame();
+      // -------- Update the Height Map with the latest depth image from the sensor --------------
+      RawImage depthImageCopy = depthImage.get();
+      Mat latestDepthImage = depthImageCopy.getCpuImageMat();
+      Instant acquisitionTime = depthImageCopy.getAcquisitionTime();
+      CameraIntrinsics depthIntrinsicsCopy = depthImageCopy.getIntrinsicsCopy();
 
-      cameraPose.setToZero(cameraFrame);
-      cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
+      update(latestDepthImage, acquisitionTime, depthIntrinsicsCopy, cameraFrame, cameraZUpFrame);
+      depthImageCopy.release();
+   }
+
+   public void update(Mat latestDepthImage,
+                      Instant acquisitionTime,
+                      CameraIntrinsics depthIntrinsicsCopy,
+                      ReferenceFrame cameraFrame,
+                      ReferenceFrame cameraZUpFrame) throws Exception
+   {
+      // Option that gets triggered from a message sent from the user
+      if (lowerHeightMapBackdropRequested.poll())
+      {
+         rapidHeightMapExtractor.lowerBackDrop();
+         if (heightMapParameters.getDriftOffsetFilter())
+         {
+            rapidHeightMapDriftOffset.reset();
+         }
+      }
+
+      // Option that gets triggered from a message sent from the user
+      if (resetHeightMapRequested.poll())
+      {
+         rapidHeightMapExtractor.reset();
+         if (heightMapParameters.getDriftOffsetFilter())
+         {
+            rapidHeightMapDriftOffset.reset();
+         }
+      }
+
+      // -------- Update the Height Map with the latest depth image from the sensor --------------
+      // This takes the latest depth image and converts it to the expected type
+      Mat hostDepthImage = new Mat();
 
       if (latestDepthImage.type() == opencv_core.CV_32FC1) // Support our simulated sensors
       {
@@ -116,58 +137,53 @@ public class RapidHeightMapManager
          latestDepthImage.convertTo(hostDepthImage, opencv_core.CV_16UC1);
       }
 
-      bodyCollisionFilter.process(hostDepthImage, deviceDepthImage, depthImageIntrinsics, robotCollidables, cameraFrame);
+      // We expect that depthImage to contain depths for parts of the robot that are in the camera frame, we remove that here
+      GpuMat depthImageWithoutRobot = bodyCollisionFilter.process(hostDepthImage, depthIntrinsicsCopy, cameraFrame);
+      // Now we are finished with the host depth image because we have a new image without the robot, so close it
+      hostDepthImage.close();
 
-      if (lowerHeightMapBackdropRequested.poll())
-      {
-         rapidHeightMapExtractor.lowerBackDrop();
-         if (heightMapParameters.getDriftOffsetFilter())
-         {
-            rapidHeightMapDriftOffset.reset();
-         }
-      }
-
-
-      if (resetHeightMapRequested.poll())
-      {
-         rapidHeightMapExtractor.reset();
-         if (heightMapParameters.getDriftOffsetFilter())
-         {
-            rapidHeightMapDriftOffset.reset();
-         }
-      }
-
+      // The controller can publish a status letting anyone listening know that the controller is aware of some amount of drift in the Z direction
+      // If we have that parameter set to true, we update the heights of the height map to account for that drift
       if (heightMapParameters.getDriftOffsetFilter())
       {
          float driftOffsetInZ = rapidHeightMapDriftOffset.getUpdateDriftOffset();
          if (!Float.isNaN(driftOffsetInZ))
          {
-            rapidHeightMapExtractor.updateHeightOffset(driftOffsetInZ);
+            rapidHeightMapExtractor.updateHeightOffset(driftOffsetInZ, depthIntrinsicsCopy);
          }
       }
-      rapidHeightMapExtractor.update(sensorToWorld, sensorToGround, groundToWorld);
 
-      Mat croppedHeightMapImage = rapidHeightMapExtractor.getVisualizedHeightMap();
+      // We expect to have knowledge of where the camera is in relation to the world so we can accurately display the height map
+      RigidBodyTransform sensorToWorld = cameraFrame.getTransformToWorldFrame();
+      RigidBodyTransform sensorToGround = cameraFrame.getTransformToDesiredFrame(cameraZUpFrame);
+      RigidBodyTransform groundToWorld = cameraZUpFrame.getTransformToWorldFrame();
+      cameraPose.setToZero(cameraFrame);
+      cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
 
+      // Perform update, this actually creates the height map
+      rapidHeightMapExtractor.update(depthImageWithoutRobot, depthIntrinsicsCopy, sensorToWorld, sensorToGround, groundToWorld);
+      Mat croppedHeightMap = rapidHeightMapExtractor.getVisualizedHeightMap();
+      // We have used the depth image without the robot, close this to avoid creating a memory leak
+      depthImageWithoutRobot.close();
+
+      // Perform a flying points filter as a post-processing step on the height map
       if (heightMapParameters.getFlyingPointsFilter())
       {
-         GpuMat deviceCroppedHeightMapImage = new GpuMat();
-         deviceCroppedHeightMapImage.upload(croppedHeightMapImage);
-         GpuMat filteredDeviceCroppedHeightMapImage = flyingPointsFilter.applyFilter(deviceCroppedHeightMapImage);
-         filteredDeviceCroppedHeightMapImage.download(croppedHeightMapImage);
-         filteredDeviceCroppedHeightMapImage.close();
-         deviceCroppedHeightMapImage.close();
+         Mat filteredCroppedHeightMapOnDevice = flyingPointsFilter.applyFilter(croppedHeightMap);
+         filteredCroppedHeightMapOnDevice.copyTo(croppedHeightMap);
+         filteredCroppedHeightMapOnDevice.close();
       }
 
-      OpenCVTools.compressImagePNG(croppedHeightMapImage, compressedCroppedHeightMapPointer);
+      // Publish the height map to anyone who is subscribing
+      OpenCVTools.compressImagePNG(croppedHeightMap, compressedCroppedHeightMapPointer);
       PerceptionMessageTools.publishCompressedDepthImage(compressedCroppedHeightMapPointer,
                                                          croppedHeightMapImageMessage,
                                                          heightMapPublisher,
                                                          cameraPose,
-                                                         imageAcquisitionTime,
+                                                         acquisitionTime,
                                                          rapidHeightMapExtractor.getSequenceNumber(),
-                                                         croppedHeightMapImage.rows(),
-                                                         croppedHeightMapImage.cols(),
+                                                         croppedHeightMap.rows(),
+                                                         croppedHeightMap.cols(),
                                                          (float) heightMapParameters.getHeightScaleFactor());
    }
 

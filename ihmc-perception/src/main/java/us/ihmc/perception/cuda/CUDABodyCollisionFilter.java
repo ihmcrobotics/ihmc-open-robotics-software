@@ -3,13 +3,13 @@ package us.ihmc.perception.cuda;
 import org.bytedeco.cuda.cudart.CUstream_st;
 import org.bytedeco.cuda.cudart.dim3;
 import org.bytedeco.javacpp.FloatPointer;
+import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.euclid.referenceFrame.FrameCapsule3D;
 import us.ihmc.euclid.referenceFrame.FrameSphere3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.camera.CameraIntrinsics;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.scs2.simulation.collision.Collidable;
 
 import java.net.URL;
@@ -19,17 +19,19 @@ import static org.bytedeco.cuda.global.cudart.cudaStreamSynchronize;
 
 public class CUDABodyCollisionFilter
 {
-   private static final int BLOCK_SIZE_XY = 16;
+   private static final int BLOCK_SIZE_XY = 32;
+   private final int NUMBER_OF_ATTRIBUTES = 7;
 
    private final CUDAProgram program;
    private final CUDAKernel kernel;
    private final CUstream_st stream;
+   private final List<Collidable> robotCollidables;
 
    private int numberOfCollidables;
-   private int numberOfAttributes = 7;
 
-   public CUDABodyCollisionFilter()
+   public CUDABodyCollisionFilter(List<Collidable> robotCollidables)
    {
+      this.robotCollidables = robotCollidables;
       URL bodyCollisionCheckURL = getClass().getResource("BodyCollisionCheck.cu");
       URL utilsURL = getClass().getResource("Utils.cu");
       URL perceptionUtilsURL = getClass().getResource("PerceptionUtils.cu");
@@ -52,11 +54,9 @@ public class CUDABodyCollisionFilter
       }
    }
 
-   public void process(Mat hostDepthImage,
-                       GpuMat latestDepthImage,
-                       CameraIntrinsics cameraIntrinsics,
-                       List<Collidable> robotCollidables,
-                       ReferenceFrame cameraFrame)
+   public GpuMat process(Mat hostDepthImage,
+                         CameraIntrinsics cameraIntrinsics,
+                         ReferenceFrame cameraFrame)
    {
       GpuMat originalDepthImage = new GpuMat();
       originalDepthImage.upload(hostDepthImage);
@@ -65,14 +65,15 @@ public class CUDABodyCollisionFilter
 
       if (numberOfCollidables == 0)
       {
-         return;
+         return originalDepthImage;
       }
 
+      GpuMat depthImageWithoutRobot = new GpuMat(hostDepthImage.size(), opencv_core.CV_16UC1);
+      
+      int dataSize = numberOfCollidables * NUMBER_OF_ATTRIBUTES * Float.BYTES;
+      FloatPointer deviceCollidableGeometryPointer = new FloatPointer();
       FloatPointer collidableGeometryPointer = getCollidablesPointer(robotCollidables, cameraFrame);
 
-      int dataSize = numberOfCollidables * numberOfAttributes * Float.BYTES;
-
-      FloatPointer deviceCollidableGeometryPointer = new FloatPointer();
       CUDATools.mallocAsync(deviceCollidableGeometryPointer, dataSize, stream);
       CUDATools.memcpyAsync(deviceCollidableGeometryPointer, collidableGeometryPointer, dataSize, stream);
 
@@ -90,29 +91,23 @@ public class CUDABodyCollisionFilter
       kernel.withFloat((float) cameraIntrinsics.getFy());
       kernel.withFloat((float) cameraIntrinsics.getCx());
       kernel.withFloat((float) cameraIntrinsics.getCy());
-      kernel.withPointer(latestDepthImage.data());
-      kernel.withLong(latestDepthImage.step());
+      kernel.withPointer(depthImageWithoutRobot.data());
+      kernel.withLong(depthImageWithoutRobot.step());
       kernel.withPointer(deviceCollidableGeometryPointer);
       kernel.withInt(numberOfCollidables);
-      kernel.withInt(numberOfAttributes);
+      kernel.withInt(NUMBER_OF_ATTRIBUTES);
 
       kernel.run(stream, gridSize, blockSize, 0);
       int error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
-
-//      Mat hostResults = new Mat();
-      //      latestDepthImage.download(hostResults);
-      //      PerceptionDebugTools.displayDepth("mask", hostResults, 1);
-      //
-      //      Mat hostDepth = new Mat();
-      //      originalDepthImage.download(hostDepth);
-      //      PerceptionDebugTools.displayDepth("depth", hostDepth, 1);
 
       blockSize.close();
       gridSize.close();
       collidableGeometryPointer.close();
       deviceCollidableGeometryPointer.close();
       originalDepthImage.close();
+
+      return depthImageWithoutRobot;
    }
 
    private int countCapsules(List<Collidable> robotCollidables)
@@ -139,7 +134,7 @@ public class CUDABodyCollisionFilter
       if (numberOfCollidables == 0)
          return new FloatPointer(0);
 
-      FloatPointer geometryPointer = new FloatPointer((long) numberOfCollidables * numberOfAttributes);
+      FloatPointer geometryPointer = new FloatPointer((long) numberOfCollidables * NUMBER_OF_ATTRIBUTES);
       int index = 0;
 
       for (Collidable collidable : robotCollidables)
