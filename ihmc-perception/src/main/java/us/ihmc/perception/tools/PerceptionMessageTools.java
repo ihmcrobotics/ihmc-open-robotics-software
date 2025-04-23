@@ -435,7 +435,7 @@ public class PerceptionMessageTools
 
    public static Mat convertHeightMapDataToMat(HeightMapData heightMapData, HeightMapParameters heightMapParameters)
    {
-      int centerIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getTerrainWidthInMeters(), heightMapParameters.getGlobalCellSizeInMeters());
+      int centerIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getTerrainWidthInMeters(), heightMapParameters.getCellSizeInMeters());
       int cellsPerAxis = 2 * centerIndex + 1;
 
       // Create a new Mat object to hold the height map data
