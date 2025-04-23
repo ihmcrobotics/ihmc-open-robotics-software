@@ -187,7 +187,6 @@ public class RapidHeightMapManager
       // We have used the depth image without the robot, close this to avoid creating a memory leak
       depthImageWithoutRobot.close();
 
-      snappedFootstepsExtractor.update(rapidHeightMapExtractor.getTerrainHeightMapImage(), sensorOrigin);
 
       // Perform a flying points filter as a post-processing step on the height map
       if (heightMapParameters.getFlyingPointsFilter())
@@ -196,6 +195,9 @@ public class RapidHeightMapManager
          filteredCroppedHeightMapOnDevice.copyTo(croppedHeightMap);
          filteredCroppedHeightMapOnDevice.close();
       }
+
+      // Now extract the maps to be used in the footstep planning algorithm
+      snappedFootstepsExtractor.update(rapidHeightMapExtractor.getTerrainHeightMapImage(), sensorOrigin);
 
       // Publish the height map to anyone who is subscribing
       OpenCVTools.compressImagePNG(croppedHeightMap, compressedCroppedHeightMapPointer);
