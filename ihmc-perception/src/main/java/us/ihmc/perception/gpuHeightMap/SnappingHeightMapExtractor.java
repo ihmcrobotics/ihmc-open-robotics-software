@@ -79,7 +79,10 @@ public class SnappingHeightMapExtractor
 
       recomputeDerivedParameters();
 
-      terrainMapData = new TerrainMapData(cellsPerAxisTerrain, cellsPerAxisTerrain, heightMapParameters);
+      terrainMapData = new TerrainMapData(cellsPerAxisTerrain,
+                                          cellsPerAxisTerrain,
+                                          heightMapParameters.getHeightScaleFactor(),
+                                          heightMapParameters.getHeightOffset());
 
       // Initialize matrices and images
       steppabilityImage = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);
@@ -95,7 +98,6 @@ public class SnappingHeightMapExtractor
       terrainCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getTerrainWidthInMeters(), heightMapParameters.getCellSizeInMeters());
       cellsPerAxisTerrain = 2 * terrainCenterIndex + 1;
    }
-
 
    public void reset(int resetOffset)
    {

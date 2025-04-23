@@ -62,7 +62,10 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       int croppedCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getCroppedWidthInMeters(), heightMapParameters.getCellSizeInMeters());
       cellsPerAxisCropped = 2 * croppedCenterIndex + 1;
 
-      terrainMapData = new TerrainMapData(cellsPerAxisCropped, cellsPerAxisCropped, heightMapParameters);
+      terrainMapData = new TerrainMapData(cellsPerAxisCropped,
+                                          cellsPerAxisCropped,
+                                          heightMapParameters.getHeightScaleFactor(),
+                                          heightMapParameters.getHeightScaleFactor());
       executorService = MissingThreadTools.newSingleThreadExecutor("Height Map Visualizer Subscription", true, 1);
    }
 
