@@ -6,8 +6,7 @@ import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.opencv.opencv_core.Scalar;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
@@ -49,7 +48,6 @@ public class SnappingHeightMapExtractor
    private final GpuMat snapNormalYImage;
    private final GpuMat snapNormalZImage;
    private final GpuMat snappedAreaFractionImage;
-   private int terrainCenterIndex;
    private int cellsPerAxisTerrain;
 
    public SnappingHeightMapExtractor(HeightMapParameters heightMapParameters)
@@ -69,7 +67,7 @@ public class SnappingHeightMapExtractor
          snappingKernel = snappingHeightMapProgram.loadKernel("computeSnappedValuesKernel");
          snappingKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
 
-         snappingParametersHostPointer = new FloatPointer(17);
+         snappingParametersHostPointer = new FloatPointer(16);
          snappingParametersDevicePointer = new FloatPointer();
       }
       catch (Exception e)
@@ -95,23 +93,18 @@ public class SnappingHeightMapExtractor
 
    private void recomputeDerivedParameters()
    {
-      terrainCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getTerrainWidthInMeters(), heightMapParameters.getCellSizeInMeters());
+      int terrainCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getTerrainWidthInMeters(), heightMapParameters.getCellSizeInMeters());
       cellsPerAxisTerrain = 2 * terrainCenterIndex + 1;
    }
 
-   public void reset(int resetOffset)
-   {
-      snapHeightImage.setTo(new Scalar(resetOffset));
-   }
-
-   public void update(GpuMat globalHeightMapImage, Point3DReadOnly sensorOrigin, int centerIndex, GpuMat terrainHeightMap)
+   public void update(GpuMat terrainHeightMap, Point3D sensorOrigin)
    {
       int error;
 
       recomputeDerivedParameters();
 
       // Populate parameters buffer for the snapping kernel
-      float[] snappingParametersArray = populateSnappingParametersArray(sensorOrigin, centerIndex, terrainCenterIndex);
+      float[] snappingParametersArray = populateSnappingParametersArray(sensorOrigin);
       snappingParametersHostPointer.put(snappingParametersArray);
 
       // Handle memory allocation and copy values to the GPU
@@ -119,7 +112,7 @@ public class SnappingHeightMapExtractor
       CUDATools.memcpyAsync(snappingParametersDevicePointer, snappingParametersHostPointer, snappingParametersArray.length, stream);
 
       // Pass all the parameters to the kernel so that its setup to run correctly
-      snappingKernel.withPointer(globalHeightMapImage.data()).withLong(globalHeightMapImage.step());
+      snappingKernel.withPointer(terrainHeightMap.data()).withLong(terrainHeightMap.step());
       snappingKernel.withPointer(steppabilityImage.data()).withLong(steppabilityImage.step());
       snappingKernel.withPointer(snapHeightImage.data()).withLong(snapHeightImage.step());
       snappingKernel.withPointer(snapNormalXImage.data()).withLong(snapNormalXImage.step());
@@ -176,18 +169,15 @@ public class SnappingHeightMapExtractor
    /**
     * Populate the parameter's array for the snapping kernels.
     *
-    * @param gridCenter        is the location of the sensor origin, that will be the center of our map
-    * @param globalCenterIndex is the center index of the global map
-    * @param cropCenterIndex   is the center index of the cropped map
+    * @param gridCenter is the location of the sensor origin, that will be the center of our map
     * @return a float array with the parameters for the snapping kernels. The order matters as it needs to match the order things are defined by in the kernel
     */
-   public float[] populateSnappingParametersArray(Tuple3DReadOnly gridCenter, int globalCenterIndex, int cropCenterIndex)
+   public float[] populateSnappingParametersArray(Tuple3DReadOnly gridCenter)
    {
       return new float[] {(float) gridCenter.getX(),
                           (float) gridCenter.getY(),
                           (float) heightMapParameters.getCellSizeInMeters(),
-                          globalCenterIndex,
-                          cropCenterIndex,
+                          (float) heightMapParameters.getTerrainWidthInMeters(),
                           (float) heightMapParameters.getHeightScaleFactor(),
                           (float) heightMapParameters.getHeightOffset(),
                           (float) steppableRegionParameters.getFootLength(),
