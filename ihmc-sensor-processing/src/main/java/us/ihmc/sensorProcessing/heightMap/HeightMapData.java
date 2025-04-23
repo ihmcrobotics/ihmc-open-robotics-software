@@ -11,15 +11,15 @@ import java.util.Arrays;
 public class HeightMapData
 {
    /* Unordered list of the keys of all occupied cells */
-   private TIntArrayList occupiedCells = new TIntArrayList();
+   private final TIntArrayList occupiedCells = new TIntArrayList();
    /* List of heights indexed by key */
-   private final double[] heights;
-   private final Vector3D[] normals;
+   private double[] heights;
+   private Vector3D[] normals;
 
-   private final int centerIndex;
-   private final int cellsPerAxis;
-   private final double gridResolutionXY;
-   private final double gridSizeXY;
+   private int centerIndex;
+   private int cellsPerAxis;
+   private double gridResolutionXY;
+   private double gridSizeXY;
    private final Point2D gridCenter = new Point2D();
    private double estimatedGroundHeight = Double.NaN;
 
@@ -47,6 +47,11 @@ public class HeightMapData
 
    public HeightMapData(HeightMapData latestHeightMapData)
    {
+      set(latestHeightMapData);
+   }
+
+   public void set(HeightMapData latestHeightMapData)
+   {
       this.gridResolutionXY = latestHeightMapData.getGridResolutionXY();
       this.gridSizeXY = latestHeightMapData.getGridSizeXY();
       this.centerIndex = HeightMapTools.computeCenterIndex(latestHeightMapData.getGridSizeXY(), latestHeightMapData.getGridResolutionXY());
@@ -59,7 +64,7 @@ public class HeightMapData
       for (int i = 0; i < latestHeightMapData.getCellsPerAxis() * latestHeightMapData.getCellsPerAxis(); i++)
       {
          this.heights[i] = latestHeightMapData.heights[i];
-         this.normals[i] = latestHeightMapData.normals[i];
+         this.normals[i] = latestHeightMapData.normals[i] != null ? new Vector3D(latestHeightMapData.normals[i]) : null;
       }
 
       this.gridCenter.set(latestHeightMapData.getGridCenter());

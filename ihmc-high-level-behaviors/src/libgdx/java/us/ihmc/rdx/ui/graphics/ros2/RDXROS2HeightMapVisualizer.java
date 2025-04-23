@@ -62,7 +62,10 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       int croppedCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getCroppedWidthInMeters(), heightMapParameters.getCellSizeInMeters());
       cellsPerAxisCropped = 2 * croppedCenterIndex + 1;
 
-      terrainMapData = new TerrainMapData(cellsPerAxisCropped, cellsPerAxisCropped, heightMapParameters);
+      terrainMapData = new TerrainMapData(cellsPerAxisCropped,
+                                          cellsPerAxisCropped,
+                                          heightMapParameters.getHeightScaleFactor(),
+                                          heightMapParameters.getHeightScaleFactor());
       executorService = MissingThreadTools.newSingleThreadExecutor("Height Map Visualizer Subscription", true, 1);
    }
 
@@ -119,7 +122,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
                                               if (latestHeightMapData == null)
                                               {
                                                  latestHeightMapData = new HeightMapData(heightMapParameters.getCellSizeInMeters(),
-                                                                                         heightMapParameters.getLocalWidthInMeters(),
+                                                                                         heightMapParameters.getCroppedWidthInMeters(),
                                                                                          imageMessage.getPosition().getX(),
                                                                                          imageMessage.getPosition().getY());
                                               }
@@ -127,13 +130,12 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
                                               PerceptionMessageTools.convertToHeightMapData(heightMapImage,
                                                                                             latestHeightMapData,
                                                                                             imageMessage.getPosition(),
-                                                                                            (float) heightMapParameters.getLocalWidthInMeters(),
+                                                                                            (float) heightMapParameters.getCroppedWidthInMeters(),
                                                                                             (float) heightMapParameters.getCellSizeInMeters(),
                                                                                             heightMapParameters);
 
                                               terrainMapData.setHeightMap(heightMapImage);
-                                              terrainMapData.setSensorOrigin(zUpToWorldTransform.getTranslation().getX(),
-                                                                             zUpToWorldTransform.getTranslation().getY());
+                                              terrainMapData.setSensorOrigin(zUpToWorldTransform.getTranslation());
                                            });
 
       getFrequency(PerceptionAPI.HEIGHT_MAP_CROPPED).ping();

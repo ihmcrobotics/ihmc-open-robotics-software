@@ -108,6 +108,7 @@ public class RapidHeightMapManager
       depthImageCopy.release();
    }
 
+
    public void update(Mat latestDepthImage,
                       Instant acquisitionTime,
                       CameraIntrinsics depthIntrinsicsCopy,

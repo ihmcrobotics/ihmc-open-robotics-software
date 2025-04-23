@@ -283,6 +283,11 @@ public class AStarFootstepPlanner
                                                                                       0.8 * request.getStatusPublishPeriod());
    }
 
+   /**
+    * This method does two things. It both publishes the current status of the planner, and also performs the wiggle step when computing the snap again.
+    * @param request
+    * @param outputToPack
+    */
    private void reportStatus(FootstepPlannerRequest request, FootstepPlannerOutput outputToPack)
    {
       outputToPack.setFootstepPlanningResult(result);
@@ -294,8 +299,14 @@ public class AStarFootstepPlanner
       {
          FootstepGraphNode footstepNode = path.get(i);
          FootstepSnapData snapData = snapper.snapFootstep(footstepNode.getSecondStep(), footstepNode.getFirstStep(), true);
+
          PlannedFootstep footstep = new PlannedFootstep(footstepNode.getSecondStepSide());
          footstep.getFootstepPose().set(snapData.getSnappedStepTransform(footstepNode.getSecondStep()));
+         if (!snapData.getCroppedFoothold().isEmpty())
+         {
+            footstep.getFoothold().set(snapData.getCroppedFoothold());
+            footstep.limitFootholdVertices();
+         }
 
          if (!footstepPlannerParameters.getWiggleWhilePlanning())
          {
