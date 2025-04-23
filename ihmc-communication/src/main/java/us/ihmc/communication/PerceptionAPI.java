@@ -347,8 +347,6 @@ public final class PerceptionAPI
 
    public static final Set<ROS2SRTStreamTopicPair> SRT_STREAM_IMAGE_MESSAGE_TOPIC_PAIRS
          = Set.of(new ROS2SRTStreamTopicPair(SRT_REALSENSE_COLOR_STREAM_STATUS, D455_COLOR_IMAGE_SRT, false),
-                  new ROS2SRTStreamTopicPair(SRT_REALSENSE_DEPTH_STREAM_STATUS, D455_DEPTH_IMAGE_SRT, true),
                   new ROS2SRTStreamTopicPair(SRT_ZED_LEFT_COLOR_STREAM_STATUS, ZED2_COLOR_IMAGES_SRT.get(RobotSide.LEFT), false),
-                  new ROS2SRTStreamTopicPair(SRT_ZED_RIGHT_COLOR_STREAM_STATUS, ZED2_COLOR_IMAGES_SRT.get(RobotSide.RIGHT), false),
-                  new ROS2SRTStreamTopicPair(SRT_ZED_DEPTH_STREAM_STATUS, ZED2_DEPTH_SRT, true));
+                  new ROS2SRTStreamTopicPair(SRT_ZED_RIGHT_COLOR_STREAM_STATUS, ZED2_COLOR_IMAGES_SRT.get(RobotSide.RIGHT), false));
 }
