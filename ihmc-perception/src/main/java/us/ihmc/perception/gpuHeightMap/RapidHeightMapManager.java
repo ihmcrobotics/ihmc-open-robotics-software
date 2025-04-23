@@ -108,7 +108,6 @@ public class RapidHeightMapManager
       depthImageCopy.release();
    }
 
-
    public void update(Mat latestDepthImage,
                       Instant acquisitionTime,
                       CameraIntrinsics depthIntrinsicsCopy,
@@ -186,7 +185,6 @@ public class RapidHeightMapManager
       Mat croppedHeightMap = rapidHeightMapExtractor.getVisualizedHeightMap();
       // We have used the depth image without the robot, close this to avoid creating a memory leak
       depthImageWithoutRobot.close();
-
 
       // Perform a flying points filter as a post-processing step on the height map
       if (heightMapParameters.getFlyingPointsFilter())
