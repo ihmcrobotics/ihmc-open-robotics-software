@@ -1,6 +1,0 @@
-
-uint32 error_source
-
-uint32 error_state
-
-

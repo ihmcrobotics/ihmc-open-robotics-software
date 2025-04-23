@@ -1,6 +1,0 @@
-
-string uuid
-
-string body
-
-
