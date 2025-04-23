@@ -69,7 +69,7 @@ public class CUDABodyCollisionFilter
       }
 
       GpuMat depthImageWithoutRobot = new GpuMat(hostDepthImage.size(), opencv_core.CV_16UC1);
-      
+
       int dataSize = numberOfCollidables * NUMBER_OF_ATTRIBUTES * Float.BYTES;
       FloatPointer deviceCollidableGeometryPointer = new FloatPointer();
       FloatPointer collidableGeometryPointer = getCollidablesPointer(robotCollidables, cameraFrame);
