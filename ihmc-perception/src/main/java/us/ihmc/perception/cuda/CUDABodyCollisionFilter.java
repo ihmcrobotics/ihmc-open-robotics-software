@@ -58,6 +58,7 @@ public class CUDABodyCollisionFilter
                          CameraIntrinsics cameraIntrinsics,
                          ReferenceFrame cameraFrame)
    {
+      int error;
       GpuMat originalDepthImage = new GpuMat();
       originalDepthImage.upload(hostDepthImage);
 
@@ -76,6 +77,9 @@ public class CUDABodyCollisionFilter
 
       CUDATools.mallocAsync(deviceCollidableGeometryPointer, dataSize, stream);
       CUDATools.memcpyAsync(deviceCollidableGeometryPointer, collidableGeometryPointer, dataSize, stream);
+
+      error = cudaStreamSynchronize(stream);
+      CUDATools.checkCUDAError(error);
 
       dim3 blockSize = new dim3(BLOCK_SIZE_XY, BLOCK_SIZE_XY, 1);
 
@@ -98,7 +102,7 @@ public class CUDABodyCollisionFilter
       kernel.withInt(NUMBER_OF_ATTRIBUTES);
 
       kernel.run(stream, gridSize, blockSize, 0);
-      int error = cudaStreamSynchronize(stream);
+      error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
 
       blockSize.close();
