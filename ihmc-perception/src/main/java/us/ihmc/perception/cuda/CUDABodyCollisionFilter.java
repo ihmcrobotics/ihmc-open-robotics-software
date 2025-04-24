@@ -15,6 +15,7 @@ import us.ihmc.scs2.simulation.collision.Collidable;
 import java.net.URL;
 import java.util.List;
 
+import static org.bytedeco.cuda.global.cudart.cudaFree;
 import static org.bytedeco.cuda.global.cudart.cudaStreamSynchronize;
 
 public class CUDABodyCollisionFilter
@@ -26,8 +27,11 @@ public class CUDABodyCollisionFilter
    private final CUDAKernel kernel;
    private final CUstream_st stream;
    private final List<Collidable> robotCollidables;
+   private final int dataSize;
 
-   private int numberOfCollidables;
+   private final int numberOfCollidables;
+   private final FloatPointer deviceCollidableGeometryPointer;
+   private final FloatPointer collidableGeometryPointer;
 
    public CUDABodyCollisionFilter(List<Collidable> robotCollidables)
    {
@@ -52,16 +56,22 @@ public class CUDABodyCollisionFilter
       {
          throw new RuntimeException("CUDA stream could not be initialized!");
       }
+
+      // Note: We get the expected number of collidables and allocate that memory amount on the GPU
+      // By allocating once we don't have to free the memory in each call, just at the end
+      numberOfCollidables = countSupportedCollidables(robotCollidables);
+      dataSize = numberOfCollidables * NUMBER_OF_ATTRIBUTES;
+      deviceCollidableGeometryPointer = new FloatPointer();
+      CUDATools.mallocAsync(deviceCollidableGeometryPointer, dataSize, stream);
+
+      collidableGeometryPointer = new FloatPointer((long) numberOfCollidables * NUMBER_OF_ATTRIBUTES);
    }
 
-   public GpuMat process(Mat hostDepthImage,
-                         CameraIntrinsics cameraIntrinsics,
-                         ReferenceFrame cameraFrame)
+   public GpuMat process(Mat hostDepthImage, CameraIntrinsics cameraIntrinsics, ReferenceFrame cameraFrame)
    {
+      int error;
       GpuMat originalDepthImage = new GpuMat();
       originalDepthImage.upload(hostDepthImage);
-
-      numberOfCollidables = countCapsules(robotCollidables);
 
       if (numberOfCollidables == 0)
       {
@@ -69,19 +79,14 @@ public class CUDABodyCollisionFilter
       }
 
       GpuMat depthImageWithoutRobot = new GpuMat(hostDepthImage.size(), opencv_core.CV_16UC1);
+      getCollidablesPointer(robotCollidables, cameraFrame);
 
-      int dataSize = numberOfCollidables * NUMBER_OF_ATTRIBUTES * Float.BYTES;
-      FloatPointer deviceCollidableGeometryPointer = new FloatPointer();
-      FloatPointer collidableGeometryPointer = getCollidablesPointer(robotCollidables, cameraFrame);
-
-      CUDATools.mallocAsync(deviceCollidableGeometryPointer, dataSize, stream);
       CUDATools.memcpyAsync(deviceCollidableGeometryPointer, collidableGeometryPointer, dataSize, stream);
-
-      dim3 blockSize = new dim3(BLOCK_SIZE_XY, BLOCK_SIZE_XY, 1);
 
       int gridSizeX = (originalDepthImage.cols() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
       int gridSizeY = (originalDepthImage.rows() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
       dim3 gridSize = new dim3(gridSizeX, gridSizeY, 1);
+      dim3 blockSize = new dim3(BLOCK_SIZE_XY, BLOCK_SIZE_XY, 1);
 
       kernel.withPointer(originalDepthImage.data());
       kernel.withLong(originalDepthImage.step());
@@ -98,77 +103,82 @@ public class CUDABodyCollisionFilter
       kernel.withInt(NUMBER_OF_ATTRIBUTES);
 
       kernel.run(stream, gridSize, blockSize, 0);
-      int error = cudaStreamSynchronize(stream);
+      error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
 
       blockSize.close();
       gridSize.close();
-      collidableGeometryPointer.close();
-      deviceCollidableGeometryPointer.close();
       originalDepthImage.close();
 
       return depthImageWithoutRobot;
    }
 
-   private int countCapsules(List<Collidable> robotCollidables)
+   private int countSupportedCollidables(List<Collidable> robotCollidables)
    {
       if (robotCollidables == null)
          return 0;
 
       int count = 0;
       for (Collidable collidable : robotCollidables)
-
       {
-         if ((collidable.getShape() instanceof FrameCapsule3D || collidable.getShape() instanceof FrameSphere3D) && !collidable.getRigidBody()
-                                                                                                                               .getName()
-                                                                                                                               .matches("TORSO_LINK|PELVIS_LINK"))
+         if (isCollidableShapeSupported(collidable))
          {
             count++;
          }
       }
-      return Math.max(count, 0); // Avoid negative count
+      return count;
    }
 
-   public FloatPointer getCollidablesPointer(List<Collidable> robotCollidables, ReferenceFrame cameraFrame)
+   public void getCollidablesPointer(List<Collidable> robotCollidables, ReferenceFrame cameraFrame)
    {
-      if (numberOfCollidables == 0)
-         return new FloatPointer(0);
-
-      FloatPointer geometryPointer = new FloatPointer((long) numberOfCollidables * NUMBER_OF_ATTRIBUTES);
       int index = 0;
 
       for (Collidable collidable : robotCollidables)
       {
+         if (!isCollidableShapeSupported(collidable))
+            continue;
+
          if (collidable.getShape() instanceof FrameSphere3D sphere)
          {
             FrameSphere3D bodypart = new FrameSphere3D(sphere);
             bodypart.changeFrame(cameraFrame);
-            geometryPointer.put(index++, bodypart.getPosition().getX32());
-            geometryPointer.put(index++, bodypart.getPosition().getY32());
-            geometryPointer.put(index++, bodypart.getPosition().getZ32());
-            geometryPointer.put(index++, bodypart.getPosition().getX32());
-            geometryPointer.put(index++, bodypart.getPosition().getY32());
-            geometryPointer.put(index++, bodypart.getPosition().getZ32());
-            geometryPointer.put(index++, (float) bodypart.getRadius());
+            collidableGeometryPointer.put(index++, bodypart.getPosition().getX32());
+            collidableGeometryPointer.put(index++, bodypart.getPosition().getY32());
+            collidableGeometryPointer.put(index++, bodypart.getPosition().getZ32());
+            collidableGeometryPointer.put(index++, bodypart.getPosition().getX32());
+            collidableGeometryPointer.put(index++, bodypart.getPosition().getY32());
+            collidableGeometryPointer.put(index++, bodypart.getPosition().getZ32());
+            collidableGeometryPointer.put(index++, (float) bodypart.getRadius());
          }
-         if (collidable.getShape() instanceof FrameCapsule3D capsule && !collidable.getRigidBody().getName().matches("TORSO_LINK|PELVIS_LINK"))
+         else if (collidable.getShape() instanceof FrameCapsule3D capsule)
          {
             FrameCapsule3D bodypart = new FrameCapsule3D(capsule);
             bodypart.changeFrame(cameraFrame);
-            geometryPointer.put(index++, bodypart.getTopCenter().getX32());
-            geometryPointer.put(index++, bodypart.getTopCenter().getY32());
-            geometryPointer.put(index++, bodypart.getTopCenter().getZ32());
-            geometryPointer.put(index++, bodypart.getBottomCenter().getX32());
-            geometryPointer.put(index++, bodypart.getBottomCenter().getY32());
-            geometryPointer.put(index++, bodypart.getBottomCenter().getZ32());
-            geometryPointer.put(index++, (float) bodypart.getRadius());
+            collidableGeometryPointer.put(index++, bodypart.getTopCenter().getX32());
+            collidableGeometryPointer.put(index++, bodypart.getTopCenter().getY32());
+            collidableGeometryPointer.put(index++, bodypart.getTopCenter().getZ32());
+            collidableGeometryPointer.put(index++, bodypart.getBottomCenter().getX32());
+            collidableGeometryPointer.put(index++, bodypart.getBottomCenter().getY32());
+            collidableGeometryPointer.put(index++, bodypart.getBottomCenter().getZ32());
+            collidableGeometryPointer.put(index++, (float) bodypart.getRadius());
          }
       }
-      return geometryPointer;
+   }
+
+   private boolean isCollidableShapeSupported(Collidable collidable)
+   {
+      return (collidable.getShape() instanceof FrameCapsule3D || collidable.getShape() instanceof FrameSphere3D) && !collidable.getRigidBody()
+                                                                                                                               .getName()
+                                                                                                                               .matches("TORSO_LINK|PELVIS_LINK");
    }
 
    public void close()
    {
+      // Need to free this memory on the GPU to shut down correctly
+      cudaFree(deviceCollidableGeometryPointer);
+
+      deviceCollidableGeometryPointer.close();
+      collidableGeometryPointer.close();
       kernel.close();
       program.close();
       CUDAStreamManager.releaseStream(stream);
