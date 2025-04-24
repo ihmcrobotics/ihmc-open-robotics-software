@@ -15,6 +15,7 @@ import us.ihmc.scs2.simulation.collision.Collidable;
 import java.net.URL;
 import java.util.List;
 
+import static org.bytedeco.cuda.global.cudart.cudaFree;
 import static org.bytedeco.cuda.global.cudart.cudaStreamSynchronize;
 
 public class CUDABodyCollisionFilter
@@ -56,10 +57,13 @@ public class CUDABodyCollisionFilter
          throw new RuntimeException("CUDA stream could not be initialized!");
       }
 
+      // Note: We get the expected number of collidables and allocate that memory amount on the GPU
+      // By allocating once we don't have to free the memory in each call, just at the end
       numberOfCollidables = countSupportedCollidables(robotCollidables);
       dataSize = numberOfCollidables * NUMBER_OF_ATTRIBUTES * Float.BYTES;
-
       deviceCollidableGeometryPointer = new FloatPointer();
+      CUDATools.mallocAsync(deviceCollidableGeometryPointer, dataSize, stream);
+
       collidableGeometryPointer = new FloatPointer((long) numberOfCollidables * NUMBER_OF_ATTRIBUTES);
    }
 
@@ -77,19 +81,12 @@ public class CUDABodyCollisionFilter
       GpuMat depthImageWithoutRobot = new GpuMat(hostDepthImage.size(), opencv_core.CV_16UC1);
       getCollidablesPointer(robotCollidables, cameraFrame);
 
-      CUDATools.mallocAsync(deviceCollidableGeometryPointer, dataSize, stream);
-      error = cudaStreamSynchronize(stream);
-      CUDATools.checkCUDAError(error);
-
       CUDATools.memcpyAsync(deviceCollidableGeometryPointer, collidableGeometryPointer, dataSize, stream);
-      error = cudaStreamSynchronize(stream);
-      CUDATools.checkCUDAError(error);
-
-      dim3 blockSize = new dim3(BLOCK_SIZE_XY, BLOCK_SIZE_XY, 1);
 
       int gridSizeX = (originalDepthImage.cols() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
       int gridSizeY = (originalDepthImage.rows() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
       dim3 gridSize = new dim3(gridSizeX, gridSizeY, 1);
+      dim3 blockSize = new dim3(BLOCK_SIZE_XY, BLOCK_SIZE_XY, 1);
 
       kernel.withPointer(originalDepthImage.data());
       kernel.withLong(originalDepthImage.step());
@@ -177,6 +174,10 @@ public class CUDABodyCollisionFilter
 
    public void close()
    {
+      // Need to free this memory on the GPU to shut down correctly
+      cudaFree(deviceCollidableGeometryPointer);
+      cudaFree(collidableGeometryPointer);
+
       deviceCollidableGeometryPointer.close();
       collidableGeometryPointer.close();
       kernel.close();
