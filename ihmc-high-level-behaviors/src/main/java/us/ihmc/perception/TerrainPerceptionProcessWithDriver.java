@@ -341,9 +341,4 @@ public class TerrainPerceptionProcessWithDriver
 
       destroyedNotification.blockingPoll();
    }
-
-   public HumanoidPerceptionModule getHumanoidPerceptionModule()
-   {
-      return humanoidPerception;
-   }
 }
