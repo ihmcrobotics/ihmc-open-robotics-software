@@ -30,6 +30,7 @@ public class CUDABodyCollisionFilter
 
    private final int numberOfCollidables;
    private final FloatPointer deviceCollidableGeometryPointer;
+   private final FloatPointer collidableGeometryPointer;
 
    public CUDABodyCollisionFilter(List<Collidable> robotCollidables)
    {
@@ -57,7 +58,9 @@ public class CUDABodyCollisionFilter
 
       numberOfCollidables = countSupportedCollidables(robotCollidables);
       dataSize = numberOfCollidables * NUMBER_OF_ATTRIBUTES * Float.BYTES;
+
       deviceCollidableGeometryPointer = new FloatPointer();
+      collidableGeometryPointer = new FloatPointer((long) numberOfCollidables * NUMBER_OF_ATTRIBUTES);
    }
 
    public GpuMat process(Mat hostDepthImage, CameraIntrinsics cameraIntrinsics, ReferenceFrame cameraFrame)
@@ -72,7 +75,7 @@ public class CUDABodyCollisionFilter
       }
 
       GpuMat depthImageWithoutRobot = new GpuMat(hostDepthImage.size(), opencv_core.CV_16UC1);
-      FloatPointer collidableGeometryPointer = getCollidablesPointer(robotCollidables, cameraFrame);
+      getCollidablesPointer(robotCollidables, cameraFrame);
 
       CUDATools.mallocAsync(deviceCollidableGeometryPointer, dataSize, stream);
       error = cudaStreamSynchronize(stream);
@@ -108,7 +111,6 @@ public class CUDABodyCollisionFilter
 
       blockSize.close();
       gridSize.close();
-      collidableGeometryPointer.close();
       originalDepthImage.close();
 
       return depthImageWithoutRobot;
@@ -130,9 +132,8 @@ public class CUDABodyCollisionFilter
       return count;
    }
 
-   public FloatPointer getCollidablesPointer(List<Collidable> robotCollidables, ReferenceFrame cameraFrame)
+   public void getCollidablesPointer(List<Collidable> robotCollidables, ReferenceFrame cameraFrame)
    {
-      FloatPointer geometryPointer = new FloatPointer((long) numberOfCollidables * NUMBER_OF_ATTRIBUTES);
       int index = 0;
 
       for (Collidable collidable : robotCollidables)
@@ -144,29 +145,27 @@ public class CUDABodyCollisionFilter
          {
             FrameSphere3D bodypart = new FrameSphere3D(sphere);
             bodypart.changeFrame(cameraFrame);
-            geometryPointer.put(index++, bodypart.getPosition().getX32());
-            geometryPointer.put(index++, bodypart.getPosition().getY32());
-            geometryPointer.put(index++, bodypart.getPosition().getZ32());
-            geometryPointer.put(index++, bodypart.getPosition().getX32());
-            geometryPointer.put(index++, bodypart.getPosition().getY32());
-            geometryPointer.put(index++, bodypart.getPosition().getZ32());
-            geometryPointer.put(index++, (float) bodypart.getRadius());
+            collidableGeometryPointer.put(index++, bodypart.getPosition().getX32());
+            collidableGeometryPointer.put(index++, bodypart.getPosition().getY32());
+            collidableGeometryPointer.put(index++, bodypart.getPosition().getZ32());
+            collidableGeometryPointer.put(index++, bodypart.getPosition().getX32());
+            collidableGeometryPointer.put(index++, bodypart.getPosition().getY32());
+            collidableGeometryPointer.put(index++, bodypart.getPosition().getZ32());
+            collidableGeometryPointer.put(index++, (float) bodypart.getRadius());
          }
          else if (collidable.getShape() instanceof FrameCapsule3D capsule)
          {
             FrameCapsule3D bodypart = new FrameCapsule3D(capsule);
             bodypart.changeFrame(cameraFrame);
-            geometryPointer.put(index++, bodypart.getTopCenter().getX32());
-            geometryPointer.put(index++, bodypart.getTopCenter().getY32());
-            geometryPointer.put(index++, bodypart.getTopCenter().getZ32());
-            geometryPointer.put(index++, bodypart.getBottomCenter().getX32());
-            geometryPointer.put(index++, bodypart.getBottomCenter().getY32());
-            geometryPointer.put(index++, bodypart.getBottomCenter().getZ32());
-            geometryPointer.put(index++, (float) bodypart.getRadius());
+            collidableGeometryPointer.put(index++, bodypart.getTopCenter().getX32());
+            collidableGeometryPointer.put(index++, bodypart.getTopCenter().getY32());
+            collidableGeometryPointer.put(index++, bodypart.getTopCenter().getZ32());
+            collidableGeometryPointer.put(index++, bodypart.getBottomCenter().getX32());
+            collidableGeometryPointer.put(index++, bodypart.getBottomCenter().getY32());
+            collidableGeometryPointer.put(index++, bodypart.getBottomCenter().getZ32());
+            collidableGeometryPointer.put(index++, (float) bodypart.getRadius());
          }
       }
-
-      return geometryPointer;
    }
 
    private boolean isCollidableShapeSupported(Collidable collidable)
@@ -179,6 +178,7 @@ public class CUDABodyCollisionFilter
    public void close()
    {
       deviceCollidableGeometryPointer.close();
+      collidableGeometryPointer.close();
       kernel.close();
       program.close();
       CUDAStreamManager.releaseStream(stream);
