@@ -450,11 +450,9 @@ public class RapidHeightMapExtractorCUDA
       return terrainHeightMapImage;
    }
 
-   public Mat getVisualizedHeightMap()
+   public GpuMat getVisualizedHeightMap()
    {
-      Mat visualizedCroppedHeightMapImage = new Mat();
-      this.sensorCroppedHeightMapImage.download(visualizedCroppedHeightMapImage);
-      return visualizedCroppedHeightMapImage;
+      return sensorCroppedHeightMapImage;
    }
 
    public int getCenterIndex()
