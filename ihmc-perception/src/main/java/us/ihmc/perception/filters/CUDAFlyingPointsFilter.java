@@ -23,13 +23,20 @@ public class CUDAFlyingPointsFilter
     * This runs a CUDA kernel that will remove the flying points from a depth map.
     * @throws Exception if loading the kernel doesn't work
     */
-   public CUDAFlyingPointsFilter() throws Exception
+   public CUDAFlyingPointsFilter()
    {
       stream = CUDAStreamManager.getStream();
       URL kernelPath = getClass().getResource("/us/ihmc/perception/cuda/FlyingPointFilter.cu");
-      flyingPointFilterCUDAProgram = new CUDAProgram(kernelPath);
-      String filterKernelName = "filterFlyingPoints";
-      flyingPointFilterKernel = flyingPointFilterCUDAProgram.loadKernel(filterKernelName);
+      try
+      {
+         flyingPointFilterCUDAProgram = new CUDAProgram(kernelPath);
+         String filterKernelName = "filterFlyingPoints";
+         flyingPointFilterKernel = flyingPointFilterCUDAProgram.loadKernel(filterKernelName);
+      }
+      catch (Exception e)
+      {
+         throw new RuntimeException(e);
+      }
    }
 
    /**

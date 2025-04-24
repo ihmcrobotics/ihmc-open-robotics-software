@@ -64,7 +64,7 @@ public class RapidHeightMapManager
                                 ReferenceFrame leftFootSoleFrame,
                                 ReferenceFrame rightFootSoleFrame,
                                 ControllerFootstepQueueMonitor controllerFootstepQueueMonitor,
-                                HeightMapParameters heightMapParameters) throws Exception
+                                HeightMapParameters heightMapParameters)
    {
       this.heightMapParameters = heightMapParameters;
 

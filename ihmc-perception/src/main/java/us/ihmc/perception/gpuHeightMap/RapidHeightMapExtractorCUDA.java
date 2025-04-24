@@ -453,9 +453,4 @@ public class RapidHeightMapExtractorCUDA
    {
       return sensorCroppedHeightMapImage;
    }
-
-   public int getCenterIndex()
-   {
-      return centerIndex;
-   }
 }

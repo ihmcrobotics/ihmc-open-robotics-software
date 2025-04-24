@@ -18,7 +18,7 @@ public class CUDAFlyingPointsFilterTest
    // Tests a simple 3x3 matrix where the input contains an outlier.
    // The test validates whether the kernel correctly replaces the outlier with the median of the surrounding values.
    @Test
-   public void testSimpleMatrix() throws Exception
+   public void testSimpleMatrix()
    {
       CUDAFlyingPointsFilter flyingPointsFilter;
       Mat outputMat = new Mat();
@@ -62,7 +62,7 @@ public class CUDAFlyingPointsFilterTest
 
    @Test
    @Disabled
-   public void testGPUMemoryUsage() throws Exception
+   public void testGPUMemoryUsage()
    {
       // Set a decent size for the rows and cols to make it easier to see a memory leak
       int rows = 1000;
