@@ -60,7 +60,7 @@ public class CUDABodyCollisionFilter
       // Note: We get the expected number of collidables and allocate that memory amount on the GPU
       // By allocating once we don't have to free the memory in each call, just at the end
       numberOfCollidables = countSupportedCollidables(robotCollidables);
-      dataSize = numberOfCollidables * NUMBER_OF_ATTRIBUTES * Float.BYTES;
+      dataSize = numberOfCollidables * NUMBER_OF_ATTRIBUTES;
       deviceCollidableGeometryPointer = new FloatPointer();
       CUDATools.mallocAsync(deviceCollidableGeometryPointer, dataSize, stream);
 
@@ -176,7 +176,6 @@ public class CUDABodyCollisionFilter
    {
       // Need to free this memory on the GPU to shut down correctly
       cudaFree(deviceCollidableGeometryPointer);
-      cudaFree(collidableGeometryPointer);
 
       deviceCollidableGeometryPointer.close();
       collidableGeometryPointer.close();
