@@ -20,7 +20,6 @@ import std_msgs.msg.dds.Float32;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.activeMapping.ActiveMappingParameterToolBox;
-import us.ihmc.behaviors.activeMapping.ContinuousHikingLogger;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
 import us.ihmc.behaviors.activeMapping.ContinuousPlannerSchedulingTask;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
@@ -106,6 +105,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    private ContinuousPlannerSchedulingTask continuousPlannerSchedulingTask;
    private ROS2StoredPropertySetGroup clientStoredPropertySets;
    private boolean runSubscriberOnly = false;
+   private ActiveMappingParameterToolBox activeMappingParameterToolBox;
    private boolean publishAndSubscribe;
    private double simulatedDriftInMeters = -0.1;
 
@@ -210,13 +210,11 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
     * This allows the {@link ContinuousPlannerSchedulingTask} to be started for when things are running in simulation, during the operation on the robot this
     * method should not be called as it will interfere with the remote process
     */
-   public void startContinuousPlannerSchedulingTask(ActiveMappingParameterToolBox activeMappingParameterToolBox,
-                                                    ROS2StoredPropertySetGroup clientStoredPropertySets,
-                                                    boolean publishAndSubscribe)
+   public void startContinuousPlannerSchedulingTask(ActiveMappingParameterToolBox activeMappingParameterToolBox, boolean publishAndSubscribe)
    {
+      this.activeMappingParameterToolBox = activeMappingParameterToolBox;
       this.publishAndSubscribe = publishAndSubscribe;
       runSubscriberOnly = true;
-      this.clientStoredPropertySets = clientStoredPropertySets;
 
       continuousPlannerSchedulingTask = new ContinuousPlannerSchedulingTask(robotModel,
                                                                             ros2Node,
@@ -245,11 +243,11 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
     * There are three situations that can occur when trying to use Continuous Hiking.
     * <ul>
     *    <li>Case 1: The situation where we are simulating the process running on a remote machine but in reality its running locally.
-    *    This is where we only want to update the property sets running on that process. Represented by {@link #clientStoredPropertySets}.
+    *    This is where we only want to update the property sets running on that process. Represented by {@link #activeMappingParameterToolBox}.
     *    So in this sense we are only subscribing to any updates sent from the user</li>
     *    <li>Case 2: The situation where we are running everything in one simulation.
     *    Here we want to publish, and subscribe in one place as everything is being run on the same machine.
-    *    So we update {@link #clientStoredPropertySets} and {@link #hostStoredPropertySets}</li>
+    *    So we update {@link #activeMappingParameterToolBox} and {@link #hostStoredPropertySets}</li>
     *    <li>Case 3: Then the situation where we only want to publish the property sets to be sent to the remote process.
     *    This is when we don't want to subscribe but we publish and changes to {@link #hostStoredPropertySets} so the remote process can receive these changes</li>
     *
@@ -259,11 +257,11 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    {
       if (runSubscriberOnly && !publishAndSubscribe)  // Case 1
       {
-         clientStoredPropertySets.update();
+         activeMappingParameterToolBox.update();
       }
       else if (publishAndSubscribe) // Case 2
       {
-         clientStoredPropertySets.update();
+         activeMappingParameterToolBox.update();
          hostStoredPropertySets.setPropertyChanged();
       }
       else  // Case 3

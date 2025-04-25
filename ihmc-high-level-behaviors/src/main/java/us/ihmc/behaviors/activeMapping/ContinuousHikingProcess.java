@@ -3,7 +3,6 @@ package us.ihmc.behaviors.activeMapping;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.perception.StandAloneRealsenseProcess;
@@ -21,9 +20,8 @@ public class ContinuousHikingProcess
    public static final String CONTINUOUS_HIKING_THREAD = "ContinuousHikingThread";
    public static final String SYNCED_ROBOT_THREAD = "SyncedRobotThread";
 
-   private final ROS2StoredPropertySetGroup ros2PropertySetGroup;
+   private final ActiveMappingParameterToolBox activeMappingParameterToolBox;
    private final ContinuousPlannerSchedulingTask continuousPlannerSchedulingTask;
-
    private final StandAloneRealsenseProcess standAloneRealsenseProcess;
 
    public ContinuousHikingProcess(DRCRobotModel robotModel, RobotCollisionModel robotCollisionModel)
@@ -39,18 +37,15 @@ public class ContinuousHikingProcess
       ScheduledExecutorService schedulerSyncedRobot = Executors.newScheduledThreadPool(1, threadFactorySyncedRobot);
       schedulerSyncedRobot.scheduleAtFixedRate(syncedRobot::update, 100, 10, TimeUnit.MILLISECONDS);
 
-      ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Node);
-      ActiveMappingParameterToolBox activeMappingParameterToolBox = new ActiveMappingParameterToolBox(ros2PropertySetGroup, robotModel, "ForContinuousWalking");
-
       ControllerFootstepQueueMonitor controllerFootstepQueueMonitor = new ControllerFootstepQueueMonitor(ros2Node, robotModel.getSimpleRobotName());
 
+      activeMappingParameterToolBox = new ActiveMappingParameterToolBox(ros2Node, robotModel, "ForContinuousWalking");
       standAloneRealsenseProcess = new StandAloneRealsenseProcess(ros2Node,
                                                                   ros2Helper,
                                                                   syncedRobot,
                                                                   robotCollisionModel,
                                                                   activeMappingParameterToolBox.getHeightMapParameters(),
                                                                   controllerFootstepQueueMonitor);
-
       continuousPlannerSchedulingTask = new ContinuousPlannerSchedulingTask(robotModel,
                                                                             ros2Node,
                                                                             syncedRobot,
@@ -68,7 +63,7 @@ public class ContinuousHikingProcess
 
    public void update()
    {
-      ros2PropertySetGroup.update();
+      activeMappingParameterToolBox.update();
 
       if (standAloneRealsenseProcess.getHeightMapManager() == null)
       {
