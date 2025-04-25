@@ -42,7 +42,6 @@ public class ContinuousHikingProcess
       ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Node);
       ActiveMappingParameterToolBox activeMappingParameterToolBox = new ActiveMappingParameterToolBox(ros2PropertySetGroup, robotModel, "ForContinuousWalking");
 
-      ContinuousHikingLogger continuousHikingLogger = new ContinuousHikingLogger();
       ControllerFootstepQueueMonitor controllerFootstepQueueMonitor = new ControllerFootstepQueueMonitor(ros2Node, robotModel.getSimpleRobotName());
 
       standAloneRealsenseProcess = new StandAloneRealsenseProcess(ros2Node,
@@ -57,7 +56,6 @@ public class ContinuousHikingProcess
                                                                             syncedRobot,
                                                                             syncedRobot.getReferenceFrames(),
                                                                             controllerFootstepQueueMonitor,
-                                                                            continuousHikingLogger,
                                                                             activeMappingParameterToolBox);
 
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "Shutdown"));

@@ -218,14 +218,11 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       runSubscriberOnly = true;
       this.clientStoredPropertySets = clientStoredPropertySets;
 
-      // We only want to start the logger if we create the subscriber for Continuous Hiking
-      ContinuousHikingLogger continuousHikingLogger = new ContinuousHikingLogger();
       continuousPlannerSchedulingTask = new ContinuousPlannerSchedulingTask(robotModel,
                                                                             ros2Node,
                                                                             syncedRobotModel,
                                                                             syncedRobotModel.getReferenceFrames(),
                                                                             controllerFootstepQueueMonitorRemote,
-                                                                            continuousHikingLogger,
                                                                             activeMappingParameterToolBox);
    }
 
