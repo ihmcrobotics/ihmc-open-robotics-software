@@ -63,8 +63,8 @@ public class StabilityBasedKinematicRetargetingCalculator
 
    private static final boolean SNAP_TO_REGION = false;
    public static boolean OVERRIDE_MESSAGE = true;
-   public static final boolean ENABLE_POSTURE_OBJECTIVE = true;
-   public static final boolean ENABLE_CONTACT_OBJECTIVE = true;
+   public static final boolean ENABLE_POSTURE_OBJECTIVE = false; // true; //
+   public static final boolean ENABLE_CONTACT_OBJECTIVE = false; // true; //
    public static final boolean INCLUDE_FF_VELOCITY = false;
 
    private static final double KP_ORIENTATION = 1200.0;
@@ -185,8 +185,8 @@ public class StabilityBasedKinematicRetargetingCalculator
       pelvisOrientationRetargeting = new OrientationRetargeting("pelvis", fullRobotModel.getPelvis(), updateDT, maxRate, MAX_PELVIS_ORIENTATION_OFFSET, graphicsListRegistry, registry);
       bracingHandOrientationRetargeting = new OrientationRetargeting("bracingHand", fullRobotModel.getHand(HumanoidKinematicsToolboxController.BRACING_HAND_SIDE), updateDT, maxRate, MAX_ARM_ORIENTATION_OFFSET, graphicsListRegistry, registry);
 
-      double minOffset = -0.07;
-      double maxOffset = 0.04;
+      double minOffset = -0.1;
+      double maxOffset = 0.1; // 0.04;
       comHeightRetargeting = new CoMHeightRetargeting(updateDT, 0.1, minOffset, maxOffset, fullRobotModel.getTotalMass(), centerOfMassFrame, stabilityGradientCalculator.getCentroidalMomentumCalculator(), registry);
 
       contactPointAdjustment = new YoFrameVector3D("contactPointAdjustment", ReferenceFrame.getWorldFrame(), registry);
@@ -212,6 +212,8 @@ public class StabilityBasedKinematicRetargetingCalculator
       pelvisDefaultWeight.set(1.0, 1.0, 1.0);
 
       // Custom lower weights to increase sensitivity
+//      chestMultiContactWeight.set(0.0, 0.0, 0.5);
+//      pelvisMultiContactWeight.set(0.5, 0.5, 0.5);
       chestMultiContactWeight.set(0.0, 0.0, 0.1);
       pelvisMultiContactWeight.set(0.2, 0.2, 0.2);
 
