@@ -282,10 +282,10 @@ public class RapidHeightMapExtractorCUDA
       CUDATools.checkCUDAError(error);
 
       // All that memory we allocated on the GPU, need to free that up now
-      cudaFree(groundToSensorTransformDevicePointer);
-      cudaFree(sensorToGroundTransformDevicePointer);
-      cudaFree(worldToGroundTransformDevicePointer);
-      cudaFree(parametersDevicePointer);
+      cudaFreeAsync(groundToSensorTransformDevicePointer, stream);
+      cudaFreeAsync(sensorToGroundTransformDevicePointer, stream);
+      cudaFreeAsync(worldToGroundTransformDevicePointer, stream);
+      cudaFreeAsync(parametersDevicePointer, stream);
    }
 
    public void updateHeightOffset(float z, CameraIntrinsics cameraIntrinsics, Point3DReadOnly sensorOrigin, double footHeight)
@@ -339,6 +339,11 @@ public class RapidHeightMapExtractorCUDA
       planOffsetKernel.run(stream, planOffsetKernelGridDim, blockSize, 0);
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
+
+      // All that memory we allocated on the GPU, need to free that up now
+      cudaFreeAsync(groundToSensorTransformDevicePointer, stream);
+      cudaFreeAsync(sensorToGroundTransformDevicePointer, stream);
+      cudaFreeAsync(parametersDevicePointer, stream);
    }
 
    public float[] populateParameterArray(HeightMapParameters parameters,
