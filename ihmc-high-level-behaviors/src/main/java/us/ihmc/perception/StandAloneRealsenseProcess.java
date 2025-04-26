@@ -92,16 +92,9 @@ public class StandAloneRealsenseProcess
       d455PublishThread.addTopic(PerceptionAPI.D455_DEPTH_IMAGE, RealSenseImageSensor.DEPTH_IMAGE_KEY);
       loopOnDemand(d455PublishThread, realsensePublishDemandNode);
 
-      initializeHeightMap(controllerFootstepQueueMonitor);
-   }
-
-   private void initializeHeightMap(ControllerFootstepQueueMonitor controllerFootstepQueueMonitor)
-   {
       heightMapUpdateThread = new RapidHeightMapUpdateThread(ros2Helper.getROS2Node(),
                                                              syncedRobot,
                                                              robotCollisionModel,
-                                                             syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.LEFT),
-                                                             syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.RIGHT),
                                                              controllerFootstepQueueMonitor,
                                                              d455Sensor,
                                                              RealSenseImageSensor.DEPTH_IMAGE_KEY,
