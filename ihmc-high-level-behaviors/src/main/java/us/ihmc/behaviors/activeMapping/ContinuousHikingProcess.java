@@ -65,11 +65,6 @@ public class ContinuousHikingProcess
    {
       activeMappingParameterToolBox.update();
 
-      if (standAloneRealsenseProcess.getHeightMapManager() == null)
-      {
-         return;
-      }
-
       if (standAloneRealsenseProcess.getLatestHeightMapData() != null && standAloneRealsenseProcess.getLatestTerrainMapData() != null)
       {
          continuousPlannerSchedulingTask.setLatestHeightMapData(standAloneRealsenseProcess.getLatestHeightMapData());

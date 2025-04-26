@@ -4,7 +4,6 @@ import org.bytedeco.cuda.cudart.CUstream_st;
 import org.bytedeco.cuda.cudart.dim3;
 import org.bytedeco.cuda.global.cudart;
 import org.bytedeco.opencv.opencv_core.GpuMat;
-import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
 
@@ -20,21 +19,36 @@ public class CUDAFlyingPointsFilter
    private final CUDAProgram flyingPointFilterCUDAProgram;
    private final CUstream_st stream;
 
-   public CUDAFlyingPointsFilter() throws Exception
+   /**
+    * This runs a CUDA kernel that will remove the flying points from a depth map.
+    * @throws Exception if loading the kernel doesn't work
+    */
+   public CUDAFlyingPointsFilter()
    {
       stream = CUDAStreamManager.getStream();
       URL kernelPath = getClass().getResource("/us/ihmc/perception/cuda/FlyingPointFilter.cu");
-      flyingPointFilterCUDAProgram = new CUDAProgram(kernelPath);
-      String filterKernelName = "filterFlyingPoints";
-      flyingPointFilterKernel = flyingPointFilterCUDAProgram.loadKernel(filterKernelName);
+      try
+      {
+         flyingPointFilterCUDAProgram = new CUDAProgram(kernelPath);
+         String filterKernelName = "filterFlyingPoints";
+         flyingPointFilterKernel = flyingPointFilterCUDAProgram.loadKernel(filterKernelName);
+      }
+      catch (Exception e)
+      {
+         throw new RuntimeException(e);
+      }
    }
 
-   public Mat applyFilter(Mat inputImage)
+   /**
+    * This method applies a flying points filter on the deviceInputImage.
+    * The result is packed into the deviceOutputImageToPack.
+    * Closing of these GpuMat's happens outside of this method.
+    * To avoid memory leaks, the method returns void and doesn't allocate any memory for the GpuMat's
+    * @param deviceInputImage the depth map that the flying points filter will be applied too
+    * @param deviceOutputImageToPack the depth map that the result will be packed into
+    */
+   public void applyFilter(GpuMat deviceInputImage, GpuMat deviceOutputImageToPack)
    {
-      GpuMat deviceInputImage = new GpuMat();
-      deviceInputImage.upload(inputImage);
-      GpuMat deviceOutputImage = new GpuMat(deviceInputImage.size(), deviceInputImage.type());
-
       int gridSizeX = (deviceInputImage.cols() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
       int gridSizeY = (deviceInputImage.rows() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
 
@@ -42,21 +56,15 @@ public class CUDAFlyingPointsFilter
       dim3 gridSize = new dim3(gridSizeX, gridSizeY, 1);
 
       flyingPointFilterKernel.withPointer(deviceInputImage.data()).withLong(deviceInputImage.step());
-      flyingPointFilterKernel.withPointer(deviceOutputImage.data()).withLong(deviceOutputImage.step());
+      flyingPointFilterKernel.withPointer(deviceOutputImageToPack.data()).withLong(deviceOutputImageToPack.step());
       flyingPointFilterKernel.withInt(deviceInputImage.rows()).withInt(deviceInputImage.cols());
       flyingPointFilterKernel.run(stream, gridSize, blockSize, 0);
 
-      CUDATools.checkCUDAError(cudart.cudaStreamSynchronize(stream));
-
-      Mat filteredDepthImageHost = new Mat();
-      deviceOutputImage.download(filteredDepthImageHost);
+      int error = cudart.cudaStreamSynchronize(stream);
+      CUDATools.checkCUDAError(error);
 
       blockSize.close();
       gridSize.close();
-      deviceInputImage.close();
-      deviceOutputImage.close();
-
-      return filteredDepthImageHost;
    }
 
    public void destroy()
@@ -66,4 +74,3 @@ public class CUDAFlyingPointsFilter
       CUDAStreamManager.releaseStream(stream);
    }
 }
-

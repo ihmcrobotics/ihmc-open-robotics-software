@@ -232,7 +232,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       return isActive() ? latestHeightMapData : null;
    }
 
-   public TerrainMapData getTerrainMapData()
+   public TerrainMapData getLatestTerrainMapData()
    {
       return terrainMapData;
    }

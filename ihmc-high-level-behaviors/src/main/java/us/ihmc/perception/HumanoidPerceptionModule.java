@@ -1,11 +1,9 @@
 package us.ihmc.perception;
 
-import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.GlobalMapTileMessage;
-import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
@@ -18,8 +16,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.perception.filters.CollidingScanRegionFilter;
-import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractorCUDA;
-import us.ihmc.perception.heightMap.RemoteHeightMapUpdater;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
@@ -29,14 +25,10 @@ import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.globalHeightMap.GlobalHeightMap;
 import us.ihmc.sensorProcessing.globalHeightMap.GlobalMapTile;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 import us.ihmc.tools.thread.MissingThreadTools;
@@ -45,7 +37,6 @@ import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
-import java.util.function.Supplier;
 
 public class HumanoidPerceptionModule
 {
@@ -53,11 +44,9 @@ public class HumanoidPerceptionModule
    private final FramePose3D lidarPose = new FramePose3D();
    private final OpenCLManager openCLManager;
 
-   private RemoteHeightMapUpdater heightMap;
    private PerceptionConfigurationParameters perceptionConfigurationParameters;
    private LocalizationAndMappingTask localizationAndMappingTask;
    private RapidPlanarRegionsExtractor rapidPlanarRegionsExtractor;
-   private RapidHeightMapExtractorCUDA rapidHeightMapExtractor;
    private CollidingScanRegionFilter collidingScanRegionFilter;
    private FullHumanoidRobotModel fullRobotModel;
    private PlanarRegionsList regionsInSensorFrame;
@@ -69,7 +58,6 @@ public class HumanoidPerceptionModule
 
    private final GlobalHeightMap globalHeightMap = new GlobalHeightMap();
    private final PerceptionStatistics perceptionStatistics = new PerceptionStatistics();
-   private final Notification resetHeightMapRequested = new Notification();
 
    private boolean rapidRegionsEnabled = false;
    private boolean sphericalRegionsEnabled = false;
@@ -82,27 +70,10 @@ public class HumanoidPerceptionModule
       this.openCLManager = openCLManager;
    }
 
-   public void initializeRealsenseDepthImage(int height, int width)
-   {
-      deviceDepthImage = new GpuMat(height, width, opencv_core.CV_16UC1);
-   }
-
    public void updateTerrain(ROS2Helper ros2Helper, Mat incomingDepth, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame, boolean metricDepth)
    {
       if (localizationAndMappingTask != null)
          localizationAndMappingTask.setEnableLiveMode(mappingEnabled);
-
-      if (rapidRegionsEnabled || heightMapEnabled)
-      {
-//         if (metricDepth)
-//         {
-//            OpenCVTools.convertFloatToShort(incomingDepth, realsenseDepthImage.getBytedecoOpenCVMat(), 1000.0, 0.0);
-//         }
-//         else
-//         {
-//            incomingDepth.convertTo(realsenseDepthImage.getBytedecoOpenCVMat(), opencv_core.CV_16UC1);
-//         }
-      }
 
       executorService.clearTaskQueue();
 
@@ -136,11 +107,6 @@ public class HumanoidPerceptionModule
       messageToPack.setCenterY(tile.getCenterY());
       messageToPack.setHashCodeOfTile(tile.hashCode());
       messageToPack.getHeightMap().set(HeightMapMessageTools.toMessage(tile));
-   }
-
-   public void publishExternalHeightMapImage(ROS2Node ros2Node)
-   {
-
    }
 
    private void updatePlanarRegions(ROS2Helper ros2Helper, ReferenceFrame cameraFrame)
@@ -194,20 +160,6 @@ public class HumanoidPerceptionModule
       this.fullRobotModel = fullRobotModel;
       this.collisionBoxProvider = collisionBoxProvider;
       this.collidingScanRegionFilter = PerceptionFilterTools.createHumanoidShinCollisionFilter(fullRobotModel, collisionBoxProvider);
-   }
-
-   public void initializeLocalizationAndMappingThread(HumanoidReferenceFrames referenceFrames, String robotName, ROS2Node ros2Node, boolean smoothing)
-   {
-      LogTools.info("Initializing Localization and Mapping Process (Smoothing: {})", smoothing);
-      localizationAndMappingTask = new LocalizationAndMappingTask(robotName,
-                                                                  PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
-                                                                  PerceptionAPI.SPHERICAL_RAPID_REGIONS_WITH_POSE,
-                                                                  ros2Node,
-                                                                  referenceFrames,
-                                                                  () ->
-                                                                  {
-                                                                  },
-                                                                  smoothing);
    }
 
    public void extractFramePlanarRegionsList(RapidPlanarRegionsExtractor extractor,
@@ -271,28 +223,9 @@ public class HumanoidPerceptionModule
       return this.regionsInWorldFrame;
    }
 
-   public Mat getRealsenseDepthImage()
-   {
-      Mat depthImage = new Mat();
-      deviceDepthImage.download(depthImage);
-      return depthImage;
-   }
-
    public RapidPlanarRegionsExtractor getRapidRegionsExtractor()
    {
       return this.rapidPlanarRegionsExtractor;
-   }
-
-   public void destroy()
-   {
-      executorService.clearTaskQueue();
-      executorService.destroy();
-
-      if (rapidPlanarRegionsExtractor != null)
-         rapidPlanarRegionsExtractor.destroy();
-
-      if (localizationAndMappingTask != null)
-         localizationAndMappingTask.destroy();
    }
 
    public void setPerceptionConfigurationParameters(PerceptionConfigurationParameters perceptionConfigurationParameters)
