@@ -72,11 +72,6 @@ public class ContinuousHikingProcess
    {
       ros2PropertySetGroup.update();
 
-      if (standAloneRealsenseProcess.getHeightMapManager() == null)
-      {
-         return;
-      }
-
       if (standAloneRealsenseProcess.getLatestHeightMapData() != null && standAloneRealsenseProcess.getLatestTerrainMapData() != null)
       {
          continuousPlannerSchedulingTask.setLatestHeightMapData(standAloneRealsenseProcess.getLatestHeightMapData());

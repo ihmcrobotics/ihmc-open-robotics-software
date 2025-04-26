@@ -2,6 +2,7 @@ package us.ihmc.perception.filters;
 
 import org.bytedeco.javacpp.SizeTPointer;
 import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import org.junit.jupiter.api.Disabled;
@@ -17,10 +18,9 @@ public class CUDAFlyingPointsFilterTest
    // Tests a simple 3x3 matrix where the input contains an outlier.
    // The test validates whether the kernel correctly replaces the outlier with the median of the surrounding values.
    @Test
-   public void testSimpleMatrix() throws Exception
+   public void testSimpleMatrix()
    {
       CUDAFlyingPointsFilter flyingPointsFilter;
-      Mat filterGpuMat;
       Mat outputMat = new Mat();
       flyingPointsFilter = new CUDAFlyingPointsFilter();
 
@@ -37,8 +37,12 @@ public class CUDAFlyingPointsFilterTest
 
       PerceptionDebugTools.printMat("input_matrix", inputMat, 1);
 
-      filterGpuMat = flyingPointsFilter.applyFilter(inputMat);
-      filterGpuMat.copyTo(outputMat);
+      GpuMat deviceInputMat = new GpuMat(inputMat.size(), inputMat.type());
+      deviceInputMat.upload(inputMat);
+      GpuMat deviceOutputMat = new GpuMat(deviceInputMat.size(), deviceInputMat.type());
+
+      flyingPointsFilter.applyFilter(deviceInputMat, deviceOutputMat);
+      deviceInputMat.close();
 
       PerceptionDebugTools.printMat("output_matrix", outputMat, 1);
 
@@ -50,14 +54,15 @@ public class CUDAFlyingPointsFilterTest
             assertEquals(10, outputMat.ptr(i, j).get(), "Element [" + i + "][" + j + "]");
          }
       }
-      filterGpuMat.close();
+
+      deviceOutputMat.close();
       outputMat.close();
       flyingPointsFilter.destroy();
    }
 
    @Test
    @Disabled
-   public void testGPUMemoryUsage() throws Exception
+   public void testGPUMemoryUsage()
    {
       // Set a decent size for the rows and cols to make it easier to see a memory leak
       int rows = 1000;
@@ -66,11 +71,15 @@ public class CUDAFlyingPointsFilterTest
 
       // Our data to pass into the update call over and over again.
       Mat cpuData = new Mat(rows, cols, opencv_core.CV_16UC1, new Scalar(33100));
+      GpuMat deviceInputData = new GpuMat();
+      deviceInputData.upload(cpuData);
+
+      GpuMat deviceOutputData = new GpuMat(deviceInputData.size(), deviceInputData.type());
 
       // Run this over and over to see if there is a memory leak
       for (int i = 0; i < 10000; i++)
       {
-         flyingPointsFilter.applyFilter(cpuData);
+         flyingPointsFilter.applyFilter(deviceInputData, deviceOutputData);
 
          SizeTPointer freePointer = new SizeTPointer(1);
          SizeTPointer usedPointer = new SizeTPointer(1);
@@ -89,6 +98,9 @@ public class CUDAFlyingPointsFilterTest
          cudaFree(freePointer);
          cudaFree(usedPointer);
       }
+
+      deviceInputData.close();
+      deviceOutputData.close();
 
       cpuData.close();
       flyingPointsFilter.destroy();

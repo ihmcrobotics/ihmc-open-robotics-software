@@ -6,7 +6,6 @@ import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
-import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
@@ -210,25 +209,19 @@ public class RapidHeightMapExtractorCUDA
       sensorToGroundTransformHostPointer.put(sensorToGroundTransformArray);
       worldToGroundTransformHostPointer.put(worldToGroundTransformArray);
 
-      //Allocate memory on the GPU for each of the transforms and images
-      //This step involves allocating CUDA memory asynchronously, and it's important to check for allocation errors
+      // Allocate memory on the GPU for each of the transforms and images
+      // This step involves allocating CUDA memory asynchronously, and it's important to check for allocation errors
       CUDATools.mallocAsync(groundToSensorTransformDevicePointer, groundToSensorTransformArray.length, stream);
       CUDATools.mallocAsync(sensorToGroundTransformDevicePointer, sensorToGroundTransformArray.length, stream);
       CUDATools.mallocAsync(worldToGroundTransformDevicePointer, worldToGroundTransformArray.length, stream);
       CUDATools.mallocAsync(parametersDevicePointer, parametersArray.length, stream);
 
-      error = cudaStreamSynchronize(stream);
-      CUDATools.checkCUDAError(error);
-
-      //Copy the data from host memory to device memory asynchronously
+      // Copy the data from host memory to device memory asynchronously
       // This ensures the device has the latest data available for kernel processing
       CUDATools.memcpyAsync(groundToSensorTransformDevicePointer, groundToSensorTransformHostPointer, groundToSensorTransformArray.length, stream);
       CUDATools.memcpyAsync(sensorToGroundTransformDevicePointer, sensorToGroundTransformHostPointer, sensorToGroundTransformArray.length, stream);
       CUDATools.memcpyAsync(worldToGroundTransformDevicePointer, worldToGroundTransformHostPointer, worldToGroundTransformArray.length, stream);
       CUDATools.memcpyAsync(parametersDevicePointer, parametersHostPointer, parametersArray.length, stream);
-
-      error = cudaStreamSynchronize(stream);
-      CUDATools.checkCUDAError(error);
 
       //Execute the CUDA kernels with the provided stream
       //Each kernel performs a specific task related to the height map update, registration, and cropping
@@ -287,6 +280,12 @@ public class RapidHeightMapExtractorCUDA
       croppingKernel.run(stream, croppingKernelGridDim, blockSize, 0);
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
+
+      // All that memory we allocated on the GPU, need to free that up now
+      cudaFreeAsync(groundToSensorTransformDevicePointer, stream);
+      cudaFreeAsync(sensorToGroundTransformDevicePointer, stream);
+      cudaFreeAsync(worldToGroundTransformDevicePointer, stream);
+      cudaFreeAsync(parametersDevicePointer, stream);
    }
 
    public void updateHeightOffset(float z, CameraIntrinsics cameraIntrinsics, Point3DReadOnly sensorOrigin, double footHeight)
@@ -340,6 +339,11 @@ public class RapidHeightMapExtractorCUDA
       planOffsetKernel.run(stream, planOffsetKernelGridDim, blockSize, 0);
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
+
+      // All that memory we allocated on the GPU, need to free that up now
+      cudaFreeAsync(groundToSensorTransformDevicePointer, stream);
+      cudaFreeAsync(sensorToGroundTransformDevicePointer, stream);
+      cudaFreeAsync(parametersDevicePointer, stream);
    }
 
    public float[] populateParameterArray(HeightMapParameters parameters,
@@ -450,15 +454,8 @@ public class RapidHeightMapExtractorCUDA
       return terrainHeightMapImage;
    }
 
-   public Mat getVisualizedHeightMap()
+   public GpuMat getVisualizedHeightMap()
    {
-      Mat visualizedCroppedHeightMapImage = new Mat();
-      this.sensorCroppedHeightMapImage.download(visualizedCroppedHeightMapImage);
-      return visualizedCroppedHeightMapImage;
-   }
-
-   public int getCenterIndex()
-   {
-      return centerIndex;
+      return sensorCroppedHeightMapImage;
    }
 }

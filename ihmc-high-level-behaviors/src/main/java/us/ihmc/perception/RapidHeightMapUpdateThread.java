@@ -42,21 +42,14 @@ public class RapidHeightMapUpdateThread extends RepeatingTaskThread
       sensorFrame = syncedRobotModel.getReferenceFrames().getSteppingCameraFrame();
       zUpSensorFrame = syncedRobotModel.getReferenceFrames().getSteppingCameraZUpFrame();
 
-      try
-      {
-         heightMapManager = new RapidHeightMapManager(ros2Node,
-                                                      robotCollisionModel,
-                                                      syncedRobotModel.getFullRobotModel(),
-                                                      syncedRobotModel.getRobotModel().getSimpleRobotName(),
-                                                      leftFootFrame,
-                                                      rightFootFrame,
-                                                      controllerFootstepQueueMonitor,
-                                                      heightMapParameters);
-      }
-      catch (Exception e)
-      {
-         throw new RuntimeException(e);
-      }
+      heightMapManager = new RapidHeightMapManager(ros2Node,
+                                                   robotCollisionModel,
+                                                   syncedRobotModel.getFullRobotModel(),
+                                                   syncedRobotModel.getRobotModel().getSimpleRobotName(),
+                                                   leftFootFrame,
+                                                   rightFootFrame,
+                                                   controllerFootstepQueueMonitor,
+                                                   heightMapParameters);
    }
 
    @Override
@@ -100,18 +93,12 @@ public class RapidHeightMapUpdateThread extends RepeatingTaskThread
       }
    }
 
-   public RapidHeightMapManager getHeightMapManager()
-   {
-      return heightMapManager;
-   }
-
    @Override
    public void kill()
    {
       super.kill();
       interrupt();
 
-      if (heightMapManager != null)
-         heightMapManager.destroy();
+      heightMapManager.destroy();
    }
 }
