@@ -32,6 +32,12 @@ public class FootstepStreamingToolboxParameters
     * or from the initial swing pose (false)
     */
    private boolean computeFromStance;
+
+   /**
+    * Option to use the com transfer of the user to detect whether the user is about to step
+    */
+   private boolean stepDetectionWithComTransfer;
+
    /**
     * Default movement threshold to determine when the user is actively stepping
     */
@@ -114,6 +120,7 @@ public class FootstepStreamingToolboxParameters
       timeThresholdForSleeping = 3.0;
 
       computeFromStance = true;
+      stepDetectionWithComTransfer = true;
       footstepMarginTime = 0.25;
 
       // Step threshold of 5cm and lift of 2cm, seem to be too conservative. Step is identified after ~0.3s. Too long considering that a step lasts ~0.57s
@@ -161,6 +168,11 @@ public class FootstepStreamingToolboxParameters
    public boolean getComputeFromStance()
    {
       return computeFromStance;
+   }
+
+   public boolean getStepDetectionWithComTransfer()
+   {
+      return stepDetectionWithComTransfer;
    }
 
    public double getStepThreshold()
