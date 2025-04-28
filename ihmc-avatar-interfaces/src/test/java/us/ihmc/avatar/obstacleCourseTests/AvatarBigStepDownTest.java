@@ -95,10 +95,10 @@ public abstract class AvatarBigStepDownTest implements MultiRobotTestInterface
       footRotation.setToYawOrientation(selectedLocation.getStartingLocationOffset().getYaw());
 
       FootstepDataMessage firstStep = HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT,
-                                                                                     new Point3D(-5.8 + 0.15, -7.471 - 0.15, 0.05),
+                                                                                     new Point3D(-5.8 + 0.15, -7.471 - 0.15, 0.00),
                                                                                      footRotation);
       FootstepDataMessage secondStep = HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT,
-                                                                                      new Point3D(-5.8 - 0.15, -7.471 + 0.15, 0.05),
+                                                                                      new Point3D(-5.8 - 0.15, -7.471 + 0.15, 0.00),
                                                                                       footRotation);
 
       @SuppressWarnings("unchecked")
