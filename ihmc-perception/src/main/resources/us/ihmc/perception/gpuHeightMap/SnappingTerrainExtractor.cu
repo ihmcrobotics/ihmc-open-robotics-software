@@ -312,9 +312,9 @@ __global__ void computeTerrainData(unsigned short *heightMap, size_t pitchHeight
 }
 
 extern "C"
-__global__ void computeSteppabilityConnectionsKernel(float* params,
-                                                     unsigned short *steppableMap, size_t pitchSteppableMap,
-                                                     unsigned short *steppableConnectionsMap, size_t pitchSteppableConnectionsMap)
+__global__ void computeSteppabilityConnections(unsigned short *steppableMap, size_t pitchSteppableMap,
+                                               unsigned short *steppableConnectionsMap, size_t pitchSteppableConnectionsMap,
+                                               float* params)
 {
     int x_index = blockIdx.x * blockDim.x + threadIdx.x;
     int y_index = blockIdx.y * blockDim.y + threadIdx.y;
@@ -324,10 +324,9 @@ __global__ void computeSteppabilityConnectionsKernel(float* params,
     int2 key = make_int2(x_index, y_index);
 
     int boundaryConnectionsEncodedAsOnes = 0;
-
     int counter = 0;
 
-    unsigned short *heightValue = (unsigned short *) ((char *)steppableMap + x_index * pitchSteppableMap) + y_index;
+    unsigned char *heightValue = (unsigned char *) ((char *)steppableMap + x_index * pitchSteppableMap) + y_index;
     if (*heightValue == VALID)
     {
         for (int x_offset = -1; x_offset <= 1; x_offset++)
@@ -348,7 +347,7 @@ __global__ void computeSteppabilityConnectionsKernel(float* params,
                 else
                 {
                     int2 query_key = make_int2(x_query, y_query);
-                    unsigned short *steppableValue = (unsigned short *) ((char *)steppableMap + query_key.x * pitchSteppableMap) + query_key.y;
+                    unsigned char *steppableValue = (unsigned char *) ((char *)steppableMap + query_key.x * pitchSteppableMap) + query_key.y;
                     if (*steppableValue == VALID)
                     {
                         boundaryConnectionsEncodedAsOnes = (1 << counter) | boundaryConnectionsEncodedAsOnes;
@@ -364,6 +363,6 @@ __global__ void computeSteppabilityConnectionsKernel(float* params,
         }
     }
 
-        unsigned short *steppableConnectionsElement = (unsigned short *)((char *)steppableConnectionsMap + key.x * pitchSteppableConnectionsMap) + key.y;
-        *steppableConnectionsElement = static_cast<unsigned short>(boundaryConnectionsEncodedAsOnes);
+        unsigned char *steppableConnectionsElement = (unsigned char *)((char *)steppableConnectionsMap + key.x * pitchSteppableConnectionsMap) + key.y;
+        *steppableConnectionsElement = static_cast<unsigned char>(boundaryConnectionsEncodedAsOnes);
 }

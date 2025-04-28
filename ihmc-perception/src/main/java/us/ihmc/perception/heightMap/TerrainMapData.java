@@ -32,12 +32,13 @@ public class TerrainMapData
    // TODO the contact map and terrain map are assumed to be null. I'm keeping them in to avoid breaking the code.
    private Mat contactMap;
 
-   private Mat steppabilityImage;
    private Mat snapHeightImage;
-   private Mat snappedAreaFractionImage;
    private Mat snapNormalXImage;
    private Mat snapNormalYImage;
    private Mat snapNormalZImage;
+   private Mat steppabilityImage;
+   private Mat steppabilityConnectionsMat;
+   private Mat snappedAreaFractionImage;
 
    public TerrainMapData(int height, int width, double heightScaleFactor, double heightScaleOffset)
    {
@@ -70,12 +71,13 @@ public class TerrainMapData
 
       setHeightMap(other.heightMap);
       setContactMap(other.contactMap);
-      setSteppabilityMat(other.steppabilityImage);
       setSnapHeightMat(other.snapHeightImage);
-      setSnappedAreaFractionMat(other.snappedAreaFractionImage);
       setSnapNormalXMat(other.snapNormalXImage);
       setSnapNormalYMat(other.snapNormalYImage);
       setSnapNormalZMat(other.snapNormalZImage);
+      setSteppabilityMat(other.steppabilityImage);
+      setSteppabilityConnectionsMat(other.steppabilityConnectionsMat);
+      setSnappedAreaFractionMat(other.snappedAreaFractionImage);
    }
 
    public boolean isEmpty()
@@ -324,11 +326,6 @@ public class TerrainMapData
       this.contactMap = contactMap == null ? null : contactMap.clone();
    }
 
-   public void setSteppabilityMat(Mat steppabilityImage)
-   {
-      this.steppabilityImage = steppabilityImage == null ? null : steppabilityImage.clone();
-   }
-
    public void setSnapHeightMat(Mat snapHeightImage)
    {
       this.snapHeightImage = snapHeightImage == null ? null : snapHeightImage.clone();
@@ -349,24 +346,24 @@ public class TerrainMapData
       this.snapNormalZImage = snapNormalZImage == null ? null : snapNormalZImage.clone();
    }
 
+   public void setSteppabilityMat(Mat steppabilityImage)
+   {
+      this.steppabilityImage = steppabilityImage == null ? null : steppabilityImage.clone();
+   }
+
+   public void setSteppabilityConnectionsMat(Mat steppabilityConnectionsImage)
+   {
+      this.steppabilityConnectionsMat = steppabilityConnectionsImage == null ? null : steppabilityConnectionsImage.clone();
+   }
+
    public void setSnappedAreaFractionMat(Mat snappedAreaFractionImage)
    {
       this.snappedAreaFractionImage = snappedAreaFractionImage == null ? null : snappedAreaFractionImage.clone();
    }
 
-   public Mat getSteppabilityMat()
-   {
-      return steppabilityImage;
-   }
-
    public Mat getSnapHeightMat()
    {
       return snapHeightImage;
-   }
-
-   public Mat getSnappedAreaFractionMat()
-   {
-      return snappedAreaFractionImage;
    }
 
    public Mat getSnapNormalXMat()
@@ -382,6 +379,21 @@ public class TerrainMapData
    public Mat getSnapNormalZMat()
    {
       return snapNormalZImage;
+   }
+
+   public Mat getSteppabilityMat()
+   {
+      return steppabilityImage;
+   }
+
+   public Mat getSteppabilityConnectionsMat()
+   {
+      return steppabilityConnectionsMat;
+   }
+
+   public Mat getSnappedAreaFractionMat()
+   {
+      return snappedAreaFractionImage;
    }
 
    public void setFromPacket(TerrainMapMessage message)
