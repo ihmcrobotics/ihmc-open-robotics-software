@@ -32,6 +32,7 @@ jobs:
     with:
       subproject: 'open-alexander'
       test-category: 'controller-api-2'
+      timeout-minutes: 45
   alexander-humanoid-behaviors:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
