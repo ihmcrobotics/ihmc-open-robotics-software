@@ -22,22 +22,22 @@ import java.net.URL;
 import static org.bytedeco.cuda.global.cudart.cudaFree;
 import static org.bytedeco.cuda.global.cudart.cudaStreamSynchronize;
 
-public class SnappingHeightMapExtractor
+public class SnappingTerrainExtractor
 {
    private static final int BLOCK_SIZE_XY = 32;
    private static final boolean PRINT_TIMING_FOR_KERNELS = false;
 
+   private final TerrainMapData terrainMapData;
+   private final HeightMapParameters heightMapParameters;
    private final SteppableRegionCalculatorParameters steppableRegionParameters = new SteppableRegionCalculatorParameters();
 
-   private final HeightMapParameters heightMapParameters;
-   private final TerrainMapData terrainMapData;
-
    private final CUstream_st stream;
-
    private final CUDAProgram snappingHeightMapProgram;
    private final CUDAKernel snappingKernel;
+
    private dim3 snappingKernelGridDim;
    private dim3 blockSize;
+   private int cellsPerAxisTerrain;
 
    private final FloatPointer snappingParametersHostPointer;
    private final FloatPointer snappingParametersDevicePointer;
@@ -48,34 +48,42 @@ public class SnappingHeightMapExtractor
    private final GpuMat snapNormalYImage;
    private final GpuMat snapNormalZImage;
    private final GpuMat snappedAreaFractionImage;
-   private int cellsPerAxisTerrain;
 
-   public SnappingHeightMapExtractor(HeightMapParameters heightMapParameters)
+   /**
+    * This class extracts terrain data from a height map.
+    * That data is stored in a {@link TerrainMapData} object.
+    * With the terrain data, we can plan precise footsteps over the height map
+    *
+    * @param heightMapParameters parameters used to compute terrain data
+    */
+   public SnappingTerrainExtractor(HeightMapParameters heightMapParameters)
    {
       this.heightMapParameters = heightMapParameters;
 
+      stream = CUDAStreamManager.getStream();
+
+      // We have to try to load the kernel inside this try catch cause it may throw an exception
       try
       {
-         stream = CUDAStreamManager.getStream();
-
          // Load header and main file
          URL heightMapUtilsHeaderPath = getClass().getResource("HeightMapUtils.cuh");
          URL mathUtilsHeaderPath = getClass().getResource("/us/ihmc/perception/cuda/MathUtils.cuh");
-         URL kernelPath = getClass().getResource("SnappingHeightMapExtractor.cu");
+         URL kernelPath = getClass().getResource("SnappingTerrainExtractor.cu");
 
          snappingHeightMapProgram = new CUDAProgram(kernelPath, heightMapUtilsHeaderPath, mathUtilsHeaderPath);
-         snappingKernel = snappingHeightMapProgram.loadKernel("computeSnappedValuesKernel");
+         snappingKernel = snappingHeightMapProgram.loadKernel("computeTerrainData");
          snappingKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
-
-         snappingParametersHostPointer = new FloatPointer(16);
-         snappingParametersDevicePointer = new FloatPointer();
       }
       catch (Exception e)
       {
          throw new RuntimeException(e);
       }
 
-      recomputeDerivedParameters();
+      // 16 is the number of parameters being passed in as floats
+      snappingParametersHostPointer = new FloatPointer(16);
+      snappingParametersDevicePointer = new FloatPointer();
+
+      computeDerivedParameters();
 
       terrainMapData = new TerrainMapData(cellsPerAxisTerrain,
                                           cellsPerAxisTerrain,
@@ -91,7 +99,11 @@ public class SnappingHeightMapExtractor
       snappedAreaFractionImage = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);
    }
 
-   private void recomputeDerivedParameters()
+   /**
+    * Compute the value of the Mat objects based on the height map parameters.
+    * This needs to be an odd number of the indexing will be messed up
+    */
+   private void computeDerivedParameters()
    {
       int terrainCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getTerrainWidthInMeters(), heightMapParameters.getCellSizeInMeters());
       cellsPerAxisTerrain = 2 * terrainCenterIndex + 1;
@@ -100,8 +112,6 @@ public class SnappingHeightMapExtractor
    public void update(GpuMat terrainHeightMap, Point3D sensorOrigin)
    {
       int error;
-
-      recomputeDerivedParameters();
 
       // Populate parameters buffer for the snapping kernel
       float[] snappingParametersArray = populateSnappingParametersArray(sensorOrigin);
@@ -139,30 +149,37 @@ public class SnappingHeightMapExtractor
          Mat cpuHeightMap = new Mat();
          terrainHeightMap.download(cpuHeightMap);
          terrainMapData.setHeightMap(cpuHeightMap);
+         cpuHeightMap.close();
 
          Mat cpuSteppabilityMap = new Mat();
          steppabilityImage.download(cpuSteppabilityMap);
          terrainMapData.setSteppabilityMat(cpuSteppabilityMap);
+         cpuSteppabilityMap.close();
 
          Mat cpuSnapHeightMap = new Mat();
          snapHeightImage.download(cpuSnapHeightMap);
          terrainMapData.setSnapHeightMat(cpuSnapHeightMap);
+         cpuSnapHeightMap.close();
 
          Mat cpuSnapNormalXMap = new Mat();
          snapNormalXImage.download(cpuSnapNormalXMap);
          terrainMapData.setSnapNormalXMat(cpuSnapNormalXMap);
+         cpuSnapNormalXMap.close();
 
          Mat cpuSnapNormalYMap = new Mat();
          snapNormalYImage.download(cpuSnapNormalYMap);
          terrainMapData.setSnapNormalYMat(cpuSnapNormalYMap);
+         cpuSnapNormalYMap.close();
 
          Mat cpuSnapNormalZMap = new Mat();
          snapNormalZImage.download(cpuSnapNormalZMap);
          terrainMapData.setSnapNormalZMat(cpuSnapNormalZMap);
+         cpuSnapNormalZMap.close();
 
          Mat cpuSnappedAreaFractionMap = new Mat();
          snappedAreaFractionImage.download(cpuSnappedAreaFractionMap);
          terrainMapData.setSnappedAreaFractionMat(cpuSnappedAreaFractionMap);
+         cpuSnappedAreaFractionMap.close();
       }
    }
 
@@ -192,7 +209,7 @@ public class SnappingHeightMapExtractor
                           (float) steppableRegionParameters.getInequalityActivationSlope()};
    }
 
-   public void destroy()
+   public void close()
    {
       snappingHeightMapProgram.close();
       snappingKernel.close();
