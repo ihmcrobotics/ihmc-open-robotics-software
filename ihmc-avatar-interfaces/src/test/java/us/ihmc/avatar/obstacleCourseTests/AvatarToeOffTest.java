@@ -1,7 +1,5 @@
 package us.ihmc.avatar.obstacleCourseTests;
 
-import static us.ihmc.robotics.Assert.assertTrue;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,6 +25,8 @@ import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class AvatarToeOffTest implements MultiRobotTestInterface
 {
@@ -133,7 +133,7 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
       anklePitchUpperLimit = simulationTestHelper.getControllerFullRobotModel().getLegJoint(RobotSide.LEFT, LegJointName.ANKLE_PITCH).getJointLimitUpper();
 
       walkForward(getStepLength(), 1, 0.0, stepHeight);
-      assertTrue(simulationTestHelper.simulateNow(1.0));
+      assertTrue(simulationTestHelper.simulateNow(0.25));
    }
 
    private void setupTest(TestInfo testInfo, CommonAvatarEnvironmentInterface environment)
@@ -147,7 +147,7 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
       simulationTestHelper.start();
       simulationTestHelper.setCamera(new Point3D(0.6, 0.0, 0.6), new Point3D(10.0, 3.0, 3.0));
 
-      assertTrue(simulationTestHelper.simulateNow(1.0));
+      assertTrue(simulationTestHelper.simulateNow(0.25));
    }
 
    private void walkForward(double stepLength, int steps, double initialXPosition)
@@ -206,7 +206,7 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
       }
       else
       {
-         assertTrue(simulationTestHelper.simulateNow(2.0));
+         assertTrue(simulationTestHelper.simulateNow(1.0));
       }
    }
 

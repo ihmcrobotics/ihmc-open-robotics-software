@@ -4,6 +4,10 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import org.ejml.data.DMatrixRMaj;
+import us.ihmc.commons.time.TimeInterval;
+import us.ihmc.commons.time.TimeIntervalBasics;
+import us.ihmc.commons.time.TimeIntervalReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreFactories;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -12,15 +16,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D;
-import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
-import us.ihmc.robotics.time.TimeInterval;
-import us.ihmc.robotics.time.TimeIntervalBasics;
-import us.ihmc.robotics.time.TimeIntervalReadOnly;
-import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.providers.IntegerProvider;
-import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.robotics.trajectories.interfaces.PolynomialReadOnly;
 
 import java.awt.*;
 import java.util.List;
@@ -235,7 +231,7 @@ public class RDXPolynomial implements RenderableProvider
 
    static class PolynomialVariables implements PolynomialReadOnly
    {
-      private final double[] coefficients;
+      private final DMatrixRMaj coefficients;
       private final int numberOfCoefficients;
       private final double[] xPowers;
       private double pos, vel, acc;
@@ -250,7 +246,7 @@ public class RDXPolynomial implements RenderableProvider
 
       private PolynomialVariables(double[] coefficients, int numberOfCoefficients, TimeIntervalReadOnly timeInterval)
       {
-         this.coefficients = coefficients;
+         this.coefficients = new DMatrixRMaj(coefficients);
          this.numberOfCoefficients = numberOfCoefficients;
          xPowers = new double[coefficients.length];
          this.timeInterval.set(timeInterval);
@@ -269,17 +265,17 @@ public class RDXPolynomial implements RenderableProvider
          pos = vel = acc = 0.0;
          for (int i = 0; i < numberOfCoefficients; i++)
          {
-            pos += coefficients[i] * xPowers[i];
+            pos += coefficients.get(i) * xPowers[i];
          }
 
          for (int i = 1; i < numberOfCoefficients; i++)
          {
-            vel += i * coefficients[i] * xPowers[i - 1];
+            vel += i * coefficients.get(i) * xPowers[i - 1];
          }
 
          for (int i = 2; i < numberOfCoefficients; i++)
          {
-            acc += (i - 1) * i * coefficients[i] * xPowers[i - 2];
+            acc += (i - 1) * i * coefficients.get(i) * xPowers[i - 2];
          }
       }
 
@@ -294,7 +290,7 @@ public class RDXPolynomial implements RenderableProvider
 
       public int getMaximumNumberOfCoefficients()
       {
-         return coefficients.length;
+         return coefficients.getNumElements();
       }
 
       public double getPosition()
@@ -315,7 +311,13 @@ public class RDXPolynomial implements RenderableProvider
       @Override
       public double[] getCoefficients()
       {
-         return coefficients;
+         return coefficients.data;
+      }
+
+      @Override
+      public DMatrixRMaj getCoefficientsVector()
+      {
+         return null;
       }
 
       @Override
@@ -334,6 +336,18 @@ public class RDXPolynomial implements RenderableProvider
       public double getCoefficient(int idx)
       {
          return getCoefficients()[idx];
+      }
+
+      @Override
+      public double getDerivativeCoefficient(int idx)
+      {
+         throw new RuntimeException("Not implemented.");
+      }
+
+      @Override
+      public double getDoubleDerivativeCoefficient(int idx)
+      {
+         throw new RuntimeException("Not implemented.");
       }
 
       @Override

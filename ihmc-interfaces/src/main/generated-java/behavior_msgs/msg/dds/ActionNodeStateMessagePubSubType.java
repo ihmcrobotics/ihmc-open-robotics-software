@@ -15,7 +15,7 @@ public class ActionNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "a35d4b97d3f6a64885a1978769af6abd5bb9a97e3a2a5125c461555b32fe9f56";
+   		return "5dcce72910b493a75bd133ff2830744105a7b96d9d09e6aa27144d1b2a5f301d";
    }
    
    @Override
@@ -52,19 +52,7 @@ public class ActionNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDat
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += behavior_msgs.msg.dds.BehaviorTreeNodeStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+      current_alignment += behavior_msgs.msg.dds.LeafNodeStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -97,25 +85,7 @@ public class ActionNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDat
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += behavior_msgs.msg.dds.BehaviorTreeNodeStateMessagePubSubType.getCdrSerializedSize(data.getState(), current_alignment);
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
-      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
-
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
+      current_alignment += behavior_msgs.msg.dds.LeafNodeStateMessagePubSubType.getCdrSerializedSize(data.getState(), current_alignment);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -148,31 +118,19 @@ public class ActionNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
    public static void write(behavior_msgs.msg.dds.ActionNodeStateMessage data, us.ihmc.idl.CDR cdr)
    {
-      behavior_msgs.msg.dds.BehaviorTreeNodeStateMessagePubSubType.write(data.getState(), cdr);
-      cdr.write_type_4(data.getId());
-
-      cdr.write_type_7(data.getIsNextForExecution());
-
-      cdr.write_type_3(data.getConcurrencyRank());
-
-      cdr.write_type_7(data.getCanExecute());
-
-      cdr.write_type_7(data.getIsExecuting());
-
-      cdr.write_type_7(data.getFailed());
-
+      behavior_msgs.msg.dds.LeafNodeStateMessagePubSubType.write(data.getState(), cdr);
       cdr.write_type_6(data.getNominalExecutionDuration());
 
       cdr.write_type_6(data.getElapsedExecutionTime());
 
       if(data.getCommandedTrajectory().size() <= 500)
       cdr.write_type_e(data.getCommandedTrajectory());else
-          throw new RuntimeException("commanded_trajectory field exceeds the maximum length");
+          throw new RuntimeException("commanded_trajectory field exceeds the maximum length: %d > %d".formatted(data.getCommandedTrajectory().size(), 500));
 
       geometry_msgs.msg.dds.PosePubSubType.write(data.getCurrentPose(), cdr);
       if(data.getCommandedJointTrajectories().size() <= 7)
       cdr.write_type_e(data.getCommandedJointTrajectories());else
-          throw new RuntimeException("commanded_joint_trajectories field exceeds the maximum length");
+          throw new RuntimeException("commanded_joint_trajectories field exceeds the maximum length: %d > %d".formatted(data.getCommandedJointTrajectories().size(), 7));
 
       for(int i0 = 0; i0 < data.getCurrentJointAngles().length; ++i0)
       {
@@ -187,19 +145,7 @@ public class ActionNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
    public static void read(behavior_msgs.msg.dds.ActionNodeStateMessage data, us.ihmc.idl.CDR cdr)
    {
-      behavior_msgs.msg.dds.BehaviorTreeNodeStateMessagePubSubType.read(data.getState(), cdr);	
-      data.setId(cdr.read_type_4());
-      	
-      data.setIsNextForExecution(cdr.read_type_7());
-      	
-      data.setConcurrencyRank(cdr.read_type_3());
-      	
-      data.setCanExecute(cdr.read_type_7());
-      	
-      data.setIsExecuting(cdr.read_type_7());
-      	
-      data.setFailed(cdr.read_type_7());
-      	
+      behavior_msgs.msg.dds.LeafNodeStateMessagePubSubType.read(data.getState(), cdr);	
       data.setNominalExecutionDuration(cdr.read_type_6());
       	
       data.setElapsedExecutionTime(cdr.read_type_6());
@@ -223,14 +169,8 @@ public class ActionNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final void serialize(behavior_msgs.msg.dds.ActionNodeStateMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_a("state", new behavior_msgs.msg.dds.BehaviorTreeNodeStateMessagePubSubType(), data.getState());
+      ser.write_type_a("state", new behavior_msgs.msg.dds.LeafNodeStateMessagePubSubType(), data.getState());
 
-      ser.write_type_4("id", data.getId());
-      ser.write_type_7("is_next_for_execution", data.getIsNextForExecution());
-      ser.write_type_3("concurrency_rank", data.getConcurrencyRank());
-      ser.write_type_7("can_execute", data.getCanExecute());
-      ser.write_type_7("is_executing", data.getIsExecuting());
-      ser.write_type_7("failed", data.getFailed());
       ser.write_type_6("nominal_execution_duration", data.getNominalExecutionDuration());
       ser.write_type_6("elapsed_execution_time", data.getElapsedExecutionTime());
       ser.write_type_e("commanded_trajectory", data.getCommandedTrajectory());
@@ -245,14 +185,8 @@ public class ActionNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.ActionNodeStateMessage data)
    {
-      ser.read_type_a("state", new behavior_msgs.msg.dds.BehaviorTreeNodeStateMessagePubSubType(), data.getState());
+      ser.read_type_a("state", new behavior_msgs.msg.dds.LeafNodeStateMessagePubSubType(), data.getState());
 
-      data.setId(ser.read_type_4("id"));
-      data.setIsNextForExecution(ser.read_type_7("is_next_for_execution"));
-      data.setConcurrencyRank(ser.read_type_3("concurrency_rank"));
-      data.setCanExecute(ser.read_type_7("can_execute"));
-      data.setIsExecuting(ser.read_type_7("is_executing"));
-      data.setFailed(ser.read_type_7("failed"));
       data.setNominalExecutionDuration(ser.read_type_6("nominal_execution_duration"));
       data.setElapsedExecutionTime(ser.read_type_6("elapsed_execution_time"));
       ser.read_type_e("commanded_trajectory", data.getCommandedTrajectory());

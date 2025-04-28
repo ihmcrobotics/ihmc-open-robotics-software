@@ -8,10 +8,18 @@ import us.ihmc.pubsub.TopicDataType;
 
 public class AI2RCommandMessage extends Packet<AI2RCommandMessage> implements Settable<AI2RCommandMessage>, EpsilonComparable<AI2RCommandMessage>
 {
-   public boolean unused_placeholder_field_;
+   /**
+            * Behavior to execute (checkpoint to jump to in the pre-loaded behavior collection)
+            */
+   public java.lang.StringBuilder behavior_to_execute_;
+   public behavior_msgs.msg.dds.AI2RHandPoseAdaptationMessage hand_pose_adaptation_;
+   public behavior_msgs.msg.dds.AI2RNavigationMessage navigation_;
 
    public AI2RCommandMessage()
    {
+      behavior_to_execute_ = new java.lang.StringBuilder(255);
+      hand_pose_adaptation_ = new behavior_msgs.msg.dds.AI2RHandPoseAdaptationMessage();
+      navigation_ = new behavior_msgs.msg.dds.AI2RNavigationMessage();
    }
 
    public AI2RCommandMessage(AI2RCommandMessage other)
@@ -22,17 +30,47 @@ public class AI2RCommandMessage extends Packet<AI2RCommandMessage> implements Se
 
    public void set(AI2RCommandMessage other)
    {
-      unused_placeholder_field_ = other.unused_placeholder_field_;
+      behavior_to_execute_.setLength(0);
+      behavior_to_execute_.append(other.behavior_to_execute_);
 
+      behavior_msgs.msg.dds.AI2RHandPoseAdaptationMessagePubSubType.staticCopy(other.hand_pose_adaptation_, hand_pose_adaptation_);
+      behavior_msgs.msg.dds.AI2RNavigationMessagePubSubType.staticCopy(other.navigation_, navigation_);
    }
 
-   public void setUnusedPlaceholderField(boolean unused_placeholder_field)
+   /**
+            * Behavior to execute (checkpoint to jump to in the pre-loaded behavior collection)
+            */
+   public void setBehaviorToExecute(java.lang.String behavior_to_execute)
    {
-      unused_placeholder_field_ = unused_placeholder_field;
+      behavior_to_execute_.setLength(0);
+      behavior_to_execute_.append(behavior_to_execute);
    }
-   public boolean getUnusedPlaceholderField()
+
+   /**
+            * Behavior to execute (checkpoint to jump to in the pre-loaded behavior collection)
+            */
+   public java.lang.String getBehaviorToExecuteAsString()
    {
-      return unused_placeholder_field_;
+      return getBehaviorToExecute().toString();
+   }
+   /**
+            * Behavior to execute (checkpoint to jump to in the pre-loaded behavior collection)
+            */
+   public java.lang.StringBuilder getBehaviorToExecute()
+   {
+      return behavior_to_execute_;
+   }
+
+
+   public behavior_msgs.msg.dds.AI2RHandPoseAdaptationMessage getHandPoseAdaptation()
+   {
+      return hand_pose_adaptation_;
+   }
+
+
+   public behavior_msgs.msg.dds.AI2RNavigationMessage getNavigation()
+   {
+      return navigation_;
    }
 
 
@@ -53,8 +91,10 @@ public class AI2RCommandMessage extends Packet<AI2RCommandMessage> implements Se
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.unused_placeholder_field_, other.unused_placeholder_field_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.behavior_to_execute_, other.behavior_to_execute_, epsilon)) return false;
 
+      if (!this.hand_pose_adaptation_.epsilonEquals(other.hand_pose_adaptation_, epsilon)) return false;
+      if (!this.navigation_.epsilonEquals(other.navigation_, epsilon)) return false;
 
       return true;
    }
@@ -68,8 +108,10 @@ public class AI2RCommandMessage extends Packet<AI2RCommandMessage> implements Se
 
       AI2RCommandMessage otherMyClass = (AI2RCommandMessage) other;
 
-      if(this.unused_placeholder_field_ != otherMyClass.unused_placeholder_field_) return false;
+      if (!us.ihmc.idl.IDLTools.equals(this.behavior_to_execute_, otherMyClass.behavior_to_execute_)) return false;
 
+      if (!this.hand_pose_adaptation_.equals(otherMyClass.hand_pose_adaptation_)) return false;
+      if (!this.navigation_.equals(otherMyClass.navigation_)) return false;
 
       return true;
    }
@@ -80,8 +122,12 @@ public class AI2RCommandMessage extends Packet<AI2RCommandMessage> implements Se
       StringBuilder builder = new StringBuilder();
 
       builder.append("AI2RCommandMessage {");
-      builder.append("unused_placeholder_field=");
-      builder.append(this.unused_placeholder_field_);
+      builder.append("behavior_to_execute=");
+      builder.append(this.behavior_to_execute_);      builder.append(", ");
+      builder.append("hand_pose_adaptation=");
+      builder.append(this.hand_pose_adaptation_);      builder.append(", ");
+      builder.append("navigation=");
+      builder.append(this.navigation_);
       builder.append("}");
       return builder.toString();
    }

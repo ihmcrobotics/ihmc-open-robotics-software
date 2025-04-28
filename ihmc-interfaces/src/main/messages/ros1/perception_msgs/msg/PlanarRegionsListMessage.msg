@@ -4,7 +4,7 @@
 # As concave hulls are complex to manipulate, a set of convex polygons are also provided, altogether they approximate the area of the planar region.
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # Approximate last update time
 ihmc_common_msgs/InstantMessage last_updated

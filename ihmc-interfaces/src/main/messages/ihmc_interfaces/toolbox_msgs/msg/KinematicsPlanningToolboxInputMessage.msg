@@ -1,6 +1,6 @@
 # This message is part of the IHMC whole-body inverse kinematics module: KinematicsPlanningToolbox.
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # This is a list of rigid body messages which is used in KinematicsPlanningToolbox.
 # It should composed of at least one message. Each message represent the input for solving the trajectory for one rigid-body.

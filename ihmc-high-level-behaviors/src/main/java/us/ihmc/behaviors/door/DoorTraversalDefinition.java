@@ -3,21 +3,21 @@ package us.ihmc.behaviors.door;
 import behavior_msgs.msg.dds.DoorTraversalDefinitionMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.communication.crdt.CRDTUnidirectionalDouble;
+import us.ihmc.communication.crdt.CRDTBidirectionalDouble;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class DoorTraversalDefinition extends BehaviorTreeNodeDefinition
 {
-   private final CRDTUnidirectionalDouble lostGraspDetectionHandOpenAngle;
-   private final CRDTUnidirectionalDouble openedDoorHandleDistanceFromStart;
+   private final CRDTBidirectionalDouble lostGraspDetectionHandOpenAngle;
+   private final CRDTBidirectionalDouble openedDoorHandleDistanceFromStart;
 
    public DoorTraversalDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(crdtInfo, saveFileDirectory);
 
-      lostGraspDetectionHandOpenAngle = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, Math.toRadians(10.0));
-      openedDoorHandleDistanceFromStart = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, 0.12);
+      lostGraspDetectionHandOpenAngle = new CRDTBidirectionalDouble(this, Math.toRadians(10.0));
+      openedDoorHandleDistanceFromStart = new CRDTBidirectionalDouble(this, 0.12);
    }
 
    public void toMessage(DoorTraversalDefinitionMessage message)
@@ -36,12 +36,12 @@ public class DoorTraversalDefinition extends BehaviorTreeNodeDefinition
       openedDoorHandleDistanceFromStart.fromMessage(message.getOpenedDoorHandleDistanceFromStart());
    }
 
-   public CRDTUnidirectionalDouble getLostGraspDetectionHandOpenAngle()
+   public CRDTBidirectionalDouble getLostGraspDetectionHandOpenAngle()
    {
       return lostGraspDetectionHandOpenAngle;
    }
 
-   public CRDTUnidirectionalDouble getOpenedDoorHandleDistanceFromStart()
+   public CRDTBidirectionalDouble getOpenedDoorHandleDistanceFromStart()
    {
       return openedDoorHandleDistanceFromStart;
    }

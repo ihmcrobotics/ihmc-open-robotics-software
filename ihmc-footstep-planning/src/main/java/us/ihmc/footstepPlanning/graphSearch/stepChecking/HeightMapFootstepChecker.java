@@ -14,7 +14,6 @@ import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepP
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.perception.steppableRegions.SnapResult;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -127,12 +126,14 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
       heuristicPoseChecker.setApproximateStepDimensions(candidateStep, stanceStep);
       achievedDeltaInside.set(snapData.getAchievedInsideDelta());
 
-      BipedalFootstepPlannerNodeRejectionReason poseRejectionReason;
+      // Check the quality of the snap data.
+      if (!doValidityCheckForSnap(candidateStep))
+         return;
 
       if (environmentHandler.hasTerrainMapData())
       {
          // Check height map rejection reasons
-         poseRejectionReason = doValidityCheckForTerrainMap(candidateStep);
+         BipedalFootstepPlannerNodeRejectionReason poseRejectionReason = doValidityCheckForTerrainMap(candidateStep);
 
          if (poseRejectionReason != null)
          {
@@ -140,16 +141,12 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
             return;
          }
 
-         // Check height map rejection reasons
-         if (!doValidityCheckForHeightMap(candidateStep))
-            return;
-
          // Check height map cliff avoidance
          heightMapCliffAvoider.setHeightMapData(environmentHandler.getHeightMap());
          if (!heightMapCliffAvoider.isStepValid(candidateStep, stanceStep))
          {
-            poseRejectionReason =  BipedalFootstepPlannerNodeRejectionReason.STEP_ON_CLIFF_EDGE;
-            rejectionReason.set(poseRejectionReason);
+            rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.STEP_ON_CLIFF_EDGE);
+            return;
          }
       }
 
@@ -159,6 +156,7 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
          return;
       }
 
+      BipedalFootstepPlannerNodeRejectionReason poseRejectionReason;
       // Check snapped footstep placement
       if (parameters.getUseReachabilityMap())
       {
@@ -190,13 +188,6 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
 
    private BipedalFootstepPlannerNodeRejectionReason doValidityCheckForTerrainMap(DiscreteFootstep candidateStep)
    {
-      double areaFraction = candidateStepSnapData.getSnapAreaFraction();
-      if (Double.isFinite(areaFraction))
-         footAreaPercentage.set(areaFraction);
-      else
-         footAreaPercentage.set(1.0);
-      rmsError.set(candidateStepSnapData.getSnapRMSError());
-
       SnapResult snapResult = environmentHandler.getTerrainMapData().getSnapResultInWorld(candidateStep.getX(), candidateStep.getY());
       return switch (snapResult)
             {
@@ -209,11 +200,8 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
    }
 
 
-   private boolean doValidityCheckForHeightMap(DiscreteFootstep candidateStep)
+   private boolean doValidityCheckForSnap(DiscreteFootstep candidateStep)
    {
-      if (environmentHandler.hasHeightMap())
-         return true;
-
       // Area
       double areaFraction = candidateStepSnapData.getSnapAreaFraction();
       if (Double.isFinite(areaFraction))
@@ -271,23 +259,24 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
       return true;
    }
 
-   private boolean isCollisionFree(DiscreteFootstep candidateStep, DiscreteFootstep stanceStep, DiscreteFootstep startOfSwing)
+   private void isCollisionFree(DiscreteFootstep candidateStep, DiscreteFootstep stanceStep, DiscreteFootstep startOfSwing)
    {
       if (stanceStep == null)
       {
-         return true;
+         return;
       }
-
 
       // Check for obstacle collisions (vertically extruded line between steps)
       if (parameters.getCheckForPathCollisions())
       {
          try
          {
+            obstacleBetweenStepsChecker.setHeightMapData(environmentHandler.getHeightMap());
+
             if (!obstacleBetweenStepsChecker.isFootstepValid(candidateStep, stanceStep))
             {
                rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.OBSTACLE_BLOCKING_BODY);
-               return false;
+               return;
             }
          }
          catch(Exception e)
@@ -302,11 +291,8 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
          if (boundingBoxCollisionDetected(candidateStep, stanceStep))
          {
             rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.OBSTACLE_HITTING_BODY);
-            return false;
          }
       }
-
-      return true;
    }
 
    private boolean boundingBoxCollisionDetected(DiscreteFootstep candidateStep, DiscreteFootstep stanceStep)
@@ -319,6 +305,7 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
 
       double candidateStepHeight = DiscreteFootstepTools.getSnappedStepHeight(candidateStep, candidateStepSnapData.getSnapTransform());
       double stanceStepHeight = DiscreteFootstepTools.getSnappedStepHeight(stanceStep, stanceStepSnapData.getSnapTransform());
+      collisionDetector.setHeightMapData(environmentHandler.getHeightMap());
       boolean collisionDetected = collisionDetector.checkForCollision(candidateStep,
                                                                       stanceStep,
                                                                       candidateStepHeight,
@@ -341,12 +328,6 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
    public void setAssumeFlatGround(boolean assumeFlatGround)
    {
       this.assumeFlatGround = assumeFlatGround;
-   }
-
-   public void setHeightMapData(HeightMapData heightMapData)
-   {
-      collisionDetector.setHeightMapData(heightMapData);
-      obstacleBetweenStepsChecker.setHeightMapData(heightMapData);
    }
 
    private static void checkWiggleParameters(DefaultFootstepPlannerParametersReadOnly parameters)
@@ -379,10 +360,5 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
    {
       // TODO
       return Double.POSITIVE_INFINITY;
-   }
-
-   public static void main(String[] args)
-   {
-
    }
 }

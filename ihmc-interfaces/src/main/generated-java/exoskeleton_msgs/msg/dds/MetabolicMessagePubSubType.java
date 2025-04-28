@@ -15,7 +15,7 @@ public class MetabolicMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "844d3023552eb76a56fcb2bd7d13d0931c0fa125faa46e39fce01bac859728dd";
+   		return "b624e16cd9694b3678fcd6bb19d498c6c84db0565479b22c2cc70f3fd303ded4";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class MetabolicMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -71,7 +71,7 @@ public class MetabolicMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -86,7 +86,7 @@ public class MetabolicMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
    public static void write(exoskeleton_msgs.msg.dds.MetabolicMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_6(data.getMetabolicRate());
 
@@ -96,7 +96,7 @@ public class MetabolicMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
    public static void read(exoskeleton_msgs.msg.dds.MetabolicMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setMetabolicRate(cdr.read_type_6());
       	
@@ -108,7 +108,7 @@ public class MetabolicMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final void serialize(exoskeleton_msgs.msg.dds.MetabolicMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_6("metabolic_rate", data.getMetabolicRate());
       ser.write_type_6("delta_metabolic_rate", data.getDeltaMetabolicRate());
    }
@@ -116,7 +116,7 @@ public class MetabolicMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, exoskeleton_msgs.msg.dds.MetabolicMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setMetabolicRate(ser.read_type_6("metabolic_rate"));
       data.setDeltaMetabolicRate(ser.read_type_6("delta_metabolic_rate"));
    }

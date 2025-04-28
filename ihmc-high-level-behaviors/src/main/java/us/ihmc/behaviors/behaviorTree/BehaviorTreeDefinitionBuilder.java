@@ -1,18 +1,25 @@
 package us.ihmc.behaviors.behaviorTree;
 
 import us.ihmc.behaviors.ai2r.AI2RNodeDefinition;
-import us.ihmc.behaviors.behaviorTree.trashCan.TrashCanInteractionDefinition;
 import us.ihmc.behaviors.door.DoorTraversalDefinition;
 import us.ihmc.behaviors.buildingExploration.BuildingExplorationDefinition;
+import us.ihmc.behaviors.sequence.actions.CheckPointNodeDefinition;
+import us.ihmc.behaviors.logic.ConditionNodeDefinition;
+import us.ihmc.behaviors.logic.GotoNodeDefinition;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
+import us.ihmc.behaviors.sequence.FallbackNodeDefinition;
 import us.ihmc.behaviors.sequence.actions.*;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class BehaviorTreeDefinitionBuilder
 {
-   public static BehaviorTreeNodeDefinition createNode(Class<?> definitionType, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public static BehaviorTreeNodeDefinition createNode(Class<?> definitionType,
+                                                       CRDTInfo crdtInfo,
+                                                       WorkspaceResourceDirectory saveFileDirectory,
+                                                       DefaultFootstepPlannerParametersReadOnly defaultFootstepPlannerParameters)
    {
       if (definitionType == BehaviorTreeNodeDefinition.class)
       {
@@ -26,13 +33,25 @@ public class BehaviorTreeDefinitionBuilder
       {
          return new ActionSequenceDefinition(crdtInfo, saveFileDirectory);
       }
+      if (definitionType == FallbackNodeDefinition.class)
+      {
+         return new FallbackNodeDefinition(crdtInfo, saveFileDirectory);
+      }
+      if (definitionType == ConditionNodeDefinition.class)
+      {
+         return new ConditionNodeDefinition(crdtInfo, saveFileDirectory);
+      }
+      if (definitionType == GotoNodeDefinition.class)
+      {
+         return new GotoNodeDefinition(crdtInfo, saveFileDirectory);
+      }
+      if (definitionType == CheckPointNodeDefinition.class)
+      {
+         return new CheckPointNodeDefinition(crdtInfo, saveFileDirectory);
+      }
       if (definitionType == DoorTraversalDefinition.class)
       {
          return new DoorTraversalDefinition(crdtInfo, saveFileDirectory);
-      }
-      if (definitionType == TrashCanInteractionDefinition.class)
-      {
-         return new TrashCanInteractionDefinition(crdtInfo, saveFileDirectory);
       }
       if (definitionType == BuildingExplorationDefinition.class)
       {
@@ -44,7 +63,7 @@ public class BehaviorTreeDefinitionBuilder
       }
       if (definitionType == FootstepPlanActionDefinition.class)
       {
-         return new FootstepPlanActionDefinition(crdtInfo, saveFileDirectory, new DefaultFootstepPlannerParameters());
+         return new FootstepPlanActionDefinition(crdtInfo, saveFileDirectory, new DefaultFootstepPlannerParameters(defaultFootstepPlannerParameters));
       }
       if (definitionType == HandPoseActionDefinition.class)
       {

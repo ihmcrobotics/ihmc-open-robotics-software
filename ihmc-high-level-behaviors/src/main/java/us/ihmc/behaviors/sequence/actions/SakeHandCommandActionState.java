@@ -14,15 +14,15 @@ public class SakeHandCommandActionState extends ActionNodeState<SakeHandCommandA
 
    public void toMessage(SakeHandCommandActionStateMessage message)
    {
-      getDefinition().toMessage(message.getDefinition());
+      definition.toMessage(message.getDefinition());
 
       super.toMessage(message.getState());
    }
 
    public void fromMessage(SakeHandCommandActionStateMessage message)
    {
-      super.fromMessage(message.getState());
+      definition.fromMessage(message.getDefinition());
 
-      getDefinition().fromMessage(message.getDefinition());
+      super.fromMessage(message.getState());
    }
 }

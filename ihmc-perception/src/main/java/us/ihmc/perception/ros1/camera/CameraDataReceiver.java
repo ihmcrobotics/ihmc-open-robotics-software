@@ -9,7 +9,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.LongUnaryOperator;
 
-import boofcv.struct.calib.CameraPinholeBrown;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.producers.CompressedVideoDataFactory;
@@ -26,6 +25,7 @@ import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBu
 import us.ihmc.sensorProcessing.sensorData.CameraData;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 
+@Deprecated
 public class CameraDataReceiver implements CloseableAndDisposable
 {
    private static final boolean DEBUG = false;
@@ -199,7 +199,7 @@ public class CameraDataReceiver implements CloseableAndDisposable
       }
    }
 
-   public void updateImage(VideoSource videoSource, BufferedImage bufferedImage, long timeStamp, CameraPinholeBrown intrinsicParameters)
+   public void updateImage(VideoSource videoSource, BufferedImage bufferedImage, long timeStamp, Object intrinsicParameters)
    {
       dataQueue.offer(new CameraData(videoSource, bufferedImage, timeStamp, intrinsicParameters));
    }

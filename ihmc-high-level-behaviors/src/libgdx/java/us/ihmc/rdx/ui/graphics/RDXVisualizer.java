@@ -11,15 +11,17 @@ import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
+import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXRenderableProvider;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2MultiTopicVisualizer;
-import us.ihmc.rdx.ui.graphics.ros2.RDXROS2RobotVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2SingleTopicVisualizer;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -30,7 +32,7 @@ public abstract class RDXVisualizer implements RDXRenderableProvider
    private final String title;
    private boolean createdYet = false;
    private Set<RDXSceneLevel> sceneLevels = Set.of(RDXSceneLevel.MODEL);
-   private Consumer<Boolean> activenessChangeCallback;
+   private final List<Consumer<Boolean>> activenessChangeCallbacks = new ArrayList<>();
    private boolean wasActive = false;
 
    @Nullable
@@ -64,10 +66,6 @@ public abstract class RDXVisualizer implements RDXRenderableProvider
    public void create()
    {
       createdYet = true;
-      if (getPanel() != null)
-      {
-         setActive(getPanel().getIsShowing().get());
-      }
    }
 
    protected void renderMenuEntry(boolean collapse, boolean renderRightContext)
@@ -98,10 +96,6 @@ public abstract class RDXVisualizer implements RDXRenderableProvider
       if (ImGui.checkbox(labels.get("##Active"), active))
       {
          setActive(active.get());
-         if (this instanceof RDXROS2RobotVisualizer robotVisualizer)
-         {
-            robotVisualizer.visualizeSensors(active.get());
-         }
 
          if (getPanel() != null)
             getPanel().getIsShowing().set(active.get());
@@ -133,6 +127,16 @@ public abstract class RDXVisualizer implements RDXRenderableProvider
       updateHeartbeat();
    }
 
+   public void calculate3DViewPick(ImGui3DViewInput input)
+   {
+
+   }
+
+   public void processImGuiInput(ImGui3DViewInput input)
+   {
+
+   }
+
    public abstract void renderImGuiWidgets();
 
    /**
@@ -161,10 +165,11 @@ public abstract class RDXVisualizer implements RDXRenderableProvider
    {
       this.active.set(active);
 
-      if (activenessChangeCallback != null && active != wasActive)
+      if (active != wasActive)
       {
          wasActive = active;
-         activenessChangeCallback.accept(active);
+         for (Consumer<Boolean> activenessChangeCallback : activenessChangeCallbacks)
+            activenessChangeCallback.accept(active);
       }
    }
 
@@ -195,9 +200,9 @@ public abstract class RDXVisualizer implements RDXRenderableProvider
       return false;
    }
 
-   public void setActivenessChangeCallback(Consumer<Boolean> activenessChangeCallback)
+   public void addActivenessChangeCallback(Consumer<Boolean> activenessChangeCallback)
    {
-      this.activenessChangeCallback = activenessChangeCallback;
+      activenessChangeCallbacks.add(activenessChangeCallback);
    }
 
    @Nullable

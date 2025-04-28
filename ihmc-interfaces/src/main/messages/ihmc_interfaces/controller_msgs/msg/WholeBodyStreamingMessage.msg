@@ -2,7 +2,7 @@
 # It is a lightweight version of WholeBodyTrajectoryMessage designed for streaming.
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # When receiving a trajectory message that is part of a stream, the controller will extrapolate the trajectory point in the future using a simple first order integration over the given duration.
 # This integration allows to improve continuity of execution for streams.
@@ -35,6 +35,10 @@ bool has_pelvis_streaming_message
 # Execute this trajectory in user mode. User mode tries to achieve the desired regardless of the leg kinematics.
 bool enable_user_pelvis_control false
 ihmc_common_msgs/SE3StreamingMessage pelvis_streaming_message
+
+# Information for the CoM
+bool has_center_of_mass_trajectory_message
+ihmc_common_msgs/EuclideanStreamingMessage center_of_mass_trajectory_message
 
 # Information for the neck joints
 bool has_neck_streaming_message

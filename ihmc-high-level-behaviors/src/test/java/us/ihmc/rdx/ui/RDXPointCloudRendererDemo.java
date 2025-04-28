@@ -2,8 +2,8 @@ package us.ihmc.rdx.ui;
 
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D32;
-import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
+import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 
 import java.util.Random;
@@ -40,9 +40,7 @@ public class RDXPointCloudRendererDemo
                point.set(new Point3D32(random.nextFloat(), random.nextFloat(), random.nextFloat()));
             }
 
-            pointCloudRenderer.setPointsToRender(points);
-
-            pointCloudRenderer.updateMesh();
+            pointCloudRenderer.updateMesh(points);
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();

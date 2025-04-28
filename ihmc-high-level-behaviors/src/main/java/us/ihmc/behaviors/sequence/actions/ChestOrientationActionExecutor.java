@@ -20,7 +20,6 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
 {
    public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);
 
-   private final ChestOrientationActionState state;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
    private final FramePose3D desiredChestPose = new FramePose3D();
@@ -35,8 +34,6 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
                                          ReferenceFrameLibrary referenceFrameLibrary)
    {
       super(new ChestOrientationActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
-
-      state = getState();
 
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
@@ -53,9 +50,9 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
    }
 
    @Override
-   public void triggerActionExecution()
+   public void triggerExecution()
    {
-      super.triggerActionExecution();
+      super.triggerExecution();
 
       if (state.getChestFrame().isChildOfWorld())
       {
@@ -64,7 +61,7 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
 
          ChestTrajectoryMessage message = new ChestTrajectoryMessage();
          message.getSo3Trajectory()
-                .set(HumanoidMessageTools.createSO3TrajectoryMessage(getDefinition().getTrajectoryDuration(),
+                .set(HumanoidMessageTools.createSO3TrajectoryMessage(definition.getTrajectoryDuration(),
                                                                      frameChestQuaternion,
                                                                      EuclidCoreTools.zeroVector3D,
                                                                      ReferenceFrame.getWorldFrame()));
@@ -75,11 +72,11 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
 
          trackingCalculator.reset();
 
-         state.setNominalExecutionDuration(getDefinition().getTrajectoryDuration());
+         state.setNominalExecutionDuration(definition.getTrajectoryDuration());
 
          desiredChestPose.setFromReferenceFrame(state.getChestFrame().getReferenceFrame());
          syncedChestPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getChest().getBodyFixedFrame());
-         state.getCommandedTrajectory().setSingleSegmentTrajectory(syncedChestPose, desiredChestPose, getDefinition().getTrajectoryDuration());
+         state.getCommandedTrajectory().setSingleSegmentTrajectory(syncedChestPose, desiredChestPose, definition.getTrajectoryDuration());
       }
       else
       {
@@ -93,11 +90,10 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
       trackingCalculator.computeExecutionTimings(state.getNominalExecutionDuration());
       state.setElapsedExecutionTime(trackingCalculator.getElapsedTime());
 
-      if (trackingCalculator.getHitTimeLimit())
+      if (trackingCalculator.getHitTimeLimit(state.getLogger()))
       {
          state.setIsExecuting(false);
          state.setFailed(true);
-         state.getLogger().error("Task execution timed out.");
          return;
       }
 
@@ -118,7 +114,7 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
          {
             state.setIsExecuting(false);
 
-            if (!getDefinition().getHoldPoseInWorldLater())
+            if (!definition.getHoldPoseInWorldLater())
             {
                disengageHoldPoseInWorld();
             }
@@ -135,7 +131,7 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
 
       ChestTrajectoryMessage message = new ChestTrajectoryMessage();
       message.getSo3Trajectory()
-             .set(HumanoidMessageTools.createSO3TrajectoryMessage(getDefinition().getTrajectoryDuration(),
+             .set(HumanoidMessageTools.createSO3TrajectoryMessage(definition.getTrajectoryDuration(),
                                                                   frameChestQuaternion,
                                                                   EuclidCoreTools.zeroVector3D,
                                                                   syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame()));

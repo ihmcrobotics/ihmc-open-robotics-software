@@ -1,6 +1,8 @@
 #ifndef __behavior_msgs__msg__AI2RCommandMessage__idl__
 #define __behavior_msgs__msg__AI2RCommandMessage__idl__
 
+#include "behavior_msgs/msg/./AI2RHandPoseAdaptationMessage_.idl"
+#include "behavior_msgs/msg/./AI2RNavigationMessage_.idl"
 module behavior_msgs
 {
   module msg
@@ -11,7 +13,12 @@ module behavior_msgs
       @TypeCode(type="behavior_msgs::msg::dds_::AI2RCommandMessage_")
       struct AI2RCommandMessage
       {
-        boolean unused_placeholder_field;
+        /**
+         * Behavior to execute (checkpoint to jump to in the pre-loaded behavior collection)
+         */
+        string behavior_to_execute;
+        behavior_msgs::msg::dds::AI2RHandPoseAdaptationMessage hand_pose_adaptation;
+        behavior_msgs::msg::dds::AI2RNavigationMessage navigation;
       };
     };
   };

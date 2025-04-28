@@ -27,23 +27,58 @@ public class RDXPredefinedRigidBodySceneNodeBuilder extends RDXSceneNodeBuilder<
       return build("Box"); // Build a box by default
    }
 
+   public RDXPredefinedRigidBodySceneNode build(String modelName, String nodeName)
+   {
+      String name = generateNodeName(modelName, nodeName);
+      long nextID = sceneGraph.getNextID().getAndIncrement();
+      return createNode(modelName, nextID, name);
+   }
+
    public RDXPredefinedRigidBodySceneNode build(String modelName)
    {
-      String name;
+      String name = generateNodeName(modelName, null);
+      long nextID = sceneGraph.getNextID().getAndIncrement();
+      return createNode(modelName, nextID, name);
+   }
 
-      if (super.name.isEmpty())
+   private String generateNodeName(String modelName, String nodeName)
+   {
+      String name;
+      if (nodeName != null)
       {
-         ids.merge(modelName, 1, Integer::sum);
-         name = modelName + ids.get(modelName).toString();
+         return nodeName;
       }
       else
       {
-         name = super.name.get();
+         if (super.name.isEmpty())
+         {
+            ids.merge(modelName, 1, Integer::sum);
+            name = modelName + ids.get(modelName).toString();
+         }
+         else
+         {
+            name = super.name.get();
+         }
+         return name;
       }
+   }
 
-      long nextID = sceneGraph.getNextID().getAndIncrement();
-      return switch (modelName)
+   private RDXPredefinedRigidBodySceneNode createNode(String modelName, long nextID, String name)
+   {
+      switch (modelName)
       {
+         case "Barrier" ->
+         {
+            PredefinedRigidBodySceneNode barrier = new PredefinedRigidBodySceneNode(nextID,
+                                                                                    name,
+                                                                                    sceneGraph.getIDToNodeMap(),
+                                                                                    parent.getID(),
+                                                                                    new RigidBodyTransform(),
+                                                                                    BARRIER_VISUAL_MODEL_FILE_PATH,
+                                                                                    BARRIER_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
+                                                                                    sceneGraph.getCRDTInfo());
+            return new RDXPredefinedRigidBodySceneNode(barrier, RDXBaseUI.getInstance().getPrimary3DPanel());
+         }
          case "Box" ->
          {
             PredefinedRigidBodySceneNode box = new PredefinedRigidBodySceneNode(nextID,
@@ -54,7 +89,7 @@ public class RDXPredefinedRigidBodySceneNodeBuilder extends RDXSceneNodeBuilder<
                                                                                 BOX_VISUAL_MODEL_FILE_PATH,
                                                                                 BOX_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
                                                                                 sceneGraph.getCRDTInfo());
-            yield new RDXPredefinedRigidBodySceneNode(box, RDXBaseUI.getInstance().getPrimary3DPanel());
+            return new RDXPredefinedRigidBodySceneNode(box, RDXBaseUI.getInstance().getPrimary3DPanel());
          }
          case "CanOfSoup" ->
          {
@@ -66,9 +101,9 @@ public class RDXPredefinedRigidBodySceneNodeBuilder extends RDXSceneNodeBuilder<
                                                                                       CAN_OF_SOUP_VISUAL_MODEL_FILE_PATH,
                                                                                       CAN_OF_SOUP_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
                                                                                       sceneGraph.getCRDTInfo());
-            yield new RDXPredefinedRigidBodySceneNode(canOfSoup, RDXBaseUI.getInstance().getPrimary3DPanel());
+            return new RDXPredefinedRigidBodySceneNode(canOfSoup, RDXBaseUI.getInstance().getPrimary3DPanel());
          }
-         case "2X4" ->
+         case "PieceOfWood" ->
          {
             PredefinedRigidBodySceneNode twoByFour = new PredefinedRigidBodySceneNode(nextID,
                                                                                       name,
@@ -78,7 +113,7 @@ public class RDXPredefinedRigidBodySceneNodeBuilder extends RDXSceneNodeBuilder<
                                                                                       DEBRIS_VISUAL_MODEL_FILE_PATH,
                                                                                       DEBRIS_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
                                                                                       sceneGraph.getCRDTInfo());
-            yield new RDXPredefinedRigidBodySceneNode(twoByFour, RDXBaseUI.getInstance().getPrimary3DPanel());
+            return new RDXPredefinedRigidBodySceneNode(twoByFour, RDXBaseUI.getInstance().getPrimary3DPanel());
          }
          case "WorkPlatform" ->
          {
@@ -90,7 +125,7 @@ public class RDXPredefinedRigidBodySceneNodeBuilder extends RDXSceneNodeBuilder<
                                                                                          PLATFORM_VISUAL_MODEL_FILE_PATH,
                                                                                          PLATFORM_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
                                                                                          sceneGraph.getCRDTInfo());
-            yield new RDXPredefinedRigidBodySceneNode(workPlatform, RDXBaseUI.getInstance().getPrimary3DPanel());
+            return new RDXPredefinedRigidBodySceneNode(workPlatform, RDXBaseUI.getInstance().getPrimary3DPanel());
          }
          case "Shoe" ->
          {
@@ -102,7 +137,7 @@ public class RDXPredefinedRigidBodySceneNodeBuilder extends RDXSceneNodeBuilder<
                                                                                  SHOE_VISUAL_MODEL_FILE_PATH,
                                                                                  SHOE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
                                                                                  sceneGraph.getCRDTInfo());
-            yield new RDXPredefinedRigidBodySceneNode(shoe, RDXBaseUI.getInstance().getPrimary3DPanel());
+            return new RDXPredefinedRigidBodySceneNode(shoe, RDXBaseUI.getInstance().getPrimary3DPanel());
          }
          case "Laptop" ->
          {
@@ -114,7 +149,7 @@ public class RDXPredefinedRigidBodySceneNodeBuilder extends RDXSceneNodeBuilder<
                                                                                    LAPTOP_VISUAL_MODEL_FILE_PATH,
                                                                                    LAPTOP_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
                                                                                    sceneGraph.getCRDTInfo());
-            yield new RDXPredefinedRigidBodySceneNode(laptop, RDXBaseUI.getInstance().getPrimary3DPanel());
+            return new RDXPredefinedRigidBodySceneNode(laptop, RDXBaseUI.getInstance().getPrimary3DPanel());
          }
          case "Book" ->
          {
@@ -126,7 +161,7 @@ public class RDXPredefinedRigidBodySceneNodeBuilder extends RDXSceneNodeBuilder<
                                                                                  BOOK_VISUAL_MODEL_FILE_PATH,
                                                                                  BOOK_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
                                                                                  sceneGraph.getCRDTInfo());
-            yield new RDXPredefinedRigidBodySceneNode(book, RDXBaseUI.getInstance().getPrimary3DPanel());
+            return new RDXPredefinedRigidBodySceneNode(book, RDXBaseUI.getInstance().getPrimary3DPanel());
          }
          case "Cereal" ->
          {
@@ -138,7 +173,7 @@ public class RDXPredefinedRigidBodySceneNodeBuilder extends RDXSceneNodeBuilder<
                                                                                    CEREAL_VISUAL_MODEL_FILE_PATH,
                                                                                    CEREAL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
                                                                                    sceneGraph.getCRDTInfo());
-            yield new RDXPredefinedRigidBodySceneNode(cereal, RDXBaseUI.getInstance().getPrimary3DPanel());
+            return new RDXPredefinedRigidBodySceneNode(cereal, RDXBaseUI.getInstance().getPrimary3DPanel());
          }
          case "Mug" ->
          {
@@ -150,7 +185,7 @@ public class RDXPredefinedRigidBodySceneNodeBuilder extends RDXSceneNodeBuilder<
                                                                                 MUG_VISUAL_MODEL_FILE_PATH,
                                                                                 MUG_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
                                                                                 sceneGraph.getCRDTInfo());
-            yield new RDXPredefinedRigidBodySceneNode(mug, RDXBaseUI.getInstance().getPrimary3DPanel());
+            return new RDXPredefinedRigidBodySceneNode(mug, RDXBaseUI.getInstance().getPrimary3DPanel());
          }
          case "Bike" ->
          {
@@ -162,19 +197,19 @@ public class RDXPredefinedRigidBodySceneNodeBuilder extends RDXSceneNodeBuilder<
                                                                                  BIKE_VISUAL_MODEL_FILE_PATH,
                                                                                  BIKE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
                                                                                  sceneGraph.getCRDTInfo());
-            yield new RDXPredefinedRigidBodySceneNode(bike, RDXBaseUI.getInstance().getPrimary3DPanel());
+            return new RDXPredefinedRigidBodySceneNode(bike, RDXBaseUI.getInstance().getPrimary3DPanel());
          }
          case "Drill" ->
          {
             PredefinedRigidBodySceneNode drill = new PredefinedRigidBodySceneNode(nextID,
-                                                                                 name,
-                                                                                 sceneGraph.getIDToNodeMap(),
-                                                                                 parent.getID(),
-                                                                                 new RigidBodyTransform(),
-                                                                                 DRILL_VISUAL_MODEL_FILE_PATH,
-                                                                                 DRILL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
+                                                                                  name,
+                                                                                  sceneGraph.getIDToNodeMap(),
+                                                                                  parent.getID(),
+                                                                                  new RigidBodyTransform(),
+                                                                                  DRILL_VISUAL_MODEL_FILE_PATH,
+                                                                                  DRILL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
                                                                                   sceneGraph.getCRDTInfo());
-            yield new RDXPredefinedRigidBodySceneNode(drill, RDXBaseUI.getInstance().getPrimary3DPanel());
+            return new RDXPredefinedRigidBodySceneNode(drill, RDXBaseUI.getInstance().getPrimary3DPanel());
          }
          case "Couch" ->
          {
@@ -186,7 +221,7 @@ public class RDXPredefinedRigidBodySceneNodeBuilder extends RDXSceneNodeBuilder<
                                                                                   COUCH_VISUAL_MODEL_FILE_PATH,
                                                                                   COUCH_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
                                                                                   sceneGraph.getCRDTInfo());
-            yield new RDXPredefinedRigidBodySceneNode(couch, RDXBaseUI.getInstance().getPrimary3DPanel());
+            return new RDXPredefinedRigidBodySceneNode(couch, RDXBaseUI.getInstance().getPrimary3DPanel());
          }
          case "TrashCan" ->
          {
@@ -198,21 +233,69 @@ public class RDXPredefinedRigidBodySceneNodeBuilder extends RDXSceneNodeBuilder<
                                                                                      TRASHCAN_VISUAL_MODEL_FILE_PATH,
                                                                                      TRASHCAN_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
                                                                                      sceneGraph.getCRDTInfo());
-            yield new RDXPredefinedRigidBodySceneNode(trashCan, RDXBaseUI.getInstance().getPrimary3DPanel());
+            return new RDXPredefinedRigidBodySceneNode(trashCan, RDXBaseUI.getInstance().getPrimary3DPanel());
          }
-         case "RightDoorPanel" ->
+         case "DoorPanel" ->
          {
-            PredefinedRigidBodySceneNode rightDoorPanel = new PredefinedRigidBodySceneNode(nextID,
+            PredefinedRigidBodySceneNode doorPanel = new PredefinedRigidBodySceneNode(nextID,
                                                                                            name,
                                                                                            sceneGraph.getIDToNodeMap(),
                                                                                            parent.getID(),
                                                                                            new RigidBodyTransform(),
                                                                                            DoorSceneNodeDefinitions.DOOR_PANEL_VISUAL_MODEL_FILE_PATH,
-                                                                                           new RigidBodyTransform(),
+                                                                                           DoorSceneNodeDefinitions.PULL_DOOR_PANEL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
                                                                                            sceneGraph.getCRDTInfo());
-            yield new RDXPredefinedRigidBodySceneNode(rightDoorPanel, RDXBaseUI.getInstance().getPrimary3DPanel());
+            return new RDXPredefinedRigidBodySceneNode(doorPanel, RDXBaseUI.getInstance().getPrimary3DPanel());
+         }
+         case "DoorLever" ->
+         {
+            PredefinedRigidBodySceneNode doorLever = new PredefinedRigidBodySceneNode(nextID,
+                                                                                      name,
+                                                                                      sceneGraph.getIDToNodeMap(),
+                                                                                      parent.getID(),
+                                                                                      new RigidBodyTransform(),
+                                                                                      DoorSceneNodeDefinitions.DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH,
+                                                                                      DoorSceneNodeDefinitions.LEFT_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
+                                                                                      sceneGraph.getCRDTInfo());
+            return new RDXPredefinedRigidBodySceneNode(doorLever, RDXBaseUI.getInstance().getPrimary3DPanel());
+         }
+         case "Charge" ->
+         {
+            PredefinedRigidBodySceneNode charge = new PredefinedRigidBodySceneNode(nextID,
+                                                                                   name,
+                                                                                   sceneGraph.getIDToNodeMap(),
+                                                                                   parent.getID(),
+                                                                                   new RigidBodyTransform(),
+                                                                                   CHARGE_VISUAL_MODEL_FILE_PATH,
+                                                                                   CHARGE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
+                                                                                   sceneGraph.getCRDTInfo());
+            return new RDXPredefinedRigidBodySceneNode(charge, RDXBaseUI.getInstance().getPrimary3DPanel());
+         }
+         case "Person" ->
+         {
+            PredefinedRigidBodySceneNode person = new PredefinedRigidBodySceneNode(nextID,
+                                                                                   name,
+                                                                                   sceneGraph.getIDToNodeMap(),
+                                                                                   parent.getID(),
+                                                                                   new RigidBodyTransform(),
+                                                                                   PERSON_VISUAL_MODEL_FILE_PATH,
+                                                                                   PERSON_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
+                                                                                   sceneGraph.getCRDTInfo());
+            return new RDXPredefinedRigidBodySceneNode(person, RDXBaseUI.getInstance().getPrimary3DPanel());
+         }
+         case "Table" ->
+         {
+            PredefinedRigidBodySceneNode table = new PredefinedRigidBodySceneNode(nextID,
+                                                                                   name,
+                                                                                   sceneGraph.getIDToNodeMap(),
+                                                                                   parent.getID(),
+                                                                                   new RigidBodyTransform(),
+                                                                                   TABLE_VISUAL_MODEL_FILE_PATH,
+                                                                                   TABLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
+                                                                                   sceneGraph.getCRDTInfo());
+            return new RDXPredefinedRigidBodySceneNode(table, RDXBaseUI.getInstance().getPrimary3DPanel());
          }
          default -> throw new IllegalStateException("Unexpected value: " + name);
-      };
+      }
    }
 }

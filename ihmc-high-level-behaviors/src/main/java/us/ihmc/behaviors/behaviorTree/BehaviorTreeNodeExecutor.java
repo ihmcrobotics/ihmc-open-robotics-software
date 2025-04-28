@@ -1,18 +1,27 @@
 package us.ihmc.behaviors.behaviorTree;
 
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The base class for an executor node, which is the type that solely exists
+ * on board the robot and controls the robot.
+ *
+ * @param <S> The type of this node's state instance.
+ * @param <D> The type of this node's definition instance.
+ */
 public class BehaviorTreeNodeExecutor<S extends BehaviorTreeNodeState<D>,
                                       D extends BehaviorTreeNodeDefinition>
-      implements BehaviorTreeNodeLayer<BehaviorTreeNodeExecutor<?, ?>, S, S, D>
+      implements BehaviorTreeNode<BehaviorTreeNodeExecutor<?, ?>, S, D>
 {
-   private final S state;
+   /** Convenient accessor to the state to keep the code clean, available to all inheriting classes. */
+   protected final S state;
+   /** Convenient accessor to the definition to keep the code clean, available to all inheriting classes. */
+   protected final D definition;
    private final List<BehaviorTreeNodeExecutor<?, ?>> children = new ArrayList<>();
    private transient BehaviorTreeNodeExecutor<?, ?> parent;
 
@@ -20,13 +29,14 @@ public class BehaviorTreeNodeExecutor<S extends BehaviorTreeNodeState<D>,
    public BehaviorTreeNodeExecutor(S state)
    {
       this.state = state;
+      definition = state.getDefinition();
    }
 
    /** For creating a basic node. */
    @SuppressWarnings("unchecked")
    public BehaviorTreeNodeExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
-      D definition = (D) new BehaviorTreeNodeDefinition(crdtInfo, saveFileDirectory);
+      definition = (D) new BehaviorTreeNodeDefinition(crdtInfo, saveFileDirectory);
       this.state = (S) new BehaviorTreeNodeState<D>(id, definition, crdtInfo);
    }
 
@@ -36,9 +46,9 @@ public class BehaviorTreeNodeExecutor<S extends BehaviorTreeNodeState<D>,
     */
    public void clock()
    {
-      getState().setIsActive(false);
+      state.setIsActive(false);
 
-      for (BehaviorTreeNodeExecutor child : children)
+      for (BehaviorTreeNodeExecutor<?, ?> child : children)
       {
          child.clock();
       }
@@ -46,14 +56,7 @@ public class BehaviorTreeNodeExecutor<S extends BehaviorTreeNodeState<D>,
 
    public void tick()
    {
-      getState().setIsActive(true);
-   }
-
-   @Override
-   public void destroy()
-   {
-      LogTools.info("Destroying node: {}:{}", getState().getDefinition().getName(), getState().getID());
-      getState().destroy();
+      state.setIsActive(true);
    }
 
    public List<BehaviorTreeNodeExecutor<?, ?>> getChildren()
@@ -75,15 +78,9 @@ public class BehaviorTreeNodeExecutor<S extends BehaviorTreeNodeState<D>,
    }
 
    @Override
-   public S getNextLowerLayer()
-   {
-      return getState();
-   }
-
-   @Override
    public D getDefinition()
    {
-      return getState().getDefinition();
+      return definition;
    }
 
    @Override

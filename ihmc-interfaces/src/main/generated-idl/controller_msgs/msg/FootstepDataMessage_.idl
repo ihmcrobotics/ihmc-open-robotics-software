@@ -29,6 +29,12 @@ module controller_msgs
       const octet TRAJECTORY_TYPE_WAYPOINTS =
       3;
 
+      const octet CSG_MODE_STANDARD =
+      0;
+
+      const octet CSG_MODE_QFP =
+      1;
+
 
       /**
        * This message is part of the IHMC whole-body controller API.
@@ -40,7 +46,7 @@ module controller_msgs
         /**
          * Unique ID used to identify this message, should preferably be consecutively increasing.
          */
-        unsigned long sequence_id;
+        unsigned long long sequence_id;
         /**
          * Specifies which foot will swing to reach the footstep.
          */
@@ -70,6 +76,10 @@ module controller_msgs
          * This contains information on what the swing trajectory should be for each step. Recommended is TRAJECTORY_TYPE_DEFAULT.
          */
         octet trajectory_type;
+        /**
+         * This contains information about what footstep generation approach should be used by the ContinuousStepGenerator.
+         */
+        octet csg_mode;
         /**
          * Contains information on how high the robot should swing its foot.
          * This affects trajectory types TRAJECTORY_TYPE_DEFAULT and TRAJECTORY_TYPE_OBSTACLE_CLEARANCE.
@@ -146,6 +156,12 @@ module controller_msgs
          * If the controller should check and fail if the step is not reachable
          */
         boolean should_check_for_reachability;
+        /**
+         * If the desired footstep is for walking in place with zero forward or lateral velocity. This logic is only utilized
+         * if csg_mode is set to QFP
+         */
+        @defaultValue(value=True)
+        boolean walking_in_place;
       };
     };
   };

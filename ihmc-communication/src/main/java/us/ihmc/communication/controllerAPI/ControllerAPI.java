@@ -4,18 +4,7 @@ import controller_msgs.msg.dds.*;
 import ihmc_common_msgs.msg.dds.MessageCollection;
 import ihmc_common_msgs.msg.dds.MessageCollectionNotification;
 import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
-import toolbox_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxInitialConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxInputCollectionMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import toolbox_msgs.msg.dds.KinematicsToolboxPrivilegedConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxSupportRegionMessage;
+import toolbox_msgs.msg.dds.*;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.ros2.ROS2QosProfile;
@@ -91,6 +80,9 @@ public final class ControllerAPI
       // Command supported by the joint-space controller JointspacePositionControllerState
       inputMessageClasses.add(WholeBodyJointspaceTrajectoryMessage.class);
 
+      // Toolbox management
+      inputMessageClasses.add(ToolboxStateMessage.class);
+
       // Commands supported by the kinematics toolbox
       inputMessageClasses.add(KinematicsToolboxCenterOfMassMessage.class);
       inputMessageClasses.add(KinematicsToolboxRigidBodyMessage.class);
@@ -110,6 +102,10 @@ public final class ControllerAPI
       inputMessageClasses.add(MessageCollection.class);
       inputMessageClasses.add(WholeBodyTrajectoryMessage.class);
       inputMessageClasses.add(WholeBodyStreamingMessage.class);
+
+      // Robot startup messages
+      inputMessageClasses.add(EnableHPUCommandMessage.class);
+      inputMessageClasses.add(MasterGainScaleControllerCommandMessage.class);
 
       // Statuses supported by bipedal walking controller {@link WalkingControllerState}
       outputMessageClasses.add(CapturabilityBasedStatus.class);
@@ -137,6 +133,10 @@ public final class ControllerAPI
       // Statuses supported by multi-contact controller, not in this repo
       outputMessageClasses.add(MultiContactBalanceStatus.class);
       outputMessageClasses.add(MultiContactTrajectoryStatus.class);
+
+      // Robot hardware status messages
+      outputMessageClasses.add(EnableHPUStatusMessage.class);
+      outputMessageClasses.add(MasterGainScaleControllerStatusMessage.class);
 
       // Setting the input messages with specific QoS
       inputMessageClassSpecificQoS.put(WholeBodyStreamingMessage.class, ROS2QosProfile.BEST_EFFORT());

@@ -15,7 +15,7 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "a9decdcb9c27d11b7d0d7350fb5e3eeb58729241281a790109926e4f008bebcd";
+   		return "a725c0f085e2d8e03426d808d4f3bd87b8a17b6d3d348a66369929b6706bc153";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -103,7 +103,7 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -173,63 +173,63 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
 
    public static void write(perception_msgs.msg.dds.SceneGraphMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_4(data.getNextId());
 
       if(data.getSceneTreeTypes().size() <= 1000)
       cdr.write_type_e(data.getSceneTreeTypes());else
-          throw new RuntimeException("scene_tree_types field exceeds the maximum length");
+          throw new RuntimeException("scene_tree_types field exceeds the maximum length: %d > %d".formatted(data.getSceneTreeTypes().size(), 1000));
 
       if(data.getSceneTreeIndices().size() <= 1000)
       cdr.write_type_e(data.getSceneTreeIndices());else
-          throw new RuntimeException("scene_tree_indices field exceeds the maximum length");
+          throw new RuntimeException("scene_tree_indices field exceeds the maximum length: %d > %d".formatted(data.getSceneTreeIndices().size(), 1000));
 
       if(data.getSceneNodes().size() <= 200)
       cdr.write_type_e(data.getSceneNodes());else
-          throw new RuntimeException("scene_nodes field exceeds the maximum length");
+          throw new RuntimeException("scene_nodes field exceeds the maximum length: %d > %d".formatted(data.getSceneNodes().size(), 200));
 
       if(data.getDetectableSceneNodes().size() <= 200)
       cdr.write_type_e(data.getDetectableSceneNodes());else
-          throw new RuntimeException("detectable_scene_nodes field exceeds the maximum length");
+          throw new RuntimeException("detectable_scene_nodes field exceeds the maximum length: %d > %d".formatted(data.getDetectableSceneNodes().size(), 200));
 
       if(data.getPredefinedRigidBodySceneNodes().size() <= 200)
       cdr.write_type_e(data.getPredefinedRigidBodySceneNodes());else
-          throw new RuntimeException("predefined_rigid_body_scene_nodes field exceeds the maximum length");
+          throw new RuntimeException("predefined_rigid_body_scene_nodes field exceeds the maximum length: %d > %d".formatted(data.getPredefinedRigidBodySceneNodes().size(), 200));
 
       if(data.getArucoMarkerSceneNodes().size() <= 200)
       cdr.write_type_e(data.getArucoMarkerSceneNodes());else
-          throw new RuntimeException("aruco_marker_scene_nodes field exceeds the maximum length");
+          throw new RuntimeException("aruco_marker_scene_nodes field exceeds the maximum length: %d > %d".formatted(data.getArucoMarkerSceneNodes().size(), 200));
 
       if(data.getCenterposeSceneNodes().size() <= 200)
       cdr.write_type_e(data.getCenterposeSceneNodes());else
-          throw new RuntimeException("centerpose_scene_nodes field exceeds the maximum length");
+          throw new RuntimeException("centerpose_scene_nodes field exceeds the maximum length: %d > %d".formatted(data.getCenterposeSceneNodes().size(), 200));
 
       if(data.getStaticRelativeSceneNodes().size() <= 200)
       cdr.write_type_e(data.getStaticRelativeSceneNodes());else
-          throw new RuntimeException("static_relative_scene_nodes field exceeds the maximum length");
+          throw new RuntimeException("static_relative_scene_nodes field exceeds the maximum length: %d > %d".formatted(data.getStaticRelativeSceneNodes().size(), 200));
 
       if(data.getPrimitiveRigidBodySceneNodes().size() <= 200)
       cdr.write_type_e(data.getPrimitiveRigidBodySceneNodes());else
-          throw new RuntimeException("primitive_rigid_body_scene_nodes field exceeds the maximum length");
+          throw new RuntimeException("primitive_rigid_body_scene_nodes field exceeds the maximum length: %d > %d".formatted(data.getPrimitiveRigidBodySceneNodes().size(), 200));
 
       if(data.getYoloSceneNodes().size() <= 200)
       cdr.write_type_e(data.getYoloSceneNodes());else
-          throw new RuntimeException("yolo_scene_nodes field exceeds the maximum length");
+          throw new RuntimeException("yolo_scene_nodes field exceeds the maximum length: %d > %d".formatted(data.getYoloSceneNodes().size(), 200));
 
       if(data.getDoorSceneNodes().size() <= 200)
       cdr.write_type_e(data.getDoorSceneNodes());else
-          throw new RuntimeException("door_scene_nodes field exceeds the maximum length");
+          throw new RuntimeException("door_scene_nodes field exceeds the maximum length: %d > %d".formatted(data.getDoorSceneNodes().size(), 200));
 
       if(data.getTrashCanNodes().size() <= 200)
       cdr.write_type_e(data.getTrashCanNodes());else
-          throw new RuntimeException("trash_can_nodes field exceeds the maximum length");
+          throw new RuntimeException("trash_can_nodes field exceeds the maximum length: %d > %d".formatted(data.getTrashCanNodes().size(), 200));
 
    }
 
    public static void read(perception_msgs.msg.dds.SceneGraphMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setNextId(cdr.read_type_4());
       	
@@ -251,7 +251,7 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final void serialize(perception_msgs.msg.dds.SceneGraphMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_4("next_id", data.getNextId());
       ser.write_type_e("scene_tree_types", data.getSceneTreeTypes());
       ser.write_type_e("scene_tree_indices", data.getSceneTreeIndices());
@@ -270,7 +270,7 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.SceneGraphMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setNextId(ser.read_type_4("next_id"));
       ser.read_type_e("scene_tree_types", data.getSceneTreeTypes());
       ser.read_type_e("scene_tree_indices", data.getSceneTreeIndices());

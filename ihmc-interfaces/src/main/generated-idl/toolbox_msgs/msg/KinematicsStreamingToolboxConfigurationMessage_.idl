@@ -18,7 +18,7 @@ module toolbox_msgs
         /**
          * Unique ID used to identify this message, should preferably be consecutively increasing.
          */
-        unsigned long sequence_id;
+        unsigned long long sequence_id;
         /**
          * Whether the pelvis should pinned or free to move.
          * Default value is false.
@@ -76,6 +76,11 @@ module toolbox_msgs
          */
         @defaultValue(value=True)
         boolean enable_pelvis_taskspace;
+        /**
+         * Whether center of mass should be controlled.
+         * Default value is false.
+         */
+        boolean enable_center_of_mass_control;
         /**
          * Reference frame in which the controller should be tracking the pose for the left hand as computed by the whole-body IK.
          * Default value is WORLD_FRAME, see FrameInformation for useful frame ids.

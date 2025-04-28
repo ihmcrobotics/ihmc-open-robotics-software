@@ -167,7 +167,7 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
 
       if(data.getData().size() <= 25000000)
       cdr.write_type_e(data.getData());else
-          throw new RuntimeException("data field exceeds the maximum length");
+          throw new RuntimeException("data field exceeds the maximum length: %d > %d".formatted(data.getData().size(), 25000000));
 
       cdr.write_type_9(data.getPixelFormat());
 
@@ -187,11 +187,11 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
 
       if(data.getOusterBeamAltitudeAngles().size() <= 128)
       cdr.write_type_e(data.getOusterBeamAltitudeAngles());else
-          throw new RuntimeException("ouster_beam_altitude_angles field exceeds the maximum length");
+          throw new RuntimeException("ouster_beam_altitude_angles field exceeds the maximum length: %d > %d".formatted(data.getOusterBeamAltitudeAngles().size(), 128));
 
       if(data.getOusterBeamAzimuthAngles().size() <= 128)
       cdr.write_type_e(data.getOusterBeamAzimuthAngles());else
-          throw new RuntimeException("ouster_beam_azimuth_angles field exceeds the maximum length");
+          throw new RuntimeException("ouster_beam_azimuth_angles field exceeds the maximum length: %d > %d".formatted(data.getOusterBeamAzimuthAngles().size(), 128));
 
    }
 

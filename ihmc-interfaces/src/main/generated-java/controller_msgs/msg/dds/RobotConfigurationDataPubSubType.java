@@ -15,7 +15,7 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "06d7040905e6dccb1fbc39f344d9b71096e35cc8faa6f66edce02b780c376aaa";
+   		return "d3b2e4fd5c9656dbdba343f2ce19340d186b5ef5c7cab8ee268996901ee0e335";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -105,7 +105,7 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -170,7 +170,7 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
 
    public static void write(controller_msgs.msg.dds.RobotConfigurationData data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_11(data.getWallTime());
 
@@ -182,15 +182,15 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
 
       if(data.getJointAngles().size() <= 50)
       cdr.write_type_e(data.getJointAngles());else
-          throw new RuntimeException("joint_angles field exceeds the maximum length");
+          throw new RuntimeException("joint_angles field exceeds the maximum length: %d > %d".formatted(data.getJointAngles().size(), 50));
 
       if(data.getJointVelocities().size() <= 50)
       cdr.write_type_e(data.getJointVelocities());else
-          throw new RuntimeException("joint_velocities field exceeds the maximum length");
+          throw new RuntimeException("joint_velocities field exceeds the maximum length: %d > %d".formatted(data.getJointVelocities().size(), 50));
 
       if(data.getJointTorques().size() <= 50)
       cdr.write_type_e(data.getJointTorques());else
-          throw new RuntimeException("joint_torques field exceeds the maximum length");
+          throw new RuntimeException("joint_torques field exceeds the maximum length: %d > %d".formatted(data.getJointTorques().size(), 50));
 
       geometry_msgs.msg.dds.PointPubSubType.write(data.getRootPosition(), cdr);
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getRootOrientation(), cdr);
@@ -199,11 +199,11 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getPelvisLinearAcceleration(), cdr);
       if(data.getForceSensorData().size() <= 50)
       cdr.write_type_e(data.getForceSensorData());else
-          throw new RuntimeException("force_sensor_data field exceeds the maximum length");
+          throw new RuntimeException("force_sensor_data field exceeds the maximum length: %d > %d".formatted(data.getForceSensorData().size(), 50));
 
       if(data.getImuSensorData().size() <= 50)
       cdr.write_type_e(data.getImuSensorData());else
-          throw new RuntimeException("imu_sensor_data field exceeds the maximum length");
+          throw new RuntimeException("imu_sensor_data field exceeds the maximum length: %d > %d".formatted(data.getImuSensorData().size(), 50));
 
       cdr.write_type_9(data.getRobotMotionStatus());
 
@@ -217,7 +217,7 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
 
    public static void read(controller_msgs.msg.dds.RobotConfigurationData data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setWallTime(cdr.read_type_11());
       	
@@ -251,7 +251,7 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final void serialize(controller_msgs.msg.dds.RobotConfigurationData data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_11("wall_time", data.getWallTime());
       ser.write_type_11("monotonic_time", data.getMonotonicTime());
       ser.write_type_11("sync_timestamp", data.getSyncTimestamp());
@@ -280,7 +280,7 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.RobotConfigurationData data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setWallTime(ser.read_type_11("wall_time"));
       data.setMonotonicTime(ser.read_type_11("monotonic_time"));
       data.setSyncTimestamp(ser.read_type_11("sync_timestamp"));

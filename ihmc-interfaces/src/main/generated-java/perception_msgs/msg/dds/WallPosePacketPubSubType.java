@@ -15,7 +15,7 @@ public class WallPosePacketPubSubType implements us.ihmc.pubsub.TopicDataType<pe
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "64e9f02137d6e8b970fc3fd72bd99099eb0fca3de216aec68580c73b5694d36a";
+   		return "9c94d8861119c3782976f64a2c4b28653e5a597af00084121351969a6e50b76a";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class WallPosePacketPubSubType implements us.ihmc.pubsub.TopicDataType<pe
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -73,7 +73,7 @@ public class WallPosePacketPubSubType implements us.ihmc.pubsub.TopicDataType<pe
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -89,7 +89,7 @@ public class WallPosePacketPubSubType implements us.ihmc.pubsub.TopicDataType<pe
 
    public static void write(perception_msgs.msg.dds.WallPosePacket data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_6(data.getCuttingRadius());
 
@@ -99,7 +99,7 @@ public class WallPosePacketPubSubType implements us.ihmc.pubsub.TopicDataType<pe
 
    public static void read(perception_msgs.msg.dds.WallPosePacket data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setCuttingRadius(cdr.read_type_6());
       	
@@ -111,7 +111,7 @@ public class WallPosePacketPubSubType implements us.ihmc.pubsub.TopicDataType<pe
    @Override
    public final void serialize(perception_msgs.msg.dds.WallPosePacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_6("cutting_radius", data.getCuttingRadius());
       ser.write_type_a("center_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getCenterPosition());
 
@@ -122,7 +122,7 @@ public class WallPosePacketPubSubType implements us.ihmc.pubsub.TopicDataType<pe
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.WallPosePacket data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setCuttingRadius(ser.read_type_6("cutting_radius"));
       ser.read_type_a("center_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getCenterPosition());
 

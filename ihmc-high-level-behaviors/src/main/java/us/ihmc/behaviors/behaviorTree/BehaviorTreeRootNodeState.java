@@ -1,14 +1,14 @@
 package us.ihmc.behaviors.behaviorTree;
 
 import behavior_msgs.msg.dds.BehaviorTreeRootNodeStateMessage;
+import gnu.trove.map.hash.TLongObjectHashMap;
 import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.behaviors.sequence.ActionNodeState;
+import us.ihmc.behaviors.sequence.LeafNodeState;
 import us.ihmc.communication.crdt.CRDTBidirectionalBoolean;
 import us.ihmc.communication.crdt.CRDTBidirectionalInteger;
+import us.ihmc.communication.crdt.CRDTBidirectionalNotification;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.communication.crdt.CRDTUnidirectionalBoolean;
-import us.ihmc.communication.crdt.CRDTUnidirectionalNotification;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SidedObject;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -19,25 +19,24 @@ import java.util.List;
 
 public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTreeRootNodeDefinition>
 {
-   private final BehaviorTreeRootNodeDefinition definition;
    private final CRDTBidirectionalBoolean automaticExecution;
    private final CRDTBidirectionalInteger executionNextIndex;
-   private final CRDTUnidirectionalNotification manualExecutionRequested;
-   private final CRDTUnidirectionalBoolean concurrencyEnabled;
+   private final CRDTBidirectionalNotification manualExecutionRequested;
+   private final CRDTBidirectionalBoolean concurrencyEnabled;
 
-   private transient final MutableInt actionIndex = new MutableInt();
-   private final List<ActionNodeState<?>> actionChildren = new ArrayList<>();
+   private final TLongObjectHashMap<BehaviorTreeNodeState<?>> idToNodeMap = new TLongObjectHashMap<>();
+   private transient final MutableInt leafIndexAssignment = new MutableInt();
+   private final List<LeafNodeState<?>> orderedLeaves = new ArrayList<>();
+   private final List<ActionNodeState<?>> orderedActions = new ArrayList<>();
 
    public BehaviorTreeRootNodeState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(id, new BehaviorTreeRootNodeDefinition(crdtInfo, saveFileDirectory), crdtInfo);
 
-      definition = getDefinition();
-
       automaticExecution = new CRDTBidirectionalBoolean(definition, false);
       executionNextIndex = new CRDTBidirectionalInteger(definition, 0);
-      manualExecutionRequested = new CRDTUnidirectionalNotification(ROS2ActorDesignation.OPERATOR, definition);
-      concurrencyEnabled = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, definition, true);
+      manualExecutionRequested = new CRDTBidirectionalNotification(definition);
+      concurrencyEnabled = new CRDTBidirectionalBoolean(definition, true);
    }
 
    @Override
@@ -45,30 +44,34 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
    {
       super.update();
 
-      actionIndex.setValue(0);
-      actionChildren.clear();
-      updateActionSubtree(this, actionIndex);
+      idToNodeMap.clear();
+      leafIndexAssignment.setValue(0);
+      orderedLeaves.clear();
+      updateSubtree(this, leafIndexAssignment);
    }
 
-   public void updateActionSubtree(BehaviorTreeNodeState<?> node, MutableInt actionIndex)
+   public void updateSubtree(BehaviorTreeNodeState<?> node, MutableInt leafIndex)
    {
+      idToNodeMap.put(node.getID(), node);
+
       for (BehaviorTreeNodeState<?> child : node.getChildren())
       {
-         if (child instanceof ActionNodeState<?> actionNode)
+         if (child instanceof LeafNodeState<?> leafNode)
          {
-            actionNode.setActionIndex(actionIndex.getAndIncrement());
-            actionChildren.add(actionNode);
+            leafNode.setLeafIndex(leafIndex.getAndIncrement());
+            orderedLeaves.add(leafNode);
+
+            if (child instanceof ActionNodeState<?> action)
+               orderedActions.add(action);
          }
-         else
-         {
-            updateActionSubtree(child, actionIndex);
-         }
+
+         updateSubtree(child, leafIndex);
       }
    }
 
    public void toMessage(BehaviorTreeRootNodeStateMessage message)
    {
-      getDefinition().toMessage(message.getDefinition());
+      definition.toMessage(message.getDefinition());
 
       super.toMessage(message.getState());
 
@@ -80,9 +83,9 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
 
    public void fromMessage(BehaviorTreeRootNodeStateMessage message)
    {
-      super.fromMessage(message.getState());
+      definition.fromMessage(message.getDefinition());
 
-      getDefinition().fromMessage(message.getDefinition());
+      super.fromMessage(message.getState());
 
       automaticExecution.fromMessage(message.getAutomaticExecution());
       executionNextIndex.fromMessage(message.getExecutionNextIndex());
@@ -91,24 +94,24 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
    }
 
    @Nullable
-   public <T extends ActionNodeState<?>> T findNextPreviousAction(Class<T> actionClass, int queryIndex, @Nullable RobotSide side)
+   public <T extends LeafNodeState<?>> T findNextPreviousLeaf(Class<T> leafClass, int queryIndex, @Nullable RobotSide side)
    {
-      T previousAction = null;
-      for (int i = queryIndex - 1; i >= 0 && previousAction == null; i--)
+      T previousLeaf = null;
+      for (int i = queryIndex - 1; i >= 0 && previousLeaf == null; i--)
       {
-         ActionNodeState<?> action = actionChildren.get(i);
-         if (actionClass.isInstance(action))
+         LeafNodeState<?> leaf = orderedLeaves.get(i);
+         if (leafClass.isInstance(leaf))
          {
             boolean match = side == null;
-            match |= action.getDefinition() instanceof SidedObject sidedAction && sidedAction.getSide() == side;
+            match |= leaf.getDefinition() instanceof SidedObject sidedAction && sidedAction.getSide() == side;
 
             if (match)
             {
-               previousAction = actionClass.cast(action);
+               previousLeaf = leafClass.cast(leaf);
             }
          }
       }
-      return previousAction;
+      return previousLeaf;
    }
 
    public void stepBackNextExecutionIndex()
@@ -119,7 +122,7 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
 
    public void stepForwardNextExecutionIndex()
    {
-      if (executionNextIndex.getValue() < actionChildren.size())
+      if (executionNextIndex.getValue() < orderedLeaves.size())
          executionNextIndex.increment();
    }
 
@@ -168,8 +171,18 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
       this.concurrencyEnabled.setValue(concurrencyEnabled);
    }
 
-   public List<ActionNodeState<?>> getActionChildren()
+   public TLongObjectHashMap<BehaviorTreeNodeState<?>> getIDToNodeMap()
    {
-      return actionChildren;
+      return idToNodeMap;
+   }
+
+   public List<LeafNodeState<?>> getOrderedLeaves()
+   {
+      return orderedLeaves;
+   }
+
+   public List<ActionNodeState<?>> getOrderedActions()
+   {
+      return orderedActions;
    }
 }

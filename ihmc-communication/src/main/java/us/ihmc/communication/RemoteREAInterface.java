@@ -6,19 +6,19 @@ import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Input;
-import us.ihmc.ros2.ROS2NodeInterface;
-import us.ihmc.ros2.ROS2PublisherBasics;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
 
 import java.util.function.Consumer;
 
 public class RemoteREAInterface
 {
-   private final ROS2PublisherBasics<REAStateRequestMessage> reaStateRequestPublisher;
+   private final ROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher;
    private final ROS2Input<PlanarRegionsListMessage> planarRegionsListInput;
 
    private final Stopwatch stopwatch = new Stopwatch();
 
-   public RemoteREAInterface(ROS2NodeInterface ros2Node)
+   public RemoteREAInterface(ROS2Node ros2Node)
    {
       reaStateRequestPublisher = ros2Node.createPublisher(PerceptionAPI.REA.withInput().withTypeName(REAStateRequestMessage.class));
       planarRegionsListInput = new ROS2Input<>(ros2Node, PerceptionAPI.LIDAR_REA_REGIONS);

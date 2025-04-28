@@ -6,7 +6,7 @@ byte ROBOT_MOTION_STATUS_STANDING=1
 byte ROBOT_MOTION_STATUS_IN_MOTION=2
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # Time in nanoseconds of the clock hanging on the wall.
 # Takes into account leap seconds/years and is updated by the NTP server (thus can jump backwards).

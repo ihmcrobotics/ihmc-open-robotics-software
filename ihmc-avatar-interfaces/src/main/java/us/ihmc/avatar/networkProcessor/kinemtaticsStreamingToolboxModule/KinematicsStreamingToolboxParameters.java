@@ -7,8 +7,10 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.tools.UnitConversions;
+import us.ihmc.commons.UnitConversions;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class KinematicsStreamingToolboxParameters
@@ -268,6 +270,8 @@ public class KinematicsStreamingToolboxParameters
    private double solverNullspaceAlpha;
    private double solverPrivilegedDefaultWeight;
    private double solverPrivilegedDefaultGain;
+
+   private final List<String> inactiveJoints = new ArrayList<>();
 
    public static KinematicsStreamingToolboxParameters defaultParameters()
    {
@@ -1058,5 +1062,10 @@ public class KinematicsStreamingToolboxParameters
    public void setSolverPrivilegedDefaultGain(double solverPrivilegedDefaultGain)
    {
       this.solverPrivilegedDefaultGain = solverPrivilegedDefaultGain;
+   }
+
+   public List<String> getInactiveJoints()
+   {
+      return inactiveJoints;
    }
 }

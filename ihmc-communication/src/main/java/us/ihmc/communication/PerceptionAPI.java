@@ -7,6 +7,8 @@ import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
 import perception_msgs.msg.dds.*;
+import sensor_msgs.msg.dds.CameraInfo;
+import sensor_msgs.msg.dds.Image;
 import std_msgs.msg.dds.Empty;
 import std_msgs.msg.dds.Float64;
 import std_msgs.msg.dds.Int64;
@@ -20,6 +22,7 @@ import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 
 import java.util.Set;
+import java.util.UUID;
 
 public final class PerceptionAPI
 {
@@ -107,7 +110,8 @@ public final class PerceptionAPI
    public static final ROS2Topic<BigVideoPacket> L515_DEBUG_EXTRACTION = BEST_EFFORT.withModule(L515_NAME)
                                                                                   .withType(BigVideoPacket.class)
                                                                                   .withSuffix("debug_extraction");
-   public static final ROS2Topic<Empty> REQUEST_REALSENSE_POINT_CLOUD = PERCEPTION_MODULE.withSuffix("request_realsense_point_cloud").withType(Empty.class);
+   public static final ROS2Topic<Empty> REQUEST_REALSENSE = PERCEPTION_MODULE.withSuffix("request_realsense").withType(Empty.class);
+   public static final ROS2Topic<Empty> REQUEST_REALSENSE_PUBLICATION = PERCEPTION_MODULE.withSuffix("request_realsense_publication").withType(Empty.class);
    public static final SideDependentList<ROS2Topic<BigVideoPacket>> BLACKFLY_VIDEO = new SideDependentList<>(BEST_EFFORT.withModule(BLACKFLY_NAME + "left")
                                                                                                                         .withType(BigVideoPacket.class)
                                                                                                                         .withSuffix("video"),
@@ -138,9 +142,8 @@ public final class PerceptionAPI
    public static final ROS2Topic<Int64> ZED_SVO_SET_POSITION = PERCEPTION_MODULE.withSuffix("zed_svo_set_position").withType(Int64.class);
    public static final ROS2Topic<Empty> ZED_SVO_PAUSE = PERCEPTION_MODULE.withSuffix("zed_svo_pause").withType(Empty.class);
    public static final ROS2Topic<Empty> ZED_SVO_PLAY = PERCEPTION_MODULE.withSuffix("zed_svo_play").withType(Empty.class);
-   public static final ROS2Topic<Empty> REQUEST_ZED_COLOR = PERCEPTION_MODULE.withSuffix("request_zed_color").withType(Empty.class);
-   public static final ROS2Topic<Empty> REQUEST_ZED_DEPTH = PERCEPTION_MODULE.withSuffix("request_zed_depth").withType(Empty.class);
-   public static final ROS2Topic<Empty> REQUEST_ZED_POINT_CLOUD = PERCEPTION_MODULE.withSuffix("request_zed_point_cloud").withType(Empty.class);
+   public static final ROS2Topic<Empty> REQUEST_ZED = PERCEPTION_MODULE.withSuffix("request_zed").withType(Empty.class);
+   public static final ROS2Topic<Empty> REQUEST_ZED_PUBLICATION = PERCEPTION_MODULE.withSuffix("request_zed_publication").withType(Empty.class);
    public static final ROS2Topic<Empty> REQUEST_CENTERPOSE = PERCEPTION_MODULE.withSuffix("request_centerpose").withType(Empty.class);
    public static final ROS2Topic<DetectedObjectPacket> CENTERPOSE_DETECTED_OBJECT = IHMC_ROOT.withModule("centerpose").withType(DetectedObjectPacket.class);
    public static final ROS2Topic<Empty> REQUEST_YOLO_ZED = PERCEPTION_MODULE.withSuffix("request_yolo_zed").withType(Empty.class);
@@ -176,10 +179,9 @@ public final class PerceptionAPI
    public static final ROS2Topic<Empty> REQUEST_PLANAR_REGIONS = IHMC_ROOT.withModule("planar_regions")
                                                                           .withSuffix("request")
                                                                           .withType(Empty.class);
-   public static final ROS2Topic<YOLOv8ParametersMessage> YOLO_PARAMETERS = IHMC_ROOT.withModule("yolo")
-                                                                                     .withSuffix("parameters")
-                                                                                     .withType(YOLOv8ParametersMessage.class);
-
+   public static final ROS2Topic<YOLOv8ExecutorParameters> YOLO_PARAMETERS = IHMC_ROOT.withModule("yolo")
+                                                                                      .withSuffix("settings")
+                                                                                      .withType(YOLOv8ExecutorParameters.class);
    public static final ROS2Topic<LidarScanMessage> MULTISENSE_LIDAR_SCAN = IHMC_ROOT.withTypeName(LidarScanMessage.class);
    public static final ROS2Topic<FusedSensorHeadPointCloudMessage> FUSED_SENSOR_HEAD_POINT_CLOUD = BEST_EFFORT.withTypeName(FusedSensorHeadPointCloudMessage.class);
    public static final ROS2Topic<FusedSensorHeadPointCloudMessage> D435_COLORED_POINT_CLOUD = BEST_EFFORT.withType(FusedSensorHeadPointCloudMessage.class)
@@ -252,6 +254,7 @@ public final class PerceptionAPI
    public static final ROS2Topic<Empty> REQUEST_LIDAR_SCAN = PERCEPTION_MODULE.withSuffix("request_lidar_scan").withType(Empty.class);
    public static final ROS2Topic<Empty> REQUEST_HEIGHT_MAP = PERCEPTION_MODULE.withSuffix("request_height_map").withType(Empty.class);
    public static final ROS2Topic<Empty> RESET_HEIGHT_MAP = PERCEPTION_MODULE.withSuffix("reset_height_map").withType(Empty.class);
+   public static final ROS2Topic<Empty> LOWER_HEIGHT_MAP_BACKDROP = PERCEPTION_MODULE.withSuffix("lower_height_map_backdrop").withType(Empty.class);
 
    public static final ROS2Topic<ArUcoMarkerPoses> ARUCO_MARKER_POSES = PERCEPTION_MODULE.withType(ArUcoMarkerPoses.class).withSuffix("aruco_marker_poses");
    public static final ROS2Topic<Empty> REQUEST_ARUCO = PERCEPTION_MODULE.withSuffix("request_aruco").withType(Empty.class);
@@ -291,7 +294,38 @@ public final class PerceptionAPI
       return BIPEDAL_SUPPORT_REGION_PARAMETERS.withRobot(robotName);
    }
 
+   public static final ROS2Topic<DetectedDoorListMessage> DETECTED_DOORS = IHMC_ROOT.withModule("door_detection").withType(DetectedDoorListMessage.class);
+
+   /* STANDARD ROS 2 PERCEPTION MESSAGE TOPICS */
+   // ZED topics
+   private static final ROS2Topic<?> ROS2_ZED = new ROS2Topic<>().withPrefix("zed").withQoS(ROS2QosProfile.RELIABLE());
+
+   private static final ROS2Topic<?> ROS2_ZED_COLOR = ROS2_ZED.withModule("color");
+   public static final ROS2Topic<Image> ROS2_ZED_COLOR_IMAGE = ROS2_ZED_COLOR.withSuffix("image").withType(Image.class);
+   public static final ROS2Topic<CameraInfo> ROS2_ZED_COLOR_CAMERA_INFO = ROS2_ZED_COLOR.withSuffix("camera_info").withType(CameraInfo.class);
+
+   private static final ROS2Topic<?> ROS2_ZED_DEPTH = ROS2_ZED.withModule("depth");
+   public static final ROS2Topic<Image> ROS2_ZED_DEPTH_IMAGE = ROS2_ZED_DEPTH.withSuffix("image").withType(Image.class);
+   public static final ROS2Topic<CameraInfo> ROS2_ZED_DEPTH_CAMERA_INFO = ROS2_ZED_DEPTH.withSuffix("camera_info").withType(CameraInfo.class);
+
+   // D455 topics
+   private static final ROS2Topic<?> ROS2_D455 = new ROS2Topic<>().withPrefix("d455").withQoS(ROS2QosProfile.RELIABLE());
+
+   private static final ROS2Topic<?> ROS2_D455_COLOR = ROS2_D455.withModule("color");
+   public static final ROS2Topic<Image> ROS2_D455_COLOR_IMAGE = ROS2_D455_COLOR.withSuffix("image").withType(Image.class);
+   public static final ROS2Topic<CameraInfo> ROS2_D455_COLOR_CAMERA_INFO = ROS2_D455_COLOR.withSuffix("camera_info").withType(CameraInfo.class);
+
+   private static final ROS2Topic<?> ROS2_D455_DEPTH = ROS2_D455.withModule("depth");
+   public static final ROS2Topic<Image> ROS2_D455_DEPTH_IMAGE = ROS2_D455_DEPTH.withSuffix("image").withType(Image.class);
+   public static final ROS2Topic<CameraInfo> ROS2_D455_DEPTH_CAMERA_INFO = ROS2_D455_DEPTH.withSuffix("camera_info").withType(CameraInfo.class);
+
+
    /* VIDEO STREAMING STUFF */
+   /**
+    * SRT_RELAY_INSTANCE_ID is a randomly generated ID for SRT image relay topics. The idea is you want each instance of a process to have a unique ID
+    * in the topic names so processes won't ever try to republish to each other.
+    */
+   private static final String SRT_RELAY_INSTANCE_ID = UUID.randomUUID().toString().replace("-", "").substring(0, 8);
    private static final ROS2Topic<?> STREAMING_MODULE = BEST_EFFORT.withModule(STREAMING_NAME);
    public static final ROS2Topic<SRTStreamStatus> SRT_STREAM_STATUS = STREAMING_MODULE.withType(SRTStreamStatus.class);
 
@@ -299,17 +333,20 @@ public final class PerceptionAPI
    private static final ROS2Topic<SRTStreamStatus> SRT_REALSENSE_STREAM_STATUS = SRT_STREAM_STATUS.withPrefix(D455_NAME);
    public static final ROS2Topic<SRTStreamStatus> SRT_REALSENSE_COLOR_STREAM_STATUS = SRT_REALSENSE_STREAM_STATUS.withSuffix("color");
    public static final ROS2Topic<SRTStreamStatus> SRT_REALSENSE_DEPTH_STREAM_STATUS = SRT_REALSENSE_STREAM_STATUS.withSuffix("depth");
+   public static final ROS2Topic<ImageMessage> D455_COLOR_IMAGE_SRT = D455_COLOR_IMAGE.withSuffix("color/srt/" + SRT_RELAY_INSTANCE_ID);
+   public static final ROS2Topic<ImageMessage> D455_DEPTH_IMAGE_SRT = D455_DEPTH_IMAGE.withSuffix("depth/srt/" + SRT_RELAY_INSTANCE_ID);
 
    // ZED
    private static final ROS2Topic<SRTStreamStatus> SRT_ZED_STREAM_STATUS = SRT_STREAM_STATUS.withPrefix(ZED2_NAME);
    public static final ROS2Topic<SRTStreamStatus> SRT_ZED_LEFT_COLOR_STREAM_STATUS = SRT_ZED_STREAM_STATUS.withSuffix("color_left");
    public static final ROS2Topic<SRTStreamStatus> SRT_ZED_RIGHT_COLOR_STREAM_STATUS = SRT_ZED_STREAM_STATUS.withSuffix("color_right");
    public static final ROS2Topic<SRTStreamStatus> SRT_ZED_DEPTH_STREAM_STATUS = SRT_ZED_STREAM_STATUS.withSuffix("depth");
+   public static final SideDependentList<ROS2Topic<ImageMessage>> ZED2_COLOR_IMAGES_SRT = new SideDependentList<>(ZED2_COLOR_IMAGES.get(RobotSide.LEFT).withSuffix("color_left/srt/" + SRT_RELAY_INSTANCE_ID),
+                                                                                                                  ZED2_COLOR_IMAGES.get(RobotSide.RIGHT).withSuffix("color_right/srt/" + SRT_RELAY_INSTANCE_ID));
+   public static final ROS2Topic<ImageMessage> ZED2_DEPTH_SRT = ZED2_DEPTH.withSuffix("depth/" + SRT_RELAY_INSTANCE_ID);
 
    public static final Set<ROS2SRTStreamTopicPair> SRT_STREAM_IMAGE_MESSAGE_TOPIC_PAIRS
-         = Set.of(new ROS2SRTStreamTopicPair(SRT_REALSENSE_COLOR_STREAM_STATUS, D455_COLOR_IMAGE, false),
-                  new ROS2SRTStreamTopicPair(SRT_REALSENSE_DEPTH_STREAM_STATUS, D455_DEPTH_IMAGE, true),
-                  new ROS2SRTStreamTopicPair(SRT_ZED_LEFT_COLOR_STREAM_STATUS, ZED2_COLOR_IMAGES.get(RobotSide.LEFT), false),
-                  new ROS2SRTStreamTopicPair(SRT_ZED_RIGHT_COLOR_STREAM_STATUS, ZED2_COLOR_IMAGES.get(RobotSide.RIGHT), false),
-                  new ROS2SRTStreamTopicPair(SRT_ZED_DEPTH_STREAM_STATUS, ZED2_DEPTH, true));
+         = Set.of(new ROS2SRTStreamTopicPair(SRT_REALSENSE_COLOR_STREAM_STATUS, D455_COLOR_IMAGE_SRT, false),
+                  new ROS2SRTStreamTopicPair(SRT_ZED_LEFT_COLOR_STREAM_STATUS, ZED2_COLOR_IMAGES_SRT.get(RobotSide.LEFT), false),
+                  new ROS2SRTStreamTopicPair(SRT_ZED_RIGHT_COLOR_STREAM_STATUS, ZED2_COLOR_IMAGES_SRT.get(RobotSide.RIGHT), false));
 }

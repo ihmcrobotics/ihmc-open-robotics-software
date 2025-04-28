@@ -24,7 +24,7 @@ int8 DOOR_NODE_TYPE=8
 int8 TRASH_CAN_NODE_TYPE=9
 
 # Monotonically increasing message ID that matches the CRDTInfo update number
-uint32 sequence_id
+uint64 sequence_id
 
 # The ID to assign to the next instantiated node
 uint32 next_id

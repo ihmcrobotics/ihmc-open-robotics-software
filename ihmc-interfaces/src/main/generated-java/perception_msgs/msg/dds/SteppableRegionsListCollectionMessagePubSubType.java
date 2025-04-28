@@ -15,7 +15,7 @@ public class SteppableRegionsListCollectionMessagePubSubType implements us.ihmc.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "da9c10b8b757c40787dfee75ca8b92675b7507156e0007ec60716fffcb2d2411";
+   		return "e6028cf86f916d847455a6ef0ec54e34d58bc9bfa458252bab76bb1373f10523";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class SteppableRegionsListCollectionMessagePubSubType implements us.ihmc.
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += ihmc_common_msgs.msg.dds.InstantMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -92,7 +92,7 @@ public class SteppableRegionsListCollectionMessagePubSubType implements us.ihmc.
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += ihmc_common_msgs.msg.dds.InstantMessagePubSubType.getCdrSerializedSize(data.getLastUpdated(), current_alignment);
@@ -144,50 +144,50 @@ public class SteppableRegionsListCollectionMessagePubSubType implements us.ihmc.
 
    public static void write(perception_msgs.msg.dds.SteppableRegionsListCollectionMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       ihmc_common_msgs.msg.dds.InstantMessagePubSubType.write(data.getLastUpdated(), cdr);
       if(data.getFootYaw().size() <= 100)
       cdr.write_type_e(data.getFootYaw());else
-          throw new RuntimeException("foot_yaw field exceeds the maximum length");
+          throw new RuntimeException("foot_yaw field exceeds the maximum length: %d > %d".formatted(data.getFootYaw().size(), 100));
 
       if(data.getRegionsPerYaw().size() <= 100)
       cdr.write_type_e(data.getRegionsPerYaw());else
-          throw new RuntimeException("regions_per_yaw field exceeds the maximum length");
+          throw new RuntimeException("regions_per_yaw field exceeds the maximum length: %d > %d".formatted(data.getRegionsPerYaw().size(), 100));
 
       if(data.getRegionId().size() <= 1000)
       cdr.write_type_e(data.getRegionId());else
-          throw new RuntimeException("region_id field exceeds the maximum length");
+          throw new RuntimeException("region_id field exceeds the maximum length: %d > %d".formatted(data.getRegionId().size(), 1000));
 
       if(data.getRegionOrigin().size() <= 1000)
       cdr.write_type_e(data.getRegionOrigin());else
-          throw new RuntimeException("region_origin field exceeds the maximum length");
+          throw new RuntimeException("region_origin field exceeds the maximum length: %d > %d".formatted(data.getRegionOrigin().size(), 1000));
 
       if(data.getRegionOrientation().size() <= 1000)
       cdr.write_type_e(data.getRegionOrientation());else
-          throw new RuntimeException("region_orientation field exceeds the maximum length");
+          throw new RuntimeException("region_orientation field exceeds the maximum length: %d > %d".formatted(data.getRegionOrientation().size(), 1000));
 
       if(data.getRegionNormal().size() <= 1000)
       cdr.write_type_e(data.getRegionNormal());else
-          throw new RuntimeException("region_normal field exceeds the maximum length");
+          throw new RuntimeException("region_normal field exceeds the maximum length: %d > %d".formatted(data.getRegionNormal().size(), 1000));
 
       if(data.getConcaveHullsSize().size() <= 100)
       cdr.write_type_e(data.getConcaveHullsSize());else
-          throw new RuntimeException("concave_hulls_size field exceeds the maximum length");
+          throw new RuntimeException("concave_hulls_size field exceeds the maximum length: %d > %d".formatted(data.getConcaveHullsSize().size(), 100));
 
       if(data.getVertexBuffer().size() <= 3000)
       cdr.write_type_e(data.getVertexBuffer());else
-          throw new RuntimeException("vertex_buffer field exceeds the maximum length");
+          throw new RuntimeException("vertex_buffer field exceeds the maximum length: %d > %d".formatted(data.getVertexBuffer().size(), 3000));
 
       if(data.getLocalHeightMap().size() <= 100)
       cdr.write_type_e(data.getLocalHeightMap());else
-          throw new RuntimeException("local_height_map field exceeds the maximum length");
+          throw new RuntimeException("local_height_map field exceeds the maximum length: %d > %d".formatted(data.getLocalHeightMap().size(), 100));
 
    }
 
    public static void read(perception_msgs.msg.dds.SteppableRegionsListCollectionMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       ihmc_common_msgs.msg.dds.InstantMessagePubSubType.read(data.getLastUpdated(), cdr);	
       cdr.read_type_e(data.getFootYaw());	
@@ -205,7 +205,7 @@ public class SteppableRegionsListCollectionMessagePubSubType implements us.ihmc.
    @Override
    public final void serialize(perception_msgs.msg.dds.SteppableRegionsListCollectionMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_a("last_updated", new ihmc_common_msgs.msg.dds.InstantMessagePubSubType(), data.getLastUpdated());
 
       ser.write_type_e("foot_yaw", data.getFootYaw());
@@ -222,7 +222,7 @@ public class SteppableRegionsListCollectionMessagePubSubType implements us.ihmc.
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.SteppableRegionsListCollectionMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       ser.read_type_a("last_updated", new ihmc_common_msgs.msg.dds.InstantMessagePubSubType(), data.getLastUpdated());
 
       ser.read_type_e("foot_yaw", data.getFootYaw());

@@ -19,16 +19,16 @@ import us.ihmc.perception.MutableBytePointer;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.opencl.OpenCLFloatBuffer;
 import us.ihmc.perception.opencl.OpenCLManager;
-import us.ihmc.perception.realsense.RealsenseDevice;
-import us.ihmc.perception.realsense.RealsenseDeviceManager;
+import us.ihmc.sensors.realsense.RealSenseDevice;
+import us.ihmc.sensors.realsense.RealSenseDeviceManager;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.RDXPointCloudRenderer;
+import us.ihmc.rdx.RDXPointCloudRendererOld;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.interactable.RDXInteractableRealsenseL515;
-import us.ihmc.tools.time.FrequencyCalculator;
+import us.ihmc.commons.time.FrequencyCalculator;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.nio.ByteOrder;
@@ -39,8 +39,8 @@ public class RDXRealsenseL515UI
    private RDXInteractableRealsenseL515 l515Interactable;
    private YoRegistry yoRegistry = new YoRegistry(getClass().getSimpleName());
    private YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-   private RealsenseDeviceManager realsenseDeviceManager;
-   private RealsenseDevice l515;
+   private RealSenseDeviceManager realsenseDeviceManager;
+   private RealSenseDevice l515;
    private RDXBytedecoImagePanel depthImagePanel;
    private RDXBytedecoImagePanel colorImagePanel;
    private Mat depthU16C1Image;
@@ -54,7 +54,7 @@ public class RDXRealsenseL515UI
    private final ImInt digitalGain = new ImInt(realsense2.RS2_DIGITAL_GAIN_LOW);
    private final String[] digitalGains = new String[] {"AUTO", "LOW", "HIGH"};
    private static final int RGBA8888_WHITE = (255 << 24) | (255 << 16) | (255 << 8) | 255;
-   private RDXPointCloudRenderer pointCloudRenderer;
+   private RDXPointCloudRendererOld pointCloudRenderer;
    private OpenCLManager openCLManager;
    private final FramePoint3D framePoint = new FramePoint3D();
    private final ImFloat focalLength = new ImFloat();
@@ -80,14 +80,14 @@ public class RDXRealsenseL515UI
 
             l515Interactable = new RDXInteractableRealsenseL515(baseUI.getPrimary3DPanel());
 
-            realsenseDeviceManager = new RealsenseDeviceManager(yoRegistry, yoGraphicsListRegistry);
+            realsenseDeviceManager = new RealSenseDeviceManager(yoRegistry, yoGraphicsListRegistry);
 
             l515 = realsenseDeviceManager.createFullFeaturedL515();
             l515.enableColor(1280, 720, 30);
             l515.initialize();
 
             openCLManager = new OpenCLManager();
-            pointCloudRenderer = new RDXPointCloudRenderer();
+            pointCloudRenderer = new RDXPointCloudRendererOld();
          }
 
          @Override

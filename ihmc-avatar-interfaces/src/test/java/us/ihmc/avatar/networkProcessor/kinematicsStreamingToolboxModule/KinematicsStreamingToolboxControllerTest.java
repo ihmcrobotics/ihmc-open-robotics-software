@@ -29,7 +29,6 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetwork
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.WalkingCommandConsumer;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.ControllerAPI;
@@ -49,16 +48,14 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
-import us.ihmc.robotics.physics.Collidable;
-import us.ihmc.robotics.physics.CollisionResult;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2PublisherBasics;
+import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Subscription;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
@@ -74,6 +71,8 @@ import us.ihmc.scs2.session.Session;
 import us.ihmc.scs2.session.Session.SessionModeChangeListener;
 import us.ihmc.scs2.session.SessionMode;
 import us.ihmc.scs2.simulation.SimulationSession;
+import us.ihmc.scs2.simulation.collision.Collidable;
+import us.ihmc.scs2.simulation.collision.CollisionResult;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
@@ -116,8 +115,8 @@ public abstract class KinematicsStreamingToolboxControllerTest
 
    protected Robot robot, ghost;
    protected ROS2Node ros2Node;
-   protected ROS2PublisherBasics<KinematicsStreamingToolboxInputMessage> inputPublisher;
-   protected ROS2PublisherBasics<ToolboxStateMessage> statePublisher;
+   protected ROS2Publisher<KinematicsStreamingToolboxInputMessage> inputPublisher;
+   protected ROS2Publisher<ToolboxStateMessage> statePublisher;
    protected ROS2Topic<?> controllerInputTopic;
    protected ROS2Topic<?> controllerOutputTopic;
    protected ROS2Topic<?> toolboxInputTopic;
@@ -153,6 +152,8 @@ public abstract class KinematicsStreamingToolboxControllerTest
                                                                                                                                              simulationTestingParameters);
       simulationTestHelperFactory.addSecondaryRobot(ghost);
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
+      if (!visualize)
+         simulationTestHelper.getAvatarSimulation().setShowGUI(false);
       YoBoolean isAutomaticManipulationAbortEnabled = (YoBoolean) simulationTestHelper.getControllerRegistry()
                                                                                       .findVariable(WalkingCommandConsumer.class.getSimpleName(),
                                                                                                     "isAutomaticManipulationAbortEnabled");
@@ -167,17 +168,17 @@ public abstract class KinematicsStreamingToolboxControllerTest
       toolboxInputTopic = KinematicsStreamingToolboxModule.getInputTopic(robotName);
       toolboxOutputTopic = KinematicsStreamingToolboxModule.getOutputTopic(robotName);
 
-      RealtimeROS2Node toolboxROS2Node = ROS2Tools.createRealtimeROS2Node(PubSubImplementation.INTRAPROCESS, "toolbox_node");
+      RealtimeROS2Node toolboxROS2Node = new ROS2NodeBuilder().buildRealtime("toolbox_node");
       ControllerNetworkSubscriber controllerNetworkSubscriber = new ControllerNetworkSubscriber(toolboxInputTopic,
                                                                                                 commandInputManager,
                                                                                                 toolboxOutputTopic,
                                                                                                 statusOutputManager,
                                                                                                 toolboxROS2Node);
 
-      ROS2PublisherBasics<WholeBodyTrajectoryMessage> trajectoryOutputPublisher = ros2Node.createPublisher(ControllerAPI.getTopic(controllerInputTopic,
+      ROS2Publisher<WholeBodyTrajectoryMessage> trajectoryOutputPublisher = ros2Node.createPublisher(ControllerAPI.getTopic(controllerInputTopic,
                                                                                                                                   WholeBodyTrajectoryMessage.class));
       toolboxController.setTrajectoryMessagePublisher(trajectoryOutputPublisher::publish);
-      ROS2PublisherBasics<WholeBodyStreamingMessage> streamingOutputPublisher = ros2Node.createPublisher(ControllerAPI.getTopic(controllerInputTopic,
+      ROS2Publisher<WholeBodyStreamingMessage> streamingOutputPublisher = ros2Node.createPublisher(ControllerAPI.getTopic(controllerInputTopic,
                                                                                                                                 WholeBodyStreamingMessage.class));
       toolboxController.setStreamingMessagePublisher(streamingOutputPublisher::publish);
 
@@ -516,20 +517,22 @@ public abstract class KinematicsStreamingToolboxControllerTest
       simulationTestHelper.start();
       SimRunner simRunner = new SimRunner(simulationTestHelper);
 
-      SimulationConstructionSet2 scs = simulationTestHelper.getSimulationConstructionSet();
-      scs.waitUntilVisualizerFullyUp();
-      Platform.runLater(() ->
-                        {
-                           Button restart = new Button("Restart");
-                           restart.setOnAction(event -> simRunner.reset());
-                           scs.addCustomGUIControl(restart);
-                        });
+      if (visualize)
+      {
+         SimulationConstructionSet2 scs = simulationTestHelper.getSimulationConstructionSet();
+         scs.waitUntilVisualizerFullyUp();
+         Platform.runLater(() ->
+                           {
+                              Button restart = new Button("Restart");
+                              restart.setOnAction(event -> simRunner.reset());
+                              scs.addCustomGUIControl(restart);
+                           });
+      }
 
       assertTrue(simRunner.simulateNow(0.5));
       wakeupToolbox();
 
       assertTrue(simRunner.simulateNow(ikStreamingTestRunParameters.simulationDuration()));
-
       KinematicsStreamingToolboxInputMessage message = new KinematicsStreamingToolboxInputMessage();
       message.setStreamToController(false);
       inputPublisher.publish(message);

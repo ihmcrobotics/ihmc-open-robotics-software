@@ -11,7 +11,7 @@ import org.bytedeco.cuda.nvcomp.PimplManager;
 import org.bytedeco.cuda.nvcomp.SnappyManager;
 import org.bytedeco.cuda.nvcomp.ZstdManager;
 import org.bytedeco.cuda.nvcomp.nvcompBatchedANSOpts_t;
-import org.bytedeco.cuda.nvcomp.nvcompBatchedBitcompFormatOpts;
+import org.bytedeco.cuda.nvcomp.nvcompBatchedBitcompOpts_t;
 import org.bytedeco.cuda.nvcomp.nvcompBatchedDeflateOpts_t;
 import org.bytedeco.cuda.nvcomp.nvcompBatchedGdeflateOpts_t;
 import org.bytedeco.cuda.nvcomp.nvcompBatchedLZ4Opts_t;
@@ -73,7 +73,7 @@ public class NVCompDemo
 
    // Bitcomp
    protected final BitcompManager bitcompManager;
-   protected final nvcompBatchedBitcompFormatOpts bitcompOptions;
+   protected final nvcompBatchedBitcompOpts_t bitcompOptions;
 
    protected final Map<String, PimplManager> compressionManagers = new TreeMap<>();
 
@@ -113,7 +113,7 @@ public class NVCompDemo
       compressionManagers.put("ANS", ansManager);
 
       // Bitcomp
-      bitcompOptions = new nvcompBatchedBitcompFormatOpts();
+      bitcompOptions = new nvcompBatchedBitcompOpts_t();
       bitcompOptions.algorithm_type(0); // 0 = default algorithm (best compression), 1 = sparse algorithm (for data with lots of zeros)
       bitcompOptions.data_type(DATA_TYPE);
       bitcompManager = new BitcompManager(chunkSize, bitcompOptions, stream, 0, NoComputeNoVerify);

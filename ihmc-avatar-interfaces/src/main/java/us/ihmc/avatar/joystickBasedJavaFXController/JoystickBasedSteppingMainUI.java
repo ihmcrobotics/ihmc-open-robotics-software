@@ -35,7 +35,6 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeInterface;
 
 public class JoystickBasedSteppingMainUI
 {
@@ -77,7 +76,7 @@ public class JoystickBasedSteppingMainUI
 
    public JoystickBasedSteppingMainUI(String robotName,
                                       Stage primaryStage,
-                                      ROS2NodeInterface ros2Node,
+                                      ROS2Node ros2Node,
                                       String workingDirectoryPath,
                                       FullHumanoidRobotModelFactory fullRobotModelFactory,
                                       WalkingControllerParameters walkingControllerParameters,

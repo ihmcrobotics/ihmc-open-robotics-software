@@ -4,6 +4,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.robotics.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
 
 public interface FixedFramePoseTrajectoryGenerator
       extends FixedFramePositionTrajectoryGenerator, FixedFrameOrientationTrajectoryGenerator, PoseTrajectoryGenerator

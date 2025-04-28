@@ -1,9 +1,5 @@
 package us.ihmc.avatar.controllerAPI;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static us.ihmc.robotics.Assert.assertEquals;
-import static us.ihmc.robotics.Assert.assertFalse;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -68,7 +64,7 @@ import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsOrientatio
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.SE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.SO3TrajectoryPoint;
-import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
+import us.ihmc.robotics.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
@@ -89,6 +85,8 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoLong;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotTestInterface
 {
@@ -338,7 +336,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
    }
 
    @Test
-   public void testPelvisTranslationContinuityForResetting() throws Exception
+   public void testICPTranslationContinuity() throws Exception
    {
       CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       Random random = new Random(564574L);

@@ -2,10 +2,10 @@ package us.ihmc.systemIdentification;
 
 import java.util.EnumMap;
 
+import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.systemIdentification.frictionId.frictionModels.FrictionModel;
 import us.ihmc.systemIdentification.frictionId.frictionModels.FrictionState;
 import us.ihmc.systemIdentification.frictionId.frictionModels.JointFrictionModel;

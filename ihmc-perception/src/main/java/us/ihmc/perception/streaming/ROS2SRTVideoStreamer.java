@@ -3,14 +3,13 @@ package us.ihmc.perception.streaming;
 import org.bytedeco.javacpp.BytePointer;
 import perception_msgs.msg.dds.SRTStreamStatus;
 import perception_msgs.msg.dds.VideoFrameExtraData;
+import us.ihmc.commons.time.FrequencyCalculator;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2PublisherBasics;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.tools.time.FrequencyCalculator;
 
 import java.net.InetSocketAddress;
 import java.util.Map;
@@ -26,7 +25,7 @@ public class ROS2SRTVideoStreamer
    private static final int COLOR_OUTPUT_PIXEL_FORMAT = AV_PIX_FMT_YUV444P;
 
    private final SRTStreamStatus statusMessage;
-   private final ROS2PublisherBasics<SRTStreamStatus> statusMessagePublisher;
+   private final ROS2Publisher<SRTStreamStatus> statusMessagePublisher;
    private final VideoFrameExtraData frameExtraData;
 
    private final SRTVideoStreamer videoStreamer;
@@ -76,7 +75,31 @@ public class ROS2SRTVideoStreamer
 
    public void initializeForColor(int imageWidth, int imageHeight, int inputPixelFormat, int intermediateColorConversion, boolean useHardwareAcceleration)
    {
-      Map<String, String> hevcOptions = StreamingTools.getHEVCNVENCStreamingOptions();
+      initializeForColor(imageWidth, imageHeight, inputPixelFormat, intermediateColorConversion, useHardwareAcceleration, false);
+   }
+
+   public void initializeForColor(RawImage exampleImage,
+                                  int inputPixelFormat,
+                                  int intermediateColorConversion,
+                                  boolean useHardwareAcceleration,
+                                  boolean highQuality)
+   {
+      initializeForColor(exampleImage.getWidth(),
+                         exampleImage.getHeight(),
+                         inputPixelFormat,
+                         intermediateColorConversion,
+                         useHardwareAcceleration,
+                         highQuality);
+   }
+
+   public void initializeForColor(int imageWidth,
+                                  int imageHeight,
+                                  int inputPixelFormat,
+                                  int intermediateColorConversion,
+                                  boolean useHardwareAcceleration,
+                                  boolean highQuality)
+   {
+      Map<String, String> hevcOptions = highQuality ? StreamingTools.getHEVCNVENCHighQualityOptions() : StreamingTools.getHEVCNVENCStreamingOptions();
       hevcOptions.put("udu_sei", "1");
       videoStreamer.initialize(imageWidth,
                                imageHeight,
@@ -117,7 +140,7 @@ public class ROS2SRTVideoStreamer
 
       frameExtraData.setSequenceNumber(frame.getSequenceNumber());
       MessageTools.toMessage(frame.getAcquisitionTime(), frameExtraData.getAcquisitionTime());
-      frameExtraData.getSensorPose().set(new Pose3D(frame.getPosition(), frame.getOrientation()));
+      frameExtraData.getSensorPose().set(frame.getTransformToWorld());
 
       if (isStreamingDepth)
       {
@@ -143,6 +166,7 @@ public class ROS2SRTVideoStreamer
       statusMessage.setFy(frame.getFocalLengthY());
       statusMessage.setCx(frame.getPrincipalPointX());
       statusMessage.setCy(frame.getPrincipalPointY());
+      statusMessage.setCameraModel(frame.getCameraModel().toByte());
       statusMessage.setDepthDiscretization(frame.getDepthDiscretization());
       statusMessagePublisher.publish(statusMessage);
 

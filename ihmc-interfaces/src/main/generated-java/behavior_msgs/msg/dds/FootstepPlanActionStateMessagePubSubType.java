@@ -15,7 +15,7 @@ public class FootstepPlanActionStateMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "e4288e3bf87d2db358ffc0fcd25721b471022402d9fe47a294710240efefaffc";
+   		return "b770243e8d712cf5e62af1c89518bc2667f3f31ebc5e50b8793d6ee30329616c";
    }
    
    @Override
@@ -142,7 +142,7 @@ public class FootstepPlanActionStateMessagePubSubType implements us.ihmc.pubsub.
       behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
       if(data.getFootsteps().size() <= 50)
       cdr.write_type_e(data.getFootsteps());else
-          throw new RuntimeException("footsteps field exceeds the maximum length");
+          throw new RuntimeException("footsteps field exceeds the maximum length: %d > %d".formatted(data.getFootsteps().size(), 50));
 
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getGoalTransformToParent(), cdr);
       cdr.write_type_9(data.getExecutionState());
@@ -153,17 +153,17 @@ public class FootstepPlanActionStateMessagePubSubType implements us.ihmc.pubsub.
 
       if(data.getDesiredLeftFootsteps().size() <= 50)
       cdr.write_type_e(data.getDesiredLeftFootsteps());else
-          throw new RuntimeException("desired_left_footsteps field exceeds the maximum length");
+          throw new RuntimeException("desired_left_footsteps field exceeds the maximum length: %d > %d".formatted(data.getDesiredLeftFootsteps().size(), 50));
 
       if(data.getDesiredRightFootsteps().size() <= 50)
       cdr.write_type_e(data.getDesiredRightFootsteps());else
-          throw new RuntimeException("desired_right_footsteps field exceeds the maximum length");
+          throw new RuntimeException("desired_right_footsteps field exceeds the maximum length: %d > %d".formatted(data.getDesiredRightFootsteps().size(), 50));
 
       geometry_msgs.msg.dds.PosePubSubType.write(data.getCurrentLeftFootPose(), cdr);
       geometry_msgs.msg.dds.PosePubSubType.write(data.getCurrentRightFootPose(), cdr);
       if(data.getPreviewFootsteps().size() <= 50)
       cdr.write_type_e(data.getPreviewFootsteps());else
-          throw new RuntimeException("preview_footsteps field exceeds the maximum length");
+          throw new RuntimeException("preview_footsteps field exceeds the maximum length: %d > %d".formatted(data.getPreviewFootsteps().size(), 50));
 
    }
 

@@ -16,6 +16,7 @@ import imgui.flag.ImGuiDataType;
 import imgui.flag.ImGuiFreeTypeBuilderFlags;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.flag.ImGuiKey;
+import imgui.flag.ImGuiStyleVar;
 import imgui.internal.ImGuiContext;
 import imgui.type.ImBoolean;
 import imgui.type.ImDouble;
@@ -28,7 +29,6 @@ import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.BoundingBox2D;
-import us.ihmc.log.LogTools;
 import us.ihmc.tools.string.StringTools;
 
 import java.io.ByteArrayOutputStream;
@@ -313,6 +313,27 @@ public class ImGuiTools
       return ImGui.isItemFocused() && (ImGui.isKeyReleased(ImGuiTools.getEnterKey()) || ImGui.isKeyReleased(ImGuiTools.getKeyPadEnterKey()));
    }
 
+   /**
+    * Renders a multiline widget that dynamically resizes to the necessary height
+    * and the width of the available area.
+    *
+    * @return If user modified, the text
+    *         If user did not modify, returns null
+    */
+   public static String inputTextMultiline(String widgetName, String text, ImString imString)
+   {
+      imString.set(text);
+
+      float height = ImGuiTools.calcTextSizeY("A") * (Math.max(text.lines().count() + 1, 2));
+
+      if (ImGui.inputTextMultiline(widgetName, imString, ImGui.getColumnWidth(), height))
+      {
+         return imString.get();
+      }
+
+      return null;
+   }
+
    public static void textColored(Color color, String text)
    {
       ImGui.textColored(color.r, color.g, color.b, color.a, text);
@@ -485,6 +506,43 @@ public class ImGuiTools
    public static float calcButtonWidth(String buttonText)
    {
       return calcTextSizeX(buttonText) + ImGui.getStyle().getFrameBorderSize() * 2 + ImGui.getStyle().getItemInnerSpacingX() * 2;
+   }
+
+   /**
+    * Calculates the render size of the passed in render method
+    * by performing an invisible render.
+    *
+    * @param renderMethod Method to render UI.
+    * @return Size of the rendered UI.
+    * @apiNote Since this method renders UI which is typically rendered over later on,
+    *       the {@code renderMethod} should allow UI items to overlap by using {@link ImGui#setItemAllowOverlap()}.
+    *       Otherwise, there may be issues interacting with the rendered items.
+    */
+   public static ImVec2 calcRenderSize(Runnable renderMethod)
+   {
+      // Make things invisible, and disable interaction
+      ImGui.pushStyleVar(ImGuiStyleVar.Alpha, 0.0f);
+      ImGui.beginDisabled();
+
+      // Record starting cursor position
+      ImVec2 start = ImGui.getCursorPos();
+
+      // Render
+      ImGui.pushID("calcRenderSize");
+      renderMethod.run();
+      ImGui.popID();
+
+      // Record ending cursor position
+      ImVec2 end = ImGui.getCursorPos();
+
+      // Re-enable stuff and make everything visible
+      ImGui.endDisabled();
+      ImGui.popStyleVar();
+
+      // Put cursor back to where it was at the start
+      ImGui.setCursorPos(start.x, start.y);
+
+      return new ImVec2(end.x - start.x, end.y - start.y);
    }
 
    /** @deprecated Use ImGuiUniqueLabelMap instead. */

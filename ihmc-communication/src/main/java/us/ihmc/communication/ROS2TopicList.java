@@ -14,7 +14,7 @@ public class ROS2TopicList
    public static void main(String[] args) throws Exception
    {
       int domainID = NetworkParameters.getRTPSDomainID();
-      Domain domain = DomainFactory.getDomain(DomainFactory.PubSubImplementation.FAST_RTPS);
+      Domain domain = DomainFactory.getDomain();
       ParticipantProfile attributes = domain.createParticipantAttributes(domainID, ROS2TopicList.class.getSimpleName());
 
       Participant participant = domain.createParticipant(attributes, (participantLocal, info) ->

@@ -15,7 +15,7 @@ public class PlanarRegionSegmentationParametersMessagePubSubType implements us.i
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "350467b4eb244e4cbfe551640ab387d8ac91f1b3af14cc6f62f40e038b61fc46";
+   		return "8a19c7194720771dbace18b47bb5c12b3d8acdd1b042f111030ac71c3aaa2759";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class PlanarRegionSegmentationParametersMessagePubSubType implements us.i
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -81,7 +81,7 @@ public class PlanarRegionSegmentationParametersMessagePubSubType implements us.i
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -111,7 +111,7 @@ public class PlanarRegionSegmentationParametersMessagePubSubType implements us.i
 
    public static void write(perception_msgs.msg.dds.PlanarRegionSegmentationParametersMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_6(data.getSearchRadius());
 
@@ -131,7 +131,7 @@ public class PlanarRegionSegmentationParametersMessagePubSubType implements us.i
 
    public static void read(perception_msgs.msg.dds.PlanarRegionSegmentationParametersMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setSearchRadius(cdr.read_type_6());
       	
@@ -153,7 +153,7 @@ public class PlanarRegionSegmentationParametersMessagePubSubType implements us.i
    @Override
    public final void serialize(perception_msgs.msg.dds.PlanarRegionSegmentationParametersMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_6("search_radius", data.getSearchRadius());
       ser.write_type_6("max_distance_from_plane", data.getMaxDistanceFromPlane());
       ser.write_type_6("max_angle_from_plane", data.getMaxAngleFromPlane());
@@ -166,7 +166,7 @@ public class PlanarRegionSegmentationParametersMessagePubSubType implements us.i
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.PlanarRegionSegmentationParametersMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setSearchRadius(ser.read_type_6("search_radius"));
       data.setMaxDistanceFromPlane(ser.read_type_6("max_distance_from_plane"));
       data.setMaxAngleFromPlane(ser.read_type_6("max_angle_from_plane"));

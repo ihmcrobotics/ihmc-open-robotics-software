@@ -5,12 +5,11 @@ import std_msgs.msg.dds.Int64;
 import us.ihmc.avatar.ros2.networkTest.ROS2NetworkTestMachine;
 import us.ihmc.avatar.ros2.networkTest.ROS2NetworkTestProfile;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.ros2.ROS2Callback;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -27,7 +26,7 @@ public class IntegersAt1HzNetworkTestProfile extends ROS2NetworkTestProfile
    private static final ROS2Topic<Int64> TO_OCU = BASE_TOPIC.withSuffix("toocu");
    private static final ROS2Topic<Int64> TO_CPU1 = BASE_TOPIC.withSuffix("tocpu1");
    private final MutableInt number = new MutableInt();
-   private final ROS2PublisherBasics<Int64> publisher;
+   private final ROS2Publisher<Int64> publisher;
 
    private final YoRegistry yoRegistry = new YoRegistry(getMachineName() + getClass().getSimpleName());
    private final YoLong messagesSent = new YoLong(getMachineName() + "Sent", yoRegistry);
@@ -39,7 +38,7 @@ public class IntegersAt1HzNetworkTestProfile extends ROS2NetworkTestProfile
    {
       LogTools.info("Running on {}", getMachineName());
 
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "profile");
+      ROS2Node ros2Node = new ROS2NodeBuilder().build("profile");
 
       ROS2Topic<Int64> publisherTopic = null;
       ROS2Topic<Int64> subscriberTopic = null;
@@ -65,7 +64,7 @@ public class IntegersAt1HzNetworkTestProfile extends ROS2NetworkTestProfile
       publisher = ros2Node.createPublisher(publisherTopic);
       if (subscriberTopic != null)
       {
-         new ROS2Callback<>(ros2Node, subscriberTopic, message ->
+         ros2Node.createSubscription2(subscriberTopic, message ->
          {
             messagesReceived.add(1);
          });

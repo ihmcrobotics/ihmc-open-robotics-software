@@ -39,16 +39,16 @@ public class BuildingExplorationState extends BehaviorTreeNodeState<BuildingExpl
 
    public void toMessage(BuildingExplorationStateMessage message)
    {
-      getDefinition().toMessage(message.getDefinition());
+      definition.toMessage(message.getDefinition());
 
       super.toMessage(message.getState());
    }
 
    public void fromMessage(BuildingExplorationStateMessage message)
    {
-      super.fromMessage(message.getState());
+      definition.fromMessage(message.getDefinition());
 
-      getDefinition().fromMessage(message.getDefinition());
+      super.fromMessage(message.getState());
    }
 
    @Nullable

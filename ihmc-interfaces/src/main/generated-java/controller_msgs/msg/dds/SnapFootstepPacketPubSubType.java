@@ -15,7 +15,7 @@ public class SnapFootstepPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "a6b46e3cc735cacc9327182cdf14c12d5b59a1b9af937c67ba7b9a8e75e3ddab";
+   		return "8d7dfc27735170a09d0c0fb6cfe2ed2c251b034ad39ed1eb365828e7a94c4dd4";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class SnapFootstepPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
       {
@@ -74,7 +74,7 @@ public class SnapFootstepPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -96,25 +96,25 @@ public class SnapFootstepPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
 
    public static void write(controller_msgs.msg.dds.SnapFootstepPacket data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       if(data.getFootstepData().size() <= 100)
       cdr.write_type_e(data.getFootstepData());else
-          throw new RuntimeException("footstep_data field exceeds the maximum length");
+          throw new RuntimeException("footstep_data field exceeds the maximum length: %d > %d".formatted(data.getFootstepData().size(), 100));
 
       if(data.getFootstepOrder().size() <= 100)
       cdr.write_type_e(data.getFootstepOrder());else
-          throw new RuntimeException("footstep_order field exceeds the maximum length");
+          throw new RuntimeException("footstep_order field exceeds the maximum length: %d > %d".formatted(data.getFootstepOrder().size(), 100));
 
       if(data.getFlag().size() <= 100)
       cdr.write_type_e(data.getFlag());else
-          throw new RuntimeException("flag field exceeds the maximum length");
+          throw new RuntimeException("flag field exceeds the maximum length: %d > %d".formatted(data.getFlag().size(), 100));
 
    }
 
    public static void read(controller_msgs.msg.dds.SnapFootstepPacket data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       cdr.read_type_e(data.getFootstepData());	
       cdr.read_type_e(data.getFootstepOrder());	
@@ -125,7 +125,7 @@ public class SnapFootstepPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
    @Override
    public final void serialize(controller_msgs.msg.dds.SnapFootstepPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_e("footstep_data", data.getFootstepData());
       ser.write_type_e("footstep_order", data.getFootstepOrder());
       ser.write_type_e("flag", data.getFlag());
@@ -134,7 +134,7 @@ public class SnapFootstepPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.SnapFootstepPacket data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       ser.read_type_e("footstep_data", data.getFootstepData());
       ser.read_type_e("footstep_order", data.getFootstepOrder());
       ser.read_type_e("flag", data.getFlag());

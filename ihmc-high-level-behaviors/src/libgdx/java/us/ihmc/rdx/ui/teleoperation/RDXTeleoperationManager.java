@@ -18,23 +18,29 @@ import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.footstepPlanning.LocomotionParameters;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.ImGuiStoredPropertySetDoubleWidget;
-import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
 import us.ihmc.rdx.ui.RDX3DPanelToolbarButton;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.affordances.*;
+import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
+import us.ihmc.rdx.ui.affordances.RDXArmControlMode;
+import us.ihmc.rdx.ui.affordances.RDXArmManager;
+import us.ihmc.rdx.ui.affordances.RDXInteractableFoot;
+import us.ihmc.rdx.ui.affordances.RDXInteractableHand;
+import us.ihmc.rdx.ui.affordances.RDXInteractableRobotLink;
+import us.ihmc.rdx.ui.affordances.RDXInteractableTools;
+import us.ihmc.rdx.ui.affordances.RDXRobotCollidable;
 import us.ihmc.rdx.ui.collidables.RDXRobotCollisionModel;
 import us.ihmc.rdx.ui.interactable.RDXHumanoidDoFsWidgets;
 import us.ihmc.rdx.ui.interactable.RDXPelvisHeightSlider;
 import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionManager;
-import us.ihmc.footstepPlanning.LocomotionParameters;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.ArmJointName;
@@ -87,7 +93,7 @@ public class RDXTeleoperationManager extends RDXPanel
    private final ImBoolean showGraphics = new ImBoolean(true);
    private final RDXTeleoperationParameters teleoperationParameters;
    private final RDXStoredPropertySetTuner teleoperationParametersTuner = new RDXStoredPropertySetTuner("Teleoperation Parameters");
-   private final RDXRobotLowLevelMessenger robotLowLevelMessenger;
+   private final RDXHardwareControlStateManager hardwareControlStateManager;
 
    private final RDXPelvisHeightSlider pelvisHeightSlider;
    private final RDXHumanoidDoFsWidgets dofsWidgets;
@@ -149,14 +155,14 @@ public class RDXTeleoperationManager extends RDXPanel
       teleoperationParameters = new RDXTeleoperationParameters(robotModel.getSimpleRobotName());
       teleoperationParameters.load();
 
-      syncedRobot = communicationHelper.newSyncedRobot();
+      syncedRobot = communicationHelper.newSyncedRobot(false);
 
-      robotLowLevelMessenger = new RDXRobotLowLevelMessenger(communicationHelper, teleoperationParameters);
+      hardwareControlStateManager = new RDXHardwareControlStateManager(communicationHelper);
 
       desiredRobot = new RDXDesiredRobot(robotModel);
       desiredRobot.setSceneLevels(RDXSceneLevel.VIRTUAL);
 
-      controllerStatusTracker = new ControllerStatusTracker(logToolsLogger, ros2Helper.getROS2NodeInterface(), robotModel.getSimpleRobotName());
+      controllerStatusTracker = new ControllerStatusTracker(logToolsLogger, ros2Helper.getROS2Node(), robotModel.getSimpleRobotName());
 
       locomotionManager = new RDXLocomotionManager(robotModel, communicationHelper, syncedRobot, controllerStatusTracker, this);
 
@@ -341,13 +347,13 @@ public class RDXTeleoperationManager extends RDXPanel
 
       RDX3DPanelToolbarButton standPrepButton = baseUI.getPrimary3DPanel().addToolbarButton();
       standPrepButton.loadAndSetIcon("icons/standPrep.png");
-      standPrepButton.setOnPressed(robotLowLevelMessenger::sendStandRequest);
+      standPrepButton.setOnPressed(hardwareControlStateManager::sendStandPrepRequest);
       standPrepButton.setTooltipText("Stand prep");
 
       RDX3DPanelToolbarButton freezeButton = baseUI.getPrimary3DPanel().addToolbarButton();
       freezeButton.loadAndSetIcon("icons/freeze.png");
       freezeButton.setTooltipText("Freeze");
-      freezeButton.setOnPressed(robotLowLevelMessenger::sendFreezeRequest);
+      freezeButton.setOnPressed(hardwareControlStateManager::sendFreezeRequest);
 
       RDX3DPanelToolbarButton abortToolbarButton = baseUI.getPrimary3DPanel().addToolbarButton();
       abortToolbarButton.loadAndSetIcon("icons/abort.png");
@@ -518,7 +524,7 @@ public class RDXTeleoperationManager extends RDXPanel
    {
       ImGuiTools.separatorText("Whole Body", ImGuiTools.getMediumFont());
 
-      robotLowLevelMessenger.renderImGuiWidgets();
+      hardwareControlStateManager.renderImGuiWidgets();
 
       pelvisHeightSlider.renderImGuiWidgets();
       dofsWidgets.renderImGuiWidgets();

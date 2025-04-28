@@ -3,7 +3,7 @@
 # It is defined by an origin and a normal
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 geometry_msgs/Point region_origin
 

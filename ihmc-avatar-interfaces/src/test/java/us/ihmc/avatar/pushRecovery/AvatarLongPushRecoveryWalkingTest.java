@@ -1,7 +1,5 @@
 package us.ihmc.avatar.pushRecovery;
 
-import static us.ihmc.robotics.Assert.assertTrue;
-
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.AfterEach;
@@ -36,6 +34,8 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class AvatarLongPushRecoveryWalkingTest implements MultiRobotTestInterface
 {
@@ -217,6 +217,7 @@ public abstract class AvatarLongPushRecoveryWalkingTest implements MultiRobotTes
          footsteps.getFootstepDataList().add().set(footstepData);
       }
 
+      footsteps.setOffsetFootstepsWithExecutionError(true);
       footsteps.setAreFootstepsAdjustable(true);
       simulationTestHelper.publishToController(footsteps);
    }

@@ -4,9 +4,8 @@ import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.HeightMapStateRequestMessage;
-import us.ihmc.ros2.ROS2PublisherBasics;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -18,7 +17,9 @@ import us.ihmc.perception.depthData.PointCloudData;
 import us.ihmc.perception.heightMap.HeightMapAPI;
 import us.ihmc.perception.heightMap.HeightMapInputData;
 import us.ihmc.perception.heightMap.HeightMapUpdater;
-import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 
@@ -35,7 +36,7 @@ public class OusterHeightMapUpdater
    private static final int initialPublishFrequency = 5;
 
    private final RealtimeROS2Node realtimeROS2Node;
-   private final ROS2PublisherBasics<HeightMapMessage> heightMapPublisher;
+   private final ROS2Publisher<HeightMapMessage> heightMapPublisher;
    private final AtomicBoolean updateThreadIsRunning = new AtomicBoolean(false);
    private final AtomicReference<WalkingStatus> currentWalkingStatus = new AtomicReference<>();
    private final HeightMapUpdater heightMapUpdater;
@@ -44,18 +45,19 @@ public class OusterHeightMapUpdater
 
    private final PausablePeriodicThread updateThread = new PausablePeriodicThread("OusterHeightMapUpdater", updateDTSeconds, this::update);
 
-   public OusterHeightMapUpdater(ROS2ControllerPublishSubscribeAPI ros2)
+   public OusterHeightMapUpdater(ROS2Node ros2Node, String simpleRobotName)
    {
-      realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "ouster_height_map_publisher");
+      realtimeROS2Node = new ROS2NodeBuilder().buildRealtime("ouster_height_map_publisher");
       heightMapPublisher = realtimeROS2Node.createPublisher(PerceptionAPI.HEIGHT_MAP_OUTPUT);
-      ros2.subscribeViaCallback(PerceptionAPI.HEIGHT_MAP_STATE_REQUEST, this::consumeStateRequestMessage);
-      ros2.subscribeToControllerViaCallback(HighLevelStateChangeStatusMessage.class, this::consumeStateChangedMessage);
-      ros2.subscribeToControllerViaCallback(WalkingStatusMessage.class, this::consumeWalkingStatusMessage);
+
+      ros2Node.createSubscription2(PerceptionAPI.HEIGHT_MAP_STATE_REQUEST, this::consumeStateRequestMessage);
+      ros2Node.createSubscription2(HumanoidControllerAPI.getTopic(HighLevelStateChangeStatusMessage.class, simpleRobotName), this::consumeStateChangedMessage);
+      ros2Node.createSubscription2(HumanoidControllerAPI.getTopic(WalkingStatusMessage.class, simpleRobotName), this::consumeWalkingStatusMessage);
 
       heightMapUpdater = new HeightMapUpdater();
       heightMapUpdater.attachHeightMapConsumer(heightMapPublisher::publish);
 
-      ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2);
+      ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Node);
       ros2PropertySetGroup.registerStoredPropertySet(HeightMapAPI.PARAMETERS, heightMapUpdater.getHeightMapParameters());
       ros2PropertySetGroup.registerStoredPropertySet(HeightMapAPI.FILTER_PARAMETERS, heightMapUpdater.getHeightMapFilterParameters());
 

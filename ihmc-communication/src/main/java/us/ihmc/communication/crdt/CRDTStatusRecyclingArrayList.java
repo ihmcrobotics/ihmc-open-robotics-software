@@ -29,7 +29,7 @@ public class CRDTStatusRecyclingArrayList<T> extends CRDTStatusMutableField<Recy
    }
 
    /**
-    * Used only for preallocating using {@link us.ihmc.robotics.lists.RecyclingArrayListTools#getUnsafe}.
+    * Used only for preallocating using {@link us.ihmc.commons.lists.RecyclingArrayListTools#getUnsafe}.
     */
    public RecyclingArrayList<T> getValueUnsafe()
    {

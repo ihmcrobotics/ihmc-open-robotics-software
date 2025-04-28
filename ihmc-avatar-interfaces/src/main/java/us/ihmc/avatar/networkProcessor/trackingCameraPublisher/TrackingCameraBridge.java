@@ -1,17 +1,10 @@
 package us.ihmc.avatar.networkProcessor.trackingCameraPublisher;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
-
 import controller_msgs.msg.dds.RobotConfigurationData;
-import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import geometry_msgs.Point;
 import geometry_msgs.Pose;
 import geometry_msgs.Vector3;
+import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PerceptionAPI;
@@ -23,11 +16,18 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelFactory;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
-import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.RosNavMsgsOdometrySubscriber;
+
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 public class TrackingCameraBridge
 {
@@ -52,12 +52,12 @@ public class TrackingCameraBridge
 
    private final Consumer<StampedPosePacket> stampedPosePacketPublisher;
 
-   public TrackingCameraBridge(FullRobotModelFactory modelFactory, ROS2NodeInterface ros2Node)
+   public TrackingCameraBridge(FullRobotModelFactory modelFactory, ROS2Node ros2Node)
    {
       this(modelFactory.getRobotDefinition().getName(), modelFactory.createFullRobotModel(), ros2Node);
    }
 
-   public TrackingCameraBridge(String robotName, FullRobotModel fullRobotModel, ROS2NodeInterface ros2Node)
+   public TrackingCameraBridge(String robotName, FullRobotModel fullRobotModel, ROS2Node ros2Node)
    {
       this.fullRobotModel = fullRobotModel;
 

@@ -15,7 +15,7 @@ public class SCSListenerPacketPubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "01b80c91854fa3d31a11becfd0b0499e16631e413b5501e0e21a41ed339b037b";
+   		return "0b2140bb3d4f70fb70ee747bfbcfa063dc940fc6f00d4c51592186b6d377da70";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class SCSListenerPacketPubSubType implements us.ihmc.pubsub.TopicDataType
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -69,7 +69,7 @@ public class SCSListenerPacketPubSubType implements us.ihmc.pubsub.TopicDataType
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -81,7 +81,7 @@ public class SCSListenerPacketPubSubType implements us.ihmc.pubsub.TopicDataType
 
    public static void write(controller_msgs.msg.dds.SCSListenerPacket data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_7(data.getIsStopped());
 
@@ -89,7 +89,7 @@ public class SCSListenerPacketPubSubType implements us.ihmc.pubsub.TopicDataType
 
    public static void read(controller_msgs.msg.dds.SCSListenerPacket data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setIsStopped(cdr.read_type_7());
       	
@@ -99,14 +99,14 @@ public class SCSListenerPacketPubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final void serialize(controller_msgs.msg.dds.SCSListenerPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_7("is_stopped", data.getIsStopped());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.SCSListenerPacket data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setIsStopped(ser.read_type_7("is_stopped"));
    }
 

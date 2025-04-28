@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateContro
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.naturalPosture.NaturalPostureManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
@@ -44,7 +45,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
-import us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStabilityMarginRegionCalculator;
+import us.ihmc.commonWalkingControlModules.staticEquilibrium.StabilityMarginRegionCalculator;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -58,8 +59,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
-import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -537,6 +536,9 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       }
 
       controllerToolbox.initialize();
+      // This must be done before calling managerFactory.initializeManagers(), becuase the pelvis orientation manager relies on thew alking trajectory path.
+      initializeWalkingTrajectoryPath();
+
       managerFactory.initializeManagers();
 
       commandInputManager.clearAllCommands();
@@ -563,7 +565,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         footDesiredCoPs.get(robotSide).setToZero(feet.get(robotSide).getSoleFrame());
+         footDesiredCoPs.get(robotSide).setToZero(feet.get(robotSide).getContactFrame());
          controllerToolbox.setDesiredCenterOfPressure(feet.get(robotSide), footDesiredCoPs.get(robotSide));
       }
 
@@ -581,12 +583,17 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       firstTick = true;
    }
 
+   private void initializeWalkingTrajectoryPath()
+   {
+      controllerToolbox.getWalkingTrajectoryPath().clearFootsteps();
+      controllerToolbox.getWalkingTrajectoryPath().reset();
+      controllerToolbox.getWalkingTrajectoryPath().initializeDoubleSupport();
+      controllerToolbox.getWalkingTrajectoryPath().updateTrajectory(FootControlModule.ConstraintType.FULL, FootControlModule.ConstraintType.FULL);
+   }
+
    private void initializeManagers()
    {
       balanceManager.disablePelvisXYControl();
-
-      double stepTime = walkingMessageHandler.getDefaultStepTime();
-      pelvisOrientationManager.setTrajectoryTime(stepTime);
 
       for (int managerIdx = 0; managerIdx < bodyManagers.size(); managerIdx++)
       {
@@ -700,9 +707,9 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       {
          controllerCoreOutput.getDesiredCenterOfPressure(footDesiredCoPs.get(robotSide), feet.get(robotSide).getRigidBody());
          // This happens on the first tick when the controller core has not yet run to update the center of pressure.
-         if (footDesiredCoPs.get(robotSide).getReferenceFrame() != feet.get(robotSide).getSoleFrame())
+         if (footDesiredCoPs.get(robotSide).getReferenceFrame() != feet.get(robotSide).getContactFrame())
          {
-            footDesiredCoPs.get(robotSide).setToZero(feet.get(robotSide).getSoleFrame());
+            footDesiredCoPs.get(robotSide).setToZero(feet.get(robotSide).getContactFrame());
          }
          controllerToolbox.setDesiredCenterOfPressure(feet.get(robotSide), footDesiredCoPs.get(robotSide));
          controllerToolbox.getFootContactState(robotSide).pollContactHasChangedNotification();
@@ -787,7 +794,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       }
 
       this.isUpperBodyLoadBearing.set(isUpperBodyLoadBearing);
-      CenterOfMassStabilityMarginRegionCalculator multiContactRegionCalculator = controllerToolbox.getMultiContactRegionCalculator();
+      StabilityMarginRegionCalculator multiContactRegionCalculator = controllerToolbox.getMultiContactStabilityRegionCalculator();
       boolean useMultiContactStabilityRegion = false;
 
       if (isUpperBodyLoadBearing)
@@ -801,7 +808,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          multiContactRegionCalculator.clear();
       }
 
-      FrameConvexPolygon2DReadOnly multiContactStabilityRegion = useMultiContactStabilityRegion ? multiContactRegionCalculator.getFeasibleCoMRegion() : zeroRegion;
+      FrameConvexPolygon2DReadOnly multiContactStabilityRegion = useMultiContactStabilityRegion ? multiContactRegionCalculator.getFeasibleRegion() : zeroRegion;
 
       pelvisOrientationManager.compute();
       if (naturalPostureManager != null && naturalPostureManager.isEnabled())

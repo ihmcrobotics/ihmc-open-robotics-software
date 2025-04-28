@@ -5,12 +5,11 @@ import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
-import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.perception.camera.CameraIntrinsics;
-import us.ihmc.perception.imageMessage.CompressionType;
 import us.ihmc.perception.imageMessage.PixelFormat;
 
 import javax.annotation.Nullable;
@@ -49,14 +48,17 @@ public class RawImage
     */
    @Nullable
    private Mat cpuImageMat = null;
+   private final Object cpuImageMutex = new Object();
    @Nullable
    private GpuMat gpuImageMat = null;
+   private final Object gpuImageMutex = new Object();
    private final PixelFormat pixelFormat;
    private final CameraIntrinsics cameraIntrinsics;
+   private final CameraModel cameraModel;
    private final float depthDiscretization;
    private final long sequenceNumber;
    private final Instant acquisitionTime;
-   private final FixedFramePose3DBasics sensorPose;
+   private final RigidBodyTransformReadOnly sensorToWorldTransform;
 
    private final AtomicInteger numberOfReferences = new AtomicInteger(1);
 
@@ -64,7 +66,8 @@ public class RawImage
                    @Nullable GpuMat gpuImageMat,
                    PixelFormat pixelFormat,
                    CameraIntrinsics cameraIntrinsics,
-                   FixedFramePose3DBasics sensorPose,
+                   CameraModel cameraModel,
+                   RigidBodyTransformReadOnly sensorToWorldTransform,
                    Instant acquisitionTime,
                    long sequenceNumber,
                    float depthDiscretization)
@@ -75,8 +78,9 @@ public class RawImage
       this.cpuImageMat = cpuImageMat;
       this.gpuImageMat = gpuImageMat;
       this.pixelFormat = pixelFormat;
-      this.cameraIntrinsics = cameraIntrinsics;
-      this.sensorPose = sensorPose;
+      this.cameraIntrinsics = new CameraIntrinsics(cameraIntrinsics);
+      this.cameraModel = cameraModel;
+      this.sensorToWorldTransform = new RigidBodyTransform(sensorToWorldTransform);
       this.acquisitionTime = acquisitionTime;
       this.sequenceNumber = sequenceNumber;
       this.depthDiscretization = depthDiscretization;
@@ -90,7 +94,8 @@ public class RawImage
          this.gpuImageMat = other.gpuImageMat.clone();
       this.pixelFormat = other.pixelFormat;
       this.cameraIntrinsics = other.cameraIntrinsics;
-      this.sensorPose = other.sensorPose;
+      this.cameraModel = other.cameraModel;
+      this.sensorToWorldTransform = other.sensorToWorldTransform;
       this.acquisitionTime = other.acquisitionTime;
       this.sequenceNumber = other.sequenceNumber;
       this.depthDiscretization = other.depthDiscretization;
@@ -98,70 +103,143 @@ public class RawImage
 
    public static RawImage createWithBGRImage(Pointer matPointer,
                                              CameraIntrinsics cameraIntrinsics,
-                                             FixedFramePose3DBasics sensorPose,
+                                             RigidBodyTransformReadOnly sensorTransformToWorld,
+                                             Instant acquisitionTime,
+                                             long sequenceNumber)
+   {
+      return createWithBGRImage(matPointer, cameraIntrinsics, CameraModel.PINHOLE, sensorTransformToWorld, acquisitionTime, sequenceNumber);
+   }
+
+   public static RawImage createWithBGRImage(Pointer matPointer,
+                                             CameraIntrinsics cameraIntrinsics,
+                                             CameraModel cameraModel,
+                                             RigidBodyTransformReadOnly sensorTransformToWorld,
                                              Instant acquisitionTime,
                                              long sequenceNumber)
    {
       if (matPointer instanceof Mat cpuImage)
-         return new RawImage(cpuImage, null, PixelFormat.BGR8, cameraIntrinsics, sensorPose, acquisitionTime, sequenceNumber, -1.0f);
+         return new RawImage(cpuImage, null, PixelFormat.BGR8, cameraIntrinsics, cameraModel, sensorTransformToWorld, acquisitionTime, sequenceNumber, -1.0f);
       else if (matPointer instanceof GpuMat gpuImage)
-         return new RawImage(null, gpuImage, PixelFormat.BGR8, cameraIntrinsics, sensorPose, acquisitionTime, sequenceNumber, -1.0f);
+         return new RawImage(null, gpuImage, PixelFormat.BGR8, cameraIntrinsics, cameraModel, sensorTransformToWorld, acquisitionTime, sequenceNumber, -1.0f);
 
       throw new IllegalArgumentException("The pointer passed in was neither a Mat nor GpuMat");
    }
 
    public static RawImage createWith16BitDepth(Pointer matPointer,
                                                CameraIntrinsics cameraIntrinsics,
-                                               FixedFramePose3DBasics sensorPose,
+                                               RigidBodyTransformReadOnly sensorTransformToWorld,
+                                               Instant acquisitionTime,
+                                               long sequenceNumber,
+                                               float depthDiscretization)
+   {
+      return createWith16BitDepth(matPointer,
+                                  cameraIntrinsics,
+                                  CameraModel.PINHOLE,
+                                  sensorTransformToWorld,
+                                  acquisitionTime,
+                                  sequenceNumber,
+                                  depthDiscretization);
+   }
+
+   public static RawImage createWith16BitDepth(Pointer matPointer,
+                                               CameraIntrinsics cameraIntrinsics,
+                                               CameraModel cameraModel,
+                                               RigidBodyTransformReadOnly sensorTransformToWorld,
                                                Instant acquisitionTime,
                                                long sequenceNumber,
                                                float depthDiscretization)
    {
       if (matPointer instanceof Mat cpuImage)
-         return new RawImage(cpuImage, null, PixelFormat.GRAY16, cameraIntrinsics, sensorPose, acquisitionTime, sequenceNumber, depthDiscretization);
+         return new RawImage(cpuImage,
+                             null,
+                             PixelFormat.GRAY16,
+                             cameraIntrinsics,
+                             cameraModel,
+                             sensorTransformToWorld,
+                             acquisitionTime,
+                             sequenceNumber,
+                             depthDiscretization);
       else if (matPointer instanceof GpuMat gpuImage)
-         return new RawImage(null, gpuImage, PixelFormat.GRAY16, cameraIntrinsics, sensorPose, acquisitionTime, sequenceNumber, depthDiscretization);
+         return new RawImage(null,
+                             gpuImage,
+                             PixelFormat.GRAY16,
+                             cameraIntrinsics,
+                             cameraModel,
+                             sensorTransformToWorld,
+                             acquisitionTime,
+                             sequenceNumber,
+                             depthDiscretization);
 
       throw new IllegalArgumentException("The pointer passed in was neither a Mat nor GpuMat");
    }
 
    /**
-    * Provides a new {@link RawImage} with the same intrinsics and metadata as this one, but with a different image.
+    * Provides a new {@link RawImage} with the same pixel format, intrinsics, and metadata as this one, but with a different image.
     * Useful when applying changes to Mats and wishing to keep the same intrinsics & metadata in the {@link RawImage}.
+    *
     * @param newCpuImageMat new CPU image mat to replace the current image. Must have the same dimensions.
     * @return A new {@link RawImage} with the same intrinsics & metadata, but with a different image.
     */
    public RawImage replaceImage(Mat newCpuImageMat)
+   {
+      return replaceImage(newCpuImageMat, this.pixelFormat);
+   }
+
+   /**
+    * Provides a new {@link RawImage} with the same intrinsics and metadata as this one, but with a different image.
+    * Useful when applying changes to Mats and wishing to keep the same intrinsics & metadata in the {@link RawImage}.
+    *
+    * @param newCpuImageMat new CPU image mat to replace the current image. Must have the same dimensions.
+    * @param newPixelFormat the PixelFormat of the new image.
+    * @return A new {@link RawImage} with the same intrinsics & metadata, but with a different image.
+    */
+   public RawImage replaceImage(Mat newCpuImageMat, PixelFormat newPixelFormat)
    {
       if (getWidth() != newCpuImageMat.cols() || getHeight() != newCpuImageMat.rows())
          throw new IllegalArgumentException("New image must have the same dimensions as the current image");
 
       return new RawImage(newCpuImageMat,
                           null,
-                          this.pixelFormat,
+                          newPixelFormat,
                           this.cameraIntrinsics,
-                          this.sensorPose,
+                          this.cameraModel,
+                          this.sensorToWorldTransform,
                           this.acquisitionTime,
                           this.sequenceNumber,
                           this.depthDiscretization);
    }
 
    /**
-    * Provides a new {@link RawImage} with the same intrinsics and metadata as this one, but with a different image.
+    * Provides a new {@link RawImage} with the same pixel format, intrinsics, and metadata as this one, but with a different image.
     * Useful when applying changes to Mats and wishing to keep the same intrinsics & metadata in the {@link RawImage}.
+    *
     * @param newGpuImageMat new GPU image mat to replace the current image. Must have the same dimensions.
     * @return A new {@link RawImage} with the same intrinsics & metadata, but with a different image.
     */
    public RawImage replaceImage(GpuMat newGpuImageMat)
+   {
+      return replaceImage(newGpuImageMat, this.pixelFormat);
+   }
+
+   /**
+    * Provides a new {@link RawImage} with the same intrinsics and metadata as this one, but with a different image.
+    * Useful when applying changes to Mats and wishing to keep the same intrinsics & metadata in the {@link RawImage}.
+    *
+    * @param newGpuImageMat new GPU image mat to replace the current image. Must have the same dimensions.
+    * @param newPixelFormat the PixelFormat of the new image.
+    * @return A new {@link RawImage} with the same intrinsics & metadata, but with a different image.
+    */
+   public RawImage replaceImage(GpuMat newGpuImageMat, PixelFormat newPixelFormat)
    {
       if (getWidth() != newGpuImageMat.cols() || getHeight() != newGpuImageMat.rows())
          throw new IllegalArgumentException("New image must have the same dimensions as the current image");
 
       return new RawImage(null,
                           newGpuImageMat,
-                          this.pixelFormat,
+                          newPixelFormat,
                           this.cameraIntrinsics,
-                          this.sensorPose,
+                          this.cameraModel,
+                          this.sensorToWorldTransform,
                           this.acquisitionTime,
                           this.sequenceNumber,
                           this.depthDiscretization);
@@ -179,22 +257,12 @@ public class RawImage
 
    public int getWidth()
    {
-      if (hasCpuImage())
-         return cpuImageMat.cols();
-      else if (hasGpuImage())
-         return gpuImageMat.cols();
-
-      throw new NullPointerException("Neither CPU nor GPU Mats were initialized");
+      return cameraIntrinsics.getWidth();
    }
 
    public int getHeight()
    {
-      if (hasCpuImage())
-         return cpuImageMat.rows();
-      else if (hasGpuImage())
-         return gpuImageMat.rows();
-
-      throw new NullPointerException("Neither CPU nor GPU Mats were initialized");
+      return cameraIntrinsics.getHeight();
    }
 
    public float getDepthDiscretization()
@@ -202,31 +270,96 @@ public class RawImage
       return depthDiscretization;
    }
 
+   /**
+    * <p>
+    * Get the image's {@link Mat}.
+    * </p>
+    * <p>
+    * If this image only has a {@link GpuMat}, a new {@link Mat} will be created
+    * and the image data will be downloaded from the device (GPU).
+    * </p>
+    *
+    * @return The {@link Mat} containing the image data.
+    */
    public Mat getCpuImageMat()
    {
-      if (cpuImageMat == null && !gpuImageMat.isNull())
+      synchronized (cpuImageMutex)
       {
-         cpuImageMat = new Mat(gpuImageMat.size(), gpuImageMat.type());
-         gpuImageMat.download(cpuImageMat);
+         if (cpuImageMat == null && !gpuImageMat.isNull())
+         {
+            cpuImageMat = new Mat(gpuImageMat.size(), gpuImageMat.type());
+            gpuImageMat.download(cpuImageMat);
+         }
       }
 
       return cpuImageMat;
    }
 
+   /**
+    * <p>
+    * Get the image's {@link GpuMat}.
+    * </p>
+    * <p>
+    * If this image only has a {@link Mat}, a new {@link GpuMat} will be created
+    * and the image data will be uploaded to the device (GPU).
+    * </p>
+    *
+    * @return The {@link GpuMat} containing the image data.
+    */
    public GpuMat getGpuImageMat()
    {
-      if (gpuImageMat == null)
+      synchronized (gpuImageMutex)
       {
-         gpuImageMat = new GpuMat(cpuImageMat.size(), cpuImageMat.type());
-         gpuImageMat.upload(cpuImageMat);
+         if (gpuImageMat == null)
+         {
+            gpuImageMat = new GpuMat(cpuImageMat.size(), cpuImageMat.type());
+            gpuImageMat.upload(cpuImageMat);
+         }
       }
 
       return gpuImageMat;
    }
 
+   /**
+    * <p>
+    * Get the pointer to the image data.
+    * </p>
+    * <p>
+    * Same as calling {@code getCpuImageMat().data()}. As such, if this image does not have a {@link Mat},
+    * a new {@link Mat} will be created and the image data will be downloaded from the device (GPU).
+    * </p>
+    *
+    * @return The pointer to the image data.
+    */
+   public BytePointer getDataPointer()
+   {
+      return getCpuImageMat().data();
+   }
+
+   /**
+    * <p>
+    * Get the CUDA pointer to the image data.
+    * </p>
+    * <p>
+    * Same as calling {@code getGpuImageMat().data()}. As such, if this image does not have a {@link GpuMat},
+    * a new {@link GpuMat} will be created and the image data will be uploaded to the device (GPU).
+    * </p>
+    *
+    * @return The CUDA pointer to the image data.
+    */
+   public BytePointer getCUDADataPointer()
+   {
+      return getGpuImageMat().data();
+   }
+
    public CameraIntrinsics getIntrinsicsCopy()
    {
       return new CameraIntrinsics(cameraIntrinsics);
+   }
+
+   public CameraModel getCameraModel()
+   {
+      return cameraModel;
    }
 
    public PixelFormat getPixelFormat()
@@ -264,19 +397,19 @@ public class RawImage
       return (float) cameraIntrinsics.getCy();
    }
 
-   public FixedFramePose3DBasics getPose()
+   public RigidBodyTransformReadOnly getTransformToWorld()
    {
-      return sensorPose;
+      return sensorToWorldTransform;
    }
 
-   public FixedFramePoint3DBasics getPosition()
+   public Tuple3DReadOnly getTranslation()
    {
-      return sensorPose.getPosition();
+      return sensorToWorldTransform.getTranslation();
    }
 
-   public FixedFrameQuaternionBasics getOrientation()
+   public Orientation3DReadOnly getRotation()
    {
-      return sensorPose.getOrientation();
+      return sensorToWorldTransform.getRotation();
    }
 
    public boolean hasCpuImage()
@@ -311,36 +444,6 @@ public class RawImage
    {
       if (numberOfReferences.decrementAndGet() <= 0)
          destroy();
-   }
-
-   /**
-    * Packs the {@link ImageMessage} with the {@link RawImage} metadata,
-    * EXCEPT:
-    * <ul>
-    * <li> the CameraModel, </li>
-    * <li> the CompressionType, </li>
-    * <li> the ouster beam altitude angles, </li>
-    * <li> the ouster beam azimuth angles, and </li>
-    * <li> the compressed data </li>
-    * </ul>
-    * To pack everything, use this instead:
-    * {@link us.ihmc.perception.tools.PerceptionMessageTools#packImageMessage(RawImage, BytePointer, CompressionType, CameraModel, ImageMessage)}
-    * @param messageToPack The message to pack
-    */
-   public void packImageMessageMetaData(ImageMessage messageToPack)
-   {
-      messageToPack.setPixelFormat(getPixelFormat().toByte());
-      messageToPack.setImageWidth(getWidth());
-      messageToPack.setImageHeight(getHeight());
-      messageToPack.setFocalLengthXPixels(getFocalLengthX());
-      messageToPack.setFocalLengthYPixels(getFocalLengthY());
-      messageToPack.setPrincipalPointXPixels(getPrincipalPointX());
-      messageToPack.setPrincipalPointYPixels(getPrincipalPointY());
-      messageToPack.setDepthDiscretization(getDepthDiscretization());
-      messageToPack.setSequenceNumber(getSequenceNumber());
-      MessageTools.toMessage(getAcquisitionTime(), messageToPack.getAcquisitionTime());
-      messageToPack.getPosition().set(getPosition());
-      messageToPack.getOrientation().set(getOrientation());
    }
 
    private void destroy()

@@ -1,8 +1,10 @@
 package us.ihmc.communication.property;
 
-import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
+import ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessage;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.tools.property.StoredPropertySetBasics;
-import us.ihmc.tools.thread.Throttler;
+import us.ihmc.commons.thread.Throttler;
 
 /**
  * ROS 2 enabled, synced, interprocess stored property set. It allows external process
@@ -13,21 +15,22 @@ public class ROS2StoredPropertySet<T extends StoredPropertySetBasics>
 {
    public static final double STATUS_PERIOD = 1.0;
 
-   private final ROS2PublishSubscribeAPI ros2PublishSubscribeAPI;
+   private final ROS2Node ros2Node;
    private final StoredPropertySetROS2TopicPair topicPair;
    private final T storedPropertySet;
    private final StoredPropertySetROS2Input commandInput;
    private final Throttler parameterOutputThrottler = new Throttler();
+   private final ROS2Publisher<PrimitiveDataVectorMessage> publisher;
 
-   public ROS2StoredPropertySet(ROS2PublishSubscribeAPI ros2PublishSubscribeAPI,
+   public ROS2StoredPropertySet(ROS2Node ros2Node,
                                 StoredPropertySetROS2TopicPair topicPair,
                                 T storedPropertySet)
    {
-      this.ros2PublishSubscribeAPI = ros2PublishSubscribeAPI;
+      this.ros2Node = ros2Node;
       this.topicPair = topicPair;
       this.storedPropertySet = storedPropertySet;
-      commandInput = new StoredPropertySetROS2Input(ros2PublishSubscribeAPI, topicPair.getCommandTopic(), storedPropertySet);
-      ros2PublishSubscribeAPI.createPublisher(topicPair.getStatusTopic());
+      commandInput = new StoredPropertySetROS2Input(ros2Node, topicPair.getCommandTopic(), storedPropertySet);
+      publisher = ros2Node.createPublisher(topicPair.getStatusTopic());
    }
 
    public void updateAndPublishThrottledStatus()
@@ -62,7 +65,7 @@ public class ROS2StoredPropertySet<T extends StoredPropertySetBasics>
 
    public void publishStatus()
    {
-      ros2PublishSubscribeAPI.publish(topicPair.getStatusTopic(), StoredPropertySetMessageTools.newMessage(storedPropertySet));
+      publisher.publish(StoredPropertySetMessageTools.newMessage(storedPropertySet));
    }
 
    public StoredPropertySetROS2Input getCommandInput()

@@ -4,15 +4,14 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.thread.Notification;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2IOTopicQualifier;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
 
 public class ROS2SceneGraphTest
 {
@@ -35,7 +34,7 @@ public class ROS2SceneGraphTest
          modificationQueue.accept(new SceneGraphNodeAddition(child1child0, child1));
       });
 
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.INTRAPROCESS, "scene_graph_test");
+      ROS2Node ros2Node = new ROS2NodeBuilder().build("scene_graph_test");
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
       SceneGraph subscriptionSceneGraph = new SceneGraph();

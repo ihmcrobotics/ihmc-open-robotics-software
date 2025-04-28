@@ -31,6 +31,11 @@ public class FootstepSnapperTest
       FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
       TestSnapper testSnapper = new TestSnapper(environmentHandler);
       PlanarRegionsList planarRegionsList = PlanarRegionsList.flatGround(1.0);
+      // Applying this transform is necessary to make the height map get populated. Otherwise, the height map is left with unoccupied cells, as it's at zero
+      // height which is equivalent to the groun dheight.
+      RigidBodyTransform transform = new RigidBodyTransform();
+      transform.appendTranslation(0.0, 0.0, 0.10);
+      planarRegionsList.getPlanarRegion(0).applyTransform(transform);
       HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList));
       environmentHandler.setHeightMap(heightMapData);
 
@@ -42,11 +47,16 @@ public class FootstepSnapperTest
             {
                RobotSide robotSide = RobotSide.generateRandomRobotSide(random);
 
-               testSnapper.snapFootstep(new DiscreteFootstep(xIndices[i], yIndices[j], yawIndices[k], robotSide));
+               // We have to pull the footstep out to use the same footstep object. The caching isn't done in a hash map anymore. Instead, the snap transform
+               // is populated in the footstep itself. This is done to avoid computation of having to retrieve the transform from a hash map with many entries.
+               // However, it means that the snaps aren't cached via a hashmap, but rather the footstep itself, so the same step object must be reused.
+               DiscreteFootstep discreteFootstep = new DiscreteFootstep(xIndices[i], yIndices[j], yawIndices[k], robotSide);
+
+               testSnapper.snapFootstep(discreteFootstep);
                assertTrue(testSnapper.dirtyBit);
 
                testSnapper.dirtyBit = false;
-               testSnapper.snapFootstep(new DiscreteFootstep(xIndices[i], yIndices[j], yawIndices[k], robotSide));
+               testSnapper.snapFootstep(discreteFootstep);
                assertFalse(testSnapper.dirtyBit);
             }
          }

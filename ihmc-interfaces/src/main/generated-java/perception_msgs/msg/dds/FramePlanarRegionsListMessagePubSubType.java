@@ -15,7 +15,7 @@ public class FramePlanarRegionsListMessagePubSubType implements us.ihmc.pubsub.T
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "2d5436a211b398c63f08cb5c52aba1e39a84b4b88f2ea527d822be9c452d942e";
+   		return "5a1f2bd26b49bb12d179262a2487aa73487b331d22263331d22eb85cfdee1c2b";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class FramePlanarRegionsListMessagePubSubType implements us.ihmc.pubsub.T
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -73,7 +73,7 @@ public class FramePlanarRegionsListMessagePubSubType implements us.ihmc.pubsub.T
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getSensorPosition(), current_alignment);
@@ -88,7 +88,7 @@ public class FramePlanarRegionsListMessagePubSubType implements us.ihmc.pubsub.T
 
    public static void write(perception_msgs.msg.dds.FramePlanarRegionsListMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       geometry_msgs.msg.dds.PointPubSubType.write(data.getSensorPosition(), cdr);
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getSensorOrientation(), cdr);
@@ -97,7 +97,7 @@ public class FramePlanarRegionsListMessagePubSubType implements us.ihmc.pubsub.T
 
    public static void read(perception_msgs.msg.dds.FramePlanarRegionsListMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       geometry_msgs.msg.dds.PointPubSubType.read(data.getSensorPosition(), cdr);	
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getSensorOrientation(), cdr);	
@@ -108,7 +108,7 @@ public class FramePlanarRegionsListMessagePubSubType implements us.ihmc.pubsub.T
    @Override
    public final void serialize(perception_msgs.msg.dds.FramePlanarRegionsListMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_a("sensor_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getSensorPosition());
 
       ser.write_type_a("sensor_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getSensorOrientation());
@@ -120,7 +120,7 @@ public class FramePlanarRegionsListMessagePubSubType implements us.ihmc.pubsub.T
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.FramePlanarRegionsListMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       ser.read_type_a("sensor_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getSensorPosition());
 
       ser.read_type_a("sensor_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getSensorOrientation());

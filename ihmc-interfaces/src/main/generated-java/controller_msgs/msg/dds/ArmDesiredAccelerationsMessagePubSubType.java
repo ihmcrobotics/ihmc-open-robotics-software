@@ -15,7 +15,7 @@ public class ArmDesiredAccelerationsMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "592d45b54ba2badd9268fb234991f0e34fdb59adf811c69958f3d872e7a6ec4d";
+   		return "6d65536695b99b086450cd960988b1a16f16c082818565cc0eee25d8eb313066";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class ArmDesiredAccelerationsMessagePubSubType implements us.ihmc.pubsub.
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -71,7 +71,7 @@ public class ArmDesiredAccelerationsMessagePubSubType implements us.ihmc.pubsub.
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -85,7 +85,7 @@ public class ArmDesiredAccelerationsMessagePubSubType implements us.ihmc.pubsub.
 
    public static void write(controller_msgs.msg.dds.ArmDesiredAccelerationsMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_9(data.getRobotSide());
 
@@ -94,7 +94,7 @@ public class ArmDesiredAccelerationsMessagePubSubType implements us.ihmc.pubsub.
 
    public static void read(controller_msgs.msg.dds.ArmDesiredAccelerationsMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setRobotSide(cdr.read_type_9());
       	
@@ -105,7 +105,7 @@ public class ArmDesiredAccelerationsMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final void serialize(controller_msgs.msg.dds.ArmDesiredAccelerationsMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_9("robot_side", data.getRobotSide());
       ser.write_type_a("desired_accelerations", new controller_msgs.msg.dds.DesiredAccelerationsMessagePubSubType(), data.getDesiredAccelerations());
 
@@ -114,7 +114,7 @@ public class ArmDesiredAccelerationsMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.ArmDesiredAccelerationsMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setRobotSide(ser.read_type_9("robot_side"));
       ser.read_type_a("desired_accelerations", new controller_msgs.msg.dds.DesiredAccelerationsMessagePubSubType(), data.getDesiredAccelerations());
 

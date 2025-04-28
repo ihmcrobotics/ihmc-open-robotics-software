@@ -33,7 +33,7 @@ import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.time.ThreadTimer;
-import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
@@ -64,7 +64,7 @@ public class IKStreamingRTPluginFactory
    }
 
    public IKStreamingRTThread createRTThread(String robotName,
-                                             ROS2NodeInterface ros2Node,
+                                             ROS2Node ros2Node,
                                              CommandInputManager walkingInputManager,
                                              StatusMessageOutputManager walkingOutputManager,
                                              FullHumanoidRobotModelFactory fullRobotModelFactory,
@@ -193,7 +193,7 @@ public class IKStreamingRTPluginFactory
       private final HumanoidRobotContextData humanoidRobotContextData;
 
       public IKStreamingRTThread(String robotName,
-                                 ROS2NodeInterface ros2Node,
+                                 ROS2Node ros2Node,
                                  CommandInputManager walkingInputManager,
                                  StatusMessageOutputManager walkingOutputManager,
                                  FullHumanoidRobotModelFactory fullRobotModelFactory,
@@ -224,6 +224,13 @@ public class IKStreamingRTPluginFactory
                                                                                               fullRobotModelFactory,
                                                                                               yoGraphicsListRegistry,
                                                                                               registry);
+
+         List<String> inactiveJoints = parameters.getInactiveJoints();
+         for (int i = 0; i < inactiveJoints.size(); i++)
+         {
+            kinematicsStreamingToolboxController.getActiveOptimizationSettings().deactivateJoint(desiredFullRobotModel.getOneDoFJointByName(inactiveJoints.get(i)));
+         }
+
          kinematicsStreamingToolboxController.setCollisionModel(collisionModel);
 
          MessageUnpacker<WholeBodyStreamingMessage> wholeBodyStreamingMessageUnpacker = MessageUnpackingTools.createWholeBodyStreamingMessageUnpacker();

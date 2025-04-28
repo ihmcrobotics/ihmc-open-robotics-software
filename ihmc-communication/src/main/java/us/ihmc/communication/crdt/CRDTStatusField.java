@@ -4,9 +4,9 @@ import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 
 /**
- * A status field does not freeze (is unconfirmed).
+ * A status field is not timestamped, it's one way.
  * It is for data that's continuously computed as a status
- * for an observer but not critical that it is recieved on
+ * for an observer but not critical that it is received on
  * the other side. Typically, the robot will compute statuses
  * for monitoring and visualization purposes in the UI.
  */
@@ -26,15 +26,24 @@ public class CRDTStatusField
 
    protected void checkActorCanModifyAndMarkHasStatus()
    {
+      checkActorCanModify();
+      markHasStatus();
+   }
+
+   protected void checkActorCanModify()
+   {
       if (isModificationDisallowed())
          throw new RuntimeException("%s is not allowed to modify this value.".formatted(crdtInfo.getActorDesignation()));
-
-      hasStatus.set();
    }
 
    protected boolean isModificationDisallowed()
    {
       return sideThatCanModify != crdtInfo.getActorDesignation();
+   }
+
+   protected void markHasStatus()
+   {
+      hasStatus.set();
    }
 
    public boolean pollHasStatus()

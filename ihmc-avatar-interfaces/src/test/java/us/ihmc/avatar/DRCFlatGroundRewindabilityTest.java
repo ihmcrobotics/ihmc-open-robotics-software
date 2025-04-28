@@ -1,7 +1,5 @@
 package us.ihmc.avatar;
 
-import static us.ihmc.robotics.Assert.fail;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,12 +21,14 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestInterface
 {
    private SimulationTestingParameters simulationTestingParameters;
 
    @BeforeEach
-   public void setUp() throws Exception
+   public void setUp()
    {
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
       simulationTestingParameters.setRunMultiThreaded(false);

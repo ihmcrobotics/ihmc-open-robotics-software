@@ -99,11 +99,6 @@ public class RDXMultiBodyGraphic extends RDXVisualizer
       }
    }
 
-   public void destroy()
-   {
-
-   }
-
    public void setOpacity(float opacity)
    {
       for (RDXRigidBody rigidBody : multiBody.subtreeIterable())

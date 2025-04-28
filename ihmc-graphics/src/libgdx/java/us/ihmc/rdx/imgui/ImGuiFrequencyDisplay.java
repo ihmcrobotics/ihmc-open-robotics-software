@@ -1,6 +1,6 @@
 package us.ihmc.rdx.imgui;
 
-import us.ihmc.tools.time.FrequencyCalculator;
+import us.ihmc.commons.time.FrequencyCalculator;
 
 /**
  * Call {@link #ping} at some frequency and optionally render a size 100 window

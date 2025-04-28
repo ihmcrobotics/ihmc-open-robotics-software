@@ -12,7 +12,6 @@ import imgui.type.ImString;
 import us.ihmc.behaviors.behaviorTree.*;
 import us.ihmc.behaviors.behaviorTree.log.BehaviorTreeNodeMessageLogger.LogMessage;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiExpandCollapseRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -27,12 +26,21 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The base class for an RDX node, which is the type that solely exists
+ * in the UIs and is used by an operator to interact with the behavior system.
+ *
+ * @param <S> The type of this node's state instance.
+ * @param <D> The type of this node's definition instance.
+ */
 public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
                                  D extends BehaviorTreeNodeDefinition>
-      implements BehaviorTreeNodeLayer<RDXBehaviorTreeNode<?, ?>, S, S, D>
+      implements BehaviorTreeNode<RDXBehaviorTreeNode<?, ?>, S, D>
 {
-   private final S state;
-   private final D definition;
+   /** Convenient accessor to the state to keep the code clean, available to all inheriting classes. */
+   protected final S state;
+   /** Convenient accessor to the definition to keep the code clean, available to all inheriting classes. */
+   protected final D definition;
    private final List<RDXBehaviorTreeNode<?, ?>> children = new ArrayList<>();
    private transient RDXBehaviorTreeNode<?, ?> parent;
 
@@ -66,14 +74,12 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    {
       definition = (D) new BehaviorTreeNodeDefinition(crdtInfo, saveFileDirectory);
       state = (S) new BehaviorTreeNodeState<D>(id, definition, crdtInfo);
-
-      definition.setName("Basic node");
    }
 
    @Override
    public void update()
    {
-      BehaviorTreeNodeLayer.super.update();
+      BehaviorTreeNode.super.update();
 
       // Automatically expand if less than 5 children are added at once
       int deltaChildren = getChildren().size() - previousNumberOfChildren;
@@ -138,6 +144,8 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       }
       else
       {
+         // Add spacing to make up for expand collapse not being there
+         ImGui.setCursorPosX(ImGui.getCursorPosX() + ImGuiExpandCollapseRenderer.getPlaceholderWidth());
          treeWidgetExpanded = false;
       }
    }
@@ -233,6 +241,11 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
             definition.setName(definition.getName() + ".json");
          }
       }
+
+      if (ImGui.menuItem(labels.get("Draw to SVG")))
+      {
+         state.drawToSVG();
+      }
    }
 
    public void renderNodeSettingsWidgets()
@@ -240,11 +253,11 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       logArea.renderImGuiWidgets();
 
       ImGui.text("Notes:");
-      notesText.set(definition.getNotes());
-      ImGui.setNextItemWidth(ImGui.getColumnWidth());
-      if (ImGui.inputTextMultiline(labels.getHidden("Notes"), notesText))
+      String notes = definition.getNotes();
+      String modifiedNotes = ImGuiTools.inputTextMultiline(labels.getHidden("Notes"), notes, notesText);
+      if (modifiedNotes != null)
       {
-         definition.setNotes(notesText.get());
+         definition.setNotes(modifiedNotes);
       }
    }
 
@@ -257,13 +270,6 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
 
-   }
-
-   @Override
-   public void destroy()
-   {
-      LogTools.info("Destroying node: {}:{}", definition.getName(), state.getID());
-      state.destroy();
    }
 
    public boolean getSelected()
@@ -337,12 +343,6 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    public RDXBehaviorTreeNode<?, ?> getParent()
    {
       return parent;
-   }
-
-   @Override
-   public S getNextLowerLayer()
-   {
-      return state;
    }
 
    @Override

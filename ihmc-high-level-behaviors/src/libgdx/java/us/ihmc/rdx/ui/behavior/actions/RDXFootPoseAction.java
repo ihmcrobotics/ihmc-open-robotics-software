@@ -5,7 +5,6 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
-import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.sequence.actions.FootPoseActionDefinition;
 import us.ihmc.behaviors.sequence.actions.FootPoseActionState;
@@ -20,16 +19,17 @@ import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.affordances.RDXInteractableHighlightModel;
 import us.ihmc.rdx.ui.affordances.RDXInteractableTools;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
+import us.ihmc.rdx.ui.behavior.tools.RDXCRDTTools;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.interaction.MouseCollidable;
-import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.scs2.simulation.collision.Collidable;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.util.ArrayList;
@@ -37,10 +37,7 @@ import java.util.List;
 
 public class RDXFootPoseAction extends RDXActionNode<FootPoseActionState, FootPoseActionDefinition>
 {
-   private final FootPoseActionState state;
-   private final FootPoseActionDefinition definition;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImBoolean adjustGoalPose = new ImBoolean();
    private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
    private final ImDoubleWrapper trajectoryDurationWidget;
    /** Gizmo is control frame */
@@ -64,20 +61,15 @@ public class RDXFootPoseAction extends RDXActionNode<FootPoseActionState, FootPo
    {
       super(new FootPoseActionState(id, crdtInfo,saveFileDirectory, referenceFrameLibrary));
 
-      state = getState();
-      definition = getDefinition();
-
-      definition.setName("Foot pose");
-
-      poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), definition.getFootToParentTransform().accessValue(), adjustGoalPose);
+      poseGizmo = new RDXSelectablePose3DGizmo();
       poseGizmo.create(panel3D);
 
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
                                                                 referenceFrameLibrary,
                                                                 definition::getParentFrameName,
                                                                 state.getFootFrame()::changeFrame);
-      trajectoryDurationWidget = new ImDoubleWrapper(getDefinition()::getTrajectoryDuration,
-                                                     getDefinition()::setTrajectoryDuration,
+      trajectoryDurationWidget = new ImDoubleWrapper(definition::getTrajectoryDuration,
+                                                     definition::setTrajectoryDuration,
                                                      imDouble -> ImGuiTools.volatileInputDouble(labels.get("Trajectory duration"), imDouble));
 
       for (RobotSide side : RobotSide.values)
@@ -113,14 +105,9 @@ public class RDXFootPoseAction extends RDXActionNode<FootPoseActionState, FootPo
             collisionShapeFrame.setParentFrame(state.getFootFrame().getReferenceFrame());
          }
 
-         poseGizmo.getPoseGizmo().update();
+         RDXCRDTTools.syncGizmoWithBidirectionalField(poseGizmo.getPoseGizmo(), definition.getFootToParentTransform(), definition);
+
          highlightModels.get(definition.getSide()).setPose(graphicFrame.getReferenceFrame());
-
-         if (poseGizmo.getPoseGizmo().getGizmoModifiedByUser().poll())
-         {
-            definition.getFootToParentTransform().accessValue();
-         }
-
          if (poseGizmo.isSelected() || isMouseHovering)
          {
             highlightModels.get(definition.getSide()).setTransparency(0.7);
@@ -135,7 +122,7 @@ public class RDXFootPoseAction extends RDXActionNode<FootPoseActionState, FootPo
    @Override
    protected void renderImGuiWidgetsInternal()
    {
-      ImGui.checkbox(labels.get("Adjust Goal Pose"), adjustGoalPose);
+      ImGui.checkbox(labels.get("Adjust Goal Pose"), poseGizmo.getSelected());
       parentFrameComboBox.render();
       ImGui.pushItemWidth(80.0f);
       trajectoryDurationWidget.renderImGuiWidget();
@@ -146,7 +133,7 @@ public class RDXFootPoseAction extends RDXActionNode<FootPoseActionState, FootPo
    {
       if (isMouseHovering)
       {
-         tooltip.render("%s Action\nIndex: %d\nName: %s".formatted(getActionTypeTitle(), state.getActionIndex(), getDefinition().getName()));
+         tooltip.render("%s Action\nIndex: %d\nName: %s".formatted(getLeafTypeTitle(), state.getLeafIndex(), definition.getName()));
       }
    }
 
@@ -174,7 +161,7 @@ public class RDXFootPoseAction extends RDXActionNode<FootPoseActionState, FootPo
       boolean isClickedOn = isMouseHovering && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
       if (isClickedOn)
       {
-         adjustGoalPose.set(true);
+         poseGizmo.setSelected(true);
       }
 
       poseGizmo.process3DViewInput(input, isMouseHovering);
@@ -198,7 +185,7 @@ public class RDXFootPoseAction extends RDXActionNode<FootPoseActionState, FootPo
    }
 
    @Override
-   public String getActionTypeTitle()
+   public String getLeafTypeTitle()
    {
       return definition.getSide().getPascalCaseName() + " Foot Pose";
    }

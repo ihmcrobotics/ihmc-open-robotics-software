@@ -9,8 +9,11 @@ byte TRAJECTORY_TYPE_OBSTACLE_CLEARANCE = 1
 byte TRAJECTORY_TYPE_CUSTOM = 2
 byte TRAJECTORY_TYPE_WAYPOINTS = 3
 
+byte CSG_MODE_STANDARD = 0
+byte CSG_MODE_QFP = 1
+
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # Specifies which foot will swing to reach the footstep.
 byte robot_side 255
@@ -30,6 +33,8 @@ geometry_msgs/Quaternion orientation
 geometry_msgs/Point[<=10] predicted_contact_points_2d
 # This contains information on what the swing trajectory should be for each step. Recommended is TRAJECTORY_TYPE_DEFAULT.
 byte trajectory_type 0
+# This contains information about what footstep generation approach should be used by the ContinuousStepGenerator.
+byte csg_mode 0
 # Contains information on how high the robot should swing its foot.
 # This affects trajectory types TRAJECTORY_TYPE_DEFAULT and TRAJECTORY_TYPE_OBSTACLE_CLEARANCE.
 # If a value smaller then the minimal swing height is chosen (e.g. 0.0) the swing height will be changed to a default value.
@@ -80,3 +85,7 @@ StepConstraintsListMessage step_constraints
 
 # If the controller should check and fail if the step is not reachable
 bool should_check_for_reachability false
+
+# If the desired footstep is for walking in place with zero forward or lateral velocity. This logic is only utilized
+# if csg_mode is set to QFP
+bool walking_in_place true

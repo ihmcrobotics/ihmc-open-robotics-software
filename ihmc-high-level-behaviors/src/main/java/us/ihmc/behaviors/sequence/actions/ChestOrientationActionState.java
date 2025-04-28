@@ -13,7 +13,6 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class ChestOrientationActionState extends ActionNodeState<ChestOrientationActionDefinition>
 {
-   private final ChestOrientationActionDefinition definition;
    private final CRDTDetachableReferenceFrame chestFrame;
    /**
     * This is the estimated goal pelvis frame as the robot executes a potential whole body action.
@@ -27,11 +26,9 @@ public class ChestOrientationActionState extends ActionNodeState<ChestOrientatio
    {
       super(id, new ChestOrientationActionDefinition(crdtInfo, saveFileDirectory), crdtInfo);
 
-      definition = getDefinition();
-
       chestFrame = new CRDTDetachableReferenceFrame(referenceFrameLibrary,
-                                                    getDefinition().getCRDTParentFrameName(),
-                                                    getDefinition().getChestToParentTransform());
+                                                    definition.getCRDTParentFrameName(),
+                                                    definition.getChestToParentTransform());
       goalPelvisToWorldTransform = new CRDTStatusRigidBodyTransform(ROS2ActorDesignation.ROBOT, crdtInfo);
       goalPelvisFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
                                                                                                goalPelvisToWorldTransform.getValueReadOnly());
@@ -53,7 +50,7 @@ public class ChestOrientationActionState extends ActionNodeState<ChestOrientatio
 
    public void toMessage(ChestOrientationActionStateMessage message)
    {
-      getDefinition().toMessage(message.getDefinition());
+      definition.toMessage(message.getDefinition());
 
       super.toMessage(message.getState());
 
@@ -62,9 +59,9 @@ public class ChestOrientationActionState extends ActionNodeState<ChestOrientatio
 
    public void fromMessage(ChestOrientationActionStateMessage message)
    {
-      super.fromMessage(message.getState());
+      definition.fromMessage(message.getDefinition());
 
-      getDefinition().fromMessage(message.getDefinition());
+      super.fromMessage(message.getState());
 
       goalPelvisToWorldTransform.fromMessage(message.getGoalPelvisTransformToWorld());
       goalPelvisFrame.update();

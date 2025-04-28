@@ -6,9 +6,9 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.controlModules.multiContact.PointJacobianMotionNumericalDerivativeCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
+import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
+import us.ihmc.yoVariables.filters.RateLimitedYoVariable;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -20,7 +20,7 @@ public class HeuristicCoMMarginPostureCalculator
    private static final int SPATIAL_DIMENSIONS = 6;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-   private final CenterOfMassStabilityMarginRegionCalculator staticStabilityRegionCalculator;
+   private final StabilityMarginRegionCalculator staticStabilityRegionCalculator;
    private final WholeBodyContactState contactState;
 
    private final TIntArrayList lowestMarginVertexIndices = new TIntArrayList();
@@ -46,7 +46,7 @@ public class HeuristicCoMMarginPostureCalculator
    private final DMatrixRMaj actuationMargin = new DMatrixRMaj(0);
    private final DMatrixRMaj actuationMarginViolation = new DMatrixRMaj(0);
 
-   public HeuristicCoMMarginPostureCalculator(CenterOfMassStabilityMarginRegionCalculator staticStabilityRegionCalculator,
+   public HeuristicCoMMarginPostureCalculator(StabilityMarginRegionCalculator staticStabilityRegionCalculator,
                                               WholeBodyContactState contactState,
                                               double controlDT,
                                               YoRegistry parentRegistry)

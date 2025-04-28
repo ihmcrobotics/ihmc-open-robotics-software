@@ -4,12 +4,15 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.SakeHandAPI;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Node;
 
 public class ROS2SakeHandStatus
 {
    private volatile boolean isCalibrated = false;
    private volatile boolean needsReset;
+   private volatile boolean isCalibrating;
+   private volatile boolean isCoolingDown;
+   private volatile boolean automaticCooldownEnabled;
 
    // Hand fully closed
    private volatile double positionUpperLimit;
@@ -26,12 +29,15 @@ public class ROS2SakeHandStatus
    private volatile int errorCodes = 0;
    private volatile int handRealtimeTick = 0;
 
-   public ROS2SakeHandStatus(ROS2NodeInterface ros2Node, String robotName, RobotSide handSide)
+   public ROS2SakeHandStatus(ROS2Node ros2Node, String robotName, RobotSide handSide)
    {
       ROS2Tools.createVolatileCallbackSubscription(ros2Node, SakeHandAPI.getHandSakeStatusTopic(robotName, handSide), sakeHandStatusMessage ->
       {
          isCalibrated = sakeHandStatusMessage.getIsCalibrated();
          needsReset = sakeHandStatusMessage.getNeedsReset();
+         isCalibrating = sakeHandStatusMessage.getIsCalibrating();
+         isCoolingDown = sakeHandStatusMessage.getIsCoolingDown();
+         automaticCooldownEnabled = sakeHandStatusMessage.getAutomaticCooldownEnabled();
 
          positionUpperLimit = sakeHandStatusMessage.getPositionUpperLimit();
          positionLowerLimit = sakeHandStatusMessage.getPositionLowerLimit();
@@ -61,6 +67,21 @@ public class ROS2SakeHandStatus
    public boolean getNeedsReset()
    {
       return needsReset;
+   }
+
+   public boolean getIsCalibrating()
+   {
+      return isCalibrating;
+   }
+
+   public boolean getIsCoolingDown()
+   {
+      return isCoolingDown;
+   }
+
+   public boolean getAutomaticCooldownEnabled()
+   {
+      return automaticCooldownEnabled;
    }
 
    public double getPositionUpperLimit()

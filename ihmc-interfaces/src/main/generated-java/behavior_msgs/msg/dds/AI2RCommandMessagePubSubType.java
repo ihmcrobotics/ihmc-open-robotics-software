@@ -15,7 +15,7 @@ public class AI2RCommandMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "5947fee668a9b61becc21e3a17b9528f0b7dbb023e1b4decb778416c54b8bfe3";
+   		return "da043020cd0ef7adf1d8169427586ab419179c23716aeb2a07a11f991174a756";
    }
    
    @Override
@@ -52,7 +52,10 @@ public class AI2RCommandMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+      current_alignment += behavior_msgs.msg.dds.AI2RHandPoseAdaptationMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += behavior_msgs.msg.dds.AI2RNavigationMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -67,8 +70,11 @@ public class AI2RCommandMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getBehaviorToExecute().length() + 1;
 
+      current_alignment += behavior_msgs.msg.dds.AI2RHandPoseAdaptationMessagePubSubType.getCdrSerializedSize(data.getHandPoseAdaptation(), current_alignment);
+
+      current_alignment += behavior_msgs.msg.dds.AI2RNavigationMessagePubSubType.getCdrSerializedSize(data.getNavigation(), current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -76,27 +82,41 @@ public class AI2RCommandMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
 
    public static void write(behavior_msgs.msg.dds.AI2RCommandMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_7(data.getUnusedPlaceholderField());
+      if(data.getBehaviorToExecute().length() <= 255)
+      cdr.write_type_d(data.getBehaviorToExecute());else
+          throw new RuntimeException("behavior_to_execute field exceeds the maximum length: %d > %d".formatted(data.getBehaviorToExecute().length(), 255));
 
+      behavior_msgs.msg.dds.AI2RHandPoseAdaptationMessagePubSubType.write(data.getHandPoseAdaptation(), cdr);
+      behavior_msgs.msg.dds.AI2RNavigationMessagePubSubType.write(data.getNavigation(), cdr);
    }
 
    public static void read(behavior_msgs.msg.dds.AI2RCommandMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setUnusedPlaceholderField(cdr.read_type_7());
-      	
+      cdr.read_type_d(data.getBehaviorToExecute());	
+      behavior_msgs.msg.dds.AI2RHandPoseAdaptationMessagePubSubType.read(data.getHandPoseAdaptation(), cdr);	
+      behavior_msgs.msg.dds.AI2RNavigationMessagePubSubType.read(data.getNavigation(), cdr);	
 
    }
 
    @Override
    public final void serialize(behavior_msgs.msg.dds.AI2RCommandMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_7("unused_placeholder_field", data.getUnusedPlaceholderField());
+      ser.write_type_d("behavior_to_execute", data.getBehaviorToExecute());
+      ser.write_type_a("hand_pose_adaptation", new behavior_msgs.msg.dds.AI2RHandPoseAdaptationMessagePubSubType(), data.getHandPoseAdaptation());
+
+      ser.write_type_a("navigation", new behavior_msgs.msg.dds.AI2RNavigationMessagePubSubType(), data.getNavigation());
+
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.AI2RCommandMessage data)
    {
-      data.setUnusedPlaceholderField(ser.read_type_7("unused_placeholder_field"));   }
+      ser.read_type_d("behavior_to_execute", data.getBehaviorToExecute());
+      ser.read_type_a("hand_pose_adaptation", new behavior_msgs.msg.dds.AI2RHandPoseAdaptationMessagePubSubType(), data.getHandPoseAdaptation());
+
+      ser.read_type_a("navigation", new behavior_msgs.msg.dds.AI2RNavigationMessagePubSubType(), data.getNavigation());
+
+   }
 
    public static void staticCopy(behavior_msgs.msg.dds.AI2RCommandMessage src, behavior_msgs.msg.dds.AI2RCommandMessage dest)
    {

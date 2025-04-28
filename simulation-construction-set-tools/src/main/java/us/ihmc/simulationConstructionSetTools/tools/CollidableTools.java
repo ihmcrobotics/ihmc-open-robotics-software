@@ -5,8 +5,8 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameRamp3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameShape3DBasics;
 import us.ihmc.euclid.shape.primitives.interfaces.Ramp3DReadOnly;
 import us.ihmc.euclid.shape.primitives.interfaces.Shape3DReadOnly;
-import us.ihmc.robotics.physics.Collidable;
-import us.ihmc.robotics.physics.PhysicsEngineTools;
+import us.ihmc.scs2.simulation.collision.Collidable;
+import us.ihmc.scs2.simulation.collision.PhysicsEngineTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 
@@ -30,10 +30,5 @@ public class CollidableTools
       }
 
       return collidables;
-   }
-
-   public static List<Collidable> toCollidables(long collisionMask, long collisionGroup, CommonAvatarEnvironmentInterface environment)
-   {
-      return toCollidables(collisionMask, collisionGroup, environment.getTerrainObject3D());
    }
 }

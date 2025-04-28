@@ -1,7 +1,7 @@
 package us.ihmc.sensorProcessing.sensorProcessors;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.math.filters.ProcessingYoVariable;
+import us.ihmc.yoVariables.filters.ProcessingYoVariable;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;

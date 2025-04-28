@@ -43,7 +43,7 @@ public class KSTInputFBControllerStateEstimator implements KSTInputStateEstimato
     * Compared to the C0 filter, the C1 filter estimates the input acceleration and double-integrates it to update the velocity and position.
     * This guarantees continuity in velocity whereas the C0 filter does not.
     */
-   private static final boolean ENABLE_C1_FILTER = true;
+   private static final boolean ENABLE_C1_FILTER = false;
    public static final double SAFE_INPUT_PERIOD_TO_CORRECTION_FACTOR = 1.5;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -836,7 +836,7 @@ public class KSTInputFBControllerStateEstimator implements KSTInputStateEstimato
             {
                double timeInterval = Conversions.nanosecondsToSeconds(inputTimestamp - lastInputTimestamp.getLongValue());
                KSTTools.computeLinearVelocity(timeInterval, rawInputPosition, position, debugInputVelocity);
-               rawInputVelocity.set(debugInputVelocity);
+               rawInputVelocity.setMatchingFrame(input.getDesiredVelocity());
             }
 
             if (rawInputVelocity.containsNaN())

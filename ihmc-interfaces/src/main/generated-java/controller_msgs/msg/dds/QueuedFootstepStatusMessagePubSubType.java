@@ -15,7 +15,7 @@ public class QueuedFootstepStatusMessagePubSubType implements us.ihmc.pubsub.Top
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "ab75e46819eae18287b738b8b36fdc8cd483fb1f430092376294f39193468d7e";
+   		return "58bdcd243bb392064579374e5b63b2e6b36242fe9442ed4d9053d6e17af81d6e";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class QueuedFootstepStatusMessagePubSubType implements us.ihmc.pubsub.Top
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -77,7 +77,7 @@ public class QueuedFootstepStatusMessagePubSubType implements us.ihmc.pubsub.Top
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -99,7 +99,7 @@ public class QueuedFootstepStatusMessagePubSubType implements us.ihmc.pubsub.Top
 
    public static void write(controller_msgs.msg.dds.QueuedFootstepStatusMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_9(data.getRobotSide());
 
@@ -113,7 +113,7 @@ public class QueuedFootstepStatusMessagePubSubType implements us.ihmc.pubsub.Top
 
    public static void read(controller_msgs.msg.dds.QueuedFootstepStatusMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setRobotSide(cdr.read_type_9());
       	
@@ -129,7 +129,7 @@ public class QueuedFootstepStatusMessagePubSubType implements us.ihmc.pubsub.Top
    @Override
    public final void serialize(controller_msgs.msg.dds.QueuedFootstepStatusMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_9("robot_side", data.getRobotSide());
       ser.write_type_a("location", new geometry_msgs.msg.dds.PointPubSubType(), data.getLocation());
 
@@ -142,7 +142,7 @@ public class QueuedFootstepStatusMessagePubSubType implements us.ihmc.pubsub.Top
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.QueuedFootstepStatusMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setRobotSide(ser.read_type_9("robot_side"));
       ser.read_type_a("location", new geometry_msgs.msg.dds.PointPubSubType(), data.getLocation());
 

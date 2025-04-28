@@ -92,7 +92,7 @@ public class BallDetectionManager
             double z = -(ballCenter.y() - colorImage.getPrincipalPointY()) / colorImage.getFocalLengthY() * depth;
 
             // get ball's position with respect to world
-            RigidBodyTransform newBallPosition = new RigidBodyTransform(colorImage.getOrientation(), colorImage.getPosition());
+            RigidBodyTransform newBallPosition = new RigidBodyTransform(colorImage.getTransformToWorld());
             newBallPosition.appendTranslation(depth, y, z);
             ballPosition.update(newBallPosition);
 
@@ -113,7 +113,7 @@ public class BallDetectionManager
 
             // send it out to UI
             ImageMessage imageMessage = new ImageMessage();
-            PerceptionMessageTools.packImageMessage(maskImage, compressedImage, CompressionType.PNG, CameraModel.PINHOLE, imageMessage);
+            PerceptionMessageTools.packImageMessage(maskImage, compressedImage, CompressionType.PNG, imageMessage);
             imageMessage.setSequenceNumber(maskImageSequenceNumber++);
             MessageTools.toMessage(maskAcquisitionTime, imageMessage.getAcquisitionTime());
             ros2Helper.publish(PerceptionAPI.BALL_SEGMENTATION_IMAGE, imageMessage);

@@ -14,15 +14,15 @@ public class HandWrenchActionState extends ActionNodeState<HandWrenchActionDefin
 
    public void toMessage(HandWrenchActionStateMessage message)
    {
-      getDefinition().toMessage(message.getDefinition());
+      definition.toMessage(message.getDefinition());
 
       super.toMessage(message.getState());
    }
 
    public void fromMessage(HandWrenchActionStateMessage message)
    {
-      super.fromMessage(message.getState());
+      definition.fromMessage(message.getDefinition());
 
-      getDefinition().fromMessage(message.getDefinition());
+      super.fromMessage(message.getState());
    }
 }

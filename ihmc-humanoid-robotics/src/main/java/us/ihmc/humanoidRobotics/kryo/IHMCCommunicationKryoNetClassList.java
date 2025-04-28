@@ -12,7 +12,6 @@ import org.ejml.data.DMatrixRMaj;
 import actionlib_msgs.msg.dds.GoalIDPubSubType;
 import actionlib_msgs.msg.dds.GoalStatusArrayPubSubType;
 import actionlib_msgs.msg.dds.GoalStatusPubSubType;
-import boofcv.struct.calib.CameraPinholeBrown;
 import builtin_interfaces.msg.dds.DurationPubSubType;
 import builtin_interfaces.msg.dds.TimePubSubType;
 import controller_msgs.msg.dds.*;
@@ -65,7 +64,6 @@ import nav_msgs.msg.dds.OccupancyGridPubSubType;
 import nav_msgs.msg.dds.OdometryPubSubType;
 import nav_msgs.msg.dds.PathPubSubType;
 import perception_msgs.msg.dds.*;
-import rcl_interfaces.msg.dds.IntraProcessMessagePubSubType;
 import rcl_interfaces.msg.dds.ListParametersResultPubSubType;
 import rcl_interfaces.msg.dds.ParameterDescriptorPubSubType;
 import rcl_interfaces.msg.dds.ParameterEventDescriptorsPubSubType;
@@ -405,7 +403,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(DisparityImagePubSubType.class);
       registerPacketField(AtlasAuxiliaryRobotDataPubSubType.class);
       registerPacketField(TemperaturePubSubType.class);
-      registerPacketField(IntraProcessMessagePubSubType.class);
       registerPacketField(HumanoidKinematicsToolboxConfigurationMessagePubSubType.class);
       registerPacketField(BatteryStatePubSubType.class);
       registerPacketField(SO3TrajectoryMessagePubSubType.class);
@@ -459,7 +456,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(TrajectoryPoint1DMessagePubSubType.class);
       registerPacketField(IntrinsicParametersMessagePubSubType.class);
       registerPacketField(SE3TrajectoryMessagePubSubType.class);
-      registerPacketField(HandCollisionDetectedPacketPubSubType.class);
       registerPacketField(ParameterEventDescriptorsPubSubType.class);
       registerPacketField(TransformPubSubType.class);
       registerPacketField(AtlasWristSensorCalibrationRequestPacketPubSubType.class);
@@ -518,7 +514,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
 
       registerPacketField(FootstepPlanRequestType.class);
       registerPacketField(char[].class);
-      registerPacketClass(HandCollisionDetectedPacket.class);
 
       // Video data
       registerPacketClass(VideoPacket.class);
@@ -758,7 +753,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(BDIBehaviorStatusPacket.class);
 
       // Camera information related
-      registerPacketField(CameraPinholeBrown.class);
+//      registerPacketField(CameraPinholeBrown.class);
 
       registerPacketClass(FisheyePacket.class);
 

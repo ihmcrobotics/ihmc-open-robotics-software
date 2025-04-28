@@ -2,7 +2,7 @@
 # Allows to specify the messages the toolbox should stream to the controller.
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # Whether the pelvis should pinned or free to move.
 # Default value is false.
@@ -43,6 +43,10 @@ bool enable_chest_taskspace true
 # Whether the pelvis should be controlled in task-space.
 # Default value is true.
 bool enable_pelvis_taskspace true
+
+# Whether center of mass should be controlled.
+# Default value is false.
+bool enable_center_of_mass_control false
 
 # Reference frame in which the controller should be tracking the pose for the left hand as computed by the whole-body IK.
 # Default value is WORLD_FRAME, see FrameInformation for useful frame ids.

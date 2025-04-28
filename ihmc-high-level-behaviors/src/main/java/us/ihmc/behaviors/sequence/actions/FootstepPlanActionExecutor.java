@@ -27,7 +27,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
-import us.ihmc.tools.thread.Throttler;
+import us.ihmc.commons.thread.Throttler;
 
 import java.util.UUID;
 
@@ -36,8 +36,6 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
    public static final double POSITION_TOLERANCE = 0.15;
    public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);
 
-   private final FootstepPlanActionState state;
-   private final FootstepPlanActionDefinition definition;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
    private final ControllerStatusTracker controllerStatusTracker;
@@ -66,9 +64,6 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
    {
       super(new FootstepPlanActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary, syncedRobot.getRobotModel()));
 
-      state = getState();
-      definition = getDefinition();
-
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
       this.controllerStatusTracker = controllerStatusTracker;
@@ -86,9 +81,6 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
       Point3DReadOnly definitionGoalStancePoint = definition.getGoalStancePoint().getValueReadOnly();
       Point3DReadOnly definitionGoalFocalPoint = definition.getGoalFocalPoint().getValueReadOnly();
       boolean invalidDefinition = definitionGoalStancePoint.geometricallyEquals(definitionGoalFocalPoint, 1e-4);
-
-      if (invalidDefinition)
-         state.getLogger().error("Approach point can not be in the same place as the focus point.");
 
       state.setCanExecute(state.areFramesInWorld() && !invalidDefinition);
       if (state.getCanExecute() && !definition.getIsManuallyPlaced())
@@ -138,12 +130,12 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
          snappedGoalStancePose.getRotation().set(stanceOrientation);
          snappedGoalStancePose.changeFrame(state.getParentFrame());
 
-         state.getGoalToParentTransform().getValue().set(snappedGoalStancePose);
+         state.getGoalToParentTransform().setValue(snappedGoalStancePose, 1e-5);
          state.getGoalFrame().getReferenceFrame().update();
 
          for (RobotSide side : RobotSide.values)
          {
-            state.copyDefinitionToGoalFoostepToGoalTransform(side);
+            state.copyDefinitionToGoalFootstepToGoalTransform(side);
 
             liveGoalFeetPoses.get(side)
                              .setIncludingFrame(state.getGoalFrame().getReferenceFrame(),
@@ -183,9 +175,9 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
    }
 
    @Override
-   public void triggerActionExecution()
+   public void triggerExecution()
    {
-      super.triggerActionExecution();
+      super.triggerExecution();
 
       // Reset state
       state.setTotalNumberOfFootsteps(0);
@@ -351,7 +343,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
          trackingCalculators.get(side).factoryInSO3Errors(ORIENTATION_TOLERANCE);
          meetsDesiredCompletionCriteria &= trackingCalculators.get(side).isWithinPositionTolerance();
          meetsDesiredCompletionCriteria &= trackingCalculators.get(side).getTimeIsUp();
-         hitTimeLimit |= trackingCalculators.get(side).getHitTimeLimit();
+         hitTimeLimit |= trackingCalculators.get(side).getHitTimeLimit(state.getLogger());
       }
 
       int incompleteFootsteps = controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps();

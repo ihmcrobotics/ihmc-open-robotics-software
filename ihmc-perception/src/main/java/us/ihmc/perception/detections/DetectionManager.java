@@ -4,6 +4,7 @@ import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.property.ROS2StoredPropertySet;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.robotics.time.TimeTools;
+import us.ihmc.ros2.ROS2Node;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -26,7 +27,7 @@ public class DetectionManager
    private final DetectionManagerSettings settings = new DetectionManagerSettings();
    private final ROS2StoredPropertySet<DetectionManagerSettings> settingsSync;
 
-   public DetectionManager(ROS2PublishSubscribeAPI ros2)
+   public DetectionManager(ROS2Node ros2)
    {
       settingsSync = ros2 == null ? null : new ROS2StoredPropertySet<>(ros2, PerceptionAPI.DETECTION_MANAGER_SETTINGS, settings);
    }

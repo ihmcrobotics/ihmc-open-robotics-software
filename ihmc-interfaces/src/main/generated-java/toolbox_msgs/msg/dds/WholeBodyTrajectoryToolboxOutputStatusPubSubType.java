@@ -15,7 +15,7 @@ public class WholeBodyTrajectoryToolboxOutputStatusPubSubType implements us.ihmc
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "13f0559c6442f9c18ae2b58226035bfd5cf9c24fcadd55fb90b47341bb5fe786";
+   		return "a862a03a5fd7d21b9fce0b609911614c4abcb5d99da934102fd2d484b5356e48";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class WholeBodyTrajectoryToolboxOutputStatusPubSubType implements us.ihmc
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -74,7 +74,7 @@ public class WholeBodyTrajectoryToolboxOutputStatusPubSubType implements us.ihmc
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -95,23 +95,23 @@ public class WholeBodyTrajectoryToolboxOutputStatusPubSubType implements us.ihmc
 
    public static void write(toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxOutputStatus data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_2(data.getPlanningResult());
 
       if(data.getTrajectoryTimes().size() <= 50)
       cdr.write_type_e(data.getTrajectoryTimes());else
-          throw new RuntimeException("trajectory_times field exceeds the maximum length");
+          throw new RuntimeException("trajectory_times field exceeds the maximum length: %d > %d".formatted(data.getTrajectoryTimes().size(), 50));
 
       if(data.getRobotConfigurations().size() <= 50)
       cdr.write_type_e(data.getRobotConfigurations());else
-          throw new RuntimeException("robot_configurations field exceeds the maximum length");
+          throw new RuntimeException("robot_configurations field exceeds the maximum length: %d > %d".formatted(data.getRobotConfigurations().size(), 50));
 
    }
 
    public static void read(toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxOutputStatus data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setPlanningResult(cdr.read_type_2());
       	
@@ -123,7 +123,7 @@ public class WholeBodyTrajectoryToolboxOutputStatusPubSubType implements us.ihmc
    @Override
    public final void serialize(toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxOutputStatus data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_2("planning_result", data.getPlanningResult());
       ser.write_type_e("trajectory_times", data.getTrajectoryTimes());
       ser.write_type_e("robot_configurations", data.getRobotConfigurations());
@@ -132,7 +132,7 @@ public class WholeBodyTrajectoryToolboxOutputStatusPubSubType implements us.ihmc
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxOutputStatus data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setPlanningResult(ser.read_type_2("planning_result"));
       ser.read_type_e("trajectory_times", data.getTrajectoryTimes());
       ser.read_type_e("robot_configurations", data.getRobotConfigurations());

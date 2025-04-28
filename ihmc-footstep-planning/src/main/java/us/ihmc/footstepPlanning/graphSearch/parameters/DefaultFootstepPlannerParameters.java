@@ -10,6 +10,7 @@ public class DefaultFootstepPlannerParameters extends StoredPropertySet implemen
 {
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
+   public static final BooleanStoredPropertyKey useGPU = keys.addBooleanKey("Use GPU");
    public static final DoubleStoredPropertyKey astarHeuristicsWeight = keys.addDoubleKey("AStar heuristics weight");
    public static final IntegerStoredPropertyKey maxBranchFactor = keys.addIntegerKey("Max branch factor");
    public static final BooleanStoredPropertyKey enableExpansionMask = keys.addBooleanKey("Enable expansion mask");
@@ -77,13 +78,18 @@ public class DefaultFootstepPlannerParameters extends StoredPropertySet implemen
    public static final DoubleStoredPropertyKey scaledFootPolygonPercentage = keys.addDoubleKey("Scaled foot polygon percentage");
    public static final DoubleStoredPropertyKey cliffHeightThreshold = keys.addDoubleKey("Cliff height threshold");
 
-
-   public DefaultFootstepPlannerParameters() // for tests and stuff that's probably not gonna save
+   /**
+    * These parameters are used for tests, please don't use on an actual robot, and please don't change these values without checking that all the tests pass
+    */
+   public DefaultFootstepPlannerParameters()
    {
       this(null);
    }
 
-   private DefaultFootstepPlannerParameters(DefaultFootstepPlannerParametersReadOnly footstepPlannerParameters)
+   /**
+    * @param footstepPlannerParameters to copy
+    */
+   public DefaultFootstepPlannerParameters(DefaultFootstepPlannerParametersReadOnly footstepPlannerParameters)
    {
       super(keys, DefaultFootstepPlannerParameters.class);
 

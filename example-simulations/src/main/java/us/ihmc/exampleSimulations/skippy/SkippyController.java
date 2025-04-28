@@ -1,11 +1,7 @@
 
 package us.ihmc.exampleSimulations.skippy;
 
-import java.awt.Container;
 import java.io.PrintWriter;
-
-import javax.swing.BoxLayout;
-import javax.swing.JFrame;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -21,19 +17,17 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
-import us.ihmc.robotics.stateMachine.extra.StateMachinesJPanel;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.PinJoint;
-import us.ihmc.simulationconstructionset.gui.EventDispatchThreadHelper;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.filters.FilteredFiniteDifferenceYoVariable;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -84,7 +78,7 @@ public class SkippyController implements RobotController
    private final YoDouble planarDistanceYZPlane, planarDistanceXZPlane;
 
    private final YoDouble alphaAngularVelocity;
-   private final FilteredVelocityYoVariable angularVelocityToCoMYZPlane2, angularVelocityToCoMXZPlane2;
+   private final FilteredFiniteDifferenceYoVariable angularVelocityToCoMYZPlane2, angularVelocityToCoMXZPlane2;
 
    private final YoFramePoint3D bodyLocation = new YoFramePoint3D("body", ReferenceFrame.getWorldFrame(), registry);
 
@@ -226,15 +220,14 @@ public class SkippyController implements RobotController
 
       alphaAngularVelocity = new YoDouble("alphaAngularVelocity", registry);
       alphaAngularVelocity.set(0.8);
-      angularVelocityToCoMYZPlane2 = new FilteredVelocityYoVariable("angularVelocityToCoMYZPlane2", "", alphaAngularVelocity, angleToCoMInYZPlane, controlDT,
-                                                                    registry);
-      angularVelocityToCoMXZPlane2 = new FilteredVelocityYoVariable("angularVelocityToCoMXZPlane2", "", alphaAngularVelocity, angleToCoMInXZPlane, controlDT,
-                                                                    registry);
+      angularVelocityToCoMYZPlane2 = new FilteredFiniteDifferenceYoVariable("angularVelocityToCoMYZPlane2", "", alphaAngularVelocity, angleToCoMInYZPlane, controlDT,
+                                                                            registry);
+      angularVelocityToCoMXZPlane2 = new FilteredFiniteDifferenceYoVariable("angularVelocityToCoMXZPlane2", "", alphaAngularVelocity, angleToCoMInXZPlane, controlDT,
+                                                                            registry);
 
       if (skippyToDo.getEnumValue() != SkippyToDo.BALANCE && skippyToDo.getEnumValue() != SkippyToDo.POSITION || true)
       {
          stateMachine = setUpStateMachines();
-         createStateMachineWindow();
       }
       /*
        * Boolean variables for artifacts drawing
@@ -1034,34 +1027,6 @@ public class SkippyController implements RobotController
       return factory.build(States.BALANCE);
    }
 
-   public void createStateMachineWindow()
-   {
-      EventDispatchThreadHelper.invokeAndWait(new Runnable()
-      {
-         public void run()
-         {
-            createStateMachineWindowLocal();
-         }
-      });
-   }
-
-   public void createStateMachineWindowLocal()
-   {
-      JFrame frame = new JFrame("Skippy Jump State Machine");
-      Container contentPane = frame.getContentPane();
-      contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.X_AXIS));
-
-      StateMachinesJPanel<States> stateMachinePanel = new StateMachinesJPanel<States>(stateMachine, true);
-
-      frame.getContentPane().add(stateMachinePanel);
-
-      frame.pack();
-      frame.setSize(450, 300);
-      frame.setAlwaysOnTop(false);
-      frame.setVisible(true);
-
-      stateMachine.addStateChangedListener(stateMachinePanel);
-   }
 
    private void setHipPlaneParametersForPositionControl()
    {

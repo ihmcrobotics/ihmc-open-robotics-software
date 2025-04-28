@@ -18,13 +18,11 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.BytedecoImage;
-import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneObjectDefinitions;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.RDXPointCloudRenderer;
+import us.ihmc.rdx.RDXPointCloudRendererOld;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.environment.RDXEnvironmentBuilder;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObject;
-import us.ihmc.rdx.simulation.environment.object.objects.RDXArUcoBoxObject;
 import us.ihmc.rdx.simulation.sensors.RDXHighLevelDepthSensorSimulator;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
@@ -60,8 +58,8 @@ public class RDXIterativeClosestPointReverseDemo
    private List<Integer> ICPIndices = new ArrayList<Integer>();
 
 
-   private final RDXPointCloudRenderer envPointCloudRenderer = new RDXPointCloudRenderer();
-   private final RDXPointCloudRenderer boxPointCloudRenderer = new RDXPointCloudRenderer();
+   private final RDXPointCloudRendererOld envPointCloudRenderer = new RDXPointCloudRendererOld();
+   private final RDXPointCloudRendererOld boxPointCloudRenderer = new RDXPointCloudRendererOld();
 
    private RigidBodyTransform boxTransform = new RigidBodyTransform();
    private ReferenceFrame boxReferenceFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(), boxTransform);

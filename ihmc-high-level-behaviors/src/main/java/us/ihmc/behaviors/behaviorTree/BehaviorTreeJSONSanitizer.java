@@ -2,14 +2,22 @@ package us.ihmc.behaviors.behaviorTree;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.commons.lang3.mutable.MutableObject;
-import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperations;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.log.LogTools;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.ros2.ROS2NodeBuilder.SpecialTransportMode;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.JSONTools;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.tools.io.WorkspaceResourceFile;
+
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 /**
  * Tool to load all JSON files and resave them all in order to perform
@@ -17,60 +25,139 @@ import us.ihmc.tools.io.WorkspaceResourceFile;
  */
 public class BehaviorTreeJSONSanitizer
 {
-   private WorkspaceResourceDirectory treeFilesDirectory;
-   private final CRDTInfo crdtInfo = new CRDTInfo(ROS2ActorDesignation.OPERATOR, 1);
+   private final DefaultFootstepPlannerParametersReadOnly defaultFootstepPlannerParameters;
+   private final CRDTInfo crdtInfo;
+   private final WorkspaceResourceDirectory treeFilesDirectory;
 
-   public BehaviorTreeJSONSanitizer(Class<?> classForFindingSourceSetDirectory)
+   public BehaviorTreeJSONSanitizer(Class<?> classForFindingSourceSetDirectory, DefaultFootstepPlannerParametersReadOnly defaultFootstepPlannerParameters)
    {
-      String[] directories = new String[] { "/behaviorTrees" }; // "/affordances"
+      this.defaultFootstepPlannerParameters = defaultFootstepPlannerParameters;
 
-      for (String directory : directories)
+      ROS2Node ros2Node = new ROS2NodeBuilder().specialTransportMode(SpecialTransportMode.INTRAPROCESS_ONLY).build("json_sanitizer");
+      ROS2PeerClockOffsetEstimator peerClockEstimator = new ROS2PeerClockOffsetEstimator(ros2Node);
+      crdtInfo = new CRDTInfo(ROS2ActorDesignation.OPERATOR, peerClockEstimator);
+
+      treeFilesDirectory = new WorkspaceResourceDirectory(classForFindingSourceSetDirectory, "/behaviorTrees");
+
+      processDirectory(treeFilesDirectory);
+
+      peerClockEstimator.destroy();
+      ros2Node.destroy();
+   }
+
+   private void processDirectory(WorkspaceResourceDirectory directory)
+   {
+      for (WorkspaceResourceFile file : directory.queryContainedFiles())
       {
-         treeFilesDirectory = new WorkspaceResourceDirectory(classForFindingSourceSetDirectory, directory);
-
-         for (WorkspaceResourceFile fileToLoad : treeFilesDirectory.queryContainedFiles())
+         if (file.getFileName().endsWith(".json"))
          {
-            MutableObject<BehaviorTreeNodeDefinition> loadedRootNode = new MutableObject<>();
-
-            LogTools.info("Loading {}", fileToLoad.getFilesystemFile());
-            JSONFileTools.load(fileToLoad, jsonNode ->
-            {
-               loadedRootNode.setValue(loadFromFile(jsonNode, null));
-            });
-
-            loadedRootNode.getValue().saveToFile();
+            BehaviorTreeNodeDefinition loadedNode = loadFromFile(file, null, null);
+            loadedNode.saveToFile();
          }
+      }
+      for (WorkspaceResourceDirectory subdirectory : directory.queryContainedDirectories())
+      {
+         processDirectory(subdirectory);
       }
    }
 
-   private BehaviorTreeNodeDefinition loadFromFile(JsonNode jsonNode, BehaviorTreeNodeDefinition parentNode)
+   private BehaviorTreeNodeDefinition loadFromFile(WorkspaceResourceFile file, JsonNode jsonNode, BehaviorTreeNodeDefinition parentNode)
    {
-      String typeName = jsonNode.get("type").textValue();
+      MutableObject<BehaviorTreeNodeDefinition> loadedNode = new MutableObject<>();
 
-      Class<?> definitionType = BehaviorTreeDefinitionRegistry.getClassFromTypeName(typeName);
-
-      BehaviorTreeNodeDefinition node = BehaviorTreeDefinitionBuilder.createNode(definitionType, crdtInfo, treeFilesDirectory);
-
-      node.loadFromFile(jsonNode);
-
-      if (parentNode != null)
-         BehaviorTreeTopologyOperations.addChildBasic(node, parentNode);
-
-      JSONTools.forEachArrayElement(jsonNode, "children", childJsonNode ->
+      if (jsonNode == null)
       {
-         JsonNode fileNode = childJsonNode.get("file");
-         if (fileNode == null)
+         try
          {
-            loadFromFile(childJsonNode, node);
+            // Try loading from file first, since maybe the user saved a new version
+            Path filesystemFile = file.getFilesystemFile();
+            if (filesystemFile != null && Files.exists(filesystemFile))
+            {
+               LogTools.info("Loading from file: {}", filesystemFile);
+               JSONFileTools.load(file, childJsonNode ->
+                     loadedNode.setValue(loadFromFile(file, childJsonNode, parentNode)));
+            }
+            else
+            {
+               URL classpathResource = file.getClasspathResource();
+               if (classpathResource != null)
+               {
+                  LogTools.info("Loading from resource: {}", classpathResource);
+                  JSONFileTools.load(classpathResource, childJsonNode ->
+                        loadedNode.setValue(loadFromFile(file, childJsonNode, parentNode)));
+               }
+            }
          }
-         else
+         catch (Exception e)
          {
-            WorkspaceResourceFile childFile = new WorkspaceResourceFile(treeFilesDirectory, fileNode.asText());
-            LogTools.info("Loading {}", childFile.getFilesystemFile());
-            JSONFileTools.load(childFile, childJSONNode -> loadFromFile(childJSONNode, node));
+            LogTools.error("""
+                           Error loading {}.
+                           Please run the JSON sanitizer in debug mode with the NullPointerException breakpoint enabled.
+                           Error: {}
+                           """, file.getFileName(), e.getMessage());
          }
-      });
+      }
+      else
+      {
+         String typeName = jsonNode.get("type").textValue();
 
-      return node;
+         Class<?> definitionType = BehaviorTreeDefinitionRegistry.getClassFromTypeName(typeName);
+
+         BehaviorTreeNodeDefinition node = BehaviorTreeDefinitionBuilder.createNode(definitionType,
+                                                                                    crdtInfo,
+                                                                                    treeFilesDirectory,
+                                                                                    defaultFootstepPlannerParameters);
+
+         node.loadFromFile(jsonNode);
+
+         // Make sure the node is named the same as the file including subdirectory
+         if (node.isJSONRoot())
+         {
+            String relativePathString;
+            Path filesystemFile = file.getFilesystemFile();
+            if (filesystemFile != null && Files.exists(filesystemFile))
+            {
+               relativePathString = treeFilesDirectory.getFilesystemDirectory().relativize(filesystemFile).toString();
+            }
+            else
+            {
+               String classpathResourceString = file.getClasspathResource().getPath();
+               String pathNecessaryForClasspathLoading = treeFilesDirectory.getPathNecessaryForClasspathLoading();
+
+               relativePathString = classpathResourceString.substring(classpathResourceString.lastIndexOf(pathNecessaryForClasspathLoading)
+                                                                      + pathNecessaryForClasspathLoading.length() + 1); // Include ending '/'
+            }
+            if (!node.getName().equals(relativePathString))
+            {
+               LogTools.warn("Renaming node to match file name: {} -> {}", node.getName(), relativePathString);
+               node.setName(relativePathString);
+            }
+         }
+
+         LogTools.info("Creating node: {}", node.getName());
+
+         if (parentNode != null)
+         {
+            node.setParent(parentNode);
+            parentNode.getChildren().add(parentNode.getChildren().size(), node);
+         }
+
+         JSONTools.forEachArrayElement(jsonNode, "children", childJsonNode ->
+         {
+            if (childJsonNode.has("file"))
+            {
+               WorkspaceResourceFile childFile = new WorkspaceResourceFile(treeFilesDirectory, childJsonNode.get("file").asText());
+               loadFromFile(childFile, null, node);
+            }
+            else
+            {
+               loadFromFile(file, childJsonNode, node);
+            }
+         });
+
+         loadedNode.setValue(node);
+      }
+
+      return loadedNode.getValue();
    }
 }

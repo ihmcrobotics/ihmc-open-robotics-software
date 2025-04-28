@@ -1,18 +1,11 @@
 package us.ihmc.commonWalkingControlModules.controllerAPI.input;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
-
 import controller_msgs.msg.dds.InvalidPacketNotificationPacket;
 import ihmc_common_msgs.msg.dds.MessageCollection;
 import ihmc_common_msgs.msg.dds.MessageCollectionNotification;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector.MessageIDExtractor;
-import us.ihmc.communication.controllerAPI.ControllerAPI;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
+import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools.MessageUnpacker;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.net.PacketConsumer;
@@ -20,9 +13,16 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.log.LogTools;
 import us.ihmc.ros2.NewMessageListener;
-import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.ROS2TopicNameTools;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * The ControllerNetworkSubscriber is meant to used as a generic interface between a network packet
@@ -57,9 +57,9 @@ public class ControllerNetworkSubscriber
     * Local buffers for each message to ensure proper copying from the controller thread to the
     * communication thread.
     */
-   private final Map<Class<? extends Settable<?>>, ROS2PublisherBasics<?>> statusMessagePublisherMap = new HashMap<>();
+   private final Map<Class<? extends Settable<?>>, ROS2Publisher<?>> statusMessagePublisherMap = new HashMap<>();
 
-   private final ROS2NodeInterface ros2Node;
+   private final ROS2Node ros2Node;
 
    private final ROS2Topic<?> inputTopic;
    private final ROS2Topic<?> outputTopic;
@@ -68,7 +68,7 @@ public class ControllerNetworkSubscriber
                                       CommandInputManager controllerCommandInputManager,
                                       ROS2Topic<?> outputTopic,
                                       StatusMessageOutputManager controllerStatusOutputManager,
-                                      ROS2NodeInterface ros2Node)
+                                      ROS2Node ros2Node)
    {
       this.inputTopic = inputTopic;
       this.controllerCommandInputManager = controllerCommandInputManager;
@@ -148,7 +148,7 @@ public class ControllerNetworkSubscriber
 
    public void addMessageCollectors(MessageIDExtractor messageIDExtractor, int numberOfSimultaneousCollectionsToSupport)
    {
-      ROS2PublisherBasics<MessageCollectionNotification> publisher = createPublisher(MessageCollectionNotification.class);
+      ROS2Publisher<MessageCollectionNotification> publisher = createPublisher(MessageCollectionNotification.class);
       listOfSupportedStatusMessages.add(MessageCollectionNotification.class);
 
       for (int i = 0; i < numberOfSimultaneousCollectionsToSupport; i++)
@@ -219,7 +219,7 @@ public class ControllerNetworkSubscriber
       }
    }
 
-   private <T extends Settable<T>> ROS2PublisherBasics<T> createPublisher(Class<T> messageClass)
+   private <T extends Settable<T>> ROS2Publisher<T> createPublisher(Class<T> messageClass)
    {
       return ros2Node.createPublisher(ControllerAPI.getTopic(outputTopic, messageClass));
    }
@@ -293,7 +293,7 @@ public class ControllerNetworkSubscriber
    @SuppressWarnings("unchecked")
    private <T> void publishStatusMessage(T message)
    {
-      ROS2PublisherBasics<T> publisher = (ROS2PublisherBasics<T>) statusMessagePublisherMap.get(message.getClass());
+      ROS2Publisher<T> publisher = (ROS2Publisher<T>) statusMessagePublisherMap.get(message.getClass());
       publisher.publish(message);
    }
 

@@ -79,10 +79,10 @@ import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
-import us.ihmc.robotics.physics.Collidable;
-import us.ihmc.robotics.physics.CollisionResult;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.time.ThreadTimer;
+import us.ihmc.scs2.simulation.collision.Collidable;
+import us.ihmc.scs2.simulation.collision.CollisionResult;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.euclid.YoVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
@@ -197,7 +197,7 @@ public class KinematicsToolboxController extends ToolboxController
     * configuration obtained from {@link #desiredOneDoFJoints} and also with the solution quality which can be
     * used to quickly see if the solution is viable. It is sent back to the caller only.
     */
-   protected final KinematicsToolboxOutputStatus inverseKinematicsSolution;
+   private final KinematicsToolboxOutputStatus inverseKinematicsSolution;
    /**
     * Variable to keep track of when the last solution was published.
     */
@@ -852,7 +852,7 @@ public class KinematicsToolboxController extends ToolboxController
       isUserProvidingSupportPolygon.set(false);
       // By default, always constrain the center of mass according to the current support polygon (if defined).
       enableSupportPolygonConstraint.set(true);
-      inverseKinematicsSolution.getMultiContactFeasibleComRegion().clear();
+      inverseKinematicsSolution.getSupportRegion().clear();
    }
 
    /**

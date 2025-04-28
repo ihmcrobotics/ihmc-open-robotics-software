@@ -15,7 +15,7 @@ public class GoHomeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<con
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "4e3c534c7eb1358bfba06a6ba28190ac4d1393267c1ea44bb8b92707e8b9774c";
+   		return "bb51acc790387fe4c5276f6cbf69b6355b2e5ad510e4753987b258bd4b685329";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class GoHomeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<con
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -75,7 +75,7 @@ public class GoHomeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<con
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -96,7 +96,7 @@ public class GoHomeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<con
 
    public static void write(controller_msgs.msg.dds.GoHomeMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_9(data.getHumanoidBodyPart());
 
@@ -110,7 +110,7 @@ public class GoHomeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<con
 
    public static void read(controller_msgs.msg.dds.GoHomeMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setHumanoidBodyPart(cdr.read_type_9());
       	
@@ -126,7 +126,7 @@ public class GoHomeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<con
    @Override
    public final void serialize(controller_msgs.msg.dds.GoHomeMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_9("humanoid_body_part", data.getHumanoidBodyPart());
       ser.write_type_9("robot_side", data.getRobotSide());
       ser.write_type_6("trajectory_time", data.getTrajectoryTime());
@@ -136,7 +136,7 @@ public class GoHomeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<con
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.GoHomeMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setHumanoidBodyPart(ser.read_type_9("humanoid_body_part"));
       data.setRobotSide(ser.read_type_9("robot_side"));
       data.setTrajectoryTime(ser.read_type_6("trajectory_time"));

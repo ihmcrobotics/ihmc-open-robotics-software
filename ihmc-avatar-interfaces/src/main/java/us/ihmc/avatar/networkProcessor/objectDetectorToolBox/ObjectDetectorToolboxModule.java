@@ -1,9 +1,5 @@
 package us.ihmc.avatar.networkProcessor.objectDetectorToolBox;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import perception_msgs.msg.dds.DetectedFiducialPacket;
 import perception_msgs.msg.dds.DoorLocationPacket;
 import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorToolboxModule;
@@ -13,19 +9,21 @@ import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class ObjectDetectorToolboxModule extends ToolboxModule
 {
    private final ObjectDetectorToolboxController controller;
 
-   public ObjectDetectorToolboxModule(String robotName, FullHumanoidRobotModel desiredFullRobotModel, LogModelProvider modelProvider,
-                                      PubSubImplementation pubSubImplementation)
+   public ObjectDetectorToolboxModule(String robotName, FullHumanoidRobotModel desiredFullRobotModel, LogModelProvider modelProvider)
    {
-      super(robotName, desiredFullRobotModel, modelProvider, false, 250, pubSubImplementation);
+      super(robotName, desiredFullRobotModel, modelProvider, false, 250);
       controller = new ObjectDetectorToolboxController(fullRobotModel, statusOutputManager, registry);
       setTimeWithoutInputsBeforeGoingToSleep(1.2e+6);
    }
@@ -38,7 +36,7 @@ public class ObjectDetectorToolboxModule extends ToolboxModule
 
    //TODO check this
    @Override
-   public void registerExtraPuSubs(ROS2NodeInterface ros2Node)
+   public void registerExtraPuSubs(ROS2Node ros2Node)
    {
       ros2Node.createSubscription(FiducialDetectorToolboxModule.getOutputTopic(robotName).withTypeName(DetectedFiducialPacket.class), s ->
       {

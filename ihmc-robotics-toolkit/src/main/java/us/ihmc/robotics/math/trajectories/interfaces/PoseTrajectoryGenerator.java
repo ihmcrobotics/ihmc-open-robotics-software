@@ -3,6 +3,7 @@ package us.ihmc.robotics.math.trajectories.interfaces;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.robotics.trajectories.interfaces.PositionTrajectoryGenerator;
 
 public interface PoseTrajectoryGenerator extends PositionTrajectoryGenerator, OrientationTrajectoryGenerator
 {

@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.messageHandlers;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import controller_msgs.msg.dds.*;
@@ -14,6 +15,7 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.ExecutionTiming;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -27,6 +29,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegionsList;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
+import us.ihmc.humanoidRobotics.communication.packets.walking.ContinuousStepGeneratorMode;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -42,6 +45,7 @@ import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -95,6 +99,8 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
 
    private final YoBoolean isWalking = new YoBoolean("isWalking", registry);
 
+   private final YoBoolean requestDisableCoPFeedbackControl = new YoBoolean("requestDisableCoPFeedbackControl", registry);
+
    private final int numberOfFootstepsToVisualize = 4;
    @SuppressWarnings("unchecked")
    private final YoEnum<RobotSide>[] upcomingFoostepSide = new YoEnum[numberOfFootstepsToVisualize];
@@ -119,6 +125,10 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
    private final DoubleProvider maxStepDistance = new DoubleParameter("MaxStepDistance", registry, Double.POSITIVE_INFINITY);
    private final DoubleProvider maxStepHeightChange = new DoubleParameter("MaxStepHeightChange", registry, Double.POSITIVE_INFINITY);
    private final DoubleProvider maxSwingDistance = new DoubleParameter("MaxSwingDistance", registry, Double.POSITIVE_INFINITY);
+
+   private final List<Listener<?>> footstepConsumptionListenerList = new ArrayList<>();
+   private final YoBoolean usingQFP = new YoBoolean("usingQFP", registry);
+   private final YoBoolean isWalkingInPlace = new YoBoolean("isWalkingInPlace", registry);
 
    public WalkingMessageHandler(double defaultTransferTime,
                                 double defaultSwingTime,
@@ -146,7 +156,7 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
          ContactablePlaneBody contactableFoot = contactableFeet.get(robotSide);
          Footstep footstepAtCurrentLocation = new Footstep(robotSide);
          footstepsAtCurrentLocation.put(robotSide, footstepAtCurrentLocation);
-         soleFrames.put(robotSide, contactableFoot.getSoleFrame());
+         soleFrames.put(robotSide, contactableFoot.getContactFrame());
 
          upcomingFootTrajectoryCommandListForFlamingoStance.put(robotSide, new RecyclingArrayDeque<>(FootTrajectoryCommand.class, FootTrajectoryCommand::set));
          upcomingLegTrajectoryCommandListForFlamingoStance.put(robotSide, new RecyclingArrayDeque<>(LegTrajectoryCommand.class, LegTrajectoryCommand::set));
@@ -163,6 +173,12 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
 
       momentumTrajectoryHandler = new MomentumTrajectoryHandler(yoTime, registry);
       comTrajectoryHandler = new CenterOfMassTrajectoryHandler(yoTime, registry);
+
+      YoVariableChangedListener requestDisableCoPFeedbackListener = change -> requestDisableCoPFeedbackControl.set(usingQFP.getBooleanValue() && !isWalkingInPlace.getBooleanValue() && !isWalkingPaused.getBooleanValue() && isWalking.getBooleanValue());
+      usingQFP.addListener(requestDisableCoPFeedbackListener);
+      isWalkingInPlace.addListener(requestDisableCoPFeedbackListener);
+      isWalkingPaused.addListener(requestDisableCoPFeedbackListener);
+      isWalking.addListener(requestDisableCoPFeedbackListener);
 
       parentRegistry.addChild(registry);
    }
@@ -187,9 +203,8 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
                clearFlamingoCommands();
                break;
             case QUEUE:
-               // TODO review the use of this. 
-               boolean checkForInconsistencies = !upcomingFootsteps.isEmpty() || currentNumberOfFootsteps.getIntegerValue() > 0;
-               if (checkForInconsistencies)
+               // Check for inconsistencies between the previous command options and the current command options
+               if (isWalking.getBooleanValue())
                {
                   if (offsettingXYPlanWithFootstepError.getValue() != command.isOffsetFootstepsWithExecutionError())
                   {
@@ -227,7 +242,7 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
                }
                else
                {
-                  // We don't have any steps in the queue, so it's effectively the same thing as overriding.
+                  // We aren't walking, we are in stance, so it's effectively the same thing as overriding.
                   offsettingXYPlanWithFootstepError.set(command.isOffsetFootstepsWithExecutionError());
                   offsettingHeightPlanWithFootstepError.set(command.isOffsetFootstepsHeightWithExecutionError());
                   planOffsetInWorld.setToZero();
@@ -279,6 +294,17 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
       boolean areFootstepsAdjustable = command.areFootstepsAdjustable();
       boolean shouldCheckPlanForReachability = command.getShouldCheckForReachability();
 
+      if (command.getNumberOfFootsteps() > 0)
+      {
+         usingQFP.set(command.getFootstep(0).getCsgMode() == ContinuousStepGeneratorMode.QFP);
+         isWalkingInPlace.set(command.getFootstep(0).walkingInPlace);
+
+         if (usingQFP.getBooleanValue() &&
+             footstepStatus.getRobotSide() == command.getFootstep(0).getRobotSide().toByte() &&
+             footstepStatus.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED)
+            command.removeFootstep(0);
+      }
+
       for (int i = 0; i < command.getNumberOfFootsteps(); i++)
       {
          boolean shouldCheckStepForReachability = shouldCheckPlanForReachability || command.getFootstep(i).getShouldCheckForReachability();
@@ -312,6 +338,10 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
       }
 
       checkForPause();
+
+      if (hasUpcomingFootsteps())
+         for (int i = 0; i < footstepConsumptionListenerList.size(); i++)
+            footstepConsumptionListenerList.get(i).doListenerAction();
 
       updateVisualization();
    }
@@ -432,6 +462,21 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
 //      }
 
 //      StepConstraintRegionsList.getAsMessage(stepConstraints, messasgeToPack.getStepConstraints());
+   }
+
+   public void addFootstepConsumptionListener(Listener<?> listener)
+   {
+      footstepConsumptionListenerList.add(listener);
+   }
+
+   public void removeFootstepConsumptionListener(Listener<?> listener)
+   {
+      footstepConsumptionListenerList.remove(listener);
+   }
+
+   public interface Listener<S extends Settable<S>>
+   {
+      void doListenerAction();
    }
 
    public MomentumTrajectoryHandler getMomentumTrajectoryHandler()
@@ -769,6 +814,16 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
       Footstep footstep = footstepsAtCurrentLocation.get(robotSide);
       footstep.setPose(tempPose);
       return footstep;
+   }
+
+   public YoBoolean getUsingQFP()
+   {
+      return usingQFP;
+   }
+
+   public YoBoolean getRequestDisableCopFeedbackControl()
+   {
+      return requestDisableCoPFeedbackControl;
    }
 
    public void setDefaultTransferTime(double transferTime)

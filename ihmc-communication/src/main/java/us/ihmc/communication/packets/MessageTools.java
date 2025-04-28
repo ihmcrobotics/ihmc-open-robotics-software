@@ -17,6 +17,7 @@ import ihmc_common_msgs.msg.dds.Capsule3DMessage;
 import ihmc_common_msgs.msg.dds.ConvexPolytope3DMessage;
 import ihmc_common_msgs.msg.dds.Cylinder3DMessage;
 import ihmc_common_msgs.msg.dds.Ellipsoid3DMessage;
+import ihmc_common_msgs.msg.dds.GuidMessage;
 import ihmc_common_msgs.msg.dds.InstantMessage;
 import ihmc_common_msgs.msg.dds.PoseListMessage;
 import ihmc_common_msgs.msg.dds.Ramp3DMessage;
@@ -44,6 +45,7 @@ import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import toolbox_msgs.msg.dds.WalkingControllerPreviewOutputMessage;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.QuaternionCalculus;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
@@ -82,9 +84,11 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.pubsub.TopicDataType;
+import us.ihmc.pubsub.common.Guid;
+import us.ihmc.pubsub.common.Guid.Entity;
+import us.ihmc.pubsub.common.Guid.GuidPrefix;
 import us.ihmc.pubsub.common.SerializedPayload;
 import us.ihmc.robotics.lidar.LidarScanParameters;
-import us.ihmc.robotics.math.QuaternionCalculus;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.OneDoFTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.SE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.OneDoFTrajectoryPointReadOnly;
@@ -1058,7 +1062,7 @@ public class MessageTools
       QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
       quaternionDot.sub(orientationEnd, orientationStart);
       quaternionDot.scale(alphaDot);
-      quaternionCalculus.computeAngularVelocityInBodyFixedFrame(orientationInterpolated, quaternionDot, angularVelocityInterpolated);
+      quaternionCalculus.computeAngularVelocityInRotatedFrame(orientationInterpolated, quaternionDot, angularVelocityInterpolated);
       angularVelocityInterpolated.scaleAdd(1.0 - alpha, angularVelocityStart, angularVelocityInterpolated);
       angularVelocityInterpolated.scaleAdd(alpha, angularVelocityEnd, angularVelocityInterpolated);
 
@@ -1420,6 +1424,25 @@ public class MessageTools
    public static UUID toUUID(UUIDMessage uuidMessage)
    {
       return new UUID(uuidMessage.getMostSignificantBits(), uuidMessage.getLeastSignificantBits());
+   }
+
+   public static void toMessage(Guid guid, GuidMessage guidMessage)
+   {
+      System.arraycopy(guid.getGuidPrefix().getValue(), 0, guidMessage.getPrefix(), 0, GuidPrefix.size);
+      System.arraycopy(guid.getEntity().getValue(), 0, guidMessage.getEntity(), 0, Entity.size);
+   }
+
+   public static void fromMessage(GuidMessage guidMessage, Guid guid)
+   {
+      System.arraycopy(guidMessage.getPrefix(), 0, guid.getGuidPrefix().getValue(), 0, GuidPrefix.size);
+      System.arraycopy(guidMessage.getEntity(), 0, guid.getEntity().getValue(), 0, Entity.size);
+   }
+
+   public static Guid toGuid(GuidMessage guidMessage)
+   {
+      Guid guid = new Guid();
+      fromMessage(guidMessage, guid);
+      return guid;
    }
 
    public static double calculateDelay(ImageMessage imageMessage)

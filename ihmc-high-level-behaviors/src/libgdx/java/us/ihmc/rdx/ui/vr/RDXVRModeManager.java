@@ -24,6 +24,7 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.RDXJoystickBasedStepping;
 import us.ihmc.rdx.ui.affordances.RDXManualFootstepPlacement;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2RobotVisualizer;
+import us.ihmc.rdx.ui.teleoperation.RDXHandConfigurationManager;
 import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationManager;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -50,6 +51,7 @@ public class RDXVRModeManager
    private ImBoolean interactablesEnabled;
    private ControllerStatusTracker controllerStatusTracker;
    private RDXManualFootstepPlacement footstepPlacer;
+   private RDXHandConfigurationManager handManager;
 
    public void create(RDXBaseUI baseUI,
                       ROS2SyncedRobotModel syncedRobot,
@@ -94,6 +96,7 @@ public class RDXVRModeManager
             interactablesEnabled = teleoperationPanel.getInteractablesEnabled();
             controllerStatusTracker = teleoperationPanel.getControllerStatusTracker();
             footstepPlacer = teleoperationPanel.getLocomotionManager().getManualFootstepPlacement();
+            handManager = teleoperationPanel.getArmManager().getHandManager();
             break;
          }
       }
@@ -109,7 +112,8 @@ public class RDXVRModeManager
                                                                     retargetingParameters,
                                                                     sceneGraph,
                                                                     controllerStatusTracker,
-                                                                    footstepPlacer);
+                                                                    footstepPlacer,
+                                                                    handManager);
          kinematicsStreamingMode.create(createKinematicsStreamingToolboxModule);
       }
 
@@ -159,7 +163,24 @@ public class RDXVRModeManager
    public void update()
    {
       if (kinematicsStreamingMode != null)
+      {
          kinematicsStreamingMode.update(mode == RDXVRMode.WHOLE_BODY_IK_STREAMING);
+
+         // Fade robot graphics
+         if (kinematicsStreamingMode.isStreaming() && stereoVision.isEnabled())
+         { // Fade graphics out if in stereo vision mode while streaming
+            kinematicsStreamingMode.visualizeIKPreviewGraphic(false);
+            robotVisualizer.fadeVisuals(0.0f, 0.01f);
+         }
+         else if (mode == RDXVRMode.WHOLE_BODY_IK_STREAMING && (stereoVision.getDisabledNotification().poll()
+                                                                || kinematicsStreamingMode.getStreamingDisabledNotification().poll()
+                                                                || robotVisualizer.isFading()))
+         { // Fade graphics in if either stereo vision or streaming are exited
+            robotVisualizer.fadeVisuals(1.0f, 0.05f);
+            if (!robotVisualizer.isFading())
+               kinematicsStreamingMode.visualizeIKPreviewGraphic(true);
+         }
+      }
       if (vrModeControls.getRenderOnLeftHand().get())
          vrModeControls3DPanel.update();
       joystickBasedStepping.update(mode == RDXVRMode.JOYSTICK_WALKING);
@@ -168,25 +189,6 @@ public class RDXVRModeManager
       if (mode == RDXVRMode.FOOTSTEP_PLACEMENT)
       { // Disable interactables because we do not want to collide with the walking control ring
          interactablesEnabled.set(false);
-      }
-      else if (!interactablesEnabled.get())
-      {
-         interactablesEnabled.set(true);
-      }
-
-      // Fade robot graphics
-      if (kinematicsStreamingMode.isStreaming() && stereoVision.isEnabled())
-      { // Fade graphics out if in stereo vision mode while streaming
-         kinematicsStreamingMode.visualizeIKPreviewGraphic(false);
-         robotVisualizer.fadeVisuals(0.0f, 0.01f);
-      }
-      else if (mode == RDXVRMode.WHOLE_BODY_IK_STREAMING && (stereoVision.getDisabledNotification().poll()
-                                                             || kinematicsStreamingMode.getStreamingDisabledNotification().poll()
-                                                             || robotVisualizer.isFading()))
-      { // Fade graphics in if either stereo vision or streaming are exited
-         robotVisualizer.fadeVisuals(1.0f, 0.05f);
-         if (!robotVisualizer.isFading())
-            kinematicsStreamingMode.visualizeIKPreviewGraphic(true);
       }
    }
 

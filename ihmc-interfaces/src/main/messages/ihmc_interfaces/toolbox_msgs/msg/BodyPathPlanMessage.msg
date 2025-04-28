@@ -1,7 +1,7 @@
 # This message is part of the IHMC footstep planning module.
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 byte FOOTSTEP_PLANNING_RESULT_OPTIMAL_SOLUTION = 0
 byte FOOTSTEP_PLANNING_RESULT_SUB_OPTIMAL_SOLUTION = 1

@@ -15,7 +15,7 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "07a2ef2127d2a7d5ff7be602a12de7890b4412f506530ad5625527b587b98c88";
+   		return "624cc92872f1d8473b47e098815669b6fb9c0a5c2459a80441afc9913a518f73";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -70,13 +70,9 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
 
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 18; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 32; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
@@ -92,7 +88,7 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -118,15 +114,9 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getDesiredRootAngularVelocity(), current_alignment);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for(int i0 = 0; i0 < data.getMultiContactFeasibleComRegion().size(); ++i0)
+      for(int i0 = 0; i0 < data.getSupportRegion().size(); ++i0)
       {
-          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getMultiContactFeasibleComRegion().get(i0), current_alignment);}
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
+          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getSupportRegion().get(i0), current_alignment);}
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -137,7 +127,7 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
 
    public static void write(toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_9(data.getCurrentToolboxState());
 
@@ -145,23 +135,19 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
 
       if(data.getDesiredJointAngles().size() <= 100)
       cdr.write_type_e(data.getDesiredJointAngles());else
-          throw new RuntimeException("desired_joint_angles field exceeds the maximum length");
+          throw new RuntimeException("desired_joint_angles field exceeds the maximum length: %d > %d".formatted(data.getDesiredJointAngles().size(), 100));
 
       geometry_msgs.msg.dds.PointPubSubType.write(data.getDesiredRootPosition(), cdr);
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getDesiredRootOrientation(), cdr);
       if(data.getDesiredJointVelocities().size() <= 100)
       cdr.write_type_e(data.getDesiredJointVelocities());else
-          throw new RuntimeException("desired_joint_velocities field exceeds the maximum length");
+          throw new RuntimeException("desired_joint_velocities field exceeds the maximum length: %d > %d".formatted(data.getDesiredJointVelocities().size(), 100));
 
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getDesiredRootLinearVelocity(), cdr);
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getDesiredRootAngularVelocity(), cdr);
-      if(data.getMultiContactFeasibleComRegion().size() <= 18)
-      cdr.write_type_e(data.getMultiContactFeasibleComRegion());else
-          throw new RuntimeException("multi_contact_feasible_com_region field exceeds the maximum length");
-
-      cdr.write_type_2(data.getClosestEdgeIndex());
-
-      cdr.write_type_6(data.getCenterOfMassStabilityMargin());
+      if(data.getSupportRegion().size() <= 32)
+      cdr.write_type_e(data.getSupportRegion());else
+          throw new RuntimeException("support_region field exceeds the maximum length: %d > %d".formatted(data.getSupportRegion().size(), 32));
 
       cdr.write_type_6(data.getSolutionQuality());
 
@@ -169,7 +155,7 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
 
    public static void read(toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setCurrentToolboxState(cdr.read_type_9());
       	
@@ -181,11 +167,7 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
       cdr.read_type_e(data.getDesiredJointVelocities());	
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getDesiredRootLinearVelocity(), cdr);	
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getDesiredRootAngularVelocity(), cdr);	
-      cdr.read_type_e(data.getMultiContactFeasibleComRegion());	
-      data.setClosestEdgeIndex(cdr.read_type_2());
-      	
-      data.setCenterOfMassStabilityMargin(cdr.read_type_6());
-      	
+      cdr.read_type_e(data.getSupportRegion());	
       data.setSolutionQuality(cdr.read_type_6());
       	
 
@@ -194,7 +176,7 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
    @Override
    public final void serialize(toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_9("current_toolbox_state", data.getCurrentToolboxState());
       ser.write_type_2("joint_name_hash", data.getJointNameHash());
       ser.write_type_e("desired_joint_angles", data.getDesiredJointAngles());
@@ -207,16 +189,14 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
 
       ser.write_type_a("desired_root_angular_velocity", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getDesiredRootAngularVelocity());
 
-      ser.write_type_e("multi_contact_feasible_com_region", data.getMultiContactFeasibleComRegion());
-      ser.write_type_2("closest_edge_index", data.getClosestEdgeIndex());
-      ser.write_type_6("center_of_mass_stability_margin", data.getCenterOfMassStabilityMargin());
+      ser.write_type_e("support_region", data.getSupportRegion());
       ser.write_type_6("solution_quality", data.getSolutionQuality());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setCurrentToolboxState(ser.read_type_9("current_toolbox_state"));
       data.setJointNameHash(ser.read_type_2("joint_name_hash"));
       ser.read_type_e("desired_joint_angles", data.getDesiredJointAngles());
@@ -229,9 +209,7 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
 
       ser.read_type_a("desired_root_angular_velocity", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getDesiredRootAngularVelocity());
 
-      ser.read_type_e("multi_contact_feasible_com_region", data.getMultiContactFeasibleComRegion());
-      data.setClosestEdgeIndex(ser.read_type_2("closest_edge_index"));
-      data.setCenterOfMassStabilityMargin(ser.read_type_6("center_of_mass_stability_margin"));
+      ser.read_type_e("support_region", data.getSupportRegion());
       data.setSolutionQuality(ser.read_type_6("solution_quality"));
    }
 

@@ -2,7 +2,7 @@
 # Main usage is for the IHMC KinematicsToolbox.
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # Nothing reported by the toolbox.
 byte CURRENT_TOOLBOX_STATE_NO_STATUS = 0
@@ -35,11 +35,7 @@ geometry_msgs/Vector3 desired_root_linear_velocity
 # Desired angular velocity of the root joint expressed in local frame.
 geometry_msgs/Vector3 desired_root_angular_velocity
 
-# Multi-contact feasible com region computed by the toolbox (if upper body is load-bearing)
-geometry_msgs/Point[<=18] multi_contact_feasible_com_region
-# Lowest-proximity edge index in multi-contact com region (if computed)
-int32 closest_edge_index -1
-# CoM stability margin if upper body is load-bearing
-float64 center_of_mass_stability_margin -1.0
+# Support region used by the toolbox
+geometry_msgs/Point[<=32] support_region
 
 float64 solution_quality -1

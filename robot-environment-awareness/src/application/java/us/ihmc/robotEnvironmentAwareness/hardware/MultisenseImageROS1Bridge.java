@@ -1,5 +1,19 @@
 package us.ihmc.robotEnvironmentAwareness.hardware;
 
+import org.jboss.netty.buffer.ChannelBuffer;
+import perception_msgs.msg.dds.Image32;
+import sensor_msgs.CameraInfo;
+import sensor_msgs.Image;
+import std_msgs.Header;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.robotEnvironmentAwareness.fusion.MultisenseInformation;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.ros2.ROS2Publisher;
+import us.ihmc.utilities.ros.RosMainNode;
+import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
+
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -8,29 +22,13 @@ import java.net.URISyntaxException;
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicReference;
 
-import javax.imageio.ImageIO;
-
-import org.jboss.netty.buffer.ChannelBuffer;
-
-import perception_msgs.msg.dds.Image32;
-import sensor_msgs.CameraInfo;
-import sensor_msgs.Image;
-import std_msgs.Header;
-import us.ihmc.ros2.ROS2PublisherBasics;
-import us.ihmc.communication.ROS2Tools;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.robotEnvironmentAwareness.fusion.MultisenseInformation;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.utilities.ros.RosMainNode;
-import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
-
 public class MultisenseImageROS1Bridge extends AbstractRosTopicSubscriber<Image>
 {
    private static final MultisenseInformation multisense = MultisenseInformation.CART;
 
-   private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "imagePublisherNode");
+   private final ROS2Node ros2Node = new ROS2NodeBuilder().build("imagePublisherNode");
 
-   private final ROS2PublisherBasics<Image32> imagePublisher;
+   private final ROS2Publisher<Image32> imagePublisher;
 
    private final MultisenseCameraInfoROS1Bridge cameraInfoBridge;
 

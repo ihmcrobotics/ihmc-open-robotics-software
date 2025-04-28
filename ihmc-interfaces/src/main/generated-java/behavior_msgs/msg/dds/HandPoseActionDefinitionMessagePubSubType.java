@@ -15,7 +15,7 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "55de2db1d5cea6ea82763889f03ae45aff2aafe02d0ea00f6ce65ccf2a574334";
+   		return "89609430f53defe66e13d25a5760706eab37a1230124341d2b5a38f6f5362854";
    }
    
    @Override
@@ -145,7 +145,7 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
 
       if(data.getParentFrameName().length() <= 255)
       cdr.write_type_d(data.getParentFrameName());else
-          throw new RuntimeException("parent_frame_name field exceeds the maximum length");
+          throw new RuntimeException("parent_frame_name field exceeds the maximum length: %d > %d".formatted(data.getParentFrameName().length(), 255));
 
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getTransformToParent(), cdr);
       cdr.write_type_7(data.getJointSpaceControl());

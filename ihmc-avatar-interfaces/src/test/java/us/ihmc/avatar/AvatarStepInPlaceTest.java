@@ -1,8 +1,5 @@
 package us.ihmc.avatar;
 
-import static us.ihmc.robotics.Assert.assertFalse;
-import static us.ihmc.robotics.Assert.assertTrue;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,6 +31,8 @@ import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 public abstract class AvatarStepInPlaceTest implements MultiRobotTestInterface
 {
    private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -42,7 +41,7 @@ public abstract class AvatarStepInPlaceTest implements MultiRobotTestInterface
    private FullHumanoidRobotModel fullRobotModel;
 
    private PushRobotControllerSCS2 pushRobotController;
-   private SideDependentList<StateTransitionCondition> singleSupportStartConditions = new SideDependentList<>();
+   private final SideDependentList<StateTransitionCondition> singleSupportStartConditions = new SideDependentList<>();
 
    protected int getNumberOfSteps()
    {
@@ -226,7 +225,7 @@ public abstract class AvatarStepInPlaceTest implements MultiRobotTestInterface
             adjusted = true;
          }
       }
-      assertTrue("Footstep wasn't adjusted, when it should have been", adjusted);
+      assertTrue(adjusted, "Footstep wasn't adjusted, when it should have been");
 
       simulationTestHelper.simulateNow(0.5);
    }
@@ -249,7 +248,7 @@ public abstract class AvatarStepInPlaceTest implements MultiRobotTestInterface
       simulationTestHelper.setCamera(cameraFix, cameraPosition);
    }
 
-   private class SingleSupportStartCondition implements StateTransitionCondition
+   private static class SingleSupportStartCondition implements StateTransitionCondition
    {
       private final YoEnum<ConstraintType> footConstraintType;
 

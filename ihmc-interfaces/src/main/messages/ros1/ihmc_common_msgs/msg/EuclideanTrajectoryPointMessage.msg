@@ -4,7 +4,7 @@
 # Feel free to look at SO3TrajectoryPointMessage (rotational) and SE3TrajectoryPointMessage (rotational AND translational).
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # Time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.
 float64 time

@@ -8,11 +8,6 @@ import us.ihmc.tools.property.StoredPropertySetBasics;
  */
 public interface ContinuousHikingParametersBasics extends ContinuousHikingParametersReadOnly, StoredPropertySetBasics
 {
-   default void setEnableContinuousHiking(boolean enableContinuousHiking)
-   {
-      set(ContinuousHikingParameters.enableContinuousHiking, enableContinuousHiking);
-   }
-
    default void setStepPublisherEnabled(boolean stepPublisherEnabled)
    {
       set(ContinuousHikingParameters.stepPublisherEnabled, stepPublisherEnabled);
@@ -21,6 +16,11 @@ public interface ContinuousHikingParametersBasics extends ContinuousHikingParame
    default void setOverrideEntireQueueEachStep(boolean overrideEntireQueueEachStep)
    {
       set(ContinuousHikingParameters.overrideEntireQueueEachStep, overrideEntireQueueEachStep);
+   }
+
+   default void setEnableSwingCollisionAvoidance(boolean enableSwingCollisionAvoidance)
+   {
+      set(ContinuousHikingParameters.enableSwingCollisionAvoidance, enableSwingCollisionAvoidance);
    }
 
    default void setNumberOfStepsToSend(int numberOfStepsToSend)
@@ -38,6 +38,16 @@ public interface ContinuousHikingParametersBasics extends ContinuousHikingParame
       set(ContinuousHikingParameters.goalPoseUpDistance, goalPoseUpDistance);
    }
 
+   default void setGoalPoseBackwardDistance(double goalPoseBackwardDistance)
+   {
+      set(ContinuousHikingParameters.goalPoseBackwardDistance, goalPoseBackwardDistance);
+   }
+
+   default void setGoalPoseSidewaysDistance(double goalPoseSidewaysDistance)
+   {
+      set(ContinuousHikingParameters.goalPoseSidewaysDistance, goalPoseSidewaysDistance);
+   }
+
    default void setSwingTime(double swingTime)
    {
       set(ContinuousHikingParameters.swingTime, swingTime);
@@ -48,19 +58,14 @@ public interface ContinuousHikingParametersBasics extends ContinuousHikingParame
       set(ContinuousHikingParameters.transferTime, transferTime);
    }
 
-   default void setPlannerTimeoutFraction(double plannerTimeoutFraction)
-   {
-      set(ContinuousHikingParameters.plannerTimeoutFraction, plannerTimeoutFraction);
-   }
-
    default void setPlanningWithoutReferenceTimeout(double planningWithoutReferenceTimeout)
    {
       set(ContinuousHikingParameters.planningWithoutReferenceTimeout, planningWithoutReferenceTimeout);
    }
 
-   default void setPercentThroughSwingToPlanTo(double percentThroughSwingToPlanTo)
+   default void setPercentThroughSwingToStartPlanning(double percentThroughSwingToStartPlanning)
    {
-      set(ContinuousHikingParameters.percentThroughSwingToPlanTo, percentThroughSwingToPlanTo);
+      set(ContinuousHikingParameters.percentThroughSwingToStartPlanning, percentThroughSwingToStartPlanning);
    }
 
    default void setLogFootstepPlans(boolean logFootstepPlans)
@@ -71,5 +76,15 @@ public interface ContinuousHikingParametersBasics extends ContinuousHikingParame
    default void setNextWaypointDistanceMargin(double nextWaypointDistanceMargin)
    {
       set(ContinuousHikingParameters.nextWaypointDistanceMargin, nextWaypointDistanceMargin);
+   }
+
+   default void setNinetyDegreeTurnSwingTime(double ninetyDegreeTurnSwingTime)
+   {
+      set(ContinuousHikingParameters.ninetyDegreeTurnSwingTime, ninetyDegreeTurnSwingTime);
+   }
+
+   default void setNinetyDegreeTurnTransferTime(double ninetyDegreeTurnTransferTime)
+   {
+      set(ContinuousHikingParameters.ninetyDegreeTurnTransferTime, ninetyDegreeTurnTransferTime);
    }
 }

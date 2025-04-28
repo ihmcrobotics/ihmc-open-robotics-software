@@ -1,7 +1,7 @@
 # This message is part of the IHMC Robot Environment Awareness (REA) module.
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # Threshold used when creating a new concave hull.
 # Uses the Duckham and al. (2008) algorithm defined in the paper "Efficient generation of

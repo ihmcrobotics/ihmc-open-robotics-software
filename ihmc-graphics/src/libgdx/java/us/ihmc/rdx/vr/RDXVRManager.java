@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.commons.time.FrequencyCalculator;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiPlot;
@@ -19,12 +20,9 @@ import us.ihmc.rdx.sceneManager.RDX3DScene;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.thread.MissingThreadTools;
-import us.ihmc.tools.time.FrequencyCalculator;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class RDXVRManager
@@ -42,19 +40,19 @@ public class RDXVRManager
    private final ImBoolean vrEnabled = new ImBoolean(false);
    private final Notification posesReady = new Notification();
    private volatile boolean waitingOnPoses = false;
-   private ImGuiPlot vrFPSPlot = new ImGuiPlot(labels.get("VR FPS Hz"), 1000, 180, 50);
-   private FrequencyCalculator vrFPSCalculator = new FrequencyCalculator();
-   private ImGuiPlot waitGetPosesPlot = new ImGuiPlot(labels.get("Wait Get Poses Hz"), 1000, 180, 50);
-   private ImGuiPlot waitGetToRenderDelayPlot = new ImGuiPlot(labels.get("WaitGetToRender Delay"), 1000, 180, 50);
+   private final ImGuiPlot vrFPSPlot = new ImGuiPlot(labels.get("VR FPS Hz"), 1000, 180, 50);
+   private final FrequencyCalculator vrFPSCalculator = new FrequencyCalculator();
+   private final ImGuiPlot waitGetPosesPlot = new ImGuiPlot(labels.get("Wait Get Poses Hz"), 1000, 180, 50);
+   private final ImGuiPlot waitGetToRenderDelayPlot = new ImGuiPlot(labels.get("WaitGetToRender Delay"), 1000, 180, 50);
    private final Stopwatch waitGetToRenderStopwatch = new Stopwatch();
    private volatile double waitGetToRenderDuration = Double.NaN;
-   private FrequencyCalculator waitGetPosesFrequencyCalculator = new FrequencyCalculator();
-   private ImGuiPlot pollEventsPlot = new ImGuiPlot(labels.get("Poll Events Hz"), 1000, 180, 50);
-   private FrequencyCalculator pollEventsFrequencyCalculator = new FrequencyCalculator();
-   private ImGuiPlot contextInitializedPlot = new ImGuiPlot(labels.get("contextInitialized"), 1000, 180, 50);
-   private ImGuiPlot initSystemCountPlot = new ImGuiPlot(labels.get("initSystemCount"), 1000, 180, 50);
+   private final FrequencyCalculator waitGetPosesFrequencyCalculator = new FrequencyCalculator();
+   private final ImGuiPlot pollEventsPlot = new ImGuiPlot(labels.get("Poll Events Hz"), 1000, 180, 50);
+   private final FrequencyCalculator pollEventsFrequencyCalculator = new FrequencyCalculator();
+   private final ImGuiPlot contextInitializedPlot = new ImGuiPlot(labels.get("contextInitialized"), 1000, 180, 50);
+   private final ImGuiPlot initSystemCountPlot = new ImGuiPlot(labels.get("initSystemCount"), 1000, 180, 50);
    private volatile int initSystemCount = 0;
-   private ImGuiPlot setupEyesCountPlot = new ImGuiPlot(labels.get("setupEyesCount"), 1000, 180, 50);
+   private final ImGuiPlot setupEyesCountPlot = new ImGuiPlot(labels.get("setupEyesCount"), 1000, 180, 50);
    private volatile int setupEyesCount = 0;
    private final Notification waitOnPosesNotification = new Notification();
    private volatile boolean waitGetPosesThreadRunning = false;
@@ -101,7 +99,7 @@ public class RDXVRManager
          {
             initializing = true;
             contextCreatedNotification = new Notification();
-            MissingThreadTools.startAsDaemon(getClass().getSimpleName() + "-initSystem", DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, () ->
+            ThreadTools.startAsDaemon(() ->
             {
                synchronized (syncObject)
                {
@@ -109,7 +107,7 @@ public class RDXVRManager
                   context.initSystem();
                }
                contextCreatedNotification.set();
-            });
+            }, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, getClass().getSimpleName() + "-initSystem");
          }
          if (contextCreatedNotification != null && contextCreatedNotification.poll())
          {

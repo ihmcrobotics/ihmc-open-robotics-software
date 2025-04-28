@@ -69,7 +69,7 @@ int8 HAND_CONFIGURATION_CREEPY_GRASPING_HARD=29
 int8 HAND_CONFIGURATION_SLOW_CLOSE=30
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # Specifies the side of the robot that will execute the trajectory
 # Field default value 255

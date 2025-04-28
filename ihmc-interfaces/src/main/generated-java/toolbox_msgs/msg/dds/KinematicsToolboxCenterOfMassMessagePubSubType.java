@@ -15,7 +15,7 @@ public class KinematicsToolboxCenterOfMassMessagePubSubType implements us.ihmc.p
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "a44158c7e1f9f01839db7c39eaa61ba8e6bc0cc4401c1239381adbf5d25b9cad";
+   		return "5e5142a488e730ce8d46b147d4010104ffb61b0476e37ae8db432e3c9a435165";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class KinematicsToolboxCenterOfMassMessagePubSubType implements us.ihmc.p
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -79,7 +79,7 @@ public class KinematicsToolboxCenterOfMassMessagePubSubType implements us.ihmc.p
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getDesiredPositionInWorld(), current_alignment);
@@ -102,7 +102,7 @@ public class KinematicsToolboxCenterOfMassMessagePubSubType implements us.ihmc.p
 
    public static void write(toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       geometry_msgs.msg.dds.PointPubSubType.write(data.getDesiredPositionInWorld(), cdr);
       cdr.write_type_7(data.getHasDesiredLinearVelocity());
@@ -116,7 +116,7 @@ public class KinematicsToolboxCenterOfMassMessagePubSubType implements us.ihmc.p
 
    public static void read(toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       geometry_msgs.msg.dds.PointPubSubType.read(data.getDesiredPositionInWorld(), cdr);	
       data.setHasDesiredLinearVelocity(cdr.read_type_7());
@@ -132,7 +132,7 @@ public class KinematicsToolboxCenterOfMassMessagePubSubType implements us.ihmc.p
    @Override
    public final void serialize(toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_a("desired_position_in_world", new geometry_msgs.msg.dds.PointPubSubType(), data.getDesiredPositionInWorld());
 
       ser.write_type_7("has_desired_linear_velocity", data.getHasDesiredLinearVelocity());
@@ -148,7 +148,7 @@ public class KinematicsToolboxCenterOfMassMessagePubSubType implements us.ihmc.p
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       ser.read_type_a("desired_position_in_world", new geometry_msgs.msg.dds.PointPubSubType(), data.getDesiredPositionInWorld());
 
       data.setHasDesiredLinearVelocity(ser.read_type_7("has_desired_linear_velocity"));

@@ -1,7 +1,5 @@
 package us.ihmc.avatar.obstacleCourseTests;
 
-import static us.ihmc.robotics.Assert.assertTrue;
-
 import java.io.InputStream;
 
 import org.junit.jupiter.api.AfterEach;
@@ -12,6 +10,7 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commons.thread.ThreadTools;
@@ -28,6 +27,8 @@ import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoBoolean;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRobotTestInterface
 {
@@ -82,10 +83,7 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
 
       setupCameraForWalkingOverCinderBlocks();
 
-      ThreadTools.sleep(0);
-      boolean success = simulationTestHelper.simulateNow(0.5);
-
-      success = success && simulationTestHelper.simulateNow(9.5);
+      boolean success = simulationTestHelper.simulateNow(6.0);
 
       // TODO GITHUB WORKFLOWS
 //      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
@@ -118,13 +116,10 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
       setupCameraForWalkingOverCinderBlocks();
 
-      simulationTestHelper.simulateNow(0.01);
+      boolean success = simulationTestHelper.simulateNow(0.25);
 
       //      InputStream scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
       //      simulationTestHelper.loadScriptFile(scriptInputStream, fullRobotModel.getSoleFrame(RobotSide.LEFT));
-
-      ThreadTools.sleep(0);
-      boolean success = simulationTestHelper.simulateNow(0.5);
 
       //      YoBoolean rightDoToeTouchdownIfPossible = (YoBoolean) simulationTestHelper.findVariable("rightFootSwingDoToeTouchdownIfPossible");
       YoBoolean doToeOffIfPossibleInSingleSupport = (YoBoolean) simulationTestHelper.findVariable("doToeOffIfPossibleInSingleSupport");
@@ -165,10 +160,10 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
 
       simulationTestHelper.publishToController(footstepDataListMessage);
 
-      success = success && simulationTestHelper.simulateNow(6.0);
+      success = success && simulationTestHelper.simulateNow(getDefaultMoveTime(footstepDataListMessage));
 
       simulationTestHelper.publishToController(footstepDataListMessage2);
-      success = success && simulationTestHelper.simulateNow(4.0);
+      success = success && simulationTestHelper.simulateNow(getDefaultMoveTime(footstepDataListMessage2));
 
       // TODO GITHUB WORKFLOWS
 //      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
@@ -203,7 +198,7 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       setupCameraForWalkingOverCinderBlocks();
 
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
-      simulationTestHelper.simulateNow(1.0);
+      simulationTestHelper.simulateNow(0.25);
       FramePoint3D pelvisHeight = new FramePoint3D(fullRobotModel.getRootJoint().getFrameAfterJoint());
       pelvisHeight.changeFrame(ReferenceFrame.getWorldFrame());
       PelvisHeightTrajectoryMessage message = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, pelvisHeight.getZ() + 0.1);
@@ -211,7 +206,6 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       InputStream scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
       simulationTestHelper.loadScriptFile(scriptInputStream, fullRobotModel.getSoleFrame(RobotSide.LEFT));
 
-      ThreadTools.sleep(0);
       assertTrue(simulationTestHelper.simulateNow(6.0));
 
       // TODO GITHUB WORKFLOWS
@@ -233,4 +227,14 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
 
       simulationTestHelper.setCamera(cameraFix, cameraPosition);
    }
+
+   private double getDefaultMoveTime(FootstepDataListMessage footsteps)
+   {
+      DRCRobotModel robotModel = getRobotModel();
+      double moveTime = footsteps.getFootstepDataList().size() * (robotModel.getWalkingControllerParameters().getDefaultSwingTime()
+                                                                  + robotModel.getWalkingControllerParameters().getDefaultTransferTime());
+      moveTime += robotModel.getWalkingControllerParameters().getDefaultInitialTransferTime() + robotModel.getWalkingControllerParameters().getDefaultFinalTransferTime();
+      return moveTime;
+   }
+
 }

@@ -16,8 +16,8 @@ public class FootPoseActionState extends ActionNodeState<FootPoseActionDefinitio
       super(id, new FootPoseActionDefinition(crdtInfo, saveFileDirectory), crdtInfo);
 
       footFrame = new CRDTDetachableReferenceFrame(referenceFrameLibrary,
-                                                    getDefinition().getCRDTParentFrameName(),
-                                                    getDefinition().getFootToParentTransform());
+                                                   definition.getCRDTParentFrameName(),
+                                                   definition.getFootToParentTransform());
    }
 
    @Override
@@ -28,16 +28,16 @@ public class FootPoseActionState extends ActionNodeState<FootPoseActionDefinitio
 
    public void toMessage(FootPoseActionStateMessage message)
    {
-      getDefinition().toMessage(message.getDefinition());
+      definition.toMessage(message.getDefinition());
 
       super.toMessage(message.getState());
    }
 
    public void fromMessage(FootPoseActionStateMessage message)
    {
-      super.fromMessage(message.getState());
+      definition.fromMessage(message.getDefinition());
 
-      getDefinition().fromMessage(message.getDefinition());
+      super.fromMessage(message.getState());
    }
 
    public CRDTDetachableReferenceFrame getFootFrame()

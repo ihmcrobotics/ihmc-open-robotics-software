@@ -7,6 +7,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticePoint;
+import us.ihmc.footstepPlanning.graphSearch.parameters.TestFootstepPlannerParameters;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -22,26 +23,29 @@ public class ReferencedAStarFootStepPlannerTest
    private static final double EPSLILON_YAW = 0.5 * LatticePoint.gridSizeYaw;
    private static final Pose3D leftNominalGoalPose = new Pose3D(0.6, 0.1, 0.0, 0.0, 0.0, 0.0);
    private static final Pose3D rightNominalGoalPose = new Pose3D(0.6, -0.1, 0.0, 0.0, 0.0, 0.0);
-   private static final FootstepPlannerRequest footstepPlannerRequest = new FootstepPlannerRequest();
+   private static final FootstepPlannerRequest request = new FootstepPlannerRequest();
    private static final FootstepPlanningModule footstepPlannerModule = new FootstepPlanningModule("testerModule");
 
    private static FootstepPlannerOutput plannerOutput;
-
+   private static final TestFootstepPlannerParameters parameters = new TestFootstepPlannerParameters();
    @BeforeAll
    public static void generateAStarPlan()
    {
+      // We use test parameters so we know what to expect
+      footstepPlannerModule.getFootstepPlannerParameters().set(parameters);
+
       // Here we set up parameters to test the specific case we need
-      footstepPlannerRequest.setStartFootPose(RobotSide.LEFT, new Pose3D(0.0, 0.1, 0.0, 0.0, 0.0, 0.0));
-      footstepPlannerRequest.setStartFootPose(RobotSide.RIGHT, new Pose3D(0.0, -0.1, 0.0, 0.0, 0.0, 0.0));
+      request.setStartFootPose(RobotSide.LEFT, new Pose3D(0.0, 0.1, 0.0, 0.0, 0.0, 0.0));
+      request.setStartFootPose(RobotSide.RIGHT, new Pose3D(0.0, -0.1, 0.0, 0.0, 0.0, 0.0));
 
-      footstepPlannerRequest.setGoalFootPose(RobotSide.LEFT, leftNominalGoalPose);
-      footstepPlannerRequest.setGoalFootPose(RobotSide.RIGHT, rightNominalGoalPose);
+      request.setGoalFootPose(RobotSide.LEFT, leftNominalGoalPose);
+      request.setGoalFootPose(RobotSide.RIGHT, rightNominalGoalPose);
 
-      footstepPlannerRequest.setRequestedInitialStanceSide(RobotSide.LEFT);
-      footstepPlannerRequest.setReferencePlan(null);
-      footstepPlannerRequest.setAssumeFlatGround(true);
+      request.setRequestedInitialStanceSide(RobotSide.LEFT);
+      request.setReferencePlan(null);
+      request.setAssumeFlatGround(true);
 
-      plannerOutput = footstepPlannerModule.handleRequest(footstepPlannerRequest);
+      plannerOutput = footstepPlannerModule.handleRequest(request);
    }
 
    /**
@@ -83,14 +87,14 @@ public class ReferencedAStarFootStepPlannerTest
 
       // Now we want to set the adjusted plan as a reference, this way the planner will try to use the reference plan
       // Specifically the adjusted step that we changed; that is what we will be comparing against
-      footstepPlannerRequest.setReferencePlan(adjustedPlan);
+      request.setReferencePlan(adjustedPlan);
 
       // We want to test that the reference alpha is working as expected, and the range of its values are from 0 to 1 so we will loop through all of these values
       for (double referenceAlpha = 0.0; referenceAlpha <= 1.0; referenceAlpha += 0.1)
       {
          // Each loop through, we update the reference alpha to the new value, then we plan new footsteps and get the output pose at the index we care about
          footstepPlannerModule.getFootstepPlannerParameters().setReferencePlanAlpha(referenceAlpha);
-         FootstepPlannerOutput output = footstepPlannerModule.handleRequest(footstepPlannerRequest);
+         FootstepPlannerOutput output = footstepPlannerModule.handleRequest(request);
          FramePose3D outputStep = output.getFootstepPlan().getFootstep(index).getFootstepPose();
 
          // We calculate the expected adjustment using an interpolation between the nominal step and the reference step

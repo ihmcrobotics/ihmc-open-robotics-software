@@ -15,7 +15,7 @@ public class WalkingControllerPreviewOutputMessagePubSubType implements us.ihmc.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "a4002b18556f30c6044b8cf8e505882c9b1a0ae85f9c3d17a60dbfad470b5c0d";
+   		return "85f7193434b41d5e0acd89bb0f6e673559fd4d1937cb356ec8c9f5ba50ea4987";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class WalkingControllerPreviewOutputMessagePubSubType implements us.ihmc.
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -72,7 +72,7 @@ public class WalkingControllerPreviewOutputMessagePubSubType implements us.ihmc.
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -89,19 +89,19 @@ public class WalkingControllerPreviewOutputMessagePubSubType implements us.ihmc.
 
    public static void write(toolbox_msgs.msg.dds.WalkingControllerPreviewOutputMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_6(data.getFrameDt());
 
       if(data.getRobotConfigurations().size() <= 1000)
       cdr.write_type_e(data.getRobotConfigurations());else
-          throw new RuntimeException("robot_configurations field exceeds the maximum length");
+          throw new RuntimeException("robot_configurations field exceeds the maximum length: %d > %d".formatted(data.getRobotConfigurations().size(), 1000));
 
    }
 
    public static void read(toolbox_msgs.msg.dds.WalkingControllerPreviewOutputMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setFrameDt(cdr.read_type_6());
       	
@@ -112,7 +112,7 @@ public class WalkingControllerPreviewOutputMessagePubSubType implements us.ihmc.
    @Override
    public final void serialize(toolbox_msgs.msg.dds.WalkingControllerPreviewOutputMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_6("frame_dt", data.getFrameDt());
       ser.write_type_e("robot_configurations", data.getRobotConfigurations());
    }
@@ -120,7 +120,7 @@ public class WalkingControllerPreviewOutputMessagePubSubType implements us.ihmc.
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, toolbox_msgs.msg.dds.WalkingControllerPreviewOutputMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setFrameDt(ser.read_type_6("frame_dt"));
       ser.read_type_e("robot_configurations", data.getRobotConfigurations());
    }

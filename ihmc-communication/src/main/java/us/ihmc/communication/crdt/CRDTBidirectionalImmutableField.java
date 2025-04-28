@@ -1,5 +1,7 @@
 package us.ihmc.communication.crdt;
 
+import java.util.Objects;
+
 /**
  * Represents a data field that can be modified by both the
  * robot and the operator.
@@ -10,13 +12,13 @@ package us.ihmc.communication.crdt;
  */
 public class CRDTBidirectionalImmutableField<T>
 {
-   private final RequestConfirmFreezable requestConfirmFreezable;
+   private final LatestTimestampModifiable latestTimestampModifiable;
 
    private T value;
 
-   public CRDTBidirectionalImmutableField(RequestConfirmFreezable requestConfirmFreezable, T initialValue)
+   public CRDTBidirectionalImmutableField(LatestTimestampModifiable latestTimestampModifiable, T initialValue)
    {
-      this.requestConfirmFreezable = requestConfirmFreezable;
+      this.latestTimestampModifiable = latestTimestampModifiable;
 
       value = initialValue;
    }
@@ -28,10 +30,10 @@ public class CRDTBidirectionalImmutableField<T>
 
    public void setValue(T value)
    {
-      if (!this.value.equals(value)) // Don't want to do anything in the case nothing changed
+      if (!Objects.equals(this.value, value)) // Don't want to do anything in the case nothing changed
       {
          this.value = value;
-         requestConfirmFreezable.freeze();
+         latestTimestampModifiable.modify();
       }
    }
 
@@ -42,7 +44,7 @@ public class CRDTBidirectionalImmutableField<T>
 
    public void fromMessage(T value)
    {
-      if (!requestConfirmFreezable.isFrozen())
+      if (latestTimestampModifiable.isModificationIncoming())
       {
          this.value = value;
       }

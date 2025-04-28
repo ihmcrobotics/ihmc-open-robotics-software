@@ -17,11 +17,16 @@ public class RDXActionProgressWidgetsManager
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiLabelledWidgetAligner widgetAligner = new ImGuiLabelledWidgetAligner();
-   private final SortedSet<RDXActionNode<?, ?>> sortedActionNodesToRender = new TreeSet<>(Comparator.comparingInt(node -> node.getState().getActionIndex()));
+   private final SortedSet<RDXActionNode<?, ?>> sortedActionNodesToRender = new TreeSet<>(Comparator.comparingInt(node -> node.getState().getLeafIndex()));
    private final ArrayList<RDXActionNode<?, ?>> actionNodesToRender = new ArrayList<>();
    private boolean renderAsPlots = true;
    private int emptyPlotIndex;
    private int numberOfLines;
+
+   public RDXActionProgressWidgetsManager()
+   {
+      ImPlotTools.ensureImPlotInitialized();
+   }
 
    public void render()
    {

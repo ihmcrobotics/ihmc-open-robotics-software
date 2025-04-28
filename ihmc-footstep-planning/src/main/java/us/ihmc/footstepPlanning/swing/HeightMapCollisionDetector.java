@@ -8,12 +8,101 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
 public class HeightMapCollisionDetector
 {
+   public static EuclidShape3DCollisionResult newEvaluateCollision(Box3DReadOnly collisionBox, HeightMapData heightMap)
+   {
+      EuclidShape3DCollisionResult collisionResult = new EuclidShape3DCollisionResult();
+
+      double resolution = heightMap.getGridResolutionXY();
+      int centerIndex = heightMap.getCenterIndex();
+      double centerX = heightMap.getGridCenter().getX();
+      double centerY = heightMap.getGridCenter().getY();
+      // get the indices of the corners of the box drawn on the ground
+      // TODO switch to using the pose of the body box
+      Point3DReadOnly minPoint = collisionBox.getBoundingBox().getMinPoint();
+      Point3DReadOnly maxPoint = collisionBox.getBoundingBox().getMaxPoint();
+      int minXIndex = HeightMapTools.coordinateToIndex(minPoint.getX(), centerX, resolution, centerIndex);
+      int minYIndex = HeightMapTools.coordinateToIndex(minPoint.getY(), centerY, resolution, centerIndex);
+      int maxXIndex = HeightMapTools.coordinateToIndex(maxPoint.getX(), centerX, resolution, centerIndex);
+      int maxYIndex = HeightMapTools.coordinateToIndex(maxPoint.getY(), centerY, resolution, centerIndex);
+
+      Point3D maximumPenetratingPointOnGround = new Point3D();
+      Point3D maximumPenetratingPointOnBox = new Point3D();
+      Vector3D maximumPenetratingBoxNormal = new Vector3D();
+      double maxPenetrationDepth = 1e-4;
+      double deepestPointDistanceFromCenter = Double.POSITIVE_INFINITY;
+
+      // find the penetration depth for all the keys, which is the vertical distance
+      for (int xIndex = minXIndex; xIndex <= maxXIndex; xIndex++)
+      {
+         for (int yIndex = minYIndex; yIndex <= maxYIndex; yIndex++)
+         {
+            double groundHeight = heightMap.getHeightAt(xIndex, yIndex);
+            double xQuery = HeightMapTools.indexToCoordinate(xIndex, centerX, resolution, centerIndex);
+            double yQuery = HeightMapTools.indexToCoordinate(yIndex, centerY, resolution, centerIndex);
+
+            Point3D pointOnGround = new Point3D(xQuery, yQuery, groundHeight);
+            Point3D pointOnBox = new Point3D();
+            Vector3D boxNormal = new Vector3D();
+
+            // find the penetration depth at this point.
+            double penetrationDepth = getPointOnBoxThatsPenetrating(collisionBox, pointOnGround, pointOnBox, boxNormal);
+
+            // don't do anything if the depth is NaN, as that means it has no intersections with the foot
+            if (Double.isFinite(penetrationDepth))
+            {
+               if (penetrationDepth < maxPenetrationDepth)
+               {
+                  // the foot IS penetrating
+                  maxPenetrationDepth = penetrationDepth;
+                  maximumPenetratingPointOnGround.set(pointOnGround);
+                  maximumPenetratingPointOnBox.set(pointOnBox);
+                  maximumPenetratingBoxNormal.set(boxNormal);
+                  deepestPointDistanceFromCenter = maximumPenetratingPointOnGround.distance(collisionBox.getPosition());
+               }
+               else if (penetrationDepth < maxPenetrationDepth + 1e-4)
+               { // the foot is approximately equal to the other best penetration
+                  double queryDistanceFromCenter = pointOnGround.distance(collisionBox.getPosition());
+                  if (queryDistanceFromCenter < deepestPointDistanceFromCenter)
+                  {  // if this query point is closer to the center of the foot, use it instead
+                     maxPenetrationDepth = penetrationDepth;
+                     maximumPenetratingPointOnGround.set(pointOnGround);
+                     maximumPenetratingPointOnBox.set(pointOnBox);
+                     maximumPenetratingBoxNormal.set(boxNormal);
+                     deepestPointDistanceFromCenter = queryDistanceFromCenter;
+                  }
+               }
+            }
+         }
+      }
+
+      // check if we're intersection free. If that's the case, return the empty collision result
+      if (maxPenetrationDepth > -1e-4)
+         return collisionResult;
+
+      collisionResult.setShapesAreColliding(true);
+      collisionResult.setSignedDistance(maxPenetrationDepth);
+
+      // set the collision information for the collision box (red point)
+      collisionResult.getPointOnA().set(maximumPenetratingPointOnBox);
+      collisionResult.getNormalOnA().set(maximumPenetratingBoxNormal);
+
+      // set the collision information for the ground (yellow point)
+      collisionResult.getPointOnB().set(maximumPenetratingPointOnGround);
+
+      // FIXME check this.
+      Vector3DReadOnly groundNormal = approximateSurfaceNormalAtPoint(maximumPenetratingPointOnGround, heightMap);
+      collisionResult.getNormalOnB().set(groundNormal);
+
+      return collisionResult;
+   }
+
    public static EuclidShape3DCollisionResult evaluateCollision(Box3DReadOnly collisionBox, HeightMapData heightMap)
    {
       EuclidShape3DCollisionResult collisionResult = new EuclidShape3DCollisionResult();
@@ -159,7 +248,142 @@ public class HeightMapCollisionDetector
       }
    }
 
-   private static double getLowestHeightOnBoxAtPoint(Box3DReadOnly collisionBox, double xQuery, double yQuery)
+   private static final double HALF_PI = 0.5 * Math.PI;
+   private enum ClosestFace {FRONT, BACK, LEFT, RIGHT, BOTTOM}
+
+   static double getPointOnBoxThatsPenetrating(Box3DReadOnly collisionBox,
+                                               Point3DReadOnly pointQuery,
+                                               Point3DBasics pointOnBoxToPack,
+                                               Vector3DBasics normalOnBoxToPack)
+   {
+      // because the top of the box is open, this algorithm fails if it pitches more or less than 90 degrees
+      double pitch = collisionBox.getOrientation().getPitch();
+      if (pitch > HALF_PI || pitch < -HALF_PI)
+      {
+         throw new RuntimeException("Cannot handle a box that is pitched more than 90 degrees.");
+      }
+
+      // Transform the point to be in the box frame. This is way faster computation.
+      Point3D pointInBox = new Point3D(pointQuery);
+      pointInBox.applyInverseTransform(collisionBox.getPose());
+
+      // Compute the distance to all the walls of the box, except for the top one. We know a height map can't penetrate from the top.
+      // If we don't have a positive distnace to any of the walls, we know we're not in the box.
+      double halfHeight = collisionBox.getSizeZ() / 2.0;
+      double distanceToBottomFace = halfHeight + pointInBox.getZ();
+      if (distanceToBottomFace < 0.0)
+      {
+         // We're not in the box
+         pointOnBoxToPack.setToNaN();
+         normalOnBoxToPack.setToNaN();
+
+         return Double.NaN;
+      }
+      double halfLength = collisionBox.getSizeX() / 2.0;
+      double distanceToFrontFace = halfLength - pointInBox.getX();
+      if (distanceToFrontFace < 0.0)
+      {
+         // We're not in the box
+         pointOnBoxToPack.setToNaN();
+         normalOnBoxToPack.setToNaN();
+
+         return Double.NaN;
+      }
+      double distanceToBackFace = pointInBox.getX() + halfLength;
+      if (distanceToBackFace < 0.0)
+      {
+         // We're not in the box
+         pointOnBoxToPack.setToNaN();
+         normalOnBoxToPack.setToNaN();
+
+         return Double.NaN;
+      }
+      double halfWidth = collisionBox.getSizeY() / 2.0;
+      double distanceToLeftFace = halfWidth - pointInBox.getY();
+      if (distanceToLeftFace < 0.0)
+      {
+         // We're not in the box
+         pointOnBoxToPack.setToNaN();
+         normalOnBoxToPack.setToNaN();
+
+         return Double.NaN;
+      }
+      double distanceToRightFace = pointInBox.getY() + halfWidth;
+      if (distanceToRightFace < 0.0)
+      {
+         // We're not in the box
+         pointOnBoxToPack.setToNaN();
+         normalOnBoxToPack.setToNaN();
+
+         return Double.NaN;
+      }
+
+      // Get the closest face
+      ClosestFace closestFace = ClosestFace.BOTTOM;
+      double closestDistance = distanceToBottomFace;
+      if (distanceToFrontFace < closestDistance)
+      {
+         closestFace = ClosestFace.FRONT;
+         closestDistance = distanceToFrontFace;
+      }
+      if (distanceToBackFace < closestDistance)
+      {
+         closestFace = ClosestFace.BACK;
+         closestDistance = distanceToBackFace;
+      }
+      if (distanceToLeftFace < closestDistance)
+      {
+         closestFace = ClosestFace.LEFT;
+         closestDistance = distanceToLeftFace;
+      }
+      if (distanceToRightFace < closestDistance)
+      {
+         closestFace = ClosestFace.RIGHT;
+         closestDistance = distanceToRightFace;
+      }
+
+      // Project the point in the box onto the closest face.
+      pointOnBoxToPack.set(pointInBox);
+      normalOnBoxToPack.setToZero();
+      switch (closestFace)
+      {
+         case BOTTOM:
+         {
+            pointOnBoxToPack.setZ(-halfHeight);
+            normalOnBoxToPack.setZ(-1.0);
+            break;
+         }
+         case LEFT:
+         {
+            pointOnBoxToPack.setY(halfWidth);
+            normalOnBoxToPack.setY(1.0);
+            break;
+         }
+         case RIGHT:
+         {
+            pointOnBoxToPack.setY(-halfWidth);
+            normalOnBoxToPack.setY(-1.0);
+            break;
+         }
+         case FRONT:
+         {
+            pointOnBoxToPack.setX(halfLength);
+            normalOnBoxToPack.setX(1.0);
+            break;
+         }
+         case BACK:
+         {
+            pointOnBoxToPack.setX(-halfLength);
+            normalOnBoxToPack.setX(-1.0);
+            break;
+         }
+      }
+      pointOnBoxToPack.applyTransform(collisionBox.getPose());
+      normalOnBoxToPack.applyTransform(collisionBox.getPose());
+      return -closestDistance;
+   }
+
+   static double getLowestHeightOnBoxAtPoint(Box3DReadOnly collisionBox, double xQuery, double yQuery)
    {
       Point3D pointQuery = new Point3D(xQuery, yQuery, 0.0);
       Point3D collision1 = new Point3D();
@@ -186,21 +410,7 @@ public class HeightMapCollisionDetector
    {
       Point3DReadOnly pointOnBox = getPointOnBoxWhenTheWholeBottomPenetrates(groundPoint, collisionBox);
 
-      Vector3D normalAtBox = new Vector3D();
-      normalAtBox.sub(pointOnBox, groundPoint);
-      normalAtBox.normalize();
-
-      collisionResult.setShapesAreColliding(true);
-
-      // set the collision information for the collision box (red point)
-      collisionResult.getPointOnA().set(pointOnBox);
-      collisionResult.getNormalOnA().set(normalAtBox);
-
-      // set the collision information for the ground (yellow point)
-      collisionResult.getPointOnB().set(groundPoint);
-
-      Vector3DReadOnly groundNormal = approximateSurfaceNormalAtPoint(groundPoint, heightMap);
-      collisionResult.getNormalOnB().set(groundNormal);
+      computeCollisionDataWhenPartialPenetration(groundPoint, pointOnBox, heightMap, collisionResult);
    }
 
    static Point3DReadOnly getPointOnBoxWhenTheWholeBottomPenetrates(Point3DReadOnly groundPoint, Box3DReadOnly collisionBox)
