@@ -8,6 +8,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapManager;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.robotics.physics.RobotCollisionModel;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
@@ -26,10 +27,7 @@ public class RapidHeightMapUpdateThread extends RepeatingTaskThread
 
    public RapidHeightMapUpdateThread(ROS2Node ros2Node,
                                      ROS2SyncedRobotModel syncedRobotModel,
-                                     RobotCollisionModel robotCollisionModel,
-                                     ReferenceFrame leftFootFrame,
-                                     ReferenceFrame rightFootFrame,
-                                     ControllerFootstepQueueMonitor controllerFootstepQueueMonitor,
+                                     RobotCollisionModel robotCollisionModel, ControllerFootstepQueueMonitor controllerFootstepQueueMonitor,
                                      ImageSensor imageSensor,
                                      int depthImageKey,
                                      HeightMapParameters heightMapParameters)
@@ -41,6 +39,9 @@ public class RapidHeightMapUpdateThread extends RepeatingTaskThread
 
       sensorFrame = syncedRobotModel.getReferenceFrames().getSteppingCameraFrame();
       zUpSensorFrame = syncedRobotModel.getReferenceFrames().getSteppingCameraZUpFrame();
+
+      ReferenceFrame leftFootFrame = syncedRobotModel.getReferenceFrames().getSoleFrame(RobotSide.LEFT);
+      ReferenceFrame rightFootFrame = syncedRobotModel.getReferenceFrames().getSoleFrame(RobotSide.LEFT);
 
       heightMapManager = new RapidHeightMapManager(ros2Node,
                                                    robotCollisionModel,

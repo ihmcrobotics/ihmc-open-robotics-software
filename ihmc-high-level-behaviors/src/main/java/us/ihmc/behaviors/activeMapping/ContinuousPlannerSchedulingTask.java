@@ -50,7 +50,6 @@ public class ContinuousPlannerSchedulingTask
                                           ROS2SyncedRobotModel syncedRobotModel,
                                           HumanoidReferenceFrames referenceFrames,
                                           ControllerFootstepQueueMonitor controllerFootstepQueueMonitor,
-                                          ContinuousHikingLogger continuousHikingLogger,
                                           ActiveMappingParameterToolBox activeMappingParameterObject)
    {
       String simpleRobotName = robotModel.getSimpleRobotName();
@@ -62,6 +61,7 @@ public class ContinuousPlannerSchedulingTask
       AtomicReference<ContinuousHikingCommandMessage> commandMessage = new AtomicReference<>(new ContinuousHikingCommandMessage());
       ros2Helper.subscribeViaCallback(ContinuousHikingAPI.CONTINUOUS_HIKING_COMMAND, commandMessage::set);
 
+      ContinuousHikingLogger continuousHikingLogger = new ContinuousHikingLogger();
       TerrainPlanningDebugger debugger = new TerrainPlanningDebugger(ros2Node, activeMappingParameterObject.getMonteCarloPlannerParameters());
       ContinuousPlanner continuousPlanner = new ContinuousPlanner(robotModel,
                                                                   referenceFrames,
