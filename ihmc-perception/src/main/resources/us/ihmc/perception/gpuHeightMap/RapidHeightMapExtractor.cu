@@ -169,13 +169,6 @@ __device__ float get_spatial_filtered_height(int xIndex, int yIndex, float heigh
     return finalHeight;
 }
 
-// Compute grid cell center coordinates (cellCenterInZUp) in the Z-Up frame based on thread indices.
-// Transform the grid cell to the sensor frame using the transformation matrix (zUpToSensorFrameTf).
-// Perform projection (spherical or perspective) to map the grid cell to image indices.
-// Iterate over a search window in the depth image to find points within the cell bounds.
-// Back-project these points to the 3D space and transform them back to the Z-Up frame.
-// Compute the average height for points within the grid cell while filtering outliers.
-
 extern "C" __global__ void preprocessImageKernel(unsigned short *in, size_t pitchIn, unsigned short *out, size_t pitchOut, int rows, int cols)
 {
     // Thread indices for output image
@@ -198,6 +191,12 @@ extern "C" __global__ void preprocessImageKernel(unsigned short *in, size_t pitc
     *(outRowPtr + outCol) = depthValue;
 }
 
+// Compute grid cell center coordinates (cellCenterInZUp) in the Z-Up frame based on thread indices.
+// Transform the grid cell to the sensor frame using the transformation matrix (zUpToSensorFrameTf).
+// Perform projection (spherical or perspective) to map the grid cell to image indices.
+// Iterate over a search window in the depth image to find points within the cell bounds.
+// Back-project these points to the 3D space and transform them back to the Z-Up frame.
+// Compute the average height for points within the grid cell while filtering outliers.
 extern "C" __global__ void heightMapUpdateKernel(unsigned short *in, size_t pitchIn, unsigned short *out, size_t pitchOut, float *params, float *sensorToZUpFrameTf, float *zUpToSensorFrameTf, int bounds)
 {
     // Thread indices
