@@ -27,7 +27,8 @@ public class RapidHeightMapUpdateThread extends RepeatingTaskThread
 
    public RapidHeightMapUpdateThread(ROS2Node ros2Node,
                                      ROS2SyncedRobotModel syncedRobotModel,
-                                     RobotCollisionModel robotCollisionModel, ControllerFootstepQueueMonitor controllerFootstepQueueMonitor,
+                                     RobotCollisionModel robotCollisionModel,
+                                     ControllerFootstepQueueMonitor controllerFootstepQueueMonitor,
                                      ImageSensor imageSensor,
                                      int depthImageKey,
                                      HeightMapParameters heightMapParameters)
