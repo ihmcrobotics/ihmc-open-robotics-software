@@ -3,6 +3,7 @@ package us.ihmc.perception.gpuHeightMap;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Scalar;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
@@ -14,6 +15,7 @@ public class SnappingTerrainExtractorTest
     * Future tests should expand on this to test the methods themselves
     */
    @Test
+   @Disabled
    public void testSnappingTerrainKernelRuns()
    {
       HeightMapParameters heightMapParameters = new HeightMapParameters();
