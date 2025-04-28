@@ -4,6 +4,8 @@ set -e
 # Print commands as they are run.
 set -o xtrace
 
+xhost +local:docker
+
 docker run \
     --tty \
     --interactive \
