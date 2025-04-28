@@ -337,11 +337,11 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
 
       checkForPause();
 
+      updateVisualization();
+
       if (hasUpcomingFootsteps())
          for (int i = 0; i < footstepConsumptionListenerList.size(); i++)
             footstepConsumptionListenerList.get(i).doListenerAction();
-
-      updateVisualization();
    }
 
    public void handlePauseWalkingCommand(PauseWalkingCommand command)
