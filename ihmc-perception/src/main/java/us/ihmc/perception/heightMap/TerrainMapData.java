@@ -29,7 +29,7 @@ public class TerrainMapData
    private double heightScaleOffset;
 
    private Mat heightMap;
-   // TODO the contact map and terrain map are assumed to be null. I'm keeping them in to avoid breaking the code.
+   private Mat terrainCostMap;
    private Mat contactMap;
 
    private Mat snapHeightImage;
@@ -45,8 +45,6 @@ public class TerrainMapData
       setHeightScaleParameters(heightScaleFactor, heightScaleOffset);
 
       heightMap = new Mat(height, width, opencv_core.CV_16UC1);
-
-      //      contactMap = new Mat(height, width, opencv_core.CV_8UC1);
       localGridSize = height;
    }
 
@@ -70,6 +68,7 @@ public class TerrainMapData
       terrainMapCenter.set(other.terrainMapCenter);
 
       setHeightMap(other.heightMap);
+      setTerrainCostMap(other.terrainCostMap);
       setContactMap(other.contactMap);
       setSnapHeightMat(other.snapHeightImage);
       setSnapNormalXMat(other.snapNormalXImage);
@@ -285,6 +284,11 @@ public class TerrainMapData
       return heightMap;
    }
 
+   public Mat getTerrainCostMap()
+   {
+      return terrainCostMap;
+   }
+
    public Mat getContactMap()
    {
       return contactMap;
@@ -314,6 +318,11 @@ public class TerrainMapData
    public double getHeightScaleFactor()
    {
       return heightScaleFactor;
+   }
+
+   public void setTerrainCostMap(Mat terrainCostMap)
+   {
+      this.terrainCostMap = terrainCostMap == null ? null : terrainCostMap.clone();
    }
 
    public void setHeightMap(Mat heightMap)

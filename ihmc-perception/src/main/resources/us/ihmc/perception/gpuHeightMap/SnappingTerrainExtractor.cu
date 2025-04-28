@@ -19,6 +19,9 @@ extern "C"
 #define MIN_SNAP_HEIGHT_THRESHOLD 13
 #define SNAP_HEIGHT_THRESHOLD_AT_SEARCH_EDGE 14
 #define INEQUALITY_ACTIVATION_SLOPE 15
+#define STEPPING_COSINE_THRESHOLD 16
+#define STEPPING_CONTACT_THRESHOLD 17
+#define CONTACT_WINDOW_SIZE 18
 
 #define SNAP_FAILED 0
 #define CLIFF_TOP 1
@@ -326,8 +329,8 @@ __global__ void computeSteppabilityConnections(unsigned short *steppableMap, siz
     int boundaryConnectionsEncodedAsOnes = 0;
     int counter = 0;
 
-    unsigned char *heightValue = (unsigned char *) ((char *)steppableMap + x_index * pitchSteppableMap) + y_index;
-    if (*heightValue == VALID)
+    unsigned char *steppability_result = (unsigned char *) ((char *)steppableMap + x_index * pitchSteppableMap) + y_index;
+    if (*steppability_result == VALID)
     {
         for (int x_offset = -1; x_offset <= 1; x_offset++)
         {
@@ -365,4 +368,129 @@ __global__ void computeSteppabilityConnections(unsigned short *steppableMap, siz
 
         unsigned char *steppableConnectionsElement = (unsigned char *)((char *)steppableConnectionsMap + key.x * pitchSteppableConnectionsMap) + key.y;
         *steppableConnectionsElement = static_cast<unsigned char>(boundaryConnectionsEncodedAsOnes);
+}
+
+extern "C"
+__global__ void computeTerrainCost(unsigned short *heightMap, size_t pitchHeightMap,
+                                   unsigned char *costMap, size_t pitchCostMap,
+                                   float *params)
+{
+    int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
+    int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
+    int cells_per_axis = 2 * compute_center_index(params[TERRAIN_WIDTH_IN_METERS], params[CELL_SIZE_IN_CENTIMETERS]) + 1;
+
+    // Bounds check
+    if (xIndex >= cells_per_axis || yIndex >= cells_per_axis)
+        return;
+
+    float heightScalingFactor = params[HEIGHT_SCALING_FACTOR];
+    float steppingCosineThreshold = params[STEPPING_COSINE_THRESHOLD];
+
+    // Sobel operators
+    const float KxSobel[9] = {-1, 0, 1, -2, 0, 2, -1, 0, 1};
+    const float KySobel[9] = {-1, -2, -1, 0, 0, 0, 1, 2, 1};
+
+    float Kx = 0.0f;
+    float Ky = 0.0f;
+
+    if (xIndex > 0 && xIndex < cells_per_axis - 1 && yIndex > 0 && yIndex < cells_per_axis - 1)
+    {
+        // Read the 3x3 neighborhood
+        for (int i = -1; i <= 1; ++i)
+        {
+            for (int j = -1; j <= 1; ++j)
+            {
+                int xi = xIndex + i;
+                int yj = yIndex + j;
+
+                unsigned short *heightPtr = (unsigned short *)((char *)heightMap + yj * pitchHeightMap) + xi;
+                float heightValue = (*heightPtr) / heightScalingFactor;
+
+                int index = (i + 1) * 3 + (j + 1);
+                Kx += heightValue * KxSobel[index];
+                Ky += heightValue * KySobel[index];
+            }
+        }
+    }
+
+    // Surface normal
+    float3 surfaceNormal;
+    surfaceNormal.x = -Kx;
+    surfaceNormal.y = -Ky;
+    surfaceNormal.z = 1.0f;
+
+    // Normalize surface normal
+    float norm = sqrtf(surfaceNormal.x * surfaceNormal.x +
+                       surfaceNormal.y * surfaceNormal.y +
+                       surfaceNormal.z * surfaceNormal.z);
+
+    if (norm > 0.0f)
+    {
+        surfaceNormal.x /= norm;
+        surfaceNormal.y /= norm;
+        surfaceNormal.z /= norm;
+    }
+
+    // Dot product with vertical (z-axis)
+    float dotProduct = fabsf(surfaceNormal.z);
+
+    // Map dotProduct to [0, 255]
+    unsigned int cost = (unsigned int)(dotProduct * 255.0f);
+
+    if (dotProduct < steppingCosineThreshold)
+        cost = 0;
+
+    unsigned char *costPtr = (unsigned char *)((char *)costMap + yIndex * pitchCostMap) + xIndex;
+    *costPtr = (unsigned char)cost;
+}
+
+extern "C"
+__global__ void computeContactMap(unsigned char *terrainCost, size_t pitchTerrainCost,
+                                  unsigned char *contactMap, size_t pitchContactMap,
+                                  float *params)
+{
+    int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
+    int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
+    int cells_per_axis = 2 * compute_center_index(params[TERRAIN_WIDTH_IN_METERS], params[CELL_SIZE_IN_CENTIMETERS]) + 1;
+
+    if (xIndex >= cells_per_axis || yIndex >= cells_per_axis)
+        return;
+
+    int windowSize = (int)params[CONTACT_WINDOW_SIZE];
+    float steppingContactThreshold = params[STEPPING_CONTACT_THRESHOLD];
+
+    unsigned int closestDistance = 1000000;
+
+    for (int i = -windowSize; i < windowSize; i++)
+    {
+        for (int j = -windowSize; j < windowSize; j++)
+        {
+            int x_query = xIndex + i;
+            int y_query = yIndex + j;
+
+            if (x_query >= 0 && x_query < cells_per_axis && y_query >= 0 && y_query < cells_per_axis)
+            {
+                unsigned char *terrainCostPtr = (unsigned char *)((char *)terrainCost + y_query * pitchTerrainCost) + x_query;
+                unsigned int steppability = *terrainCostPtr;
+
+                if (steppability <= steppingContactThreshold)
+                {
+                    // Euclidean distance
+                    float distance = sqrtf((float)(i * i + j * j));
+
+                    if (distance < closestDistance && distance > 3.0f)
+                    {
+                        closestDistance = (unsigned int)distance;
+                    }
+                    else if (distance < 3.0f)
+                    {
+                        closestDistance = 0;
+                    }
+                }
+            }
+        }
+    }
+
+    unsigned char *contactMapPtr = (unsigned char *)((char *)contactMap + yIndex * pitchContactMap) + xIndex;
+    *contactMapPtr = (unsigned char)closestDistance;
 }
