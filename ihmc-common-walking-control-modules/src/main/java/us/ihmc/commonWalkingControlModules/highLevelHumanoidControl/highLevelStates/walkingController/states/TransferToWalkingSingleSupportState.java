@@ -52,6 +52,10 @@ public class TransferToWalkingSingleSupportState extends TransferState
 
    // This flag indicates whether or not its the first tick in the transfer state. This is used to avoid double-computing some of the calls.
    private boolean firstTickInState = true;
+   // This for the update footsteps from the VRFootstepin g
+   protected final RobotSide swingSide;
+   private final YoBoolean updateFootstepContinuousThroughoutTransfer = new YoBoolean("updateFootstepContinuouslyThroughoutTransfer", registry);
+   private final WalkingMessageHandler.Listener footstepConsumptionLister = this::handleNewFootstep;;
 
    public TransferToWalkingSingleSupportState(WalkingStateEnum stateEnum,
                                               WalkingMessageHandler walkingMessageHandler,
@@ -88,6 +92,18 @@ public class TransferToWalkingSingleSupportState extends TransferState
       numberOfFootstepsToConsider = balanceManager.getMaxNumberOfStepsToConsider();
       footsteps = Footstep.createFootsteps(numberOfFootstepsToConsider);
       footstepTimings = FootstepTiming.createTimings(numberOfFootstepsToConsider);
+
+      swingSide = transferToSide.getOppositeSide();
+      walkingMessageHandler.getUsingQFP().addListener(change -> updateFootstepContinuousThroughoutTransfer.set(walkingMessageHandler.getUsingQFP().getBooleanValue()));
+      updateFootstepContinuousThroughoutTransfer.addListener(value ->
+                                                             {
+                                                                if(updateFootstepContinuousThroughoutTransfer.getBooleanValue())
+                                                                   walkingMessageHandler.addFootstepConsumptionListener(footstepConsumptionLister);
+                                                                else
+                                                                   walkingMessageHandler.removeFootstepConsumptionListener(footstepConsumptionLister);
+                                                             });
+      updateFootstepContinuousThroughoutTransfer.set(true);
+
    }
 
    @Override
@@ -151,7 +167,6 @@ public class TransferToWalkingSingleSupportState extends TransferState
          }
       }
 
-      RobotSide swingSide = transferToSide.getOppositeSide();
       if (!firstTickInState)
          feetManager.updateSwingTrajectoryPreview(swingSide);
       balanceManager.setSwingFootTrajectory(swingSide, feetManager.getSwingTrajectory(swingSide));
@@ -199,6 +214,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
       return upcomingFootstep.getTrajectoryType() == TrajectoryType.WAYPOINTS && Precision.equals(upcomingFootstep.getSwingTrajectory().get(0).getTime(), 0.0);
    }
 
+   private boolean haveWeEntered = false;
    @Override
    public void onEntry()
    {
@@ -212,6 +228,8 @@ public class TransferToWalkingSingleSupportState extends TransferState
       }
 
       super.onEntry();
+      handleNewFootstep(true);
+
 
       feetManager.initializeSwingTrajectoryPreview(transferToSide.getOppositeSide(), footsteps[0], footstepTimings[0].getSwingTime());
       balanceManager.minimizeAngularMomentumRateZ(minimizeAngularMomentumRateZDuringTransfer.getValue());
@@ -234,6 +252,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
       touchdownErrorCompensator.clear();
       firstTickInState = true;
       balanceManager.minimizeAngularMomentumRateZ(false);
+      haveWeEntered = false;
    }
 
    /**
@@ -287,5 +306,31 @@ public class TransferToWalkingSingleSupportState extends TransferState
 
          touchdownErrorCompensator.updateFootTouchdownError(previousSwingSide, actualFootPositionInWorld);
       }
+   }
+
+   private void handleNewFootstep()
+   {
+      handleNewFootstep(false);
+   }
+   private void handleNewFootstep(boolean firstTic)
+   {
+      if (!haveWeEntered)
+         return;
+
+      if (!walkingMessageHandler.isNextFootstepFor(swingSide))
+         return;
+
+      double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
+
+      walkingMessageHandler.poll(footsteps[0], footstepTimings[0]);
+      if (walkingMessageHandler.getCurrentNumberOfFootsteps() > 0)
+         walkingMessageHandler.peekFootstep(0, footsteps[0]);
+
+      //
+      balanceManager.minimizeAngularMomentumRateZ(minimizeAngularMomentumRateZDuringTransfer.getValue());
+      balanceManager.setFinalTransferTime(finalTransferTime);
+      balanceManager.clearICPPlan();
+      balanceManager.clearSwingFootTrajectory();
+      balanceManager.addFootstepToPlan(footsteps[0], footstepTimings[0]);
    }
 }
