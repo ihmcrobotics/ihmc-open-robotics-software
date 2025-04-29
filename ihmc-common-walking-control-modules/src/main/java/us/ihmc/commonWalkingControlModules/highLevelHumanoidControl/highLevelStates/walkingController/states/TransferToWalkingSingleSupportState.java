@@ -52,7 +52,9 @@ public class TransferToWalkingSingleSupportState extends TransferState
 
    // This flag indicates whether or not its the first tick in the transfer state. This is used to avoid double-computing some of the calls.
    private boolean firstTickInState = true;
-   // This for the update footsteps from the VRFootstepin g
+
+   // This for the update footsteps from the VR Footstepping
+   private boolean haveWeEntered = false;
    protected final RobotSide swingSide;
    private final YoBoolean updateFootstepContinuousThroughoutTransfer = new YoBoolean("updateFootstepContinuouslyThroughoutTransfer", registry);
    private final WalkingMessageHandler.Listener footstepConsumptionLister = this::handleNewFootstep;;
@@ -214,11 +216,11 @@ public class TransferToWalkingSingleSupportState extends TransferState
       return upcomingFootstep.getTrajectoryType() == TrajectoryType.WAYPOINTS && Precision.equals(upcomingFootstep.getSwingTrajectory().get(0).getTime(), 0.0);
    }
 
-   private boolean haveWeEntered = false;
    @Override
    public void onEntry()
    {
       firstTickInState = true;
+      haveWeEntered = true;
 
       if (balanceManager.getICPErrorMagnitude() > icpErrorThresholdForSlowTransfer.getValue())
       {
@@ -231,8 +233,8 @@ public class TransferToWalkingSingleSupportState extends TransferState
       handleNewFootstep(true);
 
 
-      feetManager.initializeSwingTrajectoryPreview(transferToSide.getOppositeSide(), footsteps[0], footstepTimings[0].getSwingTime());
-      balanceManager.minimizeAngularMomentumRateZ(minimizeAngularMomentumRateZDuringTransfer.getValue());
+//      feetManager.initializeSwingTrajectoryPreview(transferToSide.getOppositeSide(), footsteps[0], footstepTimings[0].getSwingTime());
+//      balanceManager.minimizeAngularMomentumRateZ(minimizeAngularMomentumRateZDuringTransfer.getValue());
 
       updateFootPlanOffset();
    }
@@ -312,7 +314,9 @@ public class TransferToWalkingSingleSupportState extends TransferState
    {
       handleNewFootstep(false);
    }
-   private void handleNewFootstep(boolean firstTic)
+
+   private final Footstep nextFootstep = new Footstep();
+   private void handleNewFootstep(boolean firstTick)
    {
       if (!haveWeEntered)
          return;
@@ -323,8 +327,11 @@ public class TransferToWalkingSingleSupportState extends TransferState
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
 
       walkingMessageHandler.poll(footsteps[0], footstepTimings[0]);
-      if (walkingMessageHandler.getCurrentNumberOfFootsteps() > 0)
-         walkingMessageHandler.peekFootstep(0, footsteps[0]);
+      nextFootstep.set(footsteps[0]);
+
+      //
+      feetManager.initializeSwingTrajectoryPreview(transferToSide.getOppositeSide(), footsteps[0], footstepTimings[0].getSwingTime());
+//      feetManager.updateSwingTrajectoryPreview(transferToSide.getOppositeSide());
 
       //
       balanceManager.minimizeAngularMomentumRateZ(minimizeAngularMomentumRateZDuringTransfer.getValue());
@@ -332,5 +339,20 @@ public class TransferToWalkingSingleSupportState extends TransferState
       balanceManager.clearICPPlan();
       balanceManager.clearSwingFootTrajectory();
       balanceManager.addFootstepToPlan(footsteps[0], footstepTimings[0]);
+
+      //
+      for (int i = 0; i < walkingMessageHandler.getCurrentNumberOfFootsteps(); i++)
+      {
+         walkingMessageHandler.peekFootstep(i, footsteps[i]);
+         walkingMessageHandler.peekTiming(i, footstepTimings[i]);
+         balanceManager.addFootstepToPlan(footsteps[i], footstepTimings[i]);
+      }
+
+      //
+      controllerToolbox.updateBipedSupportPolygons();
+
+      balanceManager.setSwingFootTrajectory(swingSide, feetManager.getSwingTrajectory(swingSide));
+      balanceManager.adjustFootstepInCoPPlan(nextFootstep);
+      balanceManager.computeICPPlan();
    }
 }
