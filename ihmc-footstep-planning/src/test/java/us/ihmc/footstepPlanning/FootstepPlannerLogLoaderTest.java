@@ -42,8 +42,16 @@ public class FootstepPlannerLogLoaderTest
 
       TerrainMapData terrainMapData = request.getTerrainMapData();
 
-      PerceptionDebugTools.printMat("HeightMap", terrainMapData.getHeightMap(), 10);
-      PerceptionDebugTools.printMat("Connections", terrainMapData.getSteppabilityConnectionsMat(), 10);
       PerceptionDebugTools.printMat("TerrainCost", terrainMapData.getTerrainCostMap(), 10);
+      PerceptionDebugTools.printMat("ContactMap", terrainMapData.getContactMap(), 10);
+
+      PerceptionDebugTools.printMat("HeightMap", terrainMapData.getHeightMap(), 10);
+      PerceptionDebugTools.printMat("SnapHeightMap", terrainMapData.getSnapHeightMat(), 10);
+      PerceptionDebugTools.printMat("SnapNormalX", terrainMapData.getSnapNormalXMat(), 10);
+      PerceptionDebugTools.printMat("SnapNormalY", terrainMapData.getSnapNormalYMat(), 10);
+      PerceptionDebugTools.printMat("SnapNormalZ", terrainMapData.getSnapNormalZMat(), 10);
+      PerceptionDebugTools.printMat("SnappedAreaFraction", terrainMapData.getSnappedAreaFractionMat(), 10);
+      PerceptionDebugTools.printMat("Steppability", terrainMapData.getSteppabilityMat(), 10);
+      PerceptionDebugTools.printMat("SteppableConnections", terrainMapData.getSteppabilityConnectionsMat(), 10);
    }
 }

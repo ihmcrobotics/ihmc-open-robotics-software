@@ -433,7 +433,7 @@ public class TerrainMapData
       {
          if (terrainCostMap == null)
             terrainCostMap = new Mat(localGridSize, localGridSize, opencv_core.CV_8UC1);
-         terrainCostMap.data(new BytePointer(message.getTerrainCostData().getBuffer()));
+         packDataIntoMatFromByteBuffer(message.getTerrainCostData().getBuffer(), terrainCostMap);
       }
       else
       {
@@ -443,7 +443,7 @@ public class TerrainMapData
       {
          if (contactMap == null)
             contactMap = new Mat(localGridSize, localGridSize, opencv_core.CV_8UC1);
-         contactMap.data(new BytePointer(message.getContactMapData().getBuffer()));
+         packDataIntoMatFromByteBuffer(message.getContactMapData().getBuffer(), contactMap);
       }
       else
       {
@@ -455,30 +455,7 @@ public class TerrainMapData
             heightMap = new Mat(localGridSize, localGridSize, opencv_core.CV_16UC1);
 
          ByteBuffer buffer = message.getHeightMapData().getBuffer();
-         // Need to back this guy up, all the way to the beginning
-         buffer.rewind();
-
-         int expectedShorts = heightMap.rows() * heightMap.cols();
-         int availableShorts = buffer.remaining() / 2;
-
-         if (availableShorts < expectedShorts)
-            throw new RuntimeException("Not enough data to fill height map: have " + availableShorts + " shorts, need " + expectedShorts);
-
-         // Note: Due to how the backing native memory layout is, ensure we get the total Buffer
-         // mat.asByteBuffer() doesn't always return the entire buffer, also the data may be wrong
-         int totalBytes = heightMap.rows() * heightMap.cols() * 2; // 2 bytes per short
-         ByteBuffer matBuffer = heightMap.data().limit(totalBytes).asByteBuffer();
-         ShortBuffer shortBuffer = matBuffer.asShortBuffer();
-
-         for (int i = 0; i < expectedShorts; i++)
-         {
-            // Little-endian
-            byte low = buffer.get();
-            byte high = buffer.get();
-
-            int ushort = ((high & 0xFF) << 8) | (low & 0xFF);
-            shortBuffer.put((short) ushort);
-         }
+         packDataIntoMatFromShortBuffer(buffer, heightMap);
       }
       else
       {
@@ -490,30 +467,7 @@ public class TerrainMapData
             snapHeightImage = new Mat(localGridSize, localGridSize, opencv_core.CV_16UC1);
 
          ByteBuffer buffer = message.getSnappedHeightData().getBuffer();
-         // Need to back this guy up, all the way to the beginning
-         buffer.rewind();
-
-         int expectedShorts = snapHeightImage.rows() * snapHeightImage.cols();
-         int availableShorts = buffer.remaining() / 2;
-
-         if (availableShorts < expectedShorts)
-            throw new RuntimeException("Not enough data to fill height map: have " + availableShorts + " shorts, need " + expectedShorts);
-
-         // Note: Due to how the backing native memory layout is, ensure we get the total Buffer
-         // mat.asByteBuffer() doesn't always return the entire buffer, also the data may be wrong
-         int totalBytes = snapHeightImage.rows() * snapHeightImage.cols() * 2; // 2 bytes per short
-         ByteBuffer matBuffer = snapHeightImage.data().limit(totalBytes).asByteBuffer();
-         ShortBuffer shortBuffer = matBuffer.asShortBuffer();
-
-         for (int i = 0; i < expectedShorts; i++)
-         {
-            // Little-endian
-            byte low = buffer.get();
-            byte high = buffer.get();
-
-            int ushort = ((high & 0xFF) << 8) | (low & 0xFF);
-            shortBuffer.put((short) ushort);
-         }
+         packDataIntoMatFromShortBuffer(buffer, snapHeightImage);
       }
       else
       {
@@ -523,13 +477,13 @@ public class TerrainMapData
       {
          if (snapNormalXImage == null)
             snapNormalXImage = new Mat(localGridSize, localGridSize, opencv_core.CV_8UC1);
-         snapNormalXImage.data(new BytePointer(message.getSnappedNormalXData().getBuffer()));
+         packDataIntoMatFromByteBuffer(message.getSnappedNormalXData().getBuffer(), snapNormalXImage);
          if (snapNormalYImage == null)
             snapNormalYImage = new Mat(localGridSize, localGridSize, opencv_core.CV_8UC1);
-         snapNormalYImage.data(new BytePointer(message.getSnappedNormalYData().getBuffer()));
+         packDataIntoMatFromByteBuffer(message.getSnappedNormalYData().getBuffer(), snapNormalYImage);
          if (snapNormalZImage == null)
             snapNormalZImage = new Mat(localGridSize, localGridSize, opencv_core.CV_8UC1);
-         snapNormalZImage.data(new BytePointer(message.getSnappedNormalZData().getBuffer()));
+         packDataIntoMatFromByteBuffer(message.getSnappedNormalZData().getBuffer(), snapNormalZImage);
       }
       else
       {
@@ -541,7 +495,7 @@ public class TerrainMapData
       {
          if (steppabilityImage == null)
             steppabilityImage = new Mat(localGridSize, localGridSize, opencv_core.CV_8UC1);
-         steppabilityImage.data(new BytePointer(message.getSteppabilityData().getBuffer()));
+         packDataIntoMatFromByteBuffer(message.getSteppabilityData().getBuffer(), steppabilityImage);
       }
       else
       {
@@ -551,7 +505,7 @@ public class TerrainMapData
       {
          if (steppabilityConnectionsMat == null)
             steppabilityConnectionsMat = new Mat(localGridSize, localGridSize, opencv_core.CV_8UC1);
-         steppabilityConnectionsMat.data(new BytePointer(message.getSteppableConnectionsData().getBuffer()));
+         packDataIntoMatFromByteBuffer(message.getSteppableConnectionsData().getBuffer(), steppabilityConnectionsMat);
       }
       else
       {
@@ -561,11 +515,55 @@ public class TerrainMapData
       {
          if (snappedAreaFractionImage == null)
             snappedAreaFractionImage = new Mat(localGridSize, localGridSize, opencv_core.CV_8UC1);
-         snappedAreaFractionImage.data(new BytePointer(message.getSnappedAreaData().getBuffer()));
+         packDataIntoMatFromByteBuffer(message.getSnappedAreaData().getBuffer(), snappedAreaFractionImage);
       }
       else
       {
          snappedAreaFractionImage = null;
+      }
+   }
+
+   private void packDataIntoMatFromByteBuffer(ByteBuffer buffer, Mat dataToPack)
+   {
+      // Need to back this guy up, all the way to the beginning
+      buffer.rewind();
+
+      // Note: Due to how the backing native memory layout is, ensure we get the total Buffer
+      // mat.asByteBuffer() doesn't always return the entire buffer, also the data may be wrong
+      int totalBytes = dataToPack.rows() * dataToPack.cols();
+      ByteBuffer matBuffer = dataToPack.data().limit(totalBytes).asByteBuffer();
+
+      for (int i = 0; i < totalBytes; i++)
+      {
+         matBuffer.put(buffer.get());
+      }
+   }
+
+   private void packDataIntoMatFromShortBuffer(ByteBuffer buffer, Mat dataToPack)
+   {
+      // Need to back this guy up, all the way to the beginning
+      buffer.rewind();
+
+      int expectedShorts = dataToPack.rows() * dataToPack.cols();
+      int availableShorts = buffer.remaining() / 2;
+
+      if (availableShorts < expectedShorts)
+         throw new RuntimeException("Not enough data to fill height map: have " + availableShorts + " shorts, need " + expectedShorts);
+
+      // Note: Due to how the backing native memory layout is, ensure we get the total Buffer
+      // mat.asByteBuffer() doesn't always return the entire buffer, also the data may be wrong
+      int totalBytes = dataToPack.rows() * dataToPack.cols() * 2; // 2 bytes per short
+      ByteBuffer matBuffer = dataToPack.data().limit(totalBytes).asByteBuffer();
+      ShortBuffer shortBuffer = matBuffer.asShortBuffer();
+
+      for (int i = 0; i < expectedShorts; i++)
+      {
+         // Little-endian
+         byte low = buffer.get();
+         byte high = buffer.get();
+
+         int ushort = ((high & 0xFF) << 8) | (low & 0xFF);
+         shortBuffer.put((short) ushort);
       }
    }
 }
