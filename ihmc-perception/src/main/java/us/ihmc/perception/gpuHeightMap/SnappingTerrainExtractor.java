@@ -206,7 +206,7 @@ public class SnappingTerrainExtractor
       // Update the terrain map data with the new results
       terrainMapData.setSensorOrigin(sensorOrigin.getX(), sensorOrigin.getY());
 
-      // Download all the data from the GPU and set the terrain data object
+      // --------------------------- Download all the data from the GPU and set the terrain data object ----------------------------
       {
          Mat cpuTerrainCostMap = new Mat();
          terrainCostMat.download(cpuTerrainCostMap);

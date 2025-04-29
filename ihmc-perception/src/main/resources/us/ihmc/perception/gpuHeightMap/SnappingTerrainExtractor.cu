@@ -393,23 +393,24 @@ __global__ void computeTerrainCost(unsigned short *heightMap, size_t pitchHeight
     float Kx = 0.0f;
     float Ky = 0.0f;
 
-    if (xIndex > 0 && xIndex < cells_per_axis - 1 && yIndex > 0 && yIndex < cells_per_axis - 1)
+    // Read the 3x3 neighborhood
+    for (int i = -1; i <= 1; ++i)
     {
-        // Read the 3x3 neighborhood
-        for (int i = -1; i <= 1; ++i)
+        for (int j = -1; j <= 1; ++j)
         {
-            for (int j = -1; j <= 1; ++j)
-            {
-                int xi = xIndex + i;
-                int yj = yIndex + j;
+            int xi = xIndex + i;
+            int yj = yIndex + j;
 
-                unsigned short *heightPtr = (unsigned short *)((char *)heightMap + yj * pitchHeightMap) + xi;
-                float heightValue = (*heightPtr) / heightScalingFactor;
+            // Additional bounds check
+            if (xi < 0 || xi >= cells_per_axis || yj < 0 || yj >= cells_per_axis)
+                continue;
 
-                int index = (i + 1) * 3 + (j + 1);
-                Kx += heightValue * KxSobel[index];
-                Ky += heightValue * KySobel[index];
-            }
+            unsigned short *heightPtr = (unsigned short *)((char *)heightMap + yj * pitchHeightMap) + xi;
+            float heightValue = (*heightPtr) / heightScalingFactor;
+
+            int index = (i + 1) * 3 + (j + 1);
+            Kx += heightValue * KxSobel[index];
+            Ky += heightValue * KySobel[index];
         }
     }
 
