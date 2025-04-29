@@ -48,15 +48,19 @@ public class SnappingTerrainExtractor
    private final FloatPointer snappingParametersHostPointer;
    private final FloatPointer snappingParametersDevicePointer;
 
+   /**
+    * The types of these mats depend on the data we are trying to store.
+    * Check the {@link perception_msgs.msg.dds.TerrainMapMessage} to ensure these are the same
+    */
    private final GpuMat terrainCostMat;
    private final GpuMat contactMat;
    private final GpuMat snapHeightMat;
    private final GpuMat snapNormalXMat;
    private final GpuMat snapNormalYMat;
    private final GpuMat snapNormalZMat;
+   private final GpuMat snappedAreaFractionMat;
    private final GpuMat steppabilityMat;
    private final GpuMat steppabilityConnectionsMat;
-   private final GpuMat snappedAreaFractionMat;
 
    /**
     * This class extracts terrain data from a height map.
@@ -115,9 +119,9 @@ public class SnappingTerrainExtractor
       snapNormalXMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);
       snapNormalYMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);
       snapNormalZMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);
+      snappedAreaFractionMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);
       steppabilityMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);
       steppabilityConnectionsMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);
-      snappedAreaFractionMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);
    }
 
    /**
@@ -243,6 +247,11 @@ public class SnappingTerrainExtractor
          terrainMapData.setSnapNormalZMat(cpuSnapNormalZMap);
          cpuSnapNormalZMap.close();
 
+         Mat cpuSnappedAreaFractionMap = new Mat();
+         snappedAreaFractionMat.download(cpuSnappedAreaFractionMap);
+         terrainMapData.setSnappedAreaFractionMat(cpuSnappedAreaFractionMap);
+         cpuSnappedAreaFractionMap.close();
+
          Mat cpuSteppabilityMap = new Mat();
          steppabilityMat.download(cpuSteppabilityMap);
          terrainMapData.setSteppabilityMat(cpuSteppabilityMap);
@@ -252,11 +261,6 @@ public class SnappingTerrainExtractor
          steppabilityConnectionsMat.download(cpuSteppableConnections);
          terrainMapData.setSteppabilityConnectionsMat(cpuSteppableConnections);
          cpuSteppableConnections.close();
-
-         Mat cpuSnappedAreaFractionMap = new Mat();
-         snappedAreaFractionMat.download(cpuSnappedAreaFractionMap);
-         terrainMapData.setSnappedAreaFractionMat(cpuSnappedAreaFractionMap);
-         cpuSnappedAreaFractionMap.close();
       }
    }
 
@@ -306,9 +310,9 @@ public class SnappingTerrainExtractor
       snapNormalXMat.close();
       snapNormalYMat.close();
       snapNormalZMat.close();
+      snappedAreaFractionMat.close();
       steppabilityMat.close();
       steppabilityConnectionsMat.close();
-      snappedAreaFractionMat.close();
 
       snappingParametersHostPointer.close();
       snappingParametersDevicePointer.close();

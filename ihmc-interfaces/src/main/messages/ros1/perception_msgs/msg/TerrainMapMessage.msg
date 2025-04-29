@@ -22,6 +22,10 @@ float64 height_scale_factor
 
 float64 height_scale_offset
 
+bool has_terrain_cost_data
+
+bool has_contact_map_data
+
 bool has_height_map_data
 
 bool has_snapped_height_data
@@ -31,6 +35,14 @@ bool has_snapped_normal_data
 bool has_snapped_area_data
 
 bool has_steppability_data
+
+bool has_steppable_connections_data
+
+# The raw data for the terrain cost value, which are stored as chars.
+int8[] terrain_cost_data
+
+# The raw data for the contact map value, which are stored as chars.
+int8[] contact_map_data
 
 # The raw data for the raw heights, which are stored as two bytes to form one short.
 int8[] height_map_data
@@ -50,7 +62,10 @@ int8[] snapped_normal_z_data
 # The raw data for the snapped support area, which are stored as chars.
 int8[] snapped_area_data
 
-# The raw data for the snapped support area, which are stored as chars.
+# The raw data for the steppability area, which are stored as chars.
 int8[] steppability_data
+
+# The raw data for the steppable connections value, which are stored as chars.
+int8[] steppable_connections_data
 
 

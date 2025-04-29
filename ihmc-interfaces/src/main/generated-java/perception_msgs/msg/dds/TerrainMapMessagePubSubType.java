@@ -15,7 +15,7 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "b33ee5e3531510aefbaca77e4e2ddb5c993f1d03a3f7a4851d2a1531a208c7fa";
+   		return "293e3bd5cfa8d56b6a83108b982f21492242117955c59d848d183e296da3dba4";
    }
    
    @Override
@@ -76,9 +76,21 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (250000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (250000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (500000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (500000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (250000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (250000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -139,6 +151,23 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getTerrainCostData().size() * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getContactMapData().size() * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getHeightMapData().size() * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -167,6 +196,10 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       current_alignment += (data.getSteppabilityData().size() * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getSteppableConnectionsData().size() * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -187,6 +220,10 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
 
       cdr.write_type_6(data.getHeightScaleOffset());
 
+      cdr.write_type_7(data.getHasTerrainCostData());
+
+      cdr.write_type_7(data.getHasContactMapData());
+
       cdr.write_type_7(data.getHasHeightMapData());
 
       cdr.write_type_7(data.getHasSnappedHeightData());
@@ -196,6 +233,16 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       cdr.write_type_7(data.getHasSnappedAreaData());
 
       cdr.write_type_7(data.getHasSteppabilityData());
+
+      cdr.write_type_7(data.getHasSteppableConnectionsData());
+
+      if(data.getTerrainCostData().size() <= 250000)
+      cdr.write_type_e(data.getTerrainCostData());else
+          throw new RuntimeException("terrain_cost_data field exceeds the maximum length: %d > %d".formatted(data.getTerrainCostData().size(), 250000));
+
+      if(data.getContactMapData().size() <= 250000)
+      cdr.write_type_e(data.getContactMapData());else
+          throw new RuntimeException("contact_map_data field exceeds the maximum length: %d > %d".formatted(data.getContactMapData().size(), 250000));
 
       if(data.getHeightMapData().size() <= 500000)
       cdr.write_type_e(data.getHeightMapData());else
@@ -225,6 +272,10 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       cdr.write_type_e(data.getSteppabilityData());else
           throw new RuntimeException("steppability_data field exceeds the maximum length: %d > %d".formatted(data.getSteppabilityData().size(), 250000));
 
+      if(data.getSteppableConnectionsData().size() <= 250000)
+      cdr.write_type_e(data.getSteppableConnectionsData());else
+          throw new RuntimeException("steppable_connections_data field exceeds the maximum length: %d > %d".formatted(data.getSteppableConnectionsData().size(), 250000));
+
    }
 
    public static void read(perception_msgs.msg.dds.TerrainMapMessage data, us.ihmc.idl.CDR cdr)
@@ -243,6 +294,10 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       	
       data.setHeightScaleOffset(cdr.read_type_6());
       	
+      data.setHasTerrainCostData(cdr.read_type_7());
+      	
+      data.setHasContactMapData(cdr.read_type_7());
+      	
       data.setHasHeightMapData(cdr.read_type_7());
       	
       data.setHasSnappedHeightData(cdr.read_type_7());
@@ -253,6 +308,10 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       	
       data.setHasSteppabilityData(cdr.read_type_7());
       	
+      data.setHasSteppableConnectionsData(cdr.read_type_7());
+      	
+      cdr.read_type_e(data.getTerrainCostData());	
+      cdr.read_type_e(data.getContactMapData());	
       cdr.read_type_e(data.getHeightMapData());	
       cdr.read_type_e(data.getSnappedHeightData());	
       cdr.read_type_e(data.getSnappedNormalXData());	
@@ -260,6 +319,7 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       cdr.read_type_e(data.getSnappedNormalZData());	
       cdr.read_type_e(data.getSnappedAreaData());	
       cdr.read_type_e(data.getSteppabilityData());	
+      cdr.read_type_e(data.getSteppableConnectionsData());	
 
    }
 
@@ -273,11 +333,16 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       ser.write_type_6("map_center_y", data.getMapCenterY());
       ser.write_type_6("height_scale_factor", data.getHeightScaleFactor());
       ser.write_type_6("height_scale_offset", data.getHeightScaleOffset());
+      ser.write_type_7("has_terrain_cost_data", data.getHasTerrainCostData());
+      ser.write_type_7("has_contact_map_data", data.getHasContactMapData());
       ser.write_type_7("has_height_map_data", data.getHasHeightMapData());
       ser.write_type_7("has_snapped_height_data", data.getHasSnappedHeightData());
       ser.write_type_7("has_snapped_normal_data", data.getHasSnappedNormalData());
       ser.write_type_7("has_snapped_area_data", data.getHasSnappedAreaData());
       ser.write_type_7("has_steppability_data", data.getHasSteppabilityData());
+      ser.write_type_7("has_steppable_connections_data", data.getHasSteppableConnectionsData());
+      ser.write_type_e("terrain_cost_data", data.getTerrainCostData());
+      ser.write_type_e("contact_map_data", data.getContactMapData());
       ser.write_type_e("height_map_data", data.getHeightMapData());
       ser.write_type_e("snapped_height_data", data.getSnappedHeightData());
       ser.write_type_e("snapped_normal_x_data", data.getSnappedNormalXData());
@@ -285,6 +350,7 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       ser.write_type_e("snapped_normal_z_data", data.getSnappedNormalZData());
       ser.write_type_e("snapped_area_data", data.getSnappedAreaData());
       ser.write_type_e("steppability_data", data.getSteppabilityData());
+      ser.write_type_e("steppable_connections_data", data.getSteppableConnectionsData());
    }
 
    @Override
@@ -297,11 +363,16 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       data.setMapCenterY(ser.read_type_6("map_center_y"));
       data.setHeightScaleFactor(ser.read_type_6("height_scale_factor"));
       data.setHeightScaleOffset(ser.read_type_6("height_scale_offset"));
+      data.setHasTerrainCostData(ser.read_type_7("has_terrain_cost_data"));
+      data.setHasContactMapData(ser.read_type_7("has_contact_map_data"));
       data.setHasHeightMapData(ser.read_type_7("has_height_map_data"));
       data.setHasSnappedHeightData(ser.read_type_7("has_snapped_height_data"));
       data.setHasSnappedNormalData(ser.read_type_7("has_snapped_normal_data"));
       data.setHasSnappedAreaData(ser.read_type_7("has_snapped_area_data"));
       data.setHasSteppabilityData(ser.read_type_7("has_steppability_data"));
+      data.setHasSteppableConnectionsData(ser.read_type_7("has_steppable_connections_data"));
+      ser.read_type_e("terrain_cost_data", data.getTerrainCostData());
+      ser.read_type_e("contact_map_data", data.getContactMapData());
       ser.read_type_e("height_map_data", data.getHeightMapData());
       ser.read_type_e("snapped_height_data", data.getSnappedHeightData());
       ser.read_type_e("snapped_normal_x_data", data.getSnappedNormalXData());
@@ -309,6 +380,7 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       ser.read_type_e("snapped_normal_z_data", data.getSnappedNormalZData());
       ser.read_type_e("snapped_area_data", data.getSnappedAreaData());
       ser.read_type_e("steppability_data", data.getSteppabilityData());
+      ser.read_type_e("steppable_connections_data", data.getSteppableConnectionsData());
    }
 
    public static void staticCopy(perception_msgs.msg.dds.TerrainMapMessage src, perception_msgs.msg.dds.TerrainMapMessage dest)
