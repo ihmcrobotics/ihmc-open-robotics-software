@@ -13,6 +13,15 @@ public class AlexanderSensorInformation implements HumanoidRobotSensorInformatio
 
    private final String pelvisIMUSTIMSensor = "pelvis_stim_imu";
    private final String torsoIMUSensor = "torso_imu";
+   private final String leftHipXIMUSensor = "left_hip_x_imu";
+   private final String leftThighIMUSensor = "left_thigh_imu";
+   private final String leftShinIMUSensor = "left_shin_imu";
+   private final String leftFootIMUSensor = "left_foot_imu";
+   private final String rightHipXIMUSensor = "right_hip_x_imu";
+   private final String rightThighIMUSensor = "right_thigh_imu";
+   private final String rightShinIMUSensor = "right_shin_imu";
+   private final String rightFootIMUSensor = "right_foot_imu";
+
    private final String[] imuSensorsToUse = {pelvisIMUSTIMSensor};
 
    private final String leftShoulderIMUSensor = "left_shoulder_pitch_imu";
@@ -104,5 +113,45 @@ public class AlexanderSensorInformation implements HumanoidRobotSensorInformatio
    public String getTorsoIMUName()
    {
       return torsoIMUSensor;
+   }
+
+   public String getLeftHipXIMUSensor()
+   {
+      return leftHipXIMUSensor;
+   }
+
+   public String getLeftThighIMUSensor()
+   {
+      return leftThighIMUSensor;
+   }
+
+   public String getLeftShinIMUSensor()
+   {
+      return leftShinIMUSensor;
+   }
+
+   public String getLeftFootIMUSensor()
+   {
+      return leftFootIMUSensor;
+   }
+
+   public String getRightHipXIMUSensor()
+   {
+      return rightHipXIMUSensor;
+   }
+
+   public String getRightThighIMUSensor()
+   {
+      return rightThighIMUSensor;
+   }
+
+   public String getRightShinIMUSensor()
+   {
+      return rightShinIMUSensor;
+   }
+
+   public String getRightFootIMUSensor()
+   {
+      return rightFootIMUSensor;
    }
 }
