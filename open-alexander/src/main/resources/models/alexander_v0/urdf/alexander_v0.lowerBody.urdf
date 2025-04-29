@@ -195,7 +195,7 @@
 		<parent link="LEFT_HIP_X_LINK"/>
 		<child link="LEFT_HIP_X_IMU_LINK"/>
 	</joint>
-	<gazebo reference="LEFT_HIP_X_IMU">
+	<gazebo reference="LEFT_HIP_X_IMU_LINK">
 		<sensor name="left_hip_x_imu" type="imu">
 			<always_on>true</always_on>
 			<imu>
