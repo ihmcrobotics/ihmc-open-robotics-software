@@ -100,15 +100,21 @@ public class TerrainMapTools
       message.setHeightScaleFactor(terrainMapData.getHeightScaleFactor());
       message.setHeightScaleOffset(terrainMapData.getHeightScaleOffset());
 
+      if (terrainMapData.hasTerrainCost())
+      {
+         message.setHasTerrainCostData(true);
+         PerceptionMessageTools.packDataArray(message.getTerrainCostData(), terrainMapData.getTerrainCostMap());
+      }
+      if (terrainMapData.hasContactMap())
+      {
+         message.setHasContactMapData(true);
+         PerceptionMessageTools.packDataArray(message.getContactMapData(), terrainMapData.getContactMap());
+      }
+
       if (terrainMapData.hasHeightMap())
       {
          message.setHasHeightMapData(true);
          PerceptionMessageTools.packShortDataArray(message.getHeightMapData(), terrainMapData.getHeightMap());
-      }
-      if (terrainMapData.hasSteppability())
-      {
-         message.setHasSteppabilityData(true);
-         PerceptionMessageTools.packDataArray(message.getSteppabilityData(), terrainMapData.getSteppabilityMat());
       }
       if (terrainMapData.hasSnapHeight())
       {
@@ -126,6 +132,16 @@ public class TerrainMapTools
       {
          message.setHasSnappedAreaData(true);
          PerceptionMessageTools.packDataArray(message.getSnappedAreaData(), terrainMapData.getSnappedAreaFractionMat());
+      }
+      if (terrainMapData.hasSteppability())
+      {
+         message.setHasSteppabilityData(true);
+         PerceptionMessageTools.packDataArray(message.getSteppabilityData(), terrainMapData.getSteppabilityMat());
+      }
+      if (terrainMapData.hasSteppableConnections())
+      {
+         message.setHasSteppableConnectionsData(true);
+         PerceptionMessageTools.packDataArray(message.getSteppableConnectionsData(), terrainMapData.getSteppabilityConnectionsMat());
       }
 
       return message;

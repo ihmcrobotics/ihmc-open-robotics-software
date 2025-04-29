@@ -88,6 +88,15 @@ public class TerrainMapData
       return !hasSteppability();
    }
 
+   public boolean hasTerrainCost()
+   {
+      return terrainCostMap != null;
+   }
+
+   public boolean hasContactMap()
+   {
+      return contactMap != null;
+   }
 
    public boolean hasHeightMap()
    {
@@ -107,6 +116,11 @@ public class TerrainMapData
    public boolean hasSteppability()
    {
       return steppabilityImage != null;
+   }
+
+   public boolean hasSteppableConnections()
+   {
+      return steppabilityConnectionsMat != null;
    }
 
    public boolean hasSnappedArea()
@@ -415,6 +429,26 @@ public class TerrainMapData
       heightScaleOffset = message.getHeightScaleOffset();
       heightScaleFactor = message.getHeightScaleFactor();
 
+      if (message.getHasTerrainCostData())
+      {
+         if (terrainCostMap == null)
+            terrainCostMap = new Mat(localGridSize, localGridSize, opencv_core.CV_8UC1);
+         terrainCostMap.data(new BytePointer(message.getTerrainCostData().getBuffer()));
+      }
+      else
+      {
+         terrainCostMap = null;
+      }
+      if (message.getHasContactMapData())
+      {
+         if (contactMap == null)
+            contactMap = new Mat(localGridSize, localGridSize, opencv_core.CV_8UC1);
+         contactMap.data(new BytePointer(message.getContactMapData().getBuffer()));
+      }
+      else
+      {
+         contactMap = null;
+      }
       if (message.getHasHeightMapData())
       {
          if (heightMap == null)
@@ -439,7 +473,7 @@ public class TerrainMapData
          for (int i = 0; i < expectedShorts; i++)
          {
             // Little-endian
-            byte low  = buffer.get();
+            byte low = buffer.get();
             byte high = buffer.get();
 
             int ushort = ((high & 0xFF) << 8) | (low & 0xFF);
@@ -474,13 +508,12 @@ public class TerrainMapData
          for (int i = 0; i < expectedShorts; i++)
          {
             // Little-endian
-            byte low  = buffer.get();
+            byte low = buffer.get();
             byte high = buffer.get();
 
             int ushort = ((high & 0xFF) << 8) | (low & 0xFF);
             shortBuffer.put((short) ushort);
          }
-
       }
       else
       {
@@ -514,6 +547,16 @@ public class TerrainMapData
       {
          steppabilityImage = null;
       }
+      if (message.getHasSteppableConnectionsData())
+      {
+         if (steppabilityConnectionsMat == null)
+            steppabilityConnectionsMat = new Mat(localGridSize, localGridSize, opencv_core.CV_8UC1);
+         steppabilityConnectionsMat.data(new BytePointer(message.getSteppableConnectionsData().getBuffer()));
+      }
+      else
+      {
+         steppabilityConnectionsMat = null;
+      }
       if (message.getHasSnappedAreaData())
       {
          if (snappedAreaFractionImage == null)
@@ -525,6 +568,4 @@ public class TerrainMapData
          snappedAreaFractionImage = null;
       }
    }
-
-
 }
