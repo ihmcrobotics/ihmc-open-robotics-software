@@ -198,6 +198,14 @@ public class ZEDImageSensor extends ImageSensor
       catch (ZEDException exception)
       {
          LogTools.error(exception);
+
+         if (slInputType == SL_INPUT_TYPE_STREAM)
+         {
+            // Do not retry if stream, it can cause a native crash. TODO: Look into this
+            LogTools.info("Connection to remote ZED SDK failed, not retrying.");
+            close();
+         }
+
          return false;
       }
 
