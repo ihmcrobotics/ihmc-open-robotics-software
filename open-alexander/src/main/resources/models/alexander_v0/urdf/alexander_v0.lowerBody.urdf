@@ -1,0 +1,450 @@
+<?xml version = "1.0" ?>
+<robot name="alexander">
+
+    <!-- JOINTS -->
+
+    <!-- LEFT LEG JOINTS -->
+    <joint name="LEFT_HIP_X" type="revolute">
+        <origin rpy="0 0 0" xyz="-0.16935 0.056 -0.01485"/>
+        <axis xyz="1 0 0"/>
+        <parent link="PELVIS_LINK"/>
+        <child link="LEFT_HIP_X_LINK"/>
+        <limit effort="150" lower="-1.0472" upper="0.436332" velocity="9"/>
+        <dynamics damping="0.05" friction="0.0"/>
+    </joint>
+    <joint name="LEFT_HIP_Z" type="revolute">
+        <origin rpy="0 0 0" xyz="0.05	0.0965	-0.072"/>
+        <axis xyz="0 0 1"/>
+        <parent link="LEFT_HIP_X_LINK"/>
+        <child link="LEFT_HIP_Z_LINK"/>
+        <limit effort="60" lower="-0.3490658504" upper="1.0472" velocity="11"/>
+        <dynamics damping="0.05" friction="0.0"/>
+    </joint>
+    <joint name="LEFT_HIP_Y" type="revolute">
+        <origin rpy="0 0 0" xyz="0.098	-0.046	-0.045"/>
+        <axis xyz="0 1 0"/>
+        <parent link="LEFT_HIP_Z_LINK"/>
+        <child link="LEFT_THIGH"/>
+        <limit effort="200" lower="-2.61799" upper="0.785398" velocity="8"/>
+        <dynamics damping="0.05" friction="0.0"/>
+    </joint>
+    <joint name="LEFT_KNEE_Y" type="revolute">
+        <origin rpy="0 0 0" xyz="0	0.015	-0.32"/>
+        <axis xyz="0 1 0"/>
+        <parent link="LEFT_THIGH"/>
+        <child link="LEFT_SHIN"/>
+        <limit effort="200" lower="0" upper="2.61799" velocity="8"/>
+        <dynamics damping="0.05" friction="0.0"/>
+    </joint>
+    <joint name="LEFT_ANKLE_Y" type="revolute">
+        <origin rpy="0 0 0" xyz="0	0	-0.41"/>
+        <axis xyz="0 1 0"/>
+        <parent link="LEFT_SHIN"/>
+        <child link="LEFT_ANKLE_Y_LINK"/>
+        <limit effort="180" lower="-1.0472" upper="0.523599" velocity="8"/>
+        <dynamics damping="0.05" friction="0.0"/>
+    </joint>
+    <joint name="LEFT_ANKLE_X" type="revolute">
+        <origin rpy="0 0 0" xyz="0	0	-0.01"/>
+        <axis xyz="1 0 0"/>
+        <parent link="LEFT_ANKLE_Y_LINK"/>
+        <child link="LEFT_FOOT"/>
+        <limit effort="90" lower="-0.436332" upper="0.436332" velocity="8"/>
+        <dynamics damping="0.05" friction="0.0"/>
+    </joint>
+
+    <!-- RIGHT LEG JOINTS -->
+    <joint name="RIGHT_HIP_X" type="revolute">
+        <origin rpy="0 0 0" xyz="-0.16935 -0.056 -0.01485"/>
+        <axis xyz="1 0 0"/>
+        <parent link="PELVIS_LINK"/>
+        <child link="RIGHT_HIP_X_LINK"/>
+        <limit effort="150" lower="-0.436332" upper="1.0472" velocity="9"/>
+        <dynamics damping="0.05" friction="0.0"/>
+    </joint>
+    <joint name="RIGHT_HIP_Z" type="revolute">
+        <origin rpy="0 0 0" xyz="0.05	-0.0965	-0.072"/>
+        <axis xyz="0 0 1"/>
+        <parent link="RIGHT_HIP_X_LINK"/>
+        <child link="RIGHT_HIP_Z_LINK"/>
+        <limit effort="60" lower="-1.0472" upper="0.3490658504" velocity="11"/>
+        <dynamics damping="0.05" friction="0.0"/>
+    </joint>
+    <joint name="RIGHT_HIP_Y" type="revolute">
+        <origin rpy="0 0 0" xyz="0.098	0.046	-0.045"/>
+        <axis xyz="0 1 0"/>
+        <parent link="RIGHT_HIP_Z_LINK"/>
+        <child link="RIGHT_THIGH"/>
+        <limit effort="200" lower="-2.61799" upper="0.785398" velocity="8"/>
+        <dynamics damping="0.05" friction="0.0"/>
+    </joint>
+    <joint name="RIGHT_KNEE_Y" type="revolute">
+        <origin rpy="0 0 0" xyz="0	-0.015	-0.32"/>
+        <axis xyz="0 1 0"/>
+        <parent link="RIGHT_THIGH"/>
+        <child link="RIGHT_SHIN"/>
+        <limit effort="200" lower="0" upper="2.61799" velocity="8"/>
+        <dynamics damping="0.05" friction="0.0"/>
+    </joint>
+    <joint name="RIGHT_ANKLE_Y" type="revolute">
+        <origin rpy="0 0 0" xyz="0	0	-0.41"/>
+        <axis xyz="0 1 0"/>
+        <parent link="RIGHT_SHIN"/>
+        <child link="RIGHT_ANKLE_Y_LINK"/>
+        <limit effort="180" lower="-1.0472" upper="0.523599" velocity="8"/>
+        <dynamics damping="0.05" friction="0.0"/>
+    </joint>
+    <joint name="RIGHT_ANKLE_X" type="revolute">
+        <origin rpy="0 0 0" xyz="0	0	-0.01"/>
+        <axis xyz="1 0 0"/>
+        <parent link="RIGHT_ANKLE_Y_LINK"/>
+        <child link="RIGHT_FOOT"/>
+        <limit effort="90" lower="-0.436332" upper="0.436332" velocity="8"/>
+        <dynamics damping="0.05" friction="0.0"/>
+    </joint>
+
+    <!-- SPINE JOINTS -->
+    <joint name="SPINE_Z" type="revolute">
+        <origin rpy="0 0 0" xyz="0.005 0 0.0785"/> <!-- This could be made xyz = 0 0 0 if this offset is added to the torso link origin instead -->
+        <axis xyz="0 0 1"/>
+        <parent link="PELVIS_LINK"/>
+        <child link="TORSO_LINK"/>
+        <limit effort="150" lower="-1.570796327" upper="1.570796327" velocity="9.0"/>
+        <dynamics damping="0.05" friction="0.0"/>
+    </joint>
+<!--    <joint name="SPINE_X" type="fixed">-->
+<!--        <origin rpy="0 0 0" xyz="0 0 0.08205"/>-->
+<!--        <axis xyz="1 0 0"/>-->
+<!--        <parent link="SPINE_Z_LINK"/>-->
+<!--        <child link="SPINE_X_LINK"/>-->
+<!--        <limit effort="1000" lower="-0.523599" upper="0.523599" velocity="100"/>-->
+<!--        <dynamics damping="0.05" friction="0.0"/>-->
+<!--    </joint>-->
+<!--    <joint name="SPINE_Y" type="revolute">-->
+<!--        <origin rpy="0 0 0" xyz="0.005 0 0.0785"/>-->
+<!--        <axis xyz="0 1 0"/>-->
+<!--        <parent link="SPINE_Z_LINK"/>-->
+<!--        <child link="TORSO_LINK"/>-->
+<!--        <limit effort="250.0" lower="-0.523599" upper="0.785398" velocity="6.0"/>-->
+<!--        <dynamics damping="0.05" friction="0.0"/>-->
+<!--    </joint>-->
+
+    <!-- LINKS -->
+
+    <link name="PELVIS_LINK">
+        <inertial>
+            <mass value="9.55"/>
+            <origin rpy="0 0 0" xyz="-0.08262906 0.00005323 -0.03302745"/>
+            <inertia ixx="0.03428688" ixy="0.00003029" ixz="0.00206603" iyy="0.05206257" iyz="0.00002883" izz="0.06240312"/>
+        </inertial>
+        <visual>
+            <geometry>
+                <mesh filename="package://alexander_v0/meshes/legs/pelvis.obj"/>
+            </geometry>
+            <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+        </visual>
+    </link>
+    <!-- PELVIS STIM IMU --> <!-- TODO (CD): This is a placeholder taken from Nadia to give Alexander a non-empty sensor information -->
+    <joint name="PELVIS_STIM_IMU_JOINT" type="fixed">
+        <parent link="PELVIS_LINK"/>
+        <child link="PELVIS_STIM_IMU_LINK"/>
+        <origin xyz="-0.03133646 0.02237500 -0.07000000" rpy="0.0 3.141592 0.0"/>
+    </joint>
+    <link name="PELVIS_STIM_IMU_LINK">
+        <inertial>
+            <mass value="0.0" />
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0" />
+        </inertial>
+    </link>
+    <gazebo reference="PELVIS_STIM_IMU_LINK">
+        <sensor name="pelvis_stim_imu" type="imu">
+            <always_on>1</always_on>
+            <update_rate>1000.0</update_rate>
+            <imu>
+                <noise>
+                    <type>gaussian</type>
+                    <rate>
+                        <mean>0.0</mean>
+                        <stddev>2e-4</stddev>
+                        <bias_mean>0.0000075</bias_mean>
+                        <bias_stddev>0.0000008</bias_stddev>
+                    </rate>
+                    <accel>
+                        <mean>0.0</mean>
+                        <stddev>1.7e-2</stddev>
+                        <bias_mean>0.1</bias_mean>
+                        <bias_stddev>0.001</bias_stddev>
+                    </accel>
+                </noise>
+            </imu>
+        </sensor>
+    </gazebo>
+    <!-- END PELVIS STIM IMU -->
+
+    <!-- LEFT LEG LINKS -->
+    <link name="LEFT_HIP_X_LINK">
+        <inertial>
+            <mass value="2.48"/>
+            <origin rpy="0 0 0" xyz="0.041609	0.087175	-0.027244"/>
+            <inertia ixx="0.003604455" ixy="-0.00034011" ixz="0.000130234" iyy="0.003566903" iyz="0.000375527" izz="0.00416927"/>
+        </inertial>
+        <visual>
+            <geometry>
+                <mesh filename="package://alexander_v0/meshes/legs/left_hip_roll.obj"/>
+            </geometry>
+            <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+        </visual>
+    </link>
+    <link name="LEFT_HIP_Z_LINK">
+        <inertial>
+            <mass value="0.70"/>
+            <origin rpy="0 0 0" xyz="0.050873	0.021405	0.007096"/>
+            <inertia ixx="0.002935962" ixy="0.000078328" ixz="0.001020406" iyy="0.003019906" iyz="-0.000227723" izz="0.002369299"/>
+        </inertial>
+        <visual>
+            <geometry>
+                <mesh filename="package://alexander_v0/meshes/legs/left_hip_yaw.obj"/>
+            </geometry>
+            <origin rpy="0.0 0.0 0.0" xyz="0 0 0"/>
+        </visual>
+    </link>
+    <link name="LEFT_THIGH">
+        <inertial>
+            <mass value="7.57"/>
+            <origin rpy="0 0 0" xyz="0.016667	-0.042916	-0.08067"/>
+            <inertia ixx="0.065492464" ixy="-0.000786763" ixz="0.007197569" iyy="0.066451126" iyz="0.00577279" izz="0.02082036"/>
+        </inertial>
+        <visual>
+            <geometry>
+                <mesh filename="package://alexander_v0/meshes/legs/left_thigh.obj"/>
+            </geometry>
+            <origin rpy="0.0 0.0 0.0" xyz="0 0 0"/>
+        </visual>
+    </link>
+    <link name="LEFT_SHIN">
+        <inertial>
+            <mass value="7.68"/>
+            <origin rpy="0 0 0" xyz="0.04806	-0.001471	-0.133599"/>
+            <inertia ixx="0.117055275" ixy="-0.000660882" ixz="-0.015310631" iyy="0.121402374" iyz="0.002246467" izz="0.017504326"/>
+        </inertial>
+        <visual>
+            <geometry>
+                <mesh filename="package://alexander_v0/meshes/legs/left_shin.obj"/>
+            </geometry>
+            <origin rpy="0.0 0.0 0.0" xyz="0 0 0"/>
+        </visual>
+    </link>
+    <link name="LEFT_ANKLE_Y_LINK">
+        <inertial>
+            <mass value="0.19"/>
+            <origin rpy="0 0 0" xyz="-0.003182	0.00000003437	-0.005452"/>
+            <inertia ixx="0.000077529" ixy="0" ixz="-0.000007226" iyy="0.000055986" iyz="0" izz="0.000100366"/>
+        </inertial>
+        <visual>
+            <geometry>
+                <mesh filename="package://alexander_v0/meshes/legs/left_ankle.obj"/>
+            </geometry>
+            <origin rpy="1.5708 0.0 0.0" xyz="0 0 0"/>
+        </visual>
+    </link>
+    <link name="LEFT_FOOT">
+        <inertial>
+            <mass value="1.01"/>
+            <origin rpy="0 0 0" xyz="0.048544	0.000001	-0.077815"/>
+            <inertia ixx="0.001208502" ixy="-0.000000107" ixz="0.000261446" iyy="0.004517949" iyz="0.000000008" izz="0.004987102"/>
+        </inertial>
+        <visual>
+            <geometry>
+                <mesh filename="package://alexander_v0/meshes/legs/left_foot.obj"/>
+            </geometry>
+            <origin rpy="0.0 0.0 0.0" xyz="0 0 0"/>
+        </visual>
+    </link>
+
+
+    <!-- RIGHT LEG LINKS -->
+    <link name="RIGHT_HIP_X_LINK">
+        <inertial>
+            <mass value="2.48"/>
+            <origin rpy="0 0 0" xyz="0.041609	-0.087175	-0.027244"/>
+            <inertia ixx="0.003604455" ixy="0.00034011" ixz="0.000130234" iyy="0.003566903" iyz="-0.000375527" izz="0.00416927"/>
+        </inertial>
+        <visual>
+            <geometry>
+                <mesh filename="package://alexander_v0/meshes/legs/right_hip_roll.obj"/>
+            </geometry>
+            <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+        </visual>
+    </link>
+    <link name="RIGHT_HIP_Z_LINK">
+        <inertial>
+            <mass value="0.70"/>
+            <origin rpy="0 0 0" xyz="0.050873	-0.021405	0.007096"/>
+            <inertia ixx="0.002935962" ixy="-0.000078328" ixz="0.001020406" iyy="0.003019906" iyz="0.000227723" izz="0.002369299"/>
+        </inertial>
+        <visual>
+            <geometry>
+                <mesh filename="package://alexander_v0/meshes/legs/right_hip_yaw.obj"/>
+            </geometry>
+            <origin rpy="0.0 0.0 0.0" xyz="0 0 0"/>
+        </visual>
+    </link>
+    <link name="RIGHT_THIGH">
+        <inertial>
+            <mass value="7.57"/>
+            <origin rpy="0 0 0" xyz="0.016667	0.042916	-0.08067"/>
+            <inertia ixx="0.065492464" ixy="0.000786763" ixz="0.007197569" iyy="0.066451126" iyz="-0.00577279" izz="0.02082036"/>
+        </inertial>
+        <visual>
+            <geometry>
+                <mesh filename="package://alexander_v0/meshes/legs/right_thigh.obj"/>
+            </geometry>
+            <origin rpy="0.0 0.0 0.0" xyz="0 0 0"/>
+        </visual>
+    </link>
+    <link name="RIGHT_SHIN">
+        <inertial>
+            <mass value="7.68"/>
+            <origin rpy="0 0 0" xyz="0.04806	-0.001471	-0.133599"/>
+            <inertia ixx="0.117055275" ixy="-0.000660882" ixz="-0.015310631" iyy="0.121402374" iyz="-0.002246467" izz="0.017504326"/>
+        </inertial>
+        <visual>
+            <geometry>
+                <mesh filename="package://alexander_v0/meshes/legs/right_shin.obj"/>
+            </geometry>
+            <origin rpy="0.0 0.0 0.0" xyz="0 0 0"/>
+        </visual>
+    </link>
+    <link name="RIGHT_ANKLE_Y_LINK">
+        <inertial>
+            <mass value="0.19"/>
+            <origin rpy="0 0 0" xyz="-0.003182	0.00000003437	-0.005452"/>
+            <inertia ixx="0.000077529" ixy="0" ixz="-0.000007226" iyy="0.000055986" iyz="0" izz="0.000100366"/>
+        </inertial>
+        <visual>
+            <geometry>
+                <mesh filename="package://alexander_v0/meshes/legs/right_ankle.obj"/>
+            </geometry>
+            <origin rpy="0.0 0.0 0.0" xyz="0 0 0"/>
+        </visual>
+    </link>
+    <link name="RIGHT_FOOT">
+        <inertial>
+            <mass value="1.01"/>
+            <origin rpy="0 0 0" xyz="0.048544	0.000001	-0.077815"/>
+            <inertia ixx="0.001208502" ixy="-0.000000107" ixz="0.000261446" iyy="0.004517949" iyz="0.000000008" izz="0.004987102"/>
+        </inertial>
+        <visual>
+            <geometry>
+                <mesh filename="package://alexander_v0/meshes/legs/right_foot.obj"/>
+            </geometry>
+            <origin rpy="0.0 0.0 0.0" xyz="0 0 0"/>
+        </visual>
+    </link>
+
+
+    <!-- SPINE LINKS -->
+    <link name="TORSO_LINK">
+        <inertial>
+            <mass value="13.5"/> <!-- This probably needs to be updated  -->
+            <origin rpy="0 0 0" xyz="-0.03613868 -2.81E-06 0.25908586"/>
+            <inertia ixx="0.534504681" ixy="8.41519717E-05" ixz="-0.00672956305" iyy="0.505409852" iyz="0.000207996773" izz="0.379402013"/>
+        </inertial>
+        <visual>
+            <geometry>
+                <mesh filename="package://alexander_v0/meshes/torso.obj"/>
+            </geometry>
+            <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+        </visual>
+    </link>
+
+    <!-- TORSO IMU --> <!-- TODO (CD): This is a placeholder taken from Nadia to give Alexander a non-empty sensor information -->
+    <joint name="TORSO_IMU_JOINT" type="fixed">
+        <parent link="TORSO_LINK"/>
+        <child link="TORSO_IMU_LINK"/>
+        <origin xyz="0.04529 -0.02427 0.33757" rpy="3.141592 0 0"/>
+    </joint>
+    <link name="TORSO_IMU_LINK">
+        <inertial>
+            <mass value="0.0" />
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0" />
+        </inertial>
+    </link>
+    <gazebo reference="TORSO_IMU_LINK">
+        <sensor name="torso_imu" type="imu">
+            <always_on>1</always_on>
+            <update_rate>1000.0</update_rate>
+            <imu>
+                <noise>
+                    <type>gaussian</type>
+                    <rate>
+                        <mean>0.0</mean>
+                        <stddev>2e-4</stddev>
+                        <bias_mean>0.0000075</bias_mean>
+                        <bias_stddev>0.0000008</bias_stddev>
+                    </rate>
+                    <accel>
+                        <mean>0.0</mean>
+                        <stddev>1.7e-2</stddev>
+                        <bias_mean>0.1</bias_mean>
+                        <bias_stddev>0.001</bias_stddev>
+                    </accel>
+                </noise>
+            </imu>
+        </sensor>
+    </gazebo>
+    <!-- END TORSO IMU -->
+
+    <!-- NECK & HEAD LINKS -->
+    <joint name="NECK_Z" type="revolute">
+        <origin rpy="0 0 0" xyz="0 0 0.307953"/> <!-- placeholder for the joint location -->
+        <axis xyz="0 0 1"/>
+        <parent link="TORSO_LINK"/>
+        <child link="NECK_Z_LINK"/>
+        <limit effort="20" lower="-1.5708" upper="1.5708" velocity="20"/>
+        <dynamics damping="0.05" friction="0.0"/>
+    </joint>
+    <joint name="NECK_Y" type="revolute">
+        <origin rpy="0 0 0" xyz="0.025 0.01 0.207252"/>
+        <axis xyz="0 1 0"/>
+        <parent link="NECK_Z_LINK"/>
+        <child link="HEAD_LINK"/>
+        <limit effort="20" lower="-1.0472" upper="1.0472" velocity="20"/>
+        <dynamics damping="0.05" friction="0.0"/>
+    </joint>
+
+    <!-- NECK & HEAD LINKS -->
+
+    <link name="NECK_Z_LINK">
+        <inertial>
+            <mass value="1.141"/>
+            <origin rpy="0 0 0" xyz="0.007143 0.006943 0.109823"/>
+            <inertia ixx="0.007475898" ixy="-0.000075723" ixz="-0.000745362" iyy="0.007407578" iyz="-0.000436948" izz="0.00109269"/>
+        </inertial>
+        <visual>
+            <geometry>
+                <cylinder radius="0.05" length="0.1"/>
+            </geometry>
+            <material name="gray">
+                <color rgba="0.5 0.5 0.5 1.0"/>
+            </material>
+            <origin rpy="0.0 0.0 0.0" xyz="0 0 0.0"/>
+        </visual>
+    </link>
+    <link name="HEAD_LINK">
+        <inertial>
+            <mass value="1.677"/>
+            <origin rpy="0 0 0" xyz="0.03237 -0.013568 0.007163"/>
+            <inertia ixx="0.006026191" ixy="-0.000197484" ixz="0.001813659" iyy="0.008182071" iyz="-0.000042529" izz="0.00644909"/>
+        </inertial>
+        <visual>
+            <geometry>
+                <mesh filename="package://alexander_v0/meshes/ALX02_01_A02_HeadLink.obj"/>
+            </geometry>
+            <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+        </visual>
+    </link>
+
+</robot>
