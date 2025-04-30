@@ -508,7 +508,7 @@ public class FootstepPlannerRequest
          HeightMapMessage heightMapMessage = HeightMapMessageTools.toMessage(getHeightMapData());
          requestPacket.getHeightMapMessage().set(heightMapMessage);
       }
-      // TODO need to add a message for the terrain map.
+
       if (getTerrainMapData() != null)
       {
          TerrainMapMessage terrainMapMessage = TerrainMapTools.toMessage(terrainMapData);
