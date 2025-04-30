@@ -8,7 +8,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.HandLoadBearingMessage;
+import controller_msgs.msg.dds.WalkingStatusMessage;
 import ihmc_common_msgs.msg.dds.Point2DMessage;
 import ihmc_common_msgs.msg.dds.SelectionMatrix3DMessage;
 import ihmc_common_msgs.msg.dds.WeightMatrix3DMessage;
@@ -95,6 +97,7 @@ import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
+import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.yoVariables.euclid.filters.RateLimitedYoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -736,40 +739,25 @@ public class RDXVRKinematicsStreamingMode
             ikHumanoidSolverConfigurationMessage.setHoldCurrentCenterOfMassXyPosition(false);
             ikHumanoidSolverConfigurationMessage.setEnableStabilityObjective(enableStabilityObjective.get());
 
-            // Either way specify the normal if available
-            if (multiContactStabilityGraphic.hasRegion())
+            boolean enableContactAdjustment = this.enableContactAdjustment.get();
+            boolean hasCandidateRegion = false;
+
+            for (RobotSide robotSide : RobotSide.values)
             {
-               PlanarRegion bracingRegion = multiContactStabilityGraphic.getBracingRegion();
-               ikHumanoidSolverConfigurationMessage.getRegionNormal().set(bracingRegion.getNormal());
-            }
-
-            // Configure region if doing contact adjustment
-            boolean enableContactAdjustmentRequested = enableContactAdjustment.get();
-            if (enableContactAdjustmentRequested && multiContactStabilityGraphic.hasRegion())
-            {
-               ikHumanoidSolverConfigurationMessage.setEnableContactAdjustment(true);
-
-               // Region frame
-               PlanarRegion bracingRegion = multiContactStabilityGraphic.getBracingRegion();
-               FramePose3D bracingRegionPose = new FramePose3D(ReferenceFrame.getWorldFrame(), bracingRegion.getTransformToWorld());
-               ikHumanoidSolverConfigurationMessage.getRegionPoint().set(bracingRegionPose.getPosition());
-               ikHumanoidSolverConfigurationMessage.getRegionOrientation().set(bracingRegionPose.getOrientation());
-
-               // Convex hull
-               Object<Point2DMessage> regionVertices = ikHumanoidSolverConfigurationMessage.getRegionVertices();
-               regionVertices.clear();
-               ConvexPolygon2D convexHull = bracingRegion.getConvexHull();
-               for (int i = 0; i < convexHull.getNumberOfVertices(); i++)
+               // Either way specify the normal if available
+               if (multiContactStabilityGraphic.hasRegion(robotSide))
                {
-                  Point2DMessage messageVertex = regionVertices.add();
-                  messageVertex.setX(convexHull.getVertex(i).getX());
-                  messageVertex.setY(convexHull.getVertex(i).getY());
+                  PlanarRegion bracingRegion = multiContactStabilityGraphic.getBracingRegion(robotSide);
+                  hasCandidateRegion = true;
+
+                  if (robotSide == RobotSide.LEFT)
+                     ikHumanoidSolverConfigurationMessage.getLeftHandRegionNormal().set(bracingRegion.getNormal());
+                  else
+                     ikHumanoidSolverConfigurationMessage.getRightHandRegionNormal().set(bracingRegion.getNormal());
                }
             }
-            else
-            {
-               ikHumanoidSolverConfigurationMessage.setEnableContactAdjustment(false);
-            }
+
+            ikHumanoidSolverConfigurationMessage.setEnableContactAdjustment(enableContactAdjustment && hasCandidateRegion);
 
             ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputToolboxHumanoidConfigurationTopic(syncedRobot.getRobotModel().getSimpleRobotName()), ikHumanoidSolverConfigurationMessage);
 
@@ -982,6 +970,17 @@ public class RDXVRKinematicsStreamingMode
       }
       else
       {
+         if (capturabilityBasedStatus.getMessageNotification().poll())
+         {
+            CapturabilityBasedStatus capturabilityBasedStatus = this.capturabilityBasedStatus.getMessageNotification().read();
+            for (RobotSide robotSide : RobotSide.values)
+            {
+               handsAreLoaded.put(robotSide, HumanoidMessageTools.isHandLoadBearing(robotSide, capturabilityBasedStatus));
+            }
+
+            isUpperBodyLoadBearing = handsAreLoaded.get(RobotSide.LEFT) || handsAreLoaded.get(RobotSide.RIGHT);
+         }
+
          if (!enabled.get())
          {
             streamToController.set(false);
@@ -1193,7 +1192,10 @@ public class RDXVRKinematicsStreamingMode
    {
       if (handControlModes.get(robotSide) == RDXHandControlMode.GRIPPER)
       {
-         publishHandCommand(robotSide);
+//         publishHandCommand(robotSide);
+
+         // replace with walking
+         sendWalkingTrajectory();
       }
       else if (handControlModes.get(robotSide) == RDXHandControlMode.LOAD_BEARING)
       {
@@ -1233,9 +1235,9 @@ public class RDXVRKinematicsStreamingMode
          contactPoint.changeFrame(syncedRobot.getFullRobotModel().getHand(robotSide).getBodyFixedFrame());
          handLoadBearingMessage.getContactPointInBodyFrame().set(contactPoint);
 
-         if (multiContactStabilityGraphic.hasRegion())
+         if (multiContactStabilityGraphic.hasRegion(robotSide))
          { // From perception
-            handLoadBearingMessage.getContactNormalInWorld().set(multiContactStabilityGraphic.getBracingRegion().getNormal());
+            handLoadBearingMessage.getContactNormalInWorld().set(multiContactStabilityGraphic.getBracingRegion(robotSide).getNormal());
          }
          else
          { // Fall back on hard-coded
@@ -1252,6 +1254,28 @@ public class RDXVRKinematicsStreamingMode
 
       LogTools.info("Publishing hand load bearing message " + robotSide + " hand, loading = " + handLoadBearingMessage.getLoad());
       ros2ControllerHelper.publishToController(handLoadBearingMessage);
+   }
+
+   private void sendWalkingTrajectory()
+   {
+      RobotSide swingSide = RobotSide.RIGHT;
+      FramePose3D currentFootPosition = new FramePose3D(syncedRobot.getFullRobotModel().getSoleFrame(swingSide));
+
+      double stepX = 0.58;
+      double stepZ = 0.55; // -1.0; //
+      double swingDuration = 5.5;
+
+      currentFootPosition.setX(stepX);
+      currentFootPosition.changeFrame(ReferenceFrame.getWorldFrame());
+
+      FootstepDataMessage footstepDataMessage = HumanoidMessageTools.createFootstepDataMessage(swingSide, currentFootPosition.getPosition(), currentFootPosition.getOrientation());
+      footstepDataMessage.setSwingHeight(stepZ);
+      footstepDataMessage.setSwingDuration(swingDuration);
+      footstepDataMessage.getCustomWaypointProportions().add(-0.1);
+      footstepDataMessage.getCustomWaypointProportions().add(1.1);
+
+      LogTools.info("sending footsteps");
+      ros2ControllerHelper.publishToController(HumanoidMessageTools.createFootstepDataListMessage(footstepDataMessage));
    }
 
    public void publishHandCommand(RobotSide side)

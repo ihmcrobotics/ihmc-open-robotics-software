@@ -19,14 +19,10 @@ bool enable_stability_objective false
 # If true, enables a preview of the feasible region and corresponding contact-point adjustment.
 bool enable_contact_adjustment false
 
-# If enable_contact_adjustment is true this the origin position of the frame describing the upcoming bracing region
-geometry_msgs/Point region_point
-# If enable_contact_adjustment is true this the origin orientation of the frame describing the upcoming bracing region. The normal is along z in the given plane
-geometry_msgs/Quaternion region_orientation
-# Normal in world. This is over-specific but available to use if necessary
-geometry_msgs/Vector3 region_normal
-# If enable_contact_adjustment is true this the convex hull of the upcoming bracing region
-ihmc_common_msgs/Point2DMessage[<=200] region_vertices
+# Left candidate region normal in world
+geometry_msgs/Vector3 left_hand_region_normal
+# Right candidate region normal in world
+geometry_msgs/Vector3 right_hand_region_normal
 
 # Whether restrictive joint limits are enabled, in order to have the IK avoid a solution at the joint limit.
 bool enable_joint_limit_reduction true

@@ -59,9 +59,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import static toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus.*;
 import static us.ihmc.robotModels.FullRobotModelUtils.getAllJointsExcludingHands;
@@ -72,7 +74,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    private static final double FOOT_COEFFICIENT_OF_FRICTION = 0.8;
    private static final double HAND_COEFFICIENT_OF_FRICTION = 1.0; // 0.4; //
 
-   public static RobotSide BRACING_HAND_SIDE = null;
+   public static Set<RobotSide> BRACING_HAND_SIDES = new HashSet<>();
 
    /**
     * This is the model of the robot that is constantly updated to represent the most recent solution
@@ -569,7 +571,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          retargetingCalculator.setEnabled(command.enableStabilityObjective());
          if (command.enableContactAdjustment() || (StabilityBasedKinematicRetargetingCalculator.OVERRIDE_MESSAGE && StabilityBasedKinematicRetargetingCalculator.ENABLE_CONTACT_OBJECTIVE))
          {
-            retargetingCalculator.enableContactAdjustment(command.getBracingRegionPoint(), command.getBracingRegionOrientation(), command.getBracingRegionPolygon(), command.getBracingRegionNormal());
+            retargetingCalculator.enableContactAdjustment(command.getLeftBracingRegionNormal(), command.getRightBracingRegionNormal());
          }
          else
          {
@@ -781,16 +783,16 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          { // Hand is load bearing
             initialHandPositions.get(robotside).setMatchingFrame(handContactPointInBodyFrame.get(robotside));
          }
-         else if (retargetingCalculator.contactAdjustmentRequested() && robotside == BRACING_HAND_SIDE)
+         else if (retargetingCalculator.contactAdjustmentRequested() && BRACING_HAND_SIDES.contains(robotside))
          { // Hand isn't load bearing and contact adjustment is requested
             handContactPointInBodyFrame.get(robotside).setToZero(desiredFullRobotModel.getHandControlFrame(robotside));
             handContactPointInBodyFrame.get(robotside).changeFrame(desiredFullRobotModel.getHand(robotside).getBodyFixedFrame());
             initialHandPositions.get(robotside).setMatchingFrame(handContactPointInBodyFrame.get(robotside));
 
-            if (BRACING_HAND_SIDE == RobotSide.LEFT)
-               capturabilityBasedStatusInternal.getLeftHandContactNormal().set(retargetingCalculator.getContactAdjustmentNormal());
+            if (robotside == RobotSide.LEFT)
+               capturabilityBasedStatusInternal.getLeftHandContactNormal().set(retargetingCalculator.getContactAdjustmentNormal(RobotSide.LEFT));
             else
-               capturabilityBasedStatusInternal.getRightHandContactNormal().set(retargetingCalculator.getContactAdjustmentNormal());
+               capturabilityBasedStatusInternal.getRightHandContactNormal().set(retargetingCalculator.getContactAdjustmentNormal(RobotSide.RIGHT));
          }
       }
 
@@ -828,9 +830,9 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          packFootContactPoints(RobotSide.RIGHT, capturabilityBasedStatusInternal.getRightFootSupportPolygon3d());
 
       // add hand contact points
-      if (isHandInSupport.get(RobotSide.LEFT).getValue() || (retargetingCalculator.contactAdjustmentRequested() && BRACING_HAND_SIDE == RobotSide.LEFT))
+      if (isHandInSupport.get(RobotSide.LEFT).getValue() || (retargetingCalculator.contactAdjustmentRequested() && BRACING_HAND_SIDES.contains(RobotSide.LEFT)))
          packHandContactPoint(RobotSide.LEFT, capturabilityBasedStatusInternal.getLeftHandContactNormal());
-      if (isHandInSupport.get(RobotSide.RIGHT).getValue() || (retargetingCalculator.contactAdjustmentRequested() && BRACING_HAND_SIDE == RobotSide.RIGHT))
+      if (isHandInSupport.get(RobotSide.RIGHT).getValue() || (retargetingCalculator.contactAdjustmentRequested() && BRACING_HAND_SIDES.contains(RobotSide.RIGHT)))
          packHandContactPoint(RobotSide.RIGHT, capturabilityBasedStatusInternal.getRightHandContactNormal());
 
       wholeBodyContactState.update();

@@ -39,21 +39,13 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
             */
    public boolean enable_contact_adjustment_;
    /**
-            * If enable_contact_adjustment is true this the origin position of the frame describing the upcoming bracing region
+            * Left candidate region normal in world
             */
-   public us.ihmc.euclid.tuple3D.Point3D region_point_;
+   public us.ihmc.euclid.tuple3D.Vector3D left_hand_region_normal_;
    /**
-            * If enable_contact_adjustment is true this the origin orientation of the frame describing the upcoming bracing region. The normal is along z in the given plane
+            * Right candidate region normal in world
             */
-   public us.ihmc.euclid.tuple4D.Quaternion region_orientation_;
-   /**
-            * Normal in world. This is over-specific but available to use if necessary
-            */
-   public us.ihmc.euclid.tuple3D.Vector3D region_normal_;
-   /**
-            * If enable_contact_adjustment is true this the convex hull of the upcoming bracing region
-            */
-   public us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.Point2DMessage>  region_vertices_;
+   public us.ihmc.euclid.tuple3D.Vector3D right_hand_region_normal_;
    /**
             * Whether restrictive joint limits are enabled, in order to have the IK avoid a solution at the joint limit.
             */
@@ -71,14 +63,11 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
 
    public HumanoidKinematicsToolboxConfigurationMessage()
    {
-      region_point_ = new us.ihmc.euclid.tuple3D.Point3D();
-      region_orientation_ = new us.ihmc.euclid.tuple4D.Quaternion();
-      region_normal_ = new us.ihmc.euclid.tuple3D.Vector3D();
-      region_vertices_ = new us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.Point2DMessage> (200, new ihmc_common_msgs.msg.dds.Point2DMessagePubSubType());
+      left_hand_region_normal_ = new us.ihmc.euclid.tuple3D.Vector3D();
+      right_hand_region_normal_ = new us.ihmc.euclid.tuple3D.Vector3D();
       joint_limit_reduction_factors_ = new us.ihmc.idl.IDLSequence.Float (20, "type_5");
 
       joint_limit_reduction_hash_codes_ = new us.ihmc.idl.IDLSequence.Integer (20, "type_2");
-
 
    }
 
@@ -100,10 +89,8 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
 
       enable_contact_adjustment_ = other.enable_contact_adjustment_;
 
-      geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.region_point_, region_point_);
-      geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.region_orientation_, region_orientation_);
-      geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.region_normal_, region_normal_);
-      region_vertices_.set(other.region_vertices_);
+      geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.left_hand_region_normal_, left_hand_region_normal_);
+      geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.right_hand_region_normal_, right_hand_region_normal_);
       enable_joint_limit_reduction_ = other.enable_joint_limit_reduction_;
 
       joint_limit_reduction_factors_.set(other.joint_limit_reduction_factors_);
@@ -197,38 +184,20 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
 
 
    /**
-            * If enable_contact_adjustment is true this the origin position of the frame describing the upcoming bracing region
+            * Left candidate region normal in world
             */
-   public us.ihmc.euclid.tuple3D.Point3D getRegionPoint()
+   public us.ihmc.euclid.tuple3D.Vector3D getLeftHandRegionNormal()
    {
-      return region_point_;
+      return left_hand_region_normal_;
    }
 
 
    /**
-            * If enable_contact_adjustment is true this the origin orientation of the frame describing the upcoming bracing region. The normal is along z in the given plane
+            * Right candidate region normal in world
             */
-   public us.ihmc.euclid.tuple4D.Quaternion getRegionOrientation()
+   public us.ihmc.euclid.tuple3D.Vector3D getRightHandRegionNormal()
    {
-      return region_orientation_;
-   }
-
-
-   /**
-            * Normal in world. This is over-specific but available to use if necessary
-            */
-   public us.ihmc.euclid.tuple3D.Vector3D getRegionNormal()
-   {
-      return region_normal_;
-   }
-
-
-   /**
-            * If enable_contact_adjustment is true this the convex hull of the upcoming bracing region
-            */
-   public us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.Point2DMessage>  getRegionVertices()
-   {
-      return region_vertices_;
+      return right_hand_region_normal_;
    }
 
    /**
@@ -294,16 +263,8 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_contact_adjustment_, other.enable_contact_adjustment_, epsilon)) return false;
 
-      if (!this.region_point_.epsilonEquals(other.region_point_, epsilon)) return false;
-      if (!this.region_orientation_.epsilonEquals(other.region_orientation_, epsilon)) return false;
-      if (!this.region_normal_.epsilonEquals(other.region_normal_, epsilon)) return false;
-      if (this.region_vertices_.size() != other.region_vertices_.size()) { return false; }
-      else
-      {
-         for (int i = 0; i < this.region_vertices_.size(); i++)
-         {  if (!this.region_vertices_.get(i).epsilonEquals(other.region_vertices_.get(i), epsilon)) return false; }
-      }
-
+      if (!this.left_hand_region_normal_.epsilonEquals(other.left_hand_region_normal_, epsilon)) return false;
+      if (!this.right_hand_region_normal_.epsilonEquals(other.right_hand_region_normal_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_joint_limit_reduction_, other.enable_joint_limit_reduction_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.joint_limit_reduction_factors_, other.joint_limit_reduction_factors_, epsilon)) return false;
@@ -333,10 +294,8 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
 
       if(this.enable_contact_adjustment_ != otherMyClass.enable_contact_adjustment_) return false;
 
-      if (!this.region_point_.equals(otherMyClass.region_point_)) return false;
-      if (!this.region_orientation_.equals(otherMyClass.region_orientation_)) return false;
-      if (!this.region_normal_.equals(otherMyClass.region_normal_)) return false;
-      if (!this.region_vertices_.equals(otherMyClass.region_vertices_)) return false;
+      if (!this.left_hand_region_normal_.equals(otherMyClass.left_hand_region_normal_)) return false;
+      if (!this.right_hand_region_normal_.equals(otherMyClass.right_hand_region_normal_)) return false;
       if(this.enable_joint_limit_reduction_ != otherMyClass.enable_joint_limit_reduction_) return false;
 
       if (!this.joint_limit_reduction_factors_.equals(otherMyClass.joint_limit_reduction_factors_)) return false;
@@ -361,14 +320,10 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
       builder.append(this.enable_stability_objective_);      builder.append(", ");
       builder.append("enable_contact_adjustment=");
       builder.append(this.enable_contact_adjustment_);      builder.append(", ");
-      builder.append("region_point=");
-      builder.append(this.region_point_);      builder.append(", ");
-      builder.append("region_orientation=");
-      builder.append(this.region_orientation_);      builder.append(", ");
-      builder.append("region_normal=");
-      builder.append(this.region_normal_);      builder.append(", ");
-      builder.append("region_vertices=");
-      builder.append(this.region_vertices_);      builder.append(", ");
+      builder.append("left_hand_region_normal=");
+      builder.append(this.left_hand_region_normal_);      builder.append(", ");
+      builder.append("right_hand_region_normal=");
+      builder.append(this.right_hand_region_normal_);      builder.append(", ");
       builder.append("enable_joint_limit_reduction=");
       builder.append(this.enable_joint_limit_reduction_);      builder.append(", ");
       builder.append("joint_limit_reduction_factors=");

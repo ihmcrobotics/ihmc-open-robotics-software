@@ -20,6 +20,7 @@ import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematic
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -43,6 +44,7 @@ import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -72,11 +74,11 @@ public class RDXMultiContactRegionGraphic implements RenderableProvider
    private final RigidBodyTransform transform = new RigidBodyTransform();
 
    private final AtomicReference<FramePlanarRegionsListMessage> latestPlanarRegionsMessage = new AtomicReference<>();
-   private final Vector3D bracingRegionPoint = new Vector3D();
-   private final Vector3D bracingRegionNormal = new Vector3D();
-   private final Quaternion bracingRegionOrientation = new Quaternion();
-   private final RotationMatrix bracingRegionRotation = new RotationMatrix();
-   private PlanarRegion bracingRegion = null;
+   private final SideDependentList<Vector3D> bracingRegionPoints = new SideDependentList<>(new Vector3D(), new Vector3D());
+   private final SideDependentList<Vector3D> bracingRegionNormals = new SideDependentList<>(new Vector3D(), new Vector3D());
+   private final SideDependentList<Quaternion> bracingRegionOrientations = new SideDependentList<>(new Quaternion(), new Quaternion());
+   private final SideDependentList<RotationMatrix> bracingRegionRotations = new SideDependentList<>(new RotationMatrix(), new RotationMatrix());
+   private final SideDependentList<PlanarRegion> bracingRegions = new SideDependentList<>();
 
    private ModelInstance modelInstance;
    private Model lastModel;
@@ -187,79 +189,95 @@ public class RDXMultiContactRegionGraphic implements RenderableProvider
 
          PlanarRegionsList planarRegions = PlanarRegionMessageConverter.convertToPlanarRegionsListInWorld(planarRegionsMessage);
 
-         PlanarRegion bracingRegion = null;
-         double minDistanceToHandXY = Double.MAX_VALUE;
-
-         for (int i = 0; i < planarRegions.getNumberOfPlanarRegions(); i++)
+         for (RobotSide robotSide : RobotSide.values)
          {
-            PlanarRegion region = planarRegions.getPlanarRegion(i);
+            this.bracingRegions.put(robotSide, null);
 
-            double area = region.getArea();
-            double areaThreshold = 0.15;
+            PlanarRegion bracingRegion = null;
+            double minDistanceToHandXY = Double.MAX_VALUE;
 
-            if (area < areaThreshold)
-               continue;
-
-            FrameVector3D normal = new FrameVector3D(ReferenceFrame.getWorldFrame(), region.getNormal());
-            normal.changeFrame(midFeetZUpFrame);
-            double normalZ = normal.getZ();
-            double pitch = Math.abs(Math.asin(normalZ));
-            double pitchThreshold = Math.toRadians(10.0); // Math.toRadians(9.0);
-
-            // hardware
-//            if (pitch > pitchThreshold)
-//               continue;
-//            if (normal.getX() > -0.2)
-//               continue;
-
-            // back wall
-//            if (pitch > pitchThreshold)
-//               continue;
-//            if (normal.getX() > 0.0)
-//               continue;
-
-            // top wall
-            if (normal.getZ() > -0.5)
-               continue;
-
-            // pitched wall
-//            if (Math.abs(normal.getZ()) > 0.5)
-//               continue;
-//            if (normal.getX() > -0.3)
-//               continue;
-
-            Point3D centroid = PlanarRegionTools.getCentroid3DInWorld(region);
-            FramePoint3D hand = new FramePoint3D(ghostFullRobotModel.getHandControlFrame(HumanoidKinematicsToolboxController.BRACING_HAND_SIDE));
-            hand.changeFrame(ReferenceFrame.getWorldFrame());
-
-            double distanceXY = centroid.distanceXY(hand);
-            if (distanceXY < minDistanceToHandXY)
+            for (int i = 0; i < planarRegions.getNumberOfPlanarRegions(); i++)
             {
-               minDistanceToHandXY = distanceXY;
-               bracingRegion = region;
+               PlanarRegion region = planarRegions.getPlanarRegion(i);
+
+               double area = region.getArea();
+               double areaThreshold = 0.25;
+
+               if (area < areaThreshold)
+                  continue;
+
+               FrameVector3D normal = new FrameVector3D(ReferenceFrame.getWorldFrame(), region.getNormal());
+               normal.changeFrame(midFeetZUpFrame);
+               double normalZ = normal.getZ();
+               double pitch = Math.abs(Math.asin(normalZ));
+               double pitchThreshold = Math.toRadians(10.0); // Math.toRadians(9.0);
+
+               // hardware
+               //            if (pitch > pitchThreshold)
+               //               continue;
+               //            if (normal.getX() > -0.2)
+               //               continue;
+
+               // back wall
+               //            if (pitch > pitchThreshold)
+               //               continue;
+               //            if (normal.getX() > 0.0)
+               //               continue;
+
+               // top wall
+//               if (robotSide == RobotSide.RIGHT && (normal.getZ() > -0.5 || normal.getX() > 0.1))
+//                  continue;
+
+               // pitched wall
+               //            if (Math.abs(normal.getZ()) > 0.5)
+               //               continue;
+               //            if (normal.getX() > -0.3)
+               //               continue;
+
+               // left wall
+//               if (robotSide == RobotSide.LEFT && (normal.getY() > -0.5 || normal.getX() > 0.1))
+//                  continue;
+
+               // right wall
+               if (robotSide == RobotSide.RIGHT && normal.getY() < 0.8)
+                  continue;
+
+               Point3D centroid = PlanarRegionTools.getCentroid3DInWorld(region);
+               FramePoint3D hand = new FramePoint3D(ghostFullRobotModel.getHandControlFrame(robotSide));
+               hand.changeFrame(ReferenceFrame.getWorldFrame());
+
+               normal.changeFrame(ReferenceFrame.getWorldFrame());
+               Plane3D regionPlane = new Plane3D(centroid, normal);
+
+               double distanceXY = regionPlane.distance(hand);
+               if (distanceXY < minDistanceToHandXY)
+               {
+                  minDistanceToHandXY = distanceXY;
+                  bracingRegion = region;
+               }
             }
-         }
 
-         double distanceThresholdXY = 1.5;
-         if (minDistanceToHandXY < distanceThresholdXY)
-         {
-            bracingRegionPoint.set(PlanarRegionTools.getCentroid3DInWorld(bracingRegion));
-            bracingRegionNormal.set(bracingRegion.getNormal());
-            bracingRegionRotation.set(bracingRegion.getTransformToWorldCopy().getRotation());
-            this.bracingRegion = bracingRegion;
-            this.bracingRegion.updateConvexHull();
+            double distanceThresholdXY = 1.5;
+            if (minDistanceToHandXY < distanceThresholdXY)
+            {
+               bracingRegionPoints.get(robotSide).set(PlanarRegionTools.getCentroid3DInWorld(bracingRegion));
+               bracingRegionNormals.get(robotSide).set(bracingRegion.getNormal());
+               bracingRegionRotations.get(robotSide).set(bracingRegion.getTransformToWorldCopy().getRotation());
+               bracingRegion.updateConvexHull();
+               this.bracingRegions.put(robotSide, bracingRegion);
 
-            System.out.println(bracingRegionNormal);
+//               System.out.println(bracingRegionNormal);
 
-            //            FramePose3D bracingRegionPose = new FramePose3D(ReferenceFrame.getWorldFrame(), bracingRegion.getTransformToWorld());
-//            System.out.println(bracingRegionPose.getPosition());
-//            System.out.println(bracingRegionPose.getOrientation());
-//
-//            UnitVector3DReadOnly normal = bracingRegion.getNormal();
-//            System.out.println(normal.getX() + ", " + normal.getY() + ", " + normal.getZ());
-//
-//            ConvexPolygon2D convexHull = bracingRegion.getConvexHull();
-//            System.out.println(convexHull);
+               //            FramePose3D bracingRegionPose = new FramePose3D(ReferenceFrame.getWorldFrame(), bracingRegion.getTransformToWorld());
+               //            System.out.println(bracingRegionPose.getPosition());
+               //            System.out.println(bracingRegionPose.getOrientation());
+               //
+               //            UnitVector3DReadOnly normal = bracingRegion.getNormal();
+               //            System.out.println(normal.getX() + ", " + normal.getY() + ", " + normal.getZ());
+               //
+               //            ConvexPolygon2D convexHull = bracingRegion.getConvexHull();
+               //            System.out.println(convexHull);
+            }
          }
       }
 
@@ -271,32 +289,36 @@ public class RDXMultiContactRegionGraphic implements RenderableProvider
 
    private void addRegionGraphic()
    {
-      if (bracingRegion != null)
+      for (RobotSide robotSide : RobotSide.values)
       {
-         Color color = Color.GREEN;
-         RigidBodyTransform transformToWorld = bracingRegion.getTransformToWorldCopy();
-         meshBuilder.addMultiLine(transformToWorld, bracingRegion.getConcaveHull(), 0.01, color, true);
-         for (ConvexPolygon2D convexPolygon : bracingRegion.getConvexPolygons())
+         PlanarRegion bracingRegion = bracingRegions.get(robotSide);
+         if (bracingRegion != null)
          {
-            meshBuilder.addPolygon(transformToWorld, convexPolygon, color);
-         }
+            Color color = Color.GREEN;
+            RigidBodyTransform transformToWorld = bracingRegion.getTransformToWorldCopy();
+            meshBuilder.addMultiLine(transformToWorld, bracingRegion.getConcaveHull(), 0.01, color, true);
+            for (ConvexPolygon2D convexPolygon : bracingRegion.getConvexPolygons())
+            {
+               meshBuilder.addPolygon(transformToWorld, convexPolygon, color);
+            }
 
-         double length = 0.07;
-         double radius = 0.004;
-         double cylinderToConeLengthRatio = 0.8;
-         double coneDiameterMultiplier = 1.8;
-         RDXMeshGraphicTools.drawArrow(meshBuilder, bracingRegionPoint, bracingRegionRotation, length, radius, cylinderToConeLengthRatio, coneDiameterMultiplier, Color.RED);
+            double length = 0.07;
+            double radius = 0.004;
+            double cylinderToConeLengthRatio = 0.8;
+            double coneDiameterMultiplier = 1.8;
+            RDXMeshGraphicTools.drawArrow(meshBuilder, bracingRegionPoints.get(robotSide), bracingRegionRotations.get(robotSide), length, radius, cylinderToConeLengthRatio, coneDiameterMultiplier, Color.RED);
+         }
       }
    }
 
-   public boolean hasRegion()
+   public boolean hasRegion(RobotSide robotSide)
    {
-      return bracingRegion != null;
+      return bracingRegions.get(robotSide) != null;
    }
 
-   public PlanarRegion getBracingRegion()
+   public PlanarRegion getBracingRegion(RobotSide robotSide)
    {
-      return bracingRegion;
+      return bracingRegions.get(robotSide);
    }
 
    private void generateModel()
@@ -344,11 +366,7 @@ public class RDXMultiContactRegionGraphic implements RenderableProvider
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (supportRegion.isEmpty() && bracingRegionNormal.norm() < 0.01)
-      {
-         return;
-      }
-
-      modelInstance.getRenderables(renderables, pool);
+      if (!supportRegion.isEmpty() || bracingRegionNormals.get(RobotSide.LEFT).norm() > 0.01 || bracingRegionNormals.get(RobotSide.LEFT).norm() > 0.01)
+         modelInstance.getRenderables(renderables, pool);
    }
 }

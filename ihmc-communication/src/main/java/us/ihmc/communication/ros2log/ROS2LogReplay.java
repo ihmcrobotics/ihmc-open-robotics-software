@@ -8,19 +8,35 @@ import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2Topic;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.LongSupplier;
+import java.util.function.ObjLongConsumer;
 
 public class ROS2LogReplay
 {
+   private final List<ReplayTopicManager<?>> topicManagers;
+   private final Map<String, ReplayTopicManager<?>> topicManagersMap = new HashMap<>();
+   private final File logFile;
+   private final LongSupplier timestampSupplier;
+
    public ROS2LogReplay(String robotName, List<ROS2Topic<?>> topicsToLog, File logFile, ROS2LogTimeSource timeSource)
    {
       ROS2Node ros2Node = new ROS2NodeBuilder().build("ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, getClass().getSimpleName()));
-      List<ReplayTopicManager<?>> topicManagers = ROS2LogIOTools.loadLogFile(ros2Node, topicsToLog, logFile);
+      topicManagers = ROS2LogIOTools.loadLogFile(ros2Node, topicsToLog, logFile);
+      this.logFile = logFile;
+      timestampSupplier = timeSource.createTimestampProvider(robotName, ros2Node);
+
       if (topicManagers == null)
          return;
 
-      LongSupplier timestampSupplier = timeSource.createTimestampProvider(robotName, ros2Node);
+      for (int i = 0; i < topicManagers.size(); i++)
+      {
+         topicManagersMap.put(topicManagers.get(i).getTopicName(), topicManagers.get(i));
+      }
+
       if (timeSource == ROS2LogTimeSource.SIMULATION)
       {
          while (timestampSupplier.getAsLong() == -1)
@@ -29,15 +45,18 @@ public class ROS2LogReplay
             ThreadTools.sleep(1000);
          }
       }
+   }
 
+   public void start()
+   {
       LogTools.info("Starting replay of " + logFile.getName());
-      startReplay(topicManagers, timestampSupplier);
+      startReplayInternal(topicManagers, timestampSupplier);
       LogTools.info("Finished replay");
 
       System.exit(0);
    }
 
-   private void startReplay(List<ReplayTopicManager<?>> topicManagers, LongSupplier timestampSupplier)
+   private void startReplayInternal(List<ReplayTopicManager<?>> topicManagers, LongSupplier timestampSupplier)
    {
       long startTime = timestampSupplier.getAsLong();
 
@@ -55,5 +74,10 @@ public class ROS2LogReplay
          if (isDone)
             break;
       }
+   }
+
+   public <T> void addReplayMutator(ROS2Topic<T> topic, ObjLongConsumer<T> mutator)
+   {
+      topicManagersMap.get(topic.getName()).setMutator(mutator);
    }
 }

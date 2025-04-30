@@ -105,6 +105,7 @@ public class OrientationRetargeting
          yoNominalOrientation = null;
          yoOptimizedOrientation = null;
          yoActualOrientation = null;
+         controlFrameOrigin = null;
       }
    }
 

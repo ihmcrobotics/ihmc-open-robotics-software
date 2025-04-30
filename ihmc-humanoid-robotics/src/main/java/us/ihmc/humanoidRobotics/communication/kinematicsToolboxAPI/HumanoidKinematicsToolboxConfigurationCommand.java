@@ -24,10 +24,8 @@ public class HumanoidKinematicsToolboxConfigurationCommand
    private boolean enableContactAdjustment = false; // if true, adjusts the hand contact to the region
 
    // Bracing region
-   private final Point3D bracingRegionPoint = new Point3D();
-   private final Quaternion bracingRegionOrientation = new Quaternion();
-   private final Vector3D bracingRegionNormal = new Vector3D();
-   private final ConvexPolygon2D bracingRegionPolygon = new ConvexPolygon2D();
+   private final Vector3D leftBracingRegionNormal = new Vector3D();
+   private final Vector3D rightBracingRegionNormal = new Vector3D();
 
    @Override
    public void clear()
@@ -42,10 +40,8 @@ public class HumanoidKinematicsToolboxConfigurationCommand
       enableStabilityObjective = false;
       enableContactAdjustment = false;
 
-      bracingRegionPoint.setToNaN();
-      bracingRegionOrientation.setToNaN();
-      bracingRegionNormal.setToNaN();
-      bracingRegionPolygon.setToNaN();
+      leftBracingRegionNormal.setToNaN();
+      rightBracingRegionNormal.setToNaN();
    }
 
    @Override
@@ -70,10 +66,8 @@ public class HumanoidKinematicsToolboxConfigurationCommand
 
       enableContactAdjustment = other.enableContactAdjustment;
 
-      bracingRegionPoint.set(other.bracingRegionPoint);
-      bracingRegionOrientation.set(other.bracingRegionOrientation);
-      bracingRegionNormal.set(other.bracingRegionNormal);
-      bracingRegionPolygon.set(other.bracingRegionPolygon);
+      leftBracingRegionNormal.set(other.leftBracingRegionNormal);
+      rightBracingRegionNormal.set(other.rightBracingRegionNormal);
    }
 
    @Override
@@ -97,16 +91,8 @@ public class HumanoidKinematicsToolboxConfigurationCommand
       }
 
       enableContactAdjustment = message.getEnableContactAdjustment();
-      bracingRegionPoint.set(message.getRegionPoint());
-      bracingRegionOrientation.set(message.getRegionOrientation());
-      bracingRegionNormal.set(message.getRegionNormal());
-
-      bracingRegionPolygon.clear();
-      for (int i = 0; i < message.getRegionVertices().size(); i++)
-      {
-         bracingRegionPolygon.addVertex(message.getRegionVertices().get(i).getX(), message.getRegionVertices().get(i).getY());
-      }
-      bracingRegionPolygon.update();
+      leftBracingRegionNormal.set(message.getLeftHandRegionNormal());
+      rightBracingRegionNormal.set(message.getRightHandRegionNormal());
    }
 
    public boolean holdCurrentCenterOfMassXYPosition()
@@ -154,24 +140,14 @@ public class HumanoidKinematicsToolboxConfigurationCommand
       return enableContactAdjustment;
    }
 
-   public Point3D getBracingRegionPoint()
+   public Vector3D getLeftBracingRegionNormal()
    {
-      return bracingRegionPoint;
+      return leftBracingRegionNormal;
    }
 
-   public Quaternion getBracingRegionOrientation()
+   public Vector3D getRightBracingRegionNormal()
    {
-      return bracingRegionOrientation;
-   }
-
-   public Vector3D getBracingRegionNormal()
-   {
-      return bracingRegionNormal;
-   }
-
-   public ConvexPolygon2D getBracingRegionPolygon()
-   {
-      return bracingRegionPolygon;
+      return rightBracingRegionNormal;
    }
 
    @Override

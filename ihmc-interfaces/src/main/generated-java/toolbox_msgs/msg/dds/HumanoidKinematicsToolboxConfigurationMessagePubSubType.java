@@ -15,7 +15,7 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "777e96ea4247778000030962b91a2c41537be7de576f0dc409e8d0b680c4229b";
+   		return "87694ead47f2e48520a10d773373c23201329fa512d0c6dbe658c09cd8ac4346";
    }
    
    @Override
@@ -62,15 +62,10 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
-
-      current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
-      {
-          current_alignment += ihmc_common_msgs.msg.dds.Point2DMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (20 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -105,16 +100,9 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getRegionPoint(), current_alignment);
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getLeftHandRegionNormal(), current_alignment);
 
-      current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getRegionOrientation(), current_alignment);
-
-      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getRegionNormal(), current_alignment);
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for(int i0 = 0; i0 < data.getRegionVertices().size(); ++i0)
-      {
-          current_alignment += ihmc_common_msgs.msg.dds.Point2DMessagePubSubType.getCdrSerializedSize(data.getRegionVertices().get(i0), current_alignment);}
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getRightHandRegionNormal(), current_alignment);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -143,13 +131,8 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
 
       cdr.write_type_7(data.getEnableContactAdjustment());
 
-      geometry_msgs.msg.dds.PointPubSubType.write(data.getRegionPoint(), cdr);
-      geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getRegionOrientation(), cdr);
-      geometry_msgs.msg.dds.Vector3PubSubType.write(data.getRegionNormal(), cdr);
-      if(data.getRegionVertices().size() <= 200)
-      cdr.write_type_e(data.getRegionVertices());else
-          throw new RuntimeException("region_vertices field exceeds the maximum length");
-
+      geometry_msgs.msg.dds.Vector3PubSubType.write(data.getLeftHandRegionNormal(), cdr);
+      geometry_msgs.msg.dds.Vector3PubSubType.write(data.getRightHandRegionNormal(), cdr);
       cdr.write_type_7(data.getEnableJointLimitReduction());
 
       if(data.getJointLimitReductionFactors().size() <= 20)
@@ -174,10 +157,8 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
       	
       data.setEnableContactAdjustment(cdr.read_type_7());
       	
-      geometry_msgs.msg.dds.PointPubSubType.read(data.getRegionPoint(), cdr);	
-      geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getRegionOrientation(), cdr);	
-      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getRegionNormal(), cdr);	
-      cdr.read_type_e(data.getRegionVertices());	
+      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getLeftHandRegionNormal(), cdr);	
+      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getRightHandRegionNormal(), cdr);	
       data.setEnableJointLimitReduction(cdr.read_type_7());
       	
       cdr.read_type_e(data.getJointLimitReductionFactors());	
@@ -193,13 +174,10 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
       ser.write_type_7("enable_auto_support_polygon", data.getEnableAutoSupportPolygon());
       ser.write_type_7("enable_stability_objective", data.getEnableStabilityObjective());
       ser.write_type_7("enable_contact_adjustment", data.getEnableContactAdjustment());
-      ser.write_type_a("region_point", new geometry_msgs.msg.dds.PointPubSubType(), data.getRegionPoint());
+      ser.write_type_a("left_hand_region_normal", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getLeftHandRegionNormal());
 
-      ser.write_type_a("region_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getRegionOrientation());
+      ser.write_type_a("right_hand_region_normal", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getRightHandRegionNormal());
 
-      ser.write_type_a("region_normal", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getRegionNormal());
-
-      ser.write_type_e("region_vertices", data.getRegionVertices());
       ser.write_type_7("enable_joint_limit_reduction", data.getEnableJointLimitReduction());
       ser.write_type_e("joint_limit_reduction_factors", data.getJointLimitReductionFactors());
       ser.write_type_e("joint_limit_reduction_hash_codes", data.getJointLimitReductionHashCodes());
@@ -213,13 +191,10 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
       data.setEnableAutoSupportPolygon(ser.read_type_7("enable_auto_support_polygon"));
       data.setEnableStabilityObjective(ser.read_type_7("enable_stability_objective"));
       data.setEnableContactAdjustment(ser.read_type_7("enable_contact_adjustment"));
-      ser.read_type_a("region_point", new geometry_msgs.msg.dds.PointPubSubType(), data.getRegionPoint());
+      ser.read_type_a("left_hand_region_normal", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getLeftHandRegionNormal());
 
-      ser.read_type_a("region_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getRegionOrientation());
+      ser.read_type_a("right_hand_region_normal", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getRightHandRegionNormal());
 
-      ser.read_type_a("region_normal", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getRegionNormal());
-
-      ser.read_type_e("region_vertices", data.getRegionVertices());
       data.setEnableJointLimitReduction(ser.read_type_7("enable_joint_limit_reduction"));
       ser.read_type_e("joint_limit_reduction_factors", data.getJointLimitReductionFactors());
       ser.read_type_e("joint_limit_reduction_hash_codes", data.getJointLimitReductionHashCodes());
