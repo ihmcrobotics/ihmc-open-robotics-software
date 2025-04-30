@@ -145,6 +145,7 @@ public class SnappingTerrainExtractor
       // Handle memory allocation and copy values to the GPU
       CUDATools.mallocAsync(snappingParametersDevicePointer, snappingParametersArray.length, stream);
       CUDATools.memcpyAsync(snappingParametersDevicePointer, snappingParametersHostPointer, snappingParametersArray.length, stream);
+      checkCUDAError();
 
       // Pass all the parameters to the kernel so that its setup to run correctly
       snappingTerrainKernel.withPointer(terrainHeightMap.data()).withLong(terrainHeightMap.step());
@@ -163,8 +164,7 @@ public class SnappingTerrainExtractor
 
       // Run the kernel and check for errors
       snappingTerrainKernel.run(stream, snappingKernelGridDim, blockSize, 0);
-      error = cudaStreamSynchronize(stream);
-      CUDATools.checkCUDAError(error);
+      checkCUDAError();
 
       // --------------------- Run additional kernels for even more data to be used with the terrain map ------------------
 
@@ -177,8 +177,7 @@ public class SnappingTerrainExtractor
       terrainCostKernelGridDim = new dim3(terrainCostGridSizeXY, terrainCostGridSizeXY, 1);
 
       terrainCostKernel.run(stream, terrainCostKernelGridDim, blockSize, 0);
-      error = cudaStreamSynchronize(stream);
-      CUDATools.checkCUDAError(error);
+      checkCUDAError();
 
       contactMapKernel.withPointer(terrainCostMat.data()).withLong(terrainCostMat.step());
       contactMapKernel.withPointer(contactMat.data()).withLong(contactMat.step());
@@ -189,8 +188,7 @@ public class SnappingTerrainExtractor
       contactMapKernelGridDim = new dim3(contactCostGridSizeXY, contactCostGridSizeXY, 1);
 
       contactMapKernel.run(stream, contactMapKernelGridDim, blockSize, 0);
-      error = cudaStreamSynchronize(stream);
-      CUDATools.checkCUDAError(error);
+      checkCUDAError();
 
       // --------------------- Run additional kernels for even more data to be used with the terrain map ------------------
 
@@ -204,12 +202,14 @@ public class SnappingTerrainExtractor
 
       // Now that we have the steppability mat, run the steppable regions kernel and check for errors
       steppableConnectionsKernel.run(stream, steppableConnectionsKernelGridDim, blockSize, 0);
-      error = cudaStreamSynchronize(stream);
-      CUDATools.checkCUDAError(error);
+      checkCUDAError();
 
       // Update the terrain map data with the new results
       terrainMapData.setSensorOrigin(sensorOrigin.getX(), sensorOrigin.getY());
 
+      // This has to be done because we start to download to the CPU, so the data on the GPU needs to be finalized
+      error = cudaStreamSynchronize(stream);
+      CUDATools.checkCUDAError(error);
       // --------------------------- Download all the data from the GPU and set the terrain data object ----------------------------
       {
          Mat cpuTerrainCostMap = new Mat();
@@ -261,6 +261,21 @@ public class SnappingTerrainExtractor
          steppabilityConnectionsMat.download(cpuSteppableConnections);
          terrainMapData.setSteppabilityConnectionsMat(cpuSteppableConnections);
          cpuSteppableConnections.close();
+      }
+   }
+
+   /**
+    * If we are debugging the kernels with {@link SnappingTerrainExtractor#PRINT_TIMING_FOR_KERNELS} then we want to synchronize the GPU
+    * The reason we synchronize because we are checking for errors, so this would help identify where the error is happening
+    */
+   private void checkCUDAError()
+   {
+      int error;
+      if (PRINT_TIMING_FOR_KERNELS)
+      {
+         // Check for errors after the async calls
+         error = cudaStreamSynchronize(stream);
+         CUDATools.checkCUDAError(error);
       }
    }
 

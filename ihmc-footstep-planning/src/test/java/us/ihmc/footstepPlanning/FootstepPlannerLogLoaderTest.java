@@ -29,7 +29,8 @@ public class FootstepPlannerLogLoaderTest
    @Disabled
    public void testLoadingLogWithTerrainMapData()
    {
-      // Load the log from computer, user needs to have a log in order to run this test
+      // Note: This test requires that the user changes the file path to be to a location on their machine
+      // Note: Load the log from computer, user needs to have a log in order to run this test
       String filePath = "/home/ketchup/.ihmc/logs/astar_footstep_planner/20250429/20250429_103811492_FootstepPlannerLog";
       File footstepPlannerLogFile = new File(filePath);
       FootstepPlannerLogLoader logLoader = new FootstepPlannerLogLoader();

@@ -40,13 +40,13 @@ extern "C"
 */
 extern "C"
 __global__ void computeTerrainData(unsigned short *heightMap, size_t pitchHeightMap,
-                                  unsigned short *steppabilityMap, size_t pitchSteppability,
-                                  unsigned short *snapHeightMap, size_t pitchSnapHeight,
-                                  unsigned short *snapNormalXMap, size_t pitchSnapNormalX,
-                                  unsigned short *snapNormalYMap, size_t pitchSnapNormalY,
-                                  unsigned short *snapNormalZMap, size_t pitchSnapNormalZ,
-                                  unsigned short *snappedAreaFractionMap, size_t pitchSnappedAreaFraction,
-                                  float *params, int terrainMapXY)
+                                   unsigned short *steppabilityMap, size_t pitchSteppability,
+                                   unsigned short *snapHeightMap, size_t pitchSnapHeight,
+                                   unsigned short *snapNormalXMap, size_t pitchSnapNormalX,
+                                   unsigned short *snapNormalYMap, size_t pitchSnapNormalY,
+                                   unsigned short *snapNormalZMap, size_t pitchSnapNormalZ,
+                                   unsigned short *snappedAreaFractionMap, size_t pitchSnappedAreaFraction,
+                                   float *params, int terrainMapXY)
 {
     int x_index = blockIdx.x * blockDim.x + threadIdx.x;
     int y_index = blockIdx.y * blockDim.y + threadIdx.y;
@@ -366,8 +366,8 @@ __global__ void computeSteppabilityConnections(unsigned short *steppableMap, siz
         }
     }
 
-        unsigned char *steppableConnectionsElement = (unsigned char *)((char *)steppableConnectionsMap + key.x * pitchSteppableConnectionsMap) + key.y;
-        *steppableConnectionsElement = static_cast<unsigned char>(boundaryConnectionsEncodedAsOnes);
+    unsigned char *steppableConnectionsElement = (unsigned char *)((char *)steppableConnectionsMap + key.x * pitchSteppableConnectionsMap) + key.y;
+    *steppableConnectionsElement = static_cast<unsigned char>(boundaryConnectionsEncodedAsOnes);
 }
 
 extern "C"
