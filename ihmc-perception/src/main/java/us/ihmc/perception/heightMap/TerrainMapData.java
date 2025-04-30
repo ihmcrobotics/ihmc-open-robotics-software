@@ -1,6 +1,5 @@
 package us.ihmc.perception.heightMap;
 
-import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.TerrainMapMessage;
@@ -10,10 +9,10 @@ import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
+import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.steppableRegions.SnapResult;
 
 import java.nio.ByteBuffer;
-import java.nio.ShortBuffer;
 
 public class TerrainMapData
 {
@@ -455,7 +454,7 @@ public class TerrainMapData
             heightMap = new Mat(localGridSize, localGridSize, opencv_core.CV_16UC1);
 
          ByteBuffer buffer = message.getHeightMapData().getBuffer();
-         packDataIntoMatFromShortBuffer(buffer, heightMap);
+         packDataIntoMatFromByteBuffer(buffer, heightMap);
       }
       else
       {
@@ -467,7 +466,7 @@ public class TerrainMapData
             snapHeightImage = new Mat(localGridSize, localGridSize, opencv_core.CV_16UC1);
 
          ByteBuffer buffer = message.getSnappedHeightData().getBuffer();
-         packDataIntoMatFromShortBuffer(buffer, snapHeightImage);
+         packDataIntoMatFromByteBuffer(buffer, snapHeightImage);
       }
       else
       {
@@ -525,45 +524,6 @@ public class TerrainMapData
 
    private void packDataIntoMatFromByteBuffer(ByteBuffer buffer, Mat dataToPack)
    {
-      // Need to back this guy up, all the way to the beginning
-      buffer.rewind();
-
-      // Note: Due to how the backing native memory layout is, ensure we get the total Buffer
-      // mat.asByteBuffer() doesn't always return the entire buffer, also the data may be wrong
-      int totalBytes = dataToPack.rows() * dataToPack.cols();
-      ByteBuffer matBuffer = dataToPack.data().limit(totalBytes).asByteBuffer();
-
-      for (int i = 0; i < totalBytes; i++)
-      {
-         matBuffer.put(buffer.get());
-      }
-   }
-
-   private void packDataIntoMatFromShortBuffer(ByteBuffer buffer, Mat dataToPack)
-   {
-      // Need to back this guy up, all the way to the beginning
-      buffer.rewind();
-
-      int expectedShorts = dataToPack.rows() * dataToPack.cols();
-      int availableShorts = buffer.remaining() / 2;
-
-      if (availableShorts < expectedShorts)
-         throw new RuntimeException("Not enough data to fill height map: have " + availableShorts + " shorts, need " + expectedShorts);
-
-      // Note: Due to how the backing native memory layout is, ensure we get the total Buffer
-      // mat.asByteBuffer() doesn't always return the entire buffer, also the data may be wrong
-      int totalBytes = dataToPack.rows() * dataToPack.cols() * 2; // 2 bytes per short
-      ByteBuffer matBuffer = dataToPack.data().limit(totalBytes).asByteBuffer();
-      ShortBuffer shortBuffer = matBuffer.asShortBuffer();
-
-      for (int i = 0; i < expectedShorts; i++)
-      {
-         // Little-endian
-         byte low = buffer.get();
-         byte high = buffer.get();
-
-         int ushort = ((high & 0xFF) << 8) | (low & 0xFF);
-         shortBuffer.put((short) ushort);
-      }
+      dataToPack.data().put(buffer.array(), 0, (int) OpenCVTools.dataSize(dataToPack));
    }
 }
