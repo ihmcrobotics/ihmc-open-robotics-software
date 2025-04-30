@@ -100,7 +100,7 @@ __device__ float3 back_project_perspective(int2 pos, float Z, float *params)
     return point;
 }
 
-__device__ float get_spatial_average(int xIndex, int yIndex, unsigned short *globalMap, float *params)
+__device__ float get_spatial_average(int xIndex, int yIndex, unsigned short *globalMap, size_t pitchGlobal, float *params)
 {
     // perform a smoothing over neighboring cells
     float heightSum = 0.0f;
@@ -115,8 +115,8 @@ __device__ float get_spatial_average(int xIndex, int yIndex, unsigned short *glo
 
             if (nxIndex >= 0 && nxIndex < globalCellsPerAxis && nyIndex >= 0 && nyIndex < globalCellsPerAxis)
             {
-                int index = nyIndex * globalCellsPerAxis + nxIndex;
-                heightSum += globalMap[index] / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
+                unsigned short *heightValue = (unsigned short *)((char *)globalMap + nxIndex * pitchGlobal) + nyIndex;
+                heightSum += *heightValue / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
                 count++;
             }
         }
@@ -125,7 +125,7 @@ __device__ float get_spatial_average(int xIndex, int yIndex, unsigned short *glo
     return heightAverage;
 }
 
-__device__ float get_spatial_stddev(int xIndex, int yIndex, float average, unsigned short *globalMap, float *params)
+__device__ float get_spatial_stddev(int xIndex, int yIndex, float average, unsigned short *globalMap, size_t pitchGlobal, float *params)
 {
     float totalDeviation = 0.0f;
     int count = 0;
@@ -140,8 +140,8 @@ __device__ float get_spatial_stddev(int xIndex, int yIndex, float average, unsig
 
             if (nxIndex >= 0 && nxIndex < globalCellsPerAxis && nyIndex >= 0 && nyIndex < globalCellsPerAxis)
             {
-                int index = nyIndex * globalCellsPerAxis + nxIndex;
-                float height = globalMap[index] / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
+                unsigned short *heightValue = (unsigned short *)((char *)globalMap + nxIndex * pitchGlobal) + nyIndex;
+                float height = *heightValue / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
                 totalDeviation += (height - average) * (height - average);
                 count++;
             }
@@ -151,10 +151,10 @@ __device__ float get_spatial_stddev(int xIndex, int yIndex, float average, unsig
     return heightStddev;
 }
 
-__device__ float get_spatial_filtered_height(int xIndex, int yIndex, float height, unsigned short *globalMap, float *params)
+__device__ float get_spatial_filtered_height(int xIndex, int yIndex, float height, unsigned short *globalMap, size_t pitchGlobal, float *params)
 {
-    float averageHeightZ = get_spatial_average(xIndex, yIndex, globalMap, params);
-    float heightStddev = get_spatial_stddev(xIndex, yIndex, averageHeightZ, globalMap, params);
+    float averageHeightZ = get_spatial_average(xIndex, yIndex, globalMap, pitchGlobal, params);
+    float heightStddev = get_spatial_stddev(xIndex, yIndex, averageHeightZ, globalMap, pitchGlobal, params);
     float finalHeight = height;
 
     if (fabs(finalHeight - averageHeightZ) < 0.5f * heightStddev)
@@ -407,6 +407,8 @@ __global__ void heightMapRegistrationKernel(unsigned short *localMap, size_t pit
     {
         finalHeight = localHeight;
     }
+
+    finalHeight = get_spatial_filtered_height(xIndex, yIndex, finalHeight, globalMap, pitchGlobal, params);
 
     finalHeight += params[HEIGHT_OFFSET];
 
