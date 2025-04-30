@@ -103,12 +103,9 @@ public class ZEDImageSensor extends ImageSensor
    /**
     * Constructor to connect to a remote ZED SDK instance
     */
-   public ZEDImageSensor(int cameraID, ZEDModelData zedModel, int slInputType, int slDepthMode, String remoteStreamingAddress, int remoteStreamingPort)
+   public ZEDImageSensor(int cameraID, ZEDModelData zedModel, int slDepthMode, String remoteStreamingAddress, int remoteStreamingPort)
    {
-      this(cameraID, zedModel, slInputType, slDepthMode);
-
-      if (slInputType != SL_INPUT_TYPE_STREAM)
-         throw new RuntimeException("Invalid SL_INPUT_TYPE for called constructor (must be SL_INPUT_TYPE_STREAM)");
+      this(cameraID, zedModel, SL_INPUT_TYPE_STREAM, slDepthMode);
 
       this.remoteStreamingAddress = remoteStreamingAddress;
       this.remoteStreamingPort = remoteStreamingPort;
