@@ -7,6 +7,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.perception.heightMap.TerrainMapData;
@@ -96,10 +97,9 @@ public class FootstepPlannerRequest
    private double horizonLength;
 
    /**
-    * Height map. May be null to enable flat ground mode.
+    * Holds the data for the {@link HeightMapData} and the {@link TerrainMapData}
     */
-   private HeightMapData heightMapData;
-   private TerrainMapData terrainMapData;
+   private final EnvironmentHandler environmentHandler = new EnvironmentHandler();
 
    /**
     * If true, will ignore planar regions and plan on flat ground.
@@ -149,8 +149,7 @@ public class FootstepPlannerRequest
       timeout = 5.0;
       maximumIterations = -1;
       horizonLength = Double.MAX_VALUE;
-      heightMapData = null;
-      terrainMapData = null;
+      environmentHandler.clear();
       assumeFlatGround = false;
       bodyPathWaypoints.clear();
       statusPublishPeriod = 1.0;
@@ -275,12 +274,12 @@ public class FootstepPlannerRequest
 
    public void setHeightMapData(HeightMapData heightMapData)
    {
-      this.heightMapData = heightMapData;
+      environmentHandler.setHeightMapData(heightMapData);
    }
 
    public void setTerrainMapData(TerrainMapData terrainMapData)
    {
-      this.terrainMapData = terrainMapData;
+      environmentHandler.setTerrainMapData(terrainMapData);
    }
 
    public void setAssumeFlatGround(boolean assumeFlatGround)
@@ -381,14 +380,9 @@ public class FootstepPlannerRequest
       return horizonLength;
    }
 
-   public HeightMapData getHeightMapData()
+   public EnvironmentHandler getEnvironmentHandler()
    {
-      return heightMapData;
-   }
-
-   public TerrainMapData getTerrainMapData()
-   {
-      return terrainMapData;
+      return environmentHandler;
    }
 
    public boolean getAssumeFlatGround()
@@ -503,15 +497,15 @@ public class FootstepPlannerRequest
          requestPacket.getBodyPathWaypoints().add().set(bodyPathWaypoints.get(i));
       }
 
-      if (getHeightMapData() != null)
+      if (getEnvironmentHandler().getHeightMapData() != null)
       {
-         HeightMapMessage heightMapMessage = HeightMapMessageTools.toMessage(getHeightMapData());
+         HeightMapMessage heightMapMessage = HeightMapMessageTools.toMessage(getEnvironmentHandler().getHeightMapData());
          requestPacket.getHeightMapMessage().set(heightMapMessage);
       }
       // TODO need to add a message for the terrain map.
-      if (getTerrainMapData() != null)
+      if (getEnvironmentHandler().getTerrainMapData() != null)
       {
-         TerrainMapMessage terrainMapMessage = TerrainMapTools.toMessage(terrainMapData);
+         TerrainMapMessage terrainMapMessage = TerrainMapTools.toMessage(getEnvironmentHandler().getTerrainMapData());
          requestPacket.getTerrainMapMessage().set(terrainMapMessage);
       }
 
@@ -553,15 +547,15 @@ public class FootstepPlannerRequest
          this.bodyPathWaypoints.add(new Pose3D(other.bodyPathWaypoints.get(i)));
       }
 
-      if (this.heightMapData != null)
-         this.heightMapData.set(other.heightMapData);
-      else if (other.heightMapData != null)
-         this.heightMapData = new HeightMapData(other.heightMapData);
+      if (environmentHandler.getHeightMapData() != null)
+         environmentHandler.setHeightMapData(other.getEnvironmentHandler().getHeightMapData());
+      else if (other.getEnvironmentHandler().getTerrainMapData() != null)
+         environmentHandler.setHeightMapData(new HeightMapData(other.getEnvironmentHandler().getHeightMapData()));
 
-      if (this.terrainMapData != null)
-         this.terrainMapData.set(other.terrainMapData);
-      else if (other.terrainMapData != null)
-         this.terrainMapData = new TerrainMapData(other.terrainMapData);
+      if (environmentHandler.getTerrainMapData() != null)
+         environmentHandler.setTerrainMapData(other.getEnvironmentHandler().getTerrainMapData());
+      else if (other.getEnvironmentHandler().getTerrainMapData() != null)
+         environmentHandler.setTerrainMapData(new TerrainMapData(other.getEnvironmentHandler().getTerrainMapData()));
 
       if (other.referencePlan != null)
          this.referencePlan = new FootstepPlan(other.referencePlan);

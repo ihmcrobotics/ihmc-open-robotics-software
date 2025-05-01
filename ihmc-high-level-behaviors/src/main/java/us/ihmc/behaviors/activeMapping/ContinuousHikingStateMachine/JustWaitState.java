@@ -30,7 +30,7 @@ import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.communication.ContinuousHikingAPI;
-import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
+import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
@@ -38,12 +38,10 @@ import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,7 +57,6 @@ public class JustWaitState implements State
    private final ROS2SyncedRobotModel syncedRobot;
    private final AtomicReference<ContinuousHikingCommandMessage> commandMessage;
    private final ControllerFootstepQueueMonitor controllerQueueMonitor;
-   private final FootstepPlannerEnvironmentHandler environmentHandler;
    private final ContinuousHikingParameters continuousHikingParameters;
    private final FootstepPlannerLogger logger;
    private boolean isDone;
@@ -67,8 +64,7 @@ public class JustWaitState implements State
    private final TerrainPlanningDebugger terrainPlanningDebugger;
    private final DefaultFootstepPlannerParametersBasics footstepPlannerParameters;
    private final SwingPlannerParametersBasics swingPlannerParameters;
-   private final Supplier<HeightMapData> heightMapData;
-   private final Supplier<TerrainMapData> terrainMapData;
+   private final Supplier<EnvironmentHandler> environmentHandlerSupplier;
 
    private final ROS2Topic<FootstepDataListMessage> controllerFootstepDataTopic;
    private final FramePose3D midFeetZUpPose = new FramePose3D();
@@ -85,8 +81,7 @@ public class JustWaitState implements State
                         ControllerFootstepQueueMonitor controllerQueueMonitor,
                         TerrainPlanningDebugger terrainPlanningDebugger,
                         ActiveMappingParameterToolBox activeMappingParameterToolBox,
-                        Supplier<HeightMapData> heightMapData,
-                        Supplier<TerrainMapData> terrainMapData)
+                        Supplier<EnvironmentHandler> environmentHandlerSupplier)
    {
       this.ros2Helper = ros2Helper;
       this.syncedRobot = syncedRobot;
@@ -100,11 +95,9 @@ public class JustWaitState implements State
       this.continuousHikingParameters = activeMappingParameterToolBox.getContinuousHikingParameters();
       this.footstepPlannerParameters = activeMappingParameterToolBox.getFootstepPlannerParameters();
       this.swingPlannerParameters = activeMappingParameterToolBox.getSwingPlannerParameters();
-      this.heightMapData = heightMapData;
-      this.terrainMapData = terrainMapData;
+      this.environmentHandlerSupplier = environmentHandlerSupplier;
 
-      environmentHandler = new FootstepPlannerEnvironmentHandler();
-      footstepSnapAndWiggler = new FootstepSnapAndWiggler(PlannerTools.createDefaultFootPolygons(), this.footstepPlannerParameters, environmentHandler);
+      footstepSnapAndWiggler = new FootstepSnapAndWiggler(PlannerTools.createDefaultFootPolygons(), this.footstepPlannerParameters, environmentHandlerSupplier.get());
 
       midFeetZUpFrame = syncedRobot.getReferenceFrames().getMidFeetZUpFrame();
 
@@ -242,8 +235,9 @@ public class JustWaitState implements State
 
                                   if (useEnvironmentData.get())
                                   {
-                                     footstepPlannerRequest.setHeightMapData(heightMapData.get());
-                                     footstepPlannerRequest.setTerrainMapData(terrainMapData.get());
+                                     EnvironmentHandler environmentHandler = environmentHandlerSupplier.get();
+                                     footstepPlannerRequest.setHeightMapData(environmentHandler.getHeightMapData());
+                                     footstepPlannerRequest.setTerrainMapData(environmentHandler.getTerrainMapData());
                                      footstepPlannerRequest.setSnapGoalSteps(useEnvironmentData.get());
                                   }
 
@@ -299,9 +293,6 @@ public class JustWaitState implements State
 
    public void squareUpStep()
    {
-      environmentHandler.setHeightMap(heightMapData.get());
-      environmentHandler.setTerrainMapData(terrainMapData.get());
-
       FramePose3DReadOnly firstStepInQueue;
       PlannedFootstep squareUpStep = null;
       ReferenceFrame leftFootFrame = syncedRobot.getReferenceFrames().getFootFrame(RobotSide.LEFT);

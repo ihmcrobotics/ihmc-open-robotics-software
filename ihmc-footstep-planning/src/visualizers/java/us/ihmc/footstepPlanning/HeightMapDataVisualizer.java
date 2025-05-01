@@ -10,7 +10,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.footstepPlanning.bodyPath.HeightMapRANSACNormalCalculator;
-import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
+import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -208,8 +208,8 @@ public class HeightMapDataVisualizer
       Graphics3DObject graphics3DObject = new Graphics3DObject();
       HeightMapPolygonSnapper snapper = new HeightMapPolygonSnapper();
       DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
-      FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
-      environmentHandler.setHeightMap(heightMapData);
+      EnvironmentHandler environmentHandler = new EnvironmentHandler();
+      environmentHandler.setHeightMapData(heightMapData);
 
       for (int i = 0; i < poses.length; i++)
       {

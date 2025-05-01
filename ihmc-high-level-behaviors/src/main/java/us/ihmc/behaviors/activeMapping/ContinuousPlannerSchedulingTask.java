@@ -7,17 +7,16 @@ import us.ihmc.behaviors.activeMapping.ContinuousHikingStateMachine.*;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.footstepPlanning.communication.ContinuousHikingAPI;
+import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -40,8 +39,7 @@ public class ContinuousPlannerSchedulingTask
                                                                                                           getClass(),
                                                                                                           ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
    public StateMachine<ContinuousHikingState, State> stateMachine;
-   private TerrainMapData terrainMap;
-   private HeightMapData heightMapData;
+   private EnvironmentHandler environmentHandler;
 
    private final AtomicBoolean resetStateMachine = new AtomicBoolean(false);
 
@@ -84,8 +82,7 @@ public class ContinuousPlannerSchedulingTask
                                                     continuousPlanner,
                                                     controllerFootstepQueueMonitor,
                                                     activeMappingParameterObject.getContinuousHikingParameters(),
-                                                    this::getHeightMapData,
-                                                    this::getTerrainMap,
+                                                    this::getEnvironmentHandler,
                                                     debugger,
                                                     continuousHikingLogger);
       State waitingtoLandState = new WaitingToLandState(ros2Helper,
@@ -101,8 +98,7 @@ public class ContinuousPlannerSchedulingTask
                                               controllerFootstepQueueMonitor,
                                               debugger,
                                               activeMappingParameterObject,
-                                              this::getHeightMapData,
-                                              this::getTerrainMap);
+                                              this::getEnvironmentHandler);
 
       // Adding the different states
       stateMachineFactory.addState(ContinuousHikingState.DO_NOTHING, notStartedState);
@@ -181,14 +177,9 @@ public class ContinuousPlannerSchedulingTask
       resetStateMachine.set(true);
    }
 
-   public TerrainMapData getTerrainMap()
+   public EnvironmentHandler getEnvironmentHandler()
    {
-      return terrainMap;
-   }
-
-   public HeightMapData getHeightMapData()
-   {
-      return heightMapData;
+      return environmentHandler;
    }
 
    /**
@@ -200,14 +191,9 @@ public class ContinuousPlannerSchedulingTask
       stateMachine.doActionAndTransition();
    }
 
-   public void setLatestHeightMapData(HeightMapData heightMapData)
+   public void setLatestEnvironmentHandler(EnvironmentHandler environmentHandler)
    {
-      this.heightMapData = heightMapData;
-   }
-
-   public void setTerrainMapData(TerrainMapData terrainMapData)
-   {
-      this.terrainMap = terrainMapData;
+      this.environmentHandler = environmentHandler;
    }
 
    public void destroy()

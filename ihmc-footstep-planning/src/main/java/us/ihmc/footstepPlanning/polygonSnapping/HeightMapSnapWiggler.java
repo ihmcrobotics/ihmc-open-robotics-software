@@ -7,17 +7,14 @@ import us.ihmc.euclid.orientation.Orientation2D;
 import us.ihmc.euclid.referenceFrame.FixedReferenceFrame;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
+import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
-import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 public class HeightMapSnapWiggler
 {
@@ -51,7 +48,7 @@ public class HeightMapSnapWiggler
    }
 
    public void computeWiggleTransform(DiscreteFootstep footstepToWiggle,
-                                      FootstepPlannerEnvironmentHandler environmentHandler,
+                                      EnvironmentHandler environmentHandler,
                                       FootstepSnapData snapData,
                                       double snapHeightThreshold,
                                       double minSurfaceInclineRadians)
@@ -139,7 +136,7 @@ public class HeightMapSnapWiggler
    private FootstepSnapData computeSnapData(Point2DReadOnly position,
                                             double yaw,
                                             RobotSide robotSide,
-                                            FootstepPlannerEnvironmentHandler environmentHandler,
+                                            EnvironmentHandler environmentHandler,
                                             double snapHeightThreshold,
                                             double minSurfaceInclineRadians)
    {

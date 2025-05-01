@@ -10,7 +10,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
-import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
+import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
 import us.ihmc.footstepPlanning.polygonSnapping.PolygonSnapperTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
@@ -45,7 +45,7 @@ public class StancePoseCalculator
 
    public SideDependentList<FramePose3D> getStancePoses(FramePose3DReadOnly midStancePose,
                                                         TerrainMapData terrainMap,
-                                                        FootstepPlannerEnvironmentHandler environmentHandler)
+                                                        EnvironmentHandler environmentHandler)
    {
       reset();
       populationCandidatePoses(leftPoses, midStancePose, RobotSide.LEFT);
@@ -183,7 +183,7 @@ public class StancePoseCalculator
       return cost;
    }
 
-   public void snapPosesToEnvironment(FootstepPlannerEnvironmentHandler environmentHandler)
+   public void snapPosesToEnvironment(EnvironmentHandler environmentHandler)
    {
       for (RobotSide side : RobotSide.values)
       {
@@ -191,7 +191,7 @@ public class StancePoseCalculator
       }
    }
 
-   private void snapToEnvironment(FootstepPlannerEnvironmentHandler environmentHandler, FramePose3D poseToSnap, RobotSide side)
+   private void snapToEnvironment(EnvironmentHandler environmentHandler, FramePose3D poseToSnap, RobotSide side)
    {
       // Transform the polygon to be surrounding the pose we want to step on
       ConvexPolygon2D footPolygon = new ConvexPolygon2D(footPolygons.get(side));
