@@ -307,7 +307,7 @@ public class RDXVRFootstepPlacement
    public void abortLastStep()
    {
       LogTools.info("Aborting last step in place");
-      controllerHelper.publishToController(new AbortWalkingMessage());
+//      controllerHelper.publishToController(new AbortWalkingMessage());
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
