@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.behaviors.scripts.engine;
+package us.ihmc.avatar.scriptCommandGenerator;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;

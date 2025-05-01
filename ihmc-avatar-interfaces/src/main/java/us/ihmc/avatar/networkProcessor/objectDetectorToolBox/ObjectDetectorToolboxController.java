@@ -6,7 +6,7 @@ import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
+import us.ihmc.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;

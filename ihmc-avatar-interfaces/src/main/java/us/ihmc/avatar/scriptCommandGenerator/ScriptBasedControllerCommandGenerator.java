@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.behaviors.scripts.engine;
+package us.ihmc.avatar.scriptCommandGenerator;
 
 import java.io.IOException;
 import java.io.InputStream;
