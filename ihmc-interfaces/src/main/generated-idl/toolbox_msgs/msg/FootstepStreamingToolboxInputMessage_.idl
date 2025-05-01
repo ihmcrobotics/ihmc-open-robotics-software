@@ -24,6 +24,10 @@ module toolbox_msgs
          */
         double robot_step_duration;
         /**
+         * Current robot swing duration
+         */
+        double robot_swing_duration;
+        /**
          * Time elapsed since the robot has initiated this last step
          */
         double robot_step_elapsed_time;

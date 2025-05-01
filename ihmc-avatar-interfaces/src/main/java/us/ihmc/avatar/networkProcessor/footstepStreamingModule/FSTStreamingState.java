@@ -39,6 +39,7 @@ public class FSTStreamingState implements State
    private final SideDependentList<RigidBodyTransform> initialRobotSwingFootTransformsInWorld = new SideDependentList<>();
    private final SideDependentList<Double> maxFeetHeight = new SideDependentList<>(0.0, 0.0);
    private double robotStepDuration = 0.0;
+   private double robotSwingDuration = 0.0;
    private double robotElapsedTimeCurrentStep = 0.0;
    private RobotSide robotSwingSide;
    private boolean robotSwingFootIsLanding = false;
@@ -100,6 +101,7 @@ public class FSTStreamingState implements State
    private final YoDouble yoRawStride = new YoDouble("rawStride", registry);
    private final YoDouble yoMeasuredStride = new YoDouble("measuredStride", registry);
    private final YoDouble yoDesiredStride = new YoDouble("desiredStride", registry);
+   private final YoDouble yoErrorStride = new YoDouble("errorStride", registry);
    private final YoDouble yoControlledStride = new YoDouble("controlledStride", registry);
 
    public FSTStreamingState(FSTTools tools)
@@ -195,6 +197,7 @@ public class FSTStreamingState implements State
          if (latestInput.isCommandValid())
          {
             robotStepDuration = latestInput.getRobotStepDuration();
+            robotSwingDuration = latestInput.getRobotStepDuration();
             robotElapsedTimeCurrentStep = latestInput.getRobotElapsedTimeCurrentStep();
 
             yoRobotStepDuration.set(robotStepDuration);
@@ -582,8 +585,8 @@ public class FSTStreamingState implements State
    {
 
       // 1) Basic horizontal-based raw stride estimate
-      double rawStride = measuredHorizontalDistance + strideVelocityScalingFactor.getValue() *
-                                                      getAverageHorizontalVelocity(linearVelocity) * (robotStepDuration - robotElapsedTimeCurrentStep);
+      double rawStride = measuredHorizontalDistance + strideVelocityScalingFactor.getValue() * getAverageHorizontalVelocity(linearVelocity) * (robotSwingDuration
+                                                                                                                                               - robotElapsedTimeCurrentStep);
       // 2) "Landing factor" from vertical motion
       //    If the foot is descending (verticalVel < 0), we reduce the stride.
       //    One approach is an interpolation factor landingFactor in [0,1], where 1 => no reduction,
@@ -609,6 +612,7 @@ public class FSTStreamingState implements State
 
       // 5) Apply P-control
       double error = desiredStride - currentStrideEstimate;
+      yoErrorStride.set(error);
       double newStrideEstimate = currentStrideEstimate + kpStride.getValue() * error;
 
       // 6) Final clamp

@@ -6,6 +6,9 @@ uint64 sequence_id
 # Current robot step duration
 float64 robot_step_duration
 
+# Current robot swing duration
+float64 robot_swing_duration
+
 # Time elapsed since the robot has initiated this last step
 float64 robot_step_elapsed_time
 

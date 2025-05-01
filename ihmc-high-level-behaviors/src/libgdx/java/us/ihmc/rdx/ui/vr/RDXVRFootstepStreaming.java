@@ -68,6 +68,7 @@ public class RDXVRFootstepStreaming
          }
          FootstepStreamingToolboxInputMessage toolboxInputMessage = new FootstepStreamingToolboxInputMessage();
          toolboxInputMessage.setRobotStepDuration(footstepPlacer.getStepDuration());
+         toolboxInputMessage.setRobotSwingDuration(footstepPlacer.getSwingDuration());
          toolboxInputMessage.setRobotStepElapsedTime(footstepPlacer.getTimeElapsedAfterStep());
          toolboxInputMessage.setRobotSwingSide(swingFootTracker.getSide().toByte());
          toolboxInputMessage.setIsRobotSwingFootLanding(swingFootTracker.isLanding());

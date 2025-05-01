@@ -15,7 +15,7 @@ public class FootstepStreamingToolboxInputMessagePubSubType implements us.ihmc.p
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "71dfecb39a714326a92da059ac8c25edd60e65874363857619fdcdc9e6ba47d6";
+   		return "b64df09a62e2608a16258335e10e976ad58c30924715bdae003fb86f13a09ddf";
    }
    
    @Override
@@ -58,6 +58,8 @@ public class FootstepStreamingToolboxInputMessagePubSubType implements us.ihmc.p
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -77,6 +79,9 @@ public class FootstepStreamingToolboxInputMessagePubSubType implements us.ihmc.p
    public final static int getCdrSerializedSize(toolbox_msgs.msg.dds.FootstepStreamingToolboxInputMessage data, int current_alignment)
    {
       int initial_alignment = current_alignment;
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -108,6 +113,8 @@ public class FootstepStreamingToolboxInputMessagePubSubType implements us.ihmc.p
 
       cdr.write_type_6(data.getRobotStepDuration());
 
+      cdr.write_type_6(data.getRobotSwingDuration());
+
       cdr.write_type_6(data.getRobotStepElapsedTime());
 
       cdr.write_type_9(data.getRobotSwingSide());
@@ -116,7 +123,7 @@ public class FootstepStreamingToolboxInputMessagePubSubType implements us.ihmc.p
 
       if(data.getSide().size() <= 2)
       cdr.write_type_e(data.getSide());else
-          throw new RuntimeException("side field exceeds the maximum length");
+          throw new RuntimeException("side field exceeds the maximum length: %d > %d".formatted(data.getSide().size(), 2));
 
    }
 
@@ -125,6 +132,8 @@ public class FootstepStreamingToolboxInputMessagePubSubType implements us.ihmc.p
       data.setSequenceId(cdr.read_type_12());
       	
       data.setRobotStepDuration(cdr.read_type_6());
+      	
+      data.setRobotSwingDuration(cdr.read_type_6());
       	
       data.setRobotStepElapsedTime(cdr.read_type_6());
       	
@@ -141,6 +150,7 @@ public class FootstepStreamingToolboxInputMessagePubSubType implements us.ihmc.p
    {
       ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_6("robot_step_duration", data.getRobotStepDuration());
+      ser.write_type_6("robot_swing_duration", data.getRobotSwingDuration());
       ser.write_type_6("robot_step_elapsed_time", data.getRobotStepElapsedTime());
       ser.write_type_9("robot_swing_side", data.getRobotSwingSide());
       ser.write_type_7("is_robot_swing_foot_landing", data.getIsRobotSwingFootLanding());
@@ -152,6 +162,7 @@ public class FootstepStreamingToolboxInputMessagePubSubType implements us.ihmc.p
    {
       data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setRobotStepDuration(ser.read_type_6("robot_step_duration"));
+      data.setRobotSwingDuration(ser.read_type_6("robot_swing_duration"));
       data.setRobotStepElapsedTime(ser.read_type_6("robot_step_elapsed_time"));
       data.setRobotSwingSide(ser.read_type_9("robot_swing_side"));
       data.setIsRobotSwingFootLanding(ser.read_type_7("is_robot_swing_foot_landing"));

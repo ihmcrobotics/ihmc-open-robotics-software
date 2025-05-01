@@ -20,6 +20,10 @@ public class FootstepStreamingToolboxInputMessage extends Packet<FootstepStreami
             */
    public double robot_step_duration_;
    /**
+            * Current robot swing duration
+            */
+   public double robot_swing_duration_;
+   /**
             * Time elapsed since the robot has initiated this last step
             */
    public double robot_step_elapsed_time_;
@@ -53,6 +57,8 @@ public class FootstepStreamingToolboxInputMessage extends Packet<FootstepStreami
       sequence_id_ = other.sequence_id_;
 
       robot_step_duration_ = other.robot_step_duration_;
+
+      robot_swing_duration_ = other.robot_swing_duration_;
 
       robot_step_elapsed_time_ = other.robot_step_elapsed_time_;
 
@@ -91,6 +97,21 @@ public class FootstepStreamingToolboxInputMessage extends Packet<FootstepStreami
    public double getRobotStepDuration()
    {
       return robot_step_duration_;
+   }
+
+   /**
+            * Current robot swing duration
+            */
+   public void setRobotSwingDuration(double robot_swing_duration)
+   {
+      robot_swing_duration_ = robot_swing_duration;
+   }
+   /**
+            * Current robot swing duration
+            */
+   public double getRobotSwingDuration()
+   {
+      return robot_swing_duration_;
    }
 
    /**
@@ -169,6 +190,8 @@ public class FootstepStreamingToolboxInputMessage extends Packet<FootstepStreami
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_step_duration_, other.robot_step_duration_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_swing_duration_, other.robot_swing_duration_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_step_elapsed_time_, other.robot_step_elapsed_time_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_swing_side_, other.robot_swing_side_, epsilon)) return false;
@@ -199,6 +222,8 @@ public class FootstepStreamingToolboxInputMessage extends Packet<FootstepStreami
 
       if(this.robot_step_duration_ != otherMyClass.robot_step_duration_) return false;
 
+      if(this.robot_swing_duration_ != otherMyClass.robot_swing_duration_) return false;
+
       if(this.robot_step_elapsed_time_ != otherMyClass.robot_step_elapsed_time_) return false;
 
       if(this.robot_swing_side_ != otherMyClass.robot_swing_side_) return false;
@@ -220,6 +245,8 @@ public class FootstepStreamingToolboxInputMessage extends Packet<FootstepStreami
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("robot_step_duration=");
       builder.append(this.robot_step_duration_);      builder.append(", ");
+      builder.append("robot_swing_duration=");
+      builder.append(this.robot_swing_duration_);      builder.append(", ");
       builder.append("robot_step_elapsed_time=");
       builder.append(this.robot_step_elapsed_time_);      builder.append(", ");
       builder.append("robot_swing_side=");

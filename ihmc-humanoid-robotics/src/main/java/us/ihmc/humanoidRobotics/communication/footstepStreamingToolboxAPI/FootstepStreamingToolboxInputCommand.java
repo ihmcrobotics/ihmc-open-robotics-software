@@ -5,13 +5,13 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-import java.awt.*;
 import java.util.List;
 
 public class FootstepStreamingToolboxInputCommand implements Command<FootstepStreamingToolboxInputCommand, FootstepStreamingToolboxInputMessage>
 {
    private long sequenceId;
    private double robotStepDuration;
+   private double robotSwingDuration;
    private double robotElapsedTimeCurrentStep;
    private RobotSide robotSwingSide;
    private boolean isRobotSwingFootLanding;
@@ -23,6 +23,7 @@ public class FootstepStreamingToolboxInputCommand implements Command<FootstepStr
       sequenceId = 0;
       inputs.clear();
       robotStepDuration = 0.0;
+      robotSwingDuration  = 0.0;
       robotElapsedTimeCurrentStep = 0.0;
       robotSwingSide = RobotSide.LEFT;
       isRobotSwingFootLanding = false;
@@ -36,6 +37,7 @@ public class FootstepStreamingToolboxInputCommand implements Command<FootstepStr
       for (int i = 0; i < other.inputs.size(); i++)
          inputs.add().set(other.inputs.get(i));
       robotStepDuration = other.robotStepDuration;
+      robotSwingDuration = other.robotSwingDuration;
       robotElapsedTimeCurrentStep = other.robotElapsedTimeCurrentStep;
       robotSwingSide = other.robotSwingSide;
       isRobotSwingFootLanding = other.isRobotSwingFootLanding;
@@ -49,6 +51,7 @@ public class FootstepStreamingToolboxInputCommand implements Command<FootstepStr
       for (int i = 0; i < message.getSide().size(); i++)
          inputs.add().setFromMessage(message.getSide().get(i));
       robotStepDuration = message.getRobotStepDuration();
+      robotSwingDuration = message.getRobotSwingDuration();
       robotElapsedTimeCurrentStep = message.getRobotStepElapsedTime();
       robotSwingSide = RobotSide.fromByte(message.getRobotSwingSide());
       isRobotSwingFootLanding = message.getIsRobotSwingFootLanding();
@@ -97,6 +100,11 @@ public class FootstepStreamingToolboxInputCommand implements Command<FootstepStr
    public double getRobotStepDuration()
    {
       return robotStepDuration;
+   }
+
+   public double getRobotSwingDuration()
+   {
+      return robotSwingDuration;
    }
 
    public double getRobotElapsedTimeCurrentStep()

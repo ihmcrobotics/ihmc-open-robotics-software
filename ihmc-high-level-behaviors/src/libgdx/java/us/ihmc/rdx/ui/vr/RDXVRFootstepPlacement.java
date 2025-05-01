@@ -61,8 +61,6 @@ public class RDXVRFootstepPlacement
    private final CUDAFootstepOptimizer footstepOptimizer;
    private double previousAdaptedStepHeight = Double.NaN;
    private RDXVRFootstep footstepBeingExternallyPlaced;
-   private RDXVRFootstep footstepPreview;
-   private final FootstepSnapAndWiggler snapper;
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final FramePose3D poseForPlacement = new FramePose3D();
    private long sequenceId = (UUID.randomUUID().getLeastSignificantBits() % Integer.MAX_VALUE) + Integer.MAX_VALUE;
@@ -73,6 +71,11 @@ public class RDXVRFootstepPlacement
    private final AtomicBoolean consecutiveStepping = new AtomicBoolean(false);
    private final SteppingParameters steppingParameters;
 
+   private RDXVRFootstep footstepPreview;
+   private RDXVRFootstep preOptimizationFootstepPreview;
+   private final SideDependentList<ModelInstance> preOptimizationFootstepModels = new SideDependentList<>();
+
+
    public RDXVRFootstepPlacement(RDXVRContext vrContext,
                                  ROS2SyncedRobotModel syncedRobot,
                                  ROS2ControllerHelper controllerHelper,
@@ -82,9 +85,6 @@ public class RDXVRFootstepPlacement
       this.syncedRobot = syncedRobot;
       this.controllerHelper = controllerHelper;
       this.controllerStatusTracker = controllerStatusTracker;
-      FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
-      this.snapper = new FootstepSnapAndWiggler(PlannerTools.createDefaultFootPolygons(), new DefaultFootstepPlannerParameters(), environmentHandler);
-      snapper.initialize();
 
       for (RobotSide side : RobotSide.values)
       {
@@ -92,6 +92,13 @@ public class RDXVRFootstepPlacement
          ModelInstance footModelInstance = new ModelInstance(RDXModelLoader.load(modelFileName));
          LibGDXTools.setDiffuseColor(footModelInstance, RDXFootstepGraphic.FOOT_COLORS.get(side));
          footstepModels.put(side, footModelInstance);
+
+         if (USE_STEPPABLE_REGION_ADAPTATION)
+         {
+            ModelInstance preOptimizedFootModelInstance = new ModelInstance(RDXModelLoader.load(modelFileName));
+            LibGDXTools.setDiffuseColor(preOptimizedFootModelInstance, RDXFootstepGraphic.DEBUG_FOOT_COLORS.get(side));
+            preOptimizationFootstepModels.put(side, footModelInstance);
+         }
       }
 
       if (controllerModel == RDXVRHardwareModel.FOCUS3)
@@ -194,6 +201,11 @@ public class RDXVRFootstepPlacement
    {
       footstepBeingExternallyPlaced = new RDXVRFootstep(side, footstepModels.get(side), footstepIndex++);
       footstepPreview = new RDXVRFootstep(side, footstepModels.get(side), footstepIndex);
+
+      if (USE_STEPPABLE_REGION_ADAPTATION)
+      {
+         preOptimizationFootstepPreview = new RDXVRFootstep(side, preOptimizationFootstepModels.get(side), footstepIndex);
+      }
    }
 
    public boolean setFootstepPose(FramePose3DReadOnly pose)
@@ -209,6 +221,10 @@ public class RDXVRFootstepPlacement
                adaptedPose.getPosition().setZ(height);
                if (USE_STEPPABLE_REGION_ADAPTATION)
                {
+                  FramePose3D preOptimizationPreviewPose = new FramePose3D(adaptedPose);
+                  preOptimizationPreviewPose.getPosition().setZ(adaptedPose.getZ() + 0.05);
+                  preOptimizationFootstepPreview.setPose(preOptimizationPreviewPose);
+
                   adaptedPose = footstepOptimizer.compute(latestHeightMapData, adaptedPose);
                }
                footstepBeingExternallyPlaced.setPose(adaptedPose);
@@ -361,6 +377,18 @@ public class RDXVRFootstepPlacement
       {
          return syncedRobot.getRobotModel().getWalkingControllerParameters().getDefaultSwingTime()
                 + syncedRobot.getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
+      }
+   }
+
+   public double getSwingDuration()
+   {
+      if (locomotionParameters != null)
+      {
+         return locomotionParameters.getSwingTime();
+      }
+      else
+      {
+         return syncedRobot.getRobotModel().getWalkingControllerParameters().getDefaultSwingTime();
       }
    }
 

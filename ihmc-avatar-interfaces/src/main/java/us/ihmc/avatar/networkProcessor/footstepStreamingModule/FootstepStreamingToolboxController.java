@@ -50,7 +50,7 @@ public class FootstepStreamingToolboxController extends ToolboxController
 
    private final FSTTools tools;
 
-   private final ExecutionTimer executionTimer = new ExecutionTimer("IKStreamingTimer", registry);
+   private final ExecutionTimer executionTimer = new ExecutionTimer("FSTTimer", registry);
    private FSTTimeProvider timeProvider;
    private final YoDouble time = new YoDouble("time", registry);
    private final StateMachine<FSTState, State> stateMachine;
