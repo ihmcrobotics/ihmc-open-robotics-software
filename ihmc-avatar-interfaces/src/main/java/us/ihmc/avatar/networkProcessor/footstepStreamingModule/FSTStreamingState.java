@@ -641,7 +641,7 @@ public class FSTStreamingState implements State
    {
       // 1) Basic raw yaw rotation estimate
       double rawYawRotation = measuredYawRotation + yawVelocityScalingFactor.getValue() *
-                                                    getAverageAngularVelocity(angularVelocity) * (robotStepDuration - robotElapsedTimeCurrentStep);
+                                                    getAverageAngularVelocity(angularVelocity) * (robotSwingDuration - robotElapsedTimeCurrentStep);
 
       // 2) "Landing factor" from vertical motion
       //    Interpolation factor landingFactor in [0,1], where 1 => no reduction,

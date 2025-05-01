@@ -114,7 +114,7 @@ public class FootstepStreamingToolboxParameters
       timeThresholdForSleeping = 3.0;
 
       computeFromStance = true;
-      footstepMarginTime = 0.1;
+      footstepMarginTime = 0.05;
 
       // Step threshold of 5cm and lift of 2cm, seem to be too conservative. Step is identified after ~0.3s. Too long considering that a step lasts ~0.57s
       // Step threshold of 2cm and lift of 1cm seem to work great!
