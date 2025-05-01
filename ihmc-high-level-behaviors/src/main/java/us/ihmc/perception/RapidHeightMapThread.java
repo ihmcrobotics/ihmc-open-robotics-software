@@ -1,9 +1,9 @@
 package us.ihmc.perception;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
-import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapManager;
 import us.ihmc.perception.heightMap.TerrainMapData;
@@ -14,9 +14,13 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 import us.ihmc.sensors.ImageSensor;
 
-public class RapidHeightMapUpdateThread extends RepeatingTaskThread
-{
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 
+public class RapidHeightMapThread
+{
    private final RapidHeightMapManager heightMapManager;
    private final Object heightMapLock = new Object();
 
@@ -24,17 +28,16 @@ public class RapidHeightMapUpdateThread extends RepeatingTaskThread
    private final ReferenceFrame sensorFrame;
    private final ReferenceFrame zUpSensorFrame;
    private final int depthImageKey;
+   private ScheduledExecutorService scheduler;
 
-   public RapidHeightMapUpdateThread(ROS2Node ros2Node,
-                                     ROS2SyncedRobotModel syncedRobotModel,
-                                     RobotCollisionModel robotCollisionModel,
-                                     ControllerFootstepQueueMonitor controllerFootstepQueueMonitor,
-                                     ImageSensor imageSensor,
-                                     int depthImageKey,
-                                     HeightMapParameters heightMapParameters)
+   public RapidHeightMapThread(ROS2Node ros2Node,
+                               ROS2SyncedRobotModel syncedRobotModel,
+                               RobotCollisionModel robotCollisionModel,
+                               ImageSensor imageSensor,
+                               int depthImageKey,
+                               ControllerFootstepQueueMonitor controllerFootstepQueueMonitor,
+                               HeightMapParameters heightMapParameters)
    {
-      super(imageSensor.getSensorName() + RapidHeightMapUpdateThread.class.getSimpleName());
-
       this.imageSensor = imageSensor;
       this.depthImageKey = depthImageKey;
 
@@ -54,8 +57,15 @@ public class RapidHeightMapUpdateThread extends RepeatingTaskThread
                                                    heightMapParameters);
    }
 
-   @Override
-   protected void runTask()
+   public void start()
+   {
+      // We create a ThreadFactory here so that when profiling the thread, there is a user-friendly name to identify it with
+      ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat("RemoteHeightMapUpdateThread").build();
+      scheduler = Executors.newScheduledThreadPool(1, threadFactory);
+      scheduler.scheduleWithFixedDelay(this::update, 100, 10, TimeUnit.MILLISECONDS);
+   }
+
+   public void update()
    {
       try
       {
@@ -65,13 +75,10 @@ public class RapidHeightMapUpdateThread extends RepeatingTaskThread
          // Update height map
          synchronized (heightMapLock)
          {
-            heightMapManager.update(depthImage, sensorFrame, zUpSensorFrame);
+            heightMapManager.updateAndPublishHeightMap(depthImage, sensorFrame, zUpSensorFrame);
          }
 
          depthImage.release();
-      }
-      catch (InterruptedException ignored)
-      {
       }
       catch (Exception e)
       {
@@ -95,12 +102,9 @@ public class RapidHeightMapUpdateThread extends RepeatingTaskThread
       }
    }
 
-   @Override
-   public void kill()
+   public void destroy()
    {
-      super.kill();
-      interrupt();
-
+      scheduler.shutdown();
       heightMapManager.destroy();
    }
 }
