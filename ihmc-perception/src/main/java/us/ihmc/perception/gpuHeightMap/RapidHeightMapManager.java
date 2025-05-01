@@ -40,7 +40,7 @@ public class RapidHeightMapManager
 {
    private final HeightMapParameters heightMapParameters;
    private final RapidHeightMapExtractorCUDA rapidHeightMapExtractor;
-   private final SnappingHeightMapExtractor snappedFootstepsExtractor;
+   private final SnappingTerrainExtractor snappedFootstepsExtractor;
 
    private final Point3D sensorOrigin = new Point3D();
    private final FramePose3D cameraPose = new FramePose3D();
@@ -77,7 +77,7 @@ public class RapidHeightMapManager
       flyingPointsFilter = new CUDAFlyingPointsFilter();
 
       rapidHeightMapExtractor = new RapidHeightMapExtractorCUDA(1, heightMapParameters);
-      snappedFootstepsExtractor = new SnappingHeightMapExtractor(heightMapParameters);
+      snappedFootstepsExtractor = new SnappingTerrainExtractor(heightMapParameters);
 
       // We use a notification to only call resetting the height map in one place
       heightMapPublisher = ros2Node.createPublisher(PerceptionAPI.HEIGHT_MAP_CROPPED);
@@ -256,7 +256,7 @@ public class RapidHeightMapManager
    public void destroy()
    {
       rapidHeightMapExtractor.destroy();
-      snappedFootstepsExtractor.destroy();
+      snappedFootstepsExtractor.close();
       flyingPointsFilter.destroy();
       compressedCroppedHeightMapPointer.close();
    }

@@ -1,6 +1,5 @@
 package us.ihmc.perception.heightMap;
 
-import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.TerrainMapMessage;
@@ -10,10 +9,10 @@ import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
+import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.steppableRegions.SnapResult;
 
 import java.nio.ByteBuffer;
-import java.nio.ShortBuffer;
 
 public class TerrainMapData
 {
@@ -29,23 +28,22 @@ public class TerrainMapData
    private double heightScaleOffset;
 
    private Mat heightMap;
-   // TODO the contact map and terrain map are assumed to be null. I'm keeping them in to avoid breaking the code.
+   private Mat terrainCostMap;
    private Mat contactMap;
 
-   private Mat steppabilityImage;
    private Mat snapHeightImage;
-   private Mat snappedAreaFractionImage;
    private Mat snapNormalXImage;
    private Mat snapNormalYImage;
    private Mat snapNormalZImage;
+   private Mat steppabilityImage;
+   private Mat steppabilityConnectionsMat;
+   private Mat snappedAreaFractionImage;
 
    public TerrainMapData(int height, int width, double heightScaleFactor, double heightScaleOffset)
    {
       setHeightScaleParameters(heightScaleFactor, heightScaleOffset);
 
       heightMap = new Mat(height, width, opencv_core.CV_16UC1);
-
-      //      contactMap = new Mat(height, width, opencv_core.CV_8UC1);
       localGridSize = height;
    }
 
@@ -69,13 +67,15 @@ public class TerrainMapData
       terrainMapCenter.set(other.terrainMapCenter);
 
       setHeightMap(other.heightMap);
+      setTerrainCostMap(other.terrainCostMap);
       setContactMap(other.contactMap);
-      setSteppabilityMat(other.steppabilityImage);
       setSnapHeightMat(other.snapHeightImage);
-      setSnappedAreaFractionMat(other.snappedAreaFractionImage);
       setSnapNormalXMat(other.snapNormalXImage);
       setSnapNormalYMat(other.snapNormalYImage);
       setSnapNormalZMat(other.snapNormalZImage);
+      setSteppabilityMat(other.steppabilityImage);
+      setSteppabilityConnectionsMat(other.steppabilityConnectionsMat);
+      setSnappedAreaFractionMat(other.snappedAreaFractionImage);
    }
 
    public boolean isEmpty()
@@ -87,6 +87,15 @@ public class TerrainMapData
       return !hasSteppability();
    }
 
+   public boolean hasTerrainCost()
+   {
+      return terrainCostMap != null;
+   }
+
+   public boolean hasContactMap()
+   {
+      return contactMap != null;
+   }
 
    public boolean hasHeightMap()
    {
@@ -106,6 +115,11 @@ public class TerrainMapData
    public boolean hasSteppability()
    {
       return steppabilityImage != null;
+   }
+
+   public boolean hasSteppableConnections()
+   {
+      return steppabilityConnectionsMat != null;
    }
 
    public boolean hasSnappedArea()
@@ -283,6 +297,11 @@ public class TerrainMapData
       return heightMap;
    }
 
+   public Mat getTerrainCostMap()
+   {
+      return terrainCostMap;
+   }
+
    public Mat getContactMap()
    {
       return contactMap;
@@ -314,6 +333,11 @@ public class TerrainMapData
       return heightScaleFactor;
    }
 
+   public void setTerrainCostMap(Mat terrainCostMap)
+   {
+      this.terrainCostMap = terrainCostMap == null ? null : terrainCostMap.clone();
+   }
+
    public void setHeightMap(Mat heightMap)
    {
       this.heightMap = heightMap == null ? null : heightMap.clone();
@@ -322,11 +346,6 @@ public class TerrainMapData
    public void setContactMap(Mat contactMap)
    {
       this.contactMap = contactMap == null ? null : contactMap.clone();
-   }
-
-   public void setSteppabilityMat(Mat steppabilityImage)
-   {
-      this.steppabilityImage = steppabilityImage == null ? null : steppabilityImage.clone();
    }
 
    public void setSnapHeightMat(Mat snapHeightImage)
@@ -349,24 +368,24 @@ public class TerrainMapData
       this.snapNormalZImage = snapNormalZImage == null ? null : snapNormalZImage.clone();
    }
 
+   public void setSteppabilityMat(Mat steppabilityImage)
+   {
+      this.steppabilityImage = steppabilityImage == null ? null : steppabilityImage.clone();
+   }
+
+   public void setSteppabilityConnectionsMat(Mat steppabilityConnectionsImage)
+   {
+      this.steppabilityConnectionsMat = steppabilityConnectionsImage == null ? null : steppabilityConnectionsImage.clone();
+   }
+
    public void setSnappedAreaFractionMat(Mat snappedAreaFractionImage)
    {
       this.snappedAreaFractionImage = snappedAreaFractionImage == null ? null : snappedAreaFractionImage.clone();
    }
 
-   public Mat getSteppabilityMat()
-   {
-      return steppabilityImage;
-   }
-
    public Mat getSnapHeightMat()
    {
       return snapHeightImage;
-   }
-
-   public Mat getSnappedAreaFractionMat()
-   {
-      return snappedAreaFractionImage;
    }
 
    public Mat getSnapNormalXMat()
@@ -384,6 +403,21 @@ public class TerrainMapData
       return snapNormalZImage;
    }
 
+   public Mat getSteppabilityMat()
+   {
+      return steppabilityImage;
+   }
+
+   public Mat getSteppabilityConnectionsMat()
+   {
+      return steppabilityConnectionsMat;
+   }
+
+   public Mat getSnappedAreaFractionMat()
+   {
+      return snappedAreaFractionImage;
+   }
+
    public void setFromPacket(TerrainMapMessage message)
    {
       localGridSize = message.getLocalGridSize();
@@ -394,36 +428,33 @@ public class TerrainMapData
       heightScaleOffset = message.getHeightScaleOffset();
       heightScaleFactor = message.getHeightScaleFactor();
 
+      if (message.getHasTerrainCostData())
+      {
+         if (terrainCostMap == null)
+            terrainCostMap = new Mat(localGridSize, localGridSize, opencv_core.CV_8UC1);
+         packDataIntoMatFromByteBuffer(message.getTerrainCostData().getBuffer(), terrainCostMap);
+      }
+      else
+      {
+         terrainCostMap = null;
+      }
+      if (message.getHasContactMapData())
+      {
+         if (contactMap == null)
+            contactMap = new Mat(localGridSize, localGridSize, opencv_core.CV_8UC1);
+         packDataIntoMatFromByteBuffer(message.getContactMapData().getBuffer(), contactMap);
+      }
+      else
+      {
+         contactMap = null;
+      }
       if (message.getHasHeightMapData())
       {
          if (heightMap == null)
             heightMap = new Mat(localGridSize, localGridSize, opencv_core.CV_16UC1);
 
          ByteBuffer buffer = message.getHeightMapData().getBuffer();
-         // Need to back this guy up, all the way to the beginning
-         buffer.rewind();
-
-         int expectedShorts = heightMap.rows() * heightMap.cols();
-         int availableShorts = buffer.remaining() / 2;
-
-         if (availableShorts < expectedShorts)
-            throw new RuntimeException("Not enough data to fill height map: have " + availableShorts + " shorts, need " + expectedShorts);
-
-         // Note: Due to how the backing native memory layout is, ensure we get the total Buffer
-         // mat.asByteBuffer() doesn't always return the entire buffer, also the data may be wrong
-         int totalBytes = heightMap.rows() * heightMap.cols() * 2; // 2 bytes per short
-         ByteBuffer matBuffer = heightMap.data().limit(totalBytes).asByteBuffer();
-         ShortBuffer shortBuffer = matBuffer.asShortBuffer();
-
-         for (int i = 0; i < expectedShorts; i++)
-         {
-            // Little-endian
-            byte low  = buffer.get();
-            byte high = buffer.get();
-
-            int ushort = ((high & 0xFF) << 8) | (low & 0xFF);
-            shortBuffer.put((short) ushort);
-         }
+         packDataIntoMatFromByteBuffer(buffer, heightMap);
       }
       else
       {
@@ -435,31 +466,7 @@ public class TerrainMapData
             snapHeightImage = new Mat(localGridSize, localGridSize, opencv_core.CV_16UC1);
 
          ByteBuffer buffer = message.getSnappedHeightData().getBuffer();
-         // Need to back this guy up, all the way to the beginning
-         buffer.rewind();
-
-         int expectedShorts = snapHeightImage.rows() * snapHeightImage.cols();
-         int availableShorts = buffer.remaining() / 2;
-
-         if (availableShorts < expectedShorts)
-            throw new RuntimeException("Not enough data to fill height map: have " + availableShorts + " shorts, need " + expectedShorts);
-
-         // Note: Due to how the backing native memory layout is, ensure we get the total Buffer
-         // mat.asByteBuffer() doesn't always return the entire buffer, also the data may be wrong
-         int totalBytes = snapHeightImage.rows() * snapHeightImage.cols() * 2; // 2 bytes per short
-         ByteBuffer matBuffer = snapHeightImage.data().limit(totalBytes).asByteBuffer();
-         ShortBuffer shortBuffer = matBuffer.asShortBuffer();
-
-         for (int i = 0; i < expectedShorts; i++)
-         {
-            // Little-endian
-            byte low  = buffer.get();
-            byte high = buffer.get();
-
-            int ushort = ((high & 0xFF) << 8) | (low & 0xFF);
-            shortBuffer.put((short) ushort);
-         }
-
+         packDataIntoMatFromByteBuffer(buffer, snapHeightImage);
       }
       else
       {
@@ -469,13 +476,13 @@ public class TerrainMapData
       {
          if (snapNormalXImage == null)
             snapNormalXImage = new Mat(localGridSize, localGridSize, opencv_core.CV_8UC1);
-         snapNormalXImage.data(new BytePointer(message.getSnappedNormalXData().getBuffer()));
+         packDataIntoMatFromByteBuffer(message.getSnappedNormalXData().getBuffer(), snapNormalXImage);
          if (snapNormalYImage == null)
             snapNormalYImage = new Mat(localGridSize, localGridSize, opencv_core.CV_8UC1);
-         snapNormalYImage.data(new BytePointer(message.getSnappedNormalYData().getBuffer()));
+         packDataIntoMatFromByteBuffer(message.getSnappedNormalYData().getBuffer(), snapNormalYImage);
          if (snapNormalZImage == null)
             snapNormalZImage = new Mat(localGridSize, localGridSize, opencv_core.CV_8UC1);
-         snapNormalZImage.data(new BytePointer(message.getSnappedNormalZData().getBuffer()));
+         packDataIntoMatFromByteBuffer(message.getSnappedNormalZData().getBuffer(), snapNormalZImage);
       }
       else
       {
@@ -487,17 +494,27 @@ public class TerrainMapData
       {
          if (steppabilityImage == null)
             steppabilityImage = new Mat(localGridSize, localGridSize, opencv_core.CV_8UC1);
-         steppabilityImage.data(new BytePointer(message.getSteppabilityData().getBuffer()));
+         packDataIntoMatFromByteBuffer(message.getSteppabilityData().getBuffer(), steppabilityImage);
       }
       else
       {
          steppabilityImage = null;
       }
+      if (message.getHasSteppableConnectionsData())
+      {
+         if (steppabilityConnectionsMat == null)
+            steppabilityConnectionsMat = new Mat(localGridSize, localGridSize, opencv_core.CV_8UC1);
+         packDataIntoMatFromByteBuffer(message.getSteppableConnectionsData().getBuffer(), steppabilityConnectionsMat);
+      }
+      else
+      {
+         steppabilityConnectionsMat = null;
+      }
       if (message.getHasSnappedAreaData())
       {
          if (snappedAreaFractionImage == null)
             snappedAreaFractionImage = new Mat(localGridSize, localGridSize, opencv_core.CV_8UC1);
-         snappedAreaFractionImage.data(new BytePointer(message.getSnappedAreaData().getBuffer()));
+         packDataIntoMatFromByteBuffer(message.getSnappedAreaData().getBuffer(), snappedAreaFractionImage);
       }
       else
       {
@@ -505,5 +522,8 @@ public class TerrainMapData
       }
    }
 
-
+   private void packDataIntoMatFromByteBuffer(ByteBuffer buffer, Mat dataToPack)
+   {
+      dataToPack.data().put(buffer.array(), 0, (int) OpenCVTools.dataSize(dataToPack));
+   }
 }

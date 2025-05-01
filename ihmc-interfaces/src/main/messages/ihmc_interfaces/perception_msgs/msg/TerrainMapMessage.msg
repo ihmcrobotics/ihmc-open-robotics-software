@@ -22,12 +22,19 @@ float64 map_center_y
 float64 height_scale_factor
 float64 height_scale_offset
 
+bool has_terrain_cost_data false
+bool has_contact_map_data false
 bool has_height_map_data false
 bool has_snapped_height_data false
 bool has_snapped_normal_data false
 bool has_snapped_area_data false
 bool has_steppability_data false
+bool has_steppable_connections_data false
 
+# The raw data for the terrain cost value, which are stored as chars.
+byte[<=250000] terrain_cost_data
+# The raw data for the contact map value, which are stored as chars.
+byte[<=250000] contact_map_data
 # The raw data for the raw heights, which are stored as two bytes to form one short.
 byte[<=500000] height_map_data
 # The raw data for the snapped heights, which are stored as two bytes to form one short.
@@ -40,5 +47,7 @@ byte[<=250000] snapped_normal_y_data
 byte[<=250000] snapped_normal_z_data
 # The raw data for the snapped support area, which are stored as chars.
 byte[<=250000] snapped_area_data
-# The raw data for the snapped support area, which are stored as chars.
+# The raw data for the steppability area, which are stored as chars.
 byte[<=250000] steppability_data
+# The raw data for the steppable connections value, which are stored as chars.
+byte[<=250000] steppable_connections_data
