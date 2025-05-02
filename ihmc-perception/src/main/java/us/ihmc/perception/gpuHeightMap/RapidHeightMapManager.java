@@ -3,6 +3,7 @@ package us.ihmc.perception.gpuHeightMap;
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.opencv_core.FileStorage;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
@@ -18,7 +19,10 @@ import us.ihmc.perception.RawImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.cuda.CUDABodyCollisionFilter;
 import us.ihmc.perception.filters.CUDAFlyingPointsFilter;
+import us.ihmc.perception.filters.DepthImageFlyingPointsFilter;
 import us.ihmc.perception.opencv.OpenCVTools;
+import us.ihmc.perception.tools.PerceptionDebugTools;
+import us.ihmc.perception.tools.PerceptionLoggingTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.physics.RobotCollisionModel;
@@ -29,6 +33,7 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
+import java.io.File;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +54,7 @@ public class RapidHeightMapManager
    private final Notification lowerHeightMapBackdropRequested = new Notification();
 
    private final CUDABodyCollisionFilter bodyCollisionFilter;
-   private final CUDAFlyingPointsFilter flyingPointsFilter;
+   private final DepthImageFlyingPointsFilter flyingPointsFilter;
    private final RapidHeightMapDriftOffset rapidHeightMapDriftOffset;
 
    private final ROS2Publisher<ImageMessage> heightMapPublisher;
@@ -74,7 +79,7 @@ public class RapidHeightMapManager
       List<Collidable> robotCollidables = robotCollisionModel.getRobotCollidables(robotModel.getRootBody());
       bodyCollisionFilter = new CUDABodyCollisionFilter(robotCollidables);
       rapidHeightMapDriftOffset = new RapidHeightMapDriftOffset(controllerFootstepQueueMonitor);
-      flyingPointsFilter = new CUDAFlyingPointsFilter();
+      flyingPointsFilter = new DepthImageFlyingPointsFilter();
 
       int croppedCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getCroppedWidthInMeters(), heightMapParameters.getCellSizeInMeters());
       int cellsPerAxisCropped = 2 * croppedCenterIndex + 1;
@@ -97,6 +102,7 @@ public class RapidHeightMapManager
          });
       }
    }
+   int debug = 0;
 
    public void updateAndPublishHeightMap(RawImage depthImage, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame)
    {
@@ -163,10 +169,21 @@ public class RapidHeightMapManager
       GpuMat deviceDepthImage = new GpuMat(latestDepthImage); // We are extremely prudent to close these to avoid memory leaks
       latestDepthImage.convertTo(deviceDepthImage, opencv_core.CV_16UC1);
 
+      // Perform a flying points filter as a post-processing step on the height map
+      if (heightMapParameters.getFlyingPointsFilter())
+      {
+         GpuMat deviceOutputImage = new GpuMat(deviceDepthImage.size(), deviceDepthImage.type());
+         flyingPointsFilter.applyFilter(deviceDepthImage, deviceOutputImage, depthIntrinsicsCopy);
+         deviceOutputImage.copyTo(deviceDepthImage);
+         deviceOutputImage.close();
+      }
+
+
       // We expect that depthImage to contain depths for parts of the robot that are in the camera frame, we remove that here
       GpuMat depthImageWithoutRobot = new GpuMat(deviceDepthImage.size(), deviceDepthImage.type());
       bodyCollisionFilter.process(deviceDepthImage, depthImageWithoutRobot, depthIntrinsicsCopy, cameraFrame);
       deviceDepthImage.close();   // Now we are finished with the device depth image because we have a new image without the robot, so close it
+
 
       // The controller can publish a status letting anyone listening know that the controller is aware of some amount of drift in the Z direction
       // If we have that parameter set to true, we update the heights of the height map to account for that drift
@@ -198,15 +215,6 @@ public class RapidHeightMapManager
       GpuMat deviceCroppedHeightMap = rapidHeightMapExtractor.getCroppedHeightMap();
       // We have used the depth image without the robot, close this to avoid creating a memory leak
       depthImageWithoutRobot.close();
-
-      // Perform a flying points filter as a post-processing step on the height map
-      if (heightMapParameters.getFlyingPointsFilter())
-      {
-         GpuMat deviceOutputImage = new GpuMat(deviceCroppedHeightMap.size(), deviceCroppedHeightMap.type());
-         flyingPointsFilter.applyFilter(deviceCroppedHeightMap, deviceOutputImage);
-         deviceOutputImage.copyTo(deviceCroppedHeightMap);
-         deviceOutputImage.close();
-      }
 
       // Don't close this mat as its being used in the extractor till that finish's
       deviceCroppedHeightMap.convertTo(deviceHeightMapToPack, deviceCroppedHeightMap.type());
