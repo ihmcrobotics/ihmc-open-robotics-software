@@ -302,6 +302,11 @@ public class FSTStreamingState implements State
                      {
                         // set now the initial position for robot stance foot, which will be the next swing
                         initialRobotSwingFootTransformsInWorld.put(side, new RigidBodyTransform(currentRobotFootTransformInWorld));
+                        if (side.equals(robotSwingSide))
+                        {
+                           yoInitialRobotSwingFootPosition.set(initialRobotSwingFootTransformsInWorld.get(side).getTranslation());
+                           yoInitialRobotSwingFootYaw.set(initialRobotSwingFootTransformsInWorld.get(side).getRotation().getYaw());
+                        }
                         // set first value for control of direction adjustment, used later
                         directionTrackersCtrl.put(side, new FrameVector2D());
                      }
@@ -442,6 +447,8 @@ public class FSTStreamingState implements State
 
       directionTrackersCtrl.put(side, new FrameVector2D());
       initialTrackersTransform.put(side, new RigidBodyTransform(currentTrackerTransform));
+      yoInitialTrackersPosition.get(side).set(initialTrackersTransform.get(side).getTranslation());
+      yoInitialTrackersYaw.get(side).set(initialTrackersTransform.get(side).getRotation().getYaw());
       stableIterationCounts.put(side, 0);
       maxFeetHeight.put(side, 0.0);
       velocitySum = 0.0;
