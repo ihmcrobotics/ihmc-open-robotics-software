@@ -169,6 +169,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
          }
       }
 
+//      RobotSide swingSide = transferToSide.getOppositeSide();
       if (!firstTickInState)
          feetManager.updateSwingTrajectoryPreview(swingSide);
       balanceManager.setSwingFootTrajectory(swingSide, feetManager.getSwingTrajectory(swingSide));
@@ -230,11 +231,10 @@ public class TransferToWalkingSingleSupportState extends TransferState
       }
 
       super.onEntry();
-      handleNewFootstep(true);
 
 
-//      feetManager.initializeSwingTrajectoryPreview(transferToSide.getOppositeSide(), footsteps[0], footstepTimings[0].getSwingTime());
-//      balanceManager.minimizeAngularMomentumRateZ(minimizeAngularMomentumRateZDuringTransfer.getValue());
+      feetManager.initializeSwingTrajectoryPreview(transferToSide.getOppositeSide(), footsteps[0], footstepTimings[0].getSwingTime());
+      balanceManager.minimizeAngularMomentumRateZ(minimizeAngularMomentumRateZDuringTransfer.getValue());
 
       updateFootPlanOffset();
    }
@@ -312,10 +312,12 @@ public class TransferToWalkingSingleSupportState extends TransferState
 
    private void handleNewFootstep()
    {
-      handleNewFootstep(false);
+//      handleNewFootstep(false);
    }
 
    private final Footstep nextFootstep = new Footstep();
+   private final Footstep nextNextFootstep = new Footstep();
+   private final FootstepTiming footstepTiming = new FootstepTiming();
    private void handleNewFootstep(boolean firstTick)
    {
       if (!haveWeEntered)
@@ -325,34 +327,32 @@ public class TransferToWalkingSingleSupportState extends TransferState
          return;
 
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
+//
+//      walkingMessageHandler.poll(nextFootstep, footstepTiming);
+//      if (walkingMessageHandler.getCurrentNumberOfFootsteps() > 0)
+//         walkingMessageHandler.peekFootstep(0, nextNextFootstep);
+//      nextFootstep.set(footsteps[0]);
 
-      walkingMessageHandler.poll(footsteps[0], footstepTimings[0]);
-      nextFootstep.set(footsteps[0]);
-
-      //
-      feetManager.initializeSwingTrajectoryPreview(transferToSide.getOppositeSide(), footsteps[0], footstepTimings[0].getSwingTime());
-//      feetManager.updateSwingTrajectoryPreview(transferToSide.getOppositeSide());
-
-      //
-      balanceManager.minimizeAngularMomentumRateZ(minimizeAngularMomentumRateZDuringTransfer.getValue());
-      balanceManager.setFinalTransferTime(finalTransferTime);
-      balanceManager.clearICPPlan();
-      balanceManager.clearSwingFootTrajectory();
-      balanceManager.addFootstepToPlan(footsteps[0], footstepTimings[0]);
-
-      //
+//
+//      balanceManager.minimizeAngularMomentumRateZ(minimizeAngularMomentumRateZDuringTransfer.getValue());
+//      balanceManager.setFinalTransferTime(finalTransferTime);
+//      balanceManager.clearICPPlan();
+//      balanceManager.clearSwingFootTrajectory();
+//      balanceManager.addFootstepToPlan(footsteps[0], footstepTimings[0]);
+//
+//      //
       for (int i = 0; i < walkingMessageHandler.getCurrentNumberOfFootsteps(); i++)
       {
          walkingMessageHandler.peekFootstep(i, footsteps[i]);
          walkingMessageHandler.peekTiming(i, footstepTimings[i]);
          balanceManager.addFootstepToPlan(footsteps[i], footstepTimings[i]);
       }
-
-      //
-      controllerToolbox.updateBipedSupportPolygons();
-
-      balanceManager.setSwingFootTrajectory(swingSide, feetManager.getSwingTrajectory(swingSide));
-      balanceManager.adjustFootstepInCoPPlan(nextFootstep);
+//
+//      //
+//      controllerToolbox.updateBipedSupportPolygons();
+//
+//      balanceManager.setSwingFootTrajectory(swingSide, feetManager.getSwingTrajectory(swingSide));
+      balanceManager.adjustFootstepInCoPPlan(footsteps[0]);
       balanceManager.computeICPPlan();
    }
 }
