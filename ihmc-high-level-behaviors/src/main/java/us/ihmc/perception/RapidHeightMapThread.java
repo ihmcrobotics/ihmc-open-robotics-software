@@ -10,6 +10,7 @@ import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.sensorProcessing.filters.DepthImageFilterParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 import us.ihmc.sensors.ImageSensor;
@@ -36,7 +37,8 @@ public class RapidHeightMapThread
                                ImageSensor imageSensor,
                                int depthImageKey,
                                ControllerFootstepQueueMonitor controllerFootstepQueueMonitor,
-                               HeightMapParameters heightMapParameters)
+                               HeightMapParameters heightMapParameters,
+                               DepthImageFilterParameters depthImageFilterParameters)
    {
       this.imageSensor = imageSensor;
       this.depthImageKey = depthImageKey;
@@ -54,7 +56,8 @@ public class RapidHeightMapThread
                                                    leftFootFrame,
                                                    rightFootFrame,
                                                    controllerFootstepQueueMonitor,
-                                                   heightMapParameters);
+                                                   heightMapParameters,
+                                                   depthImageFilterParameters);
    }
 
    public void start()

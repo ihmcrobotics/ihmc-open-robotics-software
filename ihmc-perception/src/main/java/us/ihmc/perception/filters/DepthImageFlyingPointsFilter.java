@@ -4,11 +4,13 @@ import org.bytedeco.cuda.cudart.CUstream_st;
 import org.bytedeco.cuda.cudart.dim3;
 import org.bytedeco.cuda.global.cudart;
 import org.bytedeco.opencv.opencv_core.GpuMat;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
 import us.ihmc.perception.cuda.CUDAStreamManager;
 import us.ihmc.perception.cuda.CUDATools;
+import us.ihmc.sensorProcessing.filters.DepthImageFilterParameters;
 
 import java.net.URL;
 
@@ -18,9 +20,11 @@ public class DepthImageFlyingPointsFilter
    private final CUDAKernel flyingPointFilterKernel;
    private final CUDAProgram flyingPointFilterCUDAProgram;
    private final CUstream_st stream;
+   private final DepthImageFilterParameters depthImageFilterParameters;
 
-   public DepthImageFlyingPointsFilter()
+   public DepthImageFlyingPointsFilter(DepthImageFilterParameters depthImageFilterParameters)
    {
+      this.depthImageFilterParameters = depthImageFilterParameters;
       stream = CUDAStreamManager.getStream();
       URL kernelPath = getClass().getResource("/us/ihmc/perception/cuda/DepthImageFlyingPointsFilter.cu");
       try
@@ -50,7 +54,10 @@ public class DepthImageFlyingPointsFilter
                              .withFloat((float) cameraIntrinsics.getFy())
                              .withFloat((float) cameraIntrinsics.getCx())
                              .withFloat((float) cameraIntrinsics.getCy());
-      flyingPointFilterKernel.withFloat(0.866F).withFloat(0.05F).withFloat(0.3F).withFloat(0.02F);
+      flyingPointFilterKernel.withFloat((float) depthImageFilterParameters.getCosAngleThreshold())
+                             .withFloat((float) depthImageFilterParameters.getDepthThreshold())
+                             .withFloat((float) depthImageFilterParameters.getNormalViewThreshold())
+                             .withFloat((float) depthImageFilterParameters.getDepthVarianceThreshold());
       flyingPointFilterKernel.run(stream, gridSize, blockSize, 0);
 
       int error = cudart.cudaStreamSynchronize(stream);

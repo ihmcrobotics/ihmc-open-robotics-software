@@ -102,6 +102,7 @@ public final class PerceptionAPI
    public static final ROS2Topic<VideoPacket> L515_DEPTH = BEST_EFFORT.withModule(L515_NAME).withType(VideoPacket.class).withSuffix("depth");
    public static final ROS2Topic<ImageMessage> L515_DEPTH_IMAGE = BEST_EFFORT.withModule(L515_NAME).withTypeName(ImageMessage.class).withSuffix("depth");
    public static final ROS2Topic<ImageMessage> D455_DEPTH_IMAGE = BEST_EFFORT.withModule(D455_NAME).withTypeName(ImageMessage.class).withSuffix("depth");
+   public static final ROS2Topic<ImageMessage> D455_DEPTH_FILTERED_IMAGE = BEST_EFFORT.withModule(D455_NAME).withTypeName(ImageMessage.class).withSuffix("depth_filtered");
    public static final ROS2Topic<ImageMessage> D455_COLOR_IMAGE = BEST_EFFORT.withModule(D455_NAME).withTypeName(ImageMessage.class).withSuffix("color");
    public static final ROS2Topic<BigVideoPacket> D455_DEPTH_LARGE = BEST_EFFORT.withModule(D455_NAME).withType(BigVideoPacket.class).withSuffix("depth");
 

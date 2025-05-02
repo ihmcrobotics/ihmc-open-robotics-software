@@ -85,7 +85,7 @@ void computeNormalsAndFilterFlyingPoints(unsigned short* depthImage, size_t dept
 
     // --- New test: normal vs viewing ray ---
     float3 viewRay = normalize(p);
-    float dotViewNormal = dot(normal, viewRay);
+    float dotViewNormal = fabsf(dot(normal, viewRay));
     bool badViewNormal = dotViewNormal < normalViewThreshold;
 
     // --- New test: depth variance in 3x3 neighborhood ---
@@ -116,5 +116,5 @@ void computeNormalsAndFilterFlyingPoints(unsigned short* depthImage, size_t dept
 
     unsigned short* inputPtr = (unsigned short*)((char*)depthImage + y * depthImagePitch) + x;
     unsigned short* maskPtr = (unsigned short*)((char*)collisionMask + y * collisionMaskPitch) + x;
-    *maskPtr = (badNormal || badDepth || badViewNormal || highDepthVariance) ? *inputPtr : 0;
+    *maskPtr = (badViewNormal) ? 0 : *inputPtr;
 }

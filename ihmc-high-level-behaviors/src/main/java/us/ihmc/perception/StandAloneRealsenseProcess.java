@@ -10,6 +10,7 @@ import us.ihmc.communication.ros2.ROS2TunedRigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.sensorProcessing.filters.DepthImageFilterParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 import us.ihmc.sensors.realsense.RealSenseConfiguration;
@@ -42,7 +43,7 @@ public class StandAloneRealsenseProcess
                                      RobotCollisionModel robotCollisionModel,
                                      HeightMapParameters heightMapParameters)
    {
-      this(ros2Node, ros2Helper, syncedRobot, robotCollisionModel, heightMapParameters, null);
+      this(ros2Node, ros2Helper, syncedRobot, robotCollisionModel, heightMapParameters, null, null);
    }
 
    public StandAloneRealsenseProcess(ROS2Node ros2Node,
@@ -50,6 +51,7 @@ public class StandAloneRealsenseProcess
                                      ROS2SyncedRobotModel syncedRobot,
                                      RobotCollisionModel robotCollisionModel,
                                      HeightMapParameters heightMapParameters,
+                                     DepthImageFilterParameters depthImageFilterParameters,
                                      ControllerFootstepQueueMonitor controllerFootstepQueueMonitor)
    {
 
@@ -86,7 +88,8 @@ public class StandAloneRealsenseProcess
                                                       d455Sensor,
                                                       RealSenseImageSensor.DEPTH_IMAGE_KEY,
                                                       controllerFootstepQueueMonitor,
-                                                      heightMapParameters);
+                                                      heightMapParameters,
+                                                      depthImageFilterParameters);
       rapidHeightMapThread.start();
    }
 

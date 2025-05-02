@@ -1,0 +1,7 @@
+{
+  "title" : "DepthImageFilterParameters",
+  "cos angle threshold" : 0.009999999999999913,
+  "depth threshold" : 0.05,
+  "normal view threshold" : 0.2,
+  "depth variance threshold" : 1.0E-4
+}

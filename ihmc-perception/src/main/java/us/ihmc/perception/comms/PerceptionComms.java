@@ -7,6 +7,10 @@ public class PerceptionComms
    private static final String MODULE_NAME = "perception";
    private static final String ACTIVE_MODULE_NAME = "active_perception";
 
+
+   public static final StoredPropertySetROS2TopicPair DEPTH_IMAGE_FILTER_PARAMETERS
+         = new StoredPropertySetROS2TopicPair(MODULE_NAME,"depth_image_filter_parameters");
+
    public static final StoredPropertySetROS2TopicPair PERCEPTION_CONFIGURATION_PARAMETERS
          = new StoredPropertySetROS2TopicPair(MODULE_NAME,"perception_configuration_parameters");
 

@@ -9,6 +9,7 @@ import us.ihmc.perception.RawImageTest;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
+import us.ihmc.sensorProcessing.filters.DepthImageFilterParameters;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -29,7 +30,7 @@ public class DepthImageFlyingPointsFilterTest
       GpuMat inputDepthImage = new GpuMat(720, 1280, opencv_core.CV_16UC1, new BytePointer(imageBytes));
       GpuMat outputFilteredDepthImage = new GpuMat(inputDepthImage.size(), inputDepthImage.type());
 
-      DepthImageFlyingPointsFilter flyingPointsFilter = new DepthImageFlyingPointsFilter();
+      DepthImageFlyingPointsFilter flyingPointsFilter = new DepthImageFlyingPointsFilter(new DepthImageFilterParameters());
       CameraIntrinsics cameraIntrinsics = new CameraIntrinsics();
       flyingPointsFilter.applyFilter(inputDepthImage, outputFilteredDepthImage, cameraIntrinsics);
 

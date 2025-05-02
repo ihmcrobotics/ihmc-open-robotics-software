@@ -52,6 +52,7 @@ public class ContinuousHikingProcess
                                                                   syncedRobot,
                                                                   robotCollisionModel,
                                                                   activeMappingParameterToolBox.getHeightMapParameters(),
+                                                                  activeMappingParameterToolBox.getDepthImageFilterParameters(),
                                                                   controllerFootstepQueueMonitor);
       continuousPlannerSchedulingTask = new ContinuousPlannerSchedulingTask(robotModel,
                                                                             ros2Node,

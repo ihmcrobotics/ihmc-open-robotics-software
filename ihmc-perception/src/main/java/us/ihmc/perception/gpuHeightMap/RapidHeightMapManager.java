@@ -3,7 +3,6 @@ package us.ihmc.perception.gpuHeightMap;
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
-import org.bytedeco.opencv.opencv_core.FileStorage;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
@@ -18,22 +17,21 @@ import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.cuda.CUDABodyCollisionFilter;
-import us.ihmc.perception.filters.CUDAFlyingPointsFilter;
+import us.ihmc.perception.cuda.CUDACompressionTools;
 import us.ihmc.perception.filters.DepthImageFlyingPointsFilter;
+import us.ihmc.perception.imageMessage.CompressionType;
 import us.ihmc.perception.opencv.OpenCVTools;
-import us.ihmc.perception.tools.PerceptionDebugTools;
-import us.ihmc.perception.tools.PerceptionLoggingTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.scs2.simulation.collision.Collidable;
+import us.ihmc.sensorProcessing.filters.DepthImageFilterParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
-import java.io.File;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -61,6 +59,7 @@ public class RapidHeightMapManager
    private final ImageMessage croppedHeightMapImageMessage = new ImageMessage();
    private final BytePointer compressedCroppedHeightMapPointer = new BytePointer();
    private final GpuMat deviceCroppedHeightMap;
+   private final ROS2Publisher<ImageMessage> filteredDepthPublisher;
 
    public RapidHeightMapManager(ROS2Node ros2Node,
                                 RobotCollisionModel robotCollisionModel,
@@ -69,7 +68,8 @@ public class RapidHeightMapManager
                                 ReferenceFrame leftFootSoleFrame,
                                 ReferenceFrame rightFootSoleFrame,
                                 ControllerFootstepQueueMonitor controllerFootstepQueueMonitor,
-                                HeightMapParameters heightMapParameters)
+                                HeightMapParameters heightMapParameters,
+                                DepthImageFilterParameters depthImageFilterParameters)
    {
       this.heightMapParameters = heightMapParameters;
 
@@ -79,7 +79,7 @@ public class RapidHeightMapManager
       List<Collidable> robotCollidables = robotCollisionModel.getRobotCollidables(robotModel.getRootBody());
       bodyCollisionFilter = new CUDABodyCollisionFilter(robotCollidables);
       rapidHeightMapDriftOffset = new RapidHeightMapDriftOffset(controllerFootstepQueueMonitor);
-      flyingPointsFilter = new DepthImageFlyingPointsFilter();
+      flyingPointsFilter = new DepthImageFlyingPointsFilter(depthImageFilterParameters);
 
       int croppedCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getCroppedWidthInMeters(), heightMapParameters.getCellSizeInMeters());
       int cellsPerAxisCropped = 2 * croppedCenterIndex + 1;
@@ -88,6 +88,8 @@ public class RapidHeightMapManager
 
       // We use a notification to only call resetting the height map in one place
       heightMapPublisher = ros2Node.createPublisher(PerceptionAPI.HEIGHT_MAP_CROPPED);
+      filteredDepthPublisher = ros2Node.createPublisher(PerceptionAPI.D455_DEPTH_FILTERED_IMAGE);
+
       ros2Node.createSubscription2(PerceptionAPI.RESET_HEIGHT_MAP, message -> resetHeightMapRequested.set());
       ros2Node.createSubscription2(PerceptionAPI.LOWER_HEIGHT_MAP_BACKDROP, message -> lowerHeightMapBackdropRequested.set());
 
@@ -111,7 +113,7 @@ public class RapidHeightMapManager
       Instant acquisitionTime = depthImageCopy.getAcquisitionTime();
       CameraIntrinsics depthIntrinsicsCopy = depthImageCopy.getIntrinsicsCopy();
 
-      updateInternal(latestDepthImage, deviceCroppedHeightMap, depthIntrinsicsCopy, cameraFrame, cameraZUpFrame);
+      updateInternal(depthImageCopy, latestDepthImage, deviceCroppedHeightMap, depthIntrinsicsCopy, cameraFrame, cameraZUpFrame);
 
       // Publish the height map to anyone who is subscribing
       Mat hostCroppedHeightMap = new Mat();
@@ -131,10 +133,13 @@ public class RapidHeightMapManager
       depthImageCopy.release();
    }
 
+   CUDACompressionTools cudaCompressionTools = new CUDACompressionTools();
+
    /**
     * Update the Height Map with the latest depth image from the sensor
     */
-   private void updateInternal(Mat latestDepthImage,
+   private void updateInternal(RawImage rawImage,
+                               Mat latestDepthImage,
                                GpuMat deviceHeightMapToPack,
                                CameraIntrinsics depthIntrinsicsCopy,
                                ReferenceFrame cameraFrame,
@@ -176,6 +181,12 @@ public class RapidHeightMapManager
          flyingPointsFilter.applyFilter(deviceDepthImage, deviceOutputImage, depthIntrinsicsCopy);
          deviceOutputImage.copyTo(deviceDepthImage);
          deviceOutputImage.close();
+
+         BytePointer bytePointer = cudaCompressionTools.compressDepth(deviceDepthImage);
+
+         ImageMessage imageMessage = new ImageMessage();
+         PerceptionMessageTools.packImageMessage(rawImage, bytePointer, CompressionType.ZSTD_NVJPEG_HYBRID, imageMessage);
+         filteredDepthPublisher.publish(imageMessage);
       }
 
 
@@ -259,6 +270,7 @@ public class RapidHeightMapManager
 
    public void destroy()
    {
+      cudaCompressionTools.destroy();
       rapidHeightMapExtractor.destroy();
       flyingPointsFilter.destroy();
       deviceCroppedHeightMap.close();

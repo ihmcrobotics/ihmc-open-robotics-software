@@ -51,7 +51,8 @@ public class RapidHeightMapAutonomyUpdateThread extends RepeatingTaskThread
                                                    leftFootFrame,
                                                    rightFootFrame,
                                                    controllerFootstepQueueMonitor,
-                                                   heightMapParameters);
+                                                   heightMapParameters,
+                                                   null);
    }
 
    @Override
