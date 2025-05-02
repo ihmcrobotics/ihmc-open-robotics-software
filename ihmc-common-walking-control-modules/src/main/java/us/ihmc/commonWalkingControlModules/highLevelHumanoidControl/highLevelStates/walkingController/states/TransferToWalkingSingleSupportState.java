@@ -95,7 +95,13 @@ public class TransferToWalkingSingleSupportState extends TransferState
       footsteps = Footstep.createFootsteps(numberOfFootstepsToConsider);
       footstepTimings = FootstepTiming.createTimings(numberOfFootstepsToConsider);
 
+      // Beomyeong: Changes swingSide to as global variable.
       swingSide = transferToSide.getOppositeSide();
+      // Beomyeong: Put this for updating walkingMessageHandler, if there's an update in the message.
+      // If I wasn't wrong, I think this is enough for this transitionState.
+      // In the action, it already has the balanceManager update things with the footstep.
+      // So, if the walkingMessageHandler is updated and footstep (desired footstep) also can be updated,
+      // I think the balanceManager could update its ICP, CMP with the updated footstep positions.
       walkingMessageHandler.getUsingQFP().addListener(change -> updateFootstepContinuousThroughoutTransfer.set(walkingMessageHandler.getUsingQFP().getBooleanValue()));
       updateFootstepContinuousThroughoutTransfer.addListener(value ->
                                                              {
@@ -153,6 +159,8 @@ public class TransferToWalkingSingleSupportState extends TransferState
    @Override
    public void doAction(double timeInState)
    {
+      // Beomyeong: This is triggered, so that means, if walkingMessageHandler is updated when new VR stepping is delivered.
+      // We don't need to add something to calculate & update the ICP , CMP
       if (resubmitStepsInTransferEveryTick.getBooleanValue()
             && balanceManager.getNumberOfStepsBeingConsidered() < walkingMessageHandler.getCurrentNumberOfFootsteps())
       {
