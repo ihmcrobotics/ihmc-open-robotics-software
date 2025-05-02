@@ -35,8 +35,7 @@ public class RapidHeightMapExtractorCUDA
    private final GpuMat globalHeightMapImage;
    private final GpuMat terrainCostImage;
    private final GpuMat contactMapImage;
-   private final GpuMat sensorCroppedHeightMapImage;
-   private final GpuMat terrainHeightMapImage;
+   private final GpuMat croppedHeightMapImage;
    private final GpuMat emptyGlobalHeightMapImage;
    private final CUDAProgram heightMapCUDAProgram;
 
@@ -65,11 +64,9 @@ public class RapidHeightMapExtractorCUDA
    private float gridOffsetX;
    private int centerIndex;
    private int cellsPerAxisLocal;
-   private int cellsPerAxisTerrain;
    private int globalCenterIndex;
    private int croppedCenterIndex;
    private int cellsPerAxisCropped;
-   private int terrainCenterIndex;
    private int globalCellsPerAxis;
    private dim3 blockSize;
    private dim3 updateKernelGridDim;
@@ -117,8 +114,7 @@ public class RapidHeightMapExtractorCUDA
          globalHeightMapImage = new GpuMat(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_16UC1);
          terrainCostImage = new GpuMat(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_8UC1);
          contactMapImage = new GpuMat(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_8UC1);
-         sensorCroppedHeightMapImage = new GpuMat(cellsPerAxisCropped, cellsPerAxisCropped, opencv_core.CV_16UC1);
-         terrainHeightMapImage = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_16UC1);
+         croppedHeightMapImage = new GpuMat(cellsPerAxisCropped, cellsPerAxisCropped, opencv_core.CV_16UC1);
 
          emptyGlobalHeightMapImage = new GpuMat(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_16UC1);
 
@@ -148,9 +144,6 @@ public class RapidHeightMapExtractorCUDA
 
       globalCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getInternalGlobalWidthInMeters(), heightMapParameters.getCellSizeInMeters());
       globalCellsPerAxis = 2 * globalCenterIndex + 1;
-
-      terrainCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getTerrainWidthInMeters(), heightMapParameters.getCellSizeInMeters());
-      cellsPerAxisTerrain = 2 * terrainCenterIndex + 1;
 
       croppedCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getCroppedWidthInMeters(), heightMapParameters.getCellSizeInMeters());
       cellsPerAxisCropped = 2 * croppedCenterIndex + 1;
@@ -269,11 +262,9 @@ public class RapidHeightMapExtractorCUDA
 
       // Run the cropping kernel
       croppingKernel.withPointer(globalHeightMapImage.data()).withLong(globalHeightMapImage.step());
-      croppingKernel.withPointer(sensorCroppedHeightMapImage.data()).withLong(sensorCroppedHeightMapImage.step());
-      croppingKernel.withPointer(terrainHeightMapImage.data()).withLong(terrainHeightMapImage.step());
+      croppingKernel.withPointer(croppedHeightMapImage.data()).withLong(croppedHeightMapImage.step());
       croppingKernel.withPointer(parametersDevicePointer);
       croppingKernel.withInt(cellsPerAxisCropped);
-      croppingKernel.withInt(terrainHeightMapImage.rows());
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
 
@@ -377,7 +368,6 @@ public class RapidHeightMapExtractorCUDA
                           (float) parameters.getSearchWindowHeight(),
                           (float) parameters.getSearchWindowWidth(),
                           (float) croppedCenterIndex,
-                          (float) terrainCenterIndex,
                           (float) parameters.getMinClampHeight(),
                           (float) parameters.getMaxClampHeight(),
                           (float) parameters.getHeightOffset(),
@@ -418,8 +408,7 @@ public class RapidHeightMapExtractorCUDA
       globalHeightMapImage.close();
       terrainCostImage.close();
       contactMapImage.close();
-      sensorCroppedHeightMapImage.close();
-      terrainHeightMapImage.close();
+      croppedHeightMapImage.close();
 
       filteredRapidHeightMapExtractor.destroy();
       verticalSurfacesExtractor.destroy();
@@ -449,13 +438,8 @@ public class RapidHeightMapExtractorCUDA
       return sequenceNumber;
    }
 
-   public GpuMat getTerrainHeightMapImage()
+   public GpuMat getCroppedHeightMap()
    {
-      return terrainHeightMapImage;
-   }
-
-   public GpuMat getVisualizedHeightMap()
-   {
-      return sensorCroppedHeightMapImage;
+      return croppedHeightMapImage;
    }
 }

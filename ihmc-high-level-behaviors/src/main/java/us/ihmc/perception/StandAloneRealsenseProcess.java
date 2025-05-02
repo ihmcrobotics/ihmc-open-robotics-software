@@ -8,7 +8,6 @@ import us.ihmc.communication.ros2.ROS2DemandGraphNode;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2TunedRigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
-import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
@@ -94,11 +93,6 @@ public class StandAloneRealsenseProcess
    public HeightMapData getLatestHeightMapData()
    {
       return rapidHeightMapThread.getLatestHeightMapData();
-   }
-
-   public TerrainMapData getLatestTerrainMapData()
-   {
-      return rapidHeightMapThread.getLatestTerrainMapData();
    }
 
    public void destroy()

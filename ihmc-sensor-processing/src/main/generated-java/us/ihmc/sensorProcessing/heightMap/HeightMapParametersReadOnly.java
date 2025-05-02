@@ -100,11 +100,6 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
       return get(localWidthInMeters);
    }
 
-   default double getTerrainWidthInMeters()
-   {
-      return get(terrainWidthInMeters);
-   }
-
    default double getCroppedWidthInMeters()
    {
       return get(croppedWidthInMeters);

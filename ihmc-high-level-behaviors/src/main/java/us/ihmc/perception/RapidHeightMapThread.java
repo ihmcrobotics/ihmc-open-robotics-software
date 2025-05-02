@@ -94,14 +94,6 @@ public class RapidHeightMapThread
       }
    }
 
-   public TerrainMapData getLatestTerrainMapData()
-   {
-      synchronized (heightMapLock)
-      {
-         return heightMapManager.getTerrainMapData();
-      }
-   }
-
    public void destroy()
    {
       scheduler.shutdown();

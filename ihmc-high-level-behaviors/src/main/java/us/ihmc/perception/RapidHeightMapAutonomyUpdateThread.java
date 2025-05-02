@@ -87,14 +87,6 @@ public class RapidHeightMapAutonomyUpdateThread extends RepeatingTaskThread
       }
    }
 
-   public TerrainMapData getLatestTerrainMapData()
-   {
-      synchronized (heightMapLock)
-      {
-         return heightMapManager.getTerrainMapData();
-      }
-   }
-
    @Override
    public void kill()
    {
