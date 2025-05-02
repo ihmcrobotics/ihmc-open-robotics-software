@@ -1,9 +1,9 @@
-package us.ihmc.humanoidBehaviors.communication;
+package us.ihmc.communication;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import us.ihmc.commons.PrintTools;
+import us.ihmc.log.LogTools;
 
 public class ConcurrentListeningQueue<T>
 {
@@ -86,12 +86,12 @@ public class ConcurrentListeningQueue<T>
 
    private void printOverflowWarning()
    {
-      PrintTools.warn("Filling " + getClass().getSimpleName() + " without emptying it. Stack trace at creation:");
+      LogTools.warn("Filling " + getClass().getSimpleName() + " without emptying it. Stack trace at creation:");
 
       for (int i = 1; i < elementsOnCreation.length; i++)
       {
          StackTraceElement s = elementsOnCreation[i];
-         PrintTools.warn("\tat " + s.getClassName() + "." + s.getMethodName() + "(" + s.getFileName() + ":" + s.getLineNumber() + ")");
+         LogTools.warn("\tat " + s.getClassName() + "." + s.getMethodName() + "(" + s.getFileName() + ":" + s.getLineNumber() + ")");
       }
    }
 

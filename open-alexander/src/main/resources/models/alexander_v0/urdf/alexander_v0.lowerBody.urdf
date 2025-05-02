@@ -141,7 +141,7 @@
             <geometry>
                 <mesh filename="package://alexander_v0/meshes/legs/pelvis.obj"/>
             </geometry>
-            <origin rpy="1.5708 0.0 0.0" xyz="0.0 0.0 0.0"/>
+            <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
         </visual>
     </link>
     <!-- PELVIS STIM IMU --> <!-- TODO (CD): This is a placeholder taken from Nadia to give Alexander a non-empty sensor information -->
@@ -193,7 +193,7 @@
             <geometry>
                 <mesh filename="package://alexander_v0/meshes/legs/left_hip_roll.obj"/>
             </geometry>
-            <origin rpy="1.5708 0.0 0.0" xyz="0.0 0.0 0.0"/>
+            <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
         </visual>
     </link>
     <link name="LEFT_HIP_Z_LINK">
@@ -206,7 +206,7 @@
             <geometry>
                 <mesh filename="package://alexander_v0/meshes/legs/left_hip_yaw.obj"/>
             </geometry>
-            <origin rpy="1.5708 0.0 0.0" xyz="0 0 0"/>
+            <origin rpy="0.0 0.0 0.0" xyz="0 0 0"/>
         </visual>
     </link>
     <link name="LEFT_THIGH">
@@ -219,7 +219,7 @@
             <geometry>
                 <mesh filename="package://alexander_v0/meshes/legs/left_thigh.obj"/>
             </geometry>
-            <origin rpy="1.5708 0.0 0.0" xyz="0 0 0"/>
+            <origin rpy="0.0 0.0 0.0" xyz="0 0 0"/>
         </visual>
     </link>
     <link name="LEFT_SHIN">
@@ -232,7 +232,7 @@
             <geometry>
                 <mesh filename="package://alexander_v0/meshes/legs/left_shin.obj"/>
             </geometry>
-            <origin rpy="1.5708 0.0 0.0" xyz="0 0 0"/>
+            <origin rpy="0.0 0.0 0.0" xyz="0 0 0"/>
         </visual>
     </link>
     <link name="LEFT_ANKLE_Y_LINK">
@@ -258,7 +258,7 @@
             <geometry>
                 <mesh filename="package://alexander_v0/meshes/legs/left_foot.obj"/>
             </geometry>
-            <origin rpy="1.5708 0.0 0.0" xyz="0 0 0"/>
+            <origin rpy="0.0 0.0 0.0" xyz="0 0 0"/>
         </visual>
     </link>
 
@@ -274,7 +274,7 @@
             <geometry>
                 <mesh filename="package://alexander_v0/meshes/legs/right_hip_roll.obj"/>
             </geometry>
-            <origin rpy="1.5708 0.0 0.0" xyz="0.0 0.0 0.0"/>
+            <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
         </visual>
     </link>
     <link name="RIGHT_HIP_Z_LINK">
@@ -287,7 +287,7 @@
             <geometry>
                 <mesh filename="package://alexander_v0/meshes/legs/right_hip_yaw.obj"/>
             </geometry>
-            <origin rpy="1.5708 0.0 0.0" xyz="0 0 0"/>
+            <origin rpy="0.0 0.0 0.0" xyz="0 0 0"/>
         </visual>
     </link>
     <link name="RIGHT_THIGH">
@@ -300,7 +300,7 @@
             <geometry>
                 <mesh filename="package://alexander_v0/meshes/legs/right_thigh.obj"/>
             </geometry>
-            <origin rpy="1.5708 0.0 0.0" xyz="0 0 0"/>
+            <origin rpy="0.0 0.0 0.0" xyz="0 0 0"/>
         </visual>
     </link>
     <link name="RIGHT_SHIN">
@@ -313,7 +313,7 @@
             <geometry>
                 <mesh filename="package://alexander_v0/meshes/legs/right_shin.obj"/>
             </geometry>
-            <origin rpy="1.5708 0.0 0.0" xyz="0 0 0"/>
+            <origin rpy="0.0 0.0 0.0" xyz="0 0 0"/>
         </visual>
     </link>
     <link name="RIGHT_ANKLE_Y_LINK">
@@ -326,7 +326,7 @@
             <geometry>
                 <mesh filename="package://alexander_v0/meshes/legs/right_ankle.obj"/>
             </geometry>
-            <origin rpy="1.5708 0.0 0.0" xyz="0 0 0"/>
+            <origin rpy="0.0 0.0 0.0" xyz="0 0 0"/>
         </visual>
     </link>
     <link name="RIGHT_FOOT">
@@ -339,7 +339,7 @@
             <geometry>
                 <mesh filename="package://alexander_v0/meshes/legs/right_foot.obj"/>
             </geometry>
-            <origin rpy="1.5708 0.0 0.0" xyz="0 0 0"/>
+            <origin rpy="0.0 0.0 0.0" xyz="0 0 0"/>
         </visual>
     </link>
 
