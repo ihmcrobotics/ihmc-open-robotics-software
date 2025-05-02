@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
-import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
+import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.stepChecking.FootstepCheckerInterface;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
@@ -37,7 +37,7 @@ public class IdealStepCalculatorTest
       Pose3D goalPose = new Pose3D(0.5 * pathLength, 0.0, 0.0, 0.0, 0.0, 0.0);
       bodyPathPlanHolder.setPoseWaypoints(Arrays.asList(startPose, goalPose));
 
-      FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
+      EnvironmentHandler environmentHandler = new EnvironmentHandler();
       IdealStepCalculator idealStepCalculator = new IdealStepCalculator(footstepPlannerParameters,
                                                                         checker,
                                                                         bodyPathPlanHolder,
