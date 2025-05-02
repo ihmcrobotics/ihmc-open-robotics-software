@@ -2,10 +2,13 @@ package us.ihmc.perception.gpuHeightMap;
 
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
+import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.perception.tools.PerceptionMessageTools;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 
 public class SnappingTerrainExtractorTest
@@ -21,13 +24,27 @@ public class SnappingTerrainExtractorTest
       HeightMapParameters heightMapParameters = new HeightMapParameters();
       SnappingTerrainExtractor snappingTerrainExtractor = new SnappingTerrainExtractor(heightMapParameters);
 
-      GpuMat fakeHeightMap = new GpuMat(500, 500, opencv_core.CV_16UC1);
+      GpuMat fakeHeightMap = new GpuMat(401, 401, opencv_core.CV_16UC1);
       fakeHeightMap.setTo(new Scalar(100));
+      Mat heightMap = new Mat(401, 401, opencv_core.CV_8UC1);
+      fakeHeightMap.download(heightMap);
 
       Point3D heightMapCenter = new Point3D();
       heightMapCenter.set(new Point3D(0.0, 0.0, 0.0));
 
-      snappingTerrainExtractor.update(fakeHeightMap, heightMapCenter);
+      HeightMapData heightMapData = new HeightMapData((float) heightMapParameters.getCellSizeInMeters(),
+                                                      (float) heightMapParameters.getCroppedWidthInMeters(),
+                                                      0,
+                                                      0);
+
+      PerceptionMessageTools.convertToHeightMapData(heightMap,
+                                                    heightMapData,
+                                                    new Point3D(0.0, 0.0, 0.0),
+                                                    (float) 4.0,
+                                                    0.02F,
+                                                    heightMapParameters);
+
+      snappingTerrainExtractor.update(heightMapData);
       snappingTerrainExtractor.close();
    }
 }
