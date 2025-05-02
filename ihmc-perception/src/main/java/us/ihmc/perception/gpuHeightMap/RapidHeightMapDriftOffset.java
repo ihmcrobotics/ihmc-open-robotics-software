@@ -35,7 +35,7 @@ public class RapidHeightMapDriftOffset
    {
       incrementalOffset.setToNaN();
 
-      if (controllerFootstepQueueMonitor.pollIsWalking())
+      if (controllerFootstepQueueMonitor.pollIsWalking() || controllerFootstepQueueMonitor.getReceivedNewFootstepPlanWithOverride())
       {
          // We reset this because the controller resets the drift on its end. So we need to reset ours as well.
          // The existing drift is already captured in the height map by the previous offsets

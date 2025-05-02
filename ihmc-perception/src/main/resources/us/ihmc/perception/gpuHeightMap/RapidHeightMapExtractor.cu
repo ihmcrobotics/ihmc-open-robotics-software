@@ -40,6 +40,7 @@ extern "C"
 #define VERTICAL_SEARCH_SIZE 35
 #define VERTICAL_SEARCH_RESOLUTION 36
 #define FAST_SEARCH_SIZE 37
+#define GROUND_HEIGHT 38
 
 #define VERTICAL_FOV 1.5707963267948966f
 #define HORIZONTAL_FOV 6.2831853f
@@ -215,7 +216,7 @@ extern "C" __global__ void heightMapUpdateKernel(unsigned short *in, size_t pitc
     float currentAverageHeight = 0.0f;
     float averageHeightZ = 0.0f;
     int count = 0;
-    float3 cellCenterInZUp = make_float3(0.0f, 0.0f, 0.5f);
+    float3 cellCenterInZUp = make_float3(0.0f, 0.0f, params[GROUND_HEIGHT] + 0.5f);
 
     // Compute grid cell center in Z-Up frame
     float2 xyCoords = indices_to_coordinate(make_int2(xIndex, yIndex),

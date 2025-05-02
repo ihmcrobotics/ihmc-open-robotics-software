@@ -7,13 +7,9 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
-
-import java.util.List;
 
 public class GarbageFreePlanarRegionPolygonSnapper
 {
@@ -29,16 +25,16 @@ public class GarbageFreePlanarRegionPolygonSnapper
     * @return RigidBodyTransform required to snap the polygon down onto the PlanarRegion
     */
    public boolean snapPolygonToPlanarRegion(ConvexPolygon2DReadOnly polygonToSnap,
-                                                   PlanarRegion planarRegionToSnapTo,
-                                                   Point3D highestVertexInWorld,
-                                                   RigidBodyTransform snapTransformToPack)
+                                            PlanarRegion planarRegionToSnapTo,
+                                            Point3DBasics highestVertexInWorldToPack,
+                                            RigidBodyTransform snapTransformToPack)
    {
       planarRegionTools.getPolygonIntersectionsWhenProjectedVertically(planarRegionToSnapTo, polygonToSnap, intersectionPoints);
 
       if (intersectionPoints.isEmpty())
          return false;
 
-      highestVertexInWorld.setToNaN();
+      highestVertexInWorldToPack.setToNaN();
 
       int numberOfIntersecingPoints = intersectionPoints.size();
       double highestZ = Double.NEGATIVE_INFINITY;
@@ -54,15 +50,15 @@ public class GarbageFreePlanarRegionPolygonSnapper
          {
             highestZ = vertexInWorld.getZ();
             noIntersection = false;
-            highestVertexInWorld.set(vertexInWorld);
+            highestVertexInWorldToPack.set(vertexInWorld);
          }
       }
 
       if (noIntersection)
          return false;
 
-      PolygonSnapperTools.constructTransformToMatchSurfaceNormalPreserveX(planarRegionToSnapTo.getNormal(), snapTransformToPack);
-      PlanarRegionPolygonSnapper.setTranslationSettingZAndPreservingXAndY(highestVertexInWorld, snapTransformToPack);
+      PolygonSnapperTools.constructRotationToMatchSurfaceNormal(planarRegionToSnapTo.getNormal(), snapTransformToPack.getRotation());
+      PolygonSnapperTools.setTranslationSettingZAndPreservingXAndY(highestVertexInWorldToPack, snapTransformToPack);
 
       return true;
    }

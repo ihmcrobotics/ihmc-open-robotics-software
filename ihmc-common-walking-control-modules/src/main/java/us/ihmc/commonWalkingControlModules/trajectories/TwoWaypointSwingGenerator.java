@@ -475,7 +475,13 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
             break;
          }
          case CUSTOM:
+         {
+            if (initialGroundZ >= finalGroundZ)
+            { // Stepping down
+               isSteppingDown.set(true);
+            }
             break;
+         }
          default:
             throw new RuntimeException("Trajectory type not implemented");
       }

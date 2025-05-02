@@ -14,6 +14,7 @@ import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
 import us.ihmc.footstepPlanning.polygonSnapping.PolygonSnapperTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
+import us.ihmc.perception.heightMap.TerrainMapTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -216,7 +217,7 @@ public class StancePoseCalculator
 
    private void snapToTerrainMap(TerrainMapData terrainMapData, FramePose3D poseToSnap)
    {
-      UnitVector3DReadOnly normal = terrainMapData.computeSurfaceNormalInWorld((float) poseToSnap.getX(), (float) poseToSnap.getY(), 1);
+      UnitVector3DReadOnly normal = TerrainMapTools.computeSurfaceNormalInWorld(terrainMapData, (float) poseToSnap.getX(), (float) poseToSnap.getY(), 1);
       RigidBodyTransform snapTransform = PolygonSnapperTools.createTransformToMatchSurfaceNormalPreserveX(normal);
       poseToSnap.applyTransform(snapTransform);
    }

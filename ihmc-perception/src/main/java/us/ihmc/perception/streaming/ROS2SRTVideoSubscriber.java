@@ -14,6 +14,7 @@ import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.ros2.ROS2Topic;
 
+import java.time.DateTimeException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +27,7 @@ import static us.ihmc.perception.streaming.StreamingTools.CONNECTION_TIMEOUT;
 
 public class ROS2SRTVideoSubscriber
 {
-   private static final double UPDATE_TIMEOUT = 0.5; // half a second
+   private static final double UPDATE_TIMEOUT = 1.0; // a second
 
    private final ROS2StreamStatusMonitor streamStatusMonitor;
    private final SRTVideoReceiver videoReceiver;
@@ -150,7 +151,20 @@ public class ROS2SRTVideoSubscriber
                }
 
                FramePose3D frameSensorPose = new FramePose3D(frameDataMessage.getSensorPose());
-               Instant frameAcquisitionTime = MessageTools.toInstant(frameDataMessage.getAcquisitionTime());
+
+               Instant frameAcquisitionTime;
+               try
+               {
+                  frameAcquisitionTime = MessageTools.toInstant(frameDataMessage.getAcquisitionTime());
+               }
+               catch (DateTimeException exception)
+               {
+                  LogTools.error("Invalid frameAcquisitionTime received: {}S{}",
+                                 frameDataMessage.getAcquisitionTime().seconds_since_epoch_,
+                                 frameDataMessage.getAcquisitionTime().additional_nanos_);
+                  continue;
+               }
+
                lastFrameDelay = TimeTools.calculateDelay(frameAcquisitionTime);
 
                // Create a RawImage

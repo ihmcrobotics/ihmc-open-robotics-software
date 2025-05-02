@@ -3,12 +3,14 @@ package us.ihmc.rdx.ui.interactable;
 import controller_msgs.msg.dds.SakeHandDesiredCommandMessage;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
+import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.sakeGripper.ROS2SakeHandStatus;
 import us.ihmc.avatar.sakeGripper.SakeHandParameters;
 import us.ihmc.avatar.sakeGripper.SakeHandPreset;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.SakeHandAPI;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiFlashingText;
@@ -42,6 +44,9 @@ public class RDXSakeHandWidgets
    private final Notification userChangedFingertipGripForce = new Notification();
    private final Notification calibrateRequested = new Notification();
    private final Notification resetErrorsRequested = new Notification();
+   private final ImBoolean imAutoCoolDownEnabled = new ImBoolean(true);
+   private final TypedNotification<Boolean> enableCooldownRequest = new TypedNotification<>();
+   private final Notification overrideCooldownRequested = new Notification();
    private final SakeHandDesiredCommandMessage sakeHandDesiredCommandMessage = new SakeHandDesiredCommandMessage();
    private final ImGuiLabelledWidgetAligner widgetAligner = new ImGuiLabelledWidgetAligner();
    private final ImGuiFlashingText calibrateStatusText = new ImGuiFlashingText(ImGuiTools.RED);
@@ -79,6 +84,8 @@ public class RDXSakeHandWidgets
          boolean sendForce = userChangedFingertipGripForce.poll() && !Double.isNaN(fingertipGripForceSlider.getDoubleValue());
          boolean sendCalibrate = calibrateRequested.poll();
          boolean sendResetErrors = resetErrorsRequested.poll();
+         boolean enableCooldown = enableCooldownRequest.poll();
+         boolean overrideCooldown = overrideCooldownRequested.poll();
 
          sakeHandDesiredCommandMessage.setRobotSide(handSide.toByte());
          SakeHandParameters.resetDesiredCommandMessage(sakeHandDesiredCommandMessage);
@@ -111,7 +118,23 @@ public class RDXSakeHandWidgets
             sakeHandDesiredCommandMessage.setRequestResetErrors(true);
          }
 
-         if (sendAngle || sendForce || sendCalibrate || sendResetErrors)
+         if (enableCooldown)
+         {
+            boolean enabled = enableCooldownRequest.read();
+            LogTools.info("Setting enable automatic cooldown: {}", enabled);
+            if (enabled)
+               sakeHandDesiredCommandMessage.setEnableAutomaticCooldown(true);
+            else
+               sakeHandDesiredCommandMessage.setDisableAutomaticCooldown(true);
+         }
+
+         if (overrideCooldown)
+         {
+            LogTools.info("Overriding cooldown");
+            sakeHandDesiredCommandMessage.setOverrideCooldown(true);
+         }
+
+         if (sendAngle || sendForce || sendCalibrate || sendResetErrors || enableCooldown || overrideCooldown)
          {
             communicationHelper.publish(robotName -> SakeHandAPI.getHandSakeCommandTopic(robotName, handSide), sakeHandDesiredCommandMessage);
          }
@@ -151,6 +174,17 @@ public class RDXSakeHandWidgets
          resetErrorsRequested.set();
       }
 
+      imAutoCoolDownEnabled.set(sakeHandStatus.getAutomaticCooldownEnabled());
+      if (ImGui.checkbox(labels.get("Automatic cooldown enabled"), imAutoCoolDownEnabled))
+      {
+         enableCooldownRequest.set(imAutoCoolDownEnabled.get());
+      }
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Override cooldown")))
+      {
+         overrideCooldownRequested.set();
+      }
+
       calibrateStatusText.renderText("Is Calibrated: %b ".formatted(sakeHandStatus.getIsCalibrated()), !sakeHandStatus.getIsCalibrated());
       ImGui.sameLine();
       needResetStatusText.renderText("Needs Reset: %b ".formatted(sakeHandStatus.getNeedsReset()), sakeHandStatus.getNeedsReset());
@@ -160,6 +194,18 @@ public class RDXSakeHandWidgets
       {
          ImGui.sameLine();
          sakeErrorStatusText.renderText("Error: %s".formatted(errorString), true);
+      }
+
+      if (sakeHandStatus.getIsCalibrating())
+      {
+         ImGui.sameLine();
+         ImGui.text("Calibrating...");
+      }
+
+      if (sakeHandStatus.getIsCoolingDown())
+      {
+         ImGui.sameLine();
+         ImGui.text("Cooling down...");
       }
 
       ImGui.beginDisabled(sakeHandStatus.getNeedsReset() || !sakeHandStatus.getIsCalibrated());
@@ -220,15 +266,15 @@ public class RDXSakeHandWidgets
 
       ImGui.endDisabled();
 
-      if (sakeHandStatus.getCurrentTemperature() >= SakeHandParameters.ERROR_TEMPERATURE_CELCIUS)
+      if (sakeHandStatus.getCurrentTemperature() >= SakeHandParameters.ERROR_TEMPERATURE_CELSIUS)
          ImGui.pushStyleColor(ImGuiCol.PlotHistogram, ImGuiTools.RED);
-      else if (sakeHandStatus.getCurrentTemperature() >= SakeHandParameters.WARNING_TEMPERATURE_CELCIUS)
+      else if (sakeHandStatus.getCurrentTemperature() >= SakeHandParameters.WARNING_TEMPERATURE_CELSIUS)
          ImGui.pushStyleColor(ImGuiCol.PlotHistogram, ImGuiTools.YELLOW);
       else
          ImGui.pushStyleColor(ImGuiCol.PlotHistogram, ImGuiTools.LIGHT_GRAY);
 
       widgetAligner.text("Temperature");
-      ImGui.progressBar((float) (sakeHandStatus.getCurrentTemperature() / SakeHandParameters.DYNAMIXEL_FAILURE_TEMPERATURE_CELCIUS),
+      ImGui.progressBar((float) (sakeHandStatus.getCurrentTemperature() / SakeHandParameters.DYNAMIXEL_FAILURE_TEMPERATURE_CELSIUS),
                         ImGui.getColumnWidth(),
                         ImGui.getFrameHeight(),
                         "%.1f %sC".formatted(sakeHandStatus.getCurrentTemperature(), EuclidCoreMissingTools.DEGREE_SYMBOL));

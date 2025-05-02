@@ -109,11 +109,6 @@ public class StandAloneRealsenseProcess
       loopOnDemand(heightMapUpdateThread, heightMapDemandNode);
    }
 
-   public RapidHeightMapManager getHeightMapManager()
-   {
-      return heightMapUpdateThread.getHeightMapManager();
-   }
-
    public HeightMapData getLatestHeightMapData()
    {
       return heightMapUpdateThread.getLatestHeightMapData();
@@ -126,6 +121,7 @@ public class StandAloneRealsenseProcess
 
    public void destroy()
    {
+      heightMapUpdateThread.blockingKill();
       realsenseDemandNode.destroy();
       realsensePublishDemandNode.destroy();
       d455Sensor.close();

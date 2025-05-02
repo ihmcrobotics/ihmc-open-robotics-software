@@ -40,6 +40,11 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
       return get(searchWindowWidth);
    }
 
+   default int getSearchSkipSize()
+   {
+      return get(searchSkipSize);
+   }
+
    default double getMinHeightRegistration()
    {
       return get(minHeightRegistration);
@@ -85,19 +90,14 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
       return get(maxClampHeight);
    }
 
+   default double getCellSizeInMeters()
+   {
+      return get(cellSizeInMeters);
+   }
+
    default double getLocalWidthInMeters()
    {
       return get(localWidthInMeters);
-   }
-
-   default double getLocalCellSizeInMeters()
-   {
-      return get(localCellSizeInMeters);
-   }
-
-   default double getGlobalWidthInMeters()
-   {
-      return get(globalWidthInMeters);
    }
 
    default double getTerrainWidthInMeters()
@@ -105,14 +105,9 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
       return get(terrainWidthInMeters);
    }
 
-   default double getGlobalCellSizeInMeters()
+   default double getCroppedWidthInMeters()
    {
-      return get(globalCellSizeInMeters);
-   }
-
-   default double getRobotCollisionCylinderRadius()
-   {
-      return get(robotCollisionCylinderRadius);
+      return get(croppedWidthInMeters);
    }
 
    default double getInternalGlobalWidthInMeters()
@@ -120,24 +115,14 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
       return get(internalGlobalWidthInMeters);
    }
 
-   default double getInternalGlobalCellSizeInMeters()
+   default double getRobotCollisionCylinderRadius()
    {
-      return get(internalGlobalCellSizeInMeters);
+      return get(robotCollisionCylinderRadius);
    }
 
    default double getHeightScaleFactor()
    {
       return get(heightScaleFactor);
-   }
-
-   default int getCropWindowSize()
-   {
-      return get(cropWindowSize);
-   }
-
-   default int getTerrainObjectSize()
-   {
-      return get(terrainObjectSize);
    }
 
    default int getSteppingContactThreshold()
@@ -153,11 +138,6 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
    default double getSteppingCosineThreshold()
    {
       return get(steppingCosineThreshold);
-   }
-
-   default int getSearchSkipSize()
-   {
-      return get(searchSkipSize);
    }
 
    default int getFastSearchSize()

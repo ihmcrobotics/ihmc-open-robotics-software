@@ -6,7 +6,6 @@ import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.opencv.opencv_core.Scalar;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.perception.cuda.CUDAKernel;
@@ -16,15 +15,16 @@ import us.ihmc.perception.cuda.CUDATools;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
+import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
 import java.net.URL;
 
 import static org.bytedeco.cuda.global.cudart.cudaFree;
 import static org.bytedeco.cuda.global.cudart.cudaStreamSynchronize;
-import static us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractorCUDA.BLOCK_SIZE_XY;
 
 public class SnappingHeightMapExtractor
 {
+   private static final int BLOCK_SIZE_XY = 32;
    private static final boolean PRINT_TIMING_FOR_KERNELS = false;
 
    private final SteppableRegionCalculatorParameters steppableRegionParameters = new SteppableRegionCalculatorParameters();
@@ -48,11 +48,11 @@ public class SnappingHeightMapExtractor
    private final GpuMat snapNormalYImage;
    private final GpuMat snapNormalZImage;
    private final GpuMat snappedAreaFractionImage;
+   private int cellsPerAxisTerrain;
 
-   public SnappingHeightMapExtractor(HeightMapParameters heightMapParameters, TerrainMapData terrainMapData)
+   public SnappingHeightMapExtractor(HeightMapParameters heightMapParameters)
    {
       this.heightMapParameters = heightMapParameters;
-      this.terrainMapData = terrainMapData;
 
       try
       {
@@ -65,10 +65,9 @@ public class SnappingHeightMapExtractor
 
          snappingHeightMapProgram = new CUDAProgram(kernelPath, heightMapUtilsHeaderPath, mathUtilsHeaderPath);
          snappingKernel = snappingHeightMapProgram.loadKernel("computeSnappedValuesKernel");
-
          snappingKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
 
-         snappingParametersHostPointer = new FloatPointer(17);
+         snappingParametersHostPointer = new FloatPointer(16);
          snappingParametersDevicePointer = new FloatPointer();
       }
       catch (Exception e)
@@ -76,26 +75,36 @@ public class SnappingHeightMapExtractor
          throw new RuntimeException(e);
       }
 
+      recomputeDerivedParameters();
+
+      terrainMapData = new TerrainMapData(cellsPerAxisTerrain,
+                                          cellsPerAxisTerrain,
+                                          heightMapParameters.getHeightScaleFactor(),
+                                          heightMapParameters.getHeightOffset());
+
       // Initialize matrices and images
-      steppabilityImage = new GpuMat(heightMapParameters.getTerrainObjectSize(), heightMapParameters.getTerrainObjectSize(), opencv_core.CV_8UC1);
-      snapHeightImage = new GpuMat(heightMapParameters.getTerrainObjectSize(), heightMapParameters.getTerrainObjectSize(), opencv_core.CV_16UC1);
-      snapNormalXImage = new GpuMat(heightMapParameters.getTerrainObjectSize(), heightMapParameters.getTerrainObjectSize(), opencv_core.CV_8UC1);
-      snapNormalYImage = new GpuMat(heightMapParameters.getTerrainObjectSize(), heightMapParameters.getTerrainObjectSize(), opencv_core.CV_8UC1);
-      snapNormalZImage = new GpuMat(heightMapParameters.getTerrainObjectSize(), heightMapParameters.getTerrainObjectSize(), opencv_core.CV_8UC1);
-      snappedAreaFractionImage = new GpuMat(heightMapParameters.getTerrainObjectSize(), heightMapParameters.getTerrainObjectSize(), opencv_core.CV_8UC1);
+      steppabilityImage = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);
+      snapHeightImage = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_16UC1);
+      snapNormalXImage = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);
+      snapNormalYImage = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);
+      snapNormalZImage = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);
+      snappedAreaFractionImage = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);
    }
 
-   public void reset(int resetOffset)
+   private void recomputeDerivedParameters()
    {
-      snapHeightImage.setTo(new Scalar(resetOffset));
+      int terrainCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getTerrainWidthInMeters(), heightMapParameters.getCellSizeInMeters());
+      cellsPerAxisTerrain = 2 * terrainCenterIndex + 1;
    }
 
-   public void update(GpuMat globalHeightMapImage, Point3D sensorOrigin, int globalCenterIndex, int cropCenterIndex)
+   public void update(GpuMat terrainHeightMap, Point3D sensorOrigin)
    {
       int error;
 
+      recomputeDerivedParameters();
+
       // Populate parameters buffer for the snapping kernel
-      float[] snappingParametersArray = populateSnappingParametersArray(sensorOrigin, globalCenterIndex, cropCenterIndex);
+      float[] snappingParametersArray = populateSnappingParametersArray(sensorOrigin);
       snappingParametersHostPointer.put(snappingParametersArray);
 
       // Handle memory allocation and copy values to the GPU
@@ -103,17 +112,17 @@ public class SnappingHeightMapExtractor
       CUDATools.memcpyAsync(snappingParametersDevicePointer, snappingParametersHostPointer, snappingParametersArray.length, stream);
 
       // Pass all the parameters to the kernel so that its setup to run correctly
-      snappingKernel.withPointer(globalHeightMapImage.data()).withLong(globalHeightMapImage.step());
+      snappingKernel.withPointer(terrainHeightMap.data()).withLong(terrainHeightMap.step());
       snappingKernel.withPointer(steppabilityImage.data()).withLong(steppabilityImage.step());
       snappingKernel.withPointer(snapHeightImage.data()).withLong(snapHeightImage.step());
       snappingKernel.withPointer(snapNormalXImage.data()).withLong(snapNormalXImage.step());
       snappingKernel.withPointer(snapNormalYImage.data()).withLong(snapNormalYImage.step());
       snappingKernel.withPointer(snapNormalZImage.data()).withLong(snapNormalZImage.step());
       snappingKernel.withPointer(snappedAreaFractionImage.data()).withLong(snappedAreaFractionImage.step());
-      snappingKernel.withPointer(snappingParametersDevicePointer).withInt(heightMapParameters.getTerrainObjectSize());
+      snappingKernel.withPointer(snappingParametersDevicePointer).withInt(cellsPerAxisTerrain);
 
       // Compute the correct number of threads to run with the kernel
-      int snappedKernelGridSizeXY = (heightMapParameters.getTerrainObjectSize() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
+      int snappedKernelGridSizeXY = (cellsPerAxisTerrain + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
       snappingKernelGridDim = new dim3(snappedKernelGridSizeXY, snappedKernelGridSizeXY, 1);
       blockSize = new dim3(BLOCK_SIZE_XY, BLOCK_SIZE_XY, 1);
 
@@ -122,49 +131,53 @@ public class SnappingHeightMapExtractor
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
 
+      // Update the terrain map data with the new results
+      terrainMapData.setSensorOrigin(sensorOrigin.getX(), sensorOrigin.getY());
+
       // Download all the data from the GPU and set the terrain data object
       {
+         Mat cpuHeightMap = new Mat();
+         terrainHeightMap.download(cpuHeightMap);
+         terrainMapData.setHeightMap(cpuHeightMap);
+
          Mat cpuSteppabilityMap = new Mat();
          steppabilityImage.download(cpuSteppabilityMap);
-         terrainMapData.setSteppabilityImage(cpuSteppabilityMap);
+         terrainMapData.setSteppabilityMat(cpuSteppabilityMap);
 
          Mat cpuSnapHeightMap = new Mat();
          snapHeightImage.download(cpuSnapHeightMap);
-         terrainMapData.setSnapHeightImage(cpuSnapHeightMap);
+         terrainMapData.setSnapHeightMat(cpuSnapHeightMap);
 
          Mat cpuSnapNormalXMap = new Mat();
          snapNormalXImage.download(cpuSnapNormalXMap);
-         terrainMapData.setSnapNormalXImage(cpuSnapNormalXMap);
+         terrainMapData.setSnapNormalXMat(cpuSnapNormalXMap);
 
          Mat cpuSnapNormalYMap = new Mat();
          snapNormalYImage.download(cpuSnapNormalYMap);
-         terrainMapData.setSnapNormalYImage(cpuSnapNormalYMap);
+         terrainMapData.setSnapNormalYMat(cpuSnapNormalYMap);
 
          Mat cpuSnapNormalZMap = new Mat();
          snapNormalZImage.download(cpuSnapNormalZMap);
-         terrainMapData.setSnapNormalZImage(cpuSnapNormalZMap);
+         terrainMapData.setSnapNormalZMat(cpuSnapNormalZMap);
 
          Mat cpuSnappedAreaFractionMap = new Mat();
          snappedAreaFractionImage.download(cpuSnappedAreaFractionMap);
-         terrainMapData.setSnappedAreaFractionImage(cpuSnappedAreaFractionMap);
+         terrainMapData.setSnappedAreaFractionMat(cpuSnappedAreaFractionMap);
       }
    }
 
    /**
     * Populate the parameter's array for the snapping kernels.
     *
-    * @param gridCenter        is the location of the sensor origin, that will be the center of our map
-    * @param globalCenterIndex is the center index of the global map
-    * @param cropCenterIndex   is the center index of the cropped map
+    * @param gridCenter is the location of the sensor origin, that will be the center of our map
     * @return a float array with the parameters for the snapping kernels. The order matters as it needs to match the order things are defined by in the kernel
     */
-   public float[] populateSnappingParametersArray(Tuple3DReadOnly gridCenter, int globalCenterIndex, int cropCenterIndex)
+   public float[] populateSnappingParametersArray(Tuple3DReadOnly gridCenter)
    {
       return new float[] {(float) gridCenter.getX(),
                           (float) gridCenter.getY(),
-                          (float) heightMapParameters.getGlobalCellSizeInMeters(),
-                          globalCenterIndex,
-                          cropCenterIndex,
+                          (float) heightMapParameters.getCellSizeInMeters(),
+                          (float) heightMapParameters.getTerrainWidthInMeters(),
                           (float) heightMapParameters.getHeightScaleFactor(),
                           (float) heightMapParameters.getHeightOffset(),
                           (float) steppableRegionParameters.getFootLength(),
@@ -201,5 +214,10 @@ public class SnappingHeightMapExtractor
 
       // At the end we have to destroy the stream to release the memory
       CUDAStreamManager.releaseStream(stream);
+   }
+
+   public TerrainMapData getTerrainMapData()
+   {
+      return terrainMapData;
    }
 }
