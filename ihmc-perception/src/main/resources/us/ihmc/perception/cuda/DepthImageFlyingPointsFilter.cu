@@ -87,6 +87,8 @@ void computeNormalsAndFilterFlyingPoints(unsigned short* depthImage, size_t dept
     float3 viewRay = normalize(p);
     float dotViewNormal = fabsf(dot(normal, viewRay));
     bool badViewNormal = dotViewNormal < normalViewThreshold;
+//     badViewNormal = badViewNormal && !(p.z < 0.001f || px1.z < 0.001f || py1.z < 0.001f || pxm1.z < 0.001f || pym1.z < 0.001f);
+    badViewNormal = badViewNormal && !(p.z < 0.001f || px1.z < 0.001f || py1.z < 0.001f || pxm1.z < 0.001f || pym1.z < 0.001f);
 
     // --- New test: depth variance in 3x3 neighborhood ---
     float depthSum = 0.0f;
@@ -116,5 +118,12 @@ void computeNormalsAndFilterFlyingPoints(unsigned short* depthImage, size_t dept
 
     unsigned short* inputPtr = (unsigned short*)((char*)depthImage + y * depthImagePitch) + x;
     unsigned short* maskPtr = (unsigned short*)((char*)collisionMask + y * collisionMaskPitch) + x;
+
+//     if (p.z < 0.001f || px1.z < 0.001f || py1.z < 0.001f || pxm1.z < 0.001f || pym1.z < 0.001f)
+//     {
+//         *maskPtr = *inputPtr;
+//         return;
+//     }
+
     *maskPtr = (badViewNormal) ? 0 : *inputPtr;
 }
