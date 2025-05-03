@@ -26,10 +26,11 @@ public class DepthImageFlyingPointsFilter
    {
       this.depthImageFilterParameters = depthImageFilterParameters;
       stream = CUDAStreamManager.getStream();
+      URL mathUtilsHeaderPath = getClass().getResource("/us/ihmc/perception/cuda/MathUtils.cuh");
       URL kernelPath = getClass().getResource("/us/ihmc/perception/cuda/DepthImageFlyingPointsFilter.cu");
       try
       {
-         flyingPointFilterCUDAProgram = new CUDAProgram(kernelPath);
+         flyingPointFilterCUDAProgram = new CUDAProgram(kernelPath, mathUtilsHeaderPath);
          String filterKernelName = "computeNormalsAndFilterFlyingPoints";
          flyingPointFilterKernel = flyingPointFilterCUDAProgram.loadKernel(filterKernelName);
       }

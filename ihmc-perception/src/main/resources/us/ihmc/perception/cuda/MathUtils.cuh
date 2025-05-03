@@ -13,6 +13,15 @@ __device__ float dot2D(const float2 a, const float2 b)
     return a.x * b.x + a.y * b.y;
 }
 
+__device__ float3 cross(const float3 &a, const float3 &b)
+{
+    return make_float3(
+        a.y * b.z - a.z * b.y,
+        a.z * b.x - a.x * b.z,
+        a.x * b.y - a.y * b.x
+    );
+}
+
 __device__ float3 transformPoint3D(float3 point, const float* transform)
 {
     return make_float3(dot(make_float3(transform[0], transform[1], transform[2]), point) + transform[3],
@@ -36,9 +45,18 @@ __device__ float length2D(float2 vec)
     return sqrtf(vec.x * vec.x + vec.y * vec.y);
 }
 
+// __device__ float3 normalize(const float3 &v)
+// {
+//     float len = sqrtf(dot(v, v));
+//     if (len > 1e-5f)
+//         return make_float3(v.x / len, v.y / len, v.z / len);
+//     else
+//         return make_float3(0.0f, 0.0f, 0.0f);
+// }
+
 __device__ float3 normalize(const float3& vec)
 {
-    float magnitude = sqrtf(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z);
+    float magnitude = sqrtf(dot(vec, vec));
 
     // Prevent division by zero
     if (magnitude > 0.0f)

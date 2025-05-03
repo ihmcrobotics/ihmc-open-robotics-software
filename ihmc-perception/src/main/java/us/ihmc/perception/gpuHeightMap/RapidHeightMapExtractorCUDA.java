@@ -390,9 +390,6 @@ public class RapidHeightMapExtractorCUDA
       croppingKernel.close();
       planOffsetKernel.close();
 
-      emptyGlobalHeightMapImage.close();
-      planOffsetKernelGridDim.close();
-
       // Clean up each resource
       deallocateFloatPointer(groundToSensorTransformHostPointer, groundToSensorTransformDevicePointer);
       deallocateFloatPointer(sensorToGroundTransformHostPointer, sensorToGroundTransformDevicePointer);
@@ -403,12 +400,15 @@ public class RapidHeightMapExtractorCUDA
       updateKernelGridDim.close();
       registerKernelGridDim.close();
       croppingKernelGridDim.close();
+      if (planOffsetKernelGridDim != null)
+         planOffsetKernelGridDim.close();
 
       localHeightMapImage.close();
       globalHeightMapImage.close();
       terrainCostImage.close();
       contactMapImage.close();
       croppedHeightMapImage.close();
+      emptyGlobalHeightMapImage.close();
 
       filteredRapidHeightMapExtractor.destroy();
       verticalSurfacesExtractor.destroy();
