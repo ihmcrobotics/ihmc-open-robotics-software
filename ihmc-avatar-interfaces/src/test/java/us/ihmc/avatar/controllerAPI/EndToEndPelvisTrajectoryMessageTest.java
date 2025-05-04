@@ -1,9 +1,5 @@
 package us.ihmc.avatar.controllerAPI;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static us.ihmc.robotics.Assert.assertEquals;
-import static us.ihmc.robotics.Assert.assertFalse;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -89,6 +85,8 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoLong;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotTestInterface
 {

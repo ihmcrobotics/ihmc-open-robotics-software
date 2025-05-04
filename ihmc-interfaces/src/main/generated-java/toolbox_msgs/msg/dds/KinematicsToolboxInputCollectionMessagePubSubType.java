@@ -112,19 +112,19 @@ public class KinematicsToolboxInputCollectionMessagePubSubType implements us.ihm
 
       if(data.getCenterOfMassInputs().size() <= 3)
       cdr.write_type_e(data.getCenterOfMassInputs());else
-          throw new RuntimeException("center_of_mass_inputs field exceeds the maximum length");
+          throw new RuntimeException("center_of_mass_inputs field exceeds the maximum length: %d > %d".formatted(data.getCenterOfMassInputs().size(), 3));
 
       if(data.getRigidBodyInputs().size() <= 20)
       cdr.write_type_e(data.getRigidBodyInputs());else
-          throw new RuntimeException("rigid_body_inputs field exceeds the maximum length");
+          throw new RuntimeException("rigid_body_inputs field exceeds the maximum length: %d > %d".formatted(data.getRigidBodyInputs().size(), 20));
 
       if(data.getJointInputs().size() <= 20)
       cdr.write_type_e(data.getJointInputs());else
-          throw new RuntimeException("joint_inputs field exceeds the maximum length");
+          throw new RuntimeException("joint_inputs field exceeds the maximum length: %d > %d".formatted(data.getJointInputs().size(), 20));
 
       if(data.getContactStateInput().size() <= 1)
       cdr.write_type_e(data.getContactStateInput());else
-          throw new RuntimeException("contact_state_input field exceeds the maximum length");
+          throw new RuntimeException("contact_state_input field exceeds the maximum length: %d > %d".formatted(data.getContactStateInput().size(), 1));
 
    }
 

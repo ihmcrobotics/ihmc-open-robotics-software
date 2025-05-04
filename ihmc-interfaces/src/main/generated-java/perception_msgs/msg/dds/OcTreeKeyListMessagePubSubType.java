@@ -100,7 +100,7 @@ public class OcTreeKeyListMessagePubSubType implements us.ihmc.pubsub.TopicDataT
 
       if(data.getKeys().size() <= 200000)
       cdr.write_type_e(data.getKeys());else
-          throw new RuntimeException("keys field exceeds the maximum length");
+          throw new RuntimeException("keys field exceeds the maximum length: %d > %d".formatted(data.getKeys().size(), 200000));
 
    }
 

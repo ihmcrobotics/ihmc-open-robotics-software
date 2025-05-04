@@ -95,7 +95,7 @@ public class WalkingControllerPreviewOutputMessagePubSubType implements us.ihmc.
 
       if(data.getRobotConfigurations().size() <= 1000)
       cdr.write_type_e(data.getRobotConfigurations());else
-          throw new RuntimeException("robot_configurations field exceeds the maximum length");
+          throw new RuntimeException("robot_configurations field exceeds the maximum length: %d > %d".formatted(data.getRobotConfigurations().size(), 1000));
 
    }
 

@@ -9,6 +9,7 @@ import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import org.bytedeco.opencv.opencv_core.Size;
+import perception_msgs.msg.dds.YOLOv8ModelInfo;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -196,7 +197,7 @@ public class YOLOv8Tools
 
    public static List<URL> getYOLOModelDirectories()
    {
-      return getYOLOModelDirectories(YOLOv8Tools.class.getResource("/yolo/models/"));
+      return getYOLOModelDirectories(YOLOv8Tools.class.getResource("/yolo/"));
    }
 
    public static boolean isValidYOLOModelDirectory(Path yoloModelDirectory)
@@ -276,5 +277,19 @@ public class YOLOv8Tools
          throw new IllegalArgumentException("Could not find an class names file in %s".formatted(yoloModelDirectory.toString()));
 
       return classNamesURL.getValue();
+   }
+
+   public static void toMessage(YOLOv8Model model, YOLOv8ModelInfo messageToPack)
+   {
+      messageToPack.setModelName(model.getName());
+      messageToPack.getDetectableObjectClasses().clear();
+      model.getDetectableObjects().forEach(detectableObject -> messageToPack.getDetectableObjectClasses().add(detectableObject));
+   }
+
+   public static YOLOv8ModelInfo toMessage(YOLOv8Model model)
+   {
+      YOLOv8ModelInfo modelInfo = new YOLOv8ModelInfo();
+      toMessage(model, modelInfo);
+      return modelInfo;
    }
 }

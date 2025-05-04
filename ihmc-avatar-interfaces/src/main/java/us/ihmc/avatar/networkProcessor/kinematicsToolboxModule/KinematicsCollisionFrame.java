@@ -8,7 +8,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.EuclidCoreMissingTools;
-import us.ihmc.robotics.physics.CollisionResult;
+import us.ihmc.scs2.simulation.collision.CollisionResult;
 
 public class KinematicsCollisionFrame extends ReferenceFrame
 {

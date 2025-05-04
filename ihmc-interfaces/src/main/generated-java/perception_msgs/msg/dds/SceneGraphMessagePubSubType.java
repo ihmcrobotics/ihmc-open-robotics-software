@@ -179,51 +179,51 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
 
       if(data.getSceneTreeTypes().size() <= 1000)
       cdr.write_type_e(data.getSceneTreeTypes());else
-          throw new RuntimeException("scene_tree_types field exceeds the maximum length");
+          throw new RuntimeException("scene_tree_types field exceeds the maximum length: %d > %d".formatted(data.getSceneTreeTypes().size(), 1000));
 
       if(data.getSceneTreeIndices().size() <= 1000)
       cdr.write_type_e(data.getSceneTreeIndices());else
-          throw new RuntimeException("scene_tree_indices field exceeds the maximum length");
+          throw new RuntimeException("scene_tree_indices field exceeds the maximum length: %d > %d".formatted(data.getSceneTreeIndices().size(), 1000));
 
       if(data.getSceneNodes().size() <= 200)
       cdr.write_type_e(data.getSceneNodes());else
-          throw new RuntimeException("scene_nodes field exceeds the maximum length");
+          throw new RuntimeException("scene_nodes field exceeds the maximum length: %d > %d".formatted(data.getSceneNodes().size(), 200));
 
       if(data.getDetectableSceneNodes().size() <= 200)
       cdr.write_type_e(data.getDetectableSceneNodes());else
-          throw new RuntimeException("detectable_scene_nodes field exceeds the maximum length");
+          throw new RuntimeException("detectable_scene_nodes field exceeds the maximum length: %d > %d".formatted(data.getDetectableSceneNodes().size(), 200));
 
       if(data.getPredefinedRigidBodySceneNodes().size() <= 200)
       cdr.write_type_e(data.getPredefinedRigidBodySceneNodes());else
-          throw new RuntimeException("predefined_rigid_body_scene_nodes field exceeds the maximum length");
+          throw new RuntimeException("predefined_rigid_body_scene_nodes field exceeds the maximum length: %d > %d".formatted(data.getPredefinedRigidBodySceneNodes().size(), 200));
 
       if(data.getArucoMarkerSceneNodes().size() <= 200)
       cdr.write_type_e(data.getArucoMarkerSceneNodes());else
-          throw new RuntimeException("aruco_marker_scene_nodes field exceeds the maximum length");
+          throw new RuntimeException("aruco_marker_scene_nodes field exceeds the maximum length: %d > %d".formatted(data.getArucoMarkerSceneNodes().size(), 200));
 
       if(data.getCenterposeSceneNodes().size() <= 200)
       cdr.write_type_e(data.getCenterposeSceneNodes());else
-          throw new RuntimeException("centerpose_scene_nodes field exceeds the maximum length");
+          throw new RuntimeException("centerpose_scene_nodes field exceeds the maximum length: %d > %d".formatted(data.getCenterposeSceneNodes().size(), 200));
 
       if(data.getStaticRelativeSceneNodes().size() <= 200)
       cdr.write_type_e(data.getStaticRelativeSceneNodes());else
-          throw new RuntimeException("static_relative_scene_nodes field exceeds the maximum length");
+          throw new RuntimeException("static_relative_scene_nodes field exceeds the maximum length: %d > %d".formatted(data.getStaticRelativeSceneNodes().size(), 200));
 
       if(data.getPrimitiveRigidBodySceneNodes().size() <= 200)
       cdr.write_type_e(data.getPrimitiveRigidBodySceneNodes());else
-          throw new RuntimeException("primitive_rigid_body_scene_nodes field exceeds the maximum length");
+          throw new RuntimeException("primitive_rigid_body_scene_nodes field exceeds the maximum length: %d > %d".formatted(data.getPrimitiveRigidBodySceneNodes().size(), 200));
 
       if(data.getYoloSceneNodes().size() <= 200)
       cdr.write_type_e(data.getYoloSceneNodes());else
-          throw new RuntimeException("yolo_scene_nodes field exceeds the maximum length");
+          throw new RuntimeException("yolo_scene_nodes field exceeds the maximum length: %d > %d".formatted(data.getYoloSceneNodes().size(), 200));
 
       if(data.getDoorSceneNodes().size() <= 200)
       cdr.write_type_e(data.getDoorSceneNodes());else
-          throw new RuntimeException("door_scene_nodes field exceeds the maximum length");
+          throw new RuntimeException("door_scene_nodes field exceeds the maximum length: %d > %d".formatted(data.getDoorSceneNodes().size(), 200));
 
       if(data.getTrashCanNodes().size() <= 200)
       cdr.write_type_e(data.getTrashCanNodes());else
-          throw new RuntimeException("trash_can_nodes field exceeds the maximum length");
+          throw new RuntimeException("trash_can_nodes field exceeds the maximum length: %d > %d".formatted(data.getTrashCanNodes().size(), 200));
 
    }
 

@@ -89,7 +89,6 @@ public class PelvisOrientationManager implements SCS2YoGraphicHolder
    {
       walkingManager.resetOrientationOffset();
       requestState(PelvisOrientationControlMode.WALKING_CONTROLLER);
-      walkingManager.setToZeroInMidFeetZUpFrame();
    }
 
    public void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command)
@@ -132,79 +131,9 @@ public class PelvisOrientationManager implements SCS2YoGraphicHolder
       requestState(PelvisOrientationControlMode.WALKING_CONTROLLER);
    }
 
-   public void setTrajectoryTime(double trajectoryTime)
-   {
-      walkingManager.setTrajectoryTime(trajectoryTime);
-   }
-
-   public void moveToAverageInSupportFoot(RobotSide supportSide)
-   {
-      walkingManager.moveToAverageInSupportFoot(supportSide);
-   }
-
-   public void resetOrientationOffset()
-   {
-      walkingManager.resetOrientationOffset();
-   }
-
-   public void setToHoldCurrentDesiredInMidFeetZUpFrame()
-   {
-      walkingManager.setToHoldCurrentDesiredInMidFeetZUpFrame();
-   }
-
-   public void centerInMidFeetZUpFrame(double trajectoryTime)
-   {
-      walkingManager.centerInMidFeetZUpFrame(trajectoryTime);
-   }
-
-   public void setToHoldCurrentDesiredInSupportFoot(RobotSide supportSide)
-   {
-      walkingManager.setToHoldCurrentDesiredInSupportFoot(supportSide);
-   }
-
    public void setToHoldCurrentInWorldFrame()
    {
       walkingManager.setToHoldCurrentInWorldFrame();
-   }
-
-   public void setToZeroInMidFeetZUpFrame()
-   {
-      walkingManager.setToZeroInMidFeetZUpFrame();
-   }
-
-   public void initializeStanding()
-   {
-      walkingManager.initializeStanding();
-   }
-
-   public void initializeSwing()
-   {
-      walkingManager.initializeTiming();
-   }
-
-   public void setUpcomingFootstep(Footstep upcomingFootstep)
-   {
-      walkingManager.setUpcomingFootstep(upcomingFootstep);
-   }
-
-   public void initializeTransfer()
-   {
-      walkingManager.initializeTiming();
-   }
-
-   public void initializeTrajectory()
-   {
-      walkingManager.updateTrajectoryFromFootstep();
-   }
-
-   public void updateTrajectoryFromFootstep()
-   {
-      walkingManager.updateTrajectoryFromFootstep();
-   }
-
-   public void setTrajectoryFromFootstep()
-   {
-      walkingManager.setTrajectoryFromFootstep();
    }
 
    public boolean handlePelvisOrientationTrajectoryCommands(PelvisOrientationTrajectoryCommand command)

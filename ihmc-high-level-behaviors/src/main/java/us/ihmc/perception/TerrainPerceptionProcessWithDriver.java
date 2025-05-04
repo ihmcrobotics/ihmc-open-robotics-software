@@ -17,7 +17,6 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.depthData.CollisionBoxProvider;
-import us.ihmc.perception.gpuHeightMap.RapidHeightMapManager;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
@@ -169,13 +168,10 @@ public class TerrainPerceptionProcessWithDriver
 
       humanoidPerception = new HumanoidPerceptionModule(openCLManager);
       humanoidPerception.initializeBodyCollisionFilter(fullRobotModel, collisionBoxProvider);
-      humanoidPerception.initializeRealsenseDepthImage(realsense.getDepthHeight(), realsense.getDepthWidth());
       humanoidPerception.initializePerspectiveRapidRegionsExtractor(realsense.getDepthCameraIntrinsics());
-      humanoidPerception.initializeHeightMapExtractor(ros2Helper, referenceFrames, realsense.getDepthCameraIntrinsics());
       humanoidPerception.getRapidRegionsExtractor().setEnabled(true);
 
       ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS, parameters);
-      ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.HEIGHT_MAP_PARAMETERS, RapidHeightMapManager.getHeightMapParameters());
       ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_RAPID_REGION_PARAMETERS,
                                                      humanoidPerception.getRapidRegionsExtractor().getParameters());
       ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_POLYGONIZER_PARAMETERS,
@@ -251,7 +247,7 @@ public class TerrainPerceptionProcessWithDriver
             executorService.submit(() ->
                                    {
                                       OpenCVTools.compressImagePNG(depth16UC1Image, compressedDepthPointer);
-                                      PerceptionMessageTools.setDepthIntrinsicsFromRealsense(realsense, depthImageMessage);
+                                      PerceptionMessageTools.packCameraIntrinsics(realsense.getDepthCameraIntrinsics(), depthImageMessage);
                                       CameraModel.PINHOLE.packMessageFormat(depthImageMessage);
                                       PerceptionMessageTools.publishCompressedDepthImage(compressedDepthPointer,
                                                                                          depthImageMessage,
@@ -282,7 +278,7 @@ public class TerrainPerceptionProcessWithDriver
                                    {
                                       OpenCVTools.compressRGBImageJPG(color8UC3Image, yuvColorImage, compressedColorPointer);
 
-                                      PerceptionMessageTools.setColorIntrinsicsFromRealsense(realsense, colorImageMessage);
+                                      PerceptionMessageTools.packCameraIntrinsics(realsense.getColorCameraIntrinsics(), colorImageMessage);
                                       CameraModel.PINHOLE.packMessageFormat(colorImageMessage);
                                       PerceptionMessageTools.publishJPGCompressedColorImage(compressedColorPointer,
                                                                                             colorTopic,
@@ -330,10 +326,6 @@ public class TerrainPerceptionProcessWithDriver
       executorService.destroy();
 
       realtimeROS2Node.destroy();
-      if (humanoidPerception != null)
-      {
-         humanoidPerception.destroy();
-      }
 
       openCLManager.destroy();
       if (depthBytedecoImage != null)
@@ -342,10 +334,5 @@ public class TerrainPerceptionProcessWithDriver
       }
 
       destroyedNotification.blockingPoll();
-   }
-
-   public HumanoidPerceptionModule getHumanoidPerceptionModule()
-   {
-      return humanoidPerception;
    }
 }

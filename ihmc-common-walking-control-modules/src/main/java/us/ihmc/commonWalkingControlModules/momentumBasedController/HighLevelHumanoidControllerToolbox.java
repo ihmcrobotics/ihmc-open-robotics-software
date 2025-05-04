@@ -49,8 +49,7 @@ import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.controllers.ControllerStateChangedListener;
 import us.ihmc.robotics.lists.FrameTuple2dArrayList;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
-import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector;
+import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFrameVector3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.AngularExcursionCalculator;
@@ -66,6 +65,7 @@ import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusChangedListener;
+import us.ihmc.yoVariables.euclid.filters.FilteredFiniteDifferenceYoFrameVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
@@ -158,16 +158,16 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
 
    private final AngularExcursionCalculator angularExcursionCalculator;
    private final YoFrameVector3D yoAngularMomentum, yoLinearMomentum;
-   private final FilteredVelocityYoFrameVector yoAngularMomentumRate, yoLinearMomentumRate;
+   private final FilteredFiniteDifferenceYoFrameVector3D yoAngularMomentumRate, yoLinearMomentumRate;
 
-   private final AlphaFilteredYoFrameVector filteredYoAngularMomentum, filteredYoLinearMomentum;
+   private final AlphaFilteredYoFrameVector3D filteredYoAngularMomentum, filteredYoLinearMomentum;
    private final YoDouble totalMass = new YoDouble("TotalMass", registry);
 
    private final FramePoint2D centerOfPressure = new FramePoint2D();
    private final YoFramePoint2D yoCenterOfPressure = new YoFramePoint2D("CenterOfPressure", worldFrame, registry);
 
    private WalkingMessageHandler walkingMessageHandler;
-   private WalkingTrajectoryPath walkingTrajectoryPath;
+   private final WalkingTrajectoryPath walkingTrajectoryPath;
 
    private final StabilityMarginRegionCalculator multiContactStabilityRegionCalculator;
    private final StabilityMarginRegionCalculator baselineRegionCalculator;
@@ -396,15 +396,15 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       YoDouble momentumRateAlpha = new YoDouble("filteredMomentumRateAlpha", registry);
       momentumRateAlpha.set(0.95); // switch to break frequency and move to walking parameters
 
-      yoAngularMomentumRate = new FilteredVelocityYoFrameVector("AngularMomentumRate", "", momentumRateAlpha, controlDT, registry, yoAngularMomentum);
-      yoLinearMomentumRate = new FilteredVelocityYoFrameVector("LinearMomentumRate", "", momentumRateAlpha, controlDT, registry, yoLinearMomentum);
+      yoAngularMomentumRate = new FilteredFiniteDifferenceYoFrameVector3D("AngularMomentumRate", "", momentumRateAlpha, controlDT, registry, yoAngularMomentum);
+      yoLinearMomentumRate = new FilteredFiniteDifferenceYoFrameVector3D("LinearMomentumRate", "", momentumRateAlpha, controlDT, registry, yoLinearMomentum);
 
       YoDouble angularMomentumAlpha = new YoDouble("filteredAngularMomentumAlpha", registry);
       YoDouble linearMomentumAlpha = new YoDouble("filteredLinearMomentumAlpha", registry);
       angularMomentumAlpha.set(0.95); // switch to break frequency and move to walking parameters
       linearMomentumAlpha.set(0.95); // switch to break frequency and move to walking parameters
-      filteredYoAngularMomentum = new AlphaFilteredYoFrameVector("filteredAngularMomentum", "", registry, angularMomentumAlpha, yoAngularMomentum);
-      filteredYoLinearMomentum = new AlphaFilteredYoFrameVector("filteredLinearMomentum", "", registry, linearMomentumAlpha, yoLinearMomentum);
+      filteredYoAngularMomentum = new AlphaFilteredYoFrameVector3D("filteredAngularMomentum", "", registry, angularMomentumAlpha, yoAngularMomentum);
+      filteredYoLinearMomentum = new AlphaFilteredYoFrameVector3D("filteredLinearMomentum", "", registry, linearMomentumAlpha, yoLinearMomentum);
 
       failureDetectionControlModule = new WalkingFailureDetectionControlModule(getContactableFeet(), registry);
 

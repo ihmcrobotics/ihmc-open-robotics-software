@@ -93,7 +93,7 @@ public class LocalizationPointMapPacketPubSubType implements us.ihmc.pubsub.Topi
 
       if(data.getLocalizationPointMap().size() <= 100)
       cdr.write_type_e(data.getLocalizationPointMap());else
-          throw new RuntimeException("localization_point_map field exceeds the maximum length");
+          throw new RuntimeException("localization_point_map field exceeds the maximum length: %d > %d".formatted(data.getLocalizationPointMap().size(), 100));
 
    }
 

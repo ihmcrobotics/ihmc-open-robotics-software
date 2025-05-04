@@ -208,8 +208,6 @@ public class BodyPathLSTraversibilityCalculator
                      this.areaAlpha.get(side).set(Double.NaN);
                      this.inclineAlpha.get(side).set(Double.NaN);
                   }
-
-                  continue;
                }
                else
                {

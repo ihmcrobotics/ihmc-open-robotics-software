@@ -2,6 +2,7 @@ package us.ihmc.manipulation.planning.manifold;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.ToDoubleFunction;
 
 import javax.vecmath.MismatchedSizeException;
 
@@ -13,7 +14,6 @@ import toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxMessage;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
@@ -21,15 +21,14 @@ import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.rotationConversion.AxisAngleConversion;
 import us.ihmc.euclid.rotationConversion.RotationMatrixConversion;
-import us.ihmc.euclid.shape.primitives.Cylinder3D;
-import us.ihmc.euclid.shape.primitives.Sphere3D;
 import us.ihmc.euclid.shape.primitives.Torus3D;
+import us.ihmc.euclid.shape.primitives.interfaces.Cylinder3DReadOnly;
+import us.ihmc.euclid.shape.primitives.interfaces.Sphere3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.MeshDataHolder;
@@ -40,13 +39,13 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTraj
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessageTools.FunctionTrajectory;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.ReachingManifoldCommand;
+import us.ihmc.log.LogTools;
 import us.ihmc.manipulation.planning.exploringSpatial.ExploringRigidBodyTools;
 import us.ihmc.manipulation.planning.exploringSpatial.TrajectoryLibraryForDRC;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.numericalMethods.GradientDescentModule;
-import us.ihmc.robotics.numericalMethods.SingleQueryFunction;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
@@ -213,12 +212,12 @@ public class ReachingManifoldTools
                                                      orientationWeight);
    }
 
-   public static List<ReachingManifoldMessage> createSphereManifoldMessagesForValkyrie(RobotSide robotSide, RigidBodyBasics hand, Sphere3D sphere3D)
+   public static List<ReachingManifoldMessage> createSphereManifoldMessagesForValkyrie(RobotSide robotSide, RigidBodyBasics hand, Sphere3DReadOnly sphere3D)
    {
       return createSphereManifoldMessagesForValkyrie(robotSide, hand, sphere3D.getPosition(), sphere3D.getRadius());
    }
 
-   public static List<ReachingManifoldMessage> createCylinderManifoldMessagesForValkyrie(RobotSide robotSide, RigidBodyBasics hand, Cylinder3D cylinder3D)
+   public static List<ReachingManifoldMessage> createCylinderManifoldMessagesForValkyrie(RobotSide robotSide, RigidBodyBasics hand, Cylinder3DReadOnly cylinder3D)
    {
       return createCylinderManifoldMessagesForValkyrie(robotSide, hand, cylinder3D.getPosition(), new RotationMatrix(EuclidGeometryTools.axisAngleFromZUpToVector3D(cylinder3D.getAxis())), cylinder3D.getRadius(),
                                                        cylinder3D.getLength());
@@ -374,37 +373,17 @@ public class ReachingManifoldTools
       toPack.getRotation().set(orientationToPack);
    }
 
-   public static double getDistance(RigidBodyTransformReadOnly origin, RigidBodyTransformReadOnly end, RigidBodyTransformReadOnly to, double positionWeight, double orientationWeight)
-   {
-      int wayPointSize = 100;
 
-      double minimumDistance = Double.MAX_VALUE;
-      for (int i = 0; i < wayPointSize; i++)
-      {
-         double interpolatedRatio = i / (double) 100;
-         RigidBodyTransform interpolated = new RigidBodyTransform();
-
-         packExtrapolatedTransform(origin, end, interpolatedRatio, interpolated);
-         minimumDistance = Math.min(minimumDistance, getDistance(interpolated, to, positionWeight, orientationWeight));
-      }
-
-      return minimumDistance;
-   }
-
+   /**
+    * Returns the weighted distance between two rigid body transforms. The euclidean distance between the two translations is scaled by {@param positionWeight}
+    * and the angle between the two rotations is scaled by {@param orientationWeight}.
+    */
    public static double getDistance(RigidBodyTransformReadOnly from, RigidBodyTransformReadOnly to, double positionWeight, double orientationWeight)
    {
-      Point3D pointFrom = new Point3D(from.getTranslation());
-      Quaternion orientationFrom = new Quaternion(from.getRotation());
+      double positionDistance = positionWeight * from.getTranslation().differenceNorm(to.getTranslation());
+      double orientationDistance = orientationWeight * from.getRotation().distance(to.getRotation());
 
-      Point3D pointTo = new Point3D(to.getTranslation());
-      Quaternion orientationTo = new Quaternion(to.getRotation());
-
-      double positionDistance = positionWeight * pointFrom.distance(pointTo);
-      double orientationDistance = orientationWeight * orientationFrom.distance(orientationTo);
-
-      double distance = positionDistance + orientationDistance;
-
-      return distance;
+      return positionDistance + orientationDistance;
    }
 
    private static void packExtrapolatedPoint(Tuple3DReadOnly from, Tuple3DReadOnly to, double ratio, Point3DBasics toPack)
@@ -438,6 +417,17 @@ public class ReachingManifoldTools
       RotationMatrixConversion.convertAxisAngleToMatrix(toPackAxisAngle, toPack);
    }
 
+   /**
+    * This computes the transform that is closest to {@param rigidBodyTransform} and is contained on the manifold defined by {@param reachingManifoldCommand},
+    * and packs the result into {@param rigidBodyTransformToPack}. The distance between the two transforms is weighted by {@param positionWeight} and
+    * {@param orientationWeight}.
+    * @param reachingManifoldCommand the manifold to find the closest point on.
+    * @param rigidBodyTransform the rigid body transform to find the closest point on the manifold to.
+    * @param rigidBodyTransformToPack resulting transform contained on the manifold that is closest to {@param rigidBodyTransform}
+    * @param positionWeight weight of the translation difference when computing the distance measure
+    * @param orientationWeight weight of the orientation difference when computing the distance measure
+    * @return distance between the two transforms.
+    */
    private static double packClosestRigidBodyTransformOnManifold(ReachingManifoldCommand reachingManifoldCommand, RigidBodyTransformReadOnly rigidBodyTransform,
                                                                  RigidBodyTransform rigidBodyTransformToPack, double positionWeight, double orientationWeight)
    {
@@ -454,15 +444,17 @@ public class ReachingManifoldTools
          lowerLimits.add(manifoldLowerLimits[i]);
       }
 
-      SingleQueryFunction function = new SingleQueryFunction()
+      ToDoubleFunction<TDoubleArrayList> function = new ToDoubleFunction<>()
       {
          @Override
-         public double getQuery(TDoubleArrayList values)
+         public double applyAsDouble(TDoubleArrayList values)
          {
-            RigidBodyTransform closestTransform = new RigidBodyTransform();
-            packRigidBodyTransformOnManifold(reachingManifoldCommand, values, closestTransform);
+            RigidBodyTransform transformContainedOnTheManifold = new RigidBodyTransform();
+            packRigidBodyTransformOnManifold(reachingManifoldCommand, values, transformContainedOnTheManifold);
 
-            return getDistance(rigidBodyTransform, closestTransform, positionWeight, orientationWeight);
+            double distance = getDistance(rigidBodyTransform, transformContainedOnTheManifold, positionWeight, orientationWeight);
+            // returns the weighted distance betwen the rigid body transform and the transform on the manifold.
+            return distance;
          }
       };
       GradientDescentModule solver = new GradientDescentModule(function, initialInput);
@@ -470,23 +462,18 @@ public class ReachingManifoldTools
       solver.setMaximumIterations(200);
       solver.setInputLowerLimit(lowerLimits);
       solver.setInputUpperLimit(upperLimits);
+      solver.setLearningRate(0.9);
 
       solver.run();
-      TDoubleArrayList optimalSolution = solver.getOptimalInput();
 
-      rigidBodyTransformToPack.setIdentity();
-      rigidBodyTransformToPack.appendTranslation(reachingManifoldCommand.getManifoldOriginPosition());
-      rigidBodyTransformToPack.getRotation().set(reachingManifoldCommand.getManifoldOriginOrientation());
-
-      for (int i = 0; i < reachingManifoldCommand.getDimensionOfManifold(); i++)
-      {
-         RigidBodyTransform appendingTransform = ExploringRigidBodyTools.getLocalRigidBodyTransform(reachingManifoldCommand.getDegreeOfManifold(i), optimalSolution.get(i));
-         rigidBodyTransformToPack.multiply(appendingTransform);
-      }
+      packRigidBodyTransformOnManifold(reachingManifoldCommand, solver.getOptimalInput(), rigidBodyTransformToPack);
 
       return solver.getOptimalQuery();
    }
 
+   /**
+    * Computes the rigid body transform offset from the manifold by the degrees contained in {@param configurations}.
+    */
    private static void packRigidBodyTransformOnManifold(ReachingManifoldCommand reachingManifoldCommand, TDoubleArrayList configurations,
                                                         RigidBodyTransform rigidBodyTransformToPack)
    {
@@ -494,10 +481,14 @@ public class ReachingManifoldTools
       if (dimensionOfManifold != configurations.size())
          throw new MismatchedSizeException("configuration space size and name size are not matched.");
 
+
+      // This initializes the transform to be at the origin of the manifold. This point is at the center of the manifold, but is not necessarily on the surface
+      // of the manifold.
       rigidBodyTransformToPack.setIdentity();
       rigidBodyTransformToPack.getTranslation().set(reachingManifoldCommand.getManifoldOriginPosition());
       rigidBodyTransformToPack.getRotation().set(reachingManifoldCommand.getManifoldOriginOrientation());
 
+      // Transform this point to be contained on the manifold itself.
       for (int i = 0; i < configurations.size(); i++)
       {
          RigidBodyTransform appendingTransform = ExploringRigidBodyTools.getLocalRigidBodyTransform(reachingManifoldCommand.getDegreeOfManifold(i), configurations.get(i));

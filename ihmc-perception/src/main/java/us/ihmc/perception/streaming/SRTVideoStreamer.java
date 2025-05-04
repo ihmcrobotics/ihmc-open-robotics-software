@@ -27,6 +27,8 @@ import static org.bytedeco.ffmpeg.global.avutil.*;
 // TODO: Make abstract SRTStreamer class and extend to video and audio
 public class SRTVideoStreamer
 {
+   private static final boolean WINDOWS = System.getProperty("os.name").contains("Windows");
+
    private static final String DEFAULT_OUTPUT_FORMAT = "mpegts";
    private static final String DEFAULT_CODEC = "hevc_nvenc"; // TODO: use other codec if CUDA not available
    private static final int OUTPUT_PIXEL_FORMAT = AV_PIX_FMT_YUV444P;
@@ -120,7 +122,7 @@ public class SRTVideoStreamer
       AVDictionary encoderOptionsDictionary = new AVDictionary();
       FFmpegTools.setAVDictionary(encoderOptionsDictionary, encoderOptions);
 
-      if (useHardwareAcceleration)
+      if (useHardwareAcceleration && !WINDOWS) // FIXME: for some reason hardware encoder doesn't work on windows.
          encoder = new FFmpegHardwareVideoEncoder(outputFormat,
                                                   encoderName,
                                                   bitRate,

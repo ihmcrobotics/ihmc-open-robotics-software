@@ -25,7 +25,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -38,6 +37,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -219,8 +219,12 @@ public class SensitivityBasedStabilityGradientCalculator
          }
       }
 
-      jointsToIgnore.addAll(multiBodySystemInput.getJointMatrixIndexProvider().getJointDoFIndices(fullRobotModel.getSpineJoint(SpineJointName.SPINE_ROLL)));
-      jointsToIgnore.addAll(multiBodySystemInput.getJointMatrixIndexProvider().getJointDoFIndices(fullRobotModel.getSpineJoint(SpineJointName.SPINE_PITCH)));
+      OneDoFJointBasics spineRoll = fullRobotModel.getSpineJoint(SpineJointName.SPINE_ROLL);
+      OneDoFJointBasics spinePitch = fullRobotModel.getSpineJoint(SpineJointName.SPINE_PITCH);
+      if (spineRoll != null)
+         jointsToIgnore.addAll(multiBodySystemInput.getJointMatrixIndexProvider().getJointDoFIndices(fullRobotModel.getSpineJoint(SpineJointName.SPINE_ROLL)));
+      if (spinePitch != null)
+         jointsToIgnore.addAll(multiBodySystemInput.getJointMatrixIndexProvider().getJointDoFIndices(fullRobotModel.getSpineJoint(SpineJointName.SPINE_PITCH)));
 
       parentRegistry.addChild(registry);
    }

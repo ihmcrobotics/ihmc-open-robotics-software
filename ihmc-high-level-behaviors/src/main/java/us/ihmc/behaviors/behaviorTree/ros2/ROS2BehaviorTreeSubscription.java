@@ -145,7 +145,7 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNode<T, ? ,?>>
             if (localNode.getDefinition().isModificationIncoming())
             {
                // This is caused by dropped messages or newly online processes
-               LogTools.error(() -> "%s: Partial data is newer than what we have. %s"
+               LogTools.debug(() -> "%s: Partial data is newer than what we have. %s"
                      .formatted(behaviorTree.getCRDTInfo().getActorDesignation(),
                                 localNode.getDefinition().getName()));
                // We need to ask to get sent the full data
@@ -154,7 +154,7 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNode<T, ? ,?>>
          }
          else
          {
-            localNode.getDefinition().confirmRecievedFullData();
+            localNode.getDefinition().confirmReceivedFullData();
             ROS2BehaviorTreeMessageTools.fromMessage(subscriptionNode, localNode.getState());
          }
       }
@@ -205,7 +205,7 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNode<T, ? ,?>>
                                                               behaviorTree.getSaveFileDirectory());
          if (subscriptionNode.getPackedType() == BehaviorTreeStateMessage.PARTIAL_DATA)
          {
-            LogTools.error("Cannot replicate node fully from partial data!");
+            LogTools.debug("Cannot replicate node fully from partial data!");
             localNode.getDefinition().requestSendFullData();
          }
       }

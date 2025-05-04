@@ -90,7 +90,7 @@ public class PelvisHeightOrientationActionDefinitionMessagePubSubType implements
       behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
       if(data.getParentFrameName().length() <= 255)
       cdr.write_type_d(data.getParentFrameName());else
-          throw new RuntimeException("parent_frame_name field exceeds the maximum length");
+          throw new RuntimeException("parent_frame_name field exceeds the maximum length: %d > %d".formatted(data.getParentFrameName().length(), 255));
 
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getPelvisTransformToParent(), cdr);
       cdr.write_type_6(data.getTrajectoryDuration());

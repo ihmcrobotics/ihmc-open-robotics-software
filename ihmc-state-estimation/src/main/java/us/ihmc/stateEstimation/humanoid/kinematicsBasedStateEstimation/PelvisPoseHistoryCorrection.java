@@ -12,6 +12,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import controller_msgs.msg.dds.PelvisPoseErrorPacket;
 import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import us.ihmc.commons.MathTools;
+import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -20,7 +21,6 @@ import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.math.YoReferencePose;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 
 /**

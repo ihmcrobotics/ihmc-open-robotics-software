@@ -6,8 +6,11 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.property.ROS2StoredPropertySet;
+import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.ImageSensorPublishThread;
 import us.ihmc.perception.RawImage;
@@ -47,8 +50,6 @@ import us.ihmc.sensors.zed.ZEDModelData;
 import us.ihmc.sensors.zed.ZEDSVOPlaybackSensor;
 import us.ihmc.tools.IHMCCommonPaths;
 
-import java.util.Map;
-
 import static us.ihmc.zed.global.zed.SL_DEPTH_MODE_NEURAL;
 import static us.ihmc.zed.global.zed.SL_DEPTH_MODE_PERFORMANCE;
 
@@ -64,6 +65,8 @@ public class RDXSceneGraphDemo
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private ROS2Node ros2Node;
    private ROS2Helper ros2Helper;
+   private ROS2PeerClockOffsetEstimator robotClockOffsetEstimator;
+   private ROS2PeerClockOffsetEstimator uiClockOffsetEstimator;
    private ModelInstance sensorPoseGraphic;
    private RDXPerceptionVisualizersPanel perceptionVisualizerPanel;
    private DetectionManager detectionManager;
@@ -98,6 +101,8 @@ public class RDXSceneGraphDemo
 
             ros2Node = new ROS2NodeBuilder().build("perception_scene_graph_demo");
             ros2Helper = new ROS2Helper(ros2Node);
+            robotClockOffsetEstimator = new ROS2PeerClockOffsetEstimator(ros2Node);
+            uiClockOffsetEstimator = new ROS2PeerClockOffsetEstimator(ros2Node);
 
             detectionManager = new DetectionManager(ros2Node);
 
@@ -131,7 +136,10 @@ public class RDXSceneGraphDemo
 
             perceptionVisualizerPanel.addVisualizer(new RDXDetectionManagerSettings("Detection Manager Settings", ros2Node));
 
-            RDXROS2YOLOv8Visualizer yoloSettingsVisualizer = new RDXROS2YOLOv8Visualizer("YOLOv8", ros2Node, PerceptionAPI.YOLO_ANNOTATED_IMAGE);
+            RDXROS2YOLOv8Visualizer yoloSettingsVisualizer = new RDXROS2YOLOv8Visualizer("YOLOv8",
+                                                                                         ros2Node,
+                                                                                         uiClockOffsetEstimator,
+                                                                                         PerceptionAPI.YOLO_ANNOTATED_IMAGE);
             yoloSettingsVisualizer.setActive(true);
             perceptionVisualizerPanel.addVisualizer(yoloSettingsVisualizer);
 
@@ -152,10 +160,10 @@ public class RDXSceneGraphDemo
             zedSVOPlayer.useTrackedPose(true);
             zedSVOPlayer.run(true);
 
-            zedPublishThread = new ImageSensorPublishThread(ros2Node, zedSVOPlayer,
-                                                            Map.of(ZEDImageSensor.LEFT_COLOR_IMAGE_KEY, PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT),
-                                                                   ZEDImageSensor.RIGHT_COLOR_IMAGE_KEY, PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.RIGHT),
-                                                                   ZEDImageSensor.DEPTH_IMAGE_KEY, PerceptionAPI.ZED2_DEPTH));
+            zedPublishThread = new ImageSensorPublishThread(ros2Node, zedSVOPlayer);
+            zedPublishThread.addTopic(PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT), ZEDImageSensor.LEFT_COLOR_IMAGE_KEY);
+            zedPublishThread.addTopic(PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.RIGHT), ZEDImageSensor.RIGHT_COLOR_IMAGE_KEY);
+            zedPublishThread.addTopic(PerceptionAPI.ZED2_DEPTH, ZEDImageSensor.DEPTH_IMAGE_KEY);
             zedPublishThread.startRepeating();
 
             zedSVORecorderPanel = new RDXZEDSVORecorderPanel(ros2Helper);
@@ -220,7 +228,8 @@ public class RDXSceneGraphDemo
 
                if (yolov8DetectionExecutor == null)
                {
-                  yolov8DetectionExecutor = new YOLOv8DetectionExecutor(yoloSettingsVisualizer::isActive);
+                  yolov8DetectionExecutor = new YOLOv8DetectionExecutor(new CRDTInfo(ROS2ActorDesignation.ROBOT, robotClockOffsetEstimator),
+                                                                        yoloSettingsVisualizer::isActive);
                   yolov8DetectionExecutor.addDetectionConsumerCallback(detectionManager::addDetections);
                }
 

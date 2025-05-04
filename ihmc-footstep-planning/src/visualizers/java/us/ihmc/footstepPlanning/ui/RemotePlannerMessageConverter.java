@@ -2,6 +2,7 @@ package us.ihmc.footstepPlanning.ui;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.TerrainMapMessage;
 import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
 import toolbox_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import us.ihmc.commons.Conversions;
@@ -31,6 +32,7 @@ public class RemotePlannerMessageConverter
    private ROS2Publisher<FootstepPlanningToolboxOutputStatus> outputStatusPublisher;
 
    private Optional<HeightMapMessage> heightMapData = Optional.empty();
+   private Optional<TerrainMapMessage> terrainMapData = Optional.empty();
 
    private final AtomicReference<FootstepPlanningResult> resultReference;
    private final AtomicReference<FootstepDataListMessage> footstepPlanReference;
@@ -98,6 +100,15 @@ public class RemotePlannerMessageConverter
       {
          this.heightMapData = Optional.of(heightMapMessage);
       }
+      TerrainMapMessage terrainMapMessage = packet.getTerrainMapMessage();
+      if (terrainMapMessage == null)
+      {
+         this.terrainMapData = Optional.empty();
+      }
+      else
+      {
+         this.terrainMapData = Optional.of(terrainMapMessage);
+      }
 
       RobotSide initialSupportSide = RobotSide.fromByte(packet.getRequestedInitialStanceSide());
       int plannerRequestId = packet.getPlannerRequestId();
@@ -106,6 +117,7 @@ public class RemotePlannerMessageConverter
       double horizonLength = packet.getHorizonLength();
 
       this.heightMapData.ifPresent(regions -> messager.submitMessage(FootstepPlannerMessagerAPI.HeightMapData, regions));
+      this.terrainMapData.ifPresent(regions -> messager.submitMessage(FootstepPlannerMessagerAPI.TerrainMapData, regions));
       messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootPose, packet.getStartLeftFootPose());
       messager.submitMessage(FootstepPlannerMessagerAPI.RightFootPose, packet.getStartRightFootPose());
       messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootGoalPose, packet.getGoalLeftFootPose());

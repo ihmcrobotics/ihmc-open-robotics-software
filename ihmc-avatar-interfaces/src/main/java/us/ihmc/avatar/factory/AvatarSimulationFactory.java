@@ -47,10 +47,6 @@ import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
 import us.ihmc.robotDataVisualizer.visualizer.SCSVisualizer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPDGains;
-import us.ihmc.robotics.physics.CollidableHelper;
-import us.ihmc.robotics.physics.MultiBodySystemStateWriter;
-import us.ihmc.robotics.physics.RobotCollisionModel;
-import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
@@ -65,7 +61,6 @@ import us.ihmc.simulationToolkit.controllers.ActualCMPComputer;
 import us.ihmc.simulationToolkit.controllers.PIDLidarTorqueController;
 import us.ihmc.simulationToolkit.controllers.PassiveJointController;
 import us.ihmc.simulationToolkit.controllers.SimulatedRobotCenterOfMassVisualizer;
-import us.ihmc.simulationToolkit.physicsEngine.ExperimentalSimulation;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -124,7 +119,6 @@ public class AvatarSimulationFactory
    private ActualCMPComputer actualCMPComputer;
    private FullHumanoidRobotModel masterFullRobotModel;
    private HumanoidRobotContextData masterContext;
-   private ExperimentalSimulation experimentalSimulation;
 
    private DRCRobotModelShapeCollisionSettings shapeCollisionSettings;
 
@@ -189,36 +183,10 @@ public class AvatarSimulationFactory
          commonAvatarEnvironment.get().createAndSetContactControllerToARobot();
       }
 
-      if (scsInitialSetup.get().getUseExperimentalPhysicsEngine())
-      {
-         experimentalSimulation = new ExperimentalSimulation(allSimulatedRobotList.toArray(new Robot[0]),
-                                                             simulationConstructionSetParameters.getDataBufferSize());
-         experimentalSimulation.setGravity(new Vector3D(0.0, 0.0, -Math.abs(gravity.get())));
 
-         CollidableHelper helper = new CollidableHelper();
-         String environmentCollisionMask = "ground";
-         String robotCollisionMask = robotModel.get().getSimpleRobotName();
-         MultiBodySystemStateWriter robotInitialStateWriter = ExperimentalSimulation.toRobotInitialStateWriter(robotInitialSetup.get()::initializeRobot,
-                                                                                                               robotModel.get());
-         experimentalSimulation.addEnvironmentCollidables(helper, robotCollisionMask, environmentCollisionMask, commonAvatarEnvironment.get());
-         RobotCollisionModel simulationRobotCollisionModel = robotModel.get()
-                                                                       .getSimulationRobotCollisionModel(helper, robotCollisionMask, environmentCollisionMask);
-         experimentalSimulation.configureRobot(robotModel.get(), simulationRobotCollisionModel, robotInitialStateWriter);
-         if (scsInitialSetup.get().getExperimentalPhysicsEngineContactParameters() != null)
-            experimentalSimulation.getPhysicsEngine().setGlobalContactParameters(scsInitialSetup.get().getExperimentalPhysicsEngineContactParameters());
-
-         simulationConstructionSet = new SimulationConstructionSet(experimentalSimulation,
-                                                                   guiInitialSetup.get().getGraphics3DAdapter(),
-                                                                   simulationConstructionSetParameters);
-         simulationConstructionSet.getRootRegistry().addChild(experimentalSimulation.getPhysicsEngineRegistry());
-         simulationConstructionSet.addYoGraphicsListRegistry(experimentalSimulation.getPhysicsEngineGraphicsRegistry());
-      }
-      else
-      {
          simulationConstructionSet = new SimulationConstructionSet(allSimulatedRobotList.toArray(new Robot[0]),
                                                                    guiInitialSetup.get().getGraphics3DAdapter(),
                                                                    simulationConstructionSetParameters);
-      }
 
       if (simulationConstructionSetParameters.getCreateGUI())
       {
@@ -590,11 +558,6 @@ public class AvatarSimulationFactory
                                                                                controllerThread.getDesiredJointDataHolder());
       if (lowLevelController != null)
          humanoidFloatingRootJointRobot.setController(lowLevelController);
-   }
-
-   public ExperimentalSimulation getExperimentalSimulation()
-   {
-      return experimentalSimulation;
    }
 
    private void setupPassiveJoints()

@@ -101,11 +101,11 @@ public class MinimalFootstepMessagePubSubType implements us.ihmc.pubsub.TopicDat
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getOrientation(), cdr);
       if(data.getSupportPolygon().size() <= 16)
       cdr.write_type_e(data.getSupportPolygon());else
-          throw new RuntimeException("support_polygon field exceeds the maximum length");
+          throw new RuntimeException("support_polygon field exceeds the maximum length: %d > %d".formatted(data.getSupportPolygon().size(), 16));
 
       if(data.getDescription().length() <= 255)
       cdr.write_type_d(data.getDescription());else
-          throw new RuntimeException("description field exceeds the maximum length");
+          throw new RuntimeException("description field exceeds the maximum length: %d > %d".formatted(data.getDescription().length(), 255));
 
    }
 

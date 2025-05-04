@@ -39,7 +39,7 @@ public class OpenCLPointCloudExtractor
          pointCloudVertexOutput.createOpenCLBufferObject(openCLManager);
       }
 
-      RigidBodyTransform depthToWorldTransform = new RigidBodyTransform(depthImage.getOrientation(), depthImage.getPosition());
+      RigidBodyTransform depthToWorldTransform = new RigidBodyTransform(depthImage.getRotation(), depthImage.getTranslation());
       depthToWorldTransformParameter.setParameter(depthToWorldTransform);
       depthToWorldTransformParameter.writeOpenCLBufferObject(openCLManager);
 

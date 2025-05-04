@@ -67,6 +67,9 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
    public int realtime_tick_;
    public boolean is_calibrated_;
    public boolean needs_reset_;
+   public boolean is_calibrating_;
+   public boolean is_cooling_down_;
+   public boolean automatic_cooldown_enabled_;
 
    public SakeHandStatusMessage()
    {
@@ -107,6 +110,12 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
       is_calibrated_ = other.is_calibrated_;
 
       needs_reset_ = other.needs_reset_;
+
+      is_calibrating_ = other.is_calibrating_;
+
+      is_cooling_down_ = other.is_cooling_down_;
+
+      automatic_cooldown_enabled_ = other.automatic_cooldown_enabled_;
 
    }
 
@@ -316,6 +325,33 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
       return needs_reset_;
    }
 
+   public void setIsCalibrating(boolean is_calibrating)
+   {
+      is_calibrating_ = is_calibrating;
+   }
+   public boolean getIsCalibrating()
+   {
+      return is_calibrating_;
+   }
+
+   public void setIsCoolingDown(boolean is_cooling_down)
+   {
+      is_cooling_down_ = is_cooling_down;
+   }
+   public boolean getIsCoolingDown()
+   {
+      return is_cooling_down_;
+   }
+
+   public void setAutomaticCooldownEnabled(boolean automatic_cooldown_enabled)
+   {
+      automatic_cooldown_enabled_ = automatic_cooldown_enabled;
+   }
+   public boolean getAutomaticCooldownEnabled()
+   {
+      return automatic_cooldown_enabled_;
+   }
+
 
    public static Supplier<SakeHandStatusMessagePubSubType> getPubSubType()
    {
@@ -362,6 +398,12 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.needs_reset_, other.needs_reset_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_calibrating_, other.is_calibrating_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_cooling_down_, other.is_cooling_down_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.automatic_cooldown_enabled_, other.automatic_cooldown_enabled_, epsilon)) return false;
+
 
       return true;
    }
@@ -403,6 +445,12 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
 
       if(this.needs_reset_ != otherMyClass.needs_reset_) return false;
 
+      if(this.is_calibrating_ != otherMyClass.is_calibrating_) return false;
+
+      if(this.is_cooling_down_ != otherMyClass.is_cooling_down_) return false;
+
+      if(this.automatic_cooldown_enabled_ != otherMyClass.automatic_cooldown_enabled_) return false;
+
 
       return true;
    }
@@ -440,7 +488,13 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
       builder.append("is_calibrated=");
       builder.append(this.is_calibrated_);      builder.append(", ");
       builder.append("needs_reset=");
-      builder.append(this.needs_reset_);
+      builder.append(this.needs_reset_);      builder.append(", ");
+      builder.append("is_calibrating=");
+      builder.append(this.is_calibrating_);      builder.append(", ");
+      builder.append("is_cooling_down=");
+      builder.append(this.is_cooling_down_);      builder.append(", ");
+      builder.append("automatic_cooldown_enabled=");
+      builder.append(this.automatic_cooldown_enabled_);
       builder.append("}");
       return builder.toString();
    }

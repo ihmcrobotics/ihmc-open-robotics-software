@@ -7,8 +7,11 @@ import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.SRTStreamStatus;
+import sensor_msgs.msg.dds.CameraInfo;
+import sensor_msgs.msg.dds.Image;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.cuda.CUDACompressionTools;
 import us.ihmc.perception.cuda.CUDAJPEGProcessor;
 import us.ihmc.perception.imageMessage.CompressionType;
@@ -29,6 +32,7 @@ public class RawImagePublisher implements AutoCloseable
 
    private final ROS2Helper ros2Helper;
    private final ImageMessage imageMessage;
+   private final Image ros2Image;
 
    private boolean destroyed = false;
 
@@ -40,10 +44,16 @@ public class RawImagePublisher implements AutoCloseable
 
       ros2Helper = new ROS2Helper(ros2Node);
       imageMessage = new ImageMessage();
+      ros2Image = new Image();
+   }
+
+   public void publishImage(ROS2Topic<? extends Packet<?>> imageTopic, RawImage imageToPublish)
+   {
+      publishImage(imageTopic, imageToPublish, null);
    }
 
    @SuppressWarnings("unchecked") // Trust me bro, I know what I'm doing
-   public synchronized void publishImage(ROS2Topic<? extends Packet<?>> imageTopic, RawImage imageToPublish)
+   public synchronized void publishImage(ROS2Topic<? extends Packet<?>> imageTopic, RawImage imageToPublish, ReferenceFrame sensorFrame)
    {
       if (destroyed)
          return;
@@ -52,10 +62,21 @@ public class RawImagePublisher implements AutoCloseable
       {  // Topic is an ImageMessage topic -> publish as image message
          publishAsImageMessage((ROS2Topic<ImageMessage>) imageTopic, imageToPublish);
       }
+      else if (imageTopic.getType().equals(Image.class))
+      {  // Topic is a standard ROS2 Image topic -> publish as standard ROS2 Image message
+         publishAsROS2Image((ROS2Topic<Image>) imageTopic, imageToPublish, sensorFrame);
+      }
+      else if (imageTopic.getType().equals(CameraInfo.class))
+      {  // Topic is a camera info topic -> publish the image's camera info
+         publishCameraInfo((ROS2Topic<CameraInfo>) imageTopic, imageToPublish, sensorFrame);
+      }
       else if (imageTopic.getType().equals(SRTStreamStatus.class))
       {  // Topic is an SRT stream topic -> stream video over SRT
          sensorStreamer.sendFrame((ROS2Topic<SRTStreamStatus>) imageTopic, imageToPublish);
       }
+      else
+         throw new IllegalArgumentException(
+               getClass().getSimpleName() + " doesn't know how to publish this message type (" + imageTopic.getType().getSimpleName() + ")");
    }
 
    private void publishAsImageMessage(ROS2Topic<ImageMessage> imageTopic, RawImage imageToPublish)
@@ -100,6 +121,31 @@ public class RawImagePublisher implements AutoCloseable
       // Pack the message and send it off
       PerceptionMessageTools.packImageMessage(imageToPublish, compressedImage, compressionType, imageMessage);
       ros2Helper.publish(imageTopic, imageMessage);
+   }
+
+   private void publishAsROS2Image(ROS2Topic<Image> imageTopic, RawImage imageToPublish, ReferenceFrame sensorFrame)
+   {
+      if (sensorFrame == null)
+         throw new IllegalArgumentException("A sensor frame must be provided to publish ROS 2 Image messages");
+
+      // Pack the Image message
+      PerceptionMessageTools.packImageMessage(imageToPublish, sensorFrame.getName(), ros2Image);
+
+      // Publish the image
+      ros2Helper.publish(imageTopic, ros2Image);
+   }
+
+   private void publishCameraInfo(ROS2Topic<CameraInfo> cameraInfoTopic, RawImage image, ReferenceFrame sensorFrame)
+   {
+      if (sensorFrame == null)
+         throw new IllegalArgumentException("A sensor frame must be provided to publish ROS 2 CameraInfo messages");
+
+      // Create and pack a CameraInfo message
+      CameraInfo cameraInfo = new CameraInfo();
+      PerceptionMessageTools.packCameraInfo(image, sensorFrame.getName(), cameraInfo);
+
+      // Publish the message
+      ros2Helper.publish(cameraInfoTopic, cameraInfo);
    }
 
    @Override

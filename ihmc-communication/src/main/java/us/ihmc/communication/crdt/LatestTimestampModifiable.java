@@ -108,7 +108,7 @@ public class LatestTimestampModifiable
    }
 
    /** Call when we receive the full data to stop requesting it. */
-   public void confirmRecievedFullData()
+   public void confirmReceivedFullData()
    {
       if (requestSendFullData)
          LogTools.debug("{}: Update # {} Full data received", ourName, crdtInfo.getUpdateNumber());
@@ -209,7 +209,7 @@ public class LatestTimestampModifiable
                }
                else // If peer that most recently modified is now offline, we need to become the latest modifier
                {    // because we don't know when that time was anymore
-                  LogTools.warn(() -> "%s: Update # %d INCOMING = true  Modification # %d -> %d  Peer offline: %s"
+                  LogTools.debug(() -> "%s: Update # %d INCOMING = true  Modification # %d -> %d  Peer offline: %s"
                         .formatted(ourName,
                                    crdtInfo.getUpdateNumber(),
                                    modificationNumber,
@@ -231,7 +231,7 @@ public class LatestTimestampModifiable
             // We'll resolve the race by a timestamp in hopes to settle it
             if (peerTimeAvailable)
             {
-               LogTools.warn(() -> "%s: Update # %d INCOMING = true  Race! Modification # %d == %d  Local: %s  %s: %s   Peer offset: %s"
+               LogTools.debug(() -> "%s: Update # %d INCOMING = true  Race! Modification # %d == %d  Local: %s  %s: %s   Peer offset: %s"
                      .formatted(ourName,
                                 crdtInfo.getUpdateNumber(),
                                 modificationNumber,
@@ -245,7 +245,7 @@ public class LatestTimestampModifiable
             }
             else // Rare case, a now offline peer somehow concurrently modified
             {
-               LogTools.error(() -> "%s: Update # %d INCOMING = true  Race: Modification # %d == %d  Local: %s  Peer offline: %s"
+               LogTools.debug(() -> "%s: Update # %d INCOMING = true  Race: Modification # %d == %d  Local: %s  Peer offline: %s"
                      .formatted(ourName,
                                 crdtInfo.getUpdateNumber(),
                                 modificationNumber,

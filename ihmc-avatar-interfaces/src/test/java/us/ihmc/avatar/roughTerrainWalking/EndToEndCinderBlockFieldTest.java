@@ -158,8 +158,9 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       walkOverSlantedCinderBlockField(cinderBlockFieldEnvironment, footsteps);
    }
 
+   @Tag("humanoid-rough-terrain-slow")
    @Test
-   public void testSteppingStonesB() throws Exception
+   public void testSteppingStonesB()
    {
       CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       simulationTestingParameters.setUsePefectSensors(getUsePerfectSensors());
@@ -175,6 +176,8 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       walkOverSlantedCinderBlockField(cinderBlockFieldEnvironment, footsteps);
    }
 
+   @Tag("humanoid-rough-terrain-slow")
+   @Test
    public void testEastHillMountain()
    {
       CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -233,8 +236,9 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       walkOverSlantedCinderBlockField(cinderBlockFieldEnvironment, footsteps);
    }
 
+   @Tag("humanoid-rough-terrain-slow")
    @Test
-   public void testSlantedCinderBlockAnkleRollLimit() throws Exception
+   public void testSlantedCinderBlockAnkleRollLimit()
    {
       CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       simulationTestingParameters.setUsePefectSensors(getUsePerfectSensors());

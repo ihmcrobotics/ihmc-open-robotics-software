@@ -57,10 +57,9 @@ public class HeightMapSnapWiggler
                                       double minSurfaceInclineRadians)
    {
       RobotSide robotSide = footstepToWiggle.getRobotSide();
-      double maxArea = footPolygonsInSoleFrame.get(robotSide).getArea();
 
       Point2D currentPosition = new Point2D(footstepToWiggle.getX(), footstepToWiggle.getY());
-      Point2D originalPosition = new Point2D(footstepToWiggle.getX(), footstepToWiggle.getY());
+      Point2D originalPosition = new Point2D(currentPosition);
 
       computeWiggleOffsets(footstepToWiggle.getYaw());
 

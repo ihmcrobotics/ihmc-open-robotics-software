@@ -8,19 +8,24 @@ import us.ihmc.tools.property.StoredPropertySetBasics;
  */
 public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, StoredPropertySetBasics
 {
+   default void setDriftOffsetFilter(boolean driftOffsetFilter)
+   {
+      set(HeightMapParameters.driftOffsetFilter, driftOffsetFilter);
+   }
+
    default void setFlyingPointsFilter(boolean flyingPointsFilter)
    {
       set(HeightMapParameters.flyingPointsFilter, flyingPointsFilter);
    }
 
-   default void setResetHeightMap(boolean resetHeightMap)
-   {
-      set(HeightMapParameters.resetHeightMap, resetHeightMap);
-   }
-
    default void setEnableAlphaFilter(boolean enableAlphaFilter)
    {
       set(HeightMapParameters.enableAlphaFilter, enableAlphaFilter);
+   }
+
+   default void setEnableVerticalFilter(boolean enableVerticalFilter)
+   {
+      set(HeightMapParameters.enableVerticalFilter, enableVerticalFilter);
    }
 
    default void setSearchWindowHeight(int searchWindowHeight)
@@ -31,6 +36,11 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
    default void setSearchWindowWidth(int searchWindowWidth)
    {
       set(HeightMapParameters.searchWindowWidth, searchWindowWidth);
+   }
+
+   default void setSearchSkipSize(int searchSkipSize)
+   {
+      set(HeightMapParameters.searchSkipSize, searchSkipSize);
    }
 
    default void setMinHeightRegistration(double minHeightRegistration)
@@ -78,29 +88,24 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
       set(HeightMapParameters.maxClampHeight, maxClampHeight);
    }
 
+   default void setCellSizeInMeters(double cellSizeInMeters)
+   {
+      set(HeightMapParameters.cellSizeInMeters, cellSizeInMeters);
+   }
+
    default void setLocalWidthInMeters(double localWidthInMeters)
    {
       set(HeightMapParameters.localWidthInMeters, localWidthInMeters);
    }
 
-   default void setLocalCellSizeInMeters(double localCellSizeInMeters)
+   default void setTerrainWidthInMeters(double terrainWidthInMeters)
    {
-      set(HeightMapParameters.localCellSizeInMeters, localCellSizeInMeters);
+      set(HeightMapParameters.terrainWidthInMeters, terrainWidthInMeters);
    }
 
-   default void setGlobalWidthInMeters(double globalWidthInMeters)
+   default void setCroppedWidthInMeters(double croppedWidthInMeters)
    {
-      set(HeightMapParameters.globalWidthInMeters, globalWidthInMeters);
-   }
-
-   default void setGlobalCellSizeInMeters(double globalCellSizeInMeters)
-   {
-      set(HeightMapParameters.globalCellSizeInMeters, globalCellSizeInMeters);
-   }
-
-   default void setRobotCollisionCylinderRadius(double robotCollisionCylinderRadius)
-   {
-      set(HeightMapParameters.robotCollisionCylinderRadius, robotCollisionCylinderRadius);
+      set(HeightMapParameters.croppedWidthInMeters, croppedWidthInMeters);
    }
 
    default void setInternalGlobalWidthInMeters(double internalGlobalWidthInMeters)
@@ -108,19 +113,14 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
       set(HeightMapParameters.internalGlobalWidthInMeters, internalGlobalWidthInMeters);
    }
 
-   default void setInternalGlobalCellSizeInMeters(double internalGlobalCellSizeInMeters)
+   default void setRobotCollisionCylinderRadius(double robotCollisionCylinderRadius)
    {
-      set(HeightMapParameters.internalGlobalCellSizeInMeters, internalGlobalCellSizeInMeters);
+      set(HeightMapParameters.robotCollisionCylinderRadius, robotCollisionCylinderRadius);
    }
 
    default void setHeightScaleFactor(double heightScaleFactor)
    {
       set(HeightMapParameters.heightScaleFactor, heightScaleFactor);
-   }
-
-   default void setCropWindowSize(int cropWindowSize)
-   {
-      set(HeightMapParameters.cropWindowSize, cropWindowSize);
    }
 
    default void setSteppingContactThreshold(int steppingContactThreshold)
@@ -136,11 +136,6 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
    default void setSteppingCosineThreshold(double steppingCosineThreshold)
    {
       set(HeightMapParameters.steppingCosineThreshold, steppingCosineThreshold);
-   }
-
-   default void setSearchSkipSize(int searchSkipSize)
-   {
-      set(HeightMapParameters.searchSkipSize, searchSkipSize);
    }
 
    default void setFastSearchSize(int fastSearchSize)

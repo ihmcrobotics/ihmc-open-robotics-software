@@ -53,7 +53,7 @@ public class OpenCVArUcoMarkerDetectionThread extends RepeatingTaskThread
          }
 
          // Update the sensor frame
-         sensorFrame.update(transformToWorld -> transformToWorld.set(colorImage.getPose()));
+         sensorFrame.update(transformToWorld -> transformToWorld.set(colorImage.getTransformToWorld()));
 
          // Detect markers
          detector.update(colorImage.getCpuImageMat());

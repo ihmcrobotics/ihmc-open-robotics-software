@@ -92,11 +92,11 @@ public class KinematicsToolboxInitialConfigurationMessagePubSubType implements u
 
       if(data.getInitialJointHashCodes().size() <= 100)
       cdr.write_type_e(data.getInitialJointHashCodes());else
-          throw new RuntimeException("initial_joint_hash_codes field exceeds the maximum length");
+          throw new RuntimeException("initial_joint_hash_codes field exceeds the maximum length: %d > %d".formatted(data.getInitialJointHashCodes().size(), 100));
 
       if(data.getInitialJointAngles().size() <= 100)
       cdr.write_type_e(data.getInitialJointAngles());else
-          throw new RuntimeException("initial_joint_angles field exceeds the maximum length");
+          throw new RuntimeException("initial_joint_angles field exceeds the maximum length: %d > %d".formatted(data.getInitialJointAngles().size(), 100));
 
    }
 

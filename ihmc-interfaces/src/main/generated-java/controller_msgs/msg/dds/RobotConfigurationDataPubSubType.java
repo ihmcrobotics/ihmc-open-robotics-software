@@ -182,15 +182,15 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
 
       if(data.getJointAngles().size() <= 50)
       cdr.write_type_e(data.getJointAngles());else
-          throw new RuntimeException("joint_angles field exceeds the maximum length");
+          throw new RuntimeException("joint_angles field exceeds the maximum length: %d > %d".formatted(data.getJointAngles().size(), 50));
 
       if(data.getJointVelocities().size() <= 50)
       cdr.write_type_e(data.getJointVelocities());else
-          throw new RuntimeException("joint_velocities field exceeds the maximum length");
+          throw new RuntimeException("joint_velocities field exceeds the maximum length: %d > %d".formatted(data.getJointVelocities().size(), 50));
 
       if(data.getJointTorques().size() <= 50)
       cdr.write_type_e(data.getJointTorques());else
-          throw new RuntimeException("joint_torques field exceeds the maximum length");
+          throw new RuntimeException("joint_torques field exceeds the maximum length: %d > %d".formatted(data.getJointTorques().size(), 50));
 
       geometry_msgs.msg.dds.PointPubSubType.write(data.getRootPosition(), cdr);
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getRootOrientation(), cdr);
@@ -199,11 +199,11 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getPelvisLinearAcceleration(), cdr);
       if(data.getForceSensorData().size() <= 50)
       cdr.write_type_e(data.getForceSensorData());else
-          throw new RuntimeException("force_sensor_data field exceeds the maximum length");
+          throw new RuntimeException("force_sensor_data field exceeds the maximum length: %d > %d".formatted(data.getForceSensorData().size(), 50));
 
       if(data.getImuSensorData().size() <= 50)
       cdr.write_type_e(data.getImuSensorData());else
-          throw new RuntimeException("imu_sensor_data field exceeds the maximum length");
+          throw new RuntimeException("imu_sensor_data field exceeds the maximum length: %d > %d".formatted(data.getImuSensorData().size(), 50));
 
       cdr.write_type_9(data.getRobotMotionStatus());
 

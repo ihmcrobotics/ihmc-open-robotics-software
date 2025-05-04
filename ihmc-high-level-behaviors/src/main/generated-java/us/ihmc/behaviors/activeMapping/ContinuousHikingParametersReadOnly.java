@@ -20,6 +20,11 @@ public interface ContinuousHikingParametersReadOnly extends StoredPropertySetRea
       return get(overrideEntireQueueEachStep);
    }
 
+   default boolean getEnableSwingCollisionAvoidance()
+   {
+      return get(enableSwingCollisionAvoidance);
+   }
+
    default int getNumberOfStepsToSend()
    {
       return get(numberOfStepsToSend);
@@ -40,6 +45,11 @@ public interface ContinuousHikingParametersReadOnly extends StoredPropertySetRea
       return get(goalPoseBackwardDistance);
    }
 
+   default double getGoalPoseSidewaysDistance()
+   {
+      return get(goalPoseSidewaysDistance);
+   }
+
    default double getSwingTime()
    {
       return get(swingTime);
@@ -50,19 +60,14 @@ public interface ContinuousHikingParametersReadOnly extends StoredPropertySetRea
       return get(transferTime);
    }
 
-   default double getPlanningTimeoutAsAFractionOfTheStepDuration()
-   {
-      return get(planningTimeoutAsAFractionOfTheStepDuration);
-   }
-
    default double getPlanningWithoutReferenceTimeout()
    {
       return get(planningWithoutReferenceTimeout);
    }
 
-   default double getPercentThroughSwingToPlanTo()
+   default double getPercentThroughSwingToStartPlanning()
    {
-      return get(percentThroughSwingToPlanTo);
+      return get(percentThroughSwingToStartPlanning);
    }
 
    default boolean getLogFootstepPlans()
@@ -73,5 +78,15 @@ public interface ContinuousHikingParametersReadOnly extends StoredPropertySetRea
    default double getNextWaypointDistanceMargin()
    {
       return get(nextWaypointDistanceMargin);
+   }
+
+   default double getNinetyDegreeTurnSwingTime()
+   {
+      return get(ninetyDegreeTurnSwingTime);
+   }
+
+   default double getNinetyDegreeTurnTransferTime()
+   {
+      return get(ninetyDegreeTurnTransferTime);
    }
 }

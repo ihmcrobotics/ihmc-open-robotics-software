@@ -2,7 +2,7 @@ package us.ihmc.footstepPlanning.graphSearch.graph;
 
 public class LatticePoint
 {
-   public static final double gridSizeXY = 0.05;
+   public static final double gridSizeXY = 0.02;
 
    public static final int yawDivisions = 36;
    public static final double gridSizeYaw = 2.0 * Math.PI / yawDivisions;

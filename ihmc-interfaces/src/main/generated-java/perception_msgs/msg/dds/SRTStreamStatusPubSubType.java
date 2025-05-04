@@ -140,7 +140,7 @@ public class SRTStreamStatusPubSubType implements us.ihmc.pubsub.TopicDataType<p
    {
       if(data.getStreamerAddress().length() <= 255)
       cdr.write_type_d(data.getStreamerAddress());else
-          throw new RuntimeException("streamer_address field exceeds the maximum length");
+          throw new RuntimeException("streamer_address field exceeds the maximum length: %d > %d".formatted(data.getStreamerAddress().length(), 255));
 
       cdr.write_type_3(data.getStreamerPort());
 

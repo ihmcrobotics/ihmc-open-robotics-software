@@ -99,7 +99,7 @@ public class HeatMapPacketPubSubType implements us.ihmc.pubsub.TopicDataType<per
 
       if(data.getData().size() <= 100)
       cdr.write_type_e(data.getData());else
-          throw new RuntimeException("data field exceeds the maximum length");
+          throw new RuntimeException("data field exceeds the maximum length: %d > %d".formatted(data.getData().size(), 100));
 
       cdr.write_type_2(data.getWidth());
 
@@ -107,7 +107,7 @@ public class HeatMapPacketPubSubType implements us.ihmc.pubsub.TopicDataType<per
 
       if(data.getName().length() <= 255)
       cdr.write_type_d(data.getName());else
-          throw new RuntimeException("name field exceeds the maximum length");
+          throw new RuntimeException("name field exceeds the maximum length: %d > %d".formatted(data.getName().length(), 255));
 
    }
 

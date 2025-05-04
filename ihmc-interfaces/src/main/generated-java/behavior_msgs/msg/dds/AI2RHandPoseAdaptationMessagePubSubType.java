@@ -87,11 +87,11 @@ public class AI2RHandPoseAdaptationMessagePubSubType implements us.ihmc.pubsub.T
    {
       if(data.getActionName().length() <= 255)
       cdr.write_type_d(data.getActionName());else
-          throw new RuntimeException("action_name field exceeds the maximum length");
+          throw new RuntimeException("action_name field exceeds the maximum length: %d > %d".formatted(data.getActionName().length(), 255));
 
       if(data.getReferenceFrameName().length() <= 255)
       cdr.write_type_d(data.getReferenceFrameName());else
-          throw new RuntimeException("reference_frame_name field exceeds the maximum length");
+          throw new RuntimeException("reference_frame_name field exceeds the maximum length: %d > %d".formatted(data.getReferenceFrameName().length(), 255));
 
       geometry_msgs.msg.dds.PointPubSubType.write(data.getNewPosition(), cdr);
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getNewOrientation(), cdr);

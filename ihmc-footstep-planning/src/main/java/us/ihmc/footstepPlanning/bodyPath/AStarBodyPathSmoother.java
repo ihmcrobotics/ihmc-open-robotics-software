@@ -186,10 +186,7 @@ public class AStarBodyPathSmoother
 
                if (visualize)
                {
-                  if (waypointIndex - 1 != 0)
-                  {
-                     waypoints[waypointIndex - 1].updateRollGraphics(-rollGradient.getX(), -rollGradient.getY());
-                  }
+                  waypoints[waypointIndex - 1].updateRollGraphics(-rollGradient.getX(), -rollGradient.getY());
                   if (waypointIndex + 1 != pathSize - 1)
                   {
                      waypoints[waypointIndex + 1].updateRollGraphics(rollGradient.getX(), rollGradient.getY());

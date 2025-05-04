@@ -102,10 +102,10 @@ public class RealsenseVideoROS1Bridge extends AbstractRosTopicSubscriber<sensor_
    // Eventually it would be nice to use Compressed Image
    private void createROS2CompressedImage(sensor_msgs.CompressedImage ros1Image)
    {
-      CompressedImage ros2Image = new CompressedImage();
-      byte[] data = ros1Image.getData().array();
-      int dataOffset = ros1Image.getData().arrayOffset();
-      int length = data.length;
-      ros2Image.getData().add(data, dataOffset, length - dataOffset);
+//      CompressedImage ros2Image = new CompressedImage();
+//      byte[] data = ros1Image.getData().array();
+//      int dataOffset = ros1Image.getData().arrayOffset();
+//      int length = data.length;
+//      ros2Image.getData().add(data, dataOffset, length - dataOffset);
    }
 }

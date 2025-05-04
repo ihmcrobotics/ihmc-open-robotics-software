@@ -155,19 +155,19 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
 
       if(data.getDesiredJointAngles().size() <= 100)
       cdr.write_type_e(data.getDesiredJointAngles());else
-          throw new RuntimeException("desired_joint_angles field exceeds the maximum length");
+          throw new RuntimeException("desired_joint_angles field exceeds the maximum length: %d > %d".formatted(data.getDesiredJointAngles().size(), 100));
 
       geometry_msgs.msg.dds.PointPubSubType.write(data.getDesiredRootPosition(), cdr);
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getDesiredRootOrientation(), cdr);
       if(data.getDesiredJointVelocities().size() <= 100)
       cdr.write_type_e(data.getDesiredJointVelocities());else
-          throw new RuntimeException("desired_joint_velocities field exceeds the maximum length");
+          throw new RuntimeException("desired_joint_velocities field exceeds the maximum length: %d > %d".formatted(data.getDesiredJointVelocities().size(), 100));
 
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getDesiredRootLinearVelocity(), cdr);
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getDesiredRootAngularVelocity(), cdr);
       if(data.getSupportRegion().size() <= 32)
       cdr.write_type_e(data.getSupportRegion());else
-          throw new RuntimeException("support_region field exceeds the maximum length");
+          throw new RuntimeException("support_region field exceeds the maximum length: %d > %d".formatted(data.getSupportRegion().size(), 32));
 
       cdr.write_type_6(data.getSupportRegionSensitivity());
 

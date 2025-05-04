@@ -19,7 +19,7 @@ public interface WholeBodyControllerParameters<E extends Enum<E> & RobotSegment<
       return getControllerDT();
    }
 
-   default double getWholeBodyControllerCoreDT()
+   default double getFeedbackControllerDT()
    {
       return 0.0;
    }

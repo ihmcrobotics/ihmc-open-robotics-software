@@ -86,7 +86,7 @@ public class StatusLogMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
       if(data.getLogMessage().size() <= 100)
       cdr.write_type_e(data.getLogMessage());else
-          throw new RuntimeException("log_message field exceeds the maximum length");
+          throw new RuntimeException("log_message field exceeds the maximum length: %d > %d".formatted(data.getLogMessage().size(), 100));
 
    }
 

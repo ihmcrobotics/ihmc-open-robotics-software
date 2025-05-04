@@ -7,7 +7,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.mecano.algorithms.CentroidalMomentumCalculator;
-import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
+import us.ihmc.yoVariables.filters.RateLimitedYoVariable;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 

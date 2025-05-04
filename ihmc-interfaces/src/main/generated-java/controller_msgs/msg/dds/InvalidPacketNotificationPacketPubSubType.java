@@ -86,11 +86,11 @@ public class InvalidPacketNotificationPacketPubSubType implements us.ihmc.pubsub
 
       if(data.getPacketClassSimpleName().length() <= 255)
       cdr.write_type_d(data.getPacketClassSimpleName());else
-          throw new RuntimeException("packet_class_simple_name field exceeds the maximum length");
+          throw new RuntimeException("packet_class_simple_name field exceeds the maximum length: %d > %d".formatted(data.getPacketClassSimpleName().length(), 255));
 
       if(data.getErrorMessage().length() <= 255)
       cdr.write_type_d(data.getErrorMessage());else
-          throw new RuntimeException("error_message field exceeds the maximum length");
+          throw new RuntimeException("error_message field exceeds the maximum length: %d > %d".formatted(data.getErrorMessage().length(), 255));
 
    }
 

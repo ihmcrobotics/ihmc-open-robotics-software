@@ -36,6 +36,10 @@ public class SRTStreamWriter
    private TimerTask endConnectionOnTimeout;
    private boolean connected = false;
 
+   private long lastPacketPTS = Long.MIN_VALUE;
+   private long lastPacketDTS = Long.MIN_VALUE;
+   private boolean allowNonIncreasingTimestamp;
+
    private int error;
 
    public SRTStreamWriter(FFmpegVideoEncoder encoder, AVIOContext srtContext, AVOutputFormat outputFormat, AVDictionary formatOptions)
@@ -55,6 +59,13 @@ public class SRTStreamWriter
       FFmpegTools.checkPointer(packetCopy, "Allocating a packet");
 
       connectionTimeoutTimer = new Timer(getClass().getSimpleName() + "ConnectionTimeout", true);
+
+      allowNonIncreasingTimestamp = false;
+   }
+
+   public void allowNonIncreasingTimestamp(boolean allow)
+   {
+      allowNonIncreasingTimestamp = allow;
    }
 
    private boolean startOutput()
@@ -84,12 +95,26 @@ public class SRTStreamWriter
 
    public synchronized boolean write(AVPacket packetToWrite)
    {
+      // Check timestamps (pts, dts) to make sure they're increasing
+      long pts = packetToWrite.pts();
+      long dts = packetToWrite.dts();
+      if ((pts <= lastPacketPTS || dts <= lastPacketDTS) && !allowNonIncreasingTimestamp)
+      {
+         LogTools.debug("PTS (%d) <= last PTS (%d) || DTS (%d) <= last DTS (%d)".formatted(pts, lastPacketPTS, dts, lastPacketDTS));
+         return connected;
+      }
+      lastPacketPTS = pts;
+      lastPacketDTS = dts;
+
+      // If we haven't started, start
       if (outputStream == null)
          connected = startOutput();
 
+      // Check that connection hasn't timed out
       if (endConnectionOnTimeout != null)
          connected &= endConnectionOnTimeout.cancel();
 
+      // If we're still connected, try sending the packet
       if (connected)
       {
          av_packet_ref(packetCopy, packetToWrite);
@@ -100,7 +125,7 @@ public class SRTStreamWriter
          if (error < 0)
          {
             connected = false;
-            LogTools.debug("Connection failed with caller while writing packet");
+            LogTools.debug("Connection failed with caller while writing packet ({})", FFmpegTools.getErrorCodeString(error));
          }
 
          endConnectionOnTimeout = new ConnectionTimeoutTask();

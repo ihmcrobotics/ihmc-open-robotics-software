@@ -374,7 +374,7 @@ public class FootstepPlannerLogLoader
       ExtrusionSide extrusionSide = ExtrusionSide.fromByte((byte) getIntCSV(true, dataFileReader.readLine())[0]);
       Optional<PlanarRegion> region = planarRegionsList.stream().filter(r -> r.getRegionId() == mapId).findFirst();
 
-      if (!region.isPresent())
+      if (region.isEmpty())
       {
          return null;
       }

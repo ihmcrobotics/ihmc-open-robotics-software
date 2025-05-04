@@ -15,7 +15,7 @@ public class FootstepDataListMessagePubSubType implements us.ihmc.pubsub.TopicDa
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "87182f5b9a9f5487b130b537b49fcd101fe50a621f41217c0799a485b4393eba";
+   		return "5379d1f991d2c764f8160d23606b39ab3dbca734a352e489e47039d5eef86a9f";
    }
    
    @Override
@@ -141,7 +141,7 @@ public class FootstepDataListMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
       if(data.getFootstepDataList().size() <= 50)
       cdr.write_type_e(data.getFootstepDataList());else
-          throw new RuntimeException("footstep_data_list field exceeds the maximum length");
+          throw new RuntimeException("footstep_data_list field exceeds the maximum length: %d > %d".formatted(data.getFootstepDataList().size(), 50));
 
       cdr.write_type_9(data.getExecutionTiming());
 

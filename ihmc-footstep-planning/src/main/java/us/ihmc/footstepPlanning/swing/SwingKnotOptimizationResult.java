@@ -6,26 +6,32 @@ import java.util.Arrays;
 
 public class SwingKnotOptimizationResult
 {
-   private static int NUMBER_OF_KNOT_POINTS = 12;
+   private final int numberOfKnotPoints;
 
-   private Vector3D[] knotDisplacement = new Vector3D[NUMBER_OF_KNOT_POINTS];
-   private short[] knotCollisions = new short[NUMBER_OF_KNOT_POINTS];
-   private byte[] knotCollisionSeverity = new byte[NUMBER_OF_KNOT_POINTS];
-   private float[] shiftDistances = new float[NUMBER_OF_KNOT_POINTS];
+   private final Vector3D[] knotDisplacement;
+   private final short[] knotCollisions;
+   private final byte[] knotCollisionSeverity;
+   private final float[] shiftDistances;
 
    private boolean verbose = true;
 
    private int numberOfCollisions = 0;
    private int numberOfSevereCollisoins = 0;
 
-   public SwingKnotOptimizationResult()
+   public SwingKnotOptimizationResult(int numberOfKnotPoints)
    {
+      this.numberOfKnotPoints = numberOfKnotPoints;
+      knotDisplacement = new Vector3D[numberOfKnotPoints];
+      knotCollisions = new short[numberOfKnotPoints];
+      knotCollisionSeverity = new byte[numberOfKnotPoints];
+      shiftDistances = new float[numberOfKnotPoints];
+
       reset();
    }
 
    public void reset()
    {
-      for (int i = 0; i < NUMBER_OF_KNOT_POINTS; i++)
+      for (int i = 0; i < numberOfKnotPoints; i++)
       {
          knotDisplacement[i] = new Vector3D();
          knotCollisions[i] = 0;

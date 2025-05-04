@@ -1,7 +1,5 @@
 package us.ihmc.avatar.obstacleCourseTests;
 
-import static us.ihmc.robotics.Assert.assertTrue;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
@@ -22,6 +21,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class DRCObstacleCourseSteppingStonesTest implements MultiRobotTestInterface
 {
@@ -65,13 +66,12 @@ public abstract class DRCObstacleCourseSteppingStonesTest implements MultiRobotT
 
          setupCameraForWalkingOverEasySteppingStones();
 
-         ThreadTools.sleep(1000);
-         boolean success = simulationTestHelper.simulateNow(2.0);
+         boolean success = simulationTestHelper.simulateNow(0.5);
 
          FootstepDataListMessage footstepDataList = createFootstepsForWalkingOverEasySteppingStones();
          simulationTestHelper.publishToController(footstepDataList);
 
-         success = success && simulationTestHelper.simulateNow(13.0);
+         success = success && simulationTestHelper.simulateNow(getDefaultMoveTime(footstepDataList));
 
          // TODO GITHUB WORKFLOWS
 //         simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
@@ -100,6 +100,15 @@ public abstract class DRCObstacleCourseSteppingStonesTest implements MultiRobotT
       Point3D cameraPosition = new Point3D(-14.0, -5.0, 2.7);
 
       simulationTestHelper.setCamera(cameraFix, cameraPosition);
+   }
+
+   private double getDefaultMoveTime(FootstepDataListMessage footsteps)
+   {
+      DRCRobotModel robotModel = getRobotModel();
+      double moveTime = footsteps.getFootstepDataList().size() * (robotModel.getWalkingControllerParameters().getDefaultSwingTime()
+                                                                  + robotModel.getWalkingControllerParameters().getDefaultTransferTime());
+      moveTime += robotModel.getWalkingControllerParameters().getDefaultInitialTransferTime() + robotModel.getWalkingControllerParameters().getDefaultFinalTransferTime();
+      return moveTime;
    }
 
    private FootstepDataListMessage createFootstepsForWalkingOverEasySteppingStones()

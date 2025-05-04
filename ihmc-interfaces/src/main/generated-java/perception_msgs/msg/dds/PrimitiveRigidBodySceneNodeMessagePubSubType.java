@@ -93,7 +93,7 @@ public class PrimitiveRigidBodySceneNodeMessagePubSubType implements us.ihmc.pub
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getInitialTransformToParent(), cdr);
       if(data.getShape().length() <= 255)
       cdr.write_type_d(data.getShape());else
-          throw new RuntimeException("shape field exceeds the maximum length");
+          throw new RuntimeException("shape field exceeds the maximum length: %d > %d".formatted(data.getShape().length(), 255));
 
    }
 

@@ -105,7 +105,7 @@ public class WrenchTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
       if(data.getWrenchTrajectoryPoints().size() <= 50)
       cdr.write_type_e(data.getWrenchTrajectoryPoints());else
-          throw new RuntimeException("wrench_trajectory_points field exceeds the maximum length");
+          throw new RuntimeException("wrench_trajectory_points field exceeds the maximum length: %d > %d".formatted(data.getWrenchTrajectoryPoints().size(), 50));
 
       ihmc_common_msgs.msg.dds.FrameInformationPubSubType.write(data.getFrameInformation(), cdr);
       cdr.write_type_7(data.getUseCustomControlFrame());

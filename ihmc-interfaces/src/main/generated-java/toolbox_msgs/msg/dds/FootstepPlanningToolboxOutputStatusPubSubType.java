@@ -15,7 +15,7 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "21ea82705a31df7858e9ec0d479a9063c03b34cf82228c19be93b4308252c474";
+   		return "c3b70f8b455e4ea1515984b7eb015728b2197b2118f9dcd54cdb029135077f7e";
    }
    
    @Override
@@ -147,21 +147,21 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
       perception_msgs.msg.dds.HeightMapMessagePubSubType.write(data.getHeightMapMessage(), cdr);
       if(data.getBodyPath().size() <= 100)
       cdr.write_type_e(data.getBodyPath());else
-          throw new RuntimeException("body_path field exceeds the maximum length");
+          throw new RuntimeException("body_path field exceeds the maximum length: %d > %d".formatted(data.getBodyPath().size(), 100));
 
       if(data.getBodyPathUnsmoothed().size() <= 100)
       cdr.write_type_e(data.getBodyPathUnsmoothed());else
-          throw new RuntimeException("body_path_unsmoothed field exceeds the maximum length");
+          throw new RuntimeException("body_path_unsmoothed field exceeds the maximum length: %d > %d".formatted(data.getBodyPathUnsmoothed().size(), 100));
 
       geometry_msgs.msg.dds.PosePubSubType.write(data.getGoalPose(), cdr);
       toolbox_msgs.msg.dds.FootstepPlanningTimingsMessagePubSubType.write(data.getPlannerTimings(), cdr);
       if(data.getExceptionMessage().length() <= 255)
       cdr.write_type_d(data.getExceptionMessage());else
-          throw new RuntimeException("exception_message field exceeds the maximum length");
+          throw new RuntimeException("exception_message field exceeds the maximum length: %d > %d".formatted(data.getExceptionMessage().length(), 255));
 
       if(data.getStacktrace().size() <= 20)
       cdr.write_type_e(data.getStacktrace());else
-          throw new RuntimeException("stacktrace field exceeds the maximum length");
+          throw new RuntimeException("stacktrace field exceeds the maximum length: %d > %d".formatted(data.getStacktrace().size(), 20));
 
    }
 

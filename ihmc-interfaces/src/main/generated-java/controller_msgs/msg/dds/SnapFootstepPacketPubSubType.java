@@ -15,7 +15,7 @@ public class SnapFootstepPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "81eade561623024d0291e175fb38cacfdf3739e3acfb6c14a1f178c7b96292b7";
+   		return "8d7dfc27735170a09d0c0fb6cfe2ed2c251b034ad39ed1eb365828e7a94c4dd4";
    }
    
    @Override
@@ -100,15 +100,15 @@ public class SnapFootstepPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
 
       if(data.getFootstepData().size() <= 100)
       cdr.write_type_e(data.getFootstepData());else
-          throw new RuntimeException("footstep_data field exceeds the maximum length");
+          throw new RuntimeException("footstep_data field exceeds the maximum length: %d > %d".formatted(data.getFootstepData().size(), 100));
 
       if(data.getFootstepOrder().size() <= 100)
       cdr.write_type_e(data.getFootstepOrder());else
-          throw new RuntimeException("footstep_order field exceeds the maximum length");
+          throw new RuntimeException("footstep_order field exceeds the maximum length: %d > %d".formatted(data.getFootstepOrder().size(), 100));
 
       if(data.getFlag().size() <= 100)
       cdr.write_type_e(data.getFlag());else
-          throw new RuntimeException("flag field exceeds the maximum length");
+          throw new RuntimeException("flag field exceeds the maximum length: %d > %d".formatted(data.getFlag().size(), 100));
 
    }
 

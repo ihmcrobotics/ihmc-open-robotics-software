@@ -486,7 +486,7 @@ public class SwingTrajectoryCalculator
          swingTrajectory.appendPositionWaypoint(tempPositionTrajectoryPoint);
       }
 
-      boolean isObstacleClearance = activeTrajectoryType.getEnumValue() == TrajectoryType.OBSTACLE_CLEARANCE;
+      boolean isObstacleClearance = activeTrajectoryType.getEnumValue() == TrajectoryType.OBSTACLE_CLEARANCE || activeTrajectoryType.getEnumValue() == TrajectoryType.CUSTOM;
       if (swingTrajectoryParameters.addFootPitchToAvoidHeelStrikeWhenSteppingForwardAndDown() && isObstacleClearance && isSteppingForwardAndDown())
       {
          tmpOrientation.setToZero(worldFrame);
