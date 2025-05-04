@@ -12,23 +12,44 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.LongSupplier;
 import java.util.function.ObjLongConsumer;
 
 public class ROS2LogReplay
 {
+   private final ROS2Node ros2Node;
+   private final ROS2LogTimeSource timeSource;
    private final List<ReplayTopicManager<?>> topicManagers;
    private final Map<String, ReplayTopicManager<?>> topicManagersMap = new HashMap<>();
-   private final File logFile;
    private final LongSupplier timestampSupplier;
 
-   public ROS2LogReplay(String robotName, List<ROS2Topic<?>> topicsToLog, File logFile, ROS2LogTimeSource timeSource)
+   private boolean firstUpdate = true;
+   private long startTime;
+
+   public ROS2LogReplay(String robotName, List<ROS2Topic<?>> loggedTopics, File logFile, ROS2LogTimeSource timeSource)
    {
-      ROS2Node ros2Node = new ROS2NodeBuilder().build("ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, getClass().getSimpleName()));
-      topicManagers = ROS2LogIOTools.loadLogFile(ros2Node, topicsToLog, logFile);
-      this.logFile = logFile;
+      this.timeSource = timeSource;
+
+      ros2Node = new ROS2NodeBuilder().build("ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, getClass().getSimpleName()));
+      topicManagers = ROS2LogIOTools.loadLogFile(ros2Node, loggedTopics, logFile);
       timestampSupplier = timeSource.createTimestampProvider(robotName, ros2Node);
 
+      populateTopicManagers();
+   }
+
+   public ROS2LogReplay(List<ROS2Topic<?>> loggedTopics, File logFile, Function<ROS2Topic, Consumer> messageConsumerGenerator, LongSupplier timestampSupplier)
+   {
+      this.ros2Node = null;
+      this.timeSource = ROS2LogTimeSource.SIMULATION;
+      this.timestampSupplier = timestampSupplier;
+      topicManagers = ROS2LogIOTools.loadLogFile(logFile, loggedTopics, messageConsumerGenerator);
+
+      populateTopicManagers();
+   }
+
+   private void populateTopicManagers()
+   {
       if (topicManagers == null)
          return;
 
@@ -36,7 +57,40 @@ public class ROS2LogReplay
       {
          topicManagersMap.put(topicManagers.get(i).getTopicName(), topicManagers.get(i));
       }
+   }
 
+   /**
+    * This performs a single update on the current thread, intended for use within the simulation process.
+    */
+   public boolean doIncrementalReplay()
+   {
+      if (timeSource == ROS2LogTimeSource.SIMULATION && timestampSupplier.getAsLong() == -1)
+      {
+         return false;
+      }
+      else if (firstUpdate)
+      {
+         startTime = timestampSupplier.getAsLong();
+         firstUpdate = false;
+      }
+
+      long now = timestampSupplier.getAsLong() - startTime;
+      boolean isDone = true;
+
+      for (int topic_idx = 0; topic_idx < topicManagers.size(); topic_idx++)
+      {
+         ReplayTopicManager<?> topicManager = topicManagers.get(topic_idx);
+         isDone = topicManager.update(now) && isDone;
+      }
+
+      return isDone;
+   }
+
+   /**
+    * This performs a complete replay on the current thread, and returns when the replay is complete.
+    */
+   public void doFullReplay()
+   {
       if (timeSource == ROS2LogTimeSource.SIMULATION)
       {
          while (timestampSupplier.getAsLong() == -1)
@@ -45,15 +99,14 @@ public class ROS2LogReplay
             ThreadTools.sleep(1000);
          }
       }
+
+      startReplayInternal(topicManagers, timestampSupplier);
+      System.exit(0);
    }
 
-   public void start()
+   public ROS2Node getRos2Node()
    {
-      LogTools.info("Starting replay of " + logFile.getName());
-      startReplayInternal(topicManagers, timestampSupplier);
-      LogTools.info("Finished replay");
-
-      System.exit(0);
+      return ros2Node;
    }
 
    private void startReplayInternal(List<ReplayTopicManager<?>> topicManagers, LongSupplier timestampSupplier)

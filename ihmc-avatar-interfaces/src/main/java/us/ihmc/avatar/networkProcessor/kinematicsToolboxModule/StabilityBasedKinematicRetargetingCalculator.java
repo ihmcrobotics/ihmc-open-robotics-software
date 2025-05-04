@@ -63,8 +63,8 @@ public class StabilityBasedKinematicRetargetingCalculator
 
    private static final boolean SNAP_TO_REGION = false;
    public static boolean OVERRIDE_MESSAGE = true;
-   public static final boolean ENABLE_POSTURE_OBJECTIVE = false; // true; //
-   public static final boolean ENABLE_CONTACT_OBJECTIVE = false; // true; //
+   public static boolean ENABLE_POSTURE_OBJECTIVE = false;
+   public static boolean ENABLE_CONTACT_OBJECTIVE = false;
    public static final boolean INCLUDE_FF_VELOCITY = false;
 
    private static final double KP_ORIENTATION = 1200.0;

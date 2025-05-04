@@ -4,11 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import gnu.trove.list.array.TLongArrayList;
+import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.idl.serializers.extra.AbstractSerializer;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
 
 import java.io.File;
@@ -21,6 +24,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * IO helper methods for ROS 2 logging, the log file is timestamped ROS 2 messages with the requested serialization. \
@@ -113,6 +118,15 @@ public class ROS2LogIOTools
 
    public static List<ReplayTopicManager<?>> loadLogFile(ROS2Node ros2Node, List<ROS2Topic<?>> loggedTopics, File logFile)
    {
+      return loadLogFile(logFile, loggedTopics, topic ->
+      {
+         ROS2Publisher publisher = ros2Node.createPublisher(topic);
+         return publisher::publish;
+      });
+   }
+
+   public static List<ReplayTopicManager<?>> loadLogFile(File logFile, List<ROS2Topic<?>> loggedTopics, Function<ROS2Topic, Consumer> messageConsumerGenerator)
+   {
       try
       {
          ROS2LogSerialization serialization = ROS2LogSerialization.fromFileName(logFile.getName());
@@ -126,7 +140,8 @@ public class ROS2LogIOTools
          for (int topic_idx = 0; topic_idx < loggedTopics.size(); topic_idx++)
          {
             ROS2Topic<?> topic = loggedTopics.get(topic_idx);
-            ReplayTopicManager topicManager = new ReplayTopicManager(topic, ros2Node);
+            Consumer<?> messageConsumer = messageConsumerGenerator.apply(topic);
+            ReplayTopicManager topicManager = new ReplayTopicManager(topic, messageConsumer);
 
             Packet packet = (Packet) topic.getType().getConstructor().newInstance();
             TopicDataType<?> topicDataType = (TopicDataType) packet.getPubSubTypePacket().get();

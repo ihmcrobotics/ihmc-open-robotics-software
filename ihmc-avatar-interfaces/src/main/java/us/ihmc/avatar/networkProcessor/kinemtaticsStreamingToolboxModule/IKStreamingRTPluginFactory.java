@@ -290,6 +290,8 @@ public class IKStreamingRTPluginFactory
                                                                                                      kinematicsStreamingToolboxController.getTools()
                                                                                                                                          .getIKController()
                                                                                                                                          .getDesiredOneDoFJoints()));
+
+
       }
 
       private long initialTime = -1L;
@@ -345,6 +347,11 @@ public class IKStreamingRTPluginFactory
 
             kinematicsStreamingToolboxController.update();
          }
+      }
+
+      public CommandInputManager getCommandInputManager()
+      {
+         return commandInputManager;
       }
 
       @Override
