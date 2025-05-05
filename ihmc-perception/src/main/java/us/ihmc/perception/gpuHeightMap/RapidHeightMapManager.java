@@ -106,7 +106,6 @@ public class RapidHeightMapManager
       CameraIntrinsics depthIntrinsicsCopy = depthImageCopy.getIntrinsicsCopy();
 
       // -------- Update the Height Map with the latest depth image from the sensor --------------
-      GpuMat deviceCroppedHeightMap = new GpuMat();
       updateInternal(latestDepthImage, deviceCroppedHeightMap, depthIntrinsicsCopy, cameraFrame, cameraZUpFrame);
 
       // Publish the height map to anyone who is subscribing
