@@ -105,6 +105,8 @@ public class RapidHeightMapManager
       Instant acquisitionTime = depthImageCopy.getAcquisitionTime();
       CameraIntrinsics depthIntrinsicsCopy = depthImageCopy.getIntrinsicsCopy();
 
+      // -------- Update the Height Map with the latest depth image from the sensor --------------
+      GpuMat deviceCroppedHeightMap = new GpuMat();
       updateInternal(latestDepthImage, deviceCroppedHeightMap, depthIntrinsicsCopy, cameraFrame, cameraZUpFrame);
 
       // Publish the height map to anyone who is subscribing
@@ -195,6 +197,7 @@ public class RapidHeightMapManager
                                      groundToWorld,
                                      sensorOrigin,
                                      computeFootHeight());
+
       GpuMat deviceCroppedHeightMap = rapidHeightMapExtractor.getCroppedHeightMap();
       // We have used the depth image without the robot, close this to avoid creating a memory leak
       depthImageWithoutRobot.close();

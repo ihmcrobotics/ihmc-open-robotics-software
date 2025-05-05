@@ -440,6 +440,6 @@ public class RapidHeightMapExtractorCUDA
 
    public GpuMat getCroppedHeightMap()
    {
-      return croppedHeightMapImage;
+      return croppedHeightMapImage.clone();
    }
 }
