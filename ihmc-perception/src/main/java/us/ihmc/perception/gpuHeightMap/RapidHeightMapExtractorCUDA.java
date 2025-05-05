@@ -456,6 +456,6 @@ public class RapidHeightMapExtractorCUDA
 
    public GpuMat getVisualizedHeightMap()
    {
-      return sensorCroppedHeightMapImage;
+      return sensorCroppedHeightMapImage.clone();
    }
 }
