@@ -96,23 +96,41 @@ public class RapidHeightMapManager
       }
    }
 
-   public void update(RawImage depthImage, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame) throws Exception
+   public void updateAndPublishHeightMap(RawImage depthImage, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame) throws Exception
    {
-      // -------- Update the Height Map with the latest depth image from the sensor --------------
       RawImage depthImageCopy = depthImage.get();
       Mat latestDepthImage = depthImageCopy.getCpuImageMat();
       Instant acquisitionTime = depthImageCopy.getAcquisitionTime();
       CameraIntrinsics depthIntrinsicsCopy = depthImageCopy.getIntrinsicsCopy();
 
-      update(latestDepthImage, acquisitionTime, depthIntrinsicsCopy, cameraFrame, cameraZUpFrame);
+      // -------- Update the Height Map with the latest depth image from the sensor --------------
+      GpuMat deviceCroppedHeightMap = new GpuMat(latestDepthImage);
+      updateInternal(latestDepthImage, deviceCroppedHeightMap, depthIntrinsicsCopy, cameraFrame, cameraZUpFrame);
+
+      // Publish the height map to anyone who is subscribing
+      Mat hostCroppedHeightMap = new Mat();
+      deviceCroppedHeightMap.download(hostCroppedHeightMap);
+      OpenCVTools.compressImagePNG(hostCroppedHeightMap, compressedCroppedHeightMapPointer);
+      PerceptionMessageTools.publishCompressedDepthImage(compressedCroppedHeightMapPointer,
+                                                         croppedHeightMapImageMessage,
+                                                         heightMapPublisher,
+                                                         cameraPose,
+                                                         acquisitionTime,
+                                                         rapidHeightMapExtractor.getSequenceNumber(),
+                                                         hostCroppedHeightMap.rows(),
+                                                         hostCroppedHeightMap.cols(),
+                                                         (float) heightMapParameters.getHeightScaleFactor());
+
+      deviceCroppedHeightMap.close();
+      hostCroppedHeightMap.close();
       depthImageCopy.release();
    }
 
-   public void update(Mat latestDepthImage,
-                      Instant acquisitionTime,
-                      CameraIntrinsics depthIntrinsicsCopy,
-                      ReferenceFrame cameraFrame,
-                      ReferenceFrame cameraZUpFrame) throws Exception
+   private void updateInternal(Mat latestDepthImage,
+                               GpuMat deviceHeightMapToPack,
+                               CameraIntrinsics depthIntrinsicsCopy,
+                               ReferenceFrame cameraFrame,
+                               ReferenceFrame cameraZUpFrame) throws Exception
    {
       // Option that gets triggered from a message sent from the user
       if (lowerHeightMapBackdropRequested.poll())
@@ -188,24 +206,11 @@ public class RapidHeightMapManager
          deviceOutputImage.close();
       }
 
+      // Don't close this mat as its being used in the extractor till that finish's
+      deviceCroppedHeightMap.convertTo(deviceHeightMapToPack, deviceCroppedHeightMap.type());
+
       // Now extract the maps to be used in the footstep planning algorithm
       snappedFootstepsExtractor.update(rapidHeightMapExtractor.getTerrainHeightMapImage(), sensorOrigin);
-
-      // Publish the height map to anyone who is subscribing
-
-      Mat hostCroppedHeightMap = new Mat();
-      deviceCroppedHeightMap.download(hostCroppedHeightMap);
-      OpenCVTools.compressImagePNG(hostCroppedHeightMap, compressedCroppedHeightMapPointer);
-      PerceptionMessageTools.publishCompressedDepthImage(compressedCroppedHeightMapPointer,
-                                                         croppedHeightMapImageMessage,
-                                                         heightMapPublisher,
-                                                         cameraPose,
-                                                         acquisitionTime,
-                                                         rapidHeightMapExtractor.getSequenceNumber(),
-                                                         hostCroppedHeightMap.rows(),
-                                                         hostCroppedHeightMap.cols(),
-                                                         (float) heightMapParameters.getHeightScaleFactor());
-      hostCroppedHeightMap.close();
    }
 
    public TerrainMapData getTerrainMapData()
@@ -253,5 +258,6 @@ public class RapidHeightMapManager
       rapidHeightMapExtractor.destroy();
       snappedFootstepsExtractor.close();
       flyingPointsFilter.destroy();
+      compressedCroppedHeightMapPointer.close();
    }
 }
