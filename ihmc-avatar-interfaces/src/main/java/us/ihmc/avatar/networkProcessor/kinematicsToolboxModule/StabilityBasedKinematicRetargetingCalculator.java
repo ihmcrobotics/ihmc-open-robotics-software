@@ -52,14 +52,14 @@ public class StabilityBasedKinematicRetargetingCalculator
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    // Simulation
-   private static final double MAX_ARM_ORIENTATION_OFFSET = Math.toRadians(180.0);
-   private static final double MAX_CHEST_ORIENTATION_OFFSET = Math.toRadians(180.0);
-   private static final double MAX_PELVIS_ORIENTATION_OFFSET = Math.toRadians(180.0);
+//   private static final double MAX_ARM_ORIENTATION_OFFSET = Math.toRadians(180.0);
+//   private static final double MAX_CHEST_ORIENTATION_OFFSET = Math.toRadians(180.0);
+//   private static final double MAX_PELVIS_ORIENTATION_OFFSET = Math.toRadians(180.0);
 
    // Hardware
-//   private static final double MAX_ARM_ORIENTATION_OFFSET = Math.toRadians(55.0);
-//   private static final double MAX_CHEST_ORIENTATION_OFFSET = Math.toRadians(30.0);
-//   private static final double MAX_PELVIS_ORIENTATION_OFFSET = Math.toRadians(25.0);
+   private static final double MAX_ARM_ORIENTATION_OFFSET = Math.toRadians(55.0);
+   private static final double MAX_CHEST_ORIENTATION_OFFSET = Math.toRadians(30.0);
+   private static final double MAX_PELVIS_ORIENTATION_OFFSET = Math.toRadians(30.0);
 
    private static final boolean SNAP_TO_REGION = false;
    public static boolean OVERRIDE_MESSAGE = true;
