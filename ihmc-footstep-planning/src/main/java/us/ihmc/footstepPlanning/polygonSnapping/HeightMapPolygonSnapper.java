@@ -13,7 +13,7 @@ import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
-import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
+import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
@@ -44,7 +44,7 @@ public class HeightMapPolygonSnapper
 
    public FootstepSnapData computeSnapData(DiscreteFootstep footstep,
                                            ConvexPolygon2DReadOnly polygonInStepFrame,
-                                           FootstepPlannerEnvironmentHandler environmentHandler,
+                                           EnvironmentHandler environmentHandler,
                                            double snapHeightThreshold,
                                            double minSurfaceIncline)
    {
@@ -62,7 +62,7 @@ public class HeightMapPolygonSnapper
                                            double stepY,
                                            double stepYaw,
                                            ConvexPolygon2DReadOnly polygonInStepFrame,
-                                           FootstepPlannerEnvironmentHandler environmentHandler,
+                                           EnvironmentHandler environmentHandler,
                                            double snapHeightThreshold,
                                            double minSurfaceIncline)
    {
@@ -71,7 +71,7 @@ public class HeightMapPolygonSnapper
 
    public FootstepSnapData computeSnapData(DiscreteFootstep footstep,
                                            ConvexPolygon2DReadOnly polygonInStepFrame,
-                                           FootstepPlannerEnvironmentHandler environmentHandler,
+                                           EnvironmentHandler environmentHandler,
                                            double snapHeightThreshold,
                                            double minSurfaceIncline,
                                            double minimumHeightToConsider)
@@ -90,7 +90,7 @@ public class HeightMapPolygonSnapper
                                            double stepY,
                                            double yaw,
                                            ConvexPolygon2DReadOnly polygonInStepFrame,
-                                           FootstepPlannerEnvironmentHandler environmentHandler,
+                                           EnvironmentHandler environmentHandler,
                                            double snapHeightThreshold,
                                            double minSurfaceIncline,
                                            double minimumHeightToConsider)
@@ -128,13 +128,13 @@ public class HeightMapPolygonSnapper
       }
    }
 
-   public RigidBodyTransform snapPolygonToHeightMap(ConvexPolygon2DReadOnly polygonToSnap, FootstepPlannerEnvironmentHandler environmentHandler)
+   public RigidBodyTransform snapPolygonToHeightMap(ConvexPolygon2DReadOnly polygonToSnap, EnvironmentHandler environmentHandler)
    {
       return snapPolygonToHeightMap(polygonToSnap, environmentHandler, Double.MAX_VALUE, Double.MAX_VALUE, -Double.MAX_VALUE);
    }
 
    public RigidBodyTransform snapPolygonToHeightMap(ConvexPolygon2DReadOnly polygonToSnap,
-                                                    FootstepPlannerEnvironmentHandler environmentHandler,
+                                                    EnvironmentHandler environmentHandler,
                                                     double snapHeightThreshold,
                                                     double minSurfaceIncline)
    {
@@ -293,7 +293,7 @@ public class HeightMapPolygonSnapper
     * - Any cells with heights below maxZ - snapHeightThreshold are ignored, where maxZ is the max height within the polygon
     */
    public RigidBodyTransform snapPolygonToHeightMap(ConvexPolygon2DReadOnly polygonToSnap,
-                                                    FootstepPlannerEnvironmentHandler environmentHandler,
+                                                    EnvironmentHandler environmentHandler,
                                                     double snapHeightThreshold,
                                                     double minSurfaceIncline,
                                                     double minimumHeightToConsider)
@@ -301,7 +301,7 @@ public class HeightMapPolygonSnapper
       RigidBodyTransform transformToReturn;
 
       TerrainMapData terrainMapData = environmentHandler.getTerrainMapData();
-      HeightMapData heightMapData = environmentHandler.getHeightMap();
+      HeightMapData heightMapData = environmentHandler.getHeightMapData();
 
       if (environmentHandler.hasTerrainMapData() && terrainMapData.hasSnapHeight() && terrainMapData.hasSnapNormal())
       {

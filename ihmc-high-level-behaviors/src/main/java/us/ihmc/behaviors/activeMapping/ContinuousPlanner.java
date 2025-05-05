@@ -18,6 +18,7 @@ import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.PlannedFootstep;
+import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloFootstepPlanner;
@@ -27,10 +28,8 @@ import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -124,24 +123,23 @@ public class ContinuousPlanner
       walkingStartMidPose.getOrientation().setToYawOrientation(startingPose.getRotation().getYaw());
    }
 
-   public void planToGoal(SideDependentList<FramePose3D> goalPoses, HeightMapData heightMapData, TerrainMapData terrainMapData)
+   public void planToGoal(SideDependentList<FramePose3D> goalPoses, EnvironmentHandler environmentHandler)
    {
       if (commandMessage.get().getUseAstarFootstepPlanner())
       {
-         latestFootstepPlan = generateAStarFootstepPlan(heightMapData, terrainMapData, commandMessage.get().getUsePreviousPlanAsReference(), false, goalPoses);
+         latestFootstepPlan = generateAStarFootstepPlan(environmentHandler, commandMessage.get().getUsePreviousPlanAsReference(), false, goalPoses);
       }
       else if (commandMessage.get().getUseMonteCarloFootstepPlanner())
       {
-         latestFootstepPlan = generateMonteCarloFootstepPlan(goalPoses, heightMapData, terrainMapData);
+         latestFootstepPlan = generateMonteCarloFootstepPlan(goalPoses, environmentHandler);
       }
       else
       {
-         latestFootstepPlan = generateAStarFootstepPlan(heightMapData, terrainMapData, true, false, goalPoses);
+         latestFootstepPlan = generateAStarFootstepPlan(environmentHandler, true, false, goalPoses);
       }
    }
 
-   public FootstepPlan generateAStarFootstepPlan(HeightMapData heightMapData,
-                                                 TerrainMapData terrainMapData,
+   public FootstepPlan generateAStarFootstepPlan(EnvironmentHandler environmentHandler,
                                                  boolean usePreviousPlanAsReference,
                                                  boolean useMonteCarloPlanAsReference,
                                                  SideDependentList<FramePose3D> goalPoses)
@@ -164,8 +162,8 @@ public class ContinuousPlanner
       request.setAssumeFlatGround(false);
       request.setPlanBodyPath(false);
       request.setRequestedInitialStanceSide(imminentFootstepSide);
-      request.setHeightMapData(heightMapData);
-      request.setTerrainMapData(terrainMapData);
+      request.setHeightMapData(environmentHandler.getHeightMapData());
+      request.setTerrainMapData(environmentHandler.getTerrainMapData());
       request.setSnapGoalSteps(true);
       request.setAbortIfGoalStepSnappingFails(true);
 
@@ -288,7 +286,7 @@ public class ContinuousPlanner
                                }, "Footstep Logger Thead");
    }
 
-   public FootstepPlan generateMonteCarloFootstepPlan(SideDependentList<FramePose3D> goalPoses, HeightMapData heightMapData, TerrainMapData terrainMapData)
+   public FootstepPlan generateMonteCarloFootstepPlan(SideDependentList<FramePose3D> goalPoses, EnvironmentHandler environmentHandler)
    {
       MonteCarloFootstepPlannerRequest monteCarloFootstepPlannerRequest = new MonteCarloFootstepPlannerRequest();
       monteCarloFootstepPlannerRequest.setTimeout(monteCarloFootstepPlanner.getParameters().getTimeoutDuration());
@@ -297,8 +295,7 @@ public class ContinuousPlanner
       monteCarloFootstepPlannerRequest.setGoalFootPose(RobotSide.LEFT, goalPoses.get(RobotSide.LEFT));
       monteCarloFootstepPlannerRequest.setGoalFootPose(RobotSide.RIGHT, goalPoses.get(RobotSide.RIGHT));
       monteCarloFootstepPlannerRequest.setRequestedInitialStanceSide(imminentFootstepSide);
-      monteCarloFootstepPlannerRequest.setTerrainMapData(terrainMapData);
-      monteCarloFootstepPlannerRequest.setHeightMapData(heightMapData);
+      monteCarloFootstepPlannerRequest.setEnvironmentHandler(environmentHandler);
 
       long timeStart = System.nanoTime();
 
@@ -309,7 +306,7 @@ public class ContinuousPlanner
 
       FootstepPlan latestMonteCarloPlan = monteCarloFootstepPlanner.generateFootstepPlan(monteCarloFootstepPlannerRequest);
       debugger.setRequest(monteCarloFootstepPlannerRequest);
-      debugger.refresh(monteCarloFootstepPlannerRequest.getTerrainMapData());
+      debugger.refresh(monteCarloFootstepPlannerRequest.getEnvironmentHandler().getTerrainMapData());
 
       monteCarloFootstepPlan.set(latestMonteCarloPlan);
       footstepPlanningResult = FootstepPlanningResult.FOUND_SOLUTION;

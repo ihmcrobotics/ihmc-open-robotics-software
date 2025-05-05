@@ -3,18 +3,18 @@ package us.ihmc.footstepPlanning.graphSearch;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
-public class FootstepPlannerEnvironmentHandler
+public class EnvironmentHandler
 {
    private HeightMapData heightMap;
    private TerrainMapData terrainMapData;
 
-   public void reset()
+   public void clear()
    {
       heightMap = null;
       terrainMapData = null;
    }
 
-   public void setHeightMap(HeightMapData heightMap)
+   public void setHeightMapData(HeightMapData heightMap)
    {
       this.heightMap = heightMap;
    }
@@ -40,7 +40,7 @@ public class FootstepPlannerEnvironmentHandler
       return terrainMapData != null;
    }
 
-   public HeightMapData getHeightMap()
+   public HeightMapData getHeightMapData()
    {
       return heightMap;
    }
