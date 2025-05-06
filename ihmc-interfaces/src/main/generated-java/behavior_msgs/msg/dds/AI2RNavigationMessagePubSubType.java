@@ -15,7 +15,7 @@ public class AI2RNavigationMessagePubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "9950968b8edaa1114a5eca043378a225da3f1ded1ee08b742cee2ad6c78c0d24";
+   		return "1012faf962742db3e1a0ad5a2a5330e57c090f0eea02325fcaa6f85a1ba60d16";
    }
    
    @Override
@@ -53,9 +53,7 @@ public class AI2RNavigationMessagePubSubType implements us.ihmc.pubsub.TopicData
       int initial_alignment = current_alignment;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
-      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
-
-      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       return current_alignment - initial_alignment;
@@ -72,9 +70,8 @@ public class AI2RNavigationMessagePubSubType implements us.ihmc.pubsub.TopicData
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getReferenceFrameName().length() + 1;
 
-      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getGoalStancePoint(), current_alignment);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getGoalFocalPoint(), current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -86,15 +83,15 @@ public class AI2RNavigationMessagePubSubType implements us.ihmc.pubsub.TopicData
       cdr.write_type_d(data.getReferenceFrameName());else
           throw new RuntimeException("reference_frame_name field exceeds the maximum length: %d > %d".formatted(data.getReferenceFrameName().length(), 255));
 
-      geometry_msgs.msg.dds.PointPubSubType.write(data.getGoalStancePoint(), cdr);
-      geometry_msgs.msg.dds.PointPubSubType.write(data.getGoalFocalPoint(), cdr);
+      cdr.write_type_6(data.getDistanceToFrame());
+
    }
 
    public static void read(behavior_msgs.msg.dds.AI2RNavigationMessage data, us.ihmc.idl.CDR cdr)
    {
       cdr.read_type_d(data.getReferenceFrameName());	
-      geometry_msgs.msg.dds.PointPubSubType.read(data.getGoalStancePoint(), cdr);	
-      geometry_msgs.msg.dds.PointPubSubType.read(data.getGoalFocalPoint(), cdr);	
+      data.setDistanceToFrame(cdr.read_type_6());
+      	
 
    }
 
@@ -102,20 +99,14 @@ public class AI2RNavigationMessagePubSubType implements us.ihmc.pubsub.TopicData
    public final void serialize(behavior_msgs.msg.dds.AI2RNavigationMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_d("reference_frame_name", data.getReferenceFrameName());
-      ser.write_type_a("goal_stance_point", new geometry_msgs.msg.dds.PointPubSubType(), data.getGoalStancePoint());
-
-      ser.write_type_a("goal_focal_point", new geometry_msgs.msg.dds.PointPubSubType(), data.getGoalFocalPoint());
-
+      ser.write_type_6("distance_to_frame", data.getDistanceToFrame());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.AI2RNavigationMessage data)
    {
       ser.read_type_d("reference_frame_name", data.getReferenceFrameName());
-      ser.read_type_a("goal_stance_point", new geometry_msgs.msg.dds.PointPubSubType(), data.getGoalStancePoint());
-
-      ser.read_type_a("goal_focal_point", new geometry_msgs.msg.dds.PointPubSubType(), data.getGoalFocalPoint());
-
+      data.setDistanceToFrame(ser.read_type_6("distance_to_frame"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.AI2RNavigationMessage src, behavior_msgs.msg.dds.AI2RNavigationMessage dest)

@@ -1,7 +1,6 @@
 #ifndef __behavior_msgs__msg__AI2RNavigationMessage__idl__
 #define __behavior_msgs__msg__AI2RNavigationMessage__idl__
 
-#include "geometry_msgs/msg/./Point_.idl"
 module behavior_msgs
 {
   module msg
@@ -17,13 +16,9 @@ module behavior_msgs
          */
         string reference_frame_name;
         /**
-         * Goto action - The position to which the goal stance is aligned
+         * Goto action - The distance to the frame
          */
-        geometry_msgs::msg::dds::Point goal_stance_point;
-        /**
-         * Goto action - The point that the robot should be facing in the goal stance
-         */
-        geometry_msgs::msg::dds::Point goal_focal_point;
+        double distance_to_frame;
       };
     };
   };

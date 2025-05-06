@@ -13,19 +13,13 @@ public class AI2RNavigationMessage extends Packet<AI2RNavigationMessage> impleme
             */
    public java.lang.StringBuilder reference_frame_name_;
    /**
-            * Goto action - The position to which the goal stance is aligned
+            * Goto action - The distance to the frame
             */
-   public us.ihmc.euclid.tuple3D.Point3D goal_stance_point_;
-   /**
-            * Goto action - The point that the robot should be facing in the goal stance
-            */
-   public us.ihmc.euclid.tuple3D.Point3D goal_focal_point_;
+   public double distance_to_frame_;
 
    public AI2RNavigationMessage()
    {
       reference_frame_name_ = new java.lang.StringBuilder(255);
-      goal_stance_point_ = new us.ihmc.euclid.tuple3D.Point3D();
-      goal_focal_point_ = new us.ihmc.euclid.tuple3D.Point3D();
    }
 
    public AI2RNavigationMessage(AI2RNavigationMessage other)
@@ -39,8 +33,8 @@ public class AI2RNavigationMessage extends Packet<AI2RNavigationMessage> impleme
       reference_frame_name_.setLength(0);
       reference_frame_name_.append(other.reference_frame_name_);
 
-      geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.goal_stance_point_, goal_stance_point_);
-      geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.goal_focal_point_, goal_focal_point_);
+      distance_to_frame_ = other.distance_to_frame_;
+
    }
 
    /**
@@ -67,22 +61,19 @@ public class AI2RNavigationMessage extends Packet<AI2RNavigationMessage> impleme
       return reference_frame_name_;
    }
 
-
    /**
-            * Goto action - The position to which the goal stance is aligned
+            * Goto action - The distance to the frame
             */
-   public us.ihmc.euclid.tuple3D.Point3D getGoalStancePoint()
+   public void setDistanceToFrame(double distance_to_frame)
    {
-      return goal_stance_point_;
+      distance_to_frame_ = distance_to_frame;
    }
-
-
    /**
-            * Goto action - The point that the robot should be facing in the goal stance
+            * Goto action - The distance to the frame
             */
-   public us.ihmc.euclid.tuple3D.Point3D getGoalFocalPoint()
+   public double getDistanceToFrame()
    {
-      return goal_focal_point_;
+      return distance_to_frame_;
    }
 
 
@@ -105,8 +96,8 @@ public class AI2RNavigationMessage extends Packet<AI2RNavigationMessage> impleme
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.reference_frame_name_, other.reference_frame_name_, epsilon)) return false;
 
-      if (!this.goal_stance_point_.epsilonEquals(other.goal_stance_point_, epsilon)) return false;
-      if (!this.goal_focal_point_.epsilonEquals(other.goal_focal_point_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.distance_to_frame_, other.distance_to_frame_, epsilon)) return false;
+
 
       return true;
    }
@@ -122,8 +113,8 @@ public class AI2RNavigationMessage extends Packet<AI2RNavigationMessage> impleme
 
       if (!us.ihmc.idl.IDLTools.equals(this.reference_frame_name_, otherMyClass.reference_frame_name_)) return false;
 
-      if (!this.goal_stance_point_.equals(otherMyClass.goal_stance_point_)) return false;
-      if (!this.goal_focal_point_.equals(otherMyClass.goal_focal_point_)) return false;
+      if(this.distance_to_frame_ != otherMyClass.distance_to_frame_) return false;
+
 
       return true;
    }
@@ -136,10 +127,8 @@ public class AI2RNavigationMessage extends Packet<AI2RNavigationMessage> impleme
       builder.append("AI2RNavigationMessage {");
       builder.append("reference_frame_name=");
       builder.append(this.reference_frame_name_);      builder.append(", ");
-      builder.append("goal_stance_point=");
-      builder.append(this.goal_stance_point_);      builder.append(", ");
-      builder.append("goal_focal_point=");
-      builder.append(this.goal_focal_point_);
+      builder.append("distance_to_frame=");
+      builder.append(this.distance_to_frame_);
       builder.append("}");
       return builder.toString();
    }
