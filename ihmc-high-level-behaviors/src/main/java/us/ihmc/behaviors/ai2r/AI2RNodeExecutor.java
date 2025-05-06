@@ -20,6 +20,7 @@ import us.ihmc.communication.AutonomyAPI;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTStatusFootstepList;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -85,13 +86,22 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
             AI2RNavigationMessage navigationMessage = message.getNavigation();
             // Set goals for GoTo behavior
             String referenceFrame = navigationMessage.getReferenceFrameName().toString();
-            Point3D goalStancePoint = navigationMessage.getGoalStancePoint();
-            Point3D goalFocalPoint = navigationMessage.getGoalFocalPoint();
+            double distanceToReferenceFrame = navigationMessage.getDistanceToFrame();
+
             for (var leaf : state.getActionSequence().getOrderedLeaves())
             {
                if (leaf.getDefinition().getName().toLowerCase().contains("go to action") && leaf instanceof FootstepPlanActionState gotoActionState)
                {
                   gotoActionState.getDefinition().setParentFrameName(referenceFrame);
+
+                  FramePoint3D goalStancePoint = new FramePoint3D(gotoActionState.getParentFrame());
+                  LogTools.info(gotoActionState.getParentFrame().getName());
+                  goalStancePoint.addX(distanceToReferenceFrame);
+                  goalStancePoint.changeFrame(ReferenceFrame.getWorldFrame());
+
+                  FramePoint3D goalFocalPoint = new FramePoint3D(gotoActionState.getParentFrame());
+                  goalFocalPoint.changeFrame(ReferenceFrame.getWorldFrame());
+
                   gotoActionState.getDefinition().getGoalStancePoint().getValue().set(goalStancePoint);
                   gotoActionState.getDefinition().getGoalFocalPoint().getValue().set(goalFocalPoint);
                   break;

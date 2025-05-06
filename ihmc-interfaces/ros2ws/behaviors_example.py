@@ -103,10 +103,8 @@ def behavior_message_callback(msg):
    new_goto_behavior = AI2RNavigationMessage()
    # Set the reference frame name - can copy from scene_objects.obj_name
    new_goto_behavior.reference_frame_name = "Charge1"
-   # Set the goal stance point - where the robot stance is positioned (position only, no orientation) wrt to the reference_frame_name
-   new_goto_behavior.goal_stance_point = Point(x=1.0, y=2.0, z=0.0)
-   # Set the goal focal point - where the stance is facing (how it is oriented) wrt to the reference_frame_name
-   new_goto_behavior.goal_focal_point = Point(x=3.0, y=4.0, z=0.0)
+   # Set the distance to the object
+   new_goto_behavior.distance_to_frame = 0.6
    behavior_command.navigation = new_goto_behavior
 
    # CAN EDIT HAND POSE ACTION, IF failed behavior has failed because of that action
