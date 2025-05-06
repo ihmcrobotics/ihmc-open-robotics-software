@@ -48,9 +48,3 @@ int32 realtime_tick
 bool is_calibrated
 
 bool needs_reset
-
-bool is_calibrating
-
-bool is_cooling_down
-
-bool automatic_cooldown_enabled

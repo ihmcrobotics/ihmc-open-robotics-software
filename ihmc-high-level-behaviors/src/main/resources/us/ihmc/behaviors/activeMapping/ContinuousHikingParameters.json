@@ -2,18 +2,15 @@
   "title" : "ContinuousHikingParameters",
   "Step publisher enabled" : false,
   "Override entire queue each step" : true,
-  "Enable Swing Collision Avoidance" : true,
-  "Number of steps to send" : 2,
+  "Number of steps to send" : 3,
   "Goal pose forward distance" : 1.4,
   "Goal pose up distance" : 0.5,
   "Goal pose backward distance" : 0.8,
   "Goal pose sideways distance" : 1.2,
-  "Swing time" : 1.0,
+  "Swing time" : 0.95,
   "Transfer time" : 0.6,
   "Planning without reference timeout" : 1.3,
   "Percent through swing to start planning" : 0.15,
   "Log footstep plans" : true,
-  "Next Waypoint Distance Margin" : 0.8,
-  "Ninety Degree Turn Swing Time" : 0.8,
-  "Ninety Degree Turn Transfer Time": 0.4
+  "Next Waypoint Distance Margin" : 0.8
 }

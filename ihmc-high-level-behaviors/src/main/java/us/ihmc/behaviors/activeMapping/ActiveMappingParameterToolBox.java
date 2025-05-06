@@ -7,7 +7,6 @@ import us.ihmc.footstepPlanning.communication.ContinuousHikingAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.perception.comms.PerceptionComms;
-import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 
 public class ActiveMappingParameterToolBox
@@ -17,12 +16,9 @@ public class ActiveMappingParameterToolBox
    private final DefaultFootstepPlannerParametersBasics footstepPlannerParameters;
    private final SwingPlannerParametersBasics swingPlannerParameters;
    private final HeightMapParameters heightMapParameters;
-   private final ROS2StoredPropertySetGroup ros2StoredPropertySetGroup;
 
-   public ActiveMappingParameterToolBox(ROS2Node ros2Node, DRCRobotModel robotModel, String taskPurpose)
+   public ActiveMappingParameterToolBox(ROS2StoredPropertySetGroup ros2PropertySetGroup, DRCRobotModel robotModel, String taskPurpose)
    {
-      ros2StoredPropertySetGroup = new ROS2StoredPropertySetGroup(ros2Node);
-
       continuousHikingParameters = new ContinuousHikingParameters();
       monteCarloPlannerParameters = new MonteCarloFootstepPlannerParameters();
       footstepPlannerParameters = robotModel.getFootstepPlannerParameters(taskPurpose);
@@ -30,16 +26,11 @@ public class ActiveMappingParameterToolBox
       heightMapParameters = new HeightMapParameters("GPU");
 
       // Add Parameters to be synced between the UI and this process
-      ros2StoredPropertySetGroup.registerStoredPropertySet(ContinuousHikingAPI.CONTINUOUS_HIKING_PARAMETERS, continuousHikingParameters);
-      ros2StoredPropertySetGroup.registerStoredPropertySet(ContinuousHikingAPI.MONTE_CARLO_PLANNER_PARAMETERS, monteCarloPlannerParameters);
-      ros2StoredPropertySetGroup.registerStoredPropertySet(ContinuousHikingAPI.FOOTSTEP_PLANNING_PARAMETERS, footstepPlannerParameters);
-      ros2StoredPropertySetGroup.registerStoredPropertySet(ContinuousHikingAPI.SWING_PLANNING_PARAMETERS, swingPlannerParameters);
-      ros2StoredPropertySetGroup.registerStoredPropertySet(PerceptionComms.HEIGHT_MAP_PARAMETERS, heightMapParameters);
-   }
-
-   public void update()
-   {
-      ros2StoredPropertySetGroup.update();
+      ros2PropertySetGroup.registerStoredPropertySet(ContinuousHikingAPI.CONTINUOUS_HIKING_PARAMETERS, continuousHikingParameters);
+      ros2PropertySetGroup.registerStoredPropertySet(ContinuousHikingAPI.MONTE_CARLO_PLANNER_PARAMETERS, monteCarloPlannerParameters);
+      ros2PropertySetGroup.registerStoredPropertySet(ContinuousHikingAPI.FOOTSTEP_PLANNING_PARAMETERS, footstepPlannerParameters);
+      ros2PropertySetGroup.registerStoredPropertySet(ContinuousHikingAPI.SWING_PLANNING_PARAMETERS, swingPlannerParameters);
+      ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.HEIGHT_MAP_PARAMETERS, heightMapParameters);
    }
 
    public ContinuousHikingParameters getContinuousHikingParameters()

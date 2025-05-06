@@ -20,7 +20,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ROS2StreamStatusMonitor
 {
-   public static final double MESSAGE_EXPIRATION_MULTIPLIER = 5;
+   public static final double MESSAGE_EXPIRATION_MULTIPLIER = 2;
+
+   private final ROS2Input<SRTStreamStatus> messageSubscription;
 
    private final Thread messageMonitor;
    private final Throttler throttler;
@@ -46,7 +48,8 @@ public class ROS2StreamStatusMonitor
       messageTimer = new Timer();
       messageMonitor = ThreadTools.startAsDaemon(this::monitorMessageFrequency, "StreamStatusMonitor-" + streamTopic.getName());
 
-      ros2.subscribe(streamTopic).addCallback(this::receiveMessage);
+      messageSubscription = ros2.subscribe(streamTopic);
+      messageSubscription.addCallback(this::receiveMessage);
    }
 
    public InetSocketAddress getStreamerAddress()

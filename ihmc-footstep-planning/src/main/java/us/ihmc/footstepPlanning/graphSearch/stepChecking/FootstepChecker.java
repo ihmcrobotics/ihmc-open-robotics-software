@@ -21,15 +21,11 @@ import java.util.List;
 
 import static us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason.HEIGHT_MAP_NONTRAVERSABLE;
 
-/**
- * This class has been deprecated, as it is only used for planar region snapping. We now do height map snapping.
- * See {@link HeightMapFootstepChecker} instead.
- */
-@Deprecated
 public class FootstepChecker implements FootstepCheckerInterface
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    public static final String rejectionReasonVariable = "rejectionReason";
+   private static final boolean USE_GPU_DATA_FOR_SNAPPING = false;
 
    private static final double traversabilityThresholdCenter = 0.08;
    private static final double traversabilityThresholdPerimeter = 0.02;
@@ -119,9 +115,24 @@ public class FootstepChecker implements FootstepCheckerInterface
       }
 
       // Snap footstep to height map/planar regions
-      FootstepSnapDataReadOnly snapData = snapper.snapFootstep(candidateStep, stanceStep, parameters.getWiggleWhilePlanning());
-      candidateStepSnapData.set(snapData);
-      achievedDeltaInside.set(snapData.getAchievedInsideDelta());
+      FootstepSnapDataReadOnly snapData;
+
+      if (USE_GPU_DATA_FOR_SNAPPING)
+      {
+         // TODO compute these from GPU data
+         RigidBodyTransform snapTransform = new RigidBodyTransform();
+         ConvexPolygon2D croppedFoothold = new ConvexPolygon2D();
+
+         FootstepSnapData snapDataOther = new FootstepSnapData(snapTransform, croppedFoothold);
+         snapper.addSnapData(candidateStep, snapDataOther);
+         snapData = snapDataOther;
+      }
+      else
+      {
+         snapData = snapper.snapFootstep(candidateStep, stanceStep, parameters.getWiggleWhilePlanning());
+         candidateStepSnapData.set(snapData);
+         achievedDeltaInside.set(snapData.getAchievedInsideDelta());
+      }
 
       heuristicPoseChecker.setApproximateStepDimensions(candidateStep, stanceStep);
 
@@ -197,7 +208,6 @@ public class FootstepChecker implements FootstepCheckerInterface
       }
 
       // Check snap area
-      // Note that, if using the terrain map data, this foothold is not cropped at all, so this percentage is not meaningful.
       ConvexPolygon2D footholdAfterSnap = candidateStepSnapData.getCroppedFoothold();
       double croppedFootArea = footholdAfterSnap.getArea();
       double fullFootArea = footPolygons.get(candidateStep.getRobotSide()).getArea();

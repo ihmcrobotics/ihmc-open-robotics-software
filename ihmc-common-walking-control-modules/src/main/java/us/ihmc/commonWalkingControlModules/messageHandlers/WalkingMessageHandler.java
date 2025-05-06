@@ -203,8 +203,9 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
                clearFlamingoCommands();
                break;
             case QUEUE:
-               // Check for inconsistencies between the previous command options and the current command options
-               if (isWalking.getBooleanValue())
+               // TODO review the use of this. 
+               boolean checkForInconsistencies = !upcomingFootsteps.isEmpty() || currentNumberOfFootsteps.getIntegerValue() > 0;
+               if (checkForInconsistencies)
                {
                   if (offsettingXYPlanWithFootstepError.getValue() != command.isOffsetFootstepsWithExecutionError())
                   {
@@ -242,7 +243,7 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
                }
                else
                {
-                  // We aren't walking, we are in stance, so it's effectively the same thing as overriding.
+                  // We don't have any steps in the queue, so it's effectively the same thing as overriding.
                   offsettingXYPlanWithFootstepError.set(command.isOffsetFootstepsWithExecutionError());
                   offsettingHeightPlanWithFootstepError.set(command.isOffsetFootstepsHeightWithExecutionError());
                   planOffsetInWorld.setToZero();
@@ -294,16 +295,13 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
       boolean areFootstepsAdjustable = command.areFootstepsAdjustable();
       boolean shouldCheckPlanForReachability = command.getShouldCheckForReachability();
 
-      if (command.getNumberOfFootsteps() > 0)
-      {
-         usingQFP.set(command.getFootstep(0).getCsgMode() == ContinuousStepGeneratorMode.QFP);
-         isWalkingInPlace.set(command.getFootstep(0).walkingInPlace);
+      usingQFP.set(command.getFootstep(0).getCsgMode() == ContinuousStepGeneratorMode.QFP);
+      isWalkingInPlace.set(command.getFootstep(0).walkingInPlace);
 
-         if (usingQFP.getBooleanValue() &&
-             footstepStatus.getRobotSide() == command.getFootstep(0).getRobotSide().toByte() &&
-             footstepStatus.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED)
-            command.removeFootstep(0);
-      }
+      if (usingQFP.getBooleanValue() &&
+          footstepStatus.getRobotSide() == command.getFootstep(0).getRobotSide().toByte() &&
+          footstepStatus.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED)
+         command.removeFootstep(0);
 
       for (int i = 0; i < command.getNumberOfFootsteps(); i++)
       {

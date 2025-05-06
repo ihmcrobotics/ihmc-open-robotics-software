@@ -27,18 +27,6 @@ public class SakeHandDesiredCommandMessage extends Packet<SakeHandDesiredCommand
             */
    public boolean request_reset_errors_;
    /**
-            * Set to true to enable automatic cooldown
-            */
-   public boolean enable_automatic_cooldown_;
-   /**
-            * Set to true to disable automatic cooldown
-            */
-   public boolean disable_automatic_cooldown_;
-   /**
-            * Set to true to override the cooldown
-            */
-   public boolean override_cooldown_;
-   /**
             * The desired dynamixel position, in radians
             */
    public double gripper_desired_position_;
@@ -71,12 +59,6 @@ public class SakeHandDesiredCommandMessage extends Packet<SakeHandDesiredCommand
       request_calibration_ = other.request_calibration_;
 
       request_reset_errors_ = other.request_reset_errors_;
-
-      enable_automatic_cooldown_ = other.enable_automatic_cooldown_;
-
-      disable_automatic_cooldown_ = other.disable_automatic_cooldown_;
-
-      override_cooldown_ = other.override_cooldown_;
 
       gripper_desired_position_ = other.gripper_desired_position_;
 
@@ -129,51 +111,6 @@ public class SakeHandDesiredCommandMessage extends Packet<SakeHandDesiredCommand
    public boolean getRequestResetErrors()
    {
       return request_reset_errors_;
-   }
-
-   /**
-            * Set to true to enable automatic cooldown
-            */
-   public void setEnableAutomaticCooldown(boolean enable_automatic_cooldown)
-   {
-      enable_automatic_cooldown_ = enable_automatic_cooldown;
-   }
-   /**
-            * Set to true to enable automatic cooldown
-            */
-   public boolean getEnableAutomaticCooldown()
-   {
-      return enable_automatic_cooldown_;
-   }
-
-   /**
-            * Set to true to disable automatic cooldown
-            */
-   public void setDisableAutomaticCooldown(boolean disable_automatic_cooldown)
-   {
-      disable_automatic_cooldown_ = disable_automatic_cooldown;
-   }
-   /**
-            * Set to true to disable automatic cooldown
-            */
-   public boolean getDisableAutomaticCooldown()
-   {
-      return disable_automatic_cooldown_;
-   }
-
-   /**
-            * Set to true to override the cooldown
-            */
-   public void setOverrideCooldown(boolean override_cooldown)
-   {
-      override_cooldown_ = override_cooldown;
-   }
-   /**
-            * Set to true to override the cooldown
-            */
-   public boolean getOverrideCooldown()
-   {
-      return override_cooldown_;
    }
 
    /**
@@ -251,12 +188,6 @@ public class SakeHandDesiredCommandMessage extends Packet<SakeHandDesiredCommand
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.request_reset_errors_, other.request_reset_errors_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_automatic_cooldown_, other.enable_automatic_cooldown_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.disable_automatic_cooldown_, other.disable_automatic_cooldown_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.override_cooldown_, other.override_cooldown_, epsilon)) return false;
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.gripper_desired_position_, other.gripper_desired_position_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.raw_gripper_torque_limit_, other.raw_gripper_torque_limit_, epsilon)) return false;
@@ -282,12 +213,6 @@ public class SakeHandDesiredCommandMessage extends Packet<SakeHandDesiredCommand
 
       if(this.request_reset_errors_ != otherMyClass.request_reset_errors_) return false;
 
-      if(this.enable_automatic_cooldown_ != otherMyClass.enable_automatic_cooldown_) return false;
-
-      if(this.disable_automatic_cooldown_ != otherMyClass.disable_automatic_cooldown_) return false;
-
-      if(this.override_cooldown_ != otherMyClass.override_cooldown_) return false;
-
       if(this.gripper_desired_position_ != otherMyClass.gripper_desired_position_) return false;
 
       if(this.raw_gripper_torque_limit_ != otherMyClass.raw_gripper_torque_limit_) return false;
@@ -310,12 +235,6 @@ public class SakeHandDesiredCommandMessage extends Packet<SakeHandDesiredCommand
       builder.append(this.request_calibration_);      builder.append(", ");
       builder.append("request_reset_errors=");
       builder.append(this.request_reset_errors_);      builder.append(", ");
-      builder.append("enable_automatic_cooldown=");
-      builder.append(this.enable_automatic_cooldown_);      builder.append(", ");
-      builder.append("disable_automatic_cooldown=");
-      builder.append(this.disable_automatic_cooldown_);      builder.append(", ");
-      builder.append("override_cooldown=");
-      builder.append(this.override_cooldown_);      builder.append(", ");
       builder.append("gripper_desired_position=");
       builder.append(this.gripper_desired_position_);      builder.append(", ");
       builder.append("raw_gripper_torque_limit=");

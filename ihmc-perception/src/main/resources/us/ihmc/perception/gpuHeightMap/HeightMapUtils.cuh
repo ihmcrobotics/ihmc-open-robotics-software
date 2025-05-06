@@ -17,8 +17,3 @@ __device__ int2 coordinate_to_indices(float2 coordinates, float2 center, float r
 {
     return make_int2(coordinate_to_index(coordinates.x, center.x, resolution, center_index), coordinate_to_index(coordinates.y, center.y, resolution, center_index));
 }
-
-__device__ int compute_center_index(float gridSize, float resolution)
-{
-    return round(0.5 * gridSize / resolution);
-}

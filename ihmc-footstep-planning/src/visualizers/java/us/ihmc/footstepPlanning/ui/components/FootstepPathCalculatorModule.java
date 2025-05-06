@@ -1,7 +1,6 @@
 package us.ihmc.footstepPlanning.ui.components;
 
 import perception_msgs.msg.dds.HeightMapMessage;
-import perception_msgs.msg.dds.TerrainMapMessage;
 import toolbox_msgs.msg.dds.FootstepPlanningTimingsMessage;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
@@ -17,7 +16,6 @@ import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.SharedMemoryMessager;
-import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
@@ -37,7 +35,6 @@ public class FootstepPathCalculatorModule
 
    private final AtomicReference<PlanarRegionsList> planarRegionsReference;
    private final AtomicReference<HeightMapMessage> heightMapReference;
-   private final AtomicReference<TerrainMapMessage> terrainMapReference;
    private final AtomicReference<RobotSide> initialStanceSideReference;
    private final AtomicReference<Pose3DReadOnly> leftFootStartPose;
    private final AtomicReference<Pose3DReadOnly> rightFootStartPose;
@@ -66,7 +63,6 @@ public class FootstepPathCalculatorModule
 
       planarRegionsReference = messager.createInput(PlanarRegionData);
       heightMapReference = messager.createInput(HeightMapData);
-      terrainMapReference = messager.createInput(TerrainMapData);
       initialStanceSideReference = messager.createInput(InitialSupportSide, RobotSide.LEFT);
       leftFootStartPose = messager.createInput(LeftFootPose);
       rightFootStartPose = messager.createInput(RightFootPose);
@@ -96,7 +92,6 @@ public class FootstepPathCalculatorModule
    {
       planarRegionsReference.set(null);
       heightMapReference.set(null);
-      terrainMapReference.set(null);
       initialStanceSideReference.set(null);
       leftFootStartPose.set(null);
       rightFootStartPose.set(null);
@@ -131,11 +126,8 @@ public class FootstepPathCalculatorModule
       }
 
       HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapReference.get());
-      TerrainMapData terrainMapData = null;
-      if (terrainMapReference.get() != null)
-         terrainMapData = new TerrainMapData(terrainMapReference.get());
 
-      if (heightMapData == null && terrainMapData == null)
+      if (heightMapData == null)
          return;
 
       if (leftFootStartPose.get() == null || rightFootStartPose.get() == null)
@@ -151,7 +143,6 @@ public class FootstepPathCalculatorModule
       {
          FootstepPlannerRequest request = new FootstepPlannerRequest();
          request.setHeightMapData(heightMapData);
-         request.setTerrainMapData(terrainMapData);
          request.setTimeout(plannerTimeoutReference.get());
          request.setMaximumIterations(plannerMaxIterationsReference.get());
          request.setHorizonLength(plannerHorizonLengthReference.get());

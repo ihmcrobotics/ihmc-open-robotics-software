@@ -3,10 +3,12 @@ package us.ihmc.perception;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.activeMapping.ActivePlanarMappingRemoteTask;
+import us.ihmc.behaviors.activeMapping.ContinuousPlannerSchedulingTask;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloPlannerTools;
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloPlanningWorld;
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloWaypointAgent;
@@ -27,6 +29,7 @@ public class HumanoidActivePerceptionModule
    private final Mat gridColor = new Mat();
 
    private ActivePlanarMappingRemoteTask activePlaneMappingRemoteThread;
+   private ContinuousPlannerSchedulingTask continuousPlannerSchedulingTask;
 
    private final PerceptionConfigurationParameters perceptionConfigurationParameters;
 
@@ -107,5 +110,13 @@ public class HumanoidActivePerceptionModule
    {
       if (activePlaneMappingRemoteThread != null)
          activePlaneMappingRemoteThread.destroy();
+
+      if (continuousPlannerSchedulingTask != null)
+         continuousPlannerSchedulingTask.destroy();
+   }
+
+   public ContinuousPlannerSchedulingTask getContinuousPlannerSchedulingTask()
+   {
+      return continuousPlannerSchedulingTask;
    }
 }

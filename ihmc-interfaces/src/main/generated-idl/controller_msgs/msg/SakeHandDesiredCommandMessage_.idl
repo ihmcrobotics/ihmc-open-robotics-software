@@ -35,18 +35,6 @@ module controller_msgs
          */
         boolean request_reset_errors;
         /**
-         * Set to true to enable automatic cooldown
-         */
-        boolean enable_automatic_cooldown;
-        /**
-         * Set to true to disable automatic cooldown
-         */
-        boolean disable_automatic_cooldown;
-        /**
-         * Set to true to override the cooldown
-         */
-        boolean override_cooldown;
-        /**
          * The desired dynamixel position, in radians
          */
         double gripper_desired_position;

@@ -295,6 +295,14 @@ public class RDXTerrainPlanningDebugger implements RenderableProvider
       startFootstepGraphics.get(RobotSide.RIGHT).getRenderables(renderables, pool);
    }
 
+   public void renderImGuiWidgets()
+   {
+      ImGui.checkbox("Show Monte-Carlo Plan", showMonteCarloPlan);
+      ImGui.checkbox("Show Continuous Walking Plan", showContinuousWalkingPlan);
+      ImGui.checkbox("Show State Spheres", showStateSpheres);
+      ImGui.checkbox("Show Expansion Spheres", showExpansionSpheres);
+   }
+
    public void reset()
    {
       footstepPlanGraphic.clear();

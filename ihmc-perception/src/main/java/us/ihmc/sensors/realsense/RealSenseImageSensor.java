@@ -4,7 +4,6 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.Throttler;
-import us.ihmc.euclid.exceptions.NotARotationMatrixException;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -78,8 +77,6 @@ public class RealSenseImageSensor extends ImageSensor
       return success;
    }
 
-   private boolean caughtAnException = false;
-
    @Override
    public boolean isSensorRunning()
    {
@@ -122,31 +119,22 @@ public class RealSenseImageSensor extends ImageSensor
       // Update grabbed images
       synchronized (grabbedImages)
       {
-         try
-         {
-            if (grabbedImages[COLOR_IMAGE_KEY] != null)
-               grabbedImages[COLOR_IMAGE_KEY].release();
-            grabbedImages[COLOR_IMAGE_KEY] = RawImage.createWithBGRImage(bgrImage,
-                                                                         realsense.getColorCameraIntrinsics(),
-                                                                         colorFrame.getTransformToRoot(),
-                                                                         grabTime,
-                                                                         grabSequenceNumber);
+         if (grabbedImages[COLOR_IMAGE_KEY] != null)
+            grabbedImages[COLOR_IMAGE_KEY].release();
+         grabbedImages[COLOR_IMAGE_KEY] = RawImage.createWithBGRImage(bgrImage,
+                                                                      realsense.getColorCameraIntrinsics(),
+                                                                      colorFrame.getTransformToRoot(),
+                                                                      grabTime,
+                                                                      grabSequenceNumber);
 
-            if (grabbedImages[DEPTH_IMAGE_KEY] != null)
-               grabbedImages[DEPTH_IMAGE_KEY].release();
-            grabbedImages[DEPTH_IMAGE_KEY] = RawImage.createWith16BitDepth(depthImage,
-                                                                           realsense.getDepthCameraIntrinsics(),
-                                                                           depthFrame.getTransformToRoot(),
-                                                                           grabTime,
-                                                                           grabSequenceNumber,
-                                                                           (float) realsense.getDepthDiscretization());
-         }
-         catch (NotARotationMatrixException e)
-         {
-            if (!caughtAnException)
-               LogTools.error("Caught a not a rotation. Only printing once.\n " + e.getMessage());
-            caughtAnException = true;
-         }
+         if (grabbedImages[DEPTH_IMAGE_KEY] != null)
+            grabbedImages[DEPTH_IMAGE_KEY].release();
+         grabbedImages[DEPTH_IMAGE_KEY] = RawImage.createWith16BitDepth(depthImage,
+                                                                        realsense.getDepthCameraIntrinsics(),
+                                                                        depthFrame.getTransformToRoot(),
+                                                                        grabTime,
+                                                                        grabSequenceNumber,
+                                                                        (float) realsense.getDepthDiscretization());
       }
 
       grabFailureCount = 0;

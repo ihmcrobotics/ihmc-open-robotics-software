@@ -48,6 +48,14 @@ public class EuclidCoreMissingTools
 {
    public static final String DEGREE_SYMBOL = "\u00B0";
 
+   public static void transform(Matrix3DReadOnly matrix, double xOriginal, double yOriginal, double zOriginal, Tuple3DBasics tupleTransformed)
+   {
+      double x = matrix.getM00() * xOriginal + matrix.getM01() * yOriginal + matrix.getM02() * zOriginal;
+      double y = matrix.getM10() * xOriginal + matrix.getM11() * yOriginal + matrix.getM12() * zOriginal;
+      double z = matrix.getM20() * xOriginal + matrix.getM21() * yOriginal + matrix.getM22() * zOriginal;
+      tupleTransformed.set(x, y, z);
+   }
+
    public static void floorToGivenPrecision(Tuple3DBasics tuple3d, double precision)
    {
       tuple3d.setX(MathTools.floorToPrecision(tuple3d.getX(), precision));

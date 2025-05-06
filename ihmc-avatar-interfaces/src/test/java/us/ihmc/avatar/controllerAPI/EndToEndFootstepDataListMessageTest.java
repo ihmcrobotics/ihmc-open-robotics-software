@@ -18,19 +18,17 @@ import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.CommandConsumerWithDelayBuffers;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
@@ -146,28 +144,6 @@ public abstract class EndToEndFootstepDataListMessageTest implements MultiRobotT
 
       assertTrue(simulationTestHelper.simulateNow(timeUntilDone + 0.25));
       assertEquals(0, (int) numberOfStepsInController.getValueAsLongBits());
-   }
-
-   @Test
-   protected void testEmptyFootstepDataListMessage()
-   {
-      createSimulationTestHelper(environment, location);
-
-      HighLevelHumanoidControllerToolbox controllerToolbox = simulationTestHelper.getHighLevelHumanoidControllerFactory().getHighLevelHumanoidControllerToolbox();
-      WalkingMessageHandler walkingMessageHandler = controllerToolbox.getWalkingMessageHandler();
-      CommandInputManager commandInputManager = simulationTestHelper.getHighLevelHumanoidControllerFactory().getCommandInputManager();
-      CommandConsumerWithDelayBuffers commandConsumerWithDelayBuffers = new CommandConsumerWithDelayBuffers(commandInputManager,
-                                                                                                            commandInputManager.getListOfSupportedCommands(),
-                                                                                                            controllerToolbox.getYoTime());
-
-      commandConsumerWithDelayBuffers.clearAllCommands();
-
-      FootstepDataListMessage emptyFootstepDataListMessage = new FootstepDataListMessage();
-      commandInputManager.submitMessage(emptyFootstepDataListMessage);
-
-      commandConsumerWithDelayBuffers.update();
-
-      assertAll(()->walkingMessageHandler.handleFootstepDataListCommand(commandConsumerWithDelayBuffers.pollNewestCommand(FootstepDataListCommand.class)));
    }
 
    protected void testMessageIsHandled(FootstepDataListMessage messageInMidFeetZUp) throws SimulationExceededMaximumTimeException

@@ -15,7 +15,7 @@ public class StepConstraintsListMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "ae6bcaac8e53e4d1f1604f944640b039b3a8de8d937e6db808d362b169070265";
+   		return "dc8a09e2acd298662ee211e94a27e511ebb88cf2a1fb25e8bac0654f328e8ba3";
    }
    
    @Override
@@ -69,7 +69,7 @@ public class StepConstraintsListMessagePubSubType implements us.ihmc.pubsub.Topi
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 5000; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50000; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
 
@@ -152,9 +152,9 @@ public class StepConstraintsListMessagePubSubType implements us.ihmc.pubsub.Topi
       cdr.write_type_e(data.getHolePolygonsSize());else
           throw new RuntimeException("hole_polygons_size field exceeds the maximum length: %d > %d".formatted(data.getHolePolygonsSize().size(), 100));
 
-      if(data.getVertexBuffer().size() <= 5000)
+      if(data.getVertexBuffer().size() <= 50000)
       cdr.write_type_e(data.getVertexBuffer());else
-          throw new RuntimeException("vertex_buffer field exceeds the maximum length: %d > %d".formatted(data.getVertexBuffer().size(), 5000));
+          throw new RuntimeException("vertex_buffer field exceeds the maximum length: %d > %d".formatted(data.getVertexBuffer().size(), 50000));
 
    }
 

@@ -91,13 +91,9 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
             */
    public double horizon_length_;
    /**
-            * Height map data, if you don't want to assume flat ground.
+            * Height map data, if you don'ot want to assume flat ground.
             */
    public perception_msgs.msg.dds.HeightMapMessage height_map_message_;
-   /**
-            * Terrain map data, if you don't want to assume flat ground.
-            */
-   public perception_msgs.msg.dds.TerrainMapMessage terrain_map_message_;
    /**
             * If true, steps are snapped assuming flat ground.
             * Note that collision checks will still be performed if enabled, such as FootstepPlannerParametersPacket.checkForBodyBoxCollisions
@@ -133,7 +129,6 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       goal_right_foot_pose_ = new us.ihmc.euclid.geometry.Pose3D();
       body_path_waypoints_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D> (50, new geometry_msgs.msg.dds.PosePubSubType());
       height_map_message_ = new perception_msgs.msg.dds.HeightMapMessage();
-      terrain_map_message_ = new perception_msgs.msg.dds.TerrainMapMessage();
       reference_plan_ = new controller_msgs.msg.dds.FootstepDataListMessage();
 
    }
@@ -178,7 +173,6 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       horizon_length_ = other.horizon_length_;
 
       perception_msgs.msg.dds.HeightMapMessagePubSubType.staticCopy(other.height_map_message_, height_map_message_);
-      perception_msgs.msg.dds.TerrainMapMessagePubSubType.staticCopy(other.terrain_map_message_, terrain_map_message_);
       assume_flat_ground_ = other.assume_flat_ground_;
 
       planner_request_id_ = other.planner_request_id_;
@@ -435,20 +429,11 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
 
    /**
-            * Height map data, if you don't want to assume flat ground.
+            * Height map data, if you don'ot want to assume flat ground.
             */
    public perception_msgs.msg.dds.HeightMapMessage getHeightMapMessage()
    {
       return height_map_message_;
-   }
-
-
-   /**
-            * Terrain map data, if you don't want to assume flat ground.
-            */
-   public perception_msgs.msg.dds.TerrainMapMessage getTerrainMapMessage()
-   {
-      return terrain_map_message_;
    }
 
    /**
@@ -595,7 +580,6 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.horizon_length_, other.horizon_length_, epsilon)) return false;
 
       if (!this.height_map_message_.epsilonEquals(other.height_map_message_, epsilon)) return false;
-      if (!this.terrain_map_message_.epsilonEquals(other.terrain_map_message_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.assume_flat_ground_, other.assume_flat_ground_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.planner_request_id_, other.planner_request_id_, epsilon)) return false;
@@ -652,7 +636,6 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       if(this.horizon_length_ != otherMyClass.horizon_length_) return false;
 
       if (!this.height_map_message_.equals(otherMyClass.height_map_message_)) return false;
-      if (!this.terrain_map_message_.equals(otherMyClass.terrain_map_message_)) return false;
       if(this.assume_flat_ground_ != otherMyClass.assume_flat_ground_) return false;
 
       if(this.planner_request_id_ != otherMyClass.planner_request_id_) return false;
@@ -712,8 +695,6 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       builder.append(this.horizon_length_);      builder.append(", ");
       builder.append("height_map_message=");
       builder.append(this.height_map_message_);      builder.append(", ");
-      builder.append("terrain_map_message=");
-      builder.append(this.terrain_map_message_);      builder.append(", ");
       builder.append("assume_flat_ground=");
       builder.append(this.assume_flat_ground_);      builder.append(", ");
       builder.append("planner_request_id=");

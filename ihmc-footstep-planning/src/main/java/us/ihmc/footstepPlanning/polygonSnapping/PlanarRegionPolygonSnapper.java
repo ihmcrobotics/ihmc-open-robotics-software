@@ -1,39 +1,36 @@
 package us.ihmc.footstepPlanning.polygonSnapping;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
-
-import java.util.List;
 
 public class PlanarRegionPolygonSnapper
 {
    /**
     * Snaps an XY polygon down onto a PlanarRegion. Returns the RigidBodyTransform required to perform the snap.
-    * <p>
-    * After this snap is performed, the only point on the polygon that maintains its original X-Y location is the highest point. The other points will likely
-    * be translated, which is required if the planar region is not flat.
-    * </p>
-    * <p>
-    * If the snap is unsuccessful, this will return a null transform. This would be unsuccessful if there is no intersection between the polygon and the planar
-    * region.
-    * </p>
-    *
-    * @param polygonToSnap              polygon to snap down. Not modified.
-    * @param planarRegionToSnapTo       region to snap the polygon to. Not modified.
-    * @param highestVertexInWorldToPack highest vertex of the planar region that has been snapped down. Modified.
-    * @return RigidBodyTransform required to snap the polygon down onto the PlanarRegion. Null if snap is unsuccessful.
+    * @param polygonToSnap
+    * @param planarRegionToSnapTo
+    * @return RigidBodyTransform required to snap the polygon down onto the PlanarRegion
     */
-   public static RigidBodyTransform snapPolygonToPlanarRegion(ConvexPolygon2DReadOnly polygonToSnap,
-                                                              PlanarRegion planarRegionToSnapTo,
-                                                              Point3DBasics highestVertexInWorldToPack)
+   public static RigidBodyTransform snapPolygonToPlanarRegion(ConvexPolygon2DReadOnly polygonToSnap, PlanarRegion planarRegionToSnapTo, Point3D highestVertexInWorld)
    {
       RigidBodyTransform transformToReturn = new RigidBodyTransform();
-      if (snapPolygonToPlanarRegion(polygonToSnap, planarRegionToSnapTo, highestVertexInWorldToPack, transformToReturn))
+      if (snapPolygonToPlanarRegion(polygonToSnap, planarRegionToSnapTo, highestVertexInWorld, transformToReturn))
          return transformToReturn;
 
       return null;
@@ -41,23 +38,13 @@ public class PlanarRegionPolygonSnapper
 
    /**
     * Snaps an XY polygon down onto a PlanarRegion. Returns the RigidBodyTransform required to perform the snap.
-    * <p>
-    * After this snap is performed, the only point on the polygon that maintains its original X-Y location is the highest point. The other points will likely
-    * be translated, which is required if the planar region is not flat.
-    * </p>
-    * <p>
-    * If the snap is unsuccessful, this will return a false. This would be unsuccessful if there is no intersection between the polygon and the planar region.
-    * </p>
-    *
-    * @param polygonToSnap              polygon to snap down. Not modified.
-    * @param planarRegionToSnapTo       region to snap the polygon to. Not modified.
-    * @param highestVertexInWorldToPack highest vertex of the planar region that has been snapped down. Modified.
-    * @param snapTransformToPack        transform applied to the polygon to snap it onto the planar region. Modified.
-    * @return whether the snap was successful.
+    * @param polygonToSnap
+    * @param planarRegionToSnapTo
+    * @return RigidBodyTransform required to snap the polygon down onto the PlanarRegion
     */
    public static boolean snapPolygonToPlanarRegion(ConvexPolygon2DReadOnly polygonToSnap,
                                                    PlanarRegion planarRegionToSnapTo,
-                                                   Point3DBasics highestVertexInWorldToPack,
+                                                   Point3D highestVertexInWorld,
                                                    RigidBodyTransform snapTransformToPack)
    {
       List<Point2DReadOnly> polygonIntersections = PlanarRegionTools.getPolygonIntersectionsWhenProjectedVertically(planarRegionToSnapTo, polygonToSnap);
@@ -81,16 +68,23 @@ public class PlanarRegionPolygonSnapper
          {
             highestZ = vertexInWorld.getZ();
             noIntersection = false;
-            highestVertexInWorldToPack.set(vertexInWorld);
+            highestVertexInWorld.set(vertexInWorld);
          }
       }
 
       if (noIntersection)
          return false;
 
-      PolygonSnapperTools.constructRotationToMatchSurfaceNormal(planarRegionToSnapTo.getNormal(), snapTransformToPack.getRotation());
-      PolygonSnapperTools.setTranslationSettingZAndPreservingXAndY(highestVertexInWorldToPack, snapTransformToPack);
+      PolygonSnapperTools.constructTransformToMatchSurfaceNormalPreserveX(planarRegionToSnapTo.getNormal(), snapTransformToPack);
+      setTranslationSettingZAndPreservingXAndY(highestVertexInWorld, snapTransformToPack);
 
       return true;
+   }
+
+   static void setTranslationSettingZAndPreservingXAndY(Point3DReadOnly highestVertex, RigidBodyTransform transformToReturn)
+   {
+      EuclidCoreMissingTools.transform(transformToReturn.getRotation(), highestVertex.getX(), highestVertex.getY(), 0.0, transformToReturn.getTranslation());
+      transformToReturn.getTranslation().scale(-1.0);
+      transformToReturn.getTranslation().add(highestVertex);
    }
 }

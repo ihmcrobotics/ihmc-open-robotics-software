@@ -230,9 +230,9 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       YoDouble damping_r_akx = (YoDouble) simulationTestHelper.findVariable("damping_" + getRightAnkleXName());
       YoDouble damping_r_aky = (YoDouble) simulationTestHelper.findVariable("damping_" + getRightAnkleYName());
       damping_l_akx.set(1.0);
-      damping_l_aky.set(0.1);
+      damping_l_aky.set(1.0);
       damping_r_akx.set(1.0);
-      damping_r_aky.set(0.1);
+      damping_r_aky.set(1.0);
 
       SideDependentList<YoEnum<ConstraintType>> footStates = new SideDependentList<>();
       // get foot states
@@ -327,11 +327,6 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
          {
             if (footStates.get(robotSide1).getEnumValue() == ConstraintType.SWING)
             {
-               if (stepCounter == footsteps.size())
-               {
-                  return;
-               }
-
                List<Point3D> contactPoints3D = footsteps.remove(stepCounter).getPredictedContactPoints2d();
                if (contactPoints3D.size() < 1)
                {
@@ -349,7 +344,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
 
       simulationTestHelper.publishToController(footstepDataListMessage);
 
-      boolean success = simulationTestHelper.simulateNow((swingDuration + transferDuration) * numberOfSteps + 3.0);
+      boolean success = simulationTestHelper.simulateNow((swingDuration + transferDuration) * numberOfSteps + 5.0);
       assertTrue(success);
    }
 
@@ -587,8 +582,8 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
 
       // build default foot polygon:
       SteppingParameters steppingParameters = getRobotModel().getWalkingControllerParameters().getSteppingParameters();
-      double footForwardOffset = steppingParameters.getFootLength() / 2.0;
-      double footBackwardOffset = footForwardOffset;
+      double footForwardOffset = steppingParameters.getFootForwardOffset();
+      double footBackwardOffset = steppingParameters.getFootBackwardOffset();
       double footWidth = steppingParameters.getFootWidth();
       double toeWidth = steppingParameters.getToeWidth();
 

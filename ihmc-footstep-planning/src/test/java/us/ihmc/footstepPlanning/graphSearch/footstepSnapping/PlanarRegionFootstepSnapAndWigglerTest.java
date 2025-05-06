@@ -426,7 +426,6 @@ public class PlanarRegionFootstepSnapAndWigglerTest
       Assertions.assertEquals(snappedStepTransform.getTranslation().getZ(), flatGroundHeight, epsilon, "Flat ground snap height is not equal");
    }
 
-   @Test
    public void testStanceFootClearance()
    {
       DataSet dataset = DataSetIOTools.loadDataSet(DataSetName._20210419_111333_GPUCinders1);

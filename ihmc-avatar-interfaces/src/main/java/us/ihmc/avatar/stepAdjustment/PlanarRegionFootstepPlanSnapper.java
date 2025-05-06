@@ -20,7 +20,6 @@ import us.ihmc.yoVariables.registry.YoRegistry;
  */
 public class PlanarRegionFootstepPlanSnapper implements FootstepPlanAdjustment
 {
-   private final SteppableRegionsProvider steppableRegionsProvider;
    private final PlanarRegionFootstepSnapper snapper;
 
    // callback function to enable visualization
@@ -35,7 +34,6 @@ public class PlanarRegionFootstepPlanSnapper implements FootstepPlanAdjustment
                                           SteppingEnvironmentalConstraintParameters constraintOptimizerParameters,
                                           YoRegistry parentRegistry)
    {
-      this.steppableRegionsProvider = steppableRegionsProvider;
       snapper = new PlanarRegionFootstepSnapper(footPolygons, steppableRegionsProvider, constraintOptimizerParameters, parentRegistry);
    }
 
@@ -49,9 +47,6 @@ public class PlanarRegionFootstepPlanSnapper implements FootstepPlanAdjustment
    @Override
    public void adjustFootstepPlan(FramePose3DReadOnly stanceFootPose, int footstepIndexToStart, FootstepDataListMessage footstepDataListMessageToAdjust)
    {
-      if (steppableRegionsProvider.getSteppableRegions().isEmpty())
-         return;
-
       for (int index = footstepIndexToStart; index < footstepDataListMessageToAdjust.getFootstepDataList().size(); index++)
       {
          if (planarRegionSnapVisualizer != null)

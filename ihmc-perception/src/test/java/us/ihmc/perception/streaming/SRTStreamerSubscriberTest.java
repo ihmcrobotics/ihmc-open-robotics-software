@@ -311,13 +311,13 @@ public class SRTStreamerSubscriberTest
       assertEquals(0, streamer.connectedCallerCount());
       assertFalse(subscriber.isConnected());
 
-      Thread sendThread = ThreadTools.startAsDaemon(() ->
+      Thread sendThread = ThreadTools.startAThread(() ->
       {
          // Send 2 seconds of video
          for (int i = 0; i < 2 * FPS; ++i)
          {
             throttler.waitAndRun();
-            streamer.sendFrame(RawImage.createWithBGRImage(sampleImage, cameraIntrinsics, testTransform, Instant.now(), 0L));
+            streamer.sendFrame(rawImage);
          }
       }, "ROS2SRTStreamerSend");
 
@@ -332,7 +332,7 @@ public class SRTStreamerSubscriberTest
       // Ensure we can receive an image
       assertTrue(subscriberHasReceivedFrame.get());
 
-      sendThread.join(3000);
+      sendThread.join();
 
       // Destroy everything
       streamer.destroy();

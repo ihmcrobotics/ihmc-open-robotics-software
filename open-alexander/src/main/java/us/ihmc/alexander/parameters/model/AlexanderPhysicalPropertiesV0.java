@@ -14,7 +14,7 @@ public class AlexanderPhysicalPropertiesV0 implements AlexanderPhysicalPropertie
 
    private final double ACTUAL_FOOT_LENGTH = 0.197;
    private final double ACTUAL_FOOT_WIDTH = 0.09;
-   private final double FOOT_BACK = 0.05;
+   private final double FOOT_BACK = 0.05 - FOOT_LENGTH_REDUCTION / 2.0;
    private final double THIGH_LENGTH = 0.431;
    private final double SHIN_LENGTH = 0.406;
 

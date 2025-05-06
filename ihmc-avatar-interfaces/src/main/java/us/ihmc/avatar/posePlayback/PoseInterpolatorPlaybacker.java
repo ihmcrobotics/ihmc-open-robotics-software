@@ -1,6 +1,5 @@
 package us.ihmc.avatar.posePlayback;
 
-import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.commons.thread.ThreadTools;
@@ -15,8 +14,8 @@ public class PoseInterpolatorPlaybacker
 
       double simulateDT = 0.005;
       
-      SimulationConstructionSetParameters parameters = SimulationConstructionSetParameters.createFromSystemProperties();
-      SimulationConstructionSet scs = new SimulationConstructionSet(sdfRobot, parameters);
+      SimulationConstructionSet scs = null;
+      scs = new SimulationConstructionSet(sdfRobot);
       if (showGui)
       {
          int recordFrequency = 1;

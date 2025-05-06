@@ -1,7 +1,6 @@
 package us.ihmc.footstepPlanning;
 
 import perception_msgs.msg.dds.HeightMapMessage;
-import perception_msgs.msg.dds.TerrainMapMessage;
 import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -10,7 +9,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.perception.heightMap.TerrainMapData;
-import us.ihmc.perception.heightMap.TerrainMapTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
@@ -465,12 +463,6 @@ public class FootstepPlannerRequest
          setHeightMapData(heightMapData);
       else
          setHeightMapData(null);
-
-      if (!TerrainMapTools.isEmpty(requestPacket.getTerrainMapMessage()))
-         setTerrainMapData(new TerrainMapData(requestPacket.getTerrainMapMessage()));
-      else
-         setTerrainMapData(null);
-
    }
 
    public void setPacket(FootstepPlanningRequestPacket requestPacket)
@@ -508,12 +500,7 @@ public class FootstepPlannerRequest
          HeightMapMessage heightMapMessage = HeightMapMessageTools.toMessage(getHeightMapData());
          requestPacket.getHeightMapMessage().set(heightMapMessage);
       }
-
-      if (getTerrainMapData() != null)
-      {
-         TerrainMapMessage terrainMapMessage = TerrainMapTools.toMessage(terrainMapData);
-         requestPacket.getTerrainMapMessage().set(terrainMapMessage);
-      }
+      // TODO need to add a message for the terrain map.
 
       if (referencePlan != null && !referencePlan.isEmpty())
       {
@@ -553,15 +540,8 @@ public class FootstepPlannerRequest
          this.bodyPathWaypoints.add(new Pose3D(other.bodyPathWaypoints.get(i)));
       }
 
-      if (this.heightMapData != null)
-         this.heightMapData.set(other.heightMapData);
-      else if (other.heightMapData != null)
-         this.heightMapData = new HeightMapData(other.heightMapData);
-
-      if (this.terrainMapData != null)
-         this.terrainMapData.set(other.terrainMapData);
-      else if (other.terrainMapData != null)
-         this.terrainMapData = new TerrainMapData(other.terrainMapData);
+      // todo should be a copy
+      this.heightMapData = other.heightMapData;
 
       if (other.referencePlan != null)
          this.referencePlan = new FootstepPlan(other.referencePlan);

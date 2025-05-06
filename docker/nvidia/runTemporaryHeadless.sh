@@ -10,7 +10,6 @@ docker run \
     --rm \
     --network host \
     --dns=1.1.1.1 \
-    --env "TERM=xterm-256color" `# Enable color in the terminal` \
     --privileged \
     --gpus all \
     --device /dev/dri:/dev/dri \

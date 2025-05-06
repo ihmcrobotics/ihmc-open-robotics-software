@@ -7,12 +7,12 @@ import us.ihmc.alexander.AlexanderVersion;
 import us.ihmc.alexander.OpenAlexanderRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.obstacleCourseTests.AvatarObstacleCoursePlatformTest;
+import us.ihmc.avatar.obstacleCourseTests.DRCObstacleCoursePlatformTest;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
-public class AlexanderObstacleCoursePlatformTest extends AvatarObstacleCoursePlatformTest
+public class AlexanderObstacleCoursePlatformTest extends DRCObstacleCoursePlatformTest
 {
 
    @Override

@@ -17,6 +17,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.depthData.CollisionBoxProvider;
+import us.ihmc.perception.gpuHeightMap.RapidHeightMapManager;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
@@ -168,6 +169,7 @@ public class TerrainPerceptionProcessWithDriver
 
       humanoidPerception = new HumanoidPerceptionModule(openCLManager);
       humanoidPerception.initializeBodyCollisionFilter(fullRobotModel, collisionBoxProvider);
+      humanoidPerception.initializeRealsenseDepthImage(realsense.getDepthHeight(), realsense.getDepthWidth());
       humanoidPerception.initializePerspectiveRapidRegionsExtractor(realsense.getDepthCameraIntrinsics());
       humanoidPerception.getRapidRegionsExtractor().setEnabled(true);
 
@@ -326,6 +328,10 @@ public class TerrainPerceptionProcessWithDriver
       executorService.destroy();
 
       realtimeROS2Node.destroy();
+      if (humanoidPerception != null)
+      {
+         humanoidPerception.destroy();
+      }
 
       openCLManager.destroy();
       if (depthBytedecoImage != null)
@@ -334,5 +340,10 @@ public class TerrainPerceptionProcessWithDriver
       }
 
       destroyedNotification.blockingPoll();
+   }
+
+   public HumanoidPerceptionModule getHumanoidPerceptionModule()
+   {
+      return humanoidPerception;
    }
 }

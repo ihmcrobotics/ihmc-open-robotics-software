@@ -72,19 +72,12 @@ __global__ void filterFlyingPoints(unsigned short *in, size_t pitchIn,
     for (int dx = -halfWindow; dx <= halfWindow; ++dx)
     {
         int nx = xIndex + dx;
-        if (nx < 0 || nx >= cols)
-            continue;
+        if (nx < 0 || nx >= cols) continue;
 
         for (int dy = -halfWindow; dy <= halfWindow; ++dy)
         {
             int ny = yIndex + dy;
-
-            if (ny < 0 || ny >= rows)
-                continue;
-
-            // Skip the current cell
-            if (nx == 0 && ny == 0)
-                continue;
+            if (ny < 0 || ny >= rows) continue;
 
             unsigned short *neighborPixel = (unsigned short *)((char *)in + ny * pitchIn) + nx;
             window[count++] = *neighborPixel;

@@ -3,7 +3,6 @@ package us.ihmc.footstepPlanning.communication;
 import controller_msgs.msg.dds.*;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.OcTreeKeyListMessage;
-import perception_msgs.msg.dds.TerrainMapMessage;
 import toolbox_msgs.msg.dds.FootstepPlanningTimingsMessage;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
@@ -66,7 +65,6 @@ public class FootstepPlannerMessagerAPI
    // Perception data
    public static final Topic<PlanarRegionsList> PlanarRegionData = topic("PlanarRegionData");
    public static final Topic<HeightMapMessage> HeightMapData = topic("HeightMapData");
-   public static final Topic<TerrainMapMessage> TerrainMapData = topic("TerrainMapData");
    public static final Topic<Boolean> AcceptNewPlanarRegions = topic("AcceptNewPlanarRegions");
    public static final Topic<OcTreeKeyListMessage> OcTreeData = topic("OcTreeData");
 

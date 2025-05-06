@@ -2,104 +2,161 @@ package us.ihmc.perception.heightMap;
 
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
-import perception_msgs.msg.dds.TerrainMapMessage;
+import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.UnitVector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
-import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.steppableRegions.SnapResult;
+import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
+import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
-import java.nio.ByteBuffer;
+import java.util.ArrayList;
 
 public class TerrainMapData
 {
+   private static final int defaultPatchSizeForNormalEstimation = 1;
    /**
     * Sensor origin that defines the center of the height map
     */
-   private final Point2D terrainMapCenter = new Point2D();
+   private final Point2D heightMapCenter = new Point2D();
 
-   private int localGridSize;
+   private final LeastSquaresZPlaneFitter planeFitter = new LeastSquaresZPlaneFitter();
+
+   private final int localGridSize;
    private int cellsPerMeter = 50;
 
-   private double heightScaleFactor;
-   private double heightScaleOffset;
-
    private Mat heightMap;
-   private Mat terrainCostMap;
    private Mat contactMap;
+   private Mat terrainCostMap;
 
+   private Mat steppableRegionAssignmentMat;
+   private Mat steppableRegionRingMat;
+   private Mat steppabilityImage;
+   private Mat steppabilityConnectionsImage;
    private Mat snapHeightImage;
+   private Mat snappedAreaFractionImage;
    private Mat snapNormalXImage;
    private Mat snapNormalYImage;
    private Mat snapNormalZImage;
-   private Mat steppabilityImage;
-   private Mat steppabilityConnectionsMat;
-   private Mat snappedAreaFractionImage;
+   private HeightMapParameters heightMapParameters;
 
-   public TerrainMapData(int height, int width, double heightScaleFactor, double heightScaleOffset)
+   public TerrainMapData(Mat heightMap, Mat contactMap, HeightMapParameters heightMapParameters)
    {
-      setHeightScaleParameters(heightScaleFactor, heightScaleOffset);
+      this(heightMap, null, contactMap, null, null, null, null, null, null, heightMapParameters);
+   }
 
+   public TerrainMapData(Mat heightMap,
+                         Mat snapHeightImage,
+                         Mat contactMap,
+                         Mat terrainCostMap,
+                         Mat steppability,
+                         Mat snapNormalXImage,
+                         Mat snapNormalYImage,
+                         Mat snapNormalZImage,
+                         Mat snappedAreaFractionImage,
+                         HeightMapParameters heightMapParameters)
+   {
+      this.heightMapParameters = heightMapParameters;
+      setHeightMap(heightMap);
+      setSnapHeightImage(snapHeightImage);
+      setContactMap(contactMap);
+      setTerrainCostMap(terrainCostMap);
+      setSteppabilityImage(steppability);
+      setSnappedAreaFractionImage(snappedAreaFractionImage);
+      setSnapNormalXImage(snapNormalXImage);
+      setSnapNormalYImage(snapNormalYImage);
+      setSnapNormalZImage(snapNormalZImage);
+
+      this.localGridSize = heightMap.rows();
+      // TODO need to add cells per meter
+   }
+
+   public TerrainMapData(int height, int width, HeightMapParameters heightMapParameters)
+   {
+      this.heightMapParameters = heightMapParameters;
       heightMap = new Mat(height, width, opencv_core.CV_16UC1);
+      terrainCostMap = new Mat(height, width, opencv_core.CV_8UC1);
+      contactMap = new Mat(height, width, opencv_core.CV_8UC1);
       localGridSize = height;
    }
 
    public TerrainMapData(TerrainMapData other)
    {
-      set(other);
-   }
-
-   public TerrainMapData(TerrainMapMessage other)
-   {
-      setFromPacket(other);
-   }
-
-   public void set(TerrainMapData other)
-   {
       this.localGridSize = other.localGridSize;
       this.cellsPerMeter = other.cellsPerMeter;
-      this.heightScaleFactor = other.heightScaleFactor;
-      this.heightScaleOffset = other.heightScaleOffset;
-
-      terrainMapCenter.set(other.terrainMapCenter);
+      heightMapCenter.set(other.heightMapCenter);
 
       setHeightMap(other.heightMap);
-      setTerrainCostMap(other.terrainCostMap);
       setContactMap(other.contactMap);
-      setSnapHeightMat(other.snapHeightImage);
-      setSnapNormalXMat(other.snapNormalXImage);
-      setSnapNormalYMat(other.snapNormalYImage);
-      setSnapNormalZMat(other.snapNormalZImage);
-      setSteppabilityMat(other.steppabilityImage);
-      setSteppabilityConnectionsMat(other.steppabilityConnectionsMat);
-      setSnappedAreaFractionMat(other.snappedAreaFractionImage);
+      setTerrainCostMap(other.terrainCostMap);
+
+      setSteppableRegionAssignmentMat(other.steppableRegionAssignmentMat);
+      setSteppableRegionRingMat(other.steppableRegionRingMat);
+      setSteppabilityImage(other.steppabilityImage);
+      setSteppabilityConnectionsImage(other.steppabilityConnectionsImage);
+      setSnapHeightImage(other.snapHeightImage);
+      setSnappedAreaFractionImage(other.snappedAreaFractionImage);
+      setSnapNormalXImage(other.snapNormalXImage);
+      setSnapNormalYImage(other.snapNormalYImage);
+      setSnapNormalZImage(other.snapNormalZImage);
    }
 
-   public boolean isEmpty()
+   private int getLocalIndex(double coordinate, double center)
    {
-      if (hasHeightMap())
-         return false;
-      if (hasSnapHeight())
-         return false;
-      return !hasSteppability();
+      // TODO probably a height map tools method for this.
+      return (int) ((coordinate - center) * cellsPerMeter + (double) localGridSize / 2);
    }
 
-   public boolean hasTerrainCost()
+   public float getSnappedAreaFractionInWorld(double x, double y)
    {
-      return terrainCostMap != null;
+      int rIndex = getLocalIndex(x, heightMapCenter.getX());
+      int cIndex = getLocalIndex(y, heightMapCenter.getY());
+      return getSnappedAreaLocal(rIndex, cIndex);
    }
 
-   public boolean hasContactMap()
+   public float getHeightInWorld(double x, double y)
    {
-      return contactMap != null;
+      int rIndex = getLocalIndex(x, heightMapCenter.getX());
+      int cIndex = getLocalIndex(y, heightMapCenter.getY());
+      return getHeightLocal(rIndex, cIndex);
    }
 
-   public boolean hasHeightMap()
+   public float getSnappedHeightInWorld(double x, double y)
    {
-      return heightMap != null;
+      int rIndex = getLocalIndex(x, heightMapCenter.getX());
+      int cIndex = getLocalIndex(y, heightMapCenter.getY());
+      return getSnappedHeightLocal(rIndex, cIndex);
+   }
+
+   public float getContactScoreInWorld(double x, double y)
+   {
+      int rIndex = getLocalIndex(x, heightMapCenter.getX32());
+      int cIndex = getLocalIndex(y, heightMapCenter.getY32());
+      return getContactScoreLocal(rIndex, cIndex);
+   }
+
+   public float getSteppabilityInWorld(double x, double y)
+   {
+      int rIndex = getLocalIndex(x, heightMapCenter.getX());
+      int cIndex = getLocalIndex(y, heightMapCenter.getY());
+      return getSteppabilityLocal(rIndex, cIndex);
+   }
+
+   public UnitVector3DReadOnly getNormalInWorld(double x, double y)
+   {
+      int rIndex = getLocalIndex(x, heightMapCenter.getX32());
+      int cIndex = getLocalIndex(y, heightMapCenter.getY32());
+      return getNormalLocal(rIndex, cIndex);
+   }
+
+   public SnapResult getSnapResultInWorld(double x, double y)
+   {
+      int rIndex = getLocalIndex(x, heightMapCenter.getX32());
+      int cIndex = getLocalIndex(y, heightMapCenter.getY32());
+      return getSnapResultLocal(rIndex, cIndex);
    }
 
    public boolean hasSnapHeight()
@@ -112,121 +169,48 @@ public class TerrainMapData
       return snapNormalXImage != null && snapNormalYImage != null && snapNormalZImage != null;
    }
 
-   public boolean hasSteppability()
+   private boolean isOutOfBounds(int rIndex, int cIndex)
    {
-      return steppabilityImage != null;
+      return rIndex < 0 || rIndex >= localGridSize || cIndex < 0 || cIndex >= localGridSize;
    }
 
-   public boolean hasSteppableConnections()
+   private float convertScaledAndOffsetValue(float value)
    {
-      return steppabilityConnectionsMat != null;
+      return (float) (value / heightMapParameters.getHeightScaleFactor()) - (float) heightMapParameters.getHeightOffset();
    }
 
-   public boolean hasSnappedArea()
+   private float getHeightLocal(int rIndex, int cIndex)
    {
-      return snappedAreaFractionImage != null;
-   }
-
-   public int getLocalXIndex(double coordinate)
-   {
-      return getLocalIndex(coordinate, terrainMapCenter.getX());
-   }
-
-   public int getLocalYIndex(double coordinate)
-   {
-      return getLocalIndex(coordinate, terrainMapCenter.getY());
-   }
-
-   private int getLocalIndex(double coordinate, double center)
-   {
-      return TerrainMapTools.getLocalIndex(cellsPerMeter, localGridSize, coordinate, center);
-   }
-
-   public float getSnappedAreaFractionInWorld(double x, double y)
-   {
-      int rIndex = getLocalXIndex(x);
-      int cIndex = getLocalYIndex(y);
-      return getSnappedAreaLocal(rIndex, cIndex);
-   }
-
-   public float getHeightInWorld(double x, double y)
-   {
-      int rIndex = getLocalXIndex(x);
-      int cIndex = getLocalYIndex(y);
-      return getHeightLocal(rIndex, cIndex);
-   }
-
-   public float getSnappedHeightInWorld(double x, double y)
-   {
-      int rIndex = getLocalIndex(x, terrainMapCenter.getX());
-      int cIndex = getLocalIndex(y, terrainMapCenter.getY());
-      return getSnappedHeightLocal(rIndex, cIndex);
-   }
-
-   public float getContactScoreInWorld(double x, double y)
-   {
-      int rIndex = getLocalIndex(x, terrainMapCenter.getX32());
-      int cIndex = getLocalIndex(y, terrainMapCenter.getY32());
-      return getContactScoreLocal(rIndex, cIndex);
-   }
-
-   public float getSteppabilityInWorld(double x, double y)
-   {
-      int rIndex = getLocalIndex(x, terrainMapCenter.getX());
-      int cIndex = getLocalIndex(y, terrainMapCenter.getY());
-      return getSteppabilityLocal(rIndex, cIndex);
-   }
-
-   public UnitVector3DReadOnly getNormalInWorld(double x, double y)
-   {
-      int rIndex = getLocalIndex(x, terrainMapCenter.getX32());
-      int cIndex = getLocalIndex(y, terrainMapCenter.getY32());
-      return getNormalLocal(rIndex, cIndex);
-   }
-
-   public SnapResult getSnapResultInWorld(double x, double y)
-   {
-      int rIndex = getLocalIndex(x, terrainMapCenter.getX32());
-      int cIndex = getLocalIndex(y, terrainMapCenter.getY32());
-      return getSnapResultLocal(rIndex, cIndex);
-   }
-
-   public float getHeightLocal(int rIndex, int cIndex)
-   {
-      if (TerrainMapTools.isOutOfBounds(localGridSize, rIndex, cIndex))
+      if (isOutOfBounds(rIndex, cIndex))
          return 0.0f;
 
-      // This mask is necessary because the height is stored as a short, and it discards all the additional information past those two bytes.
-      float height = ((int) heightMap.ptr(rIndex, cIndex).getShort() & 0xFFFF);
-      return TerrainMapTools.convertScaledAndOffsetValue((float) heightScaleFactor, (float) heightScaleOffset, height);
+      int height = ((int) heightMap.ptr(rIndex, cIndex).getShort() & 0xFFFF);
+      return convertScaledAndOffsetValue((float) height);
    }
 
-   public float getSnappedAreaLocal(int rIndex, int cIndex)
+   private float getSnappedAreaLocal(int rIndex, int cIndex)
    {
-      if (TerrainMapTools.isOutOfBounds(localGridSize, rIndex, cIndex))
+      if (isOutOfBounds(rIndex, cIndex))
          return 0.0f;
 
-      // This mask is necessary because the area is stored as an unsigned char, and it discards all the additional information past that one byte. We then scale
-      // by 255, which is the maximum value that the char can contain, to convert the output to be between 0 and 1.
-      return ((float) ((snappedAreaFractionImage.ptr(rIndex, cIndex).get() & 0xFF))) / 255;
+      return ((float) ((int) snappedAreaFractionImage.ptr(rIndex, cIndex).getShort() & 0xFF * 255)) + 1.0f;
    }
 
-   public float getSnappedHeightLocal(int rIndex, int cIndex)
+   private float getSnappedHeightLocal(int rIndex, int cIndex)
    {
       if (snapHeightImage == null)
          return getHeightLocal(rIndex, cIndex);
 
-      if (TerrainMapTools.isOutOfBounds(localGridSize, rIndex, cIndex))
+      if (isOutOfBounds(rIndex, cIndex))
          return 0.0f;
 
-      // This mask is necessary because the height is stored as a short, and it discards all the additional information past those two bytes.
       int height = ((int) snapHeightImage.ptr(rIndex, cIndex).getShort() & 0xFFFF);
-      return TerrainMapTools.convertScaledAndOffsetValue((float) heightScaleFactor, (float) heightScaleOffset, height);
+      return convertScaledAndOffsetValue((float) height);
    }
 
-   public UnitVector3DReadOnly getNormalLocal(int rIndex, int cIndex)
+   private UnitVector3DReadOnly getNormalLocal(int rIndex, int cIndex)
    {
-      if (TerrainMapTools.isOutOfBounds(localGridSize, rIndex, cIndex))
+      if (isOutOfBounds(rIndex, cIndex))
       {
          return new UnitVector3D(0.0, 0.0, 1.0);
       }
@@ -238,14 +222,12 @@ public class TerrainMapData
 
    private static float getNormalLocalUnsafe(Mat normalImage, int rIndex, int cIndex)
    {
-      // This mask is necessary because the norm is stored as an unsigned short, and it discards all the additional information past that one byte. We then
-      // scale by 2 / 255, to bring it in-range of the whole value
       return ((float) ((normalImage.ptr(rIndex, cIndex).get() & 0xFF))) * 2 / 255 - 1.0f;
    }
 
    private float getContactScoreLocal(int rIndex, int cIndex)
    {
-      if (TerrainMapTools.isOutOfBounds(localGridSize, rIndex, cIndex))
+      if (isOutOfBounds(rIndex, cIndex))
          return 0.0f;
 
       return (float) ((contactMap.ptr(rIndex, cIndex).get() & 0xFF));
@@ -258,38 +240,90 @@ public class TerrainMapData
 
    private int getSteppabilityLocal(int rIndex, int cIndex)
    {
-      if (TerrainMapTools.isOutOfBounds(localGridSize, rIndex, cIndex))
+      if (isOutOfBounds(rIndex, cIndex))
          return SnapResult.SNAP_FAILED.ordinal();
 
-      // This mask is necessary because the area is stored as an unsigned char, and it discards all the additional information past that one byte.
       return steppabilityImage.ptr(rIndex, cIndex).get() & 0xFF;
    }
 
    public void setHeightLocal(float height, int rIndex, int cIndex)
    {
-      float offsetHeight = height + (float) heightScaleOffset;
-      int finalHeight = (int) (offsetHeight * heightScaleFactor);
+      float offsetHeight = height + (float) heightMapParameters.getHeightOffset();
+      int finalHeight = (int) (offsetHeight * heightMapParameters.getHeightScaleFactor());
       heightMap.ptr(rIndex, cIndex).putShort((short) finalHeight);
    }
 
-   public void setSensorOrigin(Tuple3DReadOnly origin)
+   public void fillHeightMap(HeightMapData heightMapData)
    {
-      setSensorOrigin(origin.getX(), origin.getY());
+      this.heightMapCenter.set(heightMapData.getGridCenter());
+      int centerIndex = heightMapData.getCenterIndex();
+      for (int i = 0; i < heightMapData.getNumberOfOccupiedCells(); i++)
+      {
+         int key = heightMapData.getKey(i);
+         int xIndex = HeightMapTools.keyToXIndex(key, centerIndex);
+         int yIndex = HeightMapTools.keyToYIndex(key, centerIndex);
+         double height = heightMapData.getHeightAt(key);
+         setHeightLocal((float) height, xIndex, yIndex);
+      }
    }
 
-   public void setSensorOrigin(Tuple2DReadOnly origin)
+   public UnitVector3DReadOnly computeSurfaceNormalInWorld(double x, double y)
    {
-      setSensorOrigin(origin.getX(), origin.getY());
+      return computeSurfaceNormalInWorld(x, y, defaultPatchSizeForNormalEstimation);
+   }
+
+   public UnitVector3DReadOnly computeSurfaceNormalInWorld(double x, double y, int patchSize)
+   {
+      int rIndex = getLocalIndex(x, heightMapCenter.getX());
+      int cIndex = getLocalIndex(y, heightMapCenter.getY());
+
+      if (hasSnapNormal())
+      {
+         return getNormalLocal(rIndex, cIndex);
+      }
+      else
+      {
+         Plane3D bestFitPlane = new Plane3D();
+         ArrayList<Point3D> points = new ArrayList<>();
+
+         //LogTools.info("rIndex: {}, cIndex: {}, origin: {}", rIndex, cIndex, sensorOrigin);
+
+         for (int i = -patchSize; i <= patchSize; i++)
+         {
+            for (int j = -patchSize; j <= patchSize; j++)
+            {
+               int r = rIndex + i;
+               int c = cIndex + j;
+               if (isOutOfBounds(r, c))
+                  continue;
+
+               float height = getHeightLocal(r, c);
+
+               // compute full 3d point
+               Point3D point = new Point3D();
+               point.setX(heightMapCenter.getX() + (double) (r - localGridSize / 2) / cellsPerMeter);
+               point.setY(heightMapCenter.getY() + (double) (c - localGridSize / 2) / cellsPerMeter);
+               point.setZ(height);
+
+               //LogTools.info("Point: {}", point);
+
+               points.add(point);
+            }
+         }
+
+         planeFitter.fitPlaneToPoints(points, bestFitPlane);
+         return bestFitPlane.getNormal();
+      }
    }
 
    public void setSensorOrigin(double originX, double originY)
    {
-      this.terrainMapCenter.set(originX, originY);
+      this.heightMapCenter.set(originX, originY);
    }
 
-   public Point2DReadOnly getTerrainMapCenter()
+   public Point2D getHeightMapCenter()
    {
-      return terrainMapCenter;
+      return heightMapCenter;
    }
 
    public Mat getHeightMap()
@@ -297,14 +331,14 @@ public class TerrainMapData
       return heightMap;
    }
 
-   public Mat getTerrainCostMap()
-   {
-      return terrainCostMap;
-   }
-
    public Mat getContactMap()
    {
       return contactMap;
+   }
+
+   public Mat getTerrainCostMap()
+   {
+      return terrainCostMap;
    }
 
    public int getCellsPerMeter()
@@ -317,27 +351,6 @@ public class TerrainMapData
       return localGridSize;
    }
 
-   public void setHeightScaleParameters(double heightScaleFactor, double heightScaleOffset)
-   {
-      this.heightScaleOffset = heightScaleOffset;
-      this.heightScaleFactor = heightScaleFactor;
-   }
-
-   public double getHeightScaleOffset()
-   {
-      return heightScaleOffset;
-   }
-
-   public double getHeightScaleFactor()
-   {
-      return heightScaleFactor;
-   }
-
-   public void setTerrainCostMap(Mat terrainCostMap)
-   {
-      this.terrainCostMap = terrainCostMap == null ? null : terrainCostMap.clone();
-   }
-
    public void setHeightMap(Mat heightMap)
    {
       this.heightMap = heightMap == null ? null : heightMap.clone();
@@ -348,182 +361,98 @@ public class TerrainMapData
       this.contactMap = contactMap == null ? null : contactMap.clone();
    }
 
-   public void setSnapHeightMat(Mat snapHeightImage)
+   public void setTerrainCostMap(Mat terrainCostMap)
    {
-      this.snapHeightImage = snapHeightImage == null ? null : snapHeightImage.clone();
+      this.terrainCostMap = terrainCostMap == null ? null : terrainCostMap.clone();
    }
 
-   public void setSnapNormalXMat(Mat snapNormalXImage)
+   public void setSteppableRegionRingMat(Mat steppableRegionRingMat)
    {
-      this.snapNormalXImage = snapNormalXImage == null ? null : snapNormalXImage.clone();
+      this.steppableRegionRingMat = steppableRegionRingMat == null ? null : steppableRegionRingMat.clone();
    }
 
-   public void setSnapNormalYMat(Mat snapNormalYImage)
-   {
-      this.snapNormalYImage = snapNormalYImage == null ? null : snapNormalYImage.clone();
-   }
-
-   public void setSnapNormalZMat(Mat snapNormalZImage)
-   {
-      this.snapNormalZImage = snapNormalZImage == null ? null : snapNormalZImage.clone();
-   }
-
-   public void setSteppabilityMat(Mat steppabilityImage)
+   public void setSteppabilityImage(Mat steppabilityImage)
    {
       this.steppabilityImage = steppabilityImage == null ? null : steppabilityImage.clone();
    }
 
-   public void setSteppabilityConnectionsMat(Mat steppabilityConnectionsImage)
+   public void setSnapHeightImage(Mat snapHeightImage)
    {
-      this.steppabilityConnectionsMat = steppabilityConnectionsImage == null ? null : steppabilityConnectionsImage.clone();
+      this.snapHeightImage = snapHeightImage == null ? null : snapHeightImage.clone();
    }
 
-   public void setSnappedAreaFractionMat(Mat snappedAreaFractionImage)
+   public void setSnapNormalXImage(Mat snapNormalXImage)
+   {
+      this.snapNormalXImage = snapNormalXImage == null ? null : snapNormalXImage.clone();
+   }
+
+   public void setSnapNormalYImage(Mat snapNormalYImage)
+   {
+      this.snapNormalYImage = snapNormalYImage == null ? null : snapNormalYImage.clone();
+   }
+
+   public void setSnapNormalZImage(Mat snapNormalZImage)
+   {
+      this.snapNormalZImage = snapNormalZImage == null ? null : snapNormalZImage.clone();
+   }
+
+   public void setSnappedAreaFractionImage(Mat snappedAreaFractionImage)
    {
       this.snappedAreaFractionImage = snappedAreaFractionImage == null ? null : snappedAreaFractionImage.clone();
    }
 
-   public Mat getSnapHeightMat()
+   public void setSteppabilityConnectionsImage(Mat steppabilityConnectionsImage)
    {
-      return snapHeightImage;
+      this.steppabilityConnectionsImage = steppabilityConnectionsImage == null ? null : steppabilityConnectionsImage.clone();
    }
 
-   public Mat getSnapNormalXMat()
+   public void setSteppableRegionAssignmentMat(Mat steppableRegionAssignmentMat)
    {
-      return snapNormalXImage;
+      this.steppableRegionAssignmentMat = steppableRegionAssignmentMat == null ? null : steppableRegionAssignmentMat.clone();
    }
 
-   public Mat getSnapNormalYMat()
+   public Mat getSteppableRegionAssignmentMat()
    {
-      return snapNormalYImage;
+      return steppableRegionAssignmentMat;
    }
 
-   public Mat getSnapNormalZMat()
+   public Mat getSteppableRegionRingMat()
    {
-      return snapNormalZImage;
+      return steppableRegionRingMat;
    }
 
-   public Mat getSteppabilityMat()
+   public Mat getSteppabilityImage()
    {
       return steppabilityImage;
    }
 
-   public Mat getSteppabilityConnectionsMat()
+   public Mat getSnapHeightImage()
    {
-      return steppabilityConnectionsMat;
+      return snapHeightImage;
    }
 
-   public Mat getSnappedAreaFractionMat()
+   public Mat getSnappedAreaFractionImage()
    {
       return snappedAreaFractionImage;
    }
 
-   public void setFromPacket(TerrainMapMessage message)
+   public Mat getSnapNormalXImage()
    {
-      localGridSize = message.getLocalGridSize();
-      cellsPerMeter = message.getCellsPerMeter();
-
-      terrainMapCenter.set(message.getMapCenterX(), message.getMapCenterY());
-
-      heightScaleOffset = message.getHeightScaleOffset();
-      heightScaleFactor = message.getHeightScaleFactor();
-
-      if (message.getHasTerrainCostData())
-      {
-         if (terrainCostMap == null)
-            terrainCostMap = new Mat(localGridSize, localGridSize, opencv_core.CV_8UC1);
-         packDataIntoMatFromByteBuffer(message.getTerrainCostData().getBuffer(), terrainCostMap);
-      }
-      else
-      {
-         terrainCostMap = null;
-      }
-      if (message.getHasContactMapData())
-      {
-         if (contactMap == null)
-            contactMap = new Mat(localGridSize, localGridSize, opencv_core.CV_8UC1);
-         packDataIntoMatFromByteBuffer(message.getContactMapData().getBuffer(), contactMap);
-      }
-      else
-      {
-         contactMap = null;
-      }
-      if (message.getHasHeightMapData())
-      {
-         if (heightMap == null)
-            heightMap = new Mat(localGridSize, localGridSize, opencv_core.CV_16UC1);
-
-         ByteBuffer buffer = message.getHeightMapData().getBuffer();
-         packDataIntoMatFromByteBuffer(buffer, heightMap);
-      }
-      else
-      {
-         heightMap = null;
-      }
-      if (message.getHasSnappedHeightData())
-      {
-         if (snapHeightImage == null)
-            snapHeightImage = new Mat(localGridSize, localGridSize, opencv_core.CV_16UC1);
-
-         ByteBuffer buffer = message.getSnappedHeightData().getBuffer();
-         packDataIntoMatFromByteBuffer(buffer, snapHeightImage);
-      }
-      else
-      {
-         snapHeightImage = null;
-      }
-      if (message.getHasSnappedNormalData())
-      {
-         if (snapNormalXImage == null)
-            snapNormalXImage = new Mat(localGridSize, localGridSize, opencv_core.CV_8UC1);
-         packDataIntoMatFromByteBuffer(message.getSnappedNormalXData().getBuffer(), snapNormalXImage);
-         if (snapNormalYImage == null)
-            snapNormalYImage = new Mat(localGridSize, localGridSize, opencv_core.CV_8UC1);
-         packDataIntoMatFromByteBuffer(message.getSnappedNormalYData().getBuffer(), snapNormalYImage);
-         if (snapNormalZImage == null)
-            snapNormalZImage = new Mat(localGridSize, localGridSize, opencv_core.CV_8UC1);
-         packDataIntoMatFromByteBuffer(message.getSnappedNormalZData().getBuffer(), snapNormalZImage);
-      }
-      else
-      {
-         snapNormalXImage = null;
-         snapNormalYImage = null;
-         snapNormalZImage = null;
-      }
-      if (message.getHasSteppabilityData())
-      {
-         if (steppabilityImage == null)
-            steppabilityImage = new Mat(localGridSize, localGridSize, opencv_core.CV_8UC1);
-         packDataIntoMatFromByteBuffer(message.getSteppabilityData().getBuffer(), steppabilityImage);
-      }
-      else
-      {
-         steppabilityImage = null;
-      }
-      if (message.getHasSteppableConnectionsData())
-      {
-         if (steppabilityConnectionsMat == null)
-            steppabilityConnectionsMat = new Mat(localGridSize, localGridSize, opencv_core.CV_8UC1);
-         packDataIntoMatFromByteBuffer(message.getSteppableConnectionsData().getBuffer(), steppabilityConnectionsMat);
-      }
-      else
-      {
-         steppabilityConnectionsMat = null;
-      }
-      if (message.getHasSnappedAreaData())
-      {
-         if (snappedAreaFractionImage == null)
-            snappedAreaFractionImage = new Mat(localGridSize, localGridSize, opencv_core.CV_8UC1);
-         packDataIntoMatFromByteBuffer(message.getSnappedAreaData().getBuffer(), snappedAreaFractionImage);
-      }
-      else
-      {
-         snappedAreaFractionImage = null;
-      }
+      return snapNormalXImage;
    }
 
-   private void packDataIntoMatFromByteBuffer(ByteBuffer buffer, Mat dataToPack)
+   public Mat getSnapNormalYImage()
    {
-      dataToPack.data().put(buffer.array(), 0, (int) OpenCVTools.dataSize(dataToPack));
+      return snapNormalYImage;
+   }
+
+   public Mat getSnapNormalZImage()
+   {
+      return snapNormalZImage;
+   }
+
+   public Mat getSteppabilityConnectionsImage()
+   {
+      return steppabilityConnectionsImage;
    }
 }

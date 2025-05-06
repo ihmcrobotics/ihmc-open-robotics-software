@@ -2,14 +2,12 @@ package us.ihmc.behaviors.sequence.actions;
 
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.commons.FormattingTools;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
-import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.InitialStanceSide;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
@@ -125,32 +123,13 @@ public class FootstepPlanActionPlanningThread
 
       if (!isPreviewPlanner)
          state.getLogger().info("Planning footsteps...");
-
       FootstepPlannerOutput footstepPlannerOutput = footstepPlanner.handleRequest(footstepPlannerRequest, isPreviewPlanner);
-      boolean plannerBusy = footstepPlannerOutput == null;
-      boolean foundSolution = !plannerBusy && footstepPlannerOutput.getFootstepPlanningResult() == FootstepPlanningResult.FOUND_SOLUTION;
+      FootstepPlan footstepPlan = footstepPlannerOutput == null ? new FootstepPlan() : footstepPlannerOutput.getFootstepPlan();
+      if (!isPreviewPlanner)
+         state.getLogger().info("Footstep planner completed with {}, {} step(s)", footstepPlannerOutput.getFootstepPlanningResult(), footstepPlan.getNumberOfSteps());
 
-      while (plannerBusy) // Retry until planner is free
-      {
-         if (isPreviewPlanner)
-            return; // We don't need to do anything else here, another one will get scheduled
-
-         state.getLogger().info("Planner already running. Trying again in 1 s... (Planner timeout is %.1f s)".formatted(footstepPlannerRequest.getTimeout()));
-
-         ThreadTools.parkAtLeast(1.0);
-         footstepPlannerOutput = footstepPlanner.handleRequest(footstepPlannerRequest, isPreviewPlanner);
-         plannerBusy = footstepPlannerOutput == null;
-         foundSolution = !plannerBusy && footstepPlannerOutput.getFootstepPlanningResult() == FootstepPlanningResult.FOUND_SOLUTION;
-      }
-
-      if (foundSolution)
-      {
-         if (!isPreviewPlanner)
-            state.getLogger().info("Footstep planner completed with {}, {} step(s)",
-                                   footstepPlannerOutput.getFootstepPlanningResult(),
-                                   footstepPlannerOutput.getFootstepPlan().getNumberOfSteps());
-      }
-      else
+      FootstepPlan footstepPlanResult;
+      if (footstepPlan.getNumberOfSteps() < 1) // failed
       {
          FootstepPlannerRejectionReasonReport rejectionReasonReport = new FootstepPlannerRejectionReasonReport(footstepPlanner);
          rejectionReasonReport.update();
@@ -159,20 +138,23 @@ public class FootstepPlanActionPlanningThread
             double rejectionPercentage = rejectionReasonReport.getRejectionReasonPercentage(reason);
             state.getLogger().info("Rejection {}%: {}", FormattingTools.getFormattedToSignificantFigures(rejectionPercentage, 3), reason);
          }
-         state.getLogger().info("Footstep planning failed with {}, {} step(s)", footstepPlannerOutput.getFootstepPlanningResult(),
-                                                                                footstepPlannerOutput.getFootstepPlan().getNumberOfSteps());
+         state.getLogger().info("Footstep planning failure...");
+
+         footstepPlanResult = new FootstepPlan();
       }
-
-      // Copy of the output to be safe & use clean empty plan when no solution found
-      FootstepPlan modifiedFootstepPlan = new FootstepPlan(foundSolution ? footstepPlannerOutput.getFootstepPlan() : new FootstepPlan());
-      for (int i = 0; i < modifiedFootstepPlan.getNumberOfSteps(); i++)
+      else
       {
-         if (i == 0)
-            modifiedFootstepPlan.getFootstep(i).setTransferDuration(definition.getTransferDuration() / 2.0);
-         else
-            modifiedFootstepPlan.getFootstep(i).setTransferDuration(definition.getTransferDuration());
+         for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
+         {
+            if (i == 0)
+               footstepPlan.getFootstep(i).setTransferDuration(definition.getTransferDuration() / 2.0);
+            else
+               footstepPlan.getFootstep(i).setTransferDuration(definition.getTransferDuration());
 
-         modifiedFootstepPlan.getFootstep(i).setSwingDuration(definition.getSwingDuration());
+            footstepPlan.getFootstep(i).setSwingDuration(definition.getSwingDuration());
+         }
+
+         footstepPlanResult = new FootstepPlan(footstepPlan); // Copy of the output to be safe
       }
 
       if (!isPreviewPlanner)
@@ -185,7 +167,7 @@ public class FootstepPlanActionPlanningThread
       // Prevent an ealier plan from overwriting a later one
       if (sequenceID > completed)
       {
-         result = modifiedFootstepPlan;
+         result = footstepPlanResult;
          completed = sequenceID;
          resultNotification.set(result);
       }

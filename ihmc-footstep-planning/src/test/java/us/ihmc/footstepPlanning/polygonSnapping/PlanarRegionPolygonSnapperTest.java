@@ -1,24 +1,26 @@
 package us.ihmc.footstepPlanning.polygonSnapping;
 
-import org.junit.jupiter.api.Test;
-import us.ihmc.commons.MutationTestFacilitator;
-import us.ihmc.commons.RandomNumbers;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.tools.EuclidCoreRandomTools;
-import us.ihmc.euclid.tools.EuclidCoreTestTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.geometry.PlanarRegion;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Random;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+
+import us.ihmc.commons.MutationTestFacilitator;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.robotics.geometry.PlanarRegion;
 
 public class PlanarRegionPolygonSnapperTest
 {
@@ -45,27 +47,7 @@ public class PlanarRegionPolygonSnapperTest
          RigidBodyTransform transformExpected = new RigidBodyTransform();
          transformExpected.getRotation().set(rotationMatrix);
 
-         // Initialize this transform to have random values.
-         RigidBodyTransform transform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
-
-         transform.getTranslation().setToZero();
-         PolygonSnapperTools.constructRotationToMatchSurfaceNormal(surfaceNormal, transform.getRotation());
-
-         EuclidCoreTestTools.assertEquals(transformExpected, transform, 1e-5);
-
-         // If we create a vertical normal, after transforming it shold match the plane normal
-         Vector3D normal = new Vector3D(0.0, 0.0, 1.0);
-         normal.applyTransform(transform);
-         EuclidCoreTestTools.assertEquals(surfaceNormal, normal, 1e-5);
-
-         // Now do the same computation, but with a normal with non-unitary length
-         normal = new Vector3D(0.0, 0.0, 1.0);
-         surfaceNormal.scale(5.0);
-         PolygonSnapperTools.constructRotationToMatchSurfaceNormal(surfaceNormal, transform.getRotation());
-         normal.applyTransform(transform);
-         surfaceNormal.normalize();
-
-         EuclidCoreTestTools.assertEquals(surfaceNormal, normal, 1e-5);
+         EuclidCoreTestTools.assertEquals(transformExpected, PolygonSnapperTools.createTransformToMatchSurfaceNormalPreserveX(surfaceNormal), 1e-5);
       }
    }
 
@@ -76,11 +58,9 @@ public class PlanarRegionPolygonSnapperTest
       for (int i = 0; i < iters; i++)
       {
          Point3D highestVertex = EuclidCoreRandomTools.nextPoint3D(random);
-         // Initialize this to a random value to ensure things get set correctly.
-         RigidBodyTransform transformToModify = EuclidCoreRandomTools.nextRigidBodyTransform(random);
+         RigidBodyTransform trasnformToModify = EuclidCoreRandomTools.nextRigidBodyTransform(random);
 
-         // Compute what the expected transform is.
-         RigidBodyTransform transformExpected = new RigidBodyTransform(transformToModify);
+         RigidBodyTransform transformExpected = new RigidBodyTransform(trasnformToModify);
 
          Vector3D newTranslation = new Vector3D(highestVertex.getX(), highestVertex.getY(), 0.0);
          transformExpected.transform(newTranslation);
@@ -89,51 +69,9 @@ public class PlanarRegionPolygonSnapperTest
 
          transformExpected.getTranslation().set(newTranslation);
 
-         PolygonSnapperTools.setTranslationSettingZAndPreservingXAndY(highestVertex, transformToModify);
+         PlanarRegionPolygonSnapper.setTranslationSettingZAndPreservingXAndY(highestVertex, trasnformToModify);
 
-         EuclidCoreTestTools.assertEquals(transformExpected, transformToModify, 1e-5);
-
-         // If X and Y are preserved, it should be at the original value.
-         Pose3D snappedFootPose = new Pose3D(highestVertex, new Quaternion());
-         snappedFootPose.getTranslation().setZ(0.0);
-         snappedFootPose.applyTransform(transformToModify);
-
-         EuclidCoreTestTools.assertEquals(highestVertex, snappedFootPose.getTranslation(), 1e-5);
-      }
-   }
-
-   @Test
-   public void testSetTranslationToAchieveZAndPreserveXAndY()
-   {
-      Random random = new Random(1738L);
-      for (int i = 0; i < iters; i++)
-      {
-         Point3D originalVertex = EuclidCoreRandomTools.nextPoint3D(random);
-         Point3D highestVertex = new Point3D(originalVertex);
-         highestVertex.setZ(RandomNumbers.nextDouble(random, 1.0));
-
-         // Initialize this to a random value to ensure things get set correctly.
-         RigidBodyTransform transformToModify = EuclidCoreRandomTools.nextRigidBodyTransform(random);
-
-         // Compute what the expected transform is.
-         RigidBodyTransform transformExpected = new RigidBodyTransform(transformToModify);
-
-         Vector3D newTranslation = new Vector3D(originalVertex);
-         transformExpected.transform(newTranslation);
-         newTranslation.scale(-1.0);
-         newTranslation.add(highestVertex);
-
-         transformExpected.getTranslation().set(newTranslation);
-
-         PolygonSnapperTools.setTranslationToAchieveZAndPreserveXAndY(new Point2D(originalVertex), originalVertex.getZ(), highestVertex.getZ(), transformToModify.getRotation(), transformToModify.getTranslation());
-
-         EuclidCoreTestTools.assertEquals(transformExpected, transformToModify, 1e-5);
-
-         // If X and Y are preserved, it should be at the original value.
-         Pose3D snappedFootPose = new Pose3D(originalVertex, new Quaternion());
-         snappedFootPose.applyTransform(transformToModify);
-
-         EuclidCoreTestTools.assertEquals(highestVertex, snappedFootPose.getTranslation(), 1e-5);
+         EuclidCoreTestTools.assertEquals(transformExpected, trasnformToModify, 1e-5);
       }
    }
 

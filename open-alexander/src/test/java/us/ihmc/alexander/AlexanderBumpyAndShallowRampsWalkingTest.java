@@ -25,9 +25,7 @@ public class AlexanderBumpyAndShallowRampsWalkingTest extends DRCBumpyAndShallow
       return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ALEXANDER);
    }
 
-   // This test is disabled because the height map environmetn doesn't work in SCS2
    @Tag("humanoid-obstacle")
-   @Disabled
    @Test
    @Override
    public void testDRCBumpyGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException

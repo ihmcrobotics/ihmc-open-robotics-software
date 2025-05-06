@@ -4,7 +4,6 @@ import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.List;
 import java.util.Random;
 
 import org.junit.jupiter.api.AfterEach;
@@ -50,7 +49,6 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
 
    private static final ArrayList<Double> shoulderRollLimits = new ArrayList<Double>();
    private static final ArrayList<Double> elbowRollLimits = new ArrayList<Double>();
-   private static final ArrayList<Double> elbowYawLimits = new ArrayList<Double>();
    private static final ArrayList<Double> wristRollLimits = new ArrayList<Double>();
    private static final ArrayList<Double> shoulderYawLimits = new ArrayList<Double>();
    private static final ArrayList<Double> elbowPitchLimits = new ArrayList<Double>();
@@ -95,10 +93,8 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
 
    private enum JointNames
    {
-      SHOULDER_YAW, SHOULDER_ROLL, ELBOW_PITCH, ELBOW_ROLL, ELBOW_YAW, WRIST_PITCH, WRIST_ROLL, WRIST_YAW;
+      SHOULDER_YAW, SHOULDER_ROLL, ELBOW_PITCH, ELBOW_ROLL, WRIST_PITCH, WRIST_ROLL;
    }
-
-   private final List<JointNames> jointNames = new ArrayList<>();
 
    public NumericalInverseKinematicsCalculatorWithRobotTest()
    {
@@ -462,7 +458,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
 
    private void generateRandomArmPoseWithForwardKinematics(Random random)
    {
-      for (JointNames name : jointNames)
+      for (JointNames name : JointNames.values())
       {
          double bufferAwayFromJointLimits = 0.05; // 0.2; //0.0;
 
@@ -477,7 +473,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
 
    private void generateArmPoseSlightlyOffOfMidRangeWithForwardKinematics(Random random, double maxAngleDeviationFromMidRange)
    {
-      for (JointNames name : jointNames)
+      for (JointNames name : JointNames.values())
       {
          double bufferAwayFromJointLimits = 0.2; // 0.0;
 
@@ -495,7 +491,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
 
    private void generateArmPoseAtMidRangeWithForwardKinematics()
    {
-      for (JointNames name : jointNames)
+      for (JointNames name : JointNames.values())
       {
          double bufferAwayFromJointLimits = 0.2; // 0.0;
 
@@ -510,91 +506,38 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
 
    private void populateEnumMaps()
    {
-      if (fullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.SHOULDER_YAW) != null)
-      {
-         oneDoFJoints.put(JointNames.SHOULDER_YAW, fullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.SHOULDER_YAW));
-         jointLimits.put(JointNames.SHOULDER_YAW, shoulderYawLimits);
-         shoulderYawLimits.add(oneDoFJoints.get(JointNames.SHOULDER_YAW).getJointLimitUpper());
-         shoulderYawLimits.add(oneDoFJoints.get(JointNames.SHOULDER_YAW).getJointLimitLower());
-         jointAnglesInitial.put(JointNames.SHOULDER_YAW, 0.346);
-         jointNames.add(JointNames.SHOULDER_YAW);
-      }
-      if (fullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.SHOULDER_ROLL) != null)
-      {
-         oneDoFJoints.put(JointNames.SHOULDER_ROLL, fullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.SHOULDER_ROLL));
-         jointLimits.put(JointNames.SHOULDER_ROLL, shoulderRollLimits);
-         shoulderRollLimits.add(oneDoFJoints.get(JointNames.SHOULDER_ROLL).getJointLimitUpper());
-         shoulderRollLimits.add(oneDoFJoints.get(JointNames.SHOULDER_ROLL).getJointLimitLower());
-         jointAnglesInitial.put(JointNames.SHOULDER_ROLL, -1.3141);
-         jointNames.add(JointNames.SHOULDER_ROLL);
-      }
-      if (fullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.ELBOW_PITCH) != null)
-      {
-         oneDoFJoints.put(JointNames.ELBOW_PITCH, fullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.ELBOW_PITCH));
-         jointLimits.put(JointNames.ELBOW_PITCH, elbowPitchLimits);
+      oneDoFJoints.put(JointNames.SHOULDER_YAW, fullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.SHOULDER_YAW));
+      oneDoFJoints.put(JointNames.SHOULDER_ROLL, fullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.SHOULDER_ROLL));
+      oneDoFJoints.put(JointNames.ELBOW_PITCH, fullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.ELBOW_PITCH));
+      oneDoFJoints.put(JointNames.ELBOW_ROLL, fullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.ELBOW_ROLL));
+      oneDoFJoints.put(JointNames.WRIST_PITCH, fullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.FIRST_WRIST_PITCH));
+      oneDoFJoints.put(JointNames.WRIST_ROLL, fullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.WRIST_ROLL));
+      jointLimits.put(JointNames.SHOULDER_YAW, shoulderYawLimits);
+      jointLimits.put(JointNames.SHOULDER_ROLL, shoulderRollLimits);
+      jointLimits.put(JointNames.ELBOW_PITCH, elbowPitchLimits);
+      jointLimits.put(JointNames.ELBOW_ROLL, elbowRollLimits);
+      jointLimits.put(JointNames.WRIST_PITCH, wristPitchLimits);
+      jointLimits.put(JointNames.WRIST_ROLL, wristRollLimits);
 
-         elbowPitchLimits.add(oneDoFJoints.get(JointNames.ELBOW_PITCH).getJointLimitUpper());
-         elbowPitchLimits.add(oneDoFJoints.get(JointNames.ELBOW_PITCH).getJointLimitLower());
-         jointAnglesInitial.put(JointNames.ELBOW_PITCH, 1.9195);
-         jointNames.add(JointNames.ELBOW_PITCH);
-
-      }
-      if (fullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.ELBOW_ROLL) != null)
-      {
-         oneDoFJoints.put(JointNames.ELBOW_ROLL, fullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.ELBOW_ROLL));
-         jointLimits.put(JointNames.ELBOW_ROLL, elbowRollLimits);
-
-         elbowRollLimits.add(oneDoFJoints.get(JointNames.ELBOW_ROLL).getJointLimitUpper());
-         elbowRollLimits.add(oneDoFJoints.get(JointNames.ELBOW_ROLL).getJointLimitLower());
-         jointAnglesInitial.put(JointNames.ELBOW_ROLL, 1.1749);
-         jointNames.add(JointNames.ELBOW_ROLL);
-      }
-      if (fullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.ELBOW_YAW) != null)
-      {
-         oneDoFJoints.put(JointNames.ELBOW_YAW, fullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.ELBOW_YAW));
-         jointLimits.put(JointNames.ELBOW_YAW, elbowYawLimits);
-
-         elbowYawLimits.add(oneDoFJoints.get(JointNames.ELBOW_YAW).getJointLimitUpper());
-         elbowYawLimits.add(oneDoFJoints.get(JointNames.ELBOW_YAW).getJointLimitLower());
-         jointAnglesInitial.put(JointNames.ELBOW_YAW, 0.0);
-         jointNames.add(JointNames.ELBOW_YAW);
-      }
-      if (fullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.FIRST_WRIST_PITCH) != null)
-      {
-         oneDoFJoints.put(JointNames.WRIST_PITCH, fullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.FIRST_WRIST_PITCH));
-         jointLimits.put(JointNames.WRIST_PITCH, wristPitchLimits);
-
-         wristPitchLimits.add(oneDoFJoints.get(JointNames.WRIST_PITCH).getJointLimitUpper());
-         wristPitchLimits.add(oneDoFJoints.get(JointNames.WRIST_PITCH).getJointLimitLower());
-         jointAnglesInitial.put(JointNames.WRIST_PITCH, -0.0068);
-         jointNames.add(JointNames.WRIST_PITCH);
-      }
-      if (fullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.WRIST_ROLL) != null)
-      {
-         oneDoFJoints.put(JointNames.WRIST_ROLL, fullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.WRIST_ROLL));
-
-         jointLimits.put(JointNames.WRIST_ROLL, wristRollLimits);
-
-         // *_*_Limits(*_*_Max, *_*_Min);
-
-         wristRollLimits.add(oneDoFJoints.get(JointNames.WRIST_ROLL).getJointLimitUpper());
-         wristRollLimits.add(oneDoFJoints.get(JointNames.WRIST_ROLL).getJointLimitLower());
-         jointAnglesInitial.put(JointNames.WRIST_ROLL, -0.0447);
-         jointNames.add(JointNames.WRIST_ROLL);
-      }
-      if (fullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.WRIST_YAW) != null)
-      {
-         oneDoFJoints.put(JointNames.WRIST_YAW, fullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.WRIST_YAW));
-
-         jointLimits.put(JointNames.WRIST_YAW, wristRollLimits);
-
-         // *_*_Limits(*_*_Max, *_*_Min);
-
-         wristRollLimits.add(oneDoFJoints.get(JointNames.WRIST_YAW).getJointLimitUpper());
-         wristRollLimits.add(oneDoFJoints.get(JointNames.WRIST_YAW).getJointLimitLower());
-         jointAnglesInitial.put(JointNames.WRIST_YAW, 0.0);
-         jointNames.add(JointNames.WRIST_YAW);
-      }
+      // *_*_Limits(*_*_Max, *_*_Min);
+      shoulderRollLimits.add(oneDoFJoints.get(JointNames.SHOULDER_ROLL).getJointLimitUpper());
+      shoulderRollLimits.add(oneDoFJoints.get(JointNames.SHOULDER_ROLL).getJointLimitLower());
+      shoulderYawLimits.add(oneDoFJoints.get(JointNames.SHOULDER_YAW).getJointLimitUpper());
+      shoulderYawLimits.add(oneDoFJoints.get(JointNames.SHOULDER_YAW).getJointLimitLower());
+      elbowRollLimits.add(oneDoFJoints.get(JointNames.ELBOW_ROLL).getJointLimitUpper());
+      elbowRollLimits.add(oneDoFJoints.get(JointNames.ELBOW_ROLL).getJointLimitLower());
+      elbowPitchLimits.add(oneDoFJoints.get(JointNames.ELBOW_PITCH).getJointLimitUpper());
+      elbowPitchLimits.add(oneDoFJoints.get(JointNames.ELBOW_PITCH).getJointLimitLower());
+      wristRollLimits.add(oneDoFJoints.get(JointNames.WRIST_ROLL).getJointLimitUpper());
+      wristRollLimits.add(oneDoFJoints.get(JointNames.WRIST_ROLL).getJointLimitLower());
+      wristPitchLimits.add(oneDoFJoints.get(JointNames.WRIST_PITCH).getJointLimitUpper());
+      wristPitchLimits.add(oneDoFJoints.get(JointNames.WRIST_PITCH).getJointLimitLower());
+      jointAnglesInitial.put(JointNames.SHOULDER_YAW, 0.346);
+      jointAnglesInitial.put(JointNames.SHOULDER_ROLL, -1.3141);
+      jointAnglesInitial.put(JointNames.ELBOW_PITCH, 1.9195);
+      jointAnglesInitial.put(JointNames.ELBOW_ROLL, 1.1749);
+      jointAnglesInitial.put(JointNames.WRIST_PITCH, -0.0068);
+      jointAnglesInitial.put(JointNames.WRIST_ROLL, -0.0447);
    }
 
    private double getMaximumArray(ArrayList<Long> array)
