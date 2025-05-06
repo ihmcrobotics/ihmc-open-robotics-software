@@ -1,6 +1,6 @@
 #define GRID_RESOLUTION_YAW 0.0872664626f // 5 degrees in radians
 #define POSITION_W 10.0f
-#define YAW_W 50.0f
+#define YAW_W 1.0f
 #define PLANARITY_W 100.0f
 #define HEIGHT_W 20.0f
 #define MAX_HEIGHT_VARIANCE 0.05f
@@ -140,8 +140,8 @@ __device__ void sampleFootCorners(
     bool* isSurfaceDiscontinuous)
 {
     // Define foot corners
-    float fx = footLength + 0.10; // keep some room for not bumping into edges
-    float fy = footWidth + 0.10;
+    float fx = footLength; // keep some room for not bumping into edges
+    float fy = footWidth;
     float2 corners[5] = {
         {-fx / 2, -fy / 2},
         {fx / 2, -fy / 2},

@@ -820,7 +820,7 @@ public class RDXVRKinematicsStreamingMode
    {
       if (status.hasReceivedFirstMessage())
       {
-         ghostRobotGraphic.getRenderables(renderables, pool, sceneLevels);
+//         ghostRobotGraphic.getRenderables(renderables, pool, sceneLevels);
       }
       armStreaming.getRenderables(renderables, pool);
 
