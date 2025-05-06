@@ -195,7 +195,7 @@ public class RDXMultiContactRegionGraphic implements RenderableProvider
             PlanarRegion region = planarRegions.getPlanarRegion(i);
 
             double area = region.getArea();
-            double areaThreshold = 0.15;
+            double areaThreshold = 0.2;
 
             if (area < areaThreshold)
                continue;
@@ -207,10 +207,10 @@ public class RDXMultiContactRegionGraphic implements RenderableProvider
             double pitchThreshold = Math.toRadians(10.0); // Math.toRadians(9.0);
 
             // hardware
-//            if (pitch > pitchThreshold)
-//               continue;
-//            if (normal.getX() > -0.2)
-//               continue;
+            if (pitch > pitchThreshold)
+               continue;
+            if (normal.getX() > -0.5)
+               continue;
 
             // back wall
 //            if (pitch > pitchThreshold)
@@ -219,8 +219,8 @@ public class RDXMultiContactRegionGraphic implements RenderableProvider
 //               continue;
 
             // top wall
-            if (normal.getZ() > -0.5)
-               continue;
+//            if (normal.getZ() > -0.5)
+//               continue;
 
             // pitched wall
 //            if (Math.abs(normal.getZ()) > 0.5)
@@ -228,7 +228,12 @@ public class RDXMultiContactRegionGraphic implements RenderableProvider
 //            if (normal.getX() > -0.3)
 //               continue;
 
-            Point3D centroid = PlanarRegionTools.getCentroid3DInWorld(region);
+            FramePoint3D centroid = new FramePoint3D(ReferenceFrame.getWorldFrame(), PlanarRegionTools.getCentroid3DInWorld(region));
+            centroid.changeFrame(midFeetZUpFrame);
+            if (centroid.getX() < 0.5)
+               continue;
+
+            centroid.changeFrame(ReferenceFrame.getWorldFrame());
             FramePoint3D hand = new FramePoint3D(ghostFullRobotModel.getHandControlFrame(HumanoidKinematicsToolboxController.BRACING_HAND_SIDE));
             hand.changeFrame(ReferenceFrame.getWorldFrame());
 
@@ -320,7 +325,7 @@ public class RDXMultiContactRegionGraphic implements RenderableProvider
 
    private Color getPolygonColor()
    {
-      return (postureSensitivity > 0.035 && stabilityMargin < 0.08) ? OPTIMIZER_POLYGON_GRAPHIC_COLOR : NOMINAL_POLYGON_GRAPHIC_COLOR;
+      return (postureSensitivity > 0.01) ? OPTIMIZER_POLYGON_GRAPHIC_COLOR : NOMINAL_POLYGON_GRAPHIC_COLOR;
    }
 
    private void updateMinimumEdge()

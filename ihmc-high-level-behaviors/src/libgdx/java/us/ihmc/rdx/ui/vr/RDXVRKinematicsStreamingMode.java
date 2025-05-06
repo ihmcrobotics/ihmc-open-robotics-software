@@ -100,6 +100,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
+import java.sql.Ref;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -121,10 +122,10 @@ public class RDXVRKinematicsStreamingMode
    public static final double FRAME_AXIS_GRAPHICS_LENGTH = 0.2;
    private static final boolean USE_TRACKER_FOR_COM = false;
    private static final double COM_CONTROL_JOYSTICK_THRESHOLD = 0.7;
-   private static final double COM_JOYSTICK_INCREMENT = 0.001;
+   private static final double COM_JOYSTICK_INCREMENT = 4.0e-4;
 
    public static final Vector3D CONTACT_NORMAL = new Vector3D(-1.0, 0.0, 0.0);
-   public static Function<ROS2SyncedRobotModel, ReferenceFrame> CONTACT_FRAME_SUPPLIER = s -> ReferenceFrame.getWorldFrame();
+   public static Function<ROS2SyncedRobotModel, ReferenceFrame> CONTACT_FRAME_SUPPLIER = s -> s.getReferenceFrames().getMidFeetZUpFrame(); // ReferenceFrame.getWorldFrame();
 
    private final ROS2SyncedRobotModel syncedRobot;
    private final ROS2ControllerHelper ros2ControllerHelper;
@@ -781,17 +782,12 @@ public class RDXVRKinematicsStreamingMode
          previousControllerLastPollTimeNanos = -1;
       }
 
-      if (rightBButtonPressed)
-      {
-         LogTools.info("Requesting region preview");
-
-//         ikHumanoidSolverConfigurationMessage.setEnableRegionPreview(true);
-//         FrameVector3D contactNormal = new FrameVector3D(CONTACT_FRAME_SUPPLIER.apply(syncedRobot), CONTACT_NORMAL);
-//         contactNormal.changeFrame(ReferenceFrame.getWorldFrame());
-//         ikHumanoidSolverConfigurationMessage.getPreviewSurfaceNormal().set(contactNormal);
-         ikHumanoidSolverConfigurationMessage.setEnableStabilityObjective(true);
-         ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputToolboxHumanoidConfigurationTopic(syncedRobot.getRobotModel().getSimpleRobotName()), ikHumanoidSolverConfigurationMessage);
-      }
+//      if (rightBButtonPressed)
+//      {
+//         LogTools.info("Requesting region preview");
+//         ikHumanoidSolverConfigurationMessage.setEnableStabilityObjective(enableStabilityObjective.get());
+//         ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputToolboxHumanoidConfigurationTopic(syncedRobot.getRobotModel().getSimpleRobotName()), ikHumanoidSolverConfigurationMessage);
+//      }
 
       if (rightTriggerPressed)
       { // do not want to close grippers while interacting with the panel
@@ -1225,7 +1221,7 @@ public class RDXVRKinematicsStreamingMode
       {
          handLoadBearingMessage.setLoad(true);
 
-         double handCoefficientOfFriction = 1.0; // 0.4; //
+         double handCoefficientOfFriction = 0.55;
          handLoadBearingMessage.setCoefficientOfFriction(handCoefficientOfFriction);
 
          // Contact point assumed to be at hand control frame and is using the nubs
