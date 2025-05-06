@@ -5,7 +5,7 @@
   "Enable alpha filter": true,
   "Enable vertical filter": true,
   "Search window height": {
-    "value": 400,
+    "value": 500,
     "lowerBound": 100,
     "upperBound": 800
   },
