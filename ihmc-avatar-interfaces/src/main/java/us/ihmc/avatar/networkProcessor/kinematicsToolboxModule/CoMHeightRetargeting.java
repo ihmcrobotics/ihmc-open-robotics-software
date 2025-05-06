@@ -7,15 +7,18 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.mecano.algorithms.CentroidalMomentumCalculator;
-import us.ihmc.yoVariables.filters.RateLimitedYoVariable;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+import static us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.OrientationRetargeting.BLEND_DURATION;
+
 public class CoMHeightRetargeting
 {
-   private final RateLimitedYoVariable optimizedHeightRL;
+   private double desiredHeight;
    private double nominalHeight;
    private double optimizedHeight;
+   private double blendingHeight;
 
    private final double minOffset;
    private final double maxOffset;
@@ -32,12 +35,14 @@ public class CoMHeightRetargeting
    private final YoDouble centroidalZVelocity;
 
    private final YoDouble comRetargetDelta;
+   private double blendStartTime;
+   private final DoubleProvider timeProvider;
 
    public CoMHeightRetargeting(double integrationDT,
-                               double maxRate,
                                double minOffset,
                                double maxOffset,
                                double robotMass,
+                               DoubleProvider timeProvider,
                                ReferenceFrame centerOfMassFrame,
                                CentroidalMomentumCalculator centroidalMomentumCalculator,
                                YoRegistry registry)
@@ -48,8 +53,7 @@ public class CoMHeightRetargeting
       this.maxOffset = maxOffset;
       this.robotMass = robotMass;
       this.integrationDT = integrationDT;
-
-      optimizedHeightRL = new RateLimitedYoVariable("optimizedCoMHeight", registry, maxRate, integrationDT);
+      this.timeProvider = timeProvider;
 
       initialCoMZ = new YoDouble("initialCoMZ", registry);
       nominalCoMZ = new YoDouble("nominalCoMZ", registry);
@@ -64,10 +68,8 @@ public class CoMHeightRetargeting
       tempPoint.changeFrame(ReferenceFrame.getWorldFrame());
       nominalHeight = tempPoint.getZ();
       optimizedHeight = nominalHeight;
-
-      // call once to avoid edge cases in rate limiting
-      this.optimizedHeightRL.set(nominalHeight);
-      this.optimizedHeightRL.update(nominalHeight);
+      desiredHeight = nominalHeight;
+      blendingHeight = nominalHeight;
 
       initialCoMZ.set(tempPoint.getZ());
       comRetargetDelta.set(0.0);
@@ -79,28 +81,35 @@ public class CoMHeightRetargeting
       nominalCoMZ.set(nominalHeight);
    }
 
-   public void update(PostureOptimizerState optimizerState, DMatrixRMaj qd)
+   public void update(PostureOptimizerState optimizerState, PostureOptimizerState previousState, DMatrixRMaj qd)
    {
+      boolean isNewState = previousState != optimizerState;
+      if (isNewState && optimizerState == PostureOptimizerState.OPTIMIZER)
+      {
+         optimizedHeight = desiredHeight;
+      }
+      else if (isNewState && optimizerState == PostureOptimizerState.NOMINAL)
+      {
+         blendingHeight = desiredHeight;
+         blendStartTime = timeProvider.getValue();
+      }
+
       if (optimizerState == PostureOptimizerState.NOMINAL)
       {
-         optimizedHeightRL.update(nominalHeight);
-
-         // reset optimized to actual
-         optimizedHeight = nominalHeight;
+         double blendAlpha = EuclidCoreTools.clamp((timeProvider.getValue() - blendStartTime) / BLEND_DURATION, 0.0, 1.0);
+         desiredHeight =  EuclidCoreTools.interpolate(blendingHeight, nominalHeight, blendAlpha);
       }
       else if (optimizerState == PostureOptimizerState.OPTIMIZER)
       {
          integrate(qd);
-         optimizedHeightRL.update(optimizedHeight);
-         optimizedHeightRL.set(EuclidCoreTools.clamp(optimizedHeightRL.getValue(), nominalHeight + minOffset, nominalHeight + maxOffset));
+         desiredHeight = EuclidCoreTools.clamp(optimizedHeight, nominalHeight + minOffset, nominalHeight + maxOffset);
       }
       else
       {
          // freeze, no update (just call this to avoid edge cases in rate limiting)
-         optimizedHeightRL.update(optimizedHeightRL.getValue());
       }
 
-      comRetargetDelta.set(Math.abs(optimizedHeightRL.getValue() - nominalHeight));
+      comRetargetDelta.set(Math.abs(desiredHeight - nominalHeight));
    }
 
    public void integrate(DMatrixRMaj qd)
@@ -116,6 +125,6 @@ public class CoMHeightRetargeting
 
    public double getHeight()
    {
-      return optimizedHeightRL.getDoubleValue();
+      return desiredHeight;
    }
 }

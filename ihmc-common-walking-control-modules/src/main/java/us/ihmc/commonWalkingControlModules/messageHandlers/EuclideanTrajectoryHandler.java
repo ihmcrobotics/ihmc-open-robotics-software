@@ -360,4 +360,10 @@ public class EuclideanTrajectoryHandler
          acceleration.setElement(i, polynomial.getAcceleration());
       }
    }
+
+   public void clear()
+   {
+      while (!trajectoryPoints.isEmpty())
+         trajectoryPoints.removeFirst();
+   }
 }

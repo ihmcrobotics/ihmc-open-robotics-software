@@ -19,10 +19,12 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.yoVariables.euclid.filters.RateLimitedYoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -32,7 +34,8 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class OrientationRetargeting
 {
    private static final boolean VISUALIZE = true;
-   private final RateLimitedYoFrameQuaternion desiredOrientationRateLimited;
+   static final double BLEND_DURATION = 1.0;
+   private final YoFrameQuaternion desiredOrientation;
 
    private final FrameQuaternion nominalOrientation = new FrameQuaternion();
    private final AxisAngle optimizedOrientation = new AxisAngle();
@@ -56,18 +59,22 @@ public class OrientationRetargeting
    private final AxisAngle axisAngle = new AxisAngle();
    private final FrameQuaternion differenceToNominal = new FrameQuaternion();
 
+   private final FrameQuaternion blendOrientation = new FrameQuaternion();
    private final FrameVector3D filteredAngularVelocity = new FrameVector3D();
 
    private final YoDouble retargetDelta;
+   private double blendStartTime;
+   private final DoubleProvider timeProvider;
 
-   public OrientationRetargeting(String name, RigidBodyBasics rigidBody, double integrationDT, double maxRate, double maxAngle, YoGraphicsListRegistry graphicsListRegistry, YoRegistry registry)
+   public OrientationRetargeting(String name, RigidBodyBasics rigidBody, double integrationDT, DoubleProvider timeProvider, double maxAngle, YoGraphicsListRegistry graphicsListRegistry, YoRegistry registry)
    {
-      desiredOrientationRateLimited = new RateLimitedYoFrameQuaternion(name, "DesiredOrientation", registry, maxRate, integrationDT, ReferenceFrame.getWorldFrame());
+      desiredOrientation = new YoFrameQuaternion(name, ReferenceFrame.getWorldFrame(), registry);
       this.integrationDT = integrationDT;
       this.maxAngle = maxAngle;
       this.controlFramePose.setToZero(rigidBody.getBodyFixedFrame());
       this.rigidBody = rigidBody;
       this.retargetDelta = new YoDouble(name + "RetargetDelta", registry);
+      this.timeProvider = timeProvider;
 
       this.controlFrame = new MovingReferenceFrame(name + "ControlFrameRetarget", rigidBody.getBodyFixedFrame(), null, false, true)
       {
@@ -114,32 +121,42 @@ public class OrientationRetargeting
       controlFrame.update();
       nominalOrientation.setFromReferenceFrame(controlFrame);
 
-      // call once to avoid edge cases in rate limiting
-      this.desiredOrientationRateLimited.set(nominalOrientation);
-      this.desiredOrientationRateLimited.update(nominalOrientation);
+      this.desiredOrientation.set(nominalOrientation);
+      blendOrientation.set(nominalOrientation);
 
       optimizedOrientation.set(nominalOrientation);
       retargetDelta.set(0.0);
    }
 
-   public void updateNominalOrientation(FrameOrientation3DReadOnly nominalOrientation, FramePose3DReadOnly controlFrame)
+   public void updateNominalOrientation(FrameOrientation3DReadOnly nominalOrientation, boolean hasDesiredVelocity, SpatialVector desiredVelocity, FramePose3DReadOnly controlFrame)
    {
       this.nominalOrientation.setIncludingFrame(nominalOrientation);
       this.controlFramePose.setIncludingFrame(controlFrame);
       controlFramePose.changeFrame(rigidBody.getBodyFixedFrame());
+
+      if (hasDesiredVelocity)
+         filteredAngularVelocity.set(desiredVelocity.getAngularPart());
    }
 
-   public void update(PostureOptimizerState optimizerState)
+   public void update(PostureOptimizerState optimizerState, PostureOptimizerState previousState)
    {
       controlFrame.update();
 
+      boolean isNewState = previousState != optimizerState;
+      if (isNewState && optimizerState == PostureOptimizerState.OPTIMIZER)
+      {
+         optimizedOrientation.set(desiredOrientation);
+      }
+      else if (isNewState && optimizerState == PostureOptimizerState.NOMINAL)
+      {
+         blendOrientation.set(desiredOrientation);
+         blendStartTime = timeProvider.getValue();
+      }
+
       if (optimizerState == PostureOptimizerState.NOMINAL)
       {
-         desiredOrientationRateLimited.update(nominalOrientation);
-
-         // reset optimized to current desired
-         optimizedOrientation.set(desiredOrientationRateLimited);
-         filteredAngularVelocity.setToZero();
+         double blendAlpha = EuclidCoreTools.clamp((timeProvider.getValue() - blendStartTime) / BLEND_DURATION, 0.0, 1.0);
+         desiredOrientation.interpolate(blendOrientation, nominalOrientation, blendAlpha);
       }
       else if (optimizerState == PostureOptimizerState.OPTIMIZER)
       {
@@ -147,14 +164,10 @@ public class OrientationRetargeting
 
          double filterAlpha = 0.25;
          filteredAngularVelocity.interpolate(angularVelocity, filterAlpha);
-
-         tempQuaternion.set(optimizedOrientation);
-         desiredOrientationRateLimited.set(tempQuaternion); // here the integrator acts as the filter
       }
       else
       {
          // freeze, no update (just call this to avoid edge cases in rate limiting)
-         desiredOrientationRateLimited.update(desiredOrientationRateLimited);
          filteredAngularVelocity.setToZero();
       }
 
@@ -166,13 +179,13 @@ public class OrientationRetargeting
          yoActualOrientation.setFromReferenceFrame(controlFrame);
       }
 
-      orientationDifference.difference(nominalOrientation, desiredOrientationRateLimited);
+      orientationDifference.difference(nominalOrientation, desiredOrientation);
       retargetDelta.set(orientationDifference.angle());
    }
 
    public FixedFrameQuaternionBasics getDesiredOrientation()
    {
-      return desiredOrientationRateLimited;
+      return desiredOrientation;
    }
 
    public void integrate()

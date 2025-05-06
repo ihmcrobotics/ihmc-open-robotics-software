@@ -204,6 +204,23 @@ public class PrecomputedICPPlanner implements SCS2YoGraphicHolder
       if (withinTimeInterval)
       {
          compute(time);
+
+         boolean nanICPPosition = desiredICPPosition.containsNaN();
+         boolean nanICPVelocity = desiredICPVelocity.containsNaN() || yoDesiredCoMPosition.containsNaN() || yoDesiredCoPPosition.containsNaN() || yoDesiredCMPPosition.containsNaN();
+
+         if (!nanICPPosition && nanICPVelocity)
+         {
+            desiredICPVelocity.setToZero();
+            yoDesiredCoMPosition.set(desiredICPPosition);
+            yoDesiredCoPPosition.set(desiredICPPosition);
+            yoDesiredCMPPosition.set(desiredICPPosition);
+         }
+         else if (nanICPPosition && nanICPVelocity)
+         {
+            centerOfMassTrajectoryHandler.clear();
+            return false;
+         }
+
          desiredCapturePoint2dToPack.setIncludingFrame(ReferenceFrame.getWorldFrame(), desiredICPPosition);
          desiredCapturePointVelocity2dToPack.setIncludingFrame(ReferenceFrame.getWorldFrame(), filteredPrecomputedIcpVelocity);
          desiredCoP2DToPack.setIncludingFrame(ReferenceFrame.getWorldFrame(), desiredCoPPosition);
@@ -232,6 +249,23 @@ public class PrecomputedICPPlanner implements SCS2YoGraphicHolder
       if (withinTimeInterval)
       {
          compute(time);
+
+         boolean nanICPPosition = desiredICPPosition.containsNaN();
+         boolean nanICPVelocity = desiredICPVelocity.containsNaN() || yoDesiredCoMPosition.containsNaN() || yoDesiredCoPPosition.containsNaN() || yoDesiredCMPPosition.containsNaN();
+
+         if (!nanICPPosition && nanICPVelocity)
+         {
+            desiredICPVelocity.setToZero();
+            yoDesiredCoMPosition.set(desiredICPPosition);
+            yoDesiredCoPPosition.set(desiredICPPosition);
+            yoDesiredCMPPosition.set(desiredICPPosition);
+         }
+         else if (nanICPPosition && nanICPVelocity)
+         {
+            centerOfMassTrajectoryHandler.clear();
+            return false;
+         }
+
          if (!currentlyBlendingICPTrajectories.getBooleanValue())
          {
             blendingStartTime.set(time);
