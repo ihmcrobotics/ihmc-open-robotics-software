@@ -1,7 +1,9 @@
 package us.ihmc.perception;
 
+import org.apache.logging.log4j.core.util.ExecutorServices;
 import sensor_msgs.msg.dds.CameraInfo;
 import us.ihmc.commons.thread.RepeatingTaskThread;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros2.tf2.ROS2FollowingFrame;
 import us.ihmc.communication.ros2.tf2.ROS2StaticFrame;
@@ -17,6 +19,10 @@ import us.ihmc.sensors.ImageSensor;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 public class ImageSensorPublishThread extends RepeatingTaskThread
 {
@@ -26,9 +32,7 @@ public class ImageSensorPublishThread extends RepeatingTaskThread
 
    private final ROS2Node ros2Node;
 
-   private final Map<ROS2Topic<? extends Packet<?>>, Integer> topicToImageKeyMap = new HashMap<>();
-   private final Map<ROS2Topic<? extends Packet<?>>, Long> lastPublishedSequenceNumbers = new HashMap<>();
-   private final RawImagePublisher publisher;
+   private final Map<AsyncImagePublisher, Integer> publisherMap = new HashMap<>();
    private boolean publishingIsThrottled = false;
 
    private final ImageSensor imageSensor;
@@ -46,12 +50,11 @@ public class ImageSensorPublishThread extends RepeatingTaskThread
       this.ros2Node = ros2Node;
 
       imageSensor = sensorToPublish;
-      publisher = new RawImagePublisher(ros2Node);
    }
 
    public void addTopic(ROS2Topic<? extends Packet<?>> topicToPublishOn, int imageKey)
    {
-      topicToImageKeyMap.put(topicToPublishOn, imageKey);
+      publisherMap.put(new AsyncImagePublisher(ros2Node, topicToPublishOn), imageKey);
    }
 
    @Override
@@ -97,9 +100,10 @@ public class ImageSensorPublishThread extends RepeatingTaskThread
          if (!publishingIsThrottled)
             imageSensor.waitForGrab();
 
-         for (Entry<ROS2Topic<? extends Packet<?>>, Integer> imageEntry : topicToImageKeyMap.entrySet())
+         for (Entry<AsyncImagePublisher, Integer> imageEntry : publisherMap.entrySet())
          {
-            ROS2Topic<? extends Packet<?>> imageTopic = imageEntry.getKey();
+            AsyncImagePublisher publisher = imageEntry.getKey();
+            ROS2Topic<? extends Packet<?>> imageTopic = publisher.topic;
 
             // If the topic is a camera info topic, check whether we should skip this publish
             if (imageTopic.getType().equals(CameraInfo.class) && getCompleted() % cameraInfoPublishModulus != 0)
@@ -113,13 +117,6 @@ public class ImageSensorPublishThread extends RepeatingTaskThread
             if (imageToPublish == null)
                continue;
 
-            // Skip if this image was already published on the topic
-            if (lastPublishedSequenceNumbers.containsKey(imageTopic) && imageToPublish.getSequenceNumber() <= lastPublishedSequenceNumbers.get(imageTopic))
-               continue;
-
-            // Store the sequence number to avoid re-publishing this image
-            lastPublishedSequenceNumbers.put(imageTopic, imageToPublish.getSequenceNumber());
-
             // Update sensor frames
             ReferenceFrame imageFrame = imageSensor.getImageFrame(imageKey);
             if (ros2FramesEnabled)
@@ -129,7 +126,7 @@ public class ImageSensorPublishThread extends RepeatingTaskThread
             }
 
             // Publish the image
-            publisher.publishImage(imageTopic, imageToPublish, imageFrame);
+            publisher.publish(imageToPublish, imageFrame);
             imageToPublish.release();
          }
       }
@@ -179,8 +176,46 @@ public class ImageSensorPublishThread extends RepeatingTaskThread
       super.kill();
       interrupt();
 
+      publisherMap.keySet().forEach(AsyncImagePublisher::close);
       ros2CameraFrames.values().forEach(ReferenceFrame::remove);
       ros2OpticalFrames.values().forEach(ReferenceFrame::remove);
-      publisher.close();
+   }
+
+   private static class AsyncImagePublisher
+   {
+      private final RawImagePublisher publisher;
+      private final ROS2Topic<? extends Packet<?>> topic;
+      private long lastSequenceNumber = -1L;
+
+      private final ExecutorService publishExecutor;
+      private Future<?> publishFuture;
+
+      private AsyncImagePublisher(ROS2Node ros2Node, ROS2Topic<? extends Packet<?>> topic)
+      {
+         this.topic = topic;
+         publisher = new RawImagePublisher(ros2Node);
+         publishExecutor = Executors.newSingleThreadExecutor(ThreadTools.createNamedThreadFactory(topic.getName() + getClass().getSimpleName()));
+      }
+
+      private void publish(RawImage image, ReferenceFrame sensorFrame)
+      {
+         // Don't publish if an image is currently being published, or an image with a greater sequence number has already been published
+         if ((publishFuture != null && !publishFuture.isDone()) || image.getSequenceNumber() < lastSequenceNumber)
+            return;
+
+         image.get();
+         lastSequenceNumber = image.getSequenceNumber();
+         publishFuture = publishExecutor.submit(() ->
+         {
+            publisher.publishImage(topic, image, sensorFrame);
+            image.release();
+         });
+      }
+
+      public void close()
+      {
+         ExecutorServices.shutdown(publishExecutor, 1, TimeUnit.SECONDS, getClass().getSimpleName());
+         publisher.close();
+      }
    }
 }

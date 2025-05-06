@@ -40,6 +40,7 @@ extern "C"
 #define VERTICAL_SEARCH_SIZE 35
 #define VERTICAL_SEARCH_RESOLUTION 36
 #define FAST_SEARCH_SIZE 37
+#define GROUND_HEIGHT 38
 
 #define VERTICAL_FOV 1.5707963267948966f
 #define HORIZONTAL_FOV 6.2831853f
@@ -99,7 +100,7 @@ __device__ float3 back_project_perspective(int2 pos, float Z, float *params)
     return point;
 }
 
-__device__ float get_spatial_average(int xIndex, int yIndex, unsigned short *globalMap, float *params)
+__device__ float get_spatial_average(int xIndex, int yIndex, unsigned short *globalMap, size_t pitchGlobal, float *params)
 {
     // perform a smoothing over neighboring cells
     float heightSum = 0.0f;
@@ -114,8 +115,8 @@ __device__ float get_spatial_average(int xIndex, int yIndex, unsigned short *glo
 
             if (nxIndex >= 0 && nxIndex < globalCellsPerAxis && nyIndex >= 0 && nyIndex < globalCellsPerAxis)
             {
-                int index = nyIndex * globalCellsPerAxis + nxIndex;
-                heightSum += globalMap[index] / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
+                unsigned short *heightValue = (unsigned short *)((char *)globalMap + nxIndex * pitchGlobal) + nyIndex;
+                heightSum += *heightValue / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
                 count++;
             }
         }
@@ -124,7 +125,7 @@ __device__ float get_spatial_average(int xIndex, int yIndex, unsigned short *glo
     return heightAverage;
 }
 
-__device__ float get_spatial_stddev(int xIndex, int yIndex, float average, unsigned short *globalMap, float *params)
+__device__ float get_spatial_stddev(int xIndex, int yIndex, float average, unsigned short *globalMap, size_t pitchGlobal, float *params)
 {
     float totalDeviation = 0.0f;
     int count = 0;
@@ -139,8 +140,8 @@ __device__ float get_spatial_stddev(int xIndex, int yIndex, float average, unsig
 
             if (nxIndex >= 0 && nxIndex < globalCellsPerAxis && nyIndex >= 0 && nyIndex < globalCellsPerAxis)
             {
-                int index = nyIndex * globalCellsPerAxis + nxIndex;
-                float height = globalMap[index] / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
+                unsigned short *heightValue = (unsigned short *)((char *)globalMap + nxIndex * pitchGlobal) + nyIndex;
+                float height = *heightValue / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
                 totalDeviation += (height - average) * (height - average);
                 count++;
             }
@@ -150,10 +151,10 @@ __device__ float get_spatial_stddev(int xIndex, int yIndex, float average, unsig
     return heightStddev;
 }
 
-__device__ float get_spatial_filtered_height(int xIndex, int yIndex, float height, unsigned short *globalMap, float *params)
+__device__ float get_spatial_filtered_height(int xIndex, int yIndex, float height, unsigned short *globalMap, size_t pitchGlobal, float *params)
 {
-    float averageHeightZ = get_spatial_average(xIndex, yIndex, globalMap, params);
-    float heightStddev = get_spatial_stddev(xIndex, yIndex, averageHeightZ, globalMap, params);
+    float averageHeightZ = get_spatial_average(xIndex, yIndex, globalMap, pitchGlobal, params);
+    float heightStddev = get_spatial_stddev(xIndex, yIndex, averageHeightZ, globalMap, pitchGlobal, params);
     float finalHeight = height;
 
     if (fabs(finalHeight - averageHeightZ) < 0.5f * heightStddev)
@@ -167,13 +168,6 @@ __device__ float get_spatial_filtered_height(int xIndex, int yIndex, float heigh
 
     return finalHeight;
 }
-
-// Compute grid cell center coordinates (cellCenterInZUp) in the Z-Up frame based on thread indices.
-// Transform the grid cell to the sensor frame using the transformation matrix (zUpToSensorFrameTf).
-// Perform projection (spherical or perspective) to map the grid cell to image indices.
-// Iterate over a search window in the depth image to find points within the cell bounds.
-// Back-project these points to the 3D space and transform them back to the Z-Up frame.
-// Compute the average height for points within the grid cell while filtering outliers.
 
 extern "C" __global__ void preprocessImageKernel(unsigned short *in, size_t pitchIn, unsigned short *out, size_t pitchOut, int rows, int cols)
 {
@@ -197,6 +191,12 @@ extern "C" __global__ void preprocessImageKernel(unsigned short *in, size_t pitc
     *(outRowPtr + outCol) = depthValue;
 }
 
+// Compute grid cell center coordinates (cellCenterInZUp) in the Z-Up frame based on thread indices.
+// Transform the grid cell to the sensor frame using the transformation matrix (zUpToSensorFrameTf).
+// Perform projection (spherical or perspective) to map the grid cell to image indices.
+// Iterate over a search window in the depth image to find points within the cell bounds.
+// Back-project these points to the 3D space and transform them back to the Z-Up frame.
+// Compute the average height for points within the grid cell while filtering outliers.
 extern "C" __global__ void heightMapUpdateKernel(unsigned short *in, size_t pitchIn, unsigned short *out, size_t pitchOut, float *params, float *sensorToZUpFrameTf, float *zUpToSensorFrameTf, int bounds)
 {
     // Thread indices
@@ -215,7 +215,7 @@ extern "C" __global__ void heightMapUpdateKernel(unsigned short *in, size_t pitc
     float currentAverageHeight = 0.0f;
     float averageHeightZ = 0.0f;
     int count = 0;
-    float3 cellCenterInZUp = make_float3(0.0f, 0.0f, 0.5f);
+    float3 cellCenterInZUp = make_float3(0.0f, 0.0f, params[GROUND_HEIGHT] + 0.5f);
 
     // Compute grid cell center in Z-Up frame
     float2 xyCoords = indices_to_coordinate(make_int2(xIndex, yIndex),
@@ -407,6 +407,8 @@ __global__ void heightMapRegistrationKernel(unsigned short *localMap, size_t pit
     {
         finalHeight = localHeight;
     }
+
+    finalHeight = get_spatial_filtered_height(xIndex, yIndex, finalHeight, globalMap, pitchGlobal, params);
 
     finalHeight += params[HEIGHT_OFFSET];
 

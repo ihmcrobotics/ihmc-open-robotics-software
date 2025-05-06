@@ -18,6 +18,11 @@ public interface ContinuousHikingParametersBasics extends ContinuousHikingParame
       set(ContinuousHikingParameters.overrideEntireQueueEachStep, overrideEntireQueueEachStep);
    }
 
+   default void setEnableSwingCollisionAvoidance(boolean enableSwingCollisionAvoidance)
+   {
+      set(ContinuousHikingParameters.enableSwingCollisionAvoidance, enableSwingCollisionAvoidance);
+   }
+
    default void setNumberOfStepsToSend(int numberOfStepsToSend)
    {
       set(ContinuousHikingParameters.numberOfStepsToSend, numberOfStepsToSend);
@@ -71,5 +76,15 @@ public interface ContinuousHikingParametersBasics extends ContinuousHikingParame
    default void setNextWaypointDistanceMargin(double nextWaypointDistanceMargin)
    {
       set(ContinuousHikingParameters.nextWaypointDistanceMargin, nextWaypointDistanceMargin);
+   }
+
+   default void setNinetyDegreeTurnSwingTime(double ninetyDegreeTurnSwingTime)
+   {
+      set(ContinuousHikingParameters.ninetyDegreeTurnSwingTime, ninetyDegreeTurnSwingTime);
+   }
+
+   default void setNinetyDegreeTurnTransferTime(double ninetyDegreeTurnTransferTime)
+   {
+      set(ContinuousHikingParameters.ninetyDegreeTurnTransferTime, ninetyDegreeTurnTransferTime);
    }
 }

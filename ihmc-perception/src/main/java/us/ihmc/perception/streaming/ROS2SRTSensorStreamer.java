@@ -1,6 +1,5 @@
 package us.ihmc.perception.streaming;
 
-import org.apache.logging.log4j.core.util.ExecutorServices;
 import perception_msgs.msg.dds.SRTStreamStatus;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
@@ -10,9 +9,6 @@ import us.ihmc.ros2.ROS2Topic;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import static org.bytedeco.ffmpeg.global.avutil.*;
 import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_BGR2BGRA;
@@ -24,7 +20,6 @@ public class ROS2SRTSensorStreamer
    private boolean destroyROS2Node = false;
 
    private final Map<ROS2Topic<SRTStreamStatus>, ROS2SRTVideoStreamer> videoStreamers = new HashMap<>();
-   private final ExecutorService sendFrameExecutor = Executors.newCachedThreadPool();
 
    public ROS2SRTSensorStreamer()
    {
@@ -74,17 +69,12 @@ public class ROS2SRTSensorStreamer
       if (!hasStream(streamTopic))
          addStreamWithGuessedParameters(streamTopic, frame);
 
-      sendFrameExecutor.submit(() ->
-      {
-         videoStreamers.get(streamTopic).sendFrame(frame);
-         frame.release();
-      });
+      videoStreamers.get(streamTopic).sendFrame(frame);
+      frame.release();
    }
 
    public void destroy()
    {
-      ExecutorServices.shutdown(sendFrameExecutor, 2, TimeUnit.SECONDS, getClass().getSimpleName());
-
       for (ROS2SRTVideoStreamer videoStreamer : videoStreamers.values())
          videoStreamer.destroy();
 
