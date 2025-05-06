@@ -51,8 +51,8 @@ __global__ void computeTerrainData(unsigned short *heightMap, size_t pitchHeight
     int x_index = blockIdx.x * blockDim.x + threadIdx.x;
     int y_index = blockIdx.y * blockDim.y + threadIdx.y;
 
-//     if (x_index >= terrainMapXY || y_index >= terrainMapXY)
-//         return;
+    if (x_index >= terrainMapXY || y_index >= terrainMapXY)
+        return;
 
     float foot_width = params[FOOT_WIDTH];
     float foot_length = params[FOOT_LENGTH];
