@@ -78,6 +78,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
                break;
             }
          }
+         LogTools.warn(commandedBehaviorIndex);
 
          // Generic adaptable skills
          // GoTo behavior - Navigation
@@ -138,6 +139,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
             state.getActionSequence().setExecutionNextIndex(commandedBehaviorIndex);
             state.getActionSequence().setAutomaticExecution(true);
             statusMessage.setCompletedBehavior("-");
+            LogTools.warn("Automatic execution");
          }
       });
    }
