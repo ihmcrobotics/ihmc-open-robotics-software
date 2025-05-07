@@ -959,8 +959,10 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
       {
          // There are no upcoming steps, we are not walking, and this is an overwrite message:
          if (stepsInQueue == 0 && !isWalking.getBooleanValue())
-            transferDuration = defaultInitialTransferTime.getDoubleValue();
-//            transferDuration =  defaultTransferTime.getDoubleValue();
+         {
+            //            transferDuration = defaultInitialTransferTime.getDoubleValue();
+            transferDuration = defaultTransferTime.getDoubleValue();
+         }
          else
             transferDuration = defaultTransferTime.getDoubleValue();
       }
