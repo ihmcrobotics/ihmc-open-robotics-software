@@ -9,7 +9,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
-import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
+import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
@@ -37,7 +37,7 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
    private final HashSet<DiscreteFootstep> snappedFootsteps = new HashSet<>();
    private final HashMap<DiscreteFootstep, FootstepSnapData> manuallySnappedFootsteps = new HashMap<>();
 
-   private final FootstepPlannerEnvironmentHandler environmentHandler;
+   private final EnvironmentHandler environmentHandler;
 
    private final HeightMapPolygonSnapper heightMapSnapper = new HeightMapPolygonSnapper();
    private final HeightMapSnapWiggler heightMapSnapWiggler;
@@ -45,7 +45,7 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
    // Use this by default
    public FootstepSnapAndWiggler(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame,
                                  DefaultFootstepPlannerParametersReadOnly parameters,
-                                 FootstepPlannerEnvironmentHandler environmentHandler)
+                                 EnvironmentHandler environmentHandler)
    {
       this(footPolygonsInSoleFrame, parameters, null, environmentHandler,null, null);
    }
@@ -54,7 +54,7 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
    public FootstepSnapAndWiggler(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame,
                                  DefaultFootstepPlannerParametersReadOnly parameters,
                                  TickAndUpdatable tickAndUpdatable,
-                                 FootstepPlannerEnvironmentHandler environmentHandler,
+                                 EnvironmentHandler environmentHandler,
                                  YoGraphicsListRegistry graphicsListRegistry,
                                  YoRegistry parentRegistry)
    {
@@ -207,7 +207,7 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
       snappedFootPolygonInWorld.applyTransform(transformToFootPose, false);
 
       heightMapSnapper.computeFootPointsInTheEnvironment(snappedFootPolygonInWorld,
-                                                         environmentHandler.getHeightMap(),
+                                                         environmentHandler.getHeightMapData(),
                                                          environmentHandler.getTerrainMapData(),
                                                          parameters.getHeightMapSnapThreshold(),
                                                          parameters.getMinSurfaceIncline(),

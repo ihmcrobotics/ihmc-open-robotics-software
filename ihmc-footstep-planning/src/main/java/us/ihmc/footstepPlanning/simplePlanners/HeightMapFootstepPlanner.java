@@ -10,7 +10,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
+import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
@@ -31,8 +31,8 @@ public class HeightMapFootstepPlanner
 
       FootstepPlan footstepPlan = new FootstepPlan();
       HeightMapPolygonSnapper snapper = new HeightMapPolygonSnapper();
-      FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
-      environmentHandler.setHeightMap(heightMap);
+      EnvironmentHandler environmentHandler = new EnvironmentHandler();
+      environmentHandler.setHeightMapData(heightMap);
 
       for (int i = 0; i < stepsToDebug.size(); i++)
       {
@@ -85,8 +85,8 @@ public class HeightMapFootstepPlanner
 
       FootstepPlan footstepPlan = new FootstepPlan();
       HeightMapPolygonSnapper snapper = new HeightMapPolygonSnapper();
-      FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
-      environmentHandler.setHeightMap(heightMap);
+      EnvironmentHandler environmentHandler = new EnvironmentHandler();
+      environmentHandler.setHeightMapData(heightMap);
 
       List<Pose2D> poses = generateTurnWalkTurnPoses(start, goal, parameters);
       RobotSide stepSide = RobotSide.LEFT;

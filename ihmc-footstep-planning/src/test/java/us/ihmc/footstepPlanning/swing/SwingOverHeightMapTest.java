@@ -606,7 +606,7 @@ public class SwingOverHeightMapTest
       };
       swingPlannerParameters.set(originalSwingPlannerParameters);
 
-      HeightMapData heightMapData = request.getHeightMapData();
+      HeightMapData heightMapData = request.getEnvironmentHandler().getHeightMapData();
 
       for (double time = 0.0; time <= 1.0; time += dt)
       {

@@ -4,6 +4,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.perception.StandAloneRealsenseProcess;
 import us.ihmc.robotics.physics.RobotCollisionModel;
@@ -20,6 +21,7 @@ public class ContinuousHikingProcess
    public static final String CONTINUOUS_HIKING_THREAD = "ContinuousHikingThread";
    public static final String SYNCED_ROBOT_THREAD = "SyncedRobotThread";
 
+   private final EnvironmentHandler environmentHandler;
    private final ActiveMappingParameterToolBox activeMappingParameterToolBox;
    private final ContinuousPlannerSchedulingTask continuousPlannerSchedulingTask;
    private final StandAloneRealsenseProcess standAloneRealsenseProcess;
@@ -39,6 +41,7 @@ public class ContinuousHikingProcess
 
       ControllerFootstepQueueMonitor controllerFootstepQueueMonitor = new ControllerFootstepQueueMonitor(ros2Node, robotModel.getSimpleRobotName());
 
+      environmentHandler = new EnvironmentHandler();
       activeMappingParameterToolBox = new ActiveMappingParameterToolBox(ros2Node, robotModel, "ForContinuousWalking");
       standAloneRealsenseProcess = new StandAloneRealsenseProcess(ros2Node,
                                                                   ros2Helper,
@@ -65,11 +68,13 @@ public class ContinuousHikingProcess
    {
       activeMappingParameterToolBox.update();
 
-      if (standAloneRealsenseProcess.getLatestHeightMapData() != null && standAloneRealsenseProcess.getLatestTerrainMapData() != null)
-      {
-         continuousPlannerSchedulingTask.setLatestHeightMapData(standAloneRealsenseProcess.getLatestHeightMapData());
-         continuousPlannerSchedulingTask.setTerrainMapData(standAloneRealsenseProcess.getLatestTerrainMapData());
-      }
+      if (standAloneRealsenseProcess.getLatestHeightMapData() != null)
+         environmentHandler.setHeightMapData(standAloneRealsenseProcess.getLatestHeightMapData());
+
+      if (standAloneRealsenseProcess.getLatestTerrainMapData() != null)
+         environmentHandler.setTerrainMapData(standAloneRealsenseProcess.getLatestTerrainMapData());
+
+      continuousPlannerSchedulingTask.setLatestEnvironmentHandler(environmentHandler);
    }
 
    public void destroy()

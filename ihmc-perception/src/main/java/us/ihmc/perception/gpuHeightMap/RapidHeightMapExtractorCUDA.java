@@ -398,10 +398,10 @@ public class RapidHeightMapExtractorCUDA
       updateKernel.close();
       registerKernel.close();
       croppingKernel.close();
+      planOffsetKernel.close();
 
       emptyGlobalHeightMapImage.close();
       planOffsetKernelGridDim.close();
-      planOffsetKernel.close();
 
       // Clean up each resource
       deallocateFloatPointer(groundToSensorTransformHostPointer, groundToSensorTransformDevicePointer);
@@ -456,6 +456,6 @@ public class RapidHeightMapExtractorCUDA
 
    public GpuMat getVisualizedHeightMap()
    {
-      return sensorCroppedHeightMapImage;
+      return sensorCroppedHeightMapImage.clone();
    }
 }

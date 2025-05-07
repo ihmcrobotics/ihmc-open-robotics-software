@@ -18,7 +18,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.communication.ContinuousHikingAPI;
-import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
+import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.tools.PerceptionDebugTools;
@@ -58,7 +58,7 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
    private final SideDependentList<RDXFootstepGraphic> footstepGraphics;
 
    private final StancePoseCalculator stancePoseCalculator;
-   private final FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
+   private final EnvironmentHandler environmentHandler = new EnvironmentHandler();
 
    private boolean selectionActive = false; // Important for determining when to detect collisions or not
    private final ImBoolean calculateStancePose = new ImBoolean(false);
@@ -90,7 +90,7 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
 
    public void update(TerrainMapData latestTerrainMapData, HeightMapData latestHeightMapData)
    {
-      environmentHandler.setHeightMap(latestHeightMapData);
+      environmentHandler.setHeightMapData(latestHeightMapData);
       environmentHandler.setTerrainMapData(latestTerrainMapData);
 
       if (environmentHandler.hasTerrainMapData() && environmentHandler.hasHeightMap())
