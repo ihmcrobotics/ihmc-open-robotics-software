@@ -5,7 +5,7 @@
   "Enable alpha filter": true,
   "Enable vertical filter": true,
   "Search window height": {
-    "value": 400,
+    "value": 500,
     "lowerBound": 100,
     "upperBound": 800
   },
@@ -74,13 +74,8 @@
     "lowerBound": 1.0,
     "upperBound": 4.5
   },
-  "Terrain width in meters": {
-    "value": 4.0,
-    "lowerBound": 2.0,
-    "upperBound": 8.0
-  },
   "Cropped width in meters": {
-    "value": 6.0,
+    "value": 4.0,
     "lowerBound": 2.0,
     "upperBound": 8.0
   },
