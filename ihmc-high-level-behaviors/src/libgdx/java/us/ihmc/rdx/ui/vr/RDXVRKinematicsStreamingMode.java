@@ -23,7 +23,6 @@ import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.Kinemat
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.avatar.sakeGripper.SakeHandPreset;
-import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.commons.UnitConversions;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.Throttler;
@@ -50,10 +49,10 @@ import us.ihmc.rdx.imgui.ImGuiFrequencyPlot;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.affordances.RDXManualFootstepPlacement;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
 import us.ihmc.rdx.ui.graphics.RDXMultiContactRegionGraphic;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
+import us.ihmc.rdx.ui.graphics.ros2.RDXROS2RobotVisualizer;
 import us.ihmc.rdx.ui.teleoperation.RDXHandConfigurationManager;
 import us.ihmc.rdx.ui.tools.KinematicsRecordReplay;
 import us.ihmc.rdx.vr.RDXVRContext;
@@ -122,6 +121,7 @@ public class RDXVRKinematicsStreamingMode
    private final SceneGraph sceneGraph;
    private final RDXVRContext vrContext;
    private final RDXHandConfigurationManager handManager;
+   private final RDXROS2RobotVisualizer robotVisualizer;
    @Nullable
    private KinematicsStreamingToolboxModule toolbox;
    private final KinematicsToolboxConfigurationMessage ikSolverConfigurationMessage = new KinematicsToolboxConfigurationMessage();
@@ -147,9 +147,8 @@ public class RDXVRKinematicsStreamingMode
                                        RDXVRContext vrContext,
                                        RetargetingParameters retargetingParameters,
                                        SceneGraph sceneGraph,
-                                       ControllerStatusTracker controllerStatusTracker,
-                                       RDXManualFootstepPlacement footstepPlacer,
-                                       RDXHandConfigurationManager handManager)
+                                       RDXHandConfigurationManager handManager,
+                                       RDXROS2RobotVisualizer robotVisualizer)
    {
       this.syncedRobot = syncedRobot;
       this.robotModel = syncedRobot.getRobotModel();
@@ -158,6 +157,7 @@ public class RDXVRKinematicsStreamingMode
       this.sceneGraph = sceneGraph;
       this.vrContext = vrContext;
       this.handManager = handManager;
+      this.robotVisualizer = robotVisualizer;
    }
 
    public void create(boolean createToolbox)
@@ -269,6 +269,8 @@ public class RDXVRKinematicsStreamingMode
       }
       else
       {
+         RDXBaseUI.getInstance().getKeyBindings().register("Show/Hide ghost", "Left B button");
+         RDXBaseUI.getInstance().getKeyBindings().register("Reinitialize toolbox", "Left joystick button");
          RDXBaseUI.getInstance().getKeyBindings().register("Streaming - Enable IK (toggle)", "Right A button");
          RDXBaseUI.getInstance().getKeyBindings().register("Streaming - Control robot (toggle)", "Left A button");
       }
@@ -724,6 +726,15 @@ public class RDXVRKinematicsStreamingMode
       {
          visualizeIKPreviewGraphic(ghostPreviewEnabled.get());
       }
+      if (ImGui.button(labels.get("Hide Robot")))
+      {
+         robotVisualizer.fadeVisuals(0.0f, 0.01f); // No idea what opacity variation is
+      }
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Show Robot")))
+      {
+         robotVisualizer.fadeVisuals(1.0f, 0.05f); // No idea what opacity variation is
+      }
 
       Set<String> connectedTrackers = vrContext.getAssignedTrackerRoles();
       if (connectedTrackers.contains(CHEST.getSegmentName()))
@@ -792,7 +803,6 @@ public class RDXVRKinematicsStreamingMode
       {
          streamingDisabled.poll();
          sleepToolbox();
-         visualizeIKPreviewGraphic(true);
          streamToController.set(false);
       }
 

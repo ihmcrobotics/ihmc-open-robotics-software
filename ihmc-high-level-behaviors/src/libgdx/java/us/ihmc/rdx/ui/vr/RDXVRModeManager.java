@@ -111,9 +111,8 @@ public class RDXVRModeManager
                                                                     baseUI.getVRManager().getContext(),
                                                                     retargetingParameters,
                                                                     sceneGraph,
-                                                                    controllerStatusTracker,
-                                                                    footstepPlacer,
-                                                                    handManager);
+                                                                    handManager,
+                                                                    robotVisualizer);
          kinematicsStreamingMode.create(createKinematicsStreamingToolboxModule);
       }
 
@@ -165,21 +164,6 @@ public class RDXVRModeManager
       if (kinematicsStreamingMode != null)
       {
          kinematicsStreamingMode.update(mode == RDXVRMode.WHOLE_BODY_IK_STREAMING);
-
-         // Fade robot graphics
-         if (kinematicsStreamingMode.isStreaming() && stereoVision.isEnabled())
-         { // Fade graphics out if in stereo vision mode while streaming
-            kinematicsStreamingMode.visualizeIKPreviewGraphic(false);
-            robotVisualizer.fadeVisuals(0.0f, 0.01f);
-         }
-         else if (mode == RDXVRMode.WHOLE_BODY_IK_STREAMING && (stereoVision.getDisabledNotification().poll()
-                                                                || kinematicsStreamingMode.getStreamingDisabledNotification().poll()
-                                                                || robotVisualizer.isFading()))
-         { // Fade graphics in if either stereo vision or streaming are exited
-            robotVisualizer.fadeVisuals(1.0f, 0.05f);
-            if (!robotVisualizer.isFading())
-               kinematicsStreamingMode.visualizeIKPreviewGraphic(true);
-         }
       }
       if (vrModeControls.getRenderOnLeftHand().get())
          vrModeControls3DPanel.update();
