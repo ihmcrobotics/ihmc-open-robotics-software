@@ -1,7 +1,8 @@
 package us.ihmc.alexander.parameters.model;
 
 import jakarta.xml.bind.JAXBException;
-import us.ihmc.alexander.AlexanderVersion;
+import us.ihmc.alexander.AlexanderVersionInterface;
+import us.ihmc.alexander.OpenAlexanderVersion;
 import us.ihmc.scs2.definition.robot.urdf.URDFTools;
 import us.ihmc.scs2.definition.robot.urdf.items.URDFModel;
 
@@ -17,10 +18,11 @@ import java.util.List;
  * This class contains the paths to the individual URDF files that will be used to build the robot. It also holds some simple methods to combine the different
  * files into one input stream that will be used to build the URDF.
  */
-public class AlexanderURDFParameters
+public class AlexanderURDFParameters implements HumanoidURDFParameterInterface
 {
    public static final String URDF_MODEL_NAME = "Alexander";
    private static final String[] RESOURCE_DIRECTORIES = new String[] {"models/", "models/gazebo/", "models/alexander_v0/", "models/alexander_v0/urdf/",};
+   private static final String[] LOGGED_RESOURCES = {"models/alexander_V0/"};
 
    public static final String URDF_LOWER_BODY = "models/alexander_v0/urdf/alexander_v0.lowerBody.urdf";
    public static final String URDF_LEFT_ARM = "models/alexander_v0/urdf/alexander_v0.leftArm.urdf";
@@ -32,21 +34,30 @@ public class AlexanderURDFParameters
    // Model paths are represented as Strings because resource paths should always be separated with "/" -- this is not platform dependent
    private final Collection<String> urdfModelPath;
 
-   public AlexanderURDFParameters(AlexanderVersion alexanderVersion)
+   public AlexanderURDFParameters(AlexanderVersionInterface alexanderVersion)
    {
       urdfModelPath = alexanderVersion.getModelPath();
    }
 
+   @Override
    public String getURDFModelName()
    {
       return URDF_MODEL_NAME;
    }
 
+   @Override
    public String[] getResourceDirectories()
    {
       return RESOURCE_DIRECTORIES;
    }
 
+   @Override
+   public String[] getLoggedResources()
+   {
+      return LOGGED_RESOURCES;
+   }
+
+   @Override
    public InputStream getURDFAsInputStream()
    {
       List<InputStream> inputStreamList = new ArrayList<>();

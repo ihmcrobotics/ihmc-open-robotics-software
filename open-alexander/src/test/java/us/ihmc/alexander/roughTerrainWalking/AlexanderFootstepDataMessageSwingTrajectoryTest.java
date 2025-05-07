@@ -2,7 +2,7 @@ package us.ihmc.alexander.roughTerrainWalking;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import us.ihmc.alexander.AlexanderVersion;
+import us.ihmc.alexander.OpenAlexanderVersion;
 import us.ihmc.alexander.OpenAlexanderRobotModel;
 import us.ihmc.alexander.parameters.model.AlexanderPhysicalProperties;
 import us.ihmc.alexander.parameters.model.AlexanderPhysicalPropertiesV0;
@@ -41,7 +41,7 @@ public class AlexanderFootstepDataMessageSwingTrajectoryTest extends AvatarFoots
    public DRCRobotModel getRobotModel()
    {
       RobotTarget target = RobotTarget.SCS;
-      return new OpenAlexanderRobotModel(AlexanderVersion.V0_FULL_ROBOT, target);
+      return new OpenAlexanderRobotModel(OpenAlexanderVersion.V0_FULL_ROBOT, target);
    }
 
    @Override

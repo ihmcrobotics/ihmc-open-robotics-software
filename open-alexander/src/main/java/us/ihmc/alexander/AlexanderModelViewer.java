@@ -41,7 +41,7 @@ public class AlexanderModelViewer
 
    public AlexanderModelViewer()
    {
-      DRCRobotModel robotModel = new OpenAlexanderRobotModel(AlexanderVersion.V0_NUB_FOREARMS, RobotTarget.SCS);
+      DRCRobotModel robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V0_NUB_FOREARMS, RobotTarget.SCS);
       RobotDefinition robotDefinition = robotModel.getRobotDefinition();
 
       if (SHOW_COORDINATES_AT_JOINT_ORIGIN)

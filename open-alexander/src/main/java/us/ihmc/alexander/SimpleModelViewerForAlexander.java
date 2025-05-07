@@ -15,7 +15,7 @@ public class SimpleModelViewerForAlexander
    public static void main(String[] args) throws JAXBException
    {
       // We define the version of the robot we want to us
-      AlexanderVersion version = AlexanderVersion.V0_FULL_ROBOT;
+      OpenAlexanderVersion version = OpenAlexanderVersion.V0_FULL_ROBOT;
       AlexanderURDFParameters modelParameters = new AlexanderURDFParameters(version);
 
       // We create the URDF model to be loaded into SCS2

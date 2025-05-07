@@ -10,7 +10,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 @Tag("humanoid-flat-ground-slow-2")
 public class AlexanderFootstepQueueingTest extends AvatarFootstepQueueingTest
 {
-   private final AlexanderVersion version = AlexanderVersion.V0_FULL_ROBOT;
+   private final OpenAlexanderVersion version = OpenAlexanderVersion.V0_FULL_ROBOT;
    private final RobotTarget target = RobotTarget.SCS;
    private final OpenAlexanderRobotModel robotModel = new OpenAlexanderRobotModel(version, target);
 

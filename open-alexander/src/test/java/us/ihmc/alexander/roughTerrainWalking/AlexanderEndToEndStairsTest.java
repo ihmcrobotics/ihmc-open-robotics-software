@@ -3,7 +3,7 @@ package us.ihmc.alexander.roughTerrainWalking;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
-import us.ihmc.alexander.AlexanderVersion;
+import us.ihmc.alexander.OpenAlexanderVersion;
 import us.ihmc.alexander.OpenAlexanderRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.roughTerrainWalking.HumanoidEndToEndStairsTest;
@@ -11,7 +11,7 @@ import us.ihmc.avatar.roughTerrainWalking.HumanoidEndToEndStairsTest;
 @Tag("humanoid-stairs-slow")
 public class AlexanderEndToEndStairsTest extends HumanoidEndToEndStairsTest
 {
-   private AlexanderVersion selectedVersion = AlexanderVersion.V0_FULL_ROBOT;
+   private OpenAlexanderVersion selectedVersion = OpenAlexanderVersion.V0_FULL_ROBOT;
 
    @Override
    public DRCRobotModel getRobotModel()

@@ -3,7 +3,7 @@ package us.ihmc.alexander.controllerAPI;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import us.ihmc.alexander.AlexanderVersion;
+import us.ihmc.alexander.OpenAlexanderVersion;
 import us.ihmc.alexander.OpenAlexanderRobotModel;
 import us.ihmc.avatar.controllerAPI.EndToEndPelvisTrajectoryMessageTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -14,7 +14,7 @@ import us.ihmc.simulationConstructionSetTools.tools.CITools.SimpleRobotNameKeys;
 public class AlexanderEndToEndPelvisTrajectoryMessageTest extends EndToEndPelvisTrajectoryMessageTest
 {
 
-   private final DRCRobotModel robotModel = new OpenAlexanderRobotModel(AlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS);
+   private final DRCRobotModel robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS);
 
    @Override
    public DRCRobotModel getRobotModel()

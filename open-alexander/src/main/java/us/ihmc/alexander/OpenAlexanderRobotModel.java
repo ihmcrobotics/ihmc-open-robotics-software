@@ -18,12 +18,10 @@ import us.ihmc.avatar.AvatarSimulatedHandControlThread;
 import us.ihmc.avatar.arm.PresetArmConfiguration;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.drcRobot.SimulationLowLevelControllerFactory;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.HumanoidRobotInitialSetup;
 import us.ihmc.avatar.kinematicsSimulation.SimulatedHandKinematicController;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
-import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -52,7 +50,6 @@ import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
 import us.ihmc.scs2.simulation.collision.CollidableHelper;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationToolkit.RobotDefinitionTools;
@@ -95,39 +92,39 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
    private final AlexanderModelFactory modelFactory;
 
    private final RobotTarget robotTarget;
-   private final AlexanderVersion robotVersion;
+   private final AlexanderVersionInterface robotVersion;
    private final SideDependentList<HandModel> handModels = new SideDependentList<>();
 
    private final SideDependentList<RigidBodyTransform> handGraphicToHandFrameTransforms = new SideDependentList<>();
 
-   public OpenAlexanderRobotModel(AlexanderVersion robotVersion)
+   public OpenAlexanderRobotModel(AlexanderVersionInterface robotVersion)
    {
       this(robotVersion, RobotTarget.SCS);
    }
 
-   public OpenAlexanderRobotModel(AlexanderVersion robotVersion, RobotTarget robotTarget)
+   public OpenAlexanderRobotModel(AlexanderVersionInterface robotVersion, RobotTarget robotTarget)
    {
       this(robotVersion, robotTarget, null, true);
    }
 
-   public OpenAlexanderRobotModel(AlexanderVersion robotVersion, RobotTarget robotTarget, RobotContactPointParameters<RobotSide> contactPointParameters)
+   public OpenAlexanderRobotModel(AlexanderVersionInterface robotVersion, RobotTarget robotTarget, RobotContactPointParameters<RobotSide> contactPointParameters)
    {
       this(robotVersion, robotTarget, null, contactPointParameters);
    }
 
-   public OpenAlexanderRobotModel(AlexanderVersion robotVersion, RobotTarget robotTarget, MaterialDefinition robotMaterial)
+   public OpenAlexanderRobotModel(AlexanderVersionInterface robotVersion, RobotTarget robotTarget, MaterialDefinition robotMaterial)
    {
       this(robotVersion, robotTarget, robotMaterial, true);
    }
 
-   public OpenAlexanderRobotModel(AlexanderVersion robotVersion, RobotTarget robotTarget, MaterialDefinition robotMaterial, boolean createHandContactPoints)
+   public OpenAlexanderRobotModel(AlexanderVersionInterface robotVersion, RobotTarget robotTarget, MaterialDefinition robotMaterial, boolean createHandContactPoints)
    {
       this(robotVersion, robotTarget, robotMaterial, new AlexanderContactPointParameters(robotVersion.getJointMap(),
                                                                                          robotVersion.getPhysicalProperties(),
                                                                                          createHandContactPoints));
    }
 
-   public OpenAlexanderRobotModel(AlexanderVersion robotVersion, RobotTarget robotTarget, MaterialDefinition robotMaterial, RobotContactPointParameters<RobotSide> contactPointParameters)
+   public OpenAlexanderRobotModel(AlexanderVersionInterface robotVersion, RobotTarget robotTarget, MaterialDefinition robotMaterial, RobotContactPointParameters<RobotSide> contactPointParameters)
    {
       this.robotVersion = robotVersion;
       this.robotTarget = robotTarget;
@@ -183,7 +180,7 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
    }
 
    @Override
-   public AlexanderVersion getRobotVersion()
+   public AlexanderVersionInterface getRobotVersion()
    {
       return robotVersion;
    }

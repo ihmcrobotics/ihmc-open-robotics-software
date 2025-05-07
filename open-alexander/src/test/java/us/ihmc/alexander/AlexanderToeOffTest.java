@@ -87,7 +87,7 @@ public class AlexanderToeOffTest extends AvatarToeOffTest
     @Override
     public DRCRobotModel getRobotModel()
     {
-        OpenAlexanderRobotModel robotModel = new OpenAlexanderRobotModel(AlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS)
+        OpenAlexanderRobotModel robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS)
         {
             @Override
             public WalkingControllerParameters getWalkingControllerParameters()

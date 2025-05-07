@@ -2,7 +2,7 @@ package us.ihmc.alexander.networkProcessor.kinematicsToolboxModule;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import us.ihmc.alexander.AlexanderVersion;
+import us.ihmc.alexander.OpenAlexanderVersion;
 import us.ihmc.alexander.OpenAlexanderRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
@@ -10,8 +10,8 @@ import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematic
 
 public class AlexanderHumanoidKinematicsToolboxControllerTest extends HumanoidKinematicsToolboxControllerTest
 {
-   private DRCRobotModel robotModel = new OpenAlexanderRobotModel(AlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS);
-   private DRCRobotModel ghostRobotModel = new OpenAlexanderRobotModel(AlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS);
+   private DRCRobotModel robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS);
+   private DRCRobotModel ghostRobotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS);
 
    @Override
    @Tag("humanoid-toolbox")

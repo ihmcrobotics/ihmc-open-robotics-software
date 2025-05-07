@@ -10,7 +10,7 @@ public class AlexanderStandingOnPlanarRegionsListDefinedEnvironmentExample
 {
    public static void main(String[] args)
    {
-      OpenAlexanderRobotModel robotModel = new OpenAlexanderRobotModel(AlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS);
+      OpenAlexanderRobotModel robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS);
 
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
 

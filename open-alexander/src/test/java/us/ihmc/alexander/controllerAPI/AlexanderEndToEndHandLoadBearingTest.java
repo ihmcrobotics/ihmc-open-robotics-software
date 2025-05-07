@@ -1,17 +1,14 @@
 package us.ihmc.alexander.controllerAPI;
 
-import controller_msgs.msg.dds.ChestTrajectoryMessage;
 import controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import us.ihmc.alexander.AlexanderVersion;
+import us.ihmc.alexander.OpenAlexanderVersion;
 import us.ihmc.alexander.OpenAlexanderRobotModel;
 import us.ihmc.avatar.controllerAPI.EndToEndHandLoadBearingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
@@ -22,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class AlexanderEndToEndHandLoadBearingTest extends EndToEndHandLoadBearingTest
 {
-   private final DRCRobotModel robotModel = new OpenAlexanderRobotModel(AlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS);
+   private final DRCRobotModel robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS);
 
    @Override
    protected double getPelvisHeightOffset()
