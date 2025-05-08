@@ -40,7 +40,7 @@ public class StepGeneratorCommandInputManager implements Updatable
    private final YoVector2D desiredVelocity;
    private final YoDouble turningVelocity;
    private final YoDouble swingHeight;
-   private boolean isUnitVelocities = false;
+   private final YoBoolean isUnitVelocities;
    private int ticksToUpdateTheEnvironment = Integer.MAX_VALUE;
    private HighLevelControllerName currentController;
    private ContinuousStepGenerator continuousStepGenerator;
@@ -61,6 +61,8 @@ public class StepGeneratorCommandInputManager implements Updatable
       desiredVelocity = new YoVector2D("desiredVelocity_" + suffix, registry);
       turningVelocity = new YoDouble("desiredTurningVelocity_" + suffix, registry);
       swingHeight = new YoDouble("desiredSwingHeight_" + suffix, registry);
+      isUnitVelocities = new YoBoolean("isUnitVelocities_" + suffix, registry);
+      isUnitVelocities.set(false);
    }
 
    public void setCSG(ContinuousStepGenerator continuousStepGenerator)
@@ -136,7 +138,7 @@ public class StepGeneratorCommandInputManager implements Updatable
          desiredVelocity.setX(command.getForwardVelocity());
          desiredVelocity.setY(command.getLateralVelocity());
          turningVelocity.set(command.getTurnVelocity());
-         isUnitVelocities = command.isUnitVelocities();
+         isUnitVelocities.set(command.isUnitVelocities());
          walk.set(command.isWalk());
       }
       commandInputManager.clearCommands(ContinuousStepGeneratorInputCommand.class);
@@ -219,7 +221,7 @@ public class StepGeneratorCommandInputManager implements Updatable
          @Override
          public boolean isUnitVelocity()
          {
-            return isUnitVelocities;
+            return isUnitVelocities.getBooleanValue();
          }
       };
    }
@@ -237,7 +239,7 @@ public class StepGeneratorCommandInputManager implements Updatable
          @Override
          public boolean isUnitVelocity()
          {
-            return isUnitVelocities;
+            return isUnitVelocities.getBooleanValue();
          }
       };
    }
