@@ -64,13 +64,12 @@ public class RapidHeightMapThread extends RepeatingTaskThread
       try
       {
          imageSensor.waitForGrab();
-         RawImage depthImage = imageSensor.getImage(depthImageKey).get();
+         RawImage depthImage = imageSensor.getImage(depthImageKey);
 
          // Get everything we need from the image
-         RawImage depthImageCopy = depthImage.get();
-         GpuMat latestDepthImage = depthImageCopy.getGpuImageMat();
-         Instant acquisitionTime = depthImageCopy.getAcquisitionTime();
-         CameraIntrinsics depthIntrinsicsCopy = depthImageCopy.getIntrinsicsCopy();
+         GpuMat latestDepthImage = depthImage.getGpuImageMat();
+         Instant acquisitionTime = depthImage.getAcquisitionTime();
+         CameraIntrinsics depthIntrinsicsCopy = depthImage.getIntrinsicsCopy();
 
          // Process body collisions
          GpuMat depthImageWithoutBodyCollisions = new GpuMat(latestDepthImage.size(), latestDepthImage.type());
