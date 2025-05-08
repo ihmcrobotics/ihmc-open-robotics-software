@@ -2,7 +2,6 @@ package us.ihmc.alexander.parameters.model;
 
 import jakarta.xml.bind.JAXBException;
 import us.ihmc.alexander.AlexanderVersionInterface;
-import us.ihmc.alexander.OpenAlexanderVersion;
 import us.ihmc.scs2.definition.robot.urdf.URDFTools;
 import us.ihmc.scs2.definition.robot.urdf.items.URDFModel;
 
@@ -18,7 +17,7 @@ import java.util.List;
  * This class contains the paths to the individual URDF files that will be used to build the robot. It also holds some simple methods to combine the different
  * files into one input stream that will be used to build the URDF.
  */
-public class AlexanderURDFParameters implements HumanoidURDFParameterInterface
+public class OpenAlexanderURDFParameters implements HumanoidURDFParameterInterface
 {
    public static final String URDF_MODEL_NAME = "Alexander";
    private static final String[] RESOURCE_DIRECTORIES = new String[] {"models/", "models/gazebo/", "models/alexander_v0/", "models/alexander_v0/urdf/",};
@@ -34,7 +33,7 @@ public class AlexanderURDFParameters implements HumanoidURDFParameterInterface
    // Model paths are represented as Strings because resource paths should always be separated with "/" -- this is not platform dependent
    private final Collection<String> urdfModelPath;
 
-   public AlexanderURDFParameters(AlexanderVersionInterface alexanderVersion)
+   public OpenAlexanderURDFParameters(AlexanderVersionInterface alexanderVersion)
    {
       urdfModelPath = alexanderVersion.getModelPath();
    }

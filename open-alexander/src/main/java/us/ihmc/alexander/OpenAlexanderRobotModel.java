@@ -8,7 +8,7 @@ import us.ihmc.alexander.parameters.controller.*;
 import us.ihmc.alexander.parameters.diagnostic.AlexanderDiagnosticParameters;
 import us.ihmc.alexander.parameters.model.AlexanderKinematicsCollisionModel;
 import us.ihmc.alexander.parameters.model.AlexanderSimulationCollisionModel;
-import us.ihmc.alexander.parameters.model.AlexanderURDFParameters;
+import us.ihmc.alexander.parameters.model.OpenAlexanderURDFParameters;
 import us.ihmc.alexander.parameters.planning.AlexanderFootstepPlannerParameters;
 import us.ihmc.alexander.parameters.planning.AlexanderLocomotionParameters;
 import us.ihmc.alexander.parameters.planning.AlexanderSwingPlannerParameters;
@@ -223,7 +223,7 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
    @Override
    public String toString()
    {
-      return AlexanderURDFParameters.URDF_MODEL_NAME;
+      return OpenAlexanderURDFParameters.URDF_MODEL_NAME;
    }
 
    @Override

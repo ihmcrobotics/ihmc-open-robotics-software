@@ -1,7 +1,6 @@
 package us.ihmc.alexander;
 
 import org.apache.commons.lang3.SystemUtils;
-import us.ihmc.alexander.parameters.model.AlexanderURDFParameters;
 import us.ihmc.alexander.parameters.model.HumanoidURDFParameterInterface;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.modelFileLoaders.RobotDefinitionLoader;
