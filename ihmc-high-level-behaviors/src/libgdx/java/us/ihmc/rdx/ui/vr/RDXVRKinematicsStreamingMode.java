@@ -34,7 +34,9 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
 import us.ihmc.log.LogTools;
@@ -85,6 +87,7 @@ import static us.ihmc.motionRetargeting.VRTrackedSegmentType.*;
 
 public class RDXVRKinematicsStreamingMode
 {
+   public static final double DISTANCE_HEADSET_TO_ROBOT_FOR_STREAMING = 1.0;
    public static final double FRAME_AXIS_GRAPHICS_LENGTH = 0.2;
    private final ROS2SyncedRobotModel syncedRobot;
    private final ROS2ControllerHelper ros2ControllerHelper;
@@ -92,11 +95,11 @@ public class RDXVRKinematicsStreamingMode
    private final DRCRobotModel robotModel;
    private float userRobotOpacity = 1.0f; // store this so we can avoid overriding the user
    private RDXMultiBodyGraphic ghostRobotGraphic;
-   private final ImBoolean showGhostsWhileStreaming = new ImBoolean(true);
+   private final ImBoolean showGhosts = new ImBoolean(true);
    private FullHumanoidRobotModel ghostFullRobotModel;
    private OneDoFJointBasics[] ghostOneDoFJointsExcludingHands;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImBoolean previewEnabled = new ImBoolean(false);
+   private final ImBoolean toolboxCommunicationEnabled = new ImBoolean(false);
    private final ImBoolean streamingEnabled = new ImBoolean(false);
    private ROS2Input<KinematicsToolboxOutputStatus> status;
    private ROS2Input<CapturabilityBasedStatus> capturabilityBasedStatus;
@@ -198,7 +201,7 @@ public class RDXVRKinematicsStreamingMode
       status = ros2ControllerHelper.subscribe(KinematicsStreamingToolboxModule.getOutputStatusTopic(syncedRobot.getRobotModel().getSimpleRobotName()));
       capturabilityBasedStatus = ros2ControllerHelper.subscribeToController(CapturabilityBasedStatus.class);
 
-      kinematicsRecorder = new KinematicsRecordReplay(sceneGraph, previewEnabled);
+      kinematicsRecorder = new KinematicsRecordReplay(sceneGraph, toolboxCommunicationEnabled);
       motionRetargeting = new RDXVRMotionRetargeting(syncedRobot, handDesiredControlFrames, trackerReferenceFrames, headsetReferenceFrame, retargetingParameters);
 
       if (syncedRobot.getRobotModel().getSimpleRobotName().contains("Nadia"))
@@ -263,14 +266,15 @@ public class RDXVRKinematicsStreamingMode
 
       if (vrContext.getVRModel() == RDXVRHardwareModel.FOCUS3)
       {
-         RDXBaseUI.getInstance().getKeyBindings().register("Streaming - Enable IK (toggle)", "A button");
+         RDXBaseUI.getInstance().getKeyBindings().register("Show/Hide ghosts", "Y button");
          RDXBaseUI.getInstance().getKeyBindings().register("Streaming - Control robot (toggle)", "X button");
+         RDXBaseUI.getInstance().getKeyBindings().register("Reinitialize IK (toggle)", "A button");
       }
       else
       {
          RDXBaseUI.getInstance().getKeyBindings().register("Show/Hide ghosts", "Left B button");
-         RDXBaseUI.getInstance().getKeyBindings().register("Streaming - Enable IK (toggle)", "Right A button");
          RDXBaseUI.getInstance().getKeyBindings().register("Streaming - Control robot (toggle)", "Left A button");
+         RDXBaseUI.getInstance().getKeyBindings().register("Reinitialize IK (toggle)", "Right A button");
       }
    }
 
@@ -328,7 +332,7 @@ public class RDXVRKinematicsStreamingMode
          InputDigitalActionData bButton = controller.getBButtonActionData();
          if (bButton.bChanged() && !bButton.bState())
          {
-            showGhostsWhileStreaming.set(!showGhostsWhileStreaming.get());
+            showGhosts.set(!showGhosts.get());
          }
 
          // NOTE: Implement hand open close for controller trigger button.
@@ -337,59 +341,34 @@ public class RDXVRKinematicsStreamingMode
          {
             performHandAction(RobotSide.LEFT);
          }
-
-         // TODO: Find another button for this or something
-         // Check if left joystick is pressed in order to trigger recording or replay of motion
-         // InputDigitalActionData leftJoystickButton = controller.getJoystickPressActionData();
-         // kinematicsRecorder.processRecordReplayInput(leftJoystickButton);
-         // if (kinematicsRecorder.isReplayingEnabled().get())
-         //    wakeUpToolbox();
-         //
-         // if (leftJoystickButton.bChanged() && !leftJoystickButton.bState() &&
-         //     !kinematicsRecorder.isReplayingEnabled().get() && !kinematicsRecorder.isRecordingEnabled().get())
-         // { // reinitialize toolbox
-         //    LogTools.warn("Reinitializing toolbox. Forcing initial lower-body IK configuration to current robot configuration");
-         //    if (previewEnabled.get())
-         //    {
-         //       reinitializeToolboxRobotConfiguration();
-         //    }
-         // }
       });
 
       vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
       {
-        InputDigitalActionData aButton = controller.getAButtonActionData();
-        if (aButton.bChanged() && !aButton.bState())
-        {
-           setPreviewEnabled(!previewEnabled.get());
-        }
+         // If the checkBox for Recording/replaying is enabled, then check if right A button is pressed in order to trigger recording or replay of motion
+         InputDigitalActionData aButton = controller.getAButtonActionData();
+         kinematicsRecorder.processRecordReplayInput(aButton);
+         if (kinematicsRecorder.isReplayingEnabled().get())
+            wakeUpToolbox();
 
-        // NOTE: Implement hand open close for controller trigger button.
-        InputDigitalActionData clickTriggerButton = controller.getClickTriggerActionData();
-        if (clickTriggerButton.bChanged() && !clickTriggerButton.bState())
-        { // do not want to close grippers while interacting with the panel
-           performHandAction(RobotSide.RIGHT);
+         if (aButton.bChanged() && !aButton.bState() && !kinematicsRecorder.isReplayingEnabled().get() && !kinematicsRecorder.isRecordingEnabled().get())
+         { // reinitialize toolbox
+            LogTools.warn("Reinitializing toolbox. Forcing initial lower-body IK configuration to current robot configuration");
+            if (toolboxCommunicationEnabled.get())
+            {
+               reinitializeToolboxRobotConfiguration();
+            }
+         }
 
-           //           double trajectoryTime = 1.5;
-           //           GoHomeMessage homePelvis = new GoHomeMessage();
-           //           homePelvis.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_PELVIS);
-           //           homePelvis.setTrajectoryTime(trajectoryTime);
-           //           ros2ControllerHelper.publishToController(homePelvis);
-           //
-           //           GoHomeMessage homeChest = new GoHomeMessage();
-           //           homeChest.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_CHEST);
-           //           homeChest.setTrajectoryTime(trajectoryTime);
-           //
-           //           RDXBaseUI.pushNotification("Commanding home pose...");
-           //           ros2ControllerHelper.publishToController(homeChest);
-           //
-           //           prescientFootstepStreaming.reset();
-           //           pausedForWalking = false;
-           //           reintializingToolbox = false;
-        }
+         // NOTE: Implement hand open close for controller trigger button.
+         InputDigitalActionData clickTriggerButton = controller.getClickTriggerActionData();
+         if (clickTriggerButton.bChanged() && !clickTriggerButton.bState())
+         { // do not want to close grippers while interacting with the panel
+            performHandAction(RobotSide.RIGHT);
+         }
       });
 
-      if ((previewEnabled.get() || kinematicsRecorder.isReplaying()) && toolboxInputStreamRateLimiter.run(streamPeriod))
+      if ((toolboxCommunicationEnabled.get() || kinematicsRecorder.isReplaying()) && toolboxInputStreamRateLimiter.run(streamPeriod))
       {
          KinematicsStreamingToolboxInputMessage toolboxInputMessage = new KinematicsStreamingToolboxInputMessage();
 
@@ -481,10 +460,30 @@ public class RDXVRKinematicsStreamingMode
          }
          // ---------- end VR Controllers ------------
 
-         if (armScaling.get())
-         { // Update headset pose, used for retargeting to estimate shoulder position
-            vrContext.getHeadset().runIfConnected(headset -> headset.getXForwardZUpHeadsetFrame().update());
-         }
+         // Check for distance headset-robot to enable or disable communication with toolbox
+         vrContext.getHeadset().runIfConnected(headset ->
+         {
+           headset.getXForwardZUpHeadsetFrame().update();
+           Vector2D headsetPositionInWorld = new Vector2D(headset.getXForwardZUpHeadsetFrame().getTransformToWorldFrame().getTranslationX(),
+                                                          headset.getXForwardZUpHeadsetFrame().getTransformToWorldFrame().getTranslationY());
+           Vector2D robotPelvisPositionInWorld = new Vector2D(syncedRobot.getReferenceFrames().getPelvisZUpFrame().getTransformToWorldFrame().getTranslationX(),
+                                                              syncedRobot.getReferenceFrames().getPelvisZUpFrame().getTransformToWorldFrame().getTranslationY());
+           if (headsetPositionInWorld.differenceNorm(robotPelvisPositionInWorld) < DISTANCE_HEADSET_TO_ROBOT_FOR_STREAMING)
+           {
+              if (!toolboxCommunicationEnabled.get())
+              {
+                 setToolboxCommunicationEnabled(true);
+              }
+           }
+           else
+           {
+              if (toolboxCommunicationEnabled.get())
+              {
+                 setToolboxCommunicationEnabled(false);
+              }
+           }
+         });
+
          // Correct values from trackers/controllers using retargeting techniques
          motionRetargeting.computeDesiredValues();
          for (VRTrackedSegmentType segmentType : motionRetargeting.getRetargetedSegments())
@@ -503,7 +502,7 @@ public class RDXVRKinematicsStreamingMode
                if (segmentType.isHandRelated())
                {
                   // Check arm scaling state not changed -> disabled
-                  if (!previewEnabled.get()) return;
+                  if (!toolboxCommunicationEnabled.get()) return;
                   message.getControlFramePositionInEndEffector().set(ikControlFramePoses.get(segmentType.getSegmentSide()).getPosition());
                   message.getControlFrameOrientationInEndEffector().set(ikControlFramePoses.get(segmentType.getSegmentSide()).getOrientation());
                   toolboxInputMessage.setTimestamp(controllerLastPollTimeNanos);
@@ -538,7 +537,7 @@ public class RDXVRKinematicsStreamingMode
             lockPelvis(toolboxInputMessage);
          }
 
-         if (previewEnabled.get())
+         if (toolboxCommunicationEnabled.get())
             toolboxInputMessage.setStreamToController(streamingEnabled.get());
          else
             toolboxInputMessage.setStreamToController(kinematicsRecorder.isReplaying());
@@ -657,18 +656,18 @@ public class RDXVRKinematicsStreamingMode
       }
       else
       {
-         if (!previewEnabled.get())
+         if (!toolboxCommunicationEnabled.get())
          {
             setStreamingEnabled(false, false);
          }
 
-         if (previewEnabled.get() || kinematicsRecorder.isReplaying())
+         if (toolboxCommunicationEnabled.get() || kinematicsRecorder.isReplaying())
          {
             if (streamingEnabled.get())
             {
-               ghostRobotGraphic.setActive(showGhostsWhileStreaming.get());
-               robotVisualizer.setActive(showGhostsWhileStreaming.get());
-               if (showGhostsWhileStreaming.get())
+               ghostRobotGraphic.setActive(showGhosts.get());
+               robotVisualizer.setActive(showGhosts.get());
+               if (showGhosts.get())
                   robotVisualizer.setOpacity(0.5f);
             }
 
@@ -717,22 +716,17 @@ public class RDXVRKinematicsStreamingMode
       {
          setStreamingEnabled(streamingEnabled.get(), true);
       }
-      if (ImGui.checkbox(labels.get("Kinematics streaming"), previewEnabled))
-      {
-         setPreviewEnabled(previewEnabled.get());
-      }
+      if (ImGui.checkbox(labels.get("Show ghosts"), showGhosts));
       if (ImGui.checkbox(labels.get("Control only arms"), controlArmsOnly))
       {
-         setPreviewEnabled(false);
+         setToolboxCommunicationEnabled(false);
       }
-      if (ImGui.checkbox(labels.get("Show ghosts while streaming"), showGhostsWhileStreaming));
-
       Set<String> connectedTrackers = vrContext.getAssignedTrackerRoles();
       if (connectedTrackers.contains(CHEST.getSegmentName()))
       {
          if (ImGui.checkbox(labels.get("Arm Scaling"), armScaling))
          {
-            setPreviewEnabled(false);
+            setToolboxCommunicationEnabled(false);
          }
       }
       else if (armScaling.get())
@@ -746,7 +740,7 @@ public class RDXVRKinematicsStreamingMode
       {
          if (ImGui.checkbox(labels.get("CoM Tracking"), comTracking))
          {
-            setPreviewEnabled(false);
+            setToolboxCommunicationEnabled(false);
          }
       }
       else if (comTracking.get())
@@ -755,6 +749,10 @@ public class RDXVRKinematicsStreamingMode
       }
 
       ghostRobotGraphic.renderImGuiWidgets();
+      if (ImGui.checkbox(labels.get("KST Communication Enabled"), toolboxCommunicationEnabled))
+      {
+         setToolboxCommunicationEnabled(toolboxCommunicationEnabled.get());
+      }
       // add widgets for recording/replaying motion in VR
       ImGui.text("Press Left Joystick - Start/Stop recording");
       kinematicsRecorder.renderRecordWidgets(labels);
@@ -771,11 +769,11 @@ public class RDXVRKinematicsStreamingMode
       ImGui.checkbox(labels.get("Show reference frames"), showReferenceFrameGraphics);
    }
 
-   public void setPreviewEnabled(boolean enabled)
+   public void setToolboxCommunicationEnabled(boolean enabled)
    {
       if (enabled)
       {
-         if (!previewEnabled.get())
+         if (!toolboxCommunicationEnabled.get())
          {
             wakeUpToolbox();
             ghostRobotGraphic.setActive(true);
@@ -799,7 +797,7 @@ public class RDXVRKinematicsStreamingMode
          setStreamingEnabled(false, false);
       }
 
-      previewEnabled.set(enabled);
+      toolboxCommunicationEnabled.set(enabled);
    }
 
    public void setStreamingEnabled(boolean enabled, boolean changed)
@@ -929,7 +927,7 @@ public class RDXVRKinematicsStreamingMode
       }
       else if (handControlModes.get(robotSide) == RDXHandControlMode.LOAD_BEARING)
       {
-         if (previewEnabled.get())
+         if (toolboxCommunicationEnabled.get())
          {
             LogTools.error("Ignoring hand load bearing message, cannot live-update while IK is running. TODO fixme :)");
          }
