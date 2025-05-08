@@ -7,6 +7,7 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import imgui.type.ImBoolean;
+import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
@@ -131,6 +132,7 @@ public class RDXVRModeManager
 
       RDXBaseUI.getInstance().getKeyBindings().register("Teleport", "Right B button");
       RDXBaseUI.getInstance().getKeyBindings().register("Adjust camera Z height", "Right touchpad scroll");
+      RDXBaseUI.getInstance().getKeyBindings().register("Toggle left hand panel", "Left joystick click");
       RDXBaseUI.getInstance().getKeyBindings().register("Move 3D panels", "Right trigger click & drag");
    }
 
@@ -145,6 +147,12 @@ public class RDXVRModeManager
             vrModeControls3DPanelPose.getPosition().addY(-0.05);
             vrModeControls3DPanelPose.changeFrame(ReferenceFrame.getWorldFrame());
             vrModeControls3DPanel.updateDesiredPose(vrModeControls3DPanelPose::get);
+
+            InputDigitalActionData leftJoystickButton = controller.getJoystickPressActionData();
+            if (leftJoystickButton.bChanged() && !leftJoystickButton.bState())
+            {
+               vrModeControls.getRenderOnLeftHand().set(!vrModeControls.getRenderOnLeftHand().get());
+            }
          });
       }
 
