@@ -93,7 +93,6 @@ public class RDXVRKinematicsStreamingMode
    private float userRobotOpacity = 1.0f; // store this so we can avoid overriding the user
    private RDXMultiBodyGraphic ghostRobotGraphic;
    private final ImBoolean showGhostsWhileStreaming = new ImBoolean(true);
-   private boolean previousShowGhostsWhileStreaming = true;
    private FullHumanoidRobotModel ghostFullRobotModel;
    private OneDoFJointBasics[] ghostOneDoFJointsExcludingHands;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -667,14 +666,10 @@ public class RDXVRKinematicsStreamingMode
          {
             if (streamingEnabled.get())
             {
-               if (showGhostsWhileStreaming.get() != previousShowGhostsWhileStreaming)
-               {
-                  previousShowGhostsWhileStreaming = showGhostsWhileStreaming.get();
-                  ghostRobotGraphic.setActive(showGhostsWhileStreaming.get());
-                  robotVisualizer.setActive(showGhostsWhileStreaming.get());
-                  if (showGhostsWhileStreaming.get())
-                     robotVisualizer.setOpacity(0.5f);
-               }
+               ghostRobotGraphic.setActive(showGhostsWhileStreaming.get());
+               robotVisualizer.setActive(showGhostsWhileStreaming.get());
+               if (showGhostsWhileStreaming.get())
+                  robotVisualizer.setOpacity(0.5f);
             }
 
             if (status.getMessageNotification().poll())
