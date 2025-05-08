@@ -92,7 +92,7 @@ public class RDXVRKinematicsStreamingMode
    private final DRCRobotModel robotModel;
    private float userRobotOpacity = 1.0f; // store this so we can avoid overriding the user
    private RDXMultiBodyGraphic ghostRobotGraphic;
-   private final ImBoolean showGhostsWhileStreaming = new ImBoolean(true);
+   private final ImBoolean showGhosts = new ImBoolean(true);
    private FullHumanoidRobotModel ghostFullRobotModel;
    private OneDoFJointBasics[] ghostOneDoFJointsExcludingHands;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -263,6 +263,7 @@ public class RDXVRKinematicsStreamingMode
 
       if (vrContext.getVRModel() == RDXVRHardwareModel.FOCUS3)
       {
+         RDXBaseUI.getInstance().getKeyBindings().register("Show/Hide ghosts", "Y button");
          RDXBaseUI.getInstance().getKeyBindings().register("Streaming - Enable IK (toggle)", "A button");
          RDXBaseUI.getInstance().getKeyBindings().register("Streaming - Control robot (toggle)", "X button");
       }
@@ -331,11 +332,11 @@ public class RDXVRKinematicsStreamingMode
 
          if (controlRobotEnabled.get())
          {
-            controller.setBButtonText(showGhostsWhileStreaming.get() ? "Hide ghosts" : "Show ghosts");
+            controller.setBButtonText(showGhosts.get() ? "Hide ghosts" : "Show ghosts");
             InputDigitalActionData bButton = controller.getBButtonActionData();
             if (bButton.bChanged() && !bButton.bState())
             {
-               showGhostsWhileStreaming.set(!showGhostsWhileStreaming.get());
+               showGhosts.set(!showGhosts.get());
             }
 
             // NOTE: Implement hand open close for controller trigger button.
@@ -669,9 +670,9 @@ public class RDXVRKinematicsStreamingMode
          {
             if (controlRobotEnabled.get())
             {
-               ghostRobotGraphic.setActive(showGhostsWhileStreaming.get());
-               robotVisualizer.setActive(showGhostsWhileStreaming.get());
-               if (showGhostsWhileStreaming.get())
+               ghostRobotGraphic.setActive(showGhosts.get());
+               robotVisualizer.setActive(showGhosts.get());
+               if (showGhosts.get())
                   robotVisualizer.setOpacity(0.5f);
             }
 
@@ -728,7 +729,7 @@ public class RDXVRKinematicsStreamingMode
       {
          setPreviewEnabled(false);
       }
-      if (ImGui.checkbox(labels.get("Show ghosts while streaming"), showGhostsWhileStreaming));
+      if (ImGui.checkbox(labels.get("Show ghosts during control"), showGhosts));
 
       Set<String> connectedTrackers = vrContext.getAssignedTrackerRoles();
       if (connectedTrackers.contains(CHEST.getSegmentName()))

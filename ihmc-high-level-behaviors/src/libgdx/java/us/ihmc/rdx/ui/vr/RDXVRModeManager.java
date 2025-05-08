@@ -119,7 +119,8 @@ public class RDXVRModeManager
       vrModeControls3DPanel.create(baseUI.getImGuiWindowAndDockSystem().getImGuiGl3(), 0.3, 0.5, 10);
       vrModeControls3DPanel.setBackgroundTransparency(new Color(0.3f, 0.3f, 0.3f, 0.75f));
 
-      RDXBaseUI.getInstance().getKeyBindings().register("Teleport", "Right B button");
+      RDXBaseUI.getInstance().getKeyBindings().register("Teleport to projected location", "Right B button");
+      RDXBaseUI.getInstance().getKeyBindings().register("Teleport to robot", "Right joystick click");
       RDXBaseUI.getInstance().getKeyBindings().register("Adjust camera Z height", "Right touchpad scroll");
       RDXBaseUI.getInstance().getKeyBindings().register("Toggle left hand panel", "Left joystick click");
       RDXBaseUI.getInstance().getKeyBindings().register("Move 3D panels", "Right trigger click & drag");
