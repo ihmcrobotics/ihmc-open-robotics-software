@@ -113,16 +113,23 @@ public class RDXVRHandPlacedFootstepMode
                LibGDXTools.toLibGDX(tempTransform, footBeingPlaced.transform);
             }
 
-            InputDigitalActionData aButton = controller.getAButtonActionData();
-            if (nothingElseSelected && side == RobotSide.RIGHT && aButton.bChanged() && !aButton.bState())
+            if (side == RobotSide.RIGHT)
             {
-               sendPlacedFootsteps(locomotionParameters);
+               controller.setAButtonText("Walk");
+               InputDigitalActionData aButton = controller.getAButtonActionData();
+               if (nothingElseSelected && aButton.bChanged() && !aButton.bState())
+               {
+                  sendPlacedFootsteps(locomotionParameters);
+               }
             }
-
-            InputDigitalActionData bButton = controller.getBButtonActionData();
-            if (nothingElseSelected && side == RobotSide.LEFT && bButton.bChanged() && !bButton.bState())
+            else // LEFT
             {
-               resetFootsteps();
+               controller.setBButtonText("Clear");
+               InputDigitalActionData bButton = controller.getBButtonActionData();
+               if (nothingElseSelected && side == RobotSide.LEFT && bButton.bChanged() && !bButton.bState())
+               {
+                  resetFootsteps();
+               }
             }
          });
       }

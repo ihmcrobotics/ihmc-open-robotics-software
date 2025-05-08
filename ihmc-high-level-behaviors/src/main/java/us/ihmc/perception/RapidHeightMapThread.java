@@ -1,12 +1,14 @@
 package us.ihmc.perception;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import org.bytedeco.opencv.opencv_core.GpuMat;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
+import us.ihmc.commons.thread.RepeatingTaskThread;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.camera.CameraIntrinsics;
+import us.ihmc.perception.filters.DepthImageBodyCollisionFilter;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapManager;
-import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
@@ -14,21 +16,18 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 import us.ihmc.sensors.ImageSensor;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
+import java.time.Instant;
 
-public class RapidHeightMapThread
+public class RapidHeightMapThread extends RepeatingTaskThread
 {
+   private final DepthImageBodyCollisionFilter bodyCollisionFilter;
    private final RapidHeightMapManager heightMapManager;
    private final Object heightMapLock = new Object();
 
    private final ImageSensor imageSensor;
-   private final ReferenceFrame sensorFrame;
+   private final ReferenceFrame cameraFrame;
    private final ReferenceFrame zUpSensorFrame;
    private final int depthImageKey;
-   private ScheduledExecutorService scheduler;
 
    public RapidHeightMapThread(ROS2Node ros2Node,
                                ROS2SyncedRobotModel syncedRobotModel,
@@ -38,17 +37,19 @@ public class RapidHeightMapThread
                                ControllerFootstepQueueMonitor controllerFootstepQueueMonitor,
                                HeightMapParameters heightMapParameters)
    {
+      super(imageSensor.getSensorName() + RapidHeightMapThread.class.getSimpleName());
+
       this.imageSensor = imageSensor;
       this.depthImageKey = depthImageKey;
 
-      sensorFrame = syncedRobotModel.getReferenceFrames().getSteppingCameraFrame();
+      cameraFrame = syncedRobotModel.getReferenceFrames().getSteppingCameraFrame();
       zUpSensorFrame = syncedRobotModel.getReferenceFrames().getSteppingCameraZUpFrame();
 
       ReferenceFrame leftFootFrame = syncedRobotModel.getReferenceFrames().getSoleFrame(RobotSide.LEFT);
       ReferenceFrame rightFootFrame = syncedRobotModel.getReferenceFrames().getSoleFrame(RobotSide.LEFT);
 
+      bodyCollisionFilter = new DepthImageBodyCollisionFilter(robotCollisionModel, syncedRobotModel.getFullRobotModel().getRootBody());
       heightMapManager = new RapidHeightMapManager(ros2Node,
-                                                   robotCollisionModel,
                                                    syncedRobotModel.getFullRobotModel(),
                                                    syncedRobotModel.getRobotModel().getSimpleRobotName(),
                                                    leftFootFrame,
@@ -57,28 +58,34 @@ public class RapidHeightMapThread
                                                    heightMapParameters);
    }
 
-   public void start()
-   {
-      // We create a ThreadFactory here so that when profiling the thread, there is a user-friendly name to identify it with
-      ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat("RemoteHeightMapUpdateThread").build();
-      scheduler = Executors.newScheduledThreadPool(1, threadFactory);
-      scheduler.scheduleWithFixedDelay(this::update, 100, 10, TimeUnit.MILLISECONDS);
-   }
-
-   public void update()
+   @Override
+   protected void runTask()
    {
       try
       {
          imageSensor.waitForGrab();
          RawImage depthImage = imageSensor.getImage(depthImageKey);
 
+         // Get everything we need from the image
+         GpuMat latestDepthImage = depthImage.getGpuImageMat();
+         Instant acquisitionTime = depthImage.getAcquisitionTime();
+         CameraIntrinsics depthIntrinsicsCopy = depthImage.getIntrinsicsCopy();
+
+         // Process body collisions
+         GpuMat depthImageWithoutBodyCollisions = new GpuMat(latestDepthImage.size(), latestDepthImage.type());
+         bodyCollisionFilter.process(latestDepthImage, depthImageWithoutBodyCollisions, depthIntrinsicsCopy, cameraFrame);
+
          // Update height map
          synchronized (heightMapLock)
          {
-            heightMapManager.updateAndPublishHeightMap(depthImage, sensorFrame, zUpSensorFrame);
+            heightMapManager.updateAndPublishHeightMap(depthImageWithoutBodyCollisions, acquisitionTime, depthIntrinsicsCopy, cameraFrame, zUpSensorFrame);
          }
 
+         depthImageWithoutBodyCollisions.close();
          depthImage.release();
+      }
+      catch (InterruptedException ignored)
+      {
       }
       catch (Exception e)
       {
@@ -94,9 +101,12 @@ public class RapidHeightMapThread
       }
    }
 
-   public void destroy()
+   @Override
+   public void kill()
    {
-      scheduler.shutdown();
+      super.kill();
+      interrupt();
+
       heightMapManager.destroy();
    }
 }

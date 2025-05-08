@@ -1,4 +1,4 @@
-package us.ihmc.perception.cuda;
+package us.ihmc.perception.filters;
 
 import org.bytedeco.cuda.cudart.CUstream_st;
 import org.bytedeco.cuda.cudart.dim3;
@@ -7,7 +7,13 @@ import org.bytedeco.opencv.opencv_core.GpuMat;
 import us.ihmc.euclid.referenceFrame.FrameCapsule3D;
 import us.ihmc.euclid.referenceFrame.FrameSphere3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.perception.camera.CameraIntrinsics;
+import us.ihmc.perception.cuda.CUDAKernel;
+import us.ihmc.perception.cuda.CUDAProgram;
+import us.ihmc.perception.cuda.CUDAStreamManager;
+import us.ihmc.perception.cuda.CUDATools;
+import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.scs2.simulation.collision.Collidable;
 
 import java.net.URL;
@@ -16,8 +22,15 @@ import java.util.List;
 import static org.bytedeco.cuda.global.cudart.cudaFree;
 import static org.bytedeco.cuda.global.cudart.cudaStreamSynchronize;
 
-public class CUDABodyCollisionFilter
+/**
+ * This class removes the points of a depth image that are on parts of the body.
+ * This class expects a {@link RobotCollisionModel} and a root body in the form of a {@link RigidBodyBasics}.
+ * This class runs a CUDA GPU kernel that checks if a point lies inside any collisions on the {@link RobotCollisionModel}.
+ * The returned value represents a depth image that has zeroed out points for anything that was a collision.
+ */
+public class DepthImageBodyCollisionFilter
 {
+   private static final boolean PRINT_DEBUG_TIMINGS = false;
    private static final int BLOCK_SIZE_XY = 32;
    private final int NUMBER_OF_ATTRIBUTES = 7;
 
@@ -31,18 +44,19 @@ public class CUDABodyCollisionFilter
    private final FloatPointer deviceCollidableGeometryPointer;
    private final FloatPointer collidableGeometryPointer;
 
-   public CUDABodyCollisionFilter(List<Collidable> robotCollidables)
+   public DepthImageBodyCollisionFilter(RobotCollisionModel robotCollisionModel, RigidBodyBasics rootBody)
    {
-      this.robotCollidables = robotCollidables;
-      URL bodyCollisionCheckURL = getClass().getResource("BodyCollisionCheck.cu");
-      URL utilsURL = getClass().getResource("Utils.cu");
-      URL perceptionUtilsURL = getClass().getResource("PerceptionUtils.cu");
-      URL mathUtilsURL = getClass().getResource("MathUtils.cuh");
+      robotCollidables = robotCollisionModel.getRobotCollidables(rootBody);
+
+      URL bodyCollisionCheckURL = getClass().getResource("DepthImageBodyCollisionFilter.cu");
+      URL perceptionUtilsURL = getClass().getClassLoader().getResource("us/ihmc/perception/cuda/PerceptionUtils.cu");
+      URL mathUtilsURL = getClass().getClassLoader().getResource("us/ihmc/perception/cuda/MathUtils.cuh");
 
       try
       {
-         program = new CUDAProgram(bodyCollisionCheckURL, utilsURL, perceptionUtilsURL, mathUtilsURL);
+         program = new CUDAProgram(bodyCollisionCheckURL, perceptionUtilsURL, mathUtilsURL);
          kernel = program.loadKernel("checkBodyCollision");
+         kernel.enableKernelTimings(PRINT_DEBUG_TIMINGS);
       }
       catch (Exception e)
       {
@@ -50,14 +64,10 @@ public class CUDABodyCollisionFilter
       }
 
       stream = CUDAStreamManager.getStream();
-      if (stream == null)
-      {
-         throw new RuntimeException("CUDA stream could not be initialized!");
-      }
 
       // Note: We get the expected number of collidables and allocate that memory amount on the GPU
       // By allocating once we don't have to free the memory in each call, just at the end
-      numberOfCollidables = countSupportedCollidables(robotCollidables);
+      numberOfCollidables = robotCollidables.size();
       dataSize = numberOfCollidables * NUMBER_OF_ATTRIBUTES;
       deviceCollidableGeometryPointer = new FloatPointer();
       CUDATools.mallocAsync(deviceCollidableGeometryPointer, dataSize, stream);
@@ -107,31 +117,15 @@ public class CUDABodyCollisionFilter
       gridSize.close();
    }
 
-   private int countSupportedCollidables(List<Collidable> robotCollidables)
-   {
-      if (robotCollidables == null)
-         return 0;
-
-      int count = 0;
-      for (Collidable collidable : robotCollidables)
-      {
-         if (isCollidableShapeSupported(collidable))
-         {
-            count++;
-         }
-      }
-      return count;
-   }
-
-   public void getCollidablesPointer(List<Collidable> robotCollidables, ReferenceFrame cameraFrame)
+   /**
+    * The supported collidables are a {@link FrameSphere3D} and a {@link FrameCapsule3D}
+    */
+   private void getCollidablesPointer(List<Collidable> robotCollidables, ReferenceFrame cameraFrame)
    {
       int index = 0;
 
       for (Collidable collidable : robotCollidables)
       {
-         if (!isCollidableShapeSupported(collidable))
-            continue;
-
          if (collidable.getShape() instanceof FrameSphere3D sphere)
          {
             FrameSphere3D bodypart = new FrameSphere3D(sphere);
@@ -157,13 +151,6 @@ public class CUDABodyCollisionFilter
             collidableGeometryPointer.put(index++, (float) bodypart.getRadius());
          }
       }
-   }
-
-   private boolean isCollidableShapeSupported(Collidable collidable)
-   {
-      return (collidable.getShape() instanceof FrameCapsule3D || collidable.getShape() instanceof FrameSphere3D) && !collidable.getRigidBody()
-                                                                                                                               .getName()
-                                                                                                                               .matches("TORSO_LINK|PELVIS_LINK");
    }
 
    public void close()
