@@ -143,7 +143,7 @@ public class ROS2SceneGraphPublisher
             sceneGraphMessage.getSceneTreeTypes().add(SceneGraphMessage.YOLO_NODE_TYPE);
             sceneGraphMessage.getSceneTreeIndices().add(sceneGraphMessage.getYoloSceneNodes().size());
             YOLOv8NodeMessage yoloNodeMessage = sceneGraphMessage.getYoloSceneNodes().add();
-            yoloNode.fromMessage(yoloNodeMessage);
+            yoloNode.toMessage(yoloNodeMessage);
 
             detectableSceneNodeMessage = yoloNodeMessage.getDetectableSceneNode();
          }
