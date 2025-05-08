@@ -97,7 +97,7 @@ public class RDXVRKinematicsStreamingMode
    private OneDoFJointBasics[] ghostOneDoFJointsExcludingHands;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean previewEnabled = new ImBoolean(false);
-   private final ImBoolean streamingEnabled = new ImBoolean(false);
+   private final ImBoolean controlRobotEnabled = new ImBoolean(false);
    private ROS2Input<KinematicsToolboxOutputStatus> status;
    private ROS2Input<CapturabilityBasedStatus> capturabilityBasedStatus;
    private final double streamPeriod = UnitConversions.hertzToSeconds(120.0);
@@ -319,23 +319,40 @@ public class RDXVRKinematicsStreamingMode
    {
       vrContext.getController(RobotSide.LEFT).runIfConnected(controller ->
       {
-         InputDigitalActionData aButton = controller.getAButtonActionData();
-         if (aButton.bChanged() && !aButton.bState())
+         if (previewEnabled.get())
          {
-            setStreamingEnabled(!streamingEnabled.get(), true);
+            controller.setAButtonText(controlRobotEnabled.get() ? "Stop control" : "Start control");
+            InputDigitalActionData aButton = controller.getAButtonActionData();
+            if (aButton.bChanged() && !aButton.bState())
+            {
+               setControlRobotEnabled(!controlRobotEnabled.get(), true);
+            }
          }
 
-         InputDigitalActionData bButton = controller.getBButtonActionData();
-         if (bButton.bChanged() && !bButton.bState())
+         if (controlRobotEnabled.get())
          {
-            showGhostsWhileStreaming.set(!showGhostsWhileStreaming.get());
-         }
+            controller.setBButtonText(showGhostsWhileStreaming.get() ? "Hide ghosts" : "Show ghosts");
+            InputDigitalActionData bButton = controller.getBButtonActionData();
+            if (bButton.bChanged() && !bButton.bState())
+            {
+               showGhostsWhileStreaming.set(!showGhostsWhileStreaming.get());
+            }
 
-         // NOTE: Implement hand open close for controller trigger button.
-         InputDigitalActionData clickTriggerButton = controller.getClickTriggerActionData();
-         if (clickTriggerButton.bChanged() && !clickTriggerButton.bState())
+            // NOTE: Implement hand open close for controller trigger button.
+            InputDigitalActionData clickTriggerButton = controller.getClickTriggerActionData();
+            if (clickTriggerButton.bChanged() && !clickTriggerButton.bState())
+            {
+               performHandAction(RobotSide.LEFT);
+            }
+         }
+         else
          {
-            performHandAction(RobotSide.LEFT);
+            controller.setBButtonText("Relax hands");
+            InputDigitalActionData bButton = controller.getBButtonActionData();
+            if (bButton.bChanged() && !bButton.bState())
+            {
+               relaxHands();
+            }
          }
 
          // TODO: Find another button for this or something
@@ -358,35 +375,21 @@ public class RDXVRKinematicsStreamingMode
 
       vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
       {
-        InputDigitalActionData aButton = controller.getAButtonActionData();
-        if (aButton.bChanged() && !aButton.bState())
-        {
-           setPreviewEnabled(!previewEnabled.get());
-        }
+         controller.setAButtonText(previewEnabled.get() ? "Stop preview" : "Start preview");
+         InputDigitalActionData aButton = controller.getAButtonActionData();
+         if (aButton.bChanged() && !aButton.bState())
+         {
+            setPreviewEnabled(!previewEnabled.get());
+         }
 
-        // NOTE: Implement hand open close for controller trigger button.
-        InputDigitalActionData clickTriggerButton = controller.getClickTriggerActionData();
-        if (clickTriggerButton.bChanged() && !clickTriggerButton.bState())
-        { // do not want to close grippers while interacting with the panel
-           performHandAction(RobotSide.RIGHT);
-
-           //           double trajectoryTime = 1.5;
-           //           GoHomeMessage homePelvis = new GoHomeMessage();
-           //           homePelvis.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_PELVIS);
-           //           homePelvis.setTrajectoryTime(trajectoryTime);
-           //           ros2ControllerHelper.publishToController(homePelvis);
-           //
-           //           GoHomeMessage homeChest = new GoHomeMessage();
-           //           homeChest.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_CHEST);
-           //           homeChest.setTrajectoryTime(trajectoryTime);
-           //
-           //           RDXBaseUI.pushNotification("Commanding home pose...");
-           //           ros2ControllerHelper.publishToController(homeChest);
-           //
-           //           prescientFootstepStreaming.reset();
-           //           pausedForWalking = false;
-           //           reintializingToolbox = false;
-        }
+         if (controlRobotEnabled.get())
+         {
+            InputDigitalActionData clickTriggerButton = controller.getClickTriggerActionData();
+            if (clickTriggerButton.bChanged() && !clickTriggerButton.bState())
+            {
+               performHandAction(RobotSide.RIGHT);
+            }
+         }
       });
 
       if ((previewEnabled.get() || kinematicsRecorder.isReplaying()) && toolboxInputStreamRateLimiter.run(streamPeriod))
@@ -539,7 +542,7 @@ public class RDXVRKinematicsStreamingMode
          }
 
          if (previewEnabled.get())
-            toolboxInputMessage.setStreamToController(streamingEnabled.get());
+            toolboxInputMessage.setStreamToController(controlRobotEnabled.get());
          else
             toolboxInputMessage.setStreamToController(kinematicsRecorder.isReplaying());
          ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputToolboxConfigurationTopic(syncedRobot.getRobotModel().getSimpleRobotName()), ikSolverConfigurationMessage);
@@ -653,18 +656,18 @@ public class RDXVRKinematicsStreamingMode
       // Safety features!
       if (!ikStreamingModeEnabled)
       {
-         setStreamingEnabled(false, false);
+         setControlRobotEnabled(false, false);
       }
       else
       {
          if (!previewEnabled.get())
          {
-            setStreamingEnabled(false, false);
+            setControlRobotEnabled(false, false);
          }
 
          if (previewEnabled.get() || kinematicsRecorder.isReplaying())
          {
-            if (streamingEnabled.get())
+            if (controlRobotEnabled.get())
             {
                ghostRobotGraphic.setActive(showGhostsWhileStreaming.get());
                robotVisualizer.setActive(showGhostsWhileStreaming.get());
@@ -713,9 +716,9 @@ public class RDXVRKinematicsStreamingMode
 
    public void renderImGuiWidgets()
    {
-      if (ImGui.checkbox(labels.get("Control/Stop Robot"), streamingEnabled))
+      if (ImGui.checkbox(labels.get("Control robot"), controlRobotEnabled))
       {
-         setStreamingEnabled(streamingEnabled.get(), true);
+         setControlRobotEnabled(controlRobotEnabled.get(), true);
       }
       if (ImGui.checkbox(labels.get("Kinematics streaming"), previewEnabled))
       {
@@ -796,15 +799,15 @@ public class RDXVRKinematicsStreamingMode
       else
       {
          sleepToolbox();
-         setStreamingEnabled(false, false);
+         setControlRobotEnabled(false, false);
       }
 
       previewEnabled.set(enabled);
    }
 
-   public void setStreamingEnabled(boolean enabled, boolean changed)
+   public void setControlRobotEnabled(boolean enabled, boolean changed)
    {
-      if (changed || enabled != streamingEnabled.get())
+      if (changed || enabled != controlRobotEnabled.get())
       {
          if (enabled) // becomes enabled
          {
@@ -818,7 +821,7 @@ public class RDXVRKinematicsStreamingMode
          }
       }
 
-      streamingEnabled.set(enabled);
+      controlRobotEnabled.set(enabled);
    }
 
    private void reinitializeToolboxRobotConfiguration()
@@ -985,6 +988,15 @@ public class RDXVRKinematicsStreamingMode
       boolean close = handsAreOpen.get(side).booleanValue();
       handsAreOpen.get(side).setValue(!close);
       handManager.publishHandCommand(side, close ? SakeHandPreset.GRIP : SakeHandPreset.OPEN, false, false);
+   }
+
+   private void relaxHands()
+   {
+      for (RobotSide side : RobotSide.values)
+      { // It's important to use close so the fingers are closed but not applying force so they don't overheat when not used
+         handsAreOpen.get(side).setValue(false);
+         handManager.publishHandCommand(side, SakeHandPreset.CLOSE, false, false);
+      }
    }
 
    public void setVRHandConfiguration(RDXHandControlMode leftHandControlMode, RDXHandControlMode rightHandControlMode)
