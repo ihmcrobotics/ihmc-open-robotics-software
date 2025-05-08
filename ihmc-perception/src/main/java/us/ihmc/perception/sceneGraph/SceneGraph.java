@@ -227,8 +227,8 @@ public class SceneGraph
          });
       }
 
-//      for (PersistentDetection newDetection : newlyValidDetections)
-//         addNodeFromDetection(newDetection);
+      for (PersistentDetection newDetection : newlyValidDetections)
+         addNodeFromDetection(newDetection);
 
       detectionManager.clearNewlyValidDetections();
    }
