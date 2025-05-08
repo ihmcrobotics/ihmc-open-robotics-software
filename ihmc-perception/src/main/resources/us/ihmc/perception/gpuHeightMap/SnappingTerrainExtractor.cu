@@ -6,7 +6,7 @@ extern "C"
 #define HEIGHT_MAP_CENTER_X 0
 #define HEIGHT_MAP_CENTER_Y 1
 #define CELL_SIZE_IN_CENTIMETERS 2
-#define TERRAIN_WIDTH_IN_METERS 3
+#define HEIGHT_MAP_WIDTH_IM_METERS 3
 #define HEIGHT_SCALING_FACTOR 4
 #define HEIGHT_OFFSET 5
 #define FOOT_LENGTH 6
@@ -60,7 +60,7 @@ __global__ void computeTerrainData(unsigned short *heightMap, size_t pitchHeight
     float map_resolution = params[CELL_SIZE_IN_CENTIMETERS];
     float max_dimension = fmaxf(params[FOOT_WIDTH], params[FOOT_LENGTH]);
 
-    int terrain_map_center_index = compute_center_index(params[TERRAIN_WIDTH_IN_METERS], map_resolution);
+    int terrain_map_center_index = compute_center_index(params[HEIGHT_MAP_WIDTH_IM_METERS], map_resolution);
     float2 terrain_map_center = make_float2(params[HEIGHT_MAP_CENTER_Y], params[HEIGHT_MAP_CENTER_X]);
 
     int cells_per_axis = 2 * terrain_map_center_index + 1;
@@ -322,7 +322,7 @@ __global__ void computeSteppabilityConnections(unsigned short *steppableMap, siz
     int x_index = blockIdx.x * blockDim.x + threadIdx.x;
     int y_index = blockIdx.y * blockDim.y + threadIdx.y;
 
-    int cells_per_side = 2 * compute_center_index(params[TERRAIN_WIDTH_IN_METERS], params[CELL_SIZE_IN_CENTIMETERS]) + 1;
+    int cells_per_side = 2 * compute_center_index(params[HEIGHT_MAP_WIDTH_IM_METERS], params[CELL_SIZE_IN_CENTIMETERS]) + 1;
 
     int2 key = make_int2(x_index, y_index);
 
@@ -377,7 +377,7 @@ __global__ void computeTerrainCost(unsigned short *heightMap, size_t pitchHeight
 {
     int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
     int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
-    int cells_per_axis = 2 * compute_center_index(params[TERRAIN_WIDTH_IN_METERS], params[CELL_SIZE_IN_CENTIMETERS]) + 1;
+    int cells_per_axis = 2 * compute_center_index(params[HEIGHT_MAP_WIDTH_IM_METERS], params[CELL_SIZE_IN_CENTIMETERS]) + 1;
 
     // Bounds check
     if (xIndex >= cells_per_axis || yIndex >= cells_per_axis)
@@ -452,7 +452,7 @@ __global__ void computeContactMap(unsigned char *terrainCost, size_t pitchTerrai
 {
     int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
     int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
-    int cells_per_axis = 2 * compute_center_index(params[TERRAIN_WIDTH_IN_METERS], params[CELL_SIZE_IN_CENTIMETERS]) + 1;
+    int cells_per_axis = 2 * compute_center_index(params[HEIGHT_MAP_WIDTH_IM_METERS], params[CELL_SIZE_IN_CENTIMETERS]) + 1;
 
     if (xIndex >= cells_per_axis || yIndex >= cells_per_axis)
         return;

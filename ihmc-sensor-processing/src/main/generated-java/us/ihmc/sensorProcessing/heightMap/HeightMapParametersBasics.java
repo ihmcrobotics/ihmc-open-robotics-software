@@ -98,11 +98,6 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
       set(HeightMapParameters.localWidthInMeters, localWidthInMeters);
    }
 
-   default void setTerrainWidthInMeters(double terrainWidthInMeters)
-   {
-      set(HeightMapParameters.terrainWidthInMeters, terrainWidthInMeters);
-   }
-
    default void setCroppedWidthInMeters(double croppedWidthInMeters)
    {
       set(HeightMapParameters.croppedWidthInMeters, croppedWidthInMeters);
