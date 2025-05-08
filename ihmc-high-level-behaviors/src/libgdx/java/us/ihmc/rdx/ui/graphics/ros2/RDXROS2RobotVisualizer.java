@@ -53,7 +53,6 @@ public class RDXROS2RobotVisualizer extends RDXROS2SingleTopicVisualizer<RobotCo
    private final ROS2SyncedRobotModel syncedRobot;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiSliderFloat opacitySlider = new ImGuiSliderFloat("Opacity", "%.2f", 1.0f);
-   private boolean isFading = false;
    private final Pose3D lastHistoryPelvisPose = new Pose3D();
    private final Pose3D currentHistoryPelvisPose = new Pose3D();
    private final RDXTrajectoryGraphic pelvisPoseHistoryGraphic = new RDXTrajectoryGraphic(Color.SKY);
@@ -275,27 +274,21 @@ public class RDXROS2RobotVisualizer extends RDXROS2SingleTopicVisualizer<RobotCo
       cameraForTracking.setCameraFocusPoint(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getPelvisZUpFrame).getPosition());
    }
 
-   public void fadeVisuals(float finalOpacity, float opacityVariation)
+   public void setOpacity(float opacity)
    {
-      if (finalOpacity != opacitySlider.getFloatValue())
+      if (opacity != opacitySlider.getFloatValue())
       {
-         isFading = true;
-         float newOpacity = (opacitySlider.getFloatValue() > finalOpacity) ? Math.max(opacitySlider.getFloatValue() - opacityVariation, finalOpacity) : Math.min(opacitySlider.getFloatValue() + opacityVariation, finalOpacity);
-         opacitySlider.setFloatValue(newOpacity);
-         multiBodyGraphic.setOpacity(newOpacity);
+         opacitySlider.setFloatValue(opacity);
+         multiBodyGraphic.setOpacity(opacity);
 
          for (RDXInteractableFrameModel interactableFrameModel : interactableFrameModels)
-            interactableFrameModel.getModelInstance().setOpacity(newOpacity);
-      }
-      else
-      {
-         isFading = false;
+            interactableFrameModel.getModelInstance().setOpacity(opacity);
       }
    }
 
-   public boolean isFading()
+   public float getOpacity()
    {
-      return isFading;
+      return opacitySlider.getFloatValue();
    }
 
    public void attachInteractableFrameModel(RDXInteractableFrameModel interactableFrameModel)
