@@ -6,7 +6,9 @@ import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.HandLoadBearingMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.lwjgl.openvr.InputDigitalActionData;
+import toolbox_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInitialConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
@@ -49,6 +51,7 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
+import us.ihmc.rdx.ui.graphics.RDXMultiContactRegionGraphic;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2RobotVisualizer;
 import us.ihmc.rdx.ui.teleoperation.RDXHandConfigurationManager;
@@ -145,6 +148,13 @@ public class RDXVRKinematicsStreamingMode
    private final Notification streamingDisabled = new Notification();
    private final SideDependentList<Float> gripButtonsValue = new SideDependentList<>();
 
+   private RDXMultiContactRegionGraphic multiContactStabilityGraphic;
+   private final HumanoidKinematicsToolboxConfigurationMessage ikHumanoidSolverConfigurationMessage = new HumanoidKinematicsToolboxConfigurationMessage();
+
+   private SideDependentList<MutableBoolean> handsAreOpen = new SideDependentList<>(new MutableBoolean(false), new MutableBoolean(false));
+   private final SideDependentList<Boolean> handsAreLoaded = new SideDependentList<>(false, false);
+   private final SideDependentList<RDXHandControlMode> handControlModes = new SideDependentList<>(RDXHandControlMode.GRIPPER, RDXHandControlMode.GRIPPER);
+
    public RDXVRKinematicsStreamingMode(ROS2SyncedRobotModel syncedRobot,
                                        ROS2ControllerHelper ros2ControllerHelper,
                                        RDXVRContext vrContext,
@@ -183,6 +193,8 @@ public class RDXVRKinematicsStreamingMode
       ghostRobotGraphic.loadRobotModelAndGraphics(ghostRobotDefinition, ghostFullRobotModel.getElevator());
       ghostRobotGraphic.setActive(true);
       ghostRobotGraphic.create();
+
+      multiContactStabilityGraphic = new RDXMultiContactRegionGraphic(ghostFullRobotModel);
 
       for (RobotSide side : RobotSide.values)
       {
@@ -604,6 +616,7 @@ public class RDXVRKinematicsStreamingMode
                      ghostOneDoFJointsExcludingHands[i].setQ(latestStatus.getDesiredJointAngles().get(i));
                   }
                   ghostFullRobotModel.getElevator().updateFramesRecursively();
+                  multiContactStabilityGraphic.update(latestStatus);
                }
             }
 
@@ -868,6 +881,8 @@ public class RDXVRKinematicsStreamingMode
       {
          ghostRobotGraphic.getRenderables(renderables, pool, sceneLevels);
       }
+      multiContactStabilityGraphic.getRenderables(renderables, pool);
+      
       if(ENABLE_ARM_CONTROL_DURING_STEPPING)
       {
          armStreaming.getRenderables(renderables, pool);
