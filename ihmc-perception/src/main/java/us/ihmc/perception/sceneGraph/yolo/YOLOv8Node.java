@@ -4,6 +4,9 @@ import perception_msgs.msg.dds.YOLOv8NodeMessage;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DBasics;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D32;
@@ -28,6 +31,7 @@ public class YOLOv8Node extends DetectableSceneNode
 
    // YOLOv8Node specific variables
    private final RigidBodyTransform centroidToObjectTransform = new RigidBodyTransform();
+   private final Orientation3DBasics robotOrientation = new RotationMatrix();
    private final Pose3D objectPose;
 
    /**
@@ -76,8 +80,14 @@ public class YOLOv8Node extends DetectableSceneNode
 
       objectPose.set(mostRecentDetection.getPose());
       objectPose.appendTransform(centroidToObjectTransform);
+      objectPose.getRotation().set(robotOrientation);
 
       setNodeToParentFrameTransformAndUpdate(objectPose);
+   }
+
+   public void updateRobotOrientation(Orientation3DReadOnly orientation)
+   {
+      robotOrientation.set(orientation);
    }
 
    public RigidBodyTransformReadOnly getCentroidToObjectTransform()
