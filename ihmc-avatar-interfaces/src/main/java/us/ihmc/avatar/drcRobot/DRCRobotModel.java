@@ -25,6 +25,7 @@ import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersBasics;
+import us.ihmc.footstepPlanning.FastLocomotionParameters;
 import us.ihmc.footstepPlanning.LocomotionParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
@@ -204,6 +205,11 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
    }
 
    public default LocomotionParameters getLocomotionParameters()
+   {
+      return null;
+   }
+
+   public default FastLocomotionParameters getFastLocomotionParameters()
    {
       return null;
    }

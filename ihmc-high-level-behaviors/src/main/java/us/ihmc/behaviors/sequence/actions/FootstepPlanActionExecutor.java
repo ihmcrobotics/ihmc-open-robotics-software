@@ -1,6 +1,5 @@
 package us.ihmc.behaviors.sequence.actions;
 
-import controller_msgs.msg.dds.AbortWalkingMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
@@ -368,12 +367,6 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
       for (RobotSide side : RobotSide.values)
       {
          state.getCurrentFootPoses().get(side).accessValue().set(syncedFeetPoses.get(side));
-      }
-
-      if (state.getAbortWalking())
-      {
-         ros2ControllerHelper.publishToController(new AbortWalkingMessage());
-         state.setAbortWalking(false);
       }
    }
 }

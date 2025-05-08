@@ -605,7 +605,6 @@ public class RDXVRKinematicsStreamingMode
                {
                   LogTools.warn("Consecutive stepping from VR");
                   reintializingToolbox = false;
-                  footstepStreaming.setConsecutiveStepping(true);
                   footstepStreaming.step(false);
                   // This prevents wrong logic. The controller might think we're done walking even if we've just sent a new footstep that needs to propagate to the controller
                   controllerStatusTracker.getFinishedWalkingNotification().clear();
@@ -614,7 +613,6 @@ public class RDXVRKinematicsStreamingMode
             // Resumes streaming once walking is done
             if (pausedForWalking && controllerStatusTracker.getFinishedWalkingNotification().poll())
             {
-               footstepStreaming.setConsecutiveStepping(false);
                reintializingToolbox = true;
                timeNotificationIsDoneWalking = System.nanoTime() / 1e9;
             }
