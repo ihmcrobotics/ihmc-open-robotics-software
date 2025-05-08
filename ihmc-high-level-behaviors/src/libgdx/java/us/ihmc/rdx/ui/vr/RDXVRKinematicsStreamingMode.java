@@ -322,7 +322,7 @@ public class RDXVRKinematicsStreamingMode
          InputDigitalActionData aButton = controller.getAButtonActionData();
          if (aButton.bChanged() && !aButton.bState())
          {
-            setStreamingEnabled(!streamingEnabled.get());
+            setStreamingEnabled(!streamingEnabled.get(), true);
          }
 
          InputDigitalActionData bButton = controller.getBButtonActionData();
@@ -653,13 +653,13 @@ public class RDXVRKinematicsStreamingMode
       // Safety features!
       if (!ikStreamingModeEnabled)
       {
-         setStreamingEnabled(false);
+         setStreamingEnabled(false, false);
       }
       else
       {
          if (!previewEnabled.get())
          {
-            setStreamingEnabled(false);
+            setStreamingEnabled(false, false);
          }
 
          if (previewEnabled.get() || kinematicsRecorder.isReplaying())
@@ -713,6 +713,10 @@ public class RDXVRKinematicsStreamingMode
 
    public void renderImGuiWidgets()
    {
+      if (ImGui.checkbox(labels.get("Control/Stop Robot"), streamingEnabled))
+      {
+         setStreamingEnabled(streamingEnabled.get(), true);
+      }
       if (ImGui.checkbox(labels.get("Kinematics streaming"), previewEnabled))
       {
          setPreviewEnabled(previewEnabled.get());
@@ -792,15 +796,15 @@ public class RDXVRKinematicsStreamingMode
       else
       {
          sleepToolbox();
-         setStreamingEnabled(false);
+         setStreamingEnabled(false, false);
       }
 
       previewEnabled.set(enabled);
    }
 
-   public void setStreamingEnabled(boolean enabled)
+   public void setStreamingEnabled(boolean enabled, boolean changed)
    {
-      if (enabled != streamingEnabled.get())
+      if (changed || enabled != streamingEnabled.get())
       {
          if (enabled) // becomes enabled
          {
