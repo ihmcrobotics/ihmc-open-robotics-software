@@ -57,7 +57,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
    private boolean haveWeEntered = false;
    protected final RobotSide swingSide;
    private final YoBoolean updateFootstepContinuousThroughoutTransfer = new YoBoolean("updateFootstepContinuouslyThroughoutTransfer", registry);
-   private final WalkingMessageHandler.Listener footstepConsumptionLister = this::handleNewFootstep;;
+   private final WalkingMessageHandler.Listener footstepConsumptionListener = this::handleNewFootstep;;
 
    public TransferToWalkingSingleSupportState(WalkingStateEnum stateEnum,
                                               WalkingMessageHandler walkingMessageHandler,
@@ -102,15 +102,14 @@ public class TransferToWalkingSingleSupportState extends TransferState
       // In the action, it already has the balanceManager update things with the footstep.
       // So, if the walkingMessageHandler is updated and footstep (desired footstep) also can be updated,
       // I think the balanceManager could update its ICP, CMP with the updated footstep positions.
-      walkingMessageHandler.getUsingQFP().addListener(change -> updateFootstepContinuousThroughoutTransfer.set(walkingMessageHandler.getUsingQFP().getBooleanValue()));
-      updateFootstepContinuousThroughoutTransfer.addListener(value ->
-                                                             {
-                                                                if(updateFootstepContinuousThroughoutTransfer.getBooleanValue())
-                                                                   walkingMessageHandler.addFootstepConsumptionListener(footstepConsumptionLister);
-                                                                else
-                                                                   walkingMessageHandler.removeFootstepConsumptionListener(footstepConsumptionLister);
-                                                             });
-      updateFootstepContinuousThroughoutTransfer.set(true);
+      walkingMessageHandler.getUpdateFootstepReferenceContinuously().addListener(value ->
+                                                                                 {
+                                                                                    if (walkingMessageHandler.getUpdateFootstepReferenceContinuously().getBooleanValue())
+                                                                                       walkingMessageHandler.addFootstepConsumptionListener(footstepConsumptionListener);
+                                                                                    else
+                                                                                       walkingMessageHandler.removeFootstepConsumptionListener(footstepConsumptionListener);
+
+                                                                                 });
 
    }
 

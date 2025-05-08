@@ -81,7 +81,6 @@ public class WalkingSingleSupportState extends SingleSupportState
    private final DoubleProvider swingFootCoPWeight;
    private final CenterOfPressureCommand copCommand = new CenterOfPressureCommand();
 
-   private final YoBoolean updateFootstepContinuouslyThroughoutSwing = new YoBoolean("updateFootstepContinuouslyThroughoutSwing", registry);;
    private final WalkingMessageHandler.Listener footstepConsumptionListener = this::handleNewFootstep;
 
    public WalkingSingleSupportState(WalkingStateEnum stateEnum,
@@ -136,18 +135,14 @@ public class WalkingSingleSupportState extends SingleSupportState
       copCommand.getDesiredCoP().setToZero(contactableSwingFoot.getContactFrame());
       swingFootCoPWeight = ParameterProvider.getOrCreateParameter(parentRegistry.getName(), getClass().getSimpleName(), "swingFootCoPWeight", registry, Double.NaN);
 
-      walkingMessageHandler.getUsingQFP().addListener(change -> updateFootstepContinuouslyThroughoutSwing.set(walkingMessageHandler.getUsingQFP().getBooleanValue()));
+      walkingMessageHandler.getUpdateFootstepReferenceContinuously().addListener(value ->
+                                                                                  {
+                                                                                     if (walkingMessageHandler.getUpdateFootstepReferenceContinuously().getBooleanValue())
+                                                                                        walkingMessageHandler.addFootstepConsumptionListener(footstepConsumptionListener);
+                                                                                     else
+                                                                                        walkingMessageHandler.removeFootstepConsumptionListener(footstepConsumptionListener);
 
-      updateFootstepContinuouslyThroughoutSwing.addListener(value ->
-                                                       {
-                                                          if (updateFootstepContinuouslyThroughoutSwing.getBooleanValue())
-                                                             walkingMessageHandler.addFootstepConsumptionListener(footstepConsumptionListener);
-                                                          else
-                                                             walkingMessageHandler.removeFootstepConsumptionListener(footstepConsumptionListener);
-
-                                                       });
-
-      updateFootstepContinuouslyThroughoutSwing.set(true);
+                                                                                  });
    }
 
    int stepsToAdd;
@@ -276,7 +271,7 @@ public class WalkingSingleSupportState extends SingleSupportState
           * When waitUntilICPPlannerIsDone is true, we indicate that the foot has touched down with
           * hasSwingFootTouchedDown and keep returning false here until the ICP planner is done
           */
-         if (!walkingMessageHandler.getUsingQFP().getBooleanValue() && waitUntilICPPlannerIsDone.getValue())
+         if (waitUntilICPPlannerIsDone.getValue() && !walkingMessageHandler.getRequestDisableCopFeedbackControl().getBooleanValue())
          {
             return balanceManager.isICPPlanDone();
          }

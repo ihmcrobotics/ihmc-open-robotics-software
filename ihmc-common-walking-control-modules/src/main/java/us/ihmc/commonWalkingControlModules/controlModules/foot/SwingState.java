@@ -47,6 +47,7 @@ import us.ihmc.yoVariables.euclid.filters.RateLimitedYoFramePose3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -243,9 +244,12 @@ public class SwingState extends AbstractFootControlState
       isSwingSpeedUpEnabled = new YoBoolean(namePrefix + "IsSpeedUpEnabled", registry);
       isSwingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
 
-      controllerToolbox.getWalkingMessageHandler().getUsingQFP().addListener(change ->
+      YoVariableChangedListener qfpParameterListener = change ->
       {
-         if (controllerToolbox.getWalkingMessageHandler().getUsingQFP().getBooleanValue())
+         boolean requestDisableCoPFeedbackControl = controllerToolbox.getWalkingMessageHandler().getRequestDisableCopFeedbackControl().getBooleanValue();
+         boolean usingQFP = controllerToolbox.getWalkingMessageHandler().getUpdateFootstepReferenceContinuously().getBooleanValue() && requestDisableCoPFeedbackControl;
+
+         if (usingQFP)
          {
             isSwingSpeedUpEnabled.set(false);
             swingTrajectorySmoother.setTrackingZeta(0.0);
@@ -255,7 +259,10 @@ public class SwingState extends AbstractFootControlState
             isSwingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
             swingTrajectorySmoother.setTrackingZeta(swingTrajectorySmoother.getDefaultTrackingZeta());
          }
-      });
+      };
+
+      controllerToolbox.getWalkingMessageHandler().getUpdateFootstepReferenceContinuously().addListener(qfpParameterListener);
+      controllerToolbox.getWalkingMessageHandler().getRequestDisableCopFeedbackControl().addListener(qfpParameterListener);
 
 
       swingTimeSpeedUpFactor.setToNaN();
