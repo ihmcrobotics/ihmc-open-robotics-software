@@ -87,7 +87,7 @@ public class StandAloneRealsenseProcess
                                                       RealSenseImageSensor.DEPTH_IMAGE_KEY,
                                                       controllerFootstepQueueMonitor,
                                                       heightMapParameters);
-      rapidHeightMapThread.start();
+      rapidHeightMapThread.startRepeating();
    }
 
    public HeightMapData getLatestHeightMapData()
@@ -97,7 +97,7 @@ public class StandAloneRealsenseProcess
 
    public void destroy()
    {
-      rapidHeightMapThread.destroy();
+      rapidHeightMapThread.blockingKill();
       realsenseDemandNode.destroy();
       realsensePublishDemandNode.destroy();
       d455Sensor.close();

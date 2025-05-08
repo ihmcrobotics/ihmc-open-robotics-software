@@ -391,7 +391,8 @@ public class RapidHeightMapExtractorCUDA
       planOffsetKernel.close();
 
       emptyGlobalHeightMapImage.close();
-      planOffsetKernelGridDim.close();
+      if (planOffsetKernelGridDim != null)
+         planOffsetKernelGridDim.close();
 
       // Clean up each resource
       deallocateFloatPointer(groundToSensorTransformHostPointer, groundToSensorTransformDevicePointer);

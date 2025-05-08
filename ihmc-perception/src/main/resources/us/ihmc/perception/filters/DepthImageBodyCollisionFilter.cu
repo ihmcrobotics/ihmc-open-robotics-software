@@ -1,4 +1,3 @@
-#include "Utils.cu"
 #include "PerceptionUtils.cu"
 #include "MathUtils.cuh"
 
@@ -64,31 +63,27 @@ extern "C" __global__ void checkBodyCollision(unsigned short* depthImage,
                                             float fy,
                                             float cx,
                                             float cy,
-                                            unsigned short* collisionMask,
-                                            size_t collisionMaskPitch,
+                                            unsigned short* collisionMaskMap,
+                                            size_t pitchCollisionMaskMap,
                                             float* collidableGeometryPointer,
                                             int numCollidables,
                                             int numberOfAttributes)
 {
-    int x = Utils::getThreadCoordX();
-    int y = Utils::getThreadCoordY();
+    int x_index = blockIdx.x * blockDim.x + threadIdx.x;
+    int y_index = blockIdx.y * blockDim.y + threadIdx.y;
 
-    if (x >= width || y >= height)
+    if (x_index >= width || y_index >= height)
         return;
 
-    unsigned short depthValue = *row(col(depthImage, x), depthImagePitch, y);
-    if (depthValue == 0)
-    {
-        *row(col(collisionMask, x), collisionMaskPitch, y) = 0;
-        return;
-    }
+    unsigned short depthValue = *row(col(depthImage, x_index), depthImagePitch, y_index);
 
     float depthInMeters = depthValue/1000.0f;
     float3 depthFramePoint = make_float3(depthInMeters,
-                                          -(x - cx) / fx * depthInMeters,
-                                         -(y - cy) / fy * depthInMeters);
+                                          -(x_index - cx) / fx * depthInMeters,
+                                         -(y_index - cy) / fy * depthInMeters);
 
-    *row(col(collisionMask, x), collisionMaskPitch, y) = depthValue;
+    unsigned short *matrixRow = (unsigned short *)((char *)collisionMaskMap + y_index * pitchCollisionMaskMap) + x_index;
+    *matrixRow = depthValue;
 
     for (int i = 0; i < numCollidables; ++i)
     {
@@ -98,8 +93,6 @@ extern "C" __global__ void checkBodyCollision(unsigned short* depthImage,
                                        collidableGeometryPointer[index + 1],
                                        collidableGeometryPointer[index + 2]);
 
-
-
         float3 bottomCenter = make_float3(collidableGeometryPointer[index + 3],
                                           collidableGeometryPointer[index + 4],
                                           collidableGeometryPointer[index + 5]);
@@ -108,7 +101,8 @@ extern "C" __global__ void checkBodyCollision(unsigned short* depthImage,
 
         if (isPointInCapsule(depthFramePoint, topCenter, bottomCenter, radius))
         {
-            *row(col(collisionMask, x), collisionMaskPitch, y) = 0;
+            unsigned short *matrixRow = (unsigned short *)((char *)collisionMaskMap + y_index * pitchCollisionMaskMap) + x_index;
+            *matrixRow = 0;
             return; // No need to check other capsules if a collision is found
         }
     }
