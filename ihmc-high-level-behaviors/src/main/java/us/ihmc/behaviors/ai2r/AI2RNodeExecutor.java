@@ -273,7 +273,9 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
                else // Check if the next step's pose is too close with any object in the scene
                {
                   int stepsLeft = gotoActionState.getNumberOfIncompleteFootsteps();
-                  if (stepsLeft > 0)
+                  if (stepsLeft > plannedSteps.getSize())
+                     plannedSteps = gotoActionState.getPreviewFootsteps();
+                  if (stepsLeft > 0 && plannedSteps.getSize() >= stepsLeft)
                   {
                      Point3DReadOnly positionNextStep = plannedSteps.getPoseReadOnly(plannedSteps.getSize() - stepsLeft).getTranslation();
                      for (var object : statusMessage.getObjects())
@@ -289,6 +291,10 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
                            break goToCollisionLoop;
                         }
                      }
+                  }
+                  else
+                  {
+                     LogTools.warn("Cannot check collision of next step. Needed more time to get the plan");
                   }
                }
             }
