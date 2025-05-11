@@ -8,6 +8,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.filters.DepthImageBodyCollisionFilter;
+import us.ihmc.perception.filters.DepthImageFlyingPointsfilter;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapManager;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -21,6 +22,7 @@ import java.time.Instant;
 public class RapidHeightMapThread extends RepeatingTaskThread
 {
    private final DepthImageBodyCollisionFilter bodyCollisionFilter;
+   private final DepthImageFlyingPointsfilter flyingPointsfilter;
    private final RapidHeightMapManager heightMapManager;
    private final Object heightMapLock = new Object();
 
@@ -48,7 +50,9 @@ public class RapidHeightMapThread extends RepeatingTaskThread
       ReferenceFrame leftFootFrame = syncedRobotModel.getReferenceFrames().getSoleFrame(RobotSide.LEFT);
       ReferenceFrame rightFootFrame = syncedRobotModel.getReferenceFrames().getSoleFrame(RobotSide.LEFT);
 
+
       bodyCollisionFilter = new DepthImageBodyCollisionFilter(robotCollisionModel, syncedRobotModel.getFullRobotModel().getRootBody());
+      flyingPointsfilter = new DepthImageFlyingPointsfilter();
       heightMapManager = new RapidHeightMapManager(ros2Node,
                                                    syncedRobotModel.getFullRobotModel(),
                                                    syncedRobotModel.getRobotModel().getSimpleRobotName(),
@@ -75,13 +79,17 @@ public class RapidHeightMapThread extends RepeatingTaskThread
          GpuMat depthImageWithoutBodyCollisions = new GpuMat(latestDepthImage.size(), latestDepthImage.type());
          bodyCollisionFilter.process(latestDepthImage, depthImageWithoutBodyCollisions, depthIntrinsicsCopy, cameraFrame);
 
+         GpuMat depthImageFiltered = new GpuMat(depthImageWithoutBodyCollisions.size(), depthImageWithoutBodyCollisions.type());
+         flyingPointsfilter.applyFilter(depthImageWithoutBodyCollisions, depthImageFiltered, depthIntrinsicsCopy);
+         depthImageWithoutBodyCollisions.close();
+
          // Update height map
          synchronized (heightMapLock)
          {
-            heightMapManager.updateAndPublishHeightMap(depthImageWithoutBodyCollisions, acquisitionTime, depthIntrinsicsCopy, cameraFrame, zUpSensorFrame);
+            heightMapManager.updateAndPublishHeightMap(depthImageFiltered, acquisitionTime, depthIntrinsicsCopy, cameraFrame, zUpSensorFrame);
          }
 
-         depthImageWithoutBodyCollisions.close();
+         depthImageFiltered.close();
          depthImage.release();
       }
       catch (InterruptedException ignored)
@@ -107,6 +115,8 @@ public class RapidHeightMapThread extends RepeatingTaskThread
       super.kill();
       interrupt();
 
+      bodyCollisionFilter.close();
+      flyingPointsfilter.destroy();
       heightMapManager.destroy();
    }
 }

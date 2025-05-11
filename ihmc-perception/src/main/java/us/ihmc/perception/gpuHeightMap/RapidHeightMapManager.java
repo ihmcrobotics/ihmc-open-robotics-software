@@ -15,7 +15,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.perception.camera.CameraIntrinsics;
-import us.ihmc.perception.filters.CUDAFlyingPointsFilter;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -44,7 +43,6 @@ public class RapidHeightMapManager
    private final Notification resetHeightMapRequested = new Notification();
    private final Notification lowerHeightMapBackdropRequested = new Notification();
 
-   private final CUDAFlyingPointsFilter flyingPointsFilter;
    private final RapidHeightMapDriftOffset rapidHeightMapDriftOffset;
 
    private final ROS2Publisher<ImageMessage> heightMapPublisher;
@@ -66,7 +64,6 @@ public class RapidHeightMapManager
       footSoleFrames.add(rightFootSoleFrame);
 
       rapidHeightMapDriftOffset = new RapidHeightMapDriftOffset(controllerFootstepQueueMonitor);
-      flyingPointsFilter = new CUDAFlyingPointsFilter();
 
       int croppedCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getCroppedWidthInMeters(), heightMapParameters.getCellSizeInMeters());
       int cellsPerAxisCropped = 2 * croppedCenterIndex + 1;
@@ -171,15 +168,6 @@ public class RapidHeightMapManager
       rapidHeightMapExtractor.update(latestDepthImage, depthIntrinsicsCopy, sensorToWorld, sensorToGround, groundToWorld, sensorOrigin, computeFootHeight());
       GpuMat deviceCroppedHeightMap = rapidHeightMapExtractor.getCroppedHeightMap();
 
-      // Perform a flying points filter as a post-processing step on the height map
-      if (heightMapParameters.getFlyingPointsFilter())
-      {
-         GpuMat deviceOutputImage = new GpuMat(deviceCroppedHeightMap.size(), deviceCroppedHeightMap.type());
-         flyingPointsFilter.applyFilter(deviceCroppedHeightMap, deviceOutputImage);
-         deviceOutputImage.copyTo(deviceCroppedHeightMap);
-         deviceOutputImage.close();
-      }
-
       // Don't close this mat as its being used in the extractor till that finish's
       deviceCroppedHeightMap.convertTo(deviceHeightMapToPack, deviceCroppedHeightMap.type());
    }
@@ -224,7 +212,6 @@ public class RapidHeightMapManager
    public void destroy()
    {
       rapidHeightMapExtractor.destroy();
-      flyingPointsFilter.destroy();
       deviceCroppedHeightMap.close();
       compressedCroppedHeightMapPointer.close();
    }

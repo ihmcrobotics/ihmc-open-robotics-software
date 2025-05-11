@@ -20,9 +20,9 @@ public class CUDAFlyingPointsFilterTest
    @Test
    public void testSimpleMatrix()
    {
-      CUDAFlyingPointsFilter flyingPointsFilter;
+      DepthImageFlyingPointsfilter flyingPointsFilter;
       Mat outputMat = new Mat();
-      flyingPointsFilter = new CUDAFlyingPointsFilter();
+      flyingPointsFilter = new DepthImageFlyingPointsfilter();
 
       Mat inputMat = new Mat(3, 3, opencv_core.CV_16UC1);
       inputMat.ptr(0, 0).putShort((short) 10);
@@ -67,7 +67,7 @@ public class CUDAFlyingPointsFilterTest
       // Set a decent size for the rows and cols to make it easier to see a memory leak
       int rows = 1000;
       int cols = 1000;
-      CUDAFlyingPointsFilter flyingPointsFilter = new CUDAFlyingPointsFilter();
+      DepthImageFlyingPointsfilter flyingPointsFilter = new DepthImageFlyingPointsfilter();
 
       // Our data to pass into the update call over and over again.
       Mat cpuData = new Mat(rows, cols, opencv_core.CV_16UC1, new Scalar(33100));
