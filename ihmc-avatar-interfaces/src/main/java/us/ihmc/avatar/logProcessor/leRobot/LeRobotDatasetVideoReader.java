@@ -1,22 +1,17 @@
 package us.ihmc.avatar.logProcessor.leRobot;
 
-import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.OpenCVFrameConverter;
-import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
-import us.ihmc.robotics.robotSide.RobotSide;
 
-import java.io.File;
 import java.nio.file.Path;
 
 public class LeRobotDatasetVideoReader
 {
-   private final RobotSide side;
    private final FFmpegFrameGrabber grabber;
    private final OpenCVFrameConverter.ToMat frameConverter = new OpenCVFrameConverter.ToMat();
    private Frame currentFrame;
@@ -24,10 +19,8 @@ public class LeRobotDatasetVideoReader
    
    private long lastTimestamp = -1;
 
-   public LeRobotDatasetVideoReader(RobotSide side, Path mp4Path)
+   public LeRobotDatasetVideoReader(Path mp4Path)
    {
-      this.side = side;
-      
       // Create the grabber for the mp4 file
       grabber = new FFmpegFrameGrabber(mp4Path.toFile());
       
