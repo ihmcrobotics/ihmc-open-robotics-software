@@ -249,6 +249,7 @@ public class RDXVRKinematicsStreamingMode
          RDXBaseUI.getInstance().getKeyBindings().register("Show/Hide ghosts", "Left B button");
          RDXBaseUI.getInstance().getKeyBindings().register("Streaming - Enable IK (toggle)", "Right A button");
          RDXBaseUI.getInstance().getKeyBindings().register("Streaming - Control robot (toggle)", "Left A button");
+         RDXBaseUI.getInstance().getKeyBindings().register("Footstep Streaming - Control robot stepping (ankle trackers required)", "Hold both handle grippers");
       }
    }
 
