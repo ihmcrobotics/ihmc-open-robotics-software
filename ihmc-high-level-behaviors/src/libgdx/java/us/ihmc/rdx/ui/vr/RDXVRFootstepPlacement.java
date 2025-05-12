@@ -259,6 +259,7 @@ public class RDXVRFootstepPlacement
       footstepDataMessage.setRobotSide(footstepBeingExternallyPlaced.getSide().toByte());
       footstepDataMessage.getLocation().set(footstepBeingExternallyPlaced.getPose().getPosition());
       footstepDataMessage.getOrientation().set(footstepBeingExternallyPlaced.getPose().getOrientation());
+      footstepDataMessage.setUpdateFootstepReferenceContinuously(true);
       if (fastLocomotionParameters != null)
       {
          footstepDataMessage.setTransferDuration(fastLocomotionParameters.getTransferTime());
