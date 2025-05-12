@@ -1,6 +1,5 @@
 package us.ihmc.perception;
 
-import com.vividsolutions.jts.geomgraph.Depth;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import perception_msgs.msg.dds.ImageMessage;
@@ -14,7 +13,7 @@ import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.cuda.CUDACompressionTools;
 import us.ihmc.perception.filters.DepthImageBodyCollisionFilter;
 import us.ihmc.perception.filters.DepthImageFilteringParameters;
-import us.ihmc.perception.filters.DepthImageFlyingPointsfilter;
+import us.ihmc.perception.filters.DepthImageFlyingPointsFilter;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapManager;
 import us.ihmc.perception.imageMessage.CompressionType;
 import us.ihmc.perception.tools.PerceptionMessageTools;
@@ -31,7 +30,7 @@ import java.time.Instant;
 public class RapidHeightMapThread extends RepeatingTaskThread
 {
    private final DepthImageBodyCollisionFilter bodyCollisionFilter;
-   private final DepthImageFlyingPointsfilter flyingPointsfilter;
+   private final DepthImageFlyingPointsFilter flyingPointsfilter;
    private final RapidHeightMapManager heightMapManager;
    private final Object heightMapLock = new Object();
 
@@ -65,7 +64,7 @@ public class RapidHeightMapThread extends RepeatingTaskThread
       filteredDepthPublisher = ros2Node.createPublisher(PerceptionAPI.D455_DEPTH_FILTERED_IMAGE);
 
       bodyCollisionFilter = new DepthImageBodyCollisionFilter(robotCollisionModel, syncedRobotModel.getFullRobotModel().getRootBody());
-      flyingPointsfilter = new DepthImageFlyingPointsfilter(depthImageFilteringParameters);
+      flyingPointsfilter = new DepthImageFlyingPointsFilter(depthImageFilteringParameters);
       heightMapManager = new RapidHeightMapManager(ros2Node,
                                                    syncedRobotModel.getFullRobotModel(),
                                                    syncedRobotModel.getRobotModel().getSimpleRobotName(),

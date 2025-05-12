@@ -21,10 +21,10 @@ public class CUDAFlyingPointsFilterTest
    @Test
    public void testSimpleMatrix()
    {
-      DepthImageFlyingPointsfilter flyingPointsFilter;
+      DepthImageFlyingPointsFilter flyingPointsFilter;
       Mat outputMat = new Mat();
       DepthImageFilteringParameters depthImageFilteringParameters = new DepthImageFilteringParameters();
-      flyingPointsFilter = new DepthImageFlyingPointsfilter(depthImageFilteringParameters);
+      flyingPointsFilter = new DepthImageFlyingPointsFilter(depthImageFilteringParameters);
 
       Mat inputMat = new Mat(3, 3, opencv_core.CV_16UC1);
       inputMat.ptr(0, 0).putShort((short) 10);
@@ -70,7 +70,7 @@ public class CUDAFlyingPointsFilterTest
       int rows = 1000;
       int cols = 1000;
       DepthImageFilteringParameters depthImageFilteringParameters = new DepthImageFilteringParameters();
-      DepthImageFlyingPointsfilter flyingPointsFilter = new DepthImageFlyingPointsfilter(depthImageFilteringParameters);
+      DepthImageFlyingPointsFilter flyingPointsFilter = new DepthImageFlyingPointsFilter(depthImageFilteringParameters);
 
       // Our data to pass into the update call over and over again.
       Mat cpuData = new Mat(rows, cols, opencv_core.CV_16UC1, new Scalar(33100));

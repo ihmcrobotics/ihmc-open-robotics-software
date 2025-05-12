@@ -13,9 +13,9 @@ import java.net.URL;
 import us.ihmc.perception.cuda.CUDAStreamManager;
 import us.ihmc.perception.cuda.CUDATools;
 
-public class DepthImageFlyingPointsfilter
+public class DepthImageFlyingPointsFilter
 {
-   private static final boolean PRINT_DEBUGGING_TIMINGS = true;
+   private static final boolean PRINT_DEBUGGING_TIMINGS = false;
    private static final int BLOCK_SIZE_XY = 16;
 
    private final CUDAKernel flyingPointFilterKernel;
@@ -28,7 +28,7 @@ public class DepthImageFlyingPointsfilter
     * This runs a CUDA kernel that will remove the flying points from a depth map.
     *
     */
-   public DepthImageFlyingPointsfilter(DepthImageFilteringParameters depthImageFilteringParameters)
+   public DepthImageFlyingPointsFilter(DepthImageFilteringParameters depthImageFilteringParameters)
    {
       this.depthImageFilteringParameters = depthImageFilteringParameters;
       stream = CUDAStreamManager.getStream();
