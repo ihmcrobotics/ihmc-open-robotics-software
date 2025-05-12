@@ -66,7 +66,8 @@ public class DepthImageFlyingPointsFilter
       flyingPointFilterKernel.withPointer(deviceInputImage.data()).withLong(deviceInputImage.step());
       flyingPointFilterKernel.withPointer(deviceOutputImageToPack.data()).withLong(deviceOutputImageToPack.step());
       flyingPointFilterKernel.withInt(deviceInputImage.rows()).withInt(deviceInputImage.cols());
-      flyingPointFilterKernel.withInt(depthImageFilteringParameters.getNeighborhoodSize());
+      flyingPointFilterKernel.withInt(depthImageFilteringParameters.getLongLengthForRectangle());
+      flyingPointFilterKernel.withInt(depthImageFilteringParameters.getShortLengthForRectangle());
       flyingPointFilterKernel.withInt(depthImageFilteringParameters.getRANSACIterations());
       flyingPointFilterKernel.withInt(depthImageFilteringParameters.getMinimumNormalsFound());
       flyingPointFilterKernel.withFloat((float) depthImageFilteringParameters.getCosineThreshold());

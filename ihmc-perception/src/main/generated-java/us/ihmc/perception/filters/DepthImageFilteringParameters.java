@@ -18,7 +18,8 @@ public class DepthImageFilteringParameters extends StoredPropertySet implements 
 {
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
-   public static final IntegerStoredPropertyKey neighborhoodSize = keys.addIntegerKey("Neighborhood size");
+   public static final IntegerStoredPropertyKey longLengthForRectangle = keys.addIntegerKey("Long length for rectangle ");
+   public static final IntegerStoredPropertyKey shortLengthForRectangle = keys.addIntegerKey("Short length for rectangle");
    public static final DoubleStoredPropertyKey cosineThreshold = keys.addDoubleKey("Cosine Threshold");
    public static final DoubleStoredPropertyKey normalThreshold = keys.addDoubleKey("Normal Threshold");
    public static final IntegerStoredPropertyKey ransacIterations = keys.addIntegerKey("RANSAC iterations");

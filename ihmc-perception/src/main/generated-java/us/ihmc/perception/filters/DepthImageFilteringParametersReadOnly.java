@@ -10,9 +10,14 @@ import static us.ihmc.perception.filters.DepthImageFilteringParameters.*;
  */
 public interface DepthImageFilteringParametersReadOnly extends StoredPropertySetReadOnly
 {
-   default int getNeighborhoodSize()
+   default int getLongLengthForRectangle()
    {
-      return get(neighborhoodSize);
+      return get(longLengthForRectangle);
+   }
+
+   default int getShortLengthForRectangle()
+   {
+      return get(shortLengthForRectangle);
    }
 
    default double getCosineThreshold()

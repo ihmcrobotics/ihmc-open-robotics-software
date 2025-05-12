@@ -8,9 +8,14 @@ import us.ihmc.tools.property.StoredPropertySetBasics;
  */
 public interface DepthImageFilteringParametersBasics extends DepthImageFilteringParametersReadOnly, StoredPropertySetBasics
 {
-   default void setNeighborhoodSize(int neighborhoodSize)
+   default void setLongLengthForRectangle(int longLengthForRectangle)
    {
-      set(DepthImageFilteringParameters.neighborhoodSize, neighborhoodSize);
+      set(DepthImageFilteringParameters.longLengthForRectangle, longLengthForRectangle);
+   }
+
+   default void setShortLengthForRectangle(int shortLengthForRectangle)
+   {
+      set(DepthImageFilteringParameters.shortLengthForRectangle, shortLengthForRectangle);
    }
 
    default void setCosineThreshold(double cosineThreshold)
