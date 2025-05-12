@@ -1,4 +1,4 @@
-package us.ihmc.perception.gpuHeightMap;
+package us.ihmc.footstepPlanning;
 
 import org.bytedeco.cuda.cudart.CUstream_st;
 import org.bytedeco.cuda.cudart.dim3;
@@ -81,7 +81,7 @@ public class SnappingTerrainExtractor
       try
       {
          // Load header and main file
-         URL heightMapUtilsHeaderPath = getClass().getResource("HeightMapUtils.cuh");
+         URL heightMapUtilsHeaderPath = getClass().getResource("/us/ihmc/perception/gpuHeightMap/HeightMapUtils.cuh");
          URL mathUtilsHeaderPath = getClass().getResource("/us/ihmc/perception/cuda/MathUtils.cuh");
          URL kernelPath = getClass().getResource("SnappingTerrainExtractor.cu");
 
@@ -100,7 +100,7 @@ public class SnappingTerrainExtractor
       }
       catch (Exception e)
       {
-         throw new RuntimeException(e);
+          throw new RuntimeException(e);
       }
 
       // 16 is the number of parameters being passed in as floats

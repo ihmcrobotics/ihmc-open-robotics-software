@@ -159,24 +159,22 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
       }
 
       TerrainMapData terrainMapData = environmentHandler.getTerrainMapData();
-      //TODO Need to figure out hte contact map and contact score stuff for this
-//      if (ImGui.button("Print Contact Map"))
-//      {
-//         PerceptionDebugTools.printMat("Contact Map", terrainMapData.getContactMap(), 4);
-//      }
+      if (ImGui.button("Print Contact Map"))
+      {
+         PerceptionDebugTools.printMat("Contact Map", terrainMapData.getContactMap(), 4);
+      }
       ImGui.sameLine();
       if (ImGui.button("Print Height Map"))
       {
          PerceptionDebugTools.printMat("Height Map", terrainMapData.getHeightMap(), 4);
       }
       ImGui.text("World Point: " + latestPickPoint.getTranslation().toString("%.3f"));
-      //TODO Need to figure out hte contact map and contact score stuff for this
-//      if (terrainMapData != null && terrainMapData.getHeightMap() != null)
-//      {
-//         ImGui.text("Height: " + terrainMapData.getHeightInWorld(latestPickPoint.getTranslation().getX32(), latestPickPoint.getTranslation().getY32()));
-//         ImGui.text(
-//               "Contact Score: " + terrainMapData.getContactScoreInWorld(latestPickPoint.getTranslation().getX32(), latestPickPoint.getTranslation().getY32()));
-//      }
+      if (terrainMapData != null && terrainMapData.getHeightMap() != null)
+      {
+         ImGui.text("Height: " + terrainMapData.getHeightInWorld(latestPickPoint.getTranslation().getX32(), latestPickPoint.getTranslation().getY32()));
+         ImGui.text(
+               "Contact Score: " + terrainMapData.getContactScoreInWorld(latestPickPoint.getTranslation().getX32(), latestPickPoint.getTranslation().getY32()));
+      }
 
       ImGui.checkbox(labels.get("Calculate Stance Pose"), calculateStancePose);
       if (ImGui.collapsingHeader(labels.get("Stance Pose Parameters")))
