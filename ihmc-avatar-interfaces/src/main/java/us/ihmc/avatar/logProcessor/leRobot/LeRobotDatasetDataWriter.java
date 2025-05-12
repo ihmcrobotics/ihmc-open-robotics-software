@@ -2,7 +2,6 @@ package us.ihmc.avatar.logProcessor.leRobot;
 
 import com.jerolba.carpet.CarpetWriter;
 import com.jerolba.carpet.ColumnNamingStrategy;
-import com.jerolba.carpet.annotation.Alias;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -20,17 +19,7 @@ import java.util.List;
 
 public class LeRobotDatasetDataWriter
 {
-   record EpisodeRecord(List<Float> state,
-                        List<Float> action, // goal position of arm joints
-                        long episodeIndex, // index of the episode for this sample
-                        long frameIndex, // index of the frame for this sample in the episode; starts at 0 for each episode
-                        float timestamp, // in the episode
-                        @Alias("next.done") boolean nextDone, // true for the last frame of an episode
-                        long index, // general index in the whole dataset
-                        long taskIndex // probably 0 mostly, since we only train one task at a time
-   ) { }
-
-   private final List<EpisodeRecord> records = new ArrayList<>();
+   private final List<LeRobotEpisodeRecord> records = new ArrayList<>();
 
    private final YoRegistry yoRegistry;
    private final String feedbackController;
@@ -95,33 +84,33 @@ public class LeRobotDatasetDataWriter
       float timestamp = timestampMicros / 1e6f; // in seconds, beginning of episode is 0.0 s
       int taskIndex = 0; // We're only training one task at a time for now
       boolean isLastFrame = false;
-      records.add(new EpisodeRecord(state,
-                                    action,
-                                    episodeIndex,
-                                    frameIndex,
-                                    timestamp, isLastFrame,
-                                    datasetLengthSoFar + frameIndex, taskIndex));
+      records.add(new LeRobotEpisodeRecord(state,
+                                           action,
+                                           episodeIndex,
+                                           frameIndex,
+                                           timestamp, isLastFrame,
+                                           datasetLengthSoFar + frameIndex, taskIndex));
    }
 
    public void writeFile(Path parquetPath)
    {
       // Mark the last frame
-      EpisodeRecord last = records.get(records.size() - 1);
-      records.set(records.size() - 1, new EpisodeRecord(last.state,
-                                                        last.action,
-                                                        last.episodeIndex,
-                                                        last.frameIndex,
-                                                        last.timestamp,
-                                                        true, // <-- Main thing we're doing here
-                                                        last.index,
-                                                        last.taskIndex));
+      LeRobotEpisodeRecord last = records.get(records.size() - 1);
+      records.set(records.size() - 1, new LeRobotEpisodeRecord(last.state(),
+                                                               last.action(),
+                                                               last.episodeIndex(),
+                                                               last.frameIndex(),
+                                                               last.timestamp(),
+                                                               true, // <-- Main thing we're doing here
+                                                               last.index(),
+                                                               last.taskIndex()));
       try
       {
          OutputStream outputStream = Files.newOutputStream(parquetPath);
-         CarpetWriter<EpisodeRecord> writer = new CarpetWriter.Builder<>(outputStream, EpisodeRecord.class)
+         CarpetWriter<LeRobotEpisodeRecord> writer = new CarpetWriter.Builder<>(outputStream, LeRobotEpisodeRecord.class)
                .withColumnNamingStrategy(ColumnNamingStrategy.SNAKE_CASE).build();
 
-         for (EpisodeRecord record : records)
+         for (LeRobotEpisodeRecord record : records)
             writer.write(record);
 
          writer.close();

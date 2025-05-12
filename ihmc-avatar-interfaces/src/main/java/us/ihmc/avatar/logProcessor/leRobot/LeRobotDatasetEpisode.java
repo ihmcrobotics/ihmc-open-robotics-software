@@ -2,6 +2,8 @@ package us.ihmc.avatar.logProcessor.leRobot;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.jerolba.carpet.CarpetReader;
+import com.jerolba.carpet.FieldMatchingStrategy;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.avatar.scs2.SCS2LogSessionWithVideo;
 import us.ihmc.commons.Conversions;
@@ -13,7 +15,10 @@ import us.ihmc.scs2.session.log.ZEDSVOScrubber;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.yoVariables.variable.YoLong;
 
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
 
 public class LeRobotDatasetEpisode
 {
@@ -137,116 +142,57 @@ public class LeRobotDatasetEpisode
 
    public void appendJsonStatsLine()
    {
+      LeRobotDatasetEpisodeStatistics statistics = new LeRobotDatasetEpisodeStatistics();
+
       for (RobotSide side : RobotSide.values)
       {
          Path videoPath = zedVideoDirs.get(side).resolve(episodeName + ".mp4");
          LogTools.info("Reading video from: %s".formatted(videoPath));
          LeRobotDatasetVideoReader videoReader = new LeRobotDatasetVideoReader(videoPath);
-         
-         while (videoReader.hasMoreFrames())
+
+         Mat bgrMat = videoReader.readFrame();
+         while (bgrMat != null)
          {
-            Mat frameMat = videoReader.readFrame();
-            LogTools.info("Read frame at timestamp %d : mat: %s".formatted(videoReader.getCurrentTimestamp(), frameMat));
+            LogTools.info("Read frame at timestamp %d : mat: %s".formatted(videoReader.getCurrentTimestamp(), bgrMat));
 
+            statistics.submitFrame(side, bgrMat);
 
+            bgrMat = videoReader.readFrame();
          }
 
          videoReader.close();
       }
+      
+      Path parquetPath = dataChunk0Path.resolve(episodeName + ".parquet");
+      LogTools.info("Reading parquet data from: %s".formatted(parquetPath));
+
+      try
+      {
+         File parquetFile = parquetPath.toFile();
+         CarpetReader<LeRobotEpisodeRecord> carpetReader = new CarpetReader<>(parquetFile, LeRobotEpisodeRecord.class)
+               .withFieldMatchingStrategy(FieldMatchingStrategy.SNAKE_CASE);
+
+         List<LeRobotEpisodeRecord> records = carpetReader.toList();
+         LogTools.info("Read %d records from parquet file".formatted(records.size()));
+
+         for (LeRobotEpisodeRecord record : records)
+         {
+            statistics.processParquetRecord(record);
+         }
+      }
+      catch (IOException e)
+      {
+         LogTools.error("Failed to read parquet file: " + e.getMessage());
+      }
+
+      statistics.calculate();
 
       LeRobotDatasetTools.appendLine(episodeStatsJsonlPath, JSONFileTools.getAsSingleLine(node ->
       {
          node.put("episode_index", episodeIndex);
          ObjectNode stats = node.putObject("stats");
-         for (RobotSide side : RobotSide.values)
-         {
-            // RGB
-            ObjectNode video = stats.putObject(zedVideoDirs.get(side).getFileName().toString());
-            ArrayNode min = video.putArray("min"); // Looks like we can leave 0.0
-            min.addArray().addArray().add(0.0f);
-            min.addArray().addArray().add(0.0f);
-            min.addArray().addArray().add(0.0f);
-            ArrayNode max = video.putArray("max"); // Looks like we can leave 1.0
-            max.addArray().addArray().add(1.0f);
-            max.addArray().addArray().add(1.0f);
-            max.addArray().addArray().add(1.0f);
-            ArrayNode mean = video.putArray("mean");
-            mean.addArray().addArray().add(0.5f);
-            mean.addArray().addArray().add(0.5f);
-            mean.addArray().addArray().add(0.5f);
-            ArrayNode std = video.putArray("std");
-            std.addArray().addArray().add(0.3f);
-            std.addArray().addArray().add(0.3f);
-            std.addArray().addArray().add(0.3f);
-            video.putArray("count").add(length);
-         }
 
-         ObjectNode state = stats.putObject("state");
-         ArrayNode min = state.putArray("min");
-         for (int i = 0; i < 14; i++)
-            min.add(0.0f);
-         ArrayNode max = state.putArray("max");
-         for (int i = 0; i < 14; i++)
-            max.add(10.0f);
-         ArrayNode mean = state.putArray("mean");
-         for (int i = 0; i < 14; i++)
-            mean.add(5.0f);
-         ArrayNode std = state.putArray("std");
-         for (int i = 0; i < 14; i++)
-            std.add(3.0f);
-         state.putArray("count").add(length);
-
-         ObjectNode action = stats.putObject("action");
-         min = action.putArray("min");
-         for (int i = 0; i < 14; i++)
-            min.add(0.0f);
-         max = action.putArray("max");
-         for (int i = 0; i < 14; i++)
-            max.add(10.0f);
-         mean = action.putArray("mean");
-         for (int i = 0; i < 14; i++)
-            mean.add(5.0f);
-         std = action.putArray("std");
-         for (int i = 0; i < 14; i++)
-            std.add(3.0f);
-         action.putArray("count").add(length);
-
-         ObjectNode fieldStats = stats.putObject("episode_index");
-         fieldStats.putArray("min").add(0);
-         fieldStats.putArray("max").add(0);
-         fieldStats.putArray("mean").add(0.0f);
-         fieldStats.putArray("std").add(0.0f);
-         fieldStats.putArray("count").add(length);
-         fieldStats = stats.putObject("frame_index");
-         fieldStats.putArray("min").add(0);
-         fieldStats.putArray("max").add(length - 1);
-         fieldStats.putArray("mean").add((length - 1) / 2.0f);
-         fieldStats.putArray("std").add(0.0f);
-         fieldStats.putArray("count").add(length);
-         fieldStats = stats.putObject("timestamp");
-         fieldStats.putArray("min").add(0);
-         fieldStats.putArray("max").add(0);
-         fieldStats.putArray("mean").add(0.0f);
-         fieldStats.putArray("std").add(0.0f);
-         fieldStats.putArray("count").add(length);
-         fieldStats = stats.putObject("next.done");
-         fieldStats.putArray("min").add(false);
-         fieldStats.putArray("max").add(true);
-         fieldStats.putArray("mean").add(0.00066f);
-         fieldStats.putArray("std").add(0.025f);
-         fieldStats.putArray("count").add(length);
-         fieldStats = stats.putObject("index");
-         fieldStats.putArray("min").add(0);
-         fieldStats.putArray("max").add(length - 1);
-         fieldStats.putArray("mean").add((length - 1) / 2.0f);
-         fieldStats.putArray("std").add(0.0f);
-         fieldStats.putArray("count").add(length);
-         fieldStats = stats.putObject("task_index");
-         fieldStats.putArray("min").add(0);
-         fieldStats.putArray("max").add(0);
-         fieldStats.putArray("mean").add(0.0f);
-         fieldStats.putArray("std").add(0.0f);
-         fieldStats.putArray("count").add(length);
+         statistics.writeJson(stats, zedVideoDirs);
       }));
    }
 

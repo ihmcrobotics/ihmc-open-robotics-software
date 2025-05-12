@@ -41,8 +41,7 @@ public class LeRobotDatasetVideoReader
 
          if (currentFrame != null)
          {
-            Mat mat = frameConverter.convert(currentFrame);
-            return mat;
+            return frameConverter.convert(currentFrame);
          }
          else
          {
