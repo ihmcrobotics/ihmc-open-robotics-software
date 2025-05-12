@@ -12,11 +12,11 @@ __device__ float3 cross3(const float3 &a, const float3 &b)
     );
 }
 
-__device__ float3 computeRay(int u, int v, unsigned short * depth, float fx, float fy, float cx, float cy)
+__device__ float3 computeRay(int u, int v, float depth, float fx, float fy, float cx, float cy)
 {
-    float z = static_cast<float>(*depth);
-    float x = (u - cx) * z / fx;
-    float y = (v - cy) * z / fy;
+    float x = (u - cx) * depth / fx;
+    float y = (v - cy) * depth / fy;
+    float z = depth;
 
     return make_float3(x, y, z);
 }
@@ -34,10 +34,10 @@ __device__ float3 normalize3(float3 v)
 __device__ float3 computeNormalRANSAC(unsigned short *depthImage, size_t pitchDepthImage,
                                       int width, int height,
                                       int u, int v, float fx, float fy, float cx, float cy,
-                                      int windowSize, int ransacIters, float normalAngleThresh)
+                                      int windowSize, int ransacIters, int minNormals, float normalAngleThresh)
 {
     const int halfWindow = windowSize / 2;
-    const int maxSamples = 64;
+    const int maxSamples = 32;
 
     float3 points[maxSamples];
     int count = 0;
@@ -58,7 +58,7 @@ __device__ float3 computeNormalRANSAC(unsigned short *depthImage, size_t pitchDe
                 continue;
 
 
-            points[count++] = computeRay(x, y, depthValue, fx, fy, cx, cy);
+            points[count++] = computeRay(x, y, *depthValue, fx, fy, cx, cy);
 
             if (count >= maxSamples)
                 break;
@@ -68,7 +68,7 @@ __device__ float3 computeNormalRANSAC(unsigned short *depthImage, size_t pitchDe
             break;
     }
 
-    if (count < 3)
+    if (count < minNormals)
         return make_float3(0, 0, 0);
 
     float3 bestNormal = make_float3(0, 0, 0);
@@ -93,11 +93,14 @@ __device__ float3 computeNormalRANSAC(unsigned short *depthImage, size_t pitchDe
 
         // Count inliers: points whose normal agrees with this normal
         int inliers = 0;
-        for (int j = 0; j < count; ++j) {
+        for (int j = 0; j < count; ++j)
+        {
             float3 pj = points[j];
             float3 vj = make_float3(pj.x - p1.x, pj.y - p1.y, pj.z - p1.z);
             float len = sqrtf(dot3(vj, vj));
-            if (len < 1e-5f) continue;
+
+            if (len < 1e-5f)
+                continue;
 
             float dot = fabsf(dot3(normal, normalize3(vj)));
             float angle = acosf(dot);  // in radians
@@ -120,7 +123,7 @@ extern "C"
 __global__ void filterFlyingPoints(unsigned short *depthImage, size_t pitchDepthImage,
                                    unsigned short *filteredImage, size_t pitchFilteredImage,
                                    int width, int height,
-                                   int normalWindow, float dotThreshold, float normalAngleThreshold,
+                                   int normalWindow, int ransacIterations, int minNormals, float dotThreshold, float normalAngleThreshold,
                                    float fx, float fy, float cx, float cy)
 {
     int u = blockIdx.x * blockDim.x + threadIdx.x;
@@ -131,14 +134,14 @@ __global__ void filterFlyingPoints(unsigned short *depthImage, size_t pitchDepth
 
     unsigned short *depthValue = (unsigned short *)((char *)depthImage + u * pitchDepthImage) + v;
 
-    if (depthValue <= 0)
+    if (*depthValue <= 0)
     {
         unsigned short *filteredImageRow = (unsigned short *)((char *)filteredImage + u * pitchFilteredImage);
         filteredImageRow[v] = 0;
         return;
     }
 
-    float3 point = computeRay(u, v, depthValue, fx, fy, cx, cy);
+    float3 point = computeRay(u, v, *depthValue, fx, fy, cx, cy);
     float3 ray = point;
 
     float rayNorm = sqrtf(ray.x * ray.x + ray.y * ray.y + ray.z * ray.z);
@@ -155,7 +158,7 @@ __global__ void filterFlyingPoints(unsigned short *depthImage, size_t pitchDepth
 
     float3 normal = computeNormalRANSAC(depthImage, pitchDepthImage,
                                         width, height, u, v, fx, fy, cx, cy,
-                                        normalWindow, /*ransacIters=*/16, normalAngleThreshold);
+                                        normalWindow, ransacIterations, minNormals, normalAngleThreshold);
 
     float dot = dot3(ray, normal);
     dot = fabsf(dot);  // we want it close to 0, regardless of direction

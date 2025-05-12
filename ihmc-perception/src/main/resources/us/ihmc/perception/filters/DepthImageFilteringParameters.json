@@ -1,6 +1,8 @@
 {
-  "title" : "DepthImageFilteringParameters",
-  "Neighborhood size" : 5,
-  "Cosine Threshold" : 0.2,
-  "Normal Threshold" : 0.1
+  "title": "DepthImageFilteringParameters",
+  "Neighborhood size": 5,
+  "Cosine Threshold": 0.002,
+  "Normal Threshold": 0.1,
+  "RANSAC iterations": 16,
+  "Minimum Normals found": 2
 }

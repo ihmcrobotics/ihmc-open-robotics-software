@@ -24,4 +24,14 @@ public interface DepthImageFilteringParametersReadOnly extends StoredPropertySet
    {
       return get(normalThreshold);
    }
+
+   default int getRANSACIterations()
+   {
+      return get(ransacIterations);
+   }
+
+   default int getMinimumNormalsFound()
+   {
+      return get(minimumNormalsFound);
+   }
 }

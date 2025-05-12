@@ -15,6 +15,7 @@ import us.ihmc.perception.cuda.CUDATools;
 
 public class DepthImageFlyingPointsfilter
 {
+   private static final boolean PRINT_DEBUGGING_TIMINGS = true;
    private static final int BLOCK_SIZE_XY = 16;
 
    private final CUDAKernel flyingPointFilterKernel;
@@ -37,6 +38,7 @@ public class DepthImageFlyingPointsfilter
          flyingPointFilterCUDAProgram = new CUDAProgram(kernelPath);
          String filterKernelName = "filterFlyingPoints";
          flyingPointFilterKernel = flyingPointFilterCUDAProgram.loadKernel(filterKernelName);
+         flyingPointFilterKernel.enableKernelTimings(PRINT_DEBUGGING_TIMINGS);
       }
       catch (Exception e)
       {
@@ -65,6 +67,8 @@ public class DepthImageFlyingPointsfilter
       flyingPointFilterKernel.withPointer(deviceOutputImageToPack.data()).withLong(deviceOutputImageToPack.step());
       flyingPointFilterKernel.withInt(deviceInputImage.rows()).withInt(deviceInputImage.cols());
       flyingPointFilterKernel.withInt(depthImageFilteringParameters.getNeighborhoodSize());
+      flyingPointFilterKernel.withInt(depthImageFilteringParameters.getRANSACIterations());
+      flyingPointFilterKernel.withInt(depthImageFilteringParameters.getMinimumNormalsFound());
       flyingPointFilterKernel.withFloat((float) depthImageFilteringParameters.getCosineThreshold());
       flyingPointFilterKernel.withFloat((float) depthImageFilteringParameters.getNormalThreshold());
       flyingPointFilterKernel.withFloat((float) cameraIntrinsics.getFx())

@@ -22,4 +22,14 @@ public interface DepthImageFilteringParametersBasics extends DepthImageFiltering
    {
       set(DepthImageFilteringParameters.normalThreshold, normalThreshold);
    }
+
+   default void setRANSACIterations(int ransacIterations)
+   {
+      set(DepthImageFilteringParameters.ransacIterations, ransacIterations);
+   }
+
+   default void setMinimumNormalsFound(int minimumNormalsFound)
+   {
+      set(DepthImageFilteringParameters.minimumNormalsFound, minimumNormalsFound);
+   }
 }
