@@ -52,8 +52,8 @@ public class DepthImageFlyingPointsfilter
     */
    public void applyFilter(GpuMat deviceInputImage, GpuMat deviceOutputImageToPack, CameraIntrinsics cameraIntrinsics)
    {
-      int gridSizeX = (deviceInputImage.cols() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
-      int gridSizeY = (deviceInputImage.rows() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
+      int gridSizeX = (deviceInputImage.rows() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
+      int gridSizeY = (deviceInputImage.cols() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
 
       dim3 blockSize = new dim3(BLOCK_SIZE_XY, BLOCK_SIZE_XY, 1);
       dim3 gridSize = new dim3(gridSizeX, gridSizeY, 1);
@@ -61,7 +61,7 @@ public class DepthImageFlyingPointsfilter
       flyingPointFilterKernel.withPointer(deviceInputImage.data()).withLong(deviceInputImage.step());
       flyingPointFilterKernel.withPointer(deviceOutputImageToPack.data()).withLong(deviceOutputImageToPack.step());
       flyingPointFilterKernel.withInt(deviceInputImage.rows()).withInt(deviceInputImage.cols());
-      flyingPointFilterKernel.withInt(5).withFloat(0.8f);
+      flyingPointFilterKernel.withInt(5).withFloat(0.2f).withFloat(0.8f);
       flyingPointFilterKernel.withFloat((float) cameraIntrinsics.getFx())
                              .withFloat((float) cameraIntrinsics.getFy())
                              .withFloat((float) cameraIntrinsics.getCx())

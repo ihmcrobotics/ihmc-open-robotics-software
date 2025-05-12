@@ -80,6 +80,7 @@ public class RapidHeightMapThread extends RepeatingTaskThread
          bodyCollisionFilter.process(latestDepthImage, depthImageWithoutBodyCollisions, depthIntrinsicsCopy, cameraFrame);
 
          GpuMat depthImageFiltered = new GpuMat(depthImageWithoutBodyCollisions.size(), depthImageWithoutBodyCollisions.type());
+//         depthImageWithoutBodyCollisions.copyTo(depthImageFiltered);
          flyingPointsfilter.applyFilter(depthImageWithoutBodyCollisions, depthImageFiltered, depthIntrinsicsCopy);
          depthImageWithoutBodyCollisions.close();
 

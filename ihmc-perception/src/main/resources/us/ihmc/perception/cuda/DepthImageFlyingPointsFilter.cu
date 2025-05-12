@@ -17,13 +17,17 @@ __device__ float3 computeRay(int u, int v, unsigned short * depth, float fx, flo
     float z = static_cast<float>(*depth);
     float x = (u - cx) * z / fx;
     float y = (v - cy) * z / fy;
+
     return make_float3(x, y, z);
 }
 
 __device__ float3 normalize3(float3 v)
 {
     float norm = sqrtf(dot3(v, v));
-    if (norm < 1e-5f) return make_float3(0, 0, 0);
+
+    if (norm < 1e-5f)
+        return make_float3(0, 0, 0);
+
     return make_float3(v.x / norm, v.y / norm, v.z / norm);
 }
 
@@ -48,9 +52,9 @@ __device__ float3 computeNormalRANSAC(unsigned short *depthImage, size_t pitchDe
             if (x < 0 || x >= width || y < 0 || y >= height)
                 continue;
 
-            unsigned short *depthValue = (unsigned short *)((char *)depthImage + u * pitchDepthImage) + v;
+            unsigned short *depthValue = (unsigned short *)((char *)depthImage + x * pitchDepthImage) + y;
 
-            if (depthValue <= 0)
+            if (*depthValue <= 0)
                 continue;
 
 
@@ -59,10 +63,13 @@ __device__ float3 computeNormalRANSAC(unsigned short *depthImage, size_t pitchDe
             if (count >= maxSamples)
                 break;
         }
-        if (count >= maxSamples) break;
+
+        if (count >= maxSamples)
+            break;
     }
 
-    if (count < 3) return make_float3(0, 0, 0);
+    if (count < 3)
+        return make_float3(0, 0, 0);
 
     float3 bestNormal = make_float3(0, 0, 0);
     int bestInliers = -1;
@@ -113,7 +120,7 @@ extern "C"
 __global__ void filterFlyingPoints(unsigned short *depthImage, size_t pitchDepthImage,
                                    unsigned short *filteredImage, size_t pitchFilteredImage,
                                    int width, int height,
-                                   int normalWindow, float dotThreshold,
+                                   int normalWindow, float dotThreshold, float normalAngleThreshold,
                                    float fx, float fy, float cx, float cy)
 {
     int u = blockIdx.x * blockDim.x + threadIdx.x;
@@ -148,11 +155,11 @@ __global__ void filterFlyingPoints(unsigned short *depthImage, size_t pitchDepth
 
     float3 normal = computeNormalRANSAC(depthImage, pitchDepthImage,
                                         width, height, u, v, fx, fy, cx, cy,
-                                        normalWindow, /*ransacIters=*/16, /*normalAngleThresh=*/0.1f);
+                                        normalWindow, /*ransacIters=*/16, normalAngleThreshold);
 
-    float dot = ray.x * normal.x + ray.y * normal.y + ray.z * normal.z;
+    float dot = dot3(ray, normal);
     dot = fabsf(dot);  // we want it close to 0, regardless of direction
 
     unsigned short *filteredImageRow = (unsigned short *)((char *)filteredImage + u * pitchFilteredImage);
-    filteredImageRow[v] = (dot < dotThreshold) ? 1 : 0;
+    filteredImageRow[v] = (dot < dotThreshold) ? *depthValue : 0;
 }
