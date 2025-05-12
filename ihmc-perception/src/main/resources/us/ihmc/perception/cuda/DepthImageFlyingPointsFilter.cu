@@ -99,7 +99,7 @@ __device__ float3 computeNormalRANSAC(unsigned short *depthImage, size_t pitchDe
             float3 vj = make_float3(pj.x - p1.x, pj.y - p1.y, pj.z - p1.z);
             float len = sqrtf(dot3(vj, vj));
 
-            if (len < 1e-5f)
+            if (len < 1e-8f)
                 continue;
 
             float dot = fabsf(dot3(normal, normalize3(vj)));
