@@ -29,11 +29,10 @@ public class LeRobotDatasetEpisodeStatistics
 
    // data stats
    private int length = 0;
-   private long episodeIndex;
-   private long frameIndexSum = 0L;
-   private long frameIndexSumSquares = 0L;
-   private float meanFrameIndex;
-   private float stddevFrameIndex;
+   private final LeRobotIntegerStatisticsCalculator episodeIndexStats = new LeRobotIntegerStatisticsCalculator();
+   private final LeRobotIntegerStatisticsCalculator frameIndexStats = new LeRobotIntegerStatisticsCalculator();
+   private final LeRobotIntegerStatisticsCalculator indexStats = new LeRobotIntegerStatisticsCalculator();
+   private final LeRobotIntegerStatisticsCalculator taskIndexStats = new LeRobotIntegerStatisticsCalculator();
 
 
    public void submitFrame(RobotSide side, Mat bgrMat)
@@ -75,13 +74,13 @@ public class LeRobotDatasetEpisodeStatistics
 
    public void processParquetRecord(LeRobotEpisodeRecord dataFrame)
    {
-      // TODO
       ++length;
 
-      episodeIndex = dataFrame.episodeIndex();
-      frameIndexSum += dataFrame.frameIndex();
-      frameIndexSumSquares += dataFrame.frameIndex() * dataFrame.frameIndex();
-
+      // Track statistics for integer fields using the statistics calculator
+      episodeIndexStats.addValue(dataFrame.episodeIndex());
+      frameIndexStats.addValue(dataFrame.frameIndex());
+      indexStats.addValue(dataFrame.index());
+      taskIndexStats.addValue(dataFrame.taskIndex());
    }
 
    public void calculate()
@@ -117,8 +116,10 @@ public class LeRobotDatasetEpisodeStatistics
          LogTools.info("StdDev RGB: R=%.3f G=%.3f B=%.3f".formatted(std.r, std.g, std.b));
       }
 
-      meanFrameIndex = (float) frameIndexSum / length;
-      stddevFrameIndex = (float) Math.sqrt(((float) frameIndexSumSquares / length) - (meanFrameIndex * meanFrameIndex));
+      episodeIndexStats.calculate();
+      frameIndexStats.calculate();
+      indexStats.calculate();
+      taskIndexStats.calculate();
    }
 
    public void writeJson(ObjectNode stats, SideDependentList<Path> zedVideoDirs)
@@ -180,41 +181,45 @@ public class LeRobotDatasetEpisodeStatistics
       action.putArray("count").add(length);
 
       ObjectNode fieldStats = stats.putObject("episode_index");
-      fieldStats.putArray("min").add(episodeIndex);
-      fieldStats.putArray("max").add(episodeIndex);
-      fieldStats.putArray("mean").add((float) episodeIndex);
-      fieldStats.putArray("std").add(0.0f);
+      fieldStats.putArray("min").add(episodeIndexStats.getMin());
+      fieldStats.putArray("max").add(episodeIndexStats.getMax());
+      fieldStats.putArray("mean").add(episodeIndexStats.getMean());
+      fieldStats.putArray("std").add(episodeIndexStats.getStddev());
       fieldStats.putArray("count").add(length);
+      
       fieldStats = stats.putObject("frame_index");
-      fieldStats.putArray("min").add(0);
-      fieldStats.putArray("max").add(length - 1);
-      fieldStats.putArray("mean").add(meanFrameIndex);
-      fieldStats.putArray("std").add(stddevFrameIndex);
+      fieldStats.putArray("min").add(frameIndexStats.getMin());
+      fieldStats.putArray("max").add(frameIndexStats.getMax());
+      fieldStats.putArray("mean").add(frameIndexStats.getMean());
+      fieldStats.putArray("std").add(frameIndexStats.getStddev());
       fieldStats.putArray("count").add(length);
+      
       fieldStats = stats.putObject("timestamp");
       fieldStats.putArray("min").add(0);
       fieldStats.putArray("max").add(0);
       fieldStats.putArray("mean").add(0.0f);
       fieldStats.putArray("std").add(0.0f);
       fieldStats.putArray("count").add(length);
+      
       fieldStats = stats.putObject("next.done");
       fieldStats.putArray("min").add(false);
       fieldStats.putArray("max").add(true);
       fieldStats.putArray("mean").add(0.00066f);
       fieldStats.putArray("std").add(0.025f);
       fieldStats.putArray("count").add(length);
+      
       fieldStats = stats.putObject("index");
-      fieldStats.putArray("min").add(0);
-      fieldStats.putArray("max").add(length - 1);
-      fieldStats.putArray("mean").add((length - 1) / 2.0f);
-      fieldStats.putArray("std").add(0.0f);
+      fieldStats.putArray("min").add(indexStats.getMin());
+      fieldStats.putArray("max").add(indexStats.getMax());
+      fieldStats.putArray("mean").add(indexStats.getMean());
+      fieldStats.putArray("std").add(indexStats.getStddev());
       fieldStats.putArray("count").add(length);
+      
       fieldStats = stats.putObject("task_index");
-      fieldStats.putArray("min").add(0);
-      fieldStats.putArray("max").add(0);
-      fieldStats.putArray("mean").add(0.0f);
-      fieldStats.putArray("std").add(0.0f);
+      fieldStats.putArray("min").add(taskIndexStats.getMin());
+      fieldStats.putArray("max").add(taskIndexStats.getMax());
+      fieldStats.putArray("mean").add(taskIndexStats.getMean());
+      fieldStats.putArray("std").add(taskIndexStats.getStddev());
       fieldStats.putArray("count").add(length);
    }
-
 }
