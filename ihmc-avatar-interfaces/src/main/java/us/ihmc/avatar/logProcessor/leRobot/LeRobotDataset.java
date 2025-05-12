@@ -6,6 +6,7 @@ import us.ihmc.avatar.scs2.SCS2LogSessionWithVideo;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.nio.WriteOption;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.JSONFileTools;
@@ -214,6 +215,13 @@ public class LeRobotDataset
       for (LeRobotDatasetEpisode episode : episodes)
       {
          episode.appendJsonBasicEntryLine();
+      }
+
+      FileTools.write(episodeStatsJsonlPath, new byte[0], WriteOption.TRUNCATE, DefaultExceptionHandler.PRINT_MESSAGE);
+      for (LeRobotDatasetEpisode episode : episodes)
+      {
+         LogTools.info("Generating stats for %s...".formatted(episode.getEpisodeName()));
+         episode.appendJsonStatsLine();
       }
    }
 
