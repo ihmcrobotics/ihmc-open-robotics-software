@@ -14,8 +14,7 @@ public class LeRobotDatasetVideoReader
    private final FFmpegFrameGrabber grabber;
    private final OpenCVFrameConverter.ToMat frameConverter = new OpenCVFrameConverter.ToMat();
    private Frame currentFrame;
-   private Mat currentMat;
-   
+
    private long currentTimestamp = -1;
    private boolean hasMoreFrames = true;
 
@@ -37,20 +36,13 @@ public class LeRobotDatasetVideoReader
       try
       {
          // Grab the next frame
-         currentFrame = grabber.grabImage();
-         
+         currentFrame = grabber.grabFrame();
+         currentTimestamp = grabber.getTimestamp();
+
          if (currentFrame != null)
          {
-            // Convert the frame to a Mat
-            if (currentMat != null)
-            {
-               currentMat.close();
-            }
-
-            // Update the timestamp
-            currentTimestamp = grabber.getTimestamp();
-            
-            return currentMat;
+            Mat mat = frameConverter.convert(currentFrame);
+            return mat;
          }
          else
          {
@@ -132,12 +124,6 @@ public class LeRobotDatasetVideoReader
     */
    public void close()
    {
-      if (currentMat != null)
-      {
-         currentMat.close();
-         currentMat = null;
-      }
-      
       if (currentFrame != null)
       {
          currentFrame.close();

@@ -139,16 +139,16 @@ public class LeRobotDatasetEpisode
    {
       for (RobotSide side : RobotSide.values)
       {
-         LeRobotDatasetVideoReader videoReader = new LeRobotDatasetVideoReader(zedVideoDirs.get(side).resolve(episodeName + ".mp4"));
+         Path videoPath = zedVideoDirs.get(side).resolve(episodeName + ".mp4");
+         LogTools.info("Reading video from: %s".formatted(videoPath));
+         LeRobotDatasetVideoReader videoReader = new LeRobotDatasetVideoReader(videoPath);
          
          while (videoReader.hasMoreFrames())
          {
             Mat frameMat = videoReader.readFrame();
-
             LogTools.info("Read frame at timestamp %d : mat: %s".formatted(videoReader.getCurrentTimestamp(), frameMat));
 
-            if (frameMat != null)
-               frameMat.close();
+
          }
 
          videoReader.close();
