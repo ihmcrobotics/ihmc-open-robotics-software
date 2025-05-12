@@ -3,10 +3,14 @@ package us.ihmc.alexander;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
-import us.ihmc.alexander.parameters.model.AlexanderPhysicalProperties;
-import us.ihmc.alexander.parameters.controller.*;
+import us.ihmc.alexander.parameters.controller.AlexanderContactPointParameters;
+import us.ihmc.alexander.parameters.controller.AlexanderHighLevelControllerParameters;
+import us.ihmc.alexander.parameters.controller.AlexanderICPSplitFractionCalculatorParameters;
+import us.ihmc.alexander.parameters.controller.AlexanderStateEstimatorParameters;
+import us.ihmc.alexander.parameters.controller.OpenAlexanderWalkingControllerParameters;
 import us.ihmc.alexander.parameters.diagnostic.AlexanderDiagnosticParameters;
 import us.ihmc.alexander.parameters.model.AlexanderKinematicsCollisionModel;
+import us.ihmc.alexander.parameters.model.AlexanderPhysicalProperties;
 import us.ihmc.alexander.parameters.model.AlexanderSimulationCollisionModel;
 import us.ihmc.alexander.parameters.model.OpenAlexanderURDFParameters;
 import us.ihmc.alexander.parameters.planning.AlexanderFootstepPlannerParameters;
@@ -53,6 +57,7 @@ import us.ihmc.scs2.simulation.collision.CollidableHelper;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationToolkit.RobotDefinitionTools;
+import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -77,7 +82,7 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
    private double stepGeneratorDT = 10 * controllerDT;
 
    protected final AlexanderPhysicalProperties physicalProperties;
-   private final WalkingControllerParameters walkingControllerParameters;
+   protected final OptionalFactoryField<WalkingControllerParameters> walkingControllerParameters = new OptionalFactoryField<>("WalkingControllerParameters");
    private final HighLevelControllerParameters highLevelControllerParameters;
    private final AlexanderSensorInformation sensorInformation;
    protected final AlexanderJointMap jointMap;
@@ -91,8 +96,8 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
    private final LogModelProvider logModelProvider;
    private final AlexanderModelFactory modelFactory;
 
-   private final RobotTarget robotTarget;
-   private final AlexanderVersionInterface robotVersion;
+   protected final RobotTarget robotTarget;
+   protected final AlexanderVersionInterface robotVersion;
    private final SideDependentList<HandModel> handModels = new SideDependentList<>();
 
    private final SideDependentList<RigidBodyTransform> handGraphicToHandFrameTransforms = new SideDependentList<>();
@@ -134,7 +139,7 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
       sensorInformation = robotVersion.getSensorInformation();
       physicalProperties = robotVersion.getPhysicalProperties();
 
-      walkingControllerParameters = new OpenAlexanderWalkingControllerParameters(robotVersion, robotTarget, jointMap, physicalProperties, contactPointParameters);
+      setWalkingControllerParameters();
       highLevelControllerParameters = new AlexanderHighLevelControllerParameters(robotVersion, jointMap, robotTarget);
       diagnosticParameters = new AlexanderDiagnosticParameters(robotTarget, jointMap, sensorInformation, highLevelControllerParameters);
       stateEstimatorParameters = new AlexanderStateEstimatorParameters(getEstimatorDT(), robotTarget, sensorInformation, jointMap);
@@ -179,6 +184,11 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
       }
    }
 
+   protected void setWalkingControllerParameters()
+   {
+      walkingControllerParameters.set(new OpenAlexanderWalkingControllerParameters(robotVersion, robotTarget, jointMap, physicalProperties, contactPointParameters));
+   }
+
    @Override
    public AlexanderVersionInterface getRobotVersion()
    {
@@ -205,7 +215,7 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
    @Override
    public WalkingControllerParameters getWalkingControllerParameters()
    {
-      return walkingControllerParameters;
+      return walkingControllerParameters.get();
    }
 
    @Override
