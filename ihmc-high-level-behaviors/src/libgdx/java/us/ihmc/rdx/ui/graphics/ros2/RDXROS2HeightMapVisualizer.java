@@ -10,9 +10,11 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.jetbrains.annotations.NotNull;
 import perception_msgs.msg.dds.GlobalMapTileMessage;
 import perception_msgs.msg.dds.ImageMessage;
+import perception_msgs.msg.dds.TerrainMapMessage;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.footstepPlanning.communication.ContinuousHikingAPI;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -86,6 +88,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
    {
       this.ros2 = ros2;
       ros2.subscribeViaCallback(PerceptionAPI.HEIGHT_MAP_CROPPED, this::acceptImageMessage);
+      ros2.subscribeViaCallback(ContinuousHikingAPI.TERRAIN_MAP, this::acceptTerrainMapMessage);
    }
 
    public void setupForGlobalHeightMapTileMessage(ROS2PublishSubscribeAPI ros2)
@@ -133,12 +136,19 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
                                                                                             (float) heightMapParameters.getCroppedWidthInMeters(),
                                                                                             (float) heightMapParameters.getCellSizeInMeters(),
                                                                                             heightMapParameters);
-
-                                              terrainMapData.setHeightMap(heightMapImage);
-                                              terrainMapData.setSensorOrigin(zUpToWorldTransform.getTranslation());
                                            });
 
       getFrequency(PerceptionAPI.HEIGHT_MAP_CROPPED).ping();
+   }
+
+   public void acceptTerrainMapMessage(TerrainMapMessage terrainMapMessage)
+   {
+      // Even if the height map is publishing, we aren't going to update anything with that data unless its active
+      if (!isActive())
+         return;
+      TerrainMapData latestTerrainMapData = new TerrainMapData(terrainMapMessage);
+
+      terrainMapData.set(latestTerrainMapData);
    }
 
    @Override
