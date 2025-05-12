@@ -84,13 +84,6 @@ __device__ float3 computeNormalRANSAC(unsigned short *depthImage, size_t pitchDe
         float3 p2 = points[i2];
         float3 p3 = points[i3];
 
-//         if (u == 2 && v == 16)
-//         {
-//             printf("P1: %f, %f, %f. ", p1.x, p1.y, p1.z);
-//             printf("P2: %f, %f, %f. ", p2.x, p2.y, p2.z);
-//             printf("P3: %f, %f, %f.\n", p3.x, p3.y, p3.z);
-//         }
-
         float3 v1 = make_float3(p2.x - p1.x, p2.y - p1.y, p2.z - p1.z);
         float3 v2 = make_float3(p3.x - p1.x, p3.y - p1.y, p3.z - p1.z);
         float3 normal = normalize3(cross3(v1, v2));
@@ -118,20 +111,10 @@ __device__ float3 computeNormalRANSAC(unsigned short *depthImage, size_t pitchDe
 
         if (inliers > bestInliers)
         {
-//             if (u == 2 && v == 16)
-//             {
-//                 printf("Normal: %f, %f, %f. ", normal.x, normal.y, normal.z);
-//             }
-
             bestInliers = inliers;
             bestNormal = normal;
         }
     }
-
-//     if (u == 2 && v == 16)
-//     {
-//         printf("Best Normal: %f, %f, %f. \n", bestNormal.x, bestNormal.y, bestNormal.z);
-//     }
 
     return bestNormal;
 }
@@ -176,22 +159,9 @@ __global__ void filterFlyingPoints(unsigned short *depthImage, size_t pitchDepth
     float3 normal = computeNormalRANSAC(depthImage, pitchDepthImage,
                                         width, height, u, v, fx, fy, cx, cy,
                                         normalWindow, ransacIterations, minNormals, normalAngleThreshold);
-//     if (u == 2 && v == 16)
-//    {
-//        printf("Best Normal: %f, %f, %f. \n", normal.x, normal.y, normal.z);
-//        printf("Ray: %f, %f, %f. \n", ray.x, ray.y, ray.z);
-//    }
 
     float dot = dot3(ray, normal);
     dot = fabsf(dot);  // we want it close to 0, regardless of direction
-//
-//     if (u == 2 && v == 16)
-//     {
-//         printf("\nValues: %f\n", dot);
-//         printf("Threshold: %f\n", dotThreshold);
-//         bool isValid = (dot < dotThreshold);
-//         printf("Is valid: %d\n", (int)isValid);
-//     }
 
     unsigned short *filteredImageRow = (unsigned short *)((char *)filteredImage + u * pitchFilteredImage);
     filteredImageRow[v] = (dot < dotThreshold) ? *depthValue : 0;
