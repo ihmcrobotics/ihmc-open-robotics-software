@@ -20,11 +20,20 @@ public class LeRobotDatasetEpisodeStatistics
       float r, g, b = 0.0f;
    }
 
+   // image stats
    private final int[] sizes = new int[] {0, 0};
    private final SideDependentList<RGBL> sums = new SideDependentList<>(new RGBL(), new RGBL());
    private final SideDependentList<RGBL> sumSquares = new SideDependentList<>(new RGBL(), new RGBL());
    private final SideDependentList<RGB> means = new SideDependentList<>(new RGB(), new RGB());
    private final SideDependentList<RGB> stds = new SideDependentList<>(new RGB(), new RGB());
+
+   // data stats
+   private int length = 0;
+   private long episodeIndex;
+   private long frameIndexSum = 0L;
+   private long frameIndexSumSquares = 0L;
+   private float meanFrameIndex;
+   private float stddevFrameIndex;
 
 
    public void submitFrame(RobotSide side, Mat bgrMat)
@@ -64,10 +73,14 @@ public class LeRobotDatasetEpisodeStatistics
       }
    }
 
-   public void processParquetRecord(LeRobotEpisodeRecord record)
+   public void processParquetRecord(LeRobotEpisodeRecord dataFrame)
    {
       // TODO
+      ++length;
 
+      episodeIndex = dataFrame.episodeIndex();
+      frameIndexSum += dataFrame.frameIndex();
+      frameIndexSumSquares += dataFrame.frameIndex() * dataFrame.frameIndex();
 
    }
 
@@ -103,6 +116,9 @@ public class LeRobotDatasetEpisodeStatistics
          LogTools.info("Mean RGB: R=%.3f G=%.3f B=%.3f".formatted(mean.r, mean.g, mean.b));
          LogTools.info("StdDev RGB: R=%.3f G=%.3f B=%.3f".formatted(std.r, std.g, std.b));
       }
+
+      meanFrameIndex = (float) frameIndexSum / length;
+      stddevFrameIndex = (float) Math.sqrt(((float) frameIndexSumSquares / length) - (meanFrameIndex * meanFrameIndex));
    }
 
    public void writeJson(ObjectNode stats, SideDependentList<Path> zedVideoDirs)
@@ -132,6 +148,73 @@ public class LeRobotDatasetEpisodeStatistics
          stdNode.addArray().addArray().add(std.b);
          video.putArray("count").add(sizes[side.ordinal()]);
       }
+
+      ObjectNode state = stats.putObject("state");
+      ArrayNode min = state.putArray("min");
+      for (int i = 0; i < 14; i++)
+         min.add(0.0f);
+      ArrayNode max = state.putArray("max");
+      for (int i = 0; i < 14; i++)
+         max.add(10.0f);
+      ArrayNode mean = state.putArray("mean");
+      for (int i = 0; i < 14; i++)
+         mean.add(5.0f);
+      ArrayNode std = state.putArray("std");
+      for (int i = 0; i < 14; i++)
+         std.add(3.0f);
+      state.putArray("count").add(length);
+
+      ObjectNode action = stats.putObject("action");
+      min = action.putArray("min");
+      for (int i = 0; i < 14; i++)
+         min.add(0.0f);
+      max = action.putArray("max");
+      for (int i = 0; i < 14; i++)
+         max.add(10.0f);
+      mean = action.putArray("mean");
+      for (int i = 0; i < 14; i++)
+         mean.add(5.0f);
+      std = action.putArray("std");
+      for (int i = 0; i < 14; i++)
+         std.add(3.0f);
+      action.putArray("count").add(length);
+
+      ObjectNode fieldStats = stats.putObject("episode_index");
+      fieldStats.putArray("min").add(episodeIndex);
+      fieldStats.putArray("max").add(episodeIndex);
+      fieldStats.putArray("mean").add((float) episodeIndex);
+      fieldStats.putArray("std").add(0.0f);
+      fieldStats.putArray("count").add(length);
+      fieldStats = stats.putObject("frame_index");
+      fieldStats.putArray("min").add(0);
+      fieldStats.putArray("max").add(length - 1);
+      fieldStats.putArray("mean").add(meanFrameIndex);
+      fieldStats.putArray("std").add(stddevFrameIndex);
+      fieldStats.putArray("count").add(length);
+      fieldStats = stats.putObject("timestamp");
+      fieldStats.putArray("min").add(0);
+      fieldStats.putArray("max").add(0);
+      fieldStats.putArray("mean").add(0.0f);
+      fieldStats.putArray("std").add(0.0f);
+      fieldStats.putArray("count").add(length);
+      fieldStats = stats.putObject("next.done");
+      fieldStats.putArray("min").add(false);
+      fieldStats.putArray("max").add(true);
+      fieldStats.putArray("mean").add(0.00066f);
+      fieldStats.putArray("std").add(0.025f);
+      fieldStats.putArray("count").add(length);
+      fieldStats = stats.putObject("index");
+      fieldStats.putArray("min").add(0);
+      fieldStats.putArray("max").add(length - 1);
+      fieldStats.putArray("mean").add((length - 1) / 2.0f);
+      fieldStats.putArray("std").add(0.0f);
+      fieldStats.putArray("count").add(length);
+      fieldStats = stats.putObject("task_index");
+      fieldStats.putArray("min").add(0);
+      fieldStats.putArray("max").add(0);
+      fieldStats.putArray("mean").add(0.0f);
+      fieldStats.putArray("std").add(0.0f);
+      fieldStats.putArray("count").add(length);
    }
 
 }
