@@ -26,8 +26,6 @@ public class LeRobotDatasetEpisode
    private final SideDependentList<Path> zedVideoDirs;
 
    private long length = 0L;
-   private final SideDependentList<LeRobotDatasetVideoWriter> ffmpegRecorders = new SideDependentList<>();
-   private LeRobotDatasetDataWriter dataWriter;
 
    public LeRobotDatasetEpisode(int episodeIndex,
                                 String taskName,
@@ -65,12 +63,13 @@ public class LeRobotDatasetEpisode
 
          ZEDSVOScrubber zedSVOScrubber = session.getZedSVOScrubbers().get(0);
 
+         SideDependentList<LeRobotDatasetVideoWriter> ffmpegRecorders = new SideDependentList<>();
          for (RobotSide side : RobotSide.values)
          {
             ffmpegRecorders.put(side, new LeRobotDatasetVideoWriter(side, zedVideoDirs.get(side).resolve(episodeName + ".mp4")));
          }
 
-         dataWriter = new LeRobotDatasetDataWriter(episodeIndex, datasetLengthSoFar, session.getRootRegistry());
+         LeRobotDatasetDataWriter dataWriter = new LeRobotDatasetDataWriter(episodeIndex, datasetLengthSoFar, session.getRootRegistry());
 
          length = 0L;
          long startVideoTimestamp = -1;
@@ -137,6 +136,9 @@ public class LeRobotDatasetEpisode
 
    public void appendJsonStatsLine()
    {
+
+      // TODO
+
       LeRobotDatasetTools.appendLine(episodeStatsJsonlPath, JSONFileTools.getAsSingleLine(node ->
       {
          node.put("episode_index", episodeIndex);
