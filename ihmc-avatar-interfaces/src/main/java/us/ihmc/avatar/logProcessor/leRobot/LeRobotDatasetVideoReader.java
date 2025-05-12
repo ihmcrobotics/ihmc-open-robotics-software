@@ -3,7 +3,6 @@ package us.ihmc.avatar.logProcessor.leRobot;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.OpenCVFrameConverter;
-import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
@@ -17,61 +16,70 @@ public class LeRobotDatasetVideoReader
    private Frame currentFrame;
    private Mat currentMat;
    
-   private long lastTimestamp = -1;
+   private long currentTimestamp = -1;
+   private boolean hasMoreFrames = true;
 
    public LeRobotDatasetVideoReader(Path mp4Path)
    {
       // Create the grabber for the mp4 file
       grabber = new FFmpegFrameGrabber(mp4Path.toFile());
       
-      // Set properties that correspond to those used in the writer
-      grabber.setFormat("mp4");
-      grabber.setFrameRate(LeRobotDataset.ZED_FPS);
-      
       // Start the grabber
       ExceptionTools.handle(() -> grabber.start(), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
    }
    
    /**
-    * Reads the frame at the specified timestamp
-    * @param videoTimestampMicros timestamp in microseconds
-    * @return Mat containing the frame at the specified timestamp
+    * Reads the next frame from the video
+    * @return Mat containing the next frame, or null if no more frames are available
     */
-   public Mat readFrame(long videoTimestampMicros)
+   public Mat readFrame()
    {
-      if (videoTimestampMicros != lastTimestamp)
+      try
       {
-         // Only seek if we're moving to a different timestamp
-         ExceptionTools.handle(() -> grabber.setTimestamp(videoTimestampMicros), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+         // Grab the next frame
+         currentFrame = grabber.grabImage();
          
-         // Grab the frame at this timestamp
-         try
+         if (currentFrame != null)
          {
-            currentFrame = grabber.grabImage();
-            
-            if (currentFrame != null)
+            // Convert the frame to a Mat
+            if (currentMat != null)
             {
-               // Convert the frame to a Mat
-               if (currentMat != null)
-               {
-                  currentMat.close();
-               }
-               
-               currentMat = frameConverter.convert(currentFrame);
-               
-               // Convert RGBA to BGRA (reverse of what writer does)
-               opencv_imgproc.cvtColor(currentMat, currentMat, opencv_imgproc.COLOR_RGBA2BGRA);
-               
-               lastTimestamp = videoTimestampMicros;
+               currentMat.close();
             }
+
+            // Update the timestamp
+            currentTimestamp = grabber.getTimestamp();
+            
+            return currentMat;
          }
-         catch (Exception e)
+         else
          {
-            throw new RuntimeException("Error grabbing frame at timestamp " + videoTimestampMicros, e);
+            hasMoreFrames = false;
+            return null;
          }
       }
-      
-      return currentMat;
+      catch (Exception e)
+      {
+         throw new RuntimeException("Error grabbing next frame", e);
+      }
+   }
+   
+   /**
+    * Gets the timestamp of the current frame in microseconds
+    * @return current timestamp in microseconds
+    */
+   public long getCurrentTimestamp()
+   {
+      return currentTimestamp;
+   }
+   
+   /**
+    * Checks if there are more frames available in the video
+    * @return true if more frames are available, false otherwise
+    */
+   public boolean hasMoreFrames()
+   {
+      return hasMoreFrames;
    }
    
    /**
@@ -136,8 +144,8 @@ public class LeRobotDatasetVideoReader
          currentFrame = null;
       }
       
-      ExceptionTools.handle(() -> grabber.stop(), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
-      ExceptionTools.handle(() -> grabber.release(), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+      ExceptionTools.handle(grabber::stop, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+      ExceptionTools.handle(grabber::release, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
       frameConverter.close();
    }
 }

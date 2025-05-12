@@ -2,6 +2,7 @@ package us.ihmc.avatar.logProcessor.leRobot;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.avatar.scs2.SCS2LogSessionWithVideo;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
@@ -136,8 +137,22 @@ public class LeRobotDatasetEpisode
 
    public void appendJsonStatsLine()
    {
+      for (RobotSide side : RobotSide.values)
+      {
+         LeRobotDatasetVideoReader videoReader = new LeRobotDatasetVideoReader(zedVideoDirs.get(side).resolve(episodeName + ".mp4"));
+         
+         while (videoReader.hasMoreFrames())
+         {
+            Mat frameMat = videoReader.readFrame();
 
-      // TODO
+            LogTools.info("Read frame at timestamp %d : mat: %s".formatted(videoReader.getCurrentTimestamp(), frameMat));
+
+            if (frameMat != null)
+               frameMat.close();
+         }
+
+         videoReader.close();
+      }
 
       LeRobotDatasetTools.appendLine(episodeStatsJsonlPath, JSONFileTools.getAsSingleLine(node ->
       {
