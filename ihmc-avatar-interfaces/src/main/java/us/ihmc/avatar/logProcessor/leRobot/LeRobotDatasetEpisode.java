@@ -137,22 +137,28 @@ public class LeRobotDatasetEpisode
 
    public void appendJsonStatsLine()
    {
+      LeRobotDatasetEpisodeStatistics statistics = new LeRobotDatasetEpisodeStatistics();
+
       for (RobotSide side : RobotSide.values)
       {
          Path videoPath = zedVideoDirs.get(side).resolve(episodeName + ".mp4");
          LogTools.info("Reading video from: %s".formatted(videoPath));
          LeRobotDatasetVideoReader videoReader = new LeRobotDatasetVideoReader(videoPath);
-         
-         while (videoReader.hasMoreFrames())
+
+         Mat bgrMat = videoReader.readFrame();
+         while (bgrMat != null)
          {
-            Mat frameMat = videoReader.readFrame();
-            LogTools.info("Read frame at timestamp %d : mat: %s".formatted(videoReader.getCurrentTimestamp(), frameMat));
+            LogTools.info("Read frame at timestamp %d : mat: %s".formatted(videoReader.getCurrentTimestamp(), bgrMat));
 
+            statistics.submitFrame(side, bgrMat);
 
+            bgrMat = videoReader.readFrame();
          }
 
          videoReader.close();
       }
+
+      statistics.calculate();
 
       LeRobotDatasetTools.appendLine(episodeStatsJsonlPath, JSONFileTools.getAsSingleLine(node ->
       {
