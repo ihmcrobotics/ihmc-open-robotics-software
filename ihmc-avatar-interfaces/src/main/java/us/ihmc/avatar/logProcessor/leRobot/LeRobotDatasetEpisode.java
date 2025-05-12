@@ -2,6 +2,8 @@ package us.ihmc.avatar.logProcessor.leRobot;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.jerolba.carpet.CarpetReader;
+import com.jerolba.carpet.FieldMatchingStrategy;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.avatar.scs2.SCS2LogSessionWithVideo;
 import us.ihmc.commons.Conversions;
@@ -13,7 +15,10 @@ import us.ihmc.scs2.session.log.ZEDSVOScrubber;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.yoVariables.variable.YoLong;
 
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
 
 public class LeRobotDatasetEpisode
 {
@@ -156,6 +161,28 @@ public class LeRobotDatasetEpisode
          }
 
          videoReader.close();
+      }
+      
+      Path parquetPath = dataChunk0Path.resolve(episodeName + ".parquet");
+      LogTools.info("Reading parquet data from: %s".formatted(parquetPath));
+
+      try
+      {
+         File parquetFile = parquetPath.toFile();
+         CarpetReader<LeRobotEpisodeRecord> carpetReader = new CarpetReader<>(parquetFile, LeRobotEpisodeRecord.class)
+               .withFieldMatchingStrategy(FieldMatchingStrategy.SNAKE_CASE);
+
+         List<LeRobotEpisodeRecord> records = carpetReader.toList();
+         LogTools.info("Read %d records from parquet file".formatted(records.size()));
+
+         for (LeRobotEpisodeRecord record : records)
+         {
+            statistics.processParquetRecord(record);
+         }
+      }
+      catch (IOException e)
+      {
+         LogTools.error("Failed to read parquet file: " + e.getMessage());
       }
 
       statistics.calculate();

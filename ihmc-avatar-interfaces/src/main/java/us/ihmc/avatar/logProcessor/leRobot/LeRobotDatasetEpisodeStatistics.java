@@ -64,6 +64,13 @@ public class LeRobotDatasetEpisodeStatistics
       }
    }
 
+   public void processParquetRecord(LeRobotEpisodeRecord record)
+   {
+      // TODO
+
+
+   }
+
    public void calculate()
    {
       for (RobotSide side : RobotSide.values)
