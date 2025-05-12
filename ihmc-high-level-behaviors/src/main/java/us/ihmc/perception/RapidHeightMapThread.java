@@ -1,18 +1,27 @@
 package us.ihmc.perception;
 
+import com.vividsolutions.jts.geomgraph.Depth;
+import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.opencv_core.GpuMat;
+import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.camera.CameraIntrinsics;
+import us.ihmc.perception.cuda.CUDACompressionTools;
 import us.ihmc.perception.filters.DepthImageBodyCollisionFilter;
+import us.ihmc.perception.filters.DepthImageFilteringParameters;
 import us.ihmc.perception.filters.DepthImageFlyingPointsfilter;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapManager;
+import us.ihmc.perception.imageMessage.CompressionType;
+import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 import us.ihmc.sensors.ImageSensor;
@@ -30,6 +39,8 @@ public class RapidHeightMapThread extends RepeatingTaskThread
    private final ReferenceFrame cameraFrame;
    private final ReferenceFrame zUpSensorFrame;
    private final int depthImageKey;
+   private final CUDACompressionTools cudaCompressionTools = new CUDACompressionTools();
+   private final ROS2Publisher<ImageMessage> filteredDepthPublisher;
 
    public RapidHeightMapThread(ROS2Node ros2Node,
                                ROS2SyncedRobotModel syncedRobotModel,
@@ -37,7 +48,8 @@ public class RapidHeightMapThread extends RepeatingTaskThread
                                ImageSensor imageSensor,
                                int depthImageKey,
                                ControllerFootstepQueueMonitor controllerFootstepQueueMonitor,
-                               HeightMapParameters heightMapParameters)
+                               HeightMapParameters heightMapParameters,
+                               DepthImageFilteringParameters depthImageFilteringParameters)
    {
       super(imageSensor.getSensorName() + RapidHeightMapThread.class.getSimpleName());
 
@@ -50,9 +62,10 @@ public class RapidHeightMapThread extends RepeatingTaskThread
       ReferenceFrame leftFootFrame = syncedRobotModel.getReferenceFrames().getSoleFrame(RobotSide.LEFT);
       ReferenceFrame rightFootFrame = syncedRobotModel.getReferenceFrames().getSoleFrame(RobotSide.LEFT);
 
+      filteredDepthPublisher = ros2Node.createPublisher(PerceptionAPI.D455_DEPTH_FILTERED_IMAGE);
 
       bodyCollisionFilter = new DepthImageBodyCollisionFilter(robotCollisionModel, syncedRobotModel.getFullRobotModel().getRootBody());
-      flyingPointsfilter = new DepthImageFlyingPointsfilter();
+      flyingPointsfilter = new DepthImageFlyingPointsfilter(depthImageFilteringParameters);
       heightMapManager = new RapidHeightMapManager(ros2Node,
                                                    syncedRobotModel.getFullRobotModel(),
                                                    syncedRobotModel.getRobotModel().getSimpleRobotName(),
@@ -80,9 +93,14 @@ public class RapidHeightMapThread extends RepeatingTaskThread
          bodyCollisionFilter.process(latestDepthImage, depthImageWithoutBodyCollisions, depthIntrinsicsCopy, cameraFrame);
 
          GpuMat depthImageFiltered = new GpuMat(depthImageWithoutBodyCollisions.size(), depthImageWithoutBodyCollisions.type());
-//         depthImageWithoutBodyCollisions.copyTo(depthImageFiltered);
          flyingPointsfilter.applyFilter(depthImageWithoutBodyCollisions, depthImageFiltered, depthIntrinsicsCopy);
          depthImageWithoutBodyCollisions.close();
+
+         BytePointer bytePointer = cudaCompressionTools.compressDepth(depthImageFiltered);
+
+         ImageMessage imageMessage = new ImageMessage();
+         PerceptionMessageTools.packImageMessage(depthImage, bytePointer, CompressionType.ZSTD_NVJPEG_HYBRID, imageMessage);
+         filteredDepthPublisher.publish(imageMessage);
 
          // Update height map
          synchronized (heightMapLock)

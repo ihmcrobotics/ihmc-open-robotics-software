@@ -7,6 +7,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 
 import static org.bytedeco.cuda.global.cudart.cudaFree;
@@ -22,7 +23,8 @@ public class CUDAFlyingPointsFilterTest
    {
       DepthImageFlyingPointsfilter flyingPointsFilter;
       Mat outputMat = new Mat();
-      flyingPointsFilter = new DepthImageFlyingPointsfilter();
+      DepthImageFilteringParameters depthImageFilteringParameters = new DepthImageFilteringParameters();
+      flyingPointsFilter = new DepthImageFlyingPointsfilter(depthImageFilteringParameters);
 
       Mat inputMat = new Mat(3, 3, opencv_core.CV_16UC1);
       inputMat.ptr(0, 0).putShort((short) 10);
@@ -41,7 +43,7 @@ public class CUDAFlyingPointsFilterTest
       deviceInputMat.upload(inputMat);
       GpuMat deviceOutputMat = new GpuMat(deviceInputMat.size(), deviceInputMat.type());
 
-      flyingPointsFilter.applyFilter(deviceInputMat, deviceOutputMat);
+      flyingPointsFilter.applyFilter(deviceInputMat, deviceOutputMat, new CameraIntrinsics());
       deviceInputMat.close();
 
       PerceptionDebugTools.printMat("output_matrix", outputMat, 1);
@@ -67,7 +69,8 @@ public class CUDAFlyingPointsFilterTest
       // Set a decent size for the rows and cols to make it easier to see a memory leak
       int rows = 1000;
       int cols = 1000;
-      DepthImageFlyingPointsfilter flyingPointsFilter = new DepthImageFlyingPointsfilter();
+      DepthImageFilteringParameters depthImageFilteringParameters = new DepthImageFilteringParameters();
+      DepthImageFlyingPointsfilter flyingPointsFilter = new DepthImageFlyingPointsfilter(depthImageFilteringParameters);
 
       // Our data to pass into the update call over and over again.
       Mat cpuData = new Mat(rows, cols, opencv_core.CV_16UC1, new Scalar(33100));
@@ -79,7 +82,7 @@ public class CUDAFlyingPointsFilterTest
       // Run this over and over to see if there is a memory leak
       for (int i = 0; i < 10000; i++)
       {
-         flyingPointsFilter.applyFilter(deviceInputData, deviceOutputData);
+         flyingPointsFilter.applyFilter(deviceInputData, deviceOutputData, new CameraIntrinsics());
 
          SizeTPointer freePointer = new SizeTPointer(1);
          SizeTPointer usedPointer = new SizeTPointer(1);

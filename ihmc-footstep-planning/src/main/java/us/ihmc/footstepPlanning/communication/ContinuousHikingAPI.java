@@ -44,4 +44,7 @@ public class ContinuousHikingAPI
 
    public static final StoredPropertySetROS2TopicPair MONTE_CARLO_PLANNER_PARAMETERS
          = new StoredPropertySetROS2TopicPair(ACTIVE_MODULE_NAME,"monte_carlo_planner_parameters");
+
+   public static final StoredPropertySetROS2TopicPair DEPTH_IMAGE_FILTERING_PARAMETERS
+         = new StoredPropertySetROS2TopicPair(ACTIVE_MODULE_NAME,"depth_image_filtering_parameters");
 }

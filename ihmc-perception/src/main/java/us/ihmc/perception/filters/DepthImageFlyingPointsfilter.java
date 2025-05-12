@@ -16,17 +16,20 @@ import us.ihmc.perception.cuda.CUDATools;
 public class DepthImageFlyingPointsfilter
 {
    private static final int BLOCK_SIZE_XY = 16;
+
    private final CUDAKernel flyingPointFilterKernel;
    private final CUDAProgram flyingPointFilterCUDAProgram;
    private final CUstream_st stream;
 
+   private final DepthImageFilteringParameters depthImageFilteringParameters;
+
    /**
     * This runs a CUDA kernel that will remove the flying points from a depth map.
     *
-    * @throws Exception if loading the kernel doesn't work
     */
-   public DepthImageFlyingPointsfilter()
+   public DepthImageFlyingPointsfilter(DepthImageFilteringParameters depthImageFilteringParameters)
    {
+      this.depthImageFilteringParameters = depthImageFilteringParameters;
       stream = CUDAStreamManager.getStream();
       URL kernelPath = getClass().getResource("/us/ihmc/perception/cuda/DepthImageFlyingPointsFilter.cu");
       try
@@ -61,7 +64,9 @@ public class DepthImageFlyingPointsfilter
       flyingPointFilterKernel.withPointer(deviceInputImage.data()).withLong(deviceInputImage.step());
       flyingPointFilterKernel.withPointer(deviceOutputImageToPack.data()).withLong(deviceOutputImageToPack.step());
       flyingPointFilterKernel.withInt(deviceInputImage.rows()).withInt(deviceInputImage.cols());
-      flyingPointFilterKernel.withInt(5).withFloat(0.2f).withFloat(0.8f);
+      flyingPointFilterKernel.withInt(depthImageFilteringParameters.getNeighborhoodSize());
+      flyingPointFilterKernel.withFloat((float) depthImageFilteringParameters.getCosineThreshold());
+      flyingPointFilterKernel.withFloat((float) depthImageFilteringParameters.getNormalThreshold());
       flyingPointFilterKernel.withFloat((float) cameraIntrinsics.getFx())
                              .withFloat((float) cameraIntrinsics.getFy())
                              .withFloat((float) cameraIntrinsics.getCx())
