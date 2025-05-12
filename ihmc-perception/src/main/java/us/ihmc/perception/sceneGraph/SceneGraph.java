@@ -115,6 +115,10 @@ public class SceneGraph
       {
          staticRelativeSceneNode.updateTrackingState(sensorFrame, modificationQueue);
       }
+      else if (sceneNode instanceof YOLOv8Node yoloNode)
+      {
+         yoloNode.updateRobotOrientation(sensorFrame.getTransformToRoot().getRotation());
+      }
 
       for (SceneNode child : sceneNode.getChildren())
       {
