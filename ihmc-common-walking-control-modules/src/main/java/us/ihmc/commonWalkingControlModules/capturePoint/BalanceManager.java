@@ -342,10 +342,10 @@ public class BalanceManager implements SCS2YoGraphicHolder
       {
          YoVariableChangedListener qfpParameterListener = change ->
          {
+            boolean updateFootstepReferenceContinuously = walkingMessageHandler.getUpdateFootstepReferenceContinuously().getBooleanValue();
             boolean requestDisableCoPFeedbackControl = walkingMessageHandler.getRequestDisableCopFeedbackControl().getBooleanValue();
-            boolean usingQFP = walkingMessageHandler.getUpdateFootstepReferenceContinuously().getBooleanValue() && requestDisableCoPFeedbackControl;
 
-            stepAdjustmentController.setSwingSpeedUpEnabled(usingQFP ? false : walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
+            stepAdjustmentController.setSwingSpeedUpEnabled(updateFootstepReferenceContinuously ? false : walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
             linearMomentumRateControlModuleInput.setDisableCoPFeedbackControl(requestDisableCoPFeedbackControl ? true : !walkingControllerParameters.getICPControllerParameters().useCoPFeedback());
          };
 

@@ -246,10 +246,9 @@ public class SwingState extends AbstractFootControlState
 
       YoVariableChangedListener qfpParameterListener = change ->
       {
-         boolean requestDisableCoPFeedbackControl = controllerToolbox.getWalkingMessageHandler().getRequestDisableCopFeedbackControl().getBooleanValue();
-         boolean usingQFP = controllerToolbox.getWalkingMessageHandler().getUpdateFootstepReferenceContinuously().getBooleanValue() && requestDisableCoPFeedbackControl;
+         boolean updateFootstepReferenceContinuously = controllerToolbox.getWalkingMessageHandler().getUpdateFootstepReferenceContinuously().getBooleanValue();
 
-         if (usingQFP)
+         if (updateFootstepReferenceContinuously)
          {
             isSwingSpeedUpEnabled.set(false);
             swingTrajectorySmoother.setTrackingZeta(0.0);
@@ -262,8 +261,6 @@ public class SwingState extends AbstractFootControlState
       };
 
       controllerToolbox.getWalkingMessageHandler().getUpdateFootstepReferenceContinuously().addListener(qfpParameterListener);
-      controllerToolbox.getWalkingMessageHandler().getRequestDisableCopFeedbackControl().addListener(qfpParameterListener);
-
 
       swingTimeSpeedUpFactor.setToNaN();
 
