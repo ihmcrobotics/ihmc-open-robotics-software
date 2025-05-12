@@ -143,12 +143,13 @@ public class LeRobotDatasetEpisode
          ObjectNode stats = node.putObject("stats");
          for (RobotSide side : RobotSide.values)
          {
+            // RGB
             ObjectNode video = stats.putObject(zedVideoDirs.get(side).getFileName().toString());
-            ArrayNode min = video.putArray("min");
+            ArrayNode min = video.putArray("min"); // Looks like we can leave 0.0
             min.addArray().addArray().add(0.0f);
             min.addArray().addArray().add(0.0f);
             min.addArray().addArray().add(0.0f);
-            ArrayNode max = video.putArray("max");
+            ArrayNode max = video.putArray("max"); // Looks like we can leave 1.0
             max.addArray().addArray().add(1.0f);
             max.addArray().addArray().add(1.0f);
             max.addArray().addArray().add(1.0f);

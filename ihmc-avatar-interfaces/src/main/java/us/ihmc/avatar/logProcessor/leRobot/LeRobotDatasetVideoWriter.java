@@ -1,5 +1,6 @@
 package us.ihmc.avatar.logProcessor.leRobot;
 
+import gnu.trove.list.array.TIntArrayList;
 import org.bytedeco.ffmpeg.global.avutil;
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.javacv.FFmpegFrameRecorder;
@@ -9,6 +10,7 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Rect;
+import org.bytedeco.opencv.opencv_core.Scalar;
 import org.bytedeco.opencv.opencv_core.Size;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
@@ -25,6 +27,10 @@ public class LeRobotDatasetVideoWriter
    private final RobotSide side;
    private final FFmpegFrameRecorder recorder;
    private final OpenCVFrameConverter.ToMat frameConverter = new OpenCVFrameConverter.ToMat();
+
+   // Stats
+   private final TIntArrayList redMeans = new TIntArrayList();
+
 
    public LeRobotDatasetVideoWriter(RobotSide side, Path mp4Path)
    {
@@ -86,6 +92,9 @@ public class LeRobotDatasetVideoWriter
 
       // ZED outputs bgra but frame recorder wants rgba
       opencv_imgproc.cvtColor(cropped, cropped, opencv_imgproc.COLOR_BGR2RGBA);
+
+      // TODO: Calculate stats
+      Scalar mean = opencv_core.mean(cropped);
 
       Frame frame = frameConverter.convert(cropped);
       cropped.close();
