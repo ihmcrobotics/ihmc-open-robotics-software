@@ -1,7 +1,4 @@
-__device__ float dot3(const float3 &a, const float3 &b)
-{
-    return a.x * b.x + a.y * b.y + a.z * b.z;
-}
+#include "MathUtils.cuh"
 
 __device__ float3 cross3(const float3 &a, const float3 &b)
 {
@@ -19,16 +16,6 @@ __device__ float3 computeRay(int u, int v, float depth, float fx, float fy, floa
     float z = depth;
 
     return make_float3(x, y, z);
-}
-
-__device__ float3 normalize3(float3 v)
-{
-    float norm = sqrtf(dot3(v, v));
-
-    if (norm < 1e-5f)
-        return make_float3(0, 0, 0);
-
-    return make_float3(v.x / norm, v.y / norm, v.z / norm);
 }
 
 __device__ float3 computeNormalRANSAC(unsigned short *depthImage, size_t pitchDepthImage,
@@ -86,9 +73,9 @@ __device__ float3 computeNormalRANSAC(unsigned short *depthImage, size_t pitchDe
 
         float3 v1 = make_float3(p2.x - p1.x, p2.y - p1.y, p2.z - p1.z);
         float3 v2 = make_float3(p3.x - p1.x, p3.y - p1.y, p3.z - p1.z);
-        float3 normal = normalize3(cross3(v1, v2));
+        float3 normal = normalize(cross3(v1, v2));
 
-        if (dot3(normal, normal) < 1e-5f)
+        if (dot(normal, normal) < 1e-5f)
             continue;
 
         // Count inliers: points whose normal agrees with this normal
@@ -97,13 +84,13 @@ __device__ float3 computeNormalRANSAC(unsigned short *depthImage, size_t pitchDe
         {
             float3 pj = points[j];
             float3 vj = make_float3(pj.x - p1.x, pj.y - p1.y, pj.z - p1.z);
-            float len = sqrtf(dot3(vj, vj));
+            float len = sqrtf(dot(vj, vj));
 
             if (len < 1e-8f)
                 continue;
 
-            float dot = fabsf(dot3(normal, normalize3(vj)));
-            float angle = acosf(dot);  // in radians
+            float angle = fabsf(dot(normal, normalize(vj)));
+            float angleInRadians = acosf(angle);  // in radians
 
             if (angle < normalAngleThreshold)
                 inliers++;
@@ -161,9 +148,9 @@ __global__ void filterFlyingPoints(unsigned short *depthImage, size_t pitchDepth
                                         width, height, u, v, fx, fy, cx, cy,
                                         windowSizeInPixels, ransacIterations, minimumDepthValuesRequiredInWindow, normalAngleThreshold);
 
-    float dot = dot3(ray, normal);
-    dot = fabsf(dot);  // we want it close to 0, regardless of direction
+    float angleBetweenVectors = dot(ray, normal);
+    angleBetweenVectors = fabsf(angleBetweenVectors);  // we want it close to 0, regardless of direction
 
     unsigned short *filteredImageRow = (unsigned short *)((char *)filteredImage + u * pitchFilteredImage);
-    filteredImageRow[v] = (dot < angleThresholdInRadians) ? *depthValue : 0;
+    filteredImageRow[v] = (angleBetweenVectors < angleThresholdInRadians) ? *depthValue : 0;
 }
