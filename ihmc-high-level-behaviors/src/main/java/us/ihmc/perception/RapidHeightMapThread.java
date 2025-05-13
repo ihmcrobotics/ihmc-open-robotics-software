@@ -37,6 +37,7 @@ public class RapidHeightMapThread extends RepeatingTaskThread
    private final ImageSensor imageSensor;
    private final ReferenceFrame cameraFrame;
    private final ReferenceFrame zUpSensorFrame;
+   private final HeightMapParameters heightMapParameters;
    private final int depthImageKey;
    private final CUDACompressionTools cudaCompressionTools = new CUDACompressionTools();
    private final ROS2Publisher<ImageMessage> filteredDepthPublisher;
@@ -54,6 +55,7 @@ public class RapidHeightMapThread extends RepeatingTaskThread
 
       this.imageSensor = imageSensor;
       this.depthImageKey = depthImageKey;
+      this.heightMapParameters = heightMapParameters;
 
       cameraFrame = syncedRobotModel.getReferenceFrames().getSteppingCameraFrame();
       zUpSensorFrame = syncedRobotModel.getReferenceFrames().getSteppingCameraZUpFrame();
@@ -86,28 +88,33 @@ public class RapidHeightMapThread extends RepeatingTaskThread
          GpuMat latestDepthImage = depthImage.getGpuImageMat();
          Instant acquisitionTime = depthImage.getAcquisitionTime();
          CameraIntrinsics depthIntrinsicsCopy = depthImage.getIntrinsicsCopy();
+         GpuMat filteredDepthImage = new GpuMat(latestDepthImage.size(), latestDepthImage.type());
 
          // Process body collisions
-         GpuMat depthImageWithoutBodyCollisions = new GpuMat(latestDepthImage.size(), latestDepthImage.type());
-         bodyCollisionFilter.process(latestDepthImage, depthImageWithoutBodyCollisions, depthIntrinsicsCopy, cameraFrame);
+         bodyCollisionFilter.process(latestDepthImage, filteredDepthImage, depthIntrinsicsCopy, cameraFrame);
 
-         GpuMat depthImageFiltered = new GpuMat(depthImageWithoutBodyCollisions.size(), depthImageWithoutBodyCollisions.type());
-         flyingPointsfilter.applyFilter(depthImageWithoutBodyCollisions, depthImageFiltered, depthIntrinsicsCopy);
-         depthImageWithoutBodyCollisions.close();
+         if (heightMapParameters.getFlyingPointsFilter())
+         {
+            GpuMat depthImageNoFlyingPoints = new GpuMat(filteredDepthImage.size(), filteredDepthImage.type());
+            flyingPointsfilter.applyFilter(filteredDepthImage, depthImageNoFlyingPoints, depthIntrinsicsCopy);
+            depthImageNoFlyingPoints.copyTo(filteredDepthImage);
 
-         BytePointer bytePointer = cudaCompressionTools.compressDepth(depthImageFiltered);
+            BytePointer bytePointer = cudaCompressionTools.compressDepth(depthImageNoFlyingPoints);
 
-         ImageMessage imageMessage = new ImageMessage();
-         PerceptionMessageTools.packImageMessage(depthImage, bytePointer, CompressionType.ZSTD_NVJPEG_HYBRID, imageMessage);
-         filteredDepthPublisher.publish(imageMessage);
+            ImageMessage imageMessage = new ImageMessage();
+            PerceptionMessageTools.packImageMessage(depthImage, bytePointer, CompressionType.ZSTD_NVJPEG_HYBRID, imageMessage);
+            filteredDepthPublisher.publish(imageMessage);
+
+            depthImageNoFlyingPoints.close();
+         }
 
          // Update height map
          synchronized (heightMapLock)
          {
-            heightMapManager.updateAndPublishHeightMap(depthImageFiltered, acquisitionTime, depthIntrinsicsCopy, cameraFrame, zUpSensorFrame);
+            heightMapManager.updateAndPublishHeightMap(filteredDepthImage, acquisitionTime, depthIntrinsicsCopy, cameraFrame, zUpSensorFrame);
          }
 
-         depthImageFiltered.close();
+         filteredDepthImage.close();
          depthImage.release();
       }
       catch (InterruptedException ignored)
