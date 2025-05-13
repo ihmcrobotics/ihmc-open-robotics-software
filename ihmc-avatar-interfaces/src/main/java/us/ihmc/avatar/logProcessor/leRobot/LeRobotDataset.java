@@ -17,8 +17,6 @@ import java.util.List;
 
 public class LeRobotDataset
 {
-   public static final double ZED_FPS = 15.0;
-
    private final String name;
    private final Path directory;
    private final Path dataPath;
@@ -135,6 +133,7 @@ public class LeRobotDataset
       JSONFileTools.save(infoJsonPath, rootNode ->
       {
          totalFrames = 0;
+         float fps = episodes.isEmpty() ? 1.0f : episodes.get(0).getFps();
          for (LeRobotDatasetEpisode episode : episodes)
          {
             totalFrames += episode.getLength();
@@ -148,7 +147,7 @@ public class LeRobotDataset
          rootNode.put("total_videos", 2 * episodes.size());
          rootNode.put("total_chunks", 1);
          rootNode.put("chunks_size", 1000);
-         rootNode.put("fps", ZED_FPS);
+         rootNode.put("fps", fps);
          ObjectNode splits = rootNode.putObject("splits");
          splits.put("train", "0:%d".formatted(episodes.size()));
          rootNode.put("data_path", "data/chunk-{episode_chunk:03d}/episode_{episode_index:06d}.parquet");
@@ -161,7 +160,7 @@ public class LeRobotDataset
             cam.put("dtype", "video");
             cam.putArray("shape").add(480).add(640).add(3);
             cam.putArray("names").add("height").add("width").add("channel");
-            cam.putObject("video_info").put("video.fps", ZED_FPS)
+            cam.putObject("video_info").put("video.fps", fps)
                                        .put("video.codec", "mpeg4")
                                        .put("video.pix_fmt", "yuv420p")
                                        .put("video.is_depth_map", false)

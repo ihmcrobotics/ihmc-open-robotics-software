@@ -26,15 +26,17 @@ public class LeRobotDatasetVideoWriter
 {
    private final RobotSide side;
    private final FFmpegFrameRecorder recorder;
+   private final ZEDSVOScrubber zedSVOScrubber;
    private final OpenCVFrameConverter.ToMat frameConverter = new OpenCVFrameConverter.ToMat();
 
    // Stats
    private final TIntArrayList redMeans = new TIntArrayList();
 
 
-   public LeRobotDatasetVideoWriter(RobotSide side, Path mp4Path)
+   public LeRobotDatasetVideoWriter(RobotSide side, Path mp4Path, ZEDSVOScrubber zedSVOScrubber)
    {
       this.side = side;
+      this.zedSVOScrubber = zedSVOScrubber;
 
       // Input #0, mov,mp4,m4a,3gp,3g2,mj2, from 'episode_000000.mp4':
       //  Metadata:
@@ -58,13 +60,13 @@ public class LeRobotDatasetVideoWriter
       //            recorder.setVideoOption("preset", "10");
       //            recorder.setVideoOption("threads", String.valueOf(Runtime.getRuntime().availableProcessors()));
       recorder.setPixelFormat(avutil.AV_PIX_FMT_YUV420P);
-      recorder.setFrameRate(LeRobotDataset.ZED_FPS);
+      recorder.setFrameRate(zedSVOScrubber.getFps());
       recorder.setVideoBitrate(1352000);
 
       ExceptionTools.handle(() -> recorder.start(), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
    }
 
-   public void writeFrame(ZEDSVOScrubber zedSVOScrubber, long videoTimestampMs)
+   public void writeFrame(long videoTimestampMs)
    {
       int imageHeight = zedSVOScrubber.getImageHeight();
       int imageWidth = zedSVOScrubber.getImageWidth();

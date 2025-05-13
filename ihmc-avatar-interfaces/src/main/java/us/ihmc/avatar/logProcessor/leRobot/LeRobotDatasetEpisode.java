@@ -32,6 +32,7 @@ public class LeRobotDatasetEpisode
    private final SideDependentList<Path> zedVideoDirs;
 
    private long length = 0L;
+   private float fps;
 
    public LeRobotDatasetEpisode(int episodeIndex,
                                 String taskName,
@@ -68,11 +69,12 @@ public class LeRobotDatasetEpisode
          session.submitBufferIndexRequestAndWait(inPoint);
 
          ZEDSVOScrubber zedSVOScrubber = session.getZedSVOScrubbers().get(0);
+         fps = zedSVOScrubber.getFps();
 
          SideDependentList<LeRobotDatasetVideoWriter> ffmpegRecorders = new SideDependentList<>();
          for (RobotSide side : RobotSide.values)
          {
-            ffmpegRecorders.put(side, new LeRobotDatasetVideoWriter(side, zedVideoDirs.get(side).resolve(episodeName + ".mp4")));
+            ffmpegRecorders.put(side, new LeRobotDatasetVideoWriter(side, zedVideoDirs.get(side).resolve(episodeName + ".mp4"), zedSVOScrubber));
          }
 
          LeRobotDatasetDataWriter dataWriter = new LeRobotDatasetDataWriter(episodeIndex, datasetLengthSoFar, session.getRootRegistry());
@@ -82,7 +84,7 @@ public class LeRobotDatasetEpisode
          long lastVideoTimestamp = -1;
          for (int i = 0; i < outPoint - inPoint; i++)
          {
-            session.playbackTick(); // TODO: Is this skipping the first tick?
+            session.playbackTick();
 
             long timestamp = yoTimestamp.getLongValue();
             zedSVOScrubber.scrub(timestamp);
@@ -104,7 +106,7 @@ public class LeRobotDatasetEpisode
                                                                                                   Conversions.secondsToHertz(period)));
                for (RobotSide side : RobotSide.values)
                {
-                  ffmpegRecorders.get(side).writeFrame(zedSVOScrubber, videoTimestampMicros);
+                  ffmpegRecorders.get(side).writeFrame(videoTimestampMicros);
                }
 
                dataWriter.addFrame(videoTimestampMicros, length);
@@ -224,5 +226,10 @@ public class LeRobotDatasetEpisode
    public int getLength()
    {
       return (int) length;
+   }
+
+   public float getFps()
+   {
+      return fps;
    }
 }
