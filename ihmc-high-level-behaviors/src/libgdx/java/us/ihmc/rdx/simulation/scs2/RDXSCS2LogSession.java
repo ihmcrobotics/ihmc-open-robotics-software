@@ -2,6 +2,7 @@ package us.ihmc.rdx.simulation.scs2;
 
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
+import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.javacv.Frame;
@@ -11,9 +12,11 @@ import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.avatar.scs2.SCS2LogSessionWithVideo;
 import us.ihmc.codecs.generated.YUVPicture;
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -39,6 +42,8 @@ public class RDXSCS2LogSession extends RDXSCS2Session
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImInt logPosition = new ImInt();
+   private final ImFloat zedDelayCompensation = new ImFloat();
+   private final Notification scrubAnyway = new Notification();
    private int lastUpdatedLogPosition = -1;
    private SCS2LogSessionWithVideo logSession;
    private YoLong yoTimestamp;
@@ -112,7 +117,7 @@ public class RDXSCS2LogSession extends RDXSCS2Session
       super.update();
 
       int currentLogPosition = logDataReader.getCurrentLogPosition();
-      if (lastUpdatedLogPosition != currentLogPosition)
+      if (scrubAnyway.poll() || lastUpdatedLogPosition != currentLogPosition)
       {
          lastUpdatedLogPosition = currentLogPosition;
 
@@ -185,6 +190,12 @@ public class RDXSCS2LogSession extends RDXSCS2Session
          else
          {
             logPosition.set(logDataReader.getCurrentLogPosition());
+         }
+         ImGui.text("ZED delay compensation:");
+         if (ImGui.sliderFloat(labels.getHidden("ZED delay compensation"), zedDelayCompensation.getData(), -5.0f, 5.0f, "%.2f s"))
+         {
+            getFirstZEDScrubber().getTimestampScrubber().setDelay(Conversions.secondsToNanoseconds(zedDelayCompensation.get()));
+            scrubAnyway.set();
          }
          ImGui.popItemWidth();
       }
