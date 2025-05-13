@@ -177,7 +177,8 @@ public class RDXSCS2LogSession extends RDXSCS2Session
                                               logDataReader.getNumberOfEntries(),
                                               DurationFormatter.formatHoursMinutesSecondsMillis(logDataReader.getRelativeTimestamp(timeQueryTimestamp)));
 
-         if (ImGui.sliderInt(labels.get("Log position"), logPosition.getData(), 0, logDataReader.getNumberOfEntries() - 1, format))
+         ImGui.pushItemWidth(ImGui.getColumnWidth());
+         if (ImGui.sliderInt(labels.getHidden("Log position"), logPosition.getData(), 0, logDataReader.getNumberOfEntries() - 1, format))
          {
             logSession.submitLogPositionRequest(logPosition.get());
          }
@@ -185,6 +186,7 @@ public class RDXSCS2LogSession extends RDXSCS2Session
          {
             logPosition.set(logDataReader.getCurrentLogPosition());
          }
+         ImGui.popItemWidth();
       }
 
       super.renderImGuiWidgets();
