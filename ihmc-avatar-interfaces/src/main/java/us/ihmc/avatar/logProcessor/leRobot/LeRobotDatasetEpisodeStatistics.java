@@ -31,6 +31,7 @@ public class LeRobotDatasetEpisodeStatistics
    private int length = 0;
    private final LeRobotIntegerStatisticsCalculator episodeIndexStats = new LeRobotIntegerStatisticsCalculator();
    private final LeRobotIntegerStatisticsCalculator frameIndexStats = new LeRobotIntegerStatisticsCalculator();
+   private final LeRobotFloatStatisticsCalculator timestampStats = new LeRobotFloatStatisticsCalculator();
    private final LeRobotIntegerStatisticsCalculator nextDoneStats = new LeRobotIntegerStatisticsCalculator();
    private final LeRobotIntegerStatisticsCalculator indexStats = new LeRobotIntegerStatisticsCalculator();
    private final LeRobotIntegerStatisticsCalculator taskIndexStats = new LeRobotIntegerStatisticsCalculator();
@@ -80,6 +81,7 @@ public class LeRobotDatasetEpisodeStatistics
       // Track statistics for integer fields using the statistics calculator
       episodeIndexStats.addValue(dataFrame.episodeIndex());
       frameIndexStats.addValue(dataFrame.frameIndex());
+      timestampStats.addValue(dataFrame.timestamp());
       nextDoneStats.addValue(dataFrame.nextDone() ? 1 : 0);
       indexStats.addValue(dataFrame.index());
       taskIndexStats.addValue(dataFrame.taskIndex());
@@ -120,6 +122,7 @@ public class LeRobotDatasetEpisodeStatistics
 
       episodeIndexStats.calculate();
       frameIndexStats.calculate();
+      timestampStats.calculate();
       nextDoneStats.calculate();
       indexStats.calculate();
       taskIndexStats.calculate();
@@ -198,10 +201,10 @@ public class LeRobotDatasetEpisodeStatistics
       fieldStats.putArray("count").add(length);
       
       fieldStats = stats.putObject("timestamp");
-      fieldStats.putArray("min").add(0);
-      fieldStats.putArray("max").add(0);
-      fieldStats.putArray("mean").add(0.0f);
-      fieldStats.putArray("std").add(0.0f);
+      fieldStats.putArray("min").add(timestampStats.getMin());
+      fieldStats.putArray("max").add(timestampStats.getMax());
+      fieldStats.putArray("mean").add(timestampStats.getMean());
+      fieldStats.putArray("std").add(timestampStats.getStddev());
       fieldStats.putArray("count").add(length);
       
       fieldStats = stats.putObject("next.done");
