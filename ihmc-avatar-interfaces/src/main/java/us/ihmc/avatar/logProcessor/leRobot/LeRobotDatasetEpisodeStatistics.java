@@ -31,6 +31,7 @@ public class LeRobotDatasetEpisodeStatistics
    private int length = 0;
    private final LeRobotIntegerStatisticsCalculator episodeIndexStats = new LeRobotIntegerStatisticsCalculator();
    private final LeRobotIntegerStatisticsCalculator frameIndexStats = new LeRobotIntegerStatisticsCalculator();
+   private final LeRobotIntegerStatisticsCalculator nextDoneStats = new LeRobotIntegerStatisticsCalculator();
    private final LeRobotIntegerStatisticsCalculator indexStats = new LeRobotIntegerStatisticsCalculator();
    private final LeRobotIntegerStatisticsCalculator taskIndexStats = new LeRobotIntegerStatisticsCalculator();
 
@@ -79,6 +80,7 @@ public class LeRobotDatasetEpisodeStatistics
       // Track statistics for integer fields using the statistics calculator
       episodeIndexStats.addValue(dataFrame.episodeIndex());
       frameIndexStats.addValue(dataFrame.frameIndex());
+      nextDoneStats.addValue(dataFrame.nextDone() ? 1 : 0);
       indexStats.addValue(dataFrame.index());
       taskIndexStats.addValue(dataFrame.taskIndex());
    }
@@ -118,6 +120,7 @@ public class LeRobotDatasetEpisodeStatistics
 
       episodeIndexStats.calculate();
       frameIndexStats.calculate();
+      nextDoneStats.calculate();
       indexStats.calculate();
       taskIndexStats.calculate();
    }
@@ -202,10 +205,10 @@ public class LeRobotDatasetEpisodeStatistics
       fieldStats.putArray("count").add(length);
       
       fieldStats = stats.putObject("next.done");
-      fieldStats.putArray("min").add(false);
-      fieldStats.putArray("max").add(true);
-      fieldStats.putArray("mean").add(0.00066f);
-      fieldStats.putArray("std").add(0.025f);
+      fieldStats.putArray("min").add(nextDoneStats.getMin() == 1);
+      fieldStats.putArray("max").add(nextDoneStats.getMax() == 1);
+      fieldStats.putArray("mean").add(nextDoneStats.getMean());
+      fieldStats.putArray("std").add(nextDoneStats.getStddev());
       fieldStats.putArray("count").add(length);
       
       fieldStats = stats.putObject("index");
