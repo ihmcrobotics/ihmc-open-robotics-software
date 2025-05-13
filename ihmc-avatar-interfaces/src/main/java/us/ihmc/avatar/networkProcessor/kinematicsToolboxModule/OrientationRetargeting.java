@@ -3,17 +3,21 @@ package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 import us.ihmc.communication.PostureOptimizerState;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tools.QuaternionTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -21,7 +25,6 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.spatial.Twist;
-import us.ihmc.yoVariables.euclid.filters.RateLimitedYoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -33,9 +36,12 @@ import us.ihmc.yoVariables.variable.YoDouble;
  */
 public class OrientationRetargeting
 {
-   private static final boolean VISUALIZE = true;
+   static final boolean VISUALIZE = true;
    static final double BLEND_DURATION = 1.0;
    private final YoFrameQuaternion desiredOrientation;
+
+   private final FramePoint3D nominalPosition = new FramePoint3D();
+   private final FramePoint3D desiredPosition = new FramePoint3D();
 
    private final FrameQuaternion nominalOrientation = new FrameQuaternion();
    private final AxisAngle optimizedOrientation = new AxisAngle();
@@ -44,7 +50,8 @@ public class OrientationRetargeting
    private final YoFrameQuaternion yoNominalOrientation;
    private final YoFrameQuaternion yoOptimizedOrientation;
    private final YoFrameQuaternion yoActualOrientation;
-   private final YoFramePoint3D controlFrameOrigin;
+   private final YoFramePoint3D yoNominalPosition;
+   private final YoFramePoint3D yoDesiredPosition;
 
    private final FramePose3D controlFramePose = new FramePose3D();
    private final MovingReferenceFrame controlFrame;
@@ -66,12 +73,22 @@ public class OrientationRetargeting
    private double blendStartTime;
    private final DoubleProvider timeProvider;
 
-   public OrientationRetargeting(String name, RigidBodyBasics rigidBody, double integrationDT, DoubleProvider timeProvider, double maxAngle, YoGraphicsListRegistry graphicsListRegistry, YoRegistry registry)
+   private boolean updatePositionsFromControlFrame = true;
+   private final FrameVector3D offset = new FrameVector3D();
+
+   public OrientationRetargeting(String name,
+                                 RigidBodyBasics rigidBody,
+                                 double integrationDT,
+                                 DoubleProvider timeProvider,
+                                 double maxAngle,
+                                 FramePose3DReadOnly defaultControlFramePoseInBody,
+                                 YoGraphicsListRegistry graphicsListRegistry,
+                                 YoRegistry registry)
    {
       desiredOrientation = new YoFrameQuaternion(name, ReferenceFrame.getWorldFrame(), registry);
       this.integrationDT = integrationDT;
       this.maxAngle = maxAngle;
-      this.controlFramePose.setToZero(rigidBody.getBodyFixedFrame());
+      this.controlFramePose.setIncludingFrame(rigidBody.getBodyFixedFrame(), defaultControlFramePoseInBody);
       this.rigidBody = rigidBody;
       this.retargetDelta = new YoDouble(name + "RetargetDelta", registry);
       this.timeProvider = timeProvider;
@@ -95,24 +112,31 @@ public class OrientationRetargeting
       {
          yoNominalOrientation = new YoFrameQuaternion(name + "NominalOrientation", ReferenceFrame.getWorldFrame(), registry);
          yoOptimizedOrientation = new YoFrameQuaternion(name + "OptimizedOrientation", ReferenceFrame.getWorldFrame(), registry);
-         yoActualOrientation = new YoFrameQuaternion(name + "ActualOrientation", ReferenceFrame.getWorldFrame(), registry);
+         //         yoActualOrientation = new YoFrameQuaternion(name + "ActualOrientation", ReferenceFrame.getWorldFrame(), registry);
+         yoActualOrientation = null;
 
-         controlFrameOrigin = new YoFramePoint3D(name + "ControlFrameOrigin", ReferenceFrame.getWorldFrame(), registry);
+         yoNominalPosition = new YoFramePoint3D(name + "ControlFrameOrigin", ReferenceFrame.getWorldFrame(), registry);
+         yoDesiredPosition = new YoFramePoint3D(name + "DesiredFrameOrigin", ReferenceFrame.getWorldFrame(), registry);
 
-         YoGraphicCoordinateSystem nominalOrientation = new YoGraphicCoordinateSystem(name + "nominalOrientation", controlFrameOrigin, yoNominalOrientation, 0.35, YoAppearance.Green());
-         YoGraphicCoordinateSystem optimizedOrientation = new YoGraphicCoordinateSystem(name + "optimizedOrientation", controlFrameOrigin, yoOptimizedOrientation, 0.35, YoAppearance.Red());
-         YoGraphicCoordinateSystem actualOrientation = new YoGraphicCoordinateSystem(name + "actualOrientation", controlFrameOrigin, yoActualOrientation, 0.35, YoAppearance.Black());
+         YoGraphicCoordinateSystem nominalOrientation = new YoGraphicCoordinateSystem(name + "nominalOrientation", yoNominalPosition,
+                                                                                      yoNominalOrientation,
+                                                                                      0.35,
+                                                                                      YoAppearance.Green());
+         YoGraphicCoordinateSystem desiredOrientation = new YoGraphicCoordinateSystem(name + "desiredOrientation", yoDesiredPosition, this.desiredOrientation,
+                                                                                        0.35,
+                                                                                        YoAppearance.Red());
+         //         YoGraphicCoordinateSystem actualOrientation = new YoGraphicCoordinateSystem(name + "actualOrientation", controlFrameOrigin, yoActualOrientation, 0.35, YoAppearance.Black());
 
          graphicsListRegistry.registerYoGraphic("Coordinate Debug", nominalOrientation);
-         graphicsListRegistry.registerYoGraphic("Coordinate Debug", optimizedOrientation);
-         graphicsListRegistry.registerYoGraphic("Coordinate Debug", actualOrientation);
+         graphicsListRegistry.registerYoGraphic("Coordinate Debug", desiredOrientation);
+         //         graphicsListRegistry.registerYoGraphic("Coordinate Debug", actualOrientation);
       }
       else
       {
          yoNominalOrientation = null;
          yoOptimizedOrientation = null;
          yoActualOrientation = null;
-         controlFrameOrigin = null;
+         yoNominalPosition = null;
       }
    }
 
@@ -131,6 +155,7 @@ public class OrientationRetargeting
    public void updateNominalOrientation(FrameOrientation3DReadOnly nominalOrientation, boolean hasDesiredVelocity, SpatialVector desiredVelocity, FramePose3DReadOnly controlFrame)
    {
       this.nominalOrientation.setIncludingFrame(nominalOrientation);
+
       this.controlFramePose.setIncludingFrame(controlFrame);
       controlFramePose.changeFrame(rigidBody.getBodyFixedFrame());
 
@@ -138,9 +163,40 @@ public class OrientationRetargeting
          filteredAngularVelocity.set(desiredVelocity.getAngularPart());
    }
 
+   public void updateNominalPosition(FramePoint3DReadOnly nominalPosition)
+   {
+      this.nominalPosition.setIncludingFrame(nominalPosition);
+   }
+
+   public void updateDesiredPosition(FramePoint3DReadOnly desiredPosition)
+   {
+      this.desiredPosition.setIncludingFrame(desiredPosition);
+      updatePositionsFromControlFrame = false;
+   }
+
+   public void updatePositionOffset(FrameVector3DReadOnly offset)
+   {
+      updatePositionsFromControlFrame = true;
+      this.offset.set(offset);
+   }
+
+   public void hideViz()
+   {
+//      yoNominalPosition.setToNaN();
+//      yoDesiredPosition.setToNaN();
+   }
+
    public void update(PostureOptimizerState optimizerState, PostureOptimizerState previousState)
    {
       controlFrame.update();
+
+      if (updatePositionsFromControlFrame)
+      {
+         nominalPosition.setFromReferenceFrame(controlFrame);
+         desiredPosition.setFromReferenceFrame(controlFrame);
+
+         nominalPosition.sub(offset);
+      }
 
       boolean isNewState = previousState != optimizerState;
       if (isNewState && optimizerState == PostureOptimizerState.OPTIMIZER)
@@ -162,6 +218,8 @@ public class OrientationRetargeting
       {
          integrate();
 
+         desiredOrientation.set(optimizedOrientation);
+
          double filterAlpha = 0.25;
          filteredAngularVelocity.interpolate(angularVelocity, filterAlpha);
       }
@@ -173,10 +231,12 @@ public class OrientationRetargeting
 
       if (VISUALIZE)
       {
-         controlFrameOrigin.setFromReferenceFrame(controlFrame);
+         yoNominalPosition.set(nominalPosition);
+         yoDesiredPosition.set(desiredPosition);
+
          yoNominalOrientation.set(nominalOrientation);
          yoOptimizedOrientation.set(optimizedOrientation);
-         yoActualOrientation.setFromReferenceFrame(controlFrame);
+//         yoActualOrientation.setFromReferenceFrame(controlFrame);
       }
 
       orientationDifference.difference(nominalOrientation, desiredOrientation);

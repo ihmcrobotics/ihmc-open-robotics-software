@@ -6,7 +6,12 @@ import us.ihmc.communication.PostureOptimizerState;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.algorithms.CentroidalMomentumCalculator;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -38,6 +43,9 @@ public class CoMHeightRetargeting
    private double blendStartTime;
    private final DoubleProvider timeProvider;
 
+   private final YoFramePoint3D nominalCoM;
+   private final YoFramePoint3D desiredCoM;
+
    public CoMHeightRetargeting(double integrationDT,
                                double minOffset,
                                double maxOffset,
@@ -45,6 +53,7 @@ public class CoMHeightRetargeting
                                DoubleProvider timeProvider,
                                ReferenceFrame centerOfMassFrame,
                                CentroidalMomentumCalculator centroidalMomentumCalculator,
+                               YoGraphicsListRegistry graphicsListRegistry,
                                YoRegistry registry)
    {
       this.centroidalMomentumCalculator = centroidalMomentumCalculator;
@@ -60,6 +69,24 @@ public class CoMHeightRetargeting
       centroidalZVelocity = new YoDouble("centroidalZVelocity", registry);
 
       comRetargetDelta = new YoDouble("comRetargetDelta", registry);
+
+      if (OrientationRetargeting.VISUALIZE)
+      {
+         nominalCoM = new YoFramePoint3D("nominalPosCoM", ReferenceFrame.getWorldFrame(), registry);
+         desiredCoM = new YoFramePoint3D("desiredPosCoM", ReferenceFrame.getWorldFrame(), registry);
+         YoFrameQuaternion zeroOrientation = new YoFrameQuaternion("zeroOrientation", ReferenceFrame.getWorldFrame(), registry);
+
+         YoGraphicCoordinateSystem nominalOrientation = new YoGraphicCoordinateSystem("nominalCoM", nominalCoM, zeroOrientation, 0.35, YoAppearance.Green());
+         YoGraphicCoordinateSystem optimizedOrientation = new YoGraphicCoordinateSystem("optimizedCoM", desiredCoM, zeroOrientation, 0.35, YoAppearance.Red());
+
+         graphicsListRegistry.registerYoGraphic("Coordinate Debug", nominalOrientation);
+         graphicsListRegistry.registerYoGraphic("Coordinate Debug", optimizedOrientation);
+      }
+      else
+      {
+         nominalCoM = null;
+         desiredCoM = null;
+      }
    }
 
    public void initialize()
@@ -79,6 +106,12 @@ public class CoMHeightRetargeting
    {
       this.nominalHeight = nominalHeight;
       nominalCoMZ.set(nominalHeight);
+   }
+
+   public void hideViz()
+   {
+      nominalCoM.setToNaN();
+      desiredCoM.setToNaN();
    }
 
    public void update(PostureOptimizerState optimizerState, PostureOptimizerState previousState, DMatrixRMaj qd)
@@ -108,6 +141,12 @@ public class CoMHeightRetargeting
       {
          // freeze, no update (just call this to avoid edge cases in rate limiting)
       }
+
+      nominalCoM.setFromReferenceFrame(centerOfMassFrame);
+      desiredCoM.setFromReferenceFrame(centerOfMassFrame);
+
+      nominalCoM.setZ(nominalHeight);
+      desiredCoM.setZ(desiredHeight);
 
       comRetargetDelta.set(Math.abs(desiredHeight - nominalHeight));
    }

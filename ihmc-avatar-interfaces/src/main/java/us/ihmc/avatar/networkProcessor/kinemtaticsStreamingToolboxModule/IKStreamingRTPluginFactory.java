@@ -375,8 +375,8 @@ public class IKStreamingRTPluginFactory
       public YoGraphicsListRegistry getSCS1YoGraphicsListRegistry()
       {
          // FIXME There's duplicate YoGraphics
-         return new YoGraphicsListRegistry();
-//         return yoGraphicsListRegistry;
+//         return new YoGraphicsListRegistry();
+         return yoGraphicsListRegistry;
       }
 
       @Override

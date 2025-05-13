@@ -1,6 +1,5 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
-import org.apache.commons.math3.util.Precision;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KSTStreamingState;
@@ -11,7 +10,6 @@ import us.ihmc.commonWalkingControlModules.staticEquilibrium.SensitivityBasedSta
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.StabilityMarginRegionCalculator;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState;
 import us.ihmc.communication.PostureOptimizerState;
-import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
@@ -24,6 +22,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -53,19 +52,19 @@ public class StabilityBasedKinematicRetargetingCalculator
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    // Simulation
-//   private static final double MAX_ARM_ORIENTATION_OFFSET = Math.toRadians(180.0);
-//   private static final double MAX_CHEST_ORIENTATION_OFFSET = Math.toRadians(180.0);
-//   private static final double MAX_PELVIS_ORIENTATION_OFFSET = Math.toRadians(180.0);
+   private static final double MAX_ARM_ORIENTATION_OFFSET = Math.toRadians(180.0);
+   private static final double MAX_CHEST_ORIENTATION_OFFSET = Math.toRadians(180.0);
+   private static final double MAX_PELVIS_ORIENTATION_OFFSET = Math.toRadians(180.0);
 
    // Hardware
-   private static final double MAX_ARM_ORIENTATION_OFFSET = Math.toRadians(55.0);
-   private static final double MAX_CHEST_ORIENTATION_OFFSET = Math.toRadians(30.0);
-   private static final double MAX_PELVIS_ORIENTATION_OFFSET = Math.toRadians(30.0);
+//   private static final double MAX_ARM_ORIENTATION_OFFSET = Math.toRadians(55.0);
+//   private static final double MAX_CHEST_ORIENTATION_OFFSET = Math.toRadians(30.0);
+//   private static final double MAX_PELVIS_ORIENTATION_OFFSET = Math.toRadians(30.0);
 
    private static final boolean SNAP_TO_REGION = false;
-   public static boolean OVERRIDE_MESSAGE = false;
-   public static boolean ENABLE_POSTURE_OBJECTIVE = false;
-   public static boolean ENABLE_CONTACT_OBJECTIVE = false;
+   public static boolean OVERRIDE_MESSAGE = true;
+   public static boolean ENABLE_POSTURE_OBJECTIVE = true;
+   public static boolean ENABLE_CONTACT_OBJECTIVE = true;
    public static final boolean INCLUDE_FF_VELOCITY = false;
 
    private static final double KP_ORIENTATION = 1200.0;
@@ -140,6 +139,8 @@ public class StabilityBasedKinematicRetargetingCalculator
    private final YoFrameVector3D integratedContactPointAdjustment;
    private final YoDouble contactPointAdjustmentNorm;
 
+   private final FrameVector3D integratedContactPointAdjustmentForViz = new FrameVector3D();
+
    private final FramePose3D tempPose = new FramePose3D();
    private final FramePoint3D tempPoint = new FramePoint3D();
    private final Point2D tempPoint2D = new Point2D();
@@ -180,16 +181,19 @@ public class StabilityBasedKinematicRetargetingCalculator
                                                                                          graphicsListRegistry,
                                                                                          registry);
 
-      kpPosture.set(15.0); // 15.0);
+      kpPosture.set(12.0); // 15.0);
       kpContact.set(0.25); // 0.35);
 
-      chestOrientationRetargeting = new OrientationRetargeting("chest",  fullRobotModel.getChest(), updateDT, () -> time, MAX_CHEST_ORIENTATION_OFFSET, graphicsListRegistry, registry);
-      pelvisOrientationRetargeting = new OrientationRetargeting("pelvis", fullRobotModel.getPelvis(), updateDT, () -> time, MAX_PELVIS_ORIENTATION_OFFSET, graphicsListRegistry, registry);
-      bracingHandOrientationRetargeting = new OrientationRetargeting("bracingHand", fullRobotModel.getHand(HumanoidKinematicsToolboxController.BRACING_HAND_SIDE), updateDT, () -> time, MAX_ARM_ORIENTATION_OFFSET, graphicsListRegistry, registry);
+      FramePose3D handControlFramePose = new FramePose3D();
+      handControlFramePose.getOrientation().setYawPitchRoll(0.0, 0.5 * Math.PI, 0.0);
+
+      chestOrientationRetargeting = new OrientationRetargeting("chest",  fullRobotModel.getChest(), updateDT, () -> time, MAX_CHEST_ORIENTATION_OFFSET, new FramePose3D(), graphicsListRegistry, registry);
+      pelvisOrientationRetargeting = new OrientationRetargeting("pelvis", fullRobotModel.getPelvis(), updateDT, () -> time, MAX_PELVIS_ORIENTATION_OFFSET, new FramePose3D(), graphicsListRegistry, registry);
+      bracingHandOrientationRetargeting = new OrientationRetargeting("bracingHand", fullRobotModel.getHand(HumanoidKinematicsToolboxController.BRACING_HAND_SIDE), updateDT, () -> time, MAX_ARM_ORIENTATION_OFFSET,handControlFramePose, graphicsListRegistry, registry);
 
       double minOffset = -0.1;
       double maxOffset = 0.1; // 0.04;
-      comHeightRetargeting = new CoMHeightRetargeting(updateDT, minOffset, maxOffset, fullRobotModel.getTotalMass(), () -> time, centerOfMassFrame, stabilityGradientCalculator.getCentroidalMomentumCalculator(), registry);
+      comHeightRetargeting = new CoMHeightRetargeting(updateDT, minOffset, maxOffset, fullRobotModel.getTotalMass(), () -> time, centerOfMassFrame, stabilityGradientCalculator.getCentroidalMomentumCalculator(), graphicsListRegistry, registry);
 
       contactPointAdjustment = new YoFrameVector3D("contactPointAdjustment", ReferenceFrame.getWorldFrame(), registry);
       integratedContactPointAdjustment = new YoFrameVector3D("integratedContactPointAdjustment", ReferenceFrame.getWorldFrame(), registry);
@@ -268,6 +272,7 @@ public class StabilityBasedKinematicRetargetingCalculator
       pelvisWeight.set(isUpperBodyLoadBearing.getValue() ? pelvisMultiContactWeight : pelvisDefaultWeight);
       configureSelectionMatrix(pelvisSelectionMatrix, pelvisWeight);
 
+      integratedContactPointAdjustmentForViz.set(integratedContactPointAdjustment);
       integratedContactPointAdjustment.setToZero();
       alphaEnabled.set(0.0);
 
@@ -321,6 +326,8 @@ public class StabilityBasedKinematicRetargetingCalculator
             actualStabilityMarginVelocity.set(EuclidCoreTools.clamp(deltaMargin / updateDT, 0.6));
          }
 
+         double m = multiContactRegionCalculator.getStabilityMargin();
+
          if (!isEnabled.getValue() || !isUpperBodyLoadBearing.getValue() || !requestPostureAdjustment.getValue() || getPostureSensitivity() < sensitivityThresholdLower.getValue())
          {
             postureOptimizerState.set(PostureOptimizerState.NOMINAL);
@@ -344,6 +351,14 @@ public class StabilityBasedKinematicRetargetingCalculator
       pelvisOrientationRetargeting.update(postureOptimizerState.getValue(), previousState);
       bracingHandOrientationRetargeting.update(postureOptimizerState.getValue(), previousState);
       comHeightRetargeting.update(postureOptimizerState.getValue(), previousState, scaledStabilityGradient);
+
+      if (!isUpperBodyLoadBearing.getValue())
+      {
+         chestOrientationRetargeting.hideViz();
+         pelvisOrientationRetargeting.hideViz();
+         bracingHandOrientationRetargeting.hideViz();
+         comHeightRetargeting.hideViz();
+      }
 
       if (multiContactRegionCalculator.hasSolvedWholeRegion())
       {
@@ -411,6 +426,7 @@ public class StabilityBasedKinematicRetargetingCalculator
          FixedFrameQuaternionBasics desiredHandOrientation = command.getDesiredPose().getOrientation();
          SpatialVector desiredVelocity = command.getDesiredVelocity();
          bracingHandOrientationRetargeting.updateNominalOrientation(desiredHandOrientation, command.getHasDesiredVelocity(), desiredVelocity, command.getControlFramePose());
+         bracingHandOrientationRetargeting.updateNominalPosition(command.getDesiredPose().getPosition());
 
          desiredHandOrientation.set(bracingHandOrientationRetargeting.getDesiredOrientation());
          command.setHasDesiredVelocity(true);
@@ -450,6 +466,12 @@ public class StabilityBasedKinematicRetargetingCalculator
             // Add it
             if (addContactAdjustment.getValue())
                command.getDesiredPose().getPosition().add(integratedContactPointAdjustment);
+
+            bracingHandOrientationRetargeting.updateDesiredPosition(command.getDesiredPose().getPosition());
+         }
+         else
+         {
+            bracingHandOrientationRetargeting.updatePositionOffset(integratedContactPointAdjustmentForViz);
          }
       }
    }
