@@ -8,6 +8,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.nio.file.Path;
+import java.util.List;
 
 public class LeRobotDatasetEpisodeStatistics
 {
@@ -29,6 +30,8 @@ public class LeRobotDatasetEpisodeStatistics
 
    // data stats
    private int length = 0;
+   private final List<LeRobotFloatStatisticsCalculator> stateStats = new java.util.ArrayList<>();
+   private final List<LeRobotFloatStatisticsCalculator> actionStats = new java.util.ArrayList<>();
    private final LeRobotIntegerStatisticsCalculator episodeIndexStats = new LeRobotIntegerStatisticsCalculator();
    private final LeRobotIntegerStatisticsCalculator frameIndexStats = new LeRobotIntegerStatisticsCalculator();
    private final LeRobotFloatStatisticsCalculator timestampStats = new LeRobotFloatStatisticsCalculator();
@@ -76,15 +79,30 @@ public class LeRobotDatasetEpisodeStatistics
 
    public void processParquetRecord(LeRobotEpisodeRecord dataFrame)
    {
-      ++length;
+      for (int i = 0; i < dataFrame.state().size(); i++)
+      {
+         if (length == 0)
+            stateStats.add(new LeRobotFloatStatisticsCalculator());
 
-      // Track statistics for integer fields using the statistics calculator
+         stateStats.get(i).addValue(dataFrame.state().get(i));
+      }
+
+      for (int i = 0; i < dataFrame.action().size(); i++)
+      {
+         if (length == 0)
+            actionStats.add(new LeRobotFloatStatisticsCalculator());
+
+         actionStats.get(i).addValue(dataFrame.action().get(i));
+      }
+
       episodeIndexStats.addValue(dataFrame.episodeIndex());
       frameIndexStats.addValue(dataFrame.frameIndex());
       timestampStats.addValue(dataFrame.timestamp());
       nextDoneStats.addValue(dataFrame.nextDone() ? 1 : 0);
       indexStats.addValue(dataFrame.index());
       taskIndexStats.addValue(dataFrame.taskIndex());
+
+      ++length;
    }
 
    public void calculate()
@@ -120,6 +138,10 @@ public class LeRobotDatasetEpisodeStatistics
          LogTools.info("StdDev RGB: R=%.3f G=%.3f B=%.3f".formatted(std.r, std.g, std.b));
       }
 
+      for (LeRobotFloatStatisticsCalculator calculator : stateStats)
+         calculator.calculate();
+      for (LeRobotFloatStatisticsCalculator calculator : actionStats)
+         calculator.calculate();
       episodeIndexStats.calculate();
       frameIndexStats.calculate();
       timestampStats.calculate();
@@ -158,32 +180,32 @@ public class LeRobotDatasetEpisodeStatistics
 
       ObjectNode state = stats.putObject("state");
       ArrayNode min = state.putArray("min");
-      for (int i = 0; i < 14; i++)
-         min.add(0.0f);
       ArrayNode max = state.putArray("max");
-      for (int i = 0; i < 14; i++)
-         max.add(10.0f);
       ArrayNode mean = state.putArray("mean");
-      for (int i = 0; i < 14; i++)
-         mean.add(5.0f);
       ArrayNode std = state.putArray("std");
-      for (int i = 0; i < 14; i++)
-         std.add(3.0f);
+      
+      for (LeRobotFloatStatisticsCalculator calculator : stateStats)
+      {
+         min.add(calculator.getMin());
+         max.add(calculator.getMax());
+         mean.add(calculator.getMean());
+         std.add(calculator.getStddev());
+      }
       state.putArray("count").add(length);
-
+      
       ObjectNode action = stats.putObject("action");
       min = action.putArray("min");
-      for (int i = 0; i < 14; i++)
-         min.add(0.0f);
       max = action.putArray("max");
-      for (int i = 0; i < 14; i++)
-         max.add(10.0f);
       mean = action.putArray("mean");
-      for (int i = 0; i < 14; i++)
-         mean.add(5.0f);
       std = action.putArray("std");
-      for (int i = 0; i < 14; i++)
-         std.add(3.0f);
+      
+      for (LeRobotFloatStatisticsCalculator calculator : actionStats)
+      {
+         min.add(calculator.getMin());
+         max.add(calculator.getMax());
+         mean.add(calculator.getMean());
+         std.add(calculator.getStddev());
+      }
       action.putArray("count").add(length);
 
       ObjectNode fieldStats = stats.putObject("episode_index");
