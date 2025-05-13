@@ -8,24 +8,19 @@ import us.ihmc.tools.property.StoredPropertySetBasics;
  */
 public interface DepthImageFilteringParametersBasics extends DepthImageFilteringParametersReadOnly, StoredPropertySetBasics
 {
-   default void setLongLengthForRectangle(int longLengthForRectangle)
+   default void setWindowSizeInPixels(int windowSizeInPixels)
    {
-      set(DepthImageFilteringParameters.longLengthForRectangle, longLengthForRectangle);
+      set(DepthImageFilteringParameters.windowSizeInPixels, windowSizeInPixels);
    }
 
-   default void setShortLengthForRectangle(int shortLengthForRectangle)
+   default void setAngleThresholdInRadians(double angleThresholdInRadians)
    {
-      set(DepthImageFilteringParameters.shortLengthForRectangle, shortLengthForRectangle);
+      set(DepthImageFilteringParameters.angleThresholdInRadians, angleThresholdInRadians);
    }
 
-   default void setCosineThreshold(double cosineThreshold)
+   default void setNormalAngleThreshold(double normalAngleThreshold)
    {
-      set(DepthImageFilteringParameters.cosineThreshold, cosineThreshold);
-   }
-
-   default void setNormalThreshold(double normalThreshold)
-   {
-      set(DepthImageFilteringParameters.normalThreshold, normalThreshold);
+      set(DepthImageFilteringParameters.normalAngleThreshold, normalAngleThreshold);
    }
 
    default void setRANSACIterations(int ransacIterations)
@@ -33,8 +28,8 @@ public interface DepthImageFilteringParametersBasics extends DepthImageFiltering
       set(DepthImageFilteringParameters.ransacIterations, ransacIterations);
    }
 
-   default void setMinimumNormalsFound(int minimumNormalsFound)
+   default void setMinimumDepthValuesRequiredInWindow(int minimumDepthValuesRequiredInWindow)
    {
-      set(DepthImageFilteringParameters.minimumNormalsFound, minimumNormalsFound);
+      set(DepthImageFilteringParameters.minimumDepthValuesRequiredInWindow, minimumDepthValuesRequiredInWindow);
    }
 }

@@ -1,9 +1,8 @@
 {
   "title": "DepthImageFilteringParameters",
-  "Long length for rectangle ": 10,
-  "Short length for rectangle": 4,
-  "Cosine Threshold": 0.006,
-  "Normal Threshold": 0.1,
+  "window size in pixels ": 10,
+  "Angle threshold in radians": 0.006,
+  "Normal angle Threshold": 0.1,
   "RANSAC iterations": 12,
-  "Minimum Normals found": 2
+  "Minimum Depth values required in window": 3
 }

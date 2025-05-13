@@ -31,84 +31,50 @@ __device__ float3 normalize3(float3 v)
     return make_float3(v.x / norm, v.y / norm, v.z / norm);
 }
 
-__device__ void computeAlignedRectangleSamples(int u, int v, float3 rayDir,
-                                               int longLen, int shortLen,
-                                               int width, int height,
-                                               int2 *samples, int &count, int maxSamples)
-{
-    float2 ray2D = make_float2(rayDir.x, rayDir.y);
-    float norm = sqrtf(ray2D.x * ray2D.x + ray2D.y * ray2D.y);
-    if (norm < 1e-5f)
-        return;
-
-    ray2D.x /= norm;
-    ray2D.y /= norm;
-
-    float2 ortho = make_float2(-ray2D.y, ray2D.x);
-
-    count = 0;
-    for (int i = -longLen / 2; i <= longLen / 2; ++i)
-    {
-        for (int j = -shortLen / 2; j <= shortLen / 2; ++j)
-        {
-            float x_f = u + i * ray2D.x + j * ortho.x;
-            float y_f = v + i * ray2D.y + j * ortho.y;
-            int x = __float2int_rn(x_f);
-            int y = __float2int_rn(y_f);
-
-            if (x >= 0 && x < width && y >= 0 && y < height)
-                samples[count++] = make_int2(x, y);
-
-            if (count >= maxSamples)
-                return;
-        }
-    }
-}
-
 __device__ float3 computeNormalRANSAC(unsigned short *depthImage, size_t pitchDepthImage,
                                       int width, int height,
                                       int u, int v, float fx, float fy, float cx, float cy,
-                                      int longLen, int shortLen,
-                                      int ransacIters, int minNormals, float normalAngleThresh)
+                                      int windowSizeInPixels, int ransacIterations, int minimumDepthValuesRequiredInWindow, float normalAngleThreshold)
 {
+    const int halfWindow = windowSizeInPixels / 2;
     const int maxSamples = 32;
 
     float3 points[maxSamples];
     int count = 0;
 
-    float3 rayDir = computeRay(u, v, 1.0f, fx, fy, cx, cy);
-    int2 pixelSamples[maxSamples];
-    int sampleCount = 0;
-
-    computeAlignedRectangleSamples(u, v, rayDir, longLen, shortLen,
-                                    width, height, pixelSamples, sampleCount, maxSamples);
-
-    for (int i = 0; i < sampleCount; ++i)
+    // Gather neighborhood points
+    for (int dy = -halfWindow; dy <= halfWindow; ++dy)
     {
-        int x = pixelSamples[i].x;
-        int y = pixelSamples[i].y;
+        for (int dx = -halfWindow; dx <= halfWindow; ++dx)
+        {
+            int x = u + dx;
+            int y = v + dy;
+            if (x < 0 || x >= width || y < 0 || y >= height)
+                continue;
 
-        if (x < 0 && x > width && y < 0 && y > height)
-            continue;
+            unsigned short *depthValue = (unsigned short *)((char *)depthImage + x * pitchDepthImage) + y;
 
-        unsigned short *depthValue = (unsigned short *)((char *)depthImage + x * pitchDepthImage) + y;
+            if (*depthValue <= 0)
+                continue;
 
-        if (*depthValue <= 0)
-            continue;
 
-        points[count++] = computeRay(x, y, *depthValue, fx, fy, cx, cy);
+            points[count++] = computeRay(x, y, *depthValue, fx, fy, cx, cy);
+
+            if (count >= maxSamples)
+                break;
+        }
 
         if (count >= maxSamples)
             break;
     }
 
-    if (count < minNormals)
+    if (count < minimumDepthValuesRequiredInWindow)
         return make_float3(0, 0, 0);
 
     float3 bestNormal = make_float3(0, 0, 0);
     int bestInliers = 0;
 
-    for (int i = 0; i < ransacIters; ++i)
+    for (int i = 0; i < ransacIterations; ++i)
     {
         int i1 = i % count;
         int i2 = (i + 1) % count;
@@ -139,7 +105,7 @@ __device__ float3 computeNormalRANSAC(unsigned short *depthImage, size_t pitchDe
             float dot = fabsf(dot3(normal, normalize3(vj)));
             float angle = acosf(dot);  // in radians
 
-            if (angle < normalAngleThresh)
+            if (angle < normalAngleThreshold)
                 inliers++;
         }
 
@@ -157,8 +123,8 @@ extern "C"
 __global__ void filterFlyingPoints(unsigned short *depthImage, size_t pitchDepthImage,
                                    unsigned short *filteredImage, size_t pitchFilteredImage,
                                    int width, int height,
-                                   int longLen, int shortLen,
-                                   int ransacIterations, int minNormals, float dotThreshold, float normalAngleThreshold,
+                                   int windowSizeInPixels, int ransacIterations, int minimumDepthValuesRequiredInWindow,
+                                   float angleThresholdInRadians, float normalAngleThreshold,
                                    float fx, float fy, float cx, float cy)
 {
     int u = blockIdx.x * blockDim.x + threadIdx.x;
@@ -193,12 +159,11 @@ __global__ void filterFlyingPoints(unsigned short *depthImage, size_t pitchDepth
 
     float3 normal = computeNormalRANSAC(depthImage, pitchDepthImage,
                                         width, height, u, v, fx, fy, cx, cy,
-                                        longLen, shortLen,
-                                        ransacIterations, minNormals, normalAngleThreshold);
+                                        windowSizeInPixels, ransacIterations, minimumDepthValuesRequiredInWindow, normalAngleThreshold);
 
     float dot = dot3(ray, normal);
     dot = fabsf(dot);  // we want it close to 0, regardless of direction
 
     unsigned short *filteredImageRow = (unsigned short *)((char *)filteredImage + u * pitchFilteredImage);
-    filteredImageRow[v] = (dot < dotThreshold) ? *depthValue : 0;
+    filteredImageRow[v] = (dot < angleThresholdInRadians) ? *depthValue : 0;
 }

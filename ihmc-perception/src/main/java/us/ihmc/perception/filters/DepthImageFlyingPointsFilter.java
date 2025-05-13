@@ -66,12 +66,11 @@ public class DepthImageFlyingPointsFilter
       flyingPointFilterKernel.withPointer(deviceInputImage.data()).withLong(deviceInputImage.step());
       flyingPointFilterKernel.withPointer(deviceOutputImageToPack.data()).withLong(deviceOutputImageToPack.step());
       flyingPointFilterKernel.withInt(deviceInputImage.rows()).withInt(deviceInputImage.cols());
-      flyingPointFilterKernel.withInt(depthImageFilteringParameters.getLongLengthForRectangle());
-      flyingPointFilterKernel.withInt(depthImageFilteringParameters.getShortLengthForRectangle());
+      flyingPointFilterKernel.withInt(depthImageFilteringParameters.getWindowSizeInPixels());
       flyingPointFilterKernel.withInt(depthImageFilteringParameters.getRANSACIterations());
-      flyingPointFilterKernel.withInt(depthImageFilteringParameters.getMinimumNormalsFound());
-      flyingPointFilterKernel.withFloat((float) depthImageFilteringParameters.getCosineThreshold());
-      flyingPointFilterKernel.withFloat((float) depthImageFilteringParameters.getNormalThreshold());
+      flyingPointFilterKernel.withInt(depthImageFilteringParameters.getMinimumDepthValuesRequiredInWindow());
+      flyingPointFilterKernel.withFloat((float) depthImageFilteringParameters.getAngleThresholdInRadians());
+      flyingPointFilterKernel.withFloat((float) depthImageFilteringParameters.getNormalAngleThreshold());
       flyingPointFilterKernel.withFloat((float) cameraIntrinsics.getFx())
                              .withFloat((float) cameraIntrinsics.getFy())
                              .withFloat((float) cameraIntrinsics.getCx())

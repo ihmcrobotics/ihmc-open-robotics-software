@@ -10,24 +10,19 @@ import static us.ihmc.perception.filters.DepthImageFilteringParameters.*;
  */
 public interface DepthImageFilteringParametersReadOnly extends StoredPropertySetReadOnly
 {
-   default int getLongLengthForRectangle()
+   default int getWindowSizeInPixels()
    {
-      return get(longLengthForRectangle);
+      return get(windowSizeInPixels);
    }
 
-   default int getShortLengthForRectangle()
+   default double getAngleThresholdInRadians()
    {
-      return get(shortLengthForRectangle);
+      return get(angleThresholdInRadians);
    }
 
-   default double getCosineThreshold()
+   default double getNormalAngleThreshold()
    {
-      return get(cosineThreshold);
-   }
-
-   default double getNormalThreshold()
-   {
-      return get(normalThreshold);
+      return get(normalAngleThreshold);
    }
 
    default int getRANSACIterations()
@@ -35,8 +30,8 @@ public interface DepthImageFilteringParametersReadOnly extends StoredPropertySet
       return get(ransacIterations);
    }
 
-   default int getMinimumNormalsFound()
+   default int getMinimumDepthValuesRequiredInWindow()
    {
-      return get(minimumNormalsFound);
+      return get(minimumDepthValuesRequiredInWindow);
    }
 }

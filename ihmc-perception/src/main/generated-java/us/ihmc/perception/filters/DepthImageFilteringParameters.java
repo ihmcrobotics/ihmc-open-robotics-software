@@ -18,12 +18,11 @@ public class DepthImageFilteringParameters extends StoredPropertySet implements 
 {
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
-   public static final IntegerStoredPropertyKey longLengthForRectangle = keys.addIntegerKey("Long length for rectangle ");
-   public static final IntegerStoredPropertyKey shortLengthForRectangle = keys.addIntegerKey("Short length for rectangle");
-   public static final DoubleStoredPropertyKey cosineThreshold = keys.addDoubleKey("Cosine Threshold");
-   public static final DoubleStoredPropertyKey normalThreshold = keys.addDoubleKey("Normal Threshold");
+   public static final IntegerStoredPropertyKey windowSizeInPixels = keys.addIntegerKey("window size in pixels ");
+   public static final DoubleStoredPropertyKey angleThresholdInRadians = keys.addDoubleKey("Angle threshold in radians");
+   public static final DoubleStoredPropertyKey normalAngleThreshold = keys.addDoubleKey("Normal angle Threshold");
    public static final IntegerStoredPropertyKey ransacIterations = keys.addIntegerKey("RANSAC iterations");
-   public static final IntegerStoredPropertyKey minimumNormalsFound = keys.addIntegerKey("Minimum Normals found");
+   public static final IntegerStoredPropertyKey minimumDepthValuesRequiredInWindow = keys.addIntegerKey("Minimum Depth values required in window");
 
    /**
     * Loads this property set.
