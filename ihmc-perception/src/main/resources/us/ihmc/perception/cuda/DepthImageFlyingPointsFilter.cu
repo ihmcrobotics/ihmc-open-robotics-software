@@ -92,7 +92,7 @@ __device__ float3 computeNormalRANSAC(unsigned short *depthImage, size_t pitchDe
             float angle = fabsf(dot(normal, normalize(vj)));
             float angleInRadians = acosf(angle);  // in radians
 
-            if (angle < normalAngleThreshold)
+            if (angleInRadians < normalAngleThreshold)
                 inliers++;
         }
 
