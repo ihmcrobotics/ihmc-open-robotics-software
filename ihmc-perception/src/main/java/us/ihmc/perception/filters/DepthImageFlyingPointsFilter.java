@@ -26,7 +26,6 @@ public class DepthImageFlyingPointsFilter
 
    /**
     * This runs a CUDA kernel that will remove the flying points from a depth map.
-    *
     */
    public DepthImageFlyingPointsFilter(DepthImageFilteringParameters depthImageFilteringParameters)
    {
