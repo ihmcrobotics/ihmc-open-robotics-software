@@ -80,11 +80,9 @@ public class LeRobotDatasetEpisode
          LeRobotDatasetDataWriter dataWriter = new LeRobotDatasetDataWriter(episodeIndex, datasetLengthSoFar, session.getRootRegistry());
          LeRobotDatasetEpisodeStatistics statistics = new LeRobotDatasetEpisodeStatistics();
 
-         LogTools.info("Traversing buffer");
          length = 0L;
          long startVideoTimestamp = -1;
          long lastVideoTimestamp = -1;
-
          while (true)
          {
             int previousIndex = session.getBufferProperties().getCurrentIndex();
@@ -104,16 +102,16 @@ public class LeRobotDatasetEpisode
 
             if (currentVideoTimestamp > lastVideoTimestamp) // Write only when a new frame is available
             {
-               double period = 0.0;
-               if (lastVideoTimestamp >= 0)
-                  period = Conversions.nanosecondsToSeconds(currentVideoTimestamp - lastVideoTimestamp);
+               double frequency = lastVideoTimestamp >= 0 ?
+                     Conversions.secondsToHertz(Conversions.nanosecondsToSeconds(currentVideoTimestamp - lastVideoTimestamp)): Double.NaN;
 
                lastVideoTimestamp = currentVideoTimestamp;
 
                long videoTimestampMicros = Math.round((currentVideoTimestamp - startVideoTimestamp) / 1000.0);
-//               LogTools.info("Current timestamp: %d  Writing frame %.3f Frequency %.3f".formatted(currentVideoTimestamp,
-//                                                                                                  videoTimestampMicros / 1000.0,
-//                                                                                                  Conversions.secondsToHertz(period)));
+               LogTools.info("Current timestamp: %.3f  Writing frame %.3f Frequency %.3f"
+                                   .formatted(Conversions.nanosecondsToSeconds(currentVideoTimestamp),
+                                              Conversions.microsecondsToSeconds(videoTimestampMicros),
+                                              frequency));
                for (RobotSide side : RobotSide.values)
                {
                   ffmpegRecorders.get(side).writeFrame(videoTimestampMicros, statistics);
