@@ -169,21 +169,21 @@ public class RDXVRTeleporter
    public void snapToVRHome(RDXVRContext vrContext)
    {
       vrContext.teleport(teleportIHMCZUpToIHMCZUpWorld ->
-                         {
-                            xyYawHeadsetToTeleportTransform.setIdentity();
-                            vrContext.getHeadset().runIfConnected(headset ->
-                                                                  {
-                                                                     headset.getXForwardZUpHeadsetFrame().getTransformToDesiredFrame(xyYawHeadsetToTeleportTransform, vrContext.getTeleportFrameIHMCZUp());
-                                                                     xyYawHeadsetToTeleportTransform.getRotation().setYawPitchRoll(xyYawHeadsetToTeleportTransform.getRotation().getYaw(), 0.0, 0.0);
-                                                                  });
-                            teleportIHMCZUpToIHMCZUpWorld.set(xyYawHeadsetToTeleportTransform);
-                            teleportIHMCZUpToIHMCZUpWorld.invert();
+      {
+         xyYawHeadsetToTeleportTransform.setIdentity();
+         vrContext.getHeadset().runIfConnected(headset ->
+                                             {
+                                                headset.getXForwardZUpHeadsetFrame().getTransformToDesiredFrame(xyYawHeadsetToTeleportTransform, vrContext.getTeleportFrameIHMCZUp());
+                                                xyYawHeadsetToTeleportTransform.getRotation().setYawPitchRoll(xyYawHeadsetToTeleportTransform.getRotation().getYaw(), 0.0, 0.0);
+                                             });
+         teleportIHMCZUpToIHMCZUpWorld.set(xyYawHeadsetToTeleportTransform);
+         teleportIHMCZUpToIHMCZUpWorld.invert();
 
-                            RigidBodyTransform vrHomeFramePlanarTransformToWorld = new RigidBodyTransform(robotVRHomeReferenceFrame.getTransformToWorldFrame());
-                            vrHomeFramePlanarTransformToWorld.getRotation().setYawPitchRoll(vrHomeFramePlanarTransformToWorld.getRotation().getYaw(), 0.0, 0.0);
-                            tempTransform.set(vrHomeFramePlanarTransformToWorld);
-                            tempTransform.transform(teleportIHMCZUpToIHMCZUpWorld);
-                         });
+         RigidBodyTransform vrHomeFramePlanarTransformToWorld = new RigidBodyTransform(robotVRHomeReferenceFrame.getTransformToWorldFrame());
+         vrHomeFramePlanarTransformToWorld.getRotation().setYawPitchRoll(vrHomeFramePlanarTransformToWorld.getRotation().getYaw(), 0.0, 0.0);
+         tempTransform.set(vrHomeFramePlanarTransformToWorld);
+         tempTransform.transform(teleportIHMCZUpToIHMCZUpWorld);
+      });
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)

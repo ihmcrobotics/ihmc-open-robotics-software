@@ -103,10 +103,8 @@ public class EllipticalStepPositionLimiter
 
       wasLimited |= enforceStepWidthFromStance(constrainedSoleTouchdownPosition, desiredConstraintFrame, stanceFootZUpFrame, minStanceWidth, swingSide);
 
-      //TODO do i need to do this on line 90?
       constrainedSoleTouchdownPosition.changeFrame(desiredConstraintFrame);
 
-      //TODO limit z position as well
       if (groundPlaneEstimator != null)
       {
          constrainedTouchdownPosition2D.setIncludingFrame(constrainedSoleTouchdownPosition);

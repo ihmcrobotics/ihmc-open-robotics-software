@@ -200,7 +200,6 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
                                       ImGuiRemoteROS2StoredPropertySetGroup remotePropertySets,
                                       StoredPropertySetROS2TopicPair topicName)
    {
-      LogTools.info("{%s} Save File", storedPropertySetParameters.findSaveFileDirectory().toString());
       storedPropertySetPanel.create(storedPropertySetParameters, false);
       remotePropertySets.registerRemotePropertySet(storedPropertySetParameters, topicName);
       this.addChild(storedPropertySetPanel);

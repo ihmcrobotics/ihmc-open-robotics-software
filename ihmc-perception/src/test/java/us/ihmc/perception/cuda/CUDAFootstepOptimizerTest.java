@@ -2,7 +2,6 @@ package us.ihmc.perception.cuda;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.perception.gpuHeightMap.CUDAFootstepOptimizer;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 import static org.junit.jupiter.api.Assertions.*;

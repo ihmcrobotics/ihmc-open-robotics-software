@@ -38,8 +38,7 @@ import us.ihmc.tools.factories.OptionalFactoryField;
 public class RDXManualFootstepPlacement implements RenderableProvider
 {
    private final static boolean USE_HEIGHTMAP = true;
-   private final static boolean APPLY_REACHABLE_REGION_ELLIPTICAL_CONSTRAINT = true;
-
+   private final static boolean APPLY_REACHABLE_REGION_ELLIPTICAL_CONSTRAINT = false;
    private static final double MAX_DISTANCE_MULTIPLIER = 3.0;
 
    private final ImGuiLabelMap labels = new ImGuiLabelMap();

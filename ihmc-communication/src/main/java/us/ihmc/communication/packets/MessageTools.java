@@ -1088,8 +1088,8 @@ public class MessageTools
     * @param rootJointPosition    the privileged root joint position. Not modified.
     * @param rootJointOrientation the privileged root joint orientation. Not modified.
     * @param jointHashCodes       allows to safely identify to which joint each angle in
-    *                             privilegedJointAngles belongs to. The hash code can be
-    *                             obtained from OneDoFJointBasics#hashCode(). Not modified.
+    *                             {@link #privilegedJointAngles} belongs to. The hash code can be
+    *                             obtained from {@link OneDoFJointBasics#hashCode()}. Not modified.
     * @param jointAngles          the privileged joint angles. Not modified.
     * @throws IllegalArgumentException if the lengths of {@code jointAngles} and {@code jointHashCodes}
     *       are different.
@@ -1118,8 +1118,8 @@ public class MessageTools
     * </p>
     *
     * @param jointHashCodes allows to safely identify to which joint each angle in
-    *                       privilegedJointAngles belongs to. The hash code can be obtained
-    *                       from OneDoFJointBasics#hashCode(). Not modified.
+    *                       {@link #privilegedJointAngles} belongs to. The hash code can be obtained
+    *                       from {@link OneDoFJointBasics#hashCode()}. Not modified.
     * @param jointAngles    the privileged joint angles. Not modified.
     * @throws IllegalArgumentException if the lengths of {@code jointAngles} and {@code jointHashCodes}
     *       are different.

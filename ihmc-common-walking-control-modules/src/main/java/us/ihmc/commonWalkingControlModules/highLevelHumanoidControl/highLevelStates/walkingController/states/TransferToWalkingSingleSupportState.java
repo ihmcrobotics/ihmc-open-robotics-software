@@ -217,8 +217,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
       }
 
       super.onEntry();
-
-
+      
       feetManager.initializeSwingTrajectoryPreview(transferToSide.getOppositeSide(), footsteps[0], footstepTimings[0].getSwingTime());
       balanceManager.minimizeAngularMomentumRateZ(minimizeAngularMomentumRateZDuringTransfer.getValue());
 

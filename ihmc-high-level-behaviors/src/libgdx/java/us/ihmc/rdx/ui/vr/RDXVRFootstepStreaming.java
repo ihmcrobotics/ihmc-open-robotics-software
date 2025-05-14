@@ -46,14 +46,15 @@ public class RDXVRFootstepStreaming
    public RDXVRFootstepStreaming(ROS2SyncedRobotModel syncedRobot,
                                  ROS2Helper ros2Helper,
                                  RDXVRFootstepPlacement footstepPlacer,
-                                 SwingFootTracker swingFootTracker)
+                                 SwingFootTracker swingFootTracker,
+                                 boolean enableYoVariableServer)
    {
       this.syncedRobot = syncedRobot;
       this.footstepPlacer = footstepPlacer;
       this.ros2Helper = ros2Helper;
       this.swingFootTracker = swingFootTracker;
 
-      footstepStreamingToolbox = new FootstepStreamingToolboxModule(syncedRobot.getRobotModel(), true);
+      footstepStreamingToolbox = new FootstepStreamingToolboxModule(syncedRobot.getRobotModel(), enableYoVariableServer);
       status = ros2Helper.subscribe(FootstepStreamingToolboxModule.getOutputStatusTopic(syncedRobot.getRobotModel().getSimpleRobotName()));
    }
 

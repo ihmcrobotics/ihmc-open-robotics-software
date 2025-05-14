@@ -1,4 +1,4 @@
-package us.ihmc.perception.gpuHeightMap;
+package us.ihmc.perception.cuda;
 
 import org.bytedeco.cuda.cudart.CUstream_st;
 import org.bytedeco.cuda.cudart.dim3;
@@ -11,10 +11,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.cuda.CUDAKernel;
-import us.ihmc.perception.cuda.CUDAProgram;
-import us.ihmc.perception.cuda.CUDAStreamManager;
-import us.ihmc.perception.cuda.CUDATools;
+import us.ihmc.perception.gpuHeightMap.PlanarityChecker;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 import java.net.URL;
@@ -74,7 +71,7 @@ public class CUDAFootstepOptimizer implements AutoCloseable
       }
 
       searchRadius = 0.5f * footLength;
-      searchYawLimit = (float) Math.PI/4;
+      searchYawLimit = (float) Math.PI / 4;
       stepsXY = (int) (2 * searchRadius / SEARCH_SPACE_RESOLUTION_XY) + 1;
       stepsYaw = (int) (2 * searchYawLimit / SEARCH_SPACE_RESOLUTION_YAW);
       searchSpaceDim = stepsXY * stepsXY * stepsYaw;
@@ -232,7 +229,7 @@ public class CUDAFootstepOptimizer implements AutoCloseable
       CUDAStreamManager.releaseStream(cudaStream);
    }
 
-   public void testResultKernel()
+   void testResultKernel()
    {
       cpuGlobalBestIndex = new IntPointer(1);
       cpuGlobalBestCost = new FloatPointer(1);
@@ -299,7 +296,7 @@ public class CUDAFootstepOptimizer implements AutoCloseable
       }
    }
 
-   public void setGpuCosts(float[] costs)
+   void setGpuCosts(float[] costs)
    {
       FloatPointer cpuCosts = new FloatPointer(costs.length);
       gpuCosts = new FloatPointer();

@@ -86,6 +86,7 @@ import static us.ihmc.motionRetargeting.VRTrackedSegmentType.*;
 public class RDXVRKinematicsStreamingMode
 {
    public static final boolean ENABLE_ARM_CONTROL_DURING_STEPPING = false;
+   public static final boolean ENABLE_YO_VARIABLE_TOOLBOX_SERVERS = false;
    public static final double FRAME_AXIS_GRAPHICS_LENGTH = 0.2;
    private final ROS2SyncedRobotModel syncedRobot;
    private final ROS2ControllerHelper ros2ControllerHelper;
@@ -220,7 +221,7 @@ public class RDXVRKinematicsStreamingMode
 
       kinematicsRecorder = new KinematicsRecordReplay(sceneGraph, toolboxCommunicationEnabled);
       motionRetargeting = new RDXVRMotionRetargeting(syncedRobot, handDesiredControlFrames, trackerReferenceFrames, headsetReferenceFrame, retargetingParameters);
-      footstepStreaming = new RDXVRFootstepStreaming(syncedRobot, ros2ControllerHelper, footstepPlacer, swingFootTracker);
+      footstepStreaming = new RDXVRFootstepStreaming(syncedRobot, ros2ControllerHelper, footstepPlacer, swingFootTracker, ENABLE_YO_VARIABLE_TOOLBOX_SERVERS);
       if(ENABLE_ARM_CONTROL_DURING_STEPPING)
       {
          armStreaming = new RDXVRArmStreaming(syncedRobot, ros2ControllerHelper, handDesiredControlFrames, trackerReferenceFrames, ikControlFramePoses);
@@ -234,8 +235,7 @@ public class RDXVRKinematicsStreamingMode
       }
       if (createToolbox)
       {
-         boolean startYoVariableServer = true;
-         toolbox = new KinematicsStreamingToolboxModule(robotModel, kstParameters, startYoVariableServer);
+         toolbox = new KinematicsStreamingToolboxModule(robotModel, kstParameters, ENABLE_YO_VARIABLE_TOOLBOX_SERVERS);
       }
 
       if (vrContext.getVRModel() == RDXVRHardwareModel.FOCUS3)
