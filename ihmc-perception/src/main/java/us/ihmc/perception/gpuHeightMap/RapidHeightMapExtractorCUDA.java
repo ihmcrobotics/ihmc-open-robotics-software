@@ -79,7 +79,10 @@ public class RapidHeightMapExtractorCUDA
    private int resetOffset;
 
    private final Point3D previousSensorOrigin = new Point3D();
-   private boolean runShiftingKernel;
+   private int previousCellX;
+   private int previousCellY;
+   private int currentCellX;
+   private int currentCellY;
 
    public RapidHeightMapExtractorCUDA(int mode, HeightMapParameters heightMapParameters)
    {
@@ -249,8 +252,12 @@ public class RapidHeightMapExtractorCUDA
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
 
-      if (runShiftingKernel)
+      if (currentCellX != previousCellX || currentCellY != previousCellY)
       {
+         previousCellX = (int) Math.round(previousSensorOrigin.getX32() / heightMapParameters.getCellSizeInMeters());
+         previousCellY = (int) Math.round(previousSensorOrigin.getY32() / heightMapParameters.getCellSizeInMeters());
+         globalHeightMapImage.copyTo(oldGlobalHeightMapImage);
+
          shiftHeightMap.withPointer(oldGlobalHeightMapImage.data()).withLong(oldGlobalHeightMapImage.step());
          shiftHeightMap.withPointer(globalHeightMapImage.data()).withLong(globalHeightMapImage.step());
          shiftHeightMap.withFloat(previousSensorOrigin.getX32()).withFloat(previousSensorOrigin.getY32());
@@ -263,9 +270,10 @@ public class RapidHeightMapExtractorCUDA
          CUDATools.checkCUDAError(error);
 
          previousSensorOrigin.set(sensorOrigin);
-         globalHeightMapImage.copyTo(oldGlobalHeightMapImage);
-         runShiftingKernel = false;
       }
+
+      currentCellX = (int) Math.round(sensorOrigin.getX32() / heightMapParameters.getCellSizeInMeters());
+      currentCellY = (int) Math.round(sensorOrigin.getY32() / heightMapParameters.getCellSizeInMeters());
 
       // Run the registration kernel
       registerKernel.withPointer(localHeightMapImage.data()).withLong(localHeightMapImage.step());
@@ -304,17 +312,8 @@ public class RapidHeightMapExtractorCUDA
       cudaFreeAsync(sensorToGroundTransformDevicePointer, stream);
       cudaFreeAsync(worldToGroundTransformDevicePointer, stream);
       cudaFreeAsync(parametersDevicePointer, stream);
-
-//      worldToGroundTransform.transform(sensorOrigin);
-//      sensorToWorldTransform.transform(sensorOrigin);
-
-      if (previousSensorOrigin.distanceXY(sensorOrigin) >= heightMapParameters.getCellSizeInMeters())
-      {
-         runShiftingKernel = true;
-      }
    }
 
-//   chat gpt to global
    public void updateHeightOffset(float z, CameraIntrinsics cameraIntrinsics, Point3DReadOnly sensorOrigin, double footHeight)
    {
       int error;

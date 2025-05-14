@@ -377,17 +377,28 @@ __global__ void shiftGlobalMapKernel(unsigned short* oldMap, size_t pitchOld,
     float dx = params[HEIGHT_MAP_CENTER_X] - previousCenterX;
     float dy = params[HEIGHT_MAP_CENTER_Y] - previousCenterY;
 
+    if (x == 20 && y ==20)
+    {
+        printf("New Center: %f, %f\n", params[HEIGHT_MAP_CENTER_X], params[HEIGHT_MAP_CENTER_Y]);
+        printf("Old Center: %f, %f\n", previousCenterX, previousCenterY);
+    }
+
     int shiftX = round(dx / params[GLOBAL_CELL_SIZE]);
     int shiftY = round(dy / params[GLOBAL_CELL_SIZE]);
 
-    int dstX = x - shiftX;
-    int dstY = y - shiftY;
+    int srcX = x + shiftX;
+    int srcY = y + shiftY;
 
-    if (dstX >= 0 && dstX < mapSize && dstY >= 0 && dstY < mapSize)
+    if (srcX >= 0 && srcX < mapSize && srcY >= 0 && srcY < mapSize)
     {
-        unsigned short* oldRow = (unsigned short*)((char*)oldMap + x * pitchOld);
-        unsigned short* newRow = (unsigned short*)((char*)newMap + dstX * pitchNew);
-        newRow[dstY] = oldRow[y];
+        unsigned short* oldRow = (unsigned short*)((char*)oldMap + srcX * pitchOld);
+        unsigned short* newRow = (unsigned short*)((char*)newMap + x * pitchNew);
+        newRow[y] = oldRow[srcY];
+    }
+    else
+    {
+        unsigned short* newRow = (unsigned short*)((char*)newMap + x * pitchNew);
+        newRow[y] = 0;
     }
 }
 
