@@ -356,7 +356,12 @@ __global__ void heightMapRegistrationKernel(unsigned short *localMap, size_t pit
     if (globalIndex.x < 0 || globalIndex.x >= globalCellsPerAxis || globalIndex.y < 0 || globalIndex.y >= globalCellsPerAxis)
         return;
 
+
     unsigned short *localHeight = (unsigned short *)((char *)localMap + localIndex.x * pitchLocal) + localIndex.y;
+
+    if (*localHeight == 0)
+        return;
+
     unsigned short *globalHeight = (unsigned short *)((char *)globalMap + globalIndex.x * pitchGlobal) + globalIndex.y;
 
     *globalHeight = *localHeight;
