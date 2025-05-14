@@ -240,37 +240,37 @@ public class RapidHeightMapExtractorCUDA
       CUDATools.checkCUDAError(error);
 
       // Run the registration kernel
-      registerKernel.withPointer(localHeightMapImage.data()).withLong(localHeightMapImage.step());
-      registerKernel.withPointer(globalHeightMapImage.data()).withLong(globalHeightMapImage.step());
-      registerKernel.withPointer(parametersDevicePointer);
-      registerKernel.withPointer(worldToGroundTransformDevicePointer);
-      registerKernel.withPointer(sensorToGroundTransformDevicePointer);
+//      registerKernel.withPointer(localHeightMapImage.data()).withLong(localHeightMapImage.step());
+//      registerKernel.withPointer(globalHeightMapImage.data()).withLong(globalHeightMapImage.step());
+//      registerKernel.withPointer(parametersDevicePointer);
+//      registerKernel.withPointer(worldToGroundTransformDevicePointer);
+//      registerKernel.withPointer(sensorToGroundTransformDevicePointer);
 
-      registerKernel.run(stream, registerKernelGridDim, blockSize, 0);
-      error = cudaStreamSynchronize(stream);
-      CUDATools.checkCUDAError(error);
+//      registerKernel.run(stream, registerKernelGridDim, blockSize, 0);
+//      error = cudaStreamSynchronize(stream);
+//      CUDATools.checkCUDAError(error);
 
-      if (heightMapParameters.getEnableAlphaFilter())
-      {
-         filteredRapidHeightMapExtractor.update(globalHeightMapImage, resetOffset);
-      }
-
-      if (heightMapParameters.getEnableVerticalFilter())
-      {
-         verticalSurfacesExtractor.update(globalHeightMapImage);
-      }
+//      if (heightMapParameters.getEnableAlphaFilter())
+//      {
+//         filteredRapidHeightMapExtractor.update(globalHeightMapImage, resetOffset);
+//      }
+//
+//      if (heightMapParameters.getEnableVerticalFilter())
+//      {
+//         verticalSurfacesExtractor.update(globalHeightMapImage);
+//      }
 
       // Run the cropping kernel
-      croppingKernel.withPointer(globalHeightMapImage.data()).withLong(globalHeightMapImage.step());
-      croppingKernel.withPointer(croppedHeightMapImage.data()).withLong(croppedHeightMapImage.step());
-      croppingKernel.withPointer(parametersDevicePointer);
-      croppingKernel.withInt(cellsPerAxisCropped);
-      error = cudaStreamSynchronize(stream);
-      CUDATools.checkCUDAError(error);
+//      croppingKernel.withPointer(globalHeightMapImage.data()).withLong(globalHeightMapImage.step());
+//      croppingKernel.withPointer(croppedHeightMapImage.data()).withLong(croppedHeightMapImage.step());
+//      croppingKernel.withPointer(parametersDevicePointer);
+//      croppingKernel.withInt(cellsPerAxisCropped);
+//      error = cudaStreamSynchronize(stream);
+//      CUDATools.checkCUDAError(error);
 
-      croppingKernel.run(stream, croppingKernelGridDim, blockSize, 0);
-      error = cudaStreamSynchronize(stream);
-      CUDATools.checkCUDAError(error);
+//      croppingKernel.run(stream, croppingKernelGridDim, blockSize, 0);
+//      error = cudaStreamSynchronize(stream);
+//      CUDATools.checkCUDAError(error);
 
       // All that memory we allocated on the GPU, need to free that up now
       cudaFreeAsync(groundToSensorTransformDevicePointer, stream);
@@ -279,6 +279,7 @@ public class RapidHeightMapExtractorCUDA
       cudaFreeAsync(parametersDevicePointer, stream);
    }
 
+//   chat gpt to global
    public void updateHeightOffset(float z, CameraIntrinsics cameraIntrinsics, Point3DReadOnly sensorOrigin, double footHeight)
    {
       int error;
@@ -441,6 +442,6 @@ public class RapidHeightMapExtractorCUDA
 
    public GpuMat getCroppedHeightMap()
    {
-      return croppedHeightMapImage.clone();
+      return localHeightMapImage.clone();
    }
 }

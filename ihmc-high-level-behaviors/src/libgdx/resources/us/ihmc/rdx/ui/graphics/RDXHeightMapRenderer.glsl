@@ -11,6 +11,7 @@ uniform float u_screenWidth;
 
 uniform int u_centerIndex;
 uniform vec2 u_gridCenter;
+uniform float u_yaw;
 uniform float u_cellSize;
 uniform float u_heightScalingFactor;
 uniform float u_heightOffset;
@@ -83,8 +84,18 @@ void main()
     int xIndex = gl_VertexID / cellsPerAxis;
     int yIndex = gl_VertexID % cellsPerAxis;
 
-    float xPosition = indexToCoordinate(xIndex, u_gridCenter.x);
-    float yPosition = indexToCoordinate(yIndex, u_gridCenter.y);
+    // Compute position relative to center
+    float localX = (float(xIndex) - float(u_centerIndex)) * u_cellSize;
+    float localY = (float(yIndex) - float(u_centerIndex)) * u_cellSize;
+
+    // Apply 2D rotation (yaw) around center
+    float cosYaw = cos(u_yaw);
+    float sinYaw = sin(u_yaw);
+    float rotatedX = localX * cosYaw - localY * sinYaw;
+    float rotatedY = localX * sinYaw + localY * cosYaw;
+
+    float xPosition = u_gridCenter.x + rotatedX;
+    float yPosition = u_gridCenter.y + rotatedY;
     float zPosition = (a_height / u_heightScalingFactor) - u_heightOffset;
 
 	vec4 pointInCameraFrame = u_viewTrans * vec4(xPosition, yPosition, zPosition, 1);

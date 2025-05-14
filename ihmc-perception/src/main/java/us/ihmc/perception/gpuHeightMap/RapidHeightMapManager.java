@@ -68,7 +68,7 @@ public class RapidHeightMapManager
       rapidHeightMapDriftOffset = new RapidHeightMapDriftOffset(controllerFootstepQueueMonitor);
       flyingPointsFilter = new CUDAFlyingPointsFilter();
 
-      int croppedCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getCroppedWidthInMeters(), heightMapParameters.getCellSizeInMeters());
+      int croppedCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getLocalWidthInMeters(), heightMapParameters.getCellSizeInMeters());
       int cellsPerAxisCropped = 2 * croppedCenterIndex + 1;
       deviceCroppedHeightMap = new GpuMat(cellsPerAxisCropped, cellsPerAxisCropped, opencv_core.CV_16UC1);
       rapidHeightMapExtractor = new RapidHeightMapExtractorCUDA(1, heightMapParameters);
@@ -164,6 +164,11 @@ public class RapidHeightMapManager
       RigidBodyTransform sensorToGround = cameraFrame.getTransformToDesiredFrame(cameraZUpFrame);
       RigidBodyTransform groundToWorld = cameraZUpFrame.getTransformToWorldFrame();
       sensorOrigin.set(sensorToWorld.getTranslation());
+
+
+
+
+
       cameraPose.setToZero(cameraFrame);
       cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
 
@@ -187,7 +192,7 @@ public class RapidHeightMapManager
    public HeightMapData getLatestHeightMapData()
    {
       HeightMapData latestHeightMapData = new HeightMapData((float) heightMapParameters.getCellSizeInMeters(),
-                                                            (float) heightMapParameters.getCroppedWidthInMeters(),
+                                                            (float) heightMapParameters.getLocalWidthInMeters(),
                                                             sensorOrigin.getX(),
                                                             sensorOrigin.getY());
 
@@ -196,7 +201,7 @@ public class RapidHeightMapManager
       PerceptionMessageTools.convertToHeightMapData(heightMap,
                                                     latestHeightMapData,
                                                     sensorOrigin,
-                                                    (float) heightMapParameters.getCroppedWidthInMeters(),
+                                                    (float) heightMapParameters.getLocalWidthInMeters(),
                                                     (float) heightMapParameters.getCellSizeInMeters(),
                                                     heightMapParameters);
       heightMap.close();
