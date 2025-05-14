@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class CUDAFootstepOptimizerTest
 {
-   @Test
+   @RepeatedTest(100)
    public void findMinimumCost()
    {
       CUDAFootstepOptimizer footstepOptimizer = new CUDAFootstepOptimizer(0.5f, 0.25f);
