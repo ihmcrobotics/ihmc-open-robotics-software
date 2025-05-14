@@ -17,6 +17,8 @@ import java.awt.*;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class RDXLeRobotDatasetCreator
 {
@@ -27,6 +29,7 @@ public class RDXLeRobotDatasetCreator
    private transient final ImString imTaskName = new ImString(512);
    private List<Path> datasets;
    private LeRobotDataset dataset;
+   private final Queue<Runnable> frameTaskQueue = new ConcurrentLinkedQueue<>();
 
    public RDXLeRobotDatasetCreator(RDXSCS2LogSession logSession)
    {
@@ -35,6 +38,12 @@ public class RDXLeRobotDatasetCreator
       panel = new RDXPanel("LeRobot Dataset Creator", this::renderImGuiWidgets, false, true);
 
       refresh();
+   }
+
+   public void update()
+   {
+      if (!frameTaskQueue.isEmpty())
+         frameTaskQueue.remove().run(); // Run 1 task per frame
    }
 
    private void renderImGuiWidgets()
@@ -120,7 +129,7 @@ public class RDXLeRobotDatasetCreator
          ImGui.beginDisabled(imTaskName.get().trim().isEmpty());
          if (ImGui.button(labels.get("Add Episode")))
          {
-            dataset.addEpisode(imTaskName.get().trim(), logSession.getSession());
+            dataset.addEpisode(imTaskName.get().trim(), logSession.getSession(), frameTaskQueue::add); // Use queue to maintain framerate
          }
          ImGui.endDisabled();
 
