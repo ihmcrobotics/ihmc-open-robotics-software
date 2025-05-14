@@ -9,9 +9,6 @@ import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
@@ -45,7 +42,6 @@ public class RapidHeightMapExtractorCUDA
    private final CUDAKernel updateKernel;
    private final CUDAKernel registerKernel;
    private final CUDAKernel shiftHeightMap;
-   private final CUDAKernel croppingKernel;
    private final CUDAKernel planOffsetKernel;
    private final CUDAKernel emptyRegisterKernel;
 
@@ -110,14 +106,12 @@ public class RapidHeightMapExtractorCUDA
          updateKernel = heightMapCUDAProgram.loadKernel("heightMapUpdateKernel");
          registerKernel = heightMapCUDAProgram.loadKernel("heightMapRegistrationKernel");
          shiftHeightMap = heightMapCUDAProgram.loadKernel("shiftGlobalMapKernel");
-         croppingKernel = heightMapCUDAProgram.loadKernel("croppingKernel");
          planOffsetKernel = heightMapCUDAProgram.loadKernel("planOffsetKernel");
          emptyRegisterKernel = heightMapCUDAProgram.loadKernel("heightMapRegistrationKernel");
 
          updateKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
          registerKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
          shiftHeightMap.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
-         croppingKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
          planOffsetKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
          emptyRegisterKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
 
@@ -191,7 +185,6 @@ public class RapidHeightMapExtractorCUDA
                       RigidBodyTransformReadOnly sensorToWorldTransform,
                       RigidBodyTransform sensorToGroundTransform,
                       RigidBodyTransformReadOnly groundToWorldTransform,
-                      Point3D sensorOrigin,
                       double footHeight)
    {
       int error;
@@ -206,7 +199,7 @@ public class RapidHeightMapExtractorCUDA
       worldToGroundTransform.invert();
 
       // Populate parameter buffers with the necessary values
-      float[] parametersArray = populateParameterArray(heightMapParameters, cameraIntrinsics, sensorOrigin, footHeight);
+      float[] parametersArray = populateParameterArray(heightMapParameters, cameraIntrinsics, footHeight);
       parametersHostPointer.put(parametersArray);
 
       //Extract the transform arrays for memory transfer
@@ -306,18 +299,6 @@ public class RapidHeightMapExtractorCUDA
       //      }
       globalHeightMapImage.copyTo(croppedHeightMapImage);
 
-      // Run the cropping kernel
-      //      croppingKernel.withPointer(globalHeightMapImage.data()).withLong(globalHeightMapImage.step());
-      //      croppingKernel.withPointer(croppedHeightMapImage.data()).withLong(croppedHeightMapImage.step());
-      //      croppingKernel.withPointer(parametersDevicePointer);
-      //      croppingKernel.withInt(cellsPerAxisCropped);
-      //      error = cudaStreamSynchronize(stream);
-      //      CUDATools.checkCUDAError(error);
-      //
-      //      croppingKernel.run(stream, croppingKernelGridDim, blockSize, 0);
-      //      error = cudaStreamSynchronize(stream);
-      //      CUDATools.checkCUDAError(error);
-
       // All that memory we allocated on the GPU, need to free that up now
       cudaFreeAsync(groundToSensorTransformDevicePointer, stream);
       cudaFreeAsync(sensorToGroundTransformDevicePointer, stream);
@@ -325,12 +306,12 @@ public class RapidHeightMapExtractorCUDA
       cudaFreeAsync(parametersDevicePointer, stream);
    }
 
-   public void updateHeightOffset(float z, CameraIntrinsics cameraIntrinsics, Point3DReadOnly sensorOrigin, double footHeight)
+   public void updateHeightOffset(float z, CameraIntrinsics cameraIntrinsics, double footHeight)
    {
       int error;
 
       // Populate parameter buffers with the necessary values
-      float[] parametersArray = populateParameterArray(heightMapParameters, cameraIntrinsics, sensorOrigin, footHeight);
+      float[] parametersArray = populateParameterArray(heightMapParameters, cameraIntrinsics, footHeight);
       parametersHostPointer.put(parametersArray);
 
       CUDATools.mallocAsync(worldToGroundTransformDevicePointer, worldToGroundTransformArray.length, stream);
@@ -385,21 +366,17 @@ public class RapidHeightMapExtractorCUDA
 
    public float[] populateParameterArray(HeightMapParameters parameters,
                                          CameraIntrinsics cameraIntrinsics,
-                                         Tuple3DReadOnly gridCenter,
                                          double groundHeightGuess)
    {
       return new float[] {(float) parameters.getCellSizeInMeters(),
                           (float) centerIndex,
                           (float) cameraIntrinsics.getHeight(),
                           (float) cameraIntrinsics.getWidth(),
-                          (float) gridCenter.getX(),
-                          (float) gridCenter.getY(),
                           (float) mode,
                           (float) cameraIntrinsics.getCx(),
                           (float) cameraIntrinsics.getCy(),
                           (float) cameraIntrinsics.getFx(),
                           (float) cameraIntrinsics.getFy(),
-                          (float) parameters.getCellSizeInMeters(),
                           (float) globalCenterIndex,
                           (float) parameters.getRobotCollisionCylinderRadius(),
                           gridOffsetX,
@@ -433,7 +410,6 @@ public class RapidHeightMapExtractorCUDA
       heightMapCUDAProgram.close();
       updateKernel.close();
       registerKernel.close();
-      croppingKernel.close();
       planOffsetKernel.close();
 
       emptyGlobalHeightMapImage.close();
