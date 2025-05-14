@@ -42,6 +42,7 @@ public class RDXHeightMapRenderer implements RenderableProvider
    // Uniforms
    private int centerIndex;
    private final Vector2 gridCenter = new Vector2();
+   private float yaw;
    private float cellSize;
    private float heightScalingFactor;
    private float heightOffset;
@@ -94,6 +95,12 @@ public class RDXHeightMapRenderer implements RenderableProvider
       });
       rdxShader.registerUniform(gridCenterUniform);
 
+      RDXUniform yawUniform = RDXUniform.createGlobalUniform("u_yaw", (shader, inputID, renderable, combinedAttributes) ->
+      {
+         shader.set(inputID, yaw);
+      });
+      rdxShader.registerUniform(yawUniform);
+
       RDXUniform cellSizeUniform = RDXUniform.createGlobalUniform("u_cellSize", (shader, inputID, renderable, combinedAttributes) ->
       {
          shader.set(inputID, cellSize);
@@ -117,6 +124,7 @@ public class RDXHeightMapRenderer implements RenderableProvider
                       float heightOffset,
                       float gridCenterX,
                       float gridCenterY,
+                      float yaw,
                       int centerIndex,
                       float cellSizeXYInMeters,
                       float heightScalingFactor)
@@ -124,6 +132,7 @@ public class RDXHeightMapRenderer implements RenderableProvider
       // Update uniforms
       this.heightOffset = heightOffset;
       this.gridCenter.set(gridCenterX, gridCenterY);
+      this.yaw = yaw;
       this.centerIndex = centerIndex;
       this.cellSize = cellSizeXYInMeters;
       this.heightScalingFactor = heightScalingFactor;

@@ -2,44 +2,41 @@
 #include "MathUtils.cuh"
 
 extern "C"
-#define LOCAL_CELL_SIZE 0
+#define CELL_SIZE 0
 #define LOCAL_CENTER_INDEX 1
 #define DEPTH_INPUT_HEIGHT 2
 #define DEPTH_INPUT_WIDTH 3
-#define HEIGHT_MAP_CENTER_X 4
-#define HEIGHT_MAP_CENTER_Y 5
-#define MODE 6
-#define DEPTH_CX 7
-#define DEPTH_CY 8
-#define DEPTH_FX 9
-#define DEPTH_FY 10
-#define GLOBAL_CELL_SIZE 11
-#define GLOBAL_CENTER_INDEX 12
-#define ROBOT_COLLISION_RADIUS 13
-#define GRID_OFFSET_X 14
-#define HEIGHT_FILTER_ALPHA 15
-#define LOCAL_CELLS_PER_AXIS 16
-#define GLOBAL_CELLS_PER_AXIS 17
-#define HEIGHT_SCALING_FACTOR 18
-#define MIN_HEIGHT_REGISTRATION 19
-#define MAX_HEIGHT_REGISTRATION 20
-#define MIN_HEIGHT_DIFFERENCE 21
-#define MAX_HEIGHT_DIFFERENCE 22
-#define SEARCH_WINDOW_HEIGHT 23
-#define SEARCH_WINDOW_WIDTH 24
-#define CROPPED_WINDOW_CENTER_INDEX 25
-#define MIN_CLAMP_HEIGHT 26
-#define MAX_CLAMP_HEIGHT 27
-#define HEIGHT_OFFSET 28
-#define STEPPING_COSINE_THRESHOLD 29
-#define STEPPING_CONTACT_THRESHOLD 30
-#define CONTACT_WINDOW_SIZE 31
-#define SPATIAL_ALPHA 32
-#define SEARCH_SKIP_SIZE 33
-#define VERTICAL_SEARCH_SIZE 34
-#define VERTICAL_SEARCH_RESOLUTION 35
-#define FAST_SEARCH_SIZE 36
-#define GROUND_HEIGHT 37
+#define MODE 4
+#define DEPTH_CX 5
+#define DEPTH_CY 6
+#define DEPTH_FX 7
+#define DEPTH_FY 8
+#define GLOBAL_CENTER_INDEX 9
+#define ROBOT_COLLISION_RADIUS 10
+#define GRID_OFFSET_X 11
+#define HEIGHT_FILTER_ALPHA 12
+#define LOCAL_CELLS_PER_AXIS 13
+#define GLOBAL_CELLS_PER_AXIS 14
+#define HEIGHT_SCALING_FACTOR 15
+#define MIN_HEIGHT_REGISTRATION 16
+#define MAX_HEIGHT_REGISTRATION 17
+#define MIN_HEIGHT_DIFFERENCE 18
+#define MAX_HEIGHT_DIFFERENCE 19
+#define SEARCH_WINDOW_HEIGHT 20
+#define SEARCH_WINDOW_WIDTH 21
+#define CROPPED_WINDOW_CENTER_INDEX 22
+#define MIN_CLAMP_HEIGHT 23
+#define MAX_CLAMP_HEIGHT 24
+#define HEIGHT_OFFSET 25
+#define STEPPING_COSINE_THRESHOLD 26
+#define STEPPING_CONTACT_THRESHOLD 27
+#define CONTACT_WINDOW_SIZE 28
+#define SPATIAL_ALPHA 29
+#define SEARCH_SKIP_SIZE 30
+#define VERTICAL_SEARCH_SIZE 31
+#define VERTICAL_SEARCH_RESOLUTION 32
+#define FAST_SEARCH_SIZE 33
+#define GROUND_HEIGHT 34
 
 #define VERTICAL_FOV 1.5707963267948966f
 #define HORIZONTAL_FOV 6.2831853f
@@ -219,13 +216,13 @@ extern "C" __global__ void heightMapUpdateKernel(unsigned short *in, size_t pitc
     // Compute grid cell center in Z-Up frame
     float2 xyCoords = indices_to_coordinate(make_int2(xIndex, yIndex),
                                             make_float2(0.0f, 0.0f),
-                                            params[LOCAL_CELL_SIZE],
+                                            params[CELL_SIZE],
                                             params[LOCAL_CENTER_INDEX]);
 
     cellCenterInZUp.x = xyCoords.x + params[GRID_OFFSET_X];
     cellCenterInZUp.y = xyCoords.y;
 
-    float halfCellWidth = params[LOCAL_CELL_SIZE] / 2.0f;
+    float halfCellWidth = params[CELL_SIZE] / 2.0f;
     float minX = cellCenterInZUp.x - halfCellWidth;
     float maxX = cellCenterInZUp.x + halfCellWidth;
     float minY = cellCenterInZUp.y - halfCellWidth;
@@ -331,126 +328,96 @@ extern "C" __global__ void heightMapUpdateKernel(unsigned short *in, size_t pitc
 }
 
 extern "C"
+__global__ void shiftGlobalMapKernel(unsigned short* oldMap, size_t pitchOld,
+                                     unsigned short* newMap, size_t pitchNew,
+                                     float *previousToCurrentSensorTf,
+                                     int mapSize, float *params)
+{
+    int x = blockIdx.x * blockDim.x + threadIdx.x;  // column
+    int y = blockIdx.y * blockDim.y + threadIdx.y;  // row
+
+    if (x >= mapSize || y >= mapSize)
+        return;
+
+    float3 cellCenterInZUp = make_float3(0.0f, 0.0f, params[GROUND_HEIGHT] + 0.5f);
+
+    // Compute grid cell center in Z-Up frame
+    float2 xyCoords = indices_to_coordinate(make_int2(x, y),
+                                            make_float2(0.0f, 0.0f),
+                                            params[CELL_SIZE],
+                                            params[GLOBAL_CENTER_INDEX]);
+
+    cellCenterInZUp.x = xyCoords.x;
+    cellCenterInZUp.y = xyCoords.y;
+
+    // Transform cell center from current Z-up to previous Z-up
+    float3 cellCenterInSensor = transformPoint3D32_2(
+        cellCenterInZUp,
+        make_float3(previousToCurrentSensorTf[0], previousToCurrentSensorTf[1], previousToCurrentSensorTf[2]),
+        make_float3(previousToCurrentSensorTf[4], previousToCurrentSensorTf[5], previousToCurrentSensorTf[6]),
+        make_float3(previousToCurrentSensorTf[8], previousToCurrentSensorTf[9], previousToCurrentSensorTf[10]),
+        make_float3(previousToCurrentSensorTf[3], previousToCurrentSensorTf[7], previousToCurrentSensorTf[11]));
+
+    int2 newCellIndex = coordinate_to_indices(
+        make_float2(cellCenterInSensor.x, cellCenterInSensor.y),
+        make_float2(0.0f, 0.0f),
+        params[CELL_SIZE],
+        params[GLOBAL_CENTER_INDEX]);
+
+    int srcX = newCellIndex.x;
+    int srcY = newCellIndex.y;
+
+    if (srcX >= 0 && srcX < mapSize && srcY >= 0 && srcY < mapSize)
+    {
+        unsigned short* oldRow = (unsigned short*)((char*)oldMap + srcX * pitchOld);
+        unsigned short* newRow = (unsigned short*)((char*)newMap + x * pitchNew);
+        newRow[y] = oldRow[srcY];
+    }
+    else
+    {
+        unsigned short* newRow = (unsigned short*)((char*)newMap + x * pitchNew);
+        newRow[y] = 0;
+    }
+}
+
+extern "C"
 __global__ void heightMapRegistrationKernel(unsigned short *localMap, size_t pitchLocal,
                                             unsigned short *globalMap, size_t pitchGlobal,
-                                            float *params, float *worldToZUpFrameTf,
-                                            float *sensorToGroundTf)
+                                            float *params)
 {
     int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
     int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
 
     // Compute global map size
+    int localCellsPerAxis = static_cast<int>(params[LOCAL_CELLS_PER_AXIS]);
     int globalCellsPerAxis = static_cast<int>(params[GLOBAL_CELLS_PER_AXIS]);
 
     // Check bounds for global indices
-    if (xIndex >= globalCellsPerAxis || yIndex >= globalCellsPerAxis)
+    if (xIndex >= localCellsPerAxis || yIndex >= localCellsPerAxis)
         return;
 
-    // Create a 3D point in world frame
-    float3 cellCenterInWorld = make_float3(0, 0, 0);
+    int2 localIndex = make_int2(xIndex, yIndex);
 
-    float2 tempCoord = indices_to_coordinate(
-        make_int2(xIndex, yIndex),
-        make_float2(0.0f, 0.0f),
-        params[GLOBAL_CELL_SIZE],
-        params[GLOBAL_CENTER_INDEX]);
+    int2 globalIndex = make_int2(0, 0);
+    globalIndex.x = localIndex.x - params[LOCAL_CENTER_INDEX] + params[GLOBAL_CENTER_INDEX];
+    globalIndex.y = localIndex.y - params[LOCAL_CENTER_INDEX] + params[GLOBAL_CENTER_INDEX];
 
-    cellCenterInWorld.x = tempCoord.x;
-    cellCenterInWorld.y = tempCoord.y;
+    // The center of the local grid is shifted forward in X
+    globalIndex.x = globalIndex.x + static_cast<int>(localCellsPerAxis / 2);
 
-    // Transform the point to the ZUp frame
-    float3 cellCenterInZUpFrame = transformPoint3D32_2(
-        cellCenterInWorld,
-        make_float3(worldToZUpFrameTf[0], worldToZUpFrameTf[1], worldToZUpFrameTf[2]),
-        make_float3(worldToZUpFrameTf[4], worldToZUpFrameTf[5], worldToZUpFrameTf[6]),
-        make_float3(worldToZUpFrameTf[8], worldToZUpFrameTf[9], worldToZUpFrameTf[10]),
-        make_float3(worldToZUpFrameTf[3], worldToZUpFrameTf[7], worldToZUpFrameTf[11]));
 
-    // Check collision
-    float2 cellCenterInZUpFrameXY = make_float2(cellCenterInZUpFrame.x, cellCenterInZUpFrame.y);
-
-    bool isColliding = length2D(cellCenterInZUpFrameXY) < params[ROBOT_COLLISION_RADIUS];
-    if (isColliding)
+    if (globalIndex.x < 0 || globalIndex.x >= globalCellsPerAxis || globalIndex.y < 0 || globalIndex.y >= globalCellsPerAxis)
         return;
 
-    // Offset ZUp frame X coordinate and calculate local indices
-    cellCenterInZUpFrame.x -= params[GRID_OFFSET_X];
 
-    int2 localCellIndex = coordinate_to_indices(
-        make_float2(cellCenterInZUpFrame.x, cellCenterInZUpFrame.y),
-        make_float2(0.0f, 0.0f),
-        params[LOCAL_CELL_SIZE],
-        params[LOCAL_CENTER_INDEX]);
+    unsigned short *localHeight = (unsigned short *)((char *)localMap + localIndex.x * pitchLocal) + localIndex.y;
 
-    int localCellsPerAxis = static_cast<int>(params[LOCAL_CELLS_PER_AXIS]);
-
-    // Retrieve local height and global height
-    float sensorHeight = sensorToGroundTf[11] - 1.5f;
-
-    unsigned short *heightValue = (unsigned short *)((char *)globalMap + xIndex * pitchGlobal) + yIndex;
-    float previousHeight = *heightValue / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
-    float localHeight = previousHeight;
-
-    if (localCellIndex.x >= 0 && localCellIndex.x < localCellsPerAxis &&
-        localCellIndex.y >= 0 && localCellIndex.y < localCellsPerAxis)
-    {
-
-        unsigned short *newHeightValue = (unsigned short *)((char *)localMap + localCellIndex.x * pitchLocal) + localCellIndex.y;
-        localHeight = *newHeightValue / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
-    }
-
-    float finalHeight = previousHeight;
-
-    if (!isColliding && (localHeight - sensorHeight) > params[MIN_HEIGHT_REGISTRATION] &&
-        (localHeight - sensorHeight) < params[MAX_HEIGHT_REGISTRATION])
-    {
-        finalHeight = localHeight;
-    }
-
-    finalHeight = get_spatial_filtered_height(xIndex, yIndex, finalHeight, globalMap, pitchGlobal, params);
-
-    finalHeight += params[HEIGHT_OFFSET];
-
-    // Store the final height in the global map
-    unsigned short *globalMapElement = (unsigned short *)((char *)globalMap + xIndex * pitchGlobal) + yIndex;
-    *globalMapElement = static_cast<unsigned short>(finalHeight * params[HEIGHT_SCALING_FACTOR]);
-}
-
-extern "C" __global__ void croppingKernel(unsigned short *inputMap, size_t pitchInput,
-                                          unsigned short *croppedMap, size_t pitchCropped,
-                                          float *params, int croppedMapXY)
-{
-    int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
-    int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
-
-    int globalMapSizeX = static_cast<int>(params[GLOBAL_CELLS_PER_AXIS]);
-    int globalMapSizeY = static_cast<int>(params[GLOBAL_CELLS_PER_AXIS]);
-
-    if (xIndex >= croppedMapXY || yIndex >= croppedMapXY)
+    if (*localHeight == 0)
         return;
 
-    int2 globalSensorIndex = coordinate_to_indices(
-        make_float2(params[HEIGHT_MAP_CENTER_X], params[HEIGHT_MAP_CENTER_Y]),
-        make_float2(0.0f, 0.0f),
-        params[GLOBAL_CELL_SIZE],
-        static_cast<int>(params[GLOBAL_CENTER_INDEX]));
+    unsigned short *globalHeight = (unsigned short *)((char *)globalMap + globalIndex.x * pitchGlobal) + globalIndex.y;
 
-    int globalCellIndexX = globalSensorIndex.x + xIndex - (params[CROPPED_WINDOW_CENTER_INDEX]);
-    int globalCellIndexY = globalSensorIndex.y + yIndex - (params[CROPPED_WINDOW_CENTER_INDEX]);
-
-    // Check if global cell index is within bounds
-    if (globalCellIndexX >= 0 && globalCellIndexX < globalMapSizeX &&
-        globalCellIndexY >= 0 && globalCellIndexY < globalMapSizeY)
-    {
-        unsigned short *inputRow = (unsigned short *)((char *)inputMap + globalCellIndexX * pitchInput);
-        unsigned short *croppedRow = (unsigned short *)((char *)croppedMap + xIndex * pitchCropped);
-        croppedRow[yIndex] = inputRow[globalCellIndexY];
-    }
-    else
-    {
-        unsigned short *croppedRow = (unsigned short *)((char *)croppedMap + xIndex * pitchCropped);
-        croppedRow[yIndex] = 0; // Assign 0 for out-of-bounds cells
-    }
+    *globalHeight = *localHeight;
 }
 
 extern "C"
