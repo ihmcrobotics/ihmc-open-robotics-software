@@ -370,8 +370,8 @@ __global__ void heightMapRegistrationKernel(unsigned short *localMap, size_t pit
 extern "C"
 __global__ void shiftGlobalMapKernel(unsigned short* oldMap, size_t pitchOld,
                                      unsigned short* newMap, size_t pitchNew,
-                                     float previousCenterX, float previousCenterY,
-                                     int mapSize, float *params, float *worldToZUpFrameTf)
+                                     float *previousToCurrentSensorTf,
+                                     int mapSize, float *params)
 {
     int x = blockIdx.x * blockDim.x + threadIdx.x;  // column
     int y = blockIdx.y * blockDim.y + threadIdx.y;  // row
@@ -379,20 +379,33 @@ __global__ void shiftGlobalMapKernel(unsigned short* oldMap, size_t pitchOld,
     if (x >= mapSize || y >= mapSize)
         return;
 
-    float dx = params[HEIGHT_MAP_CENTER_X] - previousCenterX;
-    float dy = params[HEIGHT_MAP_CENTER_Y] - previousCenterY;
+    float3 cellCenterInZUp = make_float3(0.0f, 0.0f, params[GROUND_HEIGHT] + 0.5f);
 
-    if (x == 20 && y ==20)
-    {
-        printf("New Center: %f, %f\n", params[HEIGHT_MAP_CENTER_X], params[HEIGHT_MAP_CENTER_Y]);
-        printf("Old Center: %f, %f\n", previousCenterX, previousCenterY);
-    }
+    // Compute grid cell center in Z-Up frame
+    float2 xyCoords = indices_to_coordinate(make_int2(x, y),
+                                            make_float2(0.0f, 0.0f),
+                                            params[GLOBAL_CELL_SIZE],
+                                            params[GLOBAL_CENTER_INDEX]);
 
-    int shiftX = round(dx / params[GLOBAL_CELL_SIZE]);
-    int shiftY = round(dy / params[GLOBAL_CELL_SIZE]);
+    cellCenterInZUp.x = xyCoords.x;
+    cellCenterInZUp.y = xyCoords.y;
 
-    int srcX = x + shiftX;
-    int srcY = y + shiftY;
+    // Transform cell center from current Z-up to previous Z-up
+    float3 cellCenterInSensor = transformPoint3D32_2(
+        cellCenterInZUp,
+        make_float3(previousToCurrentSensorTf[0], previousToCurrentSensorTf[1], previousToCurrentSensorTf[2]),
+        make_float3(previousToCurrentSensorTf[4], previousToCurrentSensorTf[5], previousToCurrentSensorTf[6]),
+        make_float3(previousToCurrentSensorTf[8], previousToCurrentSensorTf[9], previousToCurrentSensorTf[10]),
+        make_float3(previousToCurrentSensorTf[3], previousToCurrentSensorTf[7], previousToCurrentSensorTf[11]));
+
+    int2 newCellIndex = coordinate_to_indices(
+        make_float2(cellCenterInSensor.x, cellCenterInSensor.y),
+        make_float2(0.0f, 0.0f),
+        params[GLOBAL_CELL_SIZE],
+        params[GLOBAL_CENTER_INDEX]);
+
+    int srcX = newCellIndex.x;
+    int srcY = newCellIndex.y;
 
     if (srcX >= 0 && srcX < mapSize && srcY >= 0 && srcY < mapSize)
     {

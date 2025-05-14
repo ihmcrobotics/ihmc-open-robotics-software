@@ -52,6 +52,7 @@ public class RapidHeightMapExtractorCUDA
    private final float[] worldToGroundTransformArray = new float[16];
    private final float[] groundToSensorTransformArray = new float[16];
    private final float[] sensorToGroundTransformArray = new float[16];
+   private final float[] previousToCurrentSensorTransformArray = new float[16];
 
    private final FloatPointer groundToSensorTransformHostPointer;
    private final FloatPointer groundToSensorTransformDevicePointer;
@@ -59,6 +60,8 @@ public class RapidHeightMapExtractorCUDA
    private final FloatPointer sensorToGroundTransformDevicePointer;
    private final FloatPointer worldToGroundTransformHostPointer;
    private final FloatPointer worldToGroundTransformDevicePointer;
+   private final FloatPointer previousToCurrentSensorHostPointer;
+   private final FloatPointer previousToCurrentSensorDevicePointer;
    private final FloatPointer parametersHostPointer;
    private final FloatPointer parametersDevicePointer;
    private final FilteredRapidHeightMapExtractor filteredRapidHeightMapExtractor;
@@ -78,11 +81,13 @@ public class RapidHeightMapExtractorCUDA
    private dim3 planOffsetKernelGridDim;
    private int resetOffset;
 
-   private final Point3D previousSensorOrigin = new Point3D();
    private int previousCellX;
    private int previousCellY;
    private int currentCellX;
    private int currentCellY;
+   private final RigidBodyTransform currentSensorTransformToWorld = new RigidBodyTransform();
+   private final RigidBodyTransform previousSensorTransformToWorld = new RigidBodyTransform();
+   private final RigidBodyTransform previousToCurrentSensorTransform = new RigidBodyTransform();;
 
    public RapidHeightMapExtractorCUDA(int mode, HeightMapParameters heightMapParameters)
    {
@@ -139,6 +144,9 @@ public class RapidHeightMapExtractorCUDA
 
          worldToGroundTransformHostPointer = new FloatPointer(16);
          worldToGroundTransformDevicePointer = new FloatPointer();
+
+         previousToCurrentSensorHostPointer = new FloatPointer(16);
+         previousToCurrentSensorDevicePointer = new FloatPointer();
 
          parametersHostPointer = new FloatPointer(37);
          parametersDevicePointer = new FloatPointer();
@@ -254,24 +262,39 @@ public class RapidHeightMapExtractorCUDA
 
       if (currentCellX != previousCellX || currentCellY != previousCellY)
       {
-         previousCellX = (int) Math.round(previousSensorOrigin.getX32() / heightMapParameters.getCellSizeInMeters());
-         previousCellY = (int) Math.round(previousSensorOrigin.getY32() / heightMapParameters.getCellSizeInMeters());
+         // Set the previous-to-current to the previous, inverts it, then transforms it to the current
+         // This gives the transform from the previous to the current transform of the sensor
+         previousToCurrentSensorTransform.set(previousSensorTransformToWorld);
+         previousToCurrentSensorTransform.invert();
+         currentSensorTransformToWorld.transform(previousToCurrentSensorTransform);
+
+         // Allocate gpu memory for the transform
+         previousToCurrentSensorTransform.get(previousToCurrentSensorTransformArray);
+         previousToCurrentSensorHostPointer.put(previousToCurrentSensorTransformArray);
+         CUDATools.mallocAsync(previousToCurrentSensorDevicePointer, previousToCurrentSensorTransformArray.length, stream);
+         CUDATools.memcpyAsync(previousToCurrentSensorDevicePointer, previousToCurrentSensorHostPointer, previousToCurrentSensorTransformArray.length, stream);
+
+         previousCellX = currentCellX;
+         previousCellY = currentCellY;
          globalHeightMapImage.copyTo(oldGlobalHeightMapImage);
 
          shiftHeightMap.withPointer(oldGlobalHeightMapImage.data()).withLong(oldGlobalHeightMapImage.step());
          shiftHeightMap.withPointer(globalHeightMapImage.data()).withLong(globalHeightMapImage.step());
-         shiftHeightMap.withFloat(previousSensorOrigin.getX32()).withFloat(previousSensorOrigin.getY32());
+         shiftHeightMap.withPointer(previousToCurrentSensorDevicePointer);
          shiftHeightMap.withInt(globalCellsPerAxis);
          shiftHeightMap.withPointer(parametersDevicePointer);
-         shiftHeightMap.withPointer(worldToGroundTransformDevicePointer);
 
          shiftHeightMap.run(stream, registerKernelGridDim, blockSize, 0);
          error = cudaStreamSynchronize(stream);
          CUDATools.checkCUDAError(error);
 
-         previousSensorOrigin.set(sensorOrigin);
+         // Set the previous to the current
+         previousSensorTransformToWorld.set(currentSensorTransformToWorld);
       }
 
+      // Always update the current
+      currentSensorTransformToWorld.set(groundToWorldTransform);
+      currentSensorTransformToWorld.getTranslation().setZ(0.0);
       currentCellX = (int) Math.round(sensorOrigin.getX32() / heightMapParameters.getCellSizeInMeters());
       currentCellY = (int) Math.round(sensorOrigin.getY32() / heightMapParameters.getCellSizeInMeters());
 
