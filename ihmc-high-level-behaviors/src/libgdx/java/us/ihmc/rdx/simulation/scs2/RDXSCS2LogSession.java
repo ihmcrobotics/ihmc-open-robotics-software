@@ -150,7 +150,7 @@ public class RDXSCS2LogSession extends RDXSCS2Session
          }
          for (ZEDLogVideo zedLogVideo : zedLogVideos)
          {
-            zedLogVideo.scrubber.scrub(yoTimestamp.getValueAsLongBits());
+            zedLogVideo.scrubber.scrub(yoTimestamp.getLongValue());
 
             int imageHeight = zedLogVideo.scrubber.getImageHeight();
             int imageWidth = zedLogVideo.scrubber.getImageWidth();
