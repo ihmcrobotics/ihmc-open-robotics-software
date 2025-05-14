@@ -328,46 +328,6 @@ extern "C" __global__ void heightMapUpdateKernel(unsigned short *in, size_t pitc
 }
 
 extern "C"
-__global__ void heightMapRegistrationKernel(unsigned short *localMap, size_t pitchLocal,
-                                            unsigned short *globalMap, size_t pitchGlobal,
-                                            float *params)
-{
-    int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
-    int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
-
-    // Compute global map size
-    int localCellsPerAxis = static_cast<int>(params[LOCAL_CELLS_PER_AXIS]);
-    int globalCellsPerAxis = static_cast<int>(params[GLOBAL_CELLS_PER_AXIS]);
-
-    // Check bounds for global indices
-    if (xIndex >= localCellsPerAxis || yIndex >= localCellsPerAxis)
-        return;
-
-    int2 localIndex = make_int2(xIndex, yIndex);
-
-    int2 globalIndex = make_int2(0, 0);
-    globalIndex.x = localIndex.x - params[LOCAL_CENTER_INDEX] + params[GLOBAL_CENTER_INDEX];
-    globalIndex.y = localIndex.y - params[LOCAL_CENTER_INDEX] + params[GLOBAL_CENTER_INDEX];
-
-    // The center of the local grid is shifted forward in X
-    globalIndex.x = globalIndex.x + static_cast<int>(localCellsPerAxis / 2);
-
-
-    if (globalIndex.x < 0 || globalIndex.x >= globalCellsPerAxis || globalIndex.y < 0 || globalIndex.y >= globalCellsPerAxis)
-        return;
-
-
-    unsigned short *localHeight = (unsigned short *)((char *)localMap + localIndex.x * pitchLocal) + localIndex.y;
-
-    if (*localHeight == 0)
-        return;
-
-    unsigned short *globalHeight = (unsigned short *)((char *)globalMap + globalIndex.x * pitchGlobal) + globalIndex.y;
-
-    *globalHeight = *localHeight;
-}
-
-extern "C"
 __global__ void shiftGlobalMapKernel(unsigned short* oldMap, size_t pitchOld,
                                      unsigned short* newMap, size_t pitchNew,
                                      float *previousToCurrentSensorTf,
@@ -418,6 +378,46 @@ __global__ void shiftGlobalMapKernel(unsigned short* oldMap, size_t pitchOld,
         unsigned short* newRow = (unsigned short*)((char*)newMap + x * pitchNew);
         newRow[y] = 0;
     }
+}
+
+extern "C"
+__global__ void heightMapRegistrationKernel(unsigned short *localMap, size_t pitchLocal,
+                                            unsigned short *globalMap, size_t pitchGlobal,
+                                            float *params)
+{
+    int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
+    int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
+
+    // Compute global map size
+    int localCellsPerAxis = static_cast<int>(params[LOCAL_CELLS_PER_AXIS]);
+    int globalCellsPerAxis = static_cast<int>(params[GLOBAL_CELLS_PER_AXIS]);
+
+    // Check bounds for global indices
+    if (xIndex >= localCellsPerAxis || yIndex >= localCellsPerAxis)
+        return;
+
+    int2 localIndex = make_int2(xIndex, yIndex);
+
+    int2 globalIndex = make_int2(0, 0);
+    globalIndex.x = localIndex.x - params[LOCAL_CENTER_INDEX] + params[GLOBAL_CENTER_INDEX];
+    globalIndex.y = localIndex.y - params[LOCAL_CENTER_INDEX] + params[GLOBAL_CENTER_INDEX];
+
+    // The center of the local grid is shifted forward in X
+    globalIndex.x = globalIndex.x + static_cast<int>(localCellsPerAxis / 2);
+
+
+    if (globalIndex.x < 0 || globalIndex.x >= globalCellsPerAxis || globalIndex.y < 0 || globalIndex.y >= globalCellsPerAxis)
+        return;
+
+
+    unsigned short *localHeight = (unsigned short *)((char *)localMap + localIndex.x * pitchLocal) + localIndex.y;
+
+    if (*localHeight == 0)
+        return;
+
+    unsigned short *globalHeight = (unsigned short *)((char *)globalMap + globalIndex.x * pitchGlobal) + globalIndex.y;
+
+    *globalHeight = *localHeight;
 }
 
 extern "C"
