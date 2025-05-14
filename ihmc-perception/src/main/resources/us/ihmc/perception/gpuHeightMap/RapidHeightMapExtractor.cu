@@ -352,6 +352,9 @@ __global__ void heightMapRegistrationKernel(unsigned short *localMap, size_t pit
     globalIndex.x = localIndex.x - params[LOCAL_CENTER_INDEX] + params[GLOBAL_CENTER_INDEX];
     globalIndex.y = localIndex.y - params[LOCAL_CENTER_INDEX] + params[GLOBAL_CENTER_INDEX];
 
+    // The center of the local grid is shifted forward in X
+    globalIndex.x = globalIndex.x + static_cast<int>(localCellsPerAxis / 2);
+
 
     if (globalIndex.x < 0 || globalIndex.x >= globalCellsPerAxis || globalIndex.y < 0 || globalIndex.y >= globalCellsPerAxis)
         return;

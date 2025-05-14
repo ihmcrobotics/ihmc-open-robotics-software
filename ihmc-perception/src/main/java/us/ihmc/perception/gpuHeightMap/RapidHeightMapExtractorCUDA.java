@@ -81,13 +81,9 @@ public class RapidHeightMapExtractorCUDA
    private dim3 planOffsetKernelGridDim;
    private int resetOffset;
 
-   private int previousCellX;
-   private int previousCellY;
-   private int currentCellX;
-   private int currentCellY;
-   private final RigidBodyTransform currentSensorTransformToWorld = new RigidBodyTransform();
-   private final RigidBodyTransform previousSensorTransformToWorld = new RigidBodyTransform();
-   private final RigidBodyTransform previousToCurrentSensorTransform = new RigidBodyTransform();;
+   private final RigidBodyTransform currentGroundToWorldTransform = new RigidBodyTransform();
+   private final RigidBodyTransform previousGroundToWorldTransform = new RigidBodyTransform();
+   private final RigidBodyTransform previousToCurrentSensorTransform = new RigidBodyTransform();
 
    public RapidHeightMapExtractorCUDA(int mode, HeightMapParameters heightMapParameters)
    {
@@ -260,43 +256,35 @@ public class RapidHeightMapExtractorCUDA
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
 
-      if (currentCellX != previousCellX || currentCellY != previousCellY)
-      {
-         // Set the previous-to-current to the previous, inverts it, then transforms it to the current
-         // This gives the transform from the previous to the current transform of the sensor
-         previousToCurrentSensorTransform.set(previousSensorTransformToWorld);
-         previousToCurrentSensorTransform.invert();
-         currentSensorTransformToWorld.transform(previousToCurrentSensorTransform);
+      // Set the previous-to-current to the previous, inverts it, then transforms it to the current
+      // This gives the transform from the previous to the current transform of the sensor
+      previousToCurrentSensorTransform.set(previousGroundToWorldTransform);
+      previousToCurrentSensorTransform.invert();
+      currentGroundToWorldTransform.transform(previousToCurrentSensorTransform);
 
-         // Allocate gpu memory for the transform
-         previousToCurrentSensorTransform.get(previousToCurrentSensorTransformArray);
-         previousToCurrentSensorHostPointer.put(previousToCurrentSensorTransformArray);
-         CUDATools.mallocAsync(previousToCurrentSensorDevicePointer, previousToCurrentSensorTransformArray.length, stream);
-         CUDATools.memcpyAsync(previousToCurrentSensorDevicePointer, previousToCurrentSensorHostPointer, previousToCurrentSensorTransformArray.length, stream);
+      // Allocate gpu memory for the transform
+      previousToCurrentSensorTransform.get(previousToCurrentSensorTransformArray);
+      previousToCurrentSensorHostPointer.put(previousToCurrentSensorTransformArray);
+      CUDATools.mallocAsync(previousToCurrentSensorDevicePointer, previousToCurrentSensorTransformArray.length, stream);
+      CUDATools.memcpyAsync(previousToCurrentSensorDevicePointer, previousToCurrentSensorHostPointer, previousToCurrentSensorTransformArray.length, stream);
 
-         previousCellX = currentCellX;
-         previousCellY = currentCellY;
-         globalHeightMapImage.copyTo(oldGlobalHeightMapImage);
+      globalHeightMapImage.copyTo(oldGlobalHeightMapImage);
 
-         shiftHeightMap.withPointer(oldGlobalHeightMapImage.data()).withLong(oldGlobalHeightMapImage.step());
-         shiftHeightMap.withPointer(globalHeightMapImage.data()).withLong(globalHeightMapImage.step());
-         shiftHeightMap.withPointer(previousToCurrentSensorDevicePointer);
-         shiftHeightMap.withInt(globalCellsPerAxis);
-         shiftHeightMap.withPointer(parametersDevicePointer);
+      shiftHeightMap.withPointer(oldGlobalHeightMapImage.data()).withLong(oldGlobalHeightMapImage.step());
+      shiftHeightMap.withPointer(globalHeightMapImage.data()).withLong(globalHeightMapImage.step());
+      shiftHeightMap.withPointer(previousToCurrentSensorDevicePointer);
+      shiftHeightMap.withInt(globalCellsPerAxis);
+      shiftHeightMap.withPointer(parametersDevicePointer);
 
-         shiftHeightMap.run(stream, registerKernelGridDim, blockSize, 0);
-         error = cudaStreamSynchronize(stream);
-         CUDATools.checkCUDAError(error);
+      shiftHeightMap.run(stream, registerKernelGridDim, blockSize, 0);
+      error = cudaStreamSynchronize(stream);
+      CUDATools.checkCUDAError(error);
 
-         // Set the previous to the current
-         previousSensorTransformToWorld.set(currentSensorTransformToWorld);
-      }
+      // Set the previous to the current
+      previousGroundToWorldTransform.set(currentGroundToWorldTransform);
 
       // Always update the current
-      currentSensorTransformToWorld.set(groundToWorldTransform);
-      currentSensorTransformToWorld.getTranslation().setZ(0.0);
-      currentCellX = (int) Math.round(sensorOrigin.getX32() / heightMapParameters.getCellSizeInMeters());
-      currentCellY = (int) Math.round(sensorOrigin.getY32() / heightMapParameters.getCellSizeInMeters());
+      currentGroundToWorldTransform.set(groundToWorldTransform);
 
       // Run the registration kernel
       registerKernel.withPointer(localHeightMapImage.data()).withLong(localHeightMapImage.step());
@@ -307,28 +295,28 @@ public class RapidHeightMapExtractorCUDA
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
 
-//      if (heightMapParameters.getEnableAlphaFilter())
-//      {
-//         filteredRapidHeightMapExtractor.update(globalHeightMapImage, resetOffset);
-//      }
-//
-//      if (heightMapParameters.getEnableVerticalFilter())
-//      {
-//         verticalSurfacesExtractor.update(globalHeightMapImage);
-//      }
+      //      if (heightMapParameters.getEnableAlphaFilter())
+      //      {
+      //         filteredRapidHeightMapExtractor.update(globalHeightMapImage, resetOffset);
+      //      }
+      //
+      //      if (heightMapParameters.getEnableVerticalFilter())
+      //      {
+      //         verticalSurfacesExtractor.update(globalHeightMapImage);
+      //      }
       globalHeightMapImage.copyTo(croppedHeightMapImage);
 
       // Run the cropping kernel
-//      croppingKernel.withPointer(globalHeightMapImage.data()).withLong(globalHeightMapImage.step());
-//      croppingKernel.withPointer(croppedHeightMapImage.data()).withLong(croppedHeightMapImage.step());
-//      croppingKernel.withPointer(parametersDevicePointer);
-//      croppingKernel.withInt(cellsPerAxisCropped);
-//      error = cudaStreamSynchronize(stream);
-//      CUDATools.checkCUDAError(error);
-//
-//      croppingKernel.run(stream, croppingKernelGridDim, blockSize, 0);
-//      error = cudaStreamSynchronize(stream);
-//      CUDATools.checkCUDAError(error);
+      //      croppingKernel.withPointer(globalHeightMapImage.data()).withLong(globalHeightMapImage.step());
+      //      croppingKernel.withPointer(croppedHeightMapImage.data()).withLong(croppedHeightMapImage.step());
+      //      croppingKernel.withPointer(parametersDevicePointer);
+      //      croppingKernel.withInt(cellsPerAxisCropped);
+      //      error = cudaStreamSynchronize(stream);
+      //      CUDATools.checkCUDAError(error);
+      //
+      //      croppingKernel.run(stream, croppingKernelGridDim, blockSize, 0);
+      //      error = cudaStreamSynchronize(stream);
+      //      CUDATools.checkCUDAError(error);
 
       // All that memory we allocated on the GPU, need to free that up now
       cudaFreeAsync(groundToSensorTransformDevicePointer, stream);
