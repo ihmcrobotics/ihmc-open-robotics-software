@@ -14,6 +14,7 @@ import us.ihmc.tools.io.JSONFileTools;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class LeRobotDataset
 {
@@ -94,7 +95,7 @@ public class LeRobotDataset
       });
    }
 
-   public void addEpisode(String taskName, SCS2LogSessionWithVideo session)
+   public void addEpisode(String taskName, SCS2LogSessionWithVideo session, Consumer<Runnable> frameProcessingQueue)
    {
       if (!taskNames.contains(taskName))
       {
@@ -111,7 +112,7 @@ public class LeRobotDataset
                                                                 episodeStatsJsonlPath,
                                                                 dataChunk0Path,
                                                                 zedVideoDirs);
-      episode.startGeneratingEpisode(session, this::writeMetaJson);
+      episode.startGeneratingEpisode(session, this::writeMetaJson, frameProcessingQueue);
       episodes.add(episode);
    }
 
