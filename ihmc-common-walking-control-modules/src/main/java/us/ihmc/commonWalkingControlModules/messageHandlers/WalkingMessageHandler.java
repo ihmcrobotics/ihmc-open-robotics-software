@@ -170,13 +170,6 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
       momentumTrajectoryHandler = new MomentumTrajectoryHandler(yoTime, registry);
       comTrajectoryHandler = new CenterOfMassTrajectoryHandler(yoTime, registry);
 
-      //TODO remove
-//      YoVariableChangedListener requestDisableCoPFeedbackListener = change -> requestDisableCoPFeedbackControl.set(usingQFP.getBooleanValue() && !isWalkingInPlace.getBooleanValue() && !isWalkingPaused.getBooleanValue() && isWalking.getBooleanValue());
-//      usingQFP.addListener(requestDisableCoPFeedbackListener);
-//      isWalkingInPlace.addListener(requestDisableCoPFeedbackListener);
-//      isWalkingPaused.addListener(requestDisableCoPFeedbackListener);
-//      isWalking.addListener(requestDisableCoPFeedbackListener);
-
       parentRegistry.addChild(registry);
    }
 
