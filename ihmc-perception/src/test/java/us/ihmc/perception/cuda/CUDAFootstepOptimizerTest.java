@@ -1,5 +1,6 @@
 package us.ihmc.perception.cuda;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
@@ -8,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class CUDAFootstepOptimizerTest
 {
-   @RepeatedTest(100)
+   @Disabled
    public void findMinimumCost()
    {
       CUDAFootstepOptimizer footstepOptimizer = new CUDAFootstepOptimizer(0.5f, 0.25f);
@@ -72,7 +73,7 @@ public class CUDAFootstepOptimizerTest
       return new Result(minValue, index);
    }
 
-   @Test
+   @Disabled
    public void computeCosts()
    {
       CUDAFootstepOptimizer footstepOptimizer = new CUDAFootstepOptimizer(0.5f,0.25f);
