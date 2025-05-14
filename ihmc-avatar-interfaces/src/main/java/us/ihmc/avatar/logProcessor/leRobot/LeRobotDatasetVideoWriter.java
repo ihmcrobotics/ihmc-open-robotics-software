@@ -66,7 +66,7 @@ public class LeRobotDatasetVideoWriter
       ExceptionTools.handle(() -> recorder.start(), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
    }
 
-   public void writeFrame(long videoTimestampMs)
+   public void writeFrame(long videoTimestampMs, LeRobotDatasetEpisodeStatistics statistics)
    {
       int imageHeight = zedSVOScrubber.getImageHeight();
       int imageWidth = zedSVOScrubber.getImageWidth();
@@ -92,11 +92,10 @@ public class LeRobotDatasetVideoWriter
       Mat cropped = new Mat(resized, roi);
       resized.close();
 
+      statistics.submitFrame(side, cropped);
+
       // ZED outputs bgra but frame recorder wants rgba
       opencv_imgproc.cvtColor(cropped, cropped, opencv_imgproc.COLOR_BGR2RGBA);
-
-      // TODO: Calculate stats
-      Scalar mean = opencv_core.mean(cropped);
 
       Frame frame = frameConverter.convert(cropped);
       cropped.close();

@@ -72,7 +72,7 @@ public class RDXLeRobotDatasetCreator
                File logDirectory = logSession.getSession().getLogDirectory();
                dataset = new LeRobotDataset(logDirectory.toPath().resolve(datasetName.get().trim()));
                dataset.mkdirs();
-               dataset.writeMetadataToFilesystem();
+               dataset.writeMetaJson();
                datasetName.clear();
                refresh();
             }
@@ -126,7 +126,7 @@ public class RDXLeRobotDatasetCreator
 
          if (ImGui.button(labels.get("Regenerate Metadata")))
          {
-            dataset.writeMetadataToFilesystem();
+            dataset.regenerateAndRewriteMetadata();
          }
       }
       else

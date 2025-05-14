@@ -55,14 +55,14 @@ public class LeRobotDatasetEpisode
       episodeName = "episode_%06d".formatted(episodeIndex);
    }
 
-   public void startGeneratingEpisode(SCS2LogSessionWithVideo session, Runnable writeMetadataToFilesystem)
+   public void startGeneratingEpisode(SCS2LogSessionWithVideo session, Runnable writeMetaJson)
    {
       YoLong yoTimestamp = session.getLogDataReader().getTimestamp();
 
       int inPoint = session.getBufferProperties().getInPoint();
       int outPoint = session.getBufferProperties().getOutPoint();
       double sessionDTSeconds = session.getSessionDTSeconds();
-      LogTools.info("dt: {}", sessionDTSeconds);
+      LogTools.info("Generating episode {}: dt: {}", episodeName, sessionDTSeconds);
 
       ThreadTools.startAsDaemon(() ->
       {
@@ -78,13 +78,23 @@ public class LeRobotDatasetEpisode
          }
 
          LeRobotDatasetDataWriter dataWriter = new LeRobotDatasetDataWriter(episodeIndex, datasetLengthSoFar, session.getRootRegistry());
+         LeRobotDatasetEpisodeStatistics statistics = new LeRobotDatasetEpisodeStatistics();
 
+         LogTools.info("Traversing buffer");
          length = 0L;
          long startVideoTimestamp = -1;
          long lastVideoTimestamp = -1;
-         for (int i = 0; i < outPoint - inPoint; i++)
+
+         while (true)
          {
+            int previousIndex = session.getBufferProperties().getCurrentIndex();
+
             session.playbackTick();
+
+            if (session.getBufferProperties().getCurrentIndex() < previousIndex)
+               break;
+
+            System.out.printf("\rTraversing buffer: %d -> %d / %d", inPoint, session.getBufferProperties().getCurrentIndex(), outPoint);
 
             long timestamp = yoTimestamp.getLongValue();
             zedSVOScrubber.scrub(timestamp);
@@ -101,19 +111,20 @@ public class LeRobotDatasetEpisode
                lastVideoTimestamp = currentVideoTimestamp;
 
                long videoTimestampMicros = Math.round((currentVideoTimestamp - startVideoTimestamp) / 1000.0);
-               LogTools.info("Current timestamp: %d  Writing frame %.3f Frequency %.3f".formatted(currentVideoTimestamp,
-                                                                                                  videoTimestampMicros / 1000.0,
-                                                                                                  Conversions.secondsToHertz(period)));
+//               LogTools.info("Current timestamp: %d  Writing frame %.3f Frequency %.3f".formatted(currentVideoTimestamp,
+//                                                                                                  videoTimestampMicros / 1000.0,
+//                                                                                                  Conversions.secondsToHertz(period)));
                for (RobotSide side : RobotSide.values)
                {
-                  ffmpegRecorders.get(side).writeFrame(videoTimestampMicros);
+                  ffmpegRecorders.get(side).writeFrame(videoTimestampMicros, statistics);
                }
 
-               dataWriter.addFrame(videoTimestampMicros, length);
+               dataWriter.addFrame(videoTimestampMicros, length, statistics);
 
                ++length;
             }
          }
+         System.out.println();
 
          LogTools.info("Wrote episode with %d frames.".formatted(length));
          for (RobotSide side : RobotSide.values)
@@ -124,14 +135,16 @@ public class LeRobotDatasetEpisode
          Path parquetPath = dataChunk0Path.resolve(episodeName + ".parquet");
          dataWriter.writeFile(parquetPath);
 
-         writeMetadataToFilesystem.run();
+         writeEpisodeJsonlLine();
+         writeMetaJson.run();
 
-         appendJsonStatsLine();
+         statistics.calculate();
+         writeStatsJsonlLine(statistics);
 
       }, getClass().getSimpleName());
    }
 
-   public void appendJsonBasicEntryLine()
+   public void writeEpisodeJsonlLine()
    {
       LeRobotDatasetTools.appendLine(episodesJsonlPath, JSONFileTools.getAsSingleLine(node ->
       {
@@ -142,7 +155,18 @@ public class LeRobotDatasetEpisode
       }));
    }
 
-   public void appendJsonStatsLine()
+   private void writeStatsJsonlLine(LeRobotDatasetEpisodeStatistics statistics)
+   {
+      LeRobotDatasetTools.appendLine(episodeStatsJsonlPath, JSONFileTools.getAsSingleLine(node ->
+      {
+         node.put("episode_index", episodeIndex);
+         ObjectNode stats = node.putObject("stats");
+
+         statistics.writeJson(stats, zedVideoDirs);
+      }));
+   }
+
+   public void readDataAndWriteStatisticsJsonlLine()
    {
       LeRobotDatasetEpisodeStatistics statistics = new LeRobotDatasetEpisodeStatistics();
 
@@ -155,7 +179,7 @@ public class LeRobotDatasetEpisode
          Mat bgrMat = videoReader.readFrame();
          while (bgrMat != null)
          {
-            LogTools.info("Read frame at timestamp %d : mat: %s".formatted(videoReader.getCurrentTimestamp(), bgrMat));
+//            LogTools.info("Read frame at timestamp %d : mat: %s".formatted(videoReader.getCurrentTimestamp(), bgrMat));
 
             statistics.submitFrame(side, bgrMat);
 
@@ -188,39 +212,12 @@ public class LeRobotDatasetEpisode
       }
 
       statistics.calculate();
-
-      LeRobotDatasetTools.appendLine(episodeStatsJsonlPath, JSONFileTools.getAsSingleLine(node ->
-      {
-         node.put("episode_index", episodeIndex);
-         ObjectNode stats = node.putObject("stats");
-
-         statistics.writeJson(stats, zedVideoDirs);
-      }));
+      writeStatsJsonlLine(statistics);
    }
 
    public String getEpisodeName()
    {
       return episodeName;
-   }
-
-   public Path getEpisodesJsonlPath()
-   {
-      return episodesJsonlPath;
-   }
-
-   public Path getEpisodeStatsJsonlPath()
-   {
-      return episodeStatsJsonlPath;
-   }
-
-   public Path getDataChunk0Path()
-   {
-      return dataChunk0Path;
-   }
-
-   public SideDependentList<Path> getZedVideoDirs()
-   {
-      return zedVideoDirs;
    }
 
    public int getLength()

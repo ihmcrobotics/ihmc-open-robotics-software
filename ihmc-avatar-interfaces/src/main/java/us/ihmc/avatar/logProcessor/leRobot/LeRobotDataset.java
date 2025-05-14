@@ -67,7 +67,7 @@ public class LeRobotDataset
       FileTools.ensureFileExists(tasksJsonlPath, DefaultExceptionHandler.PRINT_MESSAGE);
    }
 
-   public void loadData()
+   public void loadData() // TODO: Load completely
    {
       taskNames.clear();
       JSONFileTools.loadLines(tasksJsonlPath, lineRoot ->
@@ -99,15 +99,8 @@ public class LeRobotDataset
       if (!taskNames.contains(taskName))
       {
          taskNames.add(taskName);
-
-         LeRobotDatasetTools.appendLine(tasksJsonlPath, JSONFileTools.getAsSingleLine(node ->
-         {
-            node.put("task_index", taskNames.size() - 1);
-            node.put("task", taskName);
-         }));
+         writeTaskJsonlLine(taskName);
       }
-
-      // add episode to episodes.jsonl
 
       int episodeIndex = episodes.size();
       LeRobotDatasetEpisode episode = new LeRobotDatasetEpisode(episodeIndex,
@@ -118,17 +111,36 @@ public class LeRobotDataset
                                                                 episodeStatsJsonlPath,
                                                                 dataChunk0Path,
                                                                 zedVideoDirs);
-      episode.startGeneratingEpisode(session, this::writeMetadataToFilesystem);
+      episode.startGeneratingEpisode(session, this::writeMetaJson);
       episodes.add(episode);
-
-      // add episode stats entry
-      // update info.json
-
-      // add episode parquet file
-      // add mp4 for each camera
    }
 
-   public void writeMetadataToFilesystem()
+   public void regenerateAndRewriteMetadata()
+   {
+      writeMetaJson();
+
+      FileTools.write(episodesJsonlPath, new byte[0], WriteOption.TRUNCATE, DefaultExceptionHandler.PRINT_MESSAGE);
+      for (LeRobotDatasetEpisode episode : episodes)
+      {
+         episode.writeEpisodeJsonlLine();
+      }
+
+      FileTools.write(episodeStatsJsonlPath, new byte[0], WriteOption.TRUNCATE, DefaultExceptionHandler.PRINT_MESSAGE);
+      for (LeRobotDatasetEpisode episode : episodes)
+      {
+         LogTools.info("Generating stats for %s...".formatted(episode.getEpisodeName()));
+         episode.readDataAndWriteStatisticsJsonlLine();
+      }
+
+      FileTools.write(tasksJsonlPath, new byte[0], WriteOption.TRUNCATE, DefaultExceptionHandler.PRINT_MESSAGE);
+      for (String taskName : taskNames)
+      {
+         writeTaskJsonlLine(taskName);
+      }
+      LogTools.info("All done regenerating and rewriting metadata.");
+   }
+
+   public void writeMetaJson()
    {
       JSONFileTools.save(infoJsonPath, rootNode ->
       {
@@ -209,19 +221,15 @@ public class LeRobotDataset
          taskIndex.putArray("shape").add(1);
          taskIndex.put("names", (byte[]) null);
       });
+   }
 
-      FileTools.write(episodesJsonlPath, new byte[0], WriteOption.TRUNCATE, DefaultExceptionHandler.PRINT_MESSAGE);
-      for (LeRobotDatasetEpisode episode : episodes)
+   private void writeTaskJsonlLine(String taskName)
+   {
+      LeRobotDatasetTools.appendLine(tasksJsonlPath, JSONFileTools.getAsSingleLine(node ->
       {
-         episode.appendJsonBasicEntryLine();
-      }
-
-      FileTools.write(episodeStatsJsonlPath, new byte[0], WriteOption.TRUNCATE, DefaultExceptionHandler.PRINT_MESSAGE);
-      for (LeRobotDatasetEpisode episode : episodes)
-      {
-         LogTools.info("Generating stats for %s...".formatted(episode.getEpisodeName()));
-         episode.appendJsonStatsLine();
-      }
+         node.put("task_index", taskNames.size() - 1);
+         node.put("task", taskName);
+      }));
    }
 
    public String getName()

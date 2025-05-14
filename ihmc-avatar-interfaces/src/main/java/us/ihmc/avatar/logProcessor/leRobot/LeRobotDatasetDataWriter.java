@@ -59,7 +59,7 @@ public class LeRobotDatasetDataWriter
       }
    }
 
-   public void addFrame(long timestampMicros, long frameIndex)
+   public void addFrame(long timestampMicros, long frameIndex, LeRobotDatasetEpisodeStatistics statistics)
    {
       List<Float> state = new ArrayList<>();
       List<Float> action = new ArrayList<>();
@@ -84,12 +84,16 @@ public class LeRobotDatasetDataWriter
       float timestamp = timestampMicros / 1e6f; // in seconds, beginning of episode is 0.0 s
       int taskIndex = 0; // We're only training one task at a time for now
       boolean isLastFrame = false;
-      records.add(new LeRobotEpisodeRecord(state,
-                                           action,
-                                           episodeIndex,
-                                           frameIndex,
-                                           timestamp, isLastFrame,
-                                           datasetLengthSoFar + frameIndex, taskIndex));
+      LeRobotEpisodeRecord record = new LeRobotEpisodeRecord(state,
+                                                             action,
+                                                             episodeIndex,
+                                                             frameIndex,
+                                                             timestamp,
+                                                             isLastFrame,
+                                                             datasetLengthSoFar + frameIndex,
+                                                             taskIndex);
+      statistics.processParquetRecord(record);
+      records.add(record);
    }
 
    public void writeFile(Path parquetPath)
