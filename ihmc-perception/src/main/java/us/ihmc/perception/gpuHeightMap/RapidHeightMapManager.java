@@ -169,7 +169,7 @@ public class RapidHeightMapManager
 
 
 
-      cameraPose.setToZero(cameraFrame);
+      cameraPose.setToZero(cameraZUpFrame);
       cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
 
       // Perform update, this actually creates the height map

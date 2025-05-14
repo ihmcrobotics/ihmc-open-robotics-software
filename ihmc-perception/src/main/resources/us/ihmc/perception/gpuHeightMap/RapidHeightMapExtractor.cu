@@ -362,6 +362,34 @@ __global__ void heightMapRegistrationKernel(unsigned short *localMap, size_t pit
     *globalHeight = *localHeight;
 }
 
+extern "C"
+__global__ void shiftGlobalMapKernel(unsigned short* oldMap, size_t pitchOld,
+                                     unsigned short* newMap, size_t pitchNew,
+                                     float previousCenterX, float previousCenterY,
+                                     int mapSize, float *params, float *worldToZUpFrameTf)
+{
+    int x = blockIdx.x * blockDim.x + threadIdx.x;  // column
+    int y = blockIdx.y * blockDim.y + threadIdx.y;  // row
+
+    if (x >= mapSize || y >= mapSize)
+        return;
+
+    float dx = params[HEIGHT_MAP_CENTER_X] - previousCenterX;
+    float dy = params[HEIGHT_MAP_CENTER_Y] - previousCenterY;
+
+    int shiftX = round(dx / params[GLOBAL_CELL_SIZE]);
+    int shiftY = round(dy / params[GLOBAL_CELL_SIZE]);
+
+    int dstX = x - shiftX;
+    int dstY = y - shiftY;
+
+    if (dstX >= 0 && dstX < mapSize && dstY >= 0 && dstY < mapSize)
+    {
+        unsigned short* oldRow = (unsigned short*)((char*)oldMap + x * pitchOld);
+        unsigned short* newRow = (unsigned short*)((char*)newMap + dstX * pitchNew);
+        newRow[dstY] = oldRow[y];
+    }
+}
 
 // extern "C"
 // __global__ void heightMapRegistrationKernel(unsigned short *localMap, size_t pitchLocal,
