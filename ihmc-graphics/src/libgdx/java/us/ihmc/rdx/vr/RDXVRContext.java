@@ -184,19 +184,24 @@ public class RDXVRContext
       {
          deviceIndices[i] = i;
       }
+      String modelNumber = VRSystem.VRSystem_GetStringTrackedDeviceProperty(0, VR.ETrackedDeviceProperty_Prop_ModelNumber_String, null);
+      if (modelNumber.toLowerCase().contains("focus3"))
+         vrModel = RDXVRHardwareModel.FOCUS3;
+      else
+         vrModel = RDXVRHardwareModel.INDEX;
+
+      LogTools.info("Using VR headset/controller model: {}", vrModel);
+      for (RDXVRController controller : controllers)
+      {
+         controller.setModel(vrModel);
+         controller.initSystem();
+      }
+
       // Iterate over all potential indexes to see which one is a tracker and add it
       // NOTE. lgwjl openvr API is not stable and functions like VRSystem_GetSortedTrackedDeviceIndicesOfClass do not work
       for (int deviceIndex : deviceIndices)
       {
          int deviceClass = VRSystem.VRSystem_GetTrackedDeviceClass(deviceIndex);
-         if (deviceClass == VR.ETrackedDeviceClass_TrackedDeviceClass_HMD)
-         {
-            String modelNumber = VRSystem.VRSystem_GetStringTrackedDeviceProperty(deviceIndex, VR.ETrackedDeviceProperty_Prop_ModelNumber_String, null);
-            if (modelNumber.toLowerCase().contains("focus3"))
-               vrModel = RDXVRHardwareModel.FOCUS3;
-            else
-               vrModel = RDXVRHardwareModel.INDEX;
-         }
          if (deviceClass == VR.ETrackedDeviceClass_TrackedDeviceClass_GenericTracker)
          {
             if (!trackers.containsKey(getSerialNumber(deviceIndex)))
@@ -209,13 +214,6 @@ public class RDXVRContext
       }
       if (!trackers.isEmpty())
          loadTrackerRolesFromFile();
-
-      LogTools.info("Using VR headset/controller model: {}", vrModel);
-      for (RDXVRController controller : controllers)
-      {
-         controller.setModel(vrModel);
-         controller.initSystem();
-      }
 
       activeActionSets = VRActiveActionSet.create(1);
       activeActionSets.ulActionSet(mainActionSetHandle.get(0));

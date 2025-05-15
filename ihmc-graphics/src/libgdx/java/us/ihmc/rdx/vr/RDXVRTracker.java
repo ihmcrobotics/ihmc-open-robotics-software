@@ -32,12 +32,12 @@ public class RDXVRTracker extends RDXVRTrackedDevice
       {
          case FOCUS3 ->
          {
-            trackerYBackZLeftXRightToXForwardZUp = new RigidBodyTransform(new YawPitchRoll(Math.toRadians(0.0), Math.toRadians(90.0), Math.toRadians(0.0)),
+            trackerYBackZLeftXRightToXForwardZUp = new RigidBodyTransform(new YawPitchRoll(Math.toRadians(90.0), Math.toRadians(0.0), Math.toRadians(180.0)),
                                                                           new Point3D());
          }
          default ->
          {
-            trackerYBackZLeftXRightToXForwardZUp = new RigidBodyTransform(new YawPitchRoll(Math.toRadians(-90.0), Math.toRadians(0.0), Math.toRadians(-90.0)),
+            trackerYBackZLeftXRightToXForwardZUp = new RigidBodyTransform(new YawPitchRoll(Math.toRadians(0.0), Math.toRadians(90.0), Math.toRadians(-90.0)),
                                                                           new Point3D());
          }
       }

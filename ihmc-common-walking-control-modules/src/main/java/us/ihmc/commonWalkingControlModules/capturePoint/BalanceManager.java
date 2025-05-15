@@ -342,14 +342,14 @@ public class BalanceManager implements SCS2YoGraphicHolder
       {
          YoVariableChangedListener qfpParameterListener = change ->
          {
-            boolean usingQFP = walkingMessageHandler.getUsingQFP().getBooleanValue();
+            boolean updateFootstepReferenceContinuously = walkingMessageHandler.getUpdateFootstepReferenceContinuously().getBooleanValue();
             boolean requestDisableCoPFeedbackControl = walkingMessageHandler.getRequestDisableCopFeedbackControl().getBooleanValue();
 
-            stepAdjustmentController.setSwingSpeedUpEnabled(usingQFP ? false : walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
-            linearMomentumRateControlModuleInput.setDisableCoPFeedbackControl(usingQFP && requestDisableCoPFeedbackControl ? true : !walkingControllerParameters.getICPControllerParameters().useCoPFeedback());
+            stepAdjustmentController.setSwingSpeedUpEnabled(updateFootstepReferenceContinuously ? false : walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
+            linearMomentumRateControlModuleInput.setDisableCoPFeedbackControl(requestDisableCoPFeedbackControl ? true : !walkingControllerParameters.getICPControllerParameters().useCoPFeedback());
          };
 
-         walkingMessageHandler.getUsingQFP().addListener(qfpParameterListener);
+         walkingMessageHandler.getUpdateFootstepReferenceContinuously().addListener(qfpParameterListener);
          walkingMessageHandler.getRequestDisableCopFeedbackControl().addListener(qfpParameterListener);
       }
 
@@ -811,6 +811,10 @@ public class BalanceManager implements SCS2YoGraphicHolder
    public void disablePelvisXYControl()
    {
       pelvisICPBasedTranslationManager.disable();
+      if (precomputedICPPlanner != null)
+         precomputedICPPlanner.clear();
+      if (momentumTrajectoryHandler != null)
+         momentumTrajectoryHandler.clear();
    }
 
    public void enablePelvisXYControl()
@@ -1068,7 +1072,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
       double maxICPErrorBeforeSingleSupportY = isICPErrorToTheInside ? maxICPErrorBeforeSingleSupportInnerY.getValue()
                                                                      : maxICPErrorBeforeSingleSupportOuterY.getValue();
 
-      if (controllerToolbox.getWalkingMessageHandler().getUsingQFP().getBooleanValue())
+      if (controllerToolbox.getWalkingMessageHandler().getRequestDisableCopFeedbackControl().getBooleanValue())
          normalizedICPError.set(0.0);
       else
          normalizedICPError.set(MathTools.square(icpError2d.getX() / maxICPErrorBeforeSingleSupportX)

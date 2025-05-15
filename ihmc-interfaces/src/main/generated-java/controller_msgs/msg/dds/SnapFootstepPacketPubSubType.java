@@ -15,7 +15,7 @@ public class SnapFootstepPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "8d7dfc27735170a09d0c0fb6cfe2ed2c251b034ad39ed1eb365828e7a94c4dd4";
+   		return "b8d65366b80cb217f5cf8f3abff10c874aaa32e0d3f4dc77e65af6a2449ae136";
    }
    
    @Override

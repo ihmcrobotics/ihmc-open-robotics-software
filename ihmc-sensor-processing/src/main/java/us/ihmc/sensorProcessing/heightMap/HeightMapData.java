@@ -259,4 +259,9 @@ public class HeightMapData
       minY = gridCenter.getY() - halfWidth;
       maxY = gridCenter.getY() + halfWidth;
    }
+
+   public double[] getHeights()
+   {
+      return heights;
+   }
 }

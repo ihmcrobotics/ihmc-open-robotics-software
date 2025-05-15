@@ -1,25 +1,22 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
+import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInitialConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxInitialConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxPrivilegedConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.mecano.algorithms.CenterOfMassCalculator;
-import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
+
+import java.util.Map;
 
 public class KinematicsToolboxMessageFactory
 {
@@ -208,62 +205,6 @@ public class KinematicsToolboxMessageFactory
    }
 
    /**
-    * Create a new configuration message holding a new privileged robot configuration for the
-    * {@code KinematicsToolboxController} to use by extracting the joint angles out of the given
-    * {@code fullRobotModel}.
-    * <p>
-    * Note that the solver will update the center of mass position and foot poses in order to be able
-    * to hold their configurations. Depending on the context, it may make sense to disable this feature
-    * by setting to {@code false} the fields
-    * {@link KinematicsToolboxConfigurationMessage#holdCurrentCenterOfMassXYPosition} and
-    * {@link KinematicsToolboxConfigurationMessage#holdSupportFootPositions}.
-    * </p>
-    * <p>
-    * Note that by sending a privileged configuration the solver will get reinitialized to start off
-    * that configuration and thus may delay the convergence to the solution. It is therefore preferable
-    * to send the privileged configuration as soon as possible.
-    * </p>
-    *
-    * @param fullRobotModel        the robot that is currently at the desired privileged configuration.
-    *                              Not modified.
-    * @param useDesiredJointAngles whether the privileged joint angles are using
-    *                              {@link OneDoFJointBasics#getqDesired()} or
-    *                              {@link OneDoFJointBasics#getQ()}.
-    * @return the message containing the new privileged configuration ready to be sent to the
-    *       {@code KinematicsToolboxModule}.
-    */
-   public static KinematicsToolboxPrivilegedConfigurationMessage privilegedConfigurationFromFullRobotModel(FullRobotModel fullRobotModel)
-   {
-      KinematicsToolboxPrivilegedConfigurationMessage message = new KinematicsToolboxPrivilegedConfigurationMessage();
-
-      OneDoFJointBasics[] oneDoFJoints = fullRobotModel.getOneDoFJoints();
-
-      int[] jointHashCodes = new int[oneDoFJoints.length];
-      float[] privilegedJointAngles = new float[oneDoFJoints.length];
-
-      for (int i = 0; i < oneDoFJoints.length; i++)
-      {
-         jointHashCodes[i] = oneDoFJoints[i].hashCode();
-         privilegedJointAngles[i] = (float) oneDoFJoints[i].getQ();
-      }
-
-      FloatingJointBasics rootJoint = fullRobotModel.getRootJoint();
-      Point3D privilegedRootJointPosition = new Point3D();
-      privilegedRootJointPosition.set(rootJoint.getJointPose().getPosition());
-      Quaternion privilegedRootJointOrientation = new Quaternion();
-      privilegedRootJointOrientation.set(rootJoint.getJointPose().getOrientation());
-
-      MessageTools.packPrivilegedRobotConfiguration(message,
-                                                    privilegedRootJointPosition,
-                                                    privilegedRootJointOrientation,
-                                                    jointHashCodes,
-                                                    privilegedJointAngles);
-      message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE.ordinal());
-
-      return message;
-   }
-
-   /**
     * Create a new configuration message holding a new initial robot configuration for the
     * {@code KinematicsToolboxController} to use by extracting the joint angles out of the given
     * {@code fullRobotModel}.
@@ -274,9 +215,9 @@ public class KinematicsToolboxMessageFactory
     * @return the message containing the new privileged configuration ready to be sent to the
     *       {@code KinematicsToolboxModule}.
     */
-   public static KinematicsToolboxInitialConfigurationMessage initialConfigurationFromFullRobotModel(FullRobotModel fullRobotModel)
+   public static KinematicsStreamingToolboxInitialConfigurationMessage initialConfigurationFromFullRobotModel(FullRobotModel fullRobotModel)
    {
-      KinematicsToolboxInitialConfigurationMessage message = new KinematicsToolboxInitialConfigurationMessage();
+      KinematicsStreamingToolboxInitialConfigurationMessage message = new KinematicsStreamingToolboxInitialConfigurationMessage();
 
       OneDoFJointBasics[] oneDoFJoints = fullRobotModel.getOneDoFJoints();
 
