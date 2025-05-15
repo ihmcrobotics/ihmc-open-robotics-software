@@ -16,6 +16,7 @@ import us.ihmc.tools.io.JSONFileTools;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -41,6 +42,7 @@ public class LeRobotDatasetEpisode
    private SideDependentList<LeRobotDatasetVideoWriter> ffmpegRecorders;
    private LeRobotDatasetDataWriter dataWriter;
    private LeRobotDatasetEpisodeStatistics statistics;
+   private List<LeRobotEpisodeRecord> records = new ArrayList<>();
 
    public LeRobotDatasetEpisode(int episodeIndex,
                                 String taskName,
@@ -68,6 +70,8 @@ public class LeRobotDatasetEpisode
       this.session = session;
       this.writeMetaJson = writeMetaJson;
       this.frameProcessingQueue = frameProcessingQueue;
+
+      records.clear();
 
       int inPoint = session.getBufferProperties().getInPoint();
       double sessionDTSeconds = session.getSessionDTSeconds();
@@ -100,7 +104,8 @@ public class LeRobotDatasetEpisode
 
       session.playbackTick();
 
-      if (session.getBufferProperties().getCurrentIndex() < previousIndex)
+      int currentBufferIndex = session.getBufferProperties().getCurrentIndex();
+      if (currentBufferIndex < previousIndex)
       {
          frameProcessingQueue.accept(this::finalizeEpisodeGeneration);
          return;
@@ -112,7 +117,7 @@ public class LeRobotDatasetEpisode
 
       int inPoint = session.getBufferProperties().getInPoint();
       int outPoint = session.getBufferProperties().getOutPoint();
-      System.out.printf("\rTraversing buffer: %d -> %d / %d", inPoint, session.getBufferProperties().getCurrentIndex(), outPoint);
+      System.out.printf("\rTraversing buffer: %d -> %d / %d", inPoint, currentBufferIndex, outPoint);
 
       long timestamp = session.getLogDataReader().getTimestamp().getLongValue();
       ZEDSVOScrubber zedSVOScrubber = session.getZedSVOScrubbers().get(0);
@@ -138,7 +143,7 @@ public class LeRobotDatasetEpisode
             ffmpegRecorders.get(side).writeFrame(videoTimestampMicros, statistics);
          }
 
-         dataWriter.addFrame(videoTimestampMicros, length, statistics);
+         records.add(dataWriter.addFrame(videoTimestampMicros, length, statistics, session.getLogDataReader().getCurrentLogPosition()));
 
          ++length;
       }
@@ -208,7 +213,19 @@ public class LeRobotDatasetEpisode
 
          videoReader.close();
       }
-      
+
+      loadParquetData();
+      for (LeRobotEpisodeRecord record : records)
+      {
+         statistics.processParquetRecord(record);
+      }
+
+      statistics.calculate();
+      writeStatsJsonlLine(statistics);
+   }
+
+   public void loadParquetData()
+   {
       Path parquetPath = dataChunk0Path.resolve(episodeName + ".parquet");
       LogTools.info("Reading parquet data from: %s".formatted(parquetPath));
 
@@ -216,23 +233,22 @@ public class LeRobotDatasetEpisode
       {
          File parquetFile = parquetPath.toFile();
          CarpetReader<LeRobotEpisodeRecord> carpetReader = new CarpetReader<>(parquetFile, LeRobotEpisodeRecord.class)
-               .withFieldMatchingStrategy(FieldMatchingStrategy.SNAKE_CASE);
+               .withFieldMatchingStrategy(FieldMatchingStrategy.SNAKE_CASE)
+               .withFailOnMissingColumn(false);
 
-         List<LeRobotEpisodeRecord> records = carpetReader.toList();
+         records.clear();
+         records.addAll(carpetReader.toList());
          LogTools.info("Read %d records from parquet file".formatted(records.size()));
-
-         for (LeRobotEpisodeRecord record : records)
-         {
-            statistics.processParquetRecord(record);
-         }
       }
       catch (IOException e)
       {
          LogTools.error("Failed to read parquet file: " + e.getMessage());
       }
+   }
 
-      statistics.calculate();
-      writeStatsJsonlLine(statistics);
+   public List<LeRobotEpisodeRecord> getRecords()
+   {
+      return records;
    }
 
    public String getEpisodeName()

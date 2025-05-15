@@ -41,6 +41,10 @@ public class RDXLeRobotDatasetCreator
       panel = new RDXPanel("LeRobot Dataset Creator", this::renderImGuiWidgets, false, true);
       panel.addChild(new RDXPanel("Log Scrubber", this::renderLogScrubberWidgets));
 
+      // Set recommended settings for generating episodes
+      logSession.getSession().setBufferRecordTickPeriod(5);
+      logSession.getSession().submitBufferSizeRequest(5000);
+
       refresh();
    }
 
@@ -150,8 +154,25 @@ public class RDXLeRobotDatasetCreator
 
    private void renderLogScrubberWidgets()
    {
-      ImGui.pushItemWidth(ImGui.getColumnWidth());
       LogDataReader logDataReader = logSession.getSession().getLogDataReader();
+      float sliderWidth = ImGui.getColumnWidth();
+      ImGui.pushItemWidth(sliderWidth);
+
+      if (dataset != null)
+      {
+         for (LeRobotDatasetEpisode episode : dataset.getEpisodes())
+         {
+            var records = episode.getRecords();
+            if (!records.isEmpty())
+            {
+               int episodeStart = records.get(0).ihmcLogPosition();
+               ImGuiTools.renderSliderOrProgressNotch((episodeStart / ((float) logDataReader.getNumberOfEntries() - 1)) * sliderWidth, ImGuiTools.DARK_GREEN);
+               int episodeEnd = records.get(records.size() - 1).ihmcLogPosition();
+               ImGuiTools.renderSliderOrProgressNotch((episodeEnd / ((float) logDataReader.getNumberOfEntries() - 1)) * sliderWidth, ImGuiTools.DARK_RED);
+            }
+         }
+      }
+
       if (ImGui.sliderInt(labels.getHidden("Log position"), logPosition.getData(), 0, logDataReader.getNumberOfEntries() - 1))
       {
          logSession.getSession().submitLogPositionRequest(logPosition.get());

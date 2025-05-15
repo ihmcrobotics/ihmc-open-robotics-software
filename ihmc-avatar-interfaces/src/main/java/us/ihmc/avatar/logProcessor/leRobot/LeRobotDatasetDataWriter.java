@@ -59,7 +59,7 @@ public class LeRobotDatasetDataWriter
       }
    }
 
-   public void addFrame(long timestampMicros, long frameIndex, LeRobotDatasetEpisodeStatistics statistics)
+   public LeRobotEpisodeRecord addFrame(long timestampMicros, long frameIndex, LeRobotDatasetEpisodeStatistics statistics, int ihmcLogPosition)
    {
       List<Float> state = new ArrayList<>();
       List<Float> action = new ArrayList<>();
@@ -89,11 +89,13 @@ public class LeRobotDatasetDataWriter
                                                              episodeIndex,
                                                              frameIndex,
                                                              timestamp,
+                                                             ihmcLogPosition,
                                                              isLastFrame,
                                                              datasetLengthSoFar + frameIndex,
                                                              taskIndex);
       statistics.processParquetRecord(record);
       records.add(record);
+      return record;
    }
 
    public void writeFile(Path parquetPath)
@@ -105,6 +107,7 @@ public class LeRobotDatasetDataWriter
                                                                last.episodeIndex(),
                                                                last.frameIndex(),
                                                                last.timestamp(),
+                                                               last.ihmcLogPosition(),
                                                                true, // <-- Main thing we're doing here
                                                                last.index(),
                                                                last.taskIndex()));

@@ -89,6 +89,7 @@ public class LeRobotDataset
                                                                    episodeStatsJsonlPath,
                                                                    dataChunk0Path,
                                                                    zedVideoDirs);
+         episode.loadParquetData();
          episodes.add(episode);
 
          totalFrames += length;
