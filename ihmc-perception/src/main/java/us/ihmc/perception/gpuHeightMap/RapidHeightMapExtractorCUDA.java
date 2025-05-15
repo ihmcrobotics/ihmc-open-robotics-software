@@ -30,7 +30,7 @@ public class RapidHeightMapExtractorCUDA
    private static final boolean PRINT_TIMING_FOR_KERNELS = false;
    static final int BLOCK_SIZE_XY = 32;
    final double TRANSLATION_THRESHOLD = 0.01; // meters
-   final double ROTATION_THRESHOLD = Math.toRadians(0.05); // radians
+   final double ROTATION_THRESHOLD = Math.toRadians(0.25); // radians
 
    private final int mode; // 0 -> Ouster, 1 -> Realsense
    private final HeightMapParameters heightMapParameters;
@@ -268,8 +268,6 @@ public class RapidHeightMapExtractorCUDA
       RotationMatrix rotationMatrix = new RotationMatrix();
       rotationMatrix.set(previousToCurrentSensorTransform.getRotation());
 
-      rotationMatrix.normalize();
-
       AxisAngle axisAngle = new AxisAngle();
       axisAngle.set(rotationMatrix);
 
@@ -293,7 +291,7 @@ public class RapidHeightMapExtractorCUDA
          CUDATools.checkCUDAError(error);
 
          // Set the previous to the current
-         previousGroundToWorldTransform.set(currentGroundToWorldTransform);
+         previousGroundToWorldTransform.set(groundToWorldTransform);
          LogTools.info("Transforming global map");
       }
 
