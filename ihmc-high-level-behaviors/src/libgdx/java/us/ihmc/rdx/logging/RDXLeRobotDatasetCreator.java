@@ -2,6 +2,7 @@ package us.ihmc.rdx.logging;
 
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
+import imgui.type.ImInt;
 import imgui.type.ImString;
 import us.ihmc.avatar.logProcessor.leRobot.LeRobotDataset;
 import us.ihmc.avatar.logProcessor.leRobot.LeRobotDatasetEpisode;
@@ -12,6 +13,7 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.simulation.scs2.RDXSCS2LogSession;
+import us.ihmc.scs2.session.log.LogDataReader;
 
 import java.awt.*;
 import java.io.File;
@@ -27,6 +29,7 @@ public class RDXLeRobotDatasetCreator
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private transient final ImString datasetName = new ImString(512);
    private transient final ImString imTaskName = new ImString(512);
+   private transient final ImInt logPosition = new ImInt();
    private List<Path> datasets;
    private LeRobotDataset dataset;
    private final Queue<Runnable> frameTaskQueue = new ConcurrentLinkedQueue<>();
@@ -36,14 +39,15 @@ public class RDXLeRobotDatasetCreator
       this.logSession = logSession;
 
       panel = new RDXPanel("LeRobot Dataset Creator", this::renderImGuiWidgets, false, true);
+      panel.addChild(new RDXPanel("Log Scrubber", this::renderLogScrubberWidgets));
 
       refresh();
    }
 
    public void update()
    {
-      if (!frameTaskQueue.isEmpty())
-         frameTaskQueue.remove().run(); // Run 1 task per frame
+      for (int i = 0; i < 50 && !frameTaskQueue.isEmpty(); i++)
+         frameTaskQueue.remove().run(); // Run n tasks per frame
    }
 
    private void renderImGuiWidgets()
@@ -142,6 +146,21 @@ public class RDXLeRobotDatasetCreator
       {
          ImGui.text("Select or create a dataset using the Dataset menu..");
       }
+   }
+
+   private void renderLogScrubberWidgets()
+   {
+      ImGui.pushItemWidth(ImGui.getColumnWidth());
+      LogDataReader logDataReader = logSession.getSession().getLogDataReader();
+      if (ImGui.sliderInt(labels.getHidden("Log position"), logPosition.getData(), 0, logDataReader.getNumberOfEntries() - 1))
+      {
+         logSession.getSession().submitLogPositionRequest(logPosition.get());
+      }
+      else
+      {
+         logPosition.set(logDataReader.getCurrentLogPosition());
+      }
+      ImGui.popItemWidth();
    }
 
    private void refresh()

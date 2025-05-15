@@ -129,10 +129,10 @@ public class LeRobotDatasetEpisode
          lastVideoTimestamp = currentVideoTimestamp;
 
          long videoTimestampMicros = Math.round((currentVideoTimestamp - startVideoTimestamp) / 1000.0);
-         LogTools.info("Current timestamp: %.3f  Writing frame %.3f Frequency %.3f"
-                             .formatted(Conversions.nanosecondsToSeconds(currentVideoTimestamp),
-                                        Conversions.microsecondsToSeconds(videoTimestampMicros),
-                                        frequency));
+//         LogTools.info("Current timestamp: %.3f  Writing frame %.3f Frequency %.3f"
+//                             .formatted(Conversions.nanosecondsToSeconds(currentVideoTimestamp),
+//                                        Conversions.microsecondsToSeconds(videoTimestampMicros),
+//                                        frequency));
          for (RobotSide side : RobotSide.values)
          {
             ffmpegRecorders.get(side).writeFrame(videoTimestampMicros, statistics);
