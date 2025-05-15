@@ -435,8 +435,8 @@ extern "C" __global__ void croppingKernel(unsigned short *inputMap, size_t pitch
         params[GLOBAL_CELL_SIZE],
         static_cast<int>(params[GLOBAL_CENTER_INDEX]));
 
-    int globalCellIndexX = globalSensorIndex.x + xIndex - (params[CROPPED_WINDOW_CENTER_INDEX]);
-    int globalCellIndexY = globalSensorIndex.y + yIndex - (params[CROPPED_WINDOW_CENTER_INDEX]);
+    int globalCellIndexX = globalSensorIndex.x + xIndex - (int)(croppedMapXY / 2);
+    int globalCellIndexY = globalSensorIndex.y + yIndex - (int)(croppedMapXY / 2);
 
     // Check if global cell index is within bounds
     if (globalCellIndexX >= 0 && globalCellIndexX < globalMapSizeX &&

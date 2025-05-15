@@ -18,6 +18,7 @@ import us.ihmc.perception.gpuHeightMap.RapidHeightMapManager;
 import us.ihmc.perception.imageMessage.CompressionType;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotics.physics.RobotCollisionModel;
+import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
@@ -57,8 +58,9 @@ public class RapidHeightMapThread extends RepeatingTaskThread
       this.depthImageKey = depthImageKey;
       this.heightMapParameters = heightMapParameters;
 
-      cameraFrame = syncedRobotModel.getReferenceFrames().getSteppingCameraFrame();
-      zUpSensorFrame = syncedRobotModel.getReferenceFrames().getSteppingCameraZUpFrame();
+      // We need the original camera frame, and the Z-Up version of the camera frame to make the height map flat
+      cameraFrame = imageSensor.getSensorFrame();
+      zUpSensorFrame = new ZUpFrame(cameraFrame, imageSensor.getSensorName() + "ZUpFrame");
 
       ReferenceFrame leftFootFrame = syncedRobotModel.getReferenceFrames().getSoleFrame(RobotSide.LEFT);
       ReferenceFrame rightFootFrame = syncedRobotModel.getReferenceFrames().getSoleFrame(RobotSide.LEFT);
@@ -82,6 +84,7 @@ public class RapidHeightMapThread extends RepeatingTaskThread
       try
       {
          imageSensor.waitForGrab();
+         zUpSensorFrame.update();
          RawImage depthImage = imageSensor.getImage(depthImageKey);
 
          // Get everything we need from the image
