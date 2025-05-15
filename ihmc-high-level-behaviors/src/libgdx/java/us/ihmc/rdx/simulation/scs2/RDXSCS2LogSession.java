@@ -191,11 +191,14 @@ public class RDXSCS2LogSession extends RDXSCS2Session
          {
             logPosition.set(logDataReader.getCurrentLogPosition());
          }
-         ImGui.text("ZED delay compensation:");
-         if (ImGui.sliderFloat(labels.getHidden("ZED delay compensation"), zedDelayCompensation.getData(), -5.0f, 5.0f, "%.2f s"))
+         if (!zedLogVideos.isEmpty())
          {
-            getFirstZEDScrubber().getTimestampScrubber().setDelay(Conversions.secondsToNanoseconds(zedDelayCompensation.get()));
-            scrubAnyway.set();
+            ImGui.text("ZED delay compensation:");
+            if (ImGui.sliderFloat(labels.getHidden("ZED delay compensation"), zedDelayCompensation.getData(), -5.0f, 5.0f, "%.2f s"))
+            {
+               getFirstZEDScrubber().getTimestampScrubber().setDelay(Conversions.secondsToNanoseconds(zedDelayCompensation.get()));
+               scrubAnyway.set();
+            }
          }
          ImGui.popItemWidth();
       }
