@@ -7,8 +7,12 @@ import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Scalar;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
@@ -25,6 +29,8 @@ public class RapidHeightMapExtractorCUDA
 {
    private static final boolean PRINT_TIMING_FOR_KERNELS = false;
    static final int BLOCK_SIZE_XY = 32;
+   final double TRANSLATION_THRESHOLD = 0.01; // meters
+   final double ROTATION_THRESHOLD = Math.toRadians(0.05); // radians
 
    private final int mode; // 0 -> Ouster, 1 -> Realsense
    private final HeightMapParameters heightMapParameters;
@@ -253,31 +259,43 @@ public class RapidHeightMapExtractorCUDA
       // This gives the transform from the previous to the current transform of the sensor
       previousToCurrentSensorTransform.set(previousGroundToWorldTransform);
       previousToCurrentSensorTransform.invert();
-      currentGroundToWorldTransform.transform(previousToCurrentSensorTransform);
+      previousToCurrentSensorTransform.multiply(currentGroundToWorldTransform);
 
-      // Allocate gpu memory for the transform
-      previousToCurrentSensorTransform.get(previousToCurrentSensorTransformArray);
-      previousToCurrentSensorHostPointer.put(previousToCurrentSensorTransformArray);
-      CUDATools.mallocAsync(previousToCurrentSensorDevicePointer, previousToCurrentSensorTransformArray.length, stream);
-      CUDATools.memcpyAsync(previousToCurrentSensorDevicePointer, previousToCurrentSensorHostPointer, previousToCurrentSensorTransformArray.length, stream);
+      Vector3D translation = new Vector3D();
+      translation.set(previousToCurrentSensorTransform.getTranslation());
+      double translationMagnitude = translation.norm();
 
-      globalHeightMapImage.copyTo(oldGlobalHeightMapImage);
+      RotationMatrix rotationMatrix = new RotationMatrix();
+      rotationMatrix.set(previousToCurrentSensorTransform.getRotation());
 
-      shiftHeightMap.withPointer(oldGlobalHeightMapImage.data()).withLong(oldGlobalHeightMapImage.step());
-      shiftHeightMap.withPointer(globalHeightMapImage.data()).withLong(globalHeightMapImage.step());
-      shiftHeightMap.withPointer(previousToCurrentSensorDevicePointer);
-      shiftHeightMap.withInt(globalCellsPerAxis);
-      shiftHeightMap.withPointer(parametersDevicePointer);
+      rotationMatrix.normalize();
 
-      shiftHeightMap.run(stream, registerKernelGridDim, blockSize, 0);
-      error = cudaStreamSynchronize(stream);
-      CUDATools.checkCUDAError(error);
+      AxisAngle axisAngle = new AxisAngle();
+      axisAngle.set(rotationMatrix);
 
-      // Set the previous to the current
-      previousGroundToWorldTransform.set(currentGroundToWorldTransform);
+      double rotationAngle = Math.abs(axisAngle.getAngle());
 
-      // Always update the current
-      currentGroundToWorldTransform.set(groundToWorldTransform);
+      if (translationMagnitude > TRANSLATION_THRESHOLD || rotationAngle > ROTATION_THRESHOLD)
+      {
+         previousToCurrentSensorTransform.get(previousToCurrentSensorTransformArray);
+         previousToCurrentSensorHostPointer.put(previousToCurrentSensorTransformArray);
+         CUDATools.mallocAsync(previousToCurrentSensorDevicePointer, previousToCurrentSensorTransformArray.length, stream);
+         CUDATools.memcpyAsync(previousToCurrentSensorDevicePointer, previousToCurrentSensorHostPointer, previousToCurrentSensorTransformArray.length, stream);
+
+         shiftHeightMap.withPointer(oldGlobalHeightMapImage.data()).withLong(oldGlobalHeightMapImage.step());
+         shiftHeightMap.withPointer(globalHeightMapImage.data()).withLong(globalHeightMapImage.step());
+         shiftHeightMap.withPointer(previousToCurrentSensorDevicePointer);
+         shiftHeightMap.withInt(globalCellsPerAxis);
+         shiftHeightMap.withPointer(parametersDevicePointer);
+
+         shiftHeightMap.run(stream, registerKernelGridDim, blockSize, 0);
+         error = cudaStreamSynchronize(stream);
+         CUDATools.checkCUDAError(error);
+
+         // Set the previous to the current
+         previousGroundToWorldTransform.set(currentGroundToWorldTransform);
+         LogTools.info("Transforming global map");
+      }
 
       // Run the registration kernel
       registerKernel.withPointer(localHeightMapImage.data()).withLong(localHeightMapImage.step());
@@ -288,6 +306,9 @@ public class RapidHeightMapExtractorCUDA
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
 
+      // Always update the current
+      currentGroundToWorldTransform.set(groundToWorldTransform);
+      globalHeightMapImage.copyTo(oldGlobalHeightMapImage);
       //      if (heightMapParameters.getEnableAlphaFilter())
       //      {
       //         filteredRapidHeightMapExtractor.update(globalHeightMapImage, resetOffset);
