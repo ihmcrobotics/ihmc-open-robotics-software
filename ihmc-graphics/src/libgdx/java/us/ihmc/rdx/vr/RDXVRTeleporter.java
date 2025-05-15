@@ -13,7 +13,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
@@ -34,7 +33,7 @@ public class RDXVRTeleporter
    private final Color color = Color.WHITE;
    private double lastTouchpadY = Double.NaN;
 
-   private HumanoidReferenceFrames robotReferenceFrames;
+   private ReferenceFrame linkBeforeCameraReferenceFrame;
    // Reference frame of cameras to be set from syncedRobot (used for teleporting vr viewPoint to robot position)
    private final SideDependentList<ReferenceFrame> robotCameraReferenceFrames = new SideDependentList<>();
 
@@ -95,7 +94,7 @@ public class RDXVRTeleporter
            }
 
            // Pressed right joystick button
-           if (robotReferenceFrames != null && controller.getJoystickIsCentered() && joystickButton.bChanged() && !joystickButton.bState())
+           if (linkBeforeCameraReferenceFrame != null && controller.getJoystickIsCentered() && joystickButton.bChanged() && !joystickButton.bState())
            {
               snapToVRHome(vrContext);
            }
@@ -195,13 +194,11 @@ public class RDXVRTeleporter
       }
    }
 
-   public void setRobotReferences(HumanoidReferenceFrames referenceFrames)
+   public void setLinkBeforeCameraReferenceFrame(ReferenceFrame referenceFrame)
    {
-      robotReferenceFrames = referenceFrames;
-      robotCameraReferenceFrames.put(RobotSide.LEFT, robotReferenceFrames.getStereoCameraFrame(RobotSide.LEFT));
-      robotCameraReferenceFrames.put(RobotSide.RIGHT, robotReferenceFrames.getStereoCameraFrame(RobotSide.RIGHT));
+      linkBeforeCameraReferenceFrame = referenceFrame;
       RigidBodyTransform chestToVRHomeTransform = new RigidBodyTransform(new Quaternion(), CHEST_TO_VR_HOME_OFFSET);
-      robotVRHomeReferenceFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(robotReferenceFrames.getChestFrame(), chestToVRHomeTransform);
+      robotVRHomeReferenceFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(linkBeforeCameraReferenceFrame, chestToVRHomeTransform);
    }
 
    public void setRobotCameraReferenceFrames(ReferenceFrame leftCameraReferenceFrame, ReferenceFrame rightCameraReferenceFrame)
