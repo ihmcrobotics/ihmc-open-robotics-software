@@ -14,7 +14,7 @@ RUN mkdir -p Downloads \
  && cd Downloads \
  && curl -sL https://download.jetbrains.com/python/pycharm-2025.1.1.tar.gz -o pycharm.tar.gz \
  && tar -xzf pycharm.tar.gz \
- && mv pycharm-community-2025.1.1/ /opt/pycharm \
+ && mv pycharm-2025.1.1/ /opt/pycharm \
  && ln -s /opt/pycharm/bin/pycharm.sh /usr/local/bin/pycharm \
  && cd .. \
  && rm -rf Downloads
