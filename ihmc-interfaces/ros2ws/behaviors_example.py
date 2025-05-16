@@ -79,6 +79,8 @@ def behavior_message_callback(msg):
        print("Description: " + failure.action_name)
        print("Type: " + failure.action_type)
        print("Frame: " + failure.action_frame)
+       print("Missing Frame: " + failure.missing_frame)
+       print("Navigation Collision Frame Name: " + failure.collision_name)
 
        position_error = failure.position_error
        # Convert Point to numpy array
