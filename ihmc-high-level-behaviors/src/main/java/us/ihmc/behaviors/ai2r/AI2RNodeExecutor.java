@@ -23,6 +23,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.SceneGraph;
@@ -44,7 +45,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
    private final AI2RStatusMessage statusMessage = new AI2RStatusMessage();
    private final List<LeafNodeState<?>> failedLeaves = new ArrayList<>();
    private CRDTStatusFootstepList plannedSteps;
-   private static final double DISTANCE_COLLISION_THRESHOLD = 0.3;
+   private static final double DISTANCE_COLLISION_THRESHOLD = 0.6;
    private boolean navigationFailureForObstacle = false;
    private boolean actionFailureMissingFrame = false;
    private String navigationFailureObstacleName;
@@ -140,8 +141,11 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
             state.getActionSequence().setExecutionNextIndex(commandedBehaviorIndex);
             state.getActionSequence().setAutomaticExecution(true);
             statusMessage.setCompletedBehavior("-");
+            statusMessage.getFailure().setActionName("-");
             statusMessage.getFailure().setCollisionName("-");
             statusMessage.getFailure().setMissingFrame(false);
+            statusMessage.getFailure().getPositionError().set(new Point3D());
+            statusMessage.getFailure().getOrientationError().set(new Quaternion());
             LogTools.warn("Automatic execution");
          }
       });
@@ -159,6 +163,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
          setSceneInfo();
          setAvailableBehaviors();
          setFailedBehaviors();
+         LogTools.info("Status: failed {}, missing frame {}, collision with {}", statusMessage.getFailure().getActionName(), actionFailureMissingFrame, navigationFailureObstacleName);
          ros2.publish(AutonomyAPI.AI2R_STATUS, statusMessage);
       }
 
@@ -315,7 +320,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
                   }
                   else
                   {
-                     LogTools.warn("Cannot check collision of next step. Needed more time to get the plan");
+                     LogTools.warn("Cannot check collision of next step");
                   }
                }
             }
