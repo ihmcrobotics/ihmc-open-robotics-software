@@ -13,7 +13,7 @@
 </p>
 
 ## Prerequisites
-This repository is tested on Ubuntu 22.04, ROS2 humble, Cuda 12.1, Python 3.10 and Realsense Camera.
+This repository has been tested on Ubuntu 24.04, ROS2 Jazzy, Cuda 12.6, Python 3.10 with a docker running Ubuntu 22.04, ROS2 humble, Cuda 12.1, Python 3.10 and Realsense Camera. It can be run standalone on Ubuntu 22.04, ROS2 humble, Cuda 12.1, Python 3.10 and Realsense Camera.
 
 ## Installation
 ### Docker Installation
@@ -23,35 +23,47 @@ Build the docker image with the following command:
 ```
 ./build_foundationpose_ros2_image.sh
 ```
-Installation directories:
+First time image building will take upto 15 mintues. Installation directories:
 ```
 /root/ihmc_ros2_ws # The IHMC ROS2 interfaces get built and installed to here; source this to use IHMC ROS2 interfaces
 /root/foundationpose-ros2/FoundationPose # The FoundationPose library; cloned from https://github.com/NVlabs/FoundationPose
 /root/foundationpose-ros2 # This directory ([...]/ihmc-perception/src/foundationpose-ros2) mounted into the volume
 ```
 #### Run a docker container
-Run a docker container from a prebuilt docker image:
+Run a docker container from a prebuilt docker image (first it will download the weight files):
 ```
 ./run_foundationpose_node_docker.sh
 ```
 
 #### Run with a Realsense
-Run Realsense ros2 node system wide:
+Build the docker image with the following command:
+```
+./build_realsense_foundationpose_ros2_image.sh
+```
+Run a docker container from a prebuilt docker image:
+```
+./run_realsense_foundationpose_node_docker.sh
+```
+With a Realsense camera connected, run Realsense ros2 node inside the docker container (or system wide if you have access to the docker from system):
 ```
 ros2 launch realsense2_camera rs_launch.py enable_rgbd:=true enable_sync:=true align_depth.enable:=true enable_color:=true enable_depth:=true pointcloud.enable:=true
 ```
-Run inside the docker container:
+In another container (or terminal if you have access to the docker from system), run the following command:
 ```
 python3 foundationpose_ros_multi.py
 ```
 #### Run with a ZED2
-With a ZED2 camera connected, run 
+Build the image first:
+```
+./build_zed2_foundationpose_ros2_image.sh
+```
+With a ZED2 camera connected, run (from Java):
 ```
 ZEDColorStereoDepthPublisher
 ``` 
 Then run:
 ```
-./run_zed2_centerpose_node_docker.sh
+./run_zed2_foundationpose_node_docker.sh
 ```
 The ROS2 node will publish the poses detected from FoundationPose.
 
