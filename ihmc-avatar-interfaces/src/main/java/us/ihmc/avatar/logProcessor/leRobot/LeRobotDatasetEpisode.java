@@ -246,6 +246,13 @@ public class LeRobotDatasetEpisode
       }
    }
 
+   public void writeParquetData()
+   {
+      Path parquetPath = dataChunk0Path.resolve(episodeName + ".parquet");
+      LogTools.info("Writing parquet data to: %s".formatted(parquetPath));
+      LeRobotDatasetDataWriter.writeParquetFile(parquetPath, records);
+   }
+
    public List<LeRobotEpisodeRecord> getRecords()
    {
       return records;

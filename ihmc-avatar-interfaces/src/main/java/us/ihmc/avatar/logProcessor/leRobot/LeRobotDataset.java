@@ -44,7 +44,7 @@ public class LeRobotDataset
       videosPath = directory.resolve("videos");
       dataChunk0Path = dataPath.resolve("chunk-000");
       for (RobotSide side : RobotSide.values)
-         zedVideoDirs.put(side, videosPath.resolve("chunk-000/observations.images.cam_zed_" + side.getLowerCaseName()));
+         zedVideoDirs.put(side, videosPath.resolve("chunk-000/observation.images.cam_zed_" + side.getLowerCaseName()));
 
       episodesJsonlPath = metaPath.resolve("episodes.jsonl");
       episodeStatsJsonlPath = metaPath.resolve("episodes_stats.jsonl");
@@ -142,6 +142,14 @@ public class LeRobotDataset
       LogTools.info("All done regenerating and rewriting metadata.");
    }
 
+   public void writeParquetData()
+   {
+      for (LeRobotDatasetEpisode episode : episodes)
+      {
+         episode.writeParquetData();
+      }
+   }
+
    public void writeMetaJson()
    {
       JSONFileTools.save(infoJsonPath, rootNode ->
@@ -170,7 +178,7 @@ public class LeRobotDataset
          ObjectNode features = rootNode.putObject("features");
          for (RobotSide side : RobotSide.values)
          {
-            ObjectNode cam = features.putObject("observations.images.cam_zed_%s".formatted(side.getLowerCaseName()));
+            ObjectNode cam = features.putObject("observation.images.cam_zed_%s".formatted(side.getLowerCaseName()));
             cam.put("dtype", "video");
             cam.putArray("shape").add(480).add(640).add(3);
             cam.putArray("names").add("height").add("width").add("channel");
@@ -181,7 +189,7 @@ public class LeRobotDataset
                                        .put("has_audio", false);
          }
 
-         ObjectNode state = features.putObject("state");
+         ObjectNode state = features.putObject("observation.state");
          state.put("dtype", "float32");
          state.putArray("shape").add(14);
          ArrayNode motors = state.putObject("names").putArray("motors");

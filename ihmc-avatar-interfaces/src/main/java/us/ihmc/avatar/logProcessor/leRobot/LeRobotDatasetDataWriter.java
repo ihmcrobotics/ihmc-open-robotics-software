@@ -111,6 +111,12 @@ public class LeRobotDatasetDataWriter
                                                                true, // <-- Main thing we're doing here
                                                                last.index(),
                                                                last.taskIndex()));
+
+      writeParquetFile(parquetPath, records);
+   }
+
+   public static void writeParquetFile(Path parquetPath, List<LeRobotEpisodeRecord> records)
+   {
       try
       {
          OutputStream outputStream = Files.newOutputStream(parquetPath);

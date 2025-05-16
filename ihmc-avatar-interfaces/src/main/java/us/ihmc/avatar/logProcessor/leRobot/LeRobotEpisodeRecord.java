@@ -11,7 +11,7 @@ import java.util.List;
  */
 public record LeRobotEpisodeRecord
 (
-    List<Float> state,
+    @Alias("observation.state") List<Float> state,
     List<Float> action, // goal position of arm joints
     long episodeIndex, // index of the episode for this sample
     long frameIndex, // index of the frame for this sample in the episode; starts at 0 for each episode

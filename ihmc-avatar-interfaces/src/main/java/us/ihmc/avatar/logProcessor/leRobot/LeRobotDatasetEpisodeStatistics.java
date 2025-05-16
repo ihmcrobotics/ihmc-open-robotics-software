@@ -178,7 +178,7 @@ public class LeRobotDatasetEpisodeStatistics
          video.putArray("count").add(sizes[side.ordinal()]);
       }
 
-      ObjectNode state = stats.putObject("state");
+      ObjectNode state = stats.putObject("observation.state");
       ArrayNode min = state.putArray("min");
       ArrayNode max = state.putArray("max");
       ArrayNode mean = state.putArray("mean");
