@@ -1,0 +1,7 @@
+demo_data/
+weights/
+FoundationPose/
+sam*.pt
+.vscode/
+__pycache__/
+*.pyc
